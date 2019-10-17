@@ -36,7 +36,6 @@ describe('#useUpdateKql', () => {
       kueryFilterQuery: { expression: '', kind: 'kuery' },
       kueryFilterQueryDraft: { expression: 'host.name: "myLove"', kind: 'kuery' },
       storeType: 'timelineType',
-      type: null,
       timelineId: 'myTimelineId',
     })(mockDispatch);
     expect(applyTimelineKqlMock).toHaveBeenCalledWith({

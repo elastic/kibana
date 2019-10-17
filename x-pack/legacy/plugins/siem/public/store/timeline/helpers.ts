@@ -3,8 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import { Filter } from '@kbn/es-query';
 import { getOr, omit, uniq, isEmpty, isEqualWith } from 'lodash/fp';
 
+import { SavedQuery } from '../../../../../../../src/legacy/core_plugins/data/public';
 import { ColumnHeader } from '../../components/timeline/body/column_headers/column_header';
 import { getColumnWidthFromType } from '../../components/timeline/body/helpers';
 import { Sort } from '../../components/timeline/body/sort';
@@ -1132,6 +1135,46 @@ export const updateHighlightedDropAndProvider = ({
     [id]: {
       ...timeline,
       highlightedDropAndProviderId: providerId,
+    },
+  };
+};
+
+interface UpdateSavedQueryParams {
+  id: string;
+  savedQuery: SavedQuery | null;
+  timelineById: TimelineById;
+}
+
+export const updateSavedQuery = ({
+  id,
+  savedQuery,
+  timelineById,
+}: UpdateSavedQueryParams): TimelineById => {
+  const timeline = timelineById[id];
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      savedQuery,
+    },
+  };
+};
+
+interface UpdateFiltersParams {
+  id: string;
+  filters: Filter[];
+  timelineById: TimelineById;
+}
+
+export const updateFilters = ({ id, filters, timelineById }: UpdateFiltersParams): TimelineById => {
+  const timeline = timelineById[id];
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      filters,
     },
   };
 };

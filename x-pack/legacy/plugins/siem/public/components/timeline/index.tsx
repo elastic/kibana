@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Filter } from '@kbn/es-query';
 import { isEqual } from 'lodash/fp';
 import React, { useEffect, useCallback } from 'react';
 import { connect } from 'react-redux';
@@ -40,6 +41,7 @@ interface StateReduxProps {
   columns: ColumnHeader[];
   dataProviders?: DataProvider[];
   end: number;
+  filters: Filter[];
   isLive: boolean;
   itemsPerPage?: number;
   itemsPerPageOptions?: number[];
@@ -137,6 +139,7 @@ const StatefulTimelineComponent = React.memo<Props>(
     createTimeline,
     dataProviders,
     end,
+    filters,
     flyoutHeaderHeight,
     flyoutHeight,
     id,
@@ -252,6 +255,7 @@ const StatefulTimelineComponent = React.memo<Props>(
             columns={columns}
             dataProviders={dataProviders!}
             end={end}
+            filters={filters}
             flyoutHeaderHeight={flyoutHeaderHeight}
             flyoutHeight={flyoutHeight}
             id={id}
@@ -314,6 +318,7 @@ const makeMapStateToProps = () => {
     const {
       columns,
       dataProviders,
+      filters,
       itemsPerPage,
       itemsPerPageOptions,
       kqlMode,
@@ -326,6 +331,7 @@ const makeMapStateToProps = () => {
       columns,
       dataProviders,
       end: input.timerange.to,
+      filters: filters || [],
       id,
       isLive: input.policy.kind === 'interval',
       itemsPerPage,

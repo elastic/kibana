@@ -45,6 +45,8 @@ import {
   updateTitle,
   upsertColumn,
   updateIsLoading,
+  setSavedQuery,
+  setFilters,
 } from './actions';
 import {
   addNewTimeline,
@@ -80,6 +82,8 @@ import {
   updateTimelineSort,
   updateTimelineTitle,
   upsertTimelineColumn,
+  updateSavedQuery,
+  updateFilters,
 } from './helpers';
 
 import { TimelineState, EMPTY_TIMELINE_BY_ID } from './types';
@@ -132,7 +136,11 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
   }))
   .case(applyKqlFilterQuery, (state, { id, filterQuery }) => ({
     ...state,
-    timelineById: applyKqlFilterQueryDraft({ id, filterQuery, timelineById: state.timelineById }),
+    timelineById: applyKqlFilterQueryDraft({
+      id,
+      filterQuery,
+      timelineById: state.timelineById,
+    }),
   }))
   .case(setKqlFilterQueryDraft, (state, { id, filterQueryDraft }) => ({
     ...state,
@@ -360,5 +368,21 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
   .case(showCallOutUnauthorizedMsg, state => ({
     ...state,
     showCallOutUnauthorizedMsg: true,
+  }))
+  .case(setSavedQuery, (state, { id, savedQuery }) => ({
+    ...state,
+    timelineById: updateSavedQuery({
+      id,
+      savedQuery,
+      timelineById: state.timelineById,
+    }),
+  }))
+  .case(setFilters, (state, { id, filters }) => ({
+    ...state,
+    timelineById: updateFilters({
+      id,
+      filters,
+      timelineById: state.timelineById,
+    }),
   }))
   .build();

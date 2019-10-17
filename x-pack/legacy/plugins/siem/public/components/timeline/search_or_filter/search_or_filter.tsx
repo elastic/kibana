@@ -5,18 +5,19 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSuperSelect, EuiToolTip } from '@elastic/eui';
+import { Filter } from '@kbn/es-query';
 import * as React from 'react';
 import { pure } from 'recompose';
 import styled, { injectGlobal } from 'styled-components';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
-import { KueryAutocompletion } from '../../../containers/kuery_autocompletion';
-import { KueryFilterQuery } from '../../../store';
-import { AutocompleteField } from '../../autocomplete_field';
-
-import { getPlaceholderText, modes, options } from './helpers';
-import * as i18n from './translations';
+import { SavedQuery } from '../../../../../../../../src/legacy/core_plugins/data/public';
+import { KueryFilterQuery, KueryFilterQueryKind } from '../../../store';
 import { KqlMode } from '../../../store/timeline/model';
+import { QueryBarTimeline } from '../query_bar';
+
+import { modes, options } from './helpers';
+import * as i18n from './translations';
 
 const timelineSelectModeItemsClassName = 'timelineSelectModeItemsClassName';
 const searchOrFilterPopoverClassName = 'searchOrFilterPopover';
@@ -39,19 +40,30 @@ injectGlobal`
 `;
 
 interface Props {
-  applyKqlFilterQuery: (expression: string) => void;
+  applyKqlFilterQuery: (expression: string, kind: KueryFilterQueryKind) => void;
   filterQueryDraft: KueryFilterQuery;
   indexPattern: StaticIndexPattern;
-  isFilterQueryDraftValid: boolean;
   kqlMode: KqlMode;
   timelineId: string;
   updateKqlMode: ({ id, kqlMode }: { id: string; kqlMode: KqlMode }) => void;
-  setKqlFilterQueryDraft: (expression: string) => void;
+  setFilters: (filters: Filter[]) => void;
+  setKqlFilterQueryDraft: (expression: string, kind: KueryFilterQueryKind) => void;
+  setSavedQuery: (savedQuery: SavedQuery | null) => void;
+  filters: Filter[];
+  savedQuery: SavedQuery | null;
 }
 
 const SearchOrFilterContainer = styled.div`
   margin: 5px 0 10px 0;
   user-select: none;
+  .globalQueryBar {
+    padding: 0px;
+    .kbnQueryBar {
+      div:first-child {
+        margin-right: 0px;
+      }
+    }
+  }
 `;
 
 SearchOrFilterContainer.displayName = 'SearchOrFilterContainer';
@@ -66,11 +78,14 @@ export const SearchOrFilter = pure<Props>(
   ({
     applyKqlFilterQuery,
     indexPattern,
-    isFilterQueryDraftValid,
+    filters,
     filterQueryDraft,
     kqlMode,
     timelineId,
+    savedQuery,
+    setFilters,
     setKqlFilterQueryDraft,
+    setSavedQuery,
     updateKqlMode,
   }) => (
     <SearchOrFilterContainer>
@@ -91,20 +106,16 @@ export const SearchOrFilter = pure<Props>(
         </ModeFlexItem>
         <EuiFlexItem data-test-subj="timeline-search-or-filter-search-container">
           <EuiToolTip content={modes[kqlMode].kqlBarTooltip}>
-            <KueryAutocompletion indexPattern={indexPattern}>
-              {({ isLoadingSuggestions, loadSuggestions, suggestions }) => (
-                <AutocompleteField
-                  isLoadingSuggestions={isLoadingSuggestions}
-                  isValid={isFilterQueryDraftValid}
-                  loadSuggestions={loadSuggestions}
-                  onChange={setKqlFilterQueryDraft}
-                  onSubmit={applyKqlFilterQuery}
-                  placeholder={getPlaceholderText(kqlMode)}
-                  suggestions={suggestions}
-                  value={filterQueryDraft ? filterQueryDraft.expression : ''}
-                />
-              )}
-            </KueryAutocompletion>
+            <QueryBarTimeline
+              applyKqlFilterQuery={applyKqlFilterQuery}
+              filters={filters}
+              filterQueryDraft={filterQueryDraft}
+              indexPattern={indexPattern}
+              savedQuery={savedQuery}
+              setFilters={setFilters}
+              setKqlFilterQueryDraft={setKqlFilterQueryDraft}
+              setSavedQuery={setSavedQuery}
+            />
           </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>

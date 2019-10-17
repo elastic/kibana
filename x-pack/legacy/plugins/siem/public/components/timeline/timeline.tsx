@@ -5,7 +5,7 @@
  */
 
 import { EuiFlexGroup } from '@elastic/eui';
-import { getEsQueryConfig } from '@kbn/es-query';
+import { getEsQueryConfig, Filter } from '@kbn/es-query';
 import { getOr, isEmpty } from 'lodash/fp';
 import * as React from 'react';
 import styled from 'styled-components';
@@ -61,6 +61,7 @@ interface Props {
   columns: ColumnHeader[];
   dataProviders: DataProvider[];
   end: number;
+  filters: Filter[];
   flyoutHeaderHeight: number;
   flyoutHeight: number;
   id: string;
@@ -91,6 +92,7 @@ export const Timeline = React.memo<Props>(
     columns,
     dataProviders,
     end,
+    filters,
     flyoutHeaderHeight,
     flyoutHeight,
     id,
@@ -119,7 +121,7 @@ export const Timeline = React.memo<Props>(
       dataProviders,
       indexPattern,
       browserFields,
-      filters: [],
+      filters,
       kqlQuery: { query: kqlQueryExpression, language: 'kuery' },
       kqlMode,
       start,
