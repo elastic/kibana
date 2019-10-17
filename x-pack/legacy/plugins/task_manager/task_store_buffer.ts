@@ -7,19 +7,13 @@
 import { indexBy, pluck } from 'lodash';
 import { Subject } from 'rxjs';
 import { bufferWhen, filter } from 'rxjs/operators';
-import { Updatable } from './task_runner';
-import { BulkUpdateTaskFailureResult } from './task_store';
+import { BulkUpdateTaskFailureResult, TaskStore } from './task_store';
 import { ConcreteTaskInstance } from './task';
-import { Result, either } from './lib/result_type';
+import { either } from './lib/result_type';
+import { proxyWithOverrides } from './lib/proxy_with_overrides';
 import { Logger } from './types';
 
-export interface BatchUpdatable extends Updatable {
-  bulkUpdate(
-    docs: ConcreteTaskInstance[]
-  ): Promise<Array<Result<ConcreteTaskInstance, BulkUpdateTaskFailureResult>>>;
-}
-
-export function createTaskStoreUpdateBuffer(store: BatchUpdatable, logger: Logger): Updatable {
+export function createTaskStoreUpdateBuffer(store: TaskStore, logger: Logger): TaskStore {
   const flushBuffer = new Subject<any>();
   const storeUpdateBuffer = new Subject<{
     task: ConcreteTaskInstance;
@@ -59,18 +53,12 @@ export function createTaskStoreUpdateBuffer(store: BatchUpdatable, logger: Logge
         });
     });
 
-  return {
-    get maxAttempts() {
-      return store.maxAttempts;
-    },
+  return proxyWithOverrides(store, {
     async update(task: ConcreteTaskInstance) {
       return new Promise((resolve, reject) => {
         setImmediate(() => flushBuffer.next());
         storeUpdateBuffer.next({ task, onSuccess: resolve, onFailure: reject });
       });
     },
-    async remove(taskId: string) {
-      return store.remove(taskId);
-    },
-  };
+  });
 }

@@ -85,26 +85,28 @@ export class TaskManager {
 
     /* Kibana UUID needs to be pulled live (not cached), as it takes a long time
      * to initialize, and can change after startup */
-    const store = new TaskStore({
-      serializer: opts.serializer,
-      savedObjectsRepository: opts.savedObjectsRepository,
-      callCluster: opts.callWithInternalUser,
-      index: opts.config.get('xpack.task_manager.index'),
-      maxAttempts: opts.config.get('xpack.task_manager.max_attempts'),
-      definitions: this.definitions,
-      taskManagerId: generateTaskManagerUUID(this.logger),
-    });
+    const store = createTaskStoreUpdateBuffer(
+      new TaskStore({
+        serializer: opts.serializer,
+        savedObjectsRepository: opts.savedObjectsRepository,
+        callCluster: opts.callWithInternalUser,
+        index: opts.config.get('xpack.task_manager.index'),
+        maxAttempts: opts.config.get('xpack.task_manager.max_attempts'),
+        definitions: this.definitions,
+        taskManagerId: generateTaskManagerUUID(this.logger),
+      }),
+      this.logger
+    );
 
     const pool = new TaskPool({
       logger: this.logger,
       maxWorkers: this.maxWorkers,
     });
-    const bufferedStore = createTaskStoreUpdateBuffer(store, this.logger);
     const createRunner = (instance: ConcreteTaskInstance) =>
       new TaskManagerRunner({
         logger: this.logger,
         instance,
-        store: bufferedStore,
+        store,
         definitions: this.definitions,
         beforeRun: this.middleware.beforeRun,
       });
