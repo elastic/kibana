@@ -20,4 +20,5 @@ Use the Maps app instead of Coordinate Map and Region Map.
 The Maps app offers more functionality and is easier to use.`,
   }),
   icon: APP_ICON,
+  stage: 'production',
 });

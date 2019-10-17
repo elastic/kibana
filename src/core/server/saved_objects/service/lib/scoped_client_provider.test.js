@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { ScopedSavedObjectsClientProvider } from './scoped_client_provider';
+import { SavedObjectsClientProvider } from './scoped_client_provider';
 
 test(`uses default client factory when one isn't set`, () => {
   const returnValue = Symbol();
   const defaultClientFactoryMock = jest.fn().mockReturnValue(returnValue);
   const request = Symbol();
 
-  const clientProvider = new ScopedSavedObjectsClientProvider({
+  const clientProvider = new SavedObjectsClientProvider({
     defaultClientFactory: defaultClientFactoryMock,
   });
   const result = clientProvider.getClient(request);
@@ -42,7 +42,7 @@ test(`uses custom client factory when one is set`, () => {
   const returnValue = Symbol();
   const customClientFactoryMock = jest.fn().mockReturnValue(returnValue);
 
-  const clientProvider = new ScopedSavedObjectsClientProvider({
+  const clientProvider = new SavedObjectsClientProvider({
     defaultClientFactory: defaultClientFactoryMock,
   });
   clientProvider.setClientFactory(customClientFactoryMock);
@@ -57,7 +57,7 @@ test(`uses custom client factory when one is set`, () => {
 });
 
 test(`throws error when more than one scoped saved objects client factory is set`, () => {
-  const clientProvider = new ScopedSavedObjectsClientProvider({});
+  const clientProvider = new SavedObjectsClientProvider({});
   clientProvider.setClientFactory(() => {});
   expect(() => {
     clientProvider.setClientFactory(() => {});
@@ -66,7 +66,7 @@ test(`throws error when more than one scoped saved objects client factory is set
 
 test(`throws error when registering a wrapper with a duplicate id`, () => {
   const defaultClientFactoryMock = jest.fn();
-  const clientProvider = new ScopedSavedObjectsClientProvider({
+  const clientProvider = new SavedObjectsClientProvider({
     defaultClientFactory: defaultClientFactoryMock,
   });
   const firstClientWrapperFactoryMock = jest.fn();
@@ -81,7 +81,7 @@ test(`throws error when registering a wrapper with a duplicate id`, () => {
 test(`invokes and uses wrappers in specified order`, () => {
   const defaultClient = Symbol();
   const defaultClientFactoryMock = jest.fn().mockReturnValue(defaultClient);
-  const clientProvider = new ScopedSavedObjectsClientProvider({
+  const clientProvider = new SavedObjectsClientProvider({
     defaultClientFactory: defaultClientFactoryMock,
   });
   const firstWrappedClient = Symbol('first client');
@@ -108,7 +108,7 @@ test(`invokes and uses wrappers in specified order`, () => {
 test(`does not invoke or use excluded wrappers`, () => {
   const defaultClient = Symbol();
   const defaultClientFactoryMock = jest.fn().mockReturnValue(defaultClient);
-  const clientProvider = new ScopedSavedObjectsClientProvider({
+  const clientProvider = new SavedObjectsClientProvider({
     defaultClientFactory: defaultClientFactoryMock,
   });
   const firstWrappedClient = Symbol('first client');
@@ -135,7 +135,7 @@ test(`does not invoke or use excluded wrappers`, () => {
 test(`allows all wrappers to be excluded`, () => {
   const defaultClient = Symbol();
   const defaultClientFactoryMock = jest.fn().mockReturnValue(defaultClient);
-  const clientProvider = new ScopedSavedObjectsClientProvider({
+  const clientProvider = new SavedObjectsClientProvider({
     defaultClientFactory: defaultClientFactoryMock,
   });
   const firstWrappedClient = Symbol('first client');

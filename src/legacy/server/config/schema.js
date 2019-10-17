@@ -108,9 +108,7 @@ export default () => Joi.object({
     ssl: HANDLED_IN_NEW_PLATFORM,
   }).default(),
 
-  uiSettings: Joi.object().keys({
-    overrides: Joi.object().unknown(true).default()
-  }).default(),
+  uiSettings: HANDLED_IN_NEW_PLATFORM,
 
   logging: Joi.object().keys({
     silent: Joi.boolean().default(false),

@@ -33,6 +33,7 @@ import {
   ExplorerNoJobsFound,
   ExplorerNoResultsFound,
 } from './components';
+import { ChartTooltip } from '../components/chart_tooltip';
 import { ExplorerSwimlane } from './explorer_swimlane';
 import { KqlFilterBar } from '../components/kql_filter_bar';
 import { formatHumanReadableDateTime } from '../util/date_utils';
@@ -42,7 +43,7 @@ import { InfluencersList } from '../components/influencers_list';
 import { ALLOW_CELL_RANGE_SELECTION, dragSelect$, explorer$ } from './explorer_dashboard_service';
 import { mlResultsService } from 'plugins/ml/services/results_service';
 import { LoadingIndicator } from '../components/loading_indicator/loading_indicator';
-import { NavigationMenu } from '../components/navigation_menu/navigation_menu';
+import { NavigationMenu } from '../components/navigation_menu';
 import { CheckboxShowCharts, showCharts$ } from '../components/controls/checkbox_showcharts';
 import { JobSelector } from '../components/job_selector';
 import { SelectInterval, interval$ } from '../components/controls/select_interval/select_interval';
@@ -1145,6 +1146,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
       return (
         <ExplorerPage jobSelectorProps={jobSelectorProps}>
+          <ChartTooltip />
           <div className="results-container">
 
             {noInfluencersConfigured === false &&

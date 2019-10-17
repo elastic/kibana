@@ -27,6 +27,7 @@ import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
 import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/expressions/public';
 import { prependDatasourceExpression, prependKibanaContext } from './expression_helpers';
 import { debouncedComponent } from '../../debounced_component';
+import { trackUiEvent, trackSuggestionEvent } from '../../lens_ui_telemetry';
 
 const MAX_SUGGESTIONS_DISPLAYED = 5;
 
@@ -227,6 +228,7 @@ export function SuggestionPanel({
 
   function rollbackToCurrentVisualization() {
     if (lastSelectedSuggestion !== -1) {
+      trackSuggestionEvent('back_to_current');
       setLastSelectedSuggestion(-1);
       dispatch({
         type: 'ROLLBACK_SUGGESTION',
@@ -261,6 +263,7 @@ export function SuggestionPanel({
               data-test-subj="lensSubmitSuggestion"
               size="xs"
               onClick={() => {
+                trackUiEvent('suggestion_confirmed');
                 dispatch({
                   type: 'SUBMIT_SUGGESTION',
                 });
@@ -307,9 +310,11 @@ export function SuggestionPanel({
               ExpressionRenderer={ExpressionRendererComponent}
               key={index}
               onSelect={() => {
+                trackUiEvent('suggestion_clicked');
                 if (lastSelectedSuggestion === index) {
                   rollbackToCurrentVisualization();
                 } else {
+                  trackSuggestionEvent(`position_${index}_of_${suggestions.length}`);
                   setLastSelectedSuggestion(index);
                   switchToSuggestion(frame, dispatch, suggestion);
                 }

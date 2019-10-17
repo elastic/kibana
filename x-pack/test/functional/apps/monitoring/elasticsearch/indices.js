@@ -34,7 +34,7 @@ export default function ({ getService, getPageObjects }) {
       expect(await esClusterSummaryStatus.getContent()).to.eql({
         nodesCount: 'Nodes\n1',
         indicesCount: 'Indices\n19',
-        memory: 'Memory\n267.7 MB / 676.8 MB',
+        memory: 'JVM Heap\n267.7 MB / 676.8 MB',
         totalShards: 'Total shards\n46',
         unassignedShards: 'Unassigned shards\n23',
         documentCount: 'Documents\n4,535',

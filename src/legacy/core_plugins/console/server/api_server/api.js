@@ -25,10 +25,12 @@ class Api {
     this.endpoints = {};
     this.name = name;
   }
-  addGlobalAutocompleteRules = function (parentNode, rules) {
+
+  addGlobalAutocompleteRules = (parentNode, rules) => {
     this.globalRules[parentNode] = rules;
   }
-  addEndpointDescription(endpoint, description = {}) {
+
+  addEndpointDescription = (endpoint, description = {}) => {
     let copiedDescription = {};
     if (this.endpoints[endpoint]) {
       copiedDescription = { ...this.endpoints[endpoint] };
@@ -54,6 +56,7 @@ class Api {
       patterns: [endpoint],
       methods: ['GET']
     });
+
     this.endpoints[endpoint] = copiedDescription;
   }
 

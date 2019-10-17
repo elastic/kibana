@@ -21,21 +21,29 @@ import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common']);
-  const browser = getService('browser');
   const testSubjects = getService('testSubjects');
+  const supertest = getService('supertest');
 
   describe('legacy plugins', function describeIndexTests() {
-    it('have access to New Platform HTTP service', async () => {
-      const url = `${PageObjects.common.getHostPort()}/api/np-http-in-legacy`;
-      await browser.get(url);
+    describe('http', () => {
+      it('has access to New Platform HTTP service', async () => {
+        await supertest
+          .get('/api/np-http-in-legacy')
+          .expect(200)
+          .expect('Pong in legacy via new platform: true');
+      });
 
-      const pageSource = await browser.execute('return window.document.body.textContent;');
-      expect(pageSource).to.equal('Pong in legacy via new platform: true');
+      it('has access to New Platform HTTP context providers', async () => {
+        await supertest
+          .get('/api/np-context-in-legacy')
+          .expect(200)
+          .expect(JSON.stringify({ contexts: ['core', 'search', 'pluginA'] }));
+      });
     });
 
     describe('application service compatibility layer', function describeIndexTests() {
       it('can render legacy apps', async () => {
-        await PageObjects.common.navigateToApp('core_legacy_compat');
+        await PageObjects.common.navigateToApp('core_plugin_legacy');
         expect(await testSubjects.exists('coreLegacyCompatH1')).to.be(true);
       });
     });
