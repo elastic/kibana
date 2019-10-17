@@ -5,9 +5,9 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiPanel, EuiText } from '@elastic/eui';
 
-import { CodeBlock } from '../codeblock/codeblock';
+import { CodeBlock } from '../code_block';
 import { history } from '../../utils/url';
 import { FrameHeader } from './frame_header';
 import { RepoTitle } from './repo_title';
@@ -21,7 +21,7 @@ const associateToService = (frame: Frame) => (repo: string) =>
 const handleImport = (repo: string) => alert(`import done: ${repo}`);
 
 export const Integrations = () => (
-  <div className="codeContainer__root codeIntegrations__container">
+  <div className="codeIntegrations__container">
     {frames.map(frame => {
       const { fileName, lineNumber } = frame;
       const key = `${fileName}#L${lineNumber}`;
@@ -31,22 +31,19 @@ export const Integrations = () => (
         const { compositeContent, filePath, language, uri } = snippet;
         const { content, lineMapping } = compositeContent;
         const fileUrl = externalFileURI(uri, filePath);
+        const lines = content.split('\n');
 
         return (
           <div key={key} className="codeIntegrations__frame">
             <RepoTitle uri={snippet.uri} />
-            <CodeBlock
-              content={content}
-              header={
-                <FrameHeader
-                  fileName={fileName}
-                  lineNumber={lineNumber}
-                  onClick={() => history.push(fileUrl)}
-                />
-              }
-              language={language}
-              lineNumber={i => lineMapping[i]}
-            />
+            <EuiPanel paddingSize="s">
+              <FrameHeader
+                fileName={fileName}
+                lineNumber={lineNumber}
+                onClick={() => history.push(fileUrl)}
+              />
+              <CodeBlock lines={lines} language={language} lineNumber={i => lineMapping[i]} />
+            </EuiPanel>
           </div>
         );
       }

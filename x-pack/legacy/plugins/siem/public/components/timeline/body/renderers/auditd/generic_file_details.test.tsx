@@ -48,7 +48,7 @@ describe('GenericFileDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionalice@zeek-sanfranin/generic-text-123usinggpgconf--list-dirs agent-socket'
+        'Sessionalice@zeek-sanfranin/generic-text-123usinggpgconf(5402)gpgconf--list-dirsagent-socketgpgconf --list-dirs agent-socket'
       );
     });
 
@@ -87,7 +87,7 @@ describe('GenericFileDetails', () => {
             processExecutable="process-1"
             processTitle="process-title-1"
             workingDirectory="working-directory-1"
-            args="arg1 arg2 arg3"
+            args={['arg1', 'arg2', 'arg3']}
             filePath="/somepath"
             fileIcon="document"
             result="success"
@@ -95,7 +95,7 @@ describe('GenericFileDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1username-1@host-1inworking-directory-1generic-text-123/somepathusingprocess-name-1arg1 arg2 arg3with resultsuccess'
+        'Sessionsession-1username-1@host-1inworking-directory-1generic-text-123/somepathusingprocess-name-1(123)arg1arg2arg3process-title-1with resultsuccess'
       );
     });
 
@@ -116,7 +116,7 @@ describe('GenericFileDetails', () => {
             processExecutable="process-1"
             processTitle="process-title-1"
             workingDirectory="working-directory-1"
-            args="arg1 arg2 arg3"
+            args={['arg1', 'arg2', 'arg3']}
             filePath="/somepath"
             fileIcon="document"
             result="success"
@@ -124,7 +124,7 @@ describe('GenericFileDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1username-1@host-1inworking-directory-1generic-text-123/somepathusingprocess-name-1arg1 arg2 arg3with resultsuccess'
+        'Sessionsession-1username-1@host-1inworking-directory-1generic-text-123/somepathusingprocess-name-1(123)arg1arg2arg3process-title-1with resultsuccess'
       );
     });
 
@@ -145,7 +145,7 @@ describe('GenericFileDetails', () => {
             processExecutable="process-1"
             processTitle="process-title-1"
             workingDirectory="working-directory-1"
-            args="arg1 arg2 arg3"
+            args={['arg1', 'arg2', 'arg3']}
             filePath="/somepath"
             fileIcon="document"
             result="success"
@@ -153,7 +153,7 @@ describe('GenericFileDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1username-1@host-1inworking-directory-1generic-text-123/somepathusingprocess-name-1arg1 arg2 arg3with resultsuccess'
+        'Sessionsession-1username-1@host-1inworking-directory-1generic-text-123/somepathusingprocess-name-1(123)arg1arg2arg3process-title-1with resultsuccess'
       );
     });
 
@@ -174,7 +174,7 @@ describe('GenericFileDetails', () => {
             processExecutable="process-1"
             processTitle="process-title-1"
             workingDirectory="working-directory-1"
-            args="arg1 arg2 arg3"
+            args={['arg1', 'arg2', 'arg3']}
             filePath="/somepath"
             fileIcon="document"
             result="success"
@@ -182,7 +182,7 @@ describe('GenericFileDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1username-1@host-1inworking-directory-1generic-text-123/somepathusingprocess-name-1arg1 arg2 arg3with resultsuccess'
+        'Sessionsession-1username-1@host-1inworking-directory-1generic-text-123/somepathusingprocess-name-1(123)arg1arg2arg3process-title-1with resultsuccess'
       );
     });
 
@@ -203,7 +203,7 @@ describe('GenericFileDetails', () => {
             processExecutable="process-1"
             processTitle="process-title-1"
             workingDirectory="working-directory-1"
-            args="arg1 arg2 arg3"
+            args={['arg1', 'arg2', 'arg3']}
             filePath="/somepath"
             fileIcon="document"
             result="success"
@@ -211,7 +211,7 @@ describe('GenericFileDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1username-1@host-1inworking-directory-1generic-text-123/somepathusingprocess-name-1arg1 arg2 arg3with resultsuccess'
+        'Sessionsession-1username-1@host-1inworking-directory-1generic-text-123/somepathusingprocess-name-1(123)arg1arg2arg3process-title-1with resultsuccess'
       );
     });
 
@@ -232,7 +232,7 @@ describe('GenericFileDetails', () => {
             processExecutable="process-1"
             processTitle="process-title-1"
             workingDirectory="working-directory-1"
-            args="arg1 arg2 arg3"
+            args={['arg1', 'arg2', 'arg3']}
             filePath="/somepath"
             fileIcon="document"
             result="success"
@@ -240,7 +240,7 @@ describe('GenericFileDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1[username-2]as[username-3]@host-1inworking-directory-1generic-text-123/somepathusingprocess-name-1arg1 arg2 arg3with resultsuccess'
+        'Sessionsession-1[username-2]as[username-3]@host-1inworking-directory-1generic-text-123/somepathusingprocess-name-1(123)arg1arg2arg3process-title-1with resultsuccess'
       );
     });
 
@@ -261,7 +261,7 @@ describe('GenericFileDetails', () => {
             processExecutable="process-1"
             processTitle="process-title-1"
             workingDirectory="working-directory-1"
-            args="arg1 arg2 arg3"
+            args={['arg1', 'arg2', 'arg3']}
             filePath="/somepath"
             fileIcon="document"
             result="success"
@@ -269,7 +269,7 @@ describe('GenericFileDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1[username-1]as[username-2]@host-1inworking-directory-1generic-text-123/somepathusingprocess-name-1arg1 arg2 arg3with resultsuccess'
+        'Sessionsession-1[username-1]as[username-2]@host-1inworking-directory-1generic-text-123/somepathusingprocess-name-1(123)arg1arg2arg3process-title-1with resultsuccess'
       );
     });
 
@@ -290,7 +290,7 @@ describe('GenericFileDetails', () => {
             processExecutable="process-1"
             processTitle="process-title-1"
             workingDirectory="working-directory-1"
-            args="arg1 arg2 arg3"
+            args={['arg1', 'arg2', 'arg3']}
             filePath="/somepath"
             fileIcon="document"
             result="success"
@@ -298,7 +298,7 @@ describe('GenericFileDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1[username-primary]@host-1inworking-directory-1generic-text-123/somepathusingprocess-name-1arg1 arg2 arg3with resultsuccess'
+        'Sessionsession-1[username-primary]@host-1inworking-directory-1generic-text-123/somepathusingprocess-name-1(123)arg1arg2arg3process-title-1with resultsuccess'
       );
     });
 
@@ -319,7 +319,7 @@ describe('GenericFileDetails', () => {
             processExecutable="process-1"
             processTitle="process-title-1"
             workingDirectory="working-directory-1"
-            args="arg1 arg2 arg3"
+            args={['arg1', 'arg2', 'arg3']}
             filePath="/somepath"
             fileIcon="document"
             result="success"
@@ -327,7 +327,7 @@ describe('GenericFileDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1[username-primary]@host-1inworking-directory-1generic-text-123/somepathusingprocess-name-1arg1 arg2 arg3with resultsuccess'
+        'Sessionsession-1[username-primary]@host-1inworking-directory-1generic-text-123/somepathusingprocess-name-1(123)arg1arg2arg3process-title-1with resultsuccess'
       );
     });
 
@@ -439,7 +439,7 @@ describe('GenericFileDetails', () => {
       expect(wrapper.text()).toEqual('Sessiongeneric-text-123usingsome-process-name');
     });
 
-    test('it returns only session and user name if process title with id is given', () => {
+    test('it returns session user name and title if process title with id is given', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <AuditdGenericFileLine
@@ -463,7 +463,7 @@ describe('GenericFileDetails', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('Sessionsome-user-name');
+      expect(wrapper.text()).toEqual('Sessionsome-user-namesome-process-title');
     });
 
     test('it returns only a working directory if that is all that is given with a id', () => {
@@ -500,7 +500,7 @@ describe('GenericFileDetails', () => {
             id="hello-i-am-an-id"
             contextId="contextid-123"
             text="generic-text-123"
-            args="arg1 arg2 arg 3"
+            args={['arg1', 'arg2', 'arg 3']}
             fileIcon="document"
             userName={undefined}
             secondary={undefined}
@@ -517,7 +517,7 @@ describe('GenericFileDetails', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('Sessionarg1 arg2 arg 3');
+      expect(wrapper.text()).toEqual('Sessionarg1arg2arg 3');
     });
   });
 });

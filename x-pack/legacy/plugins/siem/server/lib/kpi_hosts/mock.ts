@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { defaultIndexPattern } from '../../../default_index_pattern';
 import { RequestBasicOptions } from '../framework/types';
 
 const FROM = new Date('2019-05-03T13:24:00.660Z').valueOf();
 const TO = new Date('2019-05-04T13:24:00.660Z').valueOf();
 
 export const mockKpiHostsOptions: RequestBasicOptions = {
-  defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+  defaultIndex: defaultIndexPattern,
   sourceConfiguration: {
     fields: {
       container: 'docker.container.name',
@@ -26,7 +27,7 @@ export const mockKpiHostsOptions: RequestBasicOptions = {
 };
 
 export const mockKpiHostDetailsOptions: RequestBasicOptions = {
-  defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+  defaultIndex: defaultIndexPattern,
   sourceConfiguration: {
     fields: {
       container: 'docker.container.name',
@@ -293,7 +294,7 @@ export const mockKpiHostsResponse = {
 export const mockKpiHostsResponseNodata = { responses: [null, null, null] };
 
 const mockMsearchHeader = {
-  index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+  index: defaultIndexPattern,
   allowNoIndices: true,
   ignoreUnavailable: true,
 };

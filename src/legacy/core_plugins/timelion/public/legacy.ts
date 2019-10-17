@@ -22,28 +22,20 @@ import { npSetup, npStart } from 'ui/new_platform';
 import { plugin } from '.';
 import { setup as visualizations } from '../../visualizations/public/np_ready/public/legacy';
 import { setup as data } from '../../data/public/legacy';
-import { TimelionPluginSetupDependencies, TimelionPluginStartDependencies } from './plugin';
-// @ts-ignore
-import panelRegistry from './lib/panel_registry';
+import { TimelionPluginSetupDependencies } from './plugin';
 import { LegacyDependenciesPlugin } from './shim';
-
-// Temporary solution
-// It will be removed when all dependent services are migrated to the new platform.
-const __LEGACY = new LegacyDependenciesPlugin();
 
 const setupPlugins: Readonly<TimelionPluginSetupDependencies> = {
   visualizations,
   data,
   expressions: npSetup.plugins.expressions,
-  __LEGACY,
-};
 
-const startPlugins: Readonly<TimelionPluginStartDependencies> = {
-  panelRegistry,
-  __LEGACY,
+  // Temporary solution
+  // It will be removed when all dependent services are migrated to the new platform.
+  __LEGACY: new LegacyDependenciesPlugin(),
 };
 
 const pluginInstance = plugin({} as PluginInitializerContext);
 
 export const setup = pluginInstance.setup(npSetup.core, setupPlugins);
-export const start = pluginInstance.start(npStart.core, startPlugins);
+export const start = pluginInstance.start(npStart.core);

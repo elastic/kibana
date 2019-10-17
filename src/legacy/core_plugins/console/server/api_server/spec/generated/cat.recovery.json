@@ -2,6 +2,7 @@
   "cat.recovery": {
     "url_params": {
       "format": "",
+      "active_only": "__flag__",
       "bytes": [
         "b",
         "k",
@@ -15,9 +16,11 @@
         "p",
         "pb"
       ],
+      "detailed": "__flag__",
       "master_timeout": "",
       "h": [],
       "help": "__flag__",
+      "index": [],
       "s": [],
       "v": "__flag__"
     },

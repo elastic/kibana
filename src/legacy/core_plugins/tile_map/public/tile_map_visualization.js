@@ -21,7 +21,7 @@ import { get } from 'lodash';
 import { GeohashLayer } from './geohash_layer';
 import { BaseMapsVisualizationProvider } from './base_maps_visualization';
 import { TileMapTooltipFormatterProvider } from './editors/_tooltip_formatter';
-import { setup as data } from '../../../core_plugins/data/public/legacy';
+import { start as data } from '../../../core_plugins/data/public/legacy';
 const filterManager = data.filter.filterManager;
 
 export const createTileMapVisualization = ({ serviceSettings, $injector }) => {

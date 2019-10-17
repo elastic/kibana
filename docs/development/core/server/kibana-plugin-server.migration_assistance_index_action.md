@@ -4,6 +4,7 @@
 
 ## MIGRATION\_ASSISTANCE\_INDEX\_ACTION type
 
+
 <b>Signature:</b>
 
 ```typescript

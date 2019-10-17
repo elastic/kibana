@@ -8,7 +8,6 @@ import crypto from 'crypto';
 import * as _ from 'lodash';
 import { CoreSetup } from 'src/core/server';
 
-import { GitOperations } from './git_operations';
 import { RepositoryIndexInitializerFactory, tryMigrateIndices } from './indexer';
 import { Esqueue } from './lib/esqueue';
 import { Logger } from './log';
@@ -59,7 +58,6 @@ import { PluginSetupContract } from '../../../../plugins/code/server/index';
 export class CodePlugin {
   private isCodeNode = false;
 
-  private gitOps: GitOperations | null = null;
   private queue: Esqueue | null = null;
   private log: Logger;
   private serverOptions: ServerOptions;
@@ -140,7 +138,6 @@ export class CodePlugin {
       repoConfigController
     );
     this.lspService = lspService;
-    this.gitOps = gitOps;
     const { indexScheduler, updateScheduler, cloneWorker } = initWorkers(
       server,
       this.log,
@@ -188,7 +185,6 @@ export class CodePlugin {
       repoConfigController
     );
     this.lspService = lspService;
-    this.gitOps = gitOps;
     const { indexScheduler, updateScheduler } = initWorkers(
       server,
       this.log,
@@ -215,7 +211,6 @@ export class CodePlugin {
 
   public async stop() {
     if (this.isCodeNode) {
-      if (this.gitOps) await this.gitOps.cleanAllRepo();
       if (this.indexScheduler) this.indexScheduler.stop();
       if (this.updateScheduler) this.updateScheduler.stop();
       if (this.queue) this.queue.destroy();

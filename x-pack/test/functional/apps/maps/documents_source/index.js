@@ -6,6 +6,7 @@
 
 export default function ({ loadTestFile }) {
   describe('documents source', function () {
+    loadTestFile(require.resolve('./docvalue_fields'));
     loadTestFile(require.resolve('./search_hits'));
     loadTestFile(require.resolve('./top_hits'));
   });

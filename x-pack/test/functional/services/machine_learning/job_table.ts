@@ -219,5 +219,16 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
       await testSubjects.click('mlActionButtonCloneJob');
       await testSubjects.existOrFail('~mlPageJobWizard');
     }
+
+    public async clickDeleteJobAction(jobId: string) {
+      await this.clickActionsMenu(jobId);
+      await testSubjects.click('mlActionButtonDeleteJob');
+      await testSubjects.existOrFail('mlDeleteJobConfirmModal');
+    }
+
+    public async confirmDeleteJobModal() {
+      await testSubjects.click('mlDeleteJobConfirmModal > confirmModalConfirmButton');
+      await testSubjects.missingOrFail('mlDeleteJobConfirmModal', { timeout: 30 * 1000 });
+    }
   })();
 }
