@@ -4,7 +4,7 @@
 <titleabbrev>Delete object</titleabbrev>
 ++++
 
-experimental[] Remove a {kib} saved object. 
+experimental[] Remove {kib} saved objects. 
 
 WARNING: Once you delete a saved object, _it cannot be recovered_.
 
