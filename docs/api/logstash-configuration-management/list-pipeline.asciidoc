@@ -1,4 +1,3 @@
-[role="xpack"]
 [[logstash-configuration-management-api-list]]
 === List Logstash pipeline API
 ++++
@@ -36,4 +35,4 @@ The API returns the following:
 }
 --------------------------------------------------
 
-<1> The `username` property may or may not be present, depending on if security was enabled when the pipeline was created or last updated.
+<1> The `username` property appears when security is enabled, and depends on when the pipeline was created or last updated.

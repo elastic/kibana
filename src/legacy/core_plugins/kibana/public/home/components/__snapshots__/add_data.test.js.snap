@@ -106,7 +106,7 @@ exports[`apmUiEnabled 1`] = `
         }
         layout="vertical"
         textAlign="center"
-        title="Logging"
+        title="Logs"
         titleElement="span"
       />
     </EuiFlexItem>
@@ -334,7 +334,7 @@ exports[`isNewKibanaInstance 1`] = `
         }
         layout="vertical"
         textAlign="center"
-        title="Logging"
+        title="Logs"
         titleElement="span"
       />
     </EuiFlexItem>
@@ -599,7 +599,7 @@ exports[`mlEnabled 1`] = `
         }
         layout="vertical"
         textAlign="center"
-        title="Logging"
+        title="Logs"
         titleElement="span"
       />
     </EuiFlexItem>
@@ -863,7 +863,7 @@ exports[`render 1`] = `
         }
         layout="vertical"
         textAlign="center"
-        title="Logging"
+        title="Logs"
         titleElement="span"
       />
     </EuiFlexItem>

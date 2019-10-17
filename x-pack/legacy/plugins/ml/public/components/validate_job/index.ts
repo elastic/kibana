@@ -4,6 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const APP_TITLE = 'Code (Beta)';
-export const APP_USAGE_TYPE = 'code';
-export const SAVED_OBJ_REPO = 'code-repo';
+export { ValidateJob } from './validate_job_view';

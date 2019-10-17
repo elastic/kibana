@@ -4,4 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './messagebar';
+import { SAVED_OBJ_REPO } from './common/constants';
+
+export const mappings = {
+  [SAVED_OBJ_REPO]: {
+    properties: {
+      uri: {
+        type: 'keyword',
+      },
+    },
+  },
+};
