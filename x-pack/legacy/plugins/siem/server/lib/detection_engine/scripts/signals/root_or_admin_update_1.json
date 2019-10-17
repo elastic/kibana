@@ -1,5 +1,5 @@
 {
-  "id": "f47e5de7-0023-4898-b856-cf3874e883ea",
+  "id": "rule-1",
   "description": "Only watch winlogbeat users",
   "index": ["winlogbeat-*"],
   "interval": "9m",
