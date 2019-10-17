@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { getLoggerStream } from './log_reporter';
+import { LogReporter } from './log_reporter';
 
 export default function loggingConfiguration(config) {
   const events = config.get('logging.events');
@@ -50,7 +50,7 @@ export default function loggingConfiguration(config) {
     });
   }
 
-  const loggerStream = getLoggerStream({
+  const logReporter = new LogReporter({
     config: {
       json: config.get('logging.json'),
       dest: config.get('logging.dest'),
@@ -79,8 +79,16 @@ export default function loggingConfiguration(config) {
       request: ['headers', 'payload']
     },
     reporters: {
-      logReporter: [loggerStream]
+      logReporter: [logReporter.logInterceptor]
     }
   };
-  return options;
+
+  return {
+    validOptions: {
+      ...options
+    },
+    extraOptions: {
+      formattedLogReporterStream: logReporter.formattedLogStream
+    }
+  };
 }

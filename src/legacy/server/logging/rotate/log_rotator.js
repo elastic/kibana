@@ -21,8 +21,8 @@ import fs from 'fs';
 import { throttle } from 'lodash';
 
 export class LogRotator {
-  constructor(config, logInterceptor) {
-    this.logInterceptor = logInterceptor;
+  constructor(config, logReporterStream) {
+    this.logReporterStream = logReporterStream;
     this.logFilePath = config.get('logging.dest');
     this.interval = config.get('logging.rotate.interval');
     this.everyBytes = config.get('logging.rotate.everyBytes');
@@ -33,8 +33,7 @@ export class LogRotator {
     this.intervalID = 0;
     this.lastIntervalCycleTime = 0;
     this.isRotating = false;
-
-    throttle(this._rotate, 5000);
+    this.throttledRotate = throttle(() => { this._rotate(); }, 5000);
   }
 
   start() {
@@ -77,7 +76,7 @@ export class LogRotator {
 
   _startLogFileSizeMonitor() {
     this.logFileSize = this._getLogFileSize();
-    this.logInterceptor.on('data', this._logFileSizeMonitorHandler());
+    this.logReporterStream.on('data', this._logFileSizeMonitorHandler.bind(this));
   }
 
   _logFileSizeMonitorHandler(chunk) {
@@ -85,12 +84,12 @@ export class LogRotator {
       return;
     }
 
-    this.logFileSize += chunk.length;
-    this._rotate();
+    this.logFileSize += chunk.length || 0;
+    this.throttledRotate();
   }
 
   _stopLogFileSizeMonitor() {
-    this.logInterceptor.removeListener('data', this._logFileIntervalMonitorHandler());
+    this.logReporterStream.removeListener('data', this._logFileIntervalMonitorHandler);
   }
 
   _startLogFileIntervalMonitor() {
@@ -98,12 +97,12 @@ export class LogRotator {
       return;
     }
 
-    this.intervalID = setInterval(this._logFileIntervalMonitorHandler, this.interval * 60 * 1000);
+    this.intervalID = setInterval(this._logFileIntervalMonitorHandler.bind(this), this.interval * 60 * 1000);
   }
 
   _logFileIntervalMonitorHandler() {
     this.lastIntervalCycleTime = new Date();
-    this._rotate();
+    this.throttledRotate();
   }
 
   _stopLogFileIntervalMonitor() {
@@ -116,11 +115,11 @@ export class LogRotator {
   }
 
   _createExitListener() {
-    process.on('exit', this.stop());
+    process.on('exit', this.stop.bind(this));
   }
 
   _deleteExitListener() {
-    process.removeListener('exit', this.stop());
+    process.removeListener('exit', this.stop);
   }
 
   _getLogFileSize() {
@@ -130,7 +129,7 @@ export class LogRotator {
 
   _callRotateOnStartup() {
     if (this.onStartup) {
-      this._rotate();
+      this.throttledRotate();
     }
   }
 
@@ -149,9 +148,13 @@ export class LogRotator {
       return true;
     }
 
+    if (!this.lastIntervalCycleTime) {
+      return false;
+    }
+
     const currentTime = (new Date()).getTime();
     const elapsedTime = Math.abs(currentTime - this.lastIntervalCycleTime.getTime());
-    return !!(this.lastIntervalCycleTime && elapsedTime > this.interval * 60 * 1000);
+    return elapsedTime > this.interval * 60 * 1000;
   }
 
   _rotate() {

@@ -33,7 +33,7 @@ export async function loggingMixin(kbnServer, server, config) {
   const generatedLoggingConfiguration = loggingConfiguration(config);
 
   logWithMetadata.decorateServer(server);
-  setupLoggingRotate(config, generatedLoggingConfiguration.reporters.logReporter[0]);
+  setupLoggingRotate(config, generatedLoggingConfiguration.extraOptions.formattedLogReporterStream);
 
-  return await setupLogging(server, generatedLoggingConfiguration);
+  return await setupLogging(server, generatedLoggingConfiguration.validOptions);
 }

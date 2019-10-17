@@ -24,29 +24,30 @@ import LogFormatJson from './log_format_json';
 import LogFormatString from './log_format_string';
 import { LogInterceptor } from './log_interceptor';
 
-export function getLoggerStream({ events, config }) {
-  const squeeze = new Squeeze(events);
-  const format = config.json ? new LogFormatJson(config) : new LogFormatString(config);
-  const logInterceptor = new LogInterceptor();
+export class LogReporter {
+  constructor({ events, config }) {
+    this.squeeze = new Squeeze(events);
+    this.format = config.json ? new LogFormatJson(config) : new LogFormatString(config);
+    this.logInterceptor = new LogInterceptor();
+    this.dest = null;
+    this.formattedLogStream = this.logInterceptor
+      .pipe(this.squeeze)
+      .pipe(this.format);
 
-  let dest;
-  if (config.dest === 'stdout') {
-    dest = process.stdout;
-  } else {
-    dest = writeStr(config.dest, {
-      flags: 'a',
-      encoding: 'utf8'
-    });
+    if (config.dest === 'stdout') {
+      this.dest = process.stdout;
+    } else {
+      this.dest = writeStr(config.dest, {
+        flags: 'a',
+        encoding: 'utf8'
+      });
 
-    logInterceptor.on('end', () => {
-      dest.end();
-    });
+      this.logInterceptor.on('end', () => {
+        this.dest.end();
+      });
+    }
+
+    this.formattedLogStream
+      .pipe(this.dest);
   }
-
-  logInterceptor
-    .pipe(squeeze)
-    .pipe(format)
-    .pipe(dest);
-
-  return logInterceptor;
 }
