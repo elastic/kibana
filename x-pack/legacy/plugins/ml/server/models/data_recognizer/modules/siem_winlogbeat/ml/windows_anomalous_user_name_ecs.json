@@ -33,19 +33,19 @@
     "custom_urls": [
       {
         "url_name": "Host Details by process name",
-        "url_value": "siem#/ml-hosts/$host.name$?_g=()&query=(expression:'process.name%20:%20%22$process.name$%22',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
+        "url_value": "siem#/ml-hosts/$host.name$?_g=()&query=(query:'process.name%20:%20%22$process.name$%22',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
       },
       {
         "url_name": "Host Details by user name",
-        "url_value": "siem#/ml-hosts/$host.name$?_g=()&query=(expression:'user.name%20:%20%22$user.name$%22',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
+        "url_value": "siem#/ml-hosts/$host.name$?_g=()&query=(query:'user.name%20:%20%22$user.name$%22',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
       },
       {
         "url_name": "Hosts Overview by process name",
-        "url_value": "siem#/ml-hosts?_g=()&query=(expression:'process.name%20:%20%22$process.name$%22',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
+        "url_value": "siem#/ml-hosts?_g=()&query=(query:'process.name%20:%20%22$process.name$%22',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
       },
       {
         "url_name": "Hosts Overview by user name",
-        "url_value": "siem#/ml-hosts?_g=()&query=(expression:'user.name%20:%20%22$user.name$%22',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
+        "url_value": "siem#/ml-hosts?_g=()&query=(query:'user.name%20:%20%22$user.name$%22',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
       }
     ]
   }
