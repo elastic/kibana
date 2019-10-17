@@ -52,6 +52,14 @@ afterEach(() => {
 describe('uiSettings', () => {
   describe('#setup', () => {
     describe('#asScopedToClient', () => {
+      it('passes saved object type "config" to UiSettingsClient', async () => {
+        const service = new UiSettingsService(coreContext);
+        const setup = await service.setup(setupDeps);
+        setup.asScopedToClient(savedObjectsClient);
+        expect(MockUiSettingsClientConstructor).toBeCalledTimes(1);
+        expect(MockUiSettingsClientConstructor.mock.calls[0][0].type).toBe('config');
+      });
+
       it('passes overrides to UiSettingsClient', async () => {
         const service = new UiSettingsService(coreContext);
         const setup = await service.setup(setupDeps);

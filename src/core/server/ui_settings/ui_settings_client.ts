@@ -92,19 +92,11 @@ export class UiSettingsClient implements IUiSettingsClient {
     );
   }
 
-  // NOTE: should be a private method
-  async getRaw(): Promise<UiSettingsRaw> {
-    const userProvided = await this.getUserProvided();
-    return defaultsDeep(userProvided, this.defaults);
-  }
-
-  async getUserProvided<T extends SavedObjectAttribute = any>(
-    options: ReadOptions = {}
-  ): Promise<UserProvided<T>> {
+  async getUserProvided<T extends SavedObjectAttribute = any>(): Promise<UserProvided<T>> {
     const userProvided: UserProvided = {};
 
     // write the userValue for each key stored in the saved object that is not overridden
-    for (const [key, userValue] of Object.entries(await this.read(options))) {
+    for (const [key, userValue] of Object.entries(await this.read())) {
       if (userValue !== null && !this.isOverridden(key)) {
         userProvided[key] = {
           userValue,
@@ -146,11 +138,15 @@ export class UiSettingsClient implements IUiSettingsClient {
     return this.overrides.hasOwnProperty(key);
   }
 
-  // NOTE: should be private method
-  assertUpdateAllowed(key: string) {
+  private assertUpdateAllowed(key: string) {
     if (this.isOverridden(key)) {
       throw new CannotOverrideError(`Unable to update "${key}" because it is overridden`);
     }
+  }
+
+  private async getRaw(): Promise<UiSettingsRaw> {
+    const userProvided = await this.getUserProvided();
+    return defaultsDeep(userProvided, this.defaults);
   }
 
   private async write<T extends SavedObjectAttribute = any>({

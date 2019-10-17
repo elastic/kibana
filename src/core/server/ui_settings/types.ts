@@ -26,7 +26,7 @@ export interface IUiSettingsClient {
   /**
    * Returns uiSettings default values {@link UiSettingsParams}
    */
-  getDefaults: () => Record<string, UiSettingsParams>;
+  getDefaults: () => Readonly<Record<string, UiSettingsParams>>;
   /**
    * Retrieves uiSettings values set by the user with fallbacks to default values if not specified.
    */
