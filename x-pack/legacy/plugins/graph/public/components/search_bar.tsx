@@ -130,7 +130,7 @@ export function SearchBarComponent(props: SearchBarProps) {
                         ),
                       i18n.translate('xpack.graph.clearWorkspace.confirmText', {
                         defaultMessage:
-                          'Changing the data source resets your fields and vertices. You will lose unsaved changes.',
+                          'If you change data sources, your current fields and vertices will be reset.',
                       }),
                       {
                         confirmButtonText: i18n.translate(
