@@ -36,6 +36,12 @@ export function scheduleTask(server, taskManager) {
 
 export function registerMapsTelemetryTask(server) {
   const taskManager = server.plugins.task_manager;
+
+  if (!taskManager) {
+    server.log(['warning', 'telemetry'], `Task manager is not available`);
+    return;
+  }
+
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
       title: 'Maps telemetry fetch task',

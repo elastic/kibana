@@ -49,7 +49,13 @@ export function initializeLensTelemetry(core: CoreSetup, { server }: { server: S
 }
 
 function registerLensTelemetryTask(core: CoreSetup, { server }: { server: Server }) {
-  const taskManager = server.plugins.task_manager!;
+  const taskManager = server.plugins.task_manager;
+
+  if (!taskManager) {
+    server.log(['warning', 'telemetry'], `Task manager is not available`);
+    return;
+  }
+
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
       title: 'Lens telemetry fetch task',
@@ -75,12 +81,14 @@ function scheduleTasks(server: Server) {
     // function block.
     (async () => {
       try {
-        await taskManager!.schedule({
-          id: TASK_ID,
-          taskType: TELEMETRY_TASK_TYPE,
-          state: { byDate: {}, suggestionsByDate: {}, saved: {}, runs: 0 },
-          params: {},
-        });
+        if (taskManager) {
+          await taskManager.schedule({
+            id: TASK_ID,
+            taskType: TELEMETRY_TASK_TYPE,
+            state: { byDate: {}, suggestionsByDate: {}, saved: {}, runs: 0 },
+            params: {},
+          });
+        }
       } catch (e) {
         server.log(['warning', 'telemetry'], `Error scheduling task, received ${e.message}`);
       }

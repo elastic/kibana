@@ -21,6 +21,11 @@ async function isTaskManagerReady(server) {
 async function fetch(server) {
   let docs;
   const taskManager = server.plugins.task_manager;
+
+  if (!taskManager) {
+    return null;
+  }
+
   try {
     ({ docs } = await taskManager.fetch({
       query: {
