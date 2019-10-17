@@ -34,10 +34,6 @@ const customExtension = {
 navSetup.register(customExtension);
 
 export class AppWithTopNav extends Component {
-  constructor() {
-    super();
-  }
-
   public render() {
     const { TopNavMenu } = navStart.ui;
     const config = [
