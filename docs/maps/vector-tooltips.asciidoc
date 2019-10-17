@@ -1,41 +1,41 @@
 [role="xpack"]
 [[vector-tooltip]]
 === Vector tooltips
+Vector tooltips display attributes for the features at your mouse location.
+These tooltips give users an in-depth insight into what's going on in the map.
 
-Vector tooltips display attributes for features at your mouse's location.
-
-Features from Elasticsearch sources use <<index-patterns, Kibana index pattern>> <<managing-fields, field formatters>> to format values. You can use field formatters to round numbers, provide units, or even display images.
-
-When more than one feature exist at a location,
-attributes for the top feature are displayed along with the number of features at that location.
-
-The image below shows a tooltip with multiple features.
-The example is from the <<add-sample-data, Kibana sample eCommerce orders>> data set.
-There are 3 features at the current location.
-The tooltip is displaying attributes for the top feature, the green circle.
-Attributes for other two features are not visible on mouse hover.
+If more than one feature exists at a location, the tooltip displays the
+attributes for the top feature, and notes the number of features at that location.
+The following image shows a tooltip with three features at the current location.
+The tooltip displays attributes for the top feature, the green circle.
 
 [role="screenshot"]
 image::maps/images/multifeature_tooltip.png[]
 
 [float]
+[[maps-vector-tooltip-formatting]]
+
+==== Formatting tooltips
+
+You can format the attributes in a tooltip by adding <<managing-fields, field formatters>> to your
+Kibana index pattern. You can use field formatters to round numbers, provide units,
+and even display images in your tooltip.
+
+[float]
 [[maps-vector-tooltip-locking]]
 ==== Locking a tooltip at the current location
-
-Click a location on the map to lock the tooltip in place.
-
+You can lock a tooltip in place by clicking a location on the map.
 With locked tooltips you can:
 
 * Page through features.
 * Create a <<maps-phrase-filter, phrase filter>> from a feature attribute value.
 * Create a <<maps-spatial-filters, spatial filter>> from a feature's geometry.
 
-The image below shows a locked tooltip with multiple features from multiple layers.
-The example is from the <<add-sample-data, Kibana sample eCommerce orders>> data set.
-There are 3 features at the current location.
-The tooltip is displaying attributes for the second feature, the blue New York State polygon.
-Use the pagination controls on the right to cycle through the features at the current location.
-Use the select box in the tooltip header to filter features by layer.
+This image shows a locked tooltip with features from three layers.
+The tooltip displays attributes
+for the second feature, the blue New York State polygon.  The tooltip includes
+controls for paging through the features and a dropdown menu for filtering
+the features by layer.
 
 [role="screenshot"]
 image::maps/images/locked_tooltip.png[]
