@@ -6,13 +6,15 @@
 
 import { SavedObjectsClientContract } from 'src/core/server/';
 import { SAVED_OBJECT_TYPE } from '../../common/constants';
-import { getInstallationObject } from './index';
+import { getInstallationObject, assetUsesObjects, CallESAsCurrentUser } from './index';
+import { AssetType } from '../../common/types';
 
 export async function removeInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
+  callCluster: CallESAsCurrentUser;
 }) {
-  const { savedObjectsClient, pkgkey } = options;
+  const { savedObjectsClient, pkgkey, callCluster } = options;
   const installation = await getInstallationObject({ savedObjectsClient, pkgkey });
   const installedObjects = (installation && installation.attributes.installed) || [];
 
@@ -21,11 +23,22 @@ export async function removeInstallation(options: {
   await savedObjectsClient.delete(SAVED_OBJECT_TYPE, pkgkey);
 
   // Delete the installed assets
-  const deletePromises = installedObjects.map(async ({ id, type }) =>
-    savedObjectsClient.delete(type, id)
-  );
+  const deletePromises = installedObjects.map(async ({ id, type }) => {
+    if (assetUsesObjects(type as AssetType)) {
+      savedObjectsClient.delete(type, id);
+    } else if (type === AssetType.ingestPipeline) {
+      deletePipeline(callCluster, id);
+    }
+  });
   await Promise.all(deletePromises);
 
   // successful delete's in SO client return {}. return something more useful
   return installedObjects;
+}
+
+async function deletePipeline(callCluster: CallESAsCurrentUser, id: string): Promise<any> {
+  // '*' shouldn't ever appear here, but it still would delete all ingest pipelines
+  if (id && id !== '*') {
+    await callCluster('ingest.deletePipeline', { id });
+  }
 }
