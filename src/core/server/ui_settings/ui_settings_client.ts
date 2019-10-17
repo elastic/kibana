@@ -18,6 +18,7 @@
  */
 import { defaultsDeep } from 'lodash';
 
+import { SavedObjectsErrorHelpers } from '../saved_objects';
 import { SavedObjectsClientContract, SavedObjectAttribute } from '../saved_objects/types';
 import { Logger } from '../logging';
 import { createOrUpgradeSavedConfig } from './create_or_upgrade_saved_config';
@@ -163,8 +164,7 @@ export class UiSettingsClient implements IUiSettingsClient {
     try {
       await this.savedObjectsClient.update(this.type, this.id, changes);
     } catch (error) {
-      const { isNotFoundError } = this.savedObjectsClient.errors;
-      if (!isNotFoundError(error) || !autoCreateOrUpgradeIfMissing) {
+      if (!SavedObjectsErrorHelpers.isNotFoundError(error) || !autoCreateOrUpgradeIfMissing) {
         throw error;
       }
 
@@ -173,6 +173,7 @@ export class UiSettingsClient implements IUiSettingsClient {
         version: this.id,
         buildNum: this.buildNum,
         log: this.log,
+        handleWriteErrors: false,
       });
 
       await this.write({
@@ -186,37 +187,17 @@ export class UiSettingsClient implements IUiSettingsClient {
     ignore401Errors = false,
     autoCreateOrUpgradeIfMissing = true,
   }: ReadOptions = {}): Promise<Record<string, T>> {
-    const {
-      isConflictError,
-      isNotFoundError,
-      isForbiddenError,
-      isNotAuthorizedError,
-    } = this.savedObjectsClient.errors;
-
     try {
       const resp = await this.savedObjectsClient.get(this.type, this.id);
       return resp.attributes;
     } catch (error) {
-      if (isNotFoundError(error) && autoCreateOrUpgradeIfMissing) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(error) && autoCreateOrUpgradeIfMissing) {
         const failedUpgradeAttributes = await createOrUpgradeSavedConfig<T>({
           savedObjectsClient: this.savedObjectsClient,
           version: this.id,
           buildNum: this.buildNum,
           log: this.log,
-          onWriteError(writeError, attributes) {
-            if (isConflictError(writeError)) {
-              // trigger `!failedUpgradeAttributes` check below, since another
-              // request caused the uiSettings object to be created so we can
-              // just re-read
-              return;
-            }
-
-            if (isNotAuthorizedError(writeError) || isForbiddenError(writeError)) {
-              return attributes;
-            }
-
-            throw writeError;
-          },
+          handleWriteErrors: true,
         });
 
         if (!failedUpgradeAttributes) {

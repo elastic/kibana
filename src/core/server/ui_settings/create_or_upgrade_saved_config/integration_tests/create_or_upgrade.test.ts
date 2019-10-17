@@ -93,6 +93,7 @@ describe('createOrUpgradeSavedConfig()', () => {
       version: '5.4.0',
       buildNum: 54099,
       log: logger,
+      handleWriteErrors: false,
     });
 
     const config540 = await savedObjectsClient.get('config', '5.4.0');
@@ -119,6 +120,7 @@ describe('createOrUpgradeSavedConfig()', () => {
       version: '5.4.1',
       buildNum: 54199,
       log: logger,
+      handleWriteErrors: false,
     });
 
     const config541 = await savedObjectsClient.get('config', '5.4.1');
@@ -145,6 +147,7 @@ describe('createOrUpgradeSavedConfig()', () => {
       version: '7.0.0-rc1',
       buildNum: 70010,
       log: logger,
+      handleWriteErrors: false,
     });
 
     const config700rc1 = await savedObjectsClient.get('config', '7.0.0-rc1');
@@ -172,6 +175,7 @@ describe('createOrUpgradeSavedConfig()', () => {
       version: '7.0.0',
       buildNum: 70099,
       log: logger,
+      handleWriteErrors: false,
     });
 
     const config700 = await savedObjectsClient.get('config', '7.0.0');
@@ -200,6 +204,7 @@ describe('createOrUpgradeSavedConfig()', () => {
       version: '6.2.3-rc1',
       buildNum: 62310,
       log: logger,
+      handleWriteErrors: false,
     });
 
     const config623rc1 = await savedObjectsClient.get('config', '6.2.3-rc1');

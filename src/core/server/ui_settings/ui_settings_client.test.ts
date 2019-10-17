@@ -120,7 +120,12 @@ describe('ui settings', () => {
 
       await uiSettings.setMany({ foo: 'bar' });
       sinon.assert.calledTwice(savedObjectsClient.update);
+
       sinon.assert.calledOnce(createOrUpgradeSavedConfig);
+      sinon.assert.calledWith(
+        createOrUpgradeSavedConfig,
+        sinon.match({ handleWriteErrors: false })
+      );
     });
 
     it('only tried to auto create once and throws NotFound', async () => {
@@ -136,6 +141,11 @@ describe('ui settings', () => {
 
       sinon.assert.calledTwice(savedObjectsClient.update);
       sinon.assert.calledOnce(createOrUpgradeSavedConfig);
+
+      sinon.assert.calledWith(
+        createOrUpgradeSavedConfig,
+        sinon.match({ handleWriteErrors: false })
+      );
     });
 
     it('throws CannotOverrideError if the key is overridden', async () => {
@@ -299,7 +309,9 @@ describe('ui settings', () => {
       expect(await uiSettings.getUserProvided()).to.eql({});
 
       sinon.assert.calledTwice(savedObjectsClient.get);
+
       sinon.assert.calledOnce(createOrUpgradeSavedConfig);
+      sinon.assert.calledWith(createOrUpgradeSavedConfig, sinon.match({ handleWriteErrors: true }));
     });
 
     it('returns result of savedConfig creation in case of notFound error', async () => {
