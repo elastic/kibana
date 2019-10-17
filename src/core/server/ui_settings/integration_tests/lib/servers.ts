@@ -24,8 +24,8 @@ import {
   TestElasticsearchUtils,
   TestKibanaUtils,
   TestUtils,
-} from '../../../../../../test_utils/kbn_server';
-import { CallCluster } from '../../../../../../legacy/core_plugins/elasticsearch';
+} from '../../../../../test_utils/kbn_server';
+import { CallCluster } from '../../../../../legacy/core_plugins/elasticsearch';
 
 let servers: TestUtils;
 let esServer: TestElasticsearchUtils;

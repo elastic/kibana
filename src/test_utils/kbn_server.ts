@@ -191,7 +191,7 @@ export function createTestServers({
   settings = {},
 }: {
   adjustTimeout: (timeout: number) => void;
-  settings: {
+  settings?: {
     es?: {
       license: 'oss' | 'basic' | 'gold' | 'trial';
       [key: string]: any;

@@ -18,28 +18,31 @@
  */
 
 import expect from '@kbn/expect';
-import { UnwrapPromise } from '@kbn/utility-types';
 import { SavedObjectsClientContract } from 'src/core/server';
 
-import KbnServer from '../../../../../legacy/server/kbn_server';
-import { createTestServers } from '../../../../../test_utils/kbn_server';
+import {
+  createTestServers,
+  TestElasticsearchUtils,
+  TestKibanaUtils,
+  TestUtils,
+} from '../../../../../test_utils/kbn_server';
 import { createOrUpgradeSavedConfig } from '../create_or_upgrade_saved_config';
 import { loggingServiceMock } from '../../../logging/logging_service.mock';
 
 const logger = loggingServiceMock.create().get();
 describe('createOrUpgradeSavedConfig()', () => {
   let savedObjectsClient: SavedObjectsClientContract;
-  let kbnServer: KbnServer;
-  let servers: ReturnType<typeof createTestServers>;
-  let esServer: UnwrapPromise<ReturnType<typeof servers['startES']>>;
-  let kbn: UnwrapPromise<ReturnType<typeof servers['startKibana']>>;
+  let servers: TestUtils;
+  let esServer: TestElasticsearchUtils;
+  let kbn: TestKibanaUtils;
+
+  let kbnServer: TestKibanaUtils['kbnServer'];
 
   beforeAll(async function() {
     servers = createTestServers({
       adjustTimeout: t => {
         jest.setTimeout(t);
       },
-      settings: {},
     });
     esServer = await servers.startES();
     kbn = await servers.startKibana();
