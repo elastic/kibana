@@ -21,6 +21,8 @@ import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const queryBar = getService('queryBar');
+  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const PageObjects = getPageObjects(['dashboard', 'header', 'common', 'visualize', 'timePicker']);
   const dashboardName = 'dashboard with filter';
@@ -28,18 +30,11 @@ export default function ({ getService, getPageObjects }) {
 
   describe('dashboard view edit mode', function viewEditModeTests() {
     before(async () => {
-      await PageObjects.dashboard.initTests({
-        kibanaIndex: 'dashboard/current/kibana',
-        dataIndex: 'dashboard/current/data',
-        defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
+      await esArchiver.load('dashboard/current/kibana');
+      await kibanaServer.uiSettings.replace({
+        'defaultIndex': '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
-    });
-
-    after(async () => {
-      await PageObjects.dashboard.cleanAfterTest({
-        kibanaIndex: 'dashboard/current/kibana',
-        dataIndex: 'dashboard/current/data'
-      });
+      await PageObjects.common.navigateToApp('dashboard');
     });
 
     it('create new dashboard opens in edit mode', async function () {

@@ -22,15 +22,17 @@ import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const pieChart = getService('pieChart');
+  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['dashboard', 'timePicker', 'settings', 'common']);
 
   describe('dashboard time zones', function () {
     this.tags('smoke');
+
     before(async () => {
-      await PageObjects.dashboard.initTests({
-        kibanaIndex: 'dashboard/current/kibana',
-        dataIndex: 'dashboard/current/data',
-        defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
+      await esArchiver.load('dashboard/current/kibana');
+      await kibanaServer.uiSettings.replace({
+        'defaultIndex': '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaSavedObjects();

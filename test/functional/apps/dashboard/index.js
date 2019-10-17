@@ -19,15 +19,24 @@
 
 export default function ({ getService, loadTestFile }) {
   const browser = getService('browser');
+  const esArchiver = getService('esArchiver');
+
+  async function loadCurrentData() {
+    await browser.setWindowSize(1300, 900);
+    await esArchiver.loadIfNeeded('dashboard/current/data');
+  }
+
+  async function unloadCurrentData() {
+    await esArchiver.unload('dashboard/current/data');
+  }
 
   describe('dashboard app', function () {
     // This has to be first since the other tests create some embeddables as side affects and our counting assumes
     // a fresh index.
     describe('using current data', function () {
       this.tags('ciGroup2');
-      before(async () => {
-        await browser.setWindowSize(1300, 900);
-      });
+      before(loadCurrentData);
+      after(unloadCurrentData);
 
       loadTestFile(require.resolve('./empty_dashboard'));
       loadTestFile(require.resolve('./embeddable_rendering'));
@@ -45,9 +54,8 @@ export default function ({ getService, loadTestFile }) {
 
     describe('using current data', function () {
       this.tags('ciGroup3');
-      before(async () => {
-        await browser.setWindowSize(1300, 900);
-      });
+      before(loadCurrentData);
+      after(unloadCurrentData);
 
       loadTestFile(require.resolve('./full_screen_mode'));
       loadTestFile(require.resolve('./dashboard_filter_bar'));

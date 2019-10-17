@@ -23,28 +23,22 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'common']);
   const screenshot = getService('screenshots');
   const browser = getService('browser');
+  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
   describe('dashboard snapshots', function describeIndexTests() {
     before(async function () {
-      await PageObjects.dashboard.initTests({
-        kibanaIndex: 'dashboard/current/kibana',
-        dataIndex: 'dashboard/current/data',
-        defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
+      await esArchiver.load('dashboard/current/kibana');
+      await kibanaServer.uiSettings.replace({
+        'defaultIndex': '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
       // We use a really small window to minimize differences across os's and browsers.
       await browser.setScreenshotSize(1000, 500);
       // adding this navigate adds the timestamp hash to the url which invalidates previous
       // session.  If we don't do this, the colors on the visualizations are different and the screenshots won't match.
       await PageObjects.common.navigateToApp('dashboard');
-    });
-
-    after(async () => {
-      await PageObjects.dashboard.cleanAfterTest({
-        kibanaIndex: 'dashboard/current/kibana',
-        dataIndex: 'dashboard/current/data'
-      });
     });
 
     after(async function () {
