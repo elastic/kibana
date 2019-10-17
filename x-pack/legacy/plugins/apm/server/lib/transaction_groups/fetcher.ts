@@ -13,6 +13,7 @@ import { Setup } from '../helpers/setup_request';
 import { getTransactionGroupsProjection } from '../../../common/projections/transaction_groups';
 import { mergeProjection } from '../../../common/projections/util/merge_projection';
 import { SortOptions } from '../../../typings/elasticsearch/aggregations';
+import { Transaction } from '../../../typings/es_schemas/ui/Transaction';
 
 interface TopTransactionOptions {
   type: 'top_transactions';
@@ -76,5 +77,5 @@ export function transactionGroupsFetcher(options: Options, setup: Setup) {
     }
   });
 
-  return client.search(params);
+  return client.search<Transaction, typeof params>(params);
 }

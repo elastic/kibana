@@ -97,7 +97,7 @@ export function getESClient(req: Legacy.Request) {
   return {
     search: async <
       TDocument = unknown,
-      TSearchRequest extends ESSearchRequest = ESSearchRequest
+      TSearchRequest extends ESSearchRequest = {}
     >(
       params: TSearchRequest,
       apmOptions?: APMOptions

@@ -49,7 +49,7 @@ export async function searchConfigurations({
     }
   };
 
-  const resp = await client.search<AgentConfiguration>(params);
+  const resp = await client.search<AgentConfiguration, typeof params>(params);
   const { hits } = resp.hits;
 
   const exactMatch = hits.find(

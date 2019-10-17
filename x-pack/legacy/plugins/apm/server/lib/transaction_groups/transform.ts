@@ -6,7 +6,6 @@
 
 import moment from 'moment';
 import { idx } from '@kbn/elastic-idx';
-import { Transaction } from '../../../typings/es_schemas/ui/Transaction';
 import { ESResponse } from './fetcher';
 
 function calculateRelativeImpacts(transactionGroups: ITransactionGroup[]) {
@@ -34,7 +33,7 @@ function getTransactionGroup(
   const averageResponseTime = bucket.avg.value;
   const transactionsPerMinute = bucket.doc_count / minutes;
   const impact = bucket.sum.value;
-  const sample = bucket.sample.hits.hits[0]._source as Transaction;
+  const sample = bucket.sample.hits.hits[0]._source;
 
   return {
     name: bucket.key as string,

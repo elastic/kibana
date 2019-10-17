@@ -8,9 +8,6 @@ import moment from 'moment';
 import KbnServer, { Server } from 'src/legacy/server/kbn_server';
 import { CoreSetup } from 'src/core/server';
 import { CallClusterOptions } from 'src/legacy/core_plugins/elasticsearch';
-// This import has the side effect of allowing us to use the elasticsearch type
-// extensions below. Without this import, the compiler is unable to find these
-// in tests
 import {
   SearchParams,
   DeleteDocumentByQueryParams,

@@ -102,13 +102,13 @@ export async function getErrorGroups({
     };
   }
 
-  const resp = await client.search(params);
+  const resp = await client.search<SampleError, typeof params>(params);
 
   // aggregations can be undefined when no matching indices are found.
   // this is an exception rather than the rule so the ES type does not account for this.
   const hits = (idx(resp, _ => _.aggregations.error_groups.buckets) || []).map(
     bucket => {
-      const source = bucket.sample.hits.hits[0]._source as SampleError;
+      const source = bucket.sample.hits.hits[0]._source;
       const message =
         idx(source, _ => _.error.log.message) ||
         idx(source, _ => _.error.exception[0].message);

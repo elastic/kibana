@@ -57,8 +57,8 @@ export interface AggregationOptionsByType {
     interval: number;
     min_doc_count?: number;
     extended_bounds?: {
-      min: number;
-      max: number;
+      min?: number | string;
+      max?: number | string;
     };
   };
   avg: MetricsAggregationOptions;
@@ -67,7 +67,7 @@ export interface AggregationOptionsByType {
   sum: MetricsAggregationOptions;
   value_count: MetricsAggregationOptions;
   cardinality: MetricsAggregationOptions & {
-    precision_treshold?: number;
+    precision_threshold?: number;
   };
   percentiles: {
     field: string;
@@ -111,20 +111,25 @@ export interface AggregationInputMap {
 }
 
 type BucketSubAggregationResponse<
-  TAggregationInputMap extends AggregationInputMap | undefined
+  TAggregationInputMap extends AggregationInputMap | undefined,
+  TDocument
 > = TAggregationInputMap extends AggregationInputMap
-  ? AggregationResponseMap<TAggregationInputMap>
+  ? AggregationResponseMap<TAggregationInputMap, TDocument>
   : {};
 
 interface AggregationResponsePart<
-  TAggregationOptionsMap extends AggregationOptionsMap
+  TAggregationOptionsMap extends AggregationOptionsMap,
+  TDocument
 > {
   terms: {
     buckets: Array<
       {
         doc_count: number;
         key: string | number;
-      } & BucketSubAggregationResponse<TAggregationOptionsMap['aggs']>
+      } & BucketSubAggregationResponse<
+        TAggregationOptionsMap['aggs'],
+        TDocument
+      >
     >;
   };
   histogram: {
@@ -132,7 +137,10 @@ interface AggregationResponsePart<
       {
         doc_count: number;
         key: number;
-      } & BucketSubAggregationResponse<TAggregationOptionsMap['aggs']>
+      } & BucketSubAggregationResponse<
+        TAggregationOptionsMap['aggs'],
+        TDocument
+      >
     >;
   };
   date_histogram: {
@@ -141,7 +149,10 @@ interface AggregationResponsePart<
         doc_count: number;
         key: number;
         key_as_string: string;
-      } & BucketSubAggregationResponse<TAggregationOptionsMap['aggs']>
+      } & BucketSubAggregationResponse<
+        TAggregationOptionsMap['aggs'],
+        TDocument
+      >
     >;
   };
   avg: MetricsAggregationResponsePart;
@@ -177,17 +188,18 @@ interface AggregationResponsePart<
       };
       max_score: number | null;
       hits: Array<{
-        _source: unknown;
+        _source: TDocument;
       }>;
     };
   };
   filter: {
     doc_count: number;
-  } & AggregationResponseMap<TAggregationOptionsMap['aggs']>;
+  } & AggregationResponseMap<TAggregationOptionsMap['aggs'], TDocument>;
   filters: TAggregationOptionsMap extends { filters: { filters: any[] } }
     ? Array<
         { doc_count: number } & AggregationResponseMap<
-          TAggregationOptionsMap['aggs']
+          TAggregationOptionsMap['aggs'],
+          TDocument
         >
       >
     : (TAggregationOptionsMap extends {
@@ -199,13 +211,16 @@ interface AggregationResponsePart<
             buckets: {
               [key in keyof TAggregationOptionsMap['filters']['filters']]: {
                 doc_count: number;
-              } & AggregationResponseMap<TAggregationOptionsMap['aggs']>;
+              } & AggregationResponseMap<
+                TAggregationOptionsMap['aggs'],
+                TDocument
+              >;
             };
           }
         : never);
   sampler: {
     doc_count: number;
-  } & AggregationResponseMap<TAggregationOptionsMap['aggs']>;
+  } & AggregationResponseMap<TAggregationOptionsMap['aggs'], TDocument>;
   derivative:
     | {
         value: number;
@@ -229,11 +244,13 @@ interface AggregationResponsePart<
 // >;
 
 export type AggregationResponseMap<
-  TAggregationInputMap extends AggregationInputMap | undefined
+  TAggregationInputMap extends AggregationInputMap | undefined,
+  TDocument
 > = TAggregationInputMap extends AggregationInputMap
   ? {
       [TName in keyof TAggregationInputMap]: AggregationResponsePart<
-        TAggregationInputMap[TName]
+        TAggregationInputMap[TName],
+        TDocument
       >[AggregationType & keyof TAggregationInputMap[TName]];
     }
   : undefined;

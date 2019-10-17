@@ -33,7 +33,10 @@ export type ESSearchResponse<
 > = Omit<SearchResponse<TDocument>, 'aggregations' | 'hits'> &
   (TSearchRequest extends { body: { aggs: AggregationInputMap } }
     ? {
-        aggregations?: AggregationResponseMap<TSearchRequest['body']['aggs']>;
+        aggregations?: AggregationResponseMap<
+          TSearchRequest['body']['aggs'],
+          TDocument
+        >;
       }
     : {}) &
   ({
