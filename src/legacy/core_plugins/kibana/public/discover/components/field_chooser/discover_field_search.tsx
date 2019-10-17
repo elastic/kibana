@@ -107,19 +107,15 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
   const applyFilterValue = (id: string, filterValue: string | boolean) => {
     switch (filterValue) {
       case 'any':
-        console.dir('1');
         onChange(id, undefined);
         break;
       case 'true':
-        console.dir('2');
         onChange(id, true);
         break;
       case 'false':
-        console.dir('3');
         onChange(id, false);
         break;
       default:
-        console.dir('4');
         onChange(id, filterValue);
     }
   };
