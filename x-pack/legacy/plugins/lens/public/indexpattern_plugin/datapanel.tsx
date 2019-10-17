@@ -459,6 +459,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                     <EuiButton
                       data-test-subj="lnsDataPanelShowAllFields"
                       onClick={() => {
+                        trackUiEvent('show_empty_fields_clicked');
                         clearLocalState();
                         onToggleEmptyFields(true);
                       }}
