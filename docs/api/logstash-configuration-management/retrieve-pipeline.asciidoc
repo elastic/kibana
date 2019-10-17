@@ -1,11 +1,10 @@
-[role="xpack"]
 [[logstash-configuration-management-api-retrieve]]
 === Retrieve pipeline API
 ++++
 <titleabbrev>Retrieve pipeline</titleabbrev>
 ++++
 
-experimental[] Retrieves a centrally-managed Logstash pipeline.
+experimental[] Retrieve a centrally-managed Logstash pipeline.
 
 [[logstash-configuration-management-api-retrieve-request]]
 ==== Request

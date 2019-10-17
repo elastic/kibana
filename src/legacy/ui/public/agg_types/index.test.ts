@@ -17,36 +17,29 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
-import './agg_type';
-import './agg_params';
-import './buckets/_histogram';
-import './buckets/_geo_hash';
-import './buckets/_range';
-import './buckets/_terms_other_bucket_helper';
-import './buckets/date_histogram/_editor';
-import './buckets/date_histogram/_params';
-import { aggTypes } from '..';
-import { BucketAggType } from '../buckets/_bucket_agg_type';
-import { MetricAggType } from '../metrics/metric_agg_type';
+import { aggTypes } from './index';
+
+import { isBucketAggType } from './buckets/_bucket_agg_type';
+import { isMetricAggType } from './metrics/metric_agg_type';
 
 const bucketAggs = aggTypes.buckets;
 const metricAggs = aggTypes.metrics;
 
-describe('AggTypesComponent', function () {
+jest.mock('ui/new_platform');
 
-  describe('bucket aggs', function () {
-    it('all extend BucketAggType', function () {
-      bucketAggs.forEach(function (bucketAgg) {
-        expect(bucketAgg).to.be.a(BucketAggType);
+describe('AggTypesComponent', () => {
+  describe('bucket aggs', () => {
+    it('all extend BucketAggType', () => {
+      bucketAggs.forEach(bucketAgg => {
+        expect(isBucketAggType(bucketAgg)).toBeTruthy();
       });
     });
   });
 
-  describe('metric aggs', function () {
-    it('all extend MetricAggType', function () {
-      metricAggs.forEach(function (metricAgg) {
-        expect(metricAgg).to.be.a(MetricAggType);
+  describe('metric aggs', () => {
+    it('all extend MetricAggType', () => {
+      metricAggs.forEach(metricAgg => {
+        expect(isMetricAggType(metricAgg)).toBeTruthy();
       });
     });
   });

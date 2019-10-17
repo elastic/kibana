@@ -11,11 +11,6 @@ RED='\033[0;31m'
 C_RESET='\033[0m' # Reset color
 
 ###
-### keep until 7.6.0 snapshots are available
-###
-export TEST_ES_BRANCH=7.5.0
-
-###
 ### Since the Jenkins logging output collector doesn't look like a TTY
 ### Node/Chalk and other color libs disable their color output. But Jenkins
 ### can handle color fine, so this forces https://github.com/chalk/supports-color

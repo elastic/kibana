@@ -1,8 +1,7 @@
-[role="xpack"]
 [[logstash-configuration-management-api-create]]
 === Create Logstash pipeline API
 ++++
-<titleabbrev>Create pipeline</titleabbrev>
+<titleabbrev>Create Logstash pipeline</titleabbrev>
 ++++
 
 experimental[] Create a centrally-managed Logstash pipeline, or update an existing pipeline.

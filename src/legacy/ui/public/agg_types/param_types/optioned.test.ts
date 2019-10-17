@@ -17,29 +17,20 @@
  * under the License.
  */
 
-import { mapValues } from 'lodash';
+import { BaseParamType } from './base';
+import { OptionedParamType } from './optioned';
 
-const json = {
-  _serialize: function (val) {
-    if (val != null) return JSON.stringify(val);
-  },
-  _deserialize: function (val) {
-    if (val != null) return JSON.parse(val);
-  }
-};
+jest.mock('ui/new_platform');
 
-export const expandShorthand = function (sh) {
-  return mapValues(sh || {}, function (val) {
-    // allow shortcuts for the field types, by just setting the value
-    // to the type name
-    if (typeof val === 'string') val = { type: val };
+describe('Optioned', () => {
+  describe('constructor', () => {
+    it('it is an instance of BaseParamType', () => {
+      const aggParam = new OptionedParamType({
+        name: 'some_param',
+        type: 'optioned',
+      });
 
-    if (val.type === 'json') {
-      val.type = 'text';
-      val._serialize = json._serialize;
-      val._deserialize = json._deserialize;
-    }
-
-    return val;
+      expect(aggParam instanceof BaseParamType).toBeTruthy();
+    });
   });
-};
+});
