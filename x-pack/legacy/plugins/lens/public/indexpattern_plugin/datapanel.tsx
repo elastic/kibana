@@ -453,17 +453,21 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                           })}
                     </strong>
                   </p>
-                  <EuiButton
-                    data-test-subj="lnsDataPanelShowAllFields"
-                    onClick={() => {
-                      clearLocalState();
-                      onToggleEmptyFields(true);
-                    }}
-                  >
-                    {i18n.translate('xpack.lens.indexPatterns.showAllFields.buttonText', {
-                      defaultMessage: 'Show All Fields',
-                    })}
-                  </EuiButton>
+                  {(!showEmptyFields ||
+                    localState.typeFilter.length ||
+                    localState.nameFilter.length) && (
+                    <EuiButton
+                      data-test-subj="lnsDataPanelShowAllFields"
+                      onClick={() => {
+                        clearLocalState();
+                        onToggleEmptyFields(true);
+                      }}
+                    >
+                      {i18n.translate('xpack.lens.indexPatterns.showAllFields.buttonText', {
+                        defaultMessage: 'Show All Fields',
+                      })}
+                    </EuiButton>
+                  )}
                 </EuiText>
               )}
             </div>
