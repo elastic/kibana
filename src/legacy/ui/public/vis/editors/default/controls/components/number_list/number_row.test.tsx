@@ -19,7 +19,6 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { NumberRow, NumberRowProps } from './number_row';
 
