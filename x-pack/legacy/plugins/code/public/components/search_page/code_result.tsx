@@ -6,13 +6,12 @@
 
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { IPosition } from 'monaco-editor';
 import React from 'react';
 import { Link } from 'react-router-dom';
 
 import { RepositoryUtils } from '../../../common/repository_utils';
 import { history } from '../../utils/url';
-import { CodeBlock } from '../codeblock/codeblock';
+import { CodeBlockPanel, Position } from '../code_block';
 
 interface Props {
   query: string;
@@ -22,15 +21,15 @@ interface Props {
 export class CodeResult extends React.PureComponent<Props> {
   public render() {
     const { results, query } = this.props;
+
     return results.map(item => {
-      const { uri, filePath, hits, compositeContent } = item;
+      const { compositeContent, filePath, hits, language, uri } = item;
       const { content, lineMapping, ranges } = compositeContent;
-      const repoLinkUrl = `/${uri}/tree/HEAD/`;
-      const fileLinkUrl = `/${uri}/blob/HEAD/${filePath}`;
       const key = `${uri}-${filePath}-${query}`;
-      const lineMappingFunc = (l: number) => {
-        return lineMapping[l - 1];
-      };
+      const repoLinkUrl = `/${uri}/tree/HEAD/`;
+      const fileLinkUrl = `/${uri}/blob/HEAD/${filePath}`; // TODO(rylnd) move these to link helpers
+      const lines = content.split('\n');
+
       return (
         <div key={`resultitem${key}`} data-test-subj="codeSearchResultList">
           <div style={{ marginBottom: '.5rem' }}>
@@ -73,25 +72,25 @@ export class CodeResult extends React.PureComponent<Props> {
               </Link>
             </EuiText>
           </EuiFlexGroup>
-          <CodeBlock
+          <CodeBlockPanel
             key={`code${key}`}
-            language={item.language}
-            startLine={0}
-            code={content}
+            className="codeResult__code-block"
+            lines={lines}
+            language={language}
             highlightRanges={ranges}
-            folding={false}
-            lineNumbersFunc={lineMappingFunc}
-            onClick={this.onCodeClick.bind(this, lineMapping, fileLinkUrl)}
+            lineNumber={i => lineMapping[i]}
+            onClick={this.onCodeClick(fileLinkUrl)}
           />
         </div>
       );
     });
   }
 
-  private onCodeClick(lineNumbers: string[], fileUrl: string, pos: IPosition) {
-    const line = parseInt(lineNumbers[pos.lineNumber - 1], 10);
-    if (!isNaN(line)) {
-      history.push(`${fileUrl}!L${line}:0`);
+  private onCodeClick = (url: string) => (position: Position) => {
+    const lineNumber = parseInt(position.lineNumber, 10);
+
+    if (!isNaN(lineNumber)) {
+      history.push(`${url}!L${lineNumber}:0`);
     }
-  }
+  };
 }

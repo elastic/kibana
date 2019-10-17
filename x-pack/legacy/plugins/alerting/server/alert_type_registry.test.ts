@@ -4,31 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('./lib/get_create_task_runner_function', () => ({
-  getCreateTaskRunnerFunction: jest.fn().mockReturnValue(jest.fn()),
-}));
-
+import { TaskRunnerFactory } from './lib';
 import { AlertTypeRegistry } from './alert_type_registry';
-import { SavedObjectsClientMock } from '../../../../../src/core/server/mocks';
 import { taskManagerMock } from '../../task_manager/task_manager.mock';
-import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/plugin.mock';
 
 const taskManager = taskManagerMock.create();
 
 const alertTypeRegistryParams = {
-  isSecurityEnabled: true,
-  getServices() {
-    return {
-      log: jest.fn(),
-      callCluster: jest.fn(),
-      savedObjectsClient: SavedObjectsClientMock.create(),
-    };
-  },
   taskManager,
-  executeAction: jest.fn(),
-  getBasePath: jest.fn().mockReturnValue(undefined),
-  spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
-  encryptedSavedObjectsPlugin: encryptedSavedObjectsMock.create(),
+  taskRunnerFactory: new TaskRunnerFactory(),
 };
 
 beforeEach(() => jest.resetAllMocks());
@@ -60,31 +44,20 @@ describe('register()', () => {
       executor: jest.fn(),
     };
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { getCreateTaskRunnerFunction } = require('./lib/get_create_task_runner_function');
     const registry = new AlertTypeRegistry(alertTypeRegistryParams);
-    getCreateTaskRunnerFunction.mockReturnValue(jest.fn());
     registry.register(alertType);
     expect(taskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
     expect(taskManager.registerTaskDefinitions.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "alerting:test": Object {
-            "createTaskRunner": [MockFunction],
+            "createTaskRunner": [Function],
             "title": "Test",
             "type": "alerting:test",
           },
         },
       ]
     `);
-    expect(getCreateTaskRunnerFunction).toHaveBeenCalledWith({
-      alertType,
-      isSecurityEnabled: true,
-      getServices: alertTypeRegistryParams.getServices,
-      encryptedSavedObjectsPlugin: alertTypeRegistryParams.encryptedSavedObjectsPlugin,
-      getBasePath: alertTypeRegistryParams.getBasePath,
-      spaceIdToNamespace: alertTypeRegistryParams.spaceIdToNamespace,
-      executeAction: alertTypeRegistryParams.executeAction,
-    });
   });
 
   test('should throw an error if type is already registered', () => {

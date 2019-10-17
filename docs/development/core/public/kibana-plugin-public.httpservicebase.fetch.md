@@ -4,6 +4,8 @@
 
 ## HttpServiceBase.fetch property
 
+Makes an HTTP request. Defaults to a GET request unless overriden. See [HttpHandler](./kibana-plugin-public.httphandler.md) for options.
+
 <b>Signature:</b>
 
 ```typescript

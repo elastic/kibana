@@ -4,48 +4,64 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+
 // TODO: Re-index is just a temporary solution in order to speed up development
 // of any front end pieces. This should be replaced with a combination of the file
 // build_events_query.ts and any scrolling/scaling solutions from that particular
 // file.
 
 interface BuildEventsReIndexParams {
+  description: string;
   index: string[];
   from: number;
   to: number;
   signalsIndex: string;
   maxDocs: number;
-  kqlFilter: {};
+  filter: Record<string, {}> | undefined;
+  kql: string | undefined;
   severity: number;
-  description: string;
   name: string;
   timeDetected: number;
   ruleRevision: number;
-  ruleId: string;
-  ruleType: string;
+  id: string;
+  type: string;
   references: string[];
 }
 
+export const getFilter = (kql: string | undefined, filter: Record<string, {}> | undefined) => {
+  if (kql != null) {
+    return toElasticsearchQuery(fromKueryExpression(kql), null);
+  } else if (filter != null) {
+    return filter;
+  } else {
+    // TODO: Re-visit this error (which should never happen) when we do signal errors for the UI
+    throw new TypeError('either kql or filter should be set');
+  }
+};
+
 export const buildEventsReIndex = ({
+  description,
   index,
   from,
   to,
   signalsIndex,
   maxDocs,
-  kqlFilter,
+  filter,
+  kql,
   severity,
-  description,
   name,
   timeDetected,
   ruleRevision,
-  ruleId,
-  ruleType,
+  id,
+  type,
   references,
 }: BuildEventsReIndexParams) => {
+  const kqlOrFilter = getFilter(kql, filter);
   const indexPatterns = index.map(element => `"${element}"`).join(',');
   const refs = references.map(element => `"${element}"`).join(',');
-  const filter = [
-    kqlFilter,
+  const filterWithTime = [
+    kqlOrFilter,
     {
       bool: {
         filter: [
@@ -96,7 +112,7 @@ export const buildEventsReIndex = ({
         query: {
           bool: {
             filter: [
-              ...filter,
+              ...filterWithTime,
               {
                 match_all: {},
               },
@@ -120,8 +136,8 @@ export const buildEventsReIndex = ({
 
           def signal = [
             "rule_revision": "${ruleRevision}",
-            "rule_id": "${ruleId}",
-            "rule_type": "${ruleType}",
+            "rule_id": "${id}",
+            "rule_type": "${type}",
             "parent": parent,
             "name": "${name}",
             "severity": ${severity},

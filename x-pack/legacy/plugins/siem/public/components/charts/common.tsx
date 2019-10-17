@@ -3,57 +3,32 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiFlexGroup, EuiText, EuiFlexItem } from '@elastic/eui';
-import React from 'react';
-import styled from 'styled-components';
+
+import chrome from 'ui/chrome';
 import {
   CustomSeriesColorsMap,
+  DARK_THEME,
   DataSeriesColorsValues,
   getSpecId,
+  LIGHT_THEME,
   mergeWithDefaultTheme,
   PartialTheme,
-  LIGHT_THEME,
-  DARK_THEME,
-  ScaleType,
-  TickFormatter,
-  SettingSpecProps,
-  Rotation,
   Rendering,
+  Rotation,
+  ScaleType,
+  SettingSpecProps,
+  TickFormatter,
 } from '@elastic/charts';
-import { i18n } from '@kbn/i18n';
-import chrome from 'ui/chrome';
 import moment from 'moment-timezone';
+import styled from 'styled-components';
 import { DEFAULT_DATE_FORMAT_TZ, DEFAULT_DARK_MODE } from '../../../common/constants';
+
 export const defaultChartHeight = '100%';
 export const defaultChartWidth = '100%';
 const chartDefaultRotation: Rotation = 0;
 const chartDefaultRendering: Rendering = 'canvas';
-const FlexGroup = styled(EuiFlexGroup)<{ height?: string | null; width?: string | null }>`
-  height: ${({ height }) => (height ? height : '100%')};
-  width: ${({ width }) => (width ? width : '100%')};
-`;
-
-FlexGroup.displayName = 'FlexGroup';
 
 export type UpdateDateRange = (min: number, max: number) => void;
-
-export const ChartHolder = ({
-  height = '100%',
-  width = '100%',
-}: {
-  height?: string | null;
-  width?: string | null;
-}) => (
-  <FlexGroup justifyContent="center" alignItems="center" height={height} width={width}>
-    <EuiFlexItem grow={false}>
-      <EuiText size="s" textAlign="center" color="subdued">
-        {i18n.translate('xpack.siem.chart.dataNotAvailableTitle', {
-          defaultMessage: 'Chart Data Not Available',
-        })}
-      </EuiText>
-    </EuiFlexItem>
-  </FlexGroup>
-);
 
 export interface ChartData {
   x: number | string | null;
@@ -136,7 +111,7 @@ export const getTheme = () => {
       bottom: 0,
     },
     scales: {
-      barsPadding: 0.5,
+      barsPadding: 0.05,
     },
   };
   const isDarkMode: boolean = chrome.getUiSettingsClient().get(DEFAULT_DARK_MODE);
@@ -166,3 +141,9 @@ export const getChartWidth = (customWidth?: number, autoSizerWidth?: number): st
   const height = customWidth || autoSizerWidth;
   return height ? `${height}px` : defaultChartWidth;
 };
+
+export const checkIfAllValuesAreZero = (data: ChartSeriesData[] | null | undefined): boolean =>
+  Array.isArray(data) &&
+  data.every(series => {
+    return Array.isArray(series.value) && (series.value as ChartData[]).every(({ y }) => y === 0);
+  });

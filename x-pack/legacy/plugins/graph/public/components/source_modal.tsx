@@ -12,18 +12,18 @@ import { SourcePicker, SourcePickerProps } from './source_picker';
 
 export function SourceModal(props: SourcePickerProps) {
   return (
-    <>
+    <div className="gphSourceModal">
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           <FormattedMessage
             id="xpack.graph.sourceModal.title"
-            defaultMessage="Choose index pattern"
+            defaultMessage="Select a data source"
           />
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         <SourcePicker {...props} />
       </EuiModalBody>
-    </>
+    </div>
   );
 }

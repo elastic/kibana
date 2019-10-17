@@ -8,7 +8,7 @@ import React, { Fragment } from 'react';
 import { NodeStatusIcon } from '../node';
 import { extractIp } from '../../../lib/extract_ip'; // TODO this is only used for elasticsearch nodes summary / node detail, so it should be moved to components/elasticsearch/nodes/lib
 import { ClusterStatus } from '../cluster_status';
-import { EuiMonitoringTable } from '../../table';
+import { EuiMonitoringSSPTable } from '../../table';
 import { MetricCell, OfflineCell } from './cells';
 import { SetupModeBadge } from '../../setup_mode/badge';
 import {
@@ -206,7 +206,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid) => {
 
   cols.push({
     name: i18n.translate('xpack.monitoring.elasticsearch.nodes.jvmMemoryColumnTitle', {
-      defaultMessage: '{javaVirtualMachine} Memory',
+      defaultMessage: '{javaVirtualMachine} Heap',
       values: {
         javaVirtualMachine: 'JVM'
       }
@@ -243,7 +243,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid) => {
 };
 
 export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsearch, ...props }) {
-  const { sorting, pagination, onTableChange, clusterUuid, setupMode } = props;
+  const { sorting, pagination, onTableChange, clusterUuid, setupMode, fetchMoreData } = props;
   const columns = getColumns(showCgroupMetricsElasticsearch, setupMode, clusterUuid);
 
   // Merge the nodes data with the setup data if enabled
@@ -364,7 +364,7 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
         {renderClusterStatus()}
         {setupModeCallout}
         <EuiPageContent>
-          <EuiMonitoringTable
+          <EuiMonitoringSSPTable
             className="elasticsearchNodesTable"
             rows={nodes}
             columns={columns}
@@ -381,9 +381,7 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
               },
             }}
             onTableChange={onTableChange}
-            executeQueryOptions={{
-              defaultFields: ['name']
-            }}
+            fetchMoreData={fetchMoreData}
           />
         </EuiPageContent>
       </EuiPageBody>

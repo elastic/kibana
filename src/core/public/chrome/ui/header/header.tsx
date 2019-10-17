@@ -19,7 +19,7 @@
 
 import Url from 'url';
 
-import React, { Component, createRef, Fragment } from 'react';
+import React, { Component, createRef } from 'react';
 import * as Rx from 'rxjs';
 
 import {
@@ -376,7 +376,7 @@ class HeaderUI extends Component<Props, State> {
     ];
 
     return (
-      <Fragment>
+      <header>
         <EuiHeader>
           <EuiHeaderSection grow={false}>
             <EuiShowFor sizes={['xs', 's']}>
@@ -407,11 +407,13 @@ class HeaderUI extends Component<Props, State> {
           isLocked={isLocked}
           onIsLockedUpdate={onIsLockedUpdate}
         >
-          <EuiNavDrawerGroup listItems={recentLinksArray} />
-          <EuiHorizontalRule margin="none" />
-          <EuiNavDrawerGroup data-test-subj="navDrawerAppsMenu" listItems={navLinksArray} />
+          <nav>
+            <EuiNavDrawerGroup listItems={recentLinksArray} />
+            <EuiHorizontalRule margin="none" />
+            <EuiNavDrawerGroup data-test-subj="navDrawerAppsMenu" listItems={navLinksArray} />
+          </nav>
         </EuiNavDrawer>
-      </Fragment>
+      </header>
     );
   }
 

@@ -170,7 +170,7 @@ export class VisEditor extends Component {
           services={{
             appName: APP_NAME,
             store: localStorage,
-            autocomplete: npStart.plugins.data.autocomplete,
+            data: npStart.plugins.data,
             ...npStart.core,
           }}
         >

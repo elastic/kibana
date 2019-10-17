@@ -18,7 +18,7 @@
  */
 
 import { defaultSearchStrategy } from './default_search_strategy';
-import { Promise } from 'bluebird';
+import Bluebird from 'bluebird';
 
 const { search } = defaultSearchStrategy;
 
@@ -35,8 +35,8 @@ describe('defaultSearchStrategy', function () {
     let searchArgs;
 
     beforeEach(() => {
-      const msearchMock = jest.fn().mockReturnValue(Promise.resolve([]));
-      const searchMock = jest.fn().mockReturnValue(Promise.resolve([]));
+      const msearchMock = jest.fn().mockReturnValue(Bluebird.resolve([]));
+      const searchMock = jest.fn().mockReturnValue(Bluebird.resolve([]));
 
       searchArgs = {
         searchRequests: [],
@@ -44,8 +44,8 @@ describe('defaultSearchStrategy', function () {
           msearch: msearchMock,
           search: searchMock,
         },
-        Promise,
-        serializeFetchParams: () => Promise.resolve('pretend this is a valid request body'),
+        Promise: Bluebird,
+        serializeFetchParams: () => Bluebird.resolve('pretend this is a valid request body'),
       };
     });
 

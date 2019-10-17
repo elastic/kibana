@@ -428,7 +428,7 @@ describe('SIEM Super Date Picker', () => {
         const mapStateToProps = makeMapStateToProps();
         const props1 = mapStateToProps(state, { id: 'global' });
         const clone = cloneDeep(state);
-        clone.inputs.global.query = [
+        clone.inputs.global.queries = [
           {
             loading: true,
             id: '1',
@@ -446,7 +446,7 @@ describe('SIEM Super Date Picker', () => {
         const mapStateToProps = makeMapStateToProps();
         const props1 = mapStateToProps(state, { id: 'global' });
         const clone = cloneDeep(state);
-        clone.inputs.global.query = [
+        clone.inputs.global.queries = [
           {
             loading: true,
             id: '1',

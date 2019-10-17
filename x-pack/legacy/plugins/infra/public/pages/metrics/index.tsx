@@ -93,7 +93,7 @@ export const MetricDetail = withMetricPageProviders(
         {
           href: '#/',
           text: i18n.translate('xpack.infra.header.infrastructureTitle', {
-            defaultMessage: 'Infrastructure',
+            defaultMessage: 'Metrics',
           }),
         },
         { text: name },

@@ -52,14 +52,14 @@ import {
   Container,
   EmbeddableOutput,
 } from '../../../../../../plugins/embeddable/public';
-import { start as visualizations } from '../../../../visualizations/public/legacy';
+import { start as visualizations } from '../../../../visualizations/public/np_ready/public/legacy';
 import { showNewVisModal } from '../wizard';
 import { SavedVisualizations } from '../types';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import { getIndexPattern } from './get_index_pattern';
 import { VisualizeEmbeddable, VisualizeInput, VisualizeOutput } from './visualize_embeddable';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
-import { TypesStart } from '../../../../visualizations/public/np_ready/types';
+import { TypesStart } from '../../../../visualizations/public/np_ready/public/types';
 
 interface VisualizationAttributes extends SavedObjectAttributes {
   visState: string;
@@ -82,6 +82,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
     super({
       savedObjectMetaData: {
         name: i18n.translate('kbn.visualize.savedObjectName', { defaultMessage: 'Visualization' }),
+        includeFields: ['visState'],
         type: 'visualization',
         getIconForSavedObject: savedObject => {
           if (!visTypes) {

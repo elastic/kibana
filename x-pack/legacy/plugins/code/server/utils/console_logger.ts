@@ -9,8 +9,11 @@ import { Logger } from '../log';
 
 export class ConsoleLogger extends Logger {
   constructor() {
-    // @ts-ignore
-    super(undefined);
+    super({
+      get: (...contextParts: string[]) => {
+        return console as any;
+      },
+    });
   }
 
   public info(msg: string | any) {

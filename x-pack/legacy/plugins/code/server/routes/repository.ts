@@ -6,6 +6,7 @@
 
 import Boom from 'boom';
 
+import { i18n } from '@kbn/i18n';
 import { RequestFacade, ResponseToolkitFacade } from '../..';
 import { validateGitUrl } from '../../common/git_url_utils';
 import { RepositoryUtils } from '../../common/repository_utils';
@@ -19,13 +20,15 @@ import { EsClientWithRequest } from '../utils/esclient_with_request';
 import { CodeServerRouter } from '../security';
 import { CodeServices } from '../distributed/code_services';
 import { RepositoryServiceDefinition } from '../distributed/apis';
+import { getReferenceHelper } from '../utils/repository_reference_helper';
 
 export function repositoryRoute(
   router: CodeServerRouter,
   codeServices: CodeServices,
   repoIndexInitializerFactory: RepositoryIndexInitializerFactory,
   repoConfigController: RepositoryConfigController,
-  options: ServerOptions
+  options: ServerOptions,
+  log: Logger
 ) {
   const repositoryService = codeServices.serviceFor(RepositoryServiceDefinition);
   // Clone a git repository
@@ -35,7 +38,6 @@ export function repositoryRoute(
     method: 'POST',
     async handler(req: RequestFacade, h: ResponseToolkitFacade) {
       const repoUrl: string = (req.payload as any).url;
-      const log = new Logger(req.server);
 
       // Reject the request if the url is an invalid git url.
       try {
@@ -56,12 +58,32 @@ export function repositoryRoute(
       try {
         // Check if the repository already exists
         await repoObjectClient.getRepository(repo.uri);
+        // distinguish between that the repository exists in the current space and that the repository exists in
+        // another space, and return the default message if error happens during reference checking.
+        try {
+          const hasRef = await getReferenceHelper(req.getSavedObjectsClient()).hasReference(
+            repo.uri
+          );
+          if (!hasRef) {
+            return Boom.conflict(
+              i18n.translate('xpack.code.repositoryManagement.repoOtherSpaceImportedMessage', {
+                defaultMessage: 'The repository has already been imported in another space!',
+              })
+            );
+          }
+        } catch (e) {
+          log.error(`Failed to check reference for ${repo.uri} in current space`);
+        }
         const msg = `Repository ${repoUrl} already exists. Skip clone.`;
         log.info(msg);
         return h.response(msg).code(304); // Not Modified
       } catch (error) {
         log.info(`Repository ${repoUrl} does not exist. Go ahead with clone.`);
         try {
+          // create the reference first, and make the creation idempotent, to avoid potential dangling repositories
+          // which have no references from any space, in case the writes to ES may fail independently
+          await getReferenceHelper(req.getSavedObjectsClient()).createReference(repo.uri);
+
           // Create the index for the repository
           const initializer = (await repoIndexInitializerFactory.create(
             repo.uri,
@@ -104,9 +126,11 @@ export function repositoryRoute(
     method: 'DELETE',
     async handler(req: RequestFacade, h: ResponseToolkitFacade) {
       const repoUri: string = req.params.uri as string;
-      const log = new Logger(req.server);
       const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
       try {
+        // make sure the repo belongs to the current space
+        getReferenceHelper(req.getSavedObjectsClient()).ensureReference(repoUri);
+
         // Check if the repository already exists. If not, an error will be thrown.
         await repoObjectClient.getRepository(repoUri);
 
@@ -130,6 +154,9 @@ export function repositoryRoute(
         };
         const endpoint = await codeServices.locate(req, repoUri);
         await repositoryService.delete(endpoint, payload);
+
+        // delete the reference last to avoid dangling repositories
+        await getReferenceHelper(req.getSavedObjectsClient()).deleteReference(repoUri);
         return {};
       } catch (error) {
         const msg = `Issue repository delete request for ${repoUri} error`;
@@ -146,8 +173,8 @@ export function repositoryRoute(
     method: 'GET',
     async handler(req: RequestFacade) {
       const repoUri = req.params.uri as string;
-      const log = new Logger(req.server);
       try {
+        await getReferenceHelper(req.getSavedObjectsClient()).ensureReference(repoUri);
         const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
         return await repoObjectClient.getRepository(repoUri);
       } catch (error) {
@@ -164,28 +191,32 @@ export function repositoryRoute(
     method: 'GET',
     async handler(req: RequestFacade) {
       const repoUri = req.params.uri as string;
-      const log = new Logger(req.server);
       try {
         const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
+
         let gitStatus = null;
-        try {
-          gitStatus = await repoObjectClient.getRepositoryGitStatus(repoUri);
-        } catch (error) {
-          log.debug(`Get repository git status ${repoUri} error: ${error}`);
-        }
-
         let indexStatus = null;
-        try {
-          indexStatus = await repoObjectClient.getRepositoryIndexStatus(repoUri);
-        } catch (error) {
-          log.debug(`Get repository index status ${repoUri} error: ${error}`);
-        }
-
         let deleteStatus = null;
-        try {
-          deleteStatus = await repoObjectClient.getRepositoryDeleteStatus(repoUri);
-        } catch (error) {
-          log.debug(`Get repository delete status ${repoUri} error: ${error}`);
+        const hasRef = await getReferenceHelper(req.getSavedObjectsClient()).hasReference(repoUri);
+
+        if (hasRef) {
+          try {
+            gitStatus = await repoObjectClient.getRepositoryGitStatus(repoUri);
+          } catch (error) {
+            log.debug(`Get repository git status ${repoUri} error: ${error}`);
+          }
+
+          try {
+            indexStatus = await repoObjectClient.getRepositoryIndexStatus(repoUri);
+          } catch (error) {
+            log.debug(`Get repository index status ${repoUri} error: ${error}`);
+          }
+
+          try {
+            deleteStatus = await repoObjectClient.getRepositoryDeleteStatus(repoUri);
+          } catch (error) {
+            log.debug(`Get repository delete status ${repoUri} error: ${error}`);
+          }
         }
         return {
           gitStatus,
@@ -206,10 +237,10 @@ export function repositoryRoute(
     path: '/api/code/repos',
     method: 'GET',
     async handler(req: RequestFacade) {
-      const log = new Logger(req.server);
       try {
+        const uris = await getReferenceHelper(req.getSavedObjectsClient()).findReferences();
         const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
-        return await repoObjectClient.getAllRepositories();
+        return await repoObjectClient.getRepositories(uris);
       } catch (error) {
         const msg = `Get all repositories error`;
         log.error(msg);
@@ -228,9 +259,9 @@ export function repositoryRoute(
     requireAdmin: true,
     async handler(req: RequestFacade) {
       const repoUri = req.params.uri as string;
-      const log = new Logger(req.server);
       const reindex: boolean = (req.payload as any).reindex;
       try {
+        await getReferenceHelper(req.getSavedObjectsClient()).ensureReference(repoUri);
         const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
         const cloneStatus = await repoObjectClient.getRepositoryGitStatus(repoUri);
 
@@ -259,11 +290,11 @@ export function repositoryRoute(
     async handler(req: RequestFacade) {
       const config: RepositoryConfig = req.payload as RepositoryConfig;
       const repoUri: RepositoryUri = config.uri;
-      const log = new Logger(req.server);
       const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
 
       try {
         // Check if the repository exists
+        await getReferenceHelper(req.getSavedObjectsClient()).ensureReference(repoUri);
         await repoObjectClient.getRepository(repoUri);
       } catch (error) {
         return Boom.badRequest(`Repository not existed for ${repoUri}`);
@@ -290,6 +321,7 @@ export function repositoryRoute(
     async handler(req: RequestFacade) {
       const repoUri = req.params.uri as string;
       try {
+        await getReferenceHelper(req.getSavedObjectsClient()).ensureReference(repoUri);
         const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
         return await repoObjectClient.getRepositoryConfig(repoUri);
       } catch (error) {

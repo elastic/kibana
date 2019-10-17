@@ -5,19 +5,27 @@
  */
 
 import React from 'react';
+import { ReactWrapper } from 'enzyme';
+import { act } from 'react-dom/test-utils';
+import { buildExistsFilter } from '@kbn/es-query';
 import { App } from './app';
 import { EditorFrameInstance } from '../types';
 import { Storage } from 'ui/storage';
 import { Document, SavedObjectStore } from '../persistence';
 import { mount } from 'enzyme';
-import { QueryBarTopRow } from '../../../../../../src/legacy/core_plugins/data/public/query/query_bar';
-import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
-import { coreMock } from 'src/core/public/mocks';
 
+import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
 const dataStartMock = dataPluginMock.createStartContract();
 
-jest.mock('../../../../../../src/legacy/core_plugins/data/public/query/query_bar', () => ({
-  QueryBarTopRow: jest.fn(() => null),
+import {
+  TopNavMenu,
+  TopNavMenuData,
+} from '../../../../../../src/legacy/core_plugins/kibana_react/public';
+import { DataStart } from '../../../../../../src/legacy/core_plugins/data/public';
+import { coreMock } from 'src/core/public/mocks';
+
+jest.mock('../../../../../../src/legacy/core_plugins/kibana_react/public', () => ({
+  TopNavMenu: jest.fn(() => null),
 }));
 
 jest.mock('ui/new_platform');
@@ -33,6 +41,31 @@ function createMockFrame(): jest.Mocked<EditorFrameInstance> {
   };
 }
 
+function createMockFilterManager() {
+  const unsubscribe = jest.fn();
+
+  let subscriber: () => void;
+  let filters: unknown = [];
+
+  return {
+    getUpdates$: () => ({
+      subscribe: ({ next }: { next: () => void }) => {
+        subscriber = next;
+        return unsubscribe;
+      },
+    }),
+    setFilters: (newFilters: unknown[]) => {
+      filters = newFilters;
+      subscriber();
+    },
+    getFilters: () => filters,
+    removeAll: () => {
+      filters = [];
+      subscriber();
+    },
+  };
+}
+
 describe('Lens App', () => {
   let frame: jest.Mocked<EditorFrameInstance>;
   let core: ReturnType<typeof coreMock['createStart']>;
@@ -41,6 +74,7 @@ describe('Lens App', () => {
     editorFrame: EditorFrameInstance;
     data: typeof dataStartMock;
     core: typeof core;
+    dataShim: DataStart;
     store: Storage;
     docId?: string;
     docStorage: SavedObjectStore;
@@ -48,8 +82,29 @@ describe('Lens App', () => {
   }> {
     return ({
       editorFrame: createMockFrame(),
-      core,
-      data: dataStartMock,
+      core: {
+        ...core,
+        application: {
+          ...core.application,
+          capabilities: {
+            ...core.application.capabilities,
+            visualize: { save: true, saveQuery: true, show: true },
+          },
+        },
+      },
+      dataShim: {
+        indexPatterns: {
+          indexPatterns: {
+            get: jest.fn(id => {
+              return new Promise(resolve => resolve({ id }));
+            }),
+          },
+        },
+        timefilter: { history: {} },
+        filter: {
+          filterManager: createMockFilterManager(),
+        },
+      },
       store: {
         get: jest.fn(),
       },
@@ -57,13 +112,12 @@ describe('Lens App', () => {
         load: jest.fn(),
         save: jest.fn(),
       },
-      QueryBarTopRow: jest.fn(() => <div />),
       redirectTo: jest.fn(id => {}),
-      savedObjectsClient: jest.fn(),
     } as unknown) as jest.Mocked<{
       editorFrame: EditorFrameInstance;
       data: typeof dataStartMock;
       core: typeof core;
+      dataShim: DataStart;
       store: Storage;
       docId?: string;
       docStorage: SavedObjectStore;
@@ -109,12 +163,14 @@ describe('Lens App', () => {
               "toDate": "now",
             },
             "doc": undefined,
+            "filters": Array [],
             "onChange": [Function],
             "onError": [Function],
             "query": Object {
               "language": "kuery",
               "query": "",
             },
+            "savedQuery": undefined,
           },
         ],
       ]
@@ -174,12 +230,11 @@ describe('Lens App', () => {
       await waitForPromises();
 
       expect(args.docStorage.load).toHaveBeenCalledWith('1234');
-      expect(QueryBarTopRow).toHaveBeenCalledWith(
+      expect(args.dataShim.indexPatterns.indexPatterns.get).toHaveBeenCalledWith('1');
+      expect(TopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
-          dateRangeFrom: 'now-7d',
-          dateRangeTo: 'now',
           query: 'fake query',
-          indexPatterns: ['saved'],
+          indexPatterns: [{ id: '1' }],
         }),
         {}
       );
@@ -233,74 +288,175 @@ describe('Lens App', () => {
     });
 
     describe('save button', () => {
-      it('shows a save button that is enabled when the frame has provided its state', () => {
-        const args = makeDefaultArgs();
-        args.editorFrame = frame;
+      interface SaveProps {
+        newCopyOnSave: boolean;
+        newTitle: string;
+      }
 
-        const instance = mount(<App {...args} />);
+      function getButton(instance: ReactWrapper): TopNavMenuData {
+        return (instance
+          .find('[data-test-subj="lnsApp_topNav"]')
+          .prop('config') as TopNavMenuData[]).find(
+          button => button.testId === 'lnsApp_saveButton'
+        )!;
+      }
 
-        expect(
-          instance
-            .find('[data-test-subj="lnsApp_saveButton"]')
-            .first()
-            .prop('disabled')
-        ).toEqual(true);
-
-        const onChange = frame.mount.mock.calls[0][1].onChange;
-        onChange({ indexPatternTitles: [], doc: ('will save this' as unknown) as Document });
-
-        instance.update();
-
-        expect(
-          instance
-            .find('[data-test-subj="lnsApp_saveButton"]')
-            .first()
-            .prop('disabled')
-        ).toEqual(false);
-      });
-
-      it('saves the latest doc and then prevents more saving', async () => {
-        const args = makeDefaultArgs();
-        args.editorFrame = frame;
-        (args.docStorage.save as jest.Mock).mockResolvedValue({ id: '1234' });
-
-        const instance = mount(<App {...args} />);
-
-        expect(frame.mount).toHaveBeenCalledTimes(1);
-
-        const onChange = frame.mount.mock.calls[0][1].onChange;
-        onChange({ indexPatternTitles: [], doc: ({ id: undefined } as unknown) as Document });
+      function testSave(instance: ReactWrapper, saveProps: SaveProps) {
+        act(() => {
+          getButton(instance).run(instance.getDOMNode());
+        });
 
         instance.update();
 
-        expect(
-          instance
-            .find('[data-test-subj="lnsApp_saveButton"]')
-            .first()
-            .prop('disabled')
-        ).toEqual(false);
+        const handler = instance.findWhere(el => el.prop('onSave')).prop('onSave') as ((
+          p: unknown
+        ) => void);
+        handler(saveProps);
+      }
 
-        instance
-          .find('[data-test-subj="lnsApp_saveButton"]')
-          .first()
-          .prop('onClick')!({} as React.MouseEvent);
+      async function save({
+        initialDocId,
+        ...saveProps
+      }: SaveProps & {
+        initialDocId?: string;
+      }) {
+        const args = {
+          ...makeDefaultArgs(),
+          docId: initialDocId,
+        };
+        args.editorFrame = frame;
+        (args.docStorage.load as jest.Mock).mockResolvedValue({
+          id: '1234',
+          state: {
+            query: 'fake query',
+            datasourceMetaData: { filterableIndexPatterns: [{ id: '1', title: 'saved' }] },
+          },
+        });
+        (args.docStorage.save as jest.Mock).mockImplementation(async ({ id }) => ({
+          id: id || 'aaa',
+        }));
 
-        expect(args.docStorage.save).toHaveBeenCalledWith({ id: undefined });
+        const instance = mount(<App {...args} />);
 
         await waitForPromises();
 
-        expect(args.redirectTo).toHaveBeenCalledWith('1234');
+        if (initialDocId) {
+          expect(args.docStorage.load).toHaveBeenCalledTimes(1);
+        } else {
+          expect(args.docStorage.load).not.toHaveBeenCalled();
+        }
+
+        const onChange = frame.mount.mock.calls[0][1].onChange;
+        onChange({
+          filterableIndexPatterns: [],
+          doc: ({ id: initialDocId } as unknown) as Document,
+        });
+
+        instance.update();
+
+        expect(getButton(instance).disableButton).toEqual(false);
+
+        testSave(instance, saveProps);
+
+        await waitForPromises();
+
+        return { args, instance };
+      }
+
+      it('shows a disabled save button when the user does not have permissions', async () => {
+        const args = makeDefaultArgs();
+        args.core.application = {
+          ...args.core.application,
+          capabilities: {
+            ...args.core.application.capabilities,
+            visualize: { save: false, saveQuery: false, show: true },
+          },
+        };
+        args.editorFrame = frame;
+
+        const instance = mount(<App {...args} />);
+
+        expect(getButton(instance).disableButton).toEqual(true);
+
+        const onChange = frame.mount.mock.calls[0][1].onChange;
+        onChange({ filterableIndexPatterns: [], doc: ('will save this' as unknown) as Document });
+
+        instance.update();
+
+        expect(getButton(instance).disableButton).toEqual(true);
+      });
+
+      it('shows a save button that is enabled when the frame has provided its state', async () => {
+        const args = makeDefaultArgs();
+        args.editorFrame = frame;
+
+        const instance = mount(<App {...args} />);
+
+        expect(getButton(instance).disableButton).toEqual(true);
+
+        const onChange = frame.mount.mock.calls[0][1].onChange;
+        onChange({ filterableIndexPatterns: [], doc: ('will save this' as unknown) as Document });
+
+        instance.update();
+
+        expect(getButton(instance).disableButton).toEqual(false);
+      });
+
+      it('saves new docs', async () => {
+        const { args, instance } = await save({
+          initialDocId: undefined,
+          newCopyOnSave: false,
+          newTitle: 'hello there',
+        });
+
+        expect(args.docStorage.save).toHaveBeenCalledWith({
+          id: undefined,
+          title: 'hello there',
+        });
+
+        expect(args.redirectTo).toHaveBeenCalledWith('aaa');
+
+        instance.setProps({ docId: 'aaa' });
+
+        expect(args.docStorage.load).not.toHaveBeenCalled();
+      });
+
+      it('saves the latest doc as a copy', async () => {
+        const { args, instance } = await save({
+          initialDocId: '1234',
+          newCopyOnSave: true,
+          newTitle: 'hello there',
+        });
+
+        expect(args.docStorage.save).toHaveBeenCalledWith({
+          id: undefined,
+          title: 'hello there',
+        });
+
+        expect(args.redirectTo).toHaveBeenCalledWith('aaa');
+
+        instance.setProps({ docId: 'aaa' });
+
+        expect(args.docStorage.load).toHaveBeenCalledTimes(1);
+      });
+
+      it('saves existing docs', async () => {
+        const { args, instance } = await save({
+          initialDocId: '1234',
+          newCopyOnSave: false,
+          newTitle: 'hello there',
+        });
+
+        expect(args.docStorage.save).toHaveBeenCalledWith({
+          id: '1234',
+          title: 'hello there',
+        });
+
+        expect(args.redirectTo).not.toHaveBeenCalled();
 
         instance.setProps({ docId: '1234' });
 
-        expect(args.docStorage.load).not.toHaveBeenCalled();
-
-        expect(
-          instance
-            .find('[data-test-subj="lnsApp_saveButton"]')
-            .first()
-            .prop('disabled')
-        ).toEqual(true);
+        expect(args.docStorage.load).toHaveBeenCalledTimes(1);
       });
 
       it('handles save failure by showing a warning, but still allows another save', async () => {
@@ -311,14 +467,11 @@ describe('Lens App', () => {
         const instance = mount(<App {...args} />);
 
         const onChange = frame.mount.mock.calls[0][1].onChange;
-        onChange({ indexPatternTitles: [], doc: ({ id: undefined } as unknown) as Document });
+        onChange({ filterableIndexPatterns: [], doc: ({ id: undefined } as unknown) as Document });
 
         instance.update();
 
-        instance
-          .find('[data-test-subj="lnsApp_saveButton"]')
-          .first()
-          .prop('onClick')!({} as React.MouseEvent);
+        testSave(instance, { newCopyOnSave: false, newTitle: 'hello there' });
 
         await waitForPromises();
 
@@ -326,12 +479,7 @@ describe('Lens App', () => {
         expect(args.redirectTo).not.toHaveBeenCalled();
         await waitForPromises();
 
-        expect(
-          instance
-            .find('[data-test-subj="lnsApp_saveButton"]')
-            .first()
-            .prop('disabled')
-        ).toEqual(false);
+        expect(getButton(instance).disableButton).toEqual(false);
       });
     });
   });
@@ -343,10 +491,8 @@ describe('Lens App', () => {
 
       mount(<App {...args} />);
 
-      expect(QueryBarTopRow).toHaveBeenCalledWith(
+      expect(TopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
-          dateRangeFrom: 'now-7d',
-          dateRangeTo: 'now',
           query: { query: '', language: 'kuery' },
         }),
         {}
@@ -360,13 +506,13 @@ describe('Lens App', () => {
       );
     });
 
-    it('updates the index patterns when the editor frame is changed', () => {
+    it('updates the index patterns when the editor frame is changed', async () => {
       const args = makeDefaultArgs();
       args.editorFrame = frame;
 
       const instance = mount(<App {...args} />);
 
-      expect(QueryBarTopRow).toHaveBeenCalledWith(
+      expect(TopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
           indexPatterns: [],
         }),
@@ -375,40 +521,52 @@ describe('Lens App', () => {
 
       const onChange = frame.mount.mock.calls[0][1].onChange;
       onChange({
-        indexPatternTitles: ['newIndex'],
+        filterableIndexPatterns: [{ id: '1', title: 'newIndex' }],
         doc: ({ id: undefined } as unknown) as Document,
       });
 
+      await waitForPromises();
       instance.update();
 
-      expect(QueryBarTopRow).toHaveBeenCalledWith(
+      expect(TopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
-          indexPatterns: ['newIndex'],
+          indexPatterns: [{ id: '1' }],
+        }),
+        {}
+      );
+
+      // Do it again to verify that the dirty checking is done right
+      onChange({
+        filterableIndexPatterns: [{ id: '2', title: 'second index' }],
+        doc: ({ id: undefined } as unknown) as Document,
+      });
+
+      await waitForPromises();
+      instance.update();
+
+      expect(TopNavMenu).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          indexPatterns: [{ id: '2' }],
         }),
         {}
       );
     });
 
-    it('updates the editor frame when the user changes query or time', () => {
+    it('updates the editor frame when the user changes query or time in the search bar', () => {
       const args = makeDefaultArgs();
       args.editorFrame = frame;
 
       const instance = mount(<App {...args} />);
 
-      instance
-        .find('[data-test-subj="lnsApp_queryBar"]')
-        .first()
-        .prop('onSubmit')!(({
+      instance.find(TopNavMenu).prop('onQuerySubmit')!({
         dateRange: { from: 'now-14d', to: 'now-7d' },
         query: { query: 'new', language: 'lucene' },
-      } as unknown) as React.FormEvent);
+      });
 
       instance.update();
 
-      expect(QueryBarTopRow).toHaveBeenCalledWith(
+      expect(TopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
-          dateRangeFrom: 'now-14d',
-          dateRangeTo: 'now-7d',
           query: { query: 'new', language: 'lucene' },
         }),
         {}
@@ -418,6 +576,159 @@ describe('Lens App', () => {
         expect.objectContaining({
           dateRange: { fromDate: 'now-14d', toDate: 'now-7d' },
           query: { query: 'new', language: 'lucene' },
+        })
+      );
+    });
+
+    it('updates the filters when the user changes them', () => {
+      const args = makeDefaultArgs();
+      args.editorFrame = frame;
+
+      const instance = mount(<App {...args} />);
+
+      args.dataShim.filter.filterManager.setFilters([
+        buildExistsFilter({ name: 'myfield' }, { id: 'index1' }),
+      ]);
+
+      instance.update();
+
+      expect(frame.mount).toHaveBeenCalledWith(
+        expect.any(Element),
+        expect.objectContaining({
+          filters: [buildExistsFilter({ name: 'myfield' }, { id: 'index1' })],
+        })
+      );
+    });
+  });
+
+  describe('saved query handling', () => {
+    it('does not allow saving when the user is missing the saveQuery permission', () => {
+      const args = makeDefaultArgs();
+      args.core.application = {
+        ...args.core.application,
+        capabilities: {
+          ...args.core.application.capabilities,
+          visualize: { save: false, saveQuery: false, show: true },
+        },
+      };
+
+      mount(<App {...args} />);
+
+      expect(TopNavMenu).toHaveBeenCalledWith(
+        expect.objectContaining({ showSaveQuery: false }),
+        {}
+      );
+    });
+
+    it('persists the saved query ID when the query is saved', () => {
+      const args = makeDefaultArgs();
+      args.editorFrame = frame;
+
+      const instance = mount(<App {...args} />);
+
+      expect(TopNavMenu).toHaveBeenCalledWith(
+        expect.objectContaining({
+          showSaveQuery: true,
+          savedQuery: undefined,
+          onSaved: expect.any(Function),
+          onSavedQueryUpdated: expect.any(Function),
+          onClearSavedQuery: expect.any(Function),
+        }),
+        {}
+      );
+
+      act(() => {
+        instance.find(TopNavMenu).prop('onSaved')!({
+          id: '1',
+          attributes: {
+            title: '',
+            description: '',
+            query: { query: '', language: 'lucene' },
+          },
+        });
+      });
+
+      expect(TopNavMenu).toHaveBeenCalledWith(
+        expect.objectContaining({
+          savedQuery: {
+            id: '1',
+            attributes: {
+              title: '',
+              description: '',
+              query: { query: '', language: 'lucene' },
+            },
+          },
+        }),
+        {}
+      );
+    });
+
+    it('changes the saved query ID when the query is updated', () => {
+      const args = makeDefaultArgs();
+      args.editorFrame = frame;
+
+      const instance = mount(<App {...args} />);
+
+      act(() => {
+        instance.find(TopNavMenu).prop('onSaved')!({
+          id: '1',
+          attributes: {
+            title: '',
+            description: '',
+            query: { query: '', language: 'lucene' },
+          },
+        });
+      });
+
+      act(() => {
+        instance.find(TopNavMenu).prop('onSavedQueryUpdated')!({
+          id: '2',
+          attributes: {
+            title: 'new title',
+            description: '',
+            query: { query: '', language: 'lucene' },
+          },
+        });
+      });
+
+      expect(TopNavMenu).toHaveBeenCalledWith(
+        expect.objectContaining({
+          savedQuery: {
+            id: '2',
+            attributes: {
+              title: 'new title',
+              description: '',
+              query: { query: '', language: 'lucene' },
+            },
+          },
+        }),
+        {}
+      );
+    });
+
+    it('clears all existing filters when the active saved query is cleared', () => {
+      const args = makeDefaultArgs();
+      args.editorFrame = frame;
+
+      const instance = mount(<App {...args} />);
+
+      instance.find(TopNavMenu).prop('onQuerySubmit')!({
+        dateRange: { from: 'now-14d', to: 'now-7d' },
+        query: { query: 'new', language: 'lucene' },
+      });
+
+      args.dataShim.filter.filterManager.setFilters([
+        buildExistsFilter({ name: 'myfield' }, { id: 'index1' }),
+      ]);
+      instance.update();
+
+      instance.find(TopNavMenu).prop('onClearSavedQuery')!();
+      instance.update();
+
+      expect(frame.mount).toHaveBeenLastCalledWith(
+        expect.any(Element),
+        expect.objectContaining({
+          filters: [],
         })
       );
     });

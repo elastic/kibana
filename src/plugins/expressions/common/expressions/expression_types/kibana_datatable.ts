@@ -19,6 +19,7 @@
 
 import { map } from 'lodash';
 import { SerializedFieldFormat } from '../types/common';
+import { Datatable, PointSeries } from '../types';
 
 const name = 'kibana_datatable';
 
@@ -41,12 +42,11 @@ export interface KibanaDatatable {
 export const kibanaDatatable = () => ({
   name,
   from: {
-    // TODO: import datatable types here instead of using any
-    datatable: (context: any) => {
+    datatable: (context: Datatable) => {
       return {
         type: name,
         rows: context.rows,
-        columns: context.columns.map((column: any) => {
+        columns: context.columns.map(column => {
           return {
             id: column.name,
             name: column.name,
@@ -54,8 +54,7 @@ export const kibanaDatatable = () => ({
         }),
       };
     },
-    // TODO: import pointseries types here instead of using any
-    pointseries: (context: any) => {
+    pointseries: (context: PointSeries) => {
       const columns = map(context.columns, (column, n) => {
         return { id: n, name: n, ...column };
       });

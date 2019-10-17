@@ -25,3 +25,7 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export { DataServerPlugin as Plugin };
+
+export * from './search';
+
+export { IRequestTypesMap, IResponseTypesMap } from './search';

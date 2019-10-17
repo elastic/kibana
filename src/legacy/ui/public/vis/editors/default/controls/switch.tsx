@@ -41,6 +41,7 @@ function SwitchParamEditor({
     <EuiFormRow fullWidth={true}>
       <EuiToolTip content={displayToolTip} delay="long" position="right">
         <EuiSwitch
+          compressed={true}
           label={displayLabel}
           checked={value}
           disabled={disabled}

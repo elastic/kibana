@@ -87,11 +87,8 @@ function wrapQueryBarInputInContext(testProps: any, store?: any) {
   };
 
   const services = {
+    ...startMock,
     appName: testProps.appName || 'test',
-    uiSettings: startMock.uiSettings,
-    savedObjects: startMock.savedObjects,
-    notifications: startMock.notifications,
-    http: startMock.http,
     store: store || createMockStorage(),
   };
 

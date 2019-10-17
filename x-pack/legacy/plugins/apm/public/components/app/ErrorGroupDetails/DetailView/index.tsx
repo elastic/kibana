@@ -36,9 +36,10 @@ import {
   logStacktraceTab
 } from './ErrorTabs';
 import { Summary } from '../../../shared/Summary';
-import { TimestampSummaryItem } from '../../../shared/Summary/TimestampSummaryItem';
+import { TimestampTooltip } from '../../../shared/TimestampTooltip';
 import { HttpInfoSummaryItem } from '../../../shared/Summary/HttpInfoSummaryItem';
 import { TransactionDetailLink } from '../../../shared/Links/apm/TransactionDetailLink';
+import { UserAgentSummaryItem } from '../../../shared/Summary/UserAgentSummaryItem';
 
 const HeaderContainer = styled.div`
   display: flex;
@@ -103,7 +104,7 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
               'xpack.apm.errorGroupDetails.viewOccurrencesInDiscoverButtonLabel',
               {
                 defaultMessage:
-                  'View {occurrencesCount} occurrences in Discover',
+                  'View {occurrencesCount} {occurrencesCount, plural, one {occurrence} other {occurrences}} in Discover.',
                 values: { occurrencesCount }
               }
             )}
@@ -113,13 +114,16 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
 
       <Summary
         items={[
-          <TimestampSummaryItem time={error.timestamp.us / 1000} />,
+          <TimestampTooltip time={error.timestamp.us / 1000} />,
           errorUrl && method ? (
             <HttpInfoSummaryItem
               url={errorUrl}
               method={method}
               status={status}
             />
+          ) : null,
+          transaction && transaction.user_agent ? (
+            <UserAgentSummaryItem {...transaction.user_agent} />
           ) : null,
           transaction && (
             <EuiToolTip
@@ -185,7 +189,7 @@ export function TabContent({
 }) {
   const codeLanguage = idx(error, _ => _.service.language.name);
   const excStackframes = idx(error, _ => _.error.exception[0].stacktrace);
-  const logStackframes = idx(error, _ => _.error.exception[0].stacktrace);
+  const logStackframes = idx(error, _ => _.error.log.stacktrace);
 
   switch (currentTab.key) {
     case logStacktraceTab.key:

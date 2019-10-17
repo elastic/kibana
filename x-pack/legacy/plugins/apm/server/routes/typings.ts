@@ -7,8 +7,8 @@
 import t from 'io-ts';
 import { Request, ResponseToolkit } from 'hapi';
 import { InternalCoreSetup } from 'src/core/server';
-import { KFetchOptions } from 'ui/kfetch';
 import { PickByValue, Optional } from 'utility-types';
+import { FetchOptions } from '../../public/services/rest/callApi';
 
 export interface Params {
   query?: t.HasProps;
@@ -105,7 +105,7 @@ type GetParams<TParams extends Params> = Exclude<
 
 export type Client<TRouteState> = <
   TPath extends keyof TRouteState & string,
-  TMethod extends keyof TRouteState[TPath],
+  TMethod extends keyof TRouteState[TPath] & string,
   TRouteDescription extends TRouteState[TPath][TMethod],
   TParams extends TRouteDescription extends { params: Params }
     ? TRouteDescription['params']
@@ -114,7 +114,8 @@ export type Client<TRouteState> = <
     ? TRouteDescription['ret']
     : undefined
 >(
-  options: Omit<KFetchOptions, 'query' | 'body' | 'pathname' | 'method'> & {
+  options: Omit<FetchOptions, 'query' | 'body' | 'pathname' | 'method'> & {
+    forceCache?: boolean;
     pathname: TPath;
   } & (TMethod extends 'GET' ? { method?: TMethod } : { method: TMethod }) &
     // Makes sure params can only be set when types were defined

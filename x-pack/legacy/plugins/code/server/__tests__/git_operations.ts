@@ -5,21 +5,20 @@
  */
 
 // @ts-ignore
-import Git from '@elastic/nodegit';
 import assert from 'assert';
 import { execSync } from 'child_process';
 import fs from 'fs';
-import * as mkdirp from 'mkdirp';
 import path from 'path';
 import rimraf from 'rimraf';
 import { GitOperations } from '../git_operations';
 import { createTestServerOption } from '../test_utils';
+import { prepareProjectByCloning as cloneProject, prepareProjectByInit } from '../test_utils';
 
 describe('git_operations', () => {
   it('get default branch from a non master repo', async () => {
     const repoUri = 'github.com/foo/bar';
     const repoDir = path.join(serverOptions.repoPath, repoUri);
-    mkdirp.sync(repoDir);
+    fs.mkdirSync(repoDir, { recursive: true });
 
     // create a non-master using git commands
     const shell = `
@@ -35,11 +34,10 @@ describe('git_operations', () => {
 
     try {
       const g = new GitOperations(serverOptions.repoPath);
-      const uri = path.join(repoUri, '.git');
-      const defaultBranch = await g.getDefaultBranch(uri);
+      const defaultBranch = await g.getDefaultBranch(repoUri);
       assert.strictEqual(defaultBranch, 'trunk');
-      const headRevision = await g.getHeadRevision(uri);
-      const headCommit = await g.getCommitInfo(uri, 'HEAD');
+      const headRevision = await g.getHeadRevision(repoUri);
+      const headCommit = await g.getCommitInfo(repoUri, 'HEAD');
       assert.strictEqual(headRevision, headCommit!.id);
     } finally {
       rimraf.sync(repoDir);
@@ -47,35 +45,18 @@ describe('git_operations', () => {
   });
 
   async function prepareProject(repoPath: string) {
-    mkdirp.sync(repoPath);
+    fs.mkdirSync(repoPath, { recursive: true });
     const workDir = path.join(serverOptions.workspacePath, repoUri);
-    const repo = await Git.Repository.init(workDir, 0);
-    const content = '';
-    fs.writeFileSync(path.join(workDir, '1'), content, 'utf8');
-    const subFolder = 'src';
-    fs.mkdirSync(path.join(workDir, subFolder));
-    fs.writeFileSync(path.join(workDir, 'src/2'), content, 'utf8');
-    fs.writeFileSync(path.join(workDir, 'src/3'), content, 'utf8');
-
-    const index = await repo.refreshIndex();
-    await index.addByPath('1');
-    await index.addByPath('src/2');
-    await index.addByPath('src/3');
-    index.write();
-    const treeId = await index.writeTree();
-    const committer = Git.Signature.create('tester', 'test@test.com', Date.now() / 1000, 60);
-    const commit = await repo.createCommit(
-      'HEAD',
-      committer,
-      committer,
-      'commit for test',
-      treeId,
-      []
-    );
+    const { git, commits } = await prepareProjectByInit(workDir, {
+      'commit for test': {
+        '1': '',
+        'src/2': '',
+        'src/3': '',
+      },
+    });
     // eslint-disable-next-line no-console
-    console.log(`created commit ${commit.tostrS()}`);
-    await Git.Clone.clone(workDir, repoPath, { bare: 1 });
-    return Git.Repository.openBare(repoPath);
+    console.log(`created commit ${commits[0]}`);
+    await git.clone(workDir, repoPath, ['--bare']);
   }
 
   // @ts-ignore
@@ -98,13 +79,10 @@ describe('git_operations', () => {
     const iterator = await g.iterateRepo(repoUri, 'HEAD');
     for await (const value of iterator) {
       if (count === 0) {
-        assert.strictEqual('1', value.name);
         assert.strictEqual('1', value.path);
       } else if (count === 1) {
-        assert.strictEqual('2', value.name);
         assert.strictEqual('src/2', value.path);
       } else if (count === 2) {
-        assert.strictEqual('3', value.name);
         assert.strictEqual('src/3', value.path);
       } else {
         assert.fail('this repo should contains exactly 3 files');
@@ -115,26 +93,6 @@ describe('git_operations', () => {
     assert.strictEqual(count, 3, 'this repo should contains exactly 3 files');
     assert.strictEqual(totalFiles, 3, 'this repo should contains exactly 3 files');
   });
-  function cloneProject(url: string, p: string) {
-    return new Promise(resolve => {
-      if (!fs.existsSync(p)) {
-        rimraf(p, error => {
-          Git.Clone.clone(url, p, {
-            bare: 1,
-            fetchOpts: {
-              callbacks: {
-                certificateCheck: () => 0,
-              },
-            },
-          }).then(repo => {
-            resolve(repo);
-          });
-        });
-      } else {
-        resolve();
-      }
-    });
-  }
 
   it('can resolve branches', async () => {
     const g = new GitOperations(serverOptions.repoPath);

@@ -6,7 +6,7 @@
 
 import { each } from 'lodash';
 import { toastNotifications } from 'ui/notify';
-import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
+import { mlMessageBarService } from 'plugins/ml/components/messagebar';
 import rison from 'rison-node';
 import chrome from 'ui/chrome';
 
@@ -179,9 +179,9 @@ export function cloneJob(jobId) {
         }
       } else {
         // otherwise use the currentJob
-        mlJobService.currentJob = job;
+        mlJobService.tempJobCloningObjects.job = job;
       }
-      window.location.href = `#/jobs/new_job`;
+      window.location.href = '#/jobs/new_job';
     })
     .catch((error) => {
       mlMessageBarService.notify.error(error);

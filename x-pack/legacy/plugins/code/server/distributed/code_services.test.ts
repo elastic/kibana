@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { Request, Server } from 'hapi';
 import { createTestHapiServer } from '../test_utils';
 import { LocalHandlerAdapter } from './local_handler_adapter';
@@ -13,9 +14,10 @@ import { DEFAULT_SERVICE_OPTION } from './service_handler_adapter';
 import { NonCodeNodeAdapter } from './multinode/non_code_node_adapter';
 import { CodeServices } from './code_services';
 import { Logger } from '../log';
+import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
 
+const log: Logger = new ConsoleLoggerFactory().getLogger(['test']);
 let hapiServer: Server = createTestHapiServer();
-const log = new Logger(hapiServer);
 
 let server: CodeServerRouter = new CodeServerRouter(hapiServer);
 beforeEach(async () => {
