@@ -32,7 +32,6 @@ export default function ({ getService, getPageObjects }) {
         dataIndex: 'dashboard/current/data',
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
-      await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaSavedObjects();
       await PageObjects.settings.importFile(path.join(__dirname, 'exports', 'timezonetest_6_2_4.json'));

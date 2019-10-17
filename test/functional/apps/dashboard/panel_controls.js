@@ -37,7 +37,6 @@ export default function ({ getService, getPageObjects }) {
 
     before(async function () {
       await PageObjects.dashboard.initTests();
-      await PageObjects.dashboard.preserveCrossAppState();
     });
 
     after(async function () {
