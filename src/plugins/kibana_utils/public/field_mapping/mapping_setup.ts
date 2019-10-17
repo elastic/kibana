@@ -17,8 +17,28 @@
  * under the License.
  */
 
-export * from './store';
-export * from './parse';
-export * from './render_complete';
-export * from './errors';
-export * from './field_mapping';
+import { mapValues, isString } from 'lodash';
+import { ES_FIELD_TYPES } from '../../../../plugins/data/common';
+import { FieldMappingSpec, MappingObject } from './types';
+
+/** @private */
+type ShorthandFieldMapObject = FieldMappingSpec | ES_FIELD_TYPES | 'json';
+
+const json: FieldMappingSpec = {
+  type: ES_FIELD_TYPES.TEXT,
+  _serialize(v) {
+    if (v) return JSON.stringify(v);
+  },
+  _deserialize(v) {
+    if (v) return JSON.parse(v);
+  },
+};
+
+/** @public */
+export const expandShorthand = (sh: Record<string, ShorthandFieldMapObject>): MappingObject => {
+  return mapValues<Record<string, ShorthandFieldMapObject>>(sh, (val: ShorthandFieldMapObject) => {
+    const fieldMap = isString(val) ? { type: val } : val;
+
+    return fieldMap.type === 'json' ? json : fieldMap;
+  }) as MappingObject;
+};

@@ -17,8 +17,14 @@
  * under the License.
  */
 
-export * from './store';
-export * from './parse';
-export * from './render_complete';
-export * from './errors';
-export * from './field_mapping';
+import { ES_FIELD_TYPES } from '../../../data/common';
+
+/** @public */
+export interface FieldMappingSpec {
+  type: ES_FIELD_TYPES;
+  _serialize?: (mapping: any) => string | undefined;
+  _deserialize?: (mapping: string) => any | undefined;
+}
+
+/** @public */
+export type MappingObject = Record<string, FieldMappingSpec>;
