@@ -7,29 +7,13 @@
 import React, { FC, Fragment, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiStat, EuiTitle } from '@elastic/eui';
-import { idx } from '@kbn/elastic-idx';
-import { ml } from '../../../../../services/ml_api_service';
-import { getErrorMessage } from '../../../analytics_management/hooks/use_create_analytics_form';
-import { RegressionEvaluateResponse } from '../../../../common';
-
 import { ErrorCallout } from './error_callout';
+import { getValuesFromResponse, loadEvalData, Eval } from '../../../../common';
 
 interface Props {
   jobId: string;
   index: string;
   dependentVariable: string;
-}
-
-interface LoadEvaluateResult {
-  success: boolean;
-  eval: RegressionEvaluateResponse | null;
-  error: string | null;
-}
-
-interface Eval {
-  meanSquaredError: number | '';
-  rSquared: number | '';
-  error: null | string;
 }
 
 const meanSquaredErrorText = i18n.translate(
@@ -45,21 +29,6 @@ const rSquaredText = i18n.translate(
   }
 );
 const defaultEval: Eval = { meanSquaredError: '', rSquared: '', error: null };
-const DEFAULT_SIG_FIGS = 3;
-
-function getValuesFromResponse(response: RegressionEvaluateResponse) {
-  let meanSquaredError = idx(response, _ => _.regression.mean_squared_error.error) as number;
-  if (meanSquaredError) {
-    meanSquaredError = Number(meanSquaredError.toPrecision(DEFAULT_SIG_FIGS));
-  }
-
-  let rSquared = idx(response, _ => _.regression.r_squared.value) as number;
-  if (rSquared) {
-    rSquared = Number(rSquared.toPrecision(DEFAULT_SIG_FIGS));
-  }
-
-  return { meanSquaredError, rSquared };
-}
 
 export const EvaluatePanel: FC<Props> = ({ jobId, index, dependentVariable }) => {
   const [trainingEval, setTrainingEval] = useState<Eval>(defaultEval);
@@ -67,46 +36,11 @@ export const EvaluatePanel: FC<Props> = ({ jobId, index, dependentVariable }) =>
   const [isLoadingTraining, setIsLoadingTraining] = useState<boolean>(false);
   const [isLoadingGeneralization, setIsLoadingGeneralization] = useState<boolean>(false);
 
-  const loadEvalData = async (isTraining: boolean) => {
-    const results: LoadEvaluateResult = { success: false, eval: null, error: null };
-
-    const config = {
-      index,
-      query: {
-        term: {
-          'ml.is_training': {
-            value: isTraining,
-          },
-        },
-      },
-      evaluation: {
-        regression: {
-          actual_field: dependentVariable,
-          predicted_field: `ml.${dependentVariable}_prediction`,
-          metrics: {
-            r_squared: {},
-            mean_squared_error: {},
-          },
-        },
-      },
-    };
-
-    try {
-      const evalResult = await ml.dataFrameAnalytics.evaluateDataFrameAnalytics(config);
-      results.success = true;
-      results.eval = evalResult;
-      return results;
-    } catch (e) {
-      results.error = getErrorMessage(e);
-      return results;
-    }
-  };
-
   const loadData = async () => {
     setIsLoadingGeneralization(true);
     setIsLoadingTraining(true);
 
-    const genErrorEval = await loadEvalData(false);
+    const genErrorEval = await loadEvalData({ isTraining: false, index, dependentVariable });
 
     if (genErrorEval.success === true && genErrorEval.eval) {
       const { meanSquaredError, rSquared } = getValuesFromResponse(genErrorEval.eval);
@@ -125,7 +59,7 @@ export const EvaluatePanel: FC<Props> = ({ jobId, index, dependentVariable }) =>
       });
     }
 
-    const trainingErrorEval = await loadEvalData(true);
+    const trainingErrorEval = await loadEvalData({ isTraining: true, index, dependentVariable });
 
     if (trainingErrorEval.success === true && trainingErrorEval.eval) {
       const { meanSquaredError, rSquared } = getValuesFromResponse(trainingErrorEval.eval);

@@ -30,7 +30,6 @@ interface QueryTabBodyProps {
   startDate: number;
   endDate: number;
   filterQuery?: string | ESTermQuery;
-  kqlQueryExpression: string;
 }
 
 export type AnomaliesQueryTabBodyProps = QueryTabBodyProps & {

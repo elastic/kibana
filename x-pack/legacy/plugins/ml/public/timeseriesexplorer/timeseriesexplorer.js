@@ -42,6 +42,7 @@ import {
   mlFunctionToESAggregation,
 } from '../../common/util/job_utils';
 
+import { ChartTooltip } from '../components/chart_tooltip';
 import { jobSelectServiceFactory, setGlobalState, getSelectedJobIds } from '../components/job_selector/job_select_service_utils';
 import { AnnotationFlyout } from '../components/annotations/annotation_flyout';
 import { AnnotationsTable } from '../components/annotations/annotations_table';
@@ -50,7 +51,7 @@ import { EntityControl } from './components/entity_control';
 import { ForecastingModal } from './components/forecasting_modal/forecasting_modal';
 import { JobSelector } from '../components/job_selector';
 import { LoadingIndicator } from '../components/loading_indicator/loading_indicator';
-import { NavigationMenu } from '../components/navigation_menu/navigation_menu';
+import { NavigationMenu } from '../components/navigation_menu';
 import { severity$, SelectSeverity } from '../components/controls/select_severity/select_severity';
 import { interval$, SelectInterval } from '../components/controls/select_interval/select_interval';
 import { TimeseriesChart } from './components/timeseries_chart/timeseries_chart';
@@ -1041,6 +1042,7 @@ export class TimeSeriesExplorer extends React.Component {
 
     return (
       <TimeSeriesExplorerPage jobSelectorProps={jobSelectorProps} loading={loading} resizeRef={this.resizeRef}>
+        <ChartTooltip />
         <div className="series-controls" data-test-subj="mlSingleMetricViewerSeriesControls">
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
