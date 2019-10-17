@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useEffect } from 'react';
-import { EuiButtonEmpty, EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiOutsideClickDetector,
+} from '@elastic/eui';
 
 import {
   useForm,
@@ -32,10 +38,11 @@ const getFieldConfig = (param: ParameterName): FieldConfig =>
   PARAMETERS_DEFINITION[param].fieldConfig || {};
 
 interface Props {
+  paddingLeft?: string;
   isCancelable?: boolean;
 }
 
-export const CreateField = React.memo(({ isCancelable = true }: Props) => {
+export const CreateField = React.memo(({ paddingLeft, isCancelable = true }: Props) => {
   const { form } = useForm<Field>({ serializer: fieldSerializer });
   const dispatch = useDispatch();
 
@@ -47,7 +54,11 @@ export const CreateField = React.memo(({ isCancelable = true }: Props) => {
     return subscription.unsubscribe;
   }, [form]);
 
-  const submitForm = async (e?: React.FormEvent) => {
+  const cancel = () => {
+    dispatch({ type: 'documentField.changeStatus', value: 'idle' });
+  };
+
+  const submitForm = async (e?: React.FormEvent, exitAfter: boolean = false) => {
     if (e) {
       e.preventDefault();
     }
@@ -57,11 +68,23 @@ export const CreateField = React.memo(({ isCancelable = true }: Props) => {
     if (isValid) {
       form.reset();
       dispatch({ type: 'field.add', value: data });
+
+      if (exitAfter) {
+        cancel();
+      }
     }
   };
 
-  const cancel = () => {
-    dispatch({ type: 'documentField.changeStatus', value: 'idle' });
+  const onClickOutside = () => {
+    if (!isCancelable) {
+      return;
+    }
+    const name = form.getFields().name.value as string;
+    if (name.trim() === '') {
+      cancel();
+    } else {
+      submitForm(undefined, true);
+    }
   };
 
   const renderFormFields = (type: MainType) => {
@@ -131,15 +154,26 @@ export const CreateField = React.memo(({ isCancelable = true }: Props) => {
   );
 
   return (
-    <Form form={form} FormWrapper={formWrapper} onSubmit={submitForm}>
-      <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" alignItems="flexEnd">
-        <FormDataProvider pathsToWatch="type">
-          {({ type }) => {
-            return <EuiFlexItem grow={false}>{renderFormFields(type)}</EuiFlexItem>;
+    <EuiOutsideClickDetector onOutsideClick={onClickOutside}>
+      <Form form={form} FormWrapper={formWrapper} onSubmit={submitForm}>
+        <div
+          className="mappings-editor__create-field-wrapper"
+          style={{
+            paddingLeft,
           }}
-        </FormDataProvider>
-        <EuiFlexItem grow={false}>{renderFormActions()}</EuiFlexItem>
-      </EuiFlexGroup>
-    </Form>
+        >
+          <div className="mappings-editor__create-field-content">
+            <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" alignItems="flexEnd">
+              <FormDataProvider pathsToWatch="type">
+                {({ type }) => {
+                  return <EuiFlexItem grow={false}>{renderFormFields(type)}</EuiFlexItem>;
+                }}
+              </FormDataProvider>
+              <EuiFlexItem grow={false}>{renderFormActions()}</EuiFlexItem>
+            </EuiFlexGroup>
+          </div>
+        </div>
+      </Form>
+    </EuiOutsideClickDetector>
   );
 });

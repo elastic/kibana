@@ -38,13 +38,7 @@ export const DocumentFields = () => {
       return null;
     }
 
-    return (
-      <div className="mappings-editor__create-field-wrapper">
-        <div className="mappings-editor__create-field-content">
-          <CreateField isCancelable={fields.length > 0} />
-        </div>
-      </div>
-    );
+    return <CreateField isCancelable={fields.length > 0} />;
   };
 
   const renderAddFieldButton = () => {

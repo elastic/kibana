@@ -63,27 +63,71 @@ export type Action =
 
 export type Dispatch = (action: Action) => void;
 
+export const addFieldToState = (field: Field, state: State): State => {
+  const id = getUniqueId();
+  const { fieldToAddFieldTo } = state.documentFields;
+  const addToRootLevel = fieldToAddFieldTo === undefined;
+  const parentField = addToRootLevel ? undefined : state.fields.byId[fieldToAddFieldTo!];
+
+  const rootLevelFields = addToRootLevel
+    ? [...state.fields.rootLevelFields, id]
+    : state.fields.rootLevelFields;
+  const nestedDepth = parentField ? parentField.nestedDepth + 1 : 0;
+  const maxNestedDepth = Math.max(state.fields.maxNestedDepth, nestedDepth);
+  const { name } = field;
+  const path = parentField ? `${parentField.path}.${name}` : name;
+
+  state.fields.byId[id] = {
+    id,
+    parentId: fieldToAddFieldTo,
+    source: field,
+    path,
+    nestedDepth,
+    ...getFieldMeta(field),
+  };
+
+  if (parentField) {
+    const childFields = parentField.childFields || [];
+
+    // Update parent field with new children
+    state.fields.byId[fieldToAddFieldTo!] = {
+      ...parentField,
+      childFields: [...childFields, id],
+      hasChildFields: true,
+      isExpanded: true,
+    };
+  }
+
+  return {
+    ...state,
+    isValid: isStateValid(state),
+    fields: { ...state.fields, rootLevelFields, maxNestedDepth },
+  };
+};
+
 export const reducer = (state: State, action: Action): State => {
   switch (action.type) {
     case 'configuration.update': {
-      return {
+      const nextState = {
         ...state,
-        isValid: isStateValid({
-          ...state,
-          configuration: action.value,
-        }),
         configuration: action.value,
       };
+
+      const isValid = isStateValid(nextState);
+      nextState.isValid = isValid;
+
+      return nextState;
     }
     case 'fieldForm.update': {
-      return {
+      const nextState = {
         ...state,
-        isValid: isStateValid({
-          ...state,
-          fieldForm: action.value,
-        }),
         fieldForm: action.value,
       };
+
+      const isValid = isStateValid(nextState);
+      nextState.isValid = isValid;
+
+      return nextState;
     }
     case 'documentField.createField':
       return {
@@ -133,45 +177,7 @@ export const reducer = (state: State, action: Action): State => {
       };
     }
     case 'field.add': {
-      const id = getUniqueId();
-      const { fieldToAddFieldTo } = state.documentFields;
-      const addToRootLevel = fieldToAddFieldTo === undefined;
-      const parentField = addToRootLevel ? undefined : state.fields.byId[fieldToAddFieldTo!];
-
-      const rootLevelFields = addToRootLevel
-        ? [...state.fields.rootLevelFields, id]
-        : state.fields.rootLevelFields;
-      const nestedDepth = parentField ? parentField.nestedDepth + 1 : 0;
-      const maxNestedDepth = Math.max(state.fields.maxNestedDepth, nestedDepth);
-      const { name } = action.value;
-      const path = parentField ? `${parentField.path}.${name}` : name;
-
-      state.fields.byId[id] = {
-        id,
-        parentId: fieldToAddFieldTo,
-        source: action.value,
-        path,
-        nestedDepth,
-        ...getFieldMeta(action.value),
-      };
-
-      if (parentField) {
-        const childFields = parentField.childFields || [];
-
-        // Update parent field with new children
-        state.fields.byId[fieldToAddFieldTo!] = {
-          ...parentField,
-          childFields: [...childFields, id],
-          hasChildFields: true,
-          isExpanded: true,
-        };
-      }
-
-      return {
-        ...state,
-        isValid: isStateValid(state),
-        fields: { ...state.fields, rootLevelFields, maxNestedDepth },
-      };
+      return addFieldToState(action.value, state);
     }
     case 'field.remove': {
       const field = state.fields.byId[action.value];

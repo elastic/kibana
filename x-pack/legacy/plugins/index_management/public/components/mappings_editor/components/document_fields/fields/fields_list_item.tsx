@@ -66,18 +66,7 @@ export const FieldsListItem = ({ field, treeDepth = 0 }: Props) => {
       return null;
     }
 
-    return (
-      <div
-        className="mappings-editor__create-field-wrapper"
-        style={{
-          paddingLeft: `${indentChild}`,
-        }}
-      >
-        <div className="mappings-editor__create-field-content">
-          <CreateField />
-        </div>
-      </div>
-    );
+    return <CreateField paddingLeft={indentChild} />;
   };
 
   const renderActionButtons = () => {

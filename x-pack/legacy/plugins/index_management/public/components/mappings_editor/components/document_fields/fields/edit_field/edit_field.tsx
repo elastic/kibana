@@ -14,7 +14,6 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
   EuiCode,
 } from '@elastic/eui';
 
