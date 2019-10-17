@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const dashboardPanelActions = getService('dashboardPanelActions');
-  const PageObjects = getPageObjects(['dashboard', 'visualize', 'header']);
+  const PageObjects = getPageObjects(['dashboard', 'visualize', 'header', 'common']);
 
   describe('expanding a panel', () => {
     before(async () => {

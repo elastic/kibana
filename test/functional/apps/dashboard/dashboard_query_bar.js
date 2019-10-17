@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const pieChart = getService('pieChart');
   const queryBar = getService('queryBar');
-  const PageObjects = getPageObjects(['dashboard', 'discover']);
+  const PageObjects = getPageObjects(['common', 'dashboard', 'discover']);
 
   describe('dashboard query bar', () => {
     before(async () => {
