@@ -5,7 +5,7 @@
  */
 
 import { uniq, indexBy } from 'lodash';
-import React, { useState, useEffect, memo, useCallback } from 'react';
+import React, { useState, useEffect, memo, useCallback, useRef } from 'react';
 import {
   // @ts-ignore
   EuiHighlight,
@@ -23,6 +23,8 @@ import {
   EuiSwitch,
   EuiFacetButton,
   EuiIcon,
+  EuiProgress,
+  EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -86,9 +88,16 @@ export function IndexPatternDataPanel({
     [state, setState]
   );
 
-  const onToggleEmptyFields = useCallback(() => {
-    setState(prevState => ({ ...prevState, showEmptyFields: !prevState.showEmptyFields }));
-  }, [setState]);
+  const onToggleEmptyFields = useCallback(
+    (showEmptyFields?: boolean) => {
+      setState(prevState => ({
+        ...prevState,
+        showEmptyFields:
+          showEmptyFields === undefined ? !prevState.showEmptyFields : showEmptyFields,
+      }));
+    },
+    [setState]
+  );
 
   const indexPatternList = uniq(
     Object.values(state.layers)
@@ -102,34 +111,38 @@ export function IndexPatternDataPanel({
       timeFieldName: indexPatterns[id].timeFieldName,
     }));
 
-  useEffect(() => {
-    syncExistingFields({
-      dateRange,
-      setState,
-      indexPatterns: indexPatternList,
-      fetchJson: core.http.get,
-    });
-  }, [
-    dateRange.fromDate,
-    dateRange.toDate,
-    indexPatternList.map(x => `${x.title}:${x.timeFieldName}`).join(','),
-  ]);
-
   return (
-    <MemoizedDataPanel
-      currentIndexPatternId={currentIndexPatternId}
-      indexPatternRefs={indexPatternRefs}
-      indexPatterns={indexPatterns}
-      query={query}
-      dateRange={dateRange}
-      filters={filters}
-      dragDropContext={dragDropContext}
-      showEmptyFields={state.showEmptyFields}
-      onToggleEmptyFields={onToggleEmptyFields}
-      core={core}
-      onChangeIndexPattern={onChangeIndexPattern}
-      existingFields={state.existingFields}
-    />
+    <>
+      <Loader
+        load={() =>
+          syncExistingFields({
+            dateRange,
+            setState,
+            indexPatterns: indexPatternList,
+            fetchJson: core.http.get,
+          })
+        }
+        loadDeps={[
+          dateRange.fromDate,
+          dateRange.toDate,
+          indexPatternList.map(x => `${x.title}:${x.timeFieldName}`).join(','),
+        ]}
+      />
+      <MemoizedDataPanel
+        currentIndexPatternId={currentIndexPatternId}
+        indexPatternRefs={indexPatternRefs}
+        indexPatterns={indexPatterns}
+        query={query}
+        dateRange={dateRange}
+        filters={filters}
+        dragDropContext={dragDropContext}
+        showEmptyFields={state.showEmptyFields}
+        onToggleEmptyFields={onToggleEmptyFields}
+        core={core}
+        onChangeIndexPattern={onChangeIndexPattern}
+        existingFields={state.existingFields}
+      />
+    </>
   );
 }
 
@@ -158,7 +171,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   indexPatterns: Record<string, IndexPattern>;
   dragDropContext: DragContextState;
   showEmptyFields: boolean;
-  onToggleEmptyFields: () => void;
+  onToggleEmptyFields: (showEmptyFields?: boolean) => void;
   onChangeIndexPattern: (newId: string) => void;
   existingFields: IndexPatternPrivateState['existingFields'];
 }) {
@@ -201,6 +214,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   const currentIndexPattern = indexPatterns[currentIndexPatternId];
   const allFields = currentIndexPattern.fields;
   const fieldByName = indexBy(allFields, 'name');
+  const clearLocalState = () => setLocalState(s => ({ ...s, nameFilter: '', typeFilter: [] }));
 
   const lazyScroll = () => {
     if (scrollContainer) {
@@ -279,12 +293,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
               indexPatternRefs={indexPatternRefs}
               onChangeIndexPattern={(newId: string) => {
                 onChangeIndexPattern(newId);
-
-                setLocalState(s => ({
-                  ...s,
-                  nameFilter: '',
-                  typeFilter: [],
-                }));
+                clearLocalState();
               }}
             />
           </div>
@@ -303,11 +312,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 }),
                 onClick: () => {
                   trackUiEvent('indexpattern_filters_cleared');
-                  setLocalState(s => ({
-                    ...s,
-                    nameFilter: '',
-                    typeFilter: [],
-                  }));
+                  clearLocalState();
                 },
               }}
             >
@@ -448,6 +453,17 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                           })}
                     </strong>
                   </p>
+                  <EuiButton
+                    data-test-subj="lnsDataPanelShowAllFields"
+                    onClick={() => {
+                      clearLocalState();
+                      onToggleEmptyFields(true);
+                    }}
+                  >
+                    {i18n.translate('xpack.lens.indexPatterns.showAllFields.buttonText', {
+                      defaultMessage: 'Show All Fields',
+                    })}
+                  </EuiButton>
                 </EuiText>
               )}
             </div>
@@ -459,3 +475,38 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
 };
 
 export const MemoizedDataPanel = memo(InnerIndexPatternDataPanel);
+
+function Loader(props: { load: () => Promise<unknown>; loadDeps: unknown[] }) {
+  const [isProcessing, setIsProcessing] = useState(false);
+  const prevRequest = useRef<Promise<unknown> | undefined>(undefined);
+  const nextRequest = useRef<(() => void) | undefined>(undefined);
+
+  useEffect(function performLoad() {
+    if (prevRequest.current) {
+      nextRequest.current = performLoad;
+      return;
+    }
+
+    setIsProcessing(true);
+    prevRequest.current = props
+      .load()
+      .catch(() => {})
+      .then(() => {
+        const reload = nextRequest.current;
+        prevRequest.current = undefined;
+        nextRequest.current = undefined;
+
+        if (reload) {
+          reload();
+        } else {
+          setIsProcessing(false);
+        }
+      });
+  }, props.loadDeps);
+
+  if (!isProcessing) {
+    return null;
+  }
+
+  return <EuiProgress size="xs" color="accent" position="absolute" />;
+}
