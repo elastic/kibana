@@ -5,6 +5,7 @@
  */
 
 import { Filter as ESFilterType } from '@kbn/es-query';
+import { Query } from 'src/plugins/data/common';
 import { TimeRange } from 'src/plugins/data/public';
 import {
   EmbeddableInput,
@@ -15,10 +16,7 @@ import { inputsModel } from '../../store/inputs';
 
 export interface MapEmbeddableInput extends EmbeddableInput {
   filters: ESFilterType[];
-  query: {
-    query: string;
-    language: string;
-  };
+  query: Query;
   refreshConfig: {
     isPaused: boolean;
     interval: number;

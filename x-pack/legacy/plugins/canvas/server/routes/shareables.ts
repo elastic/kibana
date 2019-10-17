@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server } from 'hapi';
 import archiver from 'archiver';
 
 import {
@@ -19,9 +18,11 @@ import {
   SHAREABLE_RUNTIME_SRC,
 } from '../../shareable_runtime/constants';
 
-export function shareableWorkpads(server: Server) {
+import { CoreSetup } from '../shim';
+
+export function shareableWorkpads(route: CoreSetup['http']['route']) {
   // get runtime
-  server.route({
+  route({
     method: 'GET',
     path: API_ROUTE_SHAREABLE_RUNTIME,
     handler: {
@@ -30,7 +31,7 @@ export function shareableWorkpads(server: Server) {
   });
 
   // download runtime
-  server.route({
+  route({
     method: 'GET',
     path: API_ROUTE_SHAREABLE_RUNTIME_DOWNLOAD,
     handler(_request, handler) {
@@ -41,7 +42,7 @@ export function shareableWorkpads(server: Server) {
     },
   });
 
-  server.route({
+  route({
     method: 'POST',
     path: API_ROUTE_SHAREABLE_ZIP,
     handler(request, handler) {

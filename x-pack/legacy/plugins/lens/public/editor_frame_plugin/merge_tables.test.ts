@@ -32,4 +32,29 @@ describe('lens_merge_tables', () => {
       type: 'lens_multitable',
     });
   });
+
+  it('should pass the date range along', () => {
+    expect(
+      mergeTables.fn(
+        {
+          type: 'kibana_context',
+          timeRange: {
+            from: '2019-01-01T05:00:00.000Z',
+            to: '2020-01-01T05:00:00.000Z',
+          },
+        },
+        { layerIds: ['first', 'second'], tables: [] },
+        {}
+      )
+    ).toMatchInlineSnapshot(`
+      Object {
+        "dateRange": Object {
+          "fromDate": 2019-01-01T05:00:00.000Z,
+          "toDate": 2020-01-01T05:00:00.000Z,
+        },
+        "tables": Object {},
+        "type": "lens_multitable",
+      }
+    `);
+  });
 });

@@ -259,7 +259,7 @@ export function EditorFrame(props: EditorFrameProps) {
       }
       workspacePanel={
         allLoaded && (
-          <WorkspacePanelWrapper title={state.title} dispatch={dispatch}>
+          <WorkspacePanelWrapper title={state.title}>
             <WorkspacePanel
               activeDatasourceId={state.activeDatasourceId}
               activeVisualizationId={state.visualization.activeId}

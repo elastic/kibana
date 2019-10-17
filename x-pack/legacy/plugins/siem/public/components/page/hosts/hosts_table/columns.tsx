@@ -9,7 +9,6 @@ import moment from 'moment';
 import React from 'react';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
-import { escapeQueryValue } from '../../../../lib/keury';
 import { hostsModel } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
@@ -19,7 +18,7 @@ import { HostDetailsLink } from '../../../links';
 import { LocalizedDateTooltip } from '../../../localized_date_tooltip';
 import { IS_OPERATOR } from '../../../timeline/data_providers/data_provider';
 import { Provider } from '../../../timeline/data_providers/provider';
-import { AddToKql } from '../../add_to_kql';
+import { AddToKql, createFilter } from '../../add_to_kql';
 import { HostsTableColumns } from './';
 
 import * as i18n from './translations';
@@ -56,10 +55,9 @@ export const getHostsColumns = (
                 </DragEffects>
               ) : (
                 <AddToKql
+                  id="global"
                   indexPattern={indexPattern}
-                  expression={`host.name: ${escapeQueryValue(hostName[0])}`}
-                  componentFilterType="hosts"
-                  type={type}
+                  filter={createFilter('host.name', hostName[0])}
                 >
                   <HostDetailsLink hostName={hostName[0]} />
                 </AddToKql>
@@ -106,10 +104,9 @@ export const getHostsColumns = (
       if (hostOsName != null) {
         return (
           <AddToKql
+            id="global"
             indexPattern={indexPattern}
-            expression={`host.os.name: ${escapeQueryValue(hostOsName)}`}
-            componentFilterType="hosts"
-            type={type}
+            filter={createFilter('host.os.name', hostOsName)}
           >
             <>{hostOsName}</>
           </AddToKql>
@@ -128,10 +125,9 @@ export const getHostsColumns = (
       if (hostOsVersion != null) {
         return (
           <AddToKql
+            id="global"
             indexPattern={indexPattern}
-            expression={`host.os.version: ${escapeQueryValue(hostOsVersion)}`}
-            componentFilterType="hosts"
-            type={type}
+            filter={createFilter('host.os.version', hostOsVersion)}
           >
             <>{hostOsVersion}</>
           </AddToKql>
