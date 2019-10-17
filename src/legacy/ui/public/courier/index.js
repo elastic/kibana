@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import './courier';
-
 export { SearchSource } from './search_source';
 
 export {

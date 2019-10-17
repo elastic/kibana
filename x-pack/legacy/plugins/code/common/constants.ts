@@ -6,3 +6,4 @@
 
 export const APP_TITLE = 'Code (Beta)';
 export const APP_USAGE_TYPE = 'code';
+export const SAVED_OBJ_REPO = 'code-repo';

@@ -32,8 +32,7 @@ import angular from 'angular';
 import _ from 'lodash';
 
 
-import { InvalidJSONProperty, SavedObjectNotFound } from '../../../../plugins/kibana_utils/public';
-import { expandShorthand } from '../utils/mapping_setup';
+import { InvalidJSONProperty, SavedObjectNotFound, expandShorthand } from '../../../../plugins/kibana_utils/public';
 
 import { SearchSource } from '../courier';
 import { findObjectByTitle } from './find_object_by_title';
