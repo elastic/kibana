@@ -5,11 +5,12 @@
  */
 
 import React, { Fragment, FC, useContext } from 'react';
-import { JobCreatorContext } from '../job_creator_context';
-import { JOB_TYPE } from '../../../common/job_creator/util/constants';
-import { SingleMetricView } from '../pick_fields_step/components/single_metric_view';
-import { MultiMetricView } from '../pick_fields_step/components/multi_metric_view';
-import { PopulationView } from '../pick_fields_step/components/population_view';
+import { JobCreatorContext } from '../../../job_creator_context';
+import { JOB_TYPE } from '../../../../../common/job_creator/util/constants';
+import { SingleMetricView } from '../../../pick_fields_step/components/single_metric_view';
+import { MultiMetricView } from '../../../pick_fields_step/components/multi_metric_view';
+import { PopulationView } from '../../../pick_fields_step/components/population_view';
+import { AdvancedView } from '../../../pick_fields_step/components/advanced_view';
 
 export const DetectorChart: FC = () => {
   const { jobCreator } = useContext(JobCreatorContext);
@@ -19,6 +20,7 @@ export const DetectorChart: FC = () => {
       {jobCreator.type === JOB_TYPE.SINGLE_METRIC && <SingleMetricView isActive={false} />}
       {jobCreator.type === JOB_TYPE.MULTI_METRIC && <MultiMetricView isActive={false} />}
       {jobCreator.type === JOB_TYPE.POPULATION && <PopulationView isActive={false} />}
+      {jobCreator.type === JOB_TYPE.ADVANCED && <AdvancedView isActive={false} />}
     </Fragment>
   );
 };
