@@ -12,7 +12,7 @@ import {
   EuiTitle,
   EuiFieldSearch
 } from '@elastic/eui';
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { get, pick, isEmpty } from 'lodash';
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -29,9 +29,18 @@ interface Props {
   item: Item;
   sections: SectionType[];
 }
+const filterData = (data: Record<string, unknown>, filter: string) =>
+  Object.keys(data).filter(key => {
+    const value = String(data[key]).toLowerCase();
+    return key.toLowerCase().includes(filter) || value.includes(filter);
+  });
 
-const filterSections = (sections: SectionType[], item: Item) =>
-  sections
+const filterSections = (
+  sections: SectionType[],
+  item: Item,
+  filteredValue?: string
+) => {
+  return sections
     .map(section => {
       const sectionData: Record<string, unknown> = get(item, section.key);
       let data = section.properties
@@ -40,15 +49,40 @@ const filterSections = (sections: SectionType[], item: Item) =>
 
       if (!isEmpty(data)) {
         data = pathify(data, { maxDepth: 5, parentKey: section.key });
+        if (filteredValue) {
+          return {
+            ...section,
+            data: pick(data, filterData(data, filteredValue))
+          };
+        }
       }
+
       return { ...section, data };
     })
-    .filter(({ required, data }) => required || !isEmpty(data));
+    .filter(({ required, data }) => {
+      if (filteredValue && isEmpty(data)) {
+        return false;
+      }
+      return required || !isEmpty(data);
+    });
+};
 
 export function MetadataTable({ item, sections }: Props) {
-  const filteredSections = filterSections(sections, item);
+  const [filteredSections, setFilteredSections] = useState(
+    filterSections(sections, item)
+  );
+  const [filteredValue, setFilteredValue] = useState('');
 
-  const onSearchChange = () => {};
+  useEffect(() => {
+    setFilteredSections(filterSections(sections, item, filteredValue));
+  }, [sections, item, filteredValue]);
+
+  const onSearchChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setFilteredValue(e.target.value.trim().toLowerCase());
+    },
+    []
+  );
   return (
     <React.Fragment>
       <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
