@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment } from 'react';
-import { EuiFieldText, EuiFlexItem, EuiFlexGroup, EuiFieldNumber } from '@elastic/eui';
+import {
+  EuiFieldText,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiFieldNumber,
+  EuiFieldPassword,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Action } from '../../../lib/api';
 import { ErrableFormRow } from '../../../components/page_error';
@@ -153,7 +159,7 @@ export const EmailActionFields: React.FunctionComponent<Props> = ({
               }
             )}
           >
-            <EuiFieldText
+            <EuiFieldPassword
               fullWidth
               name="password"
               value={password || ''}

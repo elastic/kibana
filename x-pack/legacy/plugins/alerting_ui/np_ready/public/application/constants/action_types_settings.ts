@@ -202,27 +202,37 @@ export const actionTypesSettings = (val: string): ActionTypeSettings => {
         validate: (action: Action): any => {
           const validationResult = { errors: {} };
           const errors = {
-            description: new Array<string>(),
+            url: new Array<string>(),
+            method: new Array<string>(),
+            user: new Array<string>(),
+            password: new Array<string>(),
           };
           validationResult.errors = errors;
           if (!action.config.url) {
-            errors.description.push(
+            errors.url.push(
               i18n.translate('xpack.alertingUI.sections.addAction.error.requiredUrlText', {
                 defaultMessage: 'Url is required.',
               })
             );
           }
           if (!action.config.method) {
-            errors.description.push(
+            errors.method.push(
               i18n.translate('xpack.alertingUI.sections.addAction.error.requiredMethodText', {
                 defaultMessage: 'Method is required.',
               })
             );
           }
-          if (!action.config.headers) {
-            errors.description.push(
-              i18n.translate('xpack.alertingUI.sections.addAction.error.requiredHeadersText', {
-                defaultMessage: 'Headers is required.',
+          if (!action.secrets.user) {
+            errors.user.push(
+              i18n.translate('xpack.alertingUI.sections.addAction.error.requiredHostText', {
+                defaultMessage: 'User is required.',
+              })
+            );
+          }
+          if (!action.secrets.password) {
+            errors.password.push(
+              i18n.translate('xpack.alertingUI.sections.addAction.error.requiredHostText', {
+                defaultMessage: 'Password is required.',
               })
             );
           }

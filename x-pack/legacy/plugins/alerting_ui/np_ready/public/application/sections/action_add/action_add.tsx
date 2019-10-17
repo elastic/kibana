@@ -200,6 +200,7 @@ export const ActionAdd = ({ actionType, refreshList }: Props) => {
           )}
           <ErrableFormRow
             id="actionDescription"
+            fullWidth
             label={
               <FormattedMessage
                 id="xpack.alertingUI.sections.actionAdd.actionDescritionLabel"
@@ -211,6 +212,7 @@ export const ActionAdd = ({ actionType, refreshList }: Props) => {
             errors={errors}
           >
             <EuiFieldText
+              fullWidth
               name="description"
               data-test-subj="descriptionInput"
               value={action.description || ''}
@@ -224,6 +226,7 @@ export const ActionAdd = ({ actionType, refreshList }: Props) => {
               }}
             />
           </ErrableFormRow>
+          <EuiSpacer size="s" />
           <FieldsComponent
             action={action}
             errors={errors}

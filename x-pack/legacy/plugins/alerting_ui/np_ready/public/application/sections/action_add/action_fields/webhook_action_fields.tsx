@@ -14,6 +14,8 @@ import {
   EuiSelect,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSpacer,
+  EuiBasicTable,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ErrableFormRow } from '../../../components/page_error';
@@ -42,14 +44,11 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
   return (
     <Fragment>
       <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiFormRow
-            label={i18n.translate(
-              'xpack.alertingUI.sections.actionAdd.webhookAction.methodFieldLabel',
-              {
-                defaultMessage: 'Method',
-              }
-            )}
+            label={i18n.translate('xpack.alertingUI.sections.webhookAction.methodFieldLabel', {
+              defaultMessage: 'Method',
+            })}
           >
             <EuiSelect
               name="method"
@@ -62,16 +61,43 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
             />
           </EuiFormRow>
         </EuiFlexItem>
+        <EuiFlexItem>
+          <ErrableFormRow
+            id="url"
+            fullWidth
+            errorKey="url"
+            errors={errors}
+            isShowingErrors={hasErrors && url !== undefined}
+            label={i18n.translate('xpack.alertingUI.sections.slackPassword.methodUrlLabel', {
+              defaultMessage: 'Url',
+            })}
+          >
+            <EuiFieldText
+              name="url"
+              fullWidth
+              value={url || ''}
+              data-test-subj="slackUrlText"
+              onChange={e => {
+                editActionConfig('url', e.target.value);
+              }}
+              onBlur={() => {
+                if (!url) {
+                  editActionConfig('url', '');
+                }
+              }}
+            />
+          </ErrableFormRow>
+        </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem>
           <ErrableFormRow
-            id="emailUser"
+            id="webhookUser"
             errorKey="user"
             fullWidth
             errors={errors}
             isShowingErrors={hasErrors && user !== undefined}
-            label={i18n.translate('xpack.alertingUI.sections.actionAdd.emailUser.userFieldLabel', {
+            label={i18n.translate('xpack.alertingUI.sections.webhookUser.userFieldLabel', {
               defaultMessage: 'User',
             })}
           >
@@ -79,7 +105,7 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
               fullWidth
               name="user"
               value={user || ''}
-              data-test-subj="emailUserInput"
+              data-test-subj="webhookUserInput"
               onChange={e => {
                 editActionSecrets('user', e.target.value);
               }}
@@ -93,23 +119,20 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
         </EuiFlexItem>
         <EuiFlexItem>
           <ErrableFormRow
-            id="emailPassword"
+            id="webhookPassword"
             errorKey="password"
             fullWidth
             errors={errors}
             isShowingErrors={hasErrors && password !== undefined}
-            label={i18n.translate(
-              'xpack.alertingUI.sections.actionAdd.emailPassword.methodPasswordLabel',
-              {
-                defaultMessage: 'Password',
-              }
-            )}
+            label={i18n.translate('xpack.alertingUI.sections.webhookPassword.methodPasswordLabel', {
+              defaultMessage: 'Password',
+            })}
           >
-            <EuiFieldText
+            <EuiFieldPassword
               fullWidth
               name="password"
               value={password || ''}
-              data-test-subj="emailPasswordInput"
+              data-test-subj="webhookPasswordInput"
               onChange={e => {
                 editActionSecrets('password', e.target.value);
               }}
@@ -122,6 +145,26 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
           </ErrableFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      <EuiSpacer size="s" />
+
+      <EuiFormRow
+        id="webhookHeaders"
+        label={i18n.translate('xpack.alertingUI.sections.webhookAction.headersFieldLabel', {
+          defaultMessage: 'Headers',
+        })}
+        fullWidth
+      >
+        <EuiFieldText
+          fullWidth
+          name="headers"
+          value={headers || ''}
+          data-test-subj="webhookHeadersInput"
+          onChange={e => {
+            editActionSecrets('headers', e.target.value);
+          }}
+        />
+      </EuiFormRow>
     </Fragment>
   );
 };
