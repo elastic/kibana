@@ -31,7 +31,7 @@ const customExtension = {
   testId: 'demoRegisteredNewButton',
 };
 
-navSetup.register(customExtension);
+navSetup.registerMenuItem(customExtension);
 
 export class AppWithTopNav extends Component {
   public render() {

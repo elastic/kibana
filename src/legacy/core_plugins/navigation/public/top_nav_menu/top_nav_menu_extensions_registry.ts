@@ -27,6 +27,7 @@ export class TopNavMenuExtensionsRegistry {
   }
 
   /** @public **/
+  // Items registered into this registry will be appended to any TopNavMenu rendered in any application.
   public register(extension: TopNavMenuData) {
     this.extensions.push(extension);
   }
@@ -42,7 +43,4 @@ export class TopNavMenuExtensionsRegistry {
   }
 }
 
-export type TopNavMenuExtensionsRegistryPublicPluginSetup = Pick<
-  TopNavMenuExtensionsRegistry,
-  'register'
->;
+export type TopNavMenuExtensionsRegistrySetup = Pick<TopNavMenuExtensionsRegistry, 'register'>;

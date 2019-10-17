@@ -18,10 +18,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
-import {
-  TopNavMenuExtensionsRegistry,
-  TopNavMenuExtensionsRegistryPublicPluginSetup,
-} from './top_nav_menu';
+import { TopNavMenuExtensionsRegistry, TopNavMenuExtensionsRegistrySetup } from './top_nav_menu';
 import { createTopNav } from './top_nav_menu/create_top_nav_menu';
 import { TopNavMenuProps } from './top_nav_menu/top_nav_menu';
 import { DataStart } from '../../data/public';
@@ -31,7 +28,9 @@ import { DataStart } from '../../data/public';
  *
  * @public
  */
-export type NavigationSetup = TopNavMenuExtensionsRegistryPublicPluginSetup;
+export interface NavigationSetup {
+  registerMenuItem: TopNavMenuExtensionsRegistrySetup['register'];
+}
 
 /**
  * Interface for this plugin's returned `start` contract.
@@ -54,7 +53,9 @@ export class NavigationPlugin implements Plugin<NavigationSetup, NavigationStart
 
   public setup(core: CoreSetup): NavigationSetup {
     return {
-      register: this.topNavMenuExtensionsRegistry.register.bind(this.topNavMenuExtensionsRegistry),
+      registerMenuItem: this.topNavMenuExtensionsRegistry.register.bind(
+        this.topNavMenuExtensionsRegistry
+      ),
     };
   }
 
