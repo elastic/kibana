@@ -35,7 +35,7 @@ export interface TaskRunner {
   toString?: () => string;
 }
 
-export interface Updatable {
+interface Updatable {
   readonly maxAttempts: number;
   update(doc: ConcreteTaskInstance): Promise<ConcreteTaskInstance>;
   remove(id: string): Promise<void>;
@@ -62,7 +62,7 @@ export class TaskManagerRunner implements TaskRunner {
   private instance: ConcreteTaskInstance;
   private definitions: TaskDictionary<TaskDefinition>;
   private logger: Logger;
-  private updatableStore: Updatable;
+  private store: Updatable;
   private beforeRun: BeforeRunFunction;
 
   /**
@@ -79,7 +79,7 @@ export class TaskManagerRunner implements TaskRunner {
     this.instance = sanitizeInstance(opts.instance);
     this.definitions = opts.definitions;
     this.logger = opts.logger;
-    this.updatableStore = opts.store;
+    this.store = opts.store;
     this.beforeRun = opts.beforeRun;
   }
 
@@ -171,7 +171,7 @@ export class TaskManagerRunner implements TaskRunner {
         );
       }
 
-      this.instance = await this.updatableStore.update({
+      this.instance = await this.store.update({
         ...this.instance,
         status: 'running',
         startedAt: now,
@@ -263,7 +263,7 @@ export class TaskManagerRunner implements TaskRunner {
       runAt = intervalFromDate(startedAt, this.instance.interval)!;
     }
 
-    await this.updatableStore.update({
+    await this.store.update({
       ...this.instance,
       runAt,
       state,
@@ -280,7 +280,7 @@ export class TaskManagerRunner implements TaskRunner {
   private async processResultWhenDone(result: RunResult): Promise<RunResult> {
     // not a recurring task: clean up by removing the task instance from store
     try {
-      await this.updatableStore.remove(this.instance.id);
+      await this.store.remove(this.instance.id);
     } catch (err) {
       if (err.statusCode === 404) {
         this.logger.warn(`Task cleanup of ${this} failed in processing. Was remove called twice?`);
@@ -306,7 +306,7 @@ export class TaskManagerRunner implements TaskRunner {
       return 'idle';
     }
 
-    const maxAttempts = this.definition.maxAttempts || this.updatableStore.maxAttempts;
+    const maxAttempts = this.definition.maxAttempts || this.store.maxAttempts;
     return this.instance.attempts < maxAttempts ? 'idle' : 'failed';
   }
 

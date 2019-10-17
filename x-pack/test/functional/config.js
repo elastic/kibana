@@ -77,9 +77,6 @@ export default async function ({ readConfigFile }) {
         ...kibanaCommonConfig.get('kbnTestServer.serverArgs'),
         '--status.allowAnonymous=true',
         '--server.uuid=5b2de169-2785-441b-ae8c-186a1936b17d',
-        '--xpack.task_manager.max_workers=50',
-        '--xpack.task_manager.poll_interval=3000',
-        // `--logging.events.log=${JSON.stringify(['warning', 'error', 'fatal', 'info', 'debug', 'task_manager'])}`,
         '--xpack.maps.showMapsInspectorAdapter=true',
         '--xpack.maps.preserveDrawingBuffer=true',
         '--xpack.reporting.queue.pollInterval=3000', // make it explicitly the default

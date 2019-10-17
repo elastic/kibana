@@ -54,7 +54,7 @@ export function createTaskStoreUpdateBuffer(store: TaskStore, logger: Logger): T
     });
 
   return proxyWithOverrides(store, {
-    async update(task: ConcreteTaskInstance) {
+    async update(task: ConcreteTaskInstance): Promise<ConcreteTaskInstance> {
       return new Promise((resolve, reject) => {
         setImmediate(() => flushBuffer.next());
         storeUpdateBuffer.next({ task, onSuccess: resolve, onFailure: reject });
