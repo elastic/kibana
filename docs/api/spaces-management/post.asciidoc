@@ -4,7 +4,7 @@
 <titleabbrev>Create space</titleabbrev>
 ++++
 
-Creates a {kib} space.
+Create a {kib} space.
 
 experimental["The underlying Spaces concepts are stable, but the APIs for managing Spaces are experimental."]
 

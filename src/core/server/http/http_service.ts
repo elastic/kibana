@@ -106,6 +106,10 @@ export class HttpService implements CoreService<InternalHttpServiceSetup, HttpSe
         contextName: T,
         provider: RequestHandlerContextProvider<T>
       ) => this.requestHandlerContext!.registerContext(pluginOpaqueId, contextName, provider),
+
+      config: {
+        defaultRoute: config.defaultRoute,
+      },
     };
 
     return contract;

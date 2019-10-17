@@ -158,7 +158,7 @@ export interface CallAPIOptions {
    * header that could have been returned by the API itself. If API didn't specify that
    * then `Basic realm="Authorization Required"` is used as `WWW-Authenticate`.
    */
-  wrap401Errors: boolean;
+  wrap401Errors?: boolean;
   /**
    * A signal object that allows you to abort the request via an AbortController object.
    */

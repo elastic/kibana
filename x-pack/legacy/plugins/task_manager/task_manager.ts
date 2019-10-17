@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import uuid from 'uuid';
 import { SavedObjectsClientContract, SavedObjectsSerializer } from 'src/core/server';
 import { Logger } from './types';
 import { fillPool } from './lib/fill_pool';
@@ -21,7 +20,13 @@ import {
 import { TaskPoller } from './task_poller';
 import { TaskPool } from './task_pool';
 import { TaskManagerRunner } from './task_runner';
-import { FetchOpts, FetchResult, TaskStore } from './task_store';
+import {
+  FetchOpts,
+  FetchResult,
+  TaskStore,
+  OwnershipClaimingOpts,
+  ClaimOwnershipResult,
+} from './task_store';
 
 export interface TaskManagerOpts {
   logger: Logger;
@@ -29,12 +34,6 @@ export interface TaskManagerOpts {
   callWithInternalUser: any;
   savedObjectsRepository: SavedObjectsClientContract;
   serializer: SavedObjectsSerializer;
-}
-
-function generateTaskManagerUUID(logger: Logger): string {
-  const taskManagerUUID = uuid.v4();
-  logger.info(`Initialising Task Manager with UUID: ${taskManagerUUID}`);
-  return taskManagerUUID;
 }
 
 /*
@@ -76,6 +75,16 @@ export class TaskManager {
     this.definitions = {};
     this.logger = opts.logger;
 
+    const taskManagerId = opts.config.get('server.uuid');
+    if (!taskManagerId) {
+      this.logger.error(
+        `TaskManager is unable to start as there the Kibana UUID is invalid (value of the "server.uuid" configuration is ${taskManagerId})`
+      );
+      throw new Error(`TaskManager is unable to start as Kibana has no valid UUID assigned to it.`);
+    } else {
+      this.logger.info(`TaskManager is identified by the Kibana UUID: ${taskManagerId}`);
+    }
+
     /* Kibana UUID needs to be pulled live (not cached), as it takes a long time
      * to initialize, and can change after startup */
     const store = new TaskStore({
@@ -85,7 +94,7 @@ export class TaskManager {
       index: opts.config.get('xpack.task_manager.index'),
       maxAttempts: opts.config.get('xpack.task_manager.max_attempts'),
       definitions: this.definitions,
-      taskManagerId: generateTaskManagerUUID(this.logger),
+      taskManagerId: `kibana:${taskManagerId}`,
     });
 
     const pool = new TaskPool({
@@ -103,7 +112,17 @@ export class TaskManager {
     const poller = new TaskPoller({
       logger: this.logger,
       pollInterval: opts.config.get('xpack.task_manager.poll_interval'),
-      work: (): Promise<void> => fillPool(pool.run, () => this.claimAvailableTasks(), createRunner),
+      work: (): Promise<void> =>
+        fillPool(
+          pool.run,
+          () =>
+            claimAvailableTasks(
+              this.store.claimAvailableTasks.bind(this.store),
+              this.pool.availableWorkers,
+              this.logger
+            ),
+          createRunner
+        ),
     });
 
     this.pool = pool;
@@ -133,20 +152,6 @@ export class TaskManager {
       }
     };
     startPoller();
-  }
-
-  private async claimAvailableTasks() {
-    const { docs, claimedTasks } = await this.store.claimAvailableTasks({
-      size: this.pool.availableWorkers,
-      claimOwnershipUntil: intervalFromNow('30s')!,
-    });
-
-    if (docs.length !== claimedTasks) {
-      this.logger.warn(
-        `[Task Ownership error]: (${claimedTasks}) tasks were claimed by Kibana, but (${docs.length}) tasks were fetched`
-      );
-    }
-    return docs;
   }
 
   private async waitUntilStarted() {
@@ -246,4 +251,28 @@ export class TaskManager {
       throw new Error(`Cannot ${message} after the task manager is initialized!`);
     }
   }
+}
+
+export async function claimAvailableTasks(
+  claim: (opts: OwnershipClaimingOpts) => Promise<ClaimOwnershipResult>,
+  availableWorkers: number,
+  logger: Logger
+) {
+  if (availableWorkers > 0) {
+    const { docs, claimedTasks } = await claim({
+      size: availableWorkers,
+      claimOwnershipUntil: intervalFromNow('30s')!,
+    });
+
+    if (docs.length !== claimedTasks) {
+      logger.warn(
+        `[Task Ownership error]: (${claimedTasks}) tasks were claimed by Kibana, but (${docs.length}) tasks were fetched`
+      );
+    }
+    return docs;
+  }
+  logger.info(
+    `[Task Ownership]: Task Manager has skipped Claiming Ownership of available tasks at it has ran out Available Workers. If this happens often, consider adjusting the "xpack.task_manager.max_workers" configuration.`
+  );
+  return [];
 }

@@ -69,7 +69,7 @@ export const NetworkContainer = React.memo<Props>(() => {
           <Route
             path={`/${SiemPageName.network}/`}
             render={({ location: { search = '' } }) => (
-              <Redirect to={`/${SiemPageName.network}/${NetworkRouteType.ips}${search}`} />
+              <Redirect to={`/${SiemPageName.network}/${NetworkRouteType.flows}${search}`} />
             )}
           />
         </Switch>
