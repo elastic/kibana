@@ -155,7 +155,6 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.clickMetricsAndAxes();
         await PageObjects.visualize.clickYAxisOptions(axisId);
         await PageObjects.visualize.selectYAxisScaleType(axisId, 'log');
-        await PageObjects.visualize.clickYAxisAdvancedOptions(axisId);
         await PageObjects.visualize.changeYAxisFilterLabelsCheckbox(axisId, false);
         await PageObjects.visualize.clickGo();
         const labels = await PageObjects.visualize.getYAxisLabels();

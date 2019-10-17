@@ -678,10 +678,6 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       await testSubjects.click(`toggleYAxisOptions-${axisId}`);
     }
 
-    async clickYAxisAdvancedOptions(axisId) {
-      await testSubjects.click(`toggleYAxisAdvancedOptions-${axisId}`);
-    }
-
     async changeYAxisFilterLabelsCheckbox(axisId, enabled) {
       const selector = `yAxisFilterLabelsCheckbox-${axisId}`;
       enabled ? await this.checkCheckbox(selector) : await this.uncheckCheckbox(selector);
@@ -693,8 +689,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async selectYAxisScaleType(axisId, scaleType) {
-      const selectElement = await testSubjects.find(`scaleSelectYAxis-${axisId}`);
-      const selector = await selectElement.findByCssSelector(`option[value="${scaleType}"]`);
+      const selector = await find.byCssSelector(`#scaleSelectYAxis-${axisId} > option[value="${scaleType}"]`);
       await selector.click();
     }
 
