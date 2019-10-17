@@ -69,6 +69,7 @@ function buildMetricOperation<T extends ParameterlessIndexPatternColumn<string>>
       schema: 'metric',
       params: {
         field: column.sourceField,
+        missing: 0,
       },
     }),
   } as OperationDefinition<T>;

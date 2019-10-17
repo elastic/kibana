@@ -17,15 +17,31 @@
  * under the License.
  */
 
-import { Filter, RangeFilter, FILTERS, isRangeFilter, isScriptedRangeFilter } from '@kbn/es-query';
+import {
+  Filter,
+  RangeFilter,
+  FILTERS,
+  isRangeFilter,
+  isScriptedRangeFilter,
+  FilterValueFormatter,
+} from '@kbn/es-query';
 import { get, has } from 'lodash';
-import { SavedObjectNotFound } from '../../../../../../../plugins/kibana_utils/public';
-import { IndexPatterns, IndexPattern, Field } from '../../../index_patterns';
+
+const getFormattedValueFn = (left: any, right: any) => {
+  return (formatter?: FilterValueFormatter) => {
+    let displayValue = `${left} to ${right}`;
+    if (formatter) {
+      const convert = formatter.getConverterFor('text');
+      displayValue = `${convert(left)} to ${convert(right)}`;
+    }
+    return displayValue;
+  };
+};
 
 const getFirstRangeKey = (filter: RangeFilter) => filter.range && Object.keys(filter.range)[0];
 const getRangeByKey = (filter: RangeFilter, key: string) => get(filter, ['range', key]);
 
-function getParams(filter: RangeFilter, indexPattern?: IndexPattern) {
+function getParams(filter: RangeFilter) {
   const isScriptedRange = isScriptedRangeFilter(filter);
   const key: string = (isScriptedRange ? filter.meta.field : getFirstRangeKey(filter)) || '';
   const params: any = isScriptedRange
@@ -38,16 +54,7 @@ function getParams(filter: RangeFilter, indexPattern?: IndexPattern) {
   let right = has(params, 'lte') ? params.lte : params.lt;
   if (right == null) right = Infinity;
 
-  let value = `${left} to ${right}`;
-
-  // Sometimes a filter will end up with an invalid index param. This could happen for a lot of reasons,
-  // for example a user might manually edit the url or the index pattern's ID might change due to
-  // external factors e.g. a reindex. We only need the index in order to grab the field formatter, so we fallback
-  // on displaying the raw value if the index is invalid.
-  if (key && indexPattern && indexPattern.fields.getByName(key)) {
-    const convert = (indexPattern.fields.getByName(key) as Field).format.getConverterFor('text');
-    value = `${convert(left)} to ${convert(right)}`;
-  }
+  const value = getFormattedValueFn(left, right);
 
   return { type: FILTERS.RANGE, key, value, params };
 }
@@ -55,25 +62,10 @@ function getParams(filter: RangeFilter, indexPattern?: IndexPattern) {
 export const isMapRangeFilter = (filter: any): filter is RangeFilter =>
   isRangeFilter(filter) || isScriptedRangeFilter(filter);
 
-export const mapRange = (indexPatterns: IndexPatterns) => {
-  return async (filter: Filter) => {
-    if (!isMapRangeFilter(filter)) {
-      throw filter;
-    }
+export const mapRange = (filter: Filter) => {
+  if (!isMapRangeFilter(filter)) {
+    throw filter;
+  }
 
-    try {
-      let indexPattern;
-
-      if (filter.meta.index) {
-        indexPattern = await indexPatterns.get(filter.meta.index);
-      }
-
-      return getParams(filter, indexPattern);
-    } catch (error) {
-      if (error instanceof SavedObjectNotFound) {
-        return getParams(filter);
-      }
-      throw error;
-    }
-  };
+  return getParams(filter);
 };

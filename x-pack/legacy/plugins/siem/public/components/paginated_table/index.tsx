@@ -27,6 +27,10 @@ import {
   NetworkTopNFlowColumns,
   NetworkTopNFlowColumnsIpDetails,
 } from '../page/network/network_top_n_flow_table/columns';
+import {
+  NetworkTopCountriesColumns,
+  NetworkTopCountriesColumnsIpDetails,
+} from '../page/network/network_top_countries_table/columns';
 import { TlsColumns } from '../page/network/tls_table/columns';
 import { UncommonProcessTableColumns } from '../page/hosts/uncommon_process_table';
 import { UsersColumns } from '../page/network/users_table/columns';
@@ -68,6 +72,8 @@ declare type BasicTableColumns =
   | HostsTableColumns
   | HostsTableColumnsTest
   | NetworkDnsColumns
+  | NetworkTopCountriesColumns
+  | NetworkTopCountriesColumnsIpDetails
   | NetworkTopNFlowColumns
   | NetworkTopNFlowColumnsIpDetails
   | TlsColumns

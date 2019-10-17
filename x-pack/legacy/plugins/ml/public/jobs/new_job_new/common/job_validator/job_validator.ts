@@ -6,7 +6,7 @@
 
 import { ReactElement } from 'react';
 import { basicJobValidation, basicDatafeedValidation } from '../../../../../common/util/job_utils';
-import { newJobLimits } from '../../../new_job/utils/new_job_defaults';
+import { newJobLimits } from '../../../new_job_new/utils/new_job_defaults';
 import { JobCreatorType } from '../job_creator';
 import { populateValidationMessages, checkForExistingJobAndGroupIds } from './util';
 import { ExistingJobsAndGroups } from '../../../../services/job_service';
