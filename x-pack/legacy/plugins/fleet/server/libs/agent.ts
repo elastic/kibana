@@ -86,6 +86,22 @@ export class AgentLib {
     return { ...agent, access_token: accessToken };
   }
 
+  public async unenrollForPolicy(user: FrameworkUser, policyId: string) {
+    let hasMore = true;
+    let page = 1;
+    while (hasMore) {
+      const { agents } = await this.agentsRepository.listForPolicy(user, policyId, {
+        page: page++,
+        perPage: 100,
+      });
+
+      if (agents.length === 0) {
+        hasMore = false;
+      }
+      await this.unenroll(user, agents.map(a => a.id));
+    }
+  }
+
   public async unenroll(
     user: FrameworkUser,
     ids: string[]

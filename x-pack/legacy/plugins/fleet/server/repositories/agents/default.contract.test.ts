@@ -248,48 +248,6 @@ describe('AgentsRepository', () => {
       expect(freshAgent).toBeNull();
     });
   });
-  describe('findEphemeralByPolicyId', () => {
-    beforeAll(async () => {
-      await loadFixtures([
-        {
-          shared_id: 'agent1',
-          active: false,
-          access_token: 'TOKEN_1',
-          policy_id: 'policy_id_1',
-          type: 'EPHEMERAL',
-          version: '1',
-          local_metadata: {
-            host: 'test.fr',
-          },
-          user_provided_metadata: {
-            color: 'red',
-          },
-          enrolled_at: '2019-08-05T19:35:14.861Z',
-        },
-        {
-          shared_id: 'agent2',
-          active: false,
-          access_token: 'TOKEN_1',
-          policy_id: 'policy_id_1',
-          type: 'EPHEMERAL',
-          version: '1',
-          local_metadata: {
-            host: 'elastic.co',
-          },
-          user_provided_metadata: {
-            color: 'blue',
-          },
-          enrolled_at: '2019-08-05T19:35:14.861Z',
-        },
-      ]);
-    });
-
-    it('should allow to find agent by policy id', async () => {
-      const agent = await adapter.findEphemeralByPolicyId(getUser(), 'policy_id_1');
-      expect(agent).toBeDefined();
-      expect((agent as Agent).shared_id).toBe('agent1');
-    });
-  });
 
   describe('list', () => {
     beforeEach(async () => {
@@ -412,6 +370,57 @@ describe('AgentsRepository', () => {
       });
 
       expect(res.agents.map(a => a.shared_id)).toEqual(['agent19', 'agent18', 'agent17']);
+    });
+  });
+
+  describe('list for policy', () => {
+    beforeEach(async () => {
+      await loadFixtures([
+        // Policy 1
+        {
+          shared_id: `agent1`,
+          active: true,
+          access_token: 'TOKEN_1',
+          policy_id: 'policy-id-1',
+          type: 'PERMANENT',
+          version: '1',
+          local_metadata: {},
+          user_provided_metadata: {},
+          enrolled_at: '2019-08-05T19:35:14.861Z',
+        },
+        {
+          shared_id: `agent2`,
+          active: true,
+          access_token: 'TOKEN_1',
+          policy_id: 'policy-id-1',
+          type: 'PERMANENT',
+          version: '1',
+          local_metadata: {},
+          user_provided_metadata: {},
+          enrolled_at: '2019-08-05T19:35:14.861Z',
+        },
+        // Policy 2
+        {
+          shared_id: `agent3`,
+          active: true,
+          access_token: 'TOKEN_1',
+          policy_id: 'policy-id-2',
+          type: 'PERMANENT',
+          version: '1',
+          local_metadata: {},
+          user_provided_metadata: {},
+          enrolled_at: '2019-08-05T19:35:14.861Z',
+        },
+      ]);
+    });
+
+    it('should allow to list agents for a policy', async () => {
+      const { total, agents } = await adapter.listForPolicy(getUser(), 'policy-id-1');
+      const agentSharedIds = agents.map(a => a.shared_id);
+
+      expect(total).toBe(2);
+      expect(agentSharedIds).toContain('agent1');
+      expect(agentSharedIds).toContain('agent2');
     });
   });
 

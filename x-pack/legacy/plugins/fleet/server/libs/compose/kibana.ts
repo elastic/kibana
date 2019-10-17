@@ -51,5 +51,6 @@ export function compose(server: any): FleetServerLib {
     policies,
     artifacts,
     install,
+    framework,
   };
 }

@@ -10,7 +10,7 @@ import { FrameworkAdapter } from './adapter_types';
 export class MemorizeFrameworkAdapter implements FrameworkAdapter {
   constructor(private readonly adapter?: FrameworkAdapter) {}
 
-  getSetting(settingPath: string): string {
+  public getSetting(settingPath: string): string {
     return Slapshot.memorize('getSetting', () => {
       if (!this.adapter) {
         throw new Error('an adapter must be provided to run online');
@@ -19,9 +19,11 @@ export class MemorizeFrameworkAdapter implements FrameworkAdapter {
     }) as string;
   }
 
-  getServerInfo() {
+  public getServerInfo() {
     return {
       protocol: 'http://',
     };
   }
+
+  public expose(name: string, thing: any) {}
 }

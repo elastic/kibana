@@ -73,15 +73,18 @@ export class InMemoryAgentsRepository implements AgentsRepository {
     return { agents, total, page, perPage };
   }
 
-  public async findEphemeralByPolicyId(
+  public async listForPolicy(
     user: FrameworkUser,
-    policyId: string
-  ): Promise<Agent | null> {
-    const agent = Object.values(this.agents).find(
-      a => a.type === 'EPHEMERAL' && a.policy_id === policyId
-    );
+    policyId: string,
+    options: ListOptions = {}
+  ): Promise<{ agents: Agent[]; total: number; page: number; perPage: number }> {
+    const { page = 1, perPage = DEFAULT_AGENTS_PAGE_SIZE } = options;
+    const start = (page - 1) * perPage;
+    const allAgents = Object.values(this.agents).filter(a => a.policy_id === policyId);
+    const agents = Object.values(allAgents).slice(start, start + perPage);
+    const total = Object.keys(allAgents).length;
 
-    return agent || null;
+    return { agents, total, page, perPage };
   }
 
   public async getByEphemeralAccessToken(token: any): Promise<Agent | null> {

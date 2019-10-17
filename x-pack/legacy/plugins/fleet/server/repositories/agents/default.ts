@@ -194,20 +194,17 @@ export class AgentsRepository implements AgentsRepositoryType {
     };
   }
 
-  public async findEphemeralByPolicyId(
+  public async listForPolicy(
     user: FrameworkUser,
-    policyId: string
-  ): Promise<Agent | null> {
-    const res = await this.soAdapter.find<SavedObjectAgentAttributes>(user, {
-      type: 'agents',
-      search: policyId,
-      searchFields: ['policy_id'],
+    policyId: string,
+    options: ListOptions = {}
+  ): Promise<{ agents: Agent[]; total: number; page: number; perPage: number }> {
+    return await this.list(user, {
+      ...options,
+      kuery: `(agents.policy_id:"${policyId}")${
+        options.kuery && options.kuery !== '' ? ` AND (${options.kuery})` : ''
+      }`,
     });
-    const agents = res.saved_objects
-      .map(this._savedObjectToAgent)
-      .filter(agent => agent.type === 'EPHEMERAL');
-
-    return agents.length > 0 ? agents[0] : null;
   }
 
   /**

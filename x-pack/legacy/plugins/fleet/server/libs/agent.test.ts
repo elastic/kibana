@@ -422,6 +422,42 @@ describe('Agent lib', () => {
     });
   });
 
+  describe('unenrollForPolicy', () => {
+    it('should set all the of agents for this policy as inactive', async () => {
+      const token = new TokenLib({} as TokensRepository, {} as FrameworkLib);
+      const agentsRepository = new InMemoryAgentsRepository();
+      const agentEventsRepository = new InMemoryAgentEventsRepository();
+      agentsRepository.agents['agent:1'] = ({
+        id: 'agent:1',
+        local_metadata: { key: 'local1' },
+        user_provided_metadata: { key: 'user1' },
+        actions: [],
+        events: [],
+        active: true,
+        policy_id: 'policy:1',
+      } as unknown) as Agent;
+      agentsRepository.agents['agent:2'] = ({
+        id: 'agent:2',
+        local_metadata: { key: 'local1' },
+        user_provided_metadata: { key: 'user1' },
+        actions: [],
+        events: [],
+        active: true,
+        policy_id: 'policy:1',
+      } as unknown) as Agent;
+      const policy = new PolicyLib({} as PoliciesRepository);
+      const agentLib = new AgentLib(agentsRepository, agentEventsRepository, token, policy);
+
+      await agentLib.unenrollForPolicy(getUser(), 'policy:1');
+
+      const refreshAgent1 = (await agentsRepository.getById(getUser(), 'agent:1')) as Agent;
+      const refreshAgent2 = (await agentsRepository.getById(getUser(), 'agent:2')) as Agent;
+
+      expect(refreshAgent1.active).toBeFalsy();
+      expect(refreshAgent2.active).toBeFalsy();
+    });
+  });
+
   describe('addAction', () => {
     it('should throw if the agent do not exists', async () => {
       const token = new TokenLib({} as TokensRepository, {} as FrameworkLib);
