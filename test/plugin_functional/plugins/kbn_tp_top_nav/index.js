@@ -17,5 +17,14 @@
  * under the License.
  */
 
-export { TopNavMenu } from './top_nav_menu';
-export { TopNavMenuData } from './top_nav_menu_data';
+export default function (kibana) {
+  return new kibana.Plugin({
+    uiExports: {
+      app: {
+        title: 'Top Nav Menu test',
+        description: 'This is a sample plugin for the functional tests.',
+        main: 'plugins/kbn_tp_top_nav/app',
+      }
+    }
+  });
+}

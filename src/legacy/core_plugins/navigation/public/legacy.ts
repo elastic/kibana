@@ -17,10 +17,14 @@
  * under the License.
  */
 
-// TODO these are imports from the old plugin world.
-// Once the new platform is ready, they can get removed
-// and handled by the platform itself in the setup method
-// of the ExpressionExectorService
+import { npSetup, npStart } from 'ui/new_platform';
+import { start as dataShim } from '../../data/public/legacy';
+import { plugin } from '.';
 
-/** @public types */
-export { Markdown, MarkdownSimple } from './markdown';
+const navPlugin = plugin();
+
+export const setup = navPlugin.setup(npSetup.core);
+
+export const start = navPlugin.start(npStart.core, {
+  data: dataShim,
+});

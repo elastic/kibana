@@ -17,10 +17,15 @@
  * under the License.
  */
 
-// TODO these are imports from the old plugin world.
-// Once the new platform is ready, they can get removed
-// and handled by the platform itself in the setup method
-// of the ExpressionExectorService
+import React from 'react';
+import { TopNavMenuProps, TopNavMenu } from './top_nav_menu';
+import { TopNavMenuData } from './top_nav_menu_data';
+import { DataStart } from '../../../../core_plugins/data/public';
 
-/** @public types */
-export { Markdown, MarkdownSimple } from './markdown';
+export function createTopNav(data: DataStart, extraConfig: TopNavMenuData[]) {
+  return (props: TopNavMenuProps) => {
+    const config = (props.config || []).concat(extraConfig);
+
+    return <TopNavMenu {...props} data={data} config={config} />;
+  };
+}

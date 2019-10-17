@@ -17,10 +17,32 @@
  * under the License.
  */
 
-// TODO these are imports from the old plugin world.
-// Once the new platform is ready, they can get removed
-// and handled by the platform itself in the setup method
-// of the ExpressionExectorService
+import { TopNavMenuData } from './top_nav_menu_data';
 
-/** @public types */
-export { Markdown, MarkdownSimple } from './markdown';
+export class TopNavMenuExtensionsRegistry {
+  private extensions: TopNavMenuData[];
+
+  constructor() {
+    this.extensions = [];
+  }
+
+  /** @public **/
+  public register(extension: TopNavMenuData) {
+    this.extensions.push(extension);
+  }
+
+  /** @internal **/
+  public getAll() {
+    return this.extensions;
+  }
+
+  /** @internal **/
+  public clear() {
+    this.extensions.length = 0;
+  }
+}
+
+export type TopNavMenuExtensionsRegistryPublicPluginSetup = Pick<
+  TopNavMenuExtensionsRegistry,
+  'register'
+>;

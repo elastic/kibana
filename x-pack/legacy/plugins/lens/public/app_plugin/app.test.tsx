@@ -20,7 +20,7 @@ const dataStartMock = dataPluginMock.createStartContract();
 import {
   TopNavMenu,
   TopNavMenuData,
-} from '../../../../../../src/legacy/core_plugins/kibana_react/public';
+} from '../../../../../../src/legacy/core_plugins/navigation/public';
 import { DataStart } from '../../../../../../src/legacy/core_plugins/data/public';
 import { coreMock } from 'src/core/public/mocks';
 

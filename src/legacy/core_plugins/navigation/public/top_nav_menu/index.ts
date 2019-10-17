@@ -17,10 +17,6 @@
  * under the License.
  */
 
-// TODO these are imports from the old plugin world.
-// Once the new platform is ready, they can get removed
-// and handled by the platform itself in the setup method
-// of the ExpressionExectorService
-
-/** @public types */
-export { Markdown, MarkdownSimple } from './markdown';
+export { TopNavMenu } from './top_nav_menu';
+export { TopNavMenuData } from './top_nav_menu_data';
+export * from './top_nav_menu_extensions_registry';

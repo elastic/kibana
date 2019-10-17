@@ -17,10 +17,26 @@
  * under the License.
  */
 
-// TODO these are imports from the old plugin world.
-// Once the new platform is ready, they can get removed
-// and handled by the platform itself in the setup method
-// of the ExpressionExectorService
+import { resolve } from 'path';
+import { Legacy } from '../../../../kibana';
 
-/** @public types */
-export { Markdown, MarkdownSimple } from './markdown';
+// eslint-disable-next-line import/no-default-export
+export default function NavigationPlugin(kibana: any) {
+  const config: Legacy.PluginSpecOptions = {
+    id: 'navigation',
+    require: [],
+    publicDir: resolve(__dirname, 'public'),
+    config: (Joi: any) => {
+      return Joi.object({
+        enabled: Joi.boolean().default(true),
+      }).default();
+    },
+    init: (server: Legacy.Server) => ({}),
+    uiExports: {
+      injectDefaultVars: () => ({}),
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
+    },
+  };
+
+  return new kibana.Plugin(config);
+}

@@ -20,7 +20,7 @@ import {
   Query,
 } from 'src/legacy/core_plugins/data/public';
 import { Filter } from '@kbn/es-query';
-import { TopNavMenu } from '../../../../../../src/legacy/core_plugins/kibana_react/public';
+import { TopNavMenu } from '../../../../../../src/legacy/core_plugins/navigation/public';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { Document, SavedObjectStore } from '../persistence';
 import { EditorFrameInstance } from '../types';

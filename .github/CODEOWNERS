@@ -10,6 +10,7 @@
 /src/plugins/data/ @elastic/kibana-app-arch
 /src/plugins/kibana_utils/ @elastic/kibana-app-arch
 /src/plugins/kibana_react/ @elastic/kibana-app-arch
+/src/plugins/navigation/ @elastic/kibana-app-arch
 
 # APM
 /x-pack/legacy/plugins/apm/  @elastic/apm-ui
