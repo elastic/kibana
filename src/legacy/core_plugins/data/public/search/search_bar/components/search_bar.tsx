@@ -105,8 +105,8 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     showAutoRefreshOnly: false,
   };
 
-  private savedQueryService!: SavedQueryService;
   private services = this.props.kibana.services;
+  private savedQueryService = createSavedQueryService(this.services.savedObjects.client);
   public filterBarRef: Element | null = null;
   public filterBarWrapperRef: Element | null = null;
 
@@ -345,9 +345,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     if (this.filterBarRef) {
       this.setFilterBarHeight();
       this.ro.observe(this.filterBarRef);
-    }
-    if (this.services.savedObjects) {
-      this.savedQueryService = createSavedQueryService(this.services.savedObjects.client);
     }
   }
 

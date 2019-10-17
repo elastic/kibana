@@ -25,7 +25,7 @@ import { EuiPopover } from '@elastic/eui';
 import { TimeHistoryContract } from 'ui/timefilter';
 import { Filter } from '@kbn/es-query';
 import { TimeRange } from 'src/plugins/data/common/types';
-import { IndexPattern, Query } from '../../../../../data/public';
+import { IndexPattern, Query, SavedQueryAttributes } from '../../../../../data/public';
 import { SearchBar } from '../../../search/search_bar/components/search_bar';
 import { SavedQueryService } from '../../../search/search_bar/lib/saved_query_service';
 /*
@@ -43,7 +43,7 @@ interface Props {
   indexPatterns: IndexPattern[];
   showSaveQuery: boolean;
   timeHistory?: TimeHistoryContract; // I need some other way of accessing timeHistory rather than passing it down all the way from the search bar
-  savedQueryService: SavedQueryService;
+  onChange: (selectedSavedQuery: SavedQuery[]) => void;
 }
 export const SavedQueryEditor: FunctionComponent<Props> = ({
   uiSettings,
@@ -51,23 +51,39 @@ export const SavedQueryEditor: FunctionComponent<Props> = ({
   indexPatterns,
   showSaveQuery,
   timeHistory,
-  savedQueryService,
+  onChange,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
+  const [currentfilters, setFilters] = useState([] as Filter[]); // change this if it ends up working to use the filters from the saved query passed in (the filter params)
   const closePopover = () => setIsPopoverOpen(false);
   const openPopover = () => setIsPopoverOpen(true);
   const onClearSavedQuery = () => {
-    // console.log('saved query cleared');
+    console.log('saved query cleared');
   };
-  const onQueryChange = (queryAndDateRange: { dateRange: TimeRange; query?: Query }) => {
-    // console.log('query changed with queryAndDateRange:', queryAndDateRange);
+  const onQueryChange = (queryAndDateRange: { dateRange?: TimeRange; query?: Query }) => {
+    console.log('query changed with queryAndDateRange:', queryAndDateRange);
     return queryAndDateRange;
   };
   const onFiltersUpdated = (filters: Filter[]) => {
-    // I seem to get the filters back and can update them from here.
-    // console.log('filtersUpdated, filters?', filters);
-    return filters;
+    // I'm not getting filters on loading a saved query
+    console.log('filtersUpdated, filters?', filters);
+    setFilters(filters);
+  };
+  // WIP
+  const updateSavedQuery = (item: SavedQuery) => {
+    console.log('items in updateSavedQuery:', item);
+    const newTimeFilter = { to: '', from: '' };
+    const QBDQ = {
+      filters: item.attributes.filters ? item.attributes.filters : undefined,
+      query: item.attributes.query,
+      dateRange: item.attributes.timefilter
+        ? { to: item.attributes.timefilter.to, from: item.attributes.timefilter.from }
+        : undefined,
+    };
+    if (QBDQ.filters) {
+      onFiltersUpdated(QBDQ.filters);
+    }
+    onQueryChange({ dateRange: QBDQ.dateRange, query: QBDQ.query });
   };
   return (
     <EuiPopover
@@ -85,14 +101,7 @@ export const SavedQueryEditor: FunctionComponent<Props> = ({
         <SearchBar
           indexPatterns={indexPatterns}
           showFilterBar={true}
-          filters={
-            currentSavedQuery &&
-            currentSavedQuery.length > 0 &&
-            currentSavedQuery[0].attributes.filters &&
-            currentSavedQuery[0].attributes.filters.length > 0
-              ? currentSavedQuery[0].attributes.filters
-              : []
-          }
+          filters={currentfilters}
           onFiltersUpdated={onFiltersUpdated}
           showQueryInput={true}
           query={
@@ -109,6 +118,7 @@ export const SavedQueryEditor: FunctionComponent<Props> = ({
             currentSavedQuery && currentSavedQuery.length > 0 ? currentSavedQuery[0] : undefined
           }
           onClearSavedQuery={onClearSavedQuery}
+          onSavedQueryUpdated={updateSavedQuery}
           showDatePicker={true}
           timeHistory={timeHistory!}
         />

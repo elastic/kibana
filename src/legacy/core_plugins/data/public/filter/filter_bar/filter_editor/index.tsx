@@ -472,14 +472,13 @@ class FilterEditorUI extends Component<Props, State> {
     }
   }
 
-  public onSavedQuerySelected = (
-    selectedOption: SavedQueryOption[],
-    savedQueries: SavedQuery[]
-  ) => {
-    const selectedSavedQuery = savedQueries.filter(
-      savedQuery => savedQuery.id === selectedOption[0].label
-    );
-    this.onSavedQueryChange(selectedSavedQuery, savedQueries);
+  public onSavedQuerySelected = (selectedSavedQuery: SavedQuery[]) => {
+    const params =
+      get(this.state.selectedSavedQuery && this.state.selectedSavedQuery[0], 'id') ===
+      get(selectedSavedQuery[0], 'id')
+        ? this.state.params
+        : selectedSavedQuery[0];
+    this.setState(state => ({ ...state, selectedSavedQuery, params }));
   };
   // SavedQueryPicker is a list of the saved queries and allows for a single option to be selected.
   // SavedQueryEditor is the Editor UI for the selected saved query and implements the SearchBar UI
@@ -487,10 +486,10 @@ class FilterEditorUI extends Component<Props, State> {
     return (
       <EuiFlexGroup responsive={false} gutterSize="s">
         <EuiFlexItem>
-          <SavedQueryPicker
+          {/* <SavedQueryPicker
             savedQueryService={this.props.savedQueryService}
             onChange={this.onSavedQuerySelected}
-          />
+          /> */}
           <SavedQueryEditor
             currentSavedQuery={this.state.selectedSavedQuery}
             uiSettings={this.props.uiSettings}
@@ -502,6 +501,7 @@ class FilterEditorUI extends Component<Props, State> {
             showSaveQuery={this.props.showSaveQuery!}
             timeHistory={this.props.timeHistory!}
             savedQueryService={this.props.savedQueryService}
+            onChange={this.onSavedQuerySelected}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -640,15 +640,15 @@ class FilterEditorUI extends Component<Props, State> {
     this.setState({ params });
   };
 
-  private onSavedQueryChange = (selectedSavedQuery: SavedQuery[], savedQueries: SavedQuery[]) => {
-    // set the selected saved query to the params?
-    const params =
-      get(this.state.selectedSavedQuery && this.state.selectedSavedQuery[0], 'id') ===
-      get(selectedSavedQuery[0], 'id')
-        ? this.state.params
-        : selectedSavedQuery[0];
-    this.setState(state => ({ ...state, selectedSavedQuery, params }));
-  };
+  // private onSavedQueryChange = (selectedSavedQuery: SavedQuery[], savedQueries: SavedQuery[]) => {
+  //   set the selected saved query to the params?
+  //   const params =
+  //     get(this.state.selectedSavedQuery && this.state.selectedSavedQuery[0], 'id') ===
+  //     get(selectedSavedQuery[0], 'id')
+  //       ? this.state.params
+  //       : selectedSavedQuery[0];
+  //   this.setState(state => ({ ...state, selectedSavedQuery, params }));
+  // };
 
   private onQueryDslChange = (queryDsl: string) => {
     this.setState({ queryDsl });
