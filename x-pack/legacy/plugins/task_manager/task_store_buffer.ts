@@ -13,7 +13,9 @@ import { either } from './lib/result_type';
 import { proxyWithOverrides } from './lib/proxy_with_overrides';
 import { Logger } from './types';
 
-export function createTaskStoreUpdateBuffer(store: TaskStore, logger: Logger): TaskStore {
+export type BufferedTaskStore = TaskStore;
+
+export function createTaskStoreUpdateBuffer(store: TaskStore, logger: Logger): BufferedTaskStore {
   const flushBuffer = new Subject<any>();
   const storeUpdateBuffer = new Subject<{
     task: ConcreteTaskInstance;
