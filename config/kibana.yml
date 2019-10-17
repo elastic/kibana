@@ -90,11 +90,11 @@
 #pid.file: /var/run/kibana.pid
 
 # Enables you specify a file where Kibana stores log output.
-logging.dest: /Users/tiagocosta/Desktop/merd/kibana.log
+#logging.dest: stdout
 
 # Enable you to turn on the logging rotate feature.
 # Even enabled, the log rotate will only take effect if you specify a file for 'logging.dest'.
-# logging.rotate.enable: false
+#logging.rotate.enable: false
 
 # Set the value of this setting to true to suppress all logging output.
 #logging.silent: false
