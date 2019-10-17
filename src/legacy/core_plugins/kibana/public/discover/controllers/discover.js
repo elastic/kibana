@@ -84,7 +84,6 @@ const fetchStatuses = {
 };
 
 const app = uiModules.get('apps/discover', [
-  'kibana/courier',
   'kibana/url',
   'kibana/index_patterns'
 ]);
@@ -184,7 +183,6 @@ function discoverController(
   Private,
   Promise,
   config,
-  courier,
   kbnUrl,
   localStorage,
   uiCapabilities
