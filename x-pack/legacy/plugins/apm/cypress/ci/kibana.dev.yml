@@ -36,6 +36,7 @@ xpack.grokdebugger.enabled: false
 xpack.index_management.enabled: false
 xpack.infra.enabled: false
 # xpack.license_management.enabled: false
+xpack.lens.enabled: false
 xpack.logstash.enabled: false
 xpack.maps.enabled: false
 xpack.ml.enabled: false
