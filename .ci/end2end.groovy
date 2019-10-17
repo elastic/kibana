@@ -97,7 +97,7 @@ pipeline {
       }
       steps{
         script {
-          def nodeDocker = docker.build('node-cypress', "${CYPRESS_DIR}/ci")
+          def nodeDocker = docker.build('node-cypress', "${BASE_DIR}/${CYPRESS_DIR}/ci")
           nodeDocker.inside('--network="host"'){
             dir("${BASE_DIR}/${CYPRESS_DIR}"){
               sh(label: 'Build tests', script: 'npm install && yarn install')
@@ -113,9 +113,9 @@ pipeline {
             junit(allowEmptyResults: true, testResults: "${CYPRESS_DIR}/*e2e-tests.xml")
           }
           dir("${APM_ITS}"){
-            sh 'docker-compose logs || true'
-            sh 'docker-compose down -v > apm-its.logs || true'
-            archiveArtifacts(allowEmptyArchive: false, artifacts: 'apm-its.logs')
+            sh 'docker-compose logs > apm-its.log || true'
+            sh 'docker-compose down -v || true'
+            archiveArtifacts(allowEmptyArchive: false, artifacts: 'apm-its.log')
           }
         }
       }
