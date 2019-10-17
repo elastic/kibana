@@ -4,6 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const APP_TITLE = 'Code (Beta)';
-export const APP_USAGE_TYPE = 'code';
-export const SAVED_OBJ_REPO = 'code-repo';
+import { SAVED_OBJ_REPO } from './common/constants';
+
+export const mappings = {
+  [SAVED_OBJ_REPO]: {
+    properties: {
+      uri: {
+        type: 'keyword',
+      },
+    },
+  },
+};
