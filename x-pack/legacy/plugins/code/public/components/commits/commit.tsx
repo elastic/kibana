@@ -21,7 +21,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { CommitInfo } from '../../../model/commit';
 import { RepositoryUtils } from '../../../common/repository_utils';
 import { parseCommitMessage } from '../../../common/commit_utils';
-import { PathTypes } from '../../common/types';
 
 const COMMIT_ID_LENGTH = 8;
 

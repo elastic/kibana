@@ -41,6 +41,7 @@ export class MonacoDiffEditor {
         renderIndentGuides: false,
         automaticLayout: false,
         lineDecorationsWidth: 16,
+        overviewRulerBorder: false,
       });
       this.resizeChecker = new ResizeChecker(this.container);
       this.resizeChecker.on('resize', () => {

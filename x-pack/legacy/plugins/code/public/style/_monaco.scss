@@ -12,15 +12,6 @@
   background-color: $euiColorLightShade;
 }
 
-.code-monaco-highlight-line {
-  background: $euiCodeBlockBuiltInColor;
-}
-
-.code-mark-line-number {
-  background: $euiCodeBlockBuiltInColor;
-  width: $euiSizeXS;
-}
-
 .monaco-diff-editor .margin-view-overlays .line-numbers,
 .monaco-editor .margin-view-overlays .line-numbers {
   text-align: center;

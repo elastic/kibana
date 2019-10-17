@@ -34,11 +34,11 @@
 
   .monaco-diff-editor .line-insert,
   .monaco-diff-editor .char-insert {
-    background-color: rgba(0, 179, 164, 0.1);
+    background-color: scale($euiColorVis0, -0.9);
   }
 
   .monaco-diff-editor .line-delete,
   .monaco-diff-editor .char-delete {
-    background-color: rgba(189, 39, 30, 0.07);
+    background-color: scale($euiColorDanger, -93%);
   }
 }
