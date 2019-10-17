@@ -17,29 +17,21 @@
  * under the License.
  */
 
-import React from 'react';
+import { KibanaConfig } from 'src/legacy/server/kbn_server';
+import { swallowError } from './util';
 
-import { banners } from 'ui/notify';
+export function getDeprecatedXpackConfig(config: KibanaConfig, configPath: string) {
+  const deprecatedXpackmainConfig = swallowError(() =>
+    config.get(`xpack.xpack_main.${configPath}`)
+  );
+  if (typeof deprecatedXpackmainConfig !== 'undefined') {
+    return deprecatedXpackmainConfig;
+  }
 
-import { clickBanner } from './click_banner';
-import { OptInBanner } from '../../components/opt_in_banner_component';
+  const deprecatedXpackConfig = swallowError(() => config.get(`xpack.${configPath}`));
+  if (typeof deprecatedXpackConfig !== 'undefined') {
+    return deprecatedXpackConfig;
+  }
 
-/**
- * Render the Telemetry Opt-in banner.
- *
- * @param {Object} telemetryOptInService The telemetry opt-in service.
- * @param {Object} _banners Banners singleton, which can be overridden for tests.
- */
-export function renderBanner(telemetryOptInService, { _banners = banners } = {}) {
-  const bannerId = _banners.add({
-    component: (
-      <OptInBanner
-        optInClick={optIn => clickBanner(telemetryOptInService, optIn)}
-        fetchTelemetry={telemetryOptInService.fetchExample}
-      />
-    ),
-    priority: 10000
-  });
-
-  telemetryOptInService.setBannerId(bannerId);
+  return null;
 }

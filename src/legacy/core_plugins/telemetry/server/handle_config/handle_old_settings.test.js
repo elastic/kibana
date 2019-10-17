@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { mockInjectedMetadata } from '../../services/telemetry_opt_in.test.mocks';
+import { mockInjectedMetadata } from '../../public/services/telemetry_opt_in.test.mocks';
 
 import sinon from 'sinon';
 
-import { CONFIG_TELEMETRY } from '../../../common/constants';
-import { handleOldSettings } from './handle_old_settings';
-import { TelemetryOptInProvider } from '../../services/telemetry_opt_in';
+import { CONFIG_TELEMETRY } from '../../common/constants';
+import { handleOldSettings } from './handle_old_monitoring_configs';
+import { TelemetryOptInProvider } from '../../public/services/telemetry_opt_in';
 
 const getTelemetryOptInProvider = (enabled, { simulateFailure = false } = {}) => {
   const $http = {

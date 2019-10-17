@@ -62,7 +62,7 @@ export class OptInExampleFlyout extends React.PureComponent<Props, State> {
       .fetchTelemetry()
       .then(response =>
         this.setState({
-          data: Array.isArray(response.data) ? response.data : null,
+          data: Array.isArray(response) ? response : null,
           isLoading: false,
           hasPrivilegeToRead: true,
         })

@@ -38,7 +38,7 @@ const SEARCH_TERMS = ['telemetry', 'usage', 'data', 'usage data'];
 
 export class TelemetryForm extends Component {
   static propTypes = {
-    telemetryOptInProvider: PropTypes.object.isRequired,
+    telemetryOptInService: PropTypes.object.isRequired,
     query: PropTypes.object,
     onQueryMatchChange: PropTypes.func.isRequired,
     showAppliesSettingMessage: PropTypes.bool.isRequired,
@@ -70,7 +70,7 @@ export class TelemetryForm extends Component {
 
   render() {
     const {
-      telemetryOptInProvider,
+      telemetryOptInService,
     } = this.props;
 
     const {
@@ -86,7 +86,7 @@ export class TelemetryForm extends Component {
       <Fragment>
         {showExample &&
           <OptInExampleFlyout
-            fetchTelemetry={() => telemetryOptInProvider.fetchExample()}
+            fetchTelemetry={() => telemetryOptInService.fetchExample()}
             onClose={this.toggleExample}
           />
         }
@@ -110,7 +110,7 @@ export class TelemetryForm extends Component {
             <Field
               setting={{
                 type: 'boolean',
-                value: telemetryOptInProvider.getOptIn() || false,
+                value: telemetryOptInService.getOptIn() || false,
                 description: this.renderDescription(),
                 defVal: false,
               }}
@@ -177,14 +177,14 @@ export class TelemetryForm extends Component {
   )
 
   toggleOptIn = async () => {
-    const newOptInValue = !this.props.telemetryOptInProvider.getOptIn();
+    const newOptInValue = !this.props.telemetryOptInService.getOptIn();
 
     return new Promise((resolve, reject) => {
       this.setState({
         enabled: newOptInValue,
         processing: true
       }, () => {
-        this.props.telemetryOptInProvider.setOptIn(newOptInValue).then(() => {
+        this.props.telemetryOptInService.setOptIn(newOptInValue).then(() => {
           this.setState({ processing: false });
           resolve();
         }, (e) => {

@@ -20,14 +20,12 @@
 import { npStart } from 'ui/new_platform';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
-import { isUnauthenticated } from '../services';
+import { getTelemetryOptInService, isUnauthenticated } from '../services';
 // @ts-ignore
 import { Telemetry } from './telemetry';
-// @ts-ignore
-import { fetchTelemetry } from './fetch_telemetry';
 
 function telemetryInit($injector: any) {
-  const $http = $injector.get('$http');
+  const telemetryOptInService = getTelemetryOptInService();
 
   const telemetryEnabled = npStart.core.injectedMetadata.getInjectedVar('telemetryEnabled');
 
@@ -37,7 +35,7 @@ function telemetryInit($injector: any) {
       return;
     }
 
-    const sender = new Telemetry($injector, () => fetchTelemetry($http));
+    const sender = new Telemetry($injector, telemetryOptInService.fetchTelemetry);
     sender.start();
   }
 }

@@ -78,7 +78,7 @@ export class Telemetry {
 
     return this._fetchTelemetry()
       .then(response => {
-        const clusters = [].concat(response.data);
+        const clusters = [].concat(response);
         return Promise.all(clusters.map(cluster => {
           const req = {
             method: 'POST',

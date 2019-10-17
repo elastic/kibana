@@ -17,17 +17,16 @@
  * under the License.
  */
 
-import { handleOldSettings } from './handle_old_settings';
+import { Legacy } from 'kibana';
+import { getDeprecatedXpackConfig } from './handle_deprecated_xpack_configs';
 
-/**
- * Determine if the banner should be displayed.
- *
- * This method can have side-effects related to deprecated config settings.
- *
- * @param {Object} config The advanced settings config object.
- * @param {Object} _handleOldSettings handleOldSettings function, but overridable for tests.
- * @return {Boolean} {@code true} if the banner should be displayed. {@code false} otherwise.
- */
-export async function shouldShowBanner(telemetryOptInProvider, config, { _handleOldSettings = handleOldSettings } = {}) {
-  return telemetryOptInProvider.getOptIn() === null && await _handleOldSettings(config, telemetryOptInProvider);
+export function getStaticTelemetryConfigPath(config: Legacy.KibanaConfig): string {
+  const CONFIG_STATIC_PATH = 'telemetry.config';
+
+  const deprecatedXpackConfig = getDeprecatedXpackConfig(config, CONFIG_STATIC_PATH) as string;
+  if (deprecatedXpackConfig !== null) {
+    return deprecatedXpackConfig;
+  }
+
+  return config.get(CONFIG_STATIC_PATH);
 }

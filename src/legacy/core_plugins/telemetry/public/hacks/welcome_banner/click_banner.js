@@ -29,20 +29,20 @@ import { FormattedMessage } from '@kbn/i18n/react';
 /**
  * Handle clicks from the user on the opt-in banner.
  *
- * @param {Object} telemetryOptInProvider the telemetry opt-in provider
+ * @param {Object} telemetryOptInService the telemetry opt-in service
  * @param {Boolean} optIn {@code true} to opt into telemetry.
  * @param {Object} _banners Singleton banners. Can be overridden for tests.
  * @param {Object} _toastNotifications Singleton toast notifications. Can be overridden for tests.
  */
 export async function clickBanner(
-  telemetryOptInProvider,
+  telemetryOptInService,
   optIn,
   { _banners = banners, _toastNotifications = toastNotifications } = {}) {
-  const bannerId = telemetryOptInProvider.getBannerId();
+  const bannerId = telemetryOptInService.getBannerId();
   let set = false;
 
   try {
-    set = await telemetryOptInProvider.setOptIn(optIn);
+    set = await telemetryOptInService.setOptIn(optIn);
   } catch (err) {
     // set is already false
     console.log('Unexpected error while trying to save setting.', err);

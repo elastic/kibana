@@ -17,29 +17,10 @@
  * under the License.
  */
 
-import React from 'react';
-
-import { banners } from 'ui/notify';
-
-import { clickBanner } from './click_banner';
-import { OptInBanner } from '../../components/opt_in_banner_component';
-
-/**
- * Render the Telemetry Opt-in banner.
- *
- * @param {Object} telemetryOptInService The telemetry opt-in service.
- * @param {Object} _banners Banners singleton, which can be overridden for tests.
- */
-export function renderBanner(telemetryOptInService, { _banners = banners } = {}) {
-  const bannerId = _banners.add({
-    component: (
-      <OptInBanner
-        optInClick={optIn => clickBanner(telemetryOptInService, optIn)}
-        fetchTelemetry={telemetryOptInService.fetchExample}
-      />
-    ),
-    priority: 10000
-  });
-
-  telemetryOptInService.setBannerId(bannerId);
+export function swallowError(fn: any) {
+  try {
+    return fn();
+  } catch (err) {
+    // swallow error;
+  }
 }

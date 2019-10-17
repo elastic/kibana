@@ -98,4 +98,37 @@ describe('TelemetryOptInProvider', () => {
     provider.setBannerId(bannerId);
     expect(provider.getBannerId()).toEqual(bannerId);
   });
+
+  describe('fetch_telemetry', () => {
+
+    it('fetchTelemetry calls expected URL with 20 minutes - now', () => {
+      const { provider } = setup({});
+      const response = Promise.resolve();
+      const $http = {
+        post: jest.fn(),
+      };
+      const basePath = 'fake';
+      const moment = {
+        subtract: jest.fn(),
+        toISOString: () => 'max123'
+      };
+
+      moment.subtract.withArgs(20, 'minutes').returns({
+        toISOString: () => 'min456'
+      });
+
+      $http.post.withArgs(`fake/api/telemetry/v2/clusters/_stats`, {
+        unencrypted: true,
+        timeRange: {
+          min: 'min456',
+          max: 'max123'
+        }
+      })
+        .returns(response);
+
+      expect(provider.fetchTelemetry($http, { basePath, _moment: () => moment, unencrypted: true })).to.be(response);
+    });
+
+  });
+
 });

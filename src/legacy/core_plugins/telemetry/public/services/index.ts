@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export { TelemetryOptInProvider } from './telemetry_opt_in';
+export { getTelemetryOptInService, TelemetryOptInService } from './telemetry_opt_in';
 export { isUnauthenticated } from './path';

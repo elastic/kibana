@@ -23,11 +23,20 @@ import { toastNotifications } from 'ui/notify';
 import { npStart } from 'ui/new_platform';
 import { i18n } from '@kbn/i18n';
 
-let bannerId: string | null = null;
-let currentOptInStatus = false;
+export type TelemetryOptInService = ReturnType<typeof createTelemetryOptInService>;
+let telemetryOptInService: TelemetryOptInService;
 
-export function TelemetryOptInProvider($injector: any, chrome: any) {
-  currentOptInStatus = npStart.core.injectedMetadata.getInjectedVar('telemetryOptedIn') as boolean;
+export function getTelemetryOptInService() {
+  if (!telemetryOptInService) {
+    telemetryOptInService = createTelemetryOptInService();
+  }
+  return telemetryOptInService;
+}
+
+export function createTelemetryOptInService() {
+  const { http, injectedMetadata } = npStart.core;
+  let currentOptInStatus = injectedMetadata.getInjectedVar('telemetryOptedIn') as boolean;
+  let bannerId: string | null = null;
 
   setCanTrackUiMetrics(currentOptInStatus);
   const provider = {
@@ -38,10 +47,11 @@ export function TelemetryOptInProvider($injector: any, chrome: any) {
     },
     setOptIn: async (enabled: boolean) => {
       setCanTrackUiMetrics(enabled);
-      const $http = $injector.get('$http');
 
       try {
-        await $http.post(chrome.addBasePath('/api/telemetry/v2/optIn'), { enabled });
+        await http.post('/api/telemetry/v2/optIn', {
+          body: JSON.stringify({ enabled }),
+        });
         currentOptInStatus = enabled;
       } catch (error) {
         toastNotifications.addError(error, {
@@ -57,16 +67,18 @@ export function TelemetryOptInProvider($injector: any, chrome: any) {
 
       return true;
     },
-    fetchExample: async () => {
-      const $http = $injector.get('$http');
-      return $http.post(chrome.addBasePath(`/api/telemetry/v2/clusters/_stats`), {
-        unencrypted: true,
-        timeRange: {
-          min: moment()
-            .subtract(20, 'minutes')
-            .toISOString(),
-          max: moment().toISOString(),
-        },
+    fetchExample: () => provider.fetchTelemetry({ unencrypted: true }),
+    fetchTelemetry: async ({ unencrypted = false } = {}): Promise<any[]> => {
+      return http.post('/api/telemetry/v2/clusters/_stats', {
+        body: JSON.stringify({
+          unencrypted,
+          timeRange: {
+            min: moment()
+              .subtract(20, 'minutes')
+              .toISOString(),
+            max: moment().toISOString(),
+          },
+        }),
       });
     },
   };

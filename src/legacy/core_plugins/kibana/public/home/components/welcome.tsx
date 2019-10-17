@@ -40,15 +40,14 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import chrome from 'ui/chrome';
 import { SampleDataCard } from './sample_data';
 import { TelemetryOptInCard } from './telemetry_opt_in';
+import { TelemetryOptInService } from '../../../../telemetry/public/services';
 // @ts-ignore
 import { trackUiMetric, METRIC_TYPE } from '../kibana_services';
 
 interface Props {
   urlBasePath: string;
   onSkip: () => {};
-  fetchTelemetry: () => Promise<any[]>;
-  setOptIn: (enabled: boolean) => Promise<boolean>;
-  getTelemetryBannerId: () => string;
+  telemetryOptInService: TelemetryOptInService;
   shouldShowTelemetryOptIn: boolean;
 }
 interface State {
@@ -76,8 +75,8 @@ export class Welcome extends React.PureComponent<Props, State> {
   private async handleTelemetrySelection(confirm: boolean) {
     const metricName = `telemetryOptIn${confirm ? 'Confirm' : 'Decline'}`;
     trackUiMetric(METRIC_TYPE.CLICK, metricName);
-    await this.props.setOptIn(confirm);
-    const bannerId = this.props.getTelemetryBannerId();
+    await this.props.telemetryOptInService.setOptIn(confirm);
+    const bannerId = this.props.telemetryOptInService.getBannerId();
     banners.remove(bannerId);
     this.setState(() => ({ step: 1 }));
   }
@@ -104,7 +103,7 @@ export class Welcome extends React.PureComponent<Props, State> {
   }
 
   render() {
-    const { urlBasePath, shouldShowTelemetryOptIn, fetchTelemetry } = this.props;
+    const { urlBasePath, shouldShowTelemetryOptIn, telemetryOptInService } = this.props;
     const { step } = this.state;
 
     return (
@@ -138,7 +137,7 @@ export class Welcome extends React.PureComponent<Props, State> {
                 {shouldShowTelemetryOptIn && step === 0 && (
                   <TelemetryOptInCard
                     urlBasePath={urlBasePath}
-                    fetchTelemetry={fetchTelemetry}
+                    fetchTelemetry={telemetryOptInService.fetchExample}
                     onConfirm={this.handleTelemetrySelection.bind(this, true)}
                     onDecline={this.handleTelemetrySelection.bind(this, false)}
                   />

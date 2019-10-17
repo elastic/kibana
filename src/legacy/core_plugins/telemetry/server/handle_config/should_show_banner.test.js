@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { mockInjectedMetadata } from '../../services/telemetry_opt_in.test.mocks';
+import { mockInjectedMetadata } from '../../public/services/telemetry_opt_in.test.mocks';
 
 import sinon from 'sinon';
 
-import { CONFIG_TELEMETRY } from '../../../common/constants';
-import { shouldShowBanner } from './should_show_banner';
-import { TelemetryOptInProvider } from '../../services';
+import { CONFIG_TELEMETRY } from '../../common/constants';
+import { shouldShowBanner } from './get_show_banner';
+import { TelemetryOptInProvider } from '../../public/services';
 
 const getMockInjector = () => {
   const get = sinon.stub();

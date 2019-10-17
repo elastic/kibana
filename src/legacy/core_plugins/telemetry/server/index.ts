@@ -20,10 +20,12 @@
 import { PluginInitializerContext } from 'src/core/server';
 import { TelemetryPlugin } from './plugin';
 import * as constants from '../common/constants';
+import * as handleConfig from './handle_config';
 
 export { getTelemetryOptIn } from './get_telemetry_opt_in';
 export { telemetryCollectionManager } from './collection_manager';
 
 export const telemetryPlugin = (initializerContext: PluginInitializerContext) =>
   new TelemetryPlugin();
-export { constants };
+
+export { constants, handleConfig };
