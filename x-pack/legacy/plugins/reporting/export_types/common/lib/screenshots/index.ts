@@ -25,6 +25,7 @@ import { waitForElementsToBeInDOM } from './wait_for_dom_elements';
 import { getTimeRange } from './get_time_range';
 import { getElementPositionAndAttributes } from './get_element_position_data';
 import { getScreenshots } from './get_screenshots';
+import { skipTelemetry } from './skip_telemetry';
 
 // NOTE: Typescript does not throw an error if this interface has errors!
 interface ScreenshotResults {
@@ -54,6 +55,10 @@ export function screenshotsObservableFactory(server: KbnServer) {
         const screenshot$ = driver$.pipe(
           mergeMap(
             (browser: HeadlessBrowser) => openUrl(browser, url, conditionalHeaders, logger),
+            browser => browser
+          ),
+          mergeMap(
+            (browser: HeadlessBrowser) => skipTelemetry(browser, logger),
             browser => browser
           ),
           mergeMap(

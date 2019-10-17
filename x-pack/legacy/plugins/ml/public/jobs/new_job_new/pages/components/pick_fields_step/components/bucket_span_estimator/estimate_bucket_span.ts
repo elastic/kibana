@@ -15,7 +15,7 @@ import {
 } from '../../../../../common/job_creator';
 import { ml, BucketSpanEstimatorData } from '../../../../../../../services/ml_api_service';
 import { useKibanaContext } from '../../../../../../../contexts/kibana';
-import { mlMessageBarService } from '../../../../../../../components/messagebar/messagebar_service';
+import { mlMessageBarService } from '../../../../../../../components/messagebar';
 
 export enum ESTIMATE_STATUS {
   NOT_RUNNING,
