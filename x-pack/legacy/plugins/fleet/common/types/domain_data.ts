@@ -44,7 +44,7 @@ export type PolicyUpdatedEvent =
   | {
       type: 'updated';
       policyId: string;
-      paylod: any;
+      payload: any;
     }
   | {
       type: 'deleted';
