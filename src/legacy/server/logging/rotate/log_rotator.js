@@ -30,6 +30,9 @@ export class LogRotator {
     this.onStartup = config.get('logging.rotate.onStartup');
     this.running = false;
     this.logFileSize = 0;
+    this.intervalID = 0;
+    this.lastIntervalCycleTime = 0;
+    this.isRotating = false;
 
     throttle(this._rotate, 5000);
   }
@@ -73,27 +76,43 @@ export class LogRotator {
   }
 
   _startLogFileSizeMonitor() {
-
+    this.logFileSize = this._getLogFileSize();
+    this.logInterceptor.on('data', this._logFileSizeMonitorHandler());
   }
 
-  _logFileSizeMonitorHandle() {
+  _logFileSizeMonitorHandler(chunk) {
+    if (!chunk) {
+      return;
+    }
 
+    this.logFileSize += chunk.length;
+    this._rotate();
   }
 
   _stopLogFileSizeMonitor() {
-
+    this.logInterceptor.removeListener('data', this._logFileIntervalMonitorHandler());
   }
 
   _startLogFileIntervalMonitor() {
+    if (!this.interval) {
+      return;
+    }
 
+    this.intervalID = setInterval(this._logFileIntervalMonitorHandler, this.interval * 60 * 1000);
   }
 
-  _logFileIntervalMonitorHandle() {
-
+  _logFileIntervalMonitorHandler() {
+    this.lastIntervalCycleTime = new Date();
+    this._rotate();
   }
 
   _stopLogFileIntervalMonitor() {
+    if (!this.intervalID) {
+      return;
+    }
 
+    clearInterval(this.intervalID);
+    this.intervalID = 0;
   }
 
   _createExitListener() {
@@ -116,7 +135,23 @@ export class LogRotator {
   }
 
   _shouldRotate() {
-    return false;
+    // should rotate evaluation
+    // 1. should rotate if current log size exceeds
+    //    the defined one on everyBytes or has already
+    //    pass the defined time on interval.
+    // 2. should not rotate if is already rotating or if any
+    //    of the conditions on 1. do not apply
+    if (this.isRotating) {
+      return false;
+    }
+
+    if (this.logFileSize >= this.everyBytes) {
+      return true;
+    }
+
+    const currentTime = (new Date()).getTime();
+    const elapsedTime = Math.abs(currentTime - this.lastIntervalCycleTime.getTime());
+    return !!(this.lastIntervalCycleTime && elapsedTime > this.interval * 60 * 1000);
   }
 
   _rotate() {
@@ -128,8 +163,17 @@ export class LogRotator {
   }
 
   _rotateNow() {
+    // rotate process
+    // 1. delete last file
+    // 2. rename all files to with +1
+    // 3. rename + compress current log into 1
+    // 4. send SIGHUP to reload log config
+
+    this.isRotating = true;
     // rename old
     // reload log configuration
-    process.kill(process.pid, 'SIGHUP');
+    // => process.kill(process.pid, 'SIGHUP');
+    console.log('ROTATED');
+    this.isRotating = false;
   }
 }
