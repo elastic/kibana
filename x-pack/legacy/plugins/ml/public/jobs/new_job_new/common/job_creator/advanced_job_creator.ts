@@ -14,6 +14,7 @@ import { createBasicDetector } from './util/default_configs';
 import { JOB_TYPE } from './util/constants';
 import { getRichDetectors } from './util/general';
 import { isValidJson } from '../../../../../common/util/validation_utils';
+import { ml } from '../../../../services/ml_api_service';
 
 export interface RichDetector {
   agg: Aggregation | null;
@@ -138,9 +139,24 @@ export class AdvancedJobCreator extends JobCreator {
     return isValidJson(this._queryString);
   }
 
+  // load the start and end times for the selected index
+  // and apply them to the job creator
+  public async autoSetTimeRange() {
+    try {
+      const { start, end } = await ml.getTimeFieldRange({
+        index: this._indexPatternTitle,
+        timeFieldName: this.timeFieldName,
+        query: this.query,
+      });
+      this.setTimeRange(start.epoch, end.epoch);
+    } catch (error) {
+      throw Error(error);
+    }
+  }
+
   public cloneFromExistingJob(job: Job, datafeed: Datafeed) {
     this._overrideConfigs(job, datafeed);
-    const detectors = getRichDetectors(job, datafeed);
+    const detectors = getRichDetectors(job, datafeed, true);
 
     this.removeAllDetectors();
     this._richDetectors.length = 0;

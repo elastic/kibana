@@ -26,6 +26,7 @@ import {
 } from '../search';
 import { EsClientWithRequest } from '../utils/esclient_with_request';
 import { CodeServerRouter } from '../security';
+import { getReferenceHelper } from '../utils/repository_reference_helper';
 
 export function repositorySearchRoute(router: CodeServerRouter, log: Logger) {
   router.route({
@@ -38,15 +39,10 @@ export function repositorySearchRoute(router: CodeServerRouter, log: Logger) {
         page = parseInt(p as string, 10);
       }
 
-      let scope: string[] = [];
-      if (typeof repoScope === 'string') {
-        scope = repoScope.split(',');
-      }
-
       const searchReq: RepositorySearchRequest = {
         query: q as string,
         page,
-        repoScope: scope,
+        repoScope: await getScope(req, repoScope),
       };
       try {
         const repoSearchClient = new RepositorySearchClient(new EsClientWithRequest(req), log);
@@ -68,15 +64,10 @@ export function repositorySearchRoute(router: CodeServerRouter, log: Logger) {
         page = parseInt(p as string, 10);
       }
 
-      let scope: string[] = [];
-      if (typeof repoScope === 'string') {
-        scope = repoScope.split(',');
-      }
-
       const searchReq: RepositorySearchRequest = {
         query: q as string,
         page,
-        repoScope: scope,
+        repoScope: await getScope(req, repoScope),
       };
       try {
         const repoSearchClient = new RepositorySearchClient(new EsClientWithRequest(req), log);
@@ -100,19 +91,12 @@ export function documentSearchRoute(router: CodeServerRouter, log: Logger) {
         page = parseInt(p as string, 10);
       }
 
-      let scope: string[] = [];
-      if (typeof repoScope === 'string') {
-        scope = [repoScope];
-      } else if (Array.isArray(repoScope)) {
-        scope = repoScope;
-      }
-
       const searchReq: DocumentSearchRequest = {
         query: q as string,
         page,
         langFilters: langs ? (langs as string).split(',') : [],
         repoFilters: repos ? decodeURIComponent(repos as string).split(',') : [],
-        repoScope: scope,
+        repoScope: await getScope(req, repoScope),
       };
       try {
         const docSearchClient = new DocumentSearchClient(new EsClientWithRequest(req), log);
@@ -134,15 +118,10 @@ export function documentSearchRoute(router: CodeServerRouter, log: Logger) {
         page = parseInt(p as string, 10);
       }
 
-      let scope: string[] = [];
-      if (typeof repoScope === 'string') {
-        scope = repoScope.split(',');
-      }
-
       const searchReq: DocumentSearchRequest = {
         query: q as string,
         page,
-        repoScope: scope,
+        repoScope: await getScope(req, repoScope),
       };
       try {
         const docSearchClient = new DocumentSearchClient(new EsClientWithRequest(req), log);
@@ -166,13 +145,17 @@ export function documentSearchRoute(router: CodeServerRouter, log: Logger) {
     method: 'POST',
     async handler(req: RequestFacade) {
       const reqs: StackTraceSnippetsRequest[] = (req.payload as any).requests;
+      const scopes = new Set(
+        await getReferenceHelper(req.getSavedObjectsClient()).findReferences()
+      );
       return await Promise.all(
         reqs.map((stacktraceReq: StackTraceSnippetsRequest) => {
           const integClient = new IntegrationsSearchClient(new EsClientWithRequest(req), log);
           return Promise.all(
             stacktraceReq.stacktraceItems.map((stacktrace: StackTraceItem) => {
+              const repoUris = stacktraceReq.repoUris.filter(uri => scopes.has(uri));
               const integrationReq: ResolveSnippetsRequest = {
-                repoUris: stacktraceReq.repoUris,
+                repoUris,
                 revision: stacktraceReq.revision,
                 filePath: stacktrace.filePath,
                 lineNumStart: stacktrace.lineNumStart,
@@ -195,15 +178,10 @@ export function symbolSearchRoute(router: CodeServerRouter, log: Logger) {
       page = parseInt(p as string, 10);
     }
 
-    let scope: string[] = [];
-    if (typeof repoScope === 'string') {
-      scope = repoScope.split(',');
-    }
-
     const searchReq: SymbolSearchRequest = {
       query: q as string,
       page,
-      repoScope: scope,
+      repoScope: await getScope(req, repoScope),
     };
     try {
       const symbolSearchClient = new SymbolSearchClient(new EsClientWithRequest(req), log);
@@ -238,18 +216,11 @@ export function commitSearchRoute(router: CodeServerRouter, log: Logger) {
         page = parseInt(p as string, 10);
       }
 
-      let scope: string[] = [];
-      if (typeof repoScope === 'string') {
-        scope = [repoScope];
-      } else if (Array.isArray(repoScope)) {
-        scope = repoScope;
-      }
-
       const searchReq: CommitSearchRequest = {
         query: q as string,
         page,
         repoFilters: repos ? decodeURIComponent(repos as string).split(',') : [],
-        repoScope: scope,
+        repoScope: await getScope(req, repoScope),
       };
       try {
         const commitSearchClient = new CommitSearchClient(new EsClientWithRequest(req), log);
@@ -260,4 +231,16 @@ export function commitSearchRoute(router: CodeServerRouter, log: Logger) {
       }
     },
   });
+}
+
+async function getScope(req: RequestFacade, repoScope: string | string[]): Promise<string[]> {
+  let scope: string[] = await getReferenceHelper(req.getSavedObjectsClient()).findReferences();
+  if (typeof repoScope === 'string') {
+    const uriSet = new Set(repoScope.split(','));
+    scope = scope.filter(uri => uriSet.has(uri));
+  } else if (Array.isArray(repoScope)) {
+    const uriSet = new Set(repoScope);
+    scope = scope.filter(uri => uriSet.has(uri));
+  }
+  return scope;
 }

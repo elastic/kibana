@@ -4,10 +4,10 @@
 
 ## CoreSetup.context property
 
+[ContextSetup](./kibana-plugin-server.contextsetup.md)
+
 <b>Signature:</b>
 
 ```typescript
-context: {
-        createContextContainer: ContextSetup['createContextContainer'];
-    };
+context: ContextSetup;
 ```

@@ -26,6 +26,8 @@ import { RequestFacade, ResponseToolkitFacade } from '../..';
 import { CodeServices } from '../distributed/code_services';
 import { GitServiceDefinition, LspServiceDefinition } from '../distributed/apis';
 import { findTitleFromHover, groupFiles } from '../utils/lsp_utils';
+import { getReferenceHelper } from '../utils/repository_reference_helper';
+import { SymbolSearchResult } from '../../model';
 
 const LANG_SERVER_ERROR = 'language server error';
 
@@ -48,6 +50,7 @@ export function lspRoute(
             const params = (req.payload as unknown) as any;
             const uri = params.textDocument.uri;
             const { repoUri } = parseLspUrl(uri)!;
+            await getReferenceHelper(req.getSavedObjectsClient()).ensureReference(repoUri);
             const endpoint = await codeServices.locate(req, repoUri);
             const requestPromise = lspService.sendRequest(endpoint, {
               method: `textDocument/${method}`,
@@ -95,7 +98,9 @@ export function lspRoute(
       // @ts-ignore
       const { textDocument, position } = req.payload;
       const { uri } = textDocument;
-      const endpoint = await codeServices.locate(req, parseLspUrl(uri).repoUri);
+      const { repoUri } = parseLspUrl(uri);
+      await getReferenceHelper(req.getSavedObjectsClient()).ensureReference(repoUri);
+      const endpoint = await codeServices.locate(req, repoUri);
       const response: ResponseMessage = await promiseTimeout(
         serverOptions.lsp.requestTimeoutMs,
         lspService.sendRequest(endpoint, {
@@ -115,11 +120,12 @@ export function lspRoute(
 
       const locators = response.result as SymbolLocator[];
       const locations = [];
+      const repoScope = await getReferenceHelper(req.getSavedObjectsClient()).findReferences();
       for (const locator of locators) {
         if (locator.location) {
           locations.push(locator.location);
-        } else if (locator.qname) {
-          const searchResults = await symbolSearchClient.findByQname(req.params.qname);
+        } else if (locator.qname && repoScope.length > 0) {
+          const searchResults = await symbolSearchClient.findByQname(req.params.qname, repoScope);
           for (const symbol of searchResults.symbols) {
             locations.push(symbol.symbolInformation.location);
           }
@@ -141,7 +147,9 @@ export function lspRoute(
         // @ts-ignore
         const { textDocument, position } = req.payload;
         const { uri } = textDocument;
-        const endpoint = await codeServices.locate(req, parseLspUrl(uri).repoUri);
+        const { repoUri } = parseLspUrl(uri);
+        await getReferenceHelper(req.getSavedObjectsClient()).ensureReference(repoUri);
+        const endpoint = await codeServices.locate(req, repoUri);
         const response: ResponseMessage = await promiseTimeout(
           serverOptions.lsp.requestTimeoutMs,
           lspService.sendRequest(endpoint, {
@@ -189,7 +197,15 @@ export function symbolByQnameRoute(router: CodeServerRouter, log: Logger) {
     async handler(req: RequestFacade) {
       try {
         const symbolSearchClient = new SymbolSearchClient(new EsClientWithRequest(req), log);
-        return await symbolSearchClient.findByQname(req.params.qname);
+        const repoScope = await getReferenceHelper(req.getSavedObjectsClient()).findReferences();
+        if (repoScope.length === 0) {
+          return {
+            symbols: [],
+            total: 0,
+            took: 0,
+          } as SymbolSearchResult;
+        }
+        return await symbolSearchClient.findByQname(req.params.qname, repoScope);
       } catch (error) {
         return Boom.internal(`Search Exception`);
       }
