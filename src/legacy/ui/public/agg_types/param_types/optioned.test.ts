@@ -17,20 +17,20 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
-import { BaseParamType } from '../../param_types/base';
-import { OptionedParamType } from '../../param_types/optioned';
+import { BaseParamType } from './base';
+import { OptionedParamType } from './optioned';
 
-describe('Optioned', function () {
+jest.mock('ui/new_platform');
 
-  describe('constructor', function () {
-    it('it is an instance of BaseParamType', function () {
+describe('Optioned', () => {
+  describe('constructor', () => {
+    it('it is an instance of BaseParamType', () => {
       const aggParam = new OptionedParamType({
         name: 'some_param',
-        type: 'optioned'
+        type: 'optioned',
       });
 
-      expect(aggParam).to.be.a(BaseParamType);
+      expect(aggParam instanceof BaseParamType).toBeTruthy();
     });
   });
 });
