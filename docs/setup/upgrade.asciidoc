@@ -19,7 +19,7 @@ Depending on which version of Kibana you're upgrading from, the upgrade process
 will vary. Please consult the following table to determine which process you
 should follow:
 
-[cols="1<m,1<m,3",options="header",]
+[cols="<1m,<1m,3",options="header"]
 |=======================================================================
 |Upgrade From   |Upgrade To     |Supported Upgrade Type
 |3.x            |5.x            |<<upgrade-new-install,New installation>>
