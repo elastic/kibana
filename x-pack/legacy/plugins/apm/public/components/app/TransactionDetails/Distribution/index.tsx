@@ -111,7 +111,7 @@ export const TransactionDistribution: FunctionComponent<Props> = (
   ]);
 
   // no data in response
-  if (!distribution || !distribution.totalHits) {
+  if (!distribution || distribution.noHits) {
     // only show loading state if there is no data - else show stale data until new data has loaded
     if (isLoading) {
       return <LoadingStatePrompt />;

@@ -6,6 +6,7 @@
 
 import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
 
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { JobCreatorContext } from '../job_creator_context';
 import { WizardNav } from '../wizard_nav';
 import { WIZARD_STEPS, StepProps } from '../step_types';
@@ -15,6 +16,7 @@ import { MultiMetricView } from './components/multi_metric_view';
 import { PopulationView } from './components/population_view';
 import { AdvancedView } from './components/advanced_view';
 import { JsonEditorFlyout, EDITOR_MODE } from '../common/json_editor_flyout';
+import { DatafeedPreviewFlyout } from '../common/datafeed_preview_flyout';
 
 export const PickFieldsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
   const { jobCreator, jobValidator, jobValidatorUpdated } = useContext(JobCreatorContext);
@@ -58,11 +60,18 @@ export const PickFieldsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
             nextActive={nextActive}
           >
             {jobType === JOB_TYPE.ADVANCED && (
-              <JsonEditorFlyout
-                isDisabled={false}
-                jobEditorMode={EDITOR_MODE.EDITABLE}
-                datafeedEditorMode={EDITOR_MODE.HIDDEN}
-              />
+              <EuiFlexGroup>
+                <EuiFlexItem grow={false}>
+                  <JsonEditorFlyout
+                    isDisabled={false}
+                    jobEditorMode={EDITOR_MODE.EDITABLE}
+                    datafeedEditorMode={EDITOR_MODE.HIDDEN}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <DatafeedPreviewFlyout isDisabled={false} />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             )}
           </WizardNav>
         </Fragment>

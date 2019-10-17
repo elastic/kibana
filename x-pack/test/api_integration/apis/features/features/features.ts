@@ -113,7 +113,6 @@ export default function({ getService }: FtrProviderContext) {
             'code',
             'infrastructure',
             'integrations_manager',
-            'lens',
             'logs',
             'maps',
             'uptime',

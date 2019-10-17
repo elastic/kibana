@@ -67,6 +67,6 @@ export async function getErrorGroup({
   return {
     transaction,
     error,
-    occurrencesCount: resp.hits.total
+    occurrencesCount: resp.hits.total.value
   };
 }
