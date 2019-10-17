@@ -20,26 +20,26 @@
 import { TopNavMenuData } from './top_nav_menu_data';
 
 export class TopNavMenuExtensionsRegistry {
-  private extensions: TopNavMenuData[];
+  private menuItems: TopNavMenuData[];
 
   constructor() {
-    this.extensions = [];
+    this.menuItems = [];
   }
 
   /** @public **/
   // Items registered into this registry will be appended to any TopNavMenu rendered in any application.
-  public register(extension: TopNavMenuData) {
-    this.extensions.push(extension);
+  public register(menuItem: TopNavMenuData) {
+    this.menuItems.push(extension);
   }
 
   /** @internal **/
   public getAll() {
-    return this.extensions;
+    return this.menuItems;
   }
 
   /** @internal **/
   public clear() {
-    this.extensions.length = 0;
+    this.menuItems.length = 0;
   }
 }
 

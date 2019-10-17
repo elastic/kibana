@@ -48,7 +48,6 @@ export interface NavigationPluginStartDependencies {
 }
 
 export class NavigationPlugin implements Plugin<NavigationSetup, NavigationStart> {
-  // Exposed services, sorted alphabetically
   private readonly topNavMenuExtensionsRegistry: TopNavMenuExtensionsRegistry = new TopNavMenuExtensionsRegistry();
 
   public setup(core: CoreSetup): NavigationSetup {
