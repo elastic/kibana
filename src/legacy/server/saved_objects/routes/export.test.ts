@@ -157,6 +157,7 @@ describe('POST /api/saved_objects/_export', () => {
         "calls": Array [
           Array [
             Object {
+              "excludeExportDetails": false,
               "exportSizeLimit": 10000,
               "includeReferencesDeep": true,
               "objects": undefined,

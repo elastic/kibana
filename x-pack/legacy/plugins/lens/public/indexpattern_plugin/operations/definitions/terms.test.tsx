@@ -346,49 +346,6 @@ describe('terms', () => {
       ]);
     });
 
-    it('should not show filter ratio column as sort target', () => {
-      const setStateSpy = jest.fn();
-      const instance = shallow(
-        <InlineOptions
-          state={{
-            ...state,
-            layers: {
-              first: {
-                ...state.layers.first,
-                columns: {
-                  ...state.layers.first.columns,
-                  col2: {
-                    label: 'Count',
-                    dataType: 'number',
-                    isBucketed: false,
-
-                    // Private
-                    operationType: 'filter_ratio',
-                    params: {
-                      numerator: { query: '', language: 'kuery' },
-                      denominator: { query: '', language: 'kuery' },
-                    },
-                  },
-                },
-              },
-            },
-          }}
-          setState={setStateSpy}
-          columnId="col1"
-          layerId="first"
-          currentColumn={state.layers.first.columns.col1 as TermsIndexPatternColumn}
-          storage={{} as Storage}
-          uiSettings={{} as UiSettingsClientContract}
-          savedObjectsClient={{} as SavedObjectsClientContract}
-          http={{} as HttpServiceBase}
-        />
-      );
-
-      const select = instance.find('[data-test-subj="indexPattern-terms-orderBy"]').find(EuiSelect);
-
-      expect(select.prop('options').map(({ value }) => value)).toEqual(['alphabetical']);
-    });
-
     it('should update state with the order by value', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(

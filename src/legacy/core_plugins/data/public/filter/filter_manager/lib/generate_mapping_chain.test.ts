@@ -31,27 +31,27 @@ describe('filter manager utilities', () => {
   });
 
   describe('generateMappingChain()', () => {
-    test('should create a chaining function which calls the next function if the promise is rejected', async () => {
+    test('should create a chaining function which calls the next function if the error is thrown', async () => {
       const filter: Filter = buildEmptyFilter(true);
 
-      mapping.rejects(filter);
-      next.resolves('good');
+      mapping.throws(filter);
+      next.returns('good');
 
       const chain = generateMappingChain(mapping, next);
-      const result = await chain(filter);
+      const result = chain(filter);
 
       expect(result).toBe('good');
       sinon.assert.calledOnce(next);
     });
 
-    test('should create a chaining function which DOES NOT call the next function if the result is resolved', async () => {
+    test('should create a chaining function which DOES NOT call the next function if the result is returned', async () => {
       const filter: Filter = buildEmptyFilter(true);
 
-      mapping.resolves('good');
-      next.resolves('bad');
+      mapping.returns('good');
+      next.returns('bad');
 
       const chain = generateMappingChain(mapping, next);
-      const result = await chain(filter);
+      const result = chain(filter);
 
       expect(result).toBe('good');
     });
@@ -59,10 +59,10 @@ describe('filter manager utilities', () => {
     test('should resolve result for the mapping function', async () => {
       const filter: Filter = buildEmptyFilter(true);
 
-      mapping.resolves({ key: 'test', value: 'example' });
+      mapping.returns({ key: 'test', value: 'example' });
 
       const chain = generateMappingChain(mapping, next);
-      const result = await chain(filter);
+      const result = chain(filter);
 
       sinon.assert.notCalled(next);
       expect(result).toEqual({ key: 'test', value: 'example' });
@@ -72,10 +72,10 @@ describe('filter manager utilities', () => {
       // @ts-ignore
       const filter: Filter = { test: 'example' };
 
-      mapping.resolves({ key: 'test', value: 'example' });
+      mapping.returns({ key: 'test', value: 'example' });
 
       const chain = generateMappingChain(mapping, next);
-      const result = await chain(filter);
+      const result = chain(filter);
 
       sinon.assert.calledOnce(mapping);
       expect(mapping.args[0][0]).toEqual({ test: 'example' });
@@ -86,29 +86,31 @@ describe('filter manager utilities', () => {
     test('should resolve result for the next function', async () => {
       const filter: Filter = buildEmptyFilter(true);
 
-      mapping.rejects(filter);
-      next.resolves({ key: 'test', value: 'example' });
+      mapping.throws(filter);
+      next.returns({ key: 'test', value: 'example' });
 
       const chain = generateMappingChain(mapping, next);
-      const result = await chain(filter);
+      const result = chain(filter);
 
       sinon.assert.calledOnce(mapping);
       sinon.assert.calledOnce(next);
       expect(result).toEqual({ key: 'test', value: 'example' });
     });
 
-    test('should reject with an error if no functions match', async done => {
+    test('should throw an error if no functions match', async done => {
       const filter: Filter = buildEmptyFilter(true);
 
-      mapping.rejects(filter);
+      mapping.throws(filter);
 
       const chain = generateMappingChain(mapping);
 
-      chain(filter).catch(err => {
+      try {
+        chain(filter);
+      } catch (err) {
         expect(err).toBeInstanceOf(Error);
         expect(err.message).toBe('No mappings have been found for filter.');
         done();
-      });
+      }
     });
   });
 });

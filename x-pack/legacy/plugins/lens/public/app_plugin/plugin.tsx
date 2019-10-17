@@ -25,6 +25,12 @@ import {
 } from '../datatable_visualization_plugin';
 import { App } from './app';
 import { EditorFrameInstance } from '../types';
+import {
+  LensReportManager,
+  setReportManager,
+  stopReportManager,
+  trackUiEvent,
+} from '../lens_ui_telemetry';
 
 export interface LensPluginStartDependencies {
   data: DataPublicPluginStart;
@@ -63,7 +69,16 @@ export class AppPlugin {
 
     this.instance = editorFrameStartInterface.createInstance({});
 
+    setReportManager(
+      new LensReportManager({
+        storage: new Storage(localStorage),
+        basePath: core.http.basePath.get(),
+        http: core.http,
+      })
+    );
+
     const renderEditor = (routeProps: RouteComponentProps<{ id?: string }>) => {
+      trackUiEvent('loaded');
       return (
         <App
           core={core}
@@ -85,6 +100,7 @@ export class AppPlugin {
     };
 
     function NotFound() {
+      trackUiEvent('loaded_404');
       return <FormattedMessage id="xpack.lens.app404" defaultMessage="404 Not Found" />;
     }
 
@@ -105,6 +121,8 @@ export class AppPlugin {
     if (this.instance) {
       this.instance.unmount();
     }
+
+    stopReportManager();
 
     // TODO this will be handled by the plugin platform itself
     indexPatternDatasourceStop();

@@ -20,11 +20,19 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { NavigationMenu } from '../../../components/navigation_menu/navigation_menu';
+import { NavigationMenu } from '../../../components/navigation_menu';
 
 import { Exploration } from './components/exploration';
+import { RegressionExploration } from './components/regression_exploration';
 
-export const Page: FC<{ jobId: string }> = ({ jobId }) => (
+import { ANALYSIS_CONFIG_TYPE } from '../../common/analytics';
+
+export const Page: FC<{
+  jobId: string;
+  analysisType: string;
+  destIndex: string;
+  depVar: string;
+}> = ({ jobId, analysisType, destIndex, depVar }) => (
   <Fragment>
     <NavigationMenu tabId="data_frame_analytics" />
     <EuiPage data-test-subj="mlPageDataFrameAnalyticsExploration">
@@ -58,7 +66,10 @@ export const Page: FC<{ jobId: string }> = ({ jobId }) => (
         </EuiPageContentHeader>
         <EuiPageContentBody>
           <EuiSpacer size="l" />
-          <Exploration jobId={jobId} />
+          {analysisType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION && <Exploration jobId={jobId} />}
+          {analysisType === ANALYSIS_CONFIG_TYPE.REGRESSION && (
+            <RegressionExploration jobId={jobId} destIndex={destIndex} dependentVariable={depVar} />
+          )}
         </EuiPageContentBody>
       </EuiPageBody>
     </EuiPage>
