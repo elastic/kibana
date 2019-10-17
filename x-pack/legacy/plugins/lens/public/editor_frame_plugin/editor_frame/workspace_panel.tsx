@@ -15,6 +15,7 @@ import {
   EuiText,
   EuiBetaBadge,
   EuiButtonEmpty,
+  EuiProgress,
 } from '@elastic/eui';
 import { toExpression } from '@kbn/interpreter/common';
 import { CoreStart, CoreSetup } from 'src/core/public';
@@ -92,7 +93,10 @@ export function InnerWorkspacePanel({
     return suggestions.find(s => s.visualizationId === activeVisualizationId) || suggestions[0];
   }, [dragDropContext.dragging]);
 
-  const [expressionError, setExpressionError] = useState<unknown>(undefined);
+  const [localState, setLocalState] = useState({
+    expressionError: undefined as unknown,
+    isLoading: false,
+  });
 
   const activeVisualization = activeVisualizationId
     ? visualizationMap[activeVisualizationId]
@@ -107,7 +111,7 @@ export function InnerWorkspacePanel({
         framePublicAPI,
       });
     } catch (e) {
-      setExpressionError(e.toString());
+      setLocalState(s => ({ ...s, expressionError: e.toString() }));
     }
   }, [
     activeVisualization,
@@ -178,8 +182,8 @@ export function InnerWorkspacePanel({
   function renderVisualization() {
     useEffect(() => {
       // reset expression error if component attempts to run it again
-      if (expressionError) {
-        setExpressionError(undefined);
+      if (expression && localState.expressionError) {
+        setLocalState(s => ({ ...s, expressionError: undefined }));
       }
     }, [expression]);
 
@@ -187,7 +191,7 @@ export function InnerWorkspacePanel({
       return renderEmptyWorkspace();
     }
 
-    if (expressionError) {
+    if (localState.expressionError) {
       return (
         <EuiFlexGroup direction="column">
           <EuiFlexItem data-test-subj="expression-failure">
@@ -203,7 +207,7 @@ export function InnerWorkspacePanel({
             </EuiFlexItem>
           )}
           <EuiFlexItem>
-            <EuiCodeBlock>{JSON.stringify(expressionError, null, 2)}</EuiCodeBlock>
+            <EuiCodeBlock>{JSON.stringify(localState.expressionError, null, 2)}</EuiCodeBlock>
           </EuiFlexItem>
         </EuiFlexGroup>
       );
@@ -213,7 +217,13 @@ export function InnerWorkspacePanel({
           className="lnsExpressionRenderer"
           expression={expression!}
           onRenderFailure={(e: unknown) => {
-            setExpressionError(e);
+            setLocalState(s => ({ ...s, expressionError: e }));
+          }}
+          onRenderStart={() => {
+            setLocalState(s => ({ ...s, isLoading: true }));
+          }}
+          onRenderComplete={() => {
+            setLocalState(s => ({ ...s, isLoading: false }));
           }}
         />
       );
@@ -227,6 +237,7 @@ export function InnerWorkspacePanel({
       droppable={Boolean(suggestionForDraggedField)}
       onDrop={onDrop}
     >
+      {localState.isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
       {renderVisualization()}
     </DragDrop>
   );

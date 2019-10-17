@@ -35,6 +35,7 @@ export class ExpressionLoader {
   private renderHandler: ExpressionRenderHandler;
   private dataSubject: Subject<Data>;
   private data: Data;
+  private executionPromise: Promise<unknown>;
 
   constructor(
     element: HTMLElement,
@@ -57,7 +58,7 @@ export class ExpressionLoader {
       this.render(data);
     });
 
-    this.execute(expression, params);
+    this.executionPromise = this.execute(expression, params);
   }
 
   destroy() {}
@@ -78,6 +79,10 @@ export class ExpressionLoader {
     return this.renderHandler.getElement();
   }
 
+  getExecutionPromise() {
+    return this.executionPromise;
+  }
+
   openInspector(title: string): InspectorSession {
     return getInspector().open(this.inspect(), {
       title,
@@ -91,11 +96,9 @@ export class ExpressionLoader {
   update(expression: string | ExpressionAST, params: IExpressionLoaderParams): Promise<RenderId> {
     const promise = this.render$.pipe(first()).toPromise();
 
-    if (expression !== null) {
-      this.execute(expression, params);
-    } else {
-      this.render(this.data);
-    }
+    this.executionPromise =
+      expression !== null ? this.execute(expression, params) : this.render(this.data);
+
     return promise;
   }
 

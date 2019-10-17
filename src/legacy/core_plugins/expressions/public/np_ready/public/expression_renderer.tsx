@@ -33,6 +33,21 @@ export interface ExpressionRendererProps extends IExpressionLoaderParams {
    * this callback is called with the given result.
    */
   onRenderFailure?: (result: IInterpreterResult) => void;
+
+  /**
+   * Called before each render attempt.
+   */
+  onRenderStart?: () => void;
+
+  /**
+   * Called after each successful render.
+   */
+  onRenderSuccess?: () => void;
+
+  /**
+   * Called after all render attempts, even failed ones.
+   */
+  onRenderComplete?: () => void;
 }
 
 export type ExpressionRenderer = React.FC<ExpressionRendererProps>;
@@ -41,6 +56,9 @@ export const createRenderer = (loader: IExpressionLoader): ExpressionRenderer =>
   className,
   expression,
   onRenderFailure,
+  onRenderStart,
+  onRenderSuccess,
+  onRenderComplete,
   ...options
 }: ExpressionRendererProps) => {
   const mountpoint: React.MutableRefObject<null | HTMLDivElement> = useRef(null);
@@ -48,11 +66,34 @@ export const createRenderer = (loader: IExpressionLoader): ExpressionRenderer =>
 
   useEffect(() => {
     if (mountpoint.current) {
+      if (onRenderStart) {
+        onRenderStart();
+      }
+
       if (!handlerRef.current) {
         handlerRef.current = loader(mountpoint.current, expression, options);
       } else {
         handlerRef.current.update(expression, options);
       }
+
+      handlerRef.current
+        .getExecutionPromise()
+        .then(() => {
+          if (onRenderSuccess) {
+            onRenderSuccess();
+          }
+        })
+        .catch(result => {
+          if (onRenderFailure) {
+            onRenderFailure(result);
+          }
+        })
+        .then(() => {
+          if (onRenderComplete) {
+            onRenderComplete();
+          }
+        });
+
       handlerRef.current.data$.toPromise().catch(result => {
         if (onRenderFailure) {
           onRenderFailure(result);
