@@ -54,15 +54,6 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await this.preserveCrossAppState();
     }
 
-    async cleanAfterTest({
-      kibanaIndex = 'dashboard/legacy',
-      dataIndex = 'logstash_functional',
-    }) {
-      log.debug('unload kibana index and data');
-      await esArchiver.unload(kibanaIndex);
-      await esArchiver.unload(dataIndex);
-    }
-
     async preserveCrossAppState() {
       const url = await browser.getCurrentUrl();
       await browser.get(url, false);

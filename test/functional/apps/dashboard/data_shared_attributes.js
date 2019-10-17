@@ -21,6 +21,8 @@ import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
+  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const PageObjects = getPageObjects(['dashboard']);
 
@@ -28,20 +30,13 @@ export default function ({ getService, getPageObjects }) {
     let originalPanelTitles;
 
     before(async () => {
-      await PageObjects.dashboard.initTests({
-        kibanaIndex: 'dashboard/current/kibana',
-        dataIndex: 'dashboard/current/data',
-        defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
+      await esArchiver.load('dashboard/current/kibana');
+      await kibanaServer.uiSettings.replace({
+        'defaultIndex': '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
+      await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.loadSavedDashboard('dashboard with everything');
       await PageObjects.dashboard.waitForRenderComplete();
-    });
-
-    after(async () => {
-      await PageObjects.dashboard.cleanAfterTest({
-        kibanaIndex: 'dashboard/current/kibana',
-        dataIndex: 'dashboard/current/data'
-      });
     });
 
     it('should have data-shared-items-count set to the number of embeddables on the dashboard', async () => {
