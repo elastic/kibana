@@ -4,7 +4,7 @@
 <titleabbrev>Create or update role</titleabbrev>
 ++++
 
-Creates a new {kib} role, or updates the attributes of an existing role. {kib} roles are stored in the
+Create a new {kib} role, or update the attributes of an existing role. {kib} roles are stored in the
 {es} native realm.
 
 experimental["The underlying mechanism of enforcing role-based access control is stable, but the APIs for managing the roles are experimental."]
@@ -40,7 +40,7 @@ To use the create or update role API, you must have the `manage_security` cluste
 `feature` ::: 
   (object) Contains privileges for specific features.
   When the `feature` privileges are specified, you are unable to use the `base` section.
-  To retrieve a list of available features, use the <<features-api, features API>>.
+  To retrieve a list of available features, use the <<features-api-get, features API>>.
 
 `spaces` ::: 
   (list) The spaces to apply the privileges to.

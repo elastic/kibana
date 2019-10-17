@@ -6,7 +6,7 @@
 
 import { DetailSymbolInformation } from '@elastic/lsp-extension';
 
-import { SymbolSearchRequest, SymbolSearchResult } from '../../model';
+import { SymbolSearchRequest, SymbolSearchResult, emptySymbolSearchResult } from '../../model';
 import { SymbolIndexNamePrefix, SymbolSearchIndexWithScope } from '../indexer/schema';
 import { EsClient } from '../lib/esqueue';
 import { Logger } from '../log';
@@ -17,10 +17,10 @@ export class SymbolSearchClient extends AbstractSearchClient {
     super(client, log);
   }
 
-  public async findByQname(qname: string): Promise<SymbolSearchResult> {
+  public async findByQname(qname: string, repoScope: string[]): Promise<SymbolSearchResult> {
     const [from, size] = [0, 1];
     const rawRes = await this.client.search({
-      index: `${SymbolIndexNamePrefix}*`,
+      index: SymbolSearchIndexWithScope(repoScope),
       body: {
         from,
         size,
@@ -42,6 +42,9 @@ export class SymbolSearchClient extends AbstractSearchClient {
     const index = req.repoScope
       ? SymbolSearchIndexWithScope(req.repoScope)
       : `${SymbolIndexNamePrefix}*`;
+    if (index.length === 0) {
+      return emptySymbolSearchResult();
+    }
 
     const rawRes = await this.client.search({
       index,

@@ -16,7 +16,6 @@ import 'plugins/ml/access_denied';
 import 'plugins/ml/jobs';
 import 'plugins/ml/overview';
 import 'plugins/ml/services/calendar_service';
-import 'plugins/ml/components/messagebar';
 import 'plugins/ml/data_frame_analytics';
 import 'plugins/ml/datavisualizer';
 import 'plugins/ml/explorer';
