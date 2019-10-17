@@ -190,7 +190,7 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
 
   const selectionPanel = (
     <div className="dscFieldSearch__formWrapper">
-      <EuiForm>
+      <EuiForm data-test-subj="filterSelectionPanel">
         <EuiFormRow
           fullWidth
           label={i18n.translate('kbn.discover.fieldChooser.filter.aggregatableLabel', {
