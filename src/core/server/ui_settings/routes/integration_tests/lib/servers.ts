@@ -17,20 +17,24 @@
  * under the License.
  */
 
-import { UnwrapPromise } from '@kbn/utility-types';
 import { SavedObjectsClientContract, IUiSettingsClient } from 'src/core/server';
 
-import KbnServer from '../../../../../../legacy/server/kbn_server';
-import { createTestServers } from '../../../../../../test_utils/kbn_server';
+import {
+  createTestServers,
+  TestElasticsearchUtils,
+  TestKibanaUtils,
+  TestUtils,
+} from '../../../../../../test_utils/kbn_server';
 import { CallCluster } from '../../../../../../legacy/core_plugins/elasticsearch';
 
-let kbnServer: KbnServer;
-let servers: ReturnType<typeof createTestServers>;
-let esServer: UnwrapPromise<ReturnType<typeof servers['startES']>>;
-let kbn: UnwrapPromise<ReturnType<typeof servers['startKibana']>>;
+let servers: TestUtils;
+let esServer: TestElasticsearchUtils;
+let kbn: TestKibanaUtils;
+
+let kbnServer: TestKibanaUtils['kbnServer'];
 
 interface AllServices {
-  kbnServer: KbnServer;
+  kbnServer: TestKibanaUtils['kbnServer'];
   savedObjectsClient: SavedObjectsClientContract;
   callCluster: CallCluster;
   uiSettings: IUiSettingsClient;
