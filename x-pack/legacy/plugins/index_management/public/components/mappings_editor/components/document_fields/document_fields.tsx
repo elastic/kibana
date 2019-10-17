@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 
 import { useState, useDispatch } from '../../mappings_state';
@@ -24,16 +24,24 @@ export const DocumentFields = () => {
     dispatch({ type: 'documentField.createField' });
   };
 
+  useEffect(() => {
+    if (status === 'idle' && fields.length === 0) {
+      addField();
+    }
+  }, [fields, status]);
+
   const renderCreateField = () => {
     // The "fieldToAddFieldTo" is undefined when adding to the top level "properties" object.
-    if (status !== 'creatingField' || fieldToAddFieldTo !== undefined) {
+    const showCreateField = status === 'creatingField' && fieldToAddFieldTo === undefined;
+
+    if (!showCreateField) {
       return null;
     }
 
     return (
       <div className="mappings-editor__create-field-wrapper">
         <div className="mappings-editor__create-field-content">
-          <CreateField />
+          <CreateField isCancelable={fields.length > 0} />
         </div>
       </div>
     );

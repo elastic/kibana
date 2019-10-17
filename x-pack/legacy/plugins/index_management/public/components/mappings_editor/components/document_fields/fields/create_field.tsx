@@ -17,7 +17,11 @@ const formWrapper = (props: any) => <form {...props} />;
 const getFieldConfig = (param: ParameterName): FieldConfig =>
   PARAMETERS_DEFINITION[param].fieldConfig || {};
 
-export const CreateField = React.memo(() => {
+interface Props {
+  isCancelable?: boolean;
+}
+
+export const CreateField = React.memo(({ isCancelable = true }: Props) => {
   const { form } = useForm<Field>();
   const dispatch = useDispatch();
 
@@ -48,7 +52,7 @@ export const CreateField = React.memo(() => {
 
   return (
     <Form form={form} FormWrapper={formWrapper} onSubmit={submitForm}>
-      <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" alignItems="center">
+      <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" alignItems="flexEnd">
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem>
@@ -70,9 +74,11 @@ export const CreateField = React.memo(() => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={cancel}>Cancel</EuiButtonEmpty>
-            </EuiFlexItem>
+            {isCancelable && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty onClick={cancel}>Cancel</EuiButtonEmpty>
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false}>
               <EuiButton color="primary" fill onClick={submitForm} type="submit">
                 Add
