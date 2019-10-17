@@ -42,7 +42,7 @@ export default async ({ readConfigFile }) => {
     stackFunctionalIntegrationTests: {
       envObj: provisionedConfigs
     },
-    // testFiles: tests.map(prepend),
-    testFiles: ['sampleData', 'reporting'].map(prepend),
+    testFiles: tests.map(prepend),
+    // testFiles: ['sampleData', 'reporting'].map(prepend),
   };
 }
