@@ -169,9 +169,9 @@ export const AnomalyDetectionPanel: FC = () => {
             </Fragment>
           }
           actions={
-            <EuiButton color="primary" href={createJobLink} fill>
+            <EuiButton color="primary" href={createJobLink} fill iconType="plusInCircle">
               {i18n.translate('xpack.ml.overview.anomalyDetection.createJobButtonText', {
-                defaultMessage: 'Create job.',
+                defaultMessage: 'Create job',
               })}
             </EuiButton>
           }
