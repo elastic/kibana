@@ -63,6 +63,7 @@ export const LICENSE_WHITELIST = [
   'MIT/X11',
   'new BSD, and MIT',
   '(OFL-1.1 AND MIT)',
+  'PSF',
   'Public Domain',
   'Unlicense',
   'WTFPL OR ISC',

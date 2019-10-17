@@ -32,7 +32,7 @@ interface Props {
 
 export function DiscoverLink({ query = {}, ...rest }: Props) {
   const core = useKibanaCore();
-  const apmIndexPattern = useAPMIndexPattern();
+  const { apmIndexPattern } = useAPMIndexPattern();
   const location = useLocation();
 
   if (!apmIndexPattern.id) {

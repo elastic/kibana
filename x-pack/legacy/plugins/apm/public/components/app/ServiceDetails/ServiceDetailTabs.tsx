@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiTabs, EuiSpacer } from '@elastic/eui';
+import { npStart } from 'ui/new_platform';
 import { ErrorGroupOverview } from '../ErrorGroupOverview';
 import { TransactionOverview } from '../TransactionOverview';
 import { ServiceMetrics } from '../ServiceMetrics';
@@ -19,9 +20,11 @@ import { MetricOverviewLink } from '../../shared/Links/apm/MetricOverviewLink';
 import { ServiceNodeOverviewLink } from '../../shared/Links/apm/ServiceNodeOverviewLink';
 import { ServiceNodeOverview } from '../ServiceNodeOverview';
 import { useAgentName } from '../../../hooks/useAgentName';
+import { ServiceMap } from '../ServiceMap';
+import { ServiceMapLink } from '../../shared/Links/apm/ServiceMapLink';
 
 interface Props {
-  tab: 'transactions' | 'errors' | 'metrics' | 'nodes';
+  tab: 'transactions' | 'errors' | 'metrics' | 'nodes' | 'service-map';
 }
 
 export function ServiceDetailTabs({ tab }: Props) {
@@ -88,6 +91,22 @@ export function ServiceDetailTabs({ tab }: Props) {
       name: 'metrics'
     };
     tabs.push(metricsTab);
+  }
+
+  const serviceMapTab = {
+    link: (
+      <ServiceMapLink serviceName={serviceName}>
+        {i18n.translate('xpack.apm.home.serviceMapTabLabel', {
+          defaultMessage: 'Service Map'
+        })}
+      </ServiceMapLink>
+    ),
+    render: () => <ServiceMap serviceName={serviceName} />,
+    name: 'service-map'
+  };
+
+  if (npStart.core.injectedMetadata.getInjectedVar('apmServiceMapEnabled')) {
+    tabs.push(serviceMapTab);
   }
 
   const selectedTab = tabs.find(serviceTab => serviceTab.name === tab);

@@ -45,7 +45,9 @@ describe('callClient', () => {
     const { source: overrideSource, ...rest } = overrides;
 
     const source = {
-      _flatten: () => ({}),
+      _flatten: () => Promise.resolve({
+        index: id
+      }),
       requestIsStopped: () => {},
       getField: () => 'indexPattern',
       getPreferredSearchStrategyId: () => undefined,
@@ -64,16 +66,14 @@ describe('callClient', () => {
     esShouldError = false;
 
     $provide.service('es', (Promise) => {
-      fakeSearch = sinon.spy(() => {
+      fakeSearch = sinon.spy(({ index }) => {
         const esPromise = new Promise((resolve, reject) => {
           if (esShouldError) {
             return reject('fake es error');
           }
 
           setTimeout(() => {
-            resolve({
-              responses: searchRequests.map(searchRequest => searchRequest.__testId__),
-            });
+            resolve(index);
           }, esRequestDelay);
         });
 
@@ -82,7 +82,7 @@ describe('callClient', () => {
       });
 
       return {
-        msearch: fakeSearch,
+        search: fakeSearch
       };
     });
   }));
@@ -99,7 +99,7 @@ describe('callClient', () => {
       expect(callingClient.then).to.be.a('function');
     });
 
-    it(`resolves the promise with the 'responses' property of the es.msearch() result`, () => {
+    it(`resolves the promise with the 'responses' property of the es.search() result`, () => {
       searchRequests = [ createSearchRequest(1) ];
 
       return callClient(searchRequests).then(results => {
@@ -150,15 +150,6 @@ describe('callClient', () => {
   });
 
   describe('implementation', () => {
-    it('calls es.msearch() once, regardless of number of searchRequests', () => {
-      expect(fakeSearch.callCount).to.be(0);
-      searchRequests = [ createSearchRequest(), createSearchRequest(), createSearchRequest() ];
-
-      return callClient(searchRequests).then(() => {
-        expect(fakeSearch.callCount).to.be(1);
-      });
-    });
-
     it('calls searchRequest.whenAborted() as part of setup', async () => {
       const whenAbortedSpy = sinon.spy();
       const searchRequest = createSearchRequest();
@@ -172,8 +163,7 @@ describe('callClient', () => {
   });
 
   describe('aborting at different points in the request lifecycle:', () => {
-
-    it('while the search body is being formed resolves with an ABORTED response', () => {
+    it('while the search body is being formed rejects with an AbortError', () => {
       const searchRequest = createSearchRequest(1, {
         source: {
           _flatten: () => {
@@ -195,12 +185,12 @@ describe('callClient', () => {
         searchRequest.abort();
       }, 20);
 
-      return callingClient.then(results => {
-        expect(results).to.eql([ ABORTED ]);
+      return callingClient.catch(error => {
+        expect(error.name).to.be('AbortError');
       });
     });
 
-    it('while the search is in flight resolves with an ABORTED response', () => {
+    it('while the search is in flight rejects with an AbortError', () => {
       esRequestDelay = 100;
 
       const searchRequest = createSearchRequest();
@@ -212,14 +202,14 @@ describe('callClient', () => {
         searchRequest.abort();
       }, 80);
 
-      return callingClient.then(results => {
-        expect(results).to.eql([ ABORTED ]);
+      return callingClient.catch(error => {
+        expect(error.name).to.be('AbortError');
       });
     });
   });
 
   describe('aborting number of requests:', () => {
-    it(`aborting all searchRequests resolves with ABORTED responses`, () => {
+    it(`aborting all searchRequests rejects with an AbortError`, () => {
       const searchRequest1 = createSearchRequest();
       const searchRequest2 = createSearchRequest();
       searchRequests = [ searchRequest1, searchRequest2 ];
@@ -228,8 +218,8 @@ describe('callClient', () => {
       searchRequest1.abort();
       searchRequest2.abort();
 
-      return callingClient.then(results => {
-        expect(results).to.eql([ABORTED, ABORTED]);
+      return callingClient.catch(error => {
+        expect(error.name).to.be('AbortError');
       });
     });
 
@@ -249,21 +239,21 @@ describe('callClient', () => {
           searchRequest1.abort();
           searchRequest2.abort();
         }),
-        callingClient.then(() => {
+        callingClient.catch(() => {
           expect(esPromiseAbortSpy.callCount).to.be(1);
         }),
       ]);
     });
 
-    it('aborting some searchRequests resolves those with ABORTED responses', () => {
+    it('aborting some searchRequests rejects with an AbortError', () => {
       const searchRequest1 = createSearchRequest(1);
       const searchRequest2 = createSearchRequest(2);
       searchRequests = [ searchRequest1, searchRequest2 ];
       const callingClient = callClient(searchRequests);
       searchRequest2.abort();
 
-      return callingClient.then(results => {
-        expect(results).to.eql([ 1, ABORTED ]);
+      return callingClient.catch(error => {
+        expect(error.name).to.be('AbortError');
       });
     });
   });

@@ -13,15 +13,8 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
   const testSubjects = getService('testSubjects');
 
   return {
-    async waitForNextButtonVisible() {
-      await retry.waitFor(
-        'next button to be visible',
-        async () => await testSubjects.isDisplayed('mlJobWizardNavButtonNext')
-      );
-    },
-
     async clickNextButton() {
-      await this.waitForNextButtonVisible();
+      await testSubjects.existOrFail('mlJobWizardNavButtonNext');
       await testSubjects.clickWhenNotDisabled('mlJobWizardNavButtonNext');
     },
 
@@ -283,9 +276,11 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
     },
 
     async assertDateRangeSelection(expectedStartDate: string, expectedEndDate: string) {
-      expect(await this.getSelectedDateRange()).to.eql({
-        startDate: expectedStartDate,
-        endDate: expectedEndDate,
+      await retry.tryForTime(5000, async () => {
+        expect(await this.getSelectedDateRange()).to.eql({
+          startDate: expectedStartDate,
+          endDate: expectedEndDate,
+        });
       });
     },
 
@@ -295,21 +290,17 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
     },
 
     async ensureAdvancedSectionOpen() {
-      await retry.try(async () => {
+      await retry.tryForTime(5000, async () => {
         if ((await testSubjects.exists('mlJobWizardAdvancedSection')) === false) {
           await testSubjects.click('mlJobWizardToggleAdvancedSection');
-          await testSubjects.existOrFail('mlJobWizardAdvancedSection');
+          await testSubjects.existOrFail('mlJobWizardAdvancedSection', { timeout: 1000 });
         }
       });
     },
 
     async createJobAndWaitForCompletion() {
       await testSubjects.clickWhenNotDisabled('mlJobWizardButtonCreateJob');
-      await retry.waitForWithTimeout(
-        'job processing to finish',
-        5 * 60 * 1000,
-        async () => await testSubjects.exists('mlJobWizardButtonRunInRealTime')
-      );
+      await testSubjects.existOrFail('mlJobWizardButtonRunInRealTime', { timeout: 5 * 60 * 1000 });
     },
   };
 }

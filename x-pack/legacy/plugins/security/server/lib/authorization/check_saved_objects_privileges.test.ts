@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SpacesPlugin } from '../../../../spaces';
+import { LegacySpacesPlugin } from '../../../../spaces';
 import { OptionalPlugin } from '../../../../../server/lib/optional_plugin';
 import { checkSavedObjectsPrivilegesWithRequestFactory } from './check_saved_objects_privileges';
 
@@ -19,7 +19,7 @@ test(`checkPrivileges.atSpace when spaces is enabled`, async () => {
   const mockSpaces = ({
     isEnabled: true,
     namespaceToSpaceId: jest.fn().mockReturnValue(spaceId),
-  } as unknown) as OptionalPlugin<SpacesPlugin>;
+  } as unknown) as OptionalPlugin<LegacySpacesPlugin>;
   const request = Symbol();
 
   const privilegeOrPrivileges = ['foo', 'bar'];
@@ -50,7 +50,7 @@ test(`checkPrivileges.globally when spaces is disabled`, async () => {
     namespaceToSpaceId: jest.fn().mockImplementation(() => {
       throw new Error('should not be called');
     }),
-  } as unknown) as OptionalPlugin<SpacesPlugin>;
+  } as unknown) as OptionalPlugin<LegacySpacesPlugin>;
 
   const request = Symbol();
 

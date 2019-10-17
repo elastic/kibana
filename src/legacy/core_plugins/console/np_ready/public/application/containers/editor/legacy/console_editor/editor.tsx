@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 
 import $ from 'jquery';
 
-import { EuiIcon } from '@elastic/eui';
+import { EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useAppContext } from '../../../../context';
 import { useUIAceKeyboardMode } from '../use_ui_ace_keyboard_mode';
 import { ConsoleMenu } from '../../../../components';
@@ -173,33 +173,43 @@ function _Editor({ previousStateLocation = 'stored' }: EditorProps) {
     <div style={abs} className="conApp">
       <div className="conApp__editor">
         <ul className="conApp__autoComplete" id="autocomplete" />
-        <div ref={actionsRef} className="conApp__editorActions" id="ConAppEditorActions">
-          <EuiToolTip
-            content={i18n.translate('console.sendRequestButtonTooltip', {
-              defaultMessage: 'click to send request',
-            })}
-          >
-            <button
-              onClick={sendCurrentRequestToES}
-              data-test-subj="sendRequestButton"
-              className="conApp__editorActionButton conApp__editorActionButton--success"
+        <EuiFlexGroup
+          ref={actionsRef}
+          className="conApp__editorActions"
+          id="ConAppEditorActions"
+          gutterSize="none"
+          responsive={false}
+        >
+          <EuiFlexItem>
+            <EuiToolTip
+              content={i18n.translate('console.sendRequestButtonTooltip', {
+                defaultMessage: 'click to send request',
+              })}
             >
-              <EuiIcon type="play" />
-            </button>
-          </EuiToolTip>
-          <ConsoleMenu
-            getCurl={(cb: any) => {
-              editorInstanceRef.current!.getRequestsAsCURL(cb);
-            }}
-            getDocumentation={() => {
-              return getDocumentation(editorInstanceRef.current!, docLinkVersion);
-            }}
-            autoIndent={(event: any) => {
-              autoIndent(editorInstanceRef.current!, event);
-            }}
-            addNotification={({ title }) => notifications.toasts.add({ title })}
-          />
-        </div>
+              <button
+                onClick={sendCurrentRequestToES}
+                data-test-subj="sendRequestButton"
+                className="conApp__editorActionButton conApp__editorActionButton--success"
+              >
+                <EuiIcon type="play" />
+              </button>
+            </EuiToolTip>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <ConsoleMenu
+              getCurl={(cb: any) => {
+                editorInstanceRef.current!.getRequestsAsCURL(cb);
+              }}
+              getDocumentation={() => {
+                return getDocumentation(editorInstanceRef.current!, docLinkVersion);
+              }}
+              autoIndent={(event: any) => {
+                autoIndent(editorInstanceRef.current!, event);
+              }}
+              addNotification={({ title }) => notifications.toasts.add({ title })}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <div
           ref={editorRef}
           id="ConAppEditor"

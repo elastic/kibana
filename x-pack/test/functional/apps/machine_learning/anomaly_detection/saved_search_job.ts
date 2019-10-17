@@ -280,7 +280,6 @@ export default function({ getService }: FtrProviderContext) {
     after(async () => {
       await esArchiver.unload('ml/farequote');
       await ml.api.cleanMlIndices();
-      await ml.api.cleanDataframeIndices();
     });
 
     for (const testData of testDataList) {
@@ -306,11 +305,14 @@ export default function({ getService }: FtrProviderContext) {
           await ml.jobWizardCommon.assertTimeRangeSectionExists();
         });
 
-        it('displays the event rate chart', async () => {
+        it('sets the timerange', async () => {
           await ml.jobWizardCommon.clickUseFullDataButton(
             'Feb 7, 2016 @ 00:00:00.000',
             'Feb 11, 2016 @ 23:59:54.000'
           );
+        });
+
+        it('displays the event rate chart', async () => {
           await ml.jobWizardCommon.assertEventRateChartExists();
           await ml.jobWizardCommon.assertEventRateChartHasData();
         });

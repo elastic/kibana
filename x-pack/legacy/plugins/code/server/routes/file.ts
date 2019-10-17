@@ -14,6 +14,7 @@ import { EsClientWithRequest } from '../utils/esclient_with_request';
 import { decodeRevisionString } from '../../common/uri_util';
 import { CodeServices } from '../distributed/code_services';
 import { GitServiceDefinition } from '../distributed/apis';
+import { getReferenceHelper } from '../utils/repository_reference_helper';
 
 export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) {
   const gitService = codeServices.serviceFor(GitServiceDefinition);
@@ -26,6 +27,7 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
 
     try {
       const repo = await repoObjectClient.getRepository(repoUri);
+      await getReferenceHelper(req.getSavedObjectsClient()).ensureReference(repo.uri);
       return repo.uri;
     } catch (e) {
       return undefined;
@@ -133,7 +135,7 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
       try {
         const blob = await gitService.raw(endpoint, { uri: repoUri, path, revision });
         if (blob.isBinary) {
-          return h.response(blob.content).type('application/octet-stream');
+          return h.response(blob.content).encoding('binary');
         } else {
           return h.response(blob.content).type('text/plain');
         }

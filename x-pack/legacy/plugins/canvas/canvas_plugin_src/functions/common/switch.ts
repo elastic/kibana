@@ -5,7 +5,7 @@
  */
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { Case } from '../../../types';
-import { getFunctionHelp } from '../../strings';
+import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
   case: Array<() => Promise<Case>>;

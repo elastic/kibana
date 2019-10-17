@@ -21,8 +21,14 @@ import Url from 'url';
 
 import Axios from 'axios';
 
-import { isAxiosRequestError, isConcliftOnGetError } from './errors';
+import { isAxiosRequestError, isAxiosResponseError } from '../axios';
 import { ToolingLog } from '../tooling_log';
+
+const isConcliftOnGetError = (error: any) => {
+  return (
+    isAxiosResponseError(error) && error.config.method === 'GET' && error.response.status === 409
+  );
+};
 
 export const uriencode = (
   strings: TemplateStringsArray,

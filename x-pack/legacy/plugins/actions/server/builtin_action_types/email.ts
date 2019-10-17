@@ -118,7 +118,7 @@ async function executor(
   { logger }: { logger: Logger },
   execOptions: ActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult> {
-  const id = execOptions.id;
+  const actionId = execOptions.actionId;
   const config = execOptions.config as ActionTypeConfigType;
   const secrets = execOptions.secrets as ActionTypeSecretsType;
   const params = execOptions.params as ActionParamsType;
@@ -156,9 +156,9 @@ async function executor(
     result = await sendEmail(logger, sendEmailOptions);
   } catch (err) {
     const message = i18n.translate('xpack.actions.builtin.email.errorSendingErrorMessage', {
-      defaultMessage: 'error in action "{id}" sending email: {errorMessage}',
+      defaultMessage: 'error in action "{actionId}" sending email: {errorMessage}',
       values: {
-        id,
+        actionId,
         errorMessage: err.message,
       },
     });

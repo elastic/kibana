@@ -28,7 +28,7 @@ import {
 } from '../../../utils/streams';
 // Disable lint errors for imports from src/core/server/saved_objects until SavedObjects migration is complete
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { getSortedObjectsForExport } from '../../../../core/server/saved_objects/export';
+import { getSortedObjectsForExport } from '../../../../core/server/saved_objects';
 import { Prerequisites } from './types';
 
 interface ExportRequest extends Hapi.Request {
@@ -43,6 +43,7 @@ interface ExportRequest extends Hapi.Request {
     }>;
     search?: string;
     includeReferencesDeep: boolean;
+    excludeExportDetails: boolean;
   };
 }
 
@@ -73,6 +74,7 @@ export const createExportRoute = (
             .optional(),
           search: Joi.string().optional(),
           includeReferencesDeep: Joi.boolean().default(false),
+          excludeExportDetails: Joi.boolean().default(false),
         })
         .xor('type', 'objects')
         .nand('search', 'objects')
@@ -87,6 +89,7 @@ export const createExportRoute = (
         objects: request.payload.objects,
         exportSizeLimit: server.config().get('savedObjects.maxImportExportSize'),
         includeReferencesDeep: request.payload.includeReferencesDeep,
+        excludeExportDetails: request.payload.excludeExportDetails,
       });
 
       const docsToExport: string[] = await createPromiseFromStreams([

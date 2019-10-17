@@ -22,6 +22,7 @@ interface FindRequest extends WithoutQueryAndParams<Hapi.Request> {
       id: string;
     };
     fields?: string[];
+    filter?: string;
   };
 }
 
@@ -58,6 +59,9 @@ export const findAlertRoute = {
           fields: Joi.array()
             .items(Joi.string())
             .single(),
+          filter: Joi.string()
+            .allow('')
+            .optional(),
         })
         .default(),
     },
@@ -75,6 +79,7 @@ export const findAlertRoute = {
         sortField: query.sort_field,
         hasReference: query.has_reference,
         fields: query.fields,
+        filter: query.filter,
       },
     });
   },

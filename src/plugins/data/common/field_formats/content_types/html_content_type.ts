@@ -17,15 +17,14 @@
  * under the License.
  */
 import { escape, isFunction } from 'lodash';
-import { FieldFormatConvert, IFieldFormat, HtmlContextTypeConvert } from '../types';
-
+import { IFieldFormat, HtmlContextTypeConvert } from '../types';
 import { asPrettyString, getHighlightHtml } from '../utils';
 
 export const HTML_CONTEXT_TYPE = 'html';
 
 const getConvertFn = (
   format: IFieldFormat,
-  fieldFormatConvert: Partial<FieldFormatConvert>
+  convert?: HtmlContextTypeConvert
 ): HtmlContextTypeConvert => {
   const fallbackHtml: HtmlContextTypeConvert = (value, field, hit) => {
     const formatted = escape(format.convert(value, 'text'));
@@ -35,14 +34,14 @@ const getConvertFn = (
       : getHighlightHtml(formatted, hit.highlight[field.name]);
   };
 
-  return (fieldFormatConvert[HTML_CONTEXT_TYPE] || fallbackHtml) as HtmlContextTypeConvert;
+  return (convert || fallbackHtml) as HtmlContextTypeConvert;
 };
 
 export const setup = (
   format: IFieldFormat,
-  fieldFormatConvert: Partial<FieldFormatConvert>
+  htmlContextTypeConvert?: HtmlContextTypeConvert
 ): HtmlContextTypeConvert => {
-  const convert = getConvertFn(format, fieldFormatConvert);
+  const convert = getConvertFn(format, htmlContextTypeConvert);
 
   const recurse: HtmlContextTypeConvert = (value, field, hit, meta) => {
     if (value == null) {
@@ -56,7 +55,7 @@ export const setup = (
     const subValues = value.map((v: any) => {
       return recurse(v, field, hit, meta);
     });
-    const useMultiLine = subValues.some((sub: any) => {
+    const useMultiLine = subValues.some((sub: string) => {
       return sub.indexOf('\n') > -1;
     });
 

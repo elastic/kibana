@@ -2,6 +2,11 @@
 
 exports[`EmbeddedMap renders correctly against snapshot 1`] = `
 <Fragment>
+  <InPortal
+    node={<div />}
+  >
+    <MapToolTip />
+  </InPortal>
   <Styled(EuiFlexGroup)>
     <Loader
       data-test-subj="loading-panel"

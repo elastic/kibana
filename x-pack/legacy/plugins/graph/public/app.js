@@ -9,12 +9,14 @@ import { i18n } from '@kbn/i18n';
 import 'ace';
 import React from 'react';
 import { Provider } from 'react-redux';
+import { isColorDark, hexToRgb } from '@elastic/eui';
 
 // import the uiExports that we want to "use"
 import 'uiExports/fieldFormats';
 import 'uiExports/savedObjectTypes';
 
 import 'ui/autoload/all';
+import 'ui/angular-bootstrap';
 import 'ui/kbn_top_nav';
 import 'ui/directives/saved_object_finder';
 import 'ui/directives/input_focus';
@@ -25,7 +27,7 @@ import { uiModules } from 'ui/modules';
 import uiRoutes from 'ui/routes';
 import { addAppRedirectMessageToUrl, toastNotifications } from 'ui/notify';
 import { formatAngularHttpError } from 'ui/notify/lib';
-import { setup as data } from '../../../../../src/legacy/core_plugins/data/public/legacy';
+import { start as data } from '../../../../../src/legacy/core_plugins/data/public/legacy';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { npStart } from 'ui/new_platform';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
@@ -38,7 +40,6 @@ import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import appTemplate from './angular/templates/index.html';
 import listingTemplate from './angular/templates/listing_ng_wrapper.html';
 import { getReadonlyBadge } from './badge';
-import { FormattedMessage } from '@kbn/i18n/react';
 
 import { GraphApp } from './components/app';
 import { VennDiagram } from './components/venn_diagram';
@@ -48,16 +49,15 @@ import { GraphVisualization } from './components/graph_visualization';
 
 import gws from './angular/graph_client_workspace.js';
 import { SavedWorkspacesProvider } from './angular/services/saved_workspaces';
-import { getEditUrl, getNewPath, getEditPath, setBreadcrumbs, getHomePath } from './services/url';
+import { getEditUrl, getNewPath, getEditPath, setBreadcrumbs } from './services/url';
 import { createCachedIndexPatternProvider } from './services/index_pattern_cache';
 import { urlTemplateRegex } from  './helpers/url_template';
 import {
   asAngularSyncedObservable,
 } from './helpers/as_observable';
-import { fetchTopNodes } from './services/fetch_top_nodes';
+import { colorChoices } from './helpers/style_choices';
 import {
   createGraphStore,
-  selectedFieldsSelector,
   datasourceSelector,
   hasFieldsSelector
 } from './state_management';
@@ -82,13 +82,23 @@ app.directive('vennDiagram', function (reactDirective) {
 });
 
 app.directive('graphListing', function (reactDirective) {
-  return reactDirective(Listing);
+  return reactDirective(Listing, [
+    ['coreStart', { watchDepth: 'reference' }],
+    ['createItem', { watchDepth: 'reference' }],
+    ['findItems', { watchDepth: 'reference' }],
+    ['deleteItems', { watchDepth: 'reference' }],
+    ['editItem', { watchDepth: 'reference' }],
+    ['getViewUrl', { watchDepth: 'reference' }],
+    ['listingLimit', { watchDepth: 'reference' }],
+    ['hideWriteControls', { watchDepth: 'reference' }],
+    ['capabilities', { watchDepth: 'reference' }],
+    ['initialFilter', { watchDepth: 'reference' }],
+  ]);
 });
 
 app.directive('graphApp', function (reactDirective) {
   return reactDirective(GraphApp, [
     ['store', { watchDepth: 'reference' }],
-    ['onFillWorkspace', { watchDepth: 'reference' }],
     ['isInitialized', { watchDepth: 'reference' }],
     ['currentIndexPattern', { watchDepth: 'reference' }],
     ['indexPatternProvider', { watchDepth: 'reference' }],
@@ -97,16 +107,15 @@ app.directive('graphApp', function (reactDirective) {
     ['initialQuery', { watchDepth: 'reference' }],
     ['confirmWipeWorkspace', { watchDepth: 'reference' }],
     ['coreStart', { watchDepth: 'reference' }],
-    ['pluginDataStart', { watchDepth: 'reference' }],
-    ['store', { watchDepth: 'reference' }],
+    ['noIndexPatterns', { watchDepth: 'reference' }],
     ['reduxStore', { watchDepth: 'reference' }],
-  ]);
+    ['pluginDataStart', { watchDepth: 'reference' }],
+  ], { restrict: 'A' });
 });
 
 app.directive('graphVisualization', function (reactDirective) {
-  return reactDirective(GraphVisualization);
+  return reactDirective(GraphVisualization, undefined, { restrict: 'A' });
 });
-
 
 if (uiRoutes.enable) {
   uiRoutes.enable();
@@ -138,6 +147,7 @@ uiRoutes
       };
       $scope.capabilities = capabilities.get().graph;
       $scope.initialFilter = ($location.search()).filter || '';
+      $scope.coreStart = npStart.core;
       setBreadcrumbs({ chrome });
     }
   })
@@ -191,30 +201,26 @@ app.controller('graphuiPlugin', function (
   checkLicense(kbnBaseUrl);
 
   function handleError(err) {
-    return checkLicense(kbnBaseUrl)
-      .then(() => {
-        const toastTitle = i18n.translate('xpack.graph.errorToastTitle', {
-          defaultMessage: 'Graph Error',
-          description: '"Graph" is a product name and should not be translated.',
-        });
-        if (err instanceof Error) {
-          toastNotifications.addError(err, {
-            title: toastTitle,
-          });
-        } else {
-          toastNotifications.addDanger({
-            title: toastTitle,
-            text: String(err),
-          });
-        }
+    checkLicense(kbnBaseUrl);
+    const toastTitle = i18n.translate('xpack.graph.errorToastTitle', {
+      defaultMessage: 'Graph Error',
+      description: '"Graph" is a product name and should not be translated.',
+    });
+    if (err instanceof Error) {
+      toastNotifications.addError(err, {
+        title: toastTitle,
       });
+    } else {
+      toastNotifications.addDanger({
+        title: toastTitle,
+        text: String(err),
+      });
+    }
   }
 
-  function handleHttpError(error) {
-    return checkLicense(kbnBaseUrl)
-      .then(() => {
-        toastNotifications.addDanger(formatAngularHttpError(error));
-      });
+  async function handleHttpError(error) {
+    checkLicense(kbnBaseUrl);
+    toastNotifications.addDanger(formatAngularHttpError(error));
   }
 
   // Replacement function for graphClientWorkspace's comms so
@@ -287,6 +293,9 @@ app.controller('graphuiPlugin', function (
     setLiveResponseFields: (fields) => {
       $scope.liveResponseFields = fields;
     },
+    setUrlTemplates: (urlTemplates) => {
+      $scope.urlTemplates = urlTemplates;
+    },
     getWorkspace: () => {
       return $scope.workspace;
     },
@@ -294,7 +303,11 @@ app.controller('graphuiPlugin', function (
       return $route.current.locals.savedWorkspace;
     },
     notifications: npStart.core.notifications,
+    http: npStart.core.http,
     showSaveModal,
+    setWorkspaceInitialized: () => {
+      $scope.workspaceInitialized = true;
+    },
     savePolicy: chrome.getInjected('graphSavePolicy'),
     changeUrl: (newUrl) => {
       $scope.$evalAsync(() => {
@@ -307,17 +320,19 @@ app.controller('graphuiPlugin', function (
     chrome,
   });
 
+  // register things on scope passed down to react components
   $scope.pluginDataStart = npStart.plugins.data;
   $scope.store = new Storage(window.localStorage);
   $scope.coreStart = npStart.core;
   $scope.loading = false;
-
-  $scope.spymode = 'request';
-
-  const allSavingDisabled = chrome.getInjected('graphSavePolicy') === 'none';
-
   $scope.reduxStore = store;
+  $scope.savedWorkspace = $route.current.locals.savedWorkspace;
 
+  // register things for legacy angular UI
+  const allSavingDisabled = chrome.getInjected('graphSavePolicy') === 'none';
+  $scope.spymode = 'request';
+  $scope.colors = colorChoices;
+  $scope.isColorDark = (color) => isColorDark(...hexToRgb(color));
   $scope.nodeClick = function (n, $event) {
 
     //Selection logic - shift key+click helps selects multiple nodes
@@ -346,14 +361,14 @@ app.controller('graphuiPlugin', function (
       onConfirm: callback,
       onCancel: (() => {}),
       confirmButtonText: i18n.translate('xpack.graph.clearWorkspace.confirmButtonLabel', {
-        defaultMessage: 'Continue',
+        defaultMessage: 'Leave anyway',
       }),
       title: i18n.translate('xpack.graph.clearWorkspace.modalTitle', {
-        defaultMessage: 'Discard changes to workspace?',
+        defaultMessage: 'Unsaved changes',
       }),
     };
     confirmModal(i18n.translate('xpack.graph.clearWorkspace.confirmText', {
-      defaultMessage: 'Once you discard changes made to a workspace, there is no getting them back.',
+      defaultMessage: 'If you leave now, you will lose unsaved changes.',
     }), confirmModalOptions);
   }
   $scope.confirmWipeWorkspace = canWipeWorkspace;
@@ -363,31 +378,6 @@ app.controller('graphuiPlugin', function (
       $scope.setDetail ({ 'inferredEdge': edge });
     }else {
       $scope.workspace.getAllIntersections($scope.handleMergeCandidatesCallback, [edge.topSrc, edge.topTarget]);
-    }
-  };
-
-
-  $scope.fillWorkspace = async () => {
-    try {
-      const fields = selectedFieldsSelector(store.getState());
-      const topTermNodes = await fetchTopNodes(
-        npStart.core.http.post,
-        datasourceSelector(store.getState()).current.title,
-        fields
-      );
-      $scope.workspace.mergeGraph({
-        nodes: topTermNodes,
-        edges: []
-      });
-      $scope.workspaceInitialized = true;
-      $scope.workspace.fillInGraph(fields.length * 10);
-    } catch (e) {
-      toastNotifications.addDanger({
-        title: i18n.translate(
-          'xpack.graph.fillWorkspaceError',
-          { defaultMessage: 'Fetching top terms failed: {message}', values: { message: e.message } }
-        ),
-      });
     }
   };
 
@@ -489,9 +479,7 @@ app.controller('graphuiPlugin', function (
     }),
     run: function () {
       canWipeWorkspace(function () {
-        $scope.$evalAsync(() => {
-          kbnUrl.change('/workspace/', {});
-        });
+        kbnUrl.change('/workspace/', {});
       });  },
     testId: 'graphNewButton',
   });
@@ -596,36 +584,7 @@ app.controller('graphuiPlugin', function (
       payload: $route.current.locals.savedWorkspace,
     });
   } else {
-    const managementUrl = npStart.core.chrome.navLinks.get('kibana:management').url;
-    const url = `${managementUrl}/kibana/index_patterns`;
-
-    if ($route.current.locals.indexPatterns.length === 0) {
-      toastNotifications.addWarning({
-        title: i18n.translate('xpack.graph.noDataSourceNotificationMessageTitle', {
-          defaultMessage: 'No data source',
-        }),
-        text: (
-          <p>
-            <FormattedMessage
-              id="xpack.graph.noDataSourceNotificationMessageText"
-              defaultMessage="Go to {managementIndexPatternsLink} and create an index pattern"
-              values={{
-                managementIndexPatternsLink: (
-                  <a href={url}>
-                    <FormattedMessage
-                      id="xpack.graph.noDataSourceNotificationMessageText.managementIndexPatternLinkText"
-                      defaultMessage="Management &gt; Index Patterns"
-                    />
-                  </a>
-                )
-              }}
-            />
-          </p>
-        ),
-      });
-    }
+    $scope.noIndexPatterns = $route.current.locals.indexPatterns.length === 0;
   }
-
-  $scope.savedWorkspace = $route.current.locals.savedWorkspace;
 });
 

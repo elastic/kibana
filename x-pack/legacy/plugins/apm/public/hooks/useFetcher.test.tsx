@@ -52,7 +52,7 @@ describe('useFetcher', () => {
       expect(hook.result.current).toEqual({
         data: undefined,
         error: undefined,
-        refresh: expect.any(Function),
+        refetch: expect.any(Function),
         status: 'loading'
       });
     });
@@ -63,7 +63,7 @@ describe('useFetcher', () => {
       expect(hook.result.current).toEqual({
         data: undefined,
         error: undefined,
-        refresh: expect.any(Function),
+        refetch: expect.any(Function),
         status: 'loading'
       });
     });
@@ -75,7 +75,7 @@ describe('useFetcher', () => {
       expect(hook.result.current).toEqual({
         data: 'response from hook',
         error: undefined,
-        refresh: expect.any(Function),
+        refetch: expect.any(Function),
         status: 'success'
       });
     });
@@ -96,7 +96,7 @@ describe('useFetcher', () => {
       expect(hook.result.current).toEqual({
         data: undefined,
         error: undefined,
-        refresh: expect.any(Function),
+        refetch: expect.any(Function),
         status: 'loading'
       });
     });
@@ -107,7 +107,7 @@ describe('useFetcher', () => {
       expect(hook.result.current).toEqual({
         data: undefined,
         error: undefined,
-        refresh: expect.any(Function),
+        refetch: expect.any(Function),
         status: 'loading'
       });
     });
@@ -119,7 +119,7 @@ describe('useFetcher', () => {
       expect(hook.result.current).toEqual({
         data: undefined,
         error: expect.any(Error),
-        refresh: expect.any(Function),
+        refetch: expect.any(Function),
         status: 'failure'
       });
     });
@@ -142,7 +142,7 @@ describe('useFetcher', () => {
       expect(hook.result.current).toEqual({
         data: undefined,
         error: undefined,
-        refresh: expect.any(Function),
+        refetch: expect.any(Function),
         status: 'loading'
       });
 
@@ -152,7 +152,7 @@ describe('useFetcher', () => {
       expect(hook.result.current).toEqual({
         data: 'first response',
         error: undefined,
-        refresh: expect.any(Function),
+        refetch: expect.any(Function),
         status: 'success'
       });
 
@@ -171,7 +171,7 @@ describe('useFetcher', () => {
       expect(hook.result.current).toEqual({
         data: 'first response',
         error: undefined,
-        refresh: expect.any(Function),
+        refetch: expect.any(Function),
         status: 'loading'
       });
 
@@ -182,7 +182,7 @@ describe('useFetcher', () => {
       expect(hook.result.current).toEqual({
         data: 'second response',
         error: undefined,
-        refresh: expect.any(Function),
+        refetch: expect.any(Function),
         status: 'success'
       });
     });

@@ -23,7 +23,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { useUiChromeContext } from '../contexts/ui/use_ui_chrome_context';
-import { NavigationMenu } from '../components/navigation_menu/navigation_menu';
+import { NavigationMenu } from '../components/navigation_menu';
 
 export function Settings({
   canGetFilters,
