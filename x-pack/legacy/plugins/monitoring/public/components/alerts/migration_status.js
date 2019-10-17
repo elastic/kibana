@@ -11,32 +11,24 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
-  EuiButtonEmpty,
-  EuiOverlayMask,
-  EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiSuperSelect,
   EuiSpacer,
   EuiLink,
   EuiCallOut,
   EuiTitle,
 } from '@elastic/eui';
 import { toggleSetupMode, getSetupModeState, addSetupModeCallback } from '../../lib/setup_mode';
-import { ManageEmailAction } from './manage_email_action';
 import {
   ALERT_ACTION_TYPE_EMAIL,
   CLUSTER_ALERTS_TO_BLACKLIST,
   CLUSTER_ALERT_ID_TO_KIBANA_ALERT_TYPE_ID
 } from '../../../common/constants';
+import { CreateActionModal } from './create_action_modal';
+import { SelectActionModal } from './select_action.modal';
 
+// Note: This is currently not rendered
 export function MigrationStatus({ clusterUuid }) {
   const [setupModeEnabled, setSetupModeEnabled] = React.useState(getSetupModeState().enabled);
   const [isCreating, setIsCreating] = React.useState(false);
-  // const [isDeleting, setIsDeleting] = React.useState(false);
   const [showCallOut, setShowCallOut] = React.useState(false);
   const [showCreate, setShowCreate] = React.useState(false);
   const [kibanaAlerts, setKibanaAlerts] = React.useState([]);
@@ -99,22 +91,6 @@ export function MigrationStatus({ clusterUuid }) {
     ]);
   }
 
-  // async function deleteKibanaAlerts() {
-  //   setIsDeleting(true);
-  //   const kibanaAlerts = await kfetch({
-  //     method: 'GET',
-  //     pathname: `/api/alert/_find`
-  //   });
-  //   for (const alert of kibanaAlerts.data) {
-  //     await kfetch({
-  //       method: 'DELETE',
-  //       pathname: '/api/alert/' + alert.id
-  //     });
-  //   }
-  //   setIsDeleting(false);
-  //   setShowCreate(true);
-  // }
-
   async function createEmailAction(data) {
     if (editAction) {
       await kfetch({
@@ -158,31 +134,17 @@ export function MigrationStatus({ clusterUuid }) {
     }
 
     return (
-      <EuiOverlayMask>
-        <EuiModal onClose={() => setShowCreateActionModal(false)} initialFocus="[name=popswitch]">
-          <EuiModalHeader>
-            <EuiModalHeaderTitle>Create email action</EuiModalHeaderTitle>
-          </EuiModalHeader>
-          <EuiModalBody>
-            <EuiText>
-              <p>
-                Please create an email action to use for Kibana alerts.
-              </p>
-            </EuiText>
-            <EuiSpacer/>
-            <ManageEmailAction
-              createEmailAction={async data => {
-                await createEmailAction(data);
-                setShowCreateActionModal(false);
-                setShowEditActionModal(false);
-                setShowSelectActionModal(true);
-              }}
-              isNew={showCreateActionModal}
-              action={editAction}
-            />
-          </EuiModalBody>
-        </EuiModal>
-      </EuiOverlayMask>
+      <CreateActionModal
+        onClose={() => setShowCreateActionModal(false)}
+        createEmailAction={async data => {
+          await createEmailAction(data);
+          setShowCreateActionModal(false);
+          setShowEditActionModal(false);
+          setShowSelectActionModal(true);
+        }}
+        isNew={showCreateActionModal}
+        editAction={editAction}
+      />
     );
   }
 
@@ -191,121 +153,80 @@ export function MigrationStatus({ clusterUuid }) {
       return null;
     }
 
-    const options = emailActions.map(action => ({
-      value: action.id,
-      inputDisplay: (
-        <EuiText>
-          {action.config.service} from {action.config.from}
-          &nbsp;
-          <EuiLink
-            onClick={() => {
-              setShowSelectActionModal(false);
-              setEditAction(action);
-              setShowEditActionModal(true);
-            }}
-          >
-            edit
-          </EuiLink>
-        </EuiText>
-      ),
-      dropdownDisplay: (
-        <EuiText>
-          {action.config.service} from {action.config.from}
-        </EuiText>
-      )
-    }));
-
     return (
-      <EuiOverlayMask>
-        <EuiModal onClose={() => setShowSelectActionModal(false)} initialFocus="[name=popswitch]">
-          <EuiModalHeader>
-            <EuiModalHeaderTitle>Select email action</EuiModalHeaderTitle>
-          </EuiModalHeader>
-
-          <EuiModalBody>
-            <EuiText>
-              <p>
-                Please select a configured email action to use for Kibana alerts.
-              </p>
-            </EuiText>
-            <EuiSpacer/>
-            <EuiSuperSelect
-              options={options}
-              valueOfSelected={selectedEmailActionId}
-              onChange={id => setSelectedEmailActionId(id)}
-            />
-          </EuiModalBody>
-
-          <EuiModalFooter>
-            <EuiButtonEmpty onClick={() => setShowSelectActionModal(false)}>Cancel</EuiButtonEmpty>
-            <EuiButton
-              onClick={() => {
-                setShowSelectActionModal(false);
-                selectedEmailActionId && createKibanaAlerts();
-              }}
-              fill
-            >
-              Use
-            </EuiButton>
-          </EuiModalFooter>
-        </EuiModal>
-      </EuiOverlayMask>
+      <SelectActionModal
+        emailActions={emailActions}
+        onClose={() => setShowSelectActionModal(false)}
+        createKibanaAlerts={createKibanaAlerts}
+        onClickEdit={action => {
+          setShowSelectActionModal(false);
+          setEditAction(action);
+          setShowEditActionModal(true);
+        }}
+        selectedEmailActionId={selectedEmailActionId}
+        setSelectedEmailActionId={setSelectedEmailActionId}
+      />
     );
   }
 
-  const missingAlerts = CLUSTER_ALERTS_TO_BLACKLIST.filter(clusterAlert => {
-    if (kibanaAlerts.find(alert => alert.alertTypeId === CLUSTER_ALERT_ID_TO_KIBANA_ALERT_TYPE_ID[clusterAlert])) {
-      return false;
+  function renderContent() {
+    const missingAlerts = CLUSTER_ALERTS_TO_BLACKLIST.filter(clusterAlert => {
+      if (kibanaAlerts.find(alert => alert.alertTypeId === CLUSTER_ALERT_ID_TO_KIBANA_ALERT_TYPE_ID[clusterAlert])) {
+        return false;
+      }
+      return true;
+    });
+
+    if (missingAlerts.length === 0) {
+      if (setupModeEnabled) {
+        return (
+          <EuiCallOut
+            color="success"
+            title="Kibana alerting is up to date!"
+            iconType="flag"
+            size="s"
+          />
+        );
+      }
     }
-    return true;
-  });
 
-  let content = null;
-
-  if (missingAlerts.length === 0) {
-    if (setupModeEnabled) {
-      content = (
+    if (showCreate) {
+      return (
         <EuiCallOut
-          color="success"
-          title="Kibana alerting is up to date!"
+          color="warning"
+          title="Migrate cluster alerts to Kibana alerting"
           iconType="flag"
-          size="s"
-        />
+        >
+          <p>
+            There are existing cluster alerts that are eligible to migrate to Kibana alerting! Click the button below to migrate.
+          </p>
+          <EuiButton onClick={selectAction} isLoading={isCreating}>
+            Migrate {missingAlerts.length} cluster alert(s) to Kibana alerting
+          </EuiButton>
+          {renderCreateActionModal()}
+          {renderSelectActionModal()}
+        </EuiCallOut>
       );
     }
-  }
-  else if (showCreate) {
-    content = (
-      <EuiCallOut
-        color="warning"
-        title="Migrate cluster alerts to Kibana alerting"
-        iconType="flag"
-      >
-        <p>
-          There are existing cluster alerts that are eligible to migrate to Kibana alerting! Click the button below to migrate.
-        </p>
-        <EuiButton onClick={selectAction} isLoading={isCreating}>
-          Migrate {missingAlerts.length} cluster alert(s) to Kibana alerting
-        </EuiButton>
-        {renderCreateActionModal()}
-        {renderSelectActionModal()}
-      </EuiCallOut>
-    );
-  }
-  else if (showCallOut) {
-    content = (
-      <EuiCallOut
-        color="warning"
-        title="Migrate cluster alert to Kibana alerting"
-      >
-        <p>
-          Some cluster alerts need to be migrated to Kibana alerting.&nbsp;
-          <EuiLink onClick={() => toggleSetupMode(true)}>Enter Setup mode</EuiLink> to start the process.
-        </p>
-      </EuiCallOut>
-    );
+
+    if (showCallOut) {
+      return (
+        <EuiCallOut
+          color="warning"
+          title="Migrate cluster alert to Kibana alerting"
+        >
+          <p>
+            Some cluster alerts need to be migrated to Kibana alerting.&nbsp;
+            <EuiLink onClick={() => toggleSetupMode(true)}>Enter Setup mode</EuiLink> to start the process.
+          </p>
+        </EuiCallOut>
+      );
+    }
+
+    return null;
   }
 
+  const content = renderContent();
   if (content) {
     return (
       <Fragment>
