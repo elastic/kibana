@@ -171,9 +171,9 @@ class FilterItemUI extends Component<Props, State> {
       },
       {
         id: 1,
-        width: 420,
+        width: filter && filter.meta && filter.meta.type === 'savedQuery' ? '70vw' : 400, // check to make sure we're on the editor for the filter,
         content: (
-          <div style={{ minWidth: 400, overflow: 'visible' }}>
+          <div>
             <FilterEditor
               filter={filter}
               indexPatterns={this.props.indexPatterns}
@@ -205,6 +205,12 @@ class FilterItemUI extends Component<Props, State> {
       </EuiPopover>
     );
   }
+  // private calculateWidth = (filter: Filter) => {
+  //   if (filter && filter.meta && filter.meta.type === 'savedQuery') {
+  //     return '85vw';
+  //   }
+  //   return 400;
+  // };
 
   private closePopover = () => {
     this.setState({

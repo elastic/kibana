@@ -136,6 +136,7 @@ class FilterEditorUI extends Component<Props, State> {
           <EuiForm>
             <EuiTabs display="condensed">
               <EuiTab
+                disabled={!this.state.isNewFilter && this.isSavedQueryFilterType()}
                 onClick={this.toggleRegularEditor}
                 aria-label={
                   this.state.isNewFilter
@@ -161,6 +162,7 @@ class FilterEditorUI extends Component<Props, State> {
               </EuiTab>
               {this.props.showSaveQuery && (
                 <EuiTab
+                  disabled={!this.state.isNewFilter && !this.isSavedQueryFilterType()}
                   onClick={this.toggleSavedQueryEditor}
                   aria-label={
                     this.state.isNewFilter
