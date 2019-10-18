@@ -11,11 +11,7 @@ import { LegacyPluginInitializer, LegacyPluginOptions } from 'src/legacy/types';
 import { Feature } from '../../../plugins/features/server/feature';
 import { PLUGIN } from './common/constants';
 import manifest from './kibana.json';
-import {
-  CoreSetup,
-  Plugin as ServerPlugin,
-  IntegrationsManagerPluginInitializerContext,
-} from './server/plugin';
+import { CoreSetup, Plugin as ServerPlugin, EPMPluginInitializerContext } from './server/plugin';
 import { mappings, savedObjectSchemas } from './server/saved_objects';
 import { getConfigSchema } from './server/config';
 
@@ -83,7 +79,7 @@ const pluginOptions: LegacyPluginOptions = {
     const getConfig$ = () =>
       new BehaviorSubject(server.config().get(PLUGIN.CONFIG_PREFIX)).asObservable();
 
-    const initializerContext: IntegrationsManagerPluginInitializerContext = {
+    const initializerContext: EPMPluginInitializerContext = {
       config: {
         create: getConfig$,
         createIfExists: getConfig$,
@@ -101,5 +97,4 @@ const pluginOptions: LegacyPluginOptions = {
   isEnabled: false,
 };
 
-export const integrationsManager: LegacyPluginInitializer = kibana =>
-  new kibana.Plugin(pluginOptions);
+export const epm: LegacyPluginInitializer = kibana => new kibana.Plugin(pluginOptions);

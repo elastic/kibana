@@ -6,18 +6,18 @@
 
 import React from 'react';
 import { EuiText, EuiTitle } from '@elastic/eui';
-import { IntegrationList } from '../../../common/types';
-import { IntegrationListGrid } from '../../components/integration_list_grid';
+import { PackageList } from '../../../common/types';
+import { PackageListGrid } from '../../components/package_list_grid';
 
 interface SearchResultsProps {
   term: string;
-  results: IntegrationList;
+  results: PackageList;
 }
 
 export function SearchResults({ term, results }: SearchResultsProps) {
   const title = 'Search results';
   return (
-    <IntegrationListGrid
+    <PackageListGrid
       title={title}
       list={results}
       showInstalledBadge={true}

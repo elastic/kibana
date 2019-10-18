@@ -14,7 +14,7 @@ export const config = {
   }),
 };
 
-export type IntegrationsManagerConfigSchema = TypeOf<typeof config.schema>;
+export type EPMConfigSchema = TypeOf<typeof config.schema>;
 
 // This is needed for the legacy plugin / NP shim setup in ../index
 // It has been moved here to keep the two config schemas as close together as possible.
@@ -22,14 +22,14 @@ export type IntegrationsManagerConfigSchema = TypeOf<typeof config.schema>;
 // these two config schemas from a common definition or from each other.
 
 export const getConfigSchema = (Joi: typeof JoiNamespace) => {
-  const IntegrationsManagerConfigSchema = Joi.object({
+  const EPMConfigSchema = Joi.object({
     enabled: Joi.boolean().default(true),
     registryUrl: Joi.string()
       .uri()
       .default(),
   }).default();
 
-  return IntegrationsManagerConfigSchema;
+  return EPMConfigSchema;
 };
 
 const DEFAULT_CONFIG = {
@@ -43,10 +43,10 @@ const DEFAULT_CONFIG = {
 // This is meant to be only updated from the config$ Observable's subscription
 // (see the Plugin class constructor in server/plugin.ts) but this is not enforced.
 
-let _config: IntegrationsManagerConfigSchema = DEFAULT_CONFIG;
+let _config: EPMConfigSchema = DEFAULT_CONFIG;
 
-export const integrationsManagerConfigStore = {
-  updateConfig(newConfig: IntegrationsManagerConfigSchema) {
+export const epmConfigStore = {
+  updateConfig(newConfig: EPMConfigSchema) {
     _config = Object.assign({}, _config, newConfig);
   },
   getConfig() {

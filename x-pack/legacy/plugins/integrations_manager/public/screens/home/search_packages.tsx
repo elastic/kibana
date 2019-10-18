@@ -6,32 +6,28 @@
 
 import React from 'react';
 import { Search as LocalSearch } from 'js-search';
-import { IntegrationList, IntegrationListItem } from '../../../common/types';
+import { PackageList, PackageListItem } from '../../../common/types';
 import { SearchResults } from './search_results';
 
 export { LocalSearch };
-export type SearchField = keyof IntegrationListItem;
+export type SearchField = keyof PackageListItem;
 export const searchIdField: SearchField = 'name';
 export const fieldsToSearch: SearchField[] = ['description', 'name', 'title'];
 
-interface SearchIntegrationsProps {
+interface SearchPackagesProps {
   searchTerm: string;
   localSearchRef: React.MutableRefObject<LocalSearch | null>;
-  allIntegrations: IntegrationList;
+  allPackages: PackageList;
 }
 
-export function SearchIntegrations({
-  searchTerm,
-  localSearchRef,
-  allIntegrations,
-}: SearchIntegrationsProps) {
+export function SearchPackages({ searchTerm, localSearchRef, allPackages }: SearchPackagesProps) {
   // this means the search index hasn't been built yet.
-  // i.e. the intial fetch of all integrations hasn't finished
+  // i.e. the intial fetch of all packages hasn't finished
   if (!localSearchRef.current) return <div>Still fetching matches. Try again in a moment.</div>;
 
-  const matches = localSearchRef.current.search(searchTerm) as IntegrationList;
+  const matches = localSearchRef.current.search(searchTerm) as PackageList;
   const matchingIds = matches.map(match => match[searchIdField]);
-  const filtered = allIntegrations.filter(item => matchingIds.includes(item[searchIdField]));
+  const filtered = allPackages.filter(item => matchingIds.includes(item[searchIdField]));
 
   return <SearchResults term={searchTerm} results={filtered} />;
 }

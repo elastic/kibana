@@ -11,10 +11,10 @@ import {
   SearchParams,
   getCategories,
   getClusterAccessor,
-  getIntegrationInfo,
   getImage,
-  getIntegrations,
-  installIntegration,
+  getPackageInfo,
+  getPackages,
+  installPackage,
   removeInstallation,
 } from './index';
 import { ImageRequestParams } from '../registry';
@@ -23,7 +23,7 @@ interface Extra extends ResponseToolkit {
   context: PluginContext;
 }
 
-interface ListIntegrationsRequest extends Request {
+interface ListPackagesRequest extends Request {
   query: Request['query'] & SearchParams;
 }
 
@@ -53,22 +53,22 @@ export async function handleGetCategories(req: Request, extra: Extra) {
   return getCategories();
 }
 
-export async function handleGetList(req: ListIntegrationsRequest, extra: Extra) {
+export async function handleGetList(req: ListPackagesRequest, extra: Extra) {
   const savedObjectsClient = getClient(req);
-  const integrationList = await getIntegrations({
+  const packageList = await getPackages({
     savedObjectsClient,
     category: req.query.category,
   });
 
-  return integrationList;
+  return packageList;
 }
 
 export async function handleGetInfo(req: PackageRequest, extra: Extra) {
   const { pkgkey } = req.params;
   const savedObjectsClient = getClient(req);
-  const integrationInfo = await getIntegrationInfo({ savedObjectsClient, pkgkey });
+  const packageInfo = await getPackageInfo({ savedObjectsClient, pkgkey });
 
-  return integrationInfo;
+  return packageInfo;
 }
 
 export const handleGetImage = async (req: ImageRequest, extra: Extra) => {
@@ -85,7 +85,7 @@ export async function handleRequestInstall(req: InstallAssetRequest, extra: Extr
 
   const savedObjectsClient = getClient(req);
   const callCluster = getClusterAccessor(extra.context.esClient, req);
-  const object = await installIntegration({
+  const object = await installPackage({
     savedObjectsClient,
     pkgkey,
     asset,

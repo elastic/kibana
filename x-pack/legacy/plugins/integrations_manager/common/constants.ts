@@ -9,12 +9,12 @@ import manifest from '../kibana.json';
 
 export const PLUGIN = {
   ID: manifest.id,
-  TITLE: i18n.translate('xpack.integrationsManager.pluginTitle', {
-    defaultMessage: 'Integrations Manager',
+  TITLE: i18n.translate('xpack.epm.pluginTitle', {
+    defaultMessage: 'Elastic Package Manager',
   }),
-  DESCRIPTION: 'Install and manage your elastic data ingest integrations',
+  DESCRIPTION: 'Install and manage your Elastic data ingest packages',
   ICON: 'merge',
-  CONFIG_PREFIX: 'xpack.integrationsManager',
+  CONFIG_PREFIX: 'xpack.epm',
 };
 
-export const SAVED_OBJECT_TYPE = 'integrations-manager';
+export const SAVED_OBJECT_TYPE = 'epm';

@@ -7,12 +7,12 @@
 import React, { Fragment } from 'react';
 import { EuiButtonEmpty, EuiButtonEmptyProps } from '@elastic/eui';
 import styled from 'styled-components';
-import { IntegrationInfo } from '../../../common/types';
+import { PackageInfo } from '../../../common/types';
 import { entries } from '../../../common/type_utils';
 import { DetailViewPanelName } from '../../';
 import { useLinks } from '../../hooks';
 
-export type NavLinkProps = Pick<IntegrationInfo, 'name' | 'version'> & {
+export type NavLinkProps = Pick<PackageInfo, 'name' | 'version'> & {
   active: DetailViewPanelName;
 };
 

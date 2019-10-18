@@ -6,7 +6,7 @@
 import { PLUGIN } from '../common/constants';
 import { ServerRoute } from '../common/types';
 import * as CommonRoutes from '../common/routes';
-import * as Integrations from './integrations/handlers';
+import * as Packages from './packages/handlers';
 
 const API_IMG_PATTERN = `${CommonRoutes.API_ROOT}/package/{pkgkey}/img/{imgPath*}`;
 
@@ -16,36 +16,36 @@ export const routes: ServerRoute[] = [
     method: 'GET',
     path: CommonRoutes.API_CATEGORIES_PATTERN,
     options: { tags: [`access:${PLUGIN.ID}`], json: { space: 2 } },
-    handler: Integrations.handleGetCategories,
+    handler: Packages.handleGetCategories,
   },
   {
     method: 'GET',
     path: CommonRoutes.API_LIST_PATTERN,
     options: { tags: [`access:${PLUGIN.ID}`], json: { space: 2 } },
-    handler: Integrations.handleGetList,
+    handler: Packages.handleGetList,
   },
   {
     method: 'GET',
     path: API_IMG_PATTERN,
     options: { tags: [`access:${PLUGIN.ID}`], json: { space: 2 } },
-    handler: Integrations.handleGetImage,
+    handler: Packages.handleGetImage,
   },
   {
     method: 'GET',
     path: CommonRoutes.API_INFO_PATTERN,
     options: { tags: [`access:${PLUGIN.ID}`], json: { space: 2 } },
-    handler: Integrations.handleGetInfo,
+    handler: Packages.handleGetInfo,
   },
   {
     method: 'GET',
     path: CommonRoutes.API_INSTALL_PATTERN,
     options: { tags: [`access:${PLUGIN.ID}`], json: { space: 2 } },
-    handler: Integrations.handleRequestInstall,
+    handler: Packages.handleRequestInstall,
   },
   {
     method: 'GET',
     path: CommonRoutes.API_DELETE_PATTERN,
     options: { tags: [`access:${PLUGIN.ID}`], json: { space: 2 } },
-    handler: Integrations.handleRequestDelete,
+    handler: Packages.handleRequestDelete,
   },
 ];

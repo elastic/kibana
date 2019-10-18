@@ -76,14 +76,14 @@ export interface RegistryPackage {
 
 // Managers public HTTP response types
 // from API_LIST_PATTERN
-export type IntegrationList = IntegrationListItem[];
+export type PackageList = PackageListItem[];
 // add title here until it's a part of registry response
-export type IntegrationListItem = Installable<Required<RegistryListItem>>;
-export type IntegrationsGroupedByStatus = Record<InstallationStatus, IntegrationList>;
+export type PackageListItem = Installable<Required<RegistryListItem>>;
+export type PackagesGroupedByStatus = Record<InstallationStatus, PackageList>;
 
 // from API_INFO_PATTERN
 // add title here until it's a part of registry response
-export type IntegrationInfo = Installable<
+export type PackageInfo = Installable<
   Required<RegistryPackage> & { assets: AssetsGroupedByServiceByType }
 >;
 

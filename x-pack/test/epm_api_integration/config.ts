@@ -16,7 +16,7 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
       supertest: xPackAPITestsConfig.get('services.supertest'),
     },
     junit: {
-      reportName: 'X-Pack Integrations Manager API Integration Tests',
+      reportName: 'X-Pack EPM API Integration Tests',
     },
 
     esTestCluster: {
@@ -27,7 +27,7 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
       ...xPackAPITestsConfig.get('kbnTestServer'),
       serverArgs: [
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
-        '--xpack.integrationsManager.registryUrl=http://localhost:6666',
+        '--xpack.epm.registryUrl=http://localhost:6666',
       ],
     },
   };

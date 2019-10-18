@@ -5,10 +5,10 @@
  */
 import React, { Fragment } from 'react';
 import { EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { IntegrationInfo } from '../../../common/types';
+import { PackageInfo } from '../../../common/types';
 import { Screenshots } from './screenshots';
 
-export function OverviewPanel(props: IntegrationInfo) {
+export function OverviewPanel(props: PackageInfo) {
   const { description, screenshots } = props;
   return (
     <Fragment>

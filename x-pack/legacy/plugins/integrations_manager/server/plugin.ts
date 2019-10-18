@@ -11,13 +11,13 @@ import {
   IClusterClient,
   PluginInitializerContext,
 } from 'src/core/server';
-import { IntegrationsManagerConfigSchema, integrationsManagerConfigStore } from './config';
+import { EPMConfigSchema, epmConfigStore } from './config';
 import { PLUGIN } from '../common/constants';
 import { Server } from '../common/types';
 import { fetchList } from './registry';
 import { routes } from './routes';
 
-export type IntegrationsManagerPluginInitializerContext = Pick<PluginInitializerContext, 'config'>;
+export type EPMPluginInitializerContext = Pick<PluginInitializerContext, 'config'>;
 
 export interface CoreSetup {
   elasticsearch: _CoreSetup['elasticsearch'];
@@ -31,12 +31,12 @@ export interface PluginContext {
 }
 
 export class Plugin {
-  public config$: Observable<IntegrationsManagerConfigSchema>;
+  public config$: Observable<EPMConfigSchema>;
 
-  constructor(initializerContext: IntegrationsManagerPluginInitializerContext) {
-    this.config$ = initializerContext.config.create<IntegrationsManagerConfigSchema>();
+  constructor(initializerContext: EPMPluginInitializerContext) {
+    this.config$ = initializerContext.config.create<EPMConfigSchema>();
     this.config$.subscribe(configValue => {
-      integrationsManagerConfigStore.updateConfig(configValue);
+      epmConfigStore.updateConfig(configValue);
     });
   }
   public setup(core: CoreSetup) {

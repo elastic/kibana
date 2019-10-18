@@ -11,7 +11,7 @@ import * as Registry from '../registry';
 import { CallESAsCurrentUser, assetUsesObjects, getInstallationObject } from './index';
 import { getObjects } from './get_objects';
 
-export async function installIntegration(options: {
+export async function installPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
   asset: AssetType;
@@ -27,7 +27,7 @@ export async function installIntegration(options: {
   });
 
   if (toSave.length) {
-    // saved those references in the integration manager's state object
+    // saved those references in the package manager's state object
     const saved = await saveInstallationReferences({
       savedObjectsClient,
       pkgkey,

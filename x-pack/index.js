@@ -43,7 +43,7 @@ import { snapshotRestore } from './legacy/plugins/snapshot_restore';
 import { transform } from './legacy/plugins/transform';
 import { actions } from './legacy/plugins/actions';
 import { alerting } from './legacy/plugins/alerting';
-import { integrationsManager } from './legacy/plugins/integrations_manager';
+import { epm } from './legacy/plugins/integrations_manager';
 import { lens } from './legacy/plugins/lens';
 
 module.exports = function (kibana) {
@@ -88,6 +88,6 @@ module.exports = function (kibana) {
     snapshotRestore(kibana),
     actions(kibana),
     alerting(kibana),
-    integrationsManager(kibana),
+    epm(kibana),
   ];
 };

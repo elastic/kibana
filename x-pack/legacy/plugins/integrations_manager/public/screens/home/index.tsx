@@ -8,19 +8,19 @@ import { EuiHorizontalRule, EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui
 import styled from 'styled-components';
 
 import { PLUGIN } from '../../../common/constants';
-import { CategorySummaryItem, IntegrationList } from '../../../common/types';
-import { IntegrationListGrid } from '../../components/integration_list_grid';
+import { CategorySummaryItem, PackageList } from '../../../common/types';
+import { PackageListGrid } from '../../components/package_list_grid';
 import { useBreadcrumbs, useLinks } from '../../hooks';
 import { CategoryFacets } from './category_facets';
 import { Header } from './header';
 import {
   useCategories,
-  useCategoryIntegrations,
-  useAllIntegrations,
+  useCategoryPackages,
+  useAllPackages,
   useLocalSearch,
-  useInstalledIntegrations,
+  useInstalledPackages,
 } from './hooks';
-import { SearchIntegrations } from './search_integrations';
+import { SearchPackages } from './search_packages';
 
 export const FullBleedPage = styled(EuiPage)`
   padding: 0;
@@ -33,20 +33,20 @@ export function Home() {
 
   const state = useHomeState();
   const body = state.searchTerm ? (
-    <SearchIntegrations
+    <SearchPackages
       searchTerm={state.searchTerm}
       localSearchRef={state.localSearchRef}
-      allIntegrations={state.allIntegrations}
+      allPackages={state.allPackages}
     />
   ) : (
     <Fragment>
-      {state.installedIntegrations.length ? (
+      {state.installedPackages.length ? (
         <Fragment>
-          <InstalledIntegrations list={state.installedIntegrations} />
+          <InstalledPackages list={state.installedPackages} />
           <EuiHorizontalRule margin="l" />
         </Fragment>
       ) : null}
-      <AvailableIntegrations {...state} />
+      <AvailablePackages {...state} />
     </Fragment>
   );
 
@@ -72,15 +72,10 @@ export function useHomeState() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [categories, setCategories] = useCategories();
-  const [categoryIntegrations, setCategoryIntegrations] = useCategoryIntegrations(selectedCategory);
-  const [allIntegrations, setAllIntegrations] = useAllIntegrations(
-    selectedCategory,
-    categoryIntegrations
-  );
-  const localSearchRef = useLocalSearch(allIntegrations);
-  const [installedIntegrations, setInstalledIntegrations] = useInstalledIntegrations(
-    allIntegrations
-  );
+  const [categoryPackages, setCategoryPackages] = useCategoryPackages(selectedCategory);
+  const [allPackages, setAllPackages] = useAllPackages(selectedCategory, categoryPackages);
+  const localSearchRef = useLocalSearch(allPackages);
+  const [installedPackages, setInstalledPackages] = useInstalledPackages(allPackages);
 
   return {
     searchTerm,
@@ -89,34 +84,34 @@ export function useHomeState() {
     setSelectedCategory,
     categories,
     setCategories,
-    allIntegrations,
-    setAllIntegrations,
-    installedIntegrations,
+    allPackages,
+    setAllPackages,
+    installedPackages,
     localSearchRef,
-    setInstalledIntegrations,
-    categoryIntegrations,
-    setCategoryIntegrations,
+    setInstalledPackages,
+    categoryPackages,
+    setCategoryPackages,
   };
 }
 
-function InstalledIntegrations({ list }: { list: IntegrationList }) {
-  const title = 'Your Integrations';
+function InstalledPackages({ list }: { list: PackageList }) {
+  const title = 'Your Packages';
 
-  return <IntegrationListGrid title={title} list={list} />;
+  return <PackageListGrid title={title} list={list} />;
 }
 
-function AvailableIntegrations({
-  allIntegrations,
+function AvailablePackages({
+  allPackages,
   categories,
-  categoryIntegrations,
+  categoryPackages,
   selectedCategory,
   setSelectedCategory,
 }: HomeState) {
-  const title = 'Available Integrations';
+  const title = 'Available Packages';
   const noFilter = {
     id: '',
     title: 'All',
-    count: allIntegrations.length,
+    count: allPackages.length,
   };
 
   const controls = (
@@ -127,5 +122,5 @@ function AvailableIntegrations({
     />
   );
 
-  return <IntegrationListGrid title={title} controls={controls} list={categoryIntegrations} />;
+  return <PackageListGrid title={title} controls={controls} list={categoryPackages} />;
 }
