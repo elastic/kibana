@@ -14,6 +14,7 @@ export const documentationLinks = {
   codeInstallLangServer: `${npStart.core.docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${npStart.core.docLinks.DOC_LINK_VERSION}/code-install-lang-server.html`,
   codeGettingStarted: `${npStart.core.docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${npStart.core.docLinks.DOC_LINK_VERSION}/code-import-first-repo.html`,
   codeRepoManagement: `${npStart.core.docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${npStart.core.docLinks.DOC_LINK_VERSION}/code-repo-management.html`,
+  codeIndexer: `${npStart.core.docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${npStart.core.docLinks.DOC_LINK_VERSION}/code-indexer.html`,
   codeSearch: `${npStart.core.docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${npStart.core.docLinks.DOC_LINK_VERSION}/code-search.html`,
   codeOtherFeatures: `${npStart.core.docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${npStart.core.docLinks.DOC_LINK_VERSION}/code-basic-nav.html`,
   semanticNavigation: `${npStart.core.docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${npStart.core.docLinks.DOC_LINK_VERSION}/code-semantic-nav.html`,

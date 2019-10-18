@@ -21,4 +21,4 @@ image::images/code-lang-server-status.png[]
 ////
 
 
-include::code-basic-nav.asciidoc[]
+include::code-indexer.asciidoc[]

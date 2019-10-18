@@ -38,7 +38,7 @@ A new item in the list displays the cloning and indexing progress of the `TypeSc
 [role="screenshot"]
 image::images/code-import-repo.png[]
 
-. After the indexing is complete, navigate to the repo by clicking its name in the list.
+. After indexing is complete, navigate to the repo by clicking its name in the list.
 +
 [role="screenshot"]
 image::images/code-starter-root.png[]
