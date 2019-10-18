@@ -77,4 +77,30 @@ describe('createSavedObjectsStreamFromNdJson', () => {
       },
     ]);
   });
+
+  it('filters the export details entry from the stream', async () => {
+    const savedObjectsStream = createSavedObjectsStreamFromNdJson(
+      new Readable({
+        read() {
+          this.push('{"id": "foo", "type": "foo-type"}\n');
+          this.push('{"id": "bar", "type": "bar-type"}\n');
+          this.push('{"exportedCount": 2, "missingRefCount": 0, "missingReferences": []}\n');
+          this.push(null);
+        },
+      })
+    );
+
+    const result = await readStreamToCompletion(savedObjectsStream);
+
+    expect(result).toEqual([
+      {
+        id: 'foo',
+        type: 'foo-type',
+      },
+      {
+        id: 'bar',
+        type: 'bar-type',
+      },
+    ]);
+  });
 });

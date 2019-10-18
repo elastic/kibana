@@ -19,6 +19,7 @@
 import { mockInitializer, mockPlugin, mockPluginLoader } from './plugin.test.mocks';
 
 import { DiscoveredPlugin } from '../../server';
+import { coreMock } from '../mocks';
 import { PluginWrapper } from './plugin';
 
 function createManifest(
@@ -36,7 +37,7 @@ function createManifest(
 
 let plugin: PluginWrapper<unknown, Record<string, unknown>>;
 const opaqueId = Symbol();
-const initializerContext = { opaqueId };
+const initializerContext = coreMock.createPluginInitializerContext();
 const addBasePath = (path: string) => path;
 
 beforeEach(() => {

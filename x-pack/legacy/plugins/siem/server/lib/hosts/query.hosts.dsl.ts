@@ -61,6 +61,7 @@ export const buildHostsQuery = ({
       track_total_hits: false,
     },
   };
+
   return dslQuery;
 };
 

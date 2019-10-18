@@ -17,11 +17,19 @@
         "pb"
       ],
       "detailed": "__flag__",
-      "master_timeout": "",
       "h": [],
       "help": "__flag__",
       "index": [],
       "s": [],
+      "time": [
+        "d",
+        "h",
+        "m",
+        "s",
+        "ms",
+        "micros",
+        "nanos"
+      ],
       "v": "__flag__"
     },
     "methods": [

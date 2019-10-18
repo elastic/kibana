@@ -18,19 +18,10 @@
  */
 
 import { mapGeoBoundingBox } from './map_geo_bounding_box';
-import { StubIndexPatterns } from '../test_helpers/stub_index_pattern';
-import { IndexPatterns } from '../../../index_patterns';
+import { Filter, GeoBoundingBoxFilter } from '@kbn/es-query';
 
 describe('filter manager utilities', () => {
   describe('mapGeoBoundingBox()', () => {
-    let mapGeoBoundingBoxFn: Function;
-
-    beforeEach(() => {
-      const indexPatterns: unknown = new StubIndexPatterns();
-
-      mapGeoBoundingBoxFn = mapGeoBoundingBox(indexPatterns as IndexPatterns);
-    });
-
     test('should return the key and value for matching filters with bounds', async () => {
       const filter = {
         meta: {
@@ -43,16 +34,20 @@ describe('filter manager utilities', () => {
             bottom_right: { lat: 15, lon: 20 },
           },
         },
-      };
+      } as GeoBoundingBoxFilter;
 
-      const result = await mapGeoBoundingBoxFn(filter);
+      const result = mapGeoBoundingBox(filter);
 
       expect(result).toHaveProperty('key', 'point');
       expect(result).toHaveProperty('value');
-      // remove html entities and non-alphanumerics to get the gist of the value
-      expect(result.value.replace(/&[a-z]+?;/g, '').replace(/[^a-z0-9]/g, '')).toBe(
-        'lat5lon10tolat15lon20'
-      );
+
+      if (result.value) {
+        const displayName = result.value();
+        // remove html entities and non-alphanumerics to get the gist of the value
+        expect(displayName.replace(/&[a-z]+?;/g, '').replace(/[^a-z0-9]/g, '')).toBe(
+          'lat5lon10tolat15lon20'
+        );
+      }
     });
 
     test('should return the key and value even when using ignore_unmapped', async () => {
@@ -68,25 +63,29 @@ describe('filter manager utilities', () => {
             bottom_right: { lat: 15, lon: 20 },
           },
         },
-      };
-      const result = await mapGeoBoundingBoxFn(filter);
+      } as GeoBoundingBoxFilter;
+      const result = mapGeoBoundingBox(filter);
 
       expect(result).toHaveProperty('key', 'point');
       expect(result).toHaveProperty('value');
-      // remove html entities and non-alphanumerics to get the gist of the value
-      expect(result.value.replace(/&[a-z]+?;/g, '').replace(/[^a-z0-9]/g, '')).toBe(
-        'lat5lon10tolat15lon20'
-      );
+
+      if (result.value) {
+        const displayName = result.value();
+        // remove html entities and non-alphanumerics to get the gist of the value
+        expect(displayName.replace(/&[a-z]+?;/g, '').replace(/[^a-z0-9]/g, '')).toBe(
+          'lat5lon10tolat15lon20'
+        );
+      }
     });
 
     test('should return undefined for none matching', async done => {
       const filter = {
         meta: { index: 'logstash-*' },
         query: { query_string: { query: 'foo:bar' } },
-      };
+      } as Filter;
 
       try {
-        await mapGeoBoundingBoxFn(filter);
+        mapGeoBoundingBox(filter);
       } catch (e) {
         expect(e).toBe(filter);
         done();
