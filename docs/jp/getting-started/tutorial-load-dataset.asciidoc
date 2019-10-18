@@ -57,7 +57,7 @@ gunzip logs.jsonl.gz
 シェイクスピアデータセットとログデータセットを読み込む前に、フィールドの {es-ref}mapping.html[_マッピング_]をセットアップする必要があります。
 マッピングは、インデックス内のドキュメントを論理グループに分け、フィールドの検索性、トークン化されているかどうか、または別々の単語に分割されているかどうかなど、フィールドの特性を指定します。
 
-ターミナル（`bash`など）で次のコマンドを使用して、シェークスピアデータセットのマッピングをセットアップします。
+ターミナル（`bash`&#8203;など）で次のコマンドを使用して、シェークスピアデータセットのマッピングをセットアップします。
 
 [source,shell]
 curl -H 'Content-Type: application/json' -XPUT http://localhost:9200/shakespeare -d '
@@ -81,9 +81,9 @@ curl -H 'Content-Type: application/json' -XPUT http://localhost:9200/shakespeare
 * これは_play_name_フィールドについても同様です。
 * _line_id_フィールドと_speech_number_フィールドは整数です。
 
-ログデータセットには、`geo_point`タイプをログのフィールドに適用して、ログ内の緯度/経度ペアを地理的位置としてラベル付けするマッピングが必要です。
+ログデータセットには、`geo_point`&#8203;タイプをログのフィールドに適用して、ログ内の緯度/経度ペアを地理的位置としてラベル付けするマッピングが必要です。
 
-次のコマンドを使用して、ログの`geo_point`マッピングを定めます。
+次のコマンドを使用して、ログの&#8203;`geo_point`&#8203;マッピングを定めます。
 
 [source,shell]
 curl -H 'Content-Type: application/json' -XPUT http://localhost:9200/logstash-2015.05.18 -d '
