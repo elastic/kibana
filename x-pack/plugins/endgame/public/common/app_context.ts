@@ -7,3 +7,5 @@
 import React from 'react';
 
 export const EndgameAppContext = React.createContext({});
+
+export const TableContext = React.createContext({});

@@ -51,10 +51,6 @@ const columns = [
   },
 ];
 
-interface Props {
-  endpointMetadata: any;
-}
-
 interface State {
   queriedEndpointMetadata: {};
 }
@@ -62,7 +58,7 @@ interface State {
 export class EndpointsPage extends PureComponent {
   static contextType = EndgameAppContext;
 
-  state = { results: [], queriedEndpointMetadata: null };
+  state = { results: [], queriedEndpointMetadata: [] };
   public updateOnChange = ({ updatedResult }: { updatedResult: {} }) => {
     this.setState({ queriedEndpointMetadata: updatedResult });
   };
@@ -70,7 +66,7 @@ export class EndpointsPage extends PureComponent {
   context!: React.ContextType<typeof EndgameAppContext>;
 
   render() {
-    const { results } = this.state;
+    const { results, queriedEndpointMetadata } = this.state;
 
     return (
       <Page title="Endpoints">
@@ -79,7 +75,7 @@ export class EndpointsPage extends PureComponent {
           defaultFields={[`_source`]}
           updateOnChange={this.updateOnChange}
         />
-        <EuiBasicTable items={results} columns={columns} />
+        <EuiBasicTable items={queriedEndpointMetadata} columns={columns} />
         <code>
           <pre>{JSON.stringify(this.state.results, null, 4)}</pre>
         </code>
@@ -93,6 +89,6 @@ export class EndpointsPage extends PureComponent {
       console.error(e); //eslint-disable-line
       return Promise.resolve([]);
     });
-    this.setState({ results });
+    this.setState({ results, queriedEndpointMetadata: results });
   }
 }
