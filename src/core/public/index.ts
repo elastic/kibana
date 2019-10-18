@@ -79,6 +79,8 @@ export {
   SavedObjectsBatchResponse,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkCreateOptions,
+  SavedObjectsBulkUpdateObject,
+  SavedObjectsBulkUpdateOptions,
   SavedObjectsCreateOptions,
   SavedObjectsFindResponsePublic,
   SavedObjectsUpdateOptions,
