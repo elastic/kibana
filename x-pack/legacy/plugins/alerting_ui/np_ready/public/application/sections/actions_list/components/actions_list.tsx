@@ -175,96 +175,89 @@ export const ActionsList: React.FunctionComponent = () => {
 
   return (
     <section data-test-subj="actionsList">
-      <ContentWrapper>
+      <Fragment>
         <EuiSpacer size="m" />
-        <EuiSearchBar
-          onChange={({ queryText }: { queryText: string }) => setSearchText(queryText)}
-          filters={[
-            {
-              type: 'field_value_selection',
-              field: 'type',
-              name: i18n.translate('xpack.alertingUI.sections.actionsList.filters.typeName', {
-                defaultMessage: 'Type',
-              }),
-              multiSelect: 'or',
-              options: Object.values(actionTypesIndex || {})
-                .map(actionType => ({
-                  value: actionType.id,
-                  name: actionType.name,
-                }))
-                .sort((a, b) => {
-                  if (a.name < b.name) return -1;
-                  if (a.name > b.name) return 1;
-                  return 0;
+        <ActionsContext.Provider value={{}}>
+          <EuiSearchBar
+            onChange={({ queryText }: { queryText: string }) => setSearchText(queryText)}
+            filters={[
+              {
+                type: 'field_value_selection',
+                field: 'type',
+                name: i18n.translate('xpack.alertingUI.sections.actionsList.filters.typeName', {
+                  defaultMessage: 'Type',
                 }),
-            },
-          ]}
-          toolsRight={[
-            <EuiButton
-              key="delete"
-              iconType="trash"
-              color="danger"
-              isDisabled={selectedItems.length === 0 || !canDelete}
-              onClick={deleteSelectedItems}
-              title={
-                canDelete
-                  ? undefined
-                  : i18n.translate(
-                      'xpack.alertingUI.sections.actionsList.buttons.deleteDisabledTitle',
-                      { defaultMessage: 'Unable to delete actions' }
-                    )
-              }
-            >
-              <FormattedMessage
-                id="xpack.alertingUI.sections.actionsList.buttons.deleteLabel"
-                defaultMessage="Delete"
-              />
-            </EuiButton>,
-            <AlertingActionsDropdown
-              key="create-action"
-              actionTypes={actionTypesIndex}
-            ></AlertingActionsDropdown>,
-          ]}
-        ></EuiSearchBar>
+                multiSelect: 'or',
+                options: Object.values(actionTypesIndex || {})
+                  .map(actionType => ({
+                    value: actionType.id,
+                    name: actionType.name,
+                  }))
+                  .sort((a, b) => {
+                    if (a.name < b.name) return -1;
+                    if (a.name > b.name) return 1;
+                    return 0;
+                  }),
+              },
+            ]}
+            toolsRight={[
+              <EuiButton
+                key="delete"
+                iconType="trash"
+                color="danger"
+                isDisabled={selectedItems.length === 0 || !canDelete}
+                onClick={deleteSelectedItems}
+                title={
+                  canDelete
+                    ? undefined
+                    : i18n.translate(
+                        'xpack.alertingUI.sections.actionsList.buttons.deleteDisabledTitle',
+                        { defaultMessage: 'Unable to delete actions' }
+                      )
+                }
+              >
+                <FormattedMessage
+                  id="xpack.alertingUI.sections.actionsList.buttons.deleteLabel"
+                  defaultMessage="Delete"
+                />
+              </EuiButton>,
+              <AlertingActionsDropdown
+                key="create-action"
+                actionTypes={actionTypesIndex}
+              ></AlertingActionsDropdown>,
+            ]}
+          ></EuiSearchBar>
 
-        <EuiSpacer size="s" />
+          <EuiSpacer size="s" />
 
-        <EuiBasicTable
-          loading={isLoadingActions || isLoadingActionTypes || isDeletingActions}
-          items={data}
-          itemId="id"
-          columns={actionsTableColumns}
-          rowProps={() => ({
-            'data-test-subj': 'row',
-          })}
-          cellProps={() => ({
-            'data-test-subj': 'cell',
-          })}
-          data-test-subj="actionsTable"
-          pagination={{
-            pageIndex: page.index,
-            pageSize: page.size,
-            totalItemCount,
-          }}
-          onChange={({ page: changedPage }: { page: Pagination }) => {
-            setPage(changedPage);
-          }}
-          selection={{
-            onSelectionChange(updatedSelectedItemsList: Data[]) {
-              setSelectedItems(updatedSelectedItemsList);
-            },
-          }}
-        />
-      </ContentWrapper>
+          <EuiBasicTable
+            loading={isLoadingActions || isLoadingActionTypes || isDeletingActions}
+            items={data}
+            itemId="id"
+            columns={actionsTableColumns}
+            rowProps={() => ({
+              'data-test-subj': 'row',
+            })}
+            cellProps={() => ({
+              'data-test-subj': 'cell',
+            })}
+            data-test-subj="actionsTable"
+            pagination={{
+              pageIndex: page.index,
+              pageSize: page.size,
+              totalItemCount,
+            }}
+            onChange={({ page: changedPage }: { page: Pagination }) => {
+              setPage(changedPage);
+            }}
+            selection={{
+              onSelectionChange(updatedSelectedItemsList: Data[]) {
+                setSelectedItems(updatedSelectedItemsList);
+              },
+            }}
+          />
+        </ActionsContext.Provider>
+      </Fragment>
     </section>
-  );
-};
-
-export const ContentWrapper = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <Fragment>
-      <EuiSpacer size="s" />
-      <ActionsContext.Provider value={{}}>{children}</ActionsContext.Provider>
-    </Fragment>
   );
 };
