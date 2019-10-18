@@ -29,7 +29,7 @@ export default function({ getService }: FtrProviderContext) {
       const fetchImage = async () => {
         await supertest
           .get(
-            '/api/integrations_manager/package/auditd-2.0.4/img/screenshots/auditbeat-file-integrity-dashboard.png'
+            '/api/epm/package/auditd-2.0.4/img/screenshots/auditbeat-file-integrity-dashboard.png'
           )
           .set('kbn-xsrf', 'xxx')
           .expect('Content-Type', 'image/png')
@@ -50,7 +50,7 @@ export default function({ getService }: FtrProviderContext) {
       const supertest = getService('supertest');
       const fetchImage = async () => {
         await supertest
-          .get('/api/integrations_manager/package/auditd-2.0.4/img/icon.svg')
+          .get('/api/epm/package/auditd-2.0.4/img/icon.svg')
           .set('kbn-xsrf', 'xxx')
           .expect('Content-Type', 'image/svg')
           .expect(200);
