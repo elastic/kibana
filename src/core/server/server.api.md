@@ -722,6 +722,8 @@ export interface InternalCoreSetup {
     // 
     // (undocumented)
     http: InternalHttpServiceSetup;
+    // (undocumented)
+    uiSettings: InternalUiSettingsServiceSetup;
 }
 
 // @internal (undocumented)
@@ -730,6 +732,12 @@ export interface InternalCoreStart {
     // 
     // (undocumented)
     savedObjects: SavedObjectsServiceStart;
+}
+
+// @internal (undocumented)
+export interface InternalUiSettingsServiceSetup {
+    asScopedToClient(savedObjectsClient: SavedObjectsClientContract): IUiSettingsClient;
+    setDefaults(values: Record<string, UiSettingsParams>): void;
 }
 
 // @public
@@ -750,6 +758,22 @@ export type IsAuthenticated = (request: KibanaRequest | LegacyRequest) => boolea
 
 // @public
 export type IScopedClusterClient = Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
+
+// @public
+export interface IUiSettingsClient {
+    get: <T extends SavedObjectAttribute = any>(key: string) => Promise<T>;
+    getAll: <T extends SavedObjectAttribute = any>() => Promise<Record<string, T>>;
+    getDefaults: () => Record<string, UiSettingsParams>;
+    getUserProvided: <T extends SavedObjectAttribute = any>() => Promise<Record<string, {
+        userValue?: T;
+        isOverridden?: boolean;
+    }>>;
+    isOverridden: (key: string) => boolean;
+    remove: (key: string) => Promise<void>;
+    removeMany: (keys: string[]) => Promise<void>;
+    set: <T extends SavedObjectAttribute = any>(key: string, value: T) => Promise<void>;
+    setMany: <T extends SavedObjectAttribute = any>(changes: Record<string, T>) => Promise<void>;
+}
 
 // @public
 export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
@@ -1166,11 +1190,25 @@ export interface SavedObjectsBulkResponse<T extends SavedObjectAttributes = any>
 }
 
 // @public (undocumented)
+export interface SavedObjectsBulkUpdateObject<T extends SavedObjectAttributes = any> extends Pick<SavedObjectsUpdateOptions, 'version' | 'references'> {
+    attributes: Partial<T>;
+    id: string;
+    type: string;
+}
+
+// @public (undocumented)
+export interface SavedObjectsBulkUpdateResponse<T extends SavedObjectAttributes = any> {
+    // (undocumented)
+    saved_objects: Array<SavedObjectsUpdateResponse<T>>;
+}
+
+// @public (undocumented)
 export class SavedObjectsClient {
     // Warning: (ae-forgotten-export) The symbol "SavedObjectsRepository" needs to be exported by the entry point index.d.ts
     constructor(repository: SavedObjectsRepository);
     bulkCreate<T extends SavedObjectAttributes = any>(objects: Array<SavedObjectsBulkCreateObject<T>>, options?: SavedObjectsCreateOptions): Promise<SavedObjectsBulkResponse<T>>;
     bulkGet<T extends SavedObjectAttributes = any>(objects?: SavedObjectsBulkGetObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsBulkResponse<T>>;
+    bulkUpdate<T extends SavedObjectAttributes = any>(objects: Array<SavedObjectsBulkUpdateObject<T>>, options?: SavedObjectsBaseOptions): Promise<SavedObjectsBulkUpdateResponse<T>>;
     create<T extends SavedObjectAttributes = any>(type: string, attributes: T, options?: SavedObjectsCreateOptions): Promise<SavedObject<T>>;
     delete(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<{}>;
     // (undocumented)
@@ -1263,6 +1301,7 @@ export class SavedObjectsErrorHelpers {
 
 // @public
 export interface SavedObjectsExportOptions {
+    excludeExportDetails?: boolean;
     exportSizeLimit: number;
     includeReferencesDeep?: boolean;
     namespace?: string;
@@ -1273,6 +1312,16 @@ export interface SavedObjectsExportOptions {
     savedObjectsClient: SavedObjectsClientContract;
     search?: string;
     types?: string[];
+}
+
+// @public
+export interface SavedObjectsExportResultDetails {
+    exportedCount: number;
+    missingRefCount: number;
+    missingReferences: Array<{
+        id: string;
+        type: string;
+    }>;
 }
 
 // @public (undocumented)
@@ -1504,7 +1553,6 @@ export class SavedObjectsSerializer {
 
 // @public (undocumented)
 export interface SavedObjectsUpdateOptions extends SavedObjectsBaseOptions {
-    // (undocumented)
     references?: SavedObjectReference[];
     version?: string;
 }
@@ -1544,6 +1592,22 @@ export interface SessionStorageFactory<T> {
     // (undocumented)
     asScoped: (request: KibanaRequest) => SessionStorage<T>;
 }
+
+// @public
+export interface UiSettingsParams {
+    category: string[];
+    description: string;
+    name: string;
+    optionLabels?: Record<string, string>;
+    options?: string[];
+    readonly?: boolean;
+    requiresPageReload?: boolean;
+    type?: UiSettingsType;
+    value: SavedObjectAttribute;
+}
+
+// @public
+export type UiSettingsType = 'json' | 'markdown' | 'number' | 'select' | 'boolean' | 'string';
 
 
 // Warnings were encountered during analysis:

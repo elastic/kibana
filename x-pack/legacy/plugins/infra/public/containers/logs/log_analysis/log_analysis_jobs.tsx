@@ -8,7 +8,7 @@ import createContainer from 'constate-latest';
 import { useMemo, useCallback, useEffect } from 'react';
 
 import { callGetMlModuleAPI } from './api/ml_get_module';
-import { bucketSpan } from '../../../../common/log_analysis';
+import { bucketSpan, getJobId } from '../../../../common/log_analysis';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { callJobsSummaryAPI } from './api/ml_get_jobs_summary_api';
 import { callSetupMlModuleAPI, SetupMlModuleResponsePayload } from './api/ml_setup_module_api';
@@ -142,6 +142,12 @@ export const useLogAnalysisJobs = ({
     fetchModuleDefinition();
   }, [fetchModuleDefinition]);
 
+  const jobIds = useMemo(() => {
+    return {
+      'log-entry-rate': getJobId(spaceId, sourceId, 'log-entry-rate'),
+    };
+  }, [sourceId, spaceId]);
+
   return {
     availableIndices,
     fetchJobStatus,
@@ -155,6 +161,7 @@ export const useLogAnalysisJobs = ({
     viewSetupForReconfiguration,
     viewSetupForUpdate,
     viewResults,
+    jobIds,
   };
 };
 

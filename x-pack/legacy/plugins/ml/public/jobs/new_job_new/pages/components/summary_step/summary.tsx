@@ -24,9 +24,10 @@ import { mlJobService } from '../../../../../services/job_service';
 import { JsonEditorFlyout, EDITOR_MODE } from '../common/json_editor_flyout';
 import { DatafeedPreviewFlyout } from '../common/datafeed_preview_flyout';
 import { JOB_TYPE } from '../../../common/job_creator/util/constants';
-import { isSingleMetricJobCreator } from '../../../common/job_creator';
-import { JobDetails } from './job_details';
-import { DetectorChart } from './detector_chart';
+import { isSingleMetricJobCreator, isAdvancedJobCreator } from '../../../common/job_creator';
+import { JobDetails } from './components/job_details';
+import { DatafeedDetails } from './components/datafeed_details';
+import { DetectorChart } from './components/detector_chart';
 import { JobProgress } from './components/job_progress';
 import { PostSaveOptions } from './components/post_save_options';
 import {
@@ -34,6 +35,7 @@ import {
   resetJob,
   advancedStartDatafeed,
 } from '../../../common/job_creator/util/general';
+import { JobSectionTitle, DatafeedSectionTitle } from './components/common';
 
 export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
   const { jobCreator, jobValidator, jobValidatorUpdated, resultsLoader } = useContext(
@@ -43,6 +45,8 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
   const [creatingJob, setCreatingJob] = useState(false);
   const [isValid, setIsValid] = useState(jobValidator.validationSummary.basic);
   const [jobRunner, setJobRunner] = useState<JobRunner | null>(null);
+
+  const isAdvanced = isAdvancedJobCreator(jobCreator);
 
   useEffect(() => {
     jobCreator.subscribeToProgress(setProgress);
@@ -117,11 +121,21 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
     <Fragment>
       {isCurrentStep && (
         <Fragment>
+          {isAdvanced && <JobSectionTitle />}
           <DetectorChart />
           <EuiSpacer size="m" />
           <JobProgress progress={progress} />
           <EuiSpacer size="m" />
           <JobDetails />
+
+          {isAdvanced && (
+            <Fragment>
+              <EuiHorizontalRule />
+              <DatafeedSectionTitle />
+              <EuiSpacer size="m" />
+              <DatafeedDetails />
+            </Fragment>
+          )}
 
           <EuiHorizontalRule />
           <EuiFlexGroup>

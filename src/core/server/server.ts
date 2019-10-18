@@ -25,6 +25,7 @@ import { ElasticsearchService, ElasticsearchServiceSetup } from './elasticsearch
 import { HttpService, InternalHttpServiceSetup } from './http';
 import { LegacyService } from './legacy';
 import { Logger, LoggerFactory } from './logging';
+import { UiSettingsService } from './ui_settings';
 import { PluginsService, config as pluginsConfig } from './plugins';
 import { SavedObjectsService } from '../server/saved_objects';
 
@@ -34,6 +35,7 @@ import { config as loggingConfig } from './logging';
 import { config as devConfig } from './dev';
 import { config as kibanaConfig } from './kibana_config';
 import { config as savedObjectsConfig } from './saved_objects';
+import { config as uiSettingsConfig } from './ui_settings';
 import { mapToObject } from '../utils/';
 import { ContextService } from './context';
 import { SavedObjectsServiceSetup } from './saved_objects/saved_objects_service';
@@ -50,6 +52,7 @@ export class Server {
   private readonly log: Logger;
   private readonly plugins: PluginsService;
   private readonly savedObjects: SavedObjectsService;
+  private readonly uiSettings: UiSettingsService;
 
   constructor(
     readonly config$: Observable<Config>,
@@ -66,6 +69,7 @@ export class Server {
     this.legacy = new LegacyService(core);
     this.elasticsearch = new ElasticsearchService(core);
     this.savedObjects = new SavedObjectsService(core);
+    this.uiSettings = new UiSettingsService(core);
   }
 
   public async setup() {
@@ -74,9 +78,14 @@ export class Server {
     // Discover any plugins before continuing. This allows other systems to utilize the plugin dependency graph.
     const pluginDependencies = await this.plugins.discover();
     const contextServiceSetup = this.context.setup({
-      // We inject a fake "legacy plugin" with no dependencies so that legacy plugins can register context providers
-      // that will only be available to other legacy plugins and will not leak into New Platform plugins.
-      pluginDependencies: new Map([...pluginDependencies, [this.legacy.legacyId, []]]),
+      // We inject a fake "legacy plugin" with dependencies on every plugin so that legacy plugins:
+      // 1) Can access context from any NP plugin
+      // 2) Can register context providers that will only be available to other legacy plugins and will not leak into
+      //    New Platform plugins.
+      pluginDependencies: new Map([
+        ...pluginDependencies,
+        [this.legacy.legacyId, [...pluginDependencies.keys()]],
+      ]),
     });
 
     const httpSetup = await this.http.setup({
@@ -89,10 +98,15 @@ export class Server {
       http: httpSetup,
     });
 
+    const uiSettingsSetup = await this.uiSettings.setup({
+      http: httpSetup,
+    });
+
     const coreSetup = {
       context: contextServiceSetup,
       elasticsearch: elasticsearchServiceSetup,
       http: httpSetup,
+      uiSettings: uiSettingsSetup,
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
@@ -184,6 +198,7 @@ export class Server {
       [devConfig.path, devConfig.schema],
       [kibanaConfig.path, kibanaConfig.schema],
       [savedObjectsConfig.path, savedObjectsConfig.schema],
+      [uiSettingsConfig.path, uiSettingsConfig.schema],
     ];
 
     for (const [path, schema] of schemas) {
