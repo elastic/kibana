@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { textService } from './text';
+import { i18n } from '@kbn/i18n';
 import { linkToHome, linkToActions } from '../constants';
 
 class BreadcrumbService {
@@ -28,14 +28,18 @@ class BreadcrumbService {
     this.breadcrumbs.home = [
       ...this.breadcrumbs.management,
       {
-        text: textService.breadcrumbs.home,
+        text: i18n.translate('xpack.alertingUI.home.breadcrumbTitle', {
+          defaultMessage: 'Alerting UI',
+        }),
         href: linkToHome(),
       },
     ];
     this.breadcrumbs.actions = [
       ...this.breadcrumbs.home,
       {
-        text: textService.breadcrumbs.actions,
+        text: i18n.translate('xpack.alertingUI.actions.breadcrumbTitle', {
+          defaultMessage: 'Actions',
+        }),
         href: linkToActions(),
       },
     ];

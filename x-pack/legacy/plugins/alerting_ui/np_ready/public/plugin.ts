@@ -13,7 +13,6 @@ import template from '../../public/index.html';
 import { renderReact } from './application';
 import { BASE_PATH } from './application/constants';
 import { breadcrumbService } from './application/lib/breadcrumb';
-import { textService } from './application/lib/text';
 
 export type Setup = void;
 export type Start = void;
@@ -45,7 +44,6 @@ export class ActionsPlugin implements Plugin<Setup, Start> {
   }
 
   public start(core: CoreStart, plugins: any) {
-    textService.init(i18n);
     breadcrumbService.init(core.chrome, plugins.management.breadcrumb);
 
     const unmountReactApp = (): void => {
