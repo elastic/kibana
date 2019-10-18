@@ -8,7 +8,6 @@ export * from './check';
 export * from './file';
 export * from './install';
 export * from './lsp';
-export * from './redirect';
 export * from './repository';
 export * from './search';
 export * from './setup';
