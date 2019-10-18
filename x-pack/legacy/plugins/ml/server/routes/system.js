@@ -23,7 +23,6 @@ export function systemRoutes({
   elasticsearchPlugin,
   route,
   xpackMainPlugin,
-  config,
   spacesPlugin
 }) {
   const callWithInternalUser = callWithInternalUserFactory(elasticsearchPlugin);
@@ -101,7 +100,7 @@ export function systemRoutes({
         const ignoreSpaces = request.query && request.query.ignoreSpaces === 'true';
         // if spaces is disabled force isMlEnabledInSpace to be true
         const { isMlEnabledInSpace } = spacesPlugin !== undefined ?
-          spacesUtilsProvider(spacesPlugin, request, config) :
+          spacesUtilsProvider(spacesPlugin, request) :
           { isMlEnabledInSpace: async () => true };
 
         const { getPrivileges } = privilegesProvider(callWithRequest, xpackMainPlugin, isMlEnabledInSpace, ignoreSpaces);

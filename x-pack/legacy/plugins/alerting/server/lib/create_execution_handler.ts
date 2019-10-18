@@ -4,18 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertAction, State, Context, AlertType, Log } from '../types';
-import { ActionsPlugin } from '../../../actions';
+import { AlertAction, State, Context, AlertType } from '../types';
+import { Logger } from '../../../../../../src/core/server';
 import { transformActionParams } from './transform_action_params';
+import { PluginStartContract as ActionsPluginStartContract } from '../../../actions';
 
 interface CreateExecutionHandlerOptions {
   alertId: string;
-  executeAction: ActionsPlugin['execute'];
+  executeAction: ActionsPluginStartContract['execute'];
   actions: AlertAction[];
   spaceId: string;
   apiKey?: string;
   alertType: AlertType;
-  log: Log;
+  logger: Logger;
 }
 
 interface ExecutionHandlerOptions {
@@ -26,7 +27,7 @@ interface ExecutionHandlerOptions {
 }
 
 export function createExecutionHandler({
-  log,
+  logger,
   alertId,
   executeAction,
   actions: alertActions,
@@ -36,10 +37,7 @@ export function createExecutionHandler({
 }: CreateExecutionHandlerOptions) {
   return async ({ actionGroup, context, state, alertInstanceId }: ExecutionHandlerOptions) => {
     if (!alertType.actionGroups.includes(actionGroup)) {
-      log(
-        ['error', 'alerting'],
-        `Invalid action group "${actionGroup}" for alert "${alertType.id}".`
-      );
+      logger.error(`Invalid action group "${actionGroup}" for alert "${alertType.id}".`);
       return;
     }
     const actions = alertActions

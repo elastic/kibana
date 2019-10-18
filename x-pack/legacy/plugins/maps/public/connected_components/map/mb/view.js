@@ -283,6 +283,7 @@ export class MBMapContainer extends React.Component {
           mbMap={this.state.mbMap}
           addFilters={this.props.addFilters}
           geoFields={this.props.geoFields}
+          renderTooltipContent={this.props.renderTooltipContent}
         />
       );
     }

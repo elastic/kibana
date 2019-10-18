@@ -43,7 +43,6 @@ import 'uiExports/embeddableFactories';
 import 'uiExports/embeddableActions';
 import 'uiExports/inspectorViews';
 import 'uiExports/search';
-import 'uiExports/autocompleteProviders';
 import 'uiExports/shareContextMenuExtensions';
 
 import 'ui/autoload/all';
@@ -53,9 +52,7 @@ import './discover';
 import './visualize';
 import './dashboard';
 import './management';
-import './doc';
 import './dev_tools';
-import './context';
 import 'ui/vislib';
 import 'ui/agg_response';
 import 'ui/agg_types';

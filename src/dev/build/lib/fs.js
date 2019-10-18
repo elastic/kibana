@@ -26,14 +26,13 @@ import { inspect } from 'util';
 
 import vfs from 'vinyl-fs';
 import { promisify } from 'bluebird';
-import mkdirpCb from 'mkdirp';
 import del from 'del';
 import deleteEmpty from 'delete-empty';
 import { createPromiseFromStreams, createMapStream } from '../../../legacy/utils';
 
 import tar from 'tar';
 
-const mkdirpAsync = promisify(mkdirpCb);
+const mkdirAsync = promisify(fs.mkdir);
 const writeFileAsync = promisify(fs.writeFile);
 const readFileAsync = promisify(fs.readFile);
 const readdirAsync = promisify(fs.readdir);
@@ -66,7 +65,7 @@ function longInspect(value) {
 
 export async function mkdirp(path) {
   assertAbsolute(path);
-  await mkdirpAsync(path);
+  await mkdirAsync(path, { recursive: true });
 }
 
 export async function write(path, contents) {
@@ -185,7 +184,7 @@ export async function untar(source, destination, extractOptions = {}) {
   assertAbsolute(source);
   assertAbsolute(destination);
 
-  await mkdirpAsync(destination);
+  await mkdirAsync(destination, { recursive: true });
 
   await createPromiseFromStreams([
     fs.createReadStream(source),

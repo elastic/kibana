@@ -4,6 +4,7 @@
 
 # App
 /x-pack/legacy/plugins/lens/ @elastic/kibana-app
+/x-pack/legacy/plugins/graph/ @elastic/kibana-app
 
 # App Architecture
 /src/plugins/data/ @elastic/kibana-app-arch
@@ -12,6 +13,8 @@
 
 # APM
 /x-pack/legacy/plugins/apm/  @elastic/apm-ui
+/x-pack/test/functional/apps/apm/  @elastic/apm-ui
+/src/legacy/core_plugins/apm_oss/  @elastic/apm-ui
 
 # Beats
 /x-pack/legacy/plugins/beats_management/  @elastic/beats
@@ -24,14 +27,16 @@
 /x-pack/test/functional/apps/code/  @teams/code
 /x-pack/test/api_integration/apis/code/  @teams/code
 
-# Infrastructure and Logs UI
-/x-pack/legacy/plugins/infra/ @elastic/infra-logs-ui
+# Logs & Metrics UI
+/x-pack/legacy/plugins/infra/ @elastic/logs-metrics-ui
+/x-pack/legacy/plugins/integrations_manager/ @elastic/epm
 
 # Machine Learning
 /x-pack/legacy/plugins/ml/  @elastic/ml-ui
 /x-pack/test/functional/apps/machine_learning/  @elastic/ml-ui
 /x-pack/test/functional/services/machine_learning/  @elastic/ml-ui
 /x-pack/test/functional/services/ml.ts  @elastic/ml-ui
+/x-pack/legacy/plugins/transform/  @elastic/ml-ui
 
 # Operations
 /renovate.json5 @elastic/kibana-operations
@@ -42,7 +47,6 @@
 # Platform
 /src/core/  @elastic/kibana-platform
 /src/legacy/server/saved_objects/  @elastic/kibana-platform
-/src/legacy/ui/public/saved_objects  @elastic/kibana-platform
 /config/kibana.yml @elastic/kibana-platform
 /x-pack/plugins/features/  @elastic/kibana-platform
 
@@ -52,6 +56,7 @@
 /x-pack/legacy/plugins/encrypted_saved_objects/  @elastic/kibana-security
 /src/legacy/server/csp/ @elastic/kibana-security
 /x-pack/plugins/security/  @elastic/kibana-security
+/x-pack/test/api_integration/apis/security/ @elastic/kibana-security
 
 # Kibana Stack Services
 /packages/kbn-analytics/ @elastic/kibana-stack-services

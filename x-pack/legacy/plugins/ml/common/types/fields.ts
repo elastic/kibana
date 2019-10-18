@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ES_FIELD_TYPES } from '../../common/constants/field_types';
+import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/common';
 import {
   ML_JOB_AGGREGATION,
   KIBANA_AGGREGATION,
@@ -30,8 +30,8 @@ export interface Field {
 export interface Aggregation {
   id: AggId;
   title: string;
-  kibanaName: KIBANA_AGGREGATION;
-  dslName: ES_AGGREGATION;
+  kibanaName: KIBANA_AGGREGATION | null;
+  dslName: ES_AGGREGATION | null;
   type: typeof METRIC_AGG_TYPE;
   mlModelPlotAgg: {
     min: string;
@@ -53,6 +53,15 @@ export interface AggFieldPair {
     field: SplitField;
     value: string | null;
   };
+  over?: {
+    field: SplitField;
+    value: string | null;
+  };
+  partition?: {
+    field: SplitField;
+    value: string | null;
+  };
+  excludeFrequent?: string;
 }
 
 export interface AggFieldNamePair {
@@ -62,4 +71,13 @@ export interface AggFieldNamePair {
     field: string | null;
     value: string | null;
   };
+  over?: {
+    field: string | null;
+    value: string | null;
+  };
+  partition?: {
+    field: string | null;
+    value: string | null;
+  };
+  excludeFrequent?: string;
 }

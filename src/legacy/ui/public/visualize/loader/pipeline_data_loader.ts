@@ -29,7 +29,7 @@ export class PipelineDataLoader {
 
     return runPipeline(
       this.vis.pipelineExpression,
-      {},
+      { type: 'null' },
       {
         getInitialContext: () => ({
           type: 'kibana_context',

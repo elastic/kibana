@@ -6,7 +6,6 @@
 
 import { IndexPattern } from 'src/legacy/core_plugins/data/public/index_patterns/index_patterns';
 import {
-  AppState,
   SerializedNode,
   UrlTemplate,
   SerializedUrlTemplate,
@@ -89,6 +88,7 @@ export function mapFields(indexPattern: IndexPattern): WorkspaceField[] {
       icon: getSuitableIcon(field.name),
       color: colorChoices[index % colorChoices.length],
       selected: false,
+      type: field.type,
     }))
     .sort((a, b) => {
       if (a.name < b.name) {
@@ -187,10 +187,11 @@ export function savedWorkspaceToAppState(
   savedWorkspace: GraphWorkspaceSavedObject,
   indexPattern: IndexPattern,
   workspaceInstance: Workspace
-): Pick<
-  AppState,
-  'urlTemplates' | 'advancedSettings' | 'workspace' | 'allFields' | 'selectedFields'
-> {
+): {
+  urlTemplates: UrlTemplate[];
+  advancedSettings: AdvancedSettings;
+  allFields: WorkspaceField[];
+} {
   const persistedWorkspaceState: SerializedWorkspaceState = JSON.parse(savedWorkspace.wsState);
 
   // ================== url templates =============================
@@ -204,9 +205,11 @@ export function savedWorkspaceToAppState(
     persistedWorkspaceState.selectedFields
   );
   const selectedFields = allFields.filter(field => field.selected);
+  workspaceInstance.options.vertex_fields = selectedFields;
 
   // ================== advanced settings =============================
   const advancedSettings = Object.assign(
+    {},
     defaultAdvancedSettings,
     persistedWorkspaceState.exploreControls
   );
@@ -218,6 +221,8 @@ export function savedWorkspaceToAppState(
       field => field.name === serializedField.name
     );
   }
+
+  workspaceInstance.options.exploreControls = advancedSettings;
 
   // ================== nodes and edges =============================
   const graph = getNodesAndEdges(persistedWorkspaceState, allFields);
@@ -231,8 +236,6 @@ export function savedWorkspaceToAppState(
   return {
     urlTemplates,
     advancedSettings,
-    workspace: workspaceInstance,
     allFields,
-    selectedFields,
   };
 }

@@ -18,7 +18,7 @@ import * as Rx from 'rxjs';
 import { ignoreElements, mergeMap, tap } from 'rxjs/operators';
 import { InnerSubscriber } from 'rxjs/internal/InnerSubscriber';
 
-import { BrowserConfig } from '../../../../types';
+import { BrowserConfig, NetworkPolicy } from '../../../../types';
 import { LevelLogger as Logger } from '../../../lib/level_logger';
 import { HeadlessChromiumDriver } from '../driver';
 import { safeChildProcess } from '../../safe_child_process';
@@ -34,17 +34,20 @@ export class HeadlessChromiumDriverFactory {
   private logger: Logger;
   private browserConfig: BrowserConfig;
   private queueTimeout: queueTimeout;
+  private networkPolicy: NetworkPolicy;
 
   constructor(
     binaryPath: binaryPath,
     logger: Logger,
     browserConfig: BrowserConfig,
-    queueTimeout: queueTimeout
+    queueTimeout: queueTimeout,
+    networkPolicy: NetworkPolicy
   ) {
     this.binaryPath = binaryPath;
     this.browserConfig = browserConfig;
     this.queueTimeout = queueTimeout;
     this.logger = logger;
+    this.networkPolicy = networkPolicy;
   }
 
   type = 'chromium';
@@ -54,7 +57,6 @@ export class HeadlessChromiumDriverFactory {
     const chromiumArgs = args({
       userDataDir,
       viewport,
-      verboseLogging: true,
       disableSandbox: this.browserConfig.disableSandbox,
       proxy: this.browserConfig.proxy,
     });
@@ -91,7 +93,6 @@ export class HeadlessChromiumDriverFactory {
       const chromiumArgs = args({
         userDataDir,
         viewport,
-        verboseLogging: this.logger.isVerbose,
         disableSandbox: this.browserConfig.disableSandbox,
         proxy: this.browserConfig.proxy,
       });
@@ -154,7 +155,7 @@ export class HeadlessChromiumDriverFactory {
       this.getBrowserLogger(page).subscribe();
       this.getProcessLogger(browser).subscribe();
 
-      const driver$ = Rx.of(new HeadlessChromiumDriver(page, { inspect: this.browserConfig.inspect })); //  prettier-ignore
+      const driver$ = Rx.of(new HeadlessChromiumDriver(page, { inspect: this.browserConfig.inspect, networkPolicy: this.networkPolicy })); //  prettier-ignore
 
       const exit$ = this.getPageExit(browser, page);
 

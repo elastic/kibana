@@ -51,6 +51,8 @@ interface BootstrapModule {
  * setup either the app or browser tests.
  */
 export class LegacyPlatformService {
+  /** Symbol to represent the legacy platform as a fake "plugin". Used by the ContextService */
+  public readonly legacyId = Symbol();
   private bootstrapModule?: BootstrapModule;
   private targetDomElement?: HTMLElement;
 

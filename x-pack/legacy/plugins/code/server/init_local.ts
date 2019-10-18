@@ -5,12 +5,13 @@
  */
 
 import { Server } from 'hapi';
+
+import { LoggerFactory } from 'src/core/server';
 import { ServerOptions } from './server_options';
 import { CodeServices } from './distributed/code_services';
 import { EsClient } from './lib/esqueue';
 import { RepositoryConfigController } from './repository_config_controller';
 import { GitOperations } from './git_operations';
-import { Logger } from './log';
 import {
   getGitServiceHandler,
   getLspServiceHandler,
@@ -29,7 +30,7 @@ import { ServerLoggerFactory } from './utils/server_logger_factory';
 
 export function initLocalService(
   server: Server,
-  log: Logger,
+  loggerFactory: LoggerFactory,
   serverOptions: ServerOptions,
   codeServices: CodeServices,
   esClient: EsClient,
@@ -43,6 +44,7 @@ export function initLocalService(
     GitServiceDefinitionOption
   );
 
+  const serverLoggerFactory = new ServerLoggerFactory(loggerFactory, serverOptions.verbose);
   const installManager = new InstallManager(server, serverOptions);
   const lspService = new LspService(
     '127.0.0.1',
@@ -50,13 +52,12 @@ export function initLocalService(
     gitOps,
     esClient,
     installManager,
-    new ServerLoggerFactory(server),
+    serverLoggerFactory,
     repoConfigController
   );
   server.events.on('stop', async () => {
-    log.debug('shutdown lsp process');
+    loggerFactory.get().debug('shutdown lsp process');
     await lspService.shutdown();
-    await gitOps.cleanAllRepo();
   });
   codeServices.registerHandler(
     LspServiceDefinition,
@@ -65,7 +66,7 @@ export function initLocalService(
   );
   codeServices.registerHandler(
     WorkspaceDefinition,
-    getWorkspaceHandler(server, lspService.workspaceHandler)
+    getWorkspaceHandler(serverLoggerFactory, lspService.workspaceHandler)
   );
   codeServices.registerHandler(SetupDefinition, setupServiceHandler);
 

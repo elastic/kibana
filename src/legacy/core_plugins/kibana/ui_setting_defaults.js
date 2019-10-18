@@ -55,6 +55,24 @@ export function getUiSettingDefaults() {
     'buildNum': {
       readonly: true
     },
+    'defaultRoute': {
+      name: i18n.translate('kbn.advancedSettings.defaultRoute.defaultRouteTitle', {
+        defaultMessage: 'Default route',
+      }),
+      value: '/app/kibana',
+      validation: {
+        regexString: '^\/',
+        message: i18n.translate('kbn.advancedSettings.defaultRoute.defaultRouteValidationMessage', {
+          defaultMessage: 'The route must start with a slash ("/")',
+        }),
+      },
+      description:
+        i18n.translate('kbn.advancedSettings.defaultRoute.defaultRouteText', {
+          defaultMessage: 'This setting specifies the default route when opening Kibana. ' +
+          'You can use this setting to modify the landing page when opening Kibana. ' +
+          'The route must start with a slash ("/").',
+        }),
+    },
     'query:queryString:options': {
       name: i18n.translate('kbn.advancedSettings.query.queryStringOptionsTitle', {
         defaultMessage: 'Query string options',
@@ -422,12 +440,13 @@ export function getUiSettingDefaults() {
       name: i18n.translate('kbn.advancedSettings.courier.batchSearchesTitle', {
         defaultMessage: 'Batch concurrent searches',
       }),
-      value: true,
+      value: false,
       type: 'boolean',
       description: i18n.translate('kbn.advancedSettings.courier.batchSearchesText', {
         defaultMessage:
-          'Batch multiple concurrent searches in a single request. This may improve overall load' +
-          'times, but it also means that no single search request will be returned until the last has completed.',
+          `When disabled, dashboard panels will load individually, and search requests will terminate when users navigate
+           away or update the query. When enabled, dashboard panels will load together when all of the data is loaded, and
+           searches will not terminate.`,
       }),
       category: ['search'],
     },
@@ -810,7 +829,7 @@ export function getUiSettingDefaults() {
     },
     'timepicker:timeDefaults': {
       name: i18n.translate('kbn.advancedSettings.timepicker.timeDefaultsTitle', {
-        defaultMessage: 'Time picker defaults',
+        defaultMessage: 'Time filter defaults',
       }),
       value:
 `{
@@ -825,7 +844,7 @@ export function getUiSettingDefaults() {
     },
     'timepicker:refreshIntervalDefaults': {
       name: i18n.translate('kbn.advancedSettings.timepicker.refreshIntervalDefaultsTitle', {
-        defaultMessage: 'Time picker refresh interval',
+        defaultMessage: 'Time filter refresh interval',
       }),
       value:
 `{
@@ -840,7 +859,7 @@ export function getUiSettingDefaults() {
     },
     'timepicker:quickRanges': {
       name: i18n.translate('kbn.advancedSettings.timepicker.quickRangesTitle', {
-        defaultMessage: 'Time picker quick ranges',
+        defaultMessage: 'Time filter quick ranges',
       }),
       value: JSON.stringify([
         {
@@ -896,7 +915,7 @@ export function getUiSettingDefaults() {
       type: 'json',
       description: i18n.translate('kbn.advancedSettings.timepicker.quickRangesText', {
         defaultMessage:
-          'The list of ranges to show in the Quick section of the time picker. This should be an array of objects, ' +
+          'The list of ranges to show in the Quick section of the time filter. This should be an array of objects, ' +
           'with each object containing "from", "to" (see {acceptedFormatsLink}), and ' +
           '"display" (the title to be displayed).',
         description:

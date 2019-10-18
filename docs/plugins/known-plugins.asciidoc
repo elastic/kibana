@@ -60,7 +60,7 @@ This list of plugins is not guaranteed to work on your version of Kibana. Instea
 
 [float]
 === Other
-* https://github.com/nreese/kibana-time-plugin[Time picker as a dashboard panel] Widget to view and edit the time range from within dashboards.
+* https://github.com/nreese/kibana-time-plugin[Time filter as a dashboard panel] Widget to view and edit the time range from within dashboards.
 
 * https://github.com/Webiks/kibana-API.git[Kibana-API] (webiks) Exposes an API with Kibana functionality.
 Use it to create, edit and embed visualizations, and also to search inside an embedded dashboard.

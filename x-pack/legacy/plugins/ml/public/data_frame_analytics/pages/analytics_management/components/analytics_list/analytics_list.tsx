@@ -8,18 +8,7 @@ import React, { Fragment, FC, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import {
-  // EuiBadge,
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiEmptyPrompt,
-} from '@elastic/eui';
-
-import {
-  OnTableChangeArg,
-  SortDirection,
-  SORT_DIRECTION,
-} from '../../../../../../common/types/eui/in_memory_table';
+import { EuiButtonEmpty, EuiCallOut, EuiEmptyPrompt } from '@elastic/eui';
 
 import { DataFrameAnalyticsId, useRefreshAnalyticsList } from '../../../../common';
 import { checkPermission } from '../../../../../privilege/check_privilege';
@@ -30,7 +19,6 @@ import {
   DataFrameAnalyticsListRow,
   ItemIdToExpandedRowMap,
   DATA_FRAME_TASK_STATE,
-  // DATA_FRAME_MODE,
   Query,
   Clause,
 } from './common';
@@ -38,7 +26,13 @@ import { ActionDispatchers } from '../../hooks/use_create_analytics_form/actions
 import { getAnalyticsFactory } from '../../services/analytics_service';
 import { getColumns } from './columns';
 import { ExpandedRow } from './expanded_row';
-import { ProgressBar, AnalyticsTable } from './analytics_table';
+import {
+  ProgressBar,
+  MlInMemoryTable,
+  OnTableChangeArg,
+  SortDirection,
+  SORT_DIRECTION,
+} from '../../../../../components/ml_in_memory_table';
 
 function getItemIdToExpandedRowMap(
   itemIds: DataFrameAnalyticsId[],
@@ -66,12 +60,14 @@ function stringMatch(str: string | undefined, substr: string) {
 
 interface Props {
   isManagementTable?: boolean;
+  isMlEnabledInSpace?: boolean;
   blockRefresh?: boolean;
   openCreateJobModal?: ActionDispatchers['openModal'];
 }
 // isManagementTable - for use in Kibana managagement ML section
 export const DataFrameAnalyticsList: FC<Props> = ({
   isManagementTable = false,
+  isMlEnabledInSpace = true,
   blockRefresh = false,
   openCreateJobModal,
 }) => {
@@ -233,7 +229,12 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     );
   }
 
-  const columns = getColumns(expandedRowItemIds, setExpandedRowItemIds, isManagementTable);
+  const columns = getColumns(
+    expandedRowItemIds,
+    setExpandedRowItemIds,
+    isManagementTable,
+    isMlEnabledInSpace
+  );
 
   const sorting = {
     sort: {
@@ -310,7 +311,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   return (
     <Fragment>
       <ProgressBar isLoading={isLoading} />
-      <AnalyticsTable
+      <MlInMemoryTable
         allowNeutralSort={false}
         className="mlAnalyticsTable"
         columns={columns}

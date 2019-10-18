@@ -12,6 +12,17 @@ interface UiSettings {
 
 type SavedObjectClient = any;
 
+export interface NetworkPolicyRule {
+  allow: boolean;
+  protocol: string;
+  host: string;
+}
+
+export interface NetworkPolicy {
+  enabled: boolean;
+  rules: NetworkPolicyRule[];
+}
+
 // these types shoud be in core kibana and are only here temporarily
 export interface KbnServer {
   info: { protocol: string };
@@ -48,7 +59,6 @@ export interface BrowserConfig {
     server: string;
     bypass?: string[];
   };
-  verboseLogging?: boolean;
 }
 
 export interface ElementPosition {

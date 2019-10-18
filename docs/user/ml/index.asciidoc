@@ -4,14 +4,9 @@
 
 As datasets increase in size and complexity, the human effort required to
 inspect dashboards or maintain rules for spotting infrastructure problems,
-cyber attacks, or business issues becomes impractical. The Elastic {ml} 
-{anomaly-detect} feature automatically models the normal behavior of your time 
-series data — learning trends, periodicity, and more — in real time to identify 
-anomalies, streamline root cause analysis, and reduce false positives.
-
-{anomaly-detect-cap} runs in and scales with {es}, and includes an
-intuitive UI on the {kib} *Machine Learning* page for creating {anomaly-jobs} 
-and understanding results.
+cyber attacks, or business issues becomes impractical. Elastic {ml-features}
+such as {anomaly-detect} and {oldetection} make it easier to notice suspicious
+activities with minimal human interference.
 
 If you have a basic license, you can use the *Data Visualizer* to learn more
 about your data. In particular, if your data is stored in {es} and contains a
@@ -25,9 +20,20 @@ experimental[] You can also upload a CSV, NDJSON, or log file (up to 100 MB in
 size). The *Data Visualizer* identifies the file format and field mappings. You 
 can then optionally import that data into an {es} index.  
 
-If you have a trial or platinum license, you can 
-create {anomaly-jobs} and manage jobs and {dfeeds} from the *Job 
-Management* pane: 
+[float]
+[[xpack-ml-anomalies]]
+=== {anomaly-detect-cap}
+
+The Elastic {ml} {anomaly-detect} feature automatically models the normal
+behavior of your time series data — learning trends, periodicity, and more — in
+real time to identify anomalies, streamline root cause analysis, and reduce
+false positives. {anomaly-detect-cap} runs in and scales with {es}, and
+includes an intuitive UI on the {kib} *Machine Learning* page for creating
+{anomaly-jobs} and understanding results.
+
+If you have a license that includes the {ml-features}, you can 
+create {anomaly-jobs} and manage jobs and {dfeeds} from the *Job Management*
+pane: 
 
 [role="screenshot"]
 image::user/ml/images/ml-job-management.jpg[Job Management]
@@ -64,6 +70,23 @@ browser so that it does not block pop-up windows or create an exception for your
 {kib} URL.
 
 For more information about the {anomaly-detect} feature, see
-https://www.elastic.co/what-is/elastic-stack-machine-learning and
-{stack-ov}/xpack-ml.html[{ml-cap} {anomaly-detect}].
+https://www.elastic.co/what-is/elastic-stack-machine-learning[{ml-cap} in the {stack}]
+and {stack-ov}/xpack-ml.html[{ml-cap} {anomaly-detect}].
 
+[float]
+[[xpack-ml-dfanalytics]]
+=== {dfanalytics-cap}
+
+The Elastic {ml} {dfanalytics} feature enables you to analyze your data using
+{oldetection} and {regression} algorithms and generate new indices that contain
+the results alongside your source data. 
+
+If you have a license that includes the {ml-features}, you can create
+{oldetection} {dfanalytics-jobs} and view their results on the *Analytics* page
+in {kib}. For example:
+
+[role="screenshot"]
+image::user/ml/images/outliers.jpg[{oldetection-cap} results in {kib}]
+
+For more information about the {dfanalytics} feature, see 
+{stack-ov}/ml-dfanalytics.html[{ml-cap} {dfanalytics}].

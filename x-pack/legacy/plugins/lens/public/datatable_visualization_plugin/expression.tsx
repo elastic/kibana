@@ -13,10 +13,10 @@ import { KibanaDatatable } from '../../../../../../src/legacy/core_plugins/inter
 import { LensMultiTable } from '../types';
 import { IInterpreterRenderFunction } from '../../../../../../src/legacy/core_plugins/expressions/public';
 import { FormatFactory } from '../../../../../../src/legacy/ui/public/visualize/loader/pipeline_helpers/utilities';
+import { VisualizationContainer } from '../visualization_container';
 
 export interface DatatableColumns {
   columnIds: string[];
-  labels: string[];
 }
 
 interface Args {
@@ -94,11 +94,6 @@ export const datatableColumns: ExpressionFunction<
       multi: true,
       help: '',
     },
-    labels: {
-      types: ['string'],
-      multi: true,
-      help: '',
-    },
   },
   fn: function fn(_context: unknown, args: DatatableColumns) {
     return {
@@ -132,28 +127,31 @@ function DatatableComponent(props: DatatableProps & { formatFactory: FormatFacto
   });
 
   return (
-    <EuiBasicTable
-      className="lnsDataTable"
-      data-test-subj="lnsDataTable"
-      columns={props.args.columns.columnIds
-        .map((field, index) => {
-          return {
-            field,
-            name: props.args.columns.labels[index],
-          };
-        })
-        .filter(({ field }) => !!field)}
-      items={
-        firstTable
-          ? firstTable.rows.map(row => {
-              const formattedRow: Record<string, unknown> = {};
-              Object.entries(formatters).forEach(([columnId, formatter]) => {
-                formattedRow[columnId] = formatter.convert(row[columnId]);
-              });
-              return formattedRow;
-            })
-          : []
-      }
-    />
+    <VisualizationContainer>
+      <EuiBasicTable
+        className="lnsDataTable"
+        data-test-subj="lnsDataTable"
+        columns={props.args.columns.columnIds
+          .map(field => {
+            const col = firstTable.columns.find(c => c.id === field);
+            return {
+              field,
+              name: (col && col.name) || '',
+            };
+          })
+          .filter(({ field }) => !!field)}
+        items={
+          firstTable
+            ? firstTable.rows.map(row => {
+                const formattedRow: Record<string, unknown> = {};
+                Object.entries(formatters).forEach(([columnId, formatter]) => {
+                  formattedRow[columnId] = formatter.convert(row[columnId]);
+                });
+                return formattedRow;
+              })
+            : []
+        }
+      />
+    </VisualizationContainer>
   );
 }

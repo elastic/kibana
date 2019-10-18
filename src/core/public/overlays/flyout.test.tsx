@@ -39,7 +39,9 @@ describe('FlyoutService', () => {
       expect(mockReactDomRender.mock.calls).toMatchSnapshot();
     });
     describe('with a currently active flyout', () => {
-      let target: HTMLElement, flyoutService: FlyoutService, ref1: FlyoutRef;
+      let target: HTMLElement;
+      let flyoutService: FlyoutService;
+      let ref1: FlyoutRef;
       beforeEach(() => {
         target = document.createElement('div');
         flyoutService = new FlyoutService(target);

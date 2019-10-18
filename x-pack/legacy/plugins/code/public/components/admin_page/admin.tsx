@@ -18,6 +18,8 @@ import { SearchBar } from '../search_bar';
 import { EmptyProject } from './empty_project';
 import { LanguageSeverTab } from './language_server_tab';
 import { ProjectTab } from './project_tab';
+import { METRIC_TYPE, trackCodeUiMetric } from '../../services/ui_metric';
+import { CodeUIUsageMetrics } from '../../../model/usage_telemetry_metrics';
 
 enum AdminTabs {
   projects = '0',
@@ -82,6 +84,11 @@ class AdminPage extends React.PureComponent<Props, State> {
     };
   }
 
+  componentDidMount() {
+    // track admin page load count
+    trackCodeUiMetric(METRIC_TYPE.LOADED, CodeUIUsageMetrics.ADMIN_PAGE_LOAD_COUNT);
+  }
+
   public getAdminTabClickHandler = (tab: AdminTabs) => () => {
     this.setState({ tab });
     this.props.history.push(url.format({ pathname: '/admin', query: { tab } }));
@@ -124,7 +131,7 @@ class AdminPage extends React.PureComponent<Props, State> {
 
   public render() {
     return (
-      <div className="codeContainer__root">
+      <main className="codeContainer__root">
         <div className="codeContainer__rootInner">
           <div className="codeContainer__adminWrapper">
             <SearchBar
@@ -140,7 +147,7 @@ class AdminPage extends React.PureComponent<Props, State> {
             </div>
           </div>
         </div>
-      </div>
+      </main>
     );
   }
 }

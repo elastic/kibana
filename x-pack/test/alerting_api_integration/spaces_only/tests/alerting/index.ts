@@ -16,6 +16,10 @@ export default function alertingTests({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./find'));
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./list_alert_types'));
+    loadTestFile(require.resolve('./mute_all'));
+    loadTestFile(require.resolve('./mute_instance'));
+    loadTestFile(require.resolve('./unmute_all'));
+    loadTestFile(require.resolve('./unmute_instance'));
     loadTestFile(require.resolve('./update'));
     loadTestFile(require.resolve('./update_api_key'));
     loadTestFile(require.resolve('./alerts'));

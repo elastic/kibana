@@ -28,7 +28,7 @@ import { Alerts } from './alerts';
 import { Axis } from './axis/axis';
 import { ChartGrid as Grid } from './chart_grid';
 import { visTypes as chartTypes } from '../visualizations/vis_types';
-import { dispatchRenderComplete } from '../../render_complete';
+import { dispatchRenderComplete } from '../../../../../plugins/kibana_utils/public';
 
 const markdownIt = new MarkdownIt({
   html: false,

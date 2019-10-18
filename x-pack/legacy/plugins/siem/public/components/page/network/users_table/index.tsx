@@ -92,6 +92,7 @@ class UsersTableComponent extends React.PureComponent<UsersTableProps> {
       <PaginatedTable
         activePage={activePage}
         columns={getUsersColumns(flowTarget, usersTableId)}
+        dataTestSubj={`table-${tableType}`}
         showMorePagesIndicator={showMorePagesIndicator}
         headerCount={totalCount}
         headerTitle={i18n.USERS}

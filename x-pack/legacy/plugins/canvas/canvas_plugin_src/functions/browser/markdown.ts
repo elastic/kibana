@@ -8,7 +8,7 @@ import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 // @ts-ignore untyped local
 import { Handlebars } from '../../../common/lib/handlebars';
 import { Datatable, Render, Style } from '../../../types';
-import { getFunctionHelp } from '../../strings';
+import { getFunctionHelp } from '../../../i18n';
 
 type Context = Datatable | null;
 

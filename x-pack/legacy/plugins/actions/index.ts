@@ -9,7 +9,14 @@ import { Root } from 'joi';
 import mappings from './mappings.json';
 import { init } from './server';
 
-export { ActionsPlugin, ActionsClient, ActionType, ActionTypeExecutorOptions } from './server';
+export {
+  ActionsPlugin,
+  ActionsClient,
+  ActionType,
+  ActionTypeExecutorOptions,
+  PluginSetupContract,
+  PluginStartContract,
+} from './server';
 
 export function actions(kibana: any) {
   return new kibana.Plugin({
@@ -28,7 +35,11 @@ export function actions(kibana: any) {
         .keys({
           enabled: Joi.boolean().default(false),
           whitelistedHosts: Joi.array()
-            .items(Joi.string().hostname())
+            .items(
+              Joi.string()
+                .hostname()
+                .allow('*')
+            )
             .sparse(false)
             .default([]),
         })

@@ -63,7 +63,7 @@ export function InspectorProvider({ getService }: FtrProviderContext) {
       if (!isOpen) {
         await retry.try(async () => {
           await testSubjects.click('openInspectorButton');
-          await testSubjects.find('inspectorPanel');
+          await testSubjects.exists('inspectorPanel');
         });
       }
     }

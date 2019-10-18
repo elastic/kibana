@@ -9,9 +9,9 @@ import { uniqueId, startsWith } from 'lodash';
 import { EuiCallOut } from '@elastic/eui';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AutocompleteSuggestion, getAutocompleteProvider } from 'ui/autocomplete_providers';
-import { StaticIndexPattern } from 'ui/index_patterns';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { AutocompleteProviderRegister, AutocompleteSuggestion } from 'src/plugins/data/public';
+import { StaticIndexPattern } from 'src/legacy/core_plugins/data/public/index_patterns/index_patterns';
 import { Typeahead } from './typeahead';
 import { getIndexPattern } from '../../../lib/adapters/index_pattern';
 import { UptimeSettingsContext } from '../../../contexts';
@@ -27,7 +27,7 @@ interface State {
   isLoadingIndexPattern: boolean;
 }
 
-function convertKueryToEsQuery(kuery: string, indexPattern: StaticIndexPattern) {
+function convertKueryToEsQuery(kuery: string, indexPattern: unknown) {
   const ast = fromKueryExpression(kuery);
   return toElasticsearchQuery(ast, indexPattern);
 }
@@ -35,9 +35,10 @@ function convertKueryToEsQuery(kuery: string, indexPattern: StaticIndexPattern) 
 function getSuggestions(
   query: string,
   selectionStart: number,
-  apmIndexPattern: StaticIndexPattern
+  apmIndexPattern: StaticIndexPattern,
+  autocomplete: Pick<AutocompleteProviderRegister, 'getProvider'>
 ) {
-  const autocompleteProvider = getAutocompleteProvider('kuery');
+  const autocompleteProvider = autocomplete.getProvider('kuery');
   if (!autocompleteProvider) {
     return [];
   }
@@ -58,7 +59,11 @@ function getSuggestions(
   return suggestions;
 }
 
-export function KueryBar() {
+interface Props {
+  autocomplete: Pick<AutocompleteProviderRegister, 'getProvider'>;
+}
+
+export function KueryBar({ autocomplete }: Props) {
   const [state, setState] = useState<State>({
     suggestions: [],
     isLoadingIndexPattern: true,
@@ -90,7 +95,12 @@ export function KueryBar() {
     currentRequestCheck = currentRequest;
 
     try {
-      let suggestions = await getSuggestions(inputValue, selectionStart, indexPattern);
+      let suggestions = await getSuggestions(
+        inputValue,
+        selectionStart,
+        indexPattern,
+        autocomplete
+      );
       suggestions = suggestions
         .filter((suggestion: AutocompleteSuggestion) => !startsWith(suggestion.text, 'span.'))
         .slice(0, 15);

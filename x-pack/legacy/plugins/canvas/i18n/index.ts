@@ -9,7 +9,15 @@ import { i18n } from '@kbn/i18n';
 export * from './angular';
 export * from './components';
 export * from './constants';
+export * from './errors';
+export * from './expression_types';
+export * from './elements';
+export * from './functions';
+export * from './renderers';
 export * from './shortcuts';
+export * from './tags';
+export * from './transitions';
+export * from './ui';
 export * from './units';
 
 export const getAppDescription = () =>

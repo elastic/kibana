@@ -1,6 +1,6 @@
 [role="xpack"]
 [[secure-reporting]]
-=== Reporting and Security
+=== Reporting and security
 
 Reporting operates by creating and updating documents in {es} in response to
 user actions in {kib}.
@@ -48,7 +48,7 @@ reporting_user:
 
 [role="xpack"]
 [[securing-reporting]]
-=== Securing the Reporting Endpoints
+=== Secure the reporting endpoints
 
 In a production environment, you should restrict access to
 the {reporting} endpoints to authorized users. This requires that you:

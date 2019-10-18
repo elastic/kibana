@@ -43,9 +43,7 @@
 import _ from 'lodash';
 import $ from 'jquery';
 import PEG from 'pegjs';
-
 import grammar from 'raw-loader!../chain.peg';
-import './timelion_expression_suggestions/timelion_expression_suggestions';
 import timelionExpressionInputTemplate from './timelion_expression_input.html';
 import {
   SUGGESTION_TYPE,
@@ -57,9 +55,8 @@ import { comboBoxKeyCodes } from '@elastic/eui';
 import { ArgValueSuggestionsProvider } from './timelion_expression_suggestions/arg_value_suggestions';
 
 const Parser = PEG.generate(grammar);
-const app = require('ui/modules').get('apps/timelion', []);
 
-app.directive('timelionExpressionInput', function ($http, $timeout, Private) {
+export function TimelionExpInput($http, $timeout, Private) {
   return {
     restrict: 'E',
     scope: {
@@ -276,4 +273,4 @@ app.directive('timelionExpressionInput', function ($http, $timeout, Private) {
       init();
     }
   };
-});
+}

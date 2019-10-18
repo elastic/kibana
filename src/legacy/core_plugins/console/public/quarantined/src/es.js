@@ -35,11 +35,6 @@ export function getContentType(body) {
 export function send(method, path, data) {
   const wrappedDfd = $.Deferred();  // eslint-disable-line new-cap
 
-  const isGetRequest = /^get$/i.test(method);
-  if (data && isGetRequest) {
-    method = 'POST';
-  }
-
   const options = {
     url: '../api/console/proxy?' + formatQueryString({ path, method }),
     data,
@@ -49,7 +44,6 @@ export function send(method, path, data) {
     type: 'POST',
     dataType: 'text', // disable automatic guessing
   };
-
 
   $.ajax(options).then(
     function (data, textStatus, jqXHR) {

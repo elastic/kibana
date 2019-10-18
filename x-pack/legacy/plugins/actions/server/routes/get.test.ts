@@ -5,11 +5,11 @@
  */
 
 import { createMockServer } from './_mock_server';
-import { getRoute } from './get';
+import { getActionRoute } from './get';
 import { ActionResult } from '../types';
 
 const { server, actionsClient } = createMockServer();
-getRoute(server);
+server.route(getActionRoute);
 
 beforeEach(() => {
   jest.resetAllMocks();

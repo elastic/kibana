@@ -34,7 +34,7 @@ import { Inspector } from '../../inspector';
 import { Adapters } from '../../inspector/types';
 import { PersistedState } from '../../persisted_state';
 import { IPrivate } from '../../private';
-import { RenderCompleteHelper } from '../../render_complete';
+import { RenderCompleteHelper } from '../../../../../plugins/kibana_utils/public';
 import { AppState } from '../../state_management/app_state';
 import { timefilter } from '../../timefilter';
 import { Vis } from '../../vis';
@@ -518,9 +518,9 @@ export class EmbeddedVisualizeHandler {
     // If the data loader was aborted then no need to surface this error in the UI
     if (error && error.name === 'AbortError') return;
 
-    // TODO: come up with a general way to cancel execution of pipeline expressions.
-    if (this.dataLoaderParams.searchSource && this.dataLoaderParams.searchSource.cancelQueued) {
-      this.dataLoaderParams.searchSource.cancelQueued();
+    // Cancel execution of pipeline expressions
+    if (this.abortController) {
+      this.abortController.abort();
     }
 
     this.vis.requestError = error;

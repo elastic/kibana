@@ -152,12 +152,7 @@ function PipelinesTableUi({
       {
         type: 'field_value_selection',
         field: 'id',
-        name: (
-          <FormattedMessage
-            id="xpack.logstash.pipelinesTable.filterByIdLabel"
-            defaultMessage="Filter by ID"
-          />
-        ),
+        name: i18n.translate('xpack.logstash.pipelinesTable.filterByIdLabel', { defaultMessage: 'Filter by ID' }),
         multiSelect: false,
         options: pipelines.map(({ id }) => {
           return {

@@ -4,15 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import * as React from 'react';
 import uuid from 'uuid';
-import styled from 'styled-components';
 
 import { TimelineNonEcsData } from '../../../../graphql/types';
 import { Note } from '../../../../lib/note';
 import { AssociateNote, UpdateNote } from '../../../notes/helpers';
 import { OnColumnResized, OnPinEvent, OnUnPinEvent } from '../../events';
+import { EventsTrData } from '../../styles';
 import { Actions } from '../actions';
 import { ColumnHeader } from '../column_headers/column_header';
 import { DataDrivenColumns } from '../data_driven_columns';
@@ -46,10 +45,6 @@ export const getNewNoteId = (): string => uuid.v4();
 
 const emptyNotes: string[] = [];
 
-const EventColumnViewFlexGroup = styled(EuiFlexGroup)`
-  border-top: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
-`;
-
 export const EventColumnView = React.memo<Props>(
   ({
     id,
@@ -73,53 +68,45 @@ export const EventColumnView = React.memo<Props>(
     toggleShowNotes,
     updateNote,
   }) => (
-    <EventColumnViewFlexGroup
-      alignItems="center"
-      data-test-subj="event-column-view"
-      gutterSize="none"
-    >
-      <EuiFlexItem data-test-subj="actions-column-item" grow={false}>
-        <Actions
-          actionsColumnWidth={actionsColumnWidth}
-          associateNote={associateNote}
-          checked={false}
-          expanded={expanded}
-          data-test-subj="actions"
-          eventId={id}
-          eventIsPinned={eventIsPinned({
-            eventId: id,
-            pinnedEventIds,
-          })}
-          getNotesByIds={getNotesByIds}
-          isEventViewer={isEventViewer}
-          loading={loading}
-          noteIds={eventIdToNoteIds[id] || emptyNotes}
-          onEventToggled={onEventToggled}
-          onPinClicked={getPinOnClick({
-            allowUnpinning: !eventHasNotes(eventIdToNoteIds[id]),
-            eventId: id,
-            onPinEvent,
-            onUnPinEvent,
-            pinnedEventIds,
-          })}
-          showCheckboxes={false}
-          showNotes={showNotes}
-          toggleShowNotes={toggleShowNotes}
-          updateNote={updateNote}
-        />
-      </EuiFlexItem>
+    <EventsTrData data-test-subj="event-column-view">
+      <Actions
+        actionsColumnWidth={actionsColumnWidth}
+        associateNote={associateNote}
+        checked={false}
+        expanded={expanded}
+        data-test-subj="actions"
+        eventId={id}
+        eventIsPinned={eventIsPinned({
+          eventId: id,
+          pinnedEventIds,
+        })}
+        getNotesByIds={getNotesByIds}
+        isEventViewer={isEventViewer}
+        loading={loading}
+        noteIds={eventIdToNoteIds[id] || emptyNotes}
+        onEventToggled={onEventToggled}
+        onPinClicked={getPinOnClick({
+          allowUnpinning: !eventHasNotes(eventIdToNoteIds[id]),
+          eventId: id,
+          onPinEvent,
+          onUnPinEvent,
+          pinnedEventIds,
+        })}
+        showCheckboxes={false}
+        showNotes={showNotes}
+        toggleShowNotes={toggleShowNotes}
+        updateNote={updateNote}
+      />
 
-      <EuiFlexItem data-test-subj="event-columns-item" grow={false}>
-        <DataDrivenColumns
-          _id={id}
-          columnHeaders={columnHeaders}
-          columnRenderers={columnRenderers}
-          data={data}
-          onColumnResized={onColumnResized}
-          timelineId={timelineId}
-        />
-      </EuiFlexItem>
-    </EventColumnViewFlexGroup>
+      <DataDrivenColumns
+        _id={id}
+        columnHeaders={columnHeaders}
+        columnRenderers={columnRenderers}
+        data={data}
+        onColumnResized={onColumnResized}
+        timelineId={timelineId}
+      />
+    </EventsTrData>
   ),
   (prevProps, nextProps) => {
     return (
@@ -137,5 +124,4 @@ export const EventColumnView = React.memo<Props>(
     );
   }
 );
-
 EventColumnView.displayName = 'EventColumnView';

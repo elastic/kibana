@@ -79,11 +79,7 @@ exports[`PipelinesTable component renders component as expected 1`] = `
         Object {
           "field": "id",
           "multiSelect": false,
-          "name": <FormattedMessage
-            defaultMessage="Filter by ID"
-            id="xpack.logstash.pipelinesTable.filterByIdLabel"
-            values={Object {}}
-          />,
+          "name": "Filter by ID",
           "options": Array [
             Object {
               "name": "testPipeline",
