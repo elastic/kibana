@@ -14,6 +14,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-6.8.4>>
 * <<release-notes-6.8.3>>
 * <<release-notes-6.8.2>>
 * <<release-notes-6.8.1>>
@@ -89,6 +90,20 @@ This section summarizes the changes in each release.
 //[float]
 //=== Known Issues
 ////
+
+[[release-notes-6.8.4]]
+== {kib} 6.8.4
+
+[float]
+[[bug-6.8.4]]
+=== Bug fixes
+
+Machine Learning::
+* Automatically applies refresh settings set in URL {pull}47052[#47052]
+
+Monitoring::
+* Respects xpack.monitoring.show_license_expiration {pull}45537[#45537]
+
 
 [[release-notes-6.8.3]]
 == {kib} 6.8.3
