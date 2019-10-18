@@ -43,7 +43,7 @@ import { InfluencersList } from '../components/influencers_list';
 import { ALLOW_CELL_RANGE_SELECTION, dragSelect$, explorer$ } from './explorer_dashboard_service';
 import { mlResultsService } from 'plugins/ml/services/results_service';
 import { LoadingIndicator } from '../components/loading_indicator/loading_indicator';
-import { NavigationMenu } from '../components/navigation_menu/navigation_menu';
+import { NavigationMenu } from '../components/navigation_menu';
 import { CheckboxShowCharts, showCharts$ } from '../components/controls/checkbox_showcharts';
 import { JobSelector } from '../components/job_selector';
 import { SelectInterval, interval$ } from '../components/controls/select_interval/select_interval';

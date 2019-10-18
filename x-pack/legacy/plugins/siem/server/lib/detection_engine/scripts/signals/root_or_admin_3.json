@@ -1,5 +1,5 @@
 {
-  "id": "3",
+  "id": "rule-3",
   "description": "Detecting root and admin users",
   "index": ["auditbeat-*", "filebeat-*", "packetbeat-*", "winlogbeat-*"],
   "interval": "5m",
@@ -10,4 +10,3 @@
   "to": "now-15y",
   "kql": "user.name: root or user.name: admin"
 }
-
