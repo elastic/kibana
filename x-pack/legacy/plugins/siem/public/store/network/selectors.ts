@@ -8,7 +8,8 @@ import { createSelector } from 'reselect';
 import { get } from 'lodash/fp';
 
 import { FlowTargetSourceDest } from '../../graphql/types';
-import { initialState, State } from '../reducer';
+import { State } from '../reducer';
+import { initialNetworkState } from './reducer';
 import {
   IpDetailsTableType,
   NetworkDetailsModel,
@@ -38,7 +39,7 @@ const selectTopNFlowByType = (
     networkType === NetworkType.page ? NetworkTableType[ft] : IpDetailsTableType[ft];
   return (
     get([networkType, 'queries', nFlowType], state.network) ||
-    get([networkType, 'queries', nFlowType], initialState.network)
+    get([networkType, 'queries', nFlowType], initialNetworkState)
   );
 };
 
@@ -51,7 +52,7 @@ const selectTlsByType = (state: State, networkType: NetworkType) => {
   const tlsType = networkType === NetworkType.page ? NetworkTableType.tls : IpDetailsTableType.tls;
   return (
     get([networkType, 'queries', tlsType], state.network) ||
-    get([networkType, 'queries', tlsType], initialState.network)
+    get([networkType, 'queries', tlsType], initialNetworkState)
   );
 };
 
@@ -70,9 +71,10 @@ const selectTopCountriesByType = (
     flowTarget === FlowTargetSourceDest.source ? 'topCountriesSource' : 'topCountriesDestination';
   const nFlowType =
     networkType === NetworkType.page ? NetworkTableType[ft] : IpDetailsTableType[ft];
+
   return (
     get([networkType, 'queries', nFlowType], state.network) ||
-    get([networkType, 'queries', nFlowType], initialState.network)
+    get([networkType, 'queries', nFlowType], initialNetworkState)
   );
 };
 
