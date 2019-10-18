@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request, ResponseToolkit } from 'hapi';
-import { JobDocPayload } from '../../types';
+import { Legacy } from 'kibana';
+import { RequestFacade, JobDocPayload } from '../../types';
 
 export type HandlerFunction = (
   exportType: any,
   jobParams: any,
-  request: Request,
-  h: ResponseToolkit
+  request: RequestFacade,
+  h: Legacy.ResponseToolkit
 ) => any;
 
 export type HandlerErrorFunction = (exportType: any, err: Error) => any;

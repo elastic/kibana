@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request, ResponseToolkit } from 'hapi';
+import { Legacy } from 'kibana';
 import { get } from 'lodash';
 
 import { API_BASE_GENERATE_V1, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../common/constants';
-import { KbnServer } from '../../types';
+import { ServerFacade, RequestFacade } from '../../types';
 import { HandlerErrorFunction, HandlerFunction, QueuedJobPayload } from './types';
 import { getRouteOptions } from './lib/route_config_factories';
 import { getJobParamsFromRequest } from '../../export_types/csv_from_savedobject/server/lib/get_job_params_from_request';
@@ -21,8 +21,8 @@ import { getJobParamsFromRequest } from '../../export_types/csv_from_savedobject
 const getJobFromRouteHandler = async (
   handleRoute: HandlerFunction,
   handleRouteError: HandlerErrorFunction,
-  request: Request,
-  h: ResponseToolkit
+  request: RequestFacade,
+  h: Legacy.ResponseToolkit
 ): Promise<QueuedJobPayload> => {
   let result: QueuedJobPayload;
   try {
@@ -49,7 +49,7 @@ const getJobFromRouteHandler = async (
  *     - local (transient) changes the user made to the saved object
  */
 export function registerGenerateCsvFromSavedObject(
-  server: KbnServer,
+  server: ServerFacade,
   handleRoute: HandlerFunction,
   handleRouteError: HandlerErrorFunction
 ) {
@@ -59,7 +59,7 @@ export function registerGenerateCsvFromSavedObject(
     path: `${API_BASE_GENERATE_V1}/csv/saved-object/{savedObjectType}:{savedObjectId}`,
     method: 'POST',
     options: routeOptions,
-    handler: async (request: Request, h: ResponseToolkit) => {
+    handler: async (request: RequestFacade, h: Legacy.ResponseToolkit) => {
       return getJobFromRouteHandler(handleRoute, handleRouteError, request, h);
     },
   });

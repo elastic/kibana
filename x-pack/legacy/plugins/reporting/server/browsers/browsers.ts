@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as chromium from './chromium';
+import * as chromeeum from './chromium';
 
-export type BrowserType = keyof typeof BROWSERS_BY_TYPE;
-
-export const BROWSERS_BY_TYPE = {
-  chromium,
+export const chromium = {
+  paths: chromeeum.paths,
+  createDriverFactory: chromeeum.createDriverFactory,
 };
+
+export type BrowserType = 'chromium';

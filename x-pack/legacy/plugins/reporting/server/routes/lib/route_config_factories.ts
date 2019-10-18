@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'hapi';
 import Joi from 'joi';
-import { KbnServer } from '../../../types';
+import { ServerFacade, RequestFacade } from '../../../types';
 // @ts-ignore
 import { authorizedUserPreRoutingFactory } from './authorized_user_pre_routing';
 // @ts-ignore
@@ -23,10 +22,10 @@ interface RouteConfigFactory {
   };
 }
 
-type GetFeatureFunction = (request: Request) => any;
+type GetFeatureFunction = (request: RequestFacade) => any;
 type PreRoutingFunction = (getFeatureId?: GetFeatureFunction) => any;
 
-export function getRouteConfigFactoryReportingPre(server: KbnServer) {
+export function getRouteConfigFactoryReportingPre(server: ServerFacade) {
   const authorizedUserPreRouting: PreRoutingFunction = authorizedUserPreRoutingFactory(server);
   const reportingFeaturePreRouting: PreRoutingFunction = reportingFeaturePreRoutingFactory(server);
 
@@ -43,7 +42,7 @@ export function getRouteConfigFactoryReportingPre(server: KbnServer) {
   };
 }
 
-export function getRouteOptions(server: KbnServer) {
+export function getRouteOptions(server: ServerFacade) {
   const getRouteConfig = getRouteConfigFactoryReportingPre(server);
   return {
     ...getRouteConfig(() => CSV_FROM_SAVEDOBJECT_JOB_TYPE),
@@ -64,7 +63,7 @@ export function getRouteOptions(server: KbnServer) {
   };
 }
 
-export function getRouteConfigFactoryManagementPre(server: KbnServer) {
+export function getRouteConfigFactoryManagementPre(server: ServerFacade) {
   const authorizedUserPreRouting = authorizedUserPreRoutingFactory(server);
   const reportingFeaturePreRouting = reportingFeaturePreRoutingFactory(server);
   const managementPreRouting = reportingFeaturePreRouting(() => 'management');
@@ -84,7 +83,7 @@ export function getRouteConfigFactoryManagementPre(server: KbnServer) {
 // TOC at the end of the PDF, but it's sending multiple cookies and causing our auth to fail with a 401.
 // Additionally, the range-request doesn't alleviate any performance issues on the server as the entire
 // download is loaded into memory.
-export function getRouteConfigFactoryDownloadPre(server: KbnServer) {
+export function getRouteConfigFactoryDownloadPre(server: ServerFacade) {
   const getManagementRouteConfig = getRouteConfigFactoryManagementPre(server);
   return (): RouteConfigFactory => ({
     ...getManagementRouteConfig(),

@@ -4,12 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'hapi';
 import { get } from 'lodash';
 // @ts-ignore
 import { events as esqueueEvents } from './esqueue';
 import { oncePerServer } from './once_per_server';
-import { KbnServer, Logger, ConditionalHeaders } from '../../types';
+import {
+  ServerFacade,
+  RequestFacade,
+  Logger,
+  CaptureConfig,
+  QueueConfig,
+  ConditionalHeaders,
+} from '../../types';
 
 interface ConfirmedJob {
   id: string;
@@ -18,12 +24,13 @@ interface ConfirmedJob {
   _primary_term: number;
 }
 
-function enqueueJobFn(server: KbnServer) {
+function enqueueJobFn(server: ServerFacade) {
   const jobQueue = server.plugins.reporting.queue;
   const config = server.config();
-  const queueConfig = config.get('xpack.reporting.queue');
-  const browserType = config.get('xpack.reporting.capture.browser.type');
-  const maxAttempts = config.get('xpack.reporting.capture.maxAttempts');
+  const captureConfig: CaptureConfig = config.get('xpack.reporting.capture.browser.type');
+  const browserType = captureConfig.browser.type;
+  const maxAttempts = captureConfig.maxAttempts;
+  const queueConfig: QueueConfig = config.get('xpack.reporting.queue');
   const exportTypesRegistry = server.plugins.reporting.exportTypesRegistry;
 
   return async function enqueueJob(
@@ -32,7 +39,7 @@ function enqueueJobFn(server: KbnServer) {
     jobParams: object,
     user: string,
     headers: ConditionalHeaders,
-    request: Request
+    request: RequestFacade
   ) {
     const logger = parentLogger.clone(['queue-job']);
     const exportType = exportTypesRegistry.getById(exportTypeId);

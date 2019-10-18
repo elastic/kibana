@@ -6,43 +6,43 @@
 
 import boom from 'boom';
 import Joi from 'joi';
-import { Request, ResponseToolkit } from 'hapi';
 import rison from 'rison-node';
+import { Legacy } from 'kibana';
 import { API_BASE_URL } from '../../common/constants';
-import { KbnServer } from '../../types';
+import { ServerFacade, RequestFacade } from '../../types';
 import { getRouteConfigFactoryReportingPre } from './lib/route_config_factories';
 import { HandlerErrorFunction, HandlerFunction } from './types';
 
 const BASE_GENERATE = `${API_BASE_URL}/generate`;
 
 export function registerGenerateFromJobParams(
-  server: KbnServer,
+  server: ServerFacade,
   handler: HandlerFunction,
   handleError: HandlerErrorFunction
 ) {
-  const getRouteConfig = getRouteConfigFactoryReportingPre(server);
+  const getRouteConfig = () => ({
+    ...getRouteConfigFactoryReportingPre(server),
+    validate: {
+      params: Joi.object({
+        exportType: Joi.string().required(),
+      }).required(),
+      payload: Joi.object({
+        jobParams: Joi.string()
+          .optional()
+          .default(null),
+      }).allow(null), // allow optional payload
+      query: Joi.object({
+        jobParams: Joi.string().default(null),
+      }).default(),
+    },
+  });
 
   // generate report
   server.route({
     path: `${BASE_GENERATE}/{exportType}`,
     method: 'POST',
-    config: {
-      ...getRouteConfig(request => request.params.exportType),
-      validate: {
-        params: Joi.object({
-          exportType: Joi.string().required(),
-        }).required(),
-        payload: Joi.object({
-          jobParams: Joi.string()
-            .optional()
-            .default(null),
-        }).allow(null), // allow optional payload
-        query: Joi.object({
-          jobParams: Joi.string().default(null),
-        }).default(),
-      },
-    },
-    handler: async (request: Request, h: ResponseToolkit) => {
+    options: getRouteConfig(),
+    handler: async (request: RequestFacade, h: Legacy.ResponseToolkit) => {
       let jobParamsRison: string | null;
 
       if (request.payload) {
@@ -77,7 +77,7 @@ export function registerGenerateFromJobParams(
   server.route({
     path: `${BASE_GENERATE}/{p*}`,
     method: 'GET',
-    config: getRouteConfig(),
+    options: getRouteConfig(),
     handler: () => {
       const err = boom.methodNotAllowed('GET is not allowed');
       err.output.headers.allow = 'POST';

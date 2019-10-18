@@ -6,7 +6,7 @@
 
 import * as Rx from 'rxjs';
 import { first, mergeMap } from 'rxjs/operators';
-import { KbnServer } from '../../../../types';
+import { ServerFacade } from '../../../../types';
 import { HeadlessChromiumDriverFactory } from '../../../../server/browsers/chromium/driver_factory';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers/chromium/driver';
 import {
@@ -33,7 +33,7 @@ interface ScreenshotResults {
   screenshots: Screenshot[];
 }
 
-export function screenshotsObservableFactory(server: KbnServer) {
+export function screenshotsObservableFactory(server: ServerFacade) {
   const browserDriverFactory: HeadlessChromiumDriverFactory = server.plugins.reporting.browserDriverFactory; // prettier-ignore
   const config = server.config();
   const captureConfig = config.get('xpack.reporting.capture');

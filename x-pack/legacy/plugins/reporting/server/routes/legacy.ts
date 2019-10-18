@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request, ResponseToolkit } from 'hapi';
+import { Legacy } from 'kibana';
 import querystring from 'querystring';
 import { API_BASE_URL } from '../../common/constants';
-import { KbnServer } from '../../types';
+import { ServerFacade, RequestFacade } from '../../types';
 import { getRouteConfigFactoryReportingPre } from './lib/route_config_factories';
 import { HandlerErrorFunction, HandlerFunction } from './types';
 
@@ -16,7 +16,7 @@ const getStaticFeatureConfig = (getRouteConfig: any, featureId: any) =>
 const BASE_GENERATE = `${API_BASE_URL}/generate`;
 
 export function registerLegacy(
-  server: KbnServer,
+  server: ServerFacade,
   handler: HandlerFunction,
   handleError: HandlerErrorFunction
 ) {
@@ -27,8 +27,8 @@ export function registerLegacy(
     server.route({
       path,
       method: 'POST',
-      config: getStaticFeatureConfig(getRouteConfig, exportTypeId),
-      handler: async (request: Request, h: ResponseToolkit) => {
+      options: getStaticFeatureConfig(getRouteConfig, exportTypeId),
+      handler: async (request: RequestFacade, h: Legacy.ResponseToolkit) => {
         const message = `The following URL is deprecated and will stop working in the next major version: ${request.url.path}`;
         server.log(['warning', 'reporting', 'deprecation'], message);
 
