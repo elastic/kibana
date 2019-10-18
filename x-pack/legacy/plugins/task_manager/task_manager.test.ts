@@ -174,6 +174,7 @@ describe('TaskManager', () => {
     const middleware = {
       beforeSave: async (saveOpts: any) => saveOpts,
       beforeRun: async (runOpts: any) => runOpts,
+      beforeMarkRunning: async (runOpts: any) => runOpts,
     };
     expect(() => client.addMiddleware(middleware)).not.toThrow();
   });
@@ -183,6 +184,7 @@ describe('TaskManager', () => {
     const middleware = {
       beforeSave: async (saveOpts: any) => saveOpts,
       beforeRun: async (runOpts: any) => runOpts,
+      beforeMarkRunning: async (runOpts: any) => runOpts,
     };
 
     client.start();

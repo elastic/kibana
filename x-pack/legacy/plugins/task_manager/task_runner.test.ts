@@ -673,6 +673,7 @@ describe('TaskManagerRunner', () => {
     };
     const runner = new TaskManagerRunner({
       beforeRun: context => Promise.resolve(context),
+      beforeMarkRunning: context => Promise.resolve(context),
       logger,
       store,
       instance: Object.assign(
