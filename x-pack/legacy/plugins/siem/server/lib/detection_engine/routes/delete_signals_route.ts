@@ -9,32 +9,34 @@ import { isFunction } from 'lodash/fp';
 
 import { deleteSignals } from '../alerts/delete_signals';
 
-export const deleteSignalsRoute = (server: Hapi.Server) => {
-  server.route({
-    method: 'DELETE',
-    path: '/api/siem/signals/{id}',
-    options: {
-      tags: ['access:signals-all'],
-      validate: {
-        options: {
-          abortEarly: false,
-        },
+export const createDeleteSignalsRoute: Hapi.ServerRoute = {
+  method: 'DELETE',
+  path: '/api/siem/signals/{id}',
+  options: {
+    tags: ['access:signals-all'],
+    validate: {
+      options: {
+        abortEarly: false,
       },
     },
-    async handler(request: Hapi.Request, headers) {
-      const { id } = request.params;
-      const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-      const actionsClient = isFunction(request.getActionsClient)
-        ? request.getActionsClient()
-        : null;
-      if (alertsClient == null || actionsClient == null) {
-        return headers.response().code(404);
-      }
-      return deleteSignals({
-        actionsClient,
-        alertsClient,
-        id,
-      });
-    },
-  });
+  },
+  async handler(request: Hapi.Request, headers) {
+    const { id } = request.params;
+    const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
+    const actionsClient = isFunction(request.getActionsClient) ? request.getActionsClient() : null;
+
+    if (alertsClient == null || actionsClient == null) {
+      return headers.response().code(404);
+    }
+
+    return deleteSignals({
+      actionsClient,
+      alertsClient,
+      id,
+    });
+  },
+};
+
+export const deleteSignalsRoute = (server: Hapi.Server): void => {
+  server.route(createDeleteSignalsRoute);
 };
