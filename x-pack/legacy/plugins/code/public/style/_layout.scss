@@ -106,6 +106,10 @@
   margin-top: $euiSize;
 }
 
+.codeViewer {
+  flex-grow: 1;
+}
+
 .codeSidebar__container {
   background-color: $euiColorLightestShade;
   border-right: solid 1px $euiBorderColor;
