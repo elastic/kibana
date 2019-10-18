@@ -12,8 +12,6 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new Plugin(initializerContext);
 }
 
-export * from './shared';
-
 // This is the shim to legacy platform
 const p = plugin({} as PluginInitializerContext);
 p.start(npStart.core);
