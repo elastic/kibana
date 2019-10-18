@@ -17,17 +17,40 @@
  * under the License.
  */
 
+export type ExpressionValueUnboxed = any;
+
+export type ExpressionValueBoxed<Type extends string = string, Value extends object = object> = {
+  type: Type;
+} & Value;
+
+export type ExpressionValue = ExpressionValueUnboxed | ExpressionValueBoxed;
+
+export type ExpressionValueConverter<I extends ExpressionValue, O extends ExpressionValue> = (
+  input: I,
+  availableTypes: Record<string, any>
+) => O;
+
 /**
  * A generic type which represents a custom Expression Type Definition that's
  * registered to the Interpreter.
  */
-export interface ExpressionType<Name extends string, Type, SerializedType = undefined> {
+export interface ExpressionType<
+  Name extends string,
+  Value extends ExpressionValueUnboxed | ExpressionValueBoxed,
+  SerializedType = undefined
+> {
   name: Name;
   validate?: (type: any) => void | Error;
-  serialize?: (type: Type) => SerializedType;
-  deserialize?: (type: SerializedType) => Type;
+  serialize?: (type: Value) => SerializedType;
+  deserialize?: (type: SerializedType) => Value;
   // TODO: Update typings for the `availableTypes` parameter once interfaces for this
   // have been added elsewhere in the interpreter.
-  from?: Record<string, (ctx: any, availableTypes: Record<string, any>) => Type>;
-  to?: Record<string, (type: Type, availableTypes: Record<string, any>) => unknown>;
+  from?: {
+    [type: string]: ExpressionValueConverter<any, Value>;
+  };
+  to?: {
+    [type: string]: ExpressionValueConverter<Value, any>;
+  };
 }
+
+export type AnyExpressionType = ExpressionType<string, ExpressionValueBoxed>;

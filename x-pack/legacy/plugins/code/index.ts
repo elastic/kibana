@@ -10,8 +10,10 @@ import { Legacy } from 'kibana';
 import { resolve } from 'path';
 import { CoreSetup } from 'src/core/server';
 
-import { APP_TITLE } from './common/constants';
+import { APP_TITLE, SAVED_OBJ_REPO } from './common/constants';
 import { codePlugin } from './server';
+import { PluginSetupContract } from '../../../plugins/code/server';
+import { mappings } from './mappings';
 
 export type RequestFacade = Legacy.Request;
 export type RequestQueryFacade = RequestQuery;
@@ -38,9 +40,16 @@ export const code = (kibana: any) =>
         const config = server.config();
         return {
           codeUiEnabled: config.get('xpack.code.ui.enabled'),
+          codeIntegrationsEnabled: config.get('xpack.code.integrations.enabled'),
         };
       },
       hacks: ['plugins/code/hacks/toggle_app_link_in_nav'],
+      savedObjectSchemas: {
+        [SAVED_OBJ_REPO]: {
+          isNamespaceAgnostic: false,
+        },
+      },
+      mappings,
     },
     config(Joi: typeof JoiNamespace) {
       return Joi.object({
@@ -49,12 +58,16 @@ export const code = (kibana: any) =>
         ui: Joi.object({
           enabled: Joi.boolean().default(true),
         }).default(),
+        integrations: Joi.object({
+          enabled: Joi.boolean().default(false),
+        }).default(),
         enabled: Joi.boolean().default(true),
-      }).default();
+      })
+        .default()
+        .unknown(true);
     },
     async init(server: ServerFacade) {
-      // @ts-ignore
-      const initializerContext = server.newPlatform.setup.plugins.code;
+      const initializerContext = server.newPlatform.setup.plugins.code as PluginSetupContract;
       if (!initializerContext.legacy.config.ui.enabled) {
         return;
       }
@@ -65,7 +78,7 @@ export const code = (kibana: any) =>
 
       // Set up with the new platform plugin lifecycle API.
       const plugin = codePlugin(initializerContext);
-      plugin.setup(coreSetup);
+      await plugin.setup(coreSetup, initializerContext.legacy.http);
 
       // @ts-ignore
       const kbnServer = this.kbnServer;

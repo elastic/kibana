@@ -30,7 +30,7 @@ import { TimefilterContract } from '../../../core_plugins/data/public/timefilter
 // and listener can be registered without angular.
 function convertISO8601(stringTime: string): string {
   const obj = moment(stringTime, 'YYYY-MM-DDTHH:mm:ss.SSSZ', true);
-  return obj.isValid() ? obj.toString() : stringTime;
+  return obj.isValid() ? obj.toISOString() : stringTime;
 }
 
 export function getTimefilterConfig() {

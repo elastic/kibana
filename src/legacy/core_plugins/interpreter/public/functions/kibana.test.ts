@@ -19,18 +19,29 @@
 
 import { functionWrapper } from '../../test_helpers';
 import { kibana } from './kibana';
+import { KibanaContext, FunctionHandlers } from '../../types';
 
 describe('interpreter/functions#kibana', () => {
   const fn = functionWrapper(kibana);
-  let context: any;
-  let initialContext: any;
-  let handlers: any;
+  let context: Partial<KibanaContext>;
+  let initialContext: KibanaContext;
+  let handlers: FunctionHandlers;
 
   beforeEach(() => {
     context = { timeRange: { from: '0', to: '1' } };
     initialContext = {
+      type: 'kibana_context',
       query: { language: 'lucene', query: 'geo.src:US' },
-      filters: [{ meta: { disabled: false }, query: { match: {} } }],
+      filters: [
+        {
+          meta: {
+            disabled: false,
+            negate: false,
+            alias: null,
+          },
+          query: { match: {} },
+        },
+      ],
       timeRange: { from: '2', to: '3' },
     };
     handlers = {
@@ -57,11 +68,34 @@ describe('interpreter/functions#kibana', () => {
   });
 
   it('combines filters from context with initialContext', () => {
-    context.filters = [{ meta: { disabled: true }, query: { match: {} } }];
+    context.filters = [
+      {
+        meta: {
+          disabled: true,
+          negate: false,
+          alias: null,
+        },
+        query: { match: {} },
+      },
+    ];
     const actual = fn(context, {}, handlers);
     expect(actual.filters).toEqual([
-      { meta: { disabled: false }, query: { match: {} } },
-      { meta: { disabled: true }, query: { match: {} } },
+      {
+        meta: {
+          disabled: false,
+          negate: false,
+          alias: null,
+        },
+        query: { match: {} },
+      },
+      {
+        meta: {
+          disabled: true,
+          negate: false,
+          alias: null,
+        },
+        query: { match: {} },
+      },
     ]);
   });
 });

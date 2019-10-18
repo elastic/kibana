@@ -26,7 +26,7 @@ const services = {
 let actionType: ActionType;
 
 beforeAll(() => {
-  const actionTypeRegistry = createActionTypeRegistry();
+  const { actionTypeRegistry } = createActionTypeRegistry();
   actionType = actionTypeRegistry.get(ACTION_TYPE_ID);
 });
 
@@ -171,9 +171,9 @@ describe('execute()', () => {
       refresh: undefined,
     };
 
-    const id = 'some-id';
+    const actionId = 'some-id';
 
-    executorOptions = { id, config, secrets, params, services };
+    executorOptions = { actionId, config, secrets, params, services };
     services.callCluster.mockClear();
     await actionType.executor(executorOptions);
 
@@ -205,7 +205,7 @@ describe('execute()', () => {
       refresh: true,
     };
 
-    executorOptions = { id, config, secrets, params, services };
+    executorOptions = { actionId, config, secrets, params, services };
     services.callCluster.mockClear();
     await actionType.executor(executorOptions);
 
@@ -242,7 +242,7 @@ describe('execute()', () => {
       refresh: undefined,
     };
 
-    executorOptions = { id, config, secrets, params, services };
+    executorOptions = { actionId, config, secrets, params, services };
     services.callCluster.mockClear();
     await actionType.executor(executorOptions);
 
@@ -274,7 +274,7 @@ describe('execute()', () => {
       refresh: undefined,
     };
 
-    executorOptions = { id, config, secrets, params, services };
+    executorOptions = { actionId, config, secrets, params, services };
     services.callCluster.mockClear();
     await actionType.executor(executorOptions);
 

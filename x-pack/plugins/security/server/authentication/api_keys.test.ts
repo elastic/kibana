@@ -5,7 +5,7 @@
  */
 
 import { APIKeys } from './api_keys';
-import { ClusterClient, ScopedClusterClient } from '../../../../../src/core/server';
+import { IClusterClient, IScopedClusterClient } from '../../../../../src/core/server';
 import {
   httpServerMock,
   loggingServiceMock,
@@ -14,15 +14,15 @@ import {
 
 describe('API Keys', () => {
   let apiKeys: APIKeys;
-  let mockClusterClient: jest.Mocked<PublicMethodsOf<ClusterClient>>;
-  let mockScopedClusterClient: jest.Mocked<PublicMethodsOf<ScopedClusterClient>>;
+  let mockClusterClient: jest.Mocked<IClusterClient>;
+  let mockScopedClusterClient: jest.Mocked<IScopedClusterClient>;
   const mockIsSecurityFeatureDisabled = jest.fn();
 
   beforeEach(() => {
     mockClusterClient = elasticsearchServiceMock.createClusterClient();
     mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
     mockClusterClient.asScoped.mockReturnValue((mockScopedClusterClient as unknown) as jest.Mocked<
-      ScopedClusterClient
+      IScopedClusterClient
     >);
     mockIsSecurityFeatureDisabled.mockReturnValue(false);
     apiKeys = new APIKeys({

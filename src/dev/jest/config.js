@@ -39,6 +39,8 @@ export default {
     '<rootDir>/test/functional/services/remote',
   ],
   collectCoverageFrom: [
+    'src/plugins/**/*.{ts,tsx}',
+    '!src/plugins/**/*.d.ts',
     'packages/kbn-ui-framework/src/components/**/*.js',
     '!packages/kbn-ui-framework/src/components/index.js',
     '!packages/kbn-ui-framework/src/components/**/*/index.js',

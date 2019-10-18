@@ -6,10 +6,10 @@
 /* eslint-disable no-console */
 
 import fs from 'fs';
-import Git from '@elastic/nodegit';
 import rimraf from 'rimraf';
 
 import { TestConfig, Repo } from '../../model/test_config';
+import { prepareProjectByCloning } from '../test_utils';
 
 export class TestRepoManager {
   private repos: Repo[];
@@ -20,30 +20,8 @@ export class TestRepoManager {
 
   public async importAllRepos() {
     for (const repo of this.repos) {
-      await this.importRepo(repo.url, repo.path);
+      await prepareProjectByCloning(repo.url, repo.path);
     }
-  }
-
-  public importRepo(url: string, path: string) {
-    return new Promise(resolve => {
-      if (!fs.existsSync(path)) {
-        rimraf(path, error => {
-          console.log(`begin to import ${url} to ${path}`);
-          Git.Clone.clone(url, path, {
-            fetchOpts: {
-              callbacks: {
-                certificateCheck: () => 0,
-              },
-            },
-          }).then(repo => {
-            console.log(`import ${url} done`);
-            resolve(repo);
-          });
-        });
-      } else {
-        resolve();
-      }
-    });
   }
 
   public async cleanAllRepos() {

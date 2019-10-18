@@ -12,20 +12,18 @@ interface MuteAllRequest extends Hapi.Request {
   };
 }
 
-export function muteAllAlertRoute(server: Hapi.Server) {
-  server.route({
-    method: 'POST',
-    path: '/api/alert/{id}/_mute_all',
-    options: {
-      tags: ['access:alerting-all'],
-      response: {
-        emptyStatusCode: 204,
-      },
+export const muteAllAlertRoute = {
+  method: 'POST',
+  path: '/api/alert/{id}/_mute_all',
+  config: {
+    tags: ['access:alerting-all'],
+    response: {
+      emptyStatusCode: 204,
     },
-    async handler(request: MuteAllRequest, h: Hapi.ResponseToolkit) {
-      const alertsClient = request.getAlertsClient!();
-      await alertsClient.muteAll(request.params);
-      return h.response();
-    },
-  });
-}
+  },
+  async handler(request: MuteAllRequest, h: Hapi.ResponseToolkit) {
+    const alertsClient = request.getAlertsClient!();
+    await alertsClient.muteAll(request.params);
+    return h.response();
+  },
+};

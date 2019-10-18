@@ -4,9 +4,10 @@
 
 ## SavedObjectAttribute type
 
+Type definition for a Saved Object attribute value
 
 <b>Signature:</b>
 
 ```typescript
-export declare type SavedObjectAttribute = string | number | boolean | null | undefined | SavedObjectAttributes | SavedObjectAttributes[];
+export declare type SavedObjectAttribute = SavedObjectAttributeSingle | SavedObjectAttributeSingle[];
 ```

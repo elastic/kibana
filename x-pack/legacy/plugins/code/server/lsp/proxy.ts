@@ -93,9 +93,10 @@ export class LanguageServerProxy implements ILanguageServerHandler {
         this.eventEmitter.on('err', error =>
           reject(new ResponseError(InternalError, 'Server error', error))
         );
-        this.eventEmitter.on('exit', () =>
-          reject(new ResponseError(RequestCancelled, 'Server closed'))
-        );
+        this.eventEmitter.on('exit', () => {
+          reject(new ResponseError(RequestCancelled, 'Server closed'));
+          this.initialized = false;
+        });
         this.eventEmitter.on('connect', () => resolve(this.clientConnection!));
       });
     }
@@ -164,6 +165,7 @@ export class LanguageServerProxy implements ILanguageServerHandler {
       clientConn.sendNotification(ExitNotification.type);
     }
     this.eventEmitter.emit('exit');
+    this.initialized = false;
   }
 
   public startServerConnection() {
@@ -246,6 +248,7 @@ export class LanguageServerProxy implements ILanguageServerHandler {
 
   private onSocketClosed() {
     this.clientConnection = null;
+    this.initialized = false;
     this.eventEmitter.emit('close');
   }
 

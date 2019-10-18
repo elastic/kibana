@@ -276,6 +276,7 @@ class DataFormatPickerUI extends Component {
               selectedOptions={selectedOption ? [selectedOption] : []}
               onChange={this.handleChange}
               singleSelection={{ asPlainText: true }}
+              data-test-subj="tsvbDataFormatPicker"
             />
           </EuiFormRow>
         </EuiFlexItem>

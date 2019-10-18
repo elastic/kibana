@@ -17,10 +17,18 @@
  * under the License.
  */
 
-export const clog = () => ({
-  name: 'clog',
+import { ExpressionFunction } from '../../types';
+
+const name = 'clog';
+
+type Context = any;
+type ClogExpressionFunction = ExpressionFunction<typeof name, Context, {}, Context>;
+
+export const clog = (): ClogExpressionFunction => ({
+  name,
+  args: {},
   help: 'Outputs the context to the console',
-  fn: (context: any) => {
+  fn: context => {
     console.log(context); // eslint-disable-line no-console
     return context;
   },

@@ -995,4 +995,145 @@ describe(`spaces disabled`, () => {
       });
     });
   });
+
+  describe('#bulkUpdate', () => {
+    test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
+      const type = 'foo';
+      const mockErrors = createMockErrors();
+      const mockCheckPrivileges = jest.fn(async () => {
+        throw new Error('An actual error would happen here');
+      });
+      const mockCheckSavedObjectsPrivilegesWithRequest = jest.fn().mockReturnValue(mockCheckPrivileges);
+      const mockRequest = Symbol();
+      const mockAuditLogger = createMockAuditLogger();
+      const mockActions = createMockActions();
+      const client = new SecureSavedObjectsClientWrapper({
+        actions: mockActions,
+        auditLogger: mockAuditLogger,
+        baseClient: null,
+        checkSavedObjectsPrivilegesWithRequest: mockCheckSavedObjectsPrivilegesWithRequest,
+        errors: mockErrors,
+        request: mockRequest,
+        savedObjectTypes: [],
+        spaces: null,
+      });
+
+      const objects = [{
+        type
+      }];
+      await expect(
+        client.bulkUpdate(objects)
+      ).rejects.toThrowError(mockErrors.generalError);
+
+      expect(mockCheckSavedObjectsPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
+      expect(mockCheckPrivileges).toHaveBeenCalledWith([mockActions.savedObject.get(type, 'bulk_update')], undefined);
+      expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
+      expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
+      expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
+    });
+
+    test(`throws decorated ForbiddenError when unauthorized`, async () => {
+      const type = 'foo';
+      const username = Symbol();
+      const mockActions = createMockActions();
+      const mockErrors = createMockErrors();
+      const mockCheckPrivileges = jest.fn(async () => ({
+        hasAllRequested: false,
+        username,
+        privileges: {
+          [mockActions.savedObject.get(type, 'bulk_update')]: false,
+        }
+      }));
+      const mockCheckSavedObjectsPrivilegesWithRequest = jest.fn().mockReturnValue(mockCheckPrivileges);
+      const mockRequest = Symbol();
+      const mockAuditLogger = createMockAuditLogger();
+      const client = new SecureSavedObjectsClientWrapper({
+        actions: mockActions,
+        auditLogger: mockAuditLogger,
+        baseClient: null,
+        checkSavedObjectsPrivilegesWithRequest: mockCheckSavedObjectsPrivilegesWithRequest,
+        errors: mockErrors,
+        request: mockRequest,
+        savedObjectTypes: [],
+        spaces: null,
+      });
+      const id = Symbol();
+      const attributes = Symbol();
+      const namespace = Symbol();
+
+      await expect(
+        client.bulkUpdate([{ type, id, attributes }], { namespace })
+      ).rejects.toThrowError(mockErrors.forbiddenError);
+
+      expect(mockCheckSavedObjectsPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
+      expect(mockCheckPrivileges).toHaveBeenCalledWith([mockActions.savedObject.get(type, 'bulk_update')], namespace);
+      expect(mockErrors.decorateForbiddenError).toHaveBeenCalledTimes(1);
+      expect(mockAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
+        username,
+        'bulk_update',
+        [type],
+        [mockActions.savedObject.get(type, 'bulk_update')],
+        {
+          objects: [
+            {
+              type,
+              id,
+              attributes,
+            }
+          ],
+          options: { namespace }
+        }
+      );
+      expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
+    });
+
+    test(`returns result of baseClient.bulkUpdate when authorized`, async () => {
+      const type = 'foo';
+      const username = Symbol();
+      const returnValue = Symbol();
+      const mockActions = createMockActions();
+      const mockBaseClient = {
+        bulkUpdate: jest.fn().mockReturnValue(returnValue)
+      };
+      const mockCheckPrivileges = jest.fn(async () => ({
+        hasAllRequested: true,
+        username,
+        privileges: {
+          [mockActions.savedObject.get(type, 'bulkUpdate')]: true,
+        }
+      }));
+      const mockCheckSavedObjectsPrivilegesWithRequest = jest.fn().mockReturnValue(mockCheckPrivileges);
+      const mockRequest = Symbol();
+      const mockAuditLogger = createMockAuditLogger();
+      const client = new SecureSavedObjectsClientWrapper({
+        actions: mockActions,
+        auditLogger: mockAuditLogger,
+        baseClient: mockBaseClient,
+        checkSavedObjectsPrivilegesWithRequest: mockCheckSavedObjectsPrivilegesWithRequest,
+        errors: null,
+        request: mockRequest,
+        savedObjectTypes: [],
+        spaces: null,
+      });
+      const id = Symbol();
+      const attributes = Symbol();
+      const namespace = Symbol();
+
+      const result = await client.bulkUpdate([{ type, id, attributes }], { namespace });
+
+      expect(result).toBe(returnValue);
+      expect(mockCheckSavedObjectsPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
+      expect(mockCheckPrivileges).toHaveBeenCalledWith([mockActions.savedObject.get(type, 'bulk_update')], namespace);
+      expect(mockBaseClient.bulkUpdate).toHaveBeenCalledWith([{ type, id, attributes }], { namespace });
+      expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
+      expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(username, 'bulk_update', [type], {
+        objects: [{
+          type,
+          id,
+          attributes,
+        }],
+        options: { namespace }
+      });
+    });
+  });
 });

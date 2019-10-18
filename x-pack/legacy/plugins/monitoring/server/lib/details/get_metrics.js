@@ -6,13 +6,13 @@
 
 import moment from 'moment';
 import { isPlainObject } from 'lodash';
-import Promise from 'bluebird';
+import Bluebird from 'bluebird';
 import { checkParam } from '../error_missing_required';
 import { getSeries } from './get_series';
 import { calculateTimeseriesInterval } from '../calculate_timeseries_interval';
 import { getTimezone } from '../get_timezone';
 
-export async function getMetrics(req, indexPattern, metricSet = [], filters = [], metricOptions = {}, numOfBuckets = 0) {
+export async function getMetrics(req, indexPattern, metricSet = [], filters = [], metricOptions = {}, numOfBuckets = 0, groupBy = null) {
   checkParam(indexPattern, 'indexPattern in details/getMetrics');
   checkParam(metricSet, 'metricSet in details/getMetrics');
 
@@ -29,7 +29,7 @@ export async function getMetrics(req, indexPattern, metricSet = [], filters = []
     min = max - (numOfBuckets * bucketSize * 1000);
   }
 
-  return Promise.map(metricSet, metric => {
+  return Bluebird.map(metricSet, metric => {
     // metric names match the literal metric name, but they can be supplied in groups or individually
     let metricNames;
 
@@ -39,8 +39,8 @@ export async function getMetrics(req, indexPattern, metricSet = [], filters = []
       metricNames = [ metric ];
     }
 
-    return Promise.map(metricNames, metricName => {
-      return getSeries(req, indexPattern, metricName, metricOptions, filters, { min, max, bucketSize, timezone });
+    return Bluebird.map(metricNames, metricName => {
+      return getSeries(req, indexPattern, metricName, metricOptions, filters, groupBy, { min, max, bucketSize, timezone });
     });
   })
     .then(rows => {

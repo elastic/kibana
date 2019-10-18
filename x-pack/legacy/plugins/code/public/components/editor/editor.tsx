@@ -175,7 +175,7 @@ export class EditorComponent extends React.Component<IProps> {
         />
         <div
           tabIndex={0}
-          className="codeContainer__editor"
+          className="codeContainer__editor codeContainer__monaco"
           id="mainEditor"
           hidden={this.props.hidden}
         />

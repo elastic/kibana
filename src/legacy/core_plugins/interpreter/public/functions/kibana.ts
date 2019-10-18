@@ -18,27 +18,39 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ExpressionFunction, KibanaContext } from '../../types';
 
-export const kibana = () => ({
+export type ExpressionFunctionKibana = ExpressionFunction<
+  'kibana',
+  KibanaContext | null,
+  object,
+  KibanaContext
+>;
+
+export const kibana = (): ExpressionFunctionKibana => ({
   name: 'kibana',
   type: 'kibana_context',
-  context: {},
+
+  context: {
+    types: ['kibana_context', 'null'],
+  },
+
   help: i18n.translate('interpreter.functions.kibana.help', {
     defaultMessage: 'Gets kibana global context',
   }),
   args: {},
-  fn(context: any, args: any, handlers: any) {
+  fn(context, args, handlers) {
     const initialContext = handlers.getInitialContext ? handlers.getInitialContext() : {};
 
-    if (context.query) {
+    if (context && context.query) {
       initialContext.query = initialContext.query.concat(context.query);
     }
 
-    if (context.filters) {
+    if (context && context.filters) {
       initialContext.filters = initialContext.filters.concat(context.filters);
     }
 
-    const timeRange = initialContext.timeRange || context.timeRange;
+    const timeRange = initialContext.timeRange || (context ? context.timeRange : undefined);
 
     return {
       ...context,

@@ -10,14 +10,24 @@ import { shallow } from 'enzyme';
 import { TooltipSelector } from './tooltip_selector';
 
 const defaultProps = {
-  value: [],
+  tooltipProperties: ['iso2'],
   onChange: (()=>{}),
-  fields: []
+  fields: [
+    {
+      name: 'iso2',
+      label: 'ISO 3166-1 alpha-2 code',
+      type: 'string'
+    },
+    {
+      name: 'iso3',
+      type: 'string'
+    },
+  ]
 };
 
 describe('TooltipSelector', () => {
 
-  test('should create eui row component', async () => {
+  test('should render component', async () => {
     const component = shallow(
       <TooltipSelector
         {...defaultProps}

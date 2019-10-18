@@ -33,7 +33,6 @@ import {
 
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { debounce, compact, isEqual } from 'lodash';
-import { PersistedLog } from 'ui/persisted_log';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { documentationLinks } from 'ui/documentation_links';
 import { Toast } from 'src/core/public';
@@ -46,11 +45,11 @@ import {
   KibanaReactContextValue,
 } from '../../../../../../../plugins/kibana_react/public';
 import { IndexPattern, StaticIndexPattern } from '../../../index_patterns';
-import { Query } from '../index';
+import { Query, getQueryLog } from '../index';
 import { fromUser, matchPairs, toUser } from '../lib';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { SuggestionsComponent } from './typeahead/suggestions_component';
-import { getQueryLog } from '../lib/get_query_log';
+import { PersistedLog } from '../../persisted_log';
 import { fetchIndexPatterns } from '../lib/fetch_index_patterns';
 import { IDataPluginServices } from '../../../types';
 
@@ -145,8 +144,8 @@ export class QueryBarInputUI extends Component<Props, State> {
     const queryString = this.getQueryString();
 
     const recentSearchSuggestions = this.getRecentSearchSuggestions(queryString);
+    const autocompleteProvider = this.services.data.autocomplete.getProvider(language);
 
-    const autocompleteProvider = this.services.autocomplete.getProvider(language);
     if (
       !autocompleteProvider ||
       !Array.isArray(this.state.indexPatterns) ||
@@ -453,6 +452,13 @@ export class QueryBarInputUI extends Component<Props, State> {
     this.inputRef.focus();
   };
 
+  private initPersistedLog = () => {
+    const { uiSettings, store, appName } = this.services;
+    this.persistedLog = this.props.persistedLog
+      ? this.props.persistedLog
+      : getQueryLog(uiSettings, store, appName, this.props.query.language);
+  };
+
   public onMouseEnterSuggestion = (index: number) => {
     this.setState({ index });
   };
@@ -463,10 +469,7 @@ export class QueryBarInputUI extends Component<Props, State> {
       this.onChange({ ...this.props.query, query: parsedQuery });
     }
 
-    this.persistedLog = this.props.persistedLog
-      ? this.props.persistedLog
-      : getQueryLog(this.services.uiSettings, this.services.appName, this.props.query.language);
-
+    this.initPersistedLog();
     this.fetchIndexPatterns().then(this.updateSuggestions);
   }
 
@@ -476,9 +479,7 @@ export class QueryBarInputUI extends Component<Props, State> {
       this.onChange({ ...this.props.query, query: parsedQuery });
     }
 
-    this.persistedLog = this.props.persistedLog
-      ? this.props.persistedLog
-      : getQueryLog(this.services.uiSettings, this.services.appName, this.props.query.language);
+    this.initPersistedLog();
 
     if (!isEqual(prevProps.indexPatterns, this.props.indexPatterns)) {
       this.fetchIndexPatterns().then(this.updateSuggestions);

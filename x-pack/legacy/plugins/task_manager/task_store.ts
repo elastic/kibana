@@ -27,7 +27,7 @@ import {
 export interface StoreOpts {
   callCluster: ElasticJs;
   index: string;
-  kibanaId: string;
+  taskManagerId: string;
   maxAttempts: number;
   definitions: TaskDictionary<TaskDefinition>;
   savedObjectsRepository: SavedObjectsClientContract;
@@ -83,7 +83,7 @@ export interface UpdateByQueryResult {
 export class TaskStore {
   public readonly maxAttempts: number;
   public readonly index: string;
-  public readonly kibanaId: string;
+  public readonly taskManagerId: string;
   private callCluster: ElasticJs;
   private definitions: TaskDictionary<TaskDefinition>;
   private savedObjectsRepository: SavedObjectsClientContract;
@@ -102,7 +102,7 @@ export class TaskStore {
   constructor(opts: StoreOpts) {
     this.callCluster = opts.callCluster;
     this.index = opts.index;
-    this.kibanaId = opts.kibanaId;
+    this.taskManagerId = opts.taskManagerId;
     this.maxAttempts = opts.maxAttempts;
     this.definitions = opts.definitions;
     this.serializer = opts.serializer;
@@ -328,7 +328,7 @@ export class TaskStore {
           source: `ctx._source.task.ownerId=params.ownerId; ctx._source.task.status=params.status; ctx._source.task.retryAt=params.retryAt;`,
           lang: 'painless',
           params: {
-            ownerId: this.kibanaId,
+            ownerId: this.taskManagerId,
             retryAt: claimOwnershipUntil,
             status: 'claiming',
           },
@@ -353,7 +353,7 @@ export class TaskStore {
           must: [
             {
               term: {
-                'task.ownerId': this.kibanaId,
+                'task.ownerId': this.taskManagerId,
               },
             },
             { term: { 'task.status': 'claiming' } },
@@ -481,7 +481,9 @@ function taskInstanceToAttributes(doc: TaskInstance): SavedObjectAttributes {
   };
 }
 
-function savedObjectToConcreteTaskInstance(savedObject: SavedObject): ConcreteTaskInstance {
+function savedObjectToConcreteTaskInstance(
+  savedObject: Omit<SavedObject, 'references'>
+): ConcreteTaskInstance {
   return {
     ...savedObject.attributes,
     id: savedObject.id,
