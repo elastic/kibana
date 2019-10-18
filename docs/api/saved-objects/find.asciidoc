@@ -1,7 +1,7 @@
 [[saved-objects-api-find]]
 === Find Objects
 
-beta[This functionality is *beta*. It's on track to become a stable, permanent feature of {kib}. Caution should be exercised because it is possible a breaking change to these APIs will occur in a minor version, but we’ll avoid this wherever possible. ]
+beta["This functionality is *beta*. It's on track to become a stable, permanent feature of {kib}. Caution should be exercised because it is possible a breaking change to these APIs will occur in a minor version, but we’ll avoid this wherever possible."]
 
 The find saved object API enables you to retrieve a paginated set of Kibana
 saved objects by various conditions.
