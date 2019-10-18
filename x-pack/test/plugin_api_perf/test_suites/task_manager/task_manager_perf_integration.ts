@@ -12,18 +12,42 @@ export default function({ getService }: { getService: (service: string) => any }
 
   describe('stressing task manager', () => {
     it('should run 10 tasks every second for a minute', async () => {
-      const { runningAverageTasksPerSecond, runningAverageLeadTime } = await supertest
+      const params = { tasksToSpawn: 50, trackExecutionTimeline: true, durationInSeconds: 60 };
+
+      const {
+        runningAverageTasksPerSecond,
+        runningAverageLeadTime,
+        numberOfTasksRanOverall,
+        timeUntilFirstRun,
+        timeUntilFirstMarkAsRun,
+        timeFromMarkAsRunTillRun,
+        timeFromRunTillNextMarkAsRun,
+      } = await supertest
         .post('/api/perf_tasks')
         .set('kbn-xsrf', 'xxx')
-        .send({ tasksToSpawn: 40, trackExecutionTimeline: false, durationInSeconds: 60 })
+        .send(params)
         .expect(200)
         .then((response: any) => response.body);
 
       log.debug(`Stress Test Result:`);
       log.debug(`Average number of tasks executed per second: ${runningAverageTasksPerSecond}`);
       log.debug(
-        `Average time it took from the moment a task's scheduled time was reached, until Task Manager picked it up: ${runningAverageLeadTime}`
+        `Average time between a task's "runAt" scheduled time and the time it actually ran: ${runningAverageLeadTime}`
       );
+
+      if (params.trackExecutionTimeline) {
+        log.debug(
+          `Overall number of tasks ran in ${params.durationInSeconds} seconds: ${numberOfTasksRanOverall}`
+        );
+        log.debug(`Average time between stages:`);
+        log.debug(
+          `Schedule ---[${timeUntilFirstMarkAsRun}ms]--> first markAsRunning ---[${timeUntilFirstRun -
+            timeUntilFirstMarkAsRun}ms]--> first run`
+        );
+        log.debug(
+          `markAsRunning ---[${timeFromMarkAsRunTillRun}ms]--> run ---[${timeFromRunTillNextMarkAsRun}ms]---> next markAsRunning`
+        );
+      }
 
       expect(runningAverageTasksPerSecond).to.be.greaterThan(0);
       expect(runningAverageLeadTime).to.be.greaterThan(0);

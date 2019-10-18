@@ -13,7 +13,7 @@
 import Joi from 'joi';
 import { intervalFromDate, intervalFromNow } from './lib/intervals';
 import { Logger } from './types';
-import { BeforeRunFunction } from './lib/middleware';
+import { BeforeRunFunction, BeforeMarkRunningFunction } from './lib/middleware';
 import {
   CancelFunction,
   CancellableTask,
@@ -44,6 +44,7 @@ interface Opts {
   instance: ConcreteTaskInstance;
   store: BufferedUpdatable;
   beforeRun: BeforeRunFunction;
+  beforeMarkRunning: BeforeMarkRunningFunction;
 }
 
 /**
@@ -61,6 +62,7 @@ export class TaskManagerRunner implements TaskRunner {
   private logger: Logger;
   private bufferedTaskStore: BufferedUpdatable;
   private beforeRun: BeforeRunFunction;
+  private beforeMarkRunning: BeforeMarkRunningFunction;
 
   /**
    * Creates an instance of TaskManagerRunner.
@@ -78,6 +80,7 @@ export class TaskManagerRunner implements TaskRunner {
     this.logger = opts.logger;
     this.bufferedTaskStore = opts.store;
     this.beforeRun = opts.beforeRun;
+    this.beforeMarkRunning = opts.beforeMarkRunning;
   }
 
   /**
@@ -151,13 +154,17 @@ export class TaskManagerRunner implements TaskRunner {
    */
   public async markTaskAsRunning(): Promise<boolean> {
     const VERSION_CONFLICT_STATUS = 409;
-    const attempts = this.instance.attempts + 1;
     const now = new Date();
 
-    const ownershipClaimedUntil = this.instance.retryAt;
+    const { taskInstance } = await this.beforeMarkRunning({
+      taskInstance: this.instance,
+    });
+
+    const attempts = taskInstance.attempts + 1;
+    const ownershipClaimedUntil = taskInstance.retryAt;
 
     try {
-      const { id } = this.instance;
+      const { id } = taskInstance;
 
       const timeUntilClaimExpires = howManyMsUntilOwnershipClaimExpires(ownershipClaimedUntil);
       if (timeUntilClaimExpires < 0) {
@@ -169,7 +176,7 @@ export class TaskManagerRunner implements TaskRunner {
       }
 
       this.instance = await this.bufferedTaskStore.update({
-        ...this.instance,
+        ...taskInstance,
         status: 'running',
         startedAt: now,
         attempts,

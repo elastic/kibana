@@ -39,7 +39,7 @@ export function initRoutes(server, performanceState) {
 
       return new Promise(resolve => {
         setTimeout(() => {
-          resolve(performanceState);
+          resolve(performanceState.summarize());
         }, durationInSeconds * 1000);
       });
     },

@@ -63,6 +63,7 @@ export class TaskManager {
   private middleware = {
     beforeSave: async (saveOpts: BeforeSaveMiddlewareParams) => saveOpts,
     beforeRun: async (runOpts: RunContext) => runOpts,
+    beforeMarkRunning: async (runOpts: RunContext) => runOpts,
   };
 
   /**
@@ -110,6 +111,7 @@ export class TaskManager {
         store,
         definitions: this.definitions,
         beforeRun: this.middleware.beforeRun,
+        beforeMarkRunning: this.middleware.beforeMarkRunning,
       });
     const poller = new TaskPoller({
       logger: this.logger,
