@@ -457,7 +457,6 @@ export interface HttpHeadersInit {
 export interface HttpInterceptor {
     request?(request: Request, controller: IHttpInterceptController): Promise<Request> | Request | void;
     requestError?(httpErrorRequest: HttpErrorRequest, controller: IHttpInterceptController): Promise<Request> | Request | void;
-    // Warning: (ae-forgotten-export) The symbol "InterceptedHttpResponse" needs to be exported by the entry point index.d.ts
     response?(httpResponse: HttpResponse, controller: IHttpInterceptController): Promise<InterceptedHttpResponse> | InterceptedHttpResponse | void;
     responseError?(httpErrorResponse: HttpErrorResponse, controller: IHttpInterceptController): Promise<InterceptedHttpResponse> | InterceptedHttpResponse | void;
 }
@@ -552,6 +551,14 @@ export interface IHttpFetchError extends Error {
 export interface IHttpInterceptController {
     halt(): void;
     halted: boolean;
+}
+
+// @public (undocumented)
+export interface InterceptedHttpResponse {
+    // (undocumented)
+    body?: HttpBody;
+    // (undocumented)
+    response?: Response;
 }
 
 // @public
