@@ -17,52 +17,42 @@ import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import { EuiText } from '@elastic/eui';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
-import { Section as SectionType } from './sections';
-import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
-import { APMError } from '../../../../typings/es_schemas/ui/APMError';
-import { Span } from '../../../../typings/es_schemas/ui/Span';
 import { HeightRetainer } from '../HeightRetainer';
 import { Section } from './Section';
 import { history } from '../../../utils/history';
 import { fromQuery, toQuery } from '../Links/url_helpers';
 import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
-import { filterSections } from './helper';
-
-export type Item = Transaction | APMError | Span;
+import { MetadataItems, filterItems } from './helper';
 
 interface Props {
-  item: Item;
-  sections: SectionType[];
+  items: MetadataItems;
 }
 
-export function MetadataTable({ item, sections }: Props) {
+export function MetadataTable({ items }: Props) {
   const location = useLocation();
   const { urlParams } = useUrlParams();
-  const { filter = '' } = urlParams;
-  const [filteredValue, setFilteredValue] = useState(filter || '');
-  const [filteredSections, setFilteredSections] = useState(
-    filterSections(sections, item, filter)
+  const { searchTerm = '' } = urlParams;
+
+  const [filteredItems, setFilteredItems] = useState(
+    searchTerm ? filterItems(items, searchTerm) : items
   );
 
   const onSearchChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value.trim().toLowerCase();
-      setFilteredValue(value);
-      setFilteredSections(filterSections(sections, item, value));
+      setFilteredItems(filterItems(items, value));
       history.replace({
         ...location,
         search: fromQuery({
           ...toQuery(location.search),
-          filter: value
+          searchTerm: value
         })
       });
     },
-    [sections, item, location]
+    [items, location]
   );
-
-  const noResultFound = (filteredValue && isEmpty(filteredSections)) || false;
-
+  const noResultFound = (searchTerm && isEmpty(filteredItems)) || false;
   return (
     <React.Fragment>
       <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
@@ -83,22 +73,22 @@ export function MetadataTable({ item, sections }: Props) {
               width: 400
             }}
             isInvalid={noResultFound}
-            value={filteredValue}
+            value={searchTerm}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
       <HeightRetainer>
-        {filteredSections.map(section => (
+        {filteredItems.map(section => (
           <div key={section.key}>
             <EuiTitle size="xs">
               <h6>{section.label}</h6>
             </EuiTitle>
             <EuiSpacer size="s" />
-            <Section propData={section.data} />
+            <Section items={section.data} />
             <EuiSpacer size="xl" />
           </div>
         ))}
-        {noResultFound && <NoResultFound value={filteredValue} />}
+        {noResultFound && <NoResultFound value={searchTerm} />}
       </HeightRetainer>
     </React.Fragment>
   );

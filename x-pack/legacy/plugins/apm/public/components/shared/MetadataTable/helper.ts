@@ -5,43 +5,49 @@
  */
 
 import { get, pick, isEmpty } from 'lodash';
-import { pathify } from '../DottedKeyValueTable';
 import { Section as SectionType } from './sections';
-import { Item } from './';
+import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
+import { APMError } from '../../../../typings/es_schemas/ui/APMError';
+import { Span } from '../../../../typings/es_schemas/ui/Span';
+import { flattenObject, FlattenItems } from '../../../utils/flattenObject';
 
-const filterData = (data: Record<string, unknown>, filter: string) =>
-  Object.keys(data).filter(key => {
-    const value = String(data[key]).toLowerCase();
-    return key.toLowerCase().includes(filter) || value.includes(filter);
-  });
+type Item = Transaction | APMError | Span;
 
-export const filterSections = (
+export type MetadataItems = Array<SectionType & { data?: FlattenItems }>;
+
+export const getMetadataItems = (
   sections: SectionType[],
-  item: Item,
-  filteredValue?: string
-) => {
+  item: Item
+): MetadataItems => {
   return sections
     .map(section => {
       const sectionData: Record<string, unknown> = get(item, section.key);
-      let data = section.properties
+      const sectionProperties:
+        | Record<string, unknown>
+        | undefined = section.properties
         ? pick(sectionData, section.properties)
         : sectionData;
-
-      if (!isEmpty(data)) {
-        data = pathify(data, { maxDepth: 5, parentKey: section.key });
-        if (filteredValue) {
-          return {
-            ...section,
-            data: pick(data, filterData(data, filteredValue))
-          };
-        }
+      let data: FlattenItems | undefined;
+      if (!isEmpty(sectionProperties)) {
+        data = flattenObject(sectionProperties, section.key);
       }
       return { ...section, data };
     })
-    .filter(({ required, data }) => {
-      if (filteredValue && isEmpty(data)) {
-        return false;
-      }
-      return required || !isEmpty(data);
-    });
+    .filter(({ required, data }) => required || !isEmpty(data));
+};
+
+export const filterItems = (items: MetadataItems, searchTerm: string) => {
+  return items
+    .map(item => {
+      const { data = [] } = item;
+      const filteredData = data.filter(({ key, value }) => {
+        const valueAsString = String(value).toLowerCase();
+        return (
+          key.toLowerCase().includes(searchTerm) ||
+          valueAsString.includes(searchTerm)
+        );
+      });
+      return { ...item, data: filteredData };
+    })
+    .filter(({ data }) => !isEmpty(data));
 };

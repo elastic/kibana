@@ -21,114 +21,44 @@ function getValues(output: ReturnType<typeof render>) {
 describe('DottedKeyValueTable', () => {
   afterEach(cleanup);
 
-  it('should display a nested object with alpha-ordered, dot notation keys and values', () => {
-    const data = {
-      name: {
-        first: 'Jo',
-        last: 'Smith'
-      },
-      age: 29,
-      active: true,
-      useless: false,
-      start: null,
-      end: undefined,
-      nested: {
-        b: {
-          c: 'ccc'
-        },
-        a: 'aaa'
-      }
-    };
-    const output = render(<DottedKeyValueTable data={data} />);
+  it('displays key and value table', () => {
+    const data = [
+      { key: 'name.first', value: 'First Name' },
+      { key: 'name.last', value: 'Last Name' },
+      { key: 'age', value: '29' },
+      { key: 'active', value: true },
+      { key: 'useless', value: false },
+      { key: 'start', value: null },
+      { key: 'end', value: undefined },
+      { key: 'nested.b.c', value: 'ccc' },
+      { key: 'nested.a', value: 'aaa' }
+    ];
+    const output = render(<DottedKeyValueTable items={data} />);
     const rows = output.container.querySelectorAll('tr');
     expect(rows.length).toEqual(9);
 
     expect(getKeys(output)).toEqual([
-      'active',
-      'age',
-      'end',
       'name.first',
       'name.last',
-      'nested.a',
-      'nested.b.c',
+      'age',
+      'active',
+      'useless',
       'start',
-      'useless'
+      'end',
+      'nested.b.c',
+      'nested.a'
     ]);
 
     expect(getValues(output)).toEqual([
-      'true',
+      'First Name',
+      'Last Name',
       '29',
+      'true',
+      'false',
       'N/A',
-      'Jo',
-      'Smith',
-      'aaa',
+      'N/A',
       'ccc',
-      'N/A',
-      'false'
-    ]);
-  });
-
-  it('should respect max depth', () => {
-    const data = {
-      nested: { b: { c: 'ccc' }, a: 'aaa' }
-    };
-    const output = render(<DottedKeyValueTable data={data} maxDepth={1} />);
-    const rows = output.container.querySelectorAll('tr');
-    expect(rows.length).toEqual(2);
-
-    expect(getKeys(output)).toEqual(['nested.a', 'nested.b']);
-
-    expect(getValues(output)).toEqual([
-      'aaa',
-      JSON.stringify({ c: 'ccc' }, null, 4)
-    ]);
-  });
-
-  it('should prepend a provided parent key to all of the dot-notation keys', () => {
-    const data = {
-      name: {
-        first: 'Jo',
-        last: 'Smith'
-      },
-      age: 29,
-      active: true
-    };
-    const output = render(<DottedKeyValueTable data={data} parentKey="top" />);
-    const rows = output.container.querySelectorAll('tr');
-    expect(rows.length).toEqual(4);
-
-    expect(getKeys(output)).toEqual([
-      'top.active',
-      'top.age',
-      'top.name.first',
-      'top.name.last'
-    ]);
-  });
-
-  it('should not add 0 sufix if value is an array with one element', () => {
-    const data = {
-      a: {
-        b: {
-          c1: ['foo', 'bar'],
-          c2: ['foo']
-        }
-      },
-      b: {
-        c: ['foo']
-      },
-      c: {
-        d: ['foo', 'bar']
-      }
-    };
-    const output = render(<DottedKeyValueTable data={data} maxDepth={5} />);
-
-    expect(getKeys(output)).toEqual([
-      'a.b.c1.0',
-      'a.b.c1.1',
-      'a.b.c2',
-      'b.c',
-      'c.d.0',
-      'c.d.1'
+      'aaa'
     ]);
   });
 });

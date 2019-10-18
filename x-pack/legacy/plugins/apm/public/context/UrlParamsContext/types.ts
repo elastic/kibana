@@ -29,5 +29,5 @@ export type IUrlParams = {
   page?: number;
   pageSize?: number;
   serviceNodeName?: string;
-  filter?: string;
+  searchTerm?: string;
 } & Partial<Record<LocalUIFilterName, string>>;

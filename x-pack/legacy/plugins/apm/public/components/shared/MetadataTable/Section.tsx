@@ -6,27 +6,24 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { isEmpty } from 'lodash';
 import { EuiText } from '@elastic/eui';
-import { DottedKeyValueTable, PathifyResult } from '../DottedKeyValueTable';
+import { DottedKeyValueTable } from '../DottedKeyValueTable';
+import { FlattenItems } from '../../../utils/flattenObject';
 
 interface Props {
-  propData?: Record<string, unknown> | PathifyResult;
-  propKey?: string;
+  items?: FlattenItems;
 }
 
-export function Section({ propData = {}, propKey }: Props) {
-  if (isEmpty(propData)) {
-    return (
-      <EuiText size="s">
-        {i18n.translate(
-          'xpack.apm.propertiesTable.agentFeature.noDataAvailableLabel',
-          { defaultMessage: 'No data available' }
-        )}
-      </EuiText>
-    );
+export function Section({ items }: Props) {
+  if (items) {
+    return <DottedKeyValueTable items={items} />;
   }
   return (
-    <DottedKeyValueTable data={propData} skipPathify parentKey={propKey} />
+    <EuiText size="s">
+      {i18n.translate(
+        'xpack.apm.propertiesTable.agentFeature.noDataAvailableLabel',
+        { defaultMessage: 'No data available' }
+      )}
+    </EuiText>
   );
 }

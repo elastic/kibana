@@ -39,7 +39,7 @@ export type APMQueryParams = {
   rangeTo?: string;
   refreshPaused?: string | boolean;
   refreshInterval?: string | number;
-  filter?: string;
+  searchTerm?: string;
 } & { [key in LocalUIFilterName]?: string };
 
 // forces every value of T[K] to be type: string

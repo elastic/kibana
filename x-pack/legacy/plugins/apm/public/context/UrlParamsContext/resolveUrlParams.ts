@@ -54,7 +54,7 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     rangeFrom = TIMEPICKER_DEFAULTS.rangeFrom,
     rangeTo = TIMEPICKER_DEFAULTS.rangeTo,
     environment,
-    filter
+    searchTerm
   } = query;
 
   const localUIFilters = pickKeys(query, ...localUIFilterNames);
@@ -82,7 +82,7 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     kuery: kuery && decodeURIComponent(kuery),
     transactionName,
     transactionType,
-    filter: toString(filter),
+    searchTerm: toString(searchTerm),
 
     // path params
     processorEvent,

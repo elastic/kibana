@@ -5,7 +5,6 @@
  */
 
 import React, { TableHTMLAttributes } from 'react';
-import { compact, isObject } from 'lodash';
 import {
   EuiTable,
   EuiTableProps,
@@ -13,71 +12,20 @@ import {
   EuiTableRow,
   EuiTableRowCell
 } from '@elastic/eui';
-import { StringMap } from '../../../../typings/common';
 import { FormattedValue } from './FormattedValue';
-
-interface PathifyOptions {
-  maxDepth?: number;
-  parentKey?: string;
-  depth?: number;
-}
-
-export interface PathifyResult {
-  [key: string]: any;
-}
-
-/**
- * Converts a deeply-nested object into a one-level object
- * with dot-notation paths as keys.
- */
-export function pathify(
-  item: StringMap<any>,
-  { maxDepth, parentKey = '', depth = 0 }: PathifyOptions
-): PathifyResult {
-  const isArrayWithSingleValue = Array.isArray(item) && item.length === 1;
-  return Object.keys(item)
-    .sort()
-    .reduce((pathified, key) => {
-      const childKey = isArrayWithSingleValue ? '' : key;
-      const currentKey = compact([parentKey, childKey]).join('.');
-      if ((!maxDepth || depth + 1 <= maxDepth) && isObject(item[key])) {
-        return {
-          ...pathified,
-          ...pathify(item[key], {
-            maxDepth,
-            parentKey: currentKey,
-            depth: depth + 1
-          })
-        };
-      } else {
-        return { ...pathified, [currentKey]: item[key] };
-      }
-    }, {});
-}
+import { FlattenItems } from '../../../utils/flattenObject';
 
 export function DottedKeyValueTable({
-  data,
-  parentKey,
-  maxDepth,
-  tableProps = {},
-  skipPathify = false
+  items,
+  tableProps = {}
 }: {
-  data: StringMap | PathifyResult;
-  parentKey?: string;
-  maxDepth?: number;
+  items: FlattenItems;
   tableProps?: EuiTableProps & TableHTMLAttributes<HTMLTableElement>;
-  skipPathify?: boolean;
 }) {
-  const pathified: PathifyResult = skipPathify
-    ? data
-    : pathify(data, { maxDepth, parentKey });
-  const rows = Object.keys(pathified)
-    .sort()
-    .map(k => [k, pathified[k]]);
   return (
     <EuiTable compressed {...tableProps}>
       <EuiTableBody>
-        {rows.map(([key, value]) => (
+        {items.map(({ key, value }) => (
           <EuiTableRow key={key}>
             <EuiTableRowCell>
               <strong data-testid="dot-key">{key}</strong>

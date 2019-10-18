@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ERROR_METADATA_SECTIONS } from './sections';
 import { APMError } from '../../../../../typings/es_schemas/ui/APMError';
+import { getMetadataItems } from '../helper';
 import { MetadataTable } from '..';
 
 interface Props {
@@ -14,5 +15,9 @@ interface Props {
 }
 
 export function ErrorMetadata({ error }: Props) {
-  return <MetadataTable item={error} sections={ERROR_METADATA_SECTIONS} />;
+  const items = useMemo(
+    () => getMetadataItems(ERROR_METADATA_SECTIONS, error),
+    [error]
+  );
+  return <MetadataTable items={items} />;
 }

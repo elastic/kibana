@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { SPAN_METADATA_SECTIONS } from './sections';
 import { Span } from '../../../../../typings/es_schemas/ui/Span';
+import { getMetadataItems } from '../helper';
 import { MetadataTable } from '..';
 
 interface Props {
@@ -14,5 +15,8 @@ interface Props {
 }
 
 export function SpanMetadata({ span }: Props) {
-  return <MetadataTable item={span} sections={SPAN_METADATA_SECTIONS} />;
+  const items = useMemo(() => getMetadataItems(SPAN_METADATA_SECTIONS, span), [
+    span
+  ]);
+  return <MetadataTable items={items} />;
 }
