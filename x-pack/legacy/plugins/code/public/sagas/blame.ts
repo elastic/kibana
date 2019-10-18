@@ -11,7 +11,7 @@ import { Match } from '../actions';
 import { loadBlame, loadBlameFailed, LoadBlamePayload, loadBlameSuccess } from '../actions/blame';
 import { blamePattern } from './patterns';
 
-function requestBlame(repoUri: string, revision: string, path: string) {
+export function requestBlame(repoUri: string, revision: string, path: string) {
   return npStart.core.http.get(
     `/api/code/repo/${repoUri}/blame/${encodeURIComponent(revision)}/${path}`
   );
