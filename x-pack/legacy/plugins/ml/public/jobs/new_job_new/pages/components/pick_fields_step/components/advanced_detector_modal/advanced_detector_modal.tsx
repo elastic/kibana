@@ -355,9 +355,12 @@ function useDetectorPlaceholder(detector: RichDetector) {
 
 // creates list of combobox options based on an aggregation's field list
 function createFieldOptionList(agg: Aggregation | null) {
-  return (agg !== null && agg.fields !== undefined ? agg.fields : [])
+  const options = (agg !== null && agg.fields !== undefined ? agg.fields : [])
     .filter(f => f.id !== EVENT_RATE_FIELD_ID)
     .map(createFieldOption);
+
+  // working round EuiComboBox's odd behavior when the options list has only one item in it
+  return options.length === 1 ? [emptyOption, ...options] : options;
 }
 
 // custom hook for storing combobox options based on an aggregation field list
