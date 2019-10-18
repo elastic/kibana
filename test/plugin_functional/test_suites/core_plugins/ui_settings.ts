@@ -17,13 +17,13 @@
  * under the License.
  */
 import expect from '@kbn/expect';
-import { FtrProviderContext } from 'test/functional/ftr_provider_context';
+import { PluginFunctionalProviderContext } from '../../services';
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getService, getPageObjects }: FtrProviderContext) {
+export default function({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const PageObjects = getPageObjects(['common']);
   const browser = getService('browser');
-  const supertest = getService('supertest' as any);
+  const supertest = getService('supertest');
 
   describe('ui settings', function() {
     before(async () => {
