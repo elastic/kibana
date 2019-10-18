@@ -59,6 +59,29 @@ export interface OverviewHostHit extends SearchHit {
     auditd_count: {
       doc_count: number;
     };
+    endgame_module: {
+      dns_event_count: {
+        doc_count: number;
+      };
+      file_event_count: {
+        doc_count: number;
+      };
+      image_load_event_count: {
+        doc_count: number;
+      };
+      network_event_count: {
+        doc_count: number;
+      };
+      process_event_count: {
+        doc_count: number;
+      };
+      registry_event: {
+        doc_count: number;
+      };
+      security_event_count: {
+        doc_count: number;
+      };
+    };
     fim_count: {
       doc_count: number;
     };

@@ -11,7 +11,7 @@ import { Link } from 'react-router-dom';
 
 import { RepositoryUtils } from '../../../common/repository_utils';
 import { history } from '../../utils/url';
-import { CodeBlock, Position } from '../codeblock/codeblock';
+import { CodeBlockPanel, Position } from '../code_block';
 
 interface Props {
   query: string;
@@ -28,6 +28,7 @@ export class CodeResult extends React.PureComponent<Props> {
       const key = `${uri}-${filePath}-${query}`;
       const repoLinkUrl = `/${uri}/tree/HEAD/`;
       const fileLinkUrl = `/${uri}/blob/HEAD/${filePath}`; // TODO(rylnd) move these to link helpers
+      const lines = content.split('\n');
 
       return (
         <div key={`resultitem${key}`} data-test-subj="codeSearchResultList">
@@ -71,10 +72,10 @@ export class CodeResult extends React.PureComponent<Props> {
               </Link>
             </EuiText>
           </EuiFlexGroup>
-          <CodeBlock
+          <CodeBlockPanel
             key={`code${key}`}
             className="codeResult__code-block"
-            content={content}
+            lines={lines}
             language={language}
             highlightRanges={ranges}
             lineNumber={i => lineMapping[i]}

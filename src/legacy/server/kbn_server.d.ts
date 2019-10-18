@@ -20,13 +20,16 @@
 import { ResponseObject, Server } from 'hapi';
 import { UnwrapPromise } from '@kbn/utility-types';
 
-import { SavedObjectsClientProviderOptions } from 'src/core/server';
+import { SavedObjectsClientProviderOptions, CoreSetup } from 'src/core/server';
 import {
   ConfigService,
   ElasticsearchServiceSetup,
+  EnvironmentMode,
   LoggerFactory,
   SavedObjectsClientContract,
   SavedObjectsLegacyService,
+  IUiSettingsClient,
+  PackageInfo,
 } from '../../core/server';
 
 import { LegacyServiceSetupDeps, LegacyServiceStartDeps } from '../../core/server/';
@@ -39,7 +42,6 @@ import { CallClusterWithRequest, ElasticsearchPlugin } from '../core_plugins/ela
 import { CapabilitiesModifier } from './capabilities';
 import { IndexPatternsServiceFactory } from './index_patterns';
 import { Capabilities } from '../../core/public';
-import { IUiSettingsClient } from '../../legacy/ui/ui_settings/ui_settings_service';
 import { UiSettingsServiceFactoryOptions } from '../../legacy/ui/ui_settings/ui_settings_service_factory';
 
 export interface KibanaConfig {
@@ -81,6 +83,7 @@ declare module 'hapi' {
     ) => void;
     uiSettingsServiceFactory: (options?: UiSettingsServiceFactoryOptions) => IUiSettingsClient;
     logWithMetadata: (tags: string[], message: string, meta: Record<string, any>) => void;
+    newPlatform: KbnServer['newPlatform'];
   }
 
   interface Request {
@@ -101,11 +104,28 @@ type KbnMixinFunc = (kbnServer: KbnServer, server: Server, config: any) => Promi
 // eslint-disable-next-line import/no-default-export
 export default class KbnServer {
   public readonly newPlatform: {
+    __internals: {
+      hapiServer: LegacyServiceSetupDeps['core']['http']['server'];
+      uiPlugins: LegacyServiceSetupDeps['core']['plugins']['uiPlugins'];
+      elasticsearch: LegacyServiceSetupDeps['core']['elasticsearch'];
+      uiSettings: LegacyServiceSetupDeps['core']['uiSettings'];
+      kibanaMigrator: LegacyServiceStartDeps['core']['savedObjects']['migrator'];
+    };
+    env: {
+      mode: Readonly<EnvironmentMode>;
+      packageInfo: Readonly<PackageInfo>;
+    };
     coreContext: {
       logger: LoggerFactory;
     };
-    setup: LegacyServiceSetupDeps;
-    start: LegacyServiceStartDeps;
+    setup: {
+      core: CoreSetup;
+      plugins: Record<string, object>;
+    };
+    start: {
+      core: CoreSetup;
+      plugins: Record<string, object>;
+    };
     stop: null;
     params: {
       handledConfigPaths: UnwrapPromise<ReturnType<ConfigService['getUsedPaths']>>;

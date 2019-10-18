@@ -17,25 +17,22 @@
  * under the License.
  */
 
-import { keys, find, get } from 'lodash';
-import { Filter, isRangeFilter } from '@kbn/es-query';
-import { IndexPatterns } from '../../../index_patterns';
+import { keys, partition } from 'lodash';
+import { Filter, isRangeFilter, RangeFilter } from '@kbn/es-query';
 
-export async function extractTimeFilter(indexPatterns: IndexPatterns, filters: Filter[]) {
-  // Assume all the index patterns are the same since they will be added
-  // from the same visualization.
-  const id: string = get(filters, '[0].meta.index');
-  if (id == null) return;
-
-  const indexPattern = await indexPatterns.get(id);
-
-  return find(filters, (obj: Filter) => {
+export function extractTimeFilter(timeFieldName: string, filters: Filter[]) {
+  const [timeRangeFilter, restOfFilters] = partition(filters, (obj: Filter) => {
     let key;
 
     if (isRangeFilter(obj)) {
       key = keys(obj.range)[0];
     }
 
-    return Boolean(key && key === indexPattern.timeFieldName);
+    return Boolean(key && key === timeFieldName);
   });
+
+  return {
+    restOfFilters,
+    timeRangeFilter: timeRangeFilter[0] as RangeFilter | undefined,
+  };
 }

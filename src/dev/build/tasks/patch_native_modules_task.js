@@ -16,62 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import install from '@elastic/simple-git/scripts/install';
+import { deleteAll } from '../lib';
+import path from 'path';
 
-import { scanCopy, untar, deleteAll } from '../lib';
-import { createWriteStream, mkdirSync } from 'fs';
-import { binaryInfo } from '../../../../x-pack/legacy/plugins/code/tasks/nodegit_info';
-import wreck from '@hapi/wreck';
-import { dirname, join, basename } from 'path';
-import { createPromiseFromStreams } from '../../../legacy/utils/streams';
-
-async function download(url, destination, log) {
-  const response = await wreck.request('GET', url);
-
-  if (response.statusCode !== 200) {
-    throw new Error(`Unexpected status code ${response.statusCode} when downloading ${url}`);
-  }
-  mkdirSync(dirname(destination), { recursive: true });
-  await createPromiseFromStreams([response, createWriteStream(destination)]);
-  log.debug('Downloaded ', url);
-}
-
-async function downloadAndExtractTarball(url, dest, log, retry) {
-  try {
-    await download(url, dest, log);
-    const extractDir = join(dirname(dest), basename(dest, '.tar.gz'));
-    await untar(dest, extractDir, {
-      strip: 1,
-    });
-    return extractDir;
-  } catch (e) {
-    if (retry > 0) {
-      await downloadAndExtractTarball(url, dest, log, retry - 1);
-    } else {
-      throw e;
-    }
-  }
-}
-
-async function patchNodeGit(config, log, build, platform) {
-  const plat = platform.isWindows() ? 'win32' : platform.getName();
-  const arch = platform.getNodeArch().split('-')[1];
-  const { downloadUrl, packageName } = binaryInfo(plat, arch);
-
-  const downloadPath = build.resolvePathForPlatform(platform, '.nodegit_binaries', packageName);
-  const extractDir = await downloadAndExtractTarball(downloadUrl, downloadPath, log, 3);
-
+async function patchGit(config, log, build, platform) {
+  const downloadPath = build.resolvePathForPlatform(platform, '.git_binaries', 'git.tar.gz');
   const destination = build.resolvePathForPlatform(
     platform,
-    'node_modules/@elastic/nodegit/build/Release'
+    'node_modules/@elastic/simple-git/native/git'
   );
-  log.debug('Replacing nodegit binaries from ', extractDir);
-  await deleteAll([destination], log);
-  await scanCopy({
-    source: extractDir,
-    destination: destination,
-    time: new Date(),
-  });
-  await deleteAll([extractDir, downloadPath], log);
+  log.debug('Replacing git binaries from ' + downloadPath + ' to ' + destination);
+  const p = platform.isWindows() ? 'win32' : platform.getName();
+  await deleteAll([destination]);
+  await install(p, downloadPath, destination);
+  await deleteAll([path.dirname(downloadPath)], log);
 }
 
 export const PatchNativeModulesTask = {
@@ -80,7 +39,7 @@ export const PatchNativeModulesTask = {
     await Promise.all(
       config.getTargetPlatforms().map(async platform => {
         if (!build.isOss()) {
-          await patchNodeGit(config, log, build, platform);
+          await patchGit(config, log, build, platform);
         }
       })
     );

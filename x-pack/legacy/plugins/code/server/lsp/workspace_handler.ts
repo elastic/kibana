@@ -4,38 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  Commit,
-  Error as GitError,
-  Repository,
-  Reset,
-  TreeEntry,
-  // @ts-ignore
-  Worktree,
-} from '@elastic/nodegit';
 import Boom from 'boom';
 import del from 'del';
 import fs from 'fs';
 import { delay } from 'lodash';
 import path from 'path';
-import { promisify } from 'util';
+import crypto from 'crypto';
 import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
 import { Hover, Location, TextDocumentPositionParams } from 'vscode-languageserver';
 
 import { DetailSymbolInformation, Full } from '@elastic/lsp-extension';
 
+import { SimpleGit } from '@elastic/simple-git/dist/promise';
+import { simplegit } from '@elastic/simple-git/dist';
 import { RepositoryUtils } from '../../common/repository_utils';
 import { parseLspUrl } from '../../common/uri_util';
-import { LspRequest, WorkerReservedProgress } from '../../model';
-import { GitOperations } from '../git_operations';
+import { FileTreeItemType, LspRequest, WorkerReservedProgress } from '../../model';
+import { GitOperations, HEAD } from '../git_operations';
 import { EsClient } from '../lib/esqueue';
 import { Logger } from '../log';
 import { RepositoryObjectClient } from '../search';
 import { LoggerFactory } from '../utils/log_factory';
 
-export const MAX_RESULT_COUNT = 20;
+interface Worktree {
+  path: string;
+  revision: string;
+  branch: string;
+}
 
-const mkdirAsync = promisify(fs.mkdir);
+export const MAX_RESULT_COUNT = 20;
 
 export class WorkspaceHandler {
   private revisionMap: { [uri: string]: string } = {};
@@ -58,9 +55,9 @@ export class WorkspaceHandler {
   /**
    * open workspace for repositoryUri, update it from bare repository if necessary.
    * @param repositoryUri the uri of bare repository.
-   * @param revision
+   * @param ref
    */
-  public async openWorkspace(repositoryUri: string, revision: string) {
+  public async openWorkspace(repositoryUri: string, ref: string) {
     // Try get repository clone status with 3 retries at maximum.
     const tryGetGitStatus = async (retryCount: number) => {
       let gitStatus;
@@ -85,48 +82,89 @@ export class WorkspaceHandler {
     if (this.objectClient) {
       await tryGetGitStatus(0);
     }
-
-    const bareRepo = await this.gitOps.openRepo(repositoryUri);
-    const targetCommit = await this.gitOps.getCommit(repositoryUri, revision);
+    const git = await this.gitOps.openGit(repositoryUri);
     const defaultBranch = await this.gitOps.getDefaultBranch(repositoryUri);
-    if (revision !== defaultBranch) {
-      await this.checkCommit(bareRepo, targetCommit);
-      revision = defaultBranch;
+    const targetRevision = await this.gitOps.getRevision(repositoryUri, ref);
+    if (ref !== defaultBranch) {
+      await this.checkCommit(git, targetRevision);
+      ref = defaultBranch;
     }
-    let workspace;
-    if (await this.workspaceExists(bareRepo, repositoryUri, revision)) {
-      workspace = await this.updateWorkspace(repositoryUri, revision, targetCommit);
+    const workspaceBranch = this.workspaceWorktreeBranchName(ref);
+    const worktrees = await this.listWorktrees(git);
+    let wt: Worktree;
+    if (worktrees.has(workspaceBranch)) {
+      wt = worktrees.get(workspaceBranch)!;
     } else {
-      workspace = await this.cloneWorkspace(bareRepo, repositoryUri, revision, targetCommit);
+      wt = await this.openWorktree(
+        git,
+        workspaceBranch,
+        await this.revisionDir(repositoryUri, ref, this.randomPath()),
+        targetRevision
+      );
     }
-    const { workspaceDir, workspaceHeadCommit } = workspace;
-
-    this.setWorkspaceRevision(workspaceDir, workspace.workspaceHeadCommit);
+    if (!targetRevision.startsWith(wt.revision)) {
+      await this.setWorkspaceRevision(wt.path, targetRevision);
+    }
     return {
-      workspaceDir,
-      workspaceRevision: workspaceHeadCommit.sha().substring(0, 7),
+      workspaceDir: wt.path,
+      workspaceRevision: targetRevision,
     };
   }
 
+  private randomPath() {
+    return crypto.randomBytes(4).toString('hex');
+  }
+
+  public async openWorktree(
+    git: SimpleGit,
+    workspaceBranch: string,
+    dir: string,
+    revision: string
+  ) {
+    await git.raw(['worktree', 'add', '-b', workspaceBranch, dir, revision]);
+    return {
+      revision,
+      path: dir,
+      branch: workspaceBranch,
+    } as Worktree;
+  }
+
   public async listWorkspaceFolders(repoUri: string) {
-    const workspaceDir = await this.workspaceDir(repoUri);
+    const git = await this.gitOps.openGit(repoUri);
+    const worktrees = await this.listWorktrees(git);
     const isDir = (source: string) => fs.lstatSync(source).isDirectory();
-    try {
-      return fs
-        .readdirSync(workspaceDir)
-        .map(name => path.join(workspaceDir, name))
-        .filter(isDir);
-    } catch (error) {
-      if (error.code === 'ENOENT') {
-        this.log.debug('Cannot find workspace dirs');
-        return [];
-      } else {
-        throw error;
+    return [...worktrees.values()]
+      .filter(wt => wt.branch.startsWith('workspace'))
+      .map(wt => wt.path)
+      .filter(isDir);
+  }
+
+  public async listWorktrees(git: SimpleGit): Promise<Map<string, Worktree>> {
+    const str = await git.raw(['worktree', 'list']);
+    const regex = /(.*?)\s+([a-h0-9]+)\s+\[(.+)\]/gm;
+    let m;
+    const result: Map<string, Worktree> = new Map();
+    while ((m = regex.exec(str)) !== null) {
+      if (m.index === regex.lastIndex) {
+        regex.lastIndex++;
       }
+      const [, p, revision, branch] = m;
+      result.set(branch, {
+        path: p,
+        revision,
+        branch,
+      });
     }
+    return result;
   }
 
   public async clearWorkspace(repoUri: string) {
+    const git = await this.gitOps.openGit(repoUri);
+    const worktrees = await this.listWorktrees(git);
+    for (const wt of worktrees.values()) {
+      await git.raw(['worktree', 'remove', wt.path, '--force']);
+      await git.deleteLocalBranch(wt.branch);
+    }
     const workspaceDir = await this.workspaceDir(repoUri);
     await del([workspaceDir], { force: true });
   }
@@ -147,8 +185,8 @@ export class WorkspaceHandler {
         if (filePath) {
           request.documentUri = payload.textDocument.uri;
           payload.textDocument.uri = request.resolvedFilePath = filePath;
-          request.workspacePath = workspacePath;
-          request.workspaceRevision = workspaceRevision;
+          request.workspacePath = workspacePath!;
+          request.workspaceRevision = workspaceRevision!;
         }
         break;
       }
@@ -158,6 +196,9 @@ export class WorkspaceHandler {
   }
 
   public handleResponse(request: LspRequest, response: ResponseMessage): ResponseMessage {
+    if (!response.result) {
+      return response;
+    }
     const { method } = request;
     switch (method) {
       case 'textDocument/hover': {
@@ -334,32 +375,28 @@ export class WorkspaceHandler {
     }
   }
 
-  private async checkCommit(repository: Repository, commit: Commit) {
+  private async checkCommit(git: SimpleGit, targetRevision: string) {
     // we only support headCommit now.
-    const headCommit = await repository.getHeadCommit();
-    if (headCommit.sha() !== commit.sha()) {
+    const headRevision = await git.revparse([HEAD]);
+    if (headRevision !== targetRevision) {
       throw Boom.badRequest(`revision must be master.`);
     }
   }
 
-  private async workspaceExists(bareRepo: Repository, repositoryUri: string, revision: string) {
-    const workTreeName = this.workspaceWorktreeBranchName(revision);
-    const wt = this.getWorktree(bareRepo, workTreeName);
-    if (wt) {
-      const workspaceDir = await this.revisionDir(repositoryUri, revision);
-      return fs.existsSync(workspaceDir);
-    }
-    return false;
+  public async revisionDir(repositoryUri: string, ref: string, randomStr: string = '') {
+    return path.join(await this.workspaceDir(repositoryUri, randomStr), ref);
   }
 
-  public async revisionDir(repositoryUri: string, revision: string) {
-    return path.join(await this.workspaceDir(repositoryUri), revision);
-  }
-
-  private async workspaceDir(repoUri: string) {
-    const randomStr =
-      this.objectClient && (await this.objectClient.getRepositoryRandomStr(repoUri));
+  private async workspaceDir(repoUri: string, randomStr: string = '') {
     const base = path.join(this.workspacePath, repoUri);
+    if (randomStr === '') {
+      const git = await this.gitOps.openGit(repoUri);
+      const trees = await this.listWorktrees(git);
+      if (trees.size > 0) {
+        const wt = trees.values().next().value;
+        return path.dirname(wt.path);
+      }
+    }
     if (randomStr) {
       return path.join(base, `__${randomStr}`);
     } else {
@@ -371,81 +408,9 @@ export class WorkspaceHandler {
     return `workspace-${branch}`;
   }
 
-  private async updateWorkspace(repositoryUri: string, revision: string, targetCommit: Commit) {
-    const workspaceDir = await this.revisionDir(repositoryUri, revision);
-    const workspaceRepo = await Repository.open(workspaceDir);
-    const workspaceHeadCommit = await workspaceRepo.getHeadCommit();
-    if (workspaceHeadCommit.sha() !== targetCommit.sha()) {
-      const commit = await workspaceRepo.getCommit(targetCommit.sha());
-      this.log.info(`Checkout workspace ${workspaceDir} to ${targetCommit.sha()}`);
-      // @ts-ignore
-      const result = await Reset.reset(workspaceRepo, commit, Reset.TYPE.HARD, {});
-      if (result !== undefined && result !== GitError.CODE.OK) {
-        throw Boom.internal(`Reset workspace to commit ${targetCommit.sha()} failed.`);
-      }
-    }
-    workspaceRepo.cleanup();
-    return { workspaceHeadCommit, workspaceDir };
-  }
-
-  private async cloneWorkspace(
-    bareRepo: Repository,
-    repositoryUri: string,
-    revision: string,
-    targetCommit: Commit
-  ) {
-    const workspaceDir = await this.revisionDir(repositoryUri, revision);
-    this.log.info(`Create workspace ${workspaceDir} from url ${bareRepo.path()}`);
-    const parentDir = path.dirname(workspaceDir);
-    // on windows, git clone will failed if parent folder is not exists;
-    await mkdirAsync(parentDir, { recursive: true });
-    const workTreeName = this.workspaceWorktreeBranchName(revision);
-    await this.pruneWorktree(bareRepo, workTreeName);
-    // Create the worktree and open it as Repository.
-    const wt = await Worktree.add(bareRepo, workTreeName, workspaceDir, { lock: 0, version: 1 });
-    // @ts-ignore
-    const workspaceRepo = await Repository.openFromWorktree(wt);
-    const workspaceHeadCommit = await workspaceRepo.getHeadCommit();
-    // when we start supporting multi-revision, targetCommit may not be head
-    if (workspaceHeadCommit.sha() !== targetCommit.sha()) {
-      const commit = await workspaceRepo.getCommit(targetCommit.sha());
-      this.log.info(`checkout ${workspaceRepo.workdir()} to commit ${targetCommit.sha()}`);
-      // @ts-ignore
-      const result = await Reset.reset(workspaceRepo, commit, Reset.TYPE.HARD, {});
-      if (result !== undefined && result !== GitError.CODE.OK) {
-        throw Boom.internal(`checkout workspace to commit ${targetCommit.sha()} failed.`);
-      }
-    }
-    workspaceRepo.cleanup();
-    return { workspaceHeadCommit, workspaceDir };
-  }
-
-  private async getWorktree(bareRepo: Repository, workTreeName: string) {
-    try {
-      const wt: Worktree = await Worktree.lookup(bareRepo, workTreeName);
-      return wt;
-    } catch (e) {
-      return null;
-    }
-  }
-
-  private async pruneWorktree(bareRepo: Repository, workTreeName: string) {
-    const wt = await this.getWorktree(bareRepo, workTreeName);
-    if (wt) {
-      wt.prune({ flags: 1 });
-      try {
-        // try delete the worktree branch
-        const ref = await bareRepo.getReference(`refs/heads/${workTreeName}`);
-        ref.delete();
-      } catch (e) {
-        // it doesn't matter if branch is not exists
-      }
-    }
-  }
-
-  private setWorkspaceRevision(workspaceDir: string, headCommit: Commit) {
-    const workspaceRelativePath = path.relative(this.workspacePath, workspaceDir);
-    this.revisionMap[workspaceRelativePath] = headCommit.sha().substring(0, 7);
+  private async setWorkspaceRevision(workspaceDir: string, revision: string) {
+    const git = simplegit(workspaceDir);
+    await git.reset(['--hard', revision]);
   }
 
   /**
@@ -459,16 +424,15 @@ export class WorkspaceHandler {
    */
   private async checkFile(repoUri: string, revision: string, filePath: string) {
     try {
-      const commit = await this.gitOps.getCommit(repoUri, revision);
-      const entry = await commit.getEntry(filePath);
-      switch (entry.filemode()) {
-        case TreeEntry.FILEMODE.TREE:
-        case TreeEntry.FILEMODE.BLOB:
-        case TreeEntry.FILEMODE.EXECUTABLE:
-          return true;
-        default:
-          return false;
+      const git = await this.gitOps.openGit(repoUri);
+      const p = filePath.endsWith('/') ? filePath.slice(0, -1) : filePath;
+      const tree = await this.gitOps.readTree(git, revision, p);
+      if (tree.entries.length !== 1) {
+        return false;
       }
+      const entry = tree.entries[0];
+      const type = GitOperations.mode2type(entry.mode);
+      return type === FileTreeItemType.File || type === FileTreeItemType.Directory;
     } catch (e) {
       // filePath may not exists
       return false;

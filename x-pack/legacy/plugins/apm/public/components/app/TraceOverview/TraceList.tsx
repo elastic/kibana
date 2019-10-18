@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiToolTip } from '@elastic/eui';
+import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
@@ -85,11 +85,31 @@ const traceListColumns: Array<ITableColumn<ITransactionGroup>> = [
   },
   {
     field: 'impact',
-    name: i18n.translate('xpack.apm.tracesTable.impactColumnLabel', {
-      defaultMessage: 'Impact'
-    }),
+    name: (
+      <EuiToolTip
+        content={i18n.translate(
+          'xpack.apm.tracesTable.impactColumnDescription',
+          {
+            defaultMessage:
+              "The most used and slowest endpoints in your service. It's calculated by taking the relative average duration times the number of transactions per minute."
+          }
+        )}
+      >
+        <>
+          {i18n.translate('xpack.apm.tracesTable.impactColumnLabel', {
+            defaultMessage: 'Impact'
+          })}{' '}
+          <EuiIcon
+            size="s"
+            color="subdued"
+            type="questionInCircle"
+            className="eui-alignTop"
+          />
+        </>
+      </EuiToolTip>
+    ),
     width: '20%',
-    align: 'right',
+    align: 'left',
     sortable: true,
     render: (value: number) => <ImpactBar value={value} />
   }

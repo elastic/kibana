@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { pingsQueryString } from '../../../../../legacy/plugins/uptime/public/queries';
-import { expectFixtureEql } from './expect_fixture_eql';
+import { expectFixtureEql } from './helpers/expect_fixture_eql';
 import { Ping, PingResults } from '../../../../../legacy/plugins/uptime/common/graphql/types';
 
 const expectPingFixtureEql = (data: { allPings: PingResults }, fixtureName: string) => {
@@ -15,6 +15,9 @@ const expectPingFixtureEql = (data: { allPings: PingResults }, fixtureName: stri
 
 export default function({ getService }: any) {
   describe('pingList query', () => {
+    before('load heartbeat data', () => getService('esArchiver').load('uptime/full_heartbeat'));
+    after('unload heartbeat index', () => getService('esArchiver').unload('uptime/full_heartbeat'));
+
     const supertest = getService('supertest');
 
     it('returns a list of pings for the given date range and default size', async () => {
@@ -23,7 +26,7 @@ export default function({ getService }: any) {
         query: pingsQueryString,
         variables: {
           dateRangeStart: '2019-01-28T17:40:08.078Z',
-          dateRangeEnd: '2019-01-28T19:00:16.078Z',
+          dateRangeEnd: '2025-01-28T19:00:16.078Z',
         },
       };
       const {
@@ -36,6 +39,7 @@ export default function({ getService }: any) {
         allPings: { pings },
       } = data;
       expect(pings).length(10);
+
       expectPingFixtureEql(data, 'ping_list');
     });
 
@@ -46,7 +50,7 @@ export default function({ getService }: any) {
         query: pingsQueryString,
         variables: {
           dateRangeStart: '2019-01-28T17:40:08.078Z',
-          dateRangeEnd: '2019-01-28T19:00:16.078Z',
+          dateRangeEnd: '2025-01-28T19:00:16.078Z',
           size: SIZE,
         },
       };
@@ -65,13 +69,13 @@ export default function({ getService }: any) {
 
     it('returns a list of pings for a monitor ID', async () => {
       const SIZE = 15;
-      const MONITOR_ID = 'auto-tcp-0X81440A68E839814C';
+      const MONITOR_ID = '0001-up';
       const getPingsQuery = {
         operationName: 'PingList',
         query: pingsQueryString,
         variables: {
           dateRangeStart: '2019-01-28T17:40:08.078Z',
-          dateRangeEnd: '2019-01-28T19:00:16.078Z',
+          dateRangeEnd: '2025-01-28T19:00:16.078Z',
           monitorId: MONITOR_ID,
           size: SIZE,
         },
@@ -87,13 +91,13 @@ export default function({ getService }: any) {
 
     it('returns a list of pings sorted ascending', async () => {
       const SIZE = 5;
-      const MONITOR_ID = 'auto-tcp-0X81440A68E839814C';
+      const MONITOR_ID = '0001-up';
       const getPingsQuery = {
         operationName: 'PingList',
         query: pingsQueryString,
         variables: {
           dateRangeStart: '2019-01-28T17:40:08.078Z',
-          dateRangeEnd: '2019-01-28T19:00:16.078Z',
+          dateRangeEnd: '2025-01-28T19:00:16.078Z',
           monitorId: MONITOR_ID,
           size: SIZE,
           sort: 'asc',
@@ -105,6 +109,7 @@ export default function({ getService }: any) {
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getPingsQuery });
+
       expectPingFixtureEql(data, 'ping_list_sort');
     });
   });

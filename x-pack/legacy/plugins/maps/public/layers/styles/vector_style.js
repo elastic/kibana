@@ -303,7 +303,7 @@ export class VectorStyle extends AbstractStyle {
     );
   }
 
-  getLegendDetails(getFieldLabel) {
+  getLegendDetails(getFieldLabel, getFieldFormatter) {
     const styles = this.getProperties();
     const styleProperties = Object.keys(styles).map(styleName => {
       const { type, options } = styles[styleName];
@@ -319,6 +319,7 @@ export class VectorStyle extends AbstractStyle {
       <VectorStyleLegend
         styleProperties={styleProperties}
         getFieldLabel={getFieldLabel}
+        getFieldFormatter={getFieldFormatter}
       />
     );
   }
@@ -402,7 +403,7 @@ export class VectorStyle extends AbstractStyle {
           } else if (range.delta === 0) {//values are identical
             styleValue = 1;//snap to end of color range
           } else {
-            styleValue = (feature.properties[name] - range.min) / range.delta;
+            styleValue = (value - range.min) / range.delta;
           }
         } else {
           if (isNaN(value)) {

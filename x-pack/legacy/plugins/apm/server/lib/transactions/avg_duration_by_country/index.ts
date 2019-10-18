@@ -11,13 +11,8 @@ import {
   TRANSACTION_DURATION,
   TRANSACTION_TYPE
 } from '../../../../common/elasticsearch_fieldnames';
-import { PromiseReturnType } from '../../../../typings/common';
 import { Setup } from '../../helpers/setup_request';
 import { rangeFilter } from '../../helpers/range_filter';
-
-export type TransactionAvgDurationByCountryAPIResponse = PromiseReturnType<
-  typeof getTransactionAvgDurationByCountry
->;
 
 export async function getTransactionAvgDurationByCountry({
   setup,

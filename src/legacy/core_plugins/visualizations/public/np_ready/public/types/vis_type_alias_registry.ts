@@ -21,7 +21,7 @@ interface VisualizationListItem {
   editUrl: string;
   icon: string;
   id: string;
-  isExperimental: boolean;
+  stage: 'experimental' | 'beta' | 'production';
   savedObjectType: string;
   title: string;
   typeTitle: string;
@@ -37,13 +37,19 @@ interface VisualizationsAppExtension {
   }) => VisualizationListItem;
 }
 
+export interface VisTypeAliasPromotion {
+  description: string;
+  buttonText: string;
+}
+
 export interface VisTypeAlias {
   aliasUrl: string;
   name: string;
   title: string;
   icon: string;
-  isPromoted?: boolean;
+  promotion?: VisTypeAliasPromotion;
   description: string;
+  stage: 'experimental' | 'beta' | 'production';
 
   appExtensions?: {
     visualizations: VisualizationsAppExtension;

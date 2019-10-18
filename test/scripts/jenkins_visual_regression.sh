@@ -3,7 +3,7 @@
 set -e
 
 if [[ -z "$IS_PIPELINE_JOB" ]] ; then
-  trap 'node "$KIBANA_DIR/src/dev/failed_tests/cli"' EXIT
+  trap 'node "$KIBANA_DIR/scripts/report_failed_tests"' EXIT
 else
   source src/dev/ci_setup/setup_env.sh
 fi

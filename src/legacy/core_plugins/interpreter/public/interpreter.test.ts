@@ -35,13 +35,13 @@ jest.mock('@kbn/interpreter/common', () => ({
   registryFactory: jest.fn(),
 }));
 
-const mockInterpreter = {
+const mockExecutor = {
   interpreter: {
     interpretAst: jest.fn(),
   },
 };
 jest.mock('./lib/interpreter', () => ({
-  initializeInterpreter: jest.fn().mockReturnValue(Promise.resolve(mockInterpreter)),
+  initializeExecutor: jest.fn().mockReturnValue(Promise.resolve(mockExecutor)),
 }));
 
 jest.mock('./registries', () => ({
@@ -59,26 +59,26 @@ jest.mock('./renderers/visualization', () => ({ visualization: {} }));
 describe('interpreter/interpreter', () => {
   let getInterpreter: any;
   let interpretAst: any;
-  let initializeInterpreter: any;
+  let initializeExecutor: any;
 
   beforeEach(() => {
     jest.clearAllMocks();
     jest.resetModules();
     getInterpreter = require('./interpreter').getInterpreter;
     interpretAst = require('./interpreter').interpretAst;
-    initializeInterpreter = require('./lib/interpreter').initializeInterpreter;
+    initializeExecutor = require('./lib/interpreter').initializeExecutor;
   });
 
   describe('getInterpreter', () => {
     it('initializes interpreter', async () => {
       await getInterpreter();
-      expect(initializeInterpreter).toHaveBeenCalledTimes(1);
+      expect(initializeExecutor).toHaveBeenCalledTimes(1);
     });
 
     it('only initializes interpreter once', async () => {
       await getInterpreter();
       await getInterpreter();
-      expect(initializeInterpreter).toHaveBeenCalledTimes(1);
+      expect(initializeExecutor).toHaveBeenCalledTimes(1);
     });
 
     it('resolves', async () => {
@@ -100,21 +100,21 @@ describe('interpreter/interpreter', () => {
     it('initializes interpreter if needed', async () => {
       const params = [{}];
       await interpretAst(...params);
-      expect(initializeInterpreter).toHaveBeenCalledTimes(1);
+      expect(initializeExecutor).toHaveBeenCalledTimes(1);
     });
 
     it('calls interpreter.interpretAst with the provided params', async () => {
       const params = [{}];
       await interpretAst(...params);
-      expect(mockInterpreter.interpreter.interpretAst).toHaveBeenCalledTimes(1);
-      expect(mockInterpreter.interpreter.interpretAst).toHaveBeenCalledWith(...params);
+      expect(mockExecutor.interpreter.interpretAst).toHaveBeenCalledTimes(1);
+      expect(mockExecutor.interpreter.interpretAst).toHaveBeenCalledWith({}, undefined, undefined);
     });
 
     it('calls interpreter.interpretAst each time', async () => {
       const params = [{}];
       await interpretAst(...params);
       await interpretAst(...params);
-      expect(mockInterpreter.interpreter.interpretAst).toHaveBeenCalledTimes(2);
+      expect(mockExecutor.interpreter.interpretAst).toHaveBeenCalledTimes(2);
     });
   });
 });

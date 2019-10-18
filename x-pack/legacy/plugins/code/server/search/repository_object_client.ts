@@ -18,8 +18,8 @@ import {
   RepositoryIndexName,
   RepositoryIndexNamePrefix,
   RepositoryIndexStatusReservedField,
-  RepositoryRandomPathReservedField,
   RepositoryReservedField,
+  RepositorySearchIndexWithScope,
 } from '../indexer/schema';
 import { EsClient } from '../lib/esqueue';
 
@@ -46,17 +46,24 @@ export class RepositoryObjectClient {
     return await this.getRepositoryObject(repoUri, RepositoryConfigReservedField);
   }
 
+  public async getRepositories(uris: string[]): Promise<Repository[]> {
+    if (uris.length === 0) {
+      return [];
+    }
+    return this.getRepositoriesInternal(RepositorySearchIndexWithScope(uris));
+  }
+
   public async getRepository(repoUri: RepositoryUri): Promise<Repository> {
     return await this.getRepositoryObject(repoUri, RepositoryReservedField);
   }
 
-  public async getRepositoryRandomStr(repoUri: RepositoryUri): Promise<string> {
-    return await this.getRepositoryObject(repoUri, RepositoryRandomPathReservedField);
+  public async getAllRepositories(): Promise<Repository[]> {
+    return await this.getRepositoriesInternal(`${RepositoryIndexNamePrefix}*`);
   }
 
-  public async getAllRepositories(): Promise<Repository[]> {
+  private async getRepositoriesInternal(index: string) {
     const res = await this.esClient.search({
-      index: `${RepositoryIndexNamePrefix}*`,
+      index,
       body: {
         query: {
           exists: {
@@ -93,10 +100,6 @@ export class RepositoryObjectClient {
 
   public async setRepositoryConfig(repoUri: RepositoryUri, config: RepositoryConfig) {
     return await this.setRepositoryObject(repoUri, RepositoryConfigReservedField, config);
-  }
-
-  public async setRepositoryRandomStr(repoUri: RepositoryUri, randomStr: string) {
-    return await this.setRepositoryObject(repoUri, RepositoryRandomPathReservedField, randomStr);
   }
 
   public async setRepository(repoUri: RepositoryUri, repo: Repository) {

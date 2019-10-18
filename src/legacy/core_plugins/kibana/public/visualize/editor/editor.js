@@ -53,7 +53,8 @@ import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
 import { npStart } from 'ui/new_platform';
-import { setup as data } from '../../../../../core_plugins/data/public/legacy';
+import { extractTimeFilter, changeTimeFilter } from '../../../../data/public';
+import { start as data } from '../../../../data/public/legacy';
 import { start as visualizations } from '../../../../visualizations/public/np_ready/public/legacy';
 
 import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
@@ -149,9 +150,6 @@ function VisEditor(
   config,
   kbnBaseUrl,
   localStorage,
-  // unused but required to initialize auto refresh :-\
-  /* eslint-disable no-unused-vars */
-  courier,
 ) {
   const queryFilter = Private(FilterBarQueryFilterProvider);
   const getUnhashableStates = Private(getUnhashableStatesProvider);
@@ -197,12 +195,12 @@ function VisEditor(
           isTitleDuplicateConfirmed,
           onTitleDuplicate,
         };
-        return doSave(saveOptions).then(({ id, error }) => {
+        return doSave(saveOptions).then((response) => {
           // If the save wasn't successful, put the original values back.
-          if (!id || error) {
+          if (!response.id || response.error) {
             savedVis.title = currentTitle;
           }
-          return { id, error };
+          return response;
         });
       };
 
@@ -343,7 +341,9 @@ function VisEditor(
   };
 
   $scope.onApplyFilters = filters => {
-    queryFilter.addFiltersAndChangeTimeFilter(filters);
+    const { timeRangeFilter, restOfFilters } = extractTimeFilter($scope.indexPattern.timeFieldName, filters);
+    queryFilter.addFilters(restOfFilters);
+    if (timeRangeFilter) changeTimeFilter(timefilter, timeRangeFilter);
     $scope.state.$newFilters = [];
   };
 
@@ -514,6 +514,8 @@ function VisEditor(
 
   const updateStateFromSavedQuery = (savedQuery) => {
     $state.query = savedQuery.attributes.query;
+    $state.save();
+
     queryFilter.setFilters(savedQuery.attributes.filters || []);
 
     if (savedQuery.attributes.timefilter) {
@@ -542,7 +544,7 @@ function VisEditor(
       $scope.savedQuery = undefined;
       return;
     }
-    if ($scope.savedQuery && newSavedQueryId !== $scope.savedQuery.id) {
+    if (!$scope.savedQuery || newSavedQueryId !== $scope.savedQuery.id) {
       savedQueryService.getSavedQuery(newSavedQueryId).then((savedQuery) => {
         $scope.$evalAsync(() => {
           $scope.savedQuery = savedQuery;

@@ -7,6 +7,8 @@
 export enum RouteName {
   HOME = 'home',
   SERVICES = 'services',
+  SERVICE_MAP = 'service-map',
+  SINGLE_SERVICE_MAP = 'single-service-map',
   TRACES = 'traces',
   SERVICE = 'service',
   TRANSACTIONS = 'transactions',

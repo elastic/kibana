@@ -58,6 +58,10 @@ export const METRIC_JAVA_NON_HEAP_MEMORY_COMMITTED =
   'jvm.memory.non_heap.committed';
 export const METRIC_JAVA_NON_HEAP_MEMORY_USED = 'jvm.memory.non_heap.used';
 export const METRIC_JAVA_THREAD_COUNT = 'jvm.thread.count';
+export const METRIC_JAVA_GC_COUNT = 'jvm.gc.count';
+export const METRIC_JAVA_GC_TIME = 'jvm.gc.time';
+
+export const LABEL_NAME = 'labels.name';
 
 export const HOST_NAME = 'host.hostname';
 export const CONTAINER_ID = 'container.id';

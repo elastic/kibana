@@ -1,5 +1,5 @@
 [[search]]
-== Searching Your Data
+== Searching your data
 You can search the indices that match the current index pattern by entering
 your search criteria in the Query bar. By default you can use Kibana's standard query language
 which features autocomplete and a simple, easy to use syntax. Kibana's legacy query
@@ -24,7 +24,7 @@ the request to Elasticsearch.
 include::kuery.asciidoc[]
 
 [[lucene-query]]
-=== Lucene Query Syntax
+=== Lucene query syntax
 Kibana's legacy query language was based on the Lucene query syntax. For the time being this syntax
 is still available under the options menu in the Query Bar and in Advanced Settings. The following
 are some tips that can help get you started.
@@ -70,7 +70,7 @@ Kibana see <<xpack-security-authorization>>.
 [role="screenshot"]
 image::discover/images/read-only-badge.png[Example of Discover's read only access indicator in Kibana's header]
 
-==== Saving a Search
+==== Save a search
 To save the current search:
 
 . Click *Save* in the Kibana toolbar.
@@ -78,7 +78,7 @@ To save the current search:
 
 You can import, export and delete saved searches from *Management/Kibana/Saved Objects*.
 
-==== Opening a Saved Search
+==== Open a saved search
 To load a saved search into Discover:
 
 . Click *Open* in the Kibana toolbar.
@@ -102,7 +102,7 @@ Saved queries don't include information specific to Discover, such as the curren
 ==== Read only access
 If you have insufficient privileges to save queries, the *Save current query* button isn't visible in the saved query management popover. For more information, see <<xpack-security-authorization, Granting access to Kibana>>
 
-==== Saving a query
+==== Save a query
 To save the current query text, filters, and time filter:
 
 . Click *#* in the search bar, next to the query text input.
@@ -117,13 +117,13 @@ image::discover/images/saved-query-management-component-all-privileges.png["Exam
 image::discover/images/saved-query-save-form-default-filters.png["Example of the saved query management save form with the filters option included and the time filter option excluded",width="80%"]
 . Click *Save*.
 
-==== Loading a query
+==== Load a query
 To load a saved query into Discover, Dashboard, or Visualize:
 
 . Click *#* in the search bar, next to the query text input.
 . Select the query you want to load. You might need to scroll down to find the query you are looking for.
 
-==== Saving changes to a query
+==== Save changes to a query
 If you load a query and then make changes to the query text, the filters, or the time filter, you can save the changes as a new query or update the existing query.
 
 To save the changes as a new query:
@@ -143,13 +143,13 @@ To save the changes to the current query:
 . Enter a description, and then select the filter options that you want to include.
 . Click *Save*.
 
-==== Clearing a query
+==== Clear a query
 To clear a query that is currently loaded in an application:
 
 . Click *#* in the search bar.
 . Click *Clear* in the popover.
 
-==== Deleting a query
+==== Delete a query
 To completely delete a query:
 
 . Click *#* in the search bar, next to the query text input.
@@ -162,7 +162,7 @@ image::discover/images/saved-query-management-component-delete-query-button.png[
 You can import, export, and delete saved queries from <<managing-saved-objects, Saved Objects in Management>>.
 
 [[select-pattern]]
-=== Changing Which Indices You're Searching
+=== Change the indices you're searching
 When you submit a search request, the indices that match the currently-selected
 index pattern are searched. The current index pattern is shown below the toolbar.
 To change which indices you are searching, click the index pattern and select a
@@ -172,24 +172,22 @@ For more information about index patterns, see <<settings-create-pattern,
 Creating an Index Pattern>>.
 
 [[autorefresh]]
-=== Refreshing the Search Results
+=== Refresh the search results
 As more documents are added to the indices you're searching, the search results
 shown in Discover and used to display visualizations get stale. You can
 configure a refresh interval to periodically resubmit your searches to
 retrieve the latest results.
 
-To enable auto refresh:
+. Click image:images/time-filter-calendar.png[].
 
-. Click the *Time Picker* image:images/time-picker.jpg[Time Picker] in the
-Kibana toolbar.
-. Click *Auto refresh*.
-. Choose a refresh interval from the list.
+. In the *Refresh every* field, enter the refresh rate, then select the interval 
+  from the dropdown.
+
+. Click *Start*.
 +
 image::images/autorefresh-intervals.png[]
 
-When auto refresh is enabled, the refresh interval is displayed next to the
-Time Picker, along with a Pause button. To temporarily disable auto refresh,
-click *Pause*.
+To disable auto refresh, click *Stop*.
 
-NOTE: If auto refresh is not enabled, you can manually refresh visualizations
-by clicking *Refresh*.
+If auto refresh is not enabled, click *Refresh* to manually refresh the search 
+results.

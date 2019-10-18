@@ -4,6 +4,8 @@
 
 ## HttpServiceBase.delete property
 
+Makes an HTTP request with the DELETE method. See [HttpHandler](./kibana-plugin-public.httphandler.md) for options.
+
 <b>Signature:</b>
 
 ```typescript

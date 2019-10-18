@@ -22,7 +22,7 @@ import { font } from './font';
 import { functionWrapper } from '../../test_helpers';
 
 describe('font', () => {
-  const fn: any = functionWrapper(font);
+  const fn = functionWrapper(font);
 
   describe('default output', () => {
     const result = fn(null);

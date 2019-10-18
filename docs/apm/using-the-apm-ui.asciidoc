@@ -35,3 +35,5 @@ include::metrics.asciidoc[]
 include::agent-configuration.asciidoc[]
 
 include::advanced-queries.asciidoc[]
+
+include::troubleshooting.asciidoc[]
