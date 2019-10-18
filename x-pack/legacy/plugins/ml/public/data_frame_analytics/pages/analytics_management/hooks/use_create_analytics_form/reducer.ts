@@ -16,6 +16,7 @@ import { getInitialState, getJobConfigFromFormState, State, JOB_TYPES } from './
 import { isJobIdValid } from '../../../../../../common/util/job_utils';
 import { maxLengthValidator } from '../../../../../../common/util/validators';
 import { JOB_ID_MAX_LENGTH } from '../../../../../../common/constants/validation';
+import { getDependentVar, isRegressionAnalysis } from '../../../../common/analytics';
 
 const getSourceIndexString = (state: State) => {
   const { jobConfig } = state;
@@ -34,21 +35,13 @@ const getSourceIndexString = (state: State) => {
 };
 
 export const validateAdvancedEditor = (state: State): State => {
-  const {
-    jobIdEmpty,
-    jobIdValid,
-    jobIdExists,
-    jobType,
-    createIndexPattern,
-    dependentVariable,
-  } = state.form;
+  const { jobIdEmpty, jobIdValid, jobIdExists, jobType, createIndexPattern } = state.form;
   const { jobConfig } = state;
 
   state.advancedEditorMessages = [];
 
   const sourceIndexName = getSourceIndexString(state);
   const sourceIndexNameEmpty = sourceIndexName === '';
-  const dependentVariableEmpty = jobType === JOB_TYPES.REGRESSION && dependentVariable === '';
   // general check against Kibana index pattern names, but since this is about the advanced editor
   // with support for arrays in the job config, we also need to check that each individual name
   // doesn't include a comma if index names are supplied as an array.
@@ -71,6 +64,12 @@ export const validateAdvancedEditor = (state: State): State => {
   const destinationIndexPatternTitleExists = state.indexPatternTitles.some(
     name => destinationIndexName === name
   );
+
+  let dependentVariableEmpty = false;
+  if (isRegressionAnalysis(jobConfig.analysis)) {
+    const dependentVariableName = getDependentVar(jobConfig.analysis) || '';
+    dependentVariableEmpty = jobType === JOB_TYPES.REGRESSION && dependentVariableName === '';
+  }
 
   if (sourceIndexNameEmpty) {
     state.advancedEditorMessages.push({
