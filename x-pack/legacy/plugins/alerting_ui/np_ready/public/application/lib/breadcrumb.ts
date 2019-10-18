@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { linkToHome, linkToActions } from '../constants';
+import { routeToHome, routeToActions } from '../constants';
 
 class BreadcrumbService {
   private chrome: any;
@@ -31,7 +31,7 @@ class BreadcrumbService {
         text: i18n.translate('xpack.alertingUI.home.breadcrumbTitle', {
           defaultMessage: 'Alerting UI',
         }),
-        href: linkToHome,
+        href: `#${routeToHome}`,
       },
     ];
     this.breadcrumbs.actions = [
@@ -40,7 +40,7 @@ class BreadcrumbService {
         text: i18n.translate('xpack.alertingUI.actions.breadcrumbTitle', {
           defaultMessage: 'Actions',
         }),
-        href: linkToActions,
+        href: `#${routeToActions}`,
       },
     ];
   }
