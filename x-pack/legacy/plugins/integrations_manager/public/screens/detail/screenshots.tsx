@@ -43,11 +43,13 @@ export function Screenshots(props: ScreenshotProps) {
       <EuiSpacer size="m" />
       <ScreenshotsContainer gutterSize="none" direction="column" alignItems="center">
         <NestedEuiFlexItem>
-          <EuiText color="ghost">We need image descriptions to be returned in the response</EuiText>
+          <EuiText color="ghost" aria-label="screenschot image caption">
+            We need image descriptions to be returned in the response
+          </EuiText>
           <EuiSpacer />
         </NestedEuiFlexItem>
         <NestedEuiFlexItem>
-          <EuiImage url={src} alt="image" size="l" allowFullScreen />
+          <EuiImage url={src} alt="screenhot image preview" size="l" allowFullScreen />
         </NestedEuiFlexItem>
       </ScreenshotsContainer>
     </Fragment>
