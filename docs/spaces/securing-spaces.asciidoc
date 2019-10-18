@@ -15,7 +15,7 @@ Access for all spaces in {kib} is governed by a concept called "minimum privileg
 There are three options for minimum privilege:
 
 
-[cols="2*^<"]
+[cols="2*<"]
 |===
 
 |`all`
@@ -39,7 +39,7 @@ access to individual spaces.
 
 
 ==== Examples
-[cols="2*^<"]
+[cols="2*<"]
 |===
 
 s|To provide
