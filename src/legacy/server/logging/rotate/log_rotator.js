@@ -19,6 +19,7 @@
 
 import fs from 'fs';
 import { throttle } from 'lodash';
+import { basename, dirname, sep } from 'path';
 
 export class LogRotator {
   constructor(config, logReporterStream) {
@@ -167,16 +168,66 @@ export class LogRotator {
 
   _rotateNow() {
     // rotate process
-    // 1. delete last file
-    // 2. rename all files to with +1
-    // 3. rename + compress current log into 1
-    // 4. send SIGHUP to reload log config
+    // 1. get rotated files metadata (list of log rotated files present on the log folder, numerical sorted)
+    // 2. delete last file
+    // 3. rename all files to the correct index +1
+    // 4. rename + compress current log into 1
+    // 5. send SIGHUP to reload log config
 
+    // rotate process is starting
     this.isRotating = true;
-    // rename old
-    // reload log configuration
-    // => process.kill(process.pid, 'SIGHUP');
-    console.log('ROTATED');
+
+    // get rotated files metadata
+    const rotatedFiles = this._readRotatedFilesMetadata();
+
+    // delete last file
+    this._deleteLastRotatedFile(rotatedFiles);
+
+    // rename all files to correct index + 1
+    this._renameRotatedFilesByOne(rotatedFiles);
+
+    // rename + compress current log into 0
+    this._rotateCurrentLogFile();
+
+    // send SIGHUP to reload log configuration
+    process.kill(process.pid, 'SIGHUP');
+
+    // rotate process is finished
     this.isRotating = false;
+  }
+
+  _readRotatedFilesMetadata() {
+    const logFileBaseName = basename(this.logFilePath);
+    const logFilesFolder = dirname(this.logFilePath);
+
+    return fs.readdirSync(logFilesFolder)
+      .filter(file => new RegExp(`${logFileBaseName}\\.\\d`).test(file))
+      .sort((a, b) => Number(a.match(/(\d+)/g)[0]) - Number(b.match(/(\d+)/g)[0]))
+      .map(filename => `${logFilesFolder}${sep}${filename}`);
+  }
+
+  _deleteLastRotatedFile(rotatedFiles) {
+    if (rotatedFiles.length < this.keepFiles) {
+      return;
+    }
+
+    const lastFilePath = rotatedFiles.pop();
+    fs.unlinkSync(lastFilePath);
+  }
+
+  _renameRotatedFilesByOne(rotatedFiles) {
+    const logFileBaseName = basename(this.logFilePath);
+    const logFilesFolder = dirname(this.logFilePath);
+
+    for (let i = rotatedFiles.length - 1; i > 0; i--) {
+      const oldFilePath = rotatedFiles[i];
+      const newFilePath = `${logFilesFolder}${sep}${logFileBaseName}.${i + 1}`;
+      fs.renameSync(oldFilePath, newFilePath);
+    }
+  }
+
+  _rotateCurrentLogFile() {
+    const newFilePath = `${this.logFilePath}.0`;
+    fs.renameSync(this.logFilePath, newFilePath);
   }
 }
