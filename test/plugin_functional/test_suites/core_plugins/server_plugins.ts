@@ -16,8 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { PluginFunctionalProviderContext } from '../../services';
 
-export default function ({ getService }) {
+// eslint-disable-next-line import/no-default-export
+export default function({ getService }: PluginFunctionalProviderContext) {
   const supertest = getService('supertest');
 
   describe('server plugins', function describeIndexTests() {

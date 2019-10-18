@@ -16,8 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { PluginFunctionalProviderContext } from '../../services';
 
-export default function ({ loadTestFile }) {
+// eslint-disable-next-line import/no-default-export
+export default function({ loadTestFile }: PluginFunctionalProviderContext) {
   describe('core plugins', () => {
     loadTestFile(require.resolve('./applications'));
     loadTestFile(require.resolve('./legacy_plugins'));
