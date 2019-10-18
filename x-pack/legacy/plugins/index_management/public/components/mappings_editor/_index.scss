@@ -1,7 +1,10 @@
 
 /*
  [1] When the <CreateField /> component is embedded inside the tree, we need
- to add some extra indent to make room for the child "bullet" on the left.
+ to add some extra indent to make room for the child "L" bullet on the left.
+
+ [2] By default all content have a padding left to leave some room for the "L" bullet
+ unless "--toggle" is added. In that case we don't need padding as the toggle will add it.
  */
 
 .mappings-editor {
@@ -32,9 +35,21 @@
       }
     }
 
+    &__wrapper {
+      padding-left: $euiSizeXS;
+
+      &--indent {
+        padding-left: $euiSize;
+      }
+    }
+
     &__content {
       height: $euiSizeXL * 2;
       position: relative;
+
+      &--indent {
+        padding-left: $euiSizeXL;
+      }
     }
 
     &__toggle {
@@ -84,12 +99,18 @@
       padding-left: $euiSizeXXL - $euiSizeXS; // [1]
     }
 
-    .mappings-editor__fields-list .mappings-editor__fields-list-item__content--toggle {
-      &::before{
-        content: none;
-      }
-      &::after {
-        content: none;
+    .mappings-editor__fields-list .mappings-editor__fields-list-item__content {
+      padding-left: $euiSizeXL; // [2]
+
+      &--toggle {
+        padding-left: 0;
+
+        &::before{
+          content: none;
+        }
+        &::after {
+          content: none;
+        }
       }
     }
 }

@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import classNames from 'classnames';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiBadge, EuiButtonIcon } from '@elastic/eui';
 
@@ -24,9 +24,9 @@ export const FieldsListItem = ({ field, treeDepth = 0 }: Props) => {
   const dispatch = useDispatch();
   const {
     documentFields: { status, fieldToAddFieldTo, fieldToEdit },
-    fields: { byId },
+    fields: { byId, maxNestedDepth },
   } = useState();
-  const getField = (propId: string) => byId[propId];
+  const getField = (fieldId: string) => byId[fieldId];
   const {
     id,
     source,
@@ -41,7 +41,11 @@ export const FieldsListItem = ({ field, treeDepth = 0 }: Props) => {
   const isAddFieldBtnDisabled = false; // For now, we never disable the Add Child button.
   // const isAddFieldBtnDisabled = field.nestedDepth === MAX_DEPTH_DEFAULT_EDITOR - 1;
   const indent = `${nestedDepth * INDENT_SIZE}px`;
-  const indentChild = `${(nestedDepth + 1) * INDENT_SIZE}px`;
+  const indentChild = `${(nestedDepth + 1) * INDENT_SIZE + 4}px`; // We need to add 4 because we have a padding left set to 4 on the wrapper
+  const childFieldsArray = useMemo(() => (hasChildFields ? childFields!.map(getField) : []), [
+    childFields,
+    byId,
+  ]);
 
   const addField = () => {
     dispatch({
@@ -112,24 +116,30 @@ export const FieldsListItem = ({ field, treeDepth = 0 }: Props) => {
             status === 'editingField' && fieldToEdit !== id,
         })}
       >
-        <div className="mappings-editor__fields-list-item__wrapper">
+        <div
+          className={classNames('mappings-editor__fields-list-item__wrapper', {
+            'mappings-editor__fields-list-item__wrapper--indent': maxNestedDepth === 0,
+          })}
+        >
           <EuiFlexGroup
             gutterSize="s"
             alignItems="center"
             className={classNames('mappings-editor__fields-list-item__content', {
               'mappings-editor__fields-list-item__content--toggle': hasChildFields,
+              'mappings-editor__fields-list-item__content--indent':
+                !hasChildFields && maxNestedDepth > nestedDepth,
             })}
           >
-            <EuiFlexItem grow={false} className="mappings-editor__fields-list-item__toggle">
-              {hasChildFields && (
+            {hasChildFields && (
+              <EuiFlexItem grow={false} className="mappings-editor__fields-list-item__toggle">
                 <EuiButtonIcon
                   color="text"
                   onClick={toggleExpand}
                   iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
                   aria-label={`Expand field ${source.name}`}
                 />
-              )}
-            </EuiFlexItem>
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false} className="mappings-editor__fields-list-item__name">
               {source.name}
             </EuiFlexItem>
@@ -149,7 +159,7 @@ export const FieldsListItem = ({ field, treeDepth = 0 }: Props) => {
       </div>
 
       {hasChildFields && isExpanded && (
-        <FieldsList fields={childFields!.map(getField)} treeDepth={treeDepth + 1} />
+        <FieldsList fields={childFieldsArray} treeDepth={treeDepth + 1} />
       )}
 
       {renderCreateField()}

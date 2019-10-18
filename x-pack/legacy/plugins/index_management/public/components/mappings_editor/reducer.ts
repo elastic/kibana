@@ -65,9 +65,10 @@ export type Dispatch = (action: Action) => void;
 
 export const addFieldToState = (field: Field, state: State): State => {
   const id = getUniqueId();
+  const updatedById = { ...state.fields.byId };
   const { fieldToAddFieldTo } = state.documentFields;
   const addToRootLevel = fieldToAddFieldTo === undefined;
-  const parentField = addToRootLevel ? undefined : state.fields.byId[fieldToAddFieldTo!];
+  const parentField = addToRootLevel ? undefined : updatedById[fieldToAddFieldTo!];
 
   const rootLevelFields = addToRootLevel
     ? [...state.fields.rootLevelFields, id]
@@ -77,7 +78,7 @@ export const addFieldToState = (field: Field, state: State): State => {
   const { name } = field;
   const path = parentField ? `${parentField.path}.${name}` : name;
 
-  state.fields.byId[id] = {
+  updatedById[id] = {
     id,
     parentId: fieldToAddFieldTo,
     source: field,
@@ -90,7 +91,7 @@ export const addFieldToState = (field: Field, state: State): State => {
     const childFields = parentField.childFields || [];
 
     // Update parent field with new children
-    state.fields.byId[fieldToAddFieldTo!] = {
+    updatedById[fieldToAddFieldTo!] = {
       ...parentField,
       childFields: [...childFields, id],
       hasChildFields: true,
@@ -101,7 +102,7 @@ export const addFieldToState = (field: Field, state: State): State => {
   return {
     ...state,
     isValid: isStateValid(state),
-    fields: { ...state.fields, rootLevelFields, maxNestedDepth },
+    fields: { ...state.fields, byId: updatedById, rootLevelFields, maxNestedDepth },
   };
 };
 

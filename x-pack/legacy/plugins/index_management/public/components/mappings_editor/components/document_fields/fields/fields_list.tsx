@@ -13,7 +13,10 @@ interface Props {
   treeDepth?: number;
 }
 
-export const FieldsList = React.memo(({ fields = [], treeDepth = 0 }: Props) => {
+export const FieldsList = React.memo(function FieldsListComponent({
+  fields = [],
+  treeDepth = 0,
+}: Props) {
   return (
     <ul className="mappings-editor__fields-list">
       {fields.map(field => (

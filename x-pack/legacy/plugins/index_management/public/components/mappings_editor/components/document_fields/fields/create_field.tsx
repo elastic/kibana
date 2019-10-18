@@ -42,7 +42,10 @@ interface Props {
   isCancelable?: boolean;
 }
 
-export const CreateField = React.memo(({ paddingLeft, isCancelable = true }: Props) => {
+export const CreateField = React.memo(function CreateFieldComponent({
+  paddingLeft,
+  isCancelable = true,
+}: Props) {
   const { form } = useForm<Field>({ serializer: fieldSerializer });
   const dispatch = useDispatch();
 
@@ -76,12 +79,12 @@ export const CreateField = React.memo(({ paddingLeft, isCancelable = true }: Pro
   };
 
   const onClickOutside = () => {
-    if (!isCancelable) {
-      return;
-    }
     const name = form.getFields().name.value as string;
+
     if (name.trim() === '') {
-      cancel();
+      if (isCancelable) {
+        cancel();
+      }
     } else {
       submitForm(undefined, true);
     }
