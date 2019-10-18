@@ -24,11 +24,12 @@ import { AdvancedJobCreator } from '../../../../../common/job_creator';
 import { detectorToString } from '../../../../../../../util/string_utils';
 
 interface Props {
+  isActive: boolean;
   onEditJob: (i: number) => void;
   onDeleteJob: (i: number) => void;
 }
 
-export const DetectorList: FC<Props> = ({ onEditJob, onDeleteJob }) => {
+export const DetectorList: FC<Props> = ({ isActive, onEditJob, onDeleteJob }) => {
   const { jobCreator: jc, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as AdvancedJobCreator;
   const [detectors, setDetectors] = useState(jobCreator.detectors);
