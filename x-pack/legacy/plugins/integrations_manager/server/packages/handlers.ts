@@ -5,19 +5,19 @@
  */
 
 import { AssetType, Request, ResponseToolkit } from '../../common/types';
+import { API_ROOT } from '../../common/routes';
 import { PluginContext } from '../plugin';
 import { getClient } from '../saved_objects';
 import {
   SearchParams,
   getCategories,
   getClusterAccessor,
-  getImage,
+  getFile,
   getPackageInfo,
   getPackages,
   installPackage,
   removeInstallation,
 } from './index';
-import { ImageRequestParams } from '../registry';
 
 interface Extra extends ResponseToolkit {
   context: PluginContext;
@@ -31,10 +31,6 @@ interface PackageRequest extends Request {
   params: {
     pkgkey: string;
   };
-}
-
-interface ImageRequest extends Request {
-  params: Request['params'] & ImageRequestParams;
 }
 
 interface InstallAssetRequest extends Request {
@@ -71,8 +67,10 @@ export async function handleGetInfo(req: PackageRequest, extra: Extra) {
   return packageInfo;
 }
 
-export const handleGetImage = async (req: ImageRequest, extra: Extra) => {
-  const response = await getImage(req.params);
+export const handleGetFile = async (req: Request, extra: Extra) => {
+  if (!req.url.path) throw new Error('path is required');
+  const filePath = req.url.path.replace(API_ROOT, '');
+  const response = await getFile(filePath);
   const newResponse = extra.response(response.body);
   // set the content type from the registry response
   newResponse.header('Content-Type', response.headers.get('content-type') || '');
