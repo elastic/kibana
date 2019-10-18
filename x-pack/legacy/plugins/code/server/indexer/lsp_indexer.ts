@@ -5,7 +5,10 @@
  */
 
 import { ResponseError } from 'vscode-jsonrpc';
-
+import fs from 'fs';
+import path from 'path';
+import { promisify } from 'util';
+import { isBinaryFile } from 'isbinaryfile';
 import { ProgressReporter } from '.';
 import { TEXT_FILE_LIMIT } from '../../common/file';
 import {
@@ -36,6 +39,9 @@ import {
 } from './index_creation_request';
 import { ALL_RESERVED, DocumentIndexName, ReferenceIndexName, SymbolIndexName } from './schema';
 
+const state = promisify(fs.stat);
+const readFile = promisify(fs.readFile);
+
 export class LspIndexer extends AbstractIndexer {
   public type: IndexerType = IndexerType.LSP;
   // Batch index helper for symbols/references
@@ -43,8 +49,9 @@ export class LspIndexer extends AbstractIndexer {
   // Batch index helper for documents
   protected docBatchIndexHelper: BatchIndexHelper;
 
-  private LSP_BATCH_INDEX_SIZE = 1000;
+  private LSP_BATCH_INDEX_SIZE = 50;
   private DOC_BATCH_INDEX_SIZE = 50;
+  private workspaceDir: string = '';
 
   constructor(
     protected readonly repoUri: RepositoryUri,
@@ -105,6 +112,8 @@ export class LspIndexer extends AbstractIndexer {
 
   protected async *getIndexRequestIterator(): AsyncIterableIterator<LspIndexRequest> {
     try {
+      await this.prepareWorkspace();
+
       const fileIterator = await this.gitOps.iterateRepo(this.repoUri, HEAD);
       for await (const file of fileIterator) {
         const filePath = file.path!;
@@ -124,6 +133,14 @@ export class LspIndexer extends AbstractIndexer {
       this.log.error(error);
       throw error;
     }
+  }
+
+  protected async prepareWorkspace() {
+    const { workspaceDir } = await this.lspService.workspaceHandler.openWorkspace(
+      this.repoUri,
+      HEAD
+    );
+    this.workspaceDir = workspaceDir;
   }
 
   protected async getIndexRequestCount(): Promise<number> {
@@ -198,14 +215,20 @@ export class LspIndexer extends AbstractIndexer {
   }
 
   protected FILE_OVERSIZE_ERROR_MSG = 'File size exceeds limit. Skip index.';
+  protected BINARY_FILE_ERROR_MSG = 'Binary file detected. Skip index.';
   protected async getFileSource(request: LspIndexRequest): Promise<string> {
-    const { revision, filePath } = request;
-    // Always read file content from the original bare repo
-    const blob = await this.gitOps.fileContent(this.repoUri, filePath, revision);
-    if (blob.rawsize() > TEXT_FILE_LIMIT) {
+    const { filePath } = request;
+    const fullPath = path.join(this.workspaceDir, filePath);
+    const fileStat = await state(fullPath);
+    const fileSize = fileStat.size;
+    if (fileSize > TEXT_FILE_LIMIT) {
       throw new Error(this.FILE_OVERSIZE_ERROR_MSG);
     }
-    return blob.content().toString();
+    const bin = await isBinaryFile(fullPath);
+    if (bin) {
+      throw new Error(this.BINARY_FILE_ERROR_MSG);
+    }
+    return readFile(fullPath, { encoding: 'utf8' }) as Promise<string>;
   }
 
   protected async execLspIndexing(
@@ -278,7 +301,10 @@ export class LspIndexer extends AbstractIndexer {
     try {
       content = await this.getFileSource(request);
     } catch (error) {
-      if ((error as Error).message === this.FILE_OVERSIZE_ERROR_MSG) {
+      if ((error as Error).message === this.BINARY_FILE_ERROR_MSG) {
+        this.log.debug(this.BINARY_FILE_ERROR_MSG);
+        return stats;
+      } else if ((error as Error).message === this.FILE_OVERSIZE_ERROR_MSG) {
         // Skip this index request if the file is oversized
         this.log.debug(this.FILE_OVERSIZE_ERROR_MSG);
         return stats;

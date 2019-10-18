@@ -18,18 +18,20 @@
  */
 
 import { Server } from 'hapi';
-import { HttpService, HttpServiceSetup } from './http_service';
+import { InternalHttpServiceSetup } from './types';
+import { HttpService } from './http_service';
 import { OnPreAuthToolkit } from './lifecycle/on_pre_auth';
 import { AuthToolkit } from './lifecycle/auth';
 import { sessionStorageMock } from './cookie_session_storage.mocks';
 import { IRouter } from './router';
 import { OnPostAuthToolkit } from './lifecycle/on_post_auth';
 
-type ServiceSetupMockType = jest.Mocked<HttpServiceSetup> & {
-  basePath: jest.Mocked<HttpServiceSetup['basePath']>;
+type ServiceSetupMockType = jest.Mocked<InternalHttpServiceSetup> & {
+  basePath: jest.Mocked<InternalHttpServiceSetup['basePath']>;
 };
 
-const createBasePathMock = (): jest.Mocked<HttpServiceSetup['basePath']> => ({
+const createBasePathMock = (): jest.Mocked<InternalHttpServiceSetup['basePath']> => ({
+  serverBasePath: '/mock-server-basepath',
   get: jest.fn(),
   set: jest.fn(),
   prepend: jest.fn(),
@@ -52,7 +54,7 @@ const createSetupContractMock = () => {
       route: jest.fn(),
       start: jest.fn(),
       stop: jest.fn(),
-    } as unknown) as Server,
+    } as unknown) as jest.MockedClass<Server>,
     createCookieSessionStorageFactory: jest.fn(),
     registerOnPreAuth: jest.fn(),
     registerAuth: jest.fn(),
@@ -66,6 +68,7 @@ const createSetupContractMock = () => {
       getAuthHeaders: jest.fn(),
     },
     isTlsEnabled: false,
+    config: {},
   };
   setupContract.createCookieSessionStorageFactory.mockResolvedValue(
     sessionStorageMock.createFactory()

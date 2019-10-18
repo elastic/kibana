@@ -53,21 +53,22 @@ import { FatalErrorsSetup, FatalErrorInfo } from './fatal_errors';
 import { HttpSetup, HttpStart } from './http';
 import { I18nStart } from './i18n';
 import { InjectedMetadataSetup, InjectedMetadataStart, LegacyNavLink } from './injected_metadata';
-import {
-  ErrorToastOptions,
-  NotificationsSetup,
-  NotificationsStart,
-  Toast,
-  ToastInput,
-  ToastsApi,
-} from './notifications';
+import { NotificationsSetup, NotificationsStart } from './notifications';
 import { OverlayStart } from './overlays';
 import { Plugin, PluginInitializer, PluginInitializerContext, PluginOpaqueId } from './plugins';
 import { UiSettingsClient, UiSettingsState, UiSettingsClientContract } from './ui_settings';
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
 import { DocLinksStart } from './doc_links';
 import { SavedObjectsStart } from './saved_objects';
-import { IContextContainer, IContextProvider, ContextSetup, IContextHandler } from './context';
+export { PackageInfo, EnvironmentMode } from '../server/types';
+import {
+  IContextContainer,
+  IContextProvider,
+  ContextSetup,
+  HandlerFunction,
+  HandlerContextType,
+  HandlerParameters,
+} from './context';
 
 export { CoreContext, CoreSystem } from './core_system';
 export { RecursiveReadonly } from '../utils';
@@ -78,12 +79,15 @@ export {
   SavedObjectsBatchResponse,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkCreateOptions,
+  SavedObjectsBulkUpdateObject,
+  SavedObjectsBulkUpdateOptions,
   SavedObjectsCreateOptions,
   SavedObjectsFindResponsePublic,
   SavedObjectsUpdateOptions,
   SavedObject,
   SavedObjectAttribute,
   SavedObjectAttributes,
+  SavedObjectAttributeSingle,
   SavedObjectReference,
   SavedObjectsBaseOptions,
   SavedObjectsFindOptions,
@@ -105,7 +109,10 @@ export {
   HttpResponse,
   HttpHandler,
   HttpBody,
-  HttpInterceptController,
+  IBasePath,
+  IHttpInterceptController,
+  IHttpFetchError,
+  InterceptedHttpResponse,
 } from './http';
 
 export {
@@ -115,6 +122,17 @@ export {
   OverlayBannersStart,
   OverlayRef,
 } from './overlays';
+
+export {
+  Toast,
+  ToastInput,
+  IToasts,
+  ToastsApi,
+  ToastInputFields,
+  ToastsSetup,
+  ToastsStart,
+  ErrorToastOptions,
+} from './notifications';
 
 /**
  * Core services exposed to the `Plugin` setup lifecycle
@@ -138,6 +156,15 @@ export interface CoreSetup {
   notifications: NotificationsSetup;
   /** {@link UiSettingsClient} */
   uiSettings: UiSettingsClientContract;
+  /**
+   * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
+   * use *only* to retrieve config values. There is no way to set injected values
+   * in the new platform. Use the legacy platform API instead.
+   * @deprecated
+   * */
+  injectedMetadata: {
+    getInjectedVar: (name: string, defaultValue?: any) => unknown;
+  };
 }
 
 /**
@@ -168,6 +195,15 @@ export interface CoreStart {
   overlays: OverlayStart;
   /** {@link UiSettingsClient} */
   uiSettings: UiSettingsClientContract;
+  /**
+   * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
+   * use *only* to retrieve config values. There is no way to set injected values
+   * in the new platform. Use the legacy platform API instead.
+   * @deprecated
+   * */
+  injectedMetadata: {
+    getInjectedVar: (name: string, defaultValue?: any) => unknown;
+  };
 }
 
 /**
@@ -217,11 +253,12 @@ export {
   ChromeRecentlyAccessedHistoryItem,
   ChromeStart,
   IContextContainer,
-  IContextHandler,
+  HandlerFunction,
+  HandlerContextType,
+  HandlerParameters,
   IContextProvider,
   ContextSetup,
   DocLinksStart,
-  ErrorToastOptions,
   FatalErrorInfo,
   FatalErrorsSetup,
   HttpSetup,
@@ -235,9 +272,6 @@ export {
   PluginInitializerContext,
   SavedObjectsStart,
   PluginOpaqueId,
-  Toast,
-  ToastInput,
-  ToastsApi,
   UiSettingsClient,
   UiSettingsClientContract,
   UiSettingsState,

@@ -43,7 +43,7 @@ export function MetricEditor({ fields, metricsFilter, metric, onChange, removeBu
         label={i18n.translate('xpack.maps.metricsEditor.selectFieldLabel', {
           defaultMessage: 'Field',
         })}
-        display="rowCompressed"
+        display="columnCompressed"
       >
         <SingleFieldSelect
           placeholder={i18n.translate('xpack.maps.metricsEditor.selectFieldPlaceholder', {
@@ -67,7 +67,7 @@ export function MetricEditor({ fields, metricsFilter, metric, onChange, removeBu
         label={i18n.translate('xpack.maps.metricsEditor.customLabel', {
           defaultMessage: 'Custom label',
         })}
-        display="rowCompressed"
+        display="columnCompressed"
       >
         <EuiFieldText
           onChange={onLabelChange}
@@ -84,8 +84,7 @@ export function MetricEditor({ fields, metricsFilter, metric, onChange, removeBu
         label={i18n.translate('xpack.maps.metricsEditor.aggregationLabel', {
           defaultMessage: 'Aggregation',
         })}
-        labelAppend={removeButton}
-        display="rowCompressed"
+        display="columnCompressed"
       >
         <MetricSelect
           onChange={onAggChange}
@@ -96,8 +95,8 @@ export function MetricEditor({ fields, metricsFilter, metric, onChange, removeBu
       </EuiFormRow>
 
       {fieldSelect}
-
       {labelInput}
+      {removeButton}
     </Fragment>
   );
 }

@@ -35,7 +35,7 @@ export function FlyoutTopLevelProperties({ transaction }: Props) {
           {transaction.service.name}
         </TransactionOverviewLink>
       ),
-      width: '50%'
+      width: '25%'
     },
     {
       label: i18n.translate('xpack.apm.transactionDetails.transactionLabel', {
@@ -53,7 +53,7 @@ export function FlyoutTopLevelProperties({ transaction }: Props) {
           {transaction.transaction.name}
         </TransactionDetailLink>
       ),
-      width: '50%'
+      width: '25%'
     }
   ];
 

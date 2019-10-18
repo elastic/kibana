@@ -93,7 +93,14 @@ export const podLayoutCreator: InfraMetricLayoutCreator = theme => [
         visConfig: {
           formatter: InfraFormatterType.percent,
           seriesOverrides: {
-            cpu: { color: theme.eui.euiColorVis1, type: InfraMetricLayoutVisualizationType.area },
+            cpu: {
+              color: theme.eui.euiColorVis1,
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.podMetricsLayout.cpuUsageSection.seriesLabel.cpu',
+                { defaultMessage: 'cpu' }
+              ),
+              type: InfraMetricLayoutVisualizationType.area,
+            },
           },
         },
       },
@@ -112,6 +119,10 @@ export const podLayoutCreator: InfraMetricLayoutCreator = theme => [
           seriesOverrides: {
             memory: {
               color: theme.eui.euiColorVis1,
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.podMetricsLayout.memoryUsageSection.seriesLabel.memory',
+                { defaultMessage: 'memory' }
+              ),
               type: InfraMetricLayoutVisualizationType.area,
             },
           },

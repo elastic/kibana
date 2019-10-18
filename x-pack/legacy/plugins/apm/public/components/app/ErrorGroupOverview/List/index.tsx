@@ -159,7 +159,6 @@ const ErrorGroupList: React.FC<Props> = props => {
       initialSortField="latestOccurrenceAt"
       initialSortDirection="desc"
       sortItems={false}
-      hidePerPageOptions={false}
     />
   );
 };

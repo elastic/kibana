@@ -16,7 +16,7 @@ function getIconForDataType(dataType: string) {
     boolean: 'invert',
     date: 'calendar',
     geo_point: 'globe',
-    ip: 'link',
+    ip: 'storage',
   };
   return icons[dataType] || ICON_TYPES.find(t => t === dataType) || 'document';
 }

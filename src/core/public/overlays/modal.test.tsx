@@ -39,7 +39,9 @@ describe('ModalService', () => {
       expect(mockReactDomRender.mock.calls).toMatchSnapshot();
     });
     describe('with a currently active modal', () => {
-      let target: HTMLElement, modalService: ModalService, ref1: ModalRef;
+      let target: HTMLElement;
+      let modalService: ModalService;
+      let ref1: ModalRef;
       beforeEach(() => {
         target = document.createElement('div');
         modalService = new ModalService(target);

@@ -6,8 +6,7 @@
 
 import fileType from 'file-type';
 import Boom from 'boom';
-import { Commit, Oid, Revwalk } from '@elastic/nodegit';
-import { commitInfo, GitOperations } from '../../git_operations';
+import { GitOperations } from '../../git_operations';
 import { FileTree } from '../../../model';
 import { RequestContext, ServiceHandlerFor } from '../service_definition';
 import { extractLines } from '../../utils/buffer';
@@ -49,7 +48,7 @@ export const GitServiceDefinition = {
     request: {} as FileLocation,
     response: {} as {
       isBinary: boolean;
-      content: string;
+      content: Buffer;
     },
   },
   history: {
@@ -140,33 +139,19 @@ export const getGitServiceHandler = (
     const isBinary = blob.isBinary();
     return {
       isBinary,
-      content: blob.content().toString(),
+      content: blob.content(),
     };
   },
   async history({ uri, path, revision, count, after }) {
-    const repository = await gitOps.openRepo(uri);
     const commit = await gitOps.getCommitInfo(uri, revision);
     if (commit === null) {
       throw Boom.notFound(`commit ${revision} not found in repo ${uri}`);
     }
-    const walk = repository.createRevWalk();
-    walk.sorting(Revwalk.SORT.TIME);
-    const commitId = Oid.fromString(commit!.id);
-    walk.push(commitId);
-    let commits: Commit[];
-    if (path) {
-      // magic number 10000: how many commits at the most to iterate in order to find the commits contains the path
-      const results = await walk.fileHistoryWalk(path, count, 10000);
-      commits = results.map(result => result.commit);
-    } else {
-      commits = await walk.getCommits(count);
-    }
+    let commits = await gitOps.log(uri, commit.id, after ? count + 1 : count, path);
     if (after && commits.length > 0) {
-      if (commits[0].id().equal(commitId)) {
-        commits = commits.slice(1);
-      }
+      commits = commits.slice(1);
     }
-    return commits.map(commitInfo);
+    return commits;
   },
   async branchesAndTags({ uri }) {
     return await gitOps.getBranchAndTags(uri);

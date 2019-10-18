@@ -9,4 +9,4 @@ export * from './document_search_client';
 export * from './repository_search_client';
 export * from './symbol_search_client';
 export * from './repository_object_client';
-export * from './integraions_search_client';
+export * from './integrations_search_client';

@@ -5,7 +5,7 @@
  */
 
 import { execFile, spawn } from 'child_process';
-import { existsSync } from 'fs';
+import { existsSync, mkdirSync } from 'fs';
 import getPort from 'get-port';
 import * as glob from 'glob';
 import { platform as getOsPlatform } from 'os';
@@ -23,7 +23,6 @@ const JAVA_LANG_DETACH_PORT = 2090;
 export class JavaLauncher extends AbstractLauncher {
   private needModuleArguments: boolean = true;
   private readonly gradleHomeFolder = '.gradle';
-  private readonly mavenSettingsFile = path.resolve('settings', 'settings.xml');
   constructor(
     readonly targetHost: string,
     readonly options: ServerOptions,
@@ -51,7 +50,7 @@ export class JavaLauncher extends AbstractLauncher {
             ),
             'java.configuration.maven.userSettings': path.resolve(
               this.installationPath,
-              this.mavenSettingsFile
+              'settings/settings.xml'
             ),
           },
         },
@@ -167,6 +166,13 @@ export class JavaLauncher extends AbstractLauncher {
       this.options.jdtWorkspacePath,
     ];
 
+    if (this.options.security.enableJavaSecurityManager) {
+      params.unshift(
+        '-Dorg.osgi.framework.security=osgi',
+        `-Djava.security.policy=${path.resolve(this.installationPath, 'all.policy')}`
+      );
+    }
+
     if (this.needModuleArguments) {
       params.push(
         '--add-modules=ALL-SYSTEM',
@@ -175,6 +181,11 @@ export class JavaLauncher extends AbstractLauncher {
         '--add-opens',
         'java.base/java.lang=ALL-UNNAMED'
       );
+    }
+
+    // Check if workspace exists before launching
+    if (!existsSync(this.options.jdtWorkspacePath)) {
+      mkdirSync(this.options.jdtWorkspacePath);
     }
 
     const p = spawn(javaPath, params, {
@@ -186,6 +197,7 @@ export class JavaLauncher extends AbstractLauncher {
         CLIENT_HOST: '127.0.0.1',
         CLIENT_PORT: port.toString(),
         JAVA_HOME: javaHomePath,
+        EXTRA_WHITELIST_HOST: this.options.security.extraJavaRepositoryWhitelist.join(','),
       },
     });
     p.stdout.on('data', data => {

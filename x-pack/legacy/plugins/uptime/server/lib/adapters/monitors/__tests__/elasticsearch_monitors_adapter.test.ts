@@ -8,12 +8,7 @@ import { get, set } from 'lodash';
 import { ElasticsearchMonitorsAdapter } from '../elasticsearch_monitors_adapter';
 import { CountParams, CountResponse } from 'elasticsearch';
 import mockChartsData from './monitor_charts_mock.json';
-
-const assertCloseTo = (actual: number, expected: number, precision: number) => {
-  if (Math.abs(expected - actual) > precision) {
-    throw new Error(`expected [${actual}] to be within ${precision} of ${actual}`);
-  }
-};
+import { assertCloseTo } from '../../../helper';
 
 // FIXME: there are many untested functions in this adapter. They should be tested.
 describe('ElasticsearchMonitorsAdapter', () => {

@@ -34,6 +34,7 @@
       'renovate:major',
     ],
   },
+  separateMajorMinor: false,
   masterIssue: true,
   masterIssueApproval: true,
   rangeStrategy: 'bump',
@@ -66,6 +67,18 @@
         packagePatterns: [
           '(\\b|_)jest(\\b|_)',
         ],
+      },
+      {
+        groupSlug: '@elastic/charts',
+        groupName: '@elastic/charts related packages',
+        packageNames: [
+          '@elastic/charts',
+          '@types/elastic__charts',
+        ],
+        reviewers: [
+          'markov00',
+        ],
+        masterIssueApproval: false,
       },
       {
         groupSlug: 'mocha',
@@ -128,6 +141,13 @@
           '@types/typescript-fsa-reducers',
           'reselect',
           '@types/reselect',
+        ],
+      },
+      {
+        groupSlug: 'moment',
+        groupName: 'moment related packages',
+        packagePatterns: [
+          '(\\b|_)moment(\\b|_)',
         ],
       },
       {
@@ -239,6 +259,18 @@
         groupName: 'storybook related packages',
         packagePatterns: [
           '(\\b|_)storybook(\\b|_)',
+        ],
+      },
+      {
+        groupSlug: 'typescript',
+        groupName: 'typescript related packages',
+        packagePatterns: [
+          '(\\b|_)ts(\\b|_)',
+          '(\\b|_)typescript(\\b|_)',
+        ],
+        packageNames: [
+          'tslib',
+          '@types/tslib',
         ],
       },
       {
@@ -458,22 +490,6 @@
         ],
       },
       {
-        groupSlug: 'mkdirp',
-        groupName: 'mkdirp related packages',
-        packageNames: [
-          'mkdirp',
-          '@types/mkdirp',
-        ],
-      },
-      {
-        groupSlug: 'moment-timezone',
-        groupName: 'moment-timezone related packages',
-        packageNames: [
-          'moment-timezone',
-          '@types/moment-timezone',
-        ],
-      },
-      {
         groupSlug: 'mustache',
         groupName: 'mustache related packages',
         packageNames: [
@@ -495,6 +511,14 @@
         packageNames: [
           'opn',
           '@types/opn',
+        ],
+      },
+      {
+        groupSlug: 'pngjs',
+        groupName: 'pngjs related packages',
+        packageNames: [
+          'pngjs',
+          '@types/pngjs',
         ],
       },
       {
@@ -586,11 +610,27 @@
         ],
       },
       {
+        groupSlug: 'vinyl-fs',
+        groupName: 'vinyl-fs related packages',
+        packageNames: [
+          'vinyl-fs',
+          '@types/vinyl-fs',
+        ],
+      },
+      {
         groupSlug: 'zen-observable',
         groupName: 'zen-observable related packages',
         packageNames: [
           'zen-observable',
           '@types/zen-observable',
+        ],
+      },
+      {
+        groupSlug: 'archiver',
+        groupName: 'archiver related packages',
+        packageNames: [
+          'archiver',
+          '@types/archiver',
         ],
       },
       {
@@ -618,11 +658,35 @@
         ],
       },
       {
+        groupSlug: 'cytoscape',
+        groupName: 'cytoscape related packages',
+        packageNames: [
+          'cytoscape',
+          '@types/cytoscape',
+        ],
+      },
+      {
+        groupSlug: 'fancy-log',
+        groupName: 'fancy-log related packages',
+        packageNames: [
+          'fancy-log',
+          '@types/fancy-log',
+        ],
+      },
+      {
         groupSlug: 'file-saver',
         groupName: 'file-saver related packages',
         packageNames: [
           'file-saver',
           '@types/file-saver',
+        ],
+      },
+      {
+        groupSlug: 'getos',
+        groupName: 'getos related packages',
+        packageNames: [
+          'getos',
+          '@types/getos',
         ],
       },
       {
@@ -714,14 +778,6 @@
         ],
       },
       {
-        groupSlug: 'pngjs',
-        groupName: 'pngjs related packages',
-        packageNames: [
-          'pngjs',
-          '@types/pngjs',
-        ],
-      },
-      {
         groupSlug: 'proper-lockfile',
         groupName: 'proper-lockfile related packages',
         packageNames: [
@@ -759,6 +815,22 @@
         packageNames: [
           'tinycolor2',
           '@types/tinycolor2',
+        ],
+      },
+      {
+        groupSlug: 'xml2js',
+        groupName: 'xml2js related packages',
+        packageNames: [
+          'xml2js',
+          '@types/xml2js',
+        ],
+      },
+      {
+        groupSlug: 'xml-crypto',
+        groupName: 'xml-crypto related packages',
+        packageNames: [
+          'xml-crypto',
+          '@types/xml-crypto',
         ],
       },
       {
@@ -863,6 +935,14 @@
         packageNames: [
           'write-pkg',
           '@types/write-pkg',
+        ],
+      },
+      {
+        groupSlug: 'parse-link-header',
+        groupName: 'parse-link-header related packages',
+        packageNames: [
+          'parse-link-header',
+          '@types/parse-link-header',
         ],
       },
       {

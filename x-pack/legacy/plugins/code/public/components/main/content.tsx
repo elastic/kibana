@@ -54,7 +54,7 @@ import { encodeRevisionString } from '../../../common/uri_util';
 import { history } from '../../utils/url';
 import { Editor } from '../editor/editor';
 import { CloneStatus } from './clone_status';
-import { CommitHistory } from './commit_history';
+import { CommitHistory } from '../commits';
 import { Directory } from './directory';
 import { ErrorPanel } from './error_panel';
 import { NotFound } from './not_found';
@@ -234,6 +234,7 @@ class CodeContent extends React.PureComponent<Props, State> {
       const rawButtonOptions: EuiButtonGroupOption[] = [
         {
           id: 'Raw',
+          className: 'eui-hideFor--m eui-hideFor--s eui-hideFor--xs',
           label: isText
             ? i18n.translate('xpack.code.mainPage.content.buttons.rawButtonLabel', {
                 defaultMessage: 'Raw',

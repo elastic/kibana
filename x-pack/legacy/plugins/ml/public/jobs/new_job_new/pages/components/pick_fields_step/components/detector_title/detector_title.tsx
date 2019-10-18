@@ -33,7 +33,7 @@ export const DetectorTitle: FC<DetectorTitleProps> = ({
   return (
     <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
       <EuiFlexItem>
-        <span style={{ fontSize: 'small' }} data-test-subj="detectorTitle">
+        <span style={{ fontSize: 'small' }} data-test-subj="mlDetectorTitle">
           {getTitle(agg, field, splitField)}
         </span>
       </EuiFlexItem>

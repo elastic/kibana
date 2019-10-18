@@ -6,30 +6,22 @@
 
 import {
   EuiButton,
-  EuiButtonEmpty,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiForm,
   EuiFormRow,
   EuiGlobalToastList,
-  EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiOverlayMask,
   EuiSpacer,
   EuiSuperSelect,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
+import { get } from 'lodash';
 import React, { ChangeEvent } from 'react';
 import { connect } from 'react-redux';
-import { capabilities } from 'ui/capabilities';
+import { npStart } from 'ui/new_platform';
+
 import { Repository } from '../../../model';
 import { closeToast, importRepo, RepoStatus } from '../../actions';
 import { RootState } from '../../reducers';
@@ -37,6 +29,7 @@ import { ToastType } from '../../reducers/repository_management';
 import { isImportRepositoryURLInvalid } from '../../utils/url';
 import { ProjectItem } from './project_item';
 import { ProjectSettings } from './project_settings';
+import { ImportModal } from '../integrations/import_modal';
 
 enum SortOptionsValue {
   AlphabeticalAsc = 'alphabetical_asc',
@@ -167,70 +160,21 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
     }
   };
 
-  public updateIsInvalid = () => {
-    this.setState({ isInvalid: isImportRepositoryURLInvalid(this.state.repoURL) });
-  };
-
   public renderImportModal = () => {
-    return (
-      <EuiOverlayMask>
-        <EuiModal onClose={this.closeModal}>
-          <EuiModalHeader>
-            <EuiModalHeaderTitle>
-              <FormattedMessage
-                id="xpack.code.adminPage.repoTab.importRepoTitle"
-                defaultMessage="Import a new repo"
-              />
-            </EuiModalHeaderTitle>
-          </EuiModalHeader>
-          <EuiModalBody>
-            <EuiTitle size="xs">
-              <h3>
-                <FormattedMessage
-                  id="xpack.code.adminPage.repoTab.repositoryUrlFormLabel"
-                  defaultMessage="Repository URL"
-                />
-              </h3>
-            </EuiTitle>
-            <EuiForm>
-              <EuiFormRow
-                isInvalid={this.state.isInvalid}
-                error={i18n.translate('xpack.code.adminPage.repoTab.repositoryUrlEmptyText', {
-                  defaultMessage: "The URL shouldn't be empty.",
-                })}
-              >
-                <EuiFieldText
-                  value={this.state.repoURL}
-                  onChange={this.onChange}
-                  onBlur={this.updateIsInvalid}
-                  placeholder="https://github.com/Microsoft/TypeScript-Node-Starter"
-                  aria-label="input project url"
-                  data-test-subj="importRepositoryUrlInputBox"
-                  isLoading={this.props.importLoading}
-                  fullWidth={true}
-                  isInvalid={this.state.isInvalid}
-                  autoFocus={true}
-                />
-              </EuiFormRow>
-            </EuiForm>
-          </EuiModalBody>
-          <EuiModalFooter>
-            <EuiButtonEmpty onClick={this.closeModal}>
-              <FormattedMessage
-                id="xpack.code.adminPage.repoTab.cancelButtonLabel"
-                defaultMessage="Cancel"
-              />
-            </EuiButtonEmpty>
-            <EuiButton fill onClick={this.submitImportProject} disabled={this.props.importLoading}>
-              <FormattedMessage
-                id="xpack.code.adminPage.repoTab.importButtonLabel"
-                defaultMessage="Import"
-              />
-            </EuiButton>
-          </EuiModalFooter>
-        </EuiModal>
-      </EuiOverlayMask>
-    );
+    const { isInvalid, repoURL, showImportProjectModal } = this.state;
+
+    if (showImportProjectModal) {
+      return (
+        <ImportModal
+          isInvalid={isInvalid}
+          isLoading={this.props.importLoading}
+          onChange={this.onChange}
+          onClose={this.closeModal}
+          onSubmit={this.submitImportProject}
+          value={repoURL}
+        />
+      );
+    }
   };
 
   public setSortOption = (value: string) => {
@@ -240,7 +184,6 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
   public render() {
     const { projects, status, toastMessage, showToast, toastType } = this.props;
     const projectsCount = projects.length;
-    const modal = this.state.showImportProjectModal && this.renderImportModal();
     const sortedProjects = projects.sort(sortFunctionsFactory(status)[this.state.sortOption]);
 
     const repoList = sortedProjects.map((repo: Repository) => (
@@ -250,7 +193,7 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
         project={repo}
         showStatus={true}
         status={status[repo.uri]}
-        enableManagement={capabilities.get().code.admin as boolean}
+        enableManagement={get(npStart.core.application.capabilities, 'code.admin') as boolean}
       />
     ));
 
@@ -292,7 +235,7 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
           <EuiFlexItem grow />
           <EuiFlexItem grow />
           <EuiFlexItem>
-            {(capabilities.get().code.admin as boolean) && (
+            {(get(npStart.core.application.capabilities, 'code.admin') as boolean) && (
               // @ts-ignore
               <EuiButton
                 className="codeButton__projectImport"
@@ -319,7 +262,7 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
         </EuiText>
         <EuiSpacer />
         {repoList}
-        {modal}
+        {this.renderImportModal()}
         {settings}
       </div>
     );

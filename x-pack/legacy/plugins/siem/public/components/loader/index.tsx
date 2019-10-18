@@ -12,26 +12,26 @@ import {
   EuiLoadingSpinnerSize,
   EuiText,
 } from '@elastic/eui';
+import { rgba } from 'polished';
 import React from 'react';
 import { pure } from 'recompose';
 import styled, { css } from 'styled-components';
 
 const Aside = styled.aside<{ overlay?: boolean; overlayBackground?: string }>`
-  ${props => css`
-    padding: ${props.theme.eui.paddingSizes.m};
+  ${({ overlay, overlayBackground, theme }) => css`
+    padding: ${theme.eui.paddingSizes.m};
 
-    ${props.overlay &&
+    ${overlay &&
       `
       background: ${
-        props.overlayBackground ? props.overlayBackground : props.theme.eui.euiColorEmptyShade
+        overlayBackground ? rgba(overlayBackground, 0.9) : rgba(theme.eui.euiColorEmptyShade, 0.9)
       };
       bottom: 0;
       left: 0;
-      opacity: 0.9; // Michael - Using opacity instead of rgba because styled components don't support hex colors in rgba
       position: absolute;
       right: 0;
       top: 0;
-      z-index: 3;
+      z-index: ${theme.eui.euiZLevel1};
     `}
   `}
 `;

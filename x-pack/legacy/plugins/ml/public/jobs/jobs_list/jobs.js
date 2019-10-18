@@ -6,7 +6,7 @@
 
 import React, { Fragment } from 'react';
 
-import { NavigationMenu } from '../../components/navigation_menu/navigation_menu';
+import { NavigationMenu } from '../../components/navigation_menu';
 
 import { JobsListView } from './components/jobs_list_view';
 

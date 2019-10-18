@@ -24,5 +24,6 @@ export enum PROJECTION {
   TRACES = 'traces',
   TRANSACTIONS = 'transactions',
   METRICS = 'metrics',
-  ERROR_GROUPS = 'errorGroups'
+  ERROR_GROUPS = 'errorGroups',
+  SERVICE_NODES = 'serviceNodes'
 }

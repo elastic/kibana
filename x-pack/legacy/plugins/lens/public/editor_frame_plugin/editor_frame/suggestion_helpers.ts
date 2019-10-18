@@ -6,6 +6,7 @@
 
 import _ from 'lodash';
 import { Ast } from '@kbn/interpreter/common';
+import { IconType } from '@elastic/eui/src/components/icon/icon';
 import {
   Visualization,
   Datasource,
@@ -25,7 +26,7 @@ export interface Suggestion {
   title: string;
   visualizationState: unknown;
   previewExpression?: Ast | string;
-  previewIcon: string;
+  previewIcon: IconType;
   hide?: boolean;
   changeType: TableChangeType;
 }

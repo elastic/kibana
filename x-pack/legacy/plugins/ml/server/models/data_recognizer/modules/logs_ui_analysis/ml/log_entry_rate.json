@@ -8,10 +8,11 @@
       {
         "detector_description": "count",
         "function": "count",
-        "detector_index": 0
+        "partition_field_name": "event.dataset",
+        "use_null": true
       }
     ],
-    "influencers": []
+    "influencers": ["event.dataset"]
   },
   "analysis_limits": {
     "model_memory_limit": "10mb"
@@ -25,6 +26,6 @@
   },
   "custom_settings": {
     "created_by": "ml-module-logs-ui-analysis",
-    "job_revision": 1
+    "job_revision": 2
   }
 }

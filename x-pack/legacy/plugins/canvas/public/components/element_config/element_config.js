@@ -7,6 +7,9 @@
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiStat, EuiTitle } from '@elastic/eui';
 import PropTypes from 'prop-types';
 import React, { Fragment } from 'react';
+import { ComponentStrings } from '../../../i18n';
+
+const { ElementConfig: strings } = ComponentStrings;
 
 export const ElementConfig = ({ elementStats }) => {
   if (!elementStats) {
@@ -19,21 +22,21 @@ export const ElementConfig = ({ elementStats }) => {
   return (
     <Fragment>
       <EuiTitle size="xs">
-        <h4>Elements</h4>
+        <h4>{strings.getTitle()}</h4>
       </EuiTitle>
       <EuiSpacer size="m" />
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiStat title={total} description="Total" titleSize="s" />
+          <EuiStat title={total} description={strings.getTotalLabel()} titleSize="s" />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiStat title={ready} description="Loaded" titleSize="s" />
+          <EuiStat title={ready} description={strings.getLoadedLabel()} titleSize="s" />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiStat title={error} description="Failed" titleSize="s" />
+          <EuiStat title={error} description={strings.getFailedLabel()} titleSize="s" />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiStat title={progress + '%'} description="Progress" titleSize="s" />
+          <EuiStat title={progress + '%'} description={strings.getProgressLabel()} titleSize="s" />
         </EuiFlexItem>
       </EuiFlexGroup>
     </Fragment>

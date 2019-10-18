@@ -19,7 +19,7 @@
 
 import { Readable } from 'stream';
 
-export function createWreckResponseStub(response) {
+export function createResponseStub(response) {
   return async () => {
     const resp = new Readable({
       read() {

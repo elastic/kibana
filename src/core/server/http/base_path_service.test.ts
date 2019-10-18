@@ -22,6 +22,18 @@ import { KibanaRequest } from './router';
 import { httpServerMock } from './http_server.mocks';
 
 describe('BasePath', () => {
+  describe('serverBasePath', () => {
+    it('defaults to an empty string', () => {
+      const basePath = new BasePath();
+      expect(basePath.serverBasePath).toBe('');
+    });
+
+    it('returns the server base path', () => {
+      const basePath = new BasePath('/server');
+      expect(basePath.serverBasePath).toBe('/server');
+    });
+  });
+
   describe('#get()', () => {
     it('returns base path associated with an incoming Legacy.Request request', () => {
       const request = httpServerMock.createRawRequest();

@@ -31,7 +31,6 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
       >
         <div
           className="euiFormRow euiFormRow--compressed"
-          id="generated-id-row"
         >
           <div
             className="euiFormRow__labelWrapper"
@@ -47,13 +46,13 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
             className="euiFormRow__fieldWrapper"
           >
             <div
-              className="euiFormControlLayout"
+              className="euiFormControlLayout euiFormControlLayout--compressed"
             >
               <div
                 className="euiFormControlLayout__childrenWrapper"
               >
                 <input
-                  className="euiFieldNumber"
+                  className="euiFieldNumber euiFieldNumber--compressed"
                   id="generated-id"
                   onBlur={[Function]}
                   onChange={[Function]}
@@ -71,7 +70,6 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
       >
         <div
           className="euiFormRow euiFormRow--compressed"
-          id="generated-id-row"
         >
           <div
             className="euiFormRow__labelWrapper"
@@ -87,13 +85,13 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
             className="euiFormRow__fieldWrapper"
           >
             <div
-              className="euiFormControlLayout"
+              className="euiFormControlLayout euiFormControlLayout--compressed"
             >
               <div
                 className="euiFormControlLayout__childrenWrapper"
               >
                 <select
-                  className="euiSelect"
+                  className="euiSelect euiSelect--compressed"
                   id="generated-id"
                   onBlur={[Function]}
                   onChange={[Function]}
@@ -160,7 +158,6 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
       >
         <div
           className="euiFormRow euiFormRow--compressed"
-          id="generated-id-row"
         >
           <div
             className="euiFormRow__labelWrapper"
@@ -176,13 +173,13 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
             className="euiFormRow__fieldWrapper"
           >
             <div
-              className="euiFormControlLayout"
+              className="euiFormControlLayout euiFormControlLayout--compressed"
             >
               <div
                 className="euiFormControlLayout__childrenWrapper"
               >
                 <select
-                  className="euiSelect"
+                  className="euiSelect euiSelect--compressed"
                   id="generated-id"
                   onBlur={[Function]}
                   onChange={[Function]}
@@ -247,7 +244,6 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
       >
         <div
           className="euiFormRow euiFormRow--compressed"
-          id="generated-id-row"
         >
           <div
             className="euiFormRow__labelWrapper"
@@ -263,13 +259,13 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
             className="euiFormRow__fieldWrapper"
           >
             <div
-              className="euiFormControlLayout"
+              className="euiFormControlLayout euiFormControlLayout--compressed"
             >
               <div
                 className="euiFormControlLayout__childrenWrapper"
               >
                 <input
-                  className="euiFieldNumber"
+                  className="euiFieldNumber euiFieldNumber--compressed"
                   id="generated-id"
                   onBlur={[Function]}
                   onChange={[Function]}
@@ -287,7 +283,6 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
       >
         <div
           className="euiFormRow euiFormRow--compressed"
-          id="generated-id-row"
         >
           <div
             className="euiFormRow__labelWrapper"
@@ -319,7 +314,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
                   value="solid"
                 />
                 <div
-                  className="euiFormControlLayout"
+                  className="euiFormControlLayout euiFormControlLayout--compressed"
                 >
                   <div
                     className="euiFormControlLayout__childrenWrapper"
@@ -343,7 +338,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
                       aria-haspopup="true"
                       aria-labelledby="generated-id generated-id"
                       aria-selected={true}
-                      className="euiSuperSelectControl"
+                      className="euiSuperSelectControl euiSuperSelectControl--compressed"
                       onBlur={[Function]}
                       onClick={[Function]}
                       onFocus={[Function]}
@@ -390,7 +385,6 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
       >
         <div
           className="euiFormRow euiFormRow--compressed"
-          id="generated-id-row"
         >
           <div
             className="euiFormRow__labelWrapper"
@@ -406,13 +400,13 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
             className="euiFormRow__fieldWrapper"
           >
             <div
-              className="euiFormControlLayout"
+              className="euiFormControlLayout euiFormControlLayout--compressed"
             >
               <div
                 className="euiFormControlLayout__childrenWrapper"
               >
                 <input
-                  className="euiFieldNumber"
+                  className="euiFieldNumber euiFieldNumber--compressed"
                   id="generated-id"
                   onBlur={[Function]}
                   onChange={[Function]}
@@ -429,8 +423,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
         className="euiFlexItem euiFlexItem--flexGrow1"
       >
         <div
-          className="euiFormRow"
-          id="generated-id-row"
+          className="euiFormRow euiFormRow--compressed"
           style={
             Object {
               "fontSize": 0,
@@ -518,7 +511,6 @@ exports[`Storyshots arguments/ContainerStyle/components appearance form 1`] = `
     >
       <div
         className="euiFormRow euiFormRow--compressed"
-        id="generated-id-row"
       >
         <div
           className="euiFormRow__labelWrapper"
@@ -534,13 +526,13 @@ exports[`Storyshots arguments/ContainerStyle/components appearance form 1`] = `
           className="euiFormRow__fieldWrapper"
         >
           <div
-            className="euiFormControlLayout"
+            className="euiFormControlLayout euiFormControlLayout--compressed"
           >
             <div
               className="euiFormControlLayout__childrenWrapper"
             >
               <input
-                className="euiFieldNumber"
+                className="euiFieldNumber euiFieldNumber--compressed"
                 id="generated-id"
                 onBlur={[Function]}
                 onChange={[Function]}
@@ -558,7 +550,6 @@ exports[`Storyshots arguments/ContainerStyle/components appearance form 1`] = `
     >
       <div
         className="euiFormRow euiFormRow--compressed"
-        id="generated-id-row"
       >
         <div
           className="euiFormRow__labelWrapper"
@@ -574,13 +565,13 @@ exports[`Storyshots arguments/ContainerStyle/components appearance form 1`] = `
           className="euiFormRow__fieldWrapper"
         >
           <div
-            className="euiFormControlLayout"
+            className="euiFormControlLayout euiFormControlLayout--compressed"
           >
             <div
               className="euiFormControlLayout__childrenWrapper"
             >
               <select
-                className="euiSelect"
+                className="euiSelect euiSelect--compressed"
                 id="generated-id"
                 onBlur={[Function]}
                 onChange={[Function]}
@@ -647,7 +638,6 @@ exports[`Storyshots arguments/ContainerStyle/components appearance form 1`] = `
     >
       <div
         className="euiFormRow euiFormRow--compressed"
-        id="generated-id-row"
       >
         <div
           className="euiFormRow__labelWrapper"
@@ -663,13 +653,13 @@ exports[`Storyshots arguments/ContainerStyle/components appearance form 1`] = `
           className="euiFormRow__fieldWrapper"
         >
           <div
-            className="euiFormControlLayout"
+            className="euiFormControlLayout euiFormControlLayout--compressed"
           >
             <div
               className="euiFormControlLayout__childrenWrapper"
             >
               <select
-                className="euiSelect"
+                className="euiSelect euiSelect--compressed"
                 id="generated-id"
                 onBlur={[Function]}
                 onChange={[Function]}
@@ -733,7 +723,6 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
     >
       <div
         className="euiFormRow euiFormRow--compressed"
-        id="generated-id-row"
       >
         <div
           className="euiFormRow__labelWrapper"
@@ -749,13 +738,13 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
           className="euiFormRow__fieldWrapper"
         >
           <div
-            className="euiFormControlLayout"
+            className="euiFormControlLayout euiFormControlLayout--compressed"
           >
             <div
               className="euiFormControlLayout__childrenWrapper"
             >
               <input
-                className="euiFieldNumber"
+                className="euiFieldNumber euiFieldNumber--compressed"
                 id="generated-id"
                 onBlur={[Function]}
                 onChange={[Function]}
@@ -773,7 +762,6 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
     >
       <div
         className="euiFormRow euiFormRow--compressed"
-        id="generated-id-row"
       >
         <div
           className="euiFormRow__labelWrapper"
@@ -805,7 +793,7 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
                 value="dotted"
               />
               <div
-                className="euiFormControlLayout"
+                className="euiFormControlLayout euiFormControlLayout--compressed"
               >
                 <div
                   className="euiFormControlLayout__childrenWrapper"
@@ -829,7 +817,7 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
                     aria-haspopup="true"
                     aria-labelledby="generated-id generated-id"
                     aria-selected={true}
-                    className="euiSuperSelectControl"
+                    className="euiSuperSelectControl euiSuperSelectControl--compressed"
                     onBlur={[Function]}
                     onClick={[Function]}
                     onFocus={[Function]}
@@ -876,7 +864,6 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
     >
       <div
         className="euiFormRow euiFormRow--compressed"
-        id="generated-id-row"
       >
         <div
           className="euiFormRow__labelWrapper"
@@ -892,13 +879,13 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
           className="euiFormRow__fieldWrapper"
         >
           <div
-            className="euiFormControlLayout"
+            className="euiFormControlLayout euiFormControlLayout--compressed"
           >
             <div
               className="euiFormControlLayout__childrenWrapper"
             >
               <input
-                className="euiFieldNumber"
+                className="euiFieldNumber euiFieldNumber--compressed"
                 id="generated-id"
                 onBlur={[Function]}
                 onChange={[Function]}
@@ -915,8 +902,7 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
       className="euiFlexItem euiFlexItem--flexGrow1"
     >
       <div
-        className="euiFormRow"
-        id="generated-id-row"
+        className="euiFormRow euiFormRow--compressed"
         style={
           Object {
             "fontSize": 0,
@@ -1015,7 +1001,6 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
       >
         <div
           className="euiFormRow euiFormRow--compressed"
-          id="generated-id-row"
         >
           <div
             className="euiFormRow__labelWrapper"
@@ -1031,13 +1016,13 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
             className="euiFormRow__fieldWrapper"
           >
             <div
-              className="euiFormControlLayout"
+              className="euiFormControlLayout euiFormControlLayout--compressed"
             >
               <div
                 className="euiFormControlLayout__childrenWrapper"
               >
                 <input
-                  className="euiFieldNumber"
+                  className="euiFieldNumber euiFieldNumber--compressed"
                   id="generated-id"
                   onBlur={[Function]}
                   onChange={[Function]}
@@ -1055,7 +1040,6 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
       >
         <div
           className="euiFormRow euiFormRow--compressed"
-          id="generated-id-row"
         >
           <div
             className="euiFormRow__labelWrapper"
@@ -1071,13 +1055,13 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
             className="euiFormRow__fieldWrapper"
           >
             <div
-              className="euiFormControlLayout"
+              className="euiFormControlLayout euiFormControlLayout--compressed"
             >
               <div
                 className="euiFormControlLayout__childrenWrapper"
               >
                 <select
-                  className="euiSelect"
+                  className="euiSelect euiSelect--compressed"
                   id="generated-id"
                   onBlur={[Function]}
                   onChange={[Function]}
@@ -1144,7 +1128,6 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
       >
         <div
           className="euiFormRow euiFormRow--compressed"
-          id="generated-id-row"
         >
           <div
             className="euiFormRow__labelWrapper"
@@ -1160,13 +1143,13 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
             className="euiFormRow__fieldWrapper"
           >
             <div
-              className="euiFormControlLayout"
+              className="euiFormControlLayout euiFormControlLayout--compressed"
             >
               <div
                 className="euiFormControlLayout__childrenWrapper"
               >
                 <select
-                  className="euiSelect"
+                  className="euiSelect euiSelect--compressed"
                   id="generated-id"
                   onBlur={[Function]}
                   onChange={[Function]}
@@ -1231,7 +1214,6 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
       >
         <div
           className="euiFormRow euiFormRow--compressed"
-          id="generated-id-row"
         >
           <div
             className="euiFormRow__labelWrapper"
@@ -1247,13 +1229,13 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
             className="euiFormRow__fieldWrapper"
           >
             <div
-              className="euiFormControlLayout"
+              className="euiFormControlLayout euiFormControlLayout--compressed"
             >
               <div
                 className="euiFormControlLayout__childrenWrapper"
               >
                 <input
-                  className="euiFieldNumber"
+                  className="euiFieldNumber euiFieldNumber--compressed"
                   id="generated-id"
                   onBlur={[Function]}
                   onChange={[Function]}
@@ -1271,7 +1253,6 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
       >
         <div
           className="euiFormRow euiFormRow--compressed"
-          id="generated-id-row"
         >
           <div
             className="euiFormRow__labelWrapper"
@@ -1303,7 +1284,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
                   value="solid"
                 />
                 <div
-                  className="euiFormControlLayout"
+                  className="euiFormControlLayout euiFormControlLayout--compressed"
                 >
                   <div
                     className="euiFormControlLayout__childrenWrapper"
@@ -1327,7 +1308,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
                       aria-haspopup="true"
                       aria-labelledby="generated-id generated-id"
                       aria-selected={true}
-                      className="euiSuperSelectControl"
+                      className="euiSuperSelectControl euiSuperSelectControl--compressed"
                       onBlur={[Function]}
                       onClick={[Function]}
                       onFocus={[Function]}
@@ -1374,7 +1355,6 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
       >
         <div
           className="euiFormRow euiFormRow--compressed"
-          id="generated-id-row"
         >
           <div
             className="euiFormRow__labelWrapper"
@@ -1390,13 +1370,13 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
             className="euiFormRow__fieldWrapper"
           >
             <div
-              className="euiFormControlLayout"
+              className="euiFormControlLayout euiFormControlLayout--compressed"
             >
               <div
                 className="euiFormControlLayout__childrenWrapper"
               >
                 <input
-                  className="euiFieldNumber"
+                  className="euiFieldNumber euiFieldNumber--compressed"
                   id="generated-id"
                   onBlur={[Function]}
                   onChange={[Function]}
@@ -1413,8 +1393,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
         className="euiFlexItem euiFlexItem--flexGrow1"
       >
         <div
-          className="euiFormRow"
-          id="generated-id-row"
+          className="euiFormRow euiFormRow--compressed"
           style={
             Object {
               "fontSize": 0,

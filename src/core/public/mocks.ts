@@ -18,7 +18,7 @@
  */
 import { applicationServiceMock } from './application/application_service.mock';
 import { chromeServiceMock } from './chrome/chrome_service.mock';
-import { CoreSetup, CoreStart, PluginInitializerContext, NotificationsSetup } from '.';
+import { CoreContext, CoreSetup, CoreStart, PluginInitializerContext, NotificationsSetup } from '.';
 import { docLinksServiceMock } from './doc_links/doc_links_service.mock';
 import { fatalErrorsServiceMock } from './fatal_errors/fatal_errors_service.mock';
 import { httpServiceMock } from './http/http_service.mock';
@@ -28,6 +28,7 @@ import { overlayServiceMock } from './overlays/overlay_service.mock';
 import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 import { savedObjectsMock } from './saved_objects/saved_objects_service.mock';
 import { contextServiceMock } from './context/context_service.mock';
+import { injectedMetadataServiceMock } from './injected_metadata/injected_metadata_service.mock';
 
 export { chromeServiceMock } from './chrome/chrome_service.mock';
 export { docLinksServiceMock } from './doc_links/doc_links_service.mock';
@@ -48,6 +49,9 @@ function createCoreSetupMock({ basePath = '' } = {}) {
     http: httpServiceMock.createSetupContract({ basePath }),
     notifications: notificationServiceMock.createSetupContract(),
     uiSettings: uiSettingsServiceMock.createSetupContract(),
+    injectedMetadata: {
+      getInjectedVar: injectedMetadataServiceMock.createSetupContract().getInjectedVar,
+    },
   };
 
   return mock;
@@ -64,13 +68,58 @@ function createCoreStartMock({ basePath = '' } = {}) {
     overlays: overlayServiceMock.createStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
     savedObjects: savedObjectsMock.createStartContract(),
+    injectedMetadata: {
+      getInjectedVar: injectedMetadataServiceMock.createStartContract().getInjectedVar,
+    },
+  };
+
+  return mock;
+}
+function pluginInitializerContextMock() {
+  const mock: PluginInitializerContext = {
+    opaqueId: Symbol(),
+    env: {
+      mode: {
+        dev: true,
+        name: 'development',
+        prod: false,
+      },
+      packageInfo: {
+        version: 'version',
+        branch: 'branch',
+        buildNum: 100,
+        buildSha: 'buildSha',
+        dist: false,
+      },
+    },
   };
 
   return mock;
 }
 
+function createCoreContext(): CoreContext {
+  return {
+    coreId: Symbol('core context mock'),
+    env: {
+      mode: {
+        dev: true,
+        name: 'development',
+        prod: false,
+      },
+      packageInfo: {
+        version: 'version',
+        branch: 'branch',
+        buildNum: 100,
+        buildSha: 'buildSha',
+        dist: false,
+      },
+    },
+  };
+}
+
 export const coreMock = {
+  createCoreContext,
   createSetup: createCoreSetupMock,
   createStart: createCoreStartMock,
-  createPluginInitializerContext: jest.fn() as jest.Mock<PluginInitializerContext>,
+  createPluginInitializerContext: pluginInitializerContextMock,
 };

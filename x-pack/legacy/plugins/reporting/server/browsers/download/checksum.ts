@@ -7,7 +7,6 @@
 import { createHash } from 'crypto';
 import { createReadStream } from 'fs';
 
-// @ts-ignore
 import { readableEnd } from './util';
 
 export async function md5(path: string) {

@@ -12,8 +12,6 @@
 import _ from 'lodash';
 import d3 from 'd3';
 
-import { relativeToAbsolute } from 'ui/url/relative_to_absolute';
-
 // Replaces all instances of dollar delimited tokens in the specified String
 // with corresponding values from the supplied object, optionally
 // encoding the replacement for a URI component.
@@ -336,13 +334,6 @@ export function escapeForElasticsearchQuery(str) {
   // + - = && || > < ! ( ) { } [ ] ^ " ~ * ? : \ /
   // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#_reserved_characters
   return String(str).replace(/[-[\]{}()+!<>=?:\/\\^"~*&|\s]/g, '\\$&');
-}
-
-// returns whether the supplied String represents a web URL
-// i.e. whether it starts with http:// or https://
-export function isWebUrl(str) {
-  const absoluteUrl = relativeToAbsolute(str);
-  return absoluteUrl.startsWith('http://') || absoluteUrl.startsWith('https://');
 }
 
 export function calculateTextWidth(txt, isNumber, elementSelection) {

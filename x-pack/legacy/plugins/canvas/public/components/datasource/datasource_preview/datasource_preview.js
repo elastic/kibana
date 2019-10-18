@@ -19,8 +19,8 @@ import {
 } from '@elastic/eui';
 import { Datatable } from '../../datatable';
 import { Error } from '../../error';
-
 import { ComponentStrings } from '../../../../i18n';
+
 const { DatasourceDatasourcePreview: strings } = ComponentStrings;
 const { DatasourceDatasourceComponent: datasourceStrings } = ComponentStrings;
 
