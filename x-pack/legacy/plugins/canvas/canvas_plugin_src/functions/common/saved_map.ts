@@ -35,7 +35,6 @@ interface SavedMapInput extends EmbeddableInput {
 type Return = EmbeddableExpression<SavedMapInput>;
 
 export function savedMap(): ExpressionFunction<'savedMap', Filter | null, Arguments, Return> {
-  // @ts-ignore elastic/kibana#44822 Disabling pending filters work
   const { help, args: argHelp } = getFunctionHelp().savedMap;
   return {
     name: 'savedMap',

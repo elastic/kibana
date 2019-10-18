@@ -79,6 +79,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsBatchResponse](./kibana-plugin-public.savedobjectsbatchresponse.md) |  |
 |  [SavedObjectsBulkCreateObject](./kibana-plugin-public.savedobjectsbulkcreateobject.md) |  |
 |  [SavedObjectsBulkCreateOptions](./kibana-plugin-public.savedobjectsbulkcreateoptions.md) |  |
+|  [SavedObjectsBulkUpdateObject](./kibana-plugin-public.savedobjectsbulkupdateobject.md) |  |
+|  [SavedObjectsBulkUpdateOptions](./kibana-plugin-public.savedobjectsbulkupdateoptions.md) |  |
 |  [SavedObjectsCreateOptions](./kibana-plugin-public.savedobjectscreateoptions.md) |  |
 |  [SavedObjectsFindOptions](./kibana-plugin-public.savedobjectsfindoptions.md) |  |
 |  [SavedObjectsFindResponsePublic](./kibana-plugin-public.savedobjectsfindresponsepublic.md) | Return type of the Saved Objects <code>find()</code> method.<!-- -->\*Note\*: this type is different between the Public and Server Saved Objects clients. |
