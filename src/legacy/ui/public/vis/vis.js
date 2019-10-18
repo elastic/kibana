@@ -33,14 +33,13 @@ import '../render_complete/directive';
 import { AggConfigs } from '../agg_types/agg_configs';
 import { PersistedState } from '../persisted_state';
 import { updateVisualizationConfig } from './vis_update';
-import { SearchSourceProvider } from '../courier/search_source';
+import { SearchSource } from '../courier';
 import { start as visualizations } from '../../../core_plugins/visualizations/public/np_ready/public/legacy';
 
 import '../directives/bind';
 
 export function VisProvider(Private, getAppState) {
   const visTypes = visualizations.types;
-  const SearchSource = Private(SearchSourceProvider);
 
   class Vis extends EventEmitter {
     constructor(indexPattern, visState) {
