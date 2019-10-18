@@ -250,7 +250,7 @@ With that specified in the plugin manifest, the appropriate interfaces are then 
 **demo plugin.ts:**
 
 ```ts
-import { CoreSetup, CoreStart } from '../../../core/server';
+import { CoreSetup, CoreStart } from 'src/core/server';
 import { FoobarPluginSetup, FoobarPluginStop } from '../../foobar/server';
 
 interface DemoSetupPlugins {
@@ -472,12 +472,14 @@ We now move this logic into a new plugin definition, which is based off of the c
 import { CoreSetup } from 'src/core/server';
 import { ElasticsearchPlugin } from '../elasticsearch';
 
-// note: We use a name unique to our plugin for this type since our shimmed still references legacy 
-// dependencies which aren't compatible with NP's CoreSetup.
-interface DemoPluginCoreSetup extends CoreSetup {
-  __legacy: {
-    elasticsearch: ElasticsearchPlugin, // note: Elasticsearch is in Core in NP, rather than a plugin
-    route: Legacy.Server['route']    // note: NP uses `http.createRouter()`
+// We inject all legacy dependencies into our plugin including dependencies on other legacy plugins.
+// Take care to only expose the legacy functionality you need e.g. don't inject the whole 
+// `Legacy.Server` if you only depend on `Legacy.Server['route']`.
+interface LegacySetup {
+  route: Legacy.Server['route']
+  plugins: {
+    elasticsearch: ElasticsearchPlugin, // note: Elasticsearch is in CoreSetup in NP, rather than a plugin
+    foo: FooSetup
   }
 }
 
@@ -485,28 +487,27 @@ interface FooSetup {
   getBar(): string
 }
 
-interface PluginsSetup {
-  __legacy: {
-    foo: FooSetup
-  }
+export interface PluginsSetup {
+  // Once we start dependending on NP plugins we'll add their types here
 }
 
-export type DemoPluginSetup = ReturnType<Plugin['setup']>;
+export type DemoPluginSetup = {
+  getDemoBar: () => string;
+}
 
 export class Plugin {
-  public setup(core: DemoPluginCoreSetup, plugins: PluginsSetup) {
+  public setup(core: CoreSetup, plugins: PluginsSetup, __LEGACY: LegacySetup) {
+    // We're still using the legacy Elasticsearch and http router here, but we're now accessing
+    // these services in the same way a NP plugin would: injected into the setup function. It's
+    // also obvious that these dependencies needs to be removed by migrating over to the New 
+    // Platform services exposed through core.
     const serverFacade: ServerFacade = {
       plugins: {
-        // We're still using the legacy Elasticsearch here, but we're now accessing it
-        // the same way a NP plugin would, via core. Later, we'll swap this out for the
-        // actual New Platform service.
-        elasticsearch: core.__legacy.elasticsearch
+        elasticsearch: __LEGACY.plugins.elasticsearch
       }
     }
 
-    // HTTP functionality from legacy platform, accessed in a way that's compatible with
-    // NP conventions even if not 100% the same
-    core.__legacy.route({
+    __LEGACY.route({
       path: '/api/demo_plugin/search',
       method: 'POST',
       async handler(request) {
@@ -520,7 +521,7 @@ export class Plugin {
     // Exposing functionality for other plugins
     return {
       getDemoBar() {
-        return `Demo ${plugins.__legacy.foo.getBar()}`; // Accessing functionality from another legacy plugin
+        return `Demo ${__LEGACY.plugins.foo.getBar()}`; // Accessing functionality from another legacy plugin
       }
     };
   }
@@ -532,29 +533,29 @@ The legacy plugin definition is still the one that is being executed, so we now 
 ```ts
 // index.ts
 
-import { Plugin } from './server/plugin';
+import { Plugin, PluginDependencies, LegacySetup } from './server/plugin';
 
 export default (kibana) => {
   return new kibana.Plugin({
     id: 'demo_plugin',
 
     init(server) {
-      // core shim
-      const coreSetup = {
-        ...server.newPlatform.setup.core,
-        __legacy: {
+      // core setup API's
+      const coreSetup = server.newPlatform.setup.core;
+
+      // For now we don't have any dependencies on NP plugins
+      const pluginsSetup: PluginsSetup = {};
+
+      // legacy dependencies
+      const __LEGACY: LegacySetup = {
+        route: server.route,
+        plugins: {
           elasticsearch: server.plugins.elasticsearch,
-          route: server.route
-        }
-      };
-      // plugins shim
-      const pluginsSetup = {
-        __legacy: {
           foo: server.plugins.foo
         }
       };
 
-      const demoSetup = new Plugin().setup(coreSetup, pluginsSetup);
+      const demoSetup = new Plugin().setup(coreSetup, pluginsSetup, __LEGACY);
 
       // continue to expose functionality to legacy plugins
       server.expose('getDemoBar', demoSetup.getDemoBar);
@@ -569,77 +570,81 @@ This introduces a layer between the legacy plugin system with hapi.js and the lo
 
 ### Switch to new platform services
 
-At this point, your legacy server-side plugin is described in the shape and conventions of the new plugin system, and all of the touch points with the legacy world and hapi.js have been isolated to the shims in the legacy plugin definition.
+At this point, your legacy server-side plugin is described in the shape and
+conventions of the new plugin system, and all of the touch points with the
+legacy world and hapi.js have been isolated inside the `__LEGACY` parameter.
 
-Now the goal is to replace the legacy services backing your shims with services provided by the new platform instead.
+Now the goal is to replace all legacy services with services provided by the new platform instead.
 
 For the first time in this guide, your progress here is limited by the migration efforts within core and other plugins.
 
 As core capabilities are migrated to services in the new platform, they are made available as lifecycle contracts to the legacy `init` function through `server.newPlatform`. This allows you to adopt the new platform service APIs directly in your legacy plugin as they get rolled out.
 
-For the most part, care has been taken when migrating services to the new platform to preserve the existing APIs as much as possible, but there will be times when new APIs differ from the legacy equivalents. Start things off by having your core shim extend the equivalent new platform contract.
-
-```ts
-// index.ts
-
-init(server) {
-  // core shim
-  const coreSetup = {
-    ...server.newPlatform.setup.core,
-    __legacy: {
-      elasticsearch: server.plugins.elasticsearch,
-      route: server.route
-    }
-  };
-}
-```
+For the most part, care has been taken when migrating services to the new platform to preserve the existing APIs as much as possible, but there will be times when new APIs differ from the legacy equivalents.
 
 If a legacy API differs from its new platform equivalent, some refactoring will be required. The best outcome comes from updating the plugin code to use the new API, but if that's not practical now, you can also create a facade inside your new plugin definition that is shaped like the legacy API but powered by the new API. Once either of these things is done, that override can be removed from the shim.
 
-Eventually, all `__legacy` dependencies will be removed and your `coreSetup` shim is entirely powered by `server.newPlatform.setup.core`.
+Eventually, all `__LEGACY` dependencies will be removed and your Plugin will
+be powered entirely by Core API's from `server.newPlatform.setup.core`.
 
 ```ts
 init(server) {
-  // core shim
-  const coreSetup = {
-    ...server.newPlatform.setup.core
-  };
-}
-```
+  // core setup API's
+  const coreSetup = server.newPlatform.setup.core;
 
-At this point, your legacy server-side plugin logic is no longer coupled to the legacy core.
+  // For now we don't have any dependencies on NP plugins
+  const pluginsSetup: PluginsSetup = {};
 
-A similar approach can be taken for your plugins shim. First, update your plugin shim in `init` to extend `server.newPlatform.setup.plugins`.
-
-```ts
-init(server) {
-  // plugins shim
-  const pluginsSetup = {
-    ...server.newPlatform.setup.plugins,
-    __legacy: {
+  // legacy dependencies, we've removed our dependency on elasticsearch and server.route
+  const __LEGACY: LegacySetup = {
+    plugins: {
       foo: server.plugins.foo
     }
   };
+
+  const demoSetup = new Plugin().setup(coreSetup, pluginsSetup, __LEGACY);
+}
+```
+
+At this point, your legacy server-side plugin logic is no longer coupled to
+the legacy core.
+
+A similar approach can be taken for your plugin dependencies. To start
+consuming an API from a New Platform plugin access these from
+`server.newPlatform.setup.plugins` and inject it into your plugin's setup
+function. 
+
+```ts
+init(server) {
+  // core setup API's
+  const coreSetup = server.newPlatform.setup.core;
+
+  // Depend on the NP plugin 'foo'
+  const pluginsSetup: PluginsSetup = {
+    foo: server.newPlatform.setup.plugins.foo
+  };
+
+  const demoSetup = new Plugin().setup(coreSetup, pluginsSetup);
 }
 ```
 
 As the plugins you depend on are migrated to the new platform, their contract
-will be exposed through `server.newPlatform`, so the `__legacy` dependencies
+will be exposed through `server.newPlatform`, so the `__LEGACY` dependencies
 should be removed. Like in core, plugins should take care to preserve their
 existing APIs to make this step as seamless as possible.
 
-It is much easier to reliably make breaking changes to plugin APIs in the new platform than it is in the legacy world, so if you're planning a big change, consider doing it after your dependent plugins have migrated rather than as part of your own migration.
+It is much easier to reliably make breaking changes to plugin APIs in the new
+platform than it is in the legacy world, so if you're planning a big change,
+consider doing it after your dependent plugins have migrated rather than as
+part of your own migration.
 
-Eventually, all overrides will be removed and your `pluginsSetup` shim is entirely powered by `server.newPlatform.setup.plugins`.
+Eventually, all `__LEGACY` dependencies will be removed and your plugin will be
+entirely powered by the New Platform and New Platform plugins.
 
-```ts
-init(server) {
-  // plugins shim
-  const pluginsSetup = {
-    ...server.newPlatform.setup.plugins
-  };
-}
-```
+> Note: All New Platform plugins are exposed to legacy plugins via
+> `server.newPlatform.setup.plugins`. Once you move your plugin over to the
+> New Platform you will have to explicitly declare your dependencies on other
+> plugins in your `kibana.json` manifest file. 
 
 At this point, your legacy server-side plugin logic is no longer coupled to legacy plugins.
 

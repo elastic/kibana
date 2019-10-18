@@ -192,27 +192,24 @@ new kibana.Plugin({
 
 ### 2. New Platform shim using legacy router
 Create a New Platform shim and inject the legacy `server.route` into your
-plugin's setup function. This shim isn't exactly the same as the New
-Platform's API's but it allows us to leave all of our route registration
-untouched. 
+plugin's setup function.
 
 ```ts
 // legacy/plugins/demoplugin/index.ts
-import { Plugin, DemoPluginCoreSetup } from './server/plugin';
+import { Plugin, LegacySetup } from './server/plugin';
 export default (kibana) => {
   return new kibana.Plugin({
     id: 'demo_plugin',
 
     init(server) {
       // core shim
-      const coreSetup: DemoPluginCoreSetup = {
-        ...server.newPlatform.setup.core,
-        __legacy: {
-          route: server.route
-        },
+      const coreSetup: server.newPlatform.setup.core;
+      const pluginSetup = {};
+      const legacySetup: LegacySetup = {
+        route: server.route
       };
 
-      new Plugin().setup(coreSetup);
+      new Plugin().setup(coreSetup, pluginSetup, legacySetup);
     }
   }
 }
@@ -222,17 +219,15 @@ export default (kibana) => {
 import { CoreSetup } from 'src/core/server';
 import { Legacy } from 'kibana';
 
-export interface DemoPluginCoreSetup extends CoreSetup {
-  __legacy: {
-    route: Legacy.Server['route'];
-  };
+export interface LegacySetup {
+  route: Legacy.Server['route'];
 };
 
+export interface DemoPluginsSetup {};
+
 export class Plugin {
-  public setup(core: DemoPluginCoreSetup, plugins: DemoPluginsSetup) {
-    // HTTP functionality from legacy platform, accessed in a way that's
-    // compatible with NP conventions even if not 100% the same
-    core.__legacy.route({
+  public setup(core: CoreSetup, plugins: DemoPluginsSetup, __LEGACY: LegacySetup) {
+    __LEGACY.route({
       path: '/api/demoplugin/search',
       method: 'POST',
       options: {
@@ -265,11 +260,10 @@ export default (kibana) => {
 
     init(server) {
       // core shim
-      const coreSetup = {
-        ...server.newPlatform.setup.core,
-      };
+      const coreSetup = server.newPlatform.setup.core;
+      const pluginSetup = {};
 
-      new Plugin().setup(coreSetup);
+      new Plugin().setup(coreSetup, pluginSetup);
     }
   }
 }
@@ -279,8 +273,10 @@ export default (kibana) => {
 import { schema } from '@kbn/config-schema';
 import { CoreSetup } from 'src/core/server';
 
+export interface DemoPluginsSetup {};
+
 class Plugin {
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup, pluginSetup: DemoPluginSetup) {
     const router = core.http.createRouter();
     router.post(
       {
@@ -308,31 +304,7 @@ As the final step we delete the shim and move all our code into a New Platform
 plugin. Since we were already consuming the New Platform API's no code changes
 are necessary inside `plugin.ts`.
 ```ts
-// plugins/demoplugin/server/plugin.ts
-import { schema } from '@kbn/config-schema';
-
-class Plugin {
-  public setup(core) {
-    const router = core.http.createRouter();
-    router.post(
-      {
-        path: '/api/demoplugin/search',
-        validate: {
-          body: schema.object({
-            field1: schema.string(),
-          }),
-        }
-      },
-      (context, req, res) => {
-        return res.ok({
-          body: {
-            message: `Received field1: ${req.body.field1}`
-          }
-        });
-      }
-    )
-  }
-}
+// Move legacy/plugins/demoplugin/server/plugin.ts -> plugins/demoplugin/server/plugin.ts
 ```
 
 ### Accessing Services
