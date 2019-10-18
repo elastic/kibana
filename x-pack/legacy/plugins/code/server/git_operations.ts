@@ -317,6 +317,10 @@ export class GitOperations {
   public async getCommitDiff(uri: string, revision: string): Promise<CommitDiff> {
     const git = await this.openGit(uri);
     const commit = await this.getCommitOr404(uri, revision);
+    if (!revision.includes('..')) {
+      revision = `${revision}~1..${revision}`;
+    }
+
     const diffs = await git.diffSummary([revision]);
 
     const commitDiff: CommitDiff = {
