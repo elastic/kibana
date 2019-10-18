@@ -49,7 +49,7 @@ export const FieldsListItem = React.memo(function FieldListItemComponent({
   addField,
   editField,
   toggleExpand,
-  treeDepth = 0,
+  treeDepth,
 }: Props) {
   const {
     source,
@@ -58,18 +58,18 @@ export const FieldsListItem = React.memo(function FieldListItemComponent({
     hasChildFields,
     canHaveMultiFields,
     hasMultiFields,
-    nestedDepth,
     isExpanded,
   } = field;
   const isAddFieldBtnDisabled = false; // For now, we never disable the Add Child button.
   // const isAddFieldBtnDisabled = field.nestedDepth === MAX_DEPTH_DEFAULT_EDITOR - 1;
-  const indent = `${nestedDepth * INDENT_SIZE}px`;
 
   // When there aren't yet any depth (maxNestedDepth === 0), there are no toggle on the left
   // we need to compensate and substract
   const substractIndentAmount = maxNestedDepth === 0 ? INDENT_SIZE * 0.5 : 0;
 
-  const indentCreateField = `${(nestedDepth + 1) * INDENT_SIZE +
+  const indent = `${treeDepth * INDENT_SIZE - substractIndentAmount}px`;
+
+  const indentCreateField = `${(treeDepth + 1) * INDENT_SIZE +
     WRAPPER_LEFT_PADDING_SIZE -
     substractIndentAmount}px`;
 
@@ -120,7 +120,8 @@ export const FieldsListItem = React.memo(function FieldListItemComponent({
       >
         <div
           className={classNames('mappings-editor__fields-list-item__wrapper', {
-            'mappings-editor__fields-list-item__wrapper--indent': maxNestedDepth === 0,
+            'mappings-editor__fields-list-item__wrapper--indent':
+              treeDepth === 0 && maxNestedDepth === 0,
           })}
         >
           <EuiFlexGroup
@@ -129,7 +130,7 @@ export const FieldsListItem = React.memo(function FieldListItemComponent({
             className={classNames('mappings-editor__fields-list-item__content', {
               'mappings-editor__fields-list-item__content--toggle': hasChildFields,
               'mappings-editor__fields-list-item__content--indent':
-                !hasChildFields && maxNestedDepth > nestedDepth,
+                !hasChildFields && maxNestedDepth > treeDepth,
             })}
           >
             {hasChildFields && (

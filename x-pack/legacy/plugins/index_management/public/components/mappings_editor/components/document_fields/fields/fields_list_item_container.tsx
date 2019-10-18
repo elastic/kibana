@@ -14,7 +14,10 @@ interface Props {
   treeDepth: number;
 }
 
-export const FieldsListItemContainer = React.memo(({ field, treeDepth }: Props) => {
+export const FieldsListItemContainer = React.memo(function FieldsListItemContainer({
+  field,
+  treeDepth,
+}: Props) {
   const dispatch = useDispatch();
   const {
     documentFields: { status, fieldToAddFieldTo, fieldToEdit },

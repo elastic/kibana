@@ -72,7 +72,8 @@ export const addFieldToState = (field: Field, state: State): State => {
   const rootLevelFields = addToRootLevel
     ? [...state.fields.rootLevelFields, id]
     : [...state.fields.rootLevelFields];
-  const nestedDepth = parentField ? parentField.nestedDepth + 1 : 0;
+  const nestedDepth =
+    parentField && parentField.canHaveChildFields ? parentField.nestedDepth + 1 : 0;
   const maxNestedDepth = Math.max(state.fields.maxNestedDepth, nestedDepth);
   const { name } = field;
   const path = parentField ? `${parentField.path}.${name}` : name;
@@ -199,6 +200,7 @@ export const reducer = (state: State, action: Action): State => {
         const parentField = state.fields.byId[parentId];
         parentField.childFields = parentField.childFields!.filter(childId => childId !== id);
         parentField.hasChildFields = Boolean(parentField.childFields.length);
+        parentField.hasMultiFields = Boolean(parentField.childFields.length);
       } else {
         // Deleting a root level field
         rootLevelFields = rootLevelFields.filter(childId => childId !== id);
