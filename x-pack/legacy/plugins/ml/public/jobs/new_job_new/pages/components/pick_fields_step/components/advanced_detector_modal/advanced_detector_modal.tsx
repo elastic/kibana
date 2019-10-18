@@ -171,7 +171,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
   }, []);
 
   useEffect(() => {
-    // wipe the exclude frequent choice if the select has beed disabled
+    // wipe the exclude frequent choice if the select has been disabled
     if (excludeFrequentEnabled === false) {
       setExcludeFrequentOption(emptyOption);
     }
