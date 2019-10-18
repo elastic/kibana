@@ -16,4 +16,8 @@ export class FrameworkAdapter implements FrameworkAdapterType {
   public getServerInfo() {
     return this.server.info;
   }
+
+  public expose(name: string, thing: any) {
+    this.server.expose(name, thing);
+  }
 }

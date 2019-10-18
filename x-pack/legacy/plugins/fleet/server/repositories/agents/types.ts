@@ -148,7 +148,11 @@ export interface AgentsRepository {
     options?: ListOptions
   ): Promise<{ agents: Agent[]; total: number; page: number; perPage: number }>;
 
-  findEphemeralByPolicyId(user: FrameworkUser, policyId: string): Promise<Agent | null>;
+  listForPolicy(
+    user: FrameworkUser,
+    policyId: string,
+    options?: ListOptions
+  ): Promise<{ agents: Agent[]; total: number; page: number; perPage: number }>;
 
   getByEphemeralAccessToken(user: FrameworkUser, token: any): Promise<Agent | null>;
 }

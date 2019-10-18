@@ -6,8 +6,21 @@
 
 import { compose } from './libs/compose/kibana';
 import { initRestApi } from './routes/init_api';
+import { FrameworkUser } from './adapters/framework/adapter_types';
+import { PolicyUpdatedEvent } from '../common/types/domain_data';
 
 export const initServerWithKibana = (hapiServer: any) => {
-  const libsRequestFactory = compose(hapiServer);
-  initRestApi(hapiServer, libsRequestFactory);
+  const libs = compose(hapiServer);
+  initRestApi(hapiServer, libs);
+  // expose methods
+  libs.framework.expose('policyUpdated', async function handlePolicyUpdate(
+    event: PolicyUpdatedEvent,
+    user: FrameworkUser = {
+      kind: 'internal',
+    }
+  ) {
+    if (event.type === 'deleted') {
+      await libs.agents.unenrollForPolicy(user, event.policyId);
+    }
+  });
 };

@@ -34,3 +34,19 @@ export interface ConfigurationBlock
 export type Agent = t.TypeOf<typeof RuntimeAgent>;
 export type AgentAction = t.TypeOf<typeof RuntimeAgentAction>;
 export type AgentEvent = t.TypeOf<typeof RuntimeAgentEvent>;
+
+export type PolicyUpdatedEvent =
+  | {
+      type: 'created';
+      policyId: string;
+      payload: any;
+    }
+  | {
+      type: 'updated';
+      policyId: string;
+      payload: any;
+    }
+  | {
+      type: 'deleted';
+      policyId: string;
+    };

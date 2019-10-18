@@ -15,6 +15,7 @@ export interface FrameworkAdapter {
   getServerInfo(): {
     protocol: string;
   };
+  expose(name: string, thing: any): void;
 }
 
 export interface FrameworkRequest<KibanaServerRequestGenaric extends Partial<Request> = any> {

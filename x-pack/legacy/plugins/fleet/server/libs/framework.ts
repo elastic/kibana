@@ -13,6 +13,10 @@ export class FrameworkLib {
     return this.adapter.getSetting(`xpack.fleet.${setting}`);
   }
 
+  public expose(key: string, method: any) {
+    this.adapter.expose(key, method);
+  }
+
   public getServerConfig() {
     return {
       host: this.adapter.getSetting('server.host'),

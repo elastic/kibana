@@ -21,7 +21,6 @@ export const NoAccessPage = injectI18n(({ intl }) => (
         id="xpack.fleet.noAccess.accessDeniedDescription"
         defaultMessage="You are not authorized to access Elastic Fleet. To use Elastic Fleet,
           you need a user role that contains read or all permissions for this application."
-        values={{ elasticFleetRole: '`elastic_admin`' }}
       />
     </p>
   </NoDataLayout>
