@@ -107,6 +107,8 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
               <EuiIcon type="alert" />
             </EuiToolTip>
           );
+        } else if (score === 0) {
+          return score;
         } else {
           const color: string = getSeverityColor(score);
           return (
