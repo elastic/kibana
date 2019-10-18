@@ -5,22 +5,24 @@
  */
 
 import { cloneDeep } from 'lodash/fp';
-import { npSetup } from 'ui/new_platform';
 
 import { mockIndexPattern } from '../../mock';
-import { mockUiSettings, MockNpSetUp } from '../../mock/ui_settings';
+import { mockUiSettings } from '../../mock/ui_settings';
 
 import { mockDataProviders } from './data_providers/mock/mock_data_providers';
 import { buildGlobalQuery, combineQueries } from './helpers';
 import { mockBrowserFields } from '../../containers/source/mock';
+import { useKibanaCore } from '../../lib/compose/kibana_core';
 
 const cleanUpKqlQuery = (str: string) => str.replace(/\n/g, '').replace(/\s\s+/g, ' ');
 const startDate = new Date('2018-03-23T18:49:23.132Z').valueOf();
 const endDate = new Date('2018-03-24T03:33:52.253Z').valueOf();
 
-const mockNpSetup: MockNpSetUp = (npSetup as unknown) as MockNpSetUp;
-jest.mock('ui/new_platform');
-mockNpSetup.core.uiSettings = mockUiSettings;
+const mockUseKibanaCore = useKibanaCore as jest.Mock;
+jest.mock('../../lib/compose/kibana_core');
+mockUseKibanaCore.mockImplementation(() => ({
+  uiSettings: mockUiSettings,
+}));
 
 describe('Build KQL Query', () => {
   test('Build KQL query with one data provider', () => {

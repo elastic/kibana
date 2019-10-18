@@ -13,10 +13,10 @@ import {
 } from '@kbn/es-query';
 import { isEmpty, isString, flow } from 'lodash/fp';
 import { StaticIndexPattern } from 'ui/index_patterns';
-import { npSetup } from 'ui/new_platform';
 import { Query } from 'src/plugins/data/common';
 
 import { KueryFilterQuery } from '../../store';
+import { useKibanaCore } from '../compose/kibana_core';
 
 export const convertKueryToElasticSearchQuery = (
   kueryExpression: string,
@@ -84,12 +84,13 @@ export const convertToBuildEsQuery = ({
   filters: Filter[];
 }) => {
   try {
+    const core = useKibanaCore();
     return JSON.stringify(
       buildEsQuery(
         indexPattern,
         queries,
         filters.filter(f => f.meta.disabled === false),
-        getEsQueryConfig(npSetup.core.uiSettings)
+        getEsQueryConfig(core.uiSettings)
       )
     );
   } catch (exp) {

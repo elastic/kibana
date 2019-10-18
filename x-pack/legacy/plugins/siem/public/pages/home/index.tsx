@@ -34,6 +34,8 @@ import { SiemPageName } from './types';
 import { UseUrlState } from '../../components/url_state';
 import { SpyRoute } from '../../utils/route/spy_routes';
 
+import 'uiExports/embeddableFactories';
+
 const WrappedByAutoSizer = styled.div`
   height: 100%;
 `;

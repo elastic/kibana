@@ -7,7 +7,6 @@
 import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import { Filter } from '@kbn/es-query';
 import React, { useEffect, useState } from 'react';
-import { npStart } from 'ui/new_platform';
 import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
 import { createPortalNode, InPortal } from 'react-reverse-portal';
 import { Query } from 'src/plugins/data/common';
@@ -16,17 +15,20 @@ import styled from 'styled-components';
 import { start } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import { EmbeddablePanel } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 
-import { Loader } from '../loader';
+import { getIndexPatternTitleIdMapping } from '../../hooks/api/helpers';
 import { useIndexPatterns } from '../../hooks/use_index_patterns';
 import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
+import { useKibanaPlugins } from '../../lib/compose/kibana_plugins';
+import { useKibanaCore } from '../../lib/compose/kibana_core';
+import { useStateToaster } from '../toasters';
+import { Loader } from '../loader';
 import { IndexPatternsMissingPrompt } from './index_patterns_missing_prompt';
 import { MapEmbeddable, SetQuery } from './types';
 import * as i18n from './translations';
-import { useStateToaster } from '../toasters';
+
 import { createEmbeddable, displayErrorToast, setupEmbeddablesAPI } from './embedded_map_helpers';
 import { MapToolTip } from './map_tool_tip/map_tool_tip';
-import { getIndexPatternTitleIdMapping } from '../../hooks/api/helpers';
 
 const EmbeddableWrapper = styled(EuiFlexGroup)`
   position: relative;
@@ -63,13 +65,16 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
     // Search InPortal/OutPortal for implementation touch points
     const portalNode = React.useMemo(() => createPortalNode(), []);
 
+    const plugins = useKibanaPlugins();
+    const core = useKibanaCore();
+
     // Initial Load useEffect
     useEffect(() => {
       let isSubscribed = true;
       async function setupEmbeddable() {
         // Configure Embeddables API
         try {
-          setupEmbeddablesAPI();
+          setupEmbeddablesAPI(plugins);
         } catch (e) {
           displayErrorToast(i18n.ERROR_CONFIGURING_EMBEDDABLES_API, e.message, dispatchToaster);
           setIsLoading(false);
@@ -96,7 +101,8 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
             startDate,
             endDate,
             setQuery,
-            portalNode
+            portalNode,
+            plugins.embeddable
           );
           if (isSubscribed) {
             setEmbeddable(embeddableObject);
@@ -154,12 +160,12 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
             <EmbeddablePanel
               data-test-subj="embeddable-panel"
               embeddable={embeddable}
-              getActions={npStart.plugins.uiActions.getTriggerCompatibleActions}
+              getActions={plugins.uiActions.getTriggerCompatibleActions}
               getEmbeddableFactory={start.getEmbeddableFactory}
               getAllEmbeddableFactories={start.getEmbeddableFactories}
-              notifications={npStart.core.notifications}
-              overlays={npStart.core.overlays}
-              inspector={npStart.plugins.inspector}
+              notifications={core.notifications}
+              overlays={core.overlays}
+              inspector={plugins.inspector}
               SavedObjectFinder={SavedObjectFinder}
             />
           ) : !isLoading && isIndexError ? (
