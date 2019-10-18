@@ -7,3 +7,9 @@
 // TODO(rylnd): make this an actual external link
 export const externalFileURI: (repoUri: string, filePath: string) => string = (uri, path) =>
   `/${uri}/blob/HEAD/${path}`;
+
+export const absoluteCodeFileURI: (
+  repoUri: string,
+  filePath: string,
+  revision: string
+) => string = (uri, path, revision = 'HEAD') => `/app/code#/${uri}/blob/${revision}/${path}`;
