@@ -170,14 +170,12 @@ export class Plugin {
       encryptedSavedObjectsPlugin: plugins.encrypted_saved_objects,
       getBasePath,
       spaceIdToNamespace,
-      isSecurityEnabled: !!plugins.security,
     });
 
     const executeFn = createExecuteFunction({
       taskManager: plugins.task_manager,
       getScopedSavedObjectsClient: core.savedObjects.getScopedSavedObjectsClient,
       getBasePath,
-      isSecurityEnabled: !!plugins.security,
     });
 
     return {

@@ -96,20 +96,13 @@ export interface DashboardAppScope extends ng.IScope {
   timefilterSubscriptions$: Subscription;
 }
 
-const app = uiModules.get('app/dashboard', [
-  'elasticsearch',
-  'ngRoute',
-  'react',
-  'kibana/courier',
-  'kibana/config',
-]);
+const app = uiModules.get('app/dashboard', ['elasticsearch', 'ngRoute', 'react', 'kibana/config']);
 
 app.directive('dashboardApp', function($injector: IInjector) {
   const AppState = $injector.get<TAppStateClass<DashboardAppState>>('AppState');
   const kbnUrl = $injector.get<KbnUrl>('kbnUrl');
   const confirmModal = $injector.get<ConfirmModalFn>('confirmModal');
   const config = $injector.get('config');
-  const courier = $injector.get<{ fetch: () => void }>('courier');
 
   const Private = $injector.get<IPrivate>('Private');
 
@@ -149,7 +142,6 @@ app.directive('dashboardApp', function($injector: IInjector) {
         indexPatterns,
         config,
         confirmModal,
-        courier,
       }),
   };
 });

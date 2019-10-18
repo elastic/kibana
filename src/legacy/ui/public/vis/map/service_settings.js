@@ -21,7 +21,7 @@ import { uiModules } from '../../modules';
 import _ from 'lodash';
 import MarkdownIt from 'markdown-it';
 import { ORIGIN } from '../../../../core_plugins/tile_map/common/origin';
-import { EMSClient } from '../../../../core_plugins/tile_map/common/ems_client';
+import { EMSClient } from '@elastic/ems-client';
 import { i18n } from '@kbn/i18n';
 import 'angular-sanitize';
 

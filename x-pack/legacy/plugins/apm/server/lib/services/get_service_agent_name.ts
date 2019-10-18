@@ -9,18 +9,14 @@ import {
   SERVICE_AGENT_NAME,
   SERVICE_NAME
 } from '../../../common/elasticsearch_fieldnames';
-import { PromiseReturnType } from '../../../typings/common';
 import { rangeFilter } from '../helpers/range_filter';
 import { Setup } from '../helpers/setup_request';
 
-export type ServiceAgentNameAPIResponse = PromiseReturnType<
-  typeof getServiceAgentName
->;
 export async function getServiceAgentName(serviceName: string, setup: Setup) {
   const { start, end, client, config } = setup;
 
   const params = {
-    terminate_after: 1,
+    terminateAfter: 1,
     index: [
       config.get<string>('apm_oss.errorIndices'),
       config.get<string>('apm_oss.transactionIndices'),

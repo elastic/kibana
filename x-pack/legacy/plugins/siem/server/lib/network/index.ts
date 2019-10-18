@@ -5,10 +5,12 @@
  */
 
 import {
-  FlowTargetNew,
+  FlowTargetSourceDest,
+  Maybe,
   NetworkDnsSortField,
+  NetworkTopCountriesData,
   NetworkTopNFlowData,
-  NetworkTopNFlowSortField,
+  NetworkTopTablesSortField,
 } from '../../graphql/types';
 import { FrameworkRequest, RequestOptionsPaginated } from '../framework';
 export * from './elasticsearch_adapter';
@@ -17,8 +19,15 @@ import { NetworkAdapter } from './types';
 export * from './types';
 
 export interface NetworkTopNFlowRequestOptions extends RequestOptionsPaginated {
-  networkTopNFlowSort: NetworkTopNFlowSortField;
-  flowTarget: FlowTargetNew;
+  networkTopNFlowSort: NetworkTopTablesSortField;
+  flowTarget: FlowTargetSourceDest;
+  ip?: Maybe<string>;
+}
+
+export interface NetworkTopCountriesRequestOptions extends RequestOptionsPaginated {
+  networkTopCountriesSort: NetworkTopTablesSortField;
+  flowTarget: FlowTargetSourceDest;
+  ip?: Maybe<string>;
 }
 
 export interface NetworkDnsRequestOptions extends RequestOptionsPaginated {
@@ -28,6 +37,13 @@ export interface NetworkDnsRequestOptions extends RequestOptionsPaginated {
 
 export class Network {
   constructor(private readonly adapter: NetworkAdapter) {}
+
+  public async getNetworkTopCountries(
+    req: FrameworkRequest,
+    options: NetworkTopCountriesRequestOptions
+  ): Promise<NetworkTopCountriesData> {
+    return this.adapter.getNetworkTopCountries(req, options);
+  }
 
   public async getNetworkTopNFlow(
     req: FrameworkRequest,

@@ -5,10 +5,8 @@
  */
 
 import { HapiServer } from '../../../';
-import { registerCspCollector } from './csp';
 import { registerVisualizationsCollector } from './visualizations/register_usage_collector';
 
 export function registerCollectors(server: HapiServer) {
   registerVisualizationsCollector(server);
-  registerCspCollector(server);
 }

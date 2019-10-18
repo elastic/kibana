@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { UnwrapPromise } from '@kbn/utility-types';
 import {
   IClusterClient,
   CoreSetup,
@@ -20,8 +21,13 @@ export { canRedirectRequest } from './can_redirect_request';
 export { Authenticator, ProviderLoginAttempt } from './authenticator';
 export { AuthenticationResult } from './authentication_result';
 export { DeauthenticationResult } from './deauthentication_result';
-export { OIDCAuthenticationFlow } from './providers';
-export { CreateAPIKeyResult } from './api_keys';
+export { OIDCAuthenticationFlow, SAMLLoginStep } from './providers';
+export {
+  CreateAPIKeyResult,
+  InvalidateAPIKeyResult,
+  CreateAPIKeyParams,
+  InvalidateAPIKeyParams,
+} from './api_keys';
 
 interface SetupAuthenticationParams {
   core: CoreSetup;
@@ -30,6 +36,8 @@ interface SetupAuthenticationParams {
   loggers: LoggerFactory;
   getLegacyAPI(): LegacyAPI;
 }
+
+export type Authentication = UnwrapPromise<ReturnType<typeof setupAuthentication>>;
 
 export async function setupAuthentication({
   core,

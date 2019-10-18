@@ -16,12 +16,25 @@ import { DEFAULT_KBN_VERSION } from '../../../../common/constants';
 
 import * as i18n from './translations';
 
-export const MlCapabilitiesContext = React.createContext<MlCapabilities>(emptyMlCapabilities);
+interface MlCapabilitiesProvider extends MlCapabilities {
+  capabilitiesFetched: boolean;
+}
+
+const emptyMlCapabilitiesProvider = {
+  ...emptyMlCapabilities,
+  capabilitiesFetched: false,
+};
+
+export const MlCapabilitiesContext = React.createContext<MlCapabilitiesProvider>(
+  emptyMlCapabilitiesProvider
+);
 
 MlCapabilitiesContext.displayName = 'MlCapabilitiesContext';
 
 export const MlCapabilitiesProvider = React.memo<{ children: JSX.Element }>(({ children }) => {
-  const [capabilities, setCapabilities] = useState<MlCapabilities>(emptyMlCapabilities);
+  const [capabilities, setCapabilities] = useState<MlCapabilitiesProvider>(
+    emptyMlCapabilitiesProvider
+  );
   const [, dispatchToaster] = useStateToaster();
   const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
 
@@ -36,7 +49,7 @@ export const MlCapabilitiesProvider = React.memo<{ children: JSX.Element }>(({ c
           abortCtrl.signal
         );
         if (isSubscribed) {
-          setCapabilities(mlCapabilities);
+          setCapabilities({ ...mlCapabilities, capabilitiesFetched: true });
         }
       } catch (error) {
         if (isSubscribed) {

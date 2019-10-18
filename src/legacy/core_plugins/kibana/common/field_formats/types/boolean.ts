@@ -21,6 +21,7 @@ import {
   FieldFormat,
   asPrettyString,
   KBN_FIELD_TYPES,
+  TextContextTypeConvert,
 } from '../../../../../../plugins/data/common';
 
 export function createBoolFormat() {
@@ -29,7 +30,7 @@ export function createBoolFormat() {
     static title = 'Boolean';
     static fieldType = [KBN_FIELD_TYPES.BOOLEAN, KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.STRING];
 
-    _convert(value: any): string {
+    textConvert: TextContextTypeConvert = value => {
       if (typeof value === 'string') {
         value = value.trim().toLowerCase();
       }
@@ -48,6 +49,6 @@ export function createBoolFormat() {
         default:
           return asPrettyString(value);
       }
-    }
+    };
   };
 }

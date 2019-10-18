@@ -75,7 +75,7 @@ describe('Field Renderers', () => {
   });
 
   describe('#autonomousSystemRenderer', () => {
-    const emptyMock: AutonomousSystem = { organization: {}, number: null };
+    const emptyMock: AutonomousSystem = { organization: { name: null }, number: null };
     const halfEmptyMock: AutonomousSystem = { organization: { name: 'Test Org' }, number: null };
 
     test('it renders correctly against snapshot', () => {

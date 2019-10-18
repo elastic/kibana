@@ -61,6 +61,12 @@ interface PackageGroup {
    * An array of users to request reviews from
    */
   readonly reviewers?: string[];
+
+  /**
+   * Unless this is set to true, then PRs will only be opened when
+   * the corresponding checkbox is ticked in the master issue.
+   */
+  readonly autoOpenPr?: boolean;
 }
 
 export const RENOVATE_PACKAGE_GROUPS: PackageGroup[] = [
@@ -84,6 +90,7 @@ export const RENOVATE_PACKAGE_GROUPS: PackageGroup[] = [
     name: '@elastic/charts',
     packageNames: ['@elastic/charts'],
     reviewers: ['markov00'],
+    autoOpenPr: true,
   },
 
   {
