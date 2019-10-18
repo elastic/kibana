@@ -28,7 +28,7 @@ export const routes: ServerRoute[] = [
     method: 'GET',
     path: API_IMG_PATTERN,
     options: { tags: [`access:${PLUGIN.ID}`], json: { space: 2 } },
-    handler: Integrations.handleGetImage,
+    handler: Packages.handleGetImage,
   },
   {
     method: 'GET',

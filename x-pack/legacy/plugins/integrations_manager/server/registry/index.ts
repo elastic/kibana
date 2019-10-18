@@ -47,7 +47,7 @@ export async function fetchInfo(key: string): Promise<RegistryPackage> {
 }
 
 export async function fetchImage(params: ImageRequestParams): Promise<Response> {
-  const { registryUrl } = integrationsManagerConfigStore.getConfig();
+  const { registryUrl } = epmConfigStore.getConfig();
   const { pkgkey, imgPath } = params;
   return getResponse(`${registryUrl}/package/${pkgkey}/img/${imgPath}`);
 }
