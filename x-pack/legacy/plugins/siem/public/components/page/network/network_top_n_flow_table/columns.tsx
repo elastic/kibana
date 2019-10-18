@@ -14,7 +14,7 @@ import {
   AutonomousSystemItem,
   FlowTargetSourceDest,
   NetworkTopNFlowEdges,
-  TopNFlowNetworkEcsField,
+  TopNetworkTablesEcsField,
 } from '../../../../graphql/types';
 import { networkModel } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
@@ -32,8 +32,8 @@ export type NetworkTopNFlowColumns = [
   Columns<NetworkTopNFlowEdges>,
   Columns<NetworkTopNFlowEdges>,
   Columns<NetworkTopNFlowEdges>,
-  Columns<TopNFlowNetworkEcsField['bytes_in']>,
-  Columns<TopNFlowNetworkEcsField['bytes_out']>,
+  Columns<TopNetworkTablesEcsField['bytes_in']>,
+  Columns<TopNetworkTablesEcsField['bytes_out']>,
   Columns<NetworkTopNFlowEdges>,
   Columns<NetworkTopNFlowEdges>
 ];
@@ -42,8 +42,8 @@ export type NetworkTopNFlowColumnsIpDetails = [
   Columns<NetworkTopNFlowEdges>,
   Columns<NetworkTopNFlowEdges>,
   Columns<NetworkTopNFlowEdges>,
-  Columns<TopNFlowNetworkEcsField['bytes_in']>,
-  Columns<TopNFlowNetworkEcsField['bytes_out']>,
+  Columns<TopNetworkTablesEcsField['bytes_in']>,
+  Columns<TopNetworkTablesEcsField['bytes_out']>,
   Columns<NetworkTopNFlowEdges>
 ];
 

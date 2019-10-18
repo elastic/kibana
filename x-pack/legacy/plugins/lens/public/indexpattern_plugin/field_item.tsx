@@ -45,6 +45,7 @@ import { DatasourceDataPanelProps, DataType } from '../types';
 import { BucketedAggregation, FieldStatsResponse } from '../../common';
 import { IndexPattern, IndexPatternField } from './types';
 import { LensFieldIcon, getColorForDataType } from './lens_field_icon';
+import { trackUiEvent } from '../lens_ui_telemetry';
 
 export interface FieldItemProps {
   core: DatasourceDataPanelProps['core'];
@@ -141,6 +142,7 @@ export function FieldItem(props: FieldItemProps) {
   function togglePopover() {
     setOpen(!infoIsOpen);
     if (!infoIsOpen) {
+      trackUiEvent('indexpattern_field_info_click');
       fetchData();
     }
   }
