@@ -8,6 +8,7 @@
 
 
 import PropTypes from 'prop-types';
+import { i18n } from '@kbn/i18n';
 
 import React, {
   Component,
@@ -111,6 +112,35 @@ Message.propTypes = {
   })
 };
 
+const MessageList = ({ messages, idFilterList }) => {
+  const callouts = messages
+    .filter(m => idFilterList.includes(m.id) === false)
+    .map((m, i) => (
+      <Callout key={`${m.id}_${i}`} message={m} />
+    ));
+
+  // there could be no error or success messages due to the
+  // idFilterList being applied. so rather than showing nothing,
+  // show a message saying all passed
+  const allPassedCallout = (<Callout message={{
+    text: i18n.translate('xpack.ml.validateJob.allPassed', {
+      defaultMessage: 'All validation checks passed successfully',
+    }),
+    status: VALIDATION_STATUS.SUCCESS
+  }}
+  />);
+
+  return (
+    <React.Fragment>
+      {callouts.length ? callouts : allPassedCallout}
+    </React.Fragment>
+  );
+};
+MessageList.propTypes = {
+  messages: PropTypes.array,
+  idFilterList: PropTypes.array,
+};
+
 
 const Callout = ({ message }) => (
   <React.Fragment>
@@ -167,7 +197,7 @@ Modal.propType = {
   title: PropTypes.string
 };
 
-class ValidateJob extends Component {
+export class ValidateJob extends Component {
   constructor(props) {
     super(props);
     this.state = getDefaultState();
@@ -272,11 +302,8 @@ class ValidateJob extends Component {
                 values={{ title: this.state.title }}
               />}
             >
-              {
-                this.state.data.messages
-                  .filter(m => idFilterList.includes(m.id) === false)
-                  .map((m, i) => <Callout key={`${m.id}_${i}`} message={m} />)
-              }
+              <MessageList messages={this.state.data.messages} idFilterList={idFilterList} />
+
               <EuiText>
                 <FormattedMessage
                   id="xpack.ml.validateJob.modal.jobValidationDescriptionText"
@@ -305,13 +332,7 @@ class ValidateJob extends Component {
           </div>
         }
         {embedded === true &&
-          <div>
-            {
-              this.state.data.messages
-                .filter(m => idFilterList.includes(m.id) === false)
-                .map((m, i) => <Callout key={`${m.id}_${i}`} message={m} />)
-            }
-          </div>
+          <MessageList messages={this.state.data.messages} idFilterList={idFilterList} />
         }
       </Fragment>
     );
@@ -329,5 +350,3 @@ ValidateJob.propTypes = {
   setIsValid: PropTypes.func,
   idFilterList: PropTypes.array,
 };
-
-export { ValidateJob };

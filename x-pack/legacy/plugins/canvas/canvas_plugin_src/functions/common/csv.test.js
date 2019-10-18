@@ -5,7 +5,7 @@
  */
 
 import { functionWrapper } from '../../../__tests__/helpers/function_wrapper';
-import { getFunctionErrors } from '../../strings';
+import { getFunctionErrors } from '../../../i18n';
 import { csv } from './csv';
 
 const errors = getFunctionErrors().csv;

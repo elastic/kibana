@@ -26,7 +26,7 @@ function generatePngObservableFn(server: KbnServer) {
   const captureConcurrency = 1;
 
   // prettier-ignore
-  const createPngWithScreenshots = async ({ urlScreenshots }: { urlScreenshots: UrlScreenshot[] }) => {
+  const createPngWithScreenshots = async ({ urlScreenshots }: { urlScreenshots: UrlScreenshot[] }): Promise<string> => {
     if (urlScreenshots.length !== 1) {
       throw new Error(
         `Expected there to be 1 URL screenshot, but there are ${urlScreenshots.length}`
@@ -47,7 +47,7 @@ function generatePngObservableFn(server: KbnServer) {
     browserTimezone: string,
     conditionalHeaders: ConditionalHeaders,
     layoutParams: LayoutParams
-  ) {
+  ): Rx.Observable<string> {
     if (!layoutParams || !layoutParams.dimensions) {
       throw new Error(`LayoutParams.Dimensions is undefined.`);
     }

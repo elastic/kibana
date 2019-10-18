@@ -70,24 +70,37 @@ function renderHeaderWithIcons(icons) {
   );
 }
 
+const EMPTY_VALUE = '';
+
 export class StylePropertyLegendRow extends Component {
 
   state = {
     label: '',
+    hasLoadedFieldFormatter: false,
   }
 
   componentDidMount() {
     this._isMounted = true;
     this._prevLabel = undefined;
+    this._fieldValueFormatter = undefined;
     this._loadLabel();
+    this._loadFieldFormatter();
   }
 
   componentDidUpdate() {
+    // label could change so it needs to be loaded on update
     this._loadLabel();
   }
 
   componentWillUnmount() {
     this._isMounted = false;
+  }
+
+  async _loadFieldFormatter() {
+    this._fieldValueFormatter = await this.props.getFieldFormatter(this.props.options.field);
+    if (this._isMounted) {
+      this.setState({ hasLoadedFieldFormatter: true });
+    }
   }
 
   _loadLabel = async () => {
@@ -112,6 +125,14 @@ export class StylePropertyLegendRow extends Component {
         !this.props.options.field || !this.props.options.field.name;
   }
 
+  _formatValue = value => {
+    if (!this.state.hasLoadedFieldFormatter || !this._fieldValueFormatter || value === EMPTY_VALUE) {
+      return value;
+    }
+
+    return this._fieldValueFormatter(value);
+  }
+
   render() {
     const { name, options, range } = this.props;
     if (this._isStatic()) {
@@ -130,8 +151,8 @@ export class StylePropertyLegendRow extends Component {
     return (
       <StyleLegendRow
         header={header}
-        minLabel={_.get(range, 'min', '')}
-        maxLabel={_.get(range, 'max', '')}
+        minLabel={this._formatValue(_.get(range, 'min', EMPTY_VALUE))}
+        maxLabel={this._formatValue(_.get(range, 'max', EMPTY_VALUE))}
         propertyLabel={getVectorStyleLabel(name)}
         fieldLabel={this.state.label}
       />
@@ -145,4 +166,5 @@ StylePropertyLegendRow.propTypes = {
   options: PropTypes.oneOfType(styleOptionShapes).isRequired,
   range: rangeShape,
   getFieldLabel: PropTypes.func.isRequired,
+  getFieldFormatter: PropTypes.func.isRequired,
 };

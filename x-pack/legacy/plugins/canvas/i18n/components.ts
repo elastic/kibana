@@ -18,6 +18,17 @@ export const ComponentStrings = {
         defaultMessage: 'Embed Object',
       }),
   },
+  AdvancedFilter: {
+    getApplyButtonLabel: () =>
+      i18n.translate('xpack.canvas.renderer.advancedFilter.applyButtonLabel', {
+        defaultMessage: 'Apply',
+        description: 'This refers to applying the filter to the Canvas workpad',
+      }),
+    getInputPlaceholder: () =>
+      i18n.translate('xpack.canvas.renderer.advancedFilter.inputPlaceholder', {
+        defaultMessage: 'Enter filter expression',
+      }),
+  },
   App: {
     getLoadErrorMessage: (error: string) =>
       i18n.translate('xpack.canvas.app.loadErrorMessage', {
@@ -255,6 +266,13 @@ export const ComponentStrings = {
     getPanelTitle: () =>
       i18n.translate('xpack.canvas.datasourceNoDatasource.panelTitle', {
         defaultMessage: 'No data source present',
+      }),
+  },
+  DropdownFilter: {
+    getMatchAllOptionLabel: () =>
+      i18n.translate('xpack.canvas.renderer.dropdownFilter.matchAllOptionLabel', {
+        defaultMessage: 'ANY',
+        description: 'The dropdown filter option to match any value in the field.',
       }),
   },
   ElementConfig: {
@@ -893,6 +911,12 @@ export const ComponentStrings = {
     getStyleUnderlineOption: () =>
       i18n.translate('xpack.canvas.textStylePicker.styleUnderlineOption', {
         defaultMessage: 'Underline',
+      }),
+  },
+  TimePicker: {
+    getApplyButtonLabel: () =>
+      i18n.translate('xpack.canvas.timePicker.applyButtonLabel', {
+        defaultMessage: 'Apply',
       }),
   },
   Toolbar: {
