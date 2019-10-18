@@ -17,12 +17,17 @@ export function Screenshots(props: ScreenshotProps) {
   const { theme } = useCore();
   const { toImage } = useLinks();
   const { images } = props;
+
   // for now, just get first image
   const src = toImage(images[0].src);
+
+  const horizontalPadding: number = parseInt(theme.eui.paddingSizes.xl, 10) * 2;
+  const bottomPadding: number = parseInt(theme.eui.paddingSizes.xl, 10) * 1.75;
+
   const ScreenshotsContainer = styled(EuiFlexGroup)`
     background: linear-gradient(360deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0) 100%),
       ${theme.eui.euiColorPrimary};
-    padding: 32px 64px 56px 64px;
+    padding: ${theme.eui.paddingSizes.xl} ${horizontalPadding}px ${bottomPadding}px;
     flex: 0 0 auto;
     border-radius: ${theme.eui.euiBorderRadius};
   `;
