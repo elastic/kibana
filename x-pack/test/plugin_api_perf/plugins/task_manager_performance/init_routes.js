@@ -24,6 +24,8 @@ export function initRoutes(server, performanceState) {
       },
     },
     async handler(request) {
+      performanceState.capture();
+
       const { tasksToSpawn, durationInSeconds, trackExecutionTimeline } = request.payload;
       const startAt = millisecondsFromNow(5000).getTime();
       await Promise.all(

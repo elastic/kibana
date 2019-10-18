@@ -21,6 +21,7 @@ export default function TaskManagerPerformanceAPI(kibana) {
     init(server) {
       const taskManager = server.plugins.task_manager;
       const performanceState = {
+        capturing: false,
         runningAverageTasksPerSecond: 0,
         averagesTaken: [],
         runningAverageLeadTime: -1,
@@ -32,7 +33,10 @@ export default function TaskManagerPerformanceAPI(kibana) {
       function flushPerfStats() {
         setTimeout(flushPerfStats, 5000);
         const tasks = performanceState.leadTimeQueue.length;
-        console.log(`I have processed ${tasks} tasks in the past 5s (${tasks / 5} per second)`);
+        const title = `[Perf${performanceState.capturing ? ' (capturing)' : ''}]`;
+        console.log(
+          `${title} I have processed ${tasks} tasks in the past 5s (${tasks / 5} per second)`
+        );
         if (tasks > 0) {
           const latestAverage = avg(performanceState.leadTimeQueue.splice(0, tasks));
 
@@ -78,23 +82,26 @@ export default function TaskManagerPerformanceAPI(kibana) {
                 };
 
                 if(params.trackExecutionTimeline) {
-                  const id = taskInstance.id.split('-')[0];
-                  performanceState.timelines[id] = performanceState.timelines[id] || [];
-
-                  if(stateUpdated.timeline && stateUpdated.timeline.length) {
-                    stateUpdated
-                      .timeline
-                      .splice(0, stateUpdated.timeline.length)
-                      .forEach(i => performanceState.timelines[id].push(i));
-                  }
-
-                  performanceState.timelines[id].push({
+                  stateUpdated.timeline = stateUpdated.timeline || [];
+                  stateUpdated.timeline.push({
                     event: 'run',
                     owner: taskInstance.ownerId.split('-')[0],
                     counter,
                     leadTime,
                     ranAt: now
                   });
+
+                  if(performanceState.capturing) {
+                    const id = taskInstance.id.split('-')[0];
+                    performanceState.timelines[id] = performanceState.timelines[id] || [];
+                    if(stateUpdated.timeline && stateUpdated.timeline.length) {
+                      stateUpdated
+                        .timeline
+                        .splice(0, stateUpdated.timeline.length)
+                        .forEach(i => performanceState.timelines[id].push(i));
+                    }
+                  }
+
                 }
 
                 return {
@@ -153,7 +160,12 @@ export default function TaskManagerPerformanceAPI(kibana) {
       });
 
       initRoutes(server, {
+        capture() {
+          performanceState.capturing = true;
+        },
         summarize() {
+          performanceState.capturing = false;
+
           const { runningAverageTasksPerSecond, runningAverageLeadTime, timelines } = performanceState;
 
           const {
@@ -229,12 +241,4 @@ function avg(items) {
     }, 0) / items.length
   );
 }
-// function millisecondsFromNow(ms) {
-//   if (!ms) {
-//     return;
-//   }
 
-//   const dt = new Date();
-//   dt.setTime(dt.getTime() + ms);
-//   return dt;
-// }
