@@ -593,7 +593,7 @@ class FilterEditorUI extends Component<Props, State> {
         return false;
       }
     } else if (isSavedQueryEditorOpen) {
-      return selectedSavedQuery && selectedSavedQuery[0].id === params.id;
+      return !!selectedSavedQuery && selectedSavedQuery[0].id === params.id;
     }
 
     return isFilterValid(indexPattern, field, operator, params);
