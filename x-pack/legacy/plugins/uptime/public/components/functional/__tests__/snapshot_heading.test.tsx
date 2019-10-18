@@ -18,4 +18,9 @@ describe('SnapshotHeading', () => {
     const wrapper = shallowWithIntl(<SnapshotHeading down={3} total={17} />);
     expect(wrapper).toMatchSnapshot();
   });
+
+  it('renders custom heading for no monitors', () => {
+    const wrapper = shallowWithIntl(<SnapshotHeading down={0} total={0} />);
+    expect(wrapper).toMatchSnapshot();
+  });
 });

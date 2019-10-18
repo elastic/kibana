@@ -13,20 +13,27 @@ interface Props {
   total: number;
 }
 
+const getMessage = (down: number, total: number): string => {
+  if (down === 0 && total > 0) {
+    return i18n.translate('xpack.uptime.snapshot.zeroDownMessage', {
+      defaultMessage: 'All monitors are up',
+    });
+  } else if (down === 0 && total === 0) {
+    return i18n.translate('xpack.uptime.snapshot.noMonitorMessage', {
+      defaultMessage: 'No monitors found',
+    });
+  }
+  return i18n.translate('xpack.uptime.snapshot.downCountsMessage', {
+    defaultMessage: '{down}/{total} monitors are down',
+    values: {
+      down,
+      total,
+    },
+  });
+};
+
 export const SnapshotHeading = ({ down, total }: Props) => (
   <EuiTitle size="s">
-    <h2>
-      {down === 0
-        ? i18n.translate('xpack.uptime.snapshot.zeroDownMessage', {
-            defaultMessage: 'All monitors are up',
-          })
-        : i18n.translate('xpack.uptime.snapshot.downCountsMessage', {
-            defaultMessage: '{down}/{total} monitors are down',
-            values: {
-              down,
-              total,
-            },
-          })}
-    </h2>
+    <h2>{getMessage(down, total)}</h2>
   </EuiTitle>
 );
