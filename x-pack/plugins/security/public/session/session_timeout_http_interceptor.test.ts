@@ -105,4 +105,16 @@ describe('responseError', () => {
 
     expect(sessionTimeoutMock.extend).not.toHaveBeenCalled();
   });
+
+  test(`doesn't extend session timeouts when there is no response`, async () => {
+    const http = setupHttp('/foo');
+    const sessionTimeoutMock = createSessionTimeoutMock();
+    const interceptor = new SessionTimeoutHttpInterceptor(sessionTimeoutMock, http.anonymousPaths);
+    http.intercept(interceptor);
+    fetchMock.mock('*', new Promise((resolve, reject) => reject(new Error('Network is down'))));
+
+    await expect(http.fetch('/foo-api')).rejects.toMatchInlineSnapshot(`[Error: Network is down]`);
+
+    expect(sessionTimeoutMock.extend).not.toHaveBeenCalled();
+  });
 });

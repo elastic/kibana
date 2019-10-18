@@ -40,6 +40,15 @@ export class SessionTimeoutHttpInterceptor implements HttpInterceptor {
       return;
     }
 
+    // if we happen to not have a response, for example if there is no
+    // network connectivity, we won't extend the session because there
+    // won't be a response with a set-cookie header, which is required
+    // to extend the session
+    const { response } = httpErrorResponse;
+    if (!response) {
+      return;
+    }
+
     this.sessionTimeout.extend();
   }
 }
