@@ -129,7 +129,7 @@ function createObjects(resp: any, indexPatternTitle: string) {
       // copy the agg and add a Fields list
       const agg: Aggregation = {
         ...a,
-        fields: [],
+        ...(a.fieldIds !== undefined ? { fields: [] } : {}),
       };
       aggMap[agg.id] = agg;
       aggs.push(agg);
@@ -188,8 +188,8 @@ function addEventRateField(aggs: Aggregation[], fields: Field[]) {
   };
 
   aggs.forEach(a => {
-    if (a.fields !== undefined && eventRateField.aggs !== undefined && a.fields.length === 0) {
-      a.fields.push(eventRateField);
+    if (eventRateField.aggs !== undefined && a.fields === undefined) {
+      a.fields = [eventRateField];
       eventRateField.aggs.push(a);
     }
   });

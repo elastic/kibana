@@ -91,11 +91,18 @@ export const AdvancedDetectorModal: FC<Props> = ({
   const [fieldOptionEnabled, setFieldOptionEnabled] = useState(true);
   const { descriptionPlaceholder, setDescriptionPlaceholder } = useDetectorPlaceholder(detector);
 
-  const aggOptions: EuiComboBoxOptionProps[] = aggs.map(createAggOption);
-  const fieldOptions: EuiComboBoxOptionProps[] = fields
+  const aggOptions: EuiComboBoxOptionProps[] = aggs
+    .filter(a => a.fields !== undefined && a.fields.length)
+    .map(createAggOption);
+
+  // fields available for the selected agg
+  const { currentFieldOptions, setCurrentFieldOptions } = useCurrentFieldOptions(detector.agg);
+
+  const allFieldOptions: EuiComboBoxOptionProps[] = fields
     .filter(f => f.id !== EVENT_RATE_FIELD_ID)
     .map(createFieldOption);
-  const splitFieldOptions = [...fieldOptions, ...createMlcategoryField(jobCreator)];
+
+  const splitFieldOptions = [...allFieldOptions, ...createMlcategoryField(jobCreator)];
 
   const eventRateField = fields.find(f => f.id === EVENT_RATE_FIELD_ID);
 
@@ -124,6 +131,8 @@ export const AdvancedDetectorModal: FC<Props> = ({
 
     if (agg !== null) {
       setFieldsEnabled(true);
+      setCurrentFieldOptions(agg);
+
       if (isFieldlessAgg(agg) && eventRateField !== undefined) {
         setFieldOption(emptyOption);
         setFieldOptionEnabled(false);
@@ -207,7 +216,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
             <FieldDescription>
               <EuiComboBox
                 singleSelection={{ asPlainText: true }}
-                options={fieldOptions}
+                options={currentFieldOptions}
                 selectedOptions={[fieldOption]}
                 onChange={onOptionChange(setFieldOption)}
                 isClearable={true}
@@ -314,6 +323,9 @@ function createExcludeFrequentOption(excludeFrequent: string | null): EuiComboBo
 }
 
 function isFieldlessAgg(agg: Aggregation) {
+  // fieldless aggs have been given one event rate field for UI reasons.
+  // therefore if an agg's field list only contains event rate, it must be
+  // a fieldless agg.
   return agg.fields && agg.fields.length === 1 && agg.fields[0].id === EVENT_RATE_FIELD_ID;
 }
 
@@ -338,6 +350,24 @@ function useDetectorPlaceholder(detector: RichDetector) {
   }
 
   return { descriptionPlaceholder, setDescriptionPlaceholder };
+}
+
+function createFieldOptionList(agg: Aggregation | null) {
+  return (agg !== null && agg.fields !== undefined ? agg.fields : [])
+    .filter(f => f.id !== EVENT_RATE_FIELD_ID)
+    .map(createFieldOption);
+}
+
+function useCurrentFieldOptions(aggregation: Aggregation | null) {
+  const [currentFieldOptions, setCurrentFieldOptions] = useState(
+    createFieldOptionList(aggregation)
+  );
+
+  return {
+    currentFieldOptions,
+    setCurrentFieldOptions: (agg: Aggregation | null) =>
+      setCurrentFieldOptions(createFieldOptionList(agg)),
+  };
 }
 
 function createDefaultDescription(dtr: RichDetector) {
