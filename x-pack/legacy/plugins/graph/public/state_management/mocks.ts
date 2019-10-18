@@ -52,9 +52,7 @@ export function createMockGraphStore({
     basePath: 'basepath',
     changeUrl: jest.fn(),
     chrome: ({
-      breadcrumbs: {
-        set: jest.fn(),
-      },
+      setBreadcrumbs: jest.fn(),
     } as unknown) as ChromeStart,
     createWorkspace: jest.fn(),
     getWorkspace: jest.fn(() => workspaceMock),

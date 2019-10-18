@@ -6,7 +6,6 @@
 
 import { createMockGraphStore, MockedGraphEnvironment } from './mocks';
 import { syncBreadcrumbSaga, updateMetaData } from './meta_data';
-import { ChromeStart } from 'kibana/public';
 
 describe('breadcrumb sync saga', () => {
   let env: MockedGraphEnvironment;
@@ -14,13 +13,6 @@ describe('breadcrumb sync saga', () => {
   beforeEach(() => {
     env = createMockGraphStore({
       sagas: [syncBreadcrumbSaga],
-      mockedDepsOverwrites: {
-        chrome: ({
-          breadcrumbs: {
-            set: jest.fn(),
-          },
-        } as unknown) as ChromeStart,
-      },
     });
   });
 
