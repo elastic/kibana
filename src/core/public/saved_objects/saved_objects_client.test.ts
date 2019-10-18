@@ -322,6 +322,43 @@ describe('SavedObjectsClient', () => {
     });
   });
 
+  describe('#bulk_update', () => {
+    const bulkUpdateDoc = {
+      id: 'AVwSwFxtcMV38qjDZoQg',
+      type: 'config',
+      attributes: { title: 'Example title' },
+      version: 'foo',
+    };
+    beforeEach(() => {
+      http.fetch.mockResolvedValue({ saved_objects: [bulkUpdateDoc] });
+    });
+
+    test('resolves with array of SimpleSavedObject instances', async () => {
+      const response = savedObjectsClient.bulkUpdate([bulkUpdateDoc]);
+      await expect(response).resolves.toHaveProperty('savedObjects');
+
+      const result = await response;
+      expect(result.savedObjects).toHaveLength(1);
+      expect(result.savedObjects[0]).toBeInstanceOf(SimpleSavedObject);
+    });
+
+    test('makes HTTP call', async () => {
+      await savedObjectsClient.bulkUpdate([bulkUpdateDoc]);
+      expect(http.fetch.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "/api/saved_objects/_bulk_update",
+            Object {
+              "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\",\\"attributes\\":{\\"title\\":\\"Example title\\"},\\"version\\":\\"foo\\"}]",
+              "method": "PUT",
+              "query": undefined,
+            },
+          ],
+        ]
+      `);
+    });
+  });
+
   describe('#find', () => {
     const object = { id: 'logstash-*', type: 'index-pattern', title: 'Test' };
 
@@ -419,15 +456,15 @@ describe('SavedObjectsClient', () => {
     };
     http.fetch.mockRejectedValue(err);
     return expect(savedObjectsClient.get(doc.type, doc.id)).rejects.toMatchInlineSnapshot(`
-      Object {
-        "body": "response body",
-        "res": Object {
-          "ok": false,
-          "redirected": false,
-          "status": 409,
-          "statusText": "Conflict",
-        },
-      }
-    `);
+                    Object {
+                      "body": "response body",
+                      "res": Object {
+                        "ok": false,
+                        "redirected": false,
+                        "status": 409,
+                        "statusText": "Conflict",
+                      },
+                    }
+                `);
   });
 });

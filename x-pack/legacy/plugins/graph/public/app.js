@@ -345,27 +345,6 @@ export function initGraphApp(angularModule, deps) {
       }
     };
 
-    function canWipeWorkspace(callback) {
-      if (!hasFieldsSelector(store.getState())) {
-        callback();
-        return;
-      }
-      const confirmModalOptions = {
-        onConfirm: callback,
-        onCancel: (() => {}),
-        confirmButtonText: i18n.translate('xpack.graph.clearWorkspace.confirmButtonLabel', {
-          defaultMessage: 'Leave anyway',
-        }),
-        title: i18n.translate('xpack.graph.clearWorkspace.modalTitle', {
-          defaultMessage: 'Unsaved changes',
-        }),
-      };
-      confirmModal(i18n.translate('xpack.graph.clearWorkspace.confirmText', {
-        defaultMessage: 'If you leave now, you will lose unsaved changes.',
-      }), confirmModalOptions);
-    }
-    $scope.confirmWipeWorkspace = canWipeWorkspace;
-
     $scope.clickEdge = function (edge) {
       if (edge.inferred) {
         $scope.setDetail ({ 'inferredEdge': edge });
@@ -421,9 +400,27 @@ export function initGraphApp(angularModule, deps) {
       $scope.detail = data;
     };
 
-    $scope.aceLoaded = (editor) => {
-      editor.$blockScrolling = Infinity;
-    };
+    function canWipeWorkspace(callback, text, options) {
+      if (!hasFieldsSelector(store.getState())) {
+        callback();
+        return;
+      }
+      const confirmModalOptions = {
+        onConfirm: callback,
+        onCancel: (() => {}),
+        confirmButtonText: i18n.translate('xpack.graph.leaveWorkspace.confirmButtonLabel', {
+          defaultMessage: 'Leave anyway',
+        }),
+        title: i18n.translate('xpack.graph.leaveWorkspace.modalTitle', {
+          defaultMessage: 'Unsaved changes',
+        }),
+        ...options,
+      };
+      confirmModal(text || i18n.translate('xpack.graph.leaveWorkspace.confirmText', {
+        defaultMessage: 'If you leave now, you will lose unsaved changes.',
+      }), confirmModalOptions);
+    }
+    $scope.confirmWipeWorkspace = canWipeWorkspace;
 
     $scope.performMerge = function (parentId, childId) {
       let found = true;
