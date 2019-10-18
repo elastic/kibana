@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { LoggerFactory } from 'src/core/server';
 import { Logger } from '../log';
-import { LoggerFactory } from './log_factory';
-import { ServerFacade } from '../..';
+import { LoggerFactory as CodeLoggerFactory } from './log_factory';
 
-export class ServerLoggerFactory implements LoggerFactory {
-  constructor(private readonly server: ServerFacade) {}
+export class ServerLoggerFactory implements CodeLoggerFactory {
+  constructor(private readonly loggerFactory: LoggerFactory, private readonly verbose: boolean) {}
 
-  public getLogger(tags: string[]): Logger {
-    return new Logger(this.server, tags);
+  public getLogger(tags: string[] = []): Logger {
+    return new Logger(this.loggerFactory, this.verbose, tags);
   }
 }

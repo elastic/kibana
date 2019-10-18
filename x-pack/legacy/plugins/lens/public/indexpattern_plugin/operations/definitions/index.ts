@@ -15,10 +15,9 @@ import { cardinalityOperation } from './cardinality';
 import { minOperation, averageOperation, sumOperation, maxOperation } from './metrics';
 import { dateHistogramOperation } from './date_histogram';
 import { countOperation } from './count';
-import { filterRatioOperation } from './filter_ratio';
 import { DimensionPriority, StateSetter, OperationMetadata } from '../../../types';
 import { BaseIndexPatternColumn, FieldBasedIndexPatternColumn } from './column_types';
-import { IndexPatternPrivateState, IndexPattern, IndexPatternField } from '../../indexpattern';
+import { IndexPatternPrivateState, IndexPattern, IndexPatternField } from '../../types';
 
 // List of all operation definitions registered to this data source.
 // If you want to implement a new operation, add it to this array and
@@ -32,14 +31,12 @@ const internalOperationDefinitions = [
   cardinalityOperation,
   sumOperation,
   countOperation,
-  filterRatioOperation,
 ];
 
 export { termsOperation } from './terms';
 export { dateHistogramOperation } from './date_histogram';
 export { minOperation, averageOperation, sumOperation, maxOperation } from './metrics';
 export { countOperation } from './count';
-export { filterRatioOperation } from './filter_ratio';
 
 /**
  * Properties passed to the operation-specific part of the popover editor

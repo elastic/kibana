@@ -8,7 +8,6 @@ import { EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo } from 'react';
-import { toastNotifications } from 'ui/notify';
 import url from 'url';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { NoServicesMessage } from './NoServicesMessage';
@@ -18,7 +17,6 @@ import { useTrackPageview } from '../../../../../infra/public';
 import { useKibanaCore } from '../../../../../observability/public';
 import { PROJECTION } from '../../../../common/projections/typings';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
-import { callApmApi } from '../../../services/rest/callApmApi';
 
 const initalData = {
   items: [],
@@ -34,21 +32,25 @@ export function ServiceOverview() {
     urlParams: { start, end },
     uiFilters
   } = useUrlParams();
-  const { data = initalData, status } = useFetcher(() => {
-    if (start && end) {
-      return callApmApi({
-        pathname: '/api/apm/services',
-        params: {
-          query: { start, end, uiFilters: JSON.stringify(uiFilters) }
-        }
-      });
-    }
-  }, [start, end, uiFilters]);
+  const { data = initalData, status } = useFetcher(
+    callApmApi => {
+      if (start && end) {
+        return callApmApi({
+          pathname: '/api/apm/services',
+          params: {
+            query: { start, end, uiFilters: JSON.stringify(uiFilters) }
+          }
+        });
+      }
+    },
+    [start, end, uiFilters]
+  );
 
   useEffect(() => {
     if (data.hasLegacyData && !hasDisplayedToast) {
       hasDisplayedToast = true;
-      toastNotifications.addWarning({
+
+      core.notifications.toasts.addWarning({
         title: i18n.translate('xpack.apm.serviceOverview.toastTitle', {
           defaultMessage:
             'Legacy data was detected within the selected time range'
@@ -77,7 +79,7 @@ export function ServiceOverview() {
         )
       });
     }
-  }, [data.hasLegacyData, core.http.basePath]);
+  }, [data.hasLegacyData, core.http.basePath, core.notifications.toasts]);
 
   useTrackPageview({ app: 'apm', path: 'services_overview' });
   useTrackPageview({ app: 'apm', path: 'services_overview', delay: 15000 });

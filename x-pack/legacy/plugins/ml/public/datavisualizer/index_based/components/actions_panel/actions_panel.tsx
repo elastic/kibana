@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import { IndexPattern } from 'ui/index_patterns';
 
-import { EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiPanel, EuiSpacer, EuiText, EuiTitle, EuiFlexGroup } from '@elastic/eui';
 
 import { useUiChromeContext } from '../../../../contexts/ui/use_ui_chrome_context';
 import { CreateJobLinkCard } from '../../../../components/create_job_link_card';
@@ -63,11 +63,9 @@ export const ActionsPanel: FC<Props> = ({ indexPattern }) => {
           </p>
         </EuiText>
         <EuiSpacer size="m" />
-        <DataRecognizer
-          indexPattern={indexPattern}
-          results={recognizerResults}
-          className="euiFlexGroup euiFlexGrid--gutterLarge euiFlexGroup--responsive euiFlexGroup--wrap"
-        ></DataRecognizer>
+        <EuiFlexGroup gutterSize="l" responsive={true} wrap={true}>
+          <DataRecognizer indexPattern={indexPattern} results={recognizerResults}></DataRecognizer>
+        </EuiFlexGroup>
         <EuiSpacer size="l" />
       </div>
       <EuiText>
@@ -80,7 +78,7 @@ export const ActionsPanel: FC<Props> = ({ indexPattern }) => {
       </EuiText>
       <EuiSpacer size="m" />
       <CreateJobLinkCard
-        iconType="createAdvancedJob"
+        icon="createAdvancedJob"
         title={i18n.translate('xpack.ml.datavisualizer.actionsPanel.advancedTitle', {
           defaultMessage: 'Advanced',
         })}
@@ -89,6 +87,7 @@ export const ActionsPanel: FC<Props> = ({ indexPattern }) => {
             'Use the full range of options to create a job for more advanced use cases',
         })}
         onClick={openAdvancedJobWizard}
+        href={`${basePath}/app/ml#/jobs/new_job/advanced?index=${indexPattern}`}
       />
     </EuiPanel>
   );

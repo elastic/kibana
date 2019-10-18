@@ -25,7 +25,7 @@ import { settingsGet } from './new_vis_modal.test.mocks';
 import { NewVisModal } from './new_vis_modal';
 
 import { VisType } from 'ui/vis';
-import { TypesStart } from '../../../../visualizations/public/np_ready/types';
+import { TypesStart } from '../../../../visualizations/public/np_ready/public/types';
 
 describe('NewVisModal', () => {
   const defaultVisTypeParams = {

@@ -20,6 +20,8 @@
 import { savedObjectsMixin } from './saved_objects_mixin';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { mockKibanaMigrator } from '../../../core/server/saved_objects/migrations/kibana/kibana_migrator.mock';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { savedObjectsClientProviderMock } from '../../../core/server/saved_objects/service/lib/scoped_client_provider.mock';
 
 const savedObjectMappings = [
   {
@@ -75,6 +77,7 @@ describe('Saved Objects Mixin', () => {
   });
 
   beforeEach(() => {
+    const clientProvider = savedObjectsClientProviderMock.create();
     mockServer = {
       log: jest.fn(),
       route: jest.fn(),
@@ -82,6 +85,11 @@ describe('Saved Objects Mixin', () => {
       config: () => {
         return {
           get: stubConfig,
+        };
+      },
+      indexPatternsServiceFactory: () => {
+        return {
+          getFieldsForWildcard: jest.fn(),
         };
       },
       plugins: {
@@ -95,10 +103,22 @@ describe('Saved Objects Mixin', () => {
           waitUntilReady: jest.fn(),
         },
       },
+      newPlatform: {
+        __internals: {
+          elasticsearch: {
+            adminClient$: {
+              pipe: jest.fn().mockImplementation(() => ({
+                toPromise: () =>
+                  Promise.resolve({ adminClient: { callAsInternalUser: mockCallCluster } }),
+              })),
+            },
+          },
+        },
+      },
     };
     mockKbnServer = {
       newPlatform: {
-        start: { core: { savedObjects: { migrator } } },
+        __internals: { kibanaMigrator: migrator, savedObjectsClientProvider: clientProvider },
       },
       server: mockServer,
       ready: () => {},
@@ -137,9 +157,9 @@ describe('Saved Objects Mixin', () => {
   });
 
   describe('Routes', () => {
-    it('should create 11 routes', () => {
+    it('should create 12 routes', () => {
       savedObjectsMixin(mockKbnServer, mockServer);
-      expect(mockServer.route).toHaveBeenCalledTimes(11);
+      expect(mockServer.route).toHaveBeenCalledTimes(12);
     });
     it('should add POST /api/saved_objects/_bulk_create', () => {
       savedObjectsMixin(mockKbnServer, mockServer);
@@ -215,15 +235,15 @@ describe('Saved Objects Mixin', () => {
   describe('Saved object service', () => {
     let service;
 
-    beforeEach(() => {
-      savedObjectsMixin(mockKbnServer, mockServer);
+    beforeEach(async () => {
+      await savedObjectsMixin(mockKbnServer, mockServer);
       const call = mockServer.decorate.mock.calls.filter(
         ([objName, methodName]) => objName === 'server' && methodName === 'savedObjects'
       );
       service = call[0][2];
     });
 
-    it('should return all but hidden types', () => {
+    it('should return all but hidden types', async () => {
       expect(service).toBeDefined();
       expect(service.types).toEqual(['config', 'testtype', 'doc1', 'doc2']);
     });
@@ -273,9 +293,8 @@ describe('Saved Objects Mixin', () => {
     });
 
     describe('get client', () => {
-      it('should return a valid client object', () => {
-        const client = service.getScopedSavedObjectsClient();
-        expect(client).toBeDefined();
+      it('should have a method to get the client', () => {
+        expect(service).toHaveProperty('getScopedSavedObjectsClient');
       });
 
       it('should have a method to set the client factory', () => {
@@ -296,21 +315,6 @@ describe('Saved Objects Mixin', () => {
         expect(() => {
           service.addScopedSavedObjectsClientWrapperFactory({});
         }).not.toThrowError();
-      });
-
-      it('should call underlining callCluster', async () => {
-        mockCallCluster.mockImplementation(method => {
-          if (method === 'indices.get') {
-            return { status: 404 };
-          } else if (method === 'indices.getAlias') {
-            return { status: 404 };
-          } else if (method === 'cat.templates') {
-            return [];
-          }
-        });
-        const client = await service.getScopedSavedObjectsClient();
-        await client.create('testtype');
-        expect(mockCallCluster).toHaveBeenCalled();
       });
     });
 

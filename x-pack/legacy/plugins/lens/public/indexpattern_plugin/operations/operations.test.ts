@@ -5,9 +5,9 @@
  */
 
 import { getOperationTypesForField, getAvailableOperationsByMetadata, buildColumn } from '.';
-import { IndexPatternPrivateState } from '../indexpattern';
 import { AvgIndexPatternColumn, MinIndexPatternColumn } from './definitions/metrics';
 import { CountIndexPatternColumn } from './definitions/count';
+import { IndexPatternPrivateState } from '../types';
 
 jest.mock('ui/new_platform');
 jest.mock('../loader');
@@ -145,6 +145,8 @@ describe('getOperationTypesForField', () => {
 
   describe('buildColumn', () => {
     const state: IndexPatternPrivateState = {
+      indexPatternRefs: [],
+      existingFields: {},
       currentIndexPatternId: '1',
       showEmptyFields: false,
       indexPatterns: expectedIndexPatterns,
@@ -154,7 +156,7 @@ describe('getOperationTypesForField', () => {
           columnOrder: ['col1'],
           columns: {
             col1: {
-              label: 'Date Histogram of timestamp',
+              label: 'Date histogram of timestamp',
               dataType: 'date',
               isBucketed: true,
 
@@ -296,10 +298,6 @@ describe('getOperationTypesForField', () => {
               },
               Object {
                 "operationType": "count",
-                "type": "document",
-              },
-              Object {
-                "operationType": "filter_ratio",
                 "type": "document",
               },
             ],

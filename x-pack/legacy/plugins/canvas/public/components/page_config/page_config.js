@@ -8,6 +8,9 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { EuiCard, EuiFormRow, EuiTitle, EuiSpacer, EuiSelect } from '@elastic/eui';
 import { WorkpadColorPicker } from '../workpad_color_picker';
+import { ComponentStrings } from '../../../i18n';
+
+const { PageConfig: strings } = ComponentStrings;
 
 export const PageConfig = ({
   pageIndex,
@@ -20,13 +23,13 @@ export const PageConfig = ({
   return (
     <Fragment>
       <EuiTitle size="xs">
-        <h4>Page</h4>
+        <h4>{strings.getTitle()}</h4>
       </EuiTitle>
       <EuiSpacer size="m" />
       <EuiFormRow
         display="rowCompressed"
-        label="Background color"
-        helpText="Accepts HEX, RGB or HTML Color names"
+        label={strings.getBackgroundColorLabel()}
+        helpText={strings.getBackgroundColorDescription()}
       >
         <WorkpadColorPicker onChange={setBackground} value={background} />
       </EuiFormRow>
@@ -35,7 +38,7 @@ export const PageConfig = ({
         page, we use the second page's transition) */}
       {pageIndex > 0 ? (
         <Fragment>
-          <EuiFormRow label="Transition" display="rowCompressed">
+          <EuiFormRow label={strings.getTransitionLabel()} display="rowCompressed">
             <EuiSelect
               value={transition ? transition.name : ''}
               options={transitions}
@@ -44,7 +47,7 @@ export const PageConfig = ({
             />
           </EuiFormRow>
           {transition ? (
-            <EuiFormRow label="Preview" display="rowCompressed">
+            <EuiFormRow label={strings.getTransitionPreviewLabel()} display="rowCompressed">
               <EuiCard
                 title=""
                 description=""

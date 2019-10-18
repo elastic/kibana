@@ -4,12 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC } from 'react';
+import React, { FC, Fragment, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiAccordion, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiAccordion,
+  EuiSpacer,
+  EuiHorizontalRule,
+} from '@elastic/eui';
 import { ModelPlotSwitch } from './components/model_plot';
 import { DedicatedIndexSwitch } from './components/dedicated_index';
-import { ModelMemoryLimitInput } from './components/model_memory_limit';
+import { ModelMemoryLimitInput } from '../../../common/model_memory_limit';
+import { JobCreatorContext } from '../../../job_creator_context';
+import { JOB_TYPE } from '../../../../../common/job_creator/util/constants';
 
 const ButtonContent = i18n.translate(
   'xpack.ml.newJob.wizard.jobDetailsStep.advancedSectionButton',
@@ -24,28 +32,49 @@ interface Props {
 }
 
 export const AdvancedSection: FC<Props> = ({ advancedExpanded, setAdvancedExpanded }) => {
+  const { jobCreator } = useContext(JobCreatorContext);
+
+  if (jobCreator.type === JOB_TYPE.ADVANCED) {
+    return (
+      <Fragment>
+        <EuiHorizontalRule margin="xl" />
+        <EuiFlexGroup gutterSize="xl">
+          <EuiFlexItem>
+            <ModelPlotSwitch />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <DedicatedIndexSwitch />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </Fragment>
+    );
+  }
+
   return (
-    <EuiAccordion
-      id="advanced-section"
-      buttonContent={ButtonContent}
-      onToggle={setAdvancedExpanded}
-      initialIsOpen={advancedExpanded}
-      data-test-subj="mlJobWizardToggleAdvancedSection"
-    >
-      <EuiSpacer />
-      <EuiFlexGroup
-        gutterSize="xl"
-        style={{ marginLeft: '0px', marginRight: '0px' }}
-        data-test-subj="mlJobWizardAdvancedSection"
+    <Fragment>
+      <EuiSpacer size="xl" />
+      <EuiAccordion
+        id="advanced-section"
+        buttonContent={ButtonContent}
+        onToggle={setAdvancedExpanded}
+        initialIsOpen={advancedExpanded}
+        data-test-subj="mlJobWizardToggleAdvancedSection"
       >
-        <EuiFlexItem>
-          <ModelPlotSwitch />
-          <ModelMemoryLimitInput />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <DedicatedIndexSwitch />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiAccordion>
+        <EuiSpacer />
+        <EuiFlexGroup
+          gutterSize="xl"
+          style={{ marginLeft: '0px', marginRight: '0px' }}
+          data-test-subj="mlJobWizardAdvancedSection"
+        >
+          <EuiFlexItem>
+            <ModelPlotSwitch />
+            <ModelMemoryLimitInput />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <DedicatedIndexSwitch />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiAccordion>
+    </Fragment>
   );
 };

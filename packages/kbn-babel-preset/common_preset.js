@@ -17,20 +17,28 @@
  * under the License.
  */
 
+const plugins = [
+  require.resolve('babel-plugin-add-module-exports'),
+
+  // The class properties proposal was merged with the private fields proposal
+  // into the "class fields" proposal. Babel doesn't support this combined
+  // proposal yet, which includes private field, so this transform is
+  // TECHNICALLY stage 2, but for all intents and purposes it's stage 3
+  //
+  // See https://github.com/babel/proposals/issues/12 for progress
+  require.resolve('@babel/plugin-proposal-class-properties'),
+];
+
 module.exports = {
   presets: [require.resolve('@babel/preset-typescript'), require.resolve('@babel/preset-react')],
-  plugins: [
-    require.resolve('@kbn/elastic-idx/babel'),
-    require.resolve('babel-plugin-add-module-exports'),
-
-    // The class properties proposal was merged with the private fields proposal
-    // into the "class fields" proposal. Babel doesn't support this combined
-    // proposal yet, which includes private field, so this transform is
-    // TECHNICALLY stage 2, but for all intents and purposes it's stage 3
-    //
-    // See https://github.com/babel/proposals/issues/12 for progress
-    require.resolve('@babel/plugin-proposal-class-properties'),
-  ],
+  plugins: plugins.concat(require.resolve('@kbn/elastic-idx/babel')),
+  // Do not use the idx plugin in the test environment because it causes
+  // causes conflicts with Jest's coverage mapping.
+  env: {
+    test: {
+      plugins,
+    },
+  },
   overrides: [
     {
       // Babel 7 don't support the namespace feature on typescript code.

@@ -18,7 +18,7 @@
  */
 
 import { UnwrapPromise } from '@kbn/utility-types';
-import { SavedObjectsClientContract } from 'src/core/server';
+import { SavedObjectsClientContract, IUiSettingsClient } from 'src/core/server';
 
 import KbnServer from '../../../../../server/kbn_server';
 import { createTestServers } from '../../../../../../test_utils/kbn_server';
@@ -33,7 +33,7 @@ interface AllServices {
   kbnServer: KbnServer;
   savedObjectsClient: SavedObjectsClientContract;
   callCluster: CallCluster;
-  uiSettings: any;
+  uiSettings: IUiSettingsClient;
   deleteKibanaIndex: typeof deleteKibanaIndex;
 }
 

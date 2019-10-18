@@ -13,20 +13,18 @@ interface MuteInstanceRequest extends Hapi.Request {
   };
 }
 
-export function muteAlertInstanceRoute(server: Hapi.Server) {
-  server.route({
-    method: 'POST',
-    path: '/api/alert/{alertId}/alert_instance/{alertInstanceId}/_mute',
-    options: {
-      tags: ['access:alerting-all'],
-      response: {
-        emptyStatusCode: 204,
-      },
+export const muteAlertInstanceRoute = {
+  method: 'POST',
+  path: '/api/alert/{alertId}/alert_instance/{alertInstanceId}/_mute',
+  config: {
+    tags: ['access:alerting-all'],
+    response: {
+      emptyStatusCode: 204,
     },
-    async handler(request: MuteInstanceRequest, h: Hapi.ResponseToolkit) {
-      const alertsClient = request.getAlertsClient!();
-      await alertsClient.muteInstance(request.params);
-      return h.response();
-    },
-  });
-}
+  },
+  async handler(request: MuteInstanceRequest, h: Hapi.ResponseToolkit) {
+    const alertsClient = request.getAlertsClient!();
+    await alertsClient.muteInstance(request.params);
+    return h.response();
+  },
+};

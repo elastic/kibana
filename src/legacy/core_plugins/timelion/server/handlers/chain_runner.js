@@ -19,7 +19,7 @@
 
 
 import _ from 'lodash';
-import Promise from 'bluebird';
+import Bluebird from 'bluebird';
 import { i18n } from '@kbn/i18n';
 
 import parseSheet from './lib/parse_sheet.js';
@@ -46,7 +46,7 @@ export default function chainRunner(tlConfig) {
 
     function resolveArgument(item) {
       if (Array.isArray(item)) {
-        return Promise.all(_.map(item, resolveArgument));
+        return Bluebird.all(_.map(item, resolveArgument));
       }
 
       if (_.isObject(item)) {
@@ -55,7 +55,7 @@ export default function chainRunner(tlConfig) {
             const itemFunctionDef = tlConfig.server.plugins.timelion.getFunction(item.function);
             if (itemFunctionDef.cacheKey && queryCache[itemFunctionDef.cacheKey(item)]) {
               stats.queryCount++;
-              return Promise.resolve(_.cloneDeep(queryCache[itemFunctionDef.cacheKey(item)]));
+              return Bluebird.resolve(_.cloneDeep(queryCache[itemFunctionDef.cacheKey(item)]));
             }
             return invoke(item.function, item.arguments);
           }
@@ -98,7 +98,7 @@ export default function chainRunner(tlConfig) {
 
     args = _.map(args, resolveArgument);
 
-    return Promise.all(args).then(function (args) {
+    return Bluebird.all(args).then(function (args) {
       args.byName = indexArguments(functionDef, args);
       return functionDef.fn(args, tlConfig);
     });
@@ -133,7 +133,7 @@ export default function chainRunner(tlConfig) {
         return args;
       });
     });
-    return Promise.all(seriesList).then(function (args) {
+    return Bluebird.all(seriesList).then(function (args) {
       const list = _.chain(args).pluck('list').flatten().value();
       const seriesList = _.merge.apply(this, _.flatten([{}, args]));
       seriesList.list = list;
@@ -161,7 +161,7 @@ export default function chainRunner(tlConfig) {
       return invoke(query.function, query.arguments);
     }).value();
 
-    return Promise.settle(promises).then(function (resolvedDatasources) {
+    return Bluebird.settle(promises).then(function (resolvedDatasources) {
 
       stats.queryTime = (new Date()).getTime();
 

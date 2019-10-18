@@ -23,7 +23,7 @@ import sinon from 'sinon';
 
 import { searchRequestQueue } from '../../search_request_queue';
 import { SearchSourceProvider } from '../search_source';
-import StubIndexPatternProv from 'test_utils/stub_index_pattern';
+import StubIndexPattern from 'test_utils/stub_index_pattern';
 
 function timeout() {
   return new Promise(resolve => {
@@ -44,9 +44,8 @@ describe('SearchSource', function () {
     config = _config_;
     SearchSource = Private(SearchSourceProvider);
 
-    const IndexPattern = Private(StubIndexPatternProv);
-    indexPattern = new IndexPattern('test-*', cfg => cfg, null, []);
-    indexPattern2 = new IndexPattern('test2-*', cfg => cfg, null, []);
+    indexPattern = new StubIndexPattern('test-*', cfg => cfg, null, []);
+    indexPattern2 = new StubIndexPattern('test2-*', cfg => cfg, null, []);
     expect(indexPattern).to.not.be(indexPattern2);
   }));
   beforeEach(() => searchRequestQueue.removeAll());

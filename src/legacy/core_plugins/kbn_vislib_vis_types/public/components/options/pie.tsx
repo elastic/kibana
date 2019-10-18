@@ -36,12 +36,12 @@ function PieOptions(props: VisOptionsProps<PieVisParams>) {
     <>
       <EuiPanel paddingSize="s">
         <EuiTitle size="xs">
-          <h2>
+          <h3>
             <FormattedMessage
               id="kbnVislibVisTypes.editors.pie.pieSettingsTitle"
               defaultMessage="Pie settings"
             />
-          </h2>
+          </h3>
         </EuiTitle>
         <EuiSpacer size="s" />
         <SwitchOption
@@ -59,12 +59,12 @@ function PieOptions(props: VisOptionsProps<PieVisParams>) {
 
       <EuiPanel paddingSize="s">
         <EuiTitle size="xs">
-          <div>
+          <h3>
             <FormattedMessage
               id="kbnVislibVisTypes.editors.pie.labelsSettingsTitle"
               defaultMessage="Labels settings"
             />
-          </div>
+          </h3>
         </EuiTitle>
         <EuiSpacer size="s" />
         <SwitchOption

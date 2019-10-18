@@ -27,12 +27,10 @@ exports[`renderUptimeKibanaGlobalHelp renders links with expected urls 1`] = `
     />
   </EuiButton>
   <EuiSpacer />
-  <EuiLink
+  <ForwardRef
     aria-label="Go to our discuss page"
-    color="primary"
     href="https://discuss.elastic.co/c/uptime"
     target="_blank"
-    type="button"
   >
     <FormattedMessage
       defaultMessage="Provide feedback for Uptime"
@@ -40,6 +38,6 @@ exports[`renderUptimeKibanaGlobalHelp renders links with expected urls 1`] = `
       id="xpack.uptime.header.helpLinkText"
       values={Object {}}
     />
-  </EuiLink>
+  </ForwardRef>
 </React.Fragment>
 `;

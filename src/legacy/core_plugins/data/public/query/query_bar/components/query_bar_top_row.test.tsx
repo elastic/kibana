@@ -21,7 +21,6 @@ import { mockPersistedLogFactory } from './query_bar_input.test.mocks';
 
 import React from 'react';
 import { mount } from 'enzyme';
-import './query_bar_top_row.test.mocks';
 import { QueryBarTopRow } from './query_bar_top_row';
 import { IndexPattern } from '../../../index';
 
@@ -48,9 +47,14 @@ startMock.uiSettings.get.mockImplementation((key: string) => {
         },
       ];
     case 'dateFormat':
-      return 'YY';
+      return 'MMM D, YYYY @ HH:mm:ss.SSS';
     case 'history:limit':
       return 10;
+    case 'timepicker:timeDefaults':
+      return {
+        from: 'now-15m',
+        to: 'now',
+      };
     default:
       throw new Error(`Unexpected config key: ${key}`);
   }
@@ -97,23 +101,33 @@ const mockIndexPattern = {
   ],
 } as IndexPattern;
 
-describe('QueryBarTopRowTopRow', () => {
-  const QUERY_INPUT_SELECTOR = 'InjectIntl(QueryBarInputUI)';
-  const TIMEPICKER_SELECTOR = 'EuiSuperDatePicker';
-  const services = {
-    uiSettings: startMock.uiSettings,
-    savedObjects: startMock.savedObjects,
-    notifications: startMock.notifications,
-    http: startMock.http,
-  };
+function wrapQueryBarTopRowInContext(testProps: any) {
   const defaultOptions = {
-    appName: 'discover',
     screenTitle: 'Another Screen',
     onSubmit: noop,
     onChange: noop,
-    store: createMockStorage(),
     intl: null as any,
   };
+
+  const services = {
+    ...startMock,
+    appName: 'discover',
+    store: createMockStorage(),
+  };
+
+  return (
+    <I18nProvider>
+      <KibanaContextProvider services={services}>
+        <QueryBarTopRow.WrappedComponent {...defaultOptions} {...testProps} />
+      </KibanaContextProvider>
+    </I18nProvider>
+  );
+}
+
+describe('QueryBarTopRowTopRow', () => {
+  const QUERY_INPUT_SELECTOR = 'QueryBarInputUI';
+  const TIMEPICKER_SELECTOR = 'EuiSuperDatePicker';
+  const TIMEPICKER_DURATION = '[data-shared-timefilter-duration]';
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -121,18 +135,13 @@ describe('QueryBarTopRowTopRow', () => {
 
   it('Should render the given query', () => {
     const component = mount(
-      <I18nProvider>
-        <KibanaContextProvider services={services}>
-          <QueryBarTopRow.WrappedComponent
-            {...defaultOptions}
-            query={kqlQuery}
-            screenTitle={'Another Screen'}
-            isDirty={false}
-            indexPatterns={[mockIndexPattern]}
-            timeHistory={timefilterSetupMock.history}
-          />
-        </KibanaContextProvider>
-      </I18nProvider>
+      wrapQueryBarTopRowInContext({
+        query: kqlQuery,
+        screenTitle: 'Another Screen',
+        isDirty: false,
+        indexPatterns: [mockIndexPattern],
+        timeHistory: timefilterSetupMock.history,
+      })
     );
 
     expect(component.find(QUERY_INPUT_SELECTOR).length).toBe(1);
@@ -141,19 +150,14 @@ describe('QueryBarTopRowTopRow', () => {
 
   it('Should create a unique PersistedLog based on the appName and query language', () => {
     mount(
-      <I18nProvider>
-        <KibanaContextProvider services={services}>
-          <QueryBarTopRow.WrappedComponent
-            {...defaultOptions}
-            query={kqlQuery}
-            screenTitle={'Another Screen'}
-            indexPatterns={[mockIndexPattern]}
-            timeHistory={timefilterSetupMock.history}
-            disableAutoFocus={true}
-            isDirty={false}
-          />
-        </KibanaContextProvider>
-      </I18nProvider>
+      wrapQueryBarTopRowInContext({
+        query: kqlQuery,
+        screenTitle: 'Another Screen',
+        indexPatterns: [mockIndexPattern],
+        timeHistory: timefilterSetupMock.history,
+        disableAutoFocus: true,
+        isDirty: false,
+      })
     );
 
     expect(mockPersistedLogFactory.mock.calls[0][0]).toBe('typeahead:discover-kuery');
@@ -161,15 +165,10 @@ describe('QueryBarTopRowTopRow', () => {
 
   it('Should render only timepicker when no options provided', () => {
     const component = mount(
-      <I18nProvider>
-        <KibanaContextProvider services={services}>
-          <QueryBarTopRow.WrappedComponent
-            {...defaultOptions}
-            isDirty={false}
-            timeHistory={timefilterSetupMock.history}
-          />
-        </KibanaContextProvider>
-      </I18nProvider>
+      wrapQueryBarTopRowInContext({
+        isDirty: false,
+        timeHistory: timefilterSetupMock.history,
+      })
     );
 
     expect(component.find(QUERY_INPUT_SELECTOR).length).toBe(0);
@@ -178,16 +177,11 @@ describe('QueryBarTopRowTopRow', () => {
 
   it('Should not show timepicker when asked', () => {
     const component = mount(
-      <I18nProvider>
-        <KibanaContextProvider services={services}>
-          <QueryBarTopRow.WrappedComponent
-            {...defaultOptions}
-            isDirty={false}
-            showDatePicker={false}
-            timeHistory={timefilterSetupMock.history}
-          />
-        </KibanaContextProvider>
-      </I18nProvider>
+      wrapQueryBarTopRowInContext({
+        showDatePicker: false,
+        timeHistory: timefilterSetupMock.history,
+        isDirty: false,
+      })
     );
 
     expect(component.find(QUERY_INPUT_SELECTOR).length).toBe(0);
@@ -196,40 +190,50 @@ describe('QueryBarTopRowTopRow', () => {
 
   it('Should render timepicker with options', () => {
     const component = mount(
-      <I18nProvider>
-        <KibanaContextProvider services={services}>
-          <QueryBarTopRow.WrappedComponent
-            {...defaultOptions}
-            isDirty={false}
-            screenTitle={'Another Screen'}
-            showDatePicker={true}
-            dateRangeFrom={'now-7d'}
-            dateRangeTo={'now'}
-            timeHistory={timefilterSetupMock.history}
-          />
-        </KibanaContextProvider>
-      </I18nProvider>
+      wrapQueryBarTopRowInContext({
+        isDirty: false,
+        screenTitle: 'Another Screen',
+        showDatePicker: true,
+        dateRangeFrom: 'now-7d',
+        dateRangeTo: 'now',
+        timeHistory: timefilterSetupMock.history,
+      })
     );
 
     expect(component.find(QUERY_INPUT_SELECTOR).length).toBe(0);
     expect(component.find(TIMEPICKER_SELECTOR).length).toBe(1);
   });
 
+  it('Should render the timefilter duration container for sharing', () => {
+    const component = mount(
+      wrapQueryBarTopRowInContext({
+        isDirty: false,
+        screenTitle: 'Another Screen',
+        showDatePicker: true,
+        dateRangeFrom: 'now-7d',
+        dateRangeTo: 'now',
+        timeHistory: timefilterSetupMock.history,
+      })
+    );
+
+    // match the data attribute rendered in the in the ReactHTML object
+    expect(component.find(TIMEPICKER_DURATION)).toMatchObject(
+      /<div\b.*\bdata-shared-timefilter-duration\b/
+    );
+  });
+
   it('Should render only query input bar', () => {
     const component = mount(
-      <I18nProvider>
-        <KibanaContextProvider services={services}>
-          <QueryBarTopRow.WrappedComponent
-            query={kqlQuery}
-            {...defaultOptions}
-            isDirty={false}
-            screenTitle={'Another Screen'}
-            indexPatterns={[mockIndexPattern]}
-            showDatePicker={false}
-            timeHistory={timefilterSetupMock.history}
-          />
-        </KibanaContextProvider>
-      </I18nProvider>
+      wrapQueryBarTopRowInContext({
+        query: kqlQuery,
+        indexPatterns: [mockIndexPattern],
+        isDirty: false,
+        screenTitle: 'Another Screen',
+        showDatePicker: false,
+        dateRangeFrom: 'now-7d',
+        dateRangeTo: 'now',
+        timeHistory: timefilterSetupMock.history,
+      })
     );
 
     expect(component.find(QUERY_INPUT_SELECTOR).length).toBe(1);
@@ -238,20 +242,15 @@ describe('QueryBarTopRowTopRow', () => {
 
   it('Should NOT render query input bar if disabled', () => {
     const component = mount(
-      <I18nProvider>
-        <KibanaContextProvider services={services}>
-          <QueryBarTopRow.WrappedComponent
-            query={kqlQuery}
-            {...defaultOptions}
-            isDirty={false}
-            screenTitle={'Another Screen'}
-            indexPatterns={[mockIndexPattern]}
-            showQueryInput={false}
-            showDatePicker={false}
-            timeHistory={timefilterSetupMock.history}
-          />
-        </KibanaContextProvider>
-      </I18nProvider>
+      wrapQueryBarTopRowInContext({
+        query: kqlQuery,
+        isDirty: false,
+        screenTitle: 'Another Screen',
+        indexPatterns: [mockIndexPattern],
+        showQueryInput: false,
+        showDatePicker: false,
+        timeHistory: timefilterSetupMock.history,
+      })
     );
 
     expect(component.find(QUERY_INPUT_SELECTOR).length).toBe(0);
@@ -260,17 +259,12 @@ describe('QueryBarTopRowTopRow', () => {
 
   it('Should NOT render query input bar if missing options', () => {
     const component = mount(
-      <I18nProvider>
-        <KibanaContextProvider services={services}>
-          <QueryBarTopRow.WrappedComponent
-            {...defaultOptions}
-            isDirty={false}
-            screenTitle={'Another Screen'}
-            showDatePicker={false}
-            timeHistory={timefilterSetupMock.history}
-          />
-        </KibanaContextProvider>
-      </I18nProvider>
+      wrapQueryBarTopRowInContext({
+        isDirty: false,
+        screenTitle: 'Another Screen',
+        showDatePicker: false,
+        timeHistory: timefilterSetupMock.history,
+      })
     );
 
     expect(component.find(QUERY_INPUT_SELECTOR).length).toBe(0);

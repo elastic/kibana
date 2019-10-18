@@ -6,6 +6,7 @@
 
 import { SuggestionRequest, VisualizationSuggestion, TableSuggestion } from '../types';
 import { State } from './types';
+import chartMetricSVG from '../assets/chart_metric.svg';
 
 /**
  * Generate suggestions for the metric chart.
@@ -40,7 +41,7 @@ function getSuggestion(table: TableSuggestion): VisualizationSuggestion<State> {
   return {
     title,
     score: 0.5,
-    previewIcon: 'visMetric',
+    previewIcon: chartMetricSVG,
     state: {
       layerId: table.layerId,
       accessor: col.columnId,

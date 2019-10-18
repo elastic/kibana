@@ -18,6 +18,14 @@ import { createStore, networkModel, State } from '../../../../store';
 import { UsersTable } from '.';
 import { mockUsersData } from './mock';
 
+jest.mock('../../../../lib/settings/use_kibana_ui_setting');
+
+jest.mock('../../../search_bar', () => ({
+  siemFilterManager: {
+    addFilters: jest.fn(),
+  },
+}));
+
 describe('Users Table Component', () => {
   const loadPage = jest.fn();
   const state: State = mockGlobalState;
@@ -96,7 +104,7 @@ describe('Users Table Component', () => {
           .find('.euiTable thead tr th button')
           .first()
           .text()
-      ).toEqual('NameClick to sort in ascending order');
+      ).toEqual('UserClick to sort in ascending order');
     });
   });
 });

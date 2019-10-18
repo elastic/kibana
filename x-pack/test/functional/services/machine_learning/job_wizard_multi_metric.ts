@@ -13,35 +13,35 @@ export function MachineLearningJobWizardMultiMetricProvider({ getService }: FtrP
 
   return {
     async assertSplitFieldInputExists() {
-      await testSubjects.existOrFail('multiMetricSplitFieldSelect > comboBoxInput');
+      await testSubjects.existOrFail('mlMultiMetricSplitFieldSelect > comboBoxInput');
     },
 
     async assertSplitFieldSelection(identifier: string) {
       const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
-        'multiMetricSplitFieldSelect > comboBoxInput'
+        'mlMultiMetricSplitFieldSelect > comboBoxInput'
       );
       expect(comboBoxSelectedOptions.length).to.eql(1);
       expect(comboBoxSelectedOptions[0]).to.eql(identifier);
     },
 
     async selectSplitField(identifier: string) {
-      await comboBox.set('multiMetricSplitFieldSelect > comboBoxInput', identifier);
+      await comboBox.set('mlMultiMetricSplitFieldSelect > comboBoxInput', identifier);
       await this.assertSplitFieldSelection(identifier);
     },
 
     async assertDetectorSplitExists(splitField: string) {
-      await testSubjects.existOrFail(`dataSplit > dataSplitTitle ${splitField}`);
-      await testSubjects.existOrFail(`dataSplit > splitCard front`);
+      await testSubjects.existOrFail(`mlDataSplit > mlDataSplitTitle ${splitField}`);
+      await testSubjects.existOrFail(`mlDataSplit > mlSplitCard front`);
     },
 
     async assertDetectorSplitFrontCardTitle(frontCardTitle: string) {
       expect(
-        await testSubjects.getVisibleText(`dataSplit > splitCard front > splitCardTitle`)
+        await testSubjects.getVisibleText(`mlDataSplit > mlSplitCard front > mlSplitCardTitle`)
       ).to.eql(frontCardTitle);
     },
 
     async assertDetectorSplitNumberOfBackCards(numberOfBackCards: number) {
-      expect(await testSubjects.findAll(`dataSplit > splitCard back`)).to.have.length(
+      expect(await testSubjects.findAll(`mlDataSplit > mlSplitCard back`)).to.have.length(
         numberOfBackCards
       );
     },

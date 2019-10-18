@@ -13,31 +13,31 @@ export function MachineLearningJobWizardPopulationProvider({ getService }: FtrPr
 
   return {
     async assertPopulationFieldInputExists() {
-      await testSubjects.existOrFail('populationSplitFieldSelect > comboBoxInput');
+      await testSubjects.existOrFail('mlPopulationSplitFieldSelect > comboBoxInput');
     },
 
     async assertPopulationFieldSelection(identifier: string) {
       const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
-        'populationSplitFieldSelect > comboBoxInput'
+        'mlPopulationSplitFieldSelect > comboBoxInput'
       );
       expect(comboBoxSelectedOptions.length).to.eql(1);
       expect(comboBoxSelectedOptions[0]).to.eql(identifier);
     },
 
     async selectPopulationField(identifier: string) {
-      await comboBox.set('populationSplitFieldSelect > comboBoxInput', identifier);
+      await comboBox.set('mlPopulationSplitFieldSelect > comboBoxInput', identifier);
       await this.assertPopulationFieldSelection(identifier);
     },
 
     async assertDetectorSplitFieldInputExists(detectorPosition: number) {
       await testSubjects.existOrFail(
-        `detector ${detectorPosition} > byFieldSelect  > comboBoxInput`
+        `mlDetector ${detectorPosition} > mlByFieldSelect  > comboBoxInput`
       );
     },
 
     async assertDetectorSplitFieldSelection(detectorPosition: number, identifier: string) {
       const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
-        `detector ${detectorPosition} > byFieldSelect  > comboBoxInput`
+        `mlDetector ${detectorPosition} > mlByFieldSelect  > comboBoxInput`
       );
       expect(comboBoxSelectedOptions.length).to.eql(1);
       expect(comboBoxSelectedOptions[0]).to.eql(identifier);
@@ -45,21 +45,23 @@ export function MachineLearningJobWizardPopulationProvider({ getService }: FtrPr
 
     async selectDetectorSplitField(detectorPosition: number, identifier: string) {
       await comboBox.set(
-        `detector ${detectorPosition} > byFieldSelect  > comboBoxInput`,
+        `mlDetector ${detectorPosition} > mlByFieldSelect  > comboBoxInput`,
         identifier
       );
       await this.assertDetectorSplitFieldSelection(detectorPosition, identifier);
     },
 
     async assertDetectorSplitExists(detectorPosition: number) {
-      await testSubjects.existOrFail(`detector ${detectorPosition} > dataSplit`);
-      await testSubjects.existOrFail(`detector ${detectorPosition} > dataSplit > splitCard front`);
+      await testSubjects.existOrFail(`mlDetector ${detectorPosition} > mlDataSplit`);
+      await testSubjects.existOrFail(
+        `mlDetector ${detectorPosition} > mlDataSplit > mlSplitCard front`
+      );
     },
 
     async assertDetectorSplitFrontCardTitle(detectorPosition: number, frontCardTitle: string) {
       expect(
         await testSubjects.getVisibleText(
-          `detector ${detectorPosition} > dataSplit > splitCard front > splitCardTitle`
+          `mlDetector ${detectorPosition} > mlDataSplit > mlSplitCard front > mlSplitCardTitle`
         )
       ).to.eql(frontCardTitle);
     },
@@ -69,7 +71,9 @@ export function MachineLearningJobWizardPopulationProvider({ getService }: FtrPr
       numberOfBackCards: number
     ) {
       expect(
-        await testSubjects.findAll(`detector ${detectorPosition} > dataSplit > splitCard back`)
+        await testSubjects.findAll(
+          `mlDetector ${detectorPosition} > mlDataSplit > mlSplitCard back`
+        )
       ).to.have.length(numberOfBackCards);
     },
   };

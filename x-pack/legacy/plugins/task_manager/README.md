@@ -171,9 +171,14 @@ The data stored for a task instance looks something like this:
   // This is incremented if a task fails or times out.
   attempts: 0,
 
-  // Currently, this is either idle | running. It is used to
+  // Currently, this is either idle | claiming | running | failed. It is used to
   // coordinate which Kibana instance owns / is running a specific
   // task instance.
+  // idle: Task Instance isn't being worked on
+  // claiming: A Kibana instance has claimed ownership but hasn't started running
+  //           the Task Instance yet
+  // running: A Kibana instance has began working on the Task Instance
+  // failed: The last run of the Task Instance failed, waiting to retry
   status: 'idle',
 
   // The params specific to this task instance, which will be
@@ -207,6 +212,9 @@ The data stored for a task instance looks something like this:
   // An application-specific designation, allowing different Kibana
   // plugins / apps to query for only those tasks they care about.
   scope: ['alerting'],
+
+  // The Kibana UUID of the Kibana instance who last claimed ownership for running this task.
+  ownerId: '123e4567-e89b-12d3-a456-426655440000'
 }
 ```
 

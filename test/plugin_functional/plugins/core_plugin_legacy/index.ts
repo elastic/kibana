@@ -24,13 +24,25 @@ export default function(kibana: any) {
   return new kibana.Plugin({
     id: 'core_plugin_legacy',
     require: ['kibana'],
+    uiExports: {
+      app: {
+        title: 'Core Legacy Compat',
+        description: 'This is a sample plugin to test core to legacy compatibility',
+        main: 'plugins/core_plugin_legacy/index',
+      },
+    },
     init(server: KbnServer) {
       const { http } = server.newPlatform.setup.core;
-      const router = http.createRouter('');
+      const router = http.createRouter();
 
       router.get({ path: '/api/np-http-in-legacy', validate: false }, async (context, req, res) => {
         const response = await context.core.elasticsearch.adminClient.callAsInternalUser('ping');
         return res.ok({ body: `Pong in legacy via new platform: ${response}` });
+      });
+
+      router.get({ path: '/api/np-context-in-legacy', validate: false }, (context, req, res) => {
+        const contexts = Object.keys(context);
+        return res.ok({ body: { contexts } });
       });
     },
   });

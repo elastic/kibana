@@ -224,12 +224,3 @@ export const DRAG_TYPE_FIELD = 'drag-type-field';
 
 /** This class is added to the document body while dragging */
 export const IS_DRAGGING_CLASS_NAME = 'is-dragging';
-
-/** A hex alpha channel suffix representing 10% for the `AA` in `#RRGGBBAA` */
-export const TEN_PERCENT_ALPHA_HEX_SUFFIX = '1A';
-
-/** A hex alpha channel suffix representing 20% for the `AA` in `#RRGGBBAA` */
-export const TWENTY_PERCENT_ALPHA_HEX_SUFFIX = '33';
-
-/** A hex alpha channel suffix representing 30% for the `AA` in `#RRGGBBAA` */
-export const THIRTY_PERCENT_ALPHA_HEX_SUFFIX = '4d';

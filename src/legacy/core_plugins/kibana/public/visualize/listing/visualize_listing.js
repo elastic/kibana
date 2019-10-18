@@ -29,7 +29,7 @@ import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { VisualizeListingTable } from './visualize_listing_table';
 import { NewVisModal } from '../wizard/new_vis_modal';
 import { VisualizeConstants } from '../visualize_constants';
-import { start as visualizations } from '../../../../visualizations/public/legacy';
+import { start as visualizations } from '../../../../visualizations/public/np_ready/public/legacy';
 import { i18n } from '@kbn/i18n';
 
 const app = uiModules.get('app/visualize', ['ngRoute', 'react']);

@@ -7,7 +7,6 @@
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { palettes } from '@elastic/eui/lib/services';
-import { isColorDark, hexToRgb } from '@elastic/eui';
 
 export interface FontawesomeIcon {
   class: string;
@@ -256,6 +255,4 @@ urlTemplateIconChoices.forEach(icon => {
   urlTemplateIconChoicesByClass[icon.class] = icon;
 });
 
-export const colorChoices = palettes.euiPaletteColorBlind.colors.filter(
-  (hex: string) => !isColorDark(...hexToRgb(hex))
-);
+export const colorChoices = palettes.euiPaletteColorBlind.colors;

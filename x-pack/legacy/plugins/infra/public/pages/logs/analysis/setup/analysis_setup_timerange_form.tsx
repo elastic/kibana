@@ -71,7 +71,7 @@ export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
         description={
           <FormattedMessage
             id="xpack.infra.analysisSetup.timeRangeDescription"
-            defaultMessage="By default, Machine Learning analyzes log messages from the start of your log indices and continues indefinitely. You can specify a different date to begin, to end, or both."
+            defaultMessage="By default, Machine Learning analyzes log messages in your log indices no older than four weeks, and continues indefinitely. You can specify a different date to begin, to end, or both."
           />
         }
       >

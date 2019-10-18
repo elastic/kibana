@@ -6,9 +6,10 @@
 
 import { getOr } from 'lodash/fp';
 import React from 'react';
+import memoizeOne from 'memoize-one';
+
 import { Query } from 'react-apollo';
 
-import memoizeOne from 'memoize-one';
 import { OpenTimelineResult } from '../../../components/open_timeline/types';
 import {
   GetAllTimeline,
@@ -35,19 +36,43 @@ interface OwnProps extends AllTimelinesVariables {
   children?: (args: AllTimelinesArgs) => React.ReactNode;
 }
 
-export class AllTimelinesQuery extends React.PureComponent<OwnProps> {
-  private memoizedAllTimeline: (
-    variables: string,
-    timelines: TimelineResult[]
-  ) => OpenTimelineResult[];
+const getAllTimeline = (variables: string, timelines: TimelineResult[]): OpenTimelineResult[] =>
+  timelines.map(timeline => ({
+    created: timeline.created,
+    description: timeline.description,
+    eventIdToNoteIds:
+      timeline.eventIdToNoteIds != null
+        ? timeline.eventIdToNoteIds.reduce((acc, note) => {
+            if (note.eventId != null) {
+              const notes = getOr([], note.eventId, acc);
+              return { ...acc, [note.eventId]: [...notes, note.noteId] };
+            }
+            return acc;
+          }, {})
+        : null,
+    favorite: timeline.favorite,
+    noteIds: timeline.noteIds,
+    notes:
+      timeline.notes != null
+        ? timeline.notes.map(note => ({ ...note, savedObjectId: note.noteId }))
+        : null,
+    pinnedEventIds:
+      timeline.pinnedEventIds != null
+        ? timeline.pinnedEventIds.reduce(
+            (acc, pinnedEventId) => ({ ...acc, [pinnedEventId]: true }),
+            {}
+          )
+        : null,
+    savedObjectId: timeline.savedObjectId,
+    title: timeline.title,
+    updated: timeline.updated,
+    updatedBy: timeline.updatedBy,
+  }));
 
-  constructor(props: OwnProps) {
-    super(props);
-    this.memoizedAllTimeline = memoizeOne(this.getAllTimeline);
-  }
+export const AllTimelinesQuery = React.memo<OwnProps>(
+  ({ children, onlyUserFavorite, pageInfo, search, sort }) => {
+    const memoizedAllTimeline = memoizeOne(getAllTimeline);
 
-  public render() {
-    const { children, onlyUserFavorite, pageInfo, search, sort } = this.props;
     const variables: GetAllTimeline.Variables = {
       onlyUserFavorite,
       pageInfo,
@@ -65,7 +90,7 @@ export class AllTimelinesQuery extends React.PureComponent<OwnProps> {
           return children!({
             loading,
             totalCount: getOr(0, 'getAllTimeline.totalCount', data),
-            timelines: this.memoizedAllTimeline(
+            timelines: memoizedAllTimeline(
               JSON.stringify(variables),
               getOr([], 'getAllTimeline.timeline', data)
             ),
@@ -74,41 +99,4 @@ export class AllTimelinesQuery extends React.PureComponent<OwnProps> {
       </Query>
     );
   }
-
-  private getAllTimeline = (
-    variables: string,
-    timelines: TimelineResult[]
-  ): OpenTimelineResult[] => {
-    return timelines.map(timeline => ({
-      created: timeline.created,
-      description: timeline.description,
-      eventIdToNoteIds:
-        timeline.eventIdToNoteIds != null
-          ? timeline.eventIdToNoteIds.reduce((acc, note) => {
-              if (note.eventId != null) {
-                const notes = getOr([], note.eventId, acc);
-                return { ...acc, [note.eventId]: [...notes, note.noteId] };
-              }
-              return acc;
-            }, {})
-          : null,
-      favorite: timeline.favorite,
-      noteIds: timeline.noteIds,
-      notes:
-        timeline.notes != null
-          ? timeline.notes.map(note => ({ ...note, savedObjectId: note.noteId }))
-          : null,
-      pinnedEventIds:
-        timeline.pinnedEventIds != null
-          ? timeline.pinnedEventIds.reduce(
-              (acc, pinnedEventId) => ({ ...acc, [pinnedEventId]: true }),
-              {}
-            )
-          : null,
-      savedObjectId: timeline.savedObjectId,
-      title: timeline.title,
-      updated: timeline.updated,
-      updatedBy: timeline.updatedBy,
-    }));
-  };
-}
+);

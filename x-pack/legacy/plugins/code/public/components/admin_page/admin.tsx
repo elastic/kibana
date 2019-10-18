@@ -131,7 +131,7 @@ class AdminPage extends React.PureComponent<Props, State> {
 
   public render() {
     return (
-      <div className="codeContainer__root">
+      <main className="codeContainer__root">
         <div className="codeContainer__rootInner">
           <div className="codeContainer__adminWrapper">
             <SearchBar
@@ -147,7 +147,7 @@ class AdminPage extends React.PureComponent<Props, State> {
             </div>
           </div>
         </div>
-      </div>
+      </main>
     );
   }
 }

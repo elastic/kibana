@@ -32,14 +32,13 @@ import angular from 'angular';
 import _ from 'lodash';
 
 
-import { InvalidJSONProperty, SavedObjectNotFound } from '../../../../plugins/kibana_utils/public';
-import { expandShorthand } from '../utils/mapping_setup';
+import { InvalidJSONProperty, SavedObjectNotFound, expandShorthand } from '../../../../plugins/kibana_utils/public';
 
 import { SearchSourceProvider } from '../courier/search_source';
 import { findObjectByTitle } from './find_object_by_title';
 import { SavedObjectsClientProvider } from './saved_objects_client_provider';
 import { migrateLegacyQuery } from '../utils/migrate_legacy_query';
-import { recentlyAccessed } from '../persisted_log';
+import { npStart } from 'ui/new_platform';
 import { i18n } from '@kbn/i18n';
 
 /**
@@ -512,7 +511,7 @@ export function SavedObjectProvider(Promise, Private, confirmModalPromise, index
         })
         .then(() => {
           if (this.showInRecentlyAccessed && this.getFullPath) {
-            recentlyAccessed.add(this.getFullPath(), this.title, this.id);
+            npStart.core.chrome.recentlyAccessed.add(this.getFullPath(), this.title, this.id);
           }
           this.isSaving = false;
           this.lastSavedTitle = this.title;

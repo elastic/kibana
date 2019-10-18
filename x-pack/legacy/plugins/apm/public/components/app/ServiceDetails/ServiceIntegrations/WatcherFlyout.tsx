@@ -30,7 +30,6 @@ import { memoize, padLeft, range } from 'lodash';
 import moment from 'moment-timezone';
 import React, { Component } from 'react';
 import styled from 'styled-components';
-import { toastNotifications } from 'ui/notify';
 import { LegacyCoreStart } from 'src/core/public';
 import { KibanaCoreContext } from '../../../../../../observability/public';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
@@ -218,7 +217,9 @@ export class WatcherFlyout extends Component<
   };
 
   public addErrorToast = () => {
-    toastNotifications.addWarning({
+    const core = this.context;
+
+    core.notifications.toasts.addWarning({
       title: i18n.translate(
         'xpack.apm.serviceDetails.enableErrorReportsPanel.watchCreationFailedNotificationTitle',
         {
@@ -240,7 +241,9 @@ export class WatcherFlyout extends Component<
   };
 
   public addSuccessToast = (id: string) => {
-    toastNotifications.addSuccess({
+    const core = this.context;
+
+    core.notifications.toasts.addSuccess({
       title: i18n.translate(
         'xpack.apm.serviceDetails.enableErrorReportsPanel.watchCreatedNotificationTitle',
         {
@@ -259,16 +262,18 @@ export class WatcherFlyout extends Component<
               }
             }
           )}{' '}
-          <KibanaLink
-            path={`/management/elasticsearch/watcher/watches/watch/${id}`}
-          >
-            {i18n.translate(
-              'xpack.apm.serviceDetails.enableErrorReportsPanel.watchCreatedNotificationText.viewWatchLinkText',
-              {
-                defaultMessage: 'View watch'
-              }
-            )}
-          </KibanaLink>
+          <KibanaCoreContext.Provider value={core}>
+            <KibanaLink
+              path={`/management/elasticsearch/watcher/watches/watch/${id}`}
+            >
+              {i18n.translate(
+                'xpack.apm.serviceDetails.enableErrorReportsPanel.watchCreatedNotificationText.viewWatchLinkText',
+                {
+                  defaultMessage: 'View watch'
+                }
+              )}
+            </KibanaLink>
+          </KibanaCoreContext.Provider>
         </p>
       )
     });

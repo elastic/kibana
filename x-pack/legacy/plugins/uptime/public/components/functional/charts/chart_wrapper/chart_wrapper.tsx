@@ -46,7 +46,7 @@ export const ChartWrapper: FC<Props> = ({
         <EuiFlexGroup
           justifyContent="spaceAround"
           alignItems="center"
-          style={{ height, marginTop: `-${height}` }}
+          style={{ height, marginTop: `-${height}`, marginBottom: 0 }}
         >
           <EuiFlexItem grow={false}>
             <EuiLoadingChart size="xl" />

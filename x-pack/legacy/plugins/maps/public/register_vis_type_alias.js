@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { setup as visualizationsSetup } from '../../../../../src/legacy/core_plugins/visualizations/public/legacy';
+import { setup as visualizationsSetup } from '../../../../../src/legacy/core_plugins/visualizations/public/np_ready/public/legacy';
 import { i18n } from '@kbn/i18n';
 import { APP_ID, APP_ICON, MAP_BASE_URL } from '../common/constants';
 
@@ -20,4 +20,5 @@ Use the Maps app instead of Coordinate Map and Region Map.
 The Maps app offers more functionality and is easier to use.`,
   }),
   icon: APP_ICON,
+  stage: 'production',
 });

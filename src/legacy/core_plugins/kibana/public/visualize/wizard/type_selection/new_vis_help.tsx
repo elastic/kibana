@@ -19,16 +19,39 @@
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
+import { EuiText, EuiButton } from '@elastic/eui';
+import chrome from 'ui/chrome';
+import { VisTypeAliasListEntry } from './type_selection';
 
-import { EuiText } from '@elastic/eui';
+interface Props {
+  promotedTypes: VisTypeAliasListEntry[];
+}
 
-export const NewVisHelp = () => (
-  <EuiText>
-    <p>
-      <FormattedMessage
-        id="kbn.visualize.newVisWizard.helpText"
-        defaultMessage="Start creating your visualization by selecting a type for that visualization."
-      />
-    </p>
-  </EuiText>
-);
+export function NewVisHelp(props: Props) {
+  return (
+    <EuiText>
+      <p>
+        <FormattedMessage
+          id="kbn.visualize.newVisWizard.helpText"
+          defaultMessage="Start creating your visualization by selecting a type for that visualization."
+        />
+      </p>
+      {props.promotedTypes.map(t => (
+        <>
+          <p>
+            <strong>{t.promotion!.description}</strong>
+          </p>
+          <EuiButton
+            href={chrome.addBasePath(t.aliasUrl)}
+            fill
+            size="s"
+            iconType="popout"
+            iconSide="right"
+          >
+            {t.promotion!.buttonText}
+          </EuiButton>
+        </>
+      ))}
+    </EuiText>
+  );
+}

@@ -9,10 +9,10 @@
  */
 
 import { chain, each, get, union, uniq } from 'lodash';
-import { parseInterval } from 'ui/utils/parse_interval';
 
 import { getEntityFieldList } from '../../common/util/anomaly_utils';
 import { isSourceDataChartableForDetector, isModelPlotEnabled } from '../../common/util/job_utils';
+import { parseInterval } from '../../common/util/parse_interval';
 import { ml } from '../services/ml_api_service';
 import { mlJobService } from '../services/job_service';
 import { mlResultsService } from 'plugins/ml/services/results_service';

@@ -19,6 +19,11 @@
 
 export function subscribeResizeChecker(ResizeChecker: any, $el: any, ...editors: any[]) {
   const checker = new ResizeChecker($el);
-  checker.on('resize', () => editors.forEach(e => e.resize()));
+  checker.on('resize', () =>
+    editors.forEach(e => {
+      e.resize();
+      if (e.updateActionsBar) e.updateActionsBar();
+    })
+  );
   return () => checker.destroy();
 }

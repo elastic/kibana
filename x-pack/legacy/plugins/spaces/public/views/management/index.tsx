@@ -24,7 +24,7 @@ const MANAGE_SPACES_KEY = 'spaces';
 
 routes.defaults(/\/management/, {
   resolve: {
-    spacesManagementSection(activeSpace: any, spaceSelectorURL: string) {
+    spacesManagementSection(activeSpace: any, serverBasePath: string) {
       function getKibanaSection() {
         return management.getSection('kibana');
       }
@@ -49,7 +49,7 @@ routes.defaults(/\/management/, {
 
         // Customize Saved Objects Management
         const action = new CopyToSpaceSavedObjectsManagementAction(
-          new SpacesManager(spaceSelectorURL),
+          new SpacesManager(serverBasePath),
           activeSpace.space
         );
         // This route resolve function executes any time the management screen is loaded, and we want to ensure

@@ -42,12 +42,12 @@ function ThresholdPanel({ stateParams, setValue, vis }: VisOptionsProps<BasicVis
   return (
     <EuiPanel paddingSize="s">
       <EuiTitle size="xs">
-        <h2>
+        <h3>
           <FormattedMessage
             id="kbnVislibVisTypes.editors.pointSeries.thresholdLineSettingsTitle"
             defaultMessage="Threshold line"
           />
-        </h2>
+        </h3>
       </EuiTitle>
       <EuiSpacer size="m" />
 

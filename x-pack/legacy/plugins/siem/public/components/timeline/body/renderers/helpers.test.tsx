@@ -8,7 +8,7 @@ import { cloneDeep } from 'lodash/fp';
 
 import { TimelineNonEcsData } from '../../../../graphql/types';
 import { mockTimelineData } from '../../../../mock';
-import { deleteItemIdx, findItem, getValues } from './helpers';
+import { deleteItemIdx, findItem, getValues, isNillEmptyOrNotFinite, showVia } from './helpers';
 
 describe('helpers', () => {
   describe('#deleteItemIdx', () => {
@@ -121,6 +121,72 @@ describe('helpers', () => {
         { field: 'user.name' },
       ];
       expect(getValues('user.name', nullValue)).toBeUndefined();
+    });
+  });
+
+  describe('#isNillEmptyOrNotFinite', () => {
+    test('undefined returns true', () => {
+      expect(isNillEmptyOrNotFinite(undefined)).toEqual(true);
+    });
+
+    test('null returns true', () => {
+      expect(isNillEmptyOrNotFinite(null)).toEqual(true);
+    });
+
+    test('empty string returns true', () => {
+      expect(isNillEmptyOrNotFinite('')).toEqual(true);
+    });
+
+    test('empty array returns true', () => {
+      expect(isNillEmptyOrNotFinite([])).toEqual(true);
+    });
+
+    test('NaN returns true', () => {
+      expect(isNillEmptyOrNotFinite(NaN)).toEqual(true);
+    });
+
+    test('Infinity returns true', () => {
+      expect(isNillEmptyOrNotFinite(Infinity)).toEqual(true);
+    });
+
+    test('a single space string returns false', () => {
+      expect(isNillEmptyOrNotFinite(' ')).toEqual(false);
+    });
+
+    test('a simple string returns false', () => {
+      expect(isNillEmptyOrNotFinite('a simple string')).toEqual(false);
+    });
+
+    test('the number 0 returns false', () => {
+      expect(isNillEmptyOrNotFinite(0)).toEqual(false);
+    });
+
+    test('a non-empty array return false', () => {
+      expect(isNillEmptyOrNotFinite(['non empty array'])).toEqual(false);
+    });
+  });
+
+  describe('#showVia', () => {
+    test('undefined returns false', () => {
+      expect(showVia(undefined)).toEqual(false);
+    });
+
+    test('null returns false', () => {
+      expect(showVia(undefined)).toEqual(false);
+    });
+
+    test('empty string false', () => {
+      expect(showVia('')).toEqual(false);
+    });
+
+    test('a random string returns false', () => {
+      expect(showVia('a random string')).toEqual(false);
+    });
+
+    ['file_create_event', 'created', 'file_delete_event', 'deleted'].forEach(eventAction => {
+      test(`${eventAction} returns true`, () => {
+        expect(showVia(eventAction)).toEqual(true);
+      });
     });
   });
 });

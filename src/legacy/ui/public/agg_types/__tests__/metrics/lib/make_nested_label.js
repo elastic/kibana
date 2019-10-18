@@ -28,6 +28,9 @@ describe('metric agg make_nested_label', function () {
         customMetric: {
           makeLabel: () => { return metricLabel; }
         }
+      },
+      getParam(key) {
+        return this.params[key];
       }
     };
   }
