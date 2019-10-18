@@ -8,7 +8,8 @@ import { ActionCreator } from 'typescript-fsa';
 import { Query } from 'src/plugins/data/common';
 
 import { DispatchUpdateTimeline } from '../open_timeline/types';
-import { navTabs, SiemPageName } from '../../pages/home/home_navigations';
+import { navTabs } from '../../pages/home/home_navigations';
+import { SiemPageName } from '../../pages/home/types';
 import { hostsModel, networkModel } from '../../store';
 import { inputsActions } from '../../store/actions';
 import { HostsTableType } from '../../store/hosts/model';

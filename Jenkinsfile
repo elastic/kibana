@@ -30,7 +30,7 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
 
 def withWorkers(name, preWorkerClosure = {}, workerClosures = [:]) {
   return {
-    jobRunner('tests-xl') {
+    jobRunner('tests-xl', true) {
       try {
         doSetup()
         preWorkerClosure()
@@ -121,7 +121,7 @@ def legacyJobRunner(name) {
         withEnv([
           "JOB=${name}",
         ]) {
-          jobRunner('linux && immutable') {
+          jobRunner('linux && immutable', false) {
             try {
               runbld('.ci/run.sh', true)
             } finally {
@@ -142,8 +142,21 @@ def legacyJobRunner(name) {
   }
 }
 
-def jobRunner(label, closure) {
+def jobRunner(label, useRamDisk, closure) {
   node(label) {
+    if (useRamDisk) {
+      // Move to a temporary workspace, so that we can symlink the real workspace into /dev/shm
+      def originalWorkspace = env.WORKSPACE
+      ws('/tmp/workspace') {
+        sh """
+          mkdir -p /dev/shm/workspace
+          mkdir -p '${originalWorkspace}' # create all of the directories leading up to the workspace, if they don't exist
+          rm --preserve-root -rf '${originalWorkspace}' # then remove just the workspace, just in case there's stuff in it
+          ln -s /dev/shm/workspace '${originalWorkspace}'
+        """
+      }
+    }
+
     def scmVars = checkout scm
 
     withEnv([
