@@ -56,6 +56,10 @@ export class GraphPlugin implements Plugin {
             xpackInfo,
             addBasePath: core.http.basePath.prepend,
             getBasePath: core.http.basePath.get,
+            canEditDrillDownUrls: core.injectedMetadata.getInjectedVar(
+              'canEditDrillDownUrls'
+            ) as boolean,
+            graphSavePolicy: core.injectedMetadata.getInjectedVar('graphSavePolicy') as string,
             Storage,
           },
           this.angularDependencies!

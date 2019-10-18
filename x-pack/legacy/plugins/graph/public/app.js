@@ -126,21 +126,20 @@ export function initGraphApp(angularModule, deps) {
     $routeProvider.when('/home', {
       template: listingTemplate,
       badge: getReadonlyBadge,
-      controller($location, $scope, Private) {
-        const kbnUrl = Private(KbnUrlProvider);
+      controller($location, $scope) {
         checkLicense(kbnBaseUrl);
         const services = savedObjectRegistry.byLoaderPropertiesName;
         const graphService = services['Graph workspace'];
 
         $scope.listingLimit = config.get('savedObjects:listingLimit');
         $scope.create = () => {
-          kbnUrl.change(getNewPath());
+          $location.url(getNewPath());
         };
         $scope.find = (search) => {
           return graphService.find(search, $scope.listingLimit);
         };
         $scope.editItem = (workspace) => {
-          kbnUrl.change(getEditPath(workspace));
+          $location.url(getEditPath(workspace));
         };
         $scope.getViewUrl = (workspace) => getEditUrl(addBasePath, workspace);
         $scope.delete = (workspaces) => {
@@ -189,8 +188,7 @@ export function initGraphApp(angularModule, deps) {
 
 
   //========  Controller for basic UI ==================
-  app.controller('graphuiPlugin', function ($scope, $route, $location, Private) {
-    const kbnUrl = Private(KbnUrlProvider);
+  app.controller('graphuiPlugin', function ($scope, $route, $location) {
     checkLicense(kbnBaseUrl);
 
     function handleError(err) {
@@ -304,7 +302,7 @@ export function initGraphApp(angularModule, deps) {
       savePolicy: graphSavePolicy,
       changeUrl: (newUrl) => {
         $scope.$evalAsync(() => {
-          kbnUrl.change(newUrl, {});
+          $location.url(newUrl);
         });
       },
       notifyAngular: () => {
@@ -472,8 +470,15 @@ export function initGraphApp(angularModule, deps) {
       }),
       run: function () {
         canWipeWorkspace(function () {
-          kbnUrl.change('/workspace/', {});
-        });  },
+          $scope.$evalAsync(() => {
+            if ($location.url() === '/workspace/') {
+              $route.reload();
+            } else {
+              $location.url('/workspace/');
+            }
+          });
+        });
+      },
       testId: 'graphNewButton',
     });
 

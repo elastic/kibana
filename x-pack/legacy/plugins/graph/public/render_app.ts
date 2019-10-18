@@ -14,16 +14,6 @@ import 'ace';
 import 'ui/kbn_top_nav';
 import { configureAppAngularModule } from 'ui/legacy_compat';
 // @ts-ignore
-import { GlobalStateProvider } from 'ui/state_management/global_state';
-// @ts-ignore
-import { StateManagementConfigProvider } from 'ui/state_management/config_provider';
-// @ts-ignore
-import { PrivateProvider } from 'ui/private/private';
-// @ts-ignore
-import { EventsProvider } from 'ui/events';
-// @ts-ignore
-import { PersistedState } from 'ui/persisted_state';
-// @ts-ignore
 import { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_top_nav';
 // @ts-ignore
 import { PromiseServiceCreator } from 'ui/promises/promises';
@@ -31,7 +21,6 @@ import { PromiseServiceCreator } from 'ui/promises/promises';
 import { KbnUrlProvider } from 'ui/url';
 
 // type imports
-import { IPrivate } from 'ui/private';
 import { DataStart } from 'src/legacy/core_plugins/data/public';
 import { AppMountContext } from 'kibana/public';
 import { AngularHttpError } from 'ui/notify/lib/format_angular_http_error';
@@ -55,6 +44,8 @@ export interface GraphDependencies {
   addBasePath: (url: string) => string;
   getBasePath: () => string;
   Storage: any;
+  canEditDrillDownUrls: boolean;
+  graphSavePolicy: string;
 }
 
 /**
@@ -83,14 +74,6 @@ export interface LegacyAngularInjectedDependencies {
    * Private(SavedObjectsClientProvider)
    */
   savedObjectsClient: any;
-  /**
-   * Injected variable
-   */
-  canEditDrillDownUrls: string;
-  /**
-   * Injected variable
-   */
-  graphSavePolicy: string;
 }
 
 export const renderApp = (
@@ -105,6 +88,8 @@ export const renderApp = (
     addBasePath,
     getBasePath,
     Storage,
+    canEditDrillDownUrls,
+    graphSavePolicy,
   }: GraphDependencies,
   angularDeps: LegacyAngularInjectedDependencies
 ) => {
@@ -122,6 +107,8 @@ export const renderApp = (
     getBasePath,
     KbnUrlProvider,
     Storage,
+    canEditDrillDownUrls,
+    graphSavePolicy,
     ...angularDeps,
   };
 
@@ -150,79 +137,20 @@ function mountGraphApp(appBasePath: string, element: HTMLElement) {
   // bootstrap angular into detached element and attach it later to
   // make angular-within-angular possible
   const $injector = angular.bootstrap(mountpoint, [moduleName]);
-  // initialize global state handler
-  $injector.get('globalState');
   element.appendChild(mountpoint);
   return $injector;
 }
 
 function createLocalAngularModule(core: AppMountContext['core']) {
   createLocalI18nModule();
-  createLocalPrivateModule();
-  createLocalPromiseModule();
-  createLocalConfigModule(core);
-  createLocalKbnUrlModule();
-  createLocalPersistedStateModule();
   createLocalTopNavModule();
-  createLocalGlobalStateModule();
 
   const graphAngularModule = angular.module(moduleName, [
     ...thirdPartyAngularDependencies,
     'graphI18n',
-    'graphPrivate',
-    'graphPersistedState',
     'graphTopNav',
-    'graphGlobalState',
   ]);
   return graphAngularModule;
-}
-
-function createLocalGlobalStateModule() {
-  angular
-    .module('graphGlobalState', ['graphPrivate', 'graphConfig', 'graphKbnUrl', 'graphPromise'])
-    .service('globalState', function(Private: any) {
-      return Private(GlobalStateProvider);
-    });
-}
-
-function createLocalPersistedStateModule() {
-  angular
-    .module('graphPersistedState', ['graphPrivate', 'graphPromise'])
-    .factory('PersistedState', (Private: IPrivate) => {
-      const Events = Private(EventsProvider);
-      return class AngularPersistedState extends PersistedState {
-        constructor(value: any, path: any) {
-          super(value, path, Events);
-        }
-      };
-    });
-}
-
-function createLocalKbnUrlModule() {
-  angular
-    .module('graphKbnUrl', ['graphPrivate', 'ngRoute'])
-    .service('kbnUrl', (Private: IPrivate) => Private(KbnUrlProvider));
-}
-
-function createLocalConfigModule(core: AppMountContext['core']) {
-  angular
-    .module('graphConfig', ['graphPrivate'])
-    .provider('stateManagementConfig', StateManagementConfigProvider)
-    .provider('config', () => {
-      return {
-        $get: () => ({
-          get: core.uiSettings.get.bind(core.uiSettings),
-        }),
-      };
-    });
-}
-
-function createLocalPromiseModule() {
-  angular.module('graphPromise', []).service('Promise', PromiseServiceCreator);
-}
-
-function createLocalPrivateModule() {
-  angular.module('graphPrivate', []).provider('Private', PrivateProvider);
 }
 
 function createLocalTopNavModule() {

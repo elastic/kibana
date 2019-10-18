@@ -45,8 +45,6 @@ async function getAngularInjectedDependencies(): Promise<LegacyAngularInjectedDe
     kbnBaseUrl: injector.get('kbnBaseUrl'),
     savedGraphWorkspaces: Private(SavedWorkspacesProvider),
     savedObjectsClient: Private(SavedObjectsClientProvider),
-    canEditDrillDownUrls: chrome.getInjected('canEditDrillDownUrls'),
-    graphSavePolicy: chrome.getInjected('graphSavePolicy'),
   };
 }
 
