@@ -130,3 +130,8 @@ export interface NormalizedField extends FieldMeta {
 export type ChildFieldName = 'properties' | 'fields';
 
 export type FieldsEditor = 'default' | 'json';
+
+export interface TreeItem {
+  label: string | JSX.Element;
+  children?: TreeItem[];
+}

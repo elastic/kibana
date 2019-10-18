@@ -116,3 +116,43 @@
       }
     }
 }
+
+ul.tree {
+  padding: 0;
+  margin: 0;
+  list-style-type: none;
+  position: relative;
+  padding-top: $euiSizeXS;
+
+  li.tree-item {
+    list-style-type: none;
+    border-left: $euiBorderThin;
+    margin-left: 1em;
+    padding-bottom: $euiSizeS;
+
+    div {
+      padding-left: 1em;
+      position: relative;
+
+      &::before {
+        content:'';
+        position: absolute;
+        top: 0;
+        left: -1px;
+        bottom: 50%;
+        width: 0.75em;
+        border: $euiBorderThin;
+        border-top: none;
+        border-right: none;
+      }
+    }
+  }
+
+  > li.tree-item:first-child {
+    padding-top: $euiSizeS;
+  }
+  > li.tree-item:last-child {
+    border-left: 1px solid transparent;
+    padding-bottom: 0;
+  }
+}

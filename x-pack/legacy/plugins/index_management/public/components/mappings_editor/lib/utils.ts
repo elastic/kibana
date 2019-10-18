@@ -14,8 +14,11 @@ import {
   MainType,
   SubType,
   ChildFieldName,
+  TreeItem,
 } from '../types';
+
 import { DATA_TYPE_DEFINITION, MAX_DEPTH_DEFAULT_EDITOR } from '../constants';
+
 import { State } from '../reducer';
 
 export const getUniqueId = () => {
@@ -287,6 +290,24 @@ export const getMaxNestedDepth = (byId: NormalizedFields['byId']): number =>
   Object.values(byId).reduce((maxDepth, field) => {
     return Math.max(maxDepth, field.nestedDepth);
   }, 0);
+
+/**
+ * Create a nested array of fields and its possible children
+ * to render a Tree view of them.
+ */
+export const buildFieldTreeFromIds = (
+  fieldsIds: string[],
+  byId: NormalizedFields['byId'],
+  render: (field: NormalizedField) => JSX.Element | string
+): TreeItem[] =>
+  fieldsIds.map(id => {
+    const field = byId[id];
+    const children = field.childFields
+      ? buildFieldTreeFromIds(field.childFields, byId, render)
+      : undefined;
+
+    return { label: render(field), children };
+  });
 
 /**
  * When changing the type of a field, in most cases we want to delete all its child fields.

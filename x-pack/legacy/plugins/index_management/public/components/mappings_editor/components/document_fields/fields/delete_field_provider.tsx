@@ -9,6 +9,8 @@ import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
 
 import { useState as useMappingsState, useDispatch } from '../../../mappings_state';
 import { NormalizedField } from '../../../types';
+import { buildFieldTreeFromIds } from '../../../lib';
+import { Tree } from '../../tree';
 
 type DeleteFieldFunc = (property: NormalizedField) => void;
 
@@ -33,9 +35,9 @@ export const DeleteFieldProvider = ({ children }: Props) => {
   };
 
   const deleteField: DeleteFieldFunc = field => {
-    const { hasChildFields } = field;
+    const { hasChildFields, hasMultiFields } = field;
 
-    if (hasChildFields) {
+    if (hasChildFields || hasMultiFields) {
       setState({ isModalOpen: true, field });
     } else {
       dispatch({ type: 'field.remove', value: field.id });
@@ -49,8 +51,14 @@ export const DeleteFieldProvider = ({ children }: Props) => {
 
   const renderModal = () => {
     const field = state.field!;
-    const childFields = field.childFields!.map(childId => byId[childId]);
     const title = `Remove property '${field.source.name}'?`;
+
+    // TODO: here indicate if the field is a "multi-field" in a badge
+    const fieldsTree = buildFieldTreeFromIds(
+      field.childFields!,
+      byId,
+      (_field: NormalizedField) => _field.source.name
+    );
 
     return (
       <EuiOverlayMask>
@@ -63,18 +71,8 @@ export const DeleteFieldProvider = ({ children }: Props) => {
           confirmButtonText="Remove"
         >
           <Fragment>
-            <p>
-              This will also delete the following child fields and the possible child fields under
-              them.
-            </p>
-            <ul>
-              {childFields
-                .map(_field => _field.source.name)
-                .sort()
-                .map(name => (
-                  <li key={name}>{name}</li>
-                ))}
-            </ul>
+            <p>This will also delete the following fields.</p>
+            <Tree tree={fieldsTree} />
           </Fragment>
         </EuiConfirmModal>
       </EuiOverlayMask>
