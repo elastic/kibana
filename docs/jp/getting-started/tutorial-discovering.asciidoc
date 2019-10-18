@@ -1,7 +1,7 @@
 [[tutorial-discovering]]
 == データの検出
 
-サイドナビゲーションで*Discover*をクリックして、Kibanaのデータ検出機能を表示します。 
+サイドナビゲーションで *Discover* をクリックして、Kibanaのデータ検出機能を表示します。 
 
 image::images/tutorial-discover.png[]
 
@@ -12,7 +12,7 @@ Index Patternを追加するには、*Management/Kibana/Index Patterns*に移動
 
 対象のフィールド名と値を使用して検索を構築できます。数値フィールドでは、より大きい（>）、より小さい（<）、または等しい（=）などの比較演算子を使用できます。論理演算子AND、OR、およびNOT（すべて大文字）で要素をつなぐことができます。
 
-試してみましょう。Index Pattern `ba*`を選択して、クエリバーに次のクエリ文字列を入力します。
+試してみましょう。Index Pattern `ba*`&#8203;を選択して、クエリバーに次のクエリ文字列を入力します。
 
 [source,text]
 account_number:<100 AND balance:>47500
@@ -22,6 +22,6 @@ Account numbers 8, 32, 78, 85, and 97.
 
 image::images/tutorial-discover-2.png[]
 
-デフォルトでは、すべてのフィールドが一致するドキュメントごとに表示されます。表示するドキュメントフィールドを選択するには、Available Fieldsリストの上にマウスカーソルを移動し、含める各フィールドの横にある*add*ボタンをクリックします。 たとえば、`account_number`のみを追加すると、5つの口座番号を示すシンプルなリストに表示が変わります。
+デフォルトでは、すべてのフィールドが一致するドキュメントごとに表示されます。表示するドキュメントフィールドを選択するには、Available Fieldsリストの上にマウスカーソルを移動し、含める各フィールドの横にある*add*ボタンをクリックします。 たとえば、&#8203;`account_number`&#8203;のみを追加すると、5つの口座番号を示すシンプルなリストに表示が変わります。
 
 image::images/tutorial-discover-3.png[]

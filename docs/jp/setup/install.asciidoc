@@ -5,21 +5,21 @@ Kibanaは、次のパッケージ形式で提供されます。
 
 [horizontal]
 `tar.gz`/`zip`::
-`tar.gz`パッケージは、LinuxとDarwinへのインストール用に提供され、Kibanaの使用を開始するのにもっとも容易な選択です。
+`tar.gz`&#8203;パッケージは、LinuxとDarwinへのインストール用に提供され、Kibanaの使用を開始するのにもっとも容易な選択です。
 +
-`zip`パッケージは、Windows向けにサポートされている唯一のパッケージです。
+`zip`&#8203;パッケージは、Windows向けにサポートされている唯一のパッケージです。
 +
 <<targz>>または<<windows>>
 
 `deb`::
 
-`deb`パッケージは、DebianやUbuntuを始めとするDebianベースのシステムに適しています。Debianパッケージは、ElasticのWebサイトまたは弊社のDebianリポジトリからダウンロードできます。
+`deb`&#8203;パッケージは、DebianやUbuntuを始めとするDebianベースのシステムに適しています。Debianパッケージは、ElasticのWebサイトまたは弊社のDebianリポジトリからダウンロードできます。
 +
 <<deb>>
 
 `rpm`::
 
-`rpm`パッケージは、Red Hat、Centos、SLES、OpenSuSEなど、RPMベースのシステムに適しています。RPMは、ElasticのWebサイトまたは弊社のRPMリポジトリからダウンロードできます。
+`rpm`&#8203;パッケージは、Red Hat、Centos、SLES、OpenSuSEなど、RPMベースのシステムに適しています。RPMは、ElasticのWebサイトまたは弊社のRPMリポジトリからダウンロードできます。
 +
 <<rpm>>
 
