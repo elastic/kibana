@@ -110,9 +110,7 @@ export class DashboardAppController {
     indexPatterns,
     config,
     confirmModal,
-    courier,
   }: {
-    courier: { fetch: () => void };
     $scope: DashboardAppScope;
     $route: any;
     $routeParams: any;

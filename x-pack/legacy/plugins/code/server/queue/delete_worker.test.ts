@@ -179,9 +179,7 @@ test('On delete job uri does not exist.', async () => {
     log,
     esClient as EsClient,
     {
-      security: {
-        enableGitCertCheck: true,
-      },
+      security: {},
     } as ServerOptions,
     (gitOps as any) as GitOperations,
     (cancellationService as any) as CancellationSerivce,
@@ -279,9 +277,7 @@ test('On delete job uri contains ../', async () => {
     log,
     esClient as EsClient,
     {
-      security: {
-        enableGitCertCheck: true,
-      },
+      security: {},
     } as ServerOptions,
     (gitOps as any) as GitOperations,
     (cancellationService as any) as CancellationSerivce,
