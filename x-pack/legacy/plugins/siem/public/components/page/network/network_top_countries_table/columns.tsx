@@ -141,7 +141,10 @@ export const getNetworkTopCountriesColumns = (
   {
     align: 'right',
     field: `node.${flowTarget}.${getOppositeField(flowTarget)}_ips`,
-    name: flowTarget === FlowTargetSourceDest.source ? i18n.SOURCE_IPS : i18n.DESTINATION_IPS,
+    name:
+      getOppositeField(flowTarget) === FlowTargetSourceDest.source
+        ? i18n.SOURCE_IPS
+        : i18n.DESTINATION_IPS,
     sortable: true,
     render: ips => {
       if (ips != null) {
