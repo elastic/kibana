@@ -31,7 +31,6 @@ export const getLicenseExpiration = (getMonitoringCluster: any, logger: Logger):
     async executor({ services, params, state }: AlertExecutorOptions): Promise<any> {
       // console.log('firing', { params, state, services: Object.keys(services) });
 
-      const $now = moment();
       const { clusterUuid } = params;
       const callCluster = await getCallCluster(services);
 
@@ -56,6 +55,7 @@ export const getLicenseExpiration = (getMonitoringCluster: any, logger: Logger):
       if (license.status !== 'active') {
         isExpired = true;
       } else if (license.expiry_date_in_millis) {
+        const $now = moment();
         for (let i = EXPIRES_DAYS.length - 1; i >= 0; i--) {
           if (license.type === 'trial' && i < 2) {
             break;
@@ -77,7 +77,7 @@ export const getLicenseExpiration = (getMonitoringCluster: any, logger: Logger):
           message: `This cluster's license is going to expire on ${$expiry.format()}. Please update your license.`,
           to: emailAddress,
         });
-        result.expired_check_date_in_millis = $now.utc();
+        result.expired_check_date_in_millis = moment().valueOf();
       } else if (!isExpired && state.expired_check_date_in_millis) {
         instance.scheduleActions('default', {
           subject: 'RESOLVED X-Pack Monitoring: License Expiration',
