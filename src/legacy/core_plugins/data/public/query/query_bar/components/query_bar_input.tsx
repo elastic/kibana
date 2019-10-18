@@ -31,9 +31,8 @@ import {
   EuiLink,
 } from '@elastic/eui';
 
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { InjectedIntl, injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { debounce, compact, isEqual } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { documentationLinks } from 'ui/documentation_links';
 import { Toast } from 'src/core/public';
 import {
