@@ -359,7 +359,7 @@ function createFieldOptionList(agg: Aggregation | null) {
     .filter(f => f.id !== EVENT_RATE_FIELD_ID)
     .map(createFieldOption);
 
-  // working round EuiComboBox's odd behavior when the options list has only one item in it
+  // working round EuiComboBox's odd behavior when the options list contains only one item
   return options.length === 1 ? [emptyOption, ...options] : options;
 }
 
