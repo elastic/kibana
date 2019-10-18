@@ -73,4 +73,14 @@ describe('getUpgradeableConfig', () => {
     const result = await getUpgradeableConfig({ savedObjectsClient, version: '7.5.0' });
     expect(result).toBe(undefined);
   });
+
+  it('handles empty config', async () => {
+    const savedObjectsClient = SavedObjectsClientMock.create();
+    savedObjectsClient.find.mockResolvedValue({
+      saved_objects: [],
+    } as any);
+
+    const result = await getUpgradeableConfig({ savedObjectsClient, version: '7.5.0' });
+    expect(result).toBe(undefined);
+  });
 });
