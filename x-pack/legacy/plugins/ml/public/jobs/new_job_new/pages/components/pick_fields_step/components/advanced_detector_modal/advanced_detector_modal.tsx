@@ -87,6 +87,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
   );
   const [descriptionOption, setDescriptionOption] = useState(detector.description || '');
   const [fieldsEnabled, setFieldsEnabled] = useState(true);
+  const [excludeFrequentEnabled, setExcludeFrequentEnabled] = useState(true);
   const [fieldOptionEnabled, setFieldOptionEnabled] = useState(true);
   const { descriptionPlaceholder, setDescriptionPlaceholder } = useDetectorPlaceholder(detector);
 
@@ -117,6 +118,9 @@ export const AdvancedDetectorModal: FC<Props> = ({
   useEffect(() => {
     const agg = getAgg(aggOption.label);
     let field = getField(fieldOption.label);
+    const byField = getField(byFieldOption.label);
+    const overField = getField(overFieldOption.label);
+    const partitionField = getField(partitionFieldOption.label);
 
     if (agg !== null) {
       setFieldsEnabled(true);
@@ -126,6 +130,8 @@ export const AdvancedDetectorModal: FC<Props> = ({
         field = eventRateField;
       } else {
         setFieldOptionEnabled(true);
+        // only enable exclude frequent if there is a by or over selected
+        setExcludeFrequentEnabled(byField !== null || overField !== null);
       }
     } else {
       setFieldsEnabled(false);
@@ -134,9 +140,9 @@ export const AdvancedDetectorModal: FC<Props> = ({
     const dtr: RichDetector = {
       agg,
       field,
-      byField: getField(byFieldOption.label),
-      overField: getField(overFieldOption.label),
-      partitionField: getField(partitionFieldOption.label),
+      byField,
+      overField,
+      partitionField,
       excludeFrequent: excludeFrequentOption.label !== '' ? excludeFrequentOption.label : null,
       description: descriptionOption !== '' ? descriptionOption : null,
     };
@@ -157,8 +163,19 @@ export const AdvancedDetectorModal: FC<Props> = ({
     setFieldsEnabled(aggOption.label !== '');
     if (agg !== null) {
       setFieldOptionEnabled(isFieldlessAgg(agg) === false);
+
+      const byField = getField(byFieldOption.label);
+      const overField = getField(overFieldOption.label);
+      setExcludeFrequentEnabled(byField !== null || overField !== null);
     }
   }, []);
+
+  useEffect(() => {
+    // wipe the exclude frequent choice if the select has been disabled
+    if (excludeFrequentEnabled === false) {
+      setExcludeFrequentOption(emptyOption);
+    }
+  }, [excludeFrequentEnabled]);
 
   function onCreateClick() {
     detectorChangeHandler(detector, payload.index);
@@ -245,7 +262,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
                 selectedOptions={[excludeFrequentOption]}
                 onChange={onOptionChange(setExcludeFrequentOption)}
                 isClearable={true}
-                isDisabled={fieldsEnabled === false}
+                isDisabled={fieldsEnabled === false || excludeFrequentEnabled === false}
               />
             </ExcludeFrequentDescription>
           </EuiFlexItem>
