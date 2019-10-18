@@ -20,6 +20,15 @@ exports[`#setup constructs UiSettingsClient and UiSettingsApi: UiSettingsApi arg
             },
           ],
         },
+        "anonymousPaths": AnonymousPaths {
+          "basePath": BasePath {
+            "basePath": "",
+            "get": [Function],
+            "prepend": [Function],
+            "remove": [Function],
+          },
+          "paths": Set {},
+        },
         "basePath": BasePath {
           "basePath": "",
           "get": [Function],
