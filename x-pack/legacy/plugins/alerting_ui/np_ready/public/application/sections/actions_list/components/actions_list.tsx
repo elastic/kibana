@@ -187,10 +187,16 @@ export const ActionsList: React.FunctionComponent = () => {
                 defaultMessage: 'Type',
               }),
               multiSelect: 'or',
-              options: Object.values(actionTypesIndex || {}).map(actionType => ({
-                value: actionType.id,
-                name: actionType.name,
-              })),
+              options: Object.values(actionTypesIndex || {})
+                .map(actionType => ({
+                  value: actionType.id,
+                  name: actionType.name,
+                }))
+                .sort((a, b) => {
+                  if (a.name < b.name) return -1;
+                  if (a.name > b.name) return 1;
+                  return 0;
+                }),
             },
           ]}
           toolsRight={[
