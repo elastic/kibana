@@ -74,7 +74,7 @@ export const TransformManagement: FC = () => {
 
   return (
     <Fragment>
-      <EuiPageBody data-test-subj="transformPageTransform">
+      <EuiPageBody data-test-subj="transformPageTransformList">
         <EuiPageContent>
           <EuiTitle size="l">
             <EuiFlexGroup alignItems="center">
