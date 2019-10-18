@@ -29,7 +29,7 @@ include::field-formatters/url-formatter.asciidoc[]
 
 Date fields support the `Date`, `Url`, and `String` formatters.
 
-The `Date` formatter enables you to choose the display format of date stamps using the http://moment.js[moment.js]
+The `Date` formatter enables you to choose the display format of date stamps using the https://momentjs.com/[moment.js]
 standard format definitions.
 
 include::field-formatters/string-formatter.asciidoc[]
