@@ -5,7 +5,6 @@
  */
 
 import checkDiskSpace from 'check-disk-space';
-import { Server } from 'hapi';
 
 import { IndexerType } from '../model';
 import { DiskWatermarkService } from './disk_watermark';
@@ -22,7 +21,6 @@ import { CloneScheduler, IndexScheduler, UpdateScheduler } from './scheduler';
 import { Logger } from './log';
 
 export function initWorkers(
-  server: Server,
   log: Logger,
   esClient: EsClient,
   queue: Esqueue,

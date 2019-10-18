@@ -34,6 +34,7 @@ import { FieldSelect } from './field_select';
 import { hasField } from '../utils';
 import { BucketNestingEditor } from './bucket_nesting_editor';
 import { IndexPattern, IndexPatternField } from '../types';
+import { trackUiEvent } from '../../lens_ui_telemetry';
 
 const operationPanels = getOperationDisplay();
 
@@ -69,6 +70,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
     layerId,
     currentIndexPattern,
     uniqueLabel,
+    hideGrouping,
   } = props;
   const { operationByDocument, operationByField, fieldByOperation } = operationFieldSupportMatrix;
   const [isPopoverOpen, setPopoverOpen] = useState(false);
@@ -162,10 +164,12 @@ export function PopoverEditor(props: PopoverEditorProps) {
               } else {
                 setInvalidOperationType(operationType);
               }
+              trackUiEvent(`indexpattern_dimension_operation_${operationType}`);
               return;
             }
             if (!compatibleWithCurrentField) {
               setInvalidOperationType(operationType);
+              trackUiEvent(`indexpattern_dimension_operation_${operationType}`);
               return;
             }
             if (incompatibleSelectedOperationType) {
@@ -182,6 +186,9 @@ export function PopoverEditor(props: PopoverEditorProps) {
               indexPattern: currentIndexPattern,
               field: hasField(selectedColumn) ? fieldMap[selectedColumn.sourceField] : undefined,
             });
+            trackUiEvent(
+              `indexpattern_dimension_operation_from_${selectedColumn.operationType}_to_${operationType}`
+            );
             setState(
               changeColumn({
                 state,
@@ -288,17 +295,23 @@ export function PopoverEditor(props: PopoverEditorProps) {
                     ('field' in choice &&
                       operationFieldSupportMatrix.operationByField[choice.field]) ||
                     [];
-
+                  let operation;
+                  if (compatibleOperations.length > 0) {
+                    operation =
+                      incompatibleSelectedOperationType &&
+                      compatibleOperations.includes(incompatibleSelectedOperationType)
+                        ? incompatibleSelectedOperationType
+                        : compatibleOperations[0];
+                  } else if ('field' in choice) {
+                    operation = choice.operationType;
+                  }
                   column = buildColumn({
                     columns: props.state.layers[props.layerId].columns,
                     field: 'field' in choice ? fieldMap[choice.field] : undefined,
                     indexPattern: currentIndexPattern,
                     layerId: props.layerId,
                     suggestedPriority: props.suggestedPriority,
-                    op:
-                      incompatibleSelectedOperationType ||
-                      ('field' in choice ? choice.operationType : undefined) ||
-                      compatibleOperations[0],
+                    op: operation as OperationType,
                     asDocumentOperation: choice.type === 'document',
                   });
                 }
@@ -387,22 +400,25 @@ export function PopoverEditor(props: PopoverEditorProps) {
                     />
                   </EuiFormRow>
                 )}
-                <BucketNestingEditor
-                  layer={state.layers[props.layerId]}
-                  columnId={props.columnId}
-                  setColumns={columnOrder => {
-                    setState({
-                      ...state,
-                      layers: {
-                        ...state.layers,
-                        [props.layerId]: {
-                          ...state.layers[props.layerId],
-                          columnOrder,
+
+                {!hideGrouping && (
+                  <BucketNestingEditor
+                    layer={state.layers[props.layerId]}
+                    columnId={props.columnId}
+                    setColumns={columnOrder => {
+                      setState({
+                        ...state,
+                        layers: {
+                          ...state.layers,
+                          [props.layerId]: {
+                            ...state.layers[props.layerId],
+                            columnOrder,
+                          },
                         },
-                      },
-                    });
-                  }}
-                />
+                      });
+                    }}
+                  />
+                )}
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

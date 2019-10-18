@@ -91,7 +91,6 @@ describe('save editor frame state', () => {
             exists: { field: '@timestamp' },
           },
         ],
-        dateRange: { fromDate: 'now-7d', toDate: 'now' },
       },
       title: 'bbb',
       type: 'lens',

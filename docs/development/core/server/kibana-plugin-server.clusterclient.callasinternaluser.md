@@ -4,7 +4,7 @@
 
 ## ClusterClient.callAsInternalUser property
 
-Calls specified endpoint with provided clientParams on behalf of the Kibana internal user.
+Calls specified endpoint with provided clientParams on behalf of the Kibana internal user. See [APICaller](./kibana-plugin-server.apicaller.md)<!-- -->.
 
 <b>Signature:</b>
 

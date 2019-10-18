@@ -4,6 +4,8 @@
 
 ## ToastsApi.remove() method
 
+Removes a toast from the current array of toasts if present.
+
 <b>Signature:</b>
 
 ```typescript
@@ -14,7 +16,7 @@ remove(toast: Toast): void;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  toast | <code>Toast</code> |  |
+|  toast | <code>Toast</code> | a  returned by  |
 
 <b>Returns:</b>
 

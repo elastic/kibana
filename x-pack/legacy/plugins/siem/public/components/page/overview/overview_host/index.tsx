@@ -17,6 +17,7 @@ import {
 } from '../../../../containers/overview/overview_host';
 import { inputsModel } from '../../../../store/inputs';
 import { OverviewHostStats } from '../overview_host_stats';
+import { getHostsUrl } from '../../../link_to';
 
 export interface OwnProps {
   startDate: number;
@@ -55,7 +56,7 @@ export const OverviewHost = pure<OverviewHostProps>(({ endDate, startDate, setQu
             <FormattedMessage id="xpack.siem.overview.hostsTitle" defaultMessage="Host events" />
           }
         >
-          <EuiButton href="#/link-to/hosts">
+          <EuiButton href={getHostsUrl()}>
             <FormattedMessage id="xpack.siem.overview.hostsAction" defaultMessage="View hosts" />
           </EuiButton>
         </HeaderPanel>

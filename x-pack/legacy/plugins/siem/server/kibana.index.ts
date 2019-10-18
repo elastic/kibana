@@ -20,7 +20,7 @@ import { createSignalsRoute } from './lib/detection_engine/routes/create_signals
 import { readSignalsRoute } from './lib/detection_engine/routes/read_signals_route';
 import { findSignalsRoute } from './lib/detection_engine/routes/find_signals_route';
 import { deleteSignalsRoute } from './lib/detection_engine/routes/delete_signals_route';
-import { updateSignalsRoute } from './lib/detection_engine/routes/updated_signals_route';
+import { updateSignalsRoute } from './lib/detection_engine/routes/update_signals_route';
 
 const APP_ID = 'siem';
 
