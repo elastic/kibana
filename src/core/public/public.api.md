@@ -426,15 +426,9 @@ export interface HttpErrorRequest {
 }
 
 // @public (undocumented)
-export interface HttpErrorResponse {
-    // (undocumented)
-    body?: HttpBody;
+export interface HttpErrorResponse extends HttpResponse {
     // (undocumented)
     error: Error | IHttpFetchError;
-    // (undocumented)
-    request: Readonly<Request>;
-    // (undocumented)
-    response?: Response;
 }
 
 // @public
@@ -463,8 +457,9 @@ export interface HttpHeadersInit {
 export interface HttpInterceptor {
     request?(request: Request, controller: IHttpInterceptController): Promise<Request> | Request | void;
     requestError?(httpErrorRequest: HttpErrorRequest, controller: IHttpInterceptController): Promise<Request> | Request | void;
-    response?(httpResponse: HttpResponse, controller: IHttpInterceptController): Promise<Partial<HttpResponse>> | Partial<HttpResponse> | void;
-    responseError?(httpErrorResponse: HttpErrorResponse, controller: IHttpInterceptController): Promise<HttpResponse> | HttpResponse | void;
+    // Warning: (ae-forgotten-export) The symbol "InterceptedHttpResponse" needs to be exported by the entry point index.d.ts
+    response?(httpResponse: HttpResponse, controller: IHttpInterceptController): Promise<InterceptedHttpResponse> | InterceptedHttpResponse | void;
+    responseError?(httpErrorResponse: HttpErrorResponse, controller: IHttpInterceptController): Promise<InterceptedHttpResponse> | InterceptedHttpResponse | void;
 }
 
 // @public
@@ -486,13 +481,9 @@ export interface HttpRequestInit {
 }
 
 // @public (undocumented)
-export interface HttpResponse {
-    // (undocumented)
-    body?: HttpBody;
+export interface HttpResponse extends InterceptedHttpResponse {
     // (undocumented)
     request: Readonly<Request>;
-    // (undocumented)
-    response?: Response;
 }
 
 // @public (undocumented)
