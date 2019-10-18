@@ -61,11 +61,10 @@ export const useAnalysisSetupState = ({
   }, [cleanupAndSetupModule, selectedIndexNames, startTime, endTime]);
 
   const validationErrors: ValidationErrors[] = useMemo(
-    () => [
-      ...(Object.values(selectedIndices).some(isSelected => isSelected)
+    () =>
+      Object.values(selectedIndices).some(isSelected => isSelected)
         ? []
-        : ['TOO_FEW_SELECTED_INDICES' as const]),
-    ],
+        : ['TOO_FEW_SELECTED_INDICES' as const],
     [selectedIndices]
   );
 
