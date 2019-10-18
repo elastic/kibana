@@ -503,7 +503,7 @@ export class GitOperations {
     const options: any = {
       n: count,
       format: {
-        updated: '%ai',
+        updated: '%aI',
         message: '%B',
         author: '%an',
         authorEmail: '%ae',
