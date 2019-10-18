@@ -17,12 +17,21 @@
  * under the License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('core plugins', () => {
-    loadTestFile(require.resolve('./applications'));
-    loadTestFile(require.resolve('./legacy_plugins'));
-    loadTestFile(require.resolve('./server_plugins'));
-    loadTestFile(require.resolve('./ui_plugins'));
-    loadTestFile(require.resolve('./ui_settings'));
-  });
+import { CoreSetup, Plugin } from 'kibana/public';
+
+declare global {
+  interface Window {
+    uiSettingsPlugin?: Record<string, any>;
+    uiSettingsPluginValue?: string;
+  }
+}
+
+export class UiSettingsPlugin implements Plugin {
+  public setup(core: CoreSetup) {
+    window.uiSettingsPlugin = core.uiSettings.getAll().ui_settings_plugin;
+    window.uiSettingsPluginValue = core.uiSettings.get('ui_settings_plugin');
+  }
+
+  public start() {}
+  public stop() {}
 }

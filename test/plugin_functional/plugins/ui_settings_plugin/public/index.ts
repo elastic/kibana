@@ -16,13 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { UiSettingsPlugin } from './plugin';
 
-export default function ({ loadTestFile }) {
-  describe('core plugins', () => {
-    loadTestFile(require.resolve('./applications'));
-    loadTestFile(require.resolve('./legacy_plugins'));
-    loadTestFile(require.resolve('./server_plugins'));
-    loadTestFile(require.resolve('./ui_plugins'));
-    loadTestFile(require.resolve('./ui_settings'));
-  });
-}
+export const plugin = () => new UiSettingsPlugin();

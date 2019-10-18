@@ -17,12 +17,28 @@
  * under the License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('core plugins', () => {
-    loadTestFile(require.resolve('./applications'));
-    loadTestFile(require.resolve('./legacy_plugins'));
-    loadTestFile(require.resolve('./server_plugins'));
-    loadTestFile(require.resolve('./ui_plugins'));
-    loadTestFile(require.resolve('./ui_settings'));
-  });
+import { Plugin, CoreSetup } from 'kibana/server';
+
+export class UiSettingsPlugin implements Plugin {
+  public setup(core: CoreSetup) {
+    core.uiSettings.setDefaults({
+      ui_settings_plugin: {
+        name: 'from_ui_settings_plugin',
+        description: 'just for testing',
+        value: '2',
+        category: ['any'],
+      },
+    });
+
+    const router = core.http.createRouter();
+    router.get({ path: '/api/ui-settings-plugin', validate: false }, async (context, req, res) => {
+      const uiSettingsValue = await context.core.uiSettings.client.get<number>(
+        'ui_settings_plugin'
+      );
+      return res.ok({ body: { uiSettingsValue } });
+    });
+  }
+
+  public start() {}
+  public stop() {}
 }
