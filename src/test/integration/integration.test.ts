@@ -35,11 +35,13 @@ describe('when a single commit is backported', () => {
 
   it('should make correct API requests', () => {
     const {
+      getDefaultRepoBranch,
       getAuthorPayload,
       getCommitsPayload,
       createPullRequestPayload
     } = spies.getAxiosCalls();
 
+    expect(getDefaultRepoBranch).toMatchSnapshot();
     expect(getAuthorPayload).toMatchSnapshot();
     expect(getCommitsPayload).toMatchSnapshot();
     expect(createPullRequestPayload).toMatchSnapshot();

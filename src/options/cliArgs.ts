@@ -15,7 +15,6 @@ export function getOptionsFromCliArgs(
     .wrap(Math.max(100, Math.min(120, yargs.terminalWidth())))
     .option('accessToken', {
       alias: 'accesstoken',
-      default: configOptions.accessToken,
       description: 'Github access token',
       type: 'string'
     })
@@ -121,6 +120,11 @@ export function getOptionsFromCliArgs(
       description: 'Name of repository',
       type: 'string'
     })
+    .option('sourceBranch', {
+      default: configOptions.sourceBranch,
+      description: `List commits to backport from another branch than master`,
+      type: 'string'
+    })
     .option('username', {
       default: configOptions.username,
       description: 'Github username',
@@ -140,6 +144,7 @@ export function getOptionsFromCliArgs(
 
   return {
     ...rest,
+    accessToken: cliArgs.accessToken || configOptions.accessToken,
     branchChoices: configOptions.branchChoices,
     multipleBranches: cliArgs.multipleBranches || cliArgs.multiple,
     multipleCommits: cliArgs.multipleCommits || cliArgs.multiple

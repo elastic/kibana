@@ -146,6 +146,12 @@ alias backport-skip-ci='backport --prDescription "[skip-ci]"'
 
 CLI: `--prDescription "skip-ci"`
 
+#### `sourceBranch`
+
+By default the list of commits will be sourced from the repository's default branch (mostly "master"). Use `sourceBranch` to list and backport commits from other branches than the default.
+
+CLI: `--sourceBranch 7.x`
+
 #### `gitHostname`
 
 Hostname for Github.

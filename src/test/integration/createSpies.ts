@@ -37,6 +37,13 @@ export function createSpies({ commitCount }: { commitCount: number }) {
   const axiosPostSpy = jest
     .spyOn(axios, 'post')
 
+    // mock getDefaultRepoBranch
+    .mockReturnValueOnce({
+      data: {
+        data: { repository: { defaultBranchRef: { name: 'master' } } }
+      }
+    } as any)
+
     // mock author id
     .mockReturnValueOnce({
       data: {
@@ -56,12 +63,7 @@ export function createSpies({ commitCount }: { commitCount: number }) {
     } as any)
 
     // mock create pull request
-    .mockReturnValueOnce({
-      data: {
-        html_url: 'pull request url',
-        number: 1337
-      }
-    } as any);
+    .mockReturnValueOnce({ data: {} } as any);
 
   // mock prompt
   jest
@@ -82,12 +84,18 @@ export function createSpies({ commitCount }: { commitCount: number }) {
   return {
     getAxiosCalls: () => {
       const [
+        getDefaultRepoBranch,
         getAuthorPayload,
         getCommitsPayload,
         createPullRequestPayload
       ] = axiosPostSpy.mock.calls.map(call => call[1]);
 
-      return { getAuthorPayload, getCommitsPayload, createPullRequestPayload };
+      return {
+        getDefaultRepoBranch,
+        getAuthorPayload,
+        getCommitsPayload,
+        createPullRequestPayload
+      };
     }
   };
 }

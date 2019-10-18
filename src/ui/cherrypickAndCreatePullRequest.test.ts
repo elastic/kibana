@@ -41,16 +41,19 @@ describe('cherrypickAndCreatePullRequest', () => {
         prTitle: '[{baseBranch}] {commitMessages}',
         repoName: 'kibana',
         repoOwner: 'elastic',
-        username: 'sqren'
+        username: 'sqren',
+        sourceBranch: 'myDefaultRepoBaseBranch'
       } as BackportOptions;
 
       const commits = [
         {
+          branch: '7.x',
           sha: 'mySha',
           message: 'myCommitMessage (#1000)',
           pullNumber: 1000
         },
         {
+          branch: '7.x',
           sha: 'mySha2',
           message: 'myOtherCommitMessage (#2000)',
           pullNumber: 2000
@@ -112,7 +115,9 @@ myPrSuffix`
 
       await cherrypickAndCreatePullRequest({
         options,
-        commits: [{ sha: 'mySha', message: 'myCommitMessage (mySha)' }],
+        commits: [
+          { branch: '7.x', sha: 'mySha', message: 'myCommitMessage (mySha)' }
+        ],
         baseBranch: '6.x'
       });
     });
@@ -167,12 +172,13 @@ myPrSuffix`
         prTitle: '[{baseBranch}] {commitMessages}',
         repoName: 'kibana',
         repoOwner: 'elastic',
-        username: 'sqren'
+        username: 'sqren',
+        sourceBranch: 'myDefaultRepoBaseBranch'
       } as BackportOptions;
 
       const promise = cherrypickAndCreatePullRequest({
         options,
-        commits: [{ sha: 'mySha', message: 'myCommitMessage' }],
+        commits: [{ branch: '7.x', sha: 'mySha', message: 'myCommitMessage' }],
         baseBranch: '6.x'
       });
 

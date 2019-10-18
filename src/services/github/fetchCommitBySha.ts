@@ -21,6 +21,7 @@ export async function fetchCommitBySha(
       }
     );
 
+    // TODO: it should be possible to backport from other branches than master
     if (isEmpty(res.data.items)) {
       throw new HandledError(`No commit found on master with sha "${sha}"`);
     }
@@ -34,6 +35,7 @@ export async function fetchCommitBySha(
     });
 
     return {
+      branch: 'master',
       message,
       sha: fullSha
     };

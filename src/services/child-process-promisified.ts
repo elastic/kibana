@@ -1,7 +1,9 @@
 import child_process from 'child_process';
 import { promisify } from 'util';
+import { logger } from './logger';
 
 export const exec = (cmd: string, options: child_process.ExecOptions = {}) => {
+  logger.info(`exec: ${cmd}`);
   const execPromisified = promisify(child_process.exec);
   return execPromisified(cmd, { maxBuffer: 100 * 1024 * 1024, ...options });
 };

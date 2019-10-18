@@ -29,11 +29,12 @@ Array [
       $repoOwner: String!
       $repoName: String!
       $commitsCount: Int!
+      $sourceBranch: String!
       $authorId: ID
       $historyPath: String
     ) {
       repository(owner: $repoOwner, name: $repoName) {
-        ref(qualifiedName: \\"master\\") {
+        ref(qualifiedName: $sourceBranch) {
           target {
             ... on Commit {
               history(
@@ -100,6 +101,7 @@ Array [
       "historyPath": null,
       "repoName": "kibana",
       "repoOwner": "elastic",
+      "sourceBranch": undefined,
     },
   },
 ]

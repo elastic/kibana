@@ -39,7 +39,7 @@ Array [
     },
   ],
   Array [
-    "git fetch elastic master:master --force && git cherry-pick 2e63475c483f7844b0f2833bc57fdee32095bacb",
+    "git fetch elastic mySourceBranch:mySourceBranch --force && git cherry-pick 2e63475c483f7844b0f2833bc57fdee32095bacb",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
     },
@@ -51,7 +51,7 @@ Array [
     },
   ],
   Array [
-    "git checkout master && git branch -D backport/6.x/commit-2e63475c",
+    "git checkout mySourceBranch && git branch -D backport/6.x/commit-2e63475c",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
     },
@@ -82,6 +82,7 @@ Array [
             "name": "[90m1.[39m Add 👻 (2e63475c) ",
             "short": "Add 👻 (2e63475c)",
             "value": Object {
+              "branch": "mySourceBranch",
               "existingBackports": Array [],
               "message": "Add 👻 (2e63475c)",
               "pullNumber": undefined,
@@ -92,6 +93,7 @@ Array [
             "name": "[90m2.[39m Add witch (#85) ",
             "short": "Add witch (#85)",
             "value": Object {
+              "branch": "mySourceBranch",
               "existingBackports": Array [],
               "message": "Add witch (#85)",
               "pullNumber": 85,
@@ -102,6 +104,7 @@ Array [
             "name": "[90m3.[39m Add SF mention (#80) [32m6.3[39m",
             "short": "Add SF mention (#80)",
             "value": Object {
+              "branch": "mySourceBranch",
               "existingBackports": Array [
                 Object {
                   "branch": "6.3",
@@ -117,6 +120,7 @@ Array [
             "name": "[90m4.[39m Add backport config (3827bbba) ",
             "short": "Add backport config (3827bbba)",
             "value": Object {
+              "branch": "mySourceBranch",
               "existingBackports": Array [],
               "message": "Add backport config (3827bbba)",
               "pullNumber": undefined,
@@ -127,6 +131,7 @@ Array [
             "name": "[90m5.[39m Initial commit (5ea0da55) ",
             "short": "Initial commit (5ea0da55)",
             "value": Object {
+              "branch": "mySourceBranch",
               "existingBackports": Array [],
               "message": "Initial commit (5ea0da55)",
               "pullNumber": undefined,

@@ -13,6 +13,7 @@ export interface Config {
   branches?: (string | BranchChoice)[];
   upstream?: string;
   fork?: boolean;
+  sourceBranch?: string;
 
   // both
   all?: boolean;

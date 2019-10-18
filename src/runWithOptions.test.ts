@@ -12,7 +12,6 @@ describe('runWithOptions', () => {
   let rpcExecMock: jest.SpyInstance;
   let rpcExecOriginalMock: jest.SpyInstance;
   let inquirerPromptMock: jest.SpyInstance;
-  let axiosHeadSpy: jest.SpyInstance;
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -49,6 +48,7 @@ describe('runWithOptions', () => {
       repoOwner: 'elastic',
       resetAuthor: false,
       sha: undefined,
+      sourceBranch: 'mySourceBranch',
       username: 'sqren',
       verbose: false
     };
@@ -69,9 +69,6 @@ describe('runWithOptions', () => {
       .mockImplementationOnce((async (args: any) => {
         return { promptResult: args[0].choices[0].name };
       }) as any);
-
-    // mock verifyAccessToken
-    axiosHeadSpy = jest.spyOn(axios, 'head').mockReturnValueOnce(true as any);
 
     // mock axios post request (graphql)
     jest
@@ -104,12 +101,6 @@ describe('runWithOptions', () => {
       } as any);
 
     await runWithOptions(options);
-  });
-
-  it('should check whether access token is valid', () => {
-    expect(axiosHeadSpy).toHaveBeenCalledWith(
-      'https://api.github.com/repos/elastic/kibana?access_token=myAccessToken'
-    );
   });
 
   it('getCommit should be called with correct args', () => {

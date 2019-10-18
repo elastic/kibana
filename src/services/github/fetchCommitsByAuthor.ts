@@ -7,6 +7,7 @@ import {
   getFormattedCommitMessage
 } from './commitFormatters';
 import { gqlRequest } from './gqlRequest';
+import { HandledError } from '../HandledError';
 
 export async function fetchCommitsByAuthor(
   options: BackportOptions
@@ -17,7 +18,8 @@ export async function fetchCommitsByAuthor(
     commitsCount,
     path,
     repoName,
-    repoOwner
+    repoOwner,
+    sourceBranch
   } = options;
 
   const query = /* GraphQL */ `
@@ -25,11 +27,12 @@ export async function fetchCommitsByAuthor(
       $repoOwner: String!
       $repoName: String!
       $commitsCount: Int!
+      $sourceBranch: String!
       $authorId: ID
       $historyPath: String
     ) {
       repository(owner: $repoOwner, name: $repoName) {
-        ref(qualifiedName: "master") {
+        ref(qualifiedName: $sourceBranch) {
           target {
             ... on Commit {
               history(
@@ -99,11 +102,18 @@ export async function fetchCommitsByAuthor(
     variables: {
       repoOwner,
       repoName,
+      sourceBranch,
       commitsCount: commitsCount || 10,
       authorId,
       historyPath: path || null
     }
   });
+
+  if (res.repository.ref === null) {
+    throw new HandledError(
+      `The upstream branch "${sourceBranch}" does not exist. Try specifying a different branch with "--sourceBranch <your-branch>"`
+    );
+  }
 
   return res.repository.ref.target.history.edges.map(edge => {
     const historyNode = edge.node;
@@ -130,6 +140,7 @@ export async function fetchCommitsByAuthor(
     });
 
     return {
+      branch: sourceBranch,
       sha,
       message,
       pullNumber,
@@ -202,7 +213,7 @@ export interface DataResponse {
           edges: HistoryEdge[];
         };
       };
-    };
+    } | null;
   };
 }
 

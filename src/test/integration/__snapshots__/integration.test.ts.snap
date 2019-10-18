@@ -22,11 +22,12 @@ Object {
       $repoOwner: String!
       $repoName: String!
       $commitsCount: Int!
+      $sourceBranch: String!
       $authorId: ID
       $historyPath: String
     ) {
       repository(owner: $repoOwner, name: $repoName) {
-        ref(qualifiedName: \\"master\\") {
+        ref(qualifiedName: $sourceBranch) {
           target {
             ... on Commit {
               history(
@@ -93,6 +94,7 @@ Object {
     "historyPath": null,
     "repoName": "backport-demo",
     "repoOwner": "elastic",
+    "sourceBranch": "master",
   },
 }
 `;
@@ -111,6 +113,24 @@ Object {
 exports[`when a single commit is backported should make correct API requests 1`] = `
 Object {
   "query": "
+    query getDefaultBranch($repoOwner: String!, $repoName: String!) {
+      repository(owner: $repoOwner, name: $repoName) {
+        defaultBranchRef {
+          name
+        }
+      }
+    }
+  ",
+  "variables": Object {
+    "repoName": "backport-demo",
+    "repoOwner": "elastic",
+  },
+}
+`;
+
+exports[`when a single commit is backported should make correct API requests 2`] = `
+Object {
+  "query": "
     query getIdByLogin($login: String!) {
       user(login: $login) {
         id
@@ -123,18 +143,19 @@ Object {
 }
 `;
 
-exports[`when a single commit is backported should make correct API requests 2`] = `
+exports[`when a single commit is backported should make correct API requests 3`] = `
 Object {
   "query": "
     query getCommitsByAuthorQuery(
       $repoOwner: String!
       $repoName: String!
       $commitsCount: Int!
+      $sourceBranch: String!
       $authorId: ID
       $historyPath: String
     ) {
       repository(owner: $repoOwner, name: $repoName) {
-        ref(qualifiedName: \\"master\\") {
+        ref(qualifiedName: $sourceBranch) {
           target {
             ... on Commit {
               history(
@@ -201,11 +222,12 @@ Object {
     "historyPath": null,
     "repoName": "backport-demo",
     "repoOwner": "elastic",
+    "sourceBranch": "master",
   },
 }
 `;
 
-exports[`when a single commit is backported should make correct API requests 3`] = `
+exports[`when a single commit is backported should make correct API requests 4`] = `
 Object {
   "base": "6.0",
   "body": "Backports the following commits to 6.0:

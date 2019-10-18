@@ -1,8 +1,8 @@
 import { BackportOptions } from '../../options/options';
-import { HandledError } from '../HandledError';
 import { CommitSelected } from './Commit';
 import { getFormattedCommitMessage } from './commitFormatters';
 import { gqlRequest } from './gqlRequest';
+import { HandledError } from '../HandledError';
 
 export async function fetchCommitByPullNumber(
   options: BackportOptions & { pullNumber: number }
@@ -39,13 +39,11 @@ export async function fetchCommitByPullNumber(
     }
   });
 
-  const baseRef = res.repository.pullRequest.baseRef.name;
-  if (baseRef !== 'master') {
-    throw new HandledError(
-      `The pull request #${pullNumber} was merged into ${baseRef}. Only commits in master can be backported`
-    );
+  if (res.repository.pullRequest.mergeCommit === null) {
+    throw new HandledError(`The PR #${pullNumber} is not merged`);
   }
 
+  const baseBranch = res.repository.pullRequest.baseRef.name;
   const sha = res.repository.pullRequest.mergeCommit.oid;
   const message = getFormattedCommitMessage({
     message: res.repository.pullRequest.mergeCommit.message,
@@ -54,6 +52,7 @@ export async function fetchCommitByPullNumber(
   });
 
   return {
+    branch: baseBranch,
     sha,
     message,
     pullNumber
@@ -69,7 +68,7 @@ interface DataResponse {
       mergeCommit: {
         oid: string;
         message: string;
-      };
+      } | null;
     };
   };
 }

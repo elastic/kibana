@@ -1,5 +1,6 @@
 // Commit object selected from list or via commit sha
 export interface CommitSelected {
+  branch: string;
   sha: string;
   message: string;
   pullNumber?: number;

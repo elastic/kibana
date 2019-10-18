@@ -4,6 +4,7 @@ import { HandledError } from './HandledError';
 import { stat } from './fs-promisified';
 import { getRepoOwnerPath, getRepoPath } from './env';
 import { execAsCallback, exec } from './child-process-promisified';
+import { CommitSelected } from './github/Commit';
 
 async function folderExists(path: string): Promise<boolean> {
   try {
@@ -94,9 +95,9 @@ export async function addRemote(options: BackportOptions, remoteName: string) {
   }
 }
 
-export function cherrypick(options: BackportOptions, commitSha: string) {
+export function cherrypick(options: BackportOptions, commit: CommitSelected) {
   return exec(
-    `git fetch ${options.repoOwner} master:master --force && git cherry-pick ${commitSha}`,
+    `git fetch ${options.repoOwner} ${commit.branch}:${commit.branch} --force && git cherry-pick ${commit.sha}`,
     {
       cwd: getRepoPath(options)
     }
@@ -152,9 +153,12 @@ export function deleteFeatureBranch(
   options: BackportOptions,
   featureBranch: string
 ) {
-  return exec(`git checkout master && git branch -D ${featureBranch}`, {
-    cwd: getRepoPath(options)
-  });
+  return exec(
+    `git checkout ${options.sourceBranch} && git branch -D ${featureBranch}`,
+    {
+      cwd: getRepoPath(options)
+    }
+  );
 }
 
 export function getRemoteName(options: BackportOptions) {

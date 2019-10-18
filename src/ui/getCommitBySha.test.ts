@@ -17,6 +17,7 @@ describe('getCommitBySha', () => {
     } as BackportOptions & { sha: string });
 
     expect(commit).toEqual({
+      branch: 'master',
       message: '[Chrome] Bootstrap Angular into document.body (myCommit)',
       sha: 'myCommitSha',
       pullNumber: undefined

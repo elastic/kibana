@@ -45,9 +45,7 @@ export async function cherrypickAndCreatePullRequest({
     createFeatureBranch(options, baseBranch, featureBranch)
   );
 
-  await sequentially(commits, commit =>
-    cherrypickAndConfirm(options, commit.sha)
-  );
+  await sequentially(commits, commit => cherrypickAndConfirm(options, commit));
 
   if (options.resetAuthor) {
     await withSpinner(
@@ -88,10 +86,15 @@ function getFeatureBranchName(baseBranch: string, commits: CommitSelected[]) {
   return `backport/${baseBranch}/${refValues}`;
 }
 
-async function cherrypickAndConfirm(options: BackportOptions, sha: string) {
-  const spinner = ora(`Cherry-picking commit ${getShortSha(sha)}`).start();
+async function cherrypickAndConfirm(
+  options: BackportOptions,
+  commit: CommitSelected
+) {
+  const spinner = ora(
+    `Cherry-picking commit ${getShortSha(commit.sha)}`
+  ).start();
   try {
-    await cherrypick(options, sha);
+    await cherrypick(options, commit);
     spinner.succeed();
   } catch (e) {
     const repoPath = getRepoPath(options);

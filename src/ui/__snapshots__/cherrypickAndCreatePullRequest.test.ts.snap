@@ -9,7 +9,7 @@ Array [
     },
   ],
   Array [
-    "git fetch elastic master:master --force && git cherry-pick mySha",
+    "git fetch elastic 7.x:7.x --force && git cherry-pick mySha",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
     },
@@ -26,7 +26,7 @@ Array [
     },
   ],
   Array [
-    "git fetch elastic master:master --force && git cherry-pick mySha",
+    "git fetch elastic 7.x:7.x --force && git cherry-pick mySha",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
     },
@@ -44,7 +44,7 @@ Array [
     },
   ],
   Array [
-    "git checkout master && git branch -D backport/6.x/commit-mySha",
+    "git checkout myDefaultRepoBaseBranch && git branch -D backport/6.x/commit-mySha",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
     },
@@ -61,13 +61,13 @@ Array [
     },
   ],
   Array [
-    "git fetch elastic master:master --force && git cherry-pick mySha",
+    "git fetch elastic 7.x:7.x --force && git cherry-pick mySha",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
     },
   ],
   Array [
-    "git fetch elastic master:master --force && git cherry-pick mySha2",
+    "git fetch elastic 7.x:7.x --force && git cherry-pick mySha2",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
     },
@@ -79,7 +79,7 @@ Array [
     },
   ],
   Array [
-    "git checkout master && git branch -D backport/6.x/pr-1000_pr-2000",
+    "git checkout myDefaultRepoBaseBranch && git branch -D backport/6.x/pr-1000_pr-2000",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
     },

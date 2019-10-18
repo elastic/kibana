@@ -1,8 +1,8 @@
 import axios from 'axios';
 import get from 'lodash.get';
-import { BackportOptions } from '../../options/options';
 import { HandledError } from '../HandledError';
 import { GithubApiError } from './GithubApiTypes';
+import { validateRequiredOptions } from '../../options/options';
 
 function getSSOAuthUrl(error: GithubApiError) {
   const githubSSO: string | undefined = get(
@@ -19,7 +19,7 @@ export async function verifyAccessToken({
   apiHostname,
   repoName,
   repoOwner
-}: BackportOptions) {
+}: ReturnType<typeof validateRequiredOptions>) {
   try {
     return await axios.head(
       `https://${apiHostname}/repos/${repoOwner}/${repoName}?access_token=${accessToken}`
