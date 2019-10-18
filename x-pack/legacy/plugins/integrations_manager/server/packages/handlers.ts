@@ -70,11 +70,15 @@ export async function handleGetInfo(req: PackageRequest, extra: Extra) {
 export const handleGetFile = async (req: Request, extra: Extra) => {
   if (!req.url.path) throw new Error('path is required');
   const filePath = req.url.path.replace(API_ROOT, '');
-  const response = await getFile(filePath);
-  const newResponse = extra.response(response.body);
-  // set the content type from the registry response
-  newResponse.header('Content-Type', response.headers.get('content-type') || '');
-  return newResponse;
+  const registryResponse = await getFile(filePath);
+  const epmResponse = extra.response(registryResponse.body);
+  const proxiedHeaders = ['Content-Type'];
+  proxiedHeaders.forEach(key => {
+    const value = registryResponse.headers.get(key);
+    if (value !== null) epmResponse.header(key, value);
+  });
+
+  return epmResponse;
 };
 
 export async function handleRequestInstall(req: InstallAssetRequest, extra: Extra) {

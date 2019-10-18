@@ -25,7 +25,7 @@ export const routes: ServerRoute[] = [
   {
     method: 'GET',
     path: `${CommonRoutes.API_INFO_PATTERN}/{filePath*}`,
-    options: { tags: [`access:${PLUGIN.ID}`], json: { space: 2 } },
+    options: { tags: [`access:${PLUGIN.ID}`] },
     handler: Packages.handleGetFile,
   },
   {
