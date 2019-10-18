@@ -46,7 +46,7 @@ function handleError(
   return Rx.of({ completed: [], failed: [] });
 }
 
-export class ReportingNotifierPublicPlugin implements Plugin<any, any> {
+export class ReportingPublicPlugin implements Plugin<any, any> {
   private readonly stop$ = new Rx.ReplaySubject(1);
 
   // FIXME: License checking: only active, non-expired licenses allowed
@@ -78,5 +78,5 @@ export class ReportingNotifierPublicPlugin implements Plugin<any, any> {
   }
 }
 
-export type Setup = ReturnType<ReportingNotifierPublicPlugin['setup']>;
-export type Start = ReturnType<ReportingNotifierPublicPlugin['start']>;
+export type Setup = ReturnType<ReportingPublicPlugin['setup']>;
+export type Start = ReturnType<ReportingPublicPlugin['start']>;

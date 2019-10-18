@@ -5,10 +5,10 @@
  */
 
 import { PluginInitializerContext } from '../../../../src/core/public';
-import { ReportingNotifierPublicPlugin } from './plugin';
+import { ReportingPublicPlugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
-  return new ReportingNotifierPublicPlugin(initializerContext);
+  return new ReportingPublicPlugin(initializerContext);
 }
 
-export { ReportingNotifierPublicPlugin as Plugin };
+export { ReportingPublicPlugin as Plugin };
