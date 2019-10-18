@@ -27,16 +27,9 @@ export const EMPTY_ACTION_SECONDARY = i18n.translate('xpack.siem.network.emptyAc
   defaultMessage: 'Go to documentation',
 });
 
-export const NAVIGATION_IPS_TITLE = i18n.translate('xpack.siem.network.navigation.ipsTitle', {
-  defaultMessage: 'IPs',
+export const NAVIGATION_FLOWS_TITLE = i18n.translate('xpack.siem.network.navigation.flowsTitle', {
+  defaultMessage: 'Flows',
 });
-
-export const NAVIGATION_COUNTRIES_TITLE = i18n.translate(
-  'xpack.siem.network.navigation.countriesTitle',
-  {
-    defaultMessage: 'Top Countries',
-  }
-);
 
 export const NAVIGATION_DNS_TITLE = i18n.translate('xpack.siem.network.navigation.dnsTitle', {
   defaultMessage: 'DNS',
