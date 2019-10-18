@@ -41,7 +41,6 @@ describe('NumberRow', () => {
       },
       onChange: jest.fn(),
       onBlur: jest.fn(),
-      onFocus: jest.fn(),
       onDelete: jest.fn(),
     };
   });

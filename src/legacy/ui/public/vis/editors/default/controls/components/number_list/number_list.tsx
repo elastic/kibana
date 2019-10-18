@@ -34,6 +34,7 @@ import {
   getUpdatedModels,
   hasInvalidValues,
 } from './utils';
+import { useValidation } from '../../agg_utils';
 
 export interface NumberListProps {
   labelledbyId: string;
@@ -42,8 +43,6 @@ export interface NumberListProps {
   showValidation: boolean;
   unitName: string;
   validateAscendingOrder?: boolean;
-  onBlur?(): void;
-  onFocus?(): void;
   onChange(list: Array<number | undefined>): void;
   setTouched(): void;
   setValidity(isValid: boolean): void;
@@ -56,8 +55,6 @@ function NumberList({
   showValidation,
   unitName,
   validateAscendingOrder = true,
-  onBlur,
-  onFocus,
   onChange,
   setTouched,
   setValidity,
@@ -68,9 +65,7 @@ function NumberList({
 
   // responsible for discarding changes
   useEffect(() => {
-    setModels(state => {
-      return getUpdatedModels(numberArray, state, numberRange);
-    });
+    setModels(state => getUpdatedModels(numberArray, state, numberRange));
   }, [numberArray, numberRange]);
 
   useEffect(() => {
@@ -86,16 +81,15 @@ function NumberList({
     }
   }, [validateAscendingOrder, models]);
 
-  useEffect(() => {
-    setValidity(!hasInvalidValues(models));
-  }, [models]);
-
   // responsible for setting up an initial value ([0]) when there is no default value
   useEffect(() => {
     if (!numberArray.length) {
       onChange([models[0].value as number]);
     }
   }, []);
+
+  const isValid = !hasInvalidValues(models) && !(showValidation && ascendingError);
+  useValidation(setValidity, isValid);
 
   const onUpdate = useCallback(
     (modelList: NumberRowModel[]) => {
@@ -108,19 +102,23 @@ function NumberList({
   const onChangeValue = useCallback(
     ({ id, value }: { id: string; value: string }) => {
       const parsedValue = parse(value);
-      const { isValid, error } = validateValue(parsedValue, numberRange);
-      setValidity(isValid);
 
-      const currentModel = models.find(model => model.id === id);
-      if (currentModel) {
-        currentModel.value = parsedValue;
-        currentModel.isInvalid = !isValid;
-        currentModel.error = error;
-      }
-
-      onUpdate(models);
+      onUpdate(
+        models.map(model => {
+          if (model.id === id) {
+            const { isInvalid, error } = validateValue(parsedValue, numberRange);
+            return {
+              id,
+              value: parsedValue,
+              isInvalid,
+              error,
+            };
+          }
+          return model;
+        })
+      );
     },
-    [numberRange, models, onUpdate, setValidity]
+    [numberRange, models, onUpdate]
   );
 
   // Add an item to the end of the list
@@ -137,13 +135,6 @@ function NumberList({
     [models, onUpdate]
   );
 
-  const onBlurFn = useCallback(() => {
-    setTouched();
-    if (onBlur) {
-      onBlur();
-    }
-  }, [setTouched, onBlur]);
-
   return (
     <>
       {models.map((model, arrayIndex) => (
@@ -155,9 +146,8 @@ function NumberList({
             labelledbyId={labelledbyId}
             range={numberRange}
             onDelete={onDelete}
-            onFocus={onFocus}
             onChange={onChangeValue}
-            onBlur={onBlurFn}
+            onBlur={setTouched}
             autoFocus={models.length !== 1 && arrayIndex === models.length - 1}
           />
           {showValidation && model.isInvalid && model.error && (

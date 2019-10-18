@@ -50,7 +50,6 @@ describe('NumberList', () => {
       showValidation: false,
       unitName: 'value',
       onChange: jest.fn(),
-      onBlur: jest.fn(),
       setTouched: jest.fn(),
       setValidity: jest.fn(),
     };
@@ -134,7 +133,7 @@ describe('NumberList', () => {
     expect(defaultProps.onChange).lastCalledWith([3, 2]);
   });
 
-  test('should call onBlur', () => {
+  test('should call setTouched', () => {
     const comp = shallow(<NumberList {...defaultProps} />);
     comp
       .find(NumberRow)
@@ -142,6 +141,5 @@ describe('NumberList', () => {
       .prop('onBlur')();
 
     expect(defaultProps.setTouched).toBeCalled();
-    expect(defaultProps.onBlur).toBeCalled();
   });
 });

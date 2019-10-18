@@ -141,12 +141,12 @@ describe('NumberList utils', () => {
 
   describe('validateValue', () => {
     test('should return valid', () => {
-      expect(validateValue(3, range)).toEqual({ isValid: true });
+      expect(validateValue(3, range)).toEqual({ isInvalid: false });
     });
 
     test('should return invalid', () => {
       range.within = jest.fn(() => false);
-      expect(validateValue(11, range)).toEqual({ isValid: false, error: expect.any(String) });
+      expect(validateValue(11, range)).toEqual({ isInvalid: true, error: expect.any(String) });
     });
   });
 

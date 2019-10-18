@@ -42,14 +42,14 @@ function getRange(range?: string): Range {
 }
 
 function validateValue(value: number | '', numberRange: Range) {
-  const result: { isValid: boolean; error?: string } = {
-    isValid: true,
+  const result: { isInvalid: boolean; error?: string } = {
+    isInvalid: false,
   };
 
   if (value === EMPTY_STRING) {
-    result.isValid = false;
+    result.isInvalid = true;
   } else if (!numberRange.within(value)) {
-    result.isValid = false;
+    result.isInvalid = true;
     result.error = i18n.translate('common.ui.aggTypes.numberList.invalidRangeErrorMessage', {
       defaultMessage: 'The value should be in the range of {min} to {max}.',
       values: { min: numberRange.min, max: numberRange.max },
@@ -115,11 +115,11 @@ function getUpdatedModels(
   return numberList.map((number, index) => {
     const model = modelList[index] || { id: generateId() };
     const newValue: NumberRowModel['value'] = number === undefined ? EMPTY_STRING : number;
-    const { isValid, error } = validateValue(newValue, numberRange);
+    const { isInvalid, error } = validateValue(newValue, numberRange);
     return {
       ...model,
       value: newValue,
-      isInvalid: !isValid,
+      isInvalid,
       error,
     };
   });

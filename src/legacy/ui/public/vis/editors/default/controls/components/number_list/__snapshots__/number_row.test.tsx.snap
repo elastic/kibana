@@ -18,7 +18,6 @@ exports[`NumberRow should be rendered with default set of props 1`] = `
       min={1}
       onBlur={[MockFunction]}
       onChange={[Function]}
-      onFocus={[MockFunction]}
       placeholder="Enter a value"
       value={1}
     />

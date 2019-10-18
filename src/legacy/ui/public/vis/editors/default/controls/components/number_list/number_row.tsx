@@ -31,7 +31,6 @@ export interface NumberRowProps {
   model: NumberRowModel;
   range: Range;
   onBlur(): void;
-  onFocus?(): void;
   onChange({ id, value }: { id: string; value: string }): void;
   onDelete(index: string): void;
 }
@@ -52,7 +51,6 @@ function NumberRow({
   range,
   onBlur,
   onDelete,
-  onFocus,
   onChange,
 }: NumberRowProps) {
   const deleteBtnAriaLabel = i18n.translate(
@@ -86,7 +84,6 @@ function NumberRow({
             defaultMessage: 'Enter a value',
           })}
           onChange={onValueChanged}
-          onFocus={onFocus}
           value={model.value}
           fullWidth={true}
           min={range.min}
