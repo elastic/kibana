@@ -256,6 +256,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
             <DescriptionDescription>
               <EuiTextArea
                 rows={2}
+                fullWidth={true}
                 placeholder={descriptionPlaceholder}
                 value={descriptionOption}
                 onChange={e => setDescriptionOption(e.target.value)}
