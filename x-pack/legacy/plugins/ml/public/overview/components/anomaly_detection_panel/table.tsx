@@ -108,7 +108,12 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
             </EuiToolTip>
           );
         } else if (score === 0) {
-          return score;
+          return (
+            // @ts-ignore
+            <EuiHealth color={'transparent'} compressed="true">
+              {score}
+            </EuiHealth>
+          );
         } else {
           const color: string = getSeverityColor(score);
           return (
