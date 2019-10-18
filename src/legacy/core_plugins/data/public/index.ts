@@ -33,6 +33,7 @@ export { FilterBar, ApplyFiltersPopover } from './filter';
 export {
   Field,
   FieldType,
+  FieldListInterface,
   IndexPattern,
   IndexPatterns,
   StaticIndexPattern,

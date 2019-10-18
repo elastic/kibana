@@ -64,7 +64,7 @@ class RangeControl extends Control {
 
     const fieldName = this.filterManager.fieldName;
 
-    const aggs = minMaxAgg(indexPattern.fields.byName[fieldName]);
+    const aggs = minMaxAgg(indexPattern.fields.getByName(fieldName));
     const searchSource = createSearchSource(this.kbnApi, null, indexPattern, aggs, this.useTimeFilter);
     this.abortController.signal.addEventListener('abort', () => searchSource.cancelQueued());
 

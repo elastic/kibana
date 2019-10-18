@@ -5,7 +5,8 @@
  */
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { injectI18n, InjectedIntl } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+
 import React, { useContext } from 'react';
 import { UICapabilities } from 'ui/capabilities';
 import { injectUICapabilities } from 'ui/capabilities/react';
@@ -30,100 +31,91 @@ import { WithKibanaChrome } from '../../../containers/with_kibana_chrome';
 import { useTrackPageview } from '../../../hooks/use_track_metric';
 
 interface SnapshotPageProps {
-  intl: InjectedIntl;
   uiCapabilities: UICapabilities;
 }
 
-export const SnapshotPage = injectUICapabilities(
-  injectI18n((props: SnapshotPageProps) => {
-    const { intl, uiCapabilities } = props;
-    const {
-      createDerivedIndexPattern,
-      hasFailedLoadingSource,
-      isLoading,
-      loadSourceFailureMessage,
-      loadSource,
-      metricIndicesExist,
-    } = useContext(Source.Context);
+export const SnapshotPage = injectUICapabilities((props: SnapshotPageProps) => {
+  const { uiCapabilities } = props;
+  const {
+    createDerivedIndexPattern,
+    hasFailedLoadingSource,
+    isLoading,
+    loadSourceFailureMessage,
+    loadSource,
+    metricIndicesExist,
+  } = useContext(Source.Context);
 
-    useTrackPageview({ app: 'infra_metrics', path: 'inventory' });
-    useTrackPageview({ app: 'infra_metrics', path: 'inventory', delay: 15000 });
+  useTrackPageview({ app: 'infra_metrics', path: 'inventory' });
+  useTrackPageview({ app: 'infra_metrics', path: 'inventory', delay: 15000 });
 
-    return (
-      <ColumnarPage>
-        <DocumentTitle
-          title={(previousTitle: string) =>
-            intl.formatMessage(
-              {
-                id: 'xpack.infra.infrastructureSnapshotPage.documentTitle',
-                defaultMessage: '{previousTitle} | Inventory',
-              },
-              {
-                previousTitle,
-              }
-            )
-          }
-        />
-        {isLoading ? (
-          <SourceLoadingPage />
-        ) : metricIndicesExist ? (
-          <>
-            <WithWaffleTimeUrlState />
-            <WithWaffleFilterUrlState indexPattern={createDerivedIndexPattern('metrics')} />
-            <WithWaffleOptionsUrlState />
-            <SnapshotToolbar />
-            <SnapshotPageContent />
-          </>
-        ) : hasFailedLoadingSource ? (
-          <SourceErrorPage errorMessage={loadSourceFailureMessage || ''} retry={loadSource} />
-        ) : (
-          <WithKibanaChrome>
-            {({ basePath }) => (
-              <NoIndices
-                title={intl.formatMessage({
-                  id: 'xpack.infra.homePage.noMetricsIndicesTitle',
-                  defaultMessage: "Looks like you don't have any metrics indices.",
-                })}
-                message={intl.formatMessage({
-                  id: 'xpack.infra.homePage.noMetricsIndicesDescription',
-                  defaultMessage: "Let's add some!",
-                })}
-                actions={
-                  <EuiFlexGroup>
+  return (
+    <ColumnarPage>
+      <DocumentTitle
+        title={(previousTitle: string) =>
+          i18n.translate('xpack.infra.infrastructureSnapshotPage.documentTitle', {
+            defaultMessage: '{previousTitle} | Inventory',
+            values: {
+              previousTitle,
+            },
+          })
+        }
+      />
+      {isLoading ? (
+        <SourceLoadingPage />
+      ) : metricIndicesExist ? (
+        <>
+          <WithWaffleTimeUrlState />
+          <WithWaffleFilterUrlState indexPattern={createDerivedIndexPattern('metrics')} />
+          <WithWaffleOptionsUrlState />
+          <SnapshotToolbar />
+          <SnapshotPageContent />
+        </>
+      ) : hasFailedLoadingSource ? (
+        <SourceErrorPage errorMessage={loadSourceFailureMessage || ''} retry={loadSource} />
+      ) : (
+        <WithKibanaChrome>
+          {({ basePath }) => (
+            <NoIndices
+              title={i18n.translate('xpack.infra.homePage.noMetricsIndicesTitle', {
+                defaultMessage: "Looks like you don't have any metrics indices.",
+              })}
+              message={i18n.translate('xpack.infra.homePage.noMetricsIndicesDescription', {
+                defaultMessage: "Let's add some!",
+              })}
+              actions={
+                <EuiFlexGroup>
+                  <EuiFlexItem>
+                    <EuiButton
+                      href={`${basePath}/app/kibana#/home/tutorial_directory/metrics`}
+                      color="primary"
+                      fill
+                      data-test-subj="infrastructureViewSetupInstructionsButton"
+                    >
+                      {i18n.translate(
+                        'xpack.infra.homePage.noMetricsIndicesInstructionsActionLabel',
+                        { defaultMessage: 'View setup instructions' }
+                      )}
+                    </EuiButton>
+                  </EuiFlexItem>
+                  {uiCapabilities.infrastructure.configureSource ? (
                     <EuiFlexItem>
-                      <EuiButton
-                        href={`${basePath}/app/kibana#/home/tutorial_directory/metrics`}
-                        color="primary"
-                        fill
-                        data-test-subj="infrastructureViewSetupInstructionsButton"
+                      <ViewSourceConfigurationButton
+                        data-test-subj="configureSourceButton"
+                        hrefBase={ViewSourceConfigurationButtonHrefBase.infrastructure}
                       >
-                        {intl.formatMessage({
-                          id: 'xpack.infra.homePage.noMetricsIndicesInstructionsActionLabel',
-                          defaultMessage: 'View setup instructions',
+                        {i18n.translate('xpack.infra.configureSourceActionLabel', {
+                          defaultMessage: 'Change source configuration',
                         })}
-                      </EuiButton>
+                      </ViewSourceConfigurationButton>
                     </EuiFlexItem>
-                    {uiCapabilities.infrastructure.configureSource ? (
-                      <EuiFlexItem>
-                        <ViewSourceConfigurationButton
-                          data-test-subj="configureSourceButton"
-                          hrefBase={ViewSourceConfigurationButtonHrefBase.infrastructure}
-                        >
-                          {intl.formatMessage({
-                            id: 'xpack.infra.configureSourceActionLabel',
-                            defaultMessage: 'Change source configuration',
-                          })}
-                        </ViewSourceConfigurationButton>
-                      </EuiFlexItem>
-                    ) : null}
-                  </EuiFlexGroup>
-                }
-                data-test-subj="noMetricsIndicesPrompt"
-              />
-            )}
-          </WithKibanaChrome>
-        )}
-      </ColumnarPage>
-    );
-  })
-);
+                  ) : null}
+                </EuiFlexGroup>
+              }
+              data-test-subj="noMetricsIndicesPrompt"
+            />
+          )}
+        </WithKibanaChrome>
+      )}
+    </ColumnarPage>
+  );
+});

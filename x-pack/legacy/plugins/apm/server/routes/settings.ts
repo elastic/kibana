@@ -97,7 +97,8 @@ export const agentConfigurationAgentNameRoute = createRoute(() => ({
   handler: async (req, { query }) => {
     const setup = await setupRequest(req);
     const { serviceName } = query;
-    return await getAgentNameByService({ serviceName, setup });
+    const agentName = await getAgentNameByService({ serviceName, setup });
+    return agentName;
   }
 }));
 

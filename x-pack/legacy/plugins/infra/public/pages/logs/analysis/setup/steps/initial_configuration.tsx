@@ -44,7 +44,7 @@ export const InitialConfiguration: React.FunctionComponent<InitialConfigurationP
               defaultMessage="By default, Machine Learning analyzes log messages in your log indices no older than four weeks, and continues indefinitely."
             />{' '}
             <EuiLink
-              onClick={e => {
+              onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                 e.preventDefault();
                 setShowTimeRangeForm(true);
               }}

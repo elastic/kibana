@@ -34,14 +34,14 @@ export function ContextPageProvider({ getService, getPageObjects }) {
   const log = getService('log');
 
   class ContextPage {
-    async navigateTo(indexPattern, anchorType, anchorId, overrideInitialState = {}) {
+    async navigateTo(indexPattern, anchorId, overrideInitialState = {}) {
       const initialState = rison.encode({
         ...DEFAULT_INITIAL_STATE,
         ...overrideInitialState,
       });
       const appUrl = getUrl.noAuth(config.get('servers.kibana'), {
         ...config.get('apps.context'),
-        hash: `${config.get('apps.context.hash')}/${indexPattern}/${anchorType}/${anchorId}?_a=${initialState}`,
+        hash: `${config.get('apps.context.hash')}/${indexPattern}/${anchorId}?_a=${initialState}`,
       });
 
       log.debug(`browser.get(${appUrl})`);

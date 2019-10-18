@@ -176,5 +176,39 @@ describe('Datatable Visualization', () => {
         ],
       });
     });
+
+    it('reorders the rendered colums based on the order from the datasource', () => {
+      const datasource = createMockDatasource();
+      const layer = { layerId: 'a', columns: ['b', 'c'] };
+      const frame = mockFrame();
+      frame.datasourceLayers = { a: datasource.publicAPIMock };
+      const component = mount(
+        <DataTableLayer
+          dragDropContext={{ dragging: undefined, setDragging: () => {} }}
+          frame={frame}
+          layer={layer}
+          setState={jest.fn()}
+          state={{ layers: [layer] }}
+        />
+      );
+
+      const accessors = component
+        .find('[data-test-subj="datatable_multicolumnEditor"]')
+        .first()
+        .prop('accessors') as string[];
+
+      expect(accessors).toEqual(['b', 'c']);
+
+      component.setProps({
+        layer: { layerId: 'a', columns: ['c', 'b'] },
+      });
+
+      const newAccessors = component
+        .find('[data-test-subj="datatable_multicolumnEditor"]')
+        .first()
+        .prop('accessors') as string[];
+
+      expect(newAccessors).toEqual(['c', 'b']);
+    });
   });
 });

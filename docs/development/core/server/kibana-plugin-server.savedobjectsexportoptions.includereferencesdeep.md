@@ -4,7 +4,7 @@
 
 ## SavedObjectsExportOptions.includeReferencesDeep property
 
-flag to also include all related saved objects in the export response.
+flag to also include all related saved objects in the export stream.
 
 <b>Signature:</b>
 

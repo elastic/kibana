@@ -7,14 +7,13 @@ exports[`BytesFormatEditor should render normally 1`] = `
     display="row"
     error={null}
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
       <span>
-        <EuiLink
-          color="primary"
+        <ForwardRef
           href="https://adamwdraper.github.io/Numeral-js/"
           target="_blank"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Documentation"
@@ -25,7 +24,7 @@ exports[`BytesFormatEditor should render normally 1`] = `
           <EuiIcon
             type="link"
           />
-        </EuiLink>
+        </ForwardRef>
       </span>
     }
     isInvalid={false}

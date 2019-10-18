@@ -440,7 +440,7 @@ export function getUiSettingDefaults() {
       name: i18n.translate('kbn.advancedSettings.courier.batchSearchesTitle', {
         defaultMessage: 'Batch concurrent searches',
       }),
-      value: true,
+      value: false,
       type: 'boolean',
       description: i18n.translate('kbn.advancedSettings.courier.batchSearchesText', {
         defaultMessage:

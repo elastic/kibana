@@ -4,14 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaConfig } from 'src/legacy/server/kbn_server';
+import { Server, KibanaConfig } from 'src/legacy/server/kbn_server';
 import { Plugin, CoreSetup, SavedObjectsLegacyService } from 'src/core/server';
 import { setupRoutes } from './routes';
-import { registerLensUsageCollector } from './usage';
+import { registerLensUsageCollector, initializeLensTelemetry } from './usage';
 
 export class LensServer implements Plugin<{}, {}, {}, {}> {
-  constructor() {}
-
   setup(
     core: CoreSetup,
     plugins: {
@@ -23,10 +21,12 @@ export class LensServer implements Plugin<{}, {}, {}, {}> {
         };
       };
       config: KibanaConfig;
+      server: Server;
     }
   ) {
-    setupRoutes(core);
+    setupRoutes(core, plugins);
     registerLensUsageCollector(core, plugins);
+    initializeLensTelemetry(core, plugins);
 
     return {};
   }

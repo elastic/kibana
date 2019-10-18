@@ -59,7 +59,7 @@ export async function getRenderedHref(Component: React.FC, location: Location) {
   return a ? a.getAttribute('href') : '';
 }
 
-export function mockNow(date: string) {
+export function mockNow(date: string | number | Date) {
   const fakeNow = new Date(date).getTime();
   return jest.spyOn(Date, 'now').mockReturnValue(fakeNow);
 }

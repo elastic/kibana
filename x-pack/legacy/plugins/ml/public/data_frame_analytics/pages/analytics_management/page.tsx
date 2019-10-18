@@ -23,7 +23,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { NavigationMenu } from '../../../components/navigation_menu/navigation_menu';
+import { NavigationMenu } from '../../../components/navigation_menu';
 import { CreateAnalyticsButton } from './components/create_analytics_button';
 import { DataFrameAnalyticsList } from './components/analytics_list';
 import { RefreshAnalyticsListButton } from './components/refresh_analytics_list_button';

@@ -4,87 +4,95 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { defaultIndexPattern } from '../../../../default_index_pattern';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
-// TODO: See build_events_reindex.ts for all the spots to make things "configurable"
-// here but this is intended to replace the build_events_reindex.ts
-export const buildEventsQuery = () => {
+interface BuildEventsScrollQuery {
+  index: string[];
+  from: string;
+  to: string;
+  kql: string | undefined;
+  filter: Record<string, {}> | undefined;
+  size: number;
+  scroll: string;
+}
+
+export const getFilter = (kql: string | undefined, filter: Record<string, {}> | undefined) => {
+  if (kql != null) {
+    return toElasticsearchQuery(fromKueryExpression(kql), null);
+  } else if (filter != null) {
+    return filter;
+  } else {
+    // TODO: Re-visit this error (which should never happen) when we do signal errors for the UI
+    throw new TypeError('either kql or filter should be set');
+  }
+};
+
+export const buildEventsScrollQuery = ({
+  index,
+  from,
+  to,
+  kql,
+  filter,
+  size,
+  scroll,
+}: BuildEventsScrollQuery) => {
+  const kqlOrFilter = getFilter(kql, filter);
+  const filterWithTime = [
+    kqlOrFilter,
+    {
+      bool: {
+        filter: [
+          {
+            bool: {
+              should: [
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: from,
+                    },
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+          {
+            bool: {
+              should: [
+                {
+                  range: {
+                    '@timestamp': {
+                      lte: to,
+                    },
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        ],
+      },
+    },
+  ];
   return {
     allowNoIndices: true,
-    index: defaultIndexPattern,
+    index,
+    scroll,
+    size,
     ignoreUnavailable: true,
     body: {
       query: {
         bool: {
           filter: [
-            {
-              bool: {
-                filter: [
-                  {
-                    bool: {
-                      should: [
-                        {
-                          match_phrase: {
-                            'user.name': 'root',
-                          },
-                        },
-                      ],
-                      minimum_should_match: 1,
-                    },
-                  },
-                  {
-                    bool: {
-                      filter: [
-                        {
-                          bool: {
-                            should: [
-                              {
-                                range: {
-                                  '@timestamp': {
-                                    gte: 1567317600000,
-                                  },
-                                },
-                              },
-                            ],
-                            minimum_should_match: 1,
-                          },
-                        },
-                        {
-                          bool: {
-                            should: [
-                              {
-                                range: {
-                                  '@timestamp': {
-                                    lte: 1569909599999,
-                                  },
-                                },
-                              },
-                            ],
-                            minimum_should_match: 1,
-                          },
-                        },
-                      ],
-                    },
-                  },
-                ],
-              },
-            },
+            ...filterWithTime,
             {
               match_all: {},
             },
           ],
         },
       },
-      size: 26,
       track_total_hits: true,
-      sort: [
-        {
-          '@timestamp': 'desc',
-        },
-        {
-          _doc: 'desc',
-        },
-      ],
+      sort: ['_doc'],
     },
   };
 };

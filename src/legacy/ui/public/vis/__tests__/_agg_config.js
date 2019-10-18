@@ -479,7 +479,7 @@ describe('AggConfig', function () {
     });
 
     it('returns the html converter if "html" is passed in', function () {
-      const field = indexPattern.fields.byName.bytes;
+      const field = indexPattern.fields.getByName('bytes');
       expect(vis.aggs.aggs[0].fieldFormatter('html')).to.be(field.format.getConverterFor('html'));
     });
   });
