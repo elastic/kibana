@@ -25,6 +25,7 @@ export interface AppDependencies {
 export function createShim() {
   return {
     pluginsSetup: {
+      capabilities,
       management: {
         getSection: management.getSection.bind(management),
       },

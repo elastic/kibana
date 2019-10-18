@@ -30,20 +30,32 @@ export class ActionsPlugin implements Plugin<Setup, Start> {
       }
     */
     const {
+      capabilities,
       management: { getSection },
     } = plugins;
 
-    const kbnSection = getSection('kibana');
-    kbnSection.register('alerting', {
-      display: i18n.translate('xpack.alertingUI.managementSection.displayName', {
-        defaultMessage: 'Alerting',
-      }),
-      order: 7,
-      url: `#${BASE_PATH}`,
-    });
+    const canShowActions = capabilities.get().actions.show;
+    if (canShowActions) {
+      const kbnSection = getSection('kibana');
+      kbnSection.register('alerting', {
+        display: i18n.translate('xpack.alertingUI.managementSection.displayName', {
+          defaultMessage: 'Alerting',
+        }),
+        order: 7,
+        url: `#${BASE_PATH}`,
+      });
+    }
   }
 
   public start(core: CoreStart, plugins: any) {
+    const { capabilities } = plugins;
+    const canShowActions = capabilities.get().actions.show;
+
+    // Don't register routes when user doesn't have access to the application
+    if (!canShowActions) {
+      return;
+    }
+
     breadcrumbService.init(core.chrome, plugins.management.breadcrumb);
 
     const unmountReactApp = (): void => {

@@ -11,6 +11,7 @@ import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTab, EuiTabs } from '@elasti
 import { BASE_PATH, Section, routeToActions } from '../../../np_ready/public/application/constants';
 import { breadcrumbService } from './lib/breadcrumb';
 import { docTitleService } from './lib/doc_title';
+import { useAppDependencies } from './index';
 
 import { ActionsList } from './sections/actions_list/components/actions_list';
 
@@ -24,11 +25,18 @@ export const AlertsUIHome: React.FunctionComponent<RouteComponentProps<MatchPara
   },
   history,
 }) => {
+  const {
+    plugins: { capabilities },
+  } = useAppDependencies();
+
+  const canShowActions = capabilities.get().actions.show;
   const tabs: Array<{
     id: Section;
     name: React.ReactNode;
-  }> = [
-    {
+  }> = [];
+
+  if (canShowActions) {
+    tabs.push({
       id: 'actions',
       name: (
         <FormattedMessage
@@ -36,8 +44,8 @@ export const AlertsUIHome: React.FunctionComponent<RouteComponentProps<MatchPara
           defaultMessage="Actions"
         />
       ),
-    },
-  ];
+    });
+  }
 
   const onSectionChange = (newSection: Section) => {
     history.push(`${BASE_PATH}/${newSection}`);
@@ -68,7 +76,7 @@ export const AlertsUIHome: React.FunctionComponent<RouteComponentProps<MatchPara
         <EuiSpacer size="s" />
 
         <Switch>
-          <Route exact path={routeToActions} component={ActionsList} />
+          {canShowActions && <Route exact path={routeToActions} component={ActionsList} />}
         </Switch>
       </EuiPageContent>
     </EuiPageBody>
