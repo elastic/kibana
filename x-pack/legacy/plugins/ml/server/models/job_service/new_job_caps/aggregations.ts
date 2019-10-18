@@ -25,6 +25,8 @@ function getBasicMlOnlyAggregation(): Omit<Aggregation, 'id' | 'title' | 'fields
   };
 }
 
+// list of aggregations only support by ML and which don't have an equivalent ES aggregation
+// note, not all aggs have a field list. Some aggs cannot be used with a field.
 export const mlOnlyAggregations: Aggregation[] = [
   {
     id: ML_JOB_AGGREGATION.NON_ZERO_COUNT,

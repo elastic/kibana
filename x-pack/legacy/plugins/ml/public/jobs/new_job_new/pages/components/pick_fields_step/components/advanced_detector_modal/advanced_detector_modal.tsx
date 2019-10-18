@@ -91,6 +91,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
   const [fieldOptionEnabled, setFieldOptionEnabled] = useState(true);
   const { descriptionPlaceholder, setDescriptionPlaceholder } = useDetectorPlaceholder(detector);
 
+  // list of aggregation combobox options. filtering out any aggs with no fields.
   const aggOptions: EuiComboBoxOptionProps[] = aggs
     .filter(a => a.fields !== undefined && a.fields.length)
     .map(createAggOption);
@@ -352,12 +353,14 @@ function useDetectorPlaceholder(detector: RichDetector) {
   return { descriptionPlaceholder, setDescriptionPlaceholder };
 }
 
+// creates list of combobox options based on an aggregation's field list
 function createFieldOptionList(agg: Aggregation | null) {
   return (agg !== null && agg.fields !== undefined ? agg.fields : [])
     .filter(f => f.id !== EVENT_RATE_FIELD_ID)
     .map(createFieldOption);
 }
 
+// custom hook for storing combobox options based on an aggregation field list
 function useCurrentFieldOptions(aggregation: Aggregation | null) {
   const [currentFieldOptions, setCurrentFieldOptions] = useState(
     createFieldOptionList(aggregation)

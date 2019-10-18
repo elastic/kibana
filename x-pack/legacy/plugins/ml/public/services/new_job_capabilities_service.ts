@@ -126,7 +126,8 @@ function createObjects(resp: any, indexPatternTitle: string) {
 
   if (results !== undefined) {
     results.aggs.forEach((a: Aggregation) => {
-      // copy the agg and add a Fields list
+      // create the aggs list
+      // only adding a fields list if there is a fieldIds list
       const agg: Aggregation = {
         ...a,
         ...(a.fieldIds !== undefined ? { fields: [] } : {}),
@@ -136,7 +137,7 @@ function createObjects(resp: any, indexPatternTitle: string) {
     });
 
     results.fields.forEach((f: Field) => {
-      // copy the field and add an Aggregations list
+      // create the fields list
       const field: Field = {
         ...f,
         aggs: [],
@@ -189,6 +190,8 @@ function addEventRateField(aggs: Aggregation[], fields: Field[]) {
 
   aggs.forEach(a => {
     if (eventRateField.aggs !== undefined && a.fields === undefined) {
+      // if the agg's field list is undefined, it is a fieldless aggregation and
+      // so can only be used with the event rate field.
       a.fields = [eventRateField];
       eventRateField.aggs.push(a);
     }
