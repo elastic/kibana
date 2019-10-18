@@ -95,7 +95,7 @@ const queryBody = (queryContext: QueryContext, searchAfter: any, size: number) =
           // Here we grab the most recent 2 check groups per location.
           // Why 2? Because the most recent one may not be for a summary, it may be incomplete.
           locations: {
-            terms: { field: 'observer.geo.name', missing: '__missing__', size: 100 },
+            terms: { field: 'observer.geo.name', missing: '__missing__' },
             aggs: {
               ips: {
                 terms: { field: 'monitor.ip', missing: '0.0.0.0' },
