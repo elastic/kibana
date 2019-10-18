@@ -12,7 +12,7 @@ const commitDateFormats: { [key: string]: string } = {
   'zh-cn': 'YYYY年Mo月Do日',
 };
 
-export const formatCommitDate: (dateString: string) => string = date => {
+export const formatCommitDate: (date: Date | string) => string = date => {
   const locale = i18n.getLocale();
   const format = commitDateFormats[locale] || commitDateFormats.en;
 

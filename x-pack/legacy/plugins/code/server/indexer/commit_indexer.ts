@@ -115,7 +115,7 @@ export class CommitIndexer extends AbstractIndexer {
           },
           message,
           parents: c.parents,
-          date: c.updated,
+          date: new Date(c.updated),
           id: c.id,
           body: body.join('\n'),
         } as Commit;

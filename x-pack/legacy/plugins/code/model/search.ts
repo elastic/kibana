@@ -25,7 +25,7 @@ export interface Commit {
   id: string;
   message: string;
   body: string;
-  date: string;
+  date: Date;
   parents: string[];
   author: {
     name: string;
