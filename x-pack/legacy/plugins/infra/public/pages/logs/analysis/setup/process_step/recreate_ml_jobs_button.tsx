@@ -9,8 +9,9 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
 export const RecreateMLJobsButton: React.FunctionComponent<{
+  isDisabled?: boolean;
   onClick: () => void;
-}> = ({ onClick }) => {
+}> = ({ isDisabled, onClick }) => {
   return (
     <>
       <FormattedMessage
@@ -18,7 +19,7 @@ export const RecreateMLJobsButton: React.FunctionComponent<{
         defaultMessage="This removes previously detected anomalies."
         tagName="p"
       />
-      <EuiButton fill onClick={onClick}>
+      <EuiButton isDisabled={isDisabled} fill onClick={onClick}>
         <FormattedMessage
           id="xpack.infra.analysisSetup.recreateMlJobButton"
           defaultMessage="Recreate ML jobs"

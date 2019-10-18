@@ -25,6 +25,7 @@ import { RecreateMLJobsButton } from './recreate_ml_jobs_button';
 interface ProcessStepProps {
   cleanupAndSetup: () => void;
   errorMessages: string[];
+  isConfigurationValid: boolean;
   setup: () => void;
   setupStatus: SetupStatus;
   viewResults: () => void;
@@ -33,6 +34,7 @@ interface ProcessStepProps {
 export const ProcessStep: React.FunctionComponent<ProcessStepProps> = ({
   cleanupAndSetup,
   errorMessages,
+  isConfigurationValid,
   setup,
   setupStatus,
   viewResults,
@@ -86,9 +88,9 @@ export const ProcessStep: React.FunctionComponent<ProcessStepProps> = ({
           </EuiButton>
         </>
       ) : setupStatus === 'requiredForUpdate' || setupStatus === 'requiredForReconfiguration' ? (
-        <RecreateMLJobsButton onClick={cleanupAndSetup} />
+        <RecreateMLJobsButton isDisabled={!isConfigurationValid} onClick={cleanupAndSetup} />
       ) : (
-        <CreateMLJobsButton onClick={setup} />
+        <CreateMLJobsButton isDisabled={!isConfigurationValid} onClick={setup} />
       )}
     </EuiText>
   );
