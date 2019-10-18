@@ -6,6 +6,11 @@
 import { HttpServiceBase } from 'kibana/public';
 import { BASE_ACTION_API_PATH } from '../constants';
 
+// We are assuming there won't be many actions. This is why we will load
+// all the actions in advance and assume the total count to not go over 100 or so.
+// We'll set this max setting assuming it's never reached.
+const MAX_ACTIONS_RETURNED = 10000;
+
 export interface ActionType {
   id: string;
   name: string;
@@ -32,8 +37,6 @@ export async function loadActionTypes({
 
 export interface LoadActionsOpts {
   http: HttpServiceBase;
-  page: { index: number; size: number };
-  searchText?: string;
 }
 
 export interface LoadActionsResponse {
@@ -43,17 +46,10 @@ export interface LoadActionsResponse {
   data: Action[];
 }
 
-export async function loadActions({
-  http,
-  page,
-  searchText,
-}: LoadActionsOpts): Promise<LoadActionsResponse> {
+export async function loadAllActions({ http }: LoadActionsOpts): Promise<LoadActionsResponse> {
   return http.get(`${BASE_ACTION_API_PATH}/_find`, {
     query: {
-      page: page.index + 1,
-      per_page: page.size,
-      search_fields: searchText ? 'description' : undefined,
-      search: searchText,
+      per_page: MAX_ACTIONS_RETURNED,
     },
   });
 }

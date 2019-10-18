@@ -6,19 +6,21 @@
 
 import React, { Fragment, useState, useEffect } from 'react';
 // @ts-ignore: EuiSearchBar not defined in TypeScript yet
-import { EuiPageContent, EuiBasicTable, EuiSpacer, EuiSearchBar, EuiButton } from '@elastic/eui';
+import { EuiPageContent, EuiInMemoryTable, EuiSpacer, EuiSearchBar, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Action, ActionType, deleteActions, loadActions, loadActionTypes } from '../../../lib/api';
 import { ActionsContext } from '../../../context/app_context';
 import { useAppDependencies } from '../../../index';
 import { AlertingActionsDropdown } from './create_menu_popover';
+import {
+  Action,
+  ActionType,
+  deleteActions,
+  loadAllActions,
+  loadActionTypes,
+} from '../../../lib/api';
 
 type ActionTypeIndex = Record<string, ActionType>;
-interface Pagination {
-  index: number;
-  size: number;
-}
 interface Data extends Action {
   actionType: ActionType['name'];
 }
@@ -37,13 +39,10 @@ export const ActionsList: React.FunctionComponent = () => {
   const [isLoadingActionTypes, setIsLoadingActionTypes] = useState<boolean>(false);
   const [isLoadingActions, setIsLoadingActions] = useState<boolean>(false);
   const [isDeletingActions, setIsDeletingActions] = useState<boolean>(false);
-  const [totalItemCount, setTotalItemCount] = useState<number>(0);
-  const [page, setPage] = useState<Pagination>({ index: 0, size: 10 });
-  const [searchText, setSearchText] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-    loadActionsTable();
-  }, [page, searchText]);
+    loadActions();
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -84,12 +83,11 @@ export const ActionsList: React.FunctionComponent = () => {
     setData(updatedData);
   }, [actions, actionTypesIndex]);
 
-  async function loadActionsTable() {
+  async function loadActions() {
     setIsLoadingActions(true);
     try {
-      const actionsResponse = await loadActions({ http, page, searchText });
+      const actionsResponse = await loadAllActions({ http });
       setActions(actionsResponse.data);
-      setTotalItemCount(actionsResponse.total);
     } catch (e) {
       toastNotifications.addDanger({
         title: i18n.translate('xpack.alertingUI.sections.actionsList.unableToLoadActionsMessage', {
@@ -103,9 +101,23 @@ export const ActionsList: React.FunctionComponent = () => {
 
   async function deleteItems(items: Data[]) {
     setIsDeletingActions(true);
-    await deleteActions({ http, ids: items.map(item => item.id) });
-    await loadActionsTable();
-    setIsDeletingActions(false);
+    const ids = items.map(item => item.id);
+    try {
+      await deleteActions({ http, ids });
+      const updatedActions = actions.filter(action => !ids.includes(action.id));
+      setActions(updatedActions);
+    } catch (e) {
+      toastNotifications.addDanger({
+        title: i18n.translate(
+          'xpack.alertingUI.sections.actionsList.failedToDeleteActionsMessage',
+          { defaultMessage: 'Failed to delete action(s)' }
+        ),
+      });
+      // Refresh the actions from the server, some actions may have beend eleted
+      loadActions();
+    } finally {
+      setIsDeletingActions(false);
+    }
   }
 
   async function deleteSelectedItems() {
@@ -121,7 +133,7 @@ export const ActionsList: React.FunctionComponent = () => {
           defaultMessage: 'Description',
         }
       ),
-      sortable: false,
+      sortable: true,
       truncateText: true,
     },
     {
@@ -132,7 +144,7 @@ export const ActionsList: React.FunctionComponent = () => {
           defaultMessage: 'Action Type',
         }
       ),
-      sortable: false,
+      sortable: true,
       truncateText: true,
     },
     {
@@ -178,61 +190,10 @@ export const ActionsList: React.FunctionComponent = () => {
       <Fragment>
         <EuiSpacer size="m" />
         <ActionsContext.Provider value={{}}>
-          <EuiSearchBar
-            onChange={({ queryText }: { queryText: string }) => setSearchText(queryText)}
-            filters={[
-              {
-                type: 'field_value_selection',
-                field: 'type',
-                name: i18n.translate('xpack.alertingUI.sections.actionsList.filters.typeName', {
-                  defaultMessage: 'Type',
-                }),
-                multiSelect: 'or',
-                options: Object.values(actionTypesIndex || {})
-                  .map(actionType => ({
-                    value: actionType.id,
-                    name: actionType.name,
-                  }))
-                  .sort((a, b) => {
-                    if (a.name < b.name) return -1;
-                    if (a.name > b.name) return 1;
-                    return 0;
-                  }),
-              },
-            ]}
-            toolsRight={[
-              <EuiButton
-                key="delete"
-                iconType="trash"
-                color="danger"
-                isDisabled={selectedItems.length === 0 || !canDelete}
-                onClick={deleteSelectedItems}
-                title={
-                  canDelete
-                    ? undefined
-                    : i18n.translate(
-                        'xpack.alertingUI.sections.actionsList.buttons.deleteDisabledTitle',
-                        { defaultMessage: 'Unable to delete actions' }
-                      )
-                }
-              >
-                <FormattedMessage
-                  id="xpack.alertingUI.sections.actionsList.buttons.deleteLabel"
-                  defaultMessage="Delete"
-                />
-              </EuiButton>,
-              <AlertingActionsDropdown
-                key="create-action"
-                actionTypes={actionTypesIndex}
-              ></AlertingActionsDropdown>,
-            ]}
-          ></EuiSearchBar>
-
-          <EuiSpacer size="s" />
-
-          <EuiBasicTable
+          <EuiInMemoryTable
             loading={isLoadingActions || isLoadingActionTypes || isDeletingActions}
             items={data}
+            sorting={true}
             itemId="id"
             columns={actionsTableColumns}
             rowProps={() => ({
@@ -242,18 +203,60 @@ export const ActionsList: React.FunctionComponent = () => {
               'data-test-subj': 'cell',
             })}
             data-test-subj="actionsTable"
-            pagination={{
-              pageIndex: page.index,
-              pageSize: page.size,
-              totalItemCount,
-            }}
-            onChange={({ page: changedPage }: { page: Pagination }) => {
-              setPage(changedPage);
-            }}
+            pagination={true}
             selection={{
               onSelectionChange(updatedSelectedItemsList: Data[]) {
                 setSelectedItems(updatedSelectedItemsList);
               },
+            }}
+            search={{
+              filters: [
+                {
+                  type: 'field_value_selection',
+                  field: 'actionTypeId',
+                  name: i18n.translate(
+                    'xpack.alertingUI.sections.actionsList.filters.actionTypeIdName',
+                    { defaultMessage: 'Action Type' }
+                  ),
+                  multiSelect: 'or',
+                  options: Object.values(actionTypesIndex || {})
+                    .map(actionType => ({
+                      value: actionType.id,
+                      name: actionType.name,
+                    }))
+                    .sort((a, b) => {
+                      if (a.name < b.name) return -1;
+                      if (a.name > b.name) return 1;
+                      return 0;
+                    }),
+                },
+              ],
+              toolsRight: [
+                <EuiButton
+                  key="delete"
+                  iconType="trash"
+                  color="danger"
+                  isDisabled={selectedItems.length === 0 || !canDelete}
+                  onClick={deleteSelectedItems}
+                  title={
+                    canDelete
+                      ? undefined
+                      : i18n.translate(
+                          'xpack.alertingUI.sections.actionsList.buttons.deleteDisabledTitle',
+                          { defaultMessage: 'Unable to delete actions' }
+                        )
+                  }
+                >
+                  <FormattedMessage
+                    id="xpack.alertingUI.sections.actionsList.buttons.deleteLabel"
+                    defaultMessage="Delete"
+                  />
+                </EuiButton>,
+                <AlertingActionsDropdown
+                  key="create-action"
+                  actionTypes={actionTypesIndex}
+                ></AlertingActionsDropdown>,
+              ],
             }}
           />
         </ActionsContext.Provider>
