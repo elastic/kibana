@@ -4,7 +4,7 @@
   "index": ["winlogbeat-*"],
   "interval": "9m",
   "name": "Just watch other winlogbeat users",
-  "severity": 500,
+  "severity": "low",
   "enabled": false,
   "type": "filter",
   "from": "now-5d",
