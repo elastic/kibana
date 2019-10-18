@@ -7,36 +7,41 @@
 import Hapi from 'hapi';
 import Joi from 'joi';
 import { isFunction } from 'lodash/fp';
-import { createSignals } from '../alerts/create_signals';
+import { updateSignal } from '../alerts/update_signals';
 import { SignalsRequest } from '../alerts/types';
 
-export const createCreateSignalsRoute: Hapi.ServerRoute = {
-  method: 'POST',
-  path: '/api/siem/signals',
+export const createUpdateSignalsRoute: Hapi.ServerRoute = {
+  method: 'PUT',
+  path: '/api/siem/signals/{id?}',
   options: {
     tags: ['access:signals-all'],
     validate: {
       options: {
         abortEarly: false,
       },
+      params: {
+        id: Joi.when(Joi.ref('$payload.id'), {
+          is: Joi.exist(),
+          then: Joi.string().optional(),
+          otherwise: Joi.string().required(),
+        }),
+      },
       payload: Joi.object({
-        description: Joi.string().required(),
-        enabled: Joi.boolean().default(true),
+        description: Joi.string(),
+        enabled: Joi.boolean(),
         filter: Joi.object(),
-        from: Joi.string().required(),
-        id: Joi.string().required(),
-        index: Joi.array().required(),
-        interval: Joi.string().default('5m'),
+        from: Joi.string(),
+        id: Joi.string(),
+        index: Joi.array(),
+        interval: Joi.string(),
         kql: Joi.string(),
         max_signals: Joi.number().default(100),
-        name: Joi.string().required(),
-        severity: Joi.number().required(),
-        to: Joi.string().required(),
-        type: Joi.string()
-          .valid('filter', 'kql')
-          .required(),
+        name: Joi.string(),
+        severity: Joi.number(),
+        to: Joi.string(),
+        type: Joi.string().valid('filter', 'kql'),
         references: Joi.array().default([]),
-      }).xor('filter', 'kql'),
+      }).nand('filter', 'kql'),
     },
   },
   async handler(request: SignalsRequest, headers) {
@@ -57,7 +62,6 @@ export const createCreateSignalsRoute: Hapi.ServerRoute = {
       type,
       references,
     } = request.payload;
-
     const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
 
     const actionsClient = isFunction(request.getActionsClient) ? request.getActionsClient() : null;
@@ -66,14 +70,14 @@ export const createCreateSignalsRoute: Hapi.ServerRoute = {
       return headers.response().code(404);
     }
 
-    return createSignals({
+    return updateSignal({
       alertsClient,
       actionsClient,
       description,
       enabled,
       filter,
       from,
-      id,
+      id: request.params.id ? request.params.id : id,
       index,
       interval,
       kql,
@@ -87,6 +91,6 @@ export const createCreateSignalsRoute: Hapi.ServerRoute = {
   },
 };
 
-export const createSignalsRoute = (server: Hapi.Server) => {
-  server.route(createCreateSignalsRoute);
+export const updateSignalsRoute = (server: Hapi.Server) => {
+  server.route(createUpdateSignalsRoute);
 };
