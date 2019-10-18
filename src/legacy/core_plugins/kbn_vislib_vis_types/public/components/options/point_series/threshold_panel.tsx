@@ -83,7 +83,7 @@ function ThresholdPanel({
             paramName="value"
             value={stateParams.thresholdLine.value}
             setValue={setThresholdLine}
-            setMultipleValidity={setThresholdLineValidity}
+            setValidity={setThresholdLineValidity}
           />
 
           <NumberInputOption
@@ -98,7 +98,7 @@ function ThresholdPanel({
             step={1}
             value={stateParams.thresholdLine.width}
             setValue={setThresholdLine}
-            setMultipleValidity={setThresholdLineValidity}
+            setValidity={setThresholdLineValidity}
           />
 
           <SelectOption

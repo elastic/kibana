@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import React, { ReactNode, useCallback, useEffect, ChangeEvent } from 'react';
+import React, { ReactNode, useCallback, ChangeEvent } from 'react';
 import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
+import { useValidation } from './utils';
 
 interface NumberInputOptionProps<ParamName extends string> {
   disabled?: boolean;
@@ -29,10 +30,10 @@ interface NumberInputOptionProps<ParamName extends string> {
   min?: number;
   paramName: ParamName;
   step?: number;
-  value: number;
+  value: number | null;
   'data-test-subj'?: string;
-  setValue(paramName: ParamName, value: number): void;
-  setMultipleValidity(paramName: ParamName, isValid: boolean): void;
+  setValue(paramName: ParamName, value: number | null): void;
+  setValidity(paramName: ParamName, isValid: boolean): void;
 }
 
 /**
@@ -52,20 +53,17 @@ function NumberInputOption<ParamName extends string>({
   step,
   value,
   setValue,
-  setMultipleValidity,
+  setValidity,
   'data-test-subj': dataTestSubj,
 }: NumberInputOptionProps<ParamName>) {
-  const isValid = !isNaN(value);
+  const isValid = value !== null;
+  useValidation(setValidity, paramName, isValid);
+
   const onChange = useCallback(
-    (ev: ChangeEvent<HTMLInputElement>) => setValue(paramName, ev.target.valueAsNumber),
+    (ev: ChangeEvent<HTMLInputElement>) =>
+      setValue(paramName, isNaN(ev.target.valueAsNumber) ? null : ev.target.valueAsNumber),
     [setValue, paramName]
   );
-
-  useEffect(() => {
-    setMultipleValidity(paramName, isValid);
-
-    return () => setMultipleValidity(paramName, true);
-  }, [isValid, paramName]);
 
   return (
     <EuiFormRow label={label} error={error} isInvalid={isInvalid} fullWidth compressed>
@@ -79,7 +77,7 @@ function NumberInputOption<ParamName extends string>({
         step={step}
         max={max}
         min={min}
-        value={isNaN(value) ? '' : value}
+        value={value === null ? '' : value}
         onChange={onChange}
       />
     </EuiFormRow>
