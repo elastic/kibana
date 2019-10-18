@@ -5,9 +5,14 @@
  */
 
 import { unmountComponentAtNode } from 'react-dom';
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
 import routes from 'ui/routes';
+import {
+  CoreSetup,
+  CoreStart,
+  Plugin as CorePlugin,
+  PluginInitializerContext,
+} from 'src/core/public';
 
 import template from '../../public/index.html';
 import { renderReact } from './application';
@@ -20,7 +25,7 @@ export type Start = void;
 
 const REACT_ROOT_ID = 'alertingRoot';
 
-export class ActionsPlugin implements Plugin<Setup, Start> {
+export class Plugin implements CorePlugin<Setup, Start> {
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, plugins: any): Setup {
