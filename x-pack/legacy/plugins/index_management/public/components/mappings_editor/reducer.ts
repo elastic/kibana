@@ -65,10 +65,9 @@ export type Dispatch = (action: Action) => void;
 
 export const addFieldToState = (field: Field, state: State): State => {
   const id = getUniqueId();
-  const updatedById = { ...state.fields.byId };
   const { fieldToAddFieldTo } = state.documentFields;
   const addToRootLevel = fieldToAddFieldTo === undefined;
-  const parentField = addToRootLevel ? undefined : updatedById[fieldToAddFieldTo!];
+  const parentField = addToRootLevel ? undefined : state.fields.byId[fieldToAddFieldTo!];
 
   const rootLevelFields = addToRootLevel
     ? [...state.fields.rootLevelFields, id]
@@ -78,7 +77,7 @@ export const addFieldToState = (field: Field, state: State): State => {
   const { name } = field;
   const path = parentField ? `${parentField.path}.${name}` : name;
 
-  updatedById[id] = {
+  state.fields.byId[id] = {
     id,
     parentId: fieldToAddFieldTo,
     source: field,
@@ -91,7 +90,7 @@ export const addFieldToState = (field: Field, state: State): State => {
     const childFields = parentField.childFields || [];
 
     // Update parent field with new children
-    updatedById[fieldToAddFieldTo!] = {
+    state.fields.byId[fieldToAddFieldTo!] = {
       ...parentField,
       childFields: [...childFields, id],
       hasChildFields: parentField.canHaveChildFields ? true : false,
@@ -102,8 +101,8 @@ export const addFieldToState = (field: Field, state: State): State => {
     // We _also_ need to make a copy of the parent "childFields"
     // array to force a re-render in the view.
     if (parentField.parentId) {
-      updatedById[parentField.parentId].childFields = [
-        ...updatedById[parentField.parentId].childFields!,
+      state.fields.byId[parentField.parentId].childFields = [
+        ...state.fields.byId[parentField.parentId].childFields!,
       ];
     }
   }
@@ -111,7 +110,7 @@ export const addFieldToState = (field: Field, state: State): State => {
   return {
     ...state,
     isValid: isStateValid(state),
-    fields: { ...state.fields, byId: updatedById, rootLevelFields, maxNestedDepth },
+    fields: { ...state.fields, rootLevelFields, maxNestedDepth },
   };
 };
 
@@ -139,7 +138,7 @@ export const reducer = (state: State, action: Action): State => {
 
       return nextState;
     }
-    case 'documentField.createField':
+    case 'documentField.createField': {
       return {
         ...state,
         documentFields: {
@@ -148,7 +147,8 @@ export const reducer = (state: State, action: Action): State => {
           status: 'creatingField',
         },
       };
-    case 'documentField.editField':
+    }
+    case 'documentField.editField': {
       return {
         ...state,
         documentFields: {
@@ -157,6 +157,7 @@ export const reducer = (state: State, action: Action): State => {
           fieldToEdit: action.value,
         },
       };
+    }
     case 'documentField.changeStatus':
       const isValid = action.value === 'idle' ? state.configuration.isValid : state.isValid;
       return {
@@ -238,7 +239,8 @@ export const reducer = (state: State, action: Action): State => {
         newField = {
           ...newField,
           ...getFieldMeta(action.value),
-          hasChildFields: previousField.hasChildFields, // we need to put that back from our previous field
+          hasChildFields: previousField.hasChildFields, // we need to put this meta back from our previous field
+          hasMultiFields: previousField.hasMultiFields, // we need to put this meta back from our previous field
         };
 
         const shouldDeleteChildFields = shouldDeleteChildFieldsAfterTypeChange(
@@ -249,6 +251,7 @@ export const reducer = (state: State, action: Action): State => {
         if (shouldDeleteChildFields) {
           newField.childFields = undefined;
           newField.hasChildFields = false;
+          newField.hasMultiFields = false;
 
           if (previousField.childFields) {
             const allChildFields = getAllChildFields(previousField, state.fields.byId);
@@ -260,6 +263,7 @@ export const reducer = (state: State, action: Action): State => {
       }
 
       let updatedById: NormalizedFields['byId'];
+
       const nameHasChanged = newField.source.name !== previousField.source.name;
 
       if (nameHasChanged) {
@@ -269,7 +273,7 @@ export const reducer = (state: State, action: Action): State => {
         updatedById = byId;
         updatedById[fieldToEdit] = { ...newField, path };
       } else {
-        updatedById = { ...state.fields.byId };
+        updatedById = state.fields.byId;
         updatedById[fieldToEdit] = newField;
       }
 
@@ -310,6 +314,16 @@ export const reducer = (state: State, action: Action): State => {
             : action.value.isExpanded,
       };
 
+      const rootLevelFields = updatedField.parentId
+        ? state.fields.rootLevelFields
+        : [...state.fields.rootLevelFields];
+
+      if (updatedField.parentId) {
+        state.fields.byId[updatedField.parentId].childFields = [
+          ...state.fields.byId[updatedField.parentId].childFields!,
+        ];
+      }
+
       return {
         ...state,
         fields: {
@@ -318,6 +332,7 @@ export const reducer = (state: State, action: Action): State => {
             ...state.fields.byId,
             [action.value.fieldId]: updatedField,
           },
+          rootLevelFields,
         },
       };
     }

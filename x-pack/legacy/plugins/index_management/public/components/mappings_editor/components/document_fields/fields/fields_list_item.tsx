@@ -35,6 +35,7 @@ interface Props {
 }
 
 const INDENT_SIZE = 32;
+const WRAPPER_LEFT_PADDING_SIZE = 4;
 
 export const FieldsListItem = React.memo(function FieldListItemComponent({
   field,
@@ -63,14 +64,21 @@ export const FieldsListItem = React.memo(function FieldListItemComponent({
   const isAddFieldBtnDisabled = false; // For now, we never disable the Add Child button.
   // const isAddFieldBtnDisabled = field.nestedDepth === MAX_DEPTH_DEFAULT_EDITOR - 1;
   const indent = `${nestedDepth * INDENT_SIZE}px`;
-  const indentChild = `${(nestedDepth + 1) * INDENT_SIZE + 4}px`; // We need to add 4 because we have a padding left set to 4 on the wrapper
+
+  // When there aren't yet any depth (maxNestedDepth === 0), there are no toggle on the left
+  // we need to compensate and substract
+  const substractIndentAmount = maxNestedDepth === 0 ? INDENT_SIZE * 0.5 : 0;
+
+  const indentCreateField = `${(nestedDepth + 1) * INDENT_SIZE +
+    WRAPPER_LEFT_PADDING_SIZE -
+    substractIndentAmount}px`;
 
   const renderCreateField = () => {
     if (!isCreateFieldFormVisible) {
       return null;
     }
 
-    return <CreateField paddingLeft={indentChild} />;
+    return <CreateField paddingLeft={indentCreateField} />;
   };
 
   const renderActionButtons = () => {
