@@ -53,7 +53,7 @@ export default function ({ getService, loadTestFile }) {
     });
 
     describe('using current data', function () {
-      this.tags('ciGroup3');
+      this.tags('ciGroup2');
       before(loadCurrentData);
       after(unloadCurrentData);
 
@@ -74,7 +74,7 @@ export default function ({ getService, loadTestFile }) {
     // the data once to save on time. Eventually, all of these tests should just use current data and we can reserve
     // legacy data only for specifically testing BWC situations.
     describe('using legacy data', function () {
-      this.tags('ciGroup4');
+      this.tags('ciGroup2');
       before(async () => {
         await browser.setWindowSize(1200, 900);
       });
@@ -86,7 +86,7 @@ export default function ({ getService, loadTestFile }) {
     });
 
     describe('using legacy data', function () {
-      this.tags('ciGroup5');
+      this.tags('ciGroup2');
       before(async () => {
         await browser.setWindowSize(1200, 900);
       });
