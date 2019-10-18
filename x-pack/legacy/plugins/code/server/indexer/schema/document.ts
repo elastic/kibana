@@ -17,8 +17,6 @@ export const RepositoryDeleteStatusReservedField = 'repository_delete_status';
 export const RepositoryIndexStatusReservedField = 'repository_index_status';
 // The field name of repository config object nested in the Document index.
 export const RepositoryConfigReservedField = 'repository_config';
-// The field name of repository config object nested in the Document index.
-export const RepositoryRandomPathReservedField = 'repository_random_path';
 
 export const ALL_RESERVED = [
   RepositoryReservedField,
@@ -26,7 +24,6 @@ export const ALL_RESERVED = [
   RepositoryDeleteStatusReservedField,
   RepositoryIndexStatusReservedField,
   RepositoryConfigReservedField,
-  RepositoryRandomPathReservedField,
 ];
 
 // Correspond to model/search/Document
@@ -106,9 +103,6 @@ export const DocumentSchema = {
         type: 'boolean',
       },
     },
-  },
-  [RepositoryRandomPathReservedField]: {
-    type: 'keyword',
   },
   // A single Repository Git Status object resides in this document index.
   [RepositoryGitStatusReservedField]: {

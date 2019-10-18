@@ -9,6 +9,7 @@ import del from 'del';
 import fs from 'fs';
 import { delay } from 'lodash';
 import path from 'path';
+import crypto from 'crypto';
 import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
 import { Hover, Location, TextDocumentPositionParams } from 'vscode-languageserver';
 
@@ -97,7 +98,7 @@ export class WorkspaceHandler {
       wt = await this.openWorktree(
         git,
         workspaceBranch,
-        await this.revisionDir(repositoryUri, ref),
+        await this.revisionDir(repositoryUri, ref, this.randomPath()),
         targetRevision
       );
     }
@@ -108,6 +109,10 @@ export class WorkspaceHandler {
       workspaceDir: wt.path,
       workspaceRevision: targetRevision,
     };
+  }
+
+  private randomPath() {
+    return crypto.randomBytes(4).toString('hex');
   }
 
   public async openWorktree(
@@ -378,14 +383,20 @@ export class WorkspaceHandler {
     }
   }
 
-  public async revisionDir(repositoryUri: string, ref: string) {
-    return path.join(await this.workspaceDir(repositoryUri), ref);
+  public async revisionDir(repositoryUri: string, ref: string, randomStr: string = '') {
+    return path.join(await this.workspaceDir(repositoryUri, randomStr), ref);
   }
 
-  private async workspaceDir(repoUri: string) {
-    const randomStr =
-      this.objectClient && (await this.objectClient.getRepositoryRandomStr(repoUri));
+  private async workspaceDir(repoUri: string, randomStr: string = '') {
     const base = path.join(this.workspacePath, repoUri);
+    if (randomStr === '') {
+      const git = await this.gitOps.openGit(repoUri);
+      const trees = await this.listWorktrees(git);
+      if (trees.size > 0) {
+        const wt = trees.values().next().value;
+        return path.dirname(wt.path);
+      }
+    }
     if (randomStr) {
       return path.join(base, `__${randomStr}`);
     } else {
