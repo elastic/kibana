@@ -14,7 +14,7 @@ import {
 
 import { buildEmbeddableFilters } from '../../../server/lib/build_embeddable_filters';
 import { Filter } from '../../../types';
-import { getFunctionHelp } from '../../strings';
+import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
   id: string;
@@ -23,6 +23,7 @@ interface Arguments {
 type Return = EmbeddableExpression<Partial<SearchInput> & { id: SearchInput['id'] }>;
 
 export function savedSearch(): ExpressionFunction<'savedSearch', Filter | null, Arguments, Return> {
+  // @ts-ignore elastic/kibana#44822 Disabling pending filters work
   const { help, args: argHelp } = getFunctionHelp().savedSearch;
   return {
     name: 'savedSearch',

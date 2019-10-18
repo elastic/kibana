@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { uniqueId, startsWith } from 'lodash';
 import { EuiCallOut } from '@elastic/eui';
 import styled from 'styled-components';
@@ -25,8 +25,10 @@ import { history } from '../../../utils/history';
 import { useMatchedRoutes } from '../../../hooks/useMatchedRoutes';
 import { RouteName } from '../../app/Main/route_config/route_names';
 import { useKibanaCore } from '../../../../../observability/public';
-import { getAPMIndexPattern } from '../../../services/rest/savedObjects';
+import { ISavedObject } from '../../../services/rest/savedObjects';
 import { AutocompleteSuggestion } from '../../../../../../../../src/plugins/data/public';
+import { FETCH_STATUS } from '../../../hooks/useFetcher';
+import { useAPMIndexPattern } from '../../../hooks/useAPMIndexPattern';
 
 const Container = styled.div`
   margin-bottom: 10px;
@@ -36,9 +38,7 @@ const getAutocompleteProvider = (language: string) =>
   npStart.plugins.data.autocomplete.getProvider(language);
 
 interface State {
-  indexPattern: StaticIndexPattern | null;
   suggestions: AutocompleteSuggestion[];
-  isLoadingIndexPattern: boolean;
   isLoadingSuggestions: boolean;
 }
 
@@ -50,13 +50,9 @@ function convertKueryToEsQuery(
   return toElasticsearchQuery(ast, indexPattern);
 }
 
-async function getAPMIndexPatternForKuery(): Promise<
-  StaticIndexPattern | undefined
-> {
-  const apmIndexPattern = await getAPMIndexPattern();
-  if (!apmIndexPattern) {
-    return;
-  }
+function getAPMIndexPatternForKuery(
+  apmIndexPattern: ISavedObject
+): StaticIndexPattern | undefined {
   return getFromSavedObject(apmIndexPattern);
 }
 
@@ -89,9 +85,7 @@ function getSuggestions(
 export function KueryBar() {
   const core = useKibanaCore();
   const [state, setState] = useState<State>({
-    indexPattern: null,
     suggestions: [],
-    isLoadingIndexPattern: true,
     isLoadingSuggestions: false
   });
   const { urlParams } = useUrlParams();
@@ -101,8 +95,19 @@ export function KueryBar() {
   const apmIndexPatternTitle = core.injectedMetadata.getInjectedVar(
     'apmIndexPatternTitle'
   );
-  const indexPatternMissing =
-    !state.isLoadingIndexPattern && !state.indexPattern;
+
+  const {
+    apmIndexPattern,
+    status: apmIndexPatternStatus
+  } = useAPMIndexPattern();
+
+  const indexPattern =
+    apmIndexPatternStatus === FETCH_STATUS.SUCCESS
+      ? getAPMIndexPatternForKuery(apmIndexPattern)
+      : null;
+
+  const indexPatternMissing = status === FETCH_STATUS.SUCCESS && !indexPattern;
+
   let currentRequestCheck;
 
   const exampleMap: { [key: string]: string } = {
@@ -116,36 +121,8 @@ export function KueryBar() {
     matchedRoutes.map(({ name }) => exampleMap[name]).find(Boolean) ||
     'transaction.duration.us > 300000 AND http.response.status_code >= 400';
 
-  useEffect(() => {
-    let didCancel = false;
-
-    async function loadIndexPattern() {
-      setState(value => ({ ...value, isLoadingIndexPattern: true }));
-      const indexPattern = await getAPMIndexPatternForKuery();
-      if (didCancel) {
-        return;
-      }
-      if (!indexPattern) {
-        setState(value => ({ ...value, isLoadingIndexPattern: false }));
-      } else {
-        setState(value => ({
-          ...value,
-          indexPattern,
-          isLoadingIndexPattern: false
-        }));
-      }
-    }
-    loadIndexPattern();
-
-    return () => {
-      didCancel = true;
-    };
-  }, []);
-
   async function onChange(inputValue: string, selectionStart: number) {
-    const { indexPattern } = state;
-
-    if (indexPattern === null) {
+    if (indexPattern == null) {
       return;
     }
 
@@ -177,9 +154,7 @@ export function KueryBar() {
   }
 
   function onSubmit(inputValue: string) {
-    const { indexPattern } = state;
-
-    if (indexPattern === null) {
+    if (indexPattern == null) {
       return;
     }
 

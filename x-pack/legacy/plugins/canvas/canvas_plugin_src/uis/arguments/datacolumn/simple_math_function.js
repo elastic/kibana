@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiSelect } from '@elastic/eui';
-import { ArgumentStrings } from '../../../strings';
+import { ArgumentStrings } from '../../../../i18n';
 
 const { DataColumn: strings } = ArgumentStrings;
 

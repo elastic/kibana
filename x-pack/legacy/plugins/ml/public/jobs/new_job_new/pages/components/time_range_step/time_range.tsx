@@ -16,6 +16,7 @@ import { useKibanaContext } from '../../../../../contexts/kibana';
 import { FullTimeRangeSelector } from '../../../../../components/full_time_range_selector';
 import { EventRateChart } from '../charts/event_rate_chart';
 import { LineChartPoint } from '../../../common/chart_loader';
+import { JOB_TYPE } from '../../../common/job_creator/util/constants';
 import { GetTimeFieldRangeResponse } from '../../../../../services/ml_api_service';
 import { TimeRangePicker, TimeRange } from '../../../common/components';
 
@@ -110,7 +111,16 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
             loading={loadingData}
           />
 
-          <WizardNav next={() => setCurrentStep(WIZARD_STEPS.PICK_FIELDS)} nextActive={true} />
+          <WizardNav
+            next={() =>
+              setCurrentStep(
+                jobCreator.type === JOB_TYPE.ADVANCED
+                  ? WIZARD_STEPS.ADVANCED_CONFIGURE_DATAFEED
+                  : WIZARD_STEPS.PICK_FIELDS
+              )
+            }
+            nextActive={true}
+          />
         </Fragment>
       )}
     </Fragment>

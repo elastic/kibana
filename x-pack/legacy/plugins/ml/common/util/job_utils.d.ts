@@ -24,6 +24,8 @@ export function basicJobValidation(
   skipMmlCheck?: boolean
 ): ValidationResults;
 
+export function basicDatafeedValidation(job: any): ValidationResults;
+
 export const ML_MEDIAN_PERCENTS: number;
 
 export const ML_DATA_PREVIEW_COUNT: number;
