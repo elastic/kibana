@@ -37,6 +37,9 @@ export const getMetadataItems = (
 };
 
 export const filterItems = (items: MetadataItems, searchTerm: string) => {
+  if (!searchTerm) {
+    return items;
+  }
   return items
     .map(item => {
       const { data = [] } = item;

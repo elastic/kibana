@@ -12,7 +12,7 @@ import {
   EuiTitle,
   EuiFieldSearch
 } from '@elastic/eui';
-import React, { useState, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import { EuiText } from '@elastic/eui';
@@ -34,14 +34,11 @@ export function MetadataTable({ items }: Props) {
   const { urlParams } = useUrlParams();
   const { searchTerm = '' } = urlParams;
 
-  const [filteredItems, setFilteredItems] = useState(
-    searchTerm ? filterItems(items, searchTerm) : items
-  );
+  const filteredItems = filterItems(items, searchTerm);
 
   const onSearchChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value.trim().toLowerCase();
-      setFilteredItems(filterItems(items, value));
       history.replace({
         ...location,
         search: fromQuery({
@@ -50,7 +47,7 @@ export function MetadataTable({ items }: Props) {
         })
       });
     },
-    [items, location]
+    [location]
   );
   const noResultFound = (searchTerm && isEmpty(filteredItems)) || false;
   return (
