@@ -8,7 +8,7 @@ import React, { Fragment, useState, useEffect } from 'react';
 import { EuiInMemoryTable, EuiSpacer, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ActionsContext } from '../../../context/app_context';
+import { ActionsContext } from '../../../context/actions_context';
 import { useAppDependencies } from '../../../index';
 import { AlertingActionsDropdown } from './create_menu_popover';
 import {
