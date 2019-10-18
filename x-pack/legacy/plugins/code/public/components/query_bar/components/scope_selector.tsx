@@ -9,7 +9,7 @@ import React, { Component } from 'react';
 
 import { SearchScope } from '../../../../model';
 import { SearchScopeText } from '../../../common/types';
-import CommitSVG from './commit.svg';
+import { CommitIcon } from './commit_icon';
 
 interface Props {
   scope: SearchScope;
@@ -55,12 +55,9 @@ export class ScopeSelector extends Component<Props> {
     {
       value: SearchScope.COMMIT,
       inputDisplay: (
-        <>
-          <EuiIcon type={CommitSVG} />{' '}
-          <EuiText className="eui-displayInlineBlock" size="s">
-            {SearchScopeText[SearchScope.COMMIT]}
-          </EuiText>
-        </>
+        <EuiText size="s">
+          <EuiIcon type={CommitIcon} /> {SearchScopeText[SearchScope.COMMIT]}
+        </EuiText>
       ),
     },
   ];
