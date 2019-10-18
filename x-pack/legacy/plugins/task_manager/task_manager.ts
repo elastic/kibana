@@ -87,18 +87,18 @@ export class TaskManager {
       this.logger.info(`TaskManager is identified by the Kibana UUID: ${taskManagerId}`);
     }
 
-    const store = createTaskStoreUpdateBuffer(
-      new TaskStore({
-        serializer: opts.serializer,
-        savedObjectsRepository: opts.savedObjectsRepository,
-        callCluster: opts.callWithInternalUser,
-        index: opts.config.get('xpack.task_manager.index'),
-        maxAttempts: opts.config.get('xpack.task_manager.max_attempts'),
-        definitions: this.definitions,
-        taskManagerId: `kibana:${taskManagerId}`,
-      }),
-      this.logger
-    );
+    const taskStore = new TaskStore({
+      serializer: opts.serializer,
+      savedObjectsRepository: opts.savedObjectsRepository,
+      callCluster: opts.callWithInternalUser,
+      index: opts.config.get('xpack.task_manager.index'),
+      maxAttempts: opts.config.get('xpack.task_manager.max_attempts'),
+      definitions: this.definitions,
+      taskManagerId: `kibana:${taskManagerId}`,
+    });
+    const store = opts.config.get('xpack.task_manager.bulk_update')
+      ? createTaskStoreUpdateBuffer(taskStore, this.logger)
+      : taskStore;
 
     const pool = new TaskPool({
       logger: this.logger,
