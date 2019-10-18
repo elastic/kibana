@@ -55,13 +55,12 @@ export const getLicenseExpiration = (getMonitoringCluster: any, logger: Logger):
       if (license.status !== 'active') {
         isExpired = true;
       } else if (license.expiry_date_in_millis) {
-        const $now = moment();
         for (let i = EXPIRES_DAYS.length - 1; i >= 0; i--) {
           if (license.type === 'trial' && i < 2) {
             break;
           }
 
-          const $fromNow = $now.add(EXPIRES_DAYS[i] * 24 * 60 * 60 * 1000);
+          const $fromNow = moment().add(EXPIRES_DAYS[i], 'days');
           if ($fromNow.isAfter($expiry)) {
             isExpired = true;
           }
