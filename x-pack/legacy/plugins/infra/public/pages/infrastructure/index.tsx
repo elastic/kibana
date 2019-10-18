@@ -59,7 +59,7 @@ export const InfrastructurePage = injectUICapabilities(
         />
 
         <AppNavigation
-          label={i18n.translate('xpack.infra.header.infrastructureNavigationTitle', {
+          aria-label={i18n.translate('xpack.infra.header.infrastructureNavigationTitle', {
             defaultMessage: 'Metrics',
           })}
         >

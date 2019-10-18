@@ -9,11 +9,11 @@ import React from 'react';
 import euiStyled from '../../../../../common/eui_styled_components';
 
 interface AppNavigationProps {
-  label: string;
+  'aria-label': string;
   children: React.ReactNode;
 }
 
-export const AppNavigation = ({ label, children }: AppNavigationProps) => (
+export const AppNavigation = ({ 'aria-label': label, children }: AppNavigationProps) => (
   <Nav aria-label={label}>
     <EuiFlexGroup gutterSize="m" alignItems="center" justifyContent="spaceBetween">
       <EuiFlexItem>{children}</EuiFlexItem>

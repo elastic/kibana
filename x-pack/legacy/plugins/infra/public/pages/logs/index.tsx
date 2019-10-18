@@ -130,7 +130,7 @@ export const LogsPage = injectUICapabilities(({ match, uiCapabilities }: LogsPag
             />
           ) : (
             <>
-              <AppNavigation label={pageTitle}>
+              <AppNavigation aria-label={pageTitle}>
                 <RoutedTabs
                   tabs={
                     logAnalysisCapabilities.hasLogAnalysisCapabilites
