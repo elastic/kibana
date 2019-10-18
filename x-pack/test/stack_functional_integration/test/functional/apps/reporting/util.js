@@ -5,12 +5,6 @@ export const pretty = x =>
   JSON.stringify(x, null, 2);
 export const buildUrl = ({ protocol, auth, hostname, port }) =>
   new URL(`${protocol}://${auth}@${hostname}:${port}`);
-export const emails = [
-  'wayne.seymour@elastic.co',
-  'lee.drengenberg@elastic.co',
-  'rashmi.kulkarni@elastic.co',
-  'bhavya@elastic.co',
-  'watchertest123@gmail.com'];
 export const putWatcher = async (watch, id, body, client, log) => {
   const putWatchResponse = await client.watcher.putWatch({ ...watch, body });
   log.debug(`# putWatchResponse \n${pretty(putWatchResponse)}`);
