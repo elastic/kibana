@@ -74,10 +74,6 @@ export const ActionAdd = ({ actionType, refreshList }: Props) => {
     dispatch({ command: 'setConfigProperty', payload: { property, value } });
   };
 
-  const editActionJSONConfig = (property: string, value: any) => {
-    dispatch({ command: 'setConfigJSONProperty', payload: { property, value } });
-  };
-
   const setActionSecretsProperty = (property: string, value: any) => {
     dispatch({ command: 'setSecretsProperty', payload: { property, value } });
   };
@@ -175,7 +171,6 @@ export const ActionAdd = ({ actionType, refreshList }: Props) => {
             errors={errors}
             editActionConfig={setActionConfigProperty}
             editActionSecrets={setActionSecretsProperty}
-            editActionJSONConfig={editActionJSONConfig}
             hasErrors={hasErrors}
           >
             {actionType.id === null ? (

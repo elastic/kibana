@@ -47,36 +47,6 @@ export const actionReducer = (state: any, actionItem: any) => {
         };
       }
     }
-    case 'setConfigJSONProperty': {
-      const { property, value } = payload;
-      if (isEqual(action.config[property], value)) {
-        return state;
-      } else {
-        try {
-          return {
-            ...state,
-            action: new ActionModel({
-              ...action,
-              config: {
-                ...action.config,
-                [property]: JSON.parse(value),
-              },
-            }),
-          };
-        } catch {
-          return {
-            ...state,
-            action: new ActionModel({
-              ...action,
-              config: {
-                ...action.config,
-                [property]: value,
-              },
-            }),
-          };
-        }
-      }
-    }
     case 'setSecretsProperty': {
       const { property, value } = payload;
       if (isEqual(action.secrets[property], value)) {
