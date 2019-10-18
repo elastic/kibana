@@ -32,13 +32,17 @@ export class SessionTimeout {
   private warningToast?: Toast;
 
   constructor(
-    private sessionTimeout: number,
+    private sessionTimeout: number | null,
     private notifications: NotificationsSetup,
     private sessionExpired: ISessionExpired,
     private http: HttpSetup
   ) {}
 
   extend(): void {
+    if (this.sessionTimeout == null) {
+      return;
+    }
+
     if (this.warningTimeout) {
       window.clearTimeout(this.warningTimeout);
     }
@@ -65,7 +69,7 @@ export class SessionTimeout {
       title: i18n.translate('xpack.security.hacks.warningTitle', {
         defaultMessage: 'Warning',
       }),
-      toastLifeTimeMs: Math.min(this.sessionTimeout - GRACE_PERIOD_MS, WARNING_MS),
+      toastLifeTimeMs: Math.min(this.sessionTimeout! - GRACE_PERIOD_MS, WARNING_MS),
     });
   };
 

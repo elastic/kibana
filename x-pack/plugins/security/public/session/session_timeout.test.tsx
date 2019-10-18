@@ -159,4 +159,13 @@ describe('session expiration', () => {
     jest.advanceTimersByTime(0);
     expect(sessionExpired.logout).toHaveBeenCalled();
   });
+
+  test(`'null' sessionTimeout never logs you out`, () => {
+    const { notifications, http } = coreMock.createSetup();
+    const sessionExpired = createSessionExpiredMock();
+    const sessionTimeout = new SessionTimeout(null, notifications, sessionExpired, http);
+    sessionTimeout.extend();
+    jest.advanceTimersByTime(Number.MAX_VALUE);
+    expect(sessionExpired.logout).not.toHaveBeenCalled();
+  });
 });

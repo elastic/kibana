@@ -14,7 +14,7 @@ import {
 
 export class SecurityPlugin implements Plugin<SecurityPluginSetup, SecurityPluginStart> {
   public setup(core: CoreSetup, deps: {}) {
-    const { http, notifications } = core;
+    const { http, notifications, injectedMetadata } = core;
     const { basePath, anonymousPaths } = http;
     anonymousPaths.register('/login');
     anonymousPaths.register('/logout');
@@ -22,7 +22,12 @@ export class SecurityPlugin implements Plugin<SecurityPluginSetup, SecurityPlugi
 
     const sessionExpired = new SessionExpired(basePath);
     http.intercept(new UnauthorizedResponseHttpInterceptor(sessionExpired, anonymousPaths));
-    const sessionTimeout = new SessionTimeout(1.5 * 60 * 1000, notifications, sessionExpired, http);
+    const sessionTimeout = new SessionTimeout(
+      injectedMetadata.getInjectedVar('sessionTimeout', null),
+      notifications,
+      sessionExpired,
+      http
+    );
     http.intercept(new SessionTimeoutHttpInterceptor(sessionTimeout, anonymousPaths));
 
     return {
