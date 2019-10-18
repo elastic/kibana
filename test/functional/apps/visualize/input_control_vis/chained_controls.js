@@ -25,14 +25,11 @@ export default function ({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const comboBox = getService('comboBox');
-  //const esArchiver = getService('esArchiver');
 
   describe('chained controls', function () {
     this.tags('smoke');
 
     before(async () => {
-      // fix for Firefox smoke run
-      //await esArchiver.unload('dashboard/current/data');
       await PageObjects.common.navigateToApp('visualize');
       await PageObjects.visualize.loadSavedVisualization('chained input control', { navigateToVisualize: false });
     });
