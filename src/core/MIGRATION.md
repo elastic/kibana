@@ -1,35 +1,56 @@
 # Migrating legacy plugins to the new platform
 
-* [Overview](#overview)
-  * [Architecture](#architecture)
-  * [Services](#services)
-  * [Integrating with other plugins](#integrating-with-other-plugins)
-  * [Challenges to overcome with legacy plugins](#challenges-to-overcome-with-legacy-plugins)
-  * [Plan of action](#plan-of-action)
-* [Server-side plan of action](#server-side-plan-of-action)
-  * [De-couple from hapi.js server and request objects](#de-couple-from-hapijs-server-and-request-objects)
-  * [Introduce new plugin definition shim](#introduce-new-plugin-definition-shim)
-  * [Switch to new platform services](#switch-to-new-platform-services)
-  * [Migrate to the new plugin system](#migrate-to-the-new-plugin-system)
-* [Browser-side plan of action](#browser-side-plan-of-action)
-  * [Move UI modules into plugins](#move-ui-modules-into-plugins)
-  * [Provide plugin extension points decoupled from angular.js](#provide-plugin-extension-points-decoupled-from-angularjs)
-  * [Move all webpack alias imports into uiExport entry files](#move-all-webpack-alias-imports-into-uiexport-entry-files)
-  * [Switch to new platform services](#switch-to-new-platform-services-1)
-  * [Migrate to the new plugin system](#migrate-to-the-new-plugin-system-1)
-* [Frequently asked questions](#frequently-asked-questions)
-  * [Is migrating a plugin an all-or-nothing thing?](#is-migrating-a-plugin-an-all-or-nothing-thing)
-  * [Do plugins need to be converted to TypeScript?](#do-plugins-need-to-be-converted-to-typescript)
-  * [Can static code be shared between plugins?](#can-static-code-be-shared-between-plugins)
-  * [How can I avoid passing Core services deeply within my UI component tree?](#how-can-i-avoid-passing-core-services-deeply-within-my-ui-component-tree)
-  * [How is "common" code shared on both the client and server?](#how-is-common-code-shared-on-both-the-client-and-server)
-  * [When does code go into a plugin, core, or packages?](#when-does-code-go-into-a-plugin-core-or-packages)
-  * [How do I build my shim for New Platform services?](#how-do-i-build-my-shim-for-new-platform-services)
-    * aka, where did everything move to?
-* [How to](#how-to)
-  * [Configure plugin](#configure-plugin)
-  * [Mock new platform services in tests](#mock-new-platform-services-in-tests)
-  * [Provide Legacy Platform API to the New platform plugin](#provide-legacy-platform-api-to-the-new-platform-plugin)
+- [Migrating legacy plugins to the new platform](#migrating-legacy-plugins-to-the-new-platform)
+  - [Overview](#overview)
+    - [Architecture](#architecture)
+    - [Services](#services)
+    - [Integrating with other plugins](#integrating-with-other-plugins)
+    - [Challenges to overcome with legacy plugins](#challenges-to-overcome-with-legacy-plugins)
+      - [Challenges on the server](#challenges-on-the-server)
+      - [Challenges in the browser](#challenges-in-the-browser)
+    - [Plan of action](#plan-of-action)
+  - [Server-side plan of action](#server-side-plan-of-action)
+    - [De-couple from hapi.js server and request objects](#de-couple-from-hapijs-server-and-request-objects)
+    - [Introduce new plugin definition shim](#introduce-new-plugin-definition-shim)
+    - [Switch to new platform services](#switch-to-new-platform-services)
+    - [Migrate to the new plugin system](#migrate-to-the-new-plugin-system)
+  - [Browser-side plan of action](#browser-side-plan-of-action)
+      - [1. Create a plugin definition file](#1-create-a-plugin-definition-file)
+      - [2. Export all static code and types from `public/index.ts`](#2-export-all-static-code-and-types-from-publicindexts)
+      - [3. Export your runtime contract](#3-export-your-runtime-contract)
+      - [4. Move "owned" UI modules into your plugin and expose them from your public contract](#4-move-owned-ui-modules-into-your-plugin-and-expose-them-from-your-public-contract)
+      - [5. Provide plugin extension points decoupled from angular.js](#5-provide-plugin-extension-points-decoupled-from-angularjs)
+      - [6. Move all webpack alias imports into uiExport entry files](#6-move-all-webpack-alias-imports-into-uiexport-entry-files)
+      - [7. Switch to new platform services](#7-switch-to-new-platform-services)
+      - [8. Migrate to the new plugin system](#8-migrate-to-the-new-plugin-system)
+      - [Bonus: Tips for complex migration scenarios](#bonus-tips-for-complex-migration-scenarios)
+  - [Frequently asked questions](#frequently-asked-questions)
+    - [Is migrating a plugin an all-or-nothing thing?](#is-migrating-a-plugin-an-all-or-nothing-thing)
+    - [Do plugins need to be converted to TypeScript?](#do-plugins-need-to-be-converted-to-typescript)
+    - [Can static code be shared between plugins?](#can-static-code-be-shared-between-plugins)
+      - [Background](#background)
+      - [What goes wrong if I do share modules with state?](#what-goes-wrong-if-i-do-share-modules-with-state)
+      - [How to decide what code can be statically imported](#how-to-decide-what-code-can-be-statically-imported)
+      - [Concrete Example](#concrete-example)
+    - [How can I avoid passing Core services deeply within my UI component tree?](#how-can-i-avoid-passing-core-services-deeply-within-my-ui-component-tree)
+    - [How is "common" code shared on both the client and server?](#how-is-common-code-shared-on-both-the-client-and-server)
+    - [When does code go into a plugin, core, or packages?](#when-does-code-go-into-a-plugin-core-or-packages)
+    - [How do I build my shim for New Platform services?](#how-do-i-build-my-shim-for-new-platform-services)
+      - [Client-side](#client-side)
+        - [Core services](#core-services)
+        - [Plugins for shared application services](#plugins-for-shared-application-services)
+      - [Server-side](#server-side)
+        - [Core services](#core-services-1)
+      - [UI Exports](#ui-exports)
+  - [How to](#how-to)
+    - [Configure plugin](#configure-plugin)
+    - [Mock new platform services in tests](#mock-new-platform-services-in-tests)
+      - [Writing mocks for your plugin](#writing-mocks-for-your-plugin)
+      - [Using mocks in your tests](#using-mocks-in-your-tests)
+      - [What about karma tests?](#what-about-karma-tests)
+    - [Provide Legacy Platform API to the New platform plugin](#provide-legacy-platform-api-to-the-new-platform-plugin)
+      - [On the server side](#on-the-server-side)
+      - [On the client side](#on-the-client-side)
 
 Make no mistake, it is going to take a lot of work to move certain plugins to the new platform. Our target is to migrate the entire repo over to the new platform throughout 7.x and to remove the legacy plugin system no later than 8.0, and this is only possible if teams start on the effort now.
 
@@ -448,13 +469,14 @@ We now move this logic into a new plugin definition, which is based off of the c
 
 ```ts
 // server/plugin.ts
+import { CoreSetup } from 'src/core/server';
 import { ElasticsearchPlugin } from '../elasticsearch';
 
-// note: We use a name unique to our plugin for this type since our shimmed interface is not 100%
-// compatible with NP's CoreSetup.
-interface DemoPluginCoreSetup {
-  elasticsearch: ElasticsearchPlugin // note: Elasticsearch is in Core in NP, rather than a plugin
-  http: {
+// note: We use a name unique to our plugin for this type since our shimmed still references legacy 
+// dependencies which aren't compatible with NP's CoreSetup.
+interface DemoPluginCoreSetup extends CoreSetup {
+  __legacy: {
+    elasticsearch: ElasticsearchPlugin, // note: Elasticsearch is in Core in NP, rather than a plugin
     route: Legacy.Server['route']    // note: NP uses `http.createRouter()`
   }
 }
@@ -464,7 +486,9 @@ interface FooSetup {
 }
 
 interface PluginsSetup {
-  foo: FooSetup
+  __legacy: {
+    foo: FooSetup
+  }
 }
 
 export type DemoPluginSetup = ReturnType<Plugin['setup']>;
@@ -476,13 +500,13 @@ export class Plugin {
         // We're still using the legacy Elasticsearch here, but we're now accessing it
         // the same way a NP plugin would, via core. Later, we'll swap this out for the
         // actual New Platform service.
-        elasticsearch: core.elasticsearch
+        elasticsearch: core.__legacy.elasticsearch
       }
     }
 
     // HTTP functionality from legacy platform, accessed in a way that's compatible with
     // NP conventions even if not 100% the same
-    core.http.route({
+    core.__legacy.route({
       path: '/api/demo_plugin/search',
       method: 'POST',
       async handler(request) {
@@ -496,7 +520,7 @@ export class Plugin {
     // Exposing functionality for other plugins
     return {
       getDemoBar() {
-        return `Demo ${plugins.foo.getBar()}`; // Accessing functionality from another plugin
+        return `Demo ${plugins.__legacy.foo.getBar()}`; // Accessing functionality from another legacy plugin
       }
     };
   }
@@ -517,14 +541,17 @@ export default (kibana) => {
     init(server) {
       // core shim
       const coreSetup = {
-        elasticsearch: server.plugins.elasticsearch,
-        http: {
+        ...server.newPlatform.setup.core,
+        __legacy: {
+          elasticsearch: server.plugins.elasticsearch,
           route: server.route
         }
       };
       // plugins shim
       const pluginsSetup = {
-        foo: server.plugins.foo
+        __legacy: {
+          foo: server.plugins.foo
+        }
       };
 
       const demoSetup = new Plugin().setup(coreSetup, pluginsSetup);
@@ -559,9 +586,8 @@ init(server) {
   // core shim
   const coreSetup = {
     ...server.newPlatform.setup.core,
-
-    elasticsearch: server.plugins.elasticsearch,
-    http: {
+    __legacy: {
+      elasticsearch: server.plugins.elasticsearch,
       route: server.route
     }
   };
@@ -570,7 +596,7 @@ init(server) {
 
 If a legacy API differs from its new platform equivalent, some refactoring will be required. The best outcome comes from updating the plugin code to use the new API, but if that's not practical now, you can also create a facade inside your new plugin definition that is shaped like the legacy API but powered by the new API. Once either of these things is done, that override can be removed from the shim.
 
-Eventually, all overrides will be removed and your `coreSetup` shim is entirely powered by `server.newPlatform.setup.core`.
+Eventually, all `__legacy` dependencies will be removed and your `coreSetup` shim is entirely powered by `server.newPlatform.setup.core`.
 
 ```ts
 init(server) {
@@ -590,12 +616,17 @@ init(server) {
   // plugins shim
   const pluginsSetup = {
     ...server.newPlatform.setup.plugins,
-    foo: server.plugins.foo
+    __legacy: {
+      foo: server.plugins.foo
+    }
   };
 }
 ```
 
-As the plugins you depend on are migrated to the new platform, their contract will be exposed through `server.newPlatform`, so the legacy override should be removed. Like in core, plugins should take care to preserve their existing APIs to make this step as seamless as possible.
+As the plugins you depend on are migrated to the new platform, their contract
+will be exposed through `server.newPlatform`, so the `__legacy` dependencies
+should be removed. Like in core, plugins should take care to preserve their
+existing APIs to make this step as seamless as possible.
 
 It is much easier to reliably make breaking changes to plugin APIs in the new platform than it is in the legacy world, so if you're planning a big change, consider doing it after your dependent plugins have migrated rather than as part of your own migration.
 
@@ -622,7 +653,7 @@ With the previous steps resolved, this final step should be easy, but the exact 
 
 Other plugins may want to move subsystems over individually. For instance, you can move routes over to the New Platform in groups rather than all at once. Other examples that could be broken up:
 - Configuration schema ([see example](./MIGRATION_EXAMPLES.md#declaring-config-schema))
-- HTTP route registration
+- HTTP route registration ([see example](./MIGRATION_EXAMPLES.md#route-registration))
 - Polling mechanisms (eg. job worker)
 
 In general, we recommend moving all at once by ensuring you're not depending on any legacy code before you move over.
@@ -1016,10 +1047,10 @@ If you have code that should be available to other plugins on both the client an
 There are some Core services that are purely presentational, for example `core.overlays.openModal()` or `core.application.createLink()` where UI code does need access to these deeply within your application. However, passing these services down as props throughout your application leads to lots of boilerplate. To avoid this, you have three options:
 1. Use an abstraction layer, like Redux, to decouple your UI code from core (**this is the highly preferred option**); or
     - [redux-thunk](https://github.com/reduxjs/redux-thunk#injecting-a-custom-argument) and [redux-saga](https://redux-saga.js.org/docs/api/#createsagamiddlewareoptions) already have ways to do this.
-1. Use React Context to provide these services to large parts of your React tree; or
-1. Create a high-order-component that injects core into a React component; or
+2. Use React Context to provide these services to large parts of your React tree; or
+3. Create a high-order-component that injects core into a React component; or
     - This would be a stateful module that holds a reference to Core, but provides it as props to components with a `withCore(MyComponent)` interface. This can make testing components simpler. (Note: this module cannot be shared across plugin boundaries, see above).
-1. Create a global singleton module that gets imported into each module that needs it. (Note: this module cannot be shared across plugin boundaries, see above). [Example](https://gist.github.com/epixa/06c8eeabd99da3c7545ab295e49acdc3).
+4. Create a global singleton module that gets imported into each module that needs it. (Note: this module cannot be shared across plugin boundaries, see above). [Example](https://gist.github.com/epixa/06c8eeabd99da3c7545ab295e49acdc3).
 
 If you find that you need many different Core services throughout your application, this may be a code smell and could lead to pain down the road. For instance, if you need access to an HTTP Client or SavedObjectsClient in many places in your React tree, it's likely that a data layer abstraction (like Redux) could make developing your plugin much simpler (see option 1).
 
@@ -1120,7 +1151,7 @@ In server code, `core` can be accessed from either `server.newPlatform` or `kbnS
 | Legacy Platform                                    | New Platform                                                                                                                      | Notes                                                                       |
 |----------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------|
 | `server.config()`                                  | [`initializerContext.config.create()`](/docs/development/core/server/kibana-plugin-server.plugininitializercontext.config.md)     | Must also define schema. See _[how to configure plugin](#configure-plugin)_ |
-| `server.route`                                     | [`core.http.createRouter`](/docs/development/core/server/kibana-plugin-server.httpservicesetup.createrouter.md)                   |                                                                             |
+| `server.route`                                     | [`core.http.createRouter`](/docs/development/core/server/kibana-plugin-server.httpservicesetup.createrouter.md)                   | [Examples](./MIGRATION_EXAMPLES.md#route-registration) |
 | `request.getBasePath()`                            | [`core.http.basePath.get`](/docs/development/core/server/kibana-plugin-server.httpservicesetup.basepath.md)                       |                                                                             |
 | `server.plugins.elasticsearch.getCluster('data')`  | [`core.elasticsearch.dataClient$`](/docs/development/core/server/kibana-plugin-server.elasticsearchservicesetup.dataclient_.md)   | Handlers will also include a pre-configured client                          |
 | `server.plugins.elasticsearch.getCluster('admin')` | [`core.elasticsearch.adminClient$`](/docs/development/core/server/kibana-plugin-server.elasticsearchservicesetup.adminclient_.md) | Handlers will also include a pre-configured client                          |

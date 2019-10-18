@@ -9,10 +9,9 @@ APIs to their New Platform equivalents.
     - [Using New Platform config from a Legacy plugin](#using-new-platform-config-from-a-legacy-plugin)
       - [Create a New Platform plugin](#create-a-new-platform-plugin)
   - [HTTP Routes](#http-routes)
-    - [Route Registration](#route-registration)
-      - [1. Legacy route registration](#1-legacy-route-registration)
-      - [2. New Platform shim using legacy router](#2-new-platform-shim-using-legacy-router)
-      - [3. New Platform shim using New Platform router](#3-new-platform-shim-using-new-platform-router)
+    - [1. Legacy route registration](#1-legacy-route-registration)
+    - [2. New Platform shim using legacy router](#2-new-platform-shim-using-legacy-router)
+    - [3. New Platform shim using New Platform router](#3-new-platform-shim-using-new-platform-router)
       - [4. New Platform plugin](#4-new-platform-plugin)
     - [Accessing Services](#accessing-services)
   - [Chrome](#chrome)
@@ -163,11 +162,10 @@ This interface has a different API with slightly different behaviors.
   continue using the `boom` module internally in your plugin, the framework does
   not have native support for converting Boom exceptions into HTTP responses.
 
-### Route Registration
 Because of the incompatibility between the legacy and New Platform HTTP Route
 API's it might be helpful to break up your migration work into several stages.
 
-#### 1. Legacy route registration
+### 1. Legacy route registration
 ```ts
 // legacy/plugins/myplugin/index.ts
 import Joi from 'joi';
@@ -192,7 +190,7 @@ new kibana.Plugin({
 });
 ```
 
-#### 2. New Platform shim using legacy router
+### 2. New Platform shim using legacy router
 Create a New Platform shim and inject the legacy `server.route` into your
 plugin's setup function. This shim isn't exactly the same as the New
 Platform's API's but it allows us to leave all of our route registration
@@ -208,7 +206,8 @@ export default (kibana) => {
     init(server) {
       // core shim
       const coreSetup: DemoPluginCoreSetup = {
-        http: {
+        ...server.newPlatform.setup.core,
+        __legacy: {
           route: server.route
         },
       };
@@ -220,10 +219,11 @@ export default (kibana) => {
 ```
 ```ts
 // legacy/plugins/demoplugin/server/plugin.ts
+import { CoreSetup } from 'src/core/server';
 import { Legacy } from 'kibana';
 
-export interface DemoPluginCoreSetup {
-  http: {
+export interface DemoPluginCoreSetup extends CoreSetup {
+  __legacy: {
     route: Legacy.Server['route'];
   };
 };
@@ -232,7 +232,7 @@ export class Plugin {
   public setup(core: DemoPluginCoreSetup, plugins: DemoPluginsSetup) {
     // HTTP functionality from legacy platform, accessed in a way that's
     // compatible with NP conventions even if not 100% the same
-    core.http.route({
+    core.__legacy.route({
       path: '/api/demoplugin/search',
       method: 'POST',
       options: {
@@ -250,7 +250,7 @@ export class Plugin {
 }
 ```
 
-#### 3. New Platform shim using New Platform router
+### 3. New Platform shim using New Platform router
 We now switch the shim to use the real New Platform HTTP API's in `coreSetup`
 instead of relying on the legacy `server.route`. Since our plugin is now using
 the New Platform API's we are guaranteed that our HTTP route handling is 100% 
@@ -266,7 +266,7 @@ export default (kibana) => {
     init(server) {
       // core shim
       const coreSetup = {
-        http: server.newPlatform.setup.core.http,
+        ...server.newPlatform.setup.core,
       };
 
       new Plugin().setup(coreSetup);
