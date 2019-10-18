@@ -61,7 +61,8 @@ export default function exploreRepositoryFunctionalTests({
       });
     });
 
-    it('Click file/directory on the file tree', async () => {
+    // Flaky: https://github.com/elastic/kibana/issues/48483
+    it.skip('Click file/directory on the file tree', async () => {
       await testSubjects.click('codeFileTreeNode-Directory-elastic/src/code');
 
       await retry.tryForTime(1000, async () => {
