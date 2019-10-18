@@ -159,14 +159,15 @@ export const normalize = (fieldsToNormalize: Fields): NormalizedFields => {
       const { childFieldsName } = meta;
 
       if (childFieldsName && field[childFieldsName]) {
+        const nextDepth = meta.canHaveChildFields ? nestedDepth + 1 : nestedDepth;
         meta.childFields = [];
-        maxNestedDepth = Math.max(maxNestedDepth, nestedDepth + 1);
+        maxNestedDepth = Math.max(maxNestedDepth, nextDepth);
         normalizeFields(
           field[meta.childFieldsName!]!,
           to,
           [...paths, propName],
           meta.childFields,
-          nestedDepth + 1,
+          nextDepth,
           id
         );
       }
