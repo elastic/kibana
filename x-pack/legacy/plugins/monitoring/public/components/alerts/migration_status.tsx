@@ -22,8 +22,9 @@ import { Alert } from '../../../../alerting/server/types';
 import { toggleSetupMode, getSetupModeState, addSetupModeCallback } from '../../lib/setup_mode';
 import {
   ALERT_ACTION_TYPE_EMAIL,
-  NUMBER_OF_LEGACY_CLUSTER_ALERTS,
+  NUMBER_OF_MIGRATED_ALERTS,
   KIBANA_ALERTING_ENABLED,
+  ALERT_TYPE_PREFIX,
 } from '../../../common/constants';
 import { CreateActionModal } from './create_action_modal';
 import { SelectActionModal } from './select_action.modal';
@@ -46,13 +47,15 @@ export const MigrationStatus: React.FC<MigrationStatusProps> = (props: Migration
   const [showEditActionModal, setShowEditActionModal] = React.useState(false);
   const [editAction, setEditAction] = React.useState<ActionResult | null>(null);
   const [showSelectActionModal, setShowSelectActionModal] = React.useState(false);
-  const [selectedEmailActionId, setSelectedEmailActionId] = React.useState(null);
+  const [selectedEmailActionId, setSelectedEmailActionId] = React.useState('');
 
   React.useEffect(() => {
     async function fetchMigrationStatus() {
       const alerts = await kfetch({ method: 'GET', pathname: `/api/alert/_find` });
-
-      setKibanaAlerts(alerts.data);
+      const monitoringAlerts = alerts.data.filter((alert: Alert) =>
+        alert.alertTypeId.startsWith(ALERT_TYPE_PREFIX)
+      );
+      setKibanaAlerts(monitoringAlerts);
       await fetchEmailActions();
 
       if (alerts.total === 0) {
@@ -144,7 +147,10 @@ export const MigrationStatus: React.FC<MigrationStatusProps> = (props: Migration
 
     return (
       <CreateActionModal
-        onClose={() => setShowCreateActionModal(false)}
+        onClose={() => {
+          setShowCreateActionModal(false);
+          setShowEditActionModal(false);
+        }}
         createEmailAction={async (data: EmailActionData) => {
           await createEmailAction(data);
           setShowCreateActionModal(false);
@@ -179,9 +185,8 @@ export const MigrationStatus: React.FC<MigrationStatusProps> = (props: Migration
   }
 
   function renderContent() {
-    const missingAlertCount = NUMBER_OF_LEGACY_CLUSTER_ALERTS - kibanaAlerts.length;
-
-    if (missingAlertCount === 0) {
+    const allMigrated = kibanaAlerts.length === NUMBER_OF_MIGRATED_ALERTS;
+    if (allMigrated) {
       if (setupModeEnabled) {
         return (
           <EuiCallOut
@@ -199,14 +204,15 @@ export const MigrationStatus: React.FC<MigrationStatusProps> = (props: Migration
     const needToMigrateLabel = i18n.translate('xpack.monitoring.alerts.migrate.needToMigrate', {
       defaultMessage: 'Migrate cluster alerts to Kibana alerting',
     });
+
     if (showCreate) {
       return (
         <EuiCallOut color="warning" title={needToMigrateLabel} iconType="flag">
           <EuiButton onClick={selectAction} isLoading={isCreating}>
             {i18n.translate('xpack.monitoring.alerts.migrate.migrateActionBtn', {
-              defaultMessage: 'Migrate {missingAlertCount} cluster alert(s) to Kibana alerting',
+              defaultMessage: 'Migrate {count} cluster alert(s) to Kibana alerting',
               values: {
-                missingAlertCount,
+                count: NUMBER_OF_MIGRATED_ALERTS,
               },
             })}
           </EuiButton>
@@ -222,17 +228,11 @@ export const MigrationStatus: React.FC<MigrationStatusProps> = (props: Migration
           <p>
             {i18n.translate('xpack.monitoring.alerts.migrate.outsideOfSetupModeText', {
               defaultMessage: 'Some cluster alerts need to be migrated to Kibana alerting.',
-              values: {
-                missingAlertCount,
-              },
             })}
             &nbsp;
             <EuiLink onClick={() => toggleSetupMode(true)}>
               {i18n.translate('xpack.monitoring.alerts.migrate.outsideOfSetupModeLinkText', {
                 defaultMessage: 'Enter Setup mode to start the process.',
-                values: {
-                  missingAlertCount,
-                },
               })}
             </EuiLink>
           </p>

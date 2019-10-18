@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG } from '../common/constants';
+import { LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG, KIBANA_ALERTING_ENABLED } from '../common/constants';
 import { requireUIRoutes } from './routes';
 import { instantiateClient } from './es_client/instantiate_client';
 import { initMonitoringXpackInfo } from './init_monitoring_xpack_info';
@@ -137,26 +137,28 @@ export class Plugin {
       };
     });
 
-    // this is not ready right away but we need to register
-    // alerts right away
-    async function getMonitoringCluster() {
-      const configs = config.get('xpack.monitoring.elasticsearch');
-      if (configs.hosts) {
-        const monitoringCluster = plugins.elasticsearch.getCluster('monitoring');
-        const { username, password } = configs;
-        const fakeRequest = {
-          headers: {
-            authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`
-          }
-        };
-        return {
-          callCluster: (...args) => monitoringCluster.callWithRequest(fakeRequest, ...args)
-        };
+    if (KIBANA_ALERTING_ENABLED) {
+      // this is not ready right away but we need to register
+      // alerts right away
+      async function getMonitoringCluster() {
+        const configs = config.get('xpack.monitoring.elasticsearch');
+        if (configs.hosts) {
+          const monitoringCluster = plugins.elasticsearch.getCluster('monitoring');
+          const { username, password } = configs;
+          const fakeRequest = {
+            headers: {
+              authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`
+            }
+          };
+          return {
+            callCluster: (...args) => monitoringCluster.callWithRequest(fakeRequest, ...args)
+          };
+        }
+        return null;
       }
-      return null;
-    }
 
-    const logger = core.newPlatform.coreContext.logger.get('plugins', LOGGING_TAG);
-    plugins.alerting.setup.registerType(getLicenseExpiration(getMonitoringCluster, logger));
+      const logger = core.newPlatform.coreContext.logger.get('plugins', LOGGING_TAG);
+      plugins.alerting.setup.registerType(getLicenseExpiration(getMonitoringCluster, logger));
+    }
   }
 }

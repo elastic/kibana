@@ -233,9 +233,14 @@ export const TELEMETRY_COLLECTION_INTERVAL = 86400000;
 export const KIBANA_ALERTING_ENABLED = true;
 
 /**
+ * The prefix for all alert types used by monitoring
+ */
+export const ALERT_TYPE_PREFIX = 'monitoring_';
+
+/**
  * This is the alert type id for the license expiration alert
  */
-export const ALERT_TYPE_LICENSE_EXPIRATION = 'monitoring_alert_type_license_expiration';
+export const ALERT_TYPE_LICENSE_EXPIRATION = `${ALERT_TYPE_PREFIX}alert_type_license_expiration`;
 
 /**
  * Matches the id for the built-in in email action type
@@ -244,7 +249,6 @@ export const ALERT_TYPE_LICENSE_EXPIRATION = 'monitoring_alert_type_license_expi
 export const ALERT_ACTION_TYPE_EMAIL = '.email';
 
 /**
- * The number of watcher-based cluster alerts. It's used as a way to indicate
- * migration progress in the UI.
+ * The number of alerts that have been migrated
  */
-export const NUMBER_OF_LEGACY_CLUSTER_ALERTS = 6;
+export const NUMBER_OF_MIGRATED_ALERTS = 1;
