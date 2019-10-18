@@ -6,3 +6,4 @@
 
 export { SectionError } from './section_error';
 export { SectionLoading } from './section_loading';
+export { ToastNotificationText } from './toast_notification_text';

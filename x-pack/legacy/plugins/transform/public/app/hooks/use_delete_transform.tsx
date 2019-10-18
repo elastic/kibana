@@ -4,10 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 
 import { TransformListRow, refreshTransformList$, REFRESH_TRANSFORM_LIST_STATE } from '../common';
+import { ToastNotificationText } from '../components';
 
 import { useApi } from './use_api';
 import { TransformEndpointRequest, TransformEndpointResult } from './use_api_types';
@@ -46,11 +49,12 @@ export const useDeleteTransforms = () => {
 
       refreshTransformList$.next(REFRESH_TRANSFORM_LIST_STATE.REFRESH);
     } catch (e) {
-      toastNotifications.addDanger(
-        i18n.translate('xpack.transform.transformList.deleteTransformGenericErrorMessage', {
+      toastNotifications.addDanger({
+        title: i18n.translate('xpack.transform.transformList.deleteTransformGenericErrorMessage', {
           defaultMessage: 'An error occurred calling the API endpoint to delete transforms.',
-        })
-      );
+        }),
+        text: <ToastNotificationText text={e} />,
+      });
     }
   };
 };
