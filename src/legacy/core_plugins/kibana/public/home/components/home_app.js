@@ -26,23 +26,28 @@ import { Tutorial } from './tutorial/tutorial';
 import {
   HashRouter as Router,
   Switch,
-  Route
+  Route,
 } from 'react-router-dom';
 import { getTutorial } from '../load_tutorials';
 import { replaceTemplateStrings } from './tutorial/replace_template_strings';
-import { telemetryOptInProvider, shouldShowTelemetryOptIn } from '../kibana_services';
-import chrome from 'ui/chrome';
+import {
+  telemetryOptInProvider,
+  shouldShowTelemetryOptIn,
+  getInjected,
+  savedObjectsClient,
+  getBasePath,
+  addBasePath,
+} from '../kibana_services';
 
 export function HomeApp({ directories }) {
-  const isCloudEnabled = chrome.getInjected('isCloudEnabled', false);
-  const apmUiEnabled = chrome.getInjected('apmUiEnabled', true);
-  const mlEnabled = chrome.getInjected('mlEnabled', false);
-  const savedObjectsClient = chrome.getSavedObjectsClient();
+  const isCloudEnabled = getInjected('isCloudEnabled', false);
+  const apmUiEnabled = getInjected('apmUiEnabled', true);
+  const mlEnabled = getInjected('mlEnabled', false);
 
   const renderTutorialDirectory = (props) => {
     return (
       <TutorialDirectory
-        addBasePath={chrome.addBasePath}
+        addBasePath={addBasePath}
         openTab={props.match.params.tab}
         isCloudEnabled={isCloudEnabled}
       />
@@ -52,7 +57,7 @@ export function HomeApp({ directories }) {
   const renderTutorial = (props) => {
     return (
       <Tutorial
-        addBasePath={chrome.addBasePath}
+        addBasePath={addBasePath}
         isCloudEnabled={isCloudEnabled}
         getTutorial={getTutorial}
         replaceTemplateStrings={replaceTemplateStrings}
@@ -77,7 +82,7 @@ export function HomeApp({ directories }) {
           path="/home/feature_directory"
         >
           <FeatureDirectory
-            addBasePath={chrome.addBasePath}
+            addBasePath={addBasePath}
             directories={directories}
           />
         </Route>
@@ -85,13 +90,13 @@ export function HomeApp({ directories }) {
           path="/home"
         >
           <Home
-            addBasePath={chrome.addBasePath}
+            addBasePath={addBasePath}
             directories={directories}
             apmUiEnabled={apmUiEnabled}
             mlEnabled={mlEnabled}
             find={savedObjectsClient.find}
             localStorage={localStorage}
-            urlBasePath={chrome.getBasePath()}
+            urlBasePath={getBasePath()}
             shouldShowTelemetryOptIn={shouldShowTelemetryOptIn}
             setOptIn={telemetryOptInProvider.setOptIn}
             fetchTelemetry={telemetryOptInProvider.fetchExample}
@@ -111,6 +116,6 @@ HomeApp.propTypes = {
     icon: PropTypes.string.isRequired,
     path: PropTypes.string.isRequired,
     showOnHomePage: PropTypes.bool.isRequired,
-    category: PropTypes.string.isRequired
+    category: PropTypes.string.isRequired,
   })),
 };

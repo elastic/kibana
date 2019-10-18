@@ -17,24 +17,41 @@
  * under the License.
  */
 
+// @ts-ignore
 import { uiModules } from 'ui/modules';
 import { npStart } from 'ui/new_platform';
+import { IPrivate } from 'ui/private';
+import { FeatureCatalogueRegistryProvider } from 'ui/registry/feature_catalogue';
 import { createUiStatsReporter, METRIC_TYPE } from '../../../ui_metric/public';
 import { TelemetryOptInProvider } from '../../../telemetry/public/services';
+import { start as data } from '../../../data/public/legacy';
+// @ts-ignore
+export { toastNotifications, banners } from 'ui/notify';
+export { kfetch } from 'ui/kfetch';
 
-export let indexPatternService;
-export let shouldShowTelemetryOptIn;
-export let telemetryOptInProvider;
+export { wrapInI18nContext } from 'ui/i18n';
+export const getInjected = npStart.core.injectedMetadata.getInjectedVar;
+
+export const savedObjectsClient = npStart.core.savedObjects.client;
+export const chrome = npStart.core.chrome;
+export const uiSettings = npStart.core.uiSettings;
+export const addBasePath = npStart.core.http.basePath.prepend;
+export const getBasePath = npStart.core.http.basePath.get;
+
+export const indexPatternService = data.indexPatterns;
+export let shouldShowTelemetryOptIn: boolean;
+export let telemetryOptInProvider: any;
+export let featureCatalogueRegistryProvider: any;
 
 export const trackUiMetric = createUiStatsReporter('Kibana_home');
 export { METRIC_TYPE };
 
-uiModules.get('kibana').run(($injector) => {
+uiModules.get('kibana').run((Private: IPrivate) => {
   const telemetryEnabled = npStart.core.injectedMetadata.getInjectedVar('telemetryEnabled');
   const telemetryBanner = npStart.core.injectedMetadata.getInjectedVar('telemetryBanner');
-  const Private = $injector.get('Private');
 
   telemetryOptInProvider = Private(TelemetryOptInProvider);
-  shouldShowTelemetryOptIn = telemetryEnabled && telemetryBanner && !telemetryOptInProvider.getOptIn();
-  indexPatternService = $injector.get('indexPatterns');
+  shouldShowTelemetryOptIn =
+    telemetryEnabled && telemetryBanner && !telemetryOptInProvider.getOptIn();
+  featureCatalogueRegistryProvider = Private(FeatureCatalogueRegistryProvider as any);
 });

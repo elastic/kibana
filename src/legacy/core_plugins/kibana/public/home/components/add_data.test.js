@@ -20,10 +20,10 @@
 import React from 'react';
 import { AddData } from './add_data';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
-import chrome from 'ui/chrome';
+import { getBasePath } from '../kibana_services';
 
 jest.mock(
-  'ui/chrome',
+  '../kibana_services',
   () => ({
     getBasePath: jest.fn(() => 'path'),
   }),
@@ -37,7 +37,7 @@ test('render', () => {
     isNewKibanaInstance={false}
   />);
   expect(component).toMatchSnapshot(); // eslint-disable-line
-  expect(chrome.getBasePath).toHaveBeenCalledTimes(1);
+  expect(getBasePath).toHaveBeenCalledTimes(1);
 });
 
 test('mlEnabled', () => {
@@ -47,7 +47,7 @@ test('mlEnabled', () => {
     isNewKibanaInstance={false}
   />);
   expect(component).toMatchSnapshot(); // eslint-disable-line
-  expect(chrome.getBasePath).toHaveBeenCalledTimes(1);
+  expect(getBasePath).toHaveBeenCalledTimes(1);
 });
 
 test('apmUiEnabled', () => {
@@ -57,7 +57,7 @@ test('apmUiEnabled', () => {
     isNewKibanaInstance={false}
   />);
   expect(component).toMatchSnapshot(); // eslint-disable-line
-  expect(chrome.getBasePath).toHaveBeenCalledTimes(1);
+  expect(getBasePath).toHaveBeenCalledTimes(1);
 });
 
 test('isNewKibanaInstance', () => {
@@ -67,5 +67,5 @@ test('isNewKibanaInstance', () => {
     isNewKibanaInstance={true}
   />);
   expect(component).toMatchSnapshot(); // eslint-disable-line
-  expect(chrome.getBasePath).toHaveBeenCalledTimes(1);
+  expect(getBasePath).toHaveBeenCalledTimes(1);
 });

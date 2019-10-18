@@ -18,11 +18,10 @@
  */
 
 import _ from 'lodash';
-import chrome from 'ui/chrome';
+import { addBasePath, toastNotifications } from './kibana_services';
 import { i18n } from '@kbn/i18n';
-import { toastNotifications } from 'ui/notify';
 
-const baseUrl = chrome.addBasePath('/api/kibana/home/tutorials');
+const baseUrl = addBasePath('/api/kibana/home/tutorials');
 const headers = new Headers();
 headers.append('Accept', 'application/json');
 headers.append('Content-Type', 'application/json');

@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import { kfetch } from 'ui/kfetch';
-import chrome from 'ui/chrome';
-import { indexPatternService } from './kibana_services';
+import { indexPatternService, uiSettings, kfetch } from './kibana_services';
 
 const sampleDataUrl = '/api/sample_data';
 
@@ -34,8 +32,8 @@ export async function listSampleDataSets() {
 export async function installSampleDataSet(id, sampleDataDefaultIndex) {
   await kfetch({ method: 'POST', pathname: `${sampleDataUrl}/${id}` });
 
-  if (chrome.getUiSettingsClient().isDefault('defaultIndex')) {
-    chrome.getUiSettingsClient().set('defaultIndex', sampleDataDefaultIndex);
+  if (uiSettings.isDefault('defaultIndex')) {
+    uiSettings.set('defaultIndex', sampleDataDefaultIndex);
   }
 
   clearIndexPatternsCache();
@@ -44,9 +42,9 @@ export async function installSampleDataSet(id, sampleDataDefaultIndex) {
 export async function uninstallSampleDataSet(id, sampleDataDefaultIndex) {
   await kfetch({ method: 'DELETE', pathname: `${sampleDataUrl}/${id}` });
 
-  if (!chrome.getUiSettingsClient().isDefault('defaultIndex')
-    && chrome.getUiSettingsClient().get('defaultIndex') === sampleDataDefaultIndex) {
-    chrome.getUiSettingsClient().set('defaultIndex', null);
+  if (!uiSettings.isDefault('defaultIndex')
+    && uiSettings.get('defaultIndex') === sampleDataDefaultIndex) {
+    uiSettings.set('defaultIndex', null);
   }
 
   clearIndexPatternsCache();

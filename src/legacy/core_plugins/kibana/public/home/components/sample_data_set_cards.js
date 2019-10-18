@@ -31,7 +31,7 @@ import {
   UNINSTALLED_STATUS,
 } from './sample_data_set_card';
 
-import { toastNotifications } from 'ui/notify';
+import { toastNotifications, uiSettings } from '../kibana_services';
 
 import {
   listSampleDataSets,
@@ -40,9 +40,8 @@ import {
 } from '../sample_data_client';
 
 import { i18n } from '@kbn/i18n';
-import chrome from 'ui/chrome';
 
-const IS_DARK_THEME = chrome.getUiSettingsClient().get('theme:darkMode');
+const IS_DARK_THEME = uiSettings.get('theme:darkMode');
 
 export class SampleDataSetCards extends React.Component {
 

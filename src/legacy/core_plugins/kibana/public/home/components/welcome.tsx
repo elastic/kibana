@@ -33,15 +33,13 @@ import {
   EuiIcon,
   EuiPortal,
 } from '@elastic/eui';
-// @ts-ignore
-import { banners } from 'ui/notify';
-
 import { FormattedMessage } from '@kbn/i18n/react';
-import chrome from 'ui/chrome';
+import { banners } from '../kibana_services';
+
 import { SampleDataCard } from './sample_data';
 import { TelemetryOptInCard } from './telemetry_opt_in';
 // @ts-ignore
-import { trackUiMetric, METRIC_TYPE } from '../kibana_services';
+import { trackUiMetric, METRIC_TYPE, addBasePath } from '../kibana_services';
 
 interface Props {
   urlBasePath: string;
@@ -51,6 +49,7 @@ interface Props {
   getTelemetryBannerId: () => string;
   shouldShowTelemetryOptIn: boolean;
 }
+
 interface State {
   step: number;
 }
@@ -70,9 +69,10 @@ export class Welcome extends React.PureComponent<Props, State> {
   };
 
   private redirecToSampleData() {
-    const path = chrome.addBasePath('#/home/tutorial_directory/sampleData');
+    const path = addBasePath('#/home/tutorial_directory/sampleData');
     window.location.href = path;
   }
+
   private async handleTelemetrySelection(confirm: boolean) {
     const metricName = `telemetryOptIn${confirm ? 'Confirm' : 'Decline'}`;
     trackUiMetric(METRIC_TYPE.CLICK, metricName);

@@ -27,7 +27,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import chrome from 'ui/chrome';
+import { addBasePath } from '../kibana_services';
 
 export class SampleDataViewDataButton extends React.Component {
 
@@ -56,7 +56,7 @@ export class SampleDataViewDataButton extends React.Component {
         datasetName: this.props.name,
       },
     });
-    const dashboardPath = chrome.addBasePath(`/app/kibana#/dashboard/${this.props.overviewDashboard}`);
+    const dashboardPath = addBasePath(`/app/kibana#/dashboard/${this.props.overviewDashboard}`);
 
     if (this.props.appLinks.length === 0) {
       return (
@@ -79,7 +79,7 @@ export class SampleDataViewDataButton extends React.Component {
             size="m"
           />
         ),
-        href: chrome.addBasePath(path)
+        href: addBasePath(path)
       };
     });
     const panels = [

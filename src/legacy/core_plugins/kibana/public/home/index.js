@@ -17,17 +17,14 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
+import { chrome, addBasePath, featureCatalogueRegistryProvider, wrapInI18nContext } from './kibana_services';
 import routes from 'ui/routes';
 import template from './home_ng_wrapper.html';
-import { FeatureCatalogueRegistryProvider } from 'ui/registry/feature_catalogue';
-import { wrapInI18nContext } from 'ui/i18n';
 import { uiModules } from 'ui/modules';
 import {
   HomeApp
 } from './components/home_app';
 import { i18n } from '@kbn/i18n';
-import { npStart } from 'ui/new_platform';
 
 const app = uiModules.get('apps/home', []);
 app.directive('homeApp', function (reactDirective) {
@@ -39,10 +36,10 @@ const homeTitle = i18n.translate('kbn.home.breadcrumbs.homeTitle', { defaultMess
 function getRoute() {
   return {
     template,
-    controller($scope, Private) {
-      $scope.directories = Private(FeatureCatalogueRegistryProvider).inTitleOrder;
-      $scope.recentlyAccessed = npStart.core.chrome.recentlyAccessed.get().map(item => {
-        item.link = chrome.addBasePath(item.link);
+    controller($scope) {
+      $scope.directories = featureCatalogueRegistryProvider.inTitleOrder;
+      $scope.recentlyAccessed = chrome.recentlyAccessed.get().map(item => {
+        item.link = addBasePath(item.link);
         return item;
       });
     },

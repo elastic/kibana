@@ -21,7 +21,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
-import chrome from 'ui/chrome';
+import { getBasePath } from '../kibana_services';
 
 import {
   EuiButton,
@@ -38,8 +38,7 @@ import {
   EuiFlexGrid,
 } from '@elastic/eui';
 
-/* istanbul ignore next */
-const basePath = chrome.getBasePath();
+const basePath = getBasePath();
 
 const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
   const renderCards = () => {
