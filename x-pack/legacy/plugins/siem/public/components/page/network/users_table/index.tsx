@@ -133,6 +133,8 @@ const UsersTableComponent = React.memo<UsersTableProps>(
   }
 );
 
+UsersTableComponent.displayName = 'UsersTableComponent';
+
 const makeMapStateToProps = () => {
   const getUsersSelector = networkSelectors.usersSelector();
   return (state: State) => ({
