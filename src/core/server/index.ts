@@ -48,6 +48,8 @@ import { InternalHttpServiceSetup, HttpServiceSetup } from './http';
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
 import { ContextSetup } from './context';
 import { SavedObjectsServiceStart } from './saved_objects';
+
+import { InternalUiSettingsServiceSetup } from './ui_settings';
 import { SavedObjectsClientContract } from './saved_objects/types';
 
 export { bootstrap } from './bootstrap';
@@ -136,7 +138,9 @@ export {
 export {
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
+  SavedObjectsBulkUpdateObject,
   SavedObjectsBulkResponse,
+  SavedObjectsBulkUpdateResponse,
   SavedObjectsClient,
   SavedObjectsClientProviderOptions,
   SavedObjectsClientWrapperFactory,
@@ -144,6 +148,7 @@ export {
   SavedObjectsCreateOptions,
   SavedObjectsErrorHelpers,
   SavedObjectsExportOptions,
+  SavedObjectsExportResultDetails,
   SavedObjectsFindResponse,
   SavedObjectsImportConflictError,
   SavedObjectsImportError,
@@ -162,6 +167,13 @@ export {
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
 } from './saved_objects';
+
+export {
+  IUiSettingsClient,
+  UiSettingsParams,
+  InternalUiSettingsServiceSetup,
+  UiSettingsType,
+} from './ui_settings';
 
 export { RecursiveReadonly } from '../utils';
 
@@ -230,6 +242,7 @@ export interface InternalCoreSetup {
   context: ContextSetup;
   http: InternalHttpServiceSetup;
   elasticsearch: InternalElasticsearchServiceSetup;
+  uiSettings: InternalUiSettingsServiceSetup;
 }
 
 /**

@@ -62,24 +62,6 @@ describe('server/config', function () {
       });
     });
 
-    describe('server.defaultRoute', () => {
-      it('renames to uiSettings.overrides.defaultRoute when specified', () => {
-        const settings = {
-          server: {
-            defaultRoute: '/app/foo',
-          },
-        };
-
-        expect(transformDeprecations(settings)).toEqual({
-          uiSettings: {
-            overrides: {
-              defaultRoute: '/app/foo'
-            }
-          }
-        });
-      });
-    });
-
     describe('csp.rules', () => {
       describe('with nonce source', () => {
         it('logs a warning', () => {
