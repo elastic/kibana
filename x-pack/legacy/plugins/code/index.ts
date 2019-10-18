@@ -56,7 +56,7 @@ export const code = (kibana: any) =>
         // Still keep this config item here for the injectDefaultVars
         // in line 40 here.
         ui: Joi.object({
-          enabled: Joi.boolean().default(true),
+          enabled: Joi.boolean().default(false),
         }).default(),
         integrations: Joi.object({
           enabled: Joi.boolean().default(false),
