@@ -21,7 +21,6 @@ import {
 } from '@elastic/charts';
 import moment from 'moment-timezone';
 import styled from 'styled-components';
-import { uniq } from 'lodash/fp';
 import { DEFAULT_DATE_FORMAT_TZ, DEFAULT_DARK_MODE } from '../../../common/constants';
 
 export const defaultChartHeight = '100%';
@@ -148,20 +147,3 @@ export const checkIfAllValuesAreZero = (data: ChartSeriesData[] | null | undefin
   data.every(series => {
     return Array.isArray(series.value) && (series.value as ChartData[]).every(({ y }) => y === 0);
   });
-
-export const getUniqueSplitSeries = (series: ChartData[] | null): string[] => {
-  const emptyArray = [] as string[];
-  if (!series) {
-    return emptyArray;
-  }
-
-  const splitSeries = series.reduce((acc: string[], item) => {
-    if (!item.g) {
-      return acc;
-    }
-
-    return [...acc, `${item.g}`];
-  }, emptyArray);
-
-  return uniq(splitSeries);
-};
