@@ -13,13 +13,13 @@ interface Props {
 
 export const ReportLink = ({ getUrl }: Props) => (
   <FormattedMessage
-    id="xpack.reportingNotifier.reportLink.pickItUpFromPathDescription"
+    id="xpack.reporting.publicNotifier.reportLink.pickItUpFromPathDescription"
     defaultMessage="Pick it up from {path}."
     values={{
       path: (
         <a href={getUrl()}>
           <FormattedMessage
-            id="xpack.reportingNotifier.reportLink.reportingSectionUrlLinkLabel"
+            id="xpack.reporting.publicNotifier.reportLink.reportingSectionUrlLinkLabel"
             defaultMessage="Management &gt; Kibana &gt; Reporting"
           />
         </a>

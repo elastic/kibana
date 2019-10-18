@@ -19,7 +19,7 @@ export const getFailureToast = (
   return {
     title: (
       <FormattedMessage
-        id="xpack.reportingNotifier.error.couldNotCreateReportTitle"
+        id="xpack.reporting.publicNotifier.error.couldNotCreateReportTitle"
         defaultMessage="Could not create report for {reportObjectType} '{reportObjectTitle}'."
         values={{ reportObjectType: job.type, reportObjectTitle: job.title }}
       />
@@ -28,7 +28,7 @@ export const getFailureToast = (
       <Fragment>
         <EuiCallOut
           size="m"
-          title={i18n.translate('xpack.reportingNotifier.error.calloutTitle', {
+          title={i18n.translate('xpack.reporting.publicNotifier.error.calloutTitle', {
             defaultMessage: 'The reporting job failed',
           })}
           color="danger"
@@ -41,13 +41,13 @@ export const getFailureToast = (
 
         <p>
           <FormattedMessage
-            id="xpack.reportingNotifier.error.checkManagement"
+            id="xpack.reporting.publicNotifier.error.checkManagement"
             defaultMessage="More information is available at {path}."
             values={{
               path: (
                 <a href={getManagmenetLink()}>
                   <FormattedMessage
-                    id="xpack.reportingNotifier.error.reportingSectionUrlLinkLabel"
+                    id="xpack.reporting.publicNotifier.error.reportingSectionUrlLinkLabel"
                     defaultMessage="Management &gt; Kibana &gt; Reporting"
                   />
                 </a>

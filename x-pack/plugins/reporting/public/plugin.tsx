@@ -36,7 +36,7 @@ function handleError(
 ): Rx.Observable<JobStatusBuckets> {
   notifications.toasts.addDanger(
     getGeneralErrorToast(
-      i18n.translate('xpack.reportingNotifier.pollingErrorMessage', {
+      i18n.translate('xpack.reporting.publicNotifier.pollingErrorMessage', {
         defaultMessage: 'Reporting notifier error!',
       }),
       err

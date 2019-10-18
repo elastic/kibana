@@ -33,7 +33,7 @@ Array [
       <p>
         <FormattedMessage
           defaultMessage="The report contains characters which spreadsheet applications can interpret as formulas."
-          id="xpack.reportingNotifier.csvContainsFormulas.formulaReportMessage"
+          id="xpack.reporting.publicNotifier.csvContainsFormulas.formulaReportMessage"
           values={Object {}}
         />
       </p>
@@ -57,7 +57,7 @@ Array [
     </React.Fragment>,
     "title": <FormattedMessage
       defaultMessage="Report may contain formulas {reportObjectType} '{reportObjectTitle}'"
-      id="xpack.reportingNotifier.csvContainsFormulas.formulaReportTitle"
+      id="xpack.reporting.publicNotifier.csvContainsFormulas.formulaReportTitle"
       values={
         Object {
           "reportObjectTitle": "Yas",
@@ -87,13 +87,13 @@ Array [
       <p>
         <FormattedMessage
           defaultMessage="More information is available at {path}."
-          id="xpack.reportingNotifier.error.checkManagement"
+          id="xpack.reporting.publicNotifier.error.checkManagement"
           values={
             Object {
               "path": <a>
                 <FormattedMessage
                   defaultMessage="Management > Kibana > Reporting"
-                  id="xpack.reportingNotifier.error.reportingSectionUrlLinkLabel"
+                  id="xpack.reporting.publicNotifier.error.reportingSectionUrlLinkLabel"
                   values={Object {}}
                 />
               </a>,
@@ -104,7 +104,7 @@ Array [
     </React.Fragment>,
     "title": <FormattedMessage
       defaultMessage="Could not create report for {reportObjectType} '{reportObjectTitle}'."
-      id="xpack.reportingNotifier.error.couldNotCreateReportTitle"
+      id="xpack.reporting.publicNotifier.error.couldNotCreateReportTitle"
       values={
         Object {
           "reportObjectTitle": "Yas 7",
@@ -124,7 +124,7 @@ Array [
       <p>
         <FormattedMessage
           defaultMessage="The report reached the max size and contains partial data."
-          id="xpack.reportingNotifier.maxSizeReached.partialReportDescription"
+          id="xpack.reporting.publicNotifier.maxSizeReached.partialReportDescription"
           values={Object {}}
         />
       </p>
@@ -148,7 +148,7 @@ Array [
     </React.Fragment>,
     "title": <FormattedMessage
       defaultMessage="Created partial report for {reportObjectType} '{reportObjectTitle}'"
-      id="xpack.reportingNotifier.maxSizeReached.partialReportTitle"
+      id="xpack.reporting.publicNotifier.maxSizeReached.partialReportTitle"
       values={
         Object {
           "reportObjectTitle": "Yas",
@@ -185,7 +185,7 @@ Array [
     </React.Fragment>,
     "title": <FormattedMessage
       defaultMessage="Created report for {reportObjectType} '{reportObjectTitle}'"
-      id="xpack.reportingNotifier.successfullyCreatedReportNotificationTitle"
+      id="xpack.reporting.publicNotifier.successfullyCreatedReportNotificationTitle"
       values={
         Object {
           "reportObjectTitle": "Yas",

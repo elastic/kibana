@@ -18,7 +18,7 @@ export const getSuccessToast = (
 ): ToastInput => ({
   title: (
     <FormattedMessage
-      id="xpack.reportingNotifier.successfullyCreatedReportNotificationTitle"
+      id="xpack.reporting.publicNotifier.successfullyCreatedReportNotificationTitle"
       defaultMessage="Created report for {reportObjectType} '{reportObjectTitle}'"
       values={{ reportObjectType: job.type, reportObjectTitle: job.title }}
     />

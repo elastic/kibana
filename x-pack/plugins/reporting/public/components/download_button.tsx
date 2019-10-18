@@ -28,7 +28,7 @@ export const DownloadButton = ({ getUrl, job }: Props) => {
       }}
     >
       <FormattedMessage
-        id="xpack.reportingNotifier.downloadReportButtonLabel"
+        id="xpack.reporting.publicNotifier.downloadReportButtonLabel"
         defaultMessage="Download report"
       />
     </EuiButton>

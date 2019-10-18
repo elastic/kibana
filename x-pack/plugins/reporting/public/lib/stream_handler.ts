@@ -136,7 +136,7 @@ export class ReportingNotifierStreamHandler {
         // show connection refused toast
         this.notifications.toasts.addDanger(
           getGeneralErrorToast(
-            i18n.translate('xpack.reportingNotifier.httpErrorMessage', {
+            i18n.translate('xpack.reporting.publicNotifier.httpErrorMessage', {
               defaultMessage: 'Could not check Reporting job status!',
             }),
             err

@@ -18,7 +18,7 @@ export const getWarningMaxSizeToast = (
 ): ToastInput => ({
   title: (
     <FormattedMessage
-      id="xpack.reportingNotifier.maxSizeReached.partialReportTitle"
+      id="xpack.reporting.publicNotifier.maxSizeReached.partialReportTitle"
       defaultMessage="Created partial report for {reportObjectType} '{reportObjectTitle}'"
       values={{ reportObjectType: job.type, reportObjectTitle: job.title }}
     />
@@ -27,7 +27,7 @@ export const getWarningMaxSizeToast = (
     <Fragment>
       <p>
         <FormattedMessage
-          id="xpack.reportingNotifier.maxSizeReached.partialReportDescription"
+          id="xpack.reporting.publicNotifier.maxSizeReached.partialReportDescription"
           defaultMessage="The report reached the max size and contains partial data."
         />
       </p>

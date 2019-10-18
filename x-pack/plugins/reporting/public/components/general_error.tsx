@@ -19,7 +19,7 @@ export const getGeneralErrorToast = (errorText: string, err: Error): ToastInput 
       <EuiSpacer />
 
       <FormattedMessage
-        id="xpack.reportingNotifier.error.tryRefresh"
+        id="xpack.reporting.publicNotifier.error.tryRefresh"
         defaultMessage="Try refreshing the page."
       ></FormattedMessage>
     </Fragment>
