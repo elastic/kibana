@@ -11,13 +11,13 @@ import {
   SearchParams,
   getCategories,
   getClusterAccessor,
-  getImage,
+  getFile,
   getPackageInfo,
   getPackages,
   installPackage,
   removeInstallation,
 } from './index';
-import { ImageRequestParams } from '../registry';
+import { FileRequestParams } from '../registry';
 
 interface Extra extends ResponseToolkit {
   context: PluginContext;
@@ -33,8 +33,8 @@ interface PackageRequest extends Request {
   };
 }
 
-interface ImageRequest extends Request {
-  params: Request['params'] & ImageRequestParams;
+interface FileRequest extends Request {
+  params: Request['params'] & FileRequestParams;
 }
 
 interface InstallAssetRequest extends Request {
@@ -71,12 +71,12 @@ export async function handleGetInfo(req: PackageRequest, extra: Extra) {
   return packageInfo;
 }
 
-export const handleGetImage = async (req: ImageRequest, extra: Extra) => {
-  const response = await getImage(req.params);
-  const newResponse = extra.response(response.body);
+export const handleGetFile = async (req: FileRequest, extra: Extra) => {
+  const response = await getFile(req.params);
+  const responseWithHeaders = extra.response(response.body);
   // set the content type from the registry response
-  newResponse.header('Content-Type', response.headers.get('content-type') || '');
-  return newResponse;
+  responseWithHeaders.header('Content-Type', response.headers.get('content-type') || '');
+  return responseWithHeaders;
 };
 
 export async function handleRequestInstall(req: InstallAssetRequest, extra: Extra) {

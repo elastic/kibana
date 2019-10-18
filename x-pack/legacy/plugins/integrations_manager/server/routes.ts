@@ -8,7 +8,7 @@ import { ServerRoute } from '../common/types';
 import * as CommonRoutes from '../common/routes';
 import * as Packages from './packages/handlers';
 
-const API_IMG_PATTERN = `${CommonRoutes.API_ROOT}/package/{pkgkey}/img/{imgPath*}`;
+const API_FILE_PATTERN = `${CommonRoutes.API_ROOT}/package/{pkgkey}/{filePath*}`;
 
 // Manager public API paths
 export const routes: ServerRoute[] = [
@@ -26,9 +26,9 @@ export const routes: ServerRoute[] = [
   },
   {
     method: 'GET',
-    path: API_IMG_PATTERN,
+    path: API_FILE_PATTERN,
     options: { tags: [`access:${PLUGIN.ID}`], json: { space: 2 } },
-    handler: Packages.handleGetImage,
+    handler: Packages.handleGetFile,
   },
   {
     method: 'GET',

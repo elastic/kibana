@@ -26,9 +26,9 @@ export interface SearchParams {
   category?: CategoryId;
 }
 
-export interface ImageRequestParams {
+export interface FileRequestParams {
   pkgkey: string;
-  imgPath: string;
+  filePath: string;
 }
 
 export async function fetchList(params?: SearchParams): Promise<RegistryList> {
@@ -46,10 +46,10 @@ export async function fetchInfo(key: string): Promise<RegistryPackage> {
   return fetchUrl(`${registryUrl}/package/${key}`).then(JSON.parse);
 }
 
-export async function fetchImage(params: ImageRequestParams): Promise<Response> {
+export async function fetchFile(params: FileRequestParams): Promise<Response> {
   const { registryUrl } = epmConfigStore.getConfig();
-  const { pkgkey, imgPath } = params;
-  return getResponse(`${registryUrl}/package/${pkgkey}/img/${imgPath}`);
+  const { pkgkey, filePath } = params;
+  return getResponse(`${registryUrl}/package/${pkgkey}/${filePath}`);
 }
 
 export async function fetchCategories(): Promise<CategorySummaryList> {

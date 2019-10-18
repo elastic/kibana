@@ -68,8 +68,7 @@ export async function getPackageInfo(options: {
   return createInstallableFrom(updated, savedObject);
 }
 
-export const getImage = async (options: Registry.ImageRequestParams) =>
-  Registry.fetchImage(options);
+export const getFile = async (options: Registry.FileRequestParams) => Registry.fetchFile(options);
 
 export async function getInstallationObject(options: {
   savedObjectsClient: SavedObjectsClientContract;
