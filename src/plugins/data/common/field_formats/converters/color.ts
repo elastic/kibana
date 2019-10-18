@@ -22,7 +22,7 @@ import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import { FieldFormat } from '../field_format';
 import { HtmlContextTypeConvert } from '../types';
 import { asPrettyString } from '../utils';
-import { DEFAULT_COLOR } from './color_default';
+import { DEFAULT_COLOR } from '../constants';
 
 const convertTemplate = template('<span style="<%- style %>"><%- val %></span>');
 

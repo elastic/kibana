@@ -32,11 +32,9 @@ import { ColorFormat } from './color';
 import { TruncateFormat } from './truncate';
 import { BoolFormat } from './boolean';
 import { StaticLookupFormat } from './static_lookup';
-import { DEFAULT_COLOR } from './color_default';
 
 export {
   UrlFormat,
-  DEFAULT_COLOR,
   StaticLookupFormat,
   SourceFormat,
   BoolFormat,
