@@ -5,7 +5,14 @@
  */
 import React, { useMemo } from 'react';
 import classNames from 'classnames';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiBadge, EuiButtonIcon } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  EuiBadge,
+  EuiFacetButton,
+  EuiButtonIcon,
+} from '@elastic/eui';
 
 import { useState, useDispatch } from '../../../mappings_state';
 import { FieldsList } from './fields_list';
@@ -37,15 +44,18 @@ export const FieldsListItem = ({ field, treeDepth = 0 }: Props) => {
     hasMultiFields,
     nestedDepth,
     isExpanded,
+    parentId,
   } = field;
   const isAddFieldBtnDisabled = false; // For now, we never disable the Add Child button.
   // const isAddFieldBtnDisabled = field.nestedDepth === MAX_DEPTH_DEFAULT_EDITOR - 1;
   const indent = `${nestedDepth * INDENT_SIZE}px`;
   const indentChild = `${(nestedDepth + 1) * INDENT_SIZE + 4}px`; // We need to add 4 because we have a padding left set to 4 on the wrapper
-  const childFieldsArray = useMemo(() => (hasChildFields ? childFields!.map(getField) : []), [
-    childFields,
-    byId,
-  ]);
+  const parentField = parentId !== undefined ? byId[parentId] : undefined;
+  const isMultiField = parentField !== undefined ? parentField.canHaveMultiFields === true : false;
+  const childFieldsArray = useMemo(
+    () => (hasChildFields || hasMultiFields ? childFields!.map(getField) : []),
+    [childFields, byId]
+  );
 
   const addField = () => {
     dispatch({
@@ -80,16 +90,11 @@ export const FieldsListItem = ({ field, treeDepth = 0 }: Props) => {
 
     return (
       <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd">
-        {(canHaveMultiFields || canHaveChildFields) && (
+        {canHaveChildFields && (
           <EuiFlexItem grow={false}>
-            {canHaveChildFields && (
-              <EuiButtonEmpty onClick={addField} disabled={isAddFieldBtnDisabled}>
-                Add child
-              </EuiButtonEmpty>
-            )}
-            {canHaveMultiFields && (
-              <EuiButtonEmpty onClick={toggleExpand}>Multi-fields</EuiButtonEmpty>
-            )}
+            <EuiButtonEmpty onClick={addField} disabled={isAddFieldBtnDisabled}>
+              Add child
+            </EuiButtonEmpty>
           </EuiFlexItem>
         )}
         <EuiFlexItem grow={false}>
@@ -146,11 +151,28 @@ export const FieldsListItem = ({ field, treeDepth = 0 }: Props) => {
             <EuiFlexItem grow={false}>
               <EuiBadge color="hollow">{source.type}</EuiBadge>
             </EuiFlexItem>
-            {hasMultiFields && (
+            {!isMultiField && canHaveMultiFields && (
+              <>
+                {hasMultiFields && (
+                  <EuiFlexItem grow={false}>
+                    <EuiFacetButton quantity={childFields!.length}>+</EuiFacetButton>
+                  </EuiFlexItem>
+                )}
+                <EuiFlexItem
+                  grow={false}
+                  className="mappings-editor__fields-list-item__multi-field-button"
+                >
+                  <EuiButtonEmpty onClick={addField} iconType="plusInCircleFilled">
+                    Add multi-field
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </>
+            )}
+            {/* {hasMultiFields && (
               <EuiFlexItem grow={false}>
                 <EuiBadge color="hollow">{`${childFields!.length} multi-field`}</EuiBadge>
               </EuiFlexItem>
-            )}
+            )} */}
             <EuiFlexItem className="mappings-editor__fields-list-item__actions">
               {renderActionButtons()}
             </EuiFlexItem>
@@ -158,7 +180,7 @@ export const FieldsListItem = ({ field, treeDepth = 0 }: Props) => {
         </div>
       </div>
 
-      {hasChildFields && isExpanded && (
+      {Boolean(childFieldsArray.length) && isExpanded && (
         <FieldsList fields={childFieldsArray} treeDepth={treeDepth + 1} />
       )}
 

@@ -14,7 +14,8 @@
 
       &:hover {
         background-color: $euiColorLightestShade;
-        .mappings-editor__fields-list-item__actions {
+        .mappings-editor__fields-list-item__actions,
+        .mappings-editor__fields-list-item__multi-field-button {
           opacity: 1;
         }
       }
@@ -57,7 +58,8 @@
       width: $euiSizeL;
     }
 
-    &__actions {
+    &__actions,
+    &__multi-field-button {
       opacity: 0;
       padding-right: $euiSizeS;
       transition: opacity $euiAnimSpeedNormal $euiAnimSlightResistance;

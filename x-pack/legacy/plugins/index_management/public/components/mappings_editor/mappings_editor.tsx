@@ -46,6 +46,7 @@ export const MappingsEditor = React.memo(({ onUpdate, defaultValue }: Props) => 
         return (
           <div className="mappings-editor">
             <ConfigurationForm defaultValue={configurationDefaultValue} />
+            <EuiSpacer />
             <DocumentFieldsHeaders />
             <EuiSpacer />
             {renderEditor()}

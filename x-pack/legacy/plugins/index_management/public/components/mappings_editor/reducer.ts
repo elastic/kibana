@@ -94,7 +94,8 @@ export const addFieldToState = (field: Field, state: State): State => {
     updatedById[fieldToAddFieldTo!] = {
       ...parentField,
       childFields: [...childFields, id],
-      hasChildFields: true,
+      hasChildFields: parentField.canHaveChildFields ? true : false,
+      hasMultiFields: parentField.canHaveMultiFields ? true : false,
       isExpanded: true,
     };
   }

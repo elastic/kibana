@@ -337,7 +337,7 @@ export const PARAMETERS_DEFINITION: {
   ignore_above: {
     fieldConfig: {
       label: 'Ignore above',
-      defaultValue: 2147483647,
+      defaultValue: 256,
       type: FIELD_TYPES.NUMBER,
       formatters: [toInt],
       validations: [
