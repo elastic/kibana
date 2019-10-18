@@ -27,8 +27,12 @@ Access tokens can be created here: https://github.com/settings/tokens/new
 
 Please select the necessary access scopes:
 
-- `repo` (for public and private repos)
-- `public_repo` (for public repos only)
+**For public and private repos (recommended)**
+![image](https://user-images.githubusercontent.com/209966/67081197-fe93d380-f196-11e9-8891-c6ba8c4686a4.png)
+
+
+**For public repos only**
+![image](https://user-images.githubusercontent.com/209966/67081207-018ec400-f197-11e9-86aa-4ae4a003fcbd.png)
 
 CLI: `--accessToken myAccessToken`
 
