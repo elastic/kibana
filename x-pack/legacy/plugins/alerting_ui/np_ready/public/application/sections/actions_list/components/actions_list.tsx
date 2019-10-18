@@ -9,7 +9,6 @@ import React, { Fragment, useState, useEffect } from 'react';
 import { EuiPageContent, EuiBasicTable, EuiSpacer, EuiSearchBar, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { PageError } from '../../../components/page_error';
 import { Action, ActionType, deleteActions, loadActions, loadActionTypes } from '../../../lib/api';
 import { ActionsContext } from '../../../context/app_context';
 import { useAppDependencies } from '../../../index';
@@ -27,7 +26,7 @@ interface Data extends Action {
 export const ActionsList: React.FunctionComponent = () => {
   const {
     core: { http },
-    plugins: { capabilities },
+    plugins: { capabilities, toastNotifications },
   } = useAppDependencies();
   const canDelete = capabilities.get().actions.delete;
 
@@ -38,7 +37,6 @@ export const ActionsList: React.FunctionComponent = () => {
   const [isLoadingActionTypes, setIsLoadingActionTypes] = useState<boolean>(false);
   const [isLoadingActions, setIsLoadingActions] = useState<boolean>(false);
   const [isDeletingActions, setIsDeletingActions] = useState<boolean>(false);
-  const [errorCode, setErrorCode] = useState<number | null>(null);
   const [totalItemCount, setTotalItemCount] = useState<number>(0);
   const [page, setPage] = useState<Pagination>({ index: 0, size: 10 });
   const [searchText, setSearchText] = useState<string | undefined>(undefined);
@@ -58,7 +56,12 @@ export const ActionsList: React.FunctionComponent = () => {
         }
         setActionTypesIndex(index);
       } catch (e) {
-        setErrorCode(e.response.status);
+        toastNotifications.addDanger({
+          title: i18n.translate(
+            'xpack.alertingUI.sections.actionsList.unableToLoadActionTypesMessage',
+            { defaultMessage: 'Unable to load action types' }
+          ),
+        });
       } finally {
         setIsLoadingActionTypes(false);
       }
@@ -83,13 +86,16 @@ export const ActionsList: React.FunctionComponent = () => {
 
   async function loadActionsTable() {
     setIsLoadingActions(true);
-    setErrorCode(null);
     try {
       const actionsResponse = await loadActions({ http, page, searchText });
       setActions(actionsResponse.data);
       setTotalItemCount(actionsResponse.total);
     } catch (e) {
-      setErrorCode(e.response.status);
+      toastNotifications.addDanger({
+        title: i18n.translate('xpack.alertingUI.sections.actionsList.unableToLoadActionsMessage', {
+          defaultMessage: 'Unable to load actions',
+        }),
+      });
     } finally {
       setIsLoadingActions(false);
     }
@@ -167,17 +173,10 @@ export const ActionsList: React.FunctionComponent = () => {
     },
   ];
 
-  let content;
-
-  if (errorCode) {
-    content = (
-      <EuiPageContent>
-        <PageError errorCode={errorCode} />
-      </EuiPageContent>
-    );
-  } else {
-    content = (
-      <Fragment>
+  return (
+    <section data-test-subj="actionsList">
+      <ContentWrapper>
+        <EuiSpacer size="m" />
         <EuiSearchBar
           onChange={({ queryText }: { queryText: string }) => setSearchText(queryText)}
           filters={[
@@ -250,15 +249,6 @@ export const ActionsList: React.FunctionComponent = () => {
             },
           }}
         />
-      </Fragment>
-    );
-  }
-
-  return (
-    <section data-test-subj="actionsList">
-      <ContentWrapper>
-        <EuiSpacer size="m" />
-        {content}
       </ContentWrapper>
     </section>
   );

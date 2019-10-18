@@ -7,12 +7,14 @@
 import { management, MANAGEMENT_BREADCRUMB } from 'ui/management';
 import { capabilities } from 'ui/capabilities';
 import { CoreStart } from 'kibana/public';
+import { toastNotifications } from 'ui/notify';
 
 export interface AppPlugins {
   management: {
     breadcrumb: typeof MANAGEMENT_BREADCRUMB;
   };
   capabilities: typeof capabilities;
+  toastNotifications: typeof toastNotifications;
 }
 
 export interface AppDependencies {
@@ -29,6 +31,7 @@ export function createShim() {
     },
     pluginsStart: {
       capabilities,
+      toastNotifications,
       management: {
         breadcrumb: MANAGEMENT_BREADCRUMB,
       },
