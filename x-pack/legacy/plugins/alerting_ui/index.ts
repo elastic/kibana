@@ -15,10 +15,7 @@ export function alertingUI(kibana: any) {
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'actions'],
     isEnabled(config: Legacy.KibanaConfig) {
-      return (
-        config.get('xpack.alerting_ui.enabled') === true &&
-        config.get('xpack.actions.enabled') === true
-      );
+      return config.get('xpack.alerting_ui.enabled') && config.get('xpack.actions.enabled');
     },
     config(Joi: Root) {
       return Joi.object()
