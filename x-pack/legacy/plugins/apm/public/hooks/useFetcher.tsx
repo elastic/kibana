@@ -7,7 +7,7 @@
 import React, { useContext, useEffect, useState, useMemo } from 'react';
 import { idx } from '@kbn/elastic-idx';
 import { i18n } from '@kbn/i18n';
-import { HttpFetchError } from 'src/core/public';
+import { IHttpFetchError } from 'src/core/public';
 import { LoadingIndicatorContext } from '../context/LoadingIndicatorContext';
 import { useComponentId } from './useComponentId';
 import { useKibanaCore } from '../../../observability/public';
@@ -86,7 +86,7 @@ export function useFetcher<TReturn>(
           } as Result<InferResponseType<TReturn>>);
         }
       } catch (e) {
-        const err = e as HttpFetchError;
+        const err = e as IHttpFetchError;
         if (!didCancel) {
           notifications.toasts.addWarning({
             title: i18n.translate('xpack.apm.fetcher.error.title', {

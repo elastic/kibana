@@ -20,7 +20,7 @@
 import Boom from 'boom';
 import { createListStream } from '../../../../legacy/utils/streams';
 import { SavedObjectsClientContract } from '../types';
-import { injectNestedDependencies } from './inject_nested_depdendencies';
+import { fetchNestedDependencies } from './inject_nested_depdendencies';
 import { sortObjects } from './sort_objects';
 
 /**
@@ -43,10 +43,30 @@ export interface SavedObjectsExportOptions {
   savedObjectsClient: SavedObjectsClientContract;
   /** the maximum number of objects to export. */
   exportSizeLimit: number;
-  /** flag to also include all related saved objects in the export response. */
+  /** flag to also include all related saved objects in the export stream. */
   includeReferencesDeep?: boolean;
+  /** flag to not append {@link SavedObjectsExportResultDetails | export details} to the end of the export stream. */
+  excludeExportDetails?: boolean;
   /** optional namespace to override the namespace used by the savedObjectsClient. */
   namespace?: string;
+}
+
+/**
+ * Structure of the export result details entry
+ * @public
+ */
+export interface SavedObjectsExportResultDetails {
+  /** number of successfully exported objects */
+  exportedCount: number;
+  /** number of missing references */
+  missingRefCount: number;
+  /** missing references details */
+  missingReferences: Array<{
+    /** the missing reference id. */
+    id: string;
+    /** the missing reference type. */
+    type: string;
+  }>;
 }
 
 async function fetchObjectsToExport({
@@ -106,9 +126,10 @@ export async function getSortedObjectsForExport({
   savedObjectsClient,
   exportSizeLimit,
   includeReferencesDeep = false,
+  excludeExportDetails = false,
   namespace,
 }: SavedObjectsExportOptions) {
-  const objectsToExport = await fetchObjectsToExport({
+  const rootObjects = await fetchObjectsToExport({
     types,
     objects,
     search,
@@ -116,12 +137,18 @@ export async function getSortedObjectsForExport({
     exportSizeLimit,
     namespace,
   });
-
-  const exportedObjects = sortObjects(
-    includeReferencesDeep
-      ? await injectNestedDependencies(objectsToExport, savedObjectsClient, namespace)
-      : objectsToExport
-  );
-
-  return createListStream(exportedObjects);
+  let exportedObjects = [...rootObjects];
+  let missingReferences: SavedObjectsExportResultDetails['missingReferences'] = [];
+  if (includeReferencesDeep) {
+    const fetchResult = await fetchNestedDependencies(rootObjects, savedObjectsClient, namespace);
+    exportedObjects = fetchResult.objects;
+    missingReferences = fetchResult.missingRefs;
+  }
+  exportedObjects = sortObjects(exportedObjects);
+  const exportDetails: SavedObjectsExportResultDetails = {
+    exportedCount: exportedObjects.length,
+    missingRefCount: missingReferences.length,
+    missingReferences,
+  };
+  return createListStream([...exportedObjects, ...(excludeExportDetails ? [] : [exportDetails])]);
 }

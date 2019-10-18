@@ -10,7 +10,7 @@ import {
   FlowTarget,
   HostsFields,
   NetworkDnsFields,
-  NetworkTopNFlowFields,
+  NetworkTopTablesFields,
   TlsFields,
   UsersFields,
 } from '../graphql/types';
@@ -46,8 +46,6 @@ export const mockGlobalState: State = {
         uncommonProcesses: { activePage: 0, limit: 10 },
         anomalies: null,
       },
-      filterQuery: null,
-      filterQueryDraft: null,
     },
     details: {
       queries: {
@@ -62,22 +60,30 @@ export const mockGlobalState: State = {
         uncommonProcesses: { activePage: 0, limit: 10 },
         anomalies: null,
       },
-      filterQuery: null,
-      filterQueryDraft: null,
     },
   },
   network: {
     page: {
       queries: {
+        [networkModel.NetworkTableType.topCountriesDestination]: {
+          activePage: 0,
+          limit: 10,
+          topCountriesSort: { field: NetworkTopTablesFields.bytes_out, direction: Direction.desc },
+        },
+        [networkModel.NetworkTableType.topCountriesSource]: {
+          activePage: 0,
+          limit: 10,
+          topCountriesSort: { field: NetworkTopTablesFields.bytes_out, direction: Direction.desc },
+        },
         [networkModel.NetworkTableType.topNFlowSource]: {
           activePage: 0,
           limit: 10,
-          topNFlowSort: { field: NetworkTopNFlowFields.bytes_out, direction: Direction.desc },
+          topNFlowSort: { field: NetworkTopTablesFields.bytes_out, direction: Direction.desc },
         },
         [networkModel.NetworkTableType.topNFlowDestination]: {
           activePage: 0,
           limit: 10,
-          topNFlowSort: { field: NetworkTopNFlowFields.bytes_out, direction: Direction.desc },
+          topNFlowSort: { field: NetworkTopTablesFields.bytes_out, direction: Direction.desc },
         },
         [networkModel.NetworkTableType.dns]: {
           activePage: 0,
@@ -85,24 +91,35 @@ export const mockGlobalState: State = {
           dnsSortField: { field: NetworkDnsFields.queryCount, direction: Direction.desc },
           isPtrIncluded: false,
         },
+        [networkModel.NetworkTableType.tls]: {
+          activePage: 0,
+          limit: 10,
+          tlsSortField: { field: TlsFields._id, direction: Direction.desc },
+        },
       },
-      filterQuery: null,
-      filterQueryDraft: null,
     },
     details: {
-      filterQuery: null,
-      filterQueryDraft: null,
       flowTarget: FlowTarget.source,
       queries: {
+        [networkModel.IpDetailsTableType.topCountriesDestination]: {
+          activePage: 0,
+          limit: 10,
+          topCountriesSort: { field: NetworkTopTablesFields.bytes_out, direction: Direction.desc },
+        },
+        [networkModel.IpDetailsTableType.topCountriesSource]: {
+          activePage: 0,
+          limit: 10,
+          topCountriesSort: { field: NetworkTopTablesFields.bytes_out, direction: Direction.desc },
+        },
         [networkModel.IpDetailsTableType.topNFlowSource]: {
           activePage: 0,
           limit: 10,
-          topNFlowSort: { field: NetworkTopNFlowFields.bytes_out, direction: Direction.desc },
+          topNFlowSort: { field: NetworkTopTablesFields.bytes_out, direction: Direction.desc },
         },
         [networkModel.IpDetailsTableType.topNFlowDestination]: {
           activePage: 0,
           limit: 10,
-          topNFlowSort: { field: NetworkTopNFlowFields.bytes_out, direction: Direction.desc },
+          topNFlowSort: { field: NetworkTopTablesFields.bytes_out, direction: Direction.desc },
         },
         [networkModel.IpDetailsTableType.tls]: {
           activePage: 0,
@@ -121,14 +138,24 @@ export const mockGlobalState: State = {
     global: {
       timerange: { kind: 'relative', fromStr: DEFAULT_FROM, toStr: DEFAULT_TO, from: 0, to: 1 },
       linkTo: ['timeline'],
-      query: [],
+      queries: [],
       policy: { kind: DEFAULT_INTERVAL_TYPE, duration: DEFAULT_INTERVAL_VALUE },
+      query: {
+        query: '',
+        language: 'kuery',
+      },
+      filters: [],
     },
     timeline: {
       timerange: { kind: 'relative', fromStr: DEFAULT_FROM, toStr: DEFAULT_TO, from: 0, to: 1 },
       linkTo: ['global'],
-      query: [],
+      queries: [],
       policy: { kind: DEFAULT_INTERVAL_TYPE, duration: DEFAULT_INTERVAL_VALUE },
+      query: {
+        query: '',
+        language: 'kuery',
+      },
+      filters: [],
     },
   },
   dragAndDrop: { dataProviders: {} },

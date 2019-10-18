@@ -14,7 +14,7 @@ import { ExpressionFunction } from '../../../../../../src/legacy/core_plugins/in
 import { functionsRegistry } from '../../../../../../src/legacy/core_plugins/interpreter/public/registries';
 import { getIndexPatternDatasource } from './indexpattern';
 import { renameColumns } from './rename_columns';
-import { calculateFilterRatio } from './filter_ratio';
+import { autoDate } from './auto_date';
 
 // TODO these are intermediary types because interpreter is not typed yet
 // They can get replaced by references to the real interfaces as soon as they
@@ -37,7 +37,7 @@ class IndexPatternDatasourcePlugin {
 
   setup(core: CoreSetup, { interpreter }: IndexPatternDatasourceSetupPlugins) {
     interpreter.functionsRegistry.register(() => renameColumns);
-    interpreter.functionsRegistry.register(() => calculateFilterRatio);
+    interpreter.functionsRegistry.register(() => autoDate);
   }
 
   stop() {}
