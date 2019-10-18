@@ -9,6 +9,9 @@
         "properties": {
           "parent": {
             "properties": {
+              "index": {
+                "type": "keyword"
+              },
               "id": {
                 "type": "keyword"
               },
@@ -20,7 +23,7 @@
               }
             }
           },
-          "time_detected": {
+          "original_time": {
             "type": "date"
           },
           "rule_revision": {
@@ -45,30 +48,10 @@
             "type": "text"
           },
           "severity": {
-            "type": "long"
+            "type": "keyword"
           },
           "references": {
             "type": "text"
-          },
-          "error": {
-            "properties": {
-              "code": {
-                "type": "keyword",
-                "ignore_above": 1024
-              },
-              "id": {
-                "type": "keyword",
-                "ignore_above": 1024
-              },
-              "message": {
-                "type": "text",
-                "norms": false
-              },
-              "type": {
-                "type": "keyword",
-                "ignore_above": 1024
-              }
-            }
           }
         }
       },
