@@ -8,15 +8,12 @@
 <b>Signature:</b>
 
 ```typescript
-export interface HttpErrorResponse 
+export interface HttpErrorResponse extends HttpResponse 
 ```
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [body](./kibana-plugin-public.httperrorresponse.body.md) | <code>HttpBody</code> |  |
 |  [error](./kibana-plugin-public.httperrorresponse.error.md) | <code>Error &#124; IHttpFetchError</code> |  |
-|  [request](./kibana-plugin-public.httperrorresponse.request.md) | <code>Request</code> |  |
-|  [response](./kibana-plugin-public.httperrorresponse.response.md) | <code>Response</code> |  |
 
