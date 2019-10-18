@@ -14,7 +14,7 @@ describe('MetadataTable Helper', () => {
     HTTP,
     { ...SERVICE, properties: ['environment'] }
   ];
-  const item = ({
+  const apmDoc = ({
     http: {
       headers: {
         Connection: 'close',
@@ -27,14 +27,15 @@ describe('MetadataTable Helper', () => {
       environment: 'production'
     }
   } as unknown) as Transaction;
-  const items = getMetadataItems(sections, item);
+  const metadataItems = getMetadataItems(sections, apmDoc);
+
   it('returns flattened data and required section', () => {
-    expect(items).toEqual([
-      { key: 'labels', label: 'Labels', required: true },
+    expect(metadataItems).toEqual([
+      { key: 'labels', label: 'Labels', required: true, rows: [] },
       {
         key: 'http',
         label: 'HTTP',
-        data: [
+        rows: [
           { key: 'http.headers.Connection', value: 'close' },
           { key: 'http.headers.Host', value: 'opbeans:3000' },
           { key: 'http.headers.request.method', value: 'get' }
@@ -44,18 +45,18 @@ describe('MetadataTable Helper', () => {
         key: 'service',
         label: 'Service',
         properties: ['environment'],
-        data: [{ key: 'service.environment', value: 'production' }]
+        rows: [{ key: 'service.environment', value: 'production' }]
       }
     ]);
   });
   describe('filter', () => {
     it('items by key', () => {
-      const filteredItems = filterItems(items, 'http');
+      const filteredItems = filterItems(metadataItems, 'http');
       expect(filteredItems).toEqual([
         {
           key: 'http',
           label: 'HTTP',
-          data: [
+          rows: [
             { key: 'http.headers.Connection', value: 'close' },
             { key: 'http.headers.Host', value: 'opbeans:3000' },
             { key: 'http.headers.request.method', value: 'get' }
@@ -65,19 +66,19 @@ describe('MetadataTable Helper', () => {
     });
 
     it('items by value', () => {
-      const filteredItems = filterItems(items, 'product');
+      const filteredItems = filterItems(metadataItems, 'product');
       expect(filteredItems).toEqual([
         {
           key: 'service',
           label: 'Service',
           properties: ['environment'],
-          data: [{ key: 'service.environment', value: 'production' }]
+          rows: [{ key: 'service.environment', value: 'production' }]
         }
       ]);
     });
 
     it('returns empty when no item matches', () => {
-      const filteredItems = filterItems(items, 'post');
+      const filteredItems = filterItems(metadataItems, 'post');
       expect(filteredItems).toEqual([]);
     });
   });

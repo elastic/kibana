@@ -8,10 +8,10 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
 import { DottedKeyValueTable } from '../DottedKeyValueTable';
-import { FlattenItems } from '../../../utils/flattenObject';
+import { KeyValuePair } from '../../../utils/flattenObject';
 
 interface Props {
-  items?: FlattenItems;
+  items?: KeyValuePair[];
 }
 
 export function Section({ items }: Props) {

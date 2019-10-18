@@ -75,13 +75,13 @@ export function MetadataTable({ items }: Props) {
         </EuiFlexItem>
       </EuiFlexGroup>
       <HeightRetainer>
-        {filteredItems.map(section => (
-          <div key={section.key}>
+        {filteredItems.map(item => (
+          <div key={item.key}>
             <EuiTitle size="xs">
-              <h6>{section.label}</h6>
+              <h6>{item.label}</h6>
             </EuiTitle>
             <EuiSpacer size="s" />
-            <Section items={section.data} />
+            <Section items={item.rows} />
             <EuiSpacer size="xl" />
           </div>
         ))}

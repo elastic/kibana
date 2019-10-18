@@ -6,16 +6,19 @@
 
 import { compact, isObject } from 'lodash';
 
-export type FlattenItems = Array<{ key: string; value: unknown }>;
+export interface KeyValuePair {
+  key: string;
+  value: unknown;
+}
 
 export const flattenObject = (
   item: Record<string, any>,
   parentKey?: string
-): FlattenItems => {
+): KeyValuePair[] => {
   const isArrayWithSingleValue = Array.isArray(item) && item.length === 1;
   return Object.keys(item)
     .sort()
-    .reduce((acc: FlattenItems, key) => {
+    .reduce((acc: KeyValuePair[], key) => {
       const childKey = isArrayWithSingleValue ? '' : key;
       const currentKey = compact([parentKey, childKey]).join('.');
       if (isObject(item[key])) {

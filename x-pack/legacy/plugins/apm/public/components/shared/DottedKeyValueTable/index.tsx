@@ -13,13 +13,13 @@ import {
   EuiTableRowCell
 } from '@elastic/eui';
 import { FormattedValue } from './FormattedValue';
-import { FlattenItems } from '../../../utils/flattenObject';
+import { KeyValuePair } from '../../../utils/flattenObject';
 
 export function DottedKeyValueTable({
   items,
   tableProps = {}
 }: {
-  items: FlattenItems;
+  items: KeyValuePair[];
   tableProps?: EuiTableProps & TableHTMLAttributes<HTMLTableElement>;
 }) {
   return (

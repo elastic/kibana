@@ -20,7 +20,7 @@ describe('MetadataTable', () => {
         label: 'Bar',
         required: false,
         properties: ['props.A', 'props.B'],
-        data: [{ key: 'props.A', value: 'A' }, { key: 'props.B', value: 'B' }]
+        rows: [{ key: 'props.A', value: 'A' }, { key: 'props.B', value: 'B' }]
       }
     ];
     const output = render(<MetadataTable items={items} />);

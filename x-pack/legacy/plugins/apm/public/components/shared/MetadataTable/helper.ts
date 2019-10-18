@@ -9,48 +9,49 @@ import { Section as SectionType } from './sections';
 import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
 import { APMError } from '../../../../typings/es_schemas/ui/APMError';
 import { Span } from '../../../../typings/es_schemas/ui/Span';
-import { flattenObject, FlattenItems } from '../../../utils/flattenObject';
+import { flattenObject, KeyValuePair } from '../../../utils/flattenObject';
 
-type Item = Transaction | APMError | Span;
-
-export type MetadataItems = Array<SectionType & { data?: FlattenItems }>;
+export type MetadataItems = Array<SectionType & { rows?: KeyValuePair[] }>;
 
 export const getMetadataItems = (
   sections: SectionType[],
-  item: Item
+  apmDoc: Transaction | APMError | Span
 ): MetadataItems => {
   return sections
     .map(section => {
-      const sectionData: Record<string, unknown> = get(item, section.key);
+      const sectionData: Record<string, unknown> = get(apmDoc, section.key);
       const sectionProperties:
         | Record<string, unknown>
         | undefined = section.properties
         ? pick(sectionData, section.properties)
         : sectionData;
-      let data: FlattenItems | undefined;
-      if (!isEmpty(sectionProperties)) {
-        data = flattenObject(sectionProperties, section.key);
-      }
-      return { ...section, data };
+
+      const rows: KeyValuePair[] = isEmpty(sectionProperties)
+        ? []
+        : flattenObject(sectionProperties, section.key);
+      return { ...section, rows };
     })
-    .filter(({ required, data }) => required || !isEmpty(data));
+    .filter(({ required, rows }) => required || !isEmpty(rows));
 };
 
-export const filterItems = (items: MetadataItems, searchTerm: string) => {
+export const filterItems = (
+  metadataItems: MetadataItems,
+  searchTerm: string
+) => {
   if (!searchTerm) {
-    return items;
+    return metadataItems;
   }
-  return items
+  return metadataItems
     .map(item => {
-      const { data = [] } = item;
-      const filteredData = data.filter(({ key, value }) => {
+      const { rows = [] } = item;
+      const filteredRows = rows.filter(({ key, value }) => {
         const valueAsString = String(value).toLowerCase();
         return (
           key.toLowerCase().includes(searchTerm) ||
           valueAsString.includes(searchTerm)
         );
       });
-      return { ...item, data: filteredData };
+      return { ...item, rows: filteredRows };
     })
-    .filter(({ data }) => !isEmpty(data));
+    .filter(({ rows }) => !isEmpty(rows));
 };
