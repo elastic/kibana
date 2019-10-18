@@ -11,7 +11,7 @@ export const mockRouteContext = ({
   licensing: {
     license: {
       check: jest.fn().mockReturnValue({
-        check: LICENSE_CHECK_STATE.Valid,
+        state: LICENSE_CHECK_STATE.Valid,
       }),
     },
   },
@@ -21,7 +21,7 @@ export const mockRouteContextWithInvalidLicense = ({
   licensing: {
     license: {
       check: jest.fn().mockReturnValue({
-        check: LICENSE_CHECK_STATE.Invalid,
+        state: LICENSE_CHECK_STATE.Invalid,
         message: 'License is invalid for spaces',
       }),
     },
