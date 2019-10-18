@@ -83,7 +83,7 @@ export const getDependentVar = (analysis: AnalysisConfig) => {
 };
 
 export const getPredictionFieldName = (analysis: AnalysisConfig) => {
-  // Default to dependent_variable
+  // If undefined will be defaulted to dependent_variable when config is created
   let predictionFieldName;
   if (isRegressionAnalysis(analysis) && analysis.regression.prediction_field_name !== undefined) {
     predictionFieldName = analysis.regression.prediction_field_name;
@@ -214,9 +214,7 @@ export const loadEvalData = async ({
     predictionFieldName ? predictionFieldName : defaultPredictionField
   }`;
 
-  const query = { term: {} };
-  // @ts-ignore TODO: fix types here
-  query.term[`${resultsField}.is_training`] = { value: isTraining };
+  const query = { term: { [`${resultsField}.is_training`]: { value: isTraining } } };
 
   const config = {
     index,
