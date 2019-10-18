@@ -19,22 +19,15 @@
 import { get, keys } from 'lodash';
 import { Filter, FilterMeta } from './meta_filter';
 
-interface FilterRange {
+export interface RangeFilterParams {
   from?: number | string;
   to?: number | string;
-}
-
-interface FilterRangeGt {
   gt?: number | string;
   lt?: number | string;
-}
-
-interface FilterRangeGte {
   gte?: number | string;
   lte?: number | string;
+  format?: string;
 }
-
-export type RangeFilterParams = FilterRange & FilterRangeGt & FilterRangeGte;
 
 export type RangeFilterMeta = FilterMeta & {
   params: RangeFilterParams;

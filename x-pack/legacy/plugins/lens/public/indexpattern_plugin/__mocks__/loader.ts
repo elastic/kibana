@@ -13,6 +13,7 @@ export function loadInitialState() {
   const result: IndexPatternPrivateState = {
     currentIndexPatternId: indexPattern.id,
     indexPatternRefs: [],
+    existingFields: {},
     indexPatterns: {
       [indexPattern.id]: indexPattern,
       [restricted.id]: restricted,

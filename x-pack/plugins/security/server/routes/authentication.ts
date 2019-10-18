@@ -107,51 +107,39 @@ function defineSAMLRoutes({
     }
   );
 
-  // Generate two identical routes with new and deprecated URL and issue a warning if route with
-  // deprecated URL is ever used.
-  for (const path of ['/api/security/saml/callback', '/api/security/v1/saml']) {
-    router.post(
-      {
-        path,
-        validate: {
-          body: schema.object({
-            SAMLResponse: schema.string(),
-            RelayState: schema.maybe(schema.string()),
-          }),
-        },
-        options: { authRequired: false },
+  router.post(
+    {
+      path: '/api/security/saml/callback',
+      validate: {
+        body: schema.object({
+          SAMLResponse: schema.string(),
+          RelayState: schema.maybe(schema.string()),
+        }),
       },
-      async (context, request, response) => {
-        try {
-          if (path === '/api/security/v1/saml') {
-            const serverBasePath = basePath.serverBasePath;
-            logger.warn(
-              `The "${serverBasePath}${path}" URL is deprecated and will stop working in the next major version, please use "${serverBasePath}/api/security/saml/callback" URL instead.`,
-              { tags: ['deprecation'] }
-            );
-          }
+      options: { authRequired: false },
+    },
+    async (context, request, response) => {
+      try {
+        // When authenticating using SAML we _expect_ to redirect to the SAML Identity provider.
+        const authenticationResult = await authc.login(request, {
+          provider: 'saml',
+          value: {
+            step: SAMLLoginStep.SAMLResponseReceived,
+            samlResponse: request.body.SAMLResponse,
+          },
+        });
 
-          // When authenticating using SAML we _expect_ to redirect to the SAML Identity provider.
-          const authenticationResult = await authc.login(request, {
-            provider: 'saml',
-            value: {
-              step: SAMLLoginStep.SAMLResponseReceived,
-              samlResponse: request.body.SAMLResponse,
-            },
+        if (authenticationResult.redirected()) {
+          return response.redirected({
+            headers: { location: authenticationResult.redirectURL! },
           });
-
-          if (authenticationResult.redirected()) {
-            return response.redirected({
-              headers: { location: authenticationResult.redirectURL! },
-            });
-          }
-
-          return response.unauthorized({ body: authenticationResult.error });
-        } catch (err) {
-          logger.error(err);
-          return response.internalError();
         }
+
+        return response.unauthorized({ body: authenticationResult.error });
+      } catch (err) {
+        logger.error(err);
+        return response.internalError();
       }
-    );
-  }
+    }
+  );
 }

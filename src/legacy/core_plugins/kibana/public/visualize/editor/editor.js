@@ -150,9 +150,6 @@ function VisEditor(
   config,
   kbnBaseUrl,
   localStorage,
-  // unused but required to initialize auto refresh :-\
-  /* eslint-disable no-unused-vars */
-  courier,
 ) {
   const queryFilter = Private(FilterBarQueryFilterProvider);
   const getUnhashableStates = Private(getUnhashableStatesProvider);
@@ -517,6 +514,8 @@ function VisEditor(
 
   const updateStateFromSavedQuery = (savedQuery) => {
     $state.query = savedQuery.attributes.query;
+    $state.save();
+
     queryFilter.setFilters(savedQuery.attributes.filters || []);
 
     if (savedQuery.attributes.timefilter) {
@@ -545,7 +544,7 @@ function VisEditor(
       $scope.savedQuery = undefined;
       return;
     }
-    if ($scope.savedQuery && newSavedQueryId !== $scope.savedQuery.id) {
+    if (!$scope.savedQuery || newSavedQueryId !== $scope.savedQuery.id) {
       savedQueryService.getSavedQuery(newSavedQueryId).then((savedQuery) => {
         $scope.$evalAsync(() => {
           $scope.savedQuery = savedQuery;

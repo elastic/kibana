@@ -7,7 +7,10 @@
 import React, { CSSProperties } from 'react';
 import ReactDOM from 'react-dom';
 import { RendererFactory, Style } from '../../../types';
+import { RendererStrings } from '../../../i18n';
 import { Metric } from './component/metric';
+
+const { metric: strings } = RendererStrings;
 
 export interface Config {
   /** The text to display under the metric */
@@ -24,8 +27,8 @@ export interface Config {
 
 export const metric: RendererFactory<Config> = () => ({
   name: 'metric',
-  displayName: 'Metric',
-  help: 'Render HTML Markup for the Metric element',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelpDescription(),
   reuseDomNode: true,
   render(domNode, config, handlers) {
     ReactDOM.render(

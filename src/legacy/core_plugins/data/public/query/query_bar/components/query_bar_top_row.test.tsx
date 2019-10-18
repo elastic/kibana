@@ -47,9 +47,14 @@ startMock.uiSettings.get.mockImplementation((key: string) => {
         },
       ];
     case 'dateFormat':
-      return 'YY';
+      return 'MMM D, YYYY @ HH:mm:ss.SSS';
     case 'history:limit':
       return 10;
+    case 'timepicker:timeDefaults':
+      return {
+        from: 'now-15m',
+        to: 'now',
+      };
     default:
       throw new Error(`Unexpected config key: ${key}`);
   }
@@ -122,6 +127,7 @@ function wrapQueryBarTopRowInContext(testProps: any) {
 describe('QueryBarTopRowTopRow', () => {
   const QUERY_INPUT_SELECTOR = 'QueryBarInputUI';
   const TIMEPICKER_SELECTOR = 'EuiSuperDatePicker';
+  const TIMEPICKER_DURATION = '[data-shared-timefilter-duration]';
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -196,6 +202,24 @@ describe('QueryBarTopRowTopRow', () => {
 
     expect(component.find(QUERY_INPUT_SELECTOR).length).toBe(0);
     expect(component.find(TIMEPICKER_SELECTOR).length).toBe(1);
+  });
+
+  it('Should render the timefilter duration container for sharing', () => {
+    const component = mount(
+      wrapQueryBarTopRowInContext({
+        isDirty: false,
+        screenTitle: 'Another Screen',
+        showDatePicker: true,
+        dateRangeFrom: 'now-7d',
+        dateRangeTo: 'now',
+        timeHistory: timefilterSetupMock.history,
+      })
+    );
+
+    // match the data attribute rendered in the in the ReactHTML object
+    expect(component.find(TIMEPICKER_DURATION)).toMatchObject(
+      /<div\b.*\bdata-shared-timefilter-duration\b/
+    );
   });
 
   it('Should render only query input bar', () => {

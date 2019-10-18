@@ -19,7 +19,6 @@
 
 import { Filter } from '@kbn/es-query';
 import { reduceRight } from 'lodash';
-import { IndexPatterns } from '../../../index_patterns';
 
 import { mapMatchAll } from './map_match_all';
 import { mapPhrase } from './map_phrase';
@@ -33,7 +32,7 @@ import { mapGeoPolygon } from './map_geo_polygon';
 import { mapDefault } from './map_default';
 import { generateMappingChain } from './generate_mapping_chain';
 
-export async function mapFilter(indexPatterns: IndexPatterns, filter: Filter) {
+export function mapFilter(filter: Filter) {
   /** Mappers **/
 
   // Each mapper is a simple promise function that test if the mapper can
@@ -52,14 +51,14 @@ export async function mapFilter(indexPatterns: IndexPatterns, filter: Filter) {
   // and add it here. ProTip: These are executed in order listed
   const mappers = [
     mapMatchAll,
-    mapRange(indexPatterns),
-    mapPhrase(indexPatterns),
+    mapRange,
+    mapPhrase,
     mapPhrases,
     mapExists,
     mapMissing,
     mapQueryString,
-    mapGeoBoundingBox(indexPatterns),
-    mapGeoPolygon(indexPatterns),
+    mapGeoBoundingBox,
+    mapGeoPolygon,
     mapDefault,
   ];
 
@@ -74,13 +73,15 @@ export async function mapFilter(indexPatterns: IndexPatterns, filter: Filter) {
     (memo, map) => generateMappingChain(map, memo),
     noop
   );
-  const mapped = await mapFn(filter);
+
+  const mapped = mapFn(filter);
 
   // Map the filter into an object with the key and value exposed so it's
   // easier to work with in the template
   filter.meta = filter.meta || {};
   filter.meta.type = mapped.type;
   filter.meta.key = mapped.key;
+  // Display value or formatter function.
   filter.meta.value = mapped.value;
   filter.meta.params = mapped.params;
   filter.meta.disabled = Boolean(filter.meta.disabled);

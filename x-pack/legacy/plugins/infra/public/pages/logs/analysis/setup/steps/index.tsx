@@ -4,32 +4,42 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiSteps, EuiStepStatus } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
+
+import { SetupStatus } from '../../../../../../common/log_analysis';
+import { useAnalysisSetupState } from '../../../../../containers/logs/log_analysis/log_analysis_setup_state';
 import { InitialConfiguration } from './initial_configuration';
 import { SetupProcess } from './setup_process';
-import { useAnalysisSetupState } from '../../../../../containers/logs/log_analysis/log_analysis_setup_state';
-import { SetupStatus } from '../../../../../containers/logs/log_analysis';
+
+type SetupHandler = (startTime?: number | undefined, endTime?: number | undefined) => void;
 
 interface AnalysisSetupStepsProps {
-  setup: (startTime?: number | undefined, endTime?: number | undefined) => void;
-  retry: (startTime?: number | undefined, endTime?: number | undefined) => void;
-  viewResults: () => void;
+  cleanupAndSetup: SetupHandler;
   indexPattern: string;
+  setup: SetupHandler;
   setupStatus: SetupStatus;
+  viewResults: () => void;
 }
 
 export const AnalysisSetupSteps: React.FunctionComponent<AnalysisSetupStepsProps> = ({
-  setup: setupModule,
-  retry: retrySetup,
-  viewResults,
+  cleanupAndSetup: cleanupAndSetupModule,
   indexPattern,
+  setup: setupModule,
   setupStatus,
+  viewResults,
 }: AnalysisSetupStepsProps) => {
-  const { setup, retry, setStartTime, setEndTime, startTime, endTime } = useAnalysisSetupState({
+  const {
+    setup,
+    cleanupAndSetup,
+    setStartTime,
+    setEndTime,
+    startTime,
+    endTime,
+  } = useAnalysisSetupState({
     setupModule,
-    retrySetup,
+    cleanupAndSetupModule,
   });
 
   const steps = [
@@ -55,7 +65,7 @@ export const AnalysisSetupSteps: React.FunctionComponent<AnalysisSetupStepsProps
           setupStatus={setupStatus}
           viewResults={viewResults}
           setup={setup}
-          retry={retry}
+          cleanupAndSetup={cleanupAndSetup}
           indexPattern={indexPattern}
         />
       ),

@@ -88,18 +88,16 @@ exports[`CalendarListsHeader renders header 1`] = `
           values={
             Object {
               "br": <br />,
-              "learnMoreLink": <EuiLink
-                color="primary"
+              "learnMoreLink": <ForwardRef
                 href="https://www.elastic.co/guide/en/elastic-stack-overview/jest-metadata-mock-branch/ml-calendars.html"
                 target="_blank"
-                type="button"
               >
                 <FormattedMessage
                   defaultMessage="Learn more"
                   id="xpack.ml.settings.calendars.listHeader.calendarsDescription.learnMoreLinkText"
                   values={Object {}}
                 />
-              </EuiLink>,
+              </ForwardRef>,
             }
           }
         />
