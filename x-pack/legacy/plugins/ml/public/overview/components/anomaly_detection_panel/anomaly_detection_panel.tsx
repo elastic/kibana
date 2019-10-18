@@ -31,7 +31,7 @@ export interface Group {
   docs_processed: number;
   earliest_timestamp: number;
   latest_timestamp: number;
-  max_anomaly_score: number | undefined;
+  max_anomaly_score: number | undefined | null;
 }
 
 type MaxScoresByGroup = Dictionary<{
