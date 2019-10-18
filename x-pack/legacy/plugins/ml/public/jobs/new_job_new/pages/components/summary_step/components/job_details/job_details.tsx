@@ -6,18 +6,34 @@
 
 import React, { FC, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
+import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiDescriptionList } from '@elastic/eui';
-import { JobCreatorContext } from '../job_creator_context';
-import { isMultiMetricJobCreator, isPopulationJobCreator } from '../../../common/job_creator';
+import { JobCreatorContext } from '../../../job_creator_context';
+import {
+  isMultiMetricJobCreator,
+  isPopulationJobCreator,
+  isAdvancedJobCreator,
+} from '../../../../../common/job_creator';
+import { newJobDefaults } from '../../../../../utils/new_job_defaults';
+import { ListItems, falseLabel, trueLabel, defaultLabel, Italic } from '../common';
+import { useKibanaContext } from '../../../../../../../contexts/kibana';
 
 export const JobDetails: FC = () => {
   const { jobCreator } = useContext(JobCreatorContext);
+  const kibanaContext = useKibanaContext();
+  const dateFormat: string = kibanaContext.kibanaConfig.get('dateFormat');
+  const { anomaly_detectors: anomalyDetectors } = newJobDefaults();
 
-  interface ListItems {
-    title: string;
-    description: string | JSX.Element;
-  }
+  const isAdvanced = isAdvancedJobCreator(jobCreator);
+
+  const modelMemoryLimitDefault = anomalyDetectors.model_memory_limit || '';
+  const modelMemoryLimit =
+    jobCreator.modelMemoryLimit !== null ? (
+      jobCreator.modelMemoryLimit
+    ) : (
+      <Italic>{`${modelMemoryLimitDefault} (${defaultLabel})`}</Italic>
+    );
 
   const jobDetails: ListItems[] = [
     {
@@ -34,12 +50,12 @@ export const JobDetails: FC = () => {
         jobCreator.description.length > 0 ? (
           jobCreator.description
         ) : (
-          <span style={{ fontStyle: 'italic' }}>
+          <Italic>
             <FormattedMessage
               id="xpack.ml.newJob.wizard.summaryStep.jobDetails.jobDescription.placeholder"
               defaultMessage="No description provided"
             />
-          </span>
+          </Italic>
         ),
     },
     {
@@ -50,12 +66,12 @@ export const JobDetails: FC = () => {
         jobCreator.groups.length > 0 ? (
           jobCreator.groups.join(', ')
         ) : (
-          <span style={{ fontStyle: 'italic' }}>
+          <Italic>
             <FormattedMessage
               id="xpack.ml.newJob.wizard.summaryStep.jobDetails.groups.placeholder"
               defaultMessage="No groups selected"
             />
-          </span>
+          </Italic>
         ),
     },
   ];
@@ -78,12 +94,12 @@ export const JobDetails: FC = () => {
         isMultiMetricJobCreator(jobCreator) && jobCreator.splitField !== null ? (
           jobCreator.splitField.name
         ) : (
-          <span style={{ fontStyle: 'italic' }}>
+          <Italic>
             <FormattedMessage
               id="xpack.ml.newJob.wizard.summaryStep.jobDetails.splitField.placeholder"
               defaultMessage="No split field selected"
             />
-          </span>
+          </Italic>
         ),
     });
   }
@@ -107,6 +123,30 @@ export const JobDetails: FC = () => {
     });
   }
 
+  if (isAdvanced && jobCreator.categorizationFieldName !== null) {
+    detectorDetails.push({
+      title: i18n.translate(
+        'xpack.ml.newJob.wizard.summaryStep.jobDetails.categorizationField.title',
+        {
+          defaultMessage: 'Categorization field',
+        }
+      ),
+      description: jobCreator.categorizationFieldName,
+    });
+  }
+
+  if (isAdvanced && jobCreator.summaryCountFieldName !== null) {
+    detectorDetails.push({
+      title: i18n.translate(
+        'xpack.ml.newJob.wizard.summaryStep.jobDetails.summaryCountField.title',
+        {
+          defaultMessage: 'Summary count field',
+        }
+      ),
+      description: jobCreator.summaryCountFieldName,
+    });
+  }
+
   detectorDetails.push({
     title: i18n.translate('xpack.ml.newJob.wizard.summaryStep.jobDetails.influencers.title', {
       defaultMessage: 'Influencers',
@@ -115,21 +155,13 @@ export const JobDetails: FC = () => {
       jobCreator.influencers.length > 0 ? (
         jobCreator.influencers.join(', ')
       ) : (
-        <span style={{ fontStyle: 'italic' }}>
+        <Italic>
           <FormattedMessage
             id="xpack.ml.newJob.wizard.summaryStep.jobDetails.influencers.placeholder"
             defaultMessage="No influencers selected"
           />
-        </span>
+        </Italic>
       ),
-  });
-
-  const trueLabel = i18n.translate('xpack.ml.newJob.wizard.summaryStep.jobDetails.trueLabel', {
-    defaultMessage: 'True',
-  });
-
-  const falseLabel = i18n.translate('xpack.ml.newJob.wizard.summaryStep.jobDetails.falseLabel', {
-    defaultMessage: 'False',
   });
 
   const advancedDetails: ListItems[] = [
@@ -155,7 +187,22 @@ export const JobDetails: FC = () => {
           defaultMessage: 'Model memory limit',
         }
       ),
-      description: jobCreator.modelMemoryLimit !== null ? jobCreator.modelMemoryLimit : '',
+      description: modelMemoryLimit,
+    },
+  ];
+
+  const timeRangeDetails: ListItems[] = [
+    {
+      title: i18n.translate('xpack.ml.newJob.wizard.summaryStep.timeRange.start.title', {
+        defaultMessage: 'Start',
+      }),
+      description: moment(jobCreator.start).format(dateFormat),
+    },
+    {
+      title: i18n.translate('xpack.ml.newJob.wizard.summaryStep.timeRange.end.title', {
+        defaultMessage: 'End',
+      }),
+      description: moment(jobCreator.end).format(dateFormat),
     },
   ];
 
@@ -170,6 +217,11 @@ export const JobDetails: FC = () => {
       <EuiFlexItem>
         <EuiDescriptionList compressed listItems={advancedDetails} />
       </EuiFlexItem>
+      {isAdvanced === false && (
+        <EuiFlexItem>
+          <EuiDescriptionList compressed listItems={timeRangeDetails} />
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };
