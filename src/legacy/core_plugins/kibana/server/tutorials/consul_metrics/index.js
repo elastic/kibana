@@ -30,7 +30,7 @@ export function consulMetricsSpecProvider(server, context) {
     }),
     category: TUTORIAL_CATEGORY.METRICS,
     shortDescription: i18n.translate('kbn.server.tutorials.consulMetrics.shortDescription', {
-      defaultMessage: 'Fetch monitoring metrics from the CouchdB server.',
+      defaultMessage: 'Fetch monitoring metrics from the Consul server.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.consulMetrics.longDescription', {
       defaultMessage: 'The `consul` Metricbeat module fetches monitoring metrics from Consul. \
