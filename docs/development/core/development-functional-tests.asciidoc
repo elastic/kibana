@@ -302,7 +302,7 @@ await testSubjects.click(‘containerButton’);
 
 * remote
     * Source: {blob}test/functional/services/remote/remote.js[test/functional/services/remote/remote.js]
-    * Instance of https://theintern.github.io/leadfoot/module-leadfoot_Command.html[Leadfoot's `Command]` class
+    * Instance of https://theintern.github.io/leadfoot/module-leadfoot_Command.html[Leadfoot's `Command`] class
     * Responsible for all communication with the browser
     * Higher level options: `testSubjects`, `find`, and `PageObjects.common`
     * See the https://theintern.github.io/leadfoot/module-leadfoot_Command.html[leadfoot/Command API] for full API
