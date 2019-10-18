@@ -39,7 +39,8 @@ export default function ({ getService, getPageObjects }) {
       expect(addButtonExists).to.be(true);
     });
 
-    it('should open add panel when add button is clicked', async () => {
+    // Flaky test: https://github.com/elastic/kibana/issues/48236
+    it.skip('should open add panel when add button is clicked', async () => {
       await testSubjects.click('emptyDashboardAddPanelButton');
       const isAddPanelOpen = await dashboardAddPanel.isAddPanelOpen();
       expect(isAddPanelOpen).to.be(true);

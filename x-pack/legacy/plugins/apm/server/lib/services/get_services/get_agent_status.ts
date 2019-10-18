@@ -42,6 +42,6 @@ export async function getAgentStatus(setup: Setup) {
   };
 
   const resp = await client.search(params);
-  const hasHistorialAgentData = resp.hits.total > 0;
+  const hasHistorialAgentData = resp.hits.total.value > 0;
   return hasHistorialAgentData;
 }

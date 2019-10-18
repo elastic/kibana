@@ -121,6 +121,11 @@ export const useMetricsExplorerOptions = () => {
   );
   const [isAutoReloading, setAutoReloading] = useState<boolean>(false);
   return {
+    defaultViewState: {
+      options: DEFAULT_OPTIONS,
+      chartOptions: DEFAULT_CHART_OPTIONS,
+      currentTimerange: DEFAULT_TIMERANGE,
+    },
     options,
     chartOptions,
     setChartOptions,

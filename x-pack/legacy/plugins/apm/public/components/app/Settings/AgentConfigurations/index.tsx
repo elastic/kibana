@@ -18,7 +18,6 @@ import {
 import { isEmpty } from 'lodash';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { AgentConfigurationListAPIResponse } from '../../../../../server/lib/settings/agent_configuration/list_configurations';
-import { callApmApi } from '../../../../services/rest/callApmApi';
 import { HomeLink } from '../../../shared/Links/apm/HomeLink';
 import { AgentConfigurationList } from './AgentConfigurationList';
 import { useTrackPageview } from '../../../../../../infra/public';
@@ -28,7 +27,8 @@ export type Config = AgentConfigurationListAPIResponse[0];
 
 export function AgentConfigurations() {
   const { data = [], status, refetch } = useFetcher(
-    () => callApmApi({ pathname: `/api/apm/settings/agent-configuration` }),
+    callApmApi =>
+      callApmApi({ pathname: `/api/apm/settings/agent-configuration` }),
     [],
     { preservePreviousData: false }
   );

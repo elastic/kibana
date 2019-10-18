@@ -71,7 +71,7 @@ Infrastructure::
 * Add APM to Metadata Endpoint {pull}42197[#42197]
 * Add AWS metrics to node detail page {pull}42153[#42153]
 * Clarify confusing message about time period {pull}44168[#44168]
-Logs UI::
+Logs::
 * Allow for jumping to the previous and next highlight {pull}40010[#40010]
 * Show highlighted log entries in the minimap {pull}40745[#40745]
 * Add a time cursor to the log minimap {pull}39538[#39538]

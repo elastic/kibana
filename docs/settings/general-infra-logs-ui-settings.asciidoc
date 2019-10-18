@@ -1,4 +1,4 @@
-`xpack.infra.enabled`:: Set to `false` to disable the Logs and Infrastructure UI plugin {kib}. Defaults to `true`.
+`xpack.infra.enabled`:: Set to `false` to disable the Logs and Metrics UI plugin {kib}. Defaults to `true`.
 
 `xpack.infra.sources.default.logAlias`:: Index pattern for matching indices that contain log data. Defaults to `filebeat-*,kibana_sample_data_logs*`.
 

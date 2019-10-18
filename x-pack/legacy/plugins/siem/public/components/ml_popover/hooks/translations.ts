@@ -6,20 +6,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const INDEX_PATTERN_FETCH_FAILURE = i18n.translate(
-  'xpack.siem.components.mlPopup.hooks.errors.indexPatternFetchFailureTitle',
-  {
-    defaultMessage: 'Index pattern fetch failure',
-  }
-);
-
-export const JOB_SUMMARY_FETCH_FAILURE = i18n.translate(
-  'xpack.siem.components.mlPopup.hooks.errors.jobSummaryFetchFailureTitle',
-  {
-    defaultMessage: 'Job summary fetch failure',
-  }
-);
-
 export const SIEM_JOB_FETCH_FAILURE = i18n.translate(
   'xpack.siem.components.mlPopup.hooks.errors.siemJobFetchFailureTitle',
   {
