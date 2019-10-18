@@ -52,7 +52,7 @@ export const AnalysisSetupIndicesForm: React.FunctionComponent<{
       description={
         <FormattedMessage
           id="xpack.infra.analysisSetup.indicesSelectionDescription"
-          defaultMessage="By default, Machine Learning analyzes log messages in all log indices configured for the source. You can choose to only analyse a subset of the index names. Every selected index name must match at least one index with log entries."
+          defaultMessage="By default, Machine Learning analyzes log messages in all log indices configured for the source. You can choose to only analyze a subset of the index names. Every selected index name must match at least one index with log entries."
         />
       }
     >
