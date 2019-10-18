@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { FieldWildcardProvider } from './field_wildcard';
+export * from './field_wildcard';
