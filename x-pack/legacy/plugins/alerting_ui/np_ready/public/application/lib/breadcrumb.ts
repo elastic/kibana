@@ -31,7 +31,7 @@ class BreadcrumbService {
         text: i18n.translate('xpack.alertingUI.home.breadcrumbTitle', {
           defaultMessage: 'Alerting UI',
         }),
-        href: linkToHome(),
+        href: linkToHome,
       },
     ];
     this.breadcrumbs.actions = [
@@ -40,7 +40,7 @@ class BreadcrumbService {
         text: i18n.translate('xpack.alertingUI.actions.breadcrumbTitle', {
           defaultMessage: 'Actions',
         }),
-        href: linkToActions(),
+        href: linkToActions,
       },
     ];
   }
