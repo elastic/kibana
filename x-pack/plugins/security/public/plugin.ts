@@ -5,7 +5,6 @@
  */
 
 import { Plugin, CoreSetup } from 'src/core/public';
-import { AnonymousPaths } from './anonymous_paths';
 import {
   SessionExpired,
   SessionTimeout,
@@ -16,13 +15,10 @@ import {
 export class SecurityPlugin implements Plugin<SecurityPluginSetup, SecurityPluginStart> {
   public setup(core: CoreSetup, deps: {}) {
     const { http, notifications } = core;
-    const { basePath } = http;
-    const anonymousPaths = new AnonymousPaths(basePath, [
-      '/login',
-      '/logout',
-      '/logged_out',
-      '/status',
-    ]);
+    const { basePath, anonymousPaths } = http;
+    anonymousPaths.register('/login');
+    anonymousPaths.register('/logout');
+    anonymousPaths.register('/logged_out');
 
     const sessionExpired = new SessionExpired(basePath);
     http.intercept(new UnauthorizedResponseHttpInterceptor(sessionExpired, anonymousPaths));

@@ -4,15 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpInterceptor, HttpErrorResponse, HttpInterceptController } from 'src/core/public';
+import {
+  HttpInterceptor,
+  HttpErrorResponse,
+  IHttpInterceptController,
+  IAnonymousPaths,
+} from 'src/core/public';
 
-import { AnonymousPaths } from '../anonymous_paths';
 import { SessionExpired } from './session_expired';
 
 export class UnauthorizedResponseHttpInterceptor implements HttpInterceptor {
-  constructor(private sessionExpired: SessionExpired, private anonymousPaths: AnonymousPaths) {}
+  constructor(private sessionExpired: SessionExpired, private anonymousPaths: IAnonymousPaths) {}
 
-  responseError(httpErrorResponse: HttpErrorResponse, controller: HttpInterceptController) {
+  responseError(httpErrorResponse: HttpErrorResponse, controller: IHttpInterceptController) {
     if (this.anonymousPaths.isAnonymous(window.location.pathname)) {
       return;
     }

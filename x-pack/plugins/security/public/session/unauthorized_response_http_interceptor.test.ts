@@ -6,7 +6,6 @@
 
 // @ts-ignore
 import fetchMock from 'fetch-mock/es5/client';
-import { AnonymousPaths } from '../anonymous_paths';
 import { SessionExpired } from './session_expired';
 import { setup } from '../../../../../src/test_utils/public/http_test_setup';
 import { UnauthorizedResponseHttpInterceptor } from './unauthorized_response_http_interceptor';
@@ -37,10 +36,7 @@ it(`logs out 401 responses`, async () => {
   const logoutPromise = new Promise(resolve => {
     jest.spyOn(sessionExpired, 'logout').mockImplementation(() => resolve());
   });
-  const interceptor = new UnauthorizedResponseHttpInterceptor(
-    sessionExpired,
-    new AnonymousPaths(http.basePath, [])
-  );
+  const interceptor = new UnauthorizedResponseHttpInterceptor(sessionExpired, http.anonymousPaths);
   http.intercept(interceptor);
   fetchMock.mock('*', 401);
 
@@ -57,11 +53,10 @@ it(`logs out 401 responses`, async () => {
 it(`ignores anonymous paths`, async () => {
   mockCurrentUrl('/foo/bar');
   const http = setupHttp('/foo');
+  const { anonymousPaths } = http;
+  anonymousPaths.register('/bar');
   const sessionExpired = new SessionExpired(http.basePath);
-  const interceptor = new UnauthorizedResponseHttpInterceptor(
-    sessionExpired,
-    new AnonymousPaths(http.basePath, ['/bar'])
-  );
+  const interceptor = new UnauthorizedResponseHttpInterceptor(sessionExpired, anonymousPaths);
   http.intercept(interceptor);
   fetchMock.mock('*', 401);
 
@@ -72,10 +67,7 @@ it(`ignores anonymous paths`, async () => {
 it(`ignores errors which don't have a response, for example network connectivity issues`, async () => {
   const http = setupHttp('/foo');
   const sessionExpired = new SessionExpired(http.basePath);
-  const interceptor = new UnauthorizedResponseHttpInterceptor(
-    sessionExpired,
-    new AnonymousPaths(http.basePath, ['/bar'])
-  );
+  const interceptor = new UnauthorizedResponseHttpInterceptor(sessionExpired, http.anonymousPaths);
   http.intercept(interceptor);
   fetchMock.mock('*', new Promise((resolve, reject) => reject(new Error('Network is down'))));
 
@@ -86,10 +78,7 @@ it(`ignores errors which don't have a response, for example network connectivity
 it(`ignores requests which omit credentials`, async () => {
   const http = setupHttp('/foo');
   const sessionExpired = new SessionExpired(http.basePath);
-  const interceptor = new UnauthorizedResponseHttpInterceptor(
-    sessionExpired,
-    new AnonymousPaths(http.basePath, ['/bar'])
-  );
+  const interceptor = new UnauthorizedResponseHttpInterceptor(sessionExpired, http.anonymousPaths);
   http.intercept(interceptor);
   fetchMock.mock('*', 401);
 
