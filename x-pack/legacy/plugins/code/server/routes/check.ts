@@ -4,10 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { schema } from '@kbn/config-schema';
 import fetch from 'node-fetch';
 
+import {
+  IRouter,
+  KibanaRequest,
+  KibanaResponseFactory,
+  RequestHandlerContext,
+} from 'src/core/server';
 import { Logger } from '../log';
-import { ServerFacade } from '../..';
 
 export async function checkCodeNode(url: string, log: Logger, rndStr: string) {
   try {
@@ -24,13 +30,22 @@ export async function checkCodeNode(url: string, log: Logger, rndStr: string) {
   return null;
 }
 
-export function checkRoute(server: ServerFacade, rndStr: string) {
-  server.route({
-    method: 'GET',
-    path: '/api/code/codeNode',
-    options: { auth: false },
-    handler(req: any) {
-      return { me: req.query.rndStr === rndStr };
+export function checkRoute(router: IRouter, rndStr: string) {
+  router.get(
+    {
+      path: '/api/code/codeNode',
+      validate: {
+        query: schema.object({}, { allowUnknowns: true }),
+      },
+      options: {
+        authRequired: false,
+      },
     },
-  });
+    (context: RequestHandlerContext, req: KibanaRequest, res: KibanaResponseFactory) => {
+      return res.ok({
+        // @ts-ignore
+        body: { me: req.query.rndStr === rndStr },
+      });
+    }
+  );
 }

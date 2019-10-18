@@ -14701,10 +14701,10 @@ history@^4.7.2:
     value-equal "^0.4.0"
     warning "^3.0.0"
 
-hjson@3.1.2:
-  version "3.1.2"
-  resolved "https://registry.yarnpkg.com/hjson/-/hjson-3.1.2.tgz#1ae8a3a897a1fab8d45180f98e9abf9b56f95b55"
-  integrity sha512-2ILrho8eRl2Bniy61mDFiXRAloYqH2T6OwWkoF/8y55DPFgG2RcqQGNXIfBLp432dnAbLOpBJ4pJs63W3X27EA==
+hjson@3.2.0:
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/hjson/-/hjson-3.2.0.tgz#76203ea69bc1c7c88422b48402cc34df8ff8de0e"
+  integrity sha512-XntQJHUg9QRKZYlADJKVoBMvuDbZve1X4Nd6ZIXCVPMwMvLhGjU9pGqW1XX8yPqBJSBAQwpcBDGTspURotVxbA==
 
 hmac-drbg@^1.0.0:
   version "1.0.1"
@@ -27351,10 +27351,10 @@ traverse@0.6.6, traverse@~0.6.6:
   resolved "https://registry.yarnpkg.com/traverse/-/traverse-0.6.6.tgz#cbdf560fd7b9af632502fed40f918c157ea97137"
   integrity sha1-y99WD9e5r2MlAv7UD5GMFX6pcTc=
 
-tree-kill@^1.1.0, tree-kill@^1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/tree-kill/-/tree-kill-1.2.0.tgz#5846786237b4239014f05db156b643212d4c6f36"
-  integrity sha512-DlX6dR0lOIRDFxI0mjL9IYg6OTncLm/Zt+JiBhE5OlFcAR8yc9S7FFXU9so0oda47frdM/JFsk7UjNt9vscKcg==
+tree-kill@^1.2.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/tree-kill/-/tree-kill-1.2.1.tgz#5398f374e2f292b9dcc7b2e71e30a5c3bb6c743a"
+  integrity sha512-4hjqbObwlh2dLyW4tcz0Ymw0ggoaVDMveUB9w8kFSQScdRLo0gxO9J7WFcUBo+W3C1TLdFIEwNOWebgZZ0RH9Q==
 
 treeify@^1.0.1, treeify@^1.1.0:
   version "1.1.0"
