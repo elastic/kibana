@@ -45,7 +45,7 @@ export const uiSettings = npStart.core.uiSettings;
 export const addBasePath = npStart.core.http.basePath.prepend;
 export const getBasePath = npStart.core.http.basePath.get;
 
-export const indexPatternService = data.indexPatterns;
+export const indexPatternService = data.indexPatterns.indexPatterns;
 export let shouldShowTelemetryOptIn: boolean;
 export let telemetryOptInProvider: any;
 export let featureCatalogueRegistryProvider: any;

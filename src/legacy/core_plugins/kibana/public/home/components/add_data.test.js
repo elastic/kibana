@@ -22,13 +22,9 @@ import { AddData } from './add_data';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { getBasePath } from '../kibana_services';
 
-jest.mock(
-  '../kibana_services',
-  () => ({
-    getBasePath: jest.fn(() => 'path'),
-  }),
-  { virtual: true }
-);
+jest.mock('../kibana_services', () =>({
+  getBasePath: jest.fn(() => 'path'),
+}));
 
 test('render', () => {
   const component = shallowWithIntl(<AddData.WrappedComponent
