@@ -29,7 +29,10 @@ jest.mock('../../../../core_plugins/data/public/legacy', () => ({
     indexPatterns: {
       indexPatterns: {
         get: () => ({
-          fields: { byName: { myField: { name: 'myField' } } }
+          fields: { getByName: name => {
+            const fields = { myField: { name: 'myField' } };
+            return fields[name];
+          } }
         }),
       }
     },
@@ -37,7 +40,10 @@ jest.mock('../../../../core_plugins/data/public/legacy', () => ({
       filterManager: {
         fieldName: 'myNumberField',
         getIndexPattern: () => ({
-          fields: { byName: { myField: { name: 'myField' } } }
+          fields: { getByName: name => {
+            const fields = { myField: { name: 'myField' } };
+            return fields[name];
+          } }
         }),
         getAppFilters: jest.fn().mockImplementation(() => ([])),
         getGlobalFilters: jest.fn().mockImplementation(() => ([])),

@@ -13,7 +13,7 @@ import {
   createPermissionFailureMessage,
 } from '../../../../../privilege/check_privilege';
 
-import { isOutlierAnalysis } from '../../../../common/analytics';
+import { isOutlierAnalysis, getAnalysisType, getDependentVar } from '../../../../common/analytics';
 
 import { getResultsUrl, isDataFrameAnalyticsRunning, DataFrameAnalyticsListRow } from './common';
 import { stopAnalytics } from '../../services/analytics_service';
@@ -24,10 +24,16 @@ import { DeleteAction } from './action_delete';
 export const AnalyticsViewAction = {
   isPrimary: true,
   render: (item: DataFrameAnalyticsListRow) => {
+    const analysisType = getAnalysisType(item.config.analysis);
+    const destIndex = item.config.dest.index;
+    const dependentVariable = getDependentVar(item.config.analysis);
+
+    const url = getResultsUrl(item.id, analysisType, destIndex, dependentVariable);
+    // Disable 'View' link for regression until results view is complete
     return (
       <EuiButtonEmpty
         disabled={!isOutlierAnalysis(item.config.analysis)}
-        onClick={() => (window.location.href = getResultsUrl(item.id))}
+        onClick={() => (window.location.href = url)}
         size="xs"
         color="text"
         iconType="visTable"
@@ -50,7 +56,7 @@ export const getActions = () => {
     AnalyticsViewAction,
     {
       render: (item: DataFrameAnalyticsListRow) => {
-        if (!isDataFrameAnalyticsRunning(item.stats)) {
+        if (!isDataFrameAnalyticsRunning(item.stats.state)) {
           return <StartAction item={item} />;
         }
 

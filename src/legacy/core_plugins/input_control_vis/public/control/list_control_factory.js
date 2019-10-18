@@ -110,7 +110,7 @@ class ListControl extends Control {
       terminate_after: chrome.getInjected('autocompleteTerminateAfter')
     };
     const aggs = termsAgg({
-      field: indexPattern.fields.byName[fieldName],
+      field: indexPattern.fields.getByName(fieldName),
       size: this.options.dynamicOptions ? null : _.get(this.options, 'size', 5),
       direction: 'desc',
       query
@@ -123,12 +123,12 @@ class ListControl extends Control {
       this.useTimeFilter,
       ancestorFilters
     );
-    this.abortController.signal.addEventListener('abort', () => searchSource.cancelQueued());
+    const abortSignal = this.abortController.signal;
 
     this.lastQuery = query;
     let resp;
     try {
-      resp = await searchSource.fetch();
+      resp = await searchSource.fetch({ abortSignal });
     } catch(error) {
       // If the fetch was aborted then no need to surface this error in the UI
       if (error.name === 'AbortError') return;

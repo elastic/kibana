@@ -7,7 +7,6 @@
 import { get } from 'lodash/fp';
 import { createSelector } from 'reselect';
 
-import { isFromKueryExpressionValid } from '../../lib/keury';
 import { State } from '../reducer';
 
 import { GenericHostsModel, HostsType, HostsTableType } from './model';
@@ -37,35 +36,4 @@ export const uncommonProcessesSelector = () =>
   createSelector(
     selectHosts,
     hosts => hosts.queries.uncommonProcesses
-  );
-
-export const hostsFilterQueryExpression = () =>
-  createSelector(
-    selectHosts,
-    hosts =>
-      hosts.filterQuery && hosts.filterQuery.kuery ? hosts.filterQuery.kuery.expression : null
-  );
-
-export const hostsFilterQueryAsKuery = () =>
-  createSelector(
-    selectHosts,
-    hosts => (hosts.filterQuery && hosts.filterQuery.kuery ? hosts.filterQuery.kuery : null)
-  );
-
-export const hostsFilterQueryAsJson = () =>
-  createSelector(
-    selectHosts,
-    hosts => (hosts.filterQuery ? hosts.filterQuery.serializedQuery : null)
-  );
-
-export const hostsFilterQueryDraft = () =>
-  createSelector(
-    selectHosts,
-    hosts => hosts.filterQueryDraft
-  );
-
-export const isHostFilterQueryDraftValid = () =>
-  createSelector(
-    selectHosts,
-    hosts => isFromKueryExpressionValid(hosts.filterQueryDraft)
   );
