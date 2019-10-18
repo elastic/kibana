@@ -20,19 +20,19 @@ import {
   EuiFilterGroup,
   EuiFilterButton,
 } from '@elastic/eui';
-import { FrontendLibs } from '../../../lib/types';
 import {
   ShellEnrollmentInstructions,
   ContainerEnrollmentInstructions,
   ToolsEnrollmentInstructions,
 } from './enrollment_instructions';
+import { useLibs } from '../../../hooks/use_libs';
 
 interface RouterProps {
-  libs: FrontendLibs;
   onClose: () => void;
 }
 
-export const AgentEnrollmentFlyout: React.SFC<RouterProps> = ({ libs, onClose }) => {
+export const AgentEnrollmentFlyout: React.SFC<RouterProps> = ({ onClose }) => {
+  const libs = useLibs();
   const [quickInstallType, setQuickInstallType] = useState<'shell' | 'container' | 'tools'>(
     'shell'
   );

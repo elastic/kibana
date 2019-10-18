@@ -91,15 +91,7 @@ export class AppRoutes extends Component<RouterProps, RouterState> {
 
         {/* Render routes from the FS */}
         <WithURLState>
-          {(URLProps: URLStateProps) => (
-            <ChildRoutes
-              routes={routeMap}
-              {...URLProps}
-              {...{
-                libs: this.props.libs,
-              }}
-            />
-          )}
+          {(URLProps: URLStateProps) => <ChildRoutes routes={routeMap} {...URLProps} />}
         </WithURLState>
       </React.Fragment>
     );

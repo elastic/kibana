@@ -20,9 +20,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedTime } from '@kbn/i18n/react';
 import { AgentEvent, Agent } from '../../../../common/types/domain_data';
 import { usePagination } from '../../../hooks/use_pagination';
-import { FrontendLibs } from '../../../lib/types';
 import { SearchBar } from '../../../components/search_bar';
 import { useDebounce } from '../../../hooks/use_debounce';
+import { useLibs } from '../../../hooks/use_libs';
 
 const DEBOUNCE_SEARCH_MS = 300;
 
@@ -43,11 +43,11 @@ function useSearch() {
 }
 
 function useGetAgentEvents(
-  libs: FrontendLibs,
   agent: Agent,
   search: string,
   pagination: { currentPage: number; pageSize: number }
 ) {
+  const libs = useLibs();
   const [state, setState] = useState<{ list: AgentEvent[]; total: number; isLoading: boolean }>({
     list: [],
     total: 0,
@@ -96,11 +96,11 @@ function useGetAgentEvents(
   return { ...state, refresh: fetchAgentEvents };
 }
 
-export const AgentEventsTable: SFC<{ libs: FrontendLibs; agent: Agent }> = ({ libs, agent }) => {
+export const AgentEventsTable: SFC<{ agent: Agent }> = ({ agent }) => {
   const { pageSizeOptions, pagination, setPagination } = usePagination();
   const { search, setSearch } = useSearch();
 
-  const { list, total, isLoading, refresh } = useGetAgentEvents(libs, agent, search, pagination);
+  const { list, total, isLoading, refresh } = useGetAgentEvents(agent, search, pagination);
   const paginationOptions = {
     pageIndex: pagination.currentPage - 1,
     pageSize: pagination.pageSize,
@@ -177,7 +177,7 @@ export const AgentEventsTable: SFC<{ libs: FrontendLibs; agent: Agent }> = ({ li
       <EuiSpacer size="l" />
       <EuiFlexGroup>
         <EuiFlexItem>
-          <SearchBar value={search} libs={libs} onChange={setSearch} fieldPrefix={'agent_events'} />
+          <SearchBar value={search} onChange={setSearch} fieldPrefix={'agent_events'} />
         </EuiFlexItem>
         <EuiFlexItem grow={null}>
           <EuiButton color="secondary" iconType="refresh" onClick={onClickRefresh}>

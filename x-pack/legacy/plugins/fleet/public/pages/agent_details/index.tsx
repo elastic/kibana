@@ -14,17 +14,15 @@ import {
   EuiPageContent,
   EuiCallOut,
   EuiText,
+  EuiSpacer,
 } from '@elastic/eui';
 import { RouteComponentProps } from 'react-router-dom';
 import { AgentEventsTable } from './components/agent_events_table';
 import { Loading } from '../../components/loading';
-import { PolicySection } from './components/policy_section';
 import { AgentDetailSection } from './components/details_section';
-import { AgentMetadataSection } from './components/metadata_section';
-import { FrontendLibs } from '../../lib/types';
 import { ModalConfirmUnenroll } from './components/modal_confirm_unenroll';
 import { useUnenroll } from './hooks/use_unenroll';
-import { useGetAgent } from './hooks/use_agent';
+import { useGetAgent, AgentRefreshContext } from './hooks/use_agent';
 
 export const Layout: SFC = ({ children }) => (
   <EuiPageBody>
@@ -32,20 +30,17 @@ export const Layout: SFC = ({ children }) => (
   </EuiPageBody>
 );
 
-type Props = {
-  libs: FrontendLibs;
-} & RouteComponentProps<{
+type Props = RouteComponentProps<{
   agentId: string;
 }>;
 
 export const AgentDetailsPage: SFC<Props> = ({
-  libs,
   match: {
     params: { agentId },
   },
 }) => {
-  const { agent, isLoading, error, refreshAgent } = useGetAgent(libs.agents, agentId);
-  const unenroll = useUnenroll(libs.agents, refreshAgent, agentId);
+  const { agent, isLoading, error, refreshAgent } = useGetAgent(agentId);
+  const unenroll = useUnenroll(refreshAgent, agentId);
 
   if (isLoading) {
     return <Loading />;
@@ -81,34 +76,36 @@ export const AgentDetailsPage: SFC<Props> = ({
   }
 
   return (
-    <Layout>
-      {unenroll.state.confirm && (
-        <ModalConfirmUnenroll onCancel={unenroll.clear} onConfirm={unenroll.confirmUnenrollement} />
-      )}
-      <EuiFlexGroup gutterSize="xl">
-        <EuiFlexItem grow={3}>
-          <EuiFlexItem grow={null}>
-            <AgentDetailSection
-              onClickUnenroll={unenroll.showConfirmModal}
-              agent={agent}
-              unenrollment={{ loading: unenroll.state.loading }}
-            />
-            <EuiHorizontalRule />
+    <AgentRefreshContext.Provider value={{ refresh: refreshAgent }}>
+      <Layout>
+        {unenroll.state.confirm && (
+          <ModalConfirmUnenroll
+            onCancel={unenroll.clear}
+            onConfirm={unenroll.confirmUnenrollement}
+          />
+        )}
+        <AgentDetailSection
+          onClickUnenroll={unenroll.showConfirmModal}
+          agent={agent}
+          unenrollment={{ loading: unenroll.state.loading }}
+        />
+        <EuiSpacer size="xl" />
+        <AgentEventsTable agent={agent} />
+        <EuiFlexGroup gutterSize="xl">
+          <EuiFlexItem grow={3}>
+            <EuiFlexItem grow={null}>
+              <EuiHorizontalRule />
+            </EuiFlexItem>
+            <EuiFlexItem grow={null}>
+              <EuiHorizontalRule />
+            </EuiFlexItem>
+            <EuiFlexItem grow={null}></EuiFlexItem>
           </EuiFlexItem>
-          <EuiFlexItem grow={null}>
-            <PolicySection agent={agent} />
-            <EuiHorizontalRule />
+          <EuiFlexItem grow={7}>
+            <EuiFlexItem grow={null}></EuiFlexItem>
           </EuiFlexItem>
-          <EuiFlexItem grow={null}>
-            <AgentMetadataSection agent={agent} />
-          </EuiFlexItem>
-        </EuiFlexItem>
-        <EuiFlexItem grow={7}>
-          <EuiFlexItem grow={null}>
-            <AgentEventsTable libs={libs} agent={agent} />
-          </EuiFlexItem>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </Layout>
+        </EuiFlexGroup>
+      </Layout>
+    </AgentRefreshContext.Provider>
   );
 };
