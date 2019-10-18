@@ -19,6 +19,7 @@ import {
   AutocompleteSuggestionType,
 } from '../..';
 import { SuggestionComponent } from './suggestion_component';
+import { CommitSuggestionsGroup } from './commit_suggestions_group';
 
 interface Props {
   query: string;
@@ -54,6 +55,7 @@ export class SuggestionsComponent extends Component<Props> {
         <div className="kbnTypeahead">
           <div className="kbnTypeahead__popover">
             {this.renderSuggestionGroups()}
+            <CommitSuggestionsGroup query={this.props.query} />
             <Link to={this.viewMoreUrl()}>
               <div className="codeSearch__full-text-button">
                 <FormattedMessage
