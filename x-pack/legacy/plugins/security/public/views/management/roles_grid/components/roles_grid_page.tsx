@@ -73,12 +73,12 @@ class RolesGridPageUI extends Component<Props, State> {
         <EuiPageContentHeader>
           <EuiPageContentHeaderSection>
             <EuiTitle>
-              <h2>
+              <h1>
                 <FormattedMessage
                   id="xpack.security.management.roles.roleTitle"
                   defaultMessage="Roles"
                 />
-              </h2>
+              </h1>
             </EuiTitle>
             <EuiText color="subdued" size="s">
               <p>

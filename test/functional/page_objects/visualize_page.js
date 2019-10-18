@@ -269,6 +269,14 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       }
     }
 
+    async isBetaInfoShown() {
+      return await testSubjects.exists('betaVisInfo');
+    }
+
+    async getBetaTypeLinks() {
+      return await find.allByCssSelector('[data-vis-stage="beta"]');
+    }
+
     async getExperimentalTypeLinks() {
       return await find.allByCssSelector('[data-vis-stage="experimental"]');
     }
@@ -494,6 +502,12 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       }
     }
 
+    async toggleAdvancedParams(aggId) {
+      const accordion = await testSubjects.find(`advancedParams-${aggId}`);
+      const accordionButton = await find.descendantDisplayedByCssSelector('button', accordion);
+      await accordionButton.click();
+    }
+
     async selectYAxisAggregation(agg, field, label, index = 1) {
       // index starts on the first "count" metric at 1
       // Each new metric or aggregation added to a visualization gets the next index.
@@ -596,6 +610,10 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
 
     async toggleMissingBucket(agg = 2) {
       return await testSubjects.click(`visEditorAggAccordion${agg} > missingBucketSwitch`);
+    }
+
+    async toggleScaleMetrics() {
+      return await testSubjects.click('scaleMetricsSwitch');
     }
 
     async isApplyEnabled() {
@@ -726,7 +744,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     async saveVisualizationExpectSuccess(vizName, { saveAsNew = false } = {}) {
       await this.saveVisualization(vizName, { saveAsNew });
       const successToast = await testSubjects.exists('saveVisualizationSuccess', {
-        timeout: defaultFindTimeout
+        timeout: 2 * defaultFindTimeout
       });
       expect(successToast).to.be(true);
     }

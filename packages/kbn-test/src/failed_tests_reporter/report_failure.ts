@@ -18,7 +18,6 @@
  */
 
 import { ToolingLog } from '@kbn/dev-utils';
-import dedent from 'dedent';
 
 import { TestFailure } from './get_failures';
 import { GithubIssue, GithubApi } from './github_api';
@@ -33,13 +32,15 @@ export async function createFailureIssue(
   const title = `Failing test: ${failure.classname} - ${failure.name}`;
 
   const body = updateIssueMetadata(
-    dedent`
-      A test failed on a tracked branch
-      \`\`\`
-      ${failure.failure}
-      \`\`\`
-      First failure: [Jenkins Build](${buildUrl})
-    `,
+    [
+      'A test failed on a tracked branch',
+      '',
+      '```',
+      failure.failure,
+      '```',
+      '',
+      `First failure: [Jenkins Build](${buildUrl})`,
+    ].join('\n'),
     {
       'test.class': failure.classname,
       'test.name': failure.name,

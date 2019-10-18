@@ -27,7 +27,6 @@ import {
 } from '../lib/test_samples/embeddables/filterable_embeddable';
 import { ERROR_EMBEDDABLE_TYPE } from '../lib/embeddables/error_embeddable';
 import { Filter, FilterStateStore } from '@kbn/es-query';
-import { PanelNotFoundError } from '../lib/errors';
 import { FilterableEmbeddableFactory } from '../lib/test_samples/embeddables/filterable_embeddable_factory';
 import { CONTACT_CARD_EMBEDDABLE } from '../lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory';
 import { SlowContactCardEmbeddableFactory } from '../lib/test_samples/embeddables/contact_card/slow_contact_card_embeddable_factory';
@@ -753,7 +752,7 @@ test('untilEmbeddableLoaded() resolves if child is loaded in the container', asy
   done();
 });
 
-test('untilEmbeddableLoaded rejects with an error if child is subsequently removed', async done => {
+test('untilEmbeddableLoaded resolves with undefined if child is subsequently removed', async done => {
   const { doStart, coreStart, uiActions } = testPlugin(
     coreMock.createSetup(),
     coreMock.createStart()
@@ -785,8 +784,8 @@ test('untilEmbeddableLoaded rejects with an error if child is subsequently remov
     }
   );
 
-  container.untilEmbeddableLoaded('123').catch(error => {
-    expect(error).toBeInstanceOf(PanelNotFoundError);
+  container.untilEmbeddableLoaded('123').then(embed => {
+    expect(embed).toBeUndefined();
     done();
   });
 

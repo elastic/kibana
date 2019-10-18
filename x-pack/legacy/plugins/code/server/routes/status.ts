@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import { KibanaRequest, KibanaResponseFactory, RequestHandlerContext } from 'src/core/server';
 
 import { CodeServerRouter } from '../security';
-import { RequestFacade } from '../../';
 import { LangServerType, RepoFileStatus, StatusReport } from '../../common/repo_file_status';
 import { CTAGS, LanguageServerDefinition } from '../lsp/language_servers';
 import { LanguageServerStatus } from '../../common/language_server';
@@ -17,6 +16,7 @@ import { EsClientWithRequest } from '../utils/esclient_with_request';
 import { CodeServices } from '../distributed/code_services';
 import { GitServiceDefinition, LspServiceDefinition } from '../distributed/apis';
 import { Endpoint } from '../distributed/resource_locator';
+import { getReferenceHelper } from '../utils/repository_reference_helper';
 
 export function statusRoute(router: CodeServerRouter, codeServices: CodeServices) {
   const gitService = codeServices.serviceFor(GitServiceDefinition);
@@ -107,17 +107,22 @@ export function statusRoute(router: CodeServerRouter, codeServices: CodeServices
   router.route({
     path: '/api/code/repo/{uri*3}/status/{ref}/{path*}',
     method: 'GET',
-    async handler(req: RequestFacade) {
-      const { uri, path, ref } = req.params;
+    async npHandler(
+      context: RequestHandlerContext,
+      req: KibanaRequest,
+      res: KibanaResponseFactory
+    ) {
+      const { uri, path, ref } = req.params as any;
       const report: StatusReport = {};
-      const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
+      const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(context, req));
       const endpoint = await codeServices.locate(req, uri);
 
       try {
         // Check if the repository already exists
-        await repoObjectClient.getRepository(uri);
+        const repo = await repoObjectClient.getRepository(uri);
+        await getReferenceHelper(context.core.savedObjects.client).ensureReference(repo.uri);
       } catch (e) {
-        return Boom.notFound(`repo ${uri} not found`);
+        return res.notFound({ body: `repo ${uri} not found` });
       }
       await handleRepoStatus(endpoint, report, uri, ref, repoObjectClient);
       if (path) {
@@ -139,10 +144,10 @@ export function statusRoute(router: CodeServerRouter, codeServices: CodeServices
             // not a file? The path may be a dir.
           }
         } catch (e) {
-          return Boom.internal(e.message || e.name);
+          return res.internalError({ body: e.message || e.name });
         }
       }
-      return report;
+      return res.ok({ body: report });
     },
   });
 }

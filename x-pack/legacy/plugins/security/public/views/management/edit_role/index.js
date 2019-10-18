@@ -13,7 +13,7 @@ import template from 'plugins/security/views/management/edit_role/edit_role.html
 import 'plugins/security/services/shield_user';
 import 'plugins/security/services/shield_role';
 import 'plugins/security/services/shield_indices';
-import { setup as data } from '../../../../../../../../src/legacy/core_plugins/data/public/legacy';
+import { start as data } from '../../../../../../../../src/legacy/core_plugins/data/public/legacy';
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import { SpacesManager } from '../../../../../spaces/public/lib';
 import { ROLES_PATH, CLONE_ROLES_PATH, EDIT_ROLES_PATH } from '../management_urls';

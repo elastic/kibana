@@ -21,7 +21,8 @@ import {
   advancedSettingsReducer,
   syncSettingsSaga,
 } from './advanced_settings';
-import { DatasourceState, datasourceReducer, datasourceSaga } from './datasource';
+import { DatasourceState, datasourceReducer } from './datasource';
+import { datasourceSaga } from './datasource.sagas';
 import {
   IndexPatternProvider,
   Workspace,

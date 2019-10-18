@@ -6,7 +6,7 @@
 
 import { elasticLogo } from '../../lib/elastic_logo';
 import { resolveFromArgs } from '../../../common/lib/resolve_dataurl';
-import { ViewStrings } from '../../strings';
+import { ViewStrings } from '../../../i18n';
 
 const { Image: strings } = ViewStrings;
 

@@ -45,11 +45,6 @@ export interface XYRender {
   value: XYChartProps;
 }
 
-export interface XYChartProps {
-  data: LensMultiTable;
-  args: XYArgs;
-}
-
 type XYChartRenderProps = XYChartProps & {
   formatFactory: FormatFactory;
   timeZone: string;
@@ -83,7 +78,7 @@ export const xyChart: ExpressionFunction<'lens_xy_chart', LensMultiTable, XYArgs
     },
   },
   context: {
-    types: ['lens_multitable'],
+    types: ['lens_multitable', 'kibana_context', 'null'],
   },
   fn(data: LensMultiTable, args: XYArgs) {
     return {
@@ -181,6 +176,8 @@ export function XYChart({ data, args, formatFactory, timeZone }: XYChartRenderPr
     layers.length > 1 || data.tables[layers[0].layerId].columns.length > 2;
   const shouldRotate = isHorizontalChart(layers);
 
+  const xTitle = (xAxisColumn && xAxisColumn.name) || args.xTitle;
+
   return (
     <Chart>
       <Settings
@@ -189,12 +186,20 @@ export function XYChart({ data, args, formatFactory, timeZone }: XYChartRenderPr
         showLegendDisplayValue={false}
         theme={chartTheme}
         rotation={shouldRotate ? 90 : 0}
+        xDomain={
+          data.dateRange && layers.every(l => l.xScaleType === 'time')
+            ? {
+                min: data.dateRange.fromDate.getTime(),
+                max: data.dateRange.toDate.getTime(),
+              }
+            : undefined
+        }
       />
 
       <Axis
         id={getAxisId('x')}
         position={shouldRotate ? Position.Left : Position.Bottom}
-        title={args.xTitle}
+        title={xTitle}
         showGridLines={false}
         hide={layers[0].hide}
         tickFormat={d => xAxisFormatter.convert(d)}

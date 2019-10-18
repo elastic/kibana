@@ -12,7 +12,7 @@ import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { getColorsFromPalette } from '../../../common/lib/get_colors_from_palette';
 // @ts-ignore untyped local
 import { getLegendConfig } from '../../../common/lib/get_legend_config';
-import { getFunctionHelp } from '../../strings';
+import { getFunctionHelp } from '../../../i18n';
 import { Legend, Palette, PointSeries, Render, SeriesStyle, Style } from '../../../types';
 
 interface PieSeriesOptions {
@@ -106,7 +106,7 @@ export function pie(): ExpressionFunction<'pie', PointSeries, Arguments, Render<
         types: ['string', 'boolean'],
         help: argHelp.legend,
         default: false,
-        options: Object.values(Legend).concat(false),
+        options: [...Object.values(Legend), false],
       },
       palette: {
         types: ['palette'],

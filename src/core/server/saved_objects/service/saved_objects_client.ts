@@ -28,8 +28,6 @@ import {
 } from '../types';
 import { SavedObjectsErrorHelpers } from './lib/errors';
 
-type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
-
 /**
  *
  * @public
@@ -61,6 +59,20 @@ export interface SavedObjectsBulkCreateObject<T extends SavedObjectAttributes = 
  *
  * @public
  */
+export interface SavedObjectsBulkUpdateObject<T extends SavedObjectAttributes = any>
+  extends Pick<SavedObjectsUpdateOptions, 'version' | 'references'> {
+  /** The ID of this Saved Object, guaranteed to be unique for all objects of the same `type` */
+  id: string;
+  /**  The type of this Saved Object. Each plugin can define it's own custom Saved Object types. */
+  type: string;
+  /** {@inheritdoc SavedObjectAttributes} */
+  attributes: Partial<T>;
+}
+
+/**
+ *
+ * @public
+ */
 export interface SavedObjectsBulkResponse<T extends SavedObjectAttributes = any> {
   saved_objects: Array<SavedObject<T>>;
 }
@@ -85,8 +97,9 @@ export interface SavedObjectsFindResponse<T extends SavedObjectAttributes = any>
  * @public
  */
 export interface SavedObjectsUpdateOptions extends SavedObjectsBaseOptions {
-  /** Ensures version matches that of persisted object */
+  /** An opaque version number which changes on each successful write operation. Can be used for implementing optimistic concurrency control. */
   version?: string;
+  /** {@inheritdoc SavedObjectReference} */
   references?: SavedObjectReference[];
 }
 
@@ -113,6 +126,14 @@ export interface SavedObjectsBulkResponse<T extends SavedObjectAttributes = any>
  *
  * @public
  */
+export interface SavedObjectsBulkUpdateResponse<T extends SavedObjectAttributes = any> {
+  saved_objects: Array<SavedObjectsUpdateResponse<T>>;
+}
+
+/**
+ *
+ * @public
+ */
 export interface SavedObjectsUpdateResponse<T extends SavedObjectAttributes = any>
   extends Omit<SavedObject<T>, 'attributes' | 'references'> {
   attributes: Partial<T>;
@@ -121,7 +142,7 @@ export interface SavedObjectsUpdateResponse<T extends SavedObjectAttributes = an
 
 /**
  *
- * @internal
+ * @public
  */
 export class SavedObjectsClient {
   public static errors = SavedObjectsErrorHelpers;
@@ -230,5 +251,17 @@ export class SavedObjectsClient {
     options: SavedObjectsUpdateOptions = {}
   ): Promise<SavedObjectsUpdateResponse<T>> {
     return await this._repository.update(type, id, attributes, options);
+  }
+
+  /**
+   * Bulk Updates multiple SavedObject at once
+   *
+   * @param objects
+   */
+  async bulkUpdate<T extends SavedObjectAttributes = any>(
+    objects: Array<SavedObjectsBulkUpdateObject<T>>,
+    options?: SavedObjectsBaseOptions
+  ): Promise<SavedObjectsBulkUpdateResponse<T>> {
+    return await this._repository.bulkUpdate(objects, options);
   }
 }

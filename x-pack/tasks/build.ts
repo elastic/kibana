@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import execa from 'execa';
 import { resolve } from 'path';
 import { writeFileSync } from 'fs';
 
@@ -20,12 +21,16 @@ import { gitInfo } from './helpers/git_info';
 import { PKG_NAME } from './helpers/pkg';
 import { BUILD_VERSION } from './helpers/build_version';
 
-const BUILD_DIR = resolve(REPO_ROOT, 'x-pack/build');
+const XPACK_DIR = resolve(REPO_ROOT, 'x-pack');
+const BUILD_DIR = resolve(XPACK_DIR, 'build');
 const PLUGIN_BUILD_DIR = resolve(BUILD_DIR, 'plugin');
 
 async function cleanBuildTask() {
   fancyLog('Deleting', BUILD_DIR);
   await del(BUILD_DIR);
+
+  fancyLog('[canvas] Deleting Shareable Runtime');
+  await del(resolve(XPACK_DIR, 'legacy/plugins/canvas/shareable_runtime/build'));
 }
 
 async function reportTask() {
@@ -41,6 +46,15 @@ async function pluginHelpersBuild() {
   await pluginHelpers.run('build', {
     skipArchive: true,
     buildDestination: PLUGIN_BUILD_DIR,
+  });
+}
+
+async function buildCanvasShareableRuntime() {
+  await execa(process.execPath, ['legacy/plugins/canvas/scripts/shareable_runtime'], {
+    cwd: XPACK_DIR,
+    stdio: ['ignore', 'inherit', 'inherit'],
+    // @ts-ignore Incorrect @types - execa supports `buffer`
+    buffer: false,
   });
 }
 
@@ -65,6 +79,7 @@ export const buildTask = gulp.series(
   cleanBuildTask,
   reportTask,
   prepareTask,
+  buildCanvasShareableRuntime,
   pluginHelpersBuild,
   generateNoticeText
 );
