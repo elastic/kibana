@@ -625,97 +625,101 @@ exports[`render full suggestions component 1`] = `
             <CommitSuggestionsGroup
               query="string"
             >
-              <EuiFlexGroup
-                className="codeSearch-suggestion__group-header"
-                justifyContent="spaceBetween"
+              <div
+                className="codeSearch-suggestion__group"
               >
-                <div
-                  className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive codeSearch-suggestion__group-header"
+                <EuiFlexGroup
+                  className="codeSearch-suggestion__group-header"
+                  justifyContent="spaceBetween"
                 >
-                  <EuiFlexGroup
-                    alignItems="center"
-                    direction="row"
-                    gutterSize="none"
-                  >
-                    <div
-                      className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
-                    >
-                      <EuiToken
-                        displayOptions={
-                          Object {
-                            "color": "tokenTint02",
-                            "fill": true,
-                            "hideBorder": true,
-                            "shape": "rectangle",
-                          }
-                        }
-                        iconType={[Function]}
-                      >
-                        <div
-                          className="euiToken euiToken--tokenTint02 euiToken--rectangle euiToken--small euiToken--fill euiToken--no-border"
-                        >
-                          <EuiIcon
-                            type={[Function]}
-                          >
-                            <CommitIcon
-                              className="euiIcon euiIcon--medium euiIcon-isLoaded"
-                              focusable="false"
-                              style={null}
-                            >
-                              <svg
-                                className="euiIcon"
-                                height="16"
-                                viewBox="0 0 16 16"
-                                width="16"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  clip-rule="evenodd"
-                                  d="M7.5 11C8.88071 11 10 9.88071 10 8.5C10 7.11929 8.88071 6 7.5 6C6.11929 6 5 7.11929 5 8.5C5 9.88071 6.11929 11 7.5 11ZM4.03544 9C4.27806 10.6961 5.73676 12 7.5 12C9.26324 12 10.7219 10.6961 10.9646 9H14.5C14.7761 9 15 8.77614 15 8.5C15 8.22386 14.7761 8 14.5 8H10.9646C10.7219 6.30385 9.26324 5 7.5 5C5.73676 5 4.27806 6.30385 4.03544 8L0.5 8C0.223858 8 0 8.22386 0 8.5C0 8.77614 0.223858 9 0.5 9L4.03544 9Z"
-                                  fill-rule="evenodd"
-                                />
-                              </svg>
-                            </CommitIcon>
-                          </EuiIcon>
-                        </div>
-                      </EuiToken>
-                      <EuiText
-                        className="codeSearch-suggestion__group-title"
-                      >
-                        <div
-                          className="euiText euiText--medium codeSearch-suggestion__group-title"
-                        >
-                          Commits
-                        </div>
-                      </EuiText>
-                    </div>
-                  </EuiFlexGroup>
                   <div
-                    className="codeSearch-suggestion__link"
+                    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive codeSearch-suggestion__group-header"
                   >
-                    <Link
-                      replace={false}
-                      to="/search?q=string&scope=commit"
+                    <EuiFlexGroup
+                      alignItems="center"
+                      direction="row"
+                      gutterSize="none"
                     >
-                      <a
-                        href="/search?q=string&scope=commit"
-                        onClick={[Function]}
+                      <div
+                        className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                       >
-                         
-                        <FormattedMessage
-                          defaultMessage="View More"
-                          id="xpack.code.searchBar.viewMoreLinkText"
-                          values={Object {}}
+                        <EuiToken
+                          displayOptions={
+                            Object {
+                              "color": "tokenTint02",
+                              "fill": true,
+                              "hideBorder": true,
+                              "shape": "rectangle",
+                            }
+                          }
+                          iconType={[Function]}
                         >
-                          <span>
-                            View More
-                          </span>
-                        </FormattedMessage>
-                      </a>
-                    </Link>
+                          <div
+                            className="euiToken euiToken--tokenTint02 euiToken--rectangle euiToken--small euiToken--fill euiToken--no-border"
+                          >
+                            <EuiIcon
+                              type={[Function]}
+                            >
+                              <CommitIcon
+                                className="euiIcon euiIcon--medium euiIcon-isLoaded"
+                                focusable="false"
+                                style={null}
+                              >
+                                <svg
+                                  className="euiIcon"
+                                  height="16"
+                                  viewBox="0 0 16 16"
+                                  width="16"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    clip-rule="evenodd"
+                                    d="M7.5 11C8.88071 11 10 9.88071 10 8.5C10 7.11929 8.88071 6 7.5 6C6.11929 6 5 7.11929 5 8.5C5 9.88071 6.11929 11 7.5 11ZM4.03544 9C4.27806 10.6961 5.73676 12 7.5 12C9.26324 12 10.7219 10.6961 10.9646 9H14.5C14.7761 9 15 8.77614 15 8.5C15 8.22386 14.7761 8 14.5 8H10.9646C10.7219 6.30385 9.26324 5 7.5 5C5.73676 5 4.27806 6.30385 4.03544 8L0.5 8C0.223858 8 0 8.22386 0 8.5C0 8.77614 0.223858 9 0.5 9L4.03544 9Z"
+                                    fill-rule="evenodd"
+                                  />
+                                </svg>
+                              </CommitIcon>
+                            </EuiIcon>
+                          </div>
+                        </EuiToken>
+                        <EuiText
+                          className="codeSearch-suggestion__group-title"
+                        >
+                          <div
+                            className="euiText euiText--medium codeSearch-suggestion__group-title"
+                          >
+                            Commits
+                          </div>
+                        </EuiText>
+                      </div>
+                    </EuiFlexGroup>
+                    <div
+                      className="codeSearch-suggestion__link"
+                    >
+                      <Link
+                        replace={false}
+                        to="/search?q=string&scope=commit"
+                      >
+                        <a
+                          href="/search?q=string&scope=commit"
+                          onClick={[Function]}
+                        >
+                           
+                          <FormattedMessage
+                            defaultMessage="Search Commits"
+                            id="xpack.code.searchScope.commitDropDownOptionLabel"
+                            values={Object {}}
+                          >
+                            <span>
+                              Search Commits
+                            </span>
+                          </FormattedMessage>
+                        </a>
+                      </Link>
+                    </div>
                   </div>
-                </div>
-              </EuiFlexGroup>
+                </EuiFlexGroup>
+              </div>
             </CommitSuggestionsGroup>
             <Link
               replace={false}

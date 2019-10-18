@@ -28,29 +28,34 @@ export const CommitSuggestionsGroup = ({ query }: Props) => {
   });
 
   return (
-    <EuiFlexGroup justifyContent="spaceBetween" className="codeSearch-suggestion__group-header">
-      <EuiFlexGroup direction="row" gutterSize="none" alignItems="center">
-        <EuiToken
-          iconType={CommitIcon as any}
-          displayOptions={{
-            fill: true,
-            color: 'tokenTint02',
-            shape: 'rectangle',
-            hideBorder: true,
-          }}
-        />
-        <EuiText className="codeSearch-suggestion__group-title">
-          {i18n.translate('xpack.code.searchBar.commitGroupTitle', {
-            defaultMessage: 'Commits',
-          })}
-        </EuiText>
+    <div className="codeSearch-suggestion__group">
+      <EuiFlexGroup justifyContent="spaceBetween" className="codeSearch-suggestion__group-header">
+        <EuiFlexGroup direction="row" gutterSize="none" alignItems="center">
+          <EuiToken
+            iconType={CommitIcon as any}
+            displayOptions={{
+              fill: true,
+              color: 'tokenTint02',
+              shape: 'rectangle',
+              hideBorder: true,
+            }}
+          />
+          <EuiText className="codeSearch-suggestion__group-title">
+            {i18n.translate('xpack.code.searchBar.commitGroupTitle', {
+              defaultMessage: 'Commits',
+            })}
+          </EuiText>
+        </EuiFlexGroup>
+        <div className="codeSearch-suggestion__link">
+          <Link to={searchPath}>
+            {' '}
+            <FormattedMessage
+              id="xpack.code.searchScope.commitDropDownOptionLabel"
+              defaultMessage="Search Commits"
+            />
+          </Link>
+        </div>
       </EuiFlexGroup>
-      <div className="codeSearch-suggestion__link">
-        <Link to={searchPath}>
-          {' '}
-          <FormattedMessage id="xpack.code.searchBar.viewMoreLinkText" defaultMessage="View More" />
-        </Link>
-      </div>
-    </EuiFlexGroup>
+    </div>
   );
 };
