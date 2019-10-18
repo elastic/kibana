@@ -8,7 +8,7 @@ import React, { useEffect } from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
-import { BASE_PATH, Section, routeToActions } from '../../../np_ready/public/application/constants';
+import { BASE_PATH, Section, routeToActions } from './constants';
 import { breadcrumbService } from './lib/breadcrumb';
 import { docTitleService } from './lib/doc_title';
 import { useAppDependencies } from './index';
