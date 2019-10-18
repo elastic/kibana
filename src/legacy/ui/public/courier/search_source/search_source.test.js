@@ -33,8 +33,8 @@ jest.mock('../fetch', () => ({
   fetchSoon: jest.fn(),
 }));
 
-const indexPattern = { title: 'foo' };
-const indexPattern2 = { title: 'foo' };
+const indexPattern = { title: 'foo', getIndex: () => 'foo' };
+const indexPattern2 = { title: 'foo', getIndex: () => 'foo' };
 
 describe('SearchSource', function () {
   describe('#setField()', function () {
