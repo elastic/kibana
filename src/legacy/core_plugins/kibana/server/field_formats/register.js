@@ -33,7 +33,7 @@ import {
   BoolFormat,
   SourceFormat,
   StaticLookupFormat
-} from '../../../../../plugins/data/common/field_formats/converters';
+} from '../../../../../plugins/data/public';
 
 export function registerFieldFormats(server) {
   server.registerFieldFormat(UrlFormat);

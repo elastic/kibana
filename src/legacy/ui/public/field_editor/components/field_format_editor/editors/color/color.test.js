@@ -21,7 +21,7 @@ import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import { ColorFormatEditor, ColorFormatEditorComponent } from './color';
-import { DEFAULT_COLOR } from '../../../../../../../../plugins/data/common/field_formats/converters/color_default';
+import { DEFAULT_COLOR } from '../../../../../../../../plugins/data/public';
 
 const fieldType = 'string';
 const format = {

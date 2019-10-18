@@ -17,9 +17,8 @@
  * under the License.
  */
 
-import { NumberFormat } from '../../../../plugins/data/common/field_formats/converters/number';
 import { FieldFormatsService } from './field_formats_service';
-import { FieldFormat } from '../../../../plugins/data/common/field_formats';
+import { NumberFormat } from '../../../../plugins/data/public';
 
 const getConfig = (key: string) => {
   switch (key) {
@@ -37,7 +36,7 @@ describe('FieldFormatsService', () => {
   let fieldFormatsService: FieldFormatsService;
 
   beforeEach(() => {
-    const fieldFormatClasses = [(NumberFormat as unknown) as FieldFormat];
+    const fieldFormatClasses = [NumberFormat];
 
     fieldFormatsService = new FieldFormatsService(fieldFormatClasses, getConfig);
   });

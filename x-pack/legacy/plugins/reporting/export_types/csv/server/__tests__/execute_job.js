@@ -11,7 +11,7 @@ import nodeCrypto from '@elastic/node-crypto';
 
 import { CancellationToken } from '../../../../common/cancellation_token';
 import { FieldFormatsService } from  '../../../../../../../../src/legacy/ui/field_formats/mixin/field_formats_service';
-import { StringFormat } from '../../../../../../../../src/plugins/data/common/field_formats/converters/string';
+import { StringFormat } from '../../../../../../../../src/plugins/data/public';
 
 import { executeJobFactory } from '../execute_job';
 
