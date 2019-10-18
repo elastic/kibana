@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { KibanaRequest } from 'src/core/server';
 import { ServiceDefinition, ServiceHandlerFor, ServiceMethodMap } from './service_definition';
 import {
   DEFAULT_SERVICE_OPTION,
@@ -11,7 +12,6 @@ import {
   ServiceRegisterOptions,
 } from './service_handler_adapter';
 import { Endpoint } from './resource_locator';
-import { RequestFacade } from '../../';
 
 export class CodeServices {
   constructor(private readonly adapter: ServiceHandlerAdapter) {}
@@ -32,11 +32,11 @@ export class CodeServices {
     await this.adapter.stop();
   }
 
-  public allocate(req: RequestFacade, resource: string): Promise<Endpoint | undefined> {
+  public allocate(req: KibanaRequest, resource: string): Promise<Endpoint | undefined> {
     return this.adapter.locator.allocate(req, resource);
   }
 
-  public locate(req: RequestFacade, resource: string): Promise<Endpoint> {
+  public locate(req: KibanaRequest, resource: string): Promise<Endpoint> {
     return this.adapter.locator.locate(req, resource);
   }
 

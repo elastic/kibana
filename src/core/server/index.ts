@@ -142,7 +142,9 @@ export {
 export {
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
+  SavedObjectsBulkUpdateObject,
   SavedObjectsBulkResponse,
+  SavedObjectsBulkUpdateResponse,
   SavedObjectsClient,
   SavedObjectsClientProviderOptions,
   SavedObjectsClientWrapperFactory,
