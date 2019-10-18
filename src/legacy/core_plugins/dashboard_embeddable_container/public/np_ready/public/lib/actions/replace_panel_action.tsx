@@ -25,11 +25,11 @@ import { DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '../embeddable';
 import {
   IAction,
   IncompatibleActionError,
-} from '../../../../../../../../../src/plugins/ui_actions/public';
+} from '../../../../../../../../plugins/ui_actions/public';
 import { NotificationsStart } from '../../../../../../../../core/public';
-import { openChangeViewFlyout } from './open_change_view_flyout';
+import { openReplacePanelFlyout } from './open_replace_panel_flyout';
 
-export const CHANGE_VIEW_ACTION = 'changeView';
+export const REPLACE_PANEL_ACTION = 'replacePanel';
 
 function isDashboard(embeddable: IEmbeddable): embeddable is DashboardContainer {
   return embeddable.type === DASHBOARD_CONTAINER_TYPE;
@@ -39,9 +39,9 @@ interface ActionContext {
   embeddable: IEmbeddable;
 }
 
-export class ChangeViewAction implements IAction<ActionContext> {
-  public readonly type = CHANGE_VIEW_ACTION;
-  public readonly id = CHANGE_VIEW_ACTION;
+export class ReplacePanelAction implements IAction<ActionContext> {
+  public readonly type = REPLACE_PANEL_ACTION;
+  public readonly id = REPLACE_PANEL_ACTION;
   public order = 11;
 
   constructor(
@@ -83,7 +83,7 @@ export class ChangeViewAction implements IAction<ActionContext> {
 
     const view = embeddable;
     const dash = embeddable.parent;
-    openChangeViewFlyout({
+    openReplacePanelFlyout({
       embeddable: dash,
       core: this.core,
       savedObjectFinder: this.savedobjectfinder,

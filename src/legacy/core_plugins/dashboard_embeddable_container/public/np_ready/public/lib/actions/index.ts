@@ -18,4 +18,4 @@
  */
 
 export { ExpandPanelAction, EXPAND_PANEL_ACTION } from './expand_panel_action';
-export { ChangeViewAction, CHANGE_VIEW_ACTION } from './change_view_action';
+export { ReplacePanelAction, REPLACE_PANEL_ACTION } from './replace_panel_action';

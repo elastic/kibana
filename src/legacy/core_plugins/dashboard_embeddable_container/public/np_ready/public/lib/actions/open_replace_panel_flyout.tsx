@@ -18,7 +18,7 @@
  */
 import React from 'react';
 import { CoreStart } from 'src/core/public';
-import { ChangeViewFlyout } from './change_view_flyout';
+import { ReplacePanelFlyout } from './replace_panel_flyout';
 
 import {
   IEmbeddable,
@@ -29,7 +29,7 @@ import {
 import { IContainer } from '../../../../../../embeddable_api/public/np_ready/public';
 import { NotificationsStart } from '../../../../../../../../core/public';
 
-export async function openChangeViewFlyout(options: {
+export async function openReplacePanelFlyout(options: {
   embeddable: IContainer;
   core: CoreStart;
   savedObjectFinder: React.ComponentType<any>;
@@ -38,7 +38,7 @@ export async function openChangeViewFlyout(options: {
 }) {
   const { embeddable, core, panelToRemove, savedObjectFinder, notifications } = options;
   const flyoutSession = core.overlays.openFlyout(
-    <ChangeViewFlyout
+    <ReplacePanelFlyout
       container={embeddable}
       onClose={() => {
         if (flyoutSession) {
@@ -50,7 +50,7 @@ export async function openChangeViewFlyout(options: {
       notifications={notifications}
     />,
     {
-      'data-test-subj': 'changeViewFlyout',
+      'data-test-subj': 'replacePanelFlyout',
     }
   );
 }

@@ -18,7 +18,7 @@
  */
 
 import { isErrorEmbeddable, EmbeddableFactory } from '../embeddable_api';
-import { ChangeViewAction } from './change_view_action';
+import { ReplacePanelAction } from './replace_panel_action';
 import { DashboardContainer } from '../embeddable';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
 import {
@@ -78,22 +78,19 @@ beforeEach(async () => {
   }
 });
 
-/*
-// need some help on this one!
 test('Executes the replace panel action', async () => {
   let core: any;
   let SavedObjectFinder: any;
   let notifications: any;
-  const action = new ChangeViewAction(core, SavedObjectFinder, notifications);
+  const action = new ReplacePanelAction(core, SavedObjectFinder, notifications);
   action.execute({ embeddable });
 });
-*/
 
 test('Is not compatible when embeddable is not in a dashboard container', async () => {
   let core: any;
   let SavedObjectFinder: any;
   let notifications: any;
-  const action = new ChangeViewAction(core, SavedObjectFinder, notifications);
+  const action = new ReplacePanelAction(core, SavedObjectFinder, notifications);
   expect(
     await action.isCompatible({
       embeddable: new ContactCardEmbeddable(
@@ -108,7 +105,7 @@ test('Execute throws an error when called with an embeddable not in a parent', a
   let core: any;
   let SavedObjectFinder: any;
   let notifications: any;
-  const action = new ChangeViewAction(core, SavedObjectFinder, notifications);
+  const action = new ReplacePanelAction(core, SavedObjectFinder, notifications);
   async function check() {
     await action.execute({ embeddable: container });
   }
@@ -119,7 +116,7 @@ test('Returns title', async () => {
   let core: any;
   let SavedObjectFinder: any;
   let notifications: any;
-  const action = new ChangeViewAction(core, SavedObjectFinder, notifications);
+  const action = new ReplacePanelAction(core, SavedObjectFinder, notifications);
   expect(action.getDisplayName({ embeddable })).toBeDefined();
 });
 
@@ -127,6 +124,6 @@ test('Returns an icon', async () => {
   let core: any;
   let SavedObjectFinder: any;
   let notifications: any;
-  const action = new ChangeViewAction(core, SavedObjectFinder, notifications);
+  const action = new ReplacePanelAction(core, SavedObjectFinder, notifications);
   expect(action.getIconType({ embeddable })).toBeDefined();
 });

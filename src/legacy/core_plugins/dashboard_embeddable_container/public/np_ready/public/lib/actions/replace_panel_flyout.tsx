@@ -48,7 +48,7 @@ interface Props {
   panelToRemove: IEmbeddable<EmbeddableInput, EmbeddableOutput>;
 }
 
-export class ChangeViewFlyout extends React.Component<Props> {
+export class ReplacePanelFlyout extends React.Component<Props> {
   private lastToast: Toast = {
     id: 'panelReplaceToast',
   };
@@ -78,7 +78,7 @@ export class ChangeViewFlyout extends React.Component<Props> {
     });
   };
 
-  public onChangeView = async (id: string, type: string, name: string) => {
+  public onReplacePanel = async (id: string, type: string, name: string) => {
     const originalPanels = this.props.container.getInput().panels;
     const filteredPanels = { ...originalPanels };
 
@@ -124,14 +124,14 @@ export class ChangeViewFlyout extends React.Component<Props> {
           )
           .map(({ savedObjectMetaData }) => savedObjectMetaData as any)}
         showFilter={true}
-        onChoose={this.onChangeView}
+        onChoose={this.onReplacePanel}
       />
     );
 
     const panelToReplace = 'Replace panel ' + this.props.panelToRemove.getTitle() + ' with:';
 
     return (
-      <EuiFlyout ownFocus onClose={this.props.onClose} data-test-subj="dashboardChangeView">
+      <EuiFlyout ownFocus onClose={this.props.onClose} data-test-subj="dashboardReplacePanel">
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2>
