@@ -33,6 +33,7 @@ import {
   muteAlertInstanceRoute,
   unmuteAlertInstanceRoute,
 } from './routes';
+import { registerBuiltInActionTypes } from './builtin_alert_types';
 
 export interface PluginSetupContract {
   registerType: AlertTypeRegistry['register'];
@@ -102,6 +103,8 @@ export class Plugin {
     });
     this.alertTypeRegistry = alertTypeRegistry;
     this.serverBasePath = core.http.basePath.serverBasePath;
+
+    registerBuiltInActionTypes(alertTypeRegistry);
 
     // Register routes
     core.http.route(createAlertRoute);

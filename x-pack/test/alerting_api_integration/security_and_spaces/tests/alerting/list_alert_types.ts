@@ -37,11 +37,11 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
               const fixtureAlertType = response.body.find(
-                (alertType: any) => alertType.id === 'test.noop'
+                (alertType: any) => alertType.id === '.always-firing'
               );
               expect(fixtureAlertType).to.eql({
-                id: 'test.noop',
-                name: 'Test: Noop',
+                id: '.always-firing',
+                name: 'Alert that always fires actions when run',
               });
               break;
             default:
