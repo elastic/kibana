@@ -257,6 +257,10 @@ export class LegacyService implements CoreService<LegacyServiceSetup> {
       settings,
       config,
       {
+        env: {
+          mode: this.coreContext.env.mode,
+          packageInfo: this.coreContext.env.packageInfo,
+        },
         handledConfigPaths: await this.coreContext.configService.getUsedPaths(),
         setupDeps: {
           core: coreSetup,
@@ -271,6 +275,8 @@ export class LegacyService implements CoreService<LegacyServiceSetup> {
           kibanaMigrator: startDeps.core.savedObjects.migrator,
           uiPlugins: setupDeps.core.plugins.uiPlugins,
           elasticsearch: setupDeps.core.elasticsearch,
+          uiSettings: setupDeps.core.uiSettings,
+          savedObjectsClientProvider: startDeps.core.savedObjects.clientProvider,
         },
         logger: this.coreContext.logger,
       },

@@ -17,6 +17,7 @@ import {
   EuiButtonIcon,
   EuiSpacer,
   EuiCallOut,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 
 import { JobCreatorContext } from '../../../job_creator_context';
@@ -36,6 +37,39 @@ export const DetectorList: FC<Props> = ({ onEditJob, onDeleteJob }) => {
   useEffect(() => {
     setDetectors(jobCreator.detectors);
   }, [jobCreatorUpdated]);
+
+  const Buttons: FC<{ index: number }> = ({ index }) => {
+    return (
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <EuiButtonIcon
+            color="primary"
+            onClick={() => onEditJob(index)}
+            iconType="pencil"
+            aria-label={i18n.translate(
+              'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorList.editButton',
+              {
+                defaultMessage: 'Edit',
+              }
+            )}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiButtonIcon
+            color="danger"
+            onClick={() => onDeleteJob(index)}
+            iconType="trash"
+            aria-label={i18n.translate(
+              'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorList.deleteButton',
+              {
+                defaultMessage: 'Delete',
+              }
+            )}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  };
 
   return (
     <Fragment>
@@ -57,38 +91,23 @@ export const DetectorList: FC<Props> = ({ onEditJob, onDeleteJob }) => {
           <EuiFlexItem key={i}>
             <EuiPanel paddingSize="m">
               <EuiFlexGroup>
-                <EuiFlexItem>{detectorToString(d)}</EuiFlexItem>
+                <EuiFlexItem>
+                  {d.detector_description !== undefined ? (
+                    <div style={{ fontWeight: 'bold' }}>{d.detector_description}</div>
+                  ) : (
+                    detectorToString(d)
+                  )}
+                </EuiFlexItem>
                 <EuiFlexItem grow={false} style={{ margin: '8px' }}>
-                  <EuiFlexGroup gutterSize="s">
-                    <EuiFlexItem>
-                      <EuiButtonIcon
-                        color="primary"
-                        onClick={() => onEditJob(i)}
-                        iconType="pencil"
-                        aria-label={i18n.translate(
-                          'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorList.editButton',
-                          {
-                            defaultMessage: 'Edit',
-                          }
-                        )}
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <EuiButtonIcon
-                        color="danger"
-                        onClick={() => onDeleteJob(i)}
-                        iconType="trash"
-                        aria-label={i18n.translate(
-                          'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorList.deleteButton',
-                          {
-                            defaultMessage: 'Delete',
-                          }
-                        )}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
+                  <Buttons index={i} />
                 </EuiFlexItem>
               </EuiFlexGroup>
+              {d.detector_description !== undefined && (
+                <Fragment>
+                  <EuiHorizontalRule margin="s" />
+                  {detectorToString(d)}
+                </Fragment>
+              )}
             </EuiPanel>
           </EuiFlexItem>
         ))}

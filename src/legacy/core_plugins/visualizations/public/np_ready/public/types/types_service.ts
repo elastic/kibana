@@ -30,7 +30,7 @@ export interface VisType {
   responseHandler: string;
   icon?: IconType;
   image?: string;
-  stage: 'experimental' | 'production';
+  stage: 'experimental' | 'beta' | 'production';
   requiresSearch: boolean;
   hidden: boolean;
 

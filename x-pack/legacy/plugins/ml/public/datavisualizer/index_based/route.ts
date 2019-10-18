@@ -15,7 +15,7 @@ import { loadCurrentIndexPattern, loadCurrentSavedSearch } from '../../util/inde
 import { checkMlNodesAvailable } from '../../ml_nodes_check';
 import { getDataVisualizerBreadcrumbs } from './breadcrumbs';
 
-const template = `<ml-nav-menu name="datavisualizer" /><ml-data-visualizer />`;
+const template = `<ml-data-visualizer />`;
 
 uiRoutes.when('/jobs/new_job/datavisualizer', {
   template,

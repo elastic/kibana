@@ -46,3 +46,24 @@ chrome.getUiSettingsClient().get.mockImplementation((key: string) => {
       throw new Error(`Unexpected config key: ${key}`);
   }
 });
+
+export interface MockNpSetUp {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  core: { uiSettings: any };
+}
+
+type Config =
+  | 'query:allowLeadingWildcards'
+  | 'query:queryString:options'
+  | 'courier:ignoreFilterIfFieldNotInIndex'
+  | 'dateFormat:tz';
+
+export const mockUiSettings = {
+  get: (item: Config) => {
+    return mockUiSettings[item];
+  },
+  'query:allowLeadingWildcards': true,
+  'query:queryString:options': {},
+  'courier:ignoreFilterIfFieldNotInIndex': true,
+  'dateFormat:tz': 'Browser',
+};
