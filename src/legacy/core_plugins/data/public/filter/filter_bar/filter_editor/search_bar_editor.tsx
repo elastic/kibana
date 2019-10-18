@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { FunctionComponent, useState } from 'react';
+import React, { FunctionComponent, useState, useEffect } from 'react';
 import { SavedQuery } from '@kbn/es-query/src/filters/lib/saved_query_filter';
 import { UiSettingsClientContract } from 'kibana/public';
 import { TimeHistoryContract } from 'ui/timefilter';
@@ -25,6 +25,7 @@ import { Filter } from '@kbn/es-query';
 import { TimeRange } from 'src/plugins/data/common/types';
 import { IndexPattern, Query } from '../../..';
 import { SearchBar } from '../../../search/search_bar/components/search_bar';
+import { FilterManager } from '../../filter_manager';
 
 interface Props {
   uiSettings: UiSettingsClientContract;
@@ -44,58 +45,77 @@ export const SearchBarEditor: FunctionComponent<Props> = ({
   onSelectionChange,
   onChange,
 }) => {
-  const [currentfilters, setFilters] = useState([] as Filter[]); // change this if it ends up working to use the filters from the saved query passed in (the filter params)
+  const [currentFilters, setCurrentFilters] = useState([] as Filter[]);
+  const [currentQuery, setCurrentQuery] = useState({
+    query: '',
+    language: uiSettings.get('search:queryLanguage'),
+  } as Query);
+  const [currentDateRange, setCurrentDateRange] = useState({ to: '', from: '' });
   const [savedQuery, setSavedQuery] = useState(currentSavedQuery);
+
+  const filterManager = new FilterManager(uiSettings);
+  filterManager.addFilters(currentFilters);
+
+  useEffect(() => {
+    // extract the query, filters and timerange from the saved query we get as a prop
+    filterManager.addFilters(currentFilters);
+  }, [currentFilters]);
+
   const onClearSavedQuery = () => {
-    // console.log('saved query cleared');
+    setCurrentFilters([]);
+    setCurrentQuery({ query: '', language: uiSettings.get('search:queryLanguage') });
+    setCurrentDateRange({ to: '', from: '' });
+    setSavedQuery(undefined);
   };
   const onQueryChange = (queryAndDateRange: { dateRange?: TimeRange; query?: Query }) => {
-    // console.log('query changed with queryAndDateRange:', queryAndDateRange);
+    const newQuery = queryAndDateRange.query ? queryAndDateRange.query : currentQuery;
+    const newDateRange = queryAndDateRange.dateRange
+      ? queryAndDateRange.dateRange
+      : currentDateRange;
+    if (newQuery) setCurrentQuery(newQuery);
+    if (newDateRange) setCurrentDateRange(newDateRange);
+
     return queryAndDateRange;
   };
   const onFiltersUpdated = (filters: Filter[]) => {
-    console.log('filters:', filters);
-    // adding a new normal filter is not creating the filter first. Are we missing the filter manager?
-    setFilters(filters);
+    setCurrentFilters(filters);
+    filterManager.addFilters(currentFilters);
   };
 
-  const updateSavedQuery = (item: SavedQuery) => {
-    console.log('item in updateSavedQuery:', item);
+  const updateSavedQuery = (updatedSavedQuery: SavedQuery) => {
     const savedQuerySearchData = {
-      filters: item.attributes.filters ? item.attributes.filters : undefined,
-      query: item.attributes.query,
-      dateRange: item.attributes.timefilter
-        ? { to: item.attributes.timefilter.to, from: item.attributes.timefilter.from }
+      filters: updatedSavedQuery.attributes.filters
+        ? updatedSavedQuery.attributes.filters
+        : undefined,
+      query: updatedSavedQuery.attributes.query,
+      dateRange: updatedSavedQuery.attributes.timefilter
+        ? {
+            to: updatedSavedQuery.attributes.timefilter.to,
+            from: updatedSavedQuery.attributes.timefilter.from,
+          }
         : undefined,
     };
+    // update the filters
     if (savedQuerySearchData.filters) {
       onFiltersUpdated(savedQuerySearchData.filters);
     }
+    // update the query and timefilter
     onQueryChange({ dateRange: savedQuerySearchData.dateRange, query: savedQuerySearchData.query });
-    setSavedQuery(item);
-    onSelectionChange([item]); // a shortcut to activate the button to save the filter
+    setSavedQuery(updatedSavedQuery);
+    onSelectionChange([updatedSavedQuery]); // a shortcut to activate the button to save the filter
   };
   return (
     <div className="savedQueryFilterEditor">
       <SearchBar
         indexPatterns={indexPatterns}
         showFilterBar={true}
-        filters={currentfilters}
+        filters={filterManager.getFilters()}
         onFiltersUpdated={onFiltersUpdated}
         showQueryInput={true}
-        query={
-          currentSavedQuery && currentSavedQuery.length > 0
-            ? {
-                language: currentSavedQuery[0].attributes.query.language,
-                query: currentSavedQuery[0].attributes.query.query,
-              }
-            : { language: uiSettings.get('search:queryLanguage'), query: '' }
-        }
+        query={currentQuery}
         onQuerySubmit={onQueryChange}
         showSaveQuery={showSaveQuery}
-        savedQuery={
-          currentSavedQuery && currentSavedQuery.length > 0 ? currentSavedQuery[0] : undefined
-        }
+        savedQuery={savedQuery}
         onClearSavedQuery={onClearSavedQuery}
         onSavedQueryUpdated={updateSavedQuery}
         showDatePicker={true}

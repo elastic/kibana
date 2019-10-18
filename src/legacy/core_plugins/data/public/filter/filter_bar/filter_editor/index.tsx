@@ -482,21 +482,23 @@ class FilterEditorUI extends Component<Props, State> {
   public onChange = () => {};
   private renderSavedQueryEditor() {
     return (
-      <SearchBarEditor
-        currentSavedQuery={
-          this.state.selectedSavedQuery ? this.state.selectedSavedQuery[0] : undefined
-        }
-        uiSettings={this.props.uiSettings}
-        indexPatterns={
-          this.state.selectedIndexPattern
-            ? [this.state.selectedIndexPattern]
-            : this.props.indexPatterns
-        }
-        showSaveQuery={this.props.showSaveQuery!}
-        timeHistory={this.props.timeHistory!}
-        onSelectionChange={this.onSavedQuerySelected}
-        onChange={this.onChange}
-      />
+      <div className="savedQueryFilterEditor">
+        <SearchBarEditor
+          currentSavedQuery={
+            this.state.selectedSavedQuery ? this.state.selectedSavedQuery[0] : undefined
+          }
+          uiSettings={this.props.uiSettings}
+          indexPatterns={
+            this.state.selectedIndexPattern
+              ? [this.state.selectedIndexPattern]
+              : this.props.indexPatterns
+          }
+          showSaveQuery={this.props.showSaveQuery!}
+          timeHistory={this.props.timeHistory!}
+          onSelectionChange={this.onSavedQuerySelected}
+          onChange={this.onChange}
+        />
+      </div>
     );
   }
 
