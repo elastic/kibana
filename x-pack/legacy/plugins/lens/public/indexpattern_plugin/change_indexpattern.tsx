@@ -9,11 +9,12 @@ import React, { useState } from 'react';
 import { EuiButtonEmpty, EuiPopover, EuiSelectable, EuiButtonEmptyProps } from '@elastic/eui';
 import { EuiSelectableProps } from '@elastic/eui/src/components/selectable/selectable';
 import { IndexPatternRef } from './types';
+import { trackUiEvent } from '../lens_ui_telemetry';
 
-export interface ChangeIndexPatternTriggerProps extends EuiButtonEmptyProps {
+export type ChangeIndexPatternTriggerProps = EuiButtonEmptyProps & {
   label: string;
   title?: string;
-}
+};
 
 export function ChangeIndexPattern({
   indexPatternRefs,
@@ -74,6 +75,7 @@ export function ChangeIndexPattern({
               const choice = (choices.find(({ checked }) => checked) as unknown) as {
                 value: string;
               };
+              trackUiEvent('indexpattern_changed');
               onChangeIndexPattern(choice.value);
               setPopoverIsOpen(false);
             }}

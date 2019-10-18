@@ -37,6 +37,7 @@ exports[`PipelineEditor component includes required error message for falsy pipe
         describedByIds={Array []}
         display="row"
         fullWidth={true}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage
@@ -63,6 +64,7 @@ exports[`PipelineEditor component includes required error message for falsy pipe
         describedByIds={Array []}
         display="row"
         fullWidth={true}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage
@@ -87,6 +89,7 @@ exports[`PipelineEditor component includes required error message for falsy pipe
         describedByIds={Array []}
         display="row"
         fullWidth={true}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage
@@ -120,6 +123,7 @@ exports[`PipelineEditor component includes required error message for falsy pipe
         describedByIds={Array []}
         display="row"
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormLabelWithIconTip
@@ -356,6 +360,7 @@ exports[`PipelineEditor component invalidates form for invalid pipeline id input
         describedByIds={Array []}
         display="row"
         fullWidth={true}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage
@@ -382,6 +387,7 @@ exports[`PipelineEditor component invalidates form for invalid pipeline id input
         describedByIds={Array []}
         display="row"
         fullWidth={true}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage
@@ -406,6 +412,7 @@ exports[`PipelineEditor component invalidates form for invalid pipeline id input
         describedByIds={Array []}
         display="row"
         fullWidth={true}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage
@@ -439,6 +446,7 @@ exports[`PipelineEditor component invalidates form for invalid pipeline id input
         describedByIds={Array []}
         display="row"
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormLabelWithIconTip
@@ -675,6 +683,7 @@ exports[`PipelineEditor component invalidates form for pipeline id with spaces 1
         describedByIds={Array []}
         display="row"
         fullWidth={true}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage
@@ -701,6 +710,7 @@ exports[`PipelineEditor component invalidates form for pipeline id with spaces 1
         describedByIds={Array []}
         display="row"
         fullWidth={true}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage
@@ -725,6 +735,7 @@ exports[`PipelineEditor component invalidates form for pipeline id with spaces 1
         describedByIds={Array []}
         display="row"
         fullWidth={true}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage
@@ -758,6 +769,7 @@ exports[`PipelineEditor component invalidates form for pipeline id with spaces 1
         describedByIds={Array []}
         display="row"
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormLabelWithIconTip
@@ -990,6 +1002,7 @@ exports[`PipelineEditor component matches snapshot for clone pipeline 1`] = `
         describedByIds={Array []}
         display="row"
         fullWidth={true}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage
@@ -1014,6 +1027,7 @@ exports[`PipelineEditor component matches snapshot for clone pipeline 1`] = `
         describedByIds={Array []}
         display="row"
         fullWidth={true}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage
@@ -1047,6 +1061,7 @@ exports[`PipelineEditor component matches snapshot for clone pipeline 1`] = `
         describedByIds={Array []}
         display="row"
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormLabelWithIconTip
@@ -1294,6 +1309,7 @@ exports[`PipelineEditor component matches snapshot for create pipeline 1`] = `
         describedByIds={Array []}
         display="row"
         fullWidth={true}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage
@@ -1320,6 +1336,7 @@ exports[`PipelineEditor component matches snapshot for create pipeline 1`] = `
         describedByIds={Array []}
         display="row"
         fullWidth={true}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage
@@ -1344,6 +1361,7 @@ exports[`PipelineEditor component matches snapshot for create pipeline 1`] = `
         describedByIds={Array []}
         display="row"
         fullWidth={true}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage
@@ -1377,6 +1395,7 @@ exports[`PipelineEditor component matches snapshot for create pipeline 1`] = `
         describedByIds={Array []}
         display="row"
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormLabelWithIconTip
@@ -1609,6 +1628,7 @@ exports[`PipelineEditor component matches snapshot for edit pipeline 1`] = `
         describedByIds={Array []}
         display="row"
         fullWidth={true}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage
@@ -1633,6 +1653,7 @@ exports[`PipelineEditor component matches snapshot for edit pipeline 1`] = `
         describedByIds={Array []}
         display="row"
         fullWidth={true}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage
@@ -1666,6 +1687,7 @@ exports[`PipelineEditor component matches snapshot for edit pipeline 1`] = `
         describedByIds={Array []}
         display="row"
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormLabelWithIconTip

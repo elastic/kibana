@@ -19,31 +19,13 @@
 
 import { coreMock } from '../../../../../core/server/mocks';
 import { EsSearchService } from './es_search_service';
-import { PluginInitializerContext } from '../../../../../core/server';
 import { searchSetupMock } from '../mocks';
 
 describe('ES search strategy service', () => {
   let service: EsSearchService;
 
   const mockCoreSetup = coreMock.createSetup();
-  const opaqueId = Symbol();
-  const context: PluginInitializerContext = {
-    opaqueId,
-    config: {
-      createIfExists: jest.fn(),
-      create: jest.fn(),
-    },
-    env: {
-      mode: {
-        dev: false,
-        name: 'development',
-        prod: false,
-      },
-    },
-    logger: {
-      get: jest.fn(),
-    },
-  };
+  const context = coreMock.createPluginInitializerContext();
 
   beforeEach(() => {
     service = new EsSearchService(context);

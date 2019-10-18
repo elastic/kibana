@@ -15,6 +15,7 @@ import { TimeField } from './components/time_field';
 import { WIZARD_STEPS, StepProps } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
 import { JsonEditorFlyout, EDITOR_MODE } from '../common/json_editor_flyout';
+import { DatafeedPreviewFlyout } from '../common/datafeed_preview_flyout';
 
 export const DatafeedStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
   const { jobValidator, jobValidatorUpdated } = useContext(JobCreatorContext);
@@ -47,11 +48,18 @@ export const DatafeedStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =
             </EuiFlexItem>
           </EuiFlexGroup>
           <WizardNav next={() => setCurrentStep(WIZARD_STEPS.PICK_FIELDS)} nextActive={nextActive}>
-            <JsonEditorFlyout
-              isDisabled={false}
-              jobEditorMode={EDITOR_MODE.HIDDEN}
-              datafeedEditorMode={EDITOR_MODE.EDITABLE}
-            />
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <JsonEditorFlyout
+                  isDisabled={false}
+                  jobEditorMode={EDITOR_MODE.HIDDEN}
+                  datafeedEditorMode={EDITOR_MODE.EDITABLE}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <DatafeedPreviewFlyout isDisabled={false} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </WizardNav>
         </Fragment>
       )}

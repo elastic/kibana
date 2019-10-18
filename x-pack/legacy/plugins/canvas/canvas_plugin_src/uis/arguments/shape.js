@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 import { ShapePickerPopover } from '../../../public/components/shape_picker_popover/';
-import { ArgumentStrings } from '../../strings';
+import { ArgumentStrings } from '../../../i18n';
 
 const { Shape: strings } = ArgumentStrings;
 

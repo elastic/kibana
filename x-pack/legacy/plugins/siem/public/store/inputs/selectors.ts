@@ -17,7 +17,7 @@ const selectGlobal = (state: State): InputsRange => state.inputs.global;
 const selectTimeline = (state: State): InputsRange => state.inputs.timeline;
 
 const selectGlobalQuery = (state: State, id: string): GlobalQuery =>
-  state.inputs.global.query.find(q => q.id === id) || {
+  state.inputs.global.queries.find(q => q.id === id) || {
     id: '',
     inspect: null,
     isInspected: false,
@@ -27,8 +27,8 @@ const selectGlobalQuery = (state: State, id: string): GlobalQuery =>
   };
 
 const selectTimelineQuery = (state: State, id: string): GlobalQuery =>
-  state.inputs.timeline.query.find(q => q.id === id) ||
-  state.inputs.global.query.find(q => q.id === id) || {
+  state.inputs.timeline.queries.find(q => q.id === id) ||
+  state.inputs.global.queries.find(q => q.id === id) || {
     id: '',
     inspect: null,
     isInspected: false,
@@ -60,7 +60,7 @@ export const globalPolicySelector = createSelector(
 
 export const globalQuery = createSelector(
   selectGlobal,
-  global => global.query
+  global => global.queries
 );
 
 export const globalQueryByIdSelector = () =>
@@ -79,6 +79,28 @@ export const globalSelector = () =>
   createSelector(
     selectGlobal,
     global => global
+  );
+
+export const globalQuerySelector = () =>
+  createSelector(
+    selectGlobal,
+    global =>
+      global.query || {
+        query: '',
+        language: 'kuery',
+      }
+  );
+
+export const globalSavedQuerySelector = () =>
+  createSelector(
+    selectGlobal,
+    global => global.savedQuery || null
+  );
+
+export const globalFiltersQuerySelector = () =>
+  createSelector(
+    selectGlobal,
+    global => global.filters || []
   );
 
 export const getTimelineSelector = () =>

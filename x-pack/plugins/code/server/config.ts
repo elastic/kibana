@@ -84,7 +84,10 @@ const createCodeConfigSchema = () => {
       gitProtocolWhitelist: schema.arrayOf(schema.string(), {
         defaultValue: ['https', 'git', 'ssh'],
       }),
-      enableGitCertCheck: schema.boolean({ defaultValue: true }),
+      enableJavaSecurityManager: schema.boolean({ defaultValue: true }),
+      extraJavaRepositoryWhitelist: schema.arrayOf(schema.string(), {
+        defaultValue: [],
+      }),
     }),
     disk: schema.object({
       thresholdEnabled: schema.boolean({ defaultValue: true }),
