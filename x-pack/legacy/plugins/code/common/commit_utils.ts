@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 const commitDateFormats: { [key: string]: string } = {
   en: 'MMM Do, YYYY',
-  'zh-cn': 'YYYY年MoDo',
+  'zh-cn': 'YYYY年Mo月Do日',
 };
 
 export const formatCommitDate: (dateString: string) => string = date => {
