@@ -8,10 +8,10 @@ import { EuiSteps, EuiStepStatus } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
-import { SetupStatus } from '../../../../../../common/log_analysis';
-import { useAnalysisSetupState } from '../../../../../containers/logs/log_analysis/log_analysis_setup_state';
-import { InitialConfiguration } from './initial_configuration';
-import { SetupProcess } from './setup_process';
+import { SetupStatus } from '../../../../../common/log_analysis';
+import { useAnalysisSetupState } from '../../../../containers/logs/log_analysis/log_analysis_setup_state';
+import { InitialConfigurationStep } from './initial_configuration_step';
+import { ProcessStep } from './process_step';
 
 type SetupHandler = (
   indices: string[],
@@ -58,7 +58,7 @@ export const AnalysisSetupSteps: React.FunctionComponent<AnalysisSetupStepsProps
         defaultMessage: 'Configuration',
       }),
       children: (
-        <InitialConfiguration
+        <InitialConfigurationStep
           setStartTime={setStartTime}
           setEndTime={setEndTime}
           startTime={startTime}
@@ -74,7 +74,7 @@ export const AnalysisSetupSteps: React.FunctionComponent<AnalysisSetupStepsProps
         defaultMessage: 'Create ML job',
       }),
       children: (
-        <SetupProcess
+        <ProcessStep
           cleanupAndSetup={cleanupAndSetup}
           errorMessages={errorMessages}
           setup={setup}

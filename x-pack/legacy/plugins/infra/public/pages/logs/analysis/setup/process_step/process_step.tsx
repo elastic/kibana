@@ -19,10 +19,10 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
 import { SetupStatus } from '../../../../../../common/log_analysis';
-import { CreateMLJobsButton } from '../create_ml_jobs_button';
-import { RecreateMLJobsButton } from '../recreate_ml_jobs_button';
+import { CreateMLJobsButton } from './create_ml_jobs_button';
+import { RecreateMLJobsButton } from './recreate_ml_jobs_button';
 
-interface SetupProcessProps {
+interface ProcessStepProps {
   cleanupAndSetup: () => void;
   errorMessages: string[];
   setup: () => void;
@@ -30,13 +30,13 @@ interface SetupProcessProps {
   viewResults: () => void;
 }
 
-export const SetupProcess: React.FunctionComponent<SetupProcessProps> = ({
+export const ProcessStep: React.FunctionComponent<ProcessStepProps> = ({
   cleanupAndSetup,
   errorMessages,
   setup,
   setupStatus,
   viewResults,
-}: SetupProcessProps) => {
+}) => {
   return (
     <EuiText size="s">
       {setupStatus === 'pending' ? (

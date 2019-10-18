@@ -4,22 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useCallback } from 'react';
-
+import { EuiCheckboxGroup, EuiCode, EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiCode, EuiDescribedFormGroup, EuiFormRow, EuiCheckboxGroup } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import React, { useCallback, useMemo } from 'react';
 
-const indicesSelectionLabel = i18n.translate('xpack.infra.analysisSetup.indicesSelectionLabel', {
-  defaultMessage: 'Indices',
-});
+export type IndicesSelection = Record<string, boolean>;
 
-type IndicesSelection = Record<string, boolean>;
+export type IndicesValidationError = 'TOO_FEW_SELECTED_INDICES';
 
 export const AnalysisSetupIndicesForm: React.FunctionComponent<{
   indices: IndicesSelection;
   onChangeSelectedIndices: (selectedIndices: IndicesSelection) => void;
-  validationErrors?: Array<'TOO_FEW_SELECTED_INDICES'>;
+  validationErrors?: IndicesValidationError[];
 }> = ({ indices, onChangeSelectedIndices, validationErrors = [] }) => {
   const choices = useMemo(
     () =>
@@ -74,7 +71,11 @@ export const AnalysisSetupIndicesForm: React.FunctionComponent<{
   );
 };
 
-const formatValidationError = (validationError: 'TOO_FEW_SELECTED_INDICES') => {
+const indicesSelectionLabel = i18n.translate('xpack.infra.analysisSetup.indicesSelectionLabel', {
+  defaultMessage: 'Indices',
+});
+
+const formatValidationError = (validationError: IndicesValidationError) => {
   switch (validationError) {
     case 'TOO_FEW_SELECTED_INDICES':
       return i18n.translate(

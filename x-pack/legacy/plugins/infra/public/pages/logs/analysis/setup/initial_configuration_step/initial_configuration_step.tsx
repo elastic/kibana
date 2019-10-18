@@ -4,22 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo } from 'react';
 import { EuiSpacer, EuiForm } from '@elastic/eui';
-import { AnalysisSetupTimerangeForm } from '../analysis_setup_timerange_form';
-import { AnalysisSetupIndicesForm } from '../analysis_setup_indices_form';
+import React, { useMemo } from 'react';
 
-interface InitialConfigurationProps {
+import {
+  AnalysisSetupIndicesForm,
+  IndicesSelection,
+  IndicesValidationError,
+} from './analysis_setup_indices_form';
+import { AnalysisSetupTimerangeForm } from './analysis_setup_timerange_form';
+
+interface InitialConfigurationStepProps {
   setStartTime: (startTime: number | undefined) => void;
   setEndTime: (endTime: number | undefined) => void;
   startTime: number | undefined;
   endTime: number | undefined;
-  selectedIndices: Record<string, boolean>;
-  setSelectedIndices: (selectedIndices: Record<string, boolean>) => void;
-  validationErrors?: Array<'TOO_FEW_SELECTED_INDICES'>;
+  selectedIndices: IndicesSelection;
+  setSelectedIndices: (selectedIndices: IndicesSelection) => void;
+  validationErrors?: IndicesValidationError[];
 }
 
-export const InitialConfiguration: React.FunctionComponent<InitialConfigurationProps> = ({
+export const InitialConfigurationStep: React.FunctionComponent<InitialConfigurationStepProps> = ({
   setStartTime,
   setEndTime,
   startTime,
@@ -27,7 +32,7 @@ export const InitialConfiguration: React.FunctionComponent<InitialConfigurationP
   selectedIndices,
   setSelectedIndices,
   validationErrors = [],
-}: InitialConfigurationProps) => {
+}: InitialConfigurationStepProps) => {
   const indicesFormValidationErrors = useMemo(
     () =>
       validationErrors.filter(validationError => validationError === 'TOO_FEW_SELECTED_INDICES'),
