@@ -5,6 +5,7 @@
  */
 
 import { URL } from 'url';
+import { Response } from 'node-fetch';
 import {
   AssetsGroupedByServiceByType,
   AssetParts,
@@ -15,7 +16,7 @@ import {
 } from '../../common/types';
 import { cacheGet, cacheSet } from './cache';
 import { ArchiveEntry, untarBuffer } from './extract';
-import { fetchUrl, getResponseStream } from './requests';
+import { fetchUrl, getResponseStream, getResponse } from './requests';
 import { streamToBuffer } from './streams';
 import { integrationsManagerConfigStore } from '../config';
 
@@ -23,6 +24,11 @@ export { ArchiveEntry } from './extract';
 
 export interface SearchParams {
   category?: CategoryId;
+}
+
+export interface ImageRequestParams {
+  pkgkey: string;
+  imgPath: string;
 }
 
 export async function fetchList(params?: SearchParams): Promise<RegistryList> {
@@ -38,6 +44,12 @@ export async function fetchList(params?: SearchParams): Promise<RegistryList> {
 export async function fetchInfo(key: string): Promise<RegistryPackage> {
   const { registryUrl } = integrationsManagerConfigStore.getConfig();
   return fetchUrl(`${registryUrl}/package/${key}`).then(JSON.parse);
+}
+
+export async function fetchImage(params: ImageRequestParams): Promise<Response> {
+  const { registryUrl } = integrationsManagerConfigStore.getConfig();
+  const { pkgkey, imgPath } = params;
+  return getResponse(`${registryUrl}/package/${pkgkey}/img/${imgPath}`);
 }
 
 export async function fetchCategories(): Promise<CategorySummaryList> {

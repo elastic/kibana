@@ -32,6 +32,10 @@ export interface RegistryListItem {
   title?: string;
 }
 
+export interface ScreenshotItem {
+  src: string;
+}
+
 // from /package/{name}
 // https://github.com/elastic/integrations-registry/blob/master/docs/api/package.json
 export type ServiceName = 'kibana' | 'elasticsearch' | 'filebeat' | 'metricbeat';
@@ -67,6 +71,7 @@ export interface RegistryPackage {
   icon: string;
   requirement: RequirementsByServiceName;
   title?: string;
+  screenshots?: ScreenshotItem[];
 }
 
 // Managers public HTTP response types

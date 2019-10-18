@@ -12,10 +12,12 @@ import {
   getCategories,
   getClusterAccessor,
   getIntegrationInfo,
+  getImage,
   getIntegrations,
   installIntegration,
   removeInstallation,
 } from './index';
+import { ImageRequestParams } from '../registry';
 
 interface Extra extends ResponseToolkit {
   context: PluginContext;
@@ -29,6 +31,10 @@ interface PackageRequest extends Request {
   params: {
     pkgkey: string;
   };
+}
+
+interface ImageRequest extends Request {
+  params: Request['params'] & ImageRequestParams;
 }
 
 interface InstallAssetRequest extends Request {
@@ -64,6 +70,14 @@ export async function handleGetInfo(req: PackageRequest, extra: Extra) {
 
   return integrationInfo;
 }
+
+export const handleGetImage = async (req: ImageRequest, extra: Extra) => {
+  const response = await getImage(req.params);
+  const newResponse = extra.response(response.body);
+  // set the content type from the registry response
+  newResponse.header('Content-Type', response.headers.get('content-type') || '');
+  return newResponse;
+};
 
 export async function handleRequestInstall(req: InstallAssetRequest, extra: Extra) {
   const { pkgkey, asset } = req.params;

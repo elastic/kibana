@@ -8,5 +8,6 @@ export default function ({ loadTestFile }) {
   describe('Integrations Manager Endpoints', function () {
     this.tags('ciGroup7');
     loadTestFile(require.resolve('./list'));
+    loadTestFile(require.resolve('./image'));
   });
 }

@@ -37,8 +37,12 @@ export function Content(props: ContentProps) {
       `
     : LeftColumn;
 
+  // fixes IE11 problem with nested flex items
+  const ContentFlexGroup = styled(EuiFlexGroup)`
+    flex: 0 0 auto !important;
+  `;
   return (
-    <EuiFlexGroup>
+    <ContentFlexGroup>
       <SideNavColumn>
         <SideNavLinks name={name} version={version} active={panel || DEFAULT_PANEL} />
       </SideNavColumn>
@@ -48,7 +52,7 @@ export function Content(props: ContentProps) {
       <RightColumn>
         <RightColumnContent {...props} />
       </RightColumn>
-    </EuiFlexGroup>
+    </ContentFlexGroup>
   );
 }
 

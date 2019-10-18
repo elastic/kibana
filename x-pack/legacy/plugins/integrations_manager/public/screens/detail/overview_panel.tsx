@@ -6,25 +6,21 @@
 import React, { Fragment } from 'react';
 import { EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { IntegrationInfo } from '../../../common/types';
+import { Screenshots } from './screenshots';
 
 export function OverviewPanel(props: IntegrationInfo) {
-  const { description } = props;
+  const { description, screenshots } = props;
   return (
     <Fragment>
-      <EuiTitle size="xs">
-        <span>About</span>
+      <EuiTitle size="s">
+        <h3>About</h3>
       </EuiTitle>
       <EuiText>
         <p>{description}</p>
         <p>Still need a) longer descriptions b) component to show/hide</p>
       </EuiText>
       <EuiSpacer size="xl" />
-      <EuiTitle size="xs">
-        <span>Screenshots</span>
-      </EuiTitle>
-      <EuiText>
-        <p>Where are we getting these images?</p>
-      </EuiText>
+      {screenshots && <Screenshots images={screenshots} />}
     </Fragment>
   );
 }

@@ -68,6 +68,9 @@ export async function getIntegrationInfo(options: {
   return createInstallableFrom(updated, savedObject);
 }
 
+export const getImage = async (options: Registry.ImageRequestParams) =>
+  Registry.fetchImage(options);
+
 export async function getInstallationObject(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
