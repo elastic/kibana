@@ -9,9 +9,9 @@ Kibanaの実地体験を始める準備はできていますか?
 * Elasticsearchへのサンプルデータセットの読み込み 
 * Index Patternの定義 
 * {kibana-ref}/discover.html[検出]を使ったサンプルデータの調査 
-* サンプルデータの{kibana-ref}/visualize.html[_ビジュアライゼーション_]のセットアップ 
+* サンプルデータの&#8203;{kibana-ref}/visualize.html[_ビジュアライゼーション_]のセットアップ
 
-{kibana-ref}/dashboard.html[ダッシュボード]へのビジュアライゼーションの統合 開始する前に、<<install, Kibanaをインストール済み>>で、{kibana-ref}/connect-to-elasticsearch.html[Elasticsearchに接続済み]であることを確認してください。
+{kibana-ref}/dashboard.html[ダッシュボード]へのビジュアライゼーションの統合 開始する前に、<<install, Kibanaをインストール済み>>で、&#8203;{kibana-ref}/connect-to-elasticsearch.html[Elasticsearchに接続済み]であることを確認してください。
 
 以下のビデオチュートリアルもご覧いただけます。
 

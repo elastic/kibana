@@ -137,7 +137,7 @@ include::systemd.asciidoc[]
 [[rpm-configuring]]
 ==== 設定ファイルによるKibanaの設定
 
-Kibanaは、デフォルトで`/etc/kibana/kibana.yml`ファイルから設定を読み込みます。この設定ファイルの形式については、{kibana-ref}/settings.html[設定]で説明しています。
+Kibanaは、デフォルトで`/etc/kibana/kibana.yml`ファイルから設定を読み込みます。この設定ファイルの形式については、&#8203;{kibana-ref}/settings.html[設定]で説明しています。
 
 [[rpm-layout]]
 ==== RPMのディレクトリ構成
