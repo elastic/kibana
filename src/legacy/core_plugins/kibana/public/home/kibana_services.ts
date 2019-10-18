@@ -18,7 +18,8 @@
  */
 
 // @ts-ignore
-import { uiModules } from 'ui/modules';
+import { uiModules as modules } from 'ui/modules';
+import routes from 'ui/routes';
 import { npStart } from 'ui/new_platform';
 import { IPrivate } from 'ui/private';
 import { FeatureCatalogueRegistryProvider } from 'ui/registry/feature_catalogue';
@@ -31,6 +32,12 @@ export { kfetch } from 'ui/kfetch';
 
 export { wrapInI18nContext } from 'ui/i18n';
 export const getInjected = npStart.core.injectedMetadata.getInjectedVar;
+export const metadata = npStart.core.injectedMetadata.getLegacyMetadata();
+
+export const docLinks = npStart.core.docLinks;
+
+export const uiRoutes = routes;
+export const uiModules = modules;
 
 export const savedObjectsClient = npStart.core.savedObjects.client;
 export const chrome = npStart.core.chrome;
@@ -46,7 +53,7 @@ export let featureCatalogueRegistryProvider: any;
 export const trackUiMetric = createUiStatsReporter('Kibana_home');
 export { METRIC_TYPE };
 
-uiModules.get('kibana').run((Private: IPrivate) => {
+modules.get('kibana').run((Private: IPrivate) => {
   const telemetryEnabled = npStart.core.injectedMetadata.getInjectedVar('telemetryEnabled');
   const telemetryBanner = npStart.core.injectedMetadata.getInjectedVar('telemetryBanner');
 

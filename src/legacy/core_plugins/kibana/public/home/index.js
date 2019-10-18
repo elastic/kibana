@@ -17,10 +17,8 @@
  * under the License.
  */
 
-import { chrome, addBasePath, featureCatalogueRegistryProvider, wrapInI18nContext } from './kibana_services';
-import routes from 'ui/routes';
+import { chrome, addBasePath, featureCatalogueRegistryProvider, wrapInI18nContext, uiRoutes, uiModules  } from './kibana_services';
 import template from './home_ng_wrapper.html';
-import { uiModules } from 'ui/modules';
 import {
   HomeApp
 } from './components/home_app';
@@ -51,7 +49,7 @@ function getRoute() {
 
 // All routing will be handled inside HomeApp via react, we just need to make sure angular doesn't
 // redirect us to the default page by encountering a url it isn't marked as being able to handle.
-routes.when('/home', getRoute());
-routes.when('/home/feature_directory', getRoute());
-routes.when('/home/tutorial_directory/:tab?', getRoute());
-routes.when('/home/tutorial/:id', getRoute());
+uiRoutes.when('/home', getRoute());
+uiRoutes.when('/home/feature_directory', getRoute());
+uiRoutes.when('/home/tutorial_directory/:tab?', getRoute());
+uiRoutes.when('/home/tutorial/:id', getRoute());
