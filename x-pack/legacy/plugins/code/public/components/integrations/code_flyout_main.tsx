@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { CodeViewer } from './code_viewer';
 import { History } from './history';
+import { absoluteCodeFileURI } from './helpers';
 
 enum Tab {
   code,
@@ -63,7 +64,7 @@ export const CodeFlyoutMain = (props: { repo: string; file: string; revision: st
           <EuiText size="s">
             <EuiLink
               className="codeFlyout__fileLink"
-              href={`/app/code#/${props.repo}/blob/${props.revision}/${props.file}`}
+              href={absoluteCodeFileURI(props.repo, props.file, props.revision)}
             >
               {props.file}
             </EuiLink>

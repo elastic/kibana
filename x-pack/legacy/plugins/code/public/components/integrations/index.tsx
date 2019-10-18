@@ -54,25 +54,25 @@ export const Integrations = () => {
         const key = `${fileName}#L${lineNumber}`;
         const snippet = results[key];
 
-      if (snippet) {
-        const { compositeContent, filePath, language, uri } = snippet;
-        const { content, lineMapping } = compositeContent;
-        const lines = content.split('\n');
+        if (snippet) {
+          const { compositeContent, filePath, language, uri } = snippet;
+          const { content, lineMapping } = compositeContent;
+          const lines = content.split('\n');
 
-        return (
-          <div key={key} className="codeIntegrations__frame">
-            <RepoTitle uri={snippet.uri} />
-            <EuiPanel paddingSize="s">
-              <FrameHeader
-                fileName={fileName}
-                lineNumber={lineNumber}
-                onClick={() => showFlyout(uri, filePath)}
-              />
-              <CodeBlock lines={lines} language={language} lineNumber={i => lineMapping[i]} />
-            </EuiPanel>
-          </div>
-        );
-      }
+          return (
+            <div key={key} className="codeIntegrations__frame">
+              <RepoTitle uri={snippet.uri} />
+              <EuiPanel paddingSize="s">
+                <FrameHeader
+                  fileName={fileName}
+                  lineNumber={lineNumber}
+                  onClick={() => showFlyout(uri, filePath)}
+                />
+                <CodeBlock lines={lines} language={language} lineNumber={i => lineMapping[i]} />
+              </EuiPanel>
+            </div>
+          );
+        }
 
         return (
           <div key={key} className="codeIntegrations__frame">
