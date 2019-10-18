@@ -583,6 +583,7 @@ describe('conditional compression', () => {
 
     const router = new Router('', logger, enhanceWithContext);
     router.get({ path: '/', validate: false }, (context, req, res) =>
+      // we need the large body here so that compression would normally be used
       res.ok({ body: 'hello'.repeat(500), headers: { 'Content-Type': 'text/html; charset=UTF-8' } })
     );
     registerRouter(router);
@@ -601,6 +602,7 @@ describe('conditional compression', () => {
 
     const router = new Router('', logger, enhanceWithContext);
     router.get({ path: '/', validate: false }, (context, req, res) =>
+      // we need the large body here so that compression will be used
       res.ok({ body: 'hello'.repeat(500), headers: { 'Content-Type': 'text/html; charset=UTF-8' } })
     );
     registerRouter(router);
