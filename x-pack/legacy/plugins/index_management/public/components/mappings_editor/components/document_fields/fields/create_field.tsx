@@ -44,7 +44,7 @@ interface Props {
 
 export const CreateField = React.memo(function CreateFieldComponent({
   paddingLeft,
-  isCancelable = true,
+  isCancelable,
 }: Props) {
   const { form } = useForm<Field>({ serializer: fieldSerializer });
   const dispatch = useDispatch();
@@ -82,7 +82,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
     const name = form.getFields().name.value as string;
 
     if (name.trim() === '') {
-      if (isCancelable) {
+      if (isCancelable !== false) {
         cancel();
       }
     } else {
@@ -143,7 +143,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
 
   const renderFormActions = () => (
     <EuiFlexGroup gutterSize="s">
-      {isCancelable && (
+      {isCancelable !== false && (
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty onClick={cancel}>Cancel</EuiButtonEmpty>
         </EuiFlexItem>

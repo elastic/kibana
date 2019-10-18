@@ -5,7 +5,7 @@
  */
 import React from 'react';
 
-import { FieldsListItem } from './fields_list_item';
+import { FieldsListItemContainer } from './fields_list_item_container';
 import { NormalizedField } from '../../../types';
 
 interface Props {
@@ -13,15 +13,18 @@ interface Props {
   treeDepth?: number;
 }
 
-export const FieldsList = React.memo(function FieldsListComponent({
-  fields = [],
-  treeDepth = 0,
-}: Props) {
+export const FieldsList = React.memo(function FieldsListComponent({ fields, treeDepth }: Props) {
+  if (fields === undefined) {
+    return null;
+  }
   return (
     <ul className="mappings-editor__fields-list">
       {fields.map(field => (
         <li key={field.id} className="mappings-editor__fields-list-item">
-          <FieldsListItem field={field} treeDepth={treeDepth} />
+          <FieldsListItemContainer
+            field={field}
+            treeDepth={treeDepth === undefined ? 0 : treeDepth}
+          />
         </li>
       ))}
     </ul>

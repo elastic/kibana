@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useMemo } from 'react';
+import React from 'react';
 import classNames from 'classnames';
 import {
   EuiFlexGroup,
@@ -14,7 +14,6 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 
-import { useState, useDispatch } from '../../../mappings_state';
 import { FieldsList } from './fields_list';
 import { CreateField } from './create_field';
 import { DeleteFieldProvider } from './delete_field_provider';
@@ -22,20 +21,36 @@ import { NormalizedField } from '../../../types';
 
 interface Props {
   field: NormalizedField;
-  treeDepth?: number;
+  isCreateFieldFormVisible: boolean;
+  areActionButtonsVisible: boolean;
+  isHighlighted: boolean;
+  isDimmed: boolean;
+  isMultiField: boolean;
+  childFieldsArray: NormalizedField[];
+  maxNestedDepth: number;
+  addField(): void;
+  editField(): void;
+  toggleExpand(): void;
+  treeDepth: number;
 }
 
 const INDENT_SIZE = 32;
 
-export const FieldsListItem = ({ field, treeDepth = 0 }: Props) => {
-  const dispatch = useDispatch();
+export const FieldsListItem = React.memo(function FieldListItemComponent({
+  field,
+  isHighlighted,
+  isDimmed,
+  isMultiField,
+  isCreateFieldFormVisible,
+  areActionButtonsVisible,
+  childFieldsArray,
+  maxNestedDepth,
+  addField,
+  editField,
+  toggleExpand,
+  treeDepth = 0,
+}: Props) {
   const {
-    documentFields: { status, fieldToAddFieldTo, fieldToEdit },
-    fields: { byId, maxNestedDepth },
-  } = useState();
-  const getField = (fieldId: string) => byId[fieldId];
-  const {
-    id,
     source,
     childFields,
     canHaveChildFields,
@@ -44,39 +59,14 @@ export const FieldsListItem = ({ field, treeDepth = 0 }: Props) => {
     hasMultiFields,
     nestedDepth,
     isExpanded,
-    parentId,
   } = field;
   const isAddFieldBtnDisabled = false; // For now, we never disable the Add Child button.
   // const isAddFieldBtnDisabled = field.nestedDepth === MAX_DEPTH_DEFAULT_EDITOR - 1;
   const indent = `${nestedDepth * INDENT_SIZE}px`;
   const indentChild = `${(nestedDepth + 1) * INDENT_SIZE + 4}px`; // We need to add 4 because we have a padding left set to 4 on the wrapper
-  const parentField = parentId !== undefined ? byId[parentId] : undefined;
-  const isMultiField = parentField !== undefined ? parentField.canHaveMultiFields === true : false;
-  const childFieldsArray = useMemo(
-    () => (hasChildFields || hasMultiFields ? childFields!.map(getField) : []),
-    [childFields, byId]
-  );
-
-  const addField = () => {
-    dispatch({
-      type: 'documentField.createField',
-      value: id,
-    });
-  };
-
-  const editField = () => {
-    dispatch({
-      type: 'documentField.editField',
-      value: id,
-    });
-  };
-
-  const toggleExpand = () => {
-    dispatch({ type: 'field.toggleExpand', value: { fieldId: id } });
-  };
 
   const renderCreateField = () => {
-    if (status !== 'creatingField' || fieldToAddFieldTo !== id) {
+    if (!isCreateFieldFormVisible) {
       return null;
     }
 
@@ -84,7 +74,7 @@ export const FieldsListItem = ({ field, treeDepth = 0 }: Props) => {
   };
 
   const renderActionButtons = () => {
-    if (status !== 'idle') {
+    if (!areActionButtonsVisible) {
       return null;
     }
 
@@ -116,9 +106,8 @@ export const FieldsListItem = ({ field, treeDepth = 0 }: Props) => {
       <div
         style={{ paddingLeft: indent }}
         className={classNames('mappings-editor__fields-list-item__field', {
-          'mappings-editor__fields-list-item__field--selected': fieldToEdit === id,
-          'mappings-editor__fields-list-item__field--dim':
-            status === 'editingField' && fieldToEdit !== id,
+          'mappings-editor__fields-list-item__field--selected': isHighlighted,
+          'mappings-editor__fields-list-item__field--dim': isDimmed,
         })}
       >
         <div
@@ -187,4 +176,4 @@ export const FieldsListItem = ({ field, treeDepth = 0 }: Props) => {
       {renderCreateField()}
     </>
   );
-};
+});

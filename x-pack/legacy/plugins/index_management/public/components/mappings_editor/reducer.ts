@@ -72,7 +72,7 @@ export const addFieldToState = (field: Field, state: State): State => {
 
   const rootLevelFields = addToRootLevel
     ? [...state.fields.rootLevelFields, id]
-    : state.fields.rootLevelFields;
+    : [...state.fields.rootLevelFields];
   const nestedDepth = parentField ? parentField.nestedDepth + 1 : 0;
   const maxNestedDepth = Math.max(state.fields.maxNestedDepth, nestedDepth);
   const { name } = field;
@@ -98,6 +98,14 @@ export const addFieldToState = (field: Field, state: State): State => {
       hasMultiFields: parentField.canHaveMultiFields ? true : false,
       isExpanded: true,
     };
+
+    // We _also_ need to make a copy of the parent "childFields"
+    // array to force a re-render in the view.
+    if (parentField.parentId) {
+      updatedById[parentField.parentId].childFields = [
+        ...updatedById[parentField.parentId].childFields!,
+      ];
+    }
   }
 
   return {
@@ -265,6 +273,18 @@ export const reducer = (state: State, action: Action): State => {
         updatedById[fieldToEdit] = newField;
       }
 
+      // We _also_ need to make a copy of the parent "childFields"
+      // array to force a re-render in the view.
+      let rootLevelFields = state.fields.rootLevelFields;
+      if (newField.parentId) {
+        updatedById[newField.parentId].childFields = [
+          ...updatedById[newField.parentId].childFields!,
+        ];
+      } else {
+        // No parent, we need to make a copy of the "rootLevelFields" then
+        rootLevelFields = [...state.fields.rootLevelFields];
+      }
+
       return {
         ...state,
         isValid: isStateValid(state),
@@ -276,6 +296,7 @@ export const reducer = (state: State, action: Action): State => {
         },
         fields: {
           ...state.fields,
+          rootLevelFields,
           byId: updatedById,
         },
       };
