@@ -9,7 +9,7 @@ Define an interceptor to be executed after a response is received.
 <b>Signature:</b>
 
 ```typescript
-response?(httpResponse: HttpResponse, controller: IHttpInterceptController): Promise<HttpResponse> | HttpResponse | void;
+response?(httpResponse: HttpResponse, controller: IHttpInterceptController): Promise<InterceptedHttpResponse> | InterceptedHttpResponse | void;
 ```
 
 ## Parameters
@@ -21,5 +21,5 @@ response?(httpResponse: HttpResponse, controller: IHttpInterceptController): Pro
 
 <b>Returns:</b>
 
-`Promise<HttpResponse> | HttpResponse | void`
+`Promise<InterceptedHttpResponse> | InterceptedHttpResponse | void`
 
