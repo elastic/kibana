@@ -17,9 +17,22 @@
  * under the License.
  */
 
-// All Kibana styles inside of the /styles dir
-const context = require.context('../styles', false, /[\/\\](?!mixins|variables|_|\.|bootstrap_(light|dark))[^\/\\]+\.less/);
-context.keys().forEach(key => context(key));
+import { CoreService } from '../../types';
 
-// manually require non-less files
-import '../styles/disable_animations';
+const createCoreServiceMock = (): jest.Mocked<CoreService> => {
+  return {
+    setup: jest.fn(),
+    start: jest.fn(),
+    stop: jest.fn(),
+  };
+};
+
+export const styleServiceMock = createCoreServiceMock();
+jest.doMock('./styles', () => ({
+  StylesService: jest.fn(() => styleServiceMock),
+}));
+
+export const timezoneServiceMock = createCoreServiceMock();
+jest.doMock('./timezone', () => ({
+  TimezoneService: jest.fn(() => timezoneServiceMock),
+}));

@@ -17,5 +17,15 @@
  * under the License.
  */
 
-import './accessibility';
-import './modules';
+import { IntegrationsService } from './integrations_service';
+
+type IntegrationsServiceContract = PublicMethodsOf<IntegrationsService>;
+const createMock = (): jest.Mocked<IntegrationsServiceContract> => ({
+  setup: jest.fn(),
+  start: jest.fn(),
+  stop: jest.fn(),
+});
+
+export const integrationsServiceMock = {
+  create: createMock,
+};

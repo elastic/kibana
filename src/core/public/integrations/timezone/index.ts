@@ -17,5 +17,4 @@
  * under the License.
  */
 
-import './accessibility';
-import './modules';
+export { TimezoneService } from './timezone_service';

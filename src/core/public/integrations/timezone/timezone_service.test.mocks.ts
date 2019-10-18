@@ -17,5 +17,12 @@
  * under the License.
  */
 
-import './accessibility';
-import './modules';
+export const momentMock = {
+  locale: jest.fn(() => 'default-locale'),
+  tz: {
+    setDefault: jest.fn(),
+  },
+  weekdays: jest.fn(() => ['dow1', 'dow2', 'dow3']),
+  updateLocale: jest.fn(),
+};
+jest.doMock('moment-timezone', () => momentMock);

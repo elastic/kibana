@@ -17,4 +17,33 @@
  * under the License.
  */
 
-import './disable_animations';
+import { UiSettingsClientContract } from '../ui_settings';
+import { CoreService } from '../../types';
+
+import { TimezoneService } from './timezone';
+import { StylesService } from './styles';
+
+interface Deps {
+  uiSettings: UiSettingsClientContract;
+}
+
+/** @internal */
+export class IntegrationsService implements CoreService {
+  private readonly styles = new StylesService();
+  private readonly timezone = new TimezoneService();
+
+  public async setup() {
+    await this.styles.setup();
+    await this.timezone.setup();
+  }
+
+  public async start({ uiSettings }: Deps) {
+    await this.styles.start({ uiSettings });
+    await this.timezone.start({ uiSettings });
+  }
+
+  public async stop() {
+    await this.styles.stop();
+    await this.timezone.stop();
+  }
+}
