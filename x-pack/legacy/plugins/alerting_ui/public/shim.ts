@@ -10,13 +10,9 @@ import { CoreStart } from 'kibana/public';
 
 export interface AppPlugins {
   management: {
-    sections: typeof management;
-    getSection(): any;
-    breadcrumb: any;
+    breadcrumb: typeof MANAGEMENT_BREADCRUMB;
   };
-  capabilities: {
-    get: () => any;
-  };
+  capabilities: typeof capabilities;
 }
 
 export interface AppDependencies {
