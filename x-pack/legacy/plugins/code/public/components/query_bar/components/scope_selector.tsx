@@ -56,7 +56,7 @@ export class ScopeSelector extends Component<Props> {
       value: SearchScope.COMMIT,
       inputDisplay: (
         <EuiText size="s">
-          <EuiIcon type={CommitIcon} /> {SearchScopeText[SearchScope.COMMIT]}
+          <EuiIcon type={CommitIcon as any} /> {SearchScopeText[SearchScope.COMMIT]}
         </EuiText>
       ),
     },

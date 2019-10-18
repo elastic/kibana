@@ -31,7 +31,7 @@ export const CommitSuggestionsGroup = ({ query }: Props) => {
     <EuiFlexGroup justifyContent="spaceBetween" className="codeSearch-suggestion__group-header">
       <EuiFlexGroup direction="row" gutterSize="none" alignItems="center">
         <EuiToken
-          iconType={CommitIcon}
+          iconType={CommitIcon as any}
           displayOptions={{
             fill: true,
             color: 'tokenTint02',
