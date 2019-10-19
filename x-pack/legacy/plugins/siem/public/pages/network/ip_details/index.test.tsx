@@ -13,18 +13,18 @@ import { MockedProvider } from 'react-apollo/test-utils';
 import { ActionCreator } from 'typescript-fsa';
 import { npSetup } from 'ui/new_platform';
 
-import '../../mock/match_media';
+import '../../../mock/match_media';
 
-import { mocksSource } from '../../containers/source/mock';
-import { FlowTarget } from '../../graphql/types';
-import { apolloClientObservable, mockGlobalState, TestProviders } from '../../mock';
-import { MockNpSetUp, mockUiSettings } from '../../mock/ui_settings';
-import { createStore, State } from '../../store';
-import { InputsModelId } from '../../store/inputs/constants';
+import { mocksSource } from '../../../containers/source/mock';
+import { FlowTarget } from '../../../graphql/types';
+import { apolloClientObservable, mockGlobalState, TestProviders } from '../../../mock';
+import { MockNpSetUp, mockUiSettings } from '../../../mock/ui_settings';
+import { createStore, State } from '../../../store';
+import { InputsModelId } from '../../../store/inputs/constants';
 
-import { IPDetailsComponent, IPDetails } from './ip_details';
+import { IPDetailsComponent, IPDetails } from './index';
 
-jest.mock('../../lib/settings/use_kibana_ui_setting');
+jest.mock('../../../lib/settings/use_kibana_ui_setting');
 
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 const pop: Action = 'POP';
@@ -37,7 +37,7 @@ mockNpSetup.core.uiSettings = mockUiSettings;
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar
-jest.mock('../../components/search_bar', () => ({
+jest.mock('../../../components/search_bar', () => ({
   SiemSearchBar: () => null,
 }));
 
