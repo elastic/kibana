@@ -20,7 +20,8 @@ import { wait } from '../../lib/helpers';
 import { TestProviders } from '../../mock';
 import { MockNpSetUp, mockUiSettings } from '../../mock/ui_settings';
 import { InputsModelId } from '../../store/inputs/constants';
-import { Hosts, HostsComponentProps } from './hosts';
+import { Hosts } from './hosts';
+import { HostsComponentProps } from './types';
 
 jest.mock('../../lib/settings/use_kibana_ui_setting');
 

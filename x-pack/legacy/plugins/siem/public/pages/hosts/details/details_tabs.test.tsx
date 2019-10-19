@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow, mount } from 'enzyme';
-import toJson from 'enzyme-to-json';
+import { mount } from 'enzyme';
 import React from 'react';
 import { StaticIndexPattern } from 'ui/index_patterns';
 import { npSetup } from 'ui/new_platform';
