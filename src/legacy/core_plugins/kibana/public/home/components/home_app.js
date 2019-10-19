@@ -28,6 +28,7 @@ import {
   HashRouter as Router,
   Switch,
   Route,
+  Redirect,
 } from 'react-router-dom';
 import { getTutorial } from '../load_tutorials';
 import { replaceTemplateStrings } from './tutorial/replace_template_strings';
@@ -47,6 +48,7 @@ export function HomeApp({ directories }) {
   const isCloudEnabled = getInjected('isCloudEnabled', false);
   const apmUiEnabled = getInjected('apmUiEnabled', true);
   const mlEnabled = getInjected('mlEnabled', false);
+  const defaultAppId = getInjected('kbnDefaultAppId', 'discover');
 
   const renderTutorialDirectory = (props) => {
     return (
@@ -76,14 +78,17 @@ export function HomeApp({ directories }) {
       <Router>
         <Switch>
           <Route
+            exact
             path="/home/tutorial/:id"
             render={renderTutorial}
           />
           <Route
+            exact
             path="/home/tutorial_directory/:tab?"
             render={renderTutorialDirectory}
           />
           <Route
+            exact
             path="/home/feature_directory"
           >
             <FeatureDirectory
@@ -92,6 +97,7 @@ export function HomeApp({ directories }) {
             />
           </Route>
           <Route
+            exact
             path="/home"
           >
             <Home
@@ -107,6 +113,9 @@ export function HomeApp({ directories }) {
               fetchTelemetry={telemetryOptInProvider.fetchExample}
               getTelemetryBannerId={telemetryOptInProvider.getBannerId}
             />
+          </Route>
+          <Route path="/home">
+            <Redirect to={`/${defaultAppId}`} />
           </Route>
         </Switch>
       </Router>
