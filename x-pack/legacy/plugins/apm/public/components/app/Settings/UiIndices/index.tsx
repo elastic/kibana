@@ -24,41 +24,52 @@ import { APMClient } from '../../../../services/rest/createCallApmApi';
 import { StringMap } from '../../../../../typings/common';
 import { useKibanaCore } from '../../../../../../observability/public';
 
-function i(id: string, defaultMessage: string, values?: StringMap<string>) {
-  return i18n.translate(`xpack.apm.settings.uiIndices.${id}`, {
-    defaultMessage,
-    values: {}
-  });
-}
-
 const APM_INDEX_LABELS = [
   {
     configurationName: 'apm_oss.sourcemapIndices',
-    label: i('sourcemapIndicesLabel', 'Sourcemap Indices')
+    label: i18n.translate(
+      'xpack.apm.settings.uiIndices.sourcemapIndicesLabel',
+      { defaultMessage: 'Sourcemap Indices' }
+    )
   },
   {
     configurationName: 'apm_oss.errorIndices',
-    label: i('errorIndicesLabel', 'Error Indices')
+    label: i18n.translate('xpack.apm.settings.uiIndices.errorIndicesLabel', {
+      defaultMessage: 'Error Indices'
+    })
   },
   {
     configurationName: 'apm_oss.onboardingIndices',
-    label: i('onboardingIndicesLabel', 'Onboarding Indices')
+    label: i18n.translate(
+      'xpack.apm.settings.uiIndices.onboardingIndicesLabel',
+      { defaultMessage: 'Onboarding Indices' }
+    )
   },
   {
     configurationName: 'apm_oss.spanIndices',
-    label: i('spanIndicesLabel', 'Span Indices')
+    label: i18n.translate('xpack.apm.settings.uiIndices.spanIndicesLabel', {
+      defaultMessage: 'Span Indices'
+    })
   },
   {
     configurationName: 'apm_oss.transactionIndices',
-    label: i('transactionIndicesLabel', 'Transaction Indices')
+    label: i18n.translate(
+      'xpack.apm.settings.uiIndices.transactionIndicesLabel',
+      { defaultMessage: 'Transaction Indices' }
+    )
   },
   {
     configurationName: 'apm_oss.metricsIndices',
-    label: i('metricsIndicesLabel', 'Metrics Indices')
+    label: i18n.translate('xpack.apm.settings.uiIndices.metricsIndicesLabel', {
+      defaultMessage: 'Metrics Indices'
+    })
   },
   {
     configurationName: 'apm_oss.apmAgentConfigurationIndex',
-    label: i('apmAgentConfigurationIndexLabel', 'Agent Configuration Index')
+    label: i18n.translate(
+      'xpack.apm.settings.uiIndices.apmAgentConfigurationIndexLabel',
+      { defaultMessage: 'Agent Configuration Index' }
+    )
   }
 ];
 
@@ -118,19 +129,31 @@ export function UiIndices() {
         uiIndices
       });
       toasts.addSuccess({
-        title: i('applyChanges.succeeded.title', 'Indices applied'),
-        text: i(
-          'applyChanges.succeeded.text',
-          'The indices changes were successfully applied. These changes are reflected immediately in the APM UI'
+        title: i18n.translate(
+          'xpack.apm.settings.uiIndices.applyChanges.succeeded.title',
+          { defaultMessage: 'Indices applied' }
+        ),
+        text: i18n.translate(
+          'xpack.apm.settings.uiIndices.applyChanges.succeeded.text',
+          {
+            defaultMessage:
+              'The indices changes were successfully applied. These changes are reflected immediately in the APM UI'
+          }
         )
       });
     } catch (error) {
       toasts.addDanger({
-        title: i('applyChanges.failed.title', 'Indices could not be applied.'),
-        text: i(
-          'applyChanges.failed.text',
-          'Something went wrong when applying indices. Error: {errorMessage}',
-          { errorMessage: error.message }
+        title: i18n.translate(
+          'xpack.apm.settings.uiIndices.applyChanges.failed.title',
+          { defaultMessage: 'Indices could not be applied.' }
+        ),
+        text: i18n.translate(
+          'xpack.apm.settings.uiIndices.applyChanges.failed.text',
+          {
+            defaultMessage:
+              'Something went wrong when applying indices. Error: {errorMessage}',
+            values: { errorMessage: error.message }
+          }
         )
       });
     }
@@ -152,15 +175,18 @@ export function UiIndices() {
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiTitle>
-            <h2>{i('title', 'Indices')}</h2>
+            <h2>
+              {i18n.translate('xpack.apm.settings.uiIndices.title', {
+                defaultMessage: 'Indices'
+              })}
+            </h2>
           </EuiTitle>
           <EuiSpacer size="m" />
           <EuiText size="s" grow={false}>
             <p>
-              {i(
-                'description',
-                `The APM UI uses index patterns to query your APM indices. If you've customized the index names that APM Server writes events to, you may need to update these patterns for the APM UI to work. Settings here take precedence over those set in kibanad.yml.`
-              )}
+              {i18n.translate('xpack.apm.settings.uiIndices.description', {
+                defaultMessage: `The APM UI uses index patterns to query your APM indices. If you've customized the index names that APM Server writes events to, you may need to update these patterns for the APM UI to work. Settings here take precedence over those set in kibanad.yml.`
+              })}
             </p>
             <EuiForm>
               {APM_INDEX_LABELS.map(({ configurationName, label }) => {
@@ -175,10 +201,13 @@ export function UiIndices() {
                   <EuiFormRow
                     key={configurationName}
                     label={label}
-                    helpText={i(
-                      'helpText',
-                      'Overrides {configurationName}: {defaultValue}',
-                      { configurationName, defaultValue }
+                    helpText={i18n.translate(
+                      'xpack.apm.settings.uiIndices.helpText',
+                      {
+                        defaultMessage:
+                          'Overrides {configurationName}: {defaultValue}',
+                        values: { configurationName, defaultValue }
+                      }
                     )}
                     fullWidth
                   >
@@ -196,7 +225,10 @@ export function UiIndices() {
               <EuiFlexGroup justifyContent="flexEnd">
                 <EuiFlexItem grow={false}>
                   <EuiButton onClick={refetch}>
-                    {i('cancelButton', 'Cancel')}
+                    {i18n.translate(
+                      'xpack.apm.settings.uiIndices.cancelButton',
+                      { defaultMessage: 'Cancel' }
+                    )}
                   </EuiButton>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -205,7 +237,10 @@ export function UiIndices() {
                     onClick={handleApplyChangesEvent}
                     isLoading={isSaving}
                   >
-                    {i('applyButton', 'Apply changes')}
+                    {i18n.translate(
+                      'xpack.apm.settings.uiIndices.applyButton',
+                      { defaultMessage: 'Apply changes' }
+                    )}
                   </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>
