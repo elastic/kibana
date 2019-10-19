@@ -32,9 +32,10 @@ export class LogRotator {
     this.running = false;
     this.logFileSize = 0;
     this.intervalID = 0;
-    this.lastIntervalCycleTime = 0;
+    this.lastRotateTime = (new Date()).getTime();
     this.isRotating = false;
     this.throttledRotate = throttle(() => { this._rotate(); }, 5000);
+    console.log(process.pid);
   }
 
   start() {
@@ -102,8 +103,7 @@ export class LogRotator {
   }
 
   _logFileIntervalMonitorHandler() {
-    this.lastIntervalCycleTime = new Date();
-    this.throttledRotate();
+    this._rotate();
   }
 
   _stopLogFileIntervalMonitor() {
@@ -124,13 +124,17 @@ export class LogRotator {
   }
 
   _getLogFileSize() {
-    const logFileStats = fs.statSync(this.logFilePath);
-    return logFileStats.size;
+    try {
+      const logFileStats = fs.statSync(this.logFilePath);
+      return logFileStats.size;
+    } catch {
+      return 0;
+    }
   }
 
   _callRotateOnStartup() {
     if (this.onStartup) {
-      this.throttledRotate();
+      this._rotate();
     }
   }
 
@@ -149,20 +153,21 @@ export class LogRotator {
       return true;
     }
 
-    if (!this.lastIntervalCycleTime) {
-      return false;
-    }
-
     const currentTime = (new Date()).getTime();
-    const elapsedTime = Math.abs(currentTime - this.lastIntervalCycleTime.getTime());
-    return elapsedTime > this.interval * 60 * 1000;
+    const elapsedTime = Math.round((currentTime - this.lastRotateTime) / 1000);
+
+    console.log('elapsedTime: ' + elapsedTime + ' interval: ' + this.interval * 60);
+    return elapsedTime >= this.interval * 30;
   }
 
   _rotate() {
+    console.log('logSize: ' + this.logFileSize + ' limit: ' + this.everyBytes);
     if (!this._shouldRotate()) {
+      console.log('no');
       return;
     }
 
+    console.log('yes');
     this._rotateNow();
   }
 
@@ -173,12 +178,17 @@ export class LogRotator {
     // 3. rename all files to the correct index +1
     // 4. rename + compress current log into 1
     // 5. send SIGHUP to reload log config
+    if (this.isRotating) {
+      return false;
+    }
 
     // rotate process is starting
     this.isRotating = true;
 
     // get rotated files metadata
     const rotatedFiles = this._readRotatedFilesMetadata();
+
+    console.log(rotatedFiles);
 
     // delete last file
     this._deleteLastRotatedFile(rotatedFiles);
@@ -192,6 +202,12 @@ export class LogRotator {
     // send SIGHUP to reload log configuration
     process.kill(process.pid, 'SIGHUP');
 
+    // Reset log file size
+    this.logFileSize = 0;
+
+    // Reset last rotate time
+    this.lastRotateTime = (new Date()).getTime();
+
     // rotate process is finished
     this.isRotating = false;
   }
@@ -203,7 +219,8 @@ export class LogRotator {
     return fs.readdirSync(logFilesFolder)
       .filter(file => new RegExp(`${logFileBaseName}\\.\\d`).test(file))
       .sort((a, b) => Number(a.match(/(\d+)/g)[0]) - Number(b.match(/(\d+)/g)[0]))
-      .map(filename => `${logFilesFolder}${sep}${filename}`);
+      .map(filename => `${logFilesFolder}${sep}${filename}`)
+      .filter(filepath => fs.existsSync(filepath));
   }
 
   _deleteLastRotatedFile(rotatedFiles) {
@@ -219,7 +236,7 @@ export class LogRotator {
     const logFileBaseName = basename(this.logFilePath);
     const logFilesFolder = dirname(this.logFilePath);
 
-    for (let i = rotatedFiles.length - 1; i > 0; i--) {
+    for (let i = rotatedFiles.length - 1; i >= 0; i--) {
       const oldFilePath = rotatedFiles[i];
       const newFilePath = `${logFilesFolder}${sep}${logFileBaseName}.${i + 1}`;
       fs.renameSync(oldFilePath, newFilePath);
@@ -229,5 +246,6 @@ export class LogRotator {
   _rotateCurrentLogFile() {
     const newFilePath = `${this.logFilePath}.0`;
     fs.renameSync(this.logFilePath, newFilePath);
+    fs.writeFileSync(this.logFilePath, '');
   }
 }

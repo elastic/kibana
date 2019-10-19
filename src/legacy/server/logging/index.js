@@ -23,6 +23,7 @@ import { logWithMetadata } from './log_with_metadata';
 import { setupLoggingRotate } from './rotate';
 
 export async function setupLogging(server, loggingConfig) {
+  console.log('MOTHER FUCKER OLA');
   return await server.register({
     plugin: good,
     options: loggingConfig
