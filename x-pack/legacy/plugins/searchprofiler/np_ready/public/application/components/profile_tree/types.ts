@@ -6,5 +6,4 @@
 
 import { Index } from '../../types';
 
-
 export type IndexMap = Record<string, Index>;
