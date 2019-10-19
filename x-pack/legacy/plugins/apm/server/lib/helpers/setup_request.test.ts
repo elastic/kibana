@@ -7,7 +7,7 @@ import { Legacy } from 'kibana';
 import { setupRequest } from './setup_request';
 import { uiSettingsServiceMock } from 'src/core/server/mocks';
 
-jest.mock('./get_apm_indices', () => ({
+jest.mock('./apm_ui_indices', () => ({
   getApmIndices: async () => ({
     apm_oss: {
       sourcemapIndices: 'apm-*',

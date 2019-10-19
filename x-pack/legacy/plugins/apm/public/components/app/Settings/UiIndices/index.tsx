@@ -21,17 +21,44 @@ import {
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { useCallApmApi } from '../../../../hooks/useCallApmApi';
 import { APMClient } from '../../../../services/rest/createCallApmApi';
+import { StringMap } from '../../../../../typings/common';
+import { useKibanaCore } from '../../../../../../observability/public';
 
-const INDICES = [
-  { configuration: 'apm_oss.sourcemapIndices', label: 'Sourcemap Indices' },
-  { configuration: 'apm_oss.errorIndices', label: 'Error Indices' },
-  { configuration: 'apm_oss.onboardingIndices', label: 'Onboarding Indices' },
-  { configuration: 'apm_oss.spanIndices', label: 'Span Indices' },
-  { configuration: 'apm_oss.transactionIndices', label: 'Transaction Indices' },
-  { configuration: 'apm_oss.metricsIndices', label: 'Metrics Indices' },
+function i(id: string, defaultMessage: string, values?: StringMap<string>) {
+  return i18n.translate(`xpack.apm.settings.uiIndices.${id}`, {
+    defaultMessage,
+    values: {}
+  });
+}
+
+const APM_INDEX_LABELS = [
   {
-    configuration: 'apm_oss.apmAgentConfigurationIndex',
-    label: 'Agent Configuration Index'
+    configurationName: 'apm_oss.sourcemapIndices',
+    label: i('sourcemapIndicesLabel', 'Sourcemap Indices')
+  },
+  {
+    configurationName: 'apm_oss.errorIndices',
+    label: i('errorIndicesLabel', 'Error Indices')
+  },
+  {
+    configurationName: 'apm_oss.onboardingIndices',
+    label: i('onboardingIndicesLabel', 'Onboarding Indices')
+  },
+  {
+    configurationName: 'apm_oss.spanIndices',
+    label: i('spanIndicesLabel', 'Span Indices')
+  },
+  {
+    configurationName: 'apm_oss.transactionIndices',
+    label: i('transactionIndicesLabel', 'Transaction Indices')
+  },
+  {
+    configurationName: 'apm_oss.metricsIndices',
+    label: i('metricsIndicesLabel', 'Metrics Indices')
+  },
+  {
+    configurationName: 'apm_oss.apmAgentConfigurationIndex',
+    label: i('apmAgentConfigurationIndexLabel', 'Agent Configuration Index')
   }
 ];
 
@@ -40,7 +67,7 @@ async function saveUiIndices({
   uiIndices
 }: {
   callApmApi: APMClient;
-  uiIndices: { [key: string]: string };
+  uiIndices: StringMap<string>;
 }) {
   await callApmApi({
     method: 'POST',
@@ -52,15 +79,18 @@ async function saveUiIndices({
 }
 
 export function UiIndices() {
-  const [uiIndices, setUiIndices] = useState<{ [key: string]: string }>({});
+  const {
+    notifications: { toasts }
+  } = useKibanaCore();
+
+  const [uiIndices, setUiIndices] = useState<StringMap<string>>({});
   const [isSaving, setIsSaving] = useState(false);
 
   const callApmApiFromHook = useCallApmApi();
 
   const { data = [], refetch } = useFetcher(
     callApmApi => callApmApi({ pathname: `/api/apm/settings/ui-indices` }),
-    [],
-    { preservePreviousData: false }
+    []
   );
 
   useEffect(() => {
@@ -82,10 +112,28 @@ export function UiIndices() {
   ) => {
     event.preventDefault();
     setIsSaving(true);
-    await saveUiIndices({
-      callApmApi: callApmApiFromHook,
-      uiIndices
-    });
+    try {
+      await saveUiIndices({
+        callApmApi: callApmApiFromHook,
+        uiIndices
+      });
+      toasts.addSuccess({
+        title: i('applyChanges.succeeded.title', 'Indices applied'),
+        text: i(
+          'applyChanges.succeeded.text',
+          'The indices changes were successfully applied. These changes are reflected immediately in the APM UI'
+        )
+      });
+    } catch (error) {
+      toasts.addDanger({
+        title: i('applyChanges.failed.title', 'Indices could not be applied.'),
+        text: i(
+          'applyChanges.failed.text',
+          'Something went wrong when applying indices. Error: {errorMessage}',
+          { errorMessage: error.message }
+        )
+      });
+    }
     setIsSaving(false);
   };
 
@@ -104,40 +152,40 @@ export function UiIndices() {
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiTitle>
-            <h2>
-              {i18n.translate('xpack.apm.settings.uiIndicesTitle', {
-                defaultMessage: 'UI Indices'
-              })}
-            </h2>
+            <h2>{i('title', 'Indices')}</h2>
           </EuiTitle>
           <EuiSpacer size="m" />
           <EuiText size="s" grow={false}>
             <p>
-              The APM UI uses index patterns to query your APM indices. If
-              you've customized the index names that APM Server writes events
-              to, you may need to update these patterns for the APM UI to work.
-              Settings here take precedence over those set in kibana.yml.
+              {i(
+                'description',
+                `The APM UI uses index patterns to query your APM indices. If you've customized the index names that APM Server writes events to, you may need to update these patterns for the APM UI to work. Settings here take precedence over those set in kibanad.yml.`
+              )}
             </p>
             <EuiForm>
-              {INDICES.map(({ configuration, label }) => {
+              {APM_INDEX_LABELS.map(({ configurationName, label }) => {
                 const matchedConfiguration = data.find(
-                  ({ configuration: config }) => config === configuration
+                  ({ configuration }) => configuration === configurationName
                 );
-                const fallbackValue = matchedConfiguration
+                const defaultValue = matchedConfiguration
                   ? matchedConfiguration.defaultValue
                   : '';
-                const savedUiIndexValue = uiIndices[configuration] || '';
+                const savedUiIndexValue = uiIndices[configurationName] || '';
                 return (
                   <EuiFormRow
-                    key={configuration}
+                    key={configurationName}
                     label={label}
-                    helpText={`Overrides ${configuration}: ${fallbackValue}`}
+                    helpText={i(
+                      'helpText',
+                      'Overrides {configurationName}: {defaultValue}',
+                      { configurationName, defaultValue }
+                    )}
                     fullWidth
                   >
                     <EuiFieldText
                       fullWidth
-                      name={configuration}
-                      placeholder={fallbackValue}
+                      name={configurationName}
+                      placeholder={defaultValue}
                       value={savedUiIndexValue}
                       onChange={handleChangeIndexConfigurationEvent}
                     />
@@ -147,7 +195,9 @@ export function UiIndices() {
               <EuiSpacer />
               <EuiFlexGroup justifyContent="flexEnd">
                 <EuiFlexItem grow={false}>
-                  <EuiButton onClick={refetch}>Cancel</EuiButton>
+                  <EuiButton onClick={refetch}>
+                    {i('cancelButton', 'Cancel')}
+                  </EuiButton>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButton
@@ -155,7 +205,7 @@ export function UiIndices() {
                     onClick={handleApplyChangesEvent}
                     isLoading={isSaving}
                   >
-                    Apply changes
+                    {i('applyButton', 'Apply changes')}
                   </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>

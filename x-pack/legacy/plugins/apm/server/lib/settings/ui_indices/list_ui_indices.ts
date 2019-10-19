@@ -7,7 +7,10 @@
 import { get } from 'lodash';
 import { Server } from 'hapi';
 import { Setup } from '../../helpers/setup_request';
-import { getSavedObjectsClient } from '../../helpers/saved_objects_client';
+import {
+  getApmUiIndicesSavedObject,
+  getApmUiIndicesConfig
+} from '../../helpers/apm_ui_indices';
 
 const APM_UI_INDICES = [
   'apm_oss.sourcemapIndices',
@@ -27,26 +30,18 @@ export async function listUiIndices({
   server: Server;
 }) {
   const { config } = setup;
+  const apmUiIndicesSavedObject = await getApmUiIndicesSavedObject(server);
+  const apmUiIndicesConfig = getApmUiIndicesConfig(config);
 
-  const savedObjectsClient = getSavedObjectsClient(server, 'data');
-  let attributes = {};
-  try {
-    const apmUiIndices = await savedObjectsClient.get(
-      'apm-ui-indices',
-      'apm-ui-indices'
-    );
-    attributes = apmUiIndices.attributes;
-  } catch (err) {
-    server.log('error', err);
-    throw err;
-  }
-
-  return APM_UI_INDICES.map(indexConfig => ({
-    configuration: indexConfig,
-    defaultValue: config.get<string>(indexConfig),
-    savedValue: get<typeof attributes, string | undefined>(
-      attributes,
-      indexConfig
+  return APM_UI_INDICES.map(configurationName => ({
+    configuration: configurationName,
+    defaultValue: get<typeof apmUiIndicesConfig, string>(
+      apmUiIndicesConfig,
+      configurationName
+    ),
+    savedValue: get<typeof apmUiIndicesSavedObject, string | undefined>(
+      apmUiIndicesSavedObject,
+      configurationName
     )
   }));
 }

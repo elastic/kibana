@@ -6,7 +6,7 @@
 
 import { InternalCoreSetup } from 'src/core/server';
 import { CallCluster } from '../../../../../../../../src/legacy/core_plugins/elasticsearch';
-import { getApmIndices } from '../../helpers/get_apm_indices';
+import { getApmIndices } from '../../helpers/apm_ui_indices';
 
 export async function createApmAgentConfigurationIndex(
   core: InternalCoreSetup

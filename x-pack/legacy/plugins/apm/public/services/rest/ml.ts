@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { npStart } from 'ui/new_platform';
 import { HttpServiceBase } from 'kibana/public';
 import {
   PROCESSOR_EVENT,
@@ -14,6 +13,7 @@ import {
 import { getMlJobId, getMlPrefix } from '../../../common/ml_job_constants';
 import { callApi } from './callApi';
 import { ESFilter } from '../../../typings/elasticsearch';
+import { createCallApmApi, APMClient } from './createCallApmApi';
 
 interface MlResponseItem {
   id: string;
@@ -32,8 +32,6 @@ interface StartedMLJobApiResponse {
   jobs: MlResponseItem[];
 }
 
-const { core } = npStart;
-
 export async function startMLJob({
   serviceName,
   transactionType,
@@ -43,9 +41,16 @@ export async function startMLJob({
   transactionType: string;
   http: HttpServiceBase;
 }) {
-  const indexPatternName = core.injectedMetadata.getInjectedVar(
-    'apmTransactionIndices'
-  );
+  const callApmApi: APMClient = createCallApmApi(http);
+  const indexPatternName = await callApmApi({
+    pathname: `/api/apm/settings/ui-indices/{indexConfigurationName}`,
+    params: {
+      path: {
+        indexConfigurationName: 'apm_oss.transactionIndices'
+      }
+    }
+  });
+
   const groups = ['apm', serviceName.toLowerCase()];
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },

@@ -79,16 +79,16 @@ export const routes: BreadcrumbRoute[] = [
   },
   {
     exact: true,
-    path: '/settings/ui-indices',
+    path: '/settings/indices',
     component: () => (
       <Settings>
         <UiIndices />
       </Settings>
     ),
-    breadcrumb: i18n.translate('xpack.apm.breadcrumb.settings.uiIndicesTitle', {
-      defaultMessage: 'UI Indices'
+    breadcrumb: i18n.translate('xpack.apm.breadcrumb.settings.indicesTitle', {
+      defaultMessage: 'Indices'
     }),
-    name: RouteName.UI_INDICES
+    name: RouteName.INDICES
   },
   {
     exact: true,

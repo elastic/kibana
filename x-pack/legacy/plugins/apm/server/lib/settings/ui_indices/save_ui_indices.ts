@@ -6,29 +6,19 @@
 
 import { Server } from 'hapi';
 import { set } from 'lodash';
-import { getSavedObjectsClient } from '../../helpers/saved_objects_client';
+import { storeApmUiIndicesSavedObject } from '../../helpers/apm_ui_indices';
+import { StringMap } from '../../../../typings/common';
 
 export async function saveUiIndices({
   server,
   uiIndices
 }: {
   server: Server;
-  uiIndices: { [key: string]: string | undefined };
+  uiIndices: StringMap<string | undefined>;
 }) {
   const uiIndicesSavedObject = Object.keys(uiIndices).reduce(
     (acc, key) => set(acc, key, uiIndices[key]),
-    {}
+    { apm_oss: {} }
   );
-
-  const savedObjectsClient = getSavedObjectsClient(server, 'data');
-  try {
-    await savedObjectsClient.create('apm-ui-indices', uiIndicesSavedObject, {
-      id: 'apm-ui-indices',
-      overwrite: true
-    });
-  } catch (err) {
-    server.log('error', err);
-    throw err;
-  }
-  return null;
+  return await storeApmUiIndicesSavedObject(server, uiIndicesSavedObject);
 }

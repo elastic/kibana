@@ -47,12 +47,12 @@ export const Settings: React.FC = props => {
                     isSelected: pathname === '/settings/agent-configuration'
                   },
                   {
-                    name: 'UI Indices',
+                    name: 'Indices',
                     id: '2',
                     // @ts-ignore
-                    href: getAPMHref('/settings/ui-indices', search),
+                    href: getAPMHref('/settings/indices', search),
                     // @ts-ignore
-                    isSelected: pathname === '/settings/ui-indices'
+                    isSelected: pathname === '/settings/indices'
                   }
                 ]
               }
