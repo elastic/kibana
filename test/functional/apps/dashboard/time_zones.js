@@ -22,6 +22,7 @@ import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const pieChart = getService('pieChart');
+  const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['dashboard', 'timePicker', 'settings', 'common']);
@@ -37,16 +38,15 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaSavedObjects();
       await PageObjects.settings.importFile(path.join(__dirname, 'exports', 'timezonetest_6_2_4.json'));
+      await PageObjects.settings.checkImportSucceeded();
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.loadSavedDashboard('time zone test');
     });
 
     after(async () => {
-      await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaSettings();
-      await PageObjects.settings.setAdvancedSettingsSelect('dateFormat:tz', 'UTC');
-      await PageObjects.common.navigateToApp('dashboard');
+      await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC' });
+      await browser.refresh();
     });
 
     it('Exported dashboard adjusts EST time to UTC', async () => {

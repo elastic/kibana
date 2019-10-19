@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const dashboardPanelActions = getService('dashboardPanelActions');
-  const PageObjects = getPageObjects(['common', 'dashboard']);
+  const PageObjects = getPageObjects(['common', 'dashboard', 'timePicker']);
 
   describe('dashboard data-shared attributes', function describeIndexTests() {
     let originalPanelTitles;
@@ -38,6 +38,13 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.loadSavedDashboard('dashboard with everything');
       await PageObjects.dashboard.waitForRenderComplete();
+    });
+
+    it('should have time picker with data-shared-timefilter-duration', async () => {
+      await retry.try(async () => {
+        const sharedData = await PageObjects.timePicker.getTimeDurationForSharing();
+        expect(sharedData).to.not.be(null);
+      });
     });
 
     it('should have data-shared-items-count set to the number of embeddables on the dashboard', async () => {

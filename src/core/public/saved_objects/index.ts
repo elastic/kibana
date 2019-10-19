@@ -21,11 +21,13 @@ export {
   SavedObjectsBatchResponse,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkCreateOptions,
+  SavedObjectsBulkUpdateObject,
   SavedObjectsClient,
   SavedObjectsClientContract,
   SavedObjectsCreateOptions,
   SavedObjectsFindResponsePublic,
   SavedObjectsUpdateOptions,
+  SavedObjectsBulkUpdateOptions,
 } from './saved_objects_client';
 export { SimpleSavedObject } from './simple_saved_object';
 export { SavedObjectsStart } from './saved_objects_service';
