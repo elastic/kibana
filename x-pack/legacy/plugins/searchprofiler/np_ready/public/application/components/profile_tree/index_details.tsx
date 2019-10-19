@@ -17,10 +17,7 @@ export interface Props {
 }
 
 export const IndexDetails = ({ index, target }: Props) => {
-  const {
-    time: { [target]: targetTime },
-    name,
-  } = index;
+  const { time, name } = index;
   return (
     <EuiFlexGroup>
       {/* Time details group */}
@@ -39,7 +36,7 @@ export const IndexDetails = ({ index, target }: Props) => {
               })}
             </small>
           </EuiToolTip>
-          {msToPretty(targetTime, 3)}
+          {msToPretty(time, 3)}
         </EuiText>
       </EuiFlexItem>
       {/* Index Title group */}

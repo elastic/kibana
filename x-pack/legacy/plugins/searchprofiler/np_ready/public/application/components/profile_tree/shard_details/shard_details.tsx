@@ -7,19 +7,18 @@
 import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiBadge, EuiLink, EuiIcon } from '@elastic/eui';
 
-import { Shard } from '../../types';
-import { msToPretty } from '../../utils';
+import { Index, Operation, Shard } from '../../../types';
+import { msToPretty } from '../../../utils';
 import { ShardDetailTree } from './shard_details_tree';
 
 interface Props {
-  target: string;
+  index: Index;
   shard: Shard;
+  operations: Operation[];
 }
 
-export const ShardDetails = ({ shard, target }: Props) => {
-  const {
-    relative: { [target]: targetRelative },
-  } = shard;
+export const ShardDetails = ({ index, shard, operations }: Props) => {
+  const { relative } = shard;
 
   const [shardVisibility, setShardVisibility] = useState<boolean>(false);
 
@@ -28,11 +27,8 @@ export const ShardDetails = ({ shard, target }: Props) => {
       <EuiFlexItem>
         <EuiText className="prfDevTool__shardDetails--dim">
           <EuiBadge style={{ '--prfDevToolProgressPercentage': shard.relative + '%' } as any}>
-            <span
-              className="prfDevTool__progress--percent-ie"
-              style={{ width: targetRelative + '%' }}
-            />
-            <span className="prfDevTool__progressText">{msToPretty(targetRelative, 3)}</span>
+            <span className="prfDevTool__progress--percent-ie" style={{ width: relative + '%' }} />
+            <span className="prfDevTool__progressText">{msToPretty(relative as number, 3)}</span>
           </EuiBadge>
         </EuiText>
         <EuiLink
@@ -42,7 +38,7 @@ export const ShardDetails = ({ shard, target }: Props) => {
           <EuiIcon type={shardVisibility ? 'arrowDown' : 'arrowRight'} />[{shard.id[0]}][
           {shard.id[2]}]
         </EuiLink>
-        {shardVisibility ? <ShardDetailTree target={shard[target]} /> : null}
+        {shardVisibility ? operations.map(data => <ShardDetailTree data={data} />) : null}
       </EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -4,12 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import { Index } from '../../types';
 
-export interface Props {
-  target: any;
-}
 
-export const ShardDetailTree = ({ target }: Props) => {
-  return <div className=""></div>;
-};
+export type IndexMap = Record<string, Index>;
