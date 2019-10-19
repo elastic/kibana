@@ -197,7 +197,12 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
         access_token: accessToken,
         refresh_token: refreshToken,
       } = await this.options.client.callAsInternalUser('shield.oidcAuthenticate', {
-        body: { state: stateOIDCState, nonce: stateNonce, redirect_uri: authenticationResponseURI },
+        body: {
+          state: stateOIDCState,
+          nonce: stateNonce,
+          redirect_uri: authenticationResponseURI,
+          realm: this.realm,
+        },
       });
 
       this.logger.debug('Request has been authenticated via OpenID Connect.');

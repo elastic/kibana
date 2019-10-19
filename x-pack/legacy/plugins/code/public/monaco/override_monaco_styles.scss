@@ -1,4 +1,4 @@
-.codeContainer__editor {
+.codeContainer__monaco {
   .monaco-editor .cursors-layer > .cursor {
     display: none !important;
   }
@@ -9,10 +9,11 @@
 
   .monaco-editor.mac .margin-view-overlays .line-numbers {
     cursor: pointer;
+    color: $euiColorMediumShade;
     background-color: $euiColorLightestShade;
   }
 
-  .code-line-decoration + .cldr.folding {
+  .cldr.code-line-decoration + .cldr.folding {
     left: -124px !important;
     opacity: 1;
   }

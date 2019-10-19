@@ -11,22 +11,20 @@ import { Draggable } from 'react-beautiful-dnd';
 import styled from 'styled-components';
 
 import { BrowserField, BrowserFields } from '../../containers/source';
-import { DraggableFieldBadge } from '../draggables/field_badge';
 import { DragEffects } from '../drag_and_drop/draggable_wrapper';
 import { DroppableWrapper } from '../drag_and_drop/droppable_wrapper';
-import { getColumnsWithTimestamp, getExampleText, getIconFromType } from '../event_details/helpers';
 import { getDraggableFieldId, getDroppableId, DRAG_TYPE_FIELD } from '../drag_and_drop/helpers';
+import { DraggableFieldBadge } from '../draggables/field_badge';
 import { getEmptyValue } from '../empty_value';
-import { OnUpdateColumns } from '../timeline/events';
+import { getColumnsWithTimestamp, getExampleText, getIconFromType } from '../event_details/helpers';
 import { SelectableText } from '../selectable_text';
-import { TruncatableText } from '../truncatable_text';
-
-import { FieldName } from './field_name';
-
-import * as i18n from './translations';
 import { ColumnHeader } from '../timeline/body/column_headers/column_header';
-import { DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/helpers';
 import { defaultColumnHeaderType } from '../timeline/body/column_headers/default_headers';
+import { DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/helpers';
+import { OnUpdateColumns } from '../timeline/events';
+import { TruncatableText } from '../truncatable_text';
+import { FieldName } from './field_name';
+import * as i18n from './translations';
 
 const TypeIcon = styled(EuiIcon)`
   margin-left: 5px;
@@ -85,15 +83,15 @@ export const getFieldItems = ({
     field: (
       <DroppableWrapper
         droppableId={getDroppableId(
-          `field-browser-field-${categoryId}-${field.name}-${timelineId}`
+          `field-browser-field-items-field-droppable-wrapper-${timelineId}-${categoryId}-${field.name}`
         )}
-        key={`${categoryId}-${field.name}-${timelineId}`}
+        key={`field-browser-field-items-field-droppable-wrapper-${timelineId}-${categoryId}-${field.name}`}
         isDropDisabled={true}
         type={DRAG_TYPE_FIELD}
       >
         <Draggable
           draggableId={getDraggableFieldId({
-            contextId: `field-browser-category-${categoryId}-field-${field.name}-${timelineId}`,
+            contextId: `field-browser-field-items-field-draggable-${timelineId}-${categoryId}-${field.name}`,
             fieldId: field.name || '',
           })}
           index={0}
@@ -179,11 +177,11 @@ export const getFieldColumns = () => [
     field: 'description',
     name: i18n.DESCRIPTION,
     render: (description: string) => (
-      <EuiToolTip position="top" content={description}>
-        <TruncatableText size="s" width="390px">
-          {description}
-        </TruncatableText>
-      </EuiToolTip>
+      <TruncatableText>
+        <EuiToolTip position="top" content={description}>
+          <>{description}</>
+        </EuiToolTip>
+      </TruncatableText>
     ),
     sortable: true,
     truncateText: true,

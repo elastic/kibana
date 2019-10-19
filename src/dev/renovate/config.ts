@@ -45,6 +45,13 @@ export const RENOVATE_CONFIG = {
     labels: [...DEFAULT_LABELS, 'renovate:major'],
   },
 
+  // TODO: remove this once we've caught up on upgrades
+  /**
+   * When there is a major and minor update available, only offer the major update,
+   * the list of all upgrades is too overwhelming for now.
+   */
+  separateMajorMinor: false,
+
   /**
    * Enable creation of a "Master Issue" within the repository. This
    * Master Issue is akin to a mini dashboard and contains a list of all
@@ -86,6 +93,8 @@ export const RENOVATE_CONFIG = {
         labels: group.extraLabels && [...DEFAULT_LABELS, ...group.extraLabels],
         enabled: group.enabled === false ? false : undefined,
         allowedVersions: group.allowedVersions || undefined,
+        reviewers: group.reviewers || undefined,
+        masterIssueApproval: group.autoOpenPr ? false : undefined,
       })),
 
       // internal/local packages

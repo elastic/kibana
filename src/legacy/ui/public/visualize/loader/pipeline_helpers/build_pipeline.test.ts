@@ -27,10 +27,15 @@ import {
   Schemas,
 } from './build_pipeline';
 import { Vis, VisState } from 'ui/vis';
-import { AggConfig } from 'ui/vis/agg_config';
-import { SearchSource } from 'ui/courier';
+import { AggConfig } from 'ui/agg_types/agg_config';
+import { searchSourceMock } from 'ui/courier/search_source/mocks';
 
-jest.mock('ui/agg_types/buckets/date_histogram', () => ({}));
+jest.mock('ui/new_platform');
+jest.mock('ui/agg_types/buckets/date_histogram', () => ({
+  setBounds: () => {},
+  dateHistogramBucketAgg: () => {},
+  isDateHistogramBucketAggConfig: () => true,
+}));
 
 describe('visualize loader pipeline helpers: build pipeline', () => {
   describe('prepareJson', () => {
@@ -343,10 +348,7 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
           toExpression: () => 'testing custom expressions',
         },
       };
-      const searchSource: SearchSource = {
-        getField: () => null,
-      };
-      const expression = await buildPipeline(vis, { searchSource });
+      const expression = await buildPipeline(vis, { searchSource: searchSourceMock });
       expect(expression).toMatchSnapshot();
     });
   });

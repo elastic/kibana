@@ -25,13 +25,13 @@ export interface ChromeStart
 |  Method | Description |
 |  --- | --- |
 |  [addApplicationClass(className)](./kibana-plugin-public.chromestart.addapplicationclass.md) | Add a className that should be set on the application container. |
-|  [getApplicationClasses$()](./kibana-plugin-public.chromestart.getapplicationclasses$.md) | Get the current set of classNames that will be set on the application container. |
-|  [getBadge$()](./kibana-plugin-public.chromestart.getbadge$.md) | Get an observable of the current badge |
-|  [getBrand$()](./kibana-plugin-public.chromestart.getbrand$.md) | Get an observable of the current brand information. |
-|  [getBreadcrumbs$()](./kibana-plugin-public.chromestart.getbreadcrumbs$.md) | Get an observable of the current list of breadcrumbs |
-|  [getHelpExtension$()](./kibana-plugin-public.chromestart.gethelpextension$.md) | Get an observable of the current custom help conttent |
-|  [getIsCollapsed$()](./kibana-plugin-public.chromestart.getiscollapsed$.md) | Get an observable of the current collapsed state of the chrome. |
-|  [getIsVisible$()](./kibana-plugin-public.chromestart.getisvisible$.md) | Get an observable of the current visibility state of the chrome. |
+|  [getApplicationClasses$()](./kibana-plugin-public.chromestart.getapplicationclasses_.md) | Get the current set of classNames that will be set on the application container. |
+|  [getBadge$()](./kibana-plugin-public.chromestart.getbadge_.md) | Get an observable of the current badge |
+|  [getBrand$()](./kibana-plugin-public.chromestart.getbrand_.md) | Get an observable of the current brand information. |
+|  [getBreadcrumbs$()](./kibana-plugin-public.chromestart.getbreadcrumbs_.md) | Get an observable of the current list of breadcrumbs |
+|  [getHelpExtension$()](./kibana-plugin-public.chromestart.gethelpextension_.md) | Get an observable of the current custom help conttent |
+|  [getIsCollapsed$()](./kibana-plugin-public.chromestart.getiscollapsed_.md) | Get an observable of the current collapsed state of the chrome. |
+|  [getIsVisible$()](./kibana-plugin-public.chromestart.getisvisible_.md) | Get an observable of the current visibility state of the chrome. |
 |  [removeApplicationClass(className)](./kibana-plugin-public.chromestart.removeapplicationclass.md) | Remove a className added with <code>addApplicationClass()</code>. If className is unknown it is ignored. |
 |  [setAppTitle(appTitle)](./kibana-plugin-public.chromestart.setapptitle.md) | Sets the current app's title |
 |  [setBadge(badge)](./kibana-plugin-public.chromestart.setbadge.md) | Override the current badge |

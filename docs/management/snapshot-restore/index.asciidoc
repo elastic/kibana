@@ -14,6 +14,7 @@ With this UI, you can:
 * <<kib-snapshot-register-repository, Register a repository for storing your snapshots>>
 * <<kib-view-snapshot, View a list of your snapshots and drill down into details>>
 * <<kib-restore-snapshot, Restore data into your cluster from a snapshot>>
+* <<kib-snapshot-policy, Create a policy for automatic snapshots>>
 * <<kib-delete-snapshot, Delete a snapshot to free storage space>>
 
 [role="screenshot"]
@@ -27,16 +28,16 @@ more detailed information.
 [[kib-snapshot-register-repository]]
 === Register a repository
 
-The *Repositories* view provides an overview of your repositories.  You can 
-drill down into each repository for further investigation. 
+The *Repositories* view provides an overview of your repositories. 
+Click a repository name to view its type, number of snapshots, and settings, and also to verify status.
 
 [role="screenshot"]
 image:management/snapshot-restore/images/repository_list.png["Repository list"]
 
-If you don't have a repository, you're prompted to register one. The 
-*Register repository* wizard supports three repository types
+If you don't have a repository, you're prompted to register one. 
+{es} supports three repository types
 out of the box: shared file system, read-only URL, and source-only.  
-For details about these repositories and their settings, 
+For more information on these repositories and their settings, 
 see {ref}/modules-snapshots.html#snapshots-repositories[Repositories]. For an example, 
 see <<snapshot-repositories-example, registering a shared file system repository>>.
 
@@ -53,7 +54,7 @@ into each snapshot for further investigation.
 [role="screenshot"]
 image:management/snapshot-restore/images/snapshot_details.png["Snapshot details"]
 
-To create snapshots, use the Kibana <<console-kibana, Console>>. The 
+If you don’t have any snapshots, you can create them from the {kib} <<console-kibana, Console>>. The 
 {ref}//modules-snapshots.html#snapshots-take-snapshot[snapshot API]
 takes the current state and data in your index or cluster, and then saves it to a 
 shared repository. 
@@ -69,15 +70,48 @@ the new data.
 
 The *Restore* wizard walks you through the process of restoring a snapshot 
 into a running cluster. To get started, go to the *Snapshots* view, find the 
-snapshot, and click the restore icon in the *Actions* column. You’re presented 
-options for defining the restore, including which 
-indices to restore and whether to modify the index settings.
+snapshot, and click the restore icon in the *Actions* column. 
 
-To track the progress of a restore, use the *Restore Status* view. You’ll 
-see the current state for each shard in the snapshot. 
+You’re presented 
+options for the restore, including which 
+indices to restore and whether to modify the index settings.
+You can restore an existing index only if it’s closed and has the same 
+number of shards as the index in the snapshot.
+
+Once you initiate the restore, you're navigated to the *Restore Status* view,
+where you can track the progress. 
 
 [role="screenshot"]
-image:management/snapshot-restore/images/restore-status.png["Snapshot details"]
+image:management/snapshot-restore/images/snapshot-restore.png["Snapshot details"]
+
+
+[float]
+[[kib-snapshot-policy]]
+=== Create a snapshot lifecycle policy
+
+You can create policies to schedule automatic snapshots of your cluster. 
+{ref}/snapshot-lifecycle-management-api.html[Snapshot lifecycle policies] are related 
+to {ref}/index-lifecycle-management.html[index lifecycle policies]. 
+However, where an index lifecycle policy applies to a single index, 
+a snapshot lifecycle policy can span multiple indices.
+
+For an overview of your policies, open the *Policies* view.
+You can drill down into each policy to examine its settings and last successful and failed run. 
+
+If you don’t have any policies, use the *Create policy* wizard.
+You’ll define the snapshots and repository, when to take snapshots, and
+the settings, such as which indices the snapshot should contain.
+
+[role="screenshot"]
+image:management/snapshot-restore/images/create-policy.png["Snapshot details"]
+
+You can perform the following actions on a policy:
+
+* *Run* a policy immediately without waiting for the scheduled time.
+This action is useful before an upgrade or before performing maintenance on indices.
+* *Edit* a policy and immediately apply changes to the schedule.
+* *Delete* a policy to prevent any future snapshots from being taken.
+This action does not cancel any currently ongoing snapshots or remove any previously taken snapshots.
 
 [float]
 [[kib-delete-snapshot]]
@@ -116,7 +150,7 @@ will live.
 . Go to *Management > Elasticsearch > Snapshot and Restore*.
 . Open the *Repositories* view.
 . Click *Register a repository*.
-. Enter a name for your repository. For example, `my_backup`.
+. Enter a name for your repository, for example, `my_backup`.
 . Set *Repository type* to Shared file system.
 + 
 [role="screenshot"]
@@ -128,7 +162,7 @@ image:management/snapshot-restore/images/register_repo.png["Register repository"
 . Use the defaults for all other fields.
 . Click *Register*.
 +
-Your new repository is listed on the *Repositories* tab.
+Your new repository is listed on the *Repositories* view.
 +
 . Click the respository and inspect its details. 
 +

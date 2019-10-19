@@ -4,9 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import {
+  buildEsQuery,
+  getEsQueryConfig,
+  Filter,
+  fromKueryExpression,
+  toElasticsearchQuery,
+} from '@kbn/es-query';
 import { isEmpty, isString, flow } from 'lodash/fp';
 import { StaticIndexPattern } from 'ui/index_patterns';
+import { npSetup } from 'ui/new_platform';
+import { Query } from 'src/plugins/data/common';
 
 import { KueryFilterQuery } from '../../store';
 
@@ -28,7 +36,7 @@ export const escapeQueryValue = (val: number | string = ''): string | number => 
     if (isEmpty(val)) {
       return '""';
     }
-    return val.split(' ').length > 1 ? `"${escapeKuery(val)}"` : escapeKuery(val);
+    return `"${escapeKuery(val)}"`;
   }
 
   return val;
@@ -52,7 +60,7 @@ const escapeWhitespace = (val: string) =>
     .replace(/\n/g, '\\n');
 
 // See the SpecialCharacter rule in kuery.peg
-const escapeSpecialCharacters = (val: string) => val.replace(/[\\():<>"*]/g, '\\$&'); // $& means the whole matched string
+const escapeSpecialCharacters = (val: string) => val.replace(/["]/g, '\\$&'); // $& means the whole matched string
 
 // See the Keyword rule in kuery.peg
 const escapeAndOr = (val: string) => val.replace(/(\s+)(and|or)(\s+)/gi, '$1\\$2$3');
@@ -65,3 +73,26 @@ export const escapeKuery = flow(
   escapeNot,
   escapeWhitespace
 );
+
+export const convertToBuildEsQuery = ({
+  indexPattern,
+  queries,
+  filters,
+}: {
+  indexPattern: StaticIndexPattern;
+  queries: Query[];
+  filters: Filter[];
+}) => {
+  try {
+    return JSON.stringify(
+      buildEsQuery(
+        indexPattern,
+        queries,
+        filters.filter(f => f.meta.disabled === false),
+        getEsQueryConfig(npSetup.core.uiSettings)
+      )
+    );
+  } catch (exp) {
+    return '';
+  }
+};

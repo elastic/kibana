@@ -4,12 +4,12 @@
 
 ## ElasticsearchServiceSetup.createClient property
 
-Create application specific Elasticsearch cluster API client with customized config.
+Create application specific Elasticsearch cluster API client with customized config. See [IClusterClient](./kibana-plugin-server.iclusterclient.md)<!-- -->.
 
 <b>Signature:</b>
 
 ```typescript
-readonly createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ClusterClient;
+readonly createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => IClusterClient;
 ```
 
 ## Example

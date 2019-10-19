@@ -27,7 +27,9 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
   >
     <EuiFormRow
       describedByIds={Array []}
+      display="row"
       fullWidth={false}
+      hasChildLabel={true}
       hasEmptyLabelSpace={true}
       labelType="label"
     >

@@ -24,13 +24,16 @@ const INDEXING_STAGE = {
   WRITING_TO_INDEX: i18n.translate(
     'xpack.fileUpload.jsonUploadAndParse.writingToIndex',
     { defaultMessage: 'Writing to index' }),
+  INDEXING_COMPLETE: i18n.translate(
+    'xpack.fileUpload.jsonUploadAndParse.indexingComplete',
+    { defaultMessage: 'Indexing complete' }),
   CREATING_INDEX_PATTERN: i18n.translate(
     'xpack.fileUpload.jsonUploadAndParse.creatingIndexPattern',
     { defaultMessage: 'Creating index pattern' }),
   INDEX_PATTERN_COMPLETE: i18n.translate(
     'xpack.fileUpload.jsonUploadAndParse.indexPatternComplete',
     { defaultMessage: 'Index pattern complete' }),
-  DATA_INDEXING_ERROR: i18n.translate(
+  INDEXING_ERROR: i18n.translate(
     'xpack.fileUpload.jsonUploadAndParse.dataIndexingError',
     { defaultMessage: 'Data indexing error' }),
   INDEX_PATTERN_ERROR: i18n.translate(
@@ -62,6 +65,14 @@ export class JsonUploadAndParse extends Component {
     indexPatternResp: '',
   };
 
+  componentDidMount() {
+    this._isMounted = true;
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
   _resetFileAndIndexSettings = () => {
     if (this.props.onFileRemove && this.state.fileRef) {
       this.props.onFileRemove(this.state.fileRef);
@@ -83,7 +94,11 @@ export class JsonUploadAndParse extends Component {
     this._setSelectedType(this.state);
     this._setIndexReady({ ...this.state, ...this.props });
     this._indexData({ ...this.state, ...this.props });
-    if (this.props.isIndexingTriggered && !this.state.showImportProgress) {
+    if (
+      this.props.isIndexingTriggered &&
+      !this.state.showImportProgress &&
+      this._isMounted
+    ) {
       this.setState({ showImportProgress: true });
     }
   }
@@ -128,17 +143,21 @@ export class JsonUploadAndParse extends Component {
       parsedFile, transformDetails, indexName, selectedIndexType, appName
     );
 
+    if (!this._isMounted) {
+      return;
+    }
+
     // Index error
     if (!indexDataResp.success) {
       this.setState({
         indexedFile: null,
         indexDataResp,
         indexRequestInFlight: false,
-        currentIndexingStage: INDEXING_STAGE.INDEXING_COMPLETE,
+        currentIndexingStage: INDEXING_STAGE.INDEXING_ERROR,
       });
       this._resetFileAndIndexSettings();
       if (onIndexingComplete) {
-        onIndexingComplete();
+        onIndexingComplete({ indexDataResp });
       }
       return;
     }
@@ -147,6 +166,7 @@ export class JsonUploadAndParse extends Component {
     this.setState({
       indexDataResp,
       indexedFile: parsedFile,
+      currentIndexingStage: INDEXING_STAGE.INDEXING_COMPLETE,
     });
     let indexPatternResp;
     if (boolCreateIndexPattern) {
@@ -154,7 +174,12 @@ export class JsonUploadAndParse extends Component {
     }
 
     // Indexing complete, update state & callback (if any)
-    this.setState({ currentIndexingStage: INDEXING_STAGE.INDEXING_COMPLETE });
+    if (!this._isMounted || !indexPatternResp) {
+      return;
+    }
+    this.setState({
+      currentIndexingStage: INDEXING_STAGE.INDEX_PATTERN_COMPLETE
+    });
     if (onIndexingComplete) {
       onIndexingComplete({
         indexDataResp,
@@ -164,12 +189,18 @@ export class JsonUploadAndParse extends Component {
   }
 
   _createIndexPattern = async ({ indexName }) => {
+    if (!this._isMounted) {
+      return;
+    }
     this.setState({
       indexPatternRequestInFlight: true,
       currentIndexingStage: INDEXING_STAGE.CREATING_INDEX_PATTERN
     });
     const indexPatternResp = await createIndexPattern(indexName);
 
+    if (!this._isMounted) {
+      return;
+    }
     this.setState({
       indexPatternResp,
       indexPatternRequestInFlight: false,
@@ -221,7 +252,10 @@ export class JsonUploadAndParse extends Component {
             importStage={currentIndexingStage}
             indexDataResp={indexDataResp}
             indexPatternResp={indexPatternResp}
-            complete={currentIndexingStage === INDEXING_STAGE.INDEXING_COMPLETE}
+            complete={
+              currentIndexingStage === INDEXING_STAGE.INDEX_PATTERN_COMPLETE
+                || currentIndexingStage === INDEXING_STAGE.INDEXING_ERROR
+            }
             indexName={indexName}
           />
           : (

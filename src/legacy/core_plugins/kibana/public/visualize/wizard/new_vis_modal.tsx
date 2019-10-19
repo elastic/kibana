@@ -24,17 +24,16 @@ import { i18n } from '@kbn/i18n';
 
 import chrome from 'ui/chrome';
 import { VisType } from 'ui/vis';
-import { VisTypeAlias } from '../../../../visualizations/public/np_ready/public';
 import { VisualizeConstants } from '../visualize_constants';
-
+import { createUiStatsReporter, METRIC_TYPE } from '../../../../ui_metric/public';
 import { SearchSelection } from './search_selection';
 import { TypeSelection } from './type_selection';
+import { TypesStart, VisTypeAlias } from '../../../../visualizations/public/np_ready/public/types';
 
 interface TypeSelectionProps {
   isOpen: boolean;
   onClose: () => void;
-  visTypesRegistry: VisType[];
-  visTypeAliases?: VisTypeAlias[];
+  visTypesRegistry: TypesStart;
   editorParams?: string[];
 }
 
@@ -51,6 +50,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
   };
 
   private readonly isLabsEnabled: boolean;
+  private readonly trackUiMetric: ReturnType<typeof createUiStatsReporter>;
 
   constructor(props: TypeSelectionProps) {
     super(props);
@@ -59,6 +59,8 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
     this.state = {
       showSearchVisModal: false,
     };
+
+    this.trackUiMetric = createUiStatsReporter('visualize');
   }
 
   public render() {
@@ -90,7 +92,6 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
             showExperimental={this.isLabsEnabled}
             onVisTypeSelected={this.onVisTypeSelected}
             visTypesRegistry={this.props.visTypesRegistry}
-            visTypeAliases={this.props.visTypeAliases}
           />
         </EuiModal>
       );
@@ -103,29 +104,40 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
     this.props.onClose();
   };
 
-  private onVisTypeSelected = (visType: VisType) => {
-    if (visType.requiresSearch && visType.options.showIndexSelection) {
+  private onVisTypeSelected = (visType: VisType | VisTypeAlias) => {
+    if (!('aliasUrl' in visType) && visType.requiresSearch && visType.options.showIndexSelection) {
       this.setState({
         showSearchVisModal: true,
         visType,
       });
     } else {
-      const params = [`type=${encodeURIComponent(visType.name)}`, ...this.props.editorParams!];
-      this.props.onClose();
-      location.assign(`${baseUrl}${params.join('&')}`);
+      this.redirectToVis(visType);
     }
   };
 
   private onSearchSelected = (searchId: string, searchType: string) => {
-    this.props.onClose();
-
-    const params = [
-      `type=${encodeURIComponent(this.state.visType!.name)}`,
-      `${searchType === 'search' ? 'savedSearchId' : 'indexPattern'}=${searchId}`,
-      ...this.props.editorParams!,
-    ];
-    location.assign(`${baseUrl}${params.join('&')}`);
+    this.redirectToVis(this.state.visType!, searchType, searchId);
   };
+
+  private redirectToVis(visType: VisType | VisTypeAlias, searchType?: string, searchId?: string) {
+    this.trackUiMetric(METRIC_TYPE.CLICK, visType.name);
+
+    if ('aliasUrl' in visType) {
+      window.location = chrome.addBasePath(visType.aliasUrl);
+
+      return;
+    }
+
+    let params = [`type=${encodeURIComponent(visType.name)}`];
+
+    if (searchType) {
+      params.push(`${searchType === 'search' ? 'savedSearchId' : 'indexPattern'}=${searchId}`);
+    }
+    params = params.concat(this.props.editorParams!);
+
+    this.props.onClose();
+    location.assign(`${baseUrl}${params.join('&')}`);
+  }
 }
 
 export { NewVisModal };

@@ -5,7 +5,6 @@
  */
 
 import fs from 'fs';
-import mkdirp from 'mkdirp';
 import * as os from 'os';
 import path from 'path';
 import rimraf from 'rimraf';
@@ -29,7 +28,21 @@ const workspaceDir = path.join(baseDir, 'workspace');
 // @ts-ignore
 const options: ServerOptions = sinon.createStubInstance(ServerOptions);
 // @ts-ignore
-options.lsp = { detach: false };
+options.lsp = {
+  TypeScript: {
+    enabled: true,
+  },
+  Java: {
+    enabled: true,
+  },
+  Go: {
+    enabled: true,
+  },
+  Ctags: {
+    enabled: true,
+  },
+  detach: false,
+};
 // @ts-ignore
 options.maxWorkspace = 2;
 const server = createTestHapiServer();
@@ -59,6 +72,8 @@ class LauncherStub implements ILanguageServerLauncher {
   ): Promise<ILanguageServerHandler> {
     return Promise.resolve(launcherSpy(builtinWorkspace, maxWorkspace, installationPath));
   }
+
+  launchFailed: boolean = false;
 }
 
 TYPESCRIPT.launcher = LauncherStub;
@@ -67,7 +82,7 @@ JAVA.launcher = LauncherStub;
 let controller: typeof LanguageServerController;
 
 beforeAll(() => {
-  mkdirp.sync(workspaceDir);
+  fs.mkdirSync(workspaceDir, { recursive: true });
 });
 beforeEach(async () => {
   sinon.reset();
@@ -99,7 +114,7 @@ afterAll(() => {
 
 function mockRequest(repo: string, file: string) {
   const repoPath = path.join(workspaceDir, repo);
-  mkdirp.sync(repoPath);
+  fs.mkdirSync(repoPath, { recursive: true });
   return {
     method: 'request',
     params: [],

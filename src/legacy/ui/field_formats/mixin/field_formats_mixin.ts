@@ -20,7 +20,7 @@
 import { has } from 'lodash';
 import { Legacy } from 'kibana';
 import { FieldFormatsService } from './field_formats_service';
-import { FieldFormat } from '../field_format';
+import { FieldFormat } from '../../../../plugins/data/common/field_formats';
 
 export function fieldFormatsMixin(kbnServer: any, server: Legacy.Server) {
   const fieldFormatClasses: FieldFormat[] = [];
@@ -28,7 +28,7 @@ export function fieldFormatsMixin(kbnServer: any, server: Legacy.Server) {
   // for use outside of the request context, for special cases
   server.decorate('server', 'fieldFormatServiceFactory', async function(uiSettings) {
     const uiConfigs = await uiSettings.getAll();
-    const uiSettingDefaults = await uiSettings.getDefaults();
+    const uiSettingDefaults = uiSettings.getDefaults();
     Object.keys(uiSettingDefaults).forEach(key => {
       if (has(uiConfigs, key) && uiSettingDefaults[key].type === 'json') {
         uiConfigs[key] = JSON.parse(uiConfigs[key]);

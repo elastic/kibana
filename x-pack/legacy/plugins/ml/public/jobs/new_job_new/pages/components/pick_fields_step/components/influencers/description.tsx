@@ -9,17 +9,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 
-interface Props {
-  children: JSX.Element;
-}
-
-export const Description: FC<Props> = memo(({ children }) => {
+export const Description: FC = memo(({ children }) => {
   const title = i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.influencers.title', {
     defaultMessage: 'Influencers',
   });
   return (
     <EuiDescribedFormGroup
-      idAria="single-example-aria"
+      idAria="description"
       title={<h3>{title}</h3>}
       description={
         <FormattedMessage
@@ -28,8 +24,8 @@ export const Description: FC<Props> = memo(({ children }) => {
         />
       }
     >
-      <EuiFormRow label={title} describedByIds={['single-example-aria']}>
-        {children}
+      <EuiFormRow label={title} describedByIds={['description']}>
+        <>{children}</>
       </EuiFormRow>
     </EuiDescribedFormGroup>
   );

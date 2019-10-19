@@ -71,7 +71,7 @@ export default function langServerCoverageFunctionalTests({
         expect(repositoryItems).to.have.length(0);
       });
 
-      await PageObjects.security.logout();
+      await PageObjects.security.forceLogout();
     });
 
     it('Verify the symbol/referernces object counts in Elasticsearch', async () => {

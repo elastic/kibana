@@ -17,13 +17,18 @@
  * under the License.
  */
 
-import { notificationServiceMock } from '../../../../../../core/public/mocks';
+import { notificationServiceMock, overlayServiceMock } from '../../../../../../core/public/mocks';
 
 jest.doMock('ui/new_platform', () => {
   return {
     npSetup: {
       core: {
         notifications: notificationServiceMock.createSetupContract(),
+      },
+    },
+    npStart: {
+      core: {
+        overlays: overlayServiceMock.createStartContract(),
       },
     },
   };

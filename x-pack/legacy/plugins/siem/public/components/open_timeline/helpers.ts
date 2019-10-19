@@ -14,6 +14,7 @@ import { TimelineResult, GetOneTimeline, NoteResult } from '../../graphql/types'
 import { addNotes as dispatchAddNotes } from '../../store/app/actions';
 import { setTimelineRangeDatePicker as dispatchSetTimelineRangeDatePicker } from '../../store/inputs/actions';
 import {
+  setKqlFilterQueryDraft as dispatchSetKqlFilterQueryDraft,
   applyKqlFilterQuery as dispatchApplyKqlFilterQuery,
   addTimeline as dispatchAddTimeline,
 } from '../../store/timeline/actions';
@@ -125,15 +126,10 @@ export const defaultTimelineToTimelineModel = (
     savedObjectId: duplicate ? null : timeline.savedObjectId,
     version: duplicate ? null : timeline.version,
     title: duplicate ? '' : timeline.title || '',
-  }).reduce(
-    (acc: TimelineModel, [key, value]) => {
-      if (value != null) {
-        acc = set(key, value, acc);
-      }
-      return acc;
-    },
-    { ...timelineDefaults, id: '' }
-  );
+  }).reduce((acc: TimelineModel, [key, value]) => (value != null ? set(key, value, acc) : acc), {
+    ...timelineDefaults,
+    id: '',
+  });
 };
 
 export const formatTimelineResultToModel = (
@@ -151,6 +147,7 @@ export interface QueryTimelineById<TCache> {
   apolloClient: ApolloClient<TCache> | ApolloClient<{}> | undefined;
   duplicate: boolean;
   timelineId: string;
+  openTimeline?: boolean;
   updateIsLoading: ActionCreator<{ id: string; isLoading: boolean }>;
   updateTimeline: DispatchUpdateTimeline;
 }
@@ -159,6 +156,7 @@ export const queryTimelineById = <TCache>({
   apolloClient,
   duplicate = false,
   timelineId,
+  openTimeline = true,
   updateIsLoading,
   updateTimeline,
 }: QueryTimelineById<TCache>) => {
@@ -183,7 +181,10 @@ export const queryTimelineById = <TCache>({
             from: getOr(getDefaultFromValue(), 'dateRange.start', timeline),
             id: 'timeline-1',
             notes,
-            timeline,
+            timeline: {
+              ...timeline,
+              show: openTimeline,
+            },
             to: getOr(getDefaultToValue(), 'dateRange.end', timeline),
           })();
         }
@@ -210,6 +211,15 @@ export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeli
     timeline.kqlQuery.filterQuery.kuery != null &&
     timeline.kqlQuery.filterQuery.kuery.expression !== ''
   ) {
+    dispatch(
+      dispatchSetKqlFilterQueryDraft({
+        id,
+        filterQueryDraft: {
+          kind: 'kuery',
+          expression: timeline.kqlQuery.filterQuery.kuery.expression || '',
+        },
+      })
+    );
     dispatch(
       dispatchApplyKqlFilterQuery({
         id,

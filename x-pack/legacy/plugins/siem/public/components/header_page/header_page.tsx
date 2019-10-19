@@ -8,6 +8,7 @@ import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@ela
 import React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
+import { DefaultDraggable } from '../draggables';
 
 const Header = styled.header`
   ${({ theme }) => `
@@ -19,23 +20,37 @@ const Header = styled.header`
 
 Header.displayName = 'Header';
 
+interface DraggableArguments {
+  field: string;
+  value: string;
+}
+
 export interface HeaderPageProps {
   badgeLabel?: string;
   badgeTooltip?: string;
   children?: React.ReactNode;
+  draggableArguments?: DraggableArguments;
   subtitle?: string | React.ReactNode;
   title: string | React.ReactNode;
-  'data-test-subj'?: string;
 }
 
 export const HeaderPage = pure<HeaderPageProps>(
-  ({ badgeLabel, badgeTooltip, children, subtitle, title, ...rest }) => (
+  ({ badgeLabel, badgeTooltip, children, draggableArguments, subtitle, title, ...rest }) => (
     <Header {...rest}>
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
           <EuiTitle size="l">
             <h1 data-test-subj="page_headline_title">
-              {title}
+              {!draggableArguments ? (
+                title
+              ) : (
+                <DefaultDraggable
+                  data-test-subj="page_headline_draggable"
+                  id={`header-page-draggable-${draggableArguments.field}-${draggableArguments.value}`}
+                  field={draggableArguments.field}
+                  value={`${draggableArguments.value}`}
+                />
+              )}
               {badgeLabel && (
                 <>
                   {' '}

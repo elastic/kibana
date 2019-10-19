@@ -58,6 +58,7 @@ export interface LegacyPluginOptions {
       icon: string;
       euiIconType: string;
       order: number;
+      listed: boolean;
     }>;
     apps: any;
     hacks: string[];
@@ -72,6 +73,7 @@ export interface LegacyPluginOptions {
     visTypes: string[];
     embeddableActions?: string[];
     embeddableFactories?: string[];
+    uiSettingDefaults?: Record<string, any>;
   }>;
   uiCapabilities?: Capabilities;
   publicDir: any;

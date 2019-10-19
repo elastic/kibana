@@ -86,7 +86,7 @@ export const init = () => {
   // Define default response for unhandled requests.
   // We make requests to APIs which don't impact the component under test, e.g. UI metric telemetry,
   // and we can mock them all with a 200 instead of mocking each one individually.
-  server.respondWith([200, {}, 'DefaultResponse']);
+  server.respondWith([200, {}, 'DefaultSinonMockServerResponse']);
 
   const httpRequestsMockHelpers = registerHttpRequestMockHelpers(server);
 

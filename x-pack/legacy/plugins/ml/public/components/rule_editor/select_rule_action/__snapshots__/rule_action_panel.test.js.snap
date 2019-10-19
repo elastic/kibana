@@ -3,8 +3,6 @@
 exports[`RuleActionPanel renders panel for rule with a condition 1`] = `
 <EuiPanel
   className="select-rule-action-panel"
-  grow={true}
-  hasShadow={false}
   paddingSize="m"
 >
   <EuiDescriptionList
@@ -45,17 +43,15 @@ exports[`RuleActionPanel renders panel for rule with a condition 1`] = `
           "title": "actions",
         },
         Object {
-          "description": <EuiLink
-            color="primary"
+          "description": <ForwardRef
             onClick={[Function]}
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Edit rule"
               id="xpack.ml.ruleEditor.ruleActionPanel.editRuleLinkText"
               values={Object {}}
             />
-          </EuiLink>,
+          </ForwardRef>,
           "title": "",
         },
         Object {
@@ -75,8 +71,6 @@ exports[`RuleActionPanel renders panel for rule with a condition 1`] = `
 exports[`RuleActionPanel renders panel for rule with a condition and scope, value not in filter list 1`] = `
 <EuiPanel
   className="select-rule-action-panel"
-  grow={true}
-  hasShadow={false}
   paddingSize="m"
 >
   <EuiDescriptionList
@@ -99,17 +93,15 @@ exports[`RuleActionPanel renders panel for rule with a condition and scope, valu
           "title": "actions",
         },
         Object {
-          "description": <EuiLink
-            color="primary"
+          "description": <ForwardRef
             onClick={[Function]}
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Edit rule"
               id="xpack.ml.ruleEditor.ruleActionPanel.editRuleLinkText"
               values={Object {}}
             />
-          </EuiLink>,
+          </ForwardRef>,
           "title": "",
         },
         Object {
@@ -129,8 +121,6 @@ exports[`RuleActionPanel renders panel for rule with a condition and scope, valu
 exports[`RuleActionPanel renders panel for rule with scope, value in filter list 1`] = `
 <EuiPanel
   className="select-rule-action-panel"
-  grow={true}
-  hasShadow={false}
   paddingSize="m"
 >
   <EuiDescriptionList
@@ -145,17 +135,15 @@ exports[`RuleActionPanel renders panel for rule with scope, value in filter list
           />,
         },
         Object {
-          "description": <EuiLink
-            color="primary"
+          "description": <ForwardRef
             onClick={[Function]}
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Edit rule"
               id="xpack.ml.ruleEditor.ruleActionPanel.editRuleLinkText"
               values={Object {}}
             />
-          </EuiLink>,
+          </ForwardRef>,
           "title": "actions",
         },
         Object {

@@ -39,6 +39,7 @@ describe('GenericRowRenderer', () => {
         browserFields,
         data: system,
         children: <span>{'some children'}</span>,
+        timelineId: 'test',
       });
 
       const wrapper = shallow(<span>{children}</span>);
@@ -68,6 +69,7 @@ describe('GenericRowRenderer', () => {
         browserFields: mockBrowserFields,
         data: system,
         children: <span>{'some children '}</span>,
+        timelineId: 'test',
       });
       const wrapper = mount(
         <TestProviders>
@@ -75,7 +77,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toContain(
-        'some children Evan@zeek-londonsome text6278with resultfailureSource128.199.212.120'
+        'some children Evan@zeek-londonsome text(6278)with resultfailureSource128.199.212.120'
       );
     });
   });
@@ -101,6 +103,7 @@ describe('GenericRowRenderer', () => {
         browserFields,
         data: systemFile,
         children: <span>{'some children'}</span>,
+        timelineId: 'test',
       });
 
       const wrapper = shallow(<span>{children}</span>);
@@ -129,6 +132,7 @@ describe('GenericRowRenderer', () => {
         browserFields: mockBrowserFields,
         data: systemFile,
         children: <span>{'some children '}</span>,
+        timelineId: 'test',
       });
       const wrapper = mount(
         <TestProviders>
@@ -136,7 +140,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toContain(
-        'some children Braden@zeek-londonsome text6278with resultfailureSource128.199.212.120'
+        'some children Braden@zeek-londonsome text(6278)with resultfailureSource128.199.212.120'
       );
     });
   });

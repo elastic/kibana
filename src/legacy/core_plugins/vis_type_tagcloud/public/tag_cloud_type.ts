@@ -23,7 +23,7 @@ import { Status } from 'ui/vis/update_status';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 
 import { TagCloudOptions } from './components/tag_cloud_options';
-import { visFactory } from '../../visualizations/public/np_ready/public';
+import { visFactory } from '../../visualizations/public';
 
 // @ts-ignore
 import { TagCloudVisualization } from './components/tag_cloud_visualization';

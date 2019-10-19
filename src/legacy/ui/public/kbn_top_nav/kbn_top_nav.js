@@ -21,9 +21,6 @@ import 'ngreact';
 import { wrapInI18nContext } from 'ui/i18n';
 import { uiModules } from 'ui/modules';
 import { TopNavMenu } from '../../../core_plugins/kibana_react/public';
-import { Storage } from 'ui/storage';
-import chrome from 'ui/chrome';
-
 
 const module = uiModules.get('kibana');
 
@@ -43,19 +40,10 @@ module.directive('kbnTopNav', () => {
       // of the config array's disableButton function return value changes.
       child.setAttribute('disabled-buttons', 'disabledButtons');
 
-      // Pass in storage
-      const localStorage = new Storage(window.localStorage);
-      child.setAttribute('store', 'store');
-      child.setAttribute('ui-settings', 'uiSettings');
-      child.setAttribute('saved-objects-client', 'savedObjectsClient');
-
       // Append helper directive
       elem.append(child);
 
       const linkFn = ($scope, _, $attr) => {
-        $scope.store = localStorage;
-        $scope.uiSettings = chrome.getUiSettingsClient();
-        $scope.savedObjectsClient = chrome.getSavedObjectsClient();
 
         // Watch config changes
         $scope.$watch(() => {
@@ -89,17 +77,12 @@ module.directive('kbnTopNavHelper', (reactDirective) => {
   return reactDirective(
     wrapInI18nContext(TopNavMenu),
     [
-      ['name', { watchDepth: 'reference' }],
       ['config', { watchDepth: 'value' }],
       ['disabledButtons', { watchDepth: 'reference' }],
 
       ['query', { watchDepth: 'reference' }],
       ['savedQuery', { watchDepth: 'reference' }],
-      ['store', { watchDepth: 'reference' }],
-      ['uiSettings', { watchDepth: 'reference' }],
-      ['savedObjectsClient', { watchDepth: 'reference' }],
       ['intl', { watchDepth: 'reference' }],
-      ['store', { watchDepth: 'reference' }],
 
       ['onQuerySubmit', { watchDepth: 'reference' }],
       ['onFiltersUpdated', { watchDepth: 'reference' }],

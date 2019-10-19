@@ -12,7 +12,6 @@ import { Dispatch } from 'redux';
 import { AddEmbeddableFlyout, Props } from './flyout';
 // @ts-ignore Untyped Local
 import { addElement } from '../../state/actions/elements';
-// @ts-ignore Untyped Local
 import { getSelectedPage } from '../../state/selectors/workpad';
 import { EmbeddableTypes } from '../../../canvas_plugin_src/expression_types/embeddable';
 
@@ -29,11 +28,11 @@ const allowedEmbeddables = {
 };
 
 interface StateProps {
-  pageId: number;
+  pageId: string;
 }
 
 interface DispatchProps {
-  addEmbeddable: (pageId: number, partialElement: { expression: string }) => void;
+  addEmbeddable: (pageId: string, partialElement: { expression: string }) => void;
 }
 
 // FIX: Missing state type
@@ -105,7 +104,7 @@ export class EmbeddableFlyoutPortal extends React.Component<Props> {
   }
 }
 
-export const AddEmbeddablePanel = compose<Props, {}>(
+export const AddEmbeddablePanel = compose<Props, { onClose: () => void }>(
   connect(
     mapStateToProps,
     mapDispatchToProps,

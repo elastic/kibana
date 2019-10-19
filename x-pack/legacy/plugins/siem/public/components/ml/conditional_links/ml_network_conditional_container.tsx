@@ -6,44 +6,40 @@
 
 import React from 'react';
 
-import { match as RouteMatch, Redirect, Route, Switch } from 'react-router-dom';
+import { Redirect, Route, Switch, RouteComponentProps } from 'react-router-dom';
 import { QueryString } from 'ui/utils/query_string';
-import { pure } from 'recompose';
 import { addEntitiesToKql } from './add_entities_to_kql';
 import { replaceKQLParts } from './replace_kql_parts';
 import { emptyEntity, getMultipleEntities, multipleEntities } from './entity_helpers';
-import { replaceKqlQueryLocationForNetworkPage } from './replace_kql_query_location_for_network_page';
-
-interface MlNetworkConditionalProps {
-  match: RouteMatch<{}>;
-  location: Location;
-}
+import { SiemPageName } from '../../../pages/home/types';
 
 interface QueryStringType {
   '?_g': string;
-  kqlQuery: string | null;
+  query: string | null;
   timerange: string | null;
 }
 
-export const MlNetworkConditionalContainer = pure<MlNetworkConditionalProps>(({ match }) => (
+type MlNetworkConditionalProps = Partial<RouteComponentProps<{}>> & { url: string };
+
+export const MlNetworkConditionalContainer = React.memo<MlNetworkConditionalProps>(({ url }) => (
   <Switch>
     <Route
       strict
       exact
-      path={match.url}
+      path={url}
       render={({ location }) => {
         const queryStringDecoded: QueryStringType = QueryString.decode(
           location.search.substring(1)
         );
-        if (queryStringDecoded.kqlQuery != null) {
-          queryStringDecoded.kqlQuery = replaceKQLParts(queryStringDecoded.kqlQuery);
+        if (queryStringDecoded.query != null) {
+          queryStringDecoded.query = replaceKQLParts(queryStringDecoded.query);
         }
         const reEncoded = QueryString.encode(queryStringDecoded);
-        return <Redirect to={`/network?${reEncoded}`} />;
+        return <Redirect to={`/${SiemPageName.network}?${reEncoded}`} />;
       }}
     />
     <Route
-      path={`${match.url}/ip/:ip`}
+      path={`${url}/ip/:ip`}
       render={({
         location,
         match: {
@@ -53,38 +49,33 @@ export const MlNetworkConditionalContainer = pure<MlNetworkConditionalProps>(({ 
         const queryStringDecoded: QueryStringType = QueryString.decode(
           location.search.substring(1)
         );
-        if (queryStringDecoded.kqlQuery != null) {
-          queryStringDecoded.kqlQuery = replaceKQLParts(queryStringDecoded.kqlQuery);
+        if (queryStringDecoded.query != null) {
+          queryStringDecoded.query = replaceKQLParts(queryStringDecoded.query);
         }
         if (emptyEntity(ip)) {
-          if (queryStringDecoded.kqlQuery != null) {
-            queryStringDecoded.kqlQuery = replaceKqlQueryLocationForNetworkPage(
-              queryStringDecoded.kqlQuery
-            );
-          }
           const reEncoded = QueryString.encode(queryStringDecoded);
-          return <Redirect to={`/network?${reEncoded}`} />;
+          return <Redirect to={`/${SiemPageName.network}?${reEncoded}`} />;
         } else if (multipleEntities(ip)) {
           const ips: string[] = getMultipleEntities(ip);
-          if (queryStringDecoded.kqlQuery != null) {
-            queryStringDecoded.kqlQuery = addEntitiesToKql(
-              ['source.ip', 'destination.ip'],
-              ips,
-              queryStringDecoded.kqlQuery
-            );
-            queryStringDecoded.kqlQuery = replaceKqlQueryLocationForNetworkPage(
-              queryStringDecoded.kqlQuery
-            );
-          }
+          queryStringDecoded.query = addEntitiesToKql(
+            ['source.ip', 'destination.ip'],
+            ips,
+            queryStringDecoded.query || ''
+          );
           const reEncoded = QueryString.encode(queryStringDecoded);
-          return <Redirect to={`/network?${reEncoded}`} />;
+          return <Redirect to={`/${SiemPageName.network}?${reEncoded}`} />;
         } else {
           const reEncoded = QueryString.encode(queryStringDecoded);
-          return <Redirect to={`/network/ip/${ip}?${reEncoded}`} />;
+          return <Redirect to={`/${SiemPageName.network}/ip/${ip}?${reEncoded}`} />;
         }
       }}
     />
-    <Redirect from="/ml-network/" to="/ml-network" />
+    <Route
+      path="/ml-network/"
+      render={({ location: { search = '' } }) => (
+        <Redirect from="/ml-network/" to={`/ml-network${search}`} />
+      )}
+    />
   </Switch>
 ));
 

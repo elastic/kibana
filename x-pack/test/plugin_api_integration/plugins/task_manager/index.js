@@ -6,7 +6,7 @@
 
 import { initRoutes } from './init_routes';
 
-export default function (kibana) {
+export default function TaskTestingAPI(kibana) {
   return new kibana.Plugin({
     name: 'sampleTask',
     require: ['elasticsearch', 'task_manager'],
@@ -25,7 +25,6 @@ export default function (kibana) {
           title: 'Sample Task',
           description: 'A sample task for testing the task_manager.',
           timeout: '1m',
-          numWorkers: 2,
 
           // This task allows tests to specify its behavior (whether it reschedules itself, whether it errors, etc)
           // taskInstance.params has the following optional fields:

@@ -81,6 +81,61 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
           }
         });
 
+        it(`shouldn't update action from another space`, async () => {
+          const { body: createdAction } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/action`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              description: 'My action',
+              actionTypeId: 'test.index-record',
+              config: {
+                unencrypted: `This value shouldn't get encrypted`,
+              },
+              secrets: {
+                encrypted: 'This value should be encrypted',
+              },
+            })
+            .expect(200);
+          objectRemover.add(space.id, createdAction.id, 'action');
+
+          const response = await supertestWithoutAuth
+            .put(`${getUrlPrefix('other')}/api/action/${createdAction.id}`)
+            .auth(user.username, user.password)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              description: 'My action updated',
+              config: {
+                unencrypted: `This value shouldn't get encrypted`,
+              },
+              secrets: {
+                encrypted: 'This value should be encrypted',
+              },
+            });
+
+          expect(response.statusCode).to.eql(404);
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'global_read at space1':
+            case 'space_1_all at space1':
+              expect(response.body).to.eql({
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Not Found',
+              });
+              break;
+            case 'superuser at space1':
+              expect(response.body).to.eql({
+                statusCode: 404,
+                error: 'Not Found',
+                message: `Saved object [action/${createdAction.id}] not found`,
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
         it('should handle update action request appropriately when passing a null config', async () => {
           const response = await supertestWithoutAuth
             .put(`${getUrlPrefix(space.id)}/api/action/1`)

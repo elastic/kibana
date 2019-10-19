@@ -17,34 +17,13 @@
  * under the License.
  */
 
-import { IconType } from '@elastic/eui';
 import { Status } from '../update_status';
-import { RequestHandler, ResponseHandler, Vis } from '..';
+import { Vis } from '..';
+export { VisType } from '../../../../core_plugins/visualizations/public';
 
 export declare class VisualizationController {
   constructor(element: HTMLElement, vis: Vis);
   public render(visData: any, visParams: any, update: { [key in Status]: boolean }): Promise<void>;
   public destroy(): void;
   public isLoaded?(): Promise<void> | void;
-}
-
-export interface VisType {
-  name: string;
-  title: string;
-  description?: string;
-  visualization: typeof VisualizationController;
-  isAccessible?: boolean;
-  requestHandler: string | RequestHandler;
-  responseHandler: string | ResponseHandler;
-  icon?: IconType;
-  image?: string;
-  stage: 'experimental' | 'production';
-  requiresSearch: boolean;
-  hidden: boolean;
-
-  // Since we haven't typed everything here yet, we basically "any" the rest
-  // of that interface. This should be removed as soon as this type definition
-  // has been completed. But that way we at least have typing for a couple of
-  // properties on that type.
-  [key: string]: any;
 }

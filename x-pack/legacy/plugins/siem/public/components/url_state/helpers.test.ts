@@ -3,9 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { navTabs, SiemPageName } from '../../pages/home/home_navigations';
+import { navTabs } from '../../pages/home/home_navigations';
+import { SiemPageName } from '../../pages/home/types';
 import { isKqlForRoute, getTitle } from './helpers';
 import { CONSTANTS } from './constants';
+import { HostsType } from '../../store/hosts/model';
 
 describe('Helpers Url_State', () => {
   describe('isKqlForRoute', () => {
@@ -60,8 +62,8 @@ describe('Helpers Url_State', () => {
       expect(result).toEqual('Timelines');
     });
     test('details page name', () => {
-      const result = getTitle('hosts', 'details', navTabs);
-      expect(result).toEqual('details');
+      const result = getTitle('hosts', HostsType.details, navTabs);
+      expect(result).toEqual(HostsType.details);
     });
     test('Not existing', () => {
       const result = getTitle('IamHereButNotReally', undefined, navTabs);

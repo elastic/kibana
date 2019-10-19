@@ -5,7 +5,6 @@
  */
 
 import { Direction, HostsFields } from '../../graphql/types';
-import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 
 export enum HostsType {
   page = 'page',
@@ -30,7 +29,7 @@ export interface HostsQuery extends BasicQueryPaginated {
   sortField: HostsFields;
 }
 
-interface Queries {
+export interface Queries {
   [HostsTableType.authentications]: BasicQueryPaginated;
   [HostsTableType.hosts]: HostsQuery;
   [HostsTableType.events]: BasicQueryPaginated;
@@ -39,8 +38,6 @@ interface Queries {
 }
 
 export interface GenericHostsModel {
-  filterQuery: SerializedFilterQuery | null;
-  filterQueryDraft: KueryFilterQuery | null;
   queries: Queries;
 }
 

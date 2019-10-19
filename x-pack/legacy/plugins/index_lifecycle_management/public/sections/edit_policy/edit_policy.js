@@ -111,7 +111,7 @@ export class EditPolicy extends Component {
     if (firstError) {
       toastNotifications.addDanger(
         i18n.translate('xpack.indexLifecycleMgmt.editPolicy.formErrorsMessage', {
-          defaultMessage: 'Please fix the  errors on this page.'
+          defaultMessage: 'Please fix the errors on this page.'
         })
       );
       const errorRowId = `${firstError.replace('.', '-')}-row`;

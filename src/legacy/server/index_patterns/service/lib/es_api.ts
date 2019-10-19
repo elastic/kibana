@@ -22,6 +22,16 @@ import { APICaller } from 'src/core/server';
 import { convertEsError } from './errors';
 import { FieldCapsResponse } from './field_capabilities';
 
+export interface IndicesAliasResponse {
+  [index: string]: IndexAliasResponse;
+}
+
+export interface IndexAliasResponse {
+  aliases: {
+    [aliasName: string]: Record<string, any>;
+  };
+}
+
 /**
  *  Call the index.getAlias API for a list of indices.
  *
@@ -36,13 +46,16 @@ import { FieldCapsResponse } from './field_capabilities';
  *  @param  {Array<String>|String} indices
  *  @return {Promise<IndexAliasResponse>}
  */
-export async function callIndexAliasApi(callCluster: APICaller, indices: string[] | string) {
+export async function callIndexAliasApi(
+  callCluster: APICaller,
+  indices: string[] | string
+): Promise<IndicesAliasResponse> {
   try {
-    return await callCluster('indices.getAlias', {
+    return (await callCluster('indices.getAlias', {
       index: indices,
       ignoreUnavailable: true,
       allowNoIndices: false,
-    });
+    })) as Promise<IndicesAliasResponse>;
   } catch (error) {
     throw convertEsError(indices, error);
   }

@@ -5,7 +5,6 @@
  */
 
 import fs from 'fs';
-import mkdirp from 'mkdirp';
 import rimraf from 'rimraf';
 import sinon from 'sinon';
 import { pathToFileURL } from 'url';
@@ -22,7 +21,7 @@ const options: ServerOptions = {
 beforeEach(async () => {
   sinon.reset();
   if (!fs.existsSync(options.workspacePath)) {
-    mkdirp.sync(options.workspacePath);
+    fs.mkdirSync(options.workspacePath, { recursive: true });
   }
 });
 
@@ -65,28 +64,6 @@ function createMockProxy(initDelay: number = 0, requestDelay: number = 0) {
 }
 
 const log = new ConsoleLogger();
-test('requests should be sequential', async () => {
-  const clock = sinon.useFakeTimers();
-  const proxyStub = createMockProxy(0, 100);
-  const expander = new RequestExpander(proxyStub, false, 1, options, {}, log);
-  const request1 = {
-    method: 'request1',
-    params: [],
-  };
-  const request2 = {
-    method: 'request2',
-    params: [],
-  };
-  const response1Promise = expander.handleRequest(request1);
-  const response2Promise = expander.handleRequest(request2);
-  clock.tick(100);
-  process.nextTick(() => clock.runAll());
-  const response1 = await response1Promise;
-  const response2 = await response2Promise;
-  // response2 should not be started before response1 ends.
-  expect(response1.result.end).toBeLessThanOrEqual(response2.result.start);
-  clock.restore();
-});
 
 test('be able to open multiple workspace', async () => {
   const proxyStub = createMockProxy();
@@ -102,8 +79,8 @@ test('be able to open multiple workspace', async () => {
     params: [],
     workspacePath: '/tmp/test/workspace/2',
   };
-  mkdirp.sync(request1.workspacePath);
-  mkdirp.sync(request2.workspacePath);
+  fs.mkdirSync(request1.workspacePath, { recursive: true });
+  fs.mkdirSync(request2.workspacePath, { recursive: true });
   await expander.handleRequest(request1);
   await expander.handleRequest(request2);
   expect(proxyStub.initialize.called);
@@ -147,8 +124,8 @@ test('be able to swap workspace', async () => {
     params: [],
     workspacePath: '/tmp/test/workspace/2',
   };
-  mkdirp.sync(request1.workspacePath);
-  mkdirp.sync(request2.workspacePath);
+  fs.mkdirSync(request1.workspacePath, { recursive: true });
+  fs.mkdirSync(request2.workspacePath, { recursive: true });
   await expander.handleRequest(request1);
   await expander.handleRequest(request2);
   expect(proxyStub.initialize.called);
@@ -188,7 +165,7 @@ test('requests should be cancelled if workspace is unloaded', async () => {
     params: [],
     workspacePath: workspace1,
   };
-  mkdirp.sync(workspace1);
+  fs.mkdirSync(workspace1, { recursive: true });
   const promise1 = expander.handleRequest(request);
   const promise2 = expander.handleRequest(request);
   setTimeout(() => expander.unloadWorkspace(workspace1), 1);

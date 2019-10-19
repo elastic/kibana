@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'timePicker']);
 
   // FLAKY: https://github.com/elastic/kibana/issues/22322
-  describe.skip('vertical bar chart', function () {
+  describe('vertical bar chart', function () {
     const fromTime = '2015-09-19 06:31:44.000';
     const toTime = '2015-09-23 18:31:44.000';
     const vizName1 = 'Visualization VerticalBarChart';
@@ -305,6 +305,8 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should show correct series when disabling first agg', async function () {
+        // this will avoid issues with the play tooltip covering the disable agg button
+        await PageObjects.visualize.scrollSubjectIntoView('metricsAggGroup');
         await PageObjects.visualize.toggleDisabledAgg(3);
         await PageObjects.visualize.clickGo();
 

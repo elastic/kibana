@@ -37,10 +37,10 @@ export const TopNav: FC = () => {
   const [time, setTime] = useState(timefilter.getTime());
   const [recentlyUsedRanges, setRecentlyUsedRanges] = useState(getRecentlyUsedRanges());
   const [isAutoRefreshSelectorEnabled, setIsAutoRefreshSelectorEnabled] = useState(
-    timefilter.isAutoRefreshSelectorEnabled
+    timefilter.isAutoRefreshSelectorEnabled()
   );
   const [isTimeRangeSelectorEnabled, setIsTimeRangeSelectorEnabled] = useState(
-    timefilter.isTimeRangeSelectorEnabled
+    timefilter.isTimeRangeSelectorEnabled()
   );
 
   const dateFormat = chrome.getUiSettingsClient().get('dateFormat');
@@ -64,8 +64,8 @@ export const TopNav: FC = () => {
   function timefilterUpdateListener() {
     setTime(timefilter.getTime());
     setRefreshInterval(timefilter.getRefreshInterval());
-    setIsAutoRefreshSelectorEnabled(timefilter.isAutoRefreshSelectorEnabled);
-    setIsTimeRangeSelectorEnabled(timefilter.isTimeRangeSelectorEnabled);
+    setIsAutoRefreshSelectorEnabled(timefilter.isAutoRefreshSelectorEnabled());
+    setIsTimeRangeSelectorEnabled(timefilter.isTimeRangeSelectorEnabled());
   }
 
   function updateFilter({ start, end }: Duration) {
@@ -104,13 +104,7 @@ export const TopNav: FC = () => {
             isAutoRefreshOnly={!isTimeRangeSelectorEnabled}
             refreshInterval={refreshInterval.value}
             onTimeChange={updateFilter}
-            onRefresh={() => {
-              // This check is a workaround to catch a bug in EuiSuperDatePicker which
-              // might not have disabled the refresh interval after a props change.
-              if (!refreshInterval.pause) {
-                mlTimefilterRefresh$.next();
-              }
-            }}
+            onRefresh={() => mlTimefilterRefresh$.next()}
             onRefreshChange={updateInterval}
             recentlyUsedRanges={recentlyUsedRanges}
             dateFormat={dateFormat}

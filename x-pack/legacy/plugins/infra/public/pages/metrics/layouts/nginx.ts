@@ -32,10 +32,26 @@ export const nginxLayoutCreator: InfraMetricLayoutCreator = theme => [
           formatter: InfraFormatterType.abbreviatedNumber,
           stacked: true,
           seriesOverrides: {
-            '200s': { color: theme.eui.euiColorVis1, type: InfraMetricLayoutVisualizationType.bar },
-            '300s': { color: theme.eui.euiColorVis5, type: InfraMetricLayoutVisualizationType.bar },
-            '400s': { color: theme.eui.euiColorVis2, type: InfraMetricLayoutVisualizationType.bar },
-            '500s': { color: theme.eui.euiColorVis9, type: InfraMetricLayoutVisualizationType.bar },
+            '200s': {
+              color: theme.eui.euiColorVis1,
+              type: InfraMetricLayoutVisualizationType.bar,
+              name: '200s',
+            },
+            '300s': {
+              color: theme.eui.euiColorVis5,
+              type: InfraMetricLayoutVisualizationType.bar,
+              name: '300s',
+            },
+            '400s': {
+              color: theme.eui.euiColorVis2,
+              type: InfraMetricLayoutVisualizationType.bar,
+              name: '400s',
+            },
+            '500s': {
+              color: theme.eui.euiColorVis9,
+              type: InfraMetricLayoutVisualizationType.bar,
+              name: '500s',
+            },
           },
         },
       },
@@ -53,7 +69,14 @@ export const nginxLayoutCreator: InfraMetricLayoutCreator = theme => [
           formatter: InfraFormatterType.abbreviatedNumber,
           formatterTemplate: '{{value}}/s',
           seriesOverrides: {
-            rate: { color: theme.eui.euiColorVis1, type: InfraMetricLayoutVisualizationType.area },
+            rate: {
+              color: theme.eui.euiColorVis1,
+              type: InfraMetricLayoutVisualizationType.area,
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.nginxMetricsLayout.requestRateSection.seriesLabel.rate',
+                { defaultMessage: 'rate' }
+              ),
+            },
           },
         },
       },
@@ -73,6 +96,10 @@ export const nginxLayoutCreator: InfraMetricLayoutCreator = theme => [
             connections: {
               color: theme.eui.euiColorVis1,
               type: InfraMetricLayoutVisualizationType.bar,
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.nginxMetricsLayout.activeConnectionsSection.seriesLabel.connections',
+                { defaultMessage: 'connections' }
+              ),
             },
           },
         },

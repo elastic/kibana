@@ -8,7 +8,7 @@ import React, { Fragment, FC, useContext, useEffect, useState, useReducer } from
 import { EuiHorizontalRule } from '@elastic/eui';
 
 import { JobCreatorContext } from '../../../job_creator_context';
-import { PopulationJobCreator, isPopulationJobCreator } from '../../../../../common/job_creator';
+import { PopulationJobCreator } from '../../../../../common/job_creator';
 import { LineChartData } from '../../../../../common/chart_loader';
 import { DropDownLabel, DropDownProps } from '../agg_select';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
@@ -17,7 +17,7 @@ import { getChartSettings, defaultChartSettings } from '../../../charts/common/s
 import { MetricSelector } from './metric_selector';
 import { SplitFieldSelector } from '../split_field';
 import { ChartGrid } from './chart_grid';
-import { mlMessageBarService } from '../../../../../../../components/messagebar/messagebar_service';
+import { mlMessageBarService } from '../../../../../../../components/messagebar';
 
 interface Props {
   setIsValid: (na: boolean) => void;
@@ -33,10 +33,6 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
     chartLoader,
     chartInterval,
   } = useContext(JobCreatorContext);
-
-  if (isPopulationJobCreator(jc) === false) {
-    return null;
-  }
   const jobCreator = jc as PopulationJobCreator;
 
   const { fields } = newJobCapsService;
@@ -48,6 +44,7 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
   const [loadingData, setLoadingData] = useState(false);
   const [start, setStart] = useState(jobCreator.start);
   const [end, setEnd] = useState(jobCreator.end);
+  const [bucketSpanMs, setBucketSpanMs] = useState(jobCreator.bucketSpanMs);
   const [chartSettings, setChartSettings] = useState(defaultChartSettings);
   const [splitField, setSplitField] = useState(jobCreator.splitField);
   const [fieldValuesPerDetector, setFieldValuesPerDetector] = useState<DetectorFieldValues>({});
@@ -112,6 +109,12 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
       setEnd(jobCreator.end);
       loadCharts();
     }
+
+    if (jobCreator.bucketSpanMs !== bucketSpanMs) {
+      setBucketSpanMs(jobCreator.bucketSpanMs);
+      loadCharts();
+    }
+
     setSplitField(jobCreator.splitField);
 
     // update by fields and their by fields
@@ -196,7 +199,14 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
   }
 
   function allDataReady() {
-    return pageReady && aggFieldPairList.length > 0;
+    let ready = aggFieldPairList.length > 0;
+    aggFieldPairList.forEach(af => {
+      if (af.by !== undefined && af.by.field !== null) {
+        // if a by field is set, it's only ready when the value is loaded
+        ready = ready && af.by.value !== null;
+      }
+    });
+    return ready;
   }
 
   return (

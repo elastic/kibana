@@ -10,15 +10,16 @@ import { CreateSourceEditor } from './create_source_editor';
 import { getKibanaRegionList } from '../../../meta';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
+import { FEATURE_ID_PROPERTY_NAME } from '../../../../common/constants';
 
 export class KibanaRegionmapSource extends AbstractVectorSource {
 
   static type = 'REGIONMAP_FILE';
   static title = i18n.translate('xpack.maps.source.kbnRegionMapTitle', {
-    defaultMessage: 'Custom vector shapes'
+    defaultMessage: 'Configured GeoJSON'
   });
   static description = i18n.translate('xpack.maps.source.kbnRegionMapDescription', {
-    defaultMessage: 'Vector shapes from static files configured in kibana.yml'
+    defaultMessage: 'Vector data from hosted GeoJSON configured in kibana.yml'
   })
   ;
   static icon = 'logoKibana';
@@ -79,6 +80,9 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
       format: vectorFileMeta.format.type,
       featureCollectionPath: vectorFileMeta.meta.feature_collection_path,
       fetchUrl: vectorFileMeta.url
+    });
+    featureCollection.features.forEach((feature, index) => {
+      feature.properties[FEATURE_ID_PROPERTY_NAME] = index;
     });
     return {
       data: featureCollection

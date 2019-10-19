@@ -15,7 +15,6 @@ import { TimelineQuery } from '../../containers/timeline';
 import { Direction } from '../../graphql/types';
 import { KqlMode } from '../../store/timeline/model';
 import { AutoSizer } from '../auto_sizer';
-
 import { ColumnHeader } from './body/column_headers/column_header';
 import { defaultHeaders } from './body/column_headers/default_headers';
 import { Sort } from './body/sort';
@@ -30,11 +29,12 @@ import {
   OnToggleDataProviderEnabled,
   OnToggleDataProviderExcluded,
 } from './events';
+import { TimelineKqlFetch } from './fetch_kql_timeline';
 import { Footer, footerHeight } from './footer';
 import { TimelineHeader } from './header';
 import { calculateBodyHeight, combineQueries } from './helpers';
 import { TimelineRefetch } from './refetch_timeline';
-import { TimelineContext, TimelineWidthContext } from './timeline_context';
+import { ManageTimelineContext } from './timeline_context';
 
 const WrappedByAutoSizer = styled.div`
   width: 100%;
@@ -111,15 +111,16 @@ export const Timeline = React.memo<Props>(
     sort,
     toggleColumn,
   }) => {
-    const combinedQueries = combineQueries(
+    const combinedQueries = combineQueries({
       dataProviders,
       indexPattern,
       browserFields,
-      kqlQueryExpression,
+      filters: [],
+      kqlQuery: { query: kqlQueryExpression, language: 'kuery' },
       kqlMode,
       start,
-      end
-    );
+      end,
+    });
     const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
     return (
       <AutoSizer detectAnyWindowResize={true} content>
@@ -147,7 +148,7 @@ export const Timeline = React.memo<Props>(
                 sort={sort}
               />
             </WrappedByAutoSizer>
-
+            <TimelineKqlFetch id={id} indexPattern={indexPattern} inputId="timeline" />
             {combinedQueries != null ? (
               <TimelineQuery
                 id={id}
@@ -170,41 +171,44 @@ export const Timeline = React.memo<Props>(
                   getUpdatedAt,
                   refetch,
                 }) => (
-                  <TimelineRefetch loading={loading} id={id} inspect={inspect} refetch={refetch}>
-                    <TimelineContext.Provider value={loading}>
-                      <TimelineWidthContext.Provider value={width}>
-                        <StatefulBody
-                          browserFields={browserFields}
-                          data={events}
-                          id={id}
-                          height={calculateBodyHeight({
-                            flyoutHeight,
-                            flyoutHeaderHeight,
-                            timelineHeaderHeight,
-                            timelineFooterHeight: footerHeight,
-                          })}
-                          sort={sort}
-                          toggleColumn={toggleColumn}
-                        />
-                        <Footer
-                          serverSideEventCount={totalCount}
-                          hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                          height={footerHeight}
-                          isLive={isLive}
-                          isLoading={loading}
-                          itemsCount={events.length}
-                          itemsPerPage={itemsPerPage}
-                          itemsPerPageOptions={itemsPerPageOptions}
-                          onChangeItemsPerPage={onChangeItemsPerPage}
-                          onLoadMore={loadMore}
-                          nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                          tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
-                          getUpdatedAt={getUpdatedAt}
-                          compact={isCompactFooter(width)}
-                        />
-                      </TimelineWidthContext.Provider>
-                    </TimelineContext.Provider>
-                  </TimelineRefetch>
+                  <ManageTimelineContext loading={loading} width={width}>
+                    <TimelineRefetch
+                      id={id}
+                      inputId="timeline"
+                      inspect={inspect}
+                      loading={loading}
+                      refetch={refetch}
+                    />
+                    <StatefulBody
+                      browserFields={browserFields}
+                      data={events}
+                      id={id}
+                      height={calculateBodyHeight({
+                        flyoutHeight,
+                        flyoutHeaderHeight,
+                        timelineHeaderHeight,
+                        timelineFooterHeight: footerHeight,
+                      })}
+                      sort={sort}
+                      toggleColumn={toggleColumn}
+                    />
+                    <Footer
+                      serverSideEventCount={totalCount}
+                      hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                      height={footerHeight}
+                      isLive={isLive}
+                      isLoading={loading}
+                      itemsCount={events.length}
+                      itemsPerPage={itemsPerPage}
+                      itemsPerPageOptions={itemsPerPageOptions}
+                      onChangeItemsPerPage={onChangeItemsPerPage}
+                      onLoadMore={loadMore}
+                      nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                      tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
+                      getUpdatedAt={getUpdatedAt}
+                      compact={isCompactFooter(width)}
+                    />
+                  </ManageTimelineContext>
                 )}
               </TimelineQuery>
             ) : null}

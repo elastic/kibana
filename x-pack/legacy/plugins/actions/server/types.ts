@@ -6,7 +6,7 @@
 
 import { SavedObjectsClientContract, SavedObjectAttributes } from 'src/core/server';
 import { ActionTypeRegistry } from './action_type_registry';
-import { ExecuteOptions } from './create_execute_function';
+import { PluginSetupContract, PluginStartContract } from './plugin';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (request: any) => Services;
@@ -17,18 +17,21 @@ export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefine
 export interface Services {
   callCluster(path: string, opts: any): Promise<any>;
   savedObjectsClient: SavedObjectsClientContract;
-  log: (tags: string | string[], data?: string | object | (() => any), timestamp?: number) => void;
 }
 
 export interface ActionsPlugin {
-  registerType: ActionTypeRegistry['register'];
-  listTypes: ActionTypeRegistry['list'];
-  execute(options: ExecuteOptions): Promise<void>;
+  setup: PluginSetupContract;
+  start: PluginStartContract;
+}
+
+export interface ActionsConfigType {
+  enabled: boolean;
+  whitelistedHosts: string[];
 }
 
 // the parameters passed to an action type executor function
 export interface ActionTypeExecutorOptions {
-  id: string;
+  actionId: string;
   services: Services;
   config: Record<string, any>;
   secrets: Record<string, any>;
@@ -59,6 +62,7 @@ interface ValidatorType {
   validate<T>(value: any): any;
 }
 
+export type ActionTypeCreator = (config?: ActionsConfigType) => ActionType;
 export interface ActionType {
   id: string;
   name: string;

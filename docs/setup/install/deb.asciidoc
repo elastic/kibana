@@ -205,6 +205,11 @@ locations for a Debian-based system:
   | The location of the data files written to disk by Kibana and its plugins
   | /var/lib/kibana
   | path.data
+  
+| logs
+    | Logs files location
+    |  /var/log/kibana
+    | path.logs
 
 | optimize
   | Transpiled source code. Certain administrative actions (e.g. plugin install)

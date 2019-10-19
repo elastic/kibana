@@ -4,11 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ApolloQueryResult } from 'apollo-client';
+import { ApolloQueryResult, NetworkStatus } from 'apollo-client';
+import { isEqual } from 'lodash/fp';
+import memoizeOne from 'memoize-one';
 import React from 'react';
 import { FetchMoreOptions, FetchMoreQueryOptions, OperationVariables } from 'react-apollo';
 
 import { ESQuery } from '../../common/typed_json';
+import { inputsModel } from '../store/model';
+import { generateTablePaginationOptions } from '../components/paginated_table/helpers';
 
 export interface QueryTemplatePaginatedProps {
   id?: string;
@@ -31,15 +35,23 @@ export class QueryTemplatePaginated<
   TData = any,
   TVariables = OperationVariables
 > extends React.PureComponent<T, TData, TVariables> {
+  private queryVariables: TVariables | null = null;
+  private myLoading: boolean = false;
   private fetchMore!: (
     fetchMoreOptions: FetchMoreOptionsArgs<TData, TVariables>
   ) => PromiseApolloQueryResult;
 
   private fetchMoreOptions!: (newActivePage: number) => FetchMoreOptionsArgs<TData, TVariables>;
 
-  // eslint-disable-next-line @typescript-eslint/no-useless-constructor
+  public memoizedRefetchQuery: (
+    variables: TVariables,
+    limit: number,
+    refetch: (variables?: TVariables) => Promise<ApolloQueryResult<TData>>
+  ) => inputsModel.Refetch;
+
   constructor(props: T) {
     super(props);
+    this.memoizedRefetchQuery = memoizeOne(this.refetchQuery);
   }
 
   public setFetchMore = (
@@ -57,4 +69,30 @@ export class QueryTemplatePaginated<
   public wrappedLoadMore = (newActivePage: number) => {
     return this.fetchMore(this.fetchMoreOptions(newActivePage));
   };
+
+  public refetchQuery = (
+    variables: TVariables,
+    limit: number,
+    refetch: (variables?: TVariables) => Promise<ApolloQueryResult<TData>>
+  ): inputsModel.Refetch => () => {
+    refetch({ ...variables, pagination: generateTablePaginationOptions(0, limit) });
+  };
+
+  public setPrevVariables(vars: TVariables) {
+    this.queryVariables = vars;
+  }
+
+  public isItAValidLoading(loading: boolean, variables: TVariables, networkStatus: NetworkStatus) {
+    if (
+      !this.myLoading &&
+      (!isEqual(variables, this.queryVariables) || networkStatus === NetworkStatus.refetch) &&
+      loading
+    ) {
+      this.myLoading = true;
+    } else if (this.myLoading && !loading) {
+      this.myLoading = false;
+    }
+    this.setPrevVariables(variables);
+    return this.myLoading;
+  }
 }

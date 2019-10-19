@@ -5,7 +5,7 @@
  */
 
 import { Request } from 'hapi';
-import { JobParams, JobDocPayload, JobParamPostPayload, ConditionalHeaders } from '../../types';
+import { JobDocPayload, JobParamPostPayload, ConditionalHeaders } from '../../types';
 
 export interface JobParamPostPayloadDiscoverCsv extends JobParamPostPayload {
   state?: {
@@ -13,7 +13,8 @@ export interface JobParamPostPayloadDiscoverCsv extends JobParamPostPayload {
     sort: any[];
   };
 }
-export interface JobParamsDiscoverCsv extends JobParams {
+
+export interface JobParamsDiscoverCsv {
   indexPatternId?: string;
   post?: JobParamPostPayloadDiscoverCsv; // delete this
 }

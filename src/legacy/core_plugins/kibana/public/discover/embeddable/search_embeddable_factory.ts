@@ -19,18 +19,18 @@
 
 import '../doc_table';
 import { capabilities } from 'ui/capabilities';
+import { npStart, npSetup } from 'ui/new_platform';
 import { i18n } from '@kbn/i18n';
 import chrome from 'ui/chrome';
 import { IPrivate } from 'ui/private';
 import { TimeRange } from 'src/plugins/data/public';
 import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
+import { TExecuteTriggerActions } from 'src/plugins/ui_actions/public';
 import {
   EmbeddableFactory,
   ErrorEmbeddable,
   Container,
-  ExecuteTriggerActions,
-} from '../../../../embeddable_api/public/np_ready/public';
-import { setup, start } from '../../../../embeddable_api/public/np_ready/public/legacy';
+} from '../../../../../../plugins/embeddable/public';
 import { SavedSearchLoader } from '../types';
 import { SearchEmbeddable, SEARCH_EMBEDDABLE_TYPE } from './search_embeddable';
 import { SearchInput, SearchOutput } from './types';
@@ -42,7 +42,7 @@ export class SearchEmbeddableFactory extends EmbeddableFactory<
 > {
   public readonly type = SEARCH_EMBEDDABLE_TYPE;
 
-  constructor(private readonly executeTriggerActions: ExecuteTriggerActions) {
+  constructor(private readonly executeTriggerActions: TExecuteTriggerActions) {
     super({
       savedObjectMetaData: {
         name: i18n.translate('kbn.discover.savedSearch.savedObjectName', {
@@ -110,5 +110,5 @@ export class SearchEmbeddableFactory extends EmbeddableFactory<
   }
 }
 
-const factory = new SearchEmbeddableFactory(start.executeTriggerActions);
-setup.registerEmbeddableFactory(factory.type, factory);
+const factory = new SearchEmbeddableFactory(npStart.plugins.uiActions.executeTriggerActions);
+npSetup.plugins.embeddable.registerEmbeddableFactory(factory.type, factory);

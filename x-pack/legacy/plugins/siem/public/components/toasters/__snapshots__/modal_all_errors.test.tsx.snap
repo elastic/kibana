@@ -36,13 +36,9 @@ exports[`Modal all errors rendering it renders the default all errors modal when
     </EuiModalBody>
     <EuiModalFooter>
       <EuiButton
-        color="primary"
         data-test-subj="modal-all-errors-close"
         fill={true}
-        iconSide="left"
         onClick={[Function]}
-        size="m"
-        type="button"
       >
         Close
       </EuiButton>

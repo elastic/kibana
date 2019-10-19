@@ -66,9 +66,6 @@ test('Execute update job', async () => {
     log,
     esClient as EsClient,
     {
-      security: {
-        enableGitCertCheck: true,
-      },
       disk: {
         thresholdEnabled: true,
         watermarkLow: '80%',
@@ -112,9 +109,6 @@ test('On update job completed because of cancellation ', async () => {
     log,
     esClient as EsClient,
     {
-      security: {
-        enableGitCertCheck: true,
-      },
       disk: {
         thresholdEnabled: true,
         watermarkLow: '80%',
@@ -187,9 +181,6 @@ test('Execute update job failed because of low available disk space', async () =
     log,
     esClient as EsClient,
     {
-      security: {
-        enableGitCertCheck: true,
-      },
       disk: {
         thresholdEnabled: true,
         watermarkLow: '80%',
@@ -266,9 +257,6 @@ test('On update job error or timeout will not persist as error', async () => {
     log,
     esClient as EsClient,
     {
-      security: {
-        enableGitCertCheck: true,
-      },
       disk: {
         thresholdEnabled: true,
         watermarkLow: '80%',

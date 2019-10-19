@@ -93,7 +93,7 @@ export const search = handleActions<SearchState, SearchPayload>(
   {
     [String(changeSearchScope)]: (state: SearchState, action: Action<SearchScope>) =>
       produce<SearchState>(state, draft => {
-        if (Object.values(SearchScope).includes(action.payload)) {
+        if (action.payload && Object.values(SearchScope).includes(action.payload)) {
           draft.scope = action.payload!;
         } else {
           draft.scope = SearchScope.DEFAULT;
@@ -156,7 +156,7 @@ export const search = handleActions<SearchState, SearchPayload>(
           took,
           stats: {
             total,
-            from: from! + 1,
+            from: from as number,
             to: from! + results!.length,
             page: page!,
             totalPage: totalPage!,

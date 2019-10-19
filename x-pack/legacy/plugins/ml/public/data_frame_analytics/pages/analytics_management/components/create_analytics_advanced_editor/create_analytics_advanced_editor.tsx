@@ -135,6 +135,7 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = ({ ac
               )}
             />
           </EuiFormRow>
+          <EuiSpacer />
           {advancedEditorMessages.map((advancedEditorMessage, i) => (
             <Fragment key={i}>
               <EuiCallOut
@@ -154,7 +155,7 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = ({ ac
                   <p>{advancedEditorMessage.error}</p>
                 ) : null}
               </EuiCallOut>
-              <EuiSpacer size="s" />
+              <EuiSpacer />
             </Fragment>
           ))}
           <EuiFormRow
@@ -162,9 +163,12 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = ({ ac
             error={
               createIndexPattern &&
               destinationIndexPatternTitleExists && [
-                i18n.translate('xpack.ml.dataframe.analytics.create.indexPatternTitleError', {
-                  defaultMessage: 'An index pattern with this title already exists.',
-                }),
+                i18n.translate(
+                  'xpack.ml.dataframe.analytics.create.indexPatternAlreadyExistsError',
+                  {
+                    defaultMessage: 'An index pattern with this title already exists.',
+                  }
+                ),
               ]
             }
           >

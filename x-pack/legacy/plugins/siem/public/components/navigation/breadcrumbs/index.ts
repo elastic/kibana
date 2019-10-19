@@ -10,7 +10,7 @@ import { getOr } from 'lodash/fp';
 import { APP_NAME } from '../../../../common/constants';
 import { getBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../pages/hosts/details/utils';
 import { getBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../pages/network/ip_details';
-import { SiemPageName } from '../../../pages/home/home_navigations';
+import { SiemPageName } from '../../../pages/home/types';
 import { RouteSpyState } from '../../../utils/route/types';
 import { getOverviewUrl } from '../../link_to';
 
@@ -45,10 +45,10 @@ export const getBreadcrumbsForRoute = (
       ...siemRootBreadcrumb,
       ...getHostDetailsBreadcrumbs(
         object,
-        urlStateKeys.reduce((acc: string[], item: SearchNavTab) => {
-          acc = [...acc, getSearch(item, object)];
-          return acc;
-        }, [])
+        urlStateKeys.reduce(
+          (acc: string[], item: SearchNavTab) => [...acc, getSearch(item, object)],
+          []
+        )
       ),
     ];
   }
@@ -59,10 +59,7 @@ export const getBreadcrumbsForRoute = (
       ...siemRootBreadcrumb,
       ...getIPDetailsBreadcrumbs(
         object.detailName,
-        urlStateKeys.reduce((acc: string[], item) => {
-          acc = [...acc, getSearch(item, object)];
-          return acc;
-        }, [])
+        urlStateKeys.reduce((acc: string[], item) => [...acc, getSearch(item, object)], [])
       ),
     ];
   }

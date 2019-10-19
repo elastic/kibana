@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { VisFiltersProvider, createFilter, createFiltersFromEvent } from './vis_filters';
+export { VisFiltersProvider, createFilter, createFiltersFromEvent, onBrushEvent } from './vis_filters';

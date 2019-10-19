@@ -20,6 +20,7 @@
 import './core.css';
 
 import { CoreId } from '../server';
+import { PackageInfo, EnvironmentMode } from '../server/types';
 import { CoreSetup, CoreStart } from '.';
 import { ChromeService } from './chrome';
 import { FatalErrorsService, FatalErrorsSetup } from './fatal_errors';
@@ -55,6 +56,10 @@ interface Params {
 /** @internal */
 export interface CoreContext {
   coreId: CoreId;
+  env: {
+    mode: Readonly<EnvironmentMode>;
+    packageInfo: Readonly<PackageInfo>;
+  };
 }
 
 /** @internal */
@@ -80,7 +85,7 @@ export interface InternalCoreStart extends Omit<CoreStart, 'application'> {
 export class CoreSystem {
   private readonly fatalErrors: FatalErrorsService;
   private readonly injectedMetadata: InjectedMetadataService;
-  private readonly legacyPlatform: LegacyPlatformService;
+  private readonly legacy: LegacyPlatformService;
   private readonly notifications: NotificationsService;
   private readonly http: HttpService;
   private readonly savedObjects: SavedObjectsService;
@@ -130,11 +135,12 @@ export class CoreSystem {
     this.rendering = new RenderingService();
     this.application = new ApplicationService();
 
-    this.coreContext = { coreId: Symbol('core') };
+    this.coreContext = { coreId: Symbol('core'), env: injectedMetadata.env };
+
     this.context = new ContextService(this.coreContext);
     this.plugins = new PluginsService(this.coreContext, injectedMetadata.uiPlugins);
 
-    this.legacyPlatform = new LegacyPlatformService({
+    this.legacy = new LegacyPlatformService({
       requireLegacyFiles,
       useLegacyTestHarness,
     });
@@ -154,7 +160,16 @@ export class CoreSystem {
       const notifications = this.notifications.setup({ uiSettings });
 
       const pluginDependencies = this.plugins.getOpaqueIds();
-      const context = this.context.setup({ pluginDependencies });
+      const context = this.context.setup({
+        // We inject a fake "legacy plugin" with dependencies on every plugin so that legacy plugins:
+        // 1) Can access context from any NP plugin
+        // 2) Can register context providers that will only be available to other legacy plugins and will not leak into
+        //    New Platform plugins.
+        pluginDependencies: new Map([
+          ...pluginDependencies,
+          [this.legacy.legacyId, [...pluginDependencies.keys()]],
+        ]),
+      });
       const application = this.application.setup({ context });
 
       const core: InternalCoreSetup = {
@@ -170,7 +185,7 @@ export class CoreSystem {
       // Services that do not expose contracts at setup
       const plugins = await this.plugins.setup(core);
 
-      await this.legacyPlatform.setup({
+      await this.legacy.setup({
         core,
         plugins: mapToObject(plugins.contracts),
       });
@@ -190,6 +205,7 @@ export class CoreSystem {
   public async start() {
     try {
       const injectedMetadata = await this.injectedMetadata.start();
+      const uiSettings = await this.uiSettings.start();
       const docLinks = await this.docLinks.start({ injectedMetadata });
       const http = await this.http.start({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });
       const savedObjects = await this.savedObjects.start({ http });
@@ -208,7 +224,11 @@ export class CoreSystem {
       this.rootDomElement.appendChild(notificationsTargetDomElement);
       this.rootDomElement.appendChild(overlayTargetDomElement);
 
-      const overlays = this.overlay.start({ i18n, targetDomElement: overlayTargetDomElement });
+      const overlays = this.overlay.start({
+        i18n,
+        targetDomElement: overlayTargetDomElement,
+        uiSettings,
+      });
       const notifications = await this.notifications.start({
         i18n,
         overlays,
@@ -221,7 +241,6 @@ export class CoreSystem {
         injectedMetadata,
         notifications,
       });
-      const uiSettings = await this.uiSettings.start();
 
       application.registerMountContext(this.coreContext.coreId, 'core', () => ({
         application: pick(application, ['capabilities', 'navigateToApp']),
@@ -232,6 +251,7 @@ export class CoreSystem {
         notifications,
         overlays,
         uiSettings,
+        injectedMetadata: pick(injectedMetadata, ['getInjectedVar']),
       }));
 
       const core: InternalCoreStart = {
@@ -252,10 +272,11 @@ export class CoreSystem {
         application,
         chrome,
         injectedMetadata,
+        overlays,
         targetDomElement: coreUiTargetDomElement,
       });
 
-      await this.legacyPlatform.start({
+      await this.legacy.start({
         core,
         plugins: mapToObject(plugins.contracts),
         targetDomElement: rendering.legacyTargetDomElement,
@@ -272,7 +293,7 @@ export class CoreSystem {
   }
 
   public stop() {
-    this.legacyPlatform.stop();
+    this.legacy.stop();
     this.plugins.stop();
     this.notifications.stop();
     this.http.stop();

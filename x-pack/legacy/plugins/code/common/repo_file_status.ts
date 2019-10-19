@@ -14,6 +14,7 @@ export enum RepoFileStatus {
   REVISION_NOT_INDEXED = 'Current revision is not indexed.',
   LANG_SERVER_NOT_INSTALLED = 'Install additional language server to support current file.',
   FILE_IS_TOO_BIG = 'Current file is too big.',
+  LANG_SERVER_LAUNCH_FAILED = 'Language server failed to launch',
 }
 
 export enum Severity {
@@ -84,6 +85,12 @@ export const RepoFileStatusText = {
       defaultMessage: 'Current file is covered by dedicated language server.',
     }
   ),
+  [RepoFileStatus.LANG_SERVER_LAUNCH_FAILED]: i18n.translate(
+    'xpack.code.repoFileStatus.langServerLaunchFailed',
+    {
+      defaultMessage: 'Language server launch failed.',
+    }
+  ),
 };
 
 export enum CTA {
@@ -124,5 +131,6 @@ export interface StatusReport {
   langServerStatus?:
     | RepoFileStatus.LANG_SERVER_IS_INITIALIZING
     | RepoFileStatus.LANG_SERVER_NOT_INSTALLED
+    | RepoFileStatus.LANG_SERVER_LAUNCH_FAILED
     | RepoFileStatus.LANG_SERVER_INITIALIZED;
 }

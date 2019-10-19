@@ -39,9 +39,13 @@ export function GenericComboBox<T>(props: GenericComboBoxProps<T>) {
 
   const labels = options.map(getLabel);
   const euiOptions: EuiComboBoxOptionProps[] = labels.map(label => ({ label }));
-  const selectedEuiOptions = selectedOptions.map(option => {
-    return euiOptions[options.indexOf(option)];
-  });
+  const selectedEuiOptions = selectedOptions
+    .filter(option => {
+      return options.indexOf(option) !== -1;
+    })
+    .map(option => {
+      return euiOptions[options.indexOf(option)];
+    });
 
   const onComboBoxChange = (newOptions: EuiComboBoxOptionProps[]) => {
     const newValues = newOptions.map(({ label }) => {

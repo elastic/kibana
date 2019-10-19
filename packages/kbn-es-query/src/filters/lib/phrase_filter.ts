@@ -17,14 +17,27 @@
  * under the License.
  */
 
+import { get } from 'lodash';
 import { Filter, FilterMeta } from './meta_filter';
 
 export type PhraseFilterMeta = FilterMeta & {
   params: {
     query: string; // The unformatted value
   };
+  script?: {
+    script: {
+      params: any;
+    };
+  };
+  field?: any;
 };
 
 export type PhraseFilter = Filter & {
   meta: PhraseFilterMeta;
 };
+
+export const isPhraseFilter = (filter: any): filter is PhraseFilter =>
+  filter && (filter.query && filter.query.match);
+
+export const isScriptedPhraseFilter = (filter: any): filter is PhraseFilter =>
+  Boolean(get(filter, 'script.script.params.value'));

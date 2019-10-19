@@ -8,10 +8,10 @@ export function MonitoringLogstashSummaryStatusProvider({ getService }) {
   const testSubjects = getService('testSubjects');
 
   const SUBJ_SUMMARY = 'logstashClusterStatus';
-  const SUBJ_SUMMARY_NODE_COUNT = `${SUBJ_SUMMARY} node_count`;
-  const SUBJ_SUMMARY_MEMORY_USED = `${SUBJ_SUMMARY} memory_used`;
-  const SUBJ_SUMMARY_EVENTS_IN_TOTAL = `${SUBJ_SUMMARY} events_in_total`;
-  const SUBJ_SUMMARY_EVENTS_OUT_TOTAL = `${SUBJ_SUMMARY} events_out_total`;
+  const SUBJ_SUMMARY_NODE_COUNT = `${SUBJ_SUMMARY} > node_count`;
+  const SUBJ_SUMMARY_MEMORY_USED = `${SUBJ_SUMMARY} > memory_used`;
+  const SUBJ_SUMMARY_EVENTS_IN_TOTAL = `${SUBJ_SUMMARY} > events_in_total`;
+  const SUBJ_SUMMARY_EVENTS_OUT_TOTAL = `${SUBJ_SUMMARY} > events_out_total`;
 
   return new class LogstashSummaryStatus {
 

@@ -18,11 +18,9 @@
  */
 
 import { defaults, pluck, last, get } from 'lodash';
-import { IndexedArray } from 'ui/indexed_array';
 import { IndexPattern } from './index_pattern';
 
-// @ts-ignore
-import { DuplicateField } from 'ui/errors';
+import { DuplicateField } from '../../../../../../plugins/kibana_utils/public';
 // @ts-ignore
 import mockLogStashFields from '../../../../../../fixtures/logstash_fields';
 // @ts-ignore
@@ -36,15 +34,20 @@ jest.mock('ui/registry/field_formats', () => ({
   },
 }));
 
-jest.mock('ui/utils/mapping_setup', () => ({
-  expandShorthand: jest.fn().mockImplementation(() => ({
-    id: true,
-    title: true,
-    fieldFormatMap: {
-      _deserialize: jest.fn().mockImplementation(() => []),
-    },
-  })),
-}));
+jest.mock('../../../../../../plugins/kibana_utils/public', () => {
+  const originalModule = jest.requireActual('../../../../../../plugins/kibana_utils/public');
+
+  return {
+    ...originalModule,
+    expandShorthand: jest.fn(() => ({
+      id: true,
+      title: true,
+      fieldFormatMap: {
+        _deserialize: jest.fn().mockImplementation(() => []),
+      },
+    })),
+  };
+});
 
 jest.mock('ui/notify', () => ({
   toastNotifications: {
@@ -106,6 +109,18 @@ const apiClient = {
   getFieldsForWildcard: jest.fn(),
 };
 
+const notifications = {
+  toasts: {
+    addDanger: jest.fn(),
+    addError: jest.fn(),
+    add: jest.fn(),
+    addWarning: jest.fn(),
+    addSuccess: jest.fn(),
+    remove: jest.fn(),
+    get$: jest.fn(),
+  },
+};
+
 // helper function to create index patterns
 function create(id: string, payload?: any): Promise<IndexPattern> {
   const indexPattern = new IndexPattern(
@@ -113,7 +128,8 @@ function create(id: string, payload?: any): Promise<IndexPattern> {
     (cfg: any) => config.get(cfg),
     savedObjectsClient as any,
     apiClient,
-    patternCache
+    patternCache,
+    notifications
   );
 
   setDocsourcePayload(id, payload);
@@ -158,7 +174,6 @@ describe('IndexPattern', () => {
     test('should append the found fields', () => {
       expect(savedObjectsClient.get).toHaveBeenCalled();
       expect(indexPattern.fields).toHaveLength(mockLogStashFields().length);
-      expect(indexPattern.fields).toBeInstanceOf(IndexedArray);
     });
   });
 
@@ -180,6 +195,39 @@ describe('IndexPattern', () => {
       const respNames = pluck(indexPattern.getScriptedFields(), 'name');
 
       expect(respNames).toEqual(scriptedNames);
+    });
+  });
+
+  describe('getComputedFields', () => {
+    test('should be a function', () => {
+      expect(indexPattern.getComputedFields).toBeInstanceOf(Function);
+    });
+
+    test('should request all stored fields', () => {
+      expect(indexPattern.getComputedFields().storedFields).toContain('*');
+    });
+
+    test('should request date fields as docvalue_fields', () => {
+      const { docvalueFields } = indexPattern.getComputedFields();
+      const docValueFieldNames = docvalueFields.map(field => field.field);
+
+      expect(Object.keys(docValueFieldNames).length).toBe(3);
+      expect(docValueFieldNames).toContain('@timestamp');
+      expect(docValueFieldNames).toContain('time');
+      expect(docValueFieldNames).toContain('utc_time');
+    });
+
+    test('should request date field doc values in date_time format', () => {
+      const { docvalueFields } = indexPattern.getComputedFields();
+      const timestampField = docvalueFields.find(field => field.field === '@timestamp');
+
+      expect(timestampField).toHaveProperty('format', 'date_time');
+    });
+
+    test('should not request scripted date fields as docvalue_fields', () => {
+      const { docvalueFields } = indexPattern.getComputedFields();
+
+      expect(docvalueFields).not.toContain('script date');
     });
   });
 
@@ -250,7 +298,9 @@ describe('IndexPattern', () => {
       const scriptedFields = indexPattern.getScriptedFields();
       // expect(saveSpy.callCount).to.equal(1);
       expect(scriptedFields).toHaveLength(oldCount + 1);
-      expect(indexPattern.fields.byName[scriptedField.name].name).toEqual(scriptedField.name);
+      expect((indexPattern.fields.getByName(scriptedField.name) as Field).name).toEqual(
+        scriptedField.name
+      );
     });
 
     test('should remove scripted field, by name', async () => {
@@ -259,11 +309,11 @@ describe('IndexPattern', () => {
       const oldCount = scriptedFields.length;
       const scriptedField = last(scriptedFields);
 
-      await indexPattern.removeScriptedField(scriptedField.name);
+      await indexPattern.removeScriptedField(scriptedField);
 
       // expect(saveSpy.callCount).to.equal(1);
       expect(indexPattern.getScriptedFields().length).toEqual(oldCount - 1);
-      expect(indexPattern.fields.byName[scriptedField.name]).toEqual(undefined);
+      expect(indexPattern.fields.getByName(scriptedField.name)).toEqual(undefined);
     });
 
     test('should not allow duplicate names', async () => {
@@ -342,7 +392,8 @@ describe('IndexPattern', () => {
       (cfg: any) => config.get(cfg),
       savedObjectsClient as any,
       apiClient,
-      patternCache
+      patternCache,
+      notifications
     );
     await pattern.init();
 
@@ -354,7 +405,8 @@ describe('IndexPattern', () => {
       (cfg: any) => config.get(cfg),
       savedObjectsClient as any,
       apiClient,
-      patternCache
+      patternCache,
+      notifications
     );
     await samePattern.init();
 

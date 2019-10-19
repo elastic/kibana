@@ -9,7 +9,7 @@ A function that returns a context value for a specific key of given context type
 <b>Signature:</b>
 
 ```typescript
-export declare type IContextProvider<TContext extends Record<string, any>, TContextName extends keyof TContext, TProviderParameters extends any[] = []> = (context: Partial<TContext>, ...rest: TProviderParameters) => Promise<TContext[TContextName]> | TContext[TContextName];
+export declare type IContextProvider<THandler extends HandlerFunction<any>, TContextName extends keyof HandlerContextType<THandler>> = (context: Partial<HandlerContextType<THandler>>, ...rest: HandlerParameters<THandler>) => Promise<HandlerContextType<THandler>[TContextName]> | HandlerContextType<THandler>[TContextName];
 ```
 
 ## Remarks

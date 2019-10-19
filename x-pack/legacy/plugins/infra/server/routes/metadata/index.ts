@@ -6,6 +6,9 @@
 
 import Boom, { boomify } from 'boom';
 import { get } from 'lodash';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/lib/Either';
+import { identity } from 'fp-ts/lib/function';
 import {
   InfraMetadata,
   InfraMetadataWrappedRequest,
@@ -29,9 +32,10 @@ export const initMetadataRoute = (libs: InfraBackendLibs) => {
     path: '/api/infra/metadata',
     handler: async req => {
       try {
-        const { nodeId, nodeType, sourceId } = InfraMetadataRequestRT.decode(
-          req.payload
-        ).getOrElseL(throwErrors(Boom.badRequest));
+        const { nodeId, nodeType, sourceId } = pipe(
+          InfraMetadataRequestRT.decode(req.payload),
+          fold(throwErrors(Boom.badRequest), identity)
+        );
 
         const { configuration } = await libs.sources.getSourceConfiguration(req, sourceId);
         const metricsMetadata = await getMetricMetadata(
@@ -60,12 +64,15 @@ export const initMetadataRoute = (libs: InfraBackendLibs) => {
 
         const id = metricsMetadata.id;
         const name = metricsMetadata.name || id;
-        return InfraMetadataRT.decode({
-          id,
-          name,
-          features: [...metricFeatures, ...cloudMetricsFeatures, ...apmMetricFeatures],
-          info,
-        }).getOrElseL(throwErrors(Boom.badImplementation));
+        return pipe(
+          InfraMetadataRT.decode({
+            id,
+            name,
+            features: [...metricFeatures, ...cloudMetricsFeatures, ...apmMetricFeatures],
+            info,
+          }),
+          fold(throwErrors(Boom.badImplementation), identity)
+        );
       } catch (error) {
         throw boomify(error);
       }

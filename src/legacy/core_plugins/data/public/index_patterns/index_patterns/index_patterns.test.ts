@@ -19,7 +19,12 @@
 
 // eslint-disable-next-line max-classes-per-file
 import { IndexPatterns } from './index_patterns';
-import { SavedObjectsClientContract, UiSettingsClientContract } from 'kibana/public';
+import {
+  SavedObjectsClientContract,
+  UiSettingsClientContract,
+  HttpServiceBase,
+  NotificationsSetup,
+} from 'kibana/public';
 
 jest.mock('../errors', () => ({
   IndexPatternMissingIndices: jest.fn(),
@@ -28,12 +33,6 @@ jest.mock('../errors', () => ({
 jest.mock('ui/registry/field_formats', () => ({
   fieldFormats: {
     getDefaultInstance: jest.fn(),
-  },
-}));
-
-jest.mock('ui/notify', () => ({
-  toastNotifications: {
-    addDanger: jest.fn(),
   },
 }));
 
@@ -65,12 +64,10 @@ describe('IndexPatterns', () => {
   beforeEach(() => {
     const savedObjectsClient = {} as SavedObjectsClientContract;
     const uiSettings = {} as UiSettingsClientContract;
+    const http = {} as HttpServiceBase;
+    const notifications = {} as NotificationsSetup;
 
-    indexPatterns = new IndexPatterns(uiSettings, savedObjectsClient);
-  });
-
-  test('does not cache gets without an id', () => {
-    expect(indexPatterns.get()).not.toBe(indexPatterns.get());
+    indexPatterns = new IndexPatterns(uiSettings, savedObjectsClient, http, notifications);
   });
 
   test('does cache gets for the same id', () => {

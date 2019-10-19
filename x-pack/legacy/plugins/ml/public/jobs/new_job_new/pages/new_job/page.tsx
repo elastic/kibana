@@ -7,12 +7,11 @@
 import React, { FC, useEffect, Fragment } from 'react';
 
 import { EuiPage, EuiPageBody, EuiPageContentBody } from '@elastic/eui';
+import { toastNotifications } from 'ui/notify';
+import { i18n } from '@kbn/i18n';
 import { Wizard } from './wizard';
-import {
-  jobCreatorFactory,
-  isSingleMetricJobCreator,
-  isPopulationJobCreator,
-} from '../../common/job_creator';
+import { WIZARD_STEPS } from '../components/step_types';
+import { jobCreatorFactory, isAdvancedJobCreator } from '../../common/job_creator';
 import {
   JOB_TYPE,
   DEFAULT_MODEL_MEMORY_LIMIT,
@@ -23,8 +22,7 @@ import { ResultsLoader } from '../../common/results_loader';
 import { JobValidator } from '../../common/job_validator';
 import { useKibanaContext } from '../../../../contexts/kibana';
 import { getTimeFilterRange } from '../../../../components/full_time_range_selector';
-import { MlTimeBuckets } from '../../../../util/ml_time_buckets';
-import { newJobDefaults } from '../../../new_job/utils/new_job_defaults';
+import { TimeBuckets } from '../../../../util/time_buckets';
 import { ExistingJobsAndGroups, mlJobService } from '../../../../services/job_service';
 import { expandCombinedJobConfig } from '../../common/job_creator/configs';
 
@@ -40,8 +38,6 @@ export interface PageProps {
 export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   const kibanaContext = useKibanaContext();
 
-  const jobDefaults = newJobDefaults();
-
   const jobCreator = jobCreatorFactory(jobType)(
     kibanaContext.currentIndexPattern,
     kibanaContext.currentSavedSearch,
@@ -51,37 +47,75 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   const { from, to } = getTimeFilterRange();
   jobCreator.setTimeRange(from, to);
 
-  let skipTimeRangeStep = false;
+  let firstWizardStep =
+    jobType === JOB_TYPE.ADVANCED
+      ? WIZARD_STEPS.ADVANCED_CONFIGURE_DATAFEED
+      : WIZARD_STEPS.TIME_RANGE;
 
   if (mlJobService.tempJobCloningObjects.job !== undefined) {
+    // cloning a job
     const clonedJob = mlJobService.cloneJob(mlJobService.tempJobCloningObjects.job);
     const { job, datafeed } = expandCombinedJobConfig(clonedJob);
     jobCreator.cloneFromExistingJob(job, datafeed);
 
-    skipTimeRangeStep = mlJobService.tempJobCloningObjects.skipTimeRangeStep;
     // if we're not skipping the time range, this is a standard job clone, so wipe the jobId
-    if (skipTimeRangeStep === false) {
+    if (mlJobService.tempJobCloningObjects.skipTimeRangeStep === false) {
       jobCreator.jobId = '';
+    } else if (jobType !== JOB_TYPE.ADVANCED) {
+      firstWizardStep = WIZARD_STEPS.PICK_FIELDS;
     }
+
     mlJobService.tempJobCloningObjects.skipTimeRangeStep = false;
     mlJobService.tempJobCloningObjects.job = undefined;
+
+    if (
+      mlJobService.tempJobCloningObjects.start !== undefined &&
+      mlJobService.tempJobCloningObjects.end !== undefined
+    ) {
+      // auto select the start and end dates for the time range picker
+      jobCreator.setTimeRange(
+        mlJobService.tempJobCloningObjects.start,
+        mlJobService.tempJobCloningObjects.end
+      );
+      mlJobService.tempJobCloningObjects.start = undefined;
+      mlJobService.tempJobCloningObjects.end = undefined;
+    }
   } else {
+    // creating a new job
     jobCreator.bucketSpan = DEFAULT_BUCKET_SPAN;
 
-    if (isPopulationJobCreator(jobCreator) === true) {
-      // for population jobs use the default mml (1GB)
-      jobCreator.modelMemoryLimit = jobDefaults.anomaly_detectors.model_memory_limit;
-    } else {
-      // for all other jobs, use 10MB
+    if (jobCreator.type !== JOB_TYPE.POPULATION && jobCreator.type !== JOB_TYPE.ADVANCED) {
+      // for all other than population or advanced, use 10MB
       jobCreator.modelMemoryLimit = DEFAULT_MODEL_MEMORY_LIMIT;
     }
 
-    if (isSingleMetricJobCreator(jobCreator) === true) {
+    if (jobCreator.type === JOB_TYPE.SINGLE_METRIC) {
       jobCreator.modelPlot = true;
+    }
+
+    if (kibanaContext.currentSavedSearch.id !== undefined) {
+      // Jobs created from saved searches cannot be cloned in the wizard as the
+      // ML job config holds no reference to the saved search ID.
+      jobCreator.createdBy = null;
+    }
+
+    if (isAdvancedJobCreator(jobCreator)) {
+      // for advanced jobs, load the full time range start and end times
+      // so they can be used for job validation and bucket span estimation
+      try {
+        jobCreator.autoSetTimeRange();
+      } catch (error) {
+        toastNotifications.addDanger({
+          title: i18n.translate('xpack.ml.newJob.wizard.autoSetJobCreatorTimeRange.error', {
+            defaultMessage: `Error retrieving beginning and end times of index`,
+          }),
+          text: error,
+        });
+      }
     }
   }
 
-  const chartInterval = new MlTimeBuckets();
+  const chartInterval = new TimeBuckets();
   chartInterval.setBarTarget(BAR_TARGET);
   chartInterval.setMaxBars(MAX_BARS);
   chartInterval.setInterval('auto');
@@ -103,7 +137,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
 
   return (
     <Fragment>
-      <EuiPage style={{ backgroundColor: '#FFF' }} data-test-subj="mlPageJobWizard">
+      <EuiPage style={{ backgroundColor: 'inherit' }} data-test-subj={`mlPageJobWizard ${jobType}`}>
         <EuiPageBody>
           <EuiPageContentBody>
             <Wizard
@@ -113,7 +147,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
               chartInterval={chartInterval}
               jobValidator={jobValidator}
               existingJobsAndGroups={existingJobsAndGroups}
-              skipTimeRangeStep={skipTimeRangeStep}
+              firstWizardStep={firstWizardStep}
             />
           </EuiPageContentBody>
         </EuiPageBody>

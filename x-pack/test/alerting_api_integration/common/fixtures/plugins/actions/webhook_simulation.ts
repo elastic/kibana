@@ -6,7 +6,9 @@
 import expect from '@kbn/expect';
 import Joi from 'joi';
 import Hapi, { Util } from 'hapi';
-import { fromNullable } from 'fp-ts/lib/Option';
+import { fromNullable, map, filter, getOrElse } from 'fp-ts/lib/Option';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { constant } from 'fp-ts/lib/function';
 
 interface WebhookRequest extends Hapi.Request {
   payload: string;
@@ -19,16 +21,18 @@ export async function initPlugin(server: Hapi.Server, path: string) {
   ) {
     const scheme = {
       async authenticate(request: Hapi.Request, h: Hapi.ResponseToolkit) {
-        const credentials = fromNullable(request.headers.authorization)
-          .map(authorization => authorization.split(/\s+/))
-          .filter(parts => parts.length > 1)
-          .map(parts => Buffer.from(parts[1], 'base64').toString())
-          .filter(credentialsPart => credentialsPart.indexOf(':') !== -1)
-          .map(credentialsPart => {
+        const credentials = pipe(
+          fromNullable(request.headers.authorization),
+          map(authorization => authorization.split(/\s+/)),
+          filter(parts => parts.length > 1),
+          map(parts => Buffer.from(parts[1], 'base64').toString()),
+          filter(credentialsPart => credentialsPart.indexOf(':') !== -1),
+          map(credentialsPart => {
             const [username, password] = credentialsPart.split(':');
             return { username, password };
-          })
-          .getOrElse({ username: '', password: '' });
+          }),
+          getOrElse(constant({ username: '', password: '' }))
+        );
 
         return h.authenticated({ credentials });
       },

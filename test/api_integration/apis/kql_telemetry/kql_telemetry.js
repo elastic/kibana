@@ -18,7 +18,7 @@
  */
 
 import expect from '@kbn/expect';
-import Promise from 'bluebird';
+import Bluebird from 'bluebird';
 import { get } from 'lodash';
 
 export default function ({ getService }) {
@@ -89,7 +89,7 @@ export default function ({ getService }) {
     });
 
     it('should only accept literal boolean values for the opt_in POST body param', function () {
-      return Promise.all([
+      return Bluebird.all([
         supertest
           .post('/api/kibana/kql_opt_in_telemetry')
           .set('content-type', 'application/json')

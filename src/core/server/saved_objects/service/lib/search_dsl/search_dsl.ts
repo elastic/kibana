@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { KueryNode } from '@kbn/es-query';
 import Boom from 'boom';
 
 import { IndexMapping } from '../../../mappings';
@@ -36,6 +37,7 @@ interface GetSearchDslOptions {
     type: string;
     id: string;
   };
+  kueryNode?: KueryNode;
 }
 
 export function getSearchDsl(
@@ -52,6 +54,7 @@ export function getSearchDsl(
     sortOrder,
     namespace,
     hasReference,
+    kueryNode,
   } = options;
 
   if (!type) {
@@ -63,7 +66,7 @@ export function getSearchDsl(
   }
 
   return {
-    ...getQueryParams(
+    ...getQueryParams({
       mappings,
       schema,
       namespace,
@@ -71,8 +74,9 @@ export function getSearchDsl(
       search,
       searchFields,
       defaultSearchOperator,
-      hasReference
-    ),
+      hasReference,
+      kueryNode,
+    }),
     ...getSortingParams(mappings, type, sortField, sortOrder),
   };
 }

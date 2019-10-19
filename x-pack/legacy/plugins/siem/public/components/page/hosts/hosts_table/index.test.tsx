@@ -10,6 +10,7 @@ import { getOr } from 'lodash/fp';
 import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { Provider as ReduxStoreProvider } from 'react-redux';
+import { npSetup } from 'ui/new_platform';
 
 import {
   apolloClientObservable,
@@ -17,11 +18,15 @@ import {
   mockGlobalState,
   TestProviders,
 } from '../../../../mock';
+import { MockNpSetUp, mockUiSettings } from '../../../../mock/ui_settings';
 import { createStore, hostsModel, State } from '../../../../store';
-
+import { HostsTableType } from '../../../../store/hosts/model';
 import { HostsTable } from './index';
 import { mockData } from './mock';
-import { HostsTableType } from '../../../../store/hosts/model';
+
+const mockNpSetup: MockNpSetUp = (npSetup as unknown) as MockNpSetUp;
+jest.mock('ui/new_platform');
+mockNpSetup.core.uiSettings = mockUiSettings;
 
 describe('Hosts Table', () => {
   const loadPage = jest.fn();
@@ -40,6 +45,7 @@ describe('Hosts Table', () => {
           <HostsTable
             data={mockData.Hosts.edges}
             id="hostsQuery"
+            isInspect={false}
             indexPattern={mockIndexPattern}
             fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.Hosts.pageInfo)}
             loading={false}
@@ -60,6 +66,7 @@ describe('Hosts Table', () => {
           <TestProviders store={store}>
             <HostsTable
               id="hostsQuery"
+              isInspect={false}
               indexPattern={mockIndexPattern}
               loading={false}
               data={mockData.Hosts.edges}
@@ -84,6 +91,7 @@ describe('Hosts Table', () => {
               <HostsTable
                 id="hostsQuery"
                 indexPattern={mockIndexPattern}
+                isInspect={false}
                 loading={false}
                 data={mockData.Hosts.edges}
                 totalCount={mockData.Hosts.totalCount}
@@ -140,7 +148,7 @@ describe('Hosts Table', () => {
             .find('.euiTable thead tr th button')
             .first()
             .text()
-        ).toEqual('NameClick to sort in descending order');
+        ).toEqual('Host nameClick to sort in descending order');
       });
     });
   });

@@ -3,7 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ResizeChecker } from 'ui/resize_checker';
+
+import { ResizeChecker } from '../components/shared/resize_checker';
 import { monaco } from './monaco';
 export class MonacoDiffEditor {
   public diffEditor: monaco.editor.IDiffEditor | null = null;

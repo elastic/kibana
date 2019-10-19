@@ -6,17 +6,14 @@
 
 import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
 import { JobCreatorContext } from '../../../job_creator_context';
-import {
-  SingleMetricJobCreator,
-  isSingleMetricJobCreator,
-} from '../../../../../common/job_creator';
+import { SingleMetricJobCreator } from '../../../../../common/job_creator';
 import { LineChartData } from '../../../../../common/chart_loader';
 import { AggSelect, DropDownLabel, DropDownProps, createLabel } from '../agg_select';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
 import { AggFieldPair } from '../../../../../../../../common/types/fields';
 import { AnomalyChart, CHART_TYPE } from '../../../charts/anomaly_chart';
 import { getChartSettings } from '../../../charts/common/settings';
-import { mlMessageBarService } from '../../../../../../../components/messagebar/messagebar_service';
+import { mlMessageBarService } from '../../../../../../../components/messagebar';
 
 interface Props {
   setIsValid: (na: boolean) => void;
@@ -32,10 +29,6 @@ export const SingleMetricDetectors: FC<Props> = ({ setIsValid }) => {
     chartLoader,
     chartInterval,
   } = useContext(JobCreatorContext);
-
-  if (isSingleMetricJobCreator(jc) === false) {
-    return null;
-  }
   const jobCreator = jc as SingleMetricJobCreator;
 
   const { fields } = newJobCapsService;
@@ -47,6 +40,7 @@ export const SingleMetricDetectors: FC<Props> = ({ setIsValid }) => {
   const [loadingData, setLoadingData] = useState(false);
   const [start, setStart] = useState(jobCreator.start);
   const [end, setEnd] = useState(jobCreator.end);
+  const [bucketSpanMs, setBucketSpanMs] = useState(jobCreator.bucketSpanMs);
 
   function detectorChangeHandler(selectedOptionsIn: DropDownLabel[]) {
     setSelectedOptions(selectedOptionsIn);
@@ -73,6 +67,11 @@ export const SingleMetricDetectors: FC<Props> = ({ setIsValid }) => {
     if (jobCreator.start !== start || jobCreator.end !== end) {
       setStart(jobCreator.start);
       setEnd(jobCreator.end);
+      loadChart();
+    }
+
+    if (jobCreator.bucketSpanMs !== bucketSpanMs) {
+      setBucketSpanMs(jobCreator.bucketSpanMs);
       loadChart();
     }
   }, [jobCreatorUpdated]);

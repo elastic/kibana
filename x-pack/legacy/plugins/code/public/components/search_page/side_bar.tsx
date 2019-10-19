@@ -9,7 +9,6 @@ import {
   EuiFacetGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
   EuiTitle,
   EuiToken,
 } from '@elastic/eui';
@@ -18,7 +17,6 @@ import React from 'react';
 
 import { RepositoryUtils } from '../../../common/repository_utils';
 import { SearchScope } from '../../../model';
-import { ScopeTabs } from './scope_tabs';
 
 interface Props {
   query: string;
@@ -74,15 +72,9 @@ export class SideBar extends React.PureComponent<Props> {
   public render() {
     return (
       <div className="codeSidebar__container">
-        <ScopeTabs query={this.props.query} scope={this.props.scope} />
-        <div className="codeFilter__group">
-          <EuiFlexGroup
-            className="codeFilter__title"
-            gutterSize="s"
-            alignItems="center"
-            style={{ marginBottom: '.5rem' }}
-          >
-            <EuiFlexItem grow={false}>
+        <div className="codeFilter__groups">
+          <EuiFlexGroup className="codeFilter__group" gutterSize="none" alignItems="center">
+            <EuiFlexItem grow={false} className="codeFilter__group-icon">
               <EuiToken iconType="tokenRepo" />
             </EuiFlexItem>
             <EuiFlexItem>
@@ -96,15 +88,9 @@ export class SideBar extends React.PureComponent<Props> {
               </EuiTitle>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiFacetGroup>{this.renderRepoFacets()}</EuiFacetGroup>
-          <EuiSpacer />
-          <EuiFlexGroup
-            className="codeFilter__title"
-            gutterSize="s"
-            alignItems="center"
-            style={{ marginBottom: '.5rem' }}
-          >
-            <EuiFlexItem grow={false}>
+          <EuiFacetGroup className="codeFilter__group">{this.renderRepoFacets()}</EuiFacetGroup>
+          <EuiFlexGroup className="codeFilter__group" gutterSize="none" alignItems="center">
+            <EuiFlexItem grow={false} className="codeFilter__group-icon">
               <EuiToken
                 iconType="tokenElement"
                 displayOptions={{ color: 'tokenTint07', shape: 'rectangle', fill: true }}
@@ -121,7 +107,10 @@ export class SideBar extends React.PureComponent<Props> {
               </EuiTitle>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiFacetGroup data-test-subj="codeSearchLanguageFilterList">
+          <EuiFacetGroup
+            className="codeFilter__group"
+            data-test-subj="codeSearchLanguageFilterList"
+          >
             {this.renderLangFacets()}
           </EuiFacetGroup>
         </div>

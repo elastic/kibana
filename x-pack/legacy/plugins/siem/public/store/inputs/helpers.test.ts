@@ -19,6 +19,7 @@ import {
   addGlobalLink,
   removeTimelineLink,
   addTimelineLink,
+  deleteOneQuery,
 } from './helpers';
 import { InputsModel, TimeRange } from './model';
 
@@ -117,7 +118,7 @@ describe('Inputs', () => {
       };
       const newState: InputsModel = upsertQuery(newQuery);
 
-      expect(newState.global.query[0]).toEqual({
+      expect(newState.global.queries[0]).toEqual({
         id: 'myQuery',
         inspect: null,
         isInspected: false,
@@ -143,7 +144,7 @@ describe('Inputs', () => {
       newQuery.state = newState;
       newState = upsertQuery(newQuery);
 
-      expect(newState.global.query[0]).toEqual({
+      expect(newState.global.queries[0]).toEqual({
         id: 'myQuery',
         inspect: null,
         isInspected: false,
@@ -178,7 +179,7 @@ describe('Inputs', () => {
       };
       const newState: InputsModel = setIsInspected(newQuery);
 
-      expect(newState.global.query[0]).toEqual({
+      expect(newState.global.queries[0]).toEqual({
         id: 'myQuery',
         inspect: null,
         isInspected: true,
@@ -198,7 +199,7 @@ describe('Inputs', () => {
       };
       const newState: InputsModel = setIsInspected(newQuery);
 
-      expect(newState.global.query[0]).toEqual({
+      expect(newState.global.queries[0]).toEqual({
         id: 'myQuery',
         inspect: null,
         isInspected: false,
@@ -225,6 +226,81 @@ describe('Inputs', () => {
     test('add timeline link Lock from inputs', () => {
       const newState: InputsModel = addTimelineLink('global', state);
       expect(newState.timeline.linkTo).toEqual(['global']);
+    });
+  });
+
+  describe('deleteOneQuery', () => {
+    test('make sure that we only delete one query', () => {
+      const refetch = jest.fn();
+      const newQuery: UpdateQueryParams = {
+        inputId: 'global',
+        id: 'myQuery',
+        inspect: null,
+        loading: false,
+        refetch,
+        state,
+      };
+      let newState: InputsModel = upsertQuery(newQuery);
+      const deleteQuery: UpdateQueryParams = {
+        inputId: 'global',
+        id: 'deleteQuery',
+        inspect: null,
+        loading: false,
+        refetch,
+        state: newState,
+      };
+      newState = upsertQuery(deleteQuery);
+      expect(
+        deleteOneQuery({
+          inputId: 'global',
+          id: 'deleteQuery',
+          state: newState,
+        })
+      ).toEqual({
+        global: {
+          linkTo: ['timeline'],
+          policy: {
+            duration: 300000,
+            kind: 'manual',
+          },
+          queries: [
+            {
+              id: 'myQuery',
+              inspect: null,
+              isInspected: false,
+              loading: false,
+              refetch,
+              selectedInspectIndex: 0,
+            },
+          ],
+          timerange: {
+            from: 0,
+            fromStr: 'now-24h',
+            kind: 'relative',
+            to: 1,
+            toStr: 'now',
+          },
+          query: { query: '', language: 'kuery' },
+          filters: [],
+        },
+        timeline: {
+          linkTo: ['global'],
+          policy: {
+            duration: 300000,
+            kind: 'manual',
+          },
+          queries: [],
+          timerange: {
+            from: 0,
+            fromStr: 'now-24h',
+            kind: 'relative',
+            to: 1,
+            toStr: 'now',
+          },
+          query: { query: '', language: 'kuery' },
+          filters: [],
+        },
+      });
     });
   });
 });

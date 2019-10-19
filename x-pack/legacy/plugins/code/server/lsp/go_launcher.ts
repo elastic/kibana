@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import paths from '@elastic/simple-git/dist/util/paths';
 import { spawn } from 'child_process';
 import fs from 'fs';
 import getPort from 'get-port';
 import * as glob from 'glob';
+import { platform as getOsPlatform } from 'os';
 import path from 'path';
 import { MarkupKind } from 'vscode-languageserver-protocol';
 import { Logger } from '../log';
@@ -24,7 +26,8 @@ export class GoServerLauncher extends AbstractLauncher {
   constructor(
     readonly targetHost: string,
     readonly options: ServerOptions,
-    readonly loggerFactory: LoggerFactory
+    readonly loggerFactory: LoggerFactory,
+    readonly installationPath: string
   ) {
     super('go', targetHost, options, loggerFactory);
   }
@@ -76,46 +79,60 @@ export class GoServerLauncher extends AbstractLauncher {
     return path.resolve(installationPath, GoToolchain[0]);
   }
 
-  async spawnProcess(installationPath: string, port: number, log: Logger) {
+  async spawnProcess(port: number, log: Logger) {
     const launchersFound = glob.sync(
       process.platform === 'win32' ? 'go-langserver.exe' : 'go-langserver',
       {
-        cwd: installationPath,
+        cwd: this.installationPath,
       }
     );
     if (!launchersFound.length) {
       throw new Error('Cannot find executable go language server');
     }
 
-    let envPath = process.env.PATH;
-    const goToolchain = await this.getBundledGoToolchain(installationPath, log);
+    const goToolchain = await this.getBundledGoToolchain(this.installationPath, log);
     if (!goToolchain) {
       throw new Error('Cannot find go toolchain in bundle installation');
     }
-    // Construct $GOROOT from the bundled go toolchain.
+
     const goRoot = goToolchain;
     const goHome = path.resolve(goToolchain, 'bin');
-    envPath = process.platform === 'win32' ? envPath + ';' + goHome : envPath + ':' + goHome;
-    // Construct $GOPATH under 'kibana/data/code'.
     const goPath = this.options.goPath;
     if (!fs.existsSync(goPath)) {
       fs.mkdirSync(goPath);
     }
     const goCache = path.resolve(goPath, '.cache');
+
+    const langserverRelatedEnv: { [name: string]: string } = {
+      GOROOT: goRoot,
+      GOPATH: goPath,
+      GOCACHE: goCache,
+      CGO_ENABLED: '0',
+    };
+
+    // Always prefer the bundled git.
+    const platform = getOsPlatform();
+    const git = paths(platform);
+    const gitPath = path.dirname(git.binPath);
+    if (platform !== 'win32') {
+      langserverRelatedEnv.PREFIX = git.nativeDir;
+      if (platform === 'linux') {
+        langserverRelatedEnv.GIT_SSL_CAINFO = path.join(git.nativeDir, 'ssl/cacert.pem');
+      }
+    }
+
     const params: string[] = ['-port=' + port.toString()];
-    const golsp = path.resolve(installationPath, launchersFound[0]);
+    const golsp = path.resolve(this.installationPath, launchersFound[0]);
+    const env = Object.create(process.env);
+    env.PATH = gitPath + path.delimiter + goHome + path.delimiter + env.PATH;
     const p = spawn(golsp, params, {
       detached: false,
       stdio: 'pipe',
       env: {
-        ...process.env,
+        ...env,
         CLIENT_HOST: '127.0.0.1',
         CLIENT_PORT: port.toString(),
-        GOROOT: goRoot,
-        GOPATH: goPath,
-        GOCACHE: goCache,
-        PATH: envPath,
-        CGO_ENABLED: '0',
+        ...langserverRelatedEnv,
       },
     });
     p.stdout.on('data', data => {

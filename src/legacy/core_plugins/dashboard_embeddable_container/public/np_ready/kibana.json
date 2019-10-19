@@ -3,7 +3,8 @@
   "version": "kibana",
   "requiredPlugins": [
     "embeddable",
-    "inspector"
+    "inspector",
+    "ui_actions"
   ],
   "server": false,
   "ui": true

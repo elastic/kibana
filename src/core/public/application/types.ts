@@ -114,6 +114,15 @@ export interface AppMountContext {
     overlays: OverlayStart;
     /** {@link UiSettingsClient} */
     uiSettings: UiSettingsClientContract;
+    /**
+     * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
+     * use *only* to retrieve config values. There is no way to set injected values
+     * in the new platform. Use the legacy platform API instead.
+     * @deprecated
+     * */
+    injectedMetadata: {
+      getInjectedVar: (name: string, defaultValue?: any) => unknown;
+    };
   };
 }
 
@@ -193,7 +202,7 @@ export interface ApplicationSetup {
    */
   registerMountContext<T extends keyof AppMountContext>(
     contextName: T,
-    provider: IContextProvider<AppMountContext, T>
+    provider: IContextProvider<App['mount'], T>
   ): void;
 }
 
@@ -224,7 +233,7 @@ export interface InternalApplicationSetup {
   registerMountContext<T extends keyof AppMountContext>(
     pluginOpaqueId: PluginOpaqueId,
     contextName: T,
-    provider: IContextProvider<AppMountContext, T>
+    provider: IContextProvider<App['mount'], T>
   ): void;
 }
 
@@ -261,7 +270,7 @@ export interface ApplicationStart {
    */
   registerMountContext<T extends keyof AppMountContext>(
     contextName: T,
-    provider: IContextProvider<AppMountContext, T>
+    provider: IContextProvider<App['mount'], T>
   ): void;
 }
 
@@ -291,7 +300,7 @@ export interface InternalApplicationStart
   registerMountContext<T extends keyof AppMountContext>(
     pluginOpaqueId: PluginOpaqueId,
     contextName: T,
-    provider: IContextProvider<AppMountContext, T>
+    provider: IContextProvider<App['mount'], T>
   ): void;
 
   // Internal APIs

@@ -6,6 +6,9 @@
 
 import expect from '@kbn/expect';
 
+import { pipe } from 'fp-ts/lib/pipeable';
+import { identity } from 'fp-ts/lib/function';
+import { fold } from 'fp-ts/lib/Either';
 import {
   LOG_ANALYSIS_GET_LOG_ENTRY_RATE_PATH,
   getLogEntryRateRequestPayloadRT,
@@ -17,8 +20,8 @@ import {
 } from '../../../../legacy/plugins/infra/common/runtime_types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-const TIME_BEFORE_START = 1564315100000;
-const TIME_AFTER_END = 1565040700000;
+const TIME_BEFORE_START = 1569934800000;
+const TIME_AFTER_END = 1570016700000;
 const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
 };
@@ -29,8 +32,8 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
 
   describe('log analysis apis', () => {
-    before(() => esArchiver.load('infra/8.0.0/ml_anomalies_log_rate'));
-    after(() => esArchiver.unload('infra/8.0.0/ml_anomalies_log_rate'));
+    before(() => esArchiver.load('infra/8.0.0/ml_anomalies_partitioned_log_rate'));
+    after(() => esArchiver.unload('infra/8.0.0/ml_anomalies_partitioned_log_rate'));
 
     describe('log rate results', () => {
       describe('with the default source', () => {
@@ -55,14 +58,16 @@ export default ({ getService }: FtrProviderContext) => {
             )
             .expect(200);
 
-          const logEntryRateBuckets = getLogEntryRateSuccessReponsePayloadRT
-            .decode(body)
-            .getOrElseL(throwErrors(createPlainError));
-
+          const logEntryRateBuckets = pipe(
+            getLogEntryRateSuccessReponsePayloadRT.decode(body),
+            fold(throwErrors(createPlainError), identity)
+          );
           expect(logEntryRateBuckets.data.bucketDuration).to.be(15 * 60 * 1000);
           expect(logEntryRateBuckets.data.histogramBuckets).to.not.be.empty();
           expect(
-            logEntryRateBuckets.data.histogramBuckets.some(bucket => bucket.anomalies.length > 0)
+            logEntryRateBuckets.data.histogramBuckets.some(bucket => {
+              return bucket.partitions.some(partition => partition.anomalies.length > 0);
+            })
           ).to.be(true);
         });
 
@@ -84,9 +89,10 @@ export default ({ getService }: FtrProviderContext) => {
             )
             .expect(200);
 
-          const logEntryRateBuckets = getLogEntryRateSuccessReponsePayloadRT
-            .decode(body)
-            .getOrElseL(throwErrors(createPlainError));
+          const logEntryRateBuckets = pipe(
+            getLogEntryRateSuccessReponsePayloadRT.decode(body),
+            fold(throwErrors(createPlainError), identity)
+          );
 
           expect(logEntryRateBuckets.data.bucketDuration).to.be(15 * 60 * 1000);
           expect(logEntryRateBuckets.data.histogramBuckets).to.be.empty();

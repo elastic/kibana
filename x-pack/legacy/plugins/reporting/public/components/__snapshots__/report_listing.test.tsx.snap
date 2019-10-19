@@ -106,12 +106,6 @@ Array [
                     align="left"
                     data-test-subj="tableHeaderCell_object_title_0"
                     key="_data_h_object_title_0"
-                    mobileOptions={
-                      Object {
-                        "show": true,
-                      }
-                    }
-                    scope="col"
                   >
                     <th
                       className="euiTableHeaderCell"
@@ -134,12 +128,6 @@ Array [
                     align="left"
                     data-test-subj="tableHeaderCell_created_at_1"
                     key="_data_h_created_at_1"
-                    mobileOptions={
-                      Object {
-                        "show": true,
-                      }
-                    }
-                    scope="col"
                   >
                     <th
                       className="euiTableHeaderCell"
@@ -162,12 +150,6 @@ Array [
                     align="left"
                     data-test-subj="tableHeaderCell_status_2"
                     key="_data_h_status_2"
-                    mobileOptions={
-                      Object {
-                        "show": true,
-                      }
-                    }
-                    scope="col"
                   >
                     <th
                       className="euiTableHeaderCell"
@@ -189,12 +171,6 @@ Array [
                   <EuiTableHeaderCell
                     align="right"
                     key="_actions_h_3"
-                    mobileOptions={
-                      Object {
-                        "show": true,
-                      }
-                    }
-                    scope="col"
                   >
                     <th
                       className="euiTableHeaderCell"
@@ -225,12 +201,6 @@ Array [
                       align="center"
                       colSpan={4}
                       isMobileFullWidth={true}
-                      mobileOptions={
-                        Object {
-                          "show": true,
-                        }
-                      }
-                      textOnly={true}
                     >
                       <td
                         className="euiTableRowCell euiTableRowCell--isMobileFullWidth"
@@ -386,12 +356,6 @@ Array [
                   align="left"
                   data-test-subj="tableHeaderCell_object_title_0"
                   key="_data_h_object_title_0"
-                  mobileOptions={
-                    Object {
-                      "show": true,
-                    }
-                  }
-                  scope="col"
                 >
                   <th
                     className="euiTableHeaderCell"
@@ -414,12 +378,6 @@ Array [
                   align="left"
                   data-test-subj="tableHeaderCell_created_at_1"
                   key="_data_h_created_at_1"
-                  mobileOptions={
-                    Object {
-                      "show": true,
-                    }
-                  }
-                  scope="col"
                 >
                   <th
                     className="euiTableHeaderCell"
@@ -442,12 +400,6 @@ Array [
                   align="left"
                   data-test-subj="tableHeaderCell_status_2"
                   key="_data_h_status_2"
-                  mobileOptions={
-                    Object {
-                      "show": true,
-                    }
-                  }
-                  scope="col"
                 >
                   <th
                     className="euiTableHeaderCell"
@@ -469,12 +421,6 @@ Array [
                 <EuiTableHeaderCell
                   align="right"
                   key="_actions_h_3"
-                  mobileOptions={
-                    Object {
-                      "show": true,
-                    }
-                  }
-                  scope="col"
                 >
                   <th
                     className="euiTableHeaderCell"
@@ -505,12 +451,6 @@ Array [
                     align="center"
                     colSpan={4}
                     isMobileFullWidth={true}
-                    mobileOptions={
-                      Object {
-                        "show": true,
-                      }
-                    }
-                    textOnly={true}
                   >
                     <td
                       className="euiTableRowCell euiTableRowCell--isMobileFullWidth"

@@ -5,7 +5,7 @@
  */
 
 import { HapiServer } from '../../../';
-import { PLUGIN_ID, VIS_TELEMETRY_TASK, VIS_TELEMETRY_TASK_NUM_WORKERS } from '../../../constants';
+import { PLUGIN_ID, VIS_TELEMETRY_TASK } from '../../../constants';
 import { visualizationsTaskRunner } from './visualizations/task_runner';
 
 export function registerTasks(server: HapiServer) {
@@ -15,7 +15,6 @@ export function registerTasks(server: HapiServer) {
     [VIS_TELEMETRY_TASK]: {
       title: 'X-Pack telemetry calculator for Visualizations',
       type: VIS_TELEMETRY_TASK,
-      numWorkers: VIS_TELEMETRY_TASK_NUM_WORKERS, // by default it's 100% their workers
       createTaskRunner({ taskInstance }: { taskInstance: any }) {
         return {
           run: visualizationsTaskRunner(taskInstance, server),

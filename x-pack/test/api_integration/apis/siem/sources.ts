@@ -30,7 +30,7 @@ export default function({ getService }: FtrProviderContext) {
         .then(resp => {
           const sourceStatus = resp.data.source.status;
           // test data in x-pack/test/functional/es_archives/auditbeat_test_data/data.json.gz
-          expect(sourceStatus.indexFields.length).to.be(349);
+          expect(sourceStatus.indexFields.length).to.be(395);
           expect(sourceStatus.indicesExist).to.be(true);
         });
     });

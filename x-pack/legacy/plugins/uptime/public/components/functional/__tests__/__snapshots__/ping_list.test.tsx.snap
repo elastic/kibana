@@ -2,11 +2,7 @@
 
 exports[`PingList component renders sorted list without errors 1`] = `
 <Fragment>
-  <EuiPanel
-    grow={true}
-    hasShadow={false}
-    paddingSize="m"
-  >
+  <EuiPanel>
     <EuiTitle
       size="xs"
     >
@@ -40,7 +36,9 @@ exports[`PingList component renders sorted list without errors 1`] = `
                 <EuiFormRow
                   aria-label="Status"
                   describedByIds={Array []}
+                  display="row"
                   fullWidth={false}
+                  hasChildLabel={true}
                   hasEmptyLabelSpace={false}
                   label="Status"
                   labelType="label"
@@ -87,7 +85,9 @@ exports[`PingList component renders sorted list without errors 1`] = `
                 <EuiFormRow
                   aria-label="Location"
                   describedByIds={Array []}
+                  display="row"
                   fullWidth={false}
+                  hasChildLabel={true}
                   hasEmptyLabelSpace={false}
                   label="Location"
                   labelType="label"

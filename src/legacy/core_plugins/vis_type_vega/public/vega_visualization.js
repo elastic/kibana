@@ -21,7 +21,10 @@ import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 import { VegaView } from './vega_view/vega_view';
 import { VegaMapView } from './vega_view/vega_map_view';
-import { findObjectByTitle } from 'ui/saved_objects';
+import { timefilter } from 'ui/timefilter';
+import { start as data } from '../../../core_plugins/data/public/legacy';
+
+import { findIndexPatternByTitle } from '../../data/public/index_patterns';
 
 export const createVegaVisualization = ({ serviceSettings }) => class VegaVisualization {
   constructor(el, vis) {
@@ -38,7 +41,7 @@ export const createVegaVisualization = ({ serviceSettings }) => class VegaVisual
   async findIndex(index) {
     let idxObj;
     if (index) {
-      idxObj = await findObjectByTitle(this.savedObjectsClient, 'index-pattern', index);
+      idxObj = await findIndexPatternByTitle(this.savedObjectsClient, index);
       if (!idxObj) {
         throw new Error(i18n.translate('visTypeVega.visualization.indexNotFoundErrorMessage', {
           defaultMessage: 'Index {index} not found',
@@ -46,7 +49,7 @@ export const createVegaVisualization = ({ serviceSettings }) => class VegaVisual
         }));
       }
     } else {
-      idxObj = await this._vis.API.indexPatterns.getDefault();
+      idxObj = await data.indexPatterns.indexPatterns.getDefault();
       if (!idxObj) {
         throw new Error(i18n.translate('visTypeVega.visualization.unableToFindDefaultIndexErrorMessage', {
           defaultMessage: 'Unable to find default index',
@@ -100,8 +103,8 @@ export const createVegaVisualization = ({ serviceSettings }) => class VegaVisual
         parentEl: this._el,
         vegaParser,
         serviceSettings,
-        queryfilter: this._vis.API.queryFilter,
-        timefilter: this._vis.API.timeFilter,
+        queryfilter: data.filter.filterManager,
+        timefilter: timefilter,
         findIndex: this.findIndex.bind(this),
       };
 

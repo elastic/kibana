@@ -17,25 +17,7 @@
  * under the License.
  */
 
-import './timefilter.test.mocks';
-
-jest.mock('ui/chrome', () => ({
-  getBasePath: () => `/some/base/path`,
-  getUiSettingsClient: () => {
-    return {
-      get: (key: string) => {
-        switch (key) {
-          case 'timepicker:timeDefaults':
-            return { from: 'now-15m', to: 'now' };
-          case 'timepicker:refreshIntervalDefaults':
-            return { pause: false, value: 0 };
-          default:
-            throw new Error(`Unexpected config key: ${key}`);
-        }
-      },
-    };
-  },
-}));
+jest.useFakeTimers();
 
 jest.mock('./lib/parse_querystring', () => ({
   parseQueryString: () => {
@@ -50,9 +32,18 @@ jest.mock('./lib/parse_querystring', () => ({
 import sinon from 'sinon';
 import expect from '@kbn/expect';
 import moment from 'moment';
-import { timefilter } from 'ui/timefilter';
+import { Timefilter } from './timefilter';
 import { Subscription } from 'rxjs';
 import { TimeRange, RefreshInterval } from 'src/plugins/data/public';
+
+import { timefilterServiceMock } from './timefilter_service.mock';
+const timefilterSetupMock = timefilterServiceMock.createSetupContract();
+
+const timefilterConfig = {
+  timeDefaults: { from: 'now-15m', to: 'now' },
+  refreshIntervalDefaults: { pause: false, value: 0 },
+};
+const timefilter = new Timefilter(timefilterConfig, timefilterSetupMock.history);
 
 function stubNowTime(nowTime: any) {
   // @ts-ignore
@@ -135,23 +126,28 @@ describe('setTime', () => {
 describe('setRefreshInterval', () => {
   let update: sinon.SinonSpy;
   let fetch: sinon.SinonSpy;
+  let autoRefreshFetch: sinon.SinonSpy;
   let fetchSub: Subscription;
   let refreshSub: Subscription;
+  let autoRefreshSub: Subscription;
 
   beforeEach(() => {
     update = sinon.spy();
     fetch = sinon.spy();
+    autoRefreshFetch = sinon.spy();
     timefilter.setRefreshInterval({
       pause: false,
       value: 0,
     });
     refreshSub = timefilter.getRefreshIntervalUpdate$().subscribe(update);
     fetchSub = timefilter.getFetch$().subscribe(fetch);
+    autoRefreshSub = timefilter.getAutoRefreshFetch$().subscribe(autoRefreshFetch);
   });
 
   afterEach(() => {
     refreshSub.unsubscribe();
     fetchSub.unsubscribe();
+    autoRefreshSub.unsubscribe();
   });
 
   test('should update refresh interval', () => {
@@ -225,6 +221,32 @@ describe('setRefreshInterval', () => {
     expect(update.calledTwice).to.be(true);
     expect(fetch.calledOnce).to.be(true);
   });
+
+  test('should start auto refresh when unpaused', () => {
+    timefilter.setRefreshInterval({ pause: false, value: 1000 });
+    expect(autoRefreshFetch.callCount).to.be(0);
+    jest.advanceTimersByTime(1000);
+    expect(autoRefreshFetch.callCount).to.be(1);
+    jest.advanceTimersByTime(1000);
+    expect(autoRefreshFetch.callCount).to.be(2);
+  });
+
+  test('should stop auto refresh when paused', () => {
+    timefilter.setRefreshInterval({ pause: true, value: 1000 });
+    expect(autoRefreshFetch.callCount).to.be(0);
+    jest.advanceTimersByTime(1000);
+    expect(autoRefreshFetch.callCount).to.be(0);
+  });
+
+  test('should not keep old interval when updated', () => {
+    timefilter.setRefreshInterval({ pause: false, value: 1000 });
+    expect(autoRefreshFetch.callCount).to.be(0);
+    jest.advanceTimersByTime(1000);
+    expect(autoRefreshFetch.callCount).to.be(1);
+    timefilter.setRefreshInterval({ pause: false, value: 2000 });
+    jest.advanceTimersByTime(2000);
+    expect(autoRefreshFetch.callCount).to.be(2);
+  });
 });
 
 describe('isTimeRangeSelectorEnabled', () => {
@@ -242,13 +264,13 @@ describe('isTimeRangeSelectorEnabled', () => {
 
   test('should emit updated when disabled', () => {
     timefilter.disableTimeRangeSelector();
-    expect(timefilter.isTimeRangeSelectorEnabled).to.be(false);
+    expect(timefilter.isTimeRangeSelectorEnabled()).to.be(false);
     expect(update.called).to.be(true);
   });
 
   test('should emit updated when enabled', () => {
     timefilter.enableTimeRangeSelector();
-    expect(timefilter.isTimeRangeSelectorEnabled).to.be(true);
+    expect(timefilter.isTimeRangeSelectorEnabled()).to.be(true);
     expect(update.called).to.be(true);
   });
 });
@@ -268,13 +290,13 @@ describe('isAutoRefreshSelectorEnabled', () => {
 
   test('should emit updated when disabled', () => {
     timefilter.disableAutoRefreshSelector();
-    expect(timefilter.isAutoRefreshSelectorEnabled).to.be(false);
+    expect(timefilter.isAutoRefreshSelectorEnabled()).to.be(false);
     expect(update.called).to.be(true);
   });
 
   test('should emit updated when enabled', () => {
     timefilter.enableAutoRefreshSelector();
-    expect(timefilter.isAutoRefreshSelectorEnabled).to.be(true);
+    expect(timefilter.isAutoRefreshSelectorEnabled()).to.be(true);
     expect(update.called).to.be(true);
   });
 });

@@ -24,30 +24,20 @@ export class GeojsonFileSource extends AbstractVectorSource {
 
   static type = GEOJSON_FILE;
   static title = i18n.translate('xpack.maps.source.geojsonFileTitle', {
-    defaultMessage: 'Upload GeoJSON vector file'
+    defaultMessage: 'Uploaded GeoJSON'
   });
   static description = i18n.translate('xpack.maps.source.geojsonFileDescription', {
-    defaultMessage: 'Upload a GeoJSON file and index in Elasticsearch'
+    defaultMessage: 'Upload and index GeoJSON data in Elasticsearch'
   });
   static icon = 'importAction';
   static isIndexingSource = true;
-  static isBeta = true;
   static layerDefaults = {
     applyGlobalQuery: DEFAULT_APPLY_GLOBAL_QUERY
   }
 
-  static createDescriptor(geoJson, name) {
-    // Wrap feature as feature collection if needed
-    const featureCollection = (geoJson.type === 'Feature')
-      ? {
-        type: 'FeatureCollection',
-        features: [{ ...geoJson }]
-      }
-      : geoJson;
-
+  static createDescriptor(name) {
     return {
       type: GeojsonFileSource.type,
-      featureCollection,
       name
     };
   }
@@ -95,9 +85,16 @@ export class GeojsonFileSource extends AbstractVectorSource {
         onPreviewSource(null);
         return;
       }
-      const sourceDescriptor = GeojsonFileSource.createDescriptor(geojsonFile, name);
+      const sourceDescriptor = GeojsonFileSource.createDescriptor(name);
       const source = new GeojsonFileSource(sourceDescriptor, inspectorAdapters);
-      onPreviewSource(source);
+      const featureCollection = (geojsonFile.type === 'Feature')
+        ? {
+          type: 'FeatureCollection',
+          features: [{ ...geojsonFile }]
+        }
+        : geojsonFile;
+
+      onPreviewSource(source, { __injectedData: featureCollection });
     };
   };
 
@@ -128,22 +125,6 @@ export class GeojsonFileSource extends AbstractVectorSource {
     );
   }
 
-  async getGeoJsonWithMeta() {
-    const copiedPropsFeatures = this._descriptor.featureCollection.features
-      .map(feature => ({
-        type: 'Feature',
-        geometry: feature.geometry,
-        properties: feature.properties ? { ...feature.properties } : {}
-      }));
-    return {
-      data: {
-        type: 'FeatureCollection',
-        features: copiedPropsFeatures
-      },
-      meta: {}
-    };
-  }
-
   async getDisplayName() {
     return this._descriptor.name;
   }
@@ -156,4 +137,7 @@ export class GeojsonFileSource extends AbstractVectorSource {
     return GeojsonFileSource.isIndexingSource;
   }
 
+  isInjectedData() {
+    return true;
+  }
 }

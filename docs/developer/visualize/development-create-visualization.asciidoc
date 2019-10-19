@@ -1,0 +1,467 @@
+[[development-create-visualization]]
+=== Developing Visualizations
+
+This is a short description of functions and interfaces provided. For more information you should check the kibana
+source code and the existing visualizations provided with it.
+
+- <<development-visualization-factory>>
+* <<development-base-visualization-type>>
+* <<development-react-visualization-type>>
+- <<development-vis-editors>>
+* <<development-default-editor>>
+* <<development-custom-editor>>
+- <<development-visualization-request-handlers>>
+* <<development-default-request-handler>>
+* <<development-none-request-handler>>
+* <<development-custom-request-handler>>
+- <<development-visualization-response-handlers>>
+* <<development-default-response-handler>>
+* <<development-none-response-handler>>
+* <<development-custom-response-handler>>
+- <<development-vis-object>>
+* <<development-vis-timefilter>>
+- <<development-aggconfig>>
+
+[[development-visualization-factory]]
+=== Visualization Factory
+
+Use the `VisualizationFactory` to create a new visualization. 
+The creation-methods create a new visualization tied to the underlying rendering technology.
+You should also register the visualization with `VisTypesRegistryProvider`.
+
+["source","js"]
+-----------
+import { VisFactoryProvider } from 'ui/vis/vis_factory';
+import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
+
+const MyNewVisType = (Private) => {
+  const VisFactory = Private(VisFactoryProvider);
+
+  return  VisFactory.createBaseVisualization({
+    name: 'my_new_vis',
+    title: 'My New Vis',
+    icon: 'my_icon',
+    description: 'Cool new chart',
+    ...
+  });
+}
+
+VisTypesRegistryProvider.register(MyNewVisType);
+-----------
+
+The list of common parameters:
+
+- *name*: unique visualization name, only lowercase letters and underscore
+- *title*: title of your visualization as displayed in kibana
+- *icon*: <string> the https://elastic.github.io/eui/#/display/icons[EUI icon] type to use for this visualization
+- *image*: instead of an icon you can provide a SVG image (imported)
+- *description*: description of your visualization as shown in kibana
+- *hidden*: <bool> if set to true, will hide the type from showing up in the visualization wizard
+- *visConfig*: object holding visualization parameters
+- *visConfig.defaults*: object holding default visualization configuration
+- *visualization*: A constructor function for a Visualization.
+- *requestHandler*: <string> one of the available request handlers or a <function> for a custom request handler
+- *responseHandler*: <string> one of the available response handlers or a <function> for a custom response handler
+- *editor*: <string> one of the available editors or Editor class for custom one
+- *editorConfig*: object holding editor parameters
+- *options.showTimePicker*: <bool> show or hide time filter (defaults to true)
+- *options.showQueryBar*: <bool> show or hide query bar (defaults to true)
+- *options.showFilterBar*: <bool> show or hide filter bar (defaults to true)
+- *options.showIndexSelection*: <bool> show or hide index selection (defaults to true)
+- *stage*: <string> Set this to "experimental" to mark your visualization as experimental.
+Experimental visualizations can also be disabled from the advanced settings. (defaults to "production")
+- *feedbackMessage*: <string> You can provide a message (which can contain HTML), that will be appended 
+to the experimental notification in visualize, if your visualization is experimental or in lab mode.
+
+
+Each of the factories have some of the custom parameters, which will be described below.
+
+[[development-base-visualization-type]]
+==== Base Visualization Type
+The base visualization type does not make any assumptions about the rendering technology you are going to use and
+works with pure JavaScript. It is the visualization type we recommend to use.
+
+You need to provide a type with a constructor function, a render method which will be called every time 
+options or data change, and a destroy method which will be called to cleanup.
+ 
+The render function receives the data object and status object which tells what actually changed.
+Render function needs to return a promise, which should be resolved once the visualization is done rendering.
+
+The status object provides information about changes since the previous render call.
+Due to performance reasons you need to opt-in for each status change, that you want
+to be informed about by Kibana. This is done by using the `requiresUpdateStatus` key
+in your visualization registration object. You pass it an array, that contains all
+the status updates you want to receive. By default none of it will be calculated.
+
+The following snippet shows explain all available status updates. You should only
+activate those changes, that you actually use in your `render` method.
+
+["source","js"]
+-----------
+import { Status } from 'ui/vis/update_status';
+
+// ...
+return  VisFactory.createBaseVisualization({
+  // ...
+  requiresUpdateStatus: [
+    // Check for changes in the aggregation configuration for the visualization
+    Status.AGGS,
+    // Check for changes in the actual data returned from Elasticsearch
+    Status.DATA,
+    // Check for changes in the parameters (configuration) for the visualization
+    Status.PARAMS,
+    // Check if the visualization has changes its size
+    Status.RESIZE,
+    // Check if the time range for the visualization has been changed
+    Status.TIME,
+    // Check if the UI state of the visualization has been changed
+    Status.UI_STATE
+  ]
+});
+-----------
+
+If you activate any of these status updates, the `status` object passed as second
+parameter to the `render` method will contain a key for that status (e.g. `status[Status.DATA]`),
+that is either `true` if a change has been detected or `false` otherwise.
+
+
+image::images/visualize-flow.png[Main Flow]
+
+- Your visualizations constructor will get called with `vis` object and the DOM-element to which it should render.
+At this point you should prepare everything for rendering, but not render yet
+- `<visualize>` component monitors `appState`, `uiState` and `vis` for changes
+- on changes the `<visualize>`-directive will call your `requestHandler`. 
+Implementing a request handler is optional, as you might use one of the provided ones.
+- response from `requestHandler` will get passed to `responseHandler`. It should convert raw data to something that
+can be consumed by visualization. Implementing `responseHandler` is optional, as you might use of of the provided ones.
+- On new data from the `responseHandler` or on when the size of the surrounding DOM-element has changed, 
+your visualization `render`-method gets called. It needs to return a promise which resolves once the visualization 
+is done rendering.
+- the visualization should call `vis.updateState()` any time something has changed that requires to 
+re-render or fetch new data.
+
+["source","js"]
+-----------
+import { VisFactoryProvider } from 'ui/vis/vis_factory';
+import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
+
+class MyVisualization {
+   constructor(el, vis) {
+      this.el = el;
+      this.vis = vis;
+   }
+   async render(visData, status) {
+      ...
+      return 'done rendering';
+   }
+   destroy() {
+      console.log('destroying');
+   }
+}
+
+const MyNewVisType = (Private) => {
+  const VisFactory = Private(VisFactoryProvider);
+
+  return VisFactory.createBaseVisualization({
+    name: 'my_new_vis',
+    title: 'My New Vis',
+    icon: 'my_icon',
+    description: 'Cool new chart',
+    visualization: MyVisualization
+  });
+}
+
+VisTypesRegistryProvider.register(MyNewVisType);
+-----------
+
+[[development-react-visualization-type]]
+==== React Visualization Type
+React visualization type assumes you are using React as your rendering technology.
+Just pass in a React component to `visConfig.component`.
+
+The visualization will receive `vis`, `appState`, `updateStatus` and `visData` as props.
+It also has a `renderComplete` property, which needs to be called once the rendering has completed.
+
+["source","js"]
+-----------
+import { ReactComponent } from './my_react_component';
+
+const MyNewVisType = (Private) => {
+  const VisFactory = Private(VisFactoryProvider);
+  
+  return VisFactory.createReactVisualization({
+    name: 'my_new_vis',
+    title: 'My New Vis',
+    icon: 'my_icon',
+    description: 'Cool new chart',
+    visConfig: {
+       component: ReactComponent
+    }
+  });
+}
+-----------
+
+[[development-vis-editors]]
+=== Visualization Editors
+By default, visualizations will use the `default` editor. 
+This is the sidebar editor you see in many of the Kibana visualizations. You can also write your own editor.
+
+[[development-default-editor]]
+==== `default` editor controller
+The default editor controller receives an `optionsTemplate` or `optionsTabs` parameter. 
+These can be either an AngularJS template or React component.
+
+["source","js"]
+-----------
+{
+    name: 'my_new_vis',
+    title: 'My New Vis',
+    icon: 'my_icon',
+    description: 'Cool new chart',
+    editor: 'default',
+    editorConfig: {
+       optionsTemplate: '<my-custom-options-directive></my-custom-options-directive>' // or
+       optionsTemplate: MyReactComponent // or if multiple tabs are required:
+       optionsTabs: [
+           { title: 'tab 1', template: '<div>....</div> },
+           { title: 'tab 2', template: '<my-custom-options-directive></my-custom-options-directive>' },
+           { title: 'tab 3', template: MyReactComponent }
+       ]
+    }
+  }
+-----------
+
+[[development-custom-editor]]
+==== custom editor controller
+You can create a custom editor controller. To do so pass an Editor object (the same format as VisController class). 
+You can make your controller take extra configuration which is passed to the editorConfig property.
+
+["source","js"]
+-----------
+import { VisFactoryProvider } from 'ui/vis/vis_factory';
+
+class MyEditorController {
+    constructor(el, vis) {
+      this.el = el;
+      this.vis = vis;
+      this.config = vis.type.editorConfig;
+   }
+   async render(visData) {
+      console.log(this.config.my);
+      ...
+      return 'done rendering';
+   }
+   destroy() {
+      console.log('destroying');
+   }
+}
+
+const MyNewVisType = (Private) => {
+  const VisFactory = Private(VisFactoryProvider);
+
+  return VisFactory.createAngularVisualization({
+    name: 'my_new_vis',
+    title: 'My New Vis',
+    icon: 'my_icon',
+    description: 'Cool new chart',
+    editor: MyEditorController,
+    editorConfig: { my: 'custom config' }
+  });
+}
+
+VisTypesRegistryProvider.register(MyNewVisType);
+-----------
+
+[[development-visualization-request-handlers]]
+=== Visualization Request Handlers
+Request handler gets called when one of the following keys on AppState change:
+`vis`, `query`, `filters` or `uiState` and when the time filter is updated. On top
+of that it will also get called on force refresh.
+
+By default visualizations will use the `courier` request handler. They can also choose to use any of the other provided 
+request handlers. It is also possible to define your own request handler 
+(which you can then register to be used by other visualizations).
+
+[[development-default-request-handler]]
+==== courier request handler
+'courier' is the default request handler which works with the 'default' side bar editor.
+
+[[development-none-request-handler]]
+==== `none` request handler
+Using 'none' as your request handles means your visualization does not require any data to be requested.
+
+[[development-custom-request-handler]]
+==== custom request handler
+You can define your custom request handler by providing a function with the following signature:
+`function (vis, { uiState, appState, timeRange }) { ... }`
+
+The `timeRange` will be an object with a `from` and `to` key, that can contain
+datemath expressions, like `now-7d`. You can use the `datemath` library to parse
+them.
+
+This function must return a promise, which should get resolved with new data that will be passed to responseHandler.
+
+It's up to function to decide when it wants to issue a new request or return previous data 
+(if none of the objects relevant to the request handler changed).
+
+["source","js"]
+-----------
+import { VisFactoryProvider } from 'ui/vis/vis_factory';
+
+const myRequestHandler = async (vis, { appState, uiState, timeRange }) => {
+  const data = ... parse ...
+  return data;
+};
+
+const MyNewVisType = (Private) => {
+  const VisFactory = Private(VisFactoryProvider);
+
+  return VisFactory.createAngularVisualization({
+    name: 'my_new_vis',
+    title: 'My New Vis',
+    icon: 'my_icon',
+    description: 'Cool new chart',
+    requestHandler: myRequestHandler
+  });
+}
+
+VisTypesRegistryProvider.register(MyNewVisType);
+-----------
+
+[[development-visualization-response-handlers]]
+=== Visualization Response Handlers
+The response handler is a function that receives the data from a request handler, as well as an instance of Vis object.
+Its job is to convert the data to a format visualization can use. By default 'default' request handler is used 
+which produces a table representation of the data. The data object will then be passed to visualization.
+This response matches the visData property of the <visualization> directive.
+
+[[development-default-response-handler]]
+==== default response handler
+The default response handler converts pure elasticsearch responses into a tabular format. 
+It is the recommended responseHandler. The response object contains a table property, 
+which is an array of all the tables in the response. Each of the table objects has two properties:
+
+- `columns`: array of column objects, where each column object has a title property and an aggConfig property
+- `rows`: array of rows, where each row is an array of non formatted cell values
+
+Here is an example of a response with 1 table, 3 columns and 2 rows:
+
+["source","js"]
+-----------
+{
+  tables: [{
+    columns: [{
+      title: 'column1',
+      aggConfig: ...
+    },{
+      title: 'column2',
+      aggConfig: ...
+    },{
+      title: 'column3',
+      aggConfig: ...
+    }],
+    rows: [
+      [ '404', 1262, 12.5 ]
+      [ '200', 343546, 60.1 ]
+    ]
+  }];
+}
+-----------
+
+[[development-none-response-handler]]
+==== none response handler
+None response handler is an identity function, which will return the same data it receives.
+
+[[development-custom-response-handler]]
+==== custom response handler
+You can define your custom response handler by providing a function with the following definition:
+'function (vis, response) { ... }'.
+
+Function should return the transformed data object that visualization can consume.
+
+["source","js"]
+-----------
+import { VisFactoryProvider } from 'ui/vis/vis_factory';
+
+const myResponseHandler = (vis, response) => {
+   // transform the response (based on vis object?)
+   const response = ... transform data ...;
+   return response;
+};
+
+const MyNewVisType(Private) => {
+  const VisFactory = Private(VisFactoryProvider);
+
+  return VisFactory.createAngularVisualization({
+    name: 'my_new_vis',
+    title: 'My New Vis',
+    icon: 'my_icon',
+    description: 'Cool new chart',
+    responseHandler: myResponseHandler
+  });
+}
+
+VisTypesRegistryProvider.register(MyNewVisType);
+-----------
+
+[[development-vis-object]]
+=== Vis object
+The `vis` object holds the visualization state and is the window into kibana:
+
+- *vis.params*: holds the visualization parameters
+- *vis.indexPattern*: selected index pattern object
+- *vis.getState()*: gets current visualization state 
+- *vis.updateState()*: updates current state with values from `vis.params`
+- *vis.resetState()*: resets `vis.params` to the values in the current state
+- *vis.forceReload()*: forces whole cycle (request handler gets called)
+- *vis.getUiState()*: gets UI state of visualization
+- *vis.uiStateVal(name, val)*: updates a property in UI state
+- *vis.isEditorMode()*: returns true if in editor mode
+- *vis.API.timeFilter*: allows you to access time filter
+- *vis.API.queryFilter*: gives you access to queryFilter
+- *vis.API.events.click*: default click handler
+- *vis.API.events.brush*: default brush handler
+
+The visualization gets all its parameters in `vis.params`, which are default values merged with the current state. 
+If the visualization needs to update the current state, it should update the `vis.params` and call `vis.updateState()` 
+which will inform <visualize> about the change, which will call request and response handler and then your 
+visualization's render method.
+
+For the parameters that should not be saved with the visualization you should use the UI state. 
+These hold viewer-specific state, such as popup open/closed, custom colors applied to the series etc.
+
+You can access the filter bar and time filter through the objects defined on `vis.API`
+
+[[development-vis-timefilter]]
+==== timeFilter
+
+Update the timefilter time values and call update() method on it to update the time filter
+
+["source","js"]
+-----------
+   timefilter.time.from = moment(ranges.xaxis.from);
+   timefilter.time.to = moment(ranges.xaxis.to);
+   timefilter.time.mode = 'absolute';
+   timefilter.update();
+-----------
+
+
+[[development-aggconfig]]
+=== AggConfig object
+ 
+The AggConfig object represents an aggregation search to Elasticsearch, 
+plus some additional functionality to manage data-values that belong to this aggregation. 
+This is primarily used internally in Kibana, but you may find you have a need for it 
+when writing your own visualization. Here we provide short description of some of the methods on it, 
+however the best reference would be to actually check the source code.
+ 
+  
+- *fieldFormatter(<type>)* : returns a function which will format your value according to field formatters defined on
+the field. The type can be either 'text' or 'html'.
+- *makeLabel()* : gets the label for the aggregation
+- *isFilterable()* : return true if aggregation is filterable (you can then call createFilter)
+- *createFilter(bucketKey)* : creates a filter for specific bucket key
+- *getValue(bucket)* : gets value for a specific bucket
+- *getField()* : gets the field used for this aggregation
+- *getFieldDisplayName()* : gets field display name
+- *getAggParams()* : gets the arguments to the aggregation

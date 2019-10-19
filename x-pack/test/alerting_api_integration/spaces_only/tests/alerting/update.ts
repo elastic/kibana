@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getTestAlertData } from './utils';
 import { Spaces } from '../../scenarios';
-import { getUrlPrefix, ObjectRemover } from '../../../common/lib';
+import { getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -32,6 +31,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         },
         interval: '12s',
         actions: [],
+        throttle: '1m',
       };
       await supertest
         .put(`${getUrlPrefix(Spaces.space1.id)}/api/alert/${createdAlert.id}`)
@@ -40,8 +40,40 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         .expect(200, {
           ...updatedData,
           id: createdAlert.id,
+          alertTypeId: 'test.noop',
+          createdBy: null,
+          enabled: true,
           updatedBy: null,
           apiKeyOwner: null,
+          muteAll: false,
+          mutedInstanceIds: [],
+          scheduledTaskId: createdAlert.scheduledTaskId,
+        });
+    });
+
+    it(`shouldn't update alert from another space`, async () => {
+      const { body: createdAlert } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestAlertData())
+        .expect(200);
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert');
+
+      await supertest
+        .put(`${getUrlPrefix(Spaces.other.id)}/api/alert/${createdAlert.id}`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          alertTypeParams: {
+            foo: true,
+          },
+          interval: '12s',
+          actions: [],
+          throttle: '1m',
+        })
+        .expect(404, {
+          statusCode: 404,
+          error: 'Not Found',
+          message: `Saved object [alert/${createdAlert.id}] not found`,
         });
     });
   });

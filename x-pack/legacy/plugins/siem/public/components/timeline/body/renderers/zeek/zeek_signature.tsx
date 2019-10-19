@@ -76,7 +76,9 @@ export const DraggableZeekElement = pure<{
         dataProvider={{
           and: [],
           enabled: true,
-          id: escapeDataProviderId(`zeek-${id}-${field}-${value}`),
+          id: escapeDataProviderId(
+            `draggable-zeek-element-draggable-wrapper-${id}-${field}-${value}`
+          ),
           name: value,
           excluded: false,
           kqlQuery: '',
@@ -186,8 +188,8 @@ export const extractStateValue = (state: string | null | undefined): string | nu
 export const constructDroppedValue = (dropped: boolean | null | undefined): string | null =>
   dropped != null ? String(dropped) : null;
 
-export const ZeekSignature = pure<{ data: Ecs }>(({ data }) => {
-  const id = data._id;
+export const ZeekSignature = pure<{ data: Ecs; timelineId: string }>(({ data, timelineId }) => {
+  const id = `zeek-signature-draggable-zeek-element-${timelineId}-${data._id}`;
   const sessionId: string | null | undefined = get('zeek.session_id[0]', data);
   const dataSet: string | null | undefined = get('event.dataset[0]', data);
   const sslVersion: string | null | undefined = get('zeek.ssl.version[0]', data);

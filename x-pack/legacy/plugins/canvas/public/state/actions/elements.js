@@ -13,11 +13,14 @@ import { interpretAst } from 'plugins/interpreter/interpreter';
 import { getPages, getNodeById, getNodes, getSelectedPageIndex } from '../selectors/workpad';
 import { getValue as getResolvedArgsValue } from '../selectors/resolved_args';
 import { getDefaultElement } from '../defaults';
+import { ErrorStrings } from '../../../i18n';
 import { notify } from '../../lib/notify';
 import { runInterpreter } from '../../lib/run_interpreter';
 import { subMultitree } from '../../lib/aeroelastic/functional';
 import { selectToplevelNodes } from './transient';
 import * as args from './resolved_args';
+
+const { actionsElements: strings } = ErrorStrings;
 
 const { set, del } = immutable;
 
@@ -67,7 +70,7 @@ export const fetchContext = createThunk(
     const invalidIndex = chain ? index >= chain.length : true;
 
     if (!element || !chain || invalidIndex) {
-      throw new Error(`Invalid argument index: ${index}`);
+      throw new Error(strings.getInvalidArgIndexErrorMessage(index));
     }
 
     // cache context as the previous index

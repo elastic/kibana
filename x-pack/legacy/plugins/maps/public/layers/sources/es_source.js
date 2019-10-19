@@ -13,13 +13,14 @@ import {
 import { createExtentFilter } from '../../elasticsearch_geo_utils';
 import { timefilter } from 'ui/timefilter';
 import _ from 'lodash';
-import { AggConfigs } from 'ui/vis/agg_configs';
+import { AggConfigs } from 'ui/agg_types';
 import { i18n } from '@kbn/i18n';
 import { ESAggMetricTooltipProperty } from '../tooltips/es_aggmetric_tooltip_property';
 
 import uuid from 'uuid/v4';
 import { copyPersistentState } from '../../reducers/util';
 import { ES_GEO_FIELD_TYPE } from '../../../common/constants';
+import { DataRequestAbortError } from '../util/data_request';
 
 export class AbstractESSource extends AbstractVectorSource {
 
@@ -131,16 +132,24 @@ export class AbstractESSource extends AbstractVectorSource {
   }
 
 
-  async _runEsQuery(requestName, searchSource, requestDescription) {
+  async _runEsQuery(requestName, searchSource, registerCancelCallback, requestDescription) {
+    const abortController = new AbortController();
+    registerCancelCallback(() => abortController.abort());
+
     try {
       return await fetchSearchSourceAndRecordWithInspector({
         inspectorAdapters: this._inspectorAdapters,
         searchSource,
         requestName,
         requestId: this.getId(),
-        requestDesc: requestDescription
+        requestDesc: requestDescription,
+        abortSignal: abortController.signal,
       });
     } catch(error) {
+      if (error.name === 'AbortError') {
+        throw new DataRequestAbortError();
+      }
+
       throw new Error(i18n.translate('xpack.maps.source.esSource.requestFailedErrorMessage', {
         defaultMessage: `Elasticsearch search request failed, error: {message}`,
         values: { message: error.message }
@@ -148,7 +157,7 @@ export class AbstractESSource extends AbstractVectorSource {
     }
   }
 
-  async _makeSearchSource(searchFilters, limit) {
+  async _makeSearchSource(searchFilters, limit, initialSearchContext) {
     const indexPattern = await this._getIndexPattern();
     const isTimeAware = await this.isTimeAware();
     const applyGlobalQuery = _.get(searchFilters, 'applyGlobalQuery', true);
@@ -162,7 +171,7 @@ export class AbstractESSource extends AbstractVectorSource {
       allFilters.push(timefilter.createFilter(indexPattern, searchFilters.timeFilters));
     }
 
-    const searchSource = new SearchSource();
+    const searchSource = new SearchSource(initialSearchContext);
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', limit);
     searchSource.setField('filter', allFilters);
@@ -263,7 +272,7 @@ export class AbstractESSource extends AbstractVectorSource {
 
   async _getGeoField() {
     const indexPattern = await this._getIndexPattern();
-    const geoField = indexPattern.fields.byName[this._descriptor.geoField];
+    const geoField = indexPattern.fields.getByName(this._descriptor.geoField);
     if (!geoField) {
       throw new Error(i18n.translate('xpack.maps.source.esSource.noGeoFieldErrorMessage', {
         defaultMessage: `Index pattern {indexPatternTitle} no longer contains the geo field {geoField}`,
@@ -291,4 +300,33 @@ export class AbstractESSource extends AbstractVectorSource {
     return this._descriptor.id;
   }
 
+  _getRawFieldName(fieldName) {
+    const metricField = this.getMetricFields().find(({ propertyKey }) => {
+      return propertyKey === fieldName;
+    });
+
+    return metricField ? metricField.field : null;
+  }
+
+  async getFieldFormatter(fieldName) {
+    // fieldName could be an aggregation so it needs to be unpacked to expose raw field.
+    const rawFieldName = this._getRawFieldName(fieldName);
+    if (!rawFieldName) {
+      return null;
+    }
+
+    let indexPattern;
+    try {
+      indexPattern = await this._getIndexPattern();
+    } catch(error) {
+      return null;
+    }
+
+    const fieldFromIndexPattern = indexPattern.fields.getByName(rawFieldName);
+    if (!fieldFromIndexPattern) {
+      return null;
+    }
+
+    return fieldFromIndexPattern.format.getConverterFor('text');
+  }
 }

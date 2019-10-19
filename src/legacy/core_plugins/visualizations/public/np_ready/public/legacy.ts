@@ -16,35 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+import { PluginInitializerContext } from 'src/core/public';
+
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 import { npSetup, npStart } from 'ui/new_platform';
 // @ts-ignore
 import { VisFiltersProvider, createFilter } from 'ui/vis/vis_filters';
-// @ts-ignore
-import { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
-// @ts-ignore
-import { VisProvider as Vis } from 'ui/vis/index.js';
-// @ts-ignore
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 /* eslint-enable @kbn/eslint/no-restricted-paths */
-
-import { visTypeAliasRegistry } from './types/vis_type_alias_registry';
 
 import { plugin } from '.';
 
-const pluginInstance = plugin({} as any);
+const pluginInstance = plugin({} as PluginInitializerContext);
 
 export const setup = pluginInstance.setup(npSetup.core, {
   __LEGACY: {
     VisFiltersProvider,
     createFilter,
-
-    Vis,
-    VisFactoryProvider,
-    VisTypesRegistryProvider,
-    defaultFeedbackMessage,
-    visTypeAliasRegistry,
   },
 });
 export const start = pluginInstance.start(npStart.core);

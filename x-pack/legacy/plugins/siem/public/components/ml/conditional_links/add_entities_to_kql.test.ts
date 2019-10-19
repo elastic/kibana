@@ -17,6 +17,7 @@ describe('add_entities_to_kql', () => {
   afterAll(() => {
     console.log = originalError;
   });
+
   describe('#entityToKql', () => {
     test('returns empty string with no entity names defined and an empty entity string', () => {
       const entity = entityToKql([], '');
@@ -100,47 +101,39 @@ describe('add_entities_to_kql', () => {
 
   describe('#addEntitiesToKql', () => {
     test('returns same kql if no entity names or values were defined', () => {
-      const entity = addEntitiesToKql(
-        [],
-        [],
-        '(filterQuery:(expression:\'process.name : ""\',kind:kuery))'
-      );
-      expect(entity).toEqual('(filterQuery:(expression:\'process.name : ""\',kind:kuery))');
+      const entity = addEntitiesToKql([], [], '(query:\'process.name : ""\',language:kuery)');
+      expect(entity).toEqual('(language:kuery,query:\'process.name : ""\')');
     });
 
-    test('returns kql with no "and" clause if the KQL expression is not defined ', () => {
+    test('returns kql with no "and" clause if the KQL query is not defined ', () => {
+      const entity = addEntitiesToKql(['host.name'], ['host-1'], "(query:'',language:kuery)");
+      expect(entity).toEqual('(language:kuery,query:\'(host.name: "host-1")\')');
+    });
+
+    test('returns kql with "and" clause separating the two if the KQL query is defined', () => {
       const entity = addEntitiesToKql(
         ['host.name'],
         ['host-1'],
-        "(filterQuery:(expression:'',kind:kuery))"
-      );
-      expect(entity).toEqual('(filterQuery:(expression:\'(host.name: "host-1")\',kind:kuery))');
-    });
-
-    test('returns kql with "and" clause separating the two if the KQL expression is defined', () => {
-      const entity = addEntitiesToKql(
-        ['host.name'],
-        ['host-1'],
-        '(filterQuery:(expression:\'process.name : ""\',kind:kuery))'
+        '(query:\'process.name : ""\',language:kuery)'
       );
       expect(entity).toEqual(
-        '(filterQuery:(expression:\'(host.name: "host-1") and (process.name : "")\',kind:kuery))'
+        '(language:kuery,query:\'(host.name: "host-1") and (process.name : "")\')'
       );
     });
 
     test('returns KQL that is not a Rison Object "as is" with no changes', () => {
       const entity = addEntitiesToKql(['host.name'], ['host-1'], 'I am some invalid value');
-      expect(entity).toEqual('I am some invalid value');
+      expect(entity).toEqual('(language:kuery,query:\'(host.name: "host-1")\')');
     });
 
     test('returns kql with "and" clause separating the two with multiple entity names and a single value', () => {
       const entity = addEntitiesToKql(
         ['source.ip', 'destination.ip'],
         ['127.0.0.1'],
-        '(filterQuery:(expression:\'process.name : ""\',kind:kuery))'
+        '(query:\'process.name : ""\',language:kuery)'
       );
       expect(entity).toEqual(
-        '(filterQuery:(expression:\'((source.ip: "127.0.0.1" or destination.ip: "127.0.0.1")) and (process.name : "")\',kind:kuery))'
+        '(language:kuery,query:\'((source.ip: "127.0.0.1" or destination.ip: "127.0.0.1")) and (process.name : "")\')'
       );
     });
 
@@ -148,10 +141,10 @@ describe('add_entities_to_kql', () => {
       const entity = addEntitiesToKql(
         ['source.ip', 'destination.ip'],
         ['127.0.0.1', '255.255.255.255'],
-        '(filterQuery:(expression:\'process.name : ""\',kind:kuery))'
+        '(query:\'process.name : ""\',language:kuery)'
       );
       expect(entity).toEqual(
-        '(filterQuery:(expression:\'((source.ip: "127.0.0.1" or destination.ip: "127.0.0.1") or (source.ip: "255.255.255.255" or destination.ip: "255.255.255.255")) and (process.name : "")\',kind:kuery))'
+        '(language:kuery,query:\'((source.ip: "127.0.0.1" or destination.ip: "127.0.0.1") or (source.ip: "255.255.255.255" or destination.ip: "255.255.255.255")) and (process.name : "")\')'
       );
     });
 
@@ -159,11 +152,16 @@ describe('add_entities_to_kql', () => {
       const entity = addEntitiesToKql(
         ['host.name'],
         ['host-name-1', 'host-name-2'],
-        '(filterQuery:(expression:\'process.name : ""\',kind:kuery))'
+        '(query:\'process.name : ""\',language:kuery)'
       );
       expect(entity).toEqual(
-        '(filterQuery:(expression:\'(host.name: "host-name-1" or host.name: "host-name-2") and (process.name : "")\',kind:kuery))'
+        '(language:kuery,query:\'(host.name: "host-name-1" or host.name: "host-name-2") and (process.name : "")\')'
       );
+    });
+
+    test('returns kql query with a null appQuery', () => {
+      const entity = addEntitiesToKql(['host.name'], ['host-1'], '!n');
+      expect(entity).toEqual('(language:kuery,query:\'(host.name: "host-1")\')');
     });
   });
 });

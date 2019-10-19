@@ -24,7 +24,7 @@ import { isFullLicense } from '../license/check_license';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { timefilter } from 'ui/timefilter';
 
-import { NavigationMenu } from '../components/navigation_menu/navigation_menu';
+import { NavigationMenu } from '../components/navigation_menu';
 
 function startTrialDescription() {
   return (

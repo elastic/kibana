@@ -3,74 +3,58 @@
 exports[`render correctly 1`] = `
 <nav
   aria-label="breadcrumb"
-  className="euiBreadcrumbs euiBreadcrumbs--truncate euiBreadcrumbs--responsive"
+  className="euiBreadcrumbs codeBreadcrumbs euiBreadcrumbs--truncate euiBreadcrumbs--responsive"
 >
   <a
-    className="euiLink euiLink--subdued euiBreadcrumb codeNoMinWidth"
+    className="euiLink euiLink--subdued euiBreadcrumb"
     data-test-subj="codeFileBreadcrumb-src"
     href="#github.com/elastic/TypeScript-Node-Starter/tree/master/src"
+    onClick={[Function]}
     rel="noreferrer"
-    title="src"
   >
     src
   </a>
   <div
     className="euiBreadcrumbSeparator"
   />
-  <a
-    className="euiLink euiLink--subdued euiBreadcrumb codeNoMinWidth"
-    data-test-subj="codeFileBreadcrumb-public"
-    href="#github.com/elastic/TypeScript-Node-Starter/tree/master/src/public"
-    rel="noreferrer"
-    title="public"
+  <div
+    className="euiPopover euiPopover--anchorDownCenter"
+    onKeyDown={[Function]}
+    onMouseDown={[Function]}
+    onMouseUp={[Function]}
+    onTouchEnd={[Function]}
+    onTouchStart={[Function]}
   >
-    public
-  </a>
+    <div
+      className="euiPopover__anchor"
+    >
+      <button
+        aria-label="Show all breadcrumbs"
+        className="euiBadge euiBadge-isClickable euiBadge--iconLeft euiBadge--default euiBreadcrumb euiBreadcrumb__collapsedBadge"
+        onClick={[Function]}
+        title="View hidden breadcrumbs"
+      >
+        <span
+          className="euiBadge__content"
+        >
+          <span
+            className="euiBadge__text"
+          >
+            …
+          </span>
+        </span>
+      </button>
+    </div>
+  </div>
   <div
     className="euiBreadcrumbSeparator"
   />
   <a
-    className="euiLink euiLink--subdued euiBreadcrumb codeNoMinWidth"
-    data-test-subj="codeFileBreadcrumb-css"
-    href="#github.com/elastic/TypeScript-Node-Starter/tree/master/src/public/css"
-    rel="noreferrer"
-    title="css"
-  >
-    css
-  </a>
-  <div
-    className="euiBreadcrumbSeparator"
-  />
-  <a
-    className="euiLink euiLink--subdued euiBreadcrumb codeNoMinWidth"
-    data-test-subj="codeFileBreadcrumb-lib"
-    href="#github.com/elastic/TypeScript-Node-Starter/tree/master/src/public/css/lib"
-    rel="noreferrer"
-    title="lib"
-  >
-    lib
-  </a>
-  <div
-    className="euiBreadcrumbSeparator"
-  />
-  <a
-    className="euiLink euiLink--subdued euiBreadcrumb codeNoMinWidth"
-    data-test-subj="codeFileBreadcrumb-bootstrap"
-    href="#github.com/elastic/TypeScript-Node-Starter/tree/master/src/public/css/lib/bootstrap"
-    rel="noreferrer"
-    title="bootstrap"
-  >
-    bootstrap
-  </a>
-  <div
-    className="euiBreadcrumbSeparator"
-  />
-  <a
-    className="euiLink euiLink--subdued euiBreadcrumb codeNoMinWidth"
+    className="euiLink euiLink--subdued euiBreadcrumb"
     data-test-subj="codeFileBreadcrumb-mixins"
     href="#github.com/elastic/TypeScript-Node-Starter/tree/master/src/public/css/lib/bootstrap/mixins"
+    onClick={[Function]}
     rel="noreferrer"
-    title="mixins"
   >
     mixins
   </a>
@@ -79,9 +63,8 @@ exports[`render correctly 1`] = `
   />
   <span
     aria-current="page"
-    className="euiBreadcrumb codeNoMinWidth euiBreadcrumb--last"
+    className="euiBreadcrumb euiBreadcrumb--last"
     data-test-subj="codeFileBreadcrumb-_alerts.scss"
-    title="_alerts.scss"
   >
     _alerts.scss
   </span>

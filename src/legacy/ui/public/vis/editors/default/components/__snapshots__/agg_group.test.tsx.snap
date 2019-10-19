@@ -10,9 +10,9 @@ exports[`DefaultEditorAgg component should init with the default set of props 1`
     <eui-title
       size="xs"
     >
-      <div>
+      <h3>
         Metrics
-      </div>
+      </h3>
     </eui-title>
     <eui-spacer
       size="s"

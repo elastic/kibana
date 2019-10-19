@@ -16,13 +16,13 @@ export class KpiHosts {
     req: FrameworkRequest,
     options: RequestBasicOptions
   ): Promise<KpiHostsData> {
-    return await this.adapter.getKpiHosts(req, options);
+    return this.adapter.getKpiHosts(req, options);
   }
 
   public async getKpiHostDetails(
     req: FrameworkRequest,
     options: RequestBasicOptions
   ): Promise<KpiHostDetailsData> {
-    return await this.adapter.getKpiHostDetails(req, options);
+    return this.adapter.getKpiHostDetails(req, options);
   }
 }

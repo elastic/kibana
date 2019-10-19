@@ -4,6 +4,7 @@
 
 ## ElasticsearchError interface
 
+
 <b>Signature:</b>
 
 ```typescript
@@ -14,5 +15,5 @@ export interface ElasticsearchError extends Boom
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [\[code\]](./kibana-plugin-server.elasticsearcherror.[code].md) | <code>string</code> |  |
+|  [\[code\]](./kibana-plugin-server.elasticsearcherror._code_.md) | <code>string</code> |  |
 

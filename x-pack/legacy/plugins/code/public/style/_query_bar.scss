@@ -5,6 +5,14 @@
   text-overflow: ellipsis;
 }
 
-.codeSearchBar__input {
+.codeQueryBar__input {
   padding-right: 10rem;
+}
+
+.codeQueryBar__scope {
+  width: calc(#{$codeSideBarWidth} - #{$codeSearchBarPadding});
+}
+
+.codeQueryBar__filter-badge {
+  margin-right: $euiSizeS;
 }

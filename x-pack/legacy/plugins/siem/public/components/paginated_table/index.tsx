@@ -13,7 +13,6 @@ import {
   EuiGlobalToastListToast as Toast,
   EuiLoadingContent,
   EuiPagination,
-  EuiPanel,
   EuiPopover,
 } from '@elastic/eui';
 import { noop } from 'lodash/fp';
@@ -22,11 +21,16 @@ import styled, { css } from 'styled-components';
 
 import { Direction } from '../../graphql/types';
 import { AuthTableColumns } from '../page/hosts/authentications_table';
-import { DomainsColumns } from '../page/network/domains_table/columns';
-import { EventsTableColumns } from '../page/hosts/events_table';
 import { HostsTableColumns } from '../page/hosts/hosts_table';
 import { NetworkDnsColumns } from '../page/network/network_dns_table/columns';
-import { NetworkTopNFlowColumns } from '../page/network/network_top_n_flow_table/columns';
+import {
+  NetworkTopNFlowColumns,
+  NetworkTopNFlowColumnsIpDetails,
+} from '../page/network/network_top_n_flow_table/columns';
+import {
+  NetworkTopCountriesColumns,
+  NetworkTopCountriesColumnsIpDetails,
+} from '../page/network/network_top_countries_table/columns';
 import { TlsColumns } from '../page/network/tls_table/columns';
 import { UncommonProcessTableColumns } from '../page/hosts/uncommon_process_table';
 import { UsersColumns } from '../page/network/users_table/columns';
@@ -36,6 +40,7 @@ import { useStateToaster } from '../toasters';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
 
 import * as i18n from './translations';
+import { Panel } from '../panel';
 
 const DEFAULT_DATA_TEST_SUBJ = 'paginated-table';
 
@@ -64,13 +69,13 @@ declare type HostsTableColumnsTest = [
 
 declare type BasicTableColumns =
   | AuthTableColumns
-  | DomainsColumns
-  | DomainsColumns
-  | EventsTableColumns
   | HostsTableColumns
   | HostsTableColumnsTest
   | NetworkDnsColumns
+  | NetworkTopCountriesColumns
+  | NetworkTopCountriesColumnsIpDetails
   | NetworkTopNFlowColumns
+  | NetworkTopNFlowColumnsIpDetails
   | TlsColumns
   | UncommonProcessTableColumns
   | UsersColumns;
@@ -79,6 +84,7 @@ declare type SiemTables = BasicTableProps<BasicTableColumns>;
 
 // Using telescoping templates to remove 'any' that was polluting downstream column type checks
 export interface BasicTableProps<T> {
+  activePage: number;
   columns: T;
   dataTestSubj?: string;
   headerCount: number;
@@ -88,6 +94,7 @@ export interface BasicTableProps<T> {
   headerUnit: string | React.ReactElement;
   id?: string;
   itemsPerRow?: ItemsPerRow[];
+  isInspect?: boolean;
   limit: number;
   loading: boolean;
   loadPage: (activePage: number) => void;
@@ -99,23 +106,24 @@ export interface BasicTableProps<T> {
   totalCount: number;
   updateActivePage: (activePage: number) => void;
   updateLimitPagination: (limit: number) => void;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  updateProps?: { [key: string]: any };
 }
+type Func<T> = (arg: T) => string | number;
 
-export interface Columns<T> {
+export interface Columns<T, U = T> {
+  align?: string;
   field?: string;
-  name: string | React.ReactNode;
-  isMobileHeader?: boolean;
-  sortable?: boolean;
-  truncateText?: boolean;
   hideForMobile?: boolean;
-  render?: (item: T) => void;
+  isMobileHeader?: boolean;
+  name: string | React.ReactNode;
+  render?: (item: T, node: U) => React.ReactNode;
+  sortable?: boolean | Func<T>;
+  truncateText?: boolean;
   width?: string;
 }
 
 export const PaginatedTable = memo<SiemTables>(
   ({
+    activePage,
     columns,
     dataTestSubj = DEFAULT_DATA_TEST_SUBJ,
     headerCount,
@@ -124,6 +132,7 @@ export const PaginatedTable = memo<SiemTables>(
     headerTooltip,
     headerUnit,
     id,
+    isInspect,
     itemsPerRow,
     limit,
     loading,
@@ -135,25 +144,29 @@ export const PaginatedTable = memo<SiemTables>(
     totalCount,
     updateActivePage,
     updateLimitPagination,
-    updateProps,
   }) => {
-    const [activePage, setActivePage] = useState(0);
+    const [myLoading, setMyLoading] = useState(loading);
+    const [myActivePage, setActivePage] = useState(activePage);
     const [showInspect, setShowInspect] = useState(false);
     const [loadingInitial, setLoadingInitial] = useState(headerCount === -1);
     const [isPopoverOpen, setPopoverOpen] = useState(false);
+
     const pageCount = Math.ceil(totalCount / limit);
     const dispatchToaster = useStateToaster()[1];
-    const effectDeps = updateProps ? [limit, ...Object.values(updateProps)] : [limit];
-    useEffect(() => {
-      if (activePage !== 0) {
-        setActivePage(0);
-        updateActivePage(0);
-      }
 
+    useEffect(() => {
+      setActivePage(activePage);
+    }, [activePage]);
+
+    useEffect(() => {
       if (headerCount >= 0 && loadingInitial) {
         setLoadingInitial(false);
       }
-    }, effectDeps);
+    }, [loadingInitial, headerCount]);
+
+    useEffect(() => {
+      setMyLoading(loading);
+    }, [loading]);
 
     const onButtonClick = () => {
       setPopoverOpen(!isPopoverOpen);
@@ -214,8 +227,8 @@ export const PaginatedTable = memo<SiemTables>(
 
     return (
       <Panel
-        data-test-subj={dataTestSubj}
-        loading={{ loading }}
+        data-test-subj={`${dataTestSubj}-loading-${loading}`}
+        loading={loading}
         onMouseEnter={() => setShowInspect(true)}
         onMouseLeave={() => setShowInspect(false)}
       >
@@ -252,7 +265,6 @@ export const PaginatedTable = memo<SiemTables>(
                   : null
               }
             />
-
             <FooterAction>
               <EuiFlexItem>
                 {itemsPerRow && itemsPerRow.length > 0 && totalCount >= itemsPerRow[0].numberOfRow && (
@@ -273,13 +285,14 @@ export const PaginatedTable = memo<SiemTables>(
                 <EuiPagination
                   data-test-subj="numberedPagination"
                   pageCount={pageCount}
-                  activePage={activePage}
+                  activePage={myActivePage}
                   onPageClick={goToPage}
                 />
               </PaginationWrapper>
             </FooterAction>
-
-            {loading && <Loader data-test-subj="loadingPanelPaginatedTable" overlay size="xl" />}
+            {(isInspect || myLoading) && (
+              <Loader data-test-subj="loadingPanelPaginatedTable" overlay size="xl" />
+            )}
           </>
         )}
       </Panel>
@@ -288,18 +301,6 @@ export const PaginatedTable = memo<SiemTables>(
 );
 
 PaginatedTable.displayName = 'PaginatedTable';
-
-const Panel = styled(EuiPanel)<{ loading: { loading?: boolean } }>`
-  position: relative;
-
-  ${({ loading }) =>
-    loading &&
-    `
-    overflow: hidden;
-  `}
-`;
-
-Panel.displayName = 'Panel';
 
 const BasicTable = styled(EuiBasicTable)`
   tbody {

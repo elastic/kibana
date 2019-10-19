@@ -20,27 +20,44 @@
 import chrome from 'ui/chrome';
 import { listControlFactory } from './list_control_factory';
 
+jest.mock('ui/timefilter', () => ({
+  createFilter: jest.fn(),
+}));
+
+jest.mock('../../../../core_plugins/data/public/legacy', () => ({
+  start: {
+    indexPatterns: {
+      indexPatterns: {
+        get: () => ({
+          fields: { getByName: name => {
+            const fields = { myField: { name: 'myField' } };
+            return fields[name];
+          } }
+        }),
+      }
+    },
+    filter: {
+      filterManager: {
+        fieldName: 'myNumberField',
+        getIndexPattern: () => ({
+          fields: { getByName: name => {
+            const fields = { myField: { name: 'myField' } };
+            return fields[name];
+          } }
+        }),
+        getAppFilters: jest.fn().mockImplementation(() => ([])),
+        getGlobalFilters: jest.fn().mockImplementation(() => ([])),
+      }
+    }
+  }
+}));
+
 chrome.getInjected.mockImplementation((key) => {
   switch(key) {
     case 'autocompleteTimeout': return 1000;
     case 'autocompleteTerminateAfter': return 100000;
   }
 });
-
-const mockField = {
-  name: 'myField',
-  format: {
-    convert: (val) => { return val; }
-  }
-};
-
-const mockIndexPattern = {
-  fields: {
-    byName: {
-      myField: mockField,
-    }
-  }
-};
 
 function MockSearchSource() {
   return {
@@ -68,19 +85,6 @@ function MockSearchSource() {
 }
 
 const getMockKbnApi = () => ({
-  indexPatterns: {
-    get: async () => {
-      return mockIndexPattern;
-    }
-  },
-  queryFilter: {
-    getAppFilters: () => {
-      return [];
-    },
-    getGlobalFilters: () => {
-      return [];
-    }
-  },
   SearchSource: jest.fn(MockSearchSource),
 });
 

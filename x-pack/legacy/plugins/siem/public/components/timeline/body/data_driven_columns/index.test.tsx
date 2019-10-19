@@ -26,6 +26,7 @@ describe('Columns', () => {
           columnRenderers={columnRenderers}
           data={mockTimelineData[0].data}
           onColumnResized={jest.fn()}
+          timelineId="test"
         />
       </TestProviders>
     );

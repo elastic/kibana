@@ -1,0 +1,135 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DonutChart component passes correct props without errors for valid props 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  responsive={false}
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <svg
+      aria-label="Pie chart showing the current status. 32 of 127 monitors are down."
+      height={125}
+      width={125}
+    />
+  </EuiFlexItem>
+  <EuiFlexItem>
+    <DonutChartLegend
+      down={32}
+      up={95}
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`DonutChart component renders a donut chart 1`] = `
+<div
+  class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+>
+  <div
+    class="euiFlexItem euiFlexItem--flexGrowZero"
+  >
+    <svg
+      aria-label="Pie chart showing the current status. 32 of 127 monitors are down."
+      height="125"
+      width="125"
+    />
+  </div>
+  <div
+    class="euiFlexItem"
+  >
+    <div
+      class="sc-htpNat kGuflQ"
+    >
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
+      >
+        <span
+          class="euiFlexItem euiFlexItem--flexGrowZero sc-bdVaJa fYBJge"
+        >
+          <div
+            class="euiHealth"
+          >
+            <div
+              class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+            >
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <svg
+                  class="euiIcon euiIcon--medium euiIcon-isLoading"
+                  focusable="false"
+                  height="16"
+                  style="fill:#bd271e"
+                  viewBox="0 0 16 16"
+                  width="16"
+                  xmlns="http://www.w3.org/2000/svg"
+                />
+              </div>
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              />
+            </div>
+          </div>
+        </span>
+        <span
+          class="euiFlexItem euiFlexItem--flexGrowZero sc-bdVaJa fYBJge"
+        >
+          Down
+        </span>
+        <span
+          class="euiFlexItem sc-bwzfXH dkRrwr"
+        >
+          32
+        </span>
+      </div>
+      <div
+        class="euiSpacer euiSpacer--m"
+      />
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
+      >
+        <span
+          class="euiFlexItem euiFlexItem--flexGrowZero sc-bdVaJa fYBJge"
+        >
+          <div
+            class="euiHealth"
+          >
+            <div
+              class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+            >
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <svg
+                  class="euiIcon euiIcon--medium euiIcon-isLoading"
+                  focusable="false"
+                  height="16"
+                  style="fill:#d3dae6"
+                  viewBox="0 0 16 16"
+                  width="16"
+                  xmlns="http://www.w3.org/2000/svg"
+                />
+              </div>
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              />
+            </div>
+          </div>
+        </span>
+        <span
+          class="euiFlexItem euiFlexItem--flexGrowZero sc-bdVaJa fYBJge"
+        >
+          Up
+        </span>
+        <span
+          class="euiFlexItem sc-bwzfXH dkRrwr"
+        >
+          95
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+`;

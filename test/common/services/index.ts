@@ -17,14 +17,13 @@
  * under the License.
  */
 
-import { EsProvider } from './es';
+import { LegacyEsProvider } from './legacy_es';
 import { EsArchiverProvider } from './es_archiver';
-// @ts-ignore not TS yet
 import { KibanaServerProvider } from './kibana_server';
 import { RetryProvider } from './retry';
 
 export const services = {
-  es: EsProvider,
+  es: LegacyEsProvider,
   esArchiver: EsArchiverProvider,
   kibanaServer: KibanaServerProvider,
   retry: RetryProvider,

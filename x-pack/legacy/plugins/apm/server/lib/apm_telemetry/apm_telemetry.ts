@@ -22,13 +22,18 @@ export function createApmTelementry(
   };
 }
 
-export function storeApmTelemetry(
+export async function storeApmTelemetry(
   server: Server,
   apmTelemetry: SavedObjectAttributes
-): void {
-  const savedObjectsClient = getSavedObjectsClient(server);
-  savedObjectsClient.create('apm-telemetry', apmTelemetry, {
-    id: APM_TELEMETRY_DOC_ID,
-    overwrite: true
-  });
+) {
+  try {
+    const savedObjectsClient = getSavedObjectsClient(server);
+    await savedObjectsClient.create('apm-telemetry', apmTelemetry, {
+      id: APM_TELEMETRY_DOC_ID,
+      overwrite: true
+    });
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error('Could not send APM telemetry:', e.message);
+  }
 }

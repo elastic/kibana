@@ -6,16 +6,17 @@
 
 import { i18n } from '@kbn/i18n';
 import { BasicValidations } from './job_validator';
-import { Job } from '../job_creator/configs';
-import { ALLOWED_DATA_UNITS } from '../../../../../common/constants/validation';
-import { newJobLimits } from '../../../new_job/utils/new_job_defaults';
+import { Job, Datafeed } from '../job_creator/configs';
+import { ALLOWED_DATA_UNITS, JOB_ID_MAX_LENGTH } from '../../../../../common/constants/validation';
+import { newJobLimits } from '../../../new_job_new/utils/new_job_defaults';
 import { ValidationResults, ValidationMessage } from '../../../../../common/util/job_utils';
 import { ExistingJobsAndGroups } from '../../../../services/job_service';
 
 export function populateValidationMessages(
   validationResults: ValidationResults,
   basicValidations: BasicValidations,
-  jobConfig: Job
+  jobConfig: Job,
+  datafeedConfig: Datafeed
 ) {
   const limits = newJobLimits();
 
@@ -27,11 +28,23 @@ export function populateValidationMessages(
       'xpack.ml.newJob.wizard.validateJob.jobNameAllowedCharactersDescription',
       {
         defaultMessage:
-          'Job name can contain lowercase alphanumeric (a-z and 0-9), hyphens or underscores; ' +
+          'Job ID can contain lowercase alphanumeric (a-z and 0-9), hyphens or underscores; ' +
           'must start and end with an alphanumeric character',
       }
     );
     basicValidations.jobId.message = msg;
+  } else if (validationResults.contains('job_id_invalid_max_length')) {
+    basicValidations.jobId.valid = false;
+    basicValidations.jobId.message = i18n.translate(
+      'xpack.ml.newJob.wizard.validateJob.jobIdInvalidMaxLengthErrorMessage',
+      {
+        defaultMessage:
+          'Job ID must be no more than {maxLength, plural, one {# character} other {# characters}} long.',
+        values: {
+          maxLength: JOB_ID_MAX_LENGTH,
+        },
+      }
+    );
   } else if (validationResults.contains('job_id_already_exists')) {
     basicValidations.jobId.valid = false;
     const msg = i18n.translate('xpack.ml.newJob.wizard.validateJob.jobNameAlreadyExists', {
@@ -52,6 +65,18 @@ export function populateValidationMessages(
       }
     );
     basicValidations.groupIds.message = msg;
+  } else if (validationResults.contains('job_group_id_invalid_max_length')) {
+    basicValidations.groupIds.valid = false;
+    basicValidations.groupIds.message = i18n.translate(
+      'xpack.ml.newJob.wizard.validateJob.jobGroupMaxLengthDescription',
+      {
+        defaultMessage:
+          'Job group name must be no more than {maxLength, plural, one {# character} other {# characters}} long.',
+        values: {
+          maxLength: JOB_ID_MAX_LENGTH,
+        },
+      }
+    );
   } else if (validationResults.contains('job_group_id_already_exists')) {
     basicValidations.groupIds.valid = false;
     const msg = i18n.translate('xpack.ml.newJob.wizard.validateJob.groupNameAlreadyExists', {
@@ -78,12 +103,13 @@ export function populateValidationMessages(
 
   if (validationResults.contains('model_memory_limit_invalid')) {
     basicValidations.modelMemoryLimit.valid = false;
+    const maxModelMemoryLimit = (limits.max_model_memory_limit || '').toUpperCase();
     const msg = i18n.translate(
       'xpack.ml.newJob.wizard.validateJob.modelMemoryLimitRangeInvalidErrorMessage',
       {
         defaultMessage:
           'Model memory limit cannot be higher than the maximum value of {maxModelMemoryLimit}',
-        values: { maxModelMemoryLimit: limits.max_model_memory_limit.toUpperCase() },
+        values: { maxModelMemoryLimit },
       }
     );
     basicValidations.modelMemoryLimit.message = msg;
@@ -112,20 +138,33 @@ export function populateValidationMessages(
     basicValidations.bucketSpan.message = msg;
   } else if (validationResults.contains('bucket_span_invalid')) {
     basicValidations.bucketSpan.valid = false;
-    const msg = i18n.translate(
-      'xpack.ml.newJob.wizard.validateJob.bucketSpanInvalidTimeIntervalFormatErrorMessage',
-      {
-        defaultMessage:
-          '{bucketSpan} is not a valid time interval format e.g. {tenMinutes}, {oneHour}. It also needs to be higher than zero.',
-        values: {
-          bucketSpan: jobConfig.analysis_config.bucket_span,
-          tenMinutes: '10m',
-          oneHour: '1h',
-        },
-      }
+    basicValidations.bucketSpan.message = invalidTimeFormatMessage(
+      jobConfig.analysis_config.bucket_span
     );
+  }
 
-    basicValidations.bucketSpan.message = msg;
+  if (validationResults.contains('query_empty')) {
+    basicValidations.query.valid = false;
+    const msg = i18n.translate('xpack.ml.newJob.wizard.validateJob.queryCannotBeEmpty', {
+      defaultMessage: 'Datafeed query cannot be empty.',
+    });
+    basicValidations.query.message = msg;
+  } else if (validationResults.contains('query_invalid')) {
+    basicValidations.query.valid = false;
+    const msg = i18n.translate('xpack.ml.newJob.wizard.validateJob.queryIsInvalidEsQuery', {
+      defaultMessage: 'Datafeed query must be a valid elasticsearch query.',
+    });
+    basicValidations.query.message = msg;
+  }
+
+  if (validationResults.contains('query_delay_invalid')) {
+    basicValidations.queryDelay.valid = false;
+    basicValidations.queryDelay.message = invalidTimeFormatMessage(datafeedConfig.query_delay);
+  }
+
+  if (validationResults.contains('frequency_invalid')) {
+    basicValidations.frequency.valid = false;
+    basicValidations.frequency.message = invalidTimeFormatMessage(datafeedConfig.frequency);
   }
 }
 
@@ -157,4 +196,19 @@ export function checkForExistingJobAndGroupIds(
     contains: (id: string) => messages.some(m => id === m.id),
     find: (id: string) => messages.find(m => id === m.id),
   };
+}
+
+function invalidTimeFormatMessage(value: string | undefined) {
+  return i18n.translate(
+    'xpack.ml.newJob.wizard.validateJob.frequencyInvalidTimeIntervalFormatErrorMessage',
+    {
+      defaultMessage:
+        '{value} is not a valid time interval format e.g. {tenMinutes}, {oneHour}. It also needs to be higher than zero.',
+      values: {
+        value,
+        tenMinutes: '10m',
+        oneHour: '1h',
+      },
+    }
+  );
 }

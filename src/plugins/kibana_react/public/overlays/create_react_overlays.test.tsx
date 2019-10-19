@@ -19,6 +19,7 @@
 
 import * as React from 'react';
 import { createReactOverlays } from './create_react_overlays';
+import { overlayServiceMock } from '../../../../core/public/mocks';
 
 test('throws if no overlays service provided', () => {
   const overlays = createReactOverlays({});
@@ -29,10 +30,7 @@ test('throws if no overlays service provided', () => {
 
 test('creates wrapped overlays service', () => {
   const overlays = createReactOverlays({
-    overlays: {
-      openFlyout: jest.fn(),
-      openModal: jest.fn(),
-    },
+    overlays: overlayServiceMock.createStartContract(),
   });
 
   expect(typeof overlays.openFlyout).toBe('function');
@@ -40,20 +38,17 @@ test('creates wrapped overlays service', () => {
 });
 
 test('can open flyout with React element', () => {
-  const openFlyout = jest.fn();
+  const coreOverlays = overlayServiceMock.createStartContract();
   const overlays = createReactOverlays({
-    overlays: {
-      openFlyout,
-      openModal: jest.fn(),
-    },
+    overlays: coreOverlays,
   });
 
-  expect(openFlyout).toHaveBeenCalledTimes(0);
+  expect(coreOverlays.openFlyout).toHaveBeenCalledTimes(0);
 
   overlays.openFlyout(<div>foo</div>);
 
-  expect(openFlyout).toHaveBeenCalledTimes(1);
-  expect(openFlyout.mock.calls[0][0]).toMatchInlineSnapshot(`
+  expect(coreOverlays.openFlyout).toHaveBeenCalledTimes(1);
+  expect(coreOverlays.openFlyout.mock.calls[0][0]).toMatchInlineSnapshot(`
         <React.Fragment>
           <div>
             foo
@@ -63,21 +58,17 @@ test('can open flyout with React element', () => {
 });
 
 test('can open modal with React element', () => {
-  const openFlyout = jest.fn();
-  const openModal = jest.fn();
+  const coreOverlays = overlayServiceMock.createStartContract();
   const overlays = createReactOverlays({
-    overlays: {
-      openFlyout,
-      openModal,
-    },
+    overlays: coreOverlays,
   });
 
-  expect(openModal).toHaveBeenCalledTimes(0);
+  expect(coreOverlays.openModal).toHaveBeenCalledTimes(0);
 
   overlays.openModal(<div>bar</div>);
 
-  expect(openModal).toHaveBeenCalledTimes(1);
-  expect(openModal.mock.calls[0][0]).toMatchInlineSnapshot(`
+  expect(coreOverlays.openModal).toHaveBeenCalledTimes(1);
+  expect(coreOverlays.openModal.mock.calls[0][0]).toMatchInlineSnapshot(`
         <React.Fragment>
           <div>
             bar
@@ -87,12 +78,9 @@ test('can open modal with React element', () => {
 });
 
 test('passes through flyout options when opening flyout', () => {
-  const openFlyout = jest.fn();
+  const coreOverlays = overlayServiceMock.createStartContract();
   const overlays = createReactOverlays({
-    overlays: {
-      openFlyout,
-      openModal: jest.fn(),
-    },
+    overlays: coreOverlays,
   });
 
   overlays.openFlyout(<>foo</>, {
@@ -100,19 +88,16 @@ test('passes through flyout options when opening flyout', () => {
     closeButtonAriaLabel: 'bar',
   });
 
-  expect(openFlyout.mock.calls[0][1]).toEqual({
+  expect(coreOverlays.openFlyout.mock.calls[0][1]).toEqual({
     'data-test-subj': 'foo',
     closeButtonAriaLabel: 'bar',
   });
 });
 
 test('passes through modal options when opening modal', () => {
-  const openModal = jest.fn();
+  const coreOverlays = overlayServiceMock.createStartContract();
   const overlays = createReactOverlays({
-    overlays: {
-      openFlyout: jest.fn(),
-      openModal,
-    },
+    overlays: coreOverlays,
   });
 
   overlays.openModal(<>foo</>, {
@@ -120,7 +105,7 @@ test('passes through modal options when opening modal', () => {
     closeButtonAriaLabel: 'bar2',
   });
 
-  expect(openModal.mock.calls[0][1]).toEqual({
+  expect(coreOverlays.openModal.mock.calls[0][1]).toEqual({
     'data-test-subj': 'foo2',
     closeButtonAriaLabel: 'bar2',
   });

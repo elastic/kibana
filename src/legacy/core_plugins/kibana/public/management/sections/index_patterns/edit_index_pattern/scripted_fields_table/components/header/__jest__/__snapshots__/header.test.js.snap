@@ -30,13 +30,8 @@ exports[`Header should render normally 1`] = `
     grow={false}
   >
     <EuiButton
-      color="primary"
       data-test-subj="addScriptedFieldLink"
-      fill={false}
       href=""
-      iconSide="left"
-      size="m"
-      type="button"
     >
       <FormattedMessage
         defaultMessage="Add scripted field"

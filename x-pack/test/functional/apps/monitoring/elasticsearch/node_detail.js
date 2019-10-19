@@ -33,7 +33,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       afterEach(async () => {
-        await PageObjects.monitoring.clickBreadcrumb('breadcrumbEsNodes'); // return back for next test
+        await PageObjects.monitoring.clickBreadcrumb('~breadcrumbEsNodes'); // return back for next test
       });
 
       it('should show node summary of master node with 20 indices and 38 shards', async () => {

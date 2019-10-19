@@ -5,14 +5,22 @@
  */
 
 
-import { ML_BREADCRUMB } from '../breadcrumbs';
+import { ML_BREADCRUMB, ANOMALY_DETECTION_BREADCRUMB } from '../breadcrumbs';
+import { i18n } from '@kbn/i18n';
 
 
 export function getAnomalyExplorerBreadcrumbs() {
   // Whilst top level nav menu with tabs remains,
   // use root ML breadcrumb.
   return [
-    ML_BREADCRUMB
+    ML_BREADCRUMB,
+    ANOMALY_DETECTION_BREADCRUMB,
+    {
+      text: i18n.translate('xpack.ml.anomalyDetection.anomalyExplorerLabel', {
+        defaultMessage: 'Anomaly Explorer'
+      }),
+      href: ''
+    }
   ];
 }
 

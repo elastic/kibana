@@ -7,15 +7,138 @@
 import { ShallowWrapper, shallow } from 'enzyme';
 import * as React from 'react';
 
-import { AreaChartBaseComponent, AreaChartWithCustomPrompt } from './areachart';
-import { ChartConfigsData, ChartHolder } from './common';
+import { AreaChartBaseComponent, AreaChart } from './areachart';
+import { ChartSeriesData } from './common';
 import { ScaleType, AreaSeries, Axis } from '@elastic/charts';
 
-jest.mock('@elastic/charts');
+const customHeight = '100px';
+const customWidth = '120px';
+const chartDataSets = [
+  [
+    [
+      {
+        key: 'uniqueSourceIpsHistogram',
+        value: [
+          { x: new Date('2019-05-03T13:00:00.000Z').valueOf(), y: 580213 },
+          { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: null },
+          { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12382 },
+        ],
+        color: '#DB1374',
+      },
+      {
+        key: 'uniqueDestinationIpsHistogram',
+        value: [
+          { x: new Date('2019-05-03T13:00:00.000Z').valueOf(), y: 565975 },
+          { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 1084366 },
+          { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12280 },
+        ],
+        color: '#490092',
+      },
+    ],
+  ],
+  [
+    [
+      {
+        key: 'uniqueSourceIpsHistogram',
+        value: [
+          { x: new Date('2019-05-03T13:00:00.000Z').valueOf(), y: 580213 },
+          { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 1096175 },
+          { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12382 },
+        ],
+        color: '#DB1374',
+      },
+      {
+        key: 'uniqueDestinationIpsHistogram',
+        value: [
+          { x: new Date('2019-05-03T13:00:00.000Z').valueOf(), y: 565975 },
+          { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 1084366 },
+          { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12280 },
+        ],
+        color: '#490092',
+      },
+    ],
+  ],
+  [
+    [
+      {
+        key: 'uniqueSourceIpsHistogram',
+        value: [
+          { x: new Date('2019-05-03T13:00:00.000Z').valueOf(), y: 580213 },
+          { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: {} },
+          { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12382 },
+        ],
+        color: '#DB1374',
+      },
+      {
+        key: 'uniqueDestinationIpsHistogram',
+        value: [
+          { x: new Date('2019-05-03T13:00:00.000Z').valueOf(), y: 565975 },
+          { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 1084366 },
+          { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12280 },
+        ],
+        color: '#490092',
+      },
+    ],
+  ],
+  [
+    [
+      {
+        key: 'uniqueSourceIpsHistogram',
+        value: [],
+        color: '#DB1374',
+      },
+      {
+        key: 'uniqueDestinationIpsHistogram',
+        value: [
+          { x: new Date('2019-05-03T13:00:00.000Z').valueOf(), y: 565975 },
+          { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 1084366 },
+          { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12280 },
+        ],
+        color: '#490092',
+      },
+    ],
+  ],
+];
 
+const chartHolderDataSets = [
+  [null],
+  [[]],
+  [
+    {
+      key: 'uniqueSourceIpsHistogram',
+      value: null,
+      color: '#DB1374',
+    },
+    {
+      key: 'uniqueDestinationIpsHistogram',
+      value: null,
+      color: '#490092',
+    },
+  ],
+  [
+    {
+      key: 'uniqueSourceIpsHistogram',
+      value: [
+        { x: new Date('2019-05-03T13:00:00.000Z').valueOf() },
+        { x: new Date('2019-05-04T01:00:00.000Z').valueOf() },
+        { x: new Date('2019-05-04T13:00:00.000Z').valueOf() },
+      ],
+      color: '#DB1374',
+    },
+    {
+      key: 'uniqueDestinationIpsHistogram',
+      value: [
+        { x: new Date('2019-05-03T13:00:00.000Z').valueOf() },
+        { x: new Date('2019-05-04T01:00:00.000Z').valueOf() },
+        { x: new Date('2019-05-04T13:00:00.000Z').valueOf() },
+      ],
+      color: '#490092',
+    },
+  ],
+];
 describe('AreaChartBaseComponent', () => {
   let shallowWrapper: ShallowWrapper;
-  const mockAreaChartData: ChartConfigsData[] = [
+  const mockAreaChartData: ChartSeriesData[] = [
     {
       key: 'uniqueSourceIpsHistogram',
       value: [
@@ -39,7 +162,11 @@ describe('AreaChartBaseComponent', () => {
   describe('render', () => {
     beforeAll(() => {
       shallowWrapper = shallow(
-        <AreaChartBaseComponent height={100} width={120} data={mockAreaChartData} />
+        <AreaChartBaseComponent
+          height={customHeight}
+          width={customWidth}
+          data={mockAreaChartData}
+        />
       );
     });
 
@@ -65,8 +192,8 @@ describe('AreaChartBaseComponent', () => {
     beforeAll(() => {
       shallowWrapper = shallow(
         <AreaChartBaseComponent
-          height={100}
-          width={120}
+          height={customHeight}
+          width={customWidth}
           data={mockAreaChartData}
           configs={configs}
         />
@@ -118,7 +245,11 @@ describe('AreaChartBaseComponent', () => {
   describe('render with default configs if no customized configs given', () => {
     beforeAll(() => {
       shallowWrapper = shallow(
-        <AreaChartBaseComponent height={100} width={120} data={mockAreaChartData} />
+        <AreaChartBaseComponent
+          height={customHeight}
+          width={customWidth}
+          data={mockAreaChartData}
+        />
       );
     });
 
@@ -177,147 +308,43 @@ describe('AreaChartBaseComponent', () => {
   });
 });
 
-describe('AreaChartWithCustomPrompt', () => {
+describe('AreaChart', () => {
   let shallowWrapper: ShallowWrapper;
-  describe.each([
-    [
-      [
-        {
-          key: 'uniqueSourceIpsHistogram',
-          value: [
-            { x: new Date('2019-05-03T13:00:00.000Z').valueOf(), y: 580213 },
-            { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 1096175 },
-            { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12382 },
-          ],
-          color: '#DB1374',
-        },
-        {
-          key: 'uniqueDestinationIpsHistogram',
-          value: [
-            { x: new Date('2019-05-03T13:00:00.000Z').valueOf(), y: 565975 },
-            { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 1084366 },
-            { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12280 },
-          ],
-          color: '#490092',
-        },
-      ],
-      [
-        [
-          {
-            key: 'uniqueSourceIpsHistogram',
-            value: [],
-            color: '#DB1374',
-          },
-          {
-            key: 'uniqueDestinationIpsHistogram',
-            value: [
-              { x: new Date('2019-05-03T13:00:00.000Z').valueOf(), y: 565975 },
-              { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 1084366 },
-              { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12280 },
-            ],
-            color: '#490092',
-          },
-        ],
-      ],
-    ],
-  ])('renders areachart', (data: ChartConfigsData[] | [] | null | undefined) => {
+  const mockConfig = {
+    series: {
+      xScaleType: ScaleType.Time,
+      yScaleType: ScaleType.Linear,
+      stackAccessors: ['g'],
+    },
+    axis: {
+      xTickFormatter: jest.fn(),
+      yTickFormatter: jest.fn(),
+      tickSize: 8,
+    },
+    customHeight: 324,
+  };
+  describe.each(chartDataSets as Array<[ChartSeriesData[]]>)('with valid data [%o]', data => {
     beforeAll(() => {
-      shallowWrapper = shallow(<AreaChartWithCustomPrompt height={100} width={120} data={data} />);
+      shallowWrapper = shallow(<AreaChart configs={mockConfig} areaChart={data} />);
     });
 
-    it('render AreaChartBaseComponent', () => {
-      expect(shallowWrapper.find(AreaChartBaseComponent)).toHaveLength(1);
-      expect(shallowWrapper.find(ChartHolder)).toHaveLength(0);
+    it(`should render area chart`, () => {
+      expect(shallowWrapper.find('AutoSizer')).toHaveLength(1);
+      expect(shallowWrapper.find('ChartPlaceHolder')).toHaveLength(0);
     });
   });
 
-  describe.each([
-    null,
-    [],
-    [
-      {
-        key: 'uniqueSourceIpsHistogram',
-        value: null,
-        color: '#DB1374',
-      },
-      {
-        key: 'uniqueDestinationIpsHistogram',
-        value: null,
-        color: '#490092',
-      },
-    ],
-    [
-      {
-        key: 'uniqueSourceIpsHistogram',
-        value: [
-          { x: new Date('2019-05-03T13:00:00.000Z').valueOf() },
-          { x: new Date('2019-05-04T01:00:00.000Z').valueOf() },
-          { x: new Date('2019-05-04T13:00:00.000Z').valueOf() },
-        ],
-        color: '#DB1374',
-      },
-      {
-        key: 'uniqueDestinationIpsHistogram',
-        value: [
-          { x: new Date('2019-05-03T13:00:00.000Z').valueOf() },
-          { x: new Date('2019-05-04T01:00:00.000Z').valueOf() },
-          { x: new Date('2019-05-04T13:00:00.000Z').valueOf() },
-        ],
-        color: '#490092',
-      },
-    ],
-    [
-      [
-        {
-          key: 'uniqueSourceIpsHistogram',
-          value: [
-            { x: new Date('2019-05-03T13:00:00.000Z').valueOf(), y: 580213 },
-            { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: null },
-            { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12382 },
-          ],
-          color: '#DB1374',
-        },
-        {
-          key: 'uniqueDestinationIpsHistogram',
-          value: [
-            { x: new Date('2019-05-03T13:00:00.000Z').valueOf(), y: 565975 },
-            { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 1084366 },
-            { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12280 },
-          ],
-          color: '#490092',
-        },
-      ],
-    ],
-    [
-      [
-        {
-          key: 'uniqueSourceIpsHistogram',
-          value: [
-            { x: new Date('2019-05-03T13:00:00.000Z').valueOf(), y: 580213 },
-            { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: {} },
-            { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12382 },
-          ],
-          color: '#DB1374',
-        },
-        {
-          key: 'uniqueDestinationIpsHistogram',
-          value: [
-            { x: new Date('2019-05-03T13:00:00.000Z').valueOf(), y: 565975 },
-            { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 1084366 },
-            { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12280 },
-          ],
-          color: '#490092',
-        },
-      ],
-    ],
-  ])('renders prompt', (data: ChartConfigsData[] | [] | null | undefined) => {
-    beforeAll(() => {
-      shallowWrapper = shallow(<AreaChartWithCustomPrompt height={100} width={120} data={data} />);
-    });
+  describe.each(chartHolderDataSets as Array<[ChartSeriesData[] | null | undefined]>)(
+    'with invalid data [%o]',
+    data => {
+      beforeAll(() => {
+        shallowWrapper = shallow(<AreaChart configs={mockConfig} areaChart={data} />);
+      });
 
-    it('render Chart Holder', () => {
-      expect(shallowWrapper.find(AreaChartBaseComponent)).toHaveLength(0);
-      expect(shallowWrapper.find(ChartHolder)).toHaveLength(1);
-    });
-  });
+      it(`should render a chart place holder`, () => {
+        expect(shallowWrapper.find('AutoSizer')).toHaveLength(0);
+        expect(shallowWrapper.find('ChartPlaceHolder')).toHaveLength(1);
+      });
+    }
+  );
 });

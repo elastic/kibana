@@ -31,8 +31,6 @@ describe('headers', () => {
             isImmediate: false,
             savedObjectType: 'search',
           },
-          relativeUrl: '/app/kibana#/something',
-          timeRange: {},
         },
         server: mockServer,
       })
@@ -55,7 +53,6 @@ describe('headers', () => {
           isImmediate: false,
           savedObjectType: 'search',
         },
-        relativeUrl: '/app/kibana#/something',
         headers: encryptedHeaders,
       },
       server: mockServer,

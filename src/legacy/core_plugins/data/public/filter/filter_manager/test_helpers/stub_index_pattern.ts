@@ -18,10 +18,10 @@
  */
 
 export class StubIndexPatterns {
-  async get(index: any) {
+  async get(index: string) {
     return {
       fields: {
-        byName: {},
+        getByName: () => undefined,
       },
     };
   }

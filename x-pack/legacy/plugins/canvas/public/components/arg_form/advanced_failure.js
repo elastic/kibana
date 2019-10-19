@@ -7,9 +7,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { compose, withProps, withPropsOnChange } from 'recompose';
-import { EuiForm, EuiTextArea, EuiButton, EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
+import { EuiTextArea, EuiButton, EuiButtonEmpty, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { fromExpression, toExpression } from '@kbn/interpreter/common';
 import { createStatefulPropHoc } from '../../components/enhance/stateful_prop';
+
+import { ComponentStrings } from '../../../i18n';
+
+const { ArgFormAdvancedFailure: strings } = ComponentStrings;
 
 export const AdvancedFailureComponent = props => {
   const {
@@ -39,27 +43,35 @@ export const AdvancedFailureComponent = props => {
   };
 
   return (
-    <EuiForm>
-      <EuiFormRow id={argId} isInvalid={!valid} error="Invalid Expression">
+    <div>
+      <EuiFormRow
+        display="rowCompressed"
+        id={argId}
+        isInvalid={!valid}
+        error={strings.getRowErrorMessage()}
+      >
         <EuiTextArea
           id={argId}
           isInvalid={!valid}
           value={argExpression}
+          compressed
           onChange={updateArgExpression}
           rows={3}
         />
       </EuiFormRow>
+      <EuiSpacer size="s" />
       <div>
         <EuiButton disabled={!valid} onClick={e => valueChange(e)} size="s" type="submit">
-          Apply
+          {strings.getApplyButtonLabel()}
         </EuiButton>
         {defaultValue && defaultValue.length && (
           <EuiButtonEmpty size="s" color="danger" onClick={confirmReset}>
-            Reset
+            {strings.getResetButtonLabel()}
           </EuiButtonEmpty>
         )}
       </div>
-    </EuiForm>
+      <EuiSpacer size="s" />
+    </div>
   );
 };
 

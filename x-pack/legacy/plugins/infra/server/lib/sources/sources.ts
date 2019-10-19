@@ -8,6 +8,9 @@ import * as runtimeTypes from 'io-ts';
 import { failure } from 'io-ts/lib/PathReporter';
 import { Legacy } from 'kibana';
 
+import { identity, constant } from 'fp-ts/lib/function';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { map, fold } from 'fp-ts/lib/Either';
 import { Pick3 } from '../../../common/utility_types';
 import { InfraConfigurationAdapter } from '../adapters/configuration';
 import { InfraFrameworkRequest, internalInfraFrameworkRequest } from '../adapters/framework';
@@ -182,15 +185,17 @@ export class InfraSources {
 
   private async getStaticDefaultSourceConfiguration() {
     const staticConfiguration = await this.libs.configuration.get();
-    const staticSourceConfiguration = runtimeTypes
-      .type({
-        sources: runtimeTypes.type({
-          default: StaticSourceConfigurationRuntimeType,
-        }),
-      })
-      .decode(staticConfiguration)
-      .map(({ sources: { default: defaultConfiguration } }) => defaultConfiguration)
-      .getOrElse({});
+    const staticSourceConfiguration = pipe(
+      runtimeTypes
+        .type({
+          sources: runtimeTypes.type({
+            default: StaticSourceConfigurationRuntimeType,
+          }),
+        })
+        .decode(staticConfiguration),
+      map(({ sources: { default: defaultConfiguration } }) => defaultConfiguration),
+      fold(constant({}), identity)
+    );
 
     return mergeSourceConfiguration(defaultSourceConfiguration, staticSourceConfiguration);
   }
@@ -238,14 +243,16 @@ const mergeSourceConfiguration = (
   );
 
 const convertSavedObjectToSavedSourceConfiguration = (savedObject: unknown) =>
-  SourceConfigurationSavedObjectRuntimeType.decode(savedObject)
-    .map(savedSourceConfiguration => ({
+  pipe(
+    SourceConfigurationSavedObjectRuntimeType.decode(savedObject),
+    map(savedSourceConfiguration => ({
       id: savedSourceConfiguration.id,
       version: savedSourceConfiguration.version,
       updatedAt: savedSourceConfiguration.updated_at,
       origin: 'stored' as 'stored',
       configuration: savedSourceConfiguration.attributes,
-    }))
-    .getOrElseL(errors => {
+    })),
+    fold(errors => {
       throw new Error(failure(errors).join('\n'));
-    });
+    }, identity)
+  );

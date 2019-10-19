@@ -32,19 +32,25 @@ interface Filter {
 export async function fetchAndTransformMetrics<T extends Aggs>({
   setup,
   serviceName,
+  serviceNodeName,
   chartBase,
   aggs,
   additionalFilters = []
 }: {
   setup: Setup;
   serviceName: string;
+  serviceNodeName?: string;
   chartBase: ChartBase;
   aggs: T;
   additionalFilters?: Filter[];
 }) {
   const { start, end, client } = setup;
 
-  const projection = getMetricsProjection({ setup, serviceName });
+  const projection = getMetricsProjection({
+    setup,
+    serviceName,
+    serviceNodeName
+  });
 
   const params = mergeProjection(projection, {
     body: {

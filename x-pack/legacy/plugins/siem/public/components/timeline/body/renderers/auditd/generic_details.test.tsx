@@ -25,6 +25,7 @@ describe('GenericDetails', () => {
           text="generic-text-123"
           browserFields={browserFields}
           data={mockTimelineData[21].ecs}
+          timelineId="test"
         />
       );
       expect(toJson(wrapper)).toMatchSnapshot();
@@ -38,11 +39,12 @@ describe('GenericDetails', () => {
             text="generic-text-123"
             browserFields={mockBrowserFields}
             data={mockTimelineData[19].ecs}
+            timelineId="test"
           />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionalice@zeek-sanfranin/generic-text-123gpgconf--list-dirs agent-socket'
+        'Sessionalice@zeek-sanfranin/generic-text-123gpgconf(5402)gpgconf--list-dirsagent-socketgpgconf --list-dirs agent-socket'
       );
     });
 
@@ -54,6 +56,7 @@ describe('GenericDetails', () => {
             text="generic-text-123"
             browserFields={mockBrowserFields}
             data={mockTimelineData[0].ecs}
+            timelineId="test"
           />
         </TestProviders>
       );
@@ -79,13 +82,13 @@ describe('GenericDetails', () => {
             processExecutable="process-1"
             processTitle="process-title-1"
             workingDirectory="working-directory-1"
-            args="arg1 arg2 arg3"
+            args={['arg1', 'arg2', 'arg3']}
             result="success"
           />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1username-1@host-1inworking-directory-1generic-text-123process-name-1arg1 arg2 arg3with resultsuccess'
+        'Sessionsession-1username-1@host-1inworking-directory-1generic-text-123process-name-1(123)arg1arg2arg3process-title-1with resultsuccess'
       );
     });
 
@@ -106,13 +109,13 @@ describe('GenericDetails', () => {
             processExecutable="process-1"
             processTitle="process-title-1"
             workingDirectory="working-directory-1"
-            args="arg1 arg2 arg3"
+            args={['arg1', 'arg2', 'arg3']}
             result="success"
           />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1username-1@host-1inworking-directory-1generic-text-123process-name-1arg1 arg2 arg3with resultsuccess'
+        'Sessionsession-1username-1@host-1inworking-directory-1generic-text-123process-name-1(123)arg1arg2arg3process-title-1with resultsuccess'
       );
     });
 
@@ -133,13 +136,13 @@ describe('GenericDetails', () => {
             processExecutable="process-1"
             processTitle="process-title-1"
             workingDirectory="working-directory-1"
-            args="arg1 arg2 arg3"
+            args={['arg1', 'arg2', 'arg3']}
             result="success"
           />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1username-1@host-1inworking-directory-1generic-text-123process-name-1arg1 arg2 arg3with resultsuccess'
+        'Sessionsession-1username-1@host-1inworking-directory-1generic-text-123process-name-1(123)arg1arg2arg3process-title-1with resultsuccess'
       );
     });
 
@@ -160,13 +163,13 @@ describe('GenericDetails', () => {
             processExecutable="process-1"
             processTitle="process-title-1"
             workingDirectory="working-directory-1"
-            args="arg1 arg2 arg3"
+            args={['arg1', 'arg2', 'arg3']}
             result="success"
           />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1username-1@host-1inworking-directory-1generic-text-123process-name-1arg1 arg2 arg3with resultsuccess'
+        'Sessionsession-1username-1@host-1inworking-directory-1generic-text-123process-name-1(123)arg1arg2arg3process-title-1with resultsuccess'
       );
     });
 
@@ -187,13 +190,13 @@ describe('GenericDetails', () => {
             processExecutable="process-1"
             processTitle="process-title-1"
             workingDirectory="working-directory-1"
-            args="arg1 arg2 arg3"
+            args={['arg1', 'arg2', 'arg3']}
             result="success"
           />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1username-1@host-1inworking-directory-1generic-text-123process-name-1arg1 arg2 arg3with resultsuccess'
+        'Sessionsession-1username-1@host-1inworking-directory-1generic-text-123process-name-1(123)arg1arg2arg3process-title-1with resultsuccess'
       );
     });
 
@@ -214,13 +217,13 @@ describe('GenericDetails', () => {
             processExecutable="process-1"
             processTitle="process-title-1"
             workingDirectory="working-directory-1"
-            args="arg1 arg2 arg3"
+            args={['arg1', 'arg2', 'arg3']}
             result="success"
           />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1[username-2]as[username-3]@host-1inworking-directory-1generic-text-123process-name-1arg1 arg2 arg3with resultsuccess'
+        'Sessionsession-1[username-2]as[username-3]@host-1inworking-directory-1generic-text-123process-name-1(123)arg1arg2arg3process-title-1with resultsuccess'
       );
     });
 
@@ -241,13 +244,13 @@ describe('GenericDetails', () => {
             processExecutable="process-1"
             processTitle="process-title-1"
             workingDirectory="working-directory-1"
-            args="arg1 arg2 arg3"
+            args={['arg1', 'arg2', 'arg3']}
             result="success"
           />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1[username-1]as[username-2]@host-1inworking-directory-1generic-text-123process-name-1arg1 arg2 arg3with resultsuccess'
+        'Sessionsession-1[username-1]as[username-2]@host-1inworking-directory-1generic-text-123process-name-1(123)arg1arg2arg3process-title-1with resultsuccess'
       );
     });
 
@@ -268,13 +271,13 @@ describe('GenericDetails', () => {
             processExecutable="process-1"
             processTitle="process-title-1"
             workingDirectory="working-directory-1"
-            args="arg1 arg2 arg3"
+            args={['arg1', 'arg2', 'arg3']}
             result="success"
           />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1[username-primary]@host-1inworking-directory-1generic-text-123process-name-1arg1 arg2 arg3with resultsuccess'
+        'Sessionsession-1[username-primary]@host-1inworking-directory-1generic-text-123process-name-1(123)arg1arg2arg3process-title-1with resultsuccess'
       );
     });
 
@@ -295,13 +298,13 @@ describe('GenericDetails', () => {
             processExecutable="process-1"
             processTitle="process-title-1"
             workingDirectory="working-directory-1"
-            args="arg1 arg2 arg3"
+            args={['arg1', 'arg2', 'arg3']}
             result="success"
           />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1[username-primary]@host-1inworking-directory-1generic-text-123process-name-1arg1 arg2 arg3with resultsuccess'
+        'Sessionsession-1[username-primary]@host-1inworking-directory-1generic-text-123process-name-1(123)arg1arg2arg3process-title-1with resultsuccess'
       );
     });
 
@@ -405,7 +408,7 @@ describe('GenericDetails', () => {
       expect(wrapper.text()).toEqual('Sessiongeneric-text-123some-process-name');
     });
 
-    test('it returns only session and user name if process title with id is given', () => {
+    test('it returns session, user name, and process title if process title with id is given', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <AuditdGenericLine
@@ -427,7 +430,7 @@ describe('GenericDetails', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('Sessionsome-user-name');
+      expect(wrapper.text()).toEqual('Sessionsome-user-namesome-process-title');
     });
 
     test('it returns only a working directory if that is all that is given with a id', () => {
@@ -462,7 +465,7 @@ describe('GenericDetails', () => {
             id="hello-i-am-an-id"
             contextId="contextid-123"
             text="generic-text-123"
-            args="arg1 arg2 arg 3"
+            args={['arg1', 'arg2', 'arg 3']}
             userName={undefined}
             secondary={undefined}
             session={undefined}
@@ -477,7 +480,7 @@ describe('GenericDetails', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('Sessionarg1 arg2 arg 3');
+      expect(wrapper.text()).toEqual('Sessionarg1arg2arg 3');
     });
   });
 });

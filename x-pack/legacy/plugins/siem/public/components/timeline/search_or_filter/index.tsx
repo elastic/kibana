@@ -11,8 +11,7 @@ import { ActionCreator } from 'typescript-fsa';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
 import { convertKueryToElasticSearchQuery } from '../../../lib/keury';
-import { KueryFilterQuery, SerializedFilterQuery, timelineSelectors } from '../../../store';
-import { State } from '../../../store';
+import { KueryFilterQuery, SerializedFilterQuery, State, timelineSelectors } from '../../../store';
 
 import { SearchOrFilter } from './search_or_filter';
 import { timelineActions } from '../../../store/actions';
@@ -46,19 +45,17 @@ interface DispatchProps {
 
 type Props = OwnProps & StateReduxProps & DispatchProps;
 
-class StatefulSearchOrFilterComponent extends React.PureComponent<Props> {
-  public render() {
-    const {
-      applyKqlFilterQuery,
-      indexPattern,
-      filterQueryDraft,
-      isFilterQueryDraftValid,
-      kqlMode,
-      timelineId,
-      setKqlFilterQueryDraft,
-      updateKqlMode,
-    } = this.props;
-
+const StatefulSearchOrFilterComponent = React.memo<Props>(
+  ({
+    applyKqlFilterQuery,
+    filterQueryDraft,
+    indexPattern,
+    isFilterQueryDraftValid,
+    kqlMode,
+    setKqlFilterQueryDraft,
+    timelineId,
+    updateKqlMode,
+  }) => {
     const applyFilterQueryFromKueryExpression = (expression: string) =>
       applyKqlFilterQuery({
         id: timelineId,
@@ -87,13 +84,14 @@ class StatefulSearchOrFilterComponent extends React.PureComponent<Props> {
         indexPattern={indexPattern}
         isFilterQueryDraftValid={isFilterQueryDraftValid}
         kqlMode={kqlMode!}
+        setKqlFilterQueryDraft={setFilterQueryDraftFromKueryExpression!}
         timelineId={timelineId}
         updateKqlMode={updateKqlMode!}
-        setKqlFilterQueryDraft={setFilterQueryDraftFromKueryExpression!}
       />
     );
   }
-}
+);
+StatefulSearchOrFilterComponent.displayName = 'StatefulSearchOrFilterComponent';
 
 const makeMapStateToProps = () => {
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
@@ -102,9 +100,9 @@ const makeMapStateToProps = () => {
   const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
     const timeline: TimelineModel | {} = getTimeline(state, timelineId);
     return {
-      kqlMode: getOr('filter', 'kqlMode', timeline),
       filterQueryDraft: getKqlFilterQueryDraft(state, timelineId),
       isFilterQueryDraftValid: isFilterQueryDraftValid(state, timelineId),
+      kqlMode: getOr('filter', 'kqlMode', timeline),
     };
   };
   return mapStateToProps;

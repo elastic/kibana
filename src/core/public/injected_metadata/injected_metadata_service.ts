@@ -19,6 +19,7 @@
 
 import { get } from 'lodash';
 import { DiscoveredPlugin, PluginName } from '../../server';
+import { EnvironmentMode, PackageInfo } from '../../server/types';
 import { UiSettingsState } from '../ui_settings';
 import { deepFreeze } from '../../utils/';
 import { Capabilities } from '..';
@@ -46,6 +47,10 @@ export interface InjectedMetadataParams {
     vars: {
       [key: string]: unknown;
     };
+    env: {
+      mode: Readonly<EnvironmentMode>;
+      packageInfo: Readonly<PackageInfo>;
+    };
     uiPlugins: Array<{
       id: PluginName;
       plugin: DiscoveredPlugin;
@@ -54,7 +59,6 @@ export interface InjectedMetadataParams {
     legacyMode: boolean;
     legacyMetadata: {
       app: unknown;
-      translations: unknown;
       bundleId: string;
       nav: LegacyNavLink[];
       version: string;
@@ -165,7 +169,6 @@ export interface InjectedMetadataSetup {
   getLegacyMode: () => boolean;
   getLegacyMetadata: () => {
     app: unknown;
-    translations: unknown;
     bundleId: string;
     nav: LegacyNavLink[];
     version: string;

@@ -33,6 +33,7 @@ const pluginInstance = plugin({} as any);
 
 export const setup = pluginInstance.setup(npSetup.core, {
   embeddable: embeddableSetup,
+  uiActions: npSetup.plugins.uiActions,
 });
 
 export const start = pluginInstance.start(npStart.core, {
@@ -42,4 +43,5 @@ export const start = pluginInstance.start(npStart.core, {
     SavedObjectFinder,
     ExitFullScreenButton,
   },
+  uiActions: npStart.plugins.uiActions,
 });

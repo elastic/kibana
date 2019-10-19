@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }) {
     before(async () => {
       await PageObjects.maps.openNewMap();
       await PageObjects.maps.clickAddLayer();
-      await PageObjects.maps.selectVectorSource();
+      await PageObjects.maps.selectEMSBoundariesSource();
       await PageObjects.maps.selectVectorLayer(LAYER_NAME);
     });
 

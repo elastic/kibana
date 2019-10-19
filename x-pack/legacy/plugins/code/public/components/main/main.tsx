@@ -17,6 +17,8 @@ import { SideTabs } from './side_tabs';
 import { structureSelector, currentTreeSelector } from '../../selectors';
 import { RootState } from '../../reducers';
 import { FileTree } from '../../../model';
+import { trackCodeUiMetric, METRIC_TYPE } from '../../services/ui_metric';
+import { CodeUIUsageMetrics } from '../../../model/usage_telemetry_metrics';
 
 interface Props extends RouteComponentProps<MainRouteParams> {
   loadingFileTree: boolean;
@@ -29,6 +31,8 @@ interface Props extends RouteComponentProps<MainRouteParams> {
 class CodeMain extends React.Component<Props> {
   public componentDidMount() {
     this.setBreadcrumbs();
+    // track source page load count
+    trackCodeUiMetric(METRIC_TYPE.LOADED, CodeUIUsageMetrics.SOURCE_VIEW_PAGE_LOAD_COUNT);
   }
 
   public componentDidUpdate() {

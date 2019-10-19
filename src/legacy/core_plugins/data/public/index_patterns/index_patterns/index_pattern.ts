@@ -20,35 +20,27 @@
 import _, { each, reject } from 'lodash';
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
-import { SavedObjectNotFound, DuplicateField } from 'ui/errors';
-// @ts-ignore
 import { fieldFormats } from 'ui/registry/field_formats';
-// @ts-ignore
-import { expandShorthand } from 'ui/utils/mapping_setup';
-import { toastNotifications } from 'ui/notify';
-import { findObjectByTitle } from 'ui/saved_objects';
-import { SavedObjectsClientContract } from 'src/core/public';
+import { NotificationsSetup, SavedObjectsClientContract } from 'src/core/public';
+import {
+  DuplicateField,
+  SavedObjectNotFound,
+  expandShorthand,
+  FieldMappingSpec,
+  MappingObject,
+} from '../../../../../../plugins/kibana_utils/public';
 
+import { findIndexPatternByTitle, getRoutes } from '../utils';
 import { IndexPatternMissingIndices } from '../errors';
-import { Field, FieldList, FieldType } from '../fields';
+import { Field, FieldList, FieldListInterface, FieldType } from '../fields';
 import { createFieldsFetcher } from './_fields_fetcher';
-import { getRoutes } from '../utils';
 import { formatHitProvider } from './format_hit';
-// @ts-ignore
 import { flattenHitWrapper } from './flatten_hit';
-import { IndexPatternsApiClient } from './index_patterns_api_client';
+import { IIndexPatternsApiClient } from './index_patterns_api_client';
+import { ES_FIELD_TYPES } from '../../../../../../plugins/data/common';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const type = 'index-pattern';
-
-interface FieldMappingSpec {
-  _serialize: (mapping: any) => string;
-  _deserialize: (mapping: string) => any;
-}
-
-interface MappingObject {
-  [key: string]: FieldMappingSpec;
-}
 
 export interface StaticIndexPattern {
   fields: FieldType[];
@@ -66,12 +58,13 @@ export class IndexPattern implements StaticIndexPattern {
   public type?: string;
   public fieldFormatMap: any;
   public typeMeta: any;
-  public fields: FieldList;
+  public fields: FieldListInterface;
   public timeFieldName: string | undefined;
   public formatHit: any;
   public formatField: any;
   public flattenHit: any;
   public metaFields: string[];
+  public notifications: NotificationsSetup;
 
   private version: string | undefined;
   private savedObjectsClient: SavedObjectsClientContract;
@@ -83,13 +76,13 @@ export class IndexPattern implements StaticIndexPattern {
   private shortDotsEnable: boolean = false;
 
   private mapping: MappingObject = expandShorthand({
-    title: 'text',
-    timeFieldName: 'keyword',
-    intervalName: 'keyword',
+    title: ES_FIELD_TYPES.TEXT,
+    timeFieldName: ES_FIELD_TYPES.KEYWORD,
+    intervalName: ES_FIELD_TYPES.KEYWORD,
     fields: 'json',
     sourceFilters: 'json',
     fieldFormatMap: {
-      type: 'text',
+      type: ES_FIELD_TYPES.TEXT,
       _serialize: (map = {}) => {
         const serialized = _.transform(map, this.serializeFieldFormatMap);
         return _.isEmpty(serialized) ? undefined : JSON.stringify(serialized);
@@ -100,7 +93,7 @@ export class IndexPattern implements StaticIndexPattern {
         });
       },
     },
-    type: 'keyword',
+    type: ES_FIELD_TYPES.KEYWORD,
     typeMeta: 'json',
   });
 
@@ -108,8 +101,9 @@ export class IndexPattern implements StaticIndexPattern {
     id: string | undefined,
     getConfig: any,
     savedObjectsClient: SavedObjectsClientContract,
-    apiClient: IndexPatternsApiClient,
-    patternCache: any
+    apiClient: IIndexPatternsApiClient,
+    patternCache: any,
+    notifications: NotificationsSetup
   ) {
     this.id = id;
     this.savedObjectsClient = savedObjectsClient;
@@ -117,11 +111,12 @@ export class IndexPattern implements StaticIndexPattern {
     // instead of storing config we rather store the getter only as np uiSettingsClient has circular references
     // which cause problems when being consumed from angular
     this.getConfig = getConfig;
+    this.notifications = notifications;
 
     this.shortDotsEnable = this.getConfig('shortDots:enable');
     this.metaFields = this.getConfig('metaFields');
 
-    this.fields = new FieldList(this, [], this.shortDotsEnable);
+    this.fields = new FieldList(this, [], this.shortDotsEnable, notifications);
     this.fieldsFetcher = createFieldsFetcher(this, apiClient, this.getConfig('metaFields'));
     this.flattenHit = flattenHitWrapper(this, this.getConfig('metaFields'));
     this.formatHit = formatHitProvider(this, fieldFormats.getDefaultInstance('string'));
@@ -135,13 +130,13 @@ export class IndexPattern implements StaticIndexPattern {
   }
 
   private deserializeFieldFormatMap(mapping: any) {
-    const FieldFormat = fieldFormats.byId[mapping.id];
+    const FieldFormat = fieldFormats.getType(mapping.id);
     return FieldFormat && new FieldFormat(mapping.params, this.getConfig);
   }
 
   private initFields(input?: any) {
     const newValue = input || this.fields;
-    this.fields = new FieldList(this, newValue, this.shortDotsEnable);
+    this.fields = new FieldList(this, newValue, this.shortDotsEnable, this.notifications);
   }
 
   private isFieldRefreshRequired(): boolean {
@@ -181,6 +176,7 @@ export class IndexPattern implements StaticIndexPattern {
       if (!fieldMapping._deserialize || !name) {
         return;
       }
+
       response._source[name] = fieldMapping._deserialize(response._source[name]);
     });
 
@@ -211,15 +207,17 @@ export class IndexPattern implements StaticIndexPattern {
     // Date value returned in "_source" could be in any number of formats
     // Use a docvalue for each date field to ensure standardized formats when working with date fields
     // indexPattern.flattenHit will override "_source" values when the same field is also defined in "fields"
-    const docvalueFields = reject(this.fields.byType.date, 'scripted').map((dateField: any) => {
-      return {
-        field: dateField.name,
-        format:
-          dateField.esTypes && dateField.esTypes.indexOf('date_nanos') !== -1
-            ? 'strict_date_time'
-            : 'date_time',
-      };
-    });
+    const docvalueFields = reject(this.fields.getByType('date'), 'scripted').map(
+      (dateField: any) => {
+        return {
+          field: dateField.name,
+          format:
+            dateField.esTypes && dateField.esTypes.indexOf('date_nanos') !== -1
+              ? 'strict_date_time'
+              : 'date_time',
+        };
+      }
+    );
 
     each(this.getScriptedFields(), function(field) {
       scriptFields[field.name] = {
@@ -275,37 +273,34 @@ export class IndexPattern implements StaticIndexPattern {
       throw new DuplicateField(name);
     }
 
-    this.fields.push(
-      new Field(this, {
-        name,
-        script,
-        fieldType,
-        scripted: true,
-        lang,
-        aggregatable: true,
-        filterable: true,
-        searchable: true,
-      })
+    this.fields.add(
+      new Field(
+        this,
+        {
+          name,
+          script,
+          fieldType,
+          scripted: true,
+          lang,
+          aggregatable: true,
+          filterable: true,
+          searchable: true,
+        },
+        false,
+        this.notifications
+      )
     );
 
     await this.save();
   }
 
-  removeScriptedField(name: string) {
-    const fieldIndex = _.findIndex(this.fields, {
-      name,
-      scripted: true,
-    });
-
-    if (fieldIndex > -1) {
-      this.fields.splice(fieldIndex, 1);
-      delete this.fieldFormatMap[name];
-      return this.save();
-    }
+  removeScriptedField(field: FieldType) {
+    this.fields.remove(field);
+    return this.save();
   }
 
   async popularizeField(fieldName: string, unit = 1) {
-    const field = this.fields.byName[fieldName];
+    const field = this.fields.getByName(fieldName);
     if (!field) {
       return;
     }
@@ -339,13 +334,13 @@ export class IndexPattern implements StaticIndexPattern {
   }
 
   getTimeField() {
-    if (!this.timeFieldName || !this.fields || !this.fields.byName) return;
-    return this.fields.byName[this.timeFieldName];
+    if (!this.timeFieldName || !this.fields || !this.fields.getByName) return;
+    return this.fields.getByName(this.timeFieldName);
   }
 
   getFieldByName(name: string): Field | void {
-    if (!this.fields || !this.fields.byName) return;
-    return this.fields.byName[name];
+    if (!this.fields || !this.fields.getByName) return;
+    return this.fields.getByName(name);
   }
 
   isWildcard() {
@@ -375,7 +370,8 @@ export class IndexPattern implements StaticIndexPattern {
           this.getConfig,
           this.savedObjectsClient,
           this.patternCache,
-          this.fieldsFetcher
+          this.fieldsFetcher,
+          this.notifications
         );
         await duplicatePattern.destroy();
       }
@@ -387,9 +383,8 @@ export class IndexPattern implements StaticIndexPattern {
       return response.id;
     };
 
-    const potentialDuplicateByTitle = await findObjectByTitle(
+    const potentialDuplicateByTitle = await findIndexPatternByTitle(
       this.savedObjectsClient,
-      type,
       this.title
     );
     // If there is potentially duplicate title, just create it
@@ -428,7 +423,8 @@ export class IndexPattern implements StaticIndexPattern {
             this.getConfig,
             this.savedObjectsClient,
             this.patternCache,
-            this.fieldsFetcher
+            this.fieldsFetcher,
+            this.notifications
           );
           return samePattern.init().then(() => {
             // What keys changed from now and what the server returned
@@ -460,7 +456,7 @@ export class IndexPattern implements StaticIndexPattern {
                     'Unable to write index pattern! Refresh the page to get the most up to date changes for this index pattern.',
                 } // eslint-disable-line max-len
               );
-              toastNotifications.addDanger(message);
+              this.notifications.toasts.addDanger(message);
               throw err;
             }
 
@@ -499,11 +495,11 @@ export class IndexPattern implements StaticIndexPattern {
         // but we do not want to potentially make any pages unusable
         // so do not rethrow the error here
         if (err instanceof IndexPatternMissingIndices) {
-          toastNotifications.addDanger((err as any).message);
+          this.notifications.toasts.addDanger((err as any).message);
           return [];
         }
 
-        toastNotifications.addError(err, {
+        this.notifications.toasts.addError(err, {
           title: i18n.translate('data.indexPatterns.fetchFieldErrorTitle', {
             defaultMessage: 'Error fetching fields',
           }),

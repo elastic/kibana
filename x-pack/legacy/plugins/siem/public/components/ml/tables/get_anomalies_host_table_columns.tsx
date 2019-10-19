@@ -7,7 +7,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import moment from 'moment';
-import { Columns } from '../../load_more_table';
+import { Columns } from '../../paginated_table';
 import { AnomaliesByHost, Anomaly, NarrowDateRange } from '../types';
 import { getRowItemDraggable } from '../../tables/helpers';
 import { EntityDraggable } from '../entity_draggable';
@@ -144,7 +144,7 @@ export const getAnomaliesHostTableColumnsCurated = (
   const columns = getAnomaliesHostTableColumns(startDate, endDate, interval, narrowDateRange);
 
   // Columns to exclude from host details pages
-  if (pageType === 'details') {
+  if (pageType === HostsType.details) {
     return columns.filter(column => column.name !== i18n.HOST_NAME);
   } else {
     return columns;

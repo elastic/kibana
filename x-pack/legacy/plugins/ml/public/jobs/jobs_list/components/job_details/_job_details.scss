@@ -20,8 +20,8 @@
   .job-section {
     overflow: auto;
     padding: 5px 15px;
-    background-color: #FBFBFB;
-    border: 1px solid #ecf0f1;
+    background-color: $euiColorLightestShade;
+    border: 1px solid $euiColorLightShade;
     border-radius: $euiBorderRadius;
     margin: $euiSizeXS 0px;
 
@@ -43,7 +43,7 @@
       .euiTableRow {
         .euiTableRowCell {
           vertical-align: top;
-          border-bottom: 1px solid #EEEEEE;
+          border-bottom: 1px solid $euiColorLightShade;
 
           .euiTableCellContent__text {
             word-wrap: break-word;

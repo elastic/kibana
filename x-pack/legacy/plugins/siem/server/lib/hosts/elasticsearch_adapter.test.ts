@@ -23,9 +23,9 @@ import {
   mockGetHostLastFirstSeenResponse,
   mockGetHostOverviewRequestDsl,
   mockGetHostLastFirstSeenDsl,
+  mockGetHostsQueryDsl,
 } from './mock';
 import { HostAggEsItem } from './types';
-import { mockGetHostsQueryDsl } from './mock';
 
 jest.mock('./query.hosts.dsl', () => {
   return {

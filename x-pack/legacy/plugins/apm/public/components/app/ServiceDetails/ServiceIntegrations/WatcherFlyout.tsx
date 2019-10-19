@@ -30,7 +30,6 @@ import { memoize, padLeft, range } from 'lodash';
 import moment from 'moment-timezone';
 import React, { Component } from 'react';
 import styled from 'styled-components';
-import { toastNotifications } from 'ui/notify';
 import { LegacyCoreStart } from 'src/core/public';
 import { KibanaCoreContext } from '../../../../../../observability/public';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
@@ -218,7 +217,9 @@ export class WatcherFlyout extends Component<
   };
 
   public addErrorToast = () => {
-    toastNotifications.addWarning({
+    const core = this.context;
+
+    core.notifications.toasts.addWarning({
       title: i18n.translate(
         'xpack.apm.serviceDetails.enableErrorReportsPanel.watchCreationFailedNotificationTitle',
         {
@@ -240,7 +241,9 @@ export class WatcherFlyout extends Component<
   };
 
   public addSuccessToast = (id: string) => {
-    toastNotifications.addSuccess({
+    const core = this.context;
+
+    core.notifications.toasts.addSuccess({
       title: i18n.translate(
         'xpack.apm.serviceDetails.enableErrorReportsPanel.watchCreatedNotificationTitle',
         {
@@ -259,16 +262,18 @@ export class WatcherFlyout extends Component<
               }
             }
           )}{' '}
-          <KibanaLink
-            path={`/management/elasticsearch/watcher/watches/watch/${id}`}
-          >
-            {i18n.translate(
-              'xpack.apm.serviceDetails.enableErrorReportsPanel.watchCreatedNotificationText.viewWatchLinkText',
-              {
-                defaultMessage: 'View watch'
-              }
-            )}
-          </KibanaLink>
+          <KibanaCoreContext.Provider value={core}>
+            <KibanaLink
+              path={`/management/elasticsearch/watcher/watches/watch/${id}`}
+            >
+              {i18n.translate(
+                'xpack.apm.serviceDetails.enableErrorReportsPanel.watchCreatedNotificationText.viewWatchLinkText',
+                {
+                  defaultMessage: 'View watch'
+                }
+              )}
+            </KibanaLink>
+          </KibanaCoreContext.Provider>
         </p>
       )
     });
@@ -355,6 +360,7 @@ export class WatcherFlyout extends Component<
               onChange={this.onChangeThreshold}
             />
           </EuiFormRow>
+          <EuiSpacer size="m" />
           <h4>
             {i18n.translate(
               'xpack.apm.serviceDetails.enableErrorReportsPanel.triggerScheduleTitle',
@@ -403,6 +409,7 @@ export class WatcherFlyout extends Component<
               disabled={this.state.schedule !== 'daily'}
             />
           </EuiFormRow>
+          <EuiSpacer size="m" />
           <EuiRadio
             id="interval"
             label={i18n.translate(
@@ -428,6 +435,7 @@ export class WatcherFlyout extends Component<
                   compressed
                 >
                   <EuiFieldNumber
+                    compressed
                     icon="clock"
                     min={1}
                     value={this.state.interval.value}
@@ -442,6 +450,7 @@ export class WatcherFlyout extends Component<
                 <EuiSelect
                   value={this.state.interval.unit}
                   onChange={this.onChangeIntervalUnit}
+                  compressed
                   options={[
                     {
                       value: 'm',
@@ -531,12 +540,14 @@ export class WatcherFlyout extends Component<
               }
             >
               <EuiFieldText
+                compressed
                 icon="user"
                 value={this.state.emails}
                 onChange={this.onChangeEmails}
               />
             </EuiFormRow>
           )}
+          <EuiSpacer size="m" />
           <EuiSwitch
             label={i18n.translate(
               'xpack.apm.serviceDetails.enableErrorReportsPanel.sendSlackNotificationLabel',
@@ -582,6 +593,7 @@ export class WatcherFlyout extends Component<
               }
             >
               <EuiFieldText
+                compressed
                 icon="link"
                 value={this.state.slackUrl}
                 onChange={this.onChangeSlackUrl}

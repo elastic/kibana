@@ -5,32 +5,18 @@
  */
 
 import createContainer from 'constate-latest';
-import { useMemo, useEffect, useState } from 'react';
+import { useMemo, useCallback, useEffect } from 'react';
+
+import { callGetMlModuleAPI } from './api/ml_get_module';
 import { bucketSpan, getJobId } from '../../../../common/log_analysis';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
-import { callSetupMlModuleAPI, SetupMlModuleResponsePayload } from './api/ml_setup_module_api';
 import { callJobsSummaryAPI } from './api/ml_get_jobs_summary_api';
+import { callSetupMlModuleAPI, SetupMlModuleResponsePayload } from './api/ml_setup_module_api';
+import { useLogAnalysisCleanup } from './log_analysis_cleanup';
+import { useStatusState } from './log_analysis_status_state';
 
-// combines and abstracts job and datafeed status
-type JobStatus =
-  | 'unknown'
-  | 'missing'
-  | 'inconsistent'
-  | 'created'
-  | 'started'
-  | 'opening'
-  | 'opened'
-  | 'failed';
-
-interface AllJobStatuses {
-  [key: string]: JobStatus;
-}
-
-const getInitialJobStatuses = (): AllJobStatuses => {
-  return {
-    logEntryRate: 'unknown',
-  };
-};
+const MODULE_ID = 'logs_ui_analysis';
+const SAMPLE_DATA_INDEX = 'kibana_sample_data_logs*';
 
 export const useLogAnalysisJobs = ({
   indexPattern,
@@ -43,107 +29,142 @@ export const useLogAnalysisJobs = ({
   spaceId: string;
   timeField: string;
 }) => {
-  const [jobStatus, setJobStatus] = useState<AllJobStatuses>(getInitialJobStatuses());
-  const [hasCompletedSetup, setHasCompletedSetup] = useState<boolean>(false);
+  const filteredIndexPattern = useMemo(() => removeSampleDataIndex(indexPattern), [indexPattern]);
+  const { cleanupMLResources } = useLogAnalysisCleanup({ sourceId, spaceId });
+  const [statusState, dispatch] = useStatusState({
+    bucketSpan,
+    indexPattern: filteredIndexPattern,
+    timestampField: timeField,
+  });
+
+  const [fetchModuleDefinitionRequest, fetchModuleDefinition] = useTrackedPromise(
+    {
+      cancelPreviousOn: 'resolution',
+      createPromise: async () => {
+        dispatch({ type: 'fetchingModuleDefinition' });
+        return await callGetMlModuleAPI(MODULE_ID);
+      },
+      onResolve: response => {
+        dispatch({
+          type: 'fetchedModuleDefinition',
+          spaceId,
+          sourceId,
+          moduleDefinition: response,
+        });
+      },
+      onReject: () => {
+        dispatch({ type: 'failedFetchingModuleDefinition' });
+      },
+    },
+    []
+  );
 
   const [setupMlModuleRequest, setupMlModule] = useTrackedPromise(
     {
       cancelPreviousOn: 'resolution',
       createPromise: async (start, end) => {
-        setJobStatus(getInitialJobStatuses());
+        dispatch({ type: 'startedSetup' });
         return await callSetupMlModuleAPI(
+          MODULE_ID,
           start,
           end,
           spaceId,
           sourceId,
-          indexPattern,
+          filteredIndexPattern,
           timeField,
           bucketSpan
         );
       },
       onResolve: ({ datafeeds, jobs }: SetupMlModuleResponsePayload) => {
-        const hasSuccessfullyCreatedJobs = jobs.every(job => job.success);
-        const hasSuccessfullyStartedDatafeeds = datafeeds.every(
-          datafeed => datafeed.success && datafeed.started
-        );
-        const hasAnyErrors =
-          jobs.some(job => !!job.error) || datafeeds.some(datafeed => !!datafeed.error);
-
-        setJobStatus(currentJobStatus => ({
-          ...currentJobStatus,
-          logEntryRate: hasAnyErrors
-            ? 'failed'
-            : hasSuccessfullyCreatedJobs
-            ? hasSuccessfullyStartedDatafeeds
-              ? 'started'
-              : 'failed'
-            : 'failed',
-        }));
-
-        setHasCompletedSetup(true);
+        dispatch({ type: 'finishedSetup', datafeeds, jobs, spaceId, sourceId });
+      },
+      onReject: () => {
+        dispatch({ type: 'failedSetup' });
       },
     },
-    [indexPattern, spaceId, sourceId]
+    [filteredIndexPattern, spaceId, sourceId, timeField, bucketSpan]
   );
 
   const [fetchJobStatusRequest, fetchJobStatus] = useTrackedPromise(
     {
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
-        return callJobsSummaryAPI(spaceId, sourceId);
+        dispatch({ type: 'fetchingJobStatuses' });
+        return await callJobsSummaryAPI(spaceId, sourceId);
       },
       onResolve: response => {
-        if (response && response.length) {
-          const logEntryRate = response.find(
-            (job: any) => job.id === getJobId(spaceId, sourceId, 'log-entry-rate')
-          );
-          setJobStatus({
-            logEntryRate: logEntryRate ? logEntryRate.jobState : 'unknown',
-          });
-        }
+        dispatch({ type: 'fetchedJobStatuses', payload: response, spaceId, sourceId });
       },
-      onReject: error => {
-        // TODO: Handle errors
+      onReject: err => {
+        dispatch({ type: 'failedFetchingJobStatuses' });
       },
     },
-    [indexPattern, spaceId, sourceId]
+    [filteredIndexPattern, spaceId, sourceId]
   );
 
-  useEffect(() => {
-    fetchJobStatus();
+  const isLoadingSetupStatus = useMemo(
+    () =>
+      fetchJobStatusRequest.state === 'pending' || fetchModuleDefinitionRequest.state === 'pending',
+    [fetchJobStatusRequest.state, fetchModuleDefinitionRequest.state]
+  );
+
+  const viewResults = useCallback(() => {
+    dispatch({ type: 'viewedResults' });
   }, []);
 
-  const isSetupRequired = useMemo(() => {
-    const jobStates = Object.values(jobStatus);
-    return (
-      jobStates.filter(state => ['opened', 'opening', 'created', 'started'].includes(state))
-        .length < jobStates.length
-    );
-  }, [jobStatus]);
+  const cleanupAndSetup = useCallback(
+    (start, end) => {
+      dispatch({ type: 'startedSetup' });
+      cleanupMLResources()
+        .then(() => {
+          setupMlModule(start, end);
+        })
+        .catch(() => {
+          dispatch({ type: 'failedSetup' });
+        });
+    },
+    [cleanupMLResources, setupMlModule]
+  );
 
-  const isLoadingSetupStatus = useMemo(() => fetchJobStatusRequest.state === 'pending', [
-    fetchJobStatusRequest.state,
-  ]);
+  const viewSetupForReconfiguration = useCallback(() => {
+    dispatch({ type: 'requestedJobConfigurationUpdate' });
+  }, []);
 
-  const isSettingUpMlModule = useMemo(() => setupMlModuleRequest.state === 'pending', [
-    setupMlModuleRequest.state,
-  ]);
+  const viewSetupForUpdate = useCallback(() => {
+    dispatch({ type: 'requestedJobDefinitionUpdate' });
+  }, []);
 
-  const didSetupFail = useMemo(() => {
-    const jobStates = Object.values(jobStatus);
-    return jobStates.filter(state => state === 'failed').length > 0;
-  }, [jobStatus]);
+  useEffect(() => {
+    fetchModuleDefinition();
+  }, [fetchModuleDefinition]);
+
+  const jobIds = useMemo(() => {
+    return {
+      'log-entry-rate': getJobId(spaceId, sourceId, 'log-entry-rate'),
+    };
+  }, [sourceId, spaceId]);
 
   return {
-    jobStatus,
-    isSetupRequired,
+    fetchJobStatus,
     isLoadingSetupStatus,
-    setupMlModule,
+    jobStatus: statusState.jobStatus,
+    cleanupAndSetup,
+    setup: setupMlModule,
     setupMlModuleRequest,
-    isSettingUpMlModule,
-    didSetupFail,
-    hasCompletedSetup,
+    setupStatus: statusState.setupStatus,
+    viewSetupForReconfiguration,
+    viewSetupForUpdate,
+    viewResults,
+    jobIds,
   };
 };
 
 export const LogAnalysisJobs = createContainer(useLogAnalysisJobs);
+//
+// This is needed due to: https://github.com/elastic/kibana/issues/43671
+const removeSampleDataIndex = (indexPattern: string) => {
+  return indexPattern
+    .split(',')
+    .filter(index => index !== SAMPLE_DATA_INDEX)
+    .join(',');
+};

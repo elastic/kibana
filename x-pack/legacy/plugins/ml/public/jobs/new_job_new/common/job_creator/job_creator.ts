@@ -13,8 +13,9 @@ import { Aggregation, Field } from '../../../../../common/types/fields';
 import { createEmptyJob, createEmptyDatafeed } from './util/default_configs';
 import { mlJobService } from '../../../../services/job_service';
 import { JobRunner, ProgressSubscriber } from '../job_runner';
-import { JOB_TYPE, CREATED_BY_LABEL } from './util/constants';
+import { JOB_TYPE, CREATED_BY_LABEL, SHARED_RESULTS_INDEX_NAME } from './util/constants';
 import { isSparseDataJob } from './util/general';
+import { parseInterval } from '../../../../../common/util/parse_interval';
 
 export class JobCreator {
   protected _type: JOB_TYPE = JOB_TYPE.SINGLE_METRIC;
@@ -25,6 +26,7 @@ export class JobCreator {
   protected _datafeed_config: Datafeed;
   protected _detectors: Detector[];
   protected _influencers: string[];
+  protected _bucketSpanMs: number = 0;
   protected _useDedicatedIndex: boolean = false;
   protected _start: number = 0;
   protected _end: number = 0;
@@ -113,10 +115,20 @@ export class JobCreator {
 
   public set bucketSpan(bucketSpan: BucketSpan) {
     this._job_config.analysis_config.bucket_span = bucketSpan;
+    this._setBucketSpanMs(bucketSpan);
   }
 
   public get bucketSpan(): BucketSpan {
     return this._job_config.analysis_config.bucket_span;
+  }
+
+  protected _setBucketSpanMs(bucketSpan: BucketSpan) {
+    const bs = parseInterval(bucketSpan);
+    this._bucketSpanMs = bs === null ? 0 : bs.asMilliseconds();
+  }
+
+  public get bucketSpanMs(): number {
+    return this._bucketSpanMs;
   }
 
   public addInfluencer(influencer: string) {
@@ -233,6 +245,70 @@ export class JobCreator {
     }
   }
 
+  public set summaryCountFieldName(fieldName: string | null) {
+    if (fieldName !== null) {
+      this._job_config.analysis_config.summary_count_field_name = fieldName;
+    } else {
+      delete this._job_config.analysis_config.summary_count_field_name;
+    }
+  }
+
+  public get summaryCountFieldName(): string | null {
+    return this._job_config.analysis_config.summary_count_field_name || null;
+  }
+
+  public set categorizationFieldName(fieldName: string | null) {
+    if (fieldName !== null) {
+      this._job_config.analysis_config.categorization_field_name = fieldName;
+    } else {
+      delete this._job_config.analysis_config.categorization_field_name;
+    }
+  }
+
+  public get categorizationFieldName(): string | null {
+    return this._job_config.analysis_config.categorization_field_name || null;
+  }
+
+  public addCategorizationFilter(filter: string) {
+    if (this._job_config.analysis_config.categorization_filters === undefined) {
+      this._job_config.analysis_config.categorization_filters = [];
+    }
+
+    const filters = this._job_config.analysis_config.categorization_filters;
+    if (filters.includes(filter) === false) {
+      filters.push(filter);
+    }
+  }
+
+  public removeCategorizationFilter(filter: string) {
+    const filters = this._job_config.analysis_config.categorization_filters;
+    if (filters !== undefined) {
+      const idx = filters.indexOf(filter);
+      if (idx !== -1) {
+        filters.splice(idx, 1);
+      }
+      if (filters.length === 0) {
+        this.removeCategorizationFilters();
+      }
+    }
+  }
+
+  public removeCategorizationFilters() {
+    delete this._job_config.analysis_config.categorization_filters;
+  }
+
+  public get categorizationFilters(): string[] | null {
+    return this._job_config.analysis_config.categorization_filters || null;
+  }
+
+  public get timeFieldName(): string {
+    return this._job_config.data_description.time_field;
+  }
+
+  public set timeFieldName(fieldName: string) {
+    this._job_config.data_description.time_field = fieldName;
+  }
+
   public get sparseData(): boolean {
     return this._sparseData;
   }
@@ -299,6 +375,42 @@ export class JobCreator {
 
   public set query(query: object) {
     this._datafeed_config.query = query;
+  }
+
+  public get queryDelay(): string | null {
+    return this._datafeed_config.query_delay || null;
+  }
+
+  public set queryDelay(queryDelay: string | null) {
+    if (queryDelay !== null) {
+      this._datafeed_config.query_delay = queryDelay;
+    } else {
+      delete this._datafeed_config.query_delay;
+    }
+  }
+
+  public get frequency(): string | null {
+    return this._datafeed_config.frequency || null;
+  }
+
+  public set frequency(frequency: string | null) {
+    if (frequency !== null) {
+      this._datafeed_config.frequency = frequency;
+    } else {
+      delete this._datafeed_config.frequency;
+    }
+  }
+
+  public get scrollSize(): number | null {
+    return this._datafeed_config.scroll_size || null;
+  }
+
+  public set scrollSize(scrollSize: number | null) {
+    if (scrollSize !== null) {
+      this._datafeed_config.scroll_size = scrollSize;
+    } else {
+      delete this._datafeed_config.scroll_size;
+    }
   }
 
   public get subscribers(): ProgressSubscriber[] {
@@ -428,6 +540,13 @@ export class JobCreator {
 
     if (this._job_config.analysis_config.influencers !== undefined) {
       this._job_config.analysis_config.influencers.forEach(i => this.addInfluencer(i));
+    }
+
+    if (
+      this._job_config.results_index_name !== undefined &&
+      this._job_config.results_index_name !== SHARED_RESULTS_INDEX_NAME
+    ) {
+      this.useDedicatedIndex = true;
     }
     this._sparseData = isSparseDataJob(job, datafeed);
   }

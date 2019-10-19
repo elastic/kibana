@@ -30,8 +30,13 @@ function delay(seconds: number) {
 }
 
 test('typescript language server could be shutdown', async () => {
-  const tsLauncher = new TypescriptServerLauncher('localhost', options, new ConsoleLoggerFactory());
-  const proxy = await tsLauncher.launch(true, 1, TYPESCRIPT.embedPath!);
+  const tsLauncher = new TypescriptServerLauncher(
+    'localhost',
+    options,
+    new ConsoleLoggerFactory(),
+    TYPESCRIPT.embedPath!
+  );
+  const proxy = await tsLauncher.launch(true, 1);
   expect(tsLauncher.running).toBeTruthy();
   await proxy.initialize(options.workspacePath);
   await proxy.exit();

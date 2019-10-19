@@ -69,6 +69,7 @@ export const useCreateAnalyticsForm = () => {
   const setIndexPatternTitles = (payload: {
     indexPatternTitles: IndexPatternTitle[];
     indexPatternsWithNumericFields: IndexPatternTitle[];
+    indexPatternsMap: any; // TODO: update this type
   }) => dispatch({ type: ACTION.SET_INDEX_PATTERN_TITLES, payload });
 
   const setIsJobCreated = (isJobCreated: boolean) =>
@@ -134,7 +135,7 @@ export const useCreateAnalyticsForm = () => {
     const indexPatternName = destinationIndex;
 
     try {
-      const newIndexPattern = await kibanaContext.indexPatterns.get();
+      const newIndexPattern = await kibanaContext.indexPatterns.make();
 
       Object.assign(newIndexPattern, {
         id: '',
@@ -235,18 +236,27 @@ export const useCreateAnalyticsForm = () => {
       // able to identify outliers if there are no numeric fields present.
       const ids = await kibanaContext.indexPatterns.getIds(true);
       const indexPatternsWithNumericFields: IndexPatternTitle[] = [];
-      ids.forEach(async id => {
-        const indexPattern = await kibanaContext.indexPatterns.get(id);
-        if (
-          indexPattern.fields
-            .filter(f => !OMIT_FIELDS.includes(f.name))
-            .map(f => f.type)
-            .includes('number')
-        ) {
-          indexPatternsWithNumericFields.push(indexPattern.title);
-        }
+      const indexPatternsMap = {}; // TODO: add type, add to state to keep track of
+      ids
+        .filter(f => !!f)
+        .forEach(async id => {
+          const indexPattern = await kibanaContext.indexPatterns.get(id!);
+          if (
+            indexPattern.fields
+              .filter(f => !OMIT_FIELDS.includes(f.name))
+              .map(f => f.type)
+              .includes('number')
+          ) {
+            indexPatternsWithNumericFields.push(indexPattern.title);
+            // @ts-ignore TODO: fix this type
+            indexPatternsMap[indexPattern.title] = id;
+          }
+        });
+      setIndexPatternTitles({
+        indexPatternTitles,
+        indexPatternsWithNumericFields,
+        indexPatternsMap,
       });
-      setIndexPatternTitles({ indexPatternTitles, indexPatternsWithNumericFields });
     } catch (e) {
       addRequestMessage({
         error: getErrorMessage(e),

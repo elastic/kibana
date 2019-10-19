@@ -4,58 +4,69 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import { connect } from 'react-redux';
-import { pure } from 'recompose';
 
-import { GlobalTime } from '../../containers/global_time';
-
-import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
-
-import { hostsModel, hostsSelectors, State } from '../../store';
-
-import { HostsComponentProps, CommonChildren, AnonamaliesChildren } from './hosts';
 import { scoreIntervalToDateTime } from '../../components/ml/score/score_interval_to_datetime';
-import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { Anomaly } from '../../components/ml/types';
+import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
+import { convertToBuildEsQuery } from '../../lib/keury';
+import { hostsModel, inputsSelectors, State } from '../../store';
+import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
+
+import { HostsComponentProps } from './hosts';
+import { CommonChildren, AnomaliesChildren } from './navigation/types';
 
 interface HostsBodyComponentProps extends HostsComponentProps {
-  kqlQueryExpression: string;
-  children: CommonChildren | AnonamaliesChildren;
+  children: CommonChildren | AnomaliesChildren;
 }
 
-const HostsBodyComponent = pure<HostsBodyComponentProps>(
-  ({ filterQuery, kqlQueryExpression, setAbsoluteRangeDatePicker, children }) => {
+const HostsBodyComponent = memo<HostsBodyComponentProps>(
+  ({
+    children,
+    deleteQuery,
+    filters,
+    from,
+    isInitializing,
+    query,
+    setAbsoluteRangeDatePicker,
+    setQuery,
+    to,
+  }) => {
     return (
       <WithSource sourceId="default">
-        {({ indicesExist, indexPattern }) =>
-          indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
-            <GlobalTime>
-              {({ to, from, setQuery, isInitializing }) => (
-                <>
-                  {children({
-                    endDate: to,
-                    filterQuery,
-                    kqlQueryExpression,
-                    skip: isInitializing,
-                    setQuery,
-                    startDate: from,
-                    type: hostsModel.HostsType.page,
-                    indexPattern,
-                    narrowDateRange: (score: Anomaly, interval: string) => {
-                      const fromTo = scoreIntervalToDateTime(score, interval);
-                      setAbsoluteRangeDatePicker({
-                        id: 'global',
-                        from: fromTo.from,
-                        to: fromTo.to,
-                      });
-                    },
-                  })}
-                </>
-              )}
-            </GlobalTime>
-          ) : null
-        }
+        {({ indicesExist, indexPattern }) => {
+          const filterQuery = convertToBuildEsQuery({
+            indexPattern,
+            queries: [query],
+            filters,
+          });
+          return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
+            <>
+              {children({
+                deleteQuery,
+                endDate: to,
+                filterQuery,
+                skip: isInitializing,
+                setQuery,
+                startDate: from,
+                type: hostsModel.HostsType.page,
+                indexPattern,
+                narrowDateRange: (score: Anomaly, interval: string) => {
+                  const fromTo = scoreIntervalToDateTime(score, interval);
+                  setAbsoluteRangeDatePicker({
+                    id: 'global',
+                    from: fromTo.from,
+                    to: fromTo.to,
+                  });
+                },
+                updateDateRange: (min: number, max: number) => {
+                  setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
+                },
+              })}
+            </>
+          ) : null;
+        }}
       </WithSource>
     );
   }
@@ -64,11 +75,11 @@ const HostsBodyComponent = pure<HostsBodyComponentProps>(
 HostsBodyComponent.displayName = 'HostsBodyComponent';
 
 const makeMapStateToProps = () => {
-  const getHostsFilterQueryAsJson = hostsSelectors.hostsFilterQueryAsJson();
-  const hostsFilterQueryExpression = hostsSelectors.hostsFilterQueryExpression();
+  const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
+  const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
   const mapStateToProps = (state: State) => ({
-    filterQuery: getHostsFilterQueryAsJson(state, hostsModel.HostsType.page) || '',
-    kqlQueryExpression: hostsFilterQueryExpression(state, hostsModel.HostsType.page) || '',
+    query: getGlobalQuerySelector(state),
+    filters: getGlobalFiltersQuerySelector(state),
   });
   return mapStateToProps;
 };

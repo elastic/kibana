@@ -5,7 +5,7 @@
  */
 
 import { execFile, spawn } from 'child_process';
-import { existsSync } from 'fs';
+import { existsSync, mkdirSync } from 'fs';
 import getPort from 'get-port';
 import * as glob from 'glob';
 import { platform as getOsPlatform } from 'os';
@@ -22,10 +22,12 @@ const JAVA_LANG_DETACH_PORT = 2090;
 
 export class JavaLauncher extends AbstractLauncher {
   private needModuleArguments: boolean = true;
+  private readonly gradleHomeFolder = '.gradle';
   constructor(
     readonly targetHost: string,
     readonly options: ServerOptions,
-    readonly loggerFactory: LoggerFactory
+    readonly loggerFactory: LoggerFactory,
+    readonly installationPath: string
   ) {
     super('java', targetHost, options, loggerFactory);
   }
@@ -42,6 +44,14 @@ export class JavaLauncher extends AbstractLauncher {
             'java.import.gradle.enabled': this.options.security.enableGradleImport,
             'java.import.maven.enabled': this.options.security.enableMavenImport,
             'java.autobuild.enabled': false,
+            'java.import.gradle.home': path.resolve(
+              this.options.jdtWorkspacePath,
+              this.gradleHomeFolder
+            ),
+            'java.configuration.maven.userSettings': path.resolve(
+              this.installationPath,
+              'settings/settings.xml'
+            ),
           },
         },
         clientCapabilities: {
@@ -116,15 +126,15 @@ export class JavaLauncher extends AbstractLauncher {
     return bundledJavaHome;
   }
 
-  async spawnProcess(installationPath: string, port: number, log: Logger) {
+  async spawnProcess(port: number, log: Logger) {
     const launchersFound = glob.sync('**/plugins/org.eclipse.equinox.launcher_*.jar', {
-      cwd: installationPath,
+      cwd: this.installationPath,
     });
     if (!launchersFound.length) {
       throw new Error('Cannot find language server jar file');
     }
 
-    const javaHomePath = await this.getJavaHome(installationPath, log);
+    const javaHomePath = await this.getJavaHome(this.installationPath, log);
     if (!javaHomePath) {
       throw new Error('Cannot find Java Home');
     }
@@ -137,7 +147,7 @@ export class JavaLauncher extends AbstractLauncher {
 
     const configPath =
       process.platform === 'win32'
-        ? path.resolve(installationPath, 'repository/config_win')
+        ? path.resolve(this.installationPath, 'repository/config_win')
         : this.options.jdtConfigPath;
 
     const params: string[] = [
@@ -149,12 +159,19 @@ export class JavaLauncher extends AbstractLauncher {
       '-noverify',
       '-Xmx4G',
       '-jar',
-      path.resolve(installationPath, launchersFound[0]),
+      path.resolve(this.installationPath, launchersFound[0]),
       '-configuration',
       configPath,
       '-data',
       this.options.jdtWorkspacePath,
     ];
+
+    if (this.options.security.enableJavaSecurityManager) {
+      params.unshift(
+        '-Dorg.osgi.framework.security=osgi',
+        `-Djava.security.policy=${path.resolve(this.installationPath, 'all.policy')}`
+      );
+    }
 
     if (this.needModuleArguments) {
       params.push(
@@ -166,7 +183,13 @@ export class JavaLauncher extends AbstractLauncher {
       );
     }
 
+    // Check if workspace exists before launching
+    if (!existsSync(this.options.jdtWorkspacePath)) {
+      mkdirSync(this.options.jdtWorkspacePath);
+    }
+
     const p = spawn(javaPath, params, {
+      cwd: this.options.jdtWorkspacePath,
       detached: false,
       stdio: 'pipe',
       env: {
@@ -174,6 +197,7 @@ export class JavaLauncher extends AbstractLauncher {
         CLIENT_HOST: '127.0.0.1',
         CLIENT_PORT: port.toString(),
         JAVA_HOME: javaHomePath,
+        EXTRA_WHITELIST_HOST: this.options.security.extraJavaRepositoryWhitelist.join(','),
       },
     });
     p.stdout.on('data', data => {
