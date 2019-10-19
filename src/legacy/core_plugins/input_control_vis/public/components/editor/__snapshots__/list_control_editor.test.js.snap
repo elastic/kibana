@@ -19,6 +19,7 @@ exports[`renders dynamic options should display disabled dynamic options with to
     describedByIds={Array []}
     display="row"
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
       <FormattedMessage
@@ -48,6 +49,7 @@ exports[`renders dynamic options should display disabled dynamic options with to
     describedByIds={Array []}
     display="row"
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
       <FormattedMessage
@@ -78,6 +80,7 @@ exports[`renders dynamic options should display disabled dynamic options with to
     describedByIds={Array []}
     display="row"
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
       <FormattedMessage
@@ -129,6 +132,7 @@ exports[`renders dynamic options should display dynamic options for string field
     describedByIds={Array []}
     display="row"
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
       <FormattedMessage
@@ -158,6 +162,7 @@ exports[`renders dynamic options should display dynamic options for string field
     describedByIds={Array []}
     display="row"
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
       <FormattedMessage
@@ -206,6 +211,7 @@ exports[`renders dynamic options should display size field when dynamic options 
     describedByIds={Array []}
     display="row"
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
       <FormattedMessage
@@ -235,6 +241,7 @@ exports[`renders dynamic options should display size field when dynamic options 
     describedByIds={Array []}
     display="row"
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
       <FormattedMessage
@@ -265,6 +272,7 @@ exports[`renders dynamic options should display size field when dynamic options 
     describedByIds={Array []}
     display="row"
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
       <FormattedMessage
@@ -316,6 +324,7 @@ exports[`renders should display chaining input when parents are provided 1`] = `
     describedByIds={Array []}
     display="row"
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
       <FormattedMessage
@@ -363,6 +372,7 @@ exports[`renders should display chaining input when parents are provided 1`] = `
     describedByIds={Array []}
     display="row"
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
       <FormattedMessage
@@ -392,6 +402,7 @@ exports[`renders should display chaining input when parents are provided 1`] = `
     describedByIds={Array []}
     display="row"
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
       <FormattedMessage
@@ -422,6 +433,7 @@ exports[`renders should display chaining input when parents are provided 1`] = `
     describedByIds={Array []}
     display="row"
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
       <FormattedMessage

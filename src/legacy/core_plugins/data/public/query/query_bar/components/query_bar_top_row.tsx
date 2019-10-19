@@ -17,15 +17,22 @@
  * under the License.
  */
 
+import dateMath from '@elastic/datemath';
 import { doesKueryExpressionHaveLuceneSyntaxError } from '@kbn/es-query';
 
 import classNames from 'classnames';
 import React, { useState, useEffect } from 'react';
-import { documentationLinks } from 'ui/documentation_links';
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSuperDatePicker } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiSuperDatePicker,
+  prettyDuration,
+} from '@elastic/eui';
 // @ts-ignore
-import { EuiSuperUpdateButton } from '@elastic/eui';
+import { EuiSuperUpdateButton, OnRefreshProps } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { Toast } from 'src/core/public';
 import { TimeRange } from 'src/plugins/data/public';
@@ -42,10 +49,12 @@ interface Props {
   query?: Query;
   onSubmit: (payload: { dateRange: TimeRange; query?: Query }) => void;
   onChange: (payload: { dateRange: TimeRange; query?: Query }) => void;
+  onRefresh?: (payload: { dateRange: TimeRange }) => void;
   disableAutoFocus?: boolean;
   screenTitle?: string;
   indexPatterns?: Array<IndexPattern | string>;
   intl: InjectedIntl;
+  isLoading?: boolean;
   prepend?: React.ReactNode;
   showQueryInput?: boolean;
   showDatePicker?: boolean;
@@ -64,7 +73,9 @@ function QueryBarTopRowUI(props: Props) {
   const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
 
   const kibana = useKibana<IDataPluginServices>();
-  const { uiSettings, notifications, store, appName } = kibana.services;
+  const { uiSettings, notifications, store, appName, docLinks } = kibana.services;
+
+  const kueryQuerySyntaxLink: string = docLinks!.links.query.kueryQuerySyntax;
 
   const queryLanguage = props.query && props.query.language;
   let persistedLog: PersistedLog | undefined;
@@ -124,6 +135,18 @@ function QueryBarTopRowUI(props: Props) {
     }
   }
 
+  function onRefresh({ start, end }: OnRefreshProps) {
+    const retVal = {
+      dateRange: {
+        from: start,
+        to: end,
+      },
+    };
+    if (props.onRefresh) {
+      props.onRefresh(retVal);
+    }
+  }
+
   function onSubmit({ query, dateRange }: { query?: Query; dateRange: TimeRange }) {
     handleLuceneSyntaxWarning();
 
@@ -139,6 +162,14 @@ function QueryBarTopRowUI(props: Props) {
       query,
       dateRange: getDateRange(),
     });
+  }
+
+  function toAbsoluteString(value: string, roundUp = false) {
+    const valueAsMoment = dateMath.parse(value, { roundUp });
+    if (!valueAsMoment) {
+      return value;
+    }
+    return valueAsMoment.toISOString();
   }
 
   function renderQueryInput() {
@@ -159,6 +190,22 @@ function QueryBarTopRowUI(props: Props) {
     );
   }
 
+  function renderSharingMetaFields() {
+    const { from, to } = getDateRange();
+    const dateRangePretty = prettyDuration(
+      toAbsoluteString(from),
+      toAbsoluteString(to),
+      [],
+      uiSettings.get('dateFormat')
+    );
+    return (
+      <div
+        data-shared-timefilter-duration={dateRangePretty}
+        data-test-subj="dataSharedTimefilterDuration"
+      />
+    );
+  }
+
   function shouldRenderDatePicker(): boolean {
     return Boolean(props.showDatePicker || props.showAutoRefreshOnly);
   }
@@ -174,6 +221,7 @@ function QueryBarTopRowUI(props: Props) {
       <EuiSuperUpdateButton
         needsUpdate={props.isDirty}
         isDisabled={isDateRangeInvalid}
+        isLoading={props.isLoading}
         onClick={onClickSubmitButton}
         data-test-subj="querySubmitButton"
       />
@@ -226,6 +274,7 @@ function QueryBarTopRowUI(props: Props) {
           isPaused={props.isRefreshPaused}
           refreshInterval={props.refreshInterval}
           onTimeChange={onTimeChange}
+          onRefresh={onRefresh}
           onRefreshChange={props.onRefreshChange}
           showUpdateButton={false}
           recentlyUsedRanges={recentlyUsedRanges}
@@ -261,7 +310,7 @@ function QueryBarTopRowUI(props: Props) {
                have Kibana Query Language (KQL) selected. Please review the KQL docs {link}."
                 values={{
                   link: (
-                    <EuiLink href={documentationLinks.query.kueryQuerySyntax} target="_blank">
+                    <EuiLink href={kueryQuerySyntaxLink} target="_blank">
                       <FormattedMessage
                         id="data.query.queryBar.syntaxOptionsDescription.docsLinkText"
                         defaultMessage="here"
@@ -305,6 +354,7 @@ function QueryBarTopRowUI(props: Props) {
       justifyContent="flexEnd"
     >
       {renderQueryInput()}
+      {renderSharingMetaFields()}
       <EuiFlexItem grow={false}>{renderUpdateButton()}</EuiFlexItem>
     </EuiFlexGroup>
   );

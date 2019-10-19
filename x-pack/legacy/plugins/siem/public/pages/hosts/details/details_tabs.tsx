@@ -4,16 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { Route, Switch } from 'react-router-dom';
 
 import { scoreIntervalToDateTime } from '../../../components/ml/score/score_interval_to_datetime';
 import { Anomaly } from '../../../components/ml/types';
-import { getHostDetailsEventsKqlQueryExpression } from './helpers';
 import { HostsTableType } from '../../../store/hosts/model';
 
 import { HostDetailsTabsProps } from './types';
-import { getFilterQuery, type } from './utils';
+import { type } from './utils';
 
 import {
   HostsQueryTabBody,
@@ -26,7 +25,7 @@ import {
 const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
   ({
     deleteQuery,
-    filterQueryExpression,
+    filterQuery,
     from,
     isInitializing,
     detailName,
@@ -55,25 +54,10 @@ const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
       [setAbsoluteRangeDatePicker, scoreIntervalToDateTime]
     );
 
-    const kqlQueryExpression = useMemo(
-      () =>
-        getHostDetailsEventsKqlQueryExpression({
-          filterQueryExpression,
-          hostName: detailName,
-        }),
-      [getHostDetailsEventsKqlQueryExpression, filterQueryExpression, detailName]
-    );
-
-    const filterQuery = useMemo(
-      () => getFilterQuery(detailName, filterQueryExpression, indexPattern),
-      [getFilterQuery, detailName, filterQueryExpression, indexPattern]
-    );
-
     const tabProps = {
       deleteQuery,
       endDate: to,
       filterQuery,
-      kqlQueryExpression,
       skip: isInitializing,
       setQuery,
       startDate: from,

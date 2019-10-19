@@ -19,7 +19,6 @@
 
 import Joi from 'joi';
 import { abortableRequestHandler } from './abortable_request_handler';
-import { handleESError } from './handle_es_error';
 
 export function createProxy(server) {
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
@@ -63,7 +62,7 @@ export function createProxy(server) {
           body
         }, { signal });
       } catch (error) {
-        throw handleESError(error);
+        return JSON.parse(error.response);
       }
     })
   });

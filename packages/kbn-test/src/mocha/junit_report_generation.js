@@ -142,13 +142,7 @@ export function setupJUnitReportGeneration(runner, options = {}) {
       `TEST-${process.env.JOB ? process.env.JOB + '-' : ''}${reportName}.xml`
     );
 
-    const reportXML = builder.end({
-      pretty: true,
-      indent: '  ',
-      newline: '\n',
-      spacebeforeslash: '',
-    });
-
+    const reportXML = builder.end();
     mkdirSync(dirname(reportPath), { recursive: true });
     writeFileSync(reportPath, reportXML, 'utf8');
   });

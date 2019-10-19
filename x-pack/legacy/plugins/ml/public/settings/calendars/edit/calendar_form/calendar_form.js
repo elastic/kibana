@@ -189,6 +189,17 @@ export const CalendarForm = injectI18n(function CalendarForm({
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           <EuiButton
+            isDisabled={saving}
+            href={`${chrome.getBasePath()}/app/ml#/settings/calendars_list`}
+          >
+            <FormattedMessage
+              id="xpack.ml.calendarsEdit.calendarForm.cancelButtonLabel"
+              defaultMessage="Cancel"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
             data-testid="ml_save_calendar_button"
             fill
             onClick={isEdit ? onEdit : onCreate}
@@ -201,17 +212,6 @@ export const CalendarForm = injectI18n(function CalendarForm({
               id="xpack.ml.calendarsEdit.calendarForm.saveButtonLabel"
               defaultMessage="Save"
             />)}
-          </EuiButton>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            isDisabled={saving}
-            href={`${chrome.getBasePath()}/app/ml#/settings/calendars_list`}
-          >
-            <FormattedMessage
-              id="xpack.ml.calendarsEdit.calendarForm.cancelButtonLabel"
-              defaultMessage="Cancel"
-            />
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>

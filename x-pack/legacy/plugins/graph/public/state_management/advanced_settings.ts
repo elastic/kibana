@@ -10,6 +10,7 @@ import { takeLatest } from 'redux-saga/effects';
 import { GraphState, GraphStoreDependencies } from './store';
 import { AdvancedSettings } from '../types';
 import { reset } from './global';
+import { setDatasource, requestDatasource } from './datasource';
 
 const actionCreator = actionCreatorFactory('x-pack/graph/advancedSettings');
 
@@ -28,6 +29,9 @@ const initialSettings: AdvancedSettingsState = {
 
 export const advancedSettingsReducer = reducerWithInitialState(initialSettings)
   .case(reset, () => initialSettings)
+  .cases([requestDatasource, setDatasource], ({ sampleDiversityField, ...restSettings }) => ({
+    ...restSettings,
+  }))
   .case(updateSettings, (_oldSettings, newSettings) => newSettings)
   .build();
 

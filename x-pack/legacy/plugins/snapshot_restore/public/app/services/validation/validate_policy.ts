@@ -88,7 +88,7 @@ export const validatePolicy = (policy: SlmPolicyPayload): PolicyValidation => {
   ) {
     validation.errors.minCount.push(
       i18n.translate('xpack.snapshotRestore.policyValidation.invalidMinCountErrorMessage', {
-        defaultMessage: 'Min count cannot be greater than max count.',
+        defaultMessage: 'Minimum count cannot be greater than maximum count.',
       })
     );
   }

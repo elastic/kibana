@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { StaticIndexPattern } from 'ui/index_patterns';
 import React, { memo } from 'react';
 import { Route, Switch } from 'react-router-dom';
 
-import { hostsModel } from '../../store';
-import { HostsComponentProps } from './types';
+import { HostsTabsProps } from './types';
 import { scoreIntervalToDateTime } from '../../components/ml/score/score_interval_to_datetime';
 import { Anomaly } from '../../components/ml/types';
 import { HostsTableType } from '../../store/hosts/model';
@@ -22,16 +20,10 @@ import {
   EventsQueryTabBody,
 } from './navigation';
 
-interface HostsTabsProps extends HostsComponentProps {
-  type: hostsModel.HostsType;
-  indexPattern: StaticIndexPattern;
-}
-
 const HostsTabs = memo<HostsTabsProps>(
   ({
     deleteQuery,
     filterQuery,
-    kqlQueryExpression,
     setAbsoluteRangeDatePicker,
     to,
     from,
@@ -45,7 +37,6 @@ const HostsTabs = memo<HostsTabsProps>(
       deleteQuery,
       endDate: to,
       filterQuery,
-      kqlQueryExpression,
       skip: isInitializing,
       setQuery,
       startDate: from,

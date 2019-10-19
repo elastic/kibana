@@ -30,7 +30,12 @@ function AutoPrecisionParamEditor({ value, setValue }: AggParamEditorProps<boole
 
   return (
     <EuiFormRow compressed>
-      <EuiSwitch label={label} checked={value} onChange={ev => setValue(ev.target.checked)} />
+      <EuiSwitch
+        compressed={true}
+        label={label}
+        checked={value}
+        onChange={ev => setValue(ev.target.checked)}
+      />
     </EuiFormRow>
   );
 }

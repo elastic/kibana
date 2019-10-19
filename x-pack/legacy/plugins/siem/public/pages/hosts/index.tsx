@@ -11,10 +11,9 @@ import { HostDetails } from './details';
 import { HostsTableType } from '../../store/hosts/model';
 
 import { GlobalTime } from '../../containers/global_time';
+import { SiemPageName } from '../home/types';
 import { Hosts } from './hosts';
-
-const hostsPagePath = `/:pageName(hosts)`;
-const hostDetailsPagePath = `${hostsPagePath}/:detailName`;
+import { hostsPagePath, hostDetailsPagePath } from './types';
 
 const getHostsTabPath = (pagePath: string) =>
   `${pagePath}/:tabName(` +
@@ -69,17 +68,19 @@ export const HostsContainer = React.memo<Props>(({ url }) => (
         />
         <Route
           path={`${url}/:detailName`}
-          render={({ location: { search = '' } }) => (
-            <Redirect
-              from={`${url}/:detailName`}
-              to={`${url}/:detailName/${HostsTableType.authentications}${search}`}
-            />
+          render={({
+            match: {
+              params: { detailName },
+            },
+            location: { search = '' },
+          }) => (
+            <Redirect to={`${url}/:${detailName}/${HostsTableType.authentications}${search}`} />
           )}
         />
         <Route
-          path="/hosts/"
+          path={`/${SiemPageName.hosts}/`}
           render={({ location: { search = '' } }) => (
-            <Redirect from={`/hosts/"`} to={`/hosts/${HostsTableType.hosts}${search}`} />
+            <Redirect to={`/${SiemPageName.hosts}/${HostsTableType.hosts}${search}`} />
           )}
         />
       </Switch>

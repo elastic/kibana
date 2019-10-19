@@ -20,7 +20,6 @@ import { toElasticsearchQuery, KueryNode } from '@kbn/es-query';
 
 import { getRootPropertiesObjects, IndexMapping } from '../../../mappings';
 import { SavedObjectsSchema } from '../../../schema';
-import { SavedObjectsIndexPattern } from '../cache_index_patterns';
 
 /**
  * Gets the types based on the type. Uses mappings to support
@@ -93,7 +92,6 @@ interface QueryParams {
   defaultSearchOperator?: string;
   hasReference?: HasReferenceQueryParams;
   kueryNode?: KueryNode;
-  indexPattern?: SavedObjectsIndexPattern;
 }
 
 /**
@@ -109,12 +107,11 @@ export function getQueryParams({
   defaultSearchOperator,
   hasReference,
   kueryNode,
-  indexPattern,
 }: QueryParams) {
   const types = getTypes(mappings, type);
   const bool: any = {
     filter: [
-      ...(kueryNode != null ? [toElasticsearchQuery(kueryNode, indexPattern)] : []),
+      ...(kueryNode != null ? [toElasticsearchQuery(kueryNode)] : []),
       {
         bool: {
           must: hasReference

@@ -12,7 +12,9 @@ import {
   asDynamicBytes,
   asPercent,
   getFixedByteFormatter,
-  asDecimal
+  asDecimal,
+  asTime,
+  asInteger
 } from '../../../../utils/formatters';
 import { Coordinate } from '../../../../../typings/timeseries';
 import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
@@ -64,6 +66,13 @@ function getYTickFormatter(chart: GenericMetricsChart) {
     case 'percent': {
       return (y: number | null | undefined) => asPercent(y || 0, 1);
     }
+    case 'time': {
+      return (y: number | null | undefined) => asTime(y);
+    }
+    case 'integer': {
+      return (y: number | null | undefined) =>
+        isValidCoordinateValue(y) ? asInteger(y) : y;
+    }
     default: {
       return (y: number | null | undefined) =>
         isValidCoordinateValue(y) ? asDecimal(y) : y;
@@ -78,6 +87,13 @@ function getTooltipFormatter({ yUnit }: GenericMetricsChart) {
     }
     case 'percent': {
       return (c: Coordinate) => asPercent(c.y || 0, 1);
+    }
+    case 'time': {
+      return (c: Coordinate) => asTime(c.y);
+    }
+    case 'integer': {
+      return (c: Coordinate) =>
+        isValidCoordinateValue(c.y) ? asInteger(c.y) : c.y;
     }
     default: {
       return (c: Coordinate) =>

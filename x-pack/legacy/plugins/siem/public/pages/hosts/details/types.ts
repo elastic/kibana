@@ -5,21 +5,24 @@
  */
 
 import { StaticIndexPattern } from 'ui/index_patterns';
+import { Filter } from '@kbn/es-query';
 import { ActionCreator } from 'typescript-fsa';
+import { Query } from 'src/plugins/data/common';
 
 import { InputsModelId } from '../../../store/inputs/constants';
 import { HostComponentProps } from '../../../components/link_to/redirect_to_hosts';
 import { HostsTableType } from '../../../store/hosts/model';
-import { HostsQueryProps } from '../hosts';
+import { HostsQueryProps } from '../types';
 import { NavTab } from '../../../components/navigation/types';
 import { KeyHostsNavTabWithoutMlPermission } from '../navigation/types';
 import { hostsModel } from '../../../store';
 
 interface HostDetailsComponentReduxProps {
-  filterQueryExpression: string;
+  query: Query;
+  filters: Filter[];
 }
 
-interface HostDetailsComponentDispatchProps {
+interface HostBodyComponentDispatchProps {
   setAbsoluteRangeDatePicker: ActionCreator<{
     id: InputsModelId;
     from: number;
@@ -27,6 +30,10 @@ interface HostDetailsComponentDispatchProps {
   }>;
   detailName: string;
   hostDetailsPagePath: string;
+}
+
+interface HostDetailsComponentDispatchProps extends HostBodyComponentDispatchProps {
+  setHostDetailsTablesActivePageToZero: ActionCreator<null>;
 }
 
 export interface HostDetailsProps extends HostsQueryProps {
@@ -52,9 +59,15 @@ type KeyHostDetailsNavTab =
 
 export type HostDetailsNavTab = Record<KeyHostDetailsNavTab, NavTab>;
 
-export type HostDetailsTabsProps = HostDetailsComponentReduxProps &
-  HostDetailsComponentDispatchProps &
+export type HostDetailsTabsProps = HostBodyComponentDispatchProps &
   HostsQueryProps & {
     indexPattern: StaticIndexPattern;
     type: hostsModel.HostsType;
+    filterQuery: string;
   };
+
+export type SetAbsoluteRangeDatePicker = ActionCreator<{
+  id: InputsModelId;
+  from: number;
+  to: number;
+}>;

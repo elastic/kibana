@@ -108,5 +108,7 @@ export const WithSource = React.memo<WithSourceProps>(({ children, sourceId }) =
   );
 });
 
+WithSource.displayName = 'WithSource';
+
 export const indicesExistOrDataTemporarilyUnavailable = (indicesExist: boolean | undefined) =>
   indicesExist || isUndefined(indicesExist);
