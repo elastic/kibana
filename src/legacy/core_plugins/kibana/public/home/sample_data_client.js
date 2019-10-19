@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { indexPatternService, uiSettings, kfetch } from './kibana_services';
+import {  getDeps } from './kibana_services';
+const { indexPatternService, uiSettings, kfetch, } = getDeps();
 
 const sampleDataUrl = '/api/sample_data';
 

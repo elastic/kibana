@@ -18,7 +18,8 @@
  */
 
 import _ from 'lodash';
-import { addBasePath, toastNotifications } from './kibana_services';
+import { getDeps } from './kibana_services';
+const { addBasePath, toastNotifications } = getDeps();
 import { i18n } from '@kbn/i18n';
 
 const baseUrl = addBasePath('/api/kibana/home/tutorials');

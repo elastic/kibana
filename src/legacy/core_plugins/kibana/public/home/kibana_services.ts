@@ -17,6 +17,16 @@
  * under the License.
  */
 
+let deps: any = {};
+
+export function setDeps(newDeps: any) {
+  deps = newDeps;
+}
+
+export function getDeps() {
+  return deps;
+}
+/*
 // @ts-ignore
 import { uiModules as modules } from 'ui/modules';
 import routes from 'ui/routes';
@@ -62,3 +72,4 @@ modules.get('kibana').run((Private: IPrivate) => {
     telemetryEnabled && telemetryBanner && !telemetryOptInProvider.getOptIn();
   featureCatalogueRegistryProvider = Private(FeatureCatalogueRegistryProvider as any);
 });
+*/

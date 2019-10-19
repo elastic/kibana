@@ -27,7 +27,12 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { addBasePath } from '../kibana_services';
+import {
+  getDeps
+} from '../kibana_services';
+const {
+  addBasePath,
+} = getDeps();
 
 export class SampleDataViewDataButton extends React.Component {
 

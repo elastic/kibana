@@ -39,7 +39,8 @@ import {
 
 import { Welcome } from './welcome';
 import { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
-import { getInjected } from '../kibana_services';
+import { getDeps } from '../kibana_services';
+const { getInjected } = getDeps();
 
 const KEY_ENABLE_WELCOME = 'home:welcome:show';
 

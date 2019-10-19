@@ -22,7 +22,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Synopsis } from './synopsis';
 import { SampleDataSetCards } from './sample_data_set_cards';
-import { chrome } from '../kibana_services';
+import { getDeps } from '../kibana_services';
+const { chrome } = getDeps();
 
 import {
   EuiPage,

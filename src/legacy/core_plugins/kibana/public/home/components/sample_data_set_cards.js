@@ -31,7 +31,8 @@ import {
   UNINSTALLED_STATUS,
 } from './sample_data_set_card';
 
-import { toastNotifications, uiSettings } from '../kibana_services';
+import { getDeps  } from '../kibana_services';
+const  { toastNotifications, uiSettings } = getDeps();
 
 import {
   listSampleDataSets,

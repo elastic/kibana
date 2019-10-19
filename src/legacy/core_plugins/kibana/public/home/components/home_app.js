@@ -18,6 +18,7 @@
  */
 
 import React from 'react';
+import { I18nProvider } from '@kbn/i18n/react';
 import PropTypes from 'prop-types';
 import { Home } from './home';
 import { FeatureDirectory } from './feature_directory';
@@ -31,13 +32,16 @@ import {
 import { getTutorial } from '../load_tutorials';
 import { replaceTemplateStrings } from './tutorial/replace_template_strings';
 import {
+  getDeps
+} from '../kibana_services';
+const {
   telemetryOptInProvider,
   shouldShowTelemetryOptIn,
   getInjected,
   savedObjectsClient,
   getBasePath,
   addBasePath,
-} from '../kibana_services';
+} = getDeps();
 
 export function HomeApp({ directories }) {
   const isCloudEnabled = getInjected('isCloudEnabled', false);
@@ -68,43 +72,45 @@ export function HomeApp({ directories }) {
   };
 
   return (
-    <Router>
-      <Switch>
-        <Route
-          path="/home/tutorial/:id"
-          render={renderTutorial}
-        />
-        <Route
-          path="/home/tutorial_directory/:tab?"
-          render={renderTutorialDirectory}
-        />
-        <Route
-          path="/home/feature_directory"
-        >
-          <FeatureDirectory
-            addBasePath={addBasePath}
-            directories={directories}
+    <I18nProvider>
+      <Router>
+        <Switch>
+          <Route
+            path="/home/tutorial/:id"
+            render={renderTutorial}
           />
-        </Route>
-        <Route
-          path="/home"
-        >
-          <Home
-            addBasePath={addBasePath}
-            directories={directories}
-            apmUiEnabled={apmUiEnabled}
-            mlEnabled={mlEnabled}
-            find={savedObjectsClient.find}
-            localStorage={localStorage}
-            urlBasePath={getBasePath()}
-            shouldShowTelemetryOptIn={shouldShowTelemetryOptIn}
-            setOptIn={telemetryOptInProvider.setOptIn}
-            fetchTelemetry={telemetryOptInProvider.fetchExample}
-            getTelemetryBannerId={telemetryOptInProvider.getBannerId}
+          <Route
+            path="/home/tutorial_directory/:tab?"
+            render={renderTutorialDirectory}
           />
-        </Route>
-      </Switch>
-    </Router>
+          <Route
+            path="/home/feature_directory"
+          >
+            <FeatureDirectory
+              addBasePath={addBasePath}
+              directories={directories}
+            />
+          </Route>
+          <Route
+            path="/home"
+          >
+            <Home
+              addBasePath={addBasePath}
+              directories={directories}
+              apmUiEnabled={apmUiEnabled}
+              mlEnabled={mlEnabled}
+              find={savedObjectsClient.find}
+              localStorage={localStorage}
+              urlBasePath={getBasePath()}
+              shouldShowTelemetryOptIn={shouldShowTelemetryOptIn}
+              setOptIn={telemetryOptInProvider.setOptIn}
+              fetchTelemetry={telemetryOptInProvider.fetchExample}
+              getTelemetryBannerId={telemetryOptInProvider.getBannerId}
+            />
+          </Route>
+        </Switch>
+      </Router>
+    </I18nProvider>
   );
 }
 

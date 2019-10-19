@@ -34,12 +34,11 @@ import {
   EuiPortal,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { banners } from '../kibana_services';
+import { getDeps } from '../kibana_services';
 
 import { SampleDataCard } from './sample_data';
 import { TelemetryOptInCard } from './telemetry_opt_in';
-// @ts-ignore
-import { trackUiMetric, METRIC_TYPE, addBasePath } from '../kibana_services';
+const { trackUiMetric, METRIC_TYPE, addBasePath, banners } = getDeps();
 
 interface Props {
   urlBasePath: string;
