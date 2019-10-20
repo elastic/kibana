@@ -18,9 +18,8 @@
  */
 
 import _ from 'lodash';
-import { LogReporter } from './log_reporter';
 
-export default function loggingConfiguration(config) {
+export default function loggingConfiguration(config, logReporter) {
   const events = config.get('logging.events');
 
   if (config.get('logging.silent')) {
@@ -50,7 +49,7 @@ export default function loggingConfiguration(config) {
     });
   }
 
-  const logReporter = new LogReporter({
+  logReporter.configLogReporter({
     config: {
       json: config.get('logging.json'),
       dest: config.get('logging.dest'),
@@ -71,7 +70,7 @@ export default function loggingConfiguration(config) {
     }, {})
   });
 
-  const options = {
+  return {
     ops: {
       interval: config.get('ops.interval')
     },
@@ -80,15 +79,6 @@ export default function loggingConfiguration(config) {
     },
     reporters: {
       logReporter: [logReporter.logInterceptor]
-    }
-  };
-
-  return {
-    validOptions: {
-      ...options
-    },
-    extraOptions: {
-      formattedLogReporterStream: logReporter.formattedLogStream
     }
   };
 }

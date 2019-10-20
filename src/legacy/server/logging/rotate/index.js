@@ -19,7 +19,9 @@
 
 import { LogRotator } from './log_rotator';
 
-export function setupLoggingRotate(config, logInterceptor) {
+let logRotator = null;
+
+export function setupLoggingRotate(config, logReporter) {
   // We just want to start the logging rotate service once
   // and we choose to use the worker server type for it
   if (process.env.kbnWorkerType !== 'server') {
@@ -42,7 +44,10 @@ export function setupLoggingRotate(config, logInterceptor) {
   }
 
   // Enable Logging Rotate Service
-  const logRotator = new LogRotator(config, logInterceptor);
+  if (!logRotator) {
+    logRotator = new LogRotator(config, logReporter.formattedLogStream);
+  }
+  logRotator.stop();
   logRotator.start();
 
   return logRotator;

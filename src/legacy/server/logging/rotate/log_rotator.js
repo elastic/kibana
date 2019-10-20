@@ -35,6 +35,7 @@ export class LogRotator {
     this.lastRotateTime = (new Date()).getTime();
     this.isRotating = false;
     this.throttledRotate = throttle(() => { this._rotate(); }, 5000);
+    console.log(process.ppid);
     console.log(process.pid);
   }
 
@@ -200,7 +201,7 @@ export class LogRotator {
     this._rotateCurrentLogFile();
 
     // send SIGHUP to reload log configuration
-    process.kill(process.pid, 'SIGHUP');
+    process.kill(process.ppid, 'SIGHUP');
 
     // Reset log file size
     this.logFileSize = 0;
@@ -246,6 +247,5 @@ export class LogRotator {
   _rotateCurrentLogFile() {
     const newFilePath = `${this.logFilePath}.0`;
     fs.renameSync(this.logFilePath, newFilePath);
-    fs.writeFileSync(this.logFilePath, '');
   }
 }

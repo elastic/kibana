@@ -25,7 +25,15 @@ import LogFormatString from './log_format_string';
 import { LogInterceptor } from './log_interceptor';
 
 export class LogReporter {
-  constructor({ events, config }) {
+  constructor() {
+    this.squeeze = null;
+    this.format = null;
+    this.logInterceptor = null;
+    this.dest = null;
+    this.formattedLogStream = null;
+  }
+
+  configLogReporter({ events, config }) {
     this.squeeze = new Squeeze(events);
     this.format = config.json ? new LogFormatJson(config) : new LogFormatString(config);
     this.logInterceptor = new LogInterceptor();
