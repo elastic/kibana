@@ -476,8 +476,8 @@ interface FooSetup {
   getBar(): string
 }
 
-// We inject all legacy dependencies into our plugin including dependencies on other legacy plugins.
-// Take care to only expose the legacy functionality you need e.g. don't inject the whole 
+// We inject the miminal legacy dependencies into our plugin including dependencies on other legacy
+// plugins. Take care to only expose the legacy functionality you need e.g. don't inject the whole 
 // `Legacy.Server` if you only depend on `Legacy.Server['route']`.
 interface LegacySetup {
   route: Legacy.Server['route']
