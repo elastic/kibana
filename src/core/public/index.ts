@@ -79,6 +79,8 @@ export {
   SavedObjectsBatchResponse,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkCreateOptions,
+  SavedObjectsBulkUpdateObject,
+  SavedObjectsBulkUpdateOptions,
   SavedObjectsCreateOptions,
   SavedObjectsFindResponsePublic,
   SavedObjectsUpdateOptions,
@@ -110,6 +112,7 @@ export {
   IBasePath,
   IHttpInterceptController,
   IHttpFetchError,
+  InterceptedHttpResponse,
 } from './http';
 
 export {

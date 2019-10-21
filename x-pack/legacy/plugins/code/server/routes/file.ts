@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
-
-import { RequestFacade, RequestQueryFacade, ResponseToolkitFacade } from '../../';
+import { KibanaRequest, KibanaResponseFactory, RequestHandlerContext } from 'src/core/server';
 import { DEFAULT_TREE_CHILDREN_LIMIT } from '../git_operations';
 import { CodeServerRouter } from '../security';
 import { RepositoryObjectClient } from '../search';
@@ -14,18 +12,21 @@ import { EsClientWithRequest } from '../utils/esclient_with_request';
 import { decodeRevisionString } from '../../common/uri_util';
 import { CodeServices } from '../distributed/code_services';
 import { GitServiceDefinition } from '../distributed/apis';
+import { getReferenceHelper } from '../utils/repository_reference_helper';
 
 export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) {
   const gitService = codeServices.serviceFor(GitServiceDefinition);
 
   async function getRepoUriFromMeta(
-    req: RequestFacade,
+    context: RequestHandlerContext,
+    req: KibanaRequest,
     repoUri: string
   ): Promise<string | undefined> {
-    const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
+    const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(context, req));
 
     try {
       const repo = await repoObjectClient.getRepository(repoUri);
+      await getReferenceHelper(context.core.savedObjects.client).ensureReference(repo.uri);
       return repo.uri;
     } catch (e) {
       return undefined;
@@ -35,23 +36,27 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
   router.route({
     path: '/api/code/repo/{uri*3}/tree/{ref}/{path*}',
     method: 'GET',
-    async handler(req: RequestFacade) {
-      const { uri, path, ref } = req.params;
+    async npHandler(
+      context: RequestHandlerContext,
+      req: KibanaRequest,
+      res: KibanaResponseFactory
+    ) {
+      const { uri, path, ref } = req.params as any;
       const revision = decodeRevisionString(ref);
-      const queries = req.query as RequestQueryFacade;
+      const queries = req.query as any;
       const limit = queries.limit
         ? parseInt(queries.limit as string, 10)
         : DEFAULT_TREE_CHILDREN_LIMIT;
       const skip = queries.skip ? parseInt(queries.skip as string, 10) : 0;
       const withParents = 'parents' in queries;
       const flatten = 'flatten' in queries;
-      const repoUri = await getRepoUriFromMeta(req, uri);
+      const repoUri = await getRepoUriFromMeta(context, req, uri);
       if (!repoUri) {
-        return Boom.notFound(`repo ${uri} not found`);
+        return res.notFound({ body: `repo ${uri} not found` });
       }
       const endpoint = await codeServices.locate(req, uri);
       try {
-        return await gitService.fileTree(endpoint, {
+        const filetree = await gitService.fileTree(endpoint, {
           uri: repoUri,
           path,
           revision,
@@ -60,11 +65,15 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
           withParents,
           flatten,
         });
+        return res.ok({ body: filetree });
       } catch (e) {
         if (e.isBoom) {
-          return e;
+          return res.customError({
+            body: e.error,
+            statusCode: e.statusCode ? e.statusCode : 500,
+          });
         } else {
-          return Boom.internal(e.message || e.name);
+          return res.internalError({ body: e.message || e.name });
         }
       }
     },
@@ -73,46 +82,59 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
   router.route({
     path: '/api/code/repo/{uri*3}/blob/{ref}/{path*}',
     method: 'GET',
-    async handler(req: RequestFacade, h: ResponseToolkitFacade) {
-      const { uri, path, ref } = req.params;
+    async npHandler(
+      context: RequestHandlerContext,
+      req: KibanaRequest,
+      res: KibanaResponseFactory
+    ) {
+      const { uri, path, ref } = req.params as any;
       const revision = decodeRevisionString(ref);
-      const repoUri = await getRepoUriFromMeta(req, uri);
+      const repoUri = await getRepoUriFromMeta(context, req, uri);
       if (!repoUri) {
-        return Boom.notFound(`repo ${uri} not found`);
+        return res.notFound({ body: `repo ${uri} not found` });
       }
       const endpoint = await codeServices.locate(req, uri);
       try {
         const blob = await gitService.blob(endpoint, {
           uri,
           path,
-          line: (req.query as RequestQueryFacade).line as string,
+          line: (req.query as any).line as string,
           revision: decodeURIComponent(revision),
         });
 
         if (blob.imageType) {
-          const response = h.response(blob.content);
-          response.type(blob.imageType);
-          return response;
+          return res.ok({
+            body: blob.content,
+            headers: { 'Content-Type': blob.imageType },
+          });
         } else if (blob.isBinary) {
-          return h
-            .response('')
-            .type('application/octet-stream')
-            .code(204);
+          return res.noContent({
+            headers: { 'Content-Type': 'application/octet-stream' },
+          });
         } else {
           if (blob.content) {
-            return h
-              .response(blob.content)
-              .type('text/plain')
-              .header('lang', blob.lang!);
+            return res.ok({
+              body: blob.content,
+              headers: {
+                'Content-Type': 'text/plain',
+                lang: blob.lang!,
+              },
+            });
           } else {
-            return h.response('').type(`text/big`);
+            return res.ok({
+              body: blob.content,
+              headers: { 'Content-Type': 'text/big' },
+            });
           }
         }
       } catch (e) {
         if (e.isBoom) {
-          return e;
+          return res.customError({
+            body: e.error,
+            statusCode: e.statusCode ? e.statusCode : 500,
+          });
         } else {
-          return Boom.internal(e.message || e.name);
+          return res.internalError({ body: e.message || e.name });
         }
       }
     },
@@ -121,27 +143,40 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
   router.route({
     path: '/app/code/repo/{uri*3}/raw/{ref}/{path*}',
     method: 'GET',
-    async handler(req: RequestFacade, h: ResponseToolkitFacade) {
-      const { uri, path, ref } = req.params;
+    async npHandler(
+      context: RequestHandlerContext,
+      req: KibanaRequest,
+      res: KibanaResponseFactory
+    ) {
+      const { uri, path, ref } = req.params as any;
       const revision = decodeRevisionString(ref);
-      const repoUri = await getRepoUriFromMeta(req, uri);
+      const repoUri = await getRepoUriFromMeta(context, req, uri);
       if (!repoUri) {
-        return Boom.notFound(`repo ${uri} not found`);
+        return res.notFound({ body: `repo ${uri} not found` });
       }
       const endpoint = await codeServices.locate(req, uri);
 
       try {
         const blob = await gitService.raw(endpoint, { uri: repoUri, path, revision });
         if (blob.isBinary) {
-          return h.response(blob.content).encoding('binary');
+          return res.ok({
+            body: blob.content,
+            headers: { 'Content-Transfer-Encoding': 'binary' },
+          });
         } else {
-          return h.response(blob.content).type('text/plain');
+          return res.ok({
+            body: blob.content,
+            headers: { 'Content-Type': 'text/plain' },
+          });
         }
       } catch (e) {
         if (e.isBoom) {
-          return e;
+          return res.customError({
+            body: e.error,
+            statusCode: e.statusCode ? e.statusCode : 500,
+          });
         } else {
-          return Boom.internal(e.message || e.name);
+          return res.internalError({ body: e.message || e.name });
         }
       }
     },
@@ -150,33 +185,47 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
   router.route({
     path: '/api/code/repo/{uri*3}/history/{ref}',
     method: 'GET',
-    handler: historyHandler,
+    npHandler: historyHandler,
   });
 
   router.route({
     path: '/api/code/repo/{uri*3}/history/{ref}/{path*}',
     method: 'GET',
-    handler: historyHandler,
+    npHandler: historyHandler,
   });
 
-  async function historyHandler(req: RequestFacade) {
-    const { uri, ref, path } = req.params;
+  async function historyHandler(
+    context: RequestHandlerContext,
+    req: KibanaRequest,
+    res: KibanaResponseFactory
+  ) {
+    const { uri, ref, path } = req.params as any;
     const revision = decodeRevisionString(ref);
-    const queries = req.query as RequestQueryFacade;
+    const queries = req.query as any;
     const count = queries.count ? parseInt(queries.count as string, 10) : 10;
     const after = queries.after !== undefined;
     try {
-      const repoUri = await getRepoUriFromMeta(req, uri);
+      const repoUri = await getRepoUriFromMeta(context, req, uri);
       if (!repoUri) {
-        return Boom.notFound(`repo ${uri} not found`);
+        return res.notFound({ body: `repo ${uri} not found` });
       }
       const endpoint = await codeServices.locate(req, uri);
-      return await gitService.history(endpoint, { uri: repoUri, path, revision, count, after });
+      const history = await gitService.history(endpoint, {
+        uri: repoUri,
+        path,
+        revision,
+        count,
+        after,
+      });
+      return res.ok({ body: history });
     } catch (e) {
       if (e.isBoom) {
-        return e;
+        return res.customError({
+          body: e.error,
+          statusCode: e.statusCode ? e.statusCode : 500,
+        });
       } else {
-        return Boom.internal(e.message || e.name);
+        return res.internalError({ body: e.message || e.name });
       }
     }
   }
@@ -184,21 +233,29 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
   router.route({
     path: '/api/code/repo/{uri*3}/references',
     method: 'GET',
-    async handler(req: RequestFacade) {
-      const uri = req.params.uri;
-      const repoUri = await getRepoUriFromMeta(req, uri);
+    async npHandler(
+      context: RequestHandlerContext,
+      req: KibanaRequest,
+      res: KibanaResponseFactory
+    ) {
+      const { uri } = req.params as any;
+      const repoUri = await getRepoUriFromMeta(context, req, uri);
       if (!repoUri) {
-        return Boom.notFound(`repo ${uri} not found`);
+        return res.badRequest({ body: `repo ${uri} not found` });
       }
       const endpoint = await codeServices.locate(req, uri);
 
       try {
-        return await gitService.branchesAndTags(endpoint, { uri: repoUri });
+        const branchesAndTags = await gitService.branchesAndTags(endpoint, { uri: repoUri });
+        return res.ok({ body: branchesAndTags });
       } catch (e) {
         if (e.isBoom) {
-          return e;
+          return res.customError({
+            body: e.error,
+            statusCode: e.statusCode ? e.statusCode : 500,
+          });
         } else {
-          return Boom.internal(e.message || e.name);
+          return res.internalError({ body: e.message || e.name });
         }
       }
     },
@@ -207,23 +264,31 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
   router.route({
     path: '/api/code/repo/{uri*3}/diff/{revision}',
     method: 'GET',
-    async handler(req: RequestFacade) {
-      const { uri, revision } = req.params;
-      const repoUri = await getRepoUriFromMeta(req, uri);
+    async npHandler(
+      context: RequestHandlerContext,
+      req: KibanaRequest,
+      res: KibanaResponseFactory
+    ) {
+      const { uri, revision } = req.params as any;
+      const repoUri = await getRepoUriFromMeta(context, req, uri);
       if (!repoUri) {
-        return Boom.notFound(`repo ${uri} not found`);
+        return res.notFound({ body: `repo ${uri} not found` });
       }
       const endpoint = await codeServices.locate(req, uri);
       try {
-        return await gitService.commitDiff(endpoint, {
+        const diff = await gitService.commitDiff(endpoint, {
           uri: repoUri,
           revision: decodeRevisionString(revision),
         });
+        return res.ok({ body: diff });
       } catch (e) {
         if (e.isBoom) {
-          return e;
+          return res.customError({
+            body: e.error,
+            statusCode: e.statusCode ? e.statusCode : 500,
+          });
         } else {
-          return Boom.internal(e.message || e.name);
+          return res.internalError({ body: e.message || e.name });
         }
       }
     },
@@ -232,25 +297,33 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
   router.route({
     path: '/api/code/repo/{uri*3}/blame/{revision}/{path*}',
     method: 'GET',
-    async handler(req: RequestFacade) {
-      const { uri, path, revision } = req.params;
-      const repoUri = await getRepoUriFromMeta(req, uri);
+    async npHandler(
+      context: RequestHandlerContext,
+      req: KibanaRequest,
+      res: KibanaResponseFactory
+    ) {
+      const { uri, path, revision } = req.params as any;
+      const repoUri = await getRepoUriFromMeta(context, req, uri);
       if (!repoUri) {
-        return Boom.notFound(`repo ${uri} not found`);
+        return res.notFound({ body: `repo ${uri} not found` });
       }
       const endpoint = await codeServices.locate(req, uri);
 
       try {
-        return await gitService.blame(endpoint, {
+        const blames = await gitService.blame(endpoint, {
           uri: repoUri,
           revision: decodeRevisionString(decodeURIComponent(revision)),
           path,
         });
+        return res.ok({ body: blames });
       } catch (e) {
         if (e.isBoom) {
-          return e;
+          return res.customError({
+            body: e.error,
+            statusCode: e.statusCode ? e.statusCode : 500,
+          });
         } else {
-          return Boom.internal(e.message || e.name);
+          return res.internalError({ body: e.message || e.name });
         }
       }
     },

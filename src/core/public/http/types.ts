@@ -226,25 +226,34 @@ export type HttpHandler = (path: string, options?: HttpFetchOptions) => Promise<
 export type HttpBody = BodyInit | null | any;
 
 /** @public */
-export interface HttpResponse {
-  request?: Request;
+export interface InterceptedHttpResponse {
   response?: Response;
   body?: HttpBody;
+}
+
+/** @public */
+export interface HttpResponse extends InterceptedHttpResponse {
+  request: Readonly<Request>;
 }
 
 /** @public */
 export interface IHttpFetchError extends Error {
   readonly request: Request;
   readonly response?: Response;
+  /**
+   * @deprecated Provided for legacy compatibility. Prefer the `request` property instead.
+   */
+  readonly req: Request;
+  /**
+   * @deprecated Provided for legacy compatibility. Prefer the `response` property instead.
+   */
+  readonly res?: Response;
   readonly body?: any;
 }
 
 /** @public */
-export interface HttpErrorResponse {
+export interface HttpErrorResponse extends HttpResponse {
   error: Error | IHttpFetchError;
-  request?: Request;
-  response?: Response;
-  body?: HttpBody;
 }
 /** @public */
 export interface HttpErrorRequest {
@@ -287,7 +296,7 @@ export interface HttpInterceptor {
   response?(
     httpResponse: HttpResponse,
     controller: IHttpInterceptController
-  ): Promise<HttpResponse> | HttpResponse | void;
+  ): Promise<InterceptedHttpResponse> | InterceptedHttpResponse | void;
 
   /**
    * Define an interceptor to be executed if a response interceptor throws an error or returns a rejected Promise.
@@ -297,7 +306,7 @@ export interface HttpInterceptor {
   responseError?(
     httpErrorResponse: HttpErrorResponse,
     controller: IHttpInterceptController
-  ): Promise<HttpResponse> | HttpResponse | void;
+  ): Promise<InterceptedHttpResponse> | InterceptedHttpResponse | void;
 }
 
 /**
