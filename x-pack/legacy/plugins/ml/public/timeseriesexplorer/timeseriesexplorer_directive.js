@@ -75,7 +75,7 @@ module.directive('mlTimeSeriesExplorer', function ($injector) {
           break;
       }
       $scope.appState.save();
-      $scope.$apply();
+      $scope.$applyAsync();
     };
 
     function updateComponent() {
