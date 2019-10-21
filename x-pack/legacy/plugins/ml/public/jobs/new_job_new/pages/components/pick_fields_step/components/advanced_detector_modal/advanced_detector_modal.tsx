@@ -218,7 +218,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
               <EuiComboBox
                 singleSelection={{ asPlainText: true }}
                 options={currentFieldOptions}
-                selectedOptions={[fieldOption]}
+                selectedOptions={createSelectedOptions(fieldOption, currentFieldOptions)}
                 onChange={onOptionChange(setFieldOption)}
                 isClearable={true}
                 isDisabled={fieldsEnabled === false || fieldOptionEnabled === false}
@@ -233,7 +233,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
               <EuiComboBox
                 singleSelection={{ asPlainText: true }}
                 options={splitFieldOptions}
-                selectedOptions={[byFieldOption]}
+                selectedOptions={createSelectedOptions(byFieldOption, splitFieldOptions)}
                 onChange={onOptionChange(setByFieldOption)}
                 isClearable={true}
                 isDisabled={fieldsEnabled === false}
@@ -245,7 +245,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
               <EuiComboBox
                 singleSelection={{ asPlainText: true }}
                 options={splitFieldOptions}
-                selectedOptions={[overFieldOption]}
+                selectedOptions={createSelectedOptions(overFieldOption, splitFieldOptions)}
                 onChange={onOptionChange(setOverFieldOption)}
                 isClearable={true}
                 isDisabled={fieldsEnabled === false}
@@ -257,7 +257,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
               <EuiComboBox
                 singleSelection={{ asPlainText: true }}
                 options={splitFieldOptions}
-                selectedOptions={[partitionFieldOption]}
+                selectedOptions={createSelectedOptions(partitionFieldOption, splitFieldOptions)}
                 onChange={onOptionChange(setPartitionFieldOption)}
                 isClearable={true}
                 isDisabled={fieldsEnabled === false}
@@ -360,7 +360,8 @@ function createFieldOptionList(agg: Aggregation | null) {
     .map(createFieldOption);
 
   // working round EuiComboBox's odd behavior when the options list contains only one item
-  return options.length === 1 ? [emptyOption, ...options] : options;
+  // return options.length === 1 ? [emptyOption, ...options] : options;
+  return options;
 }
 
 // custom hook for storing combobox options based on an aggregation field list
@@ -386,4 +387,14 @@ function createDefaultDescription(dtr: RichDetector) {
   basicDetector.partition_field_name = dtr.partitionField ? dtr.partitionField.id : undefined;
   basicDetector.exclude_frequent = dtr.excludeFrequent ? dtr.excludeFrequent : undefined;
   return detectorToString(basicDetector);
+}
+
+// fixes issue with EuiComboBox.
+// if the options list only contains one option and nothing has been selected, set
+// selectedOptions list to be an empty array
+function createSelectedOptions(
+  option: EuiComboBoxOptionProps,
+  options: EuiComboBoxOptionProps[]
+): EuiComboBoxOptionProps[] {
+  return options.length === 1 && options[0].label !== option.label ? [] : [option];
 }
