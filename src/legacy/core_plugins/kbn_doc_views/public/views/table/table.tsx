@@ -19,7 +19,7 @@
 import React, { useState } from 'react';
 import { DocViewRenderProps } from 'ui/registry/doc_views';
 import { DocViewTableRow } from './table_row';
-import { formatValue, arrayContainsObjects } from './table_helper';
+import { arrayContainsObjects } from './table_helper';
 
 const COLLAPSE_LINE_LENGTH = 350;
 
@@ -33,11 +33,11 @@ export function DocViewTable({
 }: DocViewRenderProps) {
   const mapping = indexPattern.fields.getByName;
   const flattened = indexPattern.flattenHit(hit);
-  const formatted = indexPattern.formatHit(hit, 'html');
+  const formatted = indexPattern.formatHit(hit, 'html', true);
   const [fieldRowOpen, setFieldRowOpen] = useState({} as Record<string, boolean>);
 
   function toggleValueCollapse(field: string) {
-    fieldRowOpen[field] = fieldRowOpen[field] !== true;
+    fieldRowOpen[field] = !fieldRowOpen[field];
     setFieldRowOpen({ ...fieldRowOpen });
   }
 
@@ -48,7 +48,7 @@ export function DocViewTable({
           .sort()
           .map(field => {
             const valueRaw = flattened[field];
-            const value = formatValue(valueRaw, formatted[field]);
+            const value = formatted[field];
             const isCollapsible = typeof value === 'string' && value.length > COLLAPSE_LINE_LENGTH;
             const isCollapsed = isCollapsible && !fieldRowOpen[field];
             const toggleColumn =

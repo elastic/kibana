@@ -17,6 +17,13 @@
  * under the License.
  */
 
-export { getHighlight } from './highlight';
-export { getHighlightHtml } from './highlight_html';
-export { getHighlightRequest } from './highlight_request';
+import { getHighlightReact } from './highlight_react';
+import { getHighlightHtml } from './highlight_html';
+
+export function getHighlight(fieldValue: any, highlights: any, returnReact?: boolean) {
+  if (returnReact) {
+    return getHighlightReact(fieldValue, highlights);
+  } else {
+    return getHighlightHtml(fieldValue, highlights);
+  }
+}

@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import { transform, size, cloneDeep, get, defaults } from 'lodash';
 import { createCustomFieldFormat } from './converters/custom';
 import { ContentType, FieldFormatConvert, FieldFormatConvertFunction } from './types';
@@ -76,11 +75,11 @@ export abstract class FieldFormat {
    * @param  {string} [contentType=text] - optional content type, the only two contentTypes
    *                                currently supported are "html" and "text", which helps
    *                                formatters adjust to different contexts
-   * @return {string} - the formatted string, which is assumed to be html, safe for
-   *                    injecting into the DOM or a DOM attribute
+   * @return {string | ReactElement} - the formatted string, which is assumed to be html, safe for
+   *                    injecting into the DOM or a DOM attribute, or a ReactElement
    * @public
    */
-  convert(value: any, contentType: ContentType = DEFAULT_CONTEXT_TYPE): string {
+  convert(value: any, contentType: ContentType = DEFAULT_CONTEXT_TYPE): any {
     const converter = this.getConverterFor(contentType);
 
     if (converter) {
@@ -170,7 +169,7 @@ export abstract class FieldFormat {
     };
   }
 
-  static from(convertFn: FieldFormatConvertFunction): ReturnType<typeof createCustomFieldFormat> {
+  static from(convertFn: TextContextTypeConvert): ReturnType<typeof createCustomFieldFormat> {
     return createCustomFieldFormat(convertFn);
   }
 

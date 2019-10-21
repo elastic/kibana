@@ -16,9 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import React from 'react';
 import { escape, isFunction } from 'lodash';
 import { IFieldFormat, HtmlContextTypeConvert } from '../types';
-import { asPrettyString, getHighlightHtml } from '../utils';
+import { asPrettyString, getHighlight } from '../utils';
 
 export const HTML_CONTEXT_TYPE = 'html';
 
@@ -26,12 +27,14 @@ const getConvertFn = (
   format: IFieldFormat,
   convert?: HtmlContextTypeConvert
 ): HtmlContextTypeConvert => {
-  const fallbackHtml: HtmlContextTypeConvert = (value, field, hit) => {
-    const formatted = escape(format.convert(value, 'text'));
+  const fallbackHtml: HtmlContextTypeConvert = (value, field, hit, meta, returnReact) => {
+    const formatted = returnReact
+      ? format.convert(value, 'text')
+      : escape(format.convert(value, 'text'));
 
     return !field || !hit || !hit.highlight || !hit.highlight[field.name]
       ? formatted
-      : getHighlightHtml(formatted, hit.highlight[field.name]);
+      : getHighlight(formatted, hit.highlight[field.name], returnReact);
   };
 
   return (convert || fallbackHtml) as HtmlContextTypeConvert;
@@ -43,18 +46,28 @@ export const setup = (
 ): HtmlContextTypeConvert => {
   const convert = getConvertFn(format, htmlContextTypeConvert);
 
-  const recurse: HtmlContextTypeConvert = (value, field, hit, meta) => {
+  const recurse: HtmlContextTypeConvert = (value, field, hit, meta, returnReact = false) => {
     if (value == null) {
       return asPrettyString(value);
     }
 
     if (!value || !isFunction(value.map)) {
-      return convert.call(format, value, field, hit, meta);
+      return convert.call(format, value, field, hit, meta, returnReact);
     }
 
+    // arrays
     const subValues = value.map((v: any) => {
-      return recurse(v, field, hit, meta);
+      return recurse(v, field, hit, meta, returnReact);
     });
+
+    if (returnReact) {
+      return subValues.map((component: any, idx: number) => (
+        <span key={idx}>
+          {component}
+          {idx !== subValues.length ? ', ' : ''}
+        </span>
+      ));
+    }
     const useMultiLine = subValues.some((sub: string) => {
       return sub.indexOf('\n') > -1;
     });
@@ -62,8 +75,11 @@ export const setup = (
     return subValues.join(',' + (useMultiLine ? '\n' : ' '));
   };
 
-  const wrap: HtmlContextTypeConvert = (value, field, hit, meta) => {
-    return `<span ng-non-bindable>${recurse(value, field, hit, meta)}</span>`;
+  const wrap: HtmlContextTypeConvert = (value, field, hit, meta, react = false) => {
+    if (react) {
+      return recurse(value, field, hit, meta, react);
+    }
+    return `<span ng-non-bindable>${recurse(value, field, hit, meta, react)}</span>`;
   };
 
   return wrap;

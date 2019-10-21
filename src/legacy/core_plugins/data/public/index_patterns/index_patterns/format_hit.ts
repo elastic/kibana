@@ -19,6 +19,7 @@
 
 import _ from 'lodash';
 import { IndexPattern } from './index_pattern';
+import { asPrettyString } from '../../../../../../plugins/data/common/field_formats/utils';
 
 const formattedCache = new WeakMap();
 const partialFormattedCache = new WeakMap();
@@ -26,17 +27,32 @@ const partialFormattedCache = new WeakMap();
 // Takes a hit, merges it with any stored/scripted fields, and with the metaFields
 // returns a formatted version
 export function formatHitProvider(indexPattern: IndexPattern, defaultFormat: any) {
-  function convert(hit: Record<string, any>, val: any, fieldName: string, type: string = 'html') {
+  function convert(
+    hit: Record<string, any>,
+    val: any,
+    fieldName: string,
+    type: string = 'html',
+    returnReact = false
+  ) {
     const field = indexPattern.fields.getByName(fieldName);
-    if (!field) return defaultFormat.convert(val, type);
+    if (!field) {
+      if (returnReact) {
+        return asPrettyString(val);
+      }
+      return defaultFormat.convert(val, type);
+    }
     const parsedUrl = {
       origin: window.location.origin,
       pathname: window.location.pathname,
     };
-    return field.format.getConverterFor(type)(val, field, hit, parsedUrl);
+    return field.format.getConverterFor(type)(val, field, hit, parsedUrl, returnReact);
   }
 
-  function formatHit(hit: Record<string, any>, type: string = 'html') {
+  function formatHit(
+    hit: Record<string, any>,
+    type: string = 'html',
+    returnReact: boolean = false
+  ) {
     if (type === 'text') {
       // formatHit of type text is for react components to get rid of <span ng-non-bindable>
       // since it's currently just used at the discover's doc view table, caching is not necessary
@@ -44,6 +60,15 @@ export function formatHitProvider(indexPattern: IndexPattern, defaultFormat: any
       const result: Record<string, any> = {};
       for (const [key, value] of Object.entries(flattened)) {
         result[key] = convert(hit, value, key, type);
+      }
+      return result;
+    }
+
+    if (type === 'html' && returnReact) {
+      const flattened = indexPattern.flattenHit(hit);
+      const result: Record<string, any> = {};
+      for (const [key, value] of Object.entries(flattened)) {
+        result[key] = convert(hit, value, key, type, returnReact);
       }
       return result;
     }

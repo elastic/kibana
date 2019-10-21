@@ -18,4 +18,4 @@
  */
 
 export { asPrettyString } from './as_pretty_string';
-export { getHighlightHtml, getHighlightRequest } from './highlight';
+export { getHighlightHtml, getHighlightRequest, getHighlight } from './highlight';

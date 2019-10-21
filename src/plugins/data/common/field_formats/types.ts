@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { ReactElement } from 'react';
 
 /** @public **/
 export type ContentType = 'html' | 'text';
@@ -28,8 +29,9 @@ export type HtmlContextTypeConvert = (
   value: any,
   field?: any,
   hit?: Record<string, any>,
-  meta?: any
-) => string;
+  meta?: any,
+  react?: boolean
+) => string | ReactElement;
 
 /** @internal **/
 export type TextContextTypeConvert = (value: any) => string;

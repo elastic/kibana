@@ -16,10 +16,34 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import React, { ReactElement } from 'react';
+import { htmlTags } from './html_tags';
+import { getHighlightHtml } from './highlight_html';
 
-/**
- * Returns true if the given array contains at least 1 object
- */
-export function arrayContainsObjects(value: unknown[]) {
-  return Array.isArray(value) && value.some(v => typeof v === 'object' && v !== null);
+export function replaceHighLightWithReactDom(
+  text: string,
+  tagLeft: string,
+  tagRight: string
+): ReactElement {
+  return (
+    <>
+      {text.split(tagLeft).map((markedText, idx) => {
+        const sub = markedText.split(tagRight);
+        if (sub.length === 1) {
+          return markedText;
+        }
+        return (
+          <span key={idx}>
+            <mark>{sub[0]}</mark>
+            {sub[1]}
+          </span>
+        );
+      })}
+    </>
+  );
+}
+
+export function getHighlightReact(fieldValue: any, highlights: any) {
+  const html = getHighlightHtml(fieldValue, highlights);
+  return replaceHighLightWithReactDom(html, htmlTags.pre, htmlTags.post);
 }

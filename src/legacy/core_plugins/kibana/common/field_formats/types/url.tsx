@@ -16,16 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import React, { ReactElement } from 'react';
 import { i18n } from '@kbn/i18n';
 import { escape, memoize } from 'lodash';
 import {
-  getHighlightHtml,
   FieldFormat,
   KBN_FIELD_TYPES,
   TextContextTypeConvert,
   HtmlContextTypeConvert,
 } from '../../../../../../plugins/data/common/';
+import { getHighlight } from '../../../../../../plugins/data/common/field_formats/utils/highlight';
 
 const templateMatchRE = /{{([\s\S]+?)}}/g;
 const whitelistUrlSchemes = ['http://', 'https://'];
@@ -127,23 +127,43 @@ export function createUrlFormat() {
       };
     }
 
-    private generateImgHtml(url: string, imageLabel: string): string {
+    private generateImgHtml(
+      url: string,
+      imageLabel: string,
+      returnReact: boolean = false
+    ): string | ReactElement {
       const isValidWidth = !isNaN(parseInt(this.param('width'), 10));
       const isValidHeight = !isNaN(parseInt(this.param('height'), 10));
       const maxWidth = isValidWidth ? `${this.param('width')}px` : 'none';
       const maxHeight = isValidHeight ? `${this.param('height')}px` : 'none';
-
+      if (returnReact) {
+        return (
+          <img
+            src={url}
+            alt={imageLabel}
+            style={{ width: 'auto', height: 'auto', maxWidth, maxHeight }}
+          />
+        );
+      }
       return `<img src="${url}" alt="${imageLabel}" style="width:auto; height:auto; max-width:${maxWidth}; max-height:${maxHeight};">`;
     }
 
     textConvert: TextContextTypeConvert = value => this.formatLabel(value);
 
-    htmlConvert: HtmlContextTypeConvert = (rawValue, field, hit, parsedUrl) => {
+    htmlConvert: HtmlContextTypeConvert = (rawValue, field, hit, parsedUrl, returnReact) => {
       const url = escape(this.formatUrl(rawValue));
       const label = escape(this.formatLabel(rawValue, url));
 
       switch (this.param('type')) {
         case 'audio':
+          if (returnReact) {
+            return (
+              <audio controls preload="none" src={url}>
+                <track kind="captions" />
+              </audio>
+            );
+          }
+
           return `<audio controls preload="none" src="${url}">`;
 
         case 'img':
@@ -152,7 +172,7 @@ export function createUrlFormat() {
           const imageLabel =
             label === url ? `A dynamically-specified image located at ${url}` : label;
 
-          return this.generateImgHtml(url, imageLabel);
+          return this.generateImgHtml(url, imageLabel, returnReact);
         default:
           const inWhitelist = whitelistUrlSchemes.some(scheme => url.indexOf(scheme) === 0);
           if (!inWhitelist && !parsedUrl) {
@@ -191,13 +211,19 @@ export function createUrlFormat() {
           let linkLabel;
 
           if (hit && hit.highlight && hit.highlight[field.name]) {
-            linkLabel = getHighlightHtml(label, hit.highlight[field.name]);
+            linkLabel = getHighlight(label, hit.highlight[field.name], returnReact);
           } else {
             linkLabel = label;
           }
 
           const linkTarget = this.param('openLinkInCurrentTab') ? '_self' : '_blank';
-
+          if (returnReact) {
+            return (
+              <a href={prefix + url} target={linkTarget} rel="noopener noreferrer">
+                {linkLabel}
+              </a>
+            );
+          }
           return `<a href="${prefix}${url}" target="${linkTarget}" rel="noopener noreferrer">${linkLabel}</a>`;
       }
     };
