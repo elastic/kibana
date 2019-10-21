@@ -28,9 +28,9 @@ export const SingleMetricView: FC<Props> = ({ isActive, setCanProceed }) => {
 
   return (
     <Fragment>
-      {isActive === false && <SingleMetricDetectorsSummary />}
-
-      {isActive === true && (
+      {isActive === false ? (
+        <SingleMetricDetectorsSummary />
+      ) : (
         <Fragment>
           <SingleMetricDetectors setIsValid={setMetricValid} />
           {metricsValid && (

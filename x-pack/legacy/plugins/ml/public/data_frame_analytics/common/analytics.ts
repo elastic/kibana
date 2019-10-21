@@ -25,6 +25,7 @@ interface RegressionAnalysis {
   regression: {
     dependent_variable: string;
     training_percent?: number;
+    prediction_field_name?: string;
   };
 }
 
@@ -79,6 +80,15 @@ export const getDependentVar = (analysis: AnalysisConfig) => {
     depVar = analysis.regression.dependent_variable;
   }
   return depVar;
+};
+
+export const getPredictionFieldName = (analysis: AnalysisConfig) => {
+  // If undefined will be defaulted to dependent_variable when config is created
+  let predictionFieldName;
+  if (isRegressionAnalysis(analysis) && analysis.regression.prediction_field_name !== undefined) {
+    predictionFieldName = analysis.regression.prediction_field_name;
+  }
+  return predictionFieldName;
 };
 
 export const isOutlierAnalysis = (arg: any): arg is OutlierAnalysis => {
@@ -189,26 +199,30 @@ export const loadEvalData = async ({
   isTraining,
   index,
   dependentVariable,
+  resultsField,
+  predictionFieldName,
 }: {
   isTraining: boolean;
   index: string;
   dependentVariable: string;
+  resultsField: string;
+  predictionFieldName?: string;
 }) => {
   const results: LoadEvaluateResult = { success: false, eval: null, error: null };
+  const defaultPredictionField = `${dependentVariable}_prediction`;
+  const predictedField = `${resultsField}.${
+    predictionFieldName ? predictionFieldName : defaultPredictionField
+  }`;
+
+  const query = { term: { [`${resultsField}.is_training`]: { value: isTraining } } };
 
   const config = {
     index,
-    query: {
-      term: {
-        'ml.is_training': {
-          value: isTraining,
-        },
-      },
-    },
+    query,
     evaluation: {
       regression: {
         actual_field: dependentVariable,
-        predicted_field: `ml.${dependentVariable}_prediction`,
+        predicted_field: predictedField,
         metrics: {
           r_squared: {},
           mean_squared_error: {},
