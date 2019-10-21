@@ -27,14 +27,10 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import {
-  getDeps
-} from '../kibana_services';
-const {
-  addBasePath,
-} = getDeps();
+import { getServices } from '../kibana_services';
 
 export class SampleDataViewDataButton extends React.Component {
+  addBasePath = getServices().addBasePath;
 
   state = {
     isPopoverOpen: false
@@ -61,7 +57,7 @@ export class SampleDataViewDataButton extends React.Component {
         datasetName: this.props.name,
       },
     });
-    const dashboardPath = addBasePath(`/app/kibana#/dashboard/${this.props.overviewDashboard}`);
+    const dashboardPath = this.addBasePath(`/app/kibana#/dashboard/${this.props.overviewDashboard}`);
 
     if (this.props.appLinks.length === 0) {
       return (
@@ -84,7 +80,7 @@ export class SampleDataViewDataButton extends React.Component {
             size="m"
           />
         ),
-        href: addBasePath(path)
+        href: this.addBasePath(path)
       };
     });
     const panels = [

@@ -17,16 +17,34 @@
  * under the License.
  */
 
-let deps: any = {};
+export interface HomeKibanaServices {}
 
-export function setDeps(newDeps: any) {
-  deps = newDeps;
+let services: HomeKibanaServices | null = null;
+
+export function setServices(newServices: HomeKibanaServices) {
+  if (services) {
+    throw new Error(
+      'Kibana services already set - are you trying to import this module from outside of the home app?'
+    );
+  }
+  services = newServices;
 }
 
-export function getDeps() {
-  return deps;
+export function getServices() {
+  if (!services) {
+    throw new Error(
+      'Kibana services not set - are you trying to import this module from outside of the home app?'
+    );
+  }
+  return services;
 }
 /*
+// @ts-ignore
+import { toastNotifications, banners } from 'ui/notify';
+import { kfetch } from 'ui/kfetch';
+
+import { wrapInI18nContext } from 'ui/i18n';
+
 // @ts-ignore
 import { uiModules as modules } from 'ui/modules';
 import routes from 'ui/routes';
@@ -36,32 +54,40 @@ import { FeatureCatalogueRegistryProvider } from 'ui/registry/feature_catalogue'
 import { createUiStatsReporter, METRIC_TYPE } from '../../../ui_metric/public';
 import { TelemetryOptInProvider } from '../../../telemetry/public/services';
 import { start as data } from '../../../data/public/legacy';
-// @ts-ignore
-export { toastNotifications, banners } from 'ui/notify';
-export { kfetch } from 'ui/kfetch';
 
-export { wrapInI18nContext } from 'ui/i18n';
-export const getInjected = npStart.core.injectedMetadata.getInjectedVar;
-export const metadata = npStart.core.injectedMetadata.getLegacyMetadata();
+let shouldShowTelemetryOptIn: boolean;
+let telemetryOptInProvider: any;
+let featureCatalogueRegistryProvider: any;
 
-export const docLinks = npStart.core.docLinks;
+export function getServices() {
+  return {
+    getInjected: npStart.core.injectedMetadata.getInjectedVar,
+    metadata: npStart.core.injectedMetadata.getLegacyMetadata(),
+    docLinks: npStart.core.docLinks,
 
-export const uiRoutes = routes;
-export const uiModules = modules;
+    uiRoutes: routes,
+    uiModules: modules,
 
-export const savedObjectsClient = npStart.core.savedObjects.client;
-export const chrome = npStart.core.chrome;
-export const uiSettings = npStart.core.uiSettings;
-export const addBasePath = npStart.core.http.basePath.prepend;
-export const getBasePath = npStart.core.http.basePath.get;
+    savedObjectsClient: npStart.core.savedObjects.client,
+    chrome: npStart.core.chrome,
+    uiSettings: npStart.core.uiSettings,
+    addBasePath: npStart.core.http.basePath.prepend,
+    getBasePath: npStart.core.http.basePath.get,
 
-export const indexPatternService = data.indexPatterns.indexPatterns;
-export let shouldShowTelemetryOptIn: boolean;
-export let telemetryOptInProvider: any;
-export let featureCatalogueRegistryProvider: any;
+    indexPatternService: data.indexPatterns.indexPatterns,
+    shouldShowTelemetryOptIn,
+    telemetryOptInProvider,
+    featureCatalogueRegistryProvider,
 
-export const trackUiMetric = createUiStatsReporter('Kibana_home');
-export { METRIC_TYPE };
+    trackUiMetric: createUiStatsReporter('Kibana_home'),
+    METRIC_TYPE,
+
+    toastNotifications,
+    banners,
+    kfetch,
+    wrapInI18nContext,
+  };
+}
 
 modules.get('kibana').run((Private: IPrivate) => {
   const telemetryEnabled = npStart.core.injectedMetadata.getInjectedVar('telemetryEnabled');

@@ -18,11 +18,10 @@
  */
 
 import _ from 'lodash';
-import { getDeps } from './kibana_services';
-const { addBasePath, toastNotifications } = getDeps();
+import { getServices } from './kibana_services';
 import { i18n } from '@kbn/i18n';
 
-const baseUrl = addBasePath('/api/kibana/home/tutorials');
+const baseUrl = getServices().addBasePath('/api/kibana/home/tutorials');
 const headers = new Headers();
 headers.append('Accept', 'application/json');
 headers.append('Content-Type', 'application/json');
@@ -47,7 +46,7 @@ async function loadTutorials() {
     tutorials = await response.json();
     tutorialsLoaded = true;
   } catch(err) {
-    toastNotifications.addDanger({
+    getServices().toastNotifications.addDanger({
       title: i18n.translate('kbn.home.loadTutorials.unableToLoadErrorMessage', {
         defaultMessage: 'Unable to load tutorials' }
       ),

@@ -17,31 +17,32 @@
  * under the License.
  */
 
-import {  getDeps } from './kibana_services';
-const { indexPatternService, uiSettings, kfetch, } = getDeps();
+import { getServices } from './kibana_services';
 
 const sampleDataUrl = '/api/sample_data';
 
 function clearIndexPatternsCache() {
-  indexPatternService.clearCache();
+  getServices().indexPatternService.clearCache();
 }
 
 export async function listSampleDataSets() {
-  return await kfetch({ method: 'GET', pathname: sampleDataUrl });
+  return await getServices().kfetch({ method: 'GET', pathname: sampleDataUrl });
 }
 
 export async function installSampleDataSet(id, sampleDataDefaultIndex) {
-  await kfetch({ method: 'POST', pathname: `${sampleDataUrl}/${id}` });
+  await getServices().kfetch({ method: 'POST', pathname: `${sampleDataUrl}/${id}` });
 
-  if (uiSettings.isDefault('defaultIndex')) {
-    uiSettings.set('defaultIndex', sampleDataDefaultIndex);
+  if (getServices().uiSettings.isDefault('defaultIndex')) {
+    getServices().uiSettings.set('defaultIndex', sampleDataDefaultIndex);
   }
 
   clearIndexPatternsCache();
 }
 
 export async function uninstallSampleDataSet(id, sampleDataDefaultIndex) {
-  await kfetch({ method: 'DELETE', pathname: `${sampleDataUrl}/${id}` });
+  await getServices().kfetch({ method: 'DELETE', pathname: `${sampleDataUrl}/${id}` });
+
+  const uiSettings = getServices().uiSettings;
 
   if (!uiSettings.isDefault('defaultIndex')
     && uiSettings.get('defaultIndex') === sampleDataDefaultIndex) {

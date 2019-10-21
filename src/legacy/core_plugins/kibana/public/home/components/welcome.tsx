@@ -34,11 +34,10 @@ import {
   EuiPortal,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { getDeps } from '../kibana_services';
+import { getServices } from '../kibana_services';
 
 import { SampleDataCard } from './sample_data';
 import { TelemetryOptInCard } from './telemetry_opt_in';
-const { trackUiMetric, METRIC_TYPE, addBasePath, banners } = getDeps();
 
 interface Props {
   urlBasePath: string;
@@ -57,6 +56,7 @@ interface State {
  * Shows a full-screen welcome page that gives helpful quick links to beginners.
  */
 export class Welcome extends React.PureComponent<Props, State> {
+  private services = getServices();
   public readonly state: State = {
     step: 0,
   };
@@ -68,32 +68,35 @@ export class Welcome extends React.PureComponent<Props, State> {
   };
 
   private redirecToSampleData() {
-    const path = addBasePath('#/home/tutorial_directory/sampleData');
+    const path = this.services.addBasePath('#/home/tutorial_directory/sampleData');
     window.location.href = path;
   }
 
   private async handleTelemetrySelection(confirm: boolean) {
     const metricName = `telemetryOptIn${confirm ? 'Confirm' : 'Decline'}`;
-    trackUiMetric(METRIC_TYPE.CLICK, metricName);
+    this.services.trackUiMetric(this.services.METRIC_TYPE.CLICK, metricName);
     await this.props.setOptIn(confirm);
     const bannerId = this.props.getTelemetryBannerId();
-    banners.remove(bannerId);
+    this.services.banners.remove(bannerId);
     this.setState(() => ({ step: 1 }));
   }
 
   private onSampleDataDecline = () => {
-    trackUiMetric(METRIC_TYPE.CLICK, 'sampleDataDecline');
+    this.services.trackUiMetric(this.services.METRIC_TYPE.CLICK, 'sampleDataDecline');
     this.props.onSkip();
   };
   private onSampleDataConfirm = () => {
-    trackUiMetric(METRIC_TYPE.CLICK, 'sampleDataConfirm');
+    this.services.trackUiMetric(this.services.METRIC_TYPE.CLICK, 'sampleDataConfirm');
     this.redirecToSampleData();
   };
 
   componentDidMount() {
-    trackUiMetric(METRIC_TYPE.LOADED, 'welcomeScreenMount');
+    this.services.trackUiMetric(this.services.METRIC_TYPE.LOADED, 'welcomeScreenMount');
     if (this.props.shouldShowTelemetryOptIn) {
-      trackUiMetric(METRIC_TYPE.COUNT, 'welcomeScreenWithTelemetryOptIn');
+      this.services.trackUiMetric(
+        this.services.METRIC_TYPE.COUNT,
+        'welcomeScreenWithTelemetryOptIn'
+      );
     }
     document.addEventListener('keydown', this.hideOnEsc);
   }

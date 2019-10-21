@@ -21,7 +21,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
-import { getDeps } from '../kibana_services';
+import { getServices } from '../kibana_services';
 
 import {
   EuiButton,
@@ -40,7 +40,7 @@ import {
 
 
 const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
-  const basePath = getDeps().getBasePath();
+  const basePath = getServices().getBasePath();
   const renderCards = () => {
     const apmData = {
       title: intl.formatMessage({

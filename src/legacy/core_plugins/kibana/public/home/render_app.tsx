@@ -24,7 +24,6 @@ import { Plugin as DataPlugin } from 'src/plugins/data/public';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { LegacyAngularInjectedDependencies } from './plugin';
-import { setDeps } from './kibana_services';
 
 /**
  * These are dependencies of the Graph app besides the base dependencies
