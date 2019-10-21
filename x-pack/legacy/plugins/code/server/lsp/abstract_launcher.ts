@@ -43,6 +43,8 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
       log.debug('Detach mode, expected language server launch externally');
       proxy.onConnected(() => {
         this.running = true;
+        // reset spawn times
+        this.spawnTimes = 0;
       });
       proxy.onDisconnected(() => {
         this.running = false;
@@ -81,6 +83,8 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
     await new Promise((resolve, reject) => {
       proxy.onConnected(() => {
         this.proxyConnected = true;
+        // reset spawn times
+        this.spawnTimes = 0;
         resolve();
       });
       this.launchReject = err => {

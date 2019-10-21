@@ -43,26 +43,33 @@ export interface SavedObjectsMigrationVersion {
 }
 
 /**
+ * Don't use this type, it's simply a helper type for {@link SavedObjectAttribute}
  *
  * @public
  */
-export type SavedObjectAttribute =
+export type SavedObjectAttributeSingle =
   | string
   | number
   | boolean
   | null
   | undefined
-  | SavedObjectAttributes
-  | SavedObjectAttributes[];
+  | SavedObjectAttributes;
 
 /**
- * The data for a Saved Object is stored in the `attributes` key as either an
- * object or an array of objects.
+ * Type definition for a Saved Object attribute value
+ *
+ * @public
+ */
+export type SavedObjectAttribute = SavedObjectAttributeSingle | SavedObjectAttributeSingle[];
+
+/**
+ * The data for a Saved Object is stored as an object in the `attributes`
+ * property.
  *
  * @public
  */
 export interface SavedObjectAttributes {
-  [key: string]: SavedObjectAttribute | SavedObjectAttribute[];
+  [key: string]: SavedObjectAttribute;
 }
 
 /**
@@ -123,6 +130,7 @@ export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
   searchFields?: string[];
   hasReference?: { type: string; id: string };
   defaultSearchOperator?: 'AND' | 'OR';
+  filter?: string;
 }
 
 /**
@@ -200,6 +208,7 @@ export interface SavedObjectsBaseOptions {
  * so we throw a special 503 with the intention of informing the user that their
  * Elasticsearch settings need to be updated.
  *
+ * See {@link SavedObjectsClient}
  * See {@link SavedObjectsErrorHelpers}
  *
  * @public

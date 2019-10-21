@@ -11,7 +11,7 @@ import {
   LoggerFactory,
   Logger,
   HttpServiceSetup,
-  ClusterClient,
+  IClusterClient,
 } from '../../../../../src/core/server';
 import { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';
@@ -80,7 +80,7 @@ export interface AuthenticatorOptions {
   config: Pick<ConfigType, 'sessionTimeout' | 'authc'>;
   basePath: HttpServiceSetup['basePath'];
   loggers: LoggerFactory;
-  clusterClient: PublicMethodsOf<ClusterClient>;
+  clusterClient: IClusterClient;
   sessionStorageFactory: SessionStorageFactory<ProviderSession>;
   isSystemAPIRequest: (request: KibanaRequest) => boolean;
 }

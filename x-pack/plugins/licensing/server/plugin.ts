@@ -20,6 +20,14 @@ import { LicensingConfig } from './licensing_config';
 import { License } from './license';
 import { createRouteHandlerContext } from './licensing_route_handler_context';
 
+declare module 'src/core/server' {
+  interface RequestHandlerContext {
+    licensing: {
+      license: ILicense;
+    };
+  }
+}
+
 export class Plugin implements CorePlugin<LicensingPluginSetup> {
   private readonly logger: Logger;
   private readonly config$: Observable<LicensingConfig>;

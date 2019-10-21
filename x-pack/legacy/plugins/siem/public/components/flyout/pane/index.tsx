@@ -111,18 +111,30 @@ const FlyoutHeaderWithCloseButton = React.memo<{
 
 FlyoutHeaderWithCloseButton.displayName = 'FlyoutHeaderWithCloseButton';
 
-class FlyoutPaneComponent extends React.PureComponent<Props> {
-  public render() {
-    const {
-      children,
-      flyoutHeight,
-      headerHeight,
-      onClose,
-      timelineId,
-      usersViewing,
-      width,
-    } = this.props;
+const FlyoutPaneComponent = React.memo<Props>(
+  ({
+    applyDeltaToWidth,
+    children,
+    flyoutHeight,
+    headerHeight,
+    onClose,
+    timelineId,
+    usersViewing,
+    width,
+  }) => {
+    const renderFlyout = () => <></>;
 
+    const onResize: OnResize = ({ delta, id }) => {
+      const bodyClientWidthPixels = document.body.clientWidth;
+
+      applyDeltaToWidth({
+        bodyClientWidthPixels,
+        delta,
+        id,
+        maxWidthPercent,
+        minWidthPixels,
+      });
+    };
     return (
       <EuiFlyoutContainer headerHeight={headerHeight} data-test-subj="flyout-pane" width={width}>
         <EuiFlyout
@@ -139,8 +151,8 @@ class FlyoutPaneComponent extends React.PureComponent<Props> {
               <TimelineResizeHandle data-test-subj="flyout-resize-handle" height={flyoutHeight} />
             }
             id={timelineId}
-            onResize={this.onResize}
-            render={this.renderFlyout}
+            onResize={onResize}
+            render={renderFlyout}
           />
           <EuiFlyoutHeader
             className="timeline-flyout-header"
@@ -160,23 +172,9 @@ class FlyoutPaneComponent extends React.PureComponent<Props> {
       </EuiFlyoutContainer>
     );
   }
+);
 
-  private renderFlyout = () => <></>;
-
-  private onResize: OnResize = ({ delta, id }) => {
-    const { applyDeltaToWidth } = this.props;
-
-    const bodyClientWidthPixels = document.body.clientWidth;
-
-    applyDeltaToWidth({
-      bodyClientWidthPixels,
-      delta,
-      id,
-      maxWidthPercent,
-      minWidthPixels,
-    });
-  };
-}
+FlyoutPaneComponent.displayName = 'FlyoutPaneComponent';
 
 export const Pane = connect(
   null,

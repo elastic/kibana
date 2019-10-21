@@ -5,6 +5,7 @@
  */
 
 import { EuiFlexItem } from '@elastic/eui';
+import { isNumber, isEmpty } from 'lodash/fp';
 import styled from 'styled-components';
 
 import { TimelineNonEcsData } from '../../../../graphql/types';
@@ -27,19 +28,33 @@ export const getValues = (field: string, data: TimelineNonEcsData[]): string[] |
 
 export const Details = styled.div`
   margin: 5px 0 5px 10px;
+  & .euiBadge {
+    margin: 2px 0 2px 0;
+  }
 `;
-
 Details.displayName = 'Details';
 
 export const TokensFlexItem = styled(EuiFlexItem)`
   margin-left: 3px;
 `;
-
 TokensFlexItem.displayName = 'TokensFlexItem';
 
-export const Row = styled.div`
-  width: 100%;
-  overflow: hidden;
-`;
+export function isNillEmptyOrNotFinite<T>(value: string | number | T[] | null | undefined) {
+  return isNumber(value) ? !isFinite(value) : isEmpty(value);
+}
 
-Row.displayName = 'Row';
+export const isFimEvent = ({
+  eventCategory,
+  eventDataset,
+}: {
+  eventCategory: string | null | undefined;
+  eventDataset: string | null | undefined;
+}) =>
+  (eventCategory != null && eventCategory.toLowerCase() === 'file') ||
+  (eventDataset != null && eventDataset.toLowerCase() === 'file');
+
+export const isProcessStoppedOrTerminationEvent = (eventAction: string | null | undefined) =>
+  eventAction === 'process_stopped' || eventAction === 'termination_event';
+
+export const showVia = (eventAction: string | null | undefined) =>
+  ['file_create_event', 'created', 'file_delete_event', 'deleted'].includes(`${eventAction}`);

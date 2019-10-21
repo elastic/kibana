@@ -1,6 +1,7 @@
 <discover-app class="app-container">
-  <!-- Local nav. -->
+  <h1 class="euiScreenReaderOnly">{{screenTitle}}</h1>
 
+  <!-- Local nav. -->
   <kbn-top-nav
     app-name="'discover'"
     config="topNavMenu"
@@ -28,19 +29,20 @@
   <main class="container-fluid">
     <div class="row">
       <div class="col-md-2 sidebar-container collapsible-sidebar" id="discover-sidebar">
-        <disc-field-chooser
-          class="dscFieldChooser"
-          columns="state.columns"
-          hits="rows"
-          field-counts="fieldCounts"
-          index-pattern="searchSource.getField('index')"
-          index-pattern-list="opts.indexPatternList"
-          state="state"
-          on-add-field="addColumn"
-          on-add-filter="filterQuery"
-          on-remove-field="removeColumn"
-        >
-        </disc-field-chooser>
+        <div class="dscFieldChooser">
+          <disc-field-chooser
+            columns="state.columns"
+            hits="rows"
+            field-counts="fieldCounts"
+            index-pattern="searchSource.getField('index')"
+            index-pattern-list="opts.indexPatternList"
+            state="state"
+            on-add-field="addColumn"
+            on-add-filter="filterQuery"
+            on-remove-field="removeColumn"
+          >
+          </disc-field-chooser>
+        </div>
       </div>
 
       <div class="dscWrapper col-md-10">
@@ -175,8 +177,13 @@
             <section
               class="dscTable"
               fixed-scroll
-              aria-label="{{::'kbn.discover.documentsAriaLabel' | i18n: {defaultMessage: 'Documents'} }}"
+              aria-labelledby="documentsAriaLabel"
             >
+              <h2 class="euiScreenReaderOnly"
+                id="documentsAriaLabel"
+                i18n-id="kbn.discover.documentsAriaLabel"
+                i18n-default-message="Documents"
+              ></h2>
               <doc-table
                 hits="rows"
                 index-pattern="indexPattern"

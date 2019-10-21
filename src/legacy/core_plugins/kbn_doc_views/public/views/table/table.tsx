@@ -31,7 +31,7 @@ export function DocViewTable({
   onAddColumn,
   onRemoveColumn,
 }: DocViewRenderProps) {
-  const mapping = indexPattern.fields.byName;
+  const mapping = indexPattern.fields.getByName;
   const flattened = indexPattern.flattenHit(hit);
   const formatted = indexPattern.formatHit(hit, 'html');
   const [fieldRowOpen, setFieldRowOpen] = useState({} as Record<string, boolean>);
@@ -63,15 +63,15 @@ export function DocViewTable({
                 : undefined;
             const isArrayOfObjects =
               Array.isArray(flattened[field]) && arrayContainsObjects(flattened[field]);
-            const displayUnderscoreWarning = !mapping[field] && field.indexOf('_') === 0;
+            const displayUnderscoreWarning = !mapping(field) && field.indexOf('_') === 0;
             const displayNoMappingWarning =
-              !mapping[field] && !displayUnderscoreWarning && !isArrayOfObjects;
+              !mapping(field) && !displayUnderscoreWarning && !isArrayOfObjects;
 
             return (
               <DocViewTableRow
                 key={field}
                 field={field}
-                fieldMapping={mapping[field]}
+                fieldMapping={mapping(field)}
                 displayUnderscoreWarning={displayUnderscoreWarning}
                 displayNoMappingWarning={displayNoMappingWarning}
                 isCollapsed={isCollapsed}

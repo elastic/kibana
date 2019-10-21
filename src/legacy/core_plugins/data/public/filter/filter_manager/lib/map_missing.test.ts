@@ -26,7 +26,7 @@ describe('filter manager utilities', () => {
         missing: { field: '_type' },
         ...buildEmptyFilter(true),
       };
-      const result = await mapMissing(filter);
+      const result = mapMissing(filter);
 
       expect(result).toHaveProperty('key', '_type');
       expect(result).toHaveProperty('value', 'missing');
@@ -36,7 +36,7 @@ describe('filter manager utilities', () => {
       const filter = buildEmptyFilter(true) as ExistsFilter;
 
       try {
-        await mapMissing(filter);
+        mapMissing(filter);
       } catch (e) {
         expect(e).toBe(filter);
         done();

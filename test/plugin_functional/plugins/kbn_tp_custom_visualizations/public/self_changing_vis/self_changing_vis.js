@@ -22,7 +22,7 @@ import { visFactory } from 'ui/vis/vis_factory';
 import { SelfChangingEditor } from './self_changing_editor';
 import { SelfChangingComponent } from './self_changing_components';
 
-import { setup as visualizations } from '../../../../../../src/legacy/core_plugins/visualizations/public/legacy';
+import { setup as visualizations } from '../../../../../../src/legacy/core_plugins/visualizations/public/np_ready/public/legacy';
 
 function SelfChangingVisType() {
 

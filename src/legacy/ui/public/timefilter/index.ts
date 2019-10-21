@@ -20,7 +20,7 @@
 import uiRoutes from 'ui/routes';
 import { TimefilterContract, TimeHistoryContract } from '../../../core_plugins/data/public';
 import { registerTimefilterWithGlobalState } from './setup_router';
-import { setup as data } from '../../../core_plugins/data/public/legacy';
+import { start as data } from '../../../core_plugins/data/public/legacy';
 
 export {
   getTime,

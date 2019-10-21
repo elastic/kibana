@@ -26,7 +26,6 @@ import { act } from 'react-dom/test-utils';
 import { DefaultEditorAggParams } from './agg_params';
 import { IndexPattern } from 'ui/index_patterns';
 import { AggType } from 'ui/agg_types';
-import { Schema } from 'ui/vis/editors/default/schemas';
 
 jest.mock('./agg_params', () => ({
   DefaultEditorAggParams: () => null,
@@ -61,6 +60,7 @@ describe('DefaultEditorAgg component', () => {
       dragHandleProps: null,
       formIsTouched: false,
       groupName: AggGroupNames.Metrics,
+      isDisabled: false,
       isDraggable: false,
       isLastBucket: false,
       isRemovable: false,
@@ -157,7 +157,7 @@ describe('DefaultEditorAgg component', () => {
   it('should add schema component', () => {
     defaultProps.agg.schema = {
       editorComponent: () => <div className="schemaComponent"></div>,
-    } as Schema;
+    } as any;
     const comp = mount(<DefaultEditorAgg {...defaultProps} />);
 
     expect(comp.find('.schemaComponent').exists()).toBeTruthy();
@@ -198,6 +198,18 @@ describe('DefaultEditorAgg component', () => {
       comp.find('[data-test-subj="toggleDisableAggregationBtn disable"] button').simulate('click');
 
       expect(defaultProps.onToggleEnableAgg).toBeCalledWith(defaultProps.agg, false);
+    });
+
+    it('should disable the disableAggregation button', () => {
+      defaultProps.isDisabled = true;
+      defaultProps.isRemovable = true;
+      const comp = mount(<DefaultEditorAgg {...defaultProps} />);
+
+      expect(
+        comp
+          .find('EuiButtonIcon[data-test-subj="toggleDisableAggregationBtn disable"]')
+          .prop('disabled')
+      ).toBeTruthy();
     });
 
     it('should enable agg', () => {

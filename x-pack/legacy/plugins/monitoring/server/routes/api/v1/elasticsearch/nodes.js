@@ -12,6 +12,8 @@ import { getShardStats } from '../../../../lib/elasticsearch/shards';
 import { handleError } from '../../../../lib/errors/handle_error';
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../common/constants';
+import { getPaginatedNodes } from '../../../../lib/elasticsearch/nodes/get_nodes/get_paginated_nodes';
+import { LISTING_METRICS_NAMES } from '../../../../lib/elasticsearch/nodes/get_nodes/nodes_listing_metrics';
 
 export function esNodesRoute(server) {
   server.route({
@@ -27,13 +29,22 @@ export function esNodesRoute(server) {
           timeRange: Joi.object({
             min: Joi.date().required(),
             max: Joi.date().required()
-          }).required()
+          }).required(),
+          pagination: Joi.object({
+            index: Joi.number().required(),
+            size: Joi.number().required()
+          }).required(),
+          sort: Joi.object({
+            field: Joi.string().required(),
+            direction: Joi.string().required()
+          }).optional(),
+          queryText: Joi.string().default('').allow('').optional(),
         })
       }
     },
     async handler(req) {
       const config = server.config();
-      const ccs = req.payload.ccs;
+      const { ccs, pagination, sort, queryText } = req.payload;
       const clusterUuid = req.params.clusterUuid;
       const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
 
@@ -41,9 +52,18 @@ export function esNodesRoute(server) {
         const clusterStats = await getClusterStats(req, esIndexPattern, clusterUuid);
         const shardStats = await getShardStats(req, esIndexPattern, clusterStats, { includeNodes: true });
         const clusterStatus = getClusterStatus(clusterStats, shardStats);
-        const nodes = await getNodes(req, esIndexPattern, clusterStats, shardStats);
 
-        return { clusterStatus, nodes };
+        const metricSet = LISTING_METRICS_NAMES;
+        const { pageOfNodes, totalNodeCount } = await getPaginatedNodes(
+          req, esIndexPattern, { clusterUuid }, metricSet, pagination, sort, queryText,
+          {
+            clusterStats,
+            shardStats,
+          }
+        );
+
+        const nodes = await getNodes(req, esIndexPattern, pageOfNodes, clusterStats, shardStats);
+        return { clusterStatus, nodes, totalNodeCount };
       } catch(err) {
         throw handleError(err, req);
       }

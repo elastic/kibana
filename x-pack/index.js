@@ -38,18 +38,16 @@ import { upgradeAssistant } from './legacy/plugins/upgrade_assistant';
 import { uptime } from './legacy/plugins/uptime';
 import { ossTelemetry } from './legacy/plugins/oss_telemetry';
 import { fileUpload } from './legacy/plugins/file_upload';
-import { telemetry } from './legacy/plugins/telemetry';
 import { encryptedSavedObjects } from './legacy/plugins/encrypted_saved_objects';
 import { snapshotRestore } from './legacy/plugins/snapshot_restore';
+import { transform } from './legacy/plugins/transform';
 import { actions } from './legacy/plugins/actions';
 import { alerting } from './legacy/plugins/alerting';
-import { advancedUiActions } from './legacy/plugins/advanced_ui_actions';
 import { lens } from './legacy/plugins/lens';
 
 module.exports = function (kibana) {
   return [
     xpackMain(kibana),
-    telemetry(kibana),
     graph(kibana),
     monitoring(kibana),
     reporting(kibana),
@@ -76,6 +74,7 @@ module.exports = function (kibana) {
     infra(kibana),
     taskManager(kibana),
     rollup(kibana),
+    transform(kibana),
     siem(kibana),
     remoteClusters(kibana),
     crossClusterReplication(kibana),
@@ -88,6 +87,5 @@ module.exports = function (kibana) {
     snapshotRestore(kibana),
     actions(kibana),
     alerting(kibana),
-    advancedUiActions(kibana),
   ];
 };

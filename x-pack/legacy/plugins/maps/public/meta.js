@@ -11,7 +11,7 @@ import {
 } from '../common/constants';
 import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
-import { EMSClient } from 'ui/vis/map/ems_client';
+import { EMSClient } from '@elastic/ems-client';
 import { xpackInfo } from './kibana_services';
 import fetch from 'node-fetch';
 

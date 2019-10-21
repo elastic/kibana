@@ -7,8 +7,9 @@
 
 import { difference } from 'lodash';
 import chrome from 'ui/chrome';
-import { newJobLimits } from 'plugins/ml/jobs/new_job/utils/new_job_defaults';
+import { newJobLimits } from 'plugins/ml/jobs/new_job_new/utils/new_job_defaults';
 import { mlJobService } from 'plugins/ml/services/job_service';
+import { processCreatedBy } from '../../../../../common/util/job_utils';
 
 export function saveJob(job, newJobData, finish) {
 
@@ -238,7 +239,7 @@ function processCustomSettings(jobData, datafeedData) {
     if (jobData.custom_settings.created_by !== undefined) {
       if (jobData.detectors !== undefined || Object.keys(datafeedData).length ||
         (jobData.custom_settings.custom_urls !== undefined && jobData.custom_settings.custom_urls.length)) {
-        delete customSettings.created_by;
+        processCreatedBy(customSettings);
       }
     }
   }

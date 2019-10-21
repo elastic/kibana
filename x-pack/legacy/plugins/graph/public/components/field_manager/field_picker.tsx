@@ -9,21 +9,24 @@ import { EuiPopover, EuiSelectable, EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
 import { WorkspaceField } from '../../types';
-
-import { FieldIcon } from './field_icon';
+import { FieldIcon } from '../../../../../../../src/plugins/kibana_react/public';
 
 export interface FieldPickerProps {
   fieldMap: Record<string, WorkspaceField>;
   selectField: (fieldName: string) => void;
   deselectField: (fieldName: string) => void;
+  open: boolean;
+  setOpen: (open: boolean) => void;
 }
 
-export function FieldPicker({ fieldMap, selectField, deselectField }: FieldPickerProps) {
-  const [open, setOpen] = useState(false);
-
+export function FieldPicker({
+  fieldMap,
+  selectField,
+  deselectField,
+  open,
+  setOpen,
+}: FieldPickerProps) {
   const allFields = Object.values(fieldMap);
-  const unselectedFields = allFields.filter(field => !field.selected);
-  const hasSelectedFields = unselectedFields.length < allFields.length;
 
   const hasFields = allFields.length > 0;
 
@@ -38,13 +41,9 @@ export function FieldPicker({ fieldMap, selectField, deselectField }: FieldPicke
     }
   }, [fieldMap]);
 
-  const badgeDescription = hasSelectedFields
-    ? i18n.translate('xpack.graph.bar.pickMoreFieldsLabel', {
-        defaultMessage: 'Add more fields',
-      })
-    : i18n.translate('xpack.graph.bar.pickFieldsLabel', {
-        defaultMessage: 'Add fields',
-      });
+  const badgeDescription = i18n.translate('xpack.graph.bar.pickFieldsLabel', {
+    defaultMessage: 'Add fields',
+  });
 
   return (
     <EuiPopover
@@ -54,6 +53,7 @@ export function FieldPicker({ fieldMap, selectField, deselectField }: FieldPicke
       panelPaddingSize="none"
       button={
         <EuiBadge
+          data-test-subj="graph-add-field-button"
           className={classNames('gphFieldPicker__button', {
             'gphFieldPicker__button--disabled': !hasFields,
           })}
@@ -78,9 +78,10 @@ export function FieldPicker({ fieldMap, selectField, deselectField }: FieldPicke
         <EuiSelectable
           searchProps={{
             placeholder: i18n.translate('xpack.graph.fieldManager.fieldSearchPlaceholder', {
-              defaultMessage: 'Filter fields',
+              defaultMessage: 'Filter by',
             }),
             compressed: true,
+            'data-test-subj': 'graph-field-search',
           }}
           listProps={{
             className: 'gphFieldPicker__selectableList',
@@ -115,7 +116,7 @@ function toOptions(
 ): Array<{ label: string; checked?: 'on' | 'off'; prepend?: ReactNode }> {
   return fields.map(field => ({
     label: field.name,
-    prepend: <FieldIcon type={field.type} />,
+    prepend: <FieldIcon type={field.type} size="m" useColor />,
     checked: field.selected ? 'on' : undefined,
   }));
 }

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
+import React, { useState } from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
@@ -26,10 +26,6 @@ interface Props {
    * state.
    */
   render: (showHoverContent: boolean) => JSX.Element;
-}
-
-interface State {
-  showHoverContent: boolean;
 }
 
 const HoverActionsPanelContainer = styled.div`
@@ -67,31 +63,25 @@ WithHoverActionsContainer.displayName = 'WithHoverActionsContainer';
  * component also passes `showHoverContent` as a render prop, which
  * provides a signal to the content that the user is in a hover state.
  */
-export class WithHoverActions extends React.PureComponent<Props, State> {
-  constructor(props: Props) {
-    super(props);
+export const WithHoverActions = React.memo<Props>(
+  ({ alwaysShow = false, hoverContent, render }) => {
+    const [showHoverContent, setShowHoverContent] = useState(false);
+    function onMouseEnter() {
+      setShowHoverContent(true);
+    }
 
-    this.state = { showHoverContent: false };
-  }
-
-  public render() {
-    const { alwaysShow = false, hoverContent, render } = this.props;
-
+    function onMouseLeave() {
+      setShowHoverContent(false);
+    }
     return (
-      <WithHoverActionsContainer onMouseEnter={this.onMouseEnter} onMouseLeave={this.onMouseLeave}>
-        <>{render(this.state.showHoverContent)}</>
-        <HoverActionsPanel show={this.state.showHoverContent || alwaysShow}>
+      <WithHoverActionsContainer onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+        <>{render(showHoverContent)}</>
+        <HoverActionsPanel show={showHoverContent || alwaysShow}>
           {hoverContent != null ? hoverContent : <></>}
         </HoverActionsPanel>
       </WithHoverActionsContainer>
     );
   }
+);
 
-  private onMouseEnter = () => {
-    this.setState({ showHoverContent: true });
-  };
-
-  private onMouseLeave = () => {
-    this.setState({ showHoverContent: false });
-  };
-}
+WithHoverActions.displayName = 'WithHoverActions';

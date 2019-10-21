@@ -25,7 +25,7 @@ export type KIBANA_CONTEXT_NAME = 'kibana_context';
 
 export interface KibanaContext {
   type: typeof name;
-  query?: Query;
+  query?: Query | Query[];
   filters?: Filter[];
   timeRange?: TimeRange;
 }
