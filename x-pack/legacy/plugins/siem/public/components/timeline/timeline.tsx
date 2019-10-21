@@ -116,7 +116,7 @@ export const Timeline = React.memo<Props>(
       indexPattern,
       browserFields,
       filters: [],
-      kqlQuery: { query: kqlQueryExpression, language: 'keury' },
+      kqlQuery: { query: kqlQueryExpression, language: 'kuery' },
       kqlMode,
       start,
       end,

@@ -10,6 +10,7 @@ import * as React from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import { pure } from 'recompose';
 import styled from 'styled-components';
+import { i18n } from '@kbn/i18n';
 
 import { AutoSizer } from '../../components/auto_sizer';
 import { DragDropContextWrapper } from '../../components/drag_and_drop/drag_drop_context_wrapper';
@@ -30,6 +31,7 @@ import { MlPopover } from '../../components/ml_popover/ml_popover';
 import { MlHostConditionalContainer } from '../../components/ml/conditional_links/ml_host_conditional_container';
 import { MlNetworkConditionalContainer } from '../../components/ml/conditional_links/ml_network_conditional_container';
 import { navTabs } from './home_navigations';
+import { SiemPageName } from './types';
 import { UseUrlState } from '../../components/url_state';
 import { SpyRoute } from '../../utils/route/spy_routes';
 
@@ -104,7 +106,11 @@ export const HomePage = pure(() => (
                 </Flyout>
 
                 <EuiPageBody>
-                  <NavGlobal>
+                  <NavGlobal
+                    aria-label={i18n.translate('xpack.siem.global.navigationLabel', {
+                      defaultMessage: 'SIEM app',
+                    })}
+                  >
                     <EuiFlexGroup alignItems="center" gutterSize="m" justifyContent="spaceBetween">
                       <EuiFlexItem>
                         <SiemNavigation navTabs={navTabs} />
@@ -139,27 +145,33 @@ export const HomePage = pure(() => (
                   </NavGlobal>
 
                   <Switch>
-                    <Redirect from="/" exact={true} to="/overview" />
-                    <Route path="/:pageName(overview)" render={() => <Overview />} />
+                    <Redirect from="/" exact={true} to={`/${SiemPageName.overview}`} />
                     <Route
-                      path="/:pageName(hosts)"
+                      path={`/:pageName(${SiemPageName.overview})`}
+                      render={() => <Overview />}
+                    />
+                    <Route
+                      path={`/:pageName(${SiemPageName.hosts})`}
                       render={({ match, location }) => (
                         <HostsContainer url={match.url} location={location} />
                       )}
                     />
                     <Route
-                      path="/:pageName(network)"
+                      path={`/:pageName(${SiemPageName.network})`}
                       render={({ match, location }) => (
                         <NetworkContainer url={match.url} location={location} />
                       )}
                     />
                     <Route
-                      path="/:pageName(detection-engine)"
+                      path={`/:pageName(${SiemPageName.detectionEngine})`}
                       render={({ match, location }) => (
                         <DetectionEngineContainer url={match.url} location={location} />
                       )}
                     />
-                    <Route path="/:pageName(timelines)" render={() => <Timelines />} />
+                    <Route
+                      path={`/:pageName(${SiemPageName.timelines})`}
+                      render={() => <Timelines />}
+                    />
                     <Route path="/link-to" component={LinkToPage} />
                     <Route
                       path="/ml-hosts"

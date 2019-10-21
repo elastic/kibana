@@ -103,7 +103,7 @@ declare interface Ml {
   getVisualizerOverallStats(obj: object): Promise<any>;
 
   results: {
-    getMaxAnomalyScore: (jobIds: string[], earliestMs: number, latestMs: number) => Promise<any>; // THIS ONE IS RIGHT
+    getMaxAnomalyScore: (jobIds: string[], earliestMs: number, latestMs: number) => Promise<any>;
   };
 
   jobs: {

@@ -9,13 +9,15 @@ import { first } from 'rxjs/operators';
 import { TypeOf } from '@kbn/config-schema';
 import {
   CoreSetup,
+  IClusterClient,
   LoggerFactory,
   PluginInitializerContext,
   RecursiveReadonly,
 } from 'src/core/server';
-import { deepFreeze } from '../../../../src/core/utils';
+// import { deepFreeze } from '../../../../src/core/utils';
 import { PluginSetupContract as FeaturesSetupContract } from '../../features/server';
 import { CodeConfigSchema } from './config';
+import { SAVED_OBJ_REPO } from '../../../legacy/plugins/code/common/constants';
 
 /**
  * Describes public Code plugin contract returned at the `setup` stage.
@@ -25,6 +27,10 @@ export interface PluginSetupContract {
   legacy: {
     config: TypeOf<typeof CodeConfigSchema>;
     logger: LoggerFactory;
+    http: any;
+    elasticsearch: {
+      adminClient$: IClusterClient;
+    };
   };
 }
 
@@ -57,7 +63,7 @@ export class CodePlugin {
           excludeFromBasePrivileges: true,
           api: ['code_user', 'code_admin'],
           savedObject: {
-            all: [],
+            all: [SAVED_OBJ_REPO],
             read: ['config'],
           },
           ui: ['show', 'user', 'admin'],
@@ -66,20 +72,24 @@ export class CodePlugin {
           api: ['code_user'],
           savedObject: {
             all: [],
-            read: ['config'],
+            read: ['config', SAVED_OBJ_REPO],
           },
           ui: ['show', 'user'],
         },
       },
     });
 
-    return deepFreeze({
+    return {
       /** @deprecated */
       legacy: {
         config,
         logger: this.initializerContext.logger,
+        http: coreSetup.http,
+        elasticsearch: {
+          adminClient$: await coreSetup.elasticsearch.adminClient$.pipe(first()).toPromise(),
+        },
       },
-    });
+    };
   }
 
   public start() {
