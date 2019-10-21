@@ -24,7 +24,6 @@ import { i18n } from '@kbn/i18n';
 export const convertSampleInput = (converter, inputs) => {
   let error = null;
   let samples = [];
-  // console.log('convertSampleInput', converter, inputs);
 
   try {
     samples = inputs.map(input => {

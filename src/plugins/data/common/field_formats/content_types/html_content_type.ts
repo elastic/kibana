@@ -42,7 +42,6 @@ export const setup = (
   htmlContextTypeConvert?: HtmlContextTypeConvert
 ): HtmlContextTypeConvert => {
   const convert = getConvertFn(format, htmlContextTypeConvert);
-  // console.log('html_content_type setup', format, htmlContextTypeConvert);
 
   const recurse: HtmlContextTypeConvert = (value, field, hit, meta) => {
     if (value == null) {
