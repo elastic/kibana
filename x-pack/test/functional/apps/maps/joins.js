@@ -54,7 +54,7 @@ export default function ({ getPageObjects, getService }) {
       const min = split[0];
       expect(min).to.equal('3');
 
-      const max = split[1];
+      const max = split[2];
       expect(max).to.equal('12');
     });
 
