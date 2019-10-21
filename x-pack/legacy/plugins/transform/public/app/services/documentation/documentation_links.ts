@@ -6,14 +6,14 @@
 import { TRANSFORM_DOC_PATHS } from '../../constants';
 
 class DocumentationLinksService {
-  private esPluginDocBasePath: string = '';
+  private esDocBasePath: string = '';
 
-  public init(esPluginDocBasePath: string): void {
-    this.esPluginDocBasePath = esPluginDocBasePath;
+  public init(esDocBasePath: string): void {
+    this.esDocBasePath = esDocBasePath;
   }
 
-  public getTransformPluginDocUrl() {
-    return `${this.esPluginDocBasePath}${TRANSFORM_DOC_PATHS.plugins}`;
+  public getTransformsDocUrl() {
+    return `${this.esDocBasePath}${TRANSFORM_DOC_PATHS.transforms}`;
   }
 }
 
