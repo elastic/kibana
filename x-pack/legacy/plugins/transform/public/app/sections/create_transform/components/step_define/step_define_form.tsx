@@ -827,7 +827,7 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
 
       <EuiFlexItem>
         <SourceIndexPreview cellClick={addToSearch} query={pivotQuery} />
-        <EuiSpacer size="l" />
+        <EuiSpacer size="m" />
         <PivotPreview aggs={aggList} groupBy={groupByList} query={pivotQuery} />
       </EuiFlexItem>
     </EuiFlexGroup>
