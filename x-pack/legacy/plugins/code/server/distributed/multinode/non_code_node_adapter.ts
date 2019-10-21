@@ -7,7 +7,7 @@
 import Wreck from '@hapi/wreck';
 import util from 'util';
 import Boom from 'boom';
-import { Request } from 'hapi';
+import { KibanaRequest } from 'src/core/server';
 import * as http from 'http';
 import {
   DEFAULT_SERVICE_OPTION,
@@ -23,8 +23,8 @@ import { Logger } from '../../log';
 
 const pickHeaders = ['authorization'];
 
-function filterHeaders(originRequest: Request) {
-  const result: { [name: string]: string } = {};
+function filterHeaders(originRequest: KibanaRequest) {
+  const result: { [name: string]: string | string[] | undefined } = {};
   for (const header of pickHeaders) {
     if (originRequest.headers[header]) {
       result[header] = originRequest.headers[header];
@@ -82,7 +82,12 @@ export class NonCodeNodeAdapter implements ServiceHandlerAdapter {
     return dispatchedHandler as ServiceMethodMap<def>;
   }
 
-  async requestFn(baseUrl: string, path: string, payload: RequestPayload, originRequest: Request) {
+  async requestFn(
+    baseUrl: string,
+    path: string,
+    payload: RequestPayload,
+    originRequest: KibanaRequest
+  ) {
     const opt = {
       baseUrl,
       payload: JSON.stringify(payload),

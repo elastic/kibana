@@ -4,27 +4,100 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ServerFacade, ServerRouteFacade, RouteOptionsFacade } from '..';
+import { schema } from '@kbn/config-schema';
+
+import { IRouter, RequestHandler } from 'src/core/server';
+import { ServerRouteFacade, RouteOptionsFacade } from '..';
 
 export class CodeServerRouter {
-  constructor(readonly server: ServerFacade) {}
+  constructor(readonly router: IRouter) {}
 
   route(route: CodeRoute) {
     const routeOptions: RouteOptionsFacade = (route.options || {}) as RouteOptionsFacade;
-    routeOptions.tags = [
+    const tags = [
       ...(routeOptions.tags || []),
       `access:code_${route.requireAdmin ? 'admin' : 'user'}`,
     ];
 
-    this.server.route({
-      handler: route.handler,
-      method: route.method,
-      options: routeOptions,
-      path: route.path,
-    });
+    const routeHandler = route.npHandler!;
+
+    switch ((route.method as string).toLowerCase()) {
+      case 'get': {
+        this.router.get(
+          {
+            path: route.path,
+            validate: {
+              query: schema.object({}, { allowUnknowns: true }),
+              params: schema.object({}, { allowUnknowns: true }),
+            },
+            options: {
+              tags,
+            },
+          },
+          routeHandler
+        );
+        break;
+      }
+      case 'put': {
+        this.router.put(
+          {
+            path: route.path,
+            validate: {
+              query: schema.object({}, { allowUnknowns: true }),
+              params: schema.object({}, { allowUnknowns: true }),
+              body: schema.object({}, { allowUnknowns: true }),
+            },
+            options: {
+              tags,
+            },
+          },
+          routeHandler
+        );
+        break;
+      }
+      case 'delete': {
+        this.router.delete(
+          {
+            path: route.path,
+            validate: {
+              query: schema.object({}, { allowUnknowns: true }),
+              params: schema.object({}, { allowUnknowns: true }),
+            },
+            options: {
+              tags,
+            },
+          },
+          routeHandler
+        );
+        break;
+      }
+      case 'patch':
+      case 'post': {
+        this.router.post(
+          {
+            path: route.path,
+            validate: {
+              query: schema.object({}, { allowUnknowns: true }),
+              params: schema.object({}, { allowUnknowns: true }),
+              body: schema.object({}, { allowUnknowns: true }),
+            },
+            options: {
+              tags,
+            },
+          },
+          routeHandler
+        );
+        break;
+      }
+      default: {
+        throw new Error(`Unknown HTTP method: ${route.method}`);
+      }
+    }
   }
 }
 
 export interface CodeRoute extends ServerRouteFacade {
   requireAdmin?: boolean;
+  // New Platform Route Handler API
+  npHandler?: RequestHandler<any, any, any>;
 }
