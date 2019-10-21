@@ -53,19 +53,21 @@ export const SiemNavigationComponent = React.memo<TabNavigationProps & RouteSpyS
     }, [query, pathName, search, filters, navTabs, savedQuery, timerange, timeline]);
 
     return (
-      <TabNavigation
-        query={query}
-        display={display}
-        filters={filters}
-        navTabs={navTabs}
-        pageName={pageName}
-        pathName={pathName}
-        savedQuery={savedQuery}
-        showBorder={showBorder}
-        tabName={tabName}
-        timeline={timeline}
-        timerange={timerange}
-      />
+      <nav>
+        <TabNavigation
+          query={query}
+          display={display}
+          filters={filters}
+          navTabs={navTabs}
+          pageName={pageName}
+          pathName={pathName}
+          savedQuery={savedQuery}
+          showBorder={showBorder}
+          tabName={tabName}
+          timeline={timeline}
+          timerange={timerange}
+        />
+      </nav>
     );
   },
   (prevProps, nextProps) => {
