@@ -60,7 +60,7 @@ import { showAppRedirectNotification } from 'ui/notify';
 import 'leaflet';
 import { localApplicationService } from './local_application_service';
 
-localApplicationService.registerWithAngularRouter(routes);
+localApplicationService.apply(routes);
 
 routes.enable();
 

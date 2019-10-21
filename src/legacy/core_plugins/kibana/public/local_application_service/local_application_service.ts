@@ -37,13 +37,22 @@ import { htmlIdGenerator } from '@elastic/eui';
  */
 export class LocalApplicationService {
   private apps: App[] = [];
+  private forwards: Array<{ legacyAppId: string; newAppId: string; keepPrefix: boolean }> = [];
   private idGenerator = htmlIdGenerator('kibanaAppLocalApp');
 
   register(app: App) {
     this.apps.push(app);
   }
 
-  registerWithAngularRouter(angularRouteManager: UIRoutes) {
+  forwardApp(
+    legacyAppId: string,
+    newAppId: string,
+    options: { keepPrefix: boolean } = { keepPrefix: false }
+  ) {
+    this.forwards.push({ legacyAppId, newAppId, ...options });
+  }
+
+  apply(angularRouteManager: UIRoutes) {
     this.apps.forEach(app => {
       const wrapperElementId = this.idGenerator();
       angularRouteManager.when(`/${app.id}/:tail*?`, {
@@ -59,6 +68,15 @@ export class LocalApplicationService {
               onUnmount();
             });
           })();
+        },
+      });
+    });
+
+    this.forwards.forEach(({ legacyAppId, newAppId, keepPrefix }) => {
+      angularRouteManager.when(`/${legacyAppId}:tail*?`, {
+        redirectTo: (_params: unknown, path: string, search: string) => {
+          const newPath = `/${newAppId}${keepPrefix ? path : path.replace(legacyAppId, '')}`;
+          return `${newPath}?${search}`;
         },
       });
     });
