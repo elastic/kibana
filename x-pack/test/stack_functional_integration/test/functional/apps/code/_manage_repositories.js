@@ -1,61 +1,55 @@
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
-import { bdd } from '../../../support';
+export default ({ getService, getPageObjects }) => {
+  const log = getService('log');
+  const retry = getService('retry');
+  const testSubjects = getService('testSubjects');
+  const PageObjects = getPageObjects(['common', 'code']);
 
-import PageObjects from '../../../support/page_objects';
+  const repo = 'elastic/code-examples_empty-file';
 
-bdd.describe('Manage Repositories', function manageRepositoryTest() {
-  bdd.before(function () {
-    // Navigate to the code app.
-    PageObjects.common.debug('navigate to code app');
-    return PageObjects.common.navigateToApp('code');
-  });
-
-  bdd.it('import repository', async function() {
-    // Fill in the import repository input box with a valid git repository url.
-    await PageObjects.code.fillImportRepositoryUrlInputBox(
-      'https://github.com/elastic/code-examples_empty-file'
-    );
-    // Click the import repository button.
-    await PageObjects.code.clickImportRepositoryButton();
-
-    await PageObjects.common.tryForTime(300000, async () => {
-      const repositoryItem = await PageObjects.common.findTestSubject('codeRepositoryItem');
-      expect(await repositoryItem.getVisibleText()).to.equal(
-        'elastic/code-examples_empty-file'
-      );
+  describe('Manage Repositories', function manageRepositoryTest () {
+    before(() => {
+      log.debug('navigate to code app');
+      return PageObjects.common.navigateToApp('code');
     });
 
-    // Wait for the index to start.
-    await PageObjects.common.try(async () => {
-      const ongoing = PageObjects.common.findTestSubject('repositoryIndexOngoing');
-      const exist = !!ongoing;
-      expect(exist).to.be(true);
-    });
-    // Wait for the index to end.
-    await PageObjects.common.try(async () => {
-      const done = PageObjects.common.findTestSubject('repositoryIndexDone');
-      const exist = !!done;
-      expect(exist).to.be(true);
-    });
-  });
+    it('import repository', async function() {
+      await PageObjects.code.fillImportRepositoryUrlInputBox(`https://github.com/${repo}`);
+      await PageObjects.code.clickImportRepositoryButton();
 
-  bdd.it('delete repository', async () => {
-    // Click the delete repository button.
-    await PageObjects.code.clickDeleteRepositoryButton();
-
-    await PageObjects.common.try(async () => {
-      const confirmButton = PageObjects.common.findTestSubject('confirmModalConfirmButton');
-      const exist = !!confirmButton;
-      expect(exist).to.be(true);
+      await retry.tryForTime(300000, async () => {
+        const repositoryItem = await testSubjects.find('codeRepositoryItem');
+        expect(await repositoryItem.getVisibleText()).to.equal(repo);
+      });
+      await retry.try(async function waitForIndexStart() {
+        const ongoing = await testSubjects.find('repositoryIndexOngoing');
+        const exist = !!ongoing;
+        expect(exist).to.be(true);
+      });
+      await retry.try(async function waitForIndexEnd() {
+        const done = await testSubjects.find('repositoryIndexDone');
+        const exist = !!done;
+        expect(exist).to.be(true);
+      });
     });
 
-    await PageObjects.common.findTestSubject('confirmModalConfirmButton').click();
+    it('delete repository', async () => {
+      await PageObjects.code.clickDeleteRepositoryButton();
 
-    await PageObjects.common.tryForTime(300000, async () => {
-      const importbutton = await PageObjects.common.findTestSubject('importRepositoryButton');
-      const exist = !!importbutton;
-      expect(exist).to.be(true);
+      await retry.try(async () => {
+        const confirmButton = await testSubjects.find('confirmModalConfirmButton');
+        const exist = !!confirmButton;
+        expect(exist).to.be(true);
+      });
+
+      await testSubjects.click('confirmModalConfirmButton');
+
+      await retry.tryForTime(300000, async () => {
+        const importbutton = await testSubjects.find('importRepositoryButton');
+        const exist = !!importbutton;
+        expect(exist).to.be(true);
+      });
     });
   });
-});
+}

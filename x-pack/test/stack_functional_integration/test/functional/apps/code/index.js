@@ -1,8 +1,6 @@
-import { bdd, defaultTimeout } from '../../../support';
 
-bdd.describe('code test', function () {
-  this.timeout = defaultTimeout;
-
-  require('./_manage_repositories.js');
-
-});
+export default function ({ loadTestFile }) {
+  describe('code test', function() {
+    loadTestFile(require.resolve('./_manage_repositories'));
+  });
+}
