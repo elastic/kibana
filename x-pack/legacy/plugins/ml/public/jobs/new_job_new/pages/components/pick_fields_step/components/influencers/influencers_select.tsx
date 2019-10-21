@@ -31,6 +31,13 @@ export const InfluencersSelect: FC<Props> = ({ fields, changeHandler, selectedIn
       label: MLCATEGORY,
     });
   }
+  if (jobCreator.scriptFields.length) {
+    options.push(
+      ...jobCreator.scriptFields.map(f => ({
+        label: f.id,
+      }))
+    );
+  }
 
   const selection: EuiComboBoxOptionProps[] = selectedInfluencers.map(i => ({ label: i }));
 

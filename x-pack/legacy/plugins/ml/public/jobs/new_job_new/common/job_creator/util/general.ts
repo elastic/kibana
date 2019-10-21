@@ -11,26 +11,65 @@ import {
   ML_JOB_AGGREGATION,
   SPARSE_DATA_AGGREGATIONS,
 } from '../../../../../../common/constants/aggregation_types';
-import { EVENT_RATE_FIELD_ID, AggFieldPair } from '../../../../../../common/types/fields';
+import { MLCATEGORY } from '../../../../../../common/constants/field_types';
+import {
+  EVENT_RATE_FIELD_ID,
+  Field,
+  AggFieldPair,
+  mlCategory,
+} from '../../../../../../common/types/fields';
 import { mlJobService } from '../../../../../services/job_service';
 import { JobCreatorType, isMultiMetricJobCreator, isPopulationJobCreator } from '../';
 import { CREATED_BY_LABEL, JOB_TYPE } from './constants';
 
 // populate the detectors with Field and Agg objects loaded from the job capabilities service
-export function getRichDetectors(job: Job, datafeed: Datafeed, advanced: boolean = false) {
+export function getRichDetectors(
+  job: Job,
+  datafeed: Datafeed,
+  scriptFields: Field[],
+  advanced: boolean = false
+) {
   const detectors = advanced ? getDetectorsAdvanced(job, datafeed) : getDetectors(job, datafeed);
+
+  function getFieldById(id: string) {
+    let field = newJobCapsService.getFieldById(id);
+
+    // if no field could be found it may be a pretend field, like mlcategory or a script field
+    if (field === null) {
+      if (id === MLCATEGORY) {
+        field = mlCategory;
+      } else if (scriptFields.length) {
+        field = scriptFields.find(f => f.id === id) || null;
+      }
+    }
+    return field;
+  }
+
   return detectors.map(d => {
+    let field = null;
+    let byField = null;
+    let overField = null;
+    let partitionField = null;
+
+    if (d.field_name !== undefined) {
+      field = getFieldById(d.field_name);
+    }
+    if (d.by_field_name !== undefined) {
+      byField = getFieldById(d.by_field_name);
+    }
+    if (d.over_field_name !== undefined) {
+      overField = getFieldById(d.over_field_name);
+    }
+    if (d.partition_field_name !== undefined) {
+      partitionField = getFieldById(d.partition_field_name);
+    }
+
     return {
       agg: newJobCapsService.getAggById(d.function),
-      field: d.field_name !== undefined ? newJobCapsService.getFieldById(d.field_name) : null,
-      byField:
-        d.by_field_name !== undefined ? newJobCapsService.getFieldById(d.by_field_name) : null,
-      overField:
-        d.over_field_name !== undefined ? newJobCapsService.getFieldById(d.over_field_name) : null,
-      partitionField:
-        d.partition_field_name !== undefined
-          ? newJobCapsService.getFieldById(d.partition_field_name)
-          : null,
+      field,
+      byField,
+      overField,
+      partitionField,
       excludeFrequent: d.exclude_frequent || null,
       description: d.detector_description || null,
     };
