@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ServerFacade, RequestFacade, ConditionalHeaders, CreateJobFactory } from '../../../../types';
+import {
+  ServerFacade,
+  RequestFacade,
+  ConditionalHeaders,
+  CreateJobFactory,
+} from '../../../../types';
 import { validateUrls } from '../../../../common/validate_urls';
 import { cryptoFactory } from '../../../../server/lib/crypto';
 import { oncePerServer } from '../../../../server/lib/once_per_server';
