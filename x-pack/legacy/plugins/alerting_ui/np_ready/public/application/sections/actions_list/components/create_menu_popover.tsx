@@ -16,8 +16,8 @@ import {
   EuiContextMenuItem,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ActionType } from '../../../lib/api';
 import { ActionsContext } from '../../../context/actions_context';
+import { ActionType } from '../../../../types';
 
 interface Props {
   actionTypesIndex: Record<string, ActionType> | undefined;
@@ -30,16 +30,19 @@ export const AlertingActionsDropdown: React.FunctionComponent<Props> = ({
 }) => {
   const [isPopoverOpen, setIsPopOverOpen] = useState<boolean>(false);
   const { actionTypeRegistry } = useContext(ActionsContext);
+  if (!actionTypesIndex) {
+    return null;
+  }
   const actions = Object.entries(!actionTypesIndex ? [] : actionTypesIndex)
-    .filter(aa => actionTypeRegistry.get(aa[1].id) !== null)
-    .map(([actionType, { id, name }]: any) => {
-      const actionSettings = actionTypeRegistry.get(id);
-      const typeName = name;
+    .filter(([index]) => actionTypeRegistry.get(index) !== null)
+    .map(([index, actionType]) => {
+      const actionSettings = actionTypeRegistry.get(actionType.id);
+      const typeName = actionType.name;
       const iconClass = actionSettings.iconClass;
       const selectMessage = !actionSettings.selectMessage ? name : actionSettings.selectMessage;
       return {
-        id,
-        name,
+        id: index,
+        name: index.replace('.', ''),
         typeName,
         iconClass,
         selectMessage,
@@ -85,7 +88,7 @@ export const AlertingActionsDropdown: React.FunctionComponent<Props> = ({
               }}
             >
               <EuiFlexGroup>
-                <EuiFlexItem grow={false} className="watcherThresholdWatchActionContextMenuItem">
+                <EuiFlexItem grow={false} className="alertingUIActionContextMenuItem">
                   <EuiIcon type={action.iconClass} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>

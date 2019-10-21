@@ -6,9 +6,8 @@
 import React, { Fragment } from 'react';
 import { EuiFieldText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Action } from '../../../lib/api';
 import { ErrableFormRow } from '../../../components/page_error';
-import { ActionTypeModel, Props } from '../../../../types';
+import { ActionTypeModel, Props, Action } from '../../../../types';
 
 export function getActionType(): ActionTypeModel {
   return {

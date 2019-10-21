@@ -3,8 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Action } from './application/lib/api';
-
 export interface Props {
   action: Action;
   editActionConfig: (property: string, value: any) => void;
@@ -18,6 +16,23 @@ export interface ActionTypeModel {
   iconClass: string;
   selectMessage: string;
   simulatePrompt: string;
-  validate: (action: Action) => any;
+  validate: (action: Action) => ValidationResult;
   actionFields: React.FunctionComponent<Props> | null;
+}
+
+export interface ValidationResult {
+  errors: Record<string, any>;
+}
+
+export interface ActionType {
+  id: string;
+  name: string;
+}
+
+export interface Action {
+  secrets: Record<string, any>;
+  id: string;
+  actionTypeId: string;
+  description: string;
+  config: Record<string, any>;
 }

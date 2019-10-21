@@ -26,12 +26,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Action, ActionType, saveAction } from '../../lib/api';
+import { saveAction } from '../../lib/api';
 import { SectionError, ErrableFormRow } from '../../../application/components/page_error';
 import { useAppDependencies } from '../..';
 import { ActionModel } from '../../models/action';
 import { actionReducer } from './action_reducer';
 import { ActionsContext } from '../../context/actions_context';
+import { ActionType, Action } from '../../../types';
 
 interface Props {
   actionType: ActionType;
@@ -41,9 +42,8 @@ interface Props {
 export const ActionAdd = ({ actionType, refreshList }: Props) => {
   const {
     core: { http },
-    actionTypeRegistry,
   } = useAppDependencies();
-  const { flyoutVisible, setFlyoutVisibility } = useContext(ActionsContext);
+  const { flyoutVisible, setFlyoutVisibility, actionTypeRegistry } = useContext(ActionsContext);
   // hooks
   const [{ action }, dispatch] = useReducer(actionReducer, {
     action: new ActionModel({ actionTypeId: actionType.id }),

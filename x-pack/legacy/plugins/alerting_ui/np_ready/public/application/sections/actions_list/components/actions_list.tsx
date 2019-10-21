@@ -12,14 +12,8 @@ import { ActionsContext } from '../../../context/actions_context';
 import { useAppDependencies } from '../../../index';
 import { AlertingActionsDropdown } from './create_menu_popover';
 import { ActionAdd } from '../../action_add';
-import { ActionTypeRegistry } from '../../../action_type_registry';
-import {
-  Action,
-  ActionType,
-  deleteActions,
-  loadAllActions,
-  loadActionTypes,
-} from '../../../lib/api';
+import { deleteActions, loadAllActions, loadActionTypes } from '../../../lib/api';
+import { ActionType, Action } from '../../../../types';
 
 type ActionTypeIndex = Record<string, ActionType>;
 interface Data extends Action {

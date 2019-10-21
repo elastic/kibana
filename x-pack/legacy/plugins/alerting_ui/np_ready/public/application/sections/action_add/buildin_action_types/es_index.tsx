@@ -6,8 +6,7 @@
 import React from 'react';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Action } from '../../../lib/api';
-import { ActionTypeModel, Props } from '../../../../types';
+import { ActionTypeModel, Props, Action } from '../../../../types';
 
 export function getActionType(): ActionTypeModel {
   return {
@@ -27,7 +26,7 @@ export function getActionType(): ActionTypeModel {
 }
 
 const IndexActionFields: React.FunctionComponent<Props> = ({ action, editActionConfig }) => {
-  const { index }: any = action.config;
+  const { index }: Record<string, any> = action.config;
   return (
     <EuiFormRow
       fullWidth

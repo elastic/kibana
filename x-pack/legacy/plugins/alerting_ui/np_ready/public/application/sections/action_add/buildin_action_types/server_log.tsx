@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import { Action } from '../../../lib/api';
-import { ActionTypeModel } from '../../../../types';
+import { ActionTypeModel, Action } from '../../../../types';
 
 export function getActionType(): ActionTypeModel {
   return {

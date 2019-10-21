@@ -5,46 +5,39 @@
  */
 import { HttpServiceBase } from 'kibana/public';
 import { BASE_ACTION_API_PATH } from '../constants';
+import { ActionType, Action } from '../../types';
 
 // We are assuming there won't be many actions. This is why we will load
 // all the actions in advance and assume the total count to not go over 100 or so.
 // We'll set this max setting assuming it's never reached.
 const MAX_ACTIONS_RETURNED = 10000;
 
-export interface ActionType {
-  id: string;
-  name: string;
-}
-
-export interface Action {
-  secrets: Record<string, any>;
-  id: string;
-  actionTypeId: string;
-  description: string;
-  config: Record<string, any>;
-}
-
-export interface LoadActionTypesOpts {
+interface LoadActionTypesOpts {
   http: HttpServiceBase;
 }
 
-export type LoadActionTypesResponse = ActionType[];
+type LoadActionTypesResponse = ActionType[];
+
+interface LoadActionsOpts {
+  http: HttpServiceBase;
+}
+
+interface LoadActionsResponse {
+  page: number;
+  perPage: number;
+  total: number;
+  data: Action[];
+}
+
+interface DeleteActionsOpts {
+  ids: string[];
+  http: HttpServiceBase;
+}
 
 export async function loadActionTypes({
   http,
 }: LoadActionTypesOpts): Promise<LoadActionTypesResponse> {
   return http.get(`${BASE_ACTION_API_PATH}/types`);
-}
-
-export interface LoadActionsOpts {
-  http: HttpServiceBase;
-}
-
-export interface LoadActionsResponse {
-  page: number;
-  perPage: number;
-  total: number;
-  data: Action[];
 }
 
 export async function loadAllActions({ http }: LoadActionsOpts): Promise<LoadActionsResponse> {
@@ -65,11 +58,6 @@ export async function saveAction({
   return http.post(`${BASE_ACTION_API_PATH}`, {
     body: JSON.stringify(action),
   });
-}
-
-export interface DeleteActionsOpts {
-  ids: string[];
-  http: HttpServiceBase;
 }
 
 export async function deleteActions({ ids, http }: DeleteActionsOpts): Promise<void> {
