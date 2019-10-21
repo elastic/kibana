@@ -85,7 +85,7 @@ function DefaultEditorAggGroup({
   let bucketsError;
   if (lastParentPipelineAggTitle && groupName === AggGroupNames.Buckets && !group.length) {
     bucketsError = i18n.translate('common.ui.aggTypes.buckets.mustHaveBucketErrorMessage', {
-      defaultMessage: 'Add a bucket with "Date Histogram" or "Histogram" aggregation',
+      defaultMessage: 'Add a bucket with "Date Histogram" or "Histogram" aggregation.',
       description: 'Date Histogram and Histogram should not be translated',
     });
   }
