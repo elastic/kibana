@@ -81,7 +81,7 @@ function createCoreSetupMock() {
   httpMock.createRouter.mockImplementation(() => httpService.createRouter(''));
 
   const uiSettingsMock = {
-    setDefaults: uiSettingsServiceMock.createSetupContract().setDefaults,
+    register: uiSettingsServiceMock.createSetupContract().register,
   };
   const mock: MockedKeys<CoreSetup> = {
     context: contextServiceMock.createSetupContract(),

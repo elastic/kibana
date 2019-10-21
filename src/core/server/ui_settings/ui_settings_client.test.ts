@@ -257,12 +257,12 @@ describe('ui settings', () => {
     });
   });
 
-  describe('#getDefaults()', () => {
-    it('returns the defaults passed to the constructor', () => {
+  describe('#getRegistered()', () => {
+    it('returns the registered settings passed to the constructor', () => {
       const value = chance.word();
       const defaults = { key: { value } };
       const { uiSettings } = setup({ defaults });
-      expect(uiSettings.getDefaults()).to.be(defaults);
+      expect(uiSettings.getRegistered()).to.be(defaults);
     });
   });
 

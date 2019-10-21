@@ -54,7 +54,7 @@ export class UiSettingsService implements CoreService<InternalUiSettingsServiceS
     const { version, buildNum } = this.coreContext.env.packageInfo;
 
     return {
-      setDefaults: this.setDefaults.bind(this),
+      register: this.register.bind(this),
       asScopedToClient: (savedObjectsClient: SavedObjectsClientContract) => {
         return new UiSettingsClient({
           type: 'config',
@@ -73,10 +73,10 @@ export class UiSettingsService implements CoreService<InternalUiSettingsServiceS
 
   public async stop() {}
 
-  private setDefaults(values: Record<string, UiSettingsParams> = {}) {
-    Object.entries(values).forEach(([key, value]) => {
+  private register(settings: Record<string, UiSettingsParams> = {}) {
+    Object.entries(settings).forEach(([key, value]) => {
       if (this.uiSettingsDefaults.has(key)) {
-        throw new Error(`uiSettings defaults for key [${key}] has been already set`);
+        throw new Error(`uiSettings for the key [${key}] has been already registered`);
       }
       this.uiSettingsDefaults.set(key, value);
     });

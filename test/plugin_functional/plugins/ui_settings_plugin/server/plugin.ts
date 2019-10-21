@@ -21,7 +21,7 @@ import { Plugin, CoreSetup } from 'kibana/server';
 
 export class UiSettingsPlugin implements Plugin {
   public setup(core: CoreSetup) {
-    core.uiSettings.setDefaults({
+    core.uiSettings.register({
       ui_settings_plugin: {
         name: 'from_ui_settings_plugin',
         description: 'just for testing',

@@ -24,9 +24,9 @@ import { SavedObjectsClientContract, SavedObjectAttribute } from '../saved_objec
  */
 export interface IUiSettingsClient {
   /**
-   * Returns uiSettings default values {@link UiSettingsParams}
+   * Returns registered uiSettings values {@link UiSettingsParams}
    */
-  getDefaults: () => Readonly<Record<string, UiSettingsParams>>;
+  getRegistered: () => Readonly<Record<string, UiSettingsParams>>;
   /**
    * Retrieves uiSettings values set by the user with fallbacks to default values if not specified.
    */
@@ -98,12 +98,12 @@ export interface UiSettingsParams {
 export interface InternalUiSettingsServiceSetup {
   /**
    * Sets settings with default values for the uiSettings.
-   * @param values
+   * @param settings
    */
-  setDefaults(values: Record<string, UiSettingsParams>): void;
+  register(settings: Record<string, UiSettingsParams>): void;
   /**
    * Creates uiSettings client with provided *scoped* saved objects client {@link IUiSettingsClient}
-   * @param values
+   * @param savedObjectsClient
    */
   asScopedToClient(savedObjectsClient: SavedObjectsClientContract): IUiSettingsClient;
 }
@@ -112,7 +112,7 @@ export interface InternalUiSettingsServiceSetup {
 export interface UiSettingsServiceSetup {
   /**
    * Sets settings with default values for the uiSettings.
-   * @param values
+   * @param settings
    */
-  setDefaults(values: Record<string, UiSettingsParams>): void;
+  register(settings: Record<string, UiSettingsParams>): void;
 }

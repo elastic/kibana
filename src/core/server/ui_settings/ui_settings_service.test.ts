@@ -94,7 +94,7 @@ describe('uiSettings', () => {
         const service = new UiSettingsService(coreContext);
         const setup = await service.setup(setupDeps);
 
-        setup.setDefaults(defaults);
+        setup.register(defaults);
         setup.asScopedToClient(savedObjectsClient);
         expect(MockUiSettingsClientConstructor).toBeCalledTimes(1);
 
@@ -103,13 +103,13 @@ describe('uiSettings', () => {
       });
     });
 
-    describe('#setDefaults', () => {
-      it('throws if set defaults for the same key twice', async () => {
+    describe('#register', () => {
+      it('throws if registers the same key twice', async () => {
         const service = new UiSettingsService(coreContext);
         const setup = await service.setup(setupDeps);
-        setup.setDefaults(defaults);
-        expect(() => setup.setDefaults(defaults)).toThrowErrorMatchingInlineSnapshot(
-          `"uiSettings defaults for key [foo] has been already set"`
+        setup.register(defaults);
+        expect(() => setup.register(defaults)).toThrowErrorMatchingInlineSnapshot(
+          `"uiSettings for the key [foo] has been already registered"`
         );
       });
     });

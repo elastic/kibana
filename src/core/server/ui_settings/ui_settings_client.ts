@@ -71,7 +71,7 @@ export class UiSettingsClient implements IUiSettingsClient {
     this.log = log;
   }
 
-  getDefaults() {
+  getRegistered() {
     return this.defaults;
   }
 
