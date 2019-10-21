@@ -72,22 +72,24 @@ describe('NumberList', () => {
   test('should set validity as true', () => {
     mountWithIntl(<NumberList {...defaultProps} />);
 
-    expect(defaultProps.setValidity).toBeCalledTimes(2);
     expect(defaultProps.setValidity).lastCalledWith(true);
   });
 
-  test('should set validity as false', () => {
-    defaultProps.numberArray = [3, 1];
+  test('should set validity as false when the order is invalid', () => {
+    defaultProps.numberArray = [3, 2];
     const comp = mountWithIntl(<NumberList {...defaultProps} />);
 
-    expect(defaultProps.setValidity).toBeCalledTimes(2);
     expect(defaultProps.setValidity).lastCalledWith(false);
 
-    comp.setProps({ numberArray: [1, 11] });
-    expect(defaultProps.setValidity).toBeCalledTimes(3);
-    expect(defaultProps.setValidity).lastCalledWith(false);
+    comp.setProps({ numberArray: [1, 2] });
+    expect(defaultProps.setValidity).lastCalledWith(true);
+  });
 
-    comp.setProps({ numberArray: [1, 2, undefined] });
+  test('should set validity as false when there is an empty field', () => {
+    defaultProps.numberArray = [1, 2];
+    const comp = mountWithIntl(<NumberList {...defaultProps} />);
+
+    comp.setProps({ numberArray: [1, undefined] });
     expect(defaultProps.setValidity).lastCalledWith(false);
   });
 

@@ -9,7 +9,7 @@ exports[`NumberList should be rendered with default set of props 1`] = `
     labelledbyId="numberList"
     model={
       Object {
-        "id": "121",
+        "id": "122",
         "isInvalid": false,
         "value": 1,
       }
@@ -36,7 +36,7 @@ exports[`NumberList should be rendered with default set of props 1`] = `
     labelledbyId="numberList"
     model={
       Object {
-        "id": "122",
+        "id": "123",
         "isInvalid": false,
         "value": 2,
       }

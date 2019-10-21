@@ -27,6 +27,7 @@ import { NumberRowModel } from './number_row';
 const EMPTY_STRING = '';
 const defaultRange = parseRange('[0,Infinity)');
 const generateId = htmlIdGenerator();
+const defaultModel = { value: 0, id: generateId(), isInvalid: false };
 
 function parse(value: string) {
   const parsedValue = parseFloat(value);
@@ -59,24 +60,20 @@ function validateValue(value: number | '', numberRange: Range) {
   return result;
 }
 
-function validateOrder(list: NumberRowModel[]) {
-  let isValidOrder = true;
-  list.forEach((model, index, array) => {
+function validateOrder(list: Array<number | undefined>) {
+  const result: { isValidOrder: boolean; modelIndex?: number } = {
+    isValidOrder: true,
+  };
+
+  list.forEach((inputValue, index, array) => {
     const previousModel = array[index - 1];
-    if (previousModel && model.value !== EMPTY_STRING) {
-      const isInvalidOrderOfItem = model.value <= previousModel.value;
-
-      if (!model.isInvalid && isInvalidOrderOfItem) {
-        model.isInvalid = true;
-      }
-
-      if (isInvalidOrderOfItem) {
-        isValidOrder = false;
-      }
+    if (previousModel !== undefined && inputValue !== undefined && inputValue <= previousModel) {
+      result.isValidOrder = false;
+      result.modelIndex = index;
     }
   });
 
-  return isValidOrder;
+  return result;
 }
 
 function getNextModel(list: NumberRowModel[], range: Range): NumberRowModel {
@@ -101,16 +98,17 @@ function getInitModelList(list: Array<number | undefined>): NumberRowModel[] {
         id: generateId(),
         isInvalid: false,
       }))
-    : [{ value: 0, id: generateId(), isInvalid: false }];
+    : [defaultModel];
 }
 
 function getUpdatedModels(
   numberList: Array<number | undefined>,
   modelList: NumberRowModel[],
-  numberRange: Range
+  numberRange: Range,
+  invalidOrderModelIndex?: number
 ): NumberRowModel[] {
   if (!numberList.length) {
-    return modelList;
+    return [defaultModel];
   }
   return numberList.map((number, index) => {
     const model = modelList[index] || { id: generateId() };
@@ -119,7 +117,7 @@ function getUpdatedModels(
     return {
       ...model,
       value: newValue,
-      isInvalid,
+      isInvalid: invalidOrderModelIndex === index ? true : isInvalid,
       error,
     };
   });

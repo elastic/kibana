@@ -66,7 +66,7 @@ describe('NumberList utils', () => {
     test('should return model list when number list is empty', () => {
       const updatedModelList = getUpdatedModels([], modelList, range);
 
-      expect(updatedModelList).toEqual(modelList);
+      expect(updatedModelList).toEqual([{ value: 0, id: expect.any(String), isInvalid: false }]);
     });
 
     test('should not update model list when number list is the same', () => {
@@ -100,19 +100,35 @@ describe('NumberList utils', () => {
       modelList[1].isInvalid = true;
       expect(updatedModelList).toEqual(modelList);
     });
+
+    test('should update model list when number order is invalid', () => {
+      const updatedModelList = getUpdatedModels([1, 3, 2], modelList, range, 2);
+      expect(updatedModelList).toEqual([
+        modelList[0],
+        { ...modelList[1], value: 3 },
+        { value: 2, id: expect.any(String), isInvalid: true },
+      ]);
+    });
   });
 
   describe('validateOrder', () => {
     test('should return true when order is valid', () => {
-      expect(validateOrder(modelList)).toBeTruthy();
+      expect(validateOrder([1, 2])).toEqual({
+        isValidOrder: true,
+      });
     });
 
-    test('should return true when a number is empty string', () => {
-      expect(validateOrder([...modelList, { value: '', id: '3', isInvalid: false }])).toBeTruthy();
+    test('should return true when a number is undefined', () => {
+      expect(validateOrder([1, undefined])).toEqual({
+        isValidOrder: true,
+      });
     });
 
     test('should return false when order is invalid', () => {
-      expect(validateOrder([modelList[1], modelList[0]])).toBeFalsy();
+      expect(validateOrder([2, 1])).toEqual({
+        isValidOrder: false,
+        modelIndex: 1,
+      });
     });
   });
 
