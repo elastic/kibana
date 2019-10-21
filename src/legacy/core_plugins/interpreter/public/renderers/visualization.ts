@@ -30,13 +30,16 @@ export const visualization = () => ({
     const { visData, visConfig, params } = config;
     const visType = config.visType || visConfig.type;
     const $injector = await chrome.dangerouslyGetActiveInjector();
+    const $rootScope = $injector.get('$rootScope') as any;
     const Private = $injector.get('Private') as any;
     const Vis = Private(VisProvider);
 
     if (handlers.vis) {
       // special case in visualize, we need to render first (without executing the expression), for maps to work
       if (visConfig) {
-        handlers.vis.setCurrentState({ type: visType, params: visConfig });
+        $rootScope.$apply(() => {
+          handlers.vis.setCurrentState({ type: visType, params: visConfig });
+        });
       }
     } else {
       handlers.vis = new Vis({

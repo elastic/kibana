@@ -145,7 +145,6 @@ describe('sibling pipeline aggs', function () {
         init();
 
         const searchSource = {};
-        const request = {};
         const customMetricSpy = sinon.spy();
         const customBucketSpy = sinon.spy();
         const { customMetric, customBucket } = aggConfig.params;
@@ -155,10 +154,10 @@ describe('sibling pipeline aggs', function () {
         customBucket.type.params[0].modifyAggConfigOnSearchRequestStart = customBucketSpy;
 
         aggConfig.type.params.forEach(param => {
-          param.modifyAggConfigOnSearchRequestStart(aggConfig, searchSource, request);
+          param.modifyAggConfigOnSearchRequestStart(aggConfig, searchSource);
         });
-        expect(customMetricSpy.calledWith(customMetric, searchSource, request)).to.be(true);
-        expect(customBucketSpy.calledWith(customBucket, searchSource, request)).to.be(true);
+        expect(customMetricSpy.calledWith(customMetric, searchSource)).to.be(true);
+        expect(customBucketSpy.calledWith(customBucket, searchSource)).to.be(true);
       });
 
     });
