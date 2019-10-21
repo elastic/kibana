@@ -7,16 +7,11 @@
 import DateMath from '@elastic/datemath';
 import { QUERY } from '../../../common/constants';
 
-interface HistogramInterval {
-  interval: number;
-  intervalFormatted: string;
-}
-
 export const getHistogramInterval = (
   dateRangeStart: string,
   dateRangeEnd: string,
   bucketCount?: number
-): HistogramInterval => {
+): number => {
   const from = DateMath.parse(dateRangeStart);
   const to = DateMath.parse(dateRangeEnd);
   if (from === undefined) {
@@ -25,11 +20,5 @@ export const getHistogramInterval = (
   if (to === undefined) {
     throw Error('Invalid dateRangeEnd value');
   }
-  const interval = Math.round(
-    (to.valueOf() - from.valueOf()) / (bucketCount || QUERY.DEFAULT_BUCKET_COUNT)
-  );
-  return {
-    interval,
-    intervalFormatted: `${interval}ms`,
-  };
+  return Math.round((to.valueOf() - from.valueOf()) / (bucketCount || QUERY.DEFAULT_BUCKET_COUNT));
 };

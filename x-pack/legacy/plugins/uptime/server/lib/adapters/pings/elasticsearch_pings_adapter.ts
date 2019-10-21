@@ -7,7 +7,7 @@
 import { get } from 'lodash';
 import { INDEX_NAMES } from '../../../../common/constants';
 import { DocCount, HttpBody, Ping, PingResults } from '../../../../common/graphql/types';
-import { parseFilterQuery, getFilterClause } from '../../helper';
+import { parseFilterQuery, getFilterClause, getHistogramIntervalFormatted } from '../../helper';
 import { DatabaseAdapter, HistogramQueryResult } from '../database';
 import { UMPingsAdapter } from './adapter_types';
 import { getHistogramInterval } from '../../helper/get_histogram_interval';
@@ -200,7 +200,8 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
       additionaFilters.push(boolFilters);
     }
     const filter = getFilterClause(dateRangeStart, dateRangeEnd, additionaFilters);
-    const { interval, intervalFormatted } = getHistogramInterval(dateRangeStart, dateRangeEnd);
+    const interval = getHistogramInterval(dateRangeStart, dateRangeEnd);
+    const intervalFormatted = getHistogramIntervalFormatted(dateRangeStart, dateRangeEnd);
 
     const params = {
       index: INDEX_NAMES.HEARTBEAT,

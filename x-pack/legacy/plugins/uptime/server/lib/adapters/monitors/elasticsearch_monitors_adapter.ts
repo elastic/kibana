@@ -13,7 +13,7 @@ import {
   Ping,
   LocationDurationLine,
 } from '../../../../common/graphql/types';
-import { getFilterClause, getHistogramInterval, parseFilterQuery } from '../../helper';
+import { getFilterClause, parseFilterQuery, getHistogramIntervalFormatted } from '../../helper';
 import { DatabaseAdapter } from '../database';
 import { UMMonitorsAdapter } from './adapter_types';
 
@@ -75,7 +75,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
           timeseries: {
             date_histogram: {
               field: '@timestamp',
-              fixed_interval: getHistogramInterval(dateRangeStart, dateRangeEnd).intervalFormatted,
+              fixed_interval: getHistogramIntervalFormatted(dateRangeStart, dateRangeEnd),
               min_doc_count: 0,
             },
             aggs: {
