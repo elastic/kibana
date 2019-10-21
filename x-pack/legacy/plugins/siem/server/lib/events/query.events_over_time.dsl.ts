@@ -8,7 +8,7 @@ import { RequestBasicOptions } from '../framework';
 
 export const buildEventsOverTimeQuery = ({
   filterQuery,
-  timerange: { from, time_zone, to },
+  timerange: { from, time_zone: timezone, to },
   defaultIndex,
   sourceConfiguration: {
     fields: { timestamp },
@@ -21,7 +21,7 @@ export const buildEventsOverTimeQuery = ({
         [timestamp]: {
           gte: from,
           lte: to,
-          time_zone,
+          ...(timezone && { time_zone: timezone }),
         },
       },
     },
