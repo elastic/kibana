@@ -12,17 +12,19 @@ import { i18n } from '@kbn/i18n';
 
 import {
   EuiBetaBadge,
-  EuiPage,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPageContent,
   EuiPageBody,
   EuiPageContentBody,
-  EuiPageContentHeader,
-  EuiPageContentHeaderSection,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
 
 import { APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES } from '../../../../common/constants';
 import { breadcrumbService, docTitleService, BREADCRUMB_SECTION } from '../../services/navigation';
+import { documentationLinksService } from '../../services/documentation';
 import { PrivilegesWrapper } from '../../lib/authorization';
 import { KibanaProvider } from '../../lib/kibana';
 
@@ -39,11 +41,11 @@ export const CreateTransformSection: FC<Props> = ({ match }) => {
   return (
     <PrivilegesWrapper privileges={APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES}>
       <KibanaProvider savedObjectId={match.params.savedObjectId}>
-        <EuiPage>
-          <EuiPageBody>
-            <EuiPageContentHeader>
-              <EuiPageContentHeaderSection>
-                <EuiTitle>
+        <EuiPageBody data-test-subj="transformPageCreateTransform">
+          <EuiPageContent>
+            <EuiTitle size="l">
+              <EuiFlexGroup alignItems="center">
+                <EuiFlexItem grow={true}>
                   <h1>
                     <FormattedMessage
                       id="xpack.transform.transformsWizard.createTransformTitle"
@@ -62,15 +64,28 @@ export const CreateTransformSection: FC<Props> = ({ match }) => {
                       )}
                     />
                   </h1>
-                </EuiTitle>
-              </EuiPageContentHeaderSection>
-            </EuiPageContentHeader>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    href={documentationLinksService.getTransformsDocUrl()}
+                    target="_blank"
+                    iconType="help"
+                    data-test-subj="documentationLink"
+                  >
+                    <FormattedMessage
+                      id="xpack.transform.transformsWizard.transformDocsLinkText"
+                      defaultMessage="Transform docs"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiTitle>
             <EuiPageContentBody>
               <EuiSpacer size="l" />
               <Wizard />
             </EuiPageContentBody>
-          </EuiPageBody>
-        </EuiPage>
+          </EuiPageContent>
+        </EuiPageBody>
       </KibanaProvider>
     </PrivilegesWrapper>
   );

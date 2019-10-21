@@ -85,7 +85,7 @@ export const AdvancedDetectors: FC<Props> = ({ setIsValid }) => {
 
   return (
     <Fragment>
-      <DetectorList onEditJob={onEditJob} onDeleteJob={onDeleteJob} />
+      <DetectorList isActive={true} onEditJob={onEditJob} onDeleteJob={onDeleteJob} />
       <MetricSelector
         payload={modalPayload}
         fields={fields}
