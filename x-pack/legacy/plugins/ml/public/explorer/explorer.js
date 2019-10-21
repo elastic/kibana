@@ -231,6 +231,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       });
 
       mlTimefilterRefresh$.pipe(takeUntil(this._unsubscribeAll)).subscribe(() => {
+        this.resetCache();
         this.updateExplorer();
       });
     }
@@ -238,6 +239,14 @@ export const Explorer = injectI18n(injectObservablesAsProps(
     componentWillUnmount() {
       this._unsubscribeAll.next();
       this._unsubscribeAll.complete();
+    }
+
+    resetCache() {
+      this.loadOverallDataPreviousArgs = null;
+      this.loadViewBySwimlanePreviousArgs = null;
+      this.topFieldsPreviousArgs = null;
+      this.annotationsTablePreviousArgs = null;
+      this.anomaliesTablePreviousArgs = null;
     }
 
     // based on the pattern described here:
