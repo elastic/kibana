@@ -239,6 +239,17 @@ Object {
             },
           },
         ],
+        "must_not": Array [
+          Object {
+            "terms": Object {
+              "error.log.level": Array [
+                "debug",
+                "info",
+                "warning",
+              ],
+            },
+          },
+        ],
       },
     },
     "size": 0,
