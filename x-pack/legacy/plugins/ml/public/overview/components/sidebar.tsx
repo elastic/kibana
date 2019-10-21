@@ -61,7 +61,7 @@ export const OverviewSideBar: FC = () => (
               <EuiLink href={whatIsMachineLearningLink} target="blank">
                 <FormattedMessage
                   id="xpack.ml.overview.gettingStartedSectionWhatIsMachineLearning"
-                  defaultMessage="check here"
+                  defaultMessage="here"
                 />
               </EuiLink>
             ),
