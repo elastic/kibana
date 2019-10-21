@@ -89,7 +89,7 @@ export class RestAgentAdapter extends AgentAdapter {
   }
 
   public async update(id: string, beatData: Partial<Agent>): Promise<boolean> {
-    await this.REST.put<ReturnTypeUpdate<Agent>>(`/api/fleet/agent/${id}`, beatData);
+    await this.REST.put<ReturnTypeUpdate<Agent>>(`/api/fleet/agents/${id}`, beatData);
     return true;
   }
 

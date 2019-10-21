@@ -23,6 +23,7 @@ import { createGETAgentEventsRoute } from './agents/events';
 import { createGETInstallScript } from './install';
 import { createGETAgentsRoute } from './agents/get';
 import { createPOSTAgentsUnenrollRoute } from './agents/unenroll';
+import { createPUTAgentsRoute } from './agents/put';
 
 export function initRestApi(server: Server, libs: FleetServerLib) {
   const frameworkAdapter = new HapiFrameworkAdapter(server);
@@ -38,6 +39,7 @@ export function initRestApi(server: Server, libs: FleetServerLib) {
 function createAgentsRoutes(adapter: HapiFrameworkAdapter, libs: FleetServerLib) {
   adapter.registerRoute(createListAgentsRoute(libs));
   adapter.registerRoute(createGETAgentsRoute(libs));
+  adapter.registerRoute(createPUTAgentsRoute(libs));
   adapter.registerRoute(createDeleteAgentsRoute(libs));
   adapter.registerRoute(createEnrollAgentsRoute(libs));
   adapter.registerRoute(createPOSTAgentsUnenrollRoute(libs));

@@ -12,13 +12,16 @@ import { BASE_PATH } from '../common/constants';
 import { compose } from './lib/compose/kibana';
 import { FrontendLibs } from './lib/types';
 import { AppRoutes } from './routes';
+import { LibsContext } from './hooks/use_libs';
 
 async function startApp(libs: FrontendLibs) {
   libs.framework.renderUIAtPath(
     BASE_PATH,
     <I18nContext>
       <HashRouter basename="/fleet">
-        <AppRoutes libs={libs} />
+        <LibsContext.Provider value={libs}>
+          <AppRoutes />
+        </LibsContext.Provider>
       </HashRouter>
     </I18nContext>,
     'management'

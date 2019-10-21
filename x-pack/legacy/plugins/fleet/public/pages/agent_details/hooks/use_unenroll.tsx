@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { useState } from 'react';
-import { AgentsLib } from '../../../lib/agent';
+import { useLibs } from '../../../hooks/use_libs';
 
-export function useUnenroll(agents: AgentsLib, refreshAgent: () => Promise<void>, agentId: string) {
+export function useUnenroll(refreshAgent: () => Promise<void>, agentId: string) {
+  const { agents } = useLibs();
   const [state, setState] = useState<
     | {
         confirm: false;

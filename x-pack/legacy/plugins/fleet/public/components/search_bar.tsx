@@ -9,9 +9,8 @@ import {
   // @ts-ignore
   EuiSuggest,
 } from '@elastic/eui';
-import { FrontendLibs } from '../lib/types';
-import { ElasticsearchLib } from '../lib/elasticsearch';
 import { useDebounce } from '../hooks/use_debounce';
+import { useLibs } from '../hooks/use_libs';
 
 const DEBOUNCE_SEARCH_MS = 150;
 
@@ -28,14 +27,13 @@ interface Suggestion {
 }
 
 interface Props {
-  libs: FrontendLibs;
   value: string;
   fieldPrefix: string;
   onChange: (newValue: string) => void;
 }
 
-export const SearchBar: SFC<Props> = ({ libs, value, fieldPrefix, onChange }) => {
-  const { suggestions } = useSuggestions(libs.elasticsearch, fieldPrefix, value);
+export const SearchBar: SFC<Props> = ({ value, fieldPrefix, onChange }) => {
+  const { suggestions } = useSuggestions(fieldPrefix, value);
 
   const onAutocompleteClick = (suggestion: Suggestion) => {
     onChange(
@@ -73,7 +71,8 @@ function transformSuggestionType(type: string): { iconType: string; color: strin
   }
 }
 
-function useSuggestions(elasticsearch: ElasticsearchLib, fieldPrefix: string, search: string) {
+function useSuggestions(fieldPrefix: string, search: string) {
+  const { elasticsearch } = useLibs();
   const debouncedSearch = useDebounce(search, DEBOUNCE_SEARCH_MS);
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
 

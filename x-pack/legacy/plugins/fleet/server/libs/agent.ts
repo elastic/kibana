@@ -102,6 +102,33 @@ export class AgentLib {
     }
   }
 
+  public async update(
+    user: FrameworkUser,
+    agentId: string,
+    data: {
+      user_provided_metadata?: any;
+    }
+  ) {
+    const agent = await this.getById(user, agentId);
+    if (!agent) {
+      throw Boom.notFound('Agent not found');
+    }
+
+    if (data.user_provided_metadata) {
+      const localMetadataKeys = Object.keys(agent.local_metadata || {});
+
+      const hasConflict = Object.keys(data.user_provided_metadata).find(
+        k => localMetadataKeys.indexOf(k) >= 0
+      );
+
+      if (hasConflict) {
+        throw Boom.badRequest(`It's not allowed to update local metadata (${hasConflict}).`);
+      }
+    }
+
+    this.agentsRepository.update(user, agentId, data);
+  }
+
   public async unenroll(
     user: FrameworkUser,
     ids: string[]

@@ -109,7 +109,7 @@ export class AgentsRepository implements AgentsRepositoryType {
     if (newData.local_metadata) {
       updateData.local_metadata = JSON.stringify(newData.local_metadata);
     }
-    if (updateData.user_provided_metadata) {
+    if (newData.user_provided_metadata) {
       updateData.user_provided_metadata = JSON.stringify(newData.user_provided_metadata);
     }
 

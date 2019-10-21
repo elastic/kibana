@@ -23,18 +23,15 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AGENT_POLLING_THRESHOLD_MS } from '../../../common/constants';
 import { Agent } from '../../../common/types/domain_data';
-import { FrontendLibs } from '../../lib/types';
 import { AgentHealth } from '../../components/agent_health';
 import { ConnectedLink } from '../../components/navigation/connected_link';
 import { usePagination } from '../../hooks/use_pagination';
 import { SearchBar } from '../../components/search_bar';
 import { AgentEnrollmentFlyout } from './components/agent_enrollment';
+import { useLibs } from '../../hooks/use_libs';
 
-interface RouterProps {
-  libs: FrontendLibs;
-}
-
-export const AgentListPage: React.SFC<RouterProps> = ({ libs }) => {
+export const AgentListPage: React.SFC<{}> = () => {
+  const libs = useLibs();
   // Agent data states
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [agents, setAgents] = useState<Agent[]>([]);
@@ -170,7 +167,7 @@ export const AgentListPage: React.SFC<RouterProps> = ({ libs }) => {
     <EuiPageBody>
       <EuiPageContent>
         {isEnrollmentFlyoutOpen ? (
-          <AgentEnrollmentFlyout libs={libs} onClose={() => setIsEnrollmentFlyoutOpen(false)} />
+          <AgentEnrollmentFlyout onClose={() => setIsEnrollmentFlyoutOpen(false)} />
         ) : null}
 
         <EuiTitle size="l">
@@ -191,7 +188,7 @@ export const AgentListPage: React.SFC<RouterProps> = ({ libs }) => {
 
         <EuiFlexGroup>
           <EuiFlexItem grow={4}>
-            <SearchBar libs={libs} value={search} onChange={setSearch} fieldPrefix="agents" />
+            <SearchBar value={search} onChange={setSearch} fieldPrefix="agents" />
           </EuiFlexItem>
           {libs.framework.capabilities.write && (
             <EuiFlexItem>

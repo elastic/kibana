@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { SFC } from 'react';
-import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
+import React, { SFC, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiTitle,
   EuiSpacer,
@@ -13,35 +13,34 @@ import {
   EuiFlexItem,
   EuiDescriptionList,
   EuiButton,
+  EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
+  EuiButtonEmpty,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Agent } from '../../../../common/types/domain_data';
 import { AgentHealth } from '../../../components/agent_health';
+import { AgentMetadataFlyout } from './metadata_flyout';
 
-const MAX_METADATA = 5;
-const PREFERRED_METADATA = ['ip', 'system', 'region', 'memory'];
+const Item: SFC<{ label: string }> = ({ label, children }) => {
+  return (
+    <EuiFlexItem grow={false}>
+      <EuiDescriptionList compressed>
+        <EuiDescriptionListTitle>{label}</EuiDescriptionListTitle>
+        <EuiDescriptionListDescription>{children}</EuiDescriptionListDescription>
+      </EuiDescriptionList>
+    </EuiFlexItem>
+  );
+};
 
-function getMetadataTitle(key: string): string {
-  switch (key) {
-    case 'ip':
-      return i18n.translate('xpack.fleet.agentMetadata.ipLabel', {
-        defaultMessage: 'IP Adress',
-      });
-    case 'system':
-      return i18n.translate('xpack.fleet.agentMetadata.systemLabel', {
-        defaultMessage: 'System',
-      });
-    case 'region':
-      return i18n.translate('xpack.fleet.agentMetadata.regionLabel', {
-        defaultMessage: 'Region',
-      });
-    case 'memory':
-      return i18n.translate('xpack.fleet.agentMetadata.memoryLabel', {
-        defaultMessage: 'Memory',
-      });
-    default:
-      return key;
-  }
+function useFlyout() {
+  const [isVisible, setVisible] = useState(false);
+  return {
+    isVisible,
+    show: () => setVisible(true),
+    hide: () => setVisible(false),
+  };
 }
 
 interface Props {
@@ -50,73 +49,80 @@ interface Props {
   onClickUnenroll: () => void;
 }
 export const AgentDetailSection: SFC<Props> = ({ agent, onClickUnenroll, unenrollment }) => {
-  const mapMetadata = (obj: { [key: string]: string } | undefined) => {
-    return Object.keys(obj || {}).map(key => ({
-      key,
-      value: obj ? obj[key] : '',
-    }));
-  };
-
-  const metadataItems = mapMetadata(agent.local_metadata)
-    .concat(mapMetadata(agent.user_provided_metadata))
-    .filter(item => PREFERRED_METADATA.indexOf(item.key) >= 0)
-    .map(item => ({
-      title: getMetadataTitle(item.key),
-      description: item.value,
-    }))
-    .slice(0, MAX_METADATA);
-
+  const metadataFlyout = useFlyout();
   const items = [
     {
+      title: i18n.translate('xpack.fleet.agentDetails.statusLabel', {
+        defaultMessage: 'Status',
+      }),
+      description: <AgentHealth agent={agent} />,
+    },
+    {
       title: i18n.translate('xpack.fleet.agentDetails.idLabel', {
-        defaultMessage: 'Agent ID',
+        defaultMessage: 'ID',
       }),
       description: agent.id,
     },
     {
       title: i18n.translate('xpack.fleet.agentDetails.typeLabel', {
-        defaultMessage: 'Agent Type',
+        defaultMessage: 'Type',
       }),
       description: agent.type,
     },
     {
-      title: i18n.translate('xpack.fleet.agentDetails.lastCheckinLabel', {
-        defaultMessage: 'Last checkin',
+      title: i18n.translate('xpack.fleet.agentDetails.policyLabel', {
+        defaultMessage: 'Policy',
       }),
-      description: agent.last_checkin ? (
-        <FormattedRelative value={new Date(agent.last_checkin)} />
-      ) : (
-        '-'
+      description: (
+        <EuiLink color="text">
+          <FormattedMessage
+            id="xpack.fleet.agentDetails.policyLink"
+            defaultMessage="{policy} (view)"
+            values={{ policy: agent.policy_id }}
+          />
+        </EuiLink>
       ),
     },
-  ].concat(metadataItems);
+  ];
 
   return (
     <>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <EuiTitle size="s">
-            <h3>
-              <FormattedMessage id="xpack.fleet.agentDetails.title" defaultMessage="Agent Detail" />
-            </h3>
+          <EuiTitle size="l">
+            <h1>
+              <FormattedMessage
+                id="xpack.fleet.agentDetails.agentDetailsTitle"
+                defaultMessage="Agent detail"
+              />
+            </h1>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <AgentHealth agent={agent} />
+          <EuiButton
+            disabled={unenrollment.loading === true || agent.active === false}
+            isLoading={unenrollment.loading}
+            onClick={onClickUnenroll}
+          >
+            <FormattedMessage
+              id="xpack.fleet.agentDetails.unenrollButtonText"
+              defaultMessage="Unenroll"
+            />
+          </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="l" />
-      <EuiDescriptionList type="column" compressed listItems={items} />
-      <EuiSpacer size="m" />
-      <EuiFlexItem grow={false}>
-        <EuiButton
-          disabled={unenrollment.loading === true || agent.active === false}
-          isLoading={unenrollment.loading}
-          onClick={onClickUnenroll}
-        >
-          <FormattedMessage id="xpack.fleet.agentDetails.unenroll" defaultMessage="Unenroll" />
-        </EuiButton>
-      </EuiFlexItem>
+      <EuiSpacer size={'xl'} />
+      <EuiFlexGroup alignItems="flexStart" justifyContent="spaceBetween">
+        {items.map((item, idx) => (
+          <Item key={idx} label={item.title}>
+            {item.description}
+          </Item>
+        ))}
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty onClick={() => metadataFlyout.show()}>View metadata</EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {metadataFlyout.isVisible && <AgentMetadataFlyout flyout={metadataFlyout} agent={agent} />}
     </>
   );
 };

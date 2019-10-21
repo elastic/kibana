@@ -3,11 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { useState, useEffect } from 'react';
-import { AgentsLib } from '../../../lib/agent';
+import React, { useState, useEffect } from 'react';
 import { Agent } from '../../../../common/types/domain_data';
+import { useLibs } from '../../../hooks/use_libs';
 
-export function useGetAgent(agents: AgentsLib, id: string) {
+export function useGetAgent(id: string) {
+  const { agents } = useLibs();
   const [state, setState] = useState<{
     isLoading: boolean;
     agent: Agent | null;
@@ -18,11 +19,11 @@ export function useGetAgent(agents: AgentsLib, id: string) {
     error: null,
   });
 
-  const fetchAgent = async () => {
+  const fetchAgent = async (refresh = false) => {
     setState({
-      isLoading: true,
-      agent: null,
+      ...state,
       error: null,
+      isLoading: !refresh,
     });
     try {
       const agent = await agents.get(id);
@@ -45,6 +46,12 @@ export function useGetAgent(agents: AgentsLib, id: string) {
 
   return {
     ...state,
-    refreshAgent: fetchAgent,
+    refreshAgent: () => fetchAgent(true),
   };
+}
+
+export const AgentRefreshContext = React.createContext({ refresh: () => {} });
+
+export function useAgentRefresh() {
+  return React.useContext(AgentRefreshContext).refresh;
 }
