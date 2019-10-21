@@ -110,9 +110,7 @@ export class DashboardAppController {
     indexPatterns,
     config,
     confirmModal,
-    courier,
   }: {
-    courier: { fetch: () => void };
     $scope: DashboardAppScope;
     $route: any;
     $routeParams: any;
@@ -424,19 +422,21 @@ export class DashboardAppController {
     };
 
     $scope.onApplyFilters = filters => {
-      // All filters originated from one visualization.
-      const indexPatternId = filters[0].meta.index;
-      const indexPattern = _.find(
-        $scope.indexPatterns,
-        (p: IndexPattern) => p.id === indexPatternId
-      );
-      if (indexPattern && indexPattern.timeFieldName) {
-        const { timeRangeFilter, restOfFilters } = extractTimeFilter(
-          indexPattern.timeFieldName,
-          filters
+      if (filters.length) {
+        // All filters originated from one visualization.
+        const indexPatternId = filters[0].meta.index;
+        const indexPattern = _.find(
+          $scope.indexPatterns,
+          (p: IndexPattern) => p.id === indexPatternId
         );
-        queryFilter.addFilters(restOfFilters);
-        if (timeRangeFilter) changeTimeFilter(timefilter, timeRangeFilter);
+        if (indexPattern && indexPattern.timeFieldName) {
+          const { timeRangeFilter, restOfFilters } = extractTimeFilter(
+            indexPattern.timeFieldName,
+            filters
+          );
+          queryFilter.addFilters(restOfFilters);
+          if (timeRangeFilter) changeTimeFilter(timefilter, timeRangeFilter);
+        }
       }
 
       $scope.appState.$newFilters = [];

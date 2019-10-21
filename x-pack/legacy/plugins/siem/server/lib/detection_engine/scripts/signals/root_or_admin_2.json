@@ -1,10 +1,10 @@
 {
-  "id": "2",
+  "id": "rule-2",
   "description": "Detecting root and admin users over a long period of time",
   "index": ["auditbeat-*", "filebeat-*", "packetbeat-*", "winlogbeat-*"],
   "interval": "24h",
   "name": "Detect Root/Admin Users over a long period of time",
-  "severity": 1,
+  "severity": "high",
   "type": "kql",
   "from": "now-1y",
   "to": "now",
