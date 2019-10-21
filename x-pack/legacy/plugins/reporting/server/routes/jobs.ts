@@ -5,6 +5,7 @@
  */
 
 import boom from 'boom';
+import { RequestQuery } from 'hapi';
 import { Request, ResponseToolkit } from 'hapi';
 import { API_BASE_URL } from '../../common/constants';
 import { JobDoc, KbnServer } from '../../types';
@@ -19,6 +20,12 @@ import {
 
 const MAIN_ENTRY = `${API_BASE_URL}/jobs`;
 
+type ListQuery = RequestQuery & {
+  page: string;
+  size: string;
+  ids?: string; // optional field forbids us from extending RequestQuery
+};
+
 export function registerJobs(server: KbnServer) {
   const jobsQuery = jobsQueryFactory(server);
   const getRouteConfig = getRouteConfigFactoryManagementPre(server);
@@ -30,12 +37,10 @@ export function registerJobs(server: KbnServer) {
     method: 'GET',
     config: getRouteConfig(),
     handler: (request: Request) => {
-      // @ts-ignore
-      const page = parseInt(request.query.page, 10) || 0;
-      // @ts-ignore
-      const size = Math.min(100, parseInt(request.query.size, 10) || 10);
-      // @ts-ignore
-      const jobIds = request.query.ids ? request.query.ids.split(',') : null;
+      const { page: queryPage, size: querySize, ids: queryIds } = request.query as ListQuery;
+      const page = parseInt(queryPage, 10) || 0;
+      const size = Math.min(100, parseInt(querySize, 10) || 10);
+      const jobIds = queryIds ? queryIds.split(',') : null;
 
       const results = jobsQuery.list(
         request.pre.management.jobTypes,

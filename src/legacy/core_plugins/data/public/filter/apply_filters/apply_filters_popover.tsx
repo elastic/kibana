@@ -36,6 +36,7 @@ import React, { Component } from 'react';
 import { IndexPattern } from '../../index_patterns';
 import { getDisplayValueFromFilter } from '../filter_bar/filter_editor/lib/filter_editor_utils';
 import { getFilterDisplayText } from '../filter_bar/filter_editor/lib/get_filter_display_text';
+import { mapAndFlattenFilters } from '../filter_manager/lib/map_and_flatten_filters';
 
 interface Props {
   filters: Filter[];
@@ -70,9 +71,11 @@ export class ApplyFiltersPopover extends Component<Props, State> {
       return '';
     }
 
+    const mappedFilters = mapAndFlattenFilters(this.props.filters);
+
     const form = (
       <EuiForm>
-        {this.props.filters.map((filter, i) => (
+        {mappedFilters.map((filter, i) => (
           <EuiFormRow key={i}>
             <EuiSwitch
               label={this.getLabel(filter)}
