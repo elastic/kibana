@@ -173,5 +173,5 @@ export const Wizard: SFC = React.memo(() => {
     },
   ];
 
-  return <EuiSteps steps={stepsConfig} />;
+  return <EuiSteps className="transform__steps" steps={stepsConfig} />;
 });
