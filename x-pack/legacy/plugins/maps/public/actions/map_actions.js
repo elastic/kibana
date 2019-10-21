@@ -615,7 +615,19 @@ export function removeSelectedLayer() {
   };
 }
 
-export function removeLayer(layerId) {
+export function safeRemoveLayer(layerId) {
+  return async (dispatch, getState) => {
+    const state = getState();
+    const selectedLayerId = getSelectedLayerId(state);
+    await dispatch(removeLayer(layerId));
+    if (layerId === selectedLayerId) {
+      await dispatch(updateFlyout(FLYOUT_STATE.NONE));
+      await dispatch(setSelectedLayer(null));
+    }
+  };
+}
+
+function removeLayer(layerId) {
   return (dispatch, getState) => {
     const layerGettingRemoved = getLayerById(layerId, getState());
     if (!layerGettingRemoved) {

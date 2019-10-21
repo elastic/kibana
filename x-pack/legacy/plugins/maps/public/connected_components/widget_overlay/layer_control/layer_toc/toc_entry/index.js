@@ -20,7 +20,7 @@ import {
   toggleLayerVisible,
   removeTransientLayer,
   cloneLayer,
-  removeLayer
+  safeRemoveLayer
 } from '../../../../../actions/map_actions';
 
 import { hasDirtyState, getSelectedLayer, isUsingSearch } from '../../../../../selectors/map_selectors';
@@ -53,7 +53,7 @@ function mapDispatchToProps(dispatch) {
       dispatch(cloneLayer(layerId));
     },
     removeLayer: layerId => {
-      dispatch(removeLayer(layerId));
+      dispatch(safeRemoveLayer(layerId));
     },
     hideTOCDetails: layerId => {
       dispatch(hideTOCDetails(layerId));
