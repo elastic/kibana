@@ -26,7 +26,7 @@ interface StartDeps {
 }
 
 /**
- * {@link ChromeDocTitle | APIs} for accessing and updating the document title.
+ * APIs for accessing and updating the document title.
  *
  * @example
  * How to change the title of the document
@@ -46,7 +46,7 @@ export interface ChromeDocTitle {
   /**
    * Gets an observable of the current document title.
    */
-  get$: () => Observable<string>;
+  get$(): Observable<string>;
   /**
    * Changes the current document title.
    *
@@ -65,7 +65,7 @@ export interface ChromeDocTitle {
    * @param newTitle The new title to set, either a string, string array or {@link ChromeDocTitleEntry}
    * @param [apply=true] If false, will not actually apply the new title until #apply() is called.
    */
-  change: (newTitle: ChromeDocTitleChange, apply?: boolean) => void;
+  change(newTitle: ChromeDocTitleChange, apply?: boolean): void;
   /**
    * Resets the document title to it's initial value.
    * (meaning the one present in the title meta at application load.)
@@ -76,14 +76,14 @@ export interface ChromeDocTitle {
    *
    * @param [apply=true] If false, will not actually apply the new title until #apply() is called.
    */
-  reset: (apply?: boolean) => void;
+  reset(apply?: boolean): void;
   /**
    * Apply a title change or reset that was not applied yet.
    *
    * @see {DocTitle#change}
    * @see {DocTitle#reset}
    */
-  apply: () => void;
+  apply(): void;
   /** @internal */
   __legacy: {
     setBaseTitle: (baseTitle: string) => void;
