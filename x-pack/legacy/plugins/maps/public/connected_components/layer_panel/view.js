@@ -155,7 +155,7 @@ export class LayerPanel extends React.Component {
         services={{
           appName: 'maps',
           store: localStorage,
-          autocomplete: npStart.plugins.autocomplete,
+          data: npStart.plugins.data,
           ...npStart.core,
         }}
       >

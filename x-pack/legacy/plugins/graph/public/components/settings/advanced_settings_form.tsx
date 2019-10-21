@@ -23,11 +23,11 @@ type NumberKeys<T> = Exclude<
 
 export function AdvancedSettingsForm({
   advancedSettings,
-  updateAdvancedSettings,
+  updateSettings,
   allFields,
-}: Pick<SettingsProps, 'advancedSettings' | 'updateAdvancedSettings' | 'allFields'>) {
+}: Pick<SettingsProps, 'advancedSettings' | 'updateSettings' | 'allFields'>) {
   function updateSetting<K extends keyof AdvancedSettings>(key: K, value: AdvancedSettings[K]) {
-    updateAdvancedSettings({ ...advancedSettings, [key]: value });
+    updateSettings({ ...advancedSettings, [key]: value });
   }
 
   function getNumberUpdater<K extends NumberKeys<AdvancedSettings>>(key: K) {
@@ -42,7 +42,7 @@ export function AdvancedSettingsForm({
         fullWidth
         helpText={i18n.translate('xpack.graph.settings.advancedSettings.sampleSizeInputHelpText', {
           defaultMessage:
-            'Terms are identified from samples of the most relevant documents. Bigger is not necessarily better - can be slower and less relevant',
+            'Terms are identified from samples of the most relevant documents. Bigger samples are not necessarily better—they can be slower and less relevant.',
         })}
         label={i18n.translate('xpack.graph.settings.advancedSettings.sampleSizeInputLabel', {
           defaultMessage: 'Sample size',
@@ -62,7 +62,7 @@ export function AdvancedSettingsForm({
         helpText={i18n.translate(
           'xpack.graph.settings.advancedSettings.significantLinksCheckboxHelpText',
           {
-            defaultMessage: 'Identify terms that are "significant" rather than simply popular.',
+            defaultMessage: 'Identify terms that are significant rather than popular.',
           }
         )}
         label=""
@@ -81,8 +81,7 @@ export function AdvancedSettingsForm({
       <EuiFormRow
         fullWidth
         helpText={i18n.translate('xpack.graph.settings.advancedSettings.certaintyInputHelpText', {
-          defaultMessage:
-            'The min number of documents that are required as evidence before introducing a related term',
+          defaultMessage: 'The minimum number of documents before introducing a related term.',
         })}
         label={i18n.translate('xpack.graph.settings.advancedSettings.certaintyInputLabel', {
           defaultMessage: 'Certainty',
@@ -103,14 +102,13 @@ export function AdvancedSettingsForm({
           <>
             {i18n.translate('xpack.graph.settings.advancedSettings.diversityFieldInputHelpText1', {
               defaultMessage:
-                'To avoid document samples being dominated by a single voice, pick the field that helps identify the source of bias.',
+                'To avoid dominating samples with a single voice, select a field to help identify the source of bias.',
             })}{' '}
             <em>
               {i18n.translate(
                 'xpack.graph.settings.advancedSettings.diversityFieldInputHelpText2',
                 {
-                  defaultMessage:
-                    'This must be a single-term field or searches will be rejected with an error',
+                  defaultMessage: 'This must be a single-term field, or searches will be rejected.',
                 }
               )}
             </em>
@@ -124,7 +122,7 @@ export function AdvancedSettingsForm({
           fullWidth
           placeholder={i18n.translate(
             'xpack.graph.settings.advancedSettings.diversityFieldInputOptionLabel',
-            { defaultMessage: '[No diversification]' }
+            { defaultMessage: 'No diversification' }
           )}
           singleSelection={{ asPlainText: true }}
           options={allFields.map(field => ({ label: field.name, value: field }))}
@@ -182,7 +180,7 @@ export function AdvancedSettingsForm({
       <EuiFormRow
         fullWidth
         helpText={i18n.translate('xpack.graph.settings.advancedSettings.timeoutInputHelpText', {
-          defaultMessage: 'Max time in milliseconds a request can run',
+          defaultMessage: 'The maximum number of milliseconds that a request can run.',
         })}
         label={i18n.translate('xpack.graph.settings.advancedSettings.timeoutInputLabel', {
           defaultMessage: 'Timeout',

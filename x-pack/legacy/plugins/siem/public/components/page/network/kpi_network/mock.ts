@@ -184,12 +184,19 @@ export const mockEnableChartsData = {
     {
       key: 'uniqueSourcePrivateIps',
       color: '#DB1374',
-      value: [{ x: 'Src.', y: 383, g: 'uniqueSourcePrivateIps' }],
+      value: [
+        {
+          x: 'Src.',
+          y: 383,
+          g: 'uniqueSourcePrivateIps',
+          y0: 0,
+        },
+      ],
     },
     {
       key: 'uniqueDestinationPrivateIps',
       color: '#490092',
-      value: [{ x: 'Dest.', y: 18, g: 'uniqueDestinationPrivateIps' }],
+      value: [{ x: 'Dest.', y: 18, g: 'uniqueDestinationPrivateIps', y0: 0 }],
     },
   ],
   description: 'Unique private IPs',

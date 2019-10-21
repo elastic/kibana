@@ -4,12 +4,14 @@
 
 ## ScopedClusterClient class
 
-Serves the same purpose as "normal" `ClusterClient` but exposes additional `callAsCurrentUser` method that doesn't use credentials of the Kibana internal user (as `callAsInternalUser` does) to request Elasticsearch API, but rather passes HTTP headers extracted from the current user request to the API
+Serves the same purpose as "normal" `ClusterClient` but exposes additional `callAsCurrentUser` method that doesn't use credentials of the Kibana internal user (as `callAsInternalUser` does) to request Elasticsearch API, but rather passes HTTP headers extracted from the current user request to the API.
+
+See [ScopedClusterClient](./kibana-plugin-server.scopedclusterclient.md)<!-- -->.
 
 <b>Signature:</b>
 
 ```typescript
-export declare class ScopedClusterClient 
+export declare class ScopedClusterClient implements IScopedClusterClient 
 ```
 
 ## Constructors
@@ -22,6 +24,6 @@ export declare class ScopedClusterClient
 
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  [callAsCurrentUser(endpoint, clientParams, options)](./kibana-plugin-server.scopedclusterclient.callascurrentuser.md) |  | Calls specified <code>endpoint</code> with provided <code>clientParams</code> on behalf of the user initiated request to the Kibana server (via HTTP request headers). |
-|  [callAsInternalUser(endpoint, clientParams, options)](./kibana-plugin-server.scopedclusterclient.callasinternaluser.md) |  | Calls specified <code>endpoint</code> with provided <code>clientParams</code> on behalf of the Kibana internal user. |
+|  [callAsCurrentUser(endpoint, clientParams, options)](./kibana-plugin-server.scopedclusterclient.callascurrentuser.md) |  | Calls specified <code>endpoint</code> with provided <code>clientParams</code> on behalf of the user initiated request to the Kibana server (via HTTP request headers). See [APICaller](./kibana-plugin-server.apicaller.md)<!-- -->. |
+|  [callAsInternalUser(endpoint, clientParams, options)](./kibana-plugin-server.scopedclusterclient.callasinternaluser.md) |  | Calls specified <code>endpoint</code> with provided <code>clientParams</code> on behalf of the Kibana internal user. See [APICaller](./kibana-plugin-server.apicaller.md)<!-- -->. |
 

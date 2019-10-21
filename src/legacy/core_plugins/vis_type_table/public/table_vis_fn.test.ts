@@ -76,12 +76,12 @@ describe('interpreter/functions#table', () => {
   });
 
   it('returns an object with the correct structure', async () => {
-    const actual = await fn(context, { visConfig: JSON.stringify(visConfig) });
+    const actual = await fn(context, { visConfig: JSON.stringify(visConfig) }, undefined);
     expect(actual).toMatchSnapshot();
   });
 
   it('calls response handler with correct values', async () => {
-    await fn(context, { visConfig: JSON.stringify(visConfig) });
+    await fn(context, { visConfig: JSON.stringify(visConfig) }, undefined);
     expect(mockResponseHandler).toHaveBeenCalledTimes(1);
     expect(mockResponseHandler).toHaveBeenCalledWith(context, visConfig.dimensions);
   });

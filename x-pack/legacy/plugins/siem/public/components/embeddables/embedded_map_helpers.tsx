@@ -4,8 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Filter } from '@kbn/es-query';
 import uuid from 'uuid';
+import React from 'react';
 import { npStart } from 'ui/new_platform';
+import { OutPortal, PortalNode } from 'react-reverse-portal';
+import { Query } from 'src/plugins/data/common';
+
 import { ActionToaster, AppToast } from '../toasters';
 import { start } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import {
@@ -19,7 +24,7 @@ import {
   APPLY_SIEM_FILTER_ACTION_ID,
   ApplySiemFilterAction,
 } from './actions/apply_siem_filter_action';
-import { IndexPatternMapping, MapEmbeddable, SetQuery } from './types';
+import { IndexPatternMapping, MapEmbeddable, RenderTooltipContentParams, SetQuery } from './types';
 import { getLayerList } from './map_config';
 // @ts-ignore Missing type defs as maps moves to Typescript
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../maps/common/constants';
@@ -58,16 +63,12 @@ export const displayErrorToast = (
  *
  * @throws Error if action is already registered
  */
-export const setupEmbeddablesAPI = (
-  applyFilterQueryFromKueryExpression: (expression: string) => void
-) => {
+export const setupEmbeddablesAPI = () => {
   try {
     const actions = npStart.plugins.uiActions.getTriggerActions(APPLY_FILTER_TRIGGER);
     const actionLoaded = actions.some(a => a.id === APPLY_SIEM_FILTER_ACTION_ID);
     if (!actionLoaded) {
-      const siemFilterAction = new ApplySiemFilterAction({
-        applyFilterQueryFromKueryExpression,
-      });
+      const siemFilterAction = new ApplySiemFilterAction();
       npStart.plugins.uiActions.registerAction(siemFilterAction);
       npStart.plugins.uiActions.attachAction(APPLY_FILTER_TRIGGER, siemFilterAction.id);
 
@@ -84,19 +85,22 @@ export const setupEmbeddablesAPI = (
  * Creates MapEmbeddable with provided initial configuration
  *
  * @param indexPatterns list of index patterns to configure layers for
- * @param queryExpression initial query constraints as an expression
+ * @param query initial query constraints as Query
  * @param startDate
  * @param endDate
  * @param setQuery function as provided by the GlobalTime component for reacting to refresh
+ * @param portalNode wrapper for MapToolTip so it is not rendered in the embeddables component tree
  *
  * @throws Error if EmbeddableFactory does not exist
  */
 export const createEmbeddable = async (
+  filters: Filter[],
   indexPatterns: IndexPatternMapping[],
-  queryExpression: string,
+  query: Query,
   startDate: number,
   endDate: number,
-  setQuery: SetQuery
+  setQuery: SetQuery,
+  portalNode: PortalNode
 ): Promise<MapEmbeddable> => {
   const factory = start.getEmbeddableFactory(MAP_SAVED_OBJECT_TYPE);
 
@@ -106,9 +110,9 @@ export const createEmbeddable = async (
   };
   const input = {
     id: uuid.v4(),
-    filters: [],
+    filters,
     hidePanelTitles: true,
-    query: { query: queryExpression, language: 'kuery' },
+    query,
     refreshConfig: { value: 0, pause: true },
     timeRange: {
       from: new Date(startDate).toISOString(),
@@ -121,15 +125,41 @@ export const createEmbeddable = async (
     mapCenter: { lon: -1.05469, lat: 15.96133, zoom: 1 },
   };
 
+  const renderTooltipContent = ({
+    addFilters,
+    closeTooltip,
+    features,
+    isLocked,
+    getLayerName,
+    loadFeatureProperties,
+    loadFeatureGeometry,
+  }: RenderTooltipContentParams) => {
+    const props = {
+      addFilters,
+      closeTooltip,
+      features,
+      isLocked,
+      getLayerName,
+      loadFeatureProperties,
+      loadFeatureGeometry,
+    };
+    return <OutPortal node={portalNode} {...props} />;
+  };
+
   // @ts-ignore method added in https://github.com/elastic/kibana/pull/43878
-  const embeddableObject = await factory.createFromState(state, input);
+  const embeddableObject = await factory.createFromState(
+    state,
+    input,
+    undefined,
+    renderTooltipContent
+  );
 
   // Wire up to app refresh action
   setQuery({
     id: 'embeddedMap', // Scope to page type if using map elsewhere
     inspect: null,
     loading: false,
-    refetch: embeddableObject.reload,
+    refetch: () => embeddableObject.reload(),
   });
 
   return embeddableObject;

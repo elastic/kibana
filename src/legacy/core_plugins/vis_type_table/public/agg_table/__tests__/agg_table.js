@@ -31,7 +31,7 @@ import { round } from 'lodash';
 
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { createTableVisTypeDefinition } from '../../table_vis_type';
-import { setup as visualizationsSetup } from '../../../../visualizations/public/legacy';
+import { setup as visualizationsSetup } from '../../../../visualizations/public/np_ready/public/legacy';
 
 describe('Table Vis - AggTable Directive', function () {
   let $rootScope;

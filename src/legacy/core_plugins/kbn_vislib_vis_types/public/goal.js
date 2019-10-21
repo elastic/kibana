@@ -22,7 +22,7 @@ import { Schemas } from 'ui/vis/editors/default/schemas';
 import { AggGroupNames } from 'ui/vis/editors/default';
 import { ColorSchemas } from 'ui/vislib/components/color/colormaps';
 import { GaugeOptions } from './components/options';
-import { getGaugeCollections, GaugeTypes, GaugeColorModes } from './utils/collections';
+import { getGaugeCollections, GaugeTypes, ColorModes } from './utils/collections';
 import { vislibVisController } from './controller';
 import { visFactory } from '../../../ui/public/vis/vis_factory';
 
@@ -52,7 +52,7 @@ export default function GoalVisType() {
           orientation: 'vertical',
           useRanges: false,
           colorSchema: ColorSchemas.GreenToRed,
-          gaugeColorMode: GaugeColorModes.NONE,
+          gaugeColorMode: ColorModes.NONE,
           colorsRange: [
             { from: 0, to: 10000 }
           ],

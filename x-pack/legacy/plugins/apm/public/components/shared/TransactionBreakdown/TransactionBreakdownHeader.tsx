@@ -9,8 +9,6 @@ import {
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
-  EuiBetaBadge,
   EuiButtonEmpty
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -24,28 +22,9 @@ const TransactionBreakdownHeader: React.FC<{
       <EuiFlexItem>
         <EuiTitle size="xs">
           <h3>
-            <EuiFlexGroup alignItems="center" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                {i18n.translate('xpack.apm.transactionBreakdown.chartTitle', {
-                  defaultMessage: 'Time spent by span type'
-                })}
-              </EuiFlexItem>
-              <EuiSpacer size="xs" />
-              <EuiFlexItem grow={false}>
-                <EuiBetaBadge
-                  label={i18n.translate('xpack.apm.ui.betaBadgeLabel', {
-                    defaultMessage: 'Beta'
-                  })}
-                  tooltipContent={i18n.translate(
-                    'xpack.apm.ui.betaBadgeTooltipTitle',
-                    {
-                      defaultMessage:
-                        'This feature is still in development. If you have feedback, please reach out in our Discuss forum.'
-                    }
-                  )}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            {i18n.translate('xpack.apm.transactionBreakdown.chartTitle', {
+              defaultMessage: 'Time spent by span type'
+            })}
           </h3>
         </EuiTitle>
       </EuiFlexItem>

@@ -66,6 +66,8 @@ export const expectExpressionProvider = ({ getService, updateBaselines }) => {
       runExpression: async (step, stepContext) => {
         log.debug(`running expression ${step || expression}`);
         const promise = browser.executeAsync((expression, context, initialContext, done) => {
+          if (!context) context = {};
+          if (!context.type) context.type = 'null';
           window.runPipeline(expression, context, initialContext).then(result => {
             done(result);
           });

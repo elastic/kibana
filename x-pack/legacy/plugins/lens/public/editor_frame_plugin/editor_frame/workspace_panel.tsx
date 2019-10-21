@@ -6,7 +6,16 @@
 
 import React, { useState, useEffect, useMemo, useContext } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiImage, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import {
+  EuiCodeBlock,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiImage,
+  EuiText,
+  EuiBetaBadge,
+  EuiButtonEmpty,
+} from '@elastic/eui';
 import { toExpression } from '@kbn/interpreter/common';
 import { CoreStart, CoreSetup } from 'src/core/public';
 import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/expressions/public';
@@ -16,6 +25,7 @@ import { DragDrop, DragContext } from '../../drag_drop';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
 import { buildExpression } from './expression_helpers';
 import { debouncedComponent } from '../../debounced_component';
+import { trackUiEvent } from '../../lens_ui_telemetry';
 
 export interface WorkspacePanelProps {
   activeVisualizationId: string | null;
@@ -82,8 +92,37 @@ export function InnerWorkspacePanel({
     return suggestions.find(s => s.visualizationId === activeVisualizationId) || suggestions[0];
   }, [dragDropContext.dragging]);
 
+  const [expressionError, setExpressionError] = useState<unknown>(undefined);
+
+  const activeVisualization = activeVisualizationId
+    ? visualizationMap[activeVisualizationId]
+    : null;
+  const expression = useMemo(() => {
+    try {
+      return buildExpression({
+        visualization: activeVisualization,
+        visualizationState,
+        datasourceMap,
+        datasourceStates,
+        framePublicAPI,
+      });
+    } catch (e) {
+      setExpressionError(e.toString());
+    }
+  }, [
+    activeVisualization,
+    visualizationState,
+    datasourceMap,
+    datasourceStates,
+    framePublicAPI.dateRange,
+    framePublicAPI.query,
+    framePublicAPI.filters,
+  ]);
+
   function onDrop() {
     if (suggestionForDraggedField) {
+      trackUiEvent('drop_onto_workspace');
+      trackUiEvent(expression ? 'drop_non_empty' : 'drop_empty');
       switchToSuggestion(
         framePublicAPI,
         dispatch,
@@ -94,56 +133,49 @@ export function InnerWorkspacePanel({
   }
 
   function renderEmptyWorkspace() {
+    const tooltipContent = i18n.translate('xpack.lens.editorFrame.tooltipContent', {
+      defaultMessage:
+        'Lens is in beta and is subject to change.  The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features',
+    });
     return (
-      <EuiText textAlign="center" grow={false} color="subdued" data-test-subj="empty-workspace">
-        <h3>
-          <FormattedMessage
-            id="xpack.lens.editorFrame.emptyWorkspaceHeading"
-            defaultMessage="Create a visualization"
+      <div className="eui-textCenter">
+        <EuiText textAlign="center" grow={false} color="subdued" data-test-subj="empty-workspace">
+          <h3>
+            <FormattedMessage
+              id="xpack.lens.editorFrame.emptyWorkspace"
+              defaultMessage="Drop some fields here to start"
+            />
+          </h3>
+          <EuiImage
+            style={{ width: 360 }}
+            url={core.http.basePath.prepend(emptyStateGraphicURL)}
+            alt=""
           />
-        </h3>
-        <EuiImage
-          style={{ width: 360 }}
-          url={core.http.basePath.prepend(emptyStateGraphicURL)}
-          alt=""
-        />
-        <p>
-          <FormattedMessage
-            id="xpack.lens.editorFrame.emptyWorkspace"
-            defaultMessage="Drop some fields here."
-          />
-        </p>
-      </EuiText>
+          <p>
+            <FormattedMessage
+              id="xpack.lens.editorFrame.emptyWorkspaceHeading"
+              defaultMessage="Lens is a new tool for creating visualizations"
+            />{' '}
+            <EuiBetaBadge label="Beta" tooltipContent={tooltipContent} />
+          </p>
+          <EuiButtonEmpty
+            href="https://discuss.elastic.co/c/kibana"
+            iconType="popout"
+            iconSide="right"
+            size="xs"
+            target="_blank"
+          >
+            <FormattedMessage
+              id="xpack.lens.editorFrame.goToForums"
+              defaultMessage="Make requests and give feedback"
+            />
+          </EuiButtonEmpty>
+        </EuiText>
+      </div>
     );
   }
 
   function renderVisualization() {
-    const [expressionError, setExpressionError] = useState<unknown>(undefined);
-
-    const activeVisualization = activeVisualizationId
-      ? visualizationMap[activeVisualizationId]
-      : null;
-    const expression = useMemo(() => {
-      try {
-        return buildExpression({
-          visualization: activeVisualization,
-          visualizationState,
-          datasourceMap,
-          datasourceStates,
-          framePublicAPI,
-        });
-      } catch (e) {
-        setExpressionError(e.toString());
-      }
-    }, [
-      activeVisualization,
-      visualizationState,
-      datasourceMap,
-      datasourceStates,
-      framePublicAPI.dateRange,
-      framePublicAPI.query,
-    ]);
-
     useEffect(() => {
       // reset expression error if component attempts to run it again
       if (expressionError) {

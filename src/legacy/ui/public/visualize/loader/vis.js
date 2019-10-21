@@ -31,7 +31,7 @@ import { EventEmitter } from 'events';
 import _ from 'lodash';
 import { PersistedState } from '../../persisted_state';
 
-import { start as visualizations } from '../../../../core_plugins/visualizations/public/legacy';
+import { start as visualizations } from '../../../../core_plugins/visualizations/public/np_ready/public/legacy';
 
 
 export function VisProvider(indexPatterns, getAppState) {

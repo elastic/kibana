@@ -25,7 +25,6 @@ import { KIBANA_CONTEXT_NAME } from 'src/plugins/expressions/public';
 import { Query } from 'src/legacy/core_plugins/data/public';
 import { TimeRange } from 'src/plugins/data/public';
 import { VisParams } from 'ui/vis';
-import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
 import { TimelionVisualizationDependencies } from '../plugin';
 
@@ -65,10 +64,16 @@ export function getTimelionRequestHandler(dependencies: TimelionVisualizationDep
     query: Query;
     visParams: VisParams;
     forceFetch?: boolean;
-  }): Promise<TimelionSuccessResponse | void> {
+  }): Promise<TimelionSuccessResponse> {
     const expression = visParams.expression;
 
-    if (!expression) return;
+    if (!expression) {
+      throw new Error(
+        i18n.translate('timelion.emptyExpressionErrorMessage', {
+          defaultMessage: 'Timelion error: No expression provided',
+        })
+      );
+    }
 
     const esQueryConfigs = getEsQueryConfig(uiSettings);
 
@@ -85,15 +90,17 @@ export function getTimelionRequestHandler(dependencies: TimelionVisualizationDep
         }),
       });
     } catch (e) {
-      const err = new Error(e.data.message);
-
-      err.stack = e.data.stack;
-
-      toastNotifications.addError(err, {
-        title: i18n.translate('timelion.requestHandlerErrorTitle', {
-          defaultMessage: 'Timelion request error',
-        }),
-      });
+      if (e && e.body) {
+        const err = new Error(
+          `${i18n.translate('timelion.requestHandlerErrorTitle', {
+            defaultMessage: 'Timelion request error',
+          })}: ${e.body.title} ${e.body.message}`
+        );
+        err.stack = e.stack;
+        throw err;
+      } else {
+        throw e;
+      }
     }
   };
 }

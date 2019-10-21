@@ -1200,11 +1200,14 @@ module.exports = (function () {
     }
 
 
-    //Add missing links between existing nodes
-    this.fillInGraph = function () {
+    /**
+     * Add missing links between existing nodes
+     * @param maxNewEdges Max number of new edges added. Avoid adding too many new edges
+     * at once into the graph otherwise disorientating
+     */
+    this.fillInGraph = function (maxNewEdges = 10) {
       let nodesForLinking = self.getSelectedOrAllTopNodes();
 
-      const maxNewEdges = 10; // Avoid adding too many new edges at once into the graph otherwise disorientating
       const maxNumVerticesSearchable = 100;
 
 

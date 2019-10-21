@@ -9,7 +9,7 @@ import { ConsoleLogger } from './console_logger';
 import { LoggerFactory } from './log_factory';
 
 export class ConsoleLoggerFactory implements LoggerFactory {
-  public getLogger(tags: string[]): Logger {
+  public getLogger(tags: string[] = []): Logger {
     return new ConsoleLogger();
   }
 }

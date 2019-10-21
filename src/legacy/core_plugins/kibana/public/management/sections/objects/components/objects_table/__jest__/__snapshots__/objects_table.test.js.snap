@@ -99,6 +99,7 @@ exports[`ObjectsTable export should allow the user to choose when exporting all 
       describedByIds={Array []}
       display="row"
       fullWidth={false}
+      hasChildLabel={true}
       hasEmptyLabelSpace={false}
       label={
         <FormattedMessage
@@ -200,7 +201,7 @@ exports[`ObjectsTable export should allow the user to choose when exporting all 
 `;
 
 exports[`ObjectsTable import should show the flyout 1`] = `
-<InjectIntl(FlyoutUI)
+<Flyout
   close={[Function]}
   confirmModalPromise={[MockFunction]}
   done={[Function]}
@@ -215,7 +216,7 @@ exports[`ObjectsTable import should show the flyout 1`] = `
 `;
 
 exports[`ObjectsTable relationships should show the flyout 1`] = `
-<InjectIntl(RelationshipsUI)
+<Relationships
   close={[Function]}
   getRelationships={[Function]}
   goInspectObject={[Function]}
@@ -251,7 +252,7 @@ exports[`ObjectsTable should render normally 1`] = `
   <EuiSpacer
     size="xs"
   />
-  <InjectIntl(TableUI)
+  <Table
     canDelete={false}
     filterOptions={
       Array [

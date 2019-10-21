@@ -229,6 +229,14 @@ export class DashboardStateManager {
     return this.appState.title;
   }
 
+  public isSaved() {
+    return !!this.savedDashboard.id;
+  }
+
+  public isNew() {
+    return !this.isSaved();
+  }
+
   public getDescription() {
     return this.appState.description;
   }
