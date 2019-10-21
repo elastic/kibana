@@ -9,3 +9,9 @@
  * Above this thresold, the user has to use the JSON editor.
  */
 export const MAX_DEPTH_DEFAULT_EDITOR = 4;
+
+export const EUI_SIZE = 16;
+
+export const CHILD_FIELD_INDENT_SIZE = EUI_SIZE * 2;
+
+export const LEFT_PADDING_SIZE_FIELD_ITEM_WRAPPER = EUI_SIZE * 0.25;

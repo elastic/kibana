@@ -7,6 +7,7 @@ import { FieldConfig } from './shared_imports';
 
 export interface DataTypeDefinition {
   label: string;
+  value: DataType;
   subTypes?: { label: string; types: SubType[] };
   configuration?: ParameterName[];
   basicParameters?: ParameterName[] | ParameterName[][];

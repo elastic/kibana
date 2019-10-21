@@ -203,6 +203,10 @@ export const reducer = (state: State, action: Action): State => {
         parentField.childFields = parentField.childFields!.filter(childId => childId !== id);
         parentField.hasChildFields = Boolean(parentField.childFields.length);
         parentField.hasMultiFields = Boolean(parentField.childFields.length);
+
+        if (!parentField.hasChildFields) {
+          parentField.isExpanded = false;
+        }
       } else {
         // Deleting a root level field
         rootLevelFields = rootLevelFields.filter(childId => childId !== id);

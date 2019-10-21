@@ -119,6 +119,7 @@ export const EditField = React.memo(({ field }: Props) => {
 
   const {
     source: { name, type, subType, ...fieldsSettingsDefault },
+    isMultiField,
   } = field;
 
   return (
@@ -145,7 +146,7 @@ export const EditField = React.memo(({ field }: Props) => {
               FormWrapper={formWrapper}
               onSubmit={getSubmitForm(updateField)}
             >
-              <EditFieldHeaderForm defaultValue={field.source} />
+              <EditFieldHeaderForm defaultValue={field.source} isMultiField={isMultiField} />
             </Form>
             <FieldSettingsJsonEditor
               onUpdate={onFieldsSettingsUpdate}

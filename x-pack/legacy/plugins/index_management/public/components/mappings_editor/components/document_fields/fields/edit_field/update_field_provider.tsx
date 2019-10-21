@@ -44,10 +44,10 @@ export const UpdateFieldProvider = ({ children }: Props) => {
       oldType: DataType,
       newType: DataType
     ): { requiresConfirmation: boolean } => {
-      const { hasChildFields } = field;
+      const { hasChildFields, hasMultiFields, canHaveChildFields, canHaveMultiFields } = field;
 
-      if (!hasChildFields) {
-        // No child fields will be deleted, no confirmation needed.
+      if ((!hasChildFields && canHaveChildFields) || (!hasMultiFields && canHaveMultiFields)) {
+        // No child or multi-fields will be deleted, no confirmation needed.
         return { requiresConfirmation: false };
       }
 
@@ -83,7 +83,11 @@ export const UpdateFieldProvider = ({ children }: Props) => {
     const field = state.field!;
     const title = `Confirm change '${field.source.name}' type to "${field.source.type}".`;
 
-    const fieldsTree = buildFieldTreeFromIds(field.childFields!, byId);
+    const fieldsTree = buildFieldTreeFromIds(
+      field.childFields!,
+      byId,
+      (_field: NormalizedField) => _field.source.name
+    );
 
     return (
       <EuiOverlayMask>

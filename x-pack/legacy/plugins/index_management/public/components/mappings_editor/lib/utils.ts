@@ -17,7 +17,7 @@ import {
   TreeItem,
 } from '../types';
 
-import { DATA_TYPE_DEFINITION, MAX_DEPTH_DEFAULT_EDITOR } from '../constants';
+import { MAIN_DATA_TYPE_DEFINITION, MAX_DEPTH_DEFAULT_EDITOR } from '../constants';
 
 import { State } from '../reducer';
 
@@ -82,7 +82,7 @@ export const getFieldMeta = (field: Field): FieldMeta => {
  *   short: 'numeric',
  * }
  */
-const subTypesMapToType = Object.entries(DATA_TYPE_DEFINITION).reduce(
+const subTypesMapToType = Object.entries(MAIN_DATA_TYPE_DEFINITION).reduce(
   (acc, [type, definition]) => {
     if ({}.hasOwnProperty.call(definition, 'subTypes')) {
       definition.subTypes!.types.forEach(subType => {
@@ -94,7 +94,7 @@ const subTypesMapToType = Object.entries(DATA_TYPE_DEFINITION).reduce(
   {} as Record<SubType, string>
 );
 
-export const getTypeFromSubType = (subType: SubType): MainType =>
+export const getMainTypeFromSubType = (subType: SubType): MainType =>
   subTypesMapToType[subType] as MainType;
 
 /**

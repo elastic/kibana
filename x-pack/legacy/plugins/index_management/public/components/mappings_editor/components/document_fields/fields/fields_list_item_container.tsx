@@ -12,11 +12,13 @@ import { FieldsListItem } from './fields_list_item';
 interface Props {
   field: NormalizedField;
   treeDepth: number;
+  isLastItem: boolean;
 }
 
 export const FieldsListItemContainer = React.memo(function FieldsListItemContainer({
   field,
   treeDepth,
+  isLastItem,
 }: Props) {
   const dispatch = useDispatch();
   const {
@@ -62,6 +64,7 @@ export const FieldsListItemContainer = React.memo(function FieldsListItemContain
       isDimmed={isDimmed}
       isCreateFieldFormVisible={isCreateFieldFormVisible}
       areActionButtonsVisible={areActionButtonsVisible}
+      isLastItem={isLastItem}
       childFieldsArray={childFieldsArray}
       maxNestedDepth={maxNestedDepth}
       addField={addField}

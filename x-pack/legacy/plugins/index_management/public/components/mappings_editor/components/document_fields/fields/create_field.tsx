@@ -4,12 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useEffect } from 'react';
+import classNames from 'classnames';
+
 import {
   EuiButtonEmpty,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiOutsideClickDetector,
+  EuiIcon,
 } from '@elastic/eui';
 
 import {
@@ -22,9 +25,12 @@ import {
 } from '../../../shared_imports';
 
 import {
-  DATA_TYPE_DEFINITION,
+  TYPE_DEFINITION,
   FIELD_TYPES_OPTIONS,
+  MULTIFIELD_TYPES_OPTIONS,
   PARAMETERS_DEFINITION,
+  LEFT_PADDING_SIZE_FIELD_ITEM_WRAPPER,
+  EUI_SIZE,
 } from '../../../constants';
 
 import { useDispatch } from '../../../mappings_state';
@@ -38,11 +44,13 @@ const getFieldConfig = (param: ParameterName): FieldConfig =>
   PARAMETERS_DEFINITION[param].fieldConfig || {};
 
 interface Props {
-  paddingLeft?: string;
+  isMultiField?: boolean;
+  paddingLeft?: number;
   isCancelable?: boolean;
 }
 
 export const CreateField = React.memo(function CreateFieldComponent({
+  isMultiField,
   paddingLeft,
   isCancelable,
 }: Props) {
@@ -91,7 +99,13 @@ export const CreateField = React.memo(function CreateFieldComponent({
   };
 
   const renderFormFields = (type: MainType) => {
-    const typeDefinition = DATA_TYPE_DEFINITION[type];
+    const typeDefinition = TYPE_DEFINITION[type];
+    const subTypeOptions =
+      typeDefinition && typeDefinition.subTypes
+        ? typeDefinition.subTypes.types
+            .map(subType => TYPE_DEFINITION[subType])
+            .map(subType => ({ value: subType.value, text: subType.label }))
+        : undefined;
 
     return (
       <EuiFlexGroup gutterSize="s">
@@ -108,29 +122,26 @@ export const CreateField = React.memo(function CreateFieldComponent({
             component={SelectField}
             componentProps={{
               euiFieldProps: {
-                options: FIELD_TYPES_OPTIONS,
+                options: isMultiField ? MULTIFIELD_TYPES_OPTIONS : FIELD_TYPES_OPTIONS,
               },
             }}
           />
         </EuiFlexItem>
 
         {/* Field sub type (if any) */}
-        {typeDefinition && typeDefinition.subTypes && (
+        {subTypeOptions && (
           <EuiFlexItem grow={false}>
             <UseField
               path="subType"
-              defaultValue={typeDefinition.subTypes.types[0]}
+              defaultValue={typeDefinition.subTypes!.types[0]}
               config={{
                 ...getFieldConfig('type'),
-                label: typeDefinition.subTypes.label,
+                label: typeDefinition.subTypes!.label,
               }}
               component={SelectField}
               componentProps={{
                 euiFieldProps: {
-                  options: typeDefinition.subTypes.types.map(subType => ({
-                    value: subType,
-                    text: subType,
-                  })),
+                  options: subTypeOptions,
                   hasNoInitialSelection: false,
                 },
               }}
@@ -142,7 +153,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
   };
 
   const renderFormActions = () => (
-    <EuiFlexGroup gutterSize="s">
+    <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
       {isCancelable !== false && (
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty onClick={cancel}>Cancel</EuiButtonEmpty>
@@ -160,19 +171,30 @@ export const CreateField = React.memo(function CreateFieldComponent({
     <EuiOutsideClickDetector onOutsideClick={onClickOutside}>
       <Form form={form} FormWrapper={formWrapper} onSubmit={submitForm}>
         <div
-          className="mappings-editor__create-field-wrapper"
+          className={classNames('mappings-editor__create-field-wrapper', {
+            'mappings-editor__create-field-wrapper--multi-field': isMultiField,
+          })}
           style={{
-            paddingLeft,
+            paddingLeft: `${
+              isMultiField
+                ? paddingLeft! - EUI_SIZE * 1.5 // As there are no "L" bullet list we need to substract some indent
+                : paddingLeft
+            }px`,
           }}
         >
           <div className="mappings-editor__create-field-content">
-            <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" alignItems="flexEnd">
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              {isMultiField && (
+                <EuiFlexItem grow={false} className="mappings-editor__create-field-content__icon">
+                  <EuiIcon type="link" />
+                </EuiFlexItem>
+              )}
               <FormDataProvider pathsToWatch="type">
                 {({ type }) => {
                   return <EuiFlexItem grow={false}>{renderFormFields(type)}</EuiFlexItem>;
                 }}
               </FormDataProvider>
-              <EuiFlexItem grow={false}>{renderFormActions()}</EuiFlexItem>
+              <EuiFlexItem>{renderFormActions()}</EuiFlexItem>
             </EuiFlexGroup>
           </div>
         </div>

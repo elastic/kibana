@@ -8,10 +8,11 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { FormDataProvider, SelectField, UseField, FieldConfig } from '../../../../shared_imports';
-import { MainType, ParameterName } from '../../../../types';
+import { MainType, ParameterName, Field } from '../../../../types';
 import {
-  DATA_TYPE_DEFINITION,
+  TYPE_DEFINITION,
   FIELD_TYPES_OPTIONS,
+  MULTIFIELD_TYPES_OPTIONS,
   PARAMETERS_DEFINITION,
 } from '../../../../constants';
 import { NameParameter } from '../../field_parameters';
@@ -20,15 +21,22 @@ const getFieldConfig = (param: ParameterName): FieldConfig =>
   PARAMETERS_DEFINITION[param].fieldConfig || {};
 
 interface Props {
-  defaultValue: { [key: string]: any };
+  isMultiField: boolean;
+  defaultValue: Field;
 }
 
-export const EditFieldHeaderForm = ({ defaultValue }: Props) => {
+export const EditFieldHeaderForm = ({ isMultiField, defaultValue }: Props) => {
   return (
     <FormDataProvider pathsToWatch="type">
       {formData => {
         const selectedDatatype = formData.type as MainType;
-        const typeDefinition = DATA_TYPE_DEFINITION[selectedDatatype];
+        const typeDefinition = TYPE_DEFINITION[selectedDatatype];
+        const subTypeOptions =
+          typeDefinition && typeDefinition.subTypes
+            ? typeDefinition.subTypes.types
+                .map(subType => TYPE_DEFINITION[subType])
+                .map(subType => ({ value: subType.value, text: subType.label }))
+            : undefined;
 
         return (
           <EuiFlexGroup gutterSize="s">
@@ -46,7 +54,7 @@ export const EditFieldHeaderForm = ({ defaultValue }: Props) => {
                 component={SelectField}
                 componentProps={{
                   euiFieldProps: {
-                    options: FIELD_TYPES_OPTIONS,
+                    options: isMultiField ? MULTIFIELD_TYPES_OPTIONS : FIELD_TYPES_OPTIONS,
                     hasNoInitialSelection: true,
                   },
                 }}
@@ -54,22 +62,23 @@ export const EditFieldHeaderForm = ({ defaultValue }: Props) => {
             </EuiFlexItem>
 
             {/* Field sub type (if any) */}
-            {typeDefinition && typeDefinition.subTypes && (
+            {subTypeOptions && (
               <EuiFlexItem grow={false}>
                 <UseField
                   path="subType"
-                  defaultValue={undefined}
+                  defaultValue={
+                    defaultValue.subType === undefined
+                      ? typeDefinition.subTypes!.types[0]
+                      : defaultValue.subType
+                  }
                   config={{
                     ...getFieldConfig('type'),
-                    label: typeDefinition.subTypes.label,
+                    label: typeDefinition.subTypes!.label,
                   }}
                   component={SelectField}
                   componentProps={{
                     euiFieldProps: {
-                      options: typeDefinition.subTypes.types.map(type => ({
-                        value: type,
-                        text: type,
-                      })),
+                      options: subTypeOptions,
                       hasNoInitialSelection: false,
                     },
                   }}

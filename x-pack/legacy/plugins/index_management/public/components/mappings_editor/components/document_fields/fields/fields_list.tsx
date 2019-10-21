@@ -19,13 +19,13 @@ export const FieldsList = React.memo(function FieldsListComponent({ fields, tree
   }
   return (
     <ul className="mappings-editor__fields-list">
-      {fields.map(field => (
-        <li key={field.id} className="mappings-editor__fields-list-item">
-          <FieldsListItemContainer
-            field={field}
-            treeDepth={treeDepth === undefined ? 0 : treeDepth}
-          />
-        </li>
+      {fields.map((field, index) => (
+        <FieldsListItemContainer
+          key={field.id}
+          field={field}
+          treeDepth={treeDepth === undefined ? 0 : treeDepth}
+          isLastItem={index === fields.length - 1}
+        />
       ))}
     </ul>
   );

@@ -9,6 +9,12 @@
 
 .mappings-editor {
   &__fields-list-item {
+    &--dotted-line {
+      > .mappings-editor__fields-list-item__field {
+        border-bottom-style: dashed;
+      }
+    }
+
     &__field {
       border-bottom: $euiBorderThin;
 
@@ -97,6 +103,16 @@
       }
     }
 
+    .mappings-editor__create-field-wrapper {
+      &--multi-field {
+        .mappings-editor__create-field-content {
+          &::before, &::after {
+            content: none;
+          }
+        }
+      }
+    }
+
     .mappings-editor__create-field-content {
       padding-left: $euiSizeXXL - $euiSizeXS; // [1]
     }
@@ -104,15 +120,18 @@
     .mappings-editor__fields-list .mappings-editor__fields-list-item__content {
       padding-left: $euiSizeXL; // [2]
 
+      &--toggle, &--multi-field {
+        &::before, &::after {
+          content: none;
+        }
+      }
+
       &--toggle {
         padding-left: 0;
+      }
 
-        &::before{
-          content: none;
-        }
-        &::after {
-          content: none;
-        }
+      &--multi-field {
+        padding-left: $euiSizeS;
       }
     }
 }

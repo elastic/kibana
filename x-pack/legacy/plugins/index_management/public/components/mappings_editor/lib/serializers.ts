@@ -6,8 +6,8 @@
 
 import { SerializerFunc } from '../shared_imports';
 import { Field, DataType, MainType, SubType } from '../types';
-import { INDEX_DEFAULT, DATA_TYPE_DEFINITION } from '../constants';
-import { getTypeFromSubType } from './utils';
+import { INDEX_DEFAULT, MAIN_DATA_TYPE_DEFINITION } from '../constants';
+import { getMainTypeFromSubType } from './utils';
 
 const sanitizeField = (field: Field): Field =>
   Object.entries(field)
@@ -31,8 +31,9 @@ export const fieldSerializer: SerializerFunc<Field> = (field: Field) => {
 };
 
 export const fieldDeserializer: SerializerFunc<Field> = (field: Field): Field => {
-  if (!DATA_TYPE_DEFINITION[field.type as MainType]) {
-    const type = getTypeFromSubType(field.type as SubType);
+  if (!MAIN_DATA_TYPE_DEFINITION[field.type as MainType]) {
+    // IF the type if not one of the main one, it is then probably a "sub" type.
+    const type = getMainTypeFromSubType(field.type as SubType);
     if (!type) {
       throw new Error(
         `Property type "${field.type}" not recognized and no subType was found for it.`
