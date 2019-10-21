@@ -62,4 +62,8 @@ export class AgentsLib {
   public unenroll = async (ids: string[]) => {
     return await this.adapter.unenrollByIds(ids);
   };
+
+  public unenrollByKuery = async (kuery: string = '') => {
+    return await this.adapter.unenrollByKuery(kuery);
+  };
 }

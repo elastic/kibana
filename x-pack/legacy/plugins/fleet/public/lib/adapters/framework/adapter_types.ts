@@ -15,6 +15,7 @@ export interface FrameworkAdapter {
   version: string;
   capabilities: { read: boolean; write: boolean };
   currentUser: FrameworkUser;
+  notifications: any;
   // Methods
   waitUntilFrameworkReady(): Promise<void>;
   renderUIAtPath(
