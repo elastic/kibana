@@ -11,7 +11,7 @@ Code indexes all imported repositories in order to keep them up to date. Indexes
 
 To perform a full reindex of your repository, go to the Code app, find the repository you want to update and click **Reindex**. The amount of time it takes to perform a full reindex depends on your cloud configuration and the amount of data being indexed. All existing data is cleaned and replaced with the latest code from the upstream HEAD branch. This <<code-semantic-nav, data>> includes:
 
-- **Document:** Each file in the repository
+- **Document:** The content of each file in the repository
 - **Symbols:** The semantic symbol/node such as `java.lang.String`
 - **Repository metadata:** The metadata of each git repository such as URL, name, and organization
 - **Commit:** The commit history of the repository
