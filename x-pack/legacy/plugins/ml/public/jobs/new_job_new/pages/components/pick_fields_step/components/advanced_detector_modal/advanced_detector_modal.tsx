@@ -12,6 +12,7 @@ import {
   EuiFlexGrid,
   EuiComboBoxOptionProps,
   EuiHorizontalRule,
+  EuiTextArea,
 } from '@elastic/eui';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { AdvancedJobCreator, JobCreatorType } from '../../../../../common/job_creator';
@@ -24,6 +25,8 @@ import { RichDetector } from '../../../../../common/job_creator/advanced_job_cre
 import { ES_FIELD_TYPES } from '../../../../../../../../../../../../src/plugins/data/public';
 import { ModalWrapper } from './modal_wrapper';
 import { MLCATEGORY } from '../../../../../../../../common/constants/field_types';
+import { detectorToString } from '../../../../../../../util/string_utils';
+import { createBasicDetector } from '../../../../../common/job_creator/util/default_configs';
 
 import {
   AggDescription,
@@ -32,6 +35,7 @@ import {
   OverFieldDescription,
   PartitionFieldDescription,
   ExcludeFrequentDescription,
+  DescriptionDescription,
 } from './descriptions';
 
 interface Props {
@@ -81,8 +85,11 @@ export const AdvancedDetectorModal: FC<Props> = ({
   const [excludeFrequentOption, setExcludeFrequentOption] = useState(
     createExcludeFrequentOption(detector.excludeFrequent)
   );
+  const [descriptionOption, setDescriptionOption] = useState(detector.description || '');
   const [fieldsEnabled, setFieldsEnabled] = useState(true);
+  const [excludeFrequentEnabled, setExcludeFrequentEnabled] = useState(true);
   const [fieldOptionEnabled, setFieldOptionEnabled] = useState(true);
+  const { descriptionPlaceholder, setDescriptionPlaceholder } = useDetectorPlaceholder(detector);
 
   const aggOptions: EuiComboBoxOptionProps[] = aggs.map(createAggOption);
   const fieldOptions: EuiComboBoxOptionProps[] = fields
@@ -111,6 +118,9 @@ export const AdvancedDetectorModal: FC<Props> = ({
   useEffect(() => {
     const agg = getAgg(aggOption.label);
     let field = getField(fieldOption.label);
+    const byField = getField(byFieldOption.label);
+    const overField = getField(overFieldOption.label);
+    const partitionField = getField(partitionFieldOption.label);
 
     if (agg !== null) {
       setFieldsEnabled(true);
@@ -120,6 +130,8 @@ export const AdvancedDetectorModal: FC<Props> = ({
         field = eventRateField;
       } else {
         setFieldOptionEnabled(true);
+        // only enable exclude frequent if there is a by or over selected
+        setExcludeFrequentEnabled(byField !== null || overField !== null);
       }
     } else {
       setFieldsEnabled(false);
@@ -128,12 +140,14 @@ export const AdvancedDetectorModal: FC<Props> = ({
     const dtr: RichDetector = {
       agg,
       field,
-      byField: getField(byFieldOption.label),
-      overField: getField(overFieldOption.label),
-      partitionField: getField(partitionFieldOption.label),
+      byField,
+      overField,
+      partitionField,
       excludeFrequent: excludeFrequentOption.label !== '' ? excludeFrequentOption.label : null,
+      description: descriptionOption !== '' ? descriptionOption : null,
     };
     setDetector(dtr);
+    setDescriptionPlaceholder(dtr);
   }, [
     aggOption,
     fieldOption,
@@ -141,6 +155,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
     overFieldOption,
     partitionFieldOption,
     excludeFrequentOption,
+    descriptionOption,
   ]);
 
   useEffect(() => {
@@ -148,8 +163,19 @@ export const AdvancedDetectorModal: FC<Props> = ({
     setFieldsEnabled(aggOption.label !== '');
     if (agg !== null) {
       setFieldOptionEnabled(isFieldlessAgg(agg) === false);
+
+      const byField = getField(byFieldOption.label);
+      const overField = getField(overFieldOption.label);
+      setExcludeFrequentEnabled(byField !== null || overField !== null);
     }
   }, []);
+
+  useEffect(() => {
+    // wipe the exclude frequent choice if the select has been disabled
+    if (excludeFrequentEnabled === false) {
+      setExcludeFrequentOption(emptyOption);
+    }
+  }, [excludeFrequentEnabled]);
 
   function onCreateClick() {
     detectorChangeHandler(detector, payload.index);
@@ -228,9 +254,6 @@ export const AdvancedDetectorModal: FC<Props> = ({
               />
             </PartitionFieldDescription>
           </EuiFlexItem>
-        </EuiFlexGrid>
-        <EuiHorizontalRule margin="l" />
-        <EuiFlexGroup>
           <EuiFlexItem>
             <ExcludeFrequentDescription>
               <EuiComboBox
@@ -239,11 +262,24 @@ export const AdvancedDetectorModal: FC<Props> = ({
                 selectedOptions={[excludeFrequentOption]}
                 onChange={onOptionChange(setExcludeFrequentOption)}
                 isClearable={true}
-                isDisabled={fieldsEnabled === false}
+                isDisabled={fieldsEnabled === false || excludeFrequentEnabled === false}
               />
             </ExcludeFrequentDescription>
           </EuiFlexItem>
-          <EuiFlexItem />
+        </EuiFlexGrid>
+        <EuiHorizontalRule margin="l" />
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <DescriptionDescription>
+              <EuiTextArea
+                rows={2}
+                fullWidth={true}
+                placeholder={descriptionPlaceholder}
+                value={descriptionOption}
+                onChange={e => setDescriptionOption(e.target.value)}
+              />
+            </DescriptionDescription>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </Fragment>
     </ModalWrapper>
@@ -290,4 +326,28 @@ function createMlcategoryField(jobCreator: JobCreatorType): EuiComboBoxOptionPro
       label: MLCATEGORY,
     },
   ];
+}
+
+function useDetectorPlaceholder(detector: RichDetector) {
+  const [descriptionPlaceholder, setDescriptionPlaceholderString] = useState(
+    createDefaultDescription(detector)
+  );
+
+  function setDescriptionPlaceholder(dtr: RichDetector) {
+    setDescriptionPlaceholderString(createDefaultDescription(dtr));
+  }
+
+  return { descriptionPlaceholder, setDescriptionPlaceholder };
+}
+
+function createDefaultDescription(dtr: RichDetector) {
+  if (dtr.agg === null || dtr.field === null) {
+    return '';
+  }
+  const basicDetector = createBasicDetector(dtr.agg, dtr.field);
+  basicDetector.by_field_name = dtr.byField ? dtr.byField.id : undefined;
+  basicDetector.over_field_name = dtr.overField ? dtr.overField.id : undefined;
+  basicDetector.partition_field_name = dtr.partitionField ? dtr.partitionField.id : undefined;
+  basicDetector.exclude_frequent = dtr.excludeFrequent ? dtr.excludeFrequent : undefined;
+  return detectorToString(basicDetector);
 }

@@ -587,7 +587,15 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
           // If an anomaly coincides with a gap in the data, use the anomaly actual value.
           metricValue = Array.isArray(d.actual) ? d.actual[0] : d.actual;
         }
-        return d.lower !== undefined ? Math.min(metricValue, d.lower) : metricValue;
+        if (d.lower !== undefined) {
+          if (metricValue !== null && metricValue !== undefined) {
+            return Math.min(metricValue, d.lower);
+          } else {
+            // Set according to the minimum of the lower of the model plot results.
+            return d.lower;
+          }
+        }
+        return metricValue;
       });
       yMax = d3.max(combinedData, (d) => {
         let metricValue = d.value;
