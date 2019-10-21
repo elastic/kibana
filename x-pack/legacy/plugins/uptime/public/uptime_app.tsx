@@ -154,7 +154,7 @@ const Application = (props: UptimeAppProps) => {
                   <UptimeRefreshContext.Provider value={{ lastRefresh, ...rootRouteProps }}>
                     <UptimeSettingsContext.Provider value={initializeSettingsContextValues()}>
                       <EuiPage className="app-wrapper-panel " data-test-subj="uptimeApp">
-                        <div>
+                        <main>
                           <EuiFlexGroup
                             alignItems="center"
                             justifyContent="spaceBetween"
@@ -196,7 +196,7 @@ const Application = (props: UptimeAppProps) => {
                             />
                             <Route component={NotFoundPage} />
                           </Switch>
-                        </div>
+                        </main>
                       </EuiPage>
                     </UptimeSettingsContext.Provider>
                   </UptimeRefreshContext.Provider>

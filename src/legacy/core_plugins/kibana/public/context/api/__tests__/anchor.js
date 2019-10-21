@@ -19,55 +19,34 @@
 
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import sinon from 'sinon';
 
-import { createIndexPatternsStub } from './_stubs';
-import { SearchSourceProvider } from 'ui/courier';
+import { createIndexPatternsStub, createSearchSourceStub } from './_stubs';
 
 import { fetchAnchorProvider } from '../anchor';
-
-function createSearchSourceStubProvider(hits) {
-  const searchSourceStub = {
-    _stubHits: hits,
-  };
-
-  searchSourceStub.setParent = sinon.stub().returns(searchSourceStub);
-  searchSourceStub.setField = sinon.stub().returns(searchSourceStub);
-  searchSourceStub.fetch = sinon.spy(() => Promise.resolve({
-    hits: {
-      hits: searchSourceStub._stubHits,
-      total: searchSourceStub._stubHits.length,
-    },
-  }));
-
-  return function SearchSourceStubProvider() {
-    return searchSourceStub;
-  };
-}
 
 describe('context app', function () {
   beforeEach(ngMock.module('kibana'));
 
   describe('function fetchAnchor', function () {
     let fetchAnchor;
-    let SearchSourceStub;
+    let searchSourceStub;
 
     beforeEach(ngMock.module(function createServiceStubs($provide) {
       $provide.value('indexPatterns', createIndexPatternsStub());
     }));
 
     beforeEach(ngMock.inject(function createPrivateStubs(Private) {
-      SearchSourceStub = createSearchSourceStubProvider([
+      searchSourceStub = createSearchSourceStub([
         { _id: 'hit1' },
       ]);
-      Private.stub(SearchSourceProvider, SearchSourceStub);
-
       fetchAnchor = Private(fetchAnchorProvider);
     }));
 
-    it('should use the `fetch` method of the SearchSource', function () {
-      const searchSourceStub = new SearchSourceStub();
+    afterEach(() => {
+      searchSourceStub._restore();
+    });
 
+    it('should use the `fetch` method of the SearchSource', function () {
       return fetchAnchor('INDEX_PATTERN_ID', 'id', [{ '@timestamp': 'desc' }, { '_doc': 'desc' }])
         .then(() => {
           expect(searchSourceStub.fetch.calledOnce).to.be(true);
@@ -75,8 +54,6 @@ describe('context app', function () {
     });
 
     it('should configure the SearchSource to not inherit from the implicit root', function () {
-      const searchSourceStub = new SearchSourceStub();
-
       return fetchAnchor('INDEX_PATTERN_ID', 'id', [{ '@timestamp': 'desc' }, { '_doc': 'desc' }])
         .then(() => {
           const setParentSpy = searchSourceStub.setParent;
@@ -86,8 +63,6 @@ describe('context app', function () {
     });
 
     it('should set the SearchSource index pattern', function () {
-      const searchSourceStub = new SearchSourceStub();
-
       return fetchAnchor('INDEX_PATTERN_ID', 'id', [{ '@timestamp': 'desc' }, { '_doc': 'desc' }])
         .then(() => {
           const setFieldSpy = searchSourceStub.setField;
@@ -96,8 +71,6 @@ describe('context app', function () {
     });
 
     it('should set the SearchSource version flag to true', function () {
-      const searchSourceStub = new SearchSourceStub();
-
       return fetchAnchor('INDEX_PATTERN_ID', 'id', [{ '@timestamp': 'desc' }, { '_doc': 'desc' }])
         .then(() => {
           const setVersionSpy = searchSourceStub.setField.withArgs('version');
@@ -107,8 +80,6 @@ describe('context app', function () {
     });
 
     it('should set the SearchSource size to 1', function () {
-      const searchSourceStub = new SearchSourceStub();
-
       return fetchAnchor('INDEX_PATTERN_ID', 'id', [{ '@timestamp': 'desc' }, { '_doc': 'desc' }])
         .then(() => {
           const setSizeSpy = searchSourceStub.setField.withArgs('size');
@@ -118,8 +89,6 @@ describe('context app', function () {
     });
 
     it('should set the SearchSource query to an ids query', function () {
-      const searchSourceStub = new SearchSourceStub();
-
       return fetchAnchor('INDEX_PATTERN_ID', 'id', [{ '@timestamp': 'desc' }, { '_doc': 'desc' }])
         .then(() => {
           const setQuerySpy = searchSourceStub.setField.withArgs('query');
@@ -140,8 +109,6 @@ describe('context app', function () {
     });
 
     it('should set the SearchSource sort order', function () {
-      const searchSourceStub = new SearchSourceStub();
-
       return fetchAnchor('INDEX_PATTERN_ID', 'id', [{ '@timestamp': 'desc' }, { '_doc': 'desc' }])
         .then(() => {
           const setSortSpy = searchSourceStub.setField.withArgs('sort');
@@ -154,7 +121,6 @@ describe('context app', function () {
     });
 
     it('should reject with an error when no hits were found', function () {
-      const searchSourceStub = new SearchSourceStub();
       searchSourceStub._stubHits = [];
 
       return fetchAnchor('INDEX_PATTERN_ID', 'id', [{ '@timestamp': 'desc' }, { '_doc': 'desc' }])
@@ -169,7 +135,6 @@ describe('context app', function () {
     });
 
     it('should return the first hit after adding an anchor marker', function () {
-      const searchSourceStub = new SearchSourceStub();
       searchSourceStub._stubHits = [
         { property1: 'value1' },
         { property2: 'value2' },
