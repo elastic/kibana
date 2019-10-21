@@ -30,7 +30,7 @@ export const OverviewSideBar: FC = () => (
         <FormattedMessage
           id="xpack.ml.overview.gettingStartedSectionText"
           defaultMessage="Welcome to Machine Learning. Get started by reviewing our {docs} or {createJob}.
-          For more information about machine learning in the Elastic stack please {whatIsMachineLearning}.
+          For more information about machine learning in the Elastic stack please  see {whatIsMachineLearning}.
           We recommend using {transforms} to create feature indices for analytics jobs."
           values={{
             docs: (
