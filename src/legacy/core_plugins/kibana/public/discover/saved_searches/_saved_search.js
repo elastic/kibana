@@ -22,9 +22,7 @@ import { uiModules } from 'ui/modules';
 import { createLegacyClass } from 'ui/utils/legacy_class';
 import { SavedObjectProvider } from 'ui/saved_objects/saved_object';
 
-const module = uiModules.get('discover/saved_searches', [
-  'kibana/courier'
-]);
+const module = uiModules.get('discover/saved_searches', []);
 
 module.factory('SavedSearch', function (Private) {
   const SavedObject = Private(SavedObjectProvider);
