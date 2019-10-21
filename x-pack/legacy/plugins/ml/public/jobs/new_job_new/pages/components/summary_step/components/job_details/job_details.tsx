@@ -6,6 +6,7 @@
 
 import React, { FC, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
+import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiDescriptionList } from '@elastic/eui';
 import { JobCreatorContext } from '../../../job_creator_context';
@@ -16,10 +17,15 @@ import {
 } from '../../../../../common/job_creator';
 import { newJobDefaults } from '../../../../../utils/new_job_defaults';
 import { ListItems, falseLabel, trueLabel, defaultLabel, Italic } from '../common';
+import { useKibanaContext } from '../../../../../../../contexts/kibana';
 
 export const JobDetails: FC = () => {
   const { jobCreator } = useContext(JobCreatorContext);
+  const kibanaContext = useKibanaContext();
+  const dateFormat: string = kibanaContext.kibanaConfig.get('dateFormat');
   const { anomaly_detectors: anomalyDetectors } = newJobDefaults();
+
+  const isAdvanced = isAdvancedJobCreator(jobCreator);
 
   const modelMemoryLimitDefault = anomalyDetectors.model_memory_limit || '';
   const modelMemoryLimit =
@@ -117,7 +123,7 @@ export const JobDetails: FC = () => {
     });
   }
 
-  if (isAdvancedJobCreator(jobCreator) && jobCreator.categorizationFieldName !== null) {
+  if (isAdvanced && jobCreator.categorizationFieldName !== null) {
     detectorDetails.push({
       title: i18n.translate(
         'xpack.ml.newJob.wizard.summaryStep.jobDetails.categorizationField.title',
@@ -129,7 +135,7 @@ export const JobDetails: FC = () => {
     });
   }
 
-  if (isAdvancedJobCreator(jobCreator) && jobCreator.summaryCountFieldName !== null) {
+  if (isAdvanced && jobCreator.summaryCountFieldName !== null) {
     detectorDetails.push({
       title: i18n.translate(
         'xpack.ml.newJob.wizard.summaryStep.jobDetails.summaryCountField.title',
@@ -185,6 +191,21 @@ export const JobDetails: FC = () => {
     },
   ];
 
+  const timeRangeDetails: ListItems[] = [
+    {
+      title: i18n.translate('xpack.ml.newJob.wizard.summaryStep.timeRange.start.title', {
+        defaultMessage: 'Start',
+      }),
+      description: moment(jobCreator.start).format(dateFormat),
+    },
+    {
+      title: i18n.translate('xpack.ml.newJob.wizard.summaryStep.timeRange.end.title', {
+        defaultMessage: 'End',
+      }),
+      description: moment(jobCreator.end).format(dateFormat),
+    },
+  ];
+
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
@@ -196,6 +217,11 @@ export const JobDetails: FC = () => {
       <EuiFlexItem>
         <EuiDescriptionList compressed listItems={advancedDetails} />
       </EuiFlexItem>
+      {isAdvanced === false && (
+        <EuiFlexItem>
+          <EuiDescriptionList compressed listItems={timeRangeDetails} />
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };
