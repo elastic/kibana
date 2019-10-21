@@ -18,8 +18,13 @@
  */
 
 import _ from 'lodash';
-import { FilterBarQueryFilterProvider, uiRoutes, i18n, subscribeWithScope } from './dependencies';
-import { npStart } from 'ui/new_platform';
+import {
+  FilterBarQueryFilterProvider,
+  uiRoutes,
+  i18n,
+  subscribeWithScope,
+  npStart,
+} from './dependencies';
 
 import './context_app';
 import contextAppRouteTemplate from './context.html';

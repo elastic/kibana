@@ -85,7 +85,6 @@ const fetchStatuses = {
 };
 
 const app = uiModules.get('apps/discover', [
-  'kibana/courier',
   'kibana/url',
   'kibana/index_patterns'
 ]);
@@ -185,7 +184,6 @@ function discoverController(
   Private,
   Promise,
   config,
-  courier,
   kbnUrl,
   localStorage,
   uiCapabilities
@@ -220,7 +218,6 @@ function discoverController(
   $scope.minimumVisibleRows = 50;
   $scope.fetchStatus = fetchStatuses.UNINITIALIZED;
   $scope.refreshInterval = timefilter.getRefreshInterval();
-  $scope.savedQuery = $route.current.locals.savedQuery;
   $scope.showSaveQuery = uiCapabilities.discover.saveQuery;
 
   $scope.$watch(() => uiCapabilities.discover.saveQuery, (newCapability) => {
@@ -233,7 +230,10 @@ function discoverController(
 
   // the saved savedSearch
   const savedSearch = $route.current.locals.savedSearch;
+
+  let abortController;
   $scope.$on('$destroy', () => {
+    if (abortController) abortController.abort();
     savedSearch.destroy();
     subscriptions.unsubscribe();
   });
@@ -274,12 +274,12 @@ function discoverController(
             isTitleDuplicateConfirmed,
             onTitleDuplicate,
           };
-          return saveDataSource(saveOptions).then(({ id, error }) => {
+          return saveDataSource(saveOptions).then((response) => {
             // If the save wasn't successful, put the original values back.
-            if (!id || error) {
+            if (!response.id || response.error) {
               savedSearch.title = currentTitle;
             }
-            return { id, error };
+            return response;
           });
         };
 
@@ -549,6 +549,11 @@ function discoverController(
   };
 
   const shouldSearchOnPageLoad = () => {
+    // If a saved query is referenced in the app state, omit the initial load because the saved query will
+    // be fetched separately and trigger a reload
+    if ($scope.state.savedQuery) {
+      return false;
+    }
     // A saved search is created on every page load, so we check the ID to see if we're loading a
     // previously saved search or if it is just transient
     return config.get('discover:searchOnPageLoad')
@@ -751,7 +756,8 @@ function discoverController(
     $scope.updateTime();
 
     // Abort any in-progress requests before fetching again
-    $scope.searchSource.cancelQueued();
+    if (abortController) abortController.abort();
+    abortController = new AbortController();
 
     $scope.updateDataSource()
       .then(setupVisualization)
@@ -759,7 +765,9 @@ function discoverController(
         $state.save();
         $scope.fetchStatus = fetchStatuses.LOADING;
         logInspectorRequest();
-        return $scope.searchSource.fetch();
+        return $scope.searchSource.fetch({
+          abortSignal: abortController.signal
+        });
       })
       .then(onResults)
       .catch((error) => {
@@ -947,6 +955,8 @@ function discoverController(
 
   const updateStateFromSavedQuery = (savedQuery) => {
     $state.query = savedQuery.attributes.query;
+    $state.save();
+
     queryFilter.setFilters(savedQuery.attributes.filters || []);
 
     if (savedQuery.attributes.timefilter) {
@@ -978,7 +988,7 @@ function discoverController(
       return;
     }
 
-    if ($scope.savedQuery && newSavedQueryId !== $scope.savedQuery.id) {
+    if (!$scope.savedQuery || newSavedQueryId !== $scope.savedQuery.id) {
       savedQueryService.getSavedQuery(newSavedQueryId).then((savedQuery) => {
         $scope.$evalAsync(() => {
           $scope.savedQuery = savedQuery;
@@ -1036,8 +1046,8 @@ function discoverController(
     );
     visSavedObject.vis = $scope.vis;
 
-    $scope.searchSource.onRequestStart((searchSource, searchRequest) => {
-      return $scope.vis.getAggConfig().onSearchRequestStart(searchSource, searchRequest);
+    $scope.searchSource.onRequestStart((searchSource, options) => {
+      return $scope.vis.getAggConfig().onSearchRequestStart(searchSource, options);
     });
 
     $scope.searchSource.setField('aggs', function () {

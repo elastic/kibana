@@ -4,14 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FetchOptions } from 'apollo-link-http';
 import { isString, startsWith } from 'lodash';
 import LRU from 'lru-cache';
 import hash from 'object-hash';
-import { kfetch, KFetchOptions } from 'ui/kfetch';
-import { KFetchKibanaOptions } from 'ui/kfetch/kfetch';
+import { HttpServiceBase, HttpFetchOptions } from 'kibana/public';
 
-function fetchOptionsWithDebug(fetchOptions: KFetchOptions) {
+export type FetchOptions = HttpFetchOptions & {
+  pathname: string;
+  forceCache?: boolean;
+  method?: string;
+};
+
+function fetchOptionsWithDebug(fetchOptions: FetchOptions) {
   const debugEnabled =
     sessionStorage.getItem('apm_debug') === 'true' &&
     startsWith(fetchOptions.pathname, '/api/apm');
@@ -35,9 +39,11 @@ export function clearCache() {
   cache.reset();
 }
 
+export type CallApi = typeof callApi;
+
 export async function callApi<T = void>(
-  fetchOptions: KFetchOptions & { forceCache?: boolean },
-  options?: KFetchKibanaOptions
+  http: HttpServiceBase,
+  fetchOptions: FetchOptions
 ): Promise<T> {
   const cacheKey = getCacheKey(fetchOptions);
   const cacheResponse = cache.get(cacheKey);
@@ -45,8 +51,18 @@ export async function callApi<T = void>(
     return cacheResponse;
   }
 
-  const combinedFetchOptions = fetchOptionsWithDebug(fetchOptions);
-  const res = await kfetch(combinedFetchOptions, options);
+  const { pathname, method = 'get', ...options } = fetchOptionsWithDebug(
+    fetchOptions
+  );
+
+  const lowercaseMethod = method.toLowerCase() as
+    | 'get'
+    | 'post'
+    | 'put'
+    | 'delete'
+    | 'patch';
+
+  const res = await http[lowercaseMethod](pathname, options);
 
   if (isCachable(fetchOptions)) {
     cache.set(cacheKey, res);
@@ -57,7 +73,7 @@ export async function callApi<T = void>(
 
 // only cache items that has a time range with `start` and `end` params,
 // and where `end` is not a timestamp in the future
-function isCachable(fetchOptions: KFetchOptions & { forceCache?: boolean }) {
+function isCachable(fetchOptions: FetchOptions) {
   if (fetchOptions.forceCache) {
     return true;
   }

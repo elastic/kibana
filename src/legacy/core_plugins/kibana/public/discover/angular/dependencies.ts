@@ -33,6 +33,7 @@ export { angular };
 import { npStart } from 'ui/new_platform';
 const { chrome } = npStart.core;
 export { chrome };
+export { npStart } from 'ui/new_platform';
 
 // @ts-ignore
 export { uiModules } from 'ui/modules';

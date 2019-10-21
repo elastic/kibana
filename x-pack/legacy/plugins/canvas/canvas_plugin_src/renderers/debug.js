@@ -7,11 +7,14 @@
 import ReactDOM from 'react-dom';
 import React from 'react';
 import { Debug } from '../../public/components/debug';
+import { RendererStrings } from '../../i18n';
+
+const { debug: strings } = RendererStrings;
 
 export const debug = () => ({
   name: 'debug',
-  displayName: 'Debug',
-  help: 'Render debug output as formatted JSON',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelpDescription(),
   reuseDomNode: true,
   render(domNode, config, handlers) {
     const renderDebug = () => (

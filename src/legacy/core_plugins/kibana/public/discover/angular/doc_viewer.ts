@@ -19,18 +19,29 @@
 
 // @ts-ignore
 import { uiModules } from './dependencies';
-import { DocViewer } from '../doc_viewer';
+import { DocViewer } from '../doc_viewer/doc_viewer';
 
 uiModules.get('apps/discover').directive('docViewer', (reactDirective: any) => {
-  return reactDirective(DocViewer, undefined, {
-    restrict: 'E',
-    scope: {
-      hit: '=',
-      indexPattern: '=',
-      filter: '=?',
-      columns: '=?',
-      onAddColumn: '=?',
-      onRemoveColumn: '=?',
-    },
-  });
+  return reactDirective(
+    DocViewer,
+    [
+      'hit',
+      ['indexPattern', { watchDepth: 'reference' }],
+      ['filter', { watchDepth: 'reference' }],
+      ['columns', { watchDepth: 'collection' }],
+      ['onAddColumn', { watchDepth: 'reference' }],
+      ['onRemoveColumn', { watchDepth: 'reference' }],
+    ],
+    {
+      restrict: 'E',
+      scope: {
+        hit: '=',
+        indexPattern: '=',
+        filter: '=?',
+        columns: '=?',
+        onAddColumn: '=?',
+        onRemoveColumn: '=?',
+      },
+    }
+  );
 });
