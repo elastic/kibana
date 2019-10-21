@@ -31,6 +31,7 @@ const HostsBodyComponent = memo<HostsBodyComponentProps>(
     query,
     setAbsoluteRangeDatePicker,
     setQuery,
+    timezone,
     to,
   }) => {
     return (
@@ -50,6 +51,7 @@ const HostsBodyComponent = memo<HostsBodyComponentProps>(
                 skip: isInitializing,
                 setQuery,
                 startDate: from,
+                timezone,
                 type: hostsModel.HostsType.page,
                 indexPattern,
                 narrowDateRange: (score: Anomaly, interval: string) => {

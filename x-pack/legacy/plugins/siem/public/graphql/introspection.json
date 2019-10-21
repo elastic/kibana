@@ -2351,6 +2351,12 @@
               "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
             },
             "defaultValue": null
+          },
+          {
+            "name": "time_zone",
+            "description": "The default browser set time_zone",
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "defaultValue": null
           }
         ],
         "interfaces": null,
