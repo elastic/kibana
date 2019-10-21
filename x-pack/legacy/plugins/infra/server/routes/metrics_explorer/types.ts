@@ -24,7 +24,7 @@ export enum MetricsExplorerAggregation {
 
 export interface MetricsExplorerMetric {
   aggregation: MetricsExplorerAggregation;
-  field?: string | null;
+  field?: string | undefined;
 }
 
 export interface MetricsExplorerRequest {

@@ -26,14 +26,14 @@ import { timefilter } from 'ui/timefilter';
 import observeResize from '../../lib/observe_resize';
 // @ts-ignore
 import { calculateInterval, DEFAULT_TIME_FORMAT } from '../../../common/lib';
-import { TimelionStartDependencies } from '../../plugin';
+import { TimelionVisualizationDependencies } from '../../plugin';
 import { tickFormatters } from '../../services/tick_formatters';
 import { xaxisFormatterProvider } from './xaxis_formatter';
 import { generateTicksProvider } from './tick_generator';
 
 const DEBOUNCE_DELAY = 50;
 
-export function timechartFn(dependencies: TimelionStartDependencies) {
+export function timechartFn(dependencies: TimelionVisualizationDependencies) {
   const { $rootScope, $compile, uiSettings } = dependencies;
   return function() {
     return {

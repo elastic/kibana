@@ -18,7 +18,7 @@
  */
 
 interface Actions {
-  input: any;
+  input: any; // TODO: Wrap this in an editor interface
   sendCurrentRequestToES: () => void;
   openDocumentation: () => void;
 }

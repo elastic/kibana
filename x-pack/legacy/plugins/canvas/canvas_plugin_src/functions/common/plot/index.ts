@@ -16,7 +16,7 @@ import { getFlotAxisConfig } from './get_flot_axis_config';
 import { getFontSpec } from './get_font_spec';
 import { seriesStyleToFlot } from './series_style_to_flot';
 import { getTickHash } from './get_tick_hash';
-import { getFunctionHelp } from '../../../strings';
+import { getFunctionHelp } from '../../../../i18n';
 import { AxisConfig, PointSeries, Render, SeriesStyle, Palette, Legend } from '../../../../types';
 
 interface Arguments {

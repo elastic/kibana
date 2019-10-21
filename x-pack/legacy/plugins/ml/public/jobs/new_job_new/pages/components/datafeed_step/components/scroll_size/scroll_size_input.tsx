@@ -6,7 +6,7 @@
 
 import React, { FC, useState, useContext, useEffect } from 'react';
 import { EuiFieldNumber } from '@elastic/eui';
-import { newJobDefaults } from '../../../../../../new_job/utils/new_job_defaults';
+import { newJobDefaults } from '../../../../../utils/new_job_defaults';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { Description } from './description';
 
@@ -20,7 +20,7 @@ export const ScrollSizeInput: FC = () => {
   );
 
   const { datafeeds } = newJobDefaults();
-  const { scroll_size: scrollSizeDefault } = datafeeds;
+  const scrollSizeDefault = datafeeds.scroll_size !== undefined ? `${datafeeds.scroll_size}` : '';
 
   useEffect(() => {
     jobCreator.scrollSize = scrollSizeString === '' ? null : +scrollSizeString;
