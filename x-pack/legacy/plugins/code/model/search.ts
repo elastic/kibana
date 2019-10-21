@@ -231,3 +231,64 @@ export interface SearchOptions {
   defaultRepoScopeOn: boolean;
   defaultRepoScope?: Repository;
 }
+
+export function emptySearchResult(): SearchResult {
+  return {
+    total: 0,
+    took: 0,
+  };
+}
+
+export function emptyRepositorySearchResult(): RepositorySearchResult {
+  return {
+    ...emptySearchResult(),
+    repositories: [],
+    from: 0,
+    page: 0,
+    totalPage: 0,
+  };
+}
+
+export function emptySymbolSearchResult(): SymbolSearchResult {
+  return {
+    ...emptySearchResult(),
+    symbols: [],
+  };
+}
+
+export function emptyDocumentSearchResult(query: string): DocumentSearchResult {
+  return {
+    ...emptySearchResult(),
+    query,
+    from: 0,
+    page: 0,
+    totalPage: 0,
+    stats: {
+      total: 0,
+      from: 0,
+      to: 0,
+      page: 0,
+      totalPage: 0,
+      repoStats: [],
+      languageStats: [],
+    },
+    results: [],
+    repoAggregations: [],
+    langAggregations: [],
+  };
+}
+
+export function emptyCommitSearchResult(query: string): CommitSearchResult {
+  return {
+    ...emptyDocumentSearchResult(query),
+    commits: [],
+  };
+}
+
+export function emptyIntegrationsSearchResult(): IntegrationsSearchResult {
+  return {
+    ...emptySearchResult(),
+    results: [],
+    fallback: false,
+  };
+}

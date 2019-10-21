@@ -26,11 +26,19 @@ export interface GraphAppProps extends SearchBarProps {
   store: Storage;
   reduxStore: GraphStore;
   isInitialized: boolean;
+  noIndexPatterns: boolean;
 }
 
 export function GraphApp(props: GraphAppProps) {
   const [pickerOpen, setPickerOpen] = useState(false);
-  const { coreStart, pluginDataStart, store, reduxStore, ...searchBarProps } = props;
+  const {
+    coreStart,
+    pluginDataStart,
+    store,
+    reduxStore,
+    noIndexPatterns,
+    ...searchBarProps
+  } = props;
 
   return (
     <I18nProvider>
@@ -51,6 +59,7 @@ export function GraphApp(props: GraphAppProps) {
             </div>
             {!props.isInitialized && (
               <GuidancePanel
+                noIndexPatterns={noIndexPatterns}
                 onOpenFieldPicker={() => {
                   setPickerOpen(true);
                 }}

@@ -61,10 +61,12 @@ export class GithubApi {
     }
   }
 
-  async getAllFailedTestIssues() {
-    this.log.info('Fetching failed-test issues');
-    const issues: GithubIssue[] = [];
-    let nextRequest: RequestOptions = {
+  private failedTestIssuesPageCache: {
+    pages: GithubIssue[][];
+    nextRequest: RequestOptions | undefined;
+  } = {
+    pages: [],
+    nextRequest: {
       safeForDryRun: true,
       method: 'GET',
       url: Url.resolve(BASE_URL, 'issues'),
@@ -72,30 +74,55 @@ export class GithubApi {
         state: 'all',
         per_page: '100',
         labels: 'failed-test',
+        sort: 'updated',
+        direction: 'desc',
       },
-    };
+    },
+  };
 
-    while (true) {
-      const resp = await this.request<GithubIssue[]>(nextRequest, []);
+  /**
+   * Iterate the `failed-test` issues from elastic/kibana, each response
+   * from Github is cached and subsequent calls to this method will first
+   * iterate the previous responses from Github, then start requesting
+   * more pages of issues from github until all pages have been cached.
+   *
+   * Aborting the iterator part way through will prevent unnecessary request
+   * to Github from being issued.
+   */
+  async *iterateCachedFailedTestIssues() {
+    const cache = this.failedTestIssuesPageCache;
 
-      for (const issue of resp.data) {
-        issues.push(issue);
+    // start from page 0, and progress forward if we have cache or a request that will load that cache page
+    for (let page = 0; page < cache.pages.length || cache.nextRequest; page++) {
+      if (page >= cache.pages.length && cache.nextRequest) {
+        const resp = await this.request<GithubIssue[]>(cache.nextRequest, []);
+        cache.pages.push(resp.data);
+
+        const link =
+          typeof resp.headers.link === 'string' ? parseLinkHeader(resp.headers.link) : undefined;
+
+        cache.nextRequest =
+          link && link.next && link.next.url
+            ? {
+                safeForDryRun: true,
+                method: 'GET',
+                url: link.next.url,
+              }
+            : undefined;
       }
 
-      const parsed =
-        typeof resp.headers.link === 'string' ? parseLinkHeader(resp.headers.link) : undefined;
-      if (parsed && parsed.next && parsed.next.url) {
-        nextRequest = {
-          safeForDryRun: true,
-          method: 'GET',
-          url: parsed.next.url,
-        };
-      } else {
-        break;
+      for (const issue of cache.pages[page]) {
+        yield issue;
       }
     }
+  }
 
-    return issues;
+  async findFailedTestIssue(test: (issue: GithubIssue) => boolean) {
+    for await (const issue of this.iterateCachedFailedTestIssues()) {
+      if (test(issue)) {
+        return issue;
+      }
+    }
   }
 
   async editIssueBodyAndEnsureOpen(issueNumber: number, newBody: string) {

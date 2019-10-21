@@ -33,10 +33,14 @@ import {
 import { Filter } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
-import { getFilterDisplayText } from '../filter_bar/filter_view';
+import { IndexPattern } from '../../index_patterns';
+import { getDisplayValueFromFilter } from '../filter_bar/filter_editor/lib/filter_editor_utils';
+import { getFilterDisplayText } from '../filter_bar/filter_editor/lib/get_filter_display_text';
+import { mapAndFlattenFilters } from '../filter_manager/lib/map_and_flatten_filters';
 
 interface Props {
   filters: Filter[];
+  indexPatterns: IndexPattern[];
   onCancel: () => void;
   onSubmit: (filters: Filter[]) => void;
 }
@@ -57,17 +61,24 @@ export class ApplyFiltersPopover extends Component<Props, State> {
     };
   }
 
+  private getLabel(filter: Filter) {
+    const filterDisplayValue = getDisplayValueFromFilter(filter, this.props.indexPatterns);
+    return getFilterDisplayText(filter, filterDisplayValue);
+  }
+
   public render() {
     if (this.props.filters.length === 0) {
       return '';
     }
 
+    const mappedFilters = mapAndFlattenFilters(this.props.filters);
+
     const form = (
       <EuiForm>
-        {this.props.filters.map((filter, i) => (
+        {mappedFilters.map((filter, i) => (
           <EuiFormRow key={i}>
             <EuiSwitch
-              label={getFilterDisplayText(filter)}
+              label={this.getLabel(filter)}
               checked={this.isFilterSelected(i)}
               onChange={() => this.toggleFilterSelected(i)}
             />

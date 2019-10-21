@@ -28,6 +28,7 @@ describe('DiscoverFieldSearch', () => {
       onChange: jest.fn(),
       onShowFilter: jest.fn(),
       showFilter: false,
+      filtersActive: 0,
       value: 'test',
     };
     const comp = mountWithIntl(<DiscoverFieldSearch {...props} />);
@@ -49,10 +50,21 @@ describe('DiscoverFieldSearch', () => {
     expect(props.onShowFilter).toBeCalledTimes(1);
   });
 
-  test('change showFilter value should change button label', () => {
-    const { btn, comp } = mountComponent();
-    const prevFilterBtnHTML = btn.html();
+  test('change showFilter value should change aria label', () => {
+    const { comp } = mountComponent();
+    let btn = findTestSubject(comp, 'toggleFieldFilterButton');
+    expect(btn.prop('aria-label')).toEqual('Show field filter settings');
     comp.setProps({ showFilter: true });
-    expect(btn.html()).not.toBe(prevFilterBtnHTML);
+    btn = findTestSubject(comp, 'toggleFieldFilterButton');
+    expect(btn.prop('aria-label')).toEqual('Hide field filter settings');
+  });
+
+  test('change filtersActive should change facet selection', () => {
+    const { comp } = mountComponent();
+    let btn = findTestSubject(comp, 'toggleFieldFilterButton');
+    expect(btn.hasClass('euiFacetButton--isSelected')).toBeFalsy();
+    comp.setProps({ filtersActive: 3 });
+    btn = findTestSubject(comp, 'toggleFieldFilterButton');
+    expect(btn.hasClass('euiFacetButton--isSelected')).toBe(true);
   });
 });

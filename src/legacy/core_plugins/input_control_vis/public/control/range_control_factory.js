@@ -64,13 +64,13 @@ class RangeControl extends Control {
 
     const fieldName = this.filterManager.fieldName;
 
-    const aggs = minMaxAgg(indexPattern.fields.byName[fieldName]);
+    const aggs = minMaxAgg(indexPattern.fields.getByName(fieldName));
     const searchSource = createSearchSource(this.kbnApi, null, indexPattern, aggs, this.useTimeFilter);
-    this.abortController.signal.addEventListener('abort', () => searchSource.cancelQueued());
+    const abortSignal = this.abortController.signal;
 
     let resp;
     try {
-      resp = await searchSource.fetch();
+      resp = await searchSource.fetch({ abortSignal });
     } catch(error) {
       // If the fetch was aborted then no need to surface this error in the UI
       if (error.name === 'AbortError') return;

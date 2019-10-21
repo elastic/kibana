@@ -27,8 +27,9 @@
 /x-pack/test/functional/apps/code/  @teams/code
 /x-pack/test/api_integration/apis/code/  @teams/code
 
-# Infrastructure and Logs UI
-/x-pack/legacy/plugins/infra/ @elastic/infra-logs-ui
+# Logs & Metrics UI
+/x-pack/legacy/plugins/infra/ @elastic/logs-metrics-ui
+/x-pack/legacy/plugins/integrations_manager/ @elastic/epm
 
 # Machine Learning
 /x-pack/legacy/plugins/ml/  @elastic/ml-ui
@@ -46,7 +47,6 @@
 # Platform
 /src/core/  @elastic/kibana-platform
 /src/legacy/server/saved_objects/  @elastic/kibana-platform
-/src/legacy/ui/public/saved_objects  @elastic/kibana-platform
 /config/kibana.yml @elastic/kibana-platform
 /x-pack/plugins/features/  @elastic/kibana-platform
 
@@ -56,6 +56,7 @@
 /x-pack/legacy/plugins/encrypted_saved_objects/  @elastic/kibana-security
 /src/legacy/server/csp/ @elastic/kibana-security
 /x-pack/plugins/security/  @elastic/kibana-security
+/x-pack/test/api_integration/apis/security/ @elastic/kibana-security
 
 # Kibana Stack Services
 /packages/kbn-analytics/ @elastic/kibana-stack-services
@@ -80,6 +81,9 @@
 /x-pack/legacy/plugins/rollup/  @elastic/es-ui
 /x-pack/legacy/plugins/searchprofiler/  @elastic/es-ui
 /x-pack/legacy/plugins/snapshot_restore/  @elastic/es-ui
+# ML team owns the transform plugin, ES team added here for visibility
+# because the plugin lives in Kibana's Elasticsearch management section.
+/x-pack/legacy/plugins/transform/  @elastic/es-ui
 /x-pack/legacy/plugins/watcher/  @elastic/es-ui
 
 # Kibana TSVB external contractors

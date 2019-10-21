@@ -20,7 +20,7 @@
 import { Filter, FILTERS } from '@kbn/es-query';
 import { find, keys, get } from 'lodash';
 
-export const mapDefault = async (filter: Filter) => {
+export const mapDefault = (filter: Filter) => {
   const metaProperty = /(^\$|meta)/;
   const key = find(keys(filter), item => !item.match(metaProperty));
 

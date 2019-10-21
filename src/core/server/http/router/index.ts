@@ -37,10 +37,12 @@ export {
   ResponseError,
   ResponseErrorAttributes,
   KibanaResponse,
+  IKibanaResponse,
   kibanaResponseFactory,
   KibanaResponseFactory,
   lifecycleResponseFactory,
   LifecycleResponseFactory,
+  isKibanaResponse,
 } from './response';
 
 export { IKibanaSocket } from './socket';

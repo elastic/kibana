@@ -137,7 +137,9 @@ describe.skip('<PolicyAdd />', () => {
           form.setInputValue('maxCountInput', MAX_COUNT);
           find('maxCountInput').simulate('blur');
 
-          expect(form.getErrorsMessages()).toEqual(['Min count cannot be greater than max count.']);
+          expect(form.getErrorsMessages()).toEqual([
+            'Minimum count cannot be greater than maximum count.',
+          ]);
         });
       });
     });
