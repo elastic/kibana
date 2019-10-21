@@ -43,24 +43,21 @@ import {
 export function initGraphApp(angularModule, deps) {
   const {
     xpackInfo,
-    fatalError,
     chrome,
     savedGraphWorkspaces,
     toastNotifications,
-    savedObjectsClient, //Private(SavedObjectsClientProvider)
-    indexPatterns, //data.indexPatterns.indexPatterns
+    savedObjectsClient,
+    indexPatterns,
     kbnBaseUrl,
     addBasePath,
     getBasePath,
     npData,
-    config, //uiSettings?
-    savedObjectRegistry, //Private(SavedObjectRegistryProvider)
+    config,
+    savedObjectRegistry,
     capabilities,
-    coreStart, //coreStart
-    confirmModal,
-    $http, //$http
+    coreStart,
+    $http,
     Storage,
-    KbnUrlProvider,
     canEditDrillDownUrls,
     graphSavePolicy,
   } = deps;
@@ -188,7 +185,7 @@ export function initGraphApp(angularModule, deps) {
 
 
   //========  Controller for basic UI ==================
-  app.controller('graphuiPlugin', function ($scope, $route, $location) {
+  app.controller('graphuiPlugin', function ($scope, $route, $location, confirmModal) {
     checkLicense(kbnBaseUrl);
 
     function handleError(err) {

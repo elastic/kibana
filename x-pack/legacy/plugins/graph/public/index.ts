@@ -12,12 +12,9 @@ import 'uiExports/autocompleteProviders';
 import 'ui/autoload/all';
 import chrome from 'ui/chrome';
 import { IPrivate } from 'ui/private';
-import { fatalError } from 'ui/notify';
 // @ts-ignore
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import { Storage } from 'ui/storage';
-// @ts-ignore
-import { SavedObjectsClientProvider } from 'ui/saved_objects';
 // @ts-ignore
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 
@@ -40,11 +37,9 @@ async function getAngularInjectedDependencies(): Promise<LegacyAngularInjectedDe
 
   return {
     $http: injector.get('$http'),
-    confirmModal: injector.get('confirmModal'),
     savedObjectRegistry: Private(SavedObjectRegistryProvider),
     kbnBaseUrl: injector.get('kbnBaseUrl'),
     savedGraphWorkspaces: Private(SavedWorkspacesProvider),
-    savedObjectsClient: Private(SavedObjectsClientProvider),
   };
 }
 
@@ -54,7 +49,6 @@ async function getAngularInjectedDependencies(): Promise<LegacyAngularInjectedDe
     __LEGACY: {
       xpackInfo,
       Storage,
-      fatalError,
     },
   });
   instance.start(npStart.core, {
