@@ -205,12 +205,15 @@ export class IndexWorker extends AbstractWorker {
       switch (type) {
         case IndexerType.COMMIT:
           p.commitIndexProgress = progress;
+          // Add the lsp index progress if necessary
           p.progress =
             progress.percentage +
             (indexStatus.indexProgress ? indexStatus.indexProgress.percentage : 0);
           break;
         case IndexerType.LSP:
+        case IndexerType.LSP_INC:
           p.indexProgress = progress;
+          // Add the commit index progress if necessary
           p.progress =
             progress.percentage +
             (indexStatus.commitIndexProgress ? indexStatus.commitIndexProgress.percentage : 0);
