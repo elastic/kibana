@@ -17,23 +17,28 @@
  * under the License.
  */
 
-import { getDefaultFormat } from '../get_default_format';
-import { NumberFormat } from '../../../../../../plugins/data/public';
+import { NumeralFormat } from './numeral';
+import { TextContextTypeConvert } from '../types';
 
-const getConfig = () => {
-  return '0,0.[000]';
-};
+export class PercentFormat extends NumeralFormat {
+  static id = 'percent';
+  static title = 'Percentage';
 
-describe('getDefaultFormat', () => {
+  id = PercentFormat.id;
+  title = PercentFormat.title;
 
-  it('should create default format', () => {
-    const DefaultFormat = getDefaultFormat(NumberFormat);
-    const defaultFormatObject = new DefaultFormat(null, getConfig);
-    const formatObject = new NumberFormat(null, getConfig);
-
-    expect(DefaultFormat.id).toEqual('');
-    expect(DefaultFormat.resolvedTitle).toEqual(NumberFormat.title);
-    expect(DefaultFormat.title).toEqual('- Default -');
-    expect(JSON.stringify(defaultFormatObject.params())).toEqual(JSON.stringify(formatObject.params()));
+  getParamDefaults = () => ({
+    pattern: this.getConfig('format:percent:defaultPattern'),
+    fractional: true,
   });
-});
+
+  textConvert: TextContextTypeConvert = val => {
+    const formatted = super.getConvertedValue(val);
+
+    if (this.param('fractional')) {
+      return formatted;
+    }
+
+    return String(Number(formatted) / 100);
+  };
+}

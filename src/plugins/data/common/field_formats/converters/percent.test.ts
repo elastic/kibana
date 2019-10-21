@@ -17,23 +17,24 @@
  * under the License.
  */
 
-import { getDefaultFormat } from '../get_default_format';
-import { NumberFormat } from '../../../../../../plugins/data/public';
+import { PercentFormat } from './percent';
 
-const getConfig = () => {
-  return '0,0.[000]';
-};
+describe('PercentFormat', () => {
+  const config: Record<string, any> = {};
 
-describe('getDefaultFormat', () => {
+  config['format:percent:defaultPattern'] = '0,0.[000]%';
 
-  it('should create default format', () => {
-    const DefaultFormat = getDefaultFormat(NumberFormat);
-    const defaultFormatObject = new DefaultFormat(null, getConfig);
-    const formatObject = new NumberFormat(null, getConfig);
+  const getConfig = (key: string) => config[key];
 
-    expect(DefaultFormat.id).toEqual('');
-    expect(DefaultFormat.resolvedTitle).toEqual(NumberFormat.title);
-    expect(DefaultFormat.title).toEqual('- Default -');
-    expect(JSON.stringify(defaultFormatObject.params())).toEqual(JSON.stringify(formatObject.params()));
+  test('default pattern', () => {
+    const formatter = new PercentFormat({}, getConfig);
+
+    expect(formatter.convert(0.99999)).toBe('99.999%');
+  });
+
+  test('custom pattern', () => {
+    const formatter = new PercentFormat({ pattern: '0,0%' }, getConfig);
+
+    expect(formatter.convert('0.99999')).toBe('100%');
   });
 });

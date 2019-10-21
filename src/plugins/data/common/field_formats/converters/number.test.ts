@@ -17,23 +17,24 @@
  * under the License.
  */
 
-import { getDefaultFormat } from '../get_default_format';
-import { NumberFormat } from '../../../../../../plugins/data/public';
+import { NumberFormat } from './number';
 
-const getConfig = () => {
-  return '0,0.[000]';
-};
+describe('NumberFormat', () => {
+  const config: Record<string, any> = {};
 
-describe('getDefaultFormat', () => {
+  config['format:number:defaultPattern'] = '0,0.[000]';
 
-  it('should create default format', () => {
-    const DefaultFormat = getDefaultFormat(NumberFormat);
-    const defaultFormatObject = new DefaultFormat(null, getConfig);
-    const formatObject = new NumberFormat(null, getConfig);
+  const getConfig = (key: string) => config[key];
 
-    expect(DefaultFormat.id).toEqual('');
-    expect(DefaultFormat.resolvedTitle).toEqual(NumberFormat.title);
-    expect(DefaultFormat.title).toEqual('- Default -');
-    expect(JSON.stringify(defaultFormatObject.params())).toEqual(JSON.stringify(formatObject.params()));
+  test('default pattern', () => {
+    const formatter = new NumberFormat({}, getConfig);
+
+    expect(formatter.convert(12.345678)).toBe('12.346');
+  });
+
+  test('custom pattern', () => {
+    const formatter = new NumberFormat({ pattern: '0,0' }, getConfig);
+
+    expect(formatter.convert('12.345678')).toBe('12');
   });
 });

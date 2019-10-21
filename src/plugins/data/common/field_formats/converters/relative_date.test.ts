@@ -17,23 +17,28 @@
  * under the License.
  */
 
-import { getDefaultFormat } from '../get_default_format';
-import { NumberFormat } from '../../../../../../plugins/data/public';
+import moment from 'moment-timezone';
+import { RelativeDateFormat } from './relative_date';
 
-const getConfig = () => {
-  return '0,0.[000]';
-};
+describe('Relative Date Format', () => {
+  let convert: Function;
 
-describe('getDefaultFormat', () => {
+  beforeEach(() => {
+    const relativeDate = new RelativeDateFormat({});
+    convert = relativeDate.convert.bind(relativeDate);
+  });
 
-  it('should create default format', () => {
-    const DefaultFormat = getDefaultFormat(NumberFormat);
-    const defaultFormatObject = new DefaultFormat(null, getConfig);
-    const formatObject = new NumberFormat(null, getConfig);
+  test('decoding an undefined or null date should return a "-"', () => {
+    expect(convert(null)).toBe('-');
+    expect(convert(undefined)).toBe('-');
+  });
 
-    expect(DefaultFormat.id).toEqual('');
-    expect(DefaultFormat.resolvedTitle).toEqual(NumberFormat.title);
-    expect(DefaultFormat.title).toEqual('- Default -');
-    expect(JSON.stringify(defaultFormatObject.params())).toEqual(JSON.stringify(formatObject.params()));
+  test('decoding invalid date should echo invalid value', () => {
+    expect(convert('not a valid date')).toBe('not a valid date');
+  });
+
+  test('should parse date values', () => {
+    const val = '2017-08-13T20:24:09.904Z';
+    expect(convert(val)).toBe(moment(val).fromNow());
   });
 });
