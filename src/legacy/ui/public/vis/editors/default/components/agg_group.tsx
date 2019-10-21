@@ -85,14 +85,12 @@ function DefaultEditorAggGroup({
   let bucketsError;
   if (lastParentPipelineAggTitle && groupName === AggGroupNames.Buckets && !group.length) {
     bucketsError = i18n.translate('common.ui.aggTypes.buckets.mustHaveBucketErrorMessage', {
-      defaultMessage:
-        'There is must be "Date Histogram" or "Histogram" aggregation when using "{type}" metric.',
-      values: { type: lastParentPipelineAggTitle },
+      defaultMessage: 'Add a bucket with "Date Histogram" or "Histogram" aggregation',
       description: 'Date Histogram and Histogram should not be translated',
     });
   }
 
-  const isGroupValid = Object.values(aggsState).every(item => item.valid) && !bucketsError;
+  const isGroupValid = !bucketsError && Object.values(aggsState).every(item => item.valid);
   const isAllAggsTouched = isInvalidAggsTouched(aggsState);
   const isMetricAggregationDisabled = useMemo(
     () => groupName === AggGroupNames.Metrics && getEnabledMetricAggsCount(group) === 1,
