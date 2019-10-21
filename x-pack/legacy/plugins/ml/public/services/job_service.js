@@ -404,7 +404,6 @@ class JobService {
     // return the promise chain
     return ml.validateJob(obj)
       .then((messages) => {
-        console.log('validate job', messages);
         return { success: true, messages };
       }).catch((err) => {
         msgs.error(i18n.translate('xpack.ml.jobService.jobValidationErrorMessage', {
