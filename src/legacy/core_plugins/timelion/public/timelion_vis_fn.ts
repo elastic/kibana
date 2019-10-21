@@ -32,7 +32,7 @@ interface Arguments {
 
 interface RenderValue {
   visData: Context;
-  visType: typeof name;
+  visType: 'timelion';
   visParams: VisParams;
 }
 
@@ -84,7 +84,7 @@ export const getTimelionVisualizationConfig = (
       as: 'visualization',
       value: {
         visParams,
-        visType: name,
+        visType: 'timelion',
         visData: response,
       },
     };
