@@ -26,10 +26,7 @@ export const FieldsListItemContainer = React.memo(function FieldsListItemContain
 
   const getField = (fieldId: string) => byId[fieldId];
 
-  const { id, childFields, hasChildFields, hasMultiFields, parentId } = field;
-  const parentField = parentId !== undefined ? byId[parentId] : undefined;
-
-  const isMultiField = parentField !== undefined ? parentField.canHaveMultiFields === true : false;
+  const { id, childFields, hasChildFields, hasMultiFields } = field;
   const isHighlighted = fieldToEdit === id;
   const isDimmed = status === 'editingField' && fieldToEdit !== id;
   const isCreateFieldFormVisible = status === 'creatingField' && fieldToAddFieldTo === id;
@@ -63,7 +60,6 @@ export const FieldsListItemContainer = React.memo(function FieldsListItemContain
       treeDepth={treeDepth}
       isHighlighted={isHighlighted}
       isDimmed={isDimmed}
-      isMultiField={isMultiField}
       isCreateFieldFormVisible={isCreateFieldFormVisible}
       areActionButtonsVisible={areActionButtonsVisible}
       childFieldsArray={childFieldsArray}

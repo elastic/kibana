@@ -25,7 +25,6 @@ interface Props {
   areActionButtonsVisible: boolean;
   isHighlighted: boolean;
   isDimmed: boolean;
-  isMultiField: boolean;
   childFieldsArray: NormalizedField[];
   maxNestedDepth: number;
   addField(): void;
@@ -41,7 +40,6 @@ export const FieldsListItem = React.memo(function FieldListItemComponent({
   field,
   isHighlighted,
   isDimmed,
-  isMultiField,
   isCreateFieldFormVisible,
   areActionButtonsVisible,
   childFieldsArray,
@@ -53,6 +51,7 @@ export const FieldsListItem = React.memo(function FieldListItemComponent({
 }: Props) {
   const {
     source,
+    isMultiField,
     childFields,
     canHaveChildFields,
     hasChildFields,

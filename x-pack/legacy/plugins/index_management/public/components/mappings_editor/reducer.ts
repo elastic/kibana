@@ -68,6 +68,7 @@ export const addFieldToState = (field: Field, state: State): State => {
   const { fieldToAddFieldTo } = state.documentFields;
   const addToRootLevel = fieldToAddFieldTo === undefined;
   const parentField = addToRootLevel ? undefined : state.fields.byId[fieldToAddFieldTo!];
+  const isMultiField = parentField ? parentField.canHaveMultiFields : false;
 
   const rootLevelFields = addToRootLevel
     ? [...state.fields.rootLevelFields, id]
@@ -81,6 +82,7 @@ export const addFieldToState = (field: Field, state: State): State => {
   state.fields.byId[id] = {
     id,
     parentId: fieldToAddFieldTo,
+    isMultiField,
     source: field,
     path,
     nestedDepth,

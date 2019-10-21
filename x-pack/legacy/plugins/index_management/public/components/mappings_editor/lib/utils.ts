@@ -152,6 +152,7 @@ export const normalize = (fieldsToNormalize: Fields): NormalizedFields => {
     paths: string[],
     idsArray: string[],
     nestedDepth: number,
+    isMultiField: boolean = false,
     parentId?: string
   ): Record<string, any> =>
     Object.entries(props).reduce((acc, [propName, value]) => {
@@ -165,12 +166,14 @@ export const normalize = (fieldsToNormalize: Fields): NormalizedFields => {
         const nextDepth = meta.canHaveChildFields ? nestedDepth + 1 : nestedDepth;
         meta.childFields = [];
         maxNestedDepth = Math.max(maxNestedDepth, nextDepth);
+
         normalizeFields(
           field[meta.childFieldsName!]!,
           to,
           [...paths, propName],
           meta.childFields,
           nextDepth,
+          meta.canHaveMultiFields,
           id
         );
       }
@@ -181,6 +184,7 @@ export const normalize = (fieldsToNormalize: Fields): NormalizedFields => {
         id,
         parentId,
         nestedDepth,
+        isMultiField,
         path: paths.length ? `${paths.join('.')}.${propName}` : propName,
         source: rest,
         ...meta,

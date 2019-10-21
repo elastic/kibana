@@ -125,6 +125,7 @@ export interface NormalizedField extends FieldMeta {
   nestedDepth: number;
   path: string;
   source: Omit<Field, 'properties' | 'fields'>;
+  isMultiField: boolean;
 }
 
 export type ChildFieldName = 'properties' | 'fields';
