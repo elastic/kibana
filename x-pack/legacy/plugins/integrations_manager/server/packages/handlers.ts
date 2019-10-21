@@ -95,7 +95,8 @@ export async function handleRequestInstall(req: InstallPackageRequest, extra: Ex
 export async function handleRequestDelete(req: DeletePackageRequest, extra: Extra) {
   const { pkgkey } = req.params;
   const savedObjectsClient = getClient(req);
-  const deleted = await removeInstallation({ savedObjectsClient, pkgkey });
+  const callCluster = getClusterAccessor(extra.context.esClient, req);
+  const deleted = await removeInstallation({ savedObjectsClient, pkgkey, callCluster });
 
   return deleted;
 }
