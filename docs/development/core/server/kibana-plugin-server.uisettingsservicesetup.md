@@ -15,5 +15,5 @@ export interface UiSettingsServiceSetup
 
 |  Method | Description |
 |  --- | --- |
-|  [setDefaults(values)](./kibana-plugin-server.uisettingsservicesetup.setdefaults.md) | Sets settings with default values for the uiSettings. |
+|  [register(settings)](./kibana-plugin-server.uisettingsservicesetup.register.md) | Sets settings with default values for the uiSettings. |
 

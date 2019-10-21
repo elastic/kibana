@@ -739,7 +739,7 @@ export interface InternalCoreStart {
 // @internal (undocumented)
 export interface InternalUiSettingsServiceSetup {
     asScopedToClient(savedObjectsClient: SavedObjectsClientContract): IUiSettingsClient;
-    setDefaults(values: Record<string, UiSettingsParams>): void;
+    register(settings: Record<string, UiSettingsParams>): void;
 }
 
 // @public
@@ -765,7 +765,7 @@ export type IScopedClusterClient = Pick<ScopedClusterClient, 'callAsCurrentUser'
 export interface IUiSettingsClient {
     get: <T extends SavedObjectAttribute = any>(key: string) => Promise<T>;
     getAll: <T extends SavedObjectAttribute = any>() => Promise<Record<string, T>>;
-    getDefaults: () => Readonly<Record<string, UiSettingsParams>>;
+    getRegistered: () => Readonly<Record<string, UiSettingsParams>>;
     getUserProvided: <T extends SavedObjectAttribute = any>() => Promise<Record<string, {
         userValue?: T;
         isOverridden?: boolean;
@@ -1613,7 +1613,7 @@ export interface UiSettingsParams {
 
 // @public (undocumented)
 export interface UiSettingsServiceSetup {
-    setDefaults(values: Record<string, UiSettingsParams>): void;
+    register(settings: Record<string, UiSettingsParams>): void;
 }
 
 // @public
