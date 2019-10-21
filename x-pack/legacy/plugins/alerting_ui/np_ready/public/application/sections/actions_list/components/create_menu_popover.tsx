@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import {
   EuiSpacer,
   EuiText,
@@ -16,8 +16,8 @@ import {
   EuiContextMenuItem,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { actionTypesSettings } from '../../../constants/action_types_settings';
 import { ActionType } from '../../../lib/api';
+import { ActionsContext } from '../../../context/app_context';
 
 interface Props {
   actionTypesIndex: Record<string, ActionType> | undefined;
@@ -29,10 +29,11 @@ export const AlertingActionsDropdown: React.FunctionComponent<Props> = ({
   createAction,
 }) => {
   const [isPopoverOpen, setIsPopOverOpen] = useState<boolean>(false);
-
-  const actions = Object.entries(!actionTypesIndex ? [] : actionTypesIndex).map(
-    ([actionType, { id, name }]: any) => {
-      const actionSettings = actionTypesSettings(id);
+  const { actionTypeRegistry } = useContext(ActionsContext);
+  const actions = Object.entries(!actionTypesIndex ? [] : actionTypesIndex)
+    .filter(aa => actionTypeRegistry.get(aa[1].id) !== null)
+    .map(([actionType, { id, name }]: any) => {
+      const actionSettings = actionTypeRegistry.get(id);
       const typeName = name;
       const iconClass = actionSettings.iconClass;
       const selectMessage = !actionSettings.selectMessage ? name : actionSettings.selectMessage;
@@ -43,8 +44,7 @@ export const AlertingActionsDropdown: React.FunctionComponent<Props> = ({
         iconClass,
         selectMessage,
       };
-    }
-  );
+    });
 
   const button = (
     <EuiButton

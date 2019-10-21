@@ -5,6 +5,7 @@
  */
 
 import React, { Fragment, useState, useEffect } from 'react';
+// @ts-ignore: EuiSearchBar not defined in TypeScript yet
 import { EuiPageContent, EuiBasicTable, EuiSpacer, EuiSearchBar, EuiButton } from '@elastic/eui';
 import { capabilities } from 'ui/capabilities';
 import { i18n } from '@kbn/i18n';
@@ -15,6 +16,7 @@ import { ActionsContext } from '../../../context/app_context';
 import { useAppDependencies } from '../../../index';
 import { AlertingActionsDropdown } from './create_menu_popover';
 import { ActionAdd } from '../../action_add';
+import { ActionTypeRegistry } from '../../../action_type_registry';
 
 type ActionTypeIndex = Record<string, ActionType>;
 interface Pagination {
@@ -30,6 +32,7 @@ const canDelete = capabilities.get().actions.delete;
 export const ActionsList: React.FunctionComponent = () => {
   const {
     core: { http },
+    actionTypeRegistry,
   } = useAppDependencies();
 
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
@@ -263,7 +266,11 @@ export const ActionsList: React.FunctionComponent = () => {
 
   return (
     <section data-test-subj="actionsList">
-      <ContentWrapper setFlyoutVisibility={setFlyoutVisibility} flyoutVisible={flyoutVisible}>
+      <ContentWrapper
+        setFlyoutVisibility={setFlyoutVisibility}
+        flyoutVisible={flyoutVisible}
+        actionTypeRegistry={actionTypeRegistry}
+      >
         <EuiSpacer size="m" />
         {content}
         {flyout}
@@ -275,16 +282,18 @@ export const ActionsList: React.FunctionComponent = () => {
 export const ContentWrapper = ({
   flyoutVisible,
   setFlyoutVisibility,
+  actionTypeRegistry,
   children,
 }: {
   flyoutVisible: boolean;
   setFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+  actionTypeRegistry: ActionTypeRegistry;
   children: React.ReactNode;
 }) => {
   return (
     <Fragment>
       <EuiSpacer size="s" />
-      <ActionsContext.Provider value={{ flyoutVisible, setFlyoutVisibility }}>
+      <ActionsContext.Provider value={{ flyoutVisible, setFlyoutVisibility, actionTypeRegistry }}>
         {children}
       </ActionsContext.Provider>
     </Fragment>

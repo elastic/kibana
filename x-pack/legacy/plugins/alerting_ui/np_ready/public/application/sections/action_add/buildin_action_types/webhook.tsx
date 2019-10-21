@@ -20,18 +20,64 @@ import {
 import { i18n } from '@kbn/i18n';
 import { ErrableFormRow } from '../../../components/page_error';
 import { Action } from '../../../lib/api';
-
-interface Props {
-  action: Action;
-  editActionConfig: (property: string, value: any) => void;
-  editActionSecrets: (property: string, value: any) => void;
-  errors: { [key: string]: string[] };
-  hasErrors: boolean;
-}
+import { ActionTypeModel, Props } from '../../../../types';
 
 const HTTP_VERBS = ['post', 'put'];
 
-export const WebhookActionFields: React.FunctionComponent<Props> = ({
+export function getActionType(): ActionTypeModel {
+  return {
+    id: '.webhook',
+    iconClass: 'logoWebhook',
+    selectMessage: i18n.translate('xpack.watcher.models.webhookAction.selectMessageText', {
+      defaultMessage: 'Send a request to a web service.',
+    }),
+    simulatePrompt: i18n.translate('xpack.watcher.models.webhookAction.simulateButtonLabel', {
+      defaultMessage: 'Send request',
+    }),
+    validate: (action: Action): any => {
+      const validationResult = { errors: {} };
+      const errors = {
+        url: new Array<string>(),
+        method: new Array<string>(),
+        user: new Array<string>(),
+        password: new Array<string>(),
+      };
+      validationResult.errors = errors;
+      if (!action.config.url) {
+        errors.url.push(
+          i18n.translate('xpack.alertingUI.sections.addAction.error.requiredUrlText', {
+            defaultMessage: 'Url is required.',
+          })
+        );
+      }
+      if (!action.config.method) {
+        errors.method.push(
+          i18n.translate('xpack.alertingUI.sections.addAction.error.requiredMethodText', {
+            defaultMessage: 'Method is required.',
+          })
+        );
+      }
+      if (!action.secrets.user) {
+        errors.user.push(
+          i18n.translate('xpack.alertingUI.sections.addAction.error.requiredHostText', {
+            defaultMessage: 'User is required.',
+          })
+        );
+      }
+      if (!action.secrets.password) {
+        errors.password.push(
+          i18n.translate('xpack.alertingUI.sections.addAction.error.requiredHostText', {
+            defaultMessage: 'Password is required.',
+          })
+        );
+      }
+      return validationResult;
+    },
+    actionFields: WebhookActionFields,
+  };
+}
+
+const WebhookActionFields: React.FunctionComponent<Props> = ({
   action,
   editActionConfig,
   editActionSecrets,
@@ -114,7 +160,7 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
             fullWidth
             errorKey="url"
             errors={errors}
-            isShowingErrors={hasErrors && url !== undefined}
+            isShowingErrors={hasErrors === true && url !== undefined}
             label={i18n.translate('xpack.alertingUI.sections.slackPassword.methodUrlLabel', {
               defaultMessage: 'Url',
             })}
@@ -143,7 +189,7 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
             errorKey="user"
             fullWidth
             errors={errors}
-            isShowingErrors={hasErrors && user !== undefined}
+            isShowingErrors={hasErrors === true && user !== undefined}
             label={i18n.translate('xpack.alertingUI.sections.webhookUser.userFieldLabel', {
               defaultMessage: 'User',
             })}
@@ -170,7 +216,7 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
             errorKey="password"
             fullWidth
             errors={errors}
-            isShowingErrors={hasErrors && password !== undefined}
+            isShowingErrors={hasErrors === true && password !== undefined}
             label={i18n.translate('xpack.alertingUI.sections.webhookPassword.methodPasswordLabel', {
               defaultMessage: 'Password',
             })}

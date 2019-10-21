@@ -11,6 +11,7 @@ import { CoreStart } from 'src/core/public';
 import { App } from './app';
 
 import { AppDependencies, AppPlugins } from '../../../public/shim';
+import { ActionTypeRegistry } from './action_type_registry';
 
 export { BASE_PATH as CLIENT_BASE_PATH } from './constants';
 
@@ -52,9 +53,10 @@ const getAppProviders = (deps: AppDependencies) => {
 export const renderReact = async (
   elem: HTMLElement | null,
   core: CoreStart,
-  plugins: AppPlugins
+  plugins: AppPlugins,
+  actionTypeRegistry: ActionTypeRegistry
 ) => {
-  const Providers = getAppProviders({ core, plugins });
+  const Providers = getAppProviders({ core, plugins, actionTypeRegistry });
 
   render(
     <Providers>

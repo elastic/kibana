@@ -14,6 +14,8 @@ import { renderReact } from './application';
 import { BASE_PATH } from './application/constants';
 import { breadcrumbService } from './application/lib/breadcrumb';
 import { textService } from './application/lib/text';
+import { ActionTypeRegistry } from './application/action_type_registry';
+import { registerBuiltInActionTypes } from './application/sections/action_add/buildin_action_types';
 
 export type Setup = void;
 export type Start = void;
@@ -21,6 +23,8 @@ export type Start = void;
 const REACT_ROOT_ID = 'alertingRoot';
 
 export class ActionsPlugin implements Plugin<Setup, Start> {
+  private actionTypeRegistry?: ActionTypeRegistry;
+
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, plugins: any): Setup {
@@ -33,6 +37,13 @@ export class ActionsPlugin implements Plugin<Setup, Start> {
     const {
       management: { getSection },
     } = plugins;
+
+    const actionTypeRegistry = new ActionTypeRegistry();
+    this.actionTypeRegistry = actionTypeRegistry;
+
+    registerBuiltInActionTypes({
+      actionTypeRegistry,
+    });
 
     const kbnSection = getSection('kibana');
     kbnSection.register('alerting', {
@@ -82,8 +93,8 @@ export class ActionsPlugin implements Plugin<Setup, Start> {
           $scope.$$postDigest(() => {
             unmountReactApp();
             const elReactRoot = document.getElementById(REACT_ROOT_ID);
-            if (elReactRoot) {
-              renderReact(elReactRoot, core, plugins);
+            if (elReactRoot && this.actionTypeRegistry) {
+              renderReact(elReactRoot, core, plugins, this.actionTypeRegistry);
             }
           });
         };

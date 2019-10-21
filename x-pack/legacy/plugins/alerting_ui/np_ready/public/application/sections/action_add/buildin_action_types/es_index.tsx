@@ -7,20 +7,26 @@ import React from 'react';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Action } from '../../../lib/api';
+import { ActionTypeModel, Props } from '../../../../types';
 
-interface Props {
-  action: Action;
-  editActionConfig: (property: string, value: any) => void;
-  errors: { [key: string]: string[] };
-  hasErrors: boolean;
+export function getActionType(): ActionTypeModel {
+  return {
+    id: '.index',
+    iconClass: 'indexOpen',
+    selectMessage: i18n.translate('xpack.watcher.models.indexAction.selectMessageText', {
+      defaultMessage: 'Index data into Elasticsearch.',
+    }),
+    simulatePrompt: i18n.translate('xpack.watcher.models.indexAction.simulateButtonLabel', {
+      defaultMessage: 'Index data',
+    }),
+    validate: (action: Action): any => {
+      return { errors: {} };
+    },
+    actionFields: IndexActionFields,
+  };
 }
 
-export const IndexActionFields: React.FunctionComponent<Props> = ({
-  action,
-  editActionConfig,
-  errors,
-  hasErrors,
-}) => {
+const IndexActionFields: React.FunctionComponent<Props> = ({ action, editActionConfig }) => {
   const { index }: any = action.config;
   return (
     <EuiFormRow

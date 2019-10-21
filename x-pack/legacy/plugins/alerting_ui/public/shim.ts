@@ -6,6 +6,7 @@
 
 import { management, MANAGEMENT_BREADCRUMB } from 'ui/management';
 import { CoreStart } from 'kibana/public';
+import { ActionTypeRegistry } from '../np_ready/public/application/action_type_registry';
 
 export interface AppPlugins {
   management: {
@@ -18,6 +19,7 @@ export interface AppPlugins {
 export interface AppDependencies {
   core: CoreStart;
   plugins: AppPlugins;
+  actionTypeRegistry: ActionTypeRegistry;
 }
 
 export function createShim() {

@@ -14,16 +14,76 @@ import {
 import { i18n } from '@kbn/i18n';
 import { Action } from '../../../lib/api';
 import { ErrableFormRow } from '../../../components/page_error';
+import { ActionTypeModel, Props } from '../../../../types';
 
-interface Props {
-  action: Action;
-  editActionConfig: (property: string, value: any) => void;
-  editActionSecrets: (property: string, value: any) => void;
-  errors: { [key: string]: string[] };
-  hasErrors: boolean;
+export function getActionType(): ActionTypeModel {
+  return {
+    id: '.email',
+    iconClass: 'email',
+    selectMessage: i18n.translate(
+      'xpack.alertingUI.sections.actions.emailAction.selectMessageText',
+      {
+        defaultMessage: 'Send an email from your server.',
+      }
+    ),
+    simulatePrompt: i18n.translate(
+      'xpack.alertingUI.sections.actions.emailAction.simulateButtonLabel',
+      {
+        defaultMessage: 'Send test email',
+      }
+    ),
+    validate: (action: Action): any => {
+      const validationResult = { errors: {} };
+      const errors = {
+        from: new Array<string>(),
+        port: new Array<string>(),
+        host: new Array<string>(),
+        user: new Array<string>(),
+        password: new Array<string>(),
+      };
+      validationResult.errors = errors;
+      if (!action.config.from) {
+        errors.from.push(
+          i18n.translate('xpack.alertingUI.sections.addAction.error.requiredFromText', {
+            defaultMessage: 'From is required.',
+          })
+        );
+      }
+      if (!action.config.port) {
+        errors.port.push(
+          i18n.translate('xpack.alertingUI.sections.addAction.error.requiredPortText', {
+            defaultMessage: 'Port is required.',
+          })
+        );
+      }
+      if (!action.config.host) {
+        errors.host.push(
+          i18n.translate('xpack.alertingUI.sections.addAction.error.requiredHostText', {
+            defaultMessage: 'Host is required.',
+          })
+        );
+      }
+      if (!action.secrets.user) {
+        errors.user.push(
+          i18n.translate('xpack.alertingUI.sections.addAction.error.requiredHostText', {
+            defaultMessage: 'User is required.',
+          })
+        );
+      }
+      if (!action.secrets.password) {
+        errors.password.push(
+          i18n.translate('xpack.alertingUI.sections.addAction.error.requiredHostText', {
+            defaultMessage: 'Password is required.',
+          })
+        );
+      }
+      return validationResult;
+    },
+    actionFields: EmailActionFields,
+  };
 }
 
-export const EmailActionFields: React.FunctionComponent<Props> = ({
+const EmailActionFields: React.FunctionComponent<Props> = ({
   action,
   editActionConfig,
   editActionSecrets,
@@ -40,7 +100,7 @@ export const EmailActionFields: React.FunctionComponent<Props> = ({
         errorKey="from"
         fullWidth
         errors={errors}
-        isShowingErrors={hasErrors && from !== undefined}
+        isShowingErrors={hasErrors === true && from !== undefined}
         label={i18n.translate('xpack.alertingUI.sections.actionAdd.emailAction.fromFieldLabel', {
           defaultMessage: 'From',
         })}
@@ -67,7 +127,7 @@ export const EmailActionFields: React.FunctionComponent<Props> = ({
             errorKey="host"
             fullWidth
             errors={errors}
-            isShowingErrors={hasErrors && host !== undefined}
+            isShowingErrors={hasErrors === true && host !== undefined}
             label={i18n.translate('xpack.alertingUI.sections.actionAdd.emailHost.hostFieldLabel', {
               defaultMessage: 'Host',
             })}
@@ -94,7 +154,7 @@ export const EmailActionFields: React.FunctionComponent<Props> = ({
             errorKey="port"
             fullWidth
             errors={errors}
-            isShowingErrors={hasErrors && port !== undefined}
+            isShowingErrors={hasErrors === true && port !== undefined}
             label={i18n.translate('xpack.alertingUI.sections.actionAdd.emailPort.methodPortLabel', {
               defaultMessage: 'Port',
             })}
@@ -124,7 +184,7 @@ export const EmailActionFields: React.FunctionComponent<Props> = ({
             errorKey="user"
             fullWidth
             errors={errors}
-            isShowingErrors={hasErrors && user !== undefined}
+            isShowingErrors={hasErrors === true && user !== undefined}
             label={i18n.translate('xpack.alertingUI.sections.actionAdd.emailUser.userFieldLabel', {
               defaultMessage: 'User',
             })}
@@ -151,7 +211,7 @@ export const EmailActionFields: React.FunctionComponent<Props> = ({
             errorKey="password"
             fullWidth
             errors={errors}
-            isShowingErrors={hasErrors && password !== undefined}
+            isShowingErrors={hasErrors === true && password !== undefined}
             label={i18n.translate(
               'xpack.alertingUI.sections.actionAdd.emailPassword.methodPasswordLabel',
               {

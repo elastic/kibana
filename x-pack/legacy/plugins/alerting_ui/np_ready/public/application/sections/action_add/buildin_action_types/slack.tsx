@@ -8,15 +8,44 @@ import { EuiFieldText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Action } from '../../../lib/api';
 import { ErrableFormRow } from '../../../components/page_error';
+import { ActionTypeModel, Props } from '../../../../types';
 
-interface Props {
-  action: Action;
-  editActionSecrets: (property: string, value: any) => void;
-  errors: { [key: string]: string[] };
-  hasErrors: boolean;
+export function getActionType(): ActionTypeModel {
+  return {
+    id: '.slack',
+    iconClass: 'logoSlack',
+    selectMessage: i18n.translate(
+      'xpack.alertingUI.sections.actions.slackAction.selectMessageText',
+      {
+        defaultMessage: 'Send a message to a Slack user or channel.',
+      }
+    ),
+    simulatePrompt: i18n.translate(
+      'xpack.alertingUI.sections.actions.slackAction.simulateButtonLabel',
+      {
+        defaultMessage: 'Send a sample message',
+      }
+    ),
+    validate: (action: Action): any => {
+      const validationResult = { errors: {} };
+      const errors = {
+        webhookUrl: new Array<string>(),
+      };
+      validationResult.errors = errors;
+      if (!action.secrets.webhookUrl) {
+        errors.webhookUrl.push(
+          i18n.translate('xpack.alertingUI.sections.addAction.error.requiredWebhookUrlText', {
+            defaultMessage: 'WebhookUrl is required.',
+          })
+        );
+      }
+      return validationResult;
+    },
+    actionFields: SlackActionFields,
+  };
 }
 
-export const SlackActionFields: React.FunctionComponent<Props> = ({
+const SlackActionFields: React.FunctionComponent<Props> = ({
   action,
   editActionSecrets,
   errors,
@@ -31,7 +60,7 @@ export const SlackActionFields: React.FunctionComponent<Props> = ({
         errorKey="webhookUrl"
         fullWidth
         errors={errors}
-        isShowingErrors={hasErrors && webhookUrl !== undefined}
+        isShowingErrors={hasErrors === true && webhookUrl !== undefined}
         label={i18n.translate(
           'xpack.alertingUI.sections.actionAdd.slackPassword.methodWebhookUrlLabel',
           {
