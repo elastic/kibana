@@ -22,6 +22,8 @@ import React from 'react';
 import { Subscription } from 'rxjs';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
+import '../saved_searches/saved_searches';
+import '../components/field_chooser/field_chooser';
 
 // doc table
 import './doc_table';

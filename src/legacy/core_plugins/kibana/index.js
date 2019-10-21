@@ -63,6 +63,7 @@ export default function (kibana) {
     uiExports: {
       hacks: [
         'plugins/kibana/dev_tools/hacks/hide_empty_tools',
+        'plugins/kibana/discover/legacy',
       ],
       fieldFormats: ['plugins/kibana/field_formats/register'],
       savedObjectTypes: [

@@ -18,33 +18,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
-import { i18n } from '@kbn/i18n';
-import './saved_searches/saved_searches';
-import './components/field_chooser/field_chooser';
-import './angular';
-
-import {
-  FeatureCatalogueRegistryProvider,
-  FeatureCatalogueCategory,
-} from 'ui/registry/feature_catalogue';
-
-function registerFeature() {
-  FeatureCatalogueRegistryProvider.register(() => {
-    return {
-      id: 'discover',
-      title: i18n.translate('kbn.discover.discoverTitle', {
-        defaultMessage: 'Discover',
-      }),
-      description: i18n.translate('kbn.discover.discoverDescription', {
-        defaultMessage: 'Interactively explore your data by querying and filtering raw documents.',
-      }),
-      icon: 'discoverApp',
-      path: '/app/kibana#/discover',
-      showOnHomePage: true,
-      category: FeatureCatalogueCategory.DATA,
-    };
-  });
-}
+import { registerFeature } from './helpers/register_feature';
 
 /**
  * These are the interfaces with your public contracts. You should export these
@@ -64,6 +38,7 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
   constructor(initializerContext: PluginInitializerContext) {}
   setup(core: CoreSetup, plugins: DiscoverSetupDeps): DiscoverSetup {
     registerFeature();
+    require('./angular');
     return {};
   }
 
