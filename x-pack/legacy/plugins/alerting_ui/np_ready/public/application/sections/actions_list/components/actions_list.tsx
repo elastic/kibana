@@ -223,11 +223,7 @@ export const ActionsList: React.FunctionComponent = () => {
                       value: actionType.id,
                       name: actionType.name,
                     }))
-                    .sort((a, b) => {
-                      if (a.name < b.name) return -1;
-                      if (a.name > b.name) return 1;
-                      return 0;
-                    }),
+                    .sort((a, b) => a.name.localeCompare(b.name)),
                 },
               ],
               toolsRight: [
