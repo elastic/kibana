@@ -48,13 +48,7 @@ export function getServerOptions(config: HttpConfig, { configureTLS = true } = {
         options: {
           abortEarly: false,
         },
-        payload: customJoi.alternatives().try(
-          customJoi
-            .object({})
-            .unknown()
-            .preventPrototypePollution(),
-          customJoi.array()
-        ),
+        payload: customJoi.any().preventPrototypePollution(),
       },
     },
     state: {

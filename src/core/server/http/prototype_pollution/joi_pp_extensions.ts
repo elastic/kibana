@@ -53,11 +53,11 @@ function validateObject(obj: any) {
     }
 
     if (hasOwnProperty(value, '__proto__')) {
-      return 'object.proto_invalid_key';
+      return 'proto_invalid_key';
     }
 
     if (hasOwnProperty(value, 'prototype') && previousKey === 'constructor') {
-      return `object.constructor-prototype_invalid_key`;
+      return `constructor-prototype_invalid_key`;
     }
 
     // iterating backwards through an array is reportedly more performant
@@ -66,7 +66,7 @@ function validateObject(obj: any) {
       const [key, childValue] = entries[i];
       if (isObject(childValue)) {
         if (seen.has(childValue)) {
-          return `object.circular_reference`;
+          return `circular_reference`;
         }
 
         seen.add(childValue);
@@ -81,10 +81,10 @@ function validateObject(obj: any) {
 }
 
 export function extendJoiForPrototypePollution(joi: any) {
-  const custom = joi.extend((joiInstance: any) => {
-    const preventPrototypePollutionExtension: Joi.Extension = {
-      name: 'object',
-      base: joiInstance.object(),
+  const createPreventionExtension = (name: string, base: any): Joi.Extension => {
+    return {
+      name,
+      base,
       language: {
         proto_invalid_key: '__proto__ is an invalid key',
         'constructor-prototype_invalid_key': 'constructor.prototype is an invalid key',
@@ -96,16 +96,19 @@ export function extendJoiForPrototypePollution(joi: any) {
           validate(params: any, value: any, state: Joi.State, options: Joi.ValidationOptions) {
             const error = validateObject(value);
             if (error) {
-              return this.createError(error, {}, state, options);
+              return this.createError(`${name}.${error}`, {}, state, options);
             }
             return value;
           },
         },
       ],
     };
+  };
 
-    return preventPrototypePollutionExtension;
-  });
+  const custom = joi.extend([
+    (joiInstance: any) => createPreventionExtension('any', joiInstance.any()),
+    (joiInstance: any) => createPreventionExtension('object', joiInstance.object()),
+  ]);
 
   return custom;
 }
