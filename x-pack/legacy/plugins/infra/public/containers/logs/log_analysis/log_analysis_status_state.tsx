@@ -244,7 +244,7 @@ const getJobStatus = (jobId: string) => (jobSummaries: FetchJobStatusResponsePay
     .filter(jobSummary => jobSummary.id === jobId)
     .map(
       (jobSummary): JobStatus => {
-        if (jobSummary.jobState === 'failed') {
+        if (jobSummary.jobState === 'failed' || jobSummary.datafeedState === '') {
           return 'failed';
         } else if (
           jobSummary.jobState === 'closed' &&
