@@ -11,6 +11,14 @@ experimental[] Retrieve multiple {kib} saved objects by ID.
 
 `POST /api/saved_objects/_bulk_get`
 
+`POST /s/<space_id>/api/saved_objects/_bulk_get`
+
+[[saved-objects-api-bulk-get-path-params]]
+==== Path parameters
+
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+
 [[saved-objects-api-bulk-get-request-body]]
 ==== Request Body
 
@@ -18,15 +26,15 @@ experimental[] Retrieve multiple {kib} saved objects by ID.
   (Required, string) Valid options include `visualization`, `dashboard`, `search`, `index-pattern`, `config`, and `timelion-sheet`.
 
 `id`::
-  (Required, string) ID of the retrieved object.
+  (Required, string) ID of the retrieved object. The ID includes the {kib} unique identifier or a custom identifier.
 
 `fields`::
   (Optional, array) The fields returned in the object response.
-  
+
 [[saved-objects-api-bulk-get-response-body]]
 ==== Response body
 
-`saved_objects`:: 
+`saved_objects`::
   (array) Top-level property the contains objects that represent the response for each of the requested objects. The order of the objects in the response is identical to the order of the objects in the request.
 
 Saved objects that are unable to persist are replaced with an error object.
@@ -34,13 +42,13 @@ Saved objects that are unable to persist are replaced with an error object.
 [[saved-objects-api-bulk-get-body-codes]]
 ==== Response code
 
-`200`:: 
-  Indicates a successfully call.
+`200`::
+  Indicates a successful call.
 
 [[saved-objects-api-bulk-get-body-example]]
 ==== Example
 
-Retrieve an index pattern with the `my-pattern` ID, and a dashboard with the `my-dashboard` ID: 
+Retrieve an index pattern with the `my-pattern` ID, and a dashboard with the `my-dashboard` ID:
 
 [source,js]
 --------------------------------------------------
@@ -52,7 +60,7 @@ POST api/saved_objects/_bulk_get
   },
   {
     "type": "dashboard",
-    "id": "my-dashboard"
+    "id": "be3733a0-9efe-11e7-acb3-3dab96693fab"
   }
 ]
 --------------------------------------------------
