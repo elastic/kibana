@@ -234,11 +234,7 @@ export const StepCreateForm: SFC<Props> = React.memo(
     }
 
     function getTransformConfigDevConsoleStatement() {
-      return `PUT _data_frame/transforms/${transformId}\n${JSON.stringify(
-        transformConfig,
-        null,
-        2
-      )}\n\n`;
+      return `PUT _transform/${transformId}\n${JSON.stringify(transformConfig, null, 2)}\n\n`;
     }
 
     // TODO move this to SASS
