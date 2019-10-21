@@ -8,9 +8,10 @@ import { omit } from 'lodash/fp';
 import * as i18n from './../translations';
 import { HostDetailsNavTab } from './types';
 import { HostsTableType } from '../../../store/hosts/model';
+import { SiemPageName } from '../../home/types';
 
 const getTabsOnHostDetailsUrl = (hostName: string, tabName: HostsTableType) =>
-  `#/hosts/${hostName}/${tabName}`;
+  `#/${SiemPageName.hosts}/${hostName}/${tabName}`;
 
 export const navTabsHostDetails = (
   hostName: string,
