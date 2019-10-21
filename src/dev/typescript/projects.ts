@@ -24,10 +24,14 @@ import { REPO_ROOT } from '../constants';
 import { Project } from './project';
 
 export const PROJECTS = [
-  new Project(resolve(REPO_ROOT, 'tsconfig.json')),
+  new Project(resolve(REPO_ROOT, 'src/tsconfig.json')),
   new Project(resolve(REPO_ROOT, 'test/tsconfig.json'), 'kibana/test'),
-  new Project(resolve(REPO_ROOT, 'x-pack/tsconfig.json')),
+  new Project(resolve(REPO_ROOT, 'x-pack/test_utils/tsconfig.json'), 'x-pack/test_utils'),
+  new Project(resolve(REPO_ROOT, 'x-pack/legacy/server/tsconfig.json'), 'x-pack/legacy/server'),
+  new Project(resolve(REPO_ROOT, 'x-pack/legacy/common/tsconfig.json'), 'x-pack/legacy/common'),
+  new Project(resolve(REPO_ROOT, 'x-pack/plugins/tsconfig.json'), 'x-pack/plugins'),
   new Project(resolve(REPO_ROOT, 'x-pack/test/tsconfig.json'), 'x-pack/test'),
+  new Project(resolve(REPO_ROOT, 'x-pack/tasks/tsconfig.json'), 'x-pack/tasks'),
   new Project(
     resolve(REPO_ROOT, 'x-pack/legacy/plugins/siem/cypress/tsconfig.json'),
     'siem/cypress'
@@ -37,6 +41,9 @@ export const PROJECTS = [
   // NOTE: using glob.sync rather than glob-all or globby
   // because it takes less than 10 ms, while the other modules
   // both took closer to 1000ms.
+  ...glob
+    .sync('x-pack/legacy/plugins/*/tsconfig.json', { cwd: REPO_ROOT })
+    .map(path => new Project(resolve(REPO_ROOT, path))),
   ...glob
     .sync('packages/*/tsconfig.json', { cwd: REPO_ROOT })
     .map(path => new Project(resolve(REPO_ROOT, path))),

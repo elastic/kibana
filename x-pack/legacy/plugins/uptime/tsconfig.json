@@ -1,7 +1,5 @@
 {
-  "extends": "../../../tsconfig.json",
-  "exclude": ["**/node_modules/**"],
-  "paths": {
-    "react": ["../../../node_modules/@types/react"]
-  }
+  "extends": "../../../tsconfig",
+  "include": ["./**/*", "../../../typings/**/*"],
+  "exclude": ["**/__fixtures__/**/*"]
 }

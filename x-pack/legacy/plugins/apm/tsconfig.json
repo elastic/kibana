@@ -1,5 +1,5 @@
 {
   "extends": "../../../tsconfig",
   "include": ["./**/*", "../../../typings/**/*"],
-  "exclude": ["**/__fixtures__/**/*"]
+  "exclude": ["**/__fixtures__/**/*", "./cypress/**/*"]
 }

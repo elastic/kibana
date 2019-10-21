@@ -4,6 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// rison-node
+import '../../infra/types/rison_node';
+// EuiBasicTable
+import {} from '../../reporting/public/components/report_listing';
+// .svg
+import '../../canvas/types/webpack';
+
 export interface StringMap<T = unknown> {
   [key: string]: T;
 }

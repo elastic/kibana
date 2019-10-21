@@ -21,12 +21,6 @@ import {
 } from '.';
 import { InfraApolloClient, InfraObservableApi } from '../lib/lib';
 
-declare global {
-  interface Window {
-    __REDUX_DEVTOOLS_EXTENSION_COMPOSE__: typeof compose;
-  }
-}
-
 export interface StoreDependencies {
   apolloClient: Observable<InfraApolloClient>;
   observableApi: Observable<InfraObservableApi>;

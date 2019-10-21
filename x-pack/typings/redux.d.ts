@@ -3,8 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-declare module '*.module.scss' {
-  const styles: { [className: string]: string };
-  // eslint-disable-next-line
-  export default styles;
+
+import { compose } from 'redux';
+
+declare global {
+  interface Window {
+    __REDUX_DEVTOOLS_EXTENSION_COMPOSE__: typeof compose;
+  }
 }

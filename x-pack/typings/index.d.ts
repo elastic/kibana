@@ -10,6 +10,19 @@ declare module '*.html' {
   export default template;
 }
 
+declare module '*.png';
+
+declare module '*.svg' {
+  const content: string;
+  export = content;
+}
+
+declare module '*.module.scss' {
+  const styles: { [className: string]: string };
+  // eslint-disable-next-line
+  export default styles;
+}
+
 declare module 'lodash/internal/toPath' {
   function toPath(value: string | string[]): string[];
   export = toPath;
@@ -39,4 +52,8 @@ declare module '*.json' {
   const json: any;
   // eslint-disable-next-line import/no-default-export
   export default json;
+}
+
+declare module 'ui/time_buckets' {
+  export const TimeBuckets: any;
 }

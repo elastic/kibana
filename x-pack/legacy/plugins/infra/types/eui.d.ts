@@ -26,23 +26,6 @@ declare module '@elastic/eui' {
     onClick?: React.MouseEventHandler<Element>;
   }
 
-  type EuiSideNavProps = CommonProps & {
-    style?: any;
-    items: Array<{
-      id: string | number;
-      name: string;
-      items: Array<{
-        id: string;
-        name: string;
-        onClick: () => void;
-      }>;
-    }>;
-    mobileTitle?: React.ReactNode;
-    toggleOpenOnMobile?: () => void;
-    isOpenOnMobile?: boolean;
-  };
-  export const EuiSideNav: React.SFC<EuiSideNavProps>;
-
   type EuiErrorBoundaryProps = CommonProps & {
     children: React.ReactNode;
   };
@@ -56,22 +39,4 @@ declare module '@elastic/eui' {
   export const EuiHideFor: React.SFC<EuiResponsiveProps>;
 
   export const EuiShowFor: React.SFC<EuiResponsiveProps>;
-
-  type EuiInMemoryTableProps = CommonProps & {
-    items?: any;
-    columns?: any;
-    sorting?: any;
-    search?: any;
-    selection?: any;
-    pagination?: any;
-    itemId?: any;
-    isSelectable?: any;
-    loading?: any;
-    hasActions?: any;
-    message?: any;
-    rowProps?: any;
-    cellProps?: any;
-    responsive?: boolean;
-  };
-  export const EuiInMemoryTable: React.SFC<EuiInMemoryTableProps>;
 }

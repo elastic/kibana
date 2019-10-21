@@ -37,6 +37,3 @@ declare module 'plugins/watcher/models/settings' {
 declare module 'plugins/watcher/models/action' {
   export const Action: any;
 }
-declare module 'ui/time_buckets' {
-  export const TimeBuckets: any;
-}
