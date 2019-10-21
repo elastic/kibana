@@ -28,6 +28,7 @@ export function taskManager(kibana: any) {
     config(Joi: Root) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
+        bulk_update: Joi.boolean().default(true),
         max_attempts: Joi.number()
           .description(
             'The maximum number of times a task will be attempted before being abandoned as failed'
