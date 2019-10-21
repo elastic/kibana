@@ -30,6 +30,15 @@ export default function ({ getService, loadTestFile }) {
     await esArchiver.unload('dashboard/current/data');
   }
 
+  async function loadLogstash() {
+    await browser.setWindowSize(1200, 900);
+    await esArchiver.loadIfNeeded('logstash_functional');
+  }
+
+  async function unloadLogstash() {
+    await esArchiver.unload('logstash_functional');
+  }
+
   describe('dashboard app', function () {
     // This has to be first since the other tests create some embeddables as side affects and our counting assumes
     // a fresh index.
@@ -75,9 +84,8 @@ export default function ({ getService, loadTestFile }) {
     // legacy data only for specifically testing BWC situations.
     describe('using legacy data', function () {
       this.tags('ciGroup4');
-      before(async () => {
-        await browser.setWindowSize(1200, 900);
-      });
+      before(loadLogstash);
+      after(unloadLogstash);
 
       loadTestFile(require.resolve('./dashboard_time_picker'));
       loadTestFile(require.resolve('./bwc_shared_urls'));
@@ -87,9 +95,8 @@ export default function ({ getService, loadTestFile }) {
 
     describe('using legacy data', function () {
       this.tags('ciGroup5');
-      before(async () => {
-        await browser.setWindowSize(1200, 900);
-      });
+      before(loadLogstash);
+      after(unloadLogstash);
 
       loadTestFile(require.resolve('./dashboard_save'));
       loadTestFile(require.resolve('./dashboard_time'));

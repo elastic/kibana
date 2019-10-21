@@ -41,12 +41,10 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
   class DashboardPage {
     async initTests({
       kibanaIndex = 'dashboard/legacy',
-      dataIndex = 'logstash_functional',
       defaultIndex = 'logstash-*',
     } = {}) {
       log.debug('load kibana index with visualizations and log data');
       await esArchiver.load(kibanaIndex);
-      await esArchiver.loadIfNeeded(dataIndex);
       await kibanaServer.uiSettings.replace({
         'defaultIndex': defaultIndex,
       });
