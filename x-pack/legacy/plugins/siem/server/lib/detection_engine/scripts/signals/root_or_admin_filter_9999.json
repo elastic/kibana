@@ -4,7 +4,7 @@
   "index": ["auditbeat-*", "filebeat-*", "packetbeat-*", "winlogbeat-*"],
   "interval": "5m",
   "name": "Detect Root/Admin Users",
-  "severity": 1,
+  "severity": "high",
   "type": "filter",
   "from": "now-6m",
   "to": "now",
