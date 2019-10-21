@@ -85,12 +85,10 @@ export const convertToBuildEsQuery = ({
 }) => {
   try {
     return JSON.stringify(
-      buildEsQuery(
-        indexPattern,
-        queries,
-        filters.filter(f => f.meta.disabled === false),
-        getEsQueryConfig(npSetup.core.uiSettings)
-      )
+      buildEsQuery(indexPattern, queries, filters.filter(f => f.meta.disabled === false), {
+        ...getEsQueryConfig(npSetup.core.uiSettings),
+        dateFormatTZ: null,
+      })
     );
   } catch (exp) {
     return '';
