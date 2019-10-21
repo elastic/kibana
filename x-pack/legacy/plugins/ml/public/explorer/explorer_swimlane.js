@@ -104,6 +104,7 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
       } else if (action === DRAG_SELECT_ACTION.ELEMENT_SELECT) {
         element.classed(SCSS.mlDragselectDragging, true);
       } else if (action === DRAG_SELECT_ACTION.DRAG_START) {
+        previousSelectedData = null;
         this.cellMouseoverActive = false;
         mlChartTooltipService.hide(true);
       }

@@ -29,6 +29,7 @@ const getMockState = (index: SourceIndex) =>
     jobConfig: {
       source: { index },
       dest: { index: 'the-destination-index' },
+      analysis: {},
     },
   });
 
