@@ -87,7 +87,11 @@ describe('config/deprecation warnings', function () {
   });
 
   it('logs deprecation warnings when using outdated config', async () => {
-    const deprecationLines = stdio
+    const stdioOutput = stdio;
+    console.log('############################');
+    console.log(stdioOutput);
+    console.log('############################');
+    const deprecationLines = stdioOutput
       .split('\n')
       .map(json => {
         try {
