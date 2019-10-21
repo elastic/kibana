@@ -17,6 +17,12 @@ import { HeaderGlobal } from './index';
 
 jest.mock('../../lib/settings/use_kibana_ui_setting');
 
+// Test will fail because we will to need to mock some core services to make the test work
+// For now let's forget about SiemSearchBar
+jest.mock('../search_bar', () => ({
+  SiemSearchBar: () => null,
+}));
+
 describe('HeaderGlobal', () => {
   test('it renders', () => {
     const wrapper = shallow(
@@ -36,8 +42,11 @@ describe('HeaderGlobal', () => {
     );
     const siemHeaderGlobal = wrapper.find('.siemHeaderGlobal').first();
 
-    expect(siemHeaderGlobal).toHaveStyleRule('margin-right', '-100px');
-    expect(siemHeaderGlobal).toHaveStyleRule('padding-right', '100px');
+    expect(siemHeaderGlobal).toHaveStyleRule('margin', `0 -100px 0 -${euiDarkVars.euiSizeL}`);
+    expect(siemHeaderGlobal).toHaveStyleRule(
+      'padding',
+      `${euiDarkVars.paddingSizes.m} 100px ${euiDarkVars.paddingSizes.m} ${euiDarkVars.paddingSizes.l}`
+    );
   });
 
   test('it DOES NOT apply offset styles when offsetRight is not provided', () => {
@@ -48,7 +57,13 @@ describe('HeaderGlobal', () => {
     );
     const siemHeaderGlobal = wrapper.find('.siemHeaderGlobal').first();
 
-    expect(siemHeaderGlobal).toHaveStyleRule('margin-right', euiDarkVars.euiSizeL);
-    expect(siemHeaderGlobal).toHaveStyleRule('padding-right', euiDarkVars.euiSizeL);
+    expect(siemHeaderGlobal).toHaveStyleRule(
+      'margin',
+      `0 -${euiDarkVars.euiSizeL} 0 -${euiDarkVars.euiSizeL}`
+    );
+    expect(siemHeaderGlobal).toHaveStyleRule(
+      'padding',
+      `${euiDarkVars.paddingSizes.m} ${euiDarkVars.paddingSizes.l} ${euiDarkVars.paddingSizes.m} ${euiDarkVars.paddingSizes.l}`
+    );
   });
 });

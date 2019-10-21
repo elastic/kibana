@@ -25,8 +25,8 @@ const Header = styled.header.attrs({
     background: ${theme.eui.euiColorEmptyShade};
     border-bottom: ${theme.eui.euiBorderThin};
     margin: 0 -${offsetRight ? offsetRight : theme.eui.euiSizeL} 0 -${theme.eui.euiSizeL};
-    padding: ${theme.eui.euiSize} ${offsetRight ? offsetRight : theme.eui.euiSizeL}
-      ${theme.eui.euiSize} ${theme.eui.euiSizeL};
+    padding: ${theme.eui.paddingSizes.m} ${offsetRight ? offsetRight : theme.eui.paddingSizes.l}
+      ${theme.eui.paddingSizes.m} ${theme.eui.paddingSizes.l};
   `}
 `;
 Header.displayName = 'Header';
