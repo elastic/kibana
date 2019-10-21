@@ -25,6 +25,32 @@ A † denotes an argument can be passed multiple times.
 
 Returns `true` if all of the conditions are met. See also <<any_fn>>.
 
+*Expression syntax*
+[source,js]
+----
+all {neq “foo”} {neq “bar”} {neq “fizz”}
+all condition={gt 10} condition={lt 20}
+----
+
+*Code Example*
+[source,text]
+----
+filters
+| demodata
+| math "mean(percent_uptime)"
+| formatnumber "0.0%"
+| metric "Average uptime"
+  metricFont={
+    font size=48 family="'Open Sans', Helvetica, Arial, sans-serif"
+    color={
+      if {all {gte 0} {lt 0.8}} then="red" else="green"
+    }
+    align="center" lHeight=48
+  }
+| render
+----
+This sets the color of the metric text to `”red”` if the context passed into `metric` is greater than or equal to 0 and less than 0.8. Otherwise, the color is set to green.
+
 *Accepts:* `null`
 
 [cols="3*^<"]
