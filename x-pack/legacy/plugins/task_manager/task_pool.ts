@@ -82,7 +82,7 @@ export class TaskPool {
   public cancelRunningTasks() {
     this.logger.debug(
       i18n.translate('xpack.taskManager.taskPool.cancelRunningTasks', {
-        defaultMessage: `Cancelling running tasks.`,
+        defaultMessage: 'Cancelling running tasks.',
       })
     );
     for (const task of this.running) {
@@ -115,7 +115,7 @@ export class TaskPool {
               .catch(err => {
                 this.logger.warn(
                   i18n.translate('xpack.taskManager.taskPool.runAttempt.genericError', {
-                    defaultMessage: `Task {task} failed in attempt to run: {message}`,
+                    defaultMessage: 'Task {task} failed in attempt to run: {message}',
                     values: {
                       message: err.message,
                       task: task.toString(),
@@ -128,7 +128,7 @@ export class TaskPool {
           ([task, err]) => {
             this.logger.error(
               i18n.translate('xpack.taskManager.taskPool.markAsRunning.genericError', {
-                defaultMessage: `Failed to mark Task {task} as running: {message}`,
+                defaultMessage: 'Failed to mark Task {task} as running: {message}',
                 values: {
                   message: err.message,
                   task: task.toString(),
@@ -154,7 +154,7 @@ export class TaskPool {
       if (task.isExpired) {
         this.logger.debug(
           i18n.translate('xpack.taskManager.taskPool.cancelExpiredTasks', {
-            defaultMessage: `Cancelling expired task ${task}.`,
+            defaultMessage: 'Cancelling expired task {task}.',
             values: {
               task: task.toString(),
             },
@@ -169,7 +169,7 @@ export class TaskPool {
     try {
       this.logger.debug(
         i18n.translate('xpack.taskManager.taskPool.cancelTask', {
-          defaultMessage: `Cancelling task ${task}.`,
+          defaultMessage: 'Cancelling task {task}.',
           values: {
             task: task.toString(),
           },
@@ -180,7 +180,7 @@ export class TaskPool {
     } catch (err) {
       this.logger.error(
         i18n.translate('xpack.taskManager.taskPool.cancelTaskFailure', {
-          defaultMessage: `Failed to cancel task ${task}: ${err}`,
+          defaultMessage: 'Failed to cancel task {task}: {err}',
           values: {
             err,
             task: task.toString(),
