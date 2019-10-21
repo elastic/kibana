@@ -18,11 +18,11 @@
  */
 
 import { Observable, Subject } from 'rxjs';
-import { first, share } from 'rxjs/operators';
+import { share } from 'rxjs/operators';
 import { Adapters, InspectorSession } from '../../../../../../plugins/inspector/public';
-import { execute, ExpressionDataHandler } from './execute';
+import { ExpressionDataHandler } from './execute';
 import { ExpressionRenderHandler } from './render';
-import { RenderId, Data, IExpressionLoaderParams, ExpressionAST } from './types';
+import { Data, IExpressionLoaderParams, ExpressionAST } from './types';
 import { getInspector } from './services';
 
 export class ExpressionLoader {
@@ -35,7 +35,6 @@ export class ExpressionLoader {
   private renderHandler: ExpressionRenderHandler;
   private dataSubject: Subject<Data>;
   private data: Data;
-  private executionPromise: Promise<unknown>;
 
   constructor(
     element: HTMLElement,
@@ -54,11 +53,13 @@ export class ExpressionLoader {
       this.update(newExpression, newParams);
     });
 
-    this.data$.subscribe(data => {
-      this.render(data);
+    this.data$.subscribe({
+      next: data => {
+        this.render(data);
+      },
     });
 
-    this.executionPromise = this.execute(expression, params);
+    this.loadData(expression, params);
   }
 
   destroy() {}
@@ -79,10 +80,6 @@ export class ExpressionLoader {
     return this.renderHandler.getElement();
   }
 
-  getExecutionPromise() {
-    return this.executionPromise;
-  }
-
   openInspector(title: string): InspectorSession {
     return getInspector().open(this.inspect(), {
       title,
@@ -93,30 +90,40 @@ export class ExpressionLoader {
     return this.dataHandler.inspect();
   }
 
-  update(expression: string | ExpressionAST, params: IExpressionLoaderParams): Promise<RenderId> {
-    const promise = this.render$.pipe(first()).toPromise();
-
-    this.executionPromise =
-      expression !== null ? this.execute(expression, params) : this.render(this.data);
-
-    return promise;
+  update(expression: string | ExpressionAST, params: IExpressionLoaderParams): void {
+    if (expression !== null) {
+      this.loadData(expression, params);
+    } else {
+      this.render(this.data);
+    }
   }
 
-  private execute = async (
+  private loadData = async (
     expression: string | ExpressionAST,
     params: IExpressionLoaderParams
   ): Promise<Data> => {
     if (this.dataHandler) {
       this.dataHandler.cancel();
     }
-    this.dataHandler = execute(expression, params);
-    const data = await this.dataHandler.getData();
-    this.dataSubject.next(data);
-    return data;
+    this.dataHandler = new ExpressionDataHandler(expression, params);
+    try {
+      const data = await this.dataHandler.getData();
+      if (data.type === 'error') {
+        if (data.error.name !== 'AbortError') {
+          this.dataSubject.error(new Error(data.error.message));
+          return;
+        }
+
+        return;
+      }
+      this.dataSubject.next(data);
+    } catch (e) {
+      this.dataSubject.error(new Error('Could not fetch data'));
+    }
   };
 
-  private async render(data: Data): Promise<RenderId> {
-    return this.renderHandler.render(data);
+  private render(data: Data): void {
+    this.renderHandler.render(data);
   }
 }
 

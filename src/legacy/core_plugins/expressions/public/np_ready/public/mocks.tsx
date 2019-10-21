@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import React from 'react';
 import { ExpressionsSetup, ExpressionsStart, plugin as pluginInitializer } from '.';
 /* eslint-disable */
 import { coreMock } from '../../../../../../core/public/mocks';
@@ -44,7 +45,7 @@ const createExpressionsSetupMock = (): ExpressionsSetup => {
 
 function createExpressionsStartMock(): ExpressionsStart {
   return {
-    ExpressionRenderer: jest.fn(() => null),
+    ExpressionRenderer: jest.fn(props => <></>),
     execute: jest.fn(),
     loader: jest.fn(),
     render: jest.fn(),

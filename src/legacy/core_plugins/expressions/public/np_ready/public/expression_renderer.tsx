@@ -17,88 +17,90 @@
  * under the License.
  */
 
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import React from 'react';
-import { ExpressionAST, IExpressionLoaderParams, IInterpreterResult } from './types';
-import { IExpressionLoader, ExpressionLoader } from './loader';
+import { EuiProgress } from '@elastic/eui';
+import { ExpressionAST, IExpressionLoaderParams } from './types';
+import { ExpressionLoader } from './loader';
 
 // Accept all options of the runner as props except for the
 // dom element which is provided by the component itself
 export interface ExpressionRendererProps extends IExpressionLoaderParams {
   className: string;
   expression: string | ExpressionAST;
-  /**
-   * If an element is specified, but the response of the expression run can't be rendered
-   * because it isn't a valid response or the specified renderer isn't available,
-   * this callback is called with the given result.
-   */
-  onRenderFailure?: (result: IInterpreterResult) => void;
+  renderError?: (
+    errorType: 'data' | 'render',
+    error?: string | null
+  ) => React.ReactElement | React.ReactElement[];
+}
 
-  /**
-   * Called before each render attempt.
-   */
-  onRenderStart?: () => void;
-
-  /**
-   * Called after each successful render.
-   */
-  onRenderSuccess?: () => void;
-
-  /**
-   * Called after all render attempts, even failed ones.
-   */
-  onRenderComplete?: () => void;
+interface State {
+  isLoading: boolean;
+  hasError: boolean;
+  errorType: 'data' | 'render' | null;
+  errorMessage: string | null;
 }
 
 export type ExpressionRenderer = React.FC<ExpressionRendererProps>;
 
-export const createRenderer = (loader: IExpressionLoader): ExpressionRenderer => ({
+const defaultState: State = {
+  isLoading: false,
+  hasError: false,
+  errorType: null,
+  errorMessage: null,
+};
+
+export const ExpressionRendererImplementation = ({
   className,
   expression,
-  onRenderFailure,
-  onRenderStart,
-  onRenderSuccess,
-  onRenderComplete,
   ...options
 }: ExpressionRendererProps) => {
   const mountpoint: React.MutableRefObject<null | HTMLDivElement> = useRef(null);
   const handlerRef: React.MutableRefObject<null | ExpressionLoader> = useRef(null);
+  const [state, setState] = useState<State>(defaultState);
 
   useEffect(() => {
     if (mountpoint.current) {
-      if (onRenderStart) {
-        onRenderStart();
-      }
+      setState({ ...defaultState, isLoading: true });
 
       if (!handlerRef.current) {
-        handlerRef.current = loader(mountpoint.current, expression, options);
+        handlerRef.current = new ExpressionLoader(mountpoint.current, expression, options);
+
+        // Only registers one subscriber
+        handlerRef.current.data$.subscribe({
+          next: () => {
+            setState(defaultState);
+          },
+          error: err => {
+            setState(prevState => ({
+              ...prevState,
+              isLoading: false,
+              hasError: true,
+              errorType: 'data',
+              errorMessage: err.toString(),
+            }));
+          },
+        });
+        handlerRef.current.render$.subscribe({
+          next: () => {
+            setState(() => ({
+              ...defaultState,
+              isLoading: false,
+            }));
+          },
+          error: err => {
+            setState(prevState => ({
+              ...prevState,
+              isLoading: false,
+              hasError: true,
+              errorType: 'render',
+              errorMessage: err.toString(),
+            }));
+          },
+        });
       } else {
         handlerRef.current.update(expression, options);
       }
-
-      handlerRef.current
-        .getExecutionPromise()
-        .then(() => {
-          if (onRenderSuccess) {
-            onRenderSuccess();
-          }
-        })
-        .catch(result => {
-          if (onRenderFailure) {
-            onRenderFailure(result);
-          }
-        })
-        .then(() => {
-          if (onRenderComplete) {
-            onRenderComplete();
-          }
-        });
-
-      handlerRef.current.data$.toPromise().catch(result => {
-        if (onRenderFailure) {
-          onRenderFailure(result);
-        }
-      });
     }
   }, [
     expression,
@@ -109,5 +111,24 @@ export const createRenderer = (loader: IExpressionLoader): ExpressionRenderer =>
     mountpoint.current,
   ]);
 
-  return <div className={className} ref={mountpoint} />;
+  return (
+    <div
+      style={{
+        display: state.hasError ? 'none' : 'flex',
+        position: 'relative',
+        width: '100%',
+        height: '100%',
+      }}
+    >
+      {state.isLoading ? <EuiProgress size="xs" color="accent" position="absolute" /> : null}
+      {state.hasError && state.errorType ? (
+        options.renderError ? (
+          options.renderError(state.errorType, state.errorMessage)
+        ) : (
+          <div data-test-subj="expression-renderer-error">{state.errorMessage}</div>
+        )
+      ) : null}
+      <div className={className} ref={mountpoint} />
+    </div>
+  );
 };

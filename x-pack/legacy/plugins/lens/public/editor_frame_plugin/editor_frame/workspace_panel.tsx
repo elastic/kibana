@@ -8,16 +8,14 @@ import React, { useState, useEffect, useMemo, useContext } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiImage,
   EuiText,
   EuiBetaBadge,
   EuiButtonEmpty,
-  EuiProgress,
 } from '@elastic/eui';
-import { toExpression } from '@kbn/interpreter/common';
 import { CoreStart, CoreSetup } from 'src/core/public';
 import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/expressions/public';
 import { Action } from './state_management';
@@ -94,8 +92,7 @@ export function InnerWorkspacePanel({
   }, [dragDropContext.dragging]);
 
   const [localState, setLocalState] = useState({
-    expressionError: undefined as unknown,
-    isLoading: false,
+    expressionBuildError: undefined as string | undefined,
   });
 
   const activeVisualization = activeVisualizationId
@@ -111,7 +108,8 @@ export function InnerWorkspacePanel({
         framePublicAPI,
       });
     } catch (e) {
-      setLocalState(s => ({ ...s, expressionError: e.toString() }));
+      // Most likely an error in the expression provided by a datasource or visualization
+      setLocalState(s => ({ ...s, expressionBuildError: e.toString() }));
     }
   }, [
     activeVisualization,
@@ -182,8 +180,11 @@ export function InnerWorkspacePanel({
   function renderVisualization() {
     useEffect(() => {
       // reset expression error if component attempts to run it again
-      if (expression && localState.expressionError) {
-        setLocalState(s => ({ ...s, expressionError: undefined }));
+      if (expression && localState.expressionBuildError) {
+        setLocalState(s => ({
+          ...s,
+          expressionBuildError: undefined,
+        }));
       }
     }, [expression]);
 
@@ -191,43 +192,48 @@ export function InnerWorkspacePanel({
       return renderEmptyWorkspace();
     }
 
-    if (localState.expressionError) {
+    if (localState.expressionBuildError) {
       return (
-        <EuiFlexGroup direction="column">
+        <EuiFlexGroup direction="column" className="lns">
           <EuiFlexItem data-test-subj="expression-failure">
-            {/* TODO word this differently because expressions should not be exposed at this level */}
+            <EuiIcon type="alert" size="xl" color="warning" />
             <FormattedMessage
               id="xpack.lens.editorFrame.expressionFailure"
-              defaultMessage="Expression could not be executed successfully"
+              defaultMessage="An error occurred in the expression"
             />
           </EuiFlexItem>
-          {expression && (
-            <EuiFlexItem>
-              <EuiCodeBlock>{toExpression(expression)}</EuiCodeBlock>
-            </EuiFlexItem>
-          )}
-          <EuiFlexItem>
-            <EuiCodeBlock>{JSON.stringify(localState.expressionError, null, 2)}</EuiCodeBlock>
-          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{localState.expressionBuildError}</EuiFlexItem>
         </EuiFlexGroup>
       );
-    } else {
-      return (
-        <ExpressionRendererComponent
-          className="lnsExpressionRenderer"
-          expression={expression!}
-          onRenderFailure={(e: unknown) => {
-            setLocalState(s => ({ ...s, expressionError: e }));
-          }}
-          onRenderStart={() => {
-            setLocalState(s => ({ ...s, isLoading: true }));
-          }}
-          onRenderComplete={() => {
-            setLocalState(s => ({ ...s, isLoading: false }));
-          }}
-        />
-      );
     }
+
+    return (
+      <ExpressionRendererComponent
+        className="lnsExpressionRenderer"
+        expression={expression!}
+        renderError={(errorType: 'data' | 'render', errorMessage?: string | null) => {
+          return (
+            <EuiFlexGroup direction="column" className="lns">
+              <EuiFlexItem data-test-subj="expression-failure">
+                <EuiIcon type="alert" size="xl" color="warning" />
+                {errorType === 'data' ? (
+                  <FormattedMessage
+                    id="xpack.lens.editorFrame.dataFailure"
+                    defaultMessage="An error occurred when loading data."
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.lens.editorFrame.renderFailure"
+                    defaultMessage="An error occurred when rendering the data."
+                  />
+                )}
+              </EuiFlexItem>
+              {errorMessage ? <EuiFlexItem grow={false}>{errorMessage}</EuiFlexItem> : null}
+            </EuiFlexGroup>
+          );
+        }}
+      />
+    );
   }
 
   return (
@@ -237,7 +243,6 @@ export function InnerWorkspacePanel({
       droppable={Boolean(suggestionForDraggedField)}
       onDrop={onDrop}
     >
-      {localState.isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
       {renderVisualization()}
     </DragDrop>
   );

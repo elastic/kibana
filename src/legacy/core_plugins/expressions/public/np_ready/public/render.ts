@@ -19,7 +19,7 @@
 
 import { Observable } from 'rxjs';
 import * as Rx from 'rxjs';
-import { share, first } from 'rxjs/operators';
+import { share } from 'rxjs/operators';
 import { event, RenderId, Data, IInterpreterRenderHandlers } from './types';
 import { getRenderersRegistry } from './services';
 
@@ -31,6 +31,7 @@ export class ExpressionRenderHandler {
   private element: HTMLElement;
   private destroyFn?: any;
   private renderCount: number = 0;
+  private renderSubject: Rx.Subject<unknown>;
   private handlers: IInterpreterRenderHandlers;
 
   constructor(element: HTMLElement) {
@@ -39,8 +40,8 @@ export class ExpressionRenderHandler {
     const eventsSubject = new Rx.Subject();
     this.events$ = eventsSubject.asObservable().pipe(share());
 
-    const renderSubject = new Rx.Subject();
-    this.render$ = renderSubject.asObservable().pipe(share());
+    this.renderSubject = new Rx.Subject();
+    this.render$ = this.renderSubject.asObservable().pipe(share());
 
     const updateSubject = new Rx.Subject();
     this.update$ = updateSubject.asObservable().pipe(share());
@@ -51,7 +52,7 @@ export class ExpressionRenderHandler {
       },
       done: () => {
         this.renderCount++;
-        renderSubject.next(this.renderCount);
+        this.renderSubject.next(this.renderCount);
       },
       reload: () => {
         updateSubject.next(null);
@@ -65,22 +66,24 @@ export class ExpressionRenderHandler {
     };
   }
 
-  render = async (data: Data) => {
+  render = (data: Data) => {
     if (data.type !== 'render' || !data.as) {
-      throw new Error('invalid data provided to expression renderer');
+      this.renderSubject.error(new Error('invalid data provided to the expression renderer'));
+      return;
     }
 
     if (!getRenderersRegistry().get(data.as)) {
-      throw new Error(`invalid renderer id '${data.as}'`);
+      this.renderSubject.error(new Error(`invalid renderer id '${data.as}'`));
+      return;
     }
 
-    const promise = this.render$.pipe(first()).toPromise();
-
-    getRenderersRegistry()
-      .get(data.as)
-      .render(this.element, data.value, this.handlers);
-
-    return promise;
+    try {
+      getRenderersRegistry()
+        .get(data.as)
+        .render(this.element, data.value, this.handlers);
+    } catch (e) {
+      this.renderSubject.error(new Error(e.message));
+    }
   };
 
   destroy = () => {

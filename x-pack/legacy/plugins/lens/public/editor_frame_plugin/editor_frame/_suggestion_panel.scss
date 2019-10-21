@@ -46,6 +46,7 @@
 .lnsSuggestionPanel__chartWrapper {
   display: flex;
   height: $lnsSuggestionHeight - $euiSize;
+  width: 100%;
   pointer-events: none;
   margin: 0 $euiSizeS;
 }

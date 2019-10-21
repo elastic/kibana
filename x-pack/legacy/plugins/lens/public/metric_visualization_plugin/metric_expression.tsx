@@ -8,7 +8,10 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/types';
 import { FormatFactory } from 'ui/visualize/loader/pipeline_helpers/utilities';
-import { IInterpreterRenderFunction } from '../../../../../../src/legacy/core_plugins/expressions/public/expressions';
+import {
+  IInterpreterRenderFunction,
+  IInterpreterRenderHandlers,
+} from '../../../../../../src/legacy/core_plugins/expressions/public/expressions';
 import { MetricConfig } from './types';
 import { LensMultiTable } from '../types';
 import { AutoScale } from './auto_scale';
@@ -80,8 +83,16 @@ export const getMetricChartRenderer = (
   help: 'Metric Chart Renderer',
   validate: () => {},
   reuseDomNode: true,
-  render: async (domNode: Element, config: MetricChartProps, _handlers: unknown) => {
-    ReactDOM.render(<MetricChart {...config} formatFactory={formatFactory} />, domNode);
+  render: async (
+    domNode: Element,
+    config: MetricChartProps,
+    handlers: IInterpreterRenderHandlers
+  ) => {
+    ReactDOM.render(<MetricChart {...config} formatFactory={formatFactory} />, domNode, () => {
+      if (handlers.done) {
+        handlers.done();
+      }
+    });
   },
 });
 

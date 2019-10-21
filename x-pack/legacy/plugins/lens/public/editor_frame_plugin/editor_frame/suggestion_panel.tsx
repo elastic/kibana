@@ -63,36 +63,28 @@ const PreviewRenderer = ({
   expression: string;
   ExpressionRendererComponent: ExpressionRenderer;
 }) => {
-  const [expressionError, setExpressionError] = useState<boolean>(false);
-
-  useEffect(() => {
-    setExpressionError(false);
-  }, [expression]);
-
-  return expressionError ? (
-    <div className="lnsSuggestionPanel__suggestionIcon">
-      <EuiIconTip
-        size="xl"
-        color="danger"
-        type="alert"
-        aria-label={i18n.translate('xpack.lens.editorFrame.previewErrorLabel', {
-          defaultMessage: 'Preview rendering failed',
-        })}
-        content={i18n.translate('xpack.lens.editorFrame.previewErrorTooltip', {
-          defaultMessage: 'Preview rendering failed',
-        })}
-      />
-    </div>
-  ) : (
+  return (
     <ExpressionRendererComponent
       className={classNames('lnsSuggestionPanel__chartWrapper', {
         'lnsSuggestionPanel__chartWrapper--withLabel': withLabel,
       })}
       expression={expression}
-      onRenderFailure={(e: unknown) => {
-        // eslint-disable-next-line no-console
-        console.error(`Failed to render preview: `, e);
-        setExpressionError(true);
+      renderError={() => {
+        return (
+          <div className="lnsSuggestionPanel__suggestionIcon">
+            <EuiIconTip
+              size="xl"
+              color="danger"
+              type="alert"
+              aria-label={i18n.translate('xpack.lens.editorFrame.previewErrorLabel', {
+                defaultMessage: 'Preview rendering failed',
+              })}
+              content={i18n.translate('xpack.lens.editorFrame.previewErrorLabel', {
+                defaultMessage: 'Preview rendering failed',
+              })}
+            />
+          </div>
+        );
       }}
     />
   );

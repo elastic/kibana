@@ -61,25 +61,6 @@ describe('embeddable', () => {
     expect(expressionRenderer.mock.calls[0][0]!.expression).toEqual(savedVis.expression);
   });
 
-  it('should display error if expression renderering fails', () => {
-    const embeddable = new Embeddable(
-      expressionRenderer,
-      {
-        editUrl: '',
-        editable: true,
-        savedVis,
-      },
-      { id: '123' }
-    );
-    embeddable.render(mountpoint);
-
-    act(() => {
-      expressionRenderer.mock.calls[0][0]!.onRenderFailure!({ type: 'error' });
-    });
-
-    expect(mountpoint.innerHTML).toContain("Visualization couldn't be displayed");
-  });
-
   it('should re-render if new input is pushed', () => {
     const timeRange: TimeRange = { from: 'now-15d', to: 'now' };
     const query: Query = { language: 'kquery', query: '' };

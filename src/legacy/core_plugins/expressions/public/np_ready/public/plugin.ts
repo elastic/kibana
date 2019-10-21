@@ -34,7 +34,7 @@ import {
 } from '../../../../../../plugins/inspector/public';
 import { IInterpreter } from './types';
 import { setInterpreter, setInspector, setRenderersRegistry } from './services';
-import { createRenderer } from './expression_renderer';
+import { ExpressionRendererImplementation } from './expression_renderer';
 import { loader } from './loader';
 import { execute } from './execute';
 import { render } from './render';
@@ -77,14 +77,13 @@ export class ExpressionsPublicPlugin
   }
 
   public start(core: CoreStart, { inspector }: ExpressionsStartDeps) {
-    const ExpressionRenderer = createRenderer(loader);
     setInspector(inspector);
 
     return {
       execute,
       render,
       loader,
-      ExpressionRenderer,
+      ExpressionRenderer: ExpressionRendererImplementation,
     };
   }
 

@@ -20,6 +20,7 @@ import {
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/types';
+import { IInterpreterRenderHandlers } from 'src/legacy/core_plugins/expressions/public';
 import { EuiIcon, EuiText, IconType, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -48,6 +49,7 @@ export interface XYRender {
 type XYChartRenderProps = XYChartProps & {
   formatFactory: FormatFactory;
   timeZone: string;
+  handlers: IInterpreterRenderHandlers;
 };
 
 export const xyChart: ExpressionFunction<'lens_xy_chart', LensMultiTable, XYArgs, XYRender> = ({
@@ -104,10 +106,10 @@ export const getXyChartRenderer = (dependencies: {
   }),
   validate: () => {},
   reuseDomNode: true,
-  render: async (domNode: Element, config: XYChartProps, _handlers: unknown) => {
+  render: async (domNode: Element, config: XYChartProps, handlers: IInterpreterRenderHandlers) => {
     ReactDOM.render(
       <I18nProvider>
-        <XYChartReportable {...config} {...dependencies} />
+        <XYChartReportable {...config} {...dependencies} handlers={handlers} />
       </I18nProvider>,
       domNode
     );
@@ -122,18 +124,62 @@ const MemoizedChart = React.memo(XYChart);
 
 export function XYChartReportable(props: XYChartRenderProps) {
   const [isReady, setIsReady] = useState(false);
+  const [hasError, setError] = useState(false);
 
   // It takes a cycle for the XY chart to render. This prevents
   // reporting from printing a blank chart placeholder.
   useEffect(() => {
     setIsReady(true);
+    if (props.handlers.done) {
+      props.handlers.done();
+    }
   }, []);
+
+  useEffect(() => {
+    if (hasError) {
+      // Clear error state when the config or data is updated
+      setError(false);
+    }
+  }, [props.data, props.args.layers]);
 
   return (
     <VisualizationContainer className="lnsXyExpression__container" isReady={isReady}>
-      <MemoizedChart {...props} />
+      <XYErrorBoundary
+        hasError={hasError}
+        onError={() => {
+          setError(true);
+        }}
+      >
+        <MemoizedChart {...props} />
+      </XYErrorBoundary>
     </VisualizationContainer>
   );
+}
+
+class XYErrorBoundary extends React.Component<{ hasError: boolean; onError: () => void }> {
+  constructor(props: { hasError: boolean; onError: () => void }) {
+    super(props);
+  }
+
+  componentDidCatch() {
+    this.props.onError();
+  }
+
+  render() {
+    if (this.props.hasError) {
+      return (
+        <div>
+          <EuiIcon type="alert" size="l" color="warning" />
+          <EuiText>
+            {i18n.translate('xpack.lens.xyVisualization.renderingErrorLabel', {
+              defaultMessage: 'Error rendering',
+            })}
+          </EuiText>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
 }
 
 export function XYChart({ data, args, formatFactory, timeZone }: XYChartRenderProps) {

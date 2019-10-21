@@ -20,6 +20,7 @@
 import { render, ExpressionRenderHandler } from './render';
 import { Observable } from 'rxjs';
 import { IInterpreterRenderHandlers } from './types';
+import { getRenderersRegistry } from './services';
 
 const element: HTMLElement = {} as HTMLElement;
 
@@ -31,10 +32,11 @@ jest.mock('./services', () => {
       },
     },
   };
+
   return {
-    getRenderersRegistry: () => ({
-      get: (id: string) => renderers[id],
-    }),
+    getRenderersRegistry: jest.fn(() => ({
+      get: jest.fn((id: string) => renderers[id]),
+    })),
   };
 });
 
@@ -61,27 +63,72 @@ describe('ExpressionRenderHandler', () => {
   });
 
   describe('render()', () => {
-    it('throws if invalid data is provided', async () => {
-      const expressionRenderHandler = new ExpressionRenderHandler(element);
-      await expect(expressionRenderHandler.render({})).rejects.toThrow();
+    it('sends an observable error if invalid data is provided', () => {
+      // Tried using expect.assertions(2) to indicate that async behavior is being tested, but
+      // it always passed the test even with invalid assertions
+      return new Promise(resolve => {
+        const expressionRenderHandler = new ExpressionRenderHandler(element);
+        expressionRenderHandler.render$.subscribe({
+          error(error) {
+            expect(error).toBeInstanceOf(Error);
+            expect(error.message).toEqual('invalid data provided to the expression renderer');
+            resolve();
+          },
+        });
+        expressionRenderHandler.render({});
+      });
     });
 
-    it('throws if renderer does not exist', async () => {
-      const expressionRenderHandler = new ExpressionRenderHandler(element);
-      await expect(
-        expressionRenderHandler.render({ type: 'render', as: 'something' })
-      ).rejects.toThrow();
+    it('sends an observable error if renderer does not exist', () => {
+      // Tried using expect.assertions(2) to indicate that async behavior is being tested, but
+      // it always passed the test even with invalid assertions
+      return new Promise(resolve => {
+        const expressionRenderHandler = new ExpressionRenderHandler(element);
+        expressionRenderHandler.render$.subscribe({
+          error(error) {
+            expect(error).toBeInstanceOf(Error);
+            expect(error.message).toEqual(`invalid renderer id 'something'`);
+            resolve();
+          },
+        });
+        expressionRenderHandler.render({ type: 'render', as: 'something' });
+      });
     });
 
-    it('returns a promise', () => {
-      const expressionRenderHandler = new ExpressionRenderHandler(element);
-      expect(expressionRenderHandler.render(data)).toBeInstanceOf(Promise);
+    it('sends an observable error if the rendering function throws', () => {
+      (getRenderersRegistry as jest.Mock).mockReturnValueOnce({ get: () => true });
+      (getRenderersRegistry as jest.Mock).mockReturnValueOnce({
+        get: () => ({
+          render: () => {
+            throw new Error('renderer error');
+          },
+        }),
+      });
+
+      // Tried using expect.assertions(2) to indicate that async behavior is being tested, but
+      // it always passed the test even with invalid assertions
+      return new Promise(resolve => {
+        const expressionRenderHandler = new ExpressionRenderHandler(element);
+        expressionRenderHandler.render$.subscribe({
+          error(error) {
+            expect(error).toBeInstanceOf(Error);
+            expect(error.message).toEqual(`renderer error`);
+            resolve();
+          },
+        });
+        expressionRenderHandler.render({ type: 'render', as: 'something' });
+      });
     });
 
-    it('resolves a promise once rendering is complete', async () => {
+    it('sends a next observable once rendering is complete', async () => {
+      expect.assertions(1);
       const expressionRenderHandler = new ExpressionRenderHandler(element);
-      const response = await expressionRenderHandler.render(data);
-      expect(response).toBe(1);
+      expressionRenderHandler.render$.subscribe({
+        next(message) {
+          expect(message).toEqual(1);
+        },
+      });
+      expressionRenderHandler.render(data);
     });
   });
 });

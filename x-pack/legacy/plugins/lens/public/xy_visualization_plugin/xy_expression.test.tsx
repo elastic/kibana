@@ -10,7 +10,18 @@ import { xyChart, XYChart } from './xy_expression';
 import { LensMultiTable } from '../types';
 import React from 'react';
 import { shallow } from 'enzyme';
+import { IInterpreterRenderHandlers } from 'src/legacy/core_plugins/expressions/public';
 import { XYArgs, LegendConfig, legendConfig, layerConfig, LayerArgs } from './types';
+
+function mockHandlers(): IInterpreterRenderHandlers {
+  return {
+    done: () => {},
+    onDestroy: (fn: () => void) => {},
+    reload: () => {},
+    update: () => {},
+    event: () => {},
+  };
+}
 
 function sampleArgs() {
   const data: LensMultiTable = {
@@ -121,6 +132,7 @@ describe('xy_expression', () => {
           args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'line' }] }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          handlers={mockHandlers()}
         />
       );
       expect(component).toMatchSnapshot();
@@ -145,6 +157,7 @@ describe('xy_expression', () => {
           }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          handlers={mockHandlers()}
         />
       );
       expect(component.find(Settings).prop('xDomain')).toMatchInlineSnapshot(`
@@ -173,6 +186,7 @@ describe('xy_expression', () => {
           }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          handlers={mockHandlers()}
         />
       );
       expect(component.find(Settings).prop('xDomain')).toBeUndefined();
@@ -186,6 +200,7 @@ describe('xy_expression', () => {
           args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'bar' }] }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          handlers={mockHandlers()}
         />
       );
       expect(component).toMatchSnapshot();
@@ -200,6 +215,7 @@ describe('xy_expression', () => {
           args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'area' }] }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          handlers={mockHandlers()}
         />
       );
       expect(component).toMatchSnapshot();
@@ -214,6 +230,7 @@ describe('xy_expression', () => {
           args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'bar_horizontal' }] }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          handlers={mockHandlers()}
         />
       );
       expect(component).toMatchSnapshot();
@@ -229,6 +246,7 @@ describe('xy_expression', () => {
           args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'bar_stacked' }] }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          handlers={mockHandlers()}
         />
       );
       expect(component).toMatchSnapshot();
@@ -244,6 +262,7 @@ describe('xy_expression', () => {
           args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'area_stacked' }] }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          handlers={mockHandlers()}
         />
       );
       expect(component).toMatchSnapshot();
@@ -262,6 +281,7 @@ describe('xy_expression', () => {
           }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          handlers={mockHandlers()}
         />
       );
       expect(component).toMatchSnapshot();
@@ -273,7 +293,13 @@ describe('xy_expression', () => {
     test('it passes time zone to the series', () => {
       const { data, args } = sampleArgs();
       const component = shallow(
-        <XYChart data={data} args={args} formatFactory={getFormatSpy} timeZone="CEST" />
+        <XYChart
+          data={data}
+          args={args}
+          formatFactory={getFormatSpy}
+          timeZone="CEST"
+          handlers={mockHandlers()}
+        />
       );
       expect(component.find(LineSeries).prop('timeZone')).toEqual('CEST');
     });
@@ -288,6 +314,7 @@ describe('xy_expression', () => {
           args={{ ...args, layers: [firstLayer] }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          handlers={mockHandlers()}
         />
       );
       expect(component.find(BarSeries).prop('enableHistogramMode')).toEqual(true);
@@ -310,6 +337,7 @@ describe('xy_expression', () => {
           }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          handlers={mockHandlers()}
         />
       );
       expect(component.find(BarSeries).prop('enableHistogramMode')).toEqual(true);
@@ -326,6 +354,7 @@ describe('xy_expression', () => {
           }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          handlers={mockHandlers()}
         />
       );
       expect(component.find(BarSeries).prop('enableHistogramMode')).toEqual(false);
@@ -335,7 +364,13 @@ describe('xy_expression', () => {
       const { data, args } = sampleArgs();
 
       const component = shallow(
-        <XYChart data={data} args={args} formatFactory={getFormatSpy} timeZone="UTC" />
+        <XYChart
+          data={data}
+          args={args}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          handlers={mockHandlers()}
+        />
       );
       expect(component.find(LineSeries).prop('data')).toEqual([
         { 'Label A': 1, 'Label B': 2, c: 'I' },
@@ -347,7 +382,13 @@ describe('xy_expression', () => {
       const { data, args } = sampleArgs();
 
       const component = shallow(
-        <XYChart data={data} args={args} formatFactory={getFormatSpy} timeZone="UTC" />
+        <XYChart
+          data={data}
+          args={args}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          handlers={mockHandlers()}
+        />
       );
       expect(component.find(LineSeries).prop('yAccessors')).toEqual(['Label A', 'Label B']);
     });
@@ -361,6 +402,7 @@ describe('xy_expression', () => {
           args={{ ...args, layers: [{ ...args.layers[0], xScaleType: 'ordinal' }] }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          handlers={mockHandlers()}
         />
       );
       expect(component.find(LineSeries).prop('xScaleType')).toEqual(ScaleType.Ordinal);
@@ -375,6 +417,7 @@ describe('xy_expression', () => {
           args={{ ...args, layers: [{ ...args.layers[0], yScaleType: 'sqrt' }] }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          handlers={mockHandlers()}
         />
       );
       expect(component.find(LineSeries).prop('yScaleType')).toEqual(ScaleType.Sqrt);
@@ -389,6 +432,7 @@ describe('xy_expression', () => {
           args={{ ...args }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          handlers={mockHandlers()}
         />
       );
 
@@ -404,6 +448,7 @@ describe('xy_expression', () => {
           args={{ ...args }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          handlers={mockHandlers()}
         />
       );
 
@@ -420,6 +465,7 @@ describe('xy_expression', () => {
           args={{ ...args, layers: [{ ...args.layers[0], accessors: ['a'] }] }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          handlers={mockHandlers()}
         />
       );
       expect(getFormatSpy).toHaveBeenCalledWith({
@@ -437,6 +483,7 @@ describe('xy_expression', () => {
           args={{ ...args }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          handlers={mockHandlers()}
         />
       );
 
