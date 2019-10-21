@@ -144,10 +144,17 @@ export const AgentUnenrollProvider: React.FunctionComponent<Props> = ({ children
             />
           }
           confirmButtonText={
-            <FormattedMessage
-              id="xpack.fleet.unenrollAgents.confirmModal.confirmButtonLabel"
-              defaultMessage="Unenroll"
-            />
+            isLoading ? (
+              <FormattedMessage
+                id="xpack.fleet.unenrollAgents.confirmModal.loadingButtonLabel"
+                defaultMessage="Loading…"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.fleet.unenrollAgents.confirmModal.confirmButtonLabel"
+                defaultMessage="Unenroll"
+              />
+            )
           }
           buttonColor="danger"
           confirmButtonDisabled={isLoading}
