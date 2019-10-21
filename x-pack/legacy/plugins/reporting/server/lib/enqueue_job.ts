@@ -27,7 +27,7 @@ interface ConfirmedJob {
 function enqueueJobFn(server: ServerFacade) {
   const jobQueue = server.plugins.reporting.queue;
   const config = server.config();
-  const captureConfig: CaptureConfig = config.get('xpack.reporting.capture.browser.type');
+  const captureConfig: CaptureConfig = config.get('xpack.reporting.capture');
   const browserType = captureConfig.browser.type;
   const maxAttempts = captureConfig.maxAttempts;
   const queueConfig: QueueConfig = config.get('xpack.reporting.queue');
