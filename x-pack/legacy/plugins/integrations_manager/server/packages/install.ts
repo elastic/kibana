@@ -50,8 +50,8 @@ export async function installPackage(options: {
         toSave,
       });
     }
-    return result;
   }
+  return result;
 }
 
 // the function which how to install each of the various asset types
