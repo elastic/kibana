@@ -70,7 +70,7 @@ module.exports = {
           //
           // Old recommended tslint rules
           '@typescript-eslint/adjacent-overload-signatures': 'error',
-          '@typescript-eslint/array-type': ['error', 'array-simple'],
+          '@typescript-eslint/array-type': ['error', { default: 'array-simple', readonly: 'array-simple' }],
           '@typescript-eslint/ban-types': 'error',
           'camelcase': 'off',
           '@typescript-eslint/camelcase': ['error', {
