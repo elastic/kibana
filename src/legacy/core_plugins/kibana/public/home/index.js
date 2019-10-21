@@ -27,7 +27,7 @@ import {
   HomeApp
 } from './components/home_app';
 import { i18n } from '@kbn/i18n';
-import { npStart } from 'ui/new_platform';
+import { npSetup, npStart } from 'ui/new_platform';
 
 const app = uiModules.get('apps/home', []);
 app.directive('homeApp', function (reactDirective) {
@@ -40,7 +40,11 @@ function getRoute() {
   return {
     template,
     controller($scope, Private) {
-      $scope.directories = Private(FeatureCatalogueRegistryProvider).inTitleOrder;
+      // Merge legacy registry with new registry
+      const legacyEntries = Private(FeatureCatalogueRegistryProvider).inTitleOrder;
+      legacyEntries.map(npSetup.plugins.feature_catalogue.register);
+      $scope.directories = npStart.plugins.feature_catalogue.get();
+
       $scope.recentlyAccessed = npStart.core.chrome.recentlyAccessed.get().map(item => {
         item.link = chrome.addBasePath(item.link);
         return item;
