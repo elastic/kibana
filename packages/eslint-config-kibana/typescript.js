@@ -100,7 +100,11 @@ module.exports = {
           '@typescript-eslint/no-empty-interface': 'error',
           '@typescript-eslint/no-misused-new': 'error',
           '@typescript-eslint/no-namespace': 'error',
-          '@typescript-eslint/no-triple-slash-reference': 'error',
+          '@typescript-eslint/triple-slash-reference': ['error', {
+            path: 'never',
+            types: 'never',
+            lib: 'never'
+          }],
           '@typescript-eslint/no-var-requires': 'error',
           '@typescript-eslint/type-annotation-spacing': 'error',
           '@typescript-eslint/unified-signatures': 'error',
