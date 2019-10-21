@@ -73,11 +73,15 @@ export function registerGenerateFromJobParams(
     },
   });
 
-  // show error about GET method to user
+  /* Get route to generation endpoint: show error about GET method to user
+   * The options property must be cloned from the return value, to prevent a
+   * Typescript conflict with the NP shims:
+   * Type 'Server' provides no match for the signature '(request: RequestFacade): any'.
+   */
   server.route({
     path: `${BASE_GENERATE}/{p*}`,
     method: 'GET',
-    options: getRouteConfig(),
+    options: { ...getRouteConfigFactoryReportingPre(server) }, // Must clone the object
     handler: () => {
       const err = boom.methodNotAllowed('GET is not allowed');
       err.output.headers.allow = 'POST';
