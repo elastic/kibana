@@ -104,7 +104,7 @@
   "dependencies": {
     "@babel/core": "^7.5.5",
     "@babel/register": "^7.5.5",
-    "@elastic/charts": "^13.5.1",
+    "@elastic/charts": "^13.5.4",
     "@elastic/datemath": "5.0.2",
     "@elastic/ems-client": "1.0.5",
     "@elastic/eui": "14.5.0",
@@ -355,7 +355,7 @@
     "babel-eslint": "^10.0.3",
     "babel-jest": "^24.9.0",
     "babel-plugin-dynamic-import-node": "^2.2.0",
-    "backport": "4.6.4",
+    "backport": "4.7.3",
     "chai": "3.5.0",
     "chance": "1.0.18",
     "cheerio": "0.22.0",

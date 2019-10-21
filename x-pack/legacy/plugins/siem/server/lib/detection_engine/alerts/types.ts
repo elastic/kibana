@@ -16,6 +16,7 @@ import {
 } from '../../../../../alerting/server/types';
 import { AlertsClient } from '../../../../../alerting/server/alerts_client';
 import { ActionsClient } from '../../../../../actions/server/actions_client';
+import { SearchResponse } from '../../types';
 
 export interface SignalAlertParams {
   description: string;
@@ -28,7 +29,7 @@ export interface SignalAlertParams {
   kql: string | undefined;
   maxSignals: string;
   name: string;
-  severity: number;
+  severity: string;
   type: 'filter' | 'kql';
   to: string;
   references: string[];
@@ -78,25 +79,29 @@ export interface SignalsRequest extends Hapi.Request {
 }
 
 export type SignalExecutorOptions = Omit<AlertExecutorOptions, 'params'> & {
-  params: {
-    description: string;
-    from: string;
-    id: string;
-    index: string[];
-    interval: string;
-    enabled: boolean;
-    filter: Record<string, {}> | undefined;
-    kql: string | undefined;
-    maxSignals: string;
-    name: string;
-    severity: number;
-    type: 'filter' | 'kql';
-    to: string;
-    references: string[];
+  params: SignalAlertParams & {
     scrollSize: number;
     scrollLock: string;
   };
 };
+
+export type SearchTypes =
+  | string
+  | string[]
+  | number
+  | number[]
+  | boolean
+  | boolean[]
+  | object
+  | object[];
+
+export interface SignalSource {
+  [key: string]: SearchTypes;
+  '@timestamp': string;
+}
+
+export type SignalSearchResponse = SearchResponse<SignalSource>;
+export type SignalSourceHit = SignalSearchResponse['hits']['hits'][0];
 
 // This returns true because by default a SignalAlertTypeDefinition is an AlertType
 // since we are only increasing the strictness of params.
