@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const searchResponse = [
+export const searchResponse: any = [
   {
     id: ['L22w_FX2SbqlQYOP5QrYDg', '.apm-agent-configuration', '0'],
     searches: [

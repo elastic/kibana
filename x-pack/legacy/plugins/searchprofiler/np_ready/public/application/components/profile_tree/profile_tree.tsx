@@ -10,12 +10,12 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { IndexDetails } from './index_details';
 import { ShardDetails } from './shard_details';
 import { initDataFor } from './init_data';
-import { Shard, Targets } from '../../types';
+import { Targets, ShardSerialized } from '../../types';
 import { HighlightContextProvider } from './highlight_context';
 
-interface Props {
+export interface Props {
   target: Targets;
-  data: Shard[];
+  data: ShardSerialized[];
 }
 
 export const ProfileTree = ({ data, target }: Props) => {
@@ -23,19 +23,24 @@ export const ProfileTree = ({ data, target }: Props) => {
     return null;
   }
 
-  const profileTreeData = initDataFor(target)(data);
+  const sortedIndices = initDataFor(target)(data);
 
   return (
     <HighlightContextProvider>
-      {profileTreeData.map(index => (
-        <EuiFlexGroup direction="column">
+      {sortedIndices.map(index => (
+        <EuiFlexGroup key={index.name} direction="column">
           <EuiFlexItem>
             <IndexDetails index={index} target={target} />
           </EuiFlexItem>
           <EuiSpacer />
           <EuiFlexItem>
             {index.shards.map(shard => (
-              <ShardDetails index={index} shard={shard} operations={shard[target]!} />
+              <ShardDetails
+                key={shard.id[1]}
+                index={index}
+                shard={shard}
+                operations={shard[target]!}
+              />
             ))}
           </EuiFlexItem>
         </EuiFlexGroup>

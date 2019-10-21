@@ -18,7 +18,7 @@ export interface Props {
 export const ShardDetailTree = ({ data }: Props) => {
   // Recursively render the tree structure
   const renderOperations = (operation: Operation): JSX.Element => {
-    const parent = operation.getParent();
+    const parent = operation.parent;
     const parentVisible = parent ? parent.visible : false;
     return (
       <>

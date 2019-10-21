@@ -31,9 +31,10 @@ export interface Index {
   visible: boolean;
 }
 
-export interface FlattenedStats {
-  time: number;
-  selfTime: number;
+export interface ShardSerialized {
+  id: string[];
+  searches: Operation[];
+  aggregations: Operation[];
 }
 
 export interface Operation {
@@ -45,7 +46,7 @@ export interface Operation {
   absoluteColor: string;
   time: number;
 
-  getParent(): Operation | null;
+  parent: Operation | null;
   children: Operation[];
 
   // Only exists on top level

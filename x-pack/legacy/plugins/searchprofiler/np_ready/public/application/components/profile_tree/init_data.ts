@@ -6,7 +6,7 @@
 
 import { produce } from 'immer';
 import { flow } from 'fp-ts/lib/function';
-import { Targets, Shard } from '../../types';
+import { Targets, Shard, ShardSerialized } from '../../types';
 import { calcTimes, normalizeTimes, initTree, normalizeIndices, sortIndices } from './unsafe_utils';
 import { IndexMap } from './types';
 
@@ -51,21 +51,14 @@ export function mutateSearchTimesTree(shard: Shard) {
   shard.time = shardTime;
 }
 
-const initShards = (data: Shard[]) =>
-  produce<Shard[]>(data, draft => {
-    for (const shard of draft) {
-      if (shard.time == null) {
-        shard.time = 0;
-      }
-
-      if (shard.color == null) {
-        shard.color = '';
-      }
-
-      if (shard.relative == null) {
-        shard.relative = 0;
-      }
-    }
+const initShards = (data: ShardSerialized[]) =>
+  produce<ShardSerialized[], Shard[]>(data, draft => {
+    return draft.map(s => ({
+      ...s,
+      time: 0,
+      color: '',
+      relative: 0,
+    }));
   });
 
 export const calculateShardValues = (target: Targets) => (data: Shard[]) =>

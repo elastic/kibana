@@ -163,9 +163,7 @@ export function initTree<T>(data: Operation[], depth = 0, parent: Operation | nu
     }
 
     // Use named function for tests.
-    child.getParent = function getParent() {
-      return parent;
-    };
+    child.parent = parent;
     child.time = timeInMilliseconds(child);
     child.lucene = child.description;
     child.query_type = child.type!.split('.').pop()!;

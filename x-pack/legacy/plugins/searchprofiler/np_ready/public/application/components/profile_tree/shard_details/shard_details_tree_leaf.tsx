@@ -5,8 +5,7 @@
  */
 
 import React, { useState } from 'react';
-import { EuiLink, EuiBadge, EuiCodeBlock } from '@elastic/eui';
-import { EuiIcon } from '@elastic/eui/src/components/icon/icon';
+import { EuiLink, EuiBadge, EuiCodeBlock, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { useHighlightTreeLeaf } from '../use_highlight_tree_leaf';
@@ -38,7 +37,7 @@ export const ShardDetailsTreeLeaf = ({ parentVisible, operation }: Props) => {
         <EuiLink
           className="prfDevTool__shardDetails"
           disabled={!operation.hasChildren}
-          onClick={() => {}}
+          onClick={() => setVisible(!visible)}
         >
           {operation.hasChildren ? (
             <EuiIcon type={operation.visible ? 'arrowDown' : 'arrowRight'} />
