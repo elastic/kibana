@@ -7,7 +7,7 @@ kibanaLibrary.load()
 def JOB_PARTS = params.CI_GROUP.split(':')
 def IS_XPACK = JOB_PARTS[0] == 'xpack'
 def JOB = JOB_PARTS[1]
-def CI_GROUP = JOB_PARTS[2] ?: ''
+def CI_GROUP = JOB_PARTS.size() > 2 ? JOB_PARTS[2] : ''
 
 def worker = getWorkerFromParams(IS_XPACK, JOB, CI_GROUP)
 
