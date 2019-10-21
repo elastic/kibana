@@ -6,12 +6,18 @@
 
 /* eslint-disable @typescript-eslint/camelcase */
 
-import { FileItem, LsTreeSummary, simplegit, SimpleGit } from '@elastic/simple-git/dist';
+import {
+  FileItem,
+  LsTreeSummary,
+  simplegit,
+  SimpleGit,
+  DiffTreeSummary,
+} from '@elastic/simple-git/dist';
+import { BlameSummary } from '@elastic/simple-git/dist/response';
 import Boom from 'boom';
 import * as Path from 'path';
 import * as fs from 'fs';
 import { isBinaryFileSync } from 'isbinaryfile';
-import { BlameSummary, DiffResultTextFile } from '@elastic/simple-git/dist/response';
 import moment from 'moment';
 import { GitBlame } from '../common/git_blame';
 import { CommitDiff, Diff, DiffKind } from '../common/git_diff';
@@ -320,37 +326,41 @@ export class GitOperations {
     if (!revision.includes('..')) {
       revision = `${revision}~1..${revision}`;
     }
-    const diffs = await git.diffSummary([revision]);
+    const diffSummary = new DiffTreeSummary(git, revision, undefined, {
+      summary: true,
+      recursive: true,
+      detectRename: true,
+    });
+    const diffs = await diffSummary.all();
 
     const commitDiff: CommitDiff = {
       commit,
-      additions: diffs.insertions,
-      deletions: diffs.deletions,
+      additions: diffSummary.summary!.insertions,
+      deletions: diffSummary.summary!.deletions,
       files: [],
     };
-    for (const d of diffs.files) {
+    for (const d of diffs) {
       if (!d.binary) {
-        const diff = d as DiffResultTextFile;
-        const kind = this.diffKind(diff);
+        const kind = d.type as DiffKind;
         switch (kind) {
           case DiffKind.ADDED:
             {
-              const path = diff.file;
+              const path = d.path;
               const modifiedCode = await this.getModifiedCode(git, commit, path);
               const language = await detectLanguage(path, modifiedCode);
               commitDiff.files.push({
                 language,
                 path,
                 modifiedCode,
-                additions: diff.insertions,
-                deletions: diff.deletions,
+                additions: d.insertions!,
+                deletions: d.deletions!,
                 kind,
               });
             }
             break;
           case DiffKind.DELETED:
             {
-              const path = diff.file;
+              const path = d.path;
               const originCode = await this.getOriginCode(git, commit, path);
               const language = await detectLanguage(path, originCode);
               commitDiff.files.push({
@@ -358,16 +368,16 @@ export class GitOperations {
                 path,
                 originCode,
                 kind,
-                additions: diff.insertions,
-                deletions: diff.deletions,
+                additions: d.insertions!,
+                deletions: d.deletions!,
               });
             }
             break;
           case DiffKind.MODIFIED:
             {
-              const path = diff.rename || diff.file;
+              const path = d.path;
               const modifiedCode = await this.getModifiedCode(git, commit, path);
-              const originPath = diff.file;
+              const originPath = d.beforePath || d.path;
               const originCode = await this.getOriginCode(git, commit, originPath);
               const language = await detectLanguage(path, modifiedCode);
               commitDiff.files.push({
@@ -377,20 +387,20 @@ export class GitOperations {
                 originCode,
                 modifiedCode,
                 kind,
-                additions: diff.insertions,
-                deletions: diff.deletions,
+                additions: d.insertions!,
+                deletions: d.deletions!,
               });
             }
             break;
           case DiffKind.RENAMED:
             {
-              const path = diff.rename || diff.file;
+              const path = d.path;
               commitDiff.files.push({
                 path,
-                originPath: diff.file,
+                originPath: d.beforePath!,
                 kind,
-                additions: diff.insertions,
-                deletions: diff.deletions,
+                additions: d.insertions!,
+                deletions: d.deletions!,
               });
             }
             break;
@@ -402,38 +412,28 @@ export class GitOperations {
 
   public async getDiff(uri: string, oldRevision: string, newRevision: string): Promise<Diff> {
     const git = await this.openGit(uri);
-    const diff = await git.diffSummary([oldRevision, newRevision]);
+    const diffSummary = new DiffTreeSummary(git, oldRevision, newRevision, {
+      summary: true,
+      recursive: true,
+      detectRename: true,
+    });
+    const diffs = await diffSummary.all();
+
     const res: Diff = {
-      additions: diff.insertions,
-      deletions: diff.deletions,
+      additions: diffSummary.summary!.insertions,
+      deletions: diffSummary.summary!.deletions,
       files: [],
     };
-    diff.files.forEach(d => {
-      if (!d.binary) {
-        const td = d as DiffResultTextFile;
-        const kind = this.diffKind(td);
-        res.files.push({
-          path: d.file,
-          additions: td.insertions,
-          deletions: td.deletions,
-          kind,
-        });
-      }
-    });
+    for (const d of diffs) {
+      res.files.push({
+        path: d.path,
+        additions: d.insertions!,
+        deletions: d.deletions!,
+        kind: d.type as DiffKind,
+      });
+    }
 
     return res;
-  }
-
-  private diffKind(diff: DiffResultTextFile) {
-    let kind: DiffKind = DiffKind.MODIFIED;
-    if (diff.changes === diff.insertions) {
-      kind = DiffKind.ADDED;
-    } else if (diff.changes === diff.deletions) {
-      kind = DiffKind.DELETED;
-    } else if (diff.rename) {
-      kind = DiffKind.RENAMED;
-    }
-    return kind;
   }
 
   private async getOriginCode(git: SimpleGit, commit: CommitInfo, path: string) {
