@@ -469,8 +469,12 @@ We now move this logic into a new plugin definition, which is based off of the c
 
 ```ts
 // server/plugin.ts
-import { CoreSetup } from 'src/core/server';
+import { CoreSetup, Plugin } from 'src/core/server';
 import { ElasticsearchPlugin } from '../elasticsearch';
+
+interface FooSetup {
+  getBar(): string
+}
 
 // We inject all legacy dependencies into our plugin including dependencies on other legacy plugins.
 // Take care to only expose the legacy functionality you need e.g. don't inject the whole 
@@ -483,18 +487,17 @@ interface LegacySetup {
   }
 }
 
-interface FooSetup {
-  getBar(): string
-}
-
-export interface PluginsSetup {
-  // Once we start dependending on NP plugins we'll add their types here
-}
-
-export type DemoPluginSetup = {
+// Define the public API's for our plugins setup and start lifecycle
+export interface DemoSetup {
   getDemoBar: () => string;
 }
+export interface DemoStart {}
 
+// Once we start dependending on NP plugins' setup or start API's we'll add their types here
+export interface DemoSetupDeps {}
+export interface DemoStartDeps {}
+
+export class DemoPlugin implements Plugin<DemoSetup, DemoStart, DemoSetupDeps, DemoStartDeps> {
 export class Plugin {
   public setup(core: CoreSetup, plugins: PluginsSetup, __LEGACY: LegacySetup) {
     // We're still using the legacy Elasticsearch and http router here, but we're now accessing
@@ -563,6 +566,11 @@ export default (kibana) => {
   });
 }
 ```
+> Note: An equally valid approach is to extend `CoreSetup` with a `__legacy`
+> property instead of introducing a third parameter to your plugins lifecycle
+> function. The important thing is that you reduce the legacy API surface that
+> you depend on to a minimum by only picking and injecting the methods you
+> require and that you clearly differentiate legacy dependencies in a namespace.
 
 This introduces a layer between the legacy plugin system with hapi.js and the logic you want to move to the new plugin system. The functionality exposed through that layer is still provided from the legacy world and in some cases is still technically powered directly by hapi, but building this layer forced you to identify the remaining touch points into the legacy world and it provides you with control when you start migrating to new platform-backed services.
 
@@ -790,25 +798,17 @@ import { plugin } from '.';
 import { setup as fooSetup, start as fooStart } from '../../foo/public/legacy'; // assumes `foo` lives in `legacy/core_plugins`
 
 const pluginInstance = plugin({} as PluginInitializerContext);
-const shimCoreSetup = {
-  ...npSetup.core,
-  bar: {}, // shim for a core service that hasn't migrated yet
+const __LEGACYSetup = {
+  bar: {},        // shim for a core service that hasn't migrated yet
+  foo: fooSetup,  // dependency on a legacy plugin
 };
-const shimCoreStart = {
-  ...npStart.core,
-  bar: {},
-};
-const shimSetupPlugins = {
-  ...npSetup.plugins,
-  foo: fooSetup,
-};
-const shimStartPlugins = {
-  ...npStart.plugins,
-  foo: fooStart,
+const __LEGACYStart = {
+  bar: {},        // shim for a core service that hasn't migrated yet
+  foo: fooStart,  // dependency on a legacy plugin
 };
 
-export const setup = pluginInstance.setup(shimCoreSetup, shimSetupPlugins);
-export const start = pluginInstance.start(shimCoreStart, shimStartPlugins);
+export const setup = pluginInstance.setup(npSetup.core, npSetup.plugins, __LEGACYSetup);
+export const start = pluginInstance.start(npStart.core, npStart.plugins, __LEGACYStart);
 ```
 
 > As you build your shims, you may be wondering where you will find some legacy services in the new platform. Skip to [the tables below](#how-do-i-build-my-shim-for-new-platform-services) for a list of some of the more common legacy services and where we currently expect them to live.
@@ -877,16 +877,13 @@ import { uiThing } from 'ui/thing';
 ...
 
 const pluginInstance = plugin({} as PluginInitializerContext);
-const shimSetupPlugins = {
-  ...npSetup.plugins,
+const __LEGACY = {
   foo: fooSetup,
-  __LEGACY: {
-    uiThing, // eventually this will move out of __LEGACY and into a proper plugin
-  },
+  uiThing, // eventually this will move out of __LEGACY and into a NP plugin
 };
 
 ...
-export const setup = pluginInstance.setup(npSetup.core, shimSetupPlugins);
+export const setup = pluginInstance.setup(npSetup.core, npSetup.plugins, __LEGACY);
 ```
 
 #### 7. Switch to new platform services
