@@ -70,7 +70,7 @@ class EventsOverTimeComponentQuery extends QueryTemplate<
             interval: '12h',
             from: startDate!,
             to: endDate!,
-            time_zone: timezone,
+            timezone,
           },
           defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
           inspect: isInspected,
