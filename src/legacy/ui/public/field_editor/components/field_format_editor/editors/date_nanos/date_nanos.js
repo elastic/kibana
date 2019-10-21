@@ -49,14 +49,10 @@ export class DateNanosFormatEditor extends DefaultFormatEditor {
     ];
   }
 
-  scrubSamples = samples => samples.forEach(sample => sample.output = sample.output.replace(/</g, '&lt;').replace(/>/g, '&gt;'));
-
   render() {
     const { format, formatParams } = this.props;
     const { error, samples } = this.state;
     const defaultPattern = format.getParamDefaults().pattern;
-
-    this.scrubSamples(samples);
 
     return (
       <Fragment>
