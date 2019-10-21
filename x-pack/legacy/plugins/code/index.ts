@@ -41,6 +41,7 @@ export const code = (kibana: any) =>
         return {
           codeUiEnabled: config.get('xpack.code.ui.enabled'),
           codeIntegrationsEnabled: config.get('xpack.code.integrations.enabled'),
+          codeDiffPageEnabled: config.get('xpack.code.diffPage.enabled'),
         };
       },
       hacks: ['plugins/code/hacks/toggle_app_link_in_nav'],
@@ -61,6 +62,9 @@ export const code = (kibana: any) =>
         integrations: Joi.object({
           enabled: Joi.boolean().default(false),
         }).default(),
+        diffPage: Joi.object({
+          enabled: Joi.boolean().default(false),
+        }).default(),
         enabled: Joi.boolean().default(true),
       })
         .default()
@@ -78,7 +82,7 @@ export const code = (kibana: any) =>
 
       // Set up with the new platform plugin lifecycle API.
       const plugin = codePlugin(initializerContext);
-      plugin.setup(coreSetup);
+      await plugin.setup(coreSetup, initializerContext.legacy.http);
 
       // @ts-ignore
       const kbnServer = this.kbnServer;

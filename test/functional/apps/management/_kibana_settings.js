@@ -98,8 +98,8 @@ export default function ({ getService, getPageObjects }) {
     });
 
     after(async function () {
-      await PageObjects.settings.clickKibanaSettings();
-      await PageObjects.settings.setAdvancedSettingsSelect('dateFormat:tz', 'UTC');
+      await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC' });
+      await browser.refresh();
     });
   });
 }

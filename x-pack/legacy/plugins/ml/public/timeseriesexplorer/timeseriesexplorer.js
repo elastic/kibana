@@ -337,14 +337,22 @@ export class TimeSeriesExplorer extends React.Component {
   }
 
   entityFieldValueChanged = (entity, fieldValue) => {
-    this.setState(prevState => ({
-      entities: prevState.entities.map(stateEntity => {
-        if (stateEntity.fieldName === entity.fieldName) {
-          stateEntity.fieldValue = fieldValue;
-        }
-        return stateEntity;
-      })
-    }), () => this.saveSeriesPropertiesAndRefresh());
+    const { appStateHandler } = this.props;
+    const { entities } = this.state;
+
+    const resultEntities = {
+      ...entities.reduce((appStateEntities, appStateEntity) => {
+        appStateEntities[appStateEntity.fieldName] = appStateEntity.fieldValue;
+        return appStateEntities;
+      }, {}),
+      [entity.fieldName]: fieldValue,
+    };
+
+    appStateHandler(APP_STATE_ACTION.SET_ENTITIES, resultEntities);
+
+    this.updateControlsForDetector(() => {
+      this.refresh();
+    });
   };
 
   loadAnomaliesTableData = (earliestMs, latestMs) => {
@@ -1090,11 +1098,11 @@ export class TimeSeriesExplorer extends React.Component {
           />
         )}
 
-        {(jobs.length > 0 && (fullRefresh === false || loading === false) && hasResults === false) && (
+        {(jobs.length > 0 && loading === false && hasResults === false) && (
           <TimeseriesexplorerNoChartData dataNotChartable={dataNotChartable} entities={entities} />
         )}
 
-        {(jobs.length > 0 && (fullRefresh === false || loading === false) && hasResults === true) && (
+        {(jobs.length > 0 && loading === false && hasResults === true) && (
           <EuiText className="results-container">
             <span className="panel-title">
               {i18n.translate('xpack.ml.timeSeriesExplorer.singleTimeSeriesAnalysisTitle', {
