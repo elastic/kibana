@@ -22,7 +22,7 @@ import expect from '@kbn/expect';
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const dashboardPanelActions = getService('dashboardPanelActions');
-  const PageObjects = getPageObjects(['dashboard']);
+  const PageObjects = getPageObjects(['dashboard', 'timePicker']);
 
   describe('dashboard data-shared attributes', function describeIndexTests() {
     let originalPanelTitles;
@@ -30,6 +30,13 @@ export default function ({ getService, getPageObjects }) {
     before(async () => {
       await PageObjects.dashboard.loadSavedDashboard('dashboard with everything');
       await PageObjects.dashboard.waitForRenderComplete();
+    });
+
+    it('should have time picker with data-shared-timefilter-duration', async () => {
+      await retry.try(async () => {
+        const sharedData = await PageObjects.timePicker.getTimeDurationForSharing();
+        expect(sharedData).to.not.be(null);
+      });
     });
 
     it('should have data-shared-items-count set to the number of embeddables on the dashboard', async () => {

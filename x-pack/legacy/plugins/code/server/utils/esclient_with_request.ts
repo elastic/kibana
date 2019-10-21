@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestFacade } from '../../';
+import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
 import { AnyObject, EsClient } from '../lib/esqueue';
 import { EsIndexClient } from './es_index_client';
 import { WithRequest } from './with_request';
@@ -12,8 +12,8 @@ import { WithRequest } from './with_request';
 export class EsClientWithRequest extends WithRequest implements EsClient {
   public readonly indices = new EsIndexClient(this);
 
-  constructor(readonly req: RequestFacade) {
-    super(req);
+  constructor(readonly context: RequestHandlerContext, readonly req: KibanaRequest) {
+    super(context, req);
   }
 
   public bulk(params: AnyObject): Promise<any> {

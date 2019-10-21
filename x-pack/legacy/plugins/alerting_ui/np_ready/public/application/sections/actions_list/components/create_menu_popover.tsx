@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ActionType } from '../../../lib/api';
-import { ActionsContext } from '../../../context/app_context';
+import { ActionsContext } from '../../../context/actions_context';
 
 interface Props {
   actionTypesIndex: Record<string, ActionType> | undefined;

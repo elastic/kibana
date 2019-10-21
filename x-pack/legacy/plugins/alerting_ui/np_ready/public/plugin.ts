@@ -5,15 +5,20 @@
  */
 
 import { unmountComponentAtNode } from 'react-dom';
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
 import routes from 'ui/routes';
+import {
+  CoreSetup,
+  CoreStart,
+  Plugin as CorePlugin,
+  PluginInitializerContext,
+} from 'src/core/public';
 
 import template from '../../public/index.html';
 import { renderReact } from './application';
 import { BASE_PATH } from './application/constants';
 import { breadcrumbService } from './application/lib/breadcrumb';
-import { textService } from './application/lib/text';
+import { docTitleService } from './application/lib/doc_title';
 import { ActionTypeRegistry } from './application/action_type_registry';
 import { registerBuiltInActionTypes } from './application/sections/action_add/buildin_action_types';
 
@@ -22,7 +27,7 @@ export type Start = void;
 
 const REACT_ROOT_ID = 'alertingRoot';
 
-export class ActionsPlugin implements Plugin<Setup, Start> {
+export class Plugin implements CorePlugin<Setup, Start> {
   private actionTypeRegistry?: ActionTypeRegistry;
 
   constructor(initializerContext: PluginInitializerContext) {}
@@ -35,28 +40,40 @@ export class ActionsPlugin implements Plugin<Setup, Start> {
       }
     */
     const {
+      capabilities,
       management: { getSection },
     } = plugins;
 
-    const actionTypeRegistry = new ActionTypeRegistry();
-    this.actionTypeRegistry = actionTypeRegistry;
+    const canShowActions = capabilities.get().actions.show;
+    if (canShowActions) {
+      const actionTypeRegistry = new ActionTypeRegistry();
+      this.actionTypeRegistry = actionTypeRegistry;
 
-    registerBuiltInActionTypes({
-      actionTypeRegistry,
-    });
+      registerBuiltInActionTypes({
+        actionTypeRegistry,
+      });
 
-    const kbnSection = getSection('kibana');
-    kbnSection.register('alerting', {
-      display: i18n.translate('xpack.alertingUI.managementSection.displayName', {
-        defaultMessage: 'Alerting',
-      }),
-      order: 7,
-      url: `#${BASE_PATH}`,
-    });
+      const kbnSection = getSection('kibana');
+      kbnSection.register('alerting', {
+        display: i18n.translate('xpack.alertingUI.managementSection.displayName', {
+          defaultMessage: 'Alerting',
+        }),
+        order: 7,
+        url: `#${BASE_PATH}`,
+      });
+    }
   }
 
   public start(core: CoreStart, plugins: any) {
-    textService.init(i18n);
+    const { capabilities } = plugins;
+    const canShowActions = capabilities.get().actions.show;
+
+    // Don't register routes when user doesn't have access to the application
+    if (!canShowActions) {
+      return;
+    }
+
+    docTitleService.init(plugins.docTitle.change);
     breadcrumbService.init(core.chrome, plugins.management.breadcrumb);
 
     const unmountReactApp = (): void => {

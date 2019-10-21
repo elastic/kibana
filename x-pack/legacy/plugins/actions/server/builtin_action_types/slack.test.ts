@@ -58,7 +58,7 @@ describe('action is registered', () => {
   test('returns action type', () => {
     const returnedActionType = actionTypeRegistry.get(ACTION_TYPE_ID);
     expect(returnedActionType.id).toEqual(ACTION_TYPE_ID);
-    expect(returnedActionType.name).toEqual('slack');
+    expect(returnedActionType.name).toEqual('Slack');
   });
 });
 

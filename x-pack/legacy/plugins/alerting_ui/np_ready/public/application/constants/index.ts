@@ -5,15 +5,10 @@
  */
 
 export const BASE_PATH = '/management/kibana/alerting';
-export const BASE_ACTION_API_PATH = '../api/action';
+export const BASE_ACTION_API_PATH = '/api/action';
 
 export const DEFAULT_SECTION: Section = 'actions';
 export type Section = 'actions';
 
-export function linkToHome() {
-  return `#${BASE_PATH}`;
-}
-
-export function linkToActions() {
-  return `#${BASE_PATH}/actions`;
-}
+export const routeToHome = `${BASE_PATH}`;
+export const routeToActions = `${BASE_PATH}/actions`;

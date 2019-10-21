@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { textService } from './text';
+import { i18n } from '@kbn/i18n';
 
 class DocTitleService {
   private changeDocTitle: any = () => {};
@@ -13,11 +13,21 @@ class DocTitleService {
   }
 
   public setTitle(page?: string): void {
-    if (!page || page === 'home') {
-      this.changeDocTitle(`${textService.breadcrumbs.home}`);
-    } else if (textService.breadcrumbs[page]) {
-      this.changeDocTitle(`${textService.breadcrumbs[page]} - ${textService.breadcrumbs.home}`);
+    let updatedTitle: string;
+
+    switch (page) {
+      case 'actions':
+        updatedTitle = i18n.translate('xpack.alertingUI.actions.breadcrumbTitle', {
+          defaultMessage: 'Actions',
+        });
+        break;
+      default:
+        updatedTitle = i18n.translate('xpack.alertingUI.home.breadcrumbTitle', {
+          defaultMessage: 'Alerting UI',
+        });
     }
+
+    this.changeDocTitle(updatedTitle);
   }
 }
 

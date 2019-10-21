@@ -42,7 +42,7 @@ export function getActionType(
 ): ActionType {
   return {
     id: '.slack',
-    name: i18n.translate('xpack.actions.builtin.slack.name', {
+    name: i18n.translate('xpack.actions.builtin.slackTitle', {
       defaultMessage: 'Slack',
     }),
     validate: {

@@ -17,6 +17,9 @@ import { cloneDeep, has, isString, set } from 'lodash';
 import { OBSERVER_VERSION_MAJOR } from '../../../common/elasticsearch_fieldnames';
 import { StringMap } from '../../../typings/common';
 
+// `type` was deprecated in 7.0
+export type APMIndexDocumentParams<T> = Omit<IndexDocumentParams<T>, 'type'>;
+
 function getApmIndices(config: Legacy.KibanaConfig) {
   return [
     config.get<string>('apm_oss.errorIndices'),
@@ -118,7 +121,7 @@ export function getESClient(req: Legacy.Request) {
         AggregationSearchResponseWithTotalHitsAsObject<Hits, U>
       >;
     },
-    index: <Body>(params: IndexDocumentParams<Body>) => {
+    index: <Body>(params: APMIndexDocumentParams<Body>) => {
       return cluster.callWithRequest(req, 'index', params);
     },
     delete: (params: IndicesDeleteParams) => {

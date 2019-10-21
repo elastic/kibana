@@ -5,11 +5,11 @@
  */
 
 import { PluginInitializerContext } from 'src/core/public';
-import { ActionsPlugin } from './plugin';
+import { Plugin } from './plugin';
 
 export function plugin(ctx: PluginInitializerContext) {
-  return new ActionsPlugin(ctx);
+  return new Plugin(ctx);
 }
 
-export { ActionsPlugin as Plugin };
+export { Plugin };
 export * from './plugin';

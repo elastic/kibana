@@ -27,15 +27,15 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Action, ActionType, saveAction } from '../../lib/api';
-import { ActionsContext } from '../../context/app_context';
 import { SectionError, ErrableFormRow } from '../../../application/components/page_error';
 import { useAppDependencies } from '../..';
 import { ActionModel } from '../../models/action';
 import { actionReducer } from './action_reducer';
+import { ActionsContext } from '../../context/actions_context';
 
 interface Props {
   actionType: ActionType;
-  refreshList: () => void;
+  refreshList: () => Promise<void>;
 }
 
 export const ActionAdd = ({ actionType, refreshList }: Props) => {
