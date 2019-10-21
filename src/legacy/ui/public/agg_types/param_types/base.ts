@@ -46,18 +46,17 @@ export class BaseParamType implements AggParam {
 
   /**
    *  A function that will be called before an aggConfig is serialized and sent to ES.
-   *  Allows aggConfig to retrieve values needed for serialization by creating a {SearchRequest}
+   *  Allows aggConfig to retrieve values needed for serialization
    *  Example usage: an aggregation needs to know the min/max of a field to determine an appropriate interval
    *
-   *  @param {AggConfig} aggconfig
+   *  @param {AggConfig} aggConfig
    *  @param {Courier.SearchSource} searchSource
-   *  @param {Courier.SearchRequest} searchRequest
    *  @returns {Promise<undefined>|undefined}
    */
   modifyAggConfigOnSearchRequestStart: (
-    aggconfig: AggConfig,
+    aggConfig: AggConfig,
     searchSource?: SearchSource,
-    searchRequest?: any
+    options?: any
   ) => void;
 
   constructor(config: Record<string, any>) {
