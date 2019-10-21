@@ -4,6 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import '../../infra/types/rison_node';
+import {} from '../../reporting/public/components/report_listing';
+import '../../canvas/types/webpack';
+
 export interface StringMap<T = unknown> {
   [key: string]: T;
 }
