@@ -177,6 +177,8 @@ export const reporting = (kibana) => {
       }).default();
     },
 
+    // TODO: Decouple Hapi: Build a server facade object based on the server to
+    // pass through to the libs. Do not pass server directly
     init: async function (server) {
       let isCollectorReady = false;
       const isReady = () => isCollectorReady;
