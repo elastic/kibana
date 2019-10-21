@@ -27,7 +27,7 @@ do {
     \"index\": [\"auditbeat-*\", \"filebeat-*\", \"packetbeat-*\", \"winlogbeat-*\"],
     \"interval\": \"24h\",
     \"name\": \"Detect Root/Admin Users\",
-    \"severity\": 1,
+    \"severity\": \"high\",
     \"type\": \"kql\",
     \"from\": \"now-6m\",
     \"to\": \"now\",

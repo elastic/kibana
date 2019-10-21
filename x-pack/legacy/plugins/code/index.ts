@@ -78,7 +78,7 @@ export const code = (kibana: any) =>
 
       // Set up with the new platform plugin lifecycle API.
       const plugin = codePlugin(initializerContext);
-      plugin.setup(coreSetup);
+      await plugin.setup(coreSetup, initializerContext.legacy.http);
 
       // @ts-ignore
       const kbnServer = this.kbnServer;

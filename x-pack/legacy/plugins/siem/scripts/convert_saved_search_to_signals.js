@@ -29,7 +29,7 @@ const path = require('path');
 // doing a search to KQL conversion before posting it as a signal or checking it
 // into another repository.
 const INTERVAL = '24h';
-const SEVERITY = 1;
+const SEVERITY = 'low';
 const TYPE = 'kql';
 const FROM = 'now-24h';
 const TO = 'now';
