@@ -43,9 +43,13 @@ export const CreateAnalyticsFlyout: FC<CreateAnalyticsFormProps> = ({
       <EuiFlyoutFooter>
         {(!isJobCreated || !isJobStarted) && (
           <EuiButtonEmpty onClick={closeModal}>
-            {i18n.translate('xpack.ml.dataframe.analytics.create.flyoutCancelButton', {
-              defaultMessage: 'Cancel',
-            })}
+            {isJobCreated === true
+              ? i18n.translate('xpack.ml.dataframe.analytics.create.flyoutCloseButton', {
+                  defaultMessage: 'Close',
+                })
+              : i18n.translate('xpack.ml.dataframe.analytics.create.flyoutCancelButton', {
+                  defaultMessage: 'Cancel',
+                })}
           </EuiButtonEmpty>
         )}
 

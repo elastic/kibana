@@ -133,10 +133,8 @@ export class AbstractESSource extends AbstractVectorSource {
 
 
   async _runEsQuery(requestName, searchSource, registerCancelCallback, requestDescription) {
-    const cancel = () => {
-      searchSource.cancelQueued();
-    };
-    registerCancelCallback(cancel);
+    const abortController = new AbortController();
+    registerCancelCallback(() => abortController.abort());
 
     try {
       return await fetchSearchSourceAndRecordWithInspector({
@@ -144,7 +142,8 @@ export class AbstractESSource extends AbstractVectorSource {
         searchSource,
         requestName,
         requestId: this.getId(),
-        requestDesc: requestDescription
+        requestDesc: requestDescription,
+        abortSignal: abortController.signal,
       });
     } catch(error) {
       if (error.name === 'AbortError') {
@@ -323,7 +322,7 @@ export class AbstractESSource extends AbstractVectorSource {
       return null;
     }
 
-    const fieldFromIndexPattern = indexPattern.fields.byName[rawFieldName];
+    const fieldFromIndexPattern = indexPattern.fields.getByName(rawFieldName);
     if (!fieldFromIndexPattern) {
       return null;
     }

@@ -61,6 +61,7 @@ export const lens: LegacyPluginInitializer = kibana => {
         savedObjects: server.savedObjects,
         usage: server.usage,
         config: server.config(),
+        server,
       });
 
       server.events.on('stop', () => {

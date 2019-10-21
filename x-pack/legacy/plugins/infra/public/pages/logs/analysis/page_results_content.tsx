@@ -18,21 +18,25 @@ import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
+import euiStyled from '../../../../../../common/eui_styled_components';
 import { TimeRange } from '../../../../common/http_api/shared/time_range';
 import { bucketSpan } from '../../../../common/log_analysis';
-import euiStyled from '../../../../../../common/eui_styled_components';
 import { LoadingPage } from '../../../components/loading_page';
 import {
+  LogAnalysisJobs,
   StringTimeRange,
   useLogAnalysisResults,
   useLogAnalysisResultsUrlState,
 } from '../../../containers/logs/log_analysis';
+import { useInterval } from '../../../hooks/use_interval';
 import { useTrackPageview } from '../../../hooks/use_track_metric';
-import { FirstUseCallout } from './first_use';
-import { LogRateResults } from './sections/log_rate';
-import { AnomaliesResults } from './sections/anomalies';
 import { useKibanaUiSetting } from '../../../utils/use_kibana_ui_setting';
+import { FirstUseCallout } from './first_use';
+import { AnomaliesResults } from './sections/anomalies';
+import { LogRateResults } from './sections/log_rate';
+
+const JOB_STATUS_POLLING_INTERVAL = 30000;
 
 export const AnalysisResultsContent = ({
   sourceId,
@@ -124,6 +128,19 @@ export const AnalysisResultsContent = ({
     [setAutoRefresh]
   );
 
+  const {
+    fetchJobStatus,
+    jobStatus,
+    setupStatus,
+    viewSetupForReconfiguration,
+    viewSetupForUpdate,
+    jobIds,
+  } = useContext(LogAnalysisJobs.Context);
+
+  useInterval(() => {
+    fetchJobStatus();
+  }, JOB_STATUS_POLLING_INTERVAL);
+
   return (
     <>
       {isLoading && !logEntryRate ? (
@@ -191,9 +208,14 @@ export const AnalysisResultsContent = ({
                 <EuiPanel paddingSize="l">
                   <AnomaliesResults
                     isLoading={isLoading}
+                    jobStatus={jobStatus['log-entry-rate']}
+                    viewSetupForReconfiguration={viewSetupForReconfiguration}
+                    viewSetupForUpdate={viewSetupForUpdate}
                     results={logEntryRate}
                     setTimeRange={handleChartTimeRangeChange}
+                    setupStatus={setupStatus}
                     timeRange={queryTimeRange}
+                    jobId={jobIds['log-entry-rate']}
                   />
                 </EuiPanel>
               </EuiFlexItem>
