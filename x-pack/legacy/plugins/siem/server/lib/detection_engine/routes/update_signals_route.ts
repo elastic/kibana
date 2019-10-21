@@ -37,7 +37,7 @@ export const createUpdateSignalsRoute: Hapi.ServerRoute = {
         kql: Joi.string(),
         max_signals: Joi.number().default(100),
         name: Joi.string(),
-        severity: Joi.number(),
+        severity: Joi.string(),
         to: Joi.string(),
         type: Joi.string().valid('filter', 'kql'),
         references: Joi.array().default([]),
