@@ -239,13 +239,24 @@ Object {
             },
           },
         ],
-        "must_not": Array [
+        "should": Array [
+          Object {
+            "bool": Object {
+              "must_not": Array [
+                Object {
+                  "exists": Object {
+                    "field": "error.log.level",
+                  },
+                },
+              ],
+            },
+          },
           Object {
             "terms": Object {
               "error.log.level": Array [
-                "debug",
-                "info",
-                "warning",
+                "critical",
+                "error",
+                "fatal",
               ],
             },
           },

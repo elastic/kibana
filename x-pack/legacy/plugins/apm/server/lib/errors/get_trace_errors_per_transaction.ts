@@ -18,7 +18,7 @@ export interface ErrorsPerTransaction {
   [transactionId: string]: number;
 }
 
-const excludedLogLevels = ['debug', 'info', 'warning'];
+const includedLogLevels = ['critical', 'error', 'fatal'];
 
 export async function getTraceErrorsPerTransaction(
   traceId: string,
@@ -37,7 +37,10 @@ export async function getTraceErrorsPerTransaction(
             { term: { [PROCESSOR_EVENT]: 'error' } },
             { range: rangeFilter(start, end) }
           ],
-          must_not: [{ terms: { [ERROR_LOG_LEVEL]: excludedLogLevels } }]
+          should: [
+            { bool: { must_not: [{ exists: { field: ERROR_LOG_LEVEL } }] } },
+            { terms: { [ERROR_LOG_LEVEL]: includedLogLevels } }
+          ]
         }
       },
       aggs: {
