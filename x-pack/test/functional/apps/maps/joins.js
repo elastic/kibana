@@ -51,11 +51,10 @@ export default function ({ getPageObjects, getService }) {
     it('should show dynamic data range in legend', async () => {
       const layerTOCDetails = await PageObjects.maps.getLayerTOCDetails('geo_shapes*');
       const split = layerTOCDetails.trim().split('\n');
-
       const min = split[0];
       expect(min).to.equal('3');
 
-      const max = split[2];
+      const max = split[1];
       expect(max).to.equal('12');
     });
 
