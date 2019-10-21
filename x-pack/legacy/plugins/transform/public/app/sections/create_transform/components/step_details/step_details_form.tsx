@@ -15,6 +15,7 @@ import { EuiLink, EuiSwitch, EuiFieldText, EuiForm, EuiFormRow, EuiSelect } from
 import { isKibanaContextInitialized, KibanaContext } from '../../../../lib/kibana';
 import { isValidIndexName } from '../../../../../../common/utils/es_utils';
 
+import { ToastNotificationText } from '../../../../components';
 import { useApi } from '../../../../hooks/use_api';
 
 import { isTransformIdValid, TransformId, TransformPivotConfig } from '../../../../common';
@@ -86,35 +87,37 @@ export const StepDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChang
             )
           );
         } catch (e) {
-          toastNotifications.addDanger(
-            i18n.translate('xpack.transform.stepDetailsForm.errorGettingTransformList', {
-              defaultMessage: 'An error occurred getting the existing transform IDs: {error}',
-              values: { error: JSON.stringify(e) },
-            })
-          );
+          toastNotifications.addDanger({
+            title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingTransformList', {
+              defaultMessage: 'An error occurred getting the existing transform IDs:',
+            }),
+            text: <ToastNotificationText text={e} />,
+          });
         }
 
         try {
           setIndexNames((await api.getIndices()).map(index => index.name));
         } catch (e) {
-          toastNotifications.addDanger(
-            i18n.translate('xpack.transform.stepDetailsForm.errorGettingIndexNames', {
-              defaultMessage: 'An error occurred getting the existing index names: {error}',
-              values: { error: JSON.stringify(e) },
-            })
-          );
+          toastNotifications.addDanger({
+            title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingIndexNames', {
+              defaultMessage: 'An error occurred getting the existing index names:',
+            }),
+            text: <ToastNotificationText text={e} />,
+          });
         }
 
         try {
           setIndexPatternTitles(await kibanaContext.indexPatterns.getTitles());
         } catch (e) {
-          toastNotifications.addDanger(
-            i18n.translate('xpack.transform.stepDetailsForm.errorGettingIndexPatternTitles', {
-              defaultMessage:
-                'An error occurred getting the existing index pattern titles: {error}',
-              values: { error: JSON.stringify(e) },
-            })
-          );
+          toastNotifications.addDanger({
+            title: i18n.translate(
+              'xpack.transform.stepDetailsForm.errorGettingIndexPatternTitles',
+              {
+                defaultMessage: 'An error occurred getting the existing index pattern titles:',
+              }
+            ),
+            text: <ToastNotificationText text={e} />,
+          });
         }
       }
     })();
