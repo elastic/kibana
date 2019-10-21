@@ -40,7 +40,7 @@ export class WorkspaceHandler {
   private readonly objectClient: RepositoryObjectClient | undefined = undefined;
 
   constructor(
-    readonly gitOps: GitOperations,
+    public readonly gitOps: GitOperations,
     private readonly workspacePath: string,
     private readonly client: EsClient,
     loggerFactory: LoggerFactory
