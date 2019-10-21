@@ -4,23 +4,36 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-interface BuildEventsScrollQuery {
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+
+interface BuildEventsSearchQuery {
   index: string[];
   from: string;
   to: string;
   filter: unknown;
   size: number;
-  scroll: string;
+  searchAfter: number[];
 }
 
-export const buildEventsScrollQuery = ({
+export const getFilter = (kql: string | undefined, filter: Record<string, {}> | undefined) => {
+  if (kql != null) {
+    return toElasticsearchQuery(fromKueryExpression(kql), null);
+  } else if (filter != null) {
+    return filter;
+  } else {
+    // TODO: Re-visit this error (which should never happen) when we do signal errors for the UI
+    throw new TypeError('either kql or filter should be set');
+  }
+};
+
+export const buildEventsSearchQuery = ({
   index,
   from,
   to,
   filter,
   size,
-  scroll,
-}: BuildEventsScrollQuery) => {
+  searchAfter,
+}: BuildEventsSearchQuery) => {
   const filterWithTime = [
     filter,
     {
@@ -58,17 +71,16 @@ export const buildEventsScrollQuery = ({
       },
     },
   ];
-  return {
+  const searchQuery = {
     allowNoIndices: true,
     index,
-    scroll,
     size,
     ignoreUnavailable: true,
     body: {
       query: {
         bool: {
           filter: [
-            ...filterWithTime,
+            ...[filterWithTime],
             {
               match_all: {},
             },
@@ -76,7 +88,23 @@ export const buildEventsScrollQuery = ({
         },
       },
       track_total_hits: true,
-      sort: ['_doc'],
+      sort: [
+        {
+          '@timestamp': {
+            order: 'asc',
+          },
+        },
+      ],
     },
   };
+  if (searchAfter.length > 0) {
+    return {
+      ...searchQuery,
+      body: {
+        ...searchQuery.body,
+        search_after: searchAfter,
+      },
+    };
+  }
+  return searchQuery;
 };

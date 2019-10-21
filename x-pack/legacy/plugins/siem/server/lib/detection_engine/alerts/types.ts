@@ -37,6 +37,7 @@ export interface SignalAlertParams {
   references: string[];
   savedId: string | undefined;
   severity: string;
+  size?: number;
   to: string;
   type: 'filter' | 'query' | 'saved_query';
 }

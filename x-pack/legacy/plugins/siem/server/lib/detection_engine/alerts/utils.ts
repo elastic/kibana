@@ -8,8 +8,9 @@ import { SignalHit } from '../../types';
 import { Logger } from '../../../../../../../../src/core/server';
 import { AlertServices } from '../../../../../alerting/server/types';
 import { SignalSourceHit, SignalSearchResponse, SignalAlertParams } from './types';
+import { buildEventsSearchQuery } from './build_events_query';
 
-// format scroll search result for signals index.
+// format search_after result for signals index.
 export const buildBulkBody = (doc: SignalSourceHit, signalParams: SignalAlertParams): SignalHit => {
   return {
     ...doc._source,
@@ -65,28 +66,33 @@ export const singleBulkIndex = async (
   return true;
 };
 
-// Given a scroll id, grab the next set of documents
-export const singleScroll = async (
-  scrollId: string | undefined,
-  params: SignalAlertParams & { scrollLock?: number }, // TODO: Finish plumbing the scrollLock all the way to the REST endpoint if this algorithm continues to use it.
+// utilize search_after for paging results into bulk.
+export const singleSearchAfter = async (
+  searchAfterDate: number,
+  params: SignalAlertParams,
   service: AlertServices,
   logger: Logger
 ): Promise<SignalSearchResponse> => {
-  const scroll = params.scrollLock ? params.scrollLock : '1m';
   try {
-    const nextScrollResult = await service.callCluster('scroll', {
-      scroll,
-      scrollId,
+    const searchAfterQuery = buildEventsSearchQuery({
+      index: params.index,
+      from: params.from,
+      to: params.to,
+      kql: params.kql,
+      filter: params.filter,
+      size: params.size ? params.size : 1000,
+      searchAfter: [searchAfterDate],
     });
-    return nextScrollResult;
+    const nextSearchAfterResult = await service.callCluster('search', searchAfterQuery);
+    return nextSearchAfterResult;
   } catch (exc) {
-    logger.error(`[-] nextScroll threw an error ${exc}`);
+    logger.error(`[-] nextSearchAfter threw an error ${exc}`);
     throw exc;
   }
 };
 
-// scroll through documents and re-index using bulk endpoint.
-export const scrollAndBulkIndex = async (
+// search_after through documents and re-index using bulk endpoint.
+export const searchAfterAndBulkIndex = async (
   someResult: SignalSearchResponse,
   params: SignalAlertParams,
   service: AlertServices,
@@ -98,21 +104,43 @@ export const scrollAndBulkIndex = async (
     logger.warn('First bulk index was unsuccessful');
     return false;
   }
-  let newScrollId = someResult._scroll_id;
+  let size = someResult.hits.hits.length - 1;
+  logger.info(`first size: ${size}`);
+  let sortIds = someResult.hits.hits[0].sort;
+  if (sortIds == null) {
+    logger.warn('sortIds was empty on first search');
+    return false;
+  }
+  let sortId = sortIds[0];
   while (true) {
     try {
-      const scrollResult = await singleScroll(newScrollId, params, service, logger);
-      newScrollId = scrollResult._scroll_id;
-      if (scrollResult.hits.hits.length === 0) {
-        logger.info('[+] Finished indexing signals');
-        return true;
+      logger.info(`sortIds: ${sortIds}`);
+      const searchAfterResult: SignalSearchResponse = await singleSearchAfter(
+        (sortId as unknown) as number,
+        params,
+        service,
+        logger
+      );
+      size = searchAfterResult.hits.hits.length - 1;
+      if (size <= 0) {
+        logger.info('No more hits');
+        return false;
       }
-      const bulkSuccess = await singleBulkIndex(scrollResult, params, service, logger);
+      logger.info(`size: ${size}`);
+      sortIds = searchAfterResult.hits.hits[0].sort;
+      if (sortIds == null) {
+        logger.warn('sortIds was empty on first search');
+        return false;
+      }
+      sortId = sortIds[0];
+      logger.info('next bulk index');
+      const bulkSuccess = await singleBulkIndex(searchAfterResult, params, service, logger);
+      logger.info('finished next bulk index');
       if (!bulkSuccess) {
         logger.error('[-] bulk index failed');
       }
     } catch (exc) {
-      logger.error('[-] scroll and bulk threw an error');
+      logger.error(`[-] search_after and bulk threw an error ${exc}`);
       return false;
     }
   }
