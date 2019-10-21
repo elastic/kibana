@@ -68,6 +68,7 @@ export function MonitorListDrawerComponent({
           </EuiLink>
         </EuiFlexItem>
         <EuiFlexItem>
+          <EuiIcon type={'visMapCoordinate'} />
           <LocationLink location={location} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
