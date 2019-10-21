@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'hapi';
+import { KibanaRequest, KibanaResponseFactory, RequestHandlerContext } from 'src/core/server';
 import util from 'util';
 import Boom from 'boom';
 import { ServiceHandlerAdapter, ServiceRegisterOptions } from '../service_handler_adapter';
@@ -48,7 +48,7 @@ export class ClusterNodeAdapter implements ServiceHandlerAdapter {
   private readonly nonCodeAdapter: NonCodeNodeAdapter = new NonCodeNodeAdapter('', this.log);
 
   constructor(
-    private readonly server: CodeServerRouter,
+    private readonly router: CodeServerRouter,
     private readonly log: Logger,
     serverOptions: ServerOptions,
     esClient: EsClient
@@ -113,17 +113,25 @@ export class ClusterNodeAdapter implements ServiceHandlerAdapter {
 
         const d = serviceDefinition[method];
         const path = `${options.routePrefix}/${d.routePath || method}`;
-        this.server.route({
+        this.router.route({
           method: 'post',
           path,
-          handler: async (req: Request) => {
-            const { context, params } = req.payload as RequestPayload;
+          npHandler: async (
+            ctx: RequestHandlerContext,
+            req: KibanaRequest,
+            res: KibanaResponseFactory
+          ) => {
+            const { context, params } = req.body as RequestPayload;
             this.log.debug(`Receiving RPC call ${req.url.path} ${util.inspect(params)}`);
             try {
               const data = await localHandler(params, context);
-              return { data };
+              return res.ok({ body: { data } });
             } catch (e) {
-              throw Boom.boomify(e);
+              if (Boom.isBoom(e)) {
+                throw e;
+              } else {
+                throw Boom.boomify(e, { statusCode: 500 });
+              }
             }
           },
         });

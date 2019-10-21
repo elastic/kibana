@@ -14,7 +14,13 @@ import { SearchSource } from '../../../kibana_services';
 import { hitsToGeoJson } from '../../../elasticsearch_geo_utils';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
-import { ES_SEARCH, ES_GEO_FIELD_TYPE, ES_SIZE_LIMIT, SORT_ORDER } from '../../../../common/constants';
+import {
+  ES_SEARCH,
+  ES_GEO_FIELD_TYPE,
+  ES_SIZE_LIMIT,
+  FEATURE_ID_PROPERTY_NAME,
+  SORT_ORDER,
+} from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { ESTooltipProperty } from '../../tooltips/es_tooltip_property';
@@ -91,6 +97,17 @@ export class ESSearchSource extends AbstractESSource {
     }
   }
 
+  async getDateFields() {
+    try {
+      const indexPattern = await this._getIndexPattern();
+      return indexPattern.fields.getByType('date').map(field => {
+        return { name: field.name, label: field.name };
+      });
+    } catch (error) {
+      return [];
+    }
+  }
+
   getMetricFields() {
     return [];
   }
@@ -152,6 +169,28 @@ export class ESSearchSource extends AbstractESSource {
     ];
   }
 
+  async _excludeDateFields(fieldNames) {
+    const dateFieldNames = _.map(await this.getDateFields(), 'name');
+    return fieldNames.filter(field => {
+      return !dateFieldNames.includes(field);
+    });
+  }
+
+  // Returns docvalue_fields array for the union of indexPattern's dateFields and request's field names.
+  async _getDateDocvalueFields(searchFields) {
+    const dateFieldNames = _.map(await this.getDateFields(), 'name');
+    return searchFields
+      .filter(fieldName => {
+        return dateFieldNames.includes(fieldName);
+      })
+      .map(fieldName => {
+        return {
+          field: fieldName,
+          format: 'epoch_millis'
+        };
+      });
+  }
+
   async _getTopHits(layerName, searchFilters, registerCancelCallback) {
     const {
       topHitsSplitField,
@@ -177,16 +216,19 @@ export class ESSearchSource extends AbstractESSource {
     const topHits = {
       size: topHitsSize,
       script_fields: scriptFields,
+      docvalue_fields: await this._getDateDocvalueFields(searchFilters.fieldNames),
     };
+    const nonDateFieldNames = await this._excludeDateFields(searchFilters.fieldNames);
+
     if (this._hasSort()) {
       topHits.sort = this._buildEsSort();
     }
     if (geoField.type === ES_GEO_FIELD_TYPE.GEO_POINT) {
       topHits._source = false;
-      topHits.docvalue_fields = searchFilters.fieldNames;
+      topHits.docvalue_fields.push(...nonDateFieldNames);
     } else {
       topHits._source = {
-        includes: searchFilters.fieldNames
+        includes: nonDateFieldNames
       };
     }
 
@@ -232,6 +274,9 @@ export class ESSearchSource extends AbstractESSource {
   // searchFilters.fieldNames contains geo field and any fields needed for styling features
   // Performs Elasticsearch search request being careful to pull back only required fields to minimize response size
   async _getSearchHits(layerName, searchFilters, registerCancelCallback) {
+    const initialSearchContext = {
+      docvalue_fields: await this._getDateDocvalueFields(searchFilters.fieldNames)
+    };
     const geoField = await this._getGeoField();
 
     let searchSource;
@@ -239,15 +284,13 @@ export class ESSearchSource extends AbstractESSource {
       // Request geo_point and style fields in docvalue_fields insted of _source
       // 1) Returns geo_point in a consistent format regardless of how geo_point is stored in source
       // 2) Setting _source to false so we avoid pulling back unneeded fields.
-      const initialSearchContext = {
-        docvalue_fields: searchFilters.fieldNames
-      };
+      initialSearchContext.docvalue_fields.push(...(await this._excludeDateFields(searchFilters.fieldNames)));
       searchSource = await this._makeSearchSource(searchFilters, ES_SIZE_LIMIT, initialSearchContext);
       searchSource.setField('source', false); // do not need anything from _source
       searchSource.setField('fields', searchFilters.fieldNames); // Setting "fields" filters out unused scripted fields
     } else {
       // geo_shape fields do not support docvalue_fields yet, so still have to be pulled from _source
-      searchSource = await this._makeSearchSource(searchFilters, ES_SIZE_LIMIT);
+      searchSource = await this._makeSearchSource(searchFilters, ES_SIZE_LIMIT, initialSearchContext);
       // Setting "fields" instead of "source: { includes: []}"
       // because SearchSource automatically adds the following by default
       // 1) all scripted fields
@@ -359,7 +402,7 @@ export class ESSearchSource extends AbstractESSource {
 
   async filterAndFormatPropertiesToHtml(properties) {
     const indexPattern = await this._getIndexPattern();
-    const propertyValues = await this._loadTooltipProperties(properties._id, indexPattern);
+    const propertyValues = await this._loadTooltipProperties(properties[FEATURE_ID_PROPERTY_NAME], indexPattern);
 
     return this._descriptor.tooltipProperties.map(propertyName => {
       return new ESTooltipProperty(propertyName, propertyName, propertyValues[propertyName], indexPattern);
@@ -466,8 +509,13 @@ export class ESSearchSource extends AbstractESSource {
 
     return {
       index: properties._index, // Can not use index pattern title because it may reference many indices
-      id: properties._id,
+      id: properties[FEATURE_ID_PROPERTY_NAME],
       path: geoField.name,
     };
+  }
+
+  _getRawFieldName(fieldName) {
+    // fieldName is rawFieldName for documents source since the source uses raw documents instead of aggregated metrics
+    return fieldName;
   }
 }

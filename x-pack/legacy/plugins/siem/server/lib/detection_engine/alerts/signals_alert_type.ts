@@ -7,7 +7,6 @@
 import { schema } from '@kbn/config-schema';
 import { SIGNALS_ID } from '../../../../common/constants';
 import { Logger } from '../../../../../../../../src/core/server';
-import { AlertType, AlertExecutorOptions } from '../../../../../alerting';
 
 // TODO: Remove this for the build_events_query call eventually
 import { buildEventsReIndex } from './build_events_reindex';
@@ -18,8 +17,9 @@ import { buildEventsScrollQuery } from './build_events_query';
 
 // bulk scroll class
 import { scrollAndBulkIndex } from './utils';
+import { SignalAlertTypeDefinition } from './types';
 
-export const signalsAlertType = ({ logger }: { logger: Logger }): AlertType => {
+export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTypeDefinition => {
   return {
     id: SIGNALS_ID,
     name: 'SIEM Signals',
@@ -28,13 +28,13 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): AlertType => {
       params: schema.object({
         description: schema.string(),
         from: schema.string(),
-        filter: schema.maybe(schema.object({}, { allowUnknowns: true })),
-        id: schema.number(),
+        filter: schema.nullable(schema.object({}, { allowUnknowns: true })),
+        id: schema.string(),
         index: schema.arrayOf(schema.string()),
-        kql: schema.maybe(schema.string({ defaultValue: undefined })),
+        kql: schema.nullable(schema.string()),
         maxSignals: schema.number({ defaultValue: 100 }),
         name: schema.string(),
-        severity: schema.number(),
+        severity: schema.string(),
         to: schema.string(),
         type: schema.string(),
         references: schema.arrayOf(schema.string(), { defaultValue: [] }),
@@ -42,8 +42,7 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): AlertType => {
         scrollLock: schema.maybe(schema.string()),
       }),
     },
-    // TODO: Type the params as it is all filled with any
-    async executor({ services, params, state }: AlertExecutorOptions) {
+    async executor({ services, params }) {
       const instance = services.alertInstanceFactory('siem-signals');
 
       const {
@@ -88,7 +87,7 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): AlertType => {
         severity,
         description,
         name,
-        timeDetected: Date.now(),
+        timeDetected: new Date().toISOString(),
         filter,
         maxDocs: maxSignals,
         ruleRevision: 1,

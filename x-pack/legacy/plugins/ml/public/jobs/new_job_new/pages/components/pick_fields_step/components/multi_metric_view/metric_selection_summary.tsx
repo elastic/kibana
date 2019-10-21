@@ -12,7 +12,7 @@ import { Results, ModelItem, Anomaly } from '../../../../../common/results_loade
 import { LineChartData } from '../../../../../common/chart_loader';
 import { getChartSettings, defaultChartSettings } from '../../../charts/common/settings';
 import { ChartGrid } from './chart_grid';
-import { mlMessageBarService } from '../../../../../../../components/messagebar/messagebar_service';
+import { mlMessageBarService } from '../../../../../../../components/messagebar';
 
 export const MultiMetricDetectorsSummary: FC = () => {
   const { jobCreator: jc, chartLoader, resultsLoader, chartInterval } = useContext(

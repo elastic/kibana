@@ -17,38 +17,33 @@
  * under the License.
  */
 import { mapPhrase } from './map_phrase';
-import { StubIndexPatterns } from '../test_helpers/stub_index_pattern';
-import { IndexPatterns } from '../../../index_patterns';
+import { PhraseFilter, Filter } from '@kbn/es-query';
 
 describe('filter manager utilities', () => {
   describe('mapPhrase()', () => {
-    let mapPhraseFn: Function;
-
-    beforeEach(() => {
-      const indexPatterns: unknown = new StubIndexPatterns();
-
-      mapPhraseFn = mapPhrase(indexPatterns as IndexPatterns);
-    });
-
     test('should return the key and value for matching filters', async () => {
       const filter = {
         meta: { index: 'logstash-*' },
         query: { match: { _type: { query: 'apache', type: 'phrase' } } },
-      };
-      const result = await mapPhraseFn(filter);
+      } as PhraseFilter;
+      const result = mapPhrase(filter);
 
+      expect(result).toHaveProperty('value');
       expect(result).toHaveProperty('key', '_type');
-      expect(result).toHaveProperty('value', 'apache');
+      if (result.value) {
+        const displayName = result.value();
+        expect(displayName).toBe('apache');
+      }
     });
 
     test('should return undefined for none matching', async done => {
       const filter = {
         meta: { index: 'logstash-*' },
         query: { query_string: { query: 'foo:bar' } },
-      };
+      } as Filter;
 
       try {
-        await mapPhraseFn(filter);
+        mapPhrase(filter);
       } catch (e) {
         expect(e).toBe(filter);
         done();
