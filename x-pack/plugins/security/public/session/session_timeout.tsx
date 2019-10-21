@@ -66,7 +66,7 @@ export class SessionTimeout {
     this.warningToast = this.notifications.toasts.add({
       color: 'warning',
       text: <SessionTimeoutWarning onRefreshSession={this.refreshSession} />,
-      title: i18n.translate('xpack.security.hacks.warningTitle', {
+      title: i18n.translate('xpack.security.components.sessionTimeoutWarning.title', {
         defaultMessage: 'Warning',
       }),
       toastLifeTimeMs: Math.min(this.sessionTimeout! - GRACE_PERIOD_MS, WARNING_MS),
