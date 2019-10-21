@@ -42,6 +42,7 @@ const dataPlugin = plugin();
 const legacyPlugin = new LegacyDependenciesPlugin();
 
 export const setup = dataPlugin.setup(npSetup.core, {
+  uiActions: npSetup.plugins.uiActions,
   __LEGACY: legacyPlugin.setup(),
 });
 

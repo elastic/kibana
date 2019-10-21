@@ -21,13 +21,18 @@ import moment from 'moment';
 import { keys } from 'lodash';
 import { RangeFilter } from '@kbn/es-query';
 import { TimefilterContract } from '../../../timefilter';
+import { TimeRange } from '../../../../../../../plugins/data/common';
 
-export function changeTimeFilter(timeFilter: TimefilterContract, filter: RangeFilter) {
+export function convertRangeFilterToTimeRange(filter: RangeFilter): TimeRange {
   const key = keys(filter.range)[0];
   const values = filter.range[key];
 
-  timeFilter.setTime({
-    from: moment(values.gt || values.gte),
-    to: moment(values.lt || values.lte),
-  });
+  return {
+    from: moment(values.gt || values.gte).toISOString(),
+    to: moment(values.lt || values.lte).toISOString(),
+  };
+}
+
+export function changeTimeFilter(timeFilter: TimefilterContract, filter: RangeFilter) {
+  timeFilter.setTime(convertRangeFilterToTimeRange(filter));
 }

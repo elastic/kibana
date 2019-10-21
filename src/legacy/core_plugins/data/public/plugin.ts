@@ -28,6 +28,12 @@ import {
   LegacyDependenciesPluginStart,
 } from './shim/legacy_dependencies_plugin';
 import { DataPublicPluginStart } from '../../../../plugins/data/public';
+import { IUiActionsSetup } from '../../../../plugins/ui_actions/public';
+import {
+  createFilterAction,
+  GLOBAL_APPLY_FILTER_ACTION,
+} from './filter/action/apply_filter_action';
+import { APPLY_FILTER_TRIGGER } from '../../../../plugins/embeddable/public';
 
 /**
  * Interface for any dependencies on other plugins' `setup` contracts.
@@ -35,6 +41,7 @@ import { DataPublicPluginStart } from '../../../../plugins/data/public';
  * @internal
  */
 export interface DataPluginSetupDependencies {
+  uiActions: IUiActionsSetup;
   __LEGACY: LegacyDependenciesPluginSetup;
 }
 
@@ -94,7 +101,7 @@ export class DataPlugin
 
   private setupApi!: DataSetup;
 
-  public setup(core: CoreSetup, { __LEGACY }: DataPluginSetupDependencies): DataSetup {
+  public setup(core: CoreSetup, { uiActions, __LEGACY }: DataPluginSetupDependencies): DataSetup {
     const { uiSettings } = core;
 
     const timefilterService = this.timefilter.setup({
@@ -110,6 +117,16 @@ export class DataPlugin
       timefilter: timefilterService,
       filter: filterService,
     };
+
+    uiActions.registerAction(
+      createFilterAction(
+        this.setupApi.filter.filterManager,
+        this.setupApi.timefilter.timefilter,
+        this.setupApi.indexPatterns
+      )
+    );
+
+    uiActions.attachAction(APPLY_FILTER_TRIGGER, GLOBAL_APPLY_FILTER_ACTION);
 
     return this.setupApi;
   }
