@@ -92,7 +92,7 @@ module.exports = {
           'indent': 'off',
           '@typescript-eslint/indent': [ 'error', 2, { SwitchCase: 1 } ],
           '@typescript-eslint/prefer-function-type': 'error',
-          '@typescript-eslint/prefer-interface': 'error',
+          '@typescript-eslint/consistent-type-definitions': ['error', 'interface'],
           '@typescript-eslint/member-ordering': ['error', {
             'default': ['public-static-field', 'static-field', 'instance-field']
           }],
