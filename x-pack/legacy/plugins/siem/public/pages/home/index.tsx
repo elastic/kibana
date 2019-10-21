@@ -10,6 +10,7 @@ import * as React from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import { pure } from 'recompose';
 import styled from 'styled-components';
+import { i18n } from '@kbn/i18n';
 
 import { AutoSizer } from '../../components/auto_sizer';
 import { DragDropContextWrapper } from '../../components/drag_and_drop/drag_drop_context_wrapper';
@@ -104,7 +105,11 @@ export const HomePage = pure(() => (
                 </Flyout>
 
                 <EuiPageBody>
-                  <NavGlobal>
+                  <NavGlobal
+                    aria-label={i18n.translate('xpack.siem.global.navigationLabel', {
+                      defaultMessage: 'SIEM app',
+                    })}
+                  >
                     <EuiFlexGroup alignItems="center" gutterSize="m" justifyContent="spaceBetween">
                       <EuiFlexItem>
                         <SiemNavigation navTabs={navTabs} />
