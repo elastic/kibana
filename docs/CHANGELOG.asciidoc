@@ -37,8 +37,6 @@ See also <<breaking-changes-7.4, breaking changes in 7.4>>.
 [float]
 [[enhancement-7.4.1]]
 === Enhancements
-Code::
-*  Initial code telemetry integration {pull}45467[#45467]
 Monitoring::
 *  Server side pagination for ES Nodes listing table {pull}47224[#47224]
 [float]
@@ -46,7 +44,7 @@ Monitoring::
 === Bug fixes
 Canvas::
 * Fixes workpad fullscreen view due to max-width limitation {pull}47371[#47371]
-Infra Logs UI::
+Infrastructure::
 * Loads initial page state into the URL when empty for Metrics Explorer {pull}45683[#45683]
 * Removes internal Hapi request for `makeTSVBRequest` {pull}45598[#45598]
 Machine Learning::
