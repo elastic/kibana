@@ -37,6 +37,7 @@ export default function ({ getService, getPageObjects, loadTestFile }) {
         dataIndex: DATA_ARCHIVE_PATH,
         defaultIndex: 'logstash-*',
       });
+      await PageObjects.dashboard.preserveCrossAppState();
     });
 
     after(async function () {
