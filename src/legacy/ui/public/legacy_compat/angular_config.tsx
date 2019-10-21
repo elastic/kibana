@@ -160,6 +160,12 @@ const capture$httpLoadingCount = (newPlatform: CoreStart) => (
   );
 };
 
+function isDummyWrapperRoute($route: any) {
+  return (
+    $route.current && $route.current.$$route && $route.current.$$route.outerAngularWrapperRoute
+  );
+}
+
 /**
  * internal angular run function that will be called when angular bootstraps and
  * lets us integrate with the angular router so that we can automatically clear
@@ -187,6 +193,9 @@ const $setupBreadcrumbsAutoClear = (newPlatform: CoreStart) => (
   });
 
   $rootScope.$on('$routeChangeSuccess', () => {
+    if (isDummyWrapperRoute($route)) {
+      return;
+    }
     const current = $route.current || {};
 
     if (breadcrumbSetSinceRouteChange || (current.$$route && current.$$route.redirectTo)) {
@@ -226,6 +235,9 @@ const $setupBadgeAutoClear = (newPlatform: CoreStart) => (
   });
 
   $rootScope.$on('$routeChangeSuccess', () => {
+    if (isDummyWrapperRoute($route)) {
+      return;
+    }
     const current = $route.current || {};
 
     if (badgeSetSinceRouteChange || (current.$$route && current.$$route.redirectTo)) {
@@ -274,6 +286,9 @@ const $setupHelpExtensionAutoClear = (newPlatform: CoreStart) => (
   });
 
   $rootScope.$on('$routeChangeSuccess', () => {
+    if (isDummyWrapperRoute($route)) {
+      return;
+    }
     const current = $route.current || {};
 
     if (helpExtensionSetSinceRouteChange || (current.$$route && current.$$route.redirectTo)) {
@@ -288,10 +303,15 @@ const $setupUrlOverflowHandling = (newPlatform: CoreStart) => (
   $location: ILocationService,
   $rootScope: IRootScopeService,
   Private: any,
-  config: any
+  config: any,
+  $injector: any
 ) => {
+  const $route = $injector.has('$route') ? $injector.get('$route') : {};
   const urlOverflow = new UrlOverflowService();
   const check = () => {
+    if (isDummyWrapperRoute($route)) {
+      return;
+    }
     // disable long url checks when storing state in session storage
     if (config.get('state:storeInSessionStorage')) {
       return;
