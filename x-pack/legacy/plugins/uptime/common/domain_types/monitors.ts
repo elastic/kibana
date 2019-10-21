@@ -11,7 +11,7 @@ export interface UMGqlRange {
   dateRangeEnd: string;
 }
 
-export interface GetHistogramResult {
+export interface HistogramResult {
   histogram: HistogramDataPoint[];
   interval: number;
 }

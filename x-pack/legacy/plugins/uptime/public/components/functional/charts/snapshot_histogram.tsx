@@ -26,7 +26,7 @@ import { withUptimeGraphQL, UptimeGraphQLQueryProps } from '../../higher_order';
 import { snapshotHistogramQuery } from '../../../queries/snapshot_histogram_query';
 import { ChartWrapper } from './chart_wrapper';
 import { UptimeSettingsContext } from '../../../contexts';
-import { GetHistogramResult } from '../../../../common/domain_types';
+import { HistogramResult } from '../../../../common/domain_types';
 
 const SnapshotHistogramWrapper = styled.div`
   margin-left: 120px;
@@ -56,7 +56,7 @@ export interface SnapshotHistogramProps {
 }
 
 interface SnapshotHistogramQueryResult {
-  queryResult?: GetHistogramResult;
+  queryResult?: HistogramResult;
 }
 
 type Props = UptimeGraphQLQueryProps<SnapshotHistogramQueryResult> & SnapshotHistogramProps;

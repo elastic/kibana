@@ -11,7 +11,7 @@ import { parseFilterQuery, getFilterClause } from '../../helper';
 import { DatabaseAdapter, HistogramQueryResult } from '../database';
 import { UMPingsAdapter } from './adapter_types';
 import { getHistogramInterval } from '../../helper/get_histogram_interval';
-import { GetHistogramResult } from '../../../../common/domain_types';
+import { HistogramResult } from '../../../../common/domain_types';
 
 export class ElasticsearchPingsAdapter implements UMPingsAdapter {
   private database: DatabaseAdapter;
@@ -190,7 +190,7 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
     filters?: string | null,
     monitorId?: string | null,
     statusFilter?: string | null
-  ): Promise<GetHistogramResult> {
+  ): Promise<HistogramResult> {
     const boolFilters = parseFilterQuery(filters);
     const additionaFilters = [];
     if (monitorId) {

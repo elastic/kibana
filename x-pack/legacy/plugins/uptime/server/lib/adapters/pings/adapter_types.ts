@@ -5,7 +5,7 @@
  */
 
 import { DocCount, Ping, PingResults } from '../../../../common/graphql/types';
-import { GetHistogramResult } from '../../../../common/domain_types';
+import { HistogramResult } from '../../../../common/domain_types';
 
 export interface UMPingsAdapter {
   getAll(
@@ -34,7 +34,7 @@ export interface UMPingsAdapter {
     filters?: string | null,
     monitorId?: string | null,
     statusFilter?: string | null
-  ): Promise<GetHistogramResult>;
+  ): Promise<HistogramResult>;
 
   getDocCount(request: any): Promise<DocCount>;
 }
