@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { DEFAULT_COLOR } from './color_default';
+export { DEFAULT_CONVERTER_COLOR } from './color_default';

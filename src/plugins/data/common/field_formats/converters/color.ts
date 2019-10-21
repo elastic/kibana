@@ -22,7 +22,7 @@ import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import { FieldFormat } from '../field_format';
 import { HtmlContextTypeConvert } from '../types';
 import { asPrettyString } from '../utils';
-import { DEFAULT_COLOR } from '../constants';
+import { DEFAULT_CONVERTER_COLOR } from '../constants';
 
 const convertTemplate = template('<span style="<%- style %>"><%- val %></span>');
 
@@ -34,14 +34,14 @@ export class ColorFormat extends FieldFormat {
   getParamDefaults() {
     return {
       fieldType: null, // populated by editor, see controller below
-      colors: [cloneDeep(DEFAULT_COLOR)],
+      colors: [cloneDeep(DEFAULT_CONVERTER_COLOR)],
     };
   }
 
   findColorRuleForVal(val: any) {
     switch (this.param('fieldType')) {
       case 'string':
-        return findLast(this.param('colors'), (colorParam: typeof DEFAULT_COLOR) => {
+        return findLast(this.param('colors'), (colorParam: typeof DEFAULT_CONVERTER_COLOR) => {
           return new RegExp(colorParam.regex).test(val);
         });
 
@@ -58,7 +58,7 @@ export class ColorFormat extends FieldFormat {
   }
 
   htmlConvert: HtmlContextTypeConvert = val => {
-    const color = this.findColorRuleForVal(val) as typeof DEFAULT_COLOR;
+    const color = this.findColorRuleForVal(val) as typeof DEFAULT_CONVERTER_COLOR;
     if (!color) return escape(asPrettyString(val));
 
     let style = '';

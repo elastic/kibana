@@ -27,7 +27,7 @@ import { TextContextTypeConvert } from '../types';
 
 const numeralInst = numeral();
 
-numeralLanguages.forEach(function(numeralLanguage: Record<string, any>) {
+numeralLanguages.forEach((numeralLanguage: Record<string, any>) => {
   numeral.language(numeralLanguage.id, numeralLanguage.lang);
 });
 

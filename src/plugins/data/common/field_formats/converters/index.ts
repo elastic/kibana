@@ -17,36 +17,18 @@
  * under the License.
  */
 
-import { UrlFormat } from './url';
-import { BytesFormat } from './bytes';
-import { DateFormat } from './date_server';
-import { DateNanosFormat } from './date_nanos';
-import { RelativeDateFormat } from './relative_date';
-import { DurationFormat } from './duration';
-import { IpFormat } from './ip';
-import { NumberFormat } from './number';
-import { PercentFormat } from './percent';
-import { StringFormat } from './string';
-import { SourceFormat } from './source';
-import { ColorFormat } from './color';
-import { TruncateFormat } from './truncate';
-import { BoolFormat } from './boolean';
-import { StaticLookupFormat } from './static_lookup';
-
-export {
-  UrlFormat,
-  StaticLookupFormat,
-  SourceFormat,
-  BoolFormat,
-  ColorFormat,
-  DateFormat,
-  DateNanosFormat,
-  DurationFormat,
-  IpFormat,
-  PercentFormat,
-  RelativeDateFormat,
-  TruncateFormat,
-  BytesFormat,
-  NumberFormat,
-  StringFormat,
-};
+export { UrlFormat } from './url';
+export { BytesFormat } from './bytes';
+export { DateFormat } from './date_server';
+export { DateNanosFormat } from './date_nanos';
+export { RelativeDateFormat } from './relative_date';
+export { DurationFormat } from './duration';
+export { IpFormat } from './ip';
+export { NumberFormat } from './number';
+export { PercentFormat } from './percent';
+export { StringFormat } from './string';
+export { SourceFormat } from './source';
+export { ColorFormat } from './color';
+export { TruncateFormat } from './truncate';
+export { BoolFormat } from './boolean';
+export { StaticLookupFormat } from './static_lookup';
