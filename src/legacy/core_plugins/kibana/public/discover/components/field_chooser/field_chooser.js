@@ -27,8 +27,10 @@ import _ from 'lodash';
 import $ from 'jquery';
 import rison from 'rison-node';
 import { fieldCalculator } from './lib/field_calculator';
-import { FieldList } from 'ui/index_patterns';
-import { uiModules } from 'ui/modules';
+import {
+  uiModules,
+  FieldList,
+} from '../../kibana_services';
 import fieldChooserTemplate from './field_chooser.html';
 const app = uiModules.get('apps/discover');
 

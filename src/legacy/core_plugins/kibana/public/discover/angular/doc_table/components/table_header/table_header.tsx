@@ -17,7 +17,7 @@
  * under the License.
  */
 import React from 'react';
-import { IndexPattern } from '../../../dependencies';
+import { IndexPattern } from '../../../../kibana_services';
 // @ts-ignore
 import { TableHeaderColumn } from './table_header_column';
 import { SortOrder, getDisplayedColumns } from './helpers';
@@ -47,7 +47,7 @@ export function TableHeader({
 
   return (
     <tr data-test-subj="docTableHeader" className="kbnDocTableHeader">
-      <th style={{ width: '24px' }}></th>
+      <th style={{ width: '24px' }} />
       {displayedColumns.map(col => {
         return (
           <TableHeaderColumn

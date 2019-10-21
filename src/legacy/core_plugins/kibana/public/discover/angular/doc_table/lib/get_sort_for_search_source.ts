@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { IndexPattern } from '../../dependencies';
+import { IndexPattern } from '../../../kibana_services';
 import { SortOrder } from '../components/table_header/helpers';
 import { getSort } from './get_sort';
 

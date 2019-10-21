@@ -16,8 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import './dependencies';
+import './../kibana_services';
 import './discover';
 import './doc';
 import './context';
 import './doc_viewer';
+import './directives';

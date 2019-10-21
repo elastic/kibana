@@ -16,13 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-
-import { wrapInI18nContext } from 'ui/i18n';
-import { uiModules } from 'ui/modules';
-
 import React from 'react';
-
+import { wrapInI18nContext, uiModules } from '../../kibana_services';
 import {
   EuiFlexGroup,
   EuiFlexItem,

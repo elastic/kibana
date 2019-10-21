@@ -24,7 +24,7 @@ import {
   i18n,
   subscribeWithScope,
   npStart,
-} from './dependencies';
+} from './../kibana_services';
 
 import './context_app';
 import contextAppRouteTemplate from './context.html';

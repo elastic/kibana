@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { StaticIndexPattern } from '../../dependencies';
+import { StaticIndexPattern } from '../../../kibana_services';
 import { SortOrder } from '../components/table_header/helpers';
 
 export function getSort(

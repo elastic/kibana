@@ -25,19 +25,19 @@ import 'ui/state_management/app_state';
 import 'ui/capabilities/route_setup';
 
 import uiRoutes from 'ui/routes';
-export { uiRoutes };
 
 import angular from 'angular';
-export { angular };
-
 import { npStart } from 'ui/new_platform';
 const { chrome } = npStart.core;
+
+export { uiRoutes };
 export { chrome };
 export { npStart } from 'ui/new_platform';
+export { angular };
 
 // @ts-ignore
 export { uiModules } from 'ui/modules';
-export { IndexPattern, IndexPatterns, StaticIndexPattern } from 'ui/index_patterns';
+export { IndexPattern, IndexPatterns, StaticIndexPattern, FieldList } from 'ui/index_patterns';
 export { wrapInI18nContext } from 'ui/i18n';
 export { timefilter } from 'ui/timefilter';
 export { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
@@ -75,7 +75,6 @@ export {
 export { tabifyAggResponse } from 'ui/agg_response/tabify';
 export { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 export { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
-export { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../breadcrumbs';
+export { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from './breadcrumbs';
 export { buildVislibDimensions } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
-
-import './directives';
+export { capabilities } from 'ui/capabilities';

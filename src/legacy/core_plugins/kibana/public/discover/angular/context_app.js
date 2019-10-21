@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { callAfterBindingsWorkaround, uiModules, timefilter } from './dependencies';
+import { callAfterBindingsWorkaround, uiModules, timefilter } from './../kibana_services';
 import contextAppTemplate from './context_app.html';
 import '../context/components/action_bar';
 import { getFirstSortableField } from '../context/api/utils/sorting';

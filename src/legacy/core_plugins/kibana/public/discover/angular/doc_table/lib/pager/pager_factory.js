@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { uiModules } from 'ui/modules';
+import { uiModules } from '../../../../kibana_services';
 import { Pager } from './pager';
 
 const app = uiModules.get('kibana');

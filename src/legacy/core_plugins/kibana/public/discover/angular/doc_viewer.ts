@@ -18,7 +18,7 @@
  */
 
 // @ts-ignore
-import { uiModules } from './dependencies';
+import { uiModules } from './../kibana_services';
 import { DocViewer } from '../doc_viewer/doc_viewer';
 
 uiModules.get('apps/discover').directive('docViewer', (reactDirective: any) => {

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { IndexPattern } from '../../../dependencies';
+import { IndexPattern } from '../../../../kibana_services';
 // @ts-ignore
 import { shortenDottedString } from '../../../../../../common/utils/shorten_dotted_string';
 

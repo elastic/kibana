@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '../dependencies';
+import { i18n } from '../../kibana_services';
 
 /**
  * A message letting the user know the results that have been retrieved is limited

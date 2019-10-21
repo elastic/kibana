@@ -69,7 +69,7 @@ import {
   uiRoutes,
   vislibSeriesResponseHandlerProvider,
   VisProvider,
-} from './dependencies';
+} from './../kibana_services';
 
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../breadcrumbs';
 import { extractTimeFilter, changeTimeFilter } from '../../../../data/public';
