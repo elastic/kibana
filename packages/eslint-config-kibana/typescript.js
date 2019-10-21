@@ -96,7 +96,7 @@ module.exports = {
           '@typescript-eslint/member-ordering': ['error', {
             'default': ['public-static-field', 'static-field', 'instance-field']
           }],
-          '@typescript-eslint/no-angle-bracket-type-assertion': 'error',
+          '@typescript-eslint/consistent-type-assertions': 'error',
           '@typescript-eslint/no-empty-interface': 'error',
           '@typescript-eslint/no-misused-new': 'error',
           '@typescript-eslint/no-namespace': 'error',
