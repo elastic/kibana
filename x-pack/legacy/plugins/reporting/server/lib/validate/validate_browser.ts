@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Browser } from 'puppeteer';
+import { BROWSER_TYPE } from '../../../common/constants';
 import { ServerFacade, Logger } from '../../../types';
-import { CHROMIUM } from '../../browsers/browser_types';
 import { HeadlessChromiumDriverFactory } from '../../browsers/chromium/driver_factory';
 
 /*
@@ -17,7 +17,7 @@ export const validateBrowser = async (
   browserFactory: HeadlessChromiumDriverFactory,
   logger: Logger
 ) => {
-  if (browserFactory.type === CHROMIUM) {
+  if (browserFactory.type === BROWSER_TYPE) {
     return browserFactory
       .test({ viewport: { width: 800, height: 600 } }, logger)
       .then((browser: Browser | null) => {

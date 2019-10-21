@@ -7,7 +7,7 @@
 import { resolve as resolvePath } from 'path';
 import { existsSync } from 'fs';
 
-import { BrowserType, chromium } from '../browsers';
+import { BrowserType, chromium } from '../index';
 
 import { md5 } from './checksum';
 import { asyncMap } from './util';

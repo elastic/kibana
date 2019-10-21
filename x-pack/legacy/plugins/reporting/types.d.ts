@@ -8,14 +8,8 @@ import { ResponseObject } from 'hapi';
 import { EventEmitter } from 'events';
 import { Legacy } from 'kibana';
 import { ElasticsearchPlugin } from '../../../../src/legacy/core_plugins/elasticsearch';
-import { BrowserType } from './server/browsers/browsers';
 import { HeadlessChromiumDriverFactory } from './server/browsers/chromium/driver_factory';
-
-interface UiSettings {
-  get: (value: string) => string;
-}
-
-type SavedObjectClient = any;
+import { BrowserType } from './server/browsers';
 
 export interface NetworkPolicyRule {
   allow: boolean;
