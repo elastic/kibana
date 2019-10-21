@@ -5947,7 +5947,6 @@
     "xpack.infra.metricDetailPage.hostMetricsLayout.overviewSection.memoryCapacitySeriesLabel": "メモリー使用状況",
     "xpack.infra.metricDetailPage.hostMetricsLayout.overviewSection.outboundTXSeriesLabel": "送信 (TX)",
     "xpack.infra.metricDetailPage.hostMetricsLayout.overviewSection.sectionLabel": "概要",
-    "xpack.infra.metricDetailPage.invalidNodeTypeErrorMessage": "{nodeType} は有効なノードタイプではありません",
     "xpack.infra.metricDetailPage.kubernetesMetricsLayout.nodeCpuCapacitySection.sectionLabel": "ノード CPU 処理能力",
     "xpack.infra.metricDetailPage.kubernetesMetricsLayout.nodeDiskCapacitySection.sectionLabel": "ノードディスク容量",
     "xpack.infra.metricDetailPage.kubernetesMetricsLayout.nodeMemoryCapacitySection.sectionLabel": "ノードメモリー容量",
