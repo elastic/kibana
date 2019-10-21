@@ -27,7 +27,7 @@ class ShareRouter extends Component {
   }
 }
 
-export const App = (api: any) => {
+export const App = () => {
   const sections: Section[] = ['actions'];
 
   const sectionsRegex = sections.join('|');

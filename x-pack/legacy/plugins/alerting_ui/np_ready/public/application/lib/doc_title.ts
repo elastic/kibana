@@ -13,9 +13,7 @@ class DocTitleService {
   }
 
   public setTitle(page?: string): void {
-    let updatedTitle = i18n.translate('xpack.alertingUI.home.breadcrumbTitle', {
-      defaultMessage: 'Alerting UI',
-    });
+    let updatedTitle: string;
 
     switch (page) {
       case 'actions':
@@ -23,6 +21,10 @@ class DocTitleService {
           defaultMessage: 'Actions',
         });
         break;
+      default:
+        updatedTitle = i18n.translate('xpack.alertingUI.home.breadcrumbTitle', {
+          defaultMessage: 'Alerting UI',
+        });
     }
 
     this.changeDocTitle(updatedTitle);

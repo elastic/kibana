@@ -56,7 +56,7 @@ export function getActionType({
 }): ActionType {
   return {
     id: '.webhook',
-    name: i18n.translate('xpack.actions.builtin.webhook.name', {
+    name: i18n.translate('xpack.actions.builtin.webhookTitle', {
       defaultMessage: 'Webhook',
     }),
     validate: {
