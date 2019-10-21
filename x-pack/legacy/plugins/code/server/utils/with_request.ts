@@ -4,24 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestFacade } from '../../';
-import { AnyObject } from '../lib/esqueue';
+import { APICaller, KibanaRequest, RequestHandlerContext } from 'src/core/server';
 
 export class WithRequest {
-  public readonly callCluster: (endpoint: string, clientOptions?: AnyObject) => Promise<any>;
+  public readonly callCluster: APICaller;
 
-  constructor(readonly req: RequestFacade) {
-    const cluster = req.server.plugins.elasticsearch.getCluster('data');
-
-    // @ts-ignore
-    const securityPlugin = req.server.plugins.security;
-    if (securityPlugin) {
-      const useRbac = securityPlugin.authorization.mode.useRbacForRequest(req);
-      if (useRbac) {
-        this.callCluster = cluster.callWithInternalUser;
-        return;
-      }
-    }
-    this.callCluster = cluster.callWithRequest.bind(null, req);
+  constructor(readonly context: RequestHandlerContext, readonly req: KibanaRequest) {
+    const securityPlugin = context.code.legacy.securityPlugin;
+    const useRbac =
+      securityPlugin &&
+      securityPlugin.authorization &&
+      // @ts-ignore
+      securityPlugin.authorization.mode.useRbacForRequest(req);
+    this.callCluster = useRbac
+      ? context.core.elasticsearch.dataClient.callAsInternalUser
+      : context.core.elasticsearch.dataClient.callAsCurrentUser;
   }
 }

@@ -61,6 +61,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [IContextContainer](./kibana-plugin-public.icontextcontainer.md) | An object that handles registration of context providers and configuring handlers with context. |
 |  [IHttpFetchError](./kibana-plugin-public.ihttpfetcherror.md) |  |
 |  [IHttpInterceptController](./kibana-plugin-public.ihttpinterceptcontroller.md) | Used to halt a request Promise chain in a [HttpInterceptor](./kibana-plugin-public.httpinterceptor.md)<!-- -->. |
+|  [InterceptedHttpResponse](./kibana-plugin-public.interceptedhttpresponse.md) |  |
 |  [LegacyCoreSetup](./kibana-plugin-public.legacycoresetup.md) | Setup interface exposed to the legacy platform via the <code>ui/new_platform</code> module. |
 |  [LegacyCoreStart](./kibana-plugin-public.legacycorestart.md) | Start interface exposed to the legacy platform via the <code>ui/new_platform</code> module. |
 |  [LegacyNavLink](./kibana-plugin-public.legacynavlink.md) |  |
@@ -79,6 +80,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsBatchResponse](./kibana-plugin-public.savedobjectsbatchresponse.md) |  |
 |  [SavedObjectsBulkCreateObject](./kibana-plugin-public.savedobjectsbulkcreateobject.md) |  |
 |  [SavedObjectsBulkCreateOptions](./kibana-plugin-public.savedobjectsbulkcreateoptions.md) |  |
+|  [SavedObjectsBulkUpdateObject](./kibana-plugin-public.savedobjectsbulkupdateobject.md) |  |
+|  [SavedObjectsBulkUpdateOptions](./kibana-plugin-public.savedobjectsbulkupdateoptions.md) |  |
 |  [SavedObjectsCreateOptions](./kibana-plugin-public.savedobjectscreateoptions.md) |  |
 |  [SavedObjectsFindOptions](./kibana-plugin-public.savedobjectsfindoptions.md) |  |
 |  [SavedObjectsFindResponsePublic](./kibana-plugin-public.savedobjectsfindresponsepublic.md) | Return type of the Saved Objects <code>find()</code> method.<!-- -->\*Note\*: this type is different between the Public and Server Saved Objects clients. |

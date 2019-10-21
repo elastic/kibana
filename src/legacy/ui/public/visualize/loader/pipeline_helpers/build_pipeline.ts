@@ -442,18 +442,9 @@ export const buildVislibDimensions = async (
     } else if (xAgg.type.name === 'histogram') {
       const intervalParam = xAgg.type.paramByName('interval');
       const output = { params: {} as any };
-      const searchRequest = {
-        whenAborted: (fn: any) => {
-          if (params.abortSignal) {
-            params.abortSignal.addEventListener('abort', fn);
-          }
-        },
-      };
-      await intervalParam.modifyAggConfigOnSearchRequestStart(
-        xAgg,
-        params.searchSource,
-        searchRequest
-      );
+      await intervalParam.modifyAggConfigOnSearchRequestStart(xAgg, params.searchSource, {
+        abortSignal: params.abortSignal,
+      });
       intervalParam.write(xAgg, output);
       dimensions.x.params.interval = output.params.interval;
     }

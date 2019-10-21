@@ -117,7 +117,7 @@ test('`setupPlugins` throws plugin has missing required dependency', async () =>
   pluginsSystem.addPlugin(createPlugin('some-id', { required: ['missing-dep'] }));
 
   await expect(pluginsSystem.setupPlugins(setupDeps)).rejects.toMatchInlineSnapshot(
-    `[Error: Topological ordering of plugins did not complete, these edges could not be ordered: [["some-id",{}]]]`
+    `[Error: Topological ordering of plugins did not complete, these plugins have cyclic or missing dependencies: ["some-id"]]`
   );
 });
 
@@ -127,7 +127,7 @@ test('`setupPlugins` throws if plugins have circular required dependency', async
   pluginsSystem.addPlugin(createPlugin('depends-on-2', { required: ['depends-on-1'] }));
 
   await expect(pluginsSystem.setupPlugins(setupDeps)).rejects.toMatchInlineSnapshot(
-    `[Error: Topological ordering of plugins did not complete, these edges could not be ordered: [["depends-on-1",{}],["depends-on-2",{}]]]`
+    `[Error: Topological ordering of plugins did not complete, these plugins have cyclic or missing dependencies: ["depends-on-1","depends-on-2"]]`
   );
 });
 
@@ -137,7 +137,7 @@ test('`setupPlugins` throws if plugins have circular optional dependency', async
   pluginsSystem.addPlugin(createPlugin('depends-on-2', { optional: ['depends-on-1'] }));
 
   await expect(pluginsSystem.setupPlugins(setupDeps)).rejects.toMatchInlineSnapshot(
-    `[Error: Topological ordering of plugins did not complete, these edges could not be ordered: [["depends-on-1",{}],["depends-on-2",{}]]]`
+    `[Error: Topological ordering of plugins did not complete, these plugins have cyclic or missing dependencies: ["depends-on-1","depends-on-2"]]`
   );
 });
 

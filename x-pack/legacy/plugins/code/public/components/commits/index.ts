@@ -5,6 +5,5 @@
  */
 
 export { Commit } from './commit';
-export { CommitLink } from './commit_link';
 export { CommitGroup } from './group';
 export { CommitHistory, CommitHistoryComponent } from './history';

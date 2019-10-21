@@ -32,6 +32,12 @@ const createCodeConfigSchema = () => {
       enabled: schema.boolean({ defaultValue: true }),
     }),
     enabled: schema.boolean({ defaultValue: true }),
+    diffPage: schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
+    }),
+    integrations: schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
+    }),
     queueIndex: schema.string({ defaultValue: '.code_internal-worker-queue' }),
     // 1 hour by default.
     queueTimeoutMs: schema.number({
@@ -84,7 +90,6 @@ const createCodeConfigSchema = () => {
       gitProtocolWhitelist: schema.arrayOf(schema.string(), {
         defaultValue: ['https', 'git', 'ssh'],
       }),
-      enableGitCertCheck: schema.boolean({ defaultValue: true }),
       enableJavaSecurityManager: schema.boolean({ defaultValue: true }),
       extraJavaRepositoryWhitelist: schema.arrayOf(schema.string(), {
         defaultValue: [],
