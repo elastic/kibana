@@ -87,7 +87,11 @@ export const SourceConfigurationSettings = ({
   return (
     <>
       <EuiPage>
-        <EuiPageBody className="eui-displayBlock" restrictWidth>
+        <EuiPageBody
+          className="eui-displayBlock"
+          restrictWidth
+          data-test-subj="sourceConfigurationContent"
+        >
           <Prompt
             when={isFormDirty}
             message={i18n.translate('xpack.infra.sourceConfiguration.unsavedFormPrompt', {
