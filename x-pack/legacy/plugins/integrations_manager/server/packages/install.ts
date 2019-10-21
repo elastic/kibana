@@ -14,29 +14,44 @@ import { getObjects } from './get_objects';
 export async function installPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
-  asset: AssetType;
+  asset?: AssetType;
   callCluster: CallESAsCurrentUser;
 }) {
   const { savedObjectsClient, pkgkey, asset, callCluster } = options;
-  // install any assets (in ES, as Saved Objects, etc) as required. Get references to them
-  const toSave = await installAssets({
-    savedObjectsClient,
-    pkgkey,
-    asset,
-    callCluster,
-  });
+  const assets: AssetType[] = [];
 
-  if (toSave.length) {
-    // saved those references in the package manager's state object
-    const saved = await saveInstallationReferences({
-      savedObjectsClient,
-      pkgkey,
-      toSave,
+  if (asset) {
+    assets.push(asset);
+  } else {
+    Object.values(AssetType).forEach(value => {
+      assets.push(value);
     });
-    return saved;
   }
 
-  return [];
+  let result = {};
+
+  // install any assets (in ES, as Saved Objects, etc) as required. Get references to them
+  // this is a for loop because using forEach with an async callback wouldn't wait for the
+  // awaits to resolve, and we'd return an empty result
+  for (let i = 0; i < assets.length; i++) {
+    const toSave = await installAssets({
+      savedObjectsClient,
+      pkgkey,
+      asset: assets[i],
+      callCluster,
+    });
+
+    if (toSave.length) {
+      // Save those references in the integration manager's state saved object
+      // The latest return value is the state of this object after all updates
+      result = await saveInstallationReferences({
+        savedObjectsClient,
+        pkgkey,
+        toSave,
+      });
+    }
+    return result;
+  }
 }
 
 // the function which how to install each of the various asset types

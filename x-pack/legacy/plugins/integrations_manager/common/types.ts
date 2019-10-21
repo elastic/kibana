@@ -10,14 +10,11 @@ export { Request, ResponseToolkit, Server, ServerRoute } from 'hapi';
 
 export type InstallationStatus = Installed['status'] | NotInstalled['status'];
 
-export type AssetType =
-  | 'config'
-  | 'dashboard'
-  | 'index-pattern'
-  | 'ingest-pipeline'
-  | 'search'
-  | 'timelion-sheet'
-  | 'visualization';
+export enum AssetType {
+  dashboard = 'dashboard',
+  ingestPipeline = 'ingest-pipeline',
+  visualization = 'visualization',
+}
 
 // Registry's response types
 // from /search
