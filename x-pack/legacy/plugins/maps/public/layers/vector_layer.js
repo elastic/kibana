@@ -253,15 +253,20 @@ export class VectorLayer extends AbstractLayer {
     return this._source.getDisplayName();
   }
 
-  async getOrdinalFields() {
+
+  async getDateFields() {
     const timeFields = await this._source.getDateFields();
-    const timeFieldOptions = timeFields.map(({ label, name }) => {
+    return timeFields.map(({ label, name }) => {
       return {
         label,
         name,
         origin: SOURCE_DATA_ID_ORIGIN
       };
     });
+  }
+
+
+  async getNumberFields() {
     const numberFields = await this._source.getNumberFields();
     const numberFieldOptions = numberFields.map(({ label, name }) => {
       return {
@@ -281,7 +286,7 @@ export class VectorLayer extends AbstractLayer {
       joinFields.push(...fields);
     });
 
-    return [...timeFieldOptions, ...numberFieldOptions, ...joinFields];
+    return [...numberFieldOptions, ...joinFields];
   }
 
   getIndexPatternIds() {
