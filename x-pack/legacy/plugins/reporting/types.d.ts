@@ -24,6 +24,23 @@ export interface ReportingPlugin {
   };
   browserDriverFactory: HeadlessChromiumDriverFactory;
 }
+
+export interface ReportingConfigOptions {
+  browser: BrowserConfig;
+  poll: {
+    jobCompletionNotifier: {
+      interval: number;
+      intervalErrorMultiplier: number;
+    };
+    jobsRefresh: {
+      interval: number;
+      intervalErrorMultiplier: number;
+    };
+  };
+  queue: QueueConfig;
+  capture: CaptureConfig;
+}
+
 export interface NetworkPolicyRule {
   allow: boolean;
   protocol: string;
@@ -36,6 +53,8 @@ export interface NetworkPolicy {
 }
 
 // Tracks which parts of the legacy plugin system are being used
+export type ReportingPluginSpecOptions = Legacy.PluginSpecOptions;
+
 export type ServerFacade = Legacy.Server & {
   plugins: {
     reporting?: ReportingPlugin;
