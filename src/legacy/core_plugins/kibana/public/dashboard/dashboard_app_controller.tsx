@@ -58,7 +58,6 @@ import { Subscription } from 'rxjs';
 import { npStart } from 'ui/new_platform';
 import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
 import { extractTimeFilter, changeTimeFilter } from '../../../data/public';
-import { start as data } from '../../../data/public/legacy';
 
 import {
   DashboardContainer,
@@ -88,8 +87,8 @@ import { getDashboardTitle } from './dashboard_strings';
 import { DashboardAppScope } from './dashboard_app';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '../visualize/embeddable';
 import { convertSavedDashboardPanelToPanelState } from './lib/embeddable_saved_object_converters';
+import { SavedQueryService } from '../../../data/public/search/search_bar/lib/saved_query_service';
 
-const { savedQueryService } = data.search.services;
 
 export class DashboardAppController {
   // Part of the exposed plugin API - do not remove without careful consideration.
@@ -104,12 +103,15 @@ export class DashboardAppController {
     getAppState,
     dashboardConfig,
     localStorage,
-    Private,
     kbnUrl,
     AppStateClass,
     indexPatterns,
     config,
     confirmModal,
+    queryFilter,
+    getUnhashableStates,
+    shareContextMenuExtensions,
+    savedQueryService,
   }: {
     $scope: DashboardAppScope;
     $route: any;
@@ -129,10 +131,14 @@ export class DashboardAppController {
     AppStateClass: TAppStateClass<DashboardAppState>;
     config: any;
     confirmModal: ConfirmModalFn;
+    queryFilter: any;
+    getUnhashableStates: any;
+    shareContextMenuExtensions: any;
+    savedQueryService: SavedQueryService;
   }) {
-    const queryFilter = Private(FilterBarQueryFilterProvider);
-    const getUnhashableStates = Private(getUnhashableStatesProvider);
-    const shareContextMenuExtensions = Private(ShareContextMenuExtensionsRegistryProvider);
+    // const queryFilter = Private(FilterBarQueryFilterProvider);
+    // const getUnhashableStates = Private(getUnhashableStatesProvider);
+    // const shareContextMenuExtensions = Private(ShareContextMenuExtensionsRegistryProvider);
 
     let lastReloadRequestTime = 0;
 
