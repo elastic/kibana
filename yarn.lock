@@ -8638,15 +8638,10 @@ constants-browserify@^1.0.0:
   resolved "https://registry.yarnpkg.com/constants-browserify/-/constants-browserify-1.0.0.tgz#c20b96d8c617748aaf1c16021760cd27fcb8cb75"
   integrity sha1-wguW2MYXdIqvHBYCF2DNJ/y4y3U=
 
-"constate-latest@npm:constate@^1.2.0":
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/constate/-/constate-1.2.0.tgz#2e1e608a8ecb91381fb850810ace712f1e45a504"
-  integrity sha512-cdcCg5MFSIU1sq091lpqi7RhY0KB6zYuSFtYOF9fLQRaudZVybRo7IahFxi7vvtfsuAysrTPAMmv5FDHLJ6K8Q==
-
-constate@^0.9.0:
-  version "0.9.0"
-  resolved "https://registry.yarnpkg.com/constate/-/constate-0.9.0.tgz#877197ef8fbcacee95672a7e98f7b21dec818891"
-  integrity sha512-Cgkqefi4GrepnA7gwqbrsU+Kf/xl0sPv3O1UNE/vUZtTgpWlkd+/rSZjjd7npICtExn6yuICro7Vb2zoFCnS/A==
+constate@^1.2.0:
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/constate/-/constate-1.3.2.tgz#fa5f0fc292207f1ec21b46a5eb81f59c8b0a8b84"
+  integrity sha512-aaILV4vXwGTUZaQZHS5F1xBV8wRCR0Ow1505fdkS5/BPg6hbQrhNqdHL4wgxWgaDeEj43mu/Fb+LhqOKTMcrgQ==
 
 contains-path@^0.1.0:
   version "0.1.0"
