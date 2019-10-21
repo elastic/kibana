@@ -17,23 +17,21 @@
  * under the License.
  */
 
-import { getDefaultFormat } from '../get_default_format';
-import { NumberFormat } from '../../../../../../plugins/data/public';
+import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
+import { FieldFormat } from '../field_format';
+import { TextContextTypeConvert } from '../types';
 
-const getConfig = () => {
-  return '0,0.[000]';
-};
+export class IpFormat extends FieldFormat {
+  static id = 'ip';
+  static title = 'IP Address';
+  static fieldType = KBN_FIELD_TYPES.IP;
 
-describe('getDefaultFormat', () => {
+  textConvert: TextContextTypeConvert = val => {
+    if (val === undefined || val === null) return '-';
+    if (!isFinite(val)) return val;
 
-  it('should create default format', () => {
-    const DefaultFormat = getDefaultFormat(NumberFormat);
-    const defaultFormatObject = new DefaultFormat(null, getConfig);
-    const formatObject = new NumberFormat(null, getConfig);
-
-    expect(DefaultFormat.id).toEqual('');
-    expect(DefaultFormat.resolvedTitle).toEqual(NumberFormat.title);
-    expect(DefaultFormat.title).toEqual('- Default -');
-    expect(JSON.stringify(defaultFormatObject.params())).toEqual(JSON.stringify(formatObject.params()));
-  });
-});
+    // shazzam!
+    // eslint-disable-next-line no-bitwise
+    return [val >>> 24, (val >>> 16) & 0xff, (val >>> 8) & 0xff, val & 0xff].join('.');
+  };
+}

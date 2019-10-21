@@ -17,23 +17,27 @@
  * under the License.
  */
 
-import { getDefaultFormat } from '../get_default_format';
-import { NumberFormat } from '../../../../../../plugins/data/public';
+import { trunc } from 'lodash';
+import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
+import { FieldFormat } from '../field_format';
+import { TextContextTypeConvert } from '../types';
 
-const getConfig = () => {
-  return '0,0.[000]';
-};
+const omission = '...';
 
-describe('getDefaultFormat', () => {
+export class TruncateFormat extends FieldFormat {
+  static id = 'truncate';
+  static title = 'Truncated String';
+  static fieldType = KBN_FIELD_TYPES.STRING;
 
-  it('should create default format', () => {
-    const DefaultFormat = getDefaultFormat(NumberFormat);
-    const defaultFormatObject = new DefaultFormat(null, getConfig);
-    const formatObject = new NumberFormat(null, getConfig);
+  textConvert: TextContextTypeConvert = val => {
+    const length = this.param('fieldLength');
+    if (length > 0) {
+      return trunc(val, {
+        length: length + omission.length,
+        omission,
+      });
+    }
 
-    expect(DefaultFormat.id).toEqual('');
-    expect(DefaultFormat.resolvedTitle).toEqual(NumberFormat.title);
-    expect(DefaultFormat.title).toEqual('- Default -');
-    expect(JSON.stringify(defaultFormatObject.params())).toEqual(JSON.stringify(formatObject.params()));
-  });
-});
+    return val;
+  };
+}

@@ -17,23 +17,24 @@
  * under the License.
  */
 
-import { getDefaultFormat } from '../get_default_format';
-import { NumberFormat } from '../../../../../../plugins/data/public';
+import { BytesFormat } from './bytes';
 
-const getConfig = () => {
-  return '0,0.[000]';
-};
+describe('BytesFormat', () => {
+  const config: Record<string, any> = {};
 
-describe('getDefaultFormat', () => {
+  config['format:bytes:defaultPattern'] = '0,0.[000]b';
 
-  it('should create default format', () => {
-    const DefaultFormat = getDefaultFormat(NumberFormat);
-    const defaultFormatObject = new DefaultFormat(null, getConfig);
-    const formatObject = new NumberFormat(null, getConfig);
+  const getConfig = (key: string) => config[key];
 
-    expect(DefaultFormat.id).toEqual('');
-    expect(DefaultFormat.resolvedTitle).toEqual(NumberFormat.title);
-    expect(DefaultFormat.title).toEqual('- Default -');
-    expect(JSON.stringify(defaultFormatObject.params())).toEqual(JSON.stringify(formatObject.params()));
+  test('default pattern', () => {
+    const formatter = new BytesFormat({}, getConfig);
+
+    expect(formatter.convert(5150000)).toBe('4.911MB');
+  });
+
+  test('custom pattern', () => {
+    const formatter = new BytesFormat({ pattern: '0,0b' }, getConfig);
+
+    expect(formatter.convert('5150000')).toBe('5MB');
   });
 });
