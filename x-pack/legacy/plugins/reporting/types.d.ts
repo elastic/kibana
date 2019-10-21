@@ -11,6 +11,18 @@ import { ElasticsearchPlugin } from '../../../../src/legacy/core_plugins/elastic
 import { HeadlessChromiumDriverFactory } from './server/browsers/chromium/driver_factory';
 import { BrowserType } from './server/browsers';
 
+type Job = EventEmitter & { id: string };
+
+export interface ReportingPlugin {
+  queue: {
+    addJob: (type: string, payload: object, options: object) => Job;
+  };
+  exportTypesRegistry: {
+    getById: (id: string) => ExportTypeDefinition;
+    getAll: () => ExportTypeDefinition[];
+  };
+  browserDriverFactory: HeadlessChromiumDriverFactory;
+}
 export interface NetworkPolicyRule {
   allow: boolean;
   protocol: string;
@@ -223,16 +235,3 @@ export interface ExportTypesRegistry {
 
 // Prefer to import this type using: `import { LevelLogger } from 'relative/path/server/lib';`
 export { LevelLogger as Logger } from './server/lib/level_logger';
-
-type Job = EventEmitter & { id: string };
-
-export interface ReportingPlugin {
-  queue: {
-    addJob: (type: string, payload: object, options: object) => Job;
-  };
-  exportTypesRegistry: {
-    getById: (id: string) => ExportTypeDefinition;
-    getAll: () => ExportTypeDefinition[];
-  };
-  browserDriverFactory: HeadlessChromiumDriverFactory;
-}
