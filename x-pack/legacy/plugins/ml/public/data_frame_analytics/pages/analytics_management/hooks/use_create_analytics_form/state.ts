@@ -50,13 +50,14 @@ export interface State {
     sourceIndex: EsIndexName;
     sourceIndexNameEmpty: boolean;
     sourceIndexNameValid: boolean;
+    sourceIndexContainsNumericalFields: boolean;
+    sourceIndexFieldsCheckFailed: boolean;
     trainingPercent: number;
   };
   disabled: boolean;
   indexNames: EsIndexName[];
   indexPatternsMap: any; // TODO: update type
   indexPatternTitles: IndexPatternTitle[];
-  indexPatternsWithNumericFields: IndexPatternTitle[];
   isAdvancedEditorEnabled: boolean;
   isJobCreated: boolean;
   isJobStarted: boolean;
@@ -91,6 +92,8 @@ export const getInitialState = (): State => ({
     sourceIndex: '',
     sourceIndexNameEmpty: true,
     sourceIndexNameValid: false,
+    sourceIndexContainsNumericalFields: true,
+    sourceIndexFieldsCheckFailed: false,
     trainingPercent: 80,
   },
   jobConfig: {},
@@ -100,7 +103,6 @@ export const getInitialState = (): State => ({
   indexNames: [],
   indexPatternsMap: {},
   indexPatternTitles: [],
-  indexPatternsWithNumericFields: [],
   isAdvancedEditorEnabled: false,
   isJobCreated: false,
   isJobStarted: false,

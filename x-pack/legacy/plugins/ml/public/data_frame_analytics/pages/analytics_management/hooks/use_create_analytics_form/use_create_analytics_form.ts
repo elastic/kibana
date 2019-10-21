@@ -7,7 +7,9 @@
 import { useReducer } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import { idx } from '@kbn/elastic-idx';
 
+import { SimpleSavedObject } from 'src/core/public';
 import { ml } from '../../../../../services/ml_api_service';
 import { useKibanaContext } from '../../../../../contexts/kibana';
 
@@ -32,9 +34,6 @@ export interface CreateAnalyticsFormProps {
   actions: ActionDispatchers;
   state: State;
 }
-
-// List of system fields we want to ignore for the numeric field check.
-const OMIT_FIELDS: string[] = ['_source', '_type', '_index', '_id', '_version', '_score'];
 
 export function getErrorMessage(error: any) {
   if (typeof error === 'object' && typeof error.message === 'string') {
@@ -68,7 +67,6 @@ export const useCreateAnalyticsForm = () => {
 
   const setIndexPatternTitles = (payload: {
     indexPatternTitles: IndexPatternTitle[];
-    indexPatternsWithNumericFields: IndexPatternTitle[];
     indexPatternsMap: any; // TODO: update this type
   }) => dispatch({ type: ACTION.SET_INDEX_PATTERN_TITLES, payload });
 
@@ -230,31 +228,18 @@ export const useCreateAnalyticsForm = () => {
 
     try {
       // Set the index pattern titles which the user can choose as the source.
-      const indexPatternTitles = await kibanaContext.indexPatterns.getTitles(true);
-      // Find out which index patterns contain numeric fields.
-      // This will be used to provide a hint in the form that an analytics jobs is not
-      // able to identify outliers if there are no numeric fields present.
-      const ids = await kibanaContext.indexPatterns.getIds(true);
-      const indexPatternsWithNumericFields: IndexPatternTitle[] = [];
-      const indexPatternsMap = {}; // TODO: add type, add to state to keep track of
-      ids
-        .filter(f => !!f)
-        .forEach(async id => {
-          const indexPattern = await kibanaContext.indexPatterns.get(id!);
-          if (
-            indexPattern.fields
-              .filter(f => !OMIT_FIELDS.includes(f.name))
-              .map(f => f.type)
-              .includes('number')
-          ) {
-            indexPatternsWithNumericFields.push(indexPattern.title);
-            // @ts-ignore TODO: fix this type
-            indexPatternsMap[indexPattern.title] = id;
-          }
-        });
+      const indexPatternTitles: string[] = [];
+      const indexPatternsMap: { [key: string]: string | undefined } = {};
+      const savedObjects = (await kibanaContext.indexPatterns.getCache()) || [];
+      savedObjects.forEach((obj: SimpleSavedObject<Record<string, any>>) => {
+        const title = idx(obj, _ => _.attributes.title);
+        if (title !== undefined) {
+          indexPatternTitles.push(title);
+          indexPatternsMap[title] = idx(obj, _ => _.id);
+        }
+      });
       setIndexPatternTitles({
         indexPatternTitles,
-        indexPatternsWithNumericFields,
         indexPatternsMap,
       });
     } catch (e) {

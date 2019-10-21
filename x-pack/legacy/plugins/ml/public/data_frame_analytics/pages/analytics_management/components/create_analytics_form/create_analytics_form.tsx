@@ -46,6 +46,9 @@ const NUMERICAL_FIELD_TYPES = new Set([
   'scaled_float',
 ]);
 
+// List of system fields we want to ignore for the numeric field check.
+const OMIT_FIELDS: string[] = ['_source', '_type', '_index', '_id', '_version', '_score'];
+
 export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, state }) => {
   const { setFormState } = actions;
   const kibanaContext = useKibanaContext();
@@ -53,7 +56,6 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
   const {
     form,
     indexPatternsMap,
-    indexPatternsWithNumericFields,
     indexPatternTitles,
     isAdvancedEditorEnabled,
     isJobCreated,
@@ -80,8 +82,33 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     sourceIndex,
     sourceIndexNameEmpty,
     sourceIndexNameValid,
+    sourceIndexContainsNumericalFields,
+    sourceIndexFieldsCheckFailed,
     trainingPercent,
   } = form;
+
+  // Find out if index pattern contain numeric fields. Provides a hint in the form
+  // that an analytics jobs is not able to identify outliers if there are no numeric fields present.
+  const validateSourceIndexFields = async () => {
+    try {
+      const indexPattern: IndexPattern = await kibanaContext.indexPatterns.get(
+        indexPatternsMap[sourceIndex]
+      );
+      const containsNumericalFields: boolean = indexPattern.fields
+        .filter(f => !OMIT_FIELDS.includes(f.name))
+        .map(f => f.type)
+        .includes('number');
+
+      setFormState({
+        sourceIndexContainsNumericalFields: containsNumericalFields,
+        sourceIndexFieldsCheckFailed: false,
+      });
+    } catch (e) {
+      setFormState({
+        sourceIndexFieldsCheckFailed: true,
+      });
+    }
+  };
 
   const loadDependentFieldOptions = async () => {
     setFormState({ loadingDepFieldOptions: true, dependentVariable: '' });
@@ -109,14 +136,43 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
         });
       }
     } catch (e) {
-      // TODO: ensure error messages show up correctly
       setFormState({ loadingDepFieldOptions: false, dependentVariableFetchFail: true });
     }
+  };
+
+  const getSourceIndexErrorMessages = () => {
+    const errors = [];
+    if (!sourceIndexNameEmpty && !sourceIndexNameValid) {
+      errors.push(
+        <Fragment>
+          {i18n.translate('xpack.ml.dataframe.analytics.create.sourceIndexInvalidError', {
+            defaultMessage:
+              'Invalid source index name, it cannot contain spaces or the characters: {characterList}',
+            values: { characterList },
+          })}
+        </Fragment>
+      );
+    }
+
+    if (sourceIndexFieldsCheckFailed === true) {
+      errors.push(
+        <Fragment>
+          {i18n.translate('xpack.ml.dataframe.analytics.create.sourceIndexFieldCheckError', {
+            defaultMessage:
+              'There was a problem checking for numerical fields. Please refresh the page and try again.',
+          })}
+        </Fragment>
+      );
+    }
+
+    return errors;
   };
 
   useEffect(() => {
     if (jobType === JOB_TYPES.REGRESSION && sourceIndexNameEmpty === false) {
       loadDependentFieldOptions();
+    } else if (jobType === JOB_TYPES.OUTLIER_DETECTION && sourceIndexNameEmpty === false) {
+      validateSourceIndexFields();
     }
   }, [sourceIndex, jobType, sourceIndexNameEmpty]);
 
@@ -201,32 +257,20 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
               isInvalid={(!jobIdEmpty && !jobIdValid) || jobIdExists}
             />
           </EuiFormRow>
-          {/* TODO: Does the source index message below apply for regression jobs as well? Same for all validation messages below */}
           <EuiFormRow
             label={i18n.translate('xpack.ml.dataframe.analytics.create.sourceIndexLabel', {
               defaultMessage: 'Source index',
             })}
             helpText={
               !sourceIndexNameEmpty &&
-              !indexPatternsWithNumericFields.includes(sourceIndex) &&
+              !sourceIndexContainsNumericalFields &&
               i18n.translate('xpack.ml.dataframe.analytics.create.sourceIndexHelpText', {
                 defaultMessage:
                   'This index pattern does not contain any numeric type fields. The analytics job may not be able to come up with any outliers.',
               })
             }
             isInvalid={!sourceIndexNameEmpty && !sourceIndexNameValid}
-            error={
-              !sourceIndexNameEmpty &&
-              !sourceIndexNameValid && [
-                <Fragment>
-                  {i18n.translate('xpack.ml.dataframe.analytics.create.sourceIndexInvalidError', {
-                    defaultMessage:
-                      'Invalid source index name, it cannot contain spaces or the characters: {characterList}',
-                    values: { characterList },
-                  })}
-                </Fragment>,
-              ]
-            }
+            error={getSourceIndexErrorMessages()}
           >
             <Fragment>
               {!isJobCreated && (
