@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import { FtrProviderContext } from 'test/api_integration/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getService }) {
+export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('prototype pollution smoke test', () => {
