@@ -29,7 +29,7 @@ describe('UiNavLink', () => {
         title: 'Discover',
         order: -1003,
         url: '/app/kibana#/discover',
-        icon: 'plugins/kibana/assets/discover.svg',
+        icon: 'plugins/kibana/discover/assets/discover.svg',
         euiIconType: 'discoverApp',
         hidden: true,
         disabled: true
@@ -58,7 +58,7 @@ describe('UiNavLink', () => {
         id: 'kibana:discover',
         title: 'Discover',
         url: '/app/kibana#/discover',
-        icon: 'plugins/kibana/assets/discover.svg',
+        icon: 'plugins/kibana/discover/assets/discover.svg',
       };
       const link = new UiNavLink(spec);
 
@@ -71,7 +71,7 @@ describe('UiNavLink', () => {
         title: 'Discover',
         order: -1003,
         url: '/app/kibana#/discover',
-        icon: 'plugins/kibana/assets/discover.svg',
+        icon: 'plugins/kibana/discover/assets/discover.svg',
         linkToLastSubUrl: false
       };
       const link = new UiNavLink(spec);
@@ -85,7 +85,7 @@ describe('UiNavLink', () => {
         title: 'Discover',
         order: -1003,
         url: '/app/kibana#/discover',
-        icon: 'plugins/kibana/assets/discover.svg',
+        icon: 'plugins/kibana/discover/assets/discover.svg',
       };
       const link = new UiNavLink(spec);
 
@@ -98,7 +98,7 @@ describe('UiNavLink', () => {
         title: 'Discover',
         order: -1003,
         url: '/app/kibana#/discover',
-        icon: 'plugins/kibana/assets/discover.svg',
+        icon: 'plugins/kibana/discover/assets/discover.svg',
       };
       const link = new UiNavLink(spec);
 
@@ -111,7 +111,7 @@ describe('UiNavLink', () => {
         title: 'Discover',
         order: -1003,
         url: '/app/kibana#/discover',
-        icon: 'plugins/kibana/assets/discover.svg',
+        icon: 'plugins/kibana/discover/assets/discover.svg',
       };
       const link = new UiNavLink(spec);
 
@@ -124,7 +124,7 @@ describe('UiNavLink', () => {
         title: 'Discover',
         order: -1003,
         url: '/app/kibana#/discover',
-        icon: 'plugins/kibana/assets/discover.svg',
+        icon: 'plugins/kibana/discover/assets/discover.svg',
       };
       const link = new UiNavLink(spec);
 

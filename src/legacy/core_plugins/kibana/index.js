@@ -85,7 +85,7 @@ export default function (kibana) {
           }),
           order: -1003,
           url: `${kbnBaseUrl}#/discover`,
-          icon: 'plugins/kibana/assets/discover.svg',
+          icon: 'plugins/kibana/discover/assets/discover.svg',
           euiIconType: 'discoverApp',
         },
         {
@@ -95,7 +95,7 @@ export default function (kibana) {
           }),
           order: -1002,
           url: `${kbnBaseUrl}#/visualize`,
-          icon: 'plugins/kibana/assets/visualize.svg',
+          icon: 'plugins/kibana/visualize/assets/visualize.svg',
           euiIconType: 'visualizeApp',
         },
         {
@@ -111,7 +111,7 @@ export default function (kibana) {
           // the url above in order to preserve the original url for BWC. The subUrlBase helps the Chrome api nav
           // to determine what url to use for the app link.
           subUrlBase: `${kbnBaseUrl}#/dashboard`,
-          icon: 'plugins/kibana/assets/dashboard.svg',
+          icon: 'plugins/kibana/dashboard/assets/dashboard.svg',
           euiIconType: 'dashboardApp',
         },
         {
@@ -121,7 +121,7 @@ export default function (kibana) {
           }),
           order: 9001,
           url: '/app/kibana#/dev_tools',
-          icon: 'plugins/kibana/assets/wrench.svg',
+          icon: 'plugins/kibana/dev_tools/assets/wrench.svg',
           euiIconType: 'devToolsApp',
         },
         {
@@ -131,7 +131,7 @@ export default function (kibana) {
           }),
           order: 9003,
           url: `${kbnBaseUrl}#/management`,
-          icon: 'plugins/kibana/assets/settings.svg',
+          icon: 'plugins/kibana/management/assets/settings.svg',
           euiIconType: 'managementApp',
           linkToLastSubUrl: false,
         },
