@@ -37,15 +37,15 @@ interface ImageRequest extends Request {
   params: Request['params'] & ImageRequestParams;
 }
 
-interface InstallAssetRequest extends Request {
-  params: AssetRequestParams;
+interface InstallIntegrationRequest extends Request {
+  params: IntegrationRequestParams;
 }
 
-interface DeleteAssetRequest extends Request {
-  params: AssetRequestParams;
+interface DeleteIntegrationRequest extends Request {
+  params: IntegrationRequestParams;
 }
 
-type AssetRequestParams = PackageRequest['params'] & {
+type IntegrationRequestParams = PackageRequest['params'] & {
   asset?: AssetType;
 };
 
@@ -79,7 +79,7 @@ export const handleGetImage = async (req: ImageRequest, extra: Extra) => {
   return newResponse;
 };
 
-export async function handleRequestInstall(req: InstallAssetRequest, extra: Extra) {
+export async function handleRequestInstall(req: InstallIntegrationRequest, extra: Extra) {
   const { pkgkey, asset } = req.params;
   if (!asset) throw new Error('Unhandled empty/default asset case');
 
@@ -95,7 +95,7 @@ export async function handleRequestInstall(req: InstallAssetRequest, extra: Extr
   return object;
 }
 
-export async function handleRequestDelete(req: DeleteAssetRequest, extra: Extra) {
+export async function handleRequestDelete(req: DeleteIntegrationRequest, extra: Extra) {
   const { pkgkey } = req.params;
   const savedObjectsClient = getClient(req);
   const deleted = await removeInstallation({ savedObjectsClient, pkgkey });
