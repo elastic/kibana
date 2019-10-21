@@ -18,7 +18,6 @@ import {
   EuiTab,
   EuiTabs,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import React, { Fragment, useState, useEffect } from 'react';
 
@@ -133,16 +132,16 @@ export const SnapshotDetails: React.FunctionComponent<Props> = ({
     const notFound = (error as any).status === 404;
     const errorObject = notFound
       ? {
-        data: {
-          error: i18n.translate('xpack.snapshotRestore.snapshotDetails.errorSnapshotNotFound', {
-            defaultMessage: `Either the snapshot '{snapshotId}' doesn't exist in the repository '{repositoryName}' or the repository doesn't exist.`,
-            values: {
-              snapshotId,
-              repositoryName,
-            },
-          }),
-        },
-      }
+          data: {
+            error: i18n.translate('xpack.snapshotRestore.snapshotDetails.errorSnapshotNotFound', {
+              defaultMessage: `Either the snapshot '{snapshotId}' doesn't exist in the repository '{repositoryName}' or the repository doesn't exist.`,
+              values: {
+                snapshotId,
+                repositoryName,
+              },
+            }),
+          },
+        }
       : error;
 
     content = (
@@ -205,12 +204,12 @@ export const SnapshotDetails: React.FunctionComponent<Props> = ({
                         title={
                           snapshotDetails.isManagedRepository
                             ? i18n.translate(
-                              'xpack.snapshotRestore.snapshotDetails.deleteManagedRepositorySnapshotButtonTitle',
-                              {
-                                defaultMessage:
-                                  'You cannot delete a snapshot stored in a managed repository.',
-                              }
-                            )
+                                'xpack.snapshotRestore.snapshotDetails.deleteManagedRepositorySnapshotButtonTitle',
+                                {
+                                  defaultMessage:
+                                    'You cannot delete a snapshot stored in a managed repository.',
+                                }
+                              )
                             : null
                         }
                       >
