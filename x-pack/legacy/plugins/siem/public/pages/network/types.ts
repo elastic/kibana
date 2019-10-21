@@ -9,7 +9,6 @@ import { RouteComponentProps } from 'react-router-dom';
 import { ActionCreator } from 'typescript-fsa';
 import { Query } from 'src/plugins/data/common';
 
-import { FlowTarget } from '../../graphql/types';
 import { GlobalTimeArgs } from '../../containers/global_time';
 import { InputsModelId } from '../../store/inputs/constants';
 
@@ -32,18 +31,3 @@ export type NetworkComponentProps = NetworkComponentReduxProps &
     hasMlUserPermissions: boolean;
     capabilitiesFetched: boolean;
   };
-
-interface IPDetailsComponentReduxProps {
-  filters: Filter[];
-  flowTarget: FlowTarget;
-  query: Query;
-}
-
-interface IPDetailsComponentDispatchProps {
-  setAbsoluteRangeDatePicker: SetAbsoluteRangeDatePicker;
-  setIpDetailsTablesActivePageToZero: ActionCreator<null>;
-}
-
-export type IPDetailsComponentProps = IPDetailsComponentReduxProps &
-  IPDetailsComponentDispatchProps &
-  GlobalTimeArgs & { detailName: string };
