@@ -37,15 +37,15 @@ interface ImageRequest extends Request {
   params: Request['params'] & ImageRequestParams;
 }
 
-interface InstallIntegrationRequest extends Request {
-  params: IntegrationRequestParams;
+interface InstallPackageRequest extends Request {
+  params: PackageRequestParams;
 }
 
-interface DeleteIntegrationRequest extends Request {
-  params: IntegrationRequestParams;
+interface DeletePackageRequest extends Request {
+  params: PackageRequestParams;
 }
 
-type IntegrationRequestParams = PackageRequest['params'] & {
+type PackageRequestParams = PackageRequest['params'] & {
   asset?: AssetType;
 };
 
@@ -79,7 +79,7 @@ export const handleGetImage = async (req: ImageRequest, extra: Extra) => {
   return newResponse;
 };
 
-export async function handleRequestInstall(req: InstallIntegrationRequest, extra: Extra) {
+export async function handleRequestInstall(req: InstallPackageRequest, extra: Extra) {
   const { pkgkey, asset } = req.params;
 
   const savedObjectsClient = getClient(req);
@@ -92,7 +92,7 @@ export async function handleRequestInstall(req: InstallIntegrationRequest, extra
   });
 }
 
-export async function handleRequestDelete(req: DeleteIntegrationRequest, extra: Extra) {
+export async function handleRequestDelete(req: DeletePackageRequest, extra: Extra) {
   const { pkgkey } = req.params;
   const savedObjectsClient = getClient(req);
   const deleted = await removeInstallation({ savedObjectsClient, pkgkey });
