@@ -30,7 +30,7 @@ import { start as data } from '../../../data/public/legacy';
 import { TelemetryOptInProvider } from '../../../telemetry/public/services';
 import { localApplicationService } from '../local_application_service';
 
-export const uiStatsReporter = createUiStatsReporter('Kibana_home');
+export const trackUiMetric = createUiStatsReporter('Kibana_home');
 
 /**
  * Get dependencies relying on the global angular context.
@@ -57,18 +57,17 @@ async function getAngularInjectedDependencies(): Promise<LegacyAngularInjectedDe
   const instance = new HomePlugin();
   instance.setup(npSetup.core, {
     __LEGACY: {
-      uiStatsReporter,
+      trackUiMetric,
       toastNotifications,
       banners,
       kfetch,
       metadata: npStart.core.injectedMetadata.getLegacyMetadata(),
       METRIC_TYPE,
+      localApplicationService,
     },
-    localApplicationService,
   });
   instance.start(npStart.core, {
     data,
-    npData: npStart.plugins.data,
     __LEGACY: {
       angularDependencies: await getAngularInjectedDependencies(),
     },

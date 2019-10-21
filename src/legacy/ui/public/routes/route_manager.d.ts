@@ -27,10 +27,12 @@ interface RouteConfiguration {
   controller?: string | ((...args: any[]) => void);
   redirectTo?: string;
   reloadOnSearch?: boolean;
+  reloadOnUrl?: boolean;
   resolve?: object;
   template?: string;
   k7Breadcrumbs?: (...args: any[]) => ChromeBreadcrumb[];
   requireUICapability?: string;
+  outerAngularWrapperRoute?: boolean;
 }
 
 interface RouteManager {

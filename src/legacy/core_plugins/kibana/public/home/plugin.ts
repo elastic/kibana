@@ -17,11 +17,15 @@
  * under the License.
  */
 
-import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
-import { Plugin as DataPlugin } from 'src/plugins/data/public';
+import { CoreSetup, CoreStart, LegacyNavLink, Plugin, UiSettingsState } from 'kibana/public';
+import { UiStatsMetricType } from '@kbn/analytics';
+import { ToastNotifications } from 'ui/notify/toasts/toast_notifications';
+import { KFetchOptions } from 'ui/kfetch';
+import { KFetchKibanaOptions } from 'ui/kfetch/kfetch';
 
 import { DataStart } from '../../../data/public';
 import { LocalApplicationService } from '../local_application_service';
+import { setServices } from './kibana_services';
 
 export interface LegacyAngularInjectedDependencies {
   featureCatalogueRegistryProvider: any;
@@ -31,7 +35,6 @@ export interface LegacyAngularInjectedDependencies {
 
 export interface HomePluginStartDependencies {
   data: DataStart;
-  npData: ReturnType<DataPlugin['start']>;
   __LEGACY: {
     angularDependencies: LegacyAngularInjectedDependencies;
   };
@@ -39,61 +42,62 @@ export interface HomePluginStartDependencies {
 
 export interface HomePluginSetupDependencies {
   __LEGACY: {
-    uiStatsReporter: any;
-    toastNotifications: any;
+    trackUiMetric: (type: UiStatsMetricType, eventNames: string | string[], count?: number) => void;
+    toastNotifications: ToastNotifications;
     banners: any;
-    kfetch: any;
-    metadata: any;
     METRIC_TYPE: any;
+    kfetch: (options: KFetchOptions, kfetchOptions?: KFetchKibanaOptions) => Promise<any>;
+    metadata: {
+      app: unknown;
+      bundleId: string;
+      nav: LegacyNavLink[];
+      version: string;
+      branch: string;
+      buildNum: number;
+      buildSha: string;
+      basePath: string;
+      serverName: string;
+      devMode: boolean;
+      uiSettings: { defaults: UiSettingsState; user?: UiSettingsState | undefined };
+    };
+    localApplicationService: LocalApplicationService;
   };
-  localApplicationService: LocalApplicationService;
 }
 
 export class HomePlugin implements Plugin {
   private dataStart: DataStart | null = null;
-  private npDataStart: ReturnType<DataPlugin['start']> | null = null;
   private angularDependencies: LegacyAngularInjectedDependencies | null = null;
   private savedObjectsClient: any = null;
 
   setup(
     core: CoreSetup,
-    {
-      __LEGACY: { uiStatsReporter, toastNotifications, banners, kfetch, metadata, METRIC_TYPE },
-      localApplicationService,
-    }: HomePluginSetupDependencies
+    { __LEGACY: { localApplicationService, ...legacyServices } }: HomePluginSetupDependencies
   ) {
     localApplicationService.register({
       id: 'home',
       title: 'Home',
-      mount: async (context, params) => {
+      mount: async ({ core: contextCore }, params) => {
+        setServices({
+          ...legacyServices,
+          getInjected: core.injectedMetadata.getInjectedVar,
+          docLinks: contextCore.docLinks,
+          savedObjectsClient: this.savedObjectsClient!,
+          chrome: contextCore.chrome,
+          uiSettings: core.uiSettings,
+          addBasePath: core.http.basePath.prepend,
+          getBasePath: core.http.basePath.get,
+          indexPatternService: this.dataStart!.indexPatterns.indexPatterns,
+          ...this.angularDependencies!,
+        });
         const { renderApp } = await import('./render_app');
-        return renderApp(
-          context,
-          {
-            ...params,
-            uiStatsReporter,
-            toastNotifications,
-            banners,
-            kfetch,
-            savedObjectsClient: this.savedObjectsClient,
-            metadata,
-            METRIC_TYPE,
-            data: this.dataStart!,
-            npData: this.npDataStart!,
-          },
-          this.angularDependencies!
-        );
+        return renderApp(params.element);
       },
     });
   }
 
-  start(
-    core: CoreStart,
-    { data, npData, __LEGACY: { angularDependencies } }: HomePluginStartDependencies
-  ) {
+  start(core: CoreStart, { data, __LEGACY: { angularDependencies } }: HomePluginStartDependencies) {
     // TODO is this really the right way? I though the app context would give us those
     this.dataStart = data;
-    this.npDataStart = npData;
     this.angularDependencies = angularDependencies;
     this.savedObjectsClient = core.savedObjects.client;
   }

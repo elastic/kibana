@@ -18,71 +18,18 @@
  */
 
 import React from 'react';
-import { DataStart } from 'src/legacy/core_plugins/data/public';
-import { AppMountContext } from 'kibana/public';
-import { Plugin as DataPlugin } from 'src/plugins/data/public';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
-import { LegacyAngularInjectedDependencies } from './plugin';
+// @ts-ignore
+import { HomeApp } from './components/home_app';
+import { getServices } from './kibana_services';
 
-/**
- * These are dependencies of the Graph app besides the base dependencies
- * provided by the application service. Some of those still rely on non-shimmed
- * plugins in LP-world, but if they are migrated only the import path in the plugin
- * itself changes
- */
-export interface HomeDependencies {
-  element: HTMLElement;
-  appBasePath: string;
-  data: DataStart;
-  npData: ReturnType<DataPlugin['start']>;
-  uiStatsReporter: any;
-  toastNotifications: any;
-  banners: any;
-  kfetch: any;
-  metadata: any;
-  savedObjectsClient: any;
-  METRIC_TYPE: any;
-}
-
-export const renderApp = (
-  { core }: AppMountContext,
-  {
-    element,
-    appBasePath,
-    data,
-    npData,
-    uiStatsReporter,
-    toastNotifications,
-    banners,
-    kfetch,
-    metadata,
-    savedObjectsClient,
-  }: HomeDependencies,
-  angularDeps: LegacyAngularInjectedDependencies
-) => {
-  const deps = {
-    getInjected: core.injectedMetadata.getInjectedVar,
-    metadata,
-    docLinks: core.docLinks,
-    savedObjectsClient,
-    chrome: core.chrome,
-    uiSettings: core.uiSettings,
-    addBasePath: core.http.basePath.prepend,
-    getBasePath: core.http.basePath.get,
-    indexPatternService: data.indexPatterns.indexPatterns,
-    toastNotifications,
-    banners,
-    kfetch,
-    ...angularDeps,
-  };
-  setDeps(deps);
-
+export const renderApp = (element: HTMLElement) => {
   const homeTitle = i18n.translate('kbn.home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
-  const directories = angularDeps.featureCatalogueRegistryProvider.inTitleOrder;
-  core.chrome.setBreadcrumbs([{ text: homeTitle }]);
+  const { featureCatalogueRegistryProvider, chrome } = getServices();
+  const directories = featureCatalogueRegistryProvider.inTitleOrder;
+  chrome.setBreadcrumbs([{ text: homeTitle }]);
 
-  const HomeApp = require('./components/home_app').HomeApp;
   render(<HomeApp directories={directories} />, element);
 
   return () => unmountComponentAtNode(element);

@@ -17,7 +17,50 @@
  * under the License.
  */
 
-export interface HomeKibanaServices {}
+import { ToastNotifications } from 'ui/notify/toasts/toast_notifications';
+import {
+  ChromeStart,
+  DocLinksStart,
+  LegacyNavLink,
+  SavedObjectsClientContract,
+  UiSettingsClientContract,
+  UiSettingsState,
+} from 'kibana/public';
+import { KFetchOptions } from 'ui/kfetch';
+import { KFetchKibanaOptions } from 'ui/kfetch/kfetch';
+import { UiStatsMetricType } from '@kbn/analytics';
+
+export interface HomeKibanaServices {
+  indexPatternService: any;
+  featureCatalogueRegistryProvider: any;
+  metadata: {
+    app: unknown;
+    bundleId: string;
+    nav: LegacyNavLink[];
+    version: string;
+    branch: string;
+    buildNum: number;
+    buildSha: string;
+    basePath: string;
+    serverName: string;
+    devMode: boolean;
+    uiSettings: { defaults: UiSettingsState; user?: UiSettingsState | undefined };
+  };
+  getInjected: (name: string, defaultValue?: any) => unknown;
+  chrome: ChromeStart;
+  telemetryOptInProvider: any;
+  uiSettings: UiSettingsClientContract;
+  kfetch: (options: KFetchOptions, kfetchOptions?: KFetchKibanaOptions) => Promise<any>;
+  savedObjectsClient: SavedObjectsClientContract;
+  toastNotifications: ToastNotifications;
+  banners: any;
+  METRIC_TYPE: any;
+  trackUiMetric: (type: UiStatsMetricType, eventNames: string | string[], count?: number) => void;
+  getBasePath: () => string;
+  shouldShowTelemetryOptIn: boolean;
+  docLinks: DocLinksStart;
+  addBasePath: (url: string) => string;
+}
 
 let services: HomeKibanaServices | null = null;
 
@@ -38,64 +81,3 @@ export function getServices() {
   }
   return services;
 }
-/*
-// @ts-ignore
-import { toastNotifications, banners } from 'ui/notify';
-import { kfetch } from 'ui/kfetch';
-
-import { wrapInI18nContext } from 'ui/i18n';
-
-// @ts-ignore
-import { uiModules as modules } from 'ui/modules';
-import routes from 'ui/routes';
-import { npStart } from 'ui/new_platform';
-import { IPrivate } from 'ui/private';
-import { FeatureCatalogueRegistryProvider } from 'ui/registry/feature_catalogue';
-import { createUiStatsReporter, METRIC_TYPE } from '../../../ui_metric/public';
-import { TelemetryOptInProvider } from '../../../telemetry/public/services';
-import { start as data } from '../../../data/public/legacy';
-
-let shouldShowTelemetryOptIn: boolean;
-let telemetryOptInProvider: any;
-let featureCatalogueRegistryProvider: any;
-
-export function getServices() {
-  return {
-    getInjected: npStart.core.injectedMetadata.getInjectedVar,
-    metadata: npStart.core.injectedMetadata.getLegacyMetadata(),
-    docLinks: npStart.core.docLinks,
-
-    uiRoutes: routes,
-    uiModules: modules,
-
-    savedObjectsClient: npStart.core.savedObjects.client,
-    chrome: npStart.core.chrome,
-    uiSettings: npStart.core.uiSettings,
-    addBasePath: npStart.core.http.basePath.prepend,
-    getBasePath: npStart.core.http.basePath.get,
-
-    indexPatternService: data.indexPatterns.indexPatterns,
-    shouldShowTelemetryOptIn,
-    telemetryOptInProvider,
-    featureCatalogueRegistryProvider,
-
-    trackUiMetric: createUiStatsReporter('Kibana_home'),
-    METRIC_TYPE,
-
-    toastNotifications,
-    banners,
-    kfetch,
-    wrapInI18nContext,
-  };
-}
-
-modules.get('kibana').run((Private: IPrivate) => {
-  const telemetryEnabled = npStart.core.injectedMetadata.getInjectedVar('telemetryEnabled');
-  const telemetryBanner = npStart.core.injectedMetadata.getInjectedVar('telemetryBanner');
-
-  telemetryOptInProvider = Private(TelemetryOptInProvider);
-  shouldShowTelemetryOptIn =
-    telemetryEnabled && telemetryBanner && !telemetryOptInProvider.getOptIn();
-  featureCatalogueRegistryProvider = Private(FeatureCatalogueRegistryProvider as any);
-});
-*/

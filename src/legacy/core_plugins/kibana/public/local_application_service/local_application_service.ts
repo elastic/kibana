@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ApplicationSetup, App } from 'kibana/public';
+import { App } from 'kibana/public';
 import { UIRoutes } from 'ui/routes';
 import { IScope } from 'angular';
 import { npStart } from 'ui/new_platform';
@@ -35,33 +35,24 @@ import { htmlIdGenerator } from '@elastic/eui';
  * This service becomes unnecessary once the platform provides a central
  * router that handles switching between applications without page reload.
  */
-export interface LocalApplicationService {
-  register: ApplicationSetup['register'];
-  registerWithAngularRouter: (routeManager: UIRoutes) => void;
-}
+export class LocalApplicationService {
+  private apps: App[] = [];
+  private idGenerator = htmlIdGenerator('kibanaAppLocalApp');
 
-const apps: App[] = [];
-const idGenerator = htmlIdGenerator('kibanaAppLocalApp');
+  register(app: App) {
+    this.apps.push(app);
+  }
 
-export const localApplicationService: LocalApplicationService = {
-  register(app) {
-    apps.push(app);
-  },
   registerWithAngularRouter(angularRouteManager: UIRoutes) {
-    apps.forEach(app => {
-      const wrapperElementId = idGenerator();
-      const routeConfig = {
-        // marker for stuff operating on the route data.
-        // This can be used to not execute some operations because
-        // the route is not actually doing something besides serving
-        // as a wrapper for the actual inner-angular routes
+    this.apps.forEach(app => {
+      const wrapperElementId = this.idGenerator();
+      angularRouteManager.when(`/${app.id}/:tail*?`, {
         outerAngularWrapperRoute: true,
         reloadOnSearch: false,
         reloadOnUrl: false,
         template: `<div style="height:100%" id="${wrapperElementId}"></div>`,
         controller($scope: IScope) {
           const element = document.getElementById(wrapperElementId)!;
-          // controller itself is not allowed to be async, use inner IIFE
           (async () => {
             const onUnmount = await app.mount({ core: npStart.core }, { element, appBasePath: '' });
             $scope.$on('$destroy', () => {
@@ -69,8 +60,9 @@ export const localApplicationService: LocalApplicationService = {
             });
           })();
         },
-      };
-      angularRouteManager.when(`/${app.id}/:tail*?`, routeConfig);
+      });
     });
-  },
-};
+  }
+}
+
+export const localApplicationService = new LocalApplicationService();
