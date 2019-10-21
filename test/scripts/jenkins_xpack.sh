@@ -30,6 +30,9 @@ if [[ -z "$CODE_COVERAGE" ]] ; then
 else
   echo " -> Running jest tests with coverage"
   cd "$XPACK_DIR"
+  # build runtime for canvas
+  echo "NODE_ENV=$NODE_ENV"
+  node ./legacy/plugins/canvas/scripts/shareable_runtime
   checks-reporter-with-killswitch "X-Pack Jest Coverage" node scripts/jest --ci --verbose --coverage
   echo ""
   echo ""
