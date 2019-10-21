@@ -31,15 +31,19 @@ import {
 import { getTutorial } from '../load_tutorials';
 import { replaceTemplateStrings } from './tutorial/replace_template_strings';
 import {
-  telemetryOptInProvider,
-  shouldShowTelemetryOptIn,
-  getInjected,
-  savedObjectsClient,
-  getBasePath,
-  addBasePath,
+  getServices
 } from '../kibana_services';
 
 export function HomeApp({ directories }) {
+  const {
+    telemetryOptInProvider,
+    shouldShowTelemetryOptIn,
+    getInjected,
+    savedObjectsClient,
+    getBasePath,
+    addBasePath,
+  } = getServices();
+
   const isCloudEnabled = getInjected('isCloudEnabled', false);
   const apmUiEnabled = getInjected('apmUiEnabled', true);
   const mlEnabled = getInjected('mlEnabled', false);

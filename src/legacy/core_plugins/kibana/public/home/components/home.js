@@ -39,7 +39,7 @@ import {
 
 import { Welcome } from './welcome';
 import { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
-import { getInjected } from '../kibana_services';
+import { getServices } from '../kibana_services';
 
 const KEY_ENABLE_WELCOME = 'home:welcome:show';
 
@@ -47,7 +47,10 @@ export class Home extends Component {
   constructor(props) {
     super(props);
 
-    const isWelcomeEnabled = !(getInjected('disableWelcomeScreen') || props.localStorage.getItem(KEY_ENABLE_WELCOME) === 'false');
+    const isWelcomeEnabled = !(
+      getServices().getInjected('disableWelcomeScreen') ||
+      props.localStorage.getItem(KEY_ENABLE_WELCOME) === 'false'
+    );
 
     this.state = {
       // If welcome is enabled, we wait for loading to complete

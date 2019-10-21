@@ -20,10 +20,12 @@
 import React from 'react';
 import { AddData } from './add_data';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { getBasePath } from '../kibana_services';
+import { getServices } from '../kibana_services';
 
 jest.mock('../kibana_services', () =>({
-  getBasePath: jest.fn(() => 'path'),
+  getServices: () => ({
+    getBasePath: jest.fn(() => 'path'),
+  }),
 }));
 
 test('render', () => {
@@ -33,7 +35,7 @@ test('render', () => {
     isNewKibanaInstance={false}
   />);
   expect(component).toMatchSnapshot(); // eslint-disable-line
-  expect(getBasePath).toHaveBeenCalledTimes(1);
+  expect(getServices().getBasePath).toHaveBeenCalledTimes(1);
 });
 
 test('mlEnabled', () => {
@@ -43,7 +45,7 @@ test('mlEnabled', () => {
     isNewKibanaInstance={false}
   />);
   expect(component).toMatchSnapshot(); // eslint-disable-line
-  expect(getBasePath).toHaveBeenCalledTimes(1);
+  expect(getServices().getBasePath).toHaveBeenCalledTimes(1);
 });
 
 test('apmUiEnabled', () => {
@@ -53,7 +55,7 @@ test('apmUiEnabled', () => {
     isNewKibanaInstance={false}
   />);
   expect(component).toMatchSnapshot(); // eslint-disable-line
-  expect(getBasePath).toHaveBeenCalledTimes(1);
+  expect(getServices().getBasePath).toHaveBeenCalledTimes(1);
 });
 
 test('isNewKibanaInstance', () => {
@@ -63,5 +65,5 @@ test('isNewKibanaInstance', () => {
     isNewKibanaInstance={true}
   />);
   expect(component).toMatchSnapshot(); // eslint-disable-line
-  expect(getBasePath).toHaveBeenCalledTimes(1);
+  expect(getServices().getBasePath).toHaveBeenCalledTimes(1);
 });

@@ -18,7 +18,8 @@
  */
 
 import { Writer } from 'mustache';
-import { getInjected, metadata, docLinks } from '../../kibana_services';
+import { getServices } from '../../kibana_services';
+
 
 const TEMPLATE_TAGS = ['{', '}'];
 
@@ -33,6 +34,8 @@ mustacheWriter.escapedValue = function escapedValue(token, context) {
 };
 
 export function replaceTemplateStrings(text, params = {}) {
+  const { getInjected, metadata, docLinks } = getServices();
+
   const variables = {
     // '{' and '}' can not be used in template since they are used as template tags.
     // Must use '{curlyOpen}'' and '{curlyClose}'

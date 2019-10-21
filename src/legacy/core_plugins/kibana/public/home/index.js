@@ -17,12 +17,14 @@
  * under the License.
  */
 
-import { chrome, addBasePath, featureCatalogueRegistryProvider, wrapInI18nContext, uiRoutes, uiModules  } from './kibana_services';
+import { getServices  } from './kibana_services';
 import template from './home_ng_wrapper.html';
 import {
   HomeApp
 } from './components/home_app';
 import { i18n } from '@kbn/i18n';
+
+const { wrapInI18nContext, uiRoutes, uiModules  } = getServices();
 
 const app = uiModules.get('apps/home', []);
 app.directive('homeApp', function (reactDirective) {
@@ -35,6 +37,7 @@ function getRoute() {
   return {
     template,
     controller($scope) {
+      const { chrome, addBasePath, featureCatalogueRegistryProvider } = getServices();
       $scope.directories = featureCatalogueRegistryProvider.inTitleOrder;
       $scope.recentlyAccessed = chrome.recentlyAccessed.get().map(item => {
         item.link = addBasePath(item.link);
