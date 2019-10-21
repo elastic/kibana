@@ -9,7 +9,7 @@ import { installBrowser } from './install';
 import { LevelLogger } from '../lib/level_logger';
 import { ServerFacade, CaptureConfig } from '../../types';
 import { PLUGIN_ID, BROWSER_TYPE } from '../../common/constants';
-import { chromium } from './browsers';
+import { chromium } from './index';
 import { HeadlessChromiumDriverFactory } from './chromium/driver_factory';
 
 export async function createBrowserDriverFactory(

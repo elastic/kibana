@@ -7,7 +7,7 @@
 import { PLUGIN_ID } from '../../common/constants';
 import {
   ESQueueInstance,
-  ESQueueWorkerOptions,
+  QueueConfig,
   ExportTypeDefinition,
   ESQueueWorkerExecuteFn,
   ImmediateExecuteFn,
@@ -23,7 +23,7 @@ import { oncePerServer } from './once_per_server';
 
 function createWorkerFn(server: ServerFacade) {
   const config = server.config();
-  const queueConfig: ESQueueWorkerOptions = config.get('xpack.reporting.queue');
+  const queueConfig: QueueConfig = config.get('xpack.reporting.queue');
   const kibanaName: string = config.get('server.name');
   const kibanaId: string = config.get('server.uuid');
   const exportTypesRegistry = server.plugins.reporting.exportTypesRegistry;
@@ -55,8 +55,8 @@ function createWorkerFn(server: ServerFacade) {
     const workerOptions = {
       kibanaName,
       kibanaId,
-      interval: queueConfig.interval,
-      intervalErrorMultiplier: queueConfig.intervalErrorMultiplier,
+      interval: queueConfig.pollInterval,
+      intervalErrorMultiplier: queueConfig.pollIntervalErrorMultiplier,
     };
     const worker = queue.registerWorker(PLUGIN_ID, workerFn, workerOptions);
 

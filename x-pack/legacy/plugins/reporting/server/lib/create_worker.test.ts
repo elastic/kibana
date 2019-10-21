@@ -14,8 +14,8 @@ import { ClientMock } from './esqueue/__tests__/fixtures/legacy_elasticsearch';
 
 const configGetStub = sinon.stub();
 configGetStub.withArgs('xpack.reporting.queue').returns({
-  interval: 3300,
-  intervalErrorMultiplier: 10,
+  pollInterval: 3300,
+  pollIntervalErrorMultiplier: 10,
 });
 configGetStub.withArgs('server.name').returns('test-server-123');
 configGetStub.withArgs('server.uuid').returns('g9ymiujthvy6v8yrh7567g6fwzgzftzfr');
