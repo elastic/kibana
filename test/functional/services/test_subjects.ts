@@ -55,9 +55,12 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
       selector: string,
       existsOptions?: ExistsOptions
     ): Promise<void | never> {
-      if (!(await this.exists(selector, { timeout: TRY_TIME, ...existsOptions }))) {
-        throw new Error(`expected testSubject(${selector}) to exist`);
-      }
+      const options = { timeout: TRY_TIME, ...existsOptions };
+      await retry.tryForTime(options.timeout, async () => {
+        if (!(await this.exists(selector, options))) {
+          throw new Error(`expected testSubject(${selector}) to exist`);
+        }
+      });
     }
 
     public async missingOrFail(
