@@ -498,8 +498,7 @@ export interface DemoSetupDeps {}
 export interface DemoStartDeps {}
 
 export class DemoPlugin implements Plugin<DemoSetup, DemoStart, DemoSetupDeps, DemoStartDeps> {
-export class Plugin {
-  public setup(core: CoreSetup, plugins: PluginsSetup, __LEGACY: LegacySetup) {
+  public setup(core: CoreSetup, plugins: PluginsSetup, __LEGACY: LegacySetup): DemoSetup {
     // We're still using the legacy Elasticsearch and http router here, but we're now accessing
     // these services in the same way a NP plugin would: injected into the setup function. It's
     // also obvious that these dependencies needs to be removed by migrating over to the New 
@@ -666,7 +665,7 @@ With the previous steps resolved, this final step should be easy, but the exact 
 
 Other plugins may want to move subsystems over individually. For instance, you can move routes over to the New Platform in groups rather than all at once. Other examples that could be broken up:
 - Configuration schema ([see example](./MIGRATION_EXAMPLES.md#declaring-config-schema))
-- HTTP route registration ([see example](./MIGRATION_EXAMPLES.md#route-registration))
+- HTTP route registration ([see example](./MIGRATION_EXAMPLES.md#http-routes))
 - Polling mechanisms (eg. job worker)
 
 In general, we recommend moving all at once by ensuring you're not depending on any legacy code before you move over.
