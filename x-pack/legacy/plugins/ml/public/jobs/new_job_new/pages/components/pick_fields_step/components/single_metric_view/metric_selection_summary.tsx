@@ -6,15 +6,12 @@
 
 import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
 import { JobCreatorContext } from '../../../job_creator_context';
-import {
-  SingleMetricJobCreator,
-  isSingleMetricJobCreator,
-} from '../../../../../common/job_creator';
+import { SingleMetricJobCreator } from '../../../../../common/job_creator';
 import { Results, ModelItem, Anomaly } from '../../../../../common/results_loader';
 import { LineChartData } from '../../../../../common/chart_loader';
 import { AnomalyChart, CHART_TYPE } from '../../../charts/anomaly_chart';
 import { getChartSettings } from '../../../charts/common/settings';
-import { mlMessageBarService } from '../../../../../../../components/messagebar/messagebar_service';
+import { mlMessageBarService } from '../../../../../../../components/messagebar';
 
 const DTR_IDX = 0;
 
@@ -22,10 +19,6 @@ export const SingleMetricDetectorsSummary: FC = () => {
   const { jobCreator: jc, chartLoader, resultsLoader, chartInterval } = useContext(
     JobCreatorContext
   );
-
-  if (isSingleMetricJobCreator(jc) === false) {
-    return null;
-  }
   const jobCreator = jc as SingleMetricJobCreator;
 
   const [lineChartsData, setLineChartData] = useState<LineChartData>({});

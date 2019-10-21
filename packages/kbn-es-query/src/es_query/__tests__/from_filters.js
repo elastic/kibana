@@ -55,6 +55,32 @@ describe('build query', function () {
       expect(result.filter).to.eql(expectedESQueries);
     });
 
+    it('should remove disabled filters', function () {
+      const filters = [
+        {
+          match_all: {},
+          meta: { type: 'match_all', negate: true, disabled: true },
+        },
+      ];
+
+      const expectedESQueries = [];
+
+      const result = buildQueryFromFilters(filters);
+
+      expect(result.must_not).to.eql(expectedESQueries);
+    });
+
+    it('should remove falsy filters', function () {
+      const filters = [null, undefined];
+
+      const expectedESQueries = [];
+
+      const result = buildQueryFromFilters(filters);
+
+      expect(result.must_not).to.eql(expectedESQueries);
+      expect(result.must).to.eql(expectedESQueries);
+    });
+
     it('should place negated filters in the must_not clause', function () {
       const filters = [
         {

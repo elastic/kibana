@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { Subscription } from 'rxjs';
 import { Filter } from '@kbn/es-query';
 import { CoreStart } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
@@ -64,8 +65,48 @@ export function createSearchBar({
   // App name should come from the core application service.
   // Until it's available, we'll ask the user to provide it for the pre-wired component.
   return (props: StatetfulSearchBarProps) => {
+    const tfRefreshInterval = timefilter.timefilter.getRefreshInterval();
+    const fmFilters = filterManager.getFilters();
+    const [refreshInterval, setRefreshInterval] = useState(tfRefreshInterval.value);
+    const [refreshPaused, setRefreshPaused] = useState(tfRefreshInterval.pause);
+
+    const [filters, setFilters] = useState(fmFilters);
+
+    // We do not really need to keep track of the time
+    // since this is just for initialization
     const timeRange = timefilter.timefilter.getTime();
-    const refreshInterval = timefilter.timefilter.getRefreshInterval();
+
+    useEffect(() => {
+      let isSubscribed = true;
+      const subscriptions = new Subscription();
+      subscriptions.add(
+        timefilter.timefilter.getRefreshIntervalUpdate$().subscribe({
+          next: () => {
+            if (isSubscribed) {
+              const newRefreshInterval = timefilter.timefilter.getRefreshInterval();
+              setRefreshInterval(newRefreshInterval.value);
+              setRefreshPaused(newRefreshInterval.pause);
+            }
+          },
+        })
+      );
+
+      subscriptions.add(
+        filterManager.getUpdates$().subscribe({
+          next: () => {
+            if (isSubscribed) {
+              const newFilters = filterManager.getFilters();
+              setFilters(newFilters);
+            }
+          },
+        })
+      );
+
+      return () => {
+        isSubscribed = false;
+        subscriptions.unsubscribe();
+      };
+    }, []);
 
     return (
       <KibanaContextProvider
@@ -80,9 +121,9 @@ export function createSearchBar({
           timeHistory={timefilter.history}
           dateRangeFrom={timeRange.from}
           dateRangeTo={timeRange.to}
-          refreshInterval={refreshInterval.value}
-          isRefreshPaused={refreshInterval.pause}
-          filters={filterManager.getFilters()}
+          refreshInterval={refreshInterval}
+          isRefreshPaused={refreshPaused}
+          filters={filters}
           onFiltersUpdated={defaultFiltersUpdated(filterManager)}
           onRefreshChange={defaultOnRefreshChange(timefilter)}
           {...props}

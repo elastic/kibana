@@ -5,7 +5,7 @@
  */
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { ContainerStyle, Overflow, BackgroundRepeat, BackgroundSize } from '../../../types';
-import { getFunctionHelp, getFunctionErrors } from '../../strings';
+import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 // @ts-ignore untyped local
 import { isValidUrl } from '../../../common/lib/url';
 

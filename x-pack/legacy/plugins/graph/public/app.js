@@ -16,6 +16,7 @@ import 'uiExports/fieldFormats';
 import 'uiExports/savedObjectTypes';
 
 import 'ui/autoload/all';
+import 'ui/angular-bootstrap';
 import 'ui/kbn_top_nav';
 import 'ui/directives/saved_object_finder';
 import 'ui/directives/input_focus';
@@ -39,7 +40,6 @@ import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import appTemplate from './angular/templates/index.html';
 import listingTemplate from './angular/templates/listing_ng_wrapper.html';
 import { getReadonlyBadge } from './badge';
-import { FormattedMessage } from '@kbn/i18n/react';
 
 import { GraphApp } from './components/app';
 import { VennDiagram } from './components/venn_diagram';
@@ -82,7 +82,18 @@ app.directive('vennDiagram', function (reactDirective) {
 });
 
 app.directive('graphListing', function (reactDirective) {
-  return reactDirective(Listing);
+  return reactDirective(Listing, [
+    ['coreStart', { watchDepth: 'reference' }],
+    ['createItem', { watchDepth: 'reference' }],
+    ['findItems', { watchDepth: 'reference' }],
+    ['deleteItems', { watchDepth: 'reference' }],
+    ['editItem', { watchDepth: 'reference' }],
+    ['getViewUrl', { watchDepth: 'reference' }],
+    ['listingLimit', { watchDepth: 'reference' }],
+    ['hideWriteControls', { watchDepth: 'reference' }],
+    ['capabilities', { watchDepth: 'reference' }],
+    ['initialFilter', { watchDepth: 'reference' }],
+  ]);
 });
 
 app.directive('graphApp', function (reactDirective) {
@@ -96,9 +107,9 @@ app.directive('graphApp', function (reactDirective) {
     ['initialQuery', { watchDepth: 'reference' }],
     ['confirmWipeWorkspace', { watchDepth: 'reference' }],
     ['coreStart', { watchDepth: 'reference' }],
-    ['pluginDataStart', { watchDepth: 'reference' }],
-    ['store', { watchDepth: 'reference' }],
+    ['noIndexPatterns', { watchDepth: 'reference' }],
     ['reduxStore', { watchDepth: 'reference' }],
+    ['pluginDataStart', { watchDepth: 'reference' }],
   ], { restrict: 'A' });
 });
 
@@ -136,6 +147,7 @@ uiRoutes
       };
       $scope.capabilities = capabilities.get().graph;
       $scope.initialFilter = ($location.search()).filter || '';
+      $scope.coreStart = npStart.core;
       setBreadcrumbs({ chrome });
     }
   })
@@ -189,30 +201,26 @@ app.controller('graphuiPlugin', function (
   checkLicense(kbnBaseUrl);
 
   function handleError(err) {
-    return checkLicense(kbnBaseUrl)
-      .then(() => {
-        const toastTitle = i18n.translate('xpack.graph.errorToastTitle', {
-          defaultMessage: 'Graph Error',
-          description: '"Graph" is a product name and should not be translated.',
-        });
-        if (err instanceof Error) {
-          toastNotifications.addError(err, {
-            title: toastTitle,
-          });
-        } else {
-          toastNotifications.addDanger({
-            title: toastTitle,
-            text: String(err),
-          });
-        }
+    checkLicense(kbnBaseUrl);
+    const toastTitle = i18n.translate('xpack.graph.errorToastTitle', {
+      defaultMessage: 'Graph Error',
+      description: '"Graph" is a product name and should not be translated.',
+    });
+    if (err instanceof Error) {
+      toastNotifications.addError(err, {
+        title: toastTitle,
       });
+    } else {
+      toastNotifications.addDanger({
+        title: toastTitle,
+        text: String(err),
+      });
+    }
   }
 
-  function handleHttpError(error) {
-    return checkLicense(kbnBaseUrl)
-      .then(() => {
-        toastNotifications.addDanger(formatAngularHttpError(error));
-      });
+  async function handleHttpError(error) {
+    checkLicense(kbnBaseUrl);
+    toastNotifications.addDanger(formatAngularHttpError(error));
   }
 
   // Replacement function for graphClientWorkspace's comms so
@@ -344,7 +352,7 @@ app.controller('graphuiPlugin', function (
     }
   };
 
-  function canWipeWorkspace(callback) {
+  function canWipeWorkspace(callback, text, options) {
     if (!hasFieldsSelector(store.getState())) {
       callback();
       return;
@@ -352,15 +360,16 @@ app.controller('graphuiPlugin', function (
     const confirmModalOptions = {
       onConfirm: callback,
       onCancel: (() => {}),
-      confirmButtonText: i18n.translate('xpack.graph.clearWorkspace.confirmButtonLabel', {
-        defaultMessage: 'Continue',
+      confirmButtonText: i18n.translate('xpack.graph.leaveWorkspace.confirmButtonLabel', {
+        defaultMessage: 'Leave anyway',
       }),
-      title: i18n.translate('xpack.graph.clearWorkspace.modalTitle', {
-        defaultMessage: 'Discard changes to workspace?',
+      title: i18n.translate('xpack.graph.leaveWorkspace.modalTitle', {
+        defaultMessage: 'Unsaved changes',
       }),
+      ...options,
     };
-    confirmModal(i18n.translate('xpack.graph.clearWorkspace.confirmText', {
-      defaultMessage: 'Once you discard changes made to a workspace, there is no getting them back.',
+    confirmModal(text || i18n.translate('xpack.graph.leaveWorkspace.confirmText', {
+      defaultMessage: 'If you leave now, you will lose unsaved changes.',
     }), confirmModalOptions);
   }
   $scope.confirmWipeWorkspace = canWipeWorkspace;
@@ -372,7 +381,6 @@ app.controller('graphuiPlugin', function (
       $scope.workspace.getAllIntersections($scope.handleMergeCandidatesCallback, [edge.topSrc, edge.topTarget]);
     }
   };
-
 
   $scope.submit = function (searchTerm) {
     $scope.workspaceInitialized = true;
@@ -577,34 +585,7 @@ app.controller('graphuiPlugin', function (
       payload: $route.current.locals.savedWorkspace,
     });
   } else {
-    const managementUrl = npStart.core.chrome.navLinks.get('kibana:management').url;
-    const url = `${managementUrl}/kibana/index_patterns`;
-
-    if ($route.current.locals.indexPatterns.length === 0) {
-      toastNotifications.addWarning({
-        title: i18n.translate('xpack.graph.noDataSourceNotificationMessageTitle', {
-          defaultMessage: 'No data source',
-        }),
-        text: (
-          <p>
-            <FormattedMessage
-              id="xpack.graph.noDataSourceNotificationMessageText"
-              defaultMessage="Go to {managementIndexPatternsLink} and create an index pattern"
-              values={{
-                managementIndexPatternsLink: (
-                  <a href={url}>
-                    <FormattedMessage
-                      id="xpack.graph.noDataSourceNotificationMessageText.managementIndexPatternLinkText"
-                      defaultMessage="Management &gt; Index Patterns"
-                    />
-                  </a>
-                )
-              }}
-            />
-          </p>
-        ),
-      });
-    }
+    $scope.noIndexPatterns = $route.current.locals.indexPatterns.length === 0;
   }
 });
 
