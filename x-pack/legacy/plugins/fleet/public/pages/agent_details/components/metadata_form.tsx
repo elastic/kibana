@@ -159,7 +159,7 @@ export const MetadataForm: SFC<{ agent: Agent }> = ({ agent }) => {
                 <EuiFormRow hasEmptyLabelSpace>
                   <EuiButton isLoading={form.state.isLoading} type={'submit'}>
                     <FormattedMessage
-                      id="xpack.fleet.metadataForm.submitButton"
+                      id="xpack.fleet.metadataForm.submitButtonText"
                       defaultMessage="Add"
                     />
                   </EuiButton>

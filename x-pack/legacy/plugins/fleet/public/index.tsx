@@ -20,7 +20,7 @@ async function startApp(libs: FrontendLibs) {
     <I18nContext>
       <HashRouter basename="/fleet">
         <LibsContext.Provider value={libs}>
-          <AppRoutes libs={libs} />
+          <AppRoutes />
         </LibsContext.Provider>
       </HashRouter>
     </I18nContext>,

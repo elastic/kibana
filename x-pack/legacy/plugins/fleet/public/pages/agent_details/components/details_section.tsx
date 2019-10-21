@@ -91,7 +91,10 @@ export const AgentDetailSection: SFC<Props> = ({ agent, onClickUnenroll, unenrol
         <EuiFlexItem grow={false}>
           <EuiTitle size="l">
             <h1>
-              <FormattedMessage id="xpack.fleet.agentDetails.title" defaultMessage="Agent Detail" />
+              <FormattedMessage
+                id="xpack.fleet.agentDetails.agentDetailsTitle"
+                defaultMessage="Agent detail"
+              />
             </h1>
           </EuiTitle>
         </EuiFlexItem>
@@ -101,7 +104,10 @@ export const AgentDetailSection: SFC<Props> = ({ agent, onClickUnenroll, unenrol
             isLoading={unenrollment.loading}
             onClick={onClickUnenroll}
           >
-            <FormattedMessage id="xpack.fleet.agentDetails.unenroll" defaultMessage="Unenroll" />
+            <FormattedMessage
+              id="xpack.fleet.agentDetails.unenrollButtonText"
+              defaultMessage="Unenroll"
+            />
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
