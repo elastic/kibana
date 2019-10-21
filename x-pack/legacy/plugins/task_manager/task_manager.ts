@@ -18,7 +18,7 @@ import {
   TaskInstance,
 } from './task';
 import { TaskPoller } from './task_poller';
-import { TaskPool } from './task_pool';
+import { TaskPool, TaskPoolRunResult } from './task_pool';
 import { TaskManagerRunner } from './task_runner';
 import { createTaskStoreUpdateBuffer } from './task_store_buffer';
 import {
@@ -118,7 +118,14 @@ export class TaskManager {
       pollInterval: opts.config.get('xpack.task_manager.poll_interval'),
       work: (): Promise<void> =>
         fillPool(
-          pool.run,
+          async tasks => {
+            switch (await pool.run(tasks)) {
+              case TaskPoolRunResult.RunningAllClaimedTasks:
+                return true;
+              case TaskPoolRunResult.RanOutOfCapacity:
+                return false;
+            }
+          },
           () =>
             claimAvailableTasks(
               this.store.claimAvailableTasks.bind(this.store),

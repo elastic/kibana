@@ -33,7 +33,7 @@ export interface TaskRunner {
   cancel: CancelFunction;
   markTaskAsRunning: () => Promise<boolean>;
   run: () => Promise<RunResult>;
-  toString?: () => string;
+  toString: () => string;
 }
 
 type BufferedUpdatable = Pick<BufferedTaskStore, 'update' | 'remove' | 'maxAttempts'>;

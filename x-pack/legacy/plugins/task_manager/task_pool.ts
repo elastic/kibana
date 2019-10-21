@@ -8,6 +8,7 @@
  * This module contains the logic that ensures we don't run too many
  * tasks at once in a given Kibana instance.
  */
+import { i18n } from '@kbn/i18n';
 import { Logger } from './types';
 import { TaskRunner } from './task_runner';
 
@@ -17,6 +18,18 @@ interface Opts {
   maxWorkers: number;
   logger: Logger;
 }
+
+export enum TaskPoolRunResult {
+  RunningAllClaimedTasks = 'RunningAllClaimedTasks',
+  RanOutOfCapacity = 'RanOutOfCapacity',
+}
+
+const VERSION_CONFLICT_MESSAGE = i18n.translate(
+  'xpack.taskManager.taskPool.runAttempt.versionConflict',
+  {
+    defaultMessage: 'Task has been claimed by another Kibana service',
+  }
+);
 
 /**
  * Runs tasks in batches, taking costs into account.
@@ -67,22 +80,27 @@ export class TaskPool {
   };
 
   public cancelRunningTasks() {
-    this.logger.debug(`Cancelling running tasks.`);
+    this.logger.debug(
+      i18n.translate('xpack.taskManager.taskPool.cancelRunningTasks', {
+        defaultMessage: `Cancelling running tasks.`,
+      })
+    );
     for (const task of this.running) {
       this.cancelTask(task);
     }
   }
 
-  private async attemptToRun(tasks: TaskRunner[]): Promise<boolean> {
-    const [tasksToRun, leftOverTasks] = partitionByCount(tasks, this.availableWorkers);
+  private async attemptToRun(tasks: TaskRunner[]): Promise<TaskPoolRunResult> {
+    const [tasksToRun, leftOverTasks] = partitionListByCount(tasks, this.availableWorkers);
     if (tasksToRun.length) {
       const taskRunResults = await Promise.all(
         tasksToRun.map(task =>
           task
             .markTaskAsRunning()
-            .then(
-              (hasTaskBeenMarkAsRunning: boolean) =>
-                asOk([task, hasTaskBeenMarkAsRunning]) as Ok<[TaskRunner, boolean]>
+            .then((hasTaskBeenMarkAsRunning: boolean) =>
+              hasTaskBeenMarkAsRunning
+                ? (asOk(task) as Ok<TaskRunner>)
+                : (asErr([task, { message: VERSION_CONFLICT_MESSAGE }]) as Err<[TaskRunner, Error]>)
             )
             .catch((ex: Error) => asErr([task, ex]) as Err<[TaskRunner, Error]>)
         )
@@ -90,21 +108,33 @@ export class TaskPool {
 
       taskRunResults.forEach(
         either(
-          ([task, hasTaskBeenMarkAsRunning]) => {
-            if (hasTaskBeenMarkAsRunning) {
-              this.running.add(task);
-              task
-                .run()
-                .catch(err => {
-                  this.logger.warn(`Task ${task} failed in attempt to run: ${err.message}`);
-                })
-                .then(() => this.running.delete(task));
-            } else {
-              this.logger.warn(`Failed to mark Task ${task} as running`);
-            }
+          task => {
+            this.running.add(task);
+            task
+              .run()
+              .catch(err => {
+                this.logger.warn(
+                  i18n.translate('xpack.taskManager.taskPool.runAttempt.genericError', {
+                    defaultMessage: `Task {task} failed in attempt to run: {message}`,
+                    values: {
+                      message: err.message,
+                      task: task.toString(),
+                    },
+                  })
+                );
+              })
+              .then(() => this.running.delete(task));
           },
-          ([task, ex]) => {
-            this.logger.error(`Failed to mark Task ${task} as running: ${ex.message}`);
+          ([task, err]) => {
+            this.logger.error(
+              i18n.translate('xpack.taskManager.taskPool.markAsRunning.genericError', {
+                defaultMessage: `Failed to mark Task {task} as running: {message}`,
+                values: {
+                  message: err.message,
+                  task: task.toString(),
+                },
+              })
+            );
           }
         )
       );
@@ -114,15 +144,22 @@ export class TaskPool {
       if (this.availableWorkers) {
         return this.attemptToRun(tasks);
       }
-      return false;
+      return TaskPoolRunResult.RanOutOfCapacity;
     }
-    return true;
+    return TaskPoolRunResult.RunningAllClaimedTasks;
   }
 
   private cancelExpiredTasks() {
     for (const task of this.running) {
       if (task.isExpired) {
-        this.logger.debug(`Cancelling expired task ${task}.`);
+        this.logger.debug(
+          i18n.translate('xpack.taskManager.taskPool.cancelExpiredTasks', {
+            defaultMessage: `Cancelling expired task ${task}.`,
+            values: {
+              task: task.toString(),
+            },
+          })
+        );
         this.cancelTask(task);
       }
     }
@@ -130,16 +167,31 @@ export class TaskPool {
 
   private async cancelTask(task: TaskRunner) {
     try {
-      this.logger.debug(`Cancelling task ${task}.`);
+      this.logger.debug(
+        i18n.translate('xpack.taskManager.taskPool.cancelTask', {
+          defaultMessage: `Cancelling task ${task}.`,
+          values: {
+            task: task.toString(),
+          },
+        })
+      );
       this.running.delete(task);
       await task.cancel();
     } catch (err) {
-      this.logger.error(`Failed to cancel task ${task}: ${err}`);
+      this.logger.error(
+        i18n.translate('xpack.taskManager.taskPool.cancelTaskFailure', {
+          defaultMessage: `Failed to cancel task ${task}: ${err}`,
+          values: {
+            err,
+            task: task.toString(),
+          },
+        })
+      );
     }
   }
 }
 
-function partitionByCount<T>(list: T[], count: number): [T[], T[]] {
+function partitionListByCount<T>(list: T[], count: number): [T[], T[]] {
   const listInCount = list.splice(0, count);
   return [listInCount, list];
 }
