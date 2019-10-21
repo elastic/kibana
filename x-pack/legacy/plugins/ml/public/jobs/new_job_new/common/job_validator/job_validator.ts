@@ -6,7 +6,7 @@
 
 import { ReactElement } from 'react';
 import { basicJobValidation, basicDatafeedValidation } from '../../../../../common/util/job_utils';
-import { newJobLimits } from '../../../new_job/utils/new_job_defaults';
+import { newJobLimits } from '../../../new_job_new/utils/new_job_defaults';
 import { JobCreatorType } from '../job_creator';
 import { populateValidationMessages, checkForExistingJobAndGroupIds } from './util';
 import { ExistingJobsAndGroups } from '../../../../services/job_service';
@@ -42,6 +42,7 @@ export class JobValidator {
   private _jobCreator: JobCreatorType;
   private _validationSummary: ValidationSummary;
   private _lastJobConfig: string;
+  private _lastDatafeedConfig: string;
   private _validateTimeout: ReturnType<typeof setTimeout> | null = null;
   private _existingJobsAndGroups: ExistingJobsAndGroups;
   private _basicValidations: BasicValidations = {
@@ -60,6 +61,7 @@ export class JobValidator {
   constructor(jobCreator: JobCreatorType, existingJobsAndGroups: ExistingJobsAndGroups) {
     this._jobCreator = jobCreator;
     this._lastJobConfig = this._jobCreator.formattedJobJson;
+    this._lastDatafeedConfig = this._jobCreator.formattedDatafeedJson;
     this._validationSummary = {
       basic: false,
       advanced: false,
@@ -70,13 +72,19 @@ export class JobValidator {
   public validate(callback: () => void, forceValidate: boolean = false) {
     this._validating = true;
     const formattedJobConfig = this._jobCreator.formattedJobJson;
+    const formattedDatafeedConfig = this._jobCreator.formattedDatafeedJson;
     // only validate if the config has changed
-    if (forceValidate || formattedJobConfig !== this._lastJobConfig) {
+    if (
+      forceValidate ||
+      formattedJobConfig !== this._lastJobConfig ||
+      formattedDatafeedConfig !== this._lastDatafeedConfig
+    ) {
       if (this._validateTimeout !== null) {
         // clear any previous on going validation timeouts
         clearTimeout(this._validateTimeout);
       }
       this._lastJobConfig = formattedJobConfig;
+      this._lastDatafeedConfig = formattedDatafeedConfig;
       this._validateTimeout = setTimeout(() => {
         this._runBasicValidation();
         this._validating = false;
@@ -107,10 +115,15 @@ export class JobValidator {
 
     // run standard basic validation
     const basicJobResults = basicJobValidation(jobConfig, undefined, limits);
-    populateValidationMessages(basicJobResults, this._basicValidations, jobConfig);
+    populateValidationMessages(basicJobResults, this._basicValidations, jobConfig, datafeedConfig);
 
     const basicDatafeedResults = basicDatafeedValidation(datafeedConfig);
-    populateValidationMessages(basicDatafeedResults, this._basicValidations, jobConfig);
+    populateValidationMessages(
+      basicDatafeedResults,
+      this._basicValidations,
+      jobConfig,
+      datafeedConfig
+    );
 
     // run addition job and group id validation
     const idResults = checkForExistingJobAndGroupIds(
@@ -118,7 +131,7 @@ export class JobValidator {
       this._jobCreator.groups,
       this._existingJobsAndGroups
     );
-    populateValidationMessages(idResults, this._basicValidations, jobConfig);
+    populateValidationMessages(idResults, this._basicValidations, jobConfig, datafeedConfig);
 
     this._validationSummary.basic = this._isOverallBasicValid();
   }

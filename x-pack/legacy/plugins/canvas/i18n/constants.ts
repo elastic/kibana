@@ -26,6 +26,7 @@ export const KIBANA = 'Kibana';
 export const LUCENE = 'Lucene';
 export const MARKDOWN = 'Markdown';
 export const MOMENTJS = 'MomentJS';
+export const MOMENTJS_TIMEZONE_URL = 'https://momentjs.com/timezone/';
 export const NUMERALJS = 'NumeralJS';
 export const PDF = 'PDF';
 export const POST = 'POST';

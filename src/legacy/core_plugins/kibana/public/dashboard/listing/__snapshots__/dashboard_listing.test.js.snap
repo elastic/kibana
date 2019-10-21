@@ -88,17 +88,15 @@ exports[`after fetch initialFilter 1`] = `
                 id="kbn.dashboard.listing.createNewDashboard.newToKibanaDescription"
                 values={
                   Object {
-                    "sampleDataInstallLink": <EuiLink
-                      color="primary"
+                    "sampleDataInstallLink": <ForwardRef
                       href="#/home/tutorial_directory/sampleData"
-                      type="button"
                     >
                       <FormattedMessage
                         defaultMessage="Install some sample data"
                         id="kbn.dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
                         values={Object {}}
                       />
-                    </EuiLink>,
+                    </ForwardRef>,
                   }
                 }
               />
@@ -180,17 +178,15 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
                 id="kbn.dashboard.listing.createNewDashboard.newToKibanaDescription"
                 values={
                   Object {
-                    "sampleDataInstallLink": <EuiLink
-                      color="primary"
+                    "sampleDataInstallLink": <ForwardRef
                       href="#/home/tutorial_directory/sampleData"
-                      type="button"
                     >
                       <FormattedMessage
                         defaultMessage="Install some sample data"
                         id="kbn.dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
                         values={Object {}}
                       />
-                    </EuiLink>,
+                    </ForwardRef>,
                   }
                 }
               />
@@ -272,17 +268,15 @@ exports[`after fetch renders table rows 1`] = `
                 id="kbn.dashboard.listing.createNewDashboard.newToKibanaDescription"
                 values={
                   Object {
-                    "sampleDataInstallLink": <EuiLink
-                      color="primary"
+                    "sampleDataInstallLink": <ForwardRef
                       href="#/home/tutorial_directory/sampleData"
-                      type="button"
                     >
                       <FormattedMessage
                         defaultMessage="Install some sample data"
                         id="kbn.dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
                         values={Object {}}
                       />
-                    </EuiLink>,
+                    </ForwardRef>,
                   }
                 }
               />
@@ -364,17 +358,15 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
                 id="kbn.dashboard.listing.createNewDashboard.newToKibanaDescription"
                 values={
                   Object {
-                    "sampleDataInstallLink": <EuiLink
-                      color="primary"
+                    "sampleDataInstallLink": <ForwardRef
                       href="#/home/tutorial_directory/sampleData"
-                      type="button"
                     >
                       <FormattedMessage
                         defaultMessage="Install some sample data"
                         id="kbn.dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
                         values={Object {}}
                       />
-                    </EuiLink>,
+                    </ForwardRef>,
                   }
                 }
               />
@@ -456,17 +448,15 @@ exports[`renders empty page in before initial fetch to avoid flickering 1`] = `
                 id="kbn.dashboard.listing.createNewDashboard.newToKibanaDescription"
                 values={
                   Object {
-                    "sampleDataInstallLink": <EuiLink
-                      color="primary"
+                    "sampleDataInstallLink": <ForwardRef
                       href="#/home/tutorial_directory/sampleData"
-                      type="button"
                     >
                       <FormattedMessage
                         defaultMessage="Install some sample data"
                         id="kbn.dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
                         values={Object {}}
                       />
-                    </EuiLink>,
+                    </ForwardRef>,
                   }
                 }
               />

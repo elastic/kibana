@@ -42,7 +42,7 @@ export function loadSampleData(addSavedObjectsToSampleDataset, addAppLinksToSamp
 
   addSavedObjectsToSampleDataset('logs', updateCanvasWorkpadTimestamps(webLogsSavedObjects));
   addAppLinksToSampleDataset('logs', {
-    path: '/app/canvas#/workpad/workpad-5563cc40-5760-4afe-bf33-9da72fac53b7',
+    path: '/app/canvas#/workpad/workpad-ad72a4e9-b422-480c-be6d-a64a0b79541d',
     icon: 'canvasApp',
     label,
   });
