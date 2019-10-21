@@ -15,7 +15,7 @@ export const sharedSchema = gql`
     "The beginning of the timerange"
     from: Float!
     "The default browser set time zone"
-    time_zone: String
+    timezone: String
   }
 
   type CursorType {
