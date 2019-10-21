@@ -159,6 +159,7 @@ export function buildQueryFromFilters(
   allowLeadingWildcards,
   queryStringOptions,
   dateFormatTZ) {
+  filters = filters.filter(filter => filter && !_.get(filter, ['meta', 'disabled']));
   return {
     must: [],
     filter: filters
