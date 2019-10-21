@@ -9,13 +9,15 @@ import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
 
 import { ShardDetailsTreeLeaf } from './shard_details_tree_leaf';
-import { Operation } from '../../../types';
+import { Index, Operation, Shard } from '../../../types';
 
 export interface Props {
   data: Operation;
+  index: Index;
+  shard: Shard;
 }
 
-export const ShardDetailTree = ({ data }: Props) => {
+export const ShardDetailTree = ({ data, index, shard }: Props) => {
   // Recursively render the tree structure
   const renderOperations = (operation: Operation): JSX.Element => {
     const parent = operation.parent;
@@ -23,6 +25,8 @@ export const ShardDetailTree = ({ data }: Props) => {
     return (
       <>
         <ShardDetailsTreeLeaf
+          shard={shard}
+          index={index}
           parentVisible={parentVisible || operation.depth === 0}
           operation={operation}
         />

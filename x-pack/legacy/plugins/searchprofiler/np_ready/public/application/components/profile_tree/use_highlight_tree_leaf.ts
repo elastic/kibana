@@ -6,24 +6,23 @@
 import { useEffect, useState } from 'react';
 import uuid from 'uuid';
 
-import { useHighlightContext } from './highlight_context';
+import { useHighlightContext, OnHighlightChangeArgs } from './highlight_context';
 
 export const useHighlightTreeLeaf = () => {
   const [id, setId] = useState<string>('');
-  const { store, setStore } = useHighlightContext();
+  const { selectedRow, setStore } = useHighlightContext();
 
-  const highlight = () => {
-    setStore(id, true);
+  const highlight = (value: OnHighlightChangeArgs) => {
+    setStore({ id, ...value });
   };
 
   const isHighlighted = () => {
-    return store[id];
+    return selectedRow === id;
   };
 
   useEffect(() => {
     const newId = uuid.v4();
     setId(newId);
-    setStore(newId, false);
   }, []);
 
   return {

@@ -5,9 +5,9 @@
  */
 
 import { registerTestBed } from '../../../../../../../../test_utils';
-import { HighlightDetails, Props } from '.';
+import { HighlightDetailsFlyout, Props } from '.';
 
-describe('Highlight Details Component', () => {
+describe('Highlight Details Flyout', () => {
   it('renders', async () => {
     const props: Props = {
       breakdown: [
@@ -42,7 +42,7 @@ describe('Highlight Details Component', () => {
       time: 100,
     };
 
-    const init = registerTestBed(HighlightDetails);
+    const init = registerTestBed(HighlightDetailsFlyout);
     await init(props);
   });
 });

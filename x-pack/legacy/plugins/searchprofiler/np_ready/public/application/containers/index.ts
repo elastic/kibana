@@ -4,4 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { HighlightDetails, Props } from './highlight_details';
+export { Main } from './main';
+export { ProfileQueryEditor } from './profile_query_editor';

@@ -8,39 +8,26 @@ import _ from 'lodash';
 import React from 'react';
 
 import { EuiTabs, EuiTab } from '@elastic/eui';
-
 import { FormattedMessage } from '@kbn/i18n/target/types/react';
 
-function hasSearch(profileResponse: any[]) {
-  const aggs = _.get(profileResponse, '[0].searches', []);
-  return aggs.length > 0;
-}
-
-function hasAggregations(profileResponse: any[]) {
-  const aggs = _.get(profileResponse, '[0].aggregations', []);
-  return aggs.length > 0;
-}
-
-function handleClick(activateTab: (tabName: string) => void, tabName: string) {
-  activateTab(tabName);
-}
+import { Targets } from '../types';
 
 interface Props {
-  activeTab: {
-    search: boolean;
-    aggregations: any;
+  activeTab: Targets | null;
+  activateTab: (target: Targets) => void;
+  has: {
+    searches: boolean;
+    aggregations: boolean;
   };
-  activateTab: (tabName: string) => void;
-  profileResponse: any[];
 }
 
-export const SearchProfilerTabs = (props: Props) => {
+export const SearchProfilerTabs = ({ activeTab, activateTab, has }: Props) => {
   return (
     <EuiTabs>
       <EuiTab
-        isSelected={props.activeTab.search}
-        disabled={!hasSearch(props.profileResponse)}
-        onClick={() => handleClick(props.activateTab, 'search')}
+        isSelected={activeTab === 'searches'}
+        disabled={!has.searches}
+        onClick={() => activateTab('searches')}
       >
         <FormattedMessage
           id="xpack.searchProfiler.queryProfileTabTitle"
@@ -48,9 +35,9 @@ export const SearchProfilerTabs = (props: Props) => {
         />
       </EuiTab>
       <EuiTab
-        isSelected={props.activeTab.aggregations}
-        disabled={!hasAggregations(props.profileResponse)}
-        onClick={() => handleClick(props.activateTab, 'aggregations')}
+        isSelected={activeTab === 'aggregations'}
+        disabled={!has.aggregations}
+        onClick={() => activateTab('aggregations')}
       >
         <FormattedMessage
           id="xpack.searchProfiler.aggregationProfileTabTitle"

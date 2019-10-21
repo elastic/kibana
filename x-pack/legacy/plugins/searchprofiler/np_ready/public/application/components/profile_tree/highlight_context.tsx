@@ -5,21 +5,37 @@
  */
 
 import React, { useContext, createContext, useState } from 'react';
-
-type Store = Record<string, boolean>;
+import { Operation, Shard } from '../../types';
 
 const HighlightContext = createContext<{
-  store: Store;
-  setStore: (id: string, value: boolean) => void;
+  selectedRow: string;
+  setStore: (args: OnHighlightChangeArgs & { id: string }) => void;
 }>(null as any);
 
-export const HighlightContextProvider = ({ children }: { children: any }) => {
-  const [store, setStore] = useState<Store>(Object.create(null));
+export interface OnHighlightChangeArgs {
+  indexName: string;
+  shard: Shard;
+  operation: Operation;
+}
+
+type OnHighlightChangeHandler = (data: OnHighlightChangeArgs) => void;
+
+export const HighlightContextProvider = ({
+  children,
+  onHighlight,
+}: {
+  children: any;
+  onHighlight: OnHighlightChangeHandler;
+}) => {
+  const [selectedRow, setSelectedRow] = useState<string>('');
   return (
     <HighlightContext.Provider
       value={{
-        store,
-        setStore: (id: string, value: boolean) => setStore({ ...store, [id]: value }),
+        selectedRow,
+        setStore: ({ id, ...onHighlightChangeArgs }: OnHighlightChangeArgs & { id: string }) => {
+          onHighlight(onHighlightChangeArgs);
+          setSelectedRow(id);
+        },
       }}
     >
       {children}

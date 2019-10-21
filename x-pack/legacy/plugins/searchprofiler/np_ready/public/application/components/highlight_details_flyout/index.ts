@@ -4,9 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginInitializerContext } from '../../../../../../src/core/public';
-import { SearchProfilerUIPlugin } from './plugin';
-
-export function plugin(ctx: PluginInitializerContext) {
-  return new SearchProfilerUIPlugin(ctx);
-}
+export { HighlightDetailsFlyout, Props } from './highlight_details_flyout';

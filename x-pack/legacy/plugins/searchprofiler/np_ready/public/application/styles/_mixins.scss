@@ -1,0 +1,36 @@
+@mixin prfDevToolProgress($color: tintOrShade($euiColorPrimary, 60%, 60%)) {
+  border: none;
+  display: block;
+  background-image:
+    linear-gradient(
+      to left,
+      $color 0%,
+      $color var(--prfDevToolProgressPercentage, auto),
+      $euiColorLightestShade var(--prfDevToolProgressPercentage, auto),
+      $euiColorLightestShade 100%
+    );
+
+  .prfDevTool__progress--percent-ie {
+    display: none;
+  }
+
+  @include internetExplorerOnly {
+    position: relative;
+    overflow: hidden;
+
+    .prfDevTool__progress--percent-ie {
+      display: block;
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      background: $color;
+      z-index: 1;
+    }
+
+    .prfDevTool__progressText {
+      position: relative;
+      z-index: 2;
+    }
+  }
+}

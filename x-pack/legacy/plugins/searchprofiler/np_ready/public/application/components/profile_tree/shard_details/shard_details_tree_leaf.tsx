@@ -11,10 +11,12 @@ import { i18n } from '@kbn/i18n';
 import { useHighlightTreeLeaf } from '../use_highlight_tree_leaf';
 import { msToPretty } from '../../../utils';
 
-import { Operation } from '../../../types';
+import { Index, Operation, Shard } from '../../../types';
 
 export interface Props {
   parentVisible: boolean;
+  index: Index;
+  shard: Shard;
   operation: Operation;
 }
 
@@ -23,7 +25,7 @@ const TAB_WIDTH_PX = 32;
 const limitString = (string: string, limit: number) =>
   `${string.slice(0, limit)}${string.length > limit ? '...' : ''}`;
 
-export const ShardDetailsTreeLeaf = ({ parentVisible, operation }: Props) => {
+export const ShardDetailsTreeLeaf = ({ parentVisible, operation, index, shard }: Props) => {
   if (!parentVisible) {
     return null;
   }
@@ -36,33 +38,27 @@ export const ShardDetailsTreeLeaf = ({ parentVisible, operation }: Props) => {
       <div className="prfDevTool__cell prfDevTool__description">
         <EuiLink
           className="prfDevTool__shardDetails"
-          disabled={!operation.hasChildren}
+          disabled={!op.hasChildren}
           onClick={() => setVisible(!visible)}
         >
-          {operation.hasChildren ? (
-            <EuiIcon type={operation.visible ? 'arrowDown' : 'arrowRight'} />
+          {op.hasChildren ? (
+            <EuiIcon type={op.visible ? 'arrowDown' : 'arrowRight'} />
           ) : (
             // Use dot icon for alignment if arrow isn't there
             <EuiIcon type={'dot'} />
           )}
 
-          {operation.query_type}
+          {op.query_type}
         </EuiLink>
       </div>
       <div className="prfDevTool__cell prfDevTool__time">
-        <EuiBadge
-          className="prfDevTool__badge"
-          style={{ backgroundColor: operation.absoluteColor }}
-        >
-          {msToPretty(operation.selfTime!, 1)}
+        <EuiBadge className="prfDevTool__badge" style={{ backgroundColor: op.absoluteColor }}>
+          {msToPretty(op.selfTime!, 1)}
         </EuiBadge>
       </div>
       <div className="prfDevTool__cell prfDevTool__totalTime">
-        <EuiBadge
-          className="prfDevTool__badge"
-          style={{ backgroundColor: operation.absoluteColor }}
-        >
-          {msToPretty(operation.time!, 1)}
+        <EuiBadge className="prfDevTool__badge" style={{ backgroundColor: op.absoluteColor }}>
+          {msToPretty(op.time!, 1)}
         </EuiBadge>
       </div>
     </div>
@@ -71,7 +67,7 @@ export const ShardDetailsTreeLeaf = ({ parentVisible, operation }: Props) => {
   const renderLuceneRow = (op: Operation) => (
     <div className="prfDevTool__tvRow">
       <span className="prfDevTool__detail">
-        <EuiCodeBlock>{limitString(operation.lucene || '', 120)}</EuiCodeBlock>
+        <EuiCodeBlock>{limitString(op.lucene || '', 120)}</EuiCodeBlock>
       </span>
     </div>
   );
@@ -84,7 +80,10 @@ export const ShardDetailsTreeLeaf = ({ parentVisible, operation }: Props) => {
       >
         {renderTimeRow(operation)}
         {renderLuceneRow(operation)}
-        <EuiLink type="button" onClick={() => highlight()}>
+        <EuiLink
+          type="button"
+          onClick={() => highlight({ indexName: index.name, operation, shard })}
+        >
           {i18n.translate('xpack.searchProfiler.profileTree.body.viewDetailsLabel', {
             defaultMessage: 'View Details',
           })}
@@ -92,7 +91,12 @@ export const ShardDetailsTreeLeaf = ({ parentVisible, operation }: Props) => {
       </div>
       {operation.hasChildren &&
         operation.children.flatMap(childOp => (
-          <ShardDetailsTreeLeaf parentVisible={visible} operation={childOp} />
+          <ShardDetailsTreeLeaf
+            parentVisible={visible}
+            operation={childOp}
+            index={index}
+            shard={shard}
+          />
         ))}
     </>
   );

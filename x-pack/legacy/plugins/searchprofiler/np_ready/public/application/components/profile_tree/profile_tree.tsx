@@ -11,22 +11,23 @@ import { IndexDetails } from './index_details';
 import { ShardDetails } from './shard_details';
 import { initDataFor } from './init_data';
 import { Targets, ShardSerialized } from '../../types';
-import { HighlightContextProvider } from './highlight_context';
+import { HighlightContextProvider, OnHighlightChangeArgs } from './highlight_context';
 
 export interface Props {
   target: Targets;
-  data: ShardSerialized[];
+  data: ShardSerialized[] | null;
+  onHighlight: (args: OnHighlightChangeArgs) => void;
 }
 
-export const ProfileTree = ({ data, target }: Props) => {
-  if (data.length === 0) {
+export const ProfileTree = ({ data, target, onHighlight }: Props) => {
+  if (!data || data.length === 0) {
     return null;
   }
 
   const sortedIndices = initDataFor(target)(data);
 
   return (
-    <HighlightContextProvider>
+    <HighlightContextProvider onHighlight={onHighlight}>
       {sortedIndices.map(index => (
         <EuiFlexGroup key={index.name} direction="column">
           <EuiFlexItem>

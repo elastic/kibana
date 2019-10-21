@@ -38,7 +38,9 @@ export const ShardDetails = ({ index, shard, operations }: Props) => {
           <EuiIcon type={shardVisibility ? 'arrowDown' : 'arrowRight'} />[{shard.id[0]}][
           {shard.id[2]}]
         </EuiLink>
-        {shardVisibility ? operations.map(data => <ShardDetailTree data={data} />) : null}
+        {shardVisibility
+          ? operations.map(data => <ShardDetailTree index={index} shard={shard} data={data} />)
+          : null}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
