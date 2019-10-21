@@ -71,6 +71,7 @@ export const createProxyRoute = ({
       parse: false,
     },
     validate: {
+      payload: null,
       query: Joi.object()
         .keys({
           method: Joi.string()

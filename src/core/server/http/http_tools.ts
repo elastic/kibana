@@ -21,8 +21,11 @@ import { readFileSync } from 'fs';
 import { Lifecycle, Request, ResponseToolkit, Server, ServerOptions, Util } from 'hapi';
 import Hoek from 'hoek';
 import { ServerOptions as TLSOptions } from 'https';
-import { ValidationError } from 'joi';
+import Joi, { ValidationError } from 'joi';
 import { HttpConfig } from './http_config';
+import { extendJoiForPrototypePollution } from './prototype_pollution';
+
+const customJoi = extendJoiForPrototypePollution(Joi);
 
 /**
  * Converts Kibana `HttpConfig` into `ServerOptions` that are accepted by the Hapi server.
@@ -45,6 +48,13 @@ export function getServerOptions(config: HttpConfig, { configureTLS = true } = {
         options: {
           abortEarly: false,
         },
+        payload: customJoi.alternatives().try(
+          customJoi
+            .object({})
+            .unknown()
+            .preventPrototypePollution(),
+          customJoi.array()
+        ),
       },
     },
     state: {
