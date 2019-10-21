@@ -4,7 +4,7 @@
   "index": ["auditbeat-*", "filebeat-*", "packetbeat-*", "winlogbeat-*"],
   "interval": "5m",
   "name": "Detect Root/Admin Users",
-  "severity": 1,
+  "severity": "high",
   "type": "kql",
   "from": "now-16y",
   "to": "now-15y",
