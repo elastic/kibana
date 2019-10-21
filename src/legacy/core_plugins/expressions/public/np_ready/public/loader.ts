@@ -35,7 +35,7 @@ export class ExpressionLoader {
   private dataHandler!: ExpressionDataHandler;
   private renderHandler: ExpressionRenderHandler;
   private dataSubject: Subject<Data>;
-  private loadingSubject: Subject<any>;
+  private loadingSubject: Subject<void>;
   private data: Data;
   private params: IExpressionLoaderParams;
 
