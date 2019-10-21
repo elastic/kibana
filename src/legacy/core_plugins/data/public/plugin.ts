@@ -41,12 +41,12 @@ import { APPLY_FILTER_TRIGGER } from '../../../../plugins/embeddable/public';
  * @internal
  */
 export interface DataPluginSetupDependencies {
-  uiActions: IUiActionsSetup;
   __LEGACY: LegacyDependenciesPluginSetup;
 }
 
 export interface DataPluginStartDependencies {
   data: DataPublicPluginStart;
+  uiActions: IUiActionsSetup;
   __LEGACY: LegacyDependenciesPluginStart;
 }
 
@@ -101,7 +101,7 @@ export class DataPlugin
 
   private setupApi!: DataSetup;
 
-  public setup(core: CoreSetup, { uiActions, __LEGACY }: DataPluginSetupDependencies): DataSetup {
+  public setup(core: CoreSetup, { __LEGACY }: DataPluginSetupDependencies): DataSetup {
     const { uiSettings } = core;
 
     const timefilterService = this.timefilter.setup({
@@ -118,20 +118,13 @@ export class DataPlugin
       filter: filterService,
     };
 
-    uiActions.registerAction(
-      createFilterAction(
-        this.setupApi.filter.filterManager,
-        this.setupApi.timefilter.timefilter,
-        this.setupApi.indexPatterns
-      )
-    );
-
-    uiActions.attachAction(APPLY_FILTER_TRIGGER, GLOBAL_APPLY_FILTER_ACTION);
-
     return this.setupApi;
   }
 
-  public start(core: CoreStart, { __LEGACY, data }: DataPluginStartDependencies): DataStart {
+  public start(
+    core: CoreStart,
+    { __LEGACY, data, uiActions }: DataPluginStartDependencies
+  ): DataStart {
     const { uiSettings, http, notifications, savedObjects } = core;
 
     const indexPatternsService = this.indexPatterns.start({
@@ -148,6 +141,16 @@ export class DataPlugin
       timefilter: this.setupApi.timefilter,
       filterManager: this.setupApi.filter.filterManager,
     });
+
+    uiActions.registerAction(
+      createFilterAction(
+        this.setupApi.filter.filterManager,
+        this.setupApi.timefilter.timefilter,
+        indexPatternsService
+      )
+    );
+
+    uiActions.attachAction(APPLY_FILTER_TRIGGER, GLOBAL_APPLY_FILTER_ACTION);
 
     return {
       ...this.setupApi!,

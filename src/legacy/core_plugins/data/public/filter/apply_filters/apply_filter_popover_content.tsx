@@ -35,6 +35,7 @@ import { IndexPattern } from '../../index_patterns';
 import { getFilterDisplayText } from '../filter_bar/filter_editor/lib/get_filter_display_text';
 import { mapAndFlattenFilters } from '../filter_manager/lib/map_and_flatten_filters';
 import { getDisplayValueFromFilter } from '../filter_bar/filter_editor/lib/get_display_value';
+
 interface Props {
   filters: Filter[];
   indexPatterns: IndexPattern[];
@@ -103,7 +104,7 @@ export class ApplyFiltersPopoverContent extends Component<Props, State> {
               defaultMessage="Cancel"
             />
           </EuiButtonEmpty>
-          <EuiButton onClick={this.onSubmit} fill>
+          <EuiButton onClick={this.onSubmit} data-test-subj="applyFiltersPopoverButton" fill>
             <FormattedMessage
               id="data.filter.applyFiltersPopup.saveButtonLabel"
               defaultMessage="Apply"
