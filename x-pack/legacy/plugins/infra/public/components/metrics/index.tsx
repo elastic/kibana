@@ -10,15 +10,18 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
 import { InfraMetricData } from '../../graphql/types';
-import { InfraMetricLayout, InfraMetricLayoutSection } from '../../pages/metrics/layouts/types';
 import { NoData } from '../empty_states';
 import { InfraLoadingPanel } from '../loading';
 import { Section } from './section';
 import { MetricsTimeInput } from '../../containers/metrics/with_metrics_time';
+import {
+  InventoryDetailLayout,
+  InventoryDetailSection,
+} from '../../../common/inventory_models/types';
 
 interface Props {
   metrics: InfraMetricData[];
-  layouts: InfraMetricLayout[];
+  layouts: InventoryDetailLayout[];
   loading: boolean;
   refetch: () => void;
   nodeId: string;
@@ -74,7 +77,7 @@ export const Metrics = class extends React.PureComponent<Props, State> {
     this.props.refetch();
   };
 
-  private renderLayout = (layout: InfraMetricLayout) => {
+  private renderLayout = (layout: InventoryDetailLayout) => {
     return (
       <React.Fragment key={layout.id}>
         <EuiPageContentBody>
@@ -95,7 +98,7 @@ export const Metrics = class extends React.PureComponent<Props, State> {
     );
   };
 
-  private renderSection = (layout: InfraMetricLayout) => (section: InfraMetricLayoutSection) => {
+  private renderSection = (layout: InventoryDetailLayout) => (section: InventoryDetailSection) => {
     let sectionProps = {};
     if (section.type === 'chart') {
       const { onChangeRangeTime, isLiveStreaming, stopLiveStreaming } = this.props;
