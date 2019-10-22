@@ -27,6 +27,7 @@ function getError() {
     user: { someKey: 'user value' },
     notIncluded: 'not included value',
     error: {
+      id: '7efbc7056b746fcb',
       notIncluded: 'error not included value',
       custom: {
         someKey: 'custom value'

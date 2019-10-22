@@ -10,7 +10,7 @@ import { EuiPageBody, EuiPageContent, EuiTitle, EuiSpacer, EuiCallOut } from '@e
 import { setBreadcrumbs } from '../../services/set_breadcrumbs';
 import { loadIndexTemplate, updateTemplate } from '../../services/api';
 import { decodePath, getTemplateDetailsLink } from '../../services/routing';
-import { SectionLoading, SectionError, TemplateForm } from '../../components';
+import { SectionLoading, SectionError, TemplateForm, Error } from '../../components';
 import { Template } from '../../../common/types';
 
 interface MatchParams {
@@ -73,7 +73,7 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
             defaultMessage="Error loading template"
           />
         }
-        error={error}
+        error={error as Error}
         data-test-subj="sectionError"
       />
     );

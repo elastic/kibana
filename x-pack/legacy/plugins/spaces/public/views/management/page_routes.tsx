@@ -22,11 +22,11 @@ routes.when('/management/spaces/list', {
   template,
   k7Breadcrumbs: getListBreadcrumbs,
   requireUICapability: 'management.kibana.spaces',
-  controller($scope: any, spacesNavState: SpacesNavState, spaceSelectorURL: string) {
+  controller($scope: any, spacesNavState: SpacesNavState, serverBasePath: string) {
     $scope.$$postDigest(async () => {
       const domNode = document.getElementById(reactRootNodeId);
 
-      const spacesManager = new SpacesManager(spaceSelectorURL);
+      const spacesManager = new SpacesManager(serverBasePath);
 
       render(
         <I18nContext>
@@ -49,11 +49,11 @@ routes.when('/management/spaces/create', {
   template,
   k7Breadcrumbs: getCreateBreadcrumbs,
   requireUICapability: 'management.kibana.spaces',
-  controller($scope: any, spacesNavState: SpacesNavState, spaceSelectorURL: string) {
+  controller($scope: any, spacesNavState: SpacesNavState, serverBasePath: string) {
     $scope.$$postDigest(async () => {
       const domNode = document.getElementById(reactRootNodeId);
 
-      const spacesManager = new SpacesManager(spaceSelectorURL);
+      const spacesManager = new SpacesManager(serverBasePath);
 
       render(
         <I18nContext>
@@ -85,14 +85,14 @@ routes.when('/management/spaces/edit/:spaceId', {
     $route: any,
     chrome: any,
     spacesNavState: SpacesNavState,
-    spaceSelectorURL: string
+    serverBasePath: string
   ) {
     $scope.$$postDigest(async () => {
       const domNode = document.getElementById(reactRootNodeId);
 
       const { spaceId } = $route.current.params;
 
-      const spacesManager = new SpacesManager(spaceSelectorURL);
+      const spacesManager = new SpacesManager(serverBasePath);
 
       render(
         <I18nContext>

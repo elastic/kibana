@@ -10,7 +10,7 @@ import { createWorkerFactory } from './create_worker';
 // @ts-ignore
 import { Esqueue } from './esqueue';
 // @ts-ignore
-import { ClientMock } from './esqueue/__tests__/fixtures/elasticsearch';
+import { ClientMock } from './esqueue/__tests__/fixtures/legacy_elasticsearch';
 
 const configGetStub = sinon.stub();
 configGetStub.withArgs('xpack.reporting.queue').returns({

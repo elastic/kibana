@@ -17,7 +17,7 @@
  * under the License.
  */
 import React, { useMemo, useEffect, useCallback } from 'react';
-import { EuiPanel, EuiTitle } from '@elastic/eui';
+import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -59,13 +59,15 @@ function GridPanel({ stateParams, setValue, hasHistogramAgg }: VisOptionsProps<B
   return (
     <EuiPanel paddingSize="s">
       <EuiTitle size="xs">
-        <h2>
+        <h3>
           <FormattedMessage
             id="kbnVislibVisTypes.controls.pointSeries.gridAxis.gridText"
             defaultMessage="Grid"
           />
-        </h2>
+        </h3>
       </EuiTitle>
+
+      <EuiSpacer size="m" />
 
       <SwitchOption
         disabled={hasHistogramAgg}
@@ -85,7 +87,7 @@ function GridPanel({ stateParams, setValue, hasHistogramAgg }: VisOptionsProps<B
         }
         value={stateParams.grid.categoryLines}
         setValue={setGrid}
-        dataTestSubj="showCategoryLines"
+        data-test-subj="showCategoryLines"
       />
 
       <SelectOption

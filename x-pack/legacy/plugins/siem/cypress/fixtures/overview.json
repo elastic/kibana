@@ -21,6 +21,13 @@
         "auditbeatPackage": 567,
         "auditbeatProcess": 678,
         "auditbeatUser": 789,
+        "endgameDns": 391,
+        "endgameFile": 392,
+        "endgameImageLoad": 393,
+        "endgameNetwork": 394,
+        "endgameProcess": 395,
+        "endgameRegistry": 396,
+        "endgameSecurity": 397,
         "filebeatSystemModule": 890,
         "winlogbeat": 100,
         "__typename": "OverviewHostData"

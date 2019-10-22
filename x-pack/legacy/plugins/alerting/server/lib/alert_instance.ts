@@ -54,7 +54,7 @@ export class AlertInstance {
     return true;
   }
 
-  getSechduledActionOptions() {
+  getScheduledActionOptions() {
     return this.scheduledExecutionOptions;
   }
 

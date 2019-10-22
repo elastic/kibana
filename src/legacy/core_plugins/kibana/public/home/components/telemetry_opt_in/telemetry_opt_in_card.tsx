@@ -24,7 +24,7 @@ import {
   EuiCard,
   EuiButton,
 } from '@elastic/eui';
-import { OptInMessage } from './opt_in_message';
+import { OptInMessage } from '../../../../../telemetry/public/components/opt_in_message';
 
 export interface Props {
   urlBasePath: string;
@@ -41,7 +41,7 @@ export function renderTelemetryOptInCard({
 }: Props) {
   return (
     <EuiCard
-      image={`${urlBasePath}/plugins/kibana/assets/illo_telemetry.png`}
+      image={`${urlBasePath}/plugins/kibana/home/assets/illo_telemetry.png`}
       textAlign="left"
       title={
         <FormattedMessage

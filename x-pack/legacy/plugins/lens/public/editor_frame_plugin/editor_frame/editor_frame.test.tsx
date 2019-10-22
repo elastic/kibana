@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { ReactWrapper } from 'enzyme';
+import { EuiPanel, EuiToolTip } from '@elastic/eui';
 import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { EditorFrame } from './editor_frame';
 import { Visualization, DatasourcePublicAPI, DatasourceSuggestion } from '../../types';
@@ -19,7 +20,7 @@ import {
 } from '../mocks';
 import { ExpressionRenderer } from 'src/legacy/core_plugins/expressions/public';
 import { DragDrop } from '../../drag_drop';
-import { EuiPanel, EuiToolTip } from '@elastic/eui';
+import { FrameLayout } from './frame_layout';
 
 // calling this function will wait for all pending Promises from mock
 // datasources to be processed by its callers.
@@ -48,6 +49,7 @@ function getDefaultProps() {
     onChange: jest.fn(),
     dateRange: { fromDate: '', toDate: '' },
     query: { query: '', language: 'lucene' },
+    filters: [],
     core: coreMock.createSetup(),
   };
 }
@@ -256,6 +258,7 @@ describe('editor_frame', () => {
         addNewLayer: expect.any(Function),
         removeLayers: expect.any(Function),
         query: { query: '', language: 'lucene' },
+        filters: [],
         dateRange: { fromDate: 'now-7d', toDate: 'now' },
       });
     });
@@ -409,56 +412,58 @@ describe('editor_frame', () => {
       instance.update();
 
       expect(instance.find(expressionRendererMock).prop('expression')).toMatchInlineSnapshot(`
-                Object {
-                  "chain": Array [
-                    Object {
-                      "arguments": Object {},
-                      "function": "kibana",
-                      "type": "function",
-                    },
-                    Object {
-                      "arguments": Object {
-                        "filters": Array [],
-                        "query": Array [
-                          "{\\"query\\":\\"\\",\\"language\\":\\"lucene\\"}",
-                        ],
-                        "timeRange": Array [
-                          "{\\"from\\":\\"\\",\\"to\\":\\"\\"}",
-                        ],
+        Object {
+          "chain": Array [
+            Object {
+              "arguments": Object {},
+              "function": "kibana",
+              "type": "function",
+            },
+            Object {
+              "arguments": Object {
+                "filters": Array [
+                  "[]",
+                ],
+                "query": Array [
+                  "{\\"query\\":\\"\\",\\"language\\":\\"lucene\\"}",
+                ],
+                "timeRange": Array [
+                  "{\\"from\\":\\"\\",\\"to\\":\\"\\"}",
+                ],
+              },
+              "function": "kibana_context",
+              "type": "function",
+            },
+            Object {
+              "arguments": Object {
+                "layerIds": Array [
+                  "first",
+                ],
+                "tables": Array [
+                  Object {
+                    "chain": Array [
+                      Object {
+                        "arguments": Object {},
+                        "function": "datasource",
+                        "type": "function",
                       },
-                      "function": "kibana_context",
-                      "type": "function",
-                    },
-                    Object {
-                      "arguments": Object {
-                        "layerIds": Array [
-                          "first",
-                        ],
-                        "tables": Array [
-                          Object {
-                            "chain": Array [
-                              Object {
-                                "arguments": Object {},
-                                "function": "datasource",
-                                "type": "function",
-                              },
-                            ],
-                            "type": "expression",
-                          },
-                        ],
-                      },
-                      "function": "lens_merge_tables",
-                      "type": "function",
-                    },
-                    Object {
-                      "arguments": Object {},
-                      "function": "vis",
-                      "type": "function",
-                    },
-                  ],
-                  "type": "expression",
-                }
-            `);
+                    ],
+                    "type": "expression",
+                  },
+                ],
+              },
+              "function": "lens_merge_tables",
+              "type": "function",
+            },
+            Object {
+              "arguments": Object {},
+              "function": "vis",
+              "type": "function",
+            },
+          ],
+          "type": "expression",
+        }
+      `);
     });
 
     it('should render individual expression for each given layer', async () => {
@@ -525,7 +530,9 @@ describe('editor_frame', () => {
             },
             Object {
               "arguments": Object {
-                "filters": Array [],
+                "filters": Array [
+                  "[]",
+                ],
                 "query": Array [
                   "{\\"query\\":\\"\\",\\"language\\":\\"lucene\\"}",
                 ],
@@ -1491,7 +1498,7 @@ describe('editor_frame', () => {
 
       expect(onChange).toHaveBeenCalledTimes(2);
       expect(onChange).toHaveBeenNthCalledWith(1, {
-        indexPatternTitles: ['resolved'],
+        filterableIndexPatterns: [{ id: '1', title: 'resolved' }],
         doc: {
           expression: '',
           id: undefined,
@@ -1508,7 +1515,7 @@ describe('editor_frame', () => {
         },
       });
       expect(onChange).toHaveBeenLastCalledWith({
-        indexPatternTitles: ['resolved'],
+        filterableIndexPatterns: [{ id: '1', title: 'resolved' }],
         doc: {
           expression: '',
           id: undefined,
@@ -1567,7 +1574,7 @@ describe('editor_frame', () => {
       await waitForPromises();
       expect(onChange).toHaveBeenCalledTimes(3);
       expect(onChange).toHaveBeenNthCalledWith(3, {
-        indexPatternTitles: [],
+        filterableIndexPatterns: [],
         doc: {
           expression: expect.stringContaining('vis "expression"'),
           id: undefined,
@@ -1583,6 +1590,45 @@ describe('editor_frame', () => {
           visualizationType: 'testVis',
         },
       });
+    });
+
+    it('should call onChange when the datasource makes an internal state change', async () => {
+      const onChange = jest.fn();
+
+      mockDatasource.initialize.mockResolvedValue({});
+      mockDatasource.getLayers.mockReturnValue(['first']);
+      mockDatasource.getMetaData.mockReturnValue({
+        filterableIndexPatterns: [{ id: '1', title: 'resolved' }],
+      });
+      mockVisualization.initialize.mockReturnValue({ initialState: true });
+
+      act(() => {
+        instance = mount(
+          <EditorFrame
+            {...getDefaultProps()}
+            visualizationMap={{ testVis: mockVisualization }}
+            datasourceMap={{ testDatasource: mockDatasource }}
+            initialDatasourceId="testDatasource"
+            initialVisualizationId="testVis"
+            ExpressionRenderer={expressionRendererMock}
+            onChange={onChange}
+          />
+        );
+      });
+
+      await waitForPromises();
+      expect(onChange).toHaveBeenCalledTimes(2);
+
+      (instance.find(FrameLayout).prop('dataPanel') as ReactElement)!.props.dispatch({
+        type: 'UPDATE_DATASOURCE_STATE',
+        updater: () => ({
+          newState: true,
+        }),
+        datasourceId: 'testDatasource',
+      });
+      await waitForPromises();
+
+      expect(onChange).toHaveBeenCalledTimes(3);
     });
   });
 });

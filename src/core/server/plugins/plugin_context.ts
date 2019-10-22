@@ -47,7 +47,10 @@ export function createPluginInitializerContext(
     /**
      * Environment information that is safe to expose to plugins and may be beneficial for them.
      */
-    env: { mode: coreContext.env.mode },
+    env: {
+      mode: coreContext.env.mode,
+      packageInfo: coreContext.env.packageInfo,
+    },
 
     /**
      * Plugin-scoped logger

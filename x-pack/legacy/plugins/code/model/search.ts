@@ -8,7 +8,7 @@ import { DetailSymbolInformation } from '@elastic/lsp-extension';
 import { IRange } from 'monaco-editor';
 
 import { DiffKind } from '../common/git_diff';
-import { Repository, SourceHit } from '../model';
+import { Repository } from '../model';
 import { RepositoryUri } from './repository';
 
 export interface Document {
@@ -109,12 +109,22 @@ export interface SymbolSearchRequest extends SearchRequest {
   repoScope?: RepositoryUri[];
 }
 
-export interface CodeIntegrationRequest {
-  repoUri: RepositoryUri;
-  revision?: string;
+export interface StackTraceItem {
+  filePath: string;
+  lineNumStart: number;
+  lineNumEnd?: number;
+  // We could add more in here in the future, e.g. qname.
 }
 
-export interface ResolveSnippetsIntegrationRequest extends CodeIntegrationRequest {
+export interface StackTraceSnippetsRequest {
+  repoUris: RepositoryUri[];
+  revision?: string; // Not used for now.
+  stacktraceItems: StackTraceItem[];
+}
+
+export interface ResolveSnippetsRequest {
+  repoUris: RepositoryUri[];
+  revision?: string; // Not used for now.
   filePath: string;
   lineNumStart: number;
   lineNumEnd?: number;
@@ -134,7 +144,7 @@ export interface RepositorySearchResult extends SearchResult {
 }
 
 export interface SymbolSearchResult extends SearchResult {
-  // TODO: we migit need an additional data structure for symbol search result.
+  // TODO: we might need an additional data structure for symbol search result.
   symbols: DetailSymbolInformation[];
 }
 
@@ -189,6 +199,7 @@ export interface CommitSearchResult extends DocumentSearchResult {
 
 export interface IntegrationsSearchResult extends SearchResult {
   results?: SearchResultItem[];
+  fallback: boolean;
 }
 
 export interface SourceLocation {
@@ -219,4 +230,65 @@ export interface SearchOptions {
   repoScope: Repository[];
   defaultRepoScopeOn: boolean;
   defaultRepoScope?: Repository;
+}
+
+export function emptySearchResult(): SearchResult {
+  return {
+    total: 0,
+    took: 0,
+  };
+}
+
+export function emptyRepositorySearchResult(): RepositorySearchResult {
+  return {
+    ...emptySearchResult(),
+    repositories: [],
+    from: 0,
+    page: 0,
+    totalPage: 0,
+  };
+}
+
+export function emptySymbolSearchResult(): SymbolSearchResult {
+  return {
+    ...emptySearchResult(),
+    symbols: [],
+  };
+}
+
+export function emptyDocumentSearchResult(query: string): DocumentSearchResult {
+  return {
+    ...emptySearchResult(),
+    query,
+    from: 0,
+    page: 0,
+    totalPage: 0,
+    stats: {
+      total: 0,
+      from: 0,
+      to: 0,
+      page: 0,
+      totalPage: 0,
+      repoStats: [],
+      languageStats: [],
+    },
+    results: [],
+    repoAggregations: [],
+    langAggregations: [],
+  };
+}
+
+export function emptyCommitSearchResult(query: string): CommitSearchResult {
+  return {
+    ...emptyDocumentSearchResult(query),
+    commits: [],
+  };
+}
+
+export function emptyIntegrationsSearchResult(): IntegrationsSearchResult {
+  return {
+    ...emptySearchResult(),
+    results: [],
+    fallback: false,
+  };
 }

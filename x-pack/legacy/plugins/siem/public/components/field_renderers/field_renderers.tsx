@@ -5,11 +5,12 @@
  */
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { getOr } from 'lodash/fp';
 import React, { Fragment, useState } from 'react';
-
-import { FormattedMessage } from '@kbn/i18n/react';
 import { pure } from 'recompose';
+
+import styled from 'styled-components';
 import {
   AutonomousSystem,
   FlowTarget,
@@ -17,14 +18,17 @@ import {
   IpOverviewData,
   Overview,
 } from '../../graphql/types';
+import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { DefaultDraggable } from '../draggables';
 import { getEmptyTagValue } from '../empty_value';
 import { FormattedDate } from '../formatted_date';
 import { HostDetailsLink, ReputationLink, VirusTotalLink, WhoIsLink } from '../links';
-
-import * as i18n from '../page/network/ip_overview/translations';
-import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { Spacer } from '../page';
+import * as i18n from '../page/network/ip_overview/translations';
+
+const DraggableContainerFlexGroup = styled(EuiFlexGroup)`
+  flex-grow: unset;
+`;
 
 export const IpOverviewId = 'ip-overview';
 
@@ -183,7 +187,7 @@ export const DefaultFieldRenderer = pure<DefaultFieldRendererProps>(
       });
 
       return draggables.length > 0 ? (
-        <EuiFlexGroup alignItems="center" gutterSize="none">
+        <DraggableContainerFlexGroup alignItems="center" gutterSize="none" component="span">
           {draggables}{' '}
           {
             <DefaultFieldRendererOverflow
@@ -194,7 +198,7 @@ export const DefaultFieldRenderer = pure<DefaultFieldRendererProps>(
               moreMaxHeight={moreMaxHeight}
             />
           }
-        </EuiFlexGroup>
+        </DraggableContainerFlexGroup>
       ) : (
         getEmptyTagValue()
       );
@@ -248,7 +252,7 @@ export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverf
   ({ idPrefix, moreMaxHeight, overflowIndexStart = 5, render, rowItems }) => {
     const [isOpen, setIsOpen] = useState(false);
     return (
-      <>
+      <EuiFlexItem grow={false}>
         {rowItems.length > overflowIndexStart && (
           <EuiPopover
             id="popover"
@@ -276,7 +280,7 @@ export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverf
             ></MoreContainer>
           </EuiPopover>
         )}
-      </>
+      </EuiFlexItem>
     );
   }
 );

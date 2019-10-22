@@ -9,31 +9,17 @@ import { schema } from '@kbn/config-schema';
 import { ActionTypeRegistry } from './action_type_registry';
 import { ActionsClient } from './actions_client';
 import { ExecutorType } from './types';
+import { ActionExecutor, TaskRunnerFactory } from './lib';
 import { taskManagerMock } from '../../task_manager/task_manager.mock';
 import { SavedObjectsClientMock } from '../../../../../src/core/server/mocks';
-import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/plugin.mock';
 
 const savedObjectsClient = SavedObjectsClientMock.create();
 
 const mockTaskManager = taskManagerMock.create();
 
-const mockEncryptedSavedObjectsPlugin = encryptedSavedObjectsMock.create();
-
-function getServices() {
-  return {
-    log: jest.fn(),
-    callCluster: jest.fn(),
-    savedObjectsClient: SavedObjectsClientMock.create(),
-  };
-}
-
 const actionTypeRegistryParams = {
-  getServices,
-  isSecurityEnabled: true,
   taskManager: mockTaskManager,
-  encryptedSavedObjectsPlugin: mockEncryptedSavedObjectsPlugin,
-  spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
-  getBasePath: jest.fn().mockReturnValue(undefined),
+  taskRunnerFactory: new TaskRunnerFactory(new ActionExecutor()),
 };
 
 const executor: ExecutorType = async options => {

@@ -309,6 +309,8 @@ export interface InfraMetricData {
 export interface InfraDataSeries {
   id: string;
 
+  label: string;
+
   data: InfraDataPoint[];
 }
 
@@ -574,6 +576,10 @@ export enum InfraMetric {
   hostLoad = 'hostLoad',
   hostMemoryUsage = 'hostMemoryUsage',
   hostNetworkTraffic = 'hostNetworkTraffic',
+  hostDockerOverview = 'hostDockerOverview',
+  hostDockerInfo = 'hostDockerInfo',
+  hostDockerTop5ByCpu = 'hostDockerTop5ByCpu',
+  hostDockerTop5ByMemory = 'hostDockerTop5ByMemory',
   podOverview = 'podOverview',
   podCpuUsage = 'podCpuUsage',
   podMemoryUsage = 'podMemoryUsage',
@@ -838,6 +844,8 @@ export namespace MetricsQuery {
     __typename?: 'InfraDataSeries';
 
     id: string;
+
+    label: string;
 
     data: Data[];
   };

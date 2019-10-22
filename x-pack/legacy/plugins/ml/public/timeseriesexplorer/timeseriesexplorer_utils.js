@@ -15,8 +15,6 @@
 import _ from 'lodash';
 import moment from 'moment-timezone';
 
-import { parseInterval } from 'ui/utils/parse_interval';
-
 import {
   ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
   ANOMALIES_TABLE_DEFAULT_QUERY_SIZE
@@ -25,6 +23,7 @@ import {
   isTimeSeriesViewJob,
   mlFunctionToESAggregation,
 } from '../../common/util/job_utils';
+import { parseInterval } from '../../common/util/parse_interval';
 
 import { ml } from '../services/ml_api_service';
 import { mlForecastService } from '../services/forecast_service';

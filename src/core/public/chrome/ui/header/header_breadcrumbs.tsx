@@ -21,10 +21,7 @@ import classNames from 'classnames';
 import React, { Component } from 'react';
 import * as Rx from 'rxjs';
 
-import {
-  // @ts-ignore
-  EuiHeaderBreadcrumbs,
-} from '@elastic/eui';
+import { EuiHeaderBreadcrumbs } from '@elastic/eui';
 import { ChromeBreadcrumb } from '../../chrome_service';
 
 interface Props {
@@ -64,7 +61,11 @@ export class HeaderBreadcrumbs extends Component<Props, State> {
 
   public render() {
     return (
-      <EuiHeaderBreadcrumbs breadcrumbs={this.getBreadcrumbs()} data-test-subj="breadcrumbs" />
+      <EuiHeaderBreadcrumbs
+        breadcrumbs={this.getBreadcrumbs()}
+        max={10}
+        data-test-subj="breadcrumbs"
+      />
     );
   }
 

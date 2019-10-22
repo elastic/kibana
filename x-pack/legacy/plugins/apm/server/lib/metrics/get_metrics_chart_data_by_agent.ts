@@ -15,15 +15,17 @@ export interface MetricsChartsByAgentAPIResponse {
 export async function getMetricsChartDataByAgent({
   setup,
   serviceName,
+  serviceNodeName,
   agentName
 }: {
   setup: Setup;
   serviceName: string;
+  serviceNodeName?: string;
   agentName: string;
 }): Promise<MetricsChartsByAgentAPIResponse> {
   switch (agentName) {
     case 'java': {
-      return getJavaMetricsCharts(setup, serviceName);
+      return getJavaMetricsCharts(setup, serviceName, serviceNodeName);
     }
 
     default: {

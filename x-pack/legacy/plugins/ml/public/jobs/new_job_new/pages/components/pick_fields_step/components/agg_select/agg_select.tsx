@@ -46,6 +46,7 @@ export const AggSelect: FC<Props> = ({ fields, changeHandler, selectedOptions, r
     const aggOption: DropDownOption = { label: f.name, options: [] };
     if (typeof f.aggs !== 'undefined') {
       aggOption.options = f.aggs
+        .filter(a => a.dslName !== null) // don't include aggs which have no ES equivalent
         .map(
           a =>
             ({

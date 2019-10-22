@@ -22,12 +22,12 @@ export const PersonalInfo = (props: Props) => {
     <EuiDescribedFormGroup
       fullWidth
       title={
-        <h3>
+        <h2>
           <FormattedMessage
             id="xpack.security.account.usernameGroupTitle"
             defaultMessage="Username and email"
           />
-        </h3>
+        </h2>
       }
       description={
         <FormattedMessage

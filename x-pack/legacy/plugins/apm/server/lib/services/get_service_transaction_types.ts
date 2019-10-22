@@ -9,13 +9,9 @@ import {
   SERVICE_NAME,
   TRANSACTION_TYPE
 } from '../../../common/elasticsearch_fieldnames';
-import { PromiseReturnType } from '../../../typings/common';
 import { rangeFilter } from '../helpers/range_filter';
 import { Setup } from '../helpers/setup_request';
 
-export type ServiceTransactionTypesAPIResponse = PromiseReturnType<
-  typeof getServiceTransactionTypes
->;
 export async function getServiceTransactionTypes(
   serviceName: string,
   setup: Setup

@@ -50,14 +50,14 @@ export class LanguageServerController implements ILanguageServerHandler {
   private log: Logger;
 
   constructor(
-    readonly options: ServerOptions,
-    readonly targetHost: string,
-    readonly installManager: InstallManager,
-    readonly loggerFactory: LoggerFactory,
-    readonly repoConfigController: RepositoryConfigController
+    public readonly options: ServerOptions,
+    public readonly targetHost: string,
+    public readonly installManager: InstallManager,
+    public readonly loggerFactory: LoggerFactory,
+    public readonly repoConfigController: RepositoryConfigController
   ) {
     this.log = loggerFactory.getLogger([]);
-    this.languageServers = enabledLanguageServers(installManager.server).map(def => ({
+    this.languageServers = enabledLanguageServers(options).map(def => ({
       definition: def,
       builtinWorkspaceFolders: def.builtinWorkspaceFolders,
       languages: def.languages,

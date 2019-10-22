@@ -14,6 +14,46 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
   const retry = getService('retry');
 
   return {
+    async hasJobResults(jobId: string): Promise<boolean> {
+      const response = await es.search({
+        index: '.ml-anomalies-*',
+        body: {
+          size: 1,
+          query: {
+            match: {
+              job_id: jobId,
+            },
+          },
+        },
+      });
+
+      return response.hits.hits.length > 0;
+    },
+
+    async assertJobResultsExist(jobId: string) {
+      await retry.waitForWithTimeout(`results for job ${jobId} to exist`, 30 * 1000, async () => {
+        if ((await this.hasJobResults(jobId)) === true) {
+          return true;
+        } else {
+          throw new Error(`expected results for job '${jobId}' to exist`);
+        }
+      });
+    },
+
+    async assertNoJobResultsExist(jobId: string) {
+      await retry.waitForWithTimeout(
+        `no results for job ${jobId} to exist`,
+        30 * 1000,
+        async () => {
+          if ((await this.hasJobResults(jobId)) === false) {
+            return true;
+          } else {
+            throw new Error(`expected no results for job '${jobId}' to exist`);
+          }
+        }
+      );
+    },
+
     async deleteIndices(indices: string) {
       log.debug(`Deleting indices: '${indices}'...`);
       const deleteResponse = await es.indices.delete({
@@ -38,10 +78,6 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async cleanMlIndices() {
       await this.deleteIndices('.ml-*');
-    },
-
-    async cleanDataframeIndices() {
-      await this.deleteIndices('.data-frame-*');
     },
   };
 }

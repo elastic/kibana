@@ -18,10 +18,6 @@
 # default to `true` starting in Kibana 7.0.
 #server.rewriteBasePath: false
 
-# Specifies the default route when opening Kibana. You can use this setting to modify
-# the landing page when opening Kibana.
-#server.defaultRoute: /app/kibana
-
 # The maximum payload size in bytes for incoming server requests.
 #server.maxPayloadBytes: 1048576
 
