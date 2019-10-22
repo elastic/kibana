@@ -16,26 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-// @ts-ignore
-import { getFilterGenerator } from 'ui/filter_manager';
-import angular from 'angular';
 import _ from 'lodash';
-import { SearchSource } from 'ui/courier';
-import {
-  getRequestInspectorStats,
-  getResponseInspectorStats,
-} from 'ui/courier/utils/courier_inspector_utils';
-import { IndexPattern } from 'ui/index_patterns';
 import { RequestAdapter } from 'ui/inspector/adapters';
 import { Adapters } from 'ui/inspector/types';
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
 import { Filter, FilterStateStore } from '@kbn/es-query';
-import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
-import { toastNotifications } from 'ui/notify';
-import { TimeRange } from 'src/plugins/data/public';
 import { TExecuteTriggerActions } from 'src/plugins/ui_actions/public';
 import { setup as data } from '../../../../data/public/legacy';
 import { Query, onlyDisabledFiltersChanged, getTime } from '../../../../data/public';
@@ -50,8 +37,19 @@ import searchTemplate from './search_template.html';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import { SortOrder } from '../angular/doc_table/components/table_header/helpers';
 import { getSortForSearchSource } from '../angular/doc_table/lib/get_sort_for_search_source';
+import {
+  angular,
+  toastNotifications,
+  chromeLegacy,
+  IndexPattern,
+  getRequestInspectorStats,
+  getResponseInspectorStats,
+  SearchSource,
+  getFilterGenerator,
+} from '../kibana_services';
+import { TimeRange } from '../../../../../../plugins/data/public';
 
-const config = chrome.getUiSettingsClient();
+const config = chromeLegacy.getUiSettingsClient();
 
 interface SearchScope extends ng.IScope {
   columns?: string[];

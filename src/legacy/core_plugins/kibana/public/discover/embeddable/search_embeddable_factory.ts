@@ -16,21 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import '../angular/doc_table';
-import { capabilities } from 'ui/capabilities';
-import { npStart, npSetup } from 'ui/new_platform';
-import { i18n } from '@kbn/i18n';
-import chrome from 'ui/chrome';
 import { IPrivate } from 'ui/private';
-import { TimeRange } from 'src/plugins/data/public';
-import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
+import { i18n } from '@kbn/i18n';
 import { TExecuteTriggerActions } from 'src/plugins/ui_actions/public';
+import '../angular/doc_table';
+import { capabilities, chromeLegacy, FilterBarQueryFilterProvider } from '../kibana_services';
 import {
   EmbeddableFactory,
   ErrorEmbeddable,
   Container,
 } from '../../../../../../plugins/embeddable/public';
+import { TimeRange } from '../../../../../../plugins/data/public';
 import { SavedSearchLoader } from '../types';
 import { SearchEmbeddable, SEARCH_EMBEDDABLE_TYPE } from './search_embeddable';
 import { SearchInput, SearchOutput } from './types';
@@ -55,7 +51,7 @@ export class SearchEmbeddableFactory extends EmbeddableFactory<
   }
 
   public isEditable() {
-    return capabilities.get().discover.save as boolean;
+    return capabilities.discover.save as boolean;
   }
 
   public canCreateNew() {
@@ -73,12 +69,12 @@ export class SearchEmbeddableFactory extends EmbeddableFactory<
     input: Partial<SearchInput> & { id: string; timeRange: TimeRange },
     parent?: Container
   ): Promise<SearchEmbeddable | ErrorEmbeddable> {
-    const $injector = await chrome.dangerouslyGetActiveInjector();
+    const $injector = await chromeLegacy.dangerouslyGetActiveInjector();
 
     const $compile = $injector.get<ng.ICompileService>('$compile');
     const $rootScope = $injector.get<ng.IRootScopeService>('$rootScope');
     const searchLoader = $injector.get<SavedSearchLoader>('savedSearches');
-    const editUrl = chrome.addBasePath(`/app/kibana${searchLoader.urlFor(savedObjectId)}`);
+    const editUrl = chromeLegacy.addBasePath(`/app/kibana${searchLoader.urlFor(savedObjectId)}`);
 
     const Private = $injector.get<IPrivate>('Private');
 
@@ -92,7 +88,7 @@ export class SearchEmbeddableFactory extends EmbeddableFactory<
           $compile,
           editUrl,
           queryFilter,
-          editable: capabilities.get().discover.save as boolean,
+          editable: capabilities.discover.save as boolean,
           indexPatterns: _.compact([savedObject.searchSource.getField('index')]),
         },
         input,
@@ -109,6 +105,3 @@ export class SearchEmbeddableFactory extends EmbeddableFactory<
     return new ErrorEmbeddable('Saved searches can only be created from a saved object', input);
   }
 }
-
-const factory = new SearchEmbeddableFactory(npStart.plugins.uiActions.executeTriggerActions);
-npSetup.plugins.embeddable.registerEmbeddableFactory(factory.type, factory);

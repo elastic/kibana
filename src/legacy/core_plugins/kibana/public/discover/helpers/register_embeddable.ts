@@ -16,19 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { npSetup, npStart } from 'ui/new_platform';
+import { SearchEmbeddableFactory } from '../embeddable';
 
-import { CoreSetup, Plugin, PluginInitializerContext } from 'kibana/public';
-import { registerFeature } from './helpers/register_feature';
-
-export class DiscoverPlugin implements Plugin {
-  constructor(initializerContext: PluginInitializerContext) {}
-  setup(core: CoreSetup) {
-    registerFeature();
-    require('./angular');
-    require('./helpers/register_embeddable');
-  }
-
-  start() {}
-
-  stop() {}
-}
+const factory = new SearchEmbeddableFactory(npStart.plugins.uiActions.executeTriggerActions);
+npSetup.plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
