@@ -229,7 +229,7 @@ export const useCreateAnalyticsForm = () => {
     try {
       // Set the index pattern titles which the user can choose as the source.
       const indexPatternTitles: string[] = [];
-      const indexPatternsMap: { [key: string]: string | undefined } = {};
+      const indexPatternsMap: Record<string, string | undefined> = {};
       const savedObjects = (await kibanaContext.indexPatterns.getCache()) || [];
       savedObjects.forEach((obj: SimpleSavedObject<Record<string, any>>) => {
         const title = idx(obj, _ => _.attributes.title);

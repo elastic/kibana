@@ -49,7 +49,7 @@ export type Action =
       type: ACTION.SET_INDEX_PATTERN_TITLES;
       payload: {
         indexPatternTitles: State['indexPatternTitles'];
-        indexPatternsMap: any;
+        indexPatternsMap: Record<string, string | undefined>;
       };
     }
   | { type: ACTION.SET_IS_JOB_CREATED; isJobCreated: State['isJobCreated'] }

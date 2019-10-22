@@ -56,7 +56,7 @@ export interface State {
   };
   disabled: boolean;
   indexNames: EsIndexName[];
-  indexPatternsMap: any; // TODO: update type
+  indexPatternsMap: Record<string, string>;
   indexPatternTitles: IndexPatternTitle[];
   isAdvancedEditorEnabled: boolean;
   isJobCreated: boolean;

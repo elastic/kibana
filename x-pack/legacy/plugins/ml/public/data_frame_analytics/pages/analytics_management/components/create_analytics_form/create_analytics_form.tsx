@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { metadata } from 'ui/metadata';
 import { IndexPattern, INDEX_PATTERN_ILLEGAL_CHARACTERS } from 'ui/index_patterns';
@@ -150,11 +151,11 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     if (!sourceIndexNameEmpty && !sourceIndexNameValid) {
       errors.push(
         <Fragment>
-          {i18n.translate('xpack.ml.dataframe.analytics.create.sourceIndexInvalidError', {
-            defaultMessage:
-              'Invalid source index name, it cannot contain spaces or the characters: {characterList}',
-            values: { characterList },
-          })}
+          <FormattedMessage
+            id="xpack.ml.dataframe.analytics.create.sourceIndexInvalidError"
+            defaultMessage="Invalid source index name, it cannot contain spaces or the characters: {characterList}"
+            values={{ characterList }}
+          />
         </Fragment>
       );
     }
@@ -162,10 +163,10 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     if (sourceIndexFieldsCheckFailed === true) {
       errors.push(
         <Fragment>
-          {i18n.translate('xpack.ml.dataframe.analytics.create.sourceIndexFieldCheckError', {
-            defaultMessage:
-              'There was a problem checking for numerical fields. Please refresh the page and try again.',
-          })}
+          <FormattedMessage
+            id="xpack.ml.dataframe.analytics.create.sourceIndexFieldCheckError"
+            defaultMessage="There was a problem checking for numerical fields. Please refresh the page and try again."
+          />
         </Fragment>
       );
     }
@@ -374,6 +375,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
                 )}
                 helpText={
                   dependentVariableOptions.length === 0 &&
+                  dependentVariableFetchFail === false &&
                   !sourceIndexNameEmpty &&
                   i18n.translate(
                     'xpack.ml.dataframe.analytics.create.dependentVariableOptionsNoNumericalFields',
