@@ -105,8 +105,9 @@ const handleCourierRequest = async ({
   });
 
   if (timeRange) {
-    const timeFilter = getTime(searchSource.getField('index'), timeRange);
-    if (timeFilter) timeFilterSearchSource.setField('filter', timeFilter as RangeFilter);
+    timeFilterSearchSource.setField('filter', () => {
+      return getTime(searchSource.getField('index'), timeRange) as RangeFilter;
+    });
   }
 
   requestSearchSource.setField('filter', filters);

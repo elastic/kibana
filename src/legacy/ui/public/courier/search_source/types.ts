@@ -32,7 +32,7 @@ export type EsQuerySortValue = Record<string, SortDirection>;
 export interface SearchSourceFields {
   type?: string;
   query?: Query;
-  filter?: Filter[] | Filter;
+  filter?: Filter[] | Filter | (() => Filter | undefined);
   sort?: EsQuerySortValue | EsQuerySortValue[];
   highlight?: any;
   highlightAll?: boolean;
