@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { HttpSetup } from 'src/core/public';
+import { HttpSetup } from './types';
 
 export class AnonymousPaths {
   private paths: Set<string>;
