@@ -42,16 +42,17 @@ Specifies the location of the {es} cluster where your monitoring data is stored.
 By default, this is the same as `elasticsearch.hosts`. This setting enables
 you to use a single {kib} instance to search and visualize data in your
 production cluster as well as monitor data sent to a dedicated monitoring
-cluster.
+cluster. {kib} will always use the credentials of the logged user to access the 
+dedicated monitoring cluster.
 
 `xpack.monitoring.elasticsearch.username`::
-Specifies the user ID that {kib} uses for authentication when it retrieves data
-from the monitoring cluster. If not set, {kib} uses the value of the
+Specifies the user ID that {kib} uses for authentication when it sends monitoring data
+to the monitoring cluster. If not set, {kib} uses the value of the
 `elasticsearch.username` setting.
 
 `xpack.monitoring.elasticsearch.password`::
-Specifies the password that {kib} uses for authentication when it retrieves data
-from the monitoring cluster. If not set, {kib} uses the value of the
+Specifies the password that {kib} uses for authentication when it sends monitoring data
+to the monitoring cluster. If not set, {kib} uses the value of the
 `elasticsearch.password` setting.
 
 `xpack.xpack_main.telemetry.enabled`::
