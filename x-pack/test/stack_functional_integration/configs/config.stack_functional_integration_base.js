@@ -17,14 +17,18 @@
  * under the License.
  */
 
-
 import { resolve } from 'path';
 import buildState from './build_state';
+import { ToolingLog } from '@kbn/dev-utils';
 
 const reportName = 'Stack Functional Integration Tests';
 const testsFolder = '../test/functional/apps';
 const stateFilePath = '../../../../../integration-test/qa/envvars.sh';
 const prepend = testFile => require.resolve(`${testsFolder}/${testFile}`);
+const log = new ToolingLog({
+  level: 'info',
+  writeTo: process.stdout,
+});
 
 export default async ({ readConfigFile }) => {
   const confs = await readConfigFile(require.resolve('./config.server.js'));
@@ -35,14 +39,18 @@ export default async ({ readConfigFile }) => {
   return {
     ...defaultConfigs.getAll(),
     junit: {
-      reportName: `${reportName} - ${provisionedConfigs.VM}`
+      reportName: `${reportName} - ${provisionedConfigs.VM}`,
     },
     servers,
     apps,
     stackFunctionalIntegrationTests: {
-      envObj: provisionedConfigs
+      envObj: provisionedConfigs,
     },
-    testFiles: tests.map(prepend),
-    // testFiles: ['sampleData', 'reporting'].map(prepend),
+    testFiles: tests.map(logTest).map(prepend),
+    // testFiles: ['sampleData', 'reporting', 'management'].map(logTest).map(prepend),
   };
+}
+function logTest(x) {
+  log.info(`### Testing: '${x}' app`);
+  return x;
 }

@@ -52,10 +52,10 @@ export default () => {
       //   pathname: kibanaURL,
       //   hash: '/dashboard'
       // },
-      // settings: {
-      //   pathname: kibanaURL,
-      //   hash: '/management'
-      // },
+      settings: {
+        pathname: kibanaURL,
+        hash: '/management'
+      },
       // console: {
       //   pathname: kibanaURL,
       //   hash: '/dev_tools'
