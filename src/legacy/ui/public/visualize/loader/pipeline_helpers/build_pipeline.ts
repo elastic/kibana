@@ -107,7 +107,7 @@ export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
       params.useGeocentroid = agg.params.useGeocentroid;
     }
 
-    const label = agg.makeLabel();
+    const label = agg.makeLabel && agg.makeLabel();
 
     return {
       accessor,
