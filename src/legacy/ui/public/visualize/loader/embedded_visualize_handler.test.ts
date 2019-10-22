@@ -18,6 +18,7 @@
  */
 jest.mock('ui/new_platform');
 
+import { searchSourceMock } from '../../courier/search_source/mocks';
 import { mockDataLoaderFetch, timefilter } from './embedded_visualize_handler.test.mocks';
 
 import _ from 'lodash';
@@ -85,7 +86,7 @@ describe('EmbeddedVisualizeHandler', () => {
       inspectorAdapters: {},
       query: undefined,
       queryFilter: null,
-      searchSource: undefined,
+      searchSource: searchSourceMock,
       timeRange: undefined,
       uiState: undefined,
     };
@@ -96,7 +97,7 @@ describe('EmbeddedVisualizeHandler', () => {
       {
         vis: mockVis,
         title: 'My Vis',
-        searchSource: undefined,
+        searchSource: searchSourceMock,
         destroy: () => ({}),
         copyOnSave: false,
         save: () => Promise.resolve('123'),
@@ -128,7 +129,7 @@ describe('EmbeddedVisualizeHandler', () => {
         {
           vis: mockVis,
           title: 'My Vis',
-          searchSource: undefined,
+          searchSource: searchSourceMock,
           destroy: () => ({}),
           copyOnSave: false,
           save: () => Promise.resolve('123'),
