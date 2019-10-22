@@ -44,7 +44,7 @@ export interface OwnProps extends QueryTemplatePaginatedProps {
 
 export interface NetworkDnsComponentReduxProps {
   activePage: number;
-  dnsSortField: NetworkDnsSortField;
+  sort: NetworkDnsSortField;
   isInspected: boolean;
   isPtrIncluded: boolean;
   limit: number;
@@ -61,7 +61,7 @@ class NetworkDnsComponentQuery extends QueryTemplatePaginated<
     const {
       activePage,
       children,
-      dnsSortField,
+      sort,
       endDate,
       filterQuery,
       id = ID,
@@ -78,7 +78,7 @@ class NetworkDnsComponentQuery extends QueryTemplatePaginated<
       inspect: isInspected,
       isPtrIncluded,
       pagination: generateTablePaginationOptions(activePage, limit),
-      sort: dnsSortField,
+      sort,
       sourceId,
       timerange: {
         interval: '12h',

@@ -6,7 +6,7 @@
 
 import Hapi from 'hapi';
 import { EncryptedSavedObjectsStartContract } from '../shim';
-import { SpacesPlugin as SpacesPluginStartContract } from '../../../spaces';
+import { LegacySpacesPlugin as SpacesPluginStartContract } from '../../../spaces';
 import { Logger } from '../../../../../../src/core/server';
 import { validateParams, validateConfig, validateSecrets } from './validate_with_schema';
 import {
@@ -99,7 +99,7 @@ export class ActionExecutor {
 
     try {
       result = await actionType.executor({
-        id: actionId,
+        actionId,
         services,
         params: validatedParams,
         config: validatedConfig,

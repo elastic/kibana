@@ -4,7 +4,7 @@
 
 ## RouteConfig.validate property
 
-A schema created with `@kbn/config-schema` that every request will be validated against. You \*must\* specify a validation schema to be able to read: - url path segments - request query - request body To opt out of validating the request, specify `false`<!-- -->.
+A schema created with `@kbn/config-schema` that every request will be validated against.
 
 <b>Signature:</b>
 
@@ -12,13 +12,17 @@ A schema created with `@kbn/config-schema` that every request will be validated 
 validate: RouteSchemas<P, Q, B> | false;
 ```
 
+## Remarks
+
+You \*must\* specify a validation schema to be able to read: - url path segments - request query - request body To opt out of validating the request, specify `validate: false`<!-- -->. In this case request params, query, and body will be \*\*empty\*\* objects and have no access to raw values. In some cases you may want to use another validation library. To do this, you need to instruct the `@kbn/config-schema` library to output \*\*non-validated values\*\* with setting schema as `schema.object({}, { allowUnknowns: true })`<!-- -->;
+
 ## Example
 
 
 ```ts
  import { schema } from '@kbn/config-schema';
  router.get({
-  path: 'path/{id}'
+  path: 'path/{id}',
   validate: {
     params: schema.object({
       id: schema.string(),
@@ -26,7 +30,33 @@ validate: RouteSchemas<P, Q, B> | false;
     query: schema.object({...}),
     body: schema.object({...}),
   },
- })
+},
+(context, req, res,) {
+  req.params; // type Readonly<{id: string}>
+  console.log(req.params.id); // value
+});
+
+router.get({
+  path: 'path/{id}',
+  validate: false, // handler has no access to params, query, body values.
+},
+(context, req, res,) {
+  req.params; // type Readonly<{}>;
+  console.log(req.params.id); // undefined
+});
+
+router.get({
+  path: 'path/{id}',
+  validate: {
+    // handler has access to raw non-validated params in runtime
+    params: schema.object({}, { allowUnknowns: true })
+  },
+},
+(context, req, res,) {
+  req.params; // type Readonly<{}>;
+  console.log(req.params.id); // value
+  myValidationLibrary.validate({ params: req.params });
+});
 
 ```
 

@@ -6,6 +6,7 @@
 
 import { createEmbeddable, displayErrorToast, setupEmbeddablesAPI } from './embedded_map_helpers';
 import { npStart } from 'ui/new_platform';
+import { createPortalNode } from 'react-reverse-portal';
 
 jest.mock('ui/new_platform');
 jest.mock('../../lib/settings/use_kibana_ui_setting');
@@ -50,8 +51,7 @@ describe('embedded_map_helpers', () => {
 
   describe('setupEmbeddablesAPI', () => {
     test('attaches SIEM_FILTER_ACTION, and detaches extra UI actions', () => {
-      const applyFilterMock = jest.fn();
-      setupEmbeddablesAPI(applyFilterMock);
+      setupEmbeddablesAPI();
       expect(npStart.plugins.uiActions.registerAction).toHaveBeenCalledTimes(1);
       expect(npStart.plugins.uiActions.detachAction).toHaveBeenCalledTimes(3);
     });
@@ -60,13 +60,29 @@ describe('embedded_map_helpers', () => {
   describe('createEmbeddable', () => {
     test('attaches refresh action', async () => {
       const setQueryMock = jest.fn();
-      await createEmbeddable([], '', 0, 0, setQueryMock);
+      await createEmbeddable(
+        [],
+        [],
+        { query: '', language: 'kuery' },
+        0,
+        0,
+        setQueryMock,
+        createPortalNode()
+      );
       expect(setQueryMock).toHaveBeenCalledTimes(1);
     });
 
     test('attaches refresh action with correct reference', async () => {
       const setQueryMock = jest.fn(({ id, inspect, loading, refetch }) => refetch);
-      const embeddable = await createEmbeddable([], '', 0, 0, setQueryMock);
+      const embeddable = await createEmbeddable(
+        [],
+        [],
+        { query: '', language: 'kuery' },
+        0,
+        0,
+        setQueryMock,
+        createPortalNode()
+      );
       expect(setQueryMock.mock.calls[0][0].refetch).not.toBe(embeddable.reload);
       setQueryMock.mock.results[0].value();
       expect(embeddable.reload).toHaveBeenCalledTimes(1);

@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
 import { ResponseError } from 'vscode-jsonrpc';
 import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
 import { SymbolLocator } from '@elastic/lsp-extension';
+import { KibanaRequest, KibanaResponseFactory, RequestHandlerContext } from 'src/core/server';
 
 import {
   LanguageServerStartFailed,
@@ -22,15 +22,16 @@ import { ServerOptions } from '../server_options';
 
 import { EsClientWithRequest } from '../utils/esclient_with_request';
 import { promiseTimeout } from '../utils/timeout';
-import { RequestFacade, ResponseToolkitFacade } from '../..';
 import { CodeServices } from '../distributed/code_services';
 import { GitServiceDefinition, LspServiceDefinition } from '../distributed/apis';
 import { findTitleFromHover, groupFiles } from '../utils/lsp_utils';
+import { getReferenceHelper } from '../utils/repository_reference_helper';
+import { SymbolSearchResult } from '../../model';
 
 const LANG_SERVER_ERROR = 'language server error';
 
 export function lspRoute(
-  server: CodeServerRouter,
+  router: CodeServerRouter,
   codeServices: CodeServices,
   serverOptions: ServerOptions,
   log: Logger
@@ -38,22 +39,29 @@ export function lspRoute(
   const lspService = codeServices.serviceFor(LspServiceDefinition);
   const gitService = codeServices.serviceFor(GitServiceDefinition);
 
-  server.route({
+  router.route({
     path: '/api/code/lsp/textDocument/{method}',
-    async handler(req: RequestFacade, h: ResponseToolkitFacade) {
-      if (typeof req.payload === 'object' && req.payload != null) {
+    async npHandler(
+      context: RequestHandlerContext,
+      req: KibanaRequest,
+      res: KibanaResponseFactory
+    ) {
+      if (typeof req.body === 'object' && req.body != null) {
+        // @ts-ignore
         const method = req.params.method;
         if (method) {
           try {
-            const params = (req.payload as unknown) as any;
+            const params = (req.body as unknown) as any;
             const uri = params.textDocument.uri;
             const { repoUri } = parseLspUrl(uri)!;
+            await getReferenceHelper(context.core.savedObjects.client).ensureReference(repoUri);
             const endpoint = await codeServices.locate(req, repoUri);
             const requestPromise = lspService.sendRequest(endpoint, {
               method: `textDocument/${method}`,
-              params: req.payload,
+              params: req.body,
             });
-            return await promiseTimeout(serverOptions.lsp.requestTimeoutMs, requestPromise);
+            const result = await promiseTimeout(serverOptions.lsp.requestTimeoutMs, requestPromise);
+            return res.ok({ body: result });
           } catch (error) {
             if (error instanceof ResponseError) {
               // hide some errors;
@@ -64,38 +72,49 @@ export function lspRoute(
               ) {
                 log.debug(error);
               }
-              return h
-                .response({ error: { code: error.code, msg: LANG_SERVER_ERROR } })
-                .type('json')
-                .code(500); // different code for LS errors and other internal errors.
+              return res.custom({
+                statusCode: 500,
+                body: { error: { code: 500, msg: LANG_SERVER_ERROR } },
+              });
             } else if (error.isBoom) {
-              return error;
+              return res.customError({
+                body: error.error,
+                statusCode: error.statusCode ? error.statusCode : 500,
+              });
             } else {
               log.error(error);
-              return h
-                .response({ error: { code: error.code || 500, msg: LANG_SERVER_ERROR } })
-                .type('json')
-                .code(500);
+              return res.custom({
+                statusCode: 500,
+                body: { error: { code: 500, msg: LANG_SERVER_ERROR } },
+              });
             }
           }
         } else {
-          return h.response('missing `method` in request').code(400);
+          return res.badRequest({ body: 'missing `method` in request' });
         }
       } else {
-        return h.response('json body required').code(400); // bad request
+        return res.badRequest({ body: 'json body required' });
       }
     },
     method: 'POST',
   });
 
-  server.route({
+  router.route({
     path: '/api/code/lsp/findDefinitions',
     method: 'POST',
-    async handler(req: RequestFacade, h: ResponseToolkitFacade) {
+    async npHandler(
+      context: RequestHandlerContext,
+      req: KibanaRequest,
+      res: KibanaResponseFactory
+    ) {
       // @ts-ignore
-      const { textDocument, position } = req.payload;
+      const { textDocument, position } = req.body as any;
+      // @ts-ignore
+      const { qname } = req.params as any;
       const { uri } = textDocument;
-      const endpoint = await codeServices.locate(req, parseLspUrl(uri).repoUri);
+      const { repoUri } = parseLspUrl(uri);
+      await getReferenceHelper(context.core.savedObjects.client).ensureReference(repoUri);
+      const endpoint = await codeServices.locate(req, repoUri);
       const response: ResponseMessage = await promiseTimeout(
         serverOptions.lsp.requestTimeoutMs,
         lspService.sendRequest(endpoint, {
@@ -111,15 +130,16 @@ export function lspRoute(
         },
       });
       const title: string = await findTitleFromHover(hover, uri, position);
-      const symbolSearchClient = new SymbolSearchClient(new EsClientWithRequest(req), log);
+      const symbolSearchClient = new SymbolSearchClient(new EsClientWithRequest(context, req), log);
 
       const locators = response.result as SymbolLocator[];
       const locations = [];
+      const repoScope = await getReferenceHelper(context.core.savedObjects.client).findReferences();
       for (const locator of locators) {
         if (locator.location) {
           locations.push(locator.location);
-        } else if (locator.qname) {
-          const searchResults = await symbolSearchClient.findByQname(req.params.qname);
+        } else if (locator.qname && repoScope.length > 0) {
+          const searchResults = await symbolSearchClient.findByQname(qname, repoScope);
           for (const symbol of searchResults.symbols) {
             locations.push(symbol.symbolInformation.location);
           }
@@ -129,19 +149,24 @@ export function lspRoute(
         const ep = await codeServices.locate(req, loc.uri);
         return await gitService.blob(ep, loc);
       });
-      return { title, files, uri, position };
+      return res.ok({ body: { title, files, uri, position } });
     },
   });
 
-  server.route({
+  router.route({
     path: '/api/code/lsp/findReferences',
     method: 'POST',
-    async handler(req: RequestFacade, h: ResponseToolkitFacade) {
+    async npHandler(
+      context: RequestHandlerContext,
+      req: KibanaRequest,
+      res: KibanaResponseFactory
+    ) {
       try {
-        // @ts-ignore
-        const { textDocument, position } = req.payload;
+        const { textDocument, position } = req.body as any;
         const { uri } = textDocument;
-        const endpoint = await codeServices.locate(req, parseLspUrl(uri).repoUri);
+        const { repoUri } = parseLspUrl(uri);
+        await getReferenceHelper(context.core.savedObjects.client).ensureReference(repoUri);
+        const endpoint = await codeServices.locate(req, repoUri);
         const response: ResponseMessage = await promiseTimeout(
           serverOptions.lsp.requestTimeoutMs,
           lspService.sendRequest(endpoint, {
@@ -161,21 +186,24 @@ export function lspRoute(
           const ep = await codeServices.locate(req, loc.uri);
           return await gitService.blob(ep, loc);
         });
-        return { title, files, uri, position };
+        return res.ok({ body: { title, files, uri, position } });
       } catch (error) {
         log.error(error);
         if (error instanceof ResponseError) {
-          return h
-            .response({ error: { code: error.code, msg: LANG_SERVER_ERROR } })
-            .type('json')
-            .code(500); // different code for LS errors and other internal errors.
+          return res.custom({
+            statusCode: 500,
+            body: { error: { code: error.code, msg: LANG_SERVER_ERROR } },
+          });
         } else if (error.isBoom) {
-          return error;
+          return res.customError({
+            body: error.error,
+            statusCode: error.statusCode ? error.statusCode : 500,
+          });
         } else {
-          return h
-            .response({ error: { code: 500, msg: LANG_SERVER_ERROR } })
-            .type('json')
-            .code(500);
+          return res.custom({
+            statusCode: 500,
+            body: { error: { code: 500, msg: LANG_SERVER_ERROR } },
+          });
         }
       }
     },
@@ -186,13 +214,26 @@ export function symbolByQnameRoute(router: CodeServerRouter, log: Logger) {
   router.route({
     path: '/api/code/lsp/symbol/{qname}',
     method: 'GET',
-    async handler(req: RequestFacade) {
-      try {
-        const symbolSearchClient = new SymbolSearchClient(new EsClientWithRequest(req), log);
-        return await symbolSearchClient.findByQname(req.params.qname);
-      } catch (error) {
-        return Boom.internal(`Search Exception`);
+    async npHandler(
+      context: RequestHandlerContext,
+      req: KibanaRequest,
+      res: KibanaResponseFactory
+    ) {
+      // @ts-ignore
+      const { qname } = req.params as any;
+      const symbolSearchClient = new SymbolSearchClient(new EsClientWithRequest(context, req), log);
+      const repoScope = await getReferenceHelper(context.core.savedObjects.client).findReferences();
+      if (repoScope.length === 0) {
+        return res.ok({
+          body: {
+            symbols: [],
+            total: 0,
+            took: 0,
+          } as SymbolSearchResult,
+        });
       }
+      const symbol = await symbolSearchClient.findByQname(qname, repoScope);
+      return res.ok({ body: symbol });
     },
   });
 }

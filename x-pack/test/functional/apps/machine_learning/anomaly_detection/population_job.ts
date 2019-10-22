@@ -94,7 +94,6 @@ export default function({ getService }: FtrProviderContext) {
     after(async () => {
       await esArchiver.unload('ml/farequote');
       await ml.api.cleanMlIndices();
-      await ml.api.cleanDataframeIndices();
     });
 
     describe('job creation', function() {
@@ -119,11 +118,14 @@ export default function({ getService }: FtrProviderContext) {
         await ml.jobWizardCommon.assertTimeRangeSectionExists();
       });
 
-      it('displays the event rate chart', async () => {
+      it('sets the timerange', async () => {
         await ml.jobWizardCommon.clickUseFullDataButton(
           'Jun 12, 2019 @ 00:04:19.000',
           'Jul 12, 2019 @ 23:45:36.000'
         );
+      });
+
+      it('displays the event rate chart', async () => {
         await ml.jobWizardCommon.assertEventRateChartExists();
         await ml.jobWizardCommon.assertEventRateChartHasData();
       });
@@ -262,11 +264,14 @@ export default function({ getService }: FtrProviderContext) {
         await ml.jobWizardCommon.assertTimeRangeSectionExists();
       });
 
-      it('displays the event rate chart', async () => {
+      it('sets the timerange', async () => {
         await ml.jobWizardCommon.clickUseFullDataButton(
           'Jun 12, 2019 @ 00:04:19.000',
           'Jul 12, 2019 @ 23:45:36.000'
         );
+      });
+
+      it('displays the event rate chart', async () => {
         await ml.jobWizardCommon.assertEventRateChartExists();
         await ml.jobWizardCommon.assertEventRateChartHasData();
       });

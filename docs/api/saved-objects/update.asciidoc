@@ -4,15 +4,20 @@
 <titleabbrev>Update object</titleabbrev>
 ++++
 
-experimental[] Update the attributes for an existing {kib} saved object.
+experimental[] Update the attributes for existing {kib} saved objects.
 
 [[saved-objects-api-update-request]]
 ==== Request
 
 `PUT /api/saved_objects/<type>/<id>`
 
+`PUT /s/<space_id>/api/saved_objects/<type>/<id>`
+
 [[saved-objects-api-update-path-params]]
-==== Path Parameters
+==== Path parameters
+
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
 `type`::
   (Required, string) Valid options include `visualization`, `dashboard`, `search`, `index-pattern`, `config`, and `timelion-sheet`.
@@ -21,7 +26,7 @@ experimental[] Update the attributes for an existing {kib} saved object.
   (Required, string) The object ID to update.
 
 [[saved-objects-api-update-request-body]]
-==== Request Body
+==== Request body
 
 `attributes`::
   (Required, object) The data to persist.
@@ -30,11 +35,11 @@ WARNING: When you update, attributes are not validated, which allows you to pass
 
 `references`::
   (Optional, array) Objects with `name`, `id`, and `type` properties that describe the other saved objects this object references. To refer to the other saved object, use `name` in the attributes, but never the `id`, which automatically updates during migrations or import/export.
-  
+
 [[saved-objects-api-update-errors-codes]]
 ==== Response code
 
-`200`:: 
+`200`::
     Indicates a successful call.
 
 [[saved-objects-api-update-example]]

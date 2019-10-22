@@ -6,7 +6,7 @@
 
 import { TransformFactory } from '../../../types/transforms';
 import { Arguments } from '../../functions/common/rounddate';
-import { TransformStrings } from '../../strings';
+import { TransformStrings } from '../../../i18n';
 
 const { RoundDate: strings } = TransformStrings;
 

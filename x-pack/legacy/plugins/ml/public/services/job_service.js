@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 
 import { ml } from './ml_api_service';
 
-import { mlMessageBarService } from '../components/messagebar/messagebar_service';
+import { mlMessageBarService } from '../components/messagebar';
 import { isWebUrl } from '../util/url_utils';
 import { ML_DATA_PREVIEW_COUNT } from '../../common/util/job_utils';
 import { parseInterval } from '../../common/util/parse_interval';
@@ -404,7 +404,6 @@ class JobService {
     // return the promise chain
     return ml.validateJob(obj)
       .then((messages) => {
-        console.log('validate job', messages);
         return { success: true, messages };
       }).catch((err) => {
         msgs.error(i18n.translate('xpack.ml.jobService.jobValidationErrorMessage', {

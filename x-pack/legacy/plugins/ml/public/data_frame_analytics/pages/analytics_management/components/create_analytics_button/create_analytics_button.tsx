@@ -16,7 +16,7 @@ import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form'
 
 import { CreateAnalyticsAdvancedEditor } from '../create_analytics_advanced_editor';
 import { CreateAnalyticsForm } from '../create_analytics_form';
-import { CreateAnalyticsModal } from '../create_analytics_modal';
+import { CreateAnalyticsFlyout } from '../create_analytics_flyout';
 
 export const CreateAnalyticsButton: FC<CreateAnalyticsFormProps> = props => {
   const { disabled, isAdvancedEditorEnabled, isModalVisible } = props.state;
@@ -52,10 +52,10 @@ export const CreateAnalyticsButton: FC<CreateAnalyticsFormProps> = props => {
     <Fragment>
       {button}
       {isModalVisible && (
-        <CreateAnalyticsModal {...props}>
+        <CreateAnalyticsFlyout {...props}>
           {isAdvancedEditorEnabled === false && <CreateAnalyticsForm {...props} />}
           {isAdvancedEditorEnabled === true && <CreateAnalyticsAdvancedEditor {...props} />}
-        </CreateAnalyticsModal>
+        </CreateAnalyticsFlyout>
       )}
     </Fragment>
   );

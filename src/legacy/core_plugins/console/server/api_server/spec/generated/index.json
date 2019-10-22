@@ -17,16 +17,15 @@
       "version_type": [
         "internal",
         "external",
-        "external_gte",
-        "force"
+        "external_gte"
       ],
       "if_seq_no": "",
       "if_primary_term": "",
       "pipeline": ""
     },
     "methods": [
-      "POST",
-      "PUT"
+      "PUT",
+      "POST"
     ],
     "patterns": [
       "{indices}/_doc/{id}",

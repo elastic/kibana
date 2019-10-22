@@ -45,16 +45,16 @@ async function executor(
   { logger }: { logger: Logger },
   execOptions: ActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult> {
-  const id = execOptions.id;
+  const actionId = execOptions.actionId;
   const params = execOptions.params as ActionParamsType;
 
   try {
     logger[params.level](params.message);
   } catch (err) {
     const message = i18n.translate('xpack.actions.builtin.serverLog.errorLoggingErrorMessage', {
-      defaultMessage: 'error in action "{id}" logging message: {errorMessage}',
+      defaultMessage: 'error in action "{actionId}" logging message: {errorMessage}',
       values: {
-        id,
+        actionId,
         errorMessage: err.message,
       },
     });

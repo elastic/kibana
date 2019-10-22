@@ -12,7 +12,7 @@ import { sortBy } from 'lodash';
 import { getType } from '@kbn/interpreter/common';
 import { createStatefulPropHoc } from '../../../../public/components/enhance/stateful_prop';
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
-import { ArgumentStrings } from '../../../strings';
+import { ArgumentStrings } from '../../../../i18n';
 import { SimpleMathFunction } from './simple_math_function';
 import { getFormObject } from './get_form_object';
 

@@ -5,7 +5,7 @@
  */
 
 import { AlertInstance } from './lib';
-import { AlertTypeRegistry } from './alert_type_registry';
+import { AlertTypeRegistry as OrigAlertTypeRegistry } from './alert_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { SavedObjectAttributes, SavedObjectsClientContract } from '../../../../../src/core/server';
 
@@ -26,6 +26,7 @@ export interface AlertServices extends Services {
 }
 
 export interface AlertExecutorOptions {
+  alertId: string;
   startedAt: Date;
   previousStartedAt?: Date;
   services: AlertServices;
@@ -94,4 +95,4 @@ export interface AlertingPlugin {
   start: PluginStartContract;
 }
 
-export type AlertTypeRegistry = PublicMethodsOf<AlertTypeRegistry>;
+export type AlertTypeRegistry = PublicMethodsOf<OrigAlertTypeRegistry>;

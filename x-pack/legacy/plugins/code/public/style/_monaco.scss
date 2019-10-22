@@ -1,28 +1,24 @@
 .codeSearch__highlight {
-	background-color: $euiColorVis5;
-	color: black !important;
-	padding: $euiSizeXS / 2;
-	border-radius: $euiSizeXS / 2;
-	font-weight: bold;
-	font-style: oblique;
-	cursor: pointer;
+  background-color: $euiColorVis5;
+  color: black !important;
+  padding: $euiSizeXS / 2;
+  border-radius: $euiSizeXS / 2;
+  font-weight: bold;
+  font-style: oblique;
+  cursor: pointer;
 }
 
-
-.code-monaco-highlight-line {
-  background: $euiCodeBlockBuiltInColor;
+.codeBlock__line--highlighted {
+  background-color: $euiColorLightShade;
 }
 
-.code-mark-line-number {
-  background: $euiCodeBlockBuiltInColor;
-  width: $euiSizeXS;
-}
-
+.monaco-diff-editor .margin-view-overlays .line-numbers,
 .monaco-editor .margin-view-overlays .line-numbers {
   text-align: center;
   border-right: $euiBorderThin;
 }
 
+.monaco-diff-editor-hover,
 .monaco-editor-hover {
   min-width: 350px;
   border: $euiBorderThin;
@@ -44,10 +40,12 @@
   @include euiBottomShadow;
 }
 
+.monaco-diff-editor-hover .hover-row,
 .monaco-editor-hover .hover-row {
   padding: 4px 5px;
 }
 
+.monaco-diff-editor-hover .button-group,
 .monaco-editor-hover .button-group {
   background: linear-gradient(-180deg, $euiColorLightestShade 0%, $euiColorEmptyShade 100%);
   border-radius: 0 0 4px 4px;
@@ -55,10 +53,12 @@
   height: 33px;
 }
 
+.monaco-diff-editor-hover .button-group button:not(:first-child),
 .monaco-editor-hover .button-group button:not(:first-child) {
   border-left: 1px solid $euiBorderColor;
 }
 
+.monaco-diff-editor-hover .button-group button,
 .monaco-editor-hover .button-group button {
   font-size: 13px;
   font-weight: normal;
@@ -67,13 +67,9 @@
   flex: 1;
 }
 
+.monaco-diff-editor .scroll-decoration,
 .monaco-editor .scroll-decoration {
   display: none;
-}
-
-.code-mark-line-number,
-.code-monaco-highlight-line {
-  background-color: $euiColorLightShade;
 }
 
 .text-placeholder {
