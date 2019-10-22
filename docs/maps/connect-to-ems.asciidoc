@@ -13,7 +13,16 @@ EMS requests are made to the following domains:
 * vector.maps.elastic.co
 
 **Elastic Maps** makes requests directly from the browser to EMS.
-To proxy EMS requests through the Kibana server, set `map.proxyElasticMapsServiceInMaps` to `true` in your <<settings, kibana.yml>> file.
+
+[float]
+=== Connecting to Elastic Maps Service from an internal network
+
+To connect to EMS when your Kibana server and browser are running from an internal network.
+
+1. Set `map.proxyElasticMapsServiceInMaps` to `true` in your <<settings, kibana.yml>> file to proxy EMS requests through the Kibana server.
+2. Update your firewall rules to whitelist connections from your Kibana server to the EMS domains listed above.
+
+NOTE: Coordinate map  and region map visualizations do not support `map.proxyElasticMapsServiceInMaps` and will not proxy EMS requests through the Kibana server.
 
 
 [float]
