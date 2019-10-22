@@ -8,7 +8,6 @@ import { ReactWrapper, ShallowWrapper } from 'enzyme';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { EuiComboBox, EuiSideNav, EuiPopover } from '@elastic/eui';
-import { IndexPatternPrivateState } from '../indexpattern';
 import { changeColumn } from '../state_helpers';
 import { IndexPatternDimensionPanel, IndexPatternDimensionPanelProps } from './dimension_panel';
 import { DropHandler, DragContextState } from '../../drag_drop';
@@ -20,6 +19,7 @@ import {
   HttpServiceBase,
 } from 'src/core/public';
 import { Storage } from 'ui/storage';
+import { IndexPatternPrivateState } from '../types';
 
 jest.mock('ui/new_platform');
 jest.mock('../loader');
@@ -87,9 +87,18 @@ describe('IndexPatternDimensionPanel', () => {
 
   beforeEach(() => {
     state = {
+      indexPatternRefs: [],
       indexPatterns: expectedIndexPatterns,
       currentIndexPatternId: '1',
       showEmptyFields: false,
+      existingFields: {
+        'my-fake-index-pattern': {
+          timestamp: true,
+          bytes: true,
+          memory: true,
+          source: true,
+        },
+      },
       layers: {
         first: {
           indexPatternId: '1',
@@ -198,6 +207,28 @@ describe('IndexPatternDimensionPanel', () => {
       'memory',
       'source',
     ]);
+  });
+
+  it('should hide fields that have no data', () => {
+    const props = {
+      ...defaultProps,
+      state: {
+        ...defaultProps.state,
+        existingFields: {
+          'my-fake-index-pattern': {
+            timestamp: true,
+            source: true,
+          },
+        },
+      },
+    };
+    wrapper = mount(<IndexPatternDimensionPanel {...props} />);
+
+    openPopover();
+
+    const options = wrapper.find(EuiComboBox).prop('options');
+
+    expect(options![1].options!.map(({ label }) => label)).toEqual(['timestamp', 'source']);
   });
 
   it('should indicate fields which are imcompatible for the operation of the current column', () => {
@@ -543,6 +574,40 @@ describe('IndexPatternDimensionPanel', () => {
       ).not.toContain('Incompatible');
     });
 
+    it('should select compatible operation if field not compatible with selected operation', () => {
+      wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} columnId={'col2'} />);
+
+      openPopover();
+
+      wrapper.find('button[data-test-subj="lns-indexPatternDimension-avg"]').simulate('click');
+
+      const comboBox = wrapper.find(EuiComboBox);
+      const options = comboBox.prop('options');
+
+      // options[1][2] is a `source` field of type `string` which doesn't support `avg` operation
+      act(() => {
+        comboBox.prop('onChange')!([options![1].options![2]]);
+      });
+
+      expect(setState).toHaveBeenCalledWith({
+        ...state,
+        layers: {
+          first: {
+            ...state.layers.first,
+            columns: {
+              ...state.layers.first.columns,
+              col2: expect.objectContaining({
+                sourceField: 'source',
+                operationType: 'terms',
+                // Other parts of this don't matter for this test
+              }),
+            },
+            columnOrder: ['col1', 'col2'],
+          },
+        },
+      });
+    });
+
     it('should indicate document compatibility with selected field operation', () => {
       const initialState: IndexPatternPrivateState = {
         ...state,
@@ -822,7 +887,7 @@ describe('IndexPatternDimensionPanel', () => {
         .find(EuiSideNav)
         .prop('items')[0]
         .items.map(({ name }) => name)
-    ).toEqual(['Unique count', 'Average', 'Count', 'Filter ratio', 'Maximum', 'Minimum', 'Sum']);
+    ).toEqual(['Unique count', 'Average', 'Count', 'Maximum', 'Minimum', 'Sum']);
   });
 
   it('should add a column on selection of a field', () => {
@@ -945,6 +1010,8 @@ describe('IndexPatternDimensionPanel', () => {
   describe('drag and drop', () => {
     function dragDropState(): IndexPatternPrivateState {
       return {
+        indexPatternRefs: [],
+        existingFields: {},
         indexPatterns: {
           foo: {
             id: 'foo',

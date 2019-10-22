@@ -45,7 +45,6 @@ export const reporting = (kibana) => {
       embeddableActions: [
         'plugins/reporting/panel_actions/get_csv_panel_action',
       ],
-      hacks: ['plugins/reporting/hacks/job_completion_notifier'],
       home: ['plugins/reporting/register_feature'],
       managementSections: ['plugins/reporting/views/management'],
       injectDefaultVars(server, options) {
@@ -92,6 +91,21 @@ export const reporting = (kibana) => {
           timeout: Joi.number().integer().default(120000),
         }).default(),
         capture: Joi.object({
+          networkPolicy: Joi.object({
+            enabled: Joi.boolean().default(true),
+            rules: Joi.array().items(Joi.object({
+              allow: Joi.boolean().required(),
+              protocol: Joi.string(),
+              host: Joi.string(),
+            })).default([
+              { allow: true, protocol: 'http:' },
+              { allow: true, protocol: 'https:' },
+              { allow: true, protocol: 'ws:' },
+              { allow: true, protocol: 'wss:' },
+              { allow: true, protocol: 'data:' },
+              { allow: false }, // Default action is to deny!
+            ]),
+          }).default(),
           zoom: Joi.number().integer().default(2),
           viewport: Joi.object({
             width: Joi.number().integer().default(1950),
@@ -113,7 +127,7 @@ export const reporting = (kibana) => {
                 is: false,
                 then: Joi.valid(false),
                 else: Joi.default(false),
-              }),
+              }).default(),
               disableSandbox: Joi.boolean().default(await getDefaultChromiumSandboxDisabled()),
               proxy: Joi.object({
                 enabled: Joi.boolean().default(false),

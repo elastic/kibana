@@ -30,7 +30,7 @@ export function UrlTemplateList({
       <EuiText size="s">
         {i18n.translate('xpack.graph.drilldowns.description', {
           defaultMessage:
-            'Drilldown links configured here can be used to link to other applications and carry over the selected nodes as part of the URL',
+            'Use drilldowns to link to other applications. The selected vertices become part of the URL.',
         })}
       </EuiText>
       <EuiSpacer />
@@ -73,7 +73,7 @@ export function UrlTemplateList({
           }}
         >
           {i18n.translate('xpack.graph.templates.newTemplateFormLabel', {
-            defaultMessage: 'Add template',
+            defaultMessage: 'Add drilldown',
           })}
         </EuiButton>
       </EuiTextAlign>
