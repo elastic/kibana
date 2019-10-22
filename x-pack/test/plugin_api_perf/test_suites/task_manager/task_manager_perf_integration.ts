@@ -58,17 +58,12 @@ export default function({ getService }: { getService: (service: string) => any }
           `average duration taken to Claim Available Tasks: ${descMetric(claimAvailableTasks)}`
         );
         log.debug(
-          `average duration taken to Attempt Work in Task Pooker: ${descMetric(
-            taskPollerAttemptWork
-          )}`
-        );
-        log.debug(
-          `average duration taken to Mark Tasks as Running in Task Pool: ${descMetric(
+          `average duration taken to Mark claimed Tasks as Running in Task Pool: ${descMetric(
             taskPoolAttemptToRun
           )}`
         );
         log.debug(
-          `average duration taken to Mark Task as Running in Task Runner: ${descMetric(
+          `average duration taken to Mark individual Tasks as Running in Task Runner: ${descMetric(
             taskRunnerMarkTaskAsRunning
           )}`
         );
