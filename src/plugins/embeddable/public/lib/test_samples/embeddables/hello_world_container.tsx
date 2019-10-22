@@ -33,7 +33,7 @@ export const HELLO_WORLD_CONTAINER = 'HELLO_WORLD_CONTAINER';
  * https://github.com/microsoft/TypeScript/issues/15300 is fixed so we use a type
  * here instead
  */
-// eslint-disable-next-line @typescript-eslint/prefer-interface
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 type InheritedInput = {
   id: string;
   viewMode: ViewMode;
