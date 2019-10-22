@@ -21,7 +21,7 @@ import { WithRequest } from './with_request';
 import { WithInternalRequest } from './with_internal_request';
 
 export class EsIndexClient {
-  constructor(readonly self: WithRequest | WithInternalRequest) {}
+  constructor(public readonly self: WithRequest | WithInternalRequest) {}
 
   public exists(params: IndicesExistsParams): Promise<any> {
     return this.self.callCluster('indices.exists', params);

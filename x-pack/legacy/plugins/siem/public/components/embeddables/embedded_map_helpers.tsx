@@ -7,18 +7,23 @@
 import { Filter } from '@kbn/es-query';
 import uuid from 'uuid';
 import React from 'react';
-import { npStart } from 'ui/new_platform';
 import { OutPortal, PortalNode } from 'react-reverse-portal';
 import { Query } from 'src/plugins/data/common';
+import { PluginsStart } from 'ui/new_platform/new_platform';
 
 import { ActionToaster, AppToast } from '../toasters';
-import { start } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import {
   CONTEXT_MENU_TRIGGER,
   PANEL_BADGE_TRIGGER,
   ViewMode,
 } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import { IndexPatternMapping, MapEmbeddable, RenderTooltipContentParams, SetQuery } from './types';
+import {
+  IndexPatternMapping,
+  MapEmbeddable,
+  RenderTooltipContentParams,
+  SetQuery,
+  EmbeddableApi,
+} from './types';
 import { getLayerList } from './map_config';
 // @ts-ignore Missing type defs as maps moves to Typescript
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../maps/common/constants';
@@ -55,10 +60,10 @@ export const displayErrorToast = (
  *
  * @throws Error if trigger/action doesn't exist
  */
-export const setupEmbeddablesAPI = () => {
+export const setupEmbeddablesAPI = (plugins: PluginsStart) => {
   try {
-    npStart.plugins.uiActions.detachAction(CONTEXT_MENU_TRIGGER, 'CUSTOM_TIME_RANGE');
-    npStart.plugins.uiActions.detachAction(PANEL_BADGE_TRIGGER, 'CUSTOM_TIME_RANGE_BADGE');
+    plugins.uiActions.detachAction(CONTEXT_MENU_TRIGGER, 'CUSTOM_TIME_RANGE');
+    plugins.uiActions.detachAction(PANEL_BADGE_TRIGGER, 'CUSTOM_TIME_RANGE_BADGE');
   } catch (e) {
     throw e;
   }
@@ -83,9 +88,10 @@ export const createEmbeddable = async (
   startDate: number,
   endDate: number,
   setQuery: SetQuery,
-  portalNode: PortalNode
+  portalNode: PortalNode,
+  embeddableApi: EmbeddableApi
 ): Promise<MapEmbeddable> => {
-  const factory = start.getEmbeddableFactory(MAP_SAVED_OBJECT_TYPE);
+  const factory = embeddableApi.getEmbeddableFactory(MAP_SAVED_OBJECT_TYPE);
 
   const state = {
     layerList: getLayerList(indexPatterns),
