@@ -5,9 +5,8 @@
  */
 
 import boom from 'boom';
-import { Legacy } from 'kibana';
 import { API_BASE_URL } from '../../common/constants';
-import { JobDoc, ServerFacade, RequestFacade } from '../../types';
+import { JobDoc, ServerFacade, RequestFacade, ReportingResponseToolkit } from '../../types';
 // @ts-ignore
 import { jobsQueryFactory } from '../lib/jobs_query';
 // @ts-ignore
@@ -121,7 +120,7 @@ export function registerJobs(server: ServerFacade) {
     path: `${MAIN_ENTRY}/download/{docId}`,
     method: 'GET',
     options: getRouteConfigDownload(),
-    handler: async (request: RequestFacade, h: Legacy.ResponseToolkit) => {
+    handler: async (request: RequestFacade, h: ReportingResponseToolkit) => {
       const { docId } = request.params;
 
       let response = await jobResponseHandler(

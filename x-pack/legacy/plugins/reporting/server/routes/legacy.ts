@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Legacy } from 'kibana';
 import querystring from 'querystring';
 import { API_BASE_URL } from '../../common/constants';
-import { ServerFacade, RequestFacade } from '../../types';
+import { ServerFacade, RequestFacade, ReportingResponseToolkit } from '../../types';
 import { getRouteConfigFactoryReportingPre } from './lib/route_config_factories';
 import { HandlerErrorFunction, HandlerFunction } from './types';
 
@@ -28,7 +27,7 @@ export function registerLegacy(
       path,
       method: 'POST',
       options: getStaticFeatureConfig(getRouteConfig, exportTypeId),
-      handler: async (request: RequestFacade, h: Legacy.ResponseToolkit) => {
+      handler: async (request: RequestFacade, h: ReportingResponseToolkit) => {
         const message = `The following URL is deprecated and will stop working in the next major version: ${request.url.path}`;
         server.log(['warning', 'reporting', 'deprecation'], message);
 

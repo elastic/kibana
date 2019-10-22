@@ -7,9 +7,8 @@
 import boom from 'boom';
 import Joi from 'joi';
 import rison from 'rison-node';
-import { Legacy } from 'kibana';
 import { API_BASE_URL } from '../../common/constants';
-import { ServerFacade, RequestFacade } from '../../types';
+import { ServerFacade, RequestFacade, ReportingResponseToolkit } from '../../types';
 import { getRouteConfigFactoryReportingPre } from './lib/route_config_factories';
 import { HandlerErrorFunction, HandlerFunction } from './types';
 
@@ -42,7 +41,7 @@ export function registerGenerateFromJobParams(
     path: `${BASE_GENERATE}/{exportType}`,
     method: 'POST',
     options: getRouteConfig(),
-    handler: async (request: RequestFacade, h: Legacy.ResponseToolkit) => {
+    handler: async (request: RequestFacade, h: ReportingResponseToolkit) => {
       let jobParamsRison: string | null;
 
       if (request.payload) {

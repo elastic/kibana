@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Legacy } from 'kibana';
 import { get } from 'lodash';
 
 import { API_BASE_GENERATE_V1, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../common/constants';
-import { ServerFacade, RequestFacade } from '../../types';
+import { ServerFacade, RequestFacade, ReportingResponseToolkit } from '../../types';
 import { HandlerErrorFunction, HandlerFunction, QueuedJobPayload } from './types';
 import { getRouteOptions } from './lib/route_config_factories';
 import { getJobParamsFromRequest } from '../../export_types/csv_from_savedobject/server/lib/get_job_params_from_request';
@@ -22,7 +21,7 @@ const getJobFromRouteHandler = async (
   handleRoute: HandlerFunction,
   handleRouteError: HandlerErrorFunction,
   request: RequestFacade,
-  h: Legacy.ResponseToolkit
+  h: ReportingResponseToolkit
 ): Promise<QueuedJobPayload> => {
   let result: QueuedJobPayload;
   try {
@@ -59,7 +58,7 @@ export function registerGenerateCsvFromSavedObject(
     path: `${API_BASE_GENERATE_V1}/csv/saved-object/{savedObjectType}:{savedObjectId}`,
     method: 'POST',
     options: routeOptions,
-    handler: async (request: RequestFacade, h: Legacy.ResponseToolkit) => {
+    handler: async (request: RequestFacade, h: ReportingResponseToolkit) => {
       return getJobFromRouteHandler(handleRoute, handleRouteError, request, h);
     },
   });

@@ -5,9 +5,8 @@
  */
 
 import boom from 'boom';
-import { Legacy } from 'kibana';
 import { API_BASE_URL } from '../../common/constants';
-import { ServerFacade, RequestFacade, Logger } from '../../types';
+import { ServerFacade, RequestFacade, ReportingResponseToolkit, Logger } from '../../types';
 import { enqueueJobFactory } from '../lib/enqueue_job';
 import { registerGenerateFromJobParams } from './generate_from_jobparams';
 import { registerGenerateCsvFromSavedObject } from './generate_from_savedobject';
@@ -29,7 +28,7 @@ export function registerRoutes(server: ServerFacade, logger: Logger) {
     exportTypeId: string,
     jobParams: any,
     request: RequestFacade,
-    h: Legacy.ResponseToolkit
+    h: ReportingResponseToolkit
   ) {
     // @ts-ignore
     const user = request.pre.user;

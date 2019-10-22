@@ -37,7 +37,10 @@ export interface NetworkPolicy {
 // Tracks which parts of the legacy plugin system are being used
 export type ServerFacade = Legacy.Server & {
   plugins: {
-    reporting: ReportingPlugin;
+    reporting?: ReportingPlugin;
+    xpack_main?: XPackMainPlugin & {
+      status?: any;
+    };
   };
 };
 
@@ -57,15 +60,25 @@ interface DownloadParams {
 }
 
 // Tracks which parts of the legacy plugin system are being used
-export type RequestFacade = Legacy.Request & {
+interface ReportingRequest {
   query: ListQuery & GenerateQuery;
   params: DownloadParams;
   payload: GenerateExportTypePayload;
-};
+  pre: {
+    management: {
+      jobTypes: any;
+    };
+    user: any;
+  };
+}
+
+export type RequestFacade = ReportingRequest & Legacy.Request;
 
 export type ResponseFacade = ResponseObject & {
   isBoom: boolean;
 };
+
+export type ReportingResponseToolkit = Legacy.ResponseToolkit;
 
 export interface CaptureConfig {
   browser: {
