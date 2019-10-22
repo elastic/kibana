@@ -16,7 +16,11 @@ import {
 } from '@elastic/eui';
 
 import { NormalizedField } from '../../../types';
-import { CHILD_FIELD_INDENT_SIZE, LEFT_PADDING_SIZE_FIELD_ITEM_WRAPPER } from '../../../constants';
+import {
+  TYPE_DEFINITION,
+  CHILD_FIELD_INDENT_SIZE,
+  LEFT_PADDING_SIZE_FIELD_ITEM_WRAPPER,
+} from '../../../constants';
 import { FieldsList } from './fields_list';
 import { CreateField } from './create_field';
 import { DeleteFieldProvider } from './delete_field_provider';
@@ -164,7 +168,7 @@ export const FieldsListItem = React.memo(function FieldListItemComponent({
               {source.name}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow">{source.type}</EuiBadge>
+              <EuiBadge color="hollow">{TYPE_DEFINITION[source.type].label}</EuiBadge>
             </EuiFlexItem>
             {!isMultiField && canHaveMultiFields && (
               <>
@@ -185,11 +189,6 @@ export const FieldsListItem = React.memo(function FieldListItemComponent({
                 </EuiFlexItem>
               </>
             )}
-            {/* {hasMultiFields && (
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow">{`${childFields!.length} multi-field`}</EuiBadge>
-              </EuiFlexItem>
-            )} */}
             <EuiFlexItem className="mappings-editor__fields-list-item__actions">
               {renderActionButtons()}
             </EuiFlexItem>
