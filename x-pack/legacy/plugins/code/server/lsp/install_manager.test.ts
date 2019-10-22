@@ -11,7 +11,7 @@ import os from 'os';
 import path from 'path';
 import rimraf from 'rimraf';
 
-import { LanguageServers } from './language_servers';
+import { LanguageServers, LanguageServersDeveloping } from './language_servers';
 import { InstallManager } from './install_manager';
 import { ServerOptions } from '../server_options';
 import { LanguageServerStatus } from '../../common/language_server';
@@ -19,12 +19,15 @@ import { InstallationType } from '../../common/installation';
 import { ServerFacade } from '../..';
 
 const LANG_SERVER_NAME = 'Java';
-const langSrvDef = LanguageServers.find(l => l.name === LANG_SERVER_NAME)!;
+const langSrvDef = LanguageServers.concat(LanguageServersDeveloping).find(
+  l => l.name === LANG_SERVER_NAME
+)!;
 
 const fakeTestDir = path.join(os.tmpdir(), 'foo-');
 
 const options: ServerOptions = {} as ServerOptions;
-
+// @ts-ignore
+options.devMode = true;
 const server: ServerFacade = new Server();
 server.config = () => {
   return {

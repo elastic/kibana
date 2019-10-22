@@ -11,7 +11,11 @@ import { CodeUsageMetrics } from '../model/usage_telemetry_metrics';
 import { EsClient } from './lib/esqueue';
 import { RepositoryObjectClient } from './search';
 import { LspService } from './lsp/lsp_service';
-import { LanguageServers, LanguageServerDefinition } from './lsp/language_servers';
+import {
+  LanguageServers,
+  LanguageServersDeveloping,
+  LanguageServerDefinition,
+} from './lsp/language_servers';
 
 export async function fetchCodeUsageMetrics(client: EsClient, lspService: LspService) {
   const repositoryObjectClient: RepositoryObjectClient = new RepositoryObjectClient(client);
@@ -22,12 +26,14 @@ export async function fetchCodeUsageMetrics(client: EsClient, lspService: LspSer
   };
 
   const langServersEnabled = await Promise.all(
-    LanguageServers.map(async (langServer: LanguageServerDefinition) => {
-      return {
-        key: langServer.name,
-        enabled: await langServerEnabled(langServer.name),
-      };
-    })
+    LanguageServers.concat(LanguageServersDeveloping).map(
+      async (langServer: LanguageServerDefinition) => {
+        return {
+          key: langServer.name,
+          enabled: await langServerEnabled(langServer.name),
+        };
+      }
+    )
   );
 
   return {

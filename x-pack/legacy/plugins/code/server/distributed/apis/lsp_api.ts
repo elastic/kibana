@@ -29,6 +29,10 @@ export const LspServiceDefinition = {
     request: {} as { repoUri: string; revision: string },
     response: {} as { [p: string]: WorkspaceStatus },
   },
+  allLangServerDisabled: {
+    request: {},
+    response: {} as boolean,
+  },
 };
 
 export const getLspServiceHandler = (
@@ -45,5 +49,8 @@ export const getLspServiceHandler = (
   },
   async initializeState({ repoUri, revision }) {
     return await lspService.initializeState(repoUri, revision);
+  },
+  async allLangServerDisabled() {
+    return lspService.allLangServerDisabled();
   },
 });

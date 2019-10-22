@@ -15,13 +15,16 @@ import { LoggerFactory } from '../utils/log_factory';
 import { LanguageServerController } from './controller';
 import { InstallManager } from './install_manager';
 import { WorkspaceHandler } from './workspace_handler';
+import { enabledLanguageServers } from './language_servers';
+import { ResponseError } from '../../common/jsonrpc';
+import { LanguageDisabled } from '../../common/lsp_error_codes';
 
 export class LspService {
   public readonly controller: LanguageServerController;
   public readonly workspaceHandler: WorkspaceHandler;
   constructor(
     targetHost: string,
-    serverOptions: ServerOptions,
+    private readonly serverOptions: ServerOptions,
     gitOps: GitOperations,
     client: EsClient,
     installManager: InstallManager,
@@ -49,14 +52,18 @@ export class LspService {
    * @param params the request params
    */
   public async sendRequest(method: string, params: any): Promise<ResponseMessage> {
-    const request = { method, params };
-    await this.workspaceHandler.handleRequest(request);
-    const response = await this.controller.handleRequest(request);
-    return this.workspaceHandler.handleResponse(request, response);
+    if (this.allLangServerDisabled()) {
+      throw new ResponseError(LanguageDisabled, `no language server available.`);
+    } else {
+      const request = { method, params };
+      await this.workspaceHandler.handleRequest(request);
+      const response = await this.controller.handleRequest(request);
+      return this.workspaceHandler.handleResponse(request, response);
+    }
   }
 
-  public async launchServers() {
-    await this.controller.launchServers();
+  public allLangServerDisabled() {
+    return enabledLanguageServers(this.serverOptions).length === 0;
   }
 
   public async deleteWorkspace(repoUri: string) {

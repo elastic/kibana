@@ -28,6 +28,8 @@ const workspaceDir = path.join(baseDir, 'workspace');
 // @ts-ignore
 const options: ServerOptions = sinon.createStubInstance(ServerOptions);
 // @ts-ignore
+options.devMode = true;
+// @ts-ignore
 options.lsp = {
   TypeScript: {
     enabled: true,

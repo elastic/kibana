@@ -5,10 +5,6 @@
  */
 
 import { ResponseError } from 'vscode-jsonrpc';
-import fs from 'fs';
-import path from 'path';
-import { promisify } from 'util';
-import { isBinaryFile } from 'isbinaryfile';
 import { ProgressReporter } from '.';
 import { TEXT_FILE_LIMIT } from '../../common/file';
 import {
@@ -39,9 +35,6 @@ import {
 } from './index_creation_request';
 import { ALL_RESERVED, DocumentIndexName, ReferenceIndexName, SymbolIndexName } from './schema';
 
-const state = promisify(fs.stat);
-const readFile = promisify(fs.readFile);
-
 export class LspIndexer extends AbstractIndexer {
   public type: IndexerType = IndexerType.LSP;
   // Batch index helper for symbols/references
@@ -51,7 +44,6 @@ export class LspIndexer extends AbstractIndexer {
 
   private LSP_BATCH_INDEX_SIZE = 50;
   private DOC_BATCH_INDEX_SIZE = 50;
-  private workspaceDir: string = '';
 
   constructor(
     protected readonly repoUri: RepositoryUri,
@@ -112,8 +104,6 @@ export class LspIndexer extends AbstractIndexer {
 
   protected async *getIndexRequestIterator(): AsyncIterableIterator<LspIndexRequest> {
     try {
-      await this.prepareWorkspace();
-
       const fileIterator = await this.gitOps.iterateRepo(this.repoUri, HEAD);
       for await (const file of fileIterator) {
         const filePath = file.path!;
@@ -133,14 +123,6 @@ export class LspIndexer extends AbstractIndexer {
       this.log.error(error);
       throw error;
     }
-  }
-
-  protected async prepareWorkspace() {
-    const { workspaceDir } = await this.lspService.workspaceHandler.openWorkspace(
-      this.repoUri,
-      HEAD
-    );
-    this.workspaceDir = workspaceDir;
   }
 
   protected async getIndexRequestCount(): Promise<number> {
@@ -217,18 +199,18 @@ export class LspIndexer extends AbstractIndexer {
   protected FILE_OVERSIZE_ERROR_MSG = 'File size exceeds limit. Skip index.';
   protected BINARY_FILE_ERROR_MSG = 'Binary file detected. Skip index.';
   protected async getFileSource(request: LspIndexRequest): Promise<string> {
-    const { filePath } = request;
-    const fullPath = path.join(this.workspaceDir, filePath);
-    const fileStat = await state(fullPath);
-    const fileSize = fileStat.size;
+    const { filePath, revision } = request;
+    const blob = await this.gitOps.fileContent(this.repoUri, filePath, revision);
+
+    const fileSize = blob.rawsize();
     if (fileSize > TEXT_FILE_LIMIT) {
       throw new Error(this.FILE_OVERSIZE_ERROR_MSG);
     }
-    const bin = await isBinaryFile(fullPath);
-    if (bin) {
+
+    if (blob.isBinary()) {
       throw new Error(this.BINARY_FILE_ERROR_MSG);
     }
-    return readFile(fullPath, { encoding: 'utf8' }) as Promise<string>;
+    return blob.content().toString('utf8');
   }
 
   protected async execLspIndexing(

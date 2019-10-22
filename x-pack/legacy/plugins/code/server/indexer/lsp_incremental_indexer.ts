@@ -123,7 +123,6 @@ export class LspIncrementalIndexer extends LspIndexer {
   protected async *getIndexRequestIterator(): AsyncIterableIterator<LspIncIndexRequest> {
     try {
       if (this.diff) {
-        await this.prepareWorkspace();
         for (const f of this.diff.files) {
           yield {
             repoUri: this.repoUri,

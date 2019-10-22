@@ -6,19 +6,19 @@
 
 import { KibanaRequest, KibanaResponseFactory, RequestHandlerContext } from 'src/core/server';
 
-import { RequestQueryFacade } from '../../';
+// import { RequestQueryFacade } from '../../';
 import { ServerOptions } from '../server_options';
 import { CodeServerRouter } from '../security';
 import { CodeServices } from '../distributed/code_services';
-import { WorkspaceDefinition } from '../distributed/apis';
-import { getReferenceHelper } from '../utils/repository_reference_helper';
+// import { WorkspaceDefinition } from '../distributed/apis';
+// import { getReferenceHelper } from '../utils/repository_reference_helper';
 
 export function workspaceRoute(
   router: CodeServerRouter,
   serverOptions: ServerOptions,
   codeServices: CodeServices
 ) {
-  const workspaceService = codeServices.serviceFor(WorkspaceDefinition);
+  // const workspaceService = codeServices.serviceFor(WorkspaceDefinition);
 
   router.route({
     path: '/api/code/workspace',
@@ -41,7 +41,9 @@ export function workspaceRoute(
       req: KibanaRequest,
       res: KibanaResponseFactory
     ) {
-      const { uri: repoUri, revision } = req.params as any;
+      // disabled
+      return res.forbidden();
+      /* const { uri: repoUri, revision } = req.params as any;
       getReferenceHelper(context.core.savedObjects.client).ensureReference(repoUri);
       const repoConfig = serverOptions.repoConfigs[repoUri];
       const force = !!(req.query as RequestQueryFacade).force;
@@ -65,7 +67,7 @@ export function workspaceRoute(
         }
       } else {
         return res.notFound({ body: `repo config for ${repoUri} not found.` });
-      }
+      }*/
     },
   });
 }

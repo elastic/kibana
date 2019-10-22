@@ -55,11 +55,14 @@ export function statusRoute(router: CodeServerRouter, codeServices: CodeServices
   ) {
     if (blob.content) {
       const lang: string = blob.lang!;
-      const defs = await lspService.languageSeverDef(endpoint, { lang });
-      if (defs.length === 0) {
-        report.fileStatus = RepoFileStatus.FILE_NOT_SUPPORTED;
-      } else {
-        return defs;
+      const allDisabled = await lspService.allLangServerDisabled(endpoint, {});
+      if (!allDisabled) {
+        const defs = await lspService.languageSeverDef(endpoint, { lang });
+        if (defs.length === 0) {
+          report.fileStatus = RepoFileStatus.FILE_NOT_SUPPORTED;
+        } else {
+          return defs;
+        }
       }
     } else {
       report.fileStatus = RepoFileStatus.FILE_IS_TOO_BIG;

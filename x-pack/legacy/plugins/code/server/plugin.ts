@@ -53,7 +53,7 @@ import { initWorkers } from './init_workers';
 import { ClusterNodeAdapter } from './distributed/cluster/cluster_node_adapter';
 import { NodeRepositoriesService } from './distributed/cluster/node_repositories_service';
 import { initCodeUsageCollector } from './usage_collector';
-import { PluginSetupContract } from '../../../../plugins/code/server/index';
+import { PluginSetupContract } from '../../../../plugins/code/server';
 
 declare module 'src/core/server' {
   interface RequestHandlerContext {
