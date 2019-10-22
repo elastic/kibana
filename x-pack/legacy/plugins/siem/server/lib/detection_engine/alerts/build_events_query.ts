@@ -12,7 +12,7 @@ interface BuildEventsSearchQuery {
   to: string;
   filter: unknown;
   size: number;
-  searchAfter: number[];
+  searchAfterSortId?: string;
 }
 
 export const getFilter = (kql: string | undefined, filter: Record<string, {}> | undefined) => {
@@ -32,7 +32,7 @@ export const buildEventsSearchQuery = ({
   to,
   filter,
   size,
-  searchAfter,
+  searchAfterSortId,
 }: BuildEventsSearchQuery) => {
   const filterWithTime = [
     filter,
@@ -97,12 +97,12 @@ export const buildEventsSearchQuery = ({
       ],
     },
   };
-  if (searchAfter.length > 0) {
+  if (searchAfterSortId) {
     return {
       ...searchQuery,
       body: {
         ...searchQuery.body,
-        search_after: searchAfter,
+        search_after: [searchAfterSortId],
       },
     };
   }

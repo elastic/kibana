@@ -68,7 +68,7 @@ export const singleBulkIndex = async (
 
 // utilize search_after for paging results into bulk.
 export const singleSearchAfter = async (
-  searchAfterDate: number,
+  searchAfterSortId: string,
   params: SignalAlertParams,
   service: AlertServices,
   logger: Logger
@@ -81,7 +81,7 @@ export const singleSearchAfter = async (
       kql: params.kql,
       filter: params.filter,
       size: params.size ? params.size : 1000,
-      searchAfter: [searchAfterDate],
+      searchAfterSortId,
     });
     const nextSearchAfterResult = await service.callCluster('search', searchAfterQuery);
     return nextSearchAfterResult;
@@ -113,10 +113,11 @@ export const searchAfterAndBulkIndex = async (
   }
   let sortId = sortIds[0];
   while (true) {
+    // utilize track_total_hits instead of true
     try {
       logger.info(`sortIds: ${sortIds}`);
       const searchAfterResult: SignalSearchResponse = await singleSearchAfter(
-        (sortId as unknown) as number,
+        sortId,
         params,
         service,
         logger
@@ -129,7 +130,7 @@ export const searchAfterAndBulkIndex = async (
       logger.info(`size: ${size}`);
       sortIds = searchAfterResult.hits.hits[0].sort;
       if (sortIds == null) {
-        logger.warn('sortIds was empty on first search');
+        logger.warn('sortIds was empty search');
         return false;
       }
       sortId = sortIds[0];

@@ -87,7 +87,6 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
         to,
         filter: esFilter,
         size: searchAfterSize,
-        searchAfter: [],
       });
 
       try {
