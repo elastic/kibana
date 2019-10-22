@@ -115,7 +115,7 @@ export class UrlFormatEditor extends DefaultFormatEditor {
 
   render() {
     const { format, formatParams } = this.props;
-    const { error, samples } = this.state;
+    const { error, samples, sampleConverterType } = this.state;
 
     return (
       <Fragment>
@@ -199,6 +199,7 @@ export class UrlFormatEditor extends DefaultFormatEditor {
 
         <FormatEditorSamples
           samples={samples}
+          sampleType={sampleConverterType}
         />
       </Fragment>
     );
