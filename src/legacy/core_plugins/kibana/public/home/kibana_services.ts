@@ -81,3 +81,7 @@ export function getServices() {
   }
   return services;
 }
+
+export function clearServices() {
+  services = null;
+}
