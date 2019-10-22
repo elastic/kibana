@@ -61,13 +61,15 @@ export class RestAgentAdapter extends AgentAdapter {
   public async getAll(
     page: number,
     perPage: number,
-    kuery?: string
+    kuery?: string,
+    showInactive: boolean = false
   ): Promise<ReturnTypeList<Agent>> {
     try {
       return await this.REST.get<ReturnTypeList<Agent>>('/api/fleet/agents', {
         page,
         perPage,
         kuery: kuery !== '' ? kuery : undefined,
+        showInactive,
       });
     } catch (e) {
       return {

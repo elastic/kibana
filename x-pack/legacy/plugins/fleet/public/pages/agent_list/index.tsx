@@ -18,6 +18,7 @@ import {
   EuiEmptyPrompt,
   // @ts-ignore
   EuiSearchBar,
+  EuiSwitch,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -37,6 +38,7 @@ export const AgentListPage: React.SFC<{}> = () => {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [lastPolledAgentsMs, setLastPolledAgentsMs] = useState<number>(0);
   const [totalAgents, setTotalAgents] = useState<number>(0);
+  const [showInactive, setShowInactive] = useState<boolean>(false);
 
   // Table and search states
   const [search, setSearch] = useState('');
@@ -52,7 +54,8 @@ export const AgentListPage: React.SFC<{}> = () => {
     const { list, total } = await libs.agents.getAll(
       pagination.currentPage,
       pagination.pageSize,
-      search
+      search,
+      showInactive
     );
     setAgents(list);
     setTotalAgents(total);
@@ -62,7 +65,7 @@ export const AgentListPage: React.SFC<{}> = () => {
   // Load initial list of agents
   useEffect(() => {
     fetchAgents();
-  }, []);
+  }, [showInactive]);
 
   // Update agents if pagination or query state changes
   useEffect(() => {
@@ -176,22 +179,34 @@ export const AgentListPage: React.SFC<{}> = () => {
           </h1>
         </EuiTitle>
         <EuiSpacer size="s" />
-        <EuiTitle size="s">
-          <EuiText color="subdued">
-            <FormattedMessage
-              id="xpack.fleet.agentList.pageDescription"
-              defaultMessage="Use agents to faciliate data collection for your Elastic stack."
+        <EuiFlexGroup alignItems={'center'} justifyContent={'spaceBetween'}>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="s">
+              <EuiText color="subdued">
+                <FormattedMessage
+                  id="xpack.fleet.agentList.pageDescription"
+                  defaultMessage="Use agents to faciliate data collection for your Elastic stack."
+                />
+              </EuiText>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiSwitch
+              label={i18n.translate('xpack.fleet.agentList.showInactiveSwitchLabel', {
+                defaultMessage: 'Show inactive agents',
+              })}
+              checked={showInactive}
+              onChange={() => setShowInactive(!showInactive)}
             />
-          </EuiText>
-        </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiSpacer size="m" />
-
-        <EuiFlexGroup>
+        <EuiFlexGroup alignItems={'center'}>
           <EuiFlexItem grow={4}>
             <SearchBar value={search} onChange={setSearch} fieldPrefix="agents" />
           </EuiFlexItem>
           {libs.framework.capabilities.write && (
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiButton
                 fill
                 iconType="plusInCircle"
