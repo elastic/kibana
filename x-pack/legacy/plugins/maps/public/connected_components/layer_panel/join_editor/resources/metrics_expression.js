@@ -121,10 +121,7 @@ export class MetricsExpression extends Component {
 
 MetricsExpression.propTypes = {
   metrics: PropTypes.array,
-  rightFields: PropTypes.oneOfType([
-    PropTypes.object, // IndexedArray object
-    PropTypes.array // array of Field objects
-  ]),
+  rightFields: PropTypes.array,
   onChange: PropTypes.func.isRequired,
 };
 

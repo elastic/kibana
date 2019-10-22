@@ -254,10 +254,7 @@ JoinExpression.propTypes = {
 
   // Right field props
   rightValue: PropTypes.string,
-  rightFields: PropTypes.oneOfType([
-    PropTypes.object, // IndexedArray object
-    PropTypes.array // array of Field objects
-  ]),
+  rightFields: PropTypes.array,
   onRightFieldChange: PropTypes.func.isRequired,
 };
 
