@@ -29,7 +29,7 @@ export function emsBoundariesSpecProvider(server) {
   return {
     id: 'emsBoundaries',
     name: i18n.translate('kbn.server.tutorials.ems.nameTitle', {
-      defaultMessage: 'Elastic Maps Service Boundaries',
+      defaultMessage: 'EMS Boundaries',
     }),
     category: TUTORIAL_CATEGORY.OTHER,
     shortDescription: i18n.translate('kbn.server.tutorials.ems.shortDescription', {
