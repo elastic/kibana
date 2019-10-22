@@ -21,7 +21,7 @@
   ],
   labels: [
     'release_note:skip',
-    'Team:Operations:',
+    'Team:Operations',
     'renovate',
     'v8.0.0',
     'v7.6.0',
@@ -29,7 +29,7 @@
   major: {
     labels: [
       'release_note:skip',
-      'Team:Operations:',
+      'Team:Operations',
       'renovate',
       'v8.0.0',
       'v7.6.0',
@@ -230,7 +230,7 @@
         ],
         labels: [
           'release_note:skip',
-          'Team:Operations:',
+          'Team:Operations',
           'renovate',
           'v8.0.0',
           'v7.6.0',
