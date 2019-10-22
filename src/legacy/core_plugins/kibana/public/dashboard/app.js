@@ -18,8 +18,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import './saved_dashboard/saved_dashboards';
-import './dashboard_config';
 import uiRoutes from 'ui/routes';
 import { wrapInI18nContext } from 'ui/i18n';
 
@@ -113,7 +111,7 @@ export function initDashboardApp(app, deps) {
           addHelpMenuToAppChrome(deps.chrome);
         },
         resolve: {
-          dash: function ($route, redirectWhenMissing, kbnUrl) {
+          dash: function ($route/*, redirectWhenMissing, kbnUrl*/) {
             const savedObjectsClient = deps.savedObjectsClient;
             const title = $route.current.params.title;
             if (title) {
@@ -210,7 +208,7 @@ export function initDashboardApp(app, deps) {
       });
   });
 
-  deps.getFeatureCatalogueRegistryProvider().register(() => {
+  deps.FeatureCatalogueRegistryProvider.register(() => {
     return {
       id: 'dashboard',
       title: i18n.translate('kbn.dashboard.featureCatalogue.dashboardTitle', {

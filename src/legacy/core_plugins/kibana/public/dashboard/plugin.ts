@@ -28,7 +28,6 @@ export interface LegacyAngularInjectedDependencies {
   queryFilter: any;
   getUnhashableStates: any;
   shareContextMenuExtensions: any;
-  getFeatureCatalogueRegistryProvider: () => Promise<any>;
   dashboardConfig: any;
   savedObjectRegistry: any;
   savedDashboards: any;
@@ -43,6 +42,7 @@ export interface DashboardPluginSetupDependencies {
   __LEGACY: {
     getAngularDependencies: () => Promise<LegacyAngularInjectedDependencies>;
     localApplicationService: LocalApplicationService;
+    FeatureCatalogueRegistryProvider: any;
   };
 }
 
@@ -58,9 +58,10 @@ export class DashboardPlugin implements Plugin {
       __LEGACY: { localApplicationService, getAngularDependencies, ...legacyServices },
     }: DashboardPluginSetupDependencies
   ) {
+    localApplicationService.forwardApp('dashboard', 'dashboards');
     localApplicationService.register({
-      id: 'discover',
-      title: 'Discover',
+      id: 'dashboards',
+      title: 'Dashboards',
       mount: async ({ core: contextCore }, params) => {
         const angularDependencies = await getAngularDependencies();
         const deps: RenderDeps = {

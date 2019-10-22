@@ -24,7 +24,7 @@ import { TopNavMenu } from '../../../core_plugins/kibana_react/public';
 
 const module = uiModules.get('kibana');
 
-module.directive('kbnTopNav', () => {
+export const createTopNavDirective = () => {
   return {
     restrict: 'E',
     template: '',
@@ -71,9 +71,11 @@ module.directive('kbnTopNav', () => {
       return linkFn;
     }
   };
-});
+};
 
-module.directive('kbnTopNavHelper', (reactDirective) => {
+module.directive('kbnTopNav', createTopNavDirective);
+
+export const createTopNavHelper = (reactDirective) => {
   return reactDirective(
     wrapInI18nContext(TopNavMenu),
     [
@@ -113,4 +115,6 @@ module.directive('kbnTopNavHelper', (reactDirective) => {
       'showAutoRefreshOnly',
     ],
   );
-});
+};
+
+module.directive('kbnTopNavHelper', createTopNavHelper);

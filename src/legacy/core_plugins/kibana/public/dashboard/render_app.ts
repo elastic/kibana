@@ -100,7 +100,7 @@ function mountDashboardApp(appBasePath: string, element: HTMLElement) {
   // make angular-within-angular possible
   const $injector = angular.bootstrap(mountpoint, [moduleName]);
   // initialize global state handler
-  $injector.get('globalState');
+  // $injector.get('globalState');
   element.appendChild(mountpoint);
   return $injector;
 }

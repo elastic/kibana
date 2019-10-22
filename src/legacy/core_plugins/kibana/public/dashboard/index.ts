@@ -19,6 +19,7 @@
 
 import { FeatureCatalogueRegistryProvider } from 'ui/registry/feature_catalogue';
 import { npSetup, npStart } from 'ui/new_platform';
+import { SavedObjectRegistryProvider } from 'ui/saved_objects';
 import chrome from 'ui/chrome';
 import { IPrivate } from 'ui/private';
 import { ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
@@ -28,7 +29,8 @@ import { DashboardPlugin, LegacyAngularInjectedDependencies } from './plugin';
 import { start as data } from '../../../data/public/legacy';
 import { localApplicationService } from '../local_application_service';
 import { start as embeddables } from '../../../embeddable_api/public/np_ready/public/legacy';
-import { SavedObjectRegistryProvider } from 'ui/saved_objects';
+import './saved_dashboard/saved_dashboards';
+import './dashboard_config';
 
 /**
  * Get dependencies relying on the global angular context.
@@ -48,9 +50,6 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
     queryFilter,
     getUnhashableStates,
     shareContextMenuExtensions,
-    getFeatureCatalogueRegistryProvider: () => {
-      return Private(FeatureCatalogueRegistryProvider as any);
-    },
     dashboardConfig: injector.get('dashboardConfig'),
     savedObjectRegistry,
     savedDashboards: injector.get('savedDashboards'),
@@ -63,6 +62,7 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
     __LEGACY: {
       localApplicationService,
       getAngularDependencies,
+      FeatureCatalogueRegistryProvider,
     },
   });
   instance.start(npStart.core, {

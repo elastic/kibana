@@ -75,7 +75,9 @@ export class LocalApplicationService {
     this.forwards.forEach(({ legacyAppId, newAppId, keepPrefix }) => {
       angularRouteManager.when(`/${legacyAppId}:tail*?`, {
         redirectTo: (_params: unknown, path: string, search: string) => {
-          const newPath = `/${newAppId}${keepPrefix ? path : path.replace(legacyAppId, '')}`;
+          const newPath = `/${newAppId}${
+            keepPrefix ? path : path.replace(new RegExp(`${legacyAppId}/?`), '')
+          }`;
           return `${newPath}?${search}`;
         },
       });
