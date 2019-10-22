@@ -24,6 +24,7 @@ import { Field, NormalizedField } from '../../../../types';
 import { fieldSerializer, fieldDeserializer } from '../../../../lib';
 import { UpdateFieldProvider, UpdateFieldFunc } from './update_field_provider';
 import { EditFieldHeaderForm } from './edit_field_header_form';
+import { EditFieldSection } from './edit_field_section';
 
 const formWrapper = (props: any) => <form {...props} />;
 
@@ -93,9 +94,13 @@ export const EditField = React.memo(({ field }: Props) => {
               FormWrapper={formWrapper}
               onSubmit={getSubmitForm(updateField)}
             >
-              <EditFieldHeaderForm defaultValue={field.source} isMultiField={isMultiField} />
-              <EuiSpacer size="l" />
-              <p>Here will come the form for the parameters....</p>
+              <EditFieldSection title="Field definition">
+                <EditFieldHeaderForm defaultValue={field.source} isMultiField={isMultiField} />
+              </EditFieldSection>
+
+              <EditFieldSection>
+                <p>Here will come the form for the parameters....</p>
+              </EditFieldSection>
             </Form>
           </EuiFlyoutBody>
 
