@@ -22,6 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
 import { toastNotifications } from '../../notify/toasts';
 import { ShardFailureOpenModalButton } from './components/shard_failure_open_modal_button';
+import { Request, ResponseWithShardFailure } from './components/shard_failure_types';
 
 export function handleResponse(request: any, response: any) {
   if (response.timed_out) {
@@ -51,7 +52,11 @@ export function handleResponse(request: any, response: any) {
       <>
         {description}
         <EuiSpacer size="s" />
-        <ShardFailureOpenModalButton request={request.body} response={response} title={title} />
+        <ShardFailureOpenModalButton
+          request={request.body as Request}
+          response={response as ResponseWithShardFailure}
+          title={title}
+        />
       </>
     );
 

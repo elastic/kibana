@@ -239,6 +239,28 @@ Object {
             },
           },
         ],
+        "should": Array [
+          Object {
+            "bool": Object {
+              "must_not": Array [
+                Object {
+                  "exists": Object {
+                    "field": "error.log.level",
+                  },
+                },
+              ],
+            },
+          },
+          Object {
+            "terms": Object {
+              "error.log.level": Array [
+                "critical",
+                "error",
+                "fatal",
+              ],
+            },
+          },
+        ],
       },
     },
     "size": 0,

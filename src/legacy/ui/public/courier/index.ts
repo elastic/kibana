@@ -21,3 +21,4 @@ export * from './fetch';
 export * from './search_source';
 export * from './search_strategy';
 export * from './utils/courier_inspector_utils';
+export * from './types';

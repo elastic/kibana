@@ -16,12 +16,13 @@ import {
   EuiCopy,
   EuiTitle,
 } from '@elastic/eui';
+import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CommitInfo } from '../../../model/commit';
-import { PathTypes } from '../../common/types';
 import { RepositoryUtils } from '../../../common/repository_utils';
 import { parseCommitMessage } from '../../../common/commit_utils';
+import { PathTypes } from '../../common/types';
 
 const COMMIT_ID_LENGTH = 8;
 
@@ -54,8 +55,17 @@ const revisionLinkLabel = i18n.translate('xpack.code.commits.revisionLinkAriaLab
   defaultMessage: 'View the project at this commit',
 });
 
+const getRevisionPath = (repoUri: string, commitId: string) => {
+  const diffPageEnabled = chrome.getInjected('codeDiffPageEnabled');
+  if (diffPageEnabled) {
+    return `#/${repoUri}/commit/${commitId}`;
+  } else {
+    return `#/${repoUri}/${PathTypes.tree}/${commitId}`;
+  }
+};
+
 const CommitActions = ({ commitId, repoUri }: ActionProps) => {
-  const revisionPath = `#/${repoUri}/${PathTypes.tree}/${commitId}`;
+  const revisionPath = getRevisionPath(repoUri, commitId);
 
   return (
     <div className="commit__actions">

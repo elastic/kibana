@@ -210,8 +210,8 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     const timeFilter = getTime(indexPattern, this.input.timeRange);
     if (timeFilter) timeRangeSearchSource.setField('filter', timeFilter as RangeFilter);
 
-    this.filtersSearchSource = searchSource.create();
-    this.filtersSearchSource.setParent(timeRangeSearchSource);
+    this.filtersSearchSource = searchSource.create()!;
+    this.filtersSearchSource!.setParent(timeRangeSearchSource);
 
     searchSource.setParent(this.filtersSearchSource);
 
