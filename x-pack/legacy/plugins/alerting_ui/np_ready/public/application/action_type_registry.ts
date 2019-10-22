@@ -38,21 +38,12 @@ export class ActionTypeRegistry {
   }
 
   /**
-   * Returns an action type, throws if not registered
+   * Returns an action type, null if not registered
    */
   public get(id: string): ActionTypeModel | null {
     if (!this.has(id)) {
       return null;
     }
     return this.actionTypes.get(id)!;
-  }
-
-  /**
-   * Returns a list of registered action types [{ id, name }]
-   */
-  public list() {
-    return Array.from(this.actionTypes).map(([actionTypeId, actionType]) => ({
-      id: actionTypeId,
-    }));
   }
 }
