@@ -19,7 +19,9 @@
 
 import { ConnectableObservable, Observable, Subscription } from 'rxjs';
 import { filter, first, map, publishReplay, switchMap } from 'rxjs/operators';
+
 import { CoreService } from '../../types';
+import { merge } from '../../utils';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import { ClusterClient } from './cluster_client';
@@ -99,7 +101,7 @@ export class ElasticsearchService implements CoreService<InternalElasticsearchSe
       dataClient$: clients$.pipe(map(clients => clients.dataClient)),
 
       createClient: (type: string, clientConfig: Partial<ElasticsearchClientConfig> = {}) => {
-        const finalConfig = merge(config, clientConfig);
+        const finalConfig = merge({}, config, clientConfig);
         return this.createClusterClient(type, finalConfig, deps.http.auth.getAuthHeaders);
       },
     };
@@ -128,28 +130,3 @@ export class ElasticsearchService implements CoreService<InternalElasticsearchSe
     );
   }
 }
-
-const isMergable = (obj: any) => typeof obj === 'object' && obj !== null && !Array.isArray(obj);
-
-/** Deeply merges two objects, omitting undefined values and not deeply merging Arrays. */
-const merge = <T extends Record<string, any>, U extends Record<string, any>>(
-  baseObj: T,
-  overrideObj: U
-): T & U =>
-  [...new Set([...Object.keys(baseObj), ...Object.keys(overrideObj)])].reduce(
-    (merged, key) => {
-      const baseVal = baseObj[key];
-      const overrideVal = overrideObj[key];
-
-      if (isMergable(baseVal) && isMergable(overrideVal)) {
-        merged[key] = merge(baseVal, overrideVal);
-      } else if (overrideVal !== undefined) {
-        merged[key] = overrideVal;
-      } else if (baseVal !== undefined) {
-        merged[key] = baseVal;
-      }
-
-      return merged;
-    },
-    {} as any
-  );
