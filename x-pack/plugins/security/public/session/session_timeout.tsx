@@ -27,38 +27,38 @@ export interface ISessionTimeout {
 }
 
 export class SessionTimeout {
-  private warningTimeout?: number;
-  private expirationTimeout?: number;
+  private warningTimeoutMilliseconds?: number;
+  private expirationTimeoutMilliseconds?: number;
   private warningToast?: Toast;
 
   constructor(
-    private sessionTimeout: number | null,
+    private sessionTimeoutMilliseconds: number | null,
     private notifications: NotificationsSetup,
     private sessionExpired: ISessionExpired,
     private http: HttpSetup
   ) {}
 
   extend(): void {
-    if (this.sessionTimeout == null) {
+    if (this.sessionTimeoutMilliseconds == null) {
       return;
     }
 
-    if (this.warningTimeout) {
-      window.clearTimeout(this.warningTimeout);
+    if (this.warningTimeoutMilliseconds) {
+      window.clearTimeout(this.warningTimeoutMilliseconds);
     }
-    if (this.expirationTimeout) {
-      window.clearTimeout(this.expirationTimeout);
+    if (this.expirationTimeoutMilliseconds) {
+      window.clearTimeout(this.expirationTimeoutMilliseconds);
     }
     if (this.warningToast) {
       this.notifications.toasts.remove(this.warningToast);
     }
-    this.warningTimeout = window.setTimeout(
+    this.warningTimeoutMilliseconds = window.setTimeout(
       () => this.showWarning(),
-      Math.max(this.sessionTimeout - WARNING_MS - GRACE_PERIOD_MS, 0)
+      Math.max(this.sessionTimeoutMilliseconds - WARNING_MS - GRACE_PERIOD_MS, 0)
     );
-    this.expirationTimeout = window.setTimeout(
+    this.expirationTimeoutMilliseconds = window.setTimeout(
       () => this.sessionExpired.logout(),
-      Math.max(this.sessionTimeout - GRACE_PERIOD_MS, 0)
+      Math.max(this.sessionTimeoutMilliseconds - GRACE_PERIOD_MS, 0)
     );
   }
 
@@ -69,7 +69,7 @@ export class SessionTimeout {
       title: i18n.translate('xpack.security.components.sessionTimeoutWarning.title', {
         defaultMessage: 'Warning',
       }),
-      toastLifeTimeMs: Math.min(this.sessionTimeout! - GRACE_PERIOD_MS, WARNING_MS),
+      toastLifeTimeMs: Math.min(this.sessionTimeoutMilliseconds! - GRACE_PERIOD_MS, WARNING_MS),
     });
   };
 
