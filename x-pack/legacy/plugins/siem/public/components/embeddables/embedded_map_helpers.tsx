@@ -7,12 +7,11 @@
 import { Filter } from '@kbn/es-query';
 import uuid from 'uuid';
 import React from 'react';
-import { npStart } from 'ui/new_platform';
 import { OutPortal, PortalNode } from 'react-reverse-portal';
 import { Query } from 'src/plugins/data/common';
+import { PluginsStart } from 'ui/new_platform/new_platform';
 
 import { ActionToaster, AppToast } from '../toasters';
-import { start } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import {
   APPLY_FILTER_TRIGGER,
   CONTEXT_MENU_TRIGGER,
@@ -24,7 +23,13 @@ import {
   APPLY_SIEM_FILTER_ACTION_ID,
   ApplySiemFilterAction,
 } from './actions/apply_siem_filter_action';
-import { IndexPatternMapping, MapEmbeddable, RenderTooltipContentParams, SetQuery } from './types';
+import {
+  IndexPatternMapping,
+  MapEmbeddable,
+  RenderTooltipContentParams,
+  SetQuery,
+  EmbeddableApi,
+} from './types';
 import { getLayerList } from './map_config';
 // @ts-ignore Missing type defs as maps moves to Typescript
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../maps/common/constants';
@@ -63,18 +68,18 @@ export const displayErrorToast = (
  *
  * @throws Error if action is already registered
  */
-export const setupEmbeddablesAPI = () => {
+export const setupEmbeddablesAPI = (plugins: PluginsStart) => {
   try {
-    const actions = npStart.plugins.uiActions.getTriggerActions(APPLY_FILTER_TRIGGER);
+    const actions = plugins.uiActions.getTriggerActions(APPLY_FILTER_TRIGGER);
     const actionLoaded = actions.some(a => a.id === APPLY_SIEM_FILTER_ACTION_ID);
     if (!actionLoaded) {
       const siemFilterAction = new ApplySiemFilterAction();
-      npStart.plugins.uiActions.registerAction(siemFilterAction);
-      npStart.plugins.uiActions.attachAction(APPLY_FILTER_TRIGGER, siemFilterAction.id);
+      plugins.uiActions.registerAction(siemFilterAction);
+      plugins.uiActions.attachAction(APPLY_FILTER_TRIGGER, siemFilterAction.id);
 
-      npStart.plugins.uiActions.detachAction(CONTEXT_MENU_TRIGGER, 'CUSTOM_TIME_RANGE');
-      npStart.plugins.uiActions.detachAction(PANEL_BADGE_TRIGGER, 'CUSTOM_TIME_RANGE_BADGE');
-      npStart.plugins.uiActions.detachAction(APPLY_FILTER_TRIGGER, APPLY_FILTER_ACTION);
+      plugins.uiActions.detachAction(CONTEXT_MENU_TRIGGER, 'CUSTOM_TIME_RANGE');
+      plugins.uiActions.detachAction(PANEL_BADGE_TRIGGER, 'CUSTOM_TIME_RANGE_BADGE');
+      plugins.uiActions.detachAction(APPLY_FILTER_TRIGGER, APPLY_FILTER_ACTION);
     }
   } catch (e) {
     throw e;
@@ -100,9 +105,10 @@ export const createEmbeddable = async (
   startDate: number,
   endDate: number,
   setQuery: SetQuery,
-  portalNode: PortalNode
+  portalNode: PortalNode,
+  embeddableApi: EmbeddableApi
 ): Promise<MapEmbeddable> => {
-  const factory = start.getEmbeddableFactory(MAP_SAVED_OBJECT_TYPE);
+  const factory = embeddableApi.getEmbeddableFactory(MAP_SAVED_OBJECT_TYPE);
 
   const state = {
     layerList: getLayerList(indexPatterns),
