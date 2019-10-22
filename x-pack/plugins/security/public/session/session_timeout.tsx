@@ -38,7 +38,7 @@ export class SessionTimeout {
     private http: HttpSetup
   ) {}
 
-  extend(): void {
+  extend() {
     if (this.sessionTimeoutMilliseconds == null) {
       return;
     }
