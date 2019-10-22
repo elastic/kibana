@@ -63,7 +63,9 @@ export default function({ getService }: { getService: (service: string) => any }
           )}`
         );
         log.debug(
-          `average duration taken to Run Tasks in Task Pool: ${descMetric(taskPoolAttemptToRun)}`
+          `average duration taken to Mark Tasks as Running in Task Pool: ${descMetric(
+            taskPoolAttemptToRun
+          )}`
         );
         log.debug(
           `average duration taken to Mark Task as Running in Task Runner: ${descMetric(

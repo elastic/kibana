@@ -67,7 +67,7 @@ export default function TaskManagerPerformanceAPI(kibana) {
               async run() {
                 const { params, state } = taskInstance;
 
-                const counter = (state.counter ? 1 + state.counter : 1);
+                const counter = (state.counter ? state.counter : 1);
 
                 const now = Date.now();
                 const leadTime = now - taskInstance.runAt;
@@ -82,7 +82,7 @@ export default function TaskManagerPerformanceAPI(kibana) {
 
                 const stateUpdated = {
                   ...state,
-                  counter
+                  counter: counter + 1
                 };
 
                 if(params.trackExecutionTimeline && state.perf && state.perf.id) {
