@@ -29,7 +29,7 @@ describe('BucketNestingEditor', () => {
     return result as IndexPatternColumn;
   }
 
-  it('should display an unchecked switch if there are two buckets and it is the root', () => {
+  it('should display the top level grouping when at the root', () => {
     const component = mount(
       <BucketNestingEditor
         columnId="a"
@@ -45,12 +45,14 @@ describe('BucketNestingEditor', () => {
         setColumns={jest.fn()}
       />
     );
-    const control = component.find('[data-test-subj="indexPattern-nesting-switch"]').first();
+    const control1 = component.find('[data-test-subj="indexPattern-nesting-topLevel"]').first();
+    const control2 = component.find('[data-test-subj="indexPattern-nesting-bottomLevel"]').first();
 
-    expect(control.prop('checked')).toBeFalsy();
+    expect(control1.prop('checked')).toBeTruthy();
+    expect(control2.prop('checked')).toBeFalsy();
   });
 
-  it('should display a checked switch if there are two buckets and it is not the root', () => {
+  it('should display the bottom level grouping when appropriate', () => {
     const component = mount(
       <BucketNestingEditor
         columnId="a"
@@ -66,9 +68,12 @@ describe('BucketNestingEditor', () => {
         setColumns={jest.fn()}
       />
     );
-    const control = component.find('[data-test-subj="indexPattern-nesting-switch"]').first();
 
-    expect(control.prop('checked')).toBeTruthy();
+    const control1 = component.find('[data-test-subj="indexPattern-nesting-topLevel"]').first();
+    const control2 = component.find('[data-test-subj="indexPattern-nesting-bottomLevel"]').first();
+
+    expect(control1.prop('checked')).toBeFalsy();
+    expect(control2.prop('checked')).toBeTruthy();
   });
 
   it('should reorder the columns when toggled', () => {
@@ -88,11 +93,31 @@ describe('BucketNestingEditor', () => {
         setColumns={setColumns}
       />
     );
-    const control = component.find('[data-test-subj="indexPattern-nesting-switch"]').first();
+    const control1 = component.find('[data-test-subj="indexPattern-nesting-topLevel"]').first();
 
-    (control.prop('onChange') as () => {})();
+    (control1.prop('onChange') as () => {})();
 
+    expect(setColumns).toHaveBeenCalledTimes(1);
     expect(setColumns).toHaveBeenCalledWith(['a', 'b', 'c']);
+
+    component.setProps({
+      layer: {
+        columnOrder: ['a', 'b', 'c'],
+        columns: {
+          a: mockCol({ suggestedPriority: 0 }),
+          b: mockCol({ suggestedPriority: 1 }),
+          c: mockCol({ suggestedPriority: 2, operationType: 'min', isBucketed: false }),
+        },
+        indexPatternId: 'foo',
+      },
+    });
+
+    const control2 = component.find('[data-test-subj="indexPattern-nesting-bottomLevel"]').first();
+
+    (control2.prop('onChange') as () => {})();
+
+    expect(setColumns).toHaveBeenCalledTimes(2);
+    expect(setColumns).toHaveBeenLastCalledWith(['b', 'a', 'c']);
   });
 
   it('should display nothing if there are no buckets', () => {

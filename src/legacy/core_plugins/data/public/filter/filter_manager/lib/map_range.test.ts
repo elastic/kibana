@@ -18,43 +18,48 @@
  */
 
 import { mapRange } from './map_range';
-import { StubIndexPatterns } from '../test_helpers/stub_index_pattern';
-import { IndexPatterns } from '../../../index_patterns';
+import { RangeFilter, Filter, FilterMeta } from '@kbn/es-query';
 
 describe('filter manager utilities', () => {
   describe('mapRange()', () => {
-    let mapRangeFn: Function;
-
-    beforeEach(() => {
-      const indexPatterns: unknown = new StubIndexPatterns();
-
-      mapRangeFn = mapRange(indexPatterns as IndexPatterns);
-    });
-
     test('should return the key and value for matching filters with gt/lt', async () => {
-      const filter = { meta: { index: 'logstash-*' }, range: { bytes: { lt: 2048, gt: 1024 } } };
-      const result = await mapRangeFn(filter);
+      const filter = {
+        meta: { index: 'logstash-*' } as FilterMeta,
+        range: { bytes: { lt: 2048, gt: 1024 } },
+      } as RangeFilter;
+      const result = mapRange(filter);
 
       expect(result).toHaveProperty('key', 'bytes');
-      expect(result).toHaveProperty('value', '1024 to 2048');
+      expect(result).toHaveProperty('value');
+      if (result.value) {
+        const displayName = result.value();
+        expect(displayName).toBe('1024 to 2048');
+      }
     });
 
     test('should return the key and value for matching filters with gte/lte', async () => {
-      const filter = { meta: { index: 'logstash-*' }, range: { bytes: { lte: 2048, gte: 1024 } } };
-      const result = await mapRangeFn(filter);
+      const filter = {
+        meta: { index: 'logstash-*' } as FilterMeta,
+        range: { bytes: { lte: 2048, gte: 1024 } },
+      } as RangeFilter;
+      const result = mapRange(filter);
 
       expect(result).toHaveProperty('key', 'bytes');
-      expect(result).toHaveProperty('value', '1024 to 2048');
+      expect(result).toHaveProperty('value');
+      if (result.value) {
+        const displayName = result.value();
+        expect(displayName).toBe('1024 to 2048');
+      }
     });
 
     test('should return undefined for none matching', async done => {
       const filter = {
         meta: { index: 'logstash-*' },
         query: { query_string: { query: 'foo:bar' } },
-      };
+      } as Filter;
 
       try {
-        await mapRangeFn(filter);
+        mapRange(filter);
       } catch (e) {
         expect(e).toBe(filter);
 

@@ -33,7 +33,7 @@ function ofName(name: string) {
 }
 
 function isSortableByColumn(column: IndexPatternColumn) {
-  return !column.isBucketed && column.operationType !== 'filter_ratio';
+  return !column.isBucketed;
 }
 
 const DEFAULT_SIZE = 3;

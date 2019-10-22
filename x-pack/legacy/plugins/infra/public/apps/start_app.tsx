@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Provider as ConstateProvider } from 'constate';
 import { createHashHistory } from 'history';
 import React from 'react';
 import { ApolloProvider } from 'react-apollo';
@@ -46,19 +45,17 @@ export async function startApp(libs: InfraFrontendLibs) {
       <I18nContext>
         <UICapabilitiesProvider>
           <EuiErrorBoundary>
-            <ConstateProvider devtools>
-              <ReduxStoreProvider store={store}>
-                <ApolloProvider client={libs.apolloClient}>
-                  <ApolloClientContext.Provider value={libs.apolloClient}>
-                    <EuiThemeProvider darkMode={darkMode}>
-                      <HistoryContext.Provider value={history}>
-                        <PageRouter history={history} />
-                      </HistoryContext.Provider>
-                    </EuiThemeProvider>
-                  </ApolloClientContext.Provider>
-                </ApolloProvider>
-              </ReduxStoreProvider>
-            </ConstateProvider>
+            <ReduxStoreProvider store={store}>
+              <ApolloProvider client={libs.apolloClient}>
+                <ApolloClientContext.Provider value={libs.apolloClient}>
+                  <EuiThemeProvider darkMode={darkMode}>
+                    <HistoryContext.Provider value={history}>
+                      <PageRouter history={history} />
+                    </HistoryContext.Provider>
+                  </EuiThemeProvider>
+                </ApolloClientContext.Provider>
+              </ApolloProvider>
+            </ReduxStoreProvider>
           </EuiErrorBoundary>
         </UICapabilitiesProvider>
       </I18nContext>

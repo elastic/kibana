@@ -60,10 +60,6 @@ jest.mock('../../../../core_plugins/data/public/legacy', () => ({
   }
 }));
 
-const mockKbnApi = {
-  SearchSource: MockSearchSource,
-};
-
 describe('fetch', () => {
   const controlParams = {
     id: '1',
@@ -74,7 +70,7 @@ describe('fetch', () => {
 
   let rangeControl;
   beforeEach(async () => {
-    rangeControl = await rangeControlFactory(controlParams, mockKbnApi, useTimeFilter);
+    rangeControl = await rangeControlFactory(controlParams, useTimeFilter, MockSearchSource);
   });
 
   test('should set min and max from aggregation results', async () => {

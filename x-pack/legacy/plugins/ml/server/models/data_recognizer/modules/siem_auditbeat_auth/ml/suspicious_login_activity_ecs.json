@@ -21,8 +21,9 @@
       "source.ip"
     ]
   },
+  "allow_lazy_open": true,
   "analysis_limits": {
-   "model_memory_limit": "256mb"
+    "model_memory_limit": "256mb"
   },
   "data_description": {
     "time_field": "@timestamp"
@@ -32,7 +33,7 @@
     "custom_urls": [
       {
         "url_name": "IP Address Details",
-        "url_value": "siem#/ml-network/ip/$source.ip$?_g=()&kqlQuery=(filterQuery:!n,queryLocation:network.details,type:details)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
+        "url_value": "siem#/ml-network/ip/$source.ip$?_g=()&query=!n&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
       }
     ]
   }

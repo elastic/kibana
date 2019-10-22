@@ -6,7 +6,8 @@
 
 import { Suite } from 'mocha';
 
-// eslint-disable-next-line @typescript-eslint/no-namespace We need to use the namespace here to match the Mocha definition
+// We need to use the namespace here to match the Mocha definition
+// eslint-disable-next-line @typescript-eslint/no-namespace
 declare module 'mocha' {
   interface Suite {
     /**

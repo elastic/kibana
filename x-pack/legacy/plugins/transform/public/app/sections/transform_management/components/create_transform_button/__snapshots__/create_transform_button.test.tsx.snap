@@ -12,10 +12,9 @@ exports[`Transform: Transform List <CreateTransformButton /> Minimal initializat
     fill={true}
     iconType="plusInCircle"
     onClick={[MockFunction]}
-    size="s"
   >
     <FormattedMessage
-      defaultMessage="Create transform"
+      defaultMessage="Create a transform"
       id="xpack.transform.transformList.createTransformButton"
       values={Object {}}
     />

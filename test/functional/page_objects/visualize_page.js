@@ -269,6 +269,14 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       }
     }
 
+    async isBetaInfoShown() {
+      return await testSubjects.exists('betaVisInfo');
+    }
+
+    async getBetaTypeLinks() {
+      return await find.allByCssSelector('[data-vis-stage="beta"]');
+    }
+
     async getExperimentalTypeLinks() {
       return await find.allByCssSelector('[data-vis-stage="experimental"]');
     }
