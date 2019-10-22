@@ -5,22 +5,17 @@
  */
 
 import { cloneDeep } from 'lodash/fp';
-import { npSetup } from 'ui/new_platform';
 
 import { mockIndexPattern } from '../../mock';
-import { mockUiSettings, MockNpSetUp } from '../../mock/ui_settings';
 
 import { mockDataProviders } from './data_providers/mock/mock_data_providers';
 import { buildGlobalQuery, combineQueries } from './helpers';
 import { mockBrowserFields } from '../../containers/source/mock';
+import { EsQueryConfig } from '../../lib/keury';
 
 const cleanUpKqlQuery = (str: string) => str.replace(/\n/g, '').replace(/\s\s+/g, ' ');
 const startDate = new Date('2018-03-23T18:49:23.132Z').valueOf();
 const endDate = new Date('2018-03-24T03:33:52.253Z').valueOf();
-
-const mockNpSetup: MockNpSetUp = (npSetup as unknown) as MockNpSetUp;
-jest.mock('ui/new_platform');
-mockNpSetup.core.uiSettings = mockUiSettings;
 
 describe('Build KQL Query', () => {
   test('Build KQL query with one data provider', () => {
@@ -122,9 +117,16 @@ describe('Build KQL Query', () => {
 });
 
 describe('Combined Queries', () => {
+  const config: EsQueryConfig = {
+    allowLeadingWildcards: true,
+    queryStringOptions: {},
+    ignoreFilterIfFieldNotInIndex: true,
+    dateFormatTZ: 'America/New_York',
+  };
   test('No Data Provider & No kqlQuery & and isEventViewer is false', () => {
     expect(
       combineQueries({
+        config,
         dataProviders: [],
         indexPattern: mockIndexPattern,
         browserFields: mockBrowserFields,
@@ -141,6 +143,7 @@ describe('Combined Queries', () => {
     const isEventViewer = true;
     expect(
       combineQueries({
+        config,
         dataProviders: [],
         indexPattern: mockIndexPattern,
         browserFields: mockBrowserFields,
@@ -160,6 +163,7 @@ describe('Combined Queries', () => {
   test('Only Data Provider', () => {
     const dataProviders = mockDataProviders.slice(0, 1);
     const { filterQuery } = combineQueries({
+      config,
       dataProviders,
       indexPattern: mockIndexPattern,
       browserFields: mockBrowserFields,
@@ -179,6 +183,7 @@ describe('Combined Queries', () => {
     dataProviders[0].queryMatch.field = '@timestamp';
     dataProviders[0].queryMatch.value = '2018-03-23T23:36:23.232Z';
     const { filterQuery } = combineQueries({
+      config,
       dataProviders,
       indexPattern: mockIndexPattern,
       browserFields: mockBrowserFields,
@@ -198,6 +203,7 @@ describe('Combined Queries', () => {
     dataProviders[0].queryMatch.field = '@timestamp';
     dataProviders[0].queryMatch.value = 1521848183232;
     const { filterQuery } = combineQueries({
+      config,
       dataProviders,
       indexPattern: mockIndexPattern,
       browserFields: mockBrowserFields,
@@ -217,6 +223,7 @@ describe('Combined Queries', () => {
     dataProviders[0].queryMatch.field = 'event.end';
     dataProviders[0].queryMatch.value = '2018-03-23T23:36:23.232Z';
     const { filterQuery } = combineQueries({
+      config,
       dataProviders,
       indexPattern: mockIndexPattern,
       browserFields: mockBrowserFields,
@@ -236,6 +243,7 @@ describe('Combined Queries', () => {
     dataProviders[0].queryMatch.field = 'event.end';
     dataProviders[0].queryMatch.value = 1521848183232;
     const { filterQuery } = combineQueries({
+      config,
       dataProviders,
       indexPattern: mockIndexPattern,
       browserFields: mockBrowserFields,
@@ -252,6 +260,7 @@ describe('Combined Queries', () => {
 
   test('Only KQL search/filter query', () => {
     const { filterQuery } = combineQueries({
+      config,
       dataProviders: [],
       indexPattern: mockIndexPattern,
       browserFields: mockBrowserFields,
@@ -269,6 +278,7 @@ describe('Combined Queries', () => {
   test('Data Provider & KQL search query', () => {
     const dataProviders = mockDataProviders.slice(0, 1);
     const { filterQuery } = combineQueries({
+      config,
       dataProviders,
       indexPattern: mockIndexPattern,
       browserFields: mockBrowserFields,
@@ -286,6 +296,7 @@ describe('Combined Queries', () => {
   test('Data Provider & KQL filter query', () => {
     const dataProviders = mockDataProviders.slice(0, 1);
     const { filterQuery } = combineQueries({
+      config,
       dataProviders,
       indexPattern: mockIndexPattern,
       browserFields: mockBrowserFields,
@@ -305,6 +316,7 @@ describe('Combined Queries', () => {
     dataProviders[0].and = mockDataProviders.slice(2, 4);
     dataProviders[1].and = mockDataProviders.slice(4, 5);
     const { filterQuery } = combineQueries({
+      config,
       dataProviders,
       indexPattern: mockIndexPattern,
       browserFields: mockBrowserFields,
@@ -324,6 +336,7 @@ describe('Combined Queries', () => {
     dataProviders[0].and = mockDataProviders.slice(2, 4);
     dataProviders[1].and = mockDataProviders.slice(4, 5);
     const { filterQuery } = combineQueries({
+      config,
       dataProviders,
       indexPattern: mockIndexPattern,
       browserFields: mockBrowserFields,
