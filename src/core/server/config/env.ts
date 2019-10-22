@@ -96,7 +96,7 @@ export class Env {
   /**
    * @internal
    */
-  constructor(readonly homeDir: string, options: EnvOptions) {
+  constructor(public readonly homeDir: string, options: EnvOptions) {
     this.configDir = resolve(this.homeDir, 'config');
     this.binDir = resolve(this.homeDir, 'bin');
     this.logDir = resolve(this.homeDir, 'log');

@@ -13,7 +13,7 @@ import { LanguageServerDefinition } from './language_servers';
 import { ServerFacade } from '../..';
 
 export class InstallManager {
-  constructor(public readonly server: ServerFacade, readonly serverOptions: ServerOptions) {}
+  constructor(public readonly server: ServerFacade, public readonly serverOptions: ServerOptions) {}
 
   public status(def: LanguageServerDefinition): LanguageServerStatus {
     if (def.installationType === InstallationType.Embed) {

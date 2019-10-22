@@ -34,7 +34,7 @@ export class Timefilter {
   private timeUpdate$ = new Subject();
   // Fired when a user changes the the autorefresh settings
   private refreshIntervalUpdate$ = new Subject();
-  // Used when search poll triggers an auto refresh
+  // Used when an auto refresh is triggered
   private autoRefreshFetch$ = new Subject();
   private fetch$ = new Subject();
 
@@ -44,6 +44,8 @@ export class Timefilter {
 
   private _isTimeRangeSelectorEnabled: boolean = false;
   private _isAutoRefreshSelectorEnabled: boolean = false;
+
+  private _autoRefreshIntervalId: number = 0;
 
   constructor(config: TimefilterConfig, timeHistory: TimeHistoryContract) {
     this._history = timeHistory;
@@ -142,6 +144,15 @@ export class Timefilter {
         this.fetch$.next();
       }
     }
+
+    // Clear the previous auto refresh interval and start a new one (if not paused)
+    clearInterval(this._autoRefreshIntervalId);
+    if (!newRefreshInterval.pause) {
+      this._autoRefreshIntervalId = window.setInterval(
+        () => this.autoRefreshFetch$.next(),
+        newRefreshInterval.value
+      );
+    }
   };
 
   public createFilter = (indexPattern: IndexPattern, timeRange?: TimeRange) => {
@@ -192,14 +203,6 @@ export class Timefilter {
   public disableAutoRefreshSelector = () => {
     this._isAutoRefreshSelectorEnabled = false;
     this.enabledUpdated$.next(false);
-  };
-
-  /**
-   * Added to allow search_poll to trigger an auto refresh event.
-   * Before this change, search_poll used to access a now private member of this instance.
-   */
-  public notifyShouldFetch = () => {
-    this.autoRefreshFetch$.next();
   };
 
   private getForceNow = () => {
