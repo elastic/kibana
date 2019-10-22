@@ -14,7 +14,11 @@ const OOM_SCORE_ADJ = 667;
 const OOM_ADJ = 10;
 
 export class ExternalProgram implements ControlledProgram {
-  constructor(readonly child: ChildProcess, readonly options: ServerOptions, readonly log: Logger) {
+  constructor(
+    public readonly child: ChildProcess,
+    public readonly options: ServerOptions,
+    public readonly log: Logger
+  ) {
     this.pid = child.pid;
     if (this.options.lsp.oomScoreAdj && process.platform === 'linux') {
       this.adjustOom(this.pid);
