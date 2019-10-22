@@ -29,16 +29,16 @@ export function emsBoundariesSpecProvider(server) {
   return {
     id: 'emsBoundaries',
     name: i18n.translate('kbn.server.tutorials.ems.nameTitle', {
-      defaultMessage: 'EMS boundaries',
+      defaultMessage: 'Elastic Maps Service Boundaries',
     }),
     category: TUTORIAL_CATEGORY.OTHER,
     shortDescription: i18n.translate('kbn.server.tutorials.ems.shortDescription', {
       defaultMessage: 'Administrative boundaries from Elastic Maps Service.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.ems.longDescription', {
-      defaultMessage: '[Elastic Maps Service](https://www.elastic.co/elastic-maps-service) \
+      defaultMessage: '[Elastic Maps Service (EMS)](https://www.elastic.co/elastic-maps-service) \
 hosts tile layers and vector shapes of administrative boundaries. \
-You can download EMS administrative boundaries and index them in Elasticsearch.',
+Indexing EMS administrative boundaries in Elasticsearch allows for search on boundary property fields.',
     }),
     euiIconType: 'emsApp',
     completionTimeMinutes: 1,
@@ -52,12 +52,12 @@ You can download EMS administrative boundaries and index them in Elasticsearch.'
               instructions: [
                 {
                   title: i18n.translate('kbn.server.tutorials.ems.downloadStepTitle', {
-                    defaultMessage: 'Download EMS boundaries.',
+                    defaultMessage: 'Download Elastic Maps Service boundaries',
                   }),
                   textPre: i18n.translate('kbn.server.tutorials.ems.downloadStepText', {
-                    defaultMessage: 'Navigate to [EMS landing page]({emsLandingPageUrl}). \
-                    Select administrative boundary in left side menu. \
-                    Click `Download GeoJSON` button.',
+                    defaultMessage: '1. Navigate to Elastic Maps Service [landing page]({emsLandingPageUrl}).\n\
+2. In the left sidebar, select an administrative boundary.\n\
+3. Click `Download GeoJSON` button.',
                     values: {
                       emsLandingPageUrl: server.config().get('map.emsLandingPageUrl'),
                     },
@@ -65,11 +65,12 @@ You can download EMS administrative boundaries and index them in Elasticsearch.'
                 },
                 {
                   title: i18n.translate('kbn.server.tutorials.ems.uploadStepTitle', {
-                    defaultMessage: 'Index EMS boundaries.',
+                    defaultMessage: 'Index Elastic Maps Service boundaries',
                   }),
                   textPre: i18n.translate('kbn.server.tutorials.ems.uploadStepText', {
-                    defaultMessage: 'Open [Elastic Maps]({newMapUrl}). Click `Add layer` button and select `Upload GeoJSON`. \
-                    Upload the GeoJSON file downloaded from EMS.',
+                    defaultMessage: '1. Open [Elastic Maps]({newMapUrl}).\n\
+2. Click `Add layer`, then select `Upload GeoJSON`.\n\
+3. Upload the GeoJSON file and click `Import file`.',
                     values: {
                       newMapUrl: addBasePath('/app/maps#/map')
                     }
