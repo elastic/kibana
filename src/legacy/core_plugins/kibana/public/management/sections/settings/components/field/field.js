@@ -195,7 +195,7 @@ export class Field extends PureComponent {
     this.setState({
       unsavedValue: newUnsavedValue,
       isInvalid,
-      error
+      error,
     });
   };
 
@@ -764,6 +764,7 @@ export class Field extends PureComponent {
               helpText={this.renderHelpText(setting)}
               describedByIds={[`${setting.name}-aria`]}
               className="mgtAdvancedSettings__fieldRow"
+              hasChildLabel={setting.type !== 'boolean'}
             >
               {this.renderField(setting)}
             </EuiFormRow>

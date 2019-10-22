@@ -32,7 +32,6 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./apps/management'),
       require.resolve('./apps/home'),
     ],
-    // testFiles: [require.resolve('./apps/management')],
     pageObjects,
     services,
 

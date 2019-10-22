@@ -96,10 +96,7 @@ export function A11yProvider({ getService }: FtrProviderContext) {
             enabled: false,
           },
           'scrollable-region-focusable': {
-            matches: '.euiCodeEditorWrapper',
-          },
-          'duplicate-id': {
-            matches: '.euiCodeEditorWrapper', // https://github.com/elastic/eui/issues/2415
+            selector: '.euiCodeEditorWrapper',
           },
         },
       };
