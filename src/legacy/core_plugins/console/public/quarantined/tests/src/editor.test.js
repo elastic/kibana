@@ -22,7 +22,7 @@ import _ from 'lodash';
 import ace from 'brace';
 import 'brace/mode/json';
 
-import { initializeInput } from '../../src/input';
+import { initializeEditor } from '../../src/input';
 const editorInput1 = require('./editor_input1.txt');
 const utils = require('../../src/utils');
 
@@ -40,7 +40,7 @@ describe('Editor', () => {
         <div id="ConCopyAsCurl" />
       </div>`;
 
-    input = initializeInput(
+    input = initializeEditor(
       $('#ConAppEditor'),
       $('#ConAppEditorActions'),
     );

@@ -19,7 +19,7 @@
 import './setup_mocks';
 import 'brace';
 import 'brace/mode/json';
-import { initializeInput } from '../../src/input';
+import { initializeEditor } from '../../src/input';
 import _ from 'lodash';
 const $ = require('jquery');
 
@@ -35,7 +35,7 @@ describe('Integration', () => {
     document.body.innerHTML =
       '<div><div id="ConAppEditor" /><div id="ConAppEditorActions" /><div id="ConCopyAsCurl" /></div>';
 
-    input = initializeInput(
+    input = initializeEditor(
       $('#ConAppEditor'),
       $('#ConAppEditorActions')
     );
