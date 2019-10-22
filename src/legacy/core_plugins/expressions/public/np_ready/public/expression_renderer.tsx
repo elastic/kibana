@@ -27,6 +27,7 @@ import { ExpressionLoader } from './loader';
 // dom element which is provided by the component itself
 export interface ExpressionRendererProps extends IExpressionLoaderParams {
   className: string;
+  dataAttrs?: string[];
   expression: string | ExpressionAST;
   renderError?: (
     errorType: 'data' | 'render',
@@ -52,6 +53,7 @@ const defaultState: State = {
 
 export const ExpressionRendererImplementation = ({
   className,
+  dataAttrs,
   expression,
   ...options
 }: ExpressionRendererProps) => {
@@ -113,6 +115,7 @@ export const ExpressionRendererImplementation = ({
 
   return (
     <div
+      {...dataAttrs}
       style={{
         display: state.hasError ? 'none' : 'flex',
         position: 'relative',

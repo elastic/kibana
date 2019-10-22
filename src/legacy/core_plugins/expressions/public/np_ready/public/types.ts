@@ -46,6 +46,7 @@ export interface IExpressionLoaderParams {
   disableCaching?: boolean;
   customFunctions?: [];
   customRenderers?: [];
+  extraHandlers?: Record<string, any>;
 }
 
 export interface IInterpreterHandlers {

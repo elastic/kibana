@@ -18,7 +18,7 @@
  */
 
 import { Observable, Subject } from 'rxjs';
-import { share } from 'rxjs/operators';
+import { first, share } from 'rxjs/operators';
 import { Adapters, InspectorSession } from '../../../../../../plugins/inspector/public';
 import { ExpressionDataHandler } from './execute';
 import { ExpressionRenderHandler } from './render';
@@ -30,11 +30,14 @@ export class ExpressionLoader {
   update$: ExpressionRenderHandler['update$'];
   render$: ExpressionRenderHandler['render$'];
   events$: ExpressionRenderHandler['events$'];
+  loading$: Observable<void>;
 
   private dataHandler!: ExpressionDataHandler;
   private renderHandler: ExpressionRenderHandler;
   private dataSubject: Subject<Data>;
+  private loadingSubject: Subject<void>;
   private data: Data;
+  private params: IExpressionLoaderParams;
 
   constructor(
     element: HTMLElement,
@@ -43,6 +46,9 @@ export class ExpressionLoader {
   ) {
     this.dataSubject = new Subject();
     this.data$ = this.dataSubject.asObservable().pipe(share());
+
+    this.loadingSubject = new Subject();
+    this.loading$ = this.loadingSubject.asObservable().pipe(share());
 
     this.renderHandler = new ExpressionRenderHandler(element);
     this.render$ = this.renderHandler.render$;
@@ -58,6 +64,11 @@ export class ExpressionLoader {
         this.render(data);
       },
     });
+
+    this.params = {
+      searchContext: { type: 'kibana_context' },
+      extraHandlers: params.extraHandlers,
+    };
 
     this.loadData(expression, params);
   }
@@ -90,9 +101,19 @@ export class ExpressionLoader {
     return this.dataHandler.inspect();
   }
 
-  update(expression: string | ExpressionAST, params: IExpressionLoaderParams): void {
-    if (expression !== null) {
-      this.loadData(expression, params);
+  update(expression?: string | ExpressionAST, params?: IExpressionLoaderParams): Promise<RenderId> {
+    // const promise = this.render$.pipe(first()).toPromise();
+    if (params && params.searchContext && this.params.searchContext) {
+      this.params.searchContext = _.defaults(
+        {},
+        params.searchContext,
+        this.params.searchContext
+      ) as any;
+    }
+
+    this.loadingSubject.next();
+    if (expression) {
+      this.loadData(expression, this.params);
     } else {
       this.render(this.data);
     }
@@ -100,7 +121,7 @@ export class ExpressionLoader {
 
   private loadData = async (
     expression: string | ExpressionAST,
-    params: IExpressionLoaderParams
+    params?: IExpressionLoaderParams
   ): Promise<Data> => {
     if (this.dataHandler) {
       this.dataHandler.cancel();
@@ -124,6 +145,14 @@ export class ExpressionLoader {
 
   private render(data: Data): void {
     this.renderHandler.render(data);
+    // this.dataHandler = loadData(expression, params);
+    this.data = await this.dataHandler.getData();
+    // this.dataSubject.next(this.data);
+    // return this.data;
+  }
+
+  private async render(data: Data): Promise<RenderId> {
+    return this.renderHandler.render(data, this.params.extraHandlers);
   }
 }
 
