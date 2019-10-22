@@ -213,9 +213,10 @@ describe('kuery AST API', function () {
     it('should support nested queries indicated by curly braces', () => {
       const expected = nodeTypes.function.buildNode(
         'nested',
-        nodeTypes.function.buildNode('is', 'response', '200')
+        nodeTypes.literal.buildNode('nestedField'),
+        nodeTypes.function.buildNode('is', 'childOfNested', 'foo')
       );
-      const actual = ast.fromKueryExpression('{ response:200 }');
+      const actual = ast.fromKueryExpression('nestedField:{ childOfNested: foo }');
       expect(actual).to.eql(expected);
     });
 
@@ -226,12 +227,13 @@ describe('kuery AST API', function () {
           nodeTypes.function.buildNode('is', 'response', '200'),
           nodeTypes.function.buildNode(
             'nested',
+            nodeTypes.literal.buildNode('nestedField'),
             nodeTypes.function.buildNode('or', [
-              nodeTypes.function.buildNode('is', 'extension', 'jpg'),
-              nodeTypes.function.buildNode('is', 'extension', 'png'),
+              nodeTypes.function.buildNode('is', 'childOfNested', 'foo'),
+              nodeTypes.function.buildNode('is', 'childOfNested', 'bar'),
             ])
           )]);
-      const actual = ast.fromKueryExpression('response:200 and { extension:jpg or extension:png }');
+      const actual = ast.fromKueryExpression('response:200 and nestedField:{ childOfNested:foo or childOfNested:bar }');
       expect(actual).to.eql(expected);
     });
 
@@ -243,15 +245,17 @@ describe('kuery AST API', function () {
           nodeTypes.function.buildNode('or', [
             nodeTypes.function.buildNode(
               'nested',
-              nodeTypes.function.buildNode('is', 'extension', 'jpg')
+              nodeTypes.literal.buildNode('nestedField'),
+              nodeTypes.function.buildNode('is', 'childOfNested', 'foo')
             ),
             nodeTypes.function.buildNode(
               'nested',
-              nodeTypes.function.buildNode('is', 'extension', 'png')
+              nodeTypes.literal.buildNode('nestedField'),
+              nodeTypes.function.buildNode('is', 'childOfNested', 'bar')
             ),
           ])
         ]);
-      const actual = ast.fromKueryExpression('response:200 and ( { extension:jpg } or { extension:png } )');
+      const actual = ast.fromKueryExpression('response:200 and ( nestedField:{ childOfNested:foo } or nestedField:{ childOfNested:bar } )');
       expect(actual).to.eql(expected);
     });
 
