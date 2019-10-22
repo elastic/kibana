@@ -33,6 +33,12 @@ export const DEFAULT_OPTIONS = {
   widths: [1200],
 };
 
+export const STYLE = {
+  selector: null,
+  attribute: null,
+  value: null,
+};
+
 export interface SnapshotOptions {
   /**
    * name to append to visual test name
@@ -101,17 +107,19 @@ export async function VisualTestingProvider({ getService }: FtrProviderContext) 
     private async getSnapshot(show: string[] = [], hide: string[] = []) {
       const showSelectors = show.map(testSubjSelector);
       const hideSelectors = hide.map(testSubjSelector);
-      const snapshot = await browser.execute<[string[], string[]], string | false>(
+      const snapshot = await browser.execute<[string[], string[], object], string | false>(
         takePercySnapshot,
         showSelectors,
-        hideSelectors
+        hideSelectors,
+        STYLE
       );
       return snapshot !== false
         ? snapshot
-        : await browser.execute<[string[], string[]], string>(
+        : await browser.execute<[string[], string[], object], string>(
             takePercySnapshotWithAgent,
             showSelectors,
-            hideSelectors
+            hideSelectors,
+            STYLE
           );
     }
   })();
