@@ -17,17 +17,12 @@
  * under the License.
  */
 
+import { isMaster } from 'cluster';
 import { LogRotator } from './log_rotator';
 
 let logRotator = null;
 
-export function setupLoggingRotate(config, logReporter) {
-  // We just want to start the logging rotate service once
-  // and we choose to use the worker server type for it
-  if (process.env.kbnWorkerType !== 'server') {
-    return;
-  }
-
+export function setupLoggingRotate(config) {
   // If log rotate is not enabled we skip
   if (!config.get('logging.rotate.enable')) {
     return;
@@ -43,12 +38,20 @@ export function setupLoggingRotate(config, logReporter) {
     return;
   }
 
-  // Enable Logging Rotate Service
-  if (!logRotator) {
-    logRotator = new LogRotator(config, logReporter.formattedLogStream);
+  // We just want to start the logging rotate service once
+  // and we choose to use the master from the cluster
+  if (!isMaster) {
+    return;
   }
-  logRotator.stop();
-  logRotator.start();
+
+  // Enable Logging Rotate Service
+  // We need the master process and it can
+  // try to setupLoggingRotate more than once,
+  // so we'll need to assure it only loads once.
+  if (!logRotator) {
+    logRotator = new LogRotator(config);
+    logRotator.start();
+  }
 
   return logRotator;
 }

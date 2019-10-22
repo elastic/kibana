@@ -19,31 +19,18 @@
 
 import good from '@elastic/good';
 import loggingConfiguration from './configuration';
-import { LogReporter } from './log_reporter';
 import { logWithMetadata } from './log_with_metadata';
 import { setupLoggingRotate } from './rotate';
 
 export async function setupLogging(server, config) {
-  const logReporter = new LogReporter();
-
-  await server.register({
+  setupLoggingRotate(config);
+  return await server.register({
     plugin: good,
-    options: loggingConfiguration(config, logReporter)
+    options: loggingConfiguration(config)
   });
-  setupLoggingRotate(config, logReporter);
 }
 
 export async function loggingMixin(kbnServer, server, config) {
   logWithMetadata.decorateServer(server);
-
-  console.log(process.pid);
-
-  setInterval(()=> {
-    server.logWithMetadata(
-      ['info', 'LOG'],
-      'TEST LOG'
-    );
-  }, 10000);
-
   return await setupLogging(server, config);
 }

@@ -17,26 +17,28 @@
  * under the License.
  */
 
+import * as chokidar from 'chokidar';
+import { workers } from 'cluster';
 import fs from 'fs';
 import { throttle } from 'lodash';
-import { basename, dirname, sep } from 'path';
+import { tmpdir } from 'os';
+import { basename, dirname, join, sep } from 'path';
 
 export class LogRotator {
-  constructor(config, logReporterStream) {
-    this.logReporterStream = logReporterStream;
+  constructor(config) {
     this.logFilePath = config.get('logging.dest');
-    this.interval = config.get('logging.rotate.interval');
+    this.interval = 1;
     this.everyBytes = config.get('logging.rotate.everyBytes');
     this.keepFiles = config.get('logging.rotate.keepFiles');
-    this.onStartup = config.get('logging.rotate.onStartup');
     this.running = false;
     this.logFileSize = 0;
     this.intervalID = 0;
     this.lastRotateTime = (new Date()).getTime();
     this.isRotating = false;
     this.throttledRotate = throttle(() => { this._rotate(); }, 5000);
-    console.log(process.ppid);
-    console.log(process.pid);
+    this.stalker = null;
+    this.usePolling = true;
+    this.stalkerUsePollingPolicyTestTimeout = null;
   }
 
   start() {
@@ -47,15 +49,14 @@ export class LogRotator {
     // create exit listener for cleanup purposes
     this._createExitListener();
 
+    // call rotate on startup
+    this._callRotateOnStartup();
+
     // init log file size monitor
     this._startLogFileSizeMonitor();
 
     // init log file interval monitor
-    this._startLogFileIntervalMonitor();
-
-    // call rotate in case we should try
-    // to rotate on startup
-    this._callRotateOnStartup();
+    // this._startLogFileIntervalMonitor();
 
     this.running = true;
   }
@@ -72,27 +73,81 @@ export class LogRotator {
     this._stopLogFileSizeMonitor();
 
     // stop log file interval monitor
-    this._stopLogFileIntervalMonitor();
+    // this._stopLogFileIntervalMonitor();
 
     this.running = false;
   }
 
   _startLogFileSizeMonitor() {
-    this.logFileSize = this._getLogFileSize();
-    this.logReporterStream.on('data', this._logFileSizeMonitorHandler.bind(this));
+    // Setup a test file in order to try the fs env
+    // and understand if we need to usePolling or not
+    const tempFileDir = fs.mkdtempSync(tmpdir());
+    const tempFile = join(tempFileDir, 'kbn_log_rotation_test_file.log');
+    fs.writeFileSync(tempFile, '');
+
+    // setup watcher and wait for changes on test file
+    this.stalker = chokidar.watch(tempFile, this._buildWatchCfg());
+    this.stalker.on('change', () => {
+      this.usePolling = false;
+      // Sometimes chokidar is emit an exception on close due to a bug
+      // so we need to do this to prevent it
+      setTimeout(()=> this._completeUsePollingPolicyTest(tempFile), 0);
+    });
+    this.stalker.on('ready', () => fs.writeFileSync(tempFile, 'test'));
+
+    // in case the watchers without usePolling do not work
+    // we fallback after 10s and start usePolling mechanism
+    this.stalkerUsePollingPolicyTestTimeout = setTimeout(() => this._completeUsePollingPolicyTest(tempFile), 10000);
   }
 
-  _logFileSizeMonitorHandler(chunk) {
-    if (!chunk) {
+  _completeUsePollingPolicyTest(tempFile) {
+    // if we have already call that function, return
+    if (!this.stalkerUsePollingPolicyTestTimeout) {
       return;
     }
 
-    this.logFileSize += chunk.length || 0;
+    // clear the timeout anyway if we reach that far
+    clearTimeout(this.stalkerUsePollingPolicyTestTimeout);
+    this.stalkerUsePollingPolicyTestTimeout = null;
+
+    // close the watcher for test file
+    // and delete it
+    this.stalker.close();
+    fs.unlinkSync(tempFile);
+
+    // start the real watcher for the log file
+    // with the correct usePolling option
+    this.stalker = chokidar.watch(this.logFilePath, this._buildWatchCfg(this.usePolling));
+    this.stalker.on('change', this._logFileSizeMonitorHandler.bind(this));
+  }
+
+  _buildWatchCfg(usePolling = false) {
+    return {
+      ignoreInitial: true,
+      usePolling,
+      interval: 10000,
+      binaryInterval: 10000,
+      alwaysStat: true,
+      atomic: false
+    };
+  }
+
+  _logFileSizeMonitorHandler(filename, stats) {
+    if (!filename || !stats) {
+      return;
+    }
+
+    this.logFileSize += stats.size || 0;
     this.throttledRotate();
   }
 
   _stopLogFileSizeMonitor() {
-    this.logReporterStream.removeListener('data', this._logFileIntervalMonitorHandler);
+    if (!this.stalker) {
+      return;
+    }
+
+    this.stalker.close();
+    clearTimeout(this.stalkerUsePollingPolicyTestTimeout);
   }
 
   _startLogFileIntervalMonitor() {
@@ -134,9 +189,8 @@ export class LogRotator {
   }
 
   _callRotateOnStartup() {
-    if (this.onStartup) {
-      this._rotate();
-    }
+    this.logFileSize = this._getLogFileSize();
+    this._rotate();
   }
 
   _shouldRotate() {
@@ -189,19 +243,18 @@ export class LogRotator {
     // get rotated files metadata
     const rotatedFiles = this._readRotatedFilesMetadata();
 
-    console.log(rotatedFiles);
-
     // delete last file
     this._deleteLastRotatedFile(rotatedFiles);
 
     // rename all files to correct index + 1
+    // and normalize
     this._renameRotatedFilesByOne(rotatedFiles);
 
     // rename + compress current log into 0
     this._rotateCurrentLogFile();
 
     // send SIGHUP to reload log configuration
-    process.kill(process.ppid, 'SIGHUP');
+    this._sendReloadLogConfigSignal();
 
     // Reset log file size
     this.logFileSize = 0;
@@ -247,5 +300,13 @@ export class LogRotator {
   _rotateCurrentLogFile() {
     const newFilePath = `${this.logFilePath}.0`;
     fs.renameSync(this.logFilePath, newFilePath);
+  }
+
+  _sendReloadLogConfigSignal() {
+    process.kill(process.pid, 'SIGHUP');
+
+    Object.values(workers).forEach((worker) => {
+      process.kill(worker.process.pid, 'SIGHUP');
+    });
   }
 }

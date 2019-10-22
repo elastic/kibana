@@ -24,38 +24,29 @@ import LogFormatJson from './log_format_json';
 import LogFormatString from './log_format_string';
 import { LogInterceptor } from './log_interceptor';
 
-export class LogReporter {
-  constructor() {
-    this.squeeze = null;
-    this.format = null;
-    this.logInterceptor = null;
-    this.dest = null;
-    this.formattedLogStream = null;
+export function getLoggerStream({ events, config }) {
+  const squeeze = new Squeeze(events);
+  const format = config.json ? new LogFormatJson(config) : new LogFormatString(config);
+  const logInterceptor = new LogInterceptor();
+
+  let dest;
+  if (config.dest === 'stdout') {
+    dest = process.stdout;
+  } else {
+    dest = writeStr(config.dest, {
+      flags: 'a',
+      encoding: 'utf8'
+    });
+
+    logInterceptor.on('end', () => {
+      dest.end();
+    });
   }
 
-  configLogReporter({ events, config }) {
-    this.squeeze = new Squeeze(events);
-    this.format = config.json ? new LogFormatJson(config) : new LogFormatString(config);
-    this.logInterceptor = new LogInterceptor();
-    this.dest = null;
-    this.formattedLogStream = this.logInterceptor
-      .pipe(this.squeeze)
-      .pipe(this.format);
+  logInterceptor
+    .pipe(squeeze)
+    .pipe(format)
+    .pipe(dest);
 
-    if (config.dest === 'stdout') {
-      this.dest = process.stdout;
-    } else {
-      this.dest = writeStr(config.dest, {
-        flags: 'a',
-        encoding: 'utf8'
-      });
-
-      this.logInterceptor.on('end', () => {
-        this.dest.end();
-      });
-    }
-
-    this.formattedLogStream
-      .pipe(this.dest);
-  }
+  return logInterceptor;
 }
