@@ -107,7 +107,10 @@ MetricEditor.propTypes = {
     field: PropTypes.string,
     label: PropTypes.string,
   }),
-  fields: PropTypes.object, // indexPattern.fields IndexedArray object
+  fields: PropTypes.oneOfType([
+    PropTypes.object, // IndexedArray object
+    PropTypes.array // array of Field objects
+  ]),
   onChange: PropTypes.func.isRequired,
   metricsFilter: PropTypes.func,
 };

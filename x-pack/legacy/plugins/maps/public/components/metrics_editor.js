@@ -92,7 +92,10 @@ export function MetricsEditor({ fields, metrics, onChange, allowMultipleMetrics,
 
 MetricsEditor.propTypes = {
   metrics: PropTypes.array,
-  fields: PropTypes.object, // indexPattern.fields IndexedArray object
+  fields: PropTypes.oneOfType([
+    PropTypes.object, // IndexedArray object
+    PropTypes.array // array of Field objects
+  ]),
   onChange: PropTypes.func.isRequired,
   allowMultipleMetrics: PropTypes.bool,
   metricsFilter: PropTypes.func,
