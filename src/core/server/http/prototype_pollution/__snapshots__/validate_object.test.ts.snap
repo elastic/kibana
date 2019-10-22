@@ -1,169 +1,49 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`can't submit {"headers":{"__proto__":null}} 1`] = `
-Object {
-  "errorKey": "proto_invalid_key",
-  "valid": false,
-}
-`;
+exports[`can't submit {"headers":{"__proto__":null}} 1`] = `"'__proto__' is an invalid key"`;
 
-exports[`can't submit {"headers":{"constructor":{"prototype":null}}} 1`] = `
-Object {
-  "errorKey": "constructor-prototype_invalid_key",
-  "valid": false,
-}
-`;
+exports[`can't submit {"headers":{"constructor":{"prototype":null}}} 1`] = `"'constructor.prototype' is an invalid key"`;
 
-exports[`can't submit {"headers":{"foo":{"__proto__":true}}} 1`] = `
-Object {
-  "errorKey": "proto_invalid_key",
-  "valid": false,
-}
-`;
+exports[`can't submit {"headers":{"foo":{"__proto__":true}}} 1`] = `"'__proto__' is an invalid key"`;
 
-exports[`can't submit {"headers":{"foo":{"bar":{"__proto__":{}}}}} 1`] = `
-Object {
-  "errorKey": "proto_invalid_key",
-  "valid": false,
-}
-`;
+exports[`can't submit {"headers":{"foo":{"bar":{"__proto__":{}}}}} 1`] = `"'__proto__' is an invalid key"`;
 
-exports[`can't submit {"headers":{"foo":{"bar":{"constructor":{"prototype":null}}}}} 1`] = `
-Object {
-  "errorKey": "constructor-prototype_invalid_key",
-  "valid": false,
-}
-`;
+exports[`can't submit {"headers":{"foo":{"bar":{"constructor":{"prototype":null}}}}} 1`] = `"'constructor.prototype' is an invalid key"`;
 
-exports[`can't submit {"headers":{"foo":{"constructor":{"prototype":null}}}} 1`] = `
-Object {
-  "errorKey": "constructor-prototype_invalid_key",
-  "valid": false,
-}
-`;
+exports[`can't submit {"headers":{"foo":{"constructor":{"prototype":null}}}} 1`] = `"'constructor.prototype' is an invalid key"`;
 
-exports[`can't submit {"params":{"__proto__":null}} 1`] = `
-Object {
-  "errorKey": "proto_invalid_key",
-  "valid": false,
-}
-`;
+exports[`can't submit {"params":{"__proto__":null}} 1`] = `"'__proto__' is an invalid key"`;
 
-exports[`can't submit {"params":{"constructor":{"prototype":null}}} 1`] = `
-Object {
-  "errorKey": "constructor-prototype_invalid_key",
-  "valid": false,
-}
-`;
+exports[`can't submit {"params":{"constructor":{"prototype":null}}} 1`] = `"'constructor.prototype' is an invalid key"`;
 
-exports[`can't submit {"params":{"foo":{"__proto__":true}}} 1`] = `
-Object {
-  "errorKey": "proto_invalid_key",
-  "valid": false,
-}
-`;
+exports[`can't submit {"params":{"foo":{"__proto__":true}}} 1`] = `"'__proto__' is an invalid key"`;
 
-exports[`can't submit {"params":{"foo":{"bar":{"__proto__":{}}}}} 1`] = `
-Object {
-  "errorKey": "proto_invalid_key",
-  "valid": false,
-}
-`;
+exports[`can't submit {"params":{"foo":{"bar":{"__proto__":{}}}}} 1`] = `"'__proto__' is an invalid key"`;
 
-exports[`can't submit {"params":{"foo":{"bar":{"constructor":{"prototype":null}}}}} 1`] = `
-Object {
-  "errorKey": "constructor-prototype_invalid_key",
-  "valid": false,
-}
-`;
+exports[`can't submit {"params":{"foo":{"bar":{"constructor":{"prototype":null}}}}} 1`] = `"'constructor.prototype' is an invalid key"`;
 
-exports[`can't submit {"params":{"foo":{"constructor":{"prototype":null}}}} 1`] = `
-Object {
-  "errorKey": "constructor-prototype_invalid_key",
-  "valid": false,
-}
-`;
+exports[`can't submit {"params":{"foo":{"constructor":{"prototype":null}}}} 1`] = `"'constructor.prototype' is an invalid key"`;
 
-exports[`can't submit {"payload":{"__proto__":null}} 1`] = `
-Object {
-  "errorKey": "proto_invalid_key",
-  "valid": false,
-}
-`;
+exports[`can't submit {"payload":{"__proto__":null}} 1`] = `"'__proto__' is an invalid key"`;
 
-exports[`can't submit {"payload":{"constructor":{"prototype":null}}} 1`] = `
-Object {
-  "errorKey": "constructor-prototype_invalid_key",
-  "valid": false,
-}
-`;
+exports[`can't submit {"payload":{"constructor":{"prototype":null}}} 1`] = `"'constructor.prototype' is an invalid key"`;
 
-exports[`can't submit {"payload":{"foo":{"__proto__":true}}} 1`] = `
-Object {
-  "errorKey": "proto_invalid_key",
-  "valid": false,
-}
-`;
+exports[`can't submit {"payload":{"foo":{"__proto__":true}}} 1`] = `"'__proto__' is an invalid key"`;
 
-exports[`can't submit {"payload":{"foo":{"bar":{"__proto__":{}}}}} 1`] = `
-Object {
-  "errorKey": "proto_invalid_key",
-  "valid": false,
-}
-`;
+exports[`can't submit {"payload":{"foo":{"bar":{"__proto__":{}}}}} 1`] = `"'__proto__' is an invalid key"`;
 
-exports[`can't submit {"payload":{"foo":{"bar":{"constructor":{"prototype":null}}}}} 1`] = `
-Object {
-  "errorKey": "constructor-prototype_invalid_key",
-  "valid": false,
-}
-`;
+exports[`can't submit {"payload":{"foo":{"bar":{"constructor":{"prototype":null}}}}} 1`] = `"'constructor.prototype' is an invalid key"`;
 
-exports[`can't submit {"payload":{"foo":{"constructor":{"prototype":null}}}} 1`] = `
-Object {
-  "errorKey": "constructor-prototype_invalid_key",
-  "valid": false,
-}
-`;
+exports[`can't submit {"payload":{"foo":{"constructor":{"prototype":null}}}} 1`] = `"'constructor.prototype' is an invalid key"`;
 
-exports[`can't submit {"query":{"__proto__":null}} 1`] = `
-Object {
-  "errorKey": "proto_invalid_key",
-  "valid": false,
-}
-`;
+exports[`can't submit {"query":{"__proto__":null}} 1`] = `"'__proto__' is an invalid key"`;
 
-exports[`can't submit {"query":{"constructor":{"prototype":null}}} 1`] = `
-Object {
-  "errorKey": "constructor-prototype_invalid_key",
-  "valid": false,
-}
-`;
+exports[`can't submit {"query":{"constructor":{"prototype":null}}} 1`] = `"'constructor.prototype' is an invalid key"`;
 
-exports[`can't submit {"query":{"foo":{"__proto__":true}}} 1`] = `
-Object {
-  "errorKey": "proto_invalid_key",
-  "valid": false,
-}
-`;
+exports[`can't submit {"query":{"foo":{"__proto__":true}}} 1`] = `"'__proto__' is an invalid key"`;
 
-exports[`can't submit {"query":{"foo":{"bar":{"__proto__":{}}}}} 1`] = `
-Object {
-  "errorKey": "proto_invalid_key",
-  "valid": false,
-}
-`;
+exports[`can't submit {"query":{"foo":{"bar":{"__proto__":{}}}}} 1`] = `"'__proto__' is an invalid key"`;
 
-exports[`can't submit {"query":{"foo":{"bar":{"constructor":{"prototype":null}}}}} 1`] = `
-Object {
-  "errorKey": "constructor-prototype_invalid_key",
-  "valid": false,
-}
-`;
+exports[`can't submit {"query":{"foo":{"bar":{"constructor":{"prototype":null}}}}} 1`] = `"'constructor.prototype' is an invalid key"`;
 
-exports[`can't submit {"query":{"foo":{"constructor":{"prototype":null}}}} 1`] = `
-Object {
-  "errorKey": "constructor-prototype_invalid_key",
-  "valid": false,
-}
-`;
+exports[`can't submit {"query":{"foo":{"constructor":{"prototype":null}}}} 1`] = `"'constructor.prototype' is an invalid key"`;

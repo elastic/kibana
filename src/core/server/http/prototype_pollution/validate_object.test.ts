@@ -23,16 +23,11 @@ test(`fails on circular references`, () => {
   const foo: Record<string, any> = {};
   foo.myself = foo;
 
-  expect(
+  expect(() =>
     validateObject({
       payload: foo,
     })
-  ).toMatchInlineSnapshot(`
-    Object {
-      "errorKey": "circular_reference",
-      "valid": false,
-    }
-  `);
+  ).toThrowErrorMatchingInlineSnapshot(`"circular reference detected"`);
 });
 
 [
@@ -62,7 +57,7 @@ test(`fails on circular references`, () => {
       [property]: value,
     };
     test(`can submit ${JSON.stringify(obj)}`, () => {
-      expect(validateObject(obj)).toEqual({ valid: true });
+      expect(() => validateObject(obj)).not.toThrowError();
     });
   });
 });
@@ -83,7 +78,7 @@ test(`fails on circular references`, () => {
       [property]: value,
     };
     test(`can't submit ${JSON.stringify(obj)}`, () => {
-      expect(validateObject(obj)).toMatchSnapshot();
+      expect(() => validateObject(obj)).toThrowErrorMatchingSnapshot();
     });
   });
 });
