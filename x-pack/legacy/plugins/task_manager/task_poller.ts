@@ -8,6 +8,7 @@
  * This module contains the logic for polling the task manager index for new work.
  */
 
+import { performance } from 'perf_hooks';
 import { Logger } from './types';
 
 type WorkFn = () => Promise<void>;
@@ -79,6 +80,8 @@ export class TaskPoller {
    * this has no effect.
    */
   public async attemptWork() {
+    performance.mark('attemptWork_start');
+
     if (!this.isStarted || this.isWorking) {
       return;
     }
@@ -91,6 +94,9 @@ export class TaskPoller {
       this.logger.error(`Failed to poll for work: ${err}`);
     } finally {
       this.isWorking = false;
+
+      performance.mark('attemptWork_stop');
+      performance.measure('taskPoller.attemptWork', 'attemptWork_start', 'attemptWork_stop');
     }
   }
 }

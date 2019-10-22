@@ -10,6 +10,7 @@
  * rescheduling, middleware application, etc.
  */
 
+import { performance } from 'perf_hooks';
 import Joi from 'joi';
 import { intervalFromDate, intervalFromNow } from './lib/intervals';
 import { Logger } from './types';
@@ -153,6 +154,8 @@ export class TaskManagerRunner implements TaskRunner {
    * @returns {Promise<boolean>}
    */
   public async markTaskAsRunning(): Promise<boolean> {
+    performance.mark('markTaskAsRunning_start');
+
     const VERSION_CONFLICT_STATUS = 409;
     const now = new Date();
 
@@ -202,13 +205,14 @@ export class TaskManagerRunner implements TaskRunner {
         );
       }
 
+      performanceStopMarkingTaskAsRunning();
       return true;
     } catch (error) {
+      performanceStopMarkingTaskAsRunning();
       if (error.statusCode !== VERSION_CONFLICT_STATUS) {
         throw error;
       }
     }
-
     return false;
   }
 
@@ -355,4 +359,13 @@ function sanitizeInstance(instance: ConcreteTaskInstance): ConcreteTaskInstance 
 
 function howManyMsUntilOwnershipClaimExpires(ownershipClaimedUntil: Date | null): number {
   return ownershipClaimedUntil ? ownershipClaimedUntil.getTime() - Date.now() : 0;
+}
+
+function performanceStopMarkingTaskAsRunning() {
+  performance.mark('markTaskAsRunning_stop');
+  performance.measure(
+    'taskRunner.markTaskAsRunning',
+    'markTaskAsRunning_start',
+    'markTaskAsRunning_stop'
+  );
 }

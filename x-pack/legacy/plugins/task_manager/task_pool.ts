@@ -8,6 +8,7 @@
  * This module contains the logic that ensures we don't run too many
  * tasks at once in a given Kibana instance.
  */
+import { performance } from 'perf_hooks';
 import { i18n } from '@kbn/i18n';
 import { Logger } from './types';
 import { TaskRunner } from './task_runner';
@@ -91,6 +92,8 @@ export class TaskPool {
   }
 
   private async attemptToRun(tasks: TaskRunner[]): Promise<TaskPoolRunResult> {
+    performance.mark('attemptToRun_start');
+
     const [tasksToRun, leftOverTasks] = partitionListByCount(tasks, this.availableWorkers);
     if (tasksToRun.length) {
       const taskRunResults = await Promise.all(
@@ -139,6 +142,9 @@ export class TaskPool {
         )
       );
     }
+
+    performance.mark('attemptToRun_stop');
+    performance.measure('taskPool.attemptToRun', 'attemptToRun_start', 'attemptToRun_stop');
 
     if (leftOverTasks.length) {
       if (this.availableWorkers) {

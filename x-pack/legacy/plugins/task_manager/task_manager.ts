@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { performance } from 'perf_hooks';
 import { SavedObjectsClientContract, SavedObjectsSerializer } from 'src/core/server';
 import { Logger } from './types';
 import { fillPool } from './lib/fill_pool';
@@ -270,10 +270,19 @@ export async function claimAvailableTasks(
   logger: Logger
 ) {
   if (availableWorkers > 0) {
+    performance.mark('claimAvailableTasks_start');
+
     const { docs, claimedTasks } = await claim({
       size: availableWorkers,
       claimOwnershipUntil: intervalFromNow('30s')!,
     });
+
+    performance.mark('claimAvailableTasks_stop');
+    performance.measure(
+      'claimAvailableTasks',
+      'claimAvailableTasks_start',
+      'claimAvailableTasks_stop'
+    );
 
     if (docs.length !== claimedTasks) {
       logger.warn(
