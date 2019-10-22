@@ -36,7 +36,7 @@ export const trackUiMetric = createUiStatsReporter('Kibana_home');
  * Get dependencies relying on the global angular context.
  * They also have to get resolved together with the legacy imports above
  */
-async function getAngularInjectedDependencies(): Promise<LegacyAngularInjectedDependencies> {
+async function getAngularDependencies(): Promise<LegacyAngularInjectedDependencies> {
   const injector = await chrome.dangerouslyGetActiveInjector();
 
   const Private = injector.get<IPrivate>('Private');
@@ -49,7 +49,6 @@ async function getAngularInjectedDependencies(): Promise<LegacyAngularInjectedDe
     telemetryOptInProvider,
     shouldShowTelemetryOptIn:
       telemetryEnabled && telemetryBanner && !telemetryOptInProvider.getOptIn(),
-    featureCatalogueRegistryProvider: Private(FeatureCatalogueRegistryProvider as any),
   };
 }
 
@@ -63,13 +62,18 @@ async function getAngularInjectedDependencies(): Promise<LegacyAngularInjectedDe
       kfetch,
       metadata: npStart.core.injectedMetadata.getLegacyMetadata(),
       METRIC_TYPE,
+      getFeatureCatalogueRegistryProvider: async () => {
+        const injector = await chrome.dangerouslyGetActiveInjector();
+
+        const Private = injector.get<IPrivate>('Private');
+
+        return Private(FeatureCatalogueRegistryProvider as any);
+      },
+      getAngularDependencies,
       localApplicationService,
     },
   });
   instance.start(npStart.core, {
     data,
-    __LEGACY: {
-      angularDependencies: await getAngularInjectedDependencies(),
-    },
   });
 })();

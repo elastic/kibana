@@ -32,7 +32,7 @@ import { UiStatsMetricType } from '@kbn/analytics';
 
 export interface HomeKibanaServices {
   indexPatternService: any;
-  featureCatalogueRegistryProvider: any;
+  getFeatureCatalogueRegistryProvider: () => Promise<any>;
   metadata: {
     app: unknown;
     bundleId: string;

@@ -24,10 +24,10 @@ import { i18n } from '@kbn/i18n';
 import { HomeApp } from './components/home_app';
 import { getServices } from './kibana_services';
 
-export const renderApp = (element: HTMLElement) => {
+export const renderApp = async (element: HTMLElement) => {
   const homeTitle = i18n.translate('kbn.home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
-  const { featureCatalogueRegistryProvider, chrome } = getServices();
-  const directories = featureCatalogueRegistryProvider.inTitleOrder;
+  const { getFeatureCatalogueRegistryProvider, chrome } = getServices();
+  const directories = (await getFeatureCatalogueRegistryProvider()).inTitleOrder;
   chrome.setBreadcrumbs([{ text: homeTitle }]);
 
   render(<HomeApp directories={directories} />, element);

@@ -28,16 +28,12 @@ import { LocalApplicationService } from '../local_application_service';
 import { setServices } from './kibana_services';
 
 export interface LegacyAngularInjectedDependencies {
-  featureCatalogueRegistryProvider: any;
   telemetryOptInProvider: any;
   shouldShowTelemetryOptIn: boolean;
 }
 
 export interface HomePluginStartDependencies {
   data: DataStart;
-  __LEGACY: {
-    angularDependencies: LegacyAngularInjectedDependencies;
-  };
 }
 
 export interface HomePluginSetupDependencies {
@@ -60,23 +56,27 @@ export interface HomePluginSetupDependencies {
       devMode: boolean;
       uiSettings: { defaults: UiSettingsState; user?: UiSettingsState | undefined };
     };
+    getFeatureCatalogueRegistryProvider: () => Promise<any>;
+    getAngularDependencies: () => Promise<LegacyAngularInjectedDependencies>;
     localApplicationService: LocalApplicationService;
   };
 }
 
 export class HomePlugin implements Plugin {
   private dataStart: DataStart | null = null;
-  private angularDependencies: LegacyAngularInjectedDependencies | null = null;
   private savedObjectsClient: any = null;
 
   setup(
     core: CoreSetup,
-    { __LEGACY: { localApplicationService, ...legacyServices } }: HomePluginSetupDependencies
+    {
+      __LEGACY: { localApplicationService, getAngularDependencies, ...legacyServices },
+    }: HomePluginSetupDependencies
   ) {
     localApplicationService.register({
       id: 'home',
       title: 'Home',
       mount: async ({ core: contextCore }, params) => {
+        const angularDependencies = await getAngularDependencies();
         setServices({
           ...legacyServices,
           getInjected: core.injectedMetadata.getInjectedVar,
@@ -87,18 +87,17 @@ export class HomePlugin implements Plugin {
           addBasePath: core.http.basePath.prepend,
           getBasePath: core.http.basePath.get,
           indexPatternService: this.dataStart!.indexPatterns.indexPatterns,
-          ...this.angularDependencies!,
+          ...angularDependencies,
         });
         const { renderApp } = await import('./render_app');
-        return renderApp(params.element);
+        return await renderApp(params.element);
       },
     });
   }
 
-  start(core: CoreStart, { data, __LEGACY: { angularDependencies } }: HomePluginStartDependencies) {
+  start(core: CoreStart, { data }: HomePluginStartDependencies) {
     // TODO is this really the right way? I though the app context would give us those
     this.dataStart = data;
-    this.angularDependencies = angularDependencies;
     this.savedObjectsClient = core.savedObjects.client;
   }
 

@@ -24,7 +24,9 @@ import { shallow } from 'enzyme';
 import { SampleDataViewDataButton } from './sample_data_view_data_button';
 
 jest.mock('../kibana_services', () =>({
-  addBasePath: path => `root${path}`
+  getServices: () =>({
+    addBasePath: path => `root${path}`
+  })
 }));
 
 test('should render simple button when appLinks is empty', () => {
