@@ -1142,6 +1142,23 @@ Array [
       const series = JSON.parse(migratedDoc.attributes.visState).params.series;
       expect(series[0].filter).toEqual(params.series[0].filter);
     });
+    it('should change series split_filters items from a string into an object', () => {
+      const params = {
+        type: 'timeseries',
+        filter: 'bytes:>1000',
+        series: [
+          {
+            filter: '',
+            split_filters: [{ filter: 'bytes:>1000' }],
+          },
+        ]
+      };
+      const timeSeriesDoc = generateDoc({ params: params });
+      const migratedtimeSeriesDoc = migrate(timeSeriesDoc);
+      const timeSeriesParams = JSON.parse(migratedtimeSeriesDoc.attributes.visState).params;
+      expect(timeSeriesParams.series[0].split_filters[0].filter).toHaveProperty('query');
+      expect(timeSeriesParams.series[0].split_filters[0].filter).toHaveProperty('language');
+    });
   });
   describe('7.3.0 tsvb split_filters migration', () => {
     const migrate = doc => migrations.visualization['7.3.0'](doc);

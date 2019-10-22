@@ -250,10 +250,6 @@ function transformFilterStringToQueryObject(doc) {
       // migrate the series filters
       const series = get(visState, 'params.series') || [];
       series.forEach(item => {
-        if (!item.filter) {
-          // we don't need to transform anything if there isn't a filter at all
-          return;
-        }
         // series item filter
         if (typeof item.filter === 'string') {
           const itemfilterObject = {
@@ -268,10 +264,6 @@ function transformFilterStringToQueryObject(doc) {
           if (splitFilters.length > 0) {
             // only transform split_filter filters if we have filters
             splitFilters.forEach(filter => {
-              if (!filter.filter) {
-              // // we don't need to transform anything if there isn't a filter at all
-                return;
-              }
               if (typeof filter.filter === 'string') {
                 const filterfilterObject = {
                   query: filter.filter,
