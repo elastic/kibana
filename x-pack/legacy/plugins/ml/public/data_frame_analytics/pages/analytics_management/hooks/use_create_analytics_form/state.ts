@@ -16,6 +16,11 @@ export type EsIndexName = string;
 export type DependentVariable = string;
 export type IndexPatternTitle = string;
 export type AnalyticsJobType = JOB_TYPES | undefined;
+type IndexPatternId = string;
+export type SourceIndexMap = Record<
+  IndexPatternTitle,
+  { label: IndexPatternTitle; value: IndexPatternId }
+>;
 
 export interface FormMessage {
   error?: string;
@@ -56,8 +61,7 @@ export interface State {
   };
   disabled: boolean;
   indexNames: EsIndexName[];
-  indexPatternsMap: Record<string, string>;
-  indexPatternTitles: IndexPatternTitle[];
+  indexPatternsMap: SourceIndexMap;
   isAdvancedEditorEnabled: boolean;
   isJobCreated: boolean;
   isJobStarted: boolean;
@@ -102,7 +106,6 @@ export const getInitialState = (): State => ({
     !checkPermission('canStartStopDataFrameAnalytics'),
   indexNames: [],
   indexPatternsMap: {},
-  indexPatternTitles: [],
   isAdvancedEditorEnabled: false,
   isJobCreated: false,
   isJobStarted: false,

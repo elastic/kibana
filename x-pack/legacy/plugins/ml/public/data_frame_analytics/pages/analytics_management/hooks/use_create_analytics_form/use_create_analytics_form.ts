@@ -26,8 +26,8 @@ import {
   getJobConfigFromFormState,
   EsIndexName,
   FormMessage,
-  IndexPatternTitle,
   State,
+  SourceIndexMap,
 } from './state';
 
 export interface CreateAnalyticsFormProps {
@@ -65,10 +65,8 @@ export const useCreateAnalyticsForm = () => {
   const setAdvancedEditorRawString = (advancedEditorRawString: string) =>
     dispatch({ type: ACTION.SET_ADVANCED_EDITOR_RAW_STRING, advancedEditorRawString });
 
-  const setIndexPatternTitles = (payload: {
-    indexPatternTitles: IndexPatternTitle[];
-    indexPatternsMap: any; // TODO: update this type
-  }) => dispatch({ type: ACTION.SET_INDEX_PATTERN_TITLES, payload });
+  const setIndexPatternTitles = (payload: { indexPatternsMap: SourceIndexMap }) =>
+    dispatch({ type: ACTION.SET_INDEX_PATTERN_TITLES, payload });
 
   const setIsJobCreated = (isJobCreated: boolean) =>
     dispatch({ type: ACTION.SET_IS_JOB_CREATED, isJobCreated });
@@ -228,18 +226,16 @@ export const useCreateAnalyticsForm = () => {
 
     try {
       // Set the index pattern titles which the user can choose as the source.
-      const indexPatternTitles: string[] = [];
-      const indexPatternsMap: Record<string, string | undefined> = {};
+      const indexPatternsMap: SourceIndexMap = {};
       const savedObjects = (await kibanaContext.indexPatterns.getCache()) || [];
       savedObjects.forEach((obj: SimpleSavedObject<Record<string, any>>) => {
         const title = idx(obj, _ => _.attributes.title);
         if (title !== undefined) {
-          indexPatternTitles.push(title);
-          indexPatternsMap[title] = idx(obj, _ => _.id);
+          const id = idx(obj, _ => _.id) || '';
+          indexPatternsMap[title] = { label: title, value: id };
         }
       });
       setIndexPatternTitles({
-        indexPatternTitles,
         indexPatternsMap,
       });
     } catch (e) {

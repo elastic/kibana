@@ -54,14 +54,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
   const { setFormState } = actions;
   const kibanaContext = useKibanaContext();
 
-  const {
-    form,
-    indexPatternsMap,
-    indexPatternTitles,
-    isAdvancedEditorEnabled,
-    isJobCreated,
-    requestMessages,
-  } = state;
+  const { form, indexPatternsMap, isAdvancedEditorEnabled, isJobCreated, requestMessages } = state;
 
   const {
     createIndexPattern,
@@ -93,7 +86,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
   const validateSourceIndexFields = async () => {
     try {
       const indexPattern: IndexPattern = await kibanaContext.indexPatterns.get(
-        indexPatternsMap[sourceIndex]
+        indexPatternsMap[sourceIndex].value
       );
       const containsNumericalFields: boolean = indexPattern.fields.some(
         ({ name, type }) => !OMIT_FIELDS.includes(name) && type === 'number'
@@ -120,7 +113,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     });
     try {
       const indexPattern: IndexPattern = await kibanaContext.indexPatterns.get(
-        indexPatternsMap[sourceIndex]
+        indexPatternsMap[sourceIndex].value
       );
 
       if (indexPattern !== undefined) {
@@ -288,9 +281,13 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
                     }
                   )}
                   singleSelection={{ asPlainText: true }}
-                  options={indexPatternTitles.sort().map(d => ({ label: d }))}
+                  options={Object.values(indexPatternsMap).sort((a, b) =>
+                    a.label > b.label ? 1 : -1
+                  )}
                   selectedOptions={
-                    indexPatternTitles.includes(sourceIndex) ? [{ label: sourceIndex }] : []
+                    Object.keys(indexPatternsMap).includes(sourceIndex)
+                      ? [{ label: sourceIndex }]
+                      : []
                   }
                   onChange={selectedOptions =>
                     setFormState({ sourceIndex: selectedOptions[0].label || '' })

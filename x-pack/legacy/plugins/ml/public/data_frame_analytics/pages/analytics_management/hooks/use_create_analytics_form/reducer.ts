@@ -61,7 +61,7 @@ export const validateAdvancedEditor = (state: State): State => {
   const destinationIndexName = idx(jobConfig, _ => _.dest.index) || '';
   const destinationIndexNameEmpty = destinationIndexName === '';
   const destinationIndexNameValid = isValidIndexName(destinationIndexName);
-  const destinationIndexPatternTitleExists = state.indexPatternTitles.some(
+  const destinationIndexPatternTitleExists = Object.keys(state.indexPatternsMap).some(
     name => destinationIndexName === name
   );
 
@@ -207,7 +207,7 @@ export function reducer(state: State, action: Action): State {
         );
         newFormState.destinationIndexNameEmpty = newFormState.destinationIndex === '';
         newFormState.destinationIndexNameValid = isValidIndexName(newFormState.destinationIndex);
-        newFormState.destinationIndexPatternTitleExists = state.indexPatternTitles.some(
+        newFormState.destinationIndexPatternTitleExists = Object.keys(state.indexPatternsMap).some(
           name => newFormState.destinationIndex === name
         );
       }
@@ -244,9 +244,9 @@ export function reducer(state: State, action: Action): State {
         ...state,
         ...action.payload,
       };
-      newState.form.destinationIndexPatternTitleExists = newState.indexPatternTitles.some(
-        name => newState.form.destinationIndex === name
-      );
+      newState.form.destinationIndexPatternTitleExists = Object.keys(
+        newState.indexPatternsMap
+      ).some(name => newState.form.destinationIndex === name);
       return newState;
     }
 
