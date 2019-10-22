@@ -4,7 +4,7 @@
   "index": ["auditbeat-*", "filebeat-*", "packetbeat-*", "winlogbeat-*"],
   "interval": "24h",
   "name": "Detect Longmont activity",
-  "severity": 2,
+  "severity": "high",
   "type": "kql",
   "from": "now-1y",
   "to": "now",

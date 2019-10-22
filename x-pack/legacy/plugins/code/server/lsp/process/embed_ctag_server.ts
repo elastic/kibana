@@ -12,7 +12,7 @@ import { EmbedProgram } from './embed_program';
 
 export class EmbedCtagServer extends EmbedProgram {
   private connection: IConnection | null = null;
-  constructor(readonly port: number, log: Logger) {
+  constructor(public readonly port: number, log: Logger) {
     super(log);
   }
 
