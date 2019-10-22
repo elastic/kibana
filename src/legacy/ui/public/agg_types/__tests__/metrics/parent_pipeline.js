@@ -203,7 +203,6 @@ describe('parent pipeline aggs', function () {
         });
 
         const searchSource = {};
-        const request = {};
         const customMetricSpy = sinon.spy();
         const customMetric = aggConfig.params.customMetric;
 
@@ -211,9 +210,9 @@ describe('parent pipeline aggs', function () {
         customMetric.type.params[0].modifyAggConfigOnSearchRequestStart = customMetricSpy;
 
         aggConfig.type.params.forEach(param => {
-          param.modifyAggConfigOnSearchRequestStart(aggConfig, searchSource, request);
+          param.modifyAggConfigOnSearchRequestStart(aggConfig, searchSource);
         });
-        expect(customMetricSpy.calledWith(customMetric, searchSource, request)).to.be(true);
+        expect(customMetricSpy.calledWith(customMetric, searchSource)).to.be(true);
       });
     });
   });

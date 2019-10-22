@@ -53,12 +53,12 @@ import { validateConvertFilterToKueryNode } from './filter_utils';
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
 
-// eslint-disable-next-line @typescript-eslint/prefer-interface
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 type Left<T> = {
   tag: 'Left';
   error: T;
 };
-// eslint-disable-next-line @typescript-eslint/prefer-interface
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 type Right<T> = {
   tag: 'Right';
   value: T;

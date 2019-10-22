@@ -31,7 +31,7 @@ export interface Group {
   docs_processed: number;
   earliest_timestamp: number;
   latest_timestamp: number;
-  max_anomaly_score: number | null;
+  max_anomaly_score: number | undefined | null;
 }
 
 type MaxScoresByGroup = Dictionary<{
@@ -103,8 +103,9 @@ export const AnomalyDetectionPanel: FC = () => {
       // Check results for each group's promise index and update state
       Object.keys(scores).forEach(groupId => {
         const resultsIndex = scores[groupId] && scores[groupId].index;
+        // maxScore will be null if it was not loaded correctly
         const { maxScore } = resultsIndex !== undefined && results[resultsIndex];
-        tempGroups[groupId].max_anomaly_score = maxScore || undefined;
+        tempGroups[groupId].max_anomaly_score = maxScore;
       });
 
       setGroups(tempGroups);
