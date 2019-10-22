@@ -5,7 +5,6 @@
  */
 
 import url from 'url';
-// @ts-ignore
 import { oncePerServer } from '../server/lib/once_per_server';
 import { ServerFacade } from '../types';
 
