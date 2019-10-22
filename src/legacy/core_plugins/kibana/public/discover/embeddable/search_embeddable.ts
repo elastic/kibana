@@ -35,10 +35,10 @@ import { Filter, FilterStateStore } from '@kbn/es-query';
 import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
-import { timefilter, getTime } from 'ui/timefilter';
 import { TimeRange } from 'src/plugins/data/public';
 import { TExecuteTriggerActions } from 'src/plugins/ui_actions/public';
-import { Query, onlyDisabledFiltersChanged } from '../../../../data/public';
+import { setup as data } from '../../../../data/public/legacy';
+import { Query, onlyDisabledFiltersChanged, getTime } from '../../../../data/public';
 import {
   APPLY_FILTER_TRIGGER,
   Embeddable,
@@ -102,12 +102,13 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
   private inspectorAdaptors: Adapters;
   private searchScope?: SearchScope;
   private panelTitle: string = '';
-  private filtersSearchSource: SearchSource;
+  private filtersSearchSource?: SearchSource;
   private searchInstance?: JQLite;
   private autoRefreshFetchSubscription?: Subscription;
   private subscription?: Subscription;
   public readonly type = SEARCH_EMBEDDABLE_TYPE;
   private filterGen: FilterManager;
+  private abortController?: AbortController;
 
   private prevTimeRange?: TimeRange;
   private prevFilters?: Filter[];
@@ -141,7 +142,9 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       requests: new RequestAdapter(),
     };
     this.initializeSearchScope();
-    this.autoRefreshFetchSubscription = timefilter.getAutoRefreshFetch$().subscribe(this.fetch);
+    this.autoRefreshFetchSubscription = data.timefilter.timefilter
+      .getAutoRefreshFetch$()
+      .subscribe(this.fetch);
 
     this.subscription = Rx.merge(this.getOutput$(), this.getInput$()).subscribe(() => {
       this.panelTitle = this.output.title || '';
@@ -191,7 +194,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     if (this.autoRefreshFetchSubscription) {
       this.autoRefreshFetchSubscription.unsubscribe();
     }
-    this.savedSearch.searchSource.cancelQueued();
+    if (this.abortController) this.abortController.abort();
   }
 
   private initializeSearchScope() {
@@ -271,7 +274,8 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     const { searchSource } = this.savedSearch;
 
     // Abort any in-progress requests
-    searchSource.cancelQueued();
+    if (this.abortController) this.abortController.abort();
+    this.abortController = new AbortController();
 
     searchSource.setField('size', config.get('discover:sampleSize'));
     searchSource.setField(
@@ -297,7 +301,9 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
 
     try {
       // Make the request
-      const resp = await searchSource.fetch();
+      const resp = await searchSource.fetch({
+        abortSignal: this.abortController.signal,
+      });
 
       this.searchScope.isLoading = false;
 
@@ -335,8 +341,8 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     searchScope.sharedItemTitle = this.panelTitle;
 
     if (isFetchRequired) {
-      this.filtersSearchSource.setField('filter', this.input.filters);
-      this.filtersSearchSource.setField('query', this.input.query);
+      this.filtersSearchSource!.setField('filter', this.input.filters);
+      this.filtersSearchSource!.setField('query', this.input.query);
 
       this.fetch();
 

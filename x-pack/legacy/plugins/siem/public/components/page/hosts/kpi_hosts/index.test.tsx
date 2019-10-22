@@ -62,38 +62,46 @@ describe('kpiHostsComponent', () => {
     });
   });
 
-  describe.each([
-    [mockKpiHostsData, kpiHostsMapping],
-    [mockKpiHostDetailsData, kpiHostDetailsMapping],
-  ])('it should handle KpiHostsProps and KpiHostDetailsProps', (data, mapping) => {
-    let mockUseKpiMatrixStatus: jest.SpyInstance;
-    beforeAll(() => {
-      mockUseKpiMatrixStatus = jest.spyOn(statItems, 'useKpiMatrixStatus');
-    });
+  const table = [
+    [mockKpiHostsData, kpiHostsMapping] as [typeof mockKpiHostsData, typeof kpiHostsMapping],
+    [mockKpiHostDetailsData, kpiHostDetailsMapping] as [
+      typeof mockKpiHostDetailsData,
+      typeof kpiHostDetailsMapping
+    ],
+  ];
 
-    beforeEach(() => {
-      shallow(
-        <KpiHostsComponent
-          data={data}
-          from={from}
-          id={ID}
-          loading={false}
-          to={to}
-          narrowDateRange={narrowDateRange}
-        />
-      );
-    });
+  describe.each(table)(
+    'it should handle KpiHostsProps and KpiHostDetailsProps',
+    (data, mapping) => {
+      let mockUseKpiMatrixStatus: jest.SpyInstance;
+      beforeAll(() => {
+        mockUseKpiMatrixStatus = jest.spyOn(statItems, 'useKpiMatrixStatus');
+      });
 
-    afterEach(() => {
-      mockUseKpiMatrixStatus.mockClear();
-    });
+      beforeEach(() => {
+        shallow(
+          <KpiHostsComponent
+            data={data}
+            from={from}
+            id={ID}
+            loading={false}
+            to={to}
+            narrowDateRange={narrowDateRange}
+          />
+        );
+      });
 
-    afterAll(() => {
-      mockUseKpiMatrixStatus.mockRestore();
-    });
+      afterEach(() => {
+        mockUseKpiMatrixStatus.mockClear();
+      });
 
-    test(`it should apply correct mapping by given data type`, () => {
-      expect(mockUseKpiMatrixStatus).toBeCalledWith(mapping, data, ID, from, to, narrowDateRange);
-    });
-  });
+      afterAll(() => {
+        mockUseKpiMatrixStatus.mockRestore();
+      });
+
+      test(`it should apply correct mapping by given data type`, () => {
+        expect(mockUseKpiMatrixStatus).toBeCalledWith(mapping, data, ID, from, to, narrowDateRange);
+      });
+    }
+  );
 });

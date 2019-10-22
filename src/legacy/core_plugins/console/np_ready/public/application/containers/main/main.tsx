@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { debounce } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
@@ -52,8 +52,6 @@ export function Main() {
   const [showSettings, setShowSettings] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
 
-  const containerRef = useRef<null | HTMLDivElement>(null);
-
   const [firstPanelWidth, secondPanelWidth] = storage.get(StorageKeys.WIDTH, [
     INITIAL_PANEL_WIDTH,
     INITIAL_PANEL_WIDTH,
@@ -71,9 +69,9 @@ export function Main() {
   };
 
   return (
-    <div className="consoleContainer" style={{ height: '100%', width: '100%' }} ref={containerRef}>
+    <>
       <EuiFlexGroup
-        style={{ height: '100%' }}
+        className="consoleContainer"
         gutterSize="none"
         direction="column"
         responsive={false}
@@ -118,6 +116,6 @@ export function Main() {
       {showSettings ? <Settings onClose={() => setShowSettings(false)} /> : null}
 
       {showHelp ? <HelpPanel onClose={() => setShowHelp(false)} /> : null}
-    </div>
+    </>
   );
 }

@@ -6,7 +6,7 @@
 
 import path from 'path';
 import {
-  EsProvider,
+  LegacyEsProvider,
 } from './services';
 
 export default async function ({ readConfigFile }) {
@@ -21,7 +21,7 @@ export default async function ({ readConfigFile }) {
     servers: xPackFunctionalTestsConfig.get('servers'),
     services: {
       supertest: kibanaAPITestsConfig.get('services.supertest'),
-      es: EsProvider,
+      es: LegacyEsProvider,
       esArchiver: kibanaCommonConfig.get('services.esArchiver'),
     },
     esArchiver: xPackFunctionalTestsConfig.get('esArchiver'),

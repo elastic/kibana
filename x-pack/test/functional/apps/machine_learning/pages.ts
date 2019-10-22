@@ -24,6 +24,10 @@ export default function({ getService }: FtrProviderContext) {
       await ml.navigation.navigateToMl();
     });
 
+    it('loads the overview page', async () => {
+      await ml.navigation.navigateToOverview();
+    });
+
     it('loads the anomaly detection area', async () => {
       await ml.navigation.navigateToAnomalyDetection();
     });
@@ -49,11 +53,6 @@ export default function({ getService }: FtrProviderContext) {
       await ml.navigation.navigateToSettings();
       await ml.settings.assertSettingsCalendarLinkExists();
       await ml.settings.assertSettingsFilterlistLinkExists();
-    });
-
-    it('loads the data frame page', async () => {
-      await ml.navigation.navigateToDataFrames();
-      await ml.dataFrames.assertDataFrameEmptyListMessageExists();
     });
 
     it('loads the data frame analytics page', async () => {

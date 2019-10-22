@@ -8,7 +8,7 @@ import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eu
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
-import { AutocompleteSuggestion } from 'ui/autocomplete_providers';
+import { AutocompleteSuggestion } from '../../../../../../../src/plugins/data/public';
 import { TABLE_CONFIG } from '../../../common/constants';
 import { AutocompleteField } from '../autocomplete_field/index';
 import { ControlSchema } from './action_schema';

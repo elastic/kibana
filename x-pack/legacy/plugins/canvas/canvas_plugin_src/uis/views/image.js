@@ -6,10 +6,13 @@
 
 import { elasticLogo } from '../../lib/elastic_logo';
 import { resolveFromArgs } from '../../../common/lib/resolve_dataurl';
+import { ViewStrings } from '../../../i18n';
+
+const { Image: strings } = ViewStrings;
 
 export const image = () => ({
   name: 'image',
-  displayName: 'Image',
+  displayName: strings.getDisplayName(),
   modelArgs: [],
   requiresContext: false,
   args: [
@@ -22,14 +25,14 @@ export const image = () => ({
     },
     {
       name: 'mode',
-      displayName: 'Fill mode',
-      help: 'Note: Stretched fill may not work with vector images',
+      displayName: strings.getModeDisplayName(),
+      help: strings.getModeHelp(),
       argType: 'select',
       options: {
         choices: [
-          { value: 'contain', name: 'Contain' },
-          { value: 'cover', name: 'Cover' },
-          { value: 'stretch', name: 'Stretch' },
+          { value: 'contain', name: strings.getContainMode() },
+          { value: 'cover', name: strings.getCoverMode() },
+          { value: 'stretch', name: strings.getStretchMode() },
         ],
       },
     },

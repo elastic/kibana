@@ -17,6 +17,9 @@
  * under the License.
  */
 
-export { Timefilter } from './timefilter';
-export { TimeHistory } from './time_history';
+export { TimefilterService, TimefilterSetup } from './timefilter_service';
+
+export * from './types';
+export { Timefilter, TimefilterContract } from './timefilter';
+export { TimeHistory, TimeHistoryContract } from './time_history';
 export { getTime } from './get_time';

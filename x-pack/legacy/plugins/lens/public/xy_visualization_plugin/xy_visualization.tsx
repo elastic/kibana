@@ -16,16 +16,19 @@ import { Visualization } from '../types';
 import { State, PersistableState, SeriesType, visualizationTypes } from './types';
 import { toExpression, toPreviewExpression } from './to_expression';
 import { generateId } from '../id_generator';
+import chartBarStackedSVG from '../assets/chart_bar_stacked.svg';
+import chartMixedSVG from '../assets/chart_mixed_xy.svg';
+import { isHorizontalChart } from './state_helpers';
 
-const defaultIcon = 'visBarVertical';
-const defaultSeriesType = 'bar';
+const defaultIcon = chartBarStackedSVG;
+const defaultSeriesType = 'bar_stacked';
 
 function getDescription(state?: State) {
   if (!state) {
     return {
       icon: defaultIcon,
       label: i18n.translate('xpack.lens.xyVisualization.xyLabel', {
-        defaultMessage: 'XY Chart',
+        defaultMessage: 'XY',
       }),
     };
   }
@@ -38,12 +41,19 @@ function getDescription(state?: State) {
   const seriesTypes = _.unique(state.layers.map(l => l.seriesType));
 
   return {
-    icon: visualizationType.icon,
+    icon:
+      seriesTypes.length === 1
+        ? visualizationType.largeIcon || visualizationType.icon
+        : chartMixedSVG,
     label:
       seriesTypes.length === 1
         ? visualizationType.label
+        : isHorizontalChart(state.layers)
+        ? i18n.translate('xpack.lens.xyVisualization.mixedBarHorizontalLabel', {
+            defaultMessage: 'Mixed Horizontal Bar',
+          })
         : i18n.translate('xpack.lens.xyVisualization.mixedLabel', {
-            defaultMessage: 'Mixed XY Chart',
+            defaultMessage: 'Mixed XY',
           }),
   };
 }
@@ -55,9 +65,14 @@ export const xyVisualization: Visualization<State, PersistableState> = {
 
   getDescription(state) {
     const { icon, label } = getDescription(state);
+    const chartLabel = i18n.translate('xpack.lens.xyVisualization.chartLabel', {
+      defaultMessage: '{label} Chart',
+      values: { label },
+    });
+
     return {
       icon: icon || defaultIcon,
-      label,
+      label: chartLabel,
     };
   },
 
@@ -75,7 +90,6 @@ export const xyVisualization: Visualization<State, PersistableState> = {
     return (
       state || {
         title: 'Empty XY Chart',
-        isHorizontal: false,
         legend: { isVisible: true, position: Position.Right },
         preferredSeriesType: defaultSeriesType,
         layers: [

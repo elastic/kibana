@@ -37,11 +37,17 @@ const time = {
 };
 
 export const uiTimefilterMock = {
+  isAutoRefreshSelectorEnabled() {
+    return this._isAutoRefreshSelectorEnabled;
+  },
+  isTimeRangeSelectorEnabled() {
+    return this._isTimeRangeSelectorEnabled;
+  },
   enableAutoRefreshSelector() {
-    this.isAutoRefreshSelectorEnabled = true;
+    this._isAutoRefreshSelectorEnabled = true;
   },
   enableTimeRangeSelector() {
-    this.isTimeRangeSelectorEnabled = true;
+    this._isTimeRangeSelectorEnabled = true;
   },
   getEnabledUpdated$() {
     return { subscribe: jest.fn() };
@@ -56,8 +62,8 @@ export const uiTimefilterMock = {
   getTimeUpdate$() {
     return { subscribe: jest.fn() };
   },
-  isAutoRefreshSelectorEnabled: false,
-  isTimeRangeSelectorEnabled: false,
+  _isAutoRefreshSelectorEnabled: false,
+  _isTimeRangeSelectorEnabled: false,
   refreshInterval: { value: 0, pause: true },
   on: (event: string, reload: () => void) => {},
   setRefreshInterval(refreshInterval: RefreshInterval) {

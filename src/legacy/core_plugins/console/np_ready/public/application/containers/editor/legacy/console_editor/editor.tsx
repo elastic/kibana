@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import React, { CSSProperties, useEffect, useRef, useState } from 'react';
+import React, { CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
 import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import $ from 'jquery';
 
-import { EuiIcon } from '@elastic/eui';
+import { EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useAppContext } from '../../../../context';
 import { useUIAceKeyboardMode } from '../use_ui_ace_keyboard_mode';
 import { ConsoleMenu } from '../../../../components';
@@ -33,7 +33,7 @@ import { registerCommands } from './keyboard_shortcuts';
 import { applyCurrentSettings } from './apply_editor_settings';
 
 // @ts-ignore
-import { initializeInput } from '../../../../../../../public/quarantined/src/input';
+import { initializeEditor } from '../../../../../../../public/quarantined/src/input';
 // @ts-ignore
 import mappings from '../../../../../../../public/quarantined/src/mappings';
 
@@ -62,7 +62,7 @@ const DEFAULT_INPUT_VALUE = `GET _search
 
 function _Editor({ previousStateLocation = 'stored' }: EditorProps) {
   const {
-    services: { history },
+    services: { history, notifications },
     ResizeChecker,
     docLinkVersion,
   } = useAppContext();
@@ -88,7 +88,7 @@ function _Editor({ previousStateLocation = 'stored' }: EditorProps) {
   useEffect(() => {
     const $editor = $(editorRef.current!);
     const $actions = $(actionsRef.current!);
-    editorInstanceRef.current = initializeInput($editor, $actions);
+    editorInstanceRef.current = initializeEditor($editor, $actions);
 
     if (previousStateLocation === 'stored') {
       const { content } = history.getSavedEditorState() || {
@@ -143,7 +143,7 @@ function _Editor({ previousStateLocation = 'stored' }: EditorProps) {
     };
   }, []);
 
-  const sendCurrentRequestToES = () => {
+  const sendCurrentRequestToES = useCallback(() => {
     dispatch({
       type: 'sendRequestToEs',
       value: {
@@ -153,7 +153,7 @@ function _Editor({ previousStateLocation = 'stored' }: EditorProps) {
           history.addToHistory(esPath, esMethod, esData),
       },
     });
-  };
+  }, [settings]);
 
   useEffect(() => {
     applyCurrentSettings(editorInstanceRef.current!, settings);
@@ -167,38 +167,49 @@ function _Editor({ previousStateLocation = 'stored' }: EditorProps) {
       sendCurrentRequestToES,
       openDocumentation,
     });
-  }, []);
+  }, [sendCurrentRequestToES]);
 
   return (
     <div style={abs} className="conApp">
       <div className="conApp__editor">
         <ul className="conApp__autoComplete" id="autocomplete" />
-        <div ref={actionsRef} className="conApp__editorActions" id="ConAppEditorActions">
-          <EuiToolTip
-            content={i18n.translate('console.sendRequestButtonTooltip', {
-              defaultMessage: 'click to send request',
-            })}
-          >
-            <button
-              onClick={sendCurrentRequestToES}
-              data-test-subj="send-request-button"
-              className="conApp__editorActionButton conApp__editorActionButton--success"
+        <EuiFlexGroup
+          ref={actionsRef}
+          className="conApp__editorActions"
+          id="ConAppEditorActions"
+          gutterSize="none"
+          responsive={false}
+        >
+          <EuiFlexItem>
+            <EuiToolTip
+              content={i18n.translate('console.sendRequestButtonTooltip', {
+                defaultMessage: 'click to send request',
+              })}
             >
-              <EuiIcon type="play" />
-            </button>
-          </EuiToolTip>
-          <ConsoleMenu
-            getCurl={(cb: any) => {
-              editorInstanceRef.current!.getRequestsAsCURL(cb);
-            }}
-            getDocumentation={() => {
-              return getDocumentation(editorInstanceRef.current!, docLinkVersion);
-            }}
-            autoIndent={(event: any) => {
-              autoIndent(editorInstanceRef.current!, event);
-            }}
-          />
-        </div>
+              <button
+                onClick={sendCurrentRequestToES}
+                data-test-subj="sendRequestButton"
+                className="conApp__editorActionButton conApp__editorActionButton--success"
+              >
+                <EuiIcon type="play" />
+              </button>
+            </EuiToolTip>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <ConsoleMenu
+              getCurl={(cb: any) => {
+                editorInstanceRef.current!.getRequestsAsCURL(cb);
+              }}
+              getDocumentation={() => {
+                return getDocumentation(editorInstanceRef.current!, docLinkVersion);
+              }}
+              autoIndent={(event: any) => {
+                autoIndent(editorInstanceRef.current!, event);
+              }}
+              addNotification={({ title }) => notifications.toasts.add({ title })}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <div
           ref={editorRef}
           id="ConAppEditor"

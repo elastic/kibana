@@ -27,12 +27,12 @@ export default function manageRepositoriesFunctionalTests({
   const existsInvisible = async (selector: string) =>
     await testSubjects.exists(selector, { allowHidden: true });
 
-  describe('History', function() {
+  // FLAKY: https://github.com/elastic/kibana/issues/46313
+  describe.skip('History', function() {
     this.tags('smoke');
     const repositoryListSelector = 'codeRepositoryList > codeRepositoryItem';
 
     describe('browser history can go back while exploring code app', () => {
-      let driver: any;
       before(async () => {
         await repoLoad(
           'github.com/elastic/TypeScript-Node-Starter',
@@ -44,9 +44,6 @@ export default function manageRepositoriesFunctionalTests({
         // Navigate to the code app.
         await PageObjects.common.navigateToApp('code');
         await PageObjects.header.waitUntilLoadingHasFinished();
-
-        const webDriver = await getService('__webdriver__').init();
-        driver = webDriver.driver;
       });
 
       after(async () => {
@@ -88,7 +85,7 @@ export default function manageRepositoriesFunctionalTests({
           });
 
           // can go forward to source view page
-          await driver.navigate().forward();
+          await browser.goForward();
 
           await retry.try(async () => {
             expect(await testSubjects.exists('codeStructureTreeTab')).to.be(true);
@@ -111,7 +108,7 @@ export default function manageRepositoriesFunctionalTests({
           expect(await testSubjects.exists('codeStructureTreeTab')).to.be(true);
         });
 
-        await driver.navigate().forward();
+        await browser.goForward();
 
         await retry.try(async () => {
           const searchResultListSelector = 'codeSearchResultList codeSearchResultFileItem';
@@ -156,7 +153,7 @@ export default function manageRepositoriesFunctionalTests({
           expect(lang.indexOf('typescript')).to.equal(0);
         });
 
-        await driver.navigate().forward();
+        await browser.goForward();
 
         await retry.try(async () => {
           const filter = await (await find.allByCssSelector(
@@ -206,7 +203,7 @@ export default function manageRepositoriesFunctionalTests({
           expect(existence).to.be(false);
         });
 
-        await driver.navigate().forward();
+        await browser.goForward();
 
         await retry.try(async () => {
           const existence = await find.existsByCssSelector('.code-line-number-21', FIND_TIME);
@@ -238,7 +235,7 @@ export default function manageRepositoriesFunctionalTests({
           expect(testSubjects.exists('codeFileTreeTabActive')).to.be.ok();
         });
 
-        await driver.navigate().forward();
+        await browser.goForward();
 
         await retry.try(async () => {
           // if structure tree tab is active, file tree tab's `data-test-subj` would be `codeFileTreeTab`

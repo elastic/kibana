@@ -31,7 +31,6 @@ exports[`<RolesGridPage /> renders permission denied if required 1`] = `
                   />
                 </p>
               }
-              iconColor="subdued"
               iconType="securityApp"
               title={
                 <h2>

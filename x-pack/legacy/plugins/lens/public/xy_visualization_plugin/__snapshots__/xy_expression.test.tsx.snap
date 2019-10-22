@@ -2,7 +2,6 @@
 
 exports[`xy_expression XYChart component it renders area 1`] = `
 <Chart
-  className="lnsChart"
   renderer="canvas"
 >
   <inject-SettingsComponent-with-chartStore
@@ -10,13 +9,133 @@ exports[`xy_expression XYChart component it renders area 1`] = `
     rotation={0}
     showLegend={false}
     showLegendDisplayValue={false}
+    theme={
+      Object {
+        "areaSeriesStyle": Object {
+          "area": Object {
+            "opacity": 0.3,
+          },
+          "line": Object {
+            "strokeWidth": 2,
+          },
+          "point": Object {
+            "fill": "rgba(255, 255, 255, 1)",
+            "radius": 3,
+            "strokeWidth": 2,
+            "visible": false,
+          },
+        },
+        "axes": Object {
+          "axisLineStyle": Object {
+            "stroke": "rgba(239, 241, 244, 1)",
+          },
+          "axisTitleStyle": Object {
+            "fill": "rgba(52, 55, 65, 1)",
+            "fontFamily": "'Inter UI', -apple-system, BlinkMacSystemFont,
+  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
+            "fontSize": 12,
+            "padding": 10,
+          },
+          "gridLineStyle": Object {
+            "horizontal": Object {
+              "dash": Array [
+                0,
+                0,
+              ],
+              "opacity": 1,
+              "stroke": "rgba(239, 241, 244, 1)",
+              "strokeWidth": 1,
+              "visible": true,
+            },
+            "vertical": Object {
+              "dash": Array [
+                4,
+                4,
+              ],
+              "opacity": 1,
+              "stroke": "rgba(239, 241, 244, 1)",
+              "strokeWidth": 1,
+              "visible": true,
+            },
+          },
+          "tickLabelStyle": Object {
+            "fill": "rgba(105, 112, 125, 1)",
+            "fontFamily": "'Inter UI', -apple-system, BlinkMacSystemFont,
+  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
+            "fontSize": 10,
+            "padding": 8,
+          },
+          "tickLineStyle": Object {
+            "stroke": "rgba(239, 241, 244, 1)",
+            "strokeWidth": 1,
+            "visible": false,
+          },
+        },
+        "barSeriesStyle": Object {
+          "displayValue": Object {
+            "fill": "rgba(105, 112, 125, 1)",
+            "fontFamily": "'Inter UI', -apple-system, BlinkMacSystemFont,
+  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
+            "fontSize": 8,
+          },
+        },
+        "chartMargins": Object {
+          "bottom": 0,
+          "left": 0,
+          "right": 0,
+          "top": 0,
+        },
+        "colors": Object {
+          "defaultVizColor": "#3185FC",
+          "vizColors": Array [
+            "#1EA593",
+            "#2B70F7",
+            "#CE0060",
+            "#38007E",
+            "#FCA5D3",
+            "#F37020",
+            "#E49E29",
+            "#B0916F",
+            "#7B000B",
+            "#34130C",
+          ],
+        },
+        "crosshair": Object {
+          "band": Object {
+            "fill": "rgba(245, 247, 250, 1)",
+          },
+          "line": Object {
+            "dash": Array [
+              4,
+              4,
+            ],
+            "stroke": "rgba(105, 112, 125, 1)",
+            "strokeWidth": 1,
+          },
+        },
+        "lineSeriesStyle": Object {
+          "line": Object {
+            "strokeWidth": 2,
+          },
+          "point": Object {
+            "fill": "rgba(255, 255, 255, 1)",
+            "radius": 3,
+            "strokeWidth": 2,
+          },
+        },
+        "scales": Object {
+          "barsPadding": 0.25,
+          "histogramPadding": 0.05,
+        },
+      }
+    }
   />
   <inject-AxisSpec-with-chartStore
     id="x"
     position="bottom"
     showGridLines={false}
     tickFormat={[Function]}
-    title=""
+    title="c"
   />
   <inject-AxisSpec-with-chartStore
     id="y"
@@ -65,7 +184,6 @@ exports[`xy_expression XYChart component it renders area 1`] = `
 
 exports[`xy_expression XYChart component it renders bar 1`] = `
 <Chart
-  className="lnsChart"
   renderer="canvas"
 >
   <inject-SettingsComponent-with-chartStore
@@ -73,13 +191,133 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
     rotation={0}
     showLegend={false}
     showLegendDisplayValue={false}
+    theme={
+      Object {
+        "areaSeriesStyle": Object {
+          "area": Object {
+            "opacity": 0.3,
+          },
+          "line": Object {
+            "strokeWidth": 2,
+          },
+          "point": Object {
+            "fill": "rgba(255, 255, 255, 1)",
+            "radius": 3,
+            "strokeWidth": 2,
+            "visible": false,
+          },
+        },
+        "axes": Object {
+          "axisLineStyle": Object {
+            "stroke": "rgba(239, 241, 244, 1)",
+          },
+          "axisTitleStyle": Object {
+            "fill": "rgba(52, 55, 65, 1)",
+            "fontFamily": "'Inter UI', -apple-system, BlinkMacSystemFont,
+  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
+            "fontSize": 12,
+            "padding": 10,
+          },
+          "gridLineStyle": Object {
+            "horizontal": Object {
+              "dash": Array [
+                0,
+                0,
+              ],
+              "opacity": 1,
+              "stroke": "rgba(239, 241, 244, 1)",
+              "strokeWidth": 1,
+              "visible": true,
+            },
+            "vertical": Object {
+              "dash": Array [
+                4,
+                4,
+              ],
+              "opacity": 1,
+              "stroke": "rgba(239, 241, 244, 1)",
+              "strokeWidth": 1,
+              "visible": true,
+            },
+          },
+          "tickLabelStyle": Object {
+            "fill": "rgba(105, 112, 125, 1)",
+            "fontFamily": "'Inter UI', -apple-system, BlinkMacSystemFont,
+  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
+            "fontSize": 10,
+            "padding": 8,
+          },
+          "tickLineStyle": Object {
+            "stroke": "rgba(239, 241, 244, 1)",
+            "strokeWidth": 1,
+            "visible": false,
+          },
+        },
+        "barSeriesStyle": Object {
+          "displayValue": Object {
+            "fill": "rgba(105, 112, 125, 1)",
+            "fontFamily": "'Inter UI', -apple-system, BlinkMacSystemFont,
+  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
+            "fontSize": 8,
+          },
+        },
+        "chartMargins": Object {
+          "bottom": 0,
+          "left": 0,
+          "right": 0,
+          "top": 0,
+        },
+        "colors": Object {
+          "defaultVizColor": "#3185FC",
+          "vizColors": Array [
+            "#1EA593",
+            "#2B70F7",
+            "#CE0060",
+            "#38007E",
+            "#FCA5D3",
+            "#F37020",
+            "#E49E29",
+            "#B0916F",
+            "#7B000B",
+            "#34130C",
+          ],
+        },
+        "crosshair": Object {
+          "band": Object {
+            "fill": "rgba(245, 247, 250, 1)",
+          },
+          "line": Object {
+            "dash": Array [
+              4,
+              4,
+            ],
+            "stroke": "rgba(105, 112, 125, 1)",
+            "strokeWidth": 1,
+          },
+        },
+        "lineSeriesStyle": Object {
+          "line": Object {
+            "strokeWidth": 2,
+          },
+          "point": Object {
+            "fill": "rgba(255, 255, 255, 1)",
+            "radius": 3,
+            "strokeWidth": 2,
+          },
+        },
+        "scales": Object {
+          "barsPadding": 0.25,
+          "histogramPadding": 0.05,
+        },
+      }
+    }
   />
   <inject-AxisSpec-with-chartStore
     id="x"
     position="bottom"
     showGridLines={false}
     tickFormat={[Function]}
-    title=""
+    title="c"
   />
   <inject-AxisSpec-with-chartStore
     id="y"
@@ -128,7 +366,6 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
 
 exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
 <Chart
-  className="lnsChart"
   renderer="canvas"
 >
   <inject-SettingsComponent-with-chartStore
@@ -136,13 +373,133 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
     rotation={90}
     showLegend={false}
     showLegendDisplayValue={false}
+    theme={
+      Object {
+        "areaSeriesStyle": Object {
+          "area": Object {
+            "opacity": 0.3,
+          },
+          "line": Object {
+            "strokeWidth": 2,
+          },
+          "point": Object {
+            "fill": "rgba(255, 255, 255, 1)",
+            "radius": 3,
+            "strokeWidth": 2,
+            "visible": false,
+          },
+        },
+        "axes": Object {
+          "axisLineStyle": Object {
+            "stroke": "rgba(239, 241, 244, 1)",
+          },
+          "axisTitleStyle": Object {
+            "fill": "rgba(52, 55, 65, 1)",
+            "fontFamily": "'Inter UI', -apple-system, BlinkMacSystemFont,
+  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
+            "fontSize": 12,
+            "padding": 10,
+          },
+          "gridLineStyle": Object {
+            "horizontal": Object {
+              "dash": Array [
+                0,
+                0,
+              ],
+              "opacity": 1,
+              "stroke": "rgba(239, 241, 244, 1)",
+              "strokeWidth": 1,
+              "visible": true,
+            },
+            "vertical": Object {
+              "dash": Array [
+                4,
+                4,
+              ],
+              "opacity": 1,
+              "stroke": "rgba(239, 241, 244, 1)",
+              "strokeWidth": 1,
+              "visible": true,
+            },
+          },
+          "tickLabelStyle": Object {
+            "fill": "rgba(105, 112, 125, 1)",
+            "fontFamily": "'Inter UI', -apple-system, BlinkMacSystemFont,
+  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
+            "fontSize": 10,
+            "padding": 8,
+          },
+          "tickLineStyle": Object {
+            "stroke": "rgba(239, 241, 244, 1)",
+            "strokeWidth": 1,
+            "visible": false,
+          },
+        },
+        "barSeriesStyle": Object {
+          "displayValue": Object {
+            "fill": "rgba(105, 112, 125, 1)",
+            "fontFamily": "'Inter UI', -apple-system, BlinkMacSystemFont,
+  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
+            "fontSize": 8,
+          },
+        },
+        "chartMargins": Object {
+          "bottom": 0,
+          "left": 0,
+          "right": 0,
+          "top": 0,
+        },
+        "colors": Object {
+          "defaultVizColor": "#3185FC",
+          "vizColors": Array [
+            "#1EA593",
+            "#2B70F7",
+            "#CE0060",
+            "#38007E",
+            "#FCA5D3",
+            "#F37020",
+            "#E49E29",
+            "#B0916F",
+            "#7B000B",
+            "#34130C",
+          ],
+        },
+        "crosshair": Object {
+          "band": Object {
+            "fill": "rgba(245, 247, 250, 1)",
+          },
+          "line": Object {
+            "dash": Array [
+              4,
+              4,
+            ],
+            "stroke": "rgba(105, 112, 125, 1)",
+            "strokeWidth": 1,
+          },
+        },
+        "lineSeriesStyle": Object {
+          "line": Object {
+            "strokeWidth": 2,
+          },
+          "point": Object {
+            "fill": "rgba(255, 255, 255, 1)",
+            "radius": 3,
+            "strokeWidth": 2,
+          },
+        },
+        "scales": Object {
+          "barsPadding": 0.25,
+          "histogramPadding": 0.05,
+        },
+      }
+    }
   />
   <inject-AxisSpec-with-chartStore
     id="x"
     position="left"
     showGridLines={false}
     tickFormat={[Function]}
-    title=""
+    title="c"
   />
   <inject-AxisSpec-with-chartStore
     id="y"
@@ -191,7 +548,6 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
 
 exports[`xy_expression XYChart component it renders line 1`] = `
 <Chart
-  className="lnsChart"
   renderer="canvas"
 >
   <inject-SettingsComponent-with-chartStore
@@ -199,13 +555,133 @@ exports[`xy_expression XYChart component it renders line 1`] = `
     rotation={0}
     showLegend={false}
     showLegendDisplayValue={false}
+    theme={
+      Object {
+        "areaSeriesStyle": Object {
+          "area": Object {
+            "opacity": 0.3,
+          },
+          "line": Object {
+            "strokeWidth": 2,
+          },
+          "point": Object {
+            "fill": "rgba(255, 255, 255, 1)",
+            "radius": 3,
+            "strokeWidth": 2,
+            "visible": false,
+          },
+        },
+        "axes": Object {
+          "axisLineStyle": Object {
+            "stroke": "rgba(239, 241, 244, 1)",
+          },
+          "axisTitleStyle": Object {
+            "fill": "rgba(52, 55, 65, 1)",
+            "fontFamily": "'Inter UI', -apple-system, BlinkMacSystemFont,
+  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
+            "fontSize": 12,
+            "padding": 10,
+          },
+          "gridLineStyle": Object {
+            "horizontal": Object {
+              "dash": Array [
+                0,
+                0,
+              ],
+              "opacity": 1,
+              "stroke": "rgba(239, 241, 244, 1)",
+              "strokeWidth": 1,
+              "visible": true,
+            },
+            "vertical": Object {
+              "dash": Array [
+                4,
+                4,
+              ],
+              "opacity": 1,
+              "stroke": "rgba(239, 241, 244, 1)",
+              "strokeWidth": 1,
+              "visible": true,
+            },
+          },
+          "tickLabelStyle": Object {
+            "fill": "rgba(105, 112, 125, 1)",
+            "fontFamily": "'Inter UI', -apple-system, BlinkMacSystemFont,
+  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
+            "fontSize": 10,
+            "padding": 8,
+          },
+          "tickLineStyle": Object {
+            "stroke": "rgba(239, 241, 244, 1)",
+            "strokeWidth": 1,
+            "visible": false,
+          },
+        },
+        "barSeriesStyle": Object {
+          "displayValue": Object {
+            "fill": "rgba(105, 112, 125, 1)",
+            "fontFamily": "'Inter UI', -apple-system, BlinkMacSystemFont,
+  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
+            "fontSize": 8,
+          },
+        },
+        "chartMargins": Object {
+          "bottom": 0,
+          "left": 0,
+          "right": 0,
+          "top": 0,
+        },
+        "colors": Object {
+          "defaultVizColor": "#3185FC",
+          "vizColors": Array [
+            "#1EA593",
+            "#2B70F7",
+            "#CE0060",
+            "#38007E",
+            "#FCA5D3",
+            "#F37020",
+            "#E49E29",
+            "#B0916F",
+            "#7B000B",
+            "#34130C",
+          ],
+        },
+        "crosshair": Object {
+          "band": Object {
+            "fill": "rgba(245, 247, 250, 1)",
+          },
+          "line": Object {
+            "dash": Array [
+              4,
+              4,
+            ],
+            "stroke": "rgba(105, 112, 125, 1)",
+            "strokeWidth": 1,
+          },
+        },
+        "lineSeriesStyle": Object {
+          "line": Object {
+            "strokeWidth": 2,
+          },
+          "point": Object {
+            "fill": "rgba(255, 255, 255, 1)",
+            "radius": 3,
+            "strokeWidth": 2,
+          },
+        },
+        "scales": Object {
+          "barsPadding": 0.25,
+          "histogramPadding": 0.05,
+        },
+      }
+    }
   />
   <inject-AxisSpec-with-chartStore
     id="x"
     position="bottom"
     showGridLines={false}
     tickFormat={[Function]}
-    title=""
+    title="c"
   />
   <inject-AxisSpec-with-chartStore
     id="y"
@@ -254,7 +730,6 @@ exports[`xy_expression XYChart component it renders line 1`] = `
 
 exports[`xy_expression XYChart component it renders stacked area 1`] = `
 <Chart
-  className="lnsChart"
   renderer="canvas"
 >
   <inject-SettingsComponent-with-chartStore
@@ -262,13 +737,133 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
     rotation={0}
     showLegend={false}
     showLegendDisplayValue={false}
+    theme={
+      Object {
+        "areaSeriesStyle": Object {
+          "area": Object {
+            "opacity": 0.3,
+          },
+          "line": Object {
+            "strokeWidth": 2,
+          },
+          "point": Object {
+            "fill": "rgba(255, 255, 255, 1)",
+            "radius": 3,
+            "strokeWidth": 2,
+            "visible": false,
+          },
+        },
+        "axes": Object {
+          "axisLineStyle": Object {
+            "stroke": "rgba(239, 241, 244, 1)",
+          },
+          "axisTitleStyle": Object {
+            "fill": "rgba(52, 55, 65, 1)",
+            "fontFamily": "'Inter UI', -apple-system, BlinkMacSystemFont,
+  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
+            "fontSize": 12,
+            "padding": 10,
+          },
+          "gridLineStyle": Object {
+            "horizontal": Object {
+              "dash": Array [
+                0,
+                0,
+              ],
+              "opacity": 1,
+              "stroke": "rgba(239, 241, 244, 1)",
+              "strokeWidth": 1,
+              "visible": true,
+            },
+            "vertical": Object {
+              "dash": Array [
+                4,
+                4,
+              ],
+              "opacity": 1,
+              "stroke": "rgba(239, 241, 244, 1)",
+              "strokeWidth": 1,
+              "visible": true,
+            },
+          },
+          "tickLabelStyle": Object {
+            "fill": "rgba(105, 112, 125, 1)",
+            "fontFamily": "'Inter UI', -apple-system, BlinkMacSystemFont,
+  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
+            "fontSize": 10,
+            "padding": 8,
+          },
+          "tickLineStyle": Object {
+            "stroke": "rgba(239, 241, 244, 1)",
+            "strokeWidth": 1,
+            "visible": false,
+          },
+        },
+        "barSeriesStyle": Object {
+          "displayValue": Object {
+            "fill": "rgba(105, 112, 125, 1)",
+            "fontFamily": "'Inter UI', -apple-system, BlinkMacSystemFont,
+  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
+            "fontSize": 8,
+          },
+        },
+        "chartMargins": Object {
+          "bottom": 0,
+          "left": 0,
+          "right": 0,
+          "top": 0,
+        },
+        "colors": Object {
+          "defaultVizColor": "#3185FC",
+          "vizColors": Array [
+            "#1EA593",
+            "#2B70F7",
+            "#CE0060",
+            "#38007E",
+            "#FCA5D3",
+            "#F37020",
+            "#E49E29",
+            "#B0916F",
+            "#7B000B",
+            "#34130C",
+          ],
+        },
+        "crosshair": Object {
+          "band": Object {
+            "fill": "rgba(245, 247, 250, 1)",
+          },
+          "line": Object {
+            "dash": Array [
+              4,
+              4,
+            ],
+            "stroke": "rgba(105, 112, 125, 1)",
+            "strokeWidth": 1,
+          },
+        },
+        "lineSeriesStyle": Object {
+          "line": Object {
+            "strokeWidth": 2,
+          },
+          "point": Object {
+            "fill": "rgba(255, 255, 255, 1)",
+            "radius": 3,
+            "strokeWidth": 2,
+          },
+        },
+        "scales": Object {
+          "barsPadding": 0.25,
+          "histogramPadding": 0.05,
+        },
+      }
+    }
   />
   <inject-AxisSpec-with-chartStore
     id="x"
     position="bottom"
     showGridLines={false}
     tickFormat={[Function]}
-    title=""
+    title="c"
   />
   <inject-AxisSpec-with-chartStore
     id="y"
@@ -321,7 +916,6 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
 
 exports[`xy_expression XYChart component it renders stacked bar 1`] = `
 <Chart
-  className="lnsChart"
   renderer="canvas"
 >
   <inject-SettingsComponent-with-chartStore
@@ -329,13 +923,133 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
     rotation={0}
     showLegend={false}
     showLegendDisplayValue={false}
+    theme={
+      Object {
+        "areaSeriesStyle": Object {
+          "area": Object {
+            "opacity": 0.3,
+          },
+          "line": Object {
+            "strokeWidth": 2,
+          },
+          "point": Object {
+            "fill": "rgba(255, 255, 255, 1)",
+            "radius": 3,
+            "strokeWidth": 2,
+            "visible": false,
+          },
+        },
+        "axes": Object {
+          "axisLineStyle": Object {
+            "stroke": "rgba(239, 241, 244, 1)",
+          },
+          "axisTitleStyle": Object {
+            "fill": "rgba(52, 55, 65, 1)",
+            "fontFamily": "'Inter UI', -apple-system, BlinkMacSystemFont,
+  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
+            "fontSize": 12,
+            "padding": 10,
+          },
+          "gridLineStyle": Object {
+            "horizontal": Object {
+              "dash": Array [
+                0,
+                0,
+              ],
+              "opacity": 1,
+              "stroke": "rgba(239, 241, 244, 1)",
+              "strokeWidth": 1,
+              "visible": true,
+            },
+            "vertical": Object {
+              "dash": Array [
+                4,
+                4,
+              ],
+              "opacity": 1,
+              "stroke": "rgba(239, 241, 244, 1)",
+              "strokeWidth": 1,
+              "visible": true,
+            },
+          },
+          "tickLabelStyle": Object {
+            "fill": "rgba(105, 112, 125, 1)",
+            "fontFamily": "'Inter UI', -apple-system, BlinkMacSystemFont,
+  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
+            "fontSize": 10,
+            "padding": 8,
+          },
+          "tickLineStyle": Object {
+            "stroke": "rgba(239, 241, 244, 1)",
+            "strokeWidth": 1,
+            "visible": false,
+          },
+        },
+        "barSeriesStyle": Object {
+          "displayValue": Object {
+            "fill": "rgba(105, 112, 125, 1)",
+            "fontFamily": "'Inter UI', -apple-system, BlinkMacSystemFont,
+  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
+            "fontSize": 8,
+          },
+        },
+        "chartMargins": Object {
+          "bottom": 0,
+          "left": 0,
+          "right": 0,
+          "top": 0,
+        },
+        "colors": Object {
+          "defaultVizColor": "#3185FC",
+          "vizColors": Array [
+            "#1EA593",
+            "#2B70F7",
+            "#CE0060",
+            "#38007E",
+            "#FCA5D3",
+            "#F37020",
+            "#E49E29",
+            "#B0916F",
+            "#7B000B",
+            "#34130C",
+          ],
+        },
+        "crosshair": Object {
+          "band": Object {
+            "fill": "rgba(245, 247, 250, 1)",
+          },
+          "line": Object {
+            "dash": Array [
+              4,
+              4,
+            ],
+            "stroke": "rgba(105, 112, 125, 1)",
+            "strokeWidth": 1,
+          },
+        },
+        "lineSeriesStyle": Object {
+          "line": Object {
+            "strokeWidth": 2,
+          },
+          "point": Object {
+            "fill": "rgba(255, 255, 255, 1)",
+            "radius": 3,
+            "strokeWidth": 2,
+          },
+        },
+        "scales": Object {
+          "barsPadding": 0.25,
+          "histogramPadding": 0.05,
+        },
+      }
+    }
   />
   <inject-AxisSpec-with-chartStore
     id="x"
     position="bottom"
     showGridLines={false}
     tickFormat={[Function]}
-    title=""
+    title="c"
   />
   <inject-AxisSpec-with-chartStore
     id="y"
@@ -388,7 +1102,6 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
 
 exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] = `
 <Chart
-  className="lnsChart"
   renderer="canvas"
 >
   <inject-SettingsComponent-with-chartStore
@@ -396,13 +1109,133 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
     rotation={90}
     showLegend={false}
     showLegendDisplayValue={false}
+    theme={
+      Object {
+        "areaSeriesStyle": Object {
+          "area": Object {
+            "opacity": 0.3,
+          },
+          "line": Object {
+            "strokeWidth": 2,
+          },
+          "point": Object {
+            "fill": "rgba(255, 255, 255, 1)",
+            "radius": 3,
+            "strokeWidth": 2,
+            "visible": false,
+          },
+        },
+        "axes": Object {
+          "axisLineStyle": Object {
+            "stroke": "rgba(239, 241, 244, 1)",
+          },
+          "axisTitleStyle": Object {
+            "fill": "rgba(52, 55, 65, 1)",
+            "fontFamily": "'Inter UI', -apple-system, BlinkMacSystemFont,
+  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
+            "fontSize": 12,
+            "padding": 10,
+          },
+          "gridLineStyle": Object {
+            "horizontal": Object {
+              "dash": Array [
+                0,
+                0,
+              ],
+              "opacity": 1,
+              "stroke": "rgba(239, 241, 244, 1)",
+              "strokeWidth": 1,
+              "visible": true,
+            },
+            "vertical": Object {
+              "dash": Array [
+                4,
+                4,
+              ],
+              "opacity": 1,
+              "stroke": "rgba(239, 241, 244, 1)",
+              "strokeWidth": 1,
+              "visible": true,
+            },
+          },
+          "tickLabelStyle": Object {
+            "fill": "rgba(105, 112, 125, 1)",
+            "fontFamily": "'Inter UI', -apple-system, BlinkMacSystemFont,
+  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
+            "fontSize": 10,
+            "padding": 8,
+          },
+          "tickLineStyle": Object {
+            "stroke": "rgba(239, 241, 244, 1)",
+            "strokeWidth": 1,
+            "visible": false,
+          },
+        },
+        "barSeriesStyle": Object {
+          "displayValue": Object {
+            "fill": "rgba(105, 112, 125, 1)",
+            "fontFamily": "'Inter UI', -apple-system, BlinkMacSystemFont,
+  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
+            "fontSize": 8,
+          },
+        },
+        "chartMargins": Object {
+          "bottom": 0,
+          "left": 0,
+          "right": 0,
+          "top": 0,
+        },
+        "colors": Object {
+          "defaultVizColor": "#3185FC",
+          "vizColors": Array [
+            "#1EA593",
+            "#2B70F7",
+            "#CE0060",
+            "#38007E",
+            "#FCA5D3",
+            "#F37020",
+            "#E49E29",
+            "#B0916F",
+            "#7B000B",
+            "#34130C",
+          ],
+        },
+        "crosshair": Object {
+          "band": Object {
+            "fill": "rgba(245, 247, 250, 1)",
+          },
+          "line": Object {
+            "dash": Array [
+              4,
+              4,
+            ],
+            "stroke": "rgba(105, 112, 125, 1)",
+            "strokeWidth": 1,
+          },
+        },
+        "lineSeriesStyle": Object {
+          "line": Object {
+            "strokeWidth": 2,
+          },
+          "point": Object {
+            "fill": "rgba(255, 255, 255, 1)",
+            "radius": 3,
+            "strokeWidth": 2,
+          },
+        },
+        "scales": Object {
+          "barsPadding": 0.25,
+          "histogramPadding": 0.05,
+        },
+      }
+    }
   />
   <inject-AxisSpec-with-chartStore
     id="x"
     position="left"
     showGridLines={false}
     tickFormat={[Function]}
-    title=""
+    title="c"
   />
   <inject-AxisSpec-with-chartStore
     id="y"

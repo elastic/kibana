@@ -17,22 +17,15 @@
  * under the License.
  */
 
-import { AggParamType } from 'ui/agg_types/param_types/agg';
+import { AggParamType } from './param_types/agg';
 import { FieldParamType } from './param_types/field';
 import { OptionedParamType } from './param_types/optioned';
 import { StringParamType } from './param_types/string';
 import { JsonParamType } from './param_types/json';
 import { BaseParamType } from './param_types/base';
+
 import { AggConfig } from './agg_config';
 import { AggConfigs } from './agg_configs';
-
-export type AggParam = BaseParamType;
-
-export interface AggParamOption {
-  val: string;
-  display: string;
-  enabled?(agg: AggConfig): boolean;
-}
 
 const paramTypeMap = {
   field: FieldParamType,
@@ -43,16 +36,29 @@ const paramTypeMap = {
   _default: BaseParamType,
 } as Record<string, any>;
 
-interface AggParamConfig {
+export type AggParam = BaseParamType;
+
+export interface AggParamOption {
+  val: string;
+  display: string;
+  enabled?(agg: AggConfig): boolean;
+}
+
+export interface AggParamConfig {
   type: string;
 }
 
-export const initParams = (params: AggParamConfig[]): AggParam[] => {
-  return params.map((config: AggParamConfig) => {
+export const initParams = <
+  TAggParam extends AggParam = AggParam,
+  TAggParamConfig extends AggParamConfig = AggParamConfig
+>(
+  params: TAggParamConfig[]
+): TAggParam[] =>
+  params.map((config: TAggParamConfig) => {
     const Class = paramTypeMap[config.type] || paramTypeMap._default;
+
     return new Class(config);
-  }) as AggParam[];
-};
+  }) as TAggParam[];
 
 /**
  * Reads an aggConfigs

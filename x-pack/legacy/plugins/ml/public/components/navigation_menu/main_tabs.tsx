@@ -23,26 +23,19 @@ interface Props {
 
 function getTabs(disableLinks: boolean): Tab[] {
   return [
-    // {
-    //   id: 'overview',
-    //   name: i18n.translate('xpack.ml.navMenu.overviewTabLinkText', {
-    //     defaultMessage: 'Overview',
-    //   }),
-    //   disabled: disableLinks,
-    // },
+    {
+      id: 'overview',
+      name: i18n.translate('xpack.ml.navMenu.overviewTabLinkText', {
+        defaultMessage: 'Overview',
+      }),
+      disabled: disableLinks,
+    },
     {
       id: 'anomaly_detection',
       name: i18n.translate('xpack.ml.navMenu.anomalyDetectionTabLinkText', {
         defaultMessage: 'Anomaly Detection',
       }),
       disabled: disableLinks,
-    },
-    {
-      id: 'data_frames',
-      name: i18n.translate('xpack.ml.navMenu.dataFrameTabLinkText', {
-        defaultMessage: 'Transforms',
-      }),
-      disabled: false,
     },
     {
       id: 'data_frame_analytics',
@@ -66,9 +59,8 @@ interface TabData {
 }
 
 const TAB_DATA: Record<TabId, TabData> = {
-  // overview: { testSubject: 'mlTabOverview', pathId: 'overview' },
+  overview: { testSubject: 'mlMainTab overview', pathId: 'overview' },
   anomaly_detection: { testSubject: 'mlMainTab anomalyDetection', pathId: 'jobs' },
-  data_frames: { testSubject: 'mlMainTab dataFrames' },
   data_frame_analytics: { testSubject: 'mlMainTab dataFrameAnalytics' },
   datavisualizer: { testSubject: 'mlMainTab dataVisualizer' },
 };

@@ -6,20 +6,18 @@
 
 import Hapi from 'hapi';
 
-export function disableAlertRoute(server: Hapi.Server) {
-  server.route({
-    method: 'POST',
-    path: '/api/alert/{id}/_disable',
-    options: {
-      tags: ['access:alerting-all'],
-      response: {
-        emptyStatusCode: 204,
-      },
+export const disableAlertRoute = {
+  method: 'POST',
+  path: '/api/alert/{id}/_disable',
+  config: {
+    tags: ['access:alerting-all'],
+    response: {
+      emptyStatusCode: 204,
     },
-    async handler(request: Hapi.Request, h: Hapi.ResponseToolkit) {
-      const alertsClient = request.getAlertsClient!();
-      await alertsClient.disable({ id: request.params.id });
-      return h.response();
-    },
-  });
-}
+  },
+  async handler(request: Hapi.Request, h: Hapi.ResponseToolkit) {
+    const alertsClient = request.getAlertsClient!();
+    await alertsClient.disable({ id: request.params.id });
+    return h.response();
+  },
+};

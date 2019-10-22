@@ -27,12 +27,13 @@ import {
   EuiBadge,
   EuiToolTip,
   EuiFlexGroup,
-  EuiIcon
 } from '@elastic/eui';
 import { LicenseText } from './license_text';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Reason } from '../../logs/reason';
+import { SetupModeTooltip } from '../../setup_mode/tooltip';
+import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
 
 const calculateShards = shards => {
   const total = get(shards, 'total', 0);
@@ -160,47 +161,16 @@ export function ElasticsearchPanel(props) {
 
   const licenseText = <LicenseText license={props.license} showLicenseExpiration={props.showLicenseExpiration} />;
 
-  const setupModeElasticsearchData = get(setupMode.data, 'elasticsearch');
-  let setupModeNodesData = null;
-  if (setupMode.enabled && setupModeElasticsearchData) {
-    const {
-      totalUniqueInstanceCount,
-      totalUniqueFullyMigratedCount,
-      totalUniquePartiallyMigratedCount
-    } = setupModeElasticsearchData;
-    const allMonitoredByMetricbeat = totalUniqueInstanceCount > 0 &&
-      (totalUniqueFullyMigratedCount === totalUniqueInstanceCount || totalUniquePartiallyMigratedCount === totalUniqueInstanceCount);
-    const internalCollectionOn = totalUniquePartiallyMigratedCount > 0;
-    if (!allMonitoredByMetricbeat || internalCollectionOn) {
-      let tooltipText = null;
-
-      if (!allMonitoredByMetricbeat) {
-        tooltipText = i18n.translate('xpack.monitoring.cluster.overview.elasticsearchPanel.setupModeNodesTooltip.oneInternal', {
-          defaultMessage: `There's at least one node that isn't being monitored using Metricbeat. Click the flag icon to visit the nodes
-          listing page and find out more information about the status of each node.`
-        });
-      }
-      else if (internalCollectionOn) {
-        tooltipText = i18n.translate('xpack.monitoring.cluster.overview.elasticsearchPanel.setupModeNodesTooltip.disableInternal', {
-          defaultMessage: `All nodes are being monitored using Metricbeat but internal collection still needs to be turned off. Click the
-          flag icon to visit the nodes listing page and disable internal collection.`
-        });
-      }
-
-      setupModeNodesData = (
-        <EuiFlexItem grow={false}>
-          <EuiToolTip
-            position="top"
-            content={tooltipText}
-          >
-            <EuiLink onClick={goToNodes}>
-              <EuiIcon type="flag" color="warning"/>
-            </EuiLink>
-          </EuiToolTip>
-        </EuiFlexItem>
-      );
-    }
-  }
+  const setupModeData = get(setupMode.data, 'elasticsearch');
+  const setupModeTooltip = setupMode && setupMode.enabled
+    ? (
+      <SetupModeTooltip
+        setupModeData={setupModeData}
+        productName={ELASTICSEARCH_SYSTEM_ID}
+        badgeClickAction={goToNodes}
+      />
+    )
+    : null;
 
   const showMlJobs = () => {
     // if license doesn't support ML, then `ml === null`
@@ -211,7 +181,7 @@ export function ElasticsearchPanel(props) {
           <EuiDescriptionListTitle>
             <DisabledIfNoDataAndInSetupModeLink
               setupModeEnabled={setupMode.enabled}
-              setupModeData={setupModeElasticsearchData}
+              setupModeData={setupModeData}
               href={gotoURL}
             >
               <FormattedMessage
@@ -223,7 +193,7 @@ export function ElasticsearchPanel(props) {
           <EuiDescriptionListDescription data-test-subj="esMlJobs">
             <DisabledIfNoDataAndInSetupModeLink
               setupModeEnabled={setupMode.enabled}
-              setupModeData={setupModeElasticsearchData}
+              setupModeData={setupModeData}
               href={gotoURL}
             >
               {props.ml.jobs}
@@ -251,7 +221,7 @@ export function ElasticsearchPanel(props) {
               <h3>
                 <DisabledIfNoDataAndInSetupModeLink
                   setupModeEnabled={setupMode.enabled}
-                  setupModeData={setupModeElasticsearchData}
+                  setupModeData={setupModeData}
                   onClick={goToElasticsearch}
                   aria-label={i18n.translate('xpack.monitoring.cluster.overview.esPanel.overviewLinkAriaLabel', {
                     defaultMessage: 'Elasticsearch Overview'
@@ -314,7 +284,7 @@ export function ElasticsearchPanel(props) {
                   </h3>
                 </EuiTitle>
               </EuiFlexItem>
-              {setupModeNodesData}
+              {setupModeTooltip}
             </EuiFlexGroup>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">
@@ -353,7 +323,7 @@ export function ElasticsearchPanel(props) {
               <h3>
                 <DisabledIfNoDataAndInSetupModeLink
                   setupModeEnabled={setupMode.enabled}
-                  setupModeData={setupModeElasticsearchData}
+                  setupModeData={setupModeData}
                   onClick={goToIndices}
                   data-test-subj="esNumberOfIndices"
                   aria-label={i18n.translate('xpack.monitoring.cluster.overview.esPanel.indicesCountLinkAriaLabel', {
@@ -420,7 +390,7 @@ export function ElasticsearchPanel(props) {
               <h3>
                 <DisabledIfNoDataAndInSetupModeLink
                   setupModeEnabled={setupMode.enabled}
-                  setupModeData={setupModeElasticsearchData}
+                  setupModeData={setupModeData}
                   onClick={goToElasticsearch}
                   aria-label={i18n.translate('xpack.monitoring.cluster.overview.esPanel.logsLinkAriaLabel', {
                     defaultMessage: 'Elasticsearch Logs'

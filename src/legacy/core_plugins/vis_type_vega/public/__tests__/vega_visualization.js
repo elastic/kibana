@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Promise from 'bluebird';
+import Bluebird from 'bluebird';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import $ from 'jquery';
@@ -41,7 +41,7 @@ import vegaMapImage256 from './vega_map_image_256.png';
 import { VegaParser } from '../data_model/vega_parser';
 import { SearchCache } from '../data_model/search_cache';
 
-import { setup as visualizationsSetup } from '../../../visualizations/public/legacy';
+import { setup as visualizationsSetup } from '../../../visualizations/public/np_ready/public/legacy';
 import { createVegaTypeDefinition } from '../vega_type';
 
 const THRESHOLD = 0.1;
@@ -55,6 +55,7 @@ describe('VegaVisualizations', () => {
   let vis;
   let imageComparator;
   let vegaVisualizationDependencies;
+  let visRegComplete = false;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(
@@ -65,9 +66,12 @@ describe('VegaVisualizations', () => {
         uiSettings: $injector.get('config'),
       };
 
-      visualizationsSetup.types.registerVisualization(() =>
-        createVegaTypeDefinition(vegaVisualizationDependencies)
-      );
+      if(!visRegComplete) {
+        visRegComplete = true;
+        visualizationsSetup.types.registerVisualization(() =>
+          createVegaTypeDefinition(vegaVisualizationDependencies)
+        );
+      }
 
       Vis = Private(visModule.VisProvider);
 
@@ -89,7 +93,7 @@ describe('VegaVisualizations', () => {
       imageComparator.destroy();
     });
 
-    it('should show vegalite graph and update on resize', async function () {
+    it('should show vegalite graph and update on resize (may fail in dev env)', async function () {
       let vegaVis;
       try {
         vegaVis = new VegaVisualization(domNode, vis);
@@ -112,7 +116,7 @@ describe('VegaVisualizations', () => {
       }
     });
 
-    it('should show vega graph', async function () {
+    it('should show vega graph (may fail in dev env)', async function () {
       let vegaVis;
       try {
         vegaVis = new VegaVisualization(domNode, vis);
@@ -128,7 +132,7 @@ describe('VegaVisualizations', () => {
       }
     });
 
-    it('should show vegatooltip on mouseover over a vega graph', async () => {
+    it('should show vegatooltip on mouseover over a vega graph (may fail in dev env)', async () => {
       let vegaVis;
       try {
         vegaVis = new VegaVisualization(domNode, vis);
@@ -149,7 +153,7 @@ describe('VegaVisualizations', () => {
 
         $el.find('canvas')[0].dispatchEvent(event);
 
-        await Promise.delay(10);
+        await Bluebird.delay(10);
 
         let tooltip = document.getElementById('vega-kibana-tooltip');
         expect(tooltip).to.be.ok();

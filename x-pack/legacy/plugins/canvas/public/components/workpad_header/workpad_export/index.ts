@@ -15,10 +15,15 @@ import { getReportingBrowserType } from '../../../state/selectors/app';
 import { notify } from '../../../lib/notify';
 import { getWindow } from '../../../lib/get_window';
 // @ts-ignore Untyped local
-import { downloadWorkpad } from '../../../lib/download_workpad';
+import {
+  downloadWorkpad,
+  // @ts-ignore Untyped local
+} from '../../../lib/download_workpad';
 import { WorkpadExport as Component, Props as ComponentProps } from './workpad_export';
 import { getPdfUrl, createPdf } from './utils';
 import { State, CanvasWorkpad } from '../../../../types';
+// @ts-ignore Untyped local.
+import { fetch, arrayBufferFetch } from '../../../../common/lib/fetch';
 
 import { ComponentStrings } from '../../../../i18n';
 const { WorkpadHeaderWorkpadExport: strings } = ComponentStrings;
@@ -53,7 +58,8 @@ export const WorkpadExport = compose<ComponentProps, {}>(
       enabled,
       getExportUrl: type => {
         if (type === 'pdf') {
-          return getAbsoluteUrl(getPdfUrl(workpad, { pageCount }));
+          const { createPdfUri } = getPdfUrl(workpad, { pageCount });
+          return getAbsoluteUrl(createPdfUri);
         }
 
         throw new Error(strings.getUnknownExportErrorMessage(type));
@@ -87,7 +93,7 @@ export const WorkpadExport = compose<ComponentProps, {}>(
               });
           case 'json':
             downloadWorkpad(workpad.id);
-            break;
+            return;
           default:
             throw new Error(strings.getUnknownExportErrorMessage(type));
         }

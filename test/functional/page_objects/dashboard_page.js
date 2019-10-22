@@ -41,15 +41,10 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
   class DashboardPage {
     async initTests({
       kibanaIndex = 'dashboard/legacy',
-      dataIndex = 'logstash_functional',
       defaultIndex = 'logstash-*',
     } = {}) {
       log.debug('load kibana index with visualizations and log data');
-      await Promise.all([
-        esArchiver.load(kibanaIndex),
-        esArchiver.loadIfNeeded(dataIndex)
-      ]);
-
+      await esArchiver.load(kibanaIndex);
       await kibanaServer.uiSettings.replace({
         'defaultIndex': defaultIndex,
       });
@@ -72,6 +67,8 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async clickFullScreenMode() {
       log.debug(`clickFullScreenMode`);
       await testSubjects.click('dashboardFullScreenMode');
+      await testSubjects.exists('exitFullScreenModeLogo');
+      await this.waitForRenderComplete();
     }
 
     async fullScreenModeMenuItemExists() {
@@ -96,10 +93,12 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async clickExitFullScreenLogoButton() {
       await testSubjects.click('exitFullScreenModeLogo');
+      await this.waitForRenderComplete();
     }
 
     async clickExitFullScreenTextButton() {
       await testSubjects.click('exitFullScreenModeText');
+      await this.waitForRenderComplete();
     }
 
     async getDashboardIdFromCurrentUrl() {

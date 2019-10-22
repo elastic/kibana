@@ -13,7 +13,7 @@ import PropTypes from 'prop-types';
 import React, { Fragment } from 'react';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import DragSelect from 'dragselect/dist/ds.min.js';
-import { map } from 'rxjs/operators';
+import { map, takeUntil } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -33,16 +33,17 @@ import {
   ExplorerNoJobsFound,
   ExplorerNoResultsFound,
 } from './components';
+import { ChartTooltip } from '../components/chart_tooltip';
 import { ExplorerSwimlane } from './explorer_swimlane';
 import { KqlFilterBar } from '../components/kql_filter_bar';
 import { formatHumanReadableDateTime } from '../util/date_utils';
-import { getBoundsRoundedToInterval } from 'plugins/ml/util/ml_time_buckets';
+import { getBoundsRoundedToInterval } from '../util/time_buckets';
 import { getSelectedJobIds } from '../components/job_selector/job_select_service_utils';
 import { InfluencersList } from '../components/influencers_list';
 import { ALLOW_CELL_RANGE_SELECTION, dragSelect$, explorer$ } from './explorer_dashboard_service';
 import { mlResultsService } from 'plugins/ml/services/results_service';
 import { LoadingIndicator } from '../components/loading_indicator/loading_indicator';
-import { NavigationMenu } from '../components/navigation_menu/navigation_menu';
+import { NavigationMenu } from '../components/navigation_menu';
 import { CheckboxShowCharts, showCharts$ } from '../components/controls/checkbox_showcharts';
 import { JobSelector } from '../components/job_selector';
 import { SelectInterval, interval$ } from '../components/controls/select_interval/select_interval';
@@ -97,6 +98,9 @@ import { ExplorerChartsContainer } from './explorer_charts/explorer_charts_conta
 import { AnomaliesTable } from '../components/anomalies_table/anomalies_table';
 import { timefilter } from 'ui/timefilter';
 import { toastNotifications } from 'ui/notify';
+
+import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
+import { Subject } from 'rxjs';
 
 function getExplorerDefaultState() {
   return {
@@ -159,8 +163,10 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       dateFormatTz: PropTypes.string.isRequired,
       globalState: PropTypes.object.isRequired,
       jobSelectService: PropTypes.object.isRequired,
-      MlTimeBuckets: PropTypes.func.isRequired,
+      TimeBuckets: PropTypes.func.isRequired,
     };
+
+    _unsubscribeAll = new Subject();
 
     state = getExplorerDefaultState();
 
@@ -223,6 +229,24 @@ export const Explorer = injectI18n(injectObservablesAsProps(
           }
         });
       });
+
+      mlTimefilterRefresh$.pipe(takeUntil(this._unsubscribeAll)).subscribe(() => {
+        this.resetCache();
+        this.updateExplorer();
+      });
+    }
+
+    componentWillUnmount() {
+      this._unsubscribeAll.next();
+      this._unsubscribeAll.complete();
+    }
+
+    resetCache() {
+      this.loadOverallDataPreviousArgs = null;
+      this.loadViewBySwimlanePreviousArgs = null;
+      this.topFieldsPreviousArgs = null;
+      this.annotationsTablePreviousArgs = null;
+      this.anomaliesTablePreviousArgs = null;
     }
 
     // based on the pattern described here:
@@ -365,13 +389,13 @@ export const Explorer = injectI18n(injectObservablesAsProps(
     }
 
     getSwimlaneBucketInterval(selectedJobs) {
-      const { MlTimeBuckets } = this.props;
+      const { TimeBuckets } = this.props;
 
       const swimlaneWidth = getSwimlaneContainerWidth(this.state.noInfluencersConfigured);
       // Bucketing interval should be the maximum of the chart related interval (i.e. time range related)
       // and the max bucket span for the jobs shown in the chart.
       const bounds = timefilter.getActiveBounds();
-      const buckets = new MlTimeBuckets();
+      const buckets = new TimeBuckets();
       buckets.setInterval('auto');
       buckets.setBounds(bounds);
 
@@ -1074,7 +1098,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         globalState,
         intl,
         jobSelectService,
-        MlTimeBuckets,
+        TimeBuckets,
       } = this.props;
 
       const {
@@ -1145,6 +1169,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
       return (
         <ExplorerPage jobSelectorProps={jobSelectorProps}>
+          <ChartTooltip />
           <div className="results-container">
 
             {noInfluencersConfigured === false &&
@@ -1206,7 +1231,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
                   chartWidth={swimlaneWidth}
                   filterActive={filterActive}
                   maskAll={maskAll}
-                  MlTimeBuckets={MlTimeBuckets}
+                  TimeBuckets={TimeBuckets}
                   swimlaneCellClick={this.swimlaneCellClick}
                   swimlaneData={overallSwimlaneData}
                   swimlaneType={SWIMLANE_TYPE.OVERALL}
@@ -1272,24 +1297,27 @@ export const Explorer = injectI18n(injectObservablesAsProps(
                   </EuiFlexGroup>
 
                   {showViewBySwimlane && (
-                    <div
-                      className="ml-explorer-swimlane euiText"
-                      onMouseEnter={this.onSwimlaneEnterHandler}
-                      onMouseLeave={this.onSwimlaneLeaveHandler}
-                      data-test-subj="mlAnomalyExplorerSwimlaneViewBy"
-                    >
-                      <ExplorerSwimlane
-                        chartWidth={swimlaneWidth}
-                        filterActive={filterActive}
-                        maskAll={maskAll}
-                        MlTimeBuckets={MlTimeBuckets}
-                        swimlaneCellClick={this.swimlaneCellClick}
-                        swimlaneData={viewBySwimlaneData}
-                        swimlaneType={SWIMLANE_TYPE.VIEW_BY}
-                        selection={selectedCells}
-                        swimlaneRenderDoneListener={this.swimlaneRenderDoneListener}
-                      />
-                    </div>
+                    <React.Fragment>
+                      <EuiSpacer size="m" />
+                      <div
+                        className="ml-explorer-swimlane euiText"
+                        onMouseEnter={this.onSwimlaneEnterHandler}
+                        onMouseLeave={this.onSwimlaneLeaveHandler}
+                        data-test-subj="mlAnomalyExplorerSwimlaneViewBy"
+                      >
+                        <ExplorerSwimlane
+                          chartWidth={swimlaneWidth}
+                          filterActive={filterActive}
+                          maskAll={maskAll}
+                          TimeBuckets={TimeBuckets}
+                          swimlaneCellClick={this.swimlaneCellClick}
+                          swimlaneData={viewBySwimlaneData}
+                          swimlaneType={SWIMLANE_TYPE.VIEW_BY}
+                          selection={selectedCells}
+                          swimlaneRenderDoneListener={this.swimlaneRenderDoneListener}
+                        />
+                      </div>
+                    </React.Fragment>
                   )}
 
                   {viewBySwimlaneDataLoading && (

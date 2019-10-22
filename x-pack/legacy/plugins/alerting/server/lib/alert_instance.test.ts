@@ -64,10 +64,10 @@ describe('hasScheduledActions()', () => {
   });
 });
 
-describe('getSechduledActionOptions()', () => {
+describe('getScheduledActionOptions()', () => {
   test('defaults to undefined', () => {
     const alertInstance = new AlertInstance();
-    expect(alertInstance.getSechduledActionOptions()).toBeUndefined();
+    expect(alertInstance.getScheduledActionOptions()).toBeUndefined();
   });
 });
 
@@ -80,16 +80,16 @@ describe('unscheduleActions()', () => {
     expect(alertInstance.hasScheduledActions(null)).toEqual(false);
   });
 
-  test('makes getSechduledActionOptions() return undefined', () => {
+  test('makes getScheduledActionOptions() return undefined', () => {
     const alertInstance = new AlertInstance();
     alertInstance.scheduleActions('default');
-    expect(alertInstance.getSechduledActionOptions()).toEqual({
+    expect(alertInstance.getScheduledActionOptions()).toEqual({
       actionGroup: 'default',
       context: {},
       state: {},
     });
     alertInstance.unscheduleActions();
-    expect(alertInstance.getSechduledActionOptions()).toBeUndefined();
+    expect(alertInstance.getScheduledActionOptions()).toBeUndefined();
   });
 });
 
@@ -145,10 +145,10 @@ describe('scheduleActions()', () => {
     expect(alertInstance.hasScheduledActions('1m')).toEqual(true);
   });
 
-  test('makes getSechduledActionOptions() return given options', () => {
+  test('makes getScheduledActionOptions() return given options', () => {
     const alertInstance = new AlertInstance({ state: { foo: true }, meta: {} });
     alertInstance.replaceState({ otherField: true }).scheduleActions('default', { field: true });
-    expect(alertInstance.getSechduledActionOptions()).toEqual({
+    expect(alertInstance.getScheduledActionOptions()).toEqual({
       actionGroup: 'default',
       context: { field: true },
       state: { otherField: true },

@@ -27,7 +27,7 @@ export class ConsoleUIPlugin implements Plugin<any, any> {
   // @ts-ignore
   constructor(private readonly ctx: PluginInitializerContext) {}
 
-  async setup({ application }: CoreSetup, pluginSet: XPluginSet) {
+  async setup({ application, notifications }: CoreSetup, pluginSet: XPluginSet) {
     const {
       __LEGACY: { docLinkVersion, I18nContext, ResizeChecker },
     } = pluginSet;
@@ -37,7 +37,7 @@ export class ConsoleUIPlugin implements Plugin<any, any> {
       order: 1,
       title: 'Console',
       mount(ctx, { element }) {
-        render(boot({ docLinkVersion, I18nContext, ResizeChecker }), element);
+        render(boot({ docLinkVersion, I18nContext, ResizeChecker, notifications }), element);
         return () => {
           unmountComponentAtNode(element);
         };

@@ -49,7 +49,7 @@ function isNullOrUndefined(value?: number | null): value is null | undefined {
   return value === null || value === undefined;
 }
 
-interface YExtentsProps {
+export interface YExtentsProps {
   scale: Scale;
   setScale: SetScale;
   setMultipleValidity: (paramName: string, isValid: boolean) => void;

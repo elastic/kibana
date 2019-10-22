@@ -13,6 +13,8 @@ import {
   EuiFieldNumber,
   EuiButtonIcon,
   EuiPopover,
+  EuiTextAlign,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -72,7 +74,7 @@ export class SetViewControl extends Component {
     return {
       isInvalid,
       component: (
-        <EuiFormRow label={label} isInvalid={isInvalid} error={error} display="rowCompressed">
+        <EuiFormRow label={label} isInvalid={isInvalid} error={error} display="columnCompressed">
           <EuiFieldNumber
             compressed
             value={value}
@@ -125,22 +127,29 @@ export class SetViewControl extends Component {
     });
 
     return (
-      <EuiForm data-test-subj="mapSetViewForm">
+      <EuiForm data-test-subj="mapSetViewForm" style={{ width: 240 }}>
         {latFormRow}
 
         {lonFormRow}
 
         {zoomFormRow}
 
-        <EuiButton
-          size="s"
-          fill
-          disabled={isLatInvalid || isLonInvalid || isZoomInvalid}
-          onClick={this._onSubmit}
-          data-test-subj="submitViewButton"
-        >
-          <FormattedMessage id="xpack.maps.setViewControl.submitButtonLabel" defaultMessage="Go" />
-        </EuiButton>
+        <EuiSpacer size="s" />
+
+        <EuiTextAlign textAlign="right">
+          <EuiButton
+            size="s"
+            fill
+            disabled={isLatInvalid || isLonInvalid || isZoomInvalid}
+            onClick={this._onSubmit}
+            data-test-subj="submitViewButton"
+          >
+            <FormattedMessage
+              id="xpack.maps.setViewControl.submitButtonLabel"
+              defaultMessage="Go"
+            />
+          </EuiButton>
+        </EuiTextAlign>
       </EuiForm>
     );
   }
@@ -149,6 +158,7 @@ export class SetViewControl extends Component {
     return (
       <EuiPopover
         anchorPosition="leftUp"
+        panelPaddingSize="s"
         button={
           <EuiButtonIcon
             className="mapToolbarOverlay__button"

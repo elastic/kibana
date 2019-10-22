@@ -21,22 +21,22 @@ export function MachineLearningNavigationProvider({
     },
 
     async assertTabsExist(tabTypeSubject: string, areaSubjects: string[]) {
-      await retry.try(async () => {
+      await retry.tryForTime(10000, async () => {
         expect(await testSubjects.findAll(`~${tabTypeSubject}`, 3)).to.have.length(
           areaSubjects.length
         );
         for (const areaSubj of areaSubjects) {
-          await testSubjects.existOrFail(`~${tabTypeSubject}&~${areaSubj}`);
+          await testSubjects.existOrFail(`~${tabTypeSubject}&~${areaSubj}`, { timeout: 1000 });
         }
       });
     },
 
     async navigateToArea(linkSubject: string, pageSubject: string) {
-      await retry.try(async () => {
+      await retry.tryForTime(2 * 60 * 1000, async () => {
         if ((await testSubjects.exists(`${linkSubject} selected`)) === false) {
           await testSubjects.click(linkSubject);
-          await testSubjects.existOrFail(`${linkSubject} selected`);
-          await testSubjects.existOrFail(pageSubject);
+          await testSubjects.existOrFail(`${linkSubject} selected`, { timeout: 30 * 1000 });
+          await testSubjects.existOrFail(pageSubject, { timeout: 30 * 1000 });
         }
       });
     },
@@ -50,6 +50,10 @@ export function MachineLearningNavigationProvider({
       ]);
     },
 
+    async navigateToOverview() {
+      await this.navigateToArea('mlMainTab overview', 'mlPageOverview');
+    },
+
     async navigateToAnomalyDetection() {
       await this.navigateToArea('mlMainTab anomalyDetection', 'mlPageJobManagement');
       await this.assertTabsExist('mlSubTab', [
@@ -58,11 +62,6 @@ export function MachineLearningNavigationProvider({
         'singleMetricViewer',
         'settings',
       ]);
-    },
-
-    async navigateToDataFrames() {
-      await this.navigateToArea('mlMainTab dataFrames', 'mlPageDataFrame');
-      await this.assertTabsExist('mlSubTab', []);
     },
 
     async navigateToDataFrameAnalytics() {

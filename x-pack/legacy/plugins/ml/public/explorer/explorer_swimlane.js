@@ -39,7 +39,7 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
     chartWidth: PropTypes.number.isRequired,
     filterActive: PropTypes.bool,
     maskAll: PropTypes.bool,
-    MlTimeBuckets: PropTypes.func.isRequired,
+    TimeBuckets: PropTypes.func.isRequired,
     swimlaneCellClick: PropTypes.func.isRequired,
     swimlaneData: PropTypes.shape({
       laneLabels: PropTypes.array.isRequired
@@ -104,6 +104,7 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
       } else if (action === DRAG_SELECT_ACTION.ELEMENT_SELECT) {
         element.classed(SCSS.mlDragselectDragging, true);
       } else if (action === DRAG_SELECT_ACTION.DRAG_START) {
+        previousSelectedData = null;
         this.cellMouseoverActive = false;
         mlChartTooltipService.hide(true);
       }
@@ -248,7 +249,7 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
       chartWidth,
       filterActive,
       maskAll,
-      MlTimeBuckets,
+      TimeBuckets,
       swimlaneCellClick,
       swimlaneData,
       swimlaneType,
@@ -285,7 +286,7 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
       .range([0, xAxisWidth]);
 
     // Get the scaled date format to use for x axis tick labels.
-    const timeBuckets = new MlTimeBuckets();
+    const timeBuckets = new TimeBuckets();
     timeBuckets.setInterval(`${stepSecs}s`);
     const xAxisTickFormat = timeBuckets.getScaledDateFormat();
 
@@ -309,17 +310,23 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
 
       // Display date using same format as Kibana visualizations.
       const formattedDate = formatHumanReadableDateTime(time * 1000);
-      let contents = `${formattedDate}<br/><hr/>`;
+      const tooltipData = [{ name: formattedDate }];
+
       if (swimlaneData.fieldName !== undefined) {
-        contents += `${mlEscape(swimlaneData.fieldName)}: ${mlEscape(laneLabel)}<br/><hr/>`;
+        tooltipData.push({ name: swimlaneData.fieldName, value: laneLabel, seriesKey: laneLabel, yAccessor: 'fieldName' });
       }
-      contents += intl.formatMessage(
-        { id: 'xpack.ml.explorer.swimlane.maxAnomalyScoreLabel', defaultMessage: 'Max anomaly score: {displayScore}' },
-        { displayScore }
-      );
+      tooltipData.push({
+        name: intl.formatMessage(
+          { id: 'xpack.ml.explorer.swimlane.maxAnomalyScoreLabel', defaultMessage: 'Max anomaly score' },
+        ),
+        value: displayScore,
+        color: colorScore(displayScore),
+        seriesKey: laneLabel,
+        yAccessor: 'anomaly_score'
+      });
 
       const offsets = (target.className === 'sl-cell-inner' ? { x: 0, y: 0 } : { x: 2, y: 1 });
-      mlChartTooltipService.show(contents, target, {
+      mlChartTooltipService.show(tooltipData, target, {
         x: target.offsetWidth - offsets.x,
         y: 10 + offsets.y
       });
@@ -354,8 +361,15 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
       .each(function () {
         if (swimlaneData.fieldName !== undefined) {
           d3.select(this)
-            .attr('tooltip-html-unsafe', label => `${mlEscape(swimlaneData.fieldName)}: ${mlEscape(label)}`)
-            .attr('tooltip-placement', 'right')
+            .on('mouseover', label => {
+              mlChartTooltipService.show([{ skipHeader: true }, { name: swimlaneData.fieldName, value: label }], this, {
+                x: laneLabelWidth,
+                y: 8
+              });
+            })
+            .on('mouseout', () => {
+              mlChartTooltipService.hide();
+            })
             .attr('aria-label', label => `${mlEscape(swimlaneData.fieldName)}: ${mlEscape(label)}`);
         }
       });

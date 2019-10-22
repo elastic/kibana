@@ -49,16 +49,19 @@ export class RequestExpander implements ILanguageServerHandler {
 
   constructor(
     proxy: LanguageServerProxy,
-    readonly builtinWorkspace: boolean,
-    readonly maxWorkspace: number,
-    readonly serverOptions: ServerOptions,
-    readonly initialOptions: InitializeOptions,
-    readonly log: Logger
+    public readonly builtinWorkspace: boolean,
+    public readonly maxWorkspace: number,
+    public readonly serverOptions: ServerOptions,
+    public readonly initialOptions: InitializeOptions,
+    public readonly log: Logger
   ) {
     this.proxy = proxy;
-    proxy.onDisconnected(() => {
+    const clearListener = () => {
+      this.log.debug('proxy disconnected, clearing workspace status');
       this.workspaces.clear();
-    });
+    };
+    proxy.onDisconnected(clearListener);
+    proxy.onExit(clearListener);
     this.workspaceRoot = fs.realpathSync(this.serverOptions.workspacePath);
   }
 
@@ -260,9 +263,10 @@ export class RequestExpander implements ILanguageServerHandler {
   }
 
   initializeState(workspaceDir: string): WorkspaceStatus {
-    if (this.hasWorkspacePath(workspaceDir)) {
-      return this.getWorkspace(workspaceDir).status;
+    const ws = this.getWorkspace(workspaceDir);
+    if (ws.status === WorkspaceStatus.Uninitialized) {
+      ws.initPromise = Cancelable.fromPromise(this.initialize(workspaceDir));
     }
-    return WorkspaceStatus.Uninitialized;
+    return ws.status;
   }
 }

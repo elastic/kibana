@@ -26,6 +26,7 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
       display="row"
       error={Array []}
       fullWidth={false}
+      hasChildLabel={true}
       hasEmptyLabelSpace={false}
       isInvalid={false}
       label={
@@ -51,6 +52,7 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
       describedByIds={Array []}
       display="row"
       fullWidth={false}
+      hasChildLabel={true}
       hasEmptyLabelSpace={false}
       label={
         <FormattedMessage
@@ -88,6 +90,7 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
       describedByIds={Array []}
       display="row"
       fullWidth={false}
+      hasChildLabel={true}
       hasEmptyLabelSpace={false}
       label={
         <FormattedMessage
@@ -123,6 +126,7 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
       describedByIds={Array []}
       display="row"
       fullWidth={false}
+      hasChildLabel={true}
       hasEmptyLabelSpace={false}
       label={
         <FormattedMessage
@@ -150,6 +154,9 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
         singleSelection={false}
       />
     </EuiFormRow>
+    <EuiSpacer
+      size="m"
+    />
     <EuiFlexGroup>
       <EuiFlexItem
         grow={false}
@@ -160,6 +167,7 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
           describedByIds={Array []}
           display="row"
           fullWidth={false}
+          hasChildLabel={true}
           hasEmptyLabelSpace={false}
           label={
             <FormattedMessage
@@ -223,6 +231,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
       display="row"
       error={Array []}
       fullWidth={false}
+      hasChildLabel={true}
       hasEmptyLabelSpace={false}
       isInvalid={false}
       label={
@@ -248,6 +257,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
       describedByIds={Array []}
       display="row"
       fullWidth={false}
+      hasChildLabel={true}
       hasEmptyLabelSpace={false}
       label={
         <FormattedMessage
@@ -285,6 +295,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
       describedByIds={Array []}
       display="row"
       fullWidth={false}
+      hasChildLabel={true}
       hasEmptyLabelSpace={false}
       label={
         <FormattedMessage
@@ -320,6 +331,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
       describedByIds={Array []}
       display="row"
       fullWidth={false}
+      hasChildLabel={true}
       hasEmptyLabelSpace={false}
       label={
         <FormattedMessage
@@ -353,6 +365,9 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
         singleSelection={false}
       />
     </EuiFormRow>
+    <EuiSpacer
+      size="m"
+    />
     <EuiFlexGroup>
       <EuiFlexItem
         grow={false}
@@ -363,6 +378,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
           describedByIds={Array []}
           display="row"
           fullWidth={false}
+          hasChildLabel={true}
           hasEmptyLabelSpace={false}
           label={
             <FormattedMessage
@@ -407,6 +423,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
             ]
           }
           fullWidth={false}
+          hasChildLabel={true}
           hasEmptyLabelSpace={false}
           isInvalid={true}
           label={
@@ -459,6 +476,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
       display="row"
       error={Array []}
       fullWidth={false}
+      hasChildLabel={true}
       hasEmptyLabelSpace={false}
       isInvalid={false}
       label={
@@ -484,6 +502,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
       describedByIds={Array []}
       display="row"
       fullWidth={false}
+      hasChildLabel={true}
       hasEmptyLabelSpace={false}
       label={
         <FormattedMessage
@@ -521,6 +540,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
       describedByIds={Array []}
       display="row"
       fullWidth={false}
+      hasChildLabel={true}
       hasEmptyLabelSpace={false}
       label={
         <FormattedMessage
@@ -556,6 +576,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
       describedByIds={Array []}
       display="row"
       fullWidth={false}
+      hasChildLabel={true}
       hasEmptyLabelSpace={false}
       label={
         <FormattedMessage
@@ -589,6 +610,9 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
         singleSelection={false}
       />
     </EuiFormRow>
+    <EuiSpacer
+      size="m"
+    />
     <EuiFlexGroup>
       <EuiFlexItem
         grow={false}
@@ -599,6 +623,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
           describedByIds={Array []}
           display="row"
           fullWidth={false}
+          hasChildLabel={true}
           hasEmptyLabelSpace={false}
           label={
             <FormattedMessage
@@ -639,6 +664,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
           display="row"
           error={Array []}
           fullWidth={false}
+          hasChildLabel={true}
           hasEmptyLabelSpace={false}
           isInvalid={false}
           label={
@@ -695,6 +721,7 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
         ]
       }
       fullWidth={false}
+      hasChildLabel={true}
       hasEmptyLabelSpace={false}
       isInvalid={true}
       label={
@@ -720,6 +747,7 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
       describedByIds={Array []}
       display="row"
       fullWidth={false}
+      hasChildLabel={true}
       hasEmptyLabelSpace={false}
       label={
         <FormattedMessage
@@ -757,6 +785,7 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
       describedByIds={Array []}
       display="row"
       fullWidth={false}
+      hasChildLabel={true}
       hasEmptyLabelSpace={false}
       label={
         <FormattedMessage
@@ -792,6 +821,7 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
       describedByIds={Array []}
       display="row"
       fullWidth={false}
+      hasChildLabel={true}
       hasEmptyLabelSpace={false}
       label={
         <FormattedMessage
@@ -819,6 +849,9 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
         singleSelection={false}
       />
     </EuiFormRow>
+    <EuiSpacer
+      size="m"
+    />
     <EuiFlexGroup>
       <EuiFlexItem
         grow={false}
@@ -829,6 +862,7 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
           describedByIds={Array []}
           display="row"
           fullWidth={false}
+          hasChildLabel={true}
           hasEmptyLabelSpace={false}
           label={
             <FormattedMessage
@@ -896,6 +930,7 @@ exports[`CustomUrlEditor renders the editor for other type of URL with duplicate
         ]
       }
       fullWidth={false}
+      hasChildLabel={true}
       hasEmptyLabelSpace={false}
       isInvalid={true}
       label={
@@ -921,6 +956,7 @@ exports[`CustomUrlEditor renders the editor for other type of URL with duplicate
       describedByIds={Array []}
       display="row"
       fullWidth={false}
+      hasChildLabel={true}
       hasEmptyLabelSpace={false}
       label={
         <FormattedMessage
@@ -958,6 +994,7 @@ exports[`CustomUrlEditor renders the editor for other type of URL with duplicate
       describedByIds={Array []}
       display="row"
       fullWidth={true}
+      hasChildLabel={true}
       hasEmptyLabelSpace={false}
       label={
         <FormattedMessage
@@ -1007,6 +1044,7 @@ exports[`CustomUrlEditor renders the editor for other type of URL with unique la
       display="row"
       error={Array []}
       fullWidth={false}
+      hasChildLabel={true}
       hasEmptyLabelSpace={false}
       isInvalid={false}
       label={
@@ -1032,6 +1070,7 @@ exports[`CustomUrlEditor renders the editor for other type of URL with unique la
       describedByIds={Array []}
       display="row"
       fullWidth={false}
+      hasChildLabel={true}
       hasEmptyLabelSpace={false}
       label={
         <FormattedMessage
@@ -1069,6 +1108,7 @@ exports[`CustomUrlEditor renders the editor for other type of URL with unique la
       describedByIds={Array []}
       display="row"
       fullWidth={true}
+      hasChildLabel={true}
       hasEmptyLabelSpace={false}
       label={
         <FormattedMessage

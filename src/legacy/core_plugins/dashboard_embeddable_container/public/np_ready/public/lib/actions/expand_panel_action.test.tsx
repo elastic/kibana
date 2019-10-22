@@ -24,12 +24,10 @@ import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helper
 import {
   CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableFactory,
-} from '../../../../../../embeddable_api/public/np_ready/public/lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory';
-import {
   ContactCardEmbeddable,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
-} from '../../../../../../embeddable_api/public/np_ready/public/lib/test_samples/embeddables/contact_card/contact_card_embeddable';
+} from '../../../../../../embeddable_api/public/np_ready/public/lib/test_samples';
 import { DashboardOptions } from '../embeddable/dashboard_container_factory';
 
 const embeddableFactories = new Map<string, EmbeddableFactory>();

@@ -8,5 +8,6 @@ export default function ({ loadTestFile }) {
   describe('CSV', function () {
     this.tags('ciGroup2');
     loadTestFile(require.resolve('./csv_saved_search'));
+    loadTestFile(require.resolve('./csv_job_params'));
   });
 }

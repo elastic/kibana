@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow } from 'enzyme';
+import { mount } from 'enzyme';
 import * as React from 'react';
 
 import { CONSTANTS } from '../url_state/constants';
@@ -49,26 +49,17 @@ describe('SIEM Navigation', () => {
         linkTo: ['global'],
       },
     },
-    hosts: {
-      filterQuery: null,
-      queryLocation: null,
+    [CONSTANTS.appQuery]: { query: '', language: 'kuery' },
+    [CONSTANTS.filters]: [],
+    [CONSTANTS.timeline]: {
+      id: '',
+      isOpen: false,
     },
-    hostDetails: {
-      filterQuery: null,
-      queryLocation: null,
-    },
-    network: {
-      filterQuery: null,
-      queryLocation: null,
-    },
-    [CONSTANTS.timelineId]: '',
   };
-  const wrapper = shallow(<SiemNavigationComponent {...mockProps} />);
+  const wrapper = mount(<SiemNavigationComponent {...mockProps} />);
   test('it calls setBreadcrumbs with correct path on mount', () => {
     expect(setBreadcrumbs).toHaveBeenNthCalledWith(1, {
       detailName: undefined,
-      hostDetails: { filterQuery: null, queryLocation: null },
-      hosts: { filterQuery: null, queryLocation: null },
       navTabs: {
         hosts: {
           disabled: false,
@@ -99,12 +90,17 @@ describe('SIEM Navigation', () => {
           urlKey: 'timeline',
         },
       },
-      network: { filterQuery: null, queryLocation: null },
       pageName: 'hosts',
       pathName: '/hosts',
       search: '',
       tabName: 'authentications',
-      timelineId: '',
+      query: { query: '', language: 'kuery' },
+      filters: [],
+      savedQuery: undefined,
+      timeline: {
+        id: '',
+        isOpen: false,
+      },
       timerange: {
         global: {
           linkTo: ['timeline'],
@@ -138,8 +134,6 @@ describe('SIEM Navigation', () => {
     wrapper.update();
     expect(setBreadcrumbs).toHaveBeenNthCalledWith(2, {
       detailName: undefined,
-      hostDetails: { filterQuery: null, queryLocation: null },
-      hosts: { filterQuery: null, queryLocation: null },
       navTabs: {
         hosts: {
           disabled: false,
@@ -170,12 +164,17 @@ describe('SIEM Navigation', () => {
           urlKey: 'timeline',
         },
       },
-      network: { filterQuery: null, queryLocation: null },
       pageName: 'network',
       pathName: '/network',
       search: '',
       tabName: undefined,
-      timelineId: '',
+      query: { query: '', language: 'kuery' },
+      filters: [],
+      savedQuery: undefined,
+      timeline: {
+        id: '',
+        isOpen: false,
+      },
       timerange: {
         global: {
           linkTo: ['timeline'],

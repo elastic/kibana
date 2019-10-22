@@ -13,17 +13,13 @@ import {
   SPAN_SELF_TIME_SUM,
   TRANSACTION_TYPE,
   TRANSACTION_NAME,
-  TRANSACTION_BREAKDOWN_COUNT
+  TRANSACTION_BREAKDOWN_COUNT,
+  PROCESSOR_EVENT
 } from '../../../../common/elasticsearch_fieldnames';
-import { PromiseReturnType } from '../../../../typings/common';
 import { Setup } from '../../helpers/setup_request';
 import { rangeFilter } from '../../helpers/range_filter';
 import { getMetricsDateHistogramParams } from '../../helpers/metrics';
 import { MAX_KPIS, COLORS } from './constants';
-
-export type TransactionBreakdownAPIResponse = PromiseReturnType<
-  typeof getTransactionBreakdown
->;
 
 export async function getTransactionBreakdown({
   setup,
@@ -82,6 +78,7 @@ export async function getTransactionBreakdown({
   const filters = [
     { term: { [SERVICE_NAME]: serviceName } },
     { term: { [TRANSACTION_TYPE]: transactionType } },
+    { term: { [PROCESSOR_EVENT]: 'metric' } },
     { range: rangeFilter(start, end) },
     ...uiFiltersES
   ];
