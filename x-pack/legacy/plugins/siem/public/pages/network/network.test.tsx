@@ -5,17 +5,18 @@
  */
 
 import { mount } from 'enzyme';
+import { cloneDeep } from 'lodash/fp';
 import * as React from 'react';
 import { Router } from 'react-router-dom';
+import { MockedProvider } from 'react-apollo/test-utils';
+import { npSetup } from 'ui/new_platform';
 
 import '../../mock/match_media';
-import '../../mock/ui_settings';
-import { Network } from './network';
 
 import { mocksSource } from '../../containers/source/mock';
 import { TestProviders } from '../../mock';
-import { MockedProvider } from 'react-apollo/test-utils';
-import { cloneDeep } from 'lodash/fp';
+import { mockUiSettings, MockNpSetUp } from '../../mock/ui_settings';
+import { Network } from './network';
 
 jest.mock('ui/new_platform');
 jest.mock('../../lib/settings/use_kibana_ui_setting');
@@ -24,6 +25,16 @@ jest.mock('ui/documentation_links', () => ({
   documentationLinks: {
     kibana: 'http://www.example.com',
   },
+}));
+
+const mockNpSetup: MockNpSetUp = (npSetup as unknown) as MockNpSetUp;
+jest.mock('ui/new_platform');
+mockNpSetup.core.uiSettings = mockUiSettings;
+
+// Test will fail because we will to need to mock some core services to make the test work
+// For now let's forget about SiemSearchBar
+jest.mock('../../components/search_bar', () => ({
+  SiemSearchBar: () => null,
 }));
 
 let localSource: Array<{

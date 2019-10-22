@@ -14,6 +14,5 @@ import { npSetup } from 'ui/new_platform';
  */
 export const useKibanaInjectedVar = (name: string, defaultValue?: unknown) => {
   const injectedMetadata = npSetup.core.injectedMetadata;
-
   return injectedMetadata.getInjectedVar(name, defaultValue);
 };

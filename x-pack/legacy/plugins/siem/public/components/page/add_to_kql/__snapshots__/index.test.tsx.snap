@@ -12,9 +12,31 @@ exports[`AddToKql Component Rendering 1`] = `
     }
   }
 >
-  <AddToKql
-    componentFilterType="hosts"
-    expression="host.name: \\"siem-kibana\\""
+  <Connect(AddToKqlComponent)
+    filter={
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "host.name",
+          "negate": false,
+          "params": Object {
+            "query": "siem-kibana",
+          },
+          "type": "phrase",
+          "value": "siem-kibana",
+        },
+        "query": Object {
+          "match": Object {
+            "host.name": Object {
+              "query": "siem-kibana",
+              "type": "phrase",
+            },
+          },
+        },
+      }
+    }
+    id="global"
     indexPattern={
       Object {
         "fields": Array [
@@ -96,13 +118,18 @@ exports[`AddToKql Component Rendering 1`] = `
             "searchable": true,
             "type": "string",
           },
+          Object {
+            "aggregatable": true,
+            "name": "host.name",
+            "searchable": true,
+            "type": "string",
+          },
         ],
         "title": "filebeat-*,auditbeat-*,packetbeat-*",
       }
     }
-    type="page"
   >
     siem-kibana
-  </AddToKql>
+  </Connect(AddToKqlComponent)>
 </Component>
 `;

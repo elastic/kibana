@@ -428,7 +428,7 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
   };
 
   // metadata.branch corresponds to the version used in documentation links.
-  const docsUrl = `https://www.elastic.co/guide/en/elasticsearch/reference/${metadata.branch}/transform-pivot.html`;
+  const docsUrl = `https://www.elastic.co/guide/en/elasticsearch/reference/${metadata.branch}/transform-resource.html#transform-pivot`;
   const advancedEditorHelpText = (
     <Fragment>
       {i18n.translate('xpack.transform.stepDefineForm.advancedEditorHelpText', {
@@ -827,7 +827,7 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
 
       <EuiFlexItem>
         <SourceIndexPreview cellClick={addToSearch} query={pivotQuery} />
-        <EuiSpacer size="l" />
+        <EuiSpacer size="m" />
         <PivotPreview aggs={aggList} groupBy={groupByList} query={pivotQuery} />
       </EuiFlexItem>
     </EuiFlexGroup>
