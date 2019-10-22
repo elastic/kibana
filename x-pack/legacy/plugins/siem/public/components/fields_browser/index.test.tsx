@@ -14,8 +14,17 @@ import { TestProviders } from '../../mock';
 import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from './helpers';
 
 import { StatefulFieldsBrowser } from '.';
-
+// Suppress warnings about "act" until async/await syntax is supported: https://github.com/facebook/react/issues/14769
+/* eslint-disable no-console */
+const originalError = console.error;
 describe('StatefulFieldsBrowser', () => {
+  beforeAll(() => {
+    console.error = jest.fn();
+  });
+
+  afterAll(() => {
+    console.error = originalError;
+  });
   const timelineId = 'test';
 
   test('it renders the Fields button, which displays the fields browser on click', () => {
@@ -115,6 +124,41 @@ describe('StatefulFieldsBrowser', () => {
       expect(
         wrapper.find(`.field-browser-category-pane-auditd-${timelineId}`).first()
       ).toHaveStyleRule('font-weight', 'bold');
+    });
+    test('it updates the selectedCategoryId state according to most fields returned', done => {
+      const wrapper = mount(
+        <TestProviders>
+          <StatefulFieldsBrowser
+            browserFields={mockBrowserFields}
+            columnHeaders={[]}
+            height={FIELD_BROWSER_HEIGHT}
+            onUpdateColumns={jest.fn()}
+            timelineId={timelineId}
+            toggleColumn={jest.fn()}
+            width={FIELD_BROWSER_WIDTH}
+          />
+        </TestProviders>
+      );
+
+      wrapper
+        .find('[data-test-subj="show-field-browser"]')
+        .first()
+        .simulate('click');
+      wrapper
+        .find('[data-test-subj="field-search"]')
+        .last()
+        .simulate('change', { target: { value: 'default' } });
+
+      setTimeout(() => {
+        wrapper.update();
+        expect(
+          wrapper.find(`.field-browser-category-pane-default.ECS-${timelineId}`).first()
+        ).toHaveStyleRule('font-weight', 'bold');
+        wrapper.unmount();
+        done();
+      }, 1000);
+
+      expect(true).toBeTruthy();
     });
   });
 
