@@ -15,8 +15,9 @@ import {
   EuiTextArea,
 } from '@elastic/eui';
 import { JobCreatorContext } from '../../../job_creator_context';
-import { AdvancedJobCreator, JobCreatorType } from '../../../../../common/job_creator';
+import { AdvancedJobCreator } from '../../../../../common/job_creator';
 import {
+  createFieldOptions,
   createScriptFieldOptions,
   createMlcategoryFieldOption,
 } from '../../../../../common/job_creator/util/general';
@@ -97,11 +98,11 @@ export const AdvancedDetectorModal: FC<Props> = ({
   // fields available for the selected agg
   const { currentFieldOptions, setCurrentFieldOptions } = useCurrentFieldOptions(
     detector.agg,
-    jobCreator
+    jobCreator.scriptFields
   );
 
   const allFieldOptions: EuiComboBoxOptionProps[] = [
-    ...fields.filter(f => f.id !== EVENT_RATE_FIELD_ID).map(createFieldOption),
+    ...createFieldOptions(fields),
     ...createScriptFieldOptions(jobCreator.scriptFields),
   ];
 
@@ -358,23 +359,21 @@ function useDetectorPlaceholder(detector: RichDetector) {
 }
 
 // creates list of combobox options based on an aggregation's field list
-function createFieldOptionList(agg: Aggregation | null) {
-  return (agg !== null && agg.fields !== undefined ? agg.fields : [])
-    .filter(f => f.id !== EVENT_RATE_FIELD_ID)
-    .map(createFieldOption);
+function createFieldOptionsFromAgg(agg: Aggregation | null) {
+  return createFieldOptions(agg !== null && agg.fields !== undefined ? agg.fields : []);
 }
 
 // custom hook for storing combobox options based on an aggregation field list
-function useCurrentFieldOptions(aggregation: Aggregation | null, jobCreator: JobCreatorType) {
+function useCurrentFieldOptions(aggregation: Aggregation | null, scriptFields: Field[]) {
   const [currentFieldOptions, setCurrentFieldOptions] = useState(
-    createFieldOptionList(aggregation)
+    createFieldOptionsFromAgg(aggregation)
   );
-  const scriptFieldOptions = createScriptFieldOptions(jobCreator.scriptFields);
+  const scriptFieldOptions = createScriptFieldOptions(scriptFields);
 
   return {
     currentFieldOptions,
     setCurrentFieldOptions: (agg: Aggregation | null) =>
-      setCurrentFieldOptions([...createFieldOptionList(agg), ...scriptFieldOptions]),
+      setCurrentFieldOptions([...createFieldOptionsFromAgg(agg), ...scriptFieldOptions]),
   };
 }
 

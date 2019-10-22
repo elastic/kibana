@@ -76,6 +76,16 @@ export function getRichDetectors(
   });
 }
 
+export function createFieldOptions(fields: Field[], filterOverride?: (f: Field) => boolean) {
+  const filter = filterOverride || (f => f.id !== EVENT_RATE_FIELD_ID);
+  return fields
+    .filter(filter)
+    .map(f => ({
+      label: f.name,
+    }))
+    .sort((a, b) => a.label.localeCompare(b.label));
+}
+
 export function createScriptFieldOptions(scriptFields: Field[]) {
   return scriptFields.map(f => ({
     label: f.id,

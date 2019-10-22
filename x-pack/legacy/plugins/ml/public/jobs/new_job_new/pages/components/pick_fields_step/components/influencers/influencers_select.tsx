@@ -8,8 +8,9 @@ import React, { FC, useContext } from 'react';
 import { EuiComboBox, EuiComboBoxOptionProps } from '@elastic/eui';
 
 import { JobCreatorContext } from '../../../job_creator_context';
-import { Field, EVENT_RATE_FIELD_ID } from '../../../../../../../../common/types/fields';
+import { Field } from '../../../../../../../../common/types/fields';
 import {
+  createFieldOptions,
   createScriptFieldOptions,
   createMlcategoryFieldOption,
 } from '../../../../../common/job_creator/util/general';
@@ -23,12 +24,7 @@ interface Props {
 export const InfluencersSelect: FC<Props> = ({ fields, changeHandler, selectedInfluencers }) => {
   const { jobCreator } = useContext(JobCreatorContext);
   const options: EuiComboBoxOptionProps[] = [
-    ...fields
-      .filter(f => f.id !== EVENT_RATE_FIELD_ID)
-      .map(f => ({
-        label: f.name,
-      }))
-      .sort((a, b) => a.label.localeCompare(b.label)),
+    ...createFieldOptions(fields),
     ...createScriptFieldOptions(jobCreator.scriptFields),
     ...createMlcategoryFieldOption(jobCreator.categorizationFieldName),
   ];
