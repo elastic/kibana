@@ -26,7 +26,6 @@ export function alertingUI(kibana: any) {
     },
     uiExports: {
       hacks: ['plugins/alerting_ui/hacks/register'],
-      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       managementSections: ['plugins/alerting_ui'],
     },
   });

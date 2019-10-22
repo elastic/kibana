@@ -81,8 +81,8 @@ export const AlertingActionsDropdown: React.FunctionComponent<Props> = ({
                 createAction(action);
               }}
             >
-              <EuiFlexGroup>
-                <EuiFlexItem grow={false} className="alertingUIActionContextMenuItem">
+              <EuiFlexGroup alignItems="center">
+                <EuiFlexItem grow={false}>
                   <EuiIcon type={action.iconClass} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
