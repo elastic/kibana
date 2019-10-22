@@ -13,5 +13,3 @@ export const chromium = {
   paths: chromiumDefinition.paths,
   createDriverFactory: chromiumDefinition.createDriverFactory,
 };
-
-export type BrowserType = 'chromium';
