@@ -59,12 +59,12 @@ interface Assertion {
   /**
    * Checks if the obj exactly equals another.
    */
-  equal(obj: any): Assertion;
+  equal(obj: any, msg?: string): Assertion;
 
   /**
    * Checks if the obj sortof equals another.
    */
-  eql(obj: any): Assertion;
+  eql(obj: any, msg?: string): Assertion;
 
   /**
    * Assert within start to finish (inclusive).
@@ -72,7 +72,7 @@ interface Assertion {
    * @param start
    * @param finish
    */
-  within(start: number, finish: number): Assertion;
+  within(start: number, finish: number, msg?: string): Assertion;
 
   /**
    * Assert typeof.
@@ -87,36 +87,36 @@ interface Assertion {
   /**
    * Assert numeric value above n.
    */
-  greaterThan(n: number): Assertion;
+  greaterThan(n: number, msg?: string): Assertion;
 
   /**
    * Assert numeric value above n.
    */
-  above(n: number): Assertion;
+  above(n: number, msg?: string): Assertion;
 
   /**
    * Assert numeric value below n.
    */
-  lessThan(n: number): Assertion;
+  lessThan(n: number, msg?: string): Assertion;
 
   /**
    * Assert numeric value below n.
    */
-  below(n: number): Assertion;
+  below(n: number, msg?: string): Assertion;
 
   /**
    * Assert string value matches regexp.
    *
    * @param regexp
    */
-  match(regexp: RegExp): Assertion;
+  match(regexp: RegExp, msg?: string): Assertion;
 
   /**
    * Assert property "length" exists and has value of n.
    *
    * @param n
    */
-  length(n: number): Assertion;
+  length(n: number, msg?: string): Assertion;
 
   /**
    * Assert property name exists, with optional val.
