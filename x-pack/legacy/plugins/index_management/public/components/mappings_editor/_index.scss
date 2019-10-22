@@ -5,6 +5,9 @@
 
  [2] By default all content have a padding left to leave some room for the "L" bullet
  unless "--toggle" is added. In that case we don't need padding as the toggle will add it.
+
+ [3] We need to compensate from the -4px margin added by the euiFlexGroup to make sure that the
+ border-bottom is always visible, even when mouseovering and changing the background color.
  */
 
 .mappings-editor {
@@ -17,6 +20,7 @@
 
     &__field {
       border-bottom: $euiBorderThin;
+      margin-top: 4px; // [3]
 
       &:hover {
         background-color: $euiColorLightestShade;
@@ -73,12 +77,26 @@
   }
 
   &__create-field-wrapper {
-    background-color: $euiColorLightShade;
+    background-color: $euiColorLightestShade;
+    border-right: $euiBorderThin;
+    border-bottom: $euiBorderThin;
+    border-left: $euiBorderThin;
     padding: $euiSize;
   }
 
   &__create-field-content {
     position: relative;
+  }
+
+  &__edit-field {
+    &__section {
+      border-bottom: $euiBorderThin;
+      padding: $euiSizeXL 0;
+
+      &:first-child {
+        padding-top: 0;
+      }
+    }
   }
 }
 
@@ -86,7 +104,7 @@
   .mappings-editor__fields-list .mappings-editor__fields-list-item__content,
   .mappings-editor__create-field-content {
       &::before {
-        border-bottom: 1px solid #333;
+        border-bottom: $euiBorderThin;
         content: '';
         left: $euiSize;
         position: absolute;
@@ -94,7 +112,7 @@
         width: $euiSizeS;
       }
       &::after {
-        border-left: 1px solid #333;
+        border-left: $euiBorderThin;
         content: '';
         left: $euiSize;
         position: absolute;
@@ -146,11 +164,11 @@ ul.tree {
   li.tree-item {
     list-style-type: none;
     border-left: $euiBorderThin;
-    margin-left: 1em;
+    margin-left: $euiSizeL;
     padding-bottom: $euiSizeS;
 
     div {
-      padding-left: 1em;
+      padding-left: $euiSizeL;
       position: relative;
 
       &::before {
@@ -159,7 +177,7 @@ ul.tree {
         top: 0;
         left: -1px;
         bottom: 50%;
-        width: 0.75em;
+        width: $euiSize;
         border: $euiBorderThin;
         border-top: none;
         border-right: none;
@@ -171,7 +189,7 @@ ul.tree {
     padding-top: $euiSizeS;
   }
   > li.tree-item:last-child {
-    border-left: 1px solid transparent;
+    border-left-color: transparent;
     padding-bottom: 0;
   }
 }
