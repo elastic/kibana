@@ -6,6 +6,8 @@
 
 import _ from 'lodash';
 
+import { FEATURE_ID_PROPERTY_NAME } from '../../../../common/constants';
+
 const LAT_INDEX = 0;
 const LON_INDEX = 1;
 
@@ -27,7 +29,7 @@ export function convertToLines(esResponse) {
     const sourceBuckets = _.get(destBucket, 'sourceGrid.buckets', []);
     for (let j = 0; j < sourceBuckets.length; j++) {
       const {
-        key, // eslint-disable-line no-unused-vars
+        key,
         sourceCentroid,
         ...rest
       } = sourceBuckets[j];
@@ -46,6 +48,7 @@ export function convertToLines(esResponse) {
           coordinates: [[sourceCentroid.location.lon, sourceCentroid.location.lat], dest]
         },
         properties: {
+          [FEATURE_ID_PROPERTY_NAME]: `${dest.join()},${key}`,
           ...rest
         }
       });

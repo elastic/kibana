@@ -12,6 +12,8 @@ exports[`Error ERROR_EXC_MESSAGE 1`] = `undefined`;
 
 exports[`Error ERROR_GROUP_ID 1`] = `"grouping key"`;
 
+exports[`Error ERROR_LOG_LEVEL 1`] = `undefined`;
+
 exports[`Error ERROR_LOG_MESSAGE 1`] = `undefined`;
 
 exports[`Error ERROR_PAGE_URL 1`] = `undefined`;
@@ -114,6 +116,8 @@ exports[`Span ERROR_EXC_MESSAGE 1`] = `undefined`;
 
 exports[`Span ERROR_GROUP_ID 1`] = `undefined`;
 
+exports[`Span ERROR_LOG_LEVEL 1`] = `undefined`;
+
 exports[`Span ERROR_LOG_MESSAGE 1`] = `undefined`;
 
 exports[`Span ERROR_PAGE_URL 1`] = `undefined`;
@@ -215,6 +219,8 @@ exports[`Transaction ERROR_EXC_HANDLED 1`] = `undefined`;
 exports[`Transaction ERROR_EXC_MESSAGE 1`] = `undefined`;
 
 exports[`Transaction ERROR_GROUP_ID 1`] = `undefined`;
+
+exports[`Transaction ERROR_LOG_LEVEL 1`] = `undefined`;
 
 exports[`Transaction ERROR_LOG_MESSAGE 1`] = `undefined`;
 

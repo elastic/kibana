@@ -337,6 +337,7 @@ export class IndexTable extends Component {
       const { name } = index;
       return (
         <EuiTableRow
+          data-test-subj="indexTableRow"
           isSelected={this.isItemSelected(name) || name === detailPanelIndexName}
           isSelectable
           key={`${name}-row`}
@@ -383,7 +384,8 @@ export class IndexTable extends Component {
     return (
       <EuiFlexItem key={name} grow={false}>
         <EuiSwitch
-          id={`checkboxToggles-{name}`}
+          id={`checkboxToggles-${name}`}
+          data-test-subj={`checkboxToggles-${name}`}
           checked={toggleNameToVisibleMap[name]}
           onChange={event => toggleChanged(name, event.target.checked)}
           label={label}

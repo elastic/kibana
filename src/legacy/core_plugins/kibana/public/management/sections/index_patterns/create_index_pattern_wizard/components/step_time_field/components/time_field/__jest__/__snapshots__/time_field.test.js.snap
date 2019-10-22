@@ -6,6 +6,7 @@ exports[`TimeField should render a loading state 1`] = `
     describedByIds={Array []}
     display="row"
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
       <div>
@@ -80,6 +81,7 @@ exports[`TimeField should render a selected time field 1`] = `
     describedByIds={Array []}
     display="row"
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
       <div>
@@ -119,18 +121,16 @@ exports[`TimeField should render a selected time field 1`] = `
         <EuiFlexItem
           grow={false}
         >
-          <EuiLink
+          <ForwardRef
             className="timeFieldRefreshButton"
-            color="primary"
             onClick={[Function]}
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Refresh"
               id="kbn.management.createIndexPattern.stepTime.refreshButton"
               values={Object {}}
             />
-          </EuiLink>
+          </ForwardRef>
         </EuiFlexItem>
       </ForwardRef>
     }
@@ -165,6 +165,7 @@ exports[`TimeField should render normally 1`] = `
     describedByIds={Array []}
     display="row"
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
       <div>
@@ -204,18 +205,16 @@ exports[`TimeField should render normally 1`] = `
         <EuiFlexItem
           grow={false}
         >
-          <EuiLink
+          <ForwardRef
             className="timeFieldRefreshButton"
-            color="primary"
             onClick={[Function]}
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Refresh"
               id="kbn.management.createIndexPattern.stepTime.refreshButton"
               values={Object {}}
             />
-          </EuiLink>
+          </ForwardRef>
         </EuiFlexItem>
       </ForwardRef>
     }

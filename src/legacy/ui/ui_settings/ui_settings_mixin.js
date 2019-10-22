@@ -42,22 +42,15 @@ export function uiSettingsMixin(kbnServer, server) {
     acc[currentKey] = updatedDefaultSetting;
     return acc;
   }, {});
-  const getDefaults = () => mergedUiSettingDefaults;
-  const overrides = kbnServer.config.get('uiSettings.overrides');
+
+  kbnServer.newPlatform.__internals.uiSettings.setDefaults(mergedUiSettingDefaults);
 
   server.decorate('server', 'uiSettingsServiceFactory', (options = {}) => {
-    return uiSettingsServiceFactory(server, {
-      getDefaults,
-      overrides,
-      ...options
-    });
+    return uiSettingsServiceFactory(server, options);
   });
 
   server.addMemoizedFactoryToRequest('getUiSettingsService', request => {
-    return getUiSettingsServiceForRequest(server, request, {
-      getDefaults,
-      overrides,
-    });
+    return getUiSettingsServiceForRequest(server, request);
   });
 
   server.decorate('server', 'uiSettings', () => {

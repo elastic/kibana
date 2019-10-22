@@ -6,7 +6,7 @@
 
 import React, { FC, useState, useContext, useEffect } from 'react';
 import { EuiFieldText } from '@elastic/eui';
-import { newJobDefaults } from '../../../../../new_job/utils/new_job_defaults';
+import { newJobDefaults } from '../../../../../new_job_new/utils/new_job_defaults';
 import { JobCreatorContext } from '../../job_creator_context';
 import { Description } from './description';
 
@@ -27,13 +27,13 @@ export const ModelMemoryLimitInput: FC = () => {
   const { model_memory_limit: modelMemoryLimitDefault } = anomalyDetectors;
 
   useEffect(() => {
-    setModelMemoryLimit(jobCreator.modelMemoryLimit === null ? '' : jobCreator.modelMemoryLimit);
-  }, [jobCreatorUpdated]);
-
-  useEffect(() => {
     jobCreator.modelMemoryLimit = modelMemoryLimit === '' ? null : modelMemoryLimit;
     jobCreatorUpdate();
   }, [modelMemoryLimit]);
+
+  useEffect(() => {
+    setModelMemoryLimit(jobCreator.modelMemoryLimit === null ? '' : jobCreator.modelMemoryLimit);
+  }, [jobCreatorUpdated]);
 
   useEffect(() => {
     setValidation(jobValidator.modelMemoryLimit);

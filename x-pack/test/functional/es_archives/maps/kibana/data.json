@@ -337,6 +337,62 @@
 {
   "type": "doc",
   "value": {
+    "id": "map:c9277dd0-eb8f-11e9-ae47-693d6a50fb9e",
+    "index": ".kibana",
+    "source": {
+      "map": {
+        "title" : "document example with data driven styles on date field",
+        "description" : "",
+        "mapStateJSON": "{\"zoom\":4.1,\"center\":{\"lon\":-100.61091,\"lat\":33.23887},\"timeFilters\":{\"from\":\"2015-09-20T00:00:00.000Z\",\"to\":\"2015-09-20T01:00:00.000Z\"},\"refreshConfig\":{\"isPaused\":true,\"interval\":1000},\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filters\":[]}",
+        "layerListJSON": "[{\"id\":\"0hmz5\",\"sourceDescriptor\":{\"type\":\"EMS_TMS\",\"id\":\"road_map\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"TILE\",\"properties\":{}},\"type\":\"VECTOR_TILE\",\"minZoom\":0,\"maxZoom\":24},{\"id\":\"z52lq\",\"label\":\"logstash\",\"minZoom\":0,\"maxZoom\":24,\"sourceDescriptor\":{\"id\":\"e1a5e1a6-676c-4a89-8ea9-0d91d64b73c6\",\"type\":\"ES_SEARCH\",\"geoField\":\"geo.coordinates\",\"limit\":2048,\"filterByMapBounds\":true,\"showTooltip\":true,\"tooltipProperties\":[],\"indexPatternRefName\":\"layer_1_source_index_pattern\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"DYNAMIC\",\"options\":{\"color\":\"Blues\",\"field\":{\"label\":\"@timestamp\",\"name\":\"@timestamp\",\"origin\":\"source\"}}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#FFFFFF\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"DYNAMIC\",\"options\":{\"minSize\":4,\"maxSize\":24,\"field\":{\"label\":\"bytes\",\"name\":\"bytes\",\"origin\":\"source\"}}},\"iconOrientation\":{\"type\":\"STATIC\",\"options\":{\"orientation\":0}},\"symbol\":{\"options\":{\"symbolizeAs\":\"circle\",\"symbolId\":\"airfield\"}}}},\"type\":\"VECTOR\"}]",
+        "uiStateJSON": "{\"isLayerTOCOpen\":true,\"openTOCDetails\":[]}",
+        "bounds" : {
+          "type" : "Polygon",
+          "coordinates" : [
+            [
+              [
+                -132.42879,
+                44.5711
+              ],
+              [
+                -132.42879,
+                20.22627
+              ],
+              [
+                -68.79303,
+                20.22627
+              ],
+              [
+                -68.79303,
+                44.5711
+              ],
+              [
+                -132.42879,
+                44.5711
+              ]
+            ]
+          ]
+        }
+      },
+      "type" : "map",
+      "references" : [
+        {
+          "name" : "layer_1_source_index_pattern",
+          "type" : "index-pattern",
+          "id" : "c698b940-e149-11e8-a35a-370a8516603a"
+        }
+      ],
+      "migrationVersion" : {
+        "map" : "7.5.0"
+      },
+      "updated_at" : "2019-10-10T18:57:19.916Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
     "id": "map:1649cc70-f736-11e8-8ce0-9723965e01e3",
     "index": ".kibana",
     "source": {

@@ -406,12 +406,26 @@ class HeaderUI extends Component<Props, State> {
           data-test-subj="navDrawer"
           isLocked={isLocked}
           onIsLockedUpdate={onIsLockedUpdate}
+          aria-label={i18n.translate('core.ui.primaryNav.screenReaderLabel', {
+            defaultMessage: 'Primary',
+          })}
         >
-          <nav>
-            <EuiNavDrawerGroup listItems={recentLinksArray} />
+          <>
+            <EuiNavDrawerGroup
+              listItems={recentLinksArray}
+              aria-label={i18n.translate('core.ui.recentLinks.screenReaderLabel', {
+                defaultMessage: 'Recently viewed links, navigation',
+              })}
+            />
             <EuiHorizontalRule margin="none" />
-            <EuiNavDrawerGroup data-test-subj="navDrawerAppsMenu" listItems={navLinksArray} />
-          </nav>
+            <EuiNavDrawerGroup
+              data-test-subj="navDrawerAppsMenu"
+              listItems={navLinksArray}
+              aria-label={i18n.translate('core.ui.primaryNavList.screenReaderLabel', {
+                defaultMessage: 'Primary navigation links',
+              })}
+            />
+          </>
         </EuiNavDrawer>
       </header>
     );
