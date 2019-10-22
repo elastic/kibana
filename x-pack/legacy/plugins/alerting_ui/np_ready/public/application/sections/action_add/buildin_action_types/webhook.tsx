@@ -99,7 +99,7 @@ const WebhookActionFields: React.FunctionComponent<Props> = ({
 }) => {
   const [headerKey, setHeaderKey] = useState<string>('');
   const [headerValue, setHeaderValue] = useState<string>('');
-  const [isOpen, setOpen] = useState<boolean>(false);
+  const [hasHeaders, setHasHeaders] = useState<boolean>(false);
 
   const { user, password } = action.secrets;
   const { method, url, headers } = action.config;
@@ -133,8 +133,8 @@ const WebhookActionFields: React.FunctionComponent<Props> = ({
   const hasHeaderErrors = headerErrors.keyHeader.length > 0 || headerErrors.valueHeader.length > 0;
 
   function addHeader() {
-    if (!isOpen) {
-      setOpen(true);
+    if (!hasHeaders) {
+      setHasHeaders(true);
       return;
     }
     if (headers && !!Object.keys(headers).find(key => key === headerKey)) {
@@ -148,18 +148,18 @@ const WebhookActionFields: React.FunctionComponent<Props> = ({
     setHeaderValue('');
   }
 
-  function removeHeader(objKey: string) {
+  function removeHeader(keyToRemove: string) {
     const updatedHeaders = Object.keys(headers)
-      .filter(key => key !== objKey)
-      .reduce((obj: any, key: string) => {
-        obj[key] = headers[key];
-        return obj;
+      .filter(key => key !== keyToRemove)
+      .reduce((headerToRemove: Record<string, string>, key: string) => {
+        headerToRemove[key] = headers[key];
+        return headerToRemove;
       }, {});
     editActionConfig('headers', updatedHeaders);
   }
 
   let headerControl;
-  if (isOpen) {
+  if (hasHeaders) {
     headerControl = (
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
@@ -335,7 +335,7 @@ const WebhookActionFields: React.FunctionComponent<Props> = ({
 
       <EuiSpacer size="s" />
       <EuiButton
-        isDisabled={isOpen && (hasHeaderErrors || !headerKey || !headerValue)}
+        isDisabled={hasHeaders && (hasHeaderErrors || !headerKey || !headerValue)}
         fill
         onClick={() => addHeader()}
       >
@@ -349,7 +349,7 @@ const WebhookActionFields: React.FunctionComponent<Props> = ({
       {headerControl}
       <EuiSpacer size="m" />
       <Fragment>
-        {isOpen ? (
+        {hasHeaders ? (
           <EuiTitle size="xs">
             <h5>
               <FormattedMessage
