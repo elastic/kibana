@@ -33,14 +33,6 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.preserveCrossAppState();
     });
 
-    after(async function () {
-      // avoids any 'Object with id x not found' errors when switching tests.
-      await PageObjects.header.clickVisualize();
-      await PageObjects.visualize.gotoLandingPage();
-      await PageObjects.header.clickDashboard();
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-    });
-
     it('Visualization updated when time picker changes', async () => {
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.addVisualizations([PIE_CHART_VIS_NAME]);
@@ -79,7 +71,6 @@ export default function ({ getService, getPageObjects }) {
       expect(time.start).to.be('Nov 17, 2012 @ 00:00:00.000');
       expect(time.end).to.be('Nov 17, 2015 @ 18:01:36.621');
       expect(refresh.interval).to.be('2');
-
     });
   });
 }

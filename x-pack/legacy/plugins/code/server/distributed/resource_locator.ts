@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'hapi';
+import { KibanaRequest } from 'src/core/server';
 import { RequestContext } from './service_definition';
 
 export interface Endpoint {
@@ -12,7 +12,7 @@ export interface Endpoint {
 }
 
 export interface ResourceLocator {
-  locate(req: Request, resource: string): Promise<Endpoint>;
+  locate(req: KibanaRequest, resource: string): Promise<Endpoint>;
 
   /**
    * Returns whether the resource resides on the local node. This should support both url and uri of the repository.
@@ -25,5 +25,5 @@ export interface ResourceLocator {
    * Allocates the resource to nodes and returns the endpoint corresponds to the allocated node.
    * If the resource cannot be allocated to any node, it returns undefined.
    */
-  allocate(req: Request, resource: string): Promise<Endpoint | undefined>;
+  allocate(req: KibanaRequest, resource: string): Promise<Endpoint | undefined>;
 }

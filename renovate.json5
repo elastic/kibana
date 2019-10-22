@@ -816,19 +816,19 @@
         ],
       },
       {
-        groupSlug: 'xml2js',
-        groupName: 'xml2js related packages',
-        packageNames: [
-          'xml2js',
-          '@types/xml2js',
-        ],
-      },
-      {
         groupSlug: 'xml-crypto',
         groupName: 'xml-crypto related packages',
         packageNames: [
           'xml-crypto',
           '@types/xml-crypto',
+        ],
+      },
+      {
+        groupSlug: 'xml2js',
+        groupName: 'xml2js related packages',
+        packageNames: [
+          'xml2js',
+          '@types/xml2js',
         ],
       },
       {

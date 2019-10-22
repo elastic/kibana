@@ -33,7 +33,7 @@ export const initServerWithKibana = (kbnServer: KbnServer) => {
   xpackMainPlugin.registerFeature({
     id: 'infrastructure',
     name: i18n.translate('xpack.infra.featureRegistry.linkInfrastructureTitle', {
-      defaultMessage: 'Infrastructure',
+      defaultMessage: 'Metrics',
     }),
     icon: 'infraApp',
     navLinkId: 'infra:home',

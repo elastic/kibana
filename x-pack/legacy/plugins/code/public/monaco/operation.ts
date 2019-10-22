@@ -19,10 +19,10 @@ export class Operation<T> {
   private timeout: any;
 
   constructor(
-    readonly computer: Computer<T>,
-    readonly successCallback: (result: T) => void,
-    readonly errorCallback: (error: Error) => void,
-    readonly progressCallback: (progress: any) => void
+    public readonly computer: Computer<T>,
+    public readonly successCallback: (result: T) => void,
+    public readonly errorCallback: (error: Error) => void,
+    public readonly progressCallback: (progress: any) => void
   ) {}
 
   public setDelay(delay: number) {
