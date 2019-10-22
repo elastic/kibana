@@ -3,12 +3,21 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+export type ActionTypeIndex = Record<string, ActionType>;
+export type AlertTypeIndex = Record<string, AlertType>;
+
 export interface Props {
   action: Action;
   editActionConfig: (property: string, value: any) => void;
   editActionSecrets: (property: string, value: any) => void;
   errors: { [key: string]: string[] };
   hasErrors?: boolean;
+}
+
+export interface Pagination {
+  index: number;
+  size: number;
 }
 
 export interface ActionTypeModel {
@@ -36,6 +45,10 @@ export interface Action {
   config: Record<string, any>;
 }
 
+export interface ActionTableItem extends Action {
+  actionType: ActionType['name'];
+}
+
 export interface AlertType {
   id: string;
   name: string;
@@ -61,4 +74,8 @@ export interface Alert {
   throttle: string | null;
   muteAll: boolean;
   mutedInstanceIds: string[];
+}
+
+export interface AlertTableItem extends Alert {
+  alertType: AlertType['name'];
 }

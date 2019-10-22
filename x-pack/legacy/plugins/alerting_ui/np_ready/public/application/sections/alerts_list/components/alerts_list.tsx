@@ -11,17 +11,8 @@ import React, { Fragment, useEffect, useState } from 'react';
 import { EuiBasicTable, EuiButton, EuiSearchBar, EuiSpacer } from '@elastic/eui';
 import { AlertsContext } from '../../../context/alerts_context';
 import { useAppDependencies } from '../../../index';
-import { Alert, AlertType } from '../../../../types';
+import { Alert, AlertTableItem, AlertTypeIndex, Pagination } from '../../../../types';
 import { deleteAlerts, loadAlerts, loadAlertTypes } from '../../../lib/api';
-
-type AlertTypeIndex = Record<string, AlertType>;
-interface Pagination {
-  index: number;
-  size: number;
-}
-interface Data extends Alert {
-  alertType: AlertType['name'];
-}
 
 export const AlertsList: React.FunctionComponent = () => {
   const {
@@ -32,8 +23,8 @@ export const AlertsList: React.FunctionComponent = () => {
 
   const [alertTypesIndex, setAlertTypesIndex] = useState<AlertTypeIndex | undefined>(undefined);
   const [alerts, setAlerts] = useState<Alert[]>([]);
-  const [data, setData] = useState<Data[]>([]);
-  const [selectedItems, setSelectedItems] = useState<Data[]>([]);
+  const [data, setData] = useState<AlertTableItem[]>([]);
+  const [selectedItems, setSelectedItems] = useState<AlertTableItem[]>([]);
   const [isLoadingAlertTypes, setIsLoadingAlertTypes] = useState<boolean>(false);
   const [isLoadingAlerts, setIsLoadingAlerts] = useState<boolean>(false);
   const [isDeletingActions, setIsDeletingActions] = useState<boolean>(false);
@@ -99,7 +90,7 @@ export const AlertsList: React.FunctionComponent = () => {
     }
   }
 
-  async function deleteItems(items: Data[]) {
+  async function deleteItems(items: AlertTableItem[]) {
     setIsDeletingActions(true);
     const ids = items.map(item => item.id);
     try {
@@ -163,7 +154,7 @@ export const AlertsList: React.FunctionComponent = () => {
               ),
           type: 'icon',
           icon: 'trash',
-          onClick: (item: Data) => deleteItems([item]),
+          onClick: (item: AlertTableItem) => deleteItems([item]),
         },
       ],
     },
@@ -237,7 +228,7 @@ export const AlertsList: React.FunctionComponent = () => {
               totalItemCount,
             }}
             selection={{
-              onSelectionChange(updatedSelectedItemsList: Data[]) {
+              onSelectionChange(updatedSelectedItemsList: AlertTableItem[]) {
                 setSelectedItems(updatedSelectedItemsList);
               },
             }}

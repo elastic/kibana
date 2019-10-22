@@ -13,12 +13,7 @@ import { useAppDependencies } from '../../../index';
 import { AlertingActionsDropdown } from './create_menu_popover';
 import { ActionAdd } from '../../action_add';
 import { deleteActions, loadAllActions, loadActionTypes } from '../../../lib/api';
-import { ActionType, Action } from '../../../../types';
-
-type ActionTypeIndex = Record<string, ActionType>;
-interface Data extends Action {
-  actionType: ActionType['name'];
-}
+import { ActionType, Action, ActionTableItem, ActionTypeIndex } from '../../../../types';
 
 export const ActionsList: React.FunctionComponent = () => {
   const {
@@ -30,8 +25,8 @@ export const ActionsList: React.FunctionComponent = () => {
 
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
   const [actions, setActions] = useState<Action[]>([]);
-  const [data, setData] = useState<Data[]>([]);
-  const [selectedItems, setSelectedItems] = useState<Data[]>([]);
+  const [data, setData] = useState<ActionTableItem[]>([]);
+  const [selectedItems, setSelectedItems] = useState<ActionTableItem[]>([]);
   const [isLoadingActionTypes, setIsLoadingActionTypes] = useState<boolean>(false);
   const [isLoadingActions, setIsLoadingActions] = useState<boolean>(false);
   const [isDeletingActions, setIsDeletingActions] = useState<boolean>(false);
@@ -97,7 +92,7 @@ export const ActionsList: React.FunctionComponent = () => {
     }
   }
 
-  async function deleteItems(items: Data[]) {
+  async function deleteItems(items: ActionTableItem[]) {
     setIsDeletingActions(true);
     const ids = items.map(item => item.id);
     try {
@@ -177,7 +172,7 @@ export const ActionsList: React.FunctionComponent = () => {
               ),
           type: 'icon',
           icon: 'trash',
-          onClick: (item: Data) => deleteItems([item]),
+          onClick: (item: ActionTableItem) => deleteItems([item]),
         },
       ],
     },
@@ -213,7 +208,7 @@ export const ActionsList: React.FunctionComponent = () => {
             data-test-subj="actionsTable"
             pagination={true}
             selection={{
-              onSelectionChange(updatedSelectedItemsList: Data[]) {
+              onSelectionChange(updatedSelectedItemsList: ActionTableItem[]) {
                 setSelectedItems(updatedSelectedItemsList);
               },
             }}
