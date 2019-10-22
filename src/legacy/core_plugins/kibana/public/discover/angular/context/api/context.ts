@@ -18,7 +18,7 @@
  */
 
 import { Filter } from '@kbn/es-query';
-import { IndexPatterns, IndexPattern, SearchSource } from '../../kibana_services';
+import { IndexPatterns, IndexPattern, SearchSource } from '../../../kibana_services';
 import { reverseSortDir, SortDirection } from './utils/sorting';
 import { extractNanos, convertIsoToMillis } from './utils/date_conversion';
 import { fetchHitsInInterval } from './utils/fetch_hits_in_interval';

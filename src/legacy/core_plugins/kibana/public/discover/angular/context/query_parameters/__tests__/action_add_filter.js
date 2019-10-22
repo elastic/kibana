@@ -20,7 +20,7 @@
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import sinon from 'sinon';
-import { FilterBarQueryFilterProvider } from '../../../kibana_services';
+import { FilterBarQueryFilterProvider } from '../../../../kibana_services';
 
 
 import { createStateStub } from './_utils';

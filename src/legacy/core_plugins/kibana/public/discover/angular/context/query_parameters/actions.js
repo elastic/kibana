@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { FilterBarQueryFilterProvider, getFilterGenerator } from '../../kibana_services';
+import { FilterBarQueryFilterProvider, getFilterGenerator } from '../../../kibana_services';
 
 import {
   MAX_CONTEXT_SIZE,

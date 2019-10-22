@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IndexPattern } from 'src/legacy/core_plugins/data/public';
+import { IndexPattern } from '../../../../kibana_services';
 
 export enum SortDirection {
   asc = 'asc',

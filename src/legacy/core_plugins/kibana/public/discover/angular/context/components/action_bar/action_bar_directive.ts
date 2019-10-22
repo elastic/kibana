@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { uiModules, wrapInI18nContext } from '../../../kibana_services';
+import { uiModules, wrapInI18nContext } from '../../../../kibana_services';
 import { ActionBar } from './action_bar';
 
 uiModules.get('apps/context').directive('contextActionBar', function(reactDirective: any) {

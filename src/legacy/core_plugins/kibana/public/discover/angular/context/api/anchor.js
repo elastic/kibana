@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { SearchSource } from '../../kibana_services';
+import { SearchSource } from '../../../kibana_services';
 
 
 export function fetchAnchorProvider(indexPatterns) {

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SearchSource } from 'ui/courier';
+import { SearchSource } from '../../../../kibana_services';
 import { convertTimeValueToIso } from './date_conversion';
 import { SortDirection } from './sorting';
 import { EsHitRecordList } from '../context';
