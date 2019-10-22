@@ -144,6 +144,16 @@ describe('StatefulFieldsBrowser', () => {
         .find('[data-test-subj="show-field-browser"]')
         .first()
         .simulate('click');
+
+      wrapper
+        .find(`.field-browser-category-pane-auditd-${timelineId}`)
+        .first()
+        .simulate('click');
+
+      wrapper.update();
+      expect(
+        wrapper.find(`.field-browser-category-pane-default.ECS-${timelineId}`).first()
+      ).toHaveStyleRule('font-weight', 'normal');
       wrapper
         .find('[data-test-subj="field-search"]')
         .last()
