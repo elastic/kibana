@@ -330,7 +330,7 @@ export class SearchSource {
 
     switch (key) {
       case 'filter':
-        return addToRoot('filters', (data[key] || []).concat(val));
+        return addToRoot('filters', (data.filters || []).concat(val));
       case 'query':
         return addToRoot(key, (data[key] || []).concat(val));
       case 'index':
