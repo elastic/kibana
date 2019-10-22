@@ -157,8 +157,10 @@ export class Plugin {
         return null;
       }
 
-      const logger = core.newPlatform.coreContext.logger.get('plugins', LOGGING_TAG);
-      plugins.alerting.setup.registerType(getLicenseExpiration(getMonitoringCluster, logger));
+      function getLogger(contexts) {
+        return core.newPlatform.coreContext.logger.get('plugins', LOGGING_TAG, ...contexts);
+      }
+      plugins.alerting.setup.registerType(getLicenseExpiration(getMonitoringCluster, getLogger));
     }
   }
 }

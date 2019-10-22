@@ -14,6 +14,7 @@ async function createAlerts(alertsClient, { selectedEmailActionId, clusterUuid }
   // Create alerts
   const ALERT_TYPES = {
     [ALERT_TYPE_LICENSE_EXPIRATION]: {
+      interval: '1m',
       alertTypeParams: {
         clusterUuid,
       },
@@ -35,7 +36,6 @@ async function createAlerts(alertsClient, { selectedEmailActionId, clusterUuid }
     const result = await alertsClient.create({
       data: {
         enabled: true,
-        interval: '1m',
         alertTypeId,
         ...ALERT_TYPES[alertTypeId],
       }

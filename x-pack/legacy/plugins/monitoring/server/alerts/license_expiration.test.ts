@@ -56,13 +56,14 @@ describe('getLicenseExpiration', () => {
     fatal: jest.fn(),
     info: jest.fn(),
   };
+  const getLogger: Function<Logger> = () => logger;
 
   afterEach(() => {
     (logger.warn as jest.Mock).mockClear();
   });
 
   it('should have the right id and actionGroups', () => {
-    const alert = getLicenseExpiration(getMonitoringCluster, logger);
+    const alert = getLicenseExpiration(getMonitoringCluster, getLogger);
     expect(alert.id).toBe(ALERT_TYPE_LICENSE_EXPIRATION);
     expect(alert.actionGroups).toEqual(['default']);
   });
@@ -73,7 +74,7 @@ describe('getLicenseExpiration', () => {
     savedObjectsClient: jest.Mock;
   }
   it('should return the state if no license is provided', async () => {
-    const alert = getLicenseExpiration(getMonitoringCluster, logger);
+    const alert = getLicenseExpiration(getMonitoringCluster, getLogger);
 
     const services: MockServices | AlertServices = {
       callCluster: jest.fn(),
@@ -85,7 +86,6 @@ describe('getLicenseExpiration', () => {
     };
     const state = { foo: 1 };
 
-    // async executor({ services, params, state }: AlertExecutorOptions): Promise<any> {
     const result = await alert.executor({
       alertId: '',
       startedAt: new Date(),
@@ -98,7 +98,7 @@ describe('getLicenseExpiration', () => {
   });
 
   it('should log a warning if no email is provided', async () => {
-    const alert = getLicenseExpiration(getMonitoringCluster, logger);
+    const alert = getLicenseExpiration(getMonitoringCluster, getLogger);
 
     const services = {
       callCluster: jest.fn(
@@ -138,7 +138,8 @@ describe('getLicenseExpiration', () => {
 
     expect((logger.warn as jest.Mock).mock.calls.length).toBe(1);
     expect(logger.warn).toHaveBeenCalledWith(
-      `Unable to send email for ${ALERT_TYPE_LICENSE_EXPIRATION} because there is no email configured.`
+      `Unable to send email for ${ALERT_TYPE_LICENSE_EXPIRATION} because there is no email configured.` +
+        ` Please configure 'xpack.monitoring.cluster_alerts.email_notifications.email_address'.`
     );
   });
 
@@ -152,7 +153,7 @@ describe('getLicenseExpiration', () => {
       }
     );
     const emailAddress = 'foo@foo.com';
-    const alert = getLicenseExpiration(getMonitoringCluster, logger);
+    const alert = getLicenseExpiration(getMonitoringCluster, getLogger);
 
     const services = {
       callCluster: jest.fn(
@@ -213,7 +214,7 @@ describe('getLicenseExpiration', () => {
       }
     );
     const emailAddress = 'foo@foo.com';
-    const alert = getLicenseExpiration(getMonitoringCluster, logger);
+    const alert = getLicenseExpiration(getMonitoringCluster, getLogger);
 
     const services = {
       callCluster: jest.fn(
@@ -278,7 +279,7 @@ describe('getLicenseExpiration', () => {
       }
     );
     const emailAddress = 'foo@foo.com';
-    const alert = getLicenseExpiration(getMonitoringCluster, logger);
+    const alert = getLicenseExpiration(getMonitoringCluster, getLogger);
 
     const services = {
       callCluster: jest.fn(
@@ -334,7 +335,7 @@ describe('getLicenseExpiration', () => {
       }
     );
     const emailAddress = 'foo@foo.com';
-    const alert = getLicenseExpiration(getMonitoringCluster, logger);
+    const alert = getLicenseExpiration(getMonitoringCluster, getLogger);
 
     const services = {
       callCluster: jest.fn(
