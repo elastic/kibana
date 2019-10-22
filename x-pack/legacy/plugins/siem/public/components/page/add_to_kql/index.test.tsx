@@ -9,12 +9,7 @@ import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
-import {
-  apolloClientObservable,
-  mockGlobalState,
-  TestProviders,
-  mockIndexPattern,
-} from '../../../mock';
+import { apolloClientObservable, mockGlobalState, TestProviders } from '../../../mock';
 import { createStore, State } from '../../../store';
 import { siemFilterManager } from '../../search_bar';
 import { AddToKql } from '.';
@@ -44,7 +39,6 @@ describe('AddToKql Component', () => {
       <TestProviders store={store}>
         <AddToKql
           id="global"
-          indexPattern={mockIndexPattern}
           filter={{
             meta: {
               alias: null,
@@ -80,7 +74,6 @@ describe('AddToKql Component', () => {
       <TestProviders store={store}>
         <AddToKql
           id="global"
-          indexPattern={mockIndexPattern}
           filter={{
             meta: {
               alias: null,
@@ -114,11 +107,13 @@ describe('AddToKql Component', () => {
   });
 
   test('Functionality with inputs state', async () => {
+    const onFilterAdded = jest.fn();
+
     const wrapper = mount(
       <TestProviders store={store}>
         <AddToKql
           id="global"
-          indexPattern={mockIndexPattern}
+          onFilterAdded={onFilterAdded}
           filter={{
             meta: {
               alias: null,
@@ -174,5 +169,6 @@ describe('AddToKql Component', () => {
         },
       },
     });
+    expect(onFilterAdded).toHaveBeenCalledTimes(1);
   });
 });

@@ -50,10 +50,9 @@ describe('embedded_map_helpers', () => {
   });
 
   describe('setupEmbeddablesAPI', () => {
-    test('attaches SIEM_FILTER_ACTION, and detaches extra UI actions', () => {
+    test('detaches extra UI actions', () => {
       setupEmbeddablesAPI();
-      expect(npStart.plugins.uiActions.registerAction).toHaveBeenCalledTimes(1);
-      expect(npStart.plugins.uiActions.detachAction).toHaveBeenCalledTimes(3);
+      expect(npStart.plugins.uiActions.detachAction).toHaveBeenCalledTimes(2);
     });
   });
 

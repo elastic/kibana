@@ -9322,7 +9322,6 @@
     "xpack.siem.anomaliesTable.table.anomaliesTooltip": "異常表は SIEM グローバル KQL 検索でフィルタリングできません。",
     "xpack.siem.anomaliesTable.table.unit": "{totalCount, plural, =1 {anomaly} other {anomalies}}",
     "xpack.siem.clipboard.copy.to.the.clipboard": "クリップボードにコピー",
-    "xpack.siem.components.embeddables.actions.applySiemFilterActionTitle": "フィルターを適用",
     "xpack.siem.components.embeddables.indexPatternsMissingPrompt.errorButtonLabel": "インデックスパターンを編集",
     "xpack.siem.components.embeddables.indexPatternsMissingPrompt.errorDescription": "マップにイベントデータを表示するには、ECS に準拠した Kibana インデックスパターンを構成する必要があります。ビートを使用すると、次のセットアップコマンドを実行して必要な Kibana インデックスパターンを作成するか、Kibana の設定で手動により構成することができます。",
     "xpack.siem.components.embeddables.indexPatternsMissingPrompt.errorTitle": "必要なインデックスパターンが構成されていません",

@@ -34,7 +34,6 @@ export const MapToolTip = React.memo<MapToolTipProps>(
     const [isError, setIsError] = useState<boolean>(false);
     const [featureIndex, setFeatureIndex] = useState<number>(0);
     const [featureProps, setFeatureProps] = useState<FeatureProperty[]>([]);
-    const [featurePropsFilters, setFeaturePropsFilters] = useState<Record<string, object>>({});
     const [featureGeometry, setFeatureGeometry] = useState<FeatureGeometry | null>(null);
     const [, setLayerName] = useState<string>('');
 
@@ -67,24 +66,12 @@ export const MapToolTip = React.memo<MapToolTipProps>(
               getLayerName(layerId),
             ]);
 
-            // Fetch ES filters in advance while loader is present to prevent lag when user clicks to add filter
-            const featurePropsPromises = await Promise.all(
-              featureProperties.map(property => property.getESFilters())
-            );
-            const featurePropsESFilters = featureProperties.reduce(
-              (acc, property, index) => ({
-                ...acc,
-                [property._propertyKey]: featurePropsPromises[index],
-              }),
-              {}
-            );
-
             setFeatureProps(featureProperties);
-            setFeaturePropsFilters(featurePropsESFilters);
             setFeatureGeometry(featureGeo);
             setLayerName(layerNameString);
           } catch (e) {
             setIsError(true);
+            throw e;
           } finally {
             setIsLoading(false);
             setIsLoadingNextFeature(false);
@@ -135,8 +122,6 @@ export const MapToolTip = React.memo<MapToolTipProps>(
               <PointToolTipContent
                 contextId={`${features[featureIndex].layerId}-${features[featureIndex].id}-${featureIndex}`}
                 featureProps={featureProps}
-                featurePropsFilters={featurePropsFilters}
-                addFilters={addFilters}
                 closeTooltip={closeTooltip}
               />
             )}

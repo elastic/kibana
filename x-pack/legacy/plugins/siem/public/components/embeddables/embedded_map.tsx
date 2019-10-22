@@ -63,20 +63,21 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
     // Search InPortal/OutPortal for implementation touch points
     const portalNode = React.useMemo(() => createPortalNode(), []);
 
+    // Setup embeddables API (i.e. detach extra actions) useEffect
+    useEffect(() => {
+      try {
+        setupEmbeddablesAPI();
+      } catch (e) {
+        displayErrorToast(i18n.ERROR_CONFIGURING_EMBEDDABLES_API, e.message, dispatchToaster);
+        setIsLoading(false);
+        setIsError(true);
+      }
+    }, []);
+
     // Initial Load useEffect
     useEffect(() => {
       let isSubscribed = true;
       async function setupEmbeddable() {
-        // Configure Embeddables API
-        try {
-          setupEmbeddablesAPI();
-        } catch (e) {
-          displayErrorToast(i18n.ERROR_CONFIGURING_EMBEDDABLES_API, e.message, dispatchToaster);
-          setIsLoading(false);
-          setIsError(true);
-          return false;
-        }
-
         // Ensure at least one `siem:defaultIndex` index pattern exists before trying to import
         const matchingIndexPatterns = kibanaIndexPatterns.filter(ip =>
           siemDefaultIndices.includes(ip.attributes.title)
