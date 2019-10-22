@@ -17,14 +17,12 @@
  * under the License.
  */
 
-import { HttpSetup } from './types';
+import { IAnonymousPaths, IBasePath } from 'src/core/public';
 
-export class AnonymousPaths {
+export class AnonymousPaths implements IAnonymousPaths {
   private readonly paths = new Set<string>();
 
-  constructor(private basePath: HttpSetup['basePath']) {
-    this.paths = new Set();
-  }
+  constructor(private basePath: IBasePath) {}
 
   public isAnonymous(path: string): boolean {
     const pathWithoutBasePath = this.basePath.remove(path);
