@@ -1,6 +1,5 @@
 import expect from '@kbn/expect';
 
-export const dash = x => x.replace(/\s/gm, '-');
 export const pretty = x =>
   JSON.stringify(x, null, 2);
 export const buildUrl = ({ protocol, auth, hostname, port }) =>
@@ -17,11 +16,7 @@ export const getWatcher = async (watch, id, client, log, common, tryForTime) => 
   await tryForTime(90000, async () => {
     await common.sleep(15000);
 
-    // *** Prolly gonna drop the following commented out code soon!
-    // History search
-    // const watcherHistoryResponse = await esClient.watcher.getWatch(watchId);
-    // Print history search result
-    // log.debug(`\nwatcherHistoryResponse=\n${pretty(watcherHistoryResponse)}\n`);
+    await watcherHistory(id, client, log);
 
     const getWatchResponse = await client.watcher.getWatch(watch);
     expect(getWatchResponse.body._id).to.eql(id);
@@ -41,4 +36,30 @@ export const deleteWatcher = async (watch, id, client, log) => {
   expect(deleteResponse.body._id).to.eql(id);
   expect(deleteResponse.body.found).to.eql(true);
   expect(deleteResponse.statusCode).to.eql('200');
+};
+const watcherHistory = async (watch_id, client, log) => {
+  const { body } = await client.search({
+    index: '.watcher-history*',
+    body: {
+      'query': {
+        'bool': {
+          'filter': [
+            {
+              'bool': {
+                'should': [
+                  {
+                    'match_phrase': {
+                      watch_id,
+                    },
+                  },
+                ],
+                'minimum_should_match': 1,
+              },
+            },
+          ],
+        },
+      },
+    },
+  });
+  log.debug(`\nwatcherHistoryResponse \n${pretty(body)}\n`);
 };

@@ -14,7 +14,7 @@ export default ({ getService, getPageObjects }) => {
 
     describe('PNG Reporting watch', () => {
       let id = 'watcher_png_report-';
-      id = id + Date().getTime();  // For debugging.
+      id = id + new Date().getTime();  // For debugging.
       const watch = { id };
       const reportingUrl = servers.kibana.protocol + '://'
         + KIBANAIP + ':' + servers.kibana.port

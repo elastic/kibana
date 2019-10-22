@@ -13,7 +13,7 @@ export default function({ getService, getPageObjects }) {
     const PageObjects = getPageObjects(['common']);
     describe('PDF Reporting watch', function() {
       let id = 'watcher_report-';
-      id = id +  Date().getTime();  // For debugging.
+      id = id + new Date().getTime();  // For debugging.
       const watch = { id };
       const interval = 10;
       const emails = REPORTING_TEST_EMAILS.split(',');
