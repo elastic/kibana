@@ -11,6 +11,7 @@ import { ProfileTree, Props } from '../profile_tree';
 describe('ProfileTree', () => {
   it('renders', async () => {
     const props: Props = {
+      onHighlight: () => {},
       target: 'searches',
       data: searchResponse,
     };

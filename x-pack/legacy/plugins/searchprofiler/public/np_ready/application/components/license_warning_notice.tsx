@@ -42,8 +42,8 @@ export const LicenseWarningNotice = () => {
             defaultMessage:
               'The Profiler Visualization requires an active license ({licenseTypeList} or {platinumLicenseType}), but none were found in your cluster.',
             values: {
-              html_licenseTypeList: `<code>${trialLicense}</code>, <code>${basicLicense}</code>, <code>${goldLicense}</code>`,
-              html_platinumLicenseType: `<code>${platinumLicense}</code>`,
+              licenseTypeList: `<code>${trialLicense}</code>, <code>${basicLicense}</code>, <code>${goldLicense}</code>`,
+              platinumLicenseType: `<code>${platinumLicense}</code>`,
             },
           })}
         </p>
@@ -53,7 +53,7 @@ export const LicenseWarningNotice = () => {
         {i18n.translate('xpack.searchProfiler.registerLicenseDescription', {
           defaultMessage: 'Please {registerLicenseLink} to continue using the Search Profiler',
           values: {
-            html_registerLicenseLink: `<a class='kuiLink' href='https://www.elastic.co/subscriptions' rel='noopener'>${registerLicenseLinkLabel}</a>`,
+            registerLicenseLink: `<a class='kuiLink' href='https://www.elastic.co/subscriptions' rel='noopener'>${registerLicenseLinkLabel}</a>`,
           },
         })}
       </p>

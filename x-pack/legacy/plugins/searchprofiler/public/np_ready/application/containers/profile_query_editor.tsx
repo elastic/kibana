@@ -9,6 +9,7 @@ import { EuiForm, EuiFieldText, EuiFormRow, EuiButton, EuiText } from '@elastic/
 import { Editor } from '../editor';
 import { useDoProfile } from '../hooks';
 import { ShardSerialized } from '../types';
+import { useAppContext } from '../app_context';
 
 interface Props {
   onResponse: (response: ShardSerialized[]) => void;
@@ -18,6 +19,7 @@ export const ProfileQueryEditor = ({ onResponse }: Props) => {
   const indexInputRef = useRef<HTMLInputElement>(null as any);
   const typeInputRef = useRef<HTMLInputElement>(null as any);
 
+  const { licenseEnabled } = useAppContext();
   const doProfile = useDoProfile();
 
   const handleProfileClick = async () => {
@@ -40,7 +42,7 @@ export const ProfileQueryEditor = ({ onResponse }: Props) => {
           <EuiFieldText inputRef={typeInputRef} />
         </EuiFormRow>
       </EuiForm>
-      <Editor />
+      <Editor licenseEnabled={licenseEnabled} />
       <EuiButton onClick={() => handleProfileClick()}>
         <EuiText>
           {i18n.translate('xpack.searchProfiler.formProfileButtonLabel', {

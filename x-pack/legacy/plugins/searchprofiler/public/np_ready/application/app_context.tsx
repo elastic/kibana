@@ -5,7 +5,7 @@
  */
 
 import React, { useContext, createContext } from 'react';
-import { HttpSetup, NotificationsSetup } from '../../../../../../../src/core/public';
+import { HttpSetup, NotificationsSetup } from 'src/core/public';
 
 export interface ContextValue {
   http: HttpSetup;

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* Legacy imports */
+/* eslint-disable @kbn/eslint/no-restricted-paths */
 import { npSetup, npStart } from 'ui/new_platform';
 import { I18nContext } from 'ui/i18n';
 import uiRoutes from 'ui/routes';
@@ -14,17 +14,20 @@ import { toastNotifications } from 'ui/notify';
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 // @ts-ignore
 import { formatAngularHttpError } from 'ui/notify/lib';
-/* Legacy imports */
+import 'ui/autoload/all';
+/* eslint-enable @kbn/eslint/no-restricted-paths */
 
-import { NotificationsSetup } from '../../../../../../src/core/public';
-import { plugin } from '.';
+import { NotificationsSetup } from 'src/core/public';
+import { plugin } from './np_ready';
 
 const pluginInstance = plugin({} as any);
 
-uiRoutes.when('/dev_tools/searchprofiler', {
-  template: `<kbn-dev-tools-app class="prfDevTool" data-test-subj="searchProfiler">
+const template = `<kbn-dev-tools-app class="prfDevTool" data-test-subj="searchProfiler">
   <div id="seachProfilerAppRoot" />
-</kbn-dev-tools-app>`,
+</kbn-dev-tools-app>`;
+
+uiRoutes.when('/dev_tools/searchprofiler', {
+  template,
   requireUICapability: 'dev_tools.show',
   controller: $scope => {
     const el = document.querySelector<HTMLElement>('seachProfilerAppRoot')!;

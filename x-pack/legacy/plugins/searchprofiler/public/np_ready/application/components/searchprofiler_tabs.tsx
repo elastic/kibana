@@ -8,11 +8,11 @@ import _ from 'lodash';
 import React from 'react';
 
 import { EuiTabs, EuiTab } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/target/types/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { Targets } from '../types';
 
-interface Props {
+export interface Props {
   activeTab: Targets | null;
   activateTab: (target: Targets) => void;
   has: {

@@ -5,6 +5,6 @@
  */
 
 export { SearchProfilerTabs } from './searchprofiler_tabs';
-export { LicenseWarningNotice } from './license_error_notice';
+export { LicenseWarningNotice } from './license_warning_notice';
 export { ProfileTree, OnHighlightChangeArgs } from './profile_tree';
 export { HighlightDetailsFlyout } from './highlight_details_flyout';

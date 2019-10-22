@@ -10,7 +10,7 @@ import {
   CoreSetup,
   PluginInitializerContext,
   NotificationsSetup,
-} from '../../../../../../src/core/public';
+} from 'src/core/public';
 
 import { boot } from './application/boot';
 
