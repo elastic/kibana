@@ -17,25 +17,15 @@
  * under the License.
  */
 
-import Autocomplete from './autocomplete';
-const SenseEditor = require('./sense_editor/editor');
+import { IpRangeKey } from '../agg_types/buckets/ip_range';
 
-let input;
-export function initializeInput($el, $actionsEl) {
-  input = new SenseEditor($el);
-
-  input.autocomplete = new Autocomplete(input);
-  input.$actions = $actionsEl;
-
-  /**
-   * Init the editor
-   */
-  input.focus();
-  input.highlightCurrentRequestsAndUpdateActionBar();
-
-  return input;
-}
-
-export default function getInput() {
-  return input;
-}
+export const ipRange = {
+  toString(range: IpRangeKey, format: (val: any) => string) {
+    if (range.type === 'mask') {
+      return format(range.mask);
+    }
+    const from = range.from ? format(range.from) : '-Infinity';
+    const to = range.to ? format(range.to) : 'Infinity';
+    return `${from} to ${to}`;
+  },
+};
