@@ -250,9 +250,10 @@ export const getFixedByteFormatter = memoize((max: number) => {
 function twoWithSameValue(ticks: Moment[], format: string) {
   return ticks
     .map(t => t.format(format))
-    .reduce((acc, val) => ({ same: acc.same || acc.prev === val, prev: val }), {
-      same: false
-    }).same;
+    .reduce<{ prev?: string; same: boolean }>(
+      (acc, val) => ({ same: acc.same || acc.prev === val, prev: val }),
+      { same: false }
+    ).same;
 }
 
 function chooseDateFormat(ticks: Moment[]) {
