@@ -46,6 +46,10 @@ export function getServerOptions(config: HttpConfig, { configureTLS = true } = {
         options: {
           abortEarly: false,
         },
+        // TODO: This payload validation can be removed once the legacy platform is completely removed.
+        // This is a default payload validation which applies to all LP routes which do not specify their own
+        // `validate.payload` handler, in order to reduce the likelyhood of prototype pollution vulnerabilities.
+        // (All NP routes are already required to specify their own validation in order to access the payload)
         payload: value => Promise.resolve(validateObject(value)),
       },
     },
@@ -119,14 +123,14 @@ export function createServer(serverOptions: ServerOptions, listenerOptions: List
 export interface HapiValidationError extends ValidationError {
   output: {
     statusCode: number;
-    headers: Util.Dictionary<string | string[]>;
+    headers: Util.Dictionary<string | Array<string>>;
     payload: {
       statusCode: number;
       error: string;
       message?: string;
       validation: {
         source: string;
-        keys: string[];
+        keys: Array<string>;
       };
     };
   };
@@ -148,7 +152,7 @@ export function defaultValidationErrorHandler(
   //     https://github.com/hapijs/hapi/blob/master/lib/validation.js#L102
   if (err && err.name === 'ValidationError' && err.hasOwnProperty('output')) {
     const validationError: HapiValidationError = err as HapiValidationError;
-    const validationKeys: string[] = [];
+    const validationKeys: Array<string> = [];
 
     validationError.details.forEach(detail => {
       if (detail.path.length > 0) {

@@ -136,6 +136,13 @@ export class HttpServer {
           options: {
             auth: authRequired ? undefined : false,
             tags: tags ? Array.from(tags) : undefined,
+            // TODO: This 'validate' section can be removed once the legacy platform is completely removed.
+            // We are telling Hapi that NP routes can accept any payload, so that it can bypass the default
+            // validation applied in ./http_tools#getServerOptions
+            // (All NP routes are already required to specify their own validation in order to access the payload)
+            validate: {
+              payload: true,
+            },
           },
         });
       }
