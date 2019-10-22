@@ -411,7 +411,7 @@ filters
 | table
 | render
 ----
-This only keeps the `price`, `cost`, `state`, and `project` columns from the demodata datasource and removes all other columns.
+This only keeps the `price`, `cost`, `state`, and `project` columns from the `demodata` data source and removes all other columns.
 
 *Accepts:* `datatable`
 
@@ -628,7 +628,7 @@ csv "fruit,stock
 | pie
 | render
 ----
-This is mostly useful for mocking data on the fly. 
+This is useful for quickly mocking data.
 
 *Accepts:* `null`
 
@@ -811,7 +811,7 @@ demodata
 | dropdownControl valueColumn=project filterColumn=project 
 | render
 ----
-This creates a dropdown filter element. It requires a datasource and uses the unique values from the given `valueColumn` (i.e. `project`) and applies the filter to the `project` column. Note: `filterColumn` should point to a keyword type field for Elasticsearch data sources.
+This creates a dropdown filter element. It requires a data source and uses the unique values from the given `valueColumn` (i.e. `project`) and applies the filter to the `project` column. Note: `filterColumn` should point to a keyword type field for Elasticsearch data sources.
 
 *Accepts:* `datatable`
 
@@ -1384,7 +1384,7 @@ filters
   font={font size=24 family="'Open Sans', Helvetica, Arial, sans-serif" color="#000000" align="center"}
 | render
 ----
-The `formatnumber` subexpression receives the same `context` as the `progress` function which is the output of the `math` function. It formats the value into a percentage.
+The `formatnumber` subexpression receives the same `context` as the `progress` function, which is the output of the `math` function. It formats the value into a percentage.
 
 *Accepts:* `number`
 
