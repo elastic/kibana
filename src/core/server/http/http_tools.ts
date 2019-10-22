@@ -123,14 +123,14 @@ export function createServer(serverOptions: ServerOptions, listenerOptions: List
 export interface HapiValidationError extends ValidationError {
   output: {
     statusCode: number;
-    headers: Util.Dictionary<string | Array<string>>;
+    headers: Util.Dictionary<string | string[]>;
     payload: {
       statusCode: number;
       error: string;
       message?: string;
       validation: {
         source: string;
-        keys: Array<string>;
+        keys: string[];
       };
     };
   };
@@ -152,7 +152,7 @@ export function defaultValidationErrorHandler(
   //     https://github.com/hapijs/hapi/blob/master/lib/validation.js#L102
   if (err && err.name === 'ValidationError' && err.hasOwnProperty('output')) {
     const validationError: HapiValidationError = err as HapiValidationError;
-    const validationKeys: Array<string> = [];
+    const validationKeys: string[] = [];
 
     validationError.details.forEach(detail => {
       if (detail.path.length > 0) {
