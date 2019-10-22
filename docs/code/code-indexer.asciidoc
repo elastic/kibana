@@ -14,7 +14,6 @@ To perform a full reindex of your repository, go to the Code app, find the repos
 - **Document:** The content of each file in the repository
 - **Symbols:** The semantic symbol/node such as `java.lang.String`
 - **Repository metadata:** The metadata of each git repository such as URL, name, and organization
-- **Commit:** The commit history of the repository
 
 [float]
 ==== Customize an incremental index
