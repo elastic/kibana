@@ -43,8 +43,14 @@ import { Logger } from '..';
  * @public
  */
 export interface SavedObjectsServiceSetup {
-  clientProvider: ISavedObjectsClientProvider;
   internalClient: SavedObjectsClientContract;
+}
+
+/**
+ * @internal
+ */
+export interface InternalSavedObjectsServiceSetup extends SavedObjectsServiceSetup {
+  clientProvider: ISavedObjectsClientProvider;
 }
 
 /**
@@ -66,7 +72,7 @@ export interface SavedObjectsSetupDeps {
 export interface SavedObjectsStartDeps {}
 
 export class SavedObjectsService
-  implements CoreService<SavedObjectsServiceSetup, SavedObjectsServiceStart> {
+  implements CoreService<InternalSavedObjectsServiceSetup, SavedObjectsServiceStart> {
   private migrator: KibanaMigrator | undefined;
   private logger: Logger;
   private clientProvider: ISavedObjectsClientProvider<KibanaRequest> | undefined;
@@ -75,7 +81,7 @@ export class SavedObjectsService
     this.logger = coreContext.logger.get('savedobjects-service');
   }
 
-  public async setup(setupDeps: SavedObjectsSetupDeps): Promise<SavedObjectsServiceSetup> {
+  public async setup(setupDeps: SavedObjectsSetupDeps): Promise<InternalSavedObjectsServiceSetup> {
     this.logger.debug('Setting up SavedObjects service');
 
     const {

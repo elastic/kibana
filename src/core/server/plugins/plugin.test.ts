@@ -33,6 +33,7 @@ import { PluginWrapper } from './plugin';
 import { PluginManifest } from './types';
 import { createPluginInitializerContext, createPluginSetupContext } from './plugin_context';
 import { contextServiceMock } from '../context/context_service.mock';
+import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
 
 const mockPluginInitializer = jest.fn();
 const logger = loggingServiceMock.create();
@@ -72,6 +73,7 @@ const setupDeps = {
   context: contextServiceMock.createSetupContract(),
   elasticsearch: elasticsearchServiceMock.createSetupContract(),
   http: httpServiceMock.createSetupContract(),
+  savedObjects: savedObjectsServiceMock.createSetupContract(),
 };
 beforeEach(() => {
   coreId = Symbol('core');

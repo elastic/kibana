@@ -35,6 +35,7 @@ import { PluginWrapper } from './plugin';
 import { PluginName } from './types';
 import { PluginsSystem } from './plugins_system';
 import { contextServiceMock } from '../context/context_service.mock';
+import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
 
 const logger = loggingServiceMock.create();
 function createPlugin(
@@ -72,6 +73,7 @@ const setupDeps = {
   context: contextServiceMock.createSetupContract(),
   elasticsearch: elasticsearchServiceMock.createSetupContract(),
   http: httpServiceMock.createSetupContract(),
+  savedObjects: savedObjectsServiceMock.createSetupContract(),
 };
 beforeEach(() => {
   env = Env.createDefault(getEnvOptions());

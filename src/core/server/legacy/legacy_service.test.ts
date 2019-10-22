@@ -47,6 +47,7 @@ import { KibanaMigrator } from '../saved_objects/migrations';
 import { ISavedObjectsClientProvider } from '../saved_objects';
 import { httpServiceMock } from '../http/http_service.mock';
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
+import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
 
 const MockKbnServer: jest.Mock<KbnServer> = KbnServer as any;
 
@@ -79,7 +80,7 @@ beforeEach(() => {
           getAuthHeaders: () => undefined,
         } as any,
       },
-
+      savedObjects: savedObjectsServiceMock.createSetupContract(),
       plugins: {
         contracts: new Map([['plugin-id', 'plugin-value']]),
         uiPlugins: {

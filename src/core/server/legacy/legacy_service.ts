@@ -259,6 +259,9 @@ export class LegacyService implements CoreService {
         basePath: setupDeps.core.http.basePath,
         isTlsEnabled: setupDeps.core.http.isTlsEnabled,
       },
+      savedObjects: {
+        internalClient: setupDeps.core.savedObjects.internalClient,
+      },
     };
     const coreStart: CoreStart = {};
 

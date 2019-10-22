@@ -38,7 +38,7 @@ import { config as savedObjectsConfig } from './saved_objects';
 import { config as uiSettingsConfig } from './ui_settings';
 import { mapToObject } from '../utils/';
 import { ContextService } from './context';
-import { SavedObjectsServiceSetup } from './saved_objects/saved_objects_service';
+import { InternalSavedObjectsServiceSetup } from './saved_objects/saved_objects_service';
 import { RequestHandlerContext } from '.';
 
 const coreId = Symbol('core');
@@ -168,7 +168,7 @@ export class Server {
   private registerCoreContext(coreSetup: {
     http: InternalHttpServiceSetup;
     elasticsearch: ElasticsearchServiceSetup;
-    savedObjects: SavedObjectsServiceSetup;
+    savedObjects: InternalSavedObjectsServiceSetup;
   }) {
     coreSetup.http.registerRouteHandlerContext(
       coreId,

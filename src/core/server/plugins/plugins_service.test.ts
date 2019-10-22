@@ -34,6 +34,7 @@ import { PluginsService } from './plugins_service';
 import { PluginsSystem } from './plugins_system';
 import { config } from './plugins_config';
 import { contextServiceMock } from '../context/context_service.mock';
+import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
 
 const MockPluginsSystem: jest.Mock<PluginsSystem> = PluginsSystem as any;
 
@@ -46,6 +47,7 @@ const setupDeps = {
   context: contextServiceMock.createSetupContract(),
   elasticsearch: elasticsearchServiceMock.createSetupContract(),
   http: httpServiceMock.createSetupContract(),
+  savedObjects: savedObjectsServiceMock.createSetupContract(),
 };
 const logger = loggingServiceMock.create();
 

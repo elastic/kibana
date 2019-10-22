@@ -30,6 +30,7 @@ import { DiscoveredPlugin, DiscoveredPluginInternal, PluginName } from './types'
 import { PluginsConfig, PluginsConfigType } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
 import { ContextSetup } from '../context';
+import { InternalSavedObjectsServiceSetup } from '../saved_objects/saved_objects_service';
 
 /** @public */
 export interface PluginsServiceSetup {
@@ -50,6 +51,7 @@ export interface PluginsServiceSetupDeps {
   context: ContextSetup;
   elasticsearch: InternalElasticsearchServiceSetup;
   http: InternalHttpServiceSetup;
+  savedObjects: InternalSavedObjectsServiceSetup;
 }
 
 /** @internal */

@@ -17,7 +17,11 @@
  * under the License.
  */
 
-import { SavedObjectsService, SavedObjectsServiceStart } from './saved_objects_service';
+import {
+  SavedObjectsService,
+  SavedObjectsServiceStart,
+  InternalSavedObjectsServiceSetup,
+} from './saved_objects_service';
 import { mockKibanaMigrator } from './migrations/kibana/kibana_migrator.mock';
 import { savedObjectsClientProviderMock } from './service/lib/scoped_client_provider.mock';
 import { SavedObjectsClientMock } from './service/saved_objects_client.mock';
@@ -31,6 +35,15 @@ const createStartContractMock = () => {
   };
 
   return startContract;
+};
+
+const createSetupContractMock = () => {
+  const setupContract: jest.Mocked<InternalSavedObjectsServiceSetup> = {
+    clientProvider: savedObjectsClientProviderMock.create(),
+    internalClient: SavedObjectsClientMock.create(),
+  };
+
+  return setupContract;
 };
 
 const createsavedObjectsServiceMock = () => {
@@ -51,5 +64,6 @@ const createsavedObjectsServiceMock = () => {
 
 export const savedObjectsServiceMock = {
   create: createsavedObjectsServiceMock,
+  createSetupContract: createSetupContractMock,
   createStartContract: createStartContractMock,
 };

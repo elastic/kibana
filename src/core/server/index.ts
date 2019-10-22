@@ -51,6 +51,7 @@ import { SavedObjectsServiceStart } from './saved_objects';
 
 import { InternalUiSettingsServiceSetup } from './ui_settings';
 import { SavedObjectsClientContract } from './saved_objects/types';
+import { SavedObjectsServiceSetup } from './saved_objects/saved_objects_service';
 
 export { bootstrap } from './bootstrap';
 export { ConfigPath, ConfigService, EnvironmentMode, PackageInfo } from './config';
@@ -166,6 +167,7 @@ export {
   SavedObjectsLegacyService,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
+  SavedObjectsServiceSetup,
 } from './saved_objects';
 
 export {
@@ -228,6 +230,8 @@ export interface CoreSetup {
   elasticsearch: ElasticsearchServiceSetup;
   /** {@link HttpServiceSetup} */
   http: HttpServiceSetup;
+  /** {@link SavedObjectsServiceSetup} */
+  savedObjects: SavedObjectsServiceSetup;
 }
 
 /**
@@ -243,6 +247,7 @@ export interface InternalCoreSetup {
   http: InternalHttpServiceSetup;
   elasticsearch: InternalElasticsearchServiceSetup;
   uiSettings: InternalUiSettingsServiceSetup;
+  savedObjects: SavedObjectsServiceSetup;
 }
 
 /**

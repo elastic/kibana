@@ -449,11 +449,11 @@ export interface AuthToolkit {
 export class BasePath {
     // @internal
     constructor(serverBasePath?: string);
-    get: (request: LegacyRequest | KibanaRequest<unknown, unknown, unknown>) => string;
+    get: (request: KibanaRequest<unknown, unknown, unknown> | LegacyRequest) => string;
     prepend: (path: string) => string;
     remove: (path: string) => string;
     readonly serverBasePath: string;
-    set: (request: LegacyRequest | KibanaRequest<unknown, unknown, unknown>, requestSpecificBasePath: string) => void;
+    set: (request: KibanaRequest<unknown, unknown, unknown> | LegacyRequest, requestSpecificBasePath: string) => void;
 }
 
 // Warning: (ae-forgotten-export) The symbol "BootstrapArgs" needs to be exported by the entry point index.d.ts
@@ -511,6 +511,8 @@ export interface CoreSetup {
     elasticsearch: ElasticsearchServiceSetup;
     // (undocumented)
     http: HttpServiceSetup;
+    // (undocumented)
+    savedObjects: SavedObjectsServiceSetup;
 }
 
 // @public
@@ -722,6 +724,8 @@ export interface InternalCoreSetup {
     // 
     // (undocumented)
     http: InternalHttpServiceSetup;
+    // (undocumented)
+    savedObjects: SavedObjectsServiceSetup;
     // (undocumented)
     uiSettings: InternalUiSettingsServiceSetup;
 }
@@ -1552,6 +1556,12 @@ export class SavedObjectsSerializer {
     }
 
 // @public (undocumented)
+export interface SavedObjectsServiceSetup {
+    // (undocumented)
+    internalClient: SavedObjectsClientContract;
+}
+
+// @public (undocumented)
 export interface SavedObjectsUpdateOptions extends SavedObjectsBaseOptions {
     references?: SavedObjectReference[];
     version?: string;
@@ -1613,6 +1623,6 @@ export type UiSettingsType = 'json' | 'markdown' | 'number' | 'select' | 'boolea
 // Warnings were encountered during analysis:
 // 
 // src/core/server/http/router/response.ts:316:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/plugins_service.ts:39:5 - (ae-forgotten-export) The symbol "DiscoveredPluginInternal" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/plugins_service.ts:40:5 - (ae-forgotten-export) The symbol "DiscoveredPluginInternal" needs to be exported by the entry point index.d.ts
 
 ```
