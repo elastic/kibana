@@ -42,7 +42,7 @@ export const EntityControl = injectI18n(
     }
 
     componentDidUpdate() {
-      const { entity } = this.props;
+      const { entity, forceSelection } = this.props;
       const { selectedOptions } = this.state;
 
       const fieldValue = entity.fieldValue;
@@ -58,6 +58,10 @@ export const EntityControl = injectI18n(
         this.setState({
           selectedOptions: undefined
         });
+      }
+
+      if (forceSelection && this.inputRef) {
+        this.inputRef.focus();
       }
     }
 
@@ -99,10 +103,6 @@ export const EntityControl = injectI18n(
         defaultMessage="Select {fieldName}"
         values={{ fieldName: entity.fieldName }}
       />);
-
-      if (forceSelection && this.inputRef) {
-        this.inputRef.focus();
-      }
 
       return (
         <EuiFlexItem grow={false}>
