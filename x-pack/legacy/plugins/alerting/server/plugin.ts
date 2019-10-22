@@ -70,7 +70,7 @@ export class Plugin {
             all: ['alert'],
             read: [],
           },
-          ui: [],
+          ui: ['save', 'show', 'delete'],
           api: ['alerting-read', 'alerting-all'],
         },
         read: {
@@ -78,7 +78,7 @@ export class Plugin {
             all: [],
             read: ['alert'],
           },
-          ui: [],
+          ui: ['show'],
           api: ['alerting-read'],
         },
       },

@@ -35,3 +35,30 @@ export interface Action {
   description: string;
   config: Record<string, any>;
 }
+
+export interface AlertType {
+  id: string;
+  name: string;
+}
+
+export interface AlertAction {
+  group: string;
+  id: string;
+  params: Record<string, any>;
+}
+
+export interface Alert {
+  id: string;
+  enabled: boolean;
+  alertTypeId: string;
+  interval: string;
+  actions: AlertAction[];
+  alertTypeParams: Record<string, any>;
+  scheduledTaskId?: string;
+  createdBy: string | null;
+  updatedBy: string | null;
+  apiKeyOwner?: string;
+  throttle: string | null;
+  muteAll: boolean;
+  mutedInstanceIds: string[];
+}

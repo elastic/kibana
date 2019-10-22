@@ -45,7 +45,8 @@ export class Plugin implements CorePlugin<Setup, Start> {
     } = plugins;
 
     const canShowActions = capabilities.get().actions.show;
-    if (canShowActions) {
+    const canShowAlerts = capabilities.get().alerting.show;
+    if (canShowActions || canShowAlerts) {
       const actionTypeRegistry = new ActionTypeRegistry();
       this.actionTypeRegistry = actionTypeRegistry;
 
@@ -67,9 +68,10 @@ export class Plugin implements CorePlugin<Setup, Start> {
   public start(core: CoreStart, plugins: any) {
     const { capabilities } = plugins;
     const canShowActions = capabilities.get().actions.show;
+    const canShowAlerts = capabilities.get().alerting.show;
 
     // Don't register routes when user doesn't have access to the application
-    if (!canShowActions) {
+    if (!canShowActions && !canShowAlerts) {
       return;
     }
 

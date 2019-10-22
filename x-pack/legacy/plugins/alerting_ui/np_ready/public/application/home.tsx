@@ -8,12 +8,13 @@ import React, { useEffect } from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
-import { BASE_PATH, Section, routeToActions } from './constants';
+import { BASE_PATH, Section, routeToActions, routeToAlerts } from './constants';
 import { breadcrumbService } from './lib/breadcrumb';
 import { docTitleService } from './lib/doc_title';
 import { useAppDependencies } from './index';
 
 import { ActionsList } from './sections/actions_list/components/actions_list';
+import { AlertsList } from './sections/alerts_list/components/alerts_list';
 
 interface MatchParams {
   section: Section;
@@ -30,19 +31,24 @@ export const AlertsUIHome: React.FunctionComponent<RouteComponentProps<MatchPara
   } = useAppDependencies();
 
   const canShowActions = capabilities.get().actions.show;
+  const canShowAlerts = capabilities.get().alerting.show;
   const tabs: Array<{
     id: Section;
     name: React.ReactNode;
   }> = [];
 
+  if (canShowAlerts) {
+    tabs.push({
+      id: 'alerts',
+      name: <FormattedMessage id="xpack.alertingUI.home.alertsTabTitle" defaultMessage="Alerts" />,
+    });
+  }
+
   if (canShowActions) {
     tabs.push({
       id: 'actions',
       name: (
-        <FormattedMessage
-          id="xpack.alertingUI.home.repositoriesTabTitle"
-          defaultMessage="Actions"
-        />
+        <FormattedMessage id="xpack.alertingUI.home.actionsTabTitle" defaultMessage="Actions" />
       ),
     });
   }
@@ -77,6 +83,7 @@ export const AlertsUIHome: React.FunctionComponent<RouteComponentProps<MatchPara
 
         <Switch>
           {canShowActions && <Route exact path={routeToActions} component={ActionsList} />}
+          {canShowAlerts && <Route exact path={routeToAlerts} component={AlertsList} />}
         </Switch>
       </EuiPageContent>
     </EuiPageBody>
