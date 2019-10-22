@@ -18,9 +18,9 @@ export class CtagsLauncher extends AbstractLauncher {
   private isRunning: boolean = false;
   private embed: EmbedCtagServer | null = null;
   constructor(
-    readonly targetHost: string,
-    readonly options: ServerOptions,
-    readonly loggerFactory: LoggerFactory
+    public readonly targetHost: string,
+    public readonly options: ServerOptions,
+    public readonly loggerFactory: LoggerFactory
   ) {
     super('ctags', targetHost, options, loggerFactory);
   }
