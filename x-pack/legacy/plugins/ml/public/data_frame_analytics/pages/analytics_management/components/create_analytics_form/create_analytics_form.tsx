@@ -94,10 +94,9 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
       const indexPattern: IndexPattern = await kibanaContext.indexPatterns.get(
         indexPatternsMap[sourceIndex]
       );
-      const containsNumericalFields: boolean = indexPattern.fields
-        .filter(f => !OMIT_FIELDS.includes(f.name))
-        .map(f => f.type)
-        .includes('number');
+      const containsNumericalFields: boolean = indexPattern.fields.some(
+        ({ name, type }) => !OMIT_FIELDS.includes(name) && type === 'number'
+      );
 
       setFormState({
         sourceIndexContainsNumericalFields: containsNumericalFields,
@@ -111,7 +110,13 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
   };
 
   const loadDependentFieldOptions = async () => {
-    setFormState({ loadingDepFieldOptions: true, dependentVariable: '' });
+    setFormState({
+      loadingDepFieldOptions: true,
+      dependentVariable: '',
+      // Reset outlier detection sourceIndex checks to default values if we've switched to regression
+      sourceIndexFieldsCheckFailed: false,
+      sourceIndexContainsNumericalFields: true,
+    });
     try {
       const indexPattern: IndexPattern = await kibanaContext.indexPatterns.get(
         indexPatternsMap[sourceIndex]
@@ -367,6 +372,16 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
                     defaultMessage: 'Dependent variable',
                   }
                 )}
+                helpText={
+                  dependentVariableOptions.length === 0 &&
+                  !sourceIndexNameEmpty &&
+                  i18n.translate(
+                    'xpack.ml.dataframe.analytics.create.dependentVariableOptionsNoNumericalFields',
+                    {
+                      defaultMessage: 'No numeric type fields were found for this index pattern.',
+                    }
+                  )
+                }
                 error={
                   dependentVariableFetchFail === true && [
                     <Fragment>
