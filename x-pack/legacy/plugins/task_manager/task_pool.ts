@@ -92,10 +92,9 @@ export class TaskPool {
   }
 
   private async attemptToRun(tasks: TaskRunner[]): Promise<TaskPoolRunResult> {
-    performance.mark('attemptToRun_start');
-
     const [tasksToRun, leftOverTasks] = partitionListByCount(tasks, this.availableWorkers);
     if (tasksToRun.length) {
+      performance.mark('attemptToRun_start');
       const taskRunResults = await Promise.all(
         tasksToRun.map(task =>
           task
@@ -141,10 +140,9 @@ export class TaskPool {
           }
         )
       );
+      performance.mark('attemptToRun_stop');
+      performance.measure('taskPool.attemptToRun', 'attemptToRun_start', 'attemptToRun_stop');
     }
-
-    performance.mark('attemptToRun_stop');
-    performance.measure('taskPool.attemptToRun', 'attemptToRun_start', 'attemptToRun_stop');
 
     if (leftOverTasks.length) {
       if (this.availableWorkers) {
