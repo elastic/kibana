@@ -23,7 +23,7 @@ describe('filter manager utilities', () => {
   describe('mapDefault()', () => {
     test('should return the key and value for matching filters', async () => {
       const filter: CustomFilter = buildQueryFilter({ match_all: {} }, 'index');
-      const result = await mapDefault(filter);
+      const result = mapDefault(filter);
 
       expect(result).toHaveProperty('key', 'query');
       expect(result).toHaveProperty('value', '{"match_all":{}}');
@@ -33,7 +33,7 @@ describe('filter manager utilities', () => {
       const filter = buildEmptyFilter(true) as CustomFilter;
 
       try {
-        await mapDefault(filter);
+        mapDefault(filter);
       } catch (e) {
         expect(e).toBe(filter);
       }

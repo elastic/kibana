@@ -6,6 +6,7 @@ exports[`renders without crashing 1`] = `
     describedByIds={Array []}
     display="row"
     fullWidth={true}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
       <p
@@ -33,18 +34,16 @@ exports[`renders without crashing 1`] = `
           id="xpack.spaces.management.spaceIdentifier.urlIdentifierLabel"
           values={Object {}}
         />
-        <EuiLink
+        <ForwardRef
           aria-label="Customize the URL identifier"
-          color="primary"
           onClick={[Function]}
-          type="button"
         >
           <FormattedMessage
             defaultMessage="[customize]"
             id="xpack.spaces.management.spaceIdentifier.customizeSpaceLinkText"
             values={Object {}}
           />
-        </EuiLink>
+        </ForwardRef>
       </p>
     }
     labelType="label"

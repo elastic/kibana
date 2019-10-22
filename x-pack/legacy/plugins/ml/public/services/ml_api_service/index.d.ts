@@ -9,6 +9,8 @@ import { AggFieldNamePair } from '../../../common/types/fields';
 import { ExistingJobsAndGroups } from '../job_service';
 import { PrivilegesResponse } from '../../../common/types/privileges';
 import { MlSummaryJobs } from '../../../common/types/jobs';
+import { MlServerDefaults, MlServerLimits } from '../../jobs/new_job_new/utils/new_job_defaults';
+import { ES_AGGREGATION } from '../../../common/constants/aggregation_types';
 
 // TODO This is not a complete representation of all methods of `ml.*`.
 // It just satisfies needs for other parts of the code area which use
@@ -24,6 +26,36 @@ export interface GetTimeFieldRangeResponse {
   end: { epoch: number; string: string };
 }
 
+export interface BucketSpanEstimatorData {
+  aggTypes: Array<ES_AGGREGATION | null>;
+  duration: {
+    start: number;
+    end: number;
+  };
+  fields: Array<string | null>;
+  index: string;
+  query: any;
+  splitField: string | undefined;
+  timeField: string | undefined;
+}
+
+export interface BucketSpanEstimatorResponse {
+  name: string;
+  ms: number;
+  error?: boolean;
+  message?: { msg: string } | string;
+}
+
+export interface MlInfoResponse {
+  defaults: MlServerDefaults;
+  limits: MlServerLimits;
+  native_code: {
+    build_hash: string;
+    version: string;
+  };
+  upgrade_mode: boolean;
+}
+
 declare interface Ml {
   annotations: {
     deleteAnnotation(id: string | undefined): Promise<any>;
@@ -34,6 +66,7 @@ declare interface Ml {
     getDataFrameAnalytics(analyticsId?: string): Promise<any>;
     getDataFrameAnalyticsStats(analyticsId?: string): Promise<any>;
     createDataFrameAnalytics(analyticsId: string, analyticsConfig: any): Promise<any>;
+    evaluateDataFrameAnalytics(evaluateConfig: any): Promise<any>;
     deleteDataFrameAnalytics(analyticsId: string): Promise<any>;
     startDataFrameAnalytics(analyticsId: string): Promise<any>;
     stopDataFrameAnalytics(
@@ -70,7 +103,7 @@ declare interface Ml {
   getVisualizerOverallStats(obj: object): Promise<any>;
 
   results: {
-    getMaxAnomalyScore: (jobIds: string[], earliestMs: number, latestMs: number) => Promise<any>; // THIS ONE IS RIGHT
+    getMaxAnomalyScore: (jobIds: string[], earliestMs: number, latestMs: number) => Promise<any>;
   };
 
   jobs: {
@@ -114,11 +147,10 @@ declare interface Ml {
     ): Promise<{ progress: number; isRunning: boolean; isJobClosed: boolean }>;
   };
 
-  estimateBucketSpan(
-    data: object
-  ): Promise<{ name: string; ms: number; error?: boolean; message?: { msg: string } | string }>;
+  estimateBucketSpan(data: BucketSpanEstimatorData): Promise<BucketSpanEstimatorResponse>;
 
   mlNodeCount(): Promise<{ count: number }>;
+  mlInfo(): Promise<MlInfoResponse>;
 }
 
 declare const ml: Ml;

@@ -70,7 +70,7 @@ module.exports = {
           //
           // Old recommended tslint rules
           '@typescript-eslint/adjacent-overload-signatures': 'error',
-          '@typescript-eslint/array-type': ['error', 'array-simple'],
+          '@typescript-eslint/array-type': ['error', { default: 'array-simple', readonly: 'array-simple' }],
           '@typescript-eslint/ban-types': 'error',
           'camelcase': 'off',
           '@typescript-eslint/camelcase': ['error', {
@@ -92,15 +92,19 @@ module.exports = {
           'indent': 'off',
           '@typescript-eslint/indent': [ 'error', 2, { SwitchCase: 1 } ],
           '@typescript-eslint/prefer-function-type': 'error',
-          '@typescript-eslint/prefer-interface': 'error',
+          '@typescript-eslint/consistent-type-definitions': ['error', 'interface'],
           '@typescript-eslint/member-ordering': ['error', {
             'default': ['public-static-field', 'static-field', 'instance-field']
           }],
-          '@typescript-eslint/no-angle-bracket-type-assertion': 'error',
+          '@typescript-eslint/consistent-type-assertions': 'error',
           '@typescript-eslint/no-empty-interface': 'error',
           '@typescript-eslint/no-misused-new': 'error',
           '@typescript-eslint/no-namespace': 'error',
-          '@typescript-eslint/no-triple-slash-reference': 'error',
+          '@typescript-eslint/triple-slash-reference': ['error', {
+            path: 'never',
+            types: 'never',
+            lib: 'never'
+          }],
           '@typescript-eslint/no-var-requires': 'error',
           '@typescript-eslint/type-annotation-spacing': 'error',
           '@typescript-eslint/unified-signatures': 'error',
