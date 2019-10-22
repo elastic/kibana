@@ -9,7 +9,7 @@ import { APICaller, KibanaRequest, RequestHandlerContext } from 'src/core/server
 export class WithRequest {
   public readonly callCluster: APICaller;
 
-  constructor(readonly context: RequestHandlerContext, readonly req: KibanaRequest) {
+  constructor(public readonly context: RequestHandlerContext, public readonly req: KibanaRequest) {
     const securityPlugin = context.code.legacy.securityPlugin;
     const useRbac =
       securityPlugin &&

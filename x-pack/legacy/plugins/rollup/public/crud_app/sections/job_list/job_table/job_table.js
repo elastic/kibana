@@ -6,7 +6,7 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
@@ -278,10 +278,10 @@ export class JobTableUi extends Component {
         >
           {truncateText
             ? (
-              <EuiToolTip content={value}>
+              <EuiToolTip anchorClassName="eui-textTruncate" content={value}>
                 {content}
               </EuiToolTip>
-            ) : content }
+            ) : content}
         </EuiTableRowCell>
       );
     });
