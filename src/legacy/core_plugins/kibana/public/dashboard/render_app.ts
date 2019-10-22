@@ -50,30 +50,31 @@ import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing/get_unhashable_states_provider';
 import { ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
 import { SavedQueryService } from '../../../data/public/search/search_bar/lib/saved_query_service';
+import { EmbeddablePublicPlugin } from '../../../../../plugins/embeddable/public';
 
 export interface RenderDeps {
-  core: AppMountContext['core'];
-  indexPatterns: DataStart['indexPatterns']['indexPatterns'];
-  queryFilter: any;
-  getUnhashableStates: any;
-  shareContextMenuExtensions: any;
+  core: AppMountContext['core']; //x
+  indexPatterns: DataStart['indexPatterns']['indexPatterns']; //x
+  queryFilter: any; //x
+  getUnhashableStates: any; //x
+  shareContextMenuExtensions: any; //x
+  savedObjectsClient: SavedObjectsClientContract; //x
   savedObjectRegistry: any;
-  savedObjectsClient: SavedObjectsClientContract;
-  dashboardConfig: any;
-  uiSettings: UiSettingsClientContract;
-  savedDashboards: any;
-  chrome: ChromeStart;
-  addBasePath: (path: string) => string;
-  featureCatalogueRegistryProvider: any;
-  dashboardCapabilities: any;
-  savedQueryService: SavedQueryService;
-  emebeddables: EmbeddableStart;
+  dashboardConfig: any; //x
+  savedDashboards: any
+  dashboardCapabilities: any; //x
+  uiSettings: UiSettingsClientContract; //x
+  chrome: ChromeStart; //x
+  addBasePath: (path: string) => string; //x
+  getFeatureCatalogueRegistryProvider: () => any; //x
+  savedQueryService: SavedQueryService; //x
+  embeddables: ReturnType<EmbeddablePublicPlugin['start']>; //x
 }
 
-export const renderApp = (element: HTMLElement, appBasePath: string, { core }: RenderDeps) => {
-  const dashboardAngularModule = createLocalAngularModule(core);
+export const renderApp = (element: HTMLElement, appBasePath: string, deps: RenderDeps) => {
+  const dashboardAngularModule = createLocalAngularModule(deps.core);
   configureAppAngularModule(dashboardAngularModule);
-  initDashboardApp(dashboardAngularModule);
+  initDashboardApp(dashboardAngularModule, deps);
   const $injector = mountDashboardApp(appBasePath, element);
   return () => $injector.get('$rootScope').$destroy();
 };

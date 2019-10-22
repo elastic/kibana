@@ -93,8 +93,6 @@ export function initDashboardAppDirective(app: any, deps: RenderDeps) {
     const confirmModal = $injector.get<ConfirmModalFn>('confirmModal');
     const config = deps.uiSettings;
 
-    const Private = $injector.get<IPrivate>('Private');
-
     return {
       restrict: 'E',
       controllerAs: 'dashboardApp',
@@ -121,7 +119,6 @@ export function initDashboardAppDirective(app: any, deps: RenderDeps) {
           getAppState,
           dashboardConfig,
           localStorage,
-          Private,
           kbnUrl,
           AppStateClass: AppState,
           config,

@@ -50,12 +50,9 @@ import {
 import { KbnUrl } from 'ui/url/kbn_url';
 import { Filter } from '@kbn/es-query';
 import { IndexPattern } from 'ui/index_patterns';
-import { IPrivate } from 'ui/private';
 import { Query, SavedQuery } from 'src/legacy/core_plugins/data/public';
 import { SaveOptions } from 'ui/saved_objects/saved_object';
-import { capabilities } from 'ui/capabilities';
 import { Subscription } from 'rxjs';
-import { npStart } from 'ui/new_platform';
 import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
 import { extractTimeFilter, changeTimeFilter } from '../../../data/public';
 
@@ -72,7 +69,7 @@ import {
   ViewMode,
   openAddPanelFlyout,
 } from '../../../embeddable_api/public/np_ready/public';
-import { start } from '../../../embeddable_api/public/np_ready/public/legacy';
+// import { start } from '../../../embeddable_api/public/np_ready/public/legacy';
 import { DashboardAppState, NavAction, ConfirmModalFn, SavedDashboardPanel } from './types';
 
 import { showOptionsPopover } from './top_nav/show_options_popover';
@@ -88,7 +85,28 @@ import { DashboardAppScope } from './dashboard_app';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '../visualize/embeddable';
 import { convertSavedDashboardPanelToPanelState } from './lib/embeddable_saved_object_converters';
 import { SavedQueryService } from '../../../data/public/search/search_bar/lib/saved_query_service';
+import { NotificationsStart, OverlayStart } from 'kibana/public';
+import { RenderDeps } from './render_app';
 
+export interface DashboardAppControllerDependencies extends RenderDeps {
+  $scope: DashboardAppScope;
+  $route: any;
+  $routeParams: any;
+  getAppState: {
+    previouslyStored: () => TAppState | undefined;
+  };
+  indexPatterns: {
+    getDefault: () => Promise<IndexPattern>;
+  };
+  dashboardConfig: any;
+  localStorage: {
+    get: (prop: string) => unknown;
+  };
+  kbnUrl: KbnUrl;
+  AppStateClass: TAppStateClass<DashboardAppState>;
+  config: any;
+  confirmModal: ConfirmModalFn;
+}
 
 export class DashboardAppController {
   // Part of the exposed plugin API - do not remove without careful consideration.
@@ -112,34 +130,10 @@ export class DashboardAppController {
     getUnhashableStates,
     shareContextMenuExtensions,
     savedQueryService,
-  }: {
-    $scope: DashboardAppScope;
-    $route: any;
-    $routeParams: any;
-    getAppState: {
-      previouslyStored: () => TAppState | undefined;
-    };
-    indexPatterns: {
-      getDefault: () => Promise<IndexPattern>;
-    };
-    dashboardConfig: any;
-    localStorage: {
-      get: (prop: string) => unknown;
-    };
-    Private: IPrivate;
-    kbnUrl: KbnUrl;
-    AppStateClass: TAppStateClass<DashboardAppState>;
-    config: any;
-    confirmModal: ConfirmModalFn;
-    queryFilter: any;
-    getUnhashableStates: any;
-    shareContextMenuExtensions: any;
-    savedQueryService: SavedQueryService;
-  }) {
-    // const queryFilter = Private(FilterBarQueryFilterProvider);
-    // const getUnhashableStates = Private(getUnhashableStatesProvider);
-    // const shareContextMenuExtensions = Private(ShareContextMenuExtensionsRegistryProvider);
-
+    embeddables,
+    dashboardCapabilities,
+    core: { notifications, overlays },
+  }: DashboardAppControllerDependencies) {
     let lastReloadRequestTime = 0;
 
     const dash = ($scope.dash = $route.current.locals.dash);
@@ -160,7 +154,7 @@ export class DashboardAppController {
     if (dashboardStateManager.getIsTimeSavedWithDashboard() && !getAppState.previouslyStored()) {
       dashboardStateManager.syncTimefilterWithDashboard(timefilter);
     }
-    $scope.showSaveQuery = capabilities.get().dashboard.saveQuery as boolean;
+    $scope.showSaveQuery = dashboardCapabilities.saveQuery as boolean;
 
     const updateIndexPatterns = (container?: DashboardContainer) => {
       if (!container || isErrorEmbeddable(container)) {
@@ -247,7 +241,7 @@ export class DashboardAppController {
     let outputSubscription: Subscription | undefined;
 
     const dashboardDom = document.getElementById('dashboardViewport');
-    const dashboardFactory = start.getEmbeddableFactory(
+    const dashboardFactory = embeddables.getEmbeddableFactory(
       DASHBOARD_CONTAINER_TYPE
     ) as DashboardContainerFactory;
     dashboardFactory
@@ -534,7 +528,7 @@ export class DashboardAppController {
     });
 
     $scope.$watch(
-      () => capabilities.get().dashboard.saveQuery,
+      () => dashboardCapabilities.saveQuery,
       newCapability => {
         $scope.showSaveQuery = newCapability as boolean;
       }
@@ -773,10 +767,10 @@ export class DashboardAppController {
       if (dashboardContainer && !isErrorEmbeddable(dashboardContainer)) {
         openAddPanelFlyout({
           embeddable: dashboardContainer,
-          getAllFactories: start.getEmbeddableFactories,
-          getFactory: start.getEmbeddableFactory,
-          notifications: npStart.core.notifications,
-          overlays: npStart.core.overlays,
+          getAllFactories: embeddables.getEmbeddableFactories,
+          getFactory: embeddables.getEmbeddableFactory,
+          notifications,
+          overlays,
           SavedObjectFinder,
         });
       }

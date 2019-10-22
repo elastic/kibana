@@ -21,55 +21,48 @@ import { FeatureCatalogueRegistryProvider } from 'ui/registry/feature_catalogue'
 import { npSetup, npStart } from 'ui/new_platform';
 import chrome from 'ui/chrome';
 import { IPrivate } from 'ui/private';
-// @ts-ignore
-import { toastNotifications, banners } from 'ui/notify';
-import { kfetch } from 'ui/kfetch';
-import { HomePlugin, LegacyAngularInjectedDependencies } from './plugin';
-import { createUiStatsReporter, METRIC_TYPE } from '../../../ui_metric/public';
+import { ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
+import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing/get_unhashable_states_provider';
+import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
+import { DashboardPlugin, LegacyAngularInjectedDependencies } from './plugin';
 import { start as data } from '../../../data/public/legacy';
-import { TelemetryOptInProvider } from '../../../telemetry/public/services';
 import { localApplicationService } from '../local_application_service';
-
-export const trackUiMetric = createUiStatsReporter('Kibana_home');
+import { start as embeddables } from '../../../embeddable_api/public/np_ready/public/legacy';
 
 /**
  * Get dependencies relying on the global angular context.
  * They also have to get resolved together with the legacy imports above
  */
-async function getAngularInjectedDependencies(): Promise<LegacyAngularInjectedDependencies> {
+async function getAngularDependencies(): Promise<LegacyAngularInjectedDependencies> {
   const injector = await chrome.dangerouslyGetActiveInjector();
 
   const Private = injector.get<IPrivate>('Private');
 
-  const telemetryEnabled = npStart.core.injectedMetadata.getInjectedVar('telemetryEnabled');
-  const telemetryBanner = npStart.core.injectedMetadata.getInjectedVar('telemetryBanner');
-  const telemetryOptInProvider = Private(TelemetryOptInProvider);
+  const queryFilter = Private(FilterBarQueryFilterProvider);
+  const getUnhashableStates = Private(getUnhashableStatesProvider);
+  const shareContextMenuExtensions = Private(ShareContextMenuExtensionsRegistryProvider);
 
   return {
-    telemetryOptInProvider,
-    shouldShowTelemetryOptIn:
-      telemetryEnabled && telemetryBanner && !telemetryOptInProvider.getOptIn(),
-    featureCatalogueRegistryProvider: Private(FeatureCatalogueRegistryProvider as any),
+    queryFilter,
+    getUnhashableStates,
+    shareContextMenuExtensions,
+    getFeatureCatalogueRegistryProvider: () => {
+      return Private(FeatureCatalogueRegistryProvider as any);
+    },
+    dashboardConfig: injector.get('dashboardConfig'),
   };
 }
 
 (async () => {
-  const instance = new HomePlugin();
+  const instance = new DashboardPlugin();
   instance.setup(npSetup.core, {
     __LEGACY: {
-      trackUiMetric,
-      toastNotifications,
-      banners,
-      kfetch,
-      metadata: npStart.core.injectedMetadata.getLegacyMetadata(),
-      METRIC_TYPE,
       localApplicationService,
+      getAngularDependencies,
     },
   });
   instance.start(npStart.core, {
     data,
-    __LEGACY: {
-      angularDependencies: await getAngularInjectedDependencies(),
-    },
+    embeddables,
   });
 })();

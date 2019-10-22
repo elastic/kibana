@@ -210,7 +210,7 @@ export function initDashboardApp(app, deps) {
       });
   });
 
-  deps.featureCatalogueRegistryProvider.register(() => {
+  deps.getFeatureCatalogueRegistryProvider().register(() => {
     return {
       id: 'dashboard',
       title: i18n.translate('kbn.dashboard.featureCatalogue.dashboardTitle', {
