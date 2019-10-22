@@ -44,7 +44,7 @@ export class TelemetryOptIn extends React.Component<Props, State> {
     this.setState({ showExample: true });
     this.closeReadMorePopover();
   };
-  onChangeOptIn = event => {
+  onChangeOptIn = (event: React.ChangeEvent<HTMLInputElement>) => {
     const isOptingInToTelemetry = event.target.checked;
     this.setState({ isOptingInToTelemetry });
   };
@@ -57,7 +57,7 @@ export class TelemetryOptIn extends React.Component<Props, State> {
       example = (
         <OptInExampleFlyout
           onClose={() => this.setState({ showExample: false })}
-          fetchTelemetry={getTelemetryOptInService.fetchExample}
+          fetchTelemetry={getTelemetryOptInService().fetchExample}
         />
       );
     }
@@ -130,7 +130,7 @@ export class TelemetryOptIn extends React.Component<Props, State> {
       </EuiPopover>
     );
 
-    const shouldShowTelemetryOptIn = getTelemetryOptInService.shouldShowTelemetryOptIn();
+    const shouldShowTelemetryOptIn = getTelemetryOptInService().getOptInNotifications();
 
     if (!shouldShowTelemetryOptIn) {
       return null;

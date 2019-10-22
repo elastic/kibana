@@ -48,3 +48,7 @@ jest.doMock('ui/new_platform', () => ({
     },
   },
 }));
+
+export function mockTelemetryOptInService() {
+
+}

@@ -25,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import mappings from './mappings.json';
 import { CONFIG_TELEMETRY, getConfigTelemetryDesc } from './common/constants';
-import { getTelemetryOptIn, telemetryPlugin, handleConfig } from './server';
+import { telemetryPlugin, handleConfig } from './server';
 
 import {
   createLocalizationUsageCollector,

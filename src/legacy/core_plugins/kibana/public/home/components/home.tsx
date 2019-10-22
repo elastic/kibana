@@ -18,7 +18,6 @@
  */
 
 import React, { Component } from 'react';
-// @ts-ignore
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButton,
@@ -34,6 +33,7 @@ import {
   EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
+// @ts-ignore
 import { Synopsis } from './synopsis';
 // @ts-ignore
 import { AddData } from './add_data';
@@ -41,7 +41,6 @@ import { KEY_ENABLE_WELCOME } from '../common/constants';
 import { TelemetryOptInService } from '../../../../telemetry/public/services';
 
 import { Welcome } from './welcome';
-
 import { isWelcomeScreenEnabled } from '../kibana_services';
 
 export interface Directory {

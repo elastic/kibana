@@ -32,7 +32,7 @@ export function injectBanner() {
   }
 
   // and no banner on status page
-  if (chrome.getApp().id === 'status_page') {
+  if ((chrome as any).getApp().id === 'status_page') {
     return;
   }
 

@@ -38,32 +38,32 @@ export function createTelemetryOptInService() {
   const optInNotifications = injectedMetadata.getInjectedVar(
     'telemetryOptInNotifications'
   ) as boolean;
+  const isEnabled = injectedMetadata.getInjectedVar('telemetryEnabled') as boolean;
   let currentOptInStatus = injectedMetadata.getInjectedVar('telemetryOptedIn') as boolean;
-  let shouldShowWelcomeCard = optInNotifications;
-  let shouldShowBanner =
-    optInNotifications && (injectedMetadata.getInjectedVar('telemetryBanner') as boolean);
+  let shouldShowBanner = injectedMetadata.getInjectedVar('telemetryBanner') as boolean;
+  let shouldShowWelcomeCard = true;
   let bannerId: string | null = null;
 
   setCanTrackUiMetrics(currentOptInStatus);
   const provider = {
-    // getEnabled: () => {
-    //   return injectedMetadata.getInjectedVar('telemetryEnabled') as boolean;
-    // },
+    getEnabled: (): boolean => {
+      return isEnabled;
+    },
     getOptInNotifications: (): boolean => {
       const isOptedIn = provider.getOptIn();
-      return !isOptedIn && optInNotifications;
+      return optInNotifications && !isOptedIn;
     },
     setShouldShowWelcomeCard: (enabled: boolean) => {
       shouldShowWelcomeCard = enabled;
     },
     getShouldShowWelcomeCard: () => {
-      return shouldShowWelcomeCard;
+      return optInNotifications && shouldShowWelcomeCard;
     },
     setShouldShowBanner: (enabled: boolean) => {
       shouldShowBanner = enabled;
     },
     getShouldShowBanner: (): boolean => {
-      return shouldShowBanner;
+      return optInNotifications && shouldShowBanner;
     },
     getBannerId: (): string | null => bannerId,
     setBannerId(id: string): void {

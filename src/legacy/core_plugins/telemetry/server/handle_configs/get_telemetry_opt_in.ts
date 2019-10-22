@@ -68,7 +68,7 @@ export async function getTelemetryOptInFromRequest(request: any) {
   }
 }
 
-export function getTelemetryOptIn(config: Legacy.KibanaConfig, requst: any) {
+export function getTelemetryOptIn(config: Legacy.KibanaConfig, request: any) {
   return (
     getTelemetryEnabled(config) &&
     getOldOptInSetting(config) &&

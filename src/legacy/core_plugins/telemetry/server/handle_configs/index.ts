@@ -18,7 +18,7 @@
  */
 
 export { getShowBanner } from './get_show_banner';
-export { getTelemetryOptIn } from './get_telemetry_optin';
+export { getTelemetryOptIn } from './get_telemetry_opt_in';
 export { getTelemetryEnabled } from './get_telemetry_enabled';
 export { getTelemetryUrl } from './get_telemetry_url';
 export { getStaticTelemetryConfigPath } from './get_static_config_path';

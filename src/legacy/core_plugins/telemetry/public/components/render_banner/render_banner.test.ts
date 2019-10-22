@@ -24,15 +24,15 @@ describe('render_banner', () => {
   it('adds a banner to banners with priority of 10000', () => {
     const bannerID = 'brucer-banner';
 
-    const telemetryOptInProvider = { setBannerId: jest.fn() };
+    const telemetryOptInService = { setBannerId: jest.fn() };
     const banners = { add: jest.fn().mockReturnValue(bannerID) };
     const fetchTelemetry = jest.fn();
 
-    renderBanner(telemetryOptInProvider, fetchTelemetry, { _banners: banners });
+    renderBanner(telemetryOptInService, { _banners: banners });
 
     expect(banners.add).toBeCalledTimes(1);
     expect(fetchTelemetry).toBeCalledTimes(0);
-    expect(telemetryOptInProvider.setBannerId).toBeCalledWith(bannerID);
+    expect(telemetryOptInService.setBannerId).toBeCalledWith(bannerID);
 
     const bannerConfig = banners.add.mock.calls[0][0];
 
