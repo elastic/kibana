@@ -208,7 +208,8 @@ export const AlertsList: React.FunctionComponent = () => {
             ]}
           ></EuiSearchBar>
 
-          <EuiSpacer size="s" />
+          {/* Large to remain consistent with ActionsList table spacing */}
+          <EuiSpacer size="l" />
 
           <EuiBasicTable
             loading={isLoadingAlerts || isLoadingAlertTypes || isDeletingActions}
