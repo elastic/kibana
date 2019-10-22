@@ -34,6 +34,7 @@ export interface RegistryListItem {
 
 export interface ScreenshotItem {
   src: string;
+  title?: string;
 }
 
 // from /package/{name}

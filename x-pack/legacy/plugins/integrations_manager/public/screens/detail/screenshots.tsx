@@ -19,15 +19,19 @@ export function Screenshots(props: ScreenshotProps) {
   const { images } = props;
 
   // for now, just get first image
-  const src = toImage(images[0].src);
+  const image = images[0];
+  const hasCaption: boolean = images[0].title ? true : false;
 
   const horizontalPadding: number = parseInt(theme.eui.paddingSizes.xl, 10) * 2;
-  const bottomPadding: number = parseInt(theme.eui.paddingSizes.xl, 10) * 1.75;
+  const fullVerticalPadding: number = parseInt(theme.eui.paddingSizes.xl, 10) * 1.75;
+  const padding = hasCaption
+    ? `${theme.eui.paddingSizes.xl} ${horizontalPadding}px ${fullVerticalPadding}px`
+    : `${fullVerticalPadding}px ${horizontalPadding}px`;
 
   const ScreenshotsContainer = styled(EuiFlexGroup)`
     background: linear-gradient(360deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0) 100%),
       ${theme.eui.euiColorPrimary};
-    padding: ${theme.eui.paddingSizes.xl} ${horizontalPadding}px ${bottomPadding}px;
+    padding: ${padding};
     flex: 0 0 auto;
     border-radius: ${theme.eui.euiBorderRadius};
   `;
@@ -42,14 +46,21 @@ export function Screenshots(props: ScreenshotProps) {
       </EuiTitle>
       <EuiSpacer size="m" />
       <ScreenshotsContainer gutterSize="none" direction="column" alignItems="center">
+        {hasCaption && (
+          <NestedEuiFlexItem>
+            <EuiText color="ghost" aria-label="screenschot image caption">
+              {image.title}
+            </EuiText>
+            <EuiSpacer />
+          </NestedEuiFlexItem>
+        )}
         <NestedEuiFlexItem>
-          <EuiText color="ghost" aria-label="screenschot image caption">
-            We need image descriptions to be returned in the response
-          </EuiText>
-          <EuiSpacer />
-        </NestedEuiFlexItem>
-        <NestedEuiFlexItem>
-          <EuiImage url={src} alt="screenhot image preview" size="l" allowFullScreen />
+          <EuiImage
+            url={toImage(image.src)}
+            alt="screenhot image preview"
+            size="l"
+            allowFullScreen
+          />
         </NestedEuiFlexItem>
       </ScreenshotsContainer>
     </Fragment>
