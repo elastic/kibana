@@ -29,9 +29,12 @@ export function getActionType(): ActionTypeModel {
   return {
     id: '.webhook',
     iconClass: 'logoWebhook',
-    selectMessage: i18n.translate('xpack.alertingUI.sections.actionAdd.selectMessageText', {
-      defaultMessage: 'Send a request to a web service.',
-    }),
+    selectMessage: i18n.translate(
+      'xpack.alertingUI.sections.actionAdd.webhookAction.selectMessageText',
+      {
+        defaultMessage: 'Send a request to a web service.',
+      }
+    ),
     validate: (action: Action): ValidationResult => {
       const validationResult = { errors: {} };
       const errors = {
@@ -43,30 +46,42 @@ export function getActionType(): ActionTypeModel {
       validationResult.errors = errors;
       if (!action.config.url) {
         errors.url.push(
-          i18n.translate('xpack.alertingUI.sections.actionAdd.error.requiredUrlText', {
-            defaultMessage: 'Url is required.',
-          })
+          i18n.translate(
+            'xpack.alertingUI.sections.actionAdd.webhookAction.error.requiredUrlText',
+            {
+              defaultMessage: 'Url is required.',
+            }
+          )
         );
       }
       if (!action.config.method) {
         errors.method.push(
-          i18n.translate('xpack.alertingUI.sections.addAction.error.requiredMethodText', {
-            defaultMessage: 'Method is required.',
-          })
+          i18n.translate(
+            'xpack.alertingUI.sections.addAction.webhookAction.error.requiredMethodText',
+            {
+              defaultMessage: 'Method is required.',
+            }
+          )
         );
       }
       if (!action.secrets.user) {
         errors.user.push(
-          i18n.translate('xpack.alertingUI.sections.addAction.error.requiredHostText', {
-            defaultMessage: 'User is required.',
-          })
+          i18n.translate(
+            'xpack.alertingUI.sections.addAction.webhookAction.error.requiredHostText',
+            {
+              defaultMessage: 'User is required.',
+            }
+          )
         );
       }
       if (!action.secrets.password) {
         errors.password.push(
-          i18n.translate('xpack.alertingUI.sections.addAction.error.requiredHostText', {
-            defaultMessage: 'Password is required.',
-          })
+          i18n.translate(
+            'xpack.alertingUI.sections.addAction.webhookAction.error.requiredPasswordText',
+            {
+              defaultMessage: 'Password is required.',
+            }
+          )
         );
       }
       return validationResult;
@@ -97,16 +112,22 @@ const WebhookActionFields: React.FunctionComponent<Props> = ({
   };
   if (!headerKey && headerValue) {
     headerErrors.keyHeader.push(
-      i18n.translate('xpack.alertingUI.sections.addAction.error.requiredHeaderKeyText', {
-        defaultMessage: 'Header Key is required.',
-      })
+      i18n.translate(
+        'xpack.alertingUI.sections.addAction.webhookAction.error.requiredHeaderKeyText',
+        {
+          defaultMessage: 'Header Key is required.',
+        }
+      )
     );
   }
   if (headerKey && !headerValue) {
     headerErrors.valueHeader.push(
-      i18n.translate('xpack.alertingUI.sections.addAction.error.requiredHeaderValueText', {
-        defaultMessage: 'Header Value is required.',
-      })
+      i18n.translate(
+        'xpack.alertingUI.sections.addAction.webhookAction.error.requiredHeaderValueText',
+        {
+          defaultMessage: 'Header Value is required.',
+        }
+      )
     );
   }
   const hasHeaderErrors = headerErrors.keyHeader.length > 0 || headerErrors.valueHeader.length > 0;
@@ -148,9 +169,12 @@ const WebhookActionFields: React.FunctionComponent<Props> = ({
             fullWidth
             errors={headerErrors}
             isShowingErrors={hasHeaderErrors && headerKey !== undefined}
-            label={i18n.translate('xpack.alertingUI.sections.actionAdd.keyFieldLabel', {
-              defaultMessage: 'Header Key',
-            })}
+            label={i18n.translate(
+              'xpack.alertingUI.sections.actionAdd.webhookAction.keyTextFieldLabel',
+              {
+                defaultMessage: 'Header Key',
+              }
+            )}
           >
             <EuiFieldText
               fullWidth
@@ -170,9 +194,12 @@ const WebhookActionFields: React.FunctionComponent<Props> = ({
             fullWidth
             errors={headerErrors}
             isShowingErrors={hasHeaderErrors && headerValue !== undefined}
-            label={i18n.translate('xpack.alertingUI.sections.actionAdd.valueFieldLabel', {
-              defaultMessage: 'Header Value',
-            })}
+            label={i18n.translate(
+              'xpack.alertingUI.sections.actionAdd.webhookAction.valueTextFieldLabel',
+              {
+                defaultMessage: 'Header Value',
+              }
+            )}
           >
             <EuiFieldText
               fullWidth
@@ -194,9 +221,12 @@ const WebhookActionFields: React.FunctionComponent<Props> = ({
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiFormRow
-            label={i18n.translate('xpack.alertingUI.sections.actionAdd.methodFieldLabel', {
-              defaultMessage: 'Method',
-            })}
+            label={i18n.translate(
+              'xpack.alertingUI.sections.actionAdd.webhookAction.methodTextFieldLabel',
+              {
+                defaultMessage: 'Method',
+              }
+            )}
           >
             <EuiSelect
               name="method"
@@ -216,9 +246,12 @@ const WebhookActionFields: React.FunctionComponent<Props> = ({
             errorKey="url"
             errors={errors}
             isShowingErrors={hasErrors === true && url !== undefined}
-            label={i18n.translate('xpack.alertingUI.sections.actionAdd.methodUrlLabel', {
-              defaultMessage: 'Url',
-            })}
+            label={i18n.translate(
+              'xpack.alertingUI.sections.actionAdd.webhookAction.urlTextFieldLabel',
+              {
+                defaultMessage: 'Url',
+              }
+            )}
           >
             <EuiFieldText
               name="url"
@@ -245,9 +278,12 @@ const WebhookActionFields: React.FunctionComponent<Props> = ({
             fullWidth
             errors={errors}
             isShowingErrors={hasErrors === true && user !== undefined}
-            label={i18n.translate('xpack.alertingUI.sections.actionAdd.userFieldLabel', {
-              defaultMessage: 'User',
-            })}
+            label={i18n.translate(
+              'xpack.alertingUI.sections.actionAdd.webhookAction.userTextFieldLabel',
+              {
+                defaultMessage: 'User',
+              }
+            )}
           >
             <EuiFieldText
               fullWidth
@@ -272,9 +308,12 @@ const WebhookActionFields: React.FunctionComponent<Props> = ({
             fullWidth
             errors={errors}
             isShowingErrors={hasErrors === true && password !== undefined}
-            label={i18n.translate('xpack.alertingUI.sections.actionAdd.methodPasswordLabel', {
-              defaultMessage: 'Password',
-            })}
+            label={i18n.translate(
+              'xpack.alertingUI.sections.actionAdd.webhookAction.passwordTextFieldLabel',
+              {
+                defaultMessage: 'Password',
+              }
+            )}
           >
             <EuiFieldPassword
               fullWidth
@@ -315,7 +354,7 @@ const WebhookActionFields: React.FunctionComponent<Props> = ({
             <h5>
               <FormattedMessage
                 defaultMessage={'HTTP headers list:'}
-                id="xpack.alertingUI.sections.actionAdd.httpHeadersTitle"
+                id="xpack.alertingUI.sections.actionAdd.webhookAction.httpHeadersTitle"
               />
             </h5>
           </EuiTitle>
