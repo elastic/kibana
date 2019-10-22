@@ -5,6 +5,7 @@
  */
 
 import { EuiFlexGroup } from '@elastic/eui';
+import { getEsQueryConfig } from '@kbn/es-query';
 import { getOr, isEmpty } from 'lodash/fp';
 import * as React from 'react';
 import styled from 'styled-components';
@@ -13,6 +14,7 @@ import { StaticIndexPattern } from 'ui/index_patterns';
 import { BrowserFields } from '../../containers/source';
 import { TimelineQuery } from '../../containers/timeline';
 import { Direction } from '../../graphql/types';
+import { useKibanaCore } from '../../lib/compose/kibana_core';
 import { KqlMode } from '../../store/timeline/model';
 import { AutoSizer } from '../auto_sizer';
 import { ColumnHeader } from './body/column_headers/column_header';
@@ -111,7 +113,9 @@ export const Timeline = React.memo<Props>(
     sort,
     toggleColumn,
   }) => {
+    const core = useKibanaCore();
     const combinedQueries = combineQueries({
+      config: getEsQueryConfig(core.uiSettings),
       dataProviders,
       indexPattern,
       browserFields,
