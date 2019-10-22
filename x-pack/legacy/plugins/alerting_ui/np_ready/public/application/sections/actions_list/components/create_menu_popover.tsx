@@ -34,7 +34,7 @@ export const AlertingActionsDropdown: React.FunctionComponent<Props> = ({
     return null;
   }
   const actions = Object.entries(actionTypesIndex)
-    .filter(([index]) => actionTypeRegistry.get(index) !== null)
+    .filter(([index]) => actionTypeRegistry.has(index))
     .map(([index, actionType]) => {
       return {
         ...actionTypeRegistry.get(actionType.id),
@@ -52,7 +52,7 @@ export const AlertingActionsDropdown: React.FunctionComponent<Props> = ({
       onClick={() => setIsPopOverOpen(!isPopoverOpen)}
     >
       <FormattedMessage
-        id="xpack.alertingUI.sections.actions.addActionButtonLabel"
+        id="xpack.alertingUI.sections.actionsList.addActionButtonLabel"
         defaultMessage="Add action"
       />
     </EuiButton>
