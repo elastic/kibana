@@ -90,6 +90,8 @@ export interface IncrementCounterOptions
   migrationVersion?: SavedObjectsMigrationVersion;
 }
 
+const DEFAULT_REFRESH_SETTING = 'wait_for';
+
 export class SavedObjectsRepository {
   private _migrator: KibanaMigrator;
   private _index: string;
@@ -159,7 +161,14 @@ export class SavedObjectsRepository {
     attributes: T,
     options: SavedObjectsCreateOptions = { overwrite: false, references: [] }
   ): Promise<SavedObject<T>> {
-    const { id, migrationVersion, overwrite, namespace, references } = options;
+    const {
+      id,
+      migrationVersion,
+      overwrite,
+      namespace,
+      references,
+      refresh = DEFAULT_REFRESH_SETTING,
+    } = options;
 
     if (!this._allowedTypes.includes(type)) {
       throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
@@ -184,7 +193,7 @@ export class SavedObjectsRepository {
       const response = await this._writeToCluster(method, {
         id: raw._id,
         index: this.getIndexForType(type),
-        refresh: 'wait_for',
+        refresh,
         body: raw._source,
       });
 
@@ -215,7 +224,7 @@ export class SavedObjectsRepository {
     objects: Array<SavedObjectsBulkCreateObject<T>>,
     options: SavedObjectsCreateOptions = {}
   ): Promise<SavedObjectsBulkResponse<T>> {
-    const { namespace, overwrite = false } = options;
+    const { namespace, overwrite = false, refresh = DEFAULT_REFRESH_SETTING } = options;
     const time = this._getCurrentTime();
     const bulkCreateParams: object[] = [];
 
@@ -261,7 +270,7 @@ export class SavedObjectsRepository {
     });
 
     const esResponse = await this._writeToCluster('bulk', {
-      refresh: 'wait_for',
+      refresh,
       body: bulkCreateParams,
     });
 
@@ -318,7 +327,7 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError();
     }
 
-    const { namespace, refresh = 'wait_for' } = options;
+    const { namespace, refresh = DEFAULT_REFRESH_SETTING } = options;
 
     const response = await this._writeToCluster('delete', {
       id: this._serializer.generateRawId(namespace, type, id),
@@ -358,7 +367,7 @@ export class SavedObjectsRepository {
       throw new TypeError(`namespace is required, and must be a string`);
     }
 
-    const { refresh = 'wait_for' } = options;
+    const { refresh = DEFAULT_REFRESH_SETTING } = options;
 
     const allTypes = Object.keys(getRootPropertiesObjects(this._mappings));
 
@@ -636,7 +645,7 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    const { version, namespace, references, refresh = 'wait_for' } = options;
+    const { version, namespace, references, refresh = DEFAULT_REFRESH_SETTING } = options;
 
     const time = this._getCurrentTime();
 
@@ -739,7 +748,7 @@ export class SavedObjectsRepository {
       return { tag: 'Right' as 'Right', value: expectedResult };
     });
 
-    const { refresh = 'wait_for' } = options;
+    const { refresh = DEFAULT_REFRESH_SETTING } = options;
     const esResponse = bulkUpdateParams.length
       ? await this._writeToCluster('bulk', {
           refresh,
@@ -805,7 +814,7 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
     }
 
-    const { migrationVersion, namespace, refresh = 'wait_for' } = options;
+    const { migrationVersion, namespace, refresh = DEFAULT_REFRESH_SETTING } = options;
 
     const time = this._getCurrentTime();
 

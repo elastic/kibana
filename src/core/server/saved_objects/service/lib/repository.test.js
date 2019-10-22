@@ -417,6 +417,27 @@ describe('SavedObjectsRepository', () => {
       });
     });
 
+    it('accepts custom refresh settings', async () => {
+      migrator.migrateDocument = doc => {
+        doc.attributes.title = doc.attributes.title + '!!';
+        doc.migrationVersion = { foo: '2.3.4' };
+        doc.references = [{ name: 'search_0', type: 'search', id: '123' }];
+        return doc;
+      };
+
+      await savedObjectsRepository.create('index-pattern', {
+        id: 'logstash-*',
+        title: 'Logstash',
+      }, {
+        refresh: true
+      });
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({
+        refresh: true
+      });
+    });
+
     it('should use create action if ID defined and overwrite=false', async () => {
       await savedObjectsRepository.create(
         'index-pattern',
@@ -621,6 +642,41 @@ describe('SavedObjectsRepository', () => {
       ]);
 
       expect(onBeforeWrite).toHaveBeenCalledTimes(1);
+    });
+
+    it('accepts a custom refresh setting', async () => {
+      callAdminCluster.mockReturnValue({
+        items: [
+          { create: { type: 'config', id: 'config:one', _primary_term: 1, _seq_no: 1 } },
+          { create: { type: 'index-pattern', id: 'config:two', _primary_term: 1, _seq_no: 1 } },
+        ],
+      });
+
+      await savedObjectsRepository.bulkCreate([
+        {
+          type: 'config',
+          id: 'one',
+          attributes: { title: 'Test One' },
+          references: [{ name: 'ref_0', type: 'test', id: '1' }],
+        },
+        {
+          type: 'index-pattern',
+          id: 'two',
+          attributes: { title: 'Test Two' },
+          references: [{ name: 'ref_0', type: 'test', id: '2' }],
+        },
+      ], {
+        refresh: true
+      });
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+      const bulkCalls = callAdminCluster.mock.calls.filter(([path]) => path === 'bulk');
+
+      expect(bulkCalls.length).toEqual(1);
+
+      expect(bulkCalls[0][1]).toMatchObject({
+        refresh: true
+      });
     });
 
     it('migrates the docs', async () => {

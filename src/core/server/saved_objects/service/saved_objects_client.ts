@@ -33,7 +33,9 @@ import { SavedObjectsErrorHelpers } from './lib/errors';
  *
  * @public
  */
-export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
+export interface SavedObjectsCreateOptions
+  extends SavedObjectsBaseOptions,
+    SavedObjectsMutatingOperationBaseOptions {
   /** (not recommended) Specify an id for the document */
   id?: string;
   /** Overwrite existing documents (defaults to false) */
@@ -208,7 +210,7 @@ export class SavedObjectsClient {
    * @param id
    * @param options
    */
-  async delete(type: string, id: string, options: SavedObjectsBaseOptions = {}) {
+  async delete(type: string, id: string, options: SavedObjectsDeleteOptions = {}) {
     return await this._repository.delete(type, id, options);
   }
 
@@ -279,7 +281,7 @@ export class SavedObjectsClient {
    */
   async bulkUpdate<T extends SavedObjectAttributes = any>(
     objects: Array<SavedObjectsBulkUpdateObject<T>>,
-    options?: SavedObjectsBaseOptions
+    options?: SavedObjectsBulkUpdateOptions
   ): Promise<SavedObjectsBulkUpdateResponse<T>> {
     return await this._repository.bulkUpdate(objects, options);
   }
