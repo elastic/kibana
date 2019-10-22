@@ -27,7 +27,7 @@ function getPreciseTime(precision: Props['precision']) {
 }
 
 export function TimestampTooltip({ time, precision = 'milliseconds' }: Props) {
-  const momentTime = moment.tz(time, moment.tz.guess());
+  const momentTime = moment(time);
   const relativeTimeLabel = momentTime.fromNow();
   const absoluteTimeLabel = momentTime.format(
     `MMM Do YYYY${getPreciseTime(precision)} (ZZ zz)`
