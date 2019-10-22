@@ -265,19 +265,64 @@ function transformFilterStringToQueryObject(doc) {
         // series item split filters filter
         if (item.split_filters) {
           const splitFilters = get(item, 'split_filters') || [];
-          splitFilters.forEach(filter => {
-            if (!filter.filter) {
-              // we don't need to transform anything if there isn't a filter at all
-              return;
-            }
-            if (typeof filter.filter === 'string') {
-              const filterfilterObject = {
-                query: filter.filter,
-                language: 'lucene',
-              };
-              filter.filter = filterfilterObject;
-            }
-          });
+          if (splitFilters.length > 0) {
+            // only transform split_filter filters if we have filters
+            splitFilters.forEach(filter => {
+              if (!filter.filter) {
+              // // we don't need to transform anything if there isn't a filter at all
+                return;
+              }
+              if (typeof filter.filter === 'string') {
+                const filterfilterObject = {
+                  query: filter.filter,
+                  language: 'lucene',
+                };
+                filter.filter = filterfilterObject;
+              }
+            });}
+        }
+      });
+      newDoc.attributes.visState = JSON.stringify(visState);
+    }
+  }
+  return newDoc;
+}
+
+function transformSplitFiltersStringToQueryObject(doc) {
+  const newDoc = cloneDeep(doc);
+  const visStateJSON = get(doc, 'attributes.visState');
+  if (visStateJSON) {
+    let visState;
+    try {
+      visState = JSON.parse(visStateJSON);
+    } catch (e) {
+      // let it go, the data is invalid and we'll leave it as is
+    }
+    if (visState) {
+      const visType = get(visState, 'params.type');
+      const tsvbTypes = ['metric', 'markdown', 'top_n', 'gauge', 'table', 'timeseries'];
+      if (tsvbTypes.indexOf(visType) === -1) {
+        // skip
+        return doc;
+      }
+      // migrate the series split_filter filters
+      const series = get(visState, 'params.series') || [];
+      series.forEach(item => {
+        // series item split filters filter
+        if (item.split_filters) {
+          const splitFilters = get(item, 'split_filters') || [];
+          if (splitFilters.length > 0) {
+            // only transform split_filter filters if we have filters
+            splitFilters.forEach(filter => {
+              if (typeof filter.filter === 'string') {
+                const filterfilterObject = {
+                  query: filter.filter,
+                  language: 'lucene',
+                };
+                filter.filter = filterfilterObject;
+              }
+            });
+          }
         }
       });
       newDoc.attributes.visState = JSON.stringify(visState);
@@ -423,6 +468,7 @@ const executeMigrations720 = flow(
 const executeMigrations730 = flow(
   migrateGaugeVerticalSplitToAlignment,
   transformFilterStringToQueryObject,
+  transformSplitFiltersStringToQueryObject,
   migrateFiltersAggQuery,
   replaceMovAvgToMovFn
 );

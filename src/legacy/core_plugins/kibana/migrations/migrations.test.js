@@ -1143,6 +1143,88 @@ Array [
       expect(series[0].filter).toEqual(params.series[0].filter);
     });
   });
+  describe('7.3.0 tsvb split_filters migration', () => {
+    const migrate = doc => migrations.visualization['7.3.0'](doc);
+    const generateDoc = ({ params }) => ({
+      attributes: {
+        title: 'My Vis',
+        description: 'This is my super cool vis.',
+        visState: JSON.stringify({ params }),
+        uiStateJSON: '{}',
+        version: 1,
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: '{}',
+        },
+      },
+    });
+    it('should change series item filters from a string into an object for all filters', () => {
+      const params = {
+        type: 'timeseries',
+        filter: {
+          query: 'bytes:>1000',
+          language: 'lucene'
+        },
+        series: [
+          {
+            split_filters: [{ filter: 'bytes:>1000' }],
+          },
+        ]
+      };
+      const timeSeriesDoc = generateDoc({ params: params });
+      const migratedtimeSeriesDoc = migrate(timeSeriesDoc);
+      const timeSeriesParams = JSON.parse(migratedtimeSeriesDoc.attributes.visState).params;
+      expect(Object.keys(timeSeriesParams.filter)).toEqual(
+        expect.arrayContaining(['query', 'language'])
+      );
+      expect(Object.keys(timeSeriesParams.series[0].split_filters[0].filter)).toEqual(
+        expect.arrayContaining(['query', 'language'])
+      );
+    });
+    it('should change series item split filters when there is no filter item', () => {
+      const params = {
+        type: 'timeseries',
+        filter: {
+          query: 'bytes:>1000',
+          language: 'lucene'
+        },
+        series: [
+          {
+            split_filters: [{ filter: 'bytes:>1000' }],
+          },
+        ],
+        annotations: [
+          {
+            query_string: {
+              query: 'bytes:>1000',
+              language: 'lucene'
+            }
+          }
+        ],
+      };
+      const timeSeriesDoc = generateDoc({ params: params });
+      const migratedtimeSeriesDoc = migrate(timeSeriesDoc);
+      const timeSeriesParams = JSON.parse(migratedtimeSeriesDoc.attributes.visState).params;
+      expect(timeSeriesParams.series[0].split_filters[0].filter).toHaveProperty('query');
+    });
+    it('should not error out if there are no split filter items', () => {
+      const params = {
+        type: 'timeseries',
+        filter: {
+          query: 'bytes:>1000',
+          language: 'lucene'
+        },
+        series: [
+          {
+            split_filters: [],
+          },
+        ]
+      };
+      const timeSeriesDoc = generateDoc({ params: params });
+      const migratedtimeSeriesDoc = migrate(timeSeriesDoc);
+      const timeSeriesParams = JSON.parse(migratedtimeSeriesDoc.attributes.visState).params;
+      expect(timeSeriesParams.series[0].split_filters).not.toHaveProperty;
+    });
+  });
 
   describe('7.3.1', () => {
     const migrate = migrations.visualization['7.3.1'];
