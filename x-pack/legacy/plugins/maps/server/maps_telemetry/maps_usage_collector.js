@@ -9,7 +9,7 @@ import { TASK_ID, scheduleTask, registerMapsTelemetryTask } from './telemetry_ta
 
 export function initTelemetryCollection(server) {
   registerMapsTelemetryTask(server);
-  scheduleTask(server, server.plugins.task_manager);
+  scheduleTask(server);
   registerMapsUsageCollector(server);
 }
 

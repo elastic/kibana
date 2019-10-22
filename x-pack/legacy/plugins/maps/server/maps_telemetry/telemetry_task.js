@@ -10,7 +10,14 @@ const TELEMETRY_TASK_TYPE = 'maps_telemetry';
 
 export const TASK_ID = `Maps-${TELEMETRY_TASK_TYPE}`;
 
-export function scheduleTask(server, taskManager) {
+export function scheduleTask(server) {
+  const taskManager = server.plugins.task_manager;
+
+  if (!taskManager) {
+    server.log(['warning', 'telemetry'], `Task manager is not available`);
+    return;
+  }
+
   const { kbnServer } = server.plugins.xpack_main.status.plugin;
 
   kbnServer.afterPluginsInit(() => {
