@@ -14,13 +14,13 @@ import { ActionCreator } from 'typescript-fsa';
 
 import '../../../mock/match_media';
 
-import { mocksSource } from '../../containers/source/mock';
-import { FlowTarget } from '../../graphql/types';
-import { useKibanaCore } from '../../lib/compose/kibana_core';
-import { apolloClientObservable, mockGlobalState, TestProviders } from '../../mock';
-import { mockUiSettings } from '../../mock/ui_settings';
-import { createStore, State } from '../../store';
-import { InputsModelId } from '../../store/inputs/constants';
+import { mocksSource } from '../../../containers/source/mock';
+import { FlowTarget } from '../../../graphql/types';
+import { useKibanaCore } from '../../../lib/compose/kibana_core';
+import { apolloClientObservable, mockGlobalState, TestProviders } from '../../../mock';
+import { mockUiSettings } from '../../../mock/ui_settings';
+import { createStore, State } from '../../../store';
+import { InputsModelId } from '../../../store/inputs/constants';
 
 import { IPDetailsComponent, IPDetails } from './index';
 
