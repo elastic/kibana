@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`AddToKql Component Rendering 1`] = `
+exports[`AddFilterToGlobalSearchBar Component Rendering 1`] = `
 <Component
   store={
     Object {
@@ -12,7 +12,7 @@ exports[`AddToKql Component Rendering 1`] = `
     }
   }
 >
-  <AddToKql
+  <AddFilterToGlobalSearchBar
     filter={
       Object {
         "meta": Object {
@@ -36,9 +36,8 @@ exports[`AddToKql Component Rendering 1`] = `
         },
       }
     }
-    id="global"
   >
     siem-kibana
-  </AddToKql>
+  </AddFilterToGlobalSearchBar>
 </Component>
 `;

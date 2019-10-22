@@ -6,7 +6,10 @@
 
 import React from 'react';
 import { sourceDestinationFieldMappings } from '../map_config';
-import { AddToKql, createFilter } from '../../page/add_to_kql';
+import {
+  AddFilterToGlobalSearchBar,
+  createFilter,
+} from '../../page/add_filter_to_global_search_bar';
 import { getEmptyTagValue, getOrEmptyTagFromValue } from '../../empty_value';
 import { DescriptionListStyled } from '../../page';
 import { FeatureProperty } from '../types';
@@ -21,30 +24,29 @@ interface PointToolTipContentProps {
 
 export const PointToolTipContent = React.memo<PointToolTipContentProps>(
   ({ contextId, featureProps, closeTooltip }) => {
-    const featureDescriptionListItems = featureProps.map(property => ({
-      title: sourceDestinationFieldMappings[property._propertyKey],
-      description: (
-        <AddToKql
-          id="global"
-          filter={createFilter(property._propertyKey, property._rawValue)}
-          onFilterAdded={closeTooltip}
-          data-test-subj={`add-to-kql-${property._propertyKey}`}
-        >
-          {property._rawValue != null ? (
-            <DefaultFieldRenderer
-              rowItems={
-                Array.isArray(property._rawValue) ? property._rawValue : [property._rawValue]
-              }
-              attrName={property._propertyKey}
-              idPrefix={`map-point-tooltip-${contextId}-${property._propertyKey}-${property._rawValue}`}
-              render={item => getRenderedFieldValue(property._propertyKey, item)}
-            />
-          ) : (
-            getEmptyTagValue()
-          )}
-        </AddToKql>
-      ),
-    }));
+    const featureDescriptionListItems = featureProps.map(
+      ({ _propertyKey: key, _rawValue: value }) => ({
+        title: sourceDestinationFieldMappings[key],
+        description: (
+          <AddFilterToGlobalSearchBar
+            filter={createFilter(key, value)}
+            onFilterAdded={closeTooltip}
+            data-test-subj={`add-to-kql-${key}`}
+          >
+            {value != null ? (
+              <DefaultFieldRenderer
+                rowItems={Array.isArray(value) ? value : [value]}
+                attrName={key}
+                idPrefix={`map-point-tooltip-${contextId}-${key}-${value}`}
+                render={item => getRenderedFieldValue(key, item)}
+              />
+            ) : (
+              getEmptyTagValue()
+            )}
+          </AddFilterToGlobalSearchBar>
+        ),
+      })
+    );
 
     return <DescriptionListStyled listItems={featureDescriptionListItems} />;
   }

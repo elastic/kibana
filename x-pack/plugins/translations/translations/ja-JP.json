@@ -8797,7 +8797,6 @@
     "xpack.server.checkLicense.errorExpiredMessage": "{licenseType} ライセンスが期限切れのため {pluginName} を使用できません",
     "xpack.server.checkLicense.errorUnavailableMessage": "現在ライセンス情報が利用できないため {pluginName} を使用できません。",
     "xpack.server.checkLicense.errorUnsupportedMessage": "ご使用の {licenseType} ライセンスは {pluginName} をサポートしていません。ライセンスをアップグレードしてください。",
-    "xpack.siem.add_to_kql.filterForValueHoverAction": "値でフィルターします",
     "xpack.siem.andOrBadge.and": "AND",
     "xpack.siem.andOrBadge.or": "OR",
     "xpack.siem.auditd.abortedAuditStartupDescription": "中断された監査のスタートアップ",

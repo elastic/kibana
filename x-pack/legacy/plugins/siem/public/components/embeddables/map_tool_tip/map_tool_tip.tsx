@@ -71,7 +71,6 @@ export const MapToolTip = React.memo<MapToolTipProps>(
             setLayerName(layerNameString);
           } catch (e) {
             setIsError(true);
-            throw e;
           } finally {
             setIsLoading(false);
             setIsLoadingNextFeature(false);

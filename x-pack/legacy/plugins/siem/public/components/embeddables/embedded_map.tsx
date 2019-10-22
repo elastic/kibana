@@ -71,7 +71,7 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
     // Setup embeddables API (i.e. detach extra actions) useEffect
     useEffect(() => {
       try {
-        setupEmbeddablesAPI();
+        setupEmbeddablesAPI(plugins);
       } catch (e) {
         displayErrorToast(i18n.ERROR_CONFIGURING_EMBEDDABLES_API, e.message, dispatchToaster);
         setIsLoading(false);

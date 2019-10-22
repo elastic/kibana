@@ -13,39 +13,39 @@ import { WithHoverActions } from '../../with_hover_actions';
 import { siemFilterManager } from '../../search_bar';
 
 import * as i18n from './translations';
-import { InputsModelId } from '../../../store/inputs/constants';
 
 export * from './helpers';
 
 interface OwnProps {
-  id: InputsModelId;
   children: JSX.Element;
   filter: Filter;
   onFilterAdded?: () => void;
 }
 
-export const AddToKql = React.memo<OwnProps>(({ children, filter, onFilterAdded }) => {
-  const addToKql = () => {
-    siemFilterManager.addFilters(filter);
-    if (onFilterAdded != null) {
-      onFilterAdded();
-    }
-  };
-  return (
-    <WithHoverActions
-      hoverContent={
-        <HoverActionsContainer data-test-subj="hover-actions-container">
-          <EuiToolTip content={i18n.FILTER_FOR_VALUE}>
-            <EuiIcon data-test-subj="add-to-filter" type="filter" onClick={addToKql} />
-          </EuiToolTip>
-        </HoverActionsContainer>
+export const AddFilterToGlobalSearchBar = React.memo<OwnProps>(
+  ({ children, filter, onFilterAdded }) => {
+    const addToKql = () => {
+      siemFilterManager.addFilters(filter);
+      if (onFilterAdded != null) {
+        onFilterAdded();
       }
-      render={() => children}
-    />
-  );
-});
+    };
+    return (
+      <WithHoverActions
+        hoverContent={
+          <HoverActionsContainer data-test-subj="hover-actions-container">
+            <EuiToolTip content={i18n.FILTER_FOR_VALUE}>
+              <EuiIcon data-test-subj="add-to-filter" type="filter" onClick={addToKql} />
+            </EuiToolTip>
+          </HoverActionsContainer>
+        }
+        render={() => children}
+      />
+    );
+  }
+);
 
-AddToKql.displayName = 'AddToKql';
+AddFilterToGlobalSearchBar.displayName = 'AddFilterToGlobalSearchBar';
 
 export const HoverActionsContainer = styled(EuiPanel)`
   align-items: center;

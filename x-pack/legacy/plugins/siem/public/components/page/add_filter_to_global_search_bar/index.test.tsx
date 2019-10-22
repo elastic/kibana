@@ -12,7 +12,7 @@ import * as React from 'react';
 import { apolloClientObservable, mockGlobalState, TestProviders } from '../../../mock';
 import { createStore, State } from '../../../store';
 import { siemFilterManager } from '../../search_bar';
-import { AddToKql } from '.';
+import { AddFilterToGlobalSearchBar } from '.';
 
 interface MockSiemFilterManager {
   addFilters: (filters: Filter[]) => void;
@@ -26,7 +26,7 @@ jest.mock('../../search_bar', () => ({
 const mockAddFilters = jest.fn();
 mockSiemFilterManager.addFilters = mockAddFilters;
 
-describe('AddToKql Component', () => {
+describe('AddFilterToGlobalSearchBar Component', () => {
   const state: State = mockGlobalState;
   let store = createStore(state, apolloClientObservable);
 
@@ -37,8 +37,7 @@ describe('AddToKql Component', () => {
   test('Rendering', async () => {
     const wrapper = shallow(
       <TestProviders store={store}>
-        <AddToKql
-          id="global"
+        <AddFilterToGlobalSearchBar
           filter={{
             meta: {
               alias: null,
@@ -62,7 +61,7 @@ describe('AddToKql Component', () => {
           }}
         >
           <>{'siem-kibana'}</>
-        </AddToKql>
+        </AddFilterToGlobalSearchBar>
       </TestProviders>
     );
 
@@ -72,8 +71,7 @@ describe('AddToKql Component', () => {
   test('Rendering tooltip', async () => {
     const wrapper = shallow(
       <TestProviders store={store}>
-        <AddToKql
-          id="global"
+        <AddFilterToGlobalSearchBar
           filter={{
             meta: {
               alias: null,
@@ -97,7 +95,7 @@ describe('AddToKql Component', () => {
           }}
         >
           <>{'siem-kibana'}</>
-        </AddToKql>
+        </AddFilterToGlobalSearchBar>
       </TestProviders>
     );
 
@@ -111,8 +109,7 @@ describe('AddToKql Component', () => {
 
     const wrapper = mount(
       <TestProviders store={store}>
-        <AddToKql
-          id="global"
+        <AddFilterToGlobalSearchBar
           onFilterAdded={onFilterAdded}
           filter={{
             meta: {
@@ -137,7 +134,7 @@ describe('AddToKql Component', () => {
           }}
         >
           <>{'siem-kibana'}</>
-        </AddToKql>
+        </AddFilterToGlobalSearchBar>
       </TestProviders>
     );
 
