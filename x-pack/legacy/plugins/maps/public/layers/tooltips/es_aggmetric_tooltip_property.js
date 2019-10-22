@@ -22,7 +22,7 @@ export class ESAggMetricTooltipProperty extends ESTooltipProperty {
     if (typeof this._rawValue === 'undefined') {
       return '-';
     }
-    if (this._metricField.type === METRIC_TYPE.COUNT) {
+    if (this._metricField.type === METRIC_TYPE.COUNT || this._metricField.type === METRIC_TYPE.UNIQUE_COUNT) {
       return this._rawValue;
     }
     const indexPatternField = this._indexPattern.fields.getByName(this._metricField.field);
