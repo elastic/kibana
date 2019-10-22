@@ -27,10 +27,10 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
   private launchReject?: (reason?: any) => void;
   launchFailed: boolean = false;
   protected constructor(
-    readonly name: string,
-    readonly targetHost: string,
-    readonly options: ServerOptions,
-    readonly loggerFactory: LoggerFactory
+    public readonly name: string,
+    public readonly targetHost: string,
+    public readonly options: ServerOptions,
+    public readonly loggerFactory: LoggerFactory
   ) {
     this.log = this.loggerFactory.getLogger([`${seqNo++}`, `${this.name}`, 'code']);
   }

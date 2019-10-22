@@ -16,6 +16,17 @@ interface Props {
 }
 
 export class DiffEditor extends React.Component<Props> {
+  lineHeight = 18;
+  static linesCount(s: string = '') {
+    let count = 0;
+    let position = 0;
+    while (position !== -1) {
+      count++;
+      position = position + 1;
+      position = s.indexOf('\n', position);
+    }
+    return count;
+  }
   private diffEditor: MonacoDiffEditor | null = null;
   public mountDiffEditor = (container: HTMLDivElement) => {
     this.diffEditor = new MonacoDiffEditor(
@@ -26,6 +37,12 @@ export class DiffEditor extends React.Component<Props> {
       this.props.renderSideBySide
     );
     this.diffEditor.init();
+  };
+
+  getEditorHeight = () => {
+    const originalLinesCount = DiffEditor.linesCount(this.props.originCode);
+    const modifiedLinesCount = DiffEditor.linesCount(this.props.modifiedCode);
+    return Math.min(Math.max(originalLinesCount, modifiedLinesCount) * this.lineHeight, 400);
   };
 
   public componentDidUpdate(prevProps: Props) {
@@ -39,6 +56,13 @@ export class DiffEditor extends React.Component<Props> {
   }
 
   public render() {
-    return <div id="diffEditor" ref={this.mountDiffEditor} style={{ height: 1000 }} />;
+    return (
+      <div
+        id="diffEditor"
+        className="codeContainer__monaco"
+        ref={this.mountDiffEditor}
+        style={{ height: this.getEditorHeight() }}
+      />
+    );
   }
 }

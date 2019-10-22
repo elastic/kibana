@@ -22,7 +22,7 @@ const SPLITTER = '≤∞≥';
 export class FormatParser {
   private fields: Field[];
 
-  constructor(readonly format: Format) {
+  constructor(public readonly format: Format) {
     this.fields = [];
     this.toFields(this.fields, format);
   }

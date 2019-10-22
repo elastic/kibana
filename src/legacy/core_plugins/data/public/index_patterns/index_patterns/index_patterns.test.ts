@@ -73,5 +73,6 @@ describe('IndexPatterns', () => {
     const indexPattern = await indexPatterns.get(id);
 
     expect(indexPattern).toBeDefined();
+    expect(indexPattern).toBe(await indexPatterns.get(id));
   });
 });

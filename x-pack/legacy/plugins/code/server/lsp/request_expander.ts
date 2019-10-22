@@ -49,11 +49,11 @@ export class RequestExpander implements ILanguageServerHandler {
 
   constructor(
     proxy: LanguageServerProxy,
-    readonly builtinWorkspace: boolean,
-    readonly maxWorkspace: number,
-    readonly serverOptions: ServerOptions,
-    readonly initialOptions: InitializeOptions,
-    readonly log: Logger
+    public readonly builtinWorkspace: boolean,
+    public readonly maxWorkspace: number,
+    public readonly serverOptions: ServerOptions,
+    public readonly initialOptions: InitializeOptions,
+    public readonly log: Logger
   ) {
     this.proxy = proxy;
     const clearListener = () => {

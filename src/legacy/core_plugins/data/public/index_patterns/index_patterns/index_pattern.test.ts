@@ -29,6 +29,10 @@ import { stubbedSavedObjectIndexPattern } from '../../../../../../fixtures/stubb
 import { Field } from '../index_patterns_service';
 import { setNotifications } from '../services';
 
+// Temporary disable eslint, will be removed after moving to new platform folder
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { notificationServiceMock } from '../../../../../../core/public/notifications/notifications_service.mock';
+
 jest.mock('ui/registry/field_formats', () => ({
   fieldFormats: {
     getDefaultInstance: jest.fn(),
@@ -131,22 +135,14 @@ function setDocsourcePayload(id: string | null, providedPayload: any) {
 
 describe('IndexPattern', () => {
   const indexPatternId = 'test-pattern';
+  const notifications = notificationServiceMock.createStartContract();
 
   let indexPattern: IndexPattern;
 
   // create an indexPattern instance for each test
   beforeEach(() => {
-    setNotifications({
-      toasts: {
-        addDanger: jest.fn(),
-        addError: jest.fn(),
-        add: jest.fn(),
-        addWarning: jest.fn(),
-        addSuccess: jest.fn(),
-        remove: jest.fn(),
-        get$: jest.fn(),
-      },
-    });
+    setNotifications(notifications);
+
     return create(indexPatternId).then((pattern: IndexPattern) => {
       indexPattern = pattern;
     });
