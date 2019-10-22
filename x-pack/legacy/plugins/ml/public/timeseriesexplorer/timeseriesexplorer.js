@@ -835,7 +835,9 @@ export class TimeSeriesExplorer extends React.Component {
     this.subscriptions.add(annotationsRefresh$.subscribe(this.refresh));
     this.subscriptions.add(interval$.subscribe(tableControlsListener));
     this.subscriptions.add(severity$.subscribe(tableControlsListener));
-    this.subscriptions.add(mlTimefilterRefresh$.subscribe(() => this.refresh(false)));
+    this.subscriptions.add(mlTimefilterRefresh$.subscribe(() => {
+      this.refresh(true);
+    }));
 
     // Listen for changes to job selection.
     this.subscriptions.add(this.jobSelectService.subscribe(({ selection: selectedJobIds }) => {
