@@ -4,4 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './apps/index';
+import { createUiNewPlatformMock } from 'ui/new_platform/__mocks__/helpers';
+
+const npStart = createUiNewPlatformMock().npStart;
+
+export function useKibanaPlugins() {
+  return npStart.plugins;
+}
