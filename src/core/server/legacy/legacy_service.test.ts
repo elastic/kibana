@@ -127,6 +127,7 @@ describe('once LegacyService is set up with connection info', () => {
       configService: configService as any,
     });
 
+    await legacyService.discoverPlugins();
     await legacyService.setup(setupDeps);
     await legacyService.start(startDeps);
 
@@ -152,6 +153,7 @@ describe('once LegacyService is set up with connection info', () => {
       logger,
       configService: configService as any,
     });
+    await legacyService.discoverPlugins();
     await legacyService.setup(setupDeps);
     await legacyService.start(startDeps);
 
@@ -179,6 +181,7 @@ describe('once LegacyService is set up with connection info', () => {
       configService: configService as any,
     });
 
+    await legacyService.discoverPlugins();
     await legacyService.setup(setupDeps);
     await expect(legacyService.start(startDeps)).rejects.toThrowErrorMatchingInlineSnapshot(
       `"something failed"`
@@ -198,8 +201,11 @@ describe('once LegacyService is set up with connection info', () => {
       configService: configService as any,
     });
 
-    await expect(legacyService.setup(setupDeps)).rejects.toThrowErrorMatchingInlineSnapshot(
+    await expect(legacyService.discoverPlugins()).rejects.toThrowErrorMatchingInlineSnapshot(
       `"something failed"`
+    );
+    await expect(legacyService.setup(setupDeps)).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Legacy service has not discovered legacy plugins yet. Ensure LegacyService.discoverPlugins() is called before LegacyService.setup()"`
     );
     await expect(legacyService.start(startDeps)).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Legacy service is not setup yet."`
@@ -216,6 +222,7 @@ describe('once LegacyService is set up with connection info', () => {
       logger,
       configService: configService as any,
     });
+    await legacyService.discoverPlugins();
     await legacyService.setup(setupDeps);
     await legacyService.start(startDeps);
 
@@ -236,6 +243,7 @@ describe('once LegacyService is set up with connection info', () => {
       logger,
       configService: configService as any,
     });
+    await legacyService.discoverPlugins();
     await legacyService.setup(setupDeps);
     await legacyService.start(startDeps);
 
@@ -260,6 +268,7 @@ describe('once LegacyService is set up with connection info', () => {
       logger,
       configService: configService as any,
     });
+    await legacyService.discoverPlugins();
     await legacyService.setup(setupDeps);
     await legacyService.start(startDeps);
 
@@ -279,7 +288,7 @@ describe('once LegacyService is set up without connection info', () => {
   let legacyService: LegacyService;
   beforeEach(async () => {
     legacyService = new LegacyService({ coreId, env, logger, configService: configService as any });
-
+    await legacyService.discoverPlugins();
     await legacyService.setup(setupDeps);
     await legacyService.start(startDeps);
   });
@@ -328,6 +337,7 @@ describe('once LegacyService is set up in `devClusterMaster` mode', () => {
       configService: configService as any,
     });
 
+    await devClusterLegacyService.discoverPlugins();
     await devClusterLegacyService.setup(setupDeps);
     await devClusterLegacyService.start(startDeps);
 
@@ -349,6 +359,7 @@ describe('once LegacyService is set up in `devClusterMaster` mode', () => {
       configService: configService as any,
     });
 
+    await devClusterLegacyService.discoverPlugins();
     await devClusterLegacyService.setup(setupDeps);
     await devClusterLegacyService.start(startDeps);
 

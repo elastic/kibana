@@ -51,7 +51,7 @@ describe('SavedObjectsService', () => {
       const soService = new SavedObjectsService(coreContext);
       const coreSetup = ({
         elasticsearch: { adminClient$: of(clusterClient) },
-        legacy: { uiExports: { savedObjectMappings: [] }, pluginExtendedConfig: {} },
+        legacyPlugins: { uiExports: { savedObjectMappings: [] }, pluginExtendedConfig: {} },
       } as unknown) as SavedObjectsSetupDeps;
 
       await soService.setup(coreSetup);
@@ -66,7 +66,7 @@ describe('SavedObjectsService', () => {
       const soService = new SavedObjectsService(coreContext);
       const coreSetup = ({
         elasticsearch: { adminClient$: of({ callAsInternalUser: jest.fn() }) },
-        legacy: { uiExports: {}, pluginExtendedConfig: {} },
+        legacyPlugins: { uiExports: {}, pluginExtendedConfig: {} },
       } as unknown) as SavedObjectsSetupDeps;
 
       const savedObjectsSetup = await soService.setup(coreSetup);
@@ -82,7 +82,7 @@ describe('SavedObjectsService', () => {
       const soService = new SavedObjectsService(coreContext);
       const coreSetup = ({
         elasticsearch: { adminClient$: of({ callAsInternalUser: jest.fn() }) },
-        legacy: { uiExports: {}, pluginExtendedConfig: {} },
+        legacyPlugins: { uiExports: {}, pluginExtendedConfig: {} },
       } as unknown) as SavedObjectsSetupDeps;
 
       await soService.setup(coreSetup);
@@ -96,7 +96,7 @@ describe('SavedObjectsService', () => {
       const soService = new SavedObjectsService(coreContext);
       const coreSetup = ({
         elasticsearch: { adminClient$: of({ callAsInternalUser: jest.fn() }) },
-        legacy: { uiExports: {}, pluginExtendedConfig: {} },
+        legacyPlugins: { uiExports: {}, pluginExtendedConfig: {} },
       } as unknown) as SavedObjectsSetupDeps;
 
       await soService.setup(coreSetup);
@@ -110,7 +110,7 @@ describe('SavedObjectsService', () => {
       const soService = new SavedObjectsService(coreContext);
       const coreSetup = ({
         elasticsearch: { adminClient$: of({ callAsInternalUser: jest.fn() }) },
-        legacy: { uiExports: {}, pluginExtendedConfig: {} },
+        legacyPlugins: { uiExports: {}, pluginExtendedConfig: {} },
       } as unknown) as SavedObjectsSetupDeps;
 
       await soService.setup(coreSetup);

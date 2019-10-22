@@ -35,9 +35,11 @@ jest.doMock('./elasticsearch/elasticsearch_service', () => ({
   ElasticsearchService: jest.fn(() => mockElasticsearchService),
 }));
 
-export const mockLegacyService = {
+import { ILegacyService } from './legacy/legacy_service';
+export const mockLegacyService: ILegacyService = {
   legacyId: Symbol(),
-  setup: jest.fn().mockReturnValue({ uiExports: {} }),
+  discoverPlugins: jest.fn().mockReturnValue({ uiExports: {} }),
+  setup: jest.fn(),
   start: jest.fn(),
   stop: jest.fn(),
 };

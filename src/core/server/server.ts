@@ -77,6 +77,7 @@ export class Server {
 
     // Discover any plugins before continuing. This allows other systems to utilize the plugin dependency graph.
     const pluginDependencies = await this.plugins.discover();
+    const legacyPlugins = await this.legacy.discoverPlugins();
     const contextServiceSetup = this.context.setup({
       // We inject a fake "legacy plugin" with dependencies on every plugin so that legacy plugins:
       // 1) Can access context from any NP plugin
@@ -102,26 +103,27 @@ export class Server {
       http: httpSetup,
     });
 
+    const savedObjectsSetup = await this.savedObjects.setup({
+      elasticsearch: elasticsearchServiceSetup,
+      legacyPlugins,
+    });
+
     const coreSetup = {
       context: contextServiceSetup,
       elasticsearch: elasticsearchServiceSetup,
       http: httpSetup,
       uiSettings: uiSettingsSetup,
+      savedObjects: savedObjectsSetup,
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
 
-    const legacySetup = await this.legacy.setup({
+    await this.legacy.setup({
       core: { ...coreSetup, plugins: pluginsSetup },
       plugins: mapToObject(pluginsSetup.contracts),
     });
 
-    const savedObjectsSetup = await this.savedObjects.setup({
-      elasticsearch: elasticsearchServiceSetup,
-      legacy: legacySetup,
-    });
-
-    this.registerCoreContext({ ...coreSetup, savedObjects: savedObjectsSetup });
+    this.registerCoreContext(coreSetup);
 
     return coreSetup;
   }

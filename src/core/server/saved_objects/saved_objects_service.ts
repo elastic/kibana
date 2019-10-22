@@ -30,12 +30,13 @@ import {
 import { getRootPropertiesObjects } from './mappings';
 import { KibanaMigrator, IKibanaMigrator } from './migrations';
 import { CoreContext } from '../core_context';
-import { LegacyServiceSetup } from '../legacy/legacy_service';
+import { LegacyServiceDiscoverPlugins } from '../legacy/legacy_service';
 import { ElasticsearchServiceSetup } from '../elasticsearch';
 import { KibanaConfigType } from '../kibana_config';
 import { retryCallCluster } from '../elasticsearch/retry_call_cluster';
 import { SavedObjectsConfigType } from './saved_objects_config';
 import { KibanaRequest } from '../http';
+import { SavedObjectsClientContract } from './types';
 import { Logger } from '..';
 
 /**
@@ -43,6 +44,7 @@ import { Logger } from '..';
  */
 export interface SavedObjectsServiceSetup {
   clientProvider: ISavedObjectsClientProvider;
+  internalClient: SavedObjectsClientContract;
 }
 
 /**
@@ -55,7 +57,7 @@ export interface SavedObjectsServiceStart {
 
 /** @internal */
 export interface SavedObjectsSetupDeps {
-  legacy: LegacyServiceSetup;
+  legacyPlugins: LegacyServiceDiscoverPlugins;
   elasticsearch: ElasticsearchServiceSetup;
 }
 
@@ -73,7 +75,7 @@ export class SavedObjectsService
     this.logger = coreContext.logger.get('savedobjects-service');
   }
 
-  public async setup(coreSetup: SavedObjectsSetupDeps): Promise<SavedObjectsServiceSetup> {
+  public async setup(setupDeps: SavedObjectsSetupDeps): Promise<SavedObjectsServiceSetup> {
     this.logger.debug('Setting up SavedObjects service');
 
     const {
@@ -81,9 +83,9 @@ export class SavedObjectsService
       savedObjectMappings,
       savedObjectMigrations,
       savedObjectValidations,
-    } = await coreSetup.legacy.uiExports;
+    } = setupDeps.legacyPlugins.uiExports;
 
-    const adminClient = await coreSetup.elasticsearch.adminClient$.pipe(first()).toPromise();
+    const adminClient = await setupDeps.elasticsearch.adminClient$.pipe(first()).toPromise();
 
     const kibanaConfig = await this.coreContext.configService
       .atPath<KibanaConfigType>('kibana')
@@ -102,7 +104,7 @@ export class SavedObjectsService
       savedObjectValidations,
       logger: this.coreContext.logger.get('migrations'),
       kibanaVersion: this.coreContext.env.packageInfo.version,
-      config: coreSetup.legacy.pluginExtendedConfig,
+      config: setupDeps.legacyPlugins.pluginExtendedConfig,
       savedObjectsConfig,
       kibanaConfig,
       callCluster: retryCallCluster(adminClient.callAsInternalUser),
@@ -118,7 +120,7 @@ export class SavedObjectsService
       defaultClientFactory({ request }) {
         const repository = new SavedObjectsRepository({
           index: kibanaConfig.index,
-          config: coreSetup.legacy.pluginExtendedConfig,
+          config: setupDeps.legacyPlugins.pluginExtendedConfig,
           migrator,
           mappings,
           schema,
@@ -131,8 +133,22 @@ export class SavedObjectsService
       },
     });
 
+    const internalRepository = new SavedObjectsRepository({
+      index: kibanaConfig.index,
+      config: setupDeps.legacyPlugins.pluginExtendedConfig,
+      migrator,
+      mappings,
+      schema,
+      serializer,
+      allowedTypes: visibleTypes,
+      callCluster: retryCallCluster(adminClient.callAsInternalUser),
+    });
+
+    const internalClient = new SavedObjectsClient(internalRepository);
+
     return {
       clientProvider: this.clientProvider,
+      internalClient,
     };
   }
 
