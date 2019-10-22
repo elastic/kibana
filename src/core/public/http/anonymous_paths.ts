@@ -20,7 +20,7 @@
 import { HttpSetup } from './types';
 
 export class AnonymousPaths {
-  private paths: Set<string>;
+  private readonly paths = new Set<string>();
 
   constructor(private basePath: HttpSetup['basePath']) {
     this.paths = new Set();
