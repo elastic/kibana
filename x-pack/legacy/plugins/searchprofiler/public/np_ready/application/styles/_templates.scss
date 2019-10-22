@@ -1,26 +1,49 @@
 @import '@elastic/eui/src/components/header/variables';
 @import '@elastic/eui/src/components/panel/mixins';
 
+#searchProfilerAppRoot {
+  display: flex;
+  flex: 1 1 auto;
+}
+
+
+.prfDevTool__page {
+  display: flex;
+  flex: 1 1 auto;
+  &__body {
+    flex: 1 1 auto;
+  }
+
+  &__pageBody {
+    flex: 1 1 auto;
+  }
+
+  &__pageBodyContentBody {
+    height: 100%;
+  }
+
+  &__bodyGroup {
+    height: 100%;
+  }
+}
+
 .prfDevTool {
   height: calc(100vh - #{$euiHeaderChildSize});
   overflow: hidden;
 
   .devApp__container {
-  overflow: hidden;
-  flex-shrink: 1;
+    overflow: hidden;
+    flex-shrink: 1;
   }
 }
 
 .prfDevTool__container {
-  display: flex;
-  flex: 1 1 auto;
-  padding: $euiSize;
   overflow: hidden;
 
   // SASSTODO/EUITODO/HACK: Reset font styles of headers
-  h1, h2, h3, h4, h5, h6 {
-    font: inherit;
-  }
+  //h1, h2, h3, h4, h5, h6 {
+  //  font: inherit;
+  //}
 }
 
 @include euiPanel('prfDevTool__main');

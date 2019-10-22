@@ -26,12 +26,9 @@
 @include euiPanel('prfDevTool__main');
 
 .prfDevTool__main {
-  flex: 3;
   order: 2;
   margin-left: $euiSize;
-  display: flex;
   overflow: hidden;
-  flex-direction: column;
 
   // Make only the tab content scroll
   search-profiler-tabs {

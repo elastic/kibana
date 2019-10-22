@@ -23,36 +23,43 @@ import { plugin } from './np_ready';
 const pluginInstance = plugin({} as any);
 
 const template = `<kbn-dev-tools-app class="prfDevTool" data-test-subj="searchProfiler">
-  <div id="seachProfilerAppRoot" />
+  <div id="searchProfilerAppRoot" data-ng-init="startReactApp()" />
 </kbn-dev-tools-app>`;
 
 uiRoutes.when('/dev_tools/searchprofiler', {
   template,
   requireUICapability: 'dev_tools.show',
   controller: $scope => {
-    const el = document.querySelector<HTMLElement>('seachProfilerAppRoot')!;
+    $scope.startReactApp = () => {
+      const el = document.querySelector<HTMLElement>('#searchProfilerAppRoot');
+      if (!el) {
+        const errorMessage = 'Could not mount Searchprofiler App!';
+        npSetup.core.fatalErrors.add(errorMessage);
+        throw new Error(errorMessage);
+      }
 
-    if (!el) {
-      const error = `Could not mount app!`;
-      npSetup.core.fatalErrors.add(error);
-      throw new Error(error);
-    }
+      const coreApplicationShim = {
+        register(app: any) {
+          const unmount = app.mount();
+          $scope.$on('$destroy', () => unmount());
+        },
+      };
 
-    pluginInstance.setup(npSetup.core, {
-      __LEGACY: {
-        I18nContext,
-        licenseEnabled: xpackInfo.get('features.searchprofiler.enableAppLink'),
-        notifications: (toastNotifications as unknown) as NotificationsSetup,
-        formatAngularHttpError,
-        el,
-      },
-    });
-
-    pluginInstance.start(
-      {
-        ...npStart.core,
-      },
-      {}
-    );
+      pluginInstance.setup(
+        {
+          ...npSetup.core,
+          application: coreApplicationShim,
+        },
+        {
+          __LEGACY: {
+            I18nContext,
+            licenseEnabled: xpackInfo.get('features.searchprofiler.enableAppLink'),
+            notifications: (toastNotifications as unknown) as NotificationsSetup,
+            formatAngularHttpError,
+            el,
+          },
+        }
+      );
+    };
   },
 });

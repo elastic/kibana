@@ -7,6 +7,14 @@
 import React, { useCallback, useState } from 'react';
 import _ from 'lodash';
 
+import {
+  EuiPage,
+  EuiPageBody,
+  EuiPageContent,
+  EuiPageContentBody,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { ProfileQueryEditor } from '.';
 
 import {
@@ -44,30 +52,50 @@ export const Main = () => {
 
   return (
     <>
-      <div className="prfDevTool__container">
-        <div className="prfDevTool__main">
-          <SearchProfilerTabs
-            activeTab={activeTab}
-            activateTab={(target: Targets) => setActiveTab(target)}
-            has={{
-              aggregations: Boolean(currentResponse && hasAggregations(currentResponse)),
-              searches: Boolean(currentResponse && hasSearch(currentResponse)),
-            }}
-          />
-          {activeTab ? (
-            <ProfileTree onHighlight={onHighlight} target={activeTab} data={currentResponse} />
-          ) : null}
-        </div>
-      </div>
-      <div className="prfDevTool__sense">
-        <ProfileQueryEditor onResponse={resp => setCurrentResponse(resp)} />
-        {showDetailsFlyout ? (
-          <HighlightDetailsFlyout
-            {...highlightedDetails!}
-            onClose={() => setShowDetailsFlyout(false)}
-          />
-        ) : null}
-      </div>
+      <EuiPage className="prfDevTool__page">
+        <EuiPageBody className="prfDevTool__page__pageBody">
+          <EuiPageContent className="prfDevTool__page__pageBodyContent">
+            <EuiPageContentBody className="prfDevTool__page__pageBodyContentBody">
+              <EuiFlexGroup direction="row" className="prfDevTool__page__bodyGroup">
+                <EuiFlexItem>
+                  <div className="prfDevTool__sense">
+                    <ProfileQueryEditor onResponse={resp => setCurrentResponse(resp)} />
+                  </div>
+                </EuiFlexItem>
+                <EuiFlexItem grow={3}>
+                  <EuiFlexGroup direction="column">
+                    <div className="prfDevTool__main">
+                      <SearchProfilerTabs
+                        activeTab={activeTab}
+                        activateTab={(target: Targets) => setActiveTab(target)}
+                        has={{
+                          aggregations: Boolean(
+                            currentResponse && hasAggregations(currentResponse)
+                          ),
+                          searches: Boolean(currentResponse && hasSearch(currentResponse)),
+                        }}
+                      />
+                      {activeTab ? (
+                        <ProfileTree
+                          onHighlight={onHighlight}
+                          target={activeTab}
+                          data={currentResponse}
+                        />
+                      ) : null}
+                    </div>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              {showDetailsFlyout ? (
+                <HighlightDetailsFlyout
+                  {...highlightedDetails!}
+                  onClose={() => setShowDetailsFlyout(false)}
+                />
+              ) : null}
+            </EuiPageContentBody>
+          </EuiPageContent>
+        </EuiPageBody>
+      </EuiPage>
     </>
   );
 };

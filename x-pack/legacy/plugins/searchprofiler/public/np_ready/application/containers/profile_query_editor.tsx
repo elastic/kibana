@@ -34,12 +34,12 @@ export const ProfileQueryEditor = ({ onResponse }: Props) => {
         <EuiFormRow
           label={i18n.translate('xpack.searchProfiler.formIndexLabel', { defaultMessage: 'Index' })}
         >
-          <EuiFieldText inputRef={indexInputRef} />
+          <EuiFieldText inputRef={ref => (indexInputRef.current = ref!)} />
         </EuiFormRow>
         <EuiFormRow
           label={i18n.translate('xpack.searchProfiler.formTypeLabel', { defaultMessage: 'Type' })}
         >
-          <EuiFieldText inputRef={typeInputRef} />
+          <EuiFieldText inputRef={ref => (typeInputRef.current = ref!)} />
         </EuiFormRow>
       </EuiForm>
       <Editor licenseEnabled={licenseEnabled} />
