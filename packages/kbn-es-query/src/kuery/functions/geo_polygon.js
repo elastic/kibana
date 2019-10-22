@@ -39,7 +39,7 @@ export function toElasticsearchQuery(node, indexPattern, config = {}, context = 
   const fieldName = nodeTypes.literal.toElasticsearchQuery(fullFieldNameArg);
   const field = get(indexPattern, 'fields', []).find(field => field.name === fieldName);
   const queryParams = {
-    points: points.map((point) => { ast.toElasticsearchQuery(point, indexPattern, config, context); })
+    points: points.map((point) => { return ast.toElasticsearchQuery(point, indexPattern, config, context); })
   };
 
   if (field && field.scripted) {
