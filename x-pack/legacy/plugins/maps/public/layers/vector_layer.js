@@ -195,7 +195,7 @@ export class VectorLayer extends AbstractLayer {
 
   getLegendDetails() {
     const getFieldLabel = async fieldName => {
-      const ordinalFields = await this.getOrdinalFields();
+      const ordinalFields = await this._getOrdinalFields();
       const field = ordinalFields.find(({ name }) => {
         return name === fieldName;
       });
@@ -287,6 +287,13 @@ export class VectorLayer extends AbstractLayer {
     });
 
     return [...numberFieldOptions, ...joinFields];
+  }
+
+  async _getOrdinalFields() {
+    return [
+      ... await this.getDateFields(),
+      ... await this.getNumberFields()
+    ];
   }
 
   getIndexPatternIds() {
