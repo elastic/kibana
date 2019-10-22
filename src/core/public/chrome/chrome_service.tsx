@@ -231,7 +231,6 @@ export class ChromeService {
 
   public stop() {
     this.navLinks.stop();
-    this.docTitle.stop();
     this.stop$.next();
   }
 }

@@ -18,7 +18,6 @@
  */
 
 import { DocTitleService } from './doc_title_service';
-import { take } from 'rxjs/operators';
 
 describe('DocTitleService', () => {
   const defaultTitle = 'KibanaTest';
@@ -67,38 +66,6 @@ describe('DocTitleService', () => {
       expect(document.title).toEqual(defaultTitle);
       start.apply();
       expect(document.title).toEqual('TitleA');
-    });
-  });
-
-  describe('#get$()', () => {
-    it('returns the default title at startup', async () => {
-      expect(
-        await getStart('AnotherTitle')
-          .get$()
-          .pipe(take(1))
-          .toPromise()
-      ).toEqual('AnotherTitle');
-    });
-
-    it('emits a value on each title change', async () => {
-      const start = getStart();
-      const titles: string[] = [];
-      start.get$().subscribe(title => titles.push(title));
-      start.change({ parts: ['TitleA'], excludeBase: true });
-      start.change({ parts: ['TitleB'], excludeBase: true });
-      expect(titles).toEqual(['KibanaTest', 'TitleA', 'TitleB']);
-    });
-
-    it('stops emitting once the service is stopped', async () => {
-      const service = new DocTitleService();
-      const start = service.start({ document });
-      const titles: string[] = [];
-      start.get$().subscribe(title => titles.push(title));
-      start.change({ parts: ['TitleA'], excludeBase: true });
-      expect(titles).toEqual(['KibanaTest', 'TitleA']);
-      service.stop();
-      start.change({ parts: ['TitleB'], excludeBase: true });
-      expect(titles).toEqual(['KibanaTest', 'TitleA']);
     });
   });
 

@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
 import { compact, flattenDeep, isString, isArray } from 'lodash';
-import { takeUntil } from 'rxjs/operators';
 
 interface StartDeps {
   document: { title: string };
@@ -43,10 +41,6 @@ interface StartDeps {
  * @public
  * */
 export interface ChromeDocTitle {
-  /**
-   * Gets an observable of the current document title.
-   */
-  get$(): Observable<string>;
   /**
    * Changes the current document title.
    *
@@ -126,16 +120,12 @@ export class DocTitleService {
   private document = { title: '' };
   private baseTitle = '';
   private current = defaultTitle;
-  private readonly title$ = new BehaviorSubject<string>('');
-  private readonly stop$ = new ReplaySubject(1);
 
   public start({ document }: StartDeps): ChromeDocTitle {
     this.document = document;
     this.baseTitle = document.title;
-    this.title$.next(this.baseTitle);
 
     return {
-      get$: () => this.title$.pipe(takeUntil(this.stop$)),
       change: (title: ChromeDocTitleChange, apply = true) => {
         this.current = inputToEntry(title);
         if (apply) {
@@ -159,14 +149,9 @@ export class DocTitleService {
     };
   }
 
-  public stop() {
-    this.stop$.next();
-  }
-
   private applyTitle() {
     const rendered = this.render(this.current);
     this.document.title = rendered;
-    this.title$.next(rendered);
   }
 
   private render(title: ChromeDocTitleEntry) {
