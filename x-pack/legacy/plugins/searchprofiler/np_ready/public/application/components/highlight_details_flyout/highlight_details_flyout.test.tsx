@@ -10,36 +10,51 @@ import { HighlightDetailsFlyout, Props } from '.';
 describe('Highlight Details Flyout', () => {
   it('renders', async () => {
     const props: Props = {
-      breakdown: [
-        {
-          color: 'test',
-          key: 'test',
-          relative: 100,
-          tip: 'test',
-          time: 100,
-        },
-        {
-          color: 'test',
-          key: 'test',
-          relative: 100,
-          tip: 'test',
-          time: 100,
-        },
-        {
-          color: 'test',
-          key: 'test',
-          relative: 100,
-          tip: 'test',
-          time: 100,
-        },
-      ],
+      onClose: () => {},
+      shard: {
+        aggregations: [],
+        id: ['test', 'test', 'test'],
+        searches: [],
+        color: '#fff',
+        time: 123,
+        relative: 100,
+      },
+      operation: {
+        parent: null,
+        breakdown: [
+          {
+            color: 'test',
+            key: 'test',
+            relative: 100,
+            tip: 'test',
+            time: 100,
+          },
+          {
+            color: 'test',
+            key: 'test',
+            relative: 100,
+            tip: 'test',
+            time: 100,
+          },
+          {
+            color: 'test',
+            key: 'test',
+            relative: 100,
+            tip: 'test',
+            time: 100,
+          },
+        ],
+        lucene: 'test',
+        query_type: 'test',
+        selfTime: 100,
+        time: 100,
+        children: [],
+        timePercentage: 100,
+        hasChildren: false,
+        visible: true,
+        absoluteColor: '123',
+      },
       indexName: 'test',
-      lucene: 'test',
-      queryType: 'test',
-      shardID: 'test',
-      selfTime: 100,
-      shardNumber: 'test',
-      time: 100,
     };
 
     const init = registerTestBed(HighlightDetailsFlyout);
