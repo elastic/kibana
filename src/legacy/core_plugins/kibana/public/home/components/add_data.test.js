@@ -22,11 +22,18 @@ import { AddData } from './add_data';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { getServices } from '../kibana_services';
 
-jest.mock('../kibana_services', () =>({
-  getServices: () => ({
+jest.mock('../kibana_services', () =>{
+  const mock = {
     getBasePath: jest.fn(() => 'path'),
-  }),
-}));
+  };
+  return {
+    getServices: () => mock,
+  };
+});
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
 
 test('render', () => {
   const component = shallowWithIntl(<AddData.WrappedComponent
