@@ -25,7 +25,6 @@ import {
   validateRunResult,
   TaskStatus,
 } from './task';
-import { BufferedTaskStore } from './task_store_buffer';
 
 const defaultBackoffPerFailure = 5 * 60 * 1000;
 
@@ -37,13 +36,17 @@ export interface TaskRunner {
   toString: () => string;
 }
 
-type BufferedUpdatable = Pick<BufferedTaskStore, 'update' | 'remove' | 'maxAttempts'>;
+interface Updatable {
+  readonly maxAttempts: number;
+  update(doc: ConcreteTaskInstance): Promise<ConcreteTaskInstance>;
+  remove(id: string): Promise<void>;
+}
 
 interface Opts {
   logger: Logger;
   definitions: TaskDictionary<TaskDefinition>;
   instance: ConcreteTaskInstance;
-  store: BufferedUpdatable;
+  store: Updatable;
   beforeRun: BeforeRunFunction;
   beforeMarkRunning: BeforeMarkRunningFunction;
 }
@@ -61,7 +64,7 @@ export class TaskManagerRunner implements TaskRunner {
   private instance: ConcreteTaskInstance;
   private definitions: TaskDictionary<TaskDefinition>;
   private logger: Logger;
-  private bufferedTaskStore: BufferedUpdatable;
+  private bufferedTaskStore: Updatable;
   private beforeRun: BeforeRunFunction;
   private beforeMarkRunning: BeforeMarkRunningFunction;
 
@@ -71,7 +74,7 @@ export class TaskManagerRunner implements TaskRunner {
    * @prop {Logger} logger - The task manager logger
    * @prop {TaskDefinition} definition - The definition of the task being run
    * @prop {ConcreteTaskInstance} instance - The record describing this particular task instance
-   * @prop {BufferedUpdatable} store - The store used to read / write tasks instance info
+   * @prop {Updatable} store - The store used to read / write tasks instance info
    * @prop {BeforeRunFunction} beforeRun - A function that adjusts the run context prior to running the task
    * @memberof TaskManagerRunner
    */
