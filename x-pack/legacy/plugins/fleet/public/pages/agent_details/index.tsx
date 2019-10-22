@@ -17,11 +17,9 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { RouteComponentProps } from 'react-router-dom';
-import { AgentEventsTable } from './components/agent_events_table';
 import { Loading } from '../../components/loading';
+import { AgentEventsTable } from './components/agent_events_table';
 import { AgentDetailSection } from './components/details_section';
-import { ModalConfirmUnenroll } from './components/modal_confirm_unenroll';
-import { useUnenroll } from './hooks/use_unenroll';
 import { useGetAgent, AgentRefreshContext } from './hooks/use_agent';
 
 export const Layout: SFC = ({ children }) => (
@@ -40,7 +38,6 @@ export const AgentDetailsPage: SFC<Props> = ({
   },
 }) => {
   const { agent, isLoading, error, refreshAgent } = useGetAgent(agentId);
-  const unenroll = useUnenroll(refreshAgent, agentId);
 
   if (isLoading) {
     return <Loading />;
@@ -78,17 +75,7 @@ export const AgentDetailsPage: SFC<Props> = ({
   return (
     <AgentRefreshContext.Provider value={{ refresh: refreshAgent }}>
       <Layout>
-        {unenroll.state.confirm && (
-          <ModalConfirmUnenroll
-            onCancel={unenroll.clear}
-            onConfirm={unenroll.confirmUnenrollement}
-          />
-        )}
-        <AgentDetailSection
-          onClickUnenroll={unenroll.showConfirmModal}
-          agent={agent}
-          unenrollment={{ loading: unenroll.state.loading }}
-        />
+        <AgentDetailSection agent={agent} />
         <EuiSpacer size="xl" />
         <AgentEventsTable agent={agent} />
         <EuiFlexGroup gutterSize="xl">

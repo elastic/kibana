@@ -21,7 +21,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { Agent } from '../../../../common/types/domain_data';
 import { AgentHealth } from '../../../components/agent_health';
+import { AgentUnenrollProvider } from '../../../components/agent_unenroll_provider';
 import { AgentMetadataFlyout } from './metadata_flyout';
+import { useAgentRefresh } from '../hooks/use_agent';
 
 const Item: SFC<{ label: string }> = ({ label, children }) => {
   return (
@@ -45,11 +47,11 @@ function useFlyout() {
 
 interface Props {
   agent: Agent;
-  unenrollment: { loading: boolean };
-  onClickUnenroll: () => void;
 }
-export const AgentDetailSection: SFC<Props> = ({ agent, onClickUnenroll, unenrollment }) => {
+export const AgentDetailSection: SFC<Props> = ({ agent }) => {
   const metadataFlyout = useFlyout();
+  const refreshAgent = useAgentRefresh();
+
   const items = [
     {
       title: i18n.translate('xpack.fleet.agentDetails.statusLabel', {
@@ -99,16 +101,21 @@ export const AgentDetailSection: SFC<Props> = ({ agent, onClickUnenroll, unenrol
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton
-            disabled={unenrollment.loading === true || agent.active === false}
-            isLoading={unenrollment.loading}
-            onClick={onClickUnenroll}
-          >
-            <FormattedMessage
-              id="xpack.fleet.agentDetails.unenrollButtonText"
-              defaultMessage="Unenroll"
-            />
-          </EuiButton>
+          <AgentUnenrollProvider>
+            {unenrollAgentsPrompt => (
+              <EuiButton
+                disabled={!agent.active}
+                onClick={() => {
+                  unenrollAgentsPrompt([agent.id], 1, refreshAgent);
+                }}
+              >
+                <FormattedMessage
+                  id="xpack.fleet.agentDetails.unenrollButtonText"
+                  defaultMessage="Unenroll"
+                />
+              </EuiButton>
+            )}
+          </AgentUnenrollProvider>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size={'xl'} />
