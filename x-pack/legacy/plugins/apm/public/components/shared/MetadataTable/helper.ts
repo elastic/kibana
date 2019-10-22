@@ -5,45 +5,43 @@
  */
 
 import { get, pick, isEmpty } from 'lodash';
-import { Section as SectionType } from './sections';
+import { Section } from './sections';
 import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
 import { APMError } from '../../../../typings/es_schemas/ui/APMError';
 import { Span } from '../../../../typings/es_schemas/ui/Span';
 import { flattenObject, KeyValuePair } from '../../../utils/flattenObject';
 
-export type MetadataItems = Array<SectionType & { rows?: KeyValuePair[] }>;
+export type SectionsWithRows = ReturnType<typeof getSectionsWithRows>;
 
-export const getMetadataItems = (
-  sections: SectionType[],
+export const getSectionsWithRows = (
+  sections: Section[],
   apmDoc: Transaction | APMError | Span
-): MetadataItems => {
+) => {
   return sections
     .map(section => {
       const sectionData: Record<string, unknown> = get(apmDoc, section.key);
-      const sectionProperties:
+      const filteredData:
         | Record<string, unknown>
         | undefined = section.properties
         ? pick(sectionData, section.properties)
         : sectionData;
 
-      const rows: KeyValuePair[] = isEmpty(sectionProperties)
-        ? []
-        : flattenObject(sectionProperties, section.key);
+      const rows: KeyValuePair[] = flattenObject(filteredData, section.key);
       return { ...section, rows };
     })
     .filter(({ required, rows }) => required || !isEmpty(rows));
 };
 
-export const filterItems = (
-  metadataItems: MetadataItems,
+export const filterSectionsByTerm = (
+  sections: SectionsWithRows,
   searchTerm: string
 ) => {
   if (!searchTerm) {
-    return metadataItems;
+    return sections;
   }
-  return metadataItems
-    .map(item => {
-      const { rows = [] } = item;
+  return sections
+    .map(section => {
+      const { rows = [] } = section;
       const filteredRows = rows.filter(({ key, value }) => {
         const valueAsString = String(value).toLowerCase();
         return (
@@ -51,7 +49,7 @@ export const filterItems = (
           valueAsString.includes(searchTerm)
         );
       });
-      return { ...item, rows: filteredRows };
+      return { ...section, rows: filteredRows };
     })
     .filter(({ rows }) => !isEmpty(rows));
 };

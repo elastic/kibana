@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { DottedKeyValueTable } from '..';
+import { KeyValueTable } from '..';
 import { cleanup, render } from 'react-testing-library';
 
 function getKeys(output: ReturnType<typeof render>) {
@@ -18,7 +18,7 @@ function getValues(output: ReturnType<typeof render>) {
   return Array.isArray(values) ? values.map(node => node.textContent) : [];
 }
 
-describe('DottedKeyValueTable', () => {
+describe('KeyValueTable', () => {
   afterEach(cleanup);
 
   it('displays key and value table', () => {
@@ -33,7 +33,7 @@ describe('DottedKeyValueTable', () => {
       { key: 'nested.b.c', value: 'ccc' },
       { key: 'nested.a', value: 'aaa' }
     ];
-    const output = render(<DottedKeyValueTable items={data} />);
+    const output = render(<KeyValueTable keyValuePairs={data} />);
     const rows = output.container.querySelectorAll('tr');
     expect(rows.length).toEqual(9);
 

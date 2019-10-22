@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { compact, isObject } from 'lodash';
+import { compact, isObject, isEmpty } from 'lodash';
 
 export interface KeyValuePair {
   key: string;
@@ -15,6 +15,9 @@ export const flattenObject = (
   item: Record<string, any>,
   parentKey?: string
 ): KeyValuePair[] => {
+  if (isEmpty(item)) {
+    return [];
+  }
   const isArrayWithSingleValue = Array.isArray(item) && item.length === 1;
   return Object.keys(item)
     .sort()

@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { borderRadius, px, unit, units } from '../../../style/variables';
 import { IStackframe } from '../../../../typings/es_schemas/raw/fields/Stackframe';
-import { DottedKeyValueTable } from '../DottedKeyValueTable';
+import { KeyValueTable } from '../KeyValueTable';
 import { flattenObject } from '../../../utils/flattenObject';
 
 const VariablesContainer = styled.div`
@@ -42,7 +42,7 @@ export const Variables = ({ vars }: Props) => {
           )}
         >
           <React.Fragment>
-            <DottedKeyValueTable items={flattenedVariables} />
+            <KeyValueTable keyValuePairs={flattenedVariables} />
           </React.Fragment>
         </EuiAccordion>
       </VariablesContainer>

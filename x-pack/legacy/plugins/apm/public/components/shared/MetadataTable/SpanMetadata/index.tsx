@@ -7,7 +7,7 @@
 import React, { useMemo } from 'react';
 import { SPAN_METADATA_SECTIONS } from './sections';
 import { Span } from '../../../../../typings/es_schemas/ui/Span';
-import { getMetadataItems } from '../helper';
+import { getSectionsWithRows } from '../helper';
 import { MetadataTable } from '..';
 
 interface Props {
@@ -15,8 +15,9 @@ interface Props {
 }
 
 export function SpanMetadata({ span }: Props) {
-  const items = useMemo(() => getMetadataItems(SPAN_METADATA_SECTIONS, span), [
-    span
-  ]);
-  return <MetadataTable items={items} />;
+  const sectionsWithRows = useMemo(
+    () => getSectionsWithRows(SPAN_METADATA_SECTIONS, span),
+    [span]
+  );
+  return <MetadataTable sections={sectionsWithRows} />;
 }

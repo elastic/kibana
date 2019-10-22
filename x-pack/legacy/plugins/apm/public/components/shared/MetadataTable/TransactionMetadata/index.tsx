@@ -7,7 +7,7 @@
 import React, { useMemo } from 'react';
 import { TRANSACTION_METADATA_SECTIONS } from './sections';
 import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
-import { getMetadataItems } from '../helper';
+import { getSectionsWithRows } from '../helper';
 import { MetadataTable } from '..';
 
 interface Props {
@@ -15,9 +15,9 @@ interface Props {
 }
 
 export function TransactionMetadata({ transaction }: Props) {
-  const items = useMemo(
-    () => getMetadataItems(TRANSACTION_METADATA_SECTIONS, transaction),
+  const sectionsWithRows = useMemo(
+    () => getSectionsWithRows(TRANSACTION_METADATA_SECTIONS, transaction),
     [transaction]
   );
-  return <MetadataTable items={items} />;
+  return <MetadataTable sections={sectionsWithRows} />;
 }

@@ -23,18 +23,18 @@ import { history } from '../../../utils/history';
 import { fromQuery, toQuery } from '../Links/url_helpers';
 import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
-import { MetadataItems, filterItems } from './helper';
+import { SectionsWithRows, filterSectionsByTerm } from './helper';
 
 interface Props {
-  items: MetadataItems;
+  sections: SectionsWithRows;
 }
 
-export function MetadataTable({ items }: Props) {
+export function MetadataTable({ sections }: Props) {
   const location = useLocation();
   const { urlParams } = useUrlParams();
   const { searchTerm = '' } = urlParams;
 
-  const filteredItems = filterItems(items, searchTerm);
+  const filteredSections = filterSectionsByTerm(sections, searchTerm);
 
   const onSearchChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -49,7 +49,7 @@ export function MetadataTable({ items }: Props) {
     },
     [location]
   );
-  const noResultFound = (searchTerm && isEmpty(filteredItems)) || false;
+  const noResultFound = Boolean(searchTerm) && isEmpty(filteredSections);
   return (
     <React.Fragment>
       <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
@@ -75,13 +75,13 @@ export function MetadataTable({ items }: Props) {
         </EuiFlexItem>
       </EuiFlexGroup>
       <HeightRetainer>
-        {filteredItems.map(item => (
-          <div key={item.key}>
+        {filteredSections.map(section => (
+          <div key={section.key}>
             <EuiTitle size="xs">
-              <h6>{item.label}</h6>
+              <h6>{section.label}</h6>
             </EuiTitle>
             <EuiSpacer size="s" />
-            <Section items={item.rows} />
+            <Section keyValuePairs={section.rows} />
             <EuiSpacer size="xl" />
           </div>
         ))}
@@ -96,7 +96,7 @@ const NoResultFound = ({ value }: { value: string }) => (
     <EuiFlexItem grow={false}>
       <EuiText size="s">
         {i18n.translate(
-          'xpack.apm.propertiesTable.agentFeature.noResultFound', // todo caue: change it
+          'xpack.apm.propertiesTable.agentFeature.noResultFound',
           {
             defaultMessage: `No results for "{value}".`,
             values: { value }

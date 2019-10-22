@@ -15,17 +15,17 @@ import {
 import { FormattedValue } from './FormattedValue';
 import { KeyValuePair } from '../../../utils/flattenObject';
 
-export function DottedKeyValueTable({
-  items,
+export function KeyValueTable({
+  keyValuePairs,
   tableProps = {}
 }: {
-  items: KeyValuePair[];
+  keyValuePairs: KeyValuePair[];
   tableProps?: EuiTableProps & TableHTMLAttributes<HTMLTableElement>;
 }) {
   return (
     <EuiTable compressed {...tableProps}>
       <EuiTableBody>
-        {items.map(({ key, value }) => (
+        {keyValuePairs.map(({ key, value }) => (
           <EuiTableRow key={key}>
             <EuiTableRowCell>
               <strong data-testid="dot-key">{key}</strong>

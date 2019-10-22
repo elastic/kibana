@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getMetadataItems, filterItems } from '../helper';
+import { getSectionsWithRows, filterSectionsByTerm } from '../helper';
 import { LABELS, HTTP, SERVICE } from '../sections';
 import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
 
@@ -27,7 +27,7 @@ describe('MetadataTable Helper', () => {
       environment: 'production'
     }
   } as unknown) as Transaction;
-  const metadataItems = getMetadataItems(sections, apmDoc);
+  const metadataItems = getSectionsWithRows(sections, apmDoc);
 
   it('returns flattened data and required section', () => {
     expect(metadataItems).toEqual([
@@ -51,7 +51,7 @@ describe('MetadataTable Helper', () => {
   });
   describe('filter', () => {
     it('items by key', () => {
-      const filteredItems = filterItems(metadataItems, 'http');
+      const filteredItems = filterSectionsByTerm(metadataItems, 'http');
       expect(filteredItems).toEqual([
         {
           key: 'http',
@@ -66,7 +66,7 @@ describe('MetadataTable Helper', () => {
     });
 
     it('items by value', () => {
-      const filteredItems = filterItems(metadataItems, 'product');
+      const filteredItems = filterSectionsByTerm(metadataItems, 'product');
       expect(filteredItems).toEqual([
         {
           key: 'service',
@@ -78,7 +78,7 @@ describe('MetadataTable Helper', () => {
     });
 
     it('returns empty when no item matches', () => {
-      const filteredItems = filterItems(metadataItems, 'post');
+      const filteredItems = filterSectionsByTerm(metadataItems, 'post');
       expect(filteredItems).toEqual([]);
     });
   });

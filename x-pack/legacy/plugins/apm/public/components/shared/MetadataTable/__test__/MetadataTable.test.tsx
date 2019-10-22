@@ -9,11 +9,12 @@ import 'jest-dom/extend-expect';
 import { render, cleanup } from 'react-testing-library';
 import { MetadataTable } from '..';
 import { expectTextsInDocument } from '../../../../utils/testHelpers';
+import { SectionsWithRows } from '../helper';
 
 describe('MetadataTable', () => {
   afterEach(cleanup);
   it('shows sections', () => {
-    const items = [
+    const sectionsWithRows = ([
       { key: 'foo', label: 'Foo', required: true },
       {
         key: 'bar',
@@ -22,8 +23,8 @@ describe('MetadataTable', () => {
         properties: ['props.A', 'props.B'],
         rows: [{ key: 'props.A', value: 'A' }, { key: 'props.B', value: 'B' }]
       }
-    ];
-    const output = render(<MetadataTable items={items} />);
+    ] as unknown) as SectionsWithRows;
+    const output = render(<MetadataTable sections={sectionsWithRows} />);
     expectTextsInDocument(output, [
       'Foo',
       'No data available',
@@ -36,14 +37,14 @@ describe('MetadataTable', () => {
   });
   describe('required sections', () => {
     it('shows "empty state message" if no data is available', () => {
-      const items = [
+      const sectionsWithRows = ([
         {
           key: 'foo',
           label: 'Foo',
           required: true
         }
-      ];
-      const output = render(<MetadataTable items={items} />);
+      ] as unknown) as SectionsWithRows;
+      const output = render(<MetadataTable sections={sectionsWithRows} />);
       expectTextsInDocument(output, ['Foo', 'No data available']);
     });
   });

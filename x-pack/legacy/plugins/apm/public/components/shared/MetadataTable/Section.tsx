@@ -7,16 +7,16 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
-import { DottedKeyValueTable } from '../DottedKeyValueTable';
+import { KeyValueTable } from '../KeyValueTable';
 import { KeyValuePair } from '../../../utils/flattenObject';
 
 interface Props {
-  items?: KeyValuePair[];
+  keyValuePairs?: KeyValuePair[];
 }
 
-export function Section({ items }: Props) {
-  if (items) {
-    return <DottedKeyValueTable items={items} />;
+export function Section({ keyValuePairs }: Props) {
+  if (keyValuePairs) {
+    return <KeyValueTable keyValuePairs={keyValuePairs} />;
   }
   return (
     <EuiText size="s">
