@@ -123,6 +123,7 @@ exports[`UrlFormatEditor should render label template help 1`] = `
     />
   </EuiFormRow>
   <InjectIntl(FormatEditorSamplesComponent)
+    sampleType="html"
     samples={Array []}
   />
 </Fragment>
@@ -251,6 +252,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
     />
   </EuiFormRow>
   <InjectIntl(FormatEditorSamplesComponent)
+    sampleType="html"
     samples={Array []}
   />
 </Fragment>
@@ -379,6 +381,7 @@ exports[`UrlFormatEditor should render url template help 1`] = `
     />
   </EuiFormRow>
   <InjectIntl(FormatEditorSamplesComponent)
+    sampleType="html"
     samples={Array []}
   />
 </Fragment>
