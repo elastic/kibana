@@ -81,6 +81,7 @@ exports[`StaticLookupFormatEditor should render multiple lookup entries and unkn
     describedByIds={Array []}
     display="row"
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label={
       <FormattedMessage
@@ -181,6 +182,7 @@ exports[`StaticLookupFormatEditor should render normally 1`] = `
     describedByIds={Array []}
     display="row"
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label={
       <FormattedMessage

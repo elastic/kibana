@@ -139,7 +139,6 @@ export class Plugin {
 
     this.taskRunnerFactory.initialize({
       logger: this.logger,
-      isSecurityEnabled: !!plugins.security,
       getServices(request: Hapi.Request): Services {
         return {
           callCluster: (...args) =>

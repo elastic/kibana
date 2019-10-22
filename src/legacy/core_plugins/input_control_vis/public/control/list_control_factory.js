@@ -27,7 +27,7 @@ import { PhraseFilterManager } from './filter_manager/phrase_filter_manager';
 import { createSearchSource } from './create_search_source';
 import { i18n } from '@kbn/i18n';
 import chrome from 'ui/chrome';
-import { setup as data } from '../../../../core_plugins/data/public/legacy';
+import { start as data } from '../../../../core_plugins/data/public/legacy';
 
 function getEscapedQuery(query = '') {
   // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-regexp-query.html#_standard_operators
@@ -110,7 +110,7 @@ class ListControl extends Control {
       terminate_after: chrome.getInjected('autocompleteTerminateAfter')
     };
     const aggs = termsAgg({
-      field: indexPattern.fields.byName[fieldName],
+      field: indexPattern.fields.getByName(fieldName),
       size: this.options.dynamicOptions ? null : _.get(this.options, 'size', 5),
       direction: 'desc',
       query
@@ -123,12 +123,12 @@ class ListControl extends Control {
       this.useTimeFilter,
       ancestorFilters
     );
-    this.abortController.signal.addEventListener('abort', () => searchSource.cancelQueued());
+    const abortSignal = this.abortController.signal;
 
     this.lastQuery = query;
     let resp;
     try {
-      resp = await searchSource.fetch();
+      resp = await searchSource.fetch({ abortSignal });
     } catch(error) {
       // If the fetch was aborted then no need to surface this error in the UI
       if (error.name === 'AbortError') return;

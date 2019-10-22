@@ -30,41 +30,36 @@ import {
 } from 'ui/index_patterns';
 import { fieldFormats } from 'ui/registry/field_formats';
 
-export default function () {
+export default  function StubIndexPattern(pattern, getConfig, timeField, fields) {
+  this.id = pattern;
+  this.title = pattern;
+  this.popularizeField = sinon.stub();
+  this.timeFieldName = timeField;
+  this.isTimeBased = () => Boolean(this.timeFieldName);
+  this.getConfig = getConfig;
+  this.getNonScriptedFields = sinon.spy(IndexPattern.prototype.getNonScriptedFields);
+  this.getScriptedFields = sinon.spy(IndexPattern.prototype.getScriptedFields);
+  this.getFieldByName = sinon.spy(IndexPattern.prototype.getFieldByName);
+  this.getSourceFiltering = sinon.stub();
+  this.metaFields = ['_id', '_type', '_source'];
+  this.fieldFormatMap = {};
+  this.routes = getRoutes();
 
-  function StubIndexPattern(pattern, getConfig, timeField, fields) {
-    this.id = pattern;
-    this.title = pattern;
-    this.popularizeField = sinon.stub();
-    this.timeFieldName = timeField;
-    this.isTimeBased = () => Boolean(this.timeFieldName);
-    this.getConfig = getConfig;
-    this.getNonScriptedFields = sinon.spy(IndexPattern.prototype.getNonScriptedFields);
-    this.getScriptedFields = sinon.spy(IndexPattern.prototype.getScriptedFields);
-    this.getFieldByName = sinon.spy(IndexPattern.prototype.getFieldByName);
-    this.getSourceFiltering = sinon.stub();
-    this.metaFields = ['_id', '_type', '_source'];
-    this.fieldFormatMap = {};
-    this.routes = getRoutes();
+  this.getComputedFields = IndexPattern.prototype.getComputedFields.bind(this);
+  this.flattenHit = flattenHitWrapper(this, this.metaFields);
+  this.formatHit = formatHitProvider(this, fieldFormats.getDefaultInstance('string'));
+  this.fieldsFetcher = { apiClient: { baseUrl: '' } };
+  this.formatField = this.formatHit.formatField;
 
-    this.getComputedFields = IndexPattern.prototype.getComputedFields.bind(this);
-    this.flattenHit = flattenHitWrapper(this, this.metaFields);
-    this.formatHit = formatHitProvider(this, fieldFormats.getDefaultInstance('string'));
-    this.fieldsFetcher = { apiClient: { baseUrl: '' } };
-    this.formatField = this.formatHit.formatField;
+  this._reindexFields = function () {
+    this.fields = new FieldList(this, this.fields || fields);
+  };
 
-    this._reindexFields = function () {
-      this.fields = new FieldList(this, this.fields || fields);
-    };
-
-    this.stubSetFieldFormat = function (fieldName, id, params) {
-      const FieldFormat = fieldFormats.getType(id);
-      this.fieldFormatMap[fieldName] = new FieldFormat(params);
-      this._reindexFields();
-    };
-
+  this.stubSetFieldFormat = function (fieldName, id, params) {
+    const FieldFormat = fieldFormats.getType(id);
+    this.fieldFormatMap[fieldName] = new FieldFormat(params);
     this._reindexFields();
-  }
+  };
 
-  return StubIndexPattern;
+  this._reindexFields();
 }

@@ -19,9 +19,9 @@
 
 import { timechartFn } from './schema';
 import { Panel } from '../panel';
-import { TimelionStartDependencies } from '../../plugin';
+import { TimelionVisualizationDependencies } from '../../plugin';
 
-export function getTimeChart(dependencies: TimelionStartDependencies) {
+export function getTimeChart(dependencies: TimelionVisualizationDependencies) {
   // Schema is broken out so that it may be extended for use in other plugins
   // Its also easier to test.
   return new Panel('timechart', timechartFn(dependencies)());

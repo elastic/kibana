@@ -116,7 +116,7 @@ StatefulFlyoutHeader.displayName = 'StatefulFlyoutHeader';
 
 const emptyHistory: History[] = []; // stable reference
 
-const emptyNotesId: string[] = []; //stable reference
+const emptyNotesId: string[] = []; // stable reference
 
 const makeMapStateToProps = () => {
   const getTimeline = timelineSelectors.getTimelineByIdSelector();

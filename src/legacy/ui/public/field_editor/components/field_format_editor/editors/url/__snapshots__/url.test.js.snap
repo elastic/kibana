@@ -14,6 +14,7 @@ exports[`UrlFormatEditor should render label template help 1`] = `
     describedByIds={Array []}
     display="row"
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label={
       <FormattedMessage
@@ -54,19 +55,18 @@ exports[`UrlFormatEditor should render label template help 1`] = `
     display="row"
     error={null}
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
-      <EuiLink
-        color="primary"
+      <ForwardRef
         onClick={[Function]}
-        type="button"
       >
         <FormattedMessage
           defaultMessage="URL template help"
           id="common.ui.fieldEditor.url.template.helpLinkText"
           values={Object {}}
         />
-      </EuiLink>
+      </ForwardRef>
     }
     isInvalid={false}
     label={
@@ -92,19 +92,18 @@ exports[`UrlFormatEditor should render label template help 1`] = `
     display="row"
     error={null}
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
-      <EuiLink
-        color="primary"
+      <ForwardRef
         onClick={[Function]}
-        type="button"
       >
         <FormattedMessage
           defaultMessage="Label template help"
           id="common.ui.fieldEditor.url.labelTemplateHelpText"
           values={Object {}}
         />
-      </EuiLink>
+      </ForwardRef>
     }
     isInvalid={false}
     label={
@@ -145,6 +144,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
     describedByIds={Array []}
     display="row"
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label={
       <FormattedMessage
@@ -185,19 +185,18 @@ exports[`UrlFormatEditor should render normally 1`] = `
     display="row"
     error={null}
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
-      <EuiLink
-        color="primary"
+      <ForwardRef
         onClick={[Function]}
-        type="button"
       >
         <FormattedMessage
           defaultMessage="URL template help"
           id="common.ui.fieldEditor.url.template.helpLinkText"
           values={Object {}}
         />
-      </EuiLink>
+      </ForwardRef>
     }
     isInvalid={false}
     label={
@@ -223,19 +222,18 @@ exports[`UrlFormatEditor should render normally 1`] = `
     display="row"
     error={null}
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
-      <EuiLink
-        color="primary"
+      <ForwardRef
         onClick={[Function]}
-        type="button"
       >
         <FormattedMessage
           defaultMessage="Label template help"
           id="common.ui.fieldEditor.url.labelTemplateHelpText"
           values={Object {}}
         />
-      </EuiLink>
+      </ForwardRef>
     }
     isInvalid={false}
     label={
@@ -276,6 +274,7 @@ exports[`UrlFormatEditor should render url template help 1`] = `
     describedByIds={Array []}
     display="row"
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label={
       <FormattedMessage
@@ -316,19 +315,18 @@ exports[`UrlFormatEditor should render url template help 1`] = `
     display="row"
     error={null}
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
-      <EuiLink
-        color="primary"
+      <ForwardRef
         onClick={[Function]}
-        type="button"
       >
         <FormattedMessage
           defaultMessage="URL template help"
           id="common.ui.fieldEditor.url.template.helpLinkText"
           values={Object {}}
         />
-      </EuiLink>
+      </ForwardRef>
     }
     isInvalid={false}
     label={
@@ -354,19 +352,18 @@ exports[`UrlFormatEditor should render url template help 1`] = `
     display="row"
     error={null}
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
-      <EuiLink
-        color="primary"
+      <ForwardRef
         onClick={[Function]}
-        type="button"
       >
         <FormattedMessage
           defaultMessage="Label template help"
           id="common.ui.fieldEditor.url.labelTemplateHelpText"
           values={Object {}}
         />
-      </EuiLink>
+      </ForwardRef>
     }
     isInvalid={false}
     label={
@@ -407,6 +404,7 @@ exports[`UrlFormatEditor should render width and height fields if image 1`] = `
     describedByIds={Array []}
     display="row"
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label={
       <FormattedMessage
@@ -448,19 +446,18 @@ exports[`UrlFormatEditor should render width and height fields if image 1`] = `
     display="row"
     error={null}
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
-      <EuiLink
-        color="primary"
+      <ForwardRef
         onClick={[Function]}
-        type="button"
       >
         <FormattedMessage
           defaultMessage="URL template help"
           id="common.ui.fieldEditor.url.template.helpLinkText"
           values={Object {}}
         />
-      </EuiLink>
+      </ForwardRef>
     }
     isInvalid={false}
     label={
@@ -486,19 +483,18 @@ exports[`UrlFormatEditor should render width and height fields if image 1`] = `
     display="row"
     error={null}
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
-      <EuiLink
-        color="primary"
+      <ForwardRef
         onClick={[Function]}
-        type="button"
       >
         <FormattedMessage
           defaultMessage="Label template help"
           id="common.ui.fieldEditor.url.labelTemplateHelpText"
           values={Object {}}
         />
-      </EuiLink>
+      </ForwardRef>
     }
     isInvalid={false}
     label={
@@ -523,6 +519,7 @@ exports[`UrlFormatEditor should render width and height fields if image 1`] = `
     describedByIds={Array []}
     display="row"
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label={
       <FormattedMessage
@@ -546,6 +543,7 @@ exports[`UrlFormatEditor should render width and height fields if image 1`] = `
     describedByIds={Array []}
     display="row"
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label={
       <FormattedMessage

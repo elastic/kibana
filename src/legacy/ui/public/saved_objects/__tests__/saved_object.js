@@ -23,7 +23,7 @@ import sinon from 'sinon';
 import Bluebird from 'bluebird';
 
 import { SavedObjectProvider } from '../saved_object';
-import StubIndexPatternProv from 'test_utils/stub_index_pattern';
+import StubIndexPattern from 'test_utils/stub_index_pattern';
 import { SavedObjectsClientProvider } from '../saved_objects_client_provider';
 import { InvalidJSONProperty } from '../../../../../plugins/kibana_utils/public';
 
@@ -33,7 +33,6 @@ describe('Saved Object', function () {
   require('test_utils/no_digest_promises').activateForSuite();
 
   let SavedObject;
-  let IndexPattern;
   let esDataStub;
   let savedObjectsClientStub;
   let window;
@@ -98,7 +97,6 @@ describe('Saved Object', function () {
 
   beforeEach(ngMock.inject(function (es, Private, $window) {
     SavedObject = Private(SavedObjectProvider);
-    IndexPattern = Private(StubIndexPatternProv);
     esDataStub = es;
     savedObjectsClientStub = Private(SavedObjectsClientProvider);
     window = $window;
@@ -339,7 +337,7 @@ describe('Saved Object', function () {
                 type: 'dashboard',
               });
             });
-            const indexPattern = new IndexPattern('my-index', getConfig, null, []);
+            const indexPattern = new StubIndexPattern('my-index', getConfig, null, []);
             indexPattern.title = indexPattern.id;
             savedObject.searchSource.setField('index', indexPattern);
             return savedObject
@@ -727,7 +725,7 @@ describe('Saved Object', function () {
 
         const savedObject = new SavedObject(config);
         sinon.stub(savedObject, 'hydrateIndexPattern').callsFake(() => {
-          const indexPattern = new IndexPattern(indexPatternId, getConfig, null, []);
+          const indexPattern = new StubIndexPattern(indexPatternId, getConfig, null, []);
           indexPattern.title = indexPattern.id;
           savedObject.searchSource.setField('index', indexPattern);
           return Promise.resolve(indexPattern);
@@ -737,7 +735,7 @@ describe('Saved Object', function () {
         return savedObject.init().then(() => {
           expect(afterESRespCallback.called).to.be(true);
           const index = savedObject.searchSource.getField('index');
-          expect(index instanceof IndexPattern).to.be(true);
+          expect(index instanceof StubIndexPattern).to.be(true);
           expect(index.id).to.equal(indexPatternId);
         });
       });

@@ -17,19 +17,10 @@
  * under the License.
  */
 import { mapGeoPolygon } from './map_geo_polygon';
-import { StubIndexPatterns } from '../test_helpers/stub_index_pattern';
-import { IndexPatterns } from '../../../index_patterns';
+import { GeoPolygonFilter, Filter } from '@kbn/es-query';
 
 describe('filter manager utilities', () => {
   describe('mapGeoPolygon()', () => {
-    let mapGeoPolygonFn: Function;
-
-    beforeEach(() => {
-      const indexPatterns: unknown = new StubIndexPatterns();
-
-      mapGeoPolygonFn = mapGeoPolygon(indexPatterns as IndexPatterns);
-    });
-
     test('should return the key and value for matching filters with bounds', async () => {
       const filter = {
         meta: {
@@ -40,17 +31,20 @@ describe('filter manager utilities', () => {
             points: [{ lat: 5, lon: 10 }, { lat: 15, lon: 20 }],
           },
         },
-      };
+      } as GeoPolygonFilter;
 
-      const result = await mapGeoPolygonFn(filter);
+      const result = mapGeoPolygon(filter);
 
       expect(result).toHaveProperty('key', 'point');
       expect(result).toHaveProperty('value');
 
-      // remove html entities and non-alphanumerics to get the gist of the value
-      expect(result.value.replace(/&[a-z]+?;/g, '').replace(/[^a-z0-9]/g, '')).toBe(
-        'lat5lon10lat15lon20'
-      );
+      if (result.value) {
+        const displayName = result.value();
+        // remove html entities and non-alphanumerics to get the gist of the value
+        expect(displayName.replace(/&[a-z]+?;/g, '').replace(/[^a-z0-9]/g, '')).toBe(
+          'lat5lon10lat15lon20'
+        );
+      }
     });
 
     test('should return the key and value even when using ignore_unmapped', async () => {
@@ -64,26 +58,29 @@ describe('filter manager utilities', () => {
             points: [{ lat: 5, lon: 10 }, { lat: 15, lon: 20 }],
           },
         },
-      };
-      const result = await mapGeoPolygonFn(filter);
+      } as GeoPolygonFilter;
+      const result = mapGeoPolygon(filter);
 
       expect(result).toHaveProperty('key', 'point');
       expect(result).toHaveProperty('value');
 
-      // remove html entities and non-alphanumerics to get the gist of the value
-      expect(result.value.replace(/&[a-z]+?;/g, '').replace(/[^a-z0-9]/g, '')).toBe(
-        'lat5lon10lat15lon20'
-      );
+      if (result.value) {
+        const displayName = result.value();
+        // remove html entities and non-alphanumerics to get the gist of the value
+        expect(displayName.replace(/&[a-z]+?;/g, '').replace(/[^a-z0-9]/g, '')).toBe(
+          'lat5lon10lat15lon20'
+        );
+      }
     });
 
     test('should return undefined for none matching', async done => {
       const filter = {
         meta: { index: 'logstash-*' },
         query: { query_string: { query: 'foo:bar' } },
-      };
+      } as Filter;
 
       try {
-        await mapGeoPolygonFn(filter);
+        mapGeoPolygon(filter);
       } catch (e) {
         expect(e).toBe(filter);
 

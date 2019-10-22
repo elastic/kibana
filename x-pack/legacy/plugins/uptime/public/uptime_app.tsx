@@ -53,11 +53,11 @@ export interface UptimeAppProps {
 
 const Application = (props: UptimeAppProps) => {
   const {
+    autocomplete,
     basePath,
     canSave,
     client,
     darkMode,
-    autocomplete,
     i18n: i18nCore,
     isApmAvailable,
     isInfraAvailable,
@@ -158,7 +158,7 @@ const Application = (props: UptimeAppProps) => {
                   <UptimeRefreshContext.Provider value={{ lastRefresh, ...rootRouteProps }}>
                     <UptimeSettingsContext.Provider value={initializeSettingsContextValues()}>
                       <EuiPage className="app-wrapper-panel " data-test-subj="uptimeApp">
-                        <div>
+                        <main>
                           <EuiFlexGroup
                             alignItems="center"
                             justifyContent="spaceBetween"
@@ -176,19 +176,6 @@ const Application = (props: UptimeAppProps) => {
                           <EuiSpacer size="s" />
                           <Switch>
                             <Route
-                              exact
-                              path="/"
-                              render={routerProps => (
-                                <OverviewPage
-                                  basePath={basePath}
-                                  autocomplete={autocomplete}
-                                  logOverviewPageLoad={logOverviewPageLoad}
-                                  setBreadcrumbs={setBreadcrumbs}
-                                  {...routerProps}
-                                />
-                              )}
-                            />
-                            <Route
                               path="/monitor/:monitorId/:location?"
                               render={routerProps => (
                                 <MonitorPage
@@ -199,9 +186,21 @@ const Application = (props: UptimeAppProps) => {
                                 />
                               )}
                             />
+                            <Route
+                              path="/"
+                              render={routerProps => (
+                                <OverviewPage
+                                  autocomplete={autocomplete}
+                                  basePath={basePath}
+                                  logOverviewPageLoad={logOverviewPageLoad}
+                                  setBreadcrumbs={setBreadcrumbs}
+                                  {...routerProps}
+                                />
+                              )}
+                            />
                             <Route component={NotFoundPage} />
                           </Switch>
-                        </div>
+                        </main>
                       </EuiPage>
                     </UptimeSettingsContext.Provider>
                   </UptimeRefreshContext.Provider>

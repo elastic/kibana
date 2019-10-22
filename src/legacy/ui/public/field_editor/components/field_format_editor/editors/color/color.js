@@ -31,7 +31,7 @@ import {
   DefaultFormatEditor
 } from '../default';
 
-import { DEFAULT_COLOR } from '../../../../../../../core_plugins/kibana/common/field_formats/types/color_default';
+import { DEFAULT_CONVERTER_COLOR } from '../../../../../../../../plugins/data/public';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -60,7 +60,7 @@ export class ColorFormatEditor extends DefaultFormatEditor {
     this.onChange({
       colors: [
         ...colors,
-        { ...DEFAULT_COLOR }
+        { ...DEFAULT_CONVERTER_COLOR }
       ],
     });
   }

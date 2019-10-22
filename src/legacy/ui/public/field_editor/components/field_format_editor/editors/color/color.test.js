@@ -20,15 +20,15 @@
 import React from 'react';
 import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 
-import { ColorFormatEditor } from './color';
-import { DEFAULT_COLOR } from '../../../../../../../core_plugins/kibana/common/field_formats/types/color_default';
+import { ColorFormatEditor, ColorFormatEditorComponent } from './color';
+import { DEFAULT_CONVERTER_COLOR } from '../../../../../../../../plugins/data/public';
 
 const fieldType = 'string';
 const format = {
   getConverterFor: jest.fn(),
 };
 const formatParams = {
-  colors: [{ ...DEFAULT_COLOR }],
+  colors: [{ ...DEFAULT_CONVERTER_COLOR }],
 };
 const onChange = jest.fn();
 const onError = jest.fn();

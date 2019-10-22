@@ -18,24 +18,32 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import euiStyled from '../../../../../../common/eui_styled_components';
+import { SetupStatus } from '../../../../common/log_analysis';
 import { useTrackPageview } from '../../../hooks/use_track_metric';
-import { AnalysisSetupSteps } from './setup/steps';
-import { SetupStatus } from '../../../containers/logs/log_analysis';
+import { AnalysisSetupSteps } from './setup';
+
+type SetupHandler = (
+  indices: string[],
+  startTime: number | undefined,
+  endTime: number | undefined
+) => void;
 
 interface AnalysisSetupContentProps {
-  setup: (startTime?: number | undefined, endTime?: number | undefined) => void;
-  retry: (startTime?: number | undefined, endTime?: number | undefined) => void;
-  indexPattern: string;
-  viewResults: () => void;
+  availableIndices: string[];
+  cleanupAndSetup: SetupHandler;
+  errorMessages: string[];
+  setup: SetupHandler;
   setupStatus: SetupStatus;
+  viewResults: () => void;
 }
 
 export const AnalysisSetupContent: React.FunctionComponent<AnalysisSetupContentProps> = ({
+  availableIndices,
+  cleanupAndSetup,
+  errorMessages,
   setup,
-  indexPattern,
-  viewResults,
-  retry,
   setupStatus,
+  viewResults,
 }) => {
   useTrackPageview({ app: 'infra_logs', path: 'analysis_setup' });
   useTrackPageview({ app: 'infra_logs', path: 'analysis_setup', delay: 15000 });
@@ -69,11 +77,12 @@ export const AnalysisSetupContent: React.FunctionComponent<AnalysisSetupContentP
             </EuiText>
             <EuiSpacer />
             <AnalysisSetupSteps
+              availableIndices={availableIndices}
+              cleanupAndSetup={cleanupAndSetup}
+              errorMessages={errorMessages}
               setup={setup}
-              retry={retry}
-              viewResults={viewResults}
-              indexPattern={indexPattern}
               setupStatus={setupStatus}
+              viewResults={viewResults}
             />
           </EuiPageContentBody>
         </AnalysisPageContent>
@@ -84,7 +93,7 @@ export const AnalysisSetupContent: React.FunctionComponent<AnalysisSetupContentP
 
 // !important due to https://github.com/elastic/eui/issues/2232
 const AnalysisPageContent = euiStyled(EuiPageContent)`
-  max-width: 518px !important;
+  max-width: 768px !important;
 `;
 
 const AnalysisSetupPage = euiStyled(EuiPage)`

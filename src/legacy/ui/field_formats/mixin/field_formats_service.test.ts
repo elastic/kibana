@@ -17,11 +17,8 @@
  * under the License.
  */
 
-import { FieldFormat } from '../../../../plugins/data/common/field_formats';
 import { FieldFormatsService } from './field_formats_service';
-
-// @ts-ignore
-import { createNumberFormat } from '../../../core_plugins/kibana/common/field_formats/types/number';
+import { NumberFormat } from '../../../../plugins/data/public';
 
 const getConfig = (key: string) => {
   switch (key) {
@@ -35,22 +32,22 @@ const getConfig = (key: string) => {
   }
 };
 
-describe('FieldFormatsService', function() {
+describe('FieldFormatsService', () => {
   let fieldFormatsService: FieldFormatsService;
 
-  beforeEach(function() {
-    const fieldFormatClasses = [createNumberFormat(FieldFormat)];
+  beforeEach(() => {
+    const fieldFormatClasses = [NumberFormat];
 
     fieldFormatsService = new FieldFormatsService(fieldFormatClasses, getConfig);
   });
 
-  test('FieldFormats are accessible via getType method', function() {
+  test('FieldFormats are accessible via getType method', () => {
     const Type = fieldFormatsService.getType('number');
 
     expect(Type.id).toBe('number');
   });
 
-  test('getDefaultInstance returns default FieldFormat instance for fieldType', function() {
+  test('getDefaultInstance returns default FieldFormat instance for fieldType', () => {
     const instance = fieldFormatsService.getDefaultInstance('number');
 
     expect(instance.type.id).toBe('number');

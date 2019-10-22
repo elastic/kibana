@@ -45,6 +45,7 @@ interface FindOptions {
       id: string;
     };
     fields?: string[];
+    filter?: string;
   };
 }
 
@@ -149,14 +150,9 @@ export class AlertsClient {
         }
         throw e;
       }
-      await this.savedObjectsClient.update(
-        'alert',
-        createdAlert.id,
-        {
-          scheduledTaskId: scheduledTask.id,
-        },
-        { references }
-      );
+      await this.savedObjectsClient.update('alert', createdAlert.id, {
+        scheduledTaskId: scheduledTask.id,
+      });
       createdAlert.attributes.scheduledTaskId = scheduledTask.id;
     }
     return this.getAlertFromRaw(createdAlert.id, createdAlert.attributes, references);
@@ -228,7 +224,7 @@ export class AlertsClient {
   }
 
   public async updateApiKey({ id }: { id: string }) {
-    const { references, version, attributes } = await this.savedObjectsClient.get('alert', id);
+    const { version, attributes } = await this.savedObjectsClient.get('alert', id);
 
     const apiKey = await this.createAPIKey();
     const username = await this.getUserName();
@@ -243,15 +239,12 @@ export class AlertsClient {
           ? Buffer.from(`${apiKey.result.id}:${apiKey.result.api_key}`).toString('base64')
           : null,
       },
-      {
-        version,
-        references,
-      }
+      { version }
     );
   }
 
   public async enable({ id }: { id: string }) {
-    const { attributes, version, references } = await this.savedObjectsClient.get('alert', id);
+    const { attributes, version } = await this.savedObjectsClient.get('alert', id);
     if (attributes.enabled === false) {
       const apiKey = await this.createAPIKey();
       const scheduledTask = await this.scheduleAlert(
@@ -273,16 +266,13 @@ export class AlertsClient {
             ? Buffer.from(`${apiKey.result.id}:${apiKey.result.api_key}`).toString('base64')
             : null,
         },
-        {
-          version,
-          references,
-        }
+        { version }
       );
     }
   }
 
   public async disable({ id }: { id: string }) {
-    const { attributes, version, references } = await this.savedObjectsClient.get('alert', id);
+    const { attributes, version } = await this.savedObjectsClient.get('alert', id);
     if (attributes.enabled === true) {
       await this.savedObjectsClient.update(
         'alert',
@@ -295,51 +285,26 @@ export class AlertsClient {
           apiKeyOwner: null,
           updatedBy: await this.getUserName(),
         },
-        {
-          version,
-          references,
-        }
+        { version }
       );
       await this.taskManager.remove(attributes.scheduledTaskId);
     }
   }
 
   public async muteAll({ id }: { id: string }) {
-    const {
-      references,
-      attributes: { muteAll },
-    } = await this.savedObjectsClient.get('alert', id);
-    if (!muteAll) {
-      await this.savedObjectsClient.update(
-        'alert',
-        id,
-        {
-          muteAll: true,
-          mutedInstanceIds: [],
-          updatedBy: await this.getUserName(),
-        },
-        { references }
-      );
-    }
+    await this.savedObjectsClient.update('alert', id, {
+      muteAll: true,
+      mutedInstanceIds: [],
+      updatedBy: await this.getUserName(),
+    });
   }
 
   public async unmuteAll({ id }: { id: string }) {
-    const {
-      references,
-      attributes: { muteAll },
-    } = await this.savedObjectsClient.get('alert', id);
-    if (muteAll) {
-      await this.savedObjectsClient.update(
-        'alert',
-        id,
-        {
-          muteAll: false,
-          mutedInstanceIds: [],
-          updatedBy: await this.getUserName(),
-        },
-        { references }
-      );
-    }
+    await this.savedObjectsClient.update('alert', id, {
+      muteAll: false,
+      mutedInstanceIds: [],
+      updatedBy: await this.getUserName(),
+    });
   }
 
   public async muteInstance({
@@ -349,7 +314,7 @@ export class AlertsClient {
     alertId: string;
     alertInstanceId: string;
   }) {
-    const { attributes, version, references } = await this.savedObjectsClient.get('alert', alertId);
+    const { attributes, version } = await this.savedObjectsClient.get('alert', alertId);
     const mutedInstanceIds = attributes.mutedInstanceIds || [];
     if (!attributes.muteAll && !mutedInstanceIds.includes(alertInstanceId)) {
       mutedInstanceIds.push(alertInstanceId);
@@ -360,10 +325,7 @@ export class AlertsClient {
           mutedInstanceIds,
           updatedBy: await this.getUserName(),
         },
-        {
-          version,
-          references,
-        }
+        { version }
       );
     }
   }
@@ -375,7 +337,7 @@ export class AlertsClient {
     alertId: string;
     alertInstanceId: string;
   }) {
-    const { attributes, version, references } = await this.savedObjectsClient.get('alert', alertId);
+    const { attributes, version } = await this.savedObjectsClient.get('alert', alertId);
     const mutedInstanceIds = attributes.mutedInstanceIds || [];
     if (!attributes.muteAll && mutedInstanceIds.includes(alertInstanceId)) {
       await this.savedObjectsClient.update(
@@ -385,10 +347,7 @@ export class AlertsClient {
           updatedBy: await this.getUserName(),
           mutedInstanceIds: mutedInstanceIds.filter((id: string) => id !== alertInstanceId),
         },
-        {
-          version,
-          references,
-        }
+        { version }
       );
     }
   }

@@ -149,6 +149,12 @@ exports[`Hosts Table rendering it renders the default Hosts table 1`] = `
           "searchable": true,
           "type": "string",
         },
+        Object {
+          "aggregatable": true,
+          "name": "host.name",
+          "searchable": true,
+          "type": "string",
+        },
       ],
       "title": "filebeat-*,auditbeat-*,packetbeat-*",
     }

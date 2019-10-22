@@ -157,7 +157,7 @@ function HeatmapOptions(props: VisOptionsProps<HeatmapVisParams>) {
         />
 
         <SwitchOption
-          dataTestSubj="heatmapUseCustomRanges"
+          data-test-subj="heatmapUseCustomRanges"
           label={i18n.translate('kbnVislibVisTypes.controls.heatmapOptions.useCustomRangesLabel', {
             defaultMessage: 'Use custom ranges',
           })}
