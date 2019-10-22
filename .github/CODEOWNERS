@@ -43,6 +43,12 @@
 /src/dev/ @elastic/kibana-operations
 /src/setup_node_env/ @elastic/kibana-operations
 /src/optimize/ @elastic/kibana-operations
+/packages/*eslint*/ @elastic/kibana-operations
+/packages/*babel*/ @elastic/kibana-operations
+/packages/kbn-dev-utils*/ @elastic/kibana-operations
+/packages/kbn-es/ @elastic/kibana-operations
+/packages/kbn-pm/ @elastic/kibana-operations
+/packages/kbn-test/ @elastic/kibana-operations
 
 # Platform
 /src/core/  @elastic/kibana-platform

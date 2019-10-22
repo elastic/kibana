@@ -26,11 +26,8 @@ export function buildPhraseFilter(field, value, indexPattern) {
     filter.script = getPhraseScript(field, value);
     filter.meta.field = field.name;
   } else {
-    filter.query = { match: {} };
-    filter.query.match[field.name] = {
-      query: convertedValue,
-      type: 'phrase'
-    };
+    filter.query = { match_phrase: {} };
+    filter.query.match_phrase[field.name] = convertedValue;
   }
   return filter;
 }
