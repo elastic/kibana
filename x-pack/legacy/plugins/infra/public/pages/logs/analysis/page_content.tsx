@@ -17,12 +17,18 @@ import { AnalysisUnavailableContent } from './page_unavailable_content';
 import { AnalysisSetupStatusUnknownContent } from './page_setup_status_unknown';
 
 export const AnalysisPageContent = () => {
-  const { sourceId, source } = useContext(Source.Context);
+  const { sourceId } = useContext(Source.Context);
   const { hasLogAnalysisCapabilites } = useContext(LogAnalysisCapabilities.Context);
 
-  const { setup, cleanupAndSetup, setupStatus, viewResults, fetchJobStatus } = useContext(
-    LogAnalysisJobs.Context
-  );
+  const {
+    availableIndices,
+    cleanupAndSetup,
+    fetchJobStatus,
+    lastSetupErrorMessages,
+    setup,
+    setupStatus,
+    viewResults,
+  } = useContext(LogAnalysisJobs.Context);
 
   useEffect(() => {
     fetchJobStatus();
@@ -50,10 +56,11 @@ export const AnalysisPageContent = () => {
   } else {
     return (
       <AnalysisSetupContent
-        setup={setup}
+        availableIndices={availableIndices}
         cleanupAndSetup={cleanupAndSetup}
+        errorMessages={lastSetupErrorMessages}
+        setup={setup}
         setupStatus={setupStatus}
-        indexPattern={source ? source.configuration.logAlias : ''}
         viewResults={viewResults}
       />
     );

@@ -13,10 +13,6 @@ import { getTimeInterval } from '../../lib/time_interval';
 import { CanvasLoading } from './canvas_loading';
 
 export class Router extends React.PureComponent {
-  static childContextTypes = {
-    router: PropTypes.object.isRequired,
-  };
-
   static propTypes = {
     showLoading: PropTypes.bool.isRequired,
     onLoad: PropTypes.func.isRequired,
@@ -25,6 +21,10 @@ export class Router extends React.PureComponent {
     loadingMessage: PropTypes.string,
     onRouteChange: PropTypes.func,
     setFullscreen: PropTypes.func.isRequired,
+  };
+
+  static childContextTypes = {
+    router: PropTypes.object.isRequired,
   };
 
   state = {
