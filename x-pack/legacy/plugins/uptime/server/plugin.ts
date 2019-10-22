@@ -25,7 +25,8 @@ export class Plugin {
 
   constructor(context: PluginInitializerContext) {
     console.log("CTX", context);
-    const config$ = context.config.create<UptimeConfig>();
+    const config$ = context.config.create;
+    console.log("source is", config$)
     config$.subscribe(configValue => {
       console.log("SUBSCRIBE", configValue)
       this.config = {

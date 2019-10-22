@@ -33,6 +33,7 @@ export const initServerWithKibana = (server: UptimeCoreSetup, plugins: UptimeCor
   const { usageCollector, xpack } = plugins;
   const libs = compose(
     server,
+    config,
     plugins
   );
   usageCollector.collectorSet.register(KibanaTelemetryAdapter.initUsageCollector(usageCollector));

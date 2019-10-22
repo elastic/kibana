@@ -42,7 +42,7 @@ export const uptime = (kibana: any) =>
         server.config().get('xpack.uptime')
       ).asObservable();
 
-
+      console.log("GOTIT", getConfig$)
       const initializerContext = {
         config: {
           create: getConfig$,

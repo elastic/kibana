@@ -15,7 +15,7 @@ import { ElasticsearchMonitorStatesAdapter } from '../adapters/monitor_states';
 import { UMKibanaSavedObjectsAdapter } from '../adapters/saved_objects/kibana_saved_objects_adapter';
 import { UptimeCorePlugins, UptimeCoreSetup } from '../adapters/framework';
 
-export function compose(server: UptimeCoreSetup, plugins: UptimeCorePlugins): UMServerLibs {
+export function compose(server: UptimeCoreSetup, config: UptimeConfig, plugins: UptimeCorePlugins): UMServerLibs {
   const { elasticsearch, savedObjects, xpack } = plugins;
   const framework = new UMKibanaBackendFrameworkAdapter(server, plugins);
   const database = new UMKibanaDatabaseAdapter(elasticsearch);
