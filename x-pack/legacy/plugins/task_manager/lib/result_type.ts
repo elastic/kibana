@@ -8,12 +8,12 @@
 // Which is basically the Haskel equivalent of Rust/ML/Scala's Result
 // I'll reach out to other's in Kibana to see if we can merge these into one type
 
-// eslint-disable-next-line @typescript-eslint/prefer-interface
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type Ok<T> = {
   tag: 'ok';
   value: T;
 };
-// eslint-disable-next-line @typescript-eslint/prefer-interface
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type Err<E> = {
   tag: 'err';
   error: E;
