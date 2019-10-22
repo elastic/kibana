@@ -264,9 +264,22 @@ const AllRules = React.memo(() => {
 AllRules.displayName = 'AllRules';
 
 const ActivityMonitor = React.memo(() => {
-  const [selectedState, setSelectedState] = useState([]);
-  const [sortFieldState, setSortFieldState] = useState('ran');
-  const [sortDirectionState, setSortDirectionState] = useState('desc');
+  interface ColumnTypes {
+    id: number;
+    rule: string;
+    ran: string;
+    lookedBackTo: string;
+    status: string;
+    actions: string;
+  }
+
+  interface SortTypes {
+    field: string;
+    direction: string;
+  }
+
+  const [selectedState, setSelectedState] = useState<ColumnTypes[]>([]);
+  const [sortState, setSortState] = useState<SortTypes>({ field: 'ran', direction: 'desc' });
 
   // const actions = [
   //   {
@@ -284,9 +297,7 @@ const ActivityMonitor = React.memo(() => {
 
   const actions = [
     {
-      available: (item = {}) => {
-        return item.status === 'Running' ? true : false;
-      },
+      available: (item: ColumnTypes) => (item.status === 'Running' ? true : false),
       name: 'Stop',
       isPrimary: true,
       description: 'Stop rule from running',
@@ -295,9 +306,7 @@ const ActivityMonitor = React.memo(() => {
       onClick: () => {},
     },
     {
-      available: (item = {}) => {
-        return item.status === 'Stopped' ? true : false;
-      },
+      available: (item: ColumnTypes) => (item.status === 'Stopped' ? true : false),
       name: 'Resume',
       isPrimary: true,
       description: 'Resume running rule',
@@ -367,7 +376,7 @@ const ActivityMonitor = React.memo(() => {
     },
   ];
 
-  const items = [
+  const sampleTableData = [
     {
       id: 1,
       rule: 'Automated exfiltration',
@@ -431,24 +440,20 @@ const ActivityMonitor = React.memo(() => {
           columns={columns}
           isSelectable={true}
           itemId="id"
-          items={items}
-          onChange={({ sort = {} }) => {
-            setSortFieldState(sort.field);
-            setSortDirectionState(sort.direction);
+          items={sampleTableData}
+          onChange={({ sort }: { sort: SortTypes }) => {
+            setSortState(sort);
           }}
           selection={{
-            selectable: (item = {}) => item.status !== 'Completed',
-            selectableMessage: (item = {}) =>
-              item.status !== 'Completed' ? 'Completed runs cannot be acted upon' : undefined,
-            onSelectionChange: (item = {}) => {
-              setSelectedState(item);
+            selectable: (item: ColumnTypes) => item.status !== 'Completed',
+            selectableMessage: (selectable: boolean) =>
+              selectable ? undefined : 'Completed runs cannot be acted upon',
+            onSelectionChange: (selectedItems: ColumnTypes[]) => {
+              setSelectedState(selectedItems);
             },
           }}
           sorting={{
-            sort: {
-              field: sortFieldState,
-              direction: sortDirectionState,
-            },
+            sort: sortState,
           }}
         />
       </EuiPanel>
