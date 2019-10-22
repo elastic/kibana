@@ -13,7 +13,7 @@ import {
 } from './session';
 
 export class SecurityPlugin implements Plugin<SecurityPluginSetup, SecurityPluginStart> {
-  public setup(core: CoreSetup, deps: {}) {
+  public setup(core: CoreSetup) {
     const { http, notifications, injectedMetadata } = core;
     const { basePath, anonymousPaths } = http;
     anonymousPaths.register('/login');
