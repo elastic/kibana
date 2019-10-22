@@ -8,7 +8,7 @@ import { HttpInterceptor, HttpErrorResponse, HttpResponse, IAnonymousPaths } fro
 
 import { ISessionTimeout } from './session_timeout';
 
-const isSystemAPIRequest = (request?: Request) => {
+const isSystemAPIRequest = (request: Request) => {
   return request.headers.has('kbn-system-api');
 };
 
