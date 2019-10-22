@@ -129,6 +129,8 @@ export class HttpServer {
       for (const route of router.getRoutes()) {
         this.log.debug(`registering route handler for [${route.path}]`);
         const { authRequired = true, tags } = route.options;
+        // Hapi does not allow payload validation to be specified for 'head' or 'get' requests
+        const validate = ['head', 'get'].includes(route.method) ? undefined : { payload: true };
         this.server.route({
           handler: route.handler,
           method: route.method,
@@ -140,9 +142,7 @@ export class HttpServer {
             // We are telling Hapi that NP routes can accept any payload, so that it can bypass the default
             // validation applied in ./http_tools#getServerOptions
             // (All NP routes are already required to specify their own validation in order to access the payload)
-            validate: {
-              payload: true,
-            },
+            validate,
           },
         });
       }
