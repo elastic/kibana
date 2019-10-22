@@ -9,7 +9,11 @@ import Joi from 'joi';
 import rison from 'rison-node';
 import { API_BASE_URL } from '../../common/constants';
 import { ServerFacade, RequestFacade, ReportingResponseToolkit } from '../../types';
-import { getRouteConfigFactoryReportingPre } from './lib/route_config_factories';
+import {
+  getRouteConfigFactoryReportingPre,
+  GetRouteConfigFactoryFn,
+  RouteConfigFactory,
+} from './lib/route_config_factories';
 import { HandlerErrorFunction, HandlerFunction } from './types';
 
 const BASE_GENERATE = `${API_BASE_URL}/generate`;
@@ -19,22 +23,31 @@ export function registerGenerateFromJobParams(
   handler: HandlerFunction,
   handleError: HandlerErrorFunction
 ) {
-  const getRouteConfig = () => ({
-    ...getRouteConfigFactoryReportingPre(server),
-    validate: {
-      params: Joi.object({
-        exportType: Joi.string().required(),
-      }).required(),
-      payload: Joi.object({
-        jobParams: Joi.string()
-          .optional()
-          .default(null),
-      }).allow(null), // allow optional payload
-      query: Joi.object({
-        jobParams: Joi.string().default(null),
-      }).default(),
-    },
-  });
+  const getRouteConfig = () => {
+    const getOriginalRouteConfig: GetRouteConfigFactoryFn = getRouteConfigFactoryReportingPre(
+      server
+    );
+    const routeConfigFactory: RouteConfigFactory = getOriginalRouteConfig(
+      ({ params: { exportType } }) => exportType
+    );
+
+    return {
+      ...routeConfigFactory,
+      validate: {
+        params: Joi.object({
+          exportType: Joi.string().required(),
+        }).required(),
+        payload: Joi.object({
+          jobParams: Joi.string()
+            .optional()
+            .default(null),
+        }).allow(null), // allow optional payload
+        query: Joi.object({
+          jobParams: Joi.string().default(null),
+        }).default(),
+      },
+    };
+  };
 
   // generate report
   server.route({

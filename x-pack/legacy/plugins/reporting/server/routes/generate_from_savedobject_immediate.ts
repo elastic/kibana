@@ -16,7 +16,7 @@ import {
   JobIDForImmediate,
   JobDocOutputExecuted,
 } from '../../types';
-import { getRouteOptionsCsv } from './generate_from_savedobject';
+import { getRouteOptionsCsv } from './lib/route_config_factories';
 import { getJobParamsFromRequest } from '../../export_types/csv_from_savedobject/server/lib/get_job_params_from_request';
 
 /*

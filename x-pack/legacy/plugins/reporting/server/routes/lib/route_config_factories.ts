@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Joi from 'joi';
+import { CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../common/constants';
 import { ServerFacade, RequestFacade } from '../../../types';
 // @ts-ignore
 import { authorizedUserPreRoutingFactory } from './authorized_user_pre_routing';
@@ -12,7 +14,7 @@ import { reportingFeaturePreRoutingFactory } from './reporting_feature_pre_routi
 
 const API_TAG = 'api';
 
-interface RouteConfigFactory {
+export interface RouteConfigFactory {
   tags?: string[];
   pre: any[];
   response?: {
@@ -41,6 +43,27 @@ export function getRouteConfigFactoryReportingPre(server: ServerFacade): GetRout
       tags: [API_TAG],
       pre: preRouting,
     };
+  };
+}
+
+export function getRouteOptionsCsv(server: ServerFacade) {
+  const getRouteConfig = getRouteConfigFactoryReportingPre(server);
+  return {
+    ...getRouteConfig(() => CSV_FROM_SAVEDOBJECT_JOB_TYPE),
+    validate: {
+      params: Joi.object({
+        savedObjectType: Joi.string().required(),
+        savedObjectId: Joi.string().required(),
+      }).required(),
+      payload: Joi.object({
+        state: Joi.object().default({}),
+        timerange: Joi.object({
+          timezone: Joi.string().default('UTC'),
+          min: Joi.date().required(),
+          max: Joi.date().required(),
+        }).optional(),
+      }),
+    },
   };
 }
 

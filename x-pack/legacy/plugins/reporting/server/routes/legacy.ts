@@ -23,7 +23,7 @@ export function registerLegacy(
   handler: HandlerFunction,
   handleError: HandlerErrorFunction
 ) {
-  const getRouteConfig: GetRouteConfigFactoryFn = getRouteConfigFactoryReportingPre(server);
+  const getRouteConfig = getRouteConfigFactoryReportingPre(server);
 
   function createLegacyPdfRoute({ path, objectType }: { path: string; objectType: string }) {
     const exportTypeId = 'printablePdf';
