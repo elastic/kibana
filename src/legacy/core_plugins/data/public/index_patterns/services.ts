@@ -17,28 +17,23 @@
  * under the License.
  */
 
-import { Storage } from 'ui/storage';
-import { Plugin } from '../../../../../../src/core/public';
+import { NotificationsStart } from 'src/core/public';
 
-/** @internal */
-export interface LegacyDependenciesPluginSetup {
-  storage: Storage;
-}
+const createGetterSetter = <T extends object>(name: string): [() => T, (value: T) => void] => {
+  let value: T;
 
-export interface LegacyDependenciesPluginStart {
-  storage: Storage;
-}
+  const get = (): T => {
+    if (!value) throw new Error(`${name} was not set`);
+    return value;
+  };
 
-export class LegacyDependenciesPlugin implements Plugin<any, any> {
-  public setup() {
-    return {
-      storage: new Storage(window.localStorage),
-    } as LegacyDependenciesPluginSetup;
-  }
+  const set = (newValue: T) => {
+    value = newValue;
+  };
 
-  public start() {
-    return {
-      storage: new Storage(window.localStorage),
-    } as LegacyDependenciesPluginStart;
-  }
-}
+  return [get, set];
+};
+
+export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(
+  'Notifications'
+);
