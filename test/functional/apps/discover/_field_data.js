@@ -95,7 +95,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('a bad syntax query should show an error message', async function () {
-        const expectedError = 'Expected ":", "<", "<=", ">", ">=", AND, OR, end of input, ' +
+        const expectedError = 'Expected ":", ":{", "<", "<=", ">", ">=", AND, OR, end of input, ' +
           'whitespace but "(" found.';
         await queryBar.setQuery('xxx(yyy))');
         await queryBar.submitQuery();
