@@ -16,7 +16,7 @@ import {
   JobIDForImmediate,
   JobDocOutputExecuted,
 } from '../../types';
-import { getRouteOptions } from './lib/route_config_factories';
+import { getRouteOptionsCsv } from './generate_from_savedobject';
 import { getJobParamsFromRequest } from '../../export_types/csv_from_savedobject/server/lib/get_job_params_from_request';
 
 /*
@@ -32,7 +32,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(
   server: ServerFacade,
   parentLogger: Logger
 ) {
-  const routeOptions = getRouteOptions(server);
+  const routeOptions = getRouteOptionsCsv(server);
 
   /*
    * CSV export with the `immediate` option does not queue a job with Reporting's ESQueue to run the job async. Instead, this does:

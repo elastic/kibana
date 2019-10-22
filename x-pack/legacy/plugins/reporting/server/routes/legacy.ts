@@ -7,11 +7,15 @@
 import querystring from 'querystring';
 import { API_BASE_URL } from '../../common/constants';
 import { ServerFacade, RequestFacade, ReportingResponseToolkit } from '../../types';
-import { getRouteConfigFactoryReportingPre } from './lib/route_config_factories';
+import {
+  getRouteConfigFactoryReportingPre,
+  GetRouteConfigFactoryFn,
+} from './lib/route_config_factories';
 import { HandlerErrorFunction, HandlerFunction } from './types';
 
-const getStaticFeatureConfig = (getRouteConfig: any, featureId: any) =>
+const getStaticFeatureConfig = (getRouteConfig: GetRouteConfigFactoryFn, featureId: string) =>
   getRouteConfig(() => featureId);
+
 const BASE_GENERATE = `${API_BASE_URL}/generate`;
 
 export function registerLegacy(
@@ -19,9 +23,9 @@ export function registerLegacy(
   handler: HandlerFunction,
   handleError: HandlerErrorFunction
 ) {
-  const getRouteConfig = getRouteConfigFactoryReportingPre(server);
+  const getRouteConfig: GetRouteConfigFactoryFn = getRouteConfigFactoryReportingPre(server);
 
-  function createLegacyPdfRoute({ path, objectType }: { path: string; objectType: any }) {
+  function createLegacyPdfRoute({ path, objectType }: { path: string; objectType: string }) {
     const exportTypeId = 'printablePdf';
     server.route({
       path,
