@@ -300,18 +300,13 @@ export class AbstractESSource extends AbstractVectorSource {
     return this._descriptor.id;
   }
 
-  _getRawFieldName(fieldName) {
+  async getFieldFormatter(fieldName) {
     const metricField = this.getMetricFields().find(({ propertyKey }) => {
       return propertyKey === fieldName;
     });
 
-    return metricField ? metricField.field : null;
-  }
-
-  async getFieldFormatter(fieldName) {
-    // fieldName could be an aggregation so it needs to be unpacked to expose raw field.
-    const rawFieldName = this._getRawFieldName(fieldName);
-    if (!rawFieldName) {
+    // Do not use field formatters for counting metrics
+    if (metricField && metricField.type === METRIC_TYPE.COUNT || metricField.type === METRIC_TYPE.UNIQUE_COUNT) {
       return null;
     }
 
@@ -322,7 +317,10 @@ export class AbstractESSource extends AbstractVectorSource {
       return null;
     }
 
-    const fieldFromIndexPattern = indexPattern.fields.getByName(rawFieldName);
+    const realFieldName = metricField
+      ? metricField.field
+      : fieldName;
+    const fieldFromIndexPattern = indexPattern.fields.getByName(realFieldName);
     if (!fieldFromIndexPattern) {
       return null;
     }
