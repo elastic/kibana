@@ -34,58 +34,34 @@ describe('DocTitleService', () => {
 
   describe('#change()', () => {
     it('changes the title of the document', async () => {
-      getStart().change({ parts: ['TitleA'], excludeBase: true });
-      expect(document.title).toEqual('TitleA');
+      getStart().change('TitleA');
+      expect(document.title).toEqual('TitleA - KibanaTest');
     });
 
-    it('appends the baseTitle to the title unless specified otherwise', async () => {
+    it('appends the baseTitle to the title', async () => {
       const start = getStart('BaseTitle');
-      start.change({ parts: ['TitleA'], excludeBase: true });
-      expect(document.title).toEqual('TitleA');
-      start.change({ parts: ['TitleB'], excludeBase: false });
+      start.change('TitleA');
+      expect(document.title).toEqual('TitleA - BaseTitle');
+      start.change('TitleB');
       expect(document.title).toEqual('TitleB - BaseTitle');
-      start.change({ parts: ['TitleC'] });
-      expect(document.title).toEqual('TitleC - BaseTitle');
-    });
-
-    it('accepts strings as input', async () => {
-      const start = getStart();
-      start.change('string title');
-      expect(document.title).toEqual(`string title - ${defaultTitle}`);
     });
 
     it('accepts string arrays as input', async () => {
       const start = getStart();
       start.change(['partA', 'partB']);
       expect(document.title).toEqual(`partA - partB - ${defaultTitle}`);
-    });
-
-    it('does not set the title until manual apply if apply param is false', async () => {
-      const start = getStart();
-      start.change({ parts: ['TitleA'], excludeBase: true }, false);
-      expect(document.title).toEqual(defaultTitle);
-      start.apply();
-      expect(document.title).toEqual('TitleA');
+      start.change(['partA', 'partB', 'partC']);
+      expect(document.title).toEqual(`partA - partB - partC - ${defaultTitle}`);
     });
   });
 
   describe('#reset()', () => {
     it('resets the title to the initial value', async () => {
       const start = getStart('InitialTitle');
-      start.change({ parts: ['TitleA'], excludeBase: true });
-      expect(document.title).toEqual('TitleA');
+      start.change('TitleA');
+      expect(document.title).toEqual('TitleA - InitialTitle');
       start.reset();
       expect(document.title).toEqual('InitialTitle');
-    });
-
-    it('does not reset until manual apply if apply param is false', async () => {
-      const start = getStart('ManualApplyTest');
-      start.change({ parts: ['TitleA'], excludeBase: true });
-      expect(document.title).toEqual('TitleA');
-      start.reset(false);
-      expect(document.title).toEqual('TitleA');
-      start.apply();
-      expect(document.title).toEqual('ManualApplyTest');
     });
   });
 

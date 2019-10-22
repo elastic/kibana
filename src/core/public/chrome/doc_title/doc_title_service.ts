@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { compact, flattenDeep, isString, isArray } from 'lodash';
+import { compact, flattenDeep, isString } from 'lodash';
 
 interface StartDeps {
   document: { title: string };
@@ -29,7 +29,7 @@ interface StartDeps {
  * @example
  * How to change the title of the document
  * ```ts
- * chrome.docTitle.change({ parts: ['My application'], excludeBase: true })
+ * chrome.docTitle.change('My application')
  * ```
  *
  * @example
@@ -44,50 +44,25 @@ export interface ChromeDocTitle {
   /**
    * Changes the current document title.
    *
-   * @remarks
-   * The apply option is mostly here for legacy compatibility reasons and it's default value
-   * should probably always be used.
-   *
    * @example
    * How to change the title of the document
    * ```ts
    * chrome.docTitle.change('My application title')
    * chrome.docTitle.change(['My application', 'My section'])
-   * chrome.docTitle.change({ parts: ['My application'], excludeBase: true })
    * ```
    *
    * @param newTitle The new title to set, either a string, string array or {@link ChromeDocTitleEntry}
-   * @param [apply=true] If false, will not actually apply the new title until #apply() is called.
    */
-  change(newTitle: ChromeDocTitleChange, apply?: boolean): void;
+  change(newTitle: ChromeDocTitleChange): void;
   /**
    * Resets the document title to it's initial value.
    * (meaning the one present in the title meta at application load.)
-   *
-   * @remarks
-   * The apply option is mostly here for legacy compatibility reasons and it's default value
-   * should probably always be used.
-   *
-   * @param [apply=true] If false, will not actually apply the new title until #apply() is called.
    */
-  reset(apply?: boolean): void;
-  /**
-   * Apply a title change or reset that was not applied yet.
-   *
-   * @see {DocTitle#change}
-   * @see {DocTitle#reset}
-   */
-  apply(): void;
+  reset(): void;
   /** @internal */
   __legacy: {
     setBaseTitle: (baseTitle: string) => void;
   };
-}
-
-/** @public */
-export interface ChromeDocTitleEntry {
-  parts: string[];
-  excludeBase?: boolean;
 }
 
 /**
@@ -95,51 +70,26 @@ export interface ChromeDocTitleEntry {
  *
  * @public
  */
-export type ChromeDocTitleChange = string | string[] | ChromeDocTitleEntry;
+export type ChromeDocTitleChange = string | string[];
 
-const defaultTitle: ChromeDocTitleEntry = { parts: [], excludeBase: false };
-
-const inputToEntry = (input: ChromeDocTitleChange): ChromeDocTitleEntry => {
-  if (isString(input)) {
-    return {
-      parts: [input],
-      excludeBase: false,
-    };
-  }
-  if (isArray<string>(input)) {
-    return {
-      parts: [...input],
-      excludeBase: false,
-    };
-  }
-  return input;
-};
+const defaultTitle: ChromeDocTitleChange = [];
+const titleSeparator = ' - ';
 
 /** @internal */
 export class DocTitleService {
   private document = { title: '' };
   private baseTitle = '';
-  private current = defaultTitle;
 
   public start({ document }: StartDeps): ChromeDocTitle {
     this.document = document;
     this.baseTitle = document.title;
 
     return {
-      change: (title: ChromeDocTitleChange, apply = true) => {
-        this.current = inputToEntry(title);
-        if (apply) {
-          this.applyTitle();
-        }
+      change: (title: ChromeDocTitleChange) => {
+        this.applyTitle(title);
       },
-      reset: (apply = true) => {
-        this.current = defaultTitle;
-        if (apply) {
-          this.applyTitle();
-        }
-      },
-      apply: () => {
-        this.applyTitle();
+      reset: () => {
+        this.applyTitle(defaultTitle);
       },
       __legacy: {
         setBaseTitle: baseTitle => {
@@ -149,17 +99,14 @@ export class DocTitleService {
     };
   }
 
-  private applyTitle() {
-    const rendered = this.render(this.current);
+  private applyTitle(title: ChromeDocTitleChange) {
+    const rendered = this.render(title);
     this.document.title = rendered;
   }
 
-  private render(title: ChromeDocTitleEntry) {
-    const parts = [...title.parts];
-    if (!title.excludeBase) {
-      parts.push(this.baseTitle);
-    }
-    // ensuring compat with legacy
-    return compact(flattenDeep(parts)).join(' - ');
+  private render(title: ChromeDocTitleChange) {
+    const parts = [...(isString(title) ? [title] : title), this.baseTitle];
+    // ensuring compat with legacy that might be passing nested arrays
+    return compact(flattenDeep(parts)).join(titleSeparator);
   }
 }
