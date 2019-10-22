@@ -161,16 +161,20 @@ const getUncommonColumns = (): UncommonProcessTableColumns => [
     width: '20%',
   },
   {
+    align: 'right',
     name: i18n.NUMBER_OF_HOSTS,
     truncateText: false,
     hideForMobile: false,
     render: ({ node }) => <>{node.hosts != null ? node.hosts.length : getEmptyValue()}</>,
+    width: '5%',
   },
   {
+    align: 'right',
     name: i18n.NUMBER_OF_INSTANCES,
     truncateText: false,
     hideForMobile: false,
     render: ({ node }) => defaultToEmptyTag(node.instances),
+    width: '5%',
   },
   {
     name: i18n.HOSTS,

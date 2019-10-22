@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiToolTip } from '@elastic/eui';
-import { FormattedRelative } from '@kbn/i18n/react';
 import { has } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
 import { ActionCreator } from 'typescript-fsa';
 
+import moment from 'moment';
 import { hostsActions } from '../../../../store/hosts';
 import { AuthenticationsEdges } from '../../../../graphql/types';
 import { hostsModel, hostsSelectors, State } from '../../../../store';
@@ -25,6 +24,8 @@ import { Provider } from '../../../timeline/data_providers/provider';
 
 import * as i18n from './translations';
 import { getRowItemDraggables } from '../../../tables/helpers';
+import { LocalizedDateTooltip } from '../../../localized_date_tooltip';
+import { PreferenceFormattedDate } from '../../../formatted_date';
 
 const tableType = hostsModel.HostsTableType.authentications;
 
@@ -200,6 +201,7 @@ const getAuthenticationColumns = (): AuthTableColumns => [
         />
       );
     },
+    width: '5%',
   },
   {
     name: i18n.FAILURES,
@@ -237,6 +239,7 @@ const getAuthenticationColumns = (): AuthTableColumns => [
         />
       );
     },
+    width: '5%',
   },
   {
     name: i18n.LAST_SUCCESSFUL_TIME,
@@ -244,9 +247,9 @@ const getAuthenticationColumns = (): AuthTableColumns => [
     hideForMobile: false,
     render: ({ node }) =>
       has('lastSuccess.timestamp', node) ? (
-        <EuiToolTip position="bottom" content={node.lastSuccess!.timestamp!}>
-          <FormattedRelative value={new Date(node.lastSuccess!.timestamp!)} />
-        </EuiToolTip>
+        <LocalizedDateTooltip date={moment(new Date(node.lastSuccess!.timestamp!)).toDate()}>
+          <PreferenceFormattedDate value={new Date(node.lastSuccess!.timestamp!)} />
+        </LocalizedDateTooltip>
       ) : (
         getEmptyTagValue()
       ),
@@ -291,9 +294,9 @@ const getAuthenticationColumns = (): AuthTableColumns => [
     hideForMobile: false,
     render: ({ node }) =>
       has('lastFailure.timestamp', node) && node.lastFailure!.timestamp != null ? (
-        <EuiToolTip position="bottom" content={node.lastFailure!.timestamp!}>
-          <FormattedRelative value={new Date(node.lastFailure!.timestamp!)} />
-        </EuiToolTip>
+        <LocalizedDateTooltip date={moment(new Date(node.lastFailure!.timestamp!)).toDate()}>
+          <PreferenceFormattedDate value={new Date(node.lastFailure!.timestamp!)} />
+        </LocalizedDateTooltip>
       ) : (
         getEmptyTagValue()
       ),
