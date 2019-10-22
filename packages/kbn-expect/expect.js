@@ -99,7 +99,7 @@ Assertion.prototype.assert = function (truth, msg, error, expected) {
   if (!ok) {
     err = new Error(msg.call(this));
     if (this.customMsg) {
-      err.message = '< ' + this.customMsg + ' > ' + err.message;
+      err.message = this.customMsg;
     }
     if (arguments.length > 3) {
       err.actual = this.obj;
