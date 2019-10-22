@@ -1,6 +1,5 @@
 import { Client } from '@elastic/elasticsearch';
-import moment from 'moment';
-import { dash, buildUrl, getWatcher, deleteWatcher, putWatcher } from './util';
+import { buildUrl, getWatcher, deleteWatcher, putWatcher } from './util';
 
 export default ({ getService, getPageObjects }) => {
 
@@ -15,7 +14,7 @@ export default ({ getService, getPageObjects }) => {
 
     describe('PNG Reporting watch', () => {
       let id = 'watcher_png_report-';
-      id = id + dash(moment().calendar());  // For debugging.
+      id = id + Date().getTime();  // For debugging.
       const watch = { id };
       const reportingUrl = servers.kibana.protocol + '://'
         + KIBANAIP + ':' + servers.kibana.port
