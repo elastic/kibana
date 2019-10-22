@@ -619,7 +619,7 @@ export function removeLayer(layerId) {
     const state = getState();
     const selectedLayerId = getSelectedLayerId(state);
     if (layerId === selectedLayerId) {
-      await dispatch(updateFlyout(FLYOUT_STATE.NONE));
+      dispatch(updateFlyout(FLYOUT_STATE.NONE));
       await dispatch(setSelectedLayer(null));
     }
     dispatch(removeLayerFromLayerList(layerId));
