@@ -19,7 +19,7 @@ import { ESAggMetricTooltipProperty } from '../tooltips/es_aggmetric_tooltip_pro
 
 import uuid from 'uuid/v4';
 import { copyPersistentState } from '../../reducers/util';
-import { ES_GEO_FIELD_TYPE } from '../../../common/constants';
+import { ES_GEO_FIELD_TYPE, METRIC_TYPE } from '../../../common/constants';
 import { DataRequestAbortError } from '../util/data_request';
 
 export class AbstractESSource extends AbstractVectorSource {
@@ -59,7 +59,7 @@ export class AbstractESSource extends AbstractVectorSource {
 
   _getValidMetrics() {
     const metrics = _.get(this._descriptor, 'metrics', []).filter(({ type, field }) => {
-      if (type === 'count') {
+      if (type === METRIC_TYPE.COUNT) {
         return true;
       }
 
@@ -69,7 +69,7 @@ export class AbstractESSource extends AbstractVectorSource {
       return false;
     });
     if (metrics.length === 0) {
-      metrics.push({ type: 'count' });
+      metrics.push({ type: METRIC_TYPE.COUNT });
     }
     return metrics;
   }
