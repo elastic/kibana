@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiFieldPassword,
@@ -16,6 +17,7 @@ import {
   EuiButton,
   EuiButtonIcon,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ErrableFormRow } from '../../../components/page_error';
@@ -82,6 +84,7 @@ const WebhookActionFields: React.FunctionComponent<Props> = ({
 }) => {
   const [headerKey, setHeaderKey] = useState<string>('');
   const [headerValue, setHeaderValue] = useState<string>('');
+  const [isOpen, setOpen] = useState<boolean>(false);
 
   const { user, password } = action.secrets;
   const { method, url, headers } = action.config;
@@ -109,6 +112,10 @@ const WebhookActionFields: React.FunctionComponent<Props> = ({
   const hasHeaderErrors = headerErrors.keyHeader.length > 0 || headerErrors.valueHeader.length > 0;
 
   function addHeader() {
+    if (!isOpen) {
+      setOpen(true);
+      return;
+    }
     if (headers && !!Object.keys(headers).find(key => key === headerKey)) {
       return;
     }
@@ -128,6 +135,58 @@ const WebhookActionFields: React.FunctionComponent<Props> = ({
         return obj;
       }, {});
     editActionConfig('headers', updatedHeaders);
+  }
+
+  let headerControl;
+  if (isOpen) {
+    headerControl = (
+      <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <ErrableFormRow
+            id="webhookHeaderKey"
+            errorKey="keyHeader"
+            fullWidth
+            errors={headerErrors}
+            isShowingErrors={hasHeaderErrors && headerKey !== undefined}
+            label={i18n.translate('xpack.alertingUI.sections.actionAdd.keyFieldLabel', {
+              defaultMessage: 'Header Key',
+            })}
+          >
+            <EuiFieldText
+              fullWidth
+              name="keyHeader"
+              value={headerKey}
+              data-test-subj="webhookHeadersKeyInput"
+              onChange={e => {
+                setHeaderKey(e.target.value);
+              }}
+            />
+          </ErrableFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <ErrableFormRow
+            id="webhookHeaderValue"
+            errorKey="valueHeader"
+            fullWidth
+            errors={headerErrors}
+            isShowingErrors={hasHeaderErrors && headerValue !== undefined}
+            label={i18n.translate('xpack.alertingUI.sections.actionAdd.valueFieldLabel', {
+              defaultMessage: 'Header Value',
+            })}
+          >
+            <EuiFieldText
+              fullWidth
+              name="valueHeader"
+              value={headerValue}
+              data-test-subj="webhookHeadersValueInput"
+              onChange={e => {
+                setHeaderValue(e.target.value);
+              }}
+            />
+          </ErrableFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
   }
 
   return (
@@ -236,65 +295,31 @@ const WebhookActionFields: React.FunctionComponent<Props> = ({
       </EuiFlexGroup>
 
       <EuiSpacer size="s" />
-
-      <EuiFlexGroup gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <ErrableFormRow
-            id="webhookHeaderKey"
-            errorKey="keyHeader"
-            fullWidth
-            errors={headerErrors}
-            isShowingErrors={hasHeaderErrors && headerKey !== undefined}
-            label={i18n.translate('xpack.alertingUI.sections.actionAdd.keyFieldLabel', {
-              defaultMessage: 'Header Key',
-            })}
-          >
-            <EuiFieldText
-              fullWidth
-              name="keyHeader"
-              value={headerKey}
-              data-test-subj="webhookHeadersKeyInput"
-              onChange={e => {
-                setHeaderKey(e.target.value);
-              }}
-            />
-          </ErrableFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <ErrableFormRow
-            id="webhookHeaderValue"
-            errorKey="valueHeader"
-            fullWidth
-            errors={headerErrors}
-            isShowingErrors={hasHeaderErrors && headerValue !== undefined}
-            label={i18n.translate('xpack.alertingUI.sections.actionAdd.valueFieldLabel', {
-              defaultMessage: 'Header Value',
-            })}
-          >
-            <EuiFieldText
-              fullWidth
-              name="valueHeader"
-              value={headerValue}
-              data-test-subj="webhookHeadersValueInput"
-              onChange={e => {
-                setHeaderValue(e.target.value);
-              }}
-            />
-          </ErrableFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="s" />
       <EuiButton
-        isDisabled={hasHeaderErrors || !headerKey || !headerValue}
+        isDisabled={isOpen && (hasHeaderErrors || !headerKey || !headerValue)}
         fill
         onClick={() => addHeader()}
       >
-        {i18n.translate('xpack.alertingUI.sections.actionAdd.addHeaderButton', {
-          defaultMessage: 'Add HTTP header',
-        })}
+        <FormattedMessage
+          defaultMessage={'Add HTTP header'}
+          id="xpack.alertingUI.sections.actionAdd.addHeaderButton"
+        />
       </EuiButton>
+
+      <EuiSpacer size="s" />
+      {headerControl}
       <EuiSpacer size="m" />
       <Fragment>
+        {isOpen ? (
+          <EuiTitle size="xs">
+            <h5>
+              <FormattedMessage
+                defaultMessage={'HTTP headers list:'}
+                id="xpack.alertingUI.sections.actionAdd.httpHeadersTitle"
+              />
+            </h5>
+          </EuiTitle>
+        ) : null}
         {Object.keys(headers || {}).map((key: string) => {
           return (
             <EuiFlexGroup key={key}>
