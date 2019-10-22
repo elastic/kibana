@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiToolTip } from '@elastic/eui';
+import { FormattedRelative } from '@kbn/i18n/react';
 import { has } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -245,14 +247,32 @@ const getAuthenticationColumns = (): AuthTableColumns => [
     name: i18n.LAST_SUCCESSFUL_TIME,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }) =>
-      has('lastSuccess.timestamp', node) ? (
-        <LocalizedDateTooltip date={moment(new Date(node.lastSuccess!.timestamp!)).toDate()}>
-          <PreferenceFormattedDate value={new Date(node.lastSuccess!.timestamp!)} />
-        </LocalizedDateTooltip>
-      ) : (
-        getEmptyTagValue()
-      ),
+    render: ({ node }) => {
+      if (has('lastSuccess.timestamp', node) && node.lastSuccess!.timestamp != null) {
+        const newTimestamp = node.lastSuccess!.timestamp!;
+        const newDate = new Date(newTimestamp);
+        const newDateMoment = moment(newDate);
+        const nowDate = new Date();
+        const lastHourDate = new Date();
+        const nowDateMoment = moment(nowDate);
+        const lastHourDateMoment = moment(
+          new Date(lastHourDate.setHours(lastHourDate.getHours() - 1))
+        );
+        if (newDateMoment.isBetween(lastHourDateMoment, nowDateMoment)) {
+          return (
+            <EuiToolTip position="bottom" content={newTimestamp}>
+              <FormattedRelative value={newDate} />
+            </EuiToolTip>
+          );
+        }
+        return (
+          <LocalizedDateTooltip date={newDateMoment.toDate()}>
+            <PreferenceFormattedDate value={newDate} />
+          </LocalizedDateTooltip>
+        );
+      }
+      return getEmptyTagValue();
+    },
   },
   {
     name: i18n.LAST_SUCCESSFUL_SOURCE,
@@ -292,14 +312,32 @@ const getAuthenticationColumns = (): AuthTableColumns => [
     name: i18n.LAST_FAILED_TIME,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }) =>
-      has('lastFailure.timestamp', node) && node.lastFailure!.timestamp != null ? (
-        <LocalizedDateTooltip date={moment(new Date(node.lastFailure!.timestamp!)).toDate()}>
-          <PreferenceFormattedDate value={new Date(node.lastFailure!.timestamp!)} />
-        </LocalizedDateTooltip>
-      ) : (
-        getEmptyTagValue()
-      ),
+    render: ({ node }) => {
+      if (has('lastFailure.timestamp', node) && node.lastFailure!.timestamp != null) {
+        const newTimestamp = node.lastFailure!.timestamp!;
+        const newDate = new Date(newTimestamp);
+        const newDateMoment = moment(newDate);
+        const nowDate = new Date();
+        const lastHourDate = new Date();
+        const nowDateMoment = moment(nowDate);
+        const lastHourDateMoment = moment(
+          new Date(lastHourDate.setHours(lastHourDate.getHours() - 1))
+        );
+        if (newDateMoment.isBetween(lastHourDateMoment, nowDateMoment)) {
+          return (
+            <EuiToolTip position="bottom" content={newTimestamp}>
+              <FormattedRelative value={newDate} />
+            </EuiToolTip>
+          );
+        }
+        return (
+          <LocalizedDateTooltip date={newDateMoment.toDate()}>
+            <PreferenceFormattedDate value={newDate} />
+          </LocalizedDateTooltip>
+        );
+      }
+      return getEmptyTagValue();
+    },
   },
   {
     name: i18n.LAST_FAILED_SOURCE,
