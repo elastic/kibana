@@ -19,9 +19,12 @@ export function getActionType(): ActionTypeModel {
   return {
     id: '.email',
     iconClass: 'email',
-    selectMessage: i18n.translate('xpack.alertingUI.sections.actionAdd.selectMessageText', {
-      defaultMessage: 'Send an email.',
-    }),
+    selectMessage: i18n.translate(
+      'xpack.alertingUI.sections.actionAdd.emailAction.selectMessageText',
+      {
+        defaultMessage: 'Send an email.',
+      }
+    ),
     validate: (action: Action): ValidationResult => {
       const validationResult = { errors: {} };
       const errors = {
@@ -91,9 +94,12 @@ const EmailActionFields: React.FunctionComponent<Props> = ({
         fullWidth
         errors={errors}
         isShowingErrors={hasErrors === true && from !== undefined}
-        label={i18n.translate('xpack.alertingUI.sections.actionAdd.emailActionLabel', {
-          defaultMessage: 'From',
-        })}
+        label={i18n.translate(
+          'xpack.alertingUI.sections.actionAdd.emailAction.fromTextFieldLabel',
+          {
+            defaultMessage: 'From',
+          }
+        )}
       >
         <EuiFieldText
           fullWidth
@@ -118,9 +124,12 @@ const EmailActionFields: React.FunctionComponent<Props> = ({
             fullWidth
             errors={errors}
             isShowingErrors={hasErrors === true && host !== undefined}
-            label={i18n.translate('xpack.alertingUI.sections.actionAdd.emailHostLabel', {
-              defaultMessage: 'Host',
-            })}
+            label={i18n.translate(
+              'xpack.alertingUI.sections.actionAdd.emailAction.hostTextFieldLabel',
+              {
+                defaultMessage: 'Host',
+              }
+            )}
           >
             <EuiFieldText
               fullWidth
@@ -145,9 +154,12 @@ const EmailActionFields: React.FunctionComponent<Props> = ({
             fullWidth
             errors={errors}
             isShowingErrors={hasErrors === true && port !== undefined}
-            label={i18n.translate('xpack.alertingUI.sections.actionAdd.emailPortLabel', {
-              defaultMessage: 'Port',
-            })}
+            label={i18n.translate(
+              'xpack.alertingUI.sections.actionAdd.emailAction.portTextFieldLabel',
+              {
+                defaultMessage: 'Port',
+              }
+            )}
           >
             <EuiFieldNumber
               prepend=":"
@@ -175,9 +187,12 @@ const EmailActionFields: React.FunctionComponent<Props> = ({
             fullWidth
             errors={errors}
             isShowingErrors={hasErrors === true && user !== undefined}
-            label={i18n.translate('xpack.alertingUI.sections.actionAdd.emailUserLabel', {
-              defaultMessage: 'User',
-            })}
+            label={i18n.translate(
+              'xpack.alertingUI.sections.actionAdd.emailAction.userTextFieldLabel',
+              {
+                defaultMessage: 'User',
+              }
+            )}
           >
             <EuiFieldText
               fullWidth
@@ -202,9 +217,12 @@ const EmailActionFields: React.FunctionComponent<Props> = ({
             fullWidth
             errors={errors}
             isShowingErrors={hasErrors === true && password !== undefined}
-            label={i18n.translate('xpack.alertingUI.sections.actionAdd.emailPasswordLabel', {
-              defaultMessage: 'Password',
-            })}
+            label={i18n.translate(
+              'xpack.alertingUI.sections.actionAdd.emailAction.passwordFieldLabel',
+              {
+                defaultMessage: 'Password',
+              }
+            )}
           >
             <EuiFieldPassword
               fullWidth

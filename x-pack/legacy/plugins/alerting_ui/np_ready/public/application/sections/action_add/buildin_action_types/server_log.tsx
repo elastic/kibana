@@ -10,9 +10,12 @@ export function getActionType(): ActionTypeModel {
   return {
     id: '.server-log',
     iconClass: 'loggingApp',
-    selectMessage: i18n.translate('xpack.alertingUI.sections.actionAdd.selectMessageText', {
-      defaultMessage: 'Add an item to the logs.',
-    }),
+    selectMessage: i18n.translate(
+      'xpack.alertingUI.sections.actionAdd.serverLogAction.selectMessageText',
+      {
+        defaultMessage: 'Add an item to the logs.',
+      }
+    ),
     validate: (): ValidationResult => {
       return { errors: {} };
     },

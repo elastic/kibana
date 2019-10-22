@@ -13,9 +13,12 @@ export function getActionType(): ActionTypeModel {
   return {
     id: '.slack',
     iconClass: 'logoSlack',
-    selectMessage: i18n.translate('xpack.alertingUI.sections.actionAdd.selectMessageText', {
-      defaultMessage: 'Send a message to a Slack user or channel.',
-    }),
+    selectMessage: i18n.translate(
+      'xpack.alertingUI.sections.actionAdd.slackAction.selectMessageText',
+      {
+        defaultMessage: 'Send a message to a Slack user or channel.',
+      }
+    ),
     validate: (action: Action): ValidationResult => {
       const validationResult = { errors: {} };
       const errors = {
@@ -24,9 +27,12 @@ export function getActionType(): ActionTypeModel {
       validationResult.errors = errors;
       if (!action.secrets.webhookUrl) {
         errors.webhookUrl.push(
-          i18n.translate('xpack.alertingUI.sections.actionAdd.error.requiredWebhookUrlText', {
-            defaultMessage: 'WebhookUrl is required.',
-          })
+          i18n.translate(
+            'xpack.alertingUI.sections.actionAdd.slackAction.error.requiredWebhookUrlText',
+            {
+              defaultMessage: 'WebhookUrl is required.',
+            }
+          )
         );
       }
       return validationResult;
@@ -51,9 +57,12 @@ const SlackActionFields: React.FunctionComponent<Props> = ({
         fullWidth
         errors={errors}
         isShowingErrors={hasErrors === true && webhookUrl !== undefined}
-        label={i18n.translate('xpack.alertingUI.sections.actionAdd.methodWebhookUrlLabel', {
-          defaultMessage: 'WebhookUrl',
-        })}
+        label={i18n.translate(
+          'xpack.alertingUI.sections.actionAdd.slackAction.webhookUrlTextFieldLabel',
+          {
+            defaultMessage: 'WebhookUrl',
+          }
+        )}
       >
         <EuiFieldText
           fullWidth

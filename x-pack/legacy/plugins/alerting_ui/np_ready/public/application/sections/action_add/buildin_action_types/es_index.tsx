@@ -12,9 +12,12 @@ export function getActionType(): ActionTypeModel {
   return {
     id: '.index',
     iconClass: 'indexOpen',
-    selectMessage: i18n.translate('xpack.alertingUI.sections.actionAdd.selectMessageText', {
-      defaultMessage: 'Index data into Elasticsearch.',
-    }),
+    selectMessage: i18n.translate(
+      'xpack.alertingUI.sections.actionAdd.indexAction.selectMessageText',
+      {
+        defaultMessage: 'Index data into Elasticsearch.',
+      }
+    ),
     validate: (): ValidationResult => {
       return { errors: {} };
     },
@@ -27,7 +30,7 @@ const IndexActionFields: React.FunctionComponent<Props> = ({ action, editActionC
   return (
     <EuiFormRow
       fullWidth
-      label={i18n.translate('xpack.alertingUI.sections.actionAdd.indexTextFieldLabel', {
+      label={i18n.translate('xpack.alertingUI.sections.actionAdd.indexAction.indexTextFieldLabel', {
         defaultMessage: 'Index (optional)',
       })}
     >
