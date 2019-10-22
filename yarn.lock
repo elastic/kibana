@@ -1240,16 +1240,14 @@
     vscode-languageserver "^5.2.1"
     vscode-languageserver-types "^3.14.0"
 
-"@elastic/makelogs@^4.5.0":
-  version "4.5.0"
-  resolved "https://registry.yarnpkg.com/@elastic/makelogs/-/makelogs-4.5.0.tgz#d9256eb89fbfe7df9ff442cb31c598c5594370d7"
-  integrity sha512-xf8pG6vYoztTJUIjJDxHVRpwzMfsruZ33GjwbkzvKr4C/ZN1fjk5/iZYAnoGkknZgWVB1YEwTdFdUBR9h7ejcg==
+"@elastic/makelogs@^5.0.0":
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/makelogs/-/makelogs-5.0.0.tgz#0064e9009c4e480d17195ab70d627bc07635540f"
+  integrity sha512-QiKPR4DHwGH47O1kMuQIQkFCkepVIKrwP3nHUVbC//xMul7QgKRIogcQNTsZoMTGSIUrS80ngqHx+OVnd3t4Bg==
   dependencies:
     async "^1.4.2"
-    bluebird "^2.10.0"
-    elasticsearch "^15.2.0"
-    inquirer "^0.11.1"
-    lodash "~2.4.1"
+    elasticsearch "^16.4.0"
+    inquirer "^7.0.0"
     moment "^2.10.6"
     optimist "~0.6.1"
     progress "^1.1.8"
@@ -6717,11 +6715,6 @@ bluebird@3.5.5, bluebird@^3.5.0, bluebird@^3.5.1, bluebird@^3.5.5:
   resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.5.5.tgz#a8d0afd73251effbbd5fe384a77d73003c17a71f"
   integrity sha512-5am6HnnfN+urzt4yfg7IgTbotDjIT/u8AJpEt0sIU9FtXfVeezXAPKswrG+xKUCOYAINpSdgZVDU6QFh+cuH3w==
 
-bluebird@^2.10.0:
-  version "2.11.0"
-  resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-2.11.0.tgz#534b9033c022c9579c56ba3b3e5a5caafbb650e1"
-  integrity sha1-U0uQM8AiyVecVro7Plpcqvu2UOE=
-
 bluebird@^3.3.0, bluebird@^3.3.1:
   version "3.5.1"
   resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.5.1.tgz#d9551f9de98f1fcda1e683d17ee91a0602ee2eb9"
@@ -8066,11 +8059,6 @@ cli-ux@^4.9.0:
     supports-hyperlinks "^1.0.1"
     treeify "^1.1.0"
     tslib "^1.9.3"
-
-cli-width@^1.0.1:
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/cli-width/-/cli-width-1.1.1.tgz#a4d293ef67ebb7b88d4a4d42c0ccf00c4d1e366d"
-  integrity sha1-pNKT72frt7iNSk1CwMzwDE0eNm0=
 
 cli-width@^2.0.0:
   version "2.2.0"
@@ -10712,15 +10700,6 @@ elasticsearch-browser@^16.4.0:
   version "16.4.0"
   resolved "https://registry.yarnpkg.com/elasticsearch-browser/-/elasticsearch-browser-16.4.0.tgz#0e0b9b781f9f5207498085ce1d47d916ff46fb82"
   integrity sha512-VILNtZQytYnT3mYit3SeN+SgjqOw4piZEhUrHjl7bNY1OGU7nwODtVj/rL7bc0pTmVAnDTtq0CBKE+ncjd+3hQ==
-
-elasticsearch@^15.2.0:
-  version "15.2.0"
-  resolved "https://registry.yarnpkg.com/elasticsearch/-/elasticsearch-15.2.0.tgz#234362b5aa743d9c0a925566569ea7813b8f2569"
-  integrity sha512-jOFcBoEh3Sn3gjUTozInODZTLriJtfppAUC7jnQCUE+OUj8o7GoAyC+L4h/L3ZxmXNFbQCunqVR+nmSofHdo9A==
-  dependencies:
-    agentkeepalive "^3.4.1"
-    chalk "^1.0.0"
-    lodash "^4.17.10"
 
 elasticsearch@^16.4.0:
   version "16.4.0"
@@ -15431,25 +15410,6 @@ inquirer@6.5.0:
     strip-ansi "^5.1.0"
     through "^2.3.6"
 
-inquirer@^0.11.1:
-  version "0.11.4"
-  resolved "https://registry.yarnpkg.com/inquirer/-/inquirer-0.11.4.tgz#81e3374e8361beaff2d97016206d359d0b32fa4d"
-  integrity sha1-geM3ToNhvq/y2XAWIG01nQsy+k0=
-  dependencies:
-    ansi-escapes "^1.1.0"
-    ansi-regex "^2.0.0"
-    chalk "^1.0.0"
-    cli-cursor "^1.0.1"
-    cli-width "^1.0.1"
-    figures "^1.3.5"
-    lodash "^3.3.1"
-    readline2 "^1.0.1"
-    run-async "^0.1.0"
-    rx-lite "^3.1.2"
-    string-width "^1.0.1"
-    strip-ansi "^3.0.0"
-    through "^2.3.6"
-
 inquirer@^0.12.0:
   version "0.12.0"
   resolved "https://registry.yarnpkg.com/inquirer/-/inquirer-0.12.0.tgz#1ef2bfd63504df0bc75785fff8c2c41df12f077e"
@@ -18483,7 +18443,7 @@ lodash@4.17.11, lodash@4.17.15, lodash@>4.17.4, lodash@^4.0.0, lodash@^4.0.1, lo
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.15.tgz#b447f6670a0455bbfeedd11392eff330ea097548"
   integrity sha512-8xOcRHvCjnocdS5cpwXQXVzmmh5e5+saE2QGoeQmbKmRS6J3VQppPOIt0MnmE+4xlZoumy0GPG0D0MVIQbNA1A==
 
-lodash@^3.10.1, lodash@^3.3.1:
+lodash@^3.10.1:
   version "3.10.1"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-3.10.1.tgz#5bf45e8e49ba4189e17d482789dfd15bd140b7b6"
   integrity sha1-W/Rejkm6QYnhfUgnid/RW9FAt7Y=
@@ -18492,11 +18452,6 @@ lodash@^3.10.1, lodash@^3.3.1:
   version "3.10.1-kibana3"
   resolved "https://registry.yarnpkg.com/@elastic/lodash/-/lodash-3.10.1-kibana3.tgz#c0e318245219eeeff535895c429e0cef5058a9ad"
   integrity sha512-HMfwwT2yAkEQNzHSR1BxgE5YcDMUaZ/skhNyjy1nvM/A4m0Kh940hLZeCqKBCsSaUJz/8A/9cQGd9BaAOCIBLg==
-
-lodash@~2.4.1:
-  version "2.4.2"
-  resolved "https://registry.yarnpkg.com/lodash/-/lodash-2.4.2.tgz#fadd834b9683073da179b3eae6d9c0d15053f73e"
-  integrity sha1-+t2DS5aDBz2hebPq5tnA0VBT9z4=
 
 log-ok@^0.1.1:
   version "0.1.1"
