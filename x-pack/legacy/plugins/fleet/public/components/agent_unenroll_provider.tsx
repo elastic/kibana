@@ -60,7 +60,7 @@ export const AgentUnenrollProvider: React.FunctionComponent<Props> = ({ children
     try {
       const unenrollByKuery = typeof agents === 'string';
       const agentsToUnenroll =
-        unenrollByKuery && !(agents as string).trim() ? 'agents.enrolled_at:*' : agents;
+        unenrollByKuery && !(agents as string).trim() ? 'agents.active:true' : agents;
       const unenrollMethod = unenrollByKuery ? libs.agents.unenrollByKuery : libs.agents.unenroll;
       const { results } = await unenrollMethod(agentsToUnenroll as string & string[]);
 
