@@ -30,3 +30,5 @@ checks-reporter-with-killswitch "Kibana visual regression tests" \
     --debug --bail \
     --kibana-install-dir "$installDir" \
     --config test/visual_regression/config.ts;
+
+source test/scripts/jenkins_post.sh

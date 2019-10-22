@@ -33,3 +33,5 @@ checks-reporter-with-killswitch "X-Pack visual regression tests" \
     --debug --bail \
     --kibana-install-dir "$KIBANA_INSTALL_DIR" \
     --config test/visual_regression/config.js;
+
+source test/scripts/jenkins_post.sh

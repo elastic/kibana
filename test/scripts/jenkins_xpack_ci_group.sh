@@ -64,3 +64,5 @@ echo ""
 #   --config "test/functional/config.firefox.js"
 # echo ""
 # echo ""
+
+source test/scripts/jenkins_post.sh

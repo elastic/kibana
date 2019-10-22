@@ -26,3 +26,5 @@ if [ "$CI_GROUP" == "1" ]; then
   yarn run grunt run:pluginFunctionalTestsRelease --from=source;
   yarn run grunt run:interpreterFunctionalTestsRelease;
 fi
+
+source test/scripts/jenkins_post.sh
