@@ -29,7 +29,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { saveAction } from '../../lib/api';
 import { SectionError, ErrableFormRow } from '../../../application/components/page_error';
 import { useAppDependencies } from '../..';
-import { ActionModel } from '../../models/action';
 import { actionReducer } from './action_reducer';
 import { ActionsContext } from '../../context/actions_context';
 import { ActionType, Action } from '../../../types';
@@ -46,7 +45,7 @@ export const ActionAdd = ({ actionType, refreshList }: Props) => {
   const { flyoutVisible, setFlyoutVisibility, actionTypeRegistry } = useContext(ActionsContext);
   // hooks
   const [{ action }, dispatch] = useReducer(actionReducer, {
-    action: new ActionModel({ actionTypeId: actionType.id }),
+    action: { actionTypeId: actionType.id, config: {}, secrets: {} },
   });
 
   const setActionProperty = (property: string, value: any) => {
@@ -62,7 +61,10 @@ export const ActionAdd = ({ actionType, refreshList }: Props) => {
   };
 
   const getAction = () => {
-    dispatch({ command: 'setAction', payload: new ActionModel({ actionTypeId: actionType.id }) });
+    dispatch({
+      command: 'setAction',
+      payload: { actionTypeId: actionType.id, config: {}, secrets: {} },
+    });
   };
 
   useEffect(() => {
@@ -80,10 +82,29 @@ export const ActionAdd = ({ actionType, refreshList }: Props) => {
     return null;
   }
 
+  function validateBaseProperties(actionObject: Action) {
+    const validationResult = { errors: {} };
+    const errors = {
+      description: new Array<string>(),
+    };
+    validationResult.errors = errors;
+    if (!actionObject.description) {
+      errors.description.push(
+        i18n.translate('xpack.alertingUI.sections.actionAdd.error.requiredNameText', {
+          defaultMessage: 'Description is required.',
+        })
+      );
+    }
+    return validationResult;
+  }
+
   const actionTypeRegisterd = actionTypeRegistry.get(actionType.id);
   if (actionTypeRegisterd === null) return null;
   const FieldsComponent = actionTypeRegisterd.actionFields;
-  const errors = { ...actionTypeRegisterd.validate(action).errors, ...action.validate().errors };
+  const errors = {
+    ...actionTypeRegisterd.validate(action).errors,
+    ...validateBaseProperties(action).errors,
+  };
   const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
 
   return (

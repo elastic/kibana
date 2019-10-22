@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { isEqual } from 'lodash';
-import { ActionModel } from '../../models/action';
+
+export interface ActionState {
+  action: any;
+}
 
 export const actionReducer = (state: any, actionItem: any) => {
   const { command, payload } = actionItem;
@@ -23,10 +26,10 @@ export const actionReducer = (state: any, actionItem: any) => {
       } else {
         return {
           ...state,
-          action: new ActionModel({
+          action: {
             ...action,
             [property]: value,
-          }),
+          },
         };
       }
     }
@@ -37,13 +40,13 @@ export const actionReducer = (state: any, actionItem: any) => {
       } else {
         return {
           ...state,
-          action: new ActionModel({
+          action: {
             ...action,
             config: {
               ...action.config,
               [property]: value,
             },
-          }),
+          },
         };
       }
     }
@@ -54,13 +57,13 @@ export const actionReducer = (state: any, actionItem: any) => {
       } else {
         return {
           ...state,
-          action: new ActionModel({
+          action: {
             ...action,
             secrets: {
               ...action.secrets,
               [property]: value,
             },
-          }),
+          },
         };
       }
     }
