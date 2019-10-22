@@ -7,9 +7,12 @@ import React, { Fragment } from 'react';
 import { EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { PackageInfo } from '../../../common/types';
 import { Screenshots } from './screenshots';
+import { MarkdownDescription } from './markdown_description';
 
 export function OverviewPanel(props: PackageInfo) {
   const { description, screenshots } = props;
+  // i expect to get the path from props
+  const readmePath = '/package/coredns-1.0.1/docs/README.md';
   return (
     <Fragment>
       <EuiTitle size="s">
@@ -17,7 +20,7 @@ export function OverviewPanel(props: PackageInfo) {
       </EuiTitle>
       <EuiText>
         <p>{description}</p>
-        <p>Still need a) longer descriptions b) component to show/hide</p>
+        {readmePath && <MarkdownDescription path={readmePath} />}
       </EuiText>
       <EuiSpacer size="xl" />
       {screenshots && <Screenshots images={screenshots} />}
