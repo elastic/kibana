@@ -10,7 +10,6 @@ import { Query } from 'src/legacy/core_plugins/data/public';
 import { ExpressionRendererProps } from 'src/legacy/core_plugins/expressions/public';
 import { Filter } from '@kbn/es-query';
 import { Document } from '../../persistence';
-import { act } from 'react-dom/test-utils';
 
 jest.mock('../../../../../../../src/legacy/ui/public/inspector', () => ({
   isAvailable: false,

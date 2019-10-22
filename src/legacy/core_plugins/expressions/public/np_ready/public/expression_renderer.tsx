@@ -63,12 +63,15 @@ export const ExpressionRendererImplementation = ({
 
   useEffect(() => {
     if (mountpoint.current) {
-      setState({ ...defaultState, isLoading: true });
-
       if (!handlerRef.current) {
         handlerRef.current = new ExpressionLoader(mountpoint.current, expression, options);
 
         // Only registers one subscriber
+        handlerRef.current.loading$.subscribe({
+          next: () => {
+            setState(prevState => ({ ...prevState, isLoading: true }));
+          },
+        });
         handlerRef.current.data$.subscribe({
           next: () => {
             setState(defaultState);

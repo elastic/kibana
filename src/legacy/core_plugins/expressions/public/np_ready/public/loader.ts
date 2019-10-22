@@ -18,7 +18,7 @@
  */
 
 import { Observable, Subject } from 'rxjs';
-import { first, share } from 'rxjs/operators';
+import { share } from 'rxjs/operators';
 import { Adapters, InspectorSession } from '../../../../../../plugins/inspector/public';
 import { ExpressionDataHandler } from './execute';
 import { ExpressionRenderHandler } from './render';
@@ -101,8 +101,7 @@ export class ExpressionLoader {
     return this.dataHandler.inspect();
   }
 
-  update(expression?: string | ExpressionAST, params?: IExpressionLoaderParams): Promise<RenderId> {
-    // const promise = this.render$.pipe(first()).toPromise();
+  update(expression?: string | ExpressionAST, params?: IExpressionLoaderParams): void {
     if (params && params.searchContext && this.params.searchContext) {
       this.params.searchContext = _.defaults(
         {},
@@ -121,8 +120,8 @@ export class ExpressionLoader {
 
   private loadData = async (
     expression: string | ExpressionAST,
-    params?: IExpressionLoaderParams
-  ): Promise<Data> => {
+    params: IExpressionLoaderParams
+  ): Promise<void> => {
     if (this.dataHandler) {
       this.dataHandler.cancel();
     }
@@ -139,20 +138,13 @@ export class ExpressionLoader {
       }
       this.dataSubject.next(data);
     } catch (e) {
+      // Catching error without re-throwing because loadData exceptions are not caught
       this.dataSubject.error(new Error('Could not fetch data'));
     }
   };
 
   private render(data: Data): void {
-    this.renderHandler.render(data);
-    // this.dataHandler = loadData(expression, params);
-    this.data = await this.dataHandler.getData();
-    // this.dataSubject.next(this.data);
-    // return this.data;
-  }
-
-  private async render(data: Data): Promise<RenderId> {
-    return this.renderHandler.render(data, this.params.extraHandlers);
+    this.renderHandler.render(data, this.params.extraHandlers);
   }
 }
 

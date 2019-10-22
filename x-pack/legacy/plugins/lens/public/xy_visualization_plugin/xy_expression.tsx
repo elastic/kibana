@@ -106,7 +106,7 @@ export const getXyChartRenderer = (dependencies: {
   }),
   validate: () => {},
   reuseDomNode: true,
-  render: async (domNode: Element, config: XYChartProps, handlers: IInterpreterRenderHandlers) => {
+  render: (domNode: Element, config: XYChartProps, handlers: IInterpreterRenderHandlers) => {
     ReactDOM.render(
       <I18nProvider>
         <XYChartReportable {...config} {...dependencies} handlers={handlers} />

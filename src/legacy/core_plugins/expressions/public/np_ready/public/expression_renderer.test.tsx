@@ -40,16 +40,22 @@ describe('ExpressionRenderer', () => {
     const data$ = dataSubject.asObservable().pipe(share());
     const renderSubject = new Subject();
     const render$ = renderSubject.asObservable().pipe(share());
+    const loadingSubject = new Subject();
+    const loading$ = loadingSubject.asObservable().pipe(share());
 
     (ExpressionLoader as jest.Mock).mockImplementation(() => {
       return {
         render$,
         data$,
+        loading$,
         update: jest.fn(),
       };
     });
 
     const instance = mount(<ExpressionRendererImplementation className="renderer" expression="" />);
+
+    loadingSubject.next();
+    instance.update();
 
     expect(instance.find(EuiProgress)).toHaveLength(1);
 
@@ -61,6 +67,7 @@ describe('ExpressionRenderer', () => {
     expect(instance.find(EuiProgress)).toHaveLength(0);
 
     instance.setProps({ expression: 'something new' });
+    loadingSubject.next();
     instance.update();
 
     expect(instance.find(EuiProgress)).toHaveLength(1);
@@ -76,23 +83,29 @@ describe('ExpressionRenderer', () => {
     const data$ = dataSubject.asObservable().pipe(share());
     const renderSubject = new Subject();
     const render$ = renderSubject.asObservable().pipe(share());
+    const loadingSubject = new Subject();
+    const loading$ = loadingSubject.asObservable().pipe(share());
 
     (ExpressionLoader as jest.Mock).mockImplementation(() => {
       return {
         render$,
         data$,
+        loading$,
         update: jest.fn(),
       };
     });
 
     const instance = mount(<ExpressionRendererImplementation className="renderer" expression="" />);
 
+    loadingSubject.next();
+    instance.update();
     dataSubject.error('data error');
     instance.update();
 
     expect(instance.find(EuiProgress)).toHaveLength(0);
     expect(instance.find('[data-test-subj="expression-renderer-error"]')).toHaveLength(1);
 
+    loadingSubject.next();
     renderSubject.next(1);
     dataSubject.next('good data');
     renderSubject.error('render error');
@@ -107,11 +120,14 @@ describe('ExpressionRenderer', () => {
     const data$ = dataSubject.asObservable().pipe(share());
     const renderSubject = new Subject();
     const render$ = renderSubject.asObservable().pipe(share());
+    const loadingSubject = new Subject();
+    const loading$ = loadingSubject.asObservable().pipe(share());
 
     (ExpressionLoader as jest.Mock).mockImplementation(() => {
       return {
         render$,
         data$,
+        loading$,
         update: jest.fn(),
       };
     });

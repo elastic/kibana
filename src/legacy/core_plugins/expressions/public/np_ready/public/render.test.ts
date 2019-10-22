@@ -21,6 +21,7 @@ import { render, ExpressionRenderHandler } from './render';
 import { Observable } from 'rxjs';
 import { IInterpreterRenderHandlers } from './types';
 import { getRenderersRegistry } from './services';
+import { first } from 'rxjs/operators';
 
 const element: HTMLElement = {} as HTMLElement;
 
@@ -48,8 +49,6 @@ describe('render helper function', () => {
 });
 
 describe('ExpressionRenderHandler', () => {
-  const data = { type: 'render', as: 'test' };
-
   it('constructor creates observers', () => {
     const expressionRenderHandler = new ExpressionRenderHandler(element);
     expect(expressionRenderHandler.events$).toBeInstanceOf(Observable);
@@ -63,39 +62,23 @@ describe('ExpressionRenderHandler', () => {
   });
 
   describe('render()', () => {
-    it('sends an observable error if invalid data is provided', () => {
-      // Tried using expect.assertions(2) to indicate that async behavior is being tested, but
-      // it always passed the test even with invalid assertions
-      return new Promise(resolve => {
-        const expressionRenderHandler = new ExpressionRenderHandler(element);
-        expressionRenderHandler.render$.subscribe({
-          error(error) {
-            expect(error).toBeInstanceOf(Error);
-            expect(error.message).toEqual('invalid data provided to the expression renderer');
-            resolve();
-          },
-        });
-        expressionRenderHandler.render({});
-      });
+    it('sends an observable error if invalid data is provided', async () => {
+      const expressionRenderHandler = new ExpressionRenderHandler(element);
+      expressionRenderHandler.render({});
+      await expect(expressionRenderHandler.render$.pipe(first()).toPromise()).rejects.toThrow(
+        'invalid data provided to the expression renderer'
+      );
     });
 
-    it('sends an observable error if renderer does not exist', () => {
-      // Tried using expect.assertions(2) to indicate that async behavior is being tested, but
-      // it always passed the test even with invalid assertions
-      return new Promise(resolve => {
-        const expressionRenderHandler = new ExpressionRenderHandler(element);
-        expressionRenderHandler.render$.subscribe({
-          error(error) {
-            expect(error).toBeInstanceOf(Error);
-            expect(error.message).toEqual(`invalid renderer id 'something'`);
-            resolve();
-          },
-        });
-        expressionRenderHandler.render({ type: 'render', as: 'something' });
-      });
+    it('sends an observable error if renderer does not exist', async () => {
+      const expressionRenderHandler = new ExpressionRenderHandler(element);
+      expressionRenderHandler.render({ type: 'render', as: 'something' });
+      await expect(expressionRenderHandler.render$.pipe(first()).toPromise()).rejects.toThrow(
+        `invalid renderer id 'something'`
+      );
     });
 
-    it('sends an observable error if the rendering function throws', () => {
+    it('sends an observable error if the rendering function throws', async () => {
       (getRenderersRegistry as jest.Mock).mockReturnValueOnce({ get: () => true });
       (getRenderersRegistry as jest.Mock).mockReturnValueOnce({
         get: () => ({
@@ -105,30 +88,24 @@ describe('ExpressionRenderHandler', () => {
         }),
       });
 
-      // Tried using expect.assertions(2) to indicate that async behavior is being tested, but
-      // it always passed the test even with invalid assertions
-      return new Promise(resolve => {
-        const expressionRenderHandler = new ExpressionRenderHandler(element);
-        expressionRenderHandler.render$.subscribe({
-          error(error) {
-            expect(error).toBeInstanceOf(Error);
-            expect(error.message).toEqual(`renderer error`);
-            resolve();
-          },
-        });
-        expressionRenderHandler.render({ type: 'render', as: 'something' });
-      });
+      const expressionRenderHandler = new ExpressionRenderHandler(element);
+      expressionRenderHandler.render({ type: 'render', as: 'something' });
+      await expect(expressionRenderHandler.render$.pipe(first()).toPromise()).rejects.toThrow(
+        `renderer error`
+      );
     });
 
-    it('sends a next observable once rendering is complete', async () => {
-      expect.assertions(1);
+    it('sends a next observable once rendering is complete', () => {
       const expressionRenderHandler = new ExpressionRenderHandler(element);
-      expressionRenderHandler.render$.subscribe({
-        next(message) {
-          expect(message).toEqual(1);
-        },
+      expect.assertions(1);
+      return new Promise(resolve => {
+        expressionRenderHandler.render$.subscribe(renderCount => {
+          expect(renderCount).toBe(1);
+          resolve();
+        });
+
+        expressionRenderHandler.render({ type: 'render', as: 'test' });
       });
-      expressionRenderHandler.render(data);
     });
   });
 });

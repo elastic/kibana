@@ -83,11 +83,7 @@ export const getMetricChartRenderer = (
   help: 'Metric Chart Renderer',
   validate: () => {},
   reuseDomNode: true,
-  render: async (
-    domNode: Element,
-    config: MetricChartProps,
-    handlers: IInterpreterRenderHandlers
-  ) => {
+  render: (domNode: Element, config: MetricChartProps, handlers: IInterpreterRenderHandlers) => {
     ReactDOM.render(<MetricChart {...config} formatFactory={formatFactory} />, domNode, () => {
       if (handlers.done) {
         handlers.done();
