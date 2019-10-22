@@ -166,7 +166,7 @@ const getUncommonColumns = (): UncommonProcessTableColumns => [
     truncateText: false,
     hideForMobile: false,
     render: ({ node }) => <>{node.hosts != null ? node.hosts.length : getEmptyValue()}</>,
-    width: '5%',
+    width: '8%',
   },
   {
     align: 'right',
@@ -174,7 +174,7 @@ const getUncommonColumns = (): UncommonProcessTableColumns => [
     truncateText: false,
     hideForMobile: false,
     render: ({ node }) => defaultToEmptyTag(node.instances),
-    width: '5%',
+    width: '8%',
   },
   {
     name: i18n.HOSTS,

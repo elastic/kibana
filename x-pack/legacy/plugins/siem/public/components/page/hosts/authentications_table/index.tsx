@@ -201,7 +201,7 @@ const getAuthenticationColumns = (): AuthTableColumns => [
         />
       );
     },
-    width: '5%',
+    width: '8%',
   },
   {
     name: i18n.FAILURES,
@@ -239,7 +239,7 @@ const getAuthenticationColumns = (): AuthTableColumns => [
         />
       );
     },
-    width: '5%',
+    width: '8%',
   },
   {
     name: i18n.LAST_SUCCESSFUL_TIME,
