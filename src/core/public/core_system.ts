@@ -20,6 +20,7 @@
 import './core.css';
 
 import { CoreId } from '../server';
+import { PackageInfo, EnvironmentMode } from '../server/types';
 import { CoreSetup, CoreStart } from '.';
 import { ChromeService } from './chrome';
 import { FatalErrorsService, FatalErrorsSetup } from './fatal_errors';
@@ -55,6 +56,10 @@ interface Params {
 /** @internal */
 export interface CoreContext {
   coreId: CoreId;
+  env: {
+    mode: Readonly<EnvironmentMode>;
+    packageInfo: Readonly<PackageInfo>;
+  };
 }
 
 /** @internal */
@@ -130,7 +135,8 @@ export class CoreSystem {
     this.rendering = new RenderingService();
     this.application = new ApplicationService();
 
-    this.coreContext = { coreId: Symbol('core') };
+    this.coreContext = { coreId: Symbol('core'), env: injectedMetadata.env };
+
     this.context = new ContextService(this.coreContext);
     this.plugins = new PluginsService(this.coreContext, injectedMetadata.uiPlugins);
 
@@ -155,9 +161,14 @@ export class CoreSystem {
 
       const pluginDependencies = this.plugins.getOpaqueIds();
       const context = this.context.setup({
-        // We inject a fake "legacy plugin" with no dependencies so that legacy plugins can register context providers
-        // that will only be available to other legacy plugins and will not leak into New Platform plugins.
-        pluginDependencies: new Map([...pluginDependencies, [this.legacy.legacyId, []]]),
+        // We inject a fake "legacy plugin" with dependencies on every plugin so that legacy plugins:
+        // 1) Can access context from any NP plugin
+        // 2) Can register context providers that will only be available to other legacy plugins and will not leak into
+        //    New Platform plugins.
+        pluginDependencies: new Map([
+          ...pluginDependencies,
+          [this.legacy.legacyId, [...pluginDependencies.keys()]],
+        ]),
       });
       const application = this.application.setup({ context });
 

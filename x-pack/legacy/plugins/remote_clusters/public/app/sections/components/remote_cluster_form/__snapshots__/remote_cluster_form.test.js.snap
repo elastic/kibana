@@ -40,7 +40,6 @@ Array [
           <div
             class="euiFormRow euiFormRow--fullWidth"
             data-test-subj="remoteClusterFormNameFormRow"
-            id="mockId-row"
           >
             <div
               class="euiFormRow__labelWrapper"
@@ -118,7 +117,6 @@ Array [
           <div
             class="euiFormRow euiFormRow--fullWidth"
             data-test-subj="remoteClusterFormSeedNodesFormRow"
-            id="mockId-row"
           >
             <div
               class="euiFormRow__labelWrapper"
@@ -242,7 +240,6 @@ Array [
           <div
             class="euiFormRow euiFormRow--hasEmptyLabelSpace euiFormRow--fullWidth remoteClusterSkipIfUnavailableSwitch"
             data-test-subj="remoteClusterFormSkipUnavailableFormRow"
-            id="mockId-row"
           >
             <div
               class="euiFormRow__fieldWrapper"
@@ -366,7 +363,6 @@ Array [
   <div
     class="euiFormRow euiFormRow--fullWidth"
     data-test-subj="remoteClusterFormNameFormRow"
-    id="mockId-row"
   >
     <div
       class="euiFormRow__labelWrapper"
@@ -416,7 +412,6 @@ Array [
   <div
     class="euiFormRow euiFormRow--fullWidth"
     data-test-subj="remoteClusterFormSeedNodesFormRow"
-    id="mockId-row"
   >
     <div
       class="euiFormRow__labelWrapper"
@@ -500,7 +495,6 @@ Array [
   <div
     class="euiFormRow euiFormRow--hasEmptyLabelSpace euiFormRow--fullWidth remoteClusterSkipIfUnavailableSwitch"
     data-test-subj="remoteClusterFormSkipUnavailableFormRow"
-    id="mockId-row"
   >
     <div
       class="euiFormRow__fieldWrapper"

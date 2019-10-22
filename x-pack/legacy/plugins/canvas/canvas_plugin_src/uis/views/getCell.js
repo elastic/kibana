@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ViewStrings } from '../../strings';
+import { ViewStrings } from '../../../i18n';
 
 const { GetCell: strings } = ViewStrings;
 

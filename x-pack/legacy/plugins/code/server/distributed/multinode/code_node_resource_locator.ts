@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'hapi';
+import { KibanaRequest } from 'src/core/server';
 import { Endpoint, ResourceLocator } from '../resource_locator';
 import { CodeNodeEndpoint } from './code_node_endpoint';
 
 export class CodeNodeResourceLocator implements ResourceLocator {
   constructor(private readonly codeNodeUrl: string) {}
 
-  async locate(httpRequest: Request, resource: string): Promise<Endpoint> {
+  async locate(httpRequest: KibanaRequest, resource: string): Promise<Endpoint> {
     return Promise.resolve(new CodeNodeEndpoint(httpRequest, resource, this.codeNodeUrl));
   }
 
@@ -19,7 +19,7 @@ export class CodeNodeResourceLocator implements ResourceLocator {
     return Promise.resolve(false);
   }
 
-  allocate(req: Request, resource: string): Promise<Endpoint | undefined> {
+  allocate(req: KibanaRequest, resource: string): Promise<Endpoint | undefined> {
     return this.locate(req, resource);
   }
 }

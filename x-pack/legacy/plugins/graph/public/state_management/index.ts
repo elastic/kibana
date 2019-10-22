@@ -8,6 +8,7 @@ export * from './fields';
 export * from './url_templates';
 export * from './advanced_settings';
 export * from './datasource';
+export * from './datasource.sagas';
 export * from './meta_data';
 export * from './persistence';
 export * from './workspace';

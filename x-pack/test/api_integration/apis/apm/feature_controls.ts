@@ -133,7 +133,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       req: {
         method: 'post',
         url: `/api/apm/settings/agent-configuration/search`,
-        body: { service: { name: 'test-service' } },
+        body: { service: { name: 'test-service' }, etag: 'abc' },
       },
       expectForbidden: expect404,
       expectResponse: expect200,

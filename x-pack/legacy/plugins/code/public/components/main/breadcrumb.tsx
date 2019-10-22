@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
-import { EuiBreadcrumbs } from '@elastic/eui';
+import { EuiBreadcrumbs, Breadcrumb as EuiBreadcrumb } from '@elastic/eui';
 import React from 'react';
 import { MainRouteParams } from '../../common/types';
 import { encodeRevisionString } from '../../../common/uri_util';
@@ -20,13 +19,7 @@ export class Breadcrumb extends React.PureComponent<Props> {
     const { resource, org, repo, revision, path } = this.props.routeParams;
     const repoUri = `${resource}/${org}/${repo}`;
 
-    const breadcrumbs: Array<{
-      text: string;
-      href: string;
-      className?: string;
-      ['data-test-subj']: string;
-      onClick?: Function;
-    }> = [];
+    const breadcrumbs: EuiBreadcrumb[] = [];
     const pathSegments = path ? path.split('/') : [];
 
     pathSegments.forEach((p, index, array) => {
@@ -35,7 +28,6 @@ export class Breadcrumb extends React.PureComponent<Props> {
       const breadcrumb = {
         text: p,
         href,
-        className: 'codeNoMinWidth',
         ['data-test-subj']: `codeFileBreadcrumb-${p}`,
         onClick: () => {
           // track breadcrumb click count
@@ -47,6 +39,13 @@ export class Breadcrumb extends React.PureComponent<Props> {
       }
       breadcrumbs.push(breadcrumb);
     });
-    return <EuiBreadcrumbs max={Number.MAX_VALUE} breadcrumbs={breadcrumbs} />;
+    return (
+      <EuiBreadcrumbs
+        max={3}
+        showMaxPopover
+        breadcrumbs={breadcrumbs}
+        className="codeBreadcrumbs"
+      />
+    );
   }
 }

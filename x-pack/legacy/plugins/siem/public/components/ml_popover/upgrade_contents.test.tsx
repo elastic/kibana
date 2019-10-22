@@ -9,7 +9,7 @@ import toJson from 'enzyme-to-json';
 import * as React from 'react';
 import { UpgradeContents } from './upgrade_contents';
 
-describe('FilterGroup', () => {
+describe('JobsTableFilters', () => {
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(<UpgradeContents />);
     expect(toJson(wrapper)).toMatchSnapshot();

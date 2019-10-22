@@ -1,0 +1,35 @@
+{
+  "transform.update_transform": {
+    "data_autocomplete_rules": {
+      "description": "",
+      "dest": {
+        "__template": {
+          "index": ""
+        },
+        "index": "",
+        "pipeline": ""
+      },
+      "frequency": "1m",
+      "source": {
+        "__template": {
+          "index": ""
+        },
+        "index": "",
+        "query": {
+          "__scope_link": "GLOBAL.query"
+        }
+      },
+      "sync": {
+        "__template": {
+          "time": {
+            "field": ""
+          }
+        },
+        "time": {
+          "field": "",
+          "delay": "60s"
+        }
+      }
+    }
+  }
+}

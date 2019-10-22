@@ -18,7 +18,7 @@
  */
 import { Filter, FILTERS, isMatchAllFilter } from '@kbn/es-query';
 
-export const mapMatchAll = async (filter: Filter) => {
+export const mapMatchAll = (filter: Filter) => {
   if (isMatchAllFilter(filter)) {
     return {
       type: FILTERS.MATCH_ALL,

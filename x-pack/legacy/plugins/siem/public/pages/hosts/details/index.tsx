@@ -5,63 +5,96 @@
  */
 
 import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
 
 import { FiltersGlobal } from '../../../components/filters_global';
 import { HeaderPage } from '../../../components/header_page';
-import { LastEventTime } from '../../../components/last_event_time';
-
-import { HostOverviewByNameQuery } from '../../../containers/hosts/overview';
-import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../../containers/source';
-import { LastEventIndexKey } from '../../../graphql/types';
-
-import { HostsEmptyPage } from '../hosts_empty_page';
-import { HostsKql } from '../kql';
-import { setAbsoluteRangeDatePicker as dispatchAbsoluteRangeDatePicker } from '../../../store/inputs/actions';
-import { scoreIntervalToDateTime } from '../../../components/ml/score/score_interval_to_datetime';
 import { KpiHostDetailsQuery } from '../../../containers/kpi_host_details';
+import { LastEventTime } from '../../../components/last_event_time';
 import { hostToCriteria } from '../../../components/ml/criteria/host_to_criteria';
-import { SiemNavigation } from '../../../components/navigation';
-import { HostsQueryProps } from '../hosts';
-import { SpyRoute } from '../../../utils/route/spy_routes';
+import { MlCapabilitiesContext } from '../../../components/ml/permissions/ml_capabilities_provider';
+import { hasMlUserPermissions } from '../../../components/ml/permissions/has_ml_user_permissions';
 import { AnomalyTableProvider } from '../../../components/ml/anomaly/anomaly_table_provider';
+import { scoreIntervalToDateTime } from '../../../components/ml/score/score_interval_to_datetime';
+import { setHostDetailsTablesActivePageToZero as dispatchHostDetailsTablesActivePageToZero } from '../../../store/hosts/actions';
+import { SiemNavigation } from '../../../components/navigation';
 import { manageQuery } from '../../../components/page/manage_query';
 import { HostOverview } from '../../../components/page/hosts/host_overview';
 import { KpiHostsComponent } from '../../../components/page/hosts';
+import { SiemSearchBar } from '../../../components/search_bar';
+import { HostOverviewByNameQuery } from '../../../containers/hosts/overview';
+import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../../containers/source';
+import { LastEventIndexKey } from '../../../graphql/types';
+import { convertToBuildEsQuery } from '../../../lib/keury';
+import { setAbsoluteRangeDatePicker as dispatchAbsoluteRangeDatePicker } from '../../../store/inputs/actions';
+import { SpyRoute } from '../../../utils/route/spy_routes';
 
-import { HostDetailsComponentProps } from './types';
-import { getFilterQuery, type, makeMapStateToProps } from './utils';
-import { MlCapabilitiesContext } from '../../../components/ml/permissions/ml_capabilities_provider';
-import { hasMlUserPermissions } from '../../../components/ml/permissions/has_ml_user_permissions';
+import { HostsQueryProps } from '../hosts';
+import { HostsEmptyPage } from '../hosts_empty_page';
 
 export { HostDetailsBody } from './body';
 import { navTabsHostDetails } from './nav_tabs';
+import { HostDetailsComponentProps } from './types';
+import { makeMapStateToProps } from './utils';
 
 const HostOverviewManage = manageQuery(HostOverview);
 const KpiHostDetailsManage = manageQuery(KpiHostsComponent);
 
 const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
   ({
-    isInitializing,
-    filterQueryExpression,
-    from,
     detailName,
-    setQuery,
+    filters,
+    from,
+    isInitializing,
+    query,
     setAbsoluteRangeDatePicker,
+    setHostDetailsTablesActivePageToZero,
+    setQuery,
     to,
   }) => {
+    useEffect(() => {
+      setHostDetailsTablesActivePageToZero(null);
+    }, [detailName]);
     const capabilities = useContext(MlCapabilitiesContext);
     return (
       <>
         <WithSource sourceId="default">
-          {({ indicesExist, indexPattern }) =>
-            indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
+          {({ indicesExist, indexPattern }) => {
+            const filterQuery = convertToBuildEsQuery({
+              indexPattern,
+              queries: [query],
+              filters: [
+                {
+                  meta: {
+                    alias: null,
+                    negate: false,
+                    disabled: false,
+                    type: 'phrase',
+                    key: 'host.name',
+                    value: detailName,
+                    params: {
+                      query: detailName,
+                    },
+                  },
+                  query: {
+                    match: {
+                      'host.name': {
+                        query: detailName,
+                        type: 'phrase',
+                      },
+                    },
+                  },
+                },
+                ...filters,
+              ],
+            });
+            return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
               <StickyContainer>
                 <FiltersGlobal>
-                  <HostsKql indexPattern={indexPattern} setQuery={setQuery} type={type} />
+                  <SiemSearchBar indexPattern={indexPattern} id="global" />
                 </FiltersGlobal>
 
                 <HeaderPage
@@ -114,7 +147,7 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
 
                 <KpiHostDetailsQuery
                   sourceId="default"
-                  filterQuery={getFilterQuery(detailName, filterQueryExpression, indexPattern)}
+                  filterQuery={filterQuery}
                   skip={isInitializing}
                   startDate={from}
                   endDate={to}
@@ -149,8 +182,8 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
 
                 <HostsEmptyPage />
               </>
-            )
-          }
+            );
+          }}
         </WithSource>
         <SpyRoute />
       </>
@@ -165,6 +198,7 @@ export const HostDetails = compose<React.ComponentClass<HostsQueryProps & { deta
     makeMapStateToProps,
     {
       setAbsoluteRangeDatePicker: dispatchAbsoluteRangeDatePicker,
+      setHostDetailsTablesActivePageToZero: dispatchHostDetailsTablesActivePageToZero,
     }
   )
 )(HostDetailsComponent);
