@@ -9,7 +9,6 @@ import toJson from 'enzyme-to-json';
 import { getOr } from 'lodash/fp';
 import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
-import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import {
   apolloClientObservable,
@@ -30,6 +29,12 @@ mockUseKibanaCore.mockImplementation(() => ({
   uiSettings: mockUiSettings,
 }));
 
+// Test will fail because we will to need to mock some core services to make the test work
+// For now let's forget about SiemSearchBar
+jest.mock('../../../search_bar', () => ({
+  SiemSearchBar: () => null,
+}));
+
 describe('Hosts Table', () => {
   const loadPage = jest.fn();
   const state: State = mockGlobalState;
@@ -43,7 +48,7 @@ describe('Hosts Table', () => {
   describe('rendering', () => {
     test('it renders the default Hosts table', () => {
       const wrapper = shallow(
-        <ReduxStoreProvider store={store}>
+        <TestProviders store={store}>
           <HostsTable
             data={mockData.Hosts.edges}
             id="hostsQuery"
@@ -56,7 +61,7 @@ describe('Hosts Table', () => {
             totalCount={mockData.Hosts.totalCount}
             type={hostsModel.HostsType.page}
           />
-        </ReduxStoreProvider>
+        </TestProviders>
       );
 
       expect(toJson(wrapper)).toMatchSnapshot();

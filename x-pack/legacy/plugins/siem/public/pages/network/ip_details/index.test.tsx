@@ -32,7 +32,7 @@ const pop: Action = 'POP';
 type GlobalWithFetch = NodeJS.Global & { fetch: jest.Mock };
 
 const mockUseKibanaCore = useKibanaCore as jest.Mock;
-jest.mock('../../lib/compose/kibana_core');
+jest.mock('../../../lib/compose/kibana_core');
 mockUseKibanaCore.mockImplementation(() => ({
   uiSettings: mockUiSettings,
 }));
