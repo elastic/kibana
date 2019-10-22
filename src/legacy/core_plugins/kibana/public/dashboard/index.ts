@@ -28,6 +28,7 @@ import { DashboardPlugin, LegacyAngularInjectedDependencies } from './plugin';
 import { start as data } from '../../../data/public/legacy';
 import { localApplicationService } from '../local_application_service';
 import { start as embeddables } from '../../../embeddable_api/public/np_ready/public/legacy';
+import { SavedObjectRegistryProvider } from 'ui/saved_objects';
 
 /**
  * Get dependencies relying on the global angular context.
@@ -41,6 +42,7 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
   const queryFilter = Private(FilterBarQueryFilterProvider);
   const getUnhashableStates = Private(getUnhashableStatesProvider);
   const shareContextMenuExtensions = Private(ShareContextMenuExtensionsRegistryProvider);
+  const savedObjectRegistry = Private(SavedObjectRegistryProvider);
 
   return {
     queryFilter,
@@ -50,6 +52,8 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
       return Private(FeatureCatalogueRegistryProvider as any);
     },
     dashboardConfig: injector.get('dashboardConfig'),
+    savedObjectRegistry,
+    savedDashboards: injector.get('savedDashboards'),
   };
 }
 

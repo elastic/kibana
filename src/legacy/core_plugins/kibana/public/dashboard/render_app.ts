@@ -40,35 +40,37 @@ import { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url';
 // @ts-ignore
 import { confirmModalFactory } from 'ui/modals/confirm_modal';
 
-import { AppMountContext, ChromeStart, SavedObjectsClientContract, UiSettingsClientContract } from 'kibana/public';
+import {
+  AppMountContext,
+  ChromeStart,
+  SavedObjectsClientContract,
+  UiSettingsClientContract,
+} from 'kibana/public';
 import { configureAppAngularModule } from 'ui/legacy_compat';
 
 // @ts-ignore
 import { initDashboardApp } from './app';
 import { DataStart } from '../../../data/public';
-import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
-import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing/get_unhashable_states_provider';
-import { ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
 import { SavedQueryService } from '../../../data/public/search/search_bar/lib/saved_query_service';
 import { EmbeddablePublicPlugin } from '../../../../../plugins/embeddable/public';
 
 export interface RenderDeps {
-  core: AppMountContext['core']; //x
-  indexPatterns: DataStart['indexPatterns']['indexPatterns']; //x
-  queryFilter: any; //x
-  getUnhashableStates: any; //x
-  shareContextMenuExtensions: any; //x
-  savedObjectsClient: SavedObjectsClientContract; //x
+  core: AppMountContext['core'];
+  indexPatterns: DataStart['indexPatterns']['indexPatterns'];
+  queryFilter: any;
+  getUnhashableStates: any;
+  shareContextMenuExtensions: any;
+  savedObjectsClient: SavedObjectsClientContract;
   savedObjectRegistry: any;
-  dashboardConfig: any; //x
-  savedDashboards: any
-  dashboardCapabilities: any; //x
-  uiSettings: UiSettingsClientContract; //x
-  chrome: ChromeStart; //x
-  addBasePath: (path: string) => string; //x
-  getFeatureCatalogueRegistryProvider: () => any; //x
-  savedQueryService: SavedQueryService; //x
-  embeddables: ReturnType<EmbeddablePublicPlugin['start']>; //x
+  dashboardConfig: any;
+  savedDashboards: any;
+  dashboardCapabilities: any;
+  uiSettings: UiSettingsClientContract;
+  chrome: ChromeStart;
+  addBasePath: (path: string) => string;
+  getFeatureCatalogueRegistryProvider: () => any;
+  savedQueryService: SavedQueryService;
+  embeddables: ReturnType<EmbeddablePublicPlugin['start']>;
 }
 
 export const renderApp = (element: HTMLElement, appBasePath: string, deps: RenderDeps) => {

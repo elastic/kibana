@@ -29,18 +29,16 @@ import { toastNotifications } from 'ui/notify';
 
 // @ts-ignore
 import { ConfirmationButtonTypes } from 'ui/modals/confirm_modal';
-import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 
 import { docTitle } from 'ui/doc_title/doc_title';
 
 import { showSaveModal, SaveResult } from 'ui/saved_objects/show_saved_object_save_modal';
 
-import { showShareContextMenu, ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
+import { showShareContextMenu } from 'ui/share';
 import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 
 import { timefilter } from 'ui/timefilter';
 
-import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing/get_unhashable_states_provider';
 
 import {
   AppStateClass as TAppStateClass,
@@ -84,8 +82,6 @@ import { getDashboardTitle } from './dashboard_strings';
 import { DashboardAppScope } from './dashboard_app';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '../visualize/embeddable';
 import { convertSavedDashboardPanelToPanelState } from './lib/embeddable_saved_object_converters';
-import { SavedQueryService } from '../../../data/public/search/search_bar/lib/saved_query_service';
-import { NotificationsStart, OverlayStart } from 'kibana/public';
 import { RenderDeps } from './render_app';
 
 export interface DashboardAppControllerDependencies extends RenderDeps {

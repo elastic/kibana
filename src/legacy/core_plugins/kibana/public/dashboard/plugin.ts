@@ -30,6 +30,8 @@ export interface LegacyAngularInjectedDependencies {
   shareContextMenuExtensions: any;
   getFeatureCatalogueRegistryProvider: () => Promise<any>;
   dashboardConfig: any;
+  savedObjectRegistry: any;
+  savedDashboards: any;
 }
 
 export interface DashboardPluginStartDependencies {
@@ -57,8 +59,8 @@ export class DashboardPlugin implements Plugin {
     }: DashboardPluginSetupDependencies
   ) {
     localApplicationService.register({
-      id: 'home',
-      title: 'Home',
+      id: 'discover',
+      title: 'Discover',
       mount: async ({ core: contextCore }, params) => {
         const angularDependencies = await getAngularDependencies();
         const deps: RenderDeps = {

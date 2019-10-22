@@ -150,8 +150,8 @@ export function initDashboardApp(app, deps) {
         controller: createNewDashboardCtrl,
         requireUICapability: 'dashboard.createNew',
         resolve: {
-          dash: function (savedDashboards, redirectWhenMissing) {
-            return savedDashboards.get().catch(
+          dash: function (redirectWhenMissing) {
+            return deps.savedDashboards.get().catch(
               redirectWhenMissing({
                 dashboard: DashboardConstants.LANDING_PAGE_PATH,
               })
