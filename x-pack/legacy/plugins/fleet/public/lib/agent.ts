@@ -49,9 +49,10 @@ export class AgentsLib {
   public getAll = async (
     page: number,
     perPage: number,
-    kuery?: string
+    kuery?: string,
+    showInactive?: boolean
   ): Promise<ReturnTypeList<Agent>> => {
-    return await this.adapter.getAll(page, perPage, kuery);
+    return await this.adapter.getAll(page, perPage, kuery, showInactive);
   };
 
   /** Update a given agent via it's ID */

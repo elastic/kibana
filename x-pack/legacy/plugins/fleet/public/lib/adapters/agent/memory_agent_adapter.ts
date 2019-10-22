@@ -42,7 +42,7 @@ export class AgentAdapter {
     return true;
   }
 
-  public async getAll(page: number, perPage: number, kuery?: string) {
+  public async getAll(page: number, perPage: number, kuery?: string, showInactive?: boolean) {
     const list = this.memoryDB.map<Agent>((beat: any) => omit(beat, ['access_token']));
     return { list, success: true, page, perPage, total: list.length };
   }
