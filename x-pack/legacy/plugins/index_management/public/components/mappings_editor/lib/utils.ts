@@ -14,12 +14,11 @@ import {
   MainType,
   SubType,
   ChildFieldName,
-  TreeItem,
 } from '../types';
 
 import { MAIN_DATA_TYPE_DEFINITION, MAX_DEPTH_DEFAULT_EDITOR } from '../constants';
-
 import { State } from '../reducer';
+import { TreeItem } from '../components/tree';
 
 export const getUniqueId = () => {
   const dateNow = Date.now();

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('../constants', () => ({ DATA_TYPE_DEFINITION: {} }));
+jest.mock('../constants', () => ({ MAIN_DATA_TYPE_DEFINITION: {} }));
 
 import { isStateValid } from './utils';
 
