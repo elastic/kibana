@@ -59,7 +59,7 @@ export const ManageEmailAction: React.FC<ManageActionModalProps> = (
 ) => {
   const { createEmailAction, isNew, action } = props;
 
-  const defaultData = Object.assign(DEFAULT_DATA, action.config);
+  const defaultData = Object.assign({}, DEFAULT_DATA, action ? action.config : {});
   const [isSaving, setIsSaving] = React.useState(false);
   const [showErrors, setShowErrors] = React.useState(false);
   const [errors, setErrors] = React.useState<EmailActionData | any>(
