@@ -20,6 +20,22 @@
 import { AnonymousPaths } from './anonymous_paths';
 import { BasePath } from './base_path_service';
 
+describe('#register', () => {
+  it(`throws an error for paths that don't start with '/'`, () => {
+    const basePath = new BasePath('/foo');
+    const anonymousPaths = new AnonymousPaths(basePath);
+    expect(() => anonymousPaths.register('bar')).toThrowErrorMatchingInlineSnapshot(
+      `"\\"path\\" must start with \\"/\\""`
+    );
+  });
+
+  it(`allows paths that end with '/'`, () => {
+    const basePath = new BasePath('/foo');
+    const anonymousPaths = new AnonymousPaths(basePath);
+    anonymousPaths.register('/bar/');
+  });
+});
+
 describe('#isAnonymous', () => {
   it('returns true for registered paths', () => {
     const basePath = new BasePath('/foo');
@@ -28,10 +44,38 @@ describe('#isAnonymous', () => {
     expect(anonymousPaths.isAnonymous('/foo/bar')).toBe(true);
   });
 
+  it('returns true for paths registered with a trailing slash, but call "isAnonymous" with no trailing slash', () => {
+    const basePath = new BasePath('/foo');
+    const anonymousPaths = new AnonymousPaths(basePath);
+    anonymousPaths.register('/bar/');
+    expect(anonymousPaths.isAnonymous('/foo/bar')).toBe(true);
+  });
+
+  it('returns true for paths registered without a trailing slash, but call "isAnonymous" with a trailing slash', () => {
+    const basePath = new BasePath('/foo');
+    const anonymousPaths = new AnonymousPaths(basePath);
+    anonymousPaths.register('/bar');
+    expect(anonymousPaths.isAnonymous('/foo/bar/')).toBe(true);
+  });
+
+  it('returns true for paths whose capitalization is different', () => {
+    const basePath = new BasePath('/foo');
+    const anonymousPaths = new AnonymousPaths(basePath);
+    anonymousPaths.register('/BAR');
+    expect(anonymousPaths.isAnonymous('/foo/bar')).toBe(true);
+  });
+
   it('returns false for other paths', () => {
     const basePath = new BasePath('/foo');
     const anonymousPaths = new AnonymousPaths(basePath);
     anonymousPaths.register('/bar');
     expect(anonymousPaths.isAnonymous('/foo/foo')).toBe(false);
+  });
+
+  it('returns false for sub-paths of registered paths', () => {
+    const basePath = new BasePath('/foo');
+    const anonymousPaths = new AnonymousPaths(basePath);
+    anonymousPaths.register('/bar');
+    expect(anonymousPaths.isAnonymous('/foo/bar/baz')).toBe(false);
   });
 });

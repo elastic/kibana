@@ -27,10 +27,25 @@ export class AnonymousPaths {
   }
 
   public isAnonymous(path: string): boolean {
-    return this.paths.has(this.basePath.remove(path));
+    const pathWithoutBasePath = this.basePath.remove(path);
+    return this.paths.has(this.normalizePath(pathWithoutBasePath));
   }
 
   public register(path: string) {
-    this.paths.add(path);
+    if (!path.startsWith('/')) {
+      throw new Error('"path" must start with "/"');
+    }
+
+    this.paths.add(this.normalizePath(path));
+  }
+
+  private normalizePath(path: string) {
+    const lowercased = path.toLowerCase();
+
+    if (lowercased.endsWith('/')) {
+      return lowercased.slice(0, lowercased.length - 1);
+    }
+
+    return lowercased;
   }
 }
