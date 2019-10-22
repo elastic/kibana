@@ -24,6 +24,8 @@ import {
   TaskInstance,
 } from './task';
 
+import { Result, asErr, asOk } from './lib/result_type';
+
 export interface StoreOpts {
   callCluster: ElasticJs;
   index: string;
@@ -314,6 +316,29 @@ export class TaskStore {
     );
 
     return savedObjectToConcreteTaskInstance(updatedSavedObject);
+  }
+
+  /**
+   * Updates the specified doc in the index, returning the doc
+   * with its version up to date.
+   *
+   * @param {TaskDoc} doc[]
+   * @returns {Promise<TaskDoc>}
+   */
+  public async bulkUpdate(
+    docs: ConcreteTaskInstance[]
+  ): Promise<Array<Result<ConcreteTaskInstance, BulkUpdateTaskFailureResult>>> {
+    return (await this.savedObjectsRepository.bulkUpdate(
+      docs.map(doc => ({
+        id: doc.id,
+        type: 'task',
+        attributes: taskInstanceToAttributes(doc),
+        version: doc.version,
+      }))
+    )).saved_objects.map(instance => {
+      const task = savedObjectToConcreteTaskInstance(instance);
+      return instance.error ? asErr({ task, error: instance.error }) : asOk(task);
+    });
   }
 
   /**
