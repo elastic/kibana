@@ -26,7 +26,7 @@ jest.mock('fs', () => ({
 import sinon from 'sinon';
 import Logger from '../lib/logger';
 import { join } from 'path';
-import rimraf from 'rimraf';
+import del from 'del';
 import fs from 'fs';
 import { existingInstall, assertVersion } from './kibana';
 
@@ -53,7 +53,7 @@ describe('kibana cli', function () {
       describe('assertVersion', function () {
 
         beforeEach(function () {
-          rimraf.sync(testWorkingPath);
+          del.sync(testWorkingPath);
           fs.mkdirSync(testWorkingPath, { recursive: true });
           sinon.stub(logger, 'log');
           sinon.stub(logger, 'error');
@@ -62,7 +62,7 @@ describe('kibana cli', function () {
         afterEach(function () {
           logger.log.restore();
           logger.error.restore();
-          rimraf.sync(testWorkingPath);
+          del.sync(testWorkingPath);
         });
 
         it('should succeed with exact match', function () {
