@@ -10,6 +10,7 @@ import {
   ResolveSnippetsRequest,
   SearchResultItem,
   SourceHit,
+  emptyIntegrationsSearchResult,
 } from '../../model';
 import { DocumentSearchIndexWithScope } from '../indexer/schema';
 import { EsClient } from '../lib/esqueue';
@@ -24,6 +25,9 @@ export class IntegrationsSearchClient extends DocumentSearchClient {
   public async resolveSnippets(req: ResolveSnippetsRequest): Promise<IntegrationsSearchResult> {
     const { repoUris, filePath, lineNumStart, lineNumEnd } = req;
     const index = DocumentSearchIndexWithScope(repoUris);
+    if (index.length === 0) {
+      return emptyIntegrationsSearchResult();
+    }
 
     let fallback = false;
     let rawRes = await this.client.search({

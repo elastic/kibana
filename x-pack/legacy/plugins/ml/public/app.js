@@ -9,8 +9,10 @@
 import 'uiExports/fieldFormats';
 import 'uiExports/savedObjectTypes';
 
-import 'ui/courier';
 import 'ui/autoload/all';
+
+// needed to make syntax highlighting work in ace editors
+import 'ace';
 
 import 'plugins/ml/access_denied';
 import 'plugins/ml/jobs';
