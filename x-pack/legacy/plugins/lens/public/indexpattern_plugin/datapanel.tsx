@@ -354,7 +354,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 >
                   <FormattedMessage
                     id="xpack.lens.indexPatterns.toggleFiltersPopover"
-                    defaultMessage="Fields filtered"
+                    defaultMessage="Filter by type"
                   />
                 </EuiFacetButton>
               }

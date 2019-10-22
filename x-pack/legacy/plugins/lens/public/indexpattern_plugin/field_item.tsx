@@ -175,8 +175,7 @@ export function FieldItem(props: FieldItemProps) {
                 }
               }}
               aria-label={i18n.translate('xpack.lens.indexPattern.fieldStatsButtonAriaLabel', {
-                defaultMessage:
-                  'Click or press Enter for information about {fieldName}. Or, drag field into visualization.',
+                defaultMessage: 'Click for a field preview. Or, drag and drop to visualize.',
                 values: { fieldName: field.name },
               })}
             >
@@ -226,7 +225,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
     return (
       <EuiText size="s">
         {i18n.translate('xpack.lens.indexPattern.fieldStatsNoData', {
-          defaultMessage: 'No data to display',
+          defaultMessage: 'No data to display.',
         })}
       </EuiText>
     );
