@@ -24,6 +24,7 @@ import {
   SavedObjectReference,
   SavedObjectsMigrationVersion,
   SavedObjectsBaseOptions,
+  SavedObjectsMutatingOperationBaseOptions,
   SavedObjectsFindOptions,
 } from '../types';
 import { SavedObjectsErrorHelpers } from './lib/errors';
@@ -96,12 +97,30 @@ export interface SavedObjectsFindResponse<T extends SavedObjectAttributes = any>
  *
  * @public
  */
-export interface SavedObjectsUpdateOptions extends SavedObjectsBaseOptions {
+export interface SavedObjectsUpdateOptions
+  extends SavedObjectsBaseOptions,
+    SavedObjectsMutatingOperationBaseOptions {
   /** An opaque version number which changes on each successful write operation. Can be used for implementing optimistic concurrency control. */
   version?: string;
   /** {@inheritdoc SavedObjectReference} */
   references?: SavedObjectReference[];
 }
+
+/**
+ *
+ * @public
+ */
+export interface SavedObjectsBulkUpdateOptions
+  extends SavedObjectsBaseOptions,
+    SavedObjectsMutatingOperationBaseOptions {}
+
+/**
+ *
+ * @public
+ */
+export interface SavedObjectsDeleteOptions
+  extends SavedObjectsBaseOptions,
+    SavedObjectsMutatingOperationBaseOptions {}
 
 /**
  *

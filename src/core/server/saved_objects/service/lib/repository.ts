@@ -40,6 +40,8 @@ import {
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
   SavedObjectsBulkUpdateObject,
+  SavedObjectsBulkUpdateOptions,
+  SavedObjectsDeleteOptions,
 } from '../saved_objects_client';
 import {
   SavedObject,
@@ -47,6 +49,7 @@ import {
   SavedObjectsBaseOptions,
   SavedObjectsFindOptions,
   SavedObjectsMigrationVersion,
+  SavedObjectsMutatingOperationBaseOptions,
 } from '../../types';
 import { validateConvertFilterToKueryNode } from './filter_utils';
 
@@ -81,7 +84,9 @@ export interface SavedObjectsRepositoryOptions {
   onBeforeWrite?: (...args: Parameters<CallCluster>) => Promise<void>;
 }
 
-export interface IncrementCounterOptions extends SavedObjectsBaseOptions {
+export interface IncrementCounterOptions
+  extends SavedObjectsBaseOptions,
+    SavedObjectsMutatingOperationBaseOptions {
   migrationVersion?: SavedObjectsMigrationVersion;
 }
 
@@ -308,17 +313,17 @@ export class SavedObjectsRepository {
    * @property {string} [options.namespace]
    * @returns {promise}
    */
-  async delete(type: string, id: string, options: SavedObjectsBaseOptions = {}): Promise<{}> {
+  async delete(type: string, id: string, options: SavedObjectsDeleteOptions = {}): Promise<{}> {
     if (!this._allowedTypes.includes(type)) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError();
     }
 
-    const { namespace } = options;
+    const { namespace, refresh = 'wait_for' } = options;
 
     const response = await this._writeToCluster('delete', {
       id: this._serializer.generateRawId(namespace, type, id),
       index: this.getIndexForType(type),
-      refresh: 'wait_for',
+      refresh,
       ignore: [404],
     });
 
@@ -345,10 +350,15 @@ export class SavedObjectsRepository {
    * @param {string} namespace
    * @returns {promise} - { took, timed_out, total, deleted, batches, version_conflicts, noops, retries, failures }
    */
-  async deleteByNamespace(namespace: string): Promise<any> {
+  async deleteByNamespace(
+    namespace: string,
+    options: SavedObjectsMutatingOperationBaseOptions = {}
+  ): Promise<any> {
     if (!namespace || typeof namespace !== 'string') {
       throw new TypeError(`namespace is required, and must be a string`);
     }
+
+    const { refresh = 'wait_for' } = options;
 
     const allTypes = Object.keys(getRootPropertiesObjects(this._mappings));
 
@@ -357,7 +367,7 @@ export class SavedObjectsRepository {
     const esOptions = {
       index: this.getIndicesForTypes(typesToDelete),
       ignore: [404],
-      refresh: 'wait_for',
+      refresh,
       body: {
         conflicts: 'proceed',
         ...getSearchDsl(this._mappings, this._schema, {
@@ -626,7 +636,7 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    const { version, namespace, references } = options;
+    const { version, namespace, references, refresh = 'wait_for' } = options;
 
     const time = this._getCurrentTime();
 
@@ -643,7 +653,7 @@ export class SavedObjectsRepository {
       id: this._serializer.generateRawId(namespace, type, id),
       index: this.getIndexForType(type),
       ...(version && decodeRequestVersion(version)),
-      refresh: 'wait_for',
+      refresh,
       ignore: [404],
       body: {
         doc,
@@ -675,7 +685,7 @@ export class SavedObjectsRepository {
    */
   async bulkUpdate<T extends SavedObjectAttributes = any>(
     objects: Array<SavedObjectsBulkUpdateObject<T>>,
-    options: SavedObjectsBaseOptions = {}
+    options: SavedObjectsBulkUpdateOptions = {}
   ): Promise<SavedObjectsBulkUpdateResponse<T>> {
     const time = this._getCurrentTime();
     const bulkUpdateParams: object[] = [];
@@ -729,9 +739,10 @@ export class SavedObjectsRepository {
       return { tag: 'Right' as 'Right', value: expectedResult };
     });
 
+    const { refresh = 'wait_for' } = options;
     const esResponse = bulkUpdateParams.length
       ? await this._writeToCluster('bulk', {
-          refresh: 'wait_for',
+          refresh,
           body: bulkUpdateParams,
         })
       : {};
@@ -794,7 +805,7 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
     }
 
-    const { migrationVersion, namespace } = options;
+    const { migrationVersion, namespace, refresh = 'wait_for' } = options;
 
     const time = this._getCurrentTime();
 
@@ -811,7 +822,7 @@ export class SavedObjectsRepository {
     const response = await this._writeToCluster('update', {
       id: this._serializer.generateRawId(namespace, type, id),
       index: this.getIndexForType(type),
-      refresh: 'wait_for',
+      refresh,
       _source: true,
       body: {
         script: {
