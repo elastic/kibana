@@ -76,7 +76,7 @@ describe('Filter Manager', function () {
     expect(queryFilter.addFilters.callCount).to.be(1);
     checkAddFilters(1, [{
       meta: { index: 'myIndex', negate: false },
-      query: { match: { myField: { query: 1, type: 'phrase' } } }
+      query: { match_phrase: { myField: 1 } }
     }]);
   });
 
@@ -85,13 +85,13 @@ describe('Filter Manager', function () {
     expect(queryFilter.addFilters.callCount).to.be(1);
     checkAddFilters(3, [{
       meta: { index: 'myIndex', negate: false },
-      query: { match: { myField: { query: 1, type: 'phrase' } } }
+      query: { match_phrase: { myField: 1 } }
     }, {
       meta: { index: 'myIndex', negate: false },
-      query: { match: { myField: { query: 2, type: 'phrase' } } }
+      query: { match_phrase: { myField: 2 } }
     }, {
       meta: { index: 'myIndex', negate: false },
-      query: { match: { myField: { query: 3, type: 'phrase' } } }
+      query: { match_phrase: { myField: 3 } }
     }]);
   });
 
@@ -107,7 +107,7 @@ describe('Filter Manager', function () {
     filterGen.add('myField', 1, '+', 'myIndex');
     checkAddFilters(1, [{
       meta: { index: 'myIndex', negate: false },
-      query: { match: { myField: { query: 1, type: 'phrase' } } }
+      query: { match_phrase: { myField: 1 } }
     }], 0);
     expect(appState.filters).to.have.length(1);
 
@@ -115,7 +115,7 @@ describe('Filter Manager', function () {
     filterGen.add('myField', 1, '-', 'myIndex');
     checkAddFilters(1, [{
       meta: { index: 'myIndex', negate: true, disabled: false },
-      query: { match: { myField: { query: 1, type: 'phrase' } } }
+      query: { match_phrase: { myField: 1 } }
     }], 1);
     expect(appState.filters).to.have.length(1);
 
@@ -152,7 +152,7 @@ describe('Filter Manager', function () {
   it('should enable matching filters being changed', function () {
     _.each([true, false], function (negate) {
       appState.filters = [{
-        query: { match: { myField: { query: 1 } } },
+        query: { match_phrase: { myField: 1 } },
         meta: { disabled: true, negate: negate }
       }];
       expect(appState.filters.length).to.be(1);
