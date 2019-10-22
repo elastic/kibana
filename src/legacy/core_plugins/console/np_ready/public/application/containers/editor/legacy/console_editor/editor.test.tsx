@@ -32,7 +32,7 @@ jest.mock('../../../../../../../public/quarantined/src/mappings.js', () => ({
 }));
 jest.mock('../../../../../../../public/quarantined/src/input.ts', () => {
   return {
-    initializeInput: () => ({
+    initializeEditor: () => ({
       $el: {
         css: () => {},
       },
