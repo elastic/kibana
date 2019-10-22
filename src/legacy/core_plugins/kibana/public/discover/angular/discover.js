@@ -22,6 +22,7 @@ import React from 'react';
 import { Subscription } from 'rxjs';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
+import { i18n } from '@kbn/i18n';
 import '../saved_searches/saved_searches';
 import '../components/field_chooser/field_chooser';
 
@@ -50,8 +51,6 @@ import {
   getResponseInspectorStats,
   getUnhashableStatesProvider,
   hasSearchStategyForIndexPattern,
-  i18n,
-  Inspector,
   intervalOptions,
   isDefaultTypeIndexPattern,
   migrateLegacyQuery,
@@ -356,7 +355,7 @@ function discoverController(
       }),
       testId: 'openInspectorButton',
       run() {
-        Inspector.open(inspectorAdapters, {
+        npStart.plugins.inspector.open(inspectorAdapters, {
           title: savedSearch.title
         });
       }

@@ -18,10 +18,10 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import {
   FilterBarQueryFilterProvider,
   uiRoutes,
-  i18n,
   subscribeWithScope,
   npStart,
 } from './../kibana_services';

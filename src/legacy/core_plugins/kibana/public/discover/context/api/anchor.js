@@ -18,10 +18,9 @@
  */
 
 import _ from 'lodash';
-
 import { i18n } from '@kbn/i18n';
+import { SearchSource } from '../../kibana_services';
 
-import { SearchSource } from 'ui/courier';
 
 export function fetchAnchorProvider(indexPatterns) {
   return async function fetchAnchor(

@@ -77,7 +77,7 @@ app.directive('discoverField', function ($compile) {
 
       };
 
-      $scope.canVisualize = capabilities.get().visualize.show;
+      $scope.canVisualize = capabilities.visualize.show;
 
       $scope.toggleDisplay = function (field) {
         if (field.display) {

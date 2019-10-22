@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { toastNotifications } from 'ui/notify';
+import { toastNotifications } from '../../kibana_services';
 
 import { fetchAnchorProvider } from '../api/anchor';
 import { fetchContextProvider } from '../api/context';

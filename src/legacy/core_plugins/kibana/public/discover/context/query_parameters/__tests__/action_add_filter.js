@@ -20,8 +20,8 @@
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import sinon from 'sinon';
+import { FilterBarQueryFilterProvider } from '../../../kibana_services';
 
-import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 
 import { createStateStub } from './_utils';
 import { QueryParameterActionsProvider } from '../actions';

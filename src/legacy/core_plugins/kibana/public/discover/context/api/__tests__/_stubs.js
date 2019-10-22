@@ -19,7 +19,7 @@
 
 import sinon from 'sinon';
 import moment from 'moment';
-import { SearchSource } from 'ui/courier';
+import { SearchSource } from '../../../kibana_services';
 
 export function createIndexPatternsStub() {
   return {
