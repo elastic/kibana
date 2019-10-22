@@ -45,7 +45,6 @@ export const reporting = (kibana) => {
       embeddableActions: [
         'plugins/reporting/panel_actions/get_csv_panel_action',
       ],
-      hacks: ['plugins/reporting/hacks/job_completion_notifier'],
       home: ['plugins/reporting/register_feature'],
       managementSections: ['plugins/reporting/views/management'],
       injectDefaultVars(server, options) {

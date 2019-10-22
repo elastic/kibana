@@ -28,6 +28,7 @@ export interface SavedObjectsClientStub {
   create: sinon.SinonStub<any[], any>;
   bulkCreate: sinon.SinonStub<any[], any>;
   bulkGet: sinon.SinonStub<any[], any>;
+  bulkUpdate: sinon.SinonStub<any[], any>;
   delete: sinon.SinonStub<any[], any>;
   find: sinon.SinonStub<any[], any>;
   errors: typeof savedObjectsClientErrors;
@@ -41,6 +42,7 @@ export function createObjectsClientStub(esDocSource = {}): SavedObjectsClientStu
     errors: savedObjectsClientErrors,
     bulkCreate: sinon.stub(),
     bulkGet: sinon.stub(),
+    bulkUpdate: sinon.stub(),
     delete: sinon.stub(),
     find: sinon.stub(),
   };
