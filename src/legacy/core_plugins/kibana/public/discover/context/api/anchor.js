@@ -21,11 +21,9 @@ import _ from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 
-import { SearchSourceProvider } from 'ui/courier';
+import { SearchSource } from 'ui/courier';
 
-export function fetchAnchorProvider(indexPatterns, Private) {
-  const SearchSource = Private(SearchSourceProvider);
-
+export function fetchAnchorProvider(indexPatterns) {
   return async function fetchAnchor(
     indexPatternId,
     anchorId,
