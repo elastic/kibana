@@ -76,6 +76,7 @@ import { iptablesLogsSpecProvider } from './iptables_logs';
 import { ciscoLogsSpecProvider } from './cisco_logs';
 import { envoyproxyLogsSpecProvider } from './envoyproxy_logs';
 import { couchdbMetricsSpecProvider } from './couchdb_metrics';
+import { emsBoundariesSpecProvider } from './ems';
 
 export function registerTutorials(server) {
   server.registerTutorial(systemLogsSpecProvider);
@@ -137,4 +138,5 @@ export function registerTutorials(server) {
   server.registerTutorial(ciscoLogsSpecProvider);
   server.registerTutorial(envoyproxyLogsSpecProvider);
   server.registerTutorial(couchdbMetricsSpecProvider);
+  server.registerTutorial(emsBoundariesSpecProvider);
 }
