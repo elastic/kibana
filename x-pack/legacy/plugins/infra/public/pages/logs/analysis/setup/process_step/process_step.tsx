@@ -11,29 +11,34 @@ import {
   EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
+  EuiCallOut,
+  EuiCode,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
 import { SetupStatus } from '../../../../../../common/log_analysis';
-import { CreateMLJobsButton } from '../create_ml_jobs_button';
-import { RecreateMLJobsButton } from '../recreate_ml_jobs_button';
+import { CreateMLJobsButton } from './create_ml_jobs_button';
+import { RecreateMLJobsButton } from './recreate_ml_jobs_button';
 
-interface Props {
-  viewResults: () => void;
-  setup: () => void;
+interface ProcessStepProps {
   cleanupAndSetup: () => void;
-  indexPattern: string;
+  errorMessages: string[];
+  isConfigurationValid: boolean;
+  setup: () => void;
   setupStatus: SetupStatus;
+  viewResults: () => void;
 }
 
-export const SetupProcess: React.FunctionComponent<Props> = ({
-  viewResults,
-  setup,
+export const ProcessStep: React.FunctionComponent<ProcessStepProps> = ({
   cleanupAndSetup,
-  indexPattern,
+  errorMessages,
+  isConfigurationValid,
+  setup,
   setupStatus,
-}: Props) => {
+  viewResults,
+}) => {
   return (
     <EuiText size="s">
       {setupStatus === 'pending' ? (
@@ -52,12 +57,14 @@ export const SetupProcess: React.FunctionComponent<Props> = ({
         <>
           <FormattedMessage
             id="xpack.infra.analysisSetup.steps.setupProcess.failureText"
-            defaultMessage="Something went wrong creating the necessary ML jobs.
-            Please ensure your configured logs indices ({indexPattern}) exist."
-            values={{
-              indexPattern,
-            }}
+            defaultMessage="Something went wrong creating the necessary ML jobs. Please ensure all selected log indices exist."
           />
+          <EuiSpacer />
+          {errorMessages.map(errorMessage => (
+            <EuiCallOut color="danger" iconType="alert" title={errorCalloutTitle}>
+              <EuiCode transparentBackground>{errorMessage}</EuiCode>
+            </EuiCallOut>
+          ))}
           <EuiSpacer />
           <EuiButton fill onClick={cleanupAndSetup}>
             <FormattedMessage
@@ -81,10 +88,17 @@ export const SetupProcess: React.FunctionComponent<Props> = ({
           </EuiButton>
         </>
       ) : setupStatus === 'requiredForUpdate' || setupStatus === 'requiredForReconfiguration' ? (
-        <RecreateMLJobsButton onClick={cleanupAndSetup} />
+        <RecreateMLJobsButton isDisabled={!isConfigurationValid} onClick={cleanupAndSetup} />
       ) : (
-        <CreateMLJobsButton onClick={setup} />
+        <CreateMLJobsButton isDisabled={!isConfigurationValid} onClick={setup} />
       )}
     </EuiText>
   );
 };
+
+const errorCalloutTitle = i18n.translate(
+  'xpack.infra.analysisSetup.steps.setupProcess.errorCalloutTitle',
+  {
+    defaultMessage: 'An error occurred',
+  }
+);
