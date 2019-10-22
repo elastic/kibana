@@ -78,6 +78,8 @@ import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_s
 import { buildVislibDimensions } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
 // @ts-ignore
 import { docTitle } from 'ui/doc_title';
+// @ts-ignore
+import { timezoneProvider } from 'ui/vis/lib/timezone';
 
 const services = {
   angular,
@@ -89,6 +91,7 @@ const services = {
   DOC_LINK_VERSION,
   docTitle,
   ELASTIC_WEBSITE_URL,
+  eui_utils: npStart.plugins.eui_utils,
   FieldList,
   FilterBarQueryFilterProvider,
   getDocLink,
@@ -99,6 +102,7 @@ const services = {
   hasSearchStategyForIndexPattern,
   IndexPattern,
   IndexPatterns,
+  inspector: npStart.plugins.inspector,
   intervalOptions,
   isDefaultTypeIndexPattern,
   migrateLegacyQuery,
@@ -114,6 +118,7 @@ const services = {
   subscribeWithScope,
   tabifyAggResponse,
   timefilter,
+  timezoneProvider,
   toastNotifications: npStart.core.notifications.toasts,
   uiModules,
   uiRoutes,

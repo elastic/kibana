@@ -55,7 +55,6 @@ const {
   intervalOptions,
   isDefaultTypeIndexPattern,
   migrateLegacyQuery,
-  npStart,
   RequestAdapter,
   SavedObjectSaveModal,
   ShareContextMenuExtensionsRegistryProvider,
@@ -152,7 +151,7 @@ uiRoutes
         return savedSearches.get(savedSearchId)
           .then((savedSearch) => {
             if (savedSearchId) {
-              npStart.core.chrome.recentlyAccessed.add(
+              chrome.recentlyAccessed.add(
                 savedSearch.getFullPath(),
                 savedSearch.title,
                 savedSearchId);
@@ -355,7 +354,7 @@ function discoverController(
       }),
       testId: 'openInspectorButton',
       run() {
-        npStart.plugins.inspector.open(inspectorAdapters, {
+        getServices().inspector.open(inspectorAdapters, {
           title: savedSearch.title
         });
       }

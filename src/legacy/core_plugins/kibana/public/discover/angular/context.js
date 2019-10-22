@@ -24,7 +24,7 @@ import { getServices } from './../kibana_services';
 import './context_app';
 import contextAppRouteTemplate from './context.html';
 import { getRootBreadcrumbs } from '../breadcrumbs';
-const { FilterBarQueryFilterProvider, uiRoutes, subscribeWithScope, npStart } = getServices();
+const { FilterBarQueryFilterProvider, uiRoutes, subscribeWithScope, chrome } = getServices();
 
 const k7Breadcrumbs = $route => {
   const { indexPattern } = $route.current.locals;
@@ -88,7 +88,7 @@ function ContextAppRouteController($routeParams, $scope, AppState, config, index
   });
   this.anchorId = $routeParams.id;
   this.indexPattern = indexPattern;
-  this.discoverUrl = npStart.core.chrome.navLinks.get('kibana:discover').url;
+  this.discoverUrl = chrome.navLinks.get('kibana:discover').url;
   this.filters = _.cloneDeep(queryFilter.getFilters());
 }
 

@@ -20,7 +20,7 @@ import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiCallOut, EuiCodeBlock, EuiSpacer } from '@elastic/eui';
 import { getServices } from '../../kibana_services';
-const { uiModules, wrapInI18nContext, npStart } = getServices();
+const { uiModules, wrapInI18nContext, chrome } = getServices();
 
 const DiscoverFetchError = ({ fetchError }) => {
   if (!fetchError) {
@@ -30,7 +30,7 @@ const DiscoverFetchError = ({ fetchError }) => {
   let body;
 
   if (fetchError.lang === 'painless') {
-    const managementUrl = npStart.core.chrome.navLinks.get('kibana:management').url;
+    const managementUrl = chrome.navLinks.get('kibana:management').url;
     const url = `${managementUrl}/kibana/index_patterns`;
 
     body = (
