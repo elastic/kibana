@@ -167,7 +167,7 @@ function* handleFetchTreeCommits(action: Action<FetchFilePayload>, signal: Abort
   }
 }
 
-function requestCommits(
+export function requestCommits(
   { uri, revision }: FetchRepoPayloadWithRevision,
   path?: string,
   loadMore?: boolean,

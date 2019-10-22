@@ -100,10 +100,7 @@ export function repositoryRoute(
 
           // Persist to elasticsearch
           await repoObjectClient.setRepository(repo.uri, repo);
-          const randomStr = Math.random()
-            .toString(36)
-            .substring(2, 15);
-          await repoObjectClient.setRepositoryRandomStr(repo.uri, randomStr);
+
           // Kick off clone job
           const payload = {
             url: repoUrl,
