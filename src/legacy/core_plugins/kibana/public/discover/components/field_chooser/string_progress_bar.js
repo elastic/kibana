@@ -17,7 +17,7 @@
  * under the License.
  */
 import React from 'react';
-import { wrapInI18nContext, uiModules } from '../../kibana_services';
+import { getServices } from '../../kibana_services';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -26,6 +26,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
+const { wrapInI18nContext, uiModules } = getServices();
 const module = uiModules.get('discover/field_chooser');
 
 function StringFieldProgressBar(props) {

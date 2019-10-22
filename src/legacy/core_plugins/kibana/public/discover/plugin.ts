@@ -17,18 +17,26 @@
  * under the License.
  */
 
-import { CoreSetup, Plugin, PluginInitializerContext } from 'kibana/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
 import { registerFeature } from './helpers/register_feature';
 
-export class DiscoverPlugin implements Plugin {
+/**
+ * These are the interfaces with your public contracts. You should export these
+ * for other plugins to use in _their_ `SetupDeps`/`StartDeps` interfaces.
+ * @public
+ */
+export type DiscoverSetup = void;
+export type DiscoverStart = void;
+
+export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
   constructor(initializerContext: PluginInitializerContext) {}
-  setup(core: CoreSetup) {
+  setup(core: CoreSetup): DiscoverSetup {
     registerFeature();
     require('./angular');
     require('./helpers/register_embeddable');
   }
 
-  start() {}
+  start(core: CoreStart): DiscoverStart {}
 
   stop() {}
 }

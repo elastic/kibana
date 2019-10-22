@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { FilterBarQueryFilterProvider, getFilterGenerator } from '../../../kibana_services';
+import { getServices } from '../../../kibana_services';
 
 import {
   MAX_CONTEXT_SIZE,
@@ -28,8 +28,8 @@ import {
 
 
 export function QueryParameterActionsProvider(indexPatterns, Private) {
-  const queryFilter = Private(FilterBarQueryFilterProvider);
-  const filterGen = getFilterGenerator(queryFilter);
+  const queryFilter = Private(getServices().FilterBarQueryFilterProvider);
+  const filterGen = getServices().getFilterGenerator(queryFilter);
 
   const setPredecessorCount = (state) => (predecessorCount) => (
     state.queryParameters.predecessorCount = clamp(

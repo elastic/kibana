@@ -16,9 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { wrapInI18nContext, uiModules } from '../../../../kibana_services';
+import { getServices } from '../../../../kibana_services';
 import { ToolBarPagerText } from './tool_bar_pager_text';
 import { ToolBarPagerButtons } from './tool_bar_pager_buttons';
+
+const { wrapInI18nContext, uiModules } = getServices();
 
 const app = uiModules.get('kibana');
 

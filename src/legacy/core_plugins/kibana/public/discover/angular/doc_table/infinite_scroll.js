@@ -18,8 +18,9 @@
  */
 
 import $ from 'jquery';
-import { uiModules } from '../../kibana_services';
-const module = uiModules.get('app/discover');
+import { getServices } from '../../kibana_services';
+
+const module = getServices().uiModules.get('app/discover');
 
 module.directive('kbnInfiniteScroll', function () {
   return {

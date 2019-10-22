@@ -17,9 +17,9 @@
  * under the License.
  */
 import { wrapInI18nContext } from 'ui/i18n';
-import { uiModules } from '../../../kibana_services';
+import { getServices } from '../../../kibana_services';
 import { TableHeader } from './table_header/table_header';
-const module = uiModules.get('app/discover');
+const module = getServices().uiModules.get('app/discover');
 
 module.directive('kbnTableHeader', function(reactDirective: any, config: any) {
   return reactDirective(

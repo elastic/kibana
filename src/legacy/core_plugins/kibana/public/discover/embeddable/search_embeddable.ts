@@ -37,19 +37,8 @@ import searchTemplate from './search_template.html';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import { SortOrder } from '../angular/doc_table/components/table_header/helpers';
 import { getSortForSearchSource } from '../angular/doc_table/lib/get_sort_for_search_source';
-import {
-  angular,
-  toastNotifications,
-  chromeLegacy,
-  IndexPattern,
-  getRequestInspectorStats,
-  getResponseInspectorStats,
-  SearchSource,
-  getFilterGenerator,
-} from '../kibana_services';
+import { IndexPattern, getServices, SearchSource } from '../kibana_services';
 import { TimeRange } from '../../../../../../plugins/data/public';
-
-const config = chromeLegacy.getUiSettingsClient();
 
 interface SearchScope extends ng.IScope {
   columns?: string[];
@@ -132,7 +121,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       parent
     );
 
-    this.filterGen = getFilterGenerator(queryFilter);
+    this.filterGen = getServices().getFilterGenerator(queryFilter);
     this.savedSearch = savedSearch;
     this.$rootScope = $rootScope;
     this.$compile = $compile;
@@ -170,7 +159,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       throw new Error('Search scope not defined');
     }
     this.searchInstance = this.$compile(searchTemplate)(this.searchScope);
-    const rootNode = angular.element(domNode);
+    const rootNode = getServices().angular.element(domNode);
     rootNode.append(this.searchInstance);
 
     this.pushContainerStateParamsToScope(this.searchScope);
@@ -275,7 +264,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     if (this.abortController) this.abortController.abort();
     this.abortController = new AbortController();
 
-    searchSource.setField('size', config.get('discover:sampleSize'));
+    searchSource.setField('size', getServices().uiSettings.get('discover:sampleSize'));
     searchSource.setField(
       'sort',
       getSortForSearchSource(this.searchScope.sort, this.searchScope.indexPattern)
@@ -290,7 +279,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       defaultMessage: 'This request queries Elasticsearch to fetch the data for the search.',
     });
     const inspectorRequest = this.inspectorAdaptors.requests.start(title, { description });
-    inspectorRequest.stats(getRequestInspectorStats(searchSource));
+    inspectorRequest.stats(getServices().getRequestInspectorStats(searchSource));
     searchSource.getSearchRequestBody().then((body: any) => {
       inspectorRequest.json(body);
     });
@@ -306,7 +295,9 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       this.searchScope.isLoading = false;
 
       // Log response to inspector
-      inspectorRequest.stats(getResponseInspectorStats(searchSource, resp)).ok({ json: resp });
+      inspectorRequest
+        .stats(getServices().getResponseInspectorStats(searchSource, resp))
+        .ok({ json: resp });
 
       // Apply the changes to the angular scope
       this.searchScope.$apply(() => {
@@ -317,7 +308,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       // If the fetch was aborted, no need to surface this in the UI
       if (error.name === 'AbortError') return;
 
-      toastNotifications.addError(error, {
+      getServices().toastNotifications.addError(error, {
         title: i18n.translate('kbn.embeddable.errorTitle', {
           defaultMessage: 'Error fetching data',
         }),

@@ -20,7 +20,7 @@ import { IPrivate } from 'ui/private';
 import { i18n } from '@kbn/i18n';
 import { TExecuteTriggerActions } from 'src/plugins/ui_actions/public';
 import '../angular/doc_table';
-import { capabilities, chromeLegacy, FilterBarQueryFilterProvider } from '../kibana_services';
+import { getServices } from '../kibana_services';
 import {
   EmbeddableFactory,
   ErrorEmbeddable,
@@ -51,7 +51,7 @@ export class SearchEmbeddableFactory extends EmbeddableFactory<
   }
 
   public isEditable() {
-    return capabilities.discover.save as boolean;
+    return getServices().capabilities.discover.save as boolean;
   }
 
   public canCreateNew() {
@@ -69,16 +69,18 @@ export class SearchEmbeddableFactory extends EmbeddableFactory<
     input: Partial<SearchInput> & { id: string; timeRange: TimeRange },
     parent?: Container
   ): Promise<SearchEmbeddable | ErrorEmbeddable> {
-    const $injector = await chromeLegacy.dangerouslyGetActiveInjector();
+    const $injector = await getServices().chromeLegacy.dangerouslyGetActiveInjector();
 
     const $compile = $injector.get<ng.ICompileService>('$compile');
     const $rootScope = $injector.get<ng.IRootScopeService>('$rootScope');
     const searchLoader = $injector.get<SavedSearchLoader>('savedSearches');
-    const editUrl = chromeLegacy.addBasePath(`/app/kibana${searchLoader.urlFor(savedObjectId)}`);
+    const editUrl = await getServices().chromeLegacy.addBasePath(
+      `/app/kibana${searchLoader.urlFor(savedObjectId)}`
+    );
 
     const Private = $injector.get<IPrivate>('Private');
 
-    const queryFilter = Private(FilterBarQueryFilterProvider);
+    const queryFilter = Private(getServices().FilterBarQueryFilterProvider);
     try {
       const savedObject = await searchLoader.get(savedObjectId);
       return new SearchEmbeddable(
@@ -88,7 +90,7 @@ export class SearchEmbeddableFactory extends EmbeddableFactory<
           $compile,
           editUrl,
           queryFilter,
-          editable: capabilities.discover.save as boolean,
+          editable: getServices().capabilities.discover.save as boolean,
           indexPatterns: _.compact([savedObject.searchSource.getField('index')]),
         },
         input,

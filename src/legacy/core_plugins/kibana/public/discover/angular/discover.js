@@ -38,8 +38,9 @@ import { showOpenSearchPanel } from '../top_nav/show_open_search_panel';
 import { addHelpMenuToAppChrome } from '../components/help_menu/help_menu_util';
 import '../components/fetch_error';
 import { getPainlessError } from './get_painless_error';
+import { VisProvider, getServices } from '../kibana_services';
 
-import {
+const {
   angular,
   buildVislibDimensions,
   chrome,
@@ -69,8 +70,7 @@ import {
   uiModules,
   uiRoutes,
   vislibSeriesResponseHandlerProvider,
-  VisProvider,
-} from './../kibana_services';
+}  = getServices();
 
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../breadcrumbs';
 import { extractTimeFilter, changeTimeFilter } from '../../../../data/public';

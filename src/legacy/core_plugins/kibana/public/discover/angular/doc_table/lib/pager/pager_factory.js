@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { uiModules } from '../../../../kibana_services';
+import { getServices } from '../../../../kibana_services';
 import { Pager } from './pager';
 
-const app = uiModules.get('kibana');
+const app = getServices().uiModules.get('kibana');
 
 app.factory('pagerFactory', () => {
   return {

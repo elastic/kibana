@@ -16,18 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import {
-  uiRoutes,
-  uiModules,
-  wrapInI18nContext,
-  timefilter,
-  IndexPatterns,
-} from './../kibana_services';
+import { getServices, IndexPatterns } from '../kibana_services';
 // @ts-ignore
 import { getRootBreadcrumbs } from '../breadcrumbs';
 import html from './doc.html';
 import { Doc } from '../doc/doc';
-
+const { uiRoutes, uiModules, wrapInI18nContext, timefilter } = getServices();
 uiModules.get('apps/discover').directive('discoverDoc', function(reactDirective: any) {
   return reactDirective(
     wrapInI18nContext(Doc),

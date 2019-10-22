@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { callAfterBindingsWorkaround, uiModules, timefilter } from './../kibana_services';
+import { getServices } from './../kibana_services';
 import contextAppTemplate from './context_app.html';
 import './context/components/action_bar';
 import { getFirstSortableField } from './context/api/utils/sorting';
@@ -34,6 +34,7 @@ import {
   QueryActionsProvider,
 } from './context/query';
 
+const { callAfterBindingsWorkaround, uiModules, timefilter } = getServices();
 
 // load directives
 import '../../../../data/public/legacy';

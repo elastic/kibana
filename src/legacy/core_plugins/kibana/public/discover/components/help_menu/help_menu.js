@@ -20,7 +20,8 @@
 import React, { Fragment, PureComponent } from 'react';
 import { EuiButton, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
+import { getServices } from '../../kibana_services';
+const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = getServices();
 
 export class HelpMenu extends PureComponent {
   render() {

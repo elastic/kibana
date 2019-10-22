@@ -53,13 +53,13 @@ import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 // @ts-ignore
 import { getFilterGenerator } from 'ui/filter_manager';
 import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
-export { timefilter } from 'ui/timefilter';
+import { timefilter } from 'ui/timefilter';
 
 // OTHERS
 
 import { showShareContextMenu, ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
 // @ts-ignore
-import { IndexPattern, IndexPatterns, StaticIndexPattern, FieldList } from 'ui/index_patterns';
+import { IndexPattern, IndexPatterns, FieldList } from 'ui/index_patterns';
 import { wrapInI18nContext } from 'ui/i18n';
 import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 // @ts-ignore
@@ -70,7 +70,7 @@ import { callAfterBindingsWorkaround } from 'ui/compat';
 import { vislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
 // @ts-ignore
 import { intervalOptions } from 'ui/agg_types/buckets/_interval_options';
-import { getDocLink } from 'ui/documentation_links';
+import { getDocLink, ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
 // @ts-ignore
 import { tabifyAggResponse } from 'ui/agg_response/tabify';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
@@ -78,39 +78,17 @@ import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_s
 import { buildVislibDimensions } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
 // @ts-ignore
 import { docTitle } from 'ui/doc_title';
-// @ts-ignore
-import { VisProvider } from 'ui/vis';
 
-const { chrome } = npStart.core;
-const { capabilities } = npStart.core.application;
-const toastNotifications = npStart.core.notifications.toasts;
-
-/** migration of to ad getServices function
 const services = {
-  angular,
-  capabilities,
-  chrome,
-  docTitle,
-  npStart,
-  SearchSource,
-  StateProvider,
-  toastNotifications,
-  uiModules,
-  uiRoutes,
-};
-
-export function getServices() {
-  return services;
-}**/
-
-export {
   angular,
   buildVislibDimensions,
   callAfterBindingsWorkaround,
-  capabilities,
-  chrome,
+  capabilities: npStart.core.application.capabilities,
+  chrome: npStart.core.chrome,
   chromeLegacy,
+  DOC_LINK_VERSION,
   docTitle,
+  ELASTIC_WEBSITE_URL,
   FieldList,
   FilterBarQueryFilterProvider,
   getDocLink,
@@ -133,13 +111,20 @@ export {
   showShareContextMenu,
   stateMonitorFactory,
   StateProvider,
-  StaticIndexPattern,
   subscribeWithScope,
   tabifyAggResponse,
-  toastNotifications,
+  timefilter,
+  toastNotifications: npStart.core.notifications.toasts,
   uiModules,
   uiRoutes,
+  uiSettings: npStart.core.uiSettings,
   vislibSeriesResponseHandlerProvider,
-  VisProvider, // type
   wrapInI18nContext,
 };
+export function getServices() {
+  return services;
+}
+// export types
+export { VisProvider } from 'ui/vis';
+export { StaticIndexPattern, IndexPatterns, IndexPattern } from 'ui/index_patterns';
+export { SearchSource } from 'ui/courier';
