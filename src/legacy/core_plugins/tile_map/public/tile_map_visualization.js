@@ -161,7 +161,7 @@ export const createTileMapVisualization = ({ serviceSettings, $injector }) => {
       const newParams = this._getMapsParams();
       const metricDimension = this._params.dimensions.metric;
       const metricLabel = metricDimension ? metricDimension.label : '';
-      const metricFormat = metricDimension ? getFormat(metricDimension.format) : (x) => x;
+      const metricFormat = getFormat(metricDimension && metricDimension.format);
       const boundTooltipFormatter = tooltipFormatter.bind(null, metricLabel, metricFormat.getConverterFor('text'));
 
       return {
