@@ -23,7 +23,6 @@ export default function({ getService }: { getService: (service: string) => any }
         timeFromMarkAsRunTillRun,
         timeFromRunTillNextMarkAsRun,
         claimAvailableTasks,
-        taskPollerAttemptWork,
         taskPoolAttemptToRun,
         taskRunnerMarkTaskAsRunning,
       } = await supertest
