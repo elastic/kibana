@@ -600,6 +600,8 @@ function VisEditor(
             } else if (savedVis.id === $route.current.params.id) {
               docTitle.change(savedVis.lastSavedTitle);
               chrome.breadcrumbs.set($injector.invoke(getEditBreadcrumbs));
+              savedVis.vis.title = savedVis.title;
+              savedVis.vis.description = savedVis.description;
             } else {
               kbnUrl.change(`${VisualizeConstants.EDIT_PATH}/{{id}}`, { id: savedVis.id });
             }
