@@ -42,7 +42,6 @@ export function shareableWorkpads(route: CoreSetup['http']['route']) {
   route({
     method: 'GET',
     path: API_ROUTE_SHAREABLE_RUNTIME_DOWNLOAD,
-    // @ts-ignore Hapi types incorrect
     options: {
       files: {
         relativeTo: SHAREABLE_RUNTIME_OUTPUT,
