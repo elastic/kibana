@@ -30,14 +30,10 @@ const hasOwnProperty = (obj: any, property: string) =>
 
 const isObject = (obj: any) => typeof obj === 'object' && obj !== null;
 
-type ErrorKey = 'proto_invalid_key' | 'constructor-prototype_invalid_key' | 'circular_reference';
-
-type ValidationResult = { valid: true } | { valid: false; errorKey: ErrorKey };
-
 // we're using a stack instead of recursion so we aren't limited by the call stack
-export function validateObject(obj: any): ValidationResult {
+export function validateObject(obj: any) {
   if (!isObject(obj)) {
-    return { valid: true };
+    return;
   }
 
   const stack: StackItem[] = [
@@ -56,11 +52,11 @@ export function validateObject(obj: any): ValidationResult {
     }
 
     if (hasOwnProperty(value, '__proto__')) {
-      return { valid: false, errorKey: 'proto_invalid_key' };
+      throw new Error(`'__proto__' is an invalid key`);
     }
 
     if (hasOwnProperty(value, 'prototype') && previousKey === 'constructor') {
-      return { valid: false, errorKey: `constructor-prototype_invalid_key` };
+      throw new Error(`'constructor.prototype' is an invalid key`);
     }
 
     // iterating backwards through an array is reportedly more performant
@@ -69,7 +65,7 @@ export function validateObject(obj: any): ValidationResult {
       const [key, childValue] = entries[i];
       if (isObject(childValue)) {
         if (seen.has(childValue)) {
-          return { valid: false, errorKey: `circular_reference` };
+          throw new Error('circular reference detected');
         }
 
         seen.add(childValue);
@@ -81,8 +77,4 @@ export function validateObject(obj: any): ValidationResult {
       });
     }
   }
-
-  return {
-    valid: true,
-  };
 }

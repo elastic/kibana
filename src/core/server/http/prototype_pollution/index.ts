@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { extendJoiForPrototypePollution } from './joi_pp_extensions';
+export { validateObject } from './validate_object';

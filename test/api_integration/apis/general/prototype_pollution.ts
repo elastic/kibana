@@ -37,8 +37,8 @@ export default function({ getService }: FtrProviderContext) {
         .expect(400, {
           statusCode: 400,
           error: 'Bad Request',
-          message: '"value" constructor.prototype is an invalid key',
-          validation: { source: 'payload', keys: ['value'] },
+          message: "'constructor.prototype' is an invalid key",
+          validation: { source: 'payload', keys: [] },
         });
     });
 
@@ -49,8 +49,8 @@ export default function({ getService }: FtrProviderContext) {
         .expect(400, {
           statusCode: 400,
           error: 'Bad Request',
-          message: '"value" __proto__ is an invalid key',
-          validation: { source: 'payload', keys: ['value'] },
+          message: "'__proto__' is an invalid key",
+          validation: { source: 'payload', keys: [] },
         });
     });
   });
