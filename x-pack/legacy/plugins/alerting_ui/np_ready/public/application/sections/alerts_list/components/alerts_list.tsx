@@ -11,7 +11,8 @@ import React, { Fragment, useEffect, useState } from 'react';
 import { EuiBasicTable, EuiButton, EuiSearchBar, EuiSpacer } from '@elastic/eui';
 import { AlertsContext } from '../../../context/alerts_context';
 import { useAppDependencies } from '../../../index';
-import { Alert, AlertType, deleteAlerts, loadAlerts, loadAlertTypes } from '../../../lib/api';
+import { Alert, AlertType } from '../../../../types';
+import { deleteAlerts, loadAlerts, loadAlertTypes } from '../../../lib/api';
 
 type AlertTypeIndex = Record<string, AlertType>;
 interface Pagination {
