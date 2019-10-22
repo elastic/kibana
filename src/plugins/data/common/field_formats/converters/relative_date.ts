@@ -17,23 +17,30 @@
  * under the License.
  */
 
-import { getDefaultFormat } from '../get_default_format';
-import { NumberFormat } from '../../../../../../plugins/data/public';
+import moment from 'moment';
+import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
+import { FieldFormat } from '../field_format';
+import { TextContextTypeConvert } from '../types';
 
-const getConfig = () => {
-  return '0,0.[000]';
-};
+export class RelativeDateFormat extends FieldFormat {
+  static id = 'relative_date';
+  static title = 'Relative Date';
+  static fieldType = KBN_FIELD_TYPES.DATE;
 
-describe('getDefaultFormat', () => {
+  constructor(params: Record<string, any>) {
+    super(params);
+  }
 
-  it('should create default format', () => {
-    const DefaultFormat = getDefaultFormat(NumberFormat);
-    const defaultFormatObject = new DefaultFormat(null, getConfig);
-    const formatObject = new NumberFormat(null, getConfig);
+  textConvert: TextContextTypeConvert = val => {
+    if (val === null || val === undefined) {
+      return '-';
+    }
 
-    expect(DefaultFormat.id).toEqual('');
-    expect(DefaultFormat.resolvedTitle).toEqual(NumberFormat.title);
-    expect(DefaultFormat.title).toEqual('- Default -');
-    expect(JSON.stringify(defaultFormatObject.params())).toEqual(JSON.stringify(formatObject.params()));
-  });
-});
+    const date = moment(val);
+    if (date.isValid()) {
+      return date.fromNow();
+    } else {
+      return val;
+    }
+  };
+}

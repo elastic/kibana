@@ -17,23 +17,18 @@
  * under the License.
  */
 
-import { getDefaultFormat } from '../get_default_format';
-import { NumberFormat } from '../../../../../../plugins/data/public';
-
-const getConfig = () => {
-  return '0,0.[000]';
-};
-
-describe('getDefaultFormat', () => {
-
-  it('should create default format', () => {
-    const DefaultFormat = getDefaultFormat(NumberFormat);
-    const defaultFormatObject = new DefaultFormat(null, getConfig);
-    const formatObject = new NumberFormat(null, getConfig);
-
-    expect(DefaultFormat.id).toEqual('');
-    expect(DefaultFormat.resolvedTitle).toEqual(NumberFormat.title);
-    expect(DefaultFormat.title).toEqual('- Default -');
-    expect(JSON.stringify(defaultFormatObject.params())).toEqual(JSON.stringify(formatObject.params()));
-  });
-});
+export { UrlFormat } from './url';
+export { BytesFormat } from './bytes';
+export { DateFormat } from './date_server';
+export { DateNanosFormat } from './date_nanos';
+export { RelativeDateFormat } from './relative_date';
+export { DurationFormat } from './duration';
+export { IpFormat } from './ip';
+export { NumberFormat } from './number';
+export { PercentFormat } from './percent';
+export { StringFormat } from './string';
+export { SourceFormat } from './source';
+export { ColorFormat } from './color';
+export { TruncateFormat } from './truncate';
+export { BoolFormat } from './boolean';
+export { StaticLookupFormat } from './static_lookup';
