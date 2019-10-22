@@ -20,7 +20,6 @@ import {
 import { TaskPoller } from './task_poller';
 import { TaskPool, TaskPoolRunResult } from './task_pool';
 import { TaskManagerRunner } from './task_runner';
-import { createTaskStoreUpdateBuffer } from './task_store_buffer';
 import {
   FetchOpts,
   FetchResult,
@@ -87,7 +86,7 @@ export class TaskManager {
       this.logger.info(`TaskManager is identified by the Kibana UUID: ${taskManagerId}`);
     }
 
-    const taskStore = new TaskStore({
+    const store = new TaskStore({
       serializer: opts.serializer,
       savedObjectsRepository: opts.savedObjectsRepository,
       callCluster: opts.callWithInternalUser,
@@ -96,9 +95,6 @@ export class TaskManager {
       definitions: this.definitions,
       taskManagerId: `kibana:${taskManagerId}`,
     });
-    const store = opts.config.get('xpack.task_manager.bulk_update')
-      ? createTaskStoreUpdateBuffer(taskStore, this.logger)
-      : taskStore;
 
     const pool = new TaskPool({
       logger: this.logger,
