@@ -5,18 +5,22 @@
  */
 import React from 'react';
 
-import { TreeItem as TreeItemType } from '../types';
-import { TreeItem } from './tree_item';
+import { TreeItem as TreeItemComponent } from './tree_item';
+
+export interface TreeItem {
+  label: string | JSX.Element;
+  children?: TreeItem[];
+}
 
 interface Props {
-  tree: TreeItemType[];
+  tree: TreeItem[];
 }
 
 export const Tree = ({ tree }: Props) => {
   return (
     <ul className="tree">
-      {tree.map(treeItem => (
-        <TreeItem key={treeItem.label} treeItem={treeItem} />
+      {tree.map((treeItem, i) => (
+        <TreeItemComponent key={i} treeItem={treeItem} />
       ))}
     </ul>
   );

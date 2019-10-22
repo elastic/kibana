@@ -5,12 +5,12 @@
  */
 
 import React, { useState, Fragment } from 'react';
-import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
+import { EuiConfirmModal, EuiOverlayMask, EuiBadge } from '@elastic/eui';
 
 import { useState as useMappingsState, useDispatch } from '../../../mappings_state';
 import { NormalizedField } from '../../../types';
 import { buildFieldTreeFromIds } from '../../../lib';
-import { Tree } from '../../tree';
+import { FieldsTree } from '../../fields_tree';
 
 type DeleteFieldFunc = (property: NormalizedField) => void;
 
@@ -53,11 +53,20 @@ export const DeleteFieldProvider = ({ children }: Props) => {
     const field = state.field!;
     const title = `Remove property '${field.source.name}'?`;
 
-    // TODO: here indicate if the field is a "multi-field" in a badge
     const fieldsTree = buildFieldTreeFromIds(
       field.childFields!,
       byId,
-      (_field: NormalizedField) => _field.source.name
+      (fieldItem: NormalizedField) => (
+        <>
+          {fieldItem.source.name}
+          {fieldItem.isMultiField && (
+            <>
+              {' '}
+              <EuiBadge color="hollow">multi-field</EuiBadge>
+            </>
+          )}
+        </>
+      )
     );
 
     return (
@@ -72,7 +81,7 @@ export const DeleteFieldProvider = ({ children }: Props) => {
         >
           <Fragment>
             <p>This will also delete the following fields.</p>
-            <Tree tree={fieldsTree} />
+            <FieldsTree fields={fieldsTree} />
           </Fragment>
         </EuiConfirmModal>
       </EuiOverlayMask>

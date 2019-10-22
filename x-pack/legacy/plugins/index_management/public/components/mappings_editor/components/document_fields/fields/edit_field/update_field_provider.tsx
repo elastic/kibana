@@ -5,12 +5,12 @@
  */
 
 import React, { useState, Fragment } from 'react';
-import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
+import { EuiConfirmModal, EuiOverlayMask, EuiBadge } from '@elastic/eui';
 
 import { useState as useMappingsState, useDispatch } from '../../../../mappings_state';
 import { shouldDeleteChildFieldsAfterTypeChange, buildFieldTreeFromIds } from '../../../../lib';
 import { NormalizedField, DataType } from '../../../../types';
-import { Tree } from '../../../tree';
+import { FieldsTree } from '../../../fields_tree';
 
 export type UpdateFieldFunc = (field: NormalizedField) => void;
 
@@ -86,7 +86,17 @@ export const UpdateFieldProvider = ({ children }: Props) => {
     const fieldsTree = buildFieldTreeFromIds(
       field.childFields!,
       byId,
-      (_field: NormalizedField) => _field.source.name
+      (fieldItem: NormalizedField) => (
+        <>
+          {fieldItem.source.name}
+          {fieldItem.isMultiField && (
+            <>
+              {' '}
+              <EuiBadge color="hollow">multi-field</EuiBadge>
+            </>
+          )}
+        </>
+      )
     );
 
     return (
@@ -101,7 +111,7 @@ export const UpdateFieldProvider = ({ children }: Props) => {
         >
           <Fragment>
             <p>This will delete the following fields.</p>
-            <Tree tree={fieldsTree} />
+            <FieldsTree fields={fieldsTree} />
           </Fragment>
         </EuiConfirmModal>
       </EuiOverlayMask>

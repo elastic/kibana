@@ -11,6 +11,7 @@ export {
   Form,
   FormDataProvider,
   FormSchema,
+  FieldHook,
   FIELD_TYPES,
   VALIDATION_TYPES,
   OnFormUpdateArg,
