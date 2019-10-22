@@ -15,7 +15,6 @@ export interface ActionTypeModel {
   id: string;
   iconClass: string;
   selectMessage: string;
-  simulatePrompt: string;
   validate: (action: Action) => ValidationResult;
   actionFields: React.FunctionComponent<Props> | null;
 }

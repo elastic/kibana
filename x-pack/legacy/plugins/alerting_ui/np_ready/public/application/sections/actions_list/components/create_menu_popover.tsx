@@ -33,19 +33,13 @@ export const AlertingActionsDropdown: React.FunctionComponent<Props> = ({
   if (!actionTypesIndex) {
     return null;
   }
-  const actions = Object.entries(!actionTypesIndex ? [] : actionTypesIndex)
+  const actions = Object.entries(actionTypesIndex)
     .filter(([index]) => actionTypeRegistry.get(index) !== null)
     .map(([index, actionType]) => {
-      const actionSettings = actionTypeRegistry.get(actionType.id);
-      const typeName = actionType.name;
-      const iconClass = actionSettings.iconClass;
-      const selectMessage = !actionSettings.selectMessage ? name : actionSettings.selectMessage;
       return {
-        id: index,
-        name: index.replace('.', ''),
-        typeName,
-        iconClass,
-        selectMessage,
+        ...actionTypeRegistry.get(actionType.id),
+        name: actionType.name,
+        typeName: index.replace('.', ''),
       };
     });
 
@@ -79,9 +73,9 @@ export const AlertingActionsDropdown: React.FunctionComponent<Props> = ({
           const description = action.selectMessage;
           return (
             <EuiContextMenuItem
-              key={`${action.name}-${index}`}
+              key={`${action.typeName}-${index}`}
               disabled={isActionDisabled}
-              data-test-subj={`${action.name}ActionButton`}
+              data-test-subj={`${action.typeName}ActionButton`}
               onClick={() => {
                 setIsPopOverOpen(false);
                 createAction(action);
@@ -92,7 +86,7 @@ export const AlertingActionsDropdown: React.FunctionComponent<Props> = ({
                   <EuiIcon type={action.iconClass} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <strong>{action.typeName}</strong>
+                  <strong>{action.name}</strong>
                   <EuiSpacer size="xs" />
                   <EuiText size="s">
                     <p>{description}</p>

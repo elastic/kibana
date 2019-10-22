@@ -13,25 +13,16 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ErrableFormRow } from '../../../components/page_error';
-import { ActionTypeModel, Props, Action } from '../../../../types';
+import { ActionTypeModel, Props, Action, ValidationResult } from '../../../../types';
 
 export function getActionType(): ActionTypeModel {
   return {
     id: '.email',
     iconClass: 'email',
-    selectMessage: i18n.translate(
-      'xpack.alertingUI.sections.actions.emailAction.selectMessageText',
-      {
-        defaultMessage: 'Send an email.',
-      }
-    ),
-    simulatePrompt: i18n.translate(
-      'xpack.alertingUI.sections.actions.emailAction.simulateButtonLabel',
-      {
-        defaultMessage: 'Send test email',
-      }
-    ),
-    validate: (action: Action): any => {
+    selectMessage: i18n.translate('xpack.alertingUI.sections.actionAdd.selectMessageText', {
+      defaultMessage: 'Send an email.',
+    }),
+    validate: (action: Action): ValidationResult => {
       const validationResult = { errors: {} };
       const errors = {
         from: new Array<string>(),
@@ -89,8 +80,8 @@ const EmailActionFields: React.FunctionComponent<Props> = ({
   errors,
   hasErrors,
 }) => {
-  const { from, host, port }: Record<string, any> = action.config;
-  const { user, password }: Record<string, any> = action.secrets;
+  const { from, host, port } = action.config;
+  const { user, password } = action.secrets;
 
   return (
     <Fragment>

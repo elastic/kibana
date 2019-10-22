@@ -7,19 +7,16 @@ import React, { Fragment } from 'react';
 import { EuiFieldText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ErrableFormRow } from '../../../components/page_error';
-import { ActionTypeModel, Props, Action } from '../../../../types';
+import { ActionTypeModel, Props, Action, ValidationResult } from '../../../../types';
 
 export function getActionType(): ActionTypeModel {
   return {
     id: '.pagerduty',
     iconClass: 'apps',
-    selectMessage: i18n.translate('xpack.watcher.models.pagerDutyAction.selectMessageText', {
+    selectMessage: i18n.translate('xpack.alertingUI.sections.actionAdd.selectMessageText', {
       defaultMessage: 'Create an event in PagerDuty.',
     }),
-    simulatePrompt: i18n.translate('xpack.watcher.models.pagerDutyAction.simulateButtonLabel', {
-      defaultMessage: 'Send a PagerDuty event',
-    }),
-    validate: (action: Action): any => {
+    validate: (action: Action): ValidationResult => {
       const validationResult = { errors: {} };
       const errors = {
         routingKey: new Array<string>(),
@@ -28,14 +25,14 @@ export function getActionType(): ActionTypeModel {
       validationResult.errors = errors;
       if (!action.secrets.routingKey) {
         errors.routingKey.push(
-          i18n.translate('xpack.alertingUI.sections.addAction.error.requiredRoutingKeyText', {
+          i18n.translate('xpack.alertingUI.sections.actionAdd.error.requiredRoutingKeyText', {
             defaultMessage: 'RoutingKey is required.',
           })
         );
       }
       if (!action.config.apiUrl) {
         errors.apiUrl.push(
-          i18n.translate('xpack.alertingUI.sections.addAction.error.requiredApiUrlText', {
+          i18n.translate('xpack.alertingUI.sections.actionAdd.error.requiredApiUrlText', {
             defaultMessage: 'ApiUrl is required.',
           })
         );
@@ -63,12 +60,9 @@ const PagerDutyActionFields: React.FunctionComponent<Props> = ({
         fullWidth
         errors={errors}
         isShowingErrors={hasErrors === true && apiUrl !== undefined}
-        label={i18n.translate(
-          'xpack.alertingUI.sections.actionAdd.pagerDutyAction.apiUrlFieldLabel',
-          {
-            defaultMessage: 'ApiUrl',
-          }
-        )}
+        label={i18n.translate('xpack.alertingUI.sections.actionAdd.apiUrlFieldLabel', {
+          defaultMessage: 'ApiUrl',
+        })}
       >
         <EuiFieldText
           fullWidth
@@ -91,12 +85,9 @@ const PagerDutyActionFields: React.FunctionComponent<Props> = ({
         fullWidth
         errors={errors}
         isShowingErrors={hasErrors === true && routingKey !== undefined}
-        label={i18n.translate(
-          'xpack.alertingUI.sections.actionAdd.pagerDutyAction.routingKeyFieldLabel',
-          {
-            defaultMessage: 'RoutingKey',
-          }
-        )}
+        label={i18n.translate('xpack.alertingUI.sections.actionAdd.routingKeyFieldLabel', {
+          defaultMessage: 'RoutingKey',
+        })}
       >
         <EuiFieldText
           fullWidth

@@ -7,25 +7,16 @@ import React, { Fragment } from 'react';
 import { EuiFieldText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ErrableFormRow } from '../../../components/page_error';
-import { ActionTypeModel, Props, Action } from '../../../../types';
+import { ActionTypeModel, Props, Action, ValidationResult } from '../../../../types';
 
 export function getActionType(): ActionTypeModel {
   return {
     id: '.slack',
     iconClass: 'logoSlack',
-    selectMessage: i18n.translate(
-      'xpack.alertingUI.sections.actions.slackAction.selectMessageText',
-      {
-        defaultMessage: 'Send a message to a Slack user or channel.',
-      }
-    ),
-    simulatePrompt: i18n.translate(
-      'xpack.alertingUI.sections.actions.slackAction.simulateButtonLabel',
-      {
-        defaultMessage: 'Send a sample message',
-      }
-    ),
-    validate: (action: Action): any => {
+    selectMessage: i18n.translate('xpack.alertingUI.sections.actionAdd.selectMessageText', {
+      defaultMessage: 'Send a message to a Slack user or channel.',
+    }),
+    validate: (action: Action): ValidationResult => {
       const validationResult = { errors: {} };
       const errors = {
         webhookUrl: new Array<string>(),
@@ -33,7 +24,7 @@ export function getActionType(): ActionTypeModel {
       validationResult.errors = errors;
       if (!action.secrets.webhookUrl) {
         errors.webhookUrl.push(
-          i18n.translate('xpack.alertingUI.sections.addAction.error.requiredWebhookUrlText', {
+          i18n.translate('xpack.alertingUI.sections.actionAdd.error.requiredWebhookUrlText', {
             defaultMessage: 'WebhookUrl is required.',
           })
         );
@@ -50,7 +41,7 @@ const SlackActionFields: React.FunctionComponent<Props> = ({
   errors,
   hasErrors,
 }) => {
-  const { webhookUrl }: any = action.secrets;
+  const { webhookUrl } = action.secrets;
 
   return (
     <Fragment>
@@ -60,12 +51,9 @@ const SlackActionFields: React.FunctionComponent<Props> = ({
         fullWidth
         errors={errors}
         isShowingErrors={hasErrors === true && webhookUrl !== undefined}
-        label={i18n.translate(
-          'xpack.alertingUI.sections.actionAdd.slackPassword.methodWebhookUrlLabel',
-          {
-            defaultMessage: 'WebhookUrl',
-          }
-        )}
+        label={i18n.translate('xpack.alertingUI.sections.actionAdd.methodWebhookUrlLabel', {
+          defaultMessage: 'WebhookUrl',
+        })}
       >
         <EuiFieldText
           fullWidth

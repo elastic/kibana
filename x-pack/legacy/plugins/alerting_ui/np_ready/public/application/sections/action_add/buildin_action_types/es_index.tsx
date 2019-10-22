@@ -6,19 +6,16 @@
 import React from 'react';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ActionTypeModel, Props, Action } from '../../../../types';
+import { ActionTypeModel, Props, ValidationResult } from '../../../../types';
 
 export function getActionType(): ActionTypeModel {
   return {
     id: '.index',
     iconClass: 'indexOpen',
-    selectMessage: i18n.translate('xpack.watcher.models.indexAction.selectMessageText', {
+    selectMessage: i18n.translate('xpack.alertingUI.sections.actionAdd.selectMessageText', {
       defaultMessage: 'Index data into Elasticsearch.',
     }),
-    simulatePrompt: i18n.translate('xpack.watcher.models.indexAction.simulateButtonLabel', {
-      defaultMessage: 'Index data',
-    }),
-    validate: (action: Action): any => {
+    validate: (): ValidationResult => {
       return { errors: {} };
     },
     actionFields: IndexActionFields,
@@ -26,11 +23,11 @@ export function getActionType(): ActionTypeModel {
 }
 
 const IndexActionFields: React.FunctionComponent<Props> = ({ action, editActionConfig }) => {
-  const { index }: Record<string, any> = action.config;
+  const { index } = action.config;
   return (
     <EuiFormRow
       fullWidth
-      label={i18n.translate('xpack.alertingUI.sections.actionAdd.indexAction.indexTextFieldLabel', {
+      label={i18n.translate('xpack.alertingUI.sections.actionAdd.indexTextFieldLabel', {
         defaultMessage: 'Index (optional)',
       })}
     >

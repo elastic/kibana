@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ErrableFormRow } from '../../../components/page_error';
-import { ActionTypeModel, Props, Action } from '../../../../types';
+import { ActionTypeModel, Props, Action, ValidationResult } from '../../../../types';
 
 const HTTP_VERBS = ['post', 'put'];
 
@@ -27,13 +27,10 @@ export function getActionType(): ActionTypeModel {
   return {
     id: '.webhook',
     iconClass: 'logoWebhook',
-    selectMessage: i18n.translate('xpack.watcher.models.webhookAction.selectMessageText', {
+    selectMessage: i18n.translate('xpack.alertingUI.sections.actionAdd.selectMessageText', {
       defaultMessage: 'Send a request to a web service.',
     }),
-    simulatePrompt: i18n.translate('xpack.watcher.models.webhookAction.simulateButtonLabel', {
-      defaultMessage: 'Send request',
-    }),
-    validate: (action: Action): any => {
+    validate: (action: Action): ValidationResult => {
       const validationResult = { errors: {} };
       const errors = {
         url: new Array<string>(),
@@ -44,7 +41,7 @@ export function getActionType(): ActionTypeModel {
       validationResult.errors = errors;
       if (!action.config.url) {
         errors.url.push(
-          i18n.translate('xpack.alertingUI.sections.addAction.error.requiredUrlText', {
+          i18n.translate('xpack.alertingUI.sections.actionAdd.error.requiredUrlText', {
             defaultMessage: 'Url is required.',
           })
         );
@@ -86,8 +83,8 @@ const WebhookActionFields: React.FunctionComponent<Props> = ({
   const [headerKey, setHeaderKey] = useState<string>('');
   const [headerValue, setHeaderValue] = useState<string>('');
 
-  const { user, password }: any = action.secrets;
-  const { method, url, headers }: any = action.config;
+  const { user, password } = action.secrets;
+  const { method, url, headers } = action.config;
 
   editActionConfig('method', 'post'); // set method to POST by default
 
@@ -138,7 +135,7 @@ const WebhookActionFields: React.FunctionComponent<Props> = ({
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiFormRow
-            label={i18n.translate('xpack.alertingUI.sections.webhookAction.methodFieldLabel', {
+            label={i18n.translate('xpack.alertingUI.sections.actionAdd.methodFieldLabel', {
               defaultMessage: 'Method',
             })}
           >
@@ -160,7 +157,7 @@ const WebhookActionFields: React.FunctionComponent<Props> = ({
             errorKey="url"
             errors={errors}
             isShowingErrors={hasErrors === true && url !== undefined}
-            label={i18n.translate('xpack.alertingUI.sections.slackPassword.methodUrlLabel', {
+            label={i18n.translate('xpack.alertingUI.sections.actionAdd.methodUrlLabel', {
               defaultMessage: 'Url',
             })}
           >
@@ -189,7 +186,7 @@ const WebhookActionFields: React.FunctionComponent<Props> = ({
             fullWidth
             errors={errors}
             isShowingErrors={hasErrors === true && user !== undefined}
-            label={i18n.translate('xpack.alertingUI.sections.webhookUser.userFieldLabel', {
+            label={i18n.translate('xpack.alertingUI.sections.actionAdd.userFieldLabel', {
               defaultMessage: 'User',
             })}
           >
@@ -216,7 +213,7 @@ const WebhookActionFields: React.FunctionComponent<Props> = ({
             fullWidth
             errors={errors}
             isShowingErrors={hasErrors === true && password !== undefined}
-            label={i18n.translate('xpack.alertingUI.sections.webhookPassword.methodPasswordLabel', {
+            label={i18n.translate('xpack.alertingUI.sections.actionAdd.methodPasswordLabel', {
               defaultMessage: 'Password',
             })}
           >
@@ -248,7 +245,7 @@ const WebhookActionFields: React.FunctionComponent<Props> = ({
             fullWidth
             errors={headerErrors}
             isShowingErrors={hasHeaderErrors && headerKey !== undefined}
-            label={i18n.translate('xpack.alertingUI.sections.webhookHeaders.keyFieldLabel', {
+            label={i18n.translate('xpack.alertingUI.sections.actionAdd.keyFieldLabel', {
               defaultMessage: 'Header Key',
             })}
           >
@@ -270,7 +267,7 @@ const WebhookActionFields: React.FunctionComponent<Props> = ({
             fullWidth
             errors={headerErrors}
             isShowingErrors={hasHeaderErrors && headerValue !== undefined}
-            label={i18n.translate('xpack.alertingUI.sections.webhookHeaders.valueFieldLabel', {
+            label={i18n.translate('xpack.alertingUI.sections.actionAdd.valueFieldLabel', {
               defaultMessage: 'Header Value',
             })}
           >
@@ -292,8 +289,8 @@ const WebhookActionFields: React.FunctionComponent<Props> = ({
         fill
         onClick={() => addHeader()}
       >
-        {i18n.translate('xpack.alertingUI.sections.webhookHeaders.AddHeaderButton', {
-          defaultMessage: 'Add header',
+        {i18n.translate('xpack.alertingUI.sections.actionAdd.addHeaderButton', {
+          defaultMessage: 'Add HTTP header',
         })}
       </EuiButton>
       <EuiSpacer size="m" />
