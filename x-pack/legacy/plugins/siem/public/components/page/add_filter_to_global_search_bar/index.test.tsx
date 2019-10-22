@@ -9,15 +9,10 @@ import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
-import {
-  apolloClientObservable,
-  mockGlobalState,
-  TestProviders,
-  mockIndexPattern,
-} from '../../../mock';
+import { apolloClientObservable, mockGlobalState, TestProviders } from '../../../mock';
 import { createStore, State } from '../../../store';
 import { siemFilterManager } from '../../search_bar';
-import { AddToKql } from '.';
+import { AddFilterToGlobalSearchBar } from '.';
 
 interface MockSiemFilterManager {
   addFilters: (filters: Filter[]) => void;
@@ -31,7 +26,7 @@ jest.mock('../../search_bar', () => ({
 const mockAddFilters = jest.fn();
 mockSiemFilterManager.addFilters = mockAddFilters;
 
-describe('AddToKql Component', () => {
+describe('AddFilterToGlobalSearchBar Component', () => {
   const state: State = mockGlobalState;
   let store = createStore(state, apolloClientObservable);
 
@@ -42,9 +37,7 @@ describe('AddToKql Component', () => {
   test('Rendering', async () => {
     const wrapper = shallow(
       <TestProviders store={store}>
-        <AddToKql
-          id="global"
-          indexPattern={mockIndexPattern}
+        <AddFilterToGlobalSearchBar
           filter={{
             meta: {
               alias: null,
@@ -68,7 +61,7 @@ describe('AddToKql Component', () => {
           }}
         >
           <>{'siem-kibana'}</>
-        </AddToKql>
+        </AddFilterToGlobalSearchBar>
       </TestProviders>
     );
 
@@ -78,9 +71,7 @@ describe('AddToKql Component', () => {
   test('Rendering tooltip', async () => {
     const wrapper = shallow(
       <TestProviders store={store}>
-        <AddToKql
-          id="global"
-          indexPattern={mockIndexPattern}
+        <AddFilterToGlobalSearchBar
           filter={{
             meta: {
               alias: null,
@@ -104,7 +95,7 @@ describe('AddToKql Component', () => {
           }}
         >
           <>{'siem-kibana'}</>
-        </AddToKql>
+        </AddFilterToGlobalSearchBar>
       </TestProviders>
     );
 
@@ -114,11 +105,12 @@ describe('AddToKql Component', () => {
   });
 
   test('Functionality with inputs state', async () => {
+    const onFilterAdded = jest.fn();
+
     const wrapper = mount(
       <TestProviders store={store}>
-        <AddToKql
-          id="global"
-          indexPattern={mockIndexPattern}
+        <AddFilterToGlobalSearchBar
+          onFilterAdded={onFilterAdded}
           filter={{
             meta: {
               alias: null,
@@ -142,7 +134,7 @@ describe('AddToKql Component', () => {
           }}
         >
           <>{'siem-kibana'}</>
-        </AddToKql>
+        </AddFilterToGlobalSearchBar>
       </TestProviders>
     );
 
@@ -174,5 +166,6 @@ describe('AddToKql Component', () => {
         },
       },
     });
+    expect(onFilterAdded).toHaveBeenCalledTimes(1);
   });
 });
