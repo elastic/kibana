@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'hapi';
+import { KibanaRequest } from 'src/core/server';
 import { ServiceHandlerAdapter } from './service_handler_adapter';
 import { ServiceDefinition, ServiceHandlerFor, ServiceMethodMap } from './service_definition';
 import { Endpoint, ResourceLocator } from './resource_locator';
@@ -45,7 +45,7 @@ export class LocalHandlerAdapter implements ServiceHandlerAdapter {
   }
 
   locator: ResourceLocator = {
-    async locate(httpRequest: Request, resource: string): Promise<Endpoint> {
+    async locate(httpRequest: KibanaRequest, resource: string): Promise<Endpoint> {
       return Promise.resolve(new LocalEndpoint(httpRequest, resource));
     },
 
@@ -53,7 +53,7 @@ export class LocalHandlerAdapter implements ServiceHandlerAdapter {
       return Promise.resolve(true);
     },
 
-    async allocate(httpRequest: Request, resource: string): Promise<Endpoint | undefined> {
+    async allocate(httpRequest: KibanaRequest, resource: string): Promise<Endpoint | undefined> {
       return Promise.resolve(new LocalEndpoint(httpRequest, resource));
     },
   };

@@ -89,6 +89,9 @@ export const LogsPage = injectUICapabilities(({ match, uiCapabilities }: LogsPag
     }),
     path: `${match.path}/settings`,
   };
+  const pageTitle = i18n.translate('xpack.infra.header.logsTitle', {
+    defaultMessage: 'Logs',
+  });
   return (
     <Source.Context.Provider value={source}>
       <LogAnalysisCapabilities.Context.Provider value={logAnalysisCapabilities}>
@@ -110,9 +113,7 @@ export const LogsPage = injectUICapabilities(({ match, uiCapabilities }: LogsPag
           <Header
             breadcrumbs={[
               {
-                text: i18n.translate('xpack.infra.header.logsTitle', {
-                  defaultMessage: 'Logs',
-                }),
+                text: pageTitle,
               },
             ]}
             readOnlyBadge={!uiCapabilities.logs.save}
@@ -129,7 +130,7 @@ export const LogsPage = injectUICapabilities(({ match, uiCapabilities }: LogsPag
             />
           ) : (
             <>
-              <AppNavigation>
+              <AppNavigation aria-label={pageTitle}>
                 <RoutedTabs
                   tabs={
                     logAnalysisCapabilities.hasLogAnalysisCapabilites

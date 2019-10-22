@@ -61,7 +61,7 @@ run(
           'webpack-dev-server',
           '--config',
           webpackConfig,
-          '--progress',
+          ...(process.stdout.isTTY ? ['--progress'] : []),
           '--hide-modules',
           '--display-entrypoints',
           'false',
