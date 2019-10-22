@@ -21,7 +21,7 @@ import './setup_mocks';
 import ace from 'brace';
 import 'brace/mode/json';
 import $ from 'jquery';
-import { initializeInput } from '../../src/input';
+import { initializeEditor } from '../../src/input';
 
 const tokenIterator = ace.acequire('ace/token_iterator');
 
@@ -36,20 +36,14 @@ describe('Input Tokenization', () => {
         <div id="ConCopyAsCurl" />
       </div>`;
 
-    input = initializeInput(
+    input = initializeEditor(
       $('#ConAppEditor'),
       $('#ConAppEditorActions'),
-      {},
-      { applyCurrentSettings: () => {} },
-      null
     );
 
-    input = initializeInput(
+    input = initializeEditor(
       $('#ConAppEditor'),
       $('#ConAppEditorActions'),
-      {},
-      { applyCurrentSettings: () => {} },
-      null
     );
     input.$el.show();
     input.autocomplete._test.removeChangeListener();

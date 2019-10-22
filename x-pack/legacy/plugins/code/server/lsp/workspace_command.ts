@@ -14,10 +14,10 @@ import { Logger } from '../log';
 
 export class WorkspaceCommand {
   constructor(
-    readonly repoConfig: RepoConfig,
-    readonly workspaceDir: string,
-    readonly revision: string,
-    readonly log: Logger
+    public readonly repoConfig: RepoConfig,
+    public readonly workspaceDir: string,
+    public readonly revision: string,
+    public readonly log: Logger
   ) {}
 
   public async runInit(force: boolean) {

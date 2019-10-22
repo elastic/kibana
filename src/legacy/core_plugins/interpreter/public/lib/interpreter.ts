@@ -17,18 +17,34 @@
  * under the License.
  */
 
+import { ExpressionInterpret } from 'src/plugins/expressions/common/expressions/interpreter_provider';
 import { interpreterProvider } from '../../common';
 import { createHandlers } from './create_handlers';
 import { registries } from '../registries';
+import { FunctionHandlers } from '../../types';
 
-export async function initializeInterpreter() {
-  const interpretAst = async (ast: any, context: any, handlers: any) => {
-    const interpretFn = await interpreterProvider({
+export type ExpressionInterpretWithHandlers = (
+  ast: Parameters<ExpressionInterpret>[0],
+  context: Parameters<ExpressionInterpret>[1],
+  handlers: FunctionHandlers
+) => ReturnType<ExpressionInterpret>;
+
+export interface ExpressionInterpreter {
+  interpretAst: ExpressionInterpretWithHandlers;
+}
+
+export interface ExpressionExecutor {
+  interpreter: ExpressionInterpreter;
+}
+
+export async function initializeExecutor(): Promise<ExpressionExecutor> {
+  const interpretAst: ExpressionInterpretWithHandlers = async (ast, context, handlers) => {
+    const interpret = await interpreterProvider({
       types: registries.types.toJS(),
       handlers: { ...handlers, ...createHandlers() },
       functions: registries.browserFunctions.toJS(),
     });
-    return interpretFn(ast, context);
+    return interpret(ast, context);
   };
 
   return { interpreter: { interpretAst } };

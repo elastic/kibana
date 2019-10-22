@@ -30,9 +30,9 @@ jest.mock('../../../../components/editor_example.tsx', () => {});
 jest.mock('../../../../../../../public/quarantined/src/mappings.js', () => ({
   retrieveAutoCompleteInfo: () => {},
 }));
-jest.mock('../../../../../../../public/quarantined/src/input.js', () => {
+jest.mock('../../../../../../../public/quarantined/src/input.ts', () => {
   return {
-    initializeInput: () => ({
+    initializeEditor: () => ({
       $el: {
         css: () => {},
       },

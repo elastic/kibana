@@ -25,7 +25,7 @@ import { stat, readFileSync } from 'fs';
 import { snakeCase } from 'lodash';
 import del from 'del';
 import { withProcRunner, ToolingLog } from '@kbn/dev-utils';
-import { createEsTestCluster } from '@kbn/test';
+import { createLegacyEsTestCluster } from '@kbn/test';
 import execa from 'execa';
 
 const statP = util.promisify(stat);
@@ -81,25 +81,29 @@ describe(`running the plugin-generator via 'node scripts/generate_plugin.js plug
       await execa('yarn', ['build'], { cwd: generatedPath });
     });
 
-    it(`'yarn start' should result in the spec plugin being initialized on kibana's stdout`, async () => {
+    describe('with es instance', () => {
       const log = new ToolingLog();
-      const es = createEsTestCluster({ license: 'basic', log });
-      await es.start();
-      await withProcRunner(log, async proc => {
-        await proc.run('kibana', {
-          cmd: 'yarn',
-          args: [
-            'start',
-            '--optimize.enabled=false',
-            '--logging.json=false',
-            '--migrations.skip=true',
-          ],
-          cwd: generatedPath,
-          wait: /ispec_plugin.+Status changed from uninitialized to green - Ready/,
+
+      const es = createLegacyEsTestCluster({ license: 'basic', log });
+      beforeAll(es.start);
+      afterAll(es.stop);
+
+      it(`'yarn start' should result in the spec plugin being initialized on kibana's stdout`, async () => {
+        await withProcRunner(log, async proc => {
+          await proc.run('kibana', {
+            cmd: 'yarn',
+            args: [
+              'start',
+              '--optimize.enabled=false',
+              '--logging.json=false',
+              '--migrations.skip=true',
+            ],
+            cwd: generatedPath,
+            wait: /ispec_plugin.+Status changed from uninitialized to green - Ready/,
+          });
+          await proc.stop('kibana');
         });
-        await proc.stop('kibana');
       });
-      await es.stop();
     });
 
     it(`'yarn preinstall' should exit 0`, async () => {

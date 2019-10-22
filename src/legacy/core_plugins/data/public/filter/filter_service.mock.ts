@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { FilterService, FilterSetup } from '.';
+import { FilterService, FilterStart, FilterSetup } from '.';
 
 type FilterServiceClientContract = PublicMethodsOf<FilterService>;
 
@@ -29,6 +29,14 @@ const createSetupContractMock = () => {
   return setupContract;
 };
 
+const createStartContractMock = () => {
+  const startContract: jest.Mocked<FilterStart> = {
+    filterManager: jest.fn() as any,
+  };
+
+  return startContract;
+};
+
 const createMock = () => {
   const mocked: jest.Mocked<FilterServiceClientContract> = {
     setup: jest.fn(),
@@ -37,11 +45,12 @@ const createMock = () => {
   };
 
   mocked.setup.mockReturnValue(createSetupContractMock());
+  mocked.start.mockReturnValue(createStartContractMock());
   return mocked;
 };
 
 export const filterServiceMock = {
   create: createMock,
   createSetupContract: createSetupContractMock,
-  createStartContract: createSetupContractMock,
+  createStartContract: createStartContractMock,
 };

@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server } from 'hapi';
 import { EsClient, Esqueue } from './lib/esqueue';
 import { Logger } from './log';
+import { ServerOptions } from './server_options';
 
-export function initQueue(server: Server, log: Logger, esClient: EsClient) {
-  const queueIndex: string = server.config().get('xpack.code.queueIndex');
-  const queueTimeoutMs: number = server.config().get('xpack.code.queueTimeoutMs');
+export function initQueue(serverOptions: ServerOptions, log: Logger, esClient: EsClient) {
+  const queueIndex: string = serverOptions.queueIndex;
+  const queueTimeoutMs: number = serverOptions.queueTimeoutMs;
   const queue = new Esqueue(queueIndex, {
     client: esClient,
     timeout: queueTimeoutMs,

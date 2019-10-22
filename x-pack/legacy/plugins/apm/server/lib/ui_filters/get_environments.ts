@@ -11,14 +11,10 @@ import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME
 } from '../../../common/elasticsearch_fieldnames';
-import { PromiseReturnType } from '../../../typings/common';
 import { rangeFilter } from '../helpers/range_filter';
 import { Setup } from '../helpers/setup_request';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
 
-export type EnvironmentUIFilterAPIResponse = PromiseReturnType<
-  typeof getEnvironments
->;
 export async function getEnvironments(setup: Setup, serviceName?: string) {
   const { start, end, client, config } = setup;
 

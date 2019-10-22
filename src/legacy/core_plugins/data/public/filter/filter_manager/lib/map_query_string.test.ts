@@ -27,7 +27,7 @@ describe('filter manager utilities', () => {
         { query_string: { query: 'foo:bar' } },
         'index'
       );
-      const result = await mapQueryString(filter);
+      const result = mapQueryString(filter);
 
       expect(result).toHaveProperty('key', 'query');
       expect(result).toHaveProperty('value', 'foo:bar');
@@ -37,7 +37,7 @@ describe('filter manager utilities', () => {
       const filter = buildEmptyFilter(true) as QueryStringFilter;
 
       try {
-        await mapQueryString(filter);
+        mapQueryString(filter);
       } catch (e) {
         expect(e).toBe(filter);
         done();

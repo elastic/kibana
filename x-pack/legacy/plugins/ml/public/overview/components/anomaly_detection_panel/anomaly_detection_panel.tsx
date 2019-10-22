@@ -31,7 +31,7 @@ export interface Group {
   docs_processed: number;
   earliest_timestamp: number;
   latest_timestamp: number;
-  max_anomaly_score: number | null;
+  max_anomaly_score: number | undefined | null;
 }
 
 type MaxScoresByGroup = Dictionary<{
@@ -103,8 +103,9 @@ export const AnomalyDetectionPanel: FC = () => {
       // Check results for each group's promise index and update state
       Object.keys(scores).forEach(groupId => {
         const resultsIndex = scores[groupId] && scores[groupId].index;
-        scores[groupId] = resultsIndex !== undefined && results[resultsIndex];
-        tempGroups[groupId].max_anomaly_score = resultsIndex !== undefined && results[resultsIndex];
+        // maxScore will be null if it was not loaded correctly
+        const { maxScore } = resultsIndex !== undefined && results[resultsIndex];
+        tempGroups[groupId].max_anomaly_score = maxScore;
       });
 
       setGroups(tempGroups);
@@ -143,10 +144,12 @@ export const AnomalyDetectionPanel: FC = () => {
     </Fragment>
   );
 
+  const panelClass = isLoading ? 'mlOverviewPanel__isLoading' : 'mlOverviewPanel';
+
   return (
-    <EuiPanel className="mlOverviewPanel">
+    <EuiPanel className={panelClass}>
       {typeof errorMessage !== 'undefined' && errorDisplay}
-      {isLoading && <EuiLoadingSpinner />}   
+      {isLoading && <EuiLoadingSpinner className="mlOverviewPanel__spinner" size="xl" />}   
       {isLoading === false && typeof errorMessage === 'undefined' && groupsCount === 0 && (
         <EuiEmptyPrompt
           iconType="createSingleMetricJob"
@@ -167,9 +170,9 @@ export const AnomalyDetectionPanel: FC = () => {
             </Fragment>
           }
           actions={
-            <EuiButton color="primary" href={createJobLink} fill>
+            <EuiButton color="primary" href={createJobLink} fill iconType="plusInCircle">
               {i18n.translate('xpack.ml.overview.anomalyDetection.createJobButtonText', {
-                defaultMessage: 'Create job.',
+                defaultMessage: 'Create job',
               })}
             </EuiButton>
           }
@@ -180,7 +183,7 @@ export const AnomalyDetectionPanel: FC = () => {
           <AnomalyDetectionTable items={groups} jobsList={jobsList} statsBarData={statsBarData} />
           <EuiSpacer size="m" />
           <div className="mlOverviewPanel__buttons">
-            <EuiButtonEmpty size="s" onClick={onRefresh}>
+            <EuiButtonEmpty size="s" onClick={onRefresh} className="mlOverviewPanel__refreshButton">
               {i18n.translate('xpack.ml.overview.anomalyDetection.refreshJobsButtonText', {
                 defaultMessage: 'Refresh',
               })}

@@ -10,16 +10,14 @@ export default ({ getPageObjects }: FtrProviderContext) => {
   // TODO: add UI functional tests
   const pageObjects = getPageObjects(['uptime']);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/35773
-  describe.skip('overview page', function() {
-    this.tags(['skipFirefox']);
-    const DEFAULT_DATE_START = '2019-01-28 12:40:08.078';
-    const DEFAULT_DATE_END = '2019-01-29 12:40:08.078';
+  describe('overview page', function() {
+    const DEFAULT_DATE_START = '2019-09-10 12:40:08.078';
+    const DEFAULT_DATE_END = '2019-09-11 19:40:08.078';
     it('loads and displays uptime data based on date range', async () => {
       await pageObjects.uptime.goToUptimeOverviewAndLoadData(
         DEFAULT_DATE_START,
         DEFAULT_DATE_END,
-        'monitor-page-link-auto-http-0X131221E73F825974'
+        'monitor-page-link-0000-intermittent'
       );
     });
 
@@ -27,7 +25,8 @@ export default ({ getPageObjects }: FtrProviderContext) => {
       await pageObjects.uptime.inputFilterQuery(
         DEFAULT_DATE_START,
         DEFAULT_DATE_END,
-        'monitor.status:up monitor.id:auto-http-0X131221E73F825974'
+        'monitor.status:up and monitor.id:"0000-intermittent"',
+        'monitor-page-link-0000-intermittent'
       );
     });
   });

@@ -17,10 +17,11 @@
  * under the License.
  */
 
+import Fs from 'fs';
+
 import sinon from 'sinon';
 import glob from 'glob-all';
 import rimraf from 'rimraf';
-import mkdirp from 'mkdirp';
 import Logger from '../lib/logger';
 import { extract, getPackData } from './pack';
 import { _downloadSingle }  from './download';
@@ -58,7 +59,7 @@ describe('kibana cli', function () {
       logger = new Logger(settings);
       sinon.stub(logger, 'log');
       sinon.stub(logger, 'error');
-      mkdirp.sync(testWorkingPath);
+      Fs.mkdirSync(testWorkingPath, { recursive: true });
     });
 
     afterEach(function () {

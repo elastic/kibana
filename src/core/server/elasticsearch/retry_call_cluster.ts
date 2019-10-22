@@ -19,7 +19,8 @@
 
 import { retryWhen, concatMap } from 'rxjs/operators';
 import { defer, throwError, iif, timer } from 'rxjs';
-import elasticsearch from 'elasticsearch';
+import * as legacyElasticsearch from 'elasticsearch';
+
 import { CallAPIOptions } from '.';
 
 /**
@@ -45,7 +46,7 @@ export function retryCallCluster(
           errors.pipe(
             concatMap((error, i) =>
               iif(
-                () => error instanceof elasticsearch.errors.NoConnections,
+                () => error instanceof legacyElasticsearch.errors.NoConnections,
                 timer(1000),
                 throwError(error)
               )
