@@ -19,8 +19,6 @@ import {
   StopDatafeedResponse,
 } from './types';
 import { throwIfErrorAttached, throwIfErrorAttachedToSetup } from '../ml/api/throw_if_not_ok';
-import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
-import { DEFAULT_KBN_VERSION } from '../../../common/constants';
 import { throwIfNotOk } from '../../hooks/api/api';
 
 /**
@@ -32,10 +30,9 @@ import { throwIfNotOk } from '../../hooks/api/api';
  */
 export const checkRecognizer = async ({
   indexPatternName,
-  headers = {},
+  kbnVersion,
   signal,
 }: CheckRecognizerProps): Promise<RecognizerModule[]> => {
-  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
   const response = await fetch(
     `${chrome.getBasePath()}/api/ml/modules/recognize/${indexPatternName}`,
     {
@@ -46,7 +43,6 @@ export const checkRecognizer = async ({
         'content-type': 'application/json',
         'kbn-version': kbnVersion,
         'kbn-xsrf': kbnVersion,
-        ...headers,
       },
       signal,
     }
@@ -64,10 +60,9 @@ export const checkRecognizer = async ({
  */
 export const getModules = async ({
   moduleId = '',
-  headers = {},
+  kbnVersion,
   signal,
 }: GetModulesProps): Promise<Module[]> => {
-  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
   const response = await fetch(`${chrome.getBasePath()}/api/ml/modules/get_module/${moduleId}`, {
     method: 'GET',
     credentials: 'same-origin',
@@ -76,7 +71,6 @@ export const getModules = async ({
       'content-type': 'application/json',
       'kbn-version': kbnVersion,
       'kbn-xsrf': kbnVersion,
-      ...headers,
     },
     signal,
   });
@@ -99,10 +93,9 @@ export const setupMlJob = async ({
   indexPatternName = 'auditbeat-*',
   jobIdErrorFilter = [],
   groups = ['siem'],
+  kbnVersion,
   prefix = '',
-  headers = {},
 }: MlSetupArgs): Promise<SetupMlResponse> => {
-  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
   const response = await fetch(`${chrome.getBasePath()}/api/ml/modules/setup/${configTemplate}`, {
     method: 'POST',
     credentials: 'same-origin',
@@ -118,7 +111,6 @@ export const setupMlJob = async ({
       'content-type': 'application/json',
       'kbn-version': kbnVersion,
       'kbn-xsrf': kbnVersion,
-      ...headers,
     },
   });
   await throwIfNotOk(response);
@@ -136,14 +128,13 @@ export const setupMlJob = async ({
  */
 export const startDatafeeds = async ({
   datafeedIds,
-  headers,
+  kbnVersion,
   start = 0,
 }: {
   datafeedIds: string[];
   start: number;
-  headers?: Record<string, string>;
+  kbnVersion: string;
 }): Promise<StartDatafeedResponse> => {
-  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
   const response = await fetch(`${chrome.getBasePath()}/api/ml/jobs/force_start_datafeeds`, {
     method: 'POST',
     credentials: 'same-origin',
@@ -156,7 +147,6 @@ export const startDatafeeds = async ({
       'content-type': 'application/json',
       'kbn-version': kbnVersion,
       'kbn-xsrf': kbnVersion,
-      ...headers,
     },
   });
   await throwIfNotOk(response);
@@ -173,12 +163,11 @@ export const startDatafeeds = async ({
  */
 export const stopDatafeeds = async ({
   datafeedIds,
-  headers,
+  kbnVersion,
 }: {
   datafeedIds: string[];
-  headers?: Record<string, string>;
+  kbnVersion: string;
 }): Promise<[StopDatafeedResponse | ErrorResponse, CloseJobsResponse]> => {
-  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
   const stopDatafeedsResponse = await fetch(`${chrome.getBasePath()}/api/ml/jobs/stop_datafeeds`, {
     method: 'POST',
     credentials: 'same-origin',
@@ -189,7 +178,6 @@ export const stopDatafeeds = async ({
       'kbn-system-api': 'true',
       'content-type': 'application/json',
       'kbn-xsrf': kbnVersion,
-      ...headers,
     },
   });
 
@@ -211,7 +199,6 @@ export const stopDatafeeds = async ({
       'content-type': 'application/json',
       'kbn-system-api': 'true',
       'kbn-xsrf': kbnVersion,
-      ...headers,
     },
   });
 
@@ -227,8 +214,10 @@ export const stopDatafeeds = async ({
  *
  * @param signal to cancel request
  */
-export const getJobsSummary = async (signal: AbortSignal): Promise<JobSummary[]> => {
-  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
+export const getJobsSummary = async (
+  signal: AbortSignal,
+  kbnVersion: string
+): Promise<JobSummary[]> => {
   const response = await fetch(`${chrome.getBasePath()}/api/ml/jobs/jobs_summary`, {
     method: 'POST',
     credentials: 'same-origin',

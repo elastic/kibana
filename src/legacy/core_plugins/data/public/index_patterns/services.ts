@@ -17,25 +17,23 @@
  * under the License.
  */
 
-import Autocomplete from './autocomplete';
-const SenseEditor = require('./sense_editor/editor');
+import { NotificationsStart } from 'src/core/public';
 
-let input;
-export function initializeInput($el, $actionsEl) {
-  input = new SenseEditor($el);
+const createGetterSetter = <T extends object>(name: string): [() => T, (value: T) => void] => {
+  let value: T;
 
-  input.autocomplete = new Autocomplete(input);
-  input.$actions = $actionsEl;
+  const get = (): T => {
+    if (!value) throw new Error(`${name} was not set`);
+    return value;
+  };
 
-  /**
-   * Init the editor
-   */
-  input.focus();
-  input.highlightCurrentRequestsAndUpdateActionBar();
+  const set = (newValue: T) => {
+    value = newValue;
+  };
 
-  return input;
-}
+  return [get, set];
+};
 
-export default function getInput() {
-  return input;
-}
+export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(
+  'Notifications'
+);

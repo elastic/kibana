@@ -98,6 +98,7 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
 
       schemaConfig = {
         accessor: 0,
+        label: '',
         format: {},
         params: {},
         aggType: '',
