@@ -182,10 +182,7 @@ export class AdvancedJobCreator extends JobCreator {
     const detectors = getRichDetectors(job, datafeed, true);
 
     // keep track of the custom rules for each detector
-    const customRules: Array<CustomRule[] | undefined> = [];
-    this._detectors.forEach((d, i) => {
-      customRules[i] = d.custom_rules;
-    });
+    const customRules = this._detectors.map(d => d.custom_rules);
 
     this.removeAllDetectors();
     this._richDetectors.length = 0;
