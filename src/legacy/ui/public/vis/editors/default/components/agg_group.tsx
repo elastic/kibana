@@ -26,9 +26,7 @@ import {
   EuiDraggable,
   EuiSpacer,
   EuiPanel,
-  EuiFormErrorText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 import { AggConfig } from '../../../../agg_types/agg_config';
 import { aggGroupNamesMap, AggGroupNames } from '../agg_groups';
@@ -82,15 +80,7 @@ function DefaultEditorAggGroup({
 
   const [aggsState, setAggsState] = useReducer(aggGroupReducer, group, initAggsState);
 
-  let bucketsError;
-  if (lastParentPipelineAggTitle && groupName === AggGroupNames.Buckets && !group.length) {
-    bucketsError = i18n.translate('common.ui.aggTypes.buckets.mustHaveBucketErrorMessage', {
-      defaultMessage: 'Add a bucket with "Date Histogram" or "Histogram" aggregation.',
-      description: 'Date Histogram and Histogram should not be translated',
-    });
-  }
-
-  const isGroupValid = !bucketsError && Object.values(aggsState).every(item => item.valid);
+  const isGroupValid = Object.values(aggsState).every(item => item.valid);
   const isAllAggsTouched = isInvalidAggsTouched(aggsState);
   const isMetricAggregationDisabled = useMemo(
     () => groupName === AggGroupNames.Metrics && getEnabledMetricAggsCount(group) === 1,
@@ -154,12 +144,6 @@ function DefaultEditorAggGroup({
           <h3>{groupNameLabel}</h3>
         </EuiTitle>
         <EuiSpacer size="s" />
-        {bucketsError && (
-          <>
-            <EuiFormErrorText>{bucketsError}</EuiFormErrorText>
-            <EuiSpacer size="s" />
-          </>
-        )}
         <EuiDroppable droppableId={`agg_group_dnd_${groupName}`}>
           <>
             {group.map((agg: AggConfig, index: number) => (
