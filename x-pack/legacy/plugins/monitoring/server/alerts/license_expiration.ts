@@ -67,7 +67,10 @@ export const getLicenseExpiration = (getMonitoringCluster: any, logger: Logger):
         }
       }
 
-      const result: AlertState = { ...state };
+      const result: AlertState = {
+        expired_check_date_in_millis: 0,
+        ...state,
+      };
       const instance = services.alertInstanceFactory(ALERT_TYPE_LICENSE_EXPIRATION);
 
       if (isExpired && !state.expired_check_date_in_millis) {

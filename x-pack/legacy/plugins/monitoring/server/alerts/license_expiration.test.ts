@@ -8,8 +8,12 @@ import moment from 'moment';
 import { getLicenseExpiration } from './license_expiration';
 import { ALERT_TYPE_LICENSE_EXPIRATION } from '../../common/constants';
 import { Logger } from 'src/core/server';
+import { AlertServices } from '../../../alerting/server/types';
+import { SavedObjectsClientMock } from 'src/core/server/mocks';
+import { AlertInstance } from '../../../alerting/server/lib';
+import { AlertState } from './types';
 
-function fillLicense(license) {
+function fillLicense(license: any) {
   return {
     hits: {
       hits: [
@@ -23,7 +27,7 @@ function fillLicense(license) {
   };
 }
 
-function fillEmailAddress(emailAddress) {
+function fillEmailAddress(emailAddress: string) {
   return {
     hits: {
       hits: [
@@ -44,14 +48,17 @@ function fillEmailAddress(emailAddress) {
 describe('getLicenseExpiration', () => {
   const getMonitoringCluster: () => void = jest.fn();
   const logger: Logger = {
-    trace: jest.fn(),
-    debug: jest.fn(),
-    info: jest.fn(),
     warn: jest.fn(),
+    log: jest.fn(),
+    debug: jest.fn(),
+    trace: jest.fn(),
+    error: jest.fn(),
+    fatal: jest.fn(),
+    info: jest.fn(),
   };
 
   afterEach(() => {
-    logger.warn.mockClear();
+    (logger.warn as jest.Mock).mockClear();
   });
 
   it('should have the right id and actionGroups', () => {
@@ -60,12 +67,18 @@ describe('getLicenseExpiration', () => {
     expect(alert.actionGroups).toEqual(['default']);
   });
 
+  interface MockServices {
+    callCluster: jest.Mock;
+    alertInstanceFactory: jest.Mock;
+    savedObjectsClient: jest.Mock;
+  }
   it('should return the state if no license is provided', async () => {
     const alert = getLicenseExpiration(getMonitoringCluster, logger);
 
-    const services = {
+    const services: MockServices | AlertServices = {
       callCluster: jest.fn(),
       alertInstanceFactory: jest.fn(),
+      savedObjectsClient: SavedObjectsClientMock.create(),
     };
     const params = {
       clusterUuid: '1abd45',
@@ -74,6 +87,8 @@ describe('getLicenseExpiration', () => {
 
     // async executor({ services, params, state }: AlertExecutorOptions): Promise<any> {
     const result = await alert.executor({
+      alertId: '',
+      startedAt: new Date(),
       services,
       params,
       state,
@@ -86,18 +101,26 @@ describe('getLicenseExpiration', () => {
     const alert = getLicenseExpiration(getMonitoringCluster, logger);
 
     const services = {
-      callCluster: jest.fn((method, params) => {
-        if (params.filterPath === 'hits.hits._source.license.*') {
-          return fillLicense({
-            status: 'good',
-            type: 'basic',
-            expiry_date_in_millis: moment()
-              .add(7, 'days')
-              .valueOf(),
+      callCluster: jest.fn(
+        (method: string, params): Promise<any> => {
+          return new Promise(resolve => {
+            if (params.filterPath === 'hits.hits._source.license.*') {
+              resolve(
+                fillLicense({
+                  status: 'good',
+                  type: 'basic',
+                  expiry_date_in_millis: moment()
+                    .add(7, 'days')
+                    .valueOf(),
+                })
+              );
+            }
+            resolve({});
           });
         }
-      }),
+      ),
       alertInstanceFactory: jest.fn(),
+      savedObjectsClient: SavedObjectsClientMock.create(),
     };
 
     const params = {
@@ -106,12 +129,14 @@ describe('getLicenseExpiration', () => {
     const state = {};
 
     await alert.executor({
+      alertId: '',
+      startedAt: new Date(),
       services,
       params,
       state,
     });
 
-    expect(logger.warn.mock.calls.length).toBe(1);
+    expect((logger.warn as jest.Mock).mock.calls.length).toBe(1);
     expect(logger.warn).toHaveBeenCalledWith(
       `Unable to send email for ${ALERT_TYPE_LICENSE_EXPIRATION} because there is no email configured.`
     );
@@ -119,28 +144,42 @@ describe('getLicenseExpiration', () => {
 
   it('should fire actions if going to expire', async () => {
     const scheduleActions = jest.fn();
-    const alertInstanceFactory = jest.fn(() => ({
-      scheduleActions,
-    }));
+    const alertInstanceFactory = jest.fn(
+      (id: string): AlertInstance => {
+        const instance = new AlertInstance();
+        instance.scheduleActions = scheduleActions;
+        return instance;
+      }
+    );
     const emailAddress = 'foo@foo.com';
     const alert = getLicenseExpiration(getMonitoringCluster, logger);
 
     const services = {
-      callCluster: jest.fn((method, params) => {
-        if (params.filterPath === 'hits.hits._source.license.*') {
-          return fillLicense({
-            status: 'active',
-            type: 'gold',
-            expiry_date_in_millis: moment()
-              .add(7, 'days')
-              .valueOf(),
+      callCluster: jest.fn(
+        (method: string, params): Promise<any> => {
+          return new Promise(resolve => {
+            if (params.filterPath === 'hits.hits._source.license.*') {
+              resolve(
+                fillLicense({
+                  status: 'active',
+                  type: 'gold',
+                  expiry_date_in_millis: moment()
+                    .add(7, 'days')
+                    .valueOf(),
+                })
+              );
+            }
+            if (
+              params.filterPath === 'hits.hits._source.kibana_settings.xpack.default_admin_email'
+            ) {
+              resolve(fillEmailAddress(emailAddress));
+            }
+            resolve({});
           });
         }
-        if (params.filterPath === 'hits.hits._source.kibana_settings.xpack.default_admin_email') {
-          return fillEmailAddress(emailAddress);
-        }
-      }),
+      ),
       alertInstanceFactory,
+      savedObjectsClient: SavedObjectsClientMock.create(),
     };
 
     const params = {
@@ -149,12 +188,14 @@ describe('getLicenseExpiration', () => {
     const state = {};
 
     const result = await alert.executor({
+      alertId: '',
+      startedAt: new Date(),
       services,
       params,
       state,
     });
 
-    expect(!isNaN(result.expired_check_date_in_millis)).toBe(true);
+    expect((result as AlertState).expired_check_date_in_millis > 0).toBe(true);
     expect(scheduleActions.mock.calls.length).toBe(1);
     expect(scheduleActions.mock.calls[0][1].subject).toBe(
       'NEW X-Pack Monitoring: License Expiration'
@@ -164,28 +205,42 @@ describe('getLicenseExpiration', () => {
 
   it('should fire actions if the user fixed their license', async () => {
     const scheduleActions = jest.fn();
-    const alertInstanceFactory = jest.fn(() => ({
-      scheduleActions,
-    }));
+    const alertInstanceFactory = jest.fn(
+      (id: string): AlertInstance => {
+        const instance = new AlertInstance();
+        instance.scheduleActions = scheduleActions;
+        return instance;
+      }
+    );
     const emailAddress = 'foo@foo.com';
     const alert = getLicenseExpiration(getMonitoringCluster, logger);
 
     const services = {
-      callCluster: jest.fn((method, params) => {
-        if (params.filterPath === 'hits.hits._source.license.*') {
-          return fillLicense({
-            status: 'active',
-            type: 'gold',
-            expiry_date_in_millis: moment()
-              .add(120, 'days')
-              .valueOf(),
+      callCluster: jest.fn(
+        (method: string, params): Promise<any> => {
+          return new Promise(resolve => {
+            if (params.filterPath === 'hits.hits._source.license.*') {
+              resolve(
+                fillLicense({
+                  status: 'active',
+                  type: 'gold',
+                  expiry_date_in_millis: moment()
+                    .add(120, 'days')
+                    .valueOf(),
+                })
+              );
+            }
+            if (
+              params.filterPath === 'hits.hits._source.kibana_settings.xpack.default_admin_email'
+            ) {
+              resolve(fillEmailAddress(emailAddress));
+            }
+            resolve({});
           });
         }
-        if (params.filterPath === 'hits.hits._source.kibana_settings.xpack.default_admin_email') {
-          return fillEmailAddress(emailAddress);
-        }
-      }),
+      ),
       alertInstanceFactory,
+      savedObjectsClient: SavedObjectsClientMock.create(),
     };
 
     const params = {
@@ -198,12 +253,14 @@ describe('getLicenseExpiration', () => {
     };
 
     const result = await alert.executor({
+      alertId: '',
+      startedAt: new Date(),
       services,
       params,
       state,
     });
 
-    expect(result.expired_check_date_in_millis).toBe(0);
+    expect((result as AlertState).expired_check_date_in_millis).toBe(0);
     expect(scheduleActions.mock.calls.length).toBe(1);
     expect(scheduleActions.mock.calls[0][1].subject).toBe(
       'RESOLVED X-Pack Monitoring: License Expiration'
@@ -213,28 +270,42 @@ describe('getLicenseExpiration', () => {
 
   it('should not fire actions for trial license that expire in more than 14 days', async () => {
     const scheduleActions = jest.fn();
-    const alertInstanceFactory = jest.fn(() => ({
-      scheduleActions,
-    }));
+    const alertInstanceFactory = jest.fn(
+      (id: string): AlertInstance => {
+        const instance = new AlertInstance();
+        instance.scheduleActions = scheduleActions;
+        return instance;
+      }
+    );
     const emailAddress = 'foo@foo.com';
     const alert = getLicenseExpiration(getMonitoringCluster, logger);
 
     const services = {
-      callCluster: jest.fn((method, params) => {
-        if (params.filterPath === 'hits.hits._source.license.*') {
-          return fillLicense({
-            status: 'active',
-            type: 'trial',
-            expiry_date_in_millis: moment()
-              .add(15, 'days')
-              .valueOf(),
+      callCluster: jest.fn(
+        (method: string, params): Promise<any> => {
+          return new Promise(resolve => {
+            if (params.filterPath === 'hits.hits._source.license.*') {
+              resolve(
+                fillLicense({
+                  status: 'active',
+                  type: 'trial',
+                  expiry_date_in_millis: moment()
+                    .add(15, 'days')
+                    .valueOf(),
+                })
+              );
+            }
+            if (
+              params.filterPath === 'hits.hits._source.kibana_settings.xpack.default_admin_email'
+            ) {
+              resolve(fillEmailAddress(emailAddress));
+            }
+            resolve({});
           });
         }
-        if (params.filterPath === 'hits.hits._source.kibana_settings.xpack.default_admin_email') {
-          return fillEmailAddress(emailAddress);
-        }
-      }),
+      ),
       alertInstanceFactory,
+      savedObjectsClient: SavedObjectsClientMock.create(),
     };
 
     const params = {
@@ -243,38 +314,54 @@ describe('getLicenseExpiration', () => {
     const state = {};
 
     const result = await alert.executor({
+      alertId: '',
+      startedAt: new Date(),
       services,
       params,
       state,
     });
-    expect(Object.keys(result).length).toBe(0);
+    expect((result as AlertState).expired_check_date_in_millis).toBe(0);
     expect(scheduleActions).not.toHaveBeenCalled();
   });
 
   it('should fire actions for trial license that in 14 days or less', async () => {
     const scheduleActions = jest.fn();
-    const alertInstanceFactory = jest.fn(() => ({
-      scheduleActions,
-    }));
+    const alertInstanceFactory = jest.fn(
+      (id: string): AlertInstance => {
+        const instance = new AlertInstance();
+        instance.scheduleActions = scheduleActions;
+        return instance;
+      }
+    );
     const emailAddress = 'foo@foo.com';
     const alert = getLicenseExpiration(getMonitoringCluster, logger);
 
     const services = {
-      callCluster: jest.fn((method, params) => {
-        if (params.filterPath === 'hits.hits._source.license.*') {
-          return fillLicense({
-            status: 'active',
-            type: 'trial',
-            expiry_date_in_millis: moment()
-              .add(13, 'days')
-              .valueOf(),
+      callCluster: jest.fn(
+        (method: string, params): Promise<any> => {
+          return new Promise(resolve => {
+            if (params.filterPath === 'hits.hits._source.license.*') {
+              resolve(
+                fillLicense({
+                  status: 'active',
+                  type: 'trial',
+                  expiry_date_in_millis: moment()
+                    .add(13, 'days')
+                    .valueOf(),
+                })
+              );
+            }
+            if (
+              params.filterPath === 'hits.hits._source.kibana_settings.xpack.default_admin_email'
+            ) {
+              resolve(fillEmailAddress(emailAddress));
+            }
+            resolve({});
           });
         }
-        if (params.filterPath === 'hits.hits._source.kibana_settings.xpack.default_admin_email') {
-          return fillEmailAddress(emailAddress);
-        }
-      }),
+      ),
       alertInstanceFactory,
+      savedObjectsClient: SavedObjectsClientMock.create(),
     };
 
     const params = {
@@ -283,11 +370,13 @@ describe('getLicenseExpiration', () => {
     const state = {};
 
     const result = await alert.executor({
+      alertId: '',
+      startedAt: new Date(),
       services,
       params,
       state,
     });
-    expect(!isNaN(result.expired_check_date_in_millis)).toBe(true);
+    expect((result as AlertState).expired_check_date_in_millis > 0).toBe(true);
     expect(scheduleActions.mock.calls.length).toBe(1);
   });
 });
