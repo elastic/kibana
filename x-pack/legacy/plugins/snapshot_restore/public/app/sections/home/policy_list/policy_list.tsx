@@ -122,7 +122,7 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
             <p>
               <FormattedMessage
                 id="xpack.snapshotRestore.policyList.emptyPromptDescription"
-                defaultMessage="Automate how often to create and delete snapshots."
+                defaultMessage="A policy automates the creation and deletion of snapshots."
               />
             </p>
           </Fragment>
