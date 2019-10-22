@@ -106,8 +106,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       after(async () => {
         await esArchiver.unload('kibana_sample_data_flights');
       });
-      // FLAKY: https://github.com/elastic/kibana/issues/43150
-      it.skip('should be able to switch between index patterns', async () => {
+      it('should be able to switch between index patterns', async () => {
         const value = await PageObjects.visualBuilder.getMetricValue();
         expect(value).to.eql('156');
         await PageObjects.visualBuilder.clickMetricPanelOptions();
