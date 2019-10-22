@@ -4,19 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  buildEsQuery,
-  getEsQueryConfig,
-  Filter,
-  fromKueryExpression,
-  toElasticsearchQuery,
-} from '@kbn/es-query';
+import { buildEsQuery, Filter, fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { isEmpty, isString, flow } from 'lodash/fp';
 import { StaticIndexPattern } from 'ui/index_patterns';
 import { Query } from 'src/plugins/data/common';
 
 import { KueryFilterQuery } from '../../store';
-import { useKibanaCore } from '../compose/kibana_core';
 
 export const convertKueryToElasticSearchQuery = (
   kueryExpression: string,
@@ -74,24 +67,27 @@ export const escapeKuery = flow(
   escapeWhitespace
 );
 
+export interface EsQueryConfig {
+  allowLeadingWildcards: boolean;
+  queryStringOptions: unknown;
+  ignoreFilterIfFieldNotInIndex: boolean;
+  dateFormatTZ?: string | null;
+}
+
 export const convertToBuildEsQuery = ({
+  config,
   indexPattern,
   queries,
   filters,
 }: {
+  config: EsQueryConfig;
   indexPattern: StaticIndexPattern;
   queries: Query[];
   filters: Filter[];
 }) => {
-  const core = useKibanaCore();
   try {
     return JSON.stringify(
-      buildEsQuery(
-        indexPattern,
-        queries,
-        filters.filter(f => f.meta.disabled === false),
-        getEsQueryConfig(core.uiSettings)
-      )
+      buildEsQuery(indexPattern, queries, filters.filter(f => f.meta.disabled === false), config)
     );
   } catch (exp) {
     return '';
