@@ -22,6 +22,19 @@ import { mlJobService } from '../../../../../services/job_service';
 import { JobCreatorType, isMultiMetricJobCreator, isPopulationJobCreator } from '../';
 import { CREATED_BY_LABEL, JOB_TYPE } from './constants';
 
+const getFieldByIdFactory = (scriptFields: Field[]) => (id: string) => {
+  let field = newJobCapsService.getFieldById(id);
+  // if no field could be found it may be a pretend field, like mlcategory or a script field
+  if (field === null) {
+    if (id === MLCATEGORY) {
+      field = mlCategory;
+    } else if (scriptFields.length) {
+      field = scriptFields.find(f => f.id === id) || null;
+    }
+  }
+  return field;
+};
+
 // populate the detectors with Field and Agg objects loaded from the job capabilities service
 export function getRichDetectors(
   job: Job,
@@ -31,19 +44,7 @@ export function getRichDetectors(
 ) {
   const detectors = advanced ? getDetectorsAdvanced(job, datafeed) : getDetectors(job, datafeed);
 
-  function getFieldById(id: string) {
-    let field = newJobCapsService.getFieldById(id);
-
-    // if no field could be found it may be a pretend field, like mlcategory or a script field
-    if (field === null) {
-      if (id === MLCATEGORY) {
-        field = mlCategory;
-      } else if (scriptFields.length) {
-        field = scriptFields.find(f => f.id === id) || null;
-      }
-    }
-    return field;
-  }
+  const getFieldById = getFieldByIdFactory(scriptFields);
 
   return detectors.map(d => {
     let field = null;
