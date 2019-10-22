@@ -417,6 +417,8 @@ function migrateFiltersAggQueryStringQueries(doc) {
 }
 
 function migrateSubTypeAndParentFieldProperties(doc) {
+  if (!doc.attributes.fields) return doc;
+
   const fieldsString = doc.attributes.fields;
   const fields = JSON.parse(fieldsString);
   const migratedFields = fields.map(field => {
