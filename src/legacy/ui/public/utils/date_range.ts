@@ -17,26 +17,16 @@
  * under the License.
  */
 
-import { buildRangeFilter, RangeFilterParams } from '@kbn/es-query';
-import { CidrMask } from '../../../utils/cidr_mask';
-import { IBucketAggConfig } from '../_bucket_agg_type';
-import { IpRangeKey } from '../ip_range';
+import { DateRangeKey } from '../agg_types/buckets/date_range';
 
-export const createFilterIpRange = (aggConfig: IBucketAggConfig, key: IpRangeKey) => {
-  let range: RangeFilterParams;
-
-  if (key.type === 'mask') {
-    range = new CidrMask(key.mask).getRange();
-  } else {
-    range = {
-      from: key.from ? key.from : -Infinity,
-      to: key.to ? key.to : Infinity,
-    };
-  }
-
-  return buildRangeFilter(
-    aggConfig.params.field,
-    { gte: range.from, lte: range.to },
-    aggConfig.getIndexPattern()
-  );
+export const dateRange = {
+  toString({ from, to }: DateRangeKey, format: (val: any) => string) {
+    if (!from) {
+      return 'Before ' + format(to);
+    } else if (!to) {
+      return 'After ' + format(from);
+    } else {
+      return format(from) + ' to ' + format(to);
+    }
+  },
 };
