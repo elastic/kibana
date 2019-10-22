@@ -102,12 +102,12 @@ export interface IBasePath {
  */
 export interface IAnonymousPaths {
   /**
-   * Determines whether the provided path doesn't require authentication
+   * Determines whether the provided path doesn't require authentication. `path` should include the current base-path.
    */
   isAnonymous(path: string): boolean;
 
   /**
-   * Register `path` as not requiring authentication
+   * Register `path` as not requiring authentication. `path` should not include the current base-path.
    */
   register(path: string): void;
 }
