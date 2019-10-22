@@ -70,7 +70,7 @@ describe('setup_mode', () => {
       catch (err) {
         error = err;
       }
-      expect(error).toEqual('Unable to interact with setup '
+      expect(error.message).toEqual('Unable to interact with setup '
       + 'mode because the angular injector was not previously set. This needs to be '
       + 'set by calling `initSetupModeState`.');
     });
