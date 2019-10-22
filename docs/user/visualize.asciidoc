@@ -42,6 +42,7 @@ To create a visualization:
 locations.
 * *Time Series*
 [horizontal]
+<<lens,Lens>>:: Create and build basic visualizations using time series data fields.
 <<timelion,Timelion>>:: Compute and combine data from multiple time series
 data sets.
 <<TSVB,TSVB>>:: Visualize time series data using pipeline aggregations.
@@ -141,6 +142,8 @@ Aggregation Execution Order, and You].
 include::{kib-repo-dir}/visualize/saving.asciidoc[]
 
 include::{kib-repo-dir}/visualize/visualize_rollup_data.asciidoc[]
+
+include::{kib-repo-dir}/visualize/lens.asciidoc[]
 
 include::{kib-repo-dir}/visualize/xychart.asciidoc[]
 
