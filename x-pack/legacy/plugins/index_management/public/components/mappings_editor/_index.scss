@@ -104,7 +104,7 @@
   .mappings-editor__fields-list .mappings-editor__fields-list-item__content,
   .mappings-editor__create-field-content {
       &::before {
-        border-bottom: 1px solid $euiColorMediumShade;
+        border-bottom: $euiBorderThin;
         content: '';
         left: $euiSize;
         position: absolute;
@@ -112,7 +112,7 @@
         width: $euiSizeS;
       }
       &::after {
-        border-left: 1px solid $euiColorMediumShade;
+        border-left: $euiBorderThin;
         content: '';
         left: $euiSize;
         position: absolute;
