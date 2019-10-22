@@ -83,8 +83,8 @@ export const convertToBuildEsQuery = ({
   queries: Query[];
   filters: Filter[];
 }) => {
+  const core = useKibanaCore();
   try {
-    const core = useKibanaCore();
     return JSON.stringify(
       buildEsQuery(
         indexPattern,
