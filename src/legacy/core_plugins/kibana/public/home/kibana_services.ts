@@ -20,6 +20,7 @@
 // @ts-ignore
 import { toastNotifications, banners } from 'ui/notify';
 import { kfetch } from 'ui/kfetch';
+import chrome from 'ui/chrome';
 
 import { wrapInI18nContext } from 'ui/i18n';
 
@@ -35,7 +36,6 @@ import { start as data } from '../../../data/public/legacy';
 
 let shouldShowTelemetryOptIn: boolean;
 let telemetryOptInProvider: any;
-let featureCatalogueRegistryProvider: any;
 
 export function getServices() {
   return {
@@ -55,7 +55,11 @@ export function getServices() {
     indexPatternService: data.indexPatterns.indexPatterns,
     shouldShowTelemetryOptIn,
     telemetryOptInProvider,
-    featureCatalogueRegistryProvider,
+    getFeatureCatalogueRegistryProvider: async () => {
+      const injector = await chrome.dangerouslyGetActiveInjector();
+      const Private = injector.get<IPrivate>('Private');
+      return Private(FeatureCatalogueRegistryProvider as any);
+    },
 
     trackUiMetric: createUiStatsReporter('Kibana_home'),
     METRIC_TYPE,
@@ -74,5 +78,4 @@ modules.get('kibana').run((Private: IPrivate) => {
   telemetryOptInProvider = Private(TelemetryOptInProvider);
   shouldShowTelemetryOptIn =
     telemetryEnabled && telemetryBanner && !telemetryOptInProvider.getOptIn();
-  featureCatalogueRegistryProvider = Private(FeatureCatalogueRegistryProvider as any);
 });

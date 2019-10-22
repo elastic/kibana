@@ -37,8 +37,11 @@ function getRoute() {
   return {
     template,
     controller($scope) {
-      const { chrome, addBasePath, featureCatalogueRegistryProvider } = getServices();
-      $scope.directories = featureCatalogueRegistryProvider.inTitleOrder;
+      const { chrome, addBasePath, getFeatureCatalogueRegistryProvider } = getServices();
+      getFeatureCatalogueRegistryProvider().then(catalogue => {
+        $scope.directories = catalogue.inTitleOrder;
+        $scope.$digest();
+      });
       $scope.recentlyAccessed = chrome.recentlyAccessed.get().map(item => {
         item.link = addBasePath(item.link);
         return item;
