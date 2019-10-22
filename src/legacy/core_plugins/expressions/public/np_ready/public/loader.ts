@@ -68,7 +68,6 @@ export class ExpressionLoader {
       extraHandlers: params.extraHandlers,
     };
 
-    this.loadingSubject.next();
     this.execute(expression, params);
   }
 
