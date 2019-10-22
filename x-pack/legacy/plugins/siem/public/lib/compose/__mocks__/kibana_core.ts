@@ -3,10 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import chrome from 'ui/chrome';
-import { SiemRootController } from './start_app';
 
-import 'uiExports/embeddableFactories';
+import { createUiNewPlatformMock } from 'ui/new_platform/__mocks__/helpers';
 
-// load the application
-chrome.setRootController('siem', SiemRootController);
+const npStart = createUiNewPlatformMock().npStart;
+
+export function useKibanaCore() {
+  return npStart.core;
+}
