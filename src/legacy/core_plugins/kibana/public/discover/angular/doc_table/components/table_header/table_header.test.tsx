@@ -23,7 +23,7 @@ import { TableHeader } from './table_header';
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { SortOrder } from './helpers';
-import { IndexPattern, FieldType } from 'ui/index_patterns';
+import { IndexPattern, FieldType } from '../../../../kibana_services';
 
 function getMockIndexPattern() {
   return ({

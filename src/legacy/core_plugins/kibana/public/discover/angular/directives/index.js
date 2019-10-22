@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { wrapInI18nContext } from 'ui/i18n';
+
 import '../../../../../../ui/public/render_complete/directive';
 import { DiscoverNoResults } from './no_results';
 import { DiscoverUninitialized } from './uninitialized';
@@ -25,7 +25,8 @@ import { DiscoverUnsupportedIndexPattern } from './unsupported_index_pattern';
 import { DiscoverHistogram } from './histogram';
 import { getServices } from '../../kibana_services';
 
-const app = getServices().uiModules.get('apps/discover', ['react']);
+const { wrapInI18nContext, uiModules } = getServices();
+const app = uiModules.get('apps/discover', ['react']);
 
 app.directive('discoverNoResults', reactDirective =>
   reactDirective(wrapInI18nContext(DiscoverNoResults))

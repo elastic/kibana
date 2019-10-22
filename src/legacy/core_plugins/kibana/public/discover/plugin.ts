@@ -18,7 +18,14 @@
  */
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
+import { IUiActionsStart } from 'src/plugins/ui_actions/public';
 import { registerFeature } from './helpers/register_feature';
+import './kibana_services';
+import { SearchEmbeddableFactory } from './embeddable';
+import {
+  Start as EmbeddableStart,
+  Setup as EmbeddableSetup,
+} from '../../../../../plugins/embeddable/public';
 
 /**
  * These are the interfaces with your public contracts. You should export these
@@ -27,16 +34,29 @@ import { registerFeature } from './helpers/register_feature';
  */
 export type DiscoverSetup = void;
 export type DiscoverStart = void;
+interface DiscoverSetupPlugins {
+  uiActions: IUiActionsStart;
+  embeddable: EmbeddableSetup;
+}
+interface DiscoverStartPlugins {
+  uiActions: IUiActionsStart;
+  embeddable: EmbeddableStart;
+}
 
 export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
+  factory?: SearchEmbeddableFactory;
   constructor(initializerContext: PluginInitializerContext) {}
-  setup(core: CoreSetup): DiscoverSetup {
+  setup(core: CoreSetup, plugins: DiscoverSetupPlugins): DiscoverSetup {
     registerFeature();
     require('./angular');
-    require('./helpers/register_embeddable');
+    this.factory = new SearchEmbeddableFactory(plugins.uiActions.executeTriggerActions);
   }
 
-  start(core: CoreStart): DiscoverStart {}
+  start(core: CoreStart, plugins: DiscoverStartPlugins): DiscoverStart {
+    if (this.factory) {
+      plugins.embeddable.registerEmbeddableFactory(this.factory.type, this.factory);
+    }
+  }
 
   stop() {}
 }

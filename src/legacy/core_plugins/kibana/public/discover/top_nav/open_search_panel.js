@@ -19,11 +19,9 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
 import rison from 'rison-node';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-
 import {
   EuiButton,
   EuiFlexGroup,
@@ -34,6 +32,8 @@ import {
   EuiFlyoutBody,
   EuiTitle,
 } from '@elastic/eui';
+import { getServices } from '../kibana_services';
+const SavedObjectFinder = getServices().SavedObjectFinder;
 
 const SEARCH_OBJECT_TYPE = 'search';
 

@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { StaticIndexPattern } from 'ui/index_patterns';
 import { TimeRange } from 'src/plugins/data/public';
 import { Query } from 'src/legacy/core_plugins/data/public';
 import { Filter } from '@kbn/es-query';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from 'src/plugins/embeddable/public';
+import { StaticIndexPattern } from '../kibana_services';
 import { SavedSearch } from '../types';
 import { SortOrder } from '../angular/doc_table/components/table_header/helpers';
 

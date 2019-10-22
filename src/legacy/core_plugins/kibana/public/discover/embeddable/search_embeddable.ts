@@ -17,8 +17,6 @@
  * under the License.
  */
 import _ from 'lodash';
-import { RequestAdapter } from 'ui/inspector/adapters';
-import { Adapters } from 'ui/inspector/types';
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
 import { Filter, FilterStateStore } from '@kbn/es-query';
@@ -37,8 +35,10 @@ import searchTemplate from './search_template.html';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import { SortOrder } from '../angular/doc_table/components/table_header/helpers';
 import { getSortForSearchSource } from '../angular/doc_table/lib/get_sort_for_search_source';
-import { IndexPattern, getServices, SearchSource } from '../kibana_services';
+import { IndexPattern, getServices, SearchSource, Adapters } from '../kibana_services';
 import { TimeRange } from '../../../../../../plugins/data/public';
+
+const { RequestAdapter } = getServices();
 
 interface SearchScope extends ng.IScope {
   columns?: string[];

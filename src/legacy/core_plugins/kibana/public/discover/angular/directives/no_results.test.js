@@ -41,7 +41,6 @@ describe('DiscoverNoResults', () => {
         const component = renderWithIntl(
           <DiscoverNoResults
             shardFailures={shardFailures}
-            getDocLink={() => ''}
           />
         );
 
@@ -54,7 +53,6 @@ describe('DiscoverNoResults', () => {
         const component = renderWithIntl(
           <DiscoverNoResults
             shardFailures={shardFailures}
-            getDocLink={() => ''}
           />
         );
 
@@ -67,7 +65,6 @@ describe('DiscoverNoResults', () => {
         const component = renderWithIntl(
           <DiscoverNoResults
             timeFieldName="awesome_time_field"
-            getDocLink={() => ''}
           />
         );
 

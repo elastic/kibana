@@ -17,10 +17,7 @@
  * under the License.
  */
 
-import 'ui/directives/css_truncate';
-import 'ui/directives/field_name';
 import './discover_field';
-import 'ui/angular_ui_select';
 import './discover_field_search_directive';
 import './discover_index_pattern_directive';
 import _ from 'lodash';

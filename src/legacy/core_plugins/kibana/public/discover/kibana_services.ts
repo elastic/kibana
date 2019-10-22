@@ -19,11 +19,12 @@
 import 'ui/collapsible_sidebar';
 import 'ui/directives/listen';
 import 'ui/fixed_scroll';
+import 'ui/directives/css_truncate';
+import 'ui/directives/field_name';
 
+import { npStart } from 'ui/new_platform';
 import chromeLegacy from 'ui/chrome'; // just used in embeddables
 import angular from 'angular'; // just used in embeddables and discover controller
-import { npStart } from 'ui/new_platform';
-
 import uiRoutes from 'ui/routes';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
@@ -48,6 +49,15 @@ import { StateProvider } from 'ui/state_management/state';
 import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 
+// SAVED OBJECTS
+
+// @ts-ignore
+import { SavedObjectProvider } from 'ui/saved_objects/saved_object';
+import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
+import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
+import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
+import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
+
 // FILTERS
 
 // @ts-ignore
@@ -56,7 +66,6 @@ import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 import { timefilter } from 'ui/timefilter';
 
 // OTHERS
-
 import { showShareContextMenu, ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
 // @ts-ignore
 import { IndexPattern, IndexPatterns, FieldList } from 'ui/index_patterns';
@@ -70,16 +79,15 @@ import { callAfterBindingsWorkaround } from 'ui/compat';
 import { vislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
 // @ts-ignore
 import { intervalOptions } from 'ui/agg_types/buckets/_interval_options';
-import { getDocLink, ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
+
 // @ts-ignore
 import { tabifyAggResponse } from 'ui/agg_response/tabify';
-import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
-import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { buildVislibDimensions } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
 // @ts-ignore
 import { docTitle } from 'ui/doc_title';
 // @ts-ignore
 import { timezoneProvider } from 'ui/vis/lib/timezone';
+import * as docViewsRegistry from 'ui/registry/doc_views';
 
 const services = {
   angular,
@@ -88,27 +96,27 @@ const services = {
   capabilities: npStart.core.application.capabilities,
   chrome: npStart.core.chrome,
   chromeLegacy,
-  DOC_LINK_VERSION,
+  docLinks: npStart.core.docLinks,
   docTitle,
-  ELASTIC_WEBSITE_URL,
+  docViewsRegistry,
   eui_utils: npStart.plugins.eui_utils,
   FieldList,
   FilterBarQueryFilterProvider,
-  getDocLink,
   getFilterGenerator,
   getRequestInspectorStats,
   getResponseInspectorStats,
   getUnhashableStatesProvider,
   hasSearchStategyForIndexPattern,
-  IndexPattern,
-  IndexPatterns,
   inspector: npStart.plugins.inspector,
   intervalOptions,
   isDefaultTypeIndexPattern,
+  metadata: npStart.core.injectedMetadata.getLegacyMetadata(),
   migrateLegacyQuery,
-  npStart,
   RequestAdapter,
+  SavedObjectRegistryProvider,
+  SavedObjectFinder,
   SavedObjectSaveModal,
+  SavedObjectProvider,
   SearchSource,
   ShareContextMenuExtensionsRegistryProvider,
   showSaveModal,
@@ -129,7 +137,11 @@ const services = {
 export function getServices() {
   return services;
 }
+
 // export types
 export { VisProvider } from 'ui/vis';
-export { StaticIndexPattern, IndexPatterns, IndexPattern } from 'ui/index_patterns';
+export { StaticIndexPattern, IndexPatterns, IndexPattern, FieldType } from 'ui/index_patterns';
 export { SearchSource } from 'ui/courier';
+export { ElasticSearchHit } from 'ui/registry/doc_views_types';
+export { DocViewRenderProps, DocViewRenderFn } from 'ui/registry/doc_views';
+export { Adapters } from 'ui/inspector/types';

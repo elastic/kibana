@@ -46,7 +46,6 @@ const {
   chrome,
   docTitle,
   FilterBarQueryFilterProvider,
-  getDocLink,
   getFilterGenerator,
   getRequestInspectorStats,
   getResponseInspectorStats,
@@ -211,8 +210,6 @@ function discoverController(
       mode: 'absolute',
     });
   };
-
-  $scope.getDocLink = getDocLink;
   $scope.intervalOptions = intervalOptions;
   $scope.showInterval = false;
   $scope.minimumVisibleRows = 50;
