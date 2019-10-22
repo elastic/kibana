@@ -9,6 +9,7 @@ import { EuiComboBox, EuiComboBoxOptionProps } from '@elastic/eui';
 
 import { JobCreatorContext } from '../../../job_creator_context';
 import { Field, EVENT_RATE_FIELD_ID } from '../../../../../../../../common/types/fields';
+import { createScriptFieldOptions } from '../../../../../common/job_creator/util/general';
 
 interface Props {
   fields: Field[];
@@ -18,20 +19,15 @@ interface Props {
 
 export const SummaryCountFieldSelect: FC<Props> = ({ fields, changeHandler, selectedField }) => {
   const { jobCreator } = useContext(JobCreatorContext);
-  const options: EuiComboBoxOptionProps[] = fields
-    .filter(f => f.id !== EVENT_RATE_FIELD_ID)
-    .map(f => ({
-      label: f.name,
-    }))
-    .sort((a, b) => a.label.localeCompare(b.label));
-
-  if (jobCreator.scriptFields.length) {
-    options.push(
-      ...jobCreator.scriptFields.map(f => ({
-        label: f.id,
+  const options: EuiComboBoxOptionProps[] = [
+    ...fields
+      .filter(f => f.id !== EVENT_RATE_FIELD_ID)
+      .map(f => ({
+        label: f.name,
       }))
-    );
-  }
+      .sort((a, b) => a.label.localeCompare(b.label)),
+    ...createScriptFieldOptions(jobCreator.scriptFields),
+  ];
 
   const selection: EuiComboBoxOptionProps[] = [
     {

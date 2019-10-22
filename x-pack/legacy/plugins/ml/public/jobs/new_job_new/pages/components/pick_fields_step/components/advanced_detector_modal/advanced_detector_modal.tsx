@@ -17,6 +17,10 @@ import {
 import { JobCreatorContext } from '../../../job_creator_context';
 import { AdvancedJobCreator, JobCreatorType } from '../../../../../common/job_creator';
 import {
+  createScriptFieldOptions,
+  createMlcategoryFieldOption,
+} from '../../../../../common/job_creator/util/general';
+import {
   Field,
   Aggregation,
   EVENT_RATE_FIELD_ID,
@@ -24,7 +28,6 @@ import {
 } from '../../../../../../../../common/types/fields';
 import { RichDetector } from '../../../../../common/job_creator/advanced_job_creator';
 import { ModalWrapper } from './modal_wrapper';
-import { MLCATEGORY } from '../../../../../../../../common/constants/field_types';
 import { detectorToString } from '../../../../../../../util/string_utils';
 import { createBasicDetector } from '../../../../../common/job_creator/util/default_configs';
 
@@ -99,10 +102,13 @@ export const AdvancedDetectorModal: FC<Props> = ({
 
   const allFieldOptions: EuiComboBoxOptionProps[] = [
     ...fields.filter(f => f.id !== EVENT_RATE_FIELD_ID).map(createFieldOption),
-    ...createScriptFieldOptions(jobCreator),
+    ...createScriptFieldOptions(jobCreator.scriptFields),
   ];
 
-  const splitFieldOptions = [...allFieldOptions, ...createMlcategoryFieldOption(jobCreator)];
+  const splitFieldOptions = [
+    ...allFieldOptions,
+    ...createMlcategoryFieldOption(jobCreator.categorizationFieldName),
+  ];
 
   const eventRateField = fields.find(f => f.id === EVENT_RATE_FIELD_ID);
 
@@ -339,23 +345,6 @@ function isFieldlessAgg(agg: Aggregation) {
   return agg.fields && agg.fields.length === 1 && agg.fields[0].id === EVENT_RATE_FIELD_ID;
 }
 
-function createMlcategoryFieldOption(jobCreator: JobCreatorType): EuiComboBoxOptionProps[] {
-  if (jobCreator.categorizationFieldName === null) {
-    return [];
-  }
-  return [
-    {
-      label: MLCATEGORY,
-    },
-  ];
-}
-
-function createScriptFieldOptions(jobCreator: JobCreatorType): EuiComboBoxOptionProps[] {
-  return jobCreator.scriptFields.map(f => ({
-    label: f.id,
-  }));
-}
-
 function useDetectorPlaceholder(detector: RichDetector) {
   const [descriptionPlaceholder, setDescriptionPlaceholderString] = useState(
     createDefaultDescription(detector)
@@ -380,7 +369,7 @@ function useCurrentFieldOptions(aggregation: Aggregation | null, jobCreator: Job
   const [currentFieldOptions, setCurrentFieldOptions] = useState(
     createFieldOptionList(aggregation)
   );
-  const scriptFieldOptions = createScriptFieldOptions(jobCreator);
+  const scriptFieldOptions = createScriptFieldOptions(jobCreator.scriptFields);
 
   return {
     currentFieldOptions,

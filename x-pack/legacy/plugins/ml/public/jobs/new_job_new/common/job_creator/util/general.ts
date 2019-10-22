@@ -76,6 +76,23 @@ export function getRichDetectors(
   });
 }
 
+export function createScriptFieldOptions(scriptFields: Field[]) {
+  return scriptFields.map(f => ({
+    label: f.id,
+  }));
+}
+
+export function createMlcategoryFieldOption(categorizationFieldName: string | null) {
+  if (categorizationFieldName === null) {
+    return [];
+  }
+  return [
+    {
+      label: MLCATEGORY,
+    },
+  ];
+}
+
 function getDetectorsAdvanced(job: Job, datafeed: Datafeed) {
   return processFieldlessAggs(job.analysis_config.detectors);
 }
