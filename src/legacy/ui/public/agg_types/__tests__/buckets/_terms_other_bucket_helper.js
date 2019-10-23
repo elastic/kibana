@@ -186,8 +186,8 @@ describe('Terms Agg Other bucket helper', () => {
                 filter: [{ exists: { field: 'machine.os.raw' } }],
                 should: [],
                 must_not: [
-                  { match_phrase: { 'machine.os.raw': { query: 'ios' } } },
-                  { match_phrase: { 'machine.os.raw': { query: 'win xp' } } }
+                  { match_phrase: { 'machine.os.raw': 'ios' } },
+                  { match_phrase: { 'machine.os.raw': 'win xp' } }
                 ]
               }
             },
@@ -210,13 +210,13 @@ describe('Terms Agg Other bucket helper', () => {
                 bool: {
                   must: [],
                   filter: [
-                    { match_phrase: { 'geo.src': { query: 'IN' } } },
+                    { match_phrase: { 'geo.src': 'IN' } },
                     { exists: { field: 'machine.os.raw' } }
                   ],
                   should: [],
                   must_not: [
-                    { match_phrase: { 'machine.os.raw': { query: 'ios' } } },
-                    { match_phrase: { 'machine.os.raw': { query: 'win xp' } } }
+                    { match_phrase: { 'machine.os.raw': 'ios' } },
+                    { match_phrase: { 'machine.os.raw': 'win xp' } }
                   ]
                 }
               },
@@ -224,13 +224,13 @@ describe('Terms Agg Other bucket helper', () => {
                 bool: {
                   must: [],
                   filter: [
-                    { match_phrase: { 'geo.src': { query: 'US' } } },
+                    { match_phrase: { 'geo.src': 'US' } },
                     { exists: { field: 'machine.os.raw' } }
                   ],
                   should: [],
                   must_not: [
-                    { match_phrase: { 'machine.os.raw': { query: 'ios' } } },
-                    { match_phrase: { 'machine.os.raw': { query: 'win xp' } } }
+                    { match_phrase: { 'machine.os.raw': 'ios' } },
+                    { match_phrase: { 'machine.os.raw': 'win xp' } }
                   ]
                 }
               },
