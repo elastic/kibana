@@ -24,7 +24,7 @@ import {
   SavedObjectReference,
   SavedObjectsMigrationVersion,
   SavedObjectsBaseOptions,
-  SavedObjectsMutatingOperationOptions,
+  MutatingOperationRefreshSetting,
   SavedObjectsFindOptions,
 } from '../types';
 import { SavedObjectsErrorHelpers } from './lib/errors';
@@ -33,9 +33,7 @@ import { SavedObjectsErrorHelpers } from './lib/errors';
  *
  * @public
  */
-export interface SavedObjectsCreateOptions
-  extends SavedObjectsBaseOptions,
-    SavedObjectsMutatingOperationOptions {
+export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
   /** (not recommended) Specify an id for the document */
   id?: string;
   /** Overwrite existing documents (defaults to false) */
@@ -43,6 +41,7 @@ export interface SavedObjectsCreateOptions
   /** {@inheritDoc SavedObjectsMigrationVersion} */
   migrationVersion?: SavedObjectsMigrationVersion;
   references?: SavedObjectReference[];
+  refresh?: MutatingOperationRefreshSetting;
 }
 
 /**
@@ -99,30 +98,37 @@ export interface SavedObjectsFindResponse<T extends SavedObjectAttributes = any>
  *
  * @public
  */
-export interface SavedObjectsUpdateOptions
-  extends SavedObjectsBaseOptions,
-    SavedObjectsMutatingOperationOptions {
+export interface SavedObjectsUpdateOptions extends SavedObjectsBaseOptions {
   /** An opaque version number which changes on each successful write operation. Can be used for implementing optimistic concurrency control. */
   version?: string;
   /** {@inheritdoc SavedObjectReference} */
   references?: SavedObjectReference[];
+  refresh?: MutatingOperationRefreshSetting;
 }
 
 /**
  *
  * @public
  */
-export interface SavedObjectsBulkUpdateOptions
-  extends SavedObjectsBaseOptions,
-    SavedObjectsMutatingOperationOptions {}
+export interface SavedObjectsBulkUpdateOptions extends SavedObjectsBaseOptions {
+  refresh?: MutatingOperationRefreshSetting;
+}
 
 /**
  *
  * @public
  */
-export interface SavedObjectsDeleteOptions
-  extends SavedObjectsBaseOptions,
-    SavedObjectsMutatingOperationOptions {}
+export interface SavedObjectsDeleteOptions extends SavedObjectsBaseOptions {
+  refresh?: MutatingOperationRefreshSetting;
+}
+
+/**
+ *
+ * @public
+ */
+export interface SavedObjectsDeleteByNamespaceOptions extends SavedObjectsBaseOptions {
+  refresh?: MutatingOperationRefreshSetting;
+}
 
 /**
  *

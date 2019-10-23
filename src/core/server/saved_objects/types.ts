@@ -146,10 +146,7 @@ export interface SavedObjectsBaseOptions {
  *
  * @public
  */
-export interface SavedObjectsMutatingOperationOptions {
-  /** Operation refresh setting */
-  refresh?: boolean | 'wait_for';
-}
+export type MutatingOperationRefreshSetting = boolean | 'wait_for';
 
 /**
  * Saved Objects is Kibana's data persisentence mechanism allowing plugins to
