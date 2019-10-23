@@ -4,26 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiIcon, EuiPopover, IconType } from '@elastic/eui';
+import { EuiPopover } from '@elastic/eui';
 import React, { useState } from 'react';
 
-import { BarAction, BarActionProps } from './styles';
+import { LinkIcon, LinkIconProps } from '../link_icon';
+import { BarAction } from './styles';
 
 interface PopoverProps {
-  children: BarActionProps['children'];
+  children: LinkIconProps['children'];
   popoverContent?: React.ReactNode;
 }
 
-const Popover = React.memo<UtilityBarActionProps>(({ children, popoverContent }) => {
+const Popover = React.memo<UtilityBarActionProps>(({ children, iconOptions, popoverContent }) => {
   const [popoverState, setPopoverState] = useState(false);
 
   return (
     <EuiPopover
       button={
-        <BarAction iconSide="right" onClick={() => setPopoverState(!popoverState)}>
-          <EuiIcon size="s" type="arrowDown" />
+        <LinkIcon iconOptions={iconOptions} onClick={() => setPopoverState(!popoverState)}>
           {children}
-        </BarAction>
+        </LinkIcon>
       }
       isOpen={popoverState}
       closePopover={() => setPopoverState(false)}
@@ -34,23 +34,30 @@ const Popover = React.memo<UtilityBarActionProps>(({ children, popoverContent })
 });
 Popover.displayName = 'Popover';
 
-export interface UtilityBarActionProps extends BarActionProps {
-  iconType?: IconType;
+// type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
+// type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+
+// export interface UtilityBarActionProps extends PartialBy<LinkIconProps, 'iconType'> {
+//   popoverContent?: PopoverProps['popoverContent'];
+// }
+
+export interface UtilityBarActionProps extends LinkIconProps {
   popoverContent?: PopoverProps['popoverContent'];
 }
 
 export const UtilityBarAction = React.memo<UtilityBarActionProps>(
-  ({ children, href, iconSide = 'left', iconType, onClick, popoverContent }) => {
-    if (popoverContent) {
-      return <Popover popoverContent={popoverContent}>{children}</Popover>;
-    } else {
-      return (
-        <BarAction href={href} iconSide={iconSide} onClick={onClick}>
-          {iconType && <EuiIcon size="s" type={iconType} />}
-          <span className="siemUtilityBar__actionLabel">{children}</span>
-        </BarAction>
-      );
-    }
-  }
+  ({ children, href, iconOptions, onClick, popoverContent }) => (
+    <BarAction>
+      {popoverContent ? (
+        <Popover iconOptions={iconOptions} popoverContent={popoverContent}>
+          {children}
+        </Popover>
+      ) : (
+        <LinkIcon href={href} iconOptions={iconOptions} onClick={onClick}>
+          {children}
+        </LinkIcon>
+      )}
+    </BarAction>
+  )
 );
 UtilityBarAction.displayName = 'UtilityBarAction';

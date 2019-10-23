@@ -10,15 +10,15 @@ import React from 'react';
 
 import '../../mock/ui_settings';
 import { TestProviders } from '../../mock';
-import { LinkBack } from './index';
+import { LinkIcon } from './index';
 
 jest.mock('../../lib/settings/use_kibana_ui_setting');
 
-describe('LinkBack', () => {
+describe('LinkIcon', () => {
   test('it renders', () => {
     const wrapper = shallow(
       <TestProviders>
-        <LinkBack href="#" text="Test link" />
+        <LinkIcon href="#">{'Test link'}</LinkIcon>
       </TestProviders>
     );
 

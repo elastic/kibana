@@ -52,29 +52,39 @@ const OpenSignals = React.memo(() => {
           <UtilityBarGroup>
             <UtilityBarText>{'Selected: 20 signals'}</UtilityBarText>
 
-            <UtilityBarAction popoverContent={<p>{'Batch actions context menu here.'}</p>}>
+            <UtilityBarAction
+              iconOptions={{ side: 'right', type: 'arrowDown' }}
+              popoverContent={<p>{'Batch actions context menu here.'}</p>}
+            >
               {'Batch actions'}
             </UtilityBarAction>
 
-            <UtilityBarAction iconType="listAdd">
+            <UtilityBarAction iconOptions={{ type: 'listAdd' }}>
               {'Select all signals on all pages'}
             </UtilityBarAction>
           </UtilityBarGroup>
 
           <UtilityBarGroup>
-            <UtilityBarAction iconType="cross">{'Clear 7 filters'}</UtilityBarAction>
+            <UtilityBarAction iconOptions={{ type: 'cross' }}>{'Clear 7 filters'}</UtilityBarAction>
 
-            <UtilityBarAction iconType="cross">{'Clear aggregation'}</UtilityBarAction>
+            <UtilityBarAction iconOptions={{ type: 'cross' }}>
+              {'Clear aggregation'}
+            </UtilityBarAction>
           </UtilityBarGroup>
         </UtilityBarSection>
 
         <UtilityBarSection>
           <UtilityBarGroup>
-            <UtilityBarAction popoverContent={<p>{'Customize columns context menu here.'}</p>}>
+            <UtilityBarAction
+              iconOptions={{ side: 'right', type: 'arrowDown' }}
+              popoverContent={<p>{'Customize columns context menu here.'}</p>}
+            >
               {'Customize columns'}
             </UtilityBarAction>
 
-            <UtilityBarAction iconType="indexMapping">{'Aggregate data'}</UtilityBarAction>
+            <UtilityBarAction iconOptions={{ type: 'indexMapping' }}>
+              {'Aggregate data'}
+            </UtilityBarAction>
           </UtilityBarGroup>
         </UtilityBarSection>
       </UtilityBar>
@@ -96,11 +106,16 @@ const ClosedSignals = React.memo(() => {
 
         <UtilityBarSection>
           <UtilityBarGroup>
-            <UtilityBarAction popoverContent={<p>{'Customize columns context menu here.'}</p>}>
+            <UtilityBarAction
+              iconOptions={{ side: 'right', type: 'arrowDown' }}
+              popoverContent={<p>{'Customize columns context menu here.'}</p>}
+            >
               {'Customize columns'}
             </UtilityBarAction>
 
-            <UtilityBarAction iconType="indexMapping">{'Aggregate data'}</UtilityBarAction>
+            <UtilityBarAction iconOptions={{ type: 'indexMapping' }}>
+              {'Aggregate data'}
+            </UtilityBarAction>
           </UtilityBarGroup>
         </UtilityBarSection>
       </UtilityBar>

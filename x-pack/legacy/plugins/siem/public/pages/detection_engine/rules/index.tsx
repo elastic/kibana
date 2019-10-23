@@ -28,6 +28,7 @@ import styled, { css } from 'styled-components';
 import { getEmptyTagValue } from '../../../components/empty_value';
 import { HeaderPage } from '../../../components/header_page';
 import { HeaderSection } from '../../../components/header_section';
+import { LinkIcon } from '../../../components/link_icon';
 import {
   UtilityBar,
   UtilityBarAction,
@@ -147,13 +148,16 @@ const AllRules = React.memo(() => {
           <UtilityBarGroup>
             <UtilityBarText>{'Selected: 2 rules'}</UtilityBarText>
 
-            <UtilityBarAction popoverContent={<p>{'Batch actions context menu here.'}</p>}>
+            <UtilityBarAction
+              iconOptions={{ side: 'right', type: 'arrowDown' }}
+              popoverContent={<p>{'Batch actions context menu here.'}</p>}
+            >
               {'Batch actions'}
             </UtilityBarAction>
           </UtilityBarGroup>
 
           <UtilityBarGroup>
-            <UtilityBarAction iconType="cross">{'Clear 7 filters'}</UtilityBarAction>
+            <UtilityBarAction iconOptions={{ type: 'cross' }}>{'Clear 7 filters'}</UtilityBarAction>
           </UtilityBarGroup>
         </UtilityBarSection>
       </UtilityBar>
@@ -273,48 +277,50 @@ const ActivityMonitor = React.memo(() => {
     actions: string;
   }
 
+  interface PageTypes {
+    index: number;
+    size: number;
+  }
+
   interface SortTypes {
     field: string;
     direction: string;
   }
 
-  const [selectedState, setSelectedState] = useState<ColumnTypes[]>([]);
-  const [sortState, setSortState] = useState<SortTypes>({ field: 'ran', direction: 'desc' });
+  const actions = [
+    {
+      render: (item: ColumnTypes) => {
+        if (item.status === 'Running') {
+          return <LinkIcon iconOptions={{ type: 'stop' }}>{'Stop'}</LinkIcon>;
+        } else if (item.status === 'Stopped') {
+          return <LinkIcon iconOptions={{ type: 'play' }}>{'Resume'}</LinkIcon>;
+        } else {
+          return <>{''}</>;
+        }
+      },
+    },
+  ];
 
   // const actions = [
   //   {
-  //     render: (item = {}) => {
-  //       if (item.status === 'Running') {
-  //         return <EuiLink color="danger">{'Stop'}</EuiLink>;
-  //       } else if (item.status === 'Stopped') {
-  //         return <EuiLink color="danger">{'Resume'}</EuiLink>;
-  //       } else {
-  //         return <p>{'Nada'}</p>;
-  //       }
-  //     },
+  //     available: (item: ColumnTypes) => (item.status === 'Running' ? true : false),
+  //     name: 'Stop',
+  //     isPrimary: true,
+  //     description: 'Stop rule from running',
+  //     icon: 'stop',
+  //     type: 'button',
+  //     onClick: () => {},
+  //   },
+  //   {
+  //     available: (item: ColumnTypes) => (item.status === 'Stopped' ? true : false),
+  //     name: 'Resume',
+  //     isPrimary: true,
+  //     description: 'Resume running rule',
+  //     icon: 'play',
+  //     type: 'button',
+  //     onClick: () => {},
   //   },
   // ];
-
-  const actions = [
-    {
-      available: (item: ColumnTypes) => (item.status === 'Running' ? true : false),
-      name: 'Stop',
-      isPrimary: true,
-      description: 'Stop rule from running',
-      icon: 'stop',
-      type: 'button',
-      onClick: () => {},
-    },
-    {
-      available: (item: ColumnTypes) => (item.status === 'Stopped' ? true : false),
-      name: 'Resume',
-      isPrimary: true,
-      description: 'Resume running rule',
-      icon: 'play',
-      type: 'button',
-      onClick: () => {},
-    },
-  ];
 
   const columns = [
     {
@@ -352,7 +358,7 @@ const ActivityMonitor = React.memo(() => {
           getEmptyTagValue()
         ) : (
           <>
-            {value === 'Fail' ? (
+            {/* {value === 'Fail' ? (
               <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
                 <EuiFlexItem grow={false}>
                   <EuiHealth color="danger">{value}</EuiHealth>
@@ -364,6 +370,20 @@ const ActivityMonitor = React.memo(() => {
               </EuiFlexGroup>
             ) : (
               <EuiHealth color="success">{value}</EuiHealth>
+            )} */}
+
+            {value === 'Fail' ? (
+              <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiText color="danger">{value}</EuiText>
+                </EuiFlexItem>
+
+                <EuiFlexItem grow={false}>
+                  <EuiIconTip content="Full fail message here." type="iInCircle" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            ) : (
+              <EuiText color="secondary">{value}</EuiText>
             )}
           </>
         );
@@ -409,7 +429,148 @@ const ActivityMonitor = React.memo(() => {
       status: 'Completed',
       response: 'Success',
     },
+    {
+      id: 5,
+      rule: 'Automated exfiltration',
+      ran: '12/28/2019, 12:00 PM',
+      lookedBackTo: '12/28/2019, 12:00 PM',
+      status: 'Completed',
+      response: 'Success',
+    },
+    {
+      id: 6,
+      rule: 'Automated exfiltration',
+      ran: '12/28/2019, 12:00 PM',
+      lookedBackTo: '12/28/2019, 12:00 PM',
+      status: 'Completed',
+      response: 'Success',
+    },
+    {
+      id: 7,
+      rule: 'Automated exfiltration',
+      ran: '12/28/2019, 12:00 PM',
+      lookedBackTo: '12/28/2019, 12:00 PM',
+      status: 'Completed',
+      response: 'Success',
+    },
+    {
+      id: 8,
+      rule: 'Automated exfiltration',
+      ran: '12/28/2019, 12:00 PM',
+      lookedBackTo: '12/28/2019, 12:00 PM',
+      status: 'Completed',
+      response: 'Success',
+    },
+    {
+      id: 9,
+      rule: 'Automated exfiltration',
+      ran: '12/28/2019, 12:00 PM',
+      lookedBackTo: '12/28/2019, 12:00 PM',
+      status: 'Completed',
+      response: 'Success',
+    },
+    {
+      id: 10,
+      rule: 'Automated exfiltration',
+      ran: '12/28/2019, 12:00 PM',
+      lookedBackTo: '12/28/2019, 12:00 PM',
+      status: 'Completed',
+      response: 'Success',
+    },
+    {
+      id: 11,
+      rule: 'Automated exfiltration',
+      ran: '12/28/2019, 12:00 PM',
+      lookedBackTo: '12/28/2019, 12:00 PM',
+      status: 'Completed',
+      response: 'Success',
+    },
+    {
+      id: 12,
+      rule: 'Automated exfiltration',
+      ran: '12/28/2019, 12:00 PM',
+      lookedBackTo: '12/28/2019, 12:00 PM',
+      status: 'Completed',
+      response: 'Success',
+    },
+    {
+      id: 13,
+      rule: 'Automated exfiltration',
+      ran: '12/28/2019, 12:00 PM',
+      lookedBackTo: '12/28/2019, 12:00 PM',
+      status: 'Completed',
+      response: 'Success',
+    },
+    {
+      id: 14,
+      rule: 'Automated exfiltration',
+      ran: '12/28/2019, 12:00 PM',
+      lookedBackTo: '12/28/2019, 12:00 PM',
+      status: 'Completed',
+      response: 'Success',
+    },
+    {
+      id: 15,
+      rule: 'Automated exfiltration',
+      ran: '12/28/2019, 12:00 PM',
+      lookedBackTo: '12/28/2019, 12:00 PM',
+      status: 'Completed',
+      response: 'Success',
+    },
+    {
+      id: 16,
+      rule: 'Automated exfiltration',
+      ran: '12/28/2019, 12:00 PM',
+      lookedBackTo: '12/28/2019, 12:00 PM',
+      status: 'Completed',
+      response: 'Success',
+    },
+    {
+      id: 17,
+      rule: 'Automated exfiltration',
+      ran: '12/28/2019, 12:00 PM',
+      lookedBackTo: '12/28/2019, 12:00 PM',
+      status: 'Completed',
+      response: 'Success',
+    },
+    {
+      id: 18,
+      rule: 'Automated exfiltration',
+      ran: '12/28/2019, 12:00 PM',
+      lookedBackTo: '12/28/2019, 12:00 PM',
+      status: 'Completed',
+      response: 'Success',
+    },
+    {
+      id: 19,
+      rule: 'Automated exfiltration',
+      ran: '12/28/2019, 12:00 PM',
+      lookedBackTo: '12/28/2019, 12:00 PM',
+      status: 'Completed',
+      response: 'Success',
+    },
+    {
+      id: 20,
+      rule: 'Automated exfiltration',
+      ran: '12/28/2019, 12:00 PM',
+      lookedBackTo: '12/28/2019, 12:00 PM',
+      status: 'Completed',
+      response: 'Success',
+    },
+    {
+      id: 21,
+      rule: 'Automated exfiltration',
+      ran: '12/28/2019, 12:00 PM',
+      lookedBackTo: '12/28/2019, 12:00 PM',
+      status: 'Completed',
+      response: 'Success',
+    },
   ];
+
+  const [itemsTotalState, setItemsTotalState] = useState<number>(sampleTableData.length);
+  const [pageState, setPageState] = useState<PageTypes>({ index: 0, size: 20 });
+  const [selectedState, setSelectedState] = useState<ColumnTypes[]>([]);
+  const [sortState, setSortState] = useState<SortTypes>({ field: 'ran', direction: 'desc' });
 
   return (
     <>
@@ -427,22 +588,33 @@ const ActivityMonitor = React.memo(() => {
             <UtilityBarGroup>
               <UtilityBarText>{'Selected: 2 activities'}</UtilityBarText>
 
-              <UtilityBarAction iconType="stop">{'Stop selected'}</UtilityBarAction>
+              <UtilityBarAction iconOptions={{ type: 'stop' }}>{'Stop selected'}</UtilityBarAction>
             </UtilityBarGroup>
 
             <UtilityBarGroup>
-              <UtilityBarAction iconType="cross">{'Clear 7 filters'}</UtilityBarAction>
+              <UtilityBarAction iconOptions={{ type: 'cross' }}>
+                {'Clear 7 filters'}
+              </UtilityBarAction>
             </UtilityBarGroup>
           </UtilityBarSection>
         </UtilityBar>
 
         <EuiBasicTable
           columns={columns}
-          isSelectable={true}
+          compressed
+          hasActions={false}
+          isSelectable
           itemId="id"
           items={sampleTableData}
-          onChange={({ sort }: { sort: SortTypes }) => {
+          onChange={({ page, sort }: { page: PageTypes; sort: SortTypes }) => {
+            setPageState(page);
             setSortState(sort);
+          }}
+          pagination={{
+            pageIndex: pageState.index,
+            pageSize: pageState.size,
+            totalItemCount: itemsTotalState,
+            pageSizeOptions: [5, 10, 20],
           }}
           selection={{
             selectable: (item: ColumnTypes) => item.status !== 'Completed',

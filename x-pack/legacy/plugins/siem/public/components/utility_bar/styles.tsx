@@ -108,38 +108,12 @@ export const BarText = styled.p.attrs({
 `;
 BarText.displayName = 'BarText';
 
-export interface BarActionProps {
-  children: React.ReactNode;
-  href?: string;
-  iconSide?: 'left' | 'right';
-  onClick?: Function;
-}
-
-export const BarAction = styled(EuiLink).attrs({
+export const BarAction = styled.div.attrs({
   className: 'siemUtilityBar__action',
-})<BarActionProps>`
-  ${({ iconSide, theme }) => css`
-    align-items: center;
-    display: flex;
+})`
+  ${({ theme }) => css`
     font-size: ${theme.eui.euiFontSizeXS};
     line-height: ${theme.eui.euiLineHeight};
-    white-space: nowrap;
-
-    ${iconSide === 'left' &&
-      css`
-        .euiIcon {
-          margin-right: ${theme.eui.euiSizeXS};
-        }
-      `}
-
-    ${iconSide === 'right' &&
-      css`
-        flex-direction: row-reverse;
-
-        .euiIcon {
-          margin-left: ${theme.eui.euiSizeXS};
-        }
-      `}
   `}
 `;
 BarAction.displayName = 'BarAction';

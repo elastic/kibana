@@ -9,7 +9,7 @@ import React from 'react';
 import styled, { css } from 'styled-components';
 
 import { DefaultDraggable } from '../draggables';
-import { LinkBack, LinkBackProps } from '../link_back';
+import { LinkIcon, LinkIconProps } from '../link_icon';
 import { Subtitle, SubtitleProps } from '../subtitle';
 
 interface HeaderProps {
@@ -36,14 +36,25 @@ const FlexItem = styled(EuiFlexItem)`
 `;
 FlexItem.displayName = 'FlexItem';
 
+const LinkBack = styled.div.attrs({
+  className: 'siemHeaderPage__linkBack',
+})`
+  ${({ theme }) => css`
+    font-size: ${theme.eui.euiFontSizeXS};
+    line-height: ${theme.eui.euiLineHeight};
+    margin-bottom: ${theme.eui.euiSizeS};
+  `}
+`;
+LinkBack.displayName = 'LinkBack';
+
 const Badge = styled(EuiBadge)`
   letter-spacing: 0;
 `;
 Badge.displayName = 'Badge';
 
 interface BackOptions {
-  href: LinkBackProps['href'];
-  text: LinkBackProps['text'];
+  href: LinkIconProps['href'];
+  text: LinkIconProps['children'];
 }
 
 interface BadgeOptions {
@@ -83,11 +94,15 @@ export const HeaderPage = React.memo<HeaderPageProps>(
       <EuiFlexGroup alignItems="center">
         <FlexItem>
           {backOptions && (
-            <LinkBack
-              data-test-subj="header-page-back-link"
-              href={backOptions.href}
-              text={backOptions.text}
-            />
+            <LinkBack>
+              <LinkIcon
+                data-test-subj="header-page-back-link"
+                href={backOptions.href}
+                iconOptions={{ type: 'arrowLeft' }}
+              >
+                {backOptions.text}
+              </LinkIcon>
+            </LinkBack>
           )}
 
           <EuiTitle size="l">
