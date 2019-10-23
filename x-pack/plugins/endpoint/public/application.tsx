@@ -27,6 +27,7 @@ import { Nav } from './components/nav';
 import { Home } from './components/home';
 import { Management } from './components/management';
 import { AlertList } from './components/alert_list';
+import { AlertDetails } from './components/alert_details';
 
 const EndpointRouter = ({ basename, context }: { basename: string; context: AppMountContext }) => (
   <Router basename={basename}>
@@ -37,6 +38,10 @@ const EndpointRouter = ({ basename, context }: { basename: string; context: AppM
       <Route path="/" exact component={Home} />
       <Route path="/management" component={Management} />
       <Route path="/alerts" render={props => <AlertList {...props} context={context} />} />
+      <Route
+        path="/alerts/:alertId"
+        render={props => <AlertDetails {...props} context={context} />}
+      />
     </EuiPage>
   </Router>
 );

@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-
+import { Link } from 'react-router-dom';
 import {
   EuiPage,
   EuiButton,
@@ -158,7 +158,7 @@ export const AlertList = ({ context }: { context: AppMountContext }) => {
       name: 'Timestamp',
       sortable: true,
       render: (_: any, item: any) => {
-        return item._source.endgame.timestamp_utc;
+        return <Link to={'/alerts/' + item._id}>{item._source.endgame.timestamp_utc}</Link>;
       },
     },
     {

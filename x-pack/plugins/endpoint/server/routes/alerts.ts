@@ -23,6 +23,18 @@ export function alertsRoutes(router: IRouter) {
     handleAlerts
   );
 
+  router.get(
+    {
+      path: '/alerts/{id}',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+    },
+    handleAlertDetails
+  );
+
   router.post(
     {
       path: '/alerts/archive',
@@ -40,6 +52,42 @@ async function handleArchive(context, request, response) {
   // TODO: archive the alert
   return response.ok({
     body: JSON.stringify(request.query),
+  });
+}
+
+async function handleAlertDetails(context, request, response) {
+  let elasticsearchResponse;
+  try {
+    elasticsearchResponse = await context.core.elasticsearch.dataClient.callAsCurrentUser(
+      'search',
+      {
+        body: {
+          query: {
+            bool: {
+              must: [
+                {
+                  match: {
+                    'event.kind': 'alert',
+                  },
+                },
+                {
+                  match: {
+                    _id: request.params.id,
+                  },
+                },
+              ],
+            },
+          },
+        },
+      }
+    );
+  } catch (error) {
+    return response.internalError();
+  }
+  return response.ok({
+    body: JSON.stringify({
+      elasticsearchResponse,
+    }),
   });
 }
 
