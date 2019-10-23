@@ -12,13 +12,19 @@ export class ESDocField extends AbstractField {
 
   static type = 'ES_DOC';
 
+  async _getField() {
+    const indexPattern = await this._source.getIndexPattern();
+    return indexPattern.fields.find((field) => field.name === this._fieldName);
+  }
+
   async createTooltipProperty(value) {
     const indexPattern = await this._source.getIndexPattern();
     return new ESTooltipProperty(this.getName(), this.getName(), value, indexPattern);
   }
 
   async getType() {
-
+    const type = await this._getField();
+    return type.type;
   }
 
 }

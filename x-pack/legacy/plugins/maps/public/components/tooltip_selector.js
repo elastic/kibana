@@ -58,6 +58,10 @@ export class TooltipSelector extends Component {
 
   async _loadFieldProps() {
 
+    if (!this.props.fields || !this.props.tooltipFields) {
+      return;
+    }
+
     const getProps = async field => {
       return new Promise(async (resolve, reject) => {
         console.log('f', field);

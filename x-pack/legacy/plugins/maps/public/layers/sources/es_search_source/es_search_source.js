@@ -81,6 +81,7 @@ export class ESSearchSource extends AbstractESSource {
 
     return (
       <UpdateSourceEditor
+        source={this}
         indexPatternId={this._descriptor.indexPatternId}
         onChange={onChange}
         filterByMapBounds={this._descriptor.filterByMapBounds}
@@ -520,7 +521,6 @@ export class ESSearchSource extends AbstractESSource {
 
   async getPreIndexedShape(properties) {
     const geoField = await this._getGeoField();
-
     return {
       index: properties._index, // Can not use index pattern title because it may reference many indices
       id: properties._id,

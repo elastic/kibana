@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { getTermsFields, getSourceFields } from '../../../index_pattern_util';
 import { ValidatedRange } from '../../../components/validated_range';
 import { SORT_ORDER } from '../../../../common/constants';
+import { ESDocField } from '../../fields/es_doc_field';
 
 export class UpdateSourceEditor extends Component {
   static propTypes = {
@@ -33,6 +34,7 @@ export class UpdateSourceEditor extends Component {
     useTopHits: PropTypes.bool.isRequired,
     topHitsSplitField: PropTypes.string,
     topHitsSize: PropTypes.number.isRequired,
+    source: PropTypes.object
   };
 
   state = {
@@ -72,10 +74,19 @@ export class UpdateSourceEditor extends Component {
       return;
     }
 
+    //todo move this all to the source
+    const rawTooltipFields = getSourceFields(indexPattern.fields);
+    const tooltipFields = rawTooltipFields.map(field => {
+      return new ESDocField({
+        fieldName: field.name,
+        source: this.props.source
+      });
+    });
+
     this.setState({
-      tooltipFields: getSourceFields(indexPattern.fields),
-      termFields: getTermsFields(indexPattern.fields),
-      sortFields: indexPattern.fields.filter(field => field.sortable),
+      tooltipFields: tooltipFields,
+      termFields: getTermsFields(indexPattern.fields), //todo change term fields to use fields
+      sortFields: indexPattern.fields.filter(field => field.sortable), //todo change sort fields to use fields
     });
   }
   _onTooltipPropertiesChange = propertyNames => {
@@ -164,6 +175,9 @@ export class UpdateSourceEditor extends Component {
   }
 
   render() {
+
+    console.log(this.state);
+
     return (
       <Fragment>
         <EuiFormRow>
