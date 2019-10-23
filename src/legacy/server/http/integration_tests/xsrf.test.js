@@ -73,7 +73,7 @@ describe('xsrf request filter', () => {
         payload: {
           parse: false
         },
-        validate: { payload: null }
+        validate: { payload: true }
       },
       handler: async function () {
         return 'ok';
