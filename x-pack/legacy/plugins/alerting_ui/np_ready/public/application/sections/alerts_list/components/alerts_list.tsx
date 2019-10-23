@@ -120,19 +120,19 @@ export const AlertsList: React.FunctionComponent = () => {
       field: 'alertType',
       name: i18n.translate(
         'xpack.alertingUI.sections.alertsList.alertsListTable.columns.alertType',
-        { defaultMessage: 'Alert Type' }
+        { defaultMessage: 'Type' }
       ),
       sortable: false,
       truncateText: true,
     },
     {
-      field: 'alertTypeParams',
+      field: 'interval',
       name: i18n.translate(
-        'xpack.alertingUI.sections.alertsList.alertsListTable.columns.alertTypeParams',
-        { defaultMessage: 'Params' }
+        'xpack.alertingUI.sections.alertsList.alertsListTable.columns.interval',
+        { defaultMessage: 'Runs every' }
       ),
       sortable: false,
-      truncateText: true,
+      truncateText: false,
     },
     {
       name: i18n.translate('xpack.alertingUI.sections.alertsList.alertsListTable.columns.actions', {
@@ -175,7 +175,7 @@ export const AlertsList: React.FunctionComponent = () => {
                 field: 'type',
                 name: i18n.translate(
                   'xpack.alertingUI.sections.alertsList.filters.alertTypeIdName',
-                  { defaultMessage: 'Alert Type' }
+                  { defaultMessage: 'Type' }
                 ),
                 multiSelect: 'or',
                 options: Object.values(alertTypesIndex || {})
