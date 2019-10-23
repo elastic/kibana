@@ -11,13 +11,7 @@ import React, { Fragment, useState } from 'react';
 import { pure } from 'recompose';
 
 import styled from 'styled-components';
-import {
-  AutonomousSystem,
-  FlowTarget,
-  HostEcsFields,
-  IpOverviewData,
-  Overview,
-} from '../../graphql/types';
+import { AutonomousSystem, FlowTarget, HostEcsFields, IpOverviewData } from '../../graphql/types';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { DefaultDraggable } from '../draggables';
 import { getEmptyTagValue } from '../empty_value';
