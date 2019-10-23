@@ -4,7 +4,7 @@
   "private": true,
   "license": "Apache-2.0",
   "peerDependencies": {
-    "eslint": "5.16.0",
+    "eslint": "6.5.1",
     "babel-eslint": "^10.0.3"
   },
   "dependencies": {

@@ -28,13 +28,15 @@ import { TimelionVisualizationDependencies } from '../plugin';
 // @ts-ignore
 import { AngularVisController } from '../../../../ui/public/vis/vis_types/angular_vis_type';
 
+export const TIMELION_VIS_NAME = 'timelion';
+
 export function getTimelionVisualization(dependencies: TimelionVisualizationDependencies) {
   const timelionRequestHandler = getTimelionRequestHandler(dependencies);
 
   // return the visType object, which kibana will use to display and configure new
   // Vis object of this type.
   return visFactory.createBaseVisualization({
-    name: 'timelion',
+    name: TIMELION_VIS_NAME,
     title: 'Timelion',
     icon: 'visTimelion',
     description: i18n.translate('timelion.timelionDescription', {

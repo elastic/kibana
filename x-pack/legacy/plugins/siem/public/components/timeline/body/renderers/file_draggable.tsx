@@ -31,8 +31,8 @@ export const FileDraggable = React.memo<Props>(
       return null;
     }
 
-    const fileNameIsKnown =
-      !isNillEmptyOrNotFinite(fileName) || !isNillEmptyOrNotFinite(endgameFileName);
+    const filePathIsKnown =
+      !isNillEmptyOrNotFinite(filePath) || !isNillEmptyOrNotFinite(endgameFilePath);
 
     return (
       <>
@@ -58,7 +58,7 @@ export const FileDraggable = React.memo<Props>(
           </TokensFlexItem>
         ) : null}
 
-        {fileNameIsKnown && (
+        {filePathIsKnown && (
           <TokensFlexItem data-test-subj="in" grow={false} component="span">
             {i18n.IN}
           </TokensFlexItem>

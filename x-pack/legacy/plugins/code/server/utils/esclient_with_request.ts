@@ -12,7 +12,7 @@ import { WithRequest } from './with_request';
 export class EsClientWithRequest extends WithRequest implements EsClient {
   public readonly indices = new EsIndexClient(this);
 
-  constructor(readonly context: RequestHandlerContext, readonly req: KibanaRequest) {
+  constructor(public readonly context: RequestHandlerContext, public readonly req: KibanaRequest) {
     super(context, req);
   }
 

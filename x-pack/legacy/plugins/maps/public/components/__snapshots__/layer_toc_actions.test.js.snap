@@ -105,6 +105,15 @@ exports[`LayerTocActions is rendered 1`] = `
               "name": "Clone layer",
               "onClick": [Function],
             },
+            Object {
+              "data-test-subj": "removeLayerButton",
+              "icon": <EuiIcon
+                size="m"
+                type="trash"
+              />,
+              "name": "Remove layer",
+              "onClick": [Function],
+            },
           ],
           "title": "Layer actions",
         },
@@ -217,6 +226,15 @@ exports[`LayerTocActions should disable fit to data when supportsFitToBounds is 
                 type="copy"
               />,
               "name": "Clone layer",
+              "onClick": [Function],
+            },
+            Object {
+              "data-test-subj": "removeLayerButton",
+              "icon": <EuiIcon
+                size="m"
+                type="trash"
+              />,
+              "name": "Remove layer",
               "onClick": [Function],
             },
           ],
