@@ -6,7 +6,14 @@
 
 import React, { useReducer, useEffect, createContext, useContext } from 'react';
 
-import { reducer, MappingsConfiguration, MappingsFields, State, Dispatch } from './reducer';
+import {
+  reducer,
+  addFieldToState,
+  MappingsConfiguration,
+  MappingsFields,
+  State,
+  Dispatch,
+} from './reducer';
 import { Field, FieldsEditor } from './types';
 import { normalize, deNormalize, canUseMappingsEditor } from './lib';
 
@@ -22,7 +29,7 @@ export interface Types {
 
 export interface OnUpdateHandlerArg {
   isValid?: boolean;
-  getData: () => Mappings;
+  getData: (isValid: boolean) => Mappings;
   validate: () => Promise<boolean>;
 }
 
@@ -72,23 +79,49 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
 
   useEffect(() => {
     // console.log('State update', state);
+    // If we are creating a new field, but haven't entered any name
+    // it is valid and we can byPass its form validation (that requires a "name" to be defined)
+    const byPassFieldFormValidation =
+      state.documentFields.status === 'creatingField' &&
+      state.fieldForm !== undefined &&
+      state.fieldForm.data.raw.name.trim() === '';
+
     onUpdate({
-      getData: () => ({
-        ...state.configuration.data.format(),
-        properties:
-          // Pull the mappings properties from the current editor
-          state.documentFields.editor === 'json'
-            ? state.fieldsJsonEditor.format()
-            : deNormalize(state.fields),
-      }),
-      validate: async () => {
-        if (state.fieldForm === undefined) {
-          return (await state.configuration.validate()) && state.fieldsJsonEditor.isValid;
+      getData: (isValid: boolean) => {
+        let nextState = state;
+
+        if (
+          state.documentFields.status === 'creatingField' &&
+          isValid &&
+          !byPassFieldFormValidation
+        ) {
+          // If the form field is valid and we are creating a new field that has some data
+          // we automatically add the field to our state.
+          const fieldFormData = state.fieldForm!.data.format() as Field;
+          if (Object.keys(fieldFormData).length !== 0) {
+            nextState = addFieldToState(fieldFormData, state);
+            dispatch({ type: 'field.add', value: fieldFormData });
+          }
         }
 
-        return Promise.all([state.configuration.validate(), state.fieldForm.validate()]).then(
-          ([isConfigurationValid, isFormFieldValid]) =>
-            isConfigurationValid && isFormFieldValid && state.fieldsJsonEditor.isValid
+        return {
+          ...nextState.configuration.data.format(),
+          properties:
+            // Pull the mappings properties from the current editor
+            nextState.documentFields.editor === 'json'
+              ? nextState.fieldsJsonEditor.format()
+              : deNormalize(nextState.fields),
+        };
+      },
+      validate: async () => {
+        const promisesToValidate = [state.configuration.validate()];
+
+        if (state.fieldForm !== undefined && !byPassFieldFormValidation) {
+          promisesToValidate.push(state.fieldForm.validate());
+        }
+
+        return Promise.all(promisesToValidate).then(
+          validationArray => validationArray.every(Boolean) && state.fieldsJsonEditor.isValid
         );
       },
       isValid: state.isValid,
@@ -107,10 +140,10 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
   );
 });
 
-export const useState = () => {
+export const useMappingsState = () => {
   const ctx = useContext(StateContext);
   if (ctx === undefined) {
-    throw new Error('useState must be used within a <MappingsState>');
+    throw new Error('useMappingsState must be used within a <MappingsState>');
   }
   return ctx;
 };

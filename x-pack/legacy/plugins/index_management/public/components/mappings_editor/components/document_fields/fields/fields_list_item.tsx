@@ -3,121 +3,213 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useMemo } from 'react';
-import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import React from 'react';
+import classNames from 'classnames';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  EuiBadge,
+  EuiNotificationBadge,
+  EuiButtonIcon,
+  EuiIcon,
+} from '@elastic/eui';
 
-import { useState, useDispatch } from '../../../mappings_state';
+import { NormalizedField } from '../../../types';
+import {
+  TYPE_DEFINITION,
+  CHILD_FIELD_INDENT_SIZE,
+  LEFT_PADDING_SIZE_FIELD_ITEM_WRAPPER,
+} from '../../../constants';
 import { FieldsList } from './fields_list';
 import { CreateField } from './create_field';
 import { DeleteFieldProvider } from './delete_field_provider';
-import { NormalizedField } from '../../../types';
-import { MAX_DEPTH_DEFAULT_EDITOR } from '../../../constants';
-import { validateUniqueName } from '../../../lib';
 
 interface Props {
   field: NormalizedField;
-  treeDepth?: number;
+  isCreateFieldFormVisible: boolean;
+  areActionButtonsVisible: boolean;
+  isHighlighted: boolean;
+  isDimmed: boolean;
+  isLastItem: boolean;
+  childFieldsArray: NormalizedField[];
+  maxNestedDepth: number;
+  addField(): void;
+  editField(): void;
+  toggleExpand(): void;
+  treeDepth: number;
 }
 
-const inlineStyle = {
-  borderBottom: '1px solid #ddd',
-  display: 'flex',
-  flexDirection: 'column' as 'column',
-};
-
-export const FieldsListItem = ({ field, treeDepth = 0 }: Props) => {
-  const dispatch = useDispatch();
+export const FieldsListItem = React.memo(function FieldListItemComponent({
+  field,
+  isHighlighted,
+  isDimmed,
+  isCreateFieldFormVisible,
+  areActionButtonsVisible,
+  isLastItem,
+  childFieldsArray,
+  maxNestedDepth,
+  addField,
+  editField,
+  toggleExpand,
+  treeDepth,
+}: Props) {
   const {
-    documentFields: { status, fieldToAddFieldTo },
-    fields: { byId, rootLevelFields },
-  } = useState();
-  const getField = (propId: string) => byId[propId];
-  const { id, source, childFields, hasChildFields, canHaveChildFields } = field;
-  const isAddFieldBtnDisabled = field.nestedDepth === MAX_DEPTH_DEFAULT_EDITOR - 1;
+    source,
+    isMultiField,
+    childFields,
+    canHaveChildFields,
+    hasChildFields,
+    canHaveMultiFields,
+    hasMultiFields,
+    isExpanded,
+  } = field;
+  const isAddFieldBtnDisabled = false; // For now, we never disable the Add Child button.
+  // const isAddFieldBtnDisabled = field.nestedDepth === MAX_DEPTH_DEFAULT_EDITOR - 1;
 
-  const uniqueNameValidator = useMemo(() => {
-    return validateUniqueName({ rootLevelFields, byId }, undefined, id);
-  }, [byId, rootLevelFields]);
+  // When there aren't any "child" fields (the maxNestedDepth === 0), there is no toggle icon on the left of any field.
+  // For that reason, we need to compensate and substract some indent to left align on the page.
+  const substractIndentAmount = maxNestedDepth === 0 ? CHILD_FIELD_INDENT_SIZE * 0.5 : 0;
 
-  const addField = () => {
-    dispatch({
-      type: 'documentField.createField',
-      value: id,
-    });
-  };
+  const indent = treeDepth * CHILD_FIELD_INDENT_SIZE - substractIndentAmount;
 
-  const editField = () => {
-    dispatch({
-      type: 'documentField.editField',
-      value: id,
-    });
-  };
+  const indentCreateField =
+    (treeDepth + 1) * CHILD_FIELD_INDENT_SIZE +
+    LEFT_PADDING_SIZE_FIELD_ITEM_WRAPPER -
+    substractIndentAmount;
+
+  const hasDottedLine = isMultiField
+    ? isLastItem
+      ? false
+      : true
+    : canHaveMultiFields && isExpanded;
 
   const renderCreateField = () => {
-    if (status !== 'creatingField') {
-      return null;
-    }
-
-    // Root level (0) has does not have the "fieldToAddFieldTo" set
-    if (fieldToAddFieldTo !== id) {
+    if (!isCreateFieldFormVisible) {
       return null;
     }
 
     return (
-      <div style={{ paddingLeft: '20px' }}>
-        <CreateField uniqueNameValidator={uniqueNameValidator} />
-      </div>
+      <CreateField
+        isMultiField={canHaveMultiFields}
+        paddingLeft={indentCreateField}
+        maxNestedDepth={maxNestedDepth}
+      />
     );
   };
 
   const renderActionButtons = () => {
-    if (status !== 'idle') {
+    if (!areActionButtonsVisible) {
       return null;
     }
 
     return (
-      <>
-        <EuiButton onClick={editField}>Edit</EuiButton>
+      <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd">
         {canHaveChildFields && (
-          <>
-            <EuiButton onClick={addField} disabled={isAddFieldBtnDisabled}>
-              Add field
-            </EuiButton>
-          </>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty onClick={addField} disabled={isAddFieldBtnDisabled}>
+              Add child
+            </EuiButtonEmpty>
+          </EuiFlexItem>
         )}
-        <DeleteFieldProvider>
-          {deleteField => <EuiButton onClick={() => deleteField(field)}>Remove</EuiButton>}
-        </DeleteFieldProvider>
-      </>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty onClick={editField}>Edit</EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <DeleteFieldProvider>
+            {deleteField => (
+              <EuiButtonEmpty onClick={() => deleteField(field)}>Remove</EuiButtonEmpty>
+            )}
+          </DeleteFieldProvider>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   };
 
   return (
-    <>
-      <div style={inlineStyle}>
-        <div style={{ display: 'flex', alignItems: 'center', height: '82px' }}>
-          {source.name} | {source.type} {renderActionButtons()}
+    <li
+      className={classNames('mappings-editor__fields-list-item', {
+        'mappings-editor__fields-list-item--dotted-line': hasDottedLine,
+      })}
+    >
+      <div
+        style={{ paddingLeft: `${indent}px` }}
+        className={classNames('mappings-editor__fields-list-item__field', {
+          'mappings-editor__fields-list-item__field--selected': isHighlighted,
+          'mappings-editor__fields-list-item__field--dim': isDimmed,
+        })}
+      >
+        <div
+          className={classNames('mappings-editor__fields-list-item__wrapper', {
+            'mappings-editor__fields-list-item__wrapper--indent':
+              treeDepth === 0 && maxNestedDepth === 0,
+          })}
+        >
+          <EuiFlexGroup
+            gutterSize="s"
+            alignItems="center"
+            className={classNames('mappings-editor__fields-list-item__content', {
+              'mappings-editor__fields-list-item__content--toggle':
+                hasChildFields || hasMultiFields,
+              'mappings-editor__fields-list-item__content--multi-field': isMultiField,
+              'mappings-editor__fields-list-item__content--indent':
+                !hasChildFields && !hasMultiFields && maxNestedDepth > treeDepth,
+            })}
+          >
+            {(hasChildFields || hasMultiFields) && (
+              <EuiFlexItem grow={false} className="mappings-editor__fields-list-item__toggle">
+                <EuiButtonIcon
+                  color="text"
+                  onClick={toggleExpand}
+                  iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+                  aria-label={`Expand field ${source.name}`}
+                />
+              </EuiFlexItem>
+            )}
+            {isMultiField && (
+              <EuiFlexItem grow={false} className="mappings-editor__fields-list-item__icon">
+                <EuiIcon color="subdued" type="link" />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false} className="mappings-editor__fields-list-item__name">
+              {source.name}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="hollow">{TYPE_DEFINITION[source.type].label}</EuiBadge>
+            </EuiFlexItem>
+            {canHaveMultiFields && (
+              <>
+                {hasMultiFields && (
+                  <EuiFlexItem grow={false}>
+                    <EuiNotificationBadge onClick={toggleExpand}>
+                      {childFields!.length}
+                    </EuiNotificationBadge>
+                  </EuiFlexItem>
+                )}
+                {areActionButtonsVisible && (
+                  <EuiFlexItem
+                    grow={false}
+                    className="mappings-editor__fields-list-item__multi-field-button"
+                  >
+                    <EuiButtonEmpty onClick={addField} iconType="plusInCircleFilled">
+                      Add multi-field
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                )}
+              </>
+            )}
+            <EuiFlexItem className="mappings-editor__fields-list-item__actions">
+              {renderActionButtons()}
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </div>
-        {status === 'idle' && canHaveChildFields && isAddFieldBtnDisabled && (
-          <p style={{ fontSize: '12px', margin: '-10px 0 6px', color: '#777' }}>
-            You have reached the maximum depth for the mappings editor. Switch to the{' '}
-            <EuiButtonEmpty
-              onClick={() => dispatch({ type: 'documentField.changeEditor', value: 'json' })}
-            >
-              JSON editor
-            </EuiButtonEmpty>
-            to add more fields.
-          </p>
-        )}
       </div>
 
-      {renderCreateField()}
-
-      {hasChildFields && (
-        <div style={{ paddingLeft: '20px' }}>
-          <FieldsList fields={childFields!.map(getField)} treeDepth={treeDepth + 1} />
-        </div>
+      {Boolean(childFieldsArray.length) && isExpanded && (
+        <FieldsList fields={childFieldsArray} treeDepth={treeDepth + 1} />
       )}
-    </>
+
+      {renderCreateField()}
+    </li>
   );
-};
+});

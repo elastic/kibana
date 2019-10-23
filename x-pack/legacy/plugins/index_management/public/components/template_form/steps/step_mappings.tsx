@@ -29,7 +29,7 @@ export const StepMappings: React.FunctionComponent<StepProps> = ({
       onStepValidityChange(isValid);
       setDataGetter(async () => {
         const isMappingsValid = isValid === undefined ? await validate() : isValid;
-        const mappings = getData();
+        const mappings = getData(isMappingsValid);
         return Promise.resolve({ isValid: isMappingsValid, data: { mappings } });
       });
     },

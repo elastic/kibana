@@ -5,6 +5,7 @@
  */
 import { FIELD_TYPES, fieldValidators, fieldFormatters, FieldConfig } from '../shared_imports';
 import { ParameterName, Parameter } from '../types';
+import { INDEX_DEFAULT } from '../constants';
 
 const { toInt } = fieldFormatters;
 const { emptyField, containsCharsField } = fieldValidators;
@@ -153,21 +154,21 @@ export const PARAMETERS_DEFINITION: {
   analyzer: {
     fieldConfig: {
       label: 'Analyzer',
-      defaultValue: 'index_default',
+      defaultValue: INDEX_DEFAULT,
       type: FIELD_TYPES.SELECT,
     },
   },
   search_analyzer: {
     fieldConfig: {
       label: 'Search analyzer',
-      defaultValue: 'index_default',
+      defaultValue: INDEX_DEFAULT,
       type: FIELD_TYPES.SELECT,
     },
   },
   search_quote_analyzer: {
     fieldConfig: {
       label: 'Search quote analyzer',
-      defaultValue: 'index_default',
+      defaultValue: INDEX_DEFAULT,
       type: FIELD_TYPES.SELECT,
     },
   },
@@ -336,7 +337,7 @@ export const PARAMETERS_DEFINITION: {
   ignore_above: {
     fieldConfig: {
       label: 'Ignore above',
-      defaultValue: 2147483647,
+      defaultValue: 256,
       type: FIELD_TYPES.NUMBER,
       formatters: [toInt],
       validations: [

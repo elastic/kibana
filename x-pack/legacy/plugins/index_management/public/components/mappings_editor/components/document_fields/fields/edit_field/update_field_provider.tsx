@@ -5,11 +5,12 @@
  */
 
 import React, { useState, Fragment } from 'react';
-import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
+import { EuiConfirmModal, EuiOverlayMask, EuiBadge } from '@elastic/eui';
 
-import { useState as useMappingsState, useDispatch } from '../../../../mappings_state';
-import { shouldDeleteChildFieldsAfterTypeChange } from '../../../../lib';
+import { useMappingsState, useDispatch } from '../../../../mappings_state';
+import { shouldDeleteChildFieldsAfterTypeChange, buildFieldTreeFromIds } from '../../../../lib';
 import { NormalizedField, DataType } from '../../../../types';
+import { FieldsTree } from '../../../fields_tree';
 
 export type UpdateFieldFunc = (field: NormalizedField) => void;
 
@@ -43,10 +44,10 @@ export const UpdateFieldProvider = ({ children }: Props) => {
       oldType: DataType,
       newType: DataType
     ): { requiresConfirmation: boolean } => {
-      const { hasChildFields } = field;
+      const { hasChildFields, hasMultiFields } = field;
 
-      if (!hasChildFields) {
-        // No child fields will be deleted, no confirmation needed.
+      if (!hasChildFields && !hasMultiFields) {
+        // No child or multi-fields will be deleted, no confirmation needed.
         return { requiresConfirmation: false };
       }
 
@@ -81,7 +82,22 @@ export const UpdateFieldProvider = ({ children }: Props) => {
   const renderModal = () => {
     const field = state.field!;
     const title = `Confirm change '${field.source.name}' type to "${field.source.type}".`;
-    const childFields = field.childFields!.map(childId => byId[childId]);
+
+    const fieldsTree = buildFieldTreeFromIds(
+      field.childFields!,
+      byId,
+      (fieldItem: NormalizedField) => (
+        <>
+          {fieldItem.source.name}
+          {fieldItem.isMultiField && (
+            <>
+              {' '}
+              <EuiBadge color="hollow">multi-field</EuiBadge>
+            </>
+          )}
+        </>
+      )
+    );
 
     return (
       <EuiOverlayMask>
@@ -94,17 +110,8 @@ export const UpdateFieldProvider = ({ children }: Props) => {
           confirmButtonText="Confirm type change"
         >
           <Fragment>
-            <p>
-              This will delete the following child fields and the possible child fields under them.
-            </p>
-            <ul>
-              {childFields
-                .map(_field => _field.source.name)
-                .sort()
-                .map(name => (
-                  <li key={name}>{name}</li>
-                ))}
-            </ul>
+            <p>This will delete the following fields.</p>
+            <FieldsTree fields={fieldsTree} />
           </Fragment>
         </EuiConfirmModal>
       </EuiOverlayMask>

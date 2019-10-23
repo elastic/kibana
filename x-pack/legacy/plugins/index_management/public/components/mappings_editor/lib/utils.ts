@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import uuid from 'uuid';
 
 import {
   DataType,
@@ -15,16 +16,13 @@ import {
   SubType,
   ChildFieldName,
 } from '../types';
-import { DATA_TYPE_DEFINITION, MAX_DEPTH_DEFAULT_EDITOR } from '../constants';
+
+import { MAIN_DATA_TYPE_DEFINITION, MAX_DEPTH_DEFAULT_EDITOR } from '../constants';
 import { State } from '../reducer';
+import { TreeItem } from '../components/tree';
 
 export const getUniqueId = () => {
-  return (
-    '_' +
-    (Number(String(Math.random()).slice(2)) + Date.now() + Math.round(performance.now())).toString(
-      36
-    )
-  );
+  return uuid.v4();
 };
 
 const getChildFieldsName = (dataType: DataType): ChildFieldName | undefined => {
@@ -36,18 +34,30 @@ const getChildFieldsName = (dataType: DataType): ChildFieldName | undefined => {
   return undefined;
 };
 
-export const getFieldMeta = (field: Field): FieldMeta => {
+export const getFieldMeta = (field: Field, isMultiField?: boolean): FieldMeta => {
   const childFieldsName = getChildFieldsName(field.type);
-  const canHaveChildFields = Boolean(childFieldsName);
-  const hasChildFields =
-    childFieldsName !== undefined &&
-    Boolean(field[childFieldsName]) &&
-    Object.keys(field[childFieldsName]!).length > 0;
+
+  const canHaveChildFields = isMultiField ? false : childFieldsName === 'properties';
+  const hasChildFields = isMultiField
+    ? false
+    : canHaveChildFields &&
+      Boolean(field[childFieldsName!]) &&
+      Object.keys(field[childFieldsName!]!).length > 0;
+
+  const canHaveMultiFields = isMultiField ? false : childFieldsName === 'fields';
+  const hasMultiFields = isMultiField
+    ? false
+    : canHaveMultiFields &&
+      Boolean(field[childFieldsName!]) &&
+      Object.keys(field[childFieldsName!]!).length > 0;
 
   return {
-    hasChildFields,
     childFieldsName,
     canHaveChildFields,
+    hasChildFields,
+    canHaveMultiFields,
+    hasMultiFields,
+    isExpanded: false,
   };
 };
 
@@ -62,7 +72,7 @@ export const getFieldMeta = (field: Field): FieldMeta => {
  *   short: 'numeric',
  * }
  */
-const subTypesMapToType = Object.entries(DATA_TYPE_DEFINITION).reduce(
+const subTypesMapToType = Object.entries(MAIN_DATA_TYPE_DEFINITION).reduce(
   (acc, [type, definition]) => {
     if ({}.hasOwnProperty.call(definition, 'subTypes')) {
       definition.subTypes!.types.forEach(subType => {
@@ -74,7 +84,7 @@ const subTypesMapToType = Object.entries(DATA_TYPE_DEFINITION).reduce(
   {} as Record<SubType, string>
 );
 
-export const getTypeFromSubType = (subType: SubType): MainType =>
+export const getMainTypeFromSubType = (subType: SubType): MainType =>
   subTypesMapToType[subType] as MainType;
 
 /**
@@ -128,22 +138,35 @@ export const normalize = (fieldsToNormalize: Fields): NormalizedFields => {
 
   const normalizeFields = (
     props: Fields,
-    to: NormalizedFields['byId'] = {},
+    to: NormalizedFields['byId'],
+    paths: string[],
     idsArray: string[],
     nestedDepth: number,
+    isMultiField: boolean = false,
     parentId?: string
   ): Record<string, any> =>
     Object.entries(props).reduce((acc, [propName, value]) => {
       const id = getUniqueId();
       idsArray.push(id);
       const field = { name: propName, ...value } as Field;
-      const meta = getFieldMeta(field);
+      const meta = getFieldMeta(field, isMultiField);
       const { childFieldsName } = meta;
 
       if (childFieldsName && field[childFieldsName]) {
+        const nextDepth =
+          meta.canHaveChildFields || meta.canHaveMultiFields ? nestedDepth + 1 : nestedDepth;
         meta.childFields = [];
-        maxNestedDepth = Math.max(maxNestedDepth, nestedDepth + 1);
-        normalizeFields(field[meta.childFieldsName!]!, to, meta.childFields, nestedDepth + 1, id);
+        maxNestedDepth = Math.max(maxNestedDepth, nextDepth);
+
+        normalizeFields(
+          field[meta.childFieldsName!]!,
+          to,
+          [...paths, propName],
+          meta.childFields,
+          nextDepth,
+          meta.canHaveMultiFields,
+          id
+        );
       }
 
       const { properties, fields, ...rest } = field;
@@ -152,6 +175,8 @@ export const normalize = (fieldsToNormalize: Fields): NormalizedFields => {
         id,
         parentId,
         nestedDepth,
+        isMultiField,
+        path: paths.length ? `${paths.join('.')}.${propName}` : propName,
         source: rest,
         ...meta,
       };
@@ -162,7 +187,7 @@ export const normalize = (fieldsToNormalize: Fields): NormalizedFields => {
     }, to);
 
   const rootLevelFields: string[] = [];
-  const byId = normalizeFields(fieldsToNormalize, {}, rootLevelFields, 0);
+  const byId = normalizeFields(fieldsToNormalize, {}, [], rootLevelFields, 0);
 
   return {
     byId,
@@ -190,6 +215,43 @@ export const deNormalize = (normalized: NormalizedFields): Fields => {
 };
 
 /**
+ * If we change the "name" of a field, we need to update its `path` and the
+ * one of **all** of its child properties or multi-fields.
+ *
+ * @param field The field who's name has changed
+ * @param byId The map of all the document fields
+ */
+export const updateFieldsPathAfterFieldNameChange = (
+  field: NormalizedField,
+  byId: NormalizedFields['byId']
+): { path: string; byId: NormalizedFields['byId'] } => {
+  const updatedById = { ...byId };
+  const paths = field.parentId ? byId[field.parentId].path.split('.') : [];
+
+  const updateFieldPath = (_field: NormalizedField, _paths: string[]): void => {
+    const { name } = _field.source;
+    const path = _paths.length === 0 ? name : `${_paths.join('.')}.${name}`;
+
+    updatedById[_field.id] = {
+      ..._field,
+      path,
+    };
+
+    if (_field.hasChildFields || _field.hasMultiFields) {
+      _field
+        .childFields!.map(fieldId => byId[fieldId])
+        .forEach(childField => {
+          updateFieldPath(childField, [..._paths, name]);
+        });
+    }
+  };
+
+  updateFieldPath(field, paths);
+
+  return { path: updatedById[field.id].path, byId: updatedById };
+};
+
+/**
  * Retrieve recursively all the children fields of a field
  *
  * @param field The field to return the children from
@@ -200,7 +262,7 @@ export const getAllChildFields = (
   byId: NormalizedFields['byId']
 ): NormalizedField[] => {
   const getChildFields = (_field: NormalizedField, to: NormalizedField[] = []) => {
-    if (_field.hasChildFields) {
+    if (_field.hasChildFields || _field.hasMultiFields) {
       _field
         .childFields!.map(fieldId => byId[fieldId])
         .forEach(childField => {
@@ -223,6 +285,24 @@ export const getMaxNestedDepth = (byId: NormalizedFields['byId']): number =>
   Object.values(byId).reduce((maxDepth, field) => {
     return Math.max(maxDepth, field.nestedDepth);
   }, 0);
+
+/**
+ * Create a nested array of fields and its possible children
+ * to render a Tree view of them.
+ */
+export const buildFieldTreeFromIds = (
+  fieldsIds: string[],
+  byId: NormalizedFields['byId'],
+  render: (field: NormalizedField) => JSX.Element | string
+): TreeItem[] =>
+  fieldsIds.map(id => {
+    const field = byId[id];
+    const children = field.childFields
+      ? buildFieldTreeFromIds(field.childFields, byId, render)
+      : undefined;
+
+    return { label: render(field), children };
+  });
 
 /**
  * When changing the type of a field, in most cases we want to delete all its child fields.
@@ -250,7 +330,7 @@ export const canUseMappingsEditor = (maxNestedDepth: number) =>
 
 const stateWithValidity: Array<keyof State> = ['configuration', 'fieldsJsonEditor', 'fieldForm'];
 
-export const determineIfValid = (state: State): boolean | undefined =>
+export const isStateValid = (state: State): boolean | undefined =>
   Object.entries(state)
     .filter(([key]) => stateWithValidity.includes(key as keyof State))
     .reduce(

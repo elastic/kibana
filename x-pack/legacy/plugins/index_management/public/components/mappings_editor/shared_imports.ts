@@ -9,11 +9,14 @@ export {
   UseField,
   getUseField,
   Form,
+  FormDataProvider,
   FormSchema,
+  FieldHook,
   FIELD_TYPES,
   VALIDATION_TYPES,
   OnFormUpdateArg,
   ValidationFunc,
+  SerializerFunc,
   FieldConfig,
 } from '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 

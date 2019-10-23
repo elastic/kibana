@@ -4,60 +4,62 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('../constants', () => ({ DATA_TYPE_DEFINITION: {} }));
+jest.mock('../constants', () => ({ MAIN_DATA_TYPE_DEFINITION: {} }));
 
-import { determineIfValid } from '.';
+import { isStateValid } from './utils';
 
-describe('Mappings Editor form validity', () => {
-  let components: any;
-  it('handles base case', () => {
-    components = {
-      fieldsJsonEditor: { isValid: undefined },
-      configuration: { isValid: undefined },
-      fieldForm: undefined,
-    };
-    expect(determineIfValid(components)).toBe(undefined);
-  });
+describe('utils', () => {
+  describe('isStateValid()', () => {
+    let components: any;
+    it('handles base case', () => {
+      components = {
+        fieldsJsonEditor: { isValid: undefined },
+        configuration: { isValid: undefined },
+        fieldForm: undefined,
+      };
+      expect(isStateValid(components)).toBe(undefined);
+    });
 
-  it('handles combinations of true, false and undefined', () => {
-    components = {
-      fieldsJsonEditor: { isValid: false },
-      configuration: { isValid: true },
-      fieldForm: undefined,
-    };
+    it('handles combinations of true, false and undefined', () => {
+      components = {
+        fieldsJsonEditor: { isValid: false },
+        configuration: { isValid: true },
+        fieldForm: undefined,
+      };
 
-    expect(determineIfValid(components)).toBe(false);
+      expect(isStateValid(components)).toBe(false);
 
-    components = {
-      fieldsJsonEditor: { isValid: false },
-      configuration: { isValid: undefined },
-      fieldForm: undefined,
-    };
+      components = {
+        fieldsJsonEditor: { isValid: false },
+        configuration: { isValid: undefined },
+        fieldForm: undefined,
+      };
 
-    expect(determineIfValid(components)).toBe(undefined);
+      expect(isStateValid(components)).toBe(undefined);
 
-    components = {
-      fieldsJsonEditor: { isValid: true },
-      configuration: { isValid: undefined },
-      fieldForm: undefined,
-    };
+      components = {
+        fieldsJsonEditor: { isValid: true },
+        configuration: { isValid: undefined },
+        fieldForm: undefined,
+      };
 
-    expect(determineIfValid(components)).toBe(undefined);
+      expect(isStateValid(components)).toBe(undefined);
 
-    components = {
-      fieldsJsonEditor: { isValid: true },
-      configuration: { isValid: false },
-      fieldForm: undefined,
-    };
+      components = {
+        fieldsJsonEditor: { isValid: true },
+        configuration: { isValid: false },
+        fieldForm: undefined,
+      };
 
-    expect(determineIfValid(components)).toBe(false);
+      expect(isStateValid(components)).toBe(false);
 
-    components = {
-      fieldsJsonEditor: { isValid: false },
-      configuration: { isValid: true },
-      fieldForm: { isValid: true },
-    };
+      components = {
+        fieldsJsonEditor: { isValid: false },
+        configuration: { isValid: true },
+        fieldForm: { isValid: true },
+      };
 
-    expect(determineIfValid(components)).toBe(false);
+      expect(isStateValid(components)).toBe(false);
+    });
   });
 });

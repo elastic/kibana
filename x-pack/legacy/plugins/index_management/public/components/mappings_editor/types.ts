@@ -7,6 +7,7 @@ import { FieldConfig } from './shared_imports';
 
 export interface DataTypeDefinition {
   label: string;
+  value: DataType;
   subTypes?: { label: string; types: SubType[] };
   configuration?: ParameterName[];
   basicParameters?: ParameterName[] | ParameterName[][];
@@ -96,15 +97,19 @@ export interface Fields {
 export interface Field {
   name: string;
   type: DataType;
-  properties?: { [key: string]: Field };
-  fields?: { [key: string]: Field };
+  subType?: SubType;
+  properties?: { [key: string]: Omit<Field, 'name'> };
+  fields?: { [key: string]: Omit<Field, 'name'> };
 }
 
 export interface FieldMeta {
   childFieldsName: ChildFieldName | undefined;
   canHaveChildFields: boolean;
+  canHaveMultiFields: boolean;
   hasChildFields: boolean;
+  hasMultiFields: boolean;
   childFields?: string[];
+  isExpanded: boolean;
 }
 
 export interface NormalizedFields {
@@ -119,7 +124,9 @@ export interface NormalizedField extends FieldMeta {
   id: string;
   parentId?: string;
   nestedDepth: number;
+  path: string;
   source: Omit<Field, 'properties' | 'fields'>;
+  isMultiField: boolean;
 }
 
 export type ChildFieldName = 'properties' | 'fields';

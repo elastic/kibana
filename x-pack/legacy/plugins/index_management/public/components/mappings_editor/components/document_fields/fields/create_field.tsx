@@ -4,20 +4,38 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useEffect } from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import classNames from 'classnames';
+
+import {
+  EuiButtonEmpty,
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiOutsideClickDetector,
+  EuiIcon,
+} from '@elastic/eui';
 
 import {
   useForm,
   Form,
-  TextField,
+  FormDataProvider,
   SelectField,
   UseField,
   FieldConfig,
-  ValidationFunc,
 } from '../../../shared_imports';
-import { FIELD_TYPES_OPTIONS, PARAMETERS_DEFINITION } from '../../../constants';
+
+import {
+  TYPE_DEFINITION,
+  FIELD_TYPES_OPTIONS,
+  MULTIFIELD_TYPES_OPTIONS,
+  PARAMETERS_DEFINITION,
+  EUI_SIZE,
+} from '../../../constants';
+
 import { useDispatch } from '../../../mappings_state';
-import { Field, ParameterName } from '../../../types';
+import { fieldSerializer } from '../../../lib';
+import { Field, ParameterName, MainType } from '../../../types';
+import { NameParameter } from '../field_parameters';
 
 const formWrapper = (props: any) => <form {...props} />;
 
@@ -25,11 +43,19 @@ const getFieldConfig = (param: ParameterName): FieldConfig =>
   PARAMETERS_DEFINITION[param].fieldConfig || {};
 
 interface Props {
-  uniqueNameValidator: ValidationFunc;
+  isMultiField?: boolean;
+  paddingLeft?: number;
+  isCancelable?: boolean;
+  maxNestedDepth?: number;
 }
 
-export const CreateField = React.memo(({ uniqueNameValidator }: Props) => {
-  const { form } = useForm<Field>();
+export const CreateField = React.memo(function CreateFieldComponent({
+  isMultiField,
+  paddingLeft,
+  isCancelable,
+  maxNestedDepth,
+}: Props) {
+  const { form } = useForm<Field>({ serializer: fieldSerializer });
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -40,7 +66,11 @@ export const CreateField = React.memo(({ uniqueNameValidator }: Props) => {
     return subscription.unsubscribe;
   }, [form]);
 
-  const submitForm = async (e?: React.FormEvent) => {
+  const cancel = () => {
+    dispatch({ type: 'documentField.changeStatus', value: 'idle' });
+  };
+
+  const submitForm = async (e?: React.FormEvent, exitAfter: boolean = false) => {
     if (e) {
       e.preventDefault();
     }
@@ -50,30 +80,42 @@ export const CreateField = React.memo(({ uniqueNameValidator }: Props) => {
     if (isValid) {
       form.reset();
       dispatch({ type: 'field.add', value: data });
+
+      if (exitAfter) {
+        cancel();
+      }
     }
   };
 
-  const cancel = () => {
-    dispatch({ type: 'documentField.changeStatus', value: 'idle' });
+  const onClickOutside = () => {
+    const name = form.getFields().name.value as string;
+
+    if (name.trim() === '') {
+      if (isCancelable !== false) {
+        cancel();
+      }
+    } else {
+      submitForm(undefined, true);
+    }
   };
 
-  const { validations, ...rest } = getFieldConfig('name');
-  const nameConfig: FieldConfig = {
-    ...rest,
-    validations: [
-      ...validations!,
-      {
-        validator: uniqueNameValidator,
-      },
-    ],
-  };
+  const renderFormFields = (type: MainType) => {
+    const typeDefinition = TYPE_DEFINITION[type];
+    const subTypeOptions =
+      typeDefinition && typeDefinition.subTypes
+        ? typeDefinition.subTypes.types
+            .map(subType => TYPE_DEFINITION[subType])
+            .map(subType => ({ value: subType.value, text: subType.label }))
+        : undefined;
 
-  return (
-    <Form form={form} style={{ padding: '20px 0' }} FormWrapper={formWrapper} onSubmit={submitForm}>
-      <EuiFlexGroup>
+    return (
+      <EuiFlexGroup gutterSize="s">
+        {/* Field name */}
         <EuiFlexItem>
-          <UseField path="name" config={nameConfig} component={TextField} />
+          <NameParameter />
         </EuiFlexItem>
+
+        {/* Field type */}
         <EuiFlexItem>
           <UseField
             path="type"
@@ -81,20 +123,85 @@ export const CreateField = React.memo(({ uniqueNameValidator }: Props) => {
             component={SelectField}
             componentProps={{
               euiFieldProps: {
-                options: FIELD_TYPES_OPTIONS,
+                options: isMultiField ? MULTIFIELD_TYPES_OPTIONS : FIELD_TYPES_OPTIONS,
               },
             }}
           />
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiButton onClick={submitForm} type="submit">
-            Add
-          </EuiButton>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiButton onClick={cancel}>Cancel</EuiButton>
-        </EuiFlexItem>
+
+        {/* Field sub type (if any) */}
+        {subTypeOptions && (
+          <EuiFlexItem grow={false}>
+            <UseField
+              path="subType"
+              defaultValue={typeDefinition.subTypes!.types[0]}
+              config={{
+                ...getFieldConfig('type'),
+                label: typeDefinition.subTypes!.label,
+              }}
+              component={SelectField}
+              componentProps={{
+                euiFieldProps: {
+                  options: subTypeOptions,
+                  hasNoInitialSelection: false,
+                },
+              }}
+            />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
-    </Form>
+    );
+  };
+
+  const renderFormActions = () => (
+    <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+      {isCancelable !== false && (
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty onClick={cancel}>Cancel</EuiButtonEmpty>
+        </EuiFlexItem>
+      )}
+      <EuiFlexItem grow={false}>
+        <EuiButton color="primary" fill onClick={submitForm} type="submit">
+          Add
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
+  return (
+    <EuiOutsideClickDetector onOutsideClick={onClickOutside}>
+      <Form form={form} FormWrapper={formWrapper} onSubmit={submitForm}>
+        <div
+          className={classNames('mappings-editor__create-field-wrapper', {
+            'mappings-editor__create-field-wrapper--toggle':
+              Boolean(maxNestedDepth) && maxNestedDepth! > 0,
+            'mappings-editor__create-field-wrapper--multi-field': isMultiField,
+          })}
+          style={{
+            paddingLeft: `${
+              isMultiField
+                ? paddingLeft! - EUI_SIZE * 1.5 // As there are no "L" bullet list we need to substract some indent
+                : paddingLeft
+            }px`,
+          }}
+        >
+          <div className="mappings-editor__create-field-content">
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              {isMultiField && (
+                <EuiFlexItem grow={false} className="mappings-editor__create-field-content__icon">
+                  <EuiIcon type="link" />
+                </EuiFlexItem>
+              )}
+              <FormDataProvider pathsToWatch="type">
+                {({ type }) => {
+                  return <EuiFlexItem grow={false}>{renderFormFields(type)}</EuiFlexItem>;
+                }}
+              </FormDataProvider>
+              <EuiFlexItem>{renderFormActions()}</EuiFlexItem>
+            </EuiFlexGroup>
+          </div>
+        </div>
+      </Form>
+    </EuiOutsideClickDetector>
   );
 });

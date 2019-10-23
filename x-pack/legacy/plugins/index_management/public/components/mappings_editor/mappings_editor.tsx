@@ -5,6 +5,7 @@
  */
 
 import React, { useMemo } from 'react';
+import { pick } from 'lodash';
 import { EuiSpacer } from '@elastic/eui';
 
 import {
@@ -13,7 +14,6 @@ import {
   DocumentFieldsHeaders,
   DocumentFields,
   DocumentFieldsJsonEditor,
-  EditorToggleControls,
 } from './components';
 import { MappingsState, Props as MappingsStateProps, Types } from './mappings_state';
 
@@ -25,19 +25,12 @@ interface Props {
 export const MappingsEditor = React.memo(({ onUpdate, defaultValue }: Props) => {
   const configurationDefaultValue = useMemo(
     () =>
-      defaultValue === undefined
-        ? ({} as Types['MappingsConfiguration'])
-        : Object.entries(defaultValue)
-            .filter(([key]) => CONFIGURATION_FIELDS.includes(key))
-            .reduce(
-              (acc, [key, value]) => ({
-                ...acc,
-                [key]: value,
-              }),
-              {} as Types['MappingsConfiguration']
-            ),
+      (defaultValue === undefined
+        ? {}
+        : pick(defaultValue, CONFIGURATION_FIELDS)) as Types['MappingsConfiguration'],
     [defaultValue]
   );
+
   const fieldsDefaultValue = defaultValue === undefined ? {} : defaultValue.properties;
 
   return (
@@ -51,13 +44,15 @@ export const MappingsEditor = React.memo(({ onUpdate, defaultValue }: Props) => 
         };
 
         return (
-          <>
+          <div className="mappings-editor">
             <ConfigurationForm defaultValue={configurationDefaultValue} />
+            <EuiSpacer />
             <DocumentFieldsHeaders />
+            <EuiSpacer />
             {renderEditor()}
-            <EuiSpacer size={'l'} />
-            <EditorToggleControls editor={editor} />
-          </>
+            {/* <EuiSpacer size={'l'} />
+            <EditorToggleControls editor={editor} /> */}
+          </div>
         );
       }}
     </MappingsState>

@@ -118,7 +118,7 @@ export function useForm<T extends object = FormData>(
 
     if (!areAllFieldsValidated) {
       // If *not* all the fiels have been validated, the validity of the form is unknown, thus still "undefined"
-      return;
+      return undefined;
     }
 
     const isFormValid = fieldsArray.every(isFieldValid);
