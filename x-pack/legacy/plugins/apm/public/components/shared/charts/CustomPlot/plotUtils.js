@@ -12,6 +12,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import { unit } from '../../../../style/variables';
+import { getTimezoneOffsetInMs } from './getTimezoneOffsetInMs';
 
 const XY_HEIGHT = unit * 16;
 const XY_MARGIN = {
@@ -64,15 +65,30 @@ export function getPlotValues(
     yMin = d3.min(flattenedCoordinates, d => d.y);
   }
 
+  const [xMinZone, xMaxZone] = [xMin, xMax].map(x => {
+    return x - getTimezoneOffsetInMs(x);
+  });
+
   const xScale = getXScale(xMin, xMax, width);
   const yScale = getYScale(yMin, yMax);
 
   const yMaxNice = yScale.domain()[1];
   const yTickValues = [0, yMaxNice / 2, yMaxNice];
 
+  const xTickValues = d3.time.scale
+    .utc()
+    .domain([xMinZone, xMaxZone])
+    .range([0, width])
+    .ticks()
+    .map(x => {
+      const time = x.getTime();
+      return new Date(time + getTimezoneOffsetInMs(time));
+    });
+
   return {
     x: xScale,
     y: yScale,
+    xTickValues,
     yTickValues,
     XY_MARGIN,
     XY_HEIGHT: height || XY_HEIGHT,
@@ -90,7 +106,7 @@ export function SharedPlot({ plotValues, ...props }) {
         dontCheckIfEmpty
         height={height}
         margin={margin}
-        xType="time"
+        xType="time-utc"
         width={width}
         xDomain={plotValues.x.domain()}
         yDomain={plotValues.y.domain()}

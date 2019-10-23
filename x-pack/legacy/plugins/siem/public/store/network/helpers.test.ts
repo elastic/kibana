@@ -22,7 +22,7 @@ export const mockNetworkState: NetworkModel = {
       [NetworkTableType.topCountriesSource]: {
         activePage: 7,
         limit: DEFAULT_TABLE_LIMIT,
-        topCountriesSort: {
+        sort: {
           field: NetworkTopTablesFields.bytes_out,
           direction: Direction.desc,
         },
@@ -30,7 +30,7 @@ export const mockNetworkState: NetworkModel = {
       [NetworkTableType.topCountriesDestination]: {
         activePage: 3,
         limit: DEFAULT_TABLE_LIMIT,
-        topCountriesSort: {
+        sort: {
           field: NetworkTopTablesFields.bytes_out,
           direction: Direction.desc,
         },
@@ -38,7 +38,7 @@ export const mockNetworkState: NetworkModel = {
       [NetworkTableType.topNFlowSource]: {
         activePage: 7,
         limit: DEFAULT_TABLE_LIMIT,
-        topNFlowSort: {
+        sort: {
           field: NetworkTopTablesFields.bytes_out,
           direction: Direction.desc,
         },
@@ -46,7 +46,7 @@ export const mockNetworkState: NetworkModel = {
       [NetworkTableType.topNFlowDestination]: {
         activePage: 3,
         limit: DEFAULT_TABLE_LIMIT,
-        topNFlowSort: {
+        sort: {
           field: NetworkTopTablesFields.bytes_out,
           direction: Direction.desc,
         },
@@ -54,7 +54,7 @@ export const mockNetworkState: NetworkModel = {
       [NetworkTableType.dns]: {
         activePage: 5,
         limit: DEFAULT_TABLE_LIMIT,
-        dnsSortField: {
+        sort: {
           field: NetworkDnsFields.uniqueDomains,
           direction: Direction.desc,
         },
@@ -63,7 +63,7 @@ export const mockNetworkState: NetworkModel = {
       [NetworkTableType.tls]: {
         activePage: 2,
         limit: DEFAULT_TABLE_LIMIT,
-        tlsSortField: {
+        sort: {
           field: TlsFields._id,
           direction: Direction.desc,
         },
@@ -75,7 +75,7 @@ export const mockNetworkState: NetworkModel = {
       [IpDetailsTableType.topCountriesSource]: {
         activePage: 7,
         limit: DEFAULT_TABLE_LIMIT,
-        topCountriesSort: {
+        sort: {
           field: NetworkTopTablesFields.bytes_out,
           direction: Direction.desc,
         },
@@ -83,7 +83,7 @@ export const mockNetworkState: NetworkModel = {
       [IpDetailsTableType.topCountriesDestination]: {
         activePage: 3,
         limit: DEFAULT_TABLE_LIMIT,
-        topCountriesSort: {
+        sort: {
           field: NetworkTopTablesFields.bytes_out,
           direction: Direction.desc,
         },
@@ -91,7 +91,7 @@ export const mockNetworkState: NetworkModel = {
       [IpDetailsTableType.topNFlowSource]: {
         activePage: 7,
         limit: DEFAULT_TABLE_LIMIT,
-        topNFlowSort: {
+        sort: {
           field: NetworkTopTablesFields.bytes_out,
           direction: Direction.desc,
         },
@@ -99,7 +99,7 @@ export const mockNetworkState: NetworkModel = {
       [IpDetailsTableType.topNFlowDestination]: {
         activePage: 3,
         limit: DEFAULT_TABLE_LIMIT,
-        topNFlowSort: {
+        sort: {
           field: NetworkTopTablesFields.bytes_out,
           direction: Direction.desc,
         },
@@ -107,7 +107,7 @@ export const mockNetworkState: NetworkModel = {
       [IpDetailsTableType.tls]: {
         activePage: 2,
         limit: DEFAULT_TABLE_LIMIT,
-        tlsSortField: {
+        sort: {
           field: TlsFields._id,
           direction: Direction.desc,
         },
@@ -115,7 +115,7 @@ export const mockNetworkState: NetworkModel = {
       [IpDetailsTableType.users]: {
         activePage: 6,
         limit: DEFAULT_TABLE_LIMIT,
-        usersSortField: {
+        sort: {
           field: UsersFields.name,
           direction: Direction.asc,
         },
@@ -132,23 +132,23 @@ describe('Network redux store', () => {
         [NetworkTableType.topNFlowSource]: {
           activePage: 0,
           limit: 10,
-          topNFlowSort: { field: 'bytes_out', direction: 'desc' },
+          sort: { field: 'bytes_out', direction: 'desc' },
         },
         [NetworkTableType.topNFlowDestination]: {
           activePage: 0,
           limit: 10,
-          topNFlowSort: { field: 'bytes_out', direction: 'desc' },
+          sort: { field: 'bytes_out', direction: 'desc' },
         },
         [NetworkTableType.dns]: {
           activePage: 0,
           limit: 10,
-          dnsSortField: { field: 'uniqueDomains', direction: 'desc' },
+          sort: { field: 'uniqueDomains', direction: 'desc' },
           isPtrIncluded: false,
         },
         [NetworkTableType.tls]: {
           activePage: 0,
           limit: 10,
-          tlsSortField: {
+          sort: {
             direction: 'desc',
             field: '_id',
           },
@@ -156,7 +156,7 @@ describe('Network redux store', () => {
         [NetworkTableType.topCountriesDestination]: {
           activePage: 0,
           limit: 10,
-          topCountriesSort: {
+          sort: {
             direction: 'desc',
             field: 'bytes_out',
           },
@@ -164,7 +164,7 @@ describe('Network redux store', () => {
         [NetworkTableType.topCountriesSource]: {
           activePage: 0,
           limit: 10,
-          topCountriesSort: {
+          sort: {
             direction: 'desc',
             field: 'bytes_out',
           },
@@ -177,17 +177,17 @@ describe('Network redux store', () => {
         [IpDetailsTableType.topNFlowSource]: {
           activePage: 0,
           limit: 10,
-          topNFlowSort: { field: 'bytes_out', direction: 'desc' },
+          sort: { field: 'bytes_out', direction: 'desc' },
         },
         [IpDetailsTableType.topNFlowDestination]: {
           activePage: 0,
           limit: 10,
-          topNFlowSort: { field: 'bytes_out', direction: 'desc' },
+          sort: { field: 'bytes_out', direction: 'desc' },
         },
         [IpDetailsTableType.topCountriesDestination]: {
           activePage: 0,
           limit: 10,
-          topCountriesSort: {
+          sort: {
             direction: 'desc',
             field: 'bytes_out',
           },
@@ -195,7 +195,7 @@ describe('Network redux store', () => {
         [IpDetailsTableType.topCountriesSource]: {
           activePage: 0,
           limit: 10,
-          topCountriesSort: {
+          sort: {
             direction: 'desc',
             field: 'bytes_out',
           },
@@ -203,12 +203,12 @@ describe('Network redux store', () => {
         [IpDetailsTableType.tls]: {
           activePage: 0,
           limit: 10,
-          tlsSortField: { field: '_id', direction: 'desc' },
+          sort: { field: '_id', direction: 'desc' },
         },
         [IpDetailsTableType.users]: {
           activePage: 0,
           limit: 10,
-          usersSortField: { field: 'name', direction: 'asc' },
+          sort: { field: 'name', direction: 'asc' },
         },
       });
     });

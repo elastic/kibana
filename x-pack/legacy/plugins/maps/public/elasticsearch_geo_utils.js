@@ -75,17 +75,17 @@ export function hitsToGeoJson(hits, flattenHit, geoFieldName, geoFieldType) {
     // don't include geometry field value in properties
     delete properties[geoFieldName];
 
-    // _id is unique to Elasticsearch documents.
-    // Move _id to FEATURE_ID_PROPERTY_NAME to standardize featureId keys across all sources
-    properties[FEATURE_ID_PROPERTY_NAME] = properties._id;
-    delete properties._id;
-
     //create new geojson Feature for every individual geojson geometry.
     for (let j = 0; j < tmpGeometriesAccumulator.length; j++) {
       features.push({
         type: 'Feature',
         geometry: tmpGeometriesAccumulator[j],
-        properties: properties
+        properties: {
+          ...properties,
+          // _id is not unique across Kibana index pattern. Multiple ES indices could have _id collisions
+          // Need to prefix with _index to guarantee uniqueness
+          [FEATURE_ID_PROPERTY_NAME]: `${properties._index}:${properties._id}:${j}`
+        }
       });
     }
   }
