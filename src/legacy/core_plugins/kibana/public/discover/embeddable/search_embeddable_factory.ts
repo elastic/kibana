@@ -19,6 +19,7 @@
 import { IPrivate } from 'ui/private';
 import { i18n } from '@kbn/i18n';
 import { TExecuteTriggerActions } from 'src/plugins/ui_actions/public';
+import { npStart, npSetup } from 'ui/new_platform';
 import '../angular/doc_table';
 import { getServices } from '../kibana_services';
 import {
@@ -107,3 +108,6 @@ export class SearchEmbeddableFactory extends EmbeddableFactory<
     return new ErrorEmbeddable('Saved searches can only be created from a saved object', input);
   }
 }
+
+const factory = new SearchEmbeddableFactory(npStart.plugins.uiActions.executeTriggerActions);
+npSetup.plugins.embeddable.registerEmbeddableFactory(factory.type, factory);

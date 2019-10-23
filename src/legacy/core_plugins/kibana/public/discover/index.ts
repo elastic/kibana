@@ -17,6 +17,7 @@
  * under the License.
  */
 import { PluginInitializer, PluginInitializerContext } from 'kibana/public';
+import { npSetup, npStart } from 'ui/new_platform';
 import { DiscoverPlugin, DiscoverSetup, DiscoverStart } from './plugin';
 
 // Core will be looking for this when loading our plugin in the new platform
@@ -25,3 +26,7 @@ export const plugin: PluginInitializer<DiscoverSetup, DiscoverStart> = (
 ) => {
   return new DiscoverPlugin(initializerContext);
 };
+
+const pluginInstance = plugin({} as PluginInitializerContext);
+export const setup = pluginInstance.setup(npSetup.core, npSetup.plugins);
+export const start = pluginInstance.start(npStart.core, npStart.plugins);

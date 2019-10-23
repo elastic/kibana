@@ -49,13 +49,13 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
   setup(core: CoreSetup, plugins: DiscoverSetupPlugins): DiscoverSetup {
     registerFeature();
     require('./angular');
-    this.factory = new SearchEmbeddableFactory(plugins.uiActions.executeTriggerActions);
+    // this.factory = new SearchEmbeddableFactory(plugins.uiActions.executeTriggerActions);
   }
 
   start(core: CoreStart, plugins: DiscoverStartPlugins): DiscoverStart {
-    if (this.factory) {
-      plugins.embeddable.registerEmbeddableFactory(this.factory.type, this.factory);
-    }
+    // if (this.factory) {
+    //  plugins.embeddable.registerEmbeddableFactory(this.factory.type, this.factory);
+    // }
   }
 
   stop() {}
