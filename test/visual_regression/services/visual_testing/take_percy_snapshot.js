@@ -20,7 +20,7 @@
 import { readFileSync } from 'fs';
 import { agentJsFilename } from '@percy/agent/dist/utils/sdk-utils';
 
-export function takePercySnapshot(show, hide, style) {
+export function takePercySnapshot(show, hide) {
   if (!window.PercyAgent) {
     return false;
   }
@@ -79,10 +79,6 @@ export function takePercySnapshot(show, hide, style) {
     image.style.cssText = window.getComputedStyle(canvas).cssText;
     canvas.parentElement.replaceChild(image, canvas);
     replacements.push({ canvas, image });
-  }
-
-  if (style.selector != null && style.attribute != null && style.value != null) {
-    document.querySelector(style.selector).style[style.attribute] = style.value;
   }
 
   try {

@@ -17,15 +17,11 @@
 * under the License.
 */
 
-import { DEFAULT_OPTIONS, STYLE } from '../../services/visual_testing/visual_testing';
+import { DEFAULT_OPTIONS} from '../../services/visual_testing/visual_testing';
 
 
 // Width must be the same as visual_testing or canvas image widths will get skewed
 const [SCREEN_WIDTH] = DEFAULT_OPTIONS.widths || [];
-
-STYLE.selector = 'section.dscTable';
-STYLE.attribute = 'paddingBottom';
-STYLE.value = '20px';
 
 export default function ({ getService, loadTestFile }) {
   const esArchiver = getService('esArchiver');
