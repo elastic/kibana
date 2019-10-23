@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraMetricLayoutSectionType } from '../../../pages/metrics/layouts/types';
-// import { ChartSection } from './chart_section';
 import { GaugesSection } from './gauges_section';
 import { ChartSection } from './chart_section';
 
 export const sections = {
-  [InfraMetricLayoutSectionType.chart]: ChartSection,
-  [InfraMetricLayoutSectionType.gauges]: GaugesSection,
+  chart: ChartSection,
+  gauges: GaugesSection,
 };

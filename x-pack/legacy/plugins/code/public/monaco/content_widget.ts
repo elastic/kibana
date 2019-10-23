@@ -31,7 +31,7 @@ export abstract class ContentWidget extends Disposable implements Editor.IConten
   private stoleFocus: boolean = false;
   private visible: boolean;
 
-  protected constructor(readonly id: string, readonly editor: Editor.ICodeEditor) {
+  protected constructor(public readonly id: string, public readonly editor: Editor.ICodeEditor) {
     super();
     this.containerDomNode = document.createElement('div');
     this.domNode = document.createElement('div');

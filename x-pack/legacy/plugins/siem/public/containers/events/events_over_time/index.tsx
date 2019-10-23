@@ -50,12 +50,13 @@ class EventsOverTimeComponentQuery extends QueryTemplate<
   public render() {
     const {
       children,
+      endDate,
       filterQuery,
       id = ID,
       isInspected,
       sourceId,
       startDate,
-      endDate,
+      timezone,
     } = this.props;
     return (
       <Query<GetEventsOverTimeQuery.Query, GetEventsOverTimeQuery.Variables>
@@ -69,6 +70,7 @@ class EventsOverTimeComponentQuery extends QueryTemplate<
             interval: '12h',
             from: startDate!,
             to: endDate!,
+            timezone,
           },
           defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
           inspect: isInspected,
