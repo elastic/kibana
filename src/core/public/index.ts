@@ -114,6 +114,7 @@ export {
   IBasePath,
   IHttpInterceptController,
   IHttpFetchError,
+  InterceptedHttpResponse,
 } from './http';
 
 export {

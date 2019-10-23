@@ -440,15 +440,9 @@ export interface HttpErrorRequest {
 }
 
 // @public (undocumented)
-export interface HttpErrorResponse {
-    // (undocumented)
-    body?: HttpBody;
+export interface HttpErrorResponse extends HttpResponse {
     // (undocumented)
     error: Error | IHttpFetchError;
-    // (undocumented)
-    request?: Request;
-    // (undocumented)
-    response?: Response;
 }
 
 // @public
@@ -477,8 +471,8 @@ export interface HttpHeadersInit {
 export interface HttpInterceptor {
     request?(request: Request, controller: IHttpInterceptController): Promise<Request> | Request | void;
     requestError?(httpErrorRequest: HttpErrorRequest, controller: IHttpInterceptController): Promise<Request> | Request | void;
-    response?(httpResponse: HttpResponse, controller: IHttpInterceptController): Promise<HttpResponse> | HttpResponse | void;
-    responseError?(httpErrorResponse: HttpErrorResponse, controller: IHttpInterceptController): Promise<HttpResponse> | HttpResponse | void;
+    response?(httpResponse: HttpResponse, controller: IHttpInterceptController): Promise<InterceptedHttpResponse> | InterceptedHttpResponse | void;
+    responseError?(httpErrorResponse: HttpErrorResponse, controller: IHttpInterceptController): Promise<InterceptedHttpResponse> | InterceptedHttpResponse | void;
 }
 
 // @public
@@ -500,13 +494,9 @@ export interface HttpRequestInit {
 }
 
 // @public (undocumented)
-export interface HttpResponse {
+export interface HttpResponse extends InterceptedHttpResponse {
     // (undocumented)
-    body?: HttpBody;
-    // (undocumented)
-    request?: Request;
-    // (undocumented)
-    response?: Response;
+    request: Readonly<Request>;
 }
 
 // @public (undocumented)
@@ -575,6 +565,14 @@ export interface IHttpFetchError extends Error {
 export interface IHttpInterceptController {
     halt(): void;
     halted: boolean;
+}
+
+// @public (undocumented)
+export interface InterceptedHttpResponse {
+    // (undocumented)
+    body?: HttpBody;
+    // (undocumented)
+    response?: Response;
 }
 
 // @public

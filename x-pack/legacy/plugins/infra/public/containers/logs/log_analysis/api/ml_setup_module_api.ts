@@ -92,22 +92,34 @@ const setupMlModuleRequestPayloadRT = rt.intersection([
   setupMlModuleRequestParamsRT,
 ]);
 
+const setupErrorResponseRT = rt.type({
+  msg: rt.string,
+});
+
+const datafeedSetupResponseRT = rt.intersection([
+  rt.type({
+    id: rt.string,
+    started: rt.boolean,
+    success: rt.boolean,
+  }),
+  rt.partial({
+    error: setupErrorResponseRT,
+  }),
+]);
+
+const jobSetupResponseRT = rt.intersection([
+  rt.type({
+    id: rt.string,
+    success: rt.boolean,
+  }),
+  rt.partial({
+    error: setupErrorResponseRT,
+  }),
+]);
+
 const setupMlModuleResponsePayloadRT = rt.type({
-  datafeeds: rt.array(
-    rt.type({
-      id: rt.string,
-      started: rt.boolean,
-      success: rt.boolean,
-      error: rt.any,
-    })
-  ),
-  jobs: rt.array(
-    rt.type({
-      id: rt.string,
-      success: rt.boolean,
-      error: rt.any,
-    })
-  ),
+  datafeeds: rt.array(datafeedSetupResponseRT),
+  jobs: rt.array(jobSetupResponseRT),
 });
 
 export type SetupMlModuleResponsePayload = rt.TypeOf<typeof setupMlModuleResponsePayloadRT>;
