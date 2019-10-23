@@ -1,0 +1,12 @@
+[role="xpack"]
+[[maps-aggregations]]
+== Coordinate map and region map visualizations
+
+Before *Elastic Maps*, Kibana provided mapping capabilities with <<tilemap, coordinate map>> and <<regionmap, region map>> visualizations.
+Coordinate map and region map visualizations can only display a single layer from a single index and provide a limited set of styling options.
+
+Use *Elastic Maps* instead of coordinate map and region map.
+*Elastic Maps* offers more functionality and is easier to use.
+
+Kibana's out-of-the-box settings do not display coordinate map or region map in the create visualization menu.
+Set `xpack.maps.showMapVisualizationTypes` to `true` to show coordinate map and region map visualizations in the create visualization menu.
