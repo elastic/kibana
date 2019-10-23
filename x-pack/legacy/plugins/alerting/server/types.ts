@@ -60,6 +60,7 @@ export interface RawAlertAction extends SavedObjectAttributes {
 
 export interface Alert {
   enabled: boolean;
+  name: string;
   alertTypeId: string;
   interval: string;
   actions: AlertAction[];
