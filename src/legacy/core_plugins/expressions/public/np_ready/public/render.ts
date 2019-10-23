@@ -23,6 +23,8 @@ import { share, first } from 'rxjs/operators';
 import { event, RenderId, Data, IInterpreterRenderHandlers } from './types';
 import { getRenderersRegistry } from './services';
 
+export type IExpressionRendererExtraHandlers = Record<string, any>;
+
 export class ExpressionRenderHandler {
   render$: Observable<RenderId>;
   update$: Observable<any>;
@@ -65,8 +67,8 @@ export class ExpressionRenderHandler {
     };
   }
 
-  render = async (data: Data) => {
-    if (data.type !== 'render' || !data.as) {
+  render = async (data: Data, extraHandlers: IExpressionRendererExtraHandlers = {}) => {
+    if (!data || data.type !== 'render' || !data.as) {
       throw new Error('invalid data provided to expression renderer');
     }
 
@@ -78,7 +80,7 @@ export class ExpressionRenderHandler {
 
     getRenderersRegistry()
       .get(data.as)
-      .render(this.element, data.value, this.handlers);
+      .render(this.element, data.value, { ...this.handlers, ...extraHandlers });
 
     return promise;
   };
