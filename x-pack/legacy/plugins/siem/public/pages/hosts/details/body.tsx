@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { getEsQueryConfig } from '@kbn/es-query';
 import React from 'react';
 import { connect } from 'react-redux';
 
@@ -12,6 +13,7 @@ import { setAbsoluteRangeDatePicker as dispatchAbsoluteRangeDatePicker } from '.
 import { scoreIntervalToDateTime } from '../../../components/ml/score/score_interval_to_datetime';
 import { Anomaly } from '../../../components/ml/types';
 import { convertToBuildEsQuery } from '../../../lib/keury';
+import { useKibanaCore } from '../../../lib/compose/kibana_core';
 
 import { HostDetailsBodyComponentProps } from './types';
 import { type, makeMapStateToProps } from './utils';
@@ -29,10 +31,12 @@ const HostDetailsBodyComponent = React.memo<HostDetailsBodyComponentProps>(
     setQuery,
     to,
   }) => {
+    const core = useKibanaCore();
     return (
       <WithSource sourceId="default">
         {({ indicesExist, indexPattern }) => {
           const filterQuery = convertToBuildEsQuery({
+            config: getEsQueryConfig(core.uiSettings),
             indexPattern,
             queries: [query],
             filters: [
