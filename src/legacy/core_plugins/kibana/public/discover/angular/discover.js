@@ -85,7 +85,6 @@ const fetchStatuses = {
 };
 
 const app = uiModules.get('apps/discover', [
-  'kibana/courier',
   'kibana/url',
   'kibana/index_patterns'
 ]);
@@ -185,7 +184,6 @@ function discoverController(
   Private,
   Promise,
   config,
-  courier,
   kbnUrl,
   localStorage,
   uiCapabilities
@@ -232,7 +230,10 @@ function discoverController(
 
   // the saved savedSearch
   const savedSearch = $route.current.locals.savedSearch;
+
+  let abortController;
   $scope.$on('$destroy', () => {
+    if (abortController) abortController.abort();
     savedSearch.destroy();
     subscriptions.unsubscribe();
   });
@@ -755,7 +756,8 @@ function discoverController(
     $scope.updateTime();
 
     // Abort any in-progress requests before fetching again
-    $scope.searchSource.cancelQueued();
+    if (abortController) abortController.abort();
+    abortController = new AbortController();
 
     $scope.updateDataSource()
       .then(setupVisualization)
@@ -763,7 +765,9 @@ function discoverController(
         $state.save();
         $scope.fetchStatus = fetchStatuses.LOADING;
         logInspectorRequest();
-        return $scope.searchSource.fetch();
+        return $scope.searchSource.fetch({
+          abortSignal: abortController.signal
+        });
       })
       .then(onResults)
       .catch((error) => {
@@ -1042,8 +1046,8 @@ function discoverController(
     );
     visSavedObject.vis = $scope.vis;
 
-    $scope.searchSource.onRequestStart((searchSource, searchRequest) => {
-      return $scope.vis.getAggConfig().onSearchRequestStart(searchSource, searchRequest);
+    $scope.searchSource.onRequestStart((searchSource, options) => {
+      return $scope.vis.getAggConfig().onSearchRequestStart(searchSource, options);
     });
 
     $scope.searchSource.setField('aggs', function () {

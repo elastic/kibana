@@ -9,11 +9,12 @@ import { first } from 'rxjs/operators';
 import { TypeOf } from '@kbn/config-schema';
 import {
   CoreSetup,
+  IClusterClient,
   LoggerFactory,
   PluginInitializerContext,
   RecursiveReadonly,
 } from 'src/core/server';
-import { deepFreeze } from '../../../../src/core/utils';
+// import { deepFreeze } from '../../../../src/core/utils';
 import { PluginSetupContract as FeaturesSetupContract } from '../../features/server';
 import { CodeConfigSchema } from './config';
 import { SAVED_OBJ_REPO } from '../../../legacy/plugins/code/common/constants';
@@ -26,6 +27,10 @@ export interface PluginSetupContract {
   legacy: {
     config: TypeOf<typeof CodeConfigSchema>;
     logger: LoggerFactory;
+    http: any;
+    elasticsearch: {
+      adminClient$: IClusterClient;
+    };
   };
 }
 
@@ -74,13 +79,17 @@ export class CodePlugin {
       },
     });
 
-    return deepFreeze({
+    return {
       /** @deprecated */
       legacy: {
         config,
         logger: this.initializerContext.logger,
+        http: coreSetup.http,
+        elasticsearch: {
+          adminClient$: await coreSetup.elasticsearch.adminClient$.pipe(first()).toPromise(),
+        },
       },
-    });
+    };
   }
 
   public start() {

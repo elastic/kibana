@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { getEsQueryConfig } from '@kbn/es-query';
 import React, { memo } from 'react';
 import { connect } from 'react-redux';
 
@@ -11,6 +12,7 @@ import { scoreIntervalToDateTime } from '../../components/ml/score/score_interva
 import { Anomaly } from '../../components/ml/types';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { convertToBuildEsQuery } from '../../lib/keury';
+import { useKibanaCore } from '../../lib/compose/kibana_core';
 import { hostsModel, inputsSelectors, State } from '../../store';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 
@@ -31,12 +33,15 @@ const HostsBodyComponent = memo<HostsBodyComponentProps>(
     query,
     setAbsoluteRangeDatePicker,
     setQuery,
+    timezone,
     to,
   }) => {
+    const core = useKibanaCore();
     return (
       <WithSource sourceId="default">
         {({ indicesExist, indexPattern }) => {
           const filterQuery = convertToBuildEsQuery({
+            config: getEsQueryConfig(core.uiSettings),
             indexPattern,
             queries: [query],
             filters,
@@ -50,6 +55,7 @@ const HostsBodyComponent = memo<HostsBodyComponentProps>(
                 skip: isInitializing,
                 setQuery,
                 startDate: from,
+                timezone,
                 type: hostsModel.HostsType.page,
                 indexPattern,
                 narrowDateRange: (score: Anomaly, interval: string) => {

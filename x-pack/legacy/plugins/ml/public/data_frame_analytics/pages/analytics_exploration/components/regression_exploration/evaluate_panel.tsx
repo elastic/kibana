@@ -39,8 +39,15 @@ export const EvaluatePanel: FC<Props> = ({ jobId, index, dependentVariable }) =>
   const loadData = async () => {
     setIsLoadingGeneralization(true);
     setIsLoadingTraining(true);
-
-    const genErrorEval = await loadEvalData({ isTraining: false, index, dependentVariable });
+    // TODO: resultsField and predictionFieldName will need to be properly passed to this function
+    // once the results view is in use.
+    const genErrorEval = await loadEvalData({
+      isTraining: false,
+      index,
+      dependentVariable,
+      resultsField: 'ml',
+      predictionFieldName: undefined,
+    });
 
     if (genErrorEval.success === true && genErrorEval.eval) {
       const { meanSquaredError, rSquared } = getValuesFromResponse(genErrorEval.eval);
@@ -58,8 +65,15 @@ export const EvaluatePanel: FC<Props> = ({ jobId, index, dependentVariable }) =>
         error: genErrorEval.error,
       });
     }
-
-    const trainingErrorEval = await loadEvalData({ isTraining: true, index, dependentVariable });
+    // TODO: resultsField and predictionFieldName will need to be properly passed to this function
+    // once the results view is in use.
+    const trainingErrorEval = await loadEvalData({
+      isTraining: true,
+      index,
+      dependentVariable,
+      resultsField: 'ml',
+      predictionFieldName: undefined,
+    });
 
     if (trainingErrorEval.success === true && trainingErrorEval.eval) {
       const { meanSquaredError, rSquared } = getValuesFromResponse(trainingErrorEval.eval);
