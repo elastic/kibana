@@ -482,7 +482,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
                   )}
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiText size="s" textAlign="left" color={euiTextColor}>
+                  <EuiText size="xs" textAlign="left" color={euiTextColor}>
                     {Math.round((topValue.count / props.sampledValues!) * 100)}%
                   </EuiText>
                 </EuiFlexItem>
