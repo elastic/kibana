@@ -31,18 +31,6 @@ describe('kuery AST API', function () {
     indexPattern = indexPatternResponse;
   });
 
-  describe('fromKueryExpressionWithCursor', () => {
-    it('should ', () => {
-      const actual = ast.fromKueryExpression(
-        'level1:{ foo: @kuery-cursor@ }',
-        { cursorSymbol: '@kuery-cursor@', parseCursor: true }
-      );
-
-      console.log(actual);
-    });
-
-  });
-
   describe('fromKueryExpression', function () {
 
     it('should return a match all "is" function for whitespace', function () {
@@ -259,6 +247,19 @@ describe('kuery AST API', function () {
       expect(actual).to.eql(expected);
     });
 
+    it('should support nested groups inside other nested groups', () => {
+      const expected = nodeTypes.function.buildNode(
+        'nested',
+        nodeTypes.literal.buildNode('nestedField'),
+        nodeTypes.function.buildNode(
+          'nested',
+          nodeTypes.literal.buildNode('nestedChild'),
+          nodeTypes.function.buildNode('is', 'doublyNestedChild', 'foo')
+        )
+      );
+      const actual = ast.fromKueryExpression('nestedField:{ nestedChild:{ doublyNestedChild:foo } }');
+      expect(actual).to.eql(expected);
+    });
   });
 
   describe('fromLiteralExpression', function () {
