@@ -64,7 +64,6 @@ export const configureAppAngularModule = (angularModule: IModule) => {
     .value('buildNum', legacyMetadata.buildNum)
     .value('buildSha', legacyMetadata.buildSha)
     .value('serverName', legacyMetadata.serverName)
-    .value('sessionId', Date.now())
     .value('esUrl', getEsUrl(newPlatform))
     .value('uiCapabilities', capabilities.get())
     .config(setupCompileProvider(newPlatform))

@@ -35,7 +35,7 @@ describe('AggConfig Filters', function () {
       indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
     }));
 
-    it('should return a match filter for terms', function () {
+    it('should return a match_phrase filter for terms', function () {
       const vis = new Vis(indexPattern, {
         type: 'histogram',
         aggs: [ { type: 'terms', schema: 'segment', params: { field: '_type' } } ]
@@ -43,10 +43,9 @@ describe('AggConfig Filters', function () {
       const aggConfig = vis.aggs.byName('terms')[0];
       const filter = createFilterTerms(aggConfig, 'apache');
       expect(filter).to.have.property('query');
-      expect(filter.query).to.have.property('match');
-      expect(filter.query.match).to.have.property('_type');
-      expect(filter.query.match._type).to.have.property('query', 'apache');
-      expect(filter.query.match._type).to.have.property('type', 'phrase');
+      expect(filter.query).to.have.property('match_phrase');
+      expect(filter.query.match_phrase).to.have.property('_type');
+      expect(filter.query.match_phrase._type).to.be('apache');
       expect(filter).to.have.property('meta');
       expect(filter.meta).to.have.property('index', indexPattern.id);
 
@@ -60,15 +59,15 @@ describe('AggConfig Filters', function () {
       const aggConfig = vis.aggs.byName('terms')[0];
       const filterFalse = createFilterTerms(aggConfig, 0);
       expect(filterFalse).to.have.property('query');
-      expect(filterFalse.query).to.have.property('match');
-      expect(filterFalse.query.match).to.have.property('ssl');
-      expect(filterFalse.query.match.ssl).to.have.property('query', false);
+      expect(filterFalse.query).to.have.property('match_phrase');
+      expect(filterFalse.query.match_phrase).to.have.property('ssl');
+      expect(filterFalse.query.match_phrase.ssl).to.be(false);
 
       const filterTrue = createFilterTerms(aggConfig, 1);
       expect(filterTrue).to.have.property('query');
-      expect(filterTrue.query).to.have.property('match');
-      expect(filterTrue.query.match).to.have.property('ssl');
-      expect(filterTrue.query.match.ssl).to.have.property('query', true);
+      expect(filterTrue.query).to.have.property('match_phrase');
+      expect(filterTrue.query.match_phrase).to.have.property('ssl');
+      expect(filterTrue.query.match_phrase.ssl).to.be(true);
     });
 
     it('should generate correct __missing__ filter', () => {

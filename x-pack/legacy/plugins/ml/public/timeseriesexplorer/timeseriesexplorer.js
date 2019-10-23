@@ -51,7 +51,7 @@ import { EntityControl } from './components/entity_control';
 import { ForecastingModal } from './components/forecasting_modal/forecasting_modal';
 import { JobSelector } from '../components/job_selector';
 import { LoadingIndicator } from '../components/loading_indicator/loading_indicator';
-import { NavigationMenu } from '../components/navigation_menu/navigation_menu';
+import { NavigationMenu } from '../components/navigation_menu';
 import { severity$, SelectSeverity } from '../components/controls/select_severity/select_severity';
 import { interval$, SelectInterval } from '../components/controls/select_interval/select_interval';
 import { TimeseriesChart } from './components/timeseries_chart/timeseries_chart';
@@ -337,14 +337,22 @@ export class TimeSeriesExplorer extends React.Component {
   }
 
   entityFieldValueChanged = (entity, fieldValue) => {
-    this.setState(prevState => ({
-      entities: prevState.entities.map(stateEntity => {
-        if (stateEntity.fieldName === entity.fieldName) {
-          stateEntity.fieldValue = fieldValue;
-        }
-        return stateEntity;
-      })
-    }), () => this.saveSeriesPropertiesAndRefresh());
+    const { appStateHandler } = this.props;
+    const { entities } = this.state;
+
+    const resultEntities = {
+      ...entities.reduce((appStateEntities, appStateEntity) => {
+        appStateEntities[appStateEntity.fieldName] = appStateEntity.fieldValue;
+        return appStateEntities;
+      }, {}),
+      [entity.fieldName]: fieldValue,
+    };
+
+    appStateHandler(APP_STATE_ACTION.SET_ENTITIES, resultEntities);
+
+    this.updateControlsForDetector(() => {
+      this.refresh();
+    });
   };
 
   loadAnomaliesTableData = (earliestMs, latestMs) => {
@@ -827,7 +835,9 @@ export class TimeSeriesExplorer extends React.Component {
     this.subscriptions.add(annotationsRefresh$.subscribe(this.refresh));
     this.subscriptions.add(interval$.subscribe(tableControlsListener));
     this.subscriptions.add(severity$.subscribe(tableControlsListener));
-    this.subscriptions.add(mlTimefilterRefresh$.subscribe(() => this.refresh(false)));
+    this.subscriptions.add(mlTimefilterRefresh$.subscribe(() => {
+      this.refresh(true);
+    }));
 
     // Listen for changes to job selection.
     this.subscriptions.add(this.jobSelectService.subscribe(({ selection: selectedJobIds }) => {
@@ -1090,11 +1100,11 @@ export class TimeSeriesExplorer extends React.Component {
           />
         )}
 
-        {(jobs.length > 0 && (fullRefresh === false || loading === false) && hasResults === false) && (
+        {(jobs.length > 0 && loading === false && hasResults === false) && (
           <TimeseriesexplorerNoChartData dataNotChartable={dataNotChartable} entities={entities} />
         )}
 
-        {(jobs.length > 0 && (fullRefresh === false || loading === false) && hasResults === true) && (
+        {(jobs.length > 0 && loading === false && hasResults === true) && (
           <EuiText className="results-container">
             <span className="panel-title">
               {i18n.translate('xpack.ml.timeSeriesExplorer.singleTimeSeriesAnalysisTitle', {

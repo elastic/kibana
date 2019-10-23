@@ -5,11 +5,11 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { npSetup, npStart } from 'ui/new_platform';
 // @ts-ignore: path dynamic for kibana
 import { timezoneProvider } from 'ui/vis/lib/timezone';
 
 import { DEFAULT_KBN_VERSION, DEFAULT_TIMEZONE_BROWSER } from '../../../common/constants';
+import { useKibanaCore } from '../compose/kibana_core';
 import { useObservable } from './use_observable';
 
 type GenericValue = string | boolean | number;
@@ -31,8 +31,9 @@ type GenericValue = string | boolean | number;
  * because the underlying `UiSettingsClient` doesn't support that.
  */
 export const useKibanaUiSetting = (key: string, defaultValue?: GenericValue) => {
-  const uiSettingsClient = npSetup.core.uiSettings;
-  const uiInjectedMetadata = npStart.core.injectedMetadata;
+  const core = useKibanaCore();
+  const uiSettingsClient = core.uiSettings;
+  const uiInjectedMetadata = core.injectedMetadata;
 
   if (key === DEFAULT_KBN_VERSION) {
     return [uiInjectedMetadata.getKibanaVersion()];
