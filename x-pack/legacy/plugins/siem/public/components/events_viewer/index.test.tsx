@@ -8,14 +8,21 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 
-import { TestProviders } from '../../mock';
+import { useKibanaCore } from '../../lib/compose/kibana_core';
 import { wait } from '../../lib/helpers';
-import '../../mock/ui_settings';
+import { TestProviders } from '../../mock';
+import { mockUiSettings } from '../../mock/ui_settings';
 
 import { mockEventViewerResponse } from './mock';
 import { StatefulEventsViewer } from '.';
 
 jest.mock('../../lib/settings/use_kibana_ui_setting');
+
+const mockUseKibanaCore = useKibanaCore as jest.Mock;
+jest.mock('../../lib/compose/kibana_core');
+mockUseKibanaCore.mockImplementation(() => ({
+  uiSettings: mockUiSettings,
+}));
 
 const from = 1566943856794;
 const to = 1566857456791;

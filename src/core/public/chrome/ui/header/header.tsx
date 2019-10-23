@@ -407,11 +407,9 @@ class HeaderUI extends Component<Props, State> {
           isLocked={isLocked}
           onIsLockedUpdate={onIsLockedUpdate}
         >
-          <nav>
-            <EuiNavDrawerGroup listItems={recentLinksArray} />
-            <EuiHorizontalRule margin="none" />
-            <EuiNavDrawerGroup data-test-subj="navDrawerAppsMenu" listItems={navLinksArray} />
-          </nav>
+          <EuiNavDrawerGroup listItems={recentLinksArray} />
+          <EuiHorizontalRule margin="none" />
+          <EuiNavDrawerGroup data-test-subj="navDrawerAppsMenu" listItems={navLinksArray} />
         </EuiNavDrawer>
       </header>
     );
