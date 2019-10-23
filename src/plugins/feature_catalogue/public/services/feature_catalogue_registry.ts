@@ -45,12 +45,7 @@ export interface FeatureCatalogueEntry {
   readonly showOnHomePage: boolean;
 }
 
-interface Registry<T> {
-  setup(...deps: any[]): { register(item: T): void };
-  start(...deps: any[]): { get(): readonly T[] };
-}
-
-export class FeatureCatalogueRegistry implements Registry<FeatureCatalogueEntry> {
+export class FeatureCatalogueRegistry {
   private readonly features = new Map<string, FeatureCatalogueEntry>();
 
   public setup() {

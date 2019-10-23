@@ -35,11 +35,6 @@ const DASHBOARD_FEATURE: FeatureCatalogueEntry = {
 
 describe('FeatureCatalogueRegistry', () => {
   describe('setup', () => {
-    test('allows registry of new items', () => {
-      const setup = new FeatureCatalogueRegistry().setup();
-      setup.register(DASHBOARD_FEATURE);
-    });
-
     test('throws when registering duplicate id', () => {
       const setup = new FeatureCatalogueRegistry().setup();
       setup.register(DASHBOARD_FEATURE);
@@ -75,7 +70,7 @@ describe('FeatureCatalogueRegistry', () => {
   });
 
   describe('title sorting', () => {
-    test('filters by title', () => {
+    test('sorts by title ascending', () => {
       const service = new FeatureCatalogueRegistry();
       const setup = service.setup();
       setup.register({ id: '1', title: 'Orange' } as any);
