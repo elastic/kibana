@@ -179,14 +179,16 @@ export const FieldsListItem = React.memo(function FieldListItemComponent({
                     </EuiFacetButton>
                   </EuiFlexItem>
                 )}
-                <EuiFlexItem
-                  grow={false}
-                  className="mappings-editor__fields-list-item__multi-field-button"
-                >
-                  <EuiButtonEmpty onClick={addField} iconType="plusInCircleFilled">
-                    Add multi-field
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
+                {areActionButtonsVisible && (
+                  <EuiFlexItem
+                    grow={false}
+                    className="mappings-editor__fields-list-item__multi-field-button"
+                  >
+                    <EuiButtonEmpty onClick={addField} iconType="plusInCircleFilled">
+                      Add multi-field
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                )}
               </>
             )}
             <EuiFlexItem className="mappings-editor__fields-list-item__actions">
