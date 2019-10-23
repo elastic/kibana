@@ -30,20 +30,24 @@ export class AnonymousPaths implements IAnonymousPaths {
   }
 
   public register(path: string) {
-    if (!path.startsWith('/')) {
-      throw new Error('"path" must start with "/"');
-    }
-
     this.paths.add(this.normalizePath(path));
   }
 
   private normalizePath(path: string) {
-    const lowercased = path.toLowerCase();
+    // always lower-case it
+    let normalized = path.toLowerCase();
 
-    if (lowercased.endsWith('/')) {
-      return lowercased.slice(0, lowercased.length - 1);
+    // remove the slash from the end
+    if (normalized.endsWith('/')) {
+      normalized = normalized.slice(0, normalized.length - 1);
     }
 
-    return lowercased;
+    // put a slash at the start
+    if (!normalized.startsWith('/')) {
+      normalized = `/${normalized}`;
+    }
+
+    // it's normalized!!!
+    return normalized;
   }
 }

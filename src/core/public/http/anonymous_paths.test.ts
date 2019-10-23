@@ -21,12 +21,10 @@ import { AnonymousPaths } from './anonymous_paths';
 import { BasePath } from './base_path_service';
 
 describe('#register', () => {
-  it(`throws an error for paths that don't start with '/'`, () => {
+  it(`allows paths that don't start with /`, () => {
     const basePath = new BasePath('/foo');
     const anonymousPaths = new AnonymousPaths(basePath);
-    expect(() => anonymousPaths.register('bar')).toThrowErrorMatchingInlineSnapshot(
-      `"\\"path\\" must start with \\"/\\""`
-    );
+    anonymousPaths.register('bar');
   });
 
   it(`allows paths that end with '/'`, () => {
@@ -56,6 +54,34 @@ describe('#isAnonymous', () => {
     const anonymousPaths = new AnonymousPaths(basePath);
     anonymousPaths.register('/bar');
     expect(anonymousPaths.isAnonymous('/foo/bar/')).toBe(true);
+  });
+
+  it('returns true for paths registered without a starting slash', () => {
+    const basePath = new BasePath('/foo');
+    const anonymousPaths = new AnonymousPaths(basePath);
+    anonymousPaths.register('bar');
+    expect(anonymousPaths.isAnonymous('/foo/bar')).toBe(true);
+  });
+
+  it('returns true for paths registered with a starting slash', () => {
+    const basePath = new BasePath('/foo');
+    const anonymousPaths = new AnonymousPaths(basePath);
+    anonymousPaths.register('/bar');
+    expect(anonymousPaths.isAnonymous('/foo/bar')).toBe(true);
+  });
+
+  it('when there is no basePath and calling "isAnonymous" without a starting slash, returns true for paths registered with a starting slash', () => {
+    const basePath = new BasePath('/');
+    const anonymousPaths = new AnonymousPaths(basePath);
+    anonymousPaths.register('/bar');
+    expect(anonymousPaths.isAnonymous('bar')).toBe(true);
+  });
+
+  it('when there is no basePath and calling "isAnonymous" with a starting slash, returns true for paths registered with a starting slash', () => {
+    const basePath = new BasePath('/');
+    const anonymousPaths = new AnonymousPaths(basePath);
+    anonymousPaths.register('/bar');
+    expect(anonymousPaths.isAnonymous('/bar')).toBe(true);
   });
 
   it('returns true for paths whose capitalization is different', () => {
