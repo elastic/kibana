@@ -24,6 +24,11 @@ export interface SecurityLicenseFeatures {
   readonly showLinks: boolean;
 
   /**
+   * Indicates whether we show the Role Mapping UI.
+   */
+  readonly showRoleMappingManagement: boolean;
+
+  /**
    * Indicates whether we allow users to define document level security in roles.
    */
   readonly allowRoleDocumentLevelSecurity: boolean;

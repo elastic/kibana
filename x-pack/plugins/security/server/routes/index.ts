@@ -12,6 +12,7 @@ import { LegacyAPI } from '../plugin';
 
 import { defineAuthenticationRoutes } from './authentication';
 import { defineAuthorizationRoutes } from './authorization';
+import { defineRoleMappingRoutes } from './role_mapping';
 
 /**
  * Describes parameters used to define HTTP routes.
@@ -24,10 +25,11 @@ export interface RouteDefinitionParams {
   config: ConfigType;
   authc: Authentication;
   authz: Authorization;
-  getLegacyAPI: () => Pick<LegacyAPI, 'cspRules'>;
+  getLegacyAPI: () => LegacyAPI;
 }
 
 export function defineRoutes(params: RouteDefinitionParams) {
   defineAuthenticationRoutes(params);
   defineAuthorizationRoutes(params);
+  defineRoleMappingRoutes(params);
 }

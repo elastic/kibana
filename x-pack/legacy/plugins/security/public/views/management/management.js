@@ -11,10 +11,12 @@ import 'plugins/security/views/management/roles_grid/roles';
 import 'plugins/security/views/management/api_keys_grid/api_keys';
 import 'plugins/security/views/management/edit_user/edit_user';
 import 'plugins/security/views/management/edit_role/index';
+import 'plugins/security/views/management/role_mappings/role_mappings_grid';
+import 'plugins/security/views/management/role_mappings/edit_role_mapping';
 import routes from 'ui/routes';
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import '../../services/shield_user';
-import { ROLES_PATH, USERS_PATH, API_KEYS_PATH } from './management_urls';
+import { ROLES_PATH, USERS_PATH, API_KEYS_PATH, ROLE_MAPPINGS_PATH } from './management_urls';
 
 import { management } from 'ui/management';
 import { i18n } from '@kbn/i18n';
@@ -36,9 +38,19 @@ routes.defaults(/^\/management\/security(\/|$)/, {
   resolve: {
     securityManagementSection: function (ShieldUser) {
       const showSecurityLinks = xpackInfo.get('features.security.showLinks');
+      const showRoleMappingManagementLink = xpackInfo.get('features.security.showRoleMappingManagement');
 
       function deregisterSecurity() {
         management.deregister('security');
+      }
+
+      function deregisterRoleMappingManagement() {
+        if (management.hasItem('security')) {
+          const security = management.getSection('security');
+          if (security.hasItem('roleMappings')) {
+            security.deregister('roleMappings');
+          }
+        }
       }
 
       function ensureSecurityRegistered() {
@@ -89,11 +101,28 @@ routes.defaults(/^\/management\/security(\/|$)/, {
             url: `#${API_KEYS_PATH}`,
           });
         }
+
+        console.log({ showRoleMappingManagementLink });
+        if (showRoleMappingManagementLink && !security.hasItem('roleMappings')) {
+          security.register('roleMappings', {
+            name: 'securityRoleMappingLink',
+            order: 30,
+            display: i18n.translate(
+              'xpack.security.management.roleMappingsTitle', {
+                defaultMessage: 'Role Mappings',
+              }),
+            url: `#${ROLE_MAPPINGS_PATH}`,
+          });
+        }
       }
 
       if (!showSecurityLinks) {
         deregisterSecurity();
       } else {
+        if (!showRoleMappingManagementLink) {
+          deregisterRoleMappingManagement();
+        }
+
         // getCurrent will reject if there is no authenticated user, so we prevent them from seeing the security
         // management screens
         //

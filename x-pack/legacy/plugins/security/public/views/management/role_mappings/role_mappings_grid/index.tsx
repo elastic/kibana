@@ -1,0 +1,40 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+import React from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
+// @ts-ignore
+import routes from 'ui/routes';
+// @ts-ignore
+import { I18nContext } from 'ui/i18n';
+// @ts-ignore
+import template from './role_mappings.html';
+import { ROLE_MAPPINGS_PATH } from '../../management_urls';
+import { getRoleMappingBreadcrumbs } from '../../breadcrumbs';
+import { RoleMappingsGridPage } from './components';
+
+routes.when(ROLE_MAPPINGS_PATH, {
+  template,
+  k7Breadcrumbs: getRoleMappingBreadcrumbs,
+  controller($scope) {
+    $scope.$$postDigest(() => {
+      const domNode = document.getElementById('roleMappingsGridReactRoot');
+
+      render(
+        <I18nContext>
+          <RoleMappingsGridPage />
+        </I18nContext>,
+        domNode
+      );
+
+      // unmount react on controller destroy
+      $scope.$on('$destroy', () => {
+        if (domNode) {
+          unmountComponentAtNode(domNode);
+        }
+      });
+    });
+  },
+});
