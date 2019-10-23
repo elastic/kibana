@@ -24,6 +24,22 @@ To resolve this issue, upgrade {kib} to 6.3 or later. See
 {stack-ref}/upgrading-elastic-stack.html[Upgrading the {stack}]. 
 
 [float]
+=== Filebeat index is corrupt
+
+*Symptoms:*
+
+The *Stack Monitoring* application displays an error indicating that Filebeat
+indices are corrupt.
+
+*Resolution*
+
+ - Stop all your Filebeat instances.
+ - Delete indices beginning with `filebeat-$VERSION`, where `VERSION` corresponds
+   to the version of Filebeat running.
+ - Restart all your Filebeat instances.
+
+
+[float]
 === No monitoring data is visible in {kib}
 
 *Symptoms:*
