@@ -18,7 +18,6 @@ import { countOperation } from './count';
 import { DimensionPriority, StateSetter, OperationMetadata } from '../../../types';
 import { BaseIndexPatternColumn, FieldBasedIndexPatternColumn } from './column_types';
 import { IndexPatternPrivateState, IndexPattern, IndexPatternField } from '../../types';
-export * from './consts';
 
 // List of all operation definitions registered to this data source.
 // If you want to implement a new operation, add it to this array and

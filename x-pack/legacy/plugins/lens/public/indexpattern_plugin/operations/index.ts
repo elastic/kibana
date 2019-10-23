@@ -5,4 +5,4 @@
  */
 
 export * from './operations';
-export { OperationType, IndexPatternColumn, MISSING_BUCKET_LABEL } from './definitions';
+export { OperationType, IndexPatternColumn } from './definitions';
