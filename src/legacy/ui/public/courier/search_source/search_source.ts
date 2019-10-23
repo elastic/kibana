@@ -421,8 +421,13 @@ export class SearchSource {
 
         if (agg.filters) {
           // translate filters aggregations
-          Object.keys(agg.filters.filters).forEach(function(filterId) {
-            filters[filterId] = buildEsQuery(index, [], [filters[filterId]], esQueryConfigs);
+          Object.keys(agg.filters.filters).forEach(filterId => {
+            agg.filters.filters[filterId] = buildEsQuery(
+              index,
+              [],
+              [filters[filterId]],
+              esQueryConfigs
+            );
           });
         }
 
