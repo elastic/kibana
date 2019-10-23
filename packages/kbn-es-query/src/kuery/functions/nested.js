@@ -18,10 +18,12 @@
  */
 
 import * as ast from '../ast';
+import * as literal from '../node_types/literal';
 
 export function buildNodeParams(path, child) {
+  const pathNode = typeof path === 'string' ? ast.fromLiteralExpression(path) : literal.buildNode(path);
   return {
-    arguments: [path, child],
+    arguments: [pathNode, child],
   };
 }
 
