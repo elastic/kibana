@@ -87,7 +87,7 @@ export const IntegrationGroup = ({
                 }
               )}
               href={getInfraIpHref(summary, basePath)}
-              iconType="infraApp"
+              iconType="metricsApp"
               message={i18n.translate(
                 'xpack.uptime.monitorList.infraIntegrationAction.ip.message',
                 {
@@ -116,7 +116,7 @@ export const IntegrationGroup = ({
                 }
               )}
               href={getInfraKubernetesHref(summary, basePath)}
-              iconType="infraApp"
+              iconType="metricsApp"
               message={i18n.translate(
                 'xpack.uptime.monitorList.infraIntegrationAction.kubernetes.message',
                 {
@@ -145,7 +145,7 @@ export const IntegrationGroup = ({
                 }
               )}
               href={getInfraContainerHref(summary, basePath)}
-              iconType="infraApp"
+              iconType="metricsApp"
               message={i18n.translate(
                 'xpack.uptime.monitorList.infraIntegrationAction.container.message',
                 {

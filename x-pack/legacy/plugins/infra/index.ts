@@ -43,7 +43,7 @@ export function infra(kibana: any) {
             defaultMessage: 'Explore your metrics',
           }),
           icon: 'plugins/infra/images/infra_mono_white.svg',
-          euiIconType: 'infraApp',
+          euiIconType: 'metricsApp',
           id: 'infra:home',
           order: 8000,
           title: i18n.translate('xpack.infra.linkInfrastructureTitle', {

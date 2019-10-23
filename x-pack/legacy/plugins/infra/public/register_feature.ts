@@ -21,7 +21,7 @@ FeatureCatalogueRegistryProvider.register((i18n: I18nServiceType) => ({
     defaultMessage:
       'Explore infrastructure metrics and logs for common servers, containers, and services.',
   }),
-  icon: 'infraApp',
+  icon: 'metricsApp',
   path: `/app/${APP_ID}#infrastructure`,
   showOnHomePage: true,
   category: FeatureCatalogueCategory.DATA,

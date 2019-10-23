@@ -124,7 +124,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = (
       }
     },
     {
-      icon: 'infraApp',
+      icon: 'metricsApp',
       label: i18n.translate(
         'xpack.apm.transactionActionMenu.showPodMetricsLinkLabel',
         { defaultMessage: 'Show pod metrics' }
@@ -134,7 +134,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = (
       query: infraMetricsQuery
     },
     {
-      icon: 'infraApp',
+      icon: 'metricsApp',
       label: i18n.translate(
         'xpack.apm.transactionActionMenu.showContainerMetricsLinkLabel',
         { defaultMessage: 'Show container metrics' }
@@ -144,7 +144,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = (
       query: infraMetricsQuery
     },
     {
-      icon: 'infraApp',
+      icon: 'metricsApp',
       label: i18n.translate(
         'xpack.apm.transactionActionMenu.showHostMetricsLinkLabel',
         { defaultMessage: 'Show host metrics' }
