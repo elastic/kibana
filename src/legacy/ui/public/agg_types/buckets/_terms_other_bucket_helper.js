@@ -113,7 +113,7 @@ const getAggConfigResultMissingBuckets = (responseAggs, aggId) => {
 const getOtherAggTerms = (requestAgg, key, otherAgg) => {
   return requestAgg['other-filter'].filters.filters[key].bool.must_not
     .filter(filter => filter.match_phrase && filter.match_phrase[otherAgg.params.field.name])
-    .map(filter => filter.match_phrase[otherAgg.params.field.name].query);
+    .map(filter => filter.match_phrase[otherAgg.params.field.name]);
 };
 
 export const buildOtherBucketAgg = (aggConfigs, aggWithOtherBucket, response) => {
