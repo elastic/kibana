@@ -81,7 +81,7 @@ const getPartitionSpecificSingleMetricViewerLink = (
 
   const _a = encode({
     mlTimeSeriesExplorer: {
-      entities: { 'event.dataset': partition },
+      entities: { 'event.dataset': partition === 'unknown' ? '' : partition },
     },
   });
 
