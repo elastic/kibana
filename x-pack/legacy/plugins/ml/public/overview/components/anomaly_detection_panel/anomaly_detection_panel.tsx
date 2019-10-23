@@ -17,6 +17,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { toastNotifications } from 'ui/notify';
+import { checkPermission } from '../../../privilege/check_privilege';
+import { mlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
 import { AnomalyDetectionTable } from './table';
 import { ml } from '../../../services/ml_api_service';
 import { getGroupsFromJobs, getStatsBarData, getJobsWithTimerange } from './utils';
@@ -51,6 +53,7 @@ function getDefaultAnomalyScores(groups: Group[]): MaxScoresByGroup {
 }
 
 export const AnomalyDetectionPanel: FC = () => {
+  const createButtonDisabled = !checkPermission('canCreateJob') || !mlNodesAvailable();
   const [isLoading, setIsLoading] = useState(false);
   const [groups, setGroups] = useState<GroupsDictionary>({});
   const [groupsCount, setGroupsCount] = useState<number>(0);
@@ -170,7 +173,13 @@ export const AnomalyDetectionPanel: FC = () => {
             </Fragment>
           }
           actions={
-            <EuiButton color="primary" href={createJobLink} fill iconType="plusInCircle">
+            <EuiButton
+              color="primary"
+              href={createJobLink}
+              fill
+              iconType="plusInCircle"
+              isDisabled={createButtonDisabled}
+            >
               {i18n.translate('xpack.ml.overview.anomalyDetection.createJobButtonText', {
                 defaultMessage: 'Create job',
               })}
