@@ -38,7 +38,7 @@ describe('kibana cli', function () {
     });
 
     afterEach(() => {
-      del.sync(tempPath);
+      del.sync(tempPath, { force: true });
     });
 
     describe('analyzeArchive', function () {

@@ -26,7 +26,7 @@ beforeEach(async () => {
 });
 
 afterEach(async () => {
-  await del(options.workspacePath);
+  await del(options.workspacePath, { force: true });
 });
 
 function createMockProxy(initDelay: number = 0, requestDelay: number = 0) {
