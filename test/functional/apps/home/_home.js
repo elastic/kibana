@@ -29,7 +29,6 @@ export default function ({ getService, getPageObjects }) {
     this.tags('smoke');
 
     it('clicking on kibana logo should take you to home page', async ()=> {
-      expect(false).to.be(true);
       await PageObjects.common.navigateToApp('settings');
       await globalNav.clickLogo();
       const url = await browser.getCurrentUrl();
