@@ -5,7 +5,7 @@
  */
 
 import { EuiPanel } from '@elastic/eui';
-import { Filter } from '@kbn/es-query';
+import { Filter, getEsQueryConfig } from '@kbn/es-query';
 import { getOr, isEmpty, isEqual } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
@@ -15,6 +15,7 @@ import { Query } from 'src/plugins/data/common';
 import { BrowserFields } from '../../containers/source';
 import { TimelineQuery } from '../../containers/timeline';
 import { Direction } from '../../graphql/types';
+import { useKibanaCore } from '../../lib/compose/kibana_core';
 import { KqlMode } from '../../store/timeline/model';
 import { AutoSizer } from '../auto_sizer';
 import { HeaderPanel } from '../header_panel';
@@ -81,8 +82,9 @@ export const EventsViewer = React.memo<Props>(
     toggleColumn,
   }) => {
     const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
-
+    const core = useKibanaCore();
     const combinedQueries = combineQueries({
+      config: getEsQueryConfig(core.uiSettings),
       dataProviders,
       indexPattern,
       browserFields,
