@@ -31,7 +31,7 @@ import { mapAndFlattenFilters } from '../filter/filter_manager/lib/map_and_flatt
 import { IndexPatterns } from '../index_patterns/index_patterns';
 
 /** @internal */
-export const initLegacyModule = once((): void => {
+export const initLegacyModule = once((indexPatterns: IndexPatterns): void => {
   uiModules
     .get('app/kibana', ['react'])
     .directive('filterBar', () => {
@@ -122,16 +122,5 @@ export const initLegacyModule = once((): void => {
       ])
     );
 
-  const module = uiModules.get('kibana/index_patterns');
-  let _service: any;
-  module.service('indexPatterns', function() {
-    if (!_service)
-      _service = new IndexPatterns(
-        npStart.core.uiSettings,
-        npStart.core.savedObjects.client,
-        npStart.core.http,
-        npStart.core.notifications
-      );
-    return _service;
-  });
+  uiModules.get('kibana/index_patterns').value('indexPatterns', indexPatterns);
 });

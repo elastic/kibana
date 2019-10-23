@@ -17,17 +17,16 @@ describe('TimestampTooltip', () => {
     // mock Date.now
     mockNow(1570737000000);
 
-    // hardcode timezone to avoid timezone issues on CI
-    jest
-      .spyOn(moment.tz, 'guess')
-      .mockImplementation(() => 'Europe/Copenhagen');
+    moment.tz.setDefault('Etc/GMT');
   });
+
+  afterAll(() => moment.tz.setDefault(''));
 
   it('should render component with relative time in body and absolute time in tooltip', () => {
     expect(shallow(<TimestampTooltip time={timestamp} />))
       .toMatchInlineSnapshot(`
       <EuiToolTip
-        content="Oct 10th 2019, 17:06:40.123 (+0200 CEST)"
+        content="Oct 10th 2019, 15:06:40.123 (+0000 GMT)"
         delay="regular"
         position="top"
       >
@@ -41,7 +40,7 @@ describe('TimestampTooltip', () => {
       shallow(<TimestampTooltip time={timestamp} />)
         .find('EuiToolTip')
         .prop('content')
-    ).toBe('Oct 10th 2019, 17:06:40.123 (+0200 CEST)');
+    ).toBe('Oct 10th 2019, 15:06:40.123 (+0000 GMT)');
   });
 
   it('should format with precision in minutes', () => {
@@ -49,7 +48,7 @@ describe('TimestampTooltip', () => {
       shallow(<TimestampTooltip time={timestamp} precision="minutes" />)
         .find('EuiToolTip')
         .prop('content')
-    ).toBe('Oct 10th 2019, 17:06 (+0200 CEST)');
+    ).toBe('Oct 10th 2019, 15:06 (+0000 GMT)');
   });
 
   it('should format with precision in days', () => {
@@ -57,6 +56,6 @@ describe('TimestampTooltip', () => {
       shallow(<TimestampTooltip time={timestamp} precision="days" />)
         .find('EuiToolTip')
         .prop('content')
-    ).toBe('Oct 10th 2019 (+0200 CEST)');
+    ).toBe('Oct 10th 2019 (+0000 GMT)');
   });
 });

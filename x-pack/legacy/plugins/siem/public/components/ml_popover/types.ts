@@ -14,7 +14,7 @@ export interface Group {
 
 export interface CheckRecognizerProps {
   indexPatternName: string;
-  headers?: Record<string, string>;
+  kbnVersion: string;
   signal: AbortSignal;
 }
 
@@ -30,7 +30,7 @@ export interface RecognizerModule {
 
 export interface GetModulesProps {
   moduleId?: string;
-  headers?: Record<string, string>;
+  kbnVersion: string;
   signal: AbortSignal;
 }
 
@@ -97,7 +97,7 @@ export interface MlSetupArgs {
   jobIdErrorFilter: string[];
   groups: string[];
   prefix?: string;
-  headers?: Record<string, string>;
+  kbnVersion: string;
 }
 
 /**
