@@ -27,7 +27,7 @@ export interface MetricsExplorerMetric {
   field?: string | undefined;
 }
 
-export interface MetricsExplorerRequest {
+export interface MetricsExplorerRequestBody {
   timerange: InfraTimerange;
   indexPattern: string;
   metrics: MetricsExplorerMetric[];
@@ -36,8 +36,6 @@ export interface MetricsExplorerRequest {
   limit?: number;
   filterQuery?: string;
 }
-
-export type MetricsExplorerWrappedRequest = InfraWrappableRequest<MetricsExplorerRequest>;
 
 export interface MetricsExplorerPageInfo {
   total: number;
