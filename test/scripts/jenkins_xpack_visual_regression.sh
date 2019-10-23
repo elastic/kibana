@@ -1,11 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
-
-if [[ -n "$IS_PIPELINE_JOB" ]] ; then
-  source src/dev/ci_setup/setup_env.sh
-fi
-
+source test/scripts/jenkins_test_setup.sh
 source "$KIBANA_DIR/src/dev/ci_setup/setup_percy.sh"
 
 if [[ -z "$IS_PIPELINE_JOB" ]] ; then
@@ -23,8 +18,6 @@ else
   export KIBANA_INSTALL_DIR="$destDir"
 fi
 
-export TEST_BROWSER_HEADLESS=1
-
 cd "$XPACK_DIR"
 
 checks-reporter-with-killswitch "X-Pack visual regression tests" \
@@ -33,5 +26,3 @@ checks-reporter-with-killswitch "X-Pack visual regression tests" \
     --debug --bail \
     --kibana-install-dir "$KIBANA_INSTALL_DIR" \
     --config test/visual_regression/config.js;
-
-source test/scripts/jenkins_post.sh

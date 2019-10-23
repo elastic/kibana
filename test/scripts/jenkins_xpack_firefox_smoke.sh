@@ -1,10 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
-
-if [[ -n "$IS_PIPELINE_JOB" ]] ; then
-  source src/dev/ci_setup/setup_env.sh
-fi
+source test/scripts/jenkins_test_setup.sh
 
 if [[ -z "$IS_PIPELINE_JOB" ]] ; then
   node scripts/build --debug --no-oss;
@@ -21,8 +17,6 @@ else
   export KIBANA_INSTALL_DIR="$destDir"
 fi
 
-export TEST_BROWSER_HEADLESS=1
-
 cd "$XPACK_DIR"
 
 checks-reporter-with-killswitch "X-Pack firefox smoke test" \
@@ -31,5 +25,3 @@ checks-reporter-with-killswitch "X-Pack firefox smoke test" \
     --kibana-install-dir "$KIBANA_INSTALL_DIR" \
     --include-tag "smoke" \
     --config test/functional/config.firefox.js;
-
-source test/scripts/jenkins_post.sh
