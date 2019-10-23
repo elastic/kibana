@@ -20,7 +20,6 @@ import 'ui/collapsible_sidebar';
 import 'ui/directives/listen';
 import 'ui/fixed_scroll';
 import 'ui/directives/css_truncate';
-import 'ui/directives/field_name';
 
 import { npStart } from 'ui/new_platform';
 import chromeLegacy from 'ui/chrome'; // just used in embeddables
@@ -90,16 +89,22 @@ import { timezoneProvider } from 'ui/vis/lib/timezone';
 import * as docViewsRegistry from 'ui/registry/doc_views';
 
 const services = {
+  // new plattform
+  capabilities: npStart.core.application.capabilities,
+  chrome: npStart.core.chrome,
+  docLinks: npStart.core.docLinks,
+  eui_utils: npStart.plugins.eui_utils,
+  inspector: npStart.plugins.inspector,
+  metadata: npStart.core.injectedMetadata.getLegacyMetadata(),
+  toastNotifications: npStart.core.notifications.toasts,
+  uiSettings: npStart.core.uiSettings,
+  // legacy
   angular,
   buildVislibDimensions,
   callAfterBindingsWorkaround,
-  capabilities: npStart.core.application.capabilities,
-  chrome: npStart.core.chrome,
   chromeLegacy,
-  docLinks: npStart.core.docLinks,
   docTitle,
   docViewsRegistry,
-  eui_utils: npStart.plugins.eui_utils,
   FieldList,
   FilterBarQueryFilterProvider,
   getFilterGenerator,
@@ -107,10 +112,8 @@ const services = {
   getResponseInspectorStats,
   getUnhashableStatesProvider,
   hasSearchStategyForIndexPattern,
-  inspector: npStart.plugins.inspector,
   intervalOptions,
   isDefaultTypeIndexPattern,
-  metadata: npStart.core.injectedMetadata.getLegacyMetadata(),
   migrateLegacyQuery,
   RequestAdapter,
   SavedObjectRegistryProvider,
@@ -127,10 +130,8 @@ const services = {
   tabifyAggResponse,
   timefilter,
   timezoneProvider,
-  toastNotifications: npStart.core.notifications.toasts,
   uiModules,
   uiRoutes,
-  uiSettings: npStart.core.uiSettings,
   vislibSeriesResponseHandlerProvider,
   wrapInI18nContext,
 };
