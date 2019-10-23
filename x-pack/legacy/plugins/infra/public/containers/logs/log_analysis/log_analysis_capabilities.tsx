@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import createContainer from 'constate-latest';
+import createContainer from 'constate';
 import { useMemo, useState, useEffect } from 'react';
 import { kfetch } from 'ui/kfetch';
 

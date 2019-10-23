@@ -10,7 +10,7 @@ import { IRouter, RequestHandler } from 'src/core/server';
 import { ServerRouteFacade, RouteOptionsFacade } from '..';
 
 export class CodeServerRouter {
-  constructor(readonly router: IRouter) {}
+  constructor(public readonly router: IRouter) {}
 
   route(route: CodeRoute) {
     const routeOptions: RouteOptionsFacade = (route.options || {}) as RouteOptionsFacade;

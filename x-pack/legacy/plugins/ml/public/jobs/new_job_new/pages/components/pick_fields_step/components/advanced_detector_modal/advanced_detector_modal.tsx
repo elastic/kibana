@@ -91,11 +91,19 @@ export const AdvancedDetectorModal: FC<Props> = ({
   const [fieldOptionEnabled, setFieldOptionEnabled] = useState(true);
   const { descriptionPlaceholder, setDescriptionPlaceholder } = useDetectorPlaceholder(detector);
 
-  const aggOptions: EuiComboBoxOptionProps[] = aggs.map(createAggOption);
-  const fieldOptions: EuiComboBoxOptionProps[] = fields
+  // list of aggregation combobox options. filtering out any aggs with no fields.
+  const aggOptions: EuiComboBoxOptionProps[] = aggs
+    .filter(a => a.fields !== undefined && a.fields.length)
+    .map(createAggOption);
+
+  // fields available for the selected agg
+  const { currentFieldOptions, setCurrentFieldOptions } = useCurrentFieldOptions(detector.agg);
+
+  const allFieldOptions: EuiComboBoxOptionProps[] = fields
     .filter(f => f.id !== EVENT_RATE_FIELD_ID)
     .map(createFieldOption);
-  const splitFieldOptions = [...fieldOptions, ...createMlcategoryField(jobCreator)];
+
+  const splitFieldOptions = [...allFieldOptions, ...createMlcategoryField(jobCreator)];
 
   const eventRateField = fields.find(f => f.id === EVENT_RATE_FIELD_ID);
 
@@ -124,6 +132,8 @@ export const AdvancedDetectorModal: FC<Props> = ({
 
     if (agg !== null) {
       setFieldsEnabled(true);
+      setCurrentFieldOptions(agg);
+
       if (isFieldlessAgg(agg) && eventRateField !== undefined) {
         setFieldOption(emptyOption);
         setFieldOptionEnabled(false);
@@ -145,6 +155,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
       partitionField,
       excludeFrequent: excludeFrequentOption.label !== '' ? excludeFrequentOption.label : null,
       description: descriptionOption !== '' ? descriptionOption : null,
+      customRules: null,
     };
     setDetector(dtr);
     setDescriptionPlaceholder(dtr);
@@ -207,8 +218,8 @@ export const AdvancedDetectorModal: FC<Props> = ({
             <FieldDescription>
               <EuiComboBox
                 singleSelection={{ asPlainText: true }}
-                options={fieldOptions}
-                selectedOptions={[fieldOption]}
+                options={currentFieldOptions}
+                selectedOptions={createSelectedOptions(fieldOption, currentFieldOptions)}
                 onChange={onOptionChange(setFieldOption)}
                 isClearable={true}
                 isDisabled={fieldsEnabled === false || fieldOptionEnabled === false}
@@ -223,7 +234,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
               <EuiComboBox
                 singleSelection={{ asPlainText: true }}
                 options={splitFieldOptions}
-                selectedOptions={[byFieldOption]}
+                selectedOptions={createSelectedOptions(byFieldOption, splitFieldOptions)}
                 onChange={onOptionChange(setByFieldOption)}
                 isClearable={true}
                 isDisabled={fieldsEnabled === false}
@@ -235,7 +246,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
               <EuiComboBox
                 singleSelection={{ asPlainText: true }}
                 options={splitFieldOptions}
-                selectedOptions={[overFieldOption]}
+                selectedOptions={createSelectedOptions(overFieldOption, splitFieldOptions)}
                 onChange={onOptionChange(setOverFieldOption)}
                 isClearable={true}
                 isDisabled={fieldsEnabled === false}
@@ -247,7 +258,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
               <EuiComboBox
                 singleSelection={{ asPlainText: true }}
                 options={splitFieldOptions}
-                selectedOptions={[partitionFieldOption]}
+                selectedOptions={createSelectedOptions(partitionFieldOption, splitFieldOptions)}
                 onChange={onOptionChange(setPartitionFieldOption)}
                 isClearable={true}
                 isDisabled={fieldsEnabled === false}
@@ -314,6 +325,9 @@ function createExcludeFrequentOption(excludeFrequent: string | null): EuiComboBo
 }
 
 function isFieldlessAgg(agg: Aggregation) {
+  // fieldless aggs have been given one event rate field for UI reasons.
+  // therefore if an agg's field list only contains event rate, it must be
+  // a fieldless agg.
   return agg.fields && agg.fields.length === 1 && agg.fields[0].id === EVENT_RATE_FIELD_ID;
 }
 
@@ -340,6 +354,26 @@ function useDetectorPlaceholder(detector: RichDetector) {
   return { descriptionPlaceholder, setDescriptionPlaceholder };
 }
 
+// creates list of combobox options based on an aggregation's field list
+function createFieldOptionList(agg: Aggregation | null) {
+  return (agg !== null && agg.fields !== undefined ? agg.fields : [])
+    .filter(f => f.id !== EVENT_RATE_FIELD_ID)
+    .map(createFieldOption);
+}
+
+// custom hook for storing combobox options based on an aggregation field list
+function useCurrentFieldOptions(aggregation: Aggregation | null) {
+  const [currentFieldOptions, setCurrentFieldOptions] = useState(
+    createFieldOptionList(aggregation)
+  );
+
+  return {
+    currentFieldOptions,
+    setCurrentFieldOptions: (agg: Aggregation | null) =>
+      setCurrentFieldOptions(createFieldOptionList(agg)),
+  };
+}
+
 function createDefaultDescription(dtr: RichDetector) {
   if (dtr.agg === null || dtr.field === null) {
     return '';
@@ -350,4 +384,14 @@ function createDefaultDescription(dtr: RichDetector) {
   basicDetector.partition_field_name = dtr.partitionField ? dtr.partitionField.id : undefined;
   basicDetector.exclude_frequent = dtr.excludeFrequent ? dtr.excludeFrequent : undefined;
   return detectorToString(basicDetector);
+}
+
+// fixes issue with EuiComboBox.
+// if the options list only contains one option and nothing has been selected, set
+// selectedOptions list to be an empty array
+function createSelectedOptions(
+  option: EuiComboBoxOptionProps,
+  options: EuiComboBoxOptionProps[]
+): EuiComboBoxOptionProps[] {
+  return options.length === 1 && options[0].label !== option.label ? [] : [option];
 }
