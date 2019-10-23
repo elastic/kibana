@@ -26,6 +26,7 @@ import { IExpressionLoader, ExpressionLoader } from './loader';
 // dom element which is provided by the component itself
 export interface ExpressionRendererProps extends IExpressionLoaderParams {
   className: string;
+  dataAttrs?: string[];
   expression: string | ExpressionAST;
   /**
    * If an element is specified, but the response of the expression run can't be rendered
@@ -39,6 +40,7 @@ export type ExpressionRenderer = React.FC<ExpressionRendererProps>;
 
 export const createRenderer = (loader: IExpressionLoader): ExpressionRenderer => ({
   className,
+  dataAttrs,
   expression,
   onRenderFailure,
   ...options
@@ -68,5 +70,5 @@ export const createRenderer = (loader: IExpressionLoader): ExpressionRenderer =>
     mountpoint.current,
   ]);
 
-  return <div className={className} ref={mountpoint} />;
+  return <div {...dataAttrs} className={className} ref={mountpoint} />;
 };
