@@ -20,29 +20,44 @@
 import React from 'react';
 import { renderWithIntl } from 'test_utils/enzyme_helpers';
 
-import {
-  DiscoverNoResults,
-} from './no_results';
+import { DiscoverNoResults } from './no_results';
+
+jest.mock('../../kibana_services', () => {
+  return {
+    getServices: () => ({
+      docLinks: {
+        links: {
+          query: {
+            luceneQuerySyntax: 'documentation-link',
+          },
+        },
+      },
+    }),
+  };
+});
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
 
 describe('DiscoverNoResults', () => {
   describe('props', () => {
     describe('shardFailures', () => {
       test('renders failures list when there are failures', () => {
-        const shardFailures = [{
-          index: 'A',
-          shard: '1',
-          reason: { reason: 'Awful error' },
-        }, {
-          index: 'B',
-          shard: '2',
-          reason: { reason: 'Bad error' },
-        }];
+        const shardFailures = [
+          {
+            index: 'A',
+            shard: '1',
+            reason: { reason: 'Awful error' },
+          },
+          {
+            index: 'B',
+            shard: '2',
+            reason: { reason: 'Bad error' },
+          },
+        ];
 
-        const component = renderWithIntl(
-          <DiscoverNoResults
-            shardFailures={shardFailures}
-          />
-        );
+        const component = renderWithIntl(<DiscoverNoResults shardFailures={shardFailures} />);
 
         expect(component).toMatchSnapshot();
       });
@@ -50,11 +65,7 @@ describe('DiscoverNoResults', () => {
       test(`doesn't render failures list when there are no failures`, () => {
         const shardFailures = [];
 
-        const component = renderWithIntl(
-          <DiscoverNoResults
-            shardFailures={shardFailures}
-          />
-        );
+        const component = renderWithIntl(<DiscoverNoResults shardFailures={shardFailures} />);
 
         expect(component).toMatchSnapshot();
       });
@@ -62,11 +73,7 @@ describe('DiscoverNoResults', () => {
 
     describe('timeFieldName', () => {
       test('renders time range feedback', () => {
-        const component = renderWithIntl(
-          <DiscoverNoResults
-            timeFieldName="awesome_time_field"
-          />
-        );
+        const component = renderWithIntl(<DiscoverNoResults timeFieldName="awesome_time_field" />);
 
         expect(component).toMatchSnapshot();
       });
@@ -75,10 +82,7 @@ describe('DiscoverNoResults', () => {
     describe('queryLanguage', () => {
       test('supports lucene and renders doc link', () => {
         const component = renderWithIntl(
-          <DiscoverNoResults
-            queryLanguage="lucene"
-            getDocLink={() => 'documentation-link'}
-          />
+          <DiscoverNoResults queryLanguage="lucene" getDocLink={() => 'documentation-link'} />
         );
 
         expect(component).toMatchSnapshot();
