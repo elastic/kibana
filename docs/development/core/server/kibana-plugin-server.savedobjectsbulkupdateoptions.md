@@ -8,5 +8,12 @@
 <b>Signature:</b>
 
 ```typescript
-export interface SavedObjectsBulkUpdateOptions extends SavedObjectsBaseOptions, SavedObjectsMutatingOperationBaseOptions 
+export interface SavedObjectsBulkUpdateOptions extends SavedObjectsBaseOptions 
 ```
+
+## Properties
+
+|  Property | Type | Description |
+|  --- | --- | --- |
+|  [refresh](./kibana-plugin-server.savedobjectsbulkupdateoptions.refresh.md) | <code>MutatingOperationRefreshSetting</code> | The Elasticsearch Refresh setting for this operation |
+

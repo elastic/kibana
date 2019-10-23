@@ -42,6 +42,7 @@ import {
   SavedObjectsBulkUpdateObject,
   SavedObjectsBulkUpdateOptions,
   SavedObjectsDeleteOptions,
+  SavedObjectsDeleteByNamespaceOptions,
 } from '../saved_objects_client';
 import {
   SavedObject,
@@ -49,7 +50,7 @@ import {
   SavedObjectsBaseOptions,
   SavedObjectsFindOptions,
   SavedObjectsMigrationVersion,
-  SavedObjectsMutatingOperationOptions,
+  MutatingOperationRefreshSetting,
 } from '../../types';
 import { validateConvertFilterToKueryNode } from './filter_utils';
 
@@ -84,10 +85,10 @@ export interface SavedObjectsRepositoryOptions {
   onBeforeWrite?: (...args: Parameters<CallCluster>) => Promise<void>;
 }
 
-export interface IncrementCounterOptions
-  extends SavedObjectsBaseOptions,
-    SavedObjectsMutatingOperationOptions {
+export interface IncrementCounterOptions extends SavedObjectsBaseOptions {
   migrationVersion?: SavedObjectsMigrationVersion;
+  /** The Elasticsearch Refresh setting for this operation */
+  refresh?: MutatingOperationRefreshSetting;
 }
 
 const DEFAULT_REFRESH_SETTING = 'wait_for';
@@ -361,7 +362,7 @@ export class SavedObjectsRepository {
    */
   async deleteByNamespace(
     namespace: string,
-    options: SavedObjectsMutatingOperationOptions = {}
+    options: SavedObjectsDeleteByNamespaceOptions = {}
   ): Promise<any> {
     if (!namespace || typeof namespace !== 'string') {
       throw new TypeError(`namespace is required, and must be a string`);

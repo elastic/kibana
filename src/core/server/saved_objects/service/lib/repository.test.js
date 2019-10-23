@@ -417,14 +417,19 @@ describe('SavedObjectsRepository', () => {
       });
     });
 
-    it('accepts custom refresh settings', async () => {
-      migrator.migrateDocument = doc => {
-        doc.attributes.title = doc.attributes.title + '!!';
-        doc.migrationVersion = { foo: '2.3.4' };
-        doc.references = [{ name: 'search_0', type: 'search', id: '123' }];
-        return doc;
-      };
+    it('defaults to a refresh setting of `wait_for`', async () => {
+      await savedObjectsRepository.create('index-pattern', {
+        id: 'logstash-*',
+        title: 'Logstash',
+      });
 
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({
+        refresh: 'wait_for'
+      });
+    });
+
+    it('accepts custom refresh settings', async () => {
       await savedObjectsRepository.create('index-pattern', {
         id: 'logstash-*',
         title: 'Logstash',
@@ -644,6 +649,29 @@ describe('SavedObjectsRepository', () => {
       expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
 
+    it('defaults to a refresh setting of `wait_for`', async () => {
+      callAdminCluster.mockReturnValue({
+        items: [
+          { create: { type: 'config', id: 'config:one', _primary_term: 1, _seq_no: 1 } },
+        ],
+      });
+
+      await savedObjectsRepository.bulkCreate([
+        {
+          type: 'config',
+          id: 'one',
+          attributes: { title: 'Test One' },
+          references: [{ name: 'ref_0', type: 'test', id: '1' }],
+        }
+      ]);
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+
+      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({
+        refresh: 'wait_for'
+      });
+    });
+
     it('accepts a custom refresh setting', async () => {
       callAdminCluster.mockReturnValue({
         items: [
@@ -670,11 +698,8 @@ describe('SavedObjectsRepository', () => {
       });
 
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      const bulkCalls = callAdminCluster.mock.calls.filter(([path]) => path === 'bulk');
 
-      expect(bulkCalls.length).toEqual(1);
-
-      expect(bulkCalls[0][1]).toMatchObject({
+      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({
         refresh: true
       });
     });
@@ -1122,6 +1147,16 @@ describe('SavedObjectsRepository', () => {
       expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
 
+    it('defaults to a refresh setting of `wait_for`', async () => {
+      callAdminCluster.mockReturnValue({ result: 'deleted' });
+      await savedObjectsRepository.delete('globaltype', 'logstash-*');
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({
+        refresh: 'wait_for'
+      });
+    });
+
     it(`accepts a custom refresh setting`, async () => {
       callAdminCluster.mockReturnValue({ result: 'deleted' });
       await savedObjectsRepository.delete('globaltype', 'logstash-*', {
@@ -1129,11 +1164,8 @@ describe('SavedObjectsRepository', () => {
       });
 
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster).toHaveBeenCalledWith('delete', {
-        id: 'globaltype:logstash-*',
+      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({
         refresh: false,
-        index: '.kibana-test',
-        ignore: [404],
       });
     });
   });
@@ -1176,23 +1208,22 @@ describe('SavedObjectsRepository', () => {
       });
     });
 
+    it('defaults to a refresh setting of `wait_for`', async () => {
+      callAdminCluster.mockReturnValue(deleteByQueryResults);
+      await savedObjectsRepository.deleteByNamespace('my-namespace');
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({
+        refresh: 'wait_for',
+      });
+    });
+
     it('accepts a custom refresh setting', async () => {
       callAdminCluster.mockReturnValue(deleteByQueryResults);
-      const result = await savedObjectsRepository.deleteByNamespace('my-namespace', { refresh: true });
+      await savedObjectsRepository.deleteByNamespace('my-namespace', { refresh: true });
 
-      expect(result).toEqual(deleteByQueryResults);
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
-
-      expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(mappings, schema, {
-        namespace: 'my-namespace',
-        type: ['config', 'baz', 'index-pattern', 'dashboard'],
-      });
-
-      expect(callAdminCluster).toHaveBeenCalledWith('deleteByQuery', {
-        body: { conflicts: 'proceed' },
-        ignore: [404],
-        index: ['.kibana-test', 'beats'],
+      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({
         refresh: true,
       });
     });
@@ -2055,6 +2086,21 @@ describe('SavedObjectsRepository', () => {
       expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
 
+    it('defaults to a refresh setting of `wait_for`', async () => {
+      await savedObjectsRepository.update(
+        'globaltype',
+        'foo',
+        {
+          name: 'bar',
+        }
+      );
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({
+        refresh: 'wait_for'
+      });
+    });
+
     it('accepts a custom refresh setting', async () => {
       await savedObjectsRepository.update(
         'globaltype',
@@ -2065,37 +2111,13 @@ describe('SavedObjectsRepository', () => {
         {
           refresh: true,
           namespace: 'foo-namespace',
-          references: [
-            {
-              name: 'ref_0',
-              type: 'test',
-              id: '1',
-            },
-          ],
         }
       );
 
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster).toHaveBeenCalledWith('update', {
-        id: 'globaltype:foo',
-        body: {
-          doc: {
-            updated_at: mockTimestamp,
-            globaltype: { name: 'bar' },
-            references: [
-              {
-                name: 'ref_0',
-                type: 'test',
-                id: '1',
-              },
-            ],
-          },
-        },
-        ignore: [404],
-        refresh: true,
-        index: '.kibana-test',
+      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({
+        refresh: true
       });
-
     });
   });
 
@@ -2413,12 +2435,10 @@ describe('SavedObjectsRepository', () => {
 
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
 
-      const [, { refresh } ] = callAdminCluster.mock.calls[0];
-
-      expect(refresh).toEqual('wait_for');
+      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({ refresh: 'wait_for' });
     });
 
-    it('allows accepts a custom refresh setting', async () => {
+    it('accepts a custom refresh setting', async () => {
       const objects = [
         {
           type: 'index-pattern',
@@ -2434,9 +2454,7 @@ describe('SavedObjectsRepository', () => {
 
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
 
-      const [, { refresh } ] = callAdminCluster.mock.calls[0];
-
-      expect(refresh).toEqual(true);
+      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({ refresh: true });
     });
 
     it(`prepends namespace to the id but doesn't add namespace to body when providing namespace for namespaced type`, async () => {
@@ -2681,14 +2699,18 @@ describe('SavedObjectsRepository', () => {
       });
     });
 
-    it('accepts a custom refresh setting', async () => {
-      migrator.migrateDocument = doc => {
-        doc.attributes.buildNum = 42;
-        doc.migrationVersion = { foo: '2.3.4' };
-        doc.references = [{ name: 'search_0', type: 'search', id: '123' }];
-        return doc;
-      };
+    it('defaults to a refresh setting of `wait_for`', async () => {
+      await savedObjectsRepository.incrementCounter('config', 'doesnotexist', 'buildNum', {
+        namespace: 'foo-namespace'
+      });
 
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({
+        refresh: 'wait_for'
+      });
+    });
+
+    it('accepts a custom refresh setting', async () => {
       await savedObjectsRepository.incrementCounter('config', 'doesnotexist', 'buildNum', {
         namespace: 'foo-namespace',
         refresh: true
