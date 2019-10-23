@@ -105,6 +105,8 @@ export type TableChangeType = 'initial' | 'unchanged' | 'reduced' | 'extended';
 export interface DatasourceSuggestion<T = unknown> {
   state: T;
   table: TableSuggestion;
+  // layerBehavior: 'replace' | 'add';
+  keptLayerIds: string[];
 }
 
 export interface DatasourceMetaData {
@@ -257,6 +259,10 @@ export interface SuggestionRequest<T = unknown> {
    * State is only passed if the visualization is active.
    */
   state?: T;
+  /**
+   * The visualization needs to know which table is being suggested
+   */
+  keptLayerIds: string[];
 }
 
 /**

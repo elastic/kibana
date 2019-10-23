@@ -13,6 +13,7 @@ import {
   FramePublicAPI,
   TableChangeType,
   TableSuggestion,
+  DatasourceSuggestion,
 } from '../../types';
 import { Action } from './state_management';
 
@@ -20,7 +21,7 @@ export interface Suggestion {
   visualizationId: string;
   datasourceState?: unknown;
   datasourceId?: string;
-  keptLayerIds: string[];
+  // keptLayerIds: string[];
   columns: number;
   score: number;
   title: string;
@@ -64,11 +65,11 @@ export function getSuggestions({
     ([datasourceId]) => datasourceStates[datasourceId] && !datasourceStates[datasourceId].isLoading
   );
 
-  const allLayerIds = _.flatten(
-    datasources.map(([datasourceId, datasource]) =>
-      datasource.getLayers(datasourceStates[datasourceId].state)
-    )
-  );
+  // const allLayerIds = _.flatten(
+  //   datasources.map(([datasourceId, datasource]) =>
+  //     datasource.getLayers(datasourceStates[datasourceId].state)
+  //   )
+  // );
 
   // Collect all table suggestions from available datasources
   const datasourceTableSuggestions = _.flatten(
@@ -90,17 +91,18 @@ export function getSuggestions({
           const table = datasourceSuggestion.table;
           const currentVisualizationState =
             visualizationId === activeVisualizationId ? visualizationState : undefined;
-          const keptLayerIds =
-            visualizationId !== activeVisualizationId
-              ? [datasourceSuggestion.table.layerId]
-              : allLayerIds;
+          // const keptLayerIds =
+          //   visualizationId !== activeVisualizationId
+          //     ? [datasourceSuggestion.table.layerId]
+          //     : allLayerIds;
+          console.log(visualizationId);
           return getVisualizationSuggestions(
             visualization,
             table,
             visualizationId,
             datasourceSuggestion,
-            currentVisualizationState,
-            keptLayerIds
+            currentVisualizationState
+            // keptLayerIds
           );
         })
       )
@@ -118,20 +120,22 @@ function getVisualizationSuggestions(
   visualization: Visualization<unknown, unknown>,
   table: TableSuggestion,
   visualizationId: string,
-  datasourceSuggestion: { datasourceId: string; state: unknown; table: TableSuggestion },
-  currentVisualizationState: unknown,
-  keptLayerIds: string[]
+  datasourceSuggestion: DatasourceSuggestion & { datasourceId: string },
+  currentVisualizationState: unknown
+  // keptLayerIds: string[]
 ) {
   return visualization
     .getSuggestions({
       table,
       state: currentVisualizationState,
+      keptLayerIds: datasourceSuggestion.keptLayerIds,
     })
     .map(({ state, ...visualizationSuggestion }) => ({
       ...visualizationSuggestion,
       visualizationId,
       visualizationState: state,
-      keptLayerIds,
+      keptLayerIds: datasourceSuggestion.keptLayerIds,
+      // keptLayerIds,
       datasourceState: datasourceSuggestion.state,
       datasourceId: datasourceSuggestion.datasourceId,
       columns: table.columns.length,
@@ -144,7 +148,8 @@ export function switchToSuggestion(
   dispatch: (action: Action) => void,
   suggestion: Pick<
     Suggestion,
-    'visualizationId' | 'visualizationState' | 'datasourceState' | 'datasourceId' | 'keptLayerIds'
+    // 'visualizationId' | 'visualizationState' | 'datasourceState' | 'datasourceId' | 'keptLayerIds'
+    'visualizationId' | 'visualizationState' | 'datasourceState' | 'datasourceId'
   >,
   type: 'SWITCH_VISUALIZATION' | 'SELECT_SUGGESTION' = 'SELECT_SUGGESTION'
 ) {
@@ -155,11 +160,12 @@ export function switchToSuggestion(
     datasourceState: suggestion.datasourceState,
     datasourceId: suggestion.datasourceId!,
   };
+  console.log('dispatching', action);
   dispatch(action);
-  const layerIds = Object.keys(frame.datasourceLayers).filter(id => {
-    return !suggestion.keptLayerIds.includes(id);
-  });
-  if (layerIds.length > 0) {
-    frame.removeLayers(layerIds);
-  }
+  // const layerIds = Object.keys(frame.datasourceLayers).filter(id => {
+  //   return !suggestion.keptLayerIds.includes(id);
+  // });
+  // if (layerIds.length > 0) {
+  //   frame.removeLayers(layerIds);
+  // }
 }

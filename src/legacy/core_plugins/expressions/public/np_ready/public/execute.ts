@@ -61,6 +61,7 @@ export class ExpressionDataHandler {
     this.promise = interpreter.interpretAst(this.ast, params.context || defaultContext, {
       getInitialContext,
       inspectorAdapters: this.inspectorAdapters,
+      abortSignal: this.abortController.signal,
     });
   }
 

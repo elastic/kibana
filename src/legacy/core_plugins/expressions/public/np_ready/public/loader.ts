@@ -127,6 +127,9 @@ export class ExpressionLoader {
     }
     this.dataHandler = execute(expression, params);
     this.data = await this.dataHandler.getData();
+    if (this.data.type === 'error') {
+      return;
+    }
     this.dataSubject.next(this.data);
     return this.data;
   };

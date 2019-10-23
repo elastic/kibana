@@ -109,7 +109,8 @@ export const getXyChartRenderer = (dependencies: {
       <I18nProvider>
         <XYChartReportable {...config} {...dependencies} />
       </I18nProvider>,
-      domNode
+      domNode,
+      () => _handlers.done(),
     );
   },
 });
