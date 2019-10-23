@@ -116,11 +116,11 @@ export const IpOverview = pure<IpOverviewProps>(
       [
         {
           title: i18n.FIRST_SEEN,
-          description: typeData ? dateRenderer(typeData.firstSeen) : getEmptyTagValue(),
+          description: dateRenderer(typeData.firstSeen),
         },
         {
           title: i18n.LAST_SEEN,
-          description: typeData ? dateRenderer(typeData.lastSeen) : getEmptyTagValue(),
+          description: dateRenderer(typeData.lastSeen),
         },
       ],
       [
