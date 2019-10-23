@@ -146,7 +146,7 @@ export interface SavedObjectsBaseOptions {
  *
  * @public
  */
-export interface SavedObjectsMutatingOperationBaseOptions {
+export interface SavedObjectsMutatingOperationOptions {
   /** Operation refresh setting */
   refresh?: boolean | 'wait_for';
 }

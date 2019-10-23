@@ -24,7 +24,7 @@ import {
   SavedObjectReference,
   SavedObjectsMigrationVersion,
   SavedObjectsBaseOptions,
-  SavedObjectsMutatingOperationBaseOptions,
+  SavedObjectsMutatingOperationOptions,
   SavedObjectsFindOptions,
 } from '../types';
 import { SavedObjectsErrorHelpers } from './lib/errors';
@@ -35,7 +35,7 @@ import { SavedObjectsErrorHelpers } from './lib/errors';
  */
 export interface SavedObjectsCreateOptions
   extends SavedObjectsBaseOptions,
-    SavedObjectsMutatingOperationBaseOptions {
+    SavedObjectsMutatingOperationOptions {
   /** (not recommended) Specify an id for the document */
   id?: string;
   /** Overwrite existing documents (defaults to false) */
@@ -101,7 +101,7 @@ export interface SavedObjectsFindResponse<T extends SavedObjectAttributes = any>
  */
 export interface SavedObjectsUpdateOptions
   extends SavedObjectsBaseOptions,
-    SavedObjectsMutatingOperationBaseOptions {
+    SavedObjectsMutatingOperationOptions {
   /** An opaque version number which changes on each successful write operation. Can be used for implementing optimistic concurrency control. */
   version?: string;
   /** {@inheritdoc SavedObjectReference} */
@@ -114,7 +114,7 @@ export interface SavedObjectsUpdateOptions
  */
 export interface SavedObjectsBulkUpdateOptions
   extends SavedObjectsBaseOptions,
-    SavedObjectsMutatingOperationBaseOptions {}
+    SavedObjectsMutatingOperationOptions {}
 
 /**
  *
@@ -122,7 +122,7 @@ export interface SavedObjectsBulkUpdateOptions
  */
 export interface SavedObjectsDeleteOptions
   extends SavedObjectsBaseOptions,
-    SavedObjectsMutatingOperationBaseOptions {}
+    SavedObjectsMutatingOperationOptions {}
 
 /**
  *

@@ -49,7 +49,7 @@ import {
   SavedObjectsBaseOptions,
   SavedObjectsFindOptions,
   SavedObjectsMigrationVersion,
-  SavedObjectsMutatingOperationBaseOptions,
+  SavedObjectsMutatingOperationOptions,
 } from '../../types';
 import { validateConvertFilterToKueryNode } from './filter_utils';
 
@@ -86,7 +86,7 @@ export interface SavedObjectsRepositoryOptions {
 
 export interface IncrementCounterOptions
   extends SavedObjectsBaseOptions,
-    SavedObjectsMutatingOperationBaseOptions {
+    SavedObjectsMutatingOperationOptions {
   migrationVersion?: SavedObjectsMigrationVersion;
 }
 
@@ -361,7 +361,7 @@ export class SavedObjectsRepository {
    */
   async deleteByNamespace(
     namespace: string,
-    options: SavedObjectsMutatingOperationBaseOptions = {}
+    options: SavedObjectsMutatingOperationOptions = {}
   ): Promise<any> {
     if (!namespace || typeof namespace !== 'string') {
       throw new TypeError(`namespace is required, and must be a string`);
