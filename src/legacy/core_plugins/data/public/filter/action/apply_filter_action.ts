@@ -25,6 +25,7 @@ import {
   createAction,
   IncompatibleActionError,
 } from '../../../../../../plugins/ui_actions/public';
+import { mountForComponent } from '../../../../../../plugins/kibana_react/public';
 import { changeTimeFilter, extractTimeFilter, FilterManager } from '../filter_manager';
 import { TimefilterContract } from '../../timefilter';
 import { applyFiltersPopover } from '../apply_filters/apply_filters_popover';
@@ -74,17 +75,19 @@ export function createFilterAction(
 
         const filterSelectionPromise: Promise<Filter[]> = new Promise(resolve => {
           const overlay = npStart.core.overlays.openModal(
-            applyFiltersPopover(
-              filters,
-              indexPatterns,
-              () => {
-                overlay.close();
-                resolve([]);
-              },
-              (filterSelection: Filter[]) => {
-                overlay.close();
-                resolve(filterSelection);
-              }
+            mountForComponent(
+              applyFiltersPopover(
+                filters,
+                indexPatterns,
+                () => {
+                  overlay.close();
+                  resolve([]);
+                },
+                (filterSelection: Filter[]) => {
+                  overlay.close();
+                  resolve(filterSelection);
+                }
+              )
             ),
             {
               'data-test-subj': 'test',
