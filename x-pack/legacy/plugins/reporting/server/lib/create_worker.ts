@@ -23,11 +23,11 @@ import { oncePerServer } from './once_per_server';
 
 function createWorkerFn(server: ServerFacade) {
   const config = server.config();
+  const logger = LevelLogger.createForServer(server, [PLUGIN_ID, 'queue-worker']);
   const queueConfig: QueueConfig = config.get('xpack.reporting.queue');
   const kibanaName: string = config.get('server.name');
   const kibanaId: string = config.get('server.uuid');
-  const exportTypesRegistry = server.plugins.reporting.exportTypesRegistry;
-  const logger = LevelLogger.createForServer(server, [PLUGIN_ID, 'queue-worker']);
+  const { exportTypesRegistry } = server.plugins.reporting!;
 
   // Once more document types are added, this will need to be passed in
   return function createWorker(queue: ESQueueInstance) {
