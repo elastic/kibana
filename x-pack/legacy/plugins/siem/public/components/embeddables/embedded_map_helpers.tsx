@@ -13,16 +13,10 @@ import { PluginsStart } from 'ui/new_platform/new_platform';
 
 import { ActionToaster, AppToast } from '../toasters';
 import {
-  APPLY_FILTER_TRIGGER,
   CONTEXT_MENU_TRIGGER,
   PANEL_BADGE_TRIGGER,
-  APPLY_FILTER_ACTION,
   ViewMode,
 } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import {
-  APPLY_SIEM_FILTER_ACTION_ID,
-  ApplySiemFilterAction,
-} from './actions/apply_siem_filter_action';
 import {
   IndexPatternMapping,
   MapEmbeddable,
@@ -64,23 +58,14 @@ export const displayErrorToast = (
  * Temporary Embeddables API configuration override until ability to edit actions is addressed:
  * https://github.com/elastic/kibana/issues/43643
  *
- * @param applyFilterQueryFromKueryExpression function for updating KQL as provided by NetworkFilter
+ * @param plugins new platform plugins
  *
- * @throws Error if action is already registered
+ * @throws Error if trigger/action doesn't exist
  */
 export const setupEmbeddablesAPI = (plugins: PluginsStart) => {
   try {
-    const actions = plugins.uiActions.getTriggerActions(APPLY_FILTER_TRIGGER);
-    const actionLoaded = actions.some(a => a.id === APPLY_SIEM_FILTER_ACTION_ID);
-    if (!actionLoaded) {
-      const siemFilterAction = new ApplySiemFilterAction();
-      plugins.uiActions.registerAction(siemFilterAction);
-      plugins.uiActions.attachAction(APPLY_FILTER_TRIGGER, siemFilterAction.id);
-
-      plugins.uiActions.detachAction(CONTEXT_MENU_TRIGGER, 'CUSTOM_TIME_RANGE');
-      plugins.uiActions.detachAction(PANEL_BADGE_TRIGGER, 'CUSTOM_TIME_RANGE_BADGE');
-      plugins.uiActions.detachAction(APPLY_FILTER_TRIGGER, APPLY_FILTER_ACTION);
-    }
+    plugins.uiActions.detachAction(CONTEXT_MENU_TRIGGER, 'CUSTOM_TIME_RANGE');
+    plugins.uiActions.detachAction(PANEL_BADGE_TRIGGER, 'CUSTOM_TIME_RANGE_BADGE');
   } catch (e) {
     throw e;
   }
@@ -89,12 +74,14 @@ export const setupEmbeddablesAPI = (plugins: PluginsStart) => {
 /**
  * Creates MapEmbeddable with provided initial configuration
  *
+ * @param filters any existing global filters
  * @param indexPatterns list of index patterns to configure layers for
  * @param query initial query constraints as Query
  * @param startDate
  * @param endDate
  * @param setQuery function as provided by the GlobalTime component for reacting to refresh
  * @param portalNode wrapper for MapToolTip so it is not rendered in the embeddables component tree
+ * @param embeddableApi
  *
  * @throws Error if EmbeddableFactory does not exist
  */
