@@ -21,7 +21,10 @@ export function Overview(props) {
   return (
     <EuiPage>
       <EuiPageBody>
-        <MigrationStatus clusterUuid={props.cluster.cluster_uuid}/>
+        <MigrationStatus
+          clusterUuid={props.cluster.cluster_uuid}
+          emailAddress={props.emailAddress}
+        />
 
         <AlertsPanel alerts={props.cluster.alerts} changeUrl={props.changeUrl} />
 

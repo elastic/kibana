@@ -16,6 +16,8 @@ import {
   EuiFieldPassword,
   EuiSwitch,
   EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ActionResult } from '../../../../actions/server/types';
@@ -33,8 +35,10 @@ export interface EmailActionData {
 
 interface ManageActionModalProps {
   createEmailAction: (handler: EmailActionData) => void;
+  deleteEmailAction: () => void;
+  cancel?: () => void;
   isNew: boolean;
-  action: ActionResult | null;
+  action?: ActionResult | null;
 }
 
 const DEFAULT_DATA: EmailActionData = {
@@ -47,17 +51,23 @@ const DEFAULT_DATA: EmailActionData = {
   password: '',
 };
 
-const SAVE_LABEL = i18n.translate('xpack.monitoring.alerts.migrate.manageAction.saveLabel', {
+const CREATE_LABEL = i18n.translate('xpack.monitoring.alerts.migrate.manageAction.createLabel', {
   defaultMessage: 'Create email action',
 });
-const EDIT_LABEL = i18n.translate('xpack.monitoring.alerts.migrate.manageAction.saveLabel', {
-  defaultMessage: 'Edit email action',
+const SAVE_LABEL = i18n.translate('xpack.monitoring.alerts.migrate.manageAction.saveLabel', {
+  defaultMessage: 'Save email action',
+});
+const DELETE_LABEL = i18n.translate('xpack.monitoring.alerts.migrate.manageAction.deleteLabel', {
+  defaultMessage: 'Delete',
+});
+const CANCEL_LABEL = i18n.translate('xpack.monitoring.alerts.migrate.manageAction.cancelLabel', {
+  defaultMessage: 'Cancel',
 });
 
 export const ManageEmailAction: React.FC<ManageActionModalProps> = (
   props: ManageActionModalProps
 ) => {
-  const { createEmailAction, isNew, action } = props;
+  const { createEmailAction, deleteEmailAction, cancel, isNew, action } = props;
 
   const defaultData = Object.assign({}, DEFAULT_DATA, action ? action.config : {});
   const [isSaving, setIsSaving] = React.useState(false);
@@ -204,9 +214,25 @@ export const ManageEmailAction: React.FC<ManageActionModalProps> = (
 
       <EuiSpacer />
 
-      <EuiButton type="submit" fill onClick={saveEmailAction} isLoading={isSaving}>
-        {isNew ? SAVE_LABEL : EDIT_LABEL}
-      </EuiButton>
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiButton type="submit" fill onClick={saveEmailAction} isLoading={isSaving}>
+            {isNew ? CREATE_LABEL : SAVE_LABEL}
+          </EuiButton>
+        </EuiFlexItem>
+        {!action || isNew ? null : (
+          <EuiFlexItem grow={false}>
+            <EuiButton onClick={cancel}>{CANCEL_LABEL}</EuiButton>
+          </EuiFlexItem>
+        )}
+        {isNew ? null : (
+          <EuiFlexItem grow={false}>
+            <EuiButton onClick={deleteEmailAction} color="danger" isLoading={isSaving}>
+              {DELETE_LABEL}
+            </EuiButton>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
     </EuiForm>
   );
 };

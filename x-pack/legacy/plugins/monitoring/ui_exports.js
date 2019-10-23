@@ -28,7 +28,8 @@ export const getUiExports = () => ({
   injectDefaultVars(server) {
     const config = server.config();
     return {
-      monitoringUiEnabled: config.get('xpack.monitoring.ui.enabled')
+      monitoringUiEnabled: config.get('xpack.monitoring.ui.enabled'),
+      monitoringLegacyEmailAddress: config.get('xpack.monitoring.cluster_alerts.email_notifications.email_address'),
     };
   },
   hacks: [ 'plugins/monitoring/hacks/toggle_app_link_in_nav' ],

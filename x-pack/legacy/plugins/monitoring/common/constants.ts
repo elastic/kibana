@@ -230,7 +230,7 @@ export const TELEMETRY_COLLECTION_INTERVAL = 86400000;
  * as the only way to see the new UI and actually run Kibana alerts. It will
  * be false until all alerts have been migrated, then it will be removed
  */
-export const KIBANA_ALERTING_ENABLED = false;
+export const KIBANA_ALERTING_ENABLED = true;
 
 /**
  * The prefix for all alert types used by monitoring
@@ -252,3 +252,9 @@ export const ALERT_ACTION_TYPE_EMAIL = '.email';
  * The number of alerts that have been migrated
  */
 export const NUMBER_OF_MIGRATED_ALERTS = 1;
+
+/**
+ * We store config data in a single saved object of this id
+ */
+export const MONITORING_CONFIG_SAVED_OBJECT_ID = 'monitoring';
+export const MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS = 'alertingEmailAddress';

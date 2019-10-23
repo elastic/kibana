@@ -5,49 +5,39 @@
  */
 
 import React, { Fragment } from 'react';
-import { omit, pick } from 'lodash';
 import { kfetch } from 'ui/kfetch';
 import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiSpacer,
-  EuiLink,
   EuiCallOut,
   EuiTitle,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiButtonEmpty,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ActionResult } from '../../../../actions/server/types';
 import { Alert } from '../../../../alerting/server/types';
-import { toggleSetupMode, getSetupModeState, addSetupModeCallback } from '../../lib/setup_mode';
+import { getSetupModeState, addSetupModeCallback } from '../../lib/setup_mode';
 import {
-  ALERT_ACTION_TYPE_EMAIL,
   NUMBER_OF_MIGRATED_ALERTS,
   KIBANA_ALERTING_ENABLED,
   ALERT_TYPE_PREFIX,
 } from '../../../common/constants';
-import { CreateActionModal } from './create_action_modal';
-import { SelectActionModal } from './select_action.modal';
-import { EmailActionData } from './manage_email_action';
+import { Migration } from './migration';
 
 interface MigrationStatusProps {
   clusterUuid: string;
+  emailAddress: string;
 }
 
 export const MigrationStatus: React.FC<MigrationStatusProps> = (props: MigrationStatusProps) => {
-  const { clusterUuid } = props;
+  const { clusterUuid, emailAddress } = props;
 
   const [setupModeEnabled, setSetupModeEnabled] = React.useState(getSetupModeState().enabled);
-  const [isCreating, setIsCreating] = React.useState(false);
-  const [showCallOut, setShowCallOut] = React.useState(false);
-  const [showCreate, setShowCreate] = React.useState(false);
   const [kibanaAlerts, setKibanaAlerts] = React.useState<Alert[]>([]);
-  const [emailActions, setEmailActions] = React.useState([]);
-  const [showCreateActionModal, setShowCreateActionModal] = React.useState(false);
-  const [showEditActionModal, setShowEditActionModal] = React.useState(false);
-  const [editAction, setEditAction] = React.useState<ActionResult | null>(null);
-  const [showSelectActionModal, setShowSelectActionModal] = React.useState(false);
-  const [selectedEmailActionId, setSelectedEmailActionId] = React.useState('');
+
+  const [showMigrationFlyout, setShowMigrationFlyout] = React.useState(false);
 
   React.useEffect(() => {
     async function fetchMigrationStatus() {
@@ -56,191 +46,91 @@ export const MigrationStatus: React.FC<MigrationStatusProps> = (props: Migration
         alert.alertTypeId.startsWith(ALERT_TYPE_PREFIX)
       );
       setKibanaAlerts(monitoringAlerts);
-      await fetchEmailActions();
-
-      if (alerts.total === 0) {
-        if (setupModeEnabled) {
-          setShowCreate(true);
-          setShowCallOut(false);
-        } else {
-          setShowCreate(false);
-          setShowCallOut(true);
-        }
-      }
     }
 
     fetchMigrationStatus();
-  }, [clusterUuid, setupModeEnabled]);
+  }, [clusterUuid, setupModeEnabled, showMigrationFlyout]);
 
   addSetupModeCallback(() => setSetupModeEnabled(getSetupModeState().enabled));
 
-  async function fetchEmailActions() {
-    const kibanaActions = await kfetch({
-      method: 'GET',
-      pathname: `/api/action/_find`,
-    });
-
-    const actions = kibanaActions.data.filter(
-      (action: ActionResult) => action.actionTypeId === ALERT_ACTION_TYPE_EMAIL
-    );
-    if (actions.length > 0) {
-      setSelectedEmailActionId(actions[0].id);
-    }
-    setEmailActions(actions);
-  }
-
-  async function createKibanaAlerts() {
-    setIsCreating(true);
-
-    const { alerts } = await kfetch({
-      method: 'POST',
-      pathname: `/api/monitoring/v1/clusters/${clusterUuid}/alerts`,
-      body: JSON.stringify({ selectedEmailActionId }),
-    });
-
-    setIsCreating(false);
-    setShowCreate(false);
-    setKibanaAlerts([...kibanaAlerts, ...alerts]);
-  }
-
-  async function createEmailAction(data: EmailActionData) {
-    if (editAction) {
-      await kfetch({
-        method: 'PUT',
-        pathname: `/api/action/${editAction.id}`,
-        body: JSON.stringify({
-          description: editAction.description,
-          config: omit(data, ['user', 'password']),
-          secrets: pick(data, ['user', 'password']),
-        }),
-      });
-    } else {
-      await kfetch({
-        method: 'POST',
-        pathname: '/api/action',
-        body: JSON.stringify({
-          description: i18n.translate('xpack.monitoring.alerts.actions.emailAction.description', {
-            defaultMessage: 'Kibana alerting is up to date!',
-          }),
-          actionTypeId: ALERT_ACTION_TYPE_EMAIL,
-          config: omit(data, ['user', 'password']),
-          secrets: pick(data, ['user', 'password']),
-        }),
-      });
-    }
-
-    await fetchEmailActions();
-  }
-
-  function selectAction() {
-    if (emailActions.length === 0) {
-      setShowCreateActionModal(true);
-    } else {
-      setShowSelectActionModal(true);
-    }
-  }
-
-  function renderCreateActionModal() {
-    if (!showCreateActionModal && !showEditActionModal) {
-      return null;
-    }
-
-    return (
-      <CreateActionModal
-        onClose={() => {
-          setShowCreateActionModal(false);
-          setShowEditActionModal(false);
-        }}
-        createEmailAction={async (data: EmailActionData) => {
-          await createEmailAction(data);
-          setShowCreateActionModal(false);
-          setShowEditActionModal(false);
-          setShowSelectActionModal(true);
-        }}
-        isNew={showCreateActionModal}
-        editAction={editAction}
-      />
-    );
-  }
-
-  function renderSelectActionModal() {
-    if (!showSelectActionModal) {
-      return null;
-    }
-
-    return (
-      <SelectActionModal
-        emailActions={emailActions}
-        onClose={() => setShowSelectActionModal(false)}
-        createKibanaAlerts={createKibanaAlerts}
-        onClickEdit={(action: ActionResult) => {
-          setShowSelectActionModal(false);
-          setEditAction(action);
-          setShowEditActionModal(true);
-        }}
-        selectedEmailActionId={selectedEmailActionId}
-        setSelectedEmailActionId={setSelectedEmailActionId}
-      />
-    );
-  }
-
   function renderContent() {
+    let flyout = null;
+    if (showMigrationFlyout) {
+      flyout = (
+        <EuiFlyout onClose={() => setShowMigrationFlyout(false)} aria-labelledby="flyoutTitle">
+          <EuiFlyoutHeader hasBorder>
+            <EuiTitle size="m">
+              <h2>
+                {i18n.translate('xpack.monitoring.alerts.migration.flyoutTitle', {
+                  defaultMessage: 'Alerting migration',
+                })}
+              </h2>
+            </EuiTitle>
+            <EuiText>
+              <p>
+                {i18n.translate('xpack.monitoring.alerts.migration.flyoutSubtitle', {
+                  defaultMessage: 'Configure an email server and email address to receive alerts.',
+                })}
+              </p>
+            </EuiText>
+          </EuiFlyoutHeader>
+          <EuiFlyoutBody>
+            <Migration
+              clusterUuid={clusterUuid}
+              emailAddress={emailAddress}
+              onDone={() => setShowMigrationFlyout(false)}
+            />
+          </EuiFlyoutBody>
+        </EuiFlyout>
+      );
+    }
+
     const allMigrated = kibanaAlerts.length === NUMBER_OF_MIGRATED_ALERTS;
     if (allMigrated) {
       if (setupModeEnabled) {
         return (
-          <EuiCallOut
-            color="success"
-            title={i18n.translate('xpack.monitoring.alerts.migrate.upToDate', {
-              defaultMessage: 'Kibana alerting is up to date!',
-            })}
-            iconType="flag"
-            size="s"
-          />
+          <Fragment>
+            <EuiCallOut
+              color="success"
+              title={i18n.translate('xpack.monitoring.alerts.migrate.upToDate', {
+                defaultMessage: 'Kibana alerting is up to date!',
+              })}
+              iconType="flag"
+            >
+              <p>
+                <EuiButtonEmpty onClick={() => setShowMigrationFlyout(true)}>
+                  {i18n.translate('xpack.monitoring.alerts.migrate.manage', {
+                    defaultMessage: 'Manage email action and/or receiving email address',
+                  })}
+                </EuiButtonEmpty>
+              </p>
+            </EuiCallOut>
+            {flyout}
+          </Fragment>
         );
       }
-    }
-
-    const needToMigrateLabel = i18n.translate('xpack.monitoring.alerts.migrate.needToMigrate', {
-      defaultMessage: 'Migrate cluster alerts to Kibana alerting',
-    });
-
-    if (showCreate) {
+    } else {
       return (
-        <EuiCallOut color="warning" title={needToMigrateLabel} iconType="flag">
-          <EuiButton onClick={selectAction} isLoading={isCreating}>
-            {i18n.translate('xpack.monitoring.alerts.migrate.migrateActionBtn', {
-              defaultMessage: 'Migrate {count} cluster alert(s) to Kibana alerting',
-              values: {
-                count: NUMBER_OF_MIGRATED_ALERTS,
-              },
+        <Fragment>
+          <EuiCallOut
+            color="warning"
+            title={i18n.translate('xpack.monitoring.alerts.migrate.needToMigrateTitle', {
+              defaultMessage: 'Hey! We made alerting better!',
             })}
-          </EuiButton>
-          {renderCreateActionModal()}
-          {renderSelectActionModal()}
-        </EuiCallOut>
+          >
+            <p>
+              <EuiButtonEmpty onClick={() => setShowMigrationFlyout(true)}>
+                {i18n.translate('xpack.monitoring.alerts.migrate.needToMigrate', {
+                  defaultMessage:
+                    'Click here to migrate cluster alerts to our new alerting platform.',
+                })}
+              </EuiButtonEmpty>
+            </p>
+          </EuiCallOut>
+          {flyout}
+        </Fragment>
       );
     }
-
-    if (showCallOut) {
-      return (
-        <EuiCallOut color="warning" title={needToMigrateLabel}>
-          <p>
-            {i18n.translate('xpack.monitoring.alerts.migrate.outsideOfSetupModeText', {
-              defaultMessage: 'Some cluster alerts need to be migrated to Kibana alerting.',
-            })}
-            &nbsp;
-            <EuiLink onClick={() => toggleSetupMode(true)}>
-              {i18n.translate('xpack.monitoring.alerts.migrate.outsideOfSetupModeLinkText', {
-                defaultMessage: 'Enter Setup mode to start the process.',
-              })}
-            </EuiLink>
-          </p>
-        </EuiCallOut>
-      );
-    }
-
-    return null;
   }
 
   if (!KIBANA_ALERTING_ENABLED) {
@@ -251,17 +141,7 @@ export const MigrationStatus: React.FC<MigrationStatusProps> = (props: Migration
   if (content) {
     return (
       <Fragment>
-        <EuiTitle>
-          <h4>
-            {i18n.translate('xpack.monitoring.alerts.migrate.title', {
-              defaultMessage: 'Kibana alerting',
-            })}
-          </h4>
-        </EuiTitle>
-        <EuiSpacer />
-        <EuiFlexGroup>
-          <EuiFlexItem grow={true}>{content}</EuiFlexItem>
-        </EuiFlexGroup>
+        {content}
         <EuiSpacer />
       </Fragment>
     );

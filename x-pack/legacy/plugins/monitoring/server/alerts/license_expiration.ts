@@ -16,7 +16,7 @@ const EXPIRES_DAYS = [60, 30, 14, 7];
 
 export const getLicenseExpiration = (
   getMonitoringCluster: any,
-  getLogger: Function<Logger>
+  getLogger: (contexts: string[]) => Logger
 ): AlertType => {
   async function getCallCluster(services: any): Promise<any> {
     const monitoringCluster = await getMonitoringCluster();
@@ -33,7 +33,7 @@ export const getLicenseExpiration = (
     name: 'Monitoring Alert - License Expiration',
     actionGroups: ['default'],
     async executor({ services, params, state }: AlertExecutorOptions): Promise<any> {
-      logger.debug(
+      logger.warn(
         `Firing alert with params: ${JSON.stringify(params)} and state: ${JSON.stringify(state)}`
       );
 
@@ -43,11 +43,11 @@ export const getLicenseExpiration = (
       // Fetch licensing information from cluster_stats documents
       const license: License = await fetchLicense(callCluster, clusterUuid);
       if (!license) {
-        logger.debug(`No license data found`);
+        logger.warn(`No license data found`);
         return state;
       }
 
-      const emailAddress = await fetchDefaultEmailAddress(callCluster, clusterUuid);
+      const emailAddress = await fetchDefaultEmailAddress(services.savedObjectsClient);
       if (!emailAddress) {
         // TODO: we can do more here
         logger.warn(
@@ -82,7 +82,7 @@ export const getLicenseExpiration = (
       const instance = services.alertInstanceFactory(ALERT_TYPE_LICENSE_EXPIRATION);
 
       if (isExpired && !state.expired_check_date_in_millis) {
-        logger.debug(`License will expire soon, sending email`);
+        logger.warn(`License will expire soon, sending email`);
         instance.scheduleActions('default', {
           subject: 'NEW X-Pack Monitoring: License Expiration',
           message: `This cluster's license is going to expire on ${$expiry.format()}. Please update your license.`,
@@ -90,7 +90,7 @@ export const getLicenseExpiration = (
         });
         result.expired_check_date_in_millis = moment().valueOf();
       } else if (!isExpired && state.expired_check_date_in_millis) {
-        logger.debug(`License expiration has been resolved, sending email`);
+        logger.warn(`License expiration has been resolved, sending email`);
         instance.scheduleActions('default', {
           subject: 'RESOLVED X-Pack Monitoring: License Expiration',
           message: `This cluster alert has been resolved: This cluster's license was going to expire on ${$expiry.format()}.`,

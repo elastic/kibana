@@ -6,7 +6,11 @@
 
 import Joi from 'joi';
 import { isFunction } from 'lodash';
-import { ALERT_TYPE_LICENSE_EXPIRATION } from '../../../../../common/constants';
+import {
+  ALERT_TYPE_LICENSE_EXPIRATION,
+  MONITORING_CONFIG_SAVED_OBJECT_ID,
+  MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS
+} from '../../../../../common/constants';
 
 async function createAlerts(alertsClient, { selectedEmailActionId, clusterUuid }) {
   const createdAlerts = [];
@@ -33,6 +37,15 @@ async function createAlerts(alertsClient, { selectedEmailActionId, clusterUuid }
   };
 
   for (const alertTypeId of Object.keys(ALERT_TYPES)) {
+    const existingAlert = await alertsClient.find({
+      options: {
+        search: alertTypeId
+      }
+    });
+    if (existingAlert.total === 1) {
+      await alertsClient.delete({ id: existingAlert.data[0].id });
+    }
+
     const result = await alertsClient.create({
       data: {
         enabled: true,
@@ -44,6 +57,26 @@ async function createAlerts(alertsClient, { selectedEmailActionId, clusterUuid }
   }
 
   return createdAlerts;
+}
+
+async function saveEmailAddress(emailAddress, savedObjectsClient) {
+  try {
+    await savedObjectsClient.get('config', MONITORING_CONFIG_SAVED_OBJECT_ID);
+  }
+  catch (err) {
+    await savedObjectsClient.create(
+      'config',
+      { [MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS]: emailAddress },
+      { id: MONITORING_CONFIG_SAVED_OBJECT_ID },
+    );
+    return;
+  }
+
+  await savedObjectsClient.update(
+    'config',
+    MONITORING_CONFIG_SAVED_OBJECT_ID,
+    { [MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS]: emailAddress }
+  );
 }
 
 
@@ -58,17 +91,27 @@ export function createKibanaAlertsRoute(server) {
         }),
         payload: Joi.object({
           selectedEmailActionId: Joi.string().required(),
+          emailAddress: Joi.string().required(),
         })
       }
     },
     async handler(req, headers) {
+      const { emailAddress, selectedEmailActionId } = req.payload;
       const alertsClient = isFunction(req.getAlertsClient) ? req.getAlertsClient() : null;
-      if (!alertsClient) {
+      const savedObjectsClient = isFunction(req.getSavedObjectsClient) ? req.getSavedObjectsClient() : null;
+      if (!alertsClient || !savedObjectsClient) {
         return headers.response().code(404);
       }
 
-      const alerts = await createAlerts(alertsClient, { ...req.params, ...req.payload });
-      return { alerts };
+      const [
+        alerts,
+        emailResponse
+      ] = await Promise.all([
+        createAlerts(alertsClient, { ...req.params, selectedEmailActionId }),
+        saveEmailAddress(emailAddress, savedObjectsClient)
+      ]);
+
+      return { alerts, emailResponse };
     }
   });
 }

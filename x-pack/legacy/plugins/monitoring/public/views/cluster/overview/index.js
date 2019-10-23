@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment } from 'react';
+import { isEmpty } from 'lodash';
+import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
 import uiRoutes from 'ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
@@ -12,7 +14,11 @@ import { MonitoringViewBaseController } from '../../';
 import { Overview } from 'plugins/monitoring/components/cluster/overview';
 import { I18nContext } from 'ui/i18n';
 import { SetupModeRenderer } from '../../../components/renderers';
-import { CODE_PATH_ALL } from '../../../../common/constants';
+import {
+  CODE_PATH_ALL,
+  MONITORING_CONFIG_SAVED_OBJECT_ID,
+  MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS
+} from '../../../../common/constants';
 
 const CODE_PATHS = [CODE_PATH_ALL];
 
@@ -31,6 +37,7 @@ uiRoutes.when('/overview', {
       const monitoringClusters = $injector.get('monitoringClusters');
       const globalState = $injector.get('globalState');
       const showLicenseExpiration = $injector.get('showLicenseExpiration');
+      const savedObjectsClient = chrome.getSavedObjectsClient();
 
       super({
         title: i18n.translate('xpack.monitoring.cluster.overviewTitle', {
@@ -52,7 +59,15 @@ uiRoutes.when('/overview', {
         });
       };
 
-      $scope.$watch(() => this.data, data => {
+      $scope.$watch(() => this.data, async data => {
+        if (isEmpty(data)) {
+          return;
+        }
+
+        const monitoringConfig = await savedObjectsClient.get('config', MONITORING_CONFIG_SAVED_OBJECT_ID);
+        const emailAddress = monitoringConfig.get(MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS)
+          || chrome.getInjected('monitoringLegacyEmailAddress');
+
         this.renderReact(
           <I18nContext>
             <SetupModeRenderer
@@ -63,6 +78,7 @@ uiRoutes.when('/overview', {
                   {flyoutComponent}
                   <Overview
                     cluster={data}
+                    emailAddress={emailAddress}
                     setupMode={setupMode}
                     changeUrl={changeUrl}
                     showLicenseExpiration={showLicenseExpiration}
