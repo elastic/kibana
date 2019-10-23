@@ -98,10 +98,9 @@ export class SearchSource {
     (searchSource: SearchSourceContract, options?: FetchOptions) => Promise<unknown>
   > = [];
   private inheritOptions: SearchSourceOptions = {};
-  private fields: SearchSourceFields = {};
   public history: any[] = [];
 
-  constructor() {}
+  constructor(private fields: SearchSourceFields = {}) {}
 
   /** ***
    * PUBLIC API
@@ -313,6 +312,7 @@ export class SearchSource {
     key: K
   ) {
     val = typeof val === 'function' ? val(this) : val;
+    if (val == null || !key) return;
 
     const addToRoot = (rootKey: string, value: any) => {
       data[rootKey] = value;
@@ -333,6 +333,9 @@ export class SearchSource {
         return addToRoot('filters', (data.filters || []).concat(val));
       case 'query':
         return addToRoot(key, (data[key] || []).concat(val));
+      case 'fields':
+        const fields = _.uniq((data[key] || []).concat(val));
+        return addToRoot(key, fields);
       case 'index':
       case 'type':
       case 'highlightAll':
@@ -344,9 +347,6 @@ export class SearchSource {
       case 'sort':
         const sort = normalizeSortRequest(val, this.getField('index'), config.get('sort:options'));
         return addToBody(key, sort);
-      case 'fields':
-        const fields = _.uniq((data[key] || []).concat(val || []));
-        return addToRoot(key, fields);
       default:
         return addToBody(key, val);
     }
@@ -372,58 +372,44 @@ export class SearchSource {
     const searchRequest = this.mergeProps();
 
     searchRequest.body = searchRequest.body || {};
+    const { body, index, fields, query, filters, highlightAll } = searchRequest;
 
-    const computedFields = searchRequest.index.getComputedFields();
+    const computedFields = index.getComputedFields();
 
-    searchRequest.body.stored_fields = computedFields.storedFields;
-    searchRequest.body.script_fields = searchRequest.body.script_fields || {};
-    _.extend(searchRequest.body.script_fields, computedFields.scriptFields);
+    body.stored_fields = computedFields.storedFields;
+    body.script_fields = body.script_fields || {};
+    _.extend(body.script_fields, computedFields.scriptFields);
 
-    searchRequest.body.docvalue_fields =
-      searchRequest.body.docvalue_fields || computedFields.docvalueFields || [];
+    const defaultDocValueFields = computedFields.docvalueFields
+      ? computedFields.docvalueFields
+      : [];
+    body.docvalue_fields = body.docvalue_fields || defaultDocValueFields;
 
-    if (searchRequest.body._source) {
+    if (body._source) {
       // exclude source fields for this index pattern specified by the user
-      const filter = fieldWildcardFilter(
-        searchRequest.body._source.excludes,
-        config.get('metaFields')
-      );
-      searchRequest.body.docvalue_fields = searchRequest.body.docvalue_fields.filter(
-        (docvalueField: any) => filter(docvalueField.field)
+      const filter = fieldWildcardFilter(body._source.excludes, config.get('metaFields'));
+      body.docvalue_fields = body.docvalue_fields.filter((docvalueField: any) =>
+        filter(docvalueField.field)
       );
     }
 
     // if we only want to search for certain fields
-    const fields = searchRequest.fields;
     if (fields) {
       // filter out the docvalue_fields, and script_fields to only include those that we are concerned with
-      searchRequest.body.docvalue_fields = filterDocvalueFields(
-        searchRequest.body.docvalue_fields,
-        fields
-      );
-      searchRequest.body.script_fields = _.pick(searchRequest.body.script_fields, fields);
+      body.docvalue_fields = filterDocvalueFields(body.docvalue_fields, fields);
+      body.script_fields = _.pick(body.script_fields, fields);
 
       // request the remaining fields from both stored_fields and _source
-      const remainingFields = _.difference(fields, _.keys(searchRequest.body.script_fields));
-      searchRequest.body.stored_fields = remainingFields;
-      searchRequest.body._source = { includes: remainingFields };
+      const remainingFields = _.difference(fields, _.keys(body.script_fields));
+      body.stored_fields = remainingFields;
+      _.set(body, '_source.includes', remainingFields);
     }
 
     const esQueryConfigs = getEsQueryConfig(config);
-    searchRequest.body.query = buildEsQuery(
-      searchRequest.index,
-      searchRequest.query,
-      searchRequest.filters,
-      esQueryConfigs
-    );
+    body.query = buildEsQuery(index, query, filters, esQueryConfigs);
 
-    if (searchRequest.highlightAll != null) {
-      if (searchRequest.highlightAll && searchRequest.body.query) {
-        searchRequest.body.highlight = getHighlightRequest(
-          searchRequest.body.query,
-          config.get('doc_table:highlight')
-        );
-      }
+    if (highlightAll && body.query) {
+      body.highlight = getHighlightRequest(body.query, config.get('doc_table:highlight'));
       delete searchRequest.highlightAll;
     }
 
@@ -435,21 +421,14 @@ export class SearchSource {
 
         if (agg.filters) {
           // translate filters aggregations
-          const filters = agg.filters.filters;
-
-          Object.keys(filters).forEach(function(filterId) {
-            filters[filterId] = buildEsQuery(
-              searchRequest.index,
-              [],
-              [filters[filterId]],
-              esQueryConfigs
-            );
+          Object.keys(agg.filters.filters).forEach(function(filterId) {
+            filters[filterId] = buildEsQuery(index, [], [filters[filterId]], esQueryConfigs);
           });
         }
 
         recurse(agg.aggs || agg.aggregations);
       });
-    })(searchRequest.body.aggs || searchRequest.body.aggregations);
+    })(body.aggs || body.aggregations);
 
     return searchRequest;
   }
