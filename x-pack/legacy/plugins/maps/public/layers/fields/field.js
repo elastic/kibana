@@ -16,7 +16,7 @@ export class AbstractField {
     return this._fieldName;
   }
 
-  getLabel() {
+  async getLabel() {
     return this._fieldName;
   }
 

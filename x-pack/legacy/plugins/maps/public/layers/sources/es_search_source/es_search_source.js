@@ -76,10 +76,6 @@ export class ESSearchSource extends AbstractESSource {
     });
   }
 
-  _getTooltipPropertyNames()  {
-    return this._tooltipFields.map(field => field.getName());
-  }
-
   renderSourceSettingsEditor({ onChange }) {
 
 

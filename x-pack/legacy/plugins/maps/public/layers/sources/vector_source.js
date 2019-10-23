@@ -57,6 +57,10 @@ export class AbstractVectorSource extends AbstractSource {
       mapColors);
   }
 
+  _getTooltipPropertyNames()  {
+    return this._tooltipFields.map(field => field.getName());
+  }
+
   createDefaultLayer(options, mapColors) {
     const layerDescriptor = this._createDefaultLayerDescriptor(options, mapColors);
     const style = new VectorStyle(layerDescriptor.style, this);

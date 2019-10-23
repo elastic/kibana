@@ -13,7 +13,7 @@ import { EMSFileCreateSourceEditor } from './create_source_editor';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { UpdateSourceEditor } from './update_source_editor';
-import { TooltipProperty } from '../../tooltips/tooltip_property';
+import { EMSRegionLayerField } from '../../fields/ems_region_field';
 
 export class EMSFileSource extends AbstractVectorSource {
 
@@ -45,19 +45,25 @@ export class EMSFileSource extends AbstractVectorSource {
 
   constructor(descriptor, inspectorAdapters) {
     super(EMSFileSource.createDescriptor(descriptor), inspectorAdapters);
+    this._tooltipFields = this._descriptor.tooltipProperties.map(propertyKey => {
+      return new EMSRegionLayerField({
+        fieldName: propertyKey,
+        source: this
+      });
+    });
   }
 
   renderSourceSettingsEditor({ onChange }) {
     return (
       <UpdateSourceEditor
         onChange={onChange}
-        tooltipProperties={this._descriptor.tooltipProperties}
+        tooltipProperties={this._getTooltipPropertyNames()}
         layerId={this._descriptor.id}
       />
     );
   }
 
-  async _getEMSFileLayer() {
+  async getEMSFileLayer() {
     const emsClient = getEMSClient();
     const emsFileLayers = await emsClient.getFileLayers();
     const emsFileLayer = emsFileLayers.find((fileLayer => fileLayer.getId() === this._descriptor.id));
@@ -73,7 +79,7 @@ export class EMSFileSource extends AbstractVectorSource {
   }
 
   async getGeoJsonWithMeta() {
-    const emsFileLayer = await this._getEMSFileLayer();
+    const emsFileLayer = await this.getEMSFileLayer();
     const featureCollection = await AbstractVectorSource.getGeoJson({
       format: emsFileLayer.getDefaultFormatType(),
       featureCollectionPath: 'data',
@@ -98,7 +104,7 @@ export class EMSFileSource extends AbstractVectorSource {
   async getImmutableProperties() {
     let emsLink;
     try {
-      const emsFileLayer = await this._getEMSFileLayer();
+      const emsFileLayer = await this.getEMSFileLayer();
       emsLink = emsFileLayer.getEMSHotLink();
     } catch(error) {
       // ignore error if EMS layer id could not be found
@@ -121,7 +127,7 @@ export class EMSFileSource extends AbstractVectorSource {
 
   async getDisplayName() {
     try {
-      const emsFileLayer = await this._getEMSFileLayer();
+      const emsFileLayer = await this.getEMSFileLayer();
       return emsFileLayer.getDisplayName();
     } catch (error) {
       return this._descriptor.id;
@@ -129,13 +135,13 @@ export class EMSFileSource extends AbstractVectorSource {
   }
 
   async getAttributions() {
-    const emsFileLayer = await this._getEMSFileLayer();
+    const emsFileLayer = await this.getEMSFileLayer();
     return emsFileLayer.getAttributions();
   }
 
 
   async getLeftJoinFields() {
-    const emsFileLayer = await this._getEMSFileLayer();
+    const emsFileLayer = await this.getEMSFileLayer();
     const fields = emsFileLayer.getFieldsInLanguage();
     return fields.map(f => {
       return { name: f.name, label: f.description };
@@ -143,22 +149,16 @@ export class EMSFileSource extends AbstractVectorSource {
   }
 
   canFormatFeatureProperties() {
-    return this._descriptor.tooltipProperties.length;
+    return this._tooltipFields.length > 0;
   }
 
   async filterAndFormatPropertiesToHtml(properties) {
-    const emsFileLayer = await this._getEMSFileLayer();
-    const emsFields = emsFileLayer.getFieldsInLanguage();
-
-    return this._descriptor.tooltipProperties.map(propertyName => {
-      // Map EMS field name to language specific label
-      const emsField = emsFields.find(field => {
-        return field.name === propertyName;
-      });
-      const label = emsField ? emsField.description : propertyName;
-
-      return new TooltipProperty(propertyName, label, properties[propertyName]);
+    const tooltipProperties = this._tooltipFields.map(field => {
+      const value = properties[field.getName()];
+      return field.createTooltipProperty(value);
     });
+
+    return Promise.all(tooltipProperties);
   }
 
   async getSupportedShapeTypes() {
