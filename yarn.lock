@@ -1064,13 +1064,12 @@
     debug "^3.1.0"
     lodash.once "^4.1.1"
 
-"@elastic/charts@^13.5.4":
-  version "13.5.4"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-13.5.4.tgz#b958639d485ed58d116ac66a16e4accef97919e0"
-  integrity sha512-F+aE4VgJ7xvl9RmWtJiHZwADQT9FwBSWgQS1IR1VQ5wLyOI9LUwrDGZXMtLR56M7wjPWbk0228n5xPgjsuBcdg==
+"@elastic/charts@^13.5.7":
+  version "13.5.7"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-13.5.7.tgz#97ba458059613efd542ae68d7d2da059aac38484"
+  integrity sha512-8ibgrEJD3fpoLurB/DnNaWRmMGxAPHdtvCiPl1saPIjvlmGlrUNlXMneVgsPLqerNT0vuJDgqfQHHQcef/S2Hw==
   dependencies:
     "@types/d3-shape" "^1.3.1"
-    "@types/luxon" "^1.11.1"
     classnames "^2.2.6"
     d3-array "^1.2.4"
     d3-collection "^1.0.7"
@@ -1078,7 +1077,6 @@
     d3-shape "^1.3.4"
     fp-ts "^1.14.2"
     konva "^2.6.0"
-    luxon "^1.11.3"
     mobx "^4.9.2"
     mobx-react "^5.4.3"
     newtype-ts "^0.2.4"
@@ -3640,11 +3638,6 @@
   version "5.1.0"
   resolved "https://registry.yarnpkg.com/@types/lru-cache/-/lru-cache-5.1.0.tgz#57f228f2b80c046b4a1bd5cac031f81f207f4f03"
   integrity sha512-RaE0B+14ToE4l6UqdarKPnXwVDuigfFv+5j9Dze/Nqr23yyuqdNvzcZi3xB+3Agvi5R4EOgAksfv3lXX4vBt9w==
-
-"@types/luxon@^1.11.1":
-  version "1.12.0"
-  resolved "https://registry.yarnpkg.com/@types/luxon/-/luxon-1.12.0.tgz#acf14294d18e6eba427a5e5d7dfce0f5cd2a9400"
-  integrity sha512-+UzPmwHSEEyv7aGlNkVpuFxp/BirXgl8NnPGCtmyx2KXIzAapoW3IqSVk87/Z3PUk8vEL8Pe1HXEMJbNBOQgtg==
 
 "@types/mapbox-gl@^0.54.1":
   version "0.54.3"
@@ -18704,11 +18697,6 @@ lru-queue@0.1:
   integrity sha1-Jzi9nw089PhEkMVzbEhpmsYyzaM=
   dependencies:
     es5-ext "~0.10.2"
-
-luxon@^1.11.3:
-  version "1.13.1"
-  resolved "https://registry.yarnpkg.com/luxon/-/luxon-1.13.1.tgz#b7fb7ba1e5c93ebda098af8d579314797e0a0d69"
-  integrity sha512-IQKRIiz9ldUrgcozN13SAeNZVYfD3bEI9X6TcrGu+dkgE4GR/Iik03ozbTM5cTr0lz8ucYPL2jtYT7Va2Flbsg==
 
 lz-string@^1.4.4:
   version "1.4.4"
