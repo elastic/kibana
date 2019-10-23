@@ -15,7 +15,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiCode,
-  EuiSpacer,
 } from '@elastic/eui';
 
 import { useForm, Form } from '../../../../shared_imports';

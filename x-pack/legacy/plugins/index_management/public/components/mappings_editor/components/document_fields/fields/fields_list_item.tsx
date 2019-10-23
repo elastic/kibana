@@ -10,7 +10,7 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiBadge,
-  EuiFacetButton,
+  EuiNotificationBadge,
   EuiButtonIcon,
   EuiIcon,
 } from '@elastic/eui';
@@ -67,7 +67,7 @@ export const FieldsListItem = React.memo(function FieldListItemComponent({
   const isAddFieldBtnDisabled = false; // For now, we never disable the Add Child button.
   // const isAddFieldBtnDisabled = field.nestedDepth === MAX_DEPTH_DEFAULT_EDITOR - 1;
 
-  // When there aren't any "child" fields (the maxNestedDepth === 0), there are no toggle icon on the left of any field.
+  // When there aren't any "child" fields (the maxNestedDepth === 0), there is no toggle icon on the left of any field.
   // For that reason, we need to compensate and substract some indent to left align on the page.
   const substractIndentAmount = maxNestedDepth === 0 ? CHILD_FIELD_INDENT_SIZE * 0.5 : 0;
 
@@ -89,7 +89,13 @@ export const FieldsListItem = React.memo(function FieldListItemComponent({
       return null;
     }
 
-    return <CreateField isMultiField={canHaveMultiFields} paddingLeft={indentCreateField} />;
+    return (
+      <CreateField
+        isMultiField={canHaveMultiFields}
+        paddingLeft={indentCreateField}
+        maxNestedDepth={maxNestedDepth}
+      />
+    );
   };
 
   const renderActionButtons = () => {
@@ -143,13 +149,14 @@ export const FieldsListItem = React.memo(function FieldListItemComponent({
             gutterSize="s"
             alignItems="center"
             className={classNames('mappings-editor__fields-list-item__content', {
-              'mappings-editor__fields-list-item__content--toggle': hasChildFields,
+              'mappings-editor__fields-list-item__content--toggle':
+                hasChildFields || hasMultiFields,
               'mappings-editor__fields-list-item__content--multi-field': isMultiField,
               'mappings-editor__fields-list-item__content--indent':
-                !hasChildFields && maxNestedDepth > treeDepth,
+                !hasChildFields && !hasMultiFields && maxNestedDepth > treeDepth,
             })}
           >
-            {hasChildFields && (
+            {(hasChildFields || hasMultiFields) && (
               <EuiFlexItem grow={false} className="mappings-editor__fields-list-item__toggle">
                 <EuiButtonIcon
                   color="text"
@@ -170,23 +177,25 @@ export const FieldsListItem = React.memo(function FieldListItemComponent({
             <EuiFlexItem grow={false}>
               <EuiBadge color="hollow">{TYPE_DEFINITION[source.type].label}</EuiBadge>
             </EuiFlexItem>
-            {!isMultiField && canHaveMultiFields && (
+            {canHaveMultiFields && (
               <>
                 {hasMultiFields && (
                   <EuiFlexItem grow={false}>
-                    <EuiFacetButton onClick={toggleExpand} quantity={childFields!.length}>
-                      +
-                    </EuiFacetButton>
+                    <EuiNotificationBadge onClick={toggleExpand}>
+                      {childFields!.length}
+                    </EuiNotificationBadge>
                   </EuiFlexItem>
                 )}
-                <EuiFlexItem
-                  grow={false}
-                  className="mappings-editor__fields-list-item__multi-field-button"
-                >
-                  <EuiButtonEmpty onClick={addField} iconType="plusInCircleFilled">
-                    Add multi-field
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
+                {areActionButtonsVisible && (
+                  <EuiFlexItem
+                    grow={false}
+                    className="mappings-editor__fields-list-item__multi-field-button"
+                  >
+                    <EuiButtonEmpty onClick={addField} iconType="plusInCircleFilled">
+                      Add multi-field
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                )}
               </>
             )}
             <EuiFlexItem className="mappings-editor__fields-list-item__actions">

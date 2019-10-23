@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 
-import { useState, useDispatch } from '../../mappings_state';
+import { useMappingsState, useDispatch } from '../../mappings_state';
 import { FieldsList, CreateField, EditField } from './fields';
 
 export const DocumentFields = () => {
@@ -15,10 +15,10 @@ export const DocumentFields = () => {
   const {
     fields: { byId, rootLevelFields },
     documentFields: { status, fieldToAddFieldTo, fieldToEdit },
-  } = useState();
+  } = useMappingsState();
 
   const getField = (fieldId: string) => byId[fieldId];
-  const fields = rootLevelFields.map(getField);
+  const fields = useMemo(() => rootLevelFields.map(getField), [rootLevelFields]);
 
   const addField = () => {
     dispatch({ type: 'documentField.createField' });

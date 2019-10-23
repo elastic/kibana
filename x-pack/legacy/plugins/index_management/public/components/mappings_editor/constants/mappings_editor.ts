@@ -10,6 +10,10 @@
  */
 export const MAX_DEPTH_DEFAULT_EDITOR = 4;
 
+/**
+ * 16px is the default $euiSize Sass variable.
+ * @link https://elastic.github.io/eui/#/guidelines/sass
+ */
 export const EUI_SIZE = 16;
 
 export const CHILD_FIELD_INDENT_SIZE = EUI_SIZE * 2;

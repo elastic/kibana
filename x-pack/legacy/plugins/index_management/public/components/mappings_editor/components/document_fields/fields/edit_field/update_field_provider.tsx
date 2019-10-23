@@ -7,7 +7,7 @@
 import React, { useState, Fragment } from 'react';
 import { EuiConfirmModal, EuiOverlayMask, EuiBadge } from '@elastic/eui';
 
-import { useState as useMappingsState, useDispatch } from '../../../../mappings_state';
+import { useMappingsState, useDispatch } from '../../../../mappings_state';
 import { shouldDeleteChildFieldsAfterTypeChange, buildFieldTreeFromIds } from '../../../../lib';
 import { NormalizedField, DataType } from '../../../../types';
 import { FieldsTree } from '../../../fields_tree';
@@ -44,9 +44,9 @@ export const UpdateFieldProvider = ({ children }: Props) => {
       oldType: DataType,
       newType: DataType
     ): { requiresConfirmation: boolean } => {
-      const { hasChildFields, hasMultiFields, canHaveChildFields, canHaveMultiFields } = field;
+      const { hasChildFields, hasMultiFields } = field;
 
-      if ((!hasChildFields && canHaveChildFields) || (!hasMultiFields && canHaveMultiFields)) {
+      if (!hasChildFields && !hasMultiFields) {
         // No child or multi-fields will be deleted, no confirmation needed.
         return { requiresConfirmation: false };
       }

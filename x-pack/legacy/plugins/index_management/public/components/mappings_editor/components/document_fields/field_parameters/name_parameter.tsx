@@ -9,13 +9,13 @@ import React from 'react';
 import { TextField, UseField, FieldConfig } from '../../../shared_imports';
 import { validateUniqueName } from '../../../lib';
 import { PARAMETERS_DEFINITION } from '../../../constants';
-import { useState } from '../../../mappings_state';
+import { useMappingsState } from '../../../mappings_state';
 
 export const NameParameter = () => {
   const {
     fields: { rootLevelFields, byId },
     documentFields: { fieldToAddFieldTo, fieldToEdit },
-  } = useState();
+  } = useMappingsState();
   const { validations, ...rest } = PARAMETERS_DEFINITION.name.fieldConfig as FieldConfig;
 
   const initialName = fieldToEdit ? byId[fieldToEdit].source.name : undefined;

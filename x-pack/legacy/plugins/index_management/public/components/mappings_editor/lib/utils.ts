@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import uuid from 'uuid';
 
 import {
   DataType,
@@ -21,19 +22,7 @@ import { State } from '../reducer';
 import { TreeItem } from '../components/tree';
 
 export const getUniqueId = () => {
-  const dateNow = Date.now();
-
-  let performanceNow: number;
-  try {
-    performanceNow = performance.now(); // only available in the browser
-  } catch {
-    performanceNow = process.hrtime()[0]; // only in Node
-  }
-
-  return (
-    '_' +
-    (Number(String(Math.random()).slice(2)) + dateNow + Math.round(performanceNow)).toString(36)
-  );
+  return uuid.v4();
 };
 
 const getChildFieldsName = (dataType: DataType): ChildFieldName | undefined => {
@@ -45,20 +34,22 @@ const getChildFieldsName = (dataType: DataType): ChildFieldName | undefined => {
   return undefined;
 };
 
-export const getFieldMeta = (field: Field): FieldMeta => {
+export const getFieldMeta = (field: Field, isMultiField?: boolean): FieldMeta => {
   const childFieldsName = getChildFieldsName(field.type);
 
-  const canHaveChildFields = childFieldsName === 'properties';
-  const hasChildFields =
-    canHaveChildFields &&
-    Boolean(field[childFieldsName!]) &&
-    Object.keys(field[childFieldsName!]!).length > 0;
+  const canHaveChildFields = isMultiField ? false : childFieldsName === 'properties';
+  const hasChildFields = isMultiField
+    ? false
+    : canHaveChildFields &&
+      Boolean(field[childFieldsName!]) &&
+      Object.keys(field[childFieldsName!]!).length > 0;
 
-  const canHaveMultiFields = childFieldsName === 'fields';
-  const hasMultiFields =
-    canHaveMultiFields &&
-    Boolean(field[childFieldsName!]) &&
-    Object.keys(field[childFieldsName!]!).length > 0;
+  const canHaveMultiFields = isMultiField ? false : childFieldsName === 'fields';
+  const hasMultiFields = isMultiField
+    ? false
+    : canHaveMultiFields &&
+      Boolean(field[childFieldsName!]) &&
+      Object.keys(field[childFieldsName!]!).length > 0;
 
   return {
     childFieldsName,
@@ -158,11 +149,12 @@ export const normalize = (fieldsToNormalize: Fields): NormalizedFields => {
       const id = getUniqueId();
       idsArray.push(id);
       const field = { name: propName, ...value } as Field;
-      const meta = getFieldMeta(field);
+      const meta = getFieldMeta(field, isMultiField);
       const { childFieldsName } = meta;
 
       if (childFieldsName && field[childFieldsName]) {
-        const nextDepth = meta.canHaveChildFields ? nestedDepth + 1 : nestedDepth;
+        const nextDepth =
+          meta.canHaveChildFields || meta.canHaveMultiFields ? nestedDepth + 1 : nestedDepth;
         meta.childFields = [];
         maxNestedDepth = Math.max(maxNestedDepth, nextDepth);
 

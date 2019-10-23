@@ -140,10 +140,10 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
   );
 });
 
-export const useState = () => {
+export const useMappingsState = () => {
   const ctx = useContext(StateContext);
   if (ctx === undefined) {
-    throw new Error('useState must be used within a <MappingsState>');
+    throw new Error('useMappingsState must be used within a <MappingsState>');
   }
   return ctx;
 };

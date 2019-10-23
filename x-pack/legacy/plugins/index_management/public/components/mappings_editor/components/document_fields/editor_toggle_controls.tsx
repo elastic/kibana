@@ -7,7 +7,7 @@
 import React from 'react';
 import { EuiButton, EuiText } from '@elastic/eui';
 
-import { useDispatch, useState } from '../../mappings_state';
+import { useDispatch, useMappingsState } from '../../mappings_state';
 import { FieldsEditor } from '../../types';
 import { canUseMappingsEditor, normalize } from '../../lib';
 
@@ -18,7 +18,7 @@ interface Props {
 /* TODO: Review toggle controls UI */
 export const EditorToggleControls = ({ editor }: Props) => {
   const dispatch = useDispatch();
-  const { fieldsJsonEditor } = useState();
+  const { fieldsJsonEditor } = useMappingsState();
 
   const [showMaxDepthWarning, setShowMaxDepthWarning] = React.useState<boolean>(false);
   const [showValidityWarning, setShowValidityWarning] = React.useState<boolean>(false);

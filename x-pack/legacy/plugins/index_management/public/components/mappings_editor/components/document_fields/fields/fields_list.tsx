@@ -22,7 +22,7 @@ export const FieldsList = React.memo(function FieldsListComponent({ fields, tree
       {fields.map((field, index) => (
         <FieldsListItemContainer
           key={field.id}
-          field={field}
+          fieldId={field.id}
           treeDepth={treeDepth === undefined ? 0 : treeDepth}
           isLastItem={index === fields.length - 1}
         />
