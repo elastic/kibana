@@ -13,7 +13,6 @@ export function createJestConfig({ kibanaDirectory, xPackKibanaDirectory }) {
       '<rootDir>/legacy/plugins',
       '<rootDir>/legacy/server',
       '<rootDir>/test_utils/jest/contract_tests',
-      '<rootDir>/legacy/plugins/canvas/.storybook',
     ],
     moduleFileExtensions: ['js', 'json', 'ts', 'tsx'],
     moduleNameMapper: {
