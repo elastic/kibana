@@ -100,8 +100,7 @@ export class DocTitleService {
   }
 
   private applyTitle(title: ChromeDocTitleChange) {
-    const rendered = this.render(title);
-    this.document.title = rendered;
+    this.document.title = this.render(title);
   }
 
   private render(title: ChromeDocTitleChange) {

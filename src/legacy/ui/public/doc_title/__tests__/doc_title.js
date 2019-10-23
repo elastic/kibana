@@ -38,13 +38,17 @@ describe('docTitle Service', function () {
     npStart.core.chrome.docTitle.__legacy.setBaseTitle(initialDocTitle);
   });
 
-  beforeEach(ngMock.module('kibana', function ($provide) {
-    $provide.decorator('$rootScope', decorateWithSpy('$on'));
-  }));
+  beforeEach(
+    ngMock.module('kibana', function ($provide) {
+      $provide.decorator('$rootScope', decorateWithSpy('$on'));
+    })
+  );
 
-  beforeEach(ngMock.inject(function ($injector) {
-    $rootScope = $injector.get('$rootScope');
-  }));
+  beforeEach(
+    ngMock.inject(function ($injector) {
+      $rootScope = $injector.get('$rootScope');
+    })
+  );
 
   describe('setup', function () {
     it('resets the title when a route change begins', function () {
@@ -61,13 +65,11 @@ describe('docTitle Service', function () {
   });
 
   describe('#reset', function () {
-    it('clears the internal state, next update() will write the default', function () {
+    it('clears the internal state', function () {
       docTitle.change('some title');
-      docTitle.update();
       expect(document.title).to.be('some title - ' + MAIN_TITLE);
 
       docTitle.reset();
-      docTitle.update();
       expect(document.title).to.be(MAIN_TITLE);
     });
   });
@@ -78,12 +80,6 @@ describe('docTitle Service', function () {
       docTitle.change('some secondary title');
       expect(document.title).to.be('some secondary title - ' + MAIN_TITLE);
     });
-
-    it('will write just the first param if the second param is true', function () {
-      expect(document.title).to.be(MAIN_TITLE);
-      docTitle.change('entire name', true);
-      expect(document.title).to.be('entire name');
-    });
   });
 
   function decorateWithSpy(prop) {
@@ -92,5 +88,4 @@ describe('docTitle Service', function () {
       return $delegate;
     };
   }
-
 });

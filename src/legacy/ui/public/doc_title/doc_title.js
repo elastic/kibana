@@ -23,32 +23,22 @@ import { npStart } from '../new_platform';
 
 const npDocTitle = () => npStart.core.chrome.docTitle;
 
-function change(title, complete) {
-  npDocTitle().change({
-    parts: isArray(title) ? title : [title],
-    excludeBase: complete,
-  });
+function change(title) {
+  npDocTitle().change(isArray(title) ? title : [title]);
 }
 
 function reset() {
-  npDocTitle().reset(false);
-}
-
-function update() {
-  npDocTitle().apply();
+  npDocTitle().reset();
 }
 
 export const docTitle = {
   change,
   reset,
-  update,
 };
 
 uiModules.get('kibana')
   .run(function ($rootScope) {
   // always bind to the route events
     $rootScope.$on('$routeChangeStart', docTitle.reset);
-    $rootScope.$on('$routeChangeError', docTitle.update);
-    $rootScope.$on('$routeChangeSuccess', docTitle.update);
   });
 
