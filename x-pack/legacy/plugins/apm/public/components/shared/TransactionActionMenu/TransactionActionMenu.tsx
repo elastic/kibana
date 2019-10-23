@@ -81,7 +81,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = (
 
   const infraConfigItems: InfraConfigItem[] = [
     {
-      icon: 'loggingApp',
+      icon: 'logsApp',
       label: i18n.translate(
         'xpack.apm.transactionActionMenu.showPodLogsLinkLabel',
         { defaultMessage: 'Show pod logs' }
@@ -91,7 +91,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = (
       query: { time }
     },
     {
-      icon: 'loggingApp',
+      icon: 'logsApp',
       label: i18n.translate(
         'xpack.apm.transactionActionMenu.showContainerLogsLinkLabel',
         { defaultMessage: 'Show container logs' }
@@ -101,7 +101,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = (
       query: { time }
     },
     {
-      icon: 'loggingApp',
+      icon: 'logsApp',
       label: i18n.translate(
         'xpack.apm.transactionActionMenu.showHostLogsLinkLabel',
         { defaultMessage: 'Show host logs' }
@@ -111,7 +111,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = (
       query: { time }
     },
     {
-      icon: 'loggingApp',
+      icon: 'logsApp',
       label: i18n.translate(
         'xpack.apm.transactionActionMenu.showTraceLogsLinkLabel',
         { defaultMessage: 'Show trace logs' }

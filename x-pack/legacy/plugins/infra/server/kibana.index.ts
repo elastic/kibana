@@ -73,7 +73,7 @@ export const initServerWithKibana = (kbnServer: KbnServer) => {
     name: i18n.translate('xpack.infra.featureRegistry.linkLogsTitle', {
       defaultMessage: 'Logs',
     }),
-    icon: 'loggingApp',
+    icon: 'logsApp',
     navLinkId: 'infra:logs',
     app: ['infra', 'kibana'],
     catalogue: ['infralogging'],

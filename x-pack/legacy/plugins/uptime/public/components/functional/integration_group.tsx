@@ -177,7 +177,7 @@ export const IntegrationGroup = ({
                 }
               )}
               href={getLoggingIpHref(summary, basePath)}
-              iconType="loggingApp"
+              iconType="logsApp"
               message={i18n.translate(
                 'xpack.uptime.monitorList.loggingIntegrationAction.ip.message',
                 {
@@ -200,7 +200,7 @@ export const IntegrationGroup = ({
                 }
               )}
               href={getLoggingKubernetesHref(summary, basePath)}
-              iconType="loggingApp"
+              iconType="logsApp"
               message={i18n.translate(
                 'xpack.uptime.monitorList.loggingIntegrationAction.kubernetes.message',
                 {
@@ -227,7 +227,7 @@ export const IntegrationGroup = ({
                 }
               )}
               href={getLoggingContainerHref(summary, basePath)}
-              iconType="loggingApp"
+              iconType="logsApp"
               message={i18n.translate(
                 'xpack.uptime.monitorList.loggingIntegrationAction.container.message',
                 {

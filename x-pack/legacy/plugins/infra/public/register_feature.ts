@@ -36,7 +36,7 @@ FeatureCatalogueRegistryProvider.register((i18n: I18nServiceType) => ({
     defaultMessage:
       'Stream logs in real time or scroll through historical views in a console-like experience.',
   }),
-  icon: 'loggingApp',
+  icon: 'logsApp',
   path: `/app/${APP_ID}#logs`,
   showOnHomePage: true,
   category: FeatureCatalogueCategory.DATA,

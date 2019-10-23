@@ -56,7 +56,7 @@ export function infra(kibana: any) {
             defaultMessage: 'Explore your logs',
           }),
           icon: 'plugins/infra/images/logging_mono_white.svg',
-          euiIconType: 'loggingApp',
+          euiIconType: 'logsApp',
           id: 'infra:logs',
           order: 8001,
           title: i18n.translate('xpack.infra.linkLogsTitle', {
@@ -76,7 +76,7 @@ export function infra(kibana: any) {
         {
           path: `/app/${APP_ID}#/logs`,
           label: logsSampleDataLinkLabel,
-          icon: 'loggingApp',
+          icon: 'logsApp',
         },
       ]);
     },
