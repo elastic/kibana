@@ -17,18 +17,18 @@
  * under the License.
  */
 
-import wreck from 'wreck';
+import axios from 'axios';
 
 export async function getNodeShasums(nodeVersion) {
-  const url = `https://nodejs.org/dist/v${nodeVersion}/SHASUMS256.txt`;
+  const url = `https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/dist/v${nodeVersion}/SHASUMS256.txt`;
 
-  const { res, payload } = await wreck.get(url);
+  const { status, data } = await axios.get(url);
 
-  if (res.statusCode !== 200) {
-    throw new Error(`${url} failed with a ${res.statusCode} response`);
+  if (status !== 200) {
+    throw new Error(`${url} failed with a ${status} response`);
   }
 
-  return payload
+  return data
     .toString('utf8')
     .split('\n')
     .reduce((acc, line) => {

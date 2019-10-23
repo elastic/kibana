@@ -192,7 +192,9 @@ describe('src/dev/build/tasks/nodejs/download', () => {
         });
         throw new Error('Expected download() to reject');
       } catch (error) {
-        expect(error).to.have.property('message').contain('Unexpected status code 500');
+        expect(error)
+          .to.have.property('message')
+          .contain('Request failed with status code 500');
         expect(reqCount).to.be(6);
       }
     });
