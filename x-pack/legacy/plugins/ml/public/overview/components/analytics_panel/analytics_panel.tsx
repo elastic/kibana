@@ -15,15 +15,14 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { checkPermission } from '../../../privilege/check_privilege';
 import { AnalyticsTable } from './table';
 import { getAnalyticsFactory } from '../../../data_frame_analytics/pages/analytics_management/services/analytics_service';
 import { DataFrameAnalyticsListRow } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
 
-export const AnalyticsPanel: FC = () => {
-  const createButtonDisabled =
-    !checkPermission('canCreateDataFrameAnalytics') ||
-    !checkPermission('canStartStopDataFrameAnalytics');
+interface Props {
+  jobCreationDisabled: boolean;
+}
+export const AnalyticsPanel: FC<Props> = ({ jobCreationDisabled }) => {
   const [analytics, setAnalytics] = useState<DataFrameAnalyticsListRow[]>([]);
   const [errorMessage, setErrorMessage] = useState<any>(undefined);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -90,7 +89,7 @@ export const AnalyticsPanel: FC = () => {
               color="primary"
               fill
               iconType="plusInCircle"
-              isDisabled={createButtonDisabled}
+              isDisabled={jobCreationDisabled}
             >
               {i18n.translate('xpack.ml.overview.analyticsList.createJobButtonText', {
                 defaultMessage: 'Create job',
