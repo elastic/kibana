@@ -31,11 +31,10 @@ export const CategorizationFieldSelect: FC<Props> = ({ fields, changeHandler, se
     ...createScriptFieldOptions(jobCreator.scriptFields),
   ];
 
-  const selection: EuiComboBoxOptionProps[] = [
-    {
-      label: selectedField !== null ? selectedField : '',
-    },
-  ];
+  const selection: EuiComboBoxOptionProps[] = [];
+  if (selectedField !== null) {
+    selection.push({ label: selectedField });
+  }
 
   function onChange(selectedOptions: EuiComboBoxOptionProps[]) {
     const option = selectedOptions[0];
