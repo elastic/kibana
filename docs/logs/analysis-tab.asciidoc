@@ -1,33 +1,73 @@
 [role="xpack"]
 [[xpack-logs-analysis-tab]]
-== Using machine learning to detect and inspect log anomalies
+== Detecting and inspecting log anomalies
 
 beta::[]
 
-In the Logs app, the *Analysis* tab allows you to analyze your log data using machine learning.
-The analysis highlights periods where the log rate is outside the expected limits and therefore may be anomalous.
-Within the Logs app, you can inspect the anomalies and the partitions in which they occurred.
-You can also analyze the anomalies directly in machine learning to get a greater understanding of the issues.
+The *Analysis* tab in the Logs app allows you to automatically detect some kinds of log anomalies using machine learning.
+
+The analysis automatically highlights periods where the log rate is outside the expected limits and therefore may be anomalous.
+This helps you to spot suspicious behavior without significant human intervention.
+You can use this information as a basis for further investigations.
+
+Within the the *Analysis* tab, you can inspect the anomalies and the log partitions in which they occurred.
+You can also view the anomalies directly in the Machine Learning app to get a greater understanding of the issues.
 
 The *Analysis* tab in the Logs app is only available if you have a license that includes the machine learning features.
 
 [role="screenshot"]
 image::logs/images/analysis-tab.png[Analysis tab in Logs app in Kibana]
 
-=== Set up machine learning for logs analysis
+[float]
+=== Create a machine learning job for logs analysis
 Logs anomaly detection is carried out within a {kibana-ref}/xpack-spaces.html[space].
-Within a space, the first time you select the *Analysis* tab from the Logs app, you have the option to choose the time range for the analysis.
+Within a space, the first time you select the *Analysis* tab from the Logs app, you are prompted to create a machine learning job to carry out the logs analysis.
+
+First, you need to choose the time range for the analysis.
 By default, the analysis uses logs from between four weeks ago and the current date, then continues to add new logs to the analysis as they are ingested. You cannot change the time range for the analysis after the machine learning job has been created.
 
-Click *Create ML job* to create the machine learning job, and start detecting anomalies in your logs.
-
-
-
+Once you have selected the time range, click *Create ML job* to create the machine learning job.Now you can start detecting anomalies in your logs.
 
 [float]
 === View log entries
 
+Once the machine learning job has been created, the *Analysis* tab shows the log entries chart, an overall anomalies chart, and a collapsible entry for each the anomalies in each partition.
 
+[float]
+=== Log entries chart
+
+The log entries chart shows an overall visualization of the log entry rate, partitioned and color-coded according to the value of the {ecs-ref}/ecs-event.html[ECS `event.dataset`] field.
+
+You can hover over a time period to see the log rate for each of the partitions for that period.
+
+You can click a partition name on the right hand side to show or hide the values for that partition, or hover over a partition name to highlight just the values for that partition.
+
+[float]
+=== Overall anomalies chart
+
+The overall anomalies chart shows the areas where anomalies were detected in the overall log entry rate across all log partitions. The underlying rate values are shown in grey, and the anomalous regions are color-coded and superimposed on top.
+
+Where a time period is flagged as anomalous, it means that the machine learning algorithms detected something unusual about the log rate in that time period. This may be because the log rate was significantly higher than usual, or significantly lower than usual, or some other anomalous behavior was detected.
+
+The level of anomaly detected in a time period is color-coded as follows:
+
+* red: the anomaly level was detected as critical
+* yellow: the anomaly level was detected as major
+* blue: the anomaly level was detected as warning
+
+You can hover over the underlying rate values to see the average log rate value for that time period, or hover over the anomalous region to see the partitions that had anomalies in that time period.
+
+You can also click *Analyze in ML* to open the Anomaly Explorer in Machine Learning and analyze the anomalies in more detail. For more information about the Machine Learning app, see the {kibana-ref}xpack-ml.html[machine learning documentation].
+
+[float]
+=== Partition charts
+
+As well as viewing the overall anomaly distribution, you can view the anomaly distribution for an individual partition.
+Below the main anomalies chart, click the dropdown beside a partition name.
 
 interesting phrases
 Unsupervised
+
+
+
+
