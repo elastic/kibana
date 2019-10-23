@@ -65,6 +65,13 @@ yarn prettier  "./x-pack/legacy/plugins/apm/**/*.{tsx,ts,js}" --write
 yarn eslint ./x-pack/legacy/plugins/apm --fix
 ```
 
+### Useful Github Pull Request commands
+
+The following commands can be executed by writing them as comments on a pull request:
+
+ - `@elasticmachine merge upstream`: Will merge the upstream (eg. master or 7.x) into the branch. This is useful if a bug has been fixed upstream and the fix is necessary to pass CI checks
+ - `retest` Re-run the tests. This is useful if a flaky test caused the build to fail
+
 ### Visual Studio Code
 
 When using [Visual Studio Code](https://code.visualstudio.com/) with APM it's best to set up a [multi-root workspace](https://code.visualstudio.com/docs/editor/multi-root-workspaces) and add the `x-pack/legacy/plugins/apm` directory, the `x-pack` directory, and the root of the Kibana repository to the workspace. This makes it so you can navigate and search within APM and use the wider workspace roots when you need to widen your search.
