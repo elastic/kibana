@@ -50,15 +50,10 @@ export function loadNewJobCapabilities(
 const categoryFieldTypes = [ES_FIELD_TYPES.TEXT, ES_FIELD_TYPES.KEYWORD, ES_FIELD_TYPES.IP];
 
 class NewJobCapsService {
-  private _fields: Field[];
-  private _aggs: Aggregation[];
-  private _includeEventRateField: boolean;
-
-  constructor(includeEventRateField = true) {
-    this._fields = [];
-    this._aggs = [];
-    this._includeEventRateField = includeEventRateField;
-  }
+  private _fields: Field[] = [];
+  private _aggs: Aggregation[] = [];
+  private _includeEventRateField: boolean = true;
+  private _removeTextFields: boolean = true;
 
   public get fields(): Field[] {
     return this._fields;
@@ -79,8 +74,15 @@ class NewJobCapsService {
     return this._fields.filter(f => categoryFieldTypes.includes(f.type));
   }
 
-  public async initializeFromIndexPattern(indexPattern: IndexPattern) {
+  public async initializeFromIndexPattern(
+    indexPattern: IndexPattern,
+    includeEventRateField = true,
+    removeTextFields = true
+  ) {
     try {
+      this._includeEventRateField = includeEventRateField;
+      this._removeTextFields = removeTextFields;
+
       const resp = await ml.jobs.newJobCaps(indexPattern.title, indexPattern.type === 'rollup');
       const { fields, aggs } = createObjects(resp, indexPattern.title);
 
@@ -88,7 +90,10 @@ class NewJobCapsService {
         addEventRateField(aggs, fields);
       }
 
-      this._fields = fields;
+      // remove any text fields which have a keyword equivalents
+      const processedFields = this._removeTextFields ? processTextFields(fields) : fields;
+
+      this._fields = processedFields;
       this._aggs = aggs;
     } catch (error) {
       console.error('Unable to load new job capabilities', error); // eslint-disable-line no-console
@@ -197,6 +202,16 @@ function addEventRateField(aggs: Aggregation[], fields: Field[]) {
     }
   });
   fields.splice(0, 0, eventRateField);
+}
+
+// remove fields which are text and have a keyword equivalent
+function processTextFields(fields: Field[]) {
+  const keywordIds = fields.filter(f => f.type === ES_FIELD_TYPES.KEYWORD).map(f => f.id);
+  return fields.filter(
+    f =>
+      f.type !== ES_FIELD_TYPES.TEXT ||
+      (f.type === ES_FIELD_TYPES.TEXT && keywordIds.includes(`${f.id}.keyword`) === false)
+  );
 }
 
 export const newJobCapsService = new NewJobCapsService();
