@@ -6990,7 +6990,6 @@
     "xpack.transform.transformList.stopActionName": "停止",
     "xpack.transform.transformList.stopTransformSuccessMessage": "データフレームジョブ {transformId} が停止しました",
     "xpack.transform.pivotPreview.copyClipboardTooltip": "ピボットプレビューの開発コンソールステートメントをクリップボードにコピーします。",
-    "xpack.transform.pivotPreview.statusCodeLabel": "ステータスコード",
     "xpack.transform.progress": "進捗",
     "xpack.transform.sourceIndex": "ソースインデックス",
     "xpack.transform.sourceIndexPreview.copyClipboardTooltip": "ソースインデックスプレビューの開発コンソールステートメントをクリップボードにコピーします。",
