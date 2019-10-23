@@ -124,7 +124,7 @@ export class AggConfigs {
     return aggConfigs;
   }
 
-  createAggConfig(params: AggConfig | AggConfigOptions, { addToAggConfigs = true } = {}) {
+  createAggConfig = (params: AggConfig | AggConfigOptions, { addToAggConfigs = true } = {}) => {
     let aggConfig;
     if (params instanceof AggConfig) {
       aggConfig = params;
@@ -136,7 +136,7 @@ export class AggConfigs {
       this.aggs.push(aggConfig);
     }
     return aggConfig;
-  }
+  };
 
   /**
    * Data-by-data comparison of this Aggregation

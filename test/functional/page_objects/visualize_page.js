@@ -704,11 +704,11 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async clickData() {
-      await testSubjects.click('visualizeEditDataLink');
+      await testSubjects.click('visEditorTab__data');
     }
 
     async clickVisEditorTab(tabName) {
-      await testSubjects.click('visEditorTab' + tabName);
+      await testSubjects.click(`visEditorTab__${tabName}`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 

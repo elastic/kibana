@@ -17,8 +17,8 @@
  * under the License.
  */
 
-export const DefaultEditorSize = {
-  SMALL: 'small',
-  MEDIUM: 'medium',
-  LARGE: 'large'
-};
+export enum DefaultEditorSize {
+  SMALL = 'small',
+  MEDIUM = 'medium',
+  LARGE = 'large',
+}

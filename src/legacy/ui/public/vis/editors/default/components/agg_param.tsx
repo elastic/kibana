@@ -17,18 +17,24 @@
  * under the License.
  */
 
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 
 import { AggParamEditorProps, AggParamCommonProps } from './agg_param_props';
-import { OnAggParamsChange } from './agg_common_props';
+import { OnParamChange } from './agg_common_props';
 
 interface DefaultEditorAggParamProps<T> extends AggParamCommonProps<T> {
   paramEditor: React.ComponentType<AggParamEditorProps<T>>;
-  onChange: OnAggParamsChange;
+  onChange: OnParamChange;
 }
 
 function DefaultEditorAggParam<T>(props: DefaultEditorAggParamProps<T>) {
   const { agg, aggParam, paramEditor: ParamEditor, onChange, setValidity, ...rest } = props;
+
+  const setValue = useCallback((value: T) => onChange(agg.id, aggParam.name, value), [
+    onChange,
+    agg.params,
+    aggParam.name,
+  ]);
 
   useEffect(() => {
     if (aggParam.shouldShow && !aggParam.shouldShow(agg)) {
@@ -45,7 +51,7 @@ function DefaultEditorAggParam<T>(props: DefaultEditorAggParamProps<T>) {
       agg={agg}
       aggParam={aggParam}
       setValidity={setValidity}
-      setValue={(value: T) => onChange(agg.params, aggParam.name, value)}
+      setValue={setValue}
       {...rest}
     />
   );

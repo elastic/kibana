@@ -27,8 +27,6 @@
 export { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
 // @ts-ignore
 export { visFactory } from 'ui/vis/vis_factory';
-// @ts-ignore
-export { DefaultEditorSize } from 'ui/vis/editor_size';
 
 /**
  * Legacy types which haven't been moved to this plugin yet, but

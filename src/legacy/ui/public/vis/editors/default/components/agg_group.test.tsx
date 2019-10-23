@@ -110,7 +110,6 @@ describe('DefaultEditorAgg component', () => {
       addSchema: () => {},
       removeAgg: () => {},
       onAggParamsChange: () => {},
-      onAggTypeChange: () => {},
       onToggleEnableAgg: () => {},
     };
   });

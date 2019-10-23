@@ -19,7 +19,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { Status } from 'ui/vis/update_status';
-// @ts-ignore
 import { DefaultEditorSize } from 'ui/vis/editor_size';
 // @ts-ignore
 import { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';

@@ -16,11 +16,19 @@
 .visEditorSidebar__config {
   padding: $euiSizeS;
 
+  > * {
+    flex-grow: 0;
+  }
+
   @include euiBreakpoint('l', 'xl') {
     @include flex-parent(1, 1, 1px);
     @include euiScrollBar;
     overflow: auto;
   }
+}
+
+.visEditorSidebar__config--hidden {
+  display: none;
 }
 
 //
@@ -36,35 +44,8 @@
 }
 
 .visEditorSidebar__nav {
-  min-height: 0;
-
-  .navbar-right {
-    // Match correct bootstrap container spacing to pull buttons fully right
-    margin-right: -15px;
-  }
-}
-
-
-/**
- * 1. TODO: Override bootstrap styles. Remove !important once we're rid of bootstrap.
- */
-.visEditorSidebar__navLink {
-  padding: 2px $euiSizeS !important; /* 1 */
-  color: $euiColorDarkShade !important; /* 1 */
-
-  &.visEditorSidebar__navLink-isSelected {
-    border-bottom: 2px solid $euiColorPrimary;
-    border-color: $euiColorPrimary !important;
-    color: $euiColorPrimary !important;
-
-    &:before {
-      display: none;
-    }
-
-    &:hover {
-      background-color: transparent;
-    }
-  }
+  padding: 0 $euiSizeS;
+  flex-grow: 0;
 }
 
 /**

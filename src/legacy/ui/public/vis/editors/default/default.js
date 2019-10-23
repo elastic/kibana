@@ -21,7 +21,6 @@ import 'ui/angular-bootstrap';
 import './fancy_forms';
 import './sidebar';
 import { i18n } from '@kbn/i18n';
-import './vis_options';
 import './vis_editor_resizer';
 import './vis_type_agg_filter';
 import $ from 'jquery';
@@ -29,13 +28,13 @@ import $ from 'jquery';
 import _ from 'lodash';
 import angular from 'angular';
 import defaultEditorTemplate from './default.html';
-import { keyCodes } from '@elastic/eui';
 import { parentPipelineAggHelper } from 'ui/agg_types/metrics/lib/parent_pipeline_agg_helper';
-import { DefaultEditorSize } from '../../editor_size';
 
 import { VisEditorTypesRegistryProvider } from '../../../registry/vis_editor_types';
 import { getVisualizeLoader } from '../../../visualize/loader/visualize_loader';
 import { AggGroupNames } from './agg_groups';
+import { move } from '../../../utils/collection';
+import { getEnabledMetricAggsCount } from './components/agg_group_helper';
 
 const defaultEditor = function ($rootScope, $compile) {
   return class DefaultEditor {
@@ -45,16 +44,6 @@ const defaultEditor = function ($rootScope, $compile) {
       this.el = $(el);
       this.savedObj = savedObj;
       this.vis = savedObj.vis;
-
-      if (!this.vis.type.editorConfig.optionTabs && this.vis.type.editorConfig.optionsTemplate) {
-        this.vis.type.editorConfig.optionTabs = [
-          {
-            name: 'options',
-            title: i18n.translate('common.ui.vis.editors.sidebar.tabs.optionsLabel', { defaultMessage: 'Options' }),
-            editor: this.vis.type.editorConfig.optionsTemplate,
-          }
-        ];
-      }
     }
 
     render({ uiState, timeRange, filters, appState }) {
@@ -63,6 +52,7 @@ const defaultEditor = function ($rootScope, $compile) {
       const updateScope = () => {
         $scope.vis = this.vis;
         $scope.uiState = uiState;
+        $scope.optionTabs = this.optionTabs;
         //$scope.$apply();
       };
 
@@ -104,24 +94,6 @@ const defaultEditor = function ($rootScope, $compile) {
             }, 800));
           }
 
-          $scope.submitEditorWithKeyboard = (event) => {
-            if (event.ctrlKey && event.keyCode === keyCodes.ENTER) {
-              event.preventDefault();
-              event.stopPropagation();
-              $scope.stageEditableVis();
-            }
-          };
-
-          $scope.getSidebarClass = () => {
-            if ($scope.vis.type.editorConfig.defaultSize === DefaultEditorSize.SMALL) {
-              return 'visEditor__collapsibleSidebar--small';
-            } else if ($scope.vis.type.editorConfig.defaultSize === DefaultEditorSize.MEDIUM) {
-              return 'visEditor__collapsibleSidebar--medium';
-            } else if ($scope.vis.type.editorConfig.defaultSize === DefaultEditorSize.LARGE) {
-              return 'visEditor__collapsibleSidebar--large';
-            }
-          };
-
           $scope.$watch(() => {
             return $scope.vis.getSerializableState($scope.state);
           }, function (newState) {
@@ -143,6 +115,45 @@ const defaultEditor = function ($rootScope, $compile) {
               $scope.oldState = newState;
             }
           }, true);
+
+          $scope.onParamChange = (params, paramName, value) => {
+            if (params[paramName] !== value) {
+              params[paramName] = value;
+            }
+          };
+
+          $scope.setVisType = (type) => {
+            $scope.vis.type.type = type;
+          };
+
+          $scope.removeAgg = function (agg) {
+            const aggs = $scope.state.aggs.aggs;
+            const index = aggs.indexOf(agg);
+
+            aggs.splice(index, 1);
+
+            if (agg.schema.group === AggGroupNames.Metrics) {
+              const metrics = $scope.state.aggs.bySchemaGroup(AggGroupNames.Metrics);
+
+              if (getEnabledMetricAggsCount(metrics) === 0) {
+                metrics.find(aggregation => aggregation.schema.name === 'metric').enabled = true;
+              }
+            }
+          };
+
+          $scope.onToggleEnableAgg = (agg, isEnable) => {
+            agg.enabled = isEnable;
+          };
+
+          $scope.reorderAggs = (group) => {
+            //the aggs have been reordered in [group] and we need
+            //to apply that ordering to [vis.aggs]
+            const indexOffset = $scope.state.aggs.aggs.indexOf(group[0]);
+            _.forEach(group, (agg, index) => {
+              move($scope.state.aggs.aggs, agg, indexOffset + index);
+            });
+          };
+
 
           // Load the default editor template, attach it to the DOM and compile it.
           // It should be added to the DOM before compiling, to prevent some resize
@@ -197,5 +208,3 @@ const defaultEditor = function ($rootScope, $compile) {
 };
 
 VisEditorTypesRegistryProvider.register(defaultEditor);
-
-export { defaultEditor };

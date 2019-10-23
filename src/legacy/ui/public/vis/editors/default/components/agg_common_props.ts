@@ -22,10 +22,7 @@ import { AggConfig, VisState, VisParams } from '../../..';
 import { AggParams } from '../agg_params';
 import { AggGroupNames } from '../agg_groups';
 
-export type OnAggParamsChange = <
-  Params extends AggParams | VisParams,
-  ParamName extends keyof Params
->(
+export type OnParamChange = <Params extends AggParams | VisParams, ParamName extends keyof Params>(
   params: Params,
   paramName: ParamName,
   value: Params[ParamName]
@@ -37,8 +34,7 @@ export interface DefaultEditorAggCommonProps {
   lastParentPipelineAggTitle?: string;
   metricAggs: AggConfig[];
   state: VisState;
-  onAggParamsChange: OnAggParamsChange;
-  onAggTypeChange: (agg: AggConfig, aggType: AggType) => void;
+  onAggParamsChange: OnParamChange;
   onToggleEnableAgg: (agg: AggConfig, isEnable: boolean) => void;
   removeAgg: (agg: AggConfig) => void;
   setTouched: (isTouched: boolean) => void;

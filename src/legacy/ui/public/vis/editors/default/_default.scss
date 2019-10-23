@@ -1,13 +1,9 @@
 .visEditor--default {
-  // Prevent the default editor from overflowing. Without that you can cause
-  // a weird issue where the complete page can be scrolled out of view if
-  // the editor within the sidebar is too height.
-  overflow-y: hidden;
   flex: 1 1 auto;
   display: flex;
 
   @include euiBreakpoint('xs', 's', 'm') {
-    flex-direction: column;
+    flex-direction: column-reverse;
   }
 }
 
@@ -17,7 +13,7 @@
 
 .visEditor__collapsibleSidebar {
   @include flex-parent(0, 0, auto);
-  margin-right: $euiSizeL;
+  margin-left: $euiSizeL;
   flex-direction: row;
   min-width: $vis-editor-sidebar-min-width;
   width: $vis-editor-sidebar-min-width;

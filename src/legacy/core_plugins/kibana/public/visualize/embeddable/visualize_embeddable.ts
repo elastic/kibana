@@ -20,8 +20,7 @@
 import _ from 'lodash';
 import { StaticIndexPattern } from 'ui/index_patterns';
 import { PersistedState } from 'ui/persisted_state';
-import { VisualizeLoader } from 'ui/visualize/loader';
-import { EmbeddedVisualizeHandler } from 'ui/visualize/loader/embedded_visualize_handler';
+import { VisualizeLoader, EmbeddedVisualizeHandler } from 'ui/visualize';
 import {
   VisSavedObject,
   VisualizeLoaderParams,

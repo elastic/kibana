@@ -18,7 +18,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-// @ts-ignore
 import { DefaultEditorSize } from 'ui/vis/editor_size';
 import { visFactory } from '../../../visualizations/public';
 import { getTimelionRequestHandler } from './timelion_request_handler';

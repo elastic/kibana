@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useReducer, useEffect, useMemo } from 'react';
+import React, { useReducer, useEffect, useMemo, useCallback } from 'react';
 import { EuiForm, EuiAccordion, EuiSpacer, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -47,7 +47,7 @@ import { FixedParam, TimeIntervalParam, EditorParamConfig } from '../../config/t
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { useUnmount } from '../../../../../../../plugins/kibana_react/public/util/use_unmount';
 import { AggGroupNames } from '../agg_groups';
-import { OnAggParamsChange } from './agg_common_props';
+import { OnParamChange } from './agg_common_props';
 
 const FIXED_VALUE_PROP = 'fixedValue';
 const DEFAULT_PROP = 'default';
@@ -56,7 +56,7 @@ type EditorParamConfigType = EditorParamConfig & {
 };
 export interface SubAggParamsProp {
   formIsTouched: boolean;
-  onAggParamsChange: OnAggParamsChange;
+  onAggParamsChange: OnParamChange;
   onAggTypeChange: (agg: AggConfig, aggType: AggType) => void;
 }
 export interface DefaultEditorAggParamsProps extends SubAggParamsProp {
@@ -87,7 +87,6 @@ function DefaultEditorAggParams({
   metricAggs,
   state = {} as VisState,
   onAggParamsChange,
-  onAggTypeChange,
   setTouched,
   setValidity,
 }: DefaultEditorAggParamsProps) {
@@ -114,6 +113,12 @@ function DefaultEditorAggParams({
 
   const isAllInvalidParamsTouched =
     !!errors.length || isInvalidParamsTouched(agg.type, aggType, paramsState);
+
+  const onAggTypeChange = useCallback((aggr, value) => {
+    if (aggr.type !== value) {
+      aggr.type = value;
+    }
+  }, []);
 
   // reset validity before component destroyed
   useUnmount(() => setValidity(true));
