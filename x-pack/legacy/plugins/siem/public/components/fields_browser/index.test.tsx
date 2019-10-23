@@ -120,10 +120,9 @@ describe('StatefulFieldsBrowser', () => {
         .simulate('click');
 
       wrapper.update();
-
       expect(
         wrapper.find(`.field-browser-category-pane-auditd-${timelineId}`).first()
-      ).toHaveStyleRule('font-weight', 'bold');
+      ).toHaveStyleRule('font-weight', 'bold', { modifier: '.euiText' });
     });
     test('it updates the selectedCategoryId state according to most fields returned', done => {
       const wrapper = mount(
@@ -153,7 +152,7 @@ describe('StatefulFieldsBrowser', () => {
       wrapper.update();
       expect(
         wrapper.find(`.field-browser-category-pane-default.ECS-${timelineId}`).first()
-      ).toHaveStyleRule('font-weight', 'normal');
+      ).toHaveStyleRule('font-weight', 'normal', { modifier: '.euiText' });
       wrapper
         .find('[data-test-subj="field-search"]')
         .last()
@@ -163,7 +162,7 @@ describe('StatefulFieldsBrowser', () => {
         wrapper.update();
         expect(
           wrapper.find(`.field-browser-category-pane-default.ECS-${timelineId}`).first()
-        ).toHaveStyleRule('font-weight', 'bold');
+        ).toHaveStyleRule('font-weight', 'bold', { modifier: '.euiText' });
         wrapper.unmount();
         done();
       }, 1000);
