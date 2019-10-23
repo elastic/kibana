@@ -371,6 +371,8 @@ export class SearchSource {
   private flatten() {
     const searchRequest = this.mergeProps();
 
+    searchRequest.body = searchRequest.body || {};
+
     const computedFields = searchRequest.index.getComputedFields();
 
     searchRequest.body.stored_fields = computedFields.storedFields;
@@ -404,7 +406,7 @@ export class SearchSource {
       // request the remaining fields from both stored_fields and _source
       const remainingFields = _.difference(fields, _.keys(searchRequest.body.script_fields));
       searchRequest.body.stored_fields = remainingFields;
-      _.set(searchRequest.body, '_source.includes', remainingFields);
+      searchRequest.body._source = { includes: remainingFields };
     }
 
     const esQueryConfigs = getEsQueryConfig(config);
