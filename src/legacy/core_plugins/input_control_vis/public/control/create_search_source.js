@@ -19,7 +19,7 @@
 import { timefilter } from 'ui/timefilter';
 
 export function createSearchSource(kbnApi, initialState, indexPattern, aggs, useTimeFilter, filters = []) {
-  const searchSource = new kbnApi.SearchSource(initialState);
+  const searchSource = initialState ? new kbnApi.SearchSource(initialState) : new kbnApi.SearchSource();
   // Do not not inherit from rootSearchSource to avoid picking up time and globals
   searchSource.setParent(false);
   searchSource.setField('filter', () => {
