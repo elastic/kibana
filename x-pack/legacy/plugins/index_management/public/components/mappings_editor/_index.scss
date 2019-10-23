@@ -121,8 +121,16 @@
       }
     }
 
+    .mappings-editor__create-field-content {
+      padding-left: $euiSizeXXL - $euiSizeXS; // [1]
+    }
+
     .mappings-editor__create-field-wrapper {
       &--multi-field {
+        .mappings-editor__create-field-content {
+          padding-left: $euiSize;
+        }
+
         .mappings-editor__create-field-content {
           &::before, &::after {
             content: none;
@@ -135,10 +143,6 @@
           padding-left: $euiSizeXXL - $euiSizeXS; // [1]
         }
       }
-    }
-
-    .mappings-editor__create-field-content {
-      padding-left: $euiSize
     }
 
     .mappings-editor__fields-list .mappings-editor__fields-list-item__content {
