@@ -45,7 +45,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { EuiChartThemeType } from '@elastic/eui/src/themes/charts/themes';
 import { Subscription } from 'rxjs';
-import { getServices } from '../../kibana_services';
+import { getServices, timezoneProvider } from '../../kibana_services';
 
 export interface DiscoverHistogramProps {
   chartData: any;
@@ -142,7 +142,7 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
 
   public render() {
     const uiSettings = getServices().uiSettings;
-    const timeZone = getServices().timezoneProvider(uiSettings)();
+    const timeZone = timezoneProvider(uiSettings)();
     const { chartData } = this.props;
     const { chartsTheme } = this.state;
 

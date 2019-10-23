@@ -38,36 +38,39 @@ import { showOpenSearchPanel } from '../top_nav/show_open_search_panel';
 import { addHelpMenuToAppChrome } from '../components/help_menu/help_menu_util';
 import '../components/fetch_error';
 import { getPainlessError } from './get_painless_error';
-import { VisProvider, getServices } from '../kibana_services';
-
-const {
+import {
   angular,
   buildVislibDimensions,
-  chrome,
-  docTitle,
-  FilterBarQueryFilterProvider,
   getFilterGenerator,
   getRequestInspectorStats,
   getResponseInspectorStats,
+  getServices,
   getUnhashableStatesProvider,
   hasSearchStategyForIndexPattern,
   intervalOptions,
   isDefaultTypeIndexPattern,
   migrateLegacyQuery,
   RequestAdapter,
-  SavedObjectSaveModal,
-  ShareContextMenuExtensionsRegistryProvider,
   showSaveModal,
   showShareContextMenu,
   stateMonitorFactory,
-  StateProvider,
   subscribeWithScope,
   tabifyAggResponse,
+  vislibSeriesResponseHandlerProvider,
+  VisProvider,
+  SavedObjectSaveModal,
+} from '../kibana_services';
+
+const {
+  chrome,
+  docTitle,
+  FilterBarQueryFilterProvider,
+  ShareContextMenuExtensionsRegistryProvider,
+  StateProvider,
   timefilter,
   toastNotifications,
   uiModules,
   uiRoutes,
-  vislibSeriesResponseHandlerProvider,
 }  = getServices();
 
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../breadcrumbs';

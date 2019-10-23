@@ -35,10 +35,18 @@ import searchTemplate from './search_template.html';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import { SortOrder } from '../angular/doc_table/components/table_header/helpers';
 import { getSortForSearchSource } from '../angular/doc_table/lib/get_sort_for_search_source';
-import { IndexPattern, getServices, SearchSource, Adapters } from '../kibana_services';
+import {
+  Adapters,
+  angular,
+  getFilterGenerator,
+  getRequestInspectorStats,
+  getResponseInspectorStats,
+  getServices,
+  IndexPattern,
+  RequestAdapter,
+  SearchSource,
+} from '../kibana_services';
 import { TimeRange } from '../../../../../../plugins/data/public';
-
-const { RequestAdapter } = getServices();
 
 interface SearchScope extends ng.IScope {
   columns?: string[];
@@ -121,7 +129,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       parent
     );
 
-    this.filterGen = getServices().getFilterGenerator(queryFilter);
+    this.filterGen = getFilterGenerator(queryFilter);
     this.savedSearch = savedSearch;
     this.$rootScope = $rootScope;
     this.$compile = $compile;
@@ -159,7 +167,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       throw new Error('Search scope not defined');
     }
     this.searchInstance = this.$compile(searchTemplate)(this.searchScope);
-    const rootNode = getServices().angular.element(domNode);
+    const rootNode = angular.element(domNode);
     rootNode.append(this.searchInstance);
 
     this.pushContainerStateParamsToScope(this.searchScope);
@@ -279,7 +287,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       defaultMessage: 'This request queries Elasticsearch to fetch the data for the search.',
     });
     const inspectorRequest = this.inspectorAdaptors.requests.start(title, { description });
-    inspectorRequest.stats(getServices().getRequestInspectorStats(searchSource));
+    inspectorRequest.stats(getRequestInspectorStats(searchSource));
     searchSource.getSearchRequestBody().then((body: any) => {
       inspectorRequest.json(body);
     });
@@ -295,9 +303,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       this.searchScope.isLoading = false;
 
       // Log response to inspector
-      inspectorRequest
-        .stats(getServices().getResponseInspectorStats(searchSource, resp))
-        .ok({ json: resp });
+      inspectorRequest.stats(getResponseInspectorStats(searchSource, resp)).ok({ json: resp });
 
       // Apply the changes to the angular scope
       this.searchScope.$apply(() => {

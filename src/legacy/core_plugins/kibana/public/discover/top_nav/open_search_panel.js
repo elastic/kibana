@@ -32,8 +32,7 @@ import {
   EuiFlyoutBody,
   EuiTitle,
 } from '@elastic/eui';
-import { getServices } from '../kibana_services';
-const SavedObjectFinder = getServices().SavedObjectFinder;
+import { SavedObjectFinder } from '../kibana_services';
 
 const SEARCH_OBJECT_TYPE = 'search';
 

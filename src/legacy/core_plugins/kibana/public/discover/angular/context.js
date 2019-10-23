@@ -19,12 +19,12 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { getServices } from './../kibana_services';
+import { getServices, subscribeWithScope } from './../kibana_services';
 
 import './context_app';
 import contextAppRouteTemplate from './context.html';
 import { getRootBreadcrumbs } from '../breadcrumbs';
-const { FilterBarQueryFilterProvider, uiRoutes, subscribeWithScope, chrome } = getServices();
+const { FilterBarQueryFilterProvider, uiRoutes, chrome } = getServices();
 
 const k7Breadcrumbs = $route => {
   const { indexPattern } = $route.current.locals;

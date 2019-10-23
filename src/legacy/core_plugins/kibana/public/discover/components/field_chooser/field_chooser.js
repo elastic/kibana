@@ -26,11 +26,12 @@ import $ from 'jquery';
 import rison from 'rison-node';
 import { fieldCalculator } from './lib/field_calculator';
 import {
-  getServices
+  getServices,
+  FieldList
 } from '../../kibana_services';
 import fieldChooserTemplate from './field_chooser.html';
 
-const { uiModules, FieldList } =  getServices();
+const { uiModules } =  getServices();
 const app = uiModules.get('apps/discover');
 
 app.directive('discFieldChooser', function ($location, config, $route) {

@@ -27,65 +27,21 @@ import angular from 'angular'; // just used in embeddables and discover controll
 import uiRoutes from 'ui/routes';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
-
-// COURIER
-
 import { SearchSource } from 'ui/courier';
-// @ts-ignore
-import { hasSearchStategyForIndexPattern, isDefaultTypeIndexPattern } from 'ui/courier';
-import {
-  getRequestInspectorStats,
-  getResponseInspectorStats,
-} from 'ui/courier/utils/courier_inspector_utils';
-// @ts-ignore
-import { RequestAdapter } from 'ui/inspector/adapters';
-
-// STATE MANAGEMENT
-
 // @ts-ignore
 import { StateProvider } from 'ui/state_management/state';
 // @ts-ignore
-import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
-import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
-
-// SAVED OBJECTS
-
-// @ts-ignore
 import { SavedObjectProvider } from 'ui/saved_objects/saved_object';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
-import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
-import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
-import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
-
-// FILTERS
-
-// @ts-ignore
-import { getFilterGenerator } from 'ui/filter_manager';
 import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 import { timefilter } from 'ui/timefilter';
-
-// OTHERS
-import { showShareContextMenu, ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
+import { ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
 // @ts-ignore
-import { IndexPattern, IndexPatterns, FieldList } from 'ui/index_patterns';
+import { IndexPattern, IndexPatterns } from 'ui/index_patterns';
 import { wrapInI18nContext } from 'ui/i18n';
-import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
-// @ts-ignore
-import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
-// @ts-ignore
-import { callAfterBindingsWorkaround } from 'ui/compat';
-// @ts-ignore
-import { vislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
-// @ts-ignore
-import { intervalOptions } from 'ui/agg_types/buckets/_interval_options';
-
-// @ts-ignore
-import { tabifyAggResponse } from 'ui/agg_response/tabify';
-import { buildVislibDimensions } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
 // @ts-ignore
 import { docTitle } from 'ui/doc_title';
 // @ts-ignore
-import { timezoneProvider } from 'ui/vis/lib/timezone';
 import * as docViewsRegistry from 'ui/registry/doc_views';
 
 const services = {
@@ -99,47 +55,60 @@ const services = {
   toastNotifications: npStart.core.notifications.toasts,
   uiSettings: npStart.core.uiSettings,
   // legacy
-  angular,
-  buildVislibDimensions,
-  callAfterBindingsWorkaround,
   chromeLegacy,
   docTitle,
   docViewsRegistry,
-  FieldList,
   FilterBarQueryFilterProvider,
-  getFilterGenerator,
-  getRequestInspectorStats,
-  getResponseInspectorStats,
-  getUnhashableStatesProvider,
-  hasSearchStategyForIndexPattern,
-  intervalOptions,
-  isDefaultTypeIndexPattern,
-  migrateLegacyQuery,
-  RequestAdapter,
   SavedObjectRegistryProvider,
-  SavedObjectFinder,
-  SavedObjectSaveModal,
   SavedObjectProvider,
   SearchSource,
   ShareContextMenuExtensionsRegistryProvider,
-  showSaveModal,
-  showShareContextMenu,
-  stateMonitorFactory,
   StateProvider,
-  subscribeWithScope,
-  tabifyAggResponse,
   timefilter,
-  timezoneProvider,
   uiModules,
   uiRoutes,
-  vislibSeriesResponseHandlerProvider,
   wrapInI18nContext,
 };
 export function getServices() {
   return services;
 }
 
-// export types
+// EXPORT legacy static dependencies
+export { angular };
+export { buildVislibDimensions } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
+// @ts-ignore
+export { callAfterBindingsWorkaround } from 'ui/compat';
+// @ts-ignore
+export { getFilterGenerator } from 'ui/filter_manager';
+export {
+  getRequestInspectorStats,
+  getResponseInspectorStats,
+} from 'ui/courier/utils/courier_inspector_utils';
+// @ts-ignore
+export { hasSearchStategyForIndexPattern, isDefaultTypeIndexPattern } from 'ui/courier';
+// @ts-ignore
+export { intervalOptions } from 'ui/agg_types/buckets/_interval_options';
+// @ts-ignore
+export { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
+// @ts-ignore
+export { RequestAdapter } from 'ui/inspector/adapters';
+export { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
+export { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
+export { FieldList } from 'ui/index_patterns';
+export { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
+export { showShareContextMenu } from 'ui/share';
+export { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
+export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
+// @ts-ignore
+export { timezoneProvider } from 'ui/vis/lib/timezone';
+// @ts-ignore
+export { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
+// @ts-ignore
+export { tabifyAggResponse } from 'ui/agg_response/tabify';
+// @ts-ignore
+export { vislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
+
+// EXPORT types
 export { VisProvider } from 'ui/vis';
 export { StaticIndexPattern, IndexPatterns, IndexPattern, FieldType } from 'ui/index_patterns';
 export { SearchSource } from 'ui/courier';
