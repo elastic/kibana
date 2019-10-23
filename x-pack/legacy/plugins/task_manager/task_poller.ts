@@ -80,9 +80,8 @@ export class TaskPoller {
    * this has no effect.
    */
   public async attemptWork() {
-    performance.mark('attemptWork_start');
-
     if (!this.isStarted || this.isWorking) {
+      performance.mark('attemptWork.skip');
       return;
     }
 
@@ -94,9 +93,6 @@ export class TaskPoller {
       this.logger.error(`Failed to poll for work: ${err}`);
     } finally {
       this.isWorking = false;
-
-      performance.mark('attemptWork_stop');
-      performance.measure('taskPoller.attemptWork', 'attemptWork_start', 'attemptWork_stop');
     }
   }
 }

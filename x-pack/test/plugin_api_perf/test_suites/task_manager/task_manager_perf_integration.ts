@@ -10,7 +10,7 @@ export default function({ getService }: { getService: (service: string) => any }
   const log = getService('log');
   const supertest = getService('supertest');
 
-  const params = { tasksToSpawn: 50, trackExecutionTimeline: true, durationInSeconds: 60 };
+  const params = { tasksToSpawn: 100, trackExecutionTimeline: true, durationInSeconds: 60 };
 
   describe('stressing task manager', () => {
     it(`should run ${params.tasksToSpawn} tasks over ${params.durationInSeconds} seconds`, async () => {
@@ -25,6 +25,9 @@ export default function({ getService }: { getService: (service: string) => any }
         claimAvailableTasks,
         taskPoolAttemptToRun,
         taskRunnerMarkTaskAsRunning,
+        taskPollerInactivityDuration,
+        perfTestDuration,
+        cycles: { attemptWorkSkip, fillPoolCycles, fillPoolBail, fillPoolBailNoTasks },
       } = await supertest
         .post('/api/perf_tasks')
         .set('kbn-xsrf', 'xxx')
@@ -53,6 +56,12 @@ export default function({ getService }: { getService: (service: string) => any }
             timeFromRunTillNextMarkAsRun
           )}]---> next markAsRunning`
         );
+        log.debug(`Duration of Perf Test: ${perfTestDuration}`);
+        log.debug(`inactivity waiting to poll for tasks: ${taskPollerInactivityDuration}`);
+        log.debug(
+          `task poll cycles: ${colorizeCycles(fillPoolCycles, fillPoolBail, fillPoolBailNoTasks)}`
+        );
+        log.debug(`task poll cycles skipped due to workers being busy: ${attemptWorkSkip}`);
         log.debug(
           `average duration taken to Claim Available Tasks: ${descMetric(claimAvailableTasks)}`
         );
@@ -85,6 +94,17 @@ function colorize(avg: number) {
     return red('?');
   }
   return avg < 500 ? green(`${avg}`) : avg < 1000 ? cyan(`${avg}`) : red(`${avg}`);
+}
+
+function colorizeCycles(fillPoolCycles: number, fillPoolBail: number, fillPoolBailNoTasks: number) {
+  const perc = (fillPoolBail * 100) / fillPoolCycles;
+  const colorFunc = perc >= 100 ? red : perc >= 50 ? cyan : green;
+  return (
+    colorFunc(`${fillPoolCycles}`) +
+    ` cycles, having bailed ` +
+    colorFunc(`${fillPoolBail}`) +
+    ` (No Tasks:${fillPoolBailNoTasks}, No Workers: ${fillPoolBail - fillPoolBailNoTasks})`
+  );
 }
 
 function cyan(str: string) {

@@ -310,7 +310,10 @@ export class TaskStore {
       'task',
       doc.id,
       taskInstanceToAttributes(doc),
-      { version: doc.version }
+      {
+        refresh: false,
+        version: doc.version,
+      }
     );
 
     return savedObjectToConcreteTaskInstance(updatedSavedObject);
