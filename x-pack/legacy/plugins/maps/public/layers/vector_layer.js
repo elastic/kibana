@@ -91,7 +91,8 @@ export class VectorLayer extends AbstractLayer {
     this._joins = [];
     if (options.layerDescriptor.joins) {
       options.layerDescriptor.joins.forEach((joinDescriptor) => {
-        this._joins.push(new InnerJoin(joinDescriptor, this._source.getInspectorAdapters()));
+        const join = new InnerJoin(joinDescriptor, this._source.getInspectorAdapters());
+        this._joins.push(join);
       });
     }
   }
@@ -253,7 +254,6 @@ export class VectorLayer extends AbstractLayer {
     return this._source.getDisplayName();
   }
 
-
   async getDateFields() {
     const timeFields = await this._source.getDateFields();
     return timeFields.map(({ label, name }) => {
@@ -264,7 +264,6 @@ export class VectorLayer extends AbstractLayer {
       };
     });
   }
-
 
   async getNumberFields() {
     const numberFields = await this._source.getNumberFields();

@@ -13,6 +13,7 @@ export class ESAggMetricTooltipProperty extends ESTooltipProperty {
     super(propertyKey, propertyName, rawValue, indexPattern);
     this._metricField = metricField;
   }
+
   isFilterable() {
     return false;
   }

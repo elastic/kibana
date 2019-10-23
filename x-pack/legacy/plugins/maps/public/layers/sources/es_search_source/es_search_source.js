@@ -22,10 +22,10 @@ import {
 } from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
-import { ESTooltipProperty } from '../../tooltips/es_tooltip_property';
 import { getSourceFields } from '../../../index_pattern_util';
 
 import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
+import { ESDocField } from '../../fields/es_doc_field';
 
 export class ESSearchSource extends AbstractESSource {
 
@@ -67,15 +67,28 @@ export class ESSearchSource extends AbstractESSource {
       topHitsSplitField: descriptor.topHitsSplitField,
       topHitsSize: _.get(descriptor, 'topHitsSize', 1),
     }, inspectorAdapters);
+
+    this._tooltipFields = this._descriptor.tooltipProperties.map((property) => {
+      return new ESDocField({
+        fieldName: property,
+        source: this
+      });
+    });
+  }
+
+  _getTooltipPropertyNames()  {
+    return this._tooltipFields.map(field => field.getName());
   }
 
   renderSourceSettingsEditor({ onChange }) {
+
+
     return (
       <UpdateSourceEditor
         indexPatternId={this._descriptor.indexPatternId}
         onChange={onChange}
         filterByMapBounds={this._descriptor.filterByMapBounds}
-        tooltipProperties={this._descriptor.tooltipProperties}
+        tooltipProperties={this._getTooltipPropertyNames()}
         sortField={this._descriptor.sortField}
         sortOrder={this._descriptor.sortOrder}
         useTopHits={this._descriptor.useTopHits}
@@ -94,6 +107,11 @@ export class ESSearchSource extends AbstractESSource {
     } catch (error) {
       return [];
     }
+  }
+
+  async getIndexPattern() {
+    //todo rename _getIndexPattern to getIndexPattern
+    return await this._getIndexPattern();
   }
 
   async getDateFields() {
@@ -360,11 +378,11 @@ export class ESSearchSource extends AbstractESSource {
   }
 
   canFormatFeatureProperties() {
-    return this._descriptor.tooltipProperties.length > 0;
+    return this._tooltipFields.length > 0;
   }
 
   async _loadTooltipProperties(docId, index, indexPattern) {
-    if (this._descriptor.tooltipProperties.length === 0) {
+    if (this._tooltipFields.length === 0) {
       return {};
     }
 
@@ -376,7 +394,7 @@ export class ESSearchSource extends AbstractESSource {
       query: `_id:"${docId}" and _index:${index}`
     };
     searchSource.setField('query', query);
-    searchSource.setField('fields', this._descriptor.tooltipProperties);
+    searchSource.setField('fields', this._getTooltipPropertyNames());
 
     const resp = await searchSource.fetch();
 
@@ -392,7 +410,7 @@ export class ESSearchSource extends AbstractESSource {
 
     const properties = indexPattern.flattenHit(hit);
     indexPattern.metaFields.forEach(metaField => {
-      if (!this._descriptor.tooltipProperties.includes(metaField)) {
+      if (!this._getTooltipPropertyNames().includes(metaField)) {
         delete properties[metaField];
       }
     });
@@ -402,10 +420,11 @@ export class ESSearchSource extends AbstractESSource {
   async filterAndFormatPropertiesToHtml(properties) {
     const indexPattern = await this._getIndexPattern();
     const propertyValues = await this._loadTooltipProperties(properties._id, properties._index, indexPattern);
-
-    return this._descriptor.tooltipProperties.map(propertyName => {
-      return new ESTooltipProperty(propertyName, propertyName, propertyValues[propertyName], indexPattern);
+    const tooltipProperties = this._tooltipFields.map(field => {
+      const value = propertyValues[field.getName()];
+      return field.createTooltipProperty(value);
     });
+    return Promise.all(tooltipProperties);
   }
 
   isFilterByMapBounds() {
