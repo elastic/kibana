@@ -15,6 +15,7 @@ import {
   EuiButtonIcon,
   EuiCallOut,
   EuiCheckbox,
+  EuiCodeBlock,
   EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
@@ -142,7 +143,9 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
           color="danger"
           iconType="cross"
         >
-          <p>{errorMessage}</p>
+          <EuiCodeBlock language="json" fontSize="s" paddingSize="s" isCopyable>
+            {errorMessage}
+          </EuiCodeBlock>
         </EuiCallOut>
       </EuiPanel>
     );
