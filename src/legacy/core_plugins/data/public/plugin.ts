@@ -29,7 +29,22 @@ import {
 } from './shim/legacy_dependencies_plugin';
 import {
   DataPublicPluginStart,
-  FieldFormatProviderRegister,
+  FieldFormatRegisty,
+  StaticLookupFormat,
+  NumberFormat,
+  SourceFormat,
+  BoolFormat,
+  ColorFormat,
+  DateFormat,
+  DateNanosFormat,
+  DurationFormat,
+  IpFormat,
+  PercentFormat,
+  RelativeDateFormat,
+  TruncateFormat,
+  BytesFormat,
+  StringFormat,
+  UrlFormat,
 } from '../../../../plugins/data/public';
 import { initLegacyModule } from './shim/legacy_module';
 import { IUiActionsSetup } from '../../../../plugins/ui_actions/public';
@@ -64,6 +79,7 @@ export interface DataSetup {
   timefilter: TimefilterSetup;
   indexPatterns: IndexPatternsSetup;
   filter: FilterSetup;
+  fieldFormats: FieldFormatRegisty;
 }
 
 /**
@@ -104,10 +120,10 @@ export class DataPlugin
   private readonly timefilter: TimefilterService = new TimefilterService();
 
   private setupApi!: DataSetup;
+  private fieldFormats!: FieldFormatRegisty;
 
   public setup(core: CoreSetup, { __LEGACY }: DataPluginSetupDependencies): DataSetup {
     const { uiSettings } = core;
-
     const timefilterService = this.timefilter.setup({
       uiSettings,
       store: __LEGACY.storage,
@@ -115,11 +131,32 @@ export class DataPlugin
     const filterService = this.filter.setup({
       uiSettings,
     });
+
+    this.fieldFormats = new FieldFormatRegisty(uiSettings);
+    this.fieldFormats.register([
+      UrlFormat,
+      StringFormat,
+      NumberFormat,
+      BytesFormat,
+      TruncateFormat,
+      RelativeDateFormat,
+      PercentFormat,
+      IpFormat,
+      DurationFormat,
+      DateNanosFormat,
+      DateFormat,
+      ColorFormat,
+      BoolFormat,
+      SourceFormat,
+      StaticLookupFormat,
+    ]);
+
     this.setupApi = {
       indexPatterns: this.indexPatterns.setup(),
       query: this.query.setup(),
       timefilter: timefilterService,
       filter: filterService,
+      fieldFormats: this.fieldFormats,
     };
 
     return this.setupApi;
@@ -130,14 +167,13 @@ export class DataPlugin
     { __LEGACY, data, uiActions }: DataPluginStartDependencies
   ): DataStart {
     const { uiSettings, http, notifications, savedObjects } = core;
-    const fieldFormats = new FieldFormatProviderRegister(uiSettings);
 
     const indexPatternsService = this.indexPatterns.start({
       uiSettings,
       savedObjectsClient: savedObjects.client,
       http,
       notifications,
-      fieldFormats,
+      fieldFormats: this.fieldFormats,
     });
 
     initLegacyModule(indexPatternsService.indexPatterns);
