@@ -84,14 +84,6 @@ export const ExpressionRendererImplementation = ({
         handlerRef.current.update(expression, options);
       }
     }
-
-    return function cleanup() {
-      // TODO: Cleanup run on every effect, which is not right. We want to clean up on unmount only
-      //   if (handlerRef.current) {
-      //     handlerRef.current.destroy();
-      //     handlerRef.current = null;
-      //   }
-    };
   }, [
     expression,
     options.searchContext,
@@ -100,6 +92,16 @@ export const ExpressionRendererImplementation = ({
     options.disableCaching,
     mountpoint.current,
   ]);
+
+  useEffect(() => {
+    // We only want a clean up to run when the entire component is unloaded, not on every render
+    return function cleanup() {
+      if (handlerRef.current) {
+        handlerRef.current.destroy();
+        handlerRef.current = null;
+      }
+    };
+  }, []);
 
   const classes = classNames('expExpressionRenderer', className, {
     'expExpressionRenderer-isLoading': state.isLoading,
