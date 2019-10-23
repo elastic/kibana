@@ -89,6 +89,7 @@ export interface CaptureConfig {
   };
   maxAttempts: number;
   networkPolicy: NetworkPolicy;
+  loadDelay: number;
 }
 
 export interface BrowserConfig {
