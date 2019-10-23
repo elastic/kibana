@@ -79,6 +79,12 @@ export function createHitIterator(logger: Logger) {
           }
 
           ({ scrollId, hits } = await scroll(scrollId));
+
+          if (cancellationToken.isCancelled()) {
+            logger.warning(
+              'Any remaining scrolling searches have been cancelled by the cancellation token.'
+            );
+          }
         }
       } finally {
         await clearScroll(scrollId);
