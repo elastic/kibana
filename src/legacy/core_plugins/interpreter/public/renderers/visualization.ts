@@ -38,7 +38,11 @@ export const visualization = () => ({
       // special case in visualize, we need to render first (without executing the expression), for maps to work
       if (visConfig) {
         $rootScope.$apply(() => {
-          handlers.vis.setCurrentState({ type: visType, params: visConfig });
+          handlers.vis.setCurrentState({
+            type: visType,
+            params: visConfig,
+            title: handlers.vis.title,
+          });
         });
       }
     } else {

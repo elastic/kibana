@@ -18,7 +18,7 @@ import {
   EuiFlyoutBody,
   EuiSpacer,
 } from '@elastic/eui';
-import { Job, Datafeed } from '../../../../common/job_creator/configs';
+import { Datafeed } from '../../../../common/job_creator/configs';
 import { MLJobEditor } from '../../../../../jobs_list/components/ml_job_editor';
 import { isValidJson } from '../../../../../../../common/util/validation_utils';
 import { JobCreatorContext } from '../../job_creator_context';
@@ -52,26 +52,32 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
   const editJsonMode =
     jobEditorMode === EDITOR_MODE.HIDDEN || datafeedEditorMode === EDITOR_MODE.HIDDEN;
   const flyOutSize = editJsonMode ? 'm' : 'l';
+  const readOnlyMode =
+    jobEditorMode === EDITOR_MODE.READONLY && datafeedEditorMode === EDITOR_MODE.READONLY;
 
   function toggleJsonFlyout() {
     setSaveable(false);
     setShowJsonFlyout(!showJsonFlyout);
   }
 
-  function updateSavable(json: string, originalConfig: Job | Datafeed) {
+  function onJobChange(json: string) {
+    setJobConfigString(json);
     const valid = isValidJson(json);
     setSaveable(valid);
   }
 
-  function onJobChange(json: string) {
-    setJobConfigString(json);
-
-    updateSavable(json, jobCreator.jobConfig);
-  }
   function onDatafeedChange(json: string) {
     setDatafeedConfigString(json);
-
-    updateSavable(json, jobCreator.datafeedConfig);
+    let valid = isValidJson(json);
+    if (valid) {
+      // ensure that the user hasn't altered the indices list in the json.
+      const { indices }: Datafeed = JSON.parse(json);
+      const originalIndices = jobCreator.indices.sort();
+      valid =
+        originalIndices.length === indices.length &&
+        originalIndices.every((value, index) => value === indices[index]);
+    }
+    setSaveable(valid);
   }
 
   function onSave() {
@@ -130,14 +136,16 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
                   />
                 </EuiButtonEmpty>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton onClick={onSave} fill isDisabled={saveable === false}>
-                  <FormattedMessage
-                    id="xpack.ml.newJob.wizard.jsonFlyout.saveButton"
-                    defaultMessage="Save"
-                  />
-                </EuiButton>
-              </EuiFlexItem>
+              {readOnlyMode === false && (
+                <EuiFlexItem grow={false}>
+                  <EuiButton onClick={onSave} fill isDisabled={saveable === false}>
+                    <FormattedMessage
+                      id="xpack.ml.newJob.wizard.jsonFlyout.saveButton"
+                      defaultMessage="Save"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </EuiFlyoutFooter>
         </EuiFlyout>
