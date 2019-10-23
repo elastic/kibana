@@ -1,0 +1,33 @@
+[role="xpack"]
+[[xpack-logs-analysis-tab]]
+== Using machine learning to detect and inspect log anomalies
+
+beta::[]
+
+In the Logs app, the *Analysis* tab allows you to analyze your log data using machine learning.
+The analysis highlights periods where the log rate is outside the expected limits and therefore may be anomalous.
+Within the Logs app, you can inspect the anomalies and the partitions in which they occurred.
+You can also analyze the anomalies directly in machine learning to get a greater understanding of the issues.
+
+The *Analysis* tab in the Logs app is only available if you have a license that includes the machine learning features.
+
+[role="screenshot"]
+image::logs/images/analysis-tab.png[Analysis tab in Logs app in Kibana]
+
+=== Set up machine learning for logs analysis
+Logs anomaly detection is carried out within a {kibana-ref}/xpack-spaces.html[space].
+Within a space, the first time you select the *Analysis* tab from the Logs app, you have the option to choose the time range for the analysis.
+By default, the analysis uses logs from between four weeks ago and the current date, then continues to add new logs to the analysis as they are ingested. You cannot change the time range for the analysis after the machine learning job has been created.
+
+Click *Create ML job* to create the machine learning job, and start detecting anomalies in your logs.
+
+
+
+
+[float]
+=== View log entries
+
+
+
+interesting phrases
+Unsupervised
