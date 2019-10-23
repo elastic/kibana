@@ -15,9 +15,7 @@ export class EMSRegionLayerField extends AbstractField {
     const emsFileLayer = await this._source.getEMSFileLayer();
     const emsFields = emsFileLayer.getFieldsInLanguage();
     // Map EMS field name to language specific label
-    const emsField = emsFields.find(field => {
-      return field.name === this.getName();
-    });
+    const emsField = emsFields.find(field => field.name === this.getName());
     return emsField ? emsField.description : this.getName();
   }
 

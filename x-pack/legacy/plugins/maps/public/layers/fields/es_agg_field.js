@@ -9,8 +9,4 @@ import { AbstractField } from './field';
 
 export class ESAggField extends AbstractField {
   static type = 'ES_AGG';
-
-  getAggType() {
-
-  }
 }

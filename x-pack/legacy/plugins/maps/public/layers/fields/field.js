@@ -11,7 +11,7 @@ export class AbstractField {
     STRING: 'string',
     NUMBER: 'number',
     DATE: 'date'
-  }
+  };
 
   constructor({ fieldName, source }) {
     this._fieldName = fieldName;
@@ -30,28 +30,8 @@ export class AbstractField {
     return this._fieldName;
   }
 
-  async isIdField() {
-    //todo
-  }
-
-  async isDisplayField() {
-    //todo
-  }
-
   createTooltipProperty() {
     throw new Error('must implement Field#createTooltipProperty');
-  }
-
-  getSource() {
-    return this._source;
-  }
-
-  isOrdinal() {
-    return false;
-  }
-
-  isDate() {
-    return false;
   }
 
 }

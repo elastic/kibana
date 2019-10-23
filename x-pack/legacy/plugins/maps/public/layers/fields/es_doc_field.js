@@ -23,8 +23,8 @@ export class ESDocField extends AbstractField {
   }
 
   async getType() {
-    const type = await this._getField();
-    return type.type;
+    const field = await this._getField();
+    return field.type;
   }
 
 }
