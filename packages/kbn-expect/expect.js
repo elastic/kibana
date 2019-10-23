@@ -434,7 +434,10 @@ Assertion.prototype.property = function (name, val) {
  */
 
 Assertion.prototype.string =
-Assertion.prototype.contain = function (obj) {
+Assertion.prototype.contain = function (obj, msg) {
+  if (typeof(msg) === 'string') {
+    this.customMsg = msg;
+  }
   if ('string' == typeof this.obj) {
     this.assert(
         ~this.obj.indexOf(obj)

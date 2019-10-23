@@ -129,14 +129,14 @@ interface Assertion {
   /**
    * Assert that string contains str.
    */
-  contain(str: string): Assertion;
-  string(str: string): Assertion;
+  contain(str: string, msg?: string): Assertion;
+  string(str: string, msg?: string): Assertion;
 
   /**
    * Assert that the array contains obj.
    */
-  contain(obj: any): Assertion;
-  string(obj: any): Assertion;
+  contain(obj: any, msg?: string): Assertion;
+  string(obj: any, msg?: string): Assertion;
 
   /**
    * Assert exact keys or inclusion of keys by using the `.own` modifier.
