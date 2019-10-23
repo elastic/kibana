@@ -74,7 +74,14 @@ const pluginOptions: LegacyPluginOptions = {
   // yes, any. See https://github.com/elastic/kibana/blob/master/x-pack/legacy/plugins/infra/server/lib/adapters/configuration/kibana_configuration_adapter.ts#L49-L58
   // for a way around it, but this is Legacy Platform and I'm not sure these hoops are worth jumping through.
   init(server: any) {
-    server.plugins.xpack_main.registerFeature(feature);
+    const { newPlatform } = server;
+    const npSetup = newPlatform.setup;
+    const featuresPlugin = npSetup.plugins.features;
+
+    if (!featuresPlugin) {
+      throw new Error('New Platform XPack Features plugin is not available.');
+    }
+    featuresPlugin.registerFeature(feature);
 
     const getConfig$ = () =>
       new BehaviorSubject(server.config().get(PLUGIN.CONFIG_PREFIX)).asObservable();
@@ -87,8 +94,8 @@ const pluginOptions: LegacyPluginOptions = {
     };
 
     const coreSetup: CoreSetup = {
-      elasticsearch: server.newPlatform.setup.core.elasticsearch,
-      hapiServer: server.newPlatform.__internals.hapiServer,
+      elasticsearch: npSetup.core.elasticsearch,
+      hapiServer: newPlatform.__internals.hapiServer,
     };
 
     new ServerPlugin(initializerContext).setup(coreSetup);
