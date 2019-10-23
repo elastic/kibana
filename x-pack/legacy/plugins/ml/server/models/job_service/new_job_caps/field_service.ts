@@ -139,21 +139,11 @@ async function combineFieldsAndAggs(
   const mix = mixFactory(rollupFields);
 
   aggs.forEach(a => {
-    if (a.type === METRIC_AGG_TYPE) {
+    if (a.type === METRIC_AGG_TYPE && a.fields !== undefined) {
       switch (a.id) {
-        case ML_JOB_AGGREGATION.COUNT:
-        case ML_JOB_AGGREGATION.HIGH_COUNT:
-        case ML_JOB_AGGREGATION.LOW_COUNT:
-        case ML_JOB_AGGREGATION.NON_ZERO_COUNT:
-        case ML_JOB_AGGREGATION.HIGH_NON_ZERO_COUNT:
-        case ML_JOB_AGGREGATION.LOW_NON_ZERO_COUNT:
-        case ML_JOB_AGGREGATION.RARE:
-        case ML_JOB_AGGREGATION.FREQ_RARE:
-        case ML_JOB_AGGREGATION.TIME_OF_DAY:
-        case ML_JOB_AGGREGATION.TIME_OF_WEEK:
-          // functions which do not take any fields, so break here
-          break;
         case ML_JOB_AGGREGATION.DISTINCT_COUNT:
+        case ML_JOB_AGGREGATION.HIGH_DISTINCT_COUNT:
+        case ML_JOB_AGGREGATION.LOW_DISTINCT_COUNT:
           // distinct count (i.e. cardinality) takes keywords, ips
           // as well as numerical fields
           keywordFields.forEach(f => {
