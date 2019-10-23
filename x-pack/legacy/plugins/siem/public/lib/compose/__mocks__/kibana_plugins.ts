@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as chromium from './chromium';
+import { createUiNewPlatformMock } from 'ui/new_platform/__mocks__/helpers';
 
-export type BrowserType = keyof typeof BROWSERS_BY_TYPE;
+const npStart = createUiNewPlatformMock().npStart;
 
-export const BROWSERS_BY_TYPE = {
-  chromium,
-};
+export function useKibanaPlugins() {
+  return npStart.plugins;
+}
