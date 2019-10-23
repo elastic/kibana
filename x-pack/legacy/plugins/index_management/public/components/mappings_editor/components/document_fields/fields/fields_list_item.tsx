@@ -67,7 +67,7 @@ export const FieldsListItem = React.memo(function FieldListItemComponent({
   const isAddFieldBtnDisabled = false; // For now, we never disable the Add Child button.
   // const isAddFieldBtnDisabled = field.nestedDepth === MAX_DEPTH_DEFAULT_EDITOR - 1;
 
-  // When there aren't any "child" fields (the maxNestedDepth === 0), there are no toggle icon on the left of any field.
+  // When there aren't any "child" fields (the maxNestedDepth === 0), there is no toggle icon on the left of any field.
   // For that reason, we need to compensate and substract some indent to left align on the page.
   const substractIndentAmount = maxNestedDepth === 0 ? CHILD_FIELD_INDENT_SIZE * 0.5 : 0;
 

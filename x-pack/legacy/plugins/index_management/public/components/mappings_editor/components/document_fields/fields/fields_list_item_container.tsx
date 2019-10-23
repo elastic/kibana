@@ -10,24 +10,21 @@ import { NormalizedField } from '../../../types';
 import { FieldsListItem } from './fields_list_item';
 
 interface Props {
-  field: NormalizedField;
+  fieldId: string;
   treeDepth: number;
   isLastItem: boolean;
 }
 
-export const FieldsListItemContainer = React.memo(function FieldsListItemContainer({
-  field,
-  treeDepth,
-  isLastItem,
-}: Props) {
+export const FieldsListItemContainer = ({ fieldId, treeDepth, isLastItem }: Props) => {
   const dispatch = useDispatch();
   const {
     documentFields: { status, fieldToAddFieldTo, fieldToEdit },
     fields: { byId, maxNestedDepth },
   } = useMappingsState();
 
-  const getField = (fieldId: string) => byId[fieldId];
+  const getField = (id: string) => byId[id];
 
+  const field: NormalizedField = getField(fieldId);
   const { id, childFields, hasChildFields, hasMultiFields } = field;
   const isHighlighted = fieldToEdit === id;
   const isDimmed = status === 'editingField' && fieldToEdit !== id;
@@ -72,4 +69,4 @@ export const FieldsListItemContainer = React.memo(function FieldsListItemContain
       toggleExpand={toggleExpand}
     />
   );
-});
+};

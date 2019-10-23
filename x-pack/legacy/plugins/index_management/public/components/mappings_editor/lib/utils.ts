@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import uuid from 'uuid';
 
 import {
   DataType,
@@ -21,19 +22,7 @@ import { State } from '../reducer';
 import { TreeItem } from '../components/tree';
 
 export const getUniqueId = () => {
-  const dateNow = Date.now();
-
-  let performanceNow: number;
-  try {
-    performanceNow = performance.now(); // only available in the browser
-  } catch {
-    performanceNow = process.hrtime()[0]; // only in Node
-  }
-
-  return (
-    '_' +
-    (Number(String(Math.random()).slice(2)) + dateNow + Math.round(performanceNow)).toString(36)
-  );
+  return uuid.v4();
 };
 
 const getChildFieldsName = (dataType: DataType): ChildFieldName | undefined => {
