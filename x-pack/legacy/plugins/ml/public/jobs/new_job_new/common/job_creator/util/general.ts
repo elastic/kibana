@@ -32,6 +32,7 @@ export function getRichDetectors(job: Job, datafeed: Datafeed, advanced: boolean
           ? newJobCapsService.getFieldById(d.partition_field_name)
           : null,
       excludeFrequent: d.exclude_frequent || null,
+      description: d.detector_description || null,
     };
   });
 }
@@ -145,33 +146,29 @@ export function isSparseDataJob(job: Job, datafeed: Datafeed): boolean {
 function stashCombinedJob(
   jobCreator: JobCreatorType,
   skipTimeRangeStep: boolean = false,
-  advanced: boolean = false,
   includeTimeRange: boolean = false
 ) {
   const combinedJob = {
     ...jobCreator.jobConfig,
     datafeed_config: jobCreator.datafeedConfig,
   };
-  if (advanced === true) {
-    mlJobService.currentJob = combinedJob;
-  } else {
-    mlJobService.tempJobCloningObjects.job = combinedJob;
 
-    // skip over the time picker step of the wizard
-    mlJobService.tempJobCloningObjects.skipTimeRangeStep = skipTimeRangeStep;
+  mlJobService.tempJobCloningObjects.job = combinedJob;
 
-    if (includeTimeRange === true) {
-      // auto select the start and end dates of the time picker
-      mlJobService.tempJobCloningObjects.start = jobCreator.start;
-      mlJobService.tempJobCloningObjects.end = jobCreator.end;
-    }
+  // skip over the time picker step of the wizard
+  mlJobService.tempJobCloningObjects.skipTimeRangeStep = skipTimeRangeStep;
+
+  if (includeTimeRange === true) {
+    // auto select the start and end dates of the time picker
+    mlJobService.tempJobCloningObjects.start = jobCreator.start;
+    mlJobService.tempJobCloningObjects.end = jobCreator.end;
   }
 }
 
 export function convertToMultiMetricJob(jobCreator: JobCreatorType) {
   jobCreator.createdBy = CREATED_BY_LABEL.MULTI_METRIC;
   jobCreator.modelPlot = false;
-  stashCombinedJob(jobCreator, true, false, true);
+  stashCombinedJob(jobCreator, true, true);
 
   window.location.href = window.location.href.replace(
     JOB_TYPE.SINGLE_METRIC,
@@ -181,7 +178,7 @@ export function convertToMultiMetricJob(jobCreator: JobCreatorType) {
 
 export function convertToAdvancedJob(jobCreator: JobCreatorType) {
   jobCreator.createdBy = null;
-  stashCombinedJob(jobCreator, true, false, false);
+  stashCombinedJob(jobCreator, true, true);
 
   let jobType = JOB_TYPE.SINGLE_METRIC;
   if (isMultiMetricJobCreator(jobCreator)) {
@@ -195,13 +192,13 @@ export function convertToAdvancedJob(jobCreator: JobCreatorType) {
 
 export function resetJob(jobCreator: JobCreatorType) {
   jobCreator.jobId = '';
-  stashCombinedJob(jobCreator, true, false, true);
+  stashCombinedJob(jobCreator, true, true);
 
   window.location.href = '#/jobs/new_job';
 }
 
 export function advancedStartDatafeed(jobCreator: JobCreatorType) {
-  stashCombinedJob(jobCreator, false, true, false);
+  stashCombinedJob(jobCreator, false, false);
   window.location.href = '#/jobs';
 }
 

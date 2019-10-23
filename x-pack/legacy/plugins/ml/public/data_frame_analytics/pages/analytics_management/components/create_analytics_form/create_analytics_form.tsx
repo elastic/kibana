@@ -239,7 +239,9 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
                   )}
                   singleSelection={{ asPlainText: true }}
                   options={indexPatternTitles.sort().map(d => ({ label: d }))}
-                  selectedOptions={[{ label: sourceIndex }]}
+                  selectedOptions={
+                    indexPatternTitles.includes(sourceIndex) ? [{ label: sourceIndex }] : []
+                  }
                   onChange={selectedOptions =>
                     setFormState({ sourceIndex: selectedOptions[0].label || '' })
                   }

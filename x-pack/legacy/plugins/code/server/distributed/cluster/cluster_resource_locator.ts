@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'hapi';
+import { KibanaRequest } from 'src/core/server';
 import Boom from 'boom';
 import { Endpoint, ResourceLocator } from '../resource_locator';
 import { ClusterService } from './cluster_service';
@@ -26,7 +26,7 @@ export class ClusterResourceLocator implements ResourceLocator {
     return RepositoryUtils.buildRepository(url).uri;
   }
 
-  async locate(req: Request, resource: string): Promise<Endpoint> {
+  async locate(req: KibanaRequest, resource: string): Promise<Endpoint> {
     // to be compatible with
     if (resource.trim() === '') {
       return new LocalEndpoint(req, resource);
@@ -58,7 +58,7 @@ export class ClusterResourceLocator implements ResourceLocator {
   /**
    * Return undefined to let NodeRepositoriesService enqueue the clone job in cluster mode.
    */
-  async allocate(req: Request, resource: string): Promise<Endpoint | undefined> {
+  async allocate(req: KibanaRequest, resource: string): Promise<Endpoint | undefined> {
     // make the cluster service synchronize the meta data and allocate new resources to nodes
     await this.clusterService.pollClusterState();
     return undefined;

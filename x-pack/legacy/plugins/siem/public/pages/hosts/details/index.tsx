@@ -5,6 +5,7 @@
  */
 
 import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
+import { getEsQueryConfig } from '@kbn/es-query';
 import React, { useContext, useEffect } from 'react';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
@@ -39,6 +40,7 @@ export { HostDetailsBody } from './body';
 import { navTabsHostDetails } from './nav_tabs';
 import { HostDetailsComponentProps } from './types';
 import { makeMapStateToProps } from './utils';
+import { useKibanaCore } from '../../../lib/compose/kibana_core';
 
 const HostOverviewManage = manageQuery(HostOverview);
 const KpiHostDetailsManage = manageQuery(KpiHostsComponent);
@@ -59,11 +61,13 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
       setHostDetailsTablesActivePageToZero(null);
     }, [detailName]);
     const capabilities = useContext(MlCapabilitiesContext);
+    const core = useKibanaCore();
     return (
       <>
         <WithSource sourceId="default">
           {({ indicesExist, indexPattern }) => {
             const filterQuery = convertToBuildEsQuery({
+              config: getEsQueryConfig(core.uiSettings),
               indexPattern,
               queries: [query],
               filters: [

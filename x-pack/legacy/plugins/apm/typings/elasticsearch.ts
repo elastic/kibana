@@ -34,7 +34,7 @@ declare module 'elasticsearch' {
     [key: string]: any;
   };
 
-  // eslint-disable-next-line @typescript-eslint/prefer-interface
+  // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
   export type AggregationOptionMap = {
     aggs?: {
       [aggregationName: string]: {
@@ -47,7 +47,7 @@ declare module 'elasticsearch' {
     ? AggregationResultMap<T['aggs']>
     : {};
 
-  // eslint-disable-next-line @typescript-eslint/prefer-interface
+  // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
   type BucketAggregation<SubAggregationMap, KeyType = string> = {
     buckets: Array<
       {
@@ -62,7 +62,7 @@ declare module 'elasticsearch' {
     doc_count: number;
   } & SubAggregation<SubAggregationMap>;
 
-  // eslint-disable-next-line @typescript-eslint/prefer-interface
+  // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
   type FiltersAggregation<SubAggregationMap> = {
     // The filters aggregation can have named filters or anonymous filters,
     // which changes the structure of the return
