@@ -26,6 +26,13 @@ export class TestingFrameworkAdapter implements FrameworkAdapter {
     public readonly version: string
   ) {}
 
+  public get notifications(): any {
+    return {
+      addSuccess: () => {},
+      addDanger: () => {},
+    };
+  }
+
   // We dont really want to have this, but it's needed to conditionaly render for k7 due to
   // when that data is needed.
   public getUISetting(key: 'k7design'): boolean {

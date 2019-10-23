@@ -29,6 +29,10 @@ export class FrameworkLib {
     return this.adapter.info;
   }
 
+  public get notifications() {
+    return this.adapter.notifications;
+  }
+
   public licenseIsAtLeast(type: LicenseType) {
     return (
       LICENSES.indexOf(get(this.adapter.info, 'license.type', 'oss')) >= LICENSES.indexOf(type)

@@ -33,6 +33,7 @@ export function fleet(kibana: any) {
       //   euiIconType: 'apmApp',
       //   order: 8000,
       // },
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       managementSections: ['plugins/fleet'],
       savedObjectSchemas: {
         agents: {

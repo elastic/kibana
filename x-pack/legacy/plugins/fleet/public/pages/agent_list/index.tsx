@@ -18,6 +18,7 @@ import {
   EuiEmptyPrompt,
   // @ts-ignore
   EuiSearchBar,
+  EuiLink,
   EuiSwitch,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -25,6 +26,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { AGENT_POLLING_THRESHOLD_MS } from '../../../common/constants';
 import { Agent } from '../../../common/types/domain_data';
 import { AgentHealth } from '../../components/agent_health';
+import { AgentUnenrollProvider } from '../../components/agent_unenroll_provider';
 import { ConnectedLink } from '../../components/navigation/connected_link';
 import { usePagination } from '../../hooks/use_pagination';
 import { SearchBar } from '../../components/search_bar';
@@ -43,6 +45,8 @@ export const AgentListPage: React.SFC<{}> = () => {
   // Table and search states
   const [search, setSearch] = useState('');
   const { pagination, pageSizeOptions, setPagination } = usePagination();
+  const [selectedAgents, setSelectedAgents] = useState<Agent[]>([]);
+  const [areAllAgentsSelected, setAreAllAgentsSelected] = useState<boolean>(false);
 
   // Agent enrollment flyout state
   const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState<boolean>(false);
@@ -70,6 +74,7 @@ export const AgentListPage: React.SFC<{}> = () => {
   // Update agents if pagination or query state changes
   useEffect(() => {
     fetchAgents();
+    setAreAllAgentsSelected(false);
   }, [pagination, search]);
 
   // Poll for agents on interval
@@ -86,17 +91,48 @@ export const AgentListPage: React.SFC<{}> = () => {
       name: i18n.translate('xpack.fleet.agentList.hostColumnTitle', {
         defaultMessage: 'Host',
       }),
-      truncateText: true,
+      footer: () => {
+        if (selectedAgents.length === agents.length && totalAgents > selectedAgents.length) {
+          return areAllAgentsSelected ? (
+            <FormattedMessage
+              id="xpack.fleet.agentList.allAgentsSelectedMessage"
+              defaultMessage="All {count} agents are selected. {clearSelectionLink}"
+              values={{
+                count: totalAgents,
+                clearSelectionLink: (
+                  <EuiLink onClick={() => setAreAllAgentsSelected(false)}>
+                    <FormattedMessage
+                      id="xpack.fleet.agentList.selectPageAgentsLinkText"
+                      defaultMessage="Select just this page"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.fleet.agentList.agentsOnPageSelectedMessage"
+              defaultMessage="{count, plural, one {# agent} other {# agents}} on this page are selected. {selectAllLink}"
+              values={{
+                count: selectedAgents.length,
+                selectAllLink: (
+                  <EuiLink onClick={() => setAreAllAgentsSelected(true)}>
+                    <FormattedMessage
+                      id="xpack.fleet.agentList.selectAllAgentsLinkText"
+                      defaultMessage="Select all {count} agents"
+                      values={{
+                        count: totalAgents,
+                      }}
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          );
+        }
+        return null;
+      },
     },
-    // {
-    //   field: 'id',
-    //   name: i18n.translate('xpack.fleet.agentList.metaColumnTitle', {
-    //     defaultMessage: 'Meta',
-    //   }),
-    //   truncateText: true,
-    //   sortable: true,
-    //   render: () => <span>some-region</span>,
-    // },
     {
       field: 'policy_id',
       name: i18n.translate('xpack.fleet.agentList.policyColumnTitle', {
@@ -104,15 +140,6 @@ export const AgentListPage: React.SFC<{}> = () => {
       }),
       truncateText: true,
     },
-    // {
-    //   field: 'event_rate',
-    //   name: i18n.translate('xpack.fleet.agentList.eventsColumnTitle', {
-    //     defaultMessage: 'Events (24h)',
-    //   }),
-    //   truncateText: true,
-    //   sortable: true,
-    //   render: () => <span>34</span>,
-    // },
     {
       field: 'active',
       name: i18n.translate('xpack.fleet.agentList.statusColumnTitle', {
@@ -201,9 +228,61 @@ export const AgentListPage: React.SFC<{}> = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="m" />
+
         <EuiFlexGroup alignItems={'center'}>
+          {selectedAgents.length ? (
+            <EuiFlexItem>
+              <AgentUnenrollProvider>
+                {unenrollAgentsPrompt => (
+                  <EuiButton
+                    color="danger"
+                    onClick={() => {
+                      unenrollAgentsPrompt(
+                        areAllAgentsSelected ? search : selectedAgents.map(agent => agent.id),
+                        areAllAgentsSelected ? totalAgents : selectedAgents.length,
+                        () => {
+                          // Reload agents if on first page and no search query, otherwise
+                          // reset to first page and reset search, which will trigger a reload
+                          if (pagination.currentPage === 1 && !search) {
+                            fetchAgents();
+                          } else {
+                            setPagination({
+                              ...pagination,
+                              currentPage: 1,
+                            });
+                            setSearch('');
+                          }
+
+                          setAreAllAgentsSelected(false);
+                          setSelectedAgents([]);
+                        }
+                      );
+                    }}
+                  >
+                    <FormattedMessage
+                      id="xpack.fleet.agentList.unenrollButton"
+                      defaultMessage="Unenroll {count, plural, one {# agent} other {# agents}}"
+                      values={{
+                        count: areAllAgentsSelected ? totalAgents : selectedAgents.length,
+                      }}
+                    />
+                  </EuiButton>
+                )}
+              </AgentUnenrollProvider>
+            </EuiFlexItem>
+          ) : null}
           <EuiFlexItem grow={4}>
-            <SearchBar value={search} onChange={setSearch} fieldPrefix="agents" />
+            <SearchBar
+              value={search}
+              onChange={newSearch => {
+                setPagination({
+                  ...pagination,
+                  currentPage: 1,
+                });
+                setSearch(newSearch);
+              }}
+              fieldPrefix="agents"
+            />
           </EuiFlexItem>
           {libs.framework.capabilities.write && (
             <EuiFlexItem grow={false}>
@@ -223,13 +302,14 @@ export const AgentListPage: React.SFC<{}> = () => {
 
         <EuiSpacer size="m" />
         <EuiBasicTable
+          className="fleet__agentList__table"
           loading={isLoading}
           noItemsMessage={
             isLoading
               ? i18n.translate('xpack.fleet.agentList.loadingAgentsMessage', {
                   defaultMessage: 'Loading agents…',
                 })
-              : totalAgents === 0
+              : !search.trim() && totalAgents === 0
               ? emptyPrompt
               : i18n.translate('xpack.fleet.agentList.noFilteredAgentsPrompt', {
                   defaultMessage: 'No agents found',
@@ -238,6 +318,14 @@ export const AgentListPage: React.SFC<{}> = () => {
           items={totalAgents ? agents : []}
           itemId="id"
           columns={columns}
+          isSelectable={true}
+          selection={{
+            selectable: (agent: Agent) => agent.active,
+            onSelectionChange: (newSelectedAgents: Agent[]) => {
+              setSelectedAgents(newSelectedAgents);
+              setAreAllAgentsSelected(false);
+            },
+          }}
           pagination={{
             pageIndex: pagination.currentPage - 1,
             pageSize: pagination.pageSize,

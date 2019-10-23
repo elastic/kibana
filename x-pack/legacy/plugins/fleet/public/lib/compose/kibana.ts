@@ -11,6 +11,7 @@ import 'ui/autoload/all';
 import chrome from 'ui/chrome';
 // @ts-ignore not typed yet
 import { management } from 'ui/management';
+import { toastNotifications } from 'ui/notify';
 import routes from 'ui/routes';
 import { RestAgentAdapter } from '../adapters/agent/rest_agent_adapter';
 import { RestElasticsearchAdapter } from '../adapters/elasticsearch/rest';
@@ -40,7 +41,8 @@ export function compose(): FrontendLibs {
       chrome.getBasePath,
       onKibanaReady,
       XPackInfoProvider,
-      chrome.getKibanaVersion()
+      chrome.getKibanaVersion(),
+      toastNotifications
     )
   );
 

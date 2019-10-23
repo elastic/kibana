@@ -12,6 +12,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { UIRoutes } from 'ui/routes';
 import { capabilities } from 'ui/capabilities';
+import { toastNotifications } from 'ui/notify';
 import { BufferedKibanaServiceCall, KibanaAdapterServiceRefs, KibanaUIConfig } from '../../types';
 import {
   FrameworkAdapter,
@@ -51,7 +52,8 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     private readonly getBasePath: () => string,
     private readonly onKibanaReady: () => Promise<IInjector>,
     private readonly XPackInfoProvider: unknown,
-    public readonly version: string
+    public readonly version: string,
+    public readonly notifications: typeof toastNotifications
   ) {
     this.adapterService = new KibanaAdapterServiceProvider();
   }

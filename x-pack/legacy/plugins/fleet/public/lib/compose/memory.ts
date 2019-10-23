@@ -8,6 +8,8 @@ import 'ui/autoload/all';
 // @ts-ignore: path dynamic for kibana
 import { management } from 'ui/management';
 // @ts-ignore: path dynamic for kibana
+import { toastNotifications } from 'ui/notify';
+// @ts-ignore: path dynamic for kibana
 import { uiModules } from 'ui/modules';
 // @ts-ignore: path dynamic for kibana
 import routes from 'ui/routes';
@@ -47,7 +49,8 @@ export function compose(
       () => '',
       onKibanaReady,
       null,
-      '7.0.0'
+      '7.0.0',
+      toastNotifications
     )
   );
   const libs: FrontendLibs = {
