@@ -17,17 +17,17 @@
  * under the License.
  */
 import _ from 'lodash';
-import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
+import { Subscription } from 'rxjs';
 import { Filter, FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { TExecuteTriggerActions } from 'src/plugins/ui_actions/public';
 import { setup as data } from '../../../../data/public/legacy';
-import { Query, onlyDisabledFiltersChanged, getTime } from '../../../../data/public';
+import { getTime, onlyDisabledFiltersChanged, Query } from '../../../../data/public';
 import {
   APPLY_FILTER_TRIGGER,
-  Embeddable,
   Container,
+  Embeddable,
 } from '../../../../embeddable_api/public/np_ready/public';
 import * as columnActions from '../angular/doc_table/actions/columns';
 import { SavedSearch } from '../types';
@@ -47,6 +47,7 @@ import {
   SearchSource,
 } from '../kibana_services';
 import { TimeRange } from '../../../../../../plugins/data/public';
+import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 
 interface SearchScope extends ng.IScope {
   columns?: string[];
@@ -86,8 +87,6 @@ interface SearchEmbeddableConfig {
   editable: boolean;
   queryFilter: unknown;
 }
-
-export const SEARCH_EMBEDDABLE_TYPE = 'search';
 
 export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
   implements ISearchEmbeddable {

@@ -29,8 +29,9 @@ import {
 } from '../../../../../../plugins/embeddable/public';
 import { TimeRange } from '../../../../../../plugins/data/public';
 import { SavedSearchLoader } from '../types';
-import { SearchEmbeddable, SEARCH_EMBEDDABLE_TYPE } from './search_embeddable';
+import { SearchEmbeddable } from './search_embeddable';
 import { SearchInput, SearchOutput } from './types';
+import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 
 export class SearchEmbeddableFactory extends EmbeddableFactory<
   SearchInput,

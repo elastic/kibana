@@ -16,8 +16,4 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-export * from './types';
-export * from './search_embeddable_factory';
-export * from './search_embeddable';
-export { SEARCH_EMBEDDABLE_TYPE } from './constants';
+export const SEARCH_EMBEDDABLE_TYPE = 'search';
