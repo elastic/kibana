@@ -251,17 +251,18 @@ export const reducer = (state: State, action: Action): State => {
         // The field `type` has changed, we need to update its meta information
         // and delete all its children fields.
 
-        newField = {
-          ...newField,
-          ...getFieldMeta(action.value),
-          hasChildFields: previousField.hasChildFields, // we need to put this meta back from our previous field
-          hasMultiFields: previousField.hasMultiFields, // we need to put this meta back from our previous field
-        };
-
         const shouldDeleteChildFields = shouldDeleteChildFieldsAfterTypeChange(
           previousField.source.type,
           newField.source.type
         );
+
+        newField = {
+          ...newField,
+          ...getFieldMeta(action.value, newField.isMultiField),
+          hasChildFields: shouldDeleteChildFields ? false : previousField.hasChildFields,
+          hasMultiFields: shouldDeleteChildFields ? false : previousField.hasMultiFields,
+          isExpanded: previousField.isExpanded,
+        };
 
         if (shouldDeleteChildFields) {
           newField.childFields = undefined;
