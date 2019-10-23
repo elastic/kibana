@@ -10,7 +10,7 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiBadge,
-  EuiFacetButton,
+  EuiNotificationBadge,
   EuiButtonIcon,
   EuiIcon,
 } from '@elastic/eui';
@@ -89,7 +89,13 @@ export const FieldsListItem = React.memo(function FieldListItemComponent({
       return null;
     }
 
-    return <CreateField isMultiField={canHaveMultiFields} paddingLeft={indentCreateField} />;
+    return (
+      <CreateField
+        isMultiField={canHaveMultiFields}
+        paddingLeft={indentCreateField}
+        maxNestedDepth={maxNestedDepth}
+      />
+    );
   };
 
   const renderActionButtons = () => {
@@ -143,13 +149,14 @@ export const FieldsListItem = React.memo(function FieldListItemComponent({
             gutterSize="s"
             alignItems="center"
             className={classNames('mappings-editor__fields-list-item__content', {
-              'mappings-editor__fields-list-item__content--toggle': hasChildFields,
+              'mappings-editor__fields-list-item__content--toggle':
+                hasChildFields || hasMultiFields,
               'mappings-editor__fields-list-item__content--multi-field': isMultiField,
               'mappings-editor__fields-list-item__content--indent':
-                !hasChildFields && maxNestedDepth > treeDepth,
+                !hasChildFields && !hasMultiFields && maxNestedDepth > treeDepth,
             })}
           >
-            {hasChildFields && (
+            {(hasChildFields || hasMultiFields) && (
               <EuiFlexItem grow={false} className="mappings-editor__fields-list-item__toggle">
                 <EuiButtonIcon
                   color="text"
@@ -170,13 +177,13 @@ export const FieldsListItem = React.memo(function FieldListItemComponent({
             <EuiFlexItem grow={false}>
               <EuiBadge color="hollow">{TYPE_DEFINITION[source.type].label}</EuiBadge>
             </EuiFlexItem>
-            {!isMultiField && canHaveMultiFields && (
+            {canHaveMultiFields && (
               <>
                 {hasMultiFields && (
                   <EuiFlexItem grow={false}>
-                    <EuiFacetButton onClick={toggleExpand} quantity={childFields!.length}>
-                      +
-                    </EuiFacetButton>
+                    <EuiNotificationBadge onClick={toggleExpand}>
+                      {childFields!.length}
+                    </EuiNotificationBadge>
                   </EuiFlexItem>
                 )}
                 {areActionButtonsVisible && (

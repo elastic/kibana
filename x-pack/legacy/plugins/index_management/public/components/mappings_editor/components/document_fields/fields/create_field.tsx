@@ -46,12 +46,14 @@ interface Props {
   isMultiField?: boolean;
   paddingLeft?: number;
   isCancelable?: boolean;
+  maxNestedDepth?: number;
 }
 
 export const CreateField = React.memo(function CreateFieldComponent({
   isMultiField,
   paddingLeft,
   isCancelable,
+  maxNestedDepth,
 }: Props) {
   const { form } = useForm<Field>({ serializer: fieldSerializer });
   const dispatch = useDispatch();
@@ -171,6 +173,8 @@ export const CreateField = React.memo(function CreateFieldComponent({
       <Form form={form} FormWrapper={formWrapper} onSubmit={submitForm}>
         <div
           className={classNames('mappings-editor__create-field-wrapper', {
+            'mappings-editor__create-field-wrapper--toggle':
+              Boolean(maxNestedDepth) && maxNestedDepth! > 0,
             'mappings-editor__create-field-wrapper--multi-field': isMultiField,
           })}
           style={{

@@ -74,7 +74,9 @@ export const addFieldToState = (field: Field, state: State): State => {
     ? [...state.fields.rootLevelFields, id]
     : [...state.fields.rootLevelFields];
   const nestedDepth =
-    parentField && parentField.canHaveChildFields ? parentField.nestedDepth + 1 : 0;
+    parentField && (parentField.canHaveChildFields || parentField.canHaveMultiFields)
+      ? parentField.nestedDepth + 1
+      : 0;
   const maxNestedDepth = Math.max(state.fields.maxNestedDepth, nestedDepth);
   const { name } = field;
   const path = parentField ? `${parentField.path}.${name}` : name;
@@ -86,7 +88,7 @@ export const addFieldToState = (field: Field, state: State): State => {
     source: field,
     path,
     nestedDepth,
-    ...getFieldMeta(field),
+    ...getFieldMeta(field, isMultiField),
   };
 
   if (parentField) {
@@ -195,8 +197,10 @@ export const reducer = (state: State, action: Action): State => {
     }
     case 'field.remove': {
       const field = state.fields.byId[action.value];
-      const { id, parentId, hasChildFields } = field;
+      const { id, parentId, hasChildFields, hasMultiFields } = field;
+
       let { rootLevelFields } = state.fields;
+
       if (parentId) {
         // Deleting a child field
         const parentField = state.fields.byId[parentId];
@@ -212,7 +216,7 @@ export const reducer = (state: State, action: Action): State => {
         rootLevelFields = rootLevelFields.filter(childId => childId !== id);
       }
 
-      if (hasChildFields) {
+      if (hasChildFields || hasMultiFields) {
         const allChildFields = getAllChildFields(field, state.fields.byId);
         allChildFields!.forEach(childField => {
           delete state.fields.byId[childField.id];
@@ -254,7 +258,7 @@ export const reducer = (state: State, action: Action): State => {
 
         newField = {
           ...newField,
-          ...getFieldMeta(action.value),
+          ...getFieldMeta(action.value, newField.isMultiField),
           hasChildFields: shouldDeleteChildFields ? false : previousField.hasChildFields,
           hasMultiFields: shouldDeleteChildFields ? false : previousField.hasMultiFields,
           isExpanded: previousField.isExpanded,
