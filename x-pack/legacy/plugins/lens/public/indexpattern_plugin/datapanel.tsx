@@ -18,14 +18,13 @@ import {
   EuiPopoverTitle,
   EuiPopoverFooter,
   EuiCallOut,
-  EuiText,
   EuiFormControlLayout,
   EuiSwitch,
   EuiFacetButton,
   EuiIcon,
-  EuiButton,
-  EuiFormLabel,
+  EuiButtonEmpty,
   EuiSpacer,
+  EuiFormLabel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -473,9 +472,11 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
               })}
 
               {paginatedFields.length === 0 && (
-                <EuiText size="s" color="subdued">
-                  <p>
-                    {showEmptyFields
+                <EuiCallOut
+                  size="s"
+                  color="warning"
+                  title={
+                    showEmptyFields
                       ? localState.typeFilter.length || localState.nameFilter.length
                         ? i18n.translate('xpack.lens.indexPatterns.noFilteredFieldsLabel', {
                             defaultMessage:
@@ -487,15 +488,17 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                       : i18n.translate('xpack.lens.indexPatterns.emptyFieldsWithDataLabel', {
                           defaultMessage:
                             'No fields have data with the current filters and time range. Try changing your filters or time range.',
-                        })}
-                  </p>
-
+                        })
+                  }
+                >
                   {(!showEmptyFields ||
                     localState.typeFilter.length ||
                     localState.nameFilter.length) && (
-                    <EuiButton
+                    <EuiButtonEmpty
+                      size="xs"
+                      color="primary"
+                      flush="left"
                       data-test-subj="lnsDataPanelShowAllFields"
-                      size="s"
                       onClick={() => {
                         trackUiEvent('indexpattern_show_all_fields_clicked');
                         clearLocalState();
@@ -505,9 +508,9 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                       {i18n.translate('xpack.lens.indexPatterns.showAllFields.buttonText', {
                         defaultMessage: 'Show all fields',
                       })}
-                    </EuiButton>
+                    </EuiButtonEmpty>
                   )}
-                </EuiText>
+                </EuiCallOut>
               )}
             </div>
           </div>
