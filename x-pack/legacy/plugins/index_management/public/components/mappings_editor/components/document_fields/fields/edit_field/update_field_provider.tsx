@@ -44,9 +44,9 @@ export const UpdateFieldProvider = ({ children }: Props) => {
       oldType: DataType,
       newType: DataType
     ): { requiresConfirmation: boolean } => {
-      const { hasChildFields, hasMultiFields, canHaveChildFields, canHaveMultiFields } = field;
+      const { hasChildFields, hasMultiFields } = field;
 
-      if ((!hasChildFields && canHaveChildFields) || (!hasMultiFields && canHaveMultiFields)) {
+      if (!hasChildFields && !hasMultiFields) {
         // No child or multi-fields will be deleted, no confirmation needed.
         return { requiresConfirmation: false };
       }

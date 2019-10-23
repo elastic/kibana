@@ -25,33 +25,33 @@ export const FieldsListItemContainer = ({ fieldId, treeDepth, isLastItem }: Prop
   const getField = (id: string) => byId[id];
 
   const field: NormalizedField = getField(fieldId);
-  const { id, childFields, hasChildFields, hasMultiFields } = field;
-  const isHighlighted = fieldToEdit === id;
-  const isDimmed = status === 'editingField' && fieldToEdit !== id;
-  const isCreateFieldFormVisible = status === 'creatingField' && fieldToAddFieldTo === id;
+  const { childFields } = field;
+  const isHighlighted = fieldToEdit === fieldId;
+  const isDimmed = status === 'editingField' && fieldToEdit !== fieldId;
+  const isCreateFieldFormVisible = status === 'creatingField' && fieldToAddFieldTo === fieldId;
   const areActionButtonsVisible = status === 'idle';
   const childFieldsArray = useMemo(
-    () => (hasChildFields || hasMultiFields ? childFields!.map(getField) : []),
+    () => (childFields !== undefined ? childFields.map(getField) : []),
     [childFields]
   );
 
   const addField = useCallback(() => {
     dispatch({
       type: 'documentField.createField',
-      value: id,
+      value: fieldId,
     });
-  }, [id]);
+  }, [fieldId]);
 
   const editField = useCallback(() => {
     dispatch({
       type: 'documentField.editField',
-      value: id,
+      value: fieldId,
     });
-  }, [id]);
+  }, [fieldId]);
 
   const toggleExpand = useCallback(() => {
-    dispatch({ type: 'field.toggleExpand', value: { fieldId: id } });
-  }, [id]);
+    dispatch({ type: 'field.toggleExpand', value: { fieldId } });
+  }, [fieldId]);
 
   return (
     <FieldsListItem
