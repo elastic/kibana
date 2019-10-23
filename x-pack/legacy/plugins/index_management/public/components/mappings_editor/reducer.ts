@@ -240,26 +240,28 @@ export const reducer = (state: State, action: Action): State => {
         source: action.value,
       };
 
-      if (newField.source.type !== previousField.source.type) {
+      const nameHasChanged = newField.source.name !== previousField.source.name;
+      const typeHasChanged = newField.source.type !== previousField.source.type;
+
+      if (typeHasChanged) {
         // The field `type` has changed, we need to update its meta information
         // and delete all its children fields.
-
-        newField = {
-          ...newField,
-          ...getFieldMeta(action.value),
-          hasChildFields: previousField.hasChildFields, // we need to put this meta back from our previous field
-          hasMultiFields: previousField.hasMultiFields, // we need to put this meta back from our previous field
-        };
 
         const shouldDeleteChildFields = shouldDeleteChildFieldsAfterTypeChange(
           previousField.source.type,
           newField.source.type
         );
 
+        newField = {
+          ...newField,
+          ...getFieldMeta(action.value),
+          hasChildFields: shouldDeleteChildFields ? false : previousField.hasChildFields,
+          hasMultiFields: shouldDeleteChildFields ? false : previousField.hasMultiFields,
+          isExpanded: previousField.isExpanded,
+        };
+
         if (shouldDeleteChildFields) {
           newField.childFields = undefined;
-          newField.hasChildFields = false;
-          newField.hasMultiFields = false;
 
           if (previousField.childFields) {
             const allChildFields = getAllChildFields(previousField, state.fields.byId);
@@ -270,31 +272,25 @@ export const reducer = (state: State, action: Action): State => {
         }
       }
 
-      let updatedById: NormalizedFields['byId'];
-
-      const nameHasChanged = newField.source.name !== previousField.source.name;
-
       if (nameHasChanged) {
         // If the name has changed, we need to update the `path` of the field and recursively
         // the paths of all its "descendant" fields (child or multi-field)
         const { path, byId } = updateFieldsPathAfterFieldNameChange(newField, state.fields.byId);
-        updatedById = byId;
-        updatedById[fieldToEdit] = { ...newField, path };
-      } else {
-        updatedById = state.fields.byId;
-        updatedById[fieldToEdit] = newField;
+        newField.path = path;
+        state.fields.byId = byId;
       }
+
+      state.fields.byId[fieldToEdit] = newField;
 
       // We _also_ need to make a copy of the parent "childFields"
       // array to force a re-render in the view.
-      let rootLevelFields = state.fields.rootLevelFields;
-      if (newField.parentId) {
-        updatedById[newField.parentId].childFields = [
-          ...updatedById[newField.parentId].childFields!,
-        ];
-      } else {
-        // No parent, we need to make a copy of the "rootLevelFields" then
-        rootLevelFields = [...state.fields.rootLevelFields];
+      const { parentId } = newField;
+      const rootLevelFields = parentId
+        ? state.fields.rootLevelFields
+        : [...state.fields.rootLevelFields]; // No parent, we need to make a copy of the "rootLevelFields"
+
+      if (parentId) {
+        state.fields.byId[parentId].childFields = [...state.fields.byId[parentId].childFields!];
       }
 
       return {
@@ -309,7 +305,6 @@ export const reducer = (state: State, action: Action): State => {
         fields: {
           ...state.fields,
           rootLevelFields,
-          byId: updatedById,
         },
       };
     }
