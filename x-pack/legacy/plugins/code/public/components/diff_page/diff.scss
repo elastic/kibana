@@ -1,16 +1,48 @@
-
-
-.diff > button.euiAccordion__button > div:first-child {
-  flex-direction: row-reverse;
-  padding: $euiSize $euiSizeS;
+.codeDiffCommitSelectorsContainer {
+  border-left: $euiBorderThin solid $euiColorLightShade;
+  padding-left: $euiSize;
 }
 
-.diff > button.euiAccordion__button {
-  &:hover {
-    text-decoration: none;
-  }
+.codeDiffCommitMessage {
+  padding: $euiSizeS $euiSize;
 }
 
-.euiAccordion__iconWrapper {
+.codeDiffChangedFiles {
+  color: $euiColorPrimary;
+}
+
+.codeDiffMetadata {
+  padding: 0 $euiSize $euiSizeS $euiSize;
+}
+
+.codeVisualizerIcon {
+  margin-right: $euiSizeS;
+}
+
+.codeDiffDeletion {
+  margin: 0 $euiSizeS;
+  background-color: $euiColorVis0;
+}
+
+.codeDiff__panel {
+  padding: 0 $euiSize;
+}
+
+.codeDiff__header {
+  border-bottom: $euiBorderThin solid $euiColorLightShade;
+  height: $euiSizeXXL;
+  padding: $euiSize;
+}
+
+.codeAccordionCollapse__icon {
+  margin: auto $euiSize auto 0;
   cursor: pointer;
+}
+
+.codeViewFile__button {
+  height: $euiSizeL !important;
+}
+
+.codeAccordion {
+  margin-bottom: $euiSizeM;
 }

@@ -11,7 +11,7 @@ import { QueryString } from 'ui/utils/query_string';
 import { Query } from 'src/plugins/data/common';
 
 import { inputsSelectors, State, timelineSelectors } from '../../store';
-import { SiemPageName } from '../../pages/home/home_navigations';
+import { SiemPageName } from '../../pages/home/types';
 import { NavTab } from '../navigation/types';
 import { CONSTANTS, UrlStateType } from './constants';
 import { LocationTypes, UrlStateContainerPropTypes } from './types';

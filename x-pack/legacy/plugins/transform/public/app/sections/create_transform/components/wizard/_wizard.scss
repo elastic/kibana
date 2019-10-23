@@ -1,0 +1,13 @@
+.transform__steps {
+  .euiStep__content {
+    padding-right: 0px;
+  }
+}
+
+/* This is an override to replicate the previous full-page-width of the transforms creation wizard
+when it was in use within the ML plugin. The Kibana management section limits a max-width to 1200px
+which is a bit narrow for the two column layout of the transform wizard. We might revisit this for
+future versions to blend in more with the overall design of the Kibana management section. */
+.mgtPage__body--transformWizard {
+  max-width: 100%;
+}

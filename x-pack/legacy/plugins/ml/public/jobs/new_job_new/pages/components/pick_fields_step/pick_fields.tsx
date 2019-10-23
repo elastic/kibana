@@ -47,7 +47,9 @@ export const PickFieldsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
           {jobType === JOB_TYPE.POPULATION && (
             <PopulationView isActive={isCurrentStep} setCanProceed={setNextActive} />
           )}
-          {jobType === JOB_TYPE.ADVANCED && <AdvancedView setCanProceed={setNextActive} />}
+          {jobType === JOB_TYPE.ADVANCED && (
+            <AdvancedView isActive={isCurrentStep} setCanProceed={setNextActive} />
+          )}
           <WizardNav
             previous={() =>
               setCurrentStep(

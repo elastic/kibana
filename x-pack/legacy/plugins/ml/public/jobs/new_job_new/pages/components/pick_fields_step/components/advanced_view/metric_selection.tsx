@@ -27,6 +27,7 @@ const emptyRichDetector: RichDetector = {
   partitionField: null,
   excludeFrequent: null,
   description: null,
+  customRules: null,
 };
 
 export const AdvancedDetectors: FC<Props> = ({ setIsValid }) => {
@@ -85,7 +86,7 @@ export const AdvancedDetectors: FC<Props> = ({ setIsValid }) => {
 
   return (
     <Fragment>
-      <DetectorList onEditJob={onEditJob} onDeleteJob={onDeleteJob} />
+      <DetectorList isActive={true} onEditJob={onEditJob} onDeleteJob={onDeleteJob} />
       <MetricSelector
         payload={modalPayload}
         fields={fields}
