@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import Url from 'url';
-
 import sinon from 'sinon';
 import * as requestModule from '../../request';
 import expect from '@kbn/expect';
@@ -46,15 +44,12 @@ describe('Console Proxy Route', () => {
 
       teardowns.push(() => server.stop());
 
+      const params = [];
+      if (path != null) params.push(`path=${path}`);
+      if (method != null) params.push(`method=${method}`);
       return await server.inject({
         method: 'POST',
-        url: Url.format({
-          pathname: '/api/console/proxy',
-          query: {
-            path: path == null ? undefined : path,
-            method: method == null ? undefined : method,
-          }
-        }),
+        url: `/api/console/proxy${params.length ? `?${params.join('&')}` : ''}`,
       });
     };
   });
@@ -130,11 +125,11 @@ describe('Console Proxy Route', () => {
         });
       });
       describe('is mixed case', () => {
-        it('sends a request with the method properly cased', async () => {
+        it('sends a request with the exact method', async () => {
           const { statusCode } = await request('HeAd', '/');
           expect(statusCode).to.be(200);
           sinon.assert.calledOnce(requestModule.sendRequest);
-          expect(requestModule.sendRequest.getCall(0).args[0].method).to.be('HEAD');
+          expect(requestModule.sendRequest.getCall(0).args[0].method).to.be('HeAd');
         });
       });
     });
