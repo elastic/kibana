@@ -65,7 +65,9 @@ export const FormattedDate = pure<{
 FormattedDate.displayName = 'FormattedDate';
 
 /**
- * Renders the specified date value in a format determined by the user's preferences,
+ * Renders the specified date value according to under/over one hour
+ * Under an hour = relative format
+ * Over an hour = in a format determined by the user's preferences,
  * with a tooltip that renders:
  * - the name of the field
  * - a humanized relative date (e.g. 16 minutes ago)

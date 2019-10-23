@@ -14,6 +14,7 @@ import { AutonomousSystem, FlowTarget, HostEcsFields, IpOverviewData } from '../
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { DefaultDraggable } from '../draggables';
 import { getEmptyTagValue } from '../empty_value';
+import { FormattedRelativePreferenceDate } from '../formatted_date';
 import { HostDetailsLink, ReputationLink, VirusTotalLink, WhoIsLink } from '../links';
 import { Spacer } from '../page';
 import * as i18n from '../page/network/ip_overview/translations';
@@ -45,6 +46,10 @@ export const locationRenderer = (fieldNames: string[], data: IpOverviewData): Re
   ) : (
     getEmptyTagValue()
   );
+
+export const dateRenderer = (timestamp?: string | null): React.ReactElement => (
+  <FormattedRelativePreferenceDate value={timestamp} />
+);
 
 export const autonomousSystemRenderer = (
   as: AutonomousSystem,
