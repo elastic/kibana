@@ -19,7 +19,8 @@
 
 import { useRef, useEffect, useState } from 'react';
 import React from 'react';
-import { EuiProgress } from '@elastic/eui';
+import classNames from 'classnames';
+import { EuiLoadingChart, EuiProgress } from '@elastic/eui';
 import { ExpressionAST, IExpressionLoaderParams } from './types';
 import { ExpressionLoader } from './loader';
 
@@ -116,25 +117,25 @@ export const ExpressionRendererImplementation = ({
     mountpoint.current,
   ]);
 
+  const classes = classNames('expExpressionRenderer', className);
+
   return (
-    <div
-      {...dataAttrs}
-      style={{
-        display: state.hasError ? 'none' : 'flex',
-        position: 'relative',
-        width: '100%',
-        height: '100%',
-      }}
-    >
-      {state.isLoading ? <EuiProgress size="xs" color="accent" position="absolute" /> : null}
-      {state.hasError && state.errorType ? (
-        options.renderError ? (
-          options.renderError(state.errorType, state.errorMessage)
-        ) : (
-          <div data-test-subj="expression-renderer-error">{state.errorMessage}</div>
-        )
-      ) : null}
-      <div className={className} ref={mountpoint} />
+    <div {...dataAttrs} className={classes}>
+      {false ? ( // TODO: Hook this up to show if there is no chart at all but it is loading, so there's no blank area
+        <EuiLoadingChart mono />
+      ) : (
+        <>
+          {state.isLoading ? <EuiProgress size="xs" color="accent" position="absolute" /> : null}
+          {state.hasError && state.errorType ? (
+            options.renderError ? (
+              options.renderError(state.errorType, state.errorMessage)
+            ) : (
+              <div data-test-subj="expression-renderer-error">{state.errorMessage}</div>
+            )
+          ) : null}
+          <div className="expExpressionRenderer__expression" ref={mountpoint} />
+        </>
+      )}
     </div>
   );
 };
