@@ -104,12 +104,12 @@ export const AdvancedDetectorModal: FC<Props> = ({
   const allFieldOptions: EuiComboBoxOptionProps[] = [
     ...createFieldOptions(fields),
     ...createScriptFieldOptions(jobCreator.scriptFields),
-  ].sort(comboboxPropsSort);
+  ].sort(comboBoxOptionsSort);
 
   const splitFieldOptions: EuiComboBoxOptionProps[] = [
     ...allFieldOptions,
     ...createMlcategoryFieldOption(jobCreator.categorizationFieldName),
-  ].sort(comboboxPropsSort);
+  ].sort(comboBoxOptionsSort);
 
   const eventRateField = fields.find(f => f.id === EVENT_RATE_FIELD_ID);
 
@@ -399,6 +399,6 @@ function createSelectedOptions(
   return options.length === 1 && options[0].label !== option.label ? [] : [option];
 }
 
-function comboboxPropsSort(a: EuiComboBoxOptionProps, b: EuiComboBoxOptionProps) {
+function comboBoxOptionsSort(a: EuiComboBoxOptionProps, b: EuiComboBoxOptionProps) {
   return a.label.localeCompare(b.label);
 }
