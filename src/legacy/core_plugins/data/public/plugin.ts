@@ -137,7 +137,7 @@ export class DataPlugin
 
     uiActions.registerAction(
       createFilterAction(
-        this.setupApi.filter.filterManager,
+        data.query.filterManager,
         this.setupApi.timefilter.timefilter,
         indexPatternsService
       )

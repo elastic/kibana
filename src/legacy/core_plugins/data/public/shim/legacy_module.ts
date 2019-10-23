@@ -25,8 +25,6 @@ import { wrapInI18nContext } from 'ui/i18n';
 import { uiModules } from 'ui/modules';
 import { npStart } from 'ui/new_platform';
 import { FilterBar, ApplyFiltersPopover } from '../filter';
-
-import { mapAndFlattenFilters } from '../../../../../plugins/data/public';
 import { IndexPatterns } from '../index_patterns/index_patterns';
 
 /** @internal */
