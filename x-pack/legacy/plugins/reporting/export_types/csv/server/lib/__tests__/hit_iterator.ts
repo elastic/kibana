@@ -16,29 +16,31 @@ const mockLogger = {
 } as Logger;
 const debugLogStub = sinon.stub(mockLogger, 'debug');
 const errorLogStub = sinon.stub(mockLogger, 'error');
-
-const mockSearchRequest = {};
-const realCancellationToken = new CancellationToken();
-
 const mockCallEndpoint = sinon.stub();
-mockCallEndpoint.resolves({ _scroll_id: '123blah', hits: { hits: ['you found me'] } });
-mockCallEndpoint.onThirdCall().resolves({ _scroll_id: '123blah', hits: {} });
-
-const mockConfig: ScrollConfig = {
-  duration: '2s',
-  size: 123,
-};
+const mockSearchRequest = {};
+const mockConfig: ScrollConfig = { duration: '2s', size: 123 };
+let realCancellationToken = new CancellationToken();
+let isCancelledStub: sinon.SinonStub;
 
 describe('hitIterator', function() {
-  afterEach(() => {
+  beforeEach(() => {
     debugLogStub.resetHistory();
     errorLogStub.resetHistory();
     mockCallEndpoint.resetHistory();
+    mockCallEndpoint.resetBehavior();
+    mockCallEndpoint.resolves({ _scroll_id: '123blah', hits: { hits: ['you found me'] } });
+    mockCallEndpoint.onThirdCall().resolves({ _scroll_id: '123blah', hits: {} });
+
+    isCancelledStub = sinon.stub(realCancellationToken, 'isCancelled');
+    isCancelledStub.returns(false);
+  });
+
+  afterEach(() => {
+    realCancellationToken = new CancellationToken();
   });
 
   it('iterates hits', async () => {
     const hitIterator = createHitIterator(mockLogger);
-
     const iterator = hitIterator(
       mockConfig,
       mockCallEndpoint,
@@ -53,5 +55,32 @@ describe('hitIterator', function() {
       }
       expect(hit).to.be('you found me');
     }
+
+    expect(mockCallEndpoint.callCount).to.be(4);
+    expect(debugLogStub.callCount).to.be(4);
+    expect(errorLogStub.callCount).to.be(0);
+  });
+
+  it('obeys cancellation', async () => {
+    isCancelledStub.onSecondCall().returns(true);
+    const hitIterator = createHitIterator(mockLogger);
+    const iterator = hitIterator(
+      mockConfig,
+      mockCallEndpoint,
+      mockSearchRequest,
+      realCancellationToken
+    );
+
+    while (true) {
+      const { done: iterationDone, value: hit } = await iterator.next();
+      if (iterationDone) {
+        break;
+      }
+      expect(hit).to.be('you found me');
+    }
+
+    expect(mockCallEndpoint.callCount).to.be(3);
+    expect(debugLogStub.callCount).to.be(3);
+    expect(errorLogStub.callCount).to.be(0);
   });
 });
