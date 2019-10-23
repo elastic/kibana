@@ -29,6 +29,8 @@ import { VisualizationsSetup } from '../../visualizations/public/np_ready/public
 import { getTimelionVisualizationConfig } from './timelion_vis_fn';
 import { getTimelionVisualization } from './vis';
 import { getTimeChart } from './panels/timechart/timechart';
+import { DataSetup } from '../../data/public';
+import { TimefilterSetup } from '../../data/public/timefilter';
 import { Panel } from './panels/panel';
 import { LegacyDependenciesPlugin, LegacyDependenciesPluginSetup } from './shim';
 
@@ -37,12 +39,14 @@ export interface TimelionVisualizationDependencies extends LegacyDependenciesPlu
   uiSettings: UiSettingsClientContract;
   http: HttpSetup;
   timelionPanels: Map<string, Panel>;
+  timefilter: TimefilterSetup;
 }
 
 /** @internal */
 export interface TimelionPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPlugin['setup']>;
   visualizations: VisualizationsSetup;
+  data: DataSetup;
 
   // Temporary solution
   __LEGACY: LegacyDependenciesPlugin;
@@ -58,13 +62,14 @@ export class TimelionPlugin implements Plugin<Promise<void>, void> {
 
   public async setup(
     core: CoreSetup,
-    { __LEGACY, expressions, visualizations }: TimelionPluginSetupDependencies
+    { __LEGACY, expressions, visualizations, data }: TimelionPluginSetupDependencies
   ) {
     const timelionPanels: Map<string, Panel> = new Map();
 
     const dependencies: TimelionVisualizationDependencies = {
       uiSettings: core.uiSettings,
       http: core.http,
+      timefilter: data.timefilter,
       timelionPanels,
       ...(await __LEGACY.setup(core, timelionPanels)),
     };

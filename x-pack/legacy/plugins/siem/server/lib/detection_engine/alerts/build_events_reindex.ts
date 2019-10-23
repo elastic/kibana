@@ -14,15 +14,15 @@ import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 interface BuildEventsReIndexParams {
   description: string;
   index: string[];
-  from: number;
-  to: number;
+  from: string;
+  to: string;
   signalsIndex: string;
-  maxDocs: number;
+  maxDocs: string;
   filter: Record<string, {}> | undefined;
   kql: string | undefined;
-  severity: number;
+  severity: string;
   name: string;
-  timeDetected: number;
+  timeDetected: string;
   ruleRevision: number;
   id: string;
   type: string;
@@ -131,6 +131,7 @@ export const buildEventsReIndex = ({
           def parent = [
             "id": ctx._id,
             "type": "event",
+            "index": ctx._index,
             "depth": 1
           ];
 
@@ -140,14 +141,15 @@ export const buildEventsReIndex = ({
             "rule_type": "${type}",
             "parent": parent,
             "name": "${name}",
-            "severity": ${severity},
+            "severity": "${severity}",
             "description": "${description}",
-            "time_detected": "${timeDetected}",
+            "original_time": ctx._source['@timestamp'],
             "index_patterns": indexPatterns,
             "references": references
           ];
 
           ctx._source.signal = signal;
+          ctx._source['@timestamp'] = "${timeDetected}";
         `,
         lang: 'painless',
       },

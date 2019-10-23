@@ -81,9 +81,9 @@ export const AnalyticsPanel: FC = () => {
             </Fragment>
           }
           actions={
-            <EuiButton href="#/data_frame_analytics?" color="primary" fill>
+            <EuiButton href="#/data_frame_analytics?" color="primary" fill iconType="plusInCircle">
               {i18n.translate('xpack.ml.overview.analyticsList.createJobButtonText', {
-                defaultMessage: 'Create job.',
+                defaultMessage: 'Create job',
               })}
             </EuiButton>
           }

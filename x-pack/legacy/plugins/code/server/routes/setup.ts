@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestFacade } from '../..';
+import { KibanaRequest, KibanaResponseFactory, RequestHandlerContext } from 'src/core/server';
+
 import { CodeServerRouter } from '../security';
 import { CodeServices } from '../distributed/code_services';
 import { SetupDefinition } from '../distributed/apis';
@@ -14,9 +15,14 @@ export function setupRoute(router: CodeServerRouter, codeServices: CodeServices)
   router.route({
     method: 'get',
     path: '/api/code/setup',
-    async handler(req: RequestFacade) {
+    async npHandler(
+      context: RequestHandlerContext,
+      req: KibanaRequest,
+      res: KibanaResponseFactory
+    ) {
       const endpoint = await codeServices.locate(req, '');
-      return await setupService.setup(endpoint, {});
+      const setup = await setupService.setup(endpoint, {});
+      return res.ok({ body: setup });
     },
   });
 }

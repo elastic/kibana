@@ -21,7 +21,6 @@ export interface SecurityOptions {
   installNodeDependency: boolean;
   gitHostWhitelist: string[];
   gitProtocolWhitelist: string[];
-  enableGitCertCheck: boolean;
   enableJavaSecurityManager: boolean;
   extraJavaRepositoryWhitelist: string[];
 }

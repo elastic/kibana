@@ -58,7 +58,11 @@ export const InfrastructurePage = injectUICapabilities(
           readOnlyBadge={!uiCapabilities.infrastructure.save}
         />
 
-        <AppNavigation>
+        <AppNavigation
+          aria-label={i18n.translate('xpack.infra.header.infrastructureNavigationTitle', {
+            defaultMessage: 'Metrics',
+          })}
+        >
           <RoutedTabs
             tabs={[
               {

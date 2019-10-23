@@ -117,19 +117,19 @@ class ListControl extends Control {
       query
     });
     const searchSource = createSearchSource(
-      this.kbnApi,
+      this.SearchSource,
       initialSearchSourceState,
       indexPattern,
       aggs,
       this.useTimeFilter,
       ancestorFilters
     );
-    this.abortController.signal.addEventListener('abort', () => searchSource.cancelQueued());
+    const abortSignal = this.abortController.signal;
 
     this.lastQuery = query;
     let resp;
     try {
-      resp = await searchSource.fetch();
+      resp = await searchSource.fetch({ abortSignal });
     } catch(error) {
       // If the fetch was aborted then no need to surface this error in the UI
       if (error.name === 'AbortError') return;
@@ -170,7 +170,7 @@ class ListControl extends Control {
   }
 }
 
-export async function listControlFactory(controlParams, kbnApi, useTimeFilter) {
+export async function listControlFactory(controlParams, useTimeFilter, SearchSource) {
   let indexPattern;
   try {
     indexPattern = await data.indexPatterns.indexPatterns.get(controlParams.indexPattern);
@@ -192,7 +192,7 @@ export async function listControlFactory(controlParams, kbnApi, useTimeFilter) {
   return new ListControl(
     controlParams,
     new PhraseFilterManager(controlParams.id, controlParams.fieldName, indexPattern, filterManager),
-    kbnApi,
-    useTimeFilter
+    useTimeFilter,
+    SearchSource,
   );
 }
