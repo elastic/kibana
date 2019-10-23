@@ -213,6 +213,7 @@ def sendInfraMail() {
 
 def sendKibanaMail() {
   catchError {
+    def buildStatus = buildUtils.getBuildStatus()
     if(params.NOTIFY_ON_FAILURE && buildStatus != 'SUCCESS' && buildStatus != 'ABORTED') {
       emailext(
         to: 'build-kibana@elastic.co',
