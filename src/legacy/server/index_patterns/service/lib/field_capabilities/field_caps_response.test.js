@@ -37,7 +37,7 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
     describe('conflicts', () => {
       it('returns a field for each in response, no filtering', () => {
         const fields = readFieldCapsResponse(esResponse);
-        expect(fields).toHaveLength(22);
+        expect(fields).toHaveLength(24);
       });
 
       it('includes only name, type, esTypes, searchable, aggregatable, readFromDocValues, and maybe conflictDescriptions, ' +
@@ -65,8 +65,8 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
         sandbox.spy(shouldReadFieldFromDocValuesNS, 'shouldReadFieldFromDocValues');
         const fields = readFieldCapsResponse(esResponse);
         const conflictCount = fields.filter(f => f.type === 'conflict').length;
-        // +1 is for the object field which gets filtered out of the final return value from readFieldCapsResponse
-        sinon.assert.callCount(shouldReadFieldFromDocValues, fields.length - conflictCount + 1);
+        // +2 is for the object and nested fields which get filtered out of the final return value from readFieldCapsResponse
+        sinon.assert.callCount(shouldReadFieldFromDocValues, fields.length - conflictCount + 2);
       });
 
       it('converts es types to kibana types', () => {
@@ -138,10 +138,28 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
         expect(child).toHaveProperty('subType', { multi: { parent: 'multi_parent' } });
       });
 
-      // todo
-      // it('returns nested sub-fields with a subType key describing the relationship', () => {
-      //  throw new Error('implement me');
-      // });
+      it('returns nested sub-fields with a subType key describing the relationship', () => {
+        const fields = readFieldCapsResponse(esResponse);
+        const child = fields.find(f => f.name === 'nested_object_parent.child');
+        expect(child).toHaveProperty('subType', { nested: { path: 'nested_object_parent' } });
+      });
+
+      it('handles fields that are both nested and multi', () => {
+        const fields = readFieldCapsResponse(esResponse);
+        const child = fields.find(f => f.name === 'nested_object_parent.child.keyword');
+        expect(child).toHaveProperty(
+          'subType',
+          {
+            nested: { path: 'nested_object_parent' },
+            multi: { parent: 'nested_object_parent.child' }
+          });
+      });
+
+      it('does not include the field actually mapped as nested itself', () => {
+        const fields = readFieldCapsResponse(esResponse);
+        const child = fields.find(f => f.name === 'nested_object_parent');
+        expect(child).toBeUndefined();
+      });
 
       it('should not confuse object children for multi or nested field children', () => {
         // We detect multi fields by finding fields that have a dot in their name and then looking
