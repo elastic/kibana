@@ -61,9 +61,8 @@ export const validateAdvancedEditor = (state: State): State => {
   const destinationIndexName = idx(jobConfig, _ => _.dest.index) || '';
   const destinationIndexNameEmpty = destinationIndexName === '';
   const destinationIndexNameValid = isValidIndexName(destinationIndexName);
-  const destinationIndexPatternTitleExists = Object.keys(state.indexPatternsMap).some(
-    name => destinationIndexName === name
-  );
+  const destinationIndexPatternTitleExists =
+    state.indexPatternsMap[destinationIndexName] !== undefined;
 
   let dependentVariableEmpty = false;
   if (isRegressionAnalysis(jobConfig.analysis)) {

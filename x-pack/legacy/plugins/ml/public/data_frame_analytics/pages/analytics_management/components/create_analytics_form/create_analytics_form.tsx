@@ -282,12 +282,10 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
                   )}
                   singleSelection={{ asPlainText: true }}
                   options={Object.values(indexPatternsMap).sort((a, b) =>
-                    a.label > b.label ? 1 : -1
+                    a.label.localeCompare(b.label)
                   )}
                   selectedOptions={
-                    Object.keys(indexPatternsMap).includes(sourceIndex)
-                      ? [{ label: sourceIndex }]
-                      : []
+                    indexPatternsMap[sourceIndex] !== undefined ? [{ label: sourceIndex }] : []
                   }
                   onChange={selectedOptions =>
                     setFormState({ sourceIndex: selectedOptions[0].label || '' })
