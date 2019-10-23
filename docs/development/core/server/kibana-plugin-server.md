@@ -90,10 +90,12 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsBulkGetObject](./kibana-plugin-server.savedobjectsbulkgetobject.md) |  |
 |  [SavedObjectsBulkResponse](./kibana-plugin-server.savedobjectsbulkresponse.md) |  |
 |  [SavedObjectsBulkUpdateObject](./kibana-plugin-server.savedobjectsbulkupdateobject.md) |  |
+|  [SavedObjectsBulkUpdateOptions](./kibana-plugin-server.savedobjectsbulkupdateoptions.md) |  |
 |  [SavedObjectsBulkUpdateResponse](./kibana-plugin-server.savedobjectsbulkupdateresponse.md) |  |
 |  [SavedObjectsClientProviderOptions](./kibana-plugin-server.savedobjectsclientprovideroptions.md) | Options to control the creation of the Saved Objects Client. |
 |  [SavedObjectsClientWrapperOptions](./kibana-plugin-server.savedobjectsclientwrapperoptions.md) | Options passed to each SavedObjectsClientWrapperFactory to aid in creating the wrapper instance. |
 |  [SavedObjectsCreateOptions](./kibana-plugin-server.savedobjectscreateoptions.md) |  |
+|  [SavedObjectsDeleteOptions](./kibana-plugin-server.savedobjectsdeleteoptions.md) |  |
 |  [SavedObjectsExportOptions](./kibana-plugin-server.savedobjectsexportoptions.md) | Options controlling the export operation. |
 |  [SavedObjectsExportResultDetails](./kibana-plugin-server.savedobjectsexportresultdetails.md) | Structure of the export result details entry |
 |  [SavedObjectsFindOptions](./kibana-plugin-server.savedobjectsfindoptions.md) |  |
