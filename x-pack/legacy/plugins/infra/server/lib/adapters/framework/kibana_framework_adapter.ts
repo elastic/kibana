@@ -13,10 +13,7 @@ import { schema, TypeOf, ObjectType } from '@kbn/config-schema';
 import { first } from 'rxjs/operators';
 import {
   InfraBackendFrameworkAdapter,
-  InfraFrameworkRequest,
   InfraTSVBResponse,
-  InfraWrappableRequest,
-  internalInfraFrameworkRequest,
   InfraServerPluginDeps,
   InfraDatabaseSearchResponse,
 } from './adapter_types';
@@ -28,7 +25,6 @@ import {
   RequestHandler,
   RequestHandlerContext,
   KibanaResponseFactory,
-  RouteConfig,
 } from '../../../../../../../../src/core/server';
 import { InfraConfig } from '../../../new_platform_config.schema';
 
@@ -37,12 +33,6 @@ interface CallWithRequestParams extends GenericParams {
 }
 
 const anyObject = schema.object({}, { allowUnknowns: true });
-
-const VALIDATE_PLACEHOLDER = {
-  body: anyObject,
-  params: anyObject,
-  query: anyObject,
-};
 
 type AnyObject = typeof anyObject;
 
@@ -268,7 +258,7 @@ export class InfraKibanaBackendFrameworkAdapter
 
   public getIndexPatternsService(request: KibanaRequest): Legacy.IndexPatternsService {
     return this.plugins.indexPatterns.indexPatternsServiceFactory({
-      callCluster: async (method: string, args: [GenericParams], ...rest: Array<any>) => {
+      callCluster: async (method: string, args: [GenericParams], ...rest: any[]) => {
         const fieldCaps = await this.callWithRequest(
           request,
           method,
@@ -296,7 +286,7 @@ export class InfraKibanaBackendFrameworkAdapter
     request: KibanaRequest,
     model: TSVBMetricModel,
     timerange: { min: number; max: number },
-    filters: Array<any>
+    filters: any[]
   ) {
     const server = request.server;
     const getVisData = get(server, 'plugins.metrics.getVisData');
