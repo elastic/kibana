@@ -106,9 +106,9 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.discover.brushHistogram();
 
         const newDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
-        expect(Math.round(newDurationHours)).to.be(108);
+        expect(Math.round(newDurationHours)).to.be(25);
         const rowData = await PageObjects.discover.getDocTableField(1);
-        expect(rowData).to.have.string('Sep 22, 2015 @ 23:50:13.253');
+        expect(rowData).to.have.string('Sep 20, 2015 @ 22:17:57.757');
       });
 
       it('should show correct initial chart interval of Auto', async function () {
