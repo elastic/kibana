@@ -93,7 +93,7 @@ export function toElasticsearchQuery(node, indexPattern = null, config = {}, con
       // Wildcards can easily include nested and non-nested fields. There isn't a good way to let
       // users handle this themselves so we automatically add nested queries in this scenario.
       if (
-        !fullFieldNameArg.type === 'wildcard'
+        !(fullFieldNameArg.type === 'wildcard')
         || !_.get(field, 'subType.nested')
         || context.nested
       ) {

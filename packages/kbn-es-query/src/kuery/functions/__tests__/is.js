@@ -245,6 +245,25 @@ describe('kuery functions', function () {
         expect(result).to.eql(expected);
       });
 
+      it('should use a provided nested context to create a full field name', function () {
+        const expected = {
+          bool: {
+            should: [
+              { match: { 'nestedField.extension': 'jpg' } },
+            ],
+            minimum_should_match: 1
+          }
+        };
+
+        const node = nodeTypes.function.buildNode('is', 'extension', 'jpg');
+        const result = is.toElasticsearchQuery(
+          node,
+          indexPattern,
+          {},
+          { nested: { path: 'nestedField' } }
+        );
+        expect(result).to.eql(expected);
+      });
     });
   });
 });

@@ -181,6 +181,32 @@ describe('kuery functions', function () {
         expect(result).to.eql(expected);
       });
 
+      it('should use a provided nested context to create a full field name', function () {
+        const expected = {
+          bool: {
+            should: [
+              {
+                range: {
+                  'nestedField.bytes': {
+                    gt: 1000,
+                    lt: 8000
+                  }
+                }
+              }
+            ],
+            minimum_should_match: 1
+          }
+        };
+
+        const node = nodeTypes.function.buildNode('range', 'bytes', { gt: 1000, lt: 8000 });
+        const result = range.toElasticsearchQuery(
+          node,
+          indexPattern,
+          {},
+          { nested: { path: 'nestedField' } }
+        );
+        expect(result).to.eql(expected);
+      });
     });
   });
 });
