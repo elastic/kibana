@@ -93,6 +93,7 @@ export function InnerWorkspacePanel({
 
   const [localState, setLocalState] = useState({
     expressionBuildError: undefined as string | undefined,
+    expandError: false,
   });
 
   const activeVisualization = activeVisualizationId
@@ -211,24 +212,34 @@ export function InnerWorkspacePanel({
       <ExpressionRendererComponent
         className="lnsExpressionRenderer"
         expression={expression!}
-        renderError={(errorType: 'data' | 'render', errorMessage?: string | null) => {
+        renderError={(errorMessage?: string | null) => {
           return (
             <EuiFlexGroup direction="column" className="lns">
               <EuiFlexItem data-test-subj="expression-failure">
                 <EuiIcon type="alert" size="xl" color="warning" />
-                {errorType === 'data' ? (
-                  <FormattedMessage
-                    id="xpack.lens.editorFrame.dataFailure"
-                    defaultMessage="An error occurred when loading data."
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="xpack.lens.editorFrame.renderFailure"
-                    defaultMessage="An error occurred when rendering the data."
-                  />
-                )}
+                <FormattedMessage
+                  id="xpack.lens.editorFrame.dataFailure"
+                  defaultMessage="An error occurred when loading data."
+                />
               </EuiFlexItem>
-              {errorMessage ? <EuiFlexItem grow={false}>{errorMessage}</EuiFlexItem> : null}
+              {errorMessage ? (
+                <EuiFlexItem className="eui-textBreakAll" grow={false}>
+                  <EuiButtonEmpty
+                    onClick={() => {
+                      setLocalState(prevState => ({
+                        ...prevState,
+                        expandError: !prevState.expandError,
+                      }));
+                    }}
+                  >
+                    {i18n.translate('xpack.lens.editorFrame.expandRenderingErrorButton', {
+                      defaultMessage: 'Show details of error',
+                    })}
+                  </EuiButtonEmpty>
+
+                  {localState.expandError ? errorMessage : null}
+                </EuiFlexItem>
+              ) : null}
             </EuiFlexGroup>
           );
         }}

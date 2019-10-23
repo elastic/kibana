@@ -125,11 +125,10 @@ export const getDatatableRenderer = (
       <DatatableComponent {...config} formatFactory={formatFactory} />,
       domNode,
       () => {
-        if (handlers.done) {
-          handlers.done();
-        }
+        handlers.done();
       }
     );
+    handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
   },
 });
 

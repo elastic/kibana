@@ -62,20 +62,37 @@ describe('ExpressionRenderHandler', () => {
   });
 
   describe('render()', () => {
-    it('sends an observable error if invalid data is provided', async () => {
+    it('sends an observable error and keeps it open if invalid data is provided', async () => {
       const expressionRenderHandler = new ExpressionRenderHandler(element);
-      expressionRenderHandler.render({});
-      await expect(expressionRenderHandler.render$.pipe(first()).toPromise()).rejects.toThrow(
-        'invalid data provided to the expression renderer'
-      );
+      const promise1 = expressionRenderHandler.render$.pipe(first()).toPromise();
+      expressionRenderHandler.render(false);
+      await expect(promise1).resolves.toEqual({
+        type: 'error',
+        error: {
+          message: 'invalid data provided to the expression renderer',
+        },
+      });
+
+      const promise2 = expressionRenderHandler.render$.pipe(first()).toPromise();
+      expressionRenderHandler.render(false);
+      await expect(promise2).resolves.toEqual({
+        type: 'error',
+        error: {
+          message: 'invalid data provided to the expression renderer',
+        },
+      });
     });
 
     it('sends an observable error if renderer does not exist', async () => {
       const expressionRenderHandler = new ExpressionRenderHandler(element);
+      const promise = expressionRenderHandler.render$.pipe(first()).toPromise();
       expressionRenderHandler.render({ type: 'render', as: 'something' });
-      await expect(expressionRenderHandler.render$.pipe(first()).toPromise()).rejects.toThrow(
-        `invalid renderer id 'something'`
-      );
+      await expect(promise).resolves.toEqual({
+        type: 'error',
+        error: {
+          message: `invalid renderer id 'something'`,
+        },
+      });
     });
 
     it('sends an observable error if the rendering function throws', async () => {
@@ -89,10 +106,14 @@ describe('ExpressionRenderHandler', () => {
       });
 
       const expressionRenderHandler = new ExpressionRenderHandler(element);
+      const promise = expressionRenderHandler.render$.pipe(first()).toPromise();
       expressionRenderHandler.render({ type: 'render', as: 'something' });
-      await expect(expressionRenderHandler.render$.pipe(first()).toPromise()).rejects.toThrow(
-        `renderer error`
-      );
+      await expect(promise).resolves.toEqual({
+        type: 'error',
+        error: {
+          message: 'renderer error',
+        },
+      });
     });
 
     it('sends a next observable once rendering is complete', () => {

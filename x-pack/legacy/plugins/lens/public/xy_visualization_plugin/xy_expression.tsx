@@ -49,7 +49,6 @@ export interface XYRender {
 type XYChartRenderProps = XYChartProps & {
   formatFactory: FormatFactory;
   timeZone: string;
-  handlers: IInterpreterRenderHandlers;
 };
 
 export const xyChart: ExpressionFunction<'lens_xy_chart', LensMultiTable, XYArgs, XYRender> = ({
@@ -107,11 +106,13 @@ export const getXyChartRenderer = (dependencies: {
   validate: () => {},
   reuseDomNode: true,
   render: (domNode: Element, config: XYChartProps, handlers: IInterpreterRenderHandlers) => {
+    handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
     ReactDOM.render(
       <I18nProvider>
-        <XYChartReportable {...config} {...dependencies} handlers={handlers} />
+        <XYChartReportable {...config} {...dependencies} />
       </I18nProvider>,
-      domNode
+      domNode,
+      () => handlers.done()
     );
   },
 });
@@ -123,31 +124,28 @@ function getIconForSeriesType(seriesType: SeriesType): IconType {
 const MemoizedChart = React.memo(XYChart);
 
 export function XYChartReportable(props: XYChartRenderProps) {
-  const [isReady, setIsReady] = useState(false);
-  const [hasError, setError] = useState(false);
+  const [state, setState] = useState({
+    isReady: false,
+    hasError: false,
+  });
 
   // It takes a cycle for the XY chart to render. This prevents
   // reporting from printing a blank chart placeholder.
   useEffect(() => {
-    setIsReady(true);
-    if (props.handlers.done) {
-      props.handlers.done();
-    }
+    setState({ isReady: true, hasError: false });
   }, []);
 
-  useEffect(() => {
-    if (hasError) {
-      // Clear error state when the config or data is updated
-      setError(false);
-    }
-  }, [props.data, props.args.layers]);
+  if (state.hasError) {
+    // Clear error state when the config or data is updated
+    setState({ isReady: true, hasError: false });
+  }
 
   return (
-    <VisualizationContainer className="lnsXyExpression__container" isReady={isReady}>
+    <VisualizationContainer className="lnsXyExpression__container" isReady={state.isReady}>
       <XYErrorBoundary
-        hasError={hasError}
+        hasError={state.hasError}
         onError={() => {
-          setError(true);
+          setState({ ...state, hasError: true });
         }}
       >
         <MemoizedChart {...props} />

@@ -59,7 +59,6 @@ describe('ExpressionRenderer', () => {
 
     expect(instance.find(EuiProgress)).toHaveLength(1);
 
-    dataSubject.next('data');
     renderSubject.next(1);
 
     instance.update();
@@ -97,18 +96,11 @@ describe('ExpressionRenderer', () => {
 
     const instance = mount(<ExpressionRendererImplementation className="renderer" expression="" />);
 
-    loadingSubject.next();
-    instance.update();
-    dataSubject.error('data error');
-    instance.update();
-
-    expect(instance.find(EuiProgress)).toHaveLength(0);
-    expect(instance.find('[data-test-subj="expression-renderer-error"]')).toHaveLength(1);
-
-    loadingSubject.next();
-    renderSubject.next(1);
     dataSubject.next('good data');
-    renderSubject.error('render error');
+    renderSubject.next({
+      type: 'error',
+      error: { message: 'render error' },
+    });
     instance.update();
 
     expect(instance.find(EuiProgress)).toHaveLength(0);
@@ -142,14 +134,12 @@ describe('ExpressionRenderer', () => {
       />
     );
 
-    dataSubject.error('data error');
+    renderSubject.next({
+      type: 'error',
+      error: { message: 'render error' },
+    });
     instance.update();
 
-    expect(renderErrorFn).toHaveBeenCalledWith('data', 'data error');
-
-    renderSubject.error('render error');
-    instance.update();
-
-    expect(renderErrorFn).toHaveBeenLastCalledWith('render', 'render error');
+    expect(renderErrorFn).toHaveBeenCalledWith('render error');
   });
 });

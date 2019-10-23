@@ -59,10 +59,8 @@ export class ExpressionLoader {
       this.update(newExpression, newParams);
     });
 
-    this.data$.subscribe({
-      next: data => {
-        this.render(data);
-      },
+    this.data$.subscribe(data => {
+      this.render(data);
     });
 
     this.params = {
@@ -70,10 +68,18 @@ export class ExpressionLoader {
       extraHandlers: params.extraHandlers,
     };
 
+    this.loadingSubject.next();
     this.loadData(expression, params);
   }
 
-  destroy() {}
+  destroy() {
+    this.dataSubject.complete();
+    this.loadingSubject.complete();
+    this.renderHandler.destroy();
+    if (this.dataHandler) {
+      this.dataHandler.cancel();
+    }
+  }
 
   cancel() {
     this.dataHandler.cancel();
@@ -128,18 +134,16 @@ export class ExpressionLoader {
     this.dataHandler = new ExpressionDataHandler(expression, params);
     try {
       const data = await this.dataHandler.getData();
-      if (data.type === 'error') {
-        if (data.error.name !== 'AbortError') {
-          this.dataSubject.error(new Error(data.error.message));
-          return;
-        }
-
-        return;
-      }
       this.dataSubject.next(data);
     } catch (e) {
-      // Catching error without re-throwing because loadData exceptions are not caught
-      this.dataSubject.error(new Error('Could not fetch data'));
+      this.dataSubject.next({
+        type: 'error',
+        error: {
+          type: e.type,
+          message: e.message,
+          stack: e.stack,
+        },
+      });
     }
   };
 

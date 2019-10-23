@@ -21,7 +21,7 @@ import { useRef, useEffect, useState } from 'react';
 import React from 'react';
 import classNames from 'classnames';
 import { EuiLoadingChart, EuiProgress } from '@elastic/eui';
-import { ExpressionAST, IExpressionLoaderParams } from './types';
+import { ExpressionAST, IExpressionLoaderParams, IInterpreterErrorResult } from './types';
 import { ExpressionLoader } from './loader';
 
 // Accept all options of the runner as props except for the
@@ -30,16 +30,12 @@ export interface ExpressionRendererProps extends IExpressionLoaderParams {
   className: string;
   dataAttrs?: string[];
   expression: string | ExpressionAST;
-  renderError?: (
-    errorType: 'data' | 'render',
-    error?: string | null
-  ) => React.ReactElement | React.ReactElement[];
+  renderError?: (error?: string | null) => React.ReactElement | React.ReactElement[];
 }
 
 interface State {
   isLoading: boolean;
   hasError: boolean;
-  errorType: 'data' | 'render' | null;
   errorMessage: string | null;
 }
 
@@ -48,7 +44,6 @@ export type ExpressionRenderer = React.FC<ExpressionRendererProps>;
 const defaultState: State = {
   isLoading: false,
   hasError: false,
-  errorType: null,
   errorMessage: null,
 };
 
@@ -60,7 +55,7 @@ export const ExpressionRendererImplementation = ({
 }: ExpressionRendererProps) => {
   const mountpoint: React.MutableRefObject<null | HTMLDivElement> = useRef(null);
   const handlerRef: React.MutableRefObject<null | ExpressionLoader> = useRef(null);
-  const [state, setState] = useState<State>(defaultState);
+  const [state, setState] = useState<State>({ ...defaultState });
 
   useEffect(() => {
     if (mountpoint.current) {
@@ -68,46 +63,35 @@ export const ExpressionRendererImplementation = ({
         handlerRef.current = new ExpressionLoader(mountpoint.current, expression, options);
 
         // Only registers one subscriber
-        handlerRef.current.loading$.subscribe({
-          next: () => {
-            setState(prevState => ({ ...prevState, isLoading: true }));
-          },
+        handlerRef.current.loading$.subscribe(() => {
+          setState(prevState => ({ ...prevState, isLoading: true }));
         });
-        handlerRef.current.data$.subscribe({
-          next: () => {
-            setState(defaultState);
-          },
-          error: err => {
-            setState(prevState => ({
-              ...prevState,
+        handlerRef.current.render$.subscribe((item: number | IInterpreterErrorResult) => {
+          if (item !== null && typeof item === 'object' && item.type === 'error') {
+            setState(() => ({
               isLoading: false,
               hasError: true,
-              errorType: 'data',
-              errorMessage: err.toString(),
+              errorMessage: item.error.message.toString(),
             }));
-          },
-        });
-        handlerRef.current.render$.subscribe({
-          next: () => {
+          } else {
             setState(() => ({
               ...defaultState,
               isLoading: false,
             }));
-          },
-          error: err => {
-            setState(prevState => ({
-              ...prevState,
-              isLoading: false,
-              hasError: true,
-              errorType: 'render',
-              errorMessage: err.toString(),
-            }));
-          },
+          }
         });
       } else {
         handlerRef.current.update(expression, options);
       }
     }
+
+    return function cleanup() {
+      // TODO: Cleanup run on every effect, which is not right. We want to clean up on unmount only
+      //   if (handlerRef.current) {
+      //     handlerRef.current.destroy();
+      //     handlerRef.current = null;
+      //   }
+    };
   }, [
     expression,
     options.searchContext,
@@ -117,25 +101,27 @@ export const ExpressionRendererImplementation = ({
     mountpoint.current,
   ]);
 
-  const classes = classNames('expExpressionRenderer', className);
+  const classes = classNames('expExpressionRenderer', className, {
+    'expExpressionRenderer-isLoading': state.isLoading,
+    'expExpressionRenderer-hasError': state.hasError,
+  });
 
   return (
     <div {...dataAttrs} className={classes}>
-      {false ? ( // TODO: Hook this up to show if there is no chart at all but it is loading, so there's no blank area
-        <EuiLoadingChart mono />
-      ) : (
+      {state.isLoading ? (
         <>
-          {state.isLoading ? <EuiProgress size="xs" color="accent" position="absolute" /> : null}
-          {state.hasError && state.errorType ? (
-            options.renderError ? (
-              options.renderError(state.errorType, state.errorMessage)
-            ) : (
-              <div data-test-subj="expression-renderer-error">{state.errorMessage}</div>
-            )
-          ) : null}
-          <div className="expExpressionRenderer__expression" ref={mountpoint} />
+          <EuiProgress size="xs" color="accent" position="absolute" />
+          <EuiLoadingChart mono size="l" />
         </>
-      )}
+      ) : null}
+      {!state.isLoading && state.hasError ? (
+        options.renderError ? (
+          options.renderError(state.errorMessage)
+        ) : (
+          <div data-test-subj="expression-renderer-error">{state.errorMessage}</div>
+        )
+      ) : null}
+      <div className="expExpressionRenderer__expression" ref={mountpoint} />
     </div>
   );
 };

@@ -85,10 +85,9 @@ export const getMetricChartRenderer = (
   reuseDomNode: true,
   render: (domNode: Element, config: MetricChartProps, handlers: IInterpreterRenderHandlers) => {
     ReactDOM.render(<MetricChart {...config} formatFactory={formatFactory} />, domNode, () => {
-      if (handlers.done) {
-        handlers.done();
-      }
+      handlers.done();
     });
+    handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
   },
 });
 
