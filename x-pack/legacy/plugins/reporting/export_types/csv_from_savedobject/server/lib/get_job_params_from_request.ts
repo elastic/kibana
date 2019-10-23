@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'hapi';
+import { RequestFacade } from '../../../../types';
 import { JobParamsPostPayloadPanelCsv, JobParamsPanelCsv } from '../../types';
 
 export function getJobParamsFromRequest(
-  request: Request,
+  request: RequestFacade,
   opts: { isImmediate: boolean }
 ): Partial<JobParamsPanelCsv> {
   const { savedObjectType, savedObjectId } = request.params;

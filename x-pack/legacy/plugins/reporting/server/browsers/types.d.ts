@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const CHROMIUM = 'chromium';
+export type BrowserType = 'chromium';
