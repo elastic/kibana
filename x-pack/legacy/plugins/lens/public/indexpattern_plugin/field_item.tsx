@@ -174,9 +174,8 @@ export function FieldItem(props: FieldItemProps) {
                   togglePopover();
                 }
               }}
-              aria-label={i18n.translate('xpack.lens.indexPattern.fieldStatsButtonAriaLabel', {
+              aria-label={i18n.translate('xpack.lens.indexPattern.fieldStatsButtonLabel', {
                 defaultMessage: 'Click for a field preview. Or, drag and drop to visualize.',
-                values: { fieldName: field.name },
               })}
             >
               <LensFieldIcon type={field.type as DataType} />
@@ -187,10 +186,8 @@ export function FieldItem(props: FieldItemProps) {
 
               <EuiIconTip
                 anchorClassName="lnsFieldItem__infoIcon"
-                content={i18n.translate('xpack.lens.indexPattern.fieldStatsButton', {
-                  defaultMessage:
-                    'Click for information about {fieldName}. Or, drag field into visualization.',
-                  values: { fieldName: field.name },
+                content={i18n.translate('xpack.lens.indexPattern.fieldStatsButtonLabel', {
+                  defaultMessage: 'Click for a field preview. Or, drag and drop to visualize.',
                 })}
                 type="iInCircle"
                 color="subdued"

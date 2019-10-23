@@ -259,20 +259,27 @@ export function SuggestionPanel({
         </EuiFlexItem>
         {stagedPreview && (
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              data-test-subj="lensSubmitSuggestion"
-              size="xs"
-              onClick={() => {
-                trackUiEvent('suggestion_confirmed');
-                dispatch({
-                  type: 'SUBMIT_SUGGESTION',
-                });
-              }}
-            >
-              {i18n.translate('xpack.lens.sugegstion.confirmSuggestionLabel', {
-                defaultMessage: 'Make suggestions based on selected visualization',
+            <EuiToolTip
+              content={i18n.translate('xpack.lens.suggestion.refreshSuggestionTooltip', {
+                defaultMessage: 'Refresh the suggestions based on the selected visualization',
               })}
-            </EuiButtonEmpty>
+            >
+              <EuiButtonEmpty
+                data-test-subj="lensSubmitSuggestion"
+                size="xs"
+                iconType="refresh"
+                onClick={() => {
+                  trackUiEvent('suggestion_confirmed');
+                  dispatch({
+                    type: 'SUBMIT_SUGGESTION',
+                  });
+                }}
+              >
+                {i18n.translate('xpack.lens.sugegstion.refreshSuggestionLabel', {
+                  defaultMessage: 'Refresh',
+                })}
+              </EuiButtonEmpty>
+            </EuiToolTip>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

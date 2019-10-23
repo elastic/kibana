@@ -254,58 +254,44 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
         </EuiPanel>
       ))}
 
-      <EuiToolTip
-        content={
-          <EuiText>
-            <p>
-              {i18n.translate('xpack.lens.xyChart.addLayerTooltipLineOne', {
-                defaultMessage: 'Use more than one layer when:',
-              })}
-              <ul>
-                <li>
-                  {i18n.translate('xpack.lens.xyChart.addLayerTooltipLineTwo', {
-                    defaultMessage: 'You want to combine chart types',
-                  })}
-                </li>
-                <li>
-                  {i18n.translate('xpack.lens.xyChart.addLayerTooltipLineThree', {
-                    defaultMessage: 'You want to visualize different index patterns',
-                  })}
-                </li>
-              </ul>
-            </p>
-          </EuiText>
-        }
-        position="bottom"
-      >
-        <EuiButton
-          className="lnsConfigPanel__addLayerBtn"
-          fullWidth
-          size="s"
-          data-test-subj={`lnsXY_layer_add`}
-          aria-label={i18n.translate('xpack.lens.xyChart.addLayerButton', {
-            defaultMessage: 'Add layer',
+      <EuiFlexItem grow={true}>
+        <EuiToolTip
+          className="eui-fullWidth"
+          content={i18n.translate('xpack.lens.xyChart.addLayerTooltip', {
+            defaultMessage:
+              'Use multiple layers to combine chart types or visualize different index patterns.',
           })}
-          title={i18n.translate('xpack.lens.xyChart.addLayerButton', {
-            defaultMessage: 'Add layer',
-          })}
-          onClick={() => {
-            trackUiEvent('xy_layer_added');
-            const usedSeriesTypes = _.uniq(state.layers.map(layer => layer.seriesType));
-            setState({
-              ...state,
-              layers: [
-                ...state.layers,
-                newLayerState(
-                  usedSeriesTypes.length === 1 ? usedSeriesTypes[0] : state.preferredSeriesType,
-                  frame.addNewLayer()
-                ),
-              ],
-            });
-          }}
-          iconType="plusInCircleFilled"
-        />
-      </EuiToolTip>
+          position="bottom"
+        >
+          <EuiButton
+            className="lnsConfigPanel__addLayerBtn"
+            fullWidth
+            size="s"
+            data-test-subj={`lnsXY_layer_add`}
+            aria-label={i18n.translate('xpack.lens.xyChart.addLayerButton', {
+              defaultMessage: 'Add layer',
+            })}
+            title={i18n.translate('xpack.lens.xyChart.addLayerButton', {
+              defaultMessage: 'Add layer',
+            })}
+            onClick={() => {
+              trackUiEvent('xy_layer_added');
+              const usedSeriesTypes = _.uniq(state.layers.map(layer => layer.seriesType));
+              setState({
+                ...state,
+                layers: [
+                  ...state.layers,
+                  newLayerState(
+                    usedSeriesTypes.length === 1 ? usedSeriesTypes[0] : state.preferredSeriesType,
+                    frame.addNewLayer()
+                  ),
+                ],
+              });
+            }}
+            iconType="plusInCircleFilled"
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
     </EuiForm>
   );
 }
