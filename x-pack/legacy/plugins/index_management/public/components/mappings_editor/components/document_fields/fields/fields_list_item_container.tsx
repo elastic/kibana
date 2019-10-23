@@ -5,7 +5,7 @@
  */
 import React, { useMemo, useCallback } from 'react';
 
-import { useState, useDispatch } from '../../../mappings_state';
+import { useMappingsState, useDispatch } from '../../../mappings_state';
 import { NormalizedField } from '../../../types';
 import { FieldsListItem } from './fields_list_item';
 
@@ -24,7 +24,7 @@ export const FieldsListItemContainer = React.memo(function FieldsListItemContain
   const {
     documentFields: { status, fieldToAddFieldTo, fieldToEdit },
     fields: { byId, maxNestedDepth },
-  } = useState();
+  } = useMappingsState();
 
   const getField = (fieldId: string) => byId[fieldId];
 

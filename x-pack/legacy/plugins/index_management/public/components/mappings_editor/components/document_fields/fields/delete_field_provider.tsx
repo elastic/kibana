@@ -7,7 +7,7 @@
 import React, { useState, Fragment } from 'react';
 import { EuiConfirmModal, EuiOverlayMask, EuiBadge } from '@elastic/eui';
 
-import { useState as useMappingsState, useDispatch } from '../../../mappings_state';
+import { useMappingsState, useDispatch } from '../../../mappings_state';
 import { NormalizedField } from '../../../types';
 import { buildFieldTreeFromIds } from '../../../lib';
 import { FieldsTree } from '../../fields_tree';
