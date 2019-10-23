@@ -12,6 +12,7 @@ import { AggConfigs } from 'ui/agg_types';
 import { i18n } from '@kbn/i18n';
 import { ESTooltipProperty } from '../tooltips/es_tooltip_property';
 import { ES_SIZE_LIMIT } from '../../../common/constants';
+import { ESDocField } from '../fields/es_doc_field';
 
 const TERMS_AGG_NAME = 'join';
 
@@ -58,6 +59,10 @@ export class ESTermSource extends AbstractESSource {
 
   static type = 'ES_TERM_SOURCE';
 
+  constructor(descriptor, inspectorAdapters) {
+    super(descriptor, inspectorAdapters);
+    this._termField = new ESDocField({ fieldName: descriptor.term, source: this });
+  }
 
   static renderEditor({}) {
     //no need to localize. this editor is never rendered.
@@ -72,8 +77,8 @@ export class ESTermSource extends AbstractESSource {
     return  [this._descriptor.indexPatternId];
   }
 
-  getTerm() {
-    return this._descriptor.term;
+  getTermField() {
+    return this._termField;
   }
 
   getWhereQuery() {
@@ -82,12 +87,12 @@ export class ESTermSource extends AbstractESSource {
 
   _formatMetricKey(metric) {
     const metricKey = metric.type !== 'count' ? `${metric.type}_of_${metric.field}` : metric.type;
-    return `__kbnjoin__${metricKey}_groupby_${this._descriptor.indexPatternTitle}.${this._descriptor.term}`;
+    return `__kbnjoin__${metricKey}_groupby_${this._descriptor.indexPatternTitle}.${this._termField.getName()}`;
   }
 
   _formatMetricLabel(metric) {
     const metricLabel = metric.type !== 'count' ? `${metric.type} ${metric.field}` : 'count';
-    return `${metricLabel} of ${this._descriptor.indexPatternTitle}:${this._descriptor.term}`;
+    return `${metricLabel} of ${this._descriptor.indexPatternTitle}:${this._termField.getName()}`;
   }
 
   async getPropertiesMap(searchFilters, leftSourceName, leftFieldName, registerCancelCallback) {
@@ -96,13 +101,13 @@ export class ESTermSource extends AbstractESSource {
       return [];
     }
 
-    const indexPattern = await this._getIndexPattern();
+    const indexPattern = await this.getIndexPattern();
     const searchSource  = await this._makeSearchSource(searchFilters, 0);
     const configStates = this._makeAggConfigs();
     const aggConfigs = new AggConfigs(indexPattern, configStates, aggSchemas.all);
     searchSource.setField('aggs', aggConfigs.toDsl());
 
-    const requestName = `${this._descriptor.indexPatternTitle}.${this._descriptor.term}`;
+    const requestName = `${this._descriptor.indexPatternTitle}.${this._termField.getName()}`;
     const requestDesc = this._getRequestDescription(leftSourceName, leftFieldName);
     const rawEsData = await this._runEsQuery(requestName, searchSource, registerCancelCallback, requestDesc);
 
@@ -135,7 +140,7 @@ export class ESTermSource extends AbstractESSource {
       defaultMessage: `Join {leftSourceName}:{leftFieldName} with`,
       values: { leftSourceName, leftFieldName }
     }));
-    joinStatement.push(`${this._descriptor.indexPatternTitle}:${this._descriptor.term}`);
+    joinStatement.push(`${this._descriptor.indexPatternTitle}:${this._termField.getName()}`);
     joinStatement.push(i18n.translate('xpack.maps.source.esJoin.joinMetricsDescription', {
       defaultMessage: `for metrics {metrics}`,
       values: { metrics: metrics.join(',') }
@@ -171,7 +176,7 @@ export class ESTermSource extends AbstractESSource {
         type: 'terms',
         schema: 'segment',
         params: {
-          field: this._descriptor.term,
+          field: this._termField.getName(),
           size: ES_SIZE_LIMIT
         }
       }
@@ -185,18 +190,6 @@ export class ESTermSource extends AbstractESSource {
 
   async filterAndFormatPropertiesToHtml(properties) {
     return await this.filterAndFormatPropertiesToHtmlForMetricFields(properties);
-  }
-
-  async createESTooltipProperty(propertyName, rawValue) {
-    try {
-      const indexPattern = await this._getIndexPattern();
-      if (!indexPattern) {
-        return null;
-      }
-      return new ESTooltipProperty(propertyName, propertyName, rawValue, indexPattern);
-    } catch (e) {
-      return null;
-    }
   }
 
   getFieldNames() {

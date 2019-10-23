@@ -97,7 +97,7 @@ export class ESSearchSource extends AbstractESSource {
 
   async getNumberFields() {
     try {
-      const indexPattern = await this._getIndexPattern();
+      const indexPattern = await this.getIndexPattern();
       return indexPattern.fields.getByType('number').map(field => {
         return { name: field.name, label: field.name };
       });
@@ -106,14 +106,9 @@ export class ESSearchSource extends AbstractESSource {
     }
   }
 
-  async getIndexPattern() {
-    //todo rename _getIndexPattern to getIndexPattern
-    return await this._getIndexPattern();
-  }
-
   async getDateFields() {
     try {
-      const indexPattern = await this._getIndexPattern();
+      const indexPattern = await this.getIndexPattern();
       return indexPattern.fields.getByType('date').map(field => {
         return { name: field.name, label: field.name };
       });
@@ -134,7 +129,7 @@ export class ESSearchSource extends AbstractESSource {
     let indexPatternTitle = this._descriptor.indexPatternId;
     let geoFieldType = '';
     try {
-      const indexPattern = await this._getIndexPattern();
+      const indexPattern = await this.getIndexPattern();
       indexPatternTitle = indexPattern.title;
       const geoField = await this._getGeoField();
       geoFieldType = geoField.type;
@@ -211,7 +206,7 @@ export class ESSearchSource extends AbstractESSource {
       topHitsSize,
     } = this._descriptor;
 
-    const indexPattern = await this._getIndexPattern();
+    const indexPattern = await this.getIndexPattern();
     const geoField = await this._getGeoField();
 
     const scriptFields = {};
@@ -342,7 +337,7 @@ export class ESSearchSource extends AbstractESSource {
       ? await this._getTopHits(layerName, searchFilters, registerCancelCallback)
       : await this._getSearchHits(layerName, searchFilters, registerCancelCallback);
 
-    const indexPattern = await this._getIndexPattern();
+    const indexPattern = await this.getIndexPattern();
     const unusedMetaFields = indexPattern.metaFields.filter(metaField => {
       return !['_id', '_index'].includes(metaField);
     });
@@ -415,7 +410,7 @@ export class ESSearchSource extends AbstractESSource {
   }
 
   async filterAndFormatPropertiesToHtml(properties) {
-    const indexPattern = await this._getIndexPattern();
+    const indexPattern = await this.getIndexPattern();
     const propertyValues = await this._loadTooltipProperties(properties._id, properties._index, indexPattern);
     const tooltipProperties = this._tooltipFields.map(field => {
       const value = propertyValues[field.getName()];
@@ -429,7 +424,7 @@ export class ESSearchSource extends AbstractESSource {
   }
 
   async getLeftJoinFields() {
-    const indexPattern = await this._getIndexPattern();
+    const indexPattern = await this.getIndexPattern();
     // Left fields are retrieved from _source.
     return getSourceFields(indexPattern.fields)
       .map(field => {

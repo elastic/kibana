@@ -109,7 +109,7 @@ export class ESPewPewSource extends AbstractESSource {
   async getImmutableProperties() {
     let indexPatternTitle = this._descriptor.indexPatternId;
     try {
-      const indexPattern = await this._getIndexPattern();
+      const indexPattern = await this.getIndexPattern();
       indexPatternTitle = indexPattern.title;
     } catch (error) {
       // ignore error, title will just default to id
@@ -184,7 +184,7 @@ export class ESPewPewSource extends AbstractESSource {
   }
 
   async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback) {
-    const indexPattern = await this._getIndexPattern();
+    const indexPattern = await this.getIndexPattern();
     const metricAggConfigs = this.getMetricFields().map(metric => {
       const metricAggConfig = {
         id: metric.propertyKey,
@@ -260,7 +260,7 @@ export class ESPewPewSource extends AbstractESSource {
   }
 
   async _getGeoField() {
-    const indexPattern = await this._getIndexPattern();
+    const indexPattern = await this.getIndexPattern();
     const geoField = indexPattern.fields.getByName(this._descriptor.destGeoField);
     if (!geoField) {
       throw new Error(i18n.translate('xpack.maps.source.esSource.noGeoFieldErrorMessage', {

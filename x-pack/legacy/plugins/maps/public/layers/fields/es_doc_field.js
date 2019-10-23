@@ -18,8 +18,15 @@ export class ESDocField extends AbstractField {
   }
 
   async createTooltipProperty(value) {
-    const indexPattern = await this._source.getIndexPattern();
-    return new ESTooltipProperty(this.getName(), this.getName(), value, indexPattern);
+    try {
+      const indexPattern = await this._source.getIndexPattern();
+      if (!indexPattern) {
+        return null;
+      }
+      return new ESTooltipProperty(this.getName(), this.getName(), value, indexPattern);
+    } catch (e) {
+      return null;
+    }
   }
 
   async getType() {

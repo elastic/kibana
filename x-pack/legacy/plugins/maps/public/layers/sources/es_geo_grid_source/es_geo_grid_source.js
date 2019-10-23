@@ -102,7 +102,7 @@ export class ESGeoGridSource extends AbstractESSource {
   async getImmutableProperties() {
     let indexPatternTitle = this._descriptor.indexPatternId;
     try {
-      const indexPattern = await this._getIndexPattern();
+      const indexPattern = await this.getIndexPattern();
       indexPatternTitle = indexPattern.title;
     } catch (error) {
       // ignore error, title will just default to id
@@ -184,7 +184,7 @@ export class ESGeoGridSource extends AbstractESSource {
   }
 
   async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback) {
-    const indexPattern = await this._getIndexPattern();
+    const indexPattern = await this.getIndexPattern();
     const searchSource  = await this._makeSearchSource(searchFilters, 0);
     const aggConfigs = new AggConfigs(indexPattern, this._makeAggConfigs(searchFilters.geogridPrecision), aggSchemas.all);
     searchSource.setField('aggs', aggConfigs.toDsl());

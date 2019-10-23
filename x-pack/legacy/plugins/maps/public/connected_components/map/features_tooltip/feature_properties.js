@@ -155,6 +155,7 @@ export class FeatureProperties extends React.Component {
     }
 
     const rows = this.state.properties.map(tooltipProperty => {
+
       const label = tooltipProperty.getPropertyName();
       return (
         <tr key={label}>
