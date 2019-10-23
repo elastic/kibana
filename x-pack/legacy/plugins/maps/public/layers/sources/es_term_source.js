@@ -10,7 +10,6 @@ import { AbstractESSource } from './es_source';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { AggConfigs } from 'ui/agg_types';
 import { i18n } from '@kbn/i18n';
-import { ESTooltipProperty } from '../tooltips/es_tooltip_property';
 import { ES_SIZE_LIMIT } from '../../../common/constants';
 import { ESDocField } from '../fields/es_doc_field';
 

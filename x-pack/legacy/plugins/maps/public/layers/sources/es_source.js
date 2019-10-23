@@ -329,4 +329,8 @@ export class AbstractESSource extends AbstractVectorSource {
 
     return fieldFromIndexPattern.format.getConverterFor('text');
   }
+
+  createField() {
+    throw new Error('Child must implement Source#createField');
+  }
 }

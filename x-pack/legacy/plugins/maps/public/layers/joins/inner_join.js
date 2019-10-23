@@ -10,9 +10,11 @@ import { VectorStyle } from '../styles/vector_style';
 
 export class InnerJoin {
 
-  constructor(joinDescriptor, inspectorAdapters) {
+  constructor(joinDescriptor, leftSource) {
     this._descriptor = joinDescriptor;
+    const inspectorAdapters = leftSource.getInspectorAdapters();
     this._rightSource = new ESTermSource(joinDescriptor.right, inspectorAdapters);
+    this._leftField = this._descriptor.leftField ? leftSource.createField(joinDescriptor.leftField) : null;
   }
 
   destroy() {
@@ -20,7 +22,7 @@ export class InnerJoin {
   }
 
   hasCompleteConfig() {
-    if (this._descriptor.leftField && this._rightSource) {
+    if (this._leftField && this._rightSource) {
       return this._rightSource.hasCompleteConfig();
     }
 
@@ -45,7 +47,7 @@ export class InnerJoin {
   }
 
   getLeftFieldName() {
-    return this._descriptor.leftField;
+    return this._leftField ? this._leftField.getName() : null;
   }
 
   joinPropertiesToFeature(feature, propertiesMap, rightMetricFields) {
@@ -64,7 +66,7 @@ export class InnerJoin {
       });
     }
 
-    const joinKey = feature.properties[this._descriptor.leftField];
+    const joinKey = feature.properties[this._leftField.getName()];
     const coercedKey = typeof joinKey === 'undefined' || joinKey === null  ? null : joinKey.toString();
     if (propertiesMap && coercedKey !== null && propertiesMap.has(coercedKey)) {
       Object.assign(feature.properties,  propertiesMap.get(coercedKey));

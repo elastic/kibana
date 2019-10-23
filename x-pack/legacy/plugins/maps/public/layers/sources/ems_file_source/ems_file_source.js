@@ -45,11 +45,13 @@ export class EMSFileSource extends AbstractVectorSource {
 
   constructor(descriptor, inspectorAdapters) {
     super(EMSFileSource.createDescriptor(descriptor), inspectorAdapters);
-    this._tooltipFields = this._descriptor.tooltipProperties.map(propertyKey => {
-      return new EMSRegionLayerField({
-        fieldName: propertyKey,
-        source: this
-      });
+    this._tooltipFields = this._descriptor.tooltipProperties.map(propertyKey => this.createField(propertyKey));
+  }
+
+  createField(fieldName) {
+    return new EMSRegionLayerField({
+      fieldName,
+      source: this
     });
   }
 
