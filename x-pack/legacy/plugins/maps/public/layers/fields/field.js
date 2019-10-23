@@ -7,6 +7,12 @@
 
 export class AbstractField {
 
+  static FIELD_TYPE = {
+    STRING: 'string',
+    NUMBER: 'number',
+    DATE: 'date'
+  }
+
   constructor({ fieldName, source }) {
     this._fieldName = fieldName;
     this._source = source;
@@ -14,6 +20,10 @@ export class AbstractField {
 
   getName() {
     return this._fieldName;
+  }
+
+  async getType() {
+    return AbstractField.FIELD_TYPE.STRING;
   }
 
   async getLabel() {

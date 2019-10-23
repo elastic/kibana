@@ -19,6 +19,7 @@ import {
 import { AddTooltipFieldPopover } from './add_tooltip_field_popover';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import _ from 'lodash';
 
 // TODO import reorder from EUI once its exposed as service
 // https://github.com/elastic/eui/issues/2372
@@ -32,18 +33,74 @@ const reorder = (list, startIndex, endIndex) => {
 
 export class TooltipSelector extends Component {
 
-  _getPropertyLabel = (propertyName) => {
-    if (!this.props.fields) {
-      return propertyName;
+  state = {
+    fieldProps: [],
+    selectedFieldProps: []
+  };
+
+  constructor() {
+    super();
+    this._isMounted = false;
+  }
+
+  componentDidMount() {
+    this._isMounted = true;
+    this._loadFieldProps();
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
+  componentDidUpdate() {
+    this._loadFieldProps();
+  }
+
+  async _loadFieldProps() {
+
+    const getProps = async field => {
+      return new Promise(async (resolve, reject) => {
+        console.log('f', field);
+        try {
+          const label = await field.getLabel();
+          const type = await field.getType();
+          resolve({
+            label: label,
+            type: type,
+            name: field.getName()
+          });
+        }catch(e) {
+          reject(e);
+        }
+      });
+    };
+
+    const props = this.props.fields.map(getProps);
+    const selectedProps = this.props.tooltipFields.map(getProps);
+
+    const newState = {
+      fieldProps: await Promise.all(props),
+      selectedFieldProps: await Promise.all(selectedProps)
+    };
+
+
+    if (this._isMounted) {
+      if (!_.isEqual(this.state, newState)) {
+        console.log('set the atate', newState);
+        this.setState(newState);
+      }
     }
 
-    const field = this.props.fields.find(field => {
+  }
+
+  _getPropertyLabel = (propertyName) => {
+    if (!this.state.fieldProps.length) {
+      return propertyName;
+    }
+    const prop = this.state.fieldProps.find((field) => {
       return field.name === propertyName;
     });
-
-    return field && field.label
-      ? field.label
-      : propertyName;
+    return prop.label ? prop.label : propertyName;
   }
 
   _getTooltipProperties() {
@@ -79,20 +136,22 @@ export class TooltipSelector extends Component {
   };
 
   _renderProperties() {
-    if (!this.props.tooltipFields) {
+    console.log('r', this.state);
+    if (!this.state.selectedFieldProps.length) {
       return null;
     }
 
+    console.log('render selectio');
     return (
       <EuiDragDropContext onDragEnd={this._onDragEnd}>
         <EuiDroppable droppableId="mapLayerTOC" spacing="none">
           {(provided, snapshot) => (
-            this.props.tooltipFields.map((field, idx) => (
+            this.state.selectedFieldProps.map((field, idx) => (
               <EuiDraggable
                 spacing="none"
-                key={field.getName()}
+                key={field.name}
                 index={idx}
-                draggableId={field.getName()}
+                draggableId={field.name}
                 customDragHandle={true}
                 disableInteractiveElementBlocking // Allows button to be drag handle
               >
@@ -104,7 +163,7 @@ export class TooltipSelector extends Component {
                     })}
                   >
                     <EuiText className="mapTooltipSelector__propertyContent" size="s">
-                      {this._getPropertyLabel(field.getName())}
+                      {this._getPropertyLabel(field.name)}
                     </EuiText>
                     <div className="mapTooltipSelector__propertyIcons">
                       <EuiButtonIcon
@@ -142,12 +201,7 @@ export class TooltipSelector extends Component {
   }
 
   render() {
-
-    const selectedFields = this.props.tooltipFields
-      ? this.props.tooltipFields.map(field => {
-        return { name: field.getName() };
-      })
-      : [];
+    console.log('render!');
 
     return (
       <div>
@@ -165,8 +219,8 @@ export class TooltipSelector extends Component {
         <EuiTextAlign textAlign="center">
           <AddTooltipFieldPopover
             onAdd={this._onAdd}
-            fields={this.props.fields}
-            selectedFields={selectedFields}
+            fields={this.state.fieldProps}
+            selectedFields={this.state.selectedFieldProps}
           />
         </EuiTextAlign>
       </div>

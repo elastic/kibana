@@ -17,4 +17,8 @@ export class ESDocField extends AbstractField {
     return new ESTooltipProperty(this.getName(), this.getName(), value, indexPattern);
   }
 
+  async getType() {
+
+  }
+
 }

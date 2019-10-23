@@ -8,5 +8,11 @@
 import { AbstractField } from './field';
 
 export class KibanaRegionField extends AbstractField {
+
   static type = 'KIBANA_REGION';
+
+  async getType() {
+    return AbstractField.FIELD_TYPE.STRING;
+  }
+
 }
