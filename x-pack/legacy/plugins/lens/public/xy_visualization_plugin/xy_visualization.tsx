@@ -34,7 +34,11 @@ function getDescription(state?: State) {
   }
 
   if (!state.layers.length) {
-    return visualizationTypes.find(v => v.id === state.preferredSeriesType)!;
+    const visualizationType = visualizationTypes.find(v => v.id === state.preferredSeriesType)!;
+    return {
+      icon: visualizationType.largeIcon || visualizationType.icon,
+      label: visualizationType.label,
+    };
   }
 
   const visualizationType = visualizationTypes.find(t => t.id === state.layers[0].seriesType)!;

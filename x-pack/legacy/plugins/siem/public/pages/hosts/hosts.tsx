@@ -5,7 +5,7 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
-import { Filter } from '@kbn/es-query';
+import { Filter, getEsQueryConfig } from '@kbn/es-query';
 import * as React from 'react';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
@@ -35,6 +35,7 @@ import { SpyRoute } from '../../utils/route/spy_routes';
 import { HostsEmptyPage } from './hosts_empty_page';
 import { navTabsHosts } from './nav_tabs';
 import * as i18n from './translations';
+import { useKibanaCore } from '../../lib/compose/kibana_core';
 
 const KpiHostsComponentManage = manageQuery(KpiHostsComponent);
 
@@ -51,7 +52,7 @@ interface HostsComponentDispatchProps {
   }>;
 }
 
-export type HostsQueryProps = GlobalTimeArgs;
+export type HostsQueryProps = { timezone?: string } & GlobalTimeArgs;
 
 export type HostsComponentProps = HostsComponentReduxProps &
   HostsComponentDispatchProps &
@@ -60,11 +61,13 @@ export type HostsComponentProps = HostsComponentReduxProps &
 const HostsComponent = React.memo<HostsComponentProps>(
   ({ isInitializing, filters, from, query, setAbsoluteRangeDatePicker, setQuery, to }) => {
     const capabilities = React.useContext(MlCapabilitiesContext);
+    const core = useKibanaCore();
     return (
       <>
         <WithSource sourceId="default">
           {({ indicesExist, indexPattern }) => {
             const filterQuery = convertToBuildEsQuery({
+              config: getEsQueryConfig(core.uiSettings),
               indexPattern,
               queries: [query],
               filters,
