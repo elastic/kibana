@@ -17,9 +17,20 @@
  * under the License.
  */
 
-import { NotificationsStart } from 'src/core/public';
-import { createGetterSetter } from '../../../../../plugins/kibana_utils/public';
+export type Get<T> = () => T;
+export type Set<T> = (value: T) => void;
 
-export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(
-  'Notifications'
-);
+export const createGetterSetter = <T extends object>(name: string): [Get<T>, Set<T>] => {
+  let value: T;
+
+  const get: Get<T> = () => {
+    if (!value) throw new Error(`${name} was not set.`);
+    return value;
+  };
+
+  const set: Set<T> = newValue => {
+    value = newValue;
+  };
+
+  return [get, set];
+};
