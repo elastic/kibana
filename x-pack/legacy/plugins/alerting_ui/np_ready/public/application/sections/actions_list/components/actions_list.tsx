@@ -119,35 +119,26 @@ export const ActionsList: React.FunctionComponent = () => {
 
   const actionsTableColumns = [
     {
-      field: 'description',
-      name: i18n.translate(
-        'xpack.alertingUI.sections.actionsList.actionsListTable.columns.description',
-        {
-          defaultMessage: 'Description',
-        }
-      ),
-      sortable: true,
-      truncateText: true,
-    },
-    {
       field: 'actionType',
       name: i18n.translate(
         'xpack.alertingUI.sections.actionsList.actionsListTable.columns.actionType',
         {
-          defaultMessage: 'Action Type',
+          defaultMessage: 'Type',
         }
       ),
       sortable: true,
       truncateText: true,
     },
     {
-      field: 'config',
+      field: 'description',
       name: i18n.translate(
-        'xpack.alertingUI.sections.actionsList.actionsListTable.columns.config',
-        { defaultMessage: 'Config' }
+        'xpack.alertingUI.sections.actionsList.actionsListTable.columns.description',
+        {
+          defaultMessage: 'Title',
+        }
       ),
-      sortable: false,
-      truncateText: false,
+      sortable: true,
+      truncateText: true,
     },
     {
       name: i18n.translate(
@@ -219,7 +210,7 @@ export const ActionsList: React.FunctionComponent = () => {
                   field: 'actionTypeId',
                   name: i18n.translate(
                     'xpack.alertingUI.sections.actionsList.filters.actionTypeIdName',
-                    { defaultMessage: 'Action Type' }
+                    { defaultMessage: 'Type' }
                   ),
                   multiSelect: 'or',
                   options: Object.values(actionTypesIndex || {})
