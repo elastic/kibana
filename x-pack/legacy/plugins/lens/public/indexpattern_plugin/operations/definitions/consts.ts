@@ -4,5 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './operations';
-export { OperationType, IndexPatternColumn, MISSING_BUCKET_LABEL } from './definitions';
+// esaggs returns __missing__ for null buckets in some contexts (e.g. split)
+// so, we just force null buckets to have this value, and we special-case it.
+export const MISSING_BUCKET_LABEL = '__missing__';

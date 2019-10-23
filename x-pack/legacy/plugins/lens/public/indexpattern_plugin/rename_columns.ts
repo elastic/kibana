@@ -10,7 +10,7 @@ import {
   KibanaDatatable,
   KibanaDatatableColumn,
 } from 'src/legacy/core_plugins/interpreter/public';
-import { IndexPatternColumn } from './operations';
+import { IndexPatternColumn, MISSING_BUCKET_LABEL } from './operations';
 
 interface RemapArgs {
   idMap: string;
@@ -96,6 +96,12 @@ function sanitizeValue(value: unknown) {
   if (value === '') {
     return i18n.translate('xpack.lens.indexpattern.emptyTextColumnValue', {
       defaultMessage: '(empty)',
+    });
+  }
+
+  if (value === MISSING_BUCKET_LABEL) {
+    return i18n.translate('xpack.lens.indexPattern.nullColumnValue', {
+      defaultMessage: '(null)',
     });
   }
 

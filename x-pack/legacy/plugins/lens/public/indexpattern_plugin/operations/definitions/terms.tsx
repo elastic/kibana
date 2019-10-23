@@ -12,6 +12,7 @@ import { updateColumnParam } from '../../state_helpers';
 import { DataType } from '../../../types';
 import { OperationDefinition } from '.';
 import { FieldBasedIndexPatternColumn } from './column_types';
+import { MISSING_BUCKET_LABEL } from './consts';
 
 type PropType<C> = C extends React.ComponentType<infer P> ? P : unknown;
 
@@ -107,8 +108,8 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
       size: column.params.size,
       otherBucket: false,
       otherBucketLabel: 'Other',
-      missingBucket: false,
-      missingBucketLabel: 'Missing',
+      missingBucket: true,
+      missingBucketLabel: MISSING_BUCKET_LABEL,
     },
   }),
   onFieldChange: (oldColumn, indexPattern, field) => {

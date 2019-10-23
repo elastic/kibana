@@ -80,6 +80,25 @@ describe('rename_columns', () => {
     );
   });
 
+  it('should replace "__missing__" with (null)', () => {
+    const input: KibanaDatatable = {
+      type: 'kibana_datatable',
+      columns: [{ id: 'a', name: 'A' }],
+      rows: [{ a: '__missing__' }],
+    };
+
+    const idMap = {
+      a: {
+        id: 'a',
+        label: 'Austrailia',
+      },
+    };
+
+    expect(renameColumns.fn(input, { idMap: JSON.stringify(idMap) }, {}).rows[0].a).toEqual(
+      '(null)'
+    );
+  });
+
   it('should keep columns which are not mapped', () => {
     const input: KibanaDatatable = {
       type: 'kibana_datatable',
