@@ -5,7 +5,7 @@
  */
 
 /* eslint-disable @kbn/eslint/no-restricted-paths */
-import { npSetup, npStart } from 'ui/new_platform';
+import { npSetup } from 'ui/new_platform';
 import { I18nContext } from 'ui/i18n';
 import uiRoutes from 'ui/routes';
 import 'ui/capabilities/route_setup';
@@ -17,7 +17,7 @@ import { formatAngularHttpError } from 'ui/notify/lib';
 import 'ui/autoload/all';
 /* eslint-enable @kbn/eslint/no-restricted-paths */
 
-import { NotificationsSetup } from 'src/core/public';
+import { NotificationsSetup, ApplicationSetup } from 'src/core/public';
 import { plugin } from './np_ready';
 
 const pluginInstance = plugin({} as any);
@@ -38,17 +38,18 @@ uiRoutes.when('/dev_tools/searchprofiler', {
         throw new Error(errorMessage);
       }
 
-      const coreApplicationShim = {
+      const coreApplicationSetupShim: ApplicationSetup = {
         register(app: any) {
           const unmount = app.mount();
           $scope.$on('$destroy', () => unmount());
         },
+        registerMountContext: {} as any,
       };
 
       pluginInstance.setup(
         {
           ...npSetup.core,
-          application: coreApplicationShim,
+          application: coreApplicationSetupShim,
         },
         {
           __LEGACY: {

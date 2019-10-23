@@ -45,7 +45,6 @@ export class SearchProfilerUIPlugin implements Plugin {
           I18nContext,
           notifications,
           formatAngularHttpError,
-          el,
         });
       },
     });
