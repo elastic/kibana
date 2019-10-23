@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { performance } from 'perf_hooks';
+
 type BatchRun<T> = (tasks: T[]) => Promise<boolean>;
 type Fetcher<T> = () => Promise<T[]>;
 type Converter<T1, T2> = (t: T1) => T2;
@@ -25,17 +27,30 @@ export async function fillPool<TRecord, TRunner>(
   fetchAvailableTasks: Fetcher<TRecord>,
   converter: Converter<TRecord, TRunner>
 ): Promise<void> {
+  performance.mark('fillPool.start');
   while (true) {
     const instances = await fetchAvailableTasks();
 
     if (!instances.length) {
+      performance.mark('fillPool.bailNoTasks');
+      performance.measure(
+        'fillPool.activityDurationUntilNoTasks',
+        'fillPool.start',
+        'fillPool.bailNoTasks'
+      );
       return;
     }
 
     const tasks = instances.map(converter);
-
     if (!(await run(tasks))) {
+      performance.mark('fillPool.bail');
+      performance.measure(
+        'fillPool.activityDurationUntilNoCapacity',
+        'fillPool.start',
+        'fillPool.bail'
+      );
       return;
     }
+    performance.mark('fillPool.cycle');
   }
 }
