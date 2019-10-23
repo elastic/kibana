@@ -46,19 +46,24 @@ export class TooltipSelector extends Component {
       : propertyName;
   }
 
+  _getTooltipProperties() {
+    return this.props.tooltipFields.map(field => field.getName());
+  }
+
   _onAdd = (properties) => {
-    if (!this.props.tooltipProperties) {
+    if (!this.props.tooltipFields) {
       this.props.onChange([...properties]);
     } else {
-      this.props.onChange([...this.props.tooltipProperties, ...properties]);
+      const existingProperties = this._getTooltipProperties();
+      this.props.onChange([...existingProperties, ...properties]);
     }
   }
 
   _removeProperty = (index) => {
-    if (!this.props.tooltipProperties) {
+    if (!this.props.tooltipFields) {
       this.props.onChange([]);
     } else {
-      const tooltipProperties = [...this.props.tooltipProperties];
+      const tooltipProperties = this._getTooltipProperties();
       tooltipProperties.splice(index, 1);
       this.props.onChange(tooltipProperties);
     }
@@ -70,11 +75,11 @@ export class TooltipSelector extends Component {
       return;
     }
 
-    this.props.onChange(reorder(this.props.tooltipProperties, source.index, destination.index));
+    this.props.onChange(reorder(this._getTooltipProperties(), source.index, destination.index));
   };
 
   _renderProperties() {
-    if (!this.props.tooltipProperties) {
+    if (!this.props.tooltipFields) {
       return null;
     }
 
@@ -82,12 +87,12 @@ export class TooltipSelector extends Component {
       <EuiDragDropContext onDragEnd={this._onDragEnd}>
         <EuiDroppable droppableId="mapLayerTOC" spacing="none">
           {(provided, snapshot) => (
-            this.props.tooltipProperties.map((propertyName, idx) => (
+            this.props.tooltipFields.map((field, idx) => (
               <EuiDraggable
                 spacing="none"
-                key={propertyName}
+                key={field.getName()}
                 index={idx}
-                draggableId={propertyName}
+                draggableId={field.getName()}
                 customDragHandle={true}
                 disableInteractiveElementBlocking // Allows button to be drag handle
               >
@@ -99,7 +104,7 @@ export class TooltipSelector extends Component {
                     })}
                   >
                     <EuiText className="mapTooltipSelector__propertyContent" size="s">
-                      {this._getPropertyLabel(propertyName)}
+                      {this._getPropertyLabel(field.getName())}
                     </EuiText>
                     <div className="mapTooltipSelector__propertyIcons">
                       <EuiButtonIcon
@@ -138,9 +143,9 @@ export class TooltipSelector extends Component {
 
   render() {
 
-    const selectedFields = this.props.tooltipProperties
-      ? this.props.tooltipProperties.map(propertyName => {
-        return { name: propertyName };
+    const selectedFields = this.props.tooltipFields
+      ? this.props.tooltipFields.map(field => {
+        return { name: field.getName() };
       })
       : [];
 

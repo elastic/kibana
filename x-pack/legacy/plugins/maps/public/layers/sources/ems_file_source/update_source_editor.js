@@ -58,7 +58,7 @@ export class UpdateSourceEditor extends Component {
   render() {
     return (
       <TooltipSelector
-        tooltipProperties={this.props.tooltipProperties}
+        tooltipFields={this.props.tooltipFields}
         onChange={this._onTooltipPropertiesSelect}
         fields={this.state.fields}
       />

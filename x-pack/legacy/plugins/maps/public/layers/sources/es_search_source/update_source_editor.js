@@ -27,7 +27,7 @@ export class UpdateSourceEditor extends Component {
     indexPatternId: PropTypes.string.isRequired,
     onChange: PropTypes.func.isRequired,
     filterByMapBounds: PropTypes.bool.isRequired,
-    tooltipProperties: PropTypes.arrayOf(PropTypes.string).isRequired,
+    tooltipFields: PropTypes.arrayOf(PropTypes.object).isRequired,
     sortField: PropTypes.string,
     sortOrder: PropTypes.string.isRequired,
     useTopHits: PropTypes.bool.isRequired,
@@ -168,7 +168,7 @@ export class UpdateSourceEditor extends Component {
       <Fragment>
         <EuiFormRow>
           <TooltipSelector
-            tooltipProperties={this.props.tooltipProperties}
+            tooltipFields={this.props.tooltipFields}
             onChange={this._onTooltipPropertiesChange}
             fields={this.state.tooltipFields}
           />

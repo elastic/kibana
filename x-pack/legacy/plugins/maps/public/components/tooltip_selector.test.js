@@ -9,19 +9,40 @@ import { shallow } from 'enzyme';
 
 import { TooltipSelector } from './tooltip_selector';
 
+
+class MockField {
+  constructor({ name, label, type }) {
+    this._name = name;
+    this._label = label;
+    this._type = type;
+  }
+
+  getName() {
+    return this._name;
+  }
+
+  async getLabel() {
+    return this._label;
+  }
+
+  async getType() {
+    return this._type;
+  }
+}
+
 const defaultProps = {
-  tooltipProperties: ['iso2'],
+  tooltipFields: [new MockField({ name: 'iso2' })],
   onChange: (()=>{}),
   fields: [
-    {
+    new MockField({
       name: 'iso2',
       label: 'ISO 3166-1 alpha-2 code',
       type: 'string'
-    },
-    {
+    }),
+    new MockField({
       name: 'iso3',
       type: 'string'
-    },
+    })
   ]
 };
 

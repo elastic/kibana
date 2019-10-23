@@ -57,7 +57,7 @@ export class EMSFileSource extends AbstractVectorSource {
     return (
       <UpdateSourceEditor
         onChange={onChange}
-        tooltipProperties={this._getTooltipPropertyNames()}
+        tooltipFields={this._tooltipFields}
         layerId={this._descriptor.id}
       />
     );

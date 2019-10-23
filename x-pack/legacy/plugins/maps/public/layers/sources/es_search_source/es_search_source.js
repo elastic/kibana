@@ -84,7 +84,7 @@ export class ESSearchSource extends AbstractESSource {
         indexPatternId={this._descriptor.indexPatternId}
         onChange={onChange}
         filterByMapBounds={this._descriptor.filterByMapBounds}
-        tooltipProperties={this._getTooltipPropertyNames()}
+        tooltipFields={this._tooltipFields}
         sortField={this._descriptor.sortField}
         sortOrder={this._descriptor.sortOrder}
         useTopHits={this._descriptor.useTopHits}
