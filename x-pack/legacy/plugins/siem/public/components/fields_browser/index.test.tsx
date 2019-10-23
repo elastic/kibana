@@ -167,8 +167,6 @@ describe('StatefulFieldsBrowser', () => {
         wrapper.unmount();
         done();
       }, 1000);
-
-      expect(true).toBeTruthy();
     });
   });
 
