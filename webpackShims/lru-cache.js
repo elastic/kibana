@@ -17,28 +17,4 @@
  * under the License.
  */
 
-import { Storage } from 'ui/storage';
-import { Plugin } from '../../../../../../src/core/public';
-
-/** @internal */
-export interface LegacyDependenciesPluginSetup {
-  storage: Storage;
-}
-
-export interface LegacyDependenciesPluginStart {
-  storage: Storage;
-}
-
-export class LegacyDependenciesPlugin implements Plugin<any, any> {
-  public setup() {
-    return {
-      storage: new Storage(window.localStorage),
-    } as LegacyDependenciesPluginSetup;
-  }
-
-  public start() {
-    return {
-      storage: new Storage(window.localStorage),
-    } as LegacyDependenciesPluginStart;
-  }
-}
+module.exports = require('../node_modules/lru-cache');
