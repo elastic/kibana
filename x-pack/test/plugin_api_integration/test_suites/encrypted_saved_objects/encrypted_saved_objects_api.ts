@@ -21,7 +21,6 @@ export default function({ getService }: FtrProviderContext) {
         _source: { [SAVED_OBJECT_WITH_SECRET_TYPE]: savedObject },
       } = await es.get({
         id: generateRawID(id),
-        type: '_doc',
         index: '.kibana',
       });
 

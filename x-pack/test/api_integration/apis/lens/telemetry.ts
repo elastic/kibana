@@ -95,9 +95,10 @@ export default ({ getService }: FtrProviderContext) => {
       const olderDate = moment()
         .subtract(100, 'days')
         .valueOf();
+
+      // @ts-ignore optional type: string
       await es.index({
         index: '.kibana',
-        type: '_doc',
         body: {
           type: 'lens-ui-telemetry',
           'lens-ui-telemetry': {

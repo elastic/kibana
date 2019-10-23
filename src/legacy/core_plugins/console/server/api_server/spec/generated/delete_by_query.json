@@ -1,6 +1,7 @@
 {
   "delete_by_query": {
     "url_params": {
+      "analyzer": "",
       "analyze_wildcard": "__flag__",
       "default_operator": [
         "AND",
@@ -30,7 +31,6 @@
         "dfs_query_then_fetch"
       ],
       "search_timeout": "",
-      "size": "",
       "max_docs": "all documents",
       "sort": [],
       "_source": [],
@@ -52,8 +52,7 @@
       "POST"
     ],
     "patterns": [
-      "{indices}/_delete_by_query",
-      "{indices}/{type}/_delete_by_query"
+      "{indices}/_delete_by_query"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-delete-by-query.html"
   }

@@ -22,8 +22,8 @@ export function formatJobObject(job) {
 }
 
 export function getUpdatedDocPath(response) {
-  const { _index: ind, _type: type = '_doc', _id: id } = response;
-  return `/${ind}/${type}/${id}`;
+  const { _index: ind, _id: id } = response;
+  return `/${ind}/${id}`;
 }
 
 const MAX_PARTIAL_ERROR_LENGTH = 1000; // 1000 of beginning, 1000 of end

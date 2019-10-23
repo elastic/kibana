@@ -40,7 +40,7 @@ describe('WildcardMatcher', function () {
     it('matches nothing', () => should('', '*'));
     it('does not match /', () => shouldNot('/', '*'));
     it('matches localhost', () => should('localhost', '*'));
-    it('matches a path', () => should('/index/type/_search', '*'));
+    it('matches a path', () => should('/index/_search', '*'));
 
     describe('defaultValue = /', function () {
       it('matches /', () => should('/', '*', '/'));
@@ -52,7 +52,7 @@ describe('WildcardMatcher', function () {
     it('does not match https', () => shouldNot('https', 'http'));
     it('does not match nothing', () => shouldNot('', 'http'));
     it('does not match localhost', () => shouldNot('localhost', 'http'));
-    it('does not match a path', () => shouldNot('/index/type/_search', 'http'));
+    it('does not match a path', () => shouldNot('/index/_search', 'http'));
   });
 
   describe('pattern = 560{1..9}', function () {

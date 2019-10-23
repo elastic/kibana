@@ -915,7 +915,6 @@ describe('reindexService', () => {
           expect(updatedOp.attributes.reindexTaskPercComplete).toEqual(1);
           expect(callCluster).toHaveBeenCalledWith('delete', {
             index: '.tasks',
-            type: 'task',
             id: 'xyz',
           });
         });
