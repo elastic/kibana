@@ -35,7 +35,8 @@ export const ToastNotificationText: FC<{ text: any }> = ({ text }) => {
     return text.message;
   }
 
-  const formattedText = text.message ? text.message : JSON.stringify(text, null, 2);
+  const unformattedText = text.message ? text.message : text;
+  const formattedText = typeof unformattedText === 'object' ? JSON.stringify(text, null, 2) : text;
   const previewText = `${formattedText.substring(0, 140)}${
     formattedText.length > 140 ? ' ...' : ''
   }`;
