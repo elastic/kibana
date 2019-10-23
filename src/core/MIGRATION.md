@@ -1043,6 +1043,7 @@ import { npStart: { core } } from 'ui/new_platform';
 | `ui/metadata`                                         | `core.injectedMetadata`        | May be removed in the future. If you have a necessary usecase, please let us know.                                                             |
 | `ui/notify`                                           | `core.notifications`           | Currently only supports toast messages. Banners coming soon.                                                                                   |
 | `ui/routes`                                           | --                             | There is no global routing mechanism. Each app [configures its own routing](/rfcs/text/0004_application_service_mounting.md#complete-example). |
+| `ui/doc_title`                                        | `core.chrome.docTitle`         |                                                                                                                                                |
 
 _See also: [Public's CoreStart API Docs](/docs/development/core/public/kibana-plugin-public.corestart.md)_
 
