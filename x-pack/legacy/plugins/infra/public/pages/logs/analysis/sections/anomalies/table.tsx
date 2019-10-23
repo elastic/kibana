@@ -11,7 +11,7 @@ import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 import { Results } from '../../../../../containers/logs/log_analysis/log_analysis_results';
 import { AnomaliesTableExpandedRow } from './expanded_row';
-import { formatAnomalyScore } from '../helpers/data_formatters';
+import { formatAnomalyScore, getFriendlyNameForPartitionId } from '../helpers/data_formatters';
 
 interface TableItem {
   id: string;
@@ -57,8 +57,11 @@ export const AnomaliesTable: React.FunctionComponent<{
   const tableItems: TableItem[] = useMemo(() => {
     return Object.entries(results.partitionBuckets).map(([key, value]) => {
       return {
-        id: key || 'unknown', // Note: EUI's table expanded rows won't work with a key of '' in itemIdToExpandedRowMap
-        partition: key || 'unknown',
+        // Note: EUI's table expanded rows won't work with a key of '' in itemIdToExpandedRowMap, so we have to use the friendly name here
+        id: getFriendlyNameForPartitionId(key),
+        // The real ID
+        partitionId: key,
+        partition: getFriendlyNameForPartitionId(key),
         topAnomalyScore: formatAnomalyScore(value.topAnomalyScore),
       };
     });
@@ -108,7 +111,7 @@ export const AnomaliesTable: React.FunctionComponent<{
           ...itemIdToExpandedRowMap,
           [item.id]: (
             <AnomaliesTableExpandedRow
-              partitionId={item.id}
+              partitionId={item.partitionId}
               results={results}
               topAnomalyScore={item.topAnomalyScore}
               setTimeRange={setTimeRange}

@@ -202,7 +202,7 @@ export const AnomaliesResults: React.FunctionComponent<{
 };
 
 interface ParsedAnnotationDetails {
-  anomalyScoresByPartition: Array<{ partitionId: string; maximumAnomalyScore: number }>;
+  anomalyScoresByPartition: Array<{ partitionName: string; maximumAnomalyScore: number }>;
 }
 
 const overallAnomalyScoreLabel = i18n.translate(
@@ -219,11 +219,11 @@ const AnnotationTooltip: React.FunctionComponent<{ details: string }> = ({ detai
         <b>{overallAnomalyScoreLabel}</b>
       </span>
       <ul>
-        {parsedDetails.anomalyScoresByPartition.map(({ partitionId, maximumAnomalyScore }) => {
+        {parsedDetails.anomalyScoresByPartition.map(({ partitionName, maximumAnomalyScore }) => {
           return (
-            <li key={`overall-anomaly-chart-${partitionId}`}>
+            <li key={`overall-anomaly-chart-${partitionName}`}>
               <span>
-                {`${partitionId}: `}
+                {`${partitionName}: `}
                 <b>{maximumAnomalyScore}</b>
               </span>
             </li>

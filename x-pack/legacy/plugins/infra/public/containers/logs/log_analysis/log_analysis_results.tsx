@@ -80,11 +80,11 @@ const formatLogEntryRateResultsByPartition = (
     return bucket.partitions.reduce<Record<string, { buckets: PartitionBucket[] }>>(
       (_partitionResults, partition) => {
         return {
-          ...partitionResults,
+          ..._partitionResults,
           [partition.partitionId]: {
-            buckets: partitionResults[partition.partitionId]
+            buckets: _partitionResults[partition.partitionId]
               ? [
-                  ...partitionResults[partition.partitionId].buckets,
+                  ..._partitionResults[partition.partitionId].buckets,
                   { startTime: bucket.startTime, ...partition },
                 ]
               : [{ startTime: bucket.startTime, ...partition }],
