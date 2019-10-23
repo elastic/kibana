@@ -35,14 +35,14 @@ import {
   StaticIndexPattern,
 } from './index_patterns';
 
-import { FieldFormatProviderRegister } from '../../../../../plugins/data/public/';
+import { FieldFormatRegisty } from '../../../../../plugins/data/public/';
 
 export interface IndexPatternDependencies {
   uiSettings: UiSettingsClientContract;
   savedObjectsClient: SavedObjectsClientContract;
   http: HttpServiceBase;
   notifications: NotificationsStart;
-  fieldFormats: FieldFormatProviderRegister;
+  fieldFormats: FieldFormatRegisty;
 }
 
 /**

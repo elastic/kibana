@@ -29,12 +29,6 @@ jest.mock('../errors', () => ({
   IndexPatternMissingIndices: jest.fn(),
 }));
 
-jest.mock('ui/registry/field_formats', () => ({
-  fieldFormats: {
-    getDefaultInstance: jest.fn(),
-  },
-}));
-
 jest.mock('./index_pattern', () => {
   class IndexPattern {
     init = async () => {
@@ -57,6 +51,10 @@ jest.mock('./index_patterns_api_client', () => {
   };
 });
 
+const fieldFormats = {
+  getDefaultInstance: jest.fn(),
+} as any;
+
 describe('IndexPatterns', () => {
   let indexPatterns: IndexPatterns;
 
@@ -65,7 +63,7 @@ describe('IndexPatterns', () => {
     const uiSettings = {} as UiSettingsClientContract;
     const http = {} as HttpServiceBase;
 
-    indexPatterns = new IndexPatterns(uiSettings, savedObjectsClient, http);
+    indexPatterns = new IndexPatterns(uiSettings, savedObjectsClient, http, fieldFormats);
   });
 
   test('does cache gets for the same id', async () => {

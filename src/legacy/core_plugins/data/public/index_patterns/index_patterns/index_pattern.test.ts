@@ -114,6 +114,10 @@ const apiClient = {
   getFieldsForWildcard: jest.fn(),
 };
 
+const fieldFormats = {
+  getDefaultInstance: jest.fn(),
+} as any;
+
 // helper function to create index patterns
 function create(id: string, payload?: any): Promise<IndexPattern> {
   const indexPattern = new IndexPattern(
@@ -121,7 +125,8 @@ function create(id: string, payload?: any): Promise<IndexPattern> {
     (cfg: any) => config.get(cfg),
     savedObjectsClient as any,
     apiClient,
-    patternCache
+    patternCache,
+    fieldFormats
   );
 
   setDocsourcePayload(id, payload);
@@ -387,7 +392,8 @@ describe('IndexPattern', () => {
       (cfg: any) => config.get(cfg),
       savedObjectsClient as any,
       apiClient,
-      patternCache
+      patternCache,
+      fieldFormats
     );
     await pattern.init();
 
@@ -399,7 +405,8 @@ describe('IndexPattern', () => {
       (cfg: any) => config.get(cfg),
       savedObjectsClient as any,
       apiClient,
-      patternCache
+      patternCache,
+      fieldFormats
     );
     await samePattern.init();
 

@@ -37,7 +37,7 @@ import { flattenHitWrapper } from './flatten_hit';
 import { IIndexPatternsApiClient } from './index_patterns_api_client';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../../../../../../plugins/data/common';
 import { getNotifications } from '../services';
-import { FieldFormatProviderRegister } from '../../../../../../plugins/data/public/';
+import { FieldFormatRegisty } from '../../../../../../plugins/data/public/';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const type = 'index-pattern';
@@ -64,7 +64,7 @@ export class IndexPattern implements StaticIndexPattern {
   public formatField: any;
   public flattenHit: any;
   public metaFields: string[];
-  public fieldFormats: FieldFormatProviderRegister;
+  public fieldFormats: FieldFormatRegisty;
 
   private version: string | undefined;
   private savedObjectsClient: SavedObjectsClientContract;
@@ -103,7 +103,7 @@ export class IndexPattern implements StaticIndexPattern {
     savedObjectsClient: SavedObjectsClientContract,
     apiClient: IIndexPatternsApiClient,
     patternCache: any,
-    fieldFormats: FieldFormatProviderRegister
+    fieldFormats: FieldFormatRegisty
   ) {
     this.id = id;
     this.savedObjectsClient = savedObjectsClient;
