@@ -11,7 +11,7 @@ import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
-import { FlowTargetNew } from '../../../../graphql/types';
+import { FlowTargetSourceDest } from '../../../../graphql/types';
 import {
   apolloClientObservable,
   mockGlobalState,
@@ -34,13 +34,13 @@ describe('NetworkTopNFlow Table Component', () => {
   });
 
   describe('rendering', () => {
-    test('it renders the default NetworkTopNFlow table', () => {
+    test('it renders the default NetworkTopNFlow table on the Network page', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
           <NetworkTopNFlowTable
             data={mockData.NetworkTopNFlow.edges}
             fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkTopNFlow.pageInfo)}
-            flowTargeted={FlowTargetNew.source}
+            flowTargeted={FlowTargetSourceDest.source}
             id="topNFlowSource"
             indexPattern={mockIndexPattern}
             isInspect={false}
@@ -59,6 +59,32 @@ describe('NetworkTopNFlow Table Component', () => {
 
       expect(toJson(wrapper)).toMatchSnapshot();
     });
+
+    test('it renders the default NetworkTopNFlow table on the IP Details page', () => {
+      const wrapper = shallow(
+        <ReduxStoreProvider store={store}>
+          <NetworkTopNFlowTable
+            data={mockData.NetworkTopNFlow.edges}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkTopNFlow.pageInfo)}
+            flowTargeted={FlowTargetSourceDest.source}
+            id="topNFlowSource"
+            indexPattern={mockIndexPattern}
+            isInspect={false}
+            loading={false}
+            loadPage={loadPage}
+            showMorePagesIndicator={getOr(
+              false,
+              'showMorePagesIndicator',
+              mockData.NetworkTopNFlow.pageInfo
+            )}
+            totalCount={mockData.NetworkTopNFlow.totalCount}
+            type={networkModel.NetworkType.details}
+          />
+        </ReduxStoreProvider>
+      );
+
+      expect(toJson(wrapper)).toMatchSnapshot();
+    });
   });
 
   describe('Sorting on Table', () => {
@@ -69,7 +95,7 @@ describe('NetworkTopNFlow Table Component', () => {
             <NetworkTopNFlowTable
               data={mockData.NetworkTopNFlow.edges}
               fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkTopNFlow.pageInfo)}
-              flowTargeted={FlowTargetNew.source}
+              flowTargeted={FlowTargetSourceDest.source}
               id="topNFlowSource"
               isInspect={false}
               indexPattern={mockIndexPattern}

@@ -288,6 +288,7 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
               "client": Object {
                 "bulkCreate": [MockFunction],
                 "bulkGet": [MockFunction],
+                "bulkUpdate": [MockFunction],
                 "create": [MockFunction],
                 "delete": [MockFunction],
                 "find": [MockFunction],
@@ -842,6 +843,7 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
                       "client": Object {
                         "bulkCreate": [MockFunction],
                         "bulkGet": [MockFunction],
+                        "bulkUpdate": [MockFunction],
                         "create": [MockFunction],
                         "delete": [MockFunction],
                         "find": [MockFunction],
@@ -1384,6 +1386,7 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
               "client": Object {
                 "bulkCreate": [MockFunction],
                 "bulkGet": [MockFunction],
+                "bulkUpdate": [MockFunction],
                 "create": [MockFunction],
                 "delete": [MockFunction],
                 "find": [MockFunction],
@@ -1935,6 +1938,7 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
                       "client": Object {
                         "bulkCreate": [MockFunction],
                         "bulkGet": [MockFunction],
+                        "bulkUpdate": [MockFunction],
                         "create": [MockFunction],
                         "delete": [MockFunction],
                         "find": [MockFunction],
@@ -2477,6 +2481,7 @@ exports[`QueryBarInput Should render the given query 1`] = `
               "client": Object {
                 "bulkCreate": [MockFunction],
                 "bulkGet": [MockFunction],
+                "bulkUpdate": [MockFunction],
                 "create": [MockFunction],
                 "delete": [MockFunction],
                 "find": [MockFunction],
@@ -3028,6 +3033,7 @@ exports[`QueryBarInput Should render the given query 1`] = `
                       "client": Object {
                         "bulkCreate": [MockFunction],
                         "bulkGet": [MockFunction],
+                        "bulkUpdate": [MockFunction],
                         "create": [MockFunction],
                         "delete": [MockFunction],
                         "find": [MockFunction],

@@ -10,6 +10,12 @@ import * as React from 'react';
 import { MapToolTip } from './map_tool_tip';
 import { MapFeature } from '../types';
 
+jest.mock('../../search_bar', () => ({
+  siemFilterManager: {
+    addFilters: jest.fn(),
+  },
+}));
+
 describe('MapToolTip', () => {
   test('placeholder component renders correctly against snapshot', () => {
     const wrapper = shallow(<MapToolTip />);

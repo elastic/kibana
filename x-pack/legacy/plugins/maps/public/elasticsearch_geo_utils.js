@@ -11,6 +11,7 @@ import {
   DECIMAL_DEGREES_PRECISION,
   ES_GEO_FIELD_TYPE,
   ES_SPATIAL_RELATIONS,
+  FEATURE_ID_PROPERTY_NAME,
   GEO_JSON_TYPE,
   POLYGON_COORDINATES_EXTERIOR_INDEX,
   LON_INDEX,
@@ -73,6 +74,11 @@ export function hitsToGeoJson(hits, flattenHit, geoFieldName, geoFieldType) {
 
     // don't include geometry field value in properties
     delete properties[geoFieldName];
+
+    // _id is unique to Elasticsearch documents.
+    // Move _id to FEATURE_ID_PROPERTY_NAME to standardize featureId keys across all sources
+    properties[FEATURE_ID_PROPERTY_NAME] = properties._id;
+    delete properties._id;
 
     //create new geojson Feature for every individual geojson geometry.
     for (let j = 0; j < tmpGeometriesAccumulator.length; j++) {

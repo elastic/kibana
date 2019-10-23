@@ -10,7 +10,7 @@ import React from 'react';
 import { Settings } from './settings';
 
 jest.mock('../contexts/ui/use_ui_chrome_context');
-jest.mock('../components/navigation_menu/navigation_menu', () => ({
+jest.mock('../components/navigation_menu', () => ({
   NavigationMenu: () => <div id="mockNavigationMenu" />,
 }));
 

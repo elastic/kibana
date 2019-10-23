@@ -7,6 +7,7 @@
 jest.mock('ui/new_platform');
 jest.mock('ui/index_patterns');
 
+import { FEATURE_ID_PROPERTY_NAME } from '../common/constants';
 import {
   hitsToGeoJson,
   geoPointToGeometry,
@@ -15,7 +16,6 @@ import {
   convertMapExtentToPolygon,
   roundCoordinates,
 } from './elasticsearch_geo_utils';
-
 import { flattenHitWrapper } from 'ui/index_patterns';
 
 const geoFieldName = 'location';
@@ -33,10 +33,33 @@ const flattenHitMock = hit => {
       properties[fieldName] = hit._source[fieldName];
     }
   }
+  for (const fieldName in hit.fields) {
+    if (hit.fields.hasOwnProperty(fieldName)) {
+      properties[fieldName] = hit.fields[fieldName];
+    }
+  }
+  properties._id = hit._id;
+
   return properties;
 };
 
 describe('hitsToGeoJson', () => {
+  it('Should set FEATURE_ID_PROPERTY_NAME to _id', () => {
+    const docId = 'if3mu20BBQNX22Q14Ppm';
+    const hits = [
+      {
+        _id: docId,
+        fields: {
+          [geoFieldName]: '20,100'
+        }
+      }
+    ];
+    const geojson = hitsToGeoJson(hits, flattenHitMock, geoFieldName, 'geo_point');
+    expect(geojson.type).toBe('FeatureCollection');
+    expect(geojson.features.length).toBe(1);
+    expect(geojson.features[0].properties[FEATURE_ID_PROPERTY_NAME]).toBe(docId);
+  });
+
   it('Should convert elasitcsearch hits to geojson', () => {
     const hits = [
       {
@@ -62,7 +85,6 @@ describe('hitsToGeoJson', () => {
       type: 'Feature',
     });
   });
-
 
   it('Should handle documents where geoField is not populated', () => {
     const hits = [

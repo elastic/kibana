@@ -14,6 +14,7 @@ import { createBasicDetector } from './util/default_configs';
 import { JOB_TYPE } from './util/constants';
 import { getRichDetectors } from './util/general';
 import { isValidJson } from '../../../../../common/util/validation_utils';
+import { ml } from '../../../../services/ml_api_service';
 
 export interface RichDetector {
   agg: Aggregation | null;
@@ -22,6 +23,7 @@ export interface RichDetector {
   overField: SplitField;
   partitionField: SplitField;
   excludeFrequent: string | null;
+  description: string | null;
 }
 
 export class AdvancedJobCreator extends JobCreator {
@@ -42,7 +44,8 @@ export class AdvancedJobCreator extends JobCreator {
     byField: SplitField,
     overField: SplitField,
     partitionField: SplitField,
-    excludeFrequent: string | null
+    excludeFrequent: string | null,
+    description: string | null
   ) {
     const { detector, richDetector } = this._createDetector(
       agg,
@@ -50,7 +53,8 @@ export class AdvancedJobCreator extends JobCreator {
       byField,
       overField,
       partitionField,
-      excludeFrequent
+      excludeFrequent,
+      description
     );
 
     this._addDetector(detector, agg, field);
@@ -64,6 +68,7 @@ export class AdvancedJobCreator extends JobCreator {
     overField: SplitField,
     partitionField: SplitField,
     excludeFrequent: string | null,
+    description: string | null,
     index: number
   ) {
     const { detector, richDetector } = this._createDetector(
@@ -72,7 +77,8 @@ export class AdvancedJobCreator extends JobCreator {
       byField,
       overField,
       partitionField,
-      excludeFrequent
+      excludeFrequent,
+      description
     );
 
     this._editDetector(detector, agg, field, index);
@@ -88,7 +94,8 @@ export class AdvancedJobCreator extends JobCreator {
     byField: SplitField,
     overField: SplitField,
     partitionField: SplitField,
-    excludeFrequent: string | null
+    excludeFrequent: string | null,
+    description: string | null
   ): { detector: Detector; richDetector: RichDetector } {
     const detector: Detector = createBasicDetector(agg, field);
 
@@ -104,6 +111,9 @@ export class AdvancedJobCreator extends JobCreator {
     if (excludeFrequent !== null) {
       detector.exclude_frequent = excludeFrequent;
     }
+    if (description !== null) {
+      detector.detector_description = description;
+    }
 
     const richDetector: RichDetector = {
       agg,
@@ -112,6 +122,7 @@ export class AdvancedJobCreator extends JobCreator {
       overField,
       partitionField,
       excludeFrequent,
+      description,
     };
 
     return { detector, richDetector };
@@ -138,6 +149,21 @@ export class AdvancedJobCreator extends JobCreator {
     return isValidJson(this._queryString);
   }
 
+  // load the start and end times for the selected index
+  // and apply them to the job creator
+  public async autoSetTimeRange() {
+    try {
+      const { start, end } = await ml.getTimeFieldRange({
+        index: this._indexPatternTitle,
+        timeFieldName: this.timeFieldName,
+        query: this.query,
+      });
+      this.setTimeRange(start.epoch, end.epoch);
+    } catch (error) {
+      throw Error(error);
+    }
+  }
+
   public cloneFromExistingJob(job: Job, datafeed: Datafeed) {
     this._overrideConfigs(job, datafeed);
     const detectors = getRichDetectors(job, datafeed, true);
@@ -154,7 +180,8 @@ export class AdvancedJobCreator extends JobCreator {
           dtr.byField,
           dtr.overField,
           dtr.partitionField,
-          dtr.excludeFrequent
+          dtr.excludeFrequent,
+          dtr.description
         );
       }
     });

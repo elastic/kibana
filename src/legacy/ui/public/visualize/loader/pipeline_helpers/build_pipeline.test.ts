@@ -34,6 +34,7 @@ jest.mock('ui/new_platform');
 jest.mock('ui/agg_types/buckets/date_histogram', () => ({
   setBounds: () => {},
   dateHistogramBucketAgg: () => {},
+  isDateHistogramBucketAggConfig: () => true,
 }));
 
 describe('visualize loader pipeline helpers: build pipeline', () => {
