@@ -1,7 +1,9 @@
 [[lens]]
 == Lens
 
-beta[] *Lens* provides you with a simple way to create basic visualizations.
+beta[]
+
+*Lens* provides you with a simple way to create basic visualizations.
 
 With Lens, you can:
 
