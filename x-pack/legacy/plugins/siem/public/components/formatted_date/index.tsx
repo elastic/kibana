@@ -6,6 +6,7 @@
 
 import moment from 'moment-timezone';
 import * as React from 'react';
+import { FormattedRelative } from '@kbn/i18n/react';
 import { pure } from 'recompose';
 
 import {
@@ -62,3 +63,34 @@ export const FormattedDate = pure<{
 );
 
 FormattedDate.displayName = 'FormattedDate';
+
+/**
+ * Renders the specified date value in a format determined by the user's preferences,
+ * with a tooltip that renders:
+ * - the name of the field
+ * - a humanized relative date (e.g. 16 minutes ago)
+ * - a long representation of the date that includes the day of the week (e.g. Thursday, March 21, 2019 6:47pm)
+ * - the raw date value (e.g. 2019-03-22T00:47:46Z)
+ */
+
+export const FormattedRelativePreferenceDate = ({ value }: { value?: string | number | null }) => {
+  if (value == null) {
+    return getOrEmptyTagFromValue(value);
+  }
+  const DATE = getMaybeDate(value);
+  const TO = moment(new Date());
+  const FROM = TO.clone().subtract(1, 'hours');
+  const date = DATE.toDate();
+
+  return DATE.isValid() ? (
+    <LocalizedDateTooltip date={date}>
+      {DATE.isBetween(FROM, TO) ? (
+        <FormattedRelative data-test-subj="relative-time" value={date} />
+      ) : (
+        <PreferenceFormattedDate data-test-subj="preference-time" value={date} />
+      )}
+    </LocalizedDateTooltip>
+  ) : (
+    getOrEmptyTagFromValue(value)
+  );
+};

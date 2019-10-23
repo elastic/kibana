@@ -4,21 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiToolTip } from '@elastic/eui';
-import { FormattedRelative } from '@kbn/i18n/react';
 import { has } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
 import { ActionCreator } from 'typescript-fsa';
 
-import moment from 'moment';
 import { hostsActions } from '../../../../store/hosts';
 import { AuthenticationsEdges } from '../../../../graphql/types';
 import { hostsModel, hostsSelectors, State } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { getEmptyTagValue } from '../../../empty_value';
+import { FormattedRelativePreferenceDate } from '../../../formatted_date';
 import { HostDetailsLink, IPDetailsLink } from '../../../links';
 import { Columns, ItemsPerRow, PaginatedTable } from '../../../paginated_table';
 import { IS_OPERATOR } from '../../../timeline/data_providers/data_provider';
@@ -26,8 +24,6 @@ import { Provider } from '../../../timeline/data_providers/provider';
 
 import * as i18n from './translations';
 import { getRowItemDraggables } from '../../../tables/helpers';
-import { LocalizedDateTooltip } from '../../../localized_date_tooltip';
-import { PreferenceFormattedDate } from '../../../formatted_date';
 
 const tableType = hostsModel.HostsTableType.authentications;
 
@@ -247,32 +243,12 @@ const getAuthenticationColumns = (): AuthTableColumns => [
     name: i18n.LAST_SUCCESSFUL_TIME,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }) => {
-      if (has('lastSuccess.timestamp', node) && node.lastSuccess!.timestamp != null) {
-        const newTimestamp = node.lastSuccess!.timestamp!;
-        const newDate = new Date(newTimestamp);
-        const newDateMoment = moment(newDate);
-        const nowDate = new Date();
-        const lastHourDate = new Date();
-        const nowDateMoment = moment(nowDate);
-        const lastHourDateMoment = moment(
-          new Date(lastHourDate.setHours(lastHourDate.getHours() - 1))
-        );
-        if (newDateMoment.isBetween(lastHourDateMoment, nowDateMoment)) {
-          return (
-            <EuiToolTip position="bottom" content={newTimestamp}>
-              <FormattedRelative value={newDate} />
-            </EuiToolTip>
-          );
-        }
-        return (
-          <LocalizedDateTooltip date={newDateMoment.toDate()}>
-            <PreferenceFormattedDate value={newDate} />
-          </LocalizedDateTooltip>
-        );
-      }
-      return getEmptyTagValue();
-    },
+    render: ({ node }) =>
+      has('lastSuccess.timestamp', node) && node.lastSuccess!.timestamp != null ? (
+        <FormattedRelativePreferenceDate value={node.lastSuccess!.timestamp} />
+      ) : (
+        getEmptyTagValue()
+      ),
   },
   {
     name: i18n.LAST_SUCCESSFUL_SOURCE,
@@ -312,32 +288,12 @@ const getAuthenticationColumns = (): AuthTableColumns => [
     name: i18n.LAST_FAILED_TIME,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }) => {
-      if (has('lastFailure.timestamp', node) && node.lastFailure!.timestamp != null) {
-        const newTimestamp = node.lastFailure!.timestamp!;
-        const newDate = new Date(newTimestamp);
-        const newDateMoment = moment(newDate);
-        const nowDate = new Date();
-        const lastHourDate = new Date();
-        const nowDateMoment = moment(nowDate);
-        const lastHourDateMoment = moment(
-          new Date(lastHourDate.setHours(lastHourDate.getHours() - 1))
-        );
-        if (newDateMoment.isBetween(lastHourDateMoment, nowDateMoment)) {
-          return (
-            <EuiToolTip position="bottom" content={newTimestamp}>
-              <FormattedRelative value={newDate} />
-            </EuiToolTip>
-          );
-        }
-        return (
-          <LocalizedDateTooltip date={newDateMoment.toDate()}>
-            <PreferenceFormattedDate value={newDate} />
-          </LocalizedDateTooltip>
-        );
-      }
-      return getEmptyTagValue();
-    },
+    render: ({ node }) =>
+      has('lastFailure.timestamp', node) && node.lastFailure!.timestamp != null ? (
+        <FormattedRelativePreferenceDate value={node.lastFailure!.timestamp} />
+      ) : (
+        getEmptyTagValue()
+      ),
   },
   {
     name: i18n.LAST_FAILED_SOURCE,

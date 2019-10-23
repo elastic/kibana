@@ -13,7 +13,7 @@ import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
 
 import { mockFrameworks, TestProviders, MockFrameworks, getMockKibanaUiSetting } from '../../mock';
 
-import { PreferenceFormattedDate, FormattedDate } from '.';
+import { PreferenceFormattedDate, FormattedDate, FormattedRelativePreferenceDate } from '.';
 import { getEmptyValue } from '../empty_value';
 
 const mockUseKibanaUiSetting: jest.Mock = useKibanaUiSetting as jest.Mock;
@@ -159,6 +159,21 @@ describe('formatted_date', () => {
           </TestProviders>
         );
         expect(wrapper.text()).toEqual('Rebecca Evan Braden');
+      });
+    });
+  });
+
+  describe('FormattedRelativePreferenceDate', () => {
+    describe('rendering', () => {
+      test('renders time over an hour correctly against snapshot', () => {
+        const isoDateString = '2019-02-25T22:27:05.000Z';
+        const wrapper = shallow(<FormattedRelativePreferenceDate value={isoDateString} />);
+        expect(wrapper.find('[data-test-subj="preference-time"]').exists()).toBe(true);
+      });
+      test('renders time under an hour correctly against snapshot', () => {
+        const timeTwelveMinutesAgo = new Date(new Date().getTime() - 12 * 60 * 1000).toISOString();
+        const wrapper = shallow(<FormattedRelativePreferenceDate value={timeTwelveMinutesAgo} />);
+        expect(wrapper.find('[data-test-subj="relative-time"]').exists()).toBe(true);
       });
     });
   });

@@ -5,7 +5,6 @@
  */
 
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
-import moment from 'moment';
 import React from 'react';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
@@ -13,9 +12,8 @@ import { hostsModel } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { getEmptyTagValue } from '../../../empty_value';
-import { PreferenceFormattedDate } from '../../../formatted_date';
 import { HostDetailsLink } from '../../../links';
-import { LocalizedDateTooltip } from '../../../localized_date_tooltip';
+import { FormattedRelativePreferenceDate } from '../../../formatted_date';
 import { IS_OPERATOR } from '../../../timeline/data_providers/data_provider';
 import { Provider } from '../../../timeline/data_providers/provider';
 import { AddToKql, createFilter } from '../../add_to_kql';
@@ -85,11 +83,7 @@ export const getHostsColumns = (
     sortable: true,
     render: lastSeen => {
       if (lastSeen != null) {
-        return (
-          <LocalizedDateTooltip date={moment(new Date(lastSeen)).toDate()}>
-            <PreferenceFormattedDate value={new Date(lastSeen)} />
-          </LocalizedDateTooltip>
-        );
+        return <FormattedRelativePreferenceDate value={lastSeen} />;
       }
       return getEmptyTagValue();
     },
