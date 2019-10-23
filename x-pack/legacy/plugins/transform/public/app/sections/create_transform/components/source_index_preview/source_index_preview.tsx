@@ -167,7 +167,7 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
           <p>
             {i18n.translate('xpack.transform.sourceIndexPreview.SourceIndexNoDataCalloutBody', {
               defaultMessage:
-                'The query for the source index returned no results. Please make sure the index contains documents and your query is not too restrictive.',
+                'The query for the source index returned no results. Please make sure you have sufficient permissions, the index contains documents and your query is not too restrictive.',
             })}
           </p>
         </EuiCallOut>
