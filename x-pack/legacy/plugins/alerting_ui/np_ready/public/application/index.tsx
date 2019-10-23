@@ -12,6 +12,7 @@ import { App } from './app';
 
 import { AppDependencies, AppPlugins } from '../../../public/shim';
 import { ActionTypeRegistry } from './action_type_registry';
+import { AlertTypeRegistry } from './alert_type_registry';
 
 export { BASE_PATH as CLIENT_BASE_PATH } from './constants';
 
@@ -54,9 +55,10 @@ export const renderReact = async (
   elem: HTMLElement | null,
   core: CoreStart,
   plugins: AppPlugins,
-  actionTypeRegistry: ActionTypeRegistry
+  actionTypeRegistry: ActionTypeRegistry,
+  alertTypeRegistry: AlertTypeRegistry
 ) => {
-  const Providers = getAppProviders({ core, plugins, actionTypeRegistry });
+  const Providers = getAppProviders({ core, plugins, actionTypeRegistry, alertTypeRegistry });
 
   render(
     <Providers>
