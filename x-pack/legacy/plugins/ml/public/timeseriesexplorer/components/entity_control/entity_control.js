@@ -110,12 +110,11 @@ export const EntityControl = injectI18n(
             label={entity.fieldName}
             helpText={forceSelection ? selectMessage : null}
           >
-            {forceSelection ?
-              <EuiToolTip
-                position="right"
-                content={selectMessage}
-              >{control}
-              </EuiToolTip> : control}
+            <EuiToolTip
+              position="right"
+              content={forceSelection ? selectMessage : null}
+            >{control}
+            </EuiToolTip>
           </EuiFormRow>
         </EuiFlexItem>
       );
