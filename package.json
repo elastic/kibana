@@ -1,5 +1,5 @@
 {
-  "name": "kibanana",
+  "name": "kibana",
   "description": "Kibana is a browser based analytics and search dashboard for Elasticsearch. Kibana is a snap to setup and start using. Kibana strives to be easy to get started with, while also being flexible and powerful, just like Elasticsearch.",
   "keywords": [
     "kibana",
@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": true,
-  "version": "7.5.0",
+  "version": "7.5.1234",
   "branch": "7.x",
   "types": "./kibana.d.ts",
   "tsdocMetadata": "./build/tsdoc-metadata.json",
