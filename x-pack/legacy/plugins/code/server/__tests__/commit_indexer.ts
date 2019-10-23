@@ -37,7 +37,7 @@ const serverOptions = createTestServerOption();
 const gitOps = new GitOperations(serverOptions.repoPath);
 
 async function cleanWorkspace() {
-  await del(serverOptions.workspacePath, resolve);
+  await del(serverOptions.workspacePath);
 }
 
 function setupEsClientSpy() {
@@ -82,9 +82,7 @@ describe('Commit indexer unit tests', function(this: any) {
 
   // @ts-ignore
   before(async () => {
-    return new Promise(resolve => {
-      del(serverOptions.repoPath, resolve);
-    });
+    await del(serverOptions.repoPath);
   });
 
   beforeEach(async function() {

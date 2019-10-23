@@ -29,13 +29,13 @@ const serverOptions = createTestServerOption();
 const gitOps = new GitOperations(serverOptions.repoPath);
 
 async function cleanWorkspace() {
-  await del(serverOptions.workspacePath, resolve);
+  await del(serverOptions.workspacePath);
 }
 
 describe('clone_worker_tests', () => {
   // @ts-ignore
   before(async () => {
-    await del(serverOptions.repoPath, resolve);
+    await del(serverOptions.repoPath);
   });
 
   beforeEach(async function() {

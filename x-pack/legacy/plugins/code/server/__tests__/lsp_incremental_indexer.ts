@@ -107,9 +107,7 @@ function setupLsServiceSendRequestSpy(): sinon.SinonSpy {
 describe('LSP incremental indexer unit tests', () => {
   // @ts-ignore
   before(async () => {
-    return new Promise(resolve => {
-      del(serverOptions.repoPath, resolve);
-    });
+    await del(serverOptions.repoPath);
   });
 
   beforeEach(async function() {
