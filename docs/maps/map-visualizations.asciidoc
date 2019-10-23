@@ -9,4 +9,4 @@ Use *Elastic Maps* instead of coordinate map and region map.
 *Elastic Maps* offers more functionality and is easier to use.
 
 Kibana's out-of-the-box settings do not display coordinate map or region map in the create visualization menu.
-Set `xpack.maps.showMapVisualizationTypes` to `true` to show coordinate map and region map visualizations in the create visualization menu.
+Set `xpack.maps.showMapVisualizationTypes` to `true` to show coordinate map and region map in the create visualization menu.
