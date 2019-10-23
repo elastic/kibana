@@ -36,6 +36,9 @@ export const ToastNotificationText: FC<{ text: any }> = ({ text }) => {
   }
 
   const formattedText = text.message ? text.message : JSON.stringify(text, null, 2);
+  const previewText = `${formattedText.substring(0, 140)}${
+    formattedText.length > 140 ? ' ...' : ''
+  }`;
 
   const openModal = () => {
     const modal = npStart.core.overlays.openModal(
@@ -65,6 +68,7 @@ export const ToastNotificationText: FC<{ text: any }> = ({ text }) => {
 
   return (
     <>
+      <pre>{previewText}</pre>
       <EuiButtonEmpty onClick={openModal}>
         {i18n.translate('xpack.transform.toastText.openModalButtonText', {
           defaultMessage: 'View details',

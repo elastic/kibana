@@ -97,5 +97,6 @@ export const usePivotPreviewData = (
     JSON.stringify(groupByArr),
     JSON.stringify(query),
   ]);
+
   return { errorMessage, status, previewData, previewMappings, previewRequest };
 };
