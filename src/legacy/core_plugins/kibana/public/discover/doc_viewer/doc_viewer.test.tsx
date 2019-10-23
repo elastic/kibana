@@ -44,7 +44,7 @@ beforeEach(() => {
   emptyDocViews();
   jest.clearAllMocks();
 });
-// TODO unskip
+
 test('Render <DocViewer/> with 3 different tabs', () => {
   addDocView({ order: 20, title: 'React component', component: () => <div>test</div> });
   addDocView({ order: 10, title: 'Render function', render: jest.fn() });
@@ -56,7 +56,7 @@ test('Render <DocViewer/> with 3 different tabs', () => {
 
   expect(wrapper).toMatchSnapshot();
 });
-// TODO unskip
+
 test('Render <DocViewer/> with 1 tab displaying error message', () => {
   function SomeComponent() {
     // this is just a placeholder
