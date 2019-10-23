@@ -27,7 +27,8 @@ import { EuiSpacer, EuiButtonGroup } from '@elastic/eui';
 
 export class VectorStyleEditor extends Component {
   state = {
-    ordinalFields: [],
+    dateFields: [],
+    numberFields: [],
     defaultDynamicProperties: getDefaultDynamicProperties(),
     defaultStaticProperties: getDefaultStaticProperties(),
     supportedFeatures: undefined,
@@ -50,13 +51,23 @@ export class VectorStyleEditor extends Component {
   }
 
   async _loadOrdinalFields() {
-    const ordinalFields = await this.props.layer.getOrdinalFields();
+
+    const dateFields = await this.props.layer.getDateFields();
     if (!this._isMounted) {
       return;
     }
-    if (!_.isEqual(ordinalFields, this.state.ordinalFields)) {
-      this.setState({ ordinalFields });
+    if (!_.isEqual(dateFields, this.state.dateFields)) {
+      this.setState({ dateFields });
     }
+
+    const numberFields = await this.props.layer.getNumberFields();
+    if (!this._isMounted) {
+      return;
+    }
+    if (!_.isEqual(numberFields, this.state.numberFields)) {
+      this.setState({ numberFields });
+    }
+
   }
 
   async _loadSupportedFeatures() {
@@ -96,6 +107,10 @@ export class VectorStyleEditor extends Component {
     }
   }
 
+  _getOrdinalFields() {
+    return [...this.state.dateFields, ...this.state.numberFields];
+  }
+
   _renderFillColor() {
     return (
       <VectorStyleColorEditor
@@ -103,7 +118,7 @@ export class VectorStyleEditor extends Component {
         swatches={DEFAULT_FILL_COLORS}
         handlePropertyChange={this.props.handlePropertyChange}
         styleDescriptor={this.props.styleProperties.fillColor}
-        ordinalFields={this.state.ordinalFields}
+        ordinalFields={this._getOrdinalFields()}
         defaultStaticStyleOptions={this.state.defaultStaticProperties.fillColor.options}
         defaultDynamicStyleOptions={this.state.defaultDynamicProperties.fillColor.options}
       />
@@ -117,7 +132,7 @@ export class VectorStyleEditor extends Component {
         swatches={DEFAULT_LINE_COLORS}
         handlePropertyChange={this.props.handlePropertyChange}
         styleDescriptor={this.props.styleProperties.lineColor}
-        ordinalFields={this.state.ordinalFields}
+        ordinalFields={this._getOrdinalFields()}
         defaultStaticStyleOptions={this.state.defaultStaticProperties.lineColor.options}
         defaultDynamicStyleOptions={this.state.defaultDynamicProperties.lineColor.options}
       />
@@ -130,7 +145,7 @@ export class VectorStyleEditor extends Component {
         styleProperty={vectorStyles.LINE_WIDTH}
         handlePropertyChange={this.props.handlePropertyChange}
         styleDescriptor={this.props.styleProperties.lineWidth}
-        ordinalFields={this.state.ordinalFields}
+        ordinalFields={this._getOrdinalFields()}
         defaultStaticStyleOptions={this.state.defaultStaticProperties.lineWidth.options}
         defaultDynamicStyleOptions={this.state.defaultDynamicProperties.lineWidth.options}
       />
@@ -143,7 +158,7 @@ export class VectorStyleEditor extends Component {
         styleProperty={vectorStyles.ICON_SIZE}
         handlePropertyChange={this.props.handlePropertyChange}
         styleDescriptor={this.props.styleProperties.iconSize}
-        ordinalFields={this.state.ordinalFields}
+        ordinalFields={this._getOrdinalFields()}
         defaultStaticStyleOptions={this.state.defaultStaticProperties.iconSize.options}
         defaultDynamicStyleOptions={this.state.defaultDynamicProperties.iconSize.options}
       />
@@ -159,7 +174,7 @@ export class VectorStyleEditor extends Component {
             styleProperty={vectorStyles.ICON_ORIENTATION}
             handlePropertyChange={this.props.handlePropertyChange}
             styleDescriptor={this.props.styleProperties.iconOrientation}
-            ordinalFields={this.state.ordinalFields}
+            ordinalFields={this.state.numberFields}
             defaultStaticStyleOptions={this.state.defaultStaticProperties.iconOrientation.options}
             defaultDynamicStyleOptions={this.state.defaultDynamicProperties.iconOrientation.options}
           />
