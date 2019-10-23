@@ -8,5 +8,5 @@
 <b>Signature:</b>
 
 ```typescript
-export interface SavedObjectsBulkUpdateOptions extends SavedObjectsBaseOptions, SavedObjectsMutatingOperationBaseOptions 
+export interface SavedObjectsBulkUpdateOptions extends SavedObjectsBaseOptions, SavedObjectsMutatingOperationOptions 
 ```

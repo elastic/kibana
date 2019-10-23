@@ -1196,10 +1196,10 @@ export interface SavedObjectsBulkUpdateObject<T extends SavedObjectAttributes = 
     type: string;
 }
 
-// Warning: (ae-forgotten-export) The symbol "SavedObjectsMutatingOperationBaseOptions" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "SavedObjectsMutatingOperationOptions" needs to be exported by the entry point index.d.ts
 // 
 // @public (undocumented)
-export interface SavedObjectsBulkUpdateOptions extends SavedObjectsBaseOptions, SavedObjectsMutatingOperationBaseOptions {
+export interface SavedObjectsBulkUpdateOptions extends SavedObjectsBaseOptions, SavedObjectsMutatingOperationOptions {
 }
 
 // @public (undocumented)
@@ -1247,7 +1247,7 @@ export interface SavedObjectsClientWrapperOptions<Request = unknown> {
 }
 
 // @public (undocumented)
-export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions, SavedObjectsMutatingOperationBaseOptions {
+export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions, SavedObjectsMutatingOperationOptions {
     id?: string;
     migrationVersion?: SavedObjectsMigrationVersion;
     overwrite?: boolean;
@@ -1256,7 +1256,7 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions, Save
 }
 
 // @public (undocumented)
-export interface SavedObjectsDeleteOptions extends SavedObjectsBaseOptions, SavedObjectsMutatingOperationBaseOptions {
+export interface SavedObjectsDeleteOptions extends SavedObjectsBaseOptions, SavedObjectsMutatingOperationOptions {
 }
 
 // @public (undocumented)
@@ -1562,7 +1562,7 @@ export class SavedObjectsSerializer {
     }
 
 // @public (undocumented)
-export interface SavedObjectsUpdateOptions extends SavedObjectsBaseOptions, SavedObjectsMutatingOperationBaseOptions {
+export interface SavedObjectsUpdateOptions extends SavedObjectsBaseOptions, SavedObjectsMutatingOperationOptions {
     references?: SavedObjectReference[];
     version?: string;
 }

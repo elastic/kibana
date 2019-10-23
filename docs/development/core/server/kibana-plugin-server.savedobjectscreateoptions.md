@@ -8,7 +8,7 @@
 <b>Signature:</b>
 
 ```typescript
-export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions, SavedObjectsMutatingOperationBaseOptions 
+export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions, SavedObjectsMutatingOperationOptions 
 ```
 
 ## Properties
