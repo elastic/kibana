@@ -143,7 +143,7 @@ export interface SavedObjectsBaseOptions {
 }
 
 /**
- *
+ * Elasticsearch Refresh setting for mutating operation
  * @public
  */
 export type MutatingOperationRefreshSetting = boolean | 'wait_for';

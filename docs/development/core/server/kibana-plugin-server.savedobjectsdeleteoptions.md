@@ -8,5 +8,12 @@
 <b>Signature:</b>
 
 ```typescript
-export interface SavedObjectsDeleteOptions extends SavedObjectsBaseOptions, SavedObjectsMutatingOperationOptions 
+export interface SavedObjectsDeleteOptions extends SavedObjectsBaseOptions 
 ```
+
+## Properties
+
+|  Property | Type | Description |
+|  --- | --- | --- |
+|  [refresh](./kibana-plugin-server.savedobjectsdeleteoptions.refresh.md) | <code>MutatingOperationRefreshSetting</code> | The Elasticsearch Refresh setting for this operation |
+

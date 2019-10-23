@@ -41,6 +41,7 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
   /** {@inheritDoc SavedObjectsMigrationVersion} */
   migrationVersion?: SavedObjectsMigrationVersion;
   references?: SavedObjectReference[];
+  /** The Elasticsearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
 }
 
@@ -103,6 +104,7 @@ export interface SavedObjectsUpdateOptions extends SavedObjectsBaseOptions {
   version?: string;
   /** {@inheritdoc SavedObjectReference} */
   references?: SavedObjectReference[];
+  /** The Elasticsearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
 }
 
@@ -111,6 +113,7 @@ export interface SavedObjectsUpdateOptions extends SavedObjectsBaseOptions {
  * @public
  */
 export interface SavedObjectsBulkUpdateOptions extends SavedObjectsBaseOptions {
+  /** The Elasticsearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
 }
 
@@ -119,6 +122,7 @@ export interface SavedObjectsBulkUpdateOptions extends SavedObjectsBaseOptions {
  * @public
  */
 export interface SavedObjectsDeleteOptions extends SavedObjectsBaseOptions {
+  /** The Elasticsearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
 }
 
@@ -127,6 +131,7 @@ export interface SavedObjectsDeleteOptions extends SavedObjectsBaseOptions {
  * @public
  */
 export interface SavedObjectsDeleteByNamespaceOptions extends SavedObjectsBaseOptions {
+  /** The Elasticsearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
 }
 

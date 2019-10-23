@@ -87,6 +87,7 @@ export interface SavedObjectsRepositoryOptions {
 
 export interface IncrementCounterOptions extends SavedObjectsBaseOptions {
   migrationVersion?: SavedObjectsMigrationVersion;
+  /** The Elasticsearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
 }
 

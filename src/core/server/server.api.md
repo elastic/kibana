@@ -1196,10 +1196,10 @@ export interface SavedObjectsBulkUpdateObject<T extends SavedObjectAttributes = 
     type: string;
 }
 
-// Warning: (ae-forgotten-export) The symbol "SavedObjectsMutatingOperationOptions" needs to be exported by the entry point index.d.ts
-// 
 // @public (undocumented)
-export interface SavedObjectsBulkUpdateOptions extends SavedObjectsBaseOptions, SavedObjectsMutatingOperationOptions {
+export interface SavedObjectsBulkUpdateOptions extends SavedObjectsBaseOptions {
+    // Warning: (ae-forgotten-export) The symbol "MutatingOperationRefreshSetting" needs to be exported by the entry point index.d.ts
+    refresh?: MutatingOperationRefreshSetting;
 }
 
 // @public (undocumented)
@@ -1247,16 +1247,18 @@ export interface SavedObjectsClientWrapperOptions<Request = unknown> {
 }
 
 // @public (undocumented)
-export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions, SavedObjectsMutatingOperationOptions {
+export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
     id?: string;
     migrationVersion?: SavedObjectsMigrationVersion;
     overwrite?: boolean;
     // (undocumented)
     references?: SavedObjectReference[];
+    refresh?: MutatingOperationRefreshSetting;
 }
 
 // @public (undocumented)
-export interface SavedObjectsDeleteOptions extends SavedObjectsBaseOptions, SavedObjectsMutatingOperationOptions {
+export interface SavedObjectsDeleteOptions extends SavedObjectsBaseOptions {
+    refresh?: MutatingOperationRefreshSetting;
 }
 
 // @public (undocumented)
@@ -1562,8 +1564,9 @@ export class SavedObjectsSerializer {
     }
 
 // @public (undocumented)
-export interface SavedObjectsUpdateOptions extends SavedObjectsBaseOptions, SavedObjectsMutatingOperationOptions {
+export interface SavedObjectsUpdateOptions extends SavedObjectsBaseOptions {
     references?: SavedObjectReference[];
+    refresh?: MutatingOperationRefreshSetting;
     version?: string;
 }
 
