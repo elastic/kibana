@@ -29,7 +29,7 @@ Create a PDF copy of your workpad that you can save and share outside of {kib}.
 
 . From your workpad, click the *Share workpad* icon in the upper left corner, then select *PDF reports*.
 
-. Click *Generate PDF*. 
+. Click *Generate PDF*.
 +
 [role="screenshot"]
 image::images/canvas-generate-pdf.gif[Generate PDF]
@@ -38,7 +38,7 @@ image::images/canvas-generate-pdf.gif[Generate PDF]
 [[create-workpad-URL]]
 === Create a POST URL
 
-Create the POST URL that automatically generates PDF reports with Watcher or a script. 
+Create the POST URL that automatically generates PDF reports with Watcher or a script.
 
 For more information, refer to <<automating-report-generation, Automating report generation>>.
 
@@ -46,7 +46,7 @@ For more information, refer to <<automating-report-generation, Automating report
 
 . From your workpad, click the *Share workpad* icon in the upper left corner, then select *PDF reports*.
 
-. Click *Copy POST URL*. 
+. Click *Copy POST URL*.
 +
 [role="screenshot"]
 image::images/canvas-create-URL.gif[Create POST URL]
@@ -55,7 +55,7 @@ image::images/canvas-create-URL.gif[Create POST URL]
 [[add-workpad-website]]
 === Embed the workpad
 
-To show off your workpad outside of {kib}, you can embed the workpad on a website. 
+beta[] To show off your workpad outside of {kib}, you can embed the workpad on a website.
 
 To make sure that your data remains secure, the data in the JSON file is not connected to {kib}. When your workpad contains elements that manipulate the data, the element does not appear on the workpad.
 
@@ -64,7 +64,7 @@ To make sure that your data remains secure, the data in the JSON file is not con
 . From your workpad, click the *Share workpad* icon in the upper left corner, then select *Embed on a website*.
 
 . On the *Embed on a website* window, follow the instructions.
++
+//TODO insert image
 
 NOTE: Embedded workpads encode the current state of the workpad in the JSON file. When you make changes to the workpad, the changes do not automatically appear in the JSON file.
-
-//TODO insert image
