@@ -30,7 +30,7 @@ export function getSuggestionsProvider({ indexPatterns }) {
     return indexPattern.fields.filter(isFilterable);
   }));
   return function getFieldSuggestions({ start, end, prefix, suffix, nestedPath = '' }) {
-    const search = `${nestedPath ? `${nestedPath}.` : ''}${prefix}${suffix}`.trim().toLowerCase();
+    const search = `${prefix}${suffix}`.trim().toLowerCase();
     const matchingFields = allFields.filter(field => {
       return (
         !nestedPath

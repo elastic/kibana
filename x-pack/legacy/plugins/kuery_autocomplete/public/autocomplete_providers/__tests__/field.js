@@ -101,10 +101,10 @@ describe('Kuery field suggestions', function () {
       const suffix = '';
 
       const allSuggestions = getSuggestions({ prefix, suffix });
-      expect(allSuggestions.length).to.be.greaterThan(1);
+      expect(allSuggestions.length).to.be.greaterThan(2);
 
       const nestedSuggestions = getSuggestions({ prefix, suffix, nestedPath: 'nestedField' });
-      expect(nestedSuggestions).to.have.length(1);
+      expect(nestedSuggestions).to.have.length(2);
     });
 
     it('should not wrap the suggestion in KQL\'s nested syntax if the correct nested path is already provided', () => {
@@ -112,25 +112,25 @@ describe('Kuery field suggestions', function () {
       const suffix = '';
 
       const suggestions = getSuggestions({ prefix, suffix, nestedPath: 'nestedField' });
-      expect(suggestions).to.have.length(1);
-      const [ suggestion ] = suggestions;
+      const suggestion = suggestions.find(({ field }) => field.name === 'nestedField.child');
       expect(suggestion.text).to.be('child ');
     });
 
     it('should handle fields nested multiple levels deep', () => {
+      const prefix = 'doubly';
       const suffix = '';
 
-      const suggestionsWithNoPath = getSuggestions({ prefix: 'doubly', suffix });
+      const suggestionsWithNoPath = getSuggestions({ prefix, suffix });
       expect(suggestionsWithNoPath).to.have.length(1);
       const [ noPathSuggestion ] = suggestionsWithNoPath;
       expect(noPathSuggestion.text).to.be('nestedField.nestedChild:{ doublyNestedChild  }');
 
-      const suggestionsWithPartialPath = getSuggestions({ prefix: 'nestedCh', suffix, nestedPath: 'nestedField' });
+      const suggestionsWithPartialPath = getSuggestions({ prefix, suffix, nestedPath: 'nestedField' });
       expect(suggestionsWithPartialPath).to.have.length(1);
       const [ partialPathSuggestion ] = suggestionsWithPartialPath;
       expect(partialPathSuggestion.text).to.be('nestedChild:{ doublyNestedChild  }');
 
-      const suggestionsWithFullPath = getSuggestions({ prefix: 'doubly', suffix, nestedPath: 'nestedField.nestedChild' });
+      const suggestionsWithFullPath = getSuggestions({ prefix, suffix, nestedPath: 'nestedField.nestedChild' });
       expect(suggestionsWithFullPath).to.have.length(1);
       const [ fullPathSuggestion ] = suggestionsWithFullPath;
       expect(fullPathSuggestion.text).to.be('doublyNestedChild ');
