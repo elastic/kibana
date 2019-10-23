@@ -61,6 +61,10 @@ import { VisualizeEmbeddable, VisualizeInput, VisualizeOutput } from './visualiz
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import { TypesStart } from '../../../../visualizations/public/np_ready/public/types';
 
+import { getServices } from '../kibana_services';
+
+const { addBasePath } = getServices();
+
 interface VisualizationAttributes extends SavedObjectAttributes {
   visState: string;
 }
@@ -142,7 +146,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
     try {
       const visId = savedObjectId;
 
-      const editUrl = chrome.addBasePath(`/app/kibana${savedVisualizations.urlFor(visId)}`);
+      const editUrl = addBasePath(`/app/kibana${savedVisualizations.urlFor(visId)}`);
       const loader = await getVisualizeLoader();
       const savedObject = await savedVisualizations.get(visId);
       const isLabsEnabled = config.get<boolean>('visualize:enableLabs');

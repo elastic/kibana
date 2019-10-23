@@ -17,20 +17,25 @@
  * under the License.
  */
 
-import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
-import 'ui/directives/kbn_href';
-import { uiModules } from 'ui/modules';
-import { timefilter } from 'ui/timefilter';
-import chrome from 'ui/chrome';
-import { wrapInI18nContext } from 'ui/i18n';
-import { toastNotifications } from 'ui/notify';
 import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
-import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { VisualizeListingTable } from './visualize_listing_table';
 import { NewVisModal } from '../wizard/new_vis_modal';
 import { VisualizeConstants } from '../visualize_constants';
 import { start as visualizations } from '../../../../visualizations/public/np_ready/public/legacy';
 import { i18n } from '@kbn/i18n';
+
+import { getServices } from '../kibana_services';
+
+const {
+  uiModules,
+  SavedObjectRegistryProvider,
+  timefilter,
+  chrome,
+  toastNotifications,
+  wrapInI18nContext,
+  SavedObjectsClientProvider,
+  addBasePath
+} = getServices();
 
 const app = uiModules.get('app/visualize', ['ngRoute', 'react']);
 app.directive('visualizeListingTable', reactDirective =>
@@ -55,11 +60,11 @@ export function VisualizeListingController($injector, createNewVis) {
 
   this.editItem = ({ editUrl }) => {
     // for visualizations the edit and view URLs are the same
-    window.location = chrome.addBasePath(editUrl);
+    window.location = addBasePath(editUrl);
   };
 
   this.getViewUrl = ({ editUrl }) => {
-    return chrome.addBasePath(editUrl);
+    return addBasePath(editUrl);
   };
 
   this.closeNewVisModal = () => {
@@ -112,7 +117,7 @@ export function VisualizeListingController($injector, createNewVis) {
       });
   };
 
-  chrome.breadcrumbs.set([
+  chrome.setBreadcrumbs([
     {
       text: i18n.translate('kbn.visualize.visualizeListingBreadcrumbsTitle', {
         defaultMessage: 'Visualize',

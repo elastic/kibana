@@ -21,7 +21,6 @@ import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { capabilities } from 'ui/capabilities';
 import { TableListView } from './../../table_list_view';
 
 import {
@@ -31,6 +30,10 @@ import {
   EuiButton,
   EuiEmptyPrompt,
 } from '@elastic/eui';
+
+import { getServices } from '../kibana_services';
+
+const { capabilities } = getServices();
 
 class VisualizeListingTableUi extends Component {
 
@@ -46,8 +49,8 @@ class VisualizeListingTableUi extends Component {
         // for data exploration purposes
         createItem={this.props.createItem}
         findItems={this.props.findItems}
-        deleteItems={capabilities.get().visualize.delete ? this.props.deleteItems : null}
-        editItem={capabilities.get().visualize.save ? this.props.editItem : null}
+        deleteItems={capabilities.visualize.delete ? this.props.deleteItems : null}
+        editItem={capabilities.visualize.save ? this.props.editItem : null}
         tableColumns={this.getTableColumns()}
         listingLimit={this.props.listingLimit}
         selectable={item => item.canDelete}
