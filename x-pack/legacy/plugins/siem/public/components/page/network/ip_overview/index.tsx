@@ -19,7 +19,6 @@ import { getEmptyTagValue } from '../../../empty_value';
 
 import {
   autonomousSystemRenderer,
-  dateRenderer,
   hostIdRenderer,
   hostNameRenderer,
   locationRenderer,
@@ -34,6 +33,7 @@ import { AnomalyScores } from '../../../ml/score/anomaly_scores';
 import { MlCapabilitiesContext } from '../../../ml/permissions/ml_capabilities_provider';
 import { hasMlUserPermissions } from '../../../ml/permissions/has_ml_user_permissions';
 import { InspectButton } from '../../../inspect';
+import { FormattedRelativePreferenceDate } from '../../../formatted_date';
 
 interface OwnProps {
   data: IpOverviewData;
@@ -116,11 +116,19 @@ export const IpOverview = pure<IpOverviewProps>(
       [
         {
           title: i18n.FIRST_SEEN,
-          description: typeData ? dateRenderer(typeData.firstSeen) : getEmptyTagValue(),
+          description: typeData ? (
+            <FormattedRelativePreferenceDate value={typeData.firstSeen} />
+          ) : (
+            getEmptyTagValue()
+          ),
         },
         {
           title: i18n.LAST_SEEN,
-          description: typeData ? dateRenderer(typeData.lastSeen) : getEmptyTagValue(),
+          description: typeData ? (
+            <FormattedRelativePreferenceDate value={typeData.lastSeen} />
+          ) : (
+            getEmptyTagValue()
+          ),
         },
       ],
       [

@@ -33,14 +33,6 @@ exports[`Field Renderers #autonomousSystemRenderer it renders correctly against 
 </Component>
 `;
 
-exports[`Field Renderers #dateRenderer it renders correctly against snapshot 1`] = `
-<Component>
-  <FormattedRelativePreferenceDate
-    value="2019-02-07T17:19:41.636Z"
-  />
-</Component>
-`;
-
 exports[`Field Renderers #hostIdRenderer it renders correctly against snapshot 1`] = `
 <Component>
   <DefaultDraggable

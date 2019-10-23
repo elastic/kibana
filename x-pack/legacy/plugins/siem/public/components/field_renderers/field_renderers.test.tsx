@@ -15,7 +15,6 @@ import { getEmptyValue } from '../empty_value';
 
 import {
   autonomousSystemRenderer,
-  dateRenderer,
   hostNameRenderer,
   locationRenderer,
   whoisRenderer,
@@ -53,21 +52,6 @@ describe('Field Renderers', () => {
           {locationRenderer(['source.geo.my_house'], mockData.complete)}
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(getEmptyValue());
-    });
-  });
-
-  describe('#dateRenderer', () => {
-    test('it renders correctly against snapshot', () => {
-      const wrapper = shallow(
-        <TestProviders>{dateRenderer(mockData.complete.source!.firstSeen)}</TestProviders>
-      );
-
-      expect(toJson(wrapper)).toMatchSnapshot();
-    });
-
-    test('it renders emptyTagValue when invalid field provided', () => {
-      const wrapper = mount(<TestProviders>{dateRenderer(null)}</TestProviders>);
       expect(wrapper.text()).toEqual(getEmptyValue());
     });
   });
