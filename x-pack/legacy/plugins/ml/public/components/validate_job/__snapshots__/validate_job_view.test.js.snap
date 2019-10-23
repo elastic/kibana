@@ -32,16 +32,18 @@ exports[`ValidateJob renders button and modal with a message 1`] = `
         />
       }
     >
-      <Callout
-        key="over_field_low_cardinality_0"
-        message={
-          Object {
-            "fieldName": "airline",
-            "id": "over_field_low_cardinality",
-            "status": "warning",
-            "text": "Cardinality of over_field \\"airline\\" is low and therefore less suitable for population analysis.",
-            "url": "https://www.elastic.co/blog/sizing-machine-learning-with-elasticsearch",
-          }
+      <MessageList
+        idFilterList={Array []}
+        messages={
+          Array [
+            Object {
+              "fieldName": "airline",
+              "id": "over_field_low_cardinality",
+              "status": "warning",
+              "text": "Cardinality of over_field \\"airline\\" is low and therefore less suitable for population analysis.",
+              "url": "https://www.elastic.co/blog/sizing-machine-learning-with-elasticsearch",
+            },
+          ]
         }
       />
       <EuiText>
@@ -57,18 +59,16 @@ exports[`ValidateJob renders button and modal with a message 1`] = `
           id="xpack.ml.validateJob.modal.linkToJobTipsText"
           values={
             Object {
-              "mlJobTipsLink": <EuiLink
-                color="primary"
+              "mlJobTipsLink": <ForwardRef
                 href="https://www.elastic.co/guide/en/kibana/jest-metadata-mock-branch/job-tips.html"
                 target="_blank"
-                type="button"
               >
                 <FormattedMessage
                   defaultMessage="Machine Learning Job Tips"
                   id="xpack.ml.validateJob.modal.linkToJobTipsText.mlJobTipsLinkText"
                   values={Object {}}
                 />
-              </EuiLink>,
+              </ForwardRef>,
             }
           }
         />
@@ -132,6 +132,10 @@ exports[`ValidateJob renders the button and modal with a success message 1`] = `
         />
       }
     >
+      <MessageList
+        idFilterList={Array []}
+        messages={Array []}
+      />
       <EuiText>
         <FormattedMessage
           defaultMessage="Job validation performs certain checks against job configurations and underlying source data and provides specific advice on how to adjust settings that are more likely to produce insightful results."
@@ -145,18 +149,16 @@ exports[`ValidateJob renders the button and modal with a success message 1`] = `
           id="xpack.ml.validateJob.modal.linkToJobTipsText"
           values={
             Object {
-              "mlJobTipsLink": <EuiLink
-                color="primary"
+              "mlJobTipsLink": <ForwardRef
                 href="https://www.elastic.co/guide/en/kibana/jest-metadata-mock-branch/job-tips.html"
                 target="_blank"
-                type="button"
               >
                 <FormattedMessage
                   defaultMessage="Machine Learning Job Tips"
                   id="xpack.ml.validateJob.modal.linkToJobTipsText.mlJobTipsLinkText"
                   values={Object {}}
                 />
-              </EuiLink>,
+              </ForwardRef>,
             }
           }
         />

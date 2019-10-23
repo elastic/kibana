@@ -23,7 +23,7 @@ import Boom from 'boom';
 
 import { Logger } from '../../logging';
 import { KibanaRequest } from './request';
-import { KibanaResponse, KibanaResponseFactory, kibanaResponseFactory } from './response';
+import { KibanaResponseFactory, kibanaResponseFactory, IKibanaResponse } from './response';
 import { RouteConfig, RouteConfigOptions, RouteMethod, RouteSchemas } from './route';
 import { HapiResponseAdapter } from './response_adapter';
 import { RequestHandlerContext } from '../../../server';
@@ -37,6 +37,8 @@ interface RouterRoute {
 
 /**
  * Registers route handlers for specified resource path and method.
+ * See {@link RouteConfig} and {@link RequestHandler} for more information about arguments to route registrations.
+ *
  * @public
  */
 export interface IRouter {
@@ -147,7 +149,7 @@ export class Router implements IRouter {
   public put: IRouter['put'];
 
   constructor(
-    readonly routerPath: string,
+    public readonly routerPath: string,
     private readonly log: Logger,
     private readonly enhanceWithContext: ContextEnhancer<any, any, any>
   ) {
@@ -262,4 +264,4 @@ export type RequestHandler<P extends ObjectType, Q extends ObjectType, B extends
   context: RequestHandlerContext,
   request: KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>>,
   response: KibanaResponseFactory
-) => KibanaResponse<any> | Promise<KibanaResponse<any>>;
+) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;

@@ -30,8 +30,8 @@ export interface Field {
 export interface Aggregation {
   id: AggId;
   title: string;
-  kibanaName: KIBANA_AGGREGATION;
-  dslName: ES_AGGREGATION;
+  kibanaName: KIBANA_AGGREGATION | null;
+  dslName: ES_AGGREGATION | null;
   type: typeof METRIC_AGG_TYPE;
   mlModelPlotAgg: {
     min: string;

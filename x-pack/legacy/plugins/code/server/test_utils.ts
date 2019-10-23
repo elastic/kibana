@@ -77,8 +77,8 @@ const TEST_OPTIONS = {
     enableMavenImport: true,
     enableGradleImport: true,
     installNodeDependency: true,
-    enableGitCertCheck: true,
     gitProtocolWhitelist: ['ssh', 'https', 'git'],
+    enableJavaSecurityManager: true,
   },
   disk: {
     thresholdEnabled: true,

@@ -17,7 +17,6 @@ import { VisualizationContainer } from '../visualization_container';
 
 export interface DatatableColumns {
   columnIds: string[];
-  labels: string[];
 }
 
 interface Args {
@@ -95,11 +94,6 @@ export const datatableColumns: ExpressionFunction<
       multi: true,
       help: '',
     },
-    labels: {
-      types: ['string'],
-      multi: true,
-      help: '',
-    },
   },
   fn: function fn(_context: unknown, args: DatatableColumns) {
     return {
@@ -138,10 +132,11 @@ function DatatableComponent(props: DatatableProps & { formatFactory: FormatFacto
         className="lnsDataTable"
         data-test-subj="lnsDataTable"
         columns={props.args.columns.columnIds
-          .map((field, index) => {
+          .map(field => {
+            const col = firstTable.columns.find(c => c.id === field);
             return {
               field,
-              name: props.args.columns.labels[index],
+              name: (col && col.name) || '',
             };
           })
           .filter(({ field }) => !!field)}

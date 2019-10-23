@@ -36,9 +36,9 @@ import {
 import { ExpressionInterpreter } from './types';
 import { setInterpreter, setInspector, setRenderersRegistry } from './services';
 import { createRenderer } from './expression_renderer';
-import { loader } from './loader';
-import { execute } from './execute';
-import { render } from './render';
+import { ExpressionLoader, loader } from './loader';
+import { ExpressionDataHandler, execute } from './execute';
+import { ExpressionRenderHandler, render } from './render';
 
 export interface ExpressionsSetupDeps {
   inspector: InspectorSetup;
@@ -85,6 +85,9 @@ export class ExpressionsPublicPlugin
       execute,
       render,
       loader,
+      ExpressionDataHandler,
+      ExpressionRenderHandler,
+      ExpressionLoader,
       ExpressionRenderer,
     };
   }

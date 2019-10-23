@@ -38,8 +38,10 @@ export const findPotentialMatches = async (
       // Here we grab the most recent 2 check groups per location and add them to the list.
       // Why 2? Because the most recent one may be a partial result from mode: all, and hence not match a summary doc.
       b.locations.buckets.forEach((lb: any) => {
-        lb.top.hits.hits.forEach((h: any) => {
-          checkGroups.add(h._source.monitor.check_group);
+        lb.ips.buckets.forEach((ib: any) => {
+          ib.top.hits.hits.forEach((h: any) => {
+            checkGroups.add(h._source.monitor.check_group);
+          });
         });
       });
     }
@@ -95,13 +97,18 @@ const queryBody = (queryContext: QueryContext, searchAfter: any, size: number) =
           locations: {
             terms: { field: 'observer.geo.name', missing: '__missing__' },
             aggs: {
-              top: {
-                top_hits: {
-                  sort: [{ '@timestamp': 'desc' }],
-                  _source: {
-                    includes: ['monitor.check_group', '@timestamp'],
+              ips: {
+                terms: { field: 'monitor.ip', missing: '0.0.0.0' },
+                aggs: {
+                  top: {
+                    top_hits: {
+                      sort: [{ '@timestamp': 'desc' }],
+                      _source: {
+                        includes: ['monitor.check_group', '@timestamp'],
+                      },
+                      size: 2,
+                    },
                   },
-                  size: 2,
                 },
               },
             },

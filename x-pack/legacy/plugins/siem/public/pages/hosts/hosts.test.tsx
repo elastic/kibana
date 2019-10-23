@@ -5,29 +5,41 @@
  */
 
 import { mount } from 'enzyme';
+import { cloneDeep } from 'lodash/fp';
 import * as React from 'react';
 import { Router } from 'react-router-dom';
+import { MockedProvider } from 'react-apollo/test-utils';
 import { ActionCreator } from 'typescript-fsa';
 
 import '../../mock/match_media';
-import '../../mock/ui_settings';
-import { Hosts, HostsComponentProps } from './hosts';
 
-import { mocksSource } from '../../containers/source/mock';
-import { TestProviders } from '../../mock';
-import { MockedProvider } from 'react-apollo/test-utils';
-import { cloneDeep } from 'lodash/fp';
 import { SiemNavigation } from '../../components/navigation';
+import { mocksSource } from '../../containers/source/mock';
 import { wait } from '../../lib/helpers';
-
+import { TestProviders } from '../../mock';
+import { mockUiSettings } from '../../mock/ui_settings';
 import { InputsModelId } from '../../store/inputs/constants';
+import { Hosts, HostsComponentProps } from './hosts';
+import { useKibanaCore } from '../../lib/compose/kibana_core';
 
 jest.mock('../../lib/settings/use_kibana_ui_setting');
+
+const mockUseKibanaCore = useKibanaCore as jest.Mock;
+jest.mock('../../lib/compose/kibana_core');
+mockUseKibanaCore.mockImplementation(() => ({
+  uiSettings: mockUiSettings,
+}));
 
 jest.mock('ui/documentation_links', () => ({
   documentationLinks: {
     kibana: 'http://www.example.com',
   },
+}));
+
+// Test will fail because we will to need to mock some core services to make the test work
+// For now let's forget about SiemSearchBar
+jest.mock('../../components/search_bar', () => ({
+  SiemSearchBar: () => null,
 }));
 
 let localSource: Array<{
@@ -83,7 +95,8 @@ describe('Hosts - rendering', () => {
       id: InputsModelId;
       to: number;
     }>,
-    filterQuery: '',
+    query: { query: '', language: 'kuery' },
+    filters: [],
   };
 
   beforeAll(() => {

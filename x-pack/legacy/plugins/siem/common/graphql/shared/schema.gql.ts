@@ -14,6 +14,8 @@ export const sharedSchema = gql`
     to: Float!
     "The beginning of the timerange"
     from: Float!
+    "The default browser set time zone"
+    timezone: String
   }
 
   type CursorType {
@@ -53,7 +55,7 @@ export const sharedSchema = gql`
     source
   }
 
-  enum FlowTargetNew {
+  enum FlowTargetSourceDest {
     destination
     source
   }

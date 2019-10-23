@@ -53,6 +53,9 @@ function createExpressionsStartMock(): ExpressionsStart {
     execute: jest.fn(),
     loader: jest.fn(),
     render: jest.fn(),
+    ExpressionRenderHandler: jest.fn(),
+    ExpressionDataHandler: jest.fn(),
+    ExpressionLoader: jest.fn(),
   };
 }
 

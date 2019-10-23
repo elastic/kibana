@@ -96,8 +96,8 @@ const handleCourierRequest = async ({
     return aggs.toDsl(metricsAtAllLevels);
   });
 
-  requestSearchSource.onRequestStart((paramSearchSource: SearchSource, searchRequest: unknown) => {
-    return aggs.onSearchRequestStart(paramSearchSource, searchRequest);
+  requestSearchSource.onRequestStart((paramSearchSource: SearchSource, options: any) => {
+    return aggs.onSearchRequestStart(paramSearchSource, options);
   });
 
   if (timeRange) {
@@ -114,7 +114,7 @@ const handleCourierRequest = async ({
   const queryHash = calculateObjectHash(reqBody);
   // We only need to reexecute the query, if forceFetch was true or the hash of the request body has changed
   // since the last request
-  const shouldQuery = forceFetch || searchSource.lastQuery !== queryHash;
+  const shouldQuery = forceFetch || (searchSource as any).lastQuery !== queryHash;
 
   if (shouldQuery) {
     inspectorAdapters.requests.reset();
@@ -135,18 +135,13 @@ const handleCourierRequest = async ({
     request.stats(getRequestInspectorStats(requestSearchSource));
 
     try {
-      // Abort any in-progress requests before fetching again
-      if (abortSignal) {
-        abortSignal.addEventListener('abort', () => requestSearchSource.cancelQueued());
-      }
+      const response = await requestSearchSource.fetch({ abortSignal });
 
-      const response = await requestSearchSource.fetch();
-
-      searchSource.lastQuery = queryHash;
+      (searchSource as any).lastQuery = queryHash;
 
       request.stats(getResponseInspectorStats(searchSource, response)).ok({ json: response });
 
-      searchSource.rawResponse = response;
+      (searchSource as any).rawResponse = response;
     } catch (e) {
       // Log any error during request to the inspector
       request.error({ json: e });
@@ -162,7 +157,7 @@ const handleCourierRequest = async ({
   // Note that rawResponse is not deeply cloned here, so downstream applications using courier
   // must take care not to mutate it, or it could have unintended side effects, e.g. displaying
   // response data incorrectly in the inspector.
-  let resp = searchSource.rawResponse;
+  let resp = (searchSource as any).rawResponse;
   for (const agg of aggs.aggs) {
     if (has(agg, 'type.postFlightRequest')) {
       resp = await agg.type.postFlightRequest(
@@ -176,7 +171,7 @@ const handleCourierRequest = async ({
     }
   }
 
-  searchSource.finalResponse = resp;
+  (searchSource as any).finalResponse = resp;
 
   const parsedTimeRange = timeRange ? getTime(aggs.indexPattern, timeRange) : null;
   const tabifyParams = {
@@ -187,23 +182,24 @@ const handleCourierRequest = async ({
 
   const tabifyCacheHash = calculateObjectHash({ tabifyAggs: aggs, ...tabifyParams });
   // We only need to reexecute tabify, if either we did a new request or some input params to tabify changed
-  const shouldCalculateNewTabify = shouldQuery || searchSource.lastTabifyHash !== tabifyCacheHash;
+  const shouldCalculateNewTabify =
+    shouldQuery || (searchSource as any).lastTabifyHash !== tabifyCacheHash;
 
   if (shouldCalculateNewTabify) {
-    searchSource.lastTabifyHash = tabifyCacheHash;
-    searchSource.tabifiedResponse = tabifyAggResponse(
+    (searchSource as any).lastTabifyHash = tabifyCacheHash;
+    (searchSource as any).tabifiedResponse = tabifyAggResponse(
       aggs,
-      searchSource.finalResponse,
+      (searchSource as any).finalResponse,
       tabifyParams
     );
   }
 
   inspectorAdapters.data.setTabularLoader(
-    () => buildTabularInspectorData(searchSource.tabifiedResponse, queryFilter),
+    () => buildTabularInspectorData((searchSource as any).tabifiedResponse, queryFilter),
     { returnsFormattedValues: true }
   );
 
-  return searchSource.tabifiedResponse;
+  return (searchSource as any).tabifiedResponse;
 };
 
 export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Return> => ({
@@ -245,7 +241,6 @@ export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Re
     const $injector = await chrome.dangerouslyGetActiveInjector();
     const Private: Function = $injector.get('Private');
     const { indexPatterns } = data.indexPatterns;
-    const SearchSourceClass = Private(SearchSourceProvider);
     const queryFilter = Private(FilterBarQueryFilterProvider);
 
     const aggConfigsState = JSON.parse(args.aggConfigs);
@@ -253,7 +248,7 @@ export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Re
     const aggs = new AggConfigs(indexPattern, aggConfigsState);
 
     // we should move searchSource creation inside courier request handler
-    const searchSource = new SearchSourceClass();
+    const searchSource = new SearchSource();
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', 0);
 

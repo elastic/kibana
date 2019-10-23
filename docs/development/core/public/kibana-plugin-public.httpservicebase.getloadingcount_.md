@@ -4,6 +4,8 @@
 
 ## HttpServiceBase.getLoadingCount$() method
 
+Get the sum of all loading count sources as a single Observable.
+
 <b>Signature:</b>
 
 ```typescript

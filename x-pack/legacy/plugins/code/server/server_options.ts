@@ -21,6 +21,8 @@ export interface SecurityOptions {
   installNodeDependency: boolean;
   gitHostWhitelist: string[];
   gitProtocolWhitelist: string[];
+  enableJavaSecurityManager: boolean;
+  extraJavaRepositoryWhitelist: string[];
 }
 
 export interface DiskOptions {
