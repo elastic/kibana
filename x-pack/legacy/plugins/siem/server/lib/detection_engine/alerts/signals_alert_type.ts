@@ -18,6 +18,7 @@ import { buildEventsScrollQuery } from './build_events_query';
 // bulk scroll class
 import { scrollAndBulkIndex } from './utils';
 import { SignalAlertTypeDefinition } from './types';
+import { getFilter } from './get_filter';
 
 export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTypeDefinition => {
   return {
@@ -32,6 +33,9 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
         id: schema.string(),
         index: schema.arrayOf(schema.string()),
         kql: schema.nullable(schema.string()),
+        save_id: schema.nullable(schema.string()),
+        query: schema.nullable(schema.string()),
+        filters: schema.nullable(schema.arrayOf(schema.object({}, { allowUnknowns: true }))),
         maxSignals: schema.number({ defaultValue: 100 }),
         name: schema.string(),
         severity: schema.string(),
@@ -52,6 +56,9 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
         id,
         index,
         kql,
+        filters,
+        save_id,
+        query,
         maxSignals,
         name,
         references,
@@ -64,14 +71,15 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
 
       const scroll = scrollLock ? scrollLock : '1m';
       const size = scrollSize ? scrollSize : 400;
+      services.savedObjectsClient.find('save_id');
+      const esFilter = getFilter(type, kql, filter, filters, save_id, query, index);
 
       // TODO: Turn these options being sent in into a template for the alert type
       const noReIndex = buildEventsScrollQuery({
         index,
         from,
         to,
-        kql,
-        filter,
+        filter: esFilter,
         size,
         scroll,
       });
@@ -79,7 +87,6 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
       const reIndex = buildEventsReIndex({
         index,
         from,
-        kql,
         to,
         // TODO: Change this out once we have solved
         // https://github.com/elastic/kibana/issues/47002
@@ -88,7 +95,7 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
         description,
         name,
         timeDetected: new Date().toISOString(),
-        filter,
+        filter: esFilter,
         maxDocs: maxSignals,
         ruleRevision: 1,
         id,

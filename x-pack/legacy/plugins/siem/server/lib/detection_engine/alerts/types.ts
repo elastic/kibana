@@ -7,6 +7,7 @@
 import { get } from 'lodash/fp';
 
 import Hapi from 'hapi';
+import { Filter } from '@kbn/es-query';
 import { SIGNALS_ID } from '../../../../common/constants';
 import {
   Alert,
@@ -18,6 +19,10 @@ import { AlertsClient } from '../../../../../alerting/server/alerts_client';
 import { ActionsClient } from '../../../../../actions/server/actions_client';
 import { SearchResponse } from '../../types';
 
+export interface Filters {
+  meta: {};
+}
+
 export interface SignalAlertParams {
   description: string;
   from: string;
@@ -27,10 +32,13 @@ export interface SignalAlertParams {
   enabled: boolean;
   filter: Record<string, {}> | undefined;
   kql: string | undefined;
+  query: string | undefined;
+  save_id: string | undefined;
+  filters: Filter[] | undefined;
   maxSignals: string;
   name: string;
   severity: string;
-  type: 'filter' | 'kql';
+  type: 'filter' | 'kql' | 'query';
   to: string;
   references: string[];
 }

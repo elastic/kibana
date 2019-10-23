@@ -10,6 +10,29 @@ import { isFunction } from 'lodash/fp';
 import { createSignals } from '../alerts/create_signals';
 import { SignalsRequest } from '../alerts/types';
 
+export const schema = Joi.object({
+  description: Joi.string().required(),
+  enabled: Joi.boolean().default(true),
+  filter: Joi.object(),
+  filters: Joi.array(),
+  from: Joi.string().required(),
+  id: Joi.string().required(),
+  index: Joi.array().required(),
+  interval: Joi.string().default('5m'),
+  // TODO: Change kql to be just query?
+  kql: Joi.string(),
+  query: Joi.string(),
+  save_id: Joi.string(),
+  max_signals: Joi.number().default(100),
+  name: Joi.string().required(),
+  severity: Joi.string().required(),
+  to: Joi.string().required(),
+  type: Joi.string()
+    .valid('filter', 'kql', 'query')
+    .required(),
+  references: Joi.array().default([]),
+});
+
 export const createCreateSignalsRoute: Hapi.ServerRoute = {
   method: 'POST',
   path: '/api/siem/signals',
@@ -19,24 +42,7 @@ export const createCreateSignalsRoute: Hapi.ServerRoute = {
       options: {
         abortEarly: false,
       },
-      payload: Joi.object({
-        description: Joi.string().required(),
-        enabled: Joi.boolean().default(true),
-        filter: Joi.object(),
-        from: Joi.string().required(),
-        id: Joi.string().required(),
-        index: Joi.array().required(),
-        interval: Joi.string().default('5m'),
-        kql: Joi.string(),
-        max_signals: Joi.number().default(100),
-        name: Joi.string().required(),
-        severity: Joi.string().required(),
-        to: Joi.string().required(),
-        type: Joi.string()
-          .valid('filter', 'kql')
-          .required(),
-        references: Joi.array().default([]),
-      }).xor('filter', 'kql'),
+      payload: schema,
     },
   },
   async handler(request: SignalsRequest, headers) {
@@ -46,6 +52,9 @@ export const createCreateSignalsRoute: Hapi.ServerRoute = {
       filter,
       kql,
       from,
+      query,
+      save_id,
+      filters,
       id,
       index,
       interval,
@@ -73,6 +82,9 @@ export const createCreateSignalsRoute: Hapi.ServerRoute = {
       enabled,
       filter,
       from,
+      query,
+      save_id,
+      filters,
       id,
       index,
       interval,
