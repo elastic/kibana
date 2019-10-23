@@ -89,7 +89,10 @@ def getWorkerMap(agentNumber, numberOfExecutions, worker, workerFailures, maxWor
     workerMap["agent-${agentNumber}-worker-${i}"] = { workerNumber ->
       for(def j = 0; j < workerExecutions; j++) {
         print "Execute agent-${agentNumber} worker-${workerNumber}: ${j}"
-        withEnv(["JOB=agent-${agentNumber}-worker-${workerNumber}-${j}"]) {
+        withEnv([
+          "JOB=agent-${agentNumber}-worker-${workerNumber}-${j}",
+          "REMOVE_KIBANA_INSTALL_DIR=1",
+        ]) {
           catchError {
             try {
               worker(workerNumber)
