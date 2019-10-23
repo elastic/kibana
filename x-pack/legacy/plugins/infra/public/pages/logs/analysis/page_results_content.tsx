@@ -76,15 +76,13 @@ export const AnalysisResultsContent = ({
     return roundedResult < bucketSpan ? bucketSpan : roundedResult;
   }, [queryTimeRange.startTime, queryTimeRange.endTime]);
 
-  const { isLoading, logEntryRate } = useLogAnalysisResults({
+  const { isLoading, results } = useLogAnalysisResults({
     sourceId,
     startTime: queryTimeRange.startTime,
     endTime: queryTimeRange.endTime,
     bucketDuration,
   });
-  const hasResults = useMemo(() => logEntryRate && logEntryRate.histogramBuckets.length > 0, [
-    logEntryRate,
-  ]);
+  const hasResults = useMemo(() => results && results.histogramBuckets.length > 0, [results]);
 
   const handleQueryTimeRangeChange = useCallback(
     ({ start: startTime, end: endTime }: { start: string; end: string }) => {
@@ -143,7 +141,7 @@ export const AnalysisResultsContent = ({
 
   return (
     <>
-      {isLoading && !logEntryRate ? (
+      {isLoading && !results ? (
         <LoadingPage
           message={i18n.translate('xpack.infra.logs.logsAnalysisResults.loadingMessage', {
             defaultMessage: 'Loading results...',
@@ -157,7 +155,7 @@ export const AnalysisResultsContent = ({
                 <EuiPanel paddingSize="l">
                   <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                     <EuiFlexItem grow={false}>
-                      {!isLoading && logEntryRate ? (
+                      {!isLoading && results ? (
                         <EuiText size="s">
                           <FormattedMessage
                             id="xpack.infra.logs.analysis.logRateResultsToolbarText"
@@ -166,7 +164,7 @@ export const AnalysisResultsContent = ({
                               numberOfLogs: (
                                 <EuiBadge color="primary">
                                   <EuiText size="s" color="ghost">
-                                    {numeral(logEntryRate.totalNumberOfLogEntries).format('0.00a')}
+                                    {numeral(results.totalNumberOfLogEntries).format('0.00a')}
                                   </EuiText>
                                 </EuiBadge>
                               ),
@@ -198,7 +196,7 @@ export const AnalysisResultsContent = ({
                   {isFirstUse && !hasResults ? <FirstUseCallout /> : null}
                   <LogRateResults
                     isLoading={isLoading}
-                    results={logEntryRate}
+                    results={results}
                     setTimeRange={handleChartTimeRangeChange}
                     timeRange={queryTimeRange}
                   />
@@ -211,7 +209,7 @@ export const AnalysisResultsContent = ({
                     jobStatus={jobStatus['log-entry-rate']}
                     viewSetupForReconfiguration={viewSetupForReconfiguration}
                     viewSetupForUpdate={viewSetupForUpdate}
-                    results={logEntryRate}
+                    results={results}
                     setTimeRange={handleChartTimeRangeChange}
                     setupStatus={setupStatus}
                     timeRange={queryTimeRange}

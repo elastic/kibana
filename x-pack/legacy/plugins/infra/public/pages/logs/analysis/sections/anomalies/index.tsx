@@ -18,7 +18,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 
 import euiStyled from '../../../../../../../../common/eui_styled_components';
-import { GetLogEntryRateSuccessResponsePayload } from '../../../../../../common/http_api';
+import { Results } from '../../../../../containers/logs/log_analysis/log_analysis_results';
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 import { JobStatus, SetupStatus } from '../../../../../../common/log_analysis';
 import {
@@ -35,7 +35,7 @@ import { AnalyzeInMlButton } from '../analyze_in_ml_button';
 export const AnomaliesResults: React.FunctionComponent<{
   isLoading: boolean;
   jobStatus: JobStatus;
-  results: GetLogEntryRateSuccessResponsePayload['data'] | null;
+  results: Results | null;
   setTimeRange: (timeRange: TimeRange) => void;
   setupStatus: SetupStatus;
   timeRange: TimeRange;

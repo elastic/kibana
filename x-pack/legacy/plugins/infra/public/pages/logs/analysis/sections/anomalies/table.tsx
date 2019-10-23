@@ -9,9 +9,9 @@ import { EuiBasicTable, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
-import { GetLogEntryRateSuccessResponsePayload } from '../../../../../../common/http_api/log_analysis/results/log_entry_rate';
+import { Results } from '../../../../../containers/logs/log_analysis/log_analysis_results';
 import { AnomaliesTableExpandedRow } from './expanded_row';
-import { getTopAnomalyScoresByPartition, formatAnomalyScore } from '../helpers/data_formatters';
+import { formatAnomalyScore } from '../helpers/data_formatters';
 
 interface TableItem {
   id: string;
@@ -49,17 +49,17 @@ const maxAnomalyScoreColumnName = i18n.translate(
 );
 
 export const AnomaliesTable: React.FunctionComponent<{
-  results: GetLogEntryRateSuccessResponsePayload['data'];
+  results: Results;
   setTimeRange: (timeRange: TimeRange) => void;
   timeRange: TimeRange;
   jobId: string;
 }> = ({ results, timeRange, setTimeRange, jobId }) => {
   const tableItems: TableItem[] = useMemo(() => {
-    return Object.entries(getTopAnomalyScoresByPartition(results)).map(([key, value]) => {
+    return Object.entries(results.partitionBuckets).map(([key, value]) => {
       return {
         id: key || 'unknown', // Note: EUI's table expanded rows won't work with a key of '' in itemIdToExpandedRowMap
         partition: key || 'unknown',
-        topAnomalyScore: formatAnomalyScore(value),
+        topAnomalyScore: formatAnomalyScore(value.topAnomalyScore),
       };
     });
   }, [results]);
