@@ -28,7 +28,7 @@ import { cloneDeep } from 'lodash';
 import { ml } from '../../../../../services/ml_api_service';
 import { GroupList } from './group_list';
 import { NewGroupInput } from './new_group_input';
-import { mlMessageBarService } from '../../../../../components/messagebar/messagebar_service';
+import { mlMessageBarService } from '../../../../../components/messagebar';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 function createSelectedGroups(jobs, groups) {

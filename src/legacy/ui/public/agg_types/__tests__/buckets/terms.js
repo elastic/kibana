@@ -39,7 +39,8 @@ describe('Terms Agg', function () {
           type: terms,
           vis: {
             aggs: []
-          }
+          },
+          getParam: key => aggParams[key],
         };
         $rootScope.metricAggs = metricAggs;
         $controller(orderAggController, { $scope: $rootScope });

@@ -150,9 +150,6 @@ function VisEditor(
   config,
   kbnBaseUrl,
   localStorage,
-  // unused but required to initialize auto refresh :-\
-  /* eslint-disable no-unused-vars */
-  courier,
 ) {
   const queryFilter = Private(FilterBarQueryFilterProvider);
   const getUnhashableStates = Private(getUnhashableStatesProvider);
@@ -198,12 +195,12 @@ function VisEditor(
           isTitleDuplicateConfirmed,
           onTitleDuplicate,
         };
-        return doSave(saveOptions).then(({ id, error }) => {
+        return doSave(saveOptions).then((response) => {
           // If the save wasn't successful, put the original values back.
-          if (!id || error) {
+          if (!response.id || response.error) {
             savedVis.title = currentTitle;
           }
-          return { id, error };
+          return response;
         });
       };
 
@@ -517,6 +514,8 @@ function VisEditor(
 
   const updateStateFromSavedQuery = (savedQuery) => {
     $state.query = savedQuery.attributes.query;
+    $state.save();
+
     queryFilter.setFilters(savedQuery.attributes.filters || []);
 
     if (savedQuery.attributes.timefilter) {
@@ -545,7 +544,7 @@ function VisEditor(
       $scope.savedQuery = undefined;
       return;
     }
-    if ($scope.savedQuery && newSavedQueryId !== $scope.savedQuery.id) {
+    if (!$scope.savedQuery || newSavedQueryId !== $scope.savedQuery.id) {
       savedQueryService.getSavedQuery(newSavedQueryId).then((savedQuery) => {
         $scope.$evalAsync(() => {
           $scope.savedQuery = savedQuery;
@@ -601,6 +600,10 @@ function VisEditor(
             } else if (savedVis.id === $route.current.params.id) {
               docTitle.change(savedVis.lastSavedTitle);
               chrome.breadcrumbs.set($injector.invoke(getEditBreadcrumbs));
+              savedVis.vis.title = savedVis.title;
+              savedVis.vis.description = savedVis.description;
+              // it's needed to save the state to update url string
+              $state.save();
             } else {
               kbnUrl.change(`${VisualizeConstants.EDIT_PATH}/{{id}}`, { id: savedVis.id });
             }

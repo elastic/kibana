@@ -138,7 +138,7 @@ describe('field_manager', () => {
       .find(EuiContextMenu)
       .prop('panels')![0].items![1];
 
-    expect(toggleItem.name).toEqual('Temporarily disable');
+    expect(toggleItem.name).toEqual('Disable field');
 
     toggleItem.onClick!({} as any);
 
@@ -160,7 +160,7 @@ describe('field_manager', () => {
         .dive()
         .find(EuiContextMenu)
         .prop('panels')![0].items![1].name
-    ).toEqual('Enable');
+    ).toEqual('Enable field');
   });
 
   it('should enable field', () => {
@@ -171,7 +171,7 @@ describe('field_manager', () => {
       .find(EuiContextMenu)
       .prop('panels')![0].items![1];
 
-    expect(toggleItem.name).toEqual('Enable');
+    expect(toggleItem.name).toEqual('Enable field');
 
     toggleItem.onClick!({} as any);
 
@@ -193,7 +193,7 @@ describe('field_manager', () => {
         .dive()
         .find(EuiContextMenu)
         .prop('panels')![0].items![1].name
-    ).toEqual('Temporarily disable');
+    ).toEqual('Disable field');
   });
 
   it('should change color', () => {

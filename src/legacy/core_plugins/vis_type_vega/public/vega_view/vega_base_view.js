@@ -264,7 +264,7 @@ export class VegaBaseView {
   async addFilterHandler(query, index) {
     const indexId = await this._findIndex(index);
     const filter = buildQueryFilter(query, indexId);
-    await this._queryfilter.addFilters(filter);
+    this._queryfilter.addFilters(filter);
   }
 
   /**

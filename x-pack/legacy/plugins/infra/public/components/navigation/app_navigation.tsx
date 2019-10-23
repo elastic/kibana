@@ -9,11 +9,12 @@ import React from 'react';
 import euiStyled from '../../../../../common/eui_styled_components';
 
 interface AppNavigationProps {
+  'aria-label': string;
   children: React.ReactNode;
 }
 
-export const AppNavigation = ({ children }: AppNavigationProps) => (
-  <Nav>
+export const AppNavigation = ({ 'aria-label': label, children }: AppNavigationProps) => (
+  <Nav aria-label={label}>
     <EuiFlexGroup gutterSize="m" alignItems="center" justifyContent="spaceBetween">
       <EuiFlexItem>{children}</EuiFlexItem>
     </EuiFlexGroup>
@@ -25,7 +26,7 @@ const Nav = euiStyled.nav`
   border-bottom: ${props => props.theme.eui.euiBorderThin};
   padding: ${props =>
     `${props.theme.eui.euiSize} ${props.theme.eui.euiSizeL} ${props.theme.eui.euiSize} ${props.theme.eui.euiSizeL}`}
-  
+
   .euiTabs {
     padding-left: 3px;
     margin-left: -3px;

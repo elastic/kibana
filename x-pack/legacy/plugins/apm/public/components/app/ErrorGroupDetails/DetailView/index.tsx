@@ -36,7 +36,7 @@ import {
   logStacktraceTab
 } from './ErrorTabs';
 import { Summary } from '../../../shared/Summary';
-import { TimestampSummaryItem } from '../../../shared/Summary/TimestampSummaryItem';
+import { TimestampTooltip } from '../../../shared/TimestampTooltip';
 import { HttpInfoSummaryItem } from '../../../shared/Summary/HttpInfoSummaryItem';
 import { TransactionDetailLink } from '../../../shared/Links/apm/TransactionDetailLink';
 import { UserAgentSummaryItem } from '../../../shared/Summary/UserAgentSummaryItem';
@@ -114,7 +114,7 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
 
       <Summary
         items={[
-          <TimestampSummaryItem time={error.timestamp.us / 1000} />,
+          <TimestampTooltip time={error.timestamp.us / 1000} />,
           errorUrl && method ? (
             <HttpInfoSummaryItem
               url={errorUrl}
@@ -189,7 +189,7 @@ export function TabContent({
 }) {
   const codeLanguage = idx(error, _ => _.service.language.name);
   const excStackframes = idx(error, _ => _.error.exception[0].stacktrace);
-  const logStackframes = idx(error, _ => _.error.exception[0].stacktrace);
+  const logStackframes = idx(error, _ => _.error.log.stacktrace);
 
   switch (currentTab.key) {
     case logStacktraceTab.key:

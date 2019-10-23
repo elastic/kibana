@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Filter } from '@kbn/es-query';
 import { isEqual } from 'lodash/fp';
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
+import { Query } from 'src/plugins/data/common';
 
 import { WithSource } from '../../containers/source';
 import { inputsModel, inputsSelectors, State, timelineSelectors } from '../../store';
@@ -24,7 +26,6 @@ import { InputsModelId } from '../../store/inputs/constants';
 export interface OwnProps {
   end: number;
   id: string;
-  kqlQueryExpression: string;
   start: number;
 }
 
@@ -32,10 +33,12 @@ interface StateReduxProps {
   activePage?: number;
   columns: ColumnHeader[];
   dataProviders?: DataProvider[];
+  filters: Filter[];
   isLive: boolean;
   itemsPerPage?: number;
   itemsPerPageOptions?: number[];
   kqlMode: KqlMode;
+  query: Query;
   pageCount?: number;
   sort?: Sort;
 }
@@ -75,12 +78,13 @@ const StatefulEventsViewerComponent = React.memo<Props>(
     dataProviders,
     deleteEventQuery,
     end,
+    filters,
     id,
     isLive,
     itemsPerPage,
     itemsPerPageOptions,
     kqlMode,
-    kqlQueryExpression,
+    query,
     removeColumn,
     start,
     sort,
@@ -130,13 +134,14 @@ const StatefulEventsViewerComponent = React.memo<Props>(
               id={id}
               dataProviders={dataProviders!}
               end={end}
+              filters={filters}
               indexPattern={indexPattern}
               isLive={isLive}
               itemsPerPage={itemsPerPage!}
               itemsPerPageOptions={itemsPerPageOptions!}
               kqlMode={kqlMode}
-              kqlQueryExpression={kqlQueryExpression}
               onChangeItemsPerPage={onChangeItemsPerPage}
+              query={query}
               showInspect={showInspect}
               start={start}
               sort={sort!}
@@ -153,11 +158,12 @@ const StatefulEventsViewerComponent = React.memo<Props>(
     isEqual(prevProps.columns, nextProps.columns) &&
     isEqual(prevProps.dataProviders, nextProps.dataProviders) &&
     prevProps.end === nextProps.end &&
+    isEqual(prevProps.filters, nextProps.filters) &&
     prevProps.isLive === nextProps.isLive &&
     prevProps.itemsPerPage === nextProps.itemsPerPage &&
     isEqual(prevProps.itemsPerPageOptions, nextProps.itemsPerPageOptions) &&
     prevProps.kqlMode === nextProps.kqlMode &&
-    prevProps.kqlQueryExpression === nextProps.kqlQueryExpression &&
+    isEqual(prevProps.query, nextProps.query) &&
     prevProps.pageCount === nextProps.pageCount &&
     isEqual(prevProps.sort, nextProps.sort) &&
     prevProps.start === nextProps.start
@@ -167,6 +173,8 @@ StatefulEventsViewerComponent.displayName = 'StatefulEventsViewerComponent';
 
 const makeMapStateToProps = () => {
   const getInputsTimeline = inputsSelectors.getTimelineSelector();
+  const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
+  const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
   const getEvents = timelineSelectors.getEventsByIdSelector();
   const mapStateToProps = (state: State, { id }: OwnProps) => {
     const input: inputsModel.InputsRange = getInputsTimeline(state);
@@ -176,11 +184,13 @@ const makeMapStateToProps = () => {
     return {
       columns,
       dataProviders,
+      filters: getGlobalFiltersQuerySelector(state),
       id,
       isLive: input.policy.kind === 'interval',
       itemsPerPage,
       itemsPerPageOptions,
       kqlMode,
+      query: getGlobalQuerySelector(state),
       sort,
     };
   };

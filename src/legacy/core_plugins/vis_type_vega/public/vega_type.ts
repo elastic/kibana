@@ -24,9 +24,9 @@ import { DefaultEditorSize } from 'ui/vis/editor_size';
 // @ts-ignore
 import { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
 
-import vegaEditorTemplate from './vega_editor_template.html';
 import { visFactory } from '../../visualizations/public';
 import { VegaVisualizationDependencies } from './plugin';
+import { VegaVisEditor } from './components';
 
 import { createVegaRequestHandler } from './vega_request_handler';
 // @ts-ignore
@@ -48,7 +48,7 @@ export const createVegaTypeDefinition = (dependencies: VegaVisualizationDependen
     icon: 'visVega',
     visConfig: { defaults: { spec: defaultSpec } },
     editorConfig: {
-      optionsTemplate: vegaEditorTemplate,
+      optionsTemplate: VegaVisEditor,
       enableAutoApply: true,
       defaultSize: DefaultEditorSize.MEDIUM,
     },

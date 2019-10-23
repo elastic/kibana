@@ -163,9 +163,12 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = ({ ac
             error={
               createIndexPattern &&
               destinationIndexPatternTitleExists && [
-                i18n.translate('xpack.ml.dataframe.analytics.create.indexPatternTitleError', {
-                  defaultMessage: 'An index pattern with this title already exists.',
-                }),
+                i18n.translate(
+                  'xpack.ml.dataframe.analytics.create.indexPatternAlreadyExistsError',
+                  {
+                    defaultMessage: 'An index pattern with this title already exists.',
+                  }
+                ),
               ]
             }
           >

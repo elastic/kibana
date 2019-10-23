@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { buildEsQuery, Filter, fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { isEmpty, isString, flow } from 'lodash/fp';
 import { StaticIndexPattern } from 'ui/index_patterns';
+import { Query } from 'src/plugins/data/common';
 
 import { KueryFilterQuery } from '../../store';
 
@@ -65,3 +66,30 @@ export const escapeKuery = flow(
   escapeNot,
   escapeWhitespace
 );
+
+export interface EsQueryConfig {
+  allowLeadingWildcards: boolean;
+  queryStringOptions: unknown;
+  ignoreFilterIfFieldNotInIndex: boolean;
+  dateFormatTZ?: string | null;
+}
+
+export const convertToBuildEsQuery = ({
+  config,
+  indexPattern,
+  queries,
+  filters,
+}: {
+  config: EsQueryConfig;
+  indexPattern: StaticIndexPattern;
+  queries: Query[];
+  filters: Filter[];
+}) => {
+  try {
+    return JSON.stringify(
+      buildEsQuery(indexPattern, queries, filters.filter(f => f.meta.disabled === false), config)
+    );
+  } catch (exp) {
+    return '';
+  }
+};

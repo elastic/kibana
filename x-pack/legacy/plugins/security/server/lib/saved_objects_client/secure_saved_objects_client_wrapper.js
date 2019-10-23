@@ -105,6 +105,18 @@ export class SecureSavedObjectsClientWrapper {
     return await this._baseClient.update(type, id, attributes, options);
   }
 
+  async bulkUpdate(objects = [], options) {
+    const types = uniq(objects.map(o => o.type));
+    await this._ensureAuthorized(
+      types,
+      'bulk_update',
+      options && options.namespace,
+      { objects, options },
+    );
+
+    return await this._baseClient.bulkUpdate(objects, options);
+  }
+
   async _checkPrivileges(actions, namespace) {
     try {
       return await this._checkSavedObjectsPrivileges(actions, namespace);

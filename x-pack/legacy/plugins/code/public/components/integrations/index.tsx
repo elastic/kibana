@@ -5,68 +5,92 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiPanel, EuiText } from '@elastic/eui';
 
-import { CodeBlock } from '../codeblock/codeblock';
-import { history } from '../../utils/url';
+import { CodeBlock } from '../code_block';
 import { FrameHeader } from './frame_header';
 import { RepoTitle } from './repo_title';
 import { CodeIntegrator } from './code_integrator';
-import { externalFileURI } from './helpers';
 import { frames, Frame, repos, results } from './data';
+import { CodeFlyout } from './code_flyout';
 
 const associateToService = (frame: Frame) => (repo: string) =>
   alert(`repo ${repo} associated with service ${JSON.stringify(frame)}`);
 
 const handleImport = (repo: string) => alert(`import done: ${repo}`);
 
-export const Integrations = () => (
-  <div className="codeContainer__root codeIntegrations__container">
-    {frames.map(frame => {
-      const { fileName, lineNumber } = frame;
-      const key = `${fileName}#L${lineNumber}`;
-      const snippet = results[key];
+export const Integrations = () => {
+  const [isFlyoutVisible, setVisible] = React.useState(false);
+  const [flyoutFile, setflyoutFile] = React.useState({
+    repo: 'github.com/Microsoft/TypeScript-Node-Starter',
+    file: 'src/app.ts',
+    revision: 'master',
+  });
 
-      if (snippet) {
-        const { compositeContent, filePath, language, uri } = snippet;
-        const { content, lineMapping } = compositeContent;
-        const fileUrl = externalFileURI(uri, filePath);
+  const closeFlyout = () => {
+    setVisible(false);
+  };
 
-        return (
-          <div key={key} className="codeIntegrations__frame">
-            <RepoTitle uri={snippet.uri} />
-            <CodeBlock
-              content={content}
-              header={
+  const showFlyout = (repo: string, file: string, revision: string = 'master') => {
+    setflyoutFile({
+      repo,
+      file,
+      revision,
+    });
+    setVisible(true);
+  };
+
+  return (
+    <div className="codeIntegrations__container">
+      <CodeFlyout
+        open={isFlyoutVisible}
+        onClose={closeFlyout}
+        file={flyoutFile.file}
+        repo={flyoutFile.repo}
+        revision={flyoutFile.revision}
+      />
+      {frames.map(frame => {
+        const { fileName, lineNumber } = frame;
+        const key = `${fileName}#L${lineNumber}`;
+        const snippet = results[key];
+
+        if (snippet) {
+          const { compositeContent, filePath, language, uri } = snippet;
+          const { content, lineMapping } = compositeContent;
+          const lines = content.split('\n');
+
+          return (
+            <div key={key} className="codeIntegrations__frame">
+              <RepoTitle uri={snippet.uri} />
+              <EuiPanel paddingSize="s">
                 <FrameHeader
                   fileName={fileName}
                   lineNumber={lineNumber}
-                  onClick={() => history.push(fileUrl)}
+                  onClick={() => showFlyout(uri, filePath)}
                 />
-              }
-              language={language}
-              lineNumber={i => lineMapping[i]}
-            />
+                <CodeBlock lines={lines} language={language} lineNumber={i => lineMapping[i]} />
+              </EuiPanel>
+            </div>
+          );
+        }
+
+        return (
+          <div key={key} className="codeIntegrations__frame">
+            <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" alignItems="center">
+              <EuiText size="s" className="codeIntegrations__code">
+                <span>{fileName}</span>
+                <span className="codeIntegrations__preposition">at</span>
+                <span>line {lineNumber}</span>
+              </EuiText>
+              <CodeIntegrator
+                onRepoSelect={associateToService(frame)}
+                onImportSuccess={handleImport}
+                repos={repos}
+              />
+            </EuiFlexGroup>
           </div>
         );
-      }
-
-      return (
-        <div key={key} className="codeIntegrations__frame">
-          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" alignItems="center">
-            <EuiText size="s" className="codeIntegrations__code">
-              <span>{fileName}</span>
-              <span className="codeIntegrations__preposition">at</span>
-              <span>line {lineNumber}</span>
-            </EuiText>
-            <CodeIntegrator
-              onRepoSelect={associateToService(frame)}
-              onImportSuccess={handleImport}
-              repos={repos}
-            />
-          </EuiFlexGroup>
-        </div>
-      );
-    })}
-  </div>
-);
+      })}
+    </div>
+  );
+};

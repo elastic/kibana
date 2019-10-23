@@ -5,7 +5,6 @@
  */
 
 
-
 import _ from 'lodash';
 import semver from 'semver';
 import numeral from '@elastic/numeral';
@@ -13,6 +12,7 @@ import numeral from '@elastic/numeral';
 import { ALLOWED_DATA_UNITS, JOB_ID_MAX_LENGTH } from '../constants/validation';
 import { parseInterval } from './parse_interval';
 import { maxLengthValidator } from './validators';
+import { CREATED_BY_LABEL } from '../../public/jobs/new_job_new/common/job_creator/util/constants';
 
 // work out the default frequency based on the bucket_span in seconds
 export function calculateDatafeedFrequencyDefaultSeconds(bucketSpanSeconds) {
@@ -380,15 +380,15 @@ export function basicJobValidation(job, fields, limits, skipMmlChecks = false) {
       messages.push({ id: 'bucket_span_empty' });
       valid = false;
     } else {
-      const bucketSpan = parseInterval(job.analysis_config.bucket_span, false);
-      if (bucketSpan === null || bucketSpan.asMilliseconds() === 0) {
-        messages.push({ id: 'bucket_span_invalid' });
-        valid = false;
-      } else {
+      if (isValidTimeFormat(job.analysis_config.bucket_span)) {
         messages.push({
           id: 'bucket_span_valid',
           bucketSpan: job.analysis_config.bucket_span
         });
+
+      } else {
+        messages.push({ id: 'bucket_span_invalid' });
+        valid = false;
       }
     }
 
@@ -438,6 +438,34 @@ export function basicJobValidation(job, fields, limits, skipMmlChecks = false) {
   };
 }
 
+export function basicDatafeedValidation(datafeed) {
+  const messages = [];
+  let valid = true;
+
+  if (datafeed) {
+    let queryDelayMessage = { id: 'query_delay_valid' };
+    if (isValidTimeFormat(datafeed.query_delay) === false) {
+      queryDelayMessage = { id: 'query_delay_invalid' };
+      valid = false;
+    }
+    messages.push(queryDelayMessage);
+
+    let frequencyMessage = { id: 'frequency_valid' };
+    if (isValidTimeFormat(datafeed.frequency) === false) {
+      frequencyMessage = { id: 'frequency_invalid' };
+      valid = false;
+    }
+    messages.push(frequencyMessage);
+  }
+
+  return {
+    messages,
+    valid,
+    contains: id => messages.some(m => id === m.id),
+    find: id => messages.find(m => id === m.id),
+  };
+}
+
 export function validateModelMemoryLimit(job, limits) {
   const messages = [];
   let valid = true;
@@ -472,7 +500,7 @@ export function validateModelMemoryLimitUnits(job) {
 
   if (typeof job.analysis_limits !== 'undefined' && typeof job.analysis_limits.model_memory_limit !== 'undefined') {
     const mml = job.analysis_limits.model_memory_limit.toUpperCase();
-    const mmlSplit = mml.match(/\d+(\w+)/);
+    const mmlSplit = mml.match(/\d+(\w+)$/);
     const unit = (mmlSplit && mmlSplit.length === 2) ? mmlSplit[1] : null;
 
     if (ALLOWED_DATA_UNITS.indexOf(unit) === -1) {
@@ -507,6 +535,14 @@ export function validateGroupNames(job) {
   };
 }
 
+function isValidTimeFormat(value) {
+  if (value === undefined) {
+    return true;
+  }
+  const interval = parseInterval(value, false);
+  return (interval !== null && interval.asMilliseconds() !== 0);
+}
+
 // Returns the latest of the last source data and last processed bucket timestamp,
 // as used for example in setting the end time of results views for cases where
 // anomalies might have been raised after the point at which data ingest has stopped.
@@ -515,5 +551,16 @@ export function getLatestDataOrBucketTimestamp(latestDataTimestamp, latestBucket
     return Math.max(latestDataTimestamp, latestBucketTimestamp);
   } else {
     return (latestDataTimestamp !== undefined) ? latestDataTimestamp : latestBucketTimestamp;
+  }
+}
+
+/**
+ * If created_by is set in the job's custom_settings, remove it in case
+ * it was created by a job wizard as the rules cannot currently be edited
+ * in the job wizards and so would be lost in a clone.
+ */
+export function processCreatedBy(customSettings) {
+  if (Object.values(CREATED_BY_LABEL).includes(customSettings.created_by)) {
+    delete customSettings.created_by;
   }
 }

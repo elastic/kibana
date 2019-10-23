@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import createContainer from 'constate-latest';
+import createContainer from 'constate';
 import { useState, useEffect, Dispatch, SetStateAction } from 'react';
 import { MetricsExplorerColor } from '../../../common/color_palette';
 import {
@@ -121,6 +121,11 @@ export const useMetricsExplorerOptions = () => {
   );
   const [isAutoReloading, setAutoReloading] = useState<boolean>(false);
   return {
+    defaultViewState: {
+      options: DEFAULT_OPTIONS,
+      chartOptions: DEFAULT_CHART_OPTIONS,
+      currentTimerange: DEFAULT_TIMERANGE,
+    },
     options,
     chartOptions,
     setChartOptions,

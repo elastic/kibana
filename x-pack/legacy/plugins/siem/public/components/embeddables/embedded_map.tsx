@@ -5,24 +5,28 @@
  */
 
 import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
+import { Filter } from '@kbn/es-query';
 import React, { useEffect, useState } from 'react';
-import { npStart } from 'ui/new_platform';
 import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
 import { createPortalNode, InPortal } from 'react-reverse-portal';
+import { Query } from 'src/plugins/data/common';
 
 import styled from 'styled-components';
 import { start } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import { EmbeddablePanel } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 
-import { Loader } from '../loader';
-import { useIndexPatterns } from '../ml_popover/hooks/use_index_patterns';
+import { getIndexPatternTitleIdMapping } from '../../hooks/api/helpers';
+import { useIndexPatterns } from '../../hooks/use_index_patterns';
 import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
-import { getIndexPatternTitleIdMapping } from '../ml_popover/helpers';
+import { useKibanaPlugins } from '../../lib/compose/kibana_plugins';
+import { useKibanaCore } from '../../lib/compose/kibana_core';
+import { useStateToaster } from '../toasters';
+import { Loader } from '../loader';
 import { IndexPatternsMissingPrompt } from './index_patterns_missing_prompt';
 import { MapEmbeddable, SetQuery } from './types';
 import * as i18n from './translations';
-import { useStateToaster } from '../toasters';
+
 import { createEmbeddable, displayErrorToast, setupEmbeddablesAPI } from './embedded_map_helpers';
 import { MapToolTip } from './map_tool_tip/map_tool_tip';
 
@@ -37,15 +41,15 @@ const EmbeddableWrapper = styled(EuiFlexGroup)`
 `;
 
 export interface EmbeddedMapProps {
-  applyFilterQueryFromKueryExpression: (expression: string) => void;
-  queryExpression: string;
+  query: Query;
+  filters: Filter[];
   startDate: number;
   endDate: number;
   setQuery: SetQuery;
 }
 
 export const EmbeddedMap = React.memo<EmbeddedMapProps>(
-  ({ applyFilterQueryFromKueryExpression, endDate, queryExpression, setQuery, startDate }) => {
+  ({ endDate, filters, query, setQuery, startDate }) => {
     const [embeddable, setEmbeddable] = React.useState<MapEmbeddable | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isError, setIsError] = useState(false);
@@ -61,20 +65,24 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
     // Search InPortal/OutPortal for implementation touch points
     const portalNode = React.useMemo(() => createPortalNode(), []);
 
+    const plugins = useKibanaPlugins();
+    const core = useKibanaCore();
+
+    // Setup embeddables API (i.e. detach extra actions) useEffect
+    useEffect(() => {
+      try {
+        setupEmbeddablesAPI(plugins);
+      } catch (e) {
+        displayErrorToast(i18n.ERROR_CONFIGURING_EMBEDDABLES_API, e.message, dispatchToaster);
+        setIsLoading(false);
+        setIsError(true);
+      }
+    }, []);
+
     // Initial Load useEffect
     useEffect(() => {
       let isSubscribed = true;
       async function setupEmbeddable() {
-        // Configure Embeddables API
-        try {
-          setupEmbeddablesAPI(applyFilterQueryFromKueryExpression);
-        } catch (e) {
-          displayErrorToast(i18n.ERROR_CONFIGURING_EMBEDDABLES_API, e.message, dispatchToaster);
-          setIsLoading(false);
-          setIsError(true);
-          return false;
-        }
-
         // Ensure at least one `siem:defaultIndex` index pattern exists before trying to import
         const matchingIndexPatterns = kibanaIndexPatterns.filter(ip =>
           siemDefaultIndices.includes(ip.attributes.title)
@@ -88,12 +96,14 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
         // Create & set Embeddable
         try {
           const embeddableObject = await createEmbeddable(
+            filters,
             getIndexPatternTitleIdMapping(matchingIndexPatterns),
-            queryExpression,
+            query,
             startDate,
             endDate,
             setQuery,
-            portalNode
+            portalNode,
+            plugins.embeddable
           );
           if (isSubscribed) {
             setEmbeddable(embeddableObject);
@@ -119,11 +129,16 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
 
     // queryExpression updated useEffect
     useEffect(() => {
-      if (embeddable != null && queryExpression != null) {
-        const query = { query: queryExpression, language: 'kuery' };
+      if (embeddable != null) {
         embeddable.updateInput({ query });
       }
-    }, [queryExpression]);
+    }, [query]);
+
+    useEffect(() => {
+      if (embeddable != null) {
+        embeddable.updateInput({ filters });
+      }
+    }, [filters]);
 
     // DateRange updated useEffect
     useEffect(() => {
@@ -146,12 +161,12 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
             <EmbeddablePanel
               data-test-subj="embeddable-panel"
               embeddable={embeddable}
-              getActions={npStart.plugins.uiActions.getTriggerCompatibleActions}
+              getActions={plugins.uiActions.getTriggerCompatibleActions}
               getEmbeddableFactory={start.getEmbeddableFactory}
               getAllEmbeddableFactories={start.getEmbeddableFactories}
-              notifications={npStart.core.notifications}
-              overlays={npStart.core.overlays}
-              inspector={npStart.plugins.inspector}
+              notifications={core.notifications}
+              overlays={core.overlays}
+              inspector={plugins.inspector}
               SavedObjectFinder={SavedObjectFinder}
             />
           ) : !isLoading && isIndexError ? (

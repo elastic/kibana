@@ -208,6 +208,7 @@ export interface SavedObjectsBaseOptions {
  * so we throw a special 503 with the intention of informing the user that their
  * Elasticsearch settings need to be updated.
  *
+ * See {@link SavedObjectsClient}
  * See {@link SavedObjectsErrorHelpers}
  *
  * @public
