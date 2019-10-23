@@ -24,6 +24,7 @@ import {
   SavedObjectReference,
   SavedObjectsMigrationVersion,
   SavedObjectsBaseOptions,
+  SavedObjectsMutatingOperationOptions,
   SavedObjectsFindOptions,
 } from '../types';
 import { SavedObjectsErrorHelpers } from './lib/errors';
@@ -32,7 +33,9 @@ import { SavedObjectsErrorHelpers } from './lib/errors';
  *
  * @public
  */
-export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
+export interface SavedObjectsCreateOptions
+  extends SavedObjectsBaseOptions,
+    SavedObjectsMutatingOperationOptions {
   /** (not recommended) Specify an id for the document */
   id?: string;
   /** Overwrite existing documents (defaults to false) */
@@ -96,12 +99,30 @@ export interface SavedObjectsFindResponse<T extends SavedObjectAttributes = any>
  *
  * @public
  */
-export interface SavedObjectsUpdateOptions extends SavedObjectsBaseOptions {
+export interface SavedObjectsUpdateOptions
+  extends SavedObjectsBaseOptions,
+    SavedObjectsMutatingOperationOptions {
   /** An opaque version number which changes on each successful write operation. Can be used for implementing optimistic concurrency control. */
   version?: string;
   /** {@inheritdoc SavedObjectReference} */
   references?: SavedObjectReference[];
 }
+
+/**
+ *
+ * @public
+ */
+export interface SavedObjectsBulkUpdateOptions
+  extends SavedObjectsBaseOptions,
+    SavedObjectsMutatingOperationOptions {}
+
+/**
+ *
+ * @public
+ */
+export interface SavedObjectsDeleteOptions
+  extends SavedObjectsBaseOptions,
+    SavedObjectsMutatingOperationOptions {}
 
 /**
  *
@@ -189,7 +210,7 @@ export class SavedObjectsClient {
    * @param id
    * @param options
    */
-  async delete(type: string, id: string, options: SavedObjectsBaseOptions = {}) {
+  async delete(type: string, id: string, options: SavedObjectsDeleteOptions = {}) {
     return await this._repository.delete(type, id, options);
   }
 
@@ -260,7 +281,7 @@ export class SavedObjectsClient {
    */
   async bulkUpdate<T extends SavedObjectAttributes = any>(
     objects: Array<SavedObjectsBulkUpdateObject<T>>,
-    options?: SavedObjectsBaseOptions
+    options?: SavedObjectsBulkUpdateOptions
   ): Promise<SavedObjectsBulkUpdateResponse<T>> {
     return await this._repository.bulkUpdate(objects, options);
   }

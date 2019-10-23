@@ -1196,6 +1196,12 @@ export interface SavedObjectsBulkUpdateObject<T extends SavedObjectAttributes = 
     type: string;
 }
 
+// Warning: (ae-forgotten-export) The symbol "SavedObjectsMutatingOperationBaseOptions" needs to be exported by the entry point index.d.ts
+// 
+// @public (undocumented)
+export interface SavedObjectsBulkUpdateOptions extends SavedObjectsBaseOptions, SavedObjectsMutatingOperationBaseOptions {
+}
+
 // @public (undocumented)
 export interface SavedObjectsBulkUpdateResponse<T extends SavedObjectAttributes = any> {
     // (undocumented)
@@ -1208,9 +1214,9 @@ export class SavedObjectsClient {
     constructor(repository: SavedObjectsRepository);
     bulkCreate<T extends SavedObjectAttributes = any>(objects: Array<SavedObjectsBulkCreateObject<T>>, options?: SavedObjectsCreateOptions): Promise<SavedObjectsBulkResponse<T>>;
     bulkGet<T extends SavedObjectAttributes = any>(objects?: SavedObjectsBulkGetObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsBulkResponse<T>>;
-    bulkUpdate<T extends SavedObjectAttributes = any>(objects: Array<SavedObjectsBulkUpdateObject<T>>, options?: SavedObjectsBaseOptions): Promise<SavedObjectsBulkUpdateResponse<T>>;
+    bulkUpdate<T extends SavedObjectAttributes = any>(objects: Array<SavedObjectsBulkUpdateObject<T>>, options?: SavedObjectsBulkUpdateOptions): Promise<SavedObjectsBulkUpdateResponse<T>>;
     create<T extends SavedObjectAttributes = any>(type: string, attributes: T, options?: SavedObjectsCreateOptions): Promise<SavedObject<T>>;
-    delete(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<{}>;
+    delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{}>;
     // (undocumented)
     errors: typeof SavedObjectsErrorHelpers;
     // (undocumented)
@@ -1241,12 +1247,16 @@ export interface SavedObjectsClientWrapperOptions<Request = unknown> {
 }
 
 // @public (undocumented)
-export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
+export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions, SavedObjectsMutatingOperationBaseOptions {
     id?: string;
     migrationVersion?: SavedObjectsMigrationVersion;
     overwrite?: boolean;
     // (undocumented)
     references?: SavedObjectReference[];
+}
+
+// @public (undocumented)
+export interface SavedObjectsDeleteOptions extends SavedObjectsBaseOptions, SavedObjectsMutatingOperationBaseOptions {
 }
 
 // @public (undocumented)
@@ -1552,7 +1562,7 @@ export class SavedObjectsSerializer {
     }
 
 // @public (undocumented)
-export interface SavedObjectsUpdateOptions extends SavedObjectsBaseOptions {
+export interface SavedObjectsUpdateOptions extends SavedObjectsBaseOptions, SavedObjectsMutatingOperationBaseOptions {
     references?: SavedObjectReference[];
     version?: string;
 }
