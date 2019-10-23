@@ -82,7 +82,7 @@ export const usePivotPreviewData = (
       setPreviewMappings(resp.mappings);
       setStatus(PIVOT_PREVIEW_STATUS.LOADED);
     } catch (e) {
-      setErrorMessage(JSON.stringify(e));
+      setErrorMessage(JSON.stringify(e, null, 2));
       setPreviewData([]);
       setPreviewMappings({ properties: {} });
       setStatus(PIVOT_PREVIEW_STATUS.ERROR);
@@ -97,5 +97,6 @@ export const usePivotPreviewData = (
     JSON.stringify(groupByArr),
     JSON.stringify(query),
   ]);
+
   return { errorMessage, status, previewData, previewMappings, previewRequest };
 };
