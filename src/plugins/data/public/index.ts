@@ -29,6 +29,7 @@ export { DataPublicPluginSetup, DataPublicPluginStart } from './types';
 
 export * from '../common';
 export * from './autocomplete_provider';
+export * from './field_formats_provider';
 
 export * from './types';
 

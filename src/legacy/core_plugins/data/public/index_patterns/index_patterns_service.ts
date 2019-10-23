@@ -35,11 +35,14 @@ import {
   StaticIndexPattern,
 } from './index_patterns';
 
+import { FieldFormatProviderRegister } from '../../../../../plugins/data/public/';
+
 export interface IndexPatternDependencies {
   uiSettings: UiSettingsClientContract;
   savedObjectsClient: SavedObjectsClientContract;
   http: HttpServiceBase;
   notifications: NotificationsStart;
+  fieldFormats: FieldFormatProviderRegister;
 }
 
 /**
@@ -64,12 +67,18 @@ export class IndexPatternsService {
     return this.setupApi;
   }
 
-  public start({ uiSettings, savedObjectsClient, http, notifications }: IndexPatternDependencies) {
+  public start({
+    uiSettings,
+    savedObjectsClient,
+    http,
+    notifications,
+    fieldFormats,
+  }: IndexPatternDependencies) {
     setNotifications(notifications);
 
     return {
       ...this.setupApi,
-      indexPatterns: new IndexPatterns(uiSettings, savedObjectsClient, http),
+      indexPatterns: new IndexPatterns(uiSettings, savedObjectsClient, http, fieldFormats),
       IndexPatternSelect: createIndexPatternSelect(savedObjectsClient),
     };
   }

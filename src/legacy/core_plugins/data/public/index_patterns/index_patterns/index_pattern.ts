@@ -19,8 +19,6 @@
 
 import _, { each, reject } from 'lodash';
 import { i18n } from '@kbn/i18n';
-// @ts-ignore
-import { fieldFormats } from 'ui/registry/field_formats';
 import { SavedObjectsClientContract } from 'src/core/public';
 import {
   DuplicateField,
@@ -37,8 +35,9 @@ import { createFieldsFetcher } from './_fields_fetcher';
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
 import { IIndexPatternsApiClient } from './index_patterns_api_client';
-import { ES_FIELD_TYPES } from '../../../../../../plugins/data/common';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../../../../../../plugins/data/common';
 import { getNotifications } from '../services';
+import { FieldFormatProviderRegister } from '../../../../../../plugins/data/public/';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const type = 'index-pattern';
@@ -65,6 +64,7 @@ export class IndexPattern implements StaticIndexPattern {
   public formatField: any;
   public flattenHit: any;
   public metaFields: string[];
+  public fieldFormats: FieldFormatProviderRegister;
 
   private version: string | undefined;
   private savedObjectsClient: SavedObjectsClientContract;
@@ -102,7 +102,8 @@ export class IndexPattern implements StaticIndexPattern {
     getConfig: any,
     savedObjectsClient: SavedObjectsClientContract,
     apiClient: IIndexPatternsApiClient,
-    patternCache: any
+    patternCache: any,
+    fieldFormats: FieldFormatProviderRegister
   ) {
     this.id = id;
     this.savedObjectsClient = savedObjectsClient;
@@ -117,7 +118,11 @@ export class IndexPattern implements StaticIndexPattern {
     this.fields = new FieldList(this, [], this.shortDotsEnable);
     this.fieldsFetcher = createFieldsFetcher(this, apiClient, this.getConfig('metaFields'));
     this.flattenHit = flattenHitWrapper(this, this.getConfig('metaFields'));
-    this.formatHit = formatHitProvider(this, fieldFormats.getDefaultInstance('string'));
+    this.fieldFormats = fieldFormats;
+    this.formatHit = formatHitProvider(
+      this,
+      this.fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING, [])
+    );
     this.formatField = this.formatHit.formatField;
   }
 
@@ -128,12 +133,14 @@ export class IndexPattern implements StaticIndexPattern {
   }
 
   private deserializeFieldFormatMap(mapping: any) {
-    const FieldFormat = fieldFormats.getType(mapping.id);
+    const FieldFormat = this.fieldFormats.getType(mapping.id) as any;
+
     return FieldFormat && new FieldFormat(mapping.params, this.getConfig);
   }
 
   private initFields(input?: any) {
     const newValue = input || this.fields;
+
     this.fields = new FieldList(this, newValue, this.shortDotsEnable);
   }
 
@@ -367,7 +374,8 @@ export class IndexPattern implements StaticIndexPattern {
           this.getConfig,
           this.savedObjectsClient,
           this.patternCache,
-          this.fieldsFetcher
+          this.fieldsFetcher,
+          this.fieldFormats
         );
         await duplicatePattern.destroy();
       }
@@ -419,7 +427,8 @@ export class IndexPattern implements StaticIndexPattern {
             this.getConfig,
             this.savedObjectsClient,
             this.patternCache,
-            this.fieldsFetcher
+            this.fieldsFetcher,
+            this.fieldFormats
           );
           return samePattern.init().then(() => {
             // What keys changed from now and what the server returned
@@ -454,6 +463,7 @@ export class IndexPattern implements StaticIndexPattern {
               const { toasts } = getNotifications();
 
               toasts.addDanger(message);
+
               throw err;
             }
 
@@ -495,6 +505,7 @@ export class IndexPattern implements StaticIndexPattern {
 
         if (err instanceof IndexPatternMissingIndices) {
           toasts.addDanger((err as any).message);
+
           return [];
         }
 

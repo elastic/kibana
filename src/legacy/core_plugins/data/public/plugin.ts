@@ -27,7 +27,10 @@ import {
   LegacyDependenciesPluginSetup,
   LegacyDependenciesPluginStart,
 } from './shim/legacy_dependencies_plugin';
-import { DataPublicPluginStart } from '../../../../plugins/data/public';
+import {
+  DataPublicPluginStart,
+  FieldFormatProviderRegister,
+} from '../../../../plugins/data/public';
 import { initLegacyModule } from './shim/legacy_module';
 import { IUiActionsSetup } from '../../../../plugins/ui_actions/public';
 import {
@@ -127,12 +130,14 @@ export class DataPlugin
     { __LEGACY, data, uiActions }: DataPluginStartDependencies
   ): DataStart {
     const { uiSettings, http, notifications, savedObjects } = core;
+    const fieldFormats = new FieldFormatProviderRegister(uiSettings);
 
     const indexPatternsService = this.indexPatterns.start({
       uiSettings,
       savedObjectsClient: savedObjects.client,
       http,
       notifications,
+      fieldFormats,
     });
 
     initLegacyModule(indexPatternsService.indexPatterns);
