@@ -26,7 +26,7 @@ exports[`render 1`] = `
     </EuiTitle>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
-    <SavedObjectFinder
+    <mockConstructor
       noItemsMessage={
         <FormattedMessage
           defaultMessage="No matching searches found."
