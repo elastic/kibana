@@ -23,6 +23,7 @@ import { TimeRange } from '../../../data/public';
 import { Adapters } from '../../../inspector/public';
 import { Query } from '../../../data/public';
 import { ExpressionAST } from '../../../expressions/public';
+import { ExpressionArgAST } from '../../../../plugins/expressions/public';
 
 export { ArgumentType } from './arguments';
 export {
@@ -89,6 +90,7 @@ export interface IExpressionLoaderParams {
   disableCaching?: boolean;
   customFunctions?: [];
   customRenderers?: [];
+  extraHandlers?: Record<string, any>;
 }
 
 export interface IInterpreterHandlers {

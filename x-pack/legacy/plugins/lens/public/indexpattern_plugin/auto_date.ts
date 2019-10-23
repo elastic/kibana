@@ -9,7 +9,7 @@ import dateMath from '@elastic/datemath';
 import {
   ExpressionFunction,
   KibanaContext,
-} from '../../../../../../src/plugins/expressions/common';
+} from '../../../../../../src/plugins/expressions/public';
 
 interface LensAutoDateProps {
   aggConfigs: string;
