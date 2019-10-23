@@ -53,12 +53,19 @@ export function mutateSearchTimesTree(shard: Shard) {
 
 const initShards = (data: ShardSerialized[]) =>
   produce<ShardSerialized[], Shard[]>(data, draft => {
-    return draft.map(s => ({
-      ...s,
-      time: 0,
-      color: '',
-      relative: 0,
-    }));
+    return draft.map(s => {
+      const idMatch = s.id.match(/\[([^\]\[]*?)\]/g) || [];
+      const ids = idMatch.map(id => {
+        return id.replace('[', '').replace(']', '');
+      });
+      return {
+        ...s,
+        id: ids,
+        time: 0,
+        color: '',
+        relative: 0,
+      };
+    });
   });
 
 export const calculateShardValues = (target: Targets) => (data: Shard[]) =>

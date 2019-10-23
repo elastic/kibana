@@ -20,15 +20,16 @@ export interface Props {
 export const ShardDetailTree = ({ data, index, shard }: Props) => {
   // Recursively render the tree structure
   const renderOperations = (operation: Operation): JSX.Element => {
-    const parent = operation.parent;
+    const nextOperation = operation.treeRoot || operation;
+    const parent = nextOperation.parent;
     const parentVisible = parent ? parent.visible : false;
     return (
       <>
         <ShardDetailsTreeLeaf
           shard={shard}
           index={index}
-          parentVisible={parentVisible || operation.depth === 0}
-          operation={operation}
+          parentVisible={parentVisible || nextOperation.depth === 0}
+          operation={nextOperation}
         />
       </>
     );

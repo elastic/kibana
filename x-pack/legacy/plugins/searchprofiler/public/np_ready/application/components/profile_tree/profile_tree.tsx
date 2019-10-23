@@ -29,12 +29,12 @@ export const ProfileTree = ({ data, target, onHighlight }: Props) => {
   return (
     <HighlightContextProvider onHighlight={onHighlight}>
       {sortedIndices.map(index => (
-        <EuiFlexGroup key={index.name} direction="column">
-          <EuiFlexItem>
+        <EuiFlexGroup gutterSize="none" key={index.name} direction="column">
+          <EuiFlexItem grow={false}>
             <IndexDetails index={index} target={target} />
           </EuiFlexItem>
           <EuiSpacer />
-          <EuiFlexItem>
+          <EuiFlexItem grow={false}>
             {index.shards.map(shard => (
               <ShardDetails
                 key={shard.id[1]}

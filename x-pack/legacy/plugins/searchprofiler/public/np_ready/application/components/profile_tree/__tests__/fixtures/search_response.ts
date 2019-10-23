@@ -6,7 +6,7 @@
 
 export const searchResponse: any = [
   {
-    id: ['L22w_FX2SbqlQYOP5QrYDg', '.apm-agent-configuration', '0'],
+    id: '[L22w_FX2SbqlQYOP5QrYDg] [.apm-agent-configuration] [0]',
     searches: [
       {
         query: [
@@ -52,7 +52,7 @@ export const searchResponse: any = [
     aggregations: [],
   },
   {
-    id: ['L22w_FX2SbqlQYOP5QrYDg', '.kibana_1', '0'],
+    id: '[L22w_FX2SbqlQYOP5QrYDg] [.kibana_1] [0]',
     searches: [
       {
         query: [
@@ -129,7 +129,7 @@ export const searchResponse: any = [
     aggregations: [],
   },
   {
-    id: ['L22w_FX2SbqlQYOP5QrYDg', '.kibana_task_manager_1', '0'],
+    id: '[L22w_FX2SbqlQYOP5QrYDg] [.kibana_task_manager_1] [0]',
     searches: [
       {
         query: [
@@ -206,7 +206,7 @@ export const searchResponse: any = [
     aggregations: [],
   },
   {
-    id: ['L22w_FX2SbqlQYOP5QrYDg', '.security-7', '0'],
+    id: '[L22w_FX2SbqlQYOP5QrYDg] [.security-7] [0]',
     searches: [
       {
         query: [
@@ -256,7 +256,7 @@ export const searchResponse: any = [
     aggregations: [],
   },
   {
-    id: ['L22w_FX2SbqlQYOP5QrYDg', 'kibana_sample_data_logs', '0'],
+    id: '[L22w_FX2SbqlQYOP5QrYDg] [kibana_sample_data_logs] [0]',
     searches: [
       {
         query: [

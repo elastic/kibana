@@ -11,7 +11,7 @@ export interface ContextValue {
   http: HttpSetup;
   notifications: NotificationsSetup;
   licenseEnabled: boolean;
-  formatAngularHttpError: (message: string) => string;
+  formatAngularHttpError: (error: any) => string;
 }
 
 const AppContext = createContext<ContextValue>(null as any);

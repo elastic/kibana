@@ -23,7 +23,7 @@ export const ShardDetails = ({ index, shard, operations }: Props) => {
   const [shardVisibility, setShardVisibility] = useState<boolean>(false);
 
   return (
-    <EuiFlexGroup direction="column">
+    <EuiFlexGroup gutterSize="none" direction="column">
       <EuiFlexItem>
         <EuiText className="prfDevTool__shardDetails--dim">
           <EuiBadge style={{ '--prfDevToolProgressPercentage': shard.relative + '%' } as any}>
@@ -39,7 +39,9 @@ export const ShardDetails = ({ index, shard, operations }: Props) => {
           {shard.id[2]}]
         </EuiLink>
         {shardVisibility
-          ? operations.map(data => <ShardDetailTree index={index} shard={shard} data={data} />)
+          ? operations.map(data => (
+              <ShardDetailTree key={shard.id[0]} index={index} shard={shard} data={data} />
+            ))
           : null}
       </EuiFlexItem>
     </EuiFlexGroup>

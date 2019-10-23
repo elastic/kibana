@@ -19,9 +19,9 @@ export interface Props {
 export const IndexDetails = ({ index, target }: Props) => {
   const { time, name } = index;
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup gutterSize="none">
       {/* Time details group */}
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <EuiText className="prfDevTool__shardDetails--dim">
           <EuiToolTip
             position="bottom"
@@ -40,7 +40,7 @@ export const IndexDetails = ({ index, target }: Props) => {
         </EuiText>
       </EuiFlexItem>
       {/* Index Title group */}
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <EuiText className="prfDevTool__shardDetails">
           <h3>
             <b>

@@ -12,10 +12,20 @@ import { ShardSerialized } from '../types';
 import { useAppContext } from '../app_context';
 
 interface Props {
+  onProfileClick: () => void;
   onResponse: (response: ShardSerialized[]) => void;
 }
 
-export const ProfileQueryEditor = ({ onResponse }: Props) => {
+const DEFAULT_INDEX_VALUE = '_all';
+
+const INITIAL_EDITOR_VALUE = `{
+  "query":{
+    "match_all" : {}
+  }
+}`;
+
+export const ProfileQueryEditor = ({ onResponse, onProfileClick }: Props) => {
+  const editorValueGetter = useRef<() => string>(null as any);
   const indexInputRef = useRef<HTMLInputElement>(null as any);
   const typeInputRef = useRef<HTMLInputElement>(null as any);
 
@@ -23,8 +33,15 @@ export const ProfileQueryEditor = ({ onResponse }: Props) => {
   const doProfile = useDoProfile();
 
   const handleProfileClick = async () => {
-    // TODO: Finish adding request body
-    const result = await doProfile({});
+    onProfileClick();
+    const result = await doProfile({
+      query: editorValueGetter.current!(),
+      index: indexInputRef.current.value,
+      type: typeInputRef.current.value,
+    });
+    if (result === null) {
+      return;
+    }
     onResponse(result);
   };
 
@@ -34,7 +51,12 @@ export const ProfileQueryEditor = ({ onResponse }: Props) => {
         <EuiFormRow
           label={i18n.translate('xpack.searchProfiler.formIndexLabel', { defaultMessage: 'Index' })}
         >
-          <EuiFieldText inputRef={ref => (indexInputRef.current = ref!)} />
+          <EuiFieldText
+            inputRef={ref => {
+              indexInputRef.current = ref!;
+              ref!.value = DEFAULT_INDEX_VALUE;
+            }}
+          />
         </EuiFormRow>
         <EuiFormRow
           label={i18n.translate('xpack.searchProfiler.formTypeLabel', { defaultMessage: 'Type' })}
@@ -42,7 +64,11 @@ export const ProfileQueryEditor = ({ onResponse }: Props) => {
           <EuiFieldText inputRef={ref => (typeInputRef.current = ref!)} />
         </EuiFormRow>
       </EuiForm>
-      <Editor licenseEnabled={licenseEnabled} />
+      <Editor
+        valueGetterRef={editorValueGetter}
+        licenseEnabled={licenseEnabled}
+        initialValue={INITIAL_EDITOR_VALUE}
+      />
       <EuiButton onClick={() => handleProfileClick()}>
         <EuiText>
           {i18n.translate('xpack.searchProfiler.formProfileButtonLabel', {

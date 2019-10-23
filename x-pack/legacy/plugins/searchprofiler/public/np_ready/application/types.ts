@@ -32,7 +32,7 @@ export interface Index {
 }
 
 export interface ShardSerialized {
-  id: string[];
+  id: string;
   searches: Operation[];
   aggregations: Operation[];
 }

@@ -50,6 +50,15 @@ export const Main = () => {
     [currentResponse]
   );
 
+  const onProfileClick = () => {
+    setHighlightedDetails(null);
+  };
+
+  const onResponse = (resp: ShardSerialized[]) => {
+    setCurrentResponse(resp);
+    setActiveTab('searches');
+  };
+
   return (
     <>
       <EuiPage className="prfDevTool__page">
@@ -59,7 +68,7 @@ export const Main = () => {
               <EuiFlexGroup direction="row" className="prfDevTool__page__bodyGroup">
                 <EuiFlexItem>
                   <div className="prfDevTool__sense">
-                    <ProfileQueryEditor onResponse={resp => setCurrentResponse(resp)} />
+                    <ProfileQueryEditor onProfileClick={onProfileClick} onResponse={onResponse} />
                   </div>
                 </EuiFlexItem>
                 <EuiFlexItem grow={3}>
