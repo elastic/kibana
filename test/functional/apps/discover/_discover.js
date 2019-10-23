@@ -108,7 +108,7 @@ export default function ({ getService, getPageObjects }) {
         const newDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
         expect(Math.round(newDurationHours)).to.be(25);
         const rowData = await PageObjects.discover.getDocTableField(1);
-        expect(rowData).to.have.string('Sep 20, 2015 @ 22:17:57.757');
+        expect(Date.parse(rowData)).to.be.within(Date.parse('Sep 20, 2015 @ 22:00:00.000'), Date.parse('Sep 20, 2015 @ 23:30:00.000'));
       });
 
       it('should show correct initial chart interval of Auto', async function () {
