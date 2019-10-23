@@ -122,7 +122,7 @@ export default function({ getService }: FtrProviderContext) {
             expect(logEntryHighlight.columns[1]).to.have.property('field');
             expect(logEntryHighlight.columns[1]).to.have.property('highlights');
             expect(logEntryHighlight.columns[1].highlights).to.eql([
-              'generate_test_data/simple_logs',
+              'generate_test_data',
             ]);
             expect(logEntryHighlight.columns[2]).to.have.property('message');
             expect(logEntryHighlight.columns[2].message).to.be.an('array');
