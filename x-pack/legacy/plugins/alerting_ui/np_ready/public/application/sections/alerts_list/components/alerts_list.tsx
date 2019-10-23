@@ -13,6 +13,7 @@ import { AlertsContext } from '../../../context/alerts_context';
 import { useAppDependencies } from '../../../index';
 import { Alert, AlertTableItem, AlertTypeIndex, Pagination } from '../../../../types';
 import { deleteAlerts, loadAlerts, loadAlertTypes } from '../../../lib/api';
+import { AlertAdd } from '../../alert_add';
 
 export const AlertsList: React.FunctionComponent = () => {
   const {
@@ -31,6 +32,7 @@ export const AlertsList: React.FunctionComponent = () => {
   const [totalItemCount, setTotalItemCount] = useState<number>(0);
   const [page, setPage] = useState<Pagination>({ index: 0, size: 10 });
   const [searchText, setSearchText] = useState<string | undefined>(undefined);
+  const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState<boolean>(false);
 
   useEffect(() => {
     loadAlertsData();
@@ -164,7 +166,7 @@ export const AlertsList: React.FunctionComponent = () => {
     <section data-test-subj="alertsList">
       <Fragment>
         <EuiSpacer size="m" />
-        <AlertsContext.Provider value={{}}>
+        <AlertsContext.Provider value={{ alertFlyoutVisible, setAlertFlyoutVisibility }}>
           <EuiSearchBar
             onChange={({ queryText }: { queryText: string }) => setSearchText(queryText)}
             filters={[
@@ -205,6 +207,18 @@ export const AlertsList: React.FunctionComponent = () => {
                   defaultMessage="Delete"
                 />
               </EuiButton>,
+              <EuiButton
+                data-test-subj="createAlertButton"
+                fill
+                iconType="plusInCircleFilled"
+                iconSide="left"
+                onClick={() => setAlertFlyoutVisibility(true)}
+              >
+                <FormattedMessage
+                  id="xpack.alertingUI.sections.actionsList.addActionButtonLabel"
+                  defaultMessage="Create"
+                />
+              </EuiButton>,
             ]}
           ></EuiSearchBar>
 
@@ -237,6 +251,7 @@ export const AlertsList: React.FunctionComponent = () => {
               setPage(changedPage);
             }}
           ></EuiBasicTable>
+          <AlertAdd refreshList={loadAlertsData}></AlertAdd>
         </AlertsContext.Provider>
       </Fragment>
     </section>

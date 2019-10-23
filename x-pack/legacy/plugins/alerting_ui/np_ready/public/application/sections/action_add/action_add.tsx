@@ -5,7 +5,6 @@
  */
 import React, { Fragment, useContext, useState, useCallback, useReducer, useEffect } from 'react';
 import { HttpServiceBase } from 'kibana/public';
-import { toastNotifications } from 'ui/notify';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -41,6 +40,7 @@ interface Props {
 export const ActionAdd = ({ actionType, refreshList }: Props) => {
   const {
     core: { http },
+    plugins: { toastNotifications },
   } = useAppDependencies();
   const { flyoutVisible, setFlyoutVisibility, actionTypeRegistry } = useContext(ActionsContext);
   // hooks
@@ -106,6 +106,25 @@ export const ActionAdd = ({ actionType, refreshList }: Props) => {
     ...validateBaseProperties(action).errors,
   };
   const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
+
+  async function onActionSave(): Promise<any> {
+    try {
+      const newAction = await saveAction({ http, action });
+      toastNotifications.addSuccess(
+        i18n.translate('xpack.alertingUI.sections.actionAdd.saveSuccessNotificationText', {
+          defaultMessage: "Saved '{actionName}'",
+          values: {
+            actionName: newAction.description,
+          },
+        })
+      );
+      return newAction;
+    } catch (error) {
+      return {
+        error,
+      };
+    }
+  }
 
   return (
     <EuiFlyout onClose={closeFlyout} aria-labelledby="flyoutActionAddTitle" size="m">
@@ -238,7 +257,7 @@ export const ActionAdd = ({ actionType, refreshList }: Props) => {
               isLoading={isSaving}
               onClick={async () => {
                 setIsSaving(true);
-                const savedAction = await onActionSave(http, action);
+                const savedAction = await onActionSave();
                 setIsSaving(false);
                 if (savedAction && savedAction.error) {
                   return setServerError(savedAction.error);
@@ -258,22 +277,3 @@ export const ActionAdd = ({ actionType, refreshList }: Props) => {
     </EuiFlyout>
   );
 };
-
-export async function onActionSave(http: HttpServiceBase, action: Action): Promise<any> {
-  try {
-    const newAction = await saveAction({ http, action });
-    toastNotifications.addSuccess(
-      i18n.translate('xpack.alertingUI.sections.actionAdd.saveSuccessNotificationText', {
-        defaultMessage: "Saved '{actionName}'",
-        values: {
-          actionName: newAction.description,
-        },
-      })
-    );
-    return newAction;
-  } catch (error) {
-    return {
-      error,
-    };
-  }
-}

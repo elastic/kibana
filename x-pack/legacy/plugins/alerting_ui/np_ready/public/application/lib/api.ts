@@ -113,3 +113,15 @@ export interface DeleteAlertsOpts {
 export async function deleteAlerts({ ids, http }: DeleteAlertsOpts): Promise<void> {
   await Promise.all(ids.map(id => http.delete(`${BASE_ALERT_API_PATH}/${id}`)));
 }
+
+export async function saveAlert({
+  http,
+  alert,
+}: {
+  http: HttpServiceBase;
+  alert: Alert;
+}): Promise<Alert> {
+  return http.post(`${BASE_ALERT_API_PATH}`, {
+    body: JSON.stringify(alert),
+  });
+}
