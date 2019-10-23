@@ -98,14 +98,14 @@ export const StatefulFieldsBrowserComponent = React.memo<FieldBrowserProps & Dis
       inputTimeoutId.current = window.setTimeout(() => {
         const newFilteredBrowserFields = filterBrowserFieldsByFieldName({
           browserFields: mergeBrowserFieldsWithDefaultCategory(browserFields),
-          substring: filterInput,
+          substring: newFilterInput,
         });
 
         setFilteredBrowserFields(newFilteredBrowserFields);
         setIsSearching(false);
 
         const newSelectedCategoryId =
-          filterInput === '' || Object.keys(newFilteredBrowserFields).length === 0
+          newFilterInput === '' || Object.keys(newFilteredBrowserFields).length === 0
             ? DEFAULT_CATEGORY_NAME
             : Object.keys(newFilteredBrowserFields)
                 .sort()
