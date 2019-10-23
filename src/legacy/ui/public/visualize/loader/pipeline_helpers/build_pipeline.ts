@@ -34,6 +34,7 @@ interface SchemaConfigParams {
 
 export interface SchemaConfig {
   accessor: number;
+  label: string;
   format: SerializedFieldFormat;
   params: SchemaConfigParams;
   aggType: string;
@@ -106,10 +107,13 @@ export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
       params.useGeocentroid = agg.params.useGeocentroid;
     }
 
+    const label = agg.makeLabel && agg.makeLabel();
+
     return {
       accessor,
       format,
       params,
+      label,
       aggType: agg.type.name,
     };
   };

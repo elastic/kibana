@@ -5,7 +5,7 @@ set -e
 installNode=$1
 
 dir="$(pwd)"
-cacheDir="${CACHE_DIR:-"$HOME/.kibana"}"
+cacheDir="$HOME/.kibana"
 
 RED='\033[0;31m'
 C_RESET='\033[0m' # Reset color
@@ -53,10 +53,10 @@ nodeDir="$cacheDir/node/$nodeVersion"
 
 if [[ "$OS" == "win" ]]; then
   nodeBin="$HOME/node"
-  nodeUrl="https://nodejs.org/dist/v$nodeVersion/node-v$nodeVersion-win-x64.zip"
+  nodeUrl="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/dist/v$nodeVersion/node-v$nodeVersion-win-x64.zip"
 else
   nodeBin="$nodeDir/bin"
-  nodeUrl="https://nodejs.org/dist/v$nodeVersion/node-v$nodeVersion-linux-x64.tar.gz"
+  nodeUrl="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/dist/v$nodeVersion/node-v$nodeVersion-linux-x64.tar.gz"
 fi
 
 if [[ "$installNode" == "true" ]]; then
