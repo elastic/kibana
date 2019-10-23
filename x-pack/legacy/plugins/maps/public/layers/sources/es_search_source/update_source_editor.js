@@ -175,9 +175,6 @@ export class UpdateSourceEditor extends Component {
   }
 
   render() {
-
-    console.log(this.state);
-
     return (
       <Fragment>
         <EuiFormRow>

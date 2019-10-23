@@ -64,7 +64,6 @@ export class TooltipSelector extends Component {
 
     const getProps = async field => {
       return new Promise(async (resolve, reject) => {
-        console.log('f', field);
         try {
           const label = await field.getLabel();
           const type = await field.getType();
@@ -90,7 +89,6 @@ export class TooltipSelector extends Component {
 
     if (this._isMounted) {
       if (!_.isEqual(this.state, newState)) {
-        console.log('set the atate', newState);
         this.setState(newState);
       }
     }
@@ -140,12 +138,10 @@ export class TooltipSelector extends Component {
   };
 
   _renderProperties() {
-    console.log('r', this.state);
     if (!this.state.selectedFieldProps.length) {
       return null;
     }
 
-    console.log('render selectio');
     return (
       <EuiDragDropContext onDragEnd={this._onDragEnd}>
         <EuiDroppable droppableId="mapLayerTOC" spacing="none">
@@ -205,8 +201,6 @@ export class TooltipSelector extends Component {
   }
 
   render() {
-    console.log('render!');
-
     return (
       <div>
         <EuiTitle size="xxs">

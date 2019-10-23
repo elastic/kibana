@@ -53,7 +53,6 @@ export class UpdateSourceEditor extends Component {
   }
 
   _onTooltipPropertiesSelect = (propertyNames) => {
-    console.log('on select', propertyNames);
     this.props.onChange({ propName: 'tooltipProperties', value: propertyNames });
   };
 
