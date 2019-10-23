@@ -29,7 +29,7 @@ interface StartDeps {
 }
 
 /** @internal */
-export class TimezoneService implements CoreService {
+export class MomentService implements CoreService {
   private uiSettingsSubscription?: Subscription;
 
   public async setup() {}

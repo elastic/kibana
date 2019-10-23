@@ -20,7 +20,7 @@
 import { UiSettingsClientContract } from '../ui_settings';
 import { CoreService } from '../../types';
 
-import { TimezoneService } from './timezone';
+import { MomentService } from './moment';
 import { StylesService } from './styles';
 
 interface Deps {
@@ -30,20 +30,20 @@ interface Deps {
 /** @internal */
 export class IntegrationsService implements CoreService {
   private readonly styles = new StylesService();
-  private readonly timezone = new TimezoneService();
+  private readonly moment = new MomentService();
 
   public async setup() {
     await this.styles.setup();
-    await this.timezone.setup();
+    await this.moment.setup();
   }
 
   public async start({ uiSettings }: Deps) {
     await this.styles.start({ uiSettings });
-    await this.timezone.start({ uiSettings });
+    await this.moment.start({ uiSettings });
   }
 
   public async stop() {
     await this.styles.stop();
-    await this.timezone.stop();
+    await this.moment.stop();
   }
 }

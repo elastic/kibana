@@ -17,26 +17,26 @@
  * under the License.
  */
 
-import { styleServiceMock, timezoneServiceMock } from './integrations_service.test.mocks';
+import { styleServiceMock, momentServiceMock } from './integrations_service.test.mocks';
 
 import { IntegrationsService } from './integrations_service';
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
 
 describe('IntegrationsService', () => {
-  test('it wires up styles and timezones', async () => {
+  test('it wires up styles and moment', async () => {
     const uiSettings = uiSettingsServiceMock.createStartContract();
     const service = new IntegrationsService();
 
     await service.setup();
     expect(styleServiceMock.setup).toHaveBeenCalledWith();
-    expect(timezoneServiceMock.setup).toHaveBeenCalledWith();
+    expect(momentServiceMock.setup).toHaveBeenCalledWith();
 
     await service.start({ uiSettings });
     expect(styleServiceMock.start).toHaveBeenCalledWith({ uiSettings });
-    expect(timezoneServiceMock.start).toHaveBeenCalledWith({ uiSettings });
+    expect(momentServiceMock.start).toHaveBeenCalledWith({ uiSettings });
 
     await service.stop();
     expect(styleServiceMock.stop).toHaveBeenCalledWith();
-    expect(timezoneServiceMock.stop).toHaveBeenCalledWith();
+    expect(momentServiceMock.stop).toHaveBeenCalledWith();
   });
 });

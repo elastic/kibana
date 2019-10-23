@@ -32,7 +32,7 @@ jest.doMock('./styles', () => ({
   StylesService: jest.fn(() => styleServiceMock),
 }));
 
-export const timezoneServiceMock = createCoreServiceMock();
-jest.doMock('./timezone', () => ({
-  TimezoneService: jest.fn(() => timezoneServiceMock),
+export const momentServiceMock = createCoreServiceMock();
+jest.doMock('./moment', () => ({
+  MomentService: jest.fn(() => momentServiceMock),
 }));

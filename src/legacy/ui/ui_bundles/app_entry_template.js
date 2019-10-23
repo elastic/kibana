@@ -38,10 +38,6 @@ import 'childnode-remove-polyfill';
 import { i18n } from '@kbn/i18n';
 import { CoreSystem } from '__kibanaCore__'
 
-// Load all Kibana styles
-const context = require.context('ui/styles', false, /[\\/\\\\](?!mixins|variables|_|\\.|bootstrap_(light|dark))[^\\/\\\\]+\\.less/);
-context.keys().forEach(key => context(key));
-
 const injectedMetadata = JSON.parse(document.querySelector('kbn-injected-metadata').getAttribute('data'));
 
 i18n.load(injectedMetadata.i18n.translationsUrl)

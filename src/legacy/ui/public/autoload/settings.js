@@ -17,7 +17,4 @@
  * under the License.
  */
 
-import './accessibility';
-import './modules';
-import './settings';
-import './styles';
+/** Left intentionally empty to avoid breaking plugins that import this file during the NP migration */

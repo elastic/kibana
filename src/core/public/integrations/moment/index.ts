@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { TimezoneService } from './timezone_service';
+export { MomentService } from './timezone_service';

@@ -17,7 +17,4 @@
  * under the License.
  */
 
-import './accessibility';
-import './modules';
-import './settings';
-import './styles';
+import 'ui/styles/font_awesome.less';

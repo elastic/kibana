@@ -17,17 +17,20 @@
  * under the License.
  */
 
-import { momentMock } from './timezone_service.test.mocks';
-import { TimezoneService } from './timezone_service';
+import { momentMock } from './moment_service.test.mocks';
+import { MomentService } from './moment_service';
 import { uiSettingsServiceMock } from '../../ui_settings/ui_settings_service.mock';
 import { BehaviorSubject } from 'rxjs';
 
-describe('TimezoneService', () => {
+describe('MomentService', () => {
+  let service: MomentService;
   beforeEach(() => {
     momentMock.tz.setDefault.mockClear();
     momentMock.weekdays.mockClear();
     momentMock.updateLocale.mockClear();
+    service = new MomentService();
   });
+  afterEach(() => service.stop());
 
   const flushPromises = () => new Promise(resolve => setTimeout(resolve, 100));
 
@@ -38,7 +41,7 @@ describe('TimezoneService', () => {
     const uiSettings = uiSettingsServiceMock.createSetupContract();
     uiSettings.get$.mockReturnValueOnce(tz$).mockReturnValueOnce(dow$);
 
-    new TimezoneService().start({ uiSettings });
+    service.start({ uiSettings });
     await flushPromises();
     expect(momentMock.tz.setDefault).toHaveBeenCalledWith('tz1');
     expect(momentMock.updateLocale).toHaveBeenCalledWith('default-locale', { week: { dow: 0 } });
@@ -51,7 +54,7 @@ describe('TimezoneService', () => {
     const uiSettings = uiSettingsServiceMock.createSetupContract();
     uiSettings.get$.mockReturnValueOnce(tz$).mockReturnValueOnce(dow$);
 
-    new TimezoneService().start({ uiSettings });
+    service.start({ uiSettings });
     tz$.next('tz2');
     tz$.next('tz3');
     dow$.next('dow3');
