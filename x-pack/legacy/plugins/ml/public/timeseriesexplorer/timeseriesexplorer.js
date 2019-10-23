@@ -1122,7 +1122,6 @@ export class TimeSeriesExplorer extends React.Component {
           size="s"
         />}
 
-        <ChartTooltip />
         <div className="series-controls" data-test-subj="mlSingleMetricViewerSeriesControls">
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
@@ -1174,12 +1173,14 @@ export class TimeSeriesExplorer extends React.Component {
           />
         )}
 
-        {(jobs.length > 0 && loading === false && hasResults === false) && (
+        {(arePartitioningFieldsProvided && jobs.length > 0 && loading === false && hasResults === false) && (
           <TimeseriesexplorerNoChartData dataNotChartable={dataNotChartable} entities={entities} />
         )}
 
         {(arePartitioningFieldsProvided && jobs.length > 0 && loading === false && hasResults === true) && (
           <EuiText className="results-container">
+            <ChartTooltip />
+
             <span className="panel-title">
               {i18n.translate('xpack.ml.timeSeriesExplorer.singleTimeSeriesAnalysisTitle', {
                 defaultMessage: 'Single time series analysis of {functionLabel}',
