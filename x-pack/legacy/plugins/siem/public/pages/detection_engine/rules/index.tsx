@@ -149,7 +149,8 @@ const AllRules = React.memo(() => {
             <UtilityBarText>{'Selected: 2 rules'}</UtilityBarText>
 
             <UtilityBarAction
-              iconOptions={{ side: 'right', type: 'arrowDown' }}
+              iconSide="right"
+              iconType="arrowDown"
               popoverContent={<p>{'Batch actions context menu here.'}</p>}
             >
               {'Batch actions'}
@@ -157,7 +158,7 @@ const AllRules = React.memo(() => {
           </UtilityBarGroup>
 
           <UtilityBarGroup>
-            <UtilityBarAction iconOptions={{ type: 'cross' }}>{'Clear 7 filters'}</UtilityBarAction>
+            <UtilityBarAction iconType="cross">{'Clear 7 filters'}</UtilityBarAction>
           </UtilityBarGroup>
         </UtilityBarSection>
       </UtilityBar>
@@ -291,9 +292,9 @@ const ActivityMonitor = React.memo(() => {
     {
       render: (item: ColumnTypes) => {
         if (item.status === 'Running') {
-          return <LinkIcon iconOptions={{ type: 'stop' }}>{'Stop'}</LinkIcon>;
+          return <LinkIcon iconType="stop">{'Stop'}</LinkIcon>;
         } else if (item.status === 'Stopped') {
-          return <LinkIcon iconOptions={{ type: 'play' }}>{'Resume'}</LinkIcon>;
+          return <LinkIcon iconType="play">{'Resume'}</LinkIcon>;
         } else {
           return <>{''}</>;
         }
@@ -588,13 +589,11 @@ const ActivityMonitor = React.memo(() => {
             <UtilityBarGroup>
               <UtilityBarText>{'Selected: 2 activities'}</UtilityBarText>
 
-              <UtilityBarAction iconOptions={{ type: 'stop' }}>{'Stop selected'}</UtilityBarAction>
+              <UtilityBarAction iconType="stop">{'Stop selected'}</UtilityBarAction>
             </UtilityBarGroup>
 
             <UtilityBarGroup>
-              <UtilityBarAction iconOptions={{ type: 'cross' }}>
-                {'Clear 7 filters'}
-              </UtilityBarAction>
+              <UtilityBarAction iconType="cross">{'Clear 7 filters'}</UtilityBarAction>
             </UtilityBarGroup>
           </UtilityBarSection>
         </UtilityBar>

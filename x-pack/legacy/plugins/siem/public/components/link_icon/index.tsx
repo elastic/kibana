@@ -9,38 +9,30 @@ import { LinkAnchorProps } from '@elastic/eui/src/components/link/link';
 import React from 'react';
 import styled, { css } from 'styled-components';
 
-interface IconOptions {
-  side?: 'left' | 'right';
-  size?: IconSize;
-  type: IconType;
-}
-
 interface LinkProps {
-  className?: string;
   color?: LinkAnchorProps['color'];
   href?: string;
-  // iconSide?: 'left' | 'right';
-  iconOptions: IconOptions;
+  iconSide?: 'left' | 'right';
   onClick?: Function;
 }
 
-const Link = styled(EuiLink).attrs({
-  className: 'siemLinkIcon',
-})<LinkProps>`
-  ${({ iconOptions, theme }) => css`
+const Link = styled(({ iconSide, children, ...rest }) => <EuiLink {...rest}>{children}</EuiLink>)<
+  LinkProps
+>`
+  ${({ iconSide, theme }) => css`
     align-items: center;
     display: inline-flex;
     vertical-align: top;
     white-space: nowrap;
 
-    ${iconOptions.side === 'left' &&
+    ${iconSide === 'left' &&
       css`
         .euiIcon {
           margin-right: ${theme.eui.euiSizeXS};
         }
       `}
 
-    ${iconOptions.side === 'right' &&
+    ${iconSide === 'right' &&
       css`
         flex-direction: row-reverse;
 
@@ -54,20 +46,14 @@ Link.displayName = 'Link';
 
 export interface LinkIconProps extends LinkProps {
   children: string;
-  // iconSize?: IconSize;
-  // iconType: IconType;
+  iconSize?: IconSize;
+  iconType: IconType;
 }
 
 export const LinkIcon = React.memo<LinkIconProps>(
-  ({ children, className, color, href, iconOptions = { side: 'left', size: 's' }, onClick }) => (
-    <Link
-      className={className}
-      color={color}
-      href={href}
-      iconOptions={iconOptions}
-      onClick={onClick}
-    >
-      <EuiIcon size={iconOptions.size} type={iconOptions.type} />
+  ({ children, color, href, iconSide = 'left', iconSize = 's', iconType, onClick }) => (
+    <Link className="siemLinkIcon" color={color} href={href} iconSide={iconSide} onClick={onClick}>
+      <EuiIcon size={iconSize} type={iconType} />
       <span className="siemLinkIcon__label">{children}</span>
     </Link>
   )

@@ -2,7 +2,9 @@
 
 exports[`UtilityBarAction it renders 1`] = `
 <Component>
-  <UtilityBarAction>
+  <UtilityBarAction
+    iconType="alert"
+  >
     Test action
   </UtilityBarAction>
 </Component>

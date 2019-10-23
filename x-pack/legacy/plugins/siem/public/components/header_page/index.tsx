@@ -95,11 +95,7 @@ export const HeaderPage = React.memo<HeaderPageProps>(
         <FlexItem>
           {backOptions && (
             <LinkBack>
-              <LinkIcon
-                data-test-subj="header-page-back-link"
-                href={backOptions.href}
-                iconOptions={{ type: 'arrowLeft' }}
-              >
+              <LinkIcon href={backOptions.href} iconType="arrowLeft">
                 {backOptions.text}
               </LinkIcon>
             </LinkBack>

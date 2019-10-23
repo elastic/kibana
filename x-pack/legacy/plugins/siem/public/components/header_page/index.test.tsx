@@ -59,7 +59,7 @@ describe('HeaderPage', () => {
 
     expect(
       wrapper
-        .find('[data-test-subj="header-page-back-link"]')
+        .find('.siemHeaderPage__linkBack')
         .first()
         .exists()
     ).toBe(true);
@@ -74,7 +74,7 @@ describe('HeaderPage', () => {
 
     expect(
       wrapper
-        .find('[data-test-subj="header-page-back-link"]')
+        .find('.siemHeaderPage__linkBack')
         .first()
         .exists()
     ).toBe(false);

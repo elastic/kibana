@@ -10,50 +10,59 @@ import React, { useState } from 'react';
 import { LinkIcon, LinkIconProps } from '../link_icon';
 import { BarAction } from './styles';
 
-interface PopoverProps {
-  children: LinkIconProps['children'];
+const Popover = React.memo<UtilityBarActionProps>(
+  ({ children, color, iconSide, iconSize, iconType, popoverContent }) => {
+    const [popoverState, setPopoverState] = useState(false);
+
+    return (
+      <EuiPopover
+        button={
+          <LinkIcon
+            color={color}
+            iconSide={iconSide}
+            iconSize={iconSize}
+            iconType={iconType}
+            onClick={() => setPopoverState(!popoverState)}
+          >
+            {children}
+          </LinkIcon>
+        }
+        closePopover={() => setPopoverState(false)}
+        isOpen={popoverState}
+      >
+        {popoverContent}
+      </EuiPopover>
+    );
+  }
+);
+Popover.displayName = 'Popover';
+
+export interface UtilityBarActionProps extends LinkIconProps {
   popoverContent?: React.ReactNode;
 }
 
-const Popover = React.memo<UtilityBarActionProps>(({ children, iconOptions, popoverContent }) => {
-  const [popoverState, setPopoverState] = useState(false);
-
-  return (
-    <EuiPopover
-      button={
-        <LinkIcon iconOptions={iconOptions} onClick={() => setPopoverState(!popoverState)}>
-          {children}
-        </LinkIcon>
-      }
-      isOpen={popoverState}
-      closePopover={() => setPopoverState(false)}
-    >
-      {popoverContent}
-    </EuiPopover>
-  );
-});
-Popover.displayName = 'Popover';
-
-// type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
-// type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
-
-// export interface UtilityBarActionProps extends PartialBy<LinkIconProps, 'iconType'> {
-//   popoverContent?: PopoverProps['popoverContent'];
-// }
-
-export interface UtilityBarActionProps extends LinkIconProps {
-  popoverContent?: PopoverProps['popoverContent'];
-}
-
 export const UtilityBarAction = React.memo<UtilityBarActionProps>(
-  ({ children, href, iconOptions, onClick, popoverContent }) => (
+  ({ children, color, href, iconSide, iconSize, iconType, onClick, popoverContent }) => (
     <BarAction>
       {popoverContent ? (
-        <Popover iconOptions={iconOptions} popoverContent={popoverContent}>
+        <Popover
+          color={color}
+          iconSide={iconSide}
+          iconSize={iconSize}
+          iconType={iconType}
+          popoverContent={popoverContent}
+        >
           {children}
         </Popover>
       ) : (
-        <LinkIcon href={href} iconOptions={iconOptions} onClick={onClick}>
+        <LinkIcon
+          color={color}
+          href={href}
+          iconSide={iconSide}
+          iconSize={iconSize}
+          iconType={iconType}
+          onClick={onClick}
+        >
           {children}
         </LinkIcon>
       )}
