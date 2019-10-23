@@ -149,11 +149,18 @@ export class WorkspaceHandler {
         regex.lastIndex++;
       }
       const [, p, revision, branch] = m;
-      result.set(branch, {
-        path: p,
-        revision,
-        branch,
-      });
+      if (fs.existsSync(p)) {
+        result.set(branch, {
+          path: p,
+          revision,
+          branch,
+        });
+      } else {
+        this.log.debug(
+          `workspace ${branch} found in repo, but the ${p} is not exists, delete workspace.`
+        );
+        await this.removeWorkspace(git, { path: p, revision, branch });
+      }
     }
     return result;
   }
@@ -162,11 +169,15 @@ export class WorkspaceHandler {
     const git = await this.gitOps.openGit(repoUri);
     const worktrees = await this.listWorktrees(git);
     for (const wt of worktrees.values()) {
-      await git.raw(['worktree', 'remove', wt.path, '--force']);
-      await git.deleteLocalBranch(wt.branch);
+      await this.removeWorkspace(git, wt);
     }
-    const workspaceDir = await this.workspaceDir(repoUri);
-    await del([workspaceDir], { force: true });
+    const base = path.join(this.workspacePath, repoUri);
+    await del([base], { force: true });
+  }
+
+  private async removeWorkspace(git: SimpleGit, wt: Worktree) {
+    await git.raw(['worktree', 'remove', wt.path, '--force']);
+    await git.deleteLocalBranch(wt.branch);
   }
 
   public async handleRequest(request: LspRequest): Promise<void> {
