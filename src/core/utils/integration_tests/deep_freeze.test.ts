@@ -30,14 +30,11 @@ it(
       execa('tsc', ['--noEmit'], {
         cwd: resolve(__dirname, '__fixtures__/frozen_object_mutation'),
         preferLocal: true,
-      }).then(r => r.stdout)
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`
-"Command failed: tsc --noEmit
-
-index.ts(28,12): error TS2540: Cannot assign to 'baz' because it is a read-only property.
-index.ts(36,11): error TS2540: Cannot assign to 'bar' because it is a read-only property.
-"
-`);
+      }).catch(err => err.stdout)
+    ).resolves.toMatchInlineSnapshot(`
+      "index.ts(28,12): error TS2540: Cannot assign to 'baz' because it is a read-only property.
+      index.ts(36,11): error TS2540: Cannot assign to 'bar' because it is a read-only property."
+    `);
   },
   MINUTE
 );
