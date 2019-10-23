@@ -320,7 +320,7 @@ export const AgentListPage: React.SFC<{}> = () => {
           columns={columns}
           isSelectable={true}
           selection={{
-            selectable: () => true,
+            selectable: (agent: Agent) => agent.active,
             onSelectionChange: (newSelectedAgents: Agent[]) => {
               setSelectedAgents(newSelectedAgents);
               setAreAllAgentsSelected(false);
