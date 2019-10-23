@@ -107,9 +107,7 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
                 "__legacy": Object {
                   "setBaseTitle": [MockFunction],
                 },
-                "apply": [MockFunction],
                 "change": [MockFunction],
-                "get$": [MockFunction],
                 "reset": [MockFunction],
               },
               "getApplicationClasses$": [MockFunction],
@@ -662,9 +660,7 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
                         "__legacy": Object {
                           "setBaseTitle": [MockFunction],
                         },
-                        "apply": [MockFunction],
                         "change": [MockFunction],
-                        "get$": [MockFunction],
                         "reset": [MockFunction],
                       },
                       "getApplicationClasses$": [MockFunction],
@@ -1205,9 +1201,7 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
                 "__legacy": Object {
                   "setBaseTitle": [MockFunction],
                 },
-                "apply": [MockFunction],
                 "change": [MockFunction],
-                "get$": [MockFunction],
                 "reset": [MockFunction],
               },
               "getApplicationClasses$": [MockFunction],
@@ -1757,9 +1751,7 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
                         "__legacy": Object {
                           "setBaseTitle": [MockFunction],
                         },
-                        "apply": [MockFunction],
                         "change": [MockFunction],
-                        "get$": [MockFunction],
                         "reset": [MockFunction],
                       },
                       "getApplicationClasses$": [MockFunction],
@@ -2300,9 +2292,7 @@ exports[`QueryBarInput Should render the given query 1`] = `
                 "__legacy": Object {
                   "setBaseTitle": [MockFunction],
                 },
-                "apply": [MockFunction],
                 "change": [MockFunction],
-                "get$": [MockFunction],
                 "reset": [MockFunction],
               },
               "getApplicationClasses$": [MockFunction],
@@ -2852,9 +2842,7 @@ exports[`QueryBarInput Should render the given query 1`] = `
                         "__legacy": Object {
                           "setBaseTitle": [MockFunction],
                         },
-                        "apply": [MockFunction],
                         "change": [MockFunction],
-                        "get$": [MockFunction],
                         "reset": [MockFunction],
                       },
                       "getApplicationClasses$": [MockFunction],
