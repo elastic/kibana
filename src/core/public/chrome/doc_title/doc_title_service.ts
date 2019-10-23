@@ -51,7 +51,7 @@ export interface ChromeDocTitle {
    * chrome.docTitle.change(['My application', 'My section'])
    * ```
    *
-   * @param newTitle The new title to set, either a string, string array or {@link ChromeDocTitleEntry}
+   * @param newTitle The new title to set, either a string or string array
    */
   change(newTitle: ChromeDocTitleChange): void;
   /**
@@ -59,9 +59,10 @@ export interface ChromeDocTitle {
    * (meaning the one present in the title meta at application load.)
    */
   reset(): void;
+
   /** @internal */
   __legacy: {
-    setBaseTitle: (baseTitle: string) => void;
+    setBaseTitle(baseTitle: string): void;
   };
 }
 

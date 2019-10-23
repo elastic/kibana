@@ -2,17 +2,16 @@
 
 [Home](./index.md) &gt; [kibana-plugin-public](./kibana-plugin-public.md) &gt; [ChromeDocTitle](./kibana-plugin-public.chromedoctitle.md) &gt; [reset](./kibana-plugin-public.chromedoctitle.reset.md)
 
-## ChromeDocTitle.reset property
+## ChromeDocTitle.reset() method
 
 Resets the document title to it's initial value. (meaning the one present in the title meta at application load.)
 
 <b>Signature:</b>
 
 ```typescript
-reset: (apply?: boolean) => void;
+reset(): void;
 ```
+<b>Returns:</b>
 
-## Remarks
-
-The apply option is mostly here for legacy compatibility reasons and it's default value should probably always be used.
+`void`
 

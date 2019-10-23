@@ -109,24 +109,14 @@ export type ChromeBreadcrumb = Breadcrumb;
 export interface ChromeDocTitle {
     // @internal (undocumented)
     __legacy: {
-        setBaseTitle: (baseTitle: string) => void;
+        setBaseTitle(baseTitle: string): void;
     };
-    apply: () => void;
-    change: (newTitle: ChromeDocTitleChange, apply?: boolean) => void;
-    get$: () => Observable<string>;
-    reset: (apply?: boolean) => void;
+    change(newTitle: ChromeDocTitleChange): void;
+    reset(): void;
 }
 
 // @public
-export type ChromeDocTitleChange = string | string[] | ChromeDocTitleEntry;
-
-// @public (undocumented)
-export interface ChromeDocTitleEntry {
-    // (undocumented)
-    excludeBase?: boolean;
-    // (undocumented)
-    parts: string[];
-}
+export type ChromeDocTitleChange = string | string[];
 
 // @public (undocumented)
 export type ChromeHelpExtension = (element: HTMLDivElement) => () => void;

@@ -4,7 +4,7 @@
 
 ## ChromeDocTitle interface
 
-[APIs](./kibana-plugin-public.chromedoctitle.md) for accessing and updating the document title.
+APIs for accessing and updating the document title.
 
 <b>Signature:</b>
 
@@ -12,21 +12,19 @@
 export interface ChromeDocTitle 
 ```
 
-## Properties
+## Methods
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [apply](./kibana-plugin-public.chromedoctitle.apply.md) | <code>() =&gt; void</code> | Apply a title change or reset that was not applied yet. {<!-- -->DocTitle\#change<!-- -->}  {<!-- -->DocTitle\#reset<!-- -->} |
-|  [change](./kibana-plugin-public.chromedoctitle.change.md) | <code>(newTitle: ChromeDocTitleChange, apply?: boolean) =&gt; void</code> | Changes the current document title. |
-|  [get$](./kibana-plugin-public.chromedoctitle.get_.md) | <code>() =&gt; Observable&lt;string&gt;</code> | Gets an observable of the current document title. |
-|  [reset](./kibana-plugin-public.chromedoctitle.reset.md) | <code>(apply?: boolean) =&gt; void</code> | Resets the document title to it's initial value. (meaning the one present in the title meta at application load.) |
+|  Method | Description |
+|  --- | --- |
+|  [change(newTitle)](./kibana-plugin-public.chromedoctitle.change.md) | Changes the current document title. |
+|  [reset()](./kibana-plugin-public.chromedoctitle.reset.md) | Resets the document title to it's initial value. (meaning the one present in the title meta at application load.) |
 
 ## Example 1
 
 How to change the title of the document
 
 ```ts
-chrome.docTitle.change({ parts: ['My application'], excludeBase: true })
+chrome.docTitle.change('My application')
 
 ```
 

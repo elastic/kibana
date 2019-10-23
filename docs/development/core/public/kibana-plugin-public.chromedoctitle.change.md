@@ -2,19 +2,25 @@
 
 [Home](./index.md) &gt; [kibana-plugin-public](./kibana-plugin-public.md) &gt; [ChromeDocTitle](./kibana-plugin-public.chromedoctitle.md) &gt; [change](./kibana-plugin-public.chromedoctitle.change.md)
 
-## ChromeDocTitle.change property
+## ChromeDocTitle.change() method
 
 Changes the current document title.
 
 <b>Signature:</b>
 
 ```typescript
-change: (newTitle: ChromeDocTitleChange, apply?: boolean) => void;
+change(newTitle: ChromeDocTitleChange): void;
 ```
 
-## Remarks
+## Parameters
 
-The apply option is mostly here for legacy compatibility reasons and it's default value should probably always be used.
+|  Parameter | Type | Description |
+|  --- | --- | --- |
+|  newTitle | <code>ChromeDocTitleChange</code> |  |
+
+<b>Returns:</b>
+
+`void`
 
 ## Example
 
@@ -23,7 +29,6 @@ How to change the title of the document
 ```ts
 chrome.docTitle.change('My application title')
 chrome.docTitle.change(['My application', 'My section'])
-chrome.docTitle.change({ parts: ['My application'], excludeBase: true })
 
 ```
 

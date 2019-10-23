@@ -4,7 +4,7 @@
 
 ## ChromeStart.docTitle property
 
-[APIs](./kibana-plugin-public.chromedoctitle.md) for accessing and updating the document title.
+APIs for accessing and updating the document title.
 
 <b>Signature:</b>
 

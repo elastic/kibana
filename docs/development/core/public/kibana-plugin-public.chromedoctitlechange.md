@@ -9,5 +9,5 @@ Composed type for the  possible inputs.
 <b>Signature:</b>
 
 ```typescript
-export declare type ChromeDocTitleChange = string | string[] | ChromeDocTitleEntry;
+export declare type ChromeDocTitleChange = string | string[];
 ```
