@@ -25,7 +25,13 @@ import { CustomFilter } from './custom_filter';
 import { ExistsFilter, isExistsFilter } from './exists_filter';
 import { GeoBoundingBoxFilter, isGeoBoundingBoxFilter } from './geo_bounding_box_filter';
 import { GeoPolygonFilter, isGeoPolygonFilter } from './geo_polygon_filter';
-import { PhraseFilter, isPhraseFilter, isScriptedPhraseFilter } from './phrase_filter';
+import {
+  PhraseFilter,
+  isPhraseFilter,
+  isScriptedPhraseFilter,
+  getPhraseFilterField,
+  getPhraseFilterValue,
+} from './phrase_filter';
 import { PhrasesFilter, isPhrasesFilter } from './phrases_filter';
 import { QueryStringFilter, isQueryStringFilter } from './query_string_filter';
 import {
@@ -48,6 +54,8 @@ export {
   PhraseFilter,
   isPhraseFilter,
   isScriptedPhraseFilter,
+  getPhraseFilterField,
+  getPhraseFilterValue,
   PhrasesFilter,
   isPhrasesFilter,
   QueryStringFilter,

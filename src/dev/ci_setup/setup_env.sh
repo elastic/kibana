@@ -5,7 +5,7 @@ set -e
 installNode=$1
 
 dir="$(pwd)"
-cacheDir="${CACHE_DIR:-"$HOME/.kibana"}"
+cacheDir="$HOME/.kibana"
 
 RED='\033[0;31m'
 C_RESET='\033[0m' # Reset color
