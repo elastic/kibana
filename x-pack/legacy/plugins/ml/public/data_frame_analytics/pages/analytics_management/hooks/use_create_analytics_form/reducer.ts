@@ -206,9 +206,8 @@ export function reducer(state: State, action: Action): State {
         );
         newFormState.destinationIndexNameEmpty = newFormState.destinationIndex === '';
         newFormState.destinationIndexNameValid = isValidIndexName(newFormState.destinationIndex);
-        newFormState.destinationIndexPatternTitleExists = Object.keys(state.indexPatternsMap).some(
-          name => newFormState.destinationIndex === name
-        );
+        newFormState.destinationIndexPatternTitleExists =
+          state.indexPatternsMap[newFormState.destinationIndex] !== undefined;
       }
 
       if (action.payload.jobId !== undefined) {
@@ -243,9 +242,8 @@ export function reducer(state: State, action: Action): State {
         ...state,
         ...action.payload,
       };
-      newState.form.destinationIndexPatternTitleExists = Object.keys(
-        newState.indexPatternsMap
-      ).some(name => newState.form.destinationIndex === name);
+      newState.form.destinationIndexPatternTitleExists =
+        newState.indexPatternsMap[newState.form.destinationIndex] !== undefined;
       return newState;
     }
 
