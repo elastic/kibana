@@ -21,14 +21,19 @@ import { mount, shallow } from 'enzyme';
 import { DocViewer } from './doc_viewer';
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { addDocView, emptyDocViews, DocViewRenderProps } from 'ui/registry/doc_views';
+import {
+  addDocView,
+  emptyDocViews,
+  DocViewRenderProps,
+  getDocViewsSorted as mockGetDocViewsSorted,
+} from 'ui/registry/doc_views';
 
 jest.mock('../kibana_services', () => {
   return {
     getServices: () => ({
-      docViewRegistry: {
-        getDocViewsSorted: () => {
-          return [];
+      docViewsRegistry: {
+        getDocViewsSorted: (hit: any) => {
+          return mockGetDocViewsSorted(hit);
         },
       },
     }),
@@ -40,7 +45,7 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 // TODO unskip
-test.skip('Render <DocViewer/> with 3 different tabs', () => {
+test('Render <DocViewer/> with 3 different tabs', () => {
   addDocView({ order: 20, title: 'React component', component: () => <div>test</div> });
   addDocView({ order: 10, title: 'Render function', render: jest.fn() });
   addDocView({ order: 30, title: 'Invalid doc view' });
@@ -52,7 +57,7 @@ test.skip('Render <DocViewer/> with 3 different tabs', () => {
   expect(wrapper).toMatchSnapshot();
 });
 // TODO unskip
-test.skip('Render <DocViewer/> with 1 tab displaying error message', () => {
+test('Render <DocViewer/> with 1 tab displaying error message', () => {
   function SomeComponent() {
     // this is just a placeholder
     return null;
