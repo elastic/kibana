@@ -17,9 +17,23 @@
  * under the License.
  */
 
-import { NotificationsStart } from 'src/core/public';
-import { createGetterSetter } from '../../../../../plugins/kibana_utils/public';
+import { createKibanaUtilsCore } from './create_kibana_utils_core';
+import { CoreStart } from 'kibana/public';
 
-export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(
-  'Notifications'
-);
+describe('createKibanaUtilsCore', () => {
+  it('should allows to work with multiple instances', () => {
+    const core1 = {} as CoreStart;
+    const core2 = {} as CoreStart;
+
+    const { setCoreStart: setCoreStart1, getCoreStart: getCoreStart1 } = createKibanaUtilsCore();
+    const { setCoreStart: setCoreStart2, getCoreStart: getCoreStart2 } = createKibanaUtilsCore();
+
+    setCoreStart1(core1);
+    setCoreStart2(core2);
+
+    expect(getCoreStart1()).toBe(core1);
+    expect(getCoreStart2()).toBe(core2);
+
+    expect(getCoreStart1() !== getCoreStart2()).toBeTruthy();
+  });
+});
