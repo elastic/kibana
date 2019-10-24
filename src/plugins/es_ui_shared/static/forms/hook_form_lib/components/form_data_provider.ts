@@ -20,7 +20,6 @@
 import { useState, useEffect, useRef } from 'react';
 
 import { FormData } from '../types';
-import { Subscription } from '../lib';
 import { useFormContext } from '../form_context';
 
 interface Props {
@@ -30,12 +29,12 @@ interface Props {
 
 export const FormDataProvider = ({ children, pathsToWatch }: Props) => {
   const [formData, setFormData] = useState<FormData>({});
-  const previousState = useRef<FormData>({});
-  const subscription = useRef<Subscription | null>(null);
+  const previsouRawData = useRef<FormData>({});
   const form = useFormContext();
 
   useEffect(() => {
-    subscription.current = form.__formData$.current.subscribe(data => {
+    const subscription = form.subscribe(({ data: { raw } }) => {
+      // subscription.current = form.__formData$.current.subscribe(data => {
       // To avoid re-rendering the children for updates on the form data
       // that we are **not** interested in, we can specify one or multiple path(s)
       // to watch.
@@ -43,18 +42,16 @@ export const FormDataProvider = ({ children, pathsToWatch }: Props) => {
         const valuesToWatchArray = Array.isArray(pathsToWatch)
           ? (pathsToWatch as string[])
           : ([pathsToWatch] as string[]);
-        if (valuesToWatchArray.some(value => previousState.current[value] !== data[value])) {
-          previousState.current = data;
-          setFormData(data);
+        if (valuesToWatchArray.some(value => previsouRawData.current[value] !== raw[value])) {
+          previsouRawData.current = raw;
+          setFormData(raw);
         }
       } else {
-        setFormData(data);
+        setFormData(raw);
       }
     });
 
-    return () => {
-      subscription.current!.unsubscribe();
-    };
+    return subscription.unsubscribe;
   }, [pathsToWatch]);
 
   return children(formData);
