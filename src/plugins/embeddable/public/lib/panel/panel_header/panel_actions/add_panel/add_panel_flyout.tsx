@@ -52,6 +52,10 @@ interface State {
   isCreateMenuOpen: boolean;
 }
 
+function capitalize([first, ...letters]: string) {
+  return `${first.toUpperCase()}${letters.join('')}`;
+}
+
 export class AddPanelFlyout extends React.Component<Props, State> {
   private lastToast: any;
 
@@ -121,14 +125,9 @@ export class AddPanelFlyout extends React.Component<Props, State> {
           key={factory.type}
           data-test-subj={`createNew-${factory.type}`}
           onClick={() => this.createNewEmbeddable(factory.type)}
+          className="embPanel__addItem"
         >
-          <FormattedMessage
-            id="embeddableApi.addPanel.createNew"
-            defaultMessage="Create new {factoryName}"
-            values={{
-              factoryName: factory.getDisplayName(),
-            }}
-          />
+          {capitalize(factory.getDisplayName())}
         </EuiContextMenuItem>
       ));
   }
@@ -151,10 +150,6 @@ export class AddPanelFlyout extends React.Component<Props, State> {
       />
     );
 
-    const createNewLabel = i18n.translate('embeddableApi.addPanel.createNewDefaultOption', {
-      defaultMessage: 'Create new …',
-    });
-
     return (
       <EuiFlyout ownFocus onClose={this.props.onClose} data-test-subj="dashboardAddPanel">
         <EuiFlyoutHeader hasBorder>
@@ -171,17 +166,24 @@ export class AddPanelFlyout extends React.Component<Props, State> {
               <EuiPopover
                 id="createNew"
                 button={
-                  <EuiButton data-test-subj="createNew" onClick={this.toggleCreateMenu}>
-                    {createNewLabel}
+                  <EuiButton
+                    data-test-subj="createNew"
+                    iconType="arrowDown"
+                    iconSide="right"
+                    onClick={this.toggleCreateMenu}
+                  >
+                    <FormattedMessage
+                      id="embeddableApi.addPanel.createNewDefaultOption"
+                      defaultMessage="Create new"
+                    />
                   </EuiButton>
                 }
                 isOpen={this.state.isCreateMenuOpen}
                 closePopover={this.closeCreateMenu}
                 panelPaddingSize="none"
                 anchorPosition="upLeft"
-                withTitle
               >
-                <EuiContextMenuPanel title={createNewLabel} items={this.getCreateMenuItems()} />
+                <EuiContextMenuPanel items={this.getCreateMenuItems()} />
               </EuiPopover>
             </EuiFlexItem>
           </EuiFlexGroup>
