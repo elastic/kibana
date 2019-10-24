@@ -714,7 +714,13 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               <div
                 className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
               >
-                1337 minutes ago (mocking 1515578797)
+                <span
+                  className="euiToolTipAnchor"
+                  onMouseOut={[Function]}
+                  onMouseOver={[Function]}
+                >
+                  1337 minutes ago (mocking 1515578797)
+                </span>
               </div>
             </td>
           </tr>
@@ -833,7 +839,13 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               <div
                 className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
               >
-                1337 minutes ago (mocking 1515578797)
+                <span
+                  className="euiToolTipAnchor"
+                  onMouseOut={[Function]}
+                  onMouseOver={[Function]}
+                >
+                  1337 minutes ago (mocking 1515578797)
+                </span>
               </div>
             </td>
           </tr>
@@ -952,7 +964,13 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               <div
                 className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
               >
-                1337 minutes ago (mocking 1515578796)
+                <span
+                  className="euiToolTipAnchor"
+                  onMouseOut={[Function]}
+                  onMouseOver={[Function]}
+                >
+                  1337 minutes ago (mocking 1515578796)
+                </span>
               </div>
             </td>
           </tr>
@@ -1071,7 +1089,13 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               <div
                 className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
               >
-                1337 minutes ago (mocking 1515578773)
+                <span
+                  className="euiToolTipAnchor"
+                  onMouseOut={[Function]}
+                  onMouseOver={[Function]}
+                >
+                  1337 minutes ago (mocking 1515578773)
+                </span>
               </div>
             </td>
           </tr>

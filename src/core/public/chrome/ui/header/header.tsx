@@ -410,22 +410,20 @@ class HeaderUI extends Component<Props, State> {
             defaultMessage: 'Primary',
           })}
         >
-          <>
-            <EuiNavDrawerGroup
-              listItems={recentLinksArray}
-              aria-label={i18n.translate('core.ui.recentLinks.screenReaderLabel', {
-                defaultMessage: 'Recently viewed links, navigation',
-              })}
-            />
-            <EuiHorizontalRule margin="none" />
-            <EuiNavDrawerGroup
-              data-test-subj="navDrawerAppsMenu"
-              listItems={navLinksArray}
-              aria-label={i18n.translate('core.ui.primaryNavList.screenReaderLabel', {
-                defaultMessage: 'Primary navigation links',
-              })}
-            />
-          </>
+          <EuiNavDrawerGroup
+            listItems={recentLinksArray}
+            aria-label={i18n.translate('core.ui.recentLinks.screenReaderLabel', {
+              defaultMessage: 'Recently viewed links, navigation',
+            })}
+          />
+          <EuiHorizontalRule margin="none" />
+          <EuiNavDrawerGroup
+            data-test-subj="navDrawerAppsMenu"
+            listItems={navLinksArray}
+            aria-label={i18n.translate('core.ui.primaryNavList.screenReaderLabel', {
+              defaultMessage: 'Primary navigation links',
+            })}
+          />
         </EuiNavDrawer>
       </header>
     );

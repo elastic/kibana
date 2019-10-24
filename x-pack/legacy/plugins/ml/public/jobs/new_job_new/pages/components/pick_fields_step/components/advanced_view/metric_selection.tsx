@@ -27,6 +27,7 @@ const emptyRichDetector: RichDetector = {
   partitionField: null,
   excludeFrequent: null,
   description: null,
+  customRules: null,
 };
 
 export const AdvancedDetectors: FC<Props> = ({ setIsValid }) => {
