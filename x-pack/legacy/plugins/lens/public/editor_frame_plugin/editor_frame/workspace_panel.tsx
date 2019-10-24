@@ -195,9 +195,11 @@ export function InnerWorkspacePanel({
 
     if (localState.expressionBuildError) {
       return (
-        <EuiFlexGroup direction="column" className="lns">
+        <EuiFlexGroup direction="column" alignItems="center">
+          <EuiFlexItem>
+            <EuiIcon type="alert" size="xl" color="danger" />
+          </EuiFlexItem>
           <EuiFlexItem data-test-subj="expression-failure">
-            <EuiIcon type="alert" size="xl" color="warning" />
             <FormattedMessage
               id="xpack.lens.editorFrame.expressionFailure"
               defaultMessage="An error occurred in the expression"
@@ -214,9 +216,11 @@ export function InnerWorkspacePanel({
         expression={expression!}
         renderError={(errorMessage?: string | null) => {
           return (
-            <EuiFlexGroup direction="column" className="lns">
+            <EuiFlexGroup direction="column" alignItems="center">
+              <EuiFlexItem>
+                <EuiIcon type="alert" size="xl" color="danger" />
+              </EuiFlexItem>
               <EuiFlexItem data-test-subj="expression-failure">
-                <EuiIcon type="alert" size="xl" color="warning" />
                 <FormattedMessage
                   id="xpack.lens.editorFrame.dataFailure"
                   defaultMessage="An error occurred when loading data."

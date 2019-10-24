@@ -126,58 +126,19 @@ const MemoizedChart = React.memo(XYChart);
 export function XYChartReportable(props: XYChartRenderProps) {
   const [state, setState] = useState({
     isReady: false,
-    hasError: false,
   });
 
   // It takes a cycle for the XY chart to render. This prevents
   // reporting from printing a blank chart placeholder.
   useEffect(() => {
-    setState({ isReady: true, hasError: false });
+    setState({ isReady: true });
   }, []);
-
-  if (state.hasError) {
-    // Clear error state when the config or data is updated
-    setState({ isReady: true, hasError: false });
-  }
 
   return (
     <VisualizationContainer className="lnsXyExpression__container" isReady={state.isReady}>
-      <XYErrorBoundary
-        hasError={state.hasError}
-        onError={() => {
-          setState({ ...state, hasError: true });
-        }}
-      >
-        <MemoizedChart {...props} />
-      </XYErrorBoundary>
+      <MemoizedChart {...props} />
     </VisualizationContainer>
   );
-}
-
-class XYErrorBoundary extends React.Component<{ hasError: boolean; onError: () => void }> {
-  constructor(props: { hasError: boolean; onError: () => void }) {
-    super(props);
-  }
-
-  componentDidCatch() {
-    this.props.onError();
-  }
-
-  render() {
-    if (this.props.hasError) {
-      return (
-        <div>
-          <EuiIcon type="alert" size="l" color="warning" />
-          <EuiText>
-            {i18n.translate('xpack.lens.xyVisualization.renderingErrorLabel', {
-              defaultMessage: 'Error rendering',
-            })}
-          </EuiText>
-        </div>
-      );
-    }
-    return this.props.children;
-  }
 }
 
 export function XYChart({ data, args, formatFactory, timeZone }: XYChartRenderProps) {
@@ -273,7 +234,11 @@ export function XYChart({ data, args, formatFactory, timeZone }: XYChartRenderPr
           },
           index
         ) => {
-          if (!data.tables[layerId] || data.tables[layerId].rows.length === 0) {
+          if (
+            !data.tables[layerId] ||
+            data.tables[layerId].rows.length === 0 ||
+            data.tables[layerId].rows.every(row => typeof row[xAccessor] === 'undefined')
+          ) {
             return;
           }
 

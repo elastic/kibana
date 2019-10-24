@@ -32,7 +32,7 @@ export class ExpressionLoader {
   events$: ExpressionRenderHandler['events$'];
   loading$: Observable<void>;
 
-  private dataHandler!: ExpressionDataHandler;
+  private dataHandler: ExpressionDataHandler | undefined;
   private renderHandler: ExpressionRenderHandler;
   private dataSubject: Subject<Data>;
   private loadingSubject: Subject<void>;
@@ -68,8 +68,7 @@ export class ExpressionLoader {
       extraHandlers: params.extraHandlers,
     };
 
-    this.loadingSubject.next();
-    this.loadData(expression, params);
+    this.loadData(expression, this.params);
   }
 
   destroy() {
@@ -82,29 +81,40 @@ export class ExpressionLoader {
   }
 
   cancel() {
-    this.dataHandler.cancel();
+    if (this.dataHandler) {
+      this.dataHandler.cancel();
+    }
   }
 
-  getExpression(): string {
-    return this.dataHandler.getExpression();
+  getExpression(): string | undefined {
+    if (this.dataHandler) {
+      return this.dataHandler.getExpression();
+    }
   }
 
-  getAst(): ExpressionAST {
-    return this.dataHandler.getAst();
+  getAst(): ExpressionAST | undefined {
+    if (this.dataHandler) {
+      return this.dataHandler.getAst();
+    }
   }
 
   getElement(): HTMLElement {
     return this.renderHandler.getElement();
   }
 
-  openInspector(title: string): InspectorSession {
-    return getInspector().open(this.inspect(), {
-      title,
-    });
+  openInspector(title: string): InspectorSession | undefined {
+    const inspector = this.inspect();
+    if (inspector) {
+      return getInspector().open(inspector, {
+        title,
+      });
+    }
   }
 
-  inspect(): Adapters {
-    return this.dataHandler.inspect();
+  inspect(): Adapters | undefined {
+    if (this.dataHandler) {
+      return this.dataHandler.inspect();
+    }
   }
 
   update(expression?: string | ExpressionAST, params?: IExpressionLoaderParams): void {
@@ -116,7 +126,6 @@ export class ExpressionLoader {
       ) as any;
     }
 
-    this.loadingSubject.next();
     if (expression) {
       this.loadData(expression, this.params);
     } else {
@@ -128,26 +137,17 @@ export class ExpressionLoader {
     expression: string | ExpressionAST,
     params: IExpressionLoaderParams
   ): Promise<void> => {
+    this.loadingSubject.next();
     if (this.dataHandler) {
       this.dataHandler.cancel();
     }
     this.dataHandler = new ExpressionDataHandler(expression, params);
-    try {
-      const data = await this.dataHandler.getData();
-      this.dataSubject.next(data);
-    } catch (e) {
-      this.dataSubject.next({
-        type: 'error',
-        error: {
-          type: e.type,
-          message: e.message,
-          stack: e.stack,
-        },
-      });
-    }
+    const data = await this.dataHandler.getData();
+    this.dataSubject.next(data);
   };
 
   private render(data: Data): void {
+    this.loadingSubject.next();
     this.renderHandler.render(data, this.params.extraHandlers);
   }
 }

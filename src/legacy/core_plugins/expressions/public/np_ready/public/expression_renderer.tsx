@@ -34,17 +34,17 @@ export interface ExpressionRendererProps extends IExpressionLoaderParams {
 }
 
 interface State {
+  isEmpty: boolean;
   isLoading: boolean;
-  hasError: boolean;
-  errorMessage: string | null;
+  error: null | Error;
 }
 
 export type ExpressionRenderer = React.FC<ExpressionRendererProps>;
 
 const defaultState: State = {
+  isEmpty: true,
   isLoading: false,
-  hasError: false,
-  errorMessage: null,
+  error: null,
 };
 
 export const ExpressionRendererImplementation = ({
@@ -57,32 +57,12 @@ export const ExpressionRendererImplementation = ({
   const handlerRef: React.MutableRefObject<null | ExpressionLoader> = useRef(null);
   const [state, setState] = useState<State>({ ...defaultState });
 
-  useEffect(() => {
-    if (mountpoint.current) {
-      if (!handlerRef.current) {
-        handlerRef.current = new ExpressionLoader(mountpoint.current, expression, options);
+  let isMounted = true;
 
-        // Only registers one subscriber
-        handlerRef.current.loading$.subscribe(() => {
-          setState(prevState => ({ ...prevState, isLoading: true }));
-        });
-        handlerRef.current.render$.subscribe((item: number | IInterpreterErrorResult) => {
-          if (item !== null && typeof item === 'object' && item.type === 'error') {
-            setState(() => ({
-              isLoading: false,
-              hasError: true,
-              errorMessage: item.error.message.toString(),
-            }));
-          } else {
-            setState(() => ({
-              ...defaultState,
-              isLoading: false,
-            }));
-          }
-        });
-      } else {
-        handlerRef.current.update(expression, options);
-      }
+  // Re-fetch data automatically when the inputs change
+  useEffect(() => {
+    if (handlerRef.current) {
+      handlerRef.current.update(expression, options);
     }
   }, [
     expression,
@@ -90,12 +70,43 @@ export const ExpressionRendererImplementation = ({
     options.context,
     options.variables,
     options.disableCaching,
-    mountpoint.current,
   ]);
+
+  // Initialize the loader only once
+  useEffect(() => {
+    if (mountpoint.current && !handlerRef.current) {
+      handlerRef.current = new ExpressionLoader(mountpoint.current, expression, options);
+
+      handlerRef.current.loading$.subscribe(() => {
+        if (!isMounted) {
+          return;
+        }
+        setState(prevState => ({ ...prevState, isLoading: true }));
+      });
+      handlerRef.current.render$.subscribe((item: number | IInterpreterErrorResult) => {
+        if (!isMounted) {
+          return;
+        }
+        if (typeof item !== 'number') {
+          setState(() => ({
+            ...defaultState,
+            isEmpty: false,
+            error: item.error,
+          }));
+        } else {
+          setState(() => ({
+            ...defaultState,
+            isEmpty: false,
+          }));
+        }
+      });
+    }
+  }, [mountpoint.current]);
 
   useEffect(() => {
     // We only want a clean up to run when the entire component is unloaded, not on every render
     return function cleanup() {
+      isMounted = false;
       if (handlerRef.current) {
         handlerRef.current.destroy();
         handlerRef.current = null;
@@ -105,22 +116,18 @@ export const ExpressionRendererImplementation = ({
 
   const classes = classNames('expExpressionRenderer', className, {
     'expExpressionRenderer-isLoading': state.isLoading,
-    'expExpressionRenderer-hasError': state.hasError,
+    'expExpressionRenderer-hasError': !!state.error,
   });
 
   return (
     <div {...dataAttrs} className={classes}>
-      {state.isLoading ? (
-        <>
-          <EuiProgress size="xs" color="accent" position="absolute" />
-          <EuiLoadingChart mono size="l" />
-        </>
-      ) : null}
-      {!state.isLoading && state.hasError ? (
+      {state.isEmpty ? <EuiLoadingChart mono size="l" /> : null}
+      {state.isLoading ? <EuiProgress size="xs" color="accent" position="absolute" /> : null}
+      {!state.isLoading && state.error ? (
         options.renderError ? (
-          options.renderError(state.errorMessage)
+          options.renderError(state.error.message)
         ) : (
-          <div data-test-subj="expression-renderer-error">{state.errorMessage}</div>
+          <div data-test-subj="expression-renderer-error">{state.error.message}</div>
         )
       ) : null}
       <div className="expExpressionRenderer__expression" ref={mountpoint} />
