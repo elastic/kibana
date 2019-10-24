@@ -18,7 +18,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import uiRoutes from 'ui/routes';
 import { wrapInI18nContext } from 'ui/i18n';
 
 import dashboardTemplate from './dashboard_app.html';
@@ -45,7 +44,7 @@ export function initDashboardApp(app, deps) {
     $scope.visitVisualizeAppLinkText = i18n.translate('kbn.dashboard.visitVisualizeAppLinkText', {
       defaultMessage: 'visit the Visualize app',
     });
-    addHelpMenuToAppChrome(deps.chrome);
+    addHelpMenuToAppChrome(deps.chrome, deps.core.docLinks);
   }
 
   app.config(function ($routeProvider) {
@@ -107,10 +106,10 @@ export function initDashboardApp(app, deps) {
               }),
             },
           ]);
-          addHelpMenuToAppChrome(deps.chrome);
+          addHelpMenuToAppChrome(deps.chrome, deps.core.docLinks);
         },
         resolve: {
-          dash: function ($route, redirectWhenMissing, kbnUrl) {
+          dash: function ($rootScope, $route, redirectWhenMissing, kbnUrl, Promise) {
             const savedObjectsClient = deps.savedObjectsClient;
             const title = $route.current.params.title;
             if (title) {
@@ -130,13 +129,9 @@ export function initDashboardApp(app, deps) {
                   } else {
                     kbnUrl.redirect(`${DashboardConstants.LANDING_PAGE_PATH}?filter="${title}"`);
                   }
-                  throw uiRoutes.WAIT_FOR_URL_CHANGE_TOKEN;
-                })
-                .catch(
-                  redirectWhenMissing({
-                    dashboard: DashboardConstants.LANDING_PAGE_PATH,
-                  })
-                );
+                  $rootScope.$digest();
+                  return Promise.halt();
+                });
             }
           },
         },

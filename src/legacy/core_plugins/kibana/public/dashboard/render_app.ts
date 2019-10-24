@@ -65,7 +65,7 @@ import { SavedQueryService } from '../../../data/public/search/search_bar/lib/sa
 import { EmbeddablePublicPlugin } from '../../../../../plugins/embeddable/public';
 
 export interface RenderDeps {
-  core: AppMountContext['core'];
+  core: LegacyCoreStart;
   indexPatterns: DataStart['indexPatterns']['indexPatterns'];
   dataStart: DataStart;
   queryFilter: any;
@@ -76,6 +76,7 @@ export interface RenderDeps {
   dashboardConfig: any;
   savedDashboards: any;
   dashboardCapabilities: any;
+  docTitle: any;
   uiSettings: UiSettingsClientContract;
   chrome: ChromeStart;
   addBasePath: (path: string) => string;

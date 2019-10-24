@@ -21,9 +21,9 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { HelpMenu } from './help_menu';
 
-export function addHelpMenuToAppChrome(chrome) {
+export function addHelpMenuToAppChrome(chrome, docLinks) {
   chrome.setHelpExtension(domElement => {
-    render(<HelpMenu/>, domElement);
+    render(<HelpMenu docLinks={docLinks} />, domElement);
     return () => {
       unmountComponentAtNode(domElement);
     };

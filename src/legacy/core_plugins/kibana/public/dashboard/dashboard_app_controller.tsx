@@ -24,19 +24,14 @@ import angular from 'angular';
 import { uniq } from 'lodash';
 
 import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
-import { toastNotifications } from 'ui/notify';
 
 // @ts-ignore
 import { ConfirmationButtonTypes } from 'ui/modals/confirm_modal';
-
-import { docTitle } from 'ui/doc_title/doc_title';
 
 import { showSaveModal, SaveResult } from 'ui/saved_objects/show_saved_object_save_modal';
 
 import { showShareContextMenu } from 'ui/share';
 import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
-
-import { timefilter } from 'ui/timefilter';
 
 import {
   AppStateClass as TAppStateClass,
@@ -65,7 +60,6 @@ import {
   ViewMode,
   openAddPanelFlyout,
 } from '../../../embeddable_api/public/np_ready/public';
-// import { start } from '../../../embeddable_api/public/np_ready/public/legacy';
 import { DashboardAppState, NavAction, ConfirmModalFn, SavedDashboardPanel } from './types';
 
 import { showOptionsPopover } from './top_nav/show_options_popover';
@@ -123,7 +117,11 @@ export class DashboardAppController {
     savedQueryService,
     embeddables,
     dashboardCapabilities,
-    core: { notifications, overlays, chrome },
+    docTitle,
+    dataStart: {
+      timefilter: { timefilter },
+    },
+    core: { notifications, overlays, chrome, injectedMetadata, docLinks },
   }: DashboardAppControllerDependencies) {
     let lastReloadRequestTime = 0;
 
@@ -136,6 +134,7 @@ export class DashboardAppController {
       savedDashboard: dash,
       AppStateClass,
       hideWriteControls: dashboardConfig.getHideWriteControls(),
+      kibanaVersion: injectedMetadata.getKibanaVersion(),
     });
 
     $scope.appState = dashboardStateManager.getAppState();
@@ -619,7 +618,7 @@ export class DashboardAppController {
       return saveDashboard(angular.toJson, timefilter, dashboardStateManager, saveOptions)
         .then(function(id) {
           if (id) {
-            toastNotifications.addSuccess({
+            notifications.toasts.addSuccess({
               title: i18n.translate('kbn.dashboard.dashboardWasSavedSuccessMessage', {
                 defaultMessage: `Dashboard '{dashTitle}' was saved`,
                 values: { dashTitle: dash.title },
@@ -637,7 +636,7 @@ export class DashboardAppController {
           return { id };
         })
         .catch(error => {
-          toastNotifications.addDanger({
+          notifications.toasts.addDanger({
             title: i18n.translate('kbn.dashboard.dashboardWasNotSavedDangerMessage', {
               defaultMessage: `Dashboard '{dashTitle}' was not saved. Error: {errorMessage}`,
               values: {

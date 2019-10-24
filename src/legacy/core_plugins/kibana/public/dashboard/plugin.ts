@@ -17,12 +17,17 @@
  * under the License.
  */
 
-import { CoreSetup, CoreStart, Plugin, SavedObjectsClientContract } from 'kibana/public';
+import {
+  CoreSetup,
+  CoreStart,
+  LegacyCoreStart,
+  Plugin,
+  SavedObjectsClientContract,
+} from 'kibana/public';
 import { Storage } from 'ui/storage';
 import { RenderDeps } from './render_app';
 import { LocalApplicationService } from '../local_application_service';
 import { DataStart } from '../../../data/public';
-import { SavedQueryService } from '../../../data/public/search/search_bar/lib/saved_query_service';
 import { EmbeddablePublicPlugin } from '../../../../../plugins/embeddable/public';
 
 export interface LegacyAngularInjectedDependencies {
@@ -44,14 +49,16 @@ export interface DashboardPluginSetupDependencies {
     getAngularDependencies: () => Promise<LegacyAngularInjectedDependencies>;
     localApplicationService: LocalApplicationService;
     FeatureCatalogueRegistryProvider: any;
+    docTitle: any;
   };
 }
 
 export class DashboardPlugin implements Plugin {
-  private dataStart: DataStart | null = null;
-  private savedObjectsClient: SavedObjectsClientContract | null = null;
-  private savedQueryService: SavedQueryService | null = null;
-  private embeddables: ReturnType<EmbeddablePublicPlugin['start']> | null = null;
+  private startDependencies: {
+    dataStart: DataStart;
+    savedObjectsClient: SavedObjectsClientContract;
+    embeddables: ReturnType<EmbeddablePublicPlugin['start']>;
+  } | null = null;
 
   public setup(
     core: CoreSetup,
@@ -64,18 +71,23 @@ export class DashboardPlugin implements Plugin {
       id: 'dashboards',
       title: 'Dashboards',
       mount: async ({ core: contextCore }, params) => {
+        if (this.startDependencies === null) {
+          throw new Error('not started yet');
+        }
+        const { dataStart, savedObjectsClient, embeddables } = this.startDependencies;
         const angularDependencies = await getAngularDependencies();
         const deps: RenderDeps = {
-          core: contextCore,
+          core: contextCore as LegacyCoreStart,
           ...legacyServices,
           ...angularDependencies,
-          indexPatterns: this.dataStart!.indexPatterns.indexPatterns,
-          savedObjectsClient: this.savedObjectsClient!,
+          dataStart,
+          indexPatterns: dataStart.indexPatterns.indexPatterns,
+          savedObjectsClient,
           chrome: contextCore.chrome,
           addBasePath: contextCore.http.basePath.prepend,
           uiSettings: contextCore.uiSettings,
-          savedQueryService: this.savedQueryService!,
-          embeddables: this.embeddables!,
+          savedQueryService: dataStart.search.services.savedQueryService,
+          embeddables,
           dashboardCapabilities: contextCore.application.capabilities.dashboard,
           localStorage: new Storage(localStorage),
         };
@@ -85,11 +97,14 @@ export class DashboardPlugin implements Plugin {
     });
   }
 
-  start(core: CoreStart, { data, embeddables }: DashboardPluginStartDependencies) {
-    // TODO is this really the right way? I though the app context would give us those
-    this.dataStart = data;
-    this.savedObjectsClient = core.savedObjects.client;
-    this.savedQueryService = data.search.services.savedQueryService;
-    this.embeddables = embeddables;
+  start(
+    { savedObjects: { client: savedObjectsClient } }: CoreStart,
+    { data: dataStart, embeddables }: DashboardPluginStartDependencies
+  ) {
+    this.startDependencies = {
+      dataStart,
+      savedObjectsClient,
+      embeddables,
+    };
   }
 }

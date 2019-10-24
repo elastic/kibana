@@ -20,6 +20,7 @@
 import { FeatureCatalogueRegistryProvider } from 'ui/registry/feature_catalogue';
 import { npSetup, npStart } from 'ui/new_platform';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects';
+import { docTitle } from 'ui/doc_title/doc_title';
 import chrome from 'ui/chrome';
 import { IPrivate } from 'ui/private';
 import { ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
@@ -63,6 +64,7 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
       localApplicationService,
       getAngularDependencies,
       FeatureCatalogueRegistryProvider,
+      docTitle,
     },
   });
   instance.start(npStart.core, {
