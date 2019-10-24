@@ -23,7 +23,7 @@ import { FieldBrowserProps } from './types';
 const fieldsButtonClassName = 'fields-button';
 
 /** wait this many ms after the user completes typing before applying the filter input */
-const INPUT_TIMEOUT = 250;
+export const INPUT_TIMEOUT = 250;
 
 const FieldsBrowserButtonContainer = styled.div`
   position: relative;

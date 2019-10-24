@@ -13,7 +13,7 @@ import { TestProviders } from '../../mock';
 
 import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from './helpers';
 
-import { StatefulFieldsBrowser } from '.';
+import { INPUT_TIMEOUT, StatefulFieldsBrowser } from '.';
 // Suppress warnings about "act" until async/await syntax is supported: https://github.com/facebook/react/issues/14769
 /* eslint-disable no-console */
 const originalError = console.error;
@@ -127,7 +127,7 @@ describe('StatefulFieldsBrowser', () => {
         wrapper.find(`.field-browser-category-pane-auditd-${timelineId}`).first()
       ).toHaveStyleRule('font-weight', 'bold', { modifier: '.euiText' });
     });
-    test.only('it updates the selectedCategoryId state according to most fields returned', done => {
+    test('it updates the selectedCategoryId state according to most fields returned', done => {
       const wrapper = mount(
         <TestProviders>
           <StatefulFieldsBrowser
@@ -146,40 +146,22 @@ describe('StatefulFieldsBrowser', () => {
         .find('[data-test-subj="show-field-browser"]')
         .first()
         .simulate('click');
-
-      wrapper
-        .find(`.field-browser-category-pane-auditd-${timelineId}`)
-        .first()
-        .simulate('click');
-
-      wrapper.update();
       expect(
-        wrapper.find(`.field-browser-category-pane-default.ECS-${timelineId}`).first()
+        wrapper.find(`.field-browser-category-pane-cloud-${timelineId}`).first()
       ).toHaveStyleRule('font-weight', 'normal', { modifier: '.euiText' });
       wrapper
         .find('[data-test-subj="field-search"]')
         .last()
-        .simulate('change', { target: { value: 'host' } });
+        .simulate('change', { target: { value: 'cloud' } });
 
-      console.log('111');
-      console.log(
-        'wrapper now',
-        wrapper.debug()
-      );
       setTimeout(() => {
-        console.log('333');
         wrapper.update();
-        console.log(
-          'wrapper find',
-          wrapper.debug()
-        );
         expect(
-          wrapper.find(`.field-browser-category-pane-default`).first()
+          wrapper.find(`.field-browser-category-pane-cloud-${timelineId}`).first()
         ).toHaveStyleRule('font-weight', 'bold', { modifier: '.euiText' });
-        console.log('WJA');
         wrapper.unmount();
         done();
-      }, 5000);
+      }, INPUT_TIMEOUT);
     });
   });
 
