@@ -23,11 +23,10 @@ export const TimeFieldSelect: FC<Props> = ({ fields, changeHandler, selectedFiel
     f => f.id !== EVENT_RATE_FIELD_ID && f.type === ES_FIELD_TYPES.DATE
   );
 
-  const selection: EuiComboBoxOptionProps[] = [
-    {
-      label: selectedField !== null ? selectedField : '',
-    },
-  ];
+  const selection: EuiComboBoxOptionProps[] = [];
+  if (selectedField !== null) {
+    selection.push({ label: selectedField });
+  }
 
   function onChange(selectedOptions: EuiComboBoxOptionProps[]) {
     const option = selectedOptions[0];
