@@ -70,7 +70,7 @@ describe('Server logging configuration', function () {
       child = undefined;
     }
 
-    del.sync(tempDir);
+    del.sync(tempDir, { force: true });
   });
 
   const isWindows = /^win/.test(process.platform);
