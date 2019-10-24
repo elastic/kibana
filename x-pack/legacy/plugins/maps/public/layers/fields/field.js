@@ -30,7 +30,7 @@ export class AbstractField {
     return this._fieldName;
   }
 
-  createTooltipProperty() {
+  async createTooltipProperty() {
     throw new Error('must implement Field#createTooltipProperty');
   }
 

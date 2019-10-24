@@ -421,7 +421,7 @@ export class VectorLayer extends AbstractLayer {
       } = await joinSource.getPropertiesMap(
         searchFilters,
         leftSourceName,
-        join.getLeftFieldName(),
+        join.getLeftField().getName(),
         registerCancelCallback.bind(null, requestToken));
       stopLoading(sourceDataId, requestToken, propertiesMap);
       return {
@@ -453,9 +453,7 @@ export class VectorLayer extends AbstractLayer {
     const fieldNames = [
       ...this._source.getFieldNames(),
       ...this._style.getSourceFieldNames(),
-      ...this.getValidJoins().map(join => {
-        return join.getLeftFieldName();
-      })
+      ...this.getValidJoins().map(join => join.getLeftField().getName())
     ];
 
     return {
@@ -786,7 +784,7 @@ export class VectorLayer extends AbstractLayer {
       const tooltipProperty = tooltipsFromSource[i];
       const matchingJoins = [];
       for (let j = 0; j < this._joins.length; j++) {
-        if (this._joins[j].getLeftFieldName() === tooltipProperty.getPropertyKey()) {
+        if (this._joins[j].getLeftField().getName() === tooltipProperty.getPropertyKey()) {
           matchingJoins.push(this._joins[j]);
         }
       }

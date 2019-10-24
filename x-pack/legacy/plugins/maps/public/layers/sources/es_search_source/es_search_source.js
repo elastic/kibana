@@ -118,7 +118,7 @@ export class ESSearchSource extends AbstractESSource {
   }
 
   getMetricFields() {
-    return [];
+    throw new Error('todo remove unused method');
   }
 
   getFieldNames() {

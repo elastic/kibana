@@ -7,6 +7,30 @@
 
 import { AbstractField } from './field';
 
-export class ESAggField extends AbstractField {
+
+export class ESAggMetricField extends AbstractField {
+
   static type = 'ES_AGG';
+
+  constructor({ fieldName, label, source, aggType, esDocField }) {
+    super({ fieldName, source });
+    this._label = label;
+    this._aggType = aggType;
+    this._esDocField = esDocField;
+  }
+
+  async getLabel() {
+    return this._label;
+  }
+
+  getAggType() {
+    return this._aggType;
+  }
+
+  getESDocField() {
+    return this._esDocField;
+  }
+
+
+
 }

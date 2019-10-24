@@ -59,14 +59,7 @@ export class AbstractESSource extends AbstractVectorSource {
 
   _getValidMetrics() {
     const metrics = _.get(this._descriptor, 'metrics', []).filter(({ type, field }) => {
-      if (type === 'count') {
-        return true;
-      }
-
-      if (field) {
-        return true;
-      }
-      return false;
+      return (type === 'count')  ? true : !!field;
     });
     if (metrics.length === 0) {
       metrics.push({ type: 'count' });

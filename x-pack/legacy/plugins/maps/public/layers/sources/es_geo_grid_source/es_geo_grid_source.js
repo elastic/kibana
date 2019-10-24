@@ -8,7 +8,6 @@ import React from 'react';
 import uuid from 'uuid/v4';
 
 import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
-import { AbstractESSource } from '../es_source';
 import { HeatmapLayer } from '../../heatmap_layer';
 import { VectorLayer } from '../../vector_layer';
 import { Schemas } from 'ui/vis/editors/default/schemas';
@@ -24,6 +23,7 @@ import { GRID_RESOLUTION } from '../../grid_resolution';
 import { SOURCE_DATA_ID_ORIGIN, ES_GEO_GRID } from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
+import { AbstractESAggSource } from '../es_agg_source';
 
 const COUNT_PROP_LABEL = 'count';
 const COUNT_PROP_NAME = 'doc_count';
@@ -51,7 +51,7 @@ const aggSchemas = new Schemas([
   }
 ]);
 
-export class ESGeoGridSource extends AbstractESSource {
+export class ESGeoGridSource extends AbstractESAggSource {
 
   static type = ES_GEO_GRID;
   static title = i18n.translate('xpack.maps.source.esGridTitle', {

@@ -46,8 +46,8 @@ export class InnerJoin {
     return `join_source_${this._rightSource.getId()}`;
   }
 
-  getLeftFieldName() {
-    return this._leftField ? this._leftField.getName() : null;
+  getLeftField() {
+    return this._leftField;
   }
 
   joinPropertiesToFeature(feature, propertiesMap, rightMetricFields) {
