@@ -500,7 +500,7 @@ export function validateModelMemoryLimitUnits(job) {
 
   if (typeof job.analysis_limits !== 'undefined' && typeof job.analysis_limits.model_memory_limit !== 'undefined') {
     const mml = job.analysis_limits.model_memory_limit.toUpperCase();
-    const mmlSplit = mml.match(/\d+(\w+)/);
+    const mmlSplit = mml.match(/\d+(\w+)$/);
     const unit = (mmlSplit && mmlSplit.length === 2) ? mmlSplit[1] : null;
 
     if (ALLOWED_DATA_UNITS.indexOf(unit) === -1) {
