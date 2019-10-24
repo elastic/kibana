@@ -146,15 +146,15 @@ export class SavedObjectsRepository {
    * @property {boolean} [options.overwrite=false]
    * @property {object} [options.migrationVersion=undefined]
    * @property {string} [options.namespace]
-   * @property {array} [options.references] - [{ name, type, id }]
+   * @property {array} [options.references=[]] - [{ name, type, id }]
    * @returns {promise} - { id, type, version, attributes }
    */
   public async create<T extends SavedObjectAttributes>(
     type: string,
     attributes: T,
-    options: SavedObjectsCreateOptions = { overwrite: false, references: [] }
+    options: SavedObjectsCreateOptions = {}
   ): Promise<SavedObject<T>> {
-    const { id, migrationVersion, overwrite, namespace, references } = options;
+    const { id, migrationVersion, overwrite = false, namespace, references = [] } = options;
 
     if (!this._allowedTypes.includes(type)) {
       throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);

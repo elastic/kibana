@@ -32,9 +32,9 @@ export const SingleMetricDetectors: FC<Props> = ({ setIsValid }) => {
   const jobCreator = jc as SingleMetricJobCreator;
 
   const { fields } = newJobCapsService;
-  const [selectedOptions, setSelectedOptions] = useState<DropDownProps>([
-    { label: createLabel(jobCreator.aggFieldPair) },
-  ]);
+  const [selectedOptions, setSelectedOptions] = useState<DropDownProps>(
+    jobCreator.aggFieldPair !== null ? [{ label: createLabel(jobCreator.aggFieldPair) }] : []
+  );
   const [aggFieldPair, setAggFieldPair] = useState<AggFieldPair | null>(jobCreator.aggFieldPair);
   const [lineChartsData, setLineChartData] = useState<LineChartData>({});
   const [loadingData, setLoadingData] = useState(false);

@@ -5,7 +5,7 @@
  */
 
 import fs from 'fs';
-import rimraf from 'rimraf';
+import del from 'del';
 import sinon from 'sinon';
 import { pathToFileURL } from 'url';
 
@@ -25,10 +25,8 @@ beforeEach(async () => {
   }
 });
 
-afterEach(() => {
-  return new Promise(resolve => {
-    rimraf(options.workspacePath, resolve);
-  });
+afterEach(async () => {
+  await del(options.workspacePath, { force: true });
 });
 
 function createMockProxy(initDelay: number = 0, requestDelay: number = 0) {
