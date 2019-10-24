@@ -75,8 +75,8 @@ export class AbstractESAggSource extends AbstractESSource {
   }
 
   async getNumberFields() {
-    return this.getMetricFields().map(({ propertyKey: name, propertyLabel: label }) => {
-      return { label, name };
+    return this.getMetricFields2().map(esAggMetricField => {
+      return { label: esAggMetricField.getPropertyLabel(), name: esAggMetricField.getPropertyKey() };
     });
   }
 

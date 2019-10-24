@@ -34,8 +34,8 @@ export class InnerJoin {
   }
 
   getJoinFields() {
-    return this.getRightMetricFields().map(({ propertyKey: name, propertyLabel: label }) => {
-      return { label, name };
+    return this._rightSource.getMetricFields2().map(esAggMetricField => {
+      return { label: esAggMetricField.getPropertyLabel(), name: esAggMetricField.getPropertyKey() };
     });
   }
 
