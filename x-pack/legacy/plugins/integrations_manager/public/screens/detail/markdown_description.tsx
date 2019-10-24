@@ -3,17 +3,19 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { getFileByPath } from '../../data';
+import { markdownRenderers } from './markdown_renderers';
 
-export function MarkdownDescription(props: { path: string }) {
-  const [markdown, setMarkdown] = useState<string | null>(null);
+export function MarkdownDescription({ readmePath }: { readmePath: string }) {
+  const [markdown, setMarkdown] = useState<string>('');
 
   useEffect(() => {
-    // I expect to get a path from props later
-    getFileByPath(props.path).then(res => {
+    getFileByPath(readmePath).then(res => {
       setMarkdown(res);
     });
   }, []);
-  return <Fragment>{markdown}</Fragment>;
+
+  return <ReactMarkdown renderers={markdownRenderers} source={markdown} />;
 }

@@ -10,9 +10,7 @@ import { Screenshots } from './screenshots';
 import { MarkdownDescription } from './markdown_description';
 
 export function OverviewPanel(props: PackageInfo) {
-  const { description, screenshots } = props;
-  // i expect to get the path from props
-  const readmePath = '/package/coredns-1.0.1/docs/README.md';
+  const { description, screenshots, readme } = props;
   return (
     <Fragment>
       <EuiTitle size="s">
@@ -20,7 +18,7 @@ export function OverviewPanel(props: PackageInfo) {
       </EuiTitle>
       <EuiText>
         <p>{description}</p>
-        {readmePath && <MarkdownDescription path={readmePath} />}
+        {readme && <MarkdownDescription readmePath={readme} />}
       </EuiText>
       <EuiSpacer size="xl" />
       {screenshots && <Screenshots images={screenshots} />}
