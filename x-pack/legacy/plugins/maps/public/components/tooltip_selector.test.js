@@ -22,11 +22,11 @@ class MockField {
   }
 
   async getLabel() {
-    return this._label;
+    return this._label || 'foobar_label';
   }
 
   async getType() {
-    return this._type;
+    return this._type || 'foobar_type';
   }
 }
 
@@ -48,15 +48,22 @@ const defaultProps = {
 
 describe('TooltipSelector', () => {
 
-  test('should render component', async () => {
+  test('should render component', (done) => {
+
     const component = shallow(
       <TooltipSelector
         {...defaultProps}
       />
     );
 
-    expect(component)
-      .toMatchSnapshot();
+    setTimeout(() => {
+      component.update();
+      expect(component)
+        .toMatchSnapshot();
+      done();
+    });
+
+
   });
 
 });
