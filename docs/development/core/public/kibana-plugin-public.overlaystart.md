@@ -16,6 +16,8 @@ export interface OverlayStart
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [banners](./kibana-plugin-public.overlaystart.banners.md) | <code>OverlayBannersStart</code> | [OverlayBannersStart](./kibana-plugin-public.overlaybannersstart.md) |
-|  [openFlyout](./kibana-plugin-public.overlaystart.openflyout.md) | <code>(flyoutChildren: MountPoint, flyoutProps?: {</code><br/><code>        closeButtonAriaLabel?: string;</code><br/><code>        'data-test-subj'?: string;</code><br/><code>    }) =&gt; OverlayRef</code> |  |
-|  [openModal](./kibana-plugin-public.overlaystart.openmodal.md) | <code>(modalChildren: MountPoint, modalProps?: {</code><br/><code>        className?: string;</code><br/><code>        closeButtonAriaLabel?: string;</code><br/><code>        'data-test-subj'?: string;</code><br/><code>    }) =&gt; OverlayRef</code> |  |
+|  [flyouts](./kibana-plugin-public.overlaystart.flyouts.md) | <code>OverlayFlyoutStart</code> | [OverlayFlyoutStart](./kibana-plugin-public.overlayflyoutstart.md) |
+|  [modals](./kibana-plugin-public.overlaystart.modals.md) | <code>OverlayModalStart</code> | [OverlayModalStart](./kibana-plugin-public.overlaymodalstart.md) |
+|  [openFlyout](./kibana-plugin-public.overlaystart.openflyout.md) | <code>OverlayFlyoutStart['open']</code> |  |
+|  [openModal](./kibana-plugin-public.overlaystart.openmodal.md) | <code>OverlayModalStart['open']</code> |  |
 

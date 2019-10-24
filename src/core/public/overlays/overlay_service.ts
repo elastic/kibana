@@ -59,13 +59,19 @@ export class OverlayService {
 
 /** @public */
 export interface OverlayStart {
-  /** {@inheritdoc OverlayBannersStart} */
+  /** {@link OverlayBannersStart} */
   banners: OverlayBannersStart;
-  /** {@inheritdoc OverlayModalStart} */
+  /** {@link OverlayModalStart} */
   modals: OverlayModalStart;
-  /** {@inheritdoc OverlayFlyoutStart} */
+  /** {@link OverlayFlyoutStart} */
   flyouts: OverlayFlyoutStart;
 
+  /**
+   * @deprecated Use {@link OverlayStart.flyouts} instead
+   */
   openFlyout: OverlayFlyoutStart['open'];
+  /**
+   * @deprecated Use {@link OverlayStart.modals} instead
+   */
   openModal: OverlayModalStart['open'];
 }

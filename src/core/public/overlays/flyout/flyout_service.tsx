@@ -38,7 +38,7 @@ import { MountWrapper } from '../utils';
  *
  * @public
  */
-export class FlyoutRef implements OverlayRef {
+class FlyoutRef implements OverlayRef {
   /**
    * An Promise that will resolve once this flyout is closed.
    *
@@ -73,6 +73,14 @@ export class FlyoutRef implements OverlayRef {
  * @public
  */
 export interface OverlayFlyoutStart {
+  /**
+   * Opens a flyout panel with the given mount point inside. You can use
+   * `close()` on the returned FlyoutRef to close the flyout.
+   *
+   * @param mount {@link MountPoint} - Mounts the children inside a flyout panel
+   * @param options {@link OverlayFlyoutOpenOptions} - options for the flyout
+   * @return {@link OverlayRef} A reference to the opened flyout panel.
+   */
   open(mount: MountPoint, options?: OverlayFlyoutOpenOptions): OverlayRef;
 }
 

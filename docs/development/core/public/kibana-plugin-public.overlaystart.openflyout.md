@@ -4,11 +4,13 @@
 
 ## OverlayStart.openFlyout property
 
+> Warning: This API is now obsolete.
+> 
+> Use [OverlayStart.flyouts](./kibana-plugin-public.overlaystart.flyouts.md) instead
+> 
+
 <b>Signature:</b>
 
 ```typescript
-openFlyout: (flyoutChildren: MountPoint, flyoutProps?: {
-        closeButtonAriaLabel?: string;
-        'data-test-subj'?: string;
-    }) => OverlayRef;
+openFlyout: OverlayFlyoutStart['open'];
 ```

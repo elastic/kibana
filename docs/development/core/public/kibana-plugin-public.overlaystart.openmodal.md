@@ -4,12 +4,13 @@
 
 ## OverlayStart.openModal property
 
+> Warning: This API is now obsolete.
+> 
+> Use [OverlayStart.modals](./kibana-plugin-public.overlaystart.modals.md) instead
+> 
+
 <b>Signature:</b>
 
 ```typescript
-openModal: (modalChildren: MountPoint, modalProps?: {
-        className?: string;
-        closeButtonAriaLabel?: string;
-        'data-test-subj'?: string;
-    }) => OverlayRef;
+openModal: OverlayModalStart['open'];
 ```

@@ -645,6 +645,36 @@ export interface OverlayBannersStart {
     replace(id: string | undefined, mount: MountPoint, priority?: number): string;
 }
 
+// @public (undocumented)
+export interface OverlayFlyoutOpenOptions {
+    // (undocumented)
+    'data-test-subj'?: string;
+    // (undocumented)
+    className?: string;
+    // (undocumented)
+    closeButtonAriaLabel?: string;
+}
+
+// @public
+export interface OverlayFlyoutStart {
+    open(mount: MountPoint, options?: OverlayFlyoutOpenOptions): OverlayRef;
+}
+
+// @public (undocumented)
+export interface OverlayModalOpenOptions {
+    // (undocumented)
+    'data-test-subj'?: string;
+    // (undocumented)
+    className?: string;
+    // (undocumented)
+    closeButtonAriaLabel?: string;
+}
+
+// @public
+export interface OverlayModalStart {
+    open(mount: MountPoint, options?: OverlayModalOpenOptions): OverlayRef;
+}
+
 // @public
 export interface OverlayRef {
     close(): Promise<void>;
@@ -656,16 +686,13 @@ export interface OverlayStart {
     // (undocumented)
     banners: OverlayBannersStart;
     // (undocumented)
-    openFlyout: (flyoutChildren: MountPoint, flyoutProps?: {
-        closeButtonAriaLabel?: string;
-        'data-test-subj'?: string;
-    }) => OverlayRef;
+    flyouts: OverlayFlyoutStart;
     // (undocumented)
-    openModal: (modalChildren: MountPoint, modalProps?: {
-        className?: string;
-        closeButtonAriaLabel?: string;
-        'data-test-subj'?: string;
-    }) => OverlayRef;
+    modals: OverlayModalStart;
+    // @deprecated (undocumented)
+    openFlyout: OverlayFlyoutStart['open'];
+    // @deprecated (undocumented)
+    openModal: OverlayModalStart['open'];
 }
 
 // @public (undocumented)

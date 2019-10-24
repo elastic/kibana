@@ -33,7 +33,7 @@ import { MountWrapper } from '../utils';
  *
  * @public
  */
-export class ModalRef implements OverlayRef {
+class ModalRef implements OverlayRef {
   public readonly onClose: Promise<void>;
 
   private closeSubject = new Subject<void>();
@@ -63,11 +63,11 @@ export class ModalRef implements OverlayRef {
  */
 export interface OverlayModalStart {
   /**
-   * Opens a modal panel with the given component inside. You can use
+   * Opens a modal panel with the given mount point inside. You can use
    * `close()` on the returned OverlayRef to close the modal.
    *
    * @param mount {@link MountPoint} - Mounts the children inside the modal
-   * @param options {@link OverlayModalOptions} - Mounts the children inside the modal
+   * @param options {@link OverlayModalOpenOptions} - options for the modal
    * @return {@link OverlayRef} A reference to the opened modal.
    */
   open(mount: MountPoint, options?: OverlayModalOpenOptions): OverlayRef;
