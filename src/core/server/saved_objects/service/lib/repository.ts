@@ -34,10 +34,12 @@ import {
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
   SavedObjectsBulkResponse,
+  SavedObjectsBulkUpdateResponse,
   SavedObjectsCreateOptions,
   SavedObjectsFindResponse,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
+  SavedObjectsBulkUpdateObject,
 } from '../saved_objects_client';
 import {
   SavedObject,
@@ -51,12 +53,12 @@ import { validateConvertFilterToKueryNode } from './filter_utils';
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
 
-// eslint-disable-next-line @typescript-eslint/prefer-interface
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 type Left<T> = {
   tag: 'Left';
   error: T;
 };
-// eslint-disable-next-line @typescript-eslint/prefer-interface
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 type Right<T> = {
   tag: 'Right';
   value: T;
@@ -144,15 +146,15 @@ export class SavedObjectsRepository {
    * @property {boolean} [options.overwrite=false]
    * @property {object} [options.migrationVersion=undefined]
    * @property {string} [options.namespace]
-   * @property {array} [options.references] - [{ name, type, id }]
+   * @property {array} [options.references=[]] - [{ name, type, id }]
    * @returns {promise} - { id, type, version, attributes }
    */
   public async create<T extends SavedObjectAttributes>(
     type: string,
     attributes: T,
-    options: SavedObjectsCreateOptions = { overwrite: false, references: [] }
+    options: SavedObjectsCreateOptions = {}
   ): Promise<SavedObject<T>> {
-    const { id, migrationVersion, overwrite, namespace, references } = options;
+    const { id, migrationVersion, overwrite = false, namespace, references = [] } = options;
 
     if (!this._allowedTypes.includes(type)) {
       throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
@@ -279,22 +281,12 @@ export class SavedObjectsRepository {
 
         const id = requestedId || responseId;
         if (error) {
-          if (error.type === 'version_conflict_engine_exception') {
-            return {
-              id,
-              type,
-              error: { statusCode: 409, message: 'version conflict, document already exists' },
-            };
-          }
           return {
             id,
             type,
-            error: {
-              message: error.reason || JSON.stringify(error),
-            },
+            error: getBulkOperationError(error, type, id),
           };
         }
-
         return {
           id,
           type,
@@ -674,6 +666,109 @@ export class SavedObjectsRepository {
   }
 
   /**
+   * Updates multiple objects in bulk
+   *
+   * @param {array} objects - [{ type, id, attributes, options: { version, namespace } references }]
+   * @property {string} options.version - ensures version matches that of persisted object
+   * @property {string} [options.namespace]
+   * @returns {promise} -  {saved_objects: [[{ id, type, version, references, attributes, error: { message } }]}
+   */
+  async bulkUpdate<T extends SavedObjectAttributes = any>(
+    objects: Array<SavedObjectsBulkUpdateObject<T>>,
+    options: SavedObjectsBaseOptions = {}
+  ): Promise<SavedObjectsBulkUpdateResponse<T>> {
+    const time = this._getCurrentTime();
+    const bulkUpdateParams: object[] = [];
+
+    let requestIndexCounter = 0;
+    const expectedResults: Array<Either<any, any>> = objects.map(object => {
+      const { type, id } = object;
+
+      if (!this._allowedTypes.includes(type)) {
+        return {
+          tag: 'Left' as 'Left',
+          error: {
+            id,
+            type,
+            error: SavedObjectsErrorHelpers.createGenericNotFoundError(type, id).output.payload,
+          },
+        };
+      }
+
+      const { attributes, references, version } = object;
+      const { namespace } = options;
+
+      const documentToSave = {
+        [type]: attributes,
+        updated_at: time,
+        references,
+      };
+
+      if (!Array.isArray(documentToSave.references)) {
+        delete documentToSave.references;
+      }
+
+      const expectedResult = {
+        type,
+        id,
+        esRequestIndex: requestIndexCounter++,
+        documentToSave,
+      };
+
+      bulkUpdateParams.push(
+        {
+          update: {
+            _id: this._serializer.generateRawId(namespace, type, id),
+            _index: this.getIndexForType(type),
+            ...(version && decodeRequestVersion(version)),
+          },
+        },
+        { doc: documentToSave }
+      );
+
+      return { tag: 'Right' as 'Right', value: expectedResult };
+    });
+
+    const esResponse = bulkUpdateParams.length
+      ? await this._writeToCluster('bulk', {
+          refresh: 'wait_for',
+          body: bulkUpdateParams,
+        })
+      : {};
+
+    return {
+      saved_objects: expectedResults.map(expectedResult => {
+        if (isLeft(expectedResult)) {
+          return expectedResult.error;
+        }
+
+        const { type, id, documentToSave, esRequestIndex } = expectedResult.value;
+        const response = esResponse.items[esRequestIndex];
+        const { error, _seq_no: seqNo, _primary_term: primaryTerm } = Object.values(
+          response
+        )[0] as any;
+
+        const { [type]: attributes, references, updated_at } = documentToSave;
+        if (error) {
+          return {
+            id,
+            type,
+            error: getBulkOperationError(error, type, id),
+          };
+        }
+        return {
+          id,
+          type,
+          updated_at,
+          version: encodeVersion(seqNo, primaryTerm),
+          attributes,
+          references,
+        };
+      }),
+    };
+  }
+
+  /**
    * Increases a counter field by one. Creates the document if one doesn't exist for the given id.
    *
    * @param {string} type
@@ -800,5 +895,18 @@ export class SavedObjectsRepository {
   private _rawToSavedObject(raw: RawDoc): SavedObject {
     const savedObject = this._serializer.rawToSavedObject(raw);
     return omit(savedObject, 'namespace');
+  }
+}
+
+function getBulkOperationError(error: { type: string; reason?: string }, type: string, id: string) {
+  switch (error.type) {
+    case 'version_conflict_engine_exception':
+      return { statusCode: 409, message: 'version conflict, document already exists' };
+    case 'document_missing_exception':
+      return SavedObjectsErrorHelpers.createGenericNotFoundError(type, id).output.payload;
+    default:
+      return {
+        message: error.reason || JSON.stringify(error),
+      };
   }
 }

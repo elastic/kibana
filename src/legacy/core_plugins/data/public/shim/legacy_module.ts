@@ -20,20 +20,18 @@
 import { once } from 'lodash';
 
 import { wrapInI18nContext } from 'ui/i18n';
-import { Filter } from '@kbn/es-query';
 
 // @ts-ignore
 import { uiModules } from 'ui/modules';
 import { npStart } from 'ui/new_platform';
 import { FilterBar, ApplyFiltersPopover } from '../filter';
-import template from './apply_filter_directive.html';
 
 // @ts-ignore
 import { mapAndFlattenFilters } from '../filter/filter_manager/lib/map_and_flatten_filters';
 import { IndexPatterns } from '../index_patterns/index_patterns';
 
 /** @internal */
-export const initLegacyModule = once((): void => {
+export const initLegacyModule = once((indexPatterns: IndexPatterns): void => {
   uiModules
     .get('app/kibana', ['react'])
     .directive('filterBar', () => {
@@ -76,46 +74,53 @@ export const initLegacyModule = once((): void => {
         ['pluginDataStart', { watchDepth: 'reference' }],
       ]);
     })
-    .directive('applyFiltersPopoverComponent', (reactDirective: any) =>
-      reactDirective(wrapInI18nContext(ApplyFiltersPopover))
-    )
     .directive('applyFiltersPopover', () => {
       return {
-        template,
         restrict: 'E',
-        scope: {
-          filters: '=',
-          onCancel: '=',
-          onSubmit: '=',
-          indexPatterns: '=',
-        },
-        link($scope: any) {
-          $scope.state = {};
+        template: '',
+        compile: (elem: any) => {
+          const child = document.createElement('apply-filters-popover-helper');
 
-          // Each time the new filters change we want to rebuild (not just re-render) the "apply filters"
-          // popover, because it has to reset its state whenever the new filters change. Setting a `key`
-          // property on the component accomplishes this due to how React handles the `key` property.
-          $scope.$watch('filters', (filters: any) => {
-            const mappedFilters: Filter[] = mapAndFlattenFilters(filters);
-            $scope.state = {
-              filters: mappedFilters,
-              key: Date.now(),
-            };
-          });
+          // Copy attributes to the child directive
+          for (const attr of elem[0].attributes) {
+            child.setAttribute(attr.name, attr.value);
+          }
+
+          // Add a key attribute that will force a full rerender every time that
+          // a filter changes.
+          child.setAttribute('key', 'key');
+
+          // Append helper directive
+          elem.append(child);
+
+          const linkFn = ($scope: any, _: any, $attr: any) => {
+            // Watch only for filter changes to update key.
+            $scope.$watch(
+              () => {
+                return $scope.$eval($attr.filters) || [];
+              },
+              (newVal: any) => {
+                $scope.key = Date.now();
+              },
+              true
+            );
+          };
+
+          return linkFn;
         },
       };
-    });
+    })
+    .directive('applyFiltersPopoverHelper', (reactDirective: any) =>
+      reactDirective(wrapInI18nContext(ApplyFiltersPopover), [
+        ['filters', { watchDepth: 'collection' }],
+        ['onCancel', { watchDepth: 'reference' }],
+        ['onSubmit', { watchDepth: 'reference' }],
+        ['indexPatterns', { watchDepth: 'collection' }],
 
-  const module = uiModules.get('kibana/index_patterns');
-  let _service: any;
-  module.service('indexPatterns', function() {
-    if (!_service)
-      _service = new IndexPatterns(
-        npStart.core.uiSettings,
-        npStart.core.savedObjects.client,
-        npStart.core.http,
-        npStart.core.notifications
-      );
-    return _service;
-  });
+        // Key is needed to trigger a full rerender of the component
+        'key',
+      ])
+    );
+
+  uiModules.get('kibana/index_patterns').value('indexPatterns', indexPatterns);
 });

@@ -32,7 +32,7 @@ import { UiSettingsClientContract } from 'src/core/public';
 import { IndexPattern } from '../../index_patterns';
 import { FilterEditor } from './filter_editor';
 import { FilterView } from './filter_view';
-import { getDisplayValueFromFilter } from './filter_editor/lib/filter_editor_utils';
+import { getDisplayValueFromFilter } from './filter_editor/lib/get_display_value';
 
 interface Props {
   id: string;

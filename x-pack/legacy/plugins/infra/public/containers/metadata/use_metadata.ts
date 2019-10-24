@@ -9,16 +9,16 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { InfraNodeType } from '../../graphql/types';
-import { InfraMetricLayout } from '../../pages/metrics/layouts/types';
 import { InfraMetadata, InfraMetadataRT } from '../../../common/http_api/metadata_api';
 import { getFilteredLayouts } from './lib/get_filtered_layouts';
 import { useHTTPRequest } from '../../hooks/use_http_request';
 import { throwErrors, createPlainError } from '../../../common/runtime_types';
+import { InventoryDetailLayout } from '../../../common/inventory_models/types';
 
 export function useMetadata(
   nodeId: string,
   nodeType: InfraNodeType,
-  layouts: InfraMetricLayout[],
+  layouts: InventoryDetailLayout[],
   sourceId: string
 ) {
   const decodeResponse = (response: any) => {

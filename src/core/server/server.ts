@@ -55,8 +55,8 @@ export class Server {
   private readonly uiSettings: UiSettingsService;
 
   constructor(
-    readonly config$: Observable<Config>,
-    readonly env: Env,
+    public readonly config$: Observable<Config>,
+    public readonly env: Env,
     private readonly logger: LoggerFactory
   ) {
     this.log = this.logger.get('server');
