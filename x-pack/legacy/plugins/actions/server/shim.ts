@@ -31,6 +31,10 @@ export interface Server extends Legacy.Server {
   plugins: Plugins;
 }
 
+export interface KibanaConfig {
+  index: string;
+}
+
 /**
  * Shim what we're thinking setup and start contracts will look like
  */
@@ -54,6 +58,7 @@ export type EncryptedSavedObjectsStartContract = Pick<
 export interface ActionsPluginInitializerContext {
   logger: LoggerFactory;
   config: {
+    kibana$: Rx.Observable<KibanaConfig>;
     create(): Rx.Observable<ActionsConfigType>;
   };
 }
@@ -101,6 +106,9 @@ export function shim(
   const initializerContext: ActionsPluginInitializerContext = {
     logger: newPlatform.coreContext.logger,
     config: {
+      kibana$: Rx.of({
+        index: server.config().get('kibana.index'),
+      }),
       create() {
         return Rx.of({
           enabled: server.config().get('xpack.actions.enabled') as boolean,

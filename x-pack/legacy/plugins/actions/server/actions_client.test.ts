@@ -16,6 +16,7 @@ import {
   SavedObjectsClientMock,
 } from '../../../../../src/core/server/mocks';
 
+const defaultKibanaIndex = '.kibana';
 const savedObjectsClient = SavedObjectsClientMock.create();
 const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
 
@@ -54,6 +55,7 @@ describe('create()', () => {
       actionTypeRegistry,
       savedObjectsClient,
       scopedClusterClient,
+      defaultKibanaIndex,
     });
     savedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
     const result = await actionsClient.create({
@@ -90,6 +92,7 @@ describe('create()', () => {
       actionTypeRegistry,
       savedObjectsClient,
       scopedClusterClient,
+      defaultKibanaIndex,
     });
     actionTypeRegistry.register({
       id: 'my-action-type',
@@ -121,6 +124,7 @@ describe('create()', () => {
       actionTypeRegistry,
       savedObjectsClient,
       scopedClusterClient,
+      defaultKibanaIndex,
     });
     await expect(
       actionsClient.create({
@@ -147,6 +151,7 @@ describe('create()', () => {
       actionTypeRegistry,
       savedObjectsClient,
       scopedClusterClient,
+      defaultKibanaIndex,
     });
     savedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
@@ -211,6 +216,7 @@ describe('get()', () => {
       actionTypeRegistry,
       savedObjectsClient,
       scopedClusterClient,
+      defaultKibanaIndex,
     });
     savedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
@@ -256,6 +262,7 @@ describe('find()', () => {
       actionTypeRegistry,
       savedObjectsClient,
       scopedClusterClient,
+      defaultKibanaIndex,
     });
     savedObjectsClient.find.mockResolvedValueOnce(expectedResult);
     const result = await actionsClient.find({});
@@ -291,6 +298,7 @@ describe('delete()', () => {
       actionTypeRegistry,
       savedObjectsClient,
       scopedClusterClient,
+      defaultKibanaIndex,
     });
     savedObjectsClient.delete.mockResolvedValueOnce(expectedResult);
     const result = await actionsClient.delete({ id: '1' });
@@ -317,6 +325,7 @@ describe('update()', () => {
       actionTypeRegistry,
       savedObjectsClient,
       scopedClusterClient,
+      defaultKibanaIndex,
     });
     savedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
@@ -379,6 +388,7 @@ describe('update()', () => {
       actionTypeRegistry,
       savedObjectsClient,
       scopedClusterClient,
+      defaultKibanaIndex,
     });
     actionTypeRegistry.register({
       id: 'my-action-type',
@@ -423,6 +433,7 @@ describe('update()', () => {
       actionTypeRegistry,
       savedObjectsClient,
       scopedClusterClient,
+      defaultKibanaIndex,
     });
     savedObjectsClient.get.mockResolvedValueOnce({
       id: 'my-action',

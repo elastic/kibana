@@ -54,6 +54,7 @@ interface FindResult {
 }
 
 interface ConstructorOptions {
+  defaultKibanaIndex: string;
   scopedClusterClient: IScopedClusterClient;
   actionTypeRegistry: ActionTypeRegistry;
   savedObjectsClient: SavedObjectsClientContract;
@@ -65,14 +66,21 @@ interface UpdateOptions {
 }
 
 export class ActionsClient {
+  private readonly defaultKibanaIndex: string;
   private readonly scopedClusterClient: IScopedClusterClient;
   private readonly savedObjectsClient: SavedObjectsClientContract;
   private readonly actionTypeRegistry: ActionTypeRegistry;
 
-  constructor({ actionTypeRegistry, scopedClusterClient, savedObjectsClient }: ConstructorOptions) {
+  constructor({
+    actionTypeRegistry,
+    defaultKibanaIndex,
+    scopedClusterClient,
+    savedObjectsClient,
+  }: ConstructorOptions) {
     this.actionTypeRegistry = actionTypeRegistry;
     this.savedObjectsClient = savedObjectsClient;
     this.scopedClusterClient = scopedClusterClient;
+    this.defaultKibanaIndex = defaultKibanaIndex;
   }
 
   /**
@@ -149,6 +157,7 @@ export class ActionsClient {
     });
 
     const data = await injectExtraFindData(
+      this.defaultKibanaIndex,
       this.scopedClusterClient,
       findResult.saved_objects.map(actionFromSavedObject)
     );
@@ -177,6 +186,7 @@ function actionFromSavedObject(savedObject: SavedObject<RawAction>): ActionResul
 }
 
 async function injectExtraFindData(
+  defaultKibanaIndex: string,
   scopedClusterClient: IScopedClusterClient,
   actionResults: ActionResult[]
 ): Promise<FindActionResult[]> {
@@ -215,7 +225,7 @@ async function injectExtraFindData(
     };
   }
   const aggregationResult = await scopedClusterClient.callAsCurrentUser('search', {
-    index: '.kibana',
+    index: defaultKibanaIndex,
     body: {
       aggs,
       size: 0,
