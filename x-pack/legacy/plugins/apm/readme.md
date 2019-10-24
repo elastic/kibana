@@ -120,7 +120,7 @@ To make the [VSCode debugger](https://vscode.readthedocs.io/en/latest/editor/deb
   "internalConsoleOptions": "openOnSessionStart",
   "disableOptimisticBPs": true,
   "program": "${workspaceFolder}/../../../scripts/jest.js",
-  "runtimeVersion": "10.15.2"
+  "runtimeVersion": "10.17.0"
 }
 ```
 
