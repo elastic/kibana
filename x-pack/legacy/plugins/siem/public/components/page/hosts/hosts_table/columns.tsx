@@ -7,9 +7,6 @@
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import moment from 'moment';
 import React from 'react';
-import { StaticIndexPattern } from 'ui/index_patterns';
-
-import { hostsModel } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { getEmptyTagValue } from '../../../empty_value';
@@ -18,15 +15,12 @@ import { HostDetailsLink } from '../../../links';
 import { LocalizedDateTooltip } from '../../../localized_date_tooltip';
 import { IS_OPERATOR } from '../../../timeline/data_providers/data_provider';
 import { Provider } from '../../../timeline/data_providers/provider';
-import { AddToKql, createFilter } from '../../add_to_kql';
+import { AddFilterToGlobalSearchBar, createFilter } from '../../add_filter_to_global_search_bar';
 import { HostsTableColumns } from './';
 
 import * as i18n from './translations';
 
-export const getHostsColumns = (
-  type: hostsModel.HostsType,
-  indexPattern: StaticIndexPattern
-): HostsTableColumns => [
+export const getHostsColumns = (): HostsTableColumns => [
   {
     field: 'node.host.name',
     name: i18n.NAME,
@@ -54,13 +48,9 @@ export const getHostsColumns = (
                   <Provider dataProvider={dataProvider} />
                 </DragEffects>
               ) : (
-                <AddToKql
-                  id="global"
-                  indexPattern={indexPattern}
-                  filter={createFilter('host.name', hostName[0])}
-                >
+                <AddFilterToGlobalSearchBar filter={createFilter('host.name', hostName[0])}>
                   <HostDetailsLink hostName={hostName[0]} />
-                </AddToKql>
+                </AddFilterToGlobalSearchBar>
               )
             }
           />
@@ -103,13 +93,9 @@ export const getHostsColumns = (
     render: hostOsName => {
       if (hostOsName != null) {
         return (
-          <AddToKql
-            id="global"
-            indexPattern={indexPattern}
-            filter={createFilter('host.os.name', hostOsName)}
-          >
+          <AddFilterToGlobalSearchBar filter={createFilter('host.os.name', hostOsName)}>
             <>{hostOsName}</>
-          </AddToKql>
+          </AddFilterToGlobalSearchBar>
         );
       }
       return getEmptyTagValue();
@@ -124,13 +110,9 @@ export const getHostsColumns = (
     render: hostOsVersion => {
       if (hostOsVersion != null) {
         return (
-          <AddToKql
-            id="global"
-            indexPattern={indexPattern}
-            filter={createFilter('host.os.version', hostOsVersion)}
-          >
+          <AddFilterToGlobalSearchBar filter={createFilter('host.os.version', hostOsVersion)}>
             <>{hostOsVersion}</>
-          </AddToKql>
+          </AddFilterToGlobalSearchBar>
         );
       }
       return getEmptyTagValue();
