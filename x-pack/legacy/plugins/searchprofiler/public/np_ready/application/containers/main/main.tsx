@@ -25,7 +25,7 @@ import {
 } from '../../components';
 
 import { EmptyTreePlaceHolder } from './components';
-import { Targets, ShardSerialized } from '../types';
+import { Targets, ShardSerialized } from '../../types';
 
 function hasSearch(profileResponse: ShardSerialized[]) {
   const aggs = _.get(profileResponse, '[0].searches', []);
