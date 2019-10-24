@@ -19,6 +19,8 @@
 import { reverseSortDir } from '../sorting';
 import { SortDirection } from 'ui/courier/types';
 
+jest.mock('ui/new_platform');
+
 describe('function reverseSortDir', function() {
   test('reverse a given sort direction', function() {
     expect(reverseSortDir(SortDirection.asc)).toBe(SortDirection.desc);
