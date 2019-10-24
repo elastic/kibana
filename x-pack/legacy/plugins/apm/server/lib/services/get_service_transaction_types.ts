@@ -41,6 +41,6 @@ export async function getServiceTransactionTypes(
 
   const { aggregations } = await client.search(params);
   const buckets = idx(aggregations, _ => _.types.buckets) || [];
-  const transactionTypes = buckets.map(bucket => bucket.key);
+  const transactionTypes = buckets.map(bucket => bucket.key as string);
   return { transactionTypes };
 }
