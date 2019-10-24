@@ -409,7 +409,7 @@ export const AlertsConfiguration: React.FC<AlertsConfigurationProps> = (
       !!editAction || !selectedEmailActionId || selectedEmailActionId === NEW_ACTION_ID;
 
     return {
-      title: i18n.translate('xpack.monitoring.alerts.configuration.setEmailAddress', {
+      title: i18n.translate('xpack.monitoring.alerts.configuration.confirm', {
         defaultMessage: 'Confirm and save',
       }),
       status: getStep2Status(isDisabled),
