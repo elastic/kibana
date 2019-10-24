@@ -1180,8 +1180,8 @@ Array [
       expect(migratedDoc).toEqual({ attributes: { visState: JSON.stringify(expected) } });
     });
   });
-  describe('7.5.0 tsvb split_filters migration', () => {
-    const migrate = doc => migrations.visualization['7.5.0'](doc);
+  describe('7.4.2 tsvb split_filters migration', () => {
+    const migrate = doc => migrations.visualization['7.4.2'](doc);
     const generateDoc = ({ params }) => ({
       attributes: {
         title: 'My Vis',
@@ -1213,8 +1213,8 @@ Array [
       expect(Object.keys(timeSeriesParams.filter)).toEqual(
         expect.arrayContaining(['query', 'language'])
       );
-      expect(Object.keys(timeSeriesParams.series[0].split_filters[0].filter)).toEqual(
-        expect.arrayContaining(['query', 'language'])
+      expect(timeSeriesParams.series[0].split_filters[0].filter).toEqual(
+        { query: 'bytes:>1000', language: 'lucene' }
       );
     });
     it('should change series item split filters when there is no filter item', () => {
@@ -1241,9 +1241,11 @@ Array [
       const timeSeriesDoc = generateDoc({ params: params });
       const migratedtimeSeriesDoc = migrate(timeSeriesDoc);
       const timeSeriesParams = JSON.parse(migratedtimeSeriesDoc.attributes.visState).params;
-      expect(timeSeriesParams.series[0].split_filters[0].filter).toHaveProperty('query');
+      expect(timeSeriesParams.series[0].split_filters[0].filter).toEqual(
+        { query: 'bytes:>1000', language: 'lucene' }
+      );
     });
-    it('should not error out if there are no split filter items', () => {
+    it('should not convert split_filters to objects if there are no split filter filters', () => {
       const params = {
         type: 'timeseries',
         filter: {
@@ -1259,7 +1261,7 @@ Array [
       const timeSeriesDoc = generateDoc({ params: params });
       const migratedtimeSeriesDoc = migrate(timeSeriesDoc);
       const timeSeriesParams = JSON.parse(migratedtimeSeriesDoc.attributes.visState).params;
-      expect(timeSeriesParams.series[0].split_filters).not.toHaveProperty;
+      expect(timeSeriesParams.series[0].split_filters).not.toHaveProperty('query');
     });
     it('should do nothing if a split_filter is already a query:language object', () => {
       const params = {

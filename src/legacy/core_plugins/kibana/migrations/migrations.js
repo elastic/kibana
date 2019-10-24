@@ -286,7 +286,7 @@ function transformFilterStringToQueryObject(doc) {
   return newDoc;
 }
 function transformSplitFiltersStringToQueryObject(doc) {
-  // Migrate split_filters in TSVB objects that were'nt migrated in 7.3
+  // Migrate split_filters in TSVB objects that weren't migrated in 7.3
   // If any filters exist and they are a string, we assume them to be lucene syntax and transform the filter into an object accordingly
   const newDoc = cloneDeep(doc);
   const visStateJSON = get(doc, 'attributes.visState');
@@ -479,7 +479,7 @@ const executeSearchMigrations740 = flow(
   migrateSearchSortToNestedArray,
 );
 
-const executeMigrations750 = flow(
+const executeMigrations742 = flow(
   transformSplitFiltersStringToQueryObject
 );
 
@@ -589,7 +589,8 @@ export const migrations = {
     '7.2.0': doc => executeMigrations720(doc),
     '7.3.0': executeMigrations730,
     '7.3.1': executeVisualizationMigrations731,
-    '7.5.0': executeMigrations750,
+    // migrate split_filters that were not migrated in 7.3.0 (transformFilterStringToQueryObject).
+    '7.4.2': executeMigrations742,
   },
   dashboard: {
     '7.0.0': doc => {
