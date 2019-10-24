@@ -116,6 +116,7 @@ export const MetricsExplorerToolbar = ({
             chartOptions={chartOptions}
           />
         </EuiFlexItem>
+
         <EuiFlexItem grow={false}>
           <SavedViewsToolbarControls
             defaultViewState={defaultViewState}

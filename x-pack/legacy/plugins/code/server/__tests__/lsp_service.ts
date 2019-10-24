@@ -85,6 +85,7 @@ describe('lsp_service tests', () => {
   }
 
   const repoUri = 'github.com/test/test_repo';
+  const mockRndPath = '__random';
 
   // @ts-ignore
   before(async () => {
@@ -101,7 +102,7 @@ describe('lsp_service tests', () => {
 
   function mockLspService() {
     const esClient = mockEsClient();
-    return new LspService(
+    const service = new LspService(
       '127.0.0.1',
       serverOptions,
       gitOps,
@@ -110,6 +111,9 @@ describe('lsp_service tests', () => {
       new ConsoleLoggerFactory(),
       new RepositoryConfigController(esClient)
     );
+    // @ts-ignore
+    service.workspaceHandler.randomPath = () => 'random';
+    return service;
   }
 
   async function sendHoverRequest(lspservice: LspService, revision: string) {
@@ -145,13 +149,13 @@ describe('lsp_service tests', () => {
       ctrlSpy.restore();
 
       const workspaceFolderExists = fs.existsSync(
-        path.join(serverOptions.workspacePath, repoUri, revision)
+        path.join(serverOptions.workspacePath, repoUri, mockRndPath, revision)
       );
       // workspace is opened
       assert.ok(workspaceFolderExists);
 
       const workspacePath = fs.realpathSync(
-        path.resolve(serverOptions.workspacePath, repoUri, revision)
+        path.resolve(serverOptions.workspacePath, repoUri, mockRndPath, revision)
       );
       // workspace handler is working, filled workspacePath
       sinon.assert.calledWith(
@@ -177,7 +181,12 @@ describe('lsp_service tests', () => {
       // send a dummy request to open a workspace;
       const response = await sendHoverRequest(lspservice, revision);
       assert.ok(response);
-      const workspacePath = path.resolve(serverOptions.workspacePath, repoUri, revision);
+      const workspacePath = path.resolve(
+        serverOptions.workspacePath,
+        repoUri,
+        mockRndPath,
+        revision
+      );
       const workspaceFolderExists = fs.existsSync(workspacePath);
       // workspace is opened
       assert.ok(workspaceFolderExists);
@@ -216,7 +225,12 @@ describe('lsp_service tests', () => {
       // send a dummy request to open a workspace;
       const response = await sendHoverRequest(lspservice, revision);
       assert.ok(response);
-      const workspacePath = path.resolve(serverOptions.workspacePath, repoUri, revision);
+      const workspacePath = path.resolve(
+        serverOptions.workspacePath,
+        repoUri,
+        mockRndPath,
+        revision
+      );
       const git = simplegit(workspacePath);
       const workspaceCommit = await git.revparse(['HEAD']);
       // workspace is newest now

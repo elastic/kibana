@@ -16,11 +16,6 @@ import {
   EVENT_RATE_FIELD_ID,
 } from '../../common/types/fields';
 import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
-import {
-  ML_JOB_AGGREGATION,
-  KIBANA_AGGREGATION,
-  ES_AGGREGATION,
-} from '../../common/constants/aggregation_types';
 import { ml } from './ml_api_service';
 
 // called in the angular routing resolve block to initialize the
@@ -55,15 +50,10 @@ export function loadNewJobCapabilities(
 const categoryFieldTypes = [ES_FIELD_TYPES.TEXT, ES_FIELD_TYPES.KEYWORD, ES_FIELD_TYPES.IP];
 
 class NewJobCapsService {
-  private _fields: Field[];
-  private _aggs: Aggregation[];
-  private _includeCountAgg: boolean;
-
-  constructor(includeCountAgg = true) {
-    this._fields = [];
-    this._aggs = [];
-    this._includeCountAgg = includeCountAgg;
-  }
+  private _fields: Field[] = [];
+  private _aggs: Aggregation[] = [];
+  private _includeEventRateField: boolean = true;
+  private _removeTextFields: boolean = true;
 
   public get fields(): Field[] {
     return this._fields;
@@ -84,19 +74,26 @@ class NewJobCapsService {
     return this._fields.filter(f => categoryFieldTypes.includes(f.type));
   }
 
-  public async initializeFromIndexPattern(indexPattern: IndexPattern) {
+  public async initializeFromIndexPattern(
+    indexPattern: IndexPattern,
+    includeEventRateField = true,
+    removeTextFields = true
+  ) {
     try {
+      this._includeEventRateField = includeEventRateField;
+      this._removeTextFields = removeTextFields;
+
       const resp = await ml.jobs.newJobCaps(indexPattern.title, indexPattern.type === 'rollup');
       const { fields, aggs } = createObjects(resp, indexPattern.title);
 
-      if (this._includeCountAgg === true) {
-        const { countField, countAggs } = createCountFieldAndAggs();
-
-        fields.splice(0, 0, countField);
-        aggs.push(...countAggs);
+      if (this._includeEventRateField === true) {
+        addEventRateField(aggs, fields);
       }
 
-      this._fields = fields;
+      // remove any text fields which have a keyword equivalents
+      const processedFields = this._removeTextFields ? processTextFields(fields) : fields;
+
+      this._fields = processedFields;
       this._aggs = aggs;
     } catch (error) {
       console.error('Unable to load new job capabilities', error); // eslint-disable-line no-console
@@ -134,17 +131,18 @@ function createObjects(resp: any, indexPatternTitle: string) {
 
   if (results !== undefined) {
     results.aggs.forEach((a: Aggregation) => {
-      // copy the agg and add a Fields list
+      // create the aggs list
+      // only adding a fields list if there is a fieldIds list
       const agg: Aggregation = {
         ...a,
-        fields: [],
+        ...(a.fieldIds !== undefined ? { fields: [] } : {}),
       };
       aggMap[agg.id] = agg;
       aggs.push(agg);
     });
 
     results.fields.forEach((f: Field) => {
-      // copy the field and add an Aggregations list
+      // create the fields list
       const field: Field = {
         ...f,
         aggs: [],
@@ -186,8 +184,8 @@ function mix(field: Field, agg: Aggregation) {
   field.aggs.push(agg);
 }
 
-function createCountFieldAndAggs() {
-  const countField: Field = {
+function addEventRateField(aggs: Aggregation[], fields: Field[]) {
+  const eventRateField: Field = {
     id: EVENT_RATE_FIELD_ID,
     name: 'Event rate',
     type: ES_FIELD_TYPES.INTEGER,
@@ -195,53 +193,25 @@ function createCountFieldAndAggs() {
     aggs: [],
   };
 
-  const countAggs: Aggregation[] = [
-    {
-      id: ML_JOB_AGGREGATION.COUNT,
-      title: 'Count',
-      kibanaName: KIBANA_AGGREGATION.COUNT,
-      dslName: ES_AGGREGATION.COUNT,
-      type: 'metrics',
-      mlModelPlotAgg: {
-        min: 'min',
-        max: 'max',
-      },
-      fields: [countField],
-    },
-    {
-      id: ML_JOB_AGGREGATION.HIGH_COUNT,
-      title: 'High count',
-      kibanaName: KIBANA_AGGREGATION.COUNT,
-      dslName: ES_AGGREGATION.COUNT,
-      type: 'metrics',
-      mlModelPlotAgg: {
-        min: 'min',
-        max: 'max',
-      },
-      fields: [countField],
-    },
-    {
-      id: ML_JOB_AGGREGATION.LOW_COUNT,
-      title: 'Low count',
-      kibanaName: KIBANA_AGGREGATION.COUNT,
-      dslName: ES_AGGREGATION.COUNT,
-      type: 'metrics',
-      mlModelPlotAgg: {
-        min: 'min',
-        max: 'max',
-      },
-      fields: [countField],
-    },
-  ];
+  aggs.forEach(a => {
+    if (eventRateField.aggs !== undefined && a.fields === undefined) {
+      // if the agg's field list is undefined, it is a fieldless aggregation and
+      // so can only be used with the event rate field.
+      a.fields = [eventRateField];
+      eventRateField.aggs.push(a);
+    }
+  });
+  fields.splice(0, 0, eventRateField);
+}
 
-  if (countField.aggs !== undefined) {
-    countField.aggs.push(...countAggs);
-  }
-
-  return {
-    countField,
-    countAggs,
-  };
+// remove fields which are text and have a keyword equivalent
+function processTextFields(fields: Field[]) {
+  const keywordIds = fields.filter(f => f.type === ES_FIELD_TYPES.KEYWORD).map(f => f.id);
+  return fields.filter(
+    f =>
+      f.type !== ES_FIELD_TYPES.TEXT ||
+      (f.type === ES_FIELD_TYPES.TEXT && keywordIds.includes(`${f.id}.keyword`) === false)
+  );
 }
 
 export const newJobCapsService = new NewJobCapsService();

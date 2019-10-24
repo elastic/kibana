@@ -25,10 +25,21 @@ import { CustomFilter } from './custom_filter';
 import { ExistsFilter, isExistsFilter } from './exists_filter';
 import { GeoBoundingBoxFilter, isGeoBoundingBoxFilter } from './geo_bounding_box_filter';
 import { GeoPolygonFilter, isGeoPolygonFilter } from './geo_polygon_filter';
-import { PhraseFilter, isPhraseFilter, isScriptedPhraseFilter } from './phrase_filter';
+import {
+  PhraseFilter,
+  isPhraseFilter,
+  isScriptedPhraseFilter,
+  getPhraseFilterField,
+  getPhraseFilterValue,
+} from './phrase_filter';
 import { PhrasesFilter, isPhrasesFilter } from './phrases_filter';
 import { QueryStringFilter, isQueryStringFilter } from './query_string_filter';
-import { RangeFilter, isRangeFilter, isScriptedRangeFilter } from './range_filter';
+import {
+  RangeFilter,
+  isRangeFilter,
+  isScriptedRangeFilter,
+  RangeFilterParams,
+} from './range_filter';
 import { MatchAllFilter, isMatchAllFilter } from './match_all_filter';
 import { MissingFilter, isMissingFilter } from './missing_filter';
 
@@ -43,6 +54,8 @@ export {
   PhraseFilter,
   isPhraseFilter,
   isScriptedPhraseFilter,
+  getPhraseFilterField,
+  getPhraseFilterValue,
   PhrasesFilter,
   isPhrasesFilter,
   QueryStringFilter,
@@ -50,6 +63,7 @@ export {
   RangeFilter,
   isRangeFilter,
   isScriptedRangeFilter,
+  RangeFilterParams,
   MatchAllFilter,
   isMatchAllFilter,
   MissingFilter,

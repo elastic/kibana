@@ -73,6 +73,25 @@ export const ErrorStrings = {
         defaultMessage: "Couldn't fetch Elasticsearch indices",
       }),
   },
+  RenderWithFn: {
+    getRenderErrorMessage: (functionName: string) =>
+      i18n.translate('xpack.canvas.error.RenderWithFn.renderErrorMessage', {
+        defaultMessage: "Rendering '{functionName}' failed",
+        values: {
+          functionName: functionName || 'function',
+        },
+      }),
+  },
+  RepeatImage: {
+    getMissingMaxArgumentErrorMessage: () =>
+      i18n.translate('xpack.canvas.error.repeatImage.missingMaxArgument', {
+        defaultMessage: '{maxArgument} must be set if providing an {emptyImageArgument}',
+        values: {
+          maxArgument: '`max`',
+          emptyImageArgument: '`emptyImage`',
+        },
+      }),
+  },
   WorkpadFileUpload: {
     getAcceptJSONOnlyErrorMessage: () =>
       i18n.translate('xpack.canvas.error.workpadUpload.acceptJSONOnlyErrorMessage', {

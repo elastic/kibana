@@ -14,17 +14,17 @@ import { ChartBase } from '../../../types';
 const series = {
   [METRIC_JAVA_GC_COUNT]: {
     title: i18n.translate('xpack.apm.agentMetrics.java.gcRate', {
-      defaultMessage: 'GC count'
+      defaultMessage: 'GC rate'
     }),
     color: theme.euiColorVis0
   }
 };
 
 const chartBase: ChartBase = {
-  title: i18n.translate('xpack.apm.agentMetrics.java.gcCountChartTitle', {
-    defaultMessage: 'Garbage collection count'
+  title: i18n.translate('xpack.apm.agentMetrics.java.gcRateChartTitle', {
+    defaultMessage: 'Garbage collection per minute'
   }),
-  key: 'gc_count_line_chart',
+  key: 'gc_rate_line_chart',
   type: 'linemark',
   yUnit: 'integer',
   series

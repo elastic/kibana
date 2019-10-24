@@ -123,7 +123,8 @@ export class HistogramInner extends PureComponent {
     const xDomain = x.domain();
     const yDomain = y.domain();
     const yTickValues = [0, yDomain[1] / 2, yDomain[1]];
-    const isTimeSeries = this.props.xType === 'time';
+    const isTimeSeries =
+      this.props.xType === 'time' || this.props.xType === 'time-utc';
     const shouldShowTooltip =
       hoveredBucket.x > 0 && (hoveredBucket.y > 0 || isTimeSeries);
 

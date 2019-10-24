@@ -17,7 +17,7 @@ import { IPrivate } from 'ui/private';
 import { InjectorService } from '../../../common/types/angular';
 
 import { KibanaConfigTypeFix, KibanaContext } from '../../contexts/kibana/kibana_context';
-import { SearchItemsProvider } from '../../jobs/new_job/utils/new_job_utils';
+import { SearchItemsProvider } from '../../jobs/new_job_new/utils/new_job_utils';
 
 import { Page } from './page';
 

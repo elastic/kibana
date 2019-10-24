@@ -127,6 +127,57 @@ describe('xy_expression', () => {
       expect(component.find(LineSeries)).toHaveLength(1);
     });
 
+    test('it uses the full date range', () => {
+      const { data, args } = sampleArgs();
+
+      const component = shallow(
+        <XYChart
+          data={{
+            ...data,
+            dateRange: {
+              fromDate: new Date('2019-01-02T05:00:00.000Z'),
+              toDate: new Date('2019-01-03T05:00:00.000Z'),
+            },
+          }}
+          args={{
+            ...args,
+            layers: [{ ...args.layers[0], seriesType: 'line', xScaleType: 'time' }],
+          }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+        />
+      );
+      expect(component.find(Settings).prop('xDomain')).toMatchInlineSnapshot(`
+        Object {
+          "max": 1546491600000,
+          "min": 1546405200000,
+        }
+      `);
+    });
+
+    test('it does not use date range if the x is not a time scale', () => {
+      const { data, args } = sampleArgs();
+
+      const component = shallow(
+        <XYChart
+          data={{
+            ...data,
+            dateRange: {
+              fromDate: new Date('2019-01-02T05:00:00.000Z'),
+              toDate: new Date('2019-01-03T05:00:00.000Z'),
+            },
+          }}
+          args={{
+            ...args,
+            layers: [{ ...args.layers[0], seriesType: 'line', xScaleType: 'linear' }],
+          }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+        />
+      );
+      expect(component.find(Settings).prop('xDomain')).toBeUndefined();
+    });
+
     test('it renders bar', () => {
       const { data, args } = sampleArgs();
       const component = shallow(

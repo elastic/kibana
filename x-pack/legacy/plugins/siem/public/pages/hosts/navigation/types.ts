@@ -29,8 +29,8 @@ interface QueryTabBodyProps {
   type: hostsModel.HostsType;
   startDate: number;
   endDate: number;
+  timezone?: string;
   filterQuery?: string | ESTermQuery;
-  kqlQueryExpression: string;
 }
 
 export type AnomaliesQueryTabBodyProps = QueryTabBodyProps & {

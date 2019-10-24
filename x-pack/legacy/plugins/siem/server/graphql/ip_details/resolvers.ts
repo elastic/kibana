@@ -6,27 +6,12 @@
 
 import { SourceResolvers } from '../../graphql/types';
 import { AppResolverOf, ChildResolverOf } from '../../lib/framework';
-import {
-  DomainsRequestOptions,
-  IpDetails,
-  TlsRequestOptions,
-  UsersRequestOptions,
-} from '../../lib/ip_details';
+import { IpDetails, UsersRequestOptions } from '../../lib/ip_details';
 import { createOptions, createOptionsPaginated } from '../../utils/build_query/create_options';
 import { QuerySourceResolver } from '../sources/resolvers';
 
 export type QueryIpOverviewResolver = ChildResolverOf<
   AppResolverOf<SourceResolvers.IpOverviewResolver>,
-  QuerySourceResolver
->;
-
-export type QueryDomainsResolver = ChildResolverOf<
-  AppResolverOf<SourceResolvers.DomainsResolver>,
-  QuerySourceResolver
->;
-
-export type QueryTlsResolver = ChildResolverOf<
-  AppResolverOf<SourceResolvers.TlsResolver>,
   QuerySourceResolver
 >;
 
@@ -44,8 +29,6 @@ export const createIpDetailsResolvers = (
 ): {
   Source: {
     IpOverview: QueryIpOverviewResolver;
-    Domains: QueryDomainsResolver;
-    Tls: QueryTlsResolver;
     Users: QueryUsersResolver;
   };
 } => ({
@@ -54,30 +37,11 @@ export const createIpDetailsResolvers = (
       const options = { ...createOptions(source, args, info), ip: args.ip };
       return libs.ipDetails.getIpOverview(req, options);
     },
-    async Domains(source, args, { req }, info) {
-      const options: DomainsRequestOptions = {
-        ...createOptionsPaginated(source, args, info),
-        ip: args.ip,
-        domainsSortField: args.sort,
-        flowTarget: args.flowTarget,
-        flowDirection: args.flowDirection,
-      };
-      return libs.ipDetails.getDomains(req, options);
-    },
-    async Tls(source, args, { req }, info) {
-      const options: TlsRequestOptions = {
-        ...createOptionsPaginated(source, args, info),
-        ip: args.ip,
-        tlsSortField: args.sort,
-        flowTarget: args.flowTarget,
-      };
-      return libs.ipDetails.getTls(req, options);
-    },
     async Users(source, args, { req }, info) {
       const options: UsersRequestOptions = {
         ...createOptionsPaginated(source, args, info),
         ip: args.ip,
-        usersSortField: args.sort,
+        sort: args.sort,
         flowTarget: args.flowTarget,
       };
       return libs.ipDetails.getUsers(req, options);
