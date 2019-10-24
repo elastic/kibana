@@ -11,6 +11,7 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { isColorDark, hexToRgb } from '@elastic/eui';
 
+import { mountForComponent } from '../../../../../src/plugins/kibana_react/public';
 import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { formatAngularHttpError } from 'ui/notify/lib';
@@ -549,9 +550,11 @@ export function initGraphApp(angularModule, deps) {
           canEditDrillDownUrls: canEditDrillDownUrls
         }), $scope.$digest.bind($scope));
         coreStart.overlays.openFlyout(
-          <Provider store={store}>
-            <Settings observable={settingsObservable} />
-          </Provider>, {
+          mountForComponent(
+            <Provider store={store}>
+              <Settings observable={settingsObservable} />
+            </Provider>
+          ), {
             size: 'm',
             closeButtonAriaLabel: i18n.translate('xpack.graph.settings.closeLabel', { defaultMessage: 'Close' }),
             'data-test-subj': 'graphSettingsFlyout',
