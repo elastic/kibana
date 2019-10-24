@@ -39,7 +39,7 @@ async function startApp(libs: FrontendLibs) {
                       })}
                     />
                     <EuiCallOut
-                      title="Beats Central Management has been deprecated"
+                      title="Beats central management has been deprecated"
                       color="warning"
                       iconType="help"
                     >
