@@ -400,9 +400,7 @@ describe.skip('<SnapshotRestoreHome />', () => {
 
       test('should invite the user to first register a repository', () => {
         const { find, exists } = testBed;
-        expect(find('emptyPrompt.title').text()).toBe(
-          `You don't have any snapshots or repositories yet`
-        );
+        expect(find('emptyPrompt.title').text()).toBe('Start by registering a repository');
         expect(exists('emptyPrompt.registerRepositoryButton')).toBe(true);
       });
     });
