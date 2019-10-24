@@ -26,6 +26,7 @@ exports[`TOCEntry is rendered 1`] = `
           "showAtZoomLevel": [Function],
         }
       }
+      removeLayer={[Function]}
       toggleVisible={[Function]}
       zoom={0}
     />
@@ -93,6 +94,7 @@ exports[`TOCEntry props isReadOnly 1`] = `
           "showAtZoomLevel": [Function],
         }
       }
+      removeLayer={[Function]}
       toggleVisible={[Function]}
       zoom={0}
     />
@@ -142,6 +144,7 @@ exports[`TOCEntry props should display layer details when isLegendDetailsOpen is
           "showAtZoomLevel": [Function],
         }
       }
+      removeLayer={[Function]}
       toggleVisible={[Function]}
       zoom={0}
     />

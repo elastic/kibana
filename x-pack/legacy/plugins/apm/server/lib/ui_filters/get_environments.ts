@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ESFilter } from 'elasticsearch';
 import { idx } from '@kbn/elastic-idx';
 import {
   PROCESSOR_EVENT,
@@ -14,6 +13,7 @@ import {
 import { rangeFilter } from '../helpers/range_filter';
 import { Setup } from '../helpers/setup_request';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
+import { ESFilter } from '../../../typings/elasticsearch';
 
 export async function getEnvironments(setup: Setup, serviceName?: string) {
   const { start, end, client, config } = setup;
@@ -58,7 +58,7 @@ export async function getEnvironments(setup: Setup, serviceName?: string) {
   const environmentsBuckets = idx(aggs, _ => _.environments.buckets) || [];
 
   const environments = environmentsBuckets.map(
-    environmentBucket => environmentBucket.key
+    environmentBucket => environmentBucket.key as string
   );
 
   return environments;

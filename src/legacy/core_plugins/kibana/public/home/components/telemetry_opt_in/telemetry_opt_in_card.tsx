@@ -41,7 +41,7 @@ export function renderTelemetryOptInCard({
 }: Props) {
   return (
     <EuiCard
-      image={`${urlBasePath}/plugins/kibana/assets/illo_telemetry.png`}
+      image={`${urlBasePath}/plugins/kibana/home/assets/illo_telemetry.png`}
       textAlign="left"
       title={
         <FormattedMessage
