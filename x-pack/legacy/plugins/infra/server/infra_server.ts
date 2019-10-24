@@ -13,7 +13,10 @@ import { createSnapshotResolvers } from './graphql/snapshot';
 import { createSourceStatusResolvers } from './graphql/source_status';
 import { createSourcesResolvers } from './graphql/sources';
 import { InfraBackendLibs } from './lib/infra_types';
-import { initLogAnalysisGetLogEntryRateRoute } from './routes/log_analysis';
+import {
+  initLogAnalysisGetLogEntryRateRoute,
+  initMlValidateModuleRoute,
+} from './routes/log_analysis';
 import { initMetricExplorerRoute } from './routes/metrics_explorer';
 import { initMetadataRoute } from './routes/metadata';
 
@@ -35,4 +38,5 @@ export const initInfraServer = (libs: InfraBackendLibs) => {
   initLogAnalysisGetLogEntryRateRoute(libs);
   initMetricExplorerRoute(libs);
   initMetadataRoute(libs);
+  initMlValidateModuleRoute(libs);
 };
