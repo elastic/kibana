@@ -22,7 +22,7 @@ import 'ui/fixed_scroll';
 import 'ui/directives/css_truncate';
 
 import { npStart } from 'ui/new_platform';
-import chromeLegacy from 'ui/chrome'; // just used in embeddables
+import chromeLegacy from 'ui/chrome';
 import angular from 'angular'; // just used in embeddables and discover controller
 import uiRoutes from 'ui/routes';
 // @ts-ignore
@@ -46,6 +46,7 @@ import * as docViewsRegistry from 'ui/registry/doc_views';
 
 const services = {
   // new plattform
+  addBasePath: npStart.core.http.basePath.prepend,
   capabilities: npStart.core.application.capabilities,
   chrome: npStart.core.chrome,
   docLinks: npStart.core.docLinks,
@@ -55,10 +56,12 @@ const services = {
   toastNotifications: npStart.core.notifications.toasts,
   uiSettings: npStart.core.uiSettings,
   // legacy
-  chromeLegacy,
   docTitle,
   docViewsRegistry,
   FilterBarQueryFilterProvider,
+  getInjector: () => {
+    return chromeLegacy.dangerouslyGetActiveInjector();
+  },
   SavedObjectRegistryProvider,
   SavedObjectProvider,
   SearchSource,

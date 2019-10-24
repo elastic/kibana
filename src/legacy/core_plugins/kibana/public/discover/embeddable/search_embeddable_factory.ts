@@ -71,12 +71,12 @@ export class SearchEmbeddableFactory extends EmbeddableFactory<
     input: Partial<SearchInput> & { id: string; timeRange: TimeRange },
     parent?: Container
   ): Promise<SearchEmbeddable | ErrorEmbeddable> {
-    const $injector = await getServices().chromeLegacy.dangerouslyGetActiveInjector();
+    const $injector = await getServices().getInjector();
 
     const $compile = $injector.get<ng.ICompileService>('$compile');
     const $rootScope = $injector.get<ng.IRootScopeService>('$rootScope');
     const searchLoader = $injector.get<SavedSearchLoader>('savedSearches');
-    const editUrl = await getServices().chromeLegacy.addBasePath(
+    const editUrl = await getServices().addBasePath(
       `/app/kibana${searchLoader.urlFor(savedObjectId)}`
     );
 
