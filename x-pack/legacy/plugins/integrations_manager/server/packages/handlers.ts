@@ -33,10 +33,6 @@ interface PackageRequest extends Request {
   };
 }
 
-interface ImageRequest extends Request {
-  params: Request['params'] & ImageRequestParams;
-}
-
 interface InstallPackageRequest extends Request {
   params: PackageRequestParams;
 }
