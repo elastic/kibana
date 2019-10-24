@@ -17,9 +17,23 @@
  * under the License.
  */
 
-import { NotificationsStart } from 'src/core/public';
-import { createGetterSetter } from '../../../../../plugins/kibana_utils/public';
+import { createGetterSetter, Get, Set } from './create_getter_setter';
+import { CoreStart } from '../../../../core/public';
+import { KUSavedObjectClient, createSavedObjectsClient } from './saved_objects_client';
 
-export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(
-  'Notifications'
-);
+interface Return {
+  getCoreStart: Get<CoreStart>;
+  setCoreStart: Set<CoreStart>;
+  savedObjects: KUSavedObjectClient;
+}
+
+export const createKibanaUtilsCore = (): Return => {
+  const [getCoreStart, setCoreStart] = createGetterSetter<CoreStart>('CoreStart');
+  const savedObjects = createSavedObjectsClient(getCoreStart);
+
+  return {
+    getCoreStart,
+    setCoreStart,
+    savedObjects,
+  };
+};

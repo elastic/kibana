@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import { NotificationsStart } from 'src/core/public';
-import { createGetterSetter } from '../../../../../plugins/kibana_utils/public';
+import { createGetterSetter } from './create_getter_setter';
+import { CoreStart } from '../../../../core/public';
 
-export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(
-  'Notifications'
-);
+export const [getCoreStart, setCoreStart] = createGetterSetter<CoreStart>('CoreStart');
