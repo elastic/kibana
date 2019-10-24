@@ -37,7 +37,7 @@ import { flattenHitWrapper } from './flatten_hit';
 import { IIndexPatternsApiClient } from './index_patterns_api_client';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../../../../../../plugins/data/common';
 import { getNotifications } from '../services';
-import { FieldFormatRegisty } from '../../../../../../plugins/data/public/';
+import { getFieldFormats, FieldFormatRegisty } from '../../../../../../plugins/data/public/';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const type = 'index-pattern';
@@ -102,8 +102,7 @@ export class IndexPattern implements StaticIndexPattern {
     getConfig: any,
     savedObjectsClient: SavedObjectsClientContract,
     apiClient: IIndexPatternsApiClient,
-    patternCache: any,
-    fieldFormats: FieldFormatRegisty
+    patternCache: any
   ) {
     this.id = id;
     this.savedObjectsClient = savedObjectsClient;
@@ -118,7 +117,7 @@ export class IndexPattern implements StaticIndexPattern {
     this.fields = new FieldList(this, [], this.shortDotsEnable);
     this.fieldsFetcher = createFieldsFetcher(this, apiClient, this.getConfig('metaFields'));
     this.flattenHit = flattenHitWrapper(this, this.getConfig('metaFields'));
-    this.fieldFormats = fieldFormats;
+    this.fieldFormats = getFieldFormats();
     this.formatHit = formatHitProvider(
       this,
       this.fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING, [])
@@ -374,8 +373,7 @@ export class IndexPattern implements StaticIndexPattern {
           this.getConfig,
           this.savedObjectsClient,
           this.patternCache,
-          this.fieldsFetcher,
-          this.fieldFormats
+          this.fieldsFetcher
         );
         await duplicatePattern.destroy();
       }
@@ -427,8 +425,7 @@ export class IndexPattern implements StaticIndexPattern {
             this.getConfig,
             this.savedObjectsClient,
             this.patternCache,
-            this.fieldsFetcher,
-            this.fieldFormats
+            this.fieldsFetcher
           );
           return samePattern.init().then(() => {
             // What keys changed from now and what the server returned

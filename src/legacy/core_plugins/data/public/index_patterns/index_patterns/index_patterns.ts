@@ -24,7 +24,6 @@ import {
   UiSettingsClientContract,
   HttpServiceBase,
 } from 'src/core/public';
-import { FieldFormatRegisty } from '../../../../../../plugins/data/public/';
 
 import { createIndexPatternCache } from './_pattern_cache';
 import { IndexPattern } from './index_pattern';
@@ -38,18 +37,14 @@ export class IndexPatterns {
   private savedObjectsCache?: Array<SimpleSavedObject<Record<string, any>>> | null;
   private apiClient: IndexPatternsApiClient;
 
-  public fieldFormats: FieldFormatRegisty;
-
   constructor(
     config: UiSettingsClientContract,
     savedObjectsClient: SavedObjectsClientContract,
-    http: HttpServiceBase,
-    fieldFormats: FieldFormatRegisty
+    http: HttpServiceBase
   ) {
     this.apiClient = new IndexPatternsApiClient(http);
     this.config = config;
     this.savedObjectsClient = savedObjectsClient;
-    this.fieldFormats = fieldFormats;
   }
 
   private async refreshSavedObjectsCache() {
@@ -135,8 +130,7 @@ export class IndexPatterns {
       (cfg: any) => this.config.get(cfg),
       this.savedObjectsClient,
       this.apiClient,
-      indexPatternCache,
-      this.fieldFormats
+      indexPatternCache
     );
 
     return indexPattern.init();

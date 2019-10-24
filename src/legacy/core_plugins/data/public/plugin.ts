@@ -45,6 +45,7 @@ import {
   BytesFormat,
   StringFormat,
   UrlFormat,
+  setFieldFormats,
 } from '../../../../plugins/data/public';
 import { initLegacyModule } from './shim/legacy_module';
 import { IUiActionsSetup } from '../../../../plugins/ui_actions/public';
@@ -79,7 +80,6 @@ export interface DataSetup {
   timefilter: TimefilterSetup;
   indexPatterns: IndexPatternsSetup;
   filter: FilterSetup;
-  fieldFormats: FieldFormatRegisty;
 }
 
 /**
@@ -120,20 +120,22 @@ export class DataPlugin
   private readonly timefilter: TimefilterService = new TimefilterService();
 
   private setupApi!: DataSetup;
-  private fieldFormats!: FieldFormatRegisty;
 
   public setup(core: CoreSetup, { __LEGACY }: DataPluginSetupDependencies): DataSetup {
     const { uiSettings } = core;
+
     const timefilterService = this.timefilter.setup({
       uiSettings,
       store: __LEGACY.storage,
     });
+
     const filterService = this.filter.setup({
       uiSettings,
     });
 
-    this.fieldFormats = new FieldFormatRegisty(uiSettings);
-    this.fieldFormats.register([
+    const fieldFormats = new FieldFormatRegisty(uiSettings);
+
+    fieldFormats.register([
       UrlFormat,
       StringFormat,
       NumberFormat,
@@ -151,12 +153,13 @@ export class DataPlugin
       StaticLookupFormat,
     ]);
 
+    setFieldFormats(fieldFormats);
+
     this.setupApi = {
       indexPatterns: this.indexPatterns.setup(),
       query: this.query.setup(),
       timefilter: timefilterService,
       filter: filterService,
-      fieldFormats: this.fieldFormats,
     };
 
     return this.setupApi;
@@ -173,7 +176,6 @@ export class DataPlugin
       savedObjectsClient: savedObjects.client,
       http,
       notifications,
-      fieldFormats: this.fieldFormats,
     });
 
     initLegacyModule(indexPatternsService.indexPatterns);

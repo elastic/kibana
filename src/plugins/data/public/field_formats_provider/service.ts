@@ -17,6 +17,6 @@
  * under the License.
  */
 
-export { FieldFormatRegisty } from './field_formats';
-export { FIELD_FORMATS_IDS } from './types';
-export { getFieldFormats, setFieldFormats } from './service';
+import { createGetterSetter } from '../../../../plugins/kibana_utils/public';
+
+export const [getFieldFormats, setFieldFormats] = createGetterSetter<any>('FieldFormats');
