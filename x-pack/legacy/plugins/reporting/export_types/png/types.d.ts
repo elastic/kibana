@@ -21,7 +21,7 @@ export interface JobDocPayloadPNG extends JobDocPayload {
   basePath?: string;
   browserTimezone: string;
   forceNow?: string;
-  layout: any;
+  layout: LayoutInstance;
   relativeUrl: string;
   objects: undefined;
 }

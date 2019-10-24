@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-interface AvailableTotal {
+export interface AvailableTotal {
   available: boolean;
   total: number;
 }
@@ -54,14 +54,6 @@ export type JobTypes = { [K in BaseJobTypeKeys]: AvailableTotal } & {
 export type RangeStats = JobTypes & {
   _all: number;
   status: StatusCounts;
-};
-
-export type UsageObject = RangeStats & {
-  available: boolean;
-  enabled: boolean;
-  browser_type: string;
-  lastDay: RangeStats;
-  last7Days: RangeStats;
 };
 
 export type ExportType = 'csv' | 'printable_pdf' | 'PNG';

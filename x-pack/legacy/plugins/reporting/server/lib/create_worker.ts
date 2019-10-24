@@ -5,6 +5,7 @@
  */
 
 import { PLUGIN_ID } from '../../common/constants';
+import { CancellationToken } from '../../common/cancellation_token';
 import {
   ESQueueInstance,
   QueueConfig,
@@ -14,6 +15,7 @@ import {
   JobDoc,
   JobDocPayload,
   JobSource,
+  RequestFacade,
   ServerFacade,
 } from '../../types';
 // @ts-ignore untyped dependency
@@ -39,17 +41,23 @@ function createWorkerFn(server: ServerFacade) {
       jobExecutors.set(exportType.jobType, executeJobFactory);
     }
 
-    const workerFn = (job: JobSource, jobdoc: JobDocPayload | JobDoc, cancellationToken?: any) => {
+    const workerFn = (
+      job: JobSource,
+      arg1: JobDocPayload | JobDoc,
+      arg2: CancellationToken | RequestFacade | undefined
+    ) => {
       // pass the work to the jobExecutor
       if (!jobExecutors.get(job._source.jobtype)) {
         throw new Error(`Unable to find a job executor for the claimed job: [${job._id}]`);
       }
+      // job executor function signature is different depending on whether it
+      // is ESQueueWorkerExecuteFn or ImmediateExecuteFn
       if (job._id) {
         const jobExecutor = jobExecutors.get(job._source.jobtype) as ESQueueWorkerExecuteFn;
-        return jobExecutor(job._id, jobdoc as JobDoc, cancellationToken);
+        return jobExecutor(job._id, arg1 as JobDoc, arg2 as CancellationToken);
       } else {
         const jobExecutor = jobExecutors.get(job._source.jobtype) as ImmediateExecuteFn;
-        return jobExecutor(null, jobdoc as JobDocPayload, cancellationToken);
+        return jobExecutor(null, arg1 as JobDocPayload, arg2 as RequestFacade);
       }
     };
     const workerOptions = {

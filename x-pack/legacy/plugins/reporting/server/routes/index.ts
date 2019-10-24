@@ -26,7 +26,7 @@ export function registerRoutes(server: ServerFacade, logger: Logger) {
    */
   async function handler(
     exportTypeId: string,
-    jobParams: any,
+    jobParams: object,
     request: RequestFacade,
     h: ReportingResponseToolkit
   ) {

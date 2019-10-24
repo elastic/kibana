@@ -12,6 +12,7 @@ import { LevelLogger as Logger } from '../lib/level_logger';
 import { extract } from './extract';
 // @ts-ignore
 import { md5 } from './download/checksum';
+import { BrowserDownload } from './types';
 
 const chmod = promisify(fs.chmod);
 
@@ -28,7 +29,7 @@ interface PathResponse {
  */
 export async function installBrowser(
   logger: Logger,
-  browser: any,
+  browser: BrowserDownload,
   installsPath: string
 ): Promise<PathResponse> {
   const pkg = browser.paths.packages.find((p: Package) => p.platforms.includes(process.platform));
