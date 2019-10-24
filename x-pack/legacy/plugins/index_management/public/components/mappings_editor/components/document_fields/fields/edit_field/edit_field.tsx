@@ -24,7 +24,7 @@ import { useDispatch } from '../../../../mappings_state';
 import { TYPE_DEFINITION } from '../../../../constants';
 import { Field, NormalizedField, MainType, SubType } from '../../../../types';
 import { fieldSerializer, fieldDeserializer, getTypeDocLink } from '../../../../lib';
-import { getParametersFormForType } from '../../field_types';
+import { getParametersFormForType } from '../field_types';
 import { UpdateFieldProvider, UpdateFieldFunc } from './update_field_provider';
 import { EditFieldHeaderForm } from './edit_field_header_form';
 import { EditFieldSection } from './edit_field_section';

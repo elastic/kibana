@@ -59,7 +59,6 @@ export const PARAMETERS_DEFINITION: {
   },
   index: {
     fieldConfig: {
-      label: 'Index',
       type: FIELD_TYPES.CHECKBOX,
       defaultValue: true,
     },

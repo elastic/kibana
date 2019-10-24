@@ -97,6 +97,18 @@
         padding-top: 0;
       }
     }
+
+    &__formRow {
+      margin-bottom: $euiSizeXL;
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      &__title {
+        line-height: 1;
+        margin-bottom: 8px;
+      }
+    }
   }
 }
 

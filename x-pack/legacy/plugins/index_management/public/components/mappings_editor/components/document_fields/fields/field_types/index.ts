@@ -5,7 +5,7 @@
  */
 
 import { ComponentType } from 'react';
-import { MainType, SubType, DataType } from '../../../types';
+import { MainType, SubType, DataType } from '../../../../types';
 
 import { TextType } from './text_type';
 import { KeywordType } from './keyword_type';

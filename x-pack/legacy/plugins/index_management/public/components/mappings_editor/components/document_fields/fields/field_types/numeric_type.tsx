@@ -5,13 +5,13 @@
  */
 import React from 'react';
 
-import { EditFieldSection } from '../fields/edit_field';
+import { EditFieldSection } from '../edit_field';
 
-export const TextType = () => {
+export const NumericType = () => {
   return (
     <>
       <EditFieldSection>
-        <em>TODO: Text type parameters form.</em>
+        <em>TODO: Numeric type parameters form.</em>
       </EditFieldSection>
     </>
   );

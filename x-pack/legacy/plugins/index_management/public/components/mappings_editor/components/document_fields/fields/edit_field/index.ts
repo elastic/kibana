@@ -7,3 +7,5 @@
 export * from './edit_field';
 
 export * from './edit_field_section';
+
+export * from './edit_field_form_row';
