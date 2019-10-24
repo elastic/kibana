@@ -70,7 +70,7 @@ export const AnalyticsPanel: FC<Props> = ({ jobCreationDisabled }) => {
           title={
             <h2>
               {i18n.translate('xpack.ml.overview.analyticsList.createFirstJobMessage', {
-                defaultMessage: 'Create your first analytics job.',
+                defaultMessage: 'Create your first analytics job',
               })}
             </h2>
           }

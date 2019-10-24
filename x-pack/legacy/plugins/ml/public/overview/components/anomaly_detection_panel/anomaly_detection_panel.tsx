@@ -160,7 +160,7 @@ export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled }) => {
           title={
             <h2>
               {i18n.translate('xpack.ml.overview.anomalyDetection.createFirstJobMessage', {
-                defaultMessage: 'Create your first anomaly detection job.',
+                defaultMessage: 'Create your first anomaly detection job',
               })}
             </h2>
           }
