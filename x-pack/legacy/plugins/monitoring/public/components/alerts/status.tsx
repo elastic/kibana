@@ -26,7 +26,7 @@ import {
 } from '../../../common/constants';
 import { AlertsConfiguration } from './configuration';
 
-interface AlertsStatusProps {
+export interface AlertsStatusProps {
   clusterUuid: string;
   emailAddress: string;
 }

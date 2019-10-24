@@ -169,7 +169,7 @@ export const setSetupModeMenuItem = () => {
 
 export const addSetupModeCallback = (callback: Function) => setupModeState.callbacks.push(callback);
 
-export const initSetupModeState = async ($scope: any, $injector: any, callback: Function) => {
+export const initSetupModeState = async ($scope: any, $injector: any, callback?: Function) => {
   angularState.scope = $scope;
   angularState.injector = $injector;
   if (callback) {
