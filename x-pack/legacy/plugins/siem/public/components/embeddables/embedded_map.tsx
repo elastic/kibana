@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
+import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { Filter } from '@kbn/es-query';
 import React, { useEffect, useState } from 'react';
 import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
 import { createPortalNode, InPortal } from 'react-reverse-portal';
 import { Query } from 'src/plugins/data/common';
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { start } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import { EmbeddablePanel } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 
@@ -30,15 +30,40 @@ import * as i18n from './translations';
 import { createEmbeddable, displayErrorToast, setupEmbeddablesAPI } from './embedded_map_helpers';
 import { MapToolTip } from './map_tool_tip/map_tool_tip';
 
-const EmbeddableWrapper = styled(EuiFlexGroup)`
-  position: relative;
-  height: 400px;
-  margin: 0;
+const Embeddable = styled(EuiPanel).attrs({
+  className: 'siemEmbeddable',
+  paddingSize: 'none',
+})`
+  ${({ theme }) => css``}
+`;
+Embeddable.displayName = 'Embeddable';
 
-  .mapToolbarOverlay__button {
-    display: none;
+const EmbeddableMap = styled.div.attrs({
+  className: 'siemEmbeddable__map',
+})`
+  // position: relative;
+  // height: 400px;
+  // margin: 0;
+
+  // .mapToolbarOverlay__button {
+  //   display: none;
+  // }
+
+  padding-top: calc(9 / 21 * 100%);
+  position: relative;
+
+  .euiPanel {
+    border: none;
+    box-shadow: none;
+
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
   }
 `;
+EmbeddableMap.displayName = 'EmbeddableMap';
 
 export interface EmbeddedMapProps {
   query: Query;
@@ -152,11 +177,17 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
     }, [startDate, endDate]);
 
     return isError ? null : (
-      <>
+      <Embeddable>
+        <header>
+          <h2>{'Network map'}</h2>
+          <p>{'Why is my data not appearing?'}</p>
+        </header>
+
         <InPortal node={portalNode}>
           <MapToolTip />
         </InPortal>
-        <EmbeddableWrapper>
+
+        <EmbeddableMap>
           {embeddable != null ? (
             <EmbeddablePanel
               data-test-subj="embeddable-panel"
@@ -174,9 +205,8 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
           ) : (
             <Loader data-test-subj="loading-panel" overlay size="xl" />
           )}
-        </EmbeddableWrapper>
-        <EuiSpacer />
-      </>
+        </EmbeddableMap>
+      </Embeddable>
     );
   }
 );
