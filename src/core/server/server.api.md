@@ -942,6 +942,9 @@ export type MIGRATION_ASSISTANCE_INDEX_ACTION = 'upgrade' | 'reindex';
 // @public (undocumented)
 export type MIGRATION_DEPRECATION_LEVEL = 'none' | 'info' | 'warning' | 'critical';
 
+// @public
+export type MutatingOperationRefreshSetting = boolean | 'wait_for';
+
 // Warning: (ae-forgotten-export) The symbol "OnPostAuthResult" needs to be exported by the entry point index.d.ts
 // 
 // @public
@@ -1198,7 +1201,6 @@ export interface SavedObjectsBulkUpdateObject<T extends SavedObjectAttributes = 
 
 // @public (undocumented)
 export interface SavedObjectsBulkUpdateOptions extends SavedObjectsBaseOptions {
-    // Warning: (ae-forgotten-export) The symbol "MutatingOperationRefreshSetting" needs to be exported by the entry point index.d.ts
     refresh?: MutatingOperationRefreshSetting;
 }
 

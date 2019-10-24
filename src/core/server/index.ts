@@ -186,6 +186,7 @@ export {
   SavedObjectAttributeSingle,
   SavedObjectReference,
   SavedObjectsBaseOptions,
+  MutatingOperationRefreshSetting,
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
   SavedObjectsMigrationVersion,

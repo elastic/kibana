@@ -151,6 +151,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [LifecycleResponseFactory](./kibana-plugin-server.lifecycleresponsefactory.md) | Creates an object containing redirection or error response with error details, HTTP headers, and other data transmitted to the client. |
 |  [MIGRATION\_ASSISTANCE\_INDEX\_ACTION](./kibana-plugin-server.migration_assistance_index_action.md) |  |
 |  [MIGRATION\_DEPRECATION\_LEVEL](./kibana-plugin-server.migration_deprecation_level.md) |  |
+|  [MutatingOperationRefreshSetting](./kibana-plugin-server.mutatingoperationrefreshsetting.md) | Elasticsearch Refresh setting for mutating operation |
 |  [OnPostAuthHandler](./kibana-plugin-server.onpostauthhandler.md) | See [OnPostAuthToolkit](./kibana-plugin-server.onpostauthtoolkit.md)<!-- -->. |
 |  [OnPreAuthHandler](./kibana-plugin-server.onpreauthhandler.md) | See [OnPreAuthToolkit](./kibana-plugin-server.onpreauthtoolkit.md)<!-- -->. |
 |  [PluginInitializer](./kibana-plugin-server.plugininitializer.md) | The <code>plugin</code> export at the root of a plugin's <code>server</code> directory should conform to this interface. |
