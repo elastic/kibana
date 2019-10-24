@@ -4,6 +4,7 @@
 
 ## SavedObjectsServiceSetup interface
 
+Saved Objects is Kibana's data persisentence mechanism allowing plugins to use Elasticsearch for storing and querying state.
 
 <b>Signature:</b>
 
@@ -15,5 +16,5 @@ export interface SavedObjectsServiceSetup
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [internalClient](./kibana-plugin-server.savedobjectsservicesetup.internalclient.md) | <code>SavedObjectsClientContract</code> |  |
+|  [internalClient](./kibana-plugin-server.savedobjectsservicesetup.internalclient.md) | <code>SavedObjectsClientContract</code> | A [Saved Objects client](./kibana-plugin-server.savedobjectsclientcontract.md) that uses the internal Kibana user for authenticating with Elasticsearch.<!-- -->For a client that uses the credentials and associated privileges of the incoming request see the Saved Objects client exposed from the [RequestHandlerContext](./kibana-plugin-server.requesthandlercontext.md)<!-- -->. |
 

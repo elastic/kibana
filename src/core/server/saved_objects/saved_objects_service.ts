@@ -40,9 +40,20 @@ import { SavedObjectsClientContract } from './types';
 import { Logger } from '..';
 
 /**
+ * Saved Objects is Kibana's data persisentence mechanism allowing plugins to
+ * use Elasticsearch for storing and querying state.
+ *
  * @public
  */
 export interface SavedObjectsServiceSetup {
+  /**
+   * A {@link SavedObjectsClientContract | Saved Objects client} that uses the
+   * internal Kibana user for authenticating with Elasticsearch.
+   *
+   * For a client that uses the credentials and associated privileges of the
+   * incoming request see the Saved Objects client exposed from the
+   * {@link RequestHandlerContext}.
+   */
   internalClient: SavedObjectsClientContract;
 }
 

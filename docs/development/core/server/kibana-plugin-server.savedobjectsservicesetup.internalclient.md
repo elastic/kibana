@@ -4,6 +4,10 @@
 
 ## SavedObjectsServiceSetup.internalClient property
 
+A [Saved Objects client](./kibana-plugin-server.savedobjectsclientcontract.md) that uses the internal Kibana user for authenticating with Elasticsearch.
+
+For a client that uses the credentials and associated privileges of the incoming request see the Saved Objects client exposed from the [RequestHandlerContext](./kibana-plugin-server.requesthandlercontext.md)<!-- -->.
+
 <b>Signature:</b>
 
 ```typescript

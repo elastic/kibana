@@ -1555,9 +1555,8 @@ export class SavedObjectsSerializer {
     savedObjectToRaw(savedObj: SanitizedSavedObjectDoc): SavedObjectsRawDoc;
     }
 
-// @public (undocumented)
+// @public
 export interface SavedObjectsServiceSetup {
-    // (undocumented)
     internalClient: SavedObjectsClientContract;
 }
 
