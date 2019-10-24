@@ -29,13 +29,9 @@ export class InnerJoin {
     return false;
   }
 
-  getRightMetricFields() {
-    return this._rightSource.getMetricFields();
-  }
-
   getJoinFields() {
     return this._rightSource.getMetricFields().map(esAggMetricField => {
-      return { label: esAggMetricField.getPropertyLabel(), name: esAggMetricField.getPropertyKey() };
+      return { label: esAggMetricField.getPropertyLabel(), name: esAggMetricField.getName() };
     });
   }
 
@@ -54,7 +50,7 @@ export class InnerJoin {
     const rightMetricFields = this._rightSource.getMetricFields();
     // delete feature properties added by previous join
     for (let j = 0; j < rightMetricFields.length; j++) {
-      const metricPropertyKey  = rightMetricFields[j].getPropertyKey();
+      const metricPropertyKey  = rightMetricFields[j].getName();
       delete feature.properties[metricPropertyKey];
 
       // delete all dynamic properties for metric field

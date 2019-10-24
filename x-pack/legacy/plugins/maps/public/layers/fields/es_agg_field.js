@@ -20,7 +20,7 @@ export class ESAggMetricField extends AbstractField {
   }
 
   getName() {
-    return this.getPropertyKey();
+    return this._source.formatMetricKey(this.getAggType(), this.getESDocFieldName());
   }
 
   async getLabel() {
@@ -33,10 +33,6 @@ export class ESAggMetricField extends AbstractField {
 
   getESDocField() {
     return this._esDocField;
-  }
-
-  getPropertyKey() {
-    return this._source.formatMetricKey(this.getAggType(), this.getESDocFieldName());
   }
 
   getPropertyLabel() {
@@ -53,7 +49,7 @@ export class ESAggMetricField extends AbstractField {
 
   makeMetricAggConfig() {
     const metricAggConfig = {
-      id: this.getPropertyKey(),
+      id: this.getName(),
       enabled: true,
       type: this.getAggType(),
       schema: 'metric',

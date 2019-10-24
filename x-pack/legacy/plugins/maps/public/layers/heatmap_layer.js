@@ -32,7 +32,7 @@ export class HeatmapLayer extends VectorLayer {
 
   _getPropKeyOfSelectedMetric() {
     const metricfields = this._source.getMetricFields();
-    return metricfields[0].getPropertyKey();
+    return metricfields[0].getName();
   }
 
   _getHeatmapLayerId() {

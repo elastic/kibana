@@ -59,7 +59,7 @@ export class AbstractESAggSource extends AbstractESSource {
 
   async getNumberFields() {
     return this.getMetricFields().map(esAggMetricField => {
-      return { label: esAggMetricField.getPropertyLabel(), name: esAggMetricField.getPropertyKey() };
+      return { label: esAggMetricField.getPropertyLabel(), name: esAggMetricField.getName() };
     });
   }
 
@@ -78,14 +78,14 @@ export class AbstractESAggSource extends AbstractESSource {
     metricFields.forEach((metricField) => {
       let value;
       for (const key in properties) {
-        if (properties.hasOwnProperty(key) && metricField.getPropertyKey() === key) {
+        if (properties.hasOwnProperty(key) && metricField.getName() === key) {
           value = properties[key];
           break;
         }
       }
 
       const tooltipProperty  = new ESAggMetricTooltipProperty(
-        metricField.getPropertyKey(),
+        metricField.getName(),
         metricField.getPropertyLabel(),
         value,
         indexPattern,

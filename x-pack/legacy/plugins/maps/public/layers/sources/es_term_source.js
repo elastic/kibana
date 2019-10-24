@@ -177,6 +177,6 @@ export class ESTermSource extends AbstractESAggSource {
   }
 
   getFieldNames() {
-    return this.getMetricFields().map(esAggMetricField => esAggMetricField.getPropertyKey());
+    return this.getMetricFields().map(esAggMetricField => esAggMetricField.getName());
   }
 }

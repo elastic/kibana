@@ -117,10 +117,6 @@ export class ESSearchSource extends AbstractESSource {
     }
   }
 
-  getMetricFields() {
-    throw new Error('todo remove unused method');
-  }
-
   getFieldNames() {
     return [this._descriptor.geoField];
   }
