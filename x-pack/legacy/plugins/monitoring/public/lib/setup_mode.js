@@ -7,6 +7,7 @@
 import { ajaxErrorHandlersProvider } from './ajax_error_handler';
 import { get, contains } from 'lodash';
 import chrome from 'ui/chrome';
+import { i18n } from '@kbn/i18n';
 
 function isOnPage(hash) {
   return contains(window.location.hash, hash);
@@ -139,15 +140,17 @@ export const setSetupModeMenuItem = () => {
   }
 
   const globalState = angularState.injector.get('globalState');
-  const navItems = globalState.inSetupMode
-    ? []
-    : [{
+  const navItems = [];
+  if (!globalState.inSetupMode && !chrome.getInjected('isOnCloud')) {
+    navItems.push({
       id: 'enter',
-      label: 'Enter Setup Mode',
-      description: 'Enter setup',
+      label: i18n.translate('xpack.monitoring.setupMode.enter', {
+        defaultMessage: 'Enter Setup Mode'
+      }),
       run: () => toggleSetupMode(true),
       testId: 'enterSetupMode'
-    }];
+    });
+  }
 
   angularState.scope.topNavMenu = [...navItems];
   // LOL angular
