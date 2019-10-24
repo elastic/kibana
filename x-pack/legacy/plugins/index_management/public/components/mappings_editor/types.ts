@@ -8,30 +8,24 @@ import { FieldConfig } from './shared_imports';
 export interface DataTypeDefinition {
   label: string;
   value: DataType;
+  docUri?: string;
   subTypes?: { label: string; types: SubType[] };
-  configuration?: ParameterName[];
-  basicParameters?: ParameterName[] | ParameterName[][];
-  hasAdvancedParameters?: boolean;
-  hasMultiFields?: boolean;
 }
 
 export type MainType =
   | 'text'
   | 'keyword'
   | 'numeric'
-  | 'date'
   | 'binary'
   | 'boolean'
   | 'range'
   | 'object'
   | 'nested'
-  | 'ip'
-  | 'rank_feature'
-  | 'rank_features'
-  | 'dense_vector'
-  | 'sparse_vector';
+  | 'date_type'
+  | 'geo'
+  | 'specialised';
 
-export type SubType = NumericType | DateType | RangeType;
+export type SubType = NumericType | DateType | RangeType | GeoType | SpecialisedType;
 
 export type DataType = MainType | SubType;
 
@@ -53,6 +47,23 @@ export type RangeType =
   | 'long_range'
   | 'double_range'
   | 'date_range';
+
+export type GeoType = 'geo_point' | 'geo_shape';
+
+export type SpecialisedType =
+  | 'alias'
+  | 'completion'
+  | 'dense_vector'
+  | 'flattened'
+  | 'ip'
+  | 'join'
+  | 'percolator'
+  | 'rank_feature'
+  | 'rank_features'
+  | 'search_as_you_type'
+  | 'shape'
+  | 'sparse_vector'
+  | 'token_count';
 
 export type ParameterName =
   | 'name'
