@@ -15,6 +15,7 @@ export interface HttpServiceBase
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [anonymousPaths](./kibana-plugin-public.httpservicebase.anonymouspaths.md) | <code>IAnonymousPaths</code> | APIs for denoting certain paths for not requiring authentication |
 |  [basePath](./kibana-plugin-public.httpservicebase.basepath.md) | <code>IBasePath</code> | APIs for manipulating the basePath on URL segments. |
 |  [delete](./kibana-plugin-public.httpservicebase.delete.md) | <code>HttpHandler</code> | Makes an HTTP request with the DELETE method. See [HttpHandler](./kibana-plugin-public.httphandler.md) for options. |
 |  [fetch](./kibana-plugin-public.httpservicebase.fetch.md) | <code>HttpHandler</code> | Makes an HTTP request. Defaults to a GET request unless overriden. See [HttpHandler](./kibana-plugin-public.httphandler.md) for options. |

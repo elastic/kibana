@@ -5,7 +5,6 @@
  */
 
 import { npStart } from 'ui/new_platform';
-import { ESFilter } from 'elasticsearch';
 import { HttpServiceBase } from 'kibana/public';
 import {
   PROCESSOR_EVENT,
@@ -14,6 +13,7 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { getMlJobId, getMlPrefix } from '../../../common/ml_job_constants';
 import { callApi } from './callApi';
+import { ESFilter } from '../../../typings/elasticsearch';
 
 interface MlResponseItem {
   id: string;

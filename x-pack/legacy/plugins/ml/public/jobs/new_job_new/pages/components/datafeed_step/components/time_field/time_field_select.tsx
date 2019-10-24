@@ -7,8 +7,8 @@
 import React, { FC } from 'react';
 import { EuiComboBox, EuiComboBoxOptionProps } from '@elastic/eui';
 
-import { Field, EVENT_RATE_FIELD_ID } from '../../../../../../../../common/types/fields';
-import { ES_FIELD_TYPES } from '../../../../../../../../../../../../src/plugins/data/public';
+import { Field } from '../../../../../../../../common/types/fields';
+import { createFieldOptions } from '../../../../../common/job_creator/util/general';
 
 interface Props {
   fields: Field[];
@@ -17,18 +17,12 @@ interface Props {
 }
 
 export const TimeFieldSelect: FC<Props> = ({ fields, changeHandler, selectedField }) => {
-  const options: EuiComboBoxOptionProps[] = fields
-    .filter(f => f.id !== EVENT_RATE_FIELD_ID && f.type === ES_FIELD_TYPES.DATE)
-    .map(f => ({
-      label: f.name,
-    }))
-    .sort((a, b) => a.label.localeCompare(b.label));
+  const options: EuiComboBoxOptionProps[] = createFieldOptions(fields);
 
-  const selection: EuiComboBoxOptionProps[] = [
-    {
-      label: selectedField !== null ? selectedField : '',
-    },
-  ];
+  const selection: EuiComboBoxOptionProps[] = [];
+  if (selectedField !== null) {
+    selection.push({ label: selectedField });
+  }
 
   function onChange(selectedOptions: EuiComboBoxOptionProps[]) {
     const option = selectedOptions[0];
