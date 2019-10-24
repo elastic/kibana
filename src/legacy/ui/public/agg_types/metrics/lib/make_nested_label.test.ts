@@ -17,40 +17,43 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
-import { makeNestedLabel } from '../../../metrics/lib/make_nested_label';
+import { makeNestedLabel } from './make_nested_label';
+import { IMetricAggConfig } from 'ui/agg_types/metrics/metric_agg_type';
 
-describe('metric agg make_nested_label', function () {
-
-  function generateAggConfig(metricLabel) {
-    return {
+describe('metric agg make_nested_label', () => {
+  const generateAggConfig = (metricLabel: string): IMetricAggConfig => {
+    return ({
       params: {
         customMetric: {
-          makeLabel: () => { return metricLabel; }
-        }
+          makeLabel: () => {
+            return metricLabel;
+          },
+        },
       },
-      getParam(key) {
+      getParam(this: IMetricAggConfig, key: string) {
         return this.params[key];
-      }
-    };
-  }
+      },
+    } as unknown) as IMetricAggConfig;
+  };
 
-  it('should return a metric label with prefix', function () {
+  it('should return a metric label with prefix', () => {
     const aggConfig = generateAggConfig('Count');
     const label = makeNestedLabel(aggConfig, 'derivative');
-    expect(label).to.eql('Derivative of Count');
+
+    expect(label).toEqual('Derivative of Count');
   });
 
-  it('should return a numbered prefix', function () {
+  it('should return a numbered prefix', () => {
     const aggConfig = generateAggConfig('Derivative of Count');
     const label = makeNestedLabel(aggConfig, 'derivative');
-    expect(label).to.eql('2. derivative of Count');
+
+    expect(label).toEqual('2. derivative of Count');
   });
 
-  it('should return a prefix with correct order', function () {
+  it('should return a prefix with correct order', () => {
     const aggConfig = generateAggConfig('3. derivative of Count');
     const label = makeNestedLabel(aggConfig, 'derivative');
-    expect(label).to.eql('4. derivative of Count');
-  });
 
+    expect(label).toEqual('4. derivative of Count');
+  });
 });
