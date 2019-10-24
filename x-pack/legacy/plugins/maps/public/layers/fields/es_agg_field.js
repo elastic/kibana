@@ -19,8 +19,12 @@ export class ESAggMetricField extends AbstractField {
     this._esDocField = esDocField;
   }
 
+  getName() {
+    return this.getPropertyKey();
+  }
+
   async getLabel() {
-    return this._label;
+    return this.getPropertyLabel();
   }
 
   getAggType() {

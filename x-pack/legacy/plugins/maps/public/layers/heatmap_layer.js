@@ -31,7 +31,7 @@ export class HeatmapLayer extends VectorLayer {
   }
 
   _getPropKeyOfSelectedMetric() {
-    const metricfields = this._source.getMetricFields2();
+    const metricfields = this._source.getMetricFields();
     return metricfields[0].getPropertyKey();
   }
 
@@ -101,7 +101,7 @@ export class HeatmapLayer extends VectorLayer {
   }
 
   getLegendDetails() {
-    const metricFields = this._source.getMetricFields2();
+    const metricFields = this._source.getMetricFields();
     const label = metricFields[0].getPropertyLabel();
     return this._style.getLegendDetails(label);
   }
