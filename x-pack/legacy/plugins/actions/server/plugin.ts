@@ -186,6 +186,7 @@ export class Plugin {
         return new ActionsClient({
           savedObjectsClient,
           actionTypeRegistry: actionTypeRegistry!,
+          scopedClusterClient: adminClient!.asScoped(request),
         });
       },
     };

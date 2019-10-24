@@ -11,9 +11,13 @@ import { ActionsClient } from './actions_client';
 import { ExecutorType } from './types';
 import { ActionExecutor, TaskRunnerFactory } from './lib';
 import { taskManagerMock } from '../../task_manager/task_manager.mock';
-import { SavedObjectsClientMock } from '../../../../../src/core/server/mocks';
+import {
+  elasticsearchServiceMock,
+  SavedObjectsClientMock,
+} from '../../../../../src/core/server/mocks';
 
 const savedObjectsClient = SavedObjectsClientMock.create();
+const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
 
 const mockTaskManager = taskManagerMock.create();
 
@@ -49,6 +53,7 @@ describe('create()', () => {
     const actionsClient = new ActionsClient({
       actionTypeRegistry,
       savedObjectsClient,
+      scopedClusterClient,
     });
     savedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
     const result = await actionsClient.create({
@@ -84,6 +89,7 @@ describe('create()', () => {
     const actionsClient = new ActionsClient({
       actionTypeRegistry,
       savedObjectsClient,
+      scopedClusterClient,
     });
     actionTypeRegistry.register({
       id: 'my-action-type',
@@ -114,6 +120,7 @@ describe('create()', () => {
     const actionsClient = new ActionsClient({
       actionTypeRegistry,
       savedObjectsClient,
+      scopedClusterClient,
     });
     await expect(
       actionsClient.create({
@@ -139,6 +146,7 @@ describe('create()', () => {
     const actionsClient = new ActionsClient({
       actionTypeRegistry,
       savedObjectsClient,
+      scopedClusterClient,
     });
     savedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
@@ -202,6 +210,7 @@ describe('get()', () => {
     const actionsClient = new ActionsClient({
       actionTypeRegistry,
       savedObjectsClient,
+      scopedClusterClient,
     });
     savedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
@@ -246,6 +255,7 @@ describe('find()', () => {
     const actionsClient = new ActionsClient({
       actionTypeRegistry,
       savedObjectsClient,
+      scopedClusterClient,
     });
     savedObjectsClient.find.mockResolvedValueOnce(expectedResult);
     const result = await actionsClient.find({});
@@ -280,6 +290,7 @@ describe('delete()', () => {
     const actionsClient = new ActionsClient({
       actionTypeRegistry,
       savedObjectsClient,
+      scopedClusterClient,
     });
     savedObjectsClient.delete.mockResolvedValueOnce(expectedResult);
     const result = await actionsClient.delete({ id: '1' });
@@ -305,6 +316,7 @@ describe('update()', () => {
     const actionsClient = new ActionsClient({
       actionTypeRegistry,
       savedObjectsClient,
+      scopedClusterClient,
     });
     savedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
@@ -366,6 +378,7 @@ describe('update()', () => {
     const actionsClient = new ActionsClient({
       actionTypeRegistry,
       savedObjectsClient,
+      scopedClusterClient,
     });
     actionTypeRegistry.register({
       id: 'my-action-type',
@@ -409,6 +422,7 @@ describe('update()', () => {
     const actionsClient = new ActionsClient({
       actionTypeRegistry,
       savedObjectsClient,
+      scopedClusterClient,
     });
     savedObjectsClient.get.mockResolvedValueOnce({
       id: 'my-action',
