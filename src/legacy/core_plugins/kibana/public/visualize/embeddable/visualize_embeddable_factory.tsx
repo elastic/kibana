@@ -23,7 +23,6 @@ import 'uiExports/docViews';
 import 'uiExports/embeddableFactories';
 import 'uiExports/embeddableActions';
 import 'uiExports/fieldFormatEditors';
-import 'uiExports/fieldFormats';
 import 'uiExports/home';
 import 'uiExports/indexManagement';
 import 'uiExports/inspectorViews';

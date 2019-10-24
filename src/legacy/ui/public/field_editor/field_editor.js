@@ -28,10 +28,6 @@ import {
 } from 'ui/scripting_languages';
 
 import {
-  fieldFormats
-} from 'ui/registry/field_formats';
-
-import {
   getDocLink
 } from 'ui/documentation_links';
 
@@ -77,6 +73,8 @@ import {
 
 import { FIELD_TYPES_BY_LANG, DEFAULT_FIELD_TYPES } from './constants';
 import { copyField, getDefaultFormat, executeScript, isScriptValid } from './lib';
+
+import { getFieldFormats } from '../../../../plugins/data/public';
 
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
@@ -124,6 +122,7 @@ export class FieldEditorComponent extends PureComponent {
     };
     this.supportedLangs = getSupportedScriptingLanguages();
     this.deprecatedLangs = getDeprecatedScriptingLanguages();
+    this.fieldFormats = getFieldFormats();
     this.init();
   }
 
@@ -140,10 +139,10 @@ export class FieldEditorComponent extends PureComponent {
     const fieldTypes = get(FIELD_TYPES_BY_LANG, field.lang, DEFAULT_FIELD_TYPES);
     field.type = fieldTypes.includes(field.type) ? field.type : fieldTypes[0];
 
-    const DefaultFieldFormat = fieldFormats.getDefaultType(field.type, field.esTypes);
+    const DefaultFieldFormat = this.fieldFormats.getDefaultType(field.type, field.esTypes);
     const fieldTypeFormats = [
       getDefaultFormat(DefaultFieldFormat),
-      ...fieldFormats.getByFieldType(field.type),
+      ...this.fieldFormats.getByFieldType(field.type),
     ];
 
     this.setState({
@@ -168,12 +167,12 @@ export class FieldEditorComponent extends PureComponent {
   onTypeChange = (type) => {
     const { getConfig } = this.props.helpers;
     const { field } = this.state;
-    const DefaultFieldFormat = fieldFormats.getDefaultType(type);
+    const DefaultFieldFormat = this.fieldFormats.getDefaultType(type);
     field.type = type;
 
     const fieldTypeFormats = [
       getDefaultFormat(DefaultFieldFormat),
-      ...fieldFormats.getByFieldType(field.type),
+      ...this.fieldFormats.getByFieldType(field.type),
     ];
 
     const FieldFormat = fieldTypeFormats[0];
