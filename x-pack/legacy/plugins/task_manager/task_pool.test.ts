@@ -109,6 +109,7 @@ describe('TaskPool', () => {
 
     const taskFailedToRun = mockTask();
     taskFailedToRun.run.mockImplementation(async () => {
+      await sleep(0);
       throw new Error(`Run Task has failed miserably`);
     });
 
