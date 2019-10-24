@@ -78,6 +78,8 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                   setQuery={setQuery}
                 />
 
+                <EuiSpacer />
+
                 <KpiNetworkQuery
                   endDate={to}
                   filterQuery={filterQuery}

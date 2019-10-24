@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiLink, EuiText } from '@elastic/eui';
 import { Filter } from '@kbn/es-query';
 import React, { useEffect, useState } from 'react';
 import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
@@ -30,26 +30,13 @@ import * as i18n from './translations';
 import { createEmbeddable, displayErrorToast, setupEmbeddablesAPI } from './embedded_map_helpers';
 import { MapToolTip } from './map_tool_tip/map_tool_tip';
 
-const Embeddable = styled(EuiPanel).attrs({
-  className: 'siemEmbeddable',
-  paddingSize: 'none',
-})`
-  ${({ theme }) => css``}
-`;
-Embeddable.displayName = 'Embeddable';
+import { Embeddable } from './embeddable';
+import { EmbeddableHeader } from './embeddable_header';
 
 const EmbeddableMap = styled.div.attrs({
   className: 'siemEmbeddable__map',
 })`
-  // position: relative;
-  // height: 400px;
-  // margin: 0;
-
-  // .mapToolbarOverlay__button {
-  //   display: none;
-  // }
-
-  padding-top: calc(9 / 21 * 100%);
+  padding-top: calc(9 / 21 * 100%); //21:9 ratio
   position: relative;
 
   .euiPanel {
@@ -61,6 +48,10 @@ const EmbeddableMap = styled.div.attrs({
     right: 0;
     bottom: 0;
     left: 0;
+  }
+
+  .mapToolbarOverlay__button {
+    display: none;
   }
 `;
 EmbeddableMap.displayName = 'EmbeddableMap';
@@ -178,10 +169,16 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
 
     return isError ? null : (
       <Embeddable>
-        <header>
-          <h2>{'Network map'}</h2>
-          <p>{'Why is my data not appearing?'}</p>
-        </header>
+        <EmbeddableHeader title="Network map">
+          <EuiText size="xs">
+            <EuiLink
+              href="https://www.elastic.co/guide/en/siem/guide/7.4/conf-map-ui.html#private-network"
+              target="_blank"
+            >
+              {'Why is my data not displayed?'}
+            </EuiLink>
+          </EuiText>
+        </EmbeddableHeader>
 
         <InPortal node={portalNode}>
           <MapToolTip />
