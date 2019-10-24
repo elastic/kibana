@@ -200,7 +200,7 @@ export const AlertsConfiguration: React.FC<AlertsConfigurationProps> = (
             />
           </Fragment>
         ),
-        status: 'incomplete',
+        status: 'incomplete' as const,
       };
     }
 
@@ -355,26 +355,30 @@ export const AlertsConfiguration: React.FC<AlertsConfigurationProps> = (
           {createNew}
         </Fragment>
       ),
-      status: selectedEmailActionId ? 'complete' : 'incomplete',
+      status: selectedEmailActionId ? ('complete' as const) : ('incomplete' as const),
     };
+  }
+
+  function getStep2Status(isDisabled: boolean) {
+    if (isDisabled) {
+      return 'disabled' as const;
+    }
+
+    if (emailAddress && emailAddress.length) {
+      return 'complete' as const;
+    }
+
+    return (status = 'incomplete' as const);
   }
 
   function getStep2() {
     const isDisabled = !!editAction || !selectedEmailActionId;
-    let status;
-    if (isDisabled) {
-      status = 'disabled';
-    } else if (emailAddress && emailAddress.length) {
-      status = 'complete';
-    } else {
-      status = 'incomplete';
-    }
 
     return {
       title: i18n.translate('xpack.monitoring.alerts.configuration.setEmailAddress', {
         defaultMessage: 'Set the email to receive alerts',
       }),
-      status,
+      status: getStep2Status(isDisabled),
       children: (
         <Fragment>
           <EuiForm isInvalid={showFormErrors}>
@@ -399,20 +403,12 @@ export const AlertsConfiguration: React.FC<AlertsConfigurationProps> = (
 
   function getStep3() {
     const isDisabled = !!editAction || !selectedEmailActionId;
-    let status;
-    if (isDisabled) {
-      status = 'disabled';
-    } else if (emailAddress && emailAddress.length) {
-      status = 'complete';
-    } else {
-      status = 'incomplete';
-    }
 
     return {
       title: i18n.translate('xpack.monitoring.alerts.configuration.setEmailAddress', {
         defaultMessage: 'Confirm and save',
       }),
-      status,
+      status: getStep2Status(isDisabled),
       children: (
         <Fragment>
           <EuiButton isLoading={isSaving} isDisabled={isDisabled} onClick={save}>

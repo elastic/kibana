@@ -15,6 +15,7 @@ import { AlertServices } from '../../../alerting/server/types';
 import { SavedObjectsClientMock } from 'src/core/server/mocks';
 import { AlertInstance } from '../../../alerting/server/lib';
 import { AlertState } from './types';
+import { SavedObject, SavedObjectAttributes } from 'src/core/server';
 
 function fillLicense(license: any) {
   return {
@@ -143,7 +144,10 @@ describe('getLicenseExpiration', () => {
     const savedObjectsClient = SavedObjectsClientMock.create();
     savedObjectsClient.get.mockReturnValue(
       new Promise(resolve => {
-        const savedObject: T = {
+        const savedObject: SavedObject<SavedObjectAttributes> = {
+          id: '',
+          type: '',
+          references: [],
           attributes: {
             [MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS]: emailAddress,
           },
@@ -210,7 +214,10 @@ describe('getLicenseExpiration', () => {
     const savedObjectsClient = SavedObjectsClientMock.create();
     savedObjectsClient.get.mockReturnValue(
       new Promise(resolve => {
-        const savedObject: T = {
+        const savedObject: SavedObject<SavedObjectAttributes> = {
+          id: '',
+          type: '',
+          references: [],
           attributes: {
             [MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS]: emailAddress,
           },
@@ -281,7 +288,10 @@ describe('getLicenseExpiration', () => {
     const savedObjectsClient = SavedObjectsClientMock.create();
     savedObjectsClient.get.mockReturnValue(
       new Promise(resolve => {
-        const savedObject: T = {
+        const savedObject: SavedObject<SavedObjectAttributes> = {
+          id: '',
+          type: '',
+          references: [],
           attributes: {
             [MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS]: emailAddress,
           },
@@ -343,7 +353,10 @@ describe('getLicenseExpiration', () => {
     const savedObjectsClient = SavedObjectsClientMock.create();
     savedObjectsClient.get.mockReturnValue(
       new Promise(resolve => {
-        const savedObject: T = {
+        const savedObject: SavedObject<SavedObjectAttributes> = {
+          id: '',
+          type: '',
+          references: [],
           attributes: {
             [MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS]: emailAddress,
           },
