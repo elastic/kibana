@@ -34,16 +34,18 @@ export function Stacktrace({ stackframes = [], codeLanguage }: Props) {
   }
 
   const groups = getGroupedStackframes(stackframes);
+  console.log({ groups, stackframes, codeLanguage });
+
   return (
     <Fragment>
       {groups.map((group, i) => {
         // library frame
-        if (group.isLibraryFrame) {
+        if (group.isLibraryFrame && groups.length > 1) {
           return (
             <Fragment key={i}>
               <EuiSpacer size="m" />
               <LibraryStackFrames
-                initialVisiblity={false}
+                id={i.toString()}
                 stackframes={group.stackframes}
                 codeLanguage={codeLanguage}
               />
@@ -56,7 +58,12 @@ export function Stacktrace({ stackframes = [], codeLanguage }: Props) {
         return group.stackframes.map((stackframe, idx) => (
           <Fragment key={`${i}-${idx}`}>
             {idx > 0 && <EuiSpacer size="m" />}
-            <Stackframe codeLanguage={codeLanguage} stackframe={stackframe} />
+            <Stackframe
+              codeLanguage={codeLanguage}
+              id={`${i}-${idx}`}
+              initialIsOpen={i === 0}
+              stackframe={stackframe}
+            />
           </Fragment>
         ));
       })}

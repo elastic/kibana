@@ -180,13 +180,14 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
   );
 }
 
-export function TabContent({
+function TabContent({
   error,
   currentTab
 }: {
   error: APMError;
   currentTab: ErrorTab;
 }) {
+  const title = idx(error, _ => _.error.exception[0].message);
   const codeLanguage = idx(error, _ => _.service.language.name);
   const excStackframes = idx(error, _ => _.error.exception[0].stacktrace);
   const logStackframes = idx(error, _ => _.error.log.stacktrace);
@@ -198,7 +199,16 @@ export function TabContent({
       );
     case exceptionStacktraceTab.key:
       return (
-        <Stacktrace stackframes={excStackframes} codeLanguage={codeLanguage} />
+        <>
+          <EuiTitle size="xs">
+            <h4>{title}</h4>
+          </EuiTitle>
+          <EuiSpacer size="l" />
+          <Stacktrace
+            stackframes={excStackframes}
+            codeLanguage={codeLanguage}
+          />
+        </>
       );
     default:
       return <ErrorMetadata error={error} />;
