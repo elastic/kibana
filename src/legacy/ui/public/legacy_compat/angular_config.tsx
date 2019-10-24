@@ -38,23 +38,22 @@ import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { CoreStart, LegacyCoreStart } from 'kibana/public';
 
 import { fatalError } from 'ui/notify';
-import { capabilities } from 'ui/capabilities';
 import { RouteConfiguration } from 'ui/routes/route_manager';
 // @ts-ignore
 import { modifyUrl } from 'ui/url';
 // @ts-ignore
 import { UrlOverflowService } from '../error_url_overflow';
-import { npStart } from '../new_platform';
-import { toastNotifications } from '../notify';
 // @ts-ignore
 import { isSystemApiRequest } from '../system_api';
 import { DataStart } from '../../../core_plugins/data/public';
-import { start as dataStart } from '../../../core_plugins/data/public/legacy';
 
 const URL_LIMIT_WARN_WITHIN = 1000;
 
-export const configureAppAngularModule = (angularModule: IModule) => {
-  const newPlatform = npStart.core;
+export const configureAppAngularModule = (
+  angularModule: IModule,
+  newPlatform: LegacyCoreStart,
+  dataStart: DataStart
+) => {
   const legacyMetadata = newPlatform.injectedMetadata.getLegacyMetadata();
 
   forOwn(newPlatform.injectedMetadata.getInjectedVars(), (val, name) => {
@@ -70,7 +69,7 @@ export const configureAppAngularModule = (angularModule: IModule) => {
     .value('buildSha', legacyMetadata.buildSha)
     .value('serverName', legacyMetadata.serverName)
     .value('esUrl', getEsUrl(newPlatform))
-    .value('uiCapabilities', capabilities.get())
+    .value('uiCapabilities', newPlatform.application.capabilities)
     .config(setupCompileProvider(newPlatform))
     .config(setupLocationProvider(newPlatform))
     .config($setupXsrfRequestInterceptor(newPlatform))
@@ -245,7 +244,8 @@ const $setupDefaultIndexRedirect = (newPlatform: CoreStart, data: DataStart) => 
             defaultId = patterns[0];
             newPlatform.uiSettings.set('defaultIndex', defaultId);
           } else {
-            const canManageIndexPatterns = capabilities.get().management.kibana.index_patterns;
+            const canManageIndexPatterns =
+              newPlatform.application.capabilities.management.kibana.index_patterns;
             const redirectTarget = canManageIndexPatterns
               ? '/management/kibana/index_pattern'
               : '/home';
@@ -444,7 +444,7 @@ const $setupUrlOverflowHandling = (newPlatform: CoreStart) => (
 
     try {
       if (urlOverflow.check($location.absUrl()) <= URL_LIMIT_WARN_WITHIN) {
-        toastNotifications.addWarning({
+        newPlatform.notifications.toasts.addWarning({
           title: i18n.translate('common.ui.chrome.bigUrlWarningNotificationTitle', {
             defaultMessage: 'The URL is big and Kibana might stop working',
           }),

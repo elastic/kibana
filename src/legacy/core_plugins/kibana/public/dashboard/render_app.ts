@@ -46,6 +46,7 @@ import { confirmModalFactory } from 'ui/modals/confirm_modal';
 import {
   AppMountContext,
   ChromeStart,
+  LegacyCoreStart,
   SavedObjectsClientContract,
   UiSettingsClientContract,
 } from 'kibana/public';
@@ -66,6 +67,7 @@ import { EmbeddablePublicPlugin } from '../../../../../plugins/embeddable/public
 export interface RenderDeps {
   core: AppMountContext['core'];
   indexPatterns: DataStart['indexPatterns']['indexPatterns'];
+  dataStart: DataStart;
   queryFilter: any;
   getUnhashableStates: any;
   shareContextMenuExtensions: any;
@@ -86,7 +88,7 @@ export interface RenderDeps {
 export const renderApp = (element: HTMLElement, appBasePath: string, deps: RenderDeps) => {
   const dashboardAngularModule = createLocalAngularModule(deps.core);
   // global routing stuff
-  configureAppAngularModule(dashboardAngularModule);
+  configureAppAngularModule(dashboardAngularModule, deps.core as LegacyCoreStart, deps.dataStart);
   // custom routing stuff
   initDashboardApp(dashboardAngularModule, deps);
   const $injector = mountDashboardApp(appBasePath, element);
