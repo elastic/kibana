@@ -32,17 +32,13 @@ const ANCHOR_TIMESTAMP_3 = (new Date(MS_PER_DAY * 3)).toJSON();
 const ANCHOR_TIMESTAMP_3000 = (new Date(MS_PER_DAY * 3000)).toJSON();
 
 describe('context app', function () {
-  beforeEach(ngMock.module('kibana'));
+  beforeEach(ngMock.module('app/discover'));
 
   describe('function fetchSuccessors', function () {
     let fetchSuccessors;
     let searchSourceStub;
 
-    beforeEach(ngMock.module(function createServiceStubs($provide) {
-      $provide.value('indexPatterns', createIndexPatternsStub());
-    }));
-
-    beforeEach(ngMock.inject(function createPrivateStubs(Private) {
+    beforeEach(ngMock.inject(function createPrivateStubs() {
       searchSourceStub = createContextSearchSourceStub([], '@timestamp');
 
       fetchSuccessors = (indexPatternId, timeField, sortDir, timeValIso, timeValNr, tieBreakerField, tieBreakerValue, size) => {
@@ -53,7 +49,7 @@ describe('context app', function () {
           sort: [timeValNr, tieBreakerValue]
         };
 
-        return Private(fetchContextProvider).fetchSurroundingDocs(
+        return fetchContextProvider(createIndexPatternsStub()).fetchSurroundingDocs(
           'successors',
           indexPatternId,
           anchor,

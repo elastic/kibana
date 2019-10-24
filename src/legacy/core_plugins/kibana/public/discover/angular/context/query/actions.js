@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { toastNotifications } from '../../../kibana_services';
+import { getServices, toastNotifications } from '../../../kibana_services';
 
 import { fetchAnchorProvider } from '../api/anchor';
 import { fetchContextProvider } from '../api/context';
@@ -29,8 +29,8 @@ import { FAILURE_REASONS, LOADING_STATUS } from './constants';
 import { MarkdownSimple } from '../../../../../../kibana_react/public';
 
 export function QueryActionsProvider(Private, Promise) {
-  const fetchAnchor = Private(fetchAnchorProvider);
-  const { fetchSurroundingDocs } = Private(fetchContextProvider);
+  const fetchAnchor = fetchAnchorProvider(getServices().indexPatterns, getServices().searchSource);
+  const { fetchSurroundingDocs } = fetchContextProvider(getServices().indexPatterns);
   const {
     setPredecessorCount,
     setQueryParameters,

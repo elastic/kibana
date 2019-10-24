@@ -19,13 +19,15 @@
 
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
+import 'plugins/kibana/discover/index';
+import 'plugins/kibana/discover/angular';
 
 import { createIndexPatternsStub, createSearchSourceStub } from './_stubs';
 
 import { fetchAnchorProvider } from '../anchor';
 
 describe('context app', function () {
-  beforeEach(ngMock.module('kibana'));
+  beforeEach(ngMock.module('app/discover'));
 
   describe('function fetchAnchor', function () {
     let fetchAnchor;
@@ -39,7 +41,7 @@ describe('context app', function () {
       searchSourceStub = createSearchSourceStub([
         { _id: 'hit1' },
       ]);
-      fetchAnchor = Private(fetchAnchorProvider);
+      fetchAnchor = fetchAnchorProvider(createIndexPatternsStub(), searchSourceStub);
     }));
 
     afterEach(() => {

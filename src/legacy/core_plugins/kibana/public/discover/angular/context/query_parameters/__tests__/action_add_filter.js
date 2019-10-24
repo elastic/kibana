@@ -20,13 +20,13 @@
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import sinon from 'sinon';
-import { getServices } from '../../../../kibana_services';
+import { FilterBarQueryFilterProvider } from '../../../../kibana_services';
 import { createStateStub } from './_utils';
 import { QueryParameterActionsProvider } from '../actions';
 
 
 describe('context app', function () {
-  beforeEach(ngMock.module('kibana'));
+  beforeEach(ngMock.module('app/discover'));
 
   describe('action addFilter', function () {
     let filterManagerStub;
@@ -34,7 +34,7 @@ describe('context app', function () {
 
     beforeEach(ngMock.inject(function createPrivateStubs(Private) {
       filterManagerStub = createQueryFilterStub();
-      Private.stub(getServices().FilterBarQueryFilterProvider, filterManagerStub);
+      Private.stub(FilterBarQueryFilterProvider, filterManagerStub);
 
       addFilter = Private(QueryParameterActionsProvider).addFilter;
     }));

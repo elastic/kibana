@@ -23,7 +23,8 @@ import _ from 'lodash';
 import sinon from 'sinon';
 import expect from '@kbn/expect';
 import $ from 'jquery';
-import '../../components/field_chooser/field_chooser';
+import 'plugins/kibana/discover/index';
+import 'plugins/kibana/discover/angular';
 import FixturesHitsProvider from 'fixtures/hits';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { SimpleSavedObject } from '../../../../../../../core/public';
@@ -71,7 +72,7 @@ describe('discover field chooser directives', function () {
     ></disc-field-chooser>
   `);
 
-  beforeEach(ngMock.module('kibana', ($provide) => {
+  beforeEach(ngMock.module('app/discover', ($provide) => {
     $provide.decorator('config', ($delegate) => {
       // disable shortDots for these tests
       $delegate.get = _.wrap($delegate.get, function (origGet, name) {
