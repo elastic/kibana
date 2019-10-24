@@ -599,7 +599,7 @@ export class VectorStyle extends AbstractStyle {
     // circle sizing is by radius
     // to make icons be similiar in size to circles then have to deal with icon in half width measurements
     const iconSize = this._descriptor.properties.iconSize;
-    if (iconSize.type === DynamicStyleProperty.type) {
+    if (iconSize.type === StaticStyleProperty.type) {
       const iconPixels = iconSize.options.size >= HALF_LARGE_MAKI_ICON_SIZE
         ? LARGE_MAKI_ICON_SIZE
         : SMALL_MAKI_ICON_SIZE;
