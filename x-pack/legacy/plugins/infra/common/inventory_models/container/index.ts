@@ -13,4 +13,12 @@ export const container: InventoryModel = {
   requiredModules: ['docker'],
   layout,
   metrics,
+  requiredMetrics: [
+    'containerOverview',
+    'containerCpuUsage',
+    'containerMemory',
+    'containerNetworkTraffic',
+    'containerDiskIOBytes',
+    'containerDiskIOOps',
+  ],
 };

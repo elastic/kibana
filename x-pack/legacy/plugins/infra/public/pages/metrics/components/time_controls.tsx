@@ -6,8 +6,8 @@
 
 import { EuiSuperDatePicker, OnRefreshChangeProps, OnTimeChangeProps } from '@elastic/eui';
 import React from 'react';
-import euiStyled from '../../../../../common/eui_styled_components';
-import { MetricsTimeInput } from '../../containers/metrics/with_metrics_time';
+import euiStyled from '../../../../../../common/eui_styled_components';
+import { MetricsTimeInput } from '../containers/with_metrics_time';
 
 interface MetricsTimeControlsProps {
   currentTimeRange: MetricsTimeInput;

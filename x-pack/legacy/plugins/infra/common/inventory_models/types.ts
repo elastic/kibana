@@ -32,6 +32,7 @@ export const InventoryFormatterTypeRT = rt.keyof({
   number: null,
   percent: null,
 });
+export type InventoryFormatterType = rt.TypeOf<typeof InventoryFormatterTypeRT>;
 export type InventoryItemType = rt.TypeOf<typeof ItemTypeRT>;
 
 export const InventoryMetricRT = rt.string;
@@ -282,4 +283,5 @@ export interface InventoryModel {
   requiredModules: string[];
   layout: InventoryDetailLayoutCreator;
   metrics: InventoryMetrics;
+  requiredMetrics: InventoryMetric[];
 }

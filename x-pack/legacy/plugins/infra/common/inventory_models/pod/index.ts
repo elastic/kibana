@@ -7,9 +7,18 @@
 import { layout } from './layout';
 import { metrics } from './metrics';
 import { InventoryModel } from '../types';
+import { nginx as nginxRequiredMetrics } from '../shared/metrics/required_metrics';
+
 export const pod: InventoryModel = {
   id: 'pod',
   requiredModules: ['kubernetes'],
   layout,
   metrics,
+  requiredMetrics: [
+    'podOverview',
+    'podCpuUsage',
+    'podMemoryUsage',
+    'podNetworkTraffic',
+    ...nginxRequiredMetrics,
+  ],
 };

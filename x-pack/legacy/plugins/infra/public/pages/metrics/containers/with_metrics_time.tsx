@@ -11,8 +11,8 @@ import moment from 'moment';
 import dateMath from '@elastic/datemath';
 import * as rt from 'io-ts';
 import { isRight } from 'fp-ts/lib/Either';
-import { replaceStateKeyInQueryString, UrlStateContainer } from '../../utils/url_state';
-import { InfraTimerangeInput } from '../../graphql/types';
+import { replaceStateKeyInQueryString, UrlStateContainer } from '../../../utils/url_state';
+import { InfraTimerangeInput } from '../../../graphql/types';
 
 export interface MetricsTimeInput {
   from: string;
