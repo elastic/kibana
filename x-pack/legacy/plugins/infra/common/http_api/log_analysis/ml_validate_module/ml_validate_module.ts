@@ -19,3 +19,21 @@ export const validateMlModuleRequestPayloadRT = rt.type({
 });
 
 export type ValidateMlModuleRequestPayload = rt.TypeOf<typeof validateMlModuleRequestPayloadRT>;
+
+/**
+ * Response types
+ * */
+
+export const validateMlModuleError = rt.type({
+  field: rt.keyof({ timestamp: null, indexPatternName: null }),
+  message: rt.string,
+});
+export type ValidateMlModuleError = rt.TypeOf<typeof validateMlModuleError>;
+
+export const validateMlModuleResponsePayloadRT = rt.type({
+  data: rt.type({
+    errors: rt.array(validateMlModuleError),
+  }),
+});
+
+export type ValidateMlModuleResponsePayload = rt.TypeOf<typeof validateMlModuleResponsePayloadRT>;

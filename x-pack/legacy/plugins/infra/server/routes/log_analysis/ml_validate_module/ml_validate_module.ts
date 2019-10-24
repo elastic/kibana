@@ -14,6 +14,7 @@ import { InfraBackendLibs } from '../../../lib/infra_types';
 import {
   LOG_ANALYSIS_VALIDATE_ML_MODULE_PATH,
   validateMlModuleRequestPayloadRT,
+  validateMlModuleResponsePayloadRT,
 } from '../../../../common/http_api';
 
 import { throwErrors } from '../../../../common/runtime_types';
@@ -28,7 +29,21 @@ export const initMlValidateModuleRoute = ({ framework }: InfraBackendLibs) => {
         fold(throwErrors(Boom.badRequest), identity)
       );
 
-      return res.response(payload);
+      // TODO Implement
+
+      return res.response(
+        validateMlModuleResponsePayloadRT.encode({
+          data: {
+            errors: [
+              { field: 'timestamp', message: `Timestamp: ${payload.data.timestamp}` },
+              {
+                field: 'indexPatternName',
+                message: `indexPatternName: ${payload.data.indexPatternName}`,
+              },
+            ],
+          },
+        })
+      );
     },
   });
 };
