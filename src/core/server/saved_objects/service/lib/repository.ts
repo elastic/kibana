@@ -162,14 +162,7 @@ export class SavedObjectsRepository {
     attributes: T,
     options: SavedObjectsCreateOptions = { overwrite: false, references: [] }
   ): Promise<SavedObject<T>> {
-    const {
-      id,
-      migrationVersion,
-      overwrite,
-      namespace,
-      references,
-      refresh = DEFAULT_REFRESH_SETTING,
-    } = options;
+    const { id, migrationVersion, overwrite = false, namespace, references = [] } = options;
 
     if (!this._allowedTypes.includes(type)) {
       throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
@@ -191,6 +184,7 @@ export class SavedObjectsRepository {
 
       const raw = this._serializer.savedObjectToRaw(migrated as SanitizedSavedObjectDoc);
 
+      const { refresh = DEFAULT_REFRESH_SETTING } = options;
       const response = await this._writeToCluster(method, {
         id: raw._id,
         index: this.getIndexForType(type),
