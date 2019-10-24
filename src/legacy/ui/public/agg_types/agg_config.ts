@@ -32,7 +32,7 @@ import { AggGroupNames } from '../vis/editors/default/agg_groups';
 import { writeParams } from './agg_params';
 import { AggConfigs } from './agg_configs';
 import { Schema } from '../vis/editors/default/schemas';
-import { ContentType, getFieldFormats } from '../../../../plugins/data/public';
+import { ContentType, getFieldFormats, FieldFormat } from '../../../../plugins/data/public';
 
 export interface AggConfigOptions {
   enabled: boolean;
@@ -370,11 +370,12 @@ export class AggConfig {
   }
 
   fieldFormatter(contentType?: ContentType, defaultFormat?: any) {
-    const format = this.type && this.type.getFormat(this);
+    const format = (this.type && this.type.getFormat(this)) as FieldFormat;
 
     if (format) {
       return format.getConverterFor(contentType);
     }
+
     return this.fieldOwnFormatter(contentType, defaultFormat);
   }
 

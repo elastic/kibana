@@ -51,10 +51,6 @@ jest.mock('./index_patterns_api_client', () => {
   };
 });
 
-const fieldFormats = {
-  getDefaultInstance: jest.fn(),
-} as any;
-
 describe('IndexPatterns', () => {
   let indexPatterns: IndexPatterns;
 
@@ -63,7 +59,7 @@ describe('IndexPatterns', () => {
     const uiSettings = {} as UiSettingsClientContract;
     const http = {} as HttpServiceBase;
 
-    indexPatterns = new IndexPatterns(uiSettings, savedObjectsClient, http, fieldFormats);
+    indexPatterns = new IndexPatterns(uiSettings, savedObjectsClient, http);
   });
 
   test('does cache gets for the same id', async () => {

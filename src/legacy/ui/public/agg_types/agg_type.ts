@@ -27,7 +27,7 @@ import { SearchSource } from '../courier';
 import { Adapters } from '../inspector';
 import { BaseParamType } from './param_types/base';
 
-import { getFieldFormats, FieldFormat } from '../../../../plugins/data/public';
+import { getFieldFormats, FieldFormatRegisty, FieldFormat } from '../../../../plugins/data/public';
 
 const fieldFormats = getFieldFormats();
 
@@ -56,13 +56,14 @@ export interface AggTypeConfig<
     inspectorAdapters: Adapters,
     abortSignal?: AbortSignal
   ) => Promise<any>;
-  getFormat?: (agg: TAggConfig) => FieldFormat;
+  getFormat?: (agg: TAggConfig) => FieldFormatRegisty | FieldFormat;
   getValue?: (agg: TAggConfig, bucket: any) => any;
   getKey?: (bucket: any, key: any, agg: TAggConfig) => any;
 }
 
 const getFormat = (agg: AggConfig) => {
   const field = agg.getField();
+
   return field ? field.format : fieldFormats.getDefaultInstance('string');
 };
 
@@ -188,7 +189,7 @@ export class AggType<TAggConfig extends AggConfig = AggConfig, TParam extends Ag
    * @param  {agg} agg - the agg to pick a format for
    * @return {FieldFormat}
    */
-  getFormat: (agg: TAggConfig) => FieldFormat;
+  getFormat: (agg: TAggConfig) => FieldFormatRegisty | FieldFormat;
 
   getValue: (agg: TAggConfig, bucket: any) => any;
 

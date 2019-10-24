@@ -76,7 +76,7 @@ export const termsBucketAgg = new BucketAggType({
     const params = agg.params;
     return agg.getFieldDisplayName() + ': ' + params.order.text;
   },
-  getFormat(bucket) {
+  getFormat(bucket): any {
     return {
       getConverterFor: (type: ContentType) => {
         return (val: any) => {
@@ -92,6 +92,7 @@ export const termsBucketAgg = new BucketAggType({
             basePath: chrome.getBasePath(),
           };
           const converter = bucket.params.field.format.getConverterFor(type);
+
           return converter(val, undefined, undefined, parsedUrl);
         };
       },
