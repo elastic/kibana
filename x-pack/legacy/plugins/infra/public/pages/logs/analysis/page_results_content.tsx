@@ -141,6 +141,16 @@ export const AnalysisResultsContent = ({
     fetchJobStatus();
   }, JOB_STATUS_POLLING_INTERVAL);
 
+  useInterval(
+    () => {
+      handleQueryTimeRangeChange({
+        start: selectedTimeRange.startTime,
+        end: selectedTimeRange.endTime,
+      });
+    },
+    autoRefresh.isPaused ? null : autoRefresh.interval
+  );
+
   return (
     <>
       {isLoading && !logEntryRate ? (
@@ -187,7 +197,6 @@ export const AnalysisResultsContent = ({
                         isPaused={autoRefresh.isPaused}
                         refreshInterval={autoRefresh.interval}
                         onRefreshChange={handleAutoRefreshChange}
-                        onRefresh={handleQueryTimeRangeChange}
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>
