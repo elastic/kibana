@@ -6,7 +6,7 @@
 
 import assert from 'assert';
 import path from 'path';
-import rimraf from 'rimraf';
+import del from 'del';
 import sinon from 'sinon';
 
 import { DiffKind } from '../../common/git_diff';
@@ -42,10 +42,8 @@ const serverOptions = createTestServerOption();
 const server = createTestHapiServer();
 const gitOps = new GitOperations(serverOptions.repoPath);
 
-function cleanWorkspace() {
-  return new Promise(resolve => {
-    rimraf(serverOptions.workspacePath, resolve);
-  });
+async function cleanWorkspace() {
+  await del(serverOptions.workspacePath);
 }
 
 function setupEsClientSpy() {
@@ -109,9 +107,7 @@ function setupLsServiceSendRequestSpy(): sinon.SinonSpy {
 describe('LSP incremental indexer unit tests', () => {
   // @ts-ignore
   before(async () => {
-    return new Promise(resolve => {
-      rimraf(serverOptions.repoPath, resolve);
-    });
+    await del(serverOptions.repoPath);
   });
 
   beforeEach(async function() {
