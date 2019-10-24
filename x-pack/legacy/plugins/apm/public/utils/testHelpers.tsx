@@ -15,9 +15,9 @@ import { Moment } from 'moment-timezone';
 import React from 'react';
 import { render, waitForElement } from 'react-testing-library';
 import { MemoryRouter } from 'react-router-dom';
-import { ESFilter } from 'elasticsearch';
 import { LocationProvider } from '../context/LocationContext';
 import { PromiseReturnType } from '../../typings/common';
+import { ESFilter } from '../../typings/elasticsearch';
 
 export function toJson(wrapper: ReactWrapper) {
   return enzymeToJson(wrapper, {

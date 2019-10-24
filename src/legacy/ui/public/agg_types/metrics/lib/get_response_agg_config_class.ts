@@ -16,9 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import { assign } from 'lodash';
-import { IMetricAggConfig } from './metric_agg_type';
+import { IMetricAggConfig } from '../metric_agg_type';
 
 /**
  * Get the ResponseAggConfig class for an aggConfig,
@@ -41,10 +40,7 @@ export interface IResponseAggConfig extends IMetricAggConfig {
   parentId: IMetricAggConfig['id'];
 }
 
-export const create = (
-  parentAgg: IMetricAggConfig,
-  props: Partial<IMetricAggConfig>
-): IMetricAggConfig => {
+export const create = (parentAgg: IMetricAggConfig, props: Partial<IMetricAggConfig>) => {
   /**
    * AggConfig "wrapper" for multi-value metric aggs which
    * need to modify AggConfig behavior for each value produced.
@@ -52,23 +48,21 @@ export const create = (
    * @param {string|number} key - the key or index that identifies
    *                            this part of the multi-value
    */
-  class ResponseAggConfig {
-    id: IMetricAggConfig['id'];
-    key: string | number;
-    parentId: IMetricAggConfig['id'];
+  function ResponseAggConfig(this: IResponseAggConfig, key: string) {
+    const parentId = parentAgg.id;
+    let id;
 
-    constructor(key: string) {
-      this.key = key;
-      this.parentId = parentAgg.id;
+    const subId = String(key);
 
-      const subId = String(key);
-
-      if (subId.indexOf('.') > -1) {
-        this.id = this.parentId + "['" + subId.replace(/'/g, "\\'") + "']";
-      } else {
-        this.id = this.parentId + '.' + subId;
-      }
+    if (subId.indexOf('.') > -1) {
+      id = parentId + "['" + subId.replace(/'/g, "\\'") + "']";
+    } else {
+      id = parentId + '.' + subId;
     }
+
+    this.id = id;
+    this.key = key;
+    this.parentId = parentId;
   }
 
   ResponseAggConfig.prototype = Object.create(parentAgg);
@@ -76,5 +70,5 @@ export const create = (
 
   assign(ResponseAggConfig.prototype, props);
 
-  return (ResponseAggConfig as unknown) as IMetricAggConfig;
+  return ResponseAggConfig;
 };

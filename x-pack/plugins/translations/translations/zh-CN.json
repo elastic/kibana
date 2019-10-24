@@ -7148,7 +7148,6 @@
     "xpack.transform.transformList.stopActionName": "停止",
     "xpack.transform.transformList.stopTransformSuccessMessage": "数据帧作业 {transformId} 停止成功。",
     "xpack.transform.pivotPreview.copyClipboardTooltip": "将透视预览的开发控制台语句复制到剪贴板。",
-    "xpack.transform.pivotPreview.statusCodeLabel": "状态代码",
     "xpack.transform.progress": "进度",
     "xpack.transform.sourceIndex": "源索引",
     "xpack.transform.sourceIndexPreview.copyClipboardTooltip": "将源索引预览的开发控制台语句复制到剪贴板。",
