@@ -81,7 +81,7 @@ export const updateSetupModeData = async (uuid, fetchWithoutClusterUuid = false)
   const oldData = setupModeState.data;
   const data = await fetchCollectionData(uuid, fetchWithoutClusterUuid);
   setupModeState.data = data;
-  if (get(data, '_meta.isOnCloud', false)) {
+  if (chrome.getInjected('isOnCloud')) {
     return toggleSetupMode(false); // eslint-disable-line no-use-before-define
   }
   notifySetupModeDataChange(oldData);
