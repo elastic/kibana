@@ -23,7 +23,6 @@ import {
   SimpleSavedObject,
   UiSettingsClientContract,
   HttpServiceBase,
-  NotificationsSetup,
 } from 'src/core/public';
 // @ts-ignore
 import { fieldFormats } from 'ui/registry/field_formats';
@@ -41,17 +40,13 @@ export class IndexPatterns {
   private savedObjectsClient: SavedObjectsClientContract;
   private savedObjectsCache?: Array<SimpleSavedObject<Record<string, any>>> | null;
   private apiClient: IndexPatternsApiClient;
-  private notifications: NotificationsSetup;
 
   constructor(
     config: UiSettingsClientContract,
     savedObjectsClient: SavedObjectsClientContract,
-    http: HttpServiceBase,
-    notifications: NotificationsSetup
+    http: HttpServiceBase
   ) {
     this.apiClient = new IndexPatternsApiClient(http);
-    this.notifications = notifications;
-
     this.config = config;
     this.savedObjectsClient = savedObjectsClient;
   }
@@ -122,19 +117,26 @@ export class IndexPatterns {
     return null;
   };
 
-  get = (id: string) => {
+  get = async (id: string): Promise<IndexPattern> => {
     const cache = indexPatternCache.get(id);
-    return cache || indexPatternCache.set(id, this.make(id));
+    if (cache) {
+      return cache;
+    }
+
+    const indexPattern = await this.make(id);
+
+    return indexPatternCache.set(id, indexPattern);
   };
 
   make = (id?: string): Promise<IndexPattern> => {
-    return new IndexPattern(
+    const indexPattern = new IndexPattern(
       id,
       (cfg: any) => this.config.get(cfg),
       this.savedObjectsClient,
       this.apiClient,
-      indexPatternCache,
-      this.notifications
-    ).init();
+      indexPatternCache
+    );
+
+    return indexPattern.init();
   };
 }

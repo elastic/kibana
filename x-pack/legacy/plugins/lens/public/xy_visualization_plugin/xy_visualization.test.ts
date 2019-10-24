@@ -50,6 +50,15 @@ describe('xy_visualization', () => {
       expect(desc.label).toEqual('Mixed XY Chart');
     });
 
+    it('should show the preferredSeriesType if there are no layers', () => {
+      const desc = xyVisualization.getDescription(mixedState());
+
+      // 'test-file-stub' is a hack, but it at least means we aren't using
+      // a standard icon here.
+      expect(desc.icon).toEqual('test-file-stub');
+      expect(desc.label).toEqual('Bar Chart');
+    });
+
     it('should show mixed horizontal bar chart when multiple horizontal bar types', () => {
       const desc = xyVisualization.getDescription(
         mixedState('bar_horizontal', 'bar_horizontal_stacked')

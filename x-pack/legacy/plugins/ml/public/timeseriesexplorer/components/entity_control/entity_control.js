@@ -6,12 +6,13 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import { injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 import {
   EuiComboBox,
   EuiFlexItem,
   EuiFormRow,
+  EuiToolTip,
 } from '@elastic/eui';
 
 function getEntityControlOptions(entity) {
@@ -29,6 +30,7 @@ export const EntityControl = injectI18n(
     static propTypes = {
       entity: PropTypes.object.isRequired,
       entityFieldValueChanged: PropTypes.func.isRequired,
+      forceSelection: PropTypes.bool.isRequired,
     };
 
     state = {
@@ -40,7 +42,7 @@ export const EntityControl = injectI18n(
     }
 
     componentDidUpdate() {
-      const { entity } = this.props;
+      const { entity, forceSelection } = this.props;
       const { selectedOptions } = this.state;
 
       const fieldValue = entity.fieldValue;
@@ -57,6 +59,10 @@ export const EntityControl = injectI18n(
           selectedOptions: undefined
         });
       }
+
+      if (forceSelection && this.inputRef) {
+        this.inputRef.focus();
+      }
     }
 
     onChange = (selectedOptions) => {
@@ -70,25 +76,45 @@ export const EntityControl = injectI18n(
     };
 
     render() {
-      const { entity, intl } = this.props;
+      const { entity, intl, forceSelection } = this.props;
       const { selectedOptions } = this.state;
       const options = getEntityControlOptions(entity);
 
+      const control = (<EuiComboBox
+        inputRef={input => {
+          if (input) {
+            this.inputRef = input;
+          }
+        }}
+        style={{ minWidth: '300px' }}
+        placeholder={intl.formatMessage({
+          id: 'xpack.ml.timeSeriesExplorer.enterValuePlaceholder',
+          defaultMessage: 'Enter value'
+        })}
+        singleSelection={{ asPlainText: true }}
+        options={options}
+        selectedOptions={selectedOptions}
+        onChange={this.onChange}
+        isClearable={false}
+      />);
+
+      const selectMessage = (<FormattedMessage
+        id="xpack.ml.timeSeriesExplorer.selectFieldMessage"
+        defaultMessage="Select {fieldName}"
+        values={{ fieldName: entity.fieldName }}
+      />);
+
       return (
         <EuiFlexItem grow={false}>
-          <EuiFormRow label={entity.fieldName}>
-            <EuiComboBox
-              style={{ minWidth: '300px' }}
-              placeholder={intl.formatMessage({
-                id: 'xpack.ml.timeSeriesExplorer.enterValuePlaceholder',
-                defaultMessage: 'Enter value'
-              })}
-              singleSelection={{ asPlainText: true }}
-              options={options}
-              selectedOptions={selectedOptions}
-              onChange={this.onChange}
-              isClearable={false}
-            />
+          <EuiFormRow
+            label={entity.fieldName}
+            helpText={forceSelection ? selectMessage : null}
+          >
+            <EuiToolTip
+              position="right"
+              content={forceSelection ? selectMessage : null}
+            >{control}
+            </EuiToolTip>
           </EuiFormRow>
         </EuiFlexItem>
       );
