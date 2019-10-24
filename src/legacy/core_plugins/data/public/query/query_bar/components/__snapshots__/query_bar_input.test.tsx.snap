@@ -289,6 +289,12 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
                 "remove": [MockFunction],
                 "replace": [MockFunction],
               },
+              "flyouts": Object {
+                "open": [MockFunction],
+              },
+              "modals": Object {
+                "open": [MockFunction],
+              },
               "openFlyout": [MockFunction],
               "openModal": [MockFunction],
             },
@@ -852,6 +858,12 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
                         "remove": [MockFunction],
                         "replace": [MockFunction],
                       },
+                      "flyouts": Object {
+                        "open": [MockFunction],
+                      },
+                      "modals": Object {
+                        "open": [MockFunction],
+                      },
                       "openFlyout": [MockFunction],
                       "openModal": [MockFunction],
                     },
@@ -1402,6 +1414,12 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
                 "getComponent": [MockFunction],
                 "remove": [MockFunction],
                 "replace": [MockFunction],
+              },
+              "flyouts": Object {
+                "open": [MockFunction],
+              },
+              "modals": Object {
+                "open": [MockFunction],
               },
               "openFlyout": [MockFunction],
               "openModal": [MockFunction],
@@ -1963,6 +1981,12 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
                         "remove": [MockFunction],
                         "replace": [MockFunction],
                       },
+                      "flyouts": Object {
+                        "open": [MockFunction],
+                      },
+                      "modals": Object {
+                        "open": [MockFunction],
+                      },
                       "openFlyout": [MockFunction],
                       "openModal": [MockFunction],
                     },
@@ -2513,6 +2537,12 @@ exports[`QueryBarInput Should render the given query 1`] = `
                 "getComponent": [MockFunction],
                 "remove": [MockFunction],
                 "replace": [MockFunction],
+              },
+              "flyouts": Object {
+                "open": [MockFunction],
+              },
+              "modals": Object {
+                "open": [MockFunction],
               },
               "openFlyout": [MockFunction],
               "openModal": [MockFunction],
@@ -3073,6 +3103,12 @@ exports[`QueryBarInput Should render the given query 1`] = `
                         "getComponent": [MockFunction],
                         "remove": [MockFunction],
                         "replace": [MockFunction],
+                      },
+                      "flyouts": Object {
+                        "open": [MockFunction],
+                      },
+                      "modals": Object {
+                        "open": [MockFunction],
                       },
                       "openFlyout": [MockFunction],
                       "openModal": [MockFunction],
