@@ -10,23 +10,20 @@ import * as os from 'os';
 import path from 'path';
 
 import { simplegit } from '@elastic/simple-git/dist';
-import rimraf from 'rimraf';
+import del from 'del';
 import { AnyObject } from './lib/esqueue';
 import { ServerOptions } from './server_options';
 import { ServerFacade } from '..';
 
-export function prepareProjectByCloning(url: string, p: string) {
-  return new Promise(resolve => {
-    if (!fs.existsSync(p)) {
-      rimraf(p, error => {
-        fs.mkdirSync(p, { recursive: true });
-        const git = simplegit(p);
-        git.clone(url, p, ['--bare']).then(resolve);
-      });
-    } else {
-      resolve();
-    }
-  });
+export async function prepareProjectByCloning(url: string, p: string) {
+  if (fs.existsSync(p)) {
+    return;
+  }
+
+  await del(p);
+  fs.mkdirSync(p, { recursive: true });
+  const git = simplegit(p);
+  return await git.clone(url, p, ['--bare']);
 }
 
 export async function prepareProjectByInit(

@@ -8,7 +8,7 @@ import path from 'path';
 
 import assert from 'assert';
 import * as os from 'os';
-import rimraf from 'rimraf';
+import del from 'del';
 import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
 
 import { LspRequest } from '../../model';
@@ -163,6 +163,6 @@ describe('workspace_handler tests', () => {
 
   // @ts-ignore
   after(() => {
-    rimraf.sync(baseDir);
+    del.sync(baseDir);
   });
 });
