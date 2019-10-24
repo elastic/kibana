@@ -22,9 +22,8 @@ can then optionally import that data into an {es} index.
 
 You need the following permissions to use the Data Visualizer with file upload:
 
-* cluster privileges: `monitor`, `manage_index_pipelines`, 
-`manage_index_templates`
-* index privileges: `manage`, `index`
+* cluster privileges: `monitor`, `manage_index_pipelines`
+* index privileges: `read`, `manage`, `index`
 
 For more information, see {ref}/security-privileges.html[Security privileges] 
 and {ref}/built-in-roles.html[Built-in roles].
