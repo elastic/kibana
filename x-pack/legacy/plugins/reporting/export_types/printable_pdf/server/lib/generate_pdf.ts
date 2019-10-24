@@ -8,7 +8,7 @@ import * as Rx from 'rxjs';
 import { toArray, mergeMap } from 'rxjs/operators';
 import { groupBy } from 'lodash';
 import { LevelLogger } from '../../../../server/lib';
-import { KbnServer, ConditionalHeaders } from '../../../../types';
+import { ServerFacade, ConditionalHeaders } from '../../../../types';
 // @ts-ignore untyped module
 import { pdf } from './pdf';
 import { oncePerServer } from '../../../../server/lib/once_per_server';
@@ -38,7 +38,7 @@ const getTimeRange = (urlScreenshots: UrlScreenshot[]) => {
   return null;
 };
 
-function generatePdfObservableFn(server: KbnServer) {
+function generatePdfObservableFn(server: ServerFacade) {
   const screenshotsObservable = screenshotsObservableFactory(server);
   const captureConcurrency = 1;
 
