@@ -22,6 +22,7 @@ import { StaticIndexPattern } from 'ui/index_patterns';
 import { PersistedState } from 'ui/persisted_state';
 import { VisualizeLoader } from 'ui/visualize/loader';
 import { EmbeddedVisualizeHandler } from 'ui/visualize/loader/embedded_visualize_handler';
+import { AppState } from 'ui/state_management/app_state';
 import {
   VisSavedObject,
   VisualizeLoaderParams,
@@ -48,7 +49,7 @@ export interface VisualizeEmbeddableConfiguration {
   editUrl: string;
   loader: VisualizeLoader;
   editable: boolean;
-  appState?: PersistedState;
+  appState?: AppState;
   uiState?: PersistedState;
 }
 
@@ -59,7 +60,7 @@ export interface VisualizeInput extends EmbeddableInput {
   vis?: {
     colors?: { [key: string]: string };
   };
-  appState?: PersistedState;
+  appState?: AppState;
   uiState?: PersistedState;
 }
 
@@ -73,7 +74,7 @@ export interface VisualizeOutput extends EmbeddableOutput {
 export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOutput> {
   private savedVisualization: VisSavedObject;
   private loader: VisualizeLoader;
-  private appState: any;
+  private appState: AppState | undefined;
   private uiState: PersistedState;
   private handler?: EmbeddedVisualizeHandler;
   private timeRange?: TimeRange;

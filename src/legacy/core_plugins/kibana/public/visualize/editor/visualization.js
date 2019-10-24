@@ -38,7 +38,6 @@ uiModules
         $scope.renderFunction = async () => {
           if (!$scope._handler) {
             $scope._handler = await embeddables.getEmbeddableFactory('visualization').createFromObject($scope.savedObj, {
-              //vis: $scope.savedObj.vis.getUiState(),
               timeRange: $scope.timeRange,
               filters: $scope.filters || [],
               query: $scope.query,
