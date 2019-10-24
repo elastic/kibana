@@ -5,6 +5,7 @@
  */
 
 import { performance } from 'perf_hooks';
+import { TaskPoolRunResult } from '../task_pool';
 
 type BatchRun<T> = (tasks: T[]) => Promise<boolean>;
 type Fetcher<T> = () => Promise<T[]>;
@@ -26,7 +27,7 @@ export async function fillPool<TRecord, TRunner>(
   run: BatchRun<TRunner>,
   fetchAvailableTasks: Fetcher<TRecord>,
   converter: Converter<TRecord, TRunner>
-): Promise<void> {
+): Promise<TaskPoolRunResult> {
   performance.mark('fillPool.start');
   while (true) {
     const instances = await fetchAvailableTasks();
@@ -38,18 +39,19 @@ export async function fillPool<TRecord, TRunner>(
         'fillPool.start',
         'fillPool.bailNoTasks'
       );
-      return;
+      return TaskPoolRunResult.RanOutOfTasks;
     }
 
     const tasks = instances.map(converter);
-    if (!(await run(tasks))) {
-      performance.mark('fillPool.bail');
+
+    if ((await run(tasks)) === TaskPoolRunResult.RanOutOfCapacity) {
+      performance.mark('fillPool.bailExhaustedCapacity');
       performance.measure(
-        'fillPool.activityDurationUntilNoCapacity',
+        'fillPool.activityDurationUntilExhaustedCapacity',
         'fillPool.start',
-        'fillPool.bail'
+        'fillPool.bailExhaustedCapacity'
       );
-      return;
+      return TaskPoolRunResult.RanOutOfCapacity;
     }
     performance.mark('fillPool.cycle');
   }

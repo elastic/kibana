@@ -112,16 +112,9 @@ export class TaskManager {
     const poller = new TaskPoller({
       logger: this.logger,
       pollInterval: opts.config.get('xpack.task_manager.poll_interval'),
-      work: (): Promise<void> =>
+      work: (): Promise<TaskPoolRunResult> =>
         fillPool(
-          async tasks => {
-            switch (await pool.run(tasks)) {
-              case TaskPoolRunResult.RunningAllClaimedTasks:
-                return true;
-              case TaskPoolRunResult.RanOutOfCapacity:
-                return false;
-            }
-          },
+          async tasks => await pool.run(tasks),
           () =>
             claimAvailableTasks(
               this.store.claimAvailableTasks.bind(this.store),
@@ -273,6 +266,9 @@ export async function claimAvailableTasks(
       claimOwnershipUntil: intervalFromNow('30s')!,
     });
 
+    if (claimedTasks === 0) {
+      performance.mark('claimAvailableTasks.noTasks');
+    }
     performance.mark('claimAvailableTasks_stop');
     performance.measure(
       'claimAvailableTasks',
@@ -286,6 +282,8 @@ export async function claimAvailableTasks(
       );
     }
     return docs;
+  } else {
+    performance.mark('claimAvailableTasks.noAvailableWorkers');
   }
   logger.info(
     `[Task Ownership]: Task Manager has skipped Claiming Ownership of available tasks at it has ran out Available Workers. If this happens often, consider adjusting the "xpack.task_manager.max_workers" configuration.`

@@ -11,23 +11,30 @@ export default function({ getService }: { getService: (service: string) => any }
   const supertest = getService('supertest');
 
   const params = { tasksToSpawn: 100, trackExecutionTimeline: true, durationInSeconds: 60 };
-
   describe('stressing task manager', () => {
     it(`should run ${params.tasksToSpawn} tasks over ${params.durationInSeconds} seconds`, async () => {
       const {
         runningAverageTasksPerSecond,
         runningAverageLeadTime,
+        // how often things happen in Task Manager
+        cycles: { fillPoolStarts, fillPoolCycles, fillPoolBail, fillPoolBailNoTasks },
+        claimAvailableTasksNoTasks,
+        claimAvailableTasksNoAvailableWorkers,
         numberOfTasksRanOverall,
-        firstMarkAsRunningTillRan,
-        timeUntilFirstMarkAsRun,
-        timeFromMarkAsRunTillRun,
-        timeFromRunTillNextMarkAsRun,
-        claimAvailableTasks,
+        // how long it takes to talk to Elasticsearch
+        elasticsearchApiCalls: {
+          timeUntilFirstMarkAsRun,
+          firstMarkAsRunningTillRan,
+          timeFromMarkAsRunTillRun,
+          timeFromRunTillNextMarkAsRun,
+          claimAvailableTasks,
+        },
+        // durations in Task Manager
+        perfTestDuration,
         taskPoolAttemptToRun,
         taskRunnerMarkTaskAsRunning,
-        taskPollerInactivityDuration,
-        perfTestDuration,
-        cycles: { attemptWorkSkip, fillPoolCycles, fillPoolBail, fillPoolBailNoTasks },
+        sleepDuration,
+        activityDuration,
       } = await supertest
         .post('/api/perf_tasks')
         .set('kbn-xsrf', 'xxx')
@@ -36,14 +43,20 @@ export default function({ getService }: { getService: (service: string) => any }
         .then((response: any) => response.body);
 
       log.debug(cyan(`Stress Test Result:`));
-      log.debug(`Average number of tasks executed per second: ${runningAverageTasksPerSecond}`);
       log.debug(
-        `Average time between a task's "runAt" scheduled time and the time it actually ran: ${runningAverageLeadTime}`
+        `Average number of tasks executed per second: ${bright(runningAverageTasksPerSecond)}`
+      );
+      log.debug(
+        `Average time between a task's "runAt" scheduled time and the time it actually ran: ${bright(
+          runningAverageLeadTime
+        )}`
       );
 
       if (params.trackExecutionTimeline) {
         log.debug(
-          `Overall number of tasks ran in ${params.durationInSeconds} seconds: ${numberOfTasksRanOverall}`
+          `Overall number of tasks ran in ${bright(params.durationInSeconds)} seconds: ${bright(
+            numberOfTasksRanOverall
+          )}`
         );
         log.debug(`Average time between stages:`);
         log.debug(
@@ -56,12 +69,32 @@ export default function({ getService }: { getService: (service: string) => any }
             timeFromRunTillNextMarkAsRun
           )}]---> next markAsRunning`
         );
-        log.debug(`Duration of Perf Test: ${perfTestDuration}`);
-        log.debug(`inactivity waiting to poll for tasks: ${taskPollerInactivityDuration}`);
+        log.debug(`Duration of Perf Test: ${bright(perfTestDuration)}`);
+        log.debug(`Activity within Task Poller: ${bright(activityDuration)}`);
+        log.debug(`Inactivity due to Sleep: ${bright(sleepDuration)}`);
         log.debug(
-          `task poll cycles: ${colorizeCycles(fillPoolCycles, fillPoolBail, fillPoolBailNoTasks)}`
+          `Polling Cycles: ${colorizeCycles(fillPoolStarts, fillPoolCycles, fillPoolBail)}`
         );
-        log.debug(`task poll cycles skipped due to workers being busy: ${attemptWorkSkip}`);
+        if (fillPoolBail > 0) {
+          log.debug(`  ⮑ Bailed due to:`);
+          if (fillPoolBailNoTasks > 0) {
+            log.debug(`     ⮑ No Tasks To Process:`);
+            if (claimAvailableTasksNoTasks > 0) {
+              log.debug(`       ⮑ ${claimAvailableTasksNoTasks} Times, due to No Tasks Claimed`);
+            }
+            if (claimAvailableTasksNoAvailableWorkers > 0) {
+              log.debug(
+                `       ⮑ ${claimAvailableTasksNoAvailableWorkers} Times, due to having No Available Worker Capacity`
+              );
+            }
+          }
+          if (fillPoolBail - fillPoolBailNoTasks > 0) {
+            log.debug(
+              `     ⮑ Exhausted Available Workers due to on going Task runs ${fillPoolBail -
+                fillPoolBailNoTasks}`
+            );
+          }
+        }
         log.debug(
           `average duration taken to Claim Available Tasks: ${descMetric(claimAvailableTasks)}`
         );
@@ -96,14 +129,15 @@ function colorize(avg: number) {
   return avg < 500 ? green(`${avg}`) : avg < 1000 ? cyan(`${avg}`) : red(`${avg}`);
 }
 
-function colorizeCycles(fillPoolCycles: number, fillPoolBail: number, fillPoolBailNoTasks: number) {
-  const perc = (fillPoolBail * 100) / fillPoolCycles;
-  const colorFunc = perc >= 100 ? red : perc >= 50 ? cyan : green;
+function colorizeCycles(fillPoolStarts: number, fillPoolCycles: number, fillPoolBail: number) {
+  const perc = (fillPoolCycles * 100) / fillPoolStarts;
+  const colorFunc = perc >= 100 ? green : perc >= 50 ? cyan : red;
   return (
+    `ran ` +
+    bright(`${fillPoolStarts}`) +
+    ` cycles, of which ` +
     colorFunc(`${fillPoolCycles}`) +
-    ` cycles, having bailed ` +
-    colorFunc(`${fillPoolBail}`) +
-    ` (No Tasks:${fillPoolBailNoTasks}, No Workers: ${fillPoolBail - fillPoolBailNoTasks})`
+    ` were reran before bailing`
   );
 }
 
@@ -121,4 +155,8 @@ function green(str: string) {
 
 function dim(str: string) {
   return `\x1b[2m${str}\x1b[0m`;
+}
+
+function bright(str: string | number) {
+  return `\x1b[1m${str}\x1b[0m`;
 }

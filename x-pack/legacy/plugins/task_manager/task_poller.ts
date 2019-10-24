@@ -10,8 +10,9 @@
 
 import { performance } from 'perf_hooks';
 import { Logger } from './types';
+import { TaskPoolRunResult } from './task_pool';
 
-type WorkFn = () => Promise<void>;
+type WorkFn = () => Promise<TaskPoolRunResult>;
 
 interface Opts {
   pollInterval: number;
@@ -58,8 +59,13 @@ export class TaskPoller {
     const poll = async () => {
       await this.attemptWork();
 
+      performance.mark('TaskPoller.sleep');
       if (this.isStarted) {
-        this.timeout = setTimeout(poll, this.pollInterval);
+        this.timeout = setTimeout(() => {
+          performance.mark('TaskPoller.poll');
+          performance.measure('TaskPoller.sleepDuration', 'TaskPoller.sleep', 'TaskPoller.poll');
+          poll();
+        }, this.pollInterval);
       }
     };
 
@@ -81,7 +87,6 @@ export class TaskPoller {
    */
   public async attemptWork() {
     if (!this.isStarted || this.isWorking) {
-      performance.mark('attemptWork.skip');
       return;
     }
 

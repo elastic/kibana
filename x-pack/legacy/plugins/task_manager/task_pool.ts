@@ -23,6 +23,7 @@ interface Opts {
 export enum TaskPoolRunResult {
   RunningAllClaimedTasks = 'RunningAllClaimedTasks',
   RanOutOfCapacity = 'RanOutOfCapacity',
+  RanOutOfTasks = 'RanOutOfTasks',
 }
 
 const VERSION_CONFLICT_MESSAGE = i18n.translate(
@@ -146,7 +147,7 @@ export class TaskPool {
 
     if (leftOverTasks.length) {
       if (this.availableWorkers) {
-        return this.attemptToRun(tasks);
+        return this.attemptToRun(leftOverTasks);
       }
       return TaskPoolRunResult.RanOutOfCapacity;
     }

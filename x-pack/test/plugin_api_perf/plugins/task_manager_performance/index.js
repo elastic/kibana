@@ -193,35 +193,27 @@ export default function TaskManagerPerformanceAPI(kibana) {
 
           const {
             numberOfTasksRanOverall,
-            timeUntilFirstRun,
-            timeUntilFirstMarkAsRun,
-            timeFromMarkAsRunTillRun,
-            firstMarkAsRunningTillRan,
-            timeFromRunTillNextMarkAsRun,
-            claimAvailableTasks,
-            taskPollerActivityDuration,
-            fillPoolCycles,
-            fillPoolBail,
-            fillPoolBailNoTasks,
-            attemptWorkSkip,
+            elasticsearchApiCalls,
+            activityDuration,
+            sleepDuration,
+            cycles,
+            claimAvailableTasksNoTasks,
+            claimAvailableTasksNoAvailableWorkers,
             taskPoolAttemptToRun,
-            taskRunnerMarkTaskAsRunning,
+            taskRunnerMarkTaskAsRunning
           } = performance;
 
-          const taskPollerInactivityDuration = perfTestDuration - stats.sum(taskPollerActivityDuration);
           const perfRes = {
             perfTestDuration: prettyMilliseconds(perfTestDuration),
             runningAverageTasksPerSecond,
             runningAverageLeadTime,
             numberOfTasksRanOverall,
-            timeUntilFirstRun: avg(timeUntilFirstRun),
-            timeUntilFirstMarkAsRun: avg(timeUntilFirstMarkAsRun),
-            timeFromMarkAsRunTillRun: avg(timeFromMarkAsRunTillRun),
-            timeFromRunTillNextMarkAsRun: avg(timeFromRunTillNextMarkAsRun),
-            claimAvailableTasks: avg(claimAvailableTasks),
-            firstMarkAsRunningTillRan: avg(firstMarkAsRunningTillRan),
-            taskPollerInactivityDuration: prettyMilliseconds(taskPollerInactivityDuration),
-            cycles: { attemptWorkSkip, fillPoolCycles, fillPoolBail, fillPoolBailNoTasks },
+            claimAvailableTasksNoTasks,
+            claimAvailableTasksNoAvailableWorkers,
+            elasticsearchApiCalls: _.mapValues(elasticsearchApiCalls, avg),
+            sleepDuration: prettyMilliseconds(stats.sum(sleepDuration)),
+            activityDuration: prettyMilliseconds(stats.sum(activityDuration)),
+            cycles,
             taskPoolAttemptToRun: avg(taskPoolAttemptToRun),
             taskRunnerMarkTaskAsRunning: avg(taskRunnerMarkTaskAsRunning),
           };
@@ -254,6 +246,10 @@ function avg(items) {
 }
 
 function resetPerfState(target) {
+  if(target.performanceObserver) {
+    target.performanceObserver.disconnect();
+  }
+
   const performanceState = Object.assign(target, {
     capturing: false,
     runningAverageTasksPerSecond: 0,
@@ -263,17 +259,25 @@ function resetPerfState(target) {
     leadTimeQueue: [],
     performance: {
       numberOfTasksRanOverall: 0,
-      fillPoolCycles: 0,
-      fillPoolBail: 0,
-      fillPoolBailNoTasks: 0,
-      attemptWorkSkip: 0,
-      timeUntilFirstRun: [],
-      timeUntilFirstMarkAsRun: [],
-      firstMarkAsRunningTillRan: [],
-      timeFromMarkAsRunTillRun: [],
-      timeFromRunTillNextMarkAsRun: [],
-      claimAvailableTasks: [],
-      taskPollerActivityDuration: [],
+      cycles: {
+        fillPoolStarts: 0,
+        fillPoolCycles: 0,
+        fillPoolBail: 0,
+        fillPoolBailNoTasks: 0,
+      },
+      claimAvailableTasksNoTasks: 0,
+      claimAvailableTasksNoAvailableWorkers: 0,
+      elasticsearchApiCalls: {
+        timeUntilFirstRun: [],
+        timeUntilFirstMarkAsRun: [],
+        firstMarkAsRunningTillRan: [],
+        timeFromMarkAsRunTillRun: [],
+        timeFromRunTillNextMarkAsRun: [],
+        claimAvailableTasks: [],
+      },
+      activityDuration: [],
+      sleepDuration: [],
+      taskPollerActivityDurationPreScheduleComplete: [],
       taskPoolAttemptToRun: [],
       taskRunnerMarkTaskAsRunning: [],
 
@@ -281,46 +285,57 @@ function resetPerfState(target) {
     },
   });
 
-  const performanceObserver = new PerformanceObserver((list, observer) => {
+  performanceState.performanceObserver = new PerformanceObserver((list, observer) => {
     list.getEntries().forEach(entry => {
       const { name, duration } = entry;
       switch (name) {
+        // Elasticsearch Api Calls
         case 'perfTask.firstRun':
-          performanceState.performance.timeUntilFirstRun.push(duration);
+          performanceState.performance.elasticsearchApiCalls.timeUntilFirstRun.push(duration);
           break;
         case 'perfTask.firstMarkAsRunning':
-          performanceState.performance.timeUntilFirstMarkAsRun.push(duration);
+          performanceState.performance.elasticsearchApiCalls.timeUntilFirstMarkAsRun.push(duration);
           break;
         case 'perfTask.firstMarkAsRunningTillRan':
-          performanceState.performance.firstMarkAsRunningTillRan.push(duration);
+          performanceState.performance.elasticsearchApiCalls.firstMarkAsRunningTillRan.push(duration);
           break;
         case 'perfTask.markUntilRun':
-          performanceState.performance.timeFromMarkAsRunTillRun.push(duration);
+          performanceState.performance.elasticsearchApiCalls.timeFromMarkAsRunTillRun.push(duration);
           break;
         case 'perfTask.runUntilNextMarkAsRunning':
-          performanceState.performance.timeFromRunTillNextMarkAsRun.push(duration);
+          performanceState.performance.elasticsearchApiCalls.timeFromRunTillNextMarkAsRun.push(duration);
           break;
         case 'claimAvailableTasks':
-          performanceState.performance.claimAvailableTasks.push(duration);
+          performanceState.performance.elasticsearchApiCalls.claimAvailableTasks.push(duration);
+          break;
+        case 'TaskPoller.sleepDuration':
+          performanceState.performance.sleepDuration.push(duration);
           break;
         case 'fillPool.activityDurationUntilNoTasks':
-          performanceState.performance.taskPollerActivityDuration.push(duration);
+          performanceState.performance.activityDuration.push(duration);
           break;
-        case 'fillPool.activityDurationUntilNoCapacity':
-          performanceState.performance.taskPollerActivityDuration.push(duration);
+        case 'fillPool.activityDurationUntilExhaustedCapacity':
+          performanceState.performance.activityDuration.push(duration);
           break;
-        case 'fillPool.bail':
-          performanceState.performance.fillPoolBail++;
+        case 'fillPool.bailExhaustedCapacity':
+          performanceState.performance.cycles.fillPoolBail++;
           break;
         case 'fillPool.bailNoTasks':
-          performanceState.performance.fillPoolBail++;
-          performanceState.performance.fillPoolBailNoTasks++;
+          performanceState.performance.cycles.fillPoolBail++;
+          performanceState.performance.cycles.fillPoolBailNoTasks++;
+          break;
+        case 'fillPool.start':
+          performanceState.performance.cycles.fillPoolStarts++;
           break;
         case 'fillPool.cycle':
-          performanceState.performance.fillPoolCycles++;
+          performanceState.performance.cycles.fillPoolCycles++;
           break;
-        case 'attemptWork.skip':
-          performanceState.performance.attemptWorkSkip++;
+          break;
+        case 'claimAvailableTasks.noTasks':
+          performanceState.performance.claimAvailableTasksNoTasks++;
+          break;
+        case 'claimAvailableTasks.noAvailableWorkers':
+          performanceState.performance.claimAvailableTasksNoAvailableWorkers++;
           break;
         case 'taskPool.attemptToRun':
           performanceState.performance.taskPoolAttemptToRun.push(duration);
@@ -344,7 +359,7 @@ function resetPerfState(target) {
       }
     });
   });
-  performanceObserver.observe({ entryTypes: ['measure', 'mark'] });
+  performanceState.performanceObserver.observe({ entryTypes: ['measure', 'mark'] });
 
   return performanceState;
 }
