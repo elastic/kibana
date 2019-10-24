@@ -18,6 +18,7 @@ import { countOperation } from './count';
 import { DimensionPriority, StateSetter, OperationMetadata } from '../../../types';
 import { BaseIndexPatternColumn, FieldBasedIndexPatternColumn } from './column_types';
 import { IndexPatternPrivateState, IndexPattern, IndexPatternField } from '../../types';
+import { DateRange } from '../../../../common';
 
 // List of all operation definitions registered to this data source.
 // If you want to implement a new operation, add it to this array and
@@ -51,6 +52,7 @@ export interface ParamEditorProps<C extends BaseIndexPatternColumn> {
   storage: Storage;
   savedObjectsClient: SavedObjectsClientContract;
   http: HttpServiceBase;
+  dateRange: DateRange;
 }
 
 interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
