@@ -6,7 +6,7 @@
 import { performance } from 'perf_hooks';
 import { SavedObjectsClientContract, SavedObjectsSerializer } from 'src/core/server';
 import { Logger } from './types';
-import { fillPool } from './lib/fill_pool';
+import { fillPool, FillPoolResult } from './lib/fill_pool';
 import { addMiddlewareToChain, BeforeSaveMiddlewareParams, Middleware } from './lib/middleware';
 import { sanitizeTaskDefinitions } from './lib/sanitize_task_definitions';
 import { intervalFromNow } from './lib/intervals';
@@ -18,7 +18,7 @@ import {
   TaskInstance,
 } from './task';
 import { TaskPoller } from './task_poller';
-import { TaskPool, TaskPoolRunResult } from './task_pool';
+import { TaskPool } from './task_pool';
 import { TaskManagerRunner } from './task_runner';
 import {
   FetchOpts,
@@ -55,7 +55,7 @@ export class TaskManager {
   private readonly pollerInterval: number;
   private definitions: TaskDictionary<TaskDefinition>;
   private store: TaskStore;
-  private poller: TaskPoller;
+  private poller: TaskPoller<FillPoolResult>;
   private logger: Logger;
   private pool: TaskPool;
   private startQueue: Array<() => void> = [];
@@ -109,10 +109,10 @@ export class TaskManager {
         beforeRun: this.middleware.beforeRun,
         beforeMarkRunning: this.middleware.beforeMarkRunning,
       });
-    const poller = new TaskPoller({
+    const poller = new TaskPoller<FillPoolResult>({
       logger: this.logger,
       pollInterval: opts.config.get('xpack.task_manager.poll_interval'),
-      work: (): Promise<TaskPoolRunResult> =>
+      work: (): Promise<FillPoolResult> =>
         fillPool(
           async tasks => await pool.run(tasks),
           () =>
