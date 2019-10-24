@@ -20,7 +20,7 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiTabbedContent,
-  EuiText,
+  EuiTextColor,
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import styled, { css } from 'styled-components';
@@ -302,27 +302,6 @@ const ActivityMonitor = React.memo(() => {
     },
   ];
 
-  // const actions = [
-  //   {
-  //     available: (item: ColumnTypes) => (item.status === 'Running' ? true : false),
-  //     name: 'Stop',
-  //     isPrimary: true,
-  //     description: 'Stop rule from running',
-  //     icon: 'stop',
-  //     type: 'button',
-  //     onClick: () => {},
-  //   },
-  //   {
-  //     available: (item: ColumnTypes) => (item.status === 'Stopped' ? true : false),
-  //     name: 'Resume',
-  //     isPrimary: true,
-  //     description: 'Resume running rule',
-  //     icon: 'play',
-  //     type: 'button',
-  //     onClick: () => {},
-  //   },
-  // ];
-
   const columns = [
     {
       field: 'rule',
@@ -359,32 +338,12 @@ const ActivityMonitor = React.memo(() => {
           getEmptyTagValue()
         ) : (
           <>
-            {/* {value === 'Fail' ? (
-              <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiHealth color="danger">{value}</EuiHealth>
-                </EuiFlexItem>
-
-                <EuiFlexItem grow={false}>
-                  <EuiIconTip content="Full fail message here." type="iInCircle" />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            ) : (
-              <EuiHealth color="success">{value}</EuiHealth>
-            )} */}
-
             {value === 'Fail' ? (
-              <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiText color="danger">{value}</EuiText>
-                </EuiFlexItem>
-
-                <EuiFlexItem grow={false}>
-                  <EuiIconTip content="Full fail message here." type="iInCircle" />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <EuiTextColor color="danger">
+                {value} <EuiIconTip content="Full fail message here." size="s" type="iInCircle" />
+              </EuiTextColor>
             ) : (
-              <EuiText color="secondary">{value}</EuiText>
+              <EuiTextColor color="secondary">{value}</EuiTextColor>
             )}
           </>
         );
@@ -394,6 +353,7 @@ const ActivityMonitor = React.memo(() => {
     },
     {
       actions,
+      width: '70px',
     },
   ];
 
