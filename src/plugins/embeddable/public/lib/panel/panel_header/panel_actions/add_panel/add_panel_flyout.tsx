@@ -22,21 +22,22 @@ import React from 'react';
 import { CoreSetup } from 'src/core/public';
 
 import {
+  EuiButton,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  // @ts-ignore
-  EuiSuperSelect,
+  EuiPopover,
   EuiTitle,
-  EuiText,
 } from '@elastic/eui';
 
 import { IContainer } from '../../../../containers';
 import { EmbeddableFactoryNotFoundError } from '../../../../errors';
-import { GetEmbeddableFactory, GetEmbeddableFactories } from '../../../../types';
+import { GetEmbeddableFactories, GetEmbeddableFactory } from '../../../../types';
 
 interface Props {
   onClose: () => void;
@@ -47,8 +48,16 @@ interface Props {
   SavedObjectFinder: React.ComponentType<any>;
 }
 
-export class AddPanelFlyout extends React.Component<Props> {
+interface State {
+  isCreateMenuOpen: boolean;
+}
+
+export class AddPanelFlyout extends React.Component<Props, State> {
   private lastToast: any;
+
+  public state = {
+    isCreateMenuOpen: false,
+  };
 
   constructor(props: Props) {
     super(props);
@@ -96,41 +105,32 @@ export class AddPanelFlyout extends React.Component<Props> {
     this.showToast(name);
   };
 
-  private getSelectCreateNewOptions() {
-    const list = [
-      {
-        value: 'createNew',
-        inputDisplay: (
-          <EuiText>
-            <FormattedMessage
-              id="embeddableApi.addPanel.createNewDefaultOption"
-              defaultMessage="Create new ..."
-            />
-          </EuiText>
-        ),
-      },
-      ...[...this.props.getAllFactories()]
-        .filter(
-          factory => factory.isEditable() && !factory.isContainerType && factory.canCreateNew()
-        )
-        .map(factory => ({
-          inputDisplay: (
-            <EuiText>
-              <FormattedMessage
-                id="embeddableApi.addPanel.createNew"
-                defaultMessage="Create new {factoryName}"
-                values={{
-                  factoryName: factory.getDisplayName(),
-                }}
-              />
-            </EuiText>
-          ),
-          value: factory.type,
-          'data-test-subj': `createNew-${factory.type}`,
-        })),
-    ];
+  private toggleCreateMenu = () => {
+    this.setState(prevState => ({ isCreateMenuOpen: !prevState.isCreateMenuOpen }));
+  };
 
-    return list;
+  private closeCreateMenu = () => {
+    this.setState({ isCreateMenuOpen: false });
+  };
+
+  private getCreateMenuItems() {
+    return [...this.props.getAllFactories()]
+      .filter(factory => factory.isEditable() && !factory.isContainerType && factory.canCreateNew())
+      .map(factory => (
+        <EuiContextMenuItem
+          key={factory.type}
+          data-test-subj={`createNew-${factory.type}`}
+          onClick={() => this.createNewEmbeddable(factory.type)}
+        >
+          <FormattedMessage
+            id="embeddableApi.addPanel.createNew"
+            defaultMessage="Create new {factoryName}"
+            values={{
+              factoryName: factory.getDisplayName(),
+            }}
+          />
+        </EuiContextMenuItem>
+      ));
   }
 
   public render() {
@@ -150,6 +150,11 @@ export class AddPanelFlyout extends React.Component<Props> {
         })}
       />
     );
+
+    const createNewLabel = i18n.translate('embeddableApi.addPanel.createNewDefaultOption', {
+      defaultMessage: 'Create new …',
+    });
+
     return (
       <EuiFlyout ownFocus onClose={this.props.onClose} data-test-subj="dashboardAddPanel">
         <EuiFlyoutHeader hasBorder>
@@ -163,12 +168,21 @@ export class AddPanelFlyout extends React.Component<Props> {
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={true}>
-              <EuiSuperSelect
-                data-test-subj="createNew"
-                options={this.getSelectCreateNewOptions()}
-                valueOfSelected="createNew"
-                onChange={(value: string) => this.createNewEmbeddable(value)}
-              />
+              <EuiPopover
+                id="createNew"
+                button={
+                  <EuiButton data-test-subj="createNew" onClick={this.toggleCreateMenu}>
+                    {createNewLabel}
+                  </EuiButton>
+                }
+                isOpen={this.state.isCreateMenuOpen}
+                closePopover={this.closeCreateMenu}
+                panelPaddingSize="none"
+                anchorPosition="upLeft"
+                withTitle
+              >
+                <EuiContextMenuPanel title={createNewLabel} items={this.getCreateMenuItems()} />
+              </EuiPopover>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutFooter>

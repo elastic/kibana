@@ -27,7 +27,7 @@ import {
 import { HelloWorldContainer } from '../../../../test_samples/embeddables/hello_world_container';
 import { ContactCardEmbeddable } from '../../../../test_samples/embeddables/contact_card/contact_card_embeddable';
 import { ContainerInput } from '../../../../containers';
-import { mount } from 'enzyme';
+import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
