@@ -111,7 +111,7 @@ describe('Test of <Doc /> of Discover', () => {
     const comp = await mountDoc(search, true);
     expect(findTestSubject(comp, 'doc-msg-error').length).toBe(1);
   });
-  // TODO check why this test suddenly fails
+
   test('renders elasticsearch hit ', async () => {
     const hit = { hits: { total: 1, hits: [{ _id: 1, _source: { test: 1 } }] } };
     const search = jest.fn(() => Promise.resolve(hit));
