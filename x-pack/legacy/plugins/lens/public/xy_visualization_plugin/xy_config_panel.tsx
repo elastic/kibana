@@ -102,7 +102,8 @@ function LayerSettings({
           options={visualizationTypes
             .filter(t => isHorizontalSeries(t.id as SeriesType) === horizontalOnly)
             .map(t => ({
-              ...t,
+              id: t.id,
+              label: t.label,
               iconType: t.icon || 'empty',
             }))}
           idSelected={layer.seriesType}

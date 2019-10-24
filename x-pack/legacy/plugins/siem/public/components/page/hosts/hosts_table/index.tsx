@@ -130,7 +130,7 @@ const HostsTableComponent = React.memo<HostsTableProps>(
       }
     };
 
-    const hostsColumns = useMemo(() => getHostsColumns(type, indexPattern), [type, indexPattern]);
+    const hostsColumns = useMemo(() => getHostsColumns(), []);
 
     const sorting = useMemo(() => getSorting(`${sortField}-${direction}`, sortField, direction), [
       sortField,
