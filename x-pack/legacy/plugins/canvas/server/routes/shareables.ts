@@ -16,6 +16,7 @@ import {
   SHAREABLE_RUNTIME_FILE,
   SHAREABLE_RUNTIME_NAME,
   SHAREABLE_RUNTIME_SRC,
+  SHAREABLE_RUNTIME_OUTPUT,
 } from '../../shareable_runtime/constants';
 
 import { CoreSetup } from '../shim';
@@ -25,8 +26,15 @@ export function shareableWorkpads(route: CoreSetup['http']['route']) {
   route({
     method: 'GET',
     path: API_ROUTE_SHAREABLE_RUNTIME,
+    options: {
+      files: {
+        relativeTo: SHAREABLE_RUNTIME_OUTPUT,
+      },
+    },
     handler: {
-      file: SHAREABLE_RUNTIME_FILE,
+      file: {
+        path: SHAREABLE_RUNTIME_FILE,
+      },
     },
   });
 
@@ -34,6 +42,11 @@ export function shareableWorkpads(route: CoreSetup['http']['route']) {
   route({
     method: 'GET',
     path: API_ROUTE_SHAREABLE_RUNTIME_DOWNLOAD,
+    options: {
+      files: {
+        relativeTo: SHAREABLE_RUNTIME_OUTPUT,
+      },
+    },
     handler(_request, handler) {
       // @ts-ignore No type for inert Hapi handler
       const file = handler.file(SHAREABLE_RUNTIME_FILE);
