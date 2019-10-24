@@ -7,13 +7,19 @@
 import React, { FC, Fragment, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiStat, EuiTitle } from '@elastic/eui';
+import { idx } from '@kbn/elastic-idx';
 import { ErrorCallout } from './error_callout';
-import { getValuesFromResponse, loadEvalData, Eval } from '../../../../common';
+import {
+  getValuesFromResponse,
+  getDependentVar,
+  getPredictionFieldName,
+  loadEvalData,
+  Eval,
+  DataFrameAnalyticsConfig,
+} from '../../../../common';
 
 interface Props {
-  jobId: string;
-  index: string;
-  dependentVariable: string;
+  jobConfig: DataFrameAnalyticsConfig;
 }
 
 const meanSquaredErrorText = i18n.translate(
@@ -30,23 +36,28 @@ const rSquaredText = i18n.translate(
 );
 const defaultEval: Eval = { meanSquaredError: '', rSquared: '', error: null };
 
-export const EvaluatePanel: FC<Props> = ({ jobId, index, dependentVariable }) => {
+export const EvaluatePanel: FC<Props> = ({ jobConfig }) => {
   const [trainingEval, setTrainingEval] = useState<Eval>(defaultEval);
   const [generalizationEval, setGeneralizationEval] = useState<Eval>(defaultEval);
   const [isLoadingTraining, setIsLoadingTraining] = useState<boolean>(false);
   const [isLoadingGeneralization, setIsLoadingGeneralization] = useState<boolean>(false);
 
+  const index = idx(jobConfig, _ => _.dest.index) as string;
+  const dependentVariable = getDependentVar(jobConfig.analysis);
+  const predictionFieldName = getPredictionFieldName(jobConfig.analysis);
+  // default is 'ml'
+  const resultsField = jobConfig.dest.results_field;
+
   const loadData = async () => {
     setIsLoadingGeneralization(true);
     setIsLoadingTraining(true);
-    // TODO: resultsField and predictionFieldName will need to be properly passed to this function
-    // once the results view is in use.
+
     const genErrorEval = await loadEvalData({
       isTraining: false,
       index,
       dependentVariable,
-      resultsField: 'ml',
-      predictionFieldName: undefined,
+      resultsField,
+      predictionFieldName,
     });
 
     if (genErrorEval.success === true && genErrorEval.eval) {
@@ -65,14 +76,13 @@ export const EvaluatePanel: FC<Props> = ({ jobId, index, dependentVariable }) =>
         error: genErrorEval.error,
       });
     }
-    // TODO: resultsField and predictionFieldName will need to be properly passed to this function
-    // once the results view is in use.
+
     const trainingErrorEval = await loadEvalData({
       isTraining: true,
       index,
       dependentVariable,
-      resultsField: 'ml',
-      predictionFieldName: undefined,
+      resultsField,
+      predictionFieldName,
     });
 
     if (trainingErrorEval.success === true && trainingErrorEval.eval) {
@@ -103,7 +113,7 @@ export const EvaluatePanel: FC<Props> = ({ jobId, index, dependentVariable }) =>
         <span>
           {i18n.translate('xpack.ml.dataframe.analytics.regressionExploration.jobIdTitle', {
             defaultMessage: 'Job ID {jobId}',
-            values: { jobId },
+            values: { jobId: jobConfig.id },
           })}
         </span>
       </EuiTitle>

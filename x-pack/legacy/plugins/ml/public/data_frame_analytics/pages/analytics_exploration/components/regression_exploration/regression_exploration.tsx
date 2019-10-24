@@ -4,23 +4,56 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, Fragment } from 'react';
+import React, { FC, Fragment, useState, useEffect } from 'react';
 // import { i18n } from '@kbn/i18n';
-import { EuiSpacer } from '@elastic/eui';
-
+import { EuiSpacer, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
+import { ml } from '../../../../../services/ml_api_service';
+import { DataFrameAnalyticsConfig } from '../../../../common';
 import { EvaluatePanel } from './evaluate_panel';
 // import { ResultsTable } from './results_table';
 
-interface Props {
-  jobId: string;
-  destIndex: string;
-  dependentVariable: string;
+interface GetDataFrameAnalyticsResponse {
+  count: number;
+  data_frame_analytics: DataFrameAnalyticsConfig[];
 }
 
-export const RegressionExploration: FC<Props> = ({ jobId, destIndex, dependentVariable }) => {
+interface Props {
+  jobId: string;
+}
+
+export const RegressionExploration: FC<Props> = ({ jobId }) => {
+  const [jobConfig, setJobConfig] = useState<DataFrameAnalyticsConfig | undefined>(undefined);
+  const [isLoadingJobConfig, setIsLoadingJobConfig] = useState<boolean>(false);
+
+  useEffect(() => {
+    (async function() {
+      setIsLoadingJobConfig(true);
+      const analyticsConfigs: GetDataFrameAnalyticsResponse = await ml.dataFrameAnalytics.getDataFrameAnalytics(
+        jobId
+      );
+      if (
+        Array.isArray(analyticsConfigs.data_frame_analytics) &&
+        analyticsConfigs.data_frame_analytics.length > 0
+      ) {
+        setJobConfig(analyticsConfigs.data_frame_analytics[0]);
+        setIsLoadingJobConfig(false);
+      }
+    })();
+  }, []);
+
   return (
     <Fragment>
-      <EvaluatePanel jobId={jobId} index={destIndex} dependentVariable={dependentVariable} />
+      {isLoadingJobConfig === true && jobConfig === undefined && (
+        <EuiPanel>
+          <EuiLoadingSpinner
+            className="mlRegressionExploration__evaluateLoadingSpinner"
+            size="xl"
+          />
+        </EuiPanel>
+      )}
+      {isLoadingJobConfig === false && jobConfig !== undefined && (
+        <EvaluatePanel jobConfig={jobConfig} />
+      )}
       <EuiSpacer />
       {/* <ResultsTable jobId={jobId} /> */}
     </Fragment>

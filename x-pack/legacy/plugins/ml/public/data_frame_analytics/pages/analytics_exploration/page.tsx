@@ -30,9 +30,7 @@ import { ANALYSIS_CONFIG_TYPE } from '../../common/analytics';
 export const Page: FC<{
   jobId: string;
   analysisType: string;
-  destIndex: string;
-  depVar: string;
-}> = ({ jobId, analysisType, destIndex, depVar }) => (
+}> = ({ jobId, analysisType }) => (
   <Fragment>
     <NavigationMenu tabId="data_frame_analytics" />
     <EuiPage data-test-subj="mlPageDataFrameAnalyticsExploration">
@@ -68,7 +66,7 @@ export const Page: FC<{
           <EuiSpacer size="l" />
           {analysisType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION && <Exploration jobId={jobId} />}
           {analysisType === ANALYSIS_CONFIG_TYPE.REGRESSION && (
-            <RegressionExploration jobId={jobId} destIndex={destIndex} dependentVariable={depVar} />
+            <RegressionExploration jobId={jobId} />
           )}
         </EuiPageContentBody>
       </EuiPageBody>

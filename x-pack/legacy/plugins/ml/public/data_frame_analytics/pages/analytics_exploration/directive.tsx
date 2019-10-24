@@ -50,12 +50,7 @@ module.directive('mlDataFrameAnalyticsExploration', ($injector: InjectorService)
       ReactDOM.render(
         <I18nContext>
           <KibanaContext.Provider value={kibanaContext}>
-            <Page
-              jobId={globalState.ml.jobId}
-              analysisType={globalState.ml.analysisType}
-              destIndex={globalState.ml.destIndex}
-              depVar={globalState.ml.depVar}
-            />
+            <Page jobId={globalState.ml.jobId} analysisType={globalState.ml.analysisType} />
           </KibanaContext.Provider>
         </I18nContext>,
         element[0]
