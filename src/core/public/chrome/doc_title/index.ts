@@ -17,28 +17,4 @@
  * under the License.
  */
 
-import { isArray } from 'lodash';
-import { uiModules } from '../modules';
-import { npStart } from '../new_platform';
-
-const npDocTitle = () => npStart.core.chrome.docTitle;
-
-function change(title) {
-  npDocTitle().change(isArray(title) ? title : [title]);
-}
-
-function reset() {
-  npDocTitle().reset();
-}
-
-export const docTitle = {
-  change,
-  reset,
-};
-
-uiModules.get('kibana')
-  .run(function ($rootScope) {
-  // always bind to the route events
-    $rootScope.$on('$routeChangeStart', docTitle.reset);
-  });
-
+export * from './doc_title_service';
