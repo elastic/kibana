@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
 
-  describe('top nav', function describeIndexTests() {
+  describe.skip('top nav', function describeIndexTests() {
     before(async () => {
       const url = `${PageObjects.common.getHostPort()}/app/kbn_tp_top_nav/`;
       await browser.get(url);
