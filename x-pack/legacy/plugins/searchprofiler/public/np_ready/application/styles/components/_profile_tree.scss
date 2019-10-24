@@ -19,6 +19,10 @@
   line-height: 1;
   overflow-wrap: break-word;
 
+  h3 {
+    font-size: $euiSize;
+  }
+
   &:disabled {
     text-decoration: none !important;
     cursor: default;
@@ -27,11 +31,19 @@
 
 .prfDevTool__shard {
   border: none;
+
+  &__header-flex-item {
+    align-self: center;
+  }
 }
 
 .prfDevTool__index {
   width: 100%;
   padding: $euiSize $euiSizeS;
+}
+
+.prfDevTool__indexDetails {
+  align-self: center;
 }
 
 .prfDevTool__tvRow--last {
@@ -108,3 +120,18 @@
   // Force text to always be dark on top of white -> pink color
   color: lightOrDarkTheme($euiColorDarkestShade, $euiColorLightestShade);
 }
+
+.prfDevTool__panel {
+  border-bottom: $euiBorderThin;
+}
+
+.prfDevTool__panelBody {
+  margin-top: $euiSizeS;
+  margin-left: $euiSizeL;
+}
+
+// Breakdown table
+.prfDevTool__breakdown {
+  width:100%;
+}
+

@@ -19,9 +19,22 @@ export interface Props {
 export const IndexDetails = ({ index, target }: Props) => {
   const { time, name } = index;
   return (
-    <EuiFlexGroup gutterSize="none">
-      {/* Time details group */}
+    <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" direction="row">
+      {/* Index Title group */}
       <EuiFlexItem grow={false}>
+        <EuiText className="prfDevTool__shardDetails">
+          <h3>
+            <b>
+              {i18n.translate('xpack.searchProfiler.profileTree.indexTitle', {
+                defaultMessage: 'Index:',
+              })}
+            </b>
+            {' ' + name}
+          </h3>
+        </EuiText>
+      </EuiFlexItem>
+      {/* Time details group */}
+      <EuiFlexItem grow={false} className="prfDevTool__indexDetails">
         <EuiText className="prfDevTool__shardDetails--dim">
           <EuiToolTip
             position="bottom"
@@ -36,20 +49,7 @@ export const IndexDetails = ({ index, target }: Props) => {
               })}
             </small>
           </EuiToolTip>
-          {msToPretty(time, 3)}
-        </EuiText>
-      </EuiFlexItem>
-      {/* Index Title group */}
-      <EuiFlexItem grow={false}>
-        <EuiText className="prfDevTool__shardDetails">
-          <h3>
-            <b>
-              {i18n.translate('xpack.searchProfiler.profileTree.indexTitle', {
-                defaultMessage: 'Index:',
-              })}
-            </b>
-            {name}
-          </h3>
+          {' ' + msToPretty(time, 3)}
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>

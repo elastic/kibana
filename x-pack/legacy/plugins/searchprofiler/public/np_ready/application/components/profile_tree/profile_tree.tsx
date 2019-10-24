@@ -28,24 +28,33 @@ export const ProfileTree = ({ data, target, onHighlight }: Props) => {
 
   return (
     <HighlightContextProvider onHighlight={onHighlight}>
-      {sortedIndices.map(index => (
-        <EuiFlexGroup gutterSize="none" key={index.name} direction="column">
-          <EuiFlexItem grow={false}>
-            <IndexDetails index={index} target={target} />
+      <EuiFlexGroup gutterSize="none" direction="column">
+        {sortedIndices.map(index => (
+          <EuiFlexItem key={index.name} grow={false}>
+            <EuiFlexGroup
+              className="prfDevTool__panel prfDevTool__index"
+              gutterSize="none"
+              key={index.name}
+              direction="column"
+            >
+              <EuiFlexItem grow={false}>
+                <IndexDetails index={index} target={target} />
+              </EuiFlexItem>
+              <EuiSpacer size="s" />
+              <EuiFlexItem grow={false}>
+                {index.shards.map(shard => (
+                  <ShardDetails
+                    key={shard.id[1]}
+                    index={index}
+                    shard={shard}
+                    operations={shard[target]!}
+                  />
+                ))}
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiSpacer />
-          <EuiFlexItem grow={false}>
-            {index.shards.map(shard => (
-              <ShardDetails
-                key={shard.id[1]}
-                index={index}
-                shard={shard}
-                operations={shard[target]!}
-              />
-            ))}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ))}
+        ))}
+      </EuiFlexGroup>
     </HighlightContextProvider>
   );
 };

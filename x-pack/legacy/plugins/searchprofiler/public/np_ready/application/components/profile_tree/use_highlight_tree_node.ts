@@ -3,29 +3,26 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { useEffect, useState } from 'react';
+
+import { useRef } from 'react';
 import uuid from 'uuid';
 
 import { useHighlightContext, OnHighlightChangeArgs } from './highlight_context';
 
-export const useHighlightTreeLeaf = () => {
-  const [id, setId] = useState<string>('');
+export const useHighlightTreeNode = () => {
+  const idRef = useRef<string>(uuid.v4());
   const { selectedRow, setStore } = useHighlightContext();
 
   const highlight = (value: OnHighlightChangeArgs) => {
-    setStore({ id, ...value });
+    setStore({ id: idRef.current, ...value });
   };
 
   const isHighlighted = () => {
-    return selectedRow === id;
+    return selectedRow === idRef.current;
   };
 
-  useEffect(() => {
-    const newId = uuid.v4();
-    setId(newId);
-  }, []);
-
   return {
+    id: idRef.current,
     highlight,
     isHighlighted,
   };

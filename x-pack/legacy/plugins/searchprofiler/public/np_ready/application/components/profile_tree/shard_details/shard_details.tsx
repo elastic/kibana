@@ -18,32 +18,42 @@ interface Props {
 }
 
 export const ShardDetails = ({ index, shard, operations }: Props) => {
-  const { relative } = shard;
+  const { relative, time } = shard;
 
   const [shardVisibility, setShardVisibility] = useState<boolean>(false);
 
   return (
-    <EuiFlexGroup gutterSize="none" direction="column">
-      <EuiFlexItem>
-        <EuiText className="prfDevTool__shardDetails--dim">
-          <EuiBadge style={{ '--prfDevToolProgressPercentage': shard.relative + '%' } as any}>
-            <span className="prfDevTool__progress--percent-ie" style={{ width: relative + '%' }} />
-            <span className="prfDevTool__progressText">{msToPretty(relative as number, 3)}</span>
-          </EuiBadge>
-        </EuiText>
-        <EuiLink
-          className="prfDevTool__shardDetails"
-          onClick={() => setShardVisibility(!shardVisibility)}
-        >
-          <EuiIcon type={shardVisibility ? 'arrowDown' : 'arrowRight'} />[{shard.id[0]}][
-          {shard.id[2]}]
-        </EuiLink>
-        {shardVisibility
-          ? operations.map(data => (
-              <ShardDetailTree key={shard.id[0]} index={index} shard={shard} data={data} />
-            ))
-          : null}
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <>
+      <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" direction="row">
+        <EuiFlexItem grow={false} className="prfDevTool__shard__header-flex-item">
+          <EuiLink
+            className="prfDevTool__shardDetails"
+            onClick={() => setShardVisibility(!shardVisibility)}
+          >
+            <EuiIcon type={shardVisibility ? 'arrowDown' : 'arrowRight'} />[{shard.id[0]}][
+            {shard.id[2]}]
+          </EuiLink>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} className="prfDevTool__shard__header-flex-item">
+          <EuiText className="prfDevTool__shardDetails--dim prfDevTool__shard__header">
+            <EuiBadge
+              className="prfDevTool__progress--time"
+              style={{ '--prfDevToolProgressPercentage': relative + '%' } as any}
+            >
+              <span
+                className="prfDevTool__progress--percent-ie"
+                style={{ width: relative + '%' }}
+              />
+              <span className="prfDevTool__progressText">{msToPretty(time as number, 3)}</span>
+            </EuiBadge>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {shardVisibility
+        ? operations.map((data, idx) => (
+            <ShardDetailTree key={idx} index={index} shard={shard} data={data} />
+          ))
+        : null}
+    </>
   );
 };

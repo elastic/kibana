@@ -8,13 +8,13 @@ import React, { useState } from 'react';
 import { EuiLink, EuiBadge, EuiCodeBlock, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { useHighlightTreeLeaf } from '../use_highlight_tree_leaf';
+import { hasVisibleChild } from '../utils';
+import { useHighlightTreeNode } from '../use_highlight_tree_node';
 import { msToPretty } from '../../../utils';
 
 import { Index, Operation, Shard } from '../../../types';
 
 export interface Props {
-  parentVisible: boolean;
   index: Index;
   shard: Shard;
   operation: Operation;
@@ -25,13 +25,13 @@ const TAB_WIDTH_PX = 32;
 const limitString = (string: string, limit: number) =>
   `${string.slice(0, limit)}${string.length > limit ? '...' : ''}`;
 
-export const ShardDetailsTreeLeaf = ({ parentVisible, operation, index, shard }: Props) => {
-  if (!parentVisible) {
-    return null;
-  }
-
-  const [visible, setVisible] = useState(Boolean(operation.visible));
-  const { highlight, isHighlighted } = useHighlightTreeLeaf();
+/**
+ * This is a component that recursively iterates over data to render out a tree like
+ * structure in a flatly.
+ */
+export const ShardDetailsTreeNode = ({ operation, index, shard }: Props) => {
+  const [childrenVisible, setChildrenVisible] = useState(hasVisibleChild(operation));
+  const { highlight, isHighlighted, id } = useHighlightTreeNode();
 
   const renderTimeRow = (op: Operation) => (
     <div className="prfDevTool__tvRow">
@@ -39,10 +39,10 @@ export const ShardDetailsTreeLeaf = ({ parentVisible, operation, index, shard }:
         <EuiLink
           className="prfDevTool__shardDetails"
           disabled={!op.hasChildren}
-          onClick={() => setVisible(!visible)}
+          onClick={() => setChildrenVisible(!childrenVisible)}
         >
           {op.hasChildren ? (
-            <EuiIcon type={op.visible ? 'arrowDown' : 'arrowRight'} />
+            <EuiIcon type={childrenVisible ? 'arrowDown' : 'arrowRight'} />
           ) : (
             // Use dot icon for alignment if arrow isn't there
             <EuiIcon type={'dot'} />
@@ -64,39 +64,34 @@ export const ShardDetailsTreeLeaf = ({ parentVisible, operation, index, shard }:
     </div>
   );
 
-  const renderLuceneRow = (op: Operation) => (
-    <div className="prfDevTool__tvRow">
-      <span className="prfDevTool__detail">
-        <EuiCodeBlock>{limitString(op.lucene || '', 120)}</EuiCodeBlock>
-      </span>
-    </div>
-  );
-
   return (
     <>
       <div
+        key={id}
         className={isHighlighted() ? 'prfDevTool__tvRow--last' : ''}
         style={{ paddingLeft: operation.depth! * TAB_WIDTH_PX + 'px' }}
       >
-        {renderTimeRow(operation)}
-        {renderLuceneRow(operation)}
-        <EuiLink
-          type="button"
-          onClick={() => highlight({ indexName: index.name, operation, shard })}
-        >
-          {i18n.translate('xpack.searchProfiler.profileTree.body.viewDetailsLabel', {
-            defaultMessage: 'View Details',
-          })}
-        </EuiLink>
+        <div className="prfDevTool__tvRow">{renderTimeRow(operation)}</div>
+        <div className="prfDevTool__tvRow">
+          <span className="prfDevTool__detail">
+            <EuiCodeBlock paddingSize="none">
+              {limitString(operation.lucene || '', 120)}
+            </EuiCodeBlock>
+            <EuiLink
+              type="button"
+              onClick={() => highlight({ indexName: index.name, operation, shard })}
+            >
+              {i18n.translate('xpack.searchProfiler.profileTree.body.viewDetailsLabel', {
+                defaultMessage: 'View Details',
+              })}
+            </EuiLink>
+          </span>
+        </div>
       </div>
-      {operation.hasChildren &&
-        operation.children.flatMap(childOp => (
-          <ShardDetailsTreeLeaf
-            parentVisible={visible}
-            operation={childOp}
-            index={index}
-            shard={shard}
-          />
+      {childrenVisible &&
+        operation.hasChildren &&
+        operation.children.flatMap((childOp, idx) => (
+          <ShardDetailsTreeNode key={idx} operation={childOp} index={index} shard={shard} />
         ))}
     </>
   );
