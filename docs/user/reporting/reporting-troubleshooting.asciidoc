@@ -29,6 +29,7 @@ dependencies for Chromium.
 Make sure Kibana server OS has the appropriate packages installed for the distribution.
 
 If you are using CentOS/RHEL systems, install the following packages:
+
 * `ipa-gothic-fonts`
 * `xorg-x11-fonts-100dpi`
 * `xorg-x11-fonts-75dpi`
@@ -40,6 +41,7 @@ If you are using CentOS/RHEL systems, install the following packages:
 * `freetype`
 
 If you are using Ubuntu/Debian systems, install the following packages:
+
 * `fonts-liberation`
 * `libfontconfig1`
 
