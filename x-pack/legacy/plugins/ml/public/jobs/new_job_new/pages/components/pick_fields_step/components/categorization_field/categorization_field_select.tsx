@@ -26,7 +26,9 @@ export const CategorizationFieldSelect: FC<Props> = ({ fields, changeHandler, se
   const options: EuiComboBoxOptionProps[] = [
     ...createFieldOptions(
       fields,
-      f => f.id !== EVENT_RATE_FIELD_ID && f.type === ES_FIELD_TYPES.KEYWORD
+      f =>
+        f.id !== EVENT_RATE_FIELD_ID &&
+        (f.type === ES_FIELD_TYPES.KEYWORD || f.type === ES_FIELD_TYPES.TEXT)
     ),
     ...createScriptFieldOptions(jobCreator.scriptFields),
   ];
