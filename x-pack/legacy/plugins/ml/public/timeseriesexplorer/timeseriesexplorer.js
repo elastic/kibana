@@ -1173,11 +1173,11 @@ export class TimeSeriesExplorer extends React.Component {
           />
         )}
 
-        {(arePartitioningFieldsProvided && jobs.length > 0 && loading === false && hasResults === false) && (
+        {(arePartitioningFieldsProvided && jobs.length > 0 && (fullRefresh === false || loading === false) && hasResults === false) && (
           <TimeseriesexplorerNoChartData dataNotChartable={dataNotChartable} entities={entities} />
         )}
 
-        {(arePartitioningFieldsProvided && jobs.length > 0 && loading === false && hasResults === true) && (
+        {(arePartitioningFieldsProvided && jobs.length > 0 && (fullRefresh === false || loading === false) && hasResults === true) && (
           <EuiText className="results-container">
             <ChartTooltip />
 
