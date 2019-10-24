@@ -75,11 +75,11 @@ if [[ "$installNode" == "true" ]]; then
     mkdir -p "$nodeDir"
     if [[ "$OS" == "win" ]]; then
       nodePkg="$nodeDir/${nodeUrl##*/}"
-      curl --silent -o "$nodePkg" "$nodeUrl"
+      curl --silent -L -o "$nodePkg" "$nodeUrl"
       unzip -qo "$nodePkg" -d "$nodeDir"
       mv "${nodePkg%.*}" "$nodeBin"
     else
-      curl --silent "$nodeUrl" | tar -xz -C "$nodeDir" --strip-components=1
+      curl --silent -L "$nodeUrl" | tar -xz -C "$nodeDir" --strip-components=1
     fi
   fi
 fi
