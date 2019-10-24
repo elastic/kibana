@@ -546,6 +546,28 @@ describe('SavedObjectsRepository', () => {
       );
       expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
+
+    it('defaults to empty references array if none are provided', async () => {
+      await savedObjectsRepository.create(
+        'index-pattern',
+        {
+          title: 'Logstash',
+        },
+        {
+          id: 'logstash-*',
+        }
+      );
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+      expect(callAdminCluster).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          body: expect.objectContaining({
+            references: [],
+          }),
+        })
+      );
+    });
   });
 
   describe('#bulkCreate', () => {
