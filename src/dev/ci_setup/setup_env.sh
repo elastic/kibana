@@ -79,7 +79,7 @@ if [[ "$installNode" == "true" ]]; then
       unzip -qo "$nodePkg" -d "$nodeDir"
       mv "${nodePkg%.*}" "$nodeBin"
     else
-      curl --silent "$nodeUrl" | tar -xz -C "$nodeDir" --strip-components=1
+      curl --silent -L "$nodeUrl" | tar -xz -C "$nodeDir" --strip-components=1
     fi
   # fi
 fi
