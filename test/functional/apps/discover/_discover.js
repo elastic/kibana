@@ -101,7 +101,7 @@ export default function ({ getService, getPageObjects }) {
         expect(rowData).to.have.string('Sep 21, 2015 @ 11:59:22.316');
       });
 
-      it('should modify the time range when the histogram is brushed', async function () {
+      it.skip('should modify the time range when the histogram is brushed', async function () {
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         await PageObjects.discover.brushHistogram();
 
