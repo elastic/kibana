@@ -31,12 +31,11 @@ export class AbstractESAggSource extends AbstractESSource {
     }) : [];
   }
 
-  _getValidMetrics() {
+  getMetricFields() {
     const metrics = this._metricFields.filter(esAggField => {
       return (esAggField.getAggType() === 'count')  ? true : !!esAggField.getESDocField();
     });
     if (metrics.length === 0) {
-      // metrics.push({ type: 'count' });
       metrics.push(new ESAggMetricField({
         aggType: 'count',
         source: this
@@ -54,28 +53,12 @@ export class AbstractESAggSource extends AbstractESSource {
   }
 
   createMetricAggConfigs() {
-    return this.getMetricFields2().map(esAggMetric => esAggMetric.makeMetricAggConfig());
+    return this.getMetricFields().map(esAggMetric => esAggMetric.makeMetricAggConfig());
   }
 
-  getMetricFields() {
-    return this._getValidMetrics().map(esAggMetric => {
-      const metricKey = esAggMetric.getPropertyKey();
-      const metricLabel = esAggMetric.getPropertyLabel();
-      return {
-        type: esAggMetric.getAggType(),
-        field: esAggMetric.getESDocFieldName(),
-        propertyKey: metricKey,
-        propertyLabel: metricLabel
-      };
-    });
-  }
-
-  getMetricFields2() {
-    return this._getValidMetrics();
-  }
 
   async getNumberFields() {
-    return this.getMetricFields2().map(esAggMetricField => {
+    return this.getMetricFields().map(esAggMetricField => {
       return { label: esAggMetricField.getPropertyLabel(), name: esAggMetricField.getPropertyKey() };
     });
   }
@@ -90,7 +73,7 @@ export class AbstractESAggSource extends AbstractESSource {
     }
 
 
-    const metricFields = this.getMetricFields2();
+    const metricFields = this.getMetricFields();
     const tooltipProperties = [];
     metricFields.forEach((metricField) => {
       let value;
