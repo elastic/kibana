@@ -232,7 +232,7 @@ export default function({ getService }: FtrProviderContext) {
 
       it('pre-fills field and aggregation', async () => {
         await ml.jobWizardCommon.assertAggAndFieldInputExists();
-        await ml.jobWizardCommon.assertAggAndFieldSelection(aggAndFieldIdentifier);
+        await ml.jobWizardCommon.assertAggAndFieldSelection([aggAndFieldIdentifier]);
         await ml.jobWizardCommon.assertAnomalyChartExists('LINE');
       });
 
