@@ -64,7 +64,7 @@ export class ExpressionLoader {
     });
 
     this.params = {
-      searchContext: { type: 'kibana_context' },
+      searchContext: { type: 'kibana_context', ...(params.searchContext || {}) },
       extraHandlers: params.extraHandlers,
     };
 

@@ -57,8 +57,6 @@ export const ExpressionRendererImplementation = ({
   const handlerRef: React.MutableRefObject<null | ExpressionLoader> = useRef(null);
   const [state, setState] = useState<State>({ ...defaultState });
 
-  let isMounted = true;
-
   // Re-fetch data automatically when the inputs change
   useEffect(() => {
     if (handlerRef.current) {
@@ -78,13 +76,13 @@ export const ExpressionRendererImplementation = ({
       handlerRef.current = new ExpressionLoader(mountpoint.current, expression, options);
 
       handlerRef.current.loading$.subscribe(() => {
-        if (!isMounted) {
+        if (!handlerRef.current) {
           return;
         }
         setState(prevState => ({ ...prevState, isLoading: true }));
       });
       handlerRef.current.render$.subscribe((item: number | IInterpreterErrorResult) => {
-        if (!isMounted) {
+        if (!handlerRef.current) {
           return;
         }
         if (typeof item !== 'number') {
@@ -106,7 +104,6 @@ export const ExpressionRendererImplementation = ({
   useEffect(() => {
     // We only want a clean up to run when the entire component is unloaded, not on every render
     return function cleanup() {
-      isMounted = false;
       if (handlerRef.current) {
         handlerRef.current.destroy();
         handlerRef.current = null;
