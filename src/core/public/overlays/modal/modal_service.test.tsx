@@ -16,11 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { mockReactDomRender, mockReactDomUnmount } from './flyout.test.mocks';
+import { mockReactDomRender, mockReactDomUnmount } from '../overlay.test.mocks';
 
+import React from 'react';
 import { mount } from 'enzyme';
-import { i18nServiceMock } from '../i18n/i18n_service.mock';
-import { FlyoutRef, FlyoutService } from './flyout';
+import { i18nServiceMock } from '../../i18n/i18n_service.mock';
+import { ModalService, OverlayModalStart } from './modal_service';
+import { mountForComponent } from '../utils';
+import { OverlayRef } from '../types';
 
 const i18nMock = i18nServiceMock.createStartContract();
 
@@ -29,56 +32,59 @@ beforeEach(() => {
   mockReactDomUnmount.mockClear();
 });
 
-const mountText = (text: string) => (container: HTMLElement) => {
-  const content = document.createElement('span');
-  content.textContent = text;
-  container.append(content);
-  return () => {};
+const getServiceStart = () => {
+  const service = new ModalService();
+  return service.start({ i18n: i18nMock, targetDomElement: document.createElement('div') });
 };
 
-describe('FlyoutService', () => {
-  describe('openFlyout()', () => {
-    it('renders a flyout to the DOM', () => {
-      const target = document.createElement('div');
-      const flyoutService = new FlyoutService(target);
+describe('ModalService', () => {
+  let modals: OverlayModalStart;
+  beforeEach(() => {
+    modals = getServiceStart();
+  });
+
+  describe('openModal()', () => {
+    it('renders a modal to the DOM', () => {
       expect(mockReactDomRender).not.toHaveBeenCalled();
-      flyoutService.openFlyout(i18nMock, mountText('Flyout content'));
+      modals.open(container => {
+        const content = document.createElement('span');
+        content.textContent = 'Modal content';
+        container.append(content);
+        return () => {};
+      });
       expect(mockReactDomRender.mock.calls).toMatchSnapshot();
       const modalContent = mount(mockReactDomRender.mock.calls[0][0]);
       expect(modalContent.html()).toMatchSnapshot();
     });
-    describe('with a currently active flyout', () => {
-      let target: HTMLElement;
-      let flyoutService: FlyoutService;
-      let ref1: FlyoutRef;
+
+    describe('with a currently active modal', () => {
+      let ref1: OverlayRef;
+
       beforeEach(() => {
-        target = document.createElement('div');
-        flyoutService = new FlyoutService(target);
-        ref1 = flyoutService.openFlyout(i18nMock, mountText('Flyout content'));
+        ref1 = modals.open(mountForComponent(<span>Modal content 1</span>));
       });
-      it('replaces the current flyout with a new one', () => {
-        flyoutService.openFlyout(i18nMock, mountText('Flyout content 2'));
+
+      it('replaces the current modal with a new one', () => {
+        modals.open(mountForComponent(<span>Flyout content 2</span>));
         expect(mockReactDomRender.mock.calls).toMatchSnapshot();
         expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
-        const modalContent = mount(mockReactDomRender.mock.calls[1][0]);
-        expect(modalContent.html()).toMatchSnapshot();
         expect(() => ref1.close()).not.toThrowError();
         expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
       });
+
       it('resolves onClose on the previous ref', async () => {
         const onCloseComplete = jest.fn();
         ref1.onClose.then(onCloseComplete);
-        flyoutService.openFlyout(i18nMock, mountText('Flyout content 2'));
+        modals.open(mountForComponent(<span>Flyout content 2</span>));
         await ref1.onClose;
         expect(onCloseComplete).toBeCalledTimes(1);
       });
     });
   });
-  describe('FlyoutRef#close()', () => {
+
+  describe('ModalRef#close()', () => {
     it('resolves the onClose Promise', async () => {
-      const target = document.createElement('div');
-      const flyoutService = new FlyoutService(target);
-      const ref = flyoutService.openFlyout(i18nMock, mountText('Flyout content'));
+      const ref = modals.open(mountForComponent(<span>Flyout content</span>));
 
       const onCloseComplete = jest.fn();
       ref.onClose.then(onCloseComplete);
@@ -86,21 +92,19 @@ describe('FlyoutService', () => {
       await ref.close();
       expect(onCloseComplete).toHaveBeenCalledTimes(1);
     });
-    it('can be called multiple times on the same FlyoutRef', async () => {
-      const target = document.createElement('div');
-      const flyoutService = new FlyoutService(target);
-      const ref = flyoutService.openFlyout(i18nMock, mountText('Flyout content'));
+
+    it('can be called multiple times on the same ModalRef', async () => {
+      const ref = modals.open(mountForComponent(<span>Flyout content</span>));
       expect(mockReactDomUnmount).not.toHaveBeenCalled();
       await ref.close();
       expect(mockReactDomUnmount.mock.calls).toMatchSnapshot();
       await ref.close();
       expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
     });
-    it("on a stale FlyoutRef doesn't affect the active flyout", async () => {
-      const target = document.createElement('div');
-      const flyoutService = new FlyoutService(target);
-      const ref1 = flyoutService.openFlyout(i18nMock, mountText('Flyout content 1'));
-      const ref2 = flyoutService.openFlyout(i18nMock, mountText('Flyout content 2'));
+
+    it("on a stale ModalRef doesn't affect the active flyout", async () => {
+      const ref1 = modals.open(mountForComponent(<span>Modal content 1</span>));
+      const ref2 = modals.open(mountForComponent(<span>Modal content 2</span>));
       const onCloseComplete = jest.fn();
       ref2.onClose.then(onCloseComplete);
       mockReactDomUnmount.mockClear();

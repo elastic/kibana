@@ -23,10 +23,9 @@ import { EuiFlyout } from '@elastic/eui';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subject } from 'rxjs';
-import { I18nStart } from '../i18n';
-import { OverlayRef } from './overlay_service';
-import { MountPoint } from './types';
-import { MountWrapper } from './utils';
+import { I18nStart } from '../../i18n';
+import { MountPoint, OverlayRef } from '../types';
+import { MountWrapper } from '../utils';
 
 /**
  * A FlyoutRef is a reference to an opened flyout panel. It offers methods to
@@ -68,55 +67,69 @@ export class FlyoutRef implements OverlayRef {
   }
 }
 
+/**
+ * APIs to open and manage fly-out dialogs.
+ *
+ * @public
+ */
+export interface OverlayFlyoutStart {
+  open(mount: MountPoint, options?: OverlayFlyoutOpenOptions): OverlayRef;
+}
+
+/**
+ * @public
+ */
+export interface OverlayFlyoutOpenOptions {
+  className?: string;
+  closeButtonAriaLabel?: string;
+  'data-test-subj'?: string;
+}
+
+interface StartDeps {
+  i18n: I18nStart;
+  targetDomElement: Element;
+}
+
 /** @internal */
 export class FlyoutService {
   private activeFlyout: FlyoutRef | null = null;
+  private targetDomElement: Element | null = null;
 
-  constructor(private readonly targetDomElement: Element) {}
+  public start({ i18n, targetDomElement }: StartDeps): OverlayFlyoutStart {
+    this.targetDomElement = targetDomElement;
 
-  /**
-   * Opens a flyout panel with the given component inside. You can use
-   * `close()` on the returned FlyoutRef to close the flyout.
-   *
-   * @param flyoutMount - Mounts the children inside a flyout panel
-   * @return {FlyoutRef} A reference to the opened flyout panel.
-   */
-  public openFlyout = (
-    i18n: I18nStart,
-    flyoutMount: MountPoint,
-    flyoutProps: {
-      closeButtonAriaLabel?: string;
-      'data-test-subj'?: string;
-    } = {}
-  ): FlyoutRef => {
-    // If there is an active flyout session close it before opening a new one.
-    if (this.activeFlyout) {
-      this.activeFlyout.close();
-      this.cleanupDom();
-    }
+    return {
+      open: (mount: MountPoint, options: OverlayFlyoutOpenOptions = {}): OverlayRef => {
+        // If there is an active flyout session close it before opening a new one.
+        if (this.activeFlyout) {
+          this.activeFlyout.close();
+          this.cleanupDom();
+        }
 
-    const flyout = new FlyoutRef();
+        const flyout = new FlyoutRef();
 
-    // If a flyout gets closed through it's FlyoutRef, remove it from the dom
-    flyout.onClose.then(() => {
-      if (this.activeFlyout === flyout) {
-        this.cleanupDom();
-      }
-    });
+        // If a flyout gets closed through it's FlyoutRef, remove it from the dom
+        flyout.onClose.then(() => {
+          if (this.activeFlyout === flyout) {
+            this.cleanupDom();
+          }
+        });
 
-    this.activeFlyout = flyout;
+        this.activeFlyout = flyout;
 
-    render(
-      <i18n.Context>
-        <EuiFlyout {...flyoutProps} onClose={() => flyout.close()}>
-          <MountWrapper mount={flyoutMount} />
-        </EuiFlyout>
-      </i18n.Context>,
-      this.targetDomElement
-    );
+        render(
+          <i18n.Context>
+            <EuiFlyout {...options} onClose={() => flyout.close()}>
+              <MountWrapper mount={mount} />
+            </EuiFlyout>
+          </i18n.Context>,
+          this.targetDomElement
+        );
 
-    return flyout;
-  };
+        return flyout;
+      },
+    };
+  }
 
   /**
    * Using React.Render to re-render into a target DOM element will replace
@@ -126,8 +139,10 @@ export class FlyoutService {
    * depend on unmounting for cleanup behaviour.
    */
   private cleanupDom(): void {
-    unmountComponentAtNode(this.targetDomElement);
-    this.targetDomElement.innerHTML = '';
+    if (this.targetDomElement != null) {
+      unmountComponentAtNode(this.targetDomElement);
+      this.targetDomElement.innerHTML = '';
+    }
     this.activeFlyout = null;
   }
 }

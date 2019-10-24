@@ -122,6 +122,10 @@ export {
   UnmountCallback,
   OverlayStart,
   OverlayBannersStart,
+  OverlayModalStart,
+  OverlayModalOpenOptions,
+  OverlayFlyoutStart,
+  OverlayFlyoutOpenOptions,
   OverlayRef,
 } from './overlays';
 

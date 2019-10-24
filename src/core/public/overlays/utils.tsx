@@ -25,7 +25,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 /**
  * Mount converter for react components.
  *
- * @param component to get a mount for
+ * @internal
  */
 export const mountForComponent = (component: React.ReactElement): MountPoint => (
   element: HTMLElement
@@ -35,9 +35,7 @@ export const mountForComponent = (component: React.ReactElement): MountPoint => 
 };
 
 /**
- *
- * @param mount
- * @constructor
+ * MountWrapper is a react component to mount a {@link MountPoint} inside a react tree.
  */
 export const MountWrapper: React.FunctionComponent<{ mount: MountPoint }> = ({ mount }) => {
   const element = useRef(null);
