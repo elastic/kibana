@@ -27,23 +27,18 @@ interface ListPackagesRequest extends Request {
   query: Request['query'] & SearchParams;
 }
 
-interface PackageRequest extends Request {
+interface PackageInfoRequest extends Request {
   params: {
     pkgkey: string;
   };
 }
 
-interface InstallPackageRequest extends Request {
-  params: PackageRequestParams;
+interface InstallDeletePackageRequest extends Request {
+  params: {
+    pkgkey: string;
+    asset: AssetType;
+  };
 }
-
-interface DeletePackageRequest extends Request {
-  params: PackageRequestParams;
-}
-
-type PackageRequestParams = PackageRequest['params'] & {
-  asset?: AssetType;
-};
 
 export async function handleGetCategories(req: Request, extra: Extra) {
   return getCategories();
@@ -59,7 +54,7 @@ export async function handleGetList(req: ListPackagesRequest, extra: Extra) {
   return packageList;
 }
 
-export async function handleGetInfo(req: PackageRequest, extra: Extra) {
+export async function handleGetInfo(req: PackageInfoRequest, extra: Extra) {
   const { pkgkey } = req.params;
   const savedObjectsClient = getClient(req);
   const packageInfo = await getPackageInfo({ savedObjectsClient, pkgkey });
@@ -81,7 +76,7 @@ export const handleGetFile = async (req: Request, extra: Extra) => {
   return epmResponse;
 };
 
-export async function handleRequestInstall(req: InstallPackageRequest, extra: Extra) {
+export async function handleRequestInstall(req: InstallDeletePackageRequest, extra: Extra) {
   const { pkgkey, asset } = req.params;
 
   const savedObjectsClient = getClient(req);
@@ -94,7 +89,7 @@ export async function handleRequestInstall(req: InstallPackageRequest, extra: Ex
   });
 }
 
-export async function handleRequestDelete(req: DeletePackageRequest, extra: Extra) {
+export async function handleRequestDelete(req: InstallDeletePackageRequest, extra: Extra) {
   const { pkgkey } = req.params;
   const savedObjectsClient = getClient(req);
   const callCluster = getClusterAccessor(extra.context.esClient, req);

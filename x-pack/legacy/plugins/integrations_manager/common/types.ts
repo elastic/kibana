@@ -12,8 +12,9 @@ export type InstallationStatus = Installed['status'] | NotInstalled['status'];
 
 export enum AssetType {
   dashboard = 'dashboard',
-  ingestPipeline = 'ingest-pipeline',
   visualization = 'visualization',
+  search = 'search',
+  ingestPipeline = 'ingest-pipeline',
 }
 
 // Registry's response types
