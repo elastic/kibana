@@ -19,7 +19,7 @@ import { Description } from './description';
 export const CategorizationField: FC = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as MultiMetricJobCreator | PopulationJobCreator | AdvancedJobCreator;
-  const { fields } = newJobCapsService;
+  const { catFields } = newJobCapsService;
   const [categorizationFieldName, setCategorizationFieldName] = useState(
     jobCreator.categorizationFieldName
   );
@@ -36,7 +36,7 @@ export const CategorizationField: FC = () => {
   return (
     <Description>
       <CategorizationFieldSelect
-        fields={fields}
+        fields={catFields}
         changeHandler={setCategorizationFieldName}
         selectedField={categorizationFieldName}
       />
