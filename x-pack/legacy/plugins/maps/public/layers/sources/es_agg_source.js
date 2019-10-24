@@ -59,11 +59,15 @@ export class AbstractESAggSource extends AbstractESSource {
       const metricLabel = esAggMetric.getPropertyLabel();
       return {
         type: esAggMetric.getAggType(),
-        field: esAggMetric._getESDocFieldName(),
+        field: esAggMetric.getESDocFieldName(),
         propertyKey: metricKey,
         propertyLabel: metricLabel
       };
     });
+  }
+
+  getMetricFields2() {
+    return this._getValidMetrics();
   }
 
   async getNumberFields() {

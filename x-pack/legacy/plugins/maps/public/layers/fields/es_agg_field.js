@@ -32,19 +32,19 @@ export class ESAggMetricField extends AbstractField {
   }
 
   getPropertyKey() {
-    return this._source.formatMetricKey(this.getAggType(), this._getESDocFieldName());
+    return this._source.formatMetricKey(this.getAggType(), this.getESDocFieldName());
   }
 
   getPropertyLabel() {
-    return this._label ? this._label : this._source.formatMetricLabel(this.getAggType(), this._getESDocFieldName());
+    return this._label ? this._label : this._source.formatMetricLabel(this.getAggType(), this.getESDocFieldName());
   }
 
-  _getESDocFieldName() {
+  getESDocFieldName() {
     return this._esDocField ? this._esDocField.getName() : '';
   }
 
   getRequestDescription() {
-    return this.getAggType() !== 'count' ? `${this.getAggType()} ${this._getESDocFieldName()}` : 'count';
+    return this.getAggType() !== 'count' ? `${this.getAggType()} ${this.getESDocFieldName()}` : 'count';
   }
 
 }

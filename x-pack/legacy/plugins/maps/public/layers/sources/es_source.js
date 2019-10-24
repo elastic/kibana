@@ -225,11 +225,8 @@ export class AbstractESSource extends AbstractVectorSource {
   }
 
   _getRawFieldName(fieldName) {
-    const metricField = this.getMetricFields().find(({ propertyKey }) => {
-      return propertyKey === fieldName;
-    });
-
-    return metricField ? metricField.field : null;
+    const metricField = this.getMetricFields2().find((esAggMetricField) => esAggMetricField.getPropertyKey() === fieldName);
+    return metricField ? metricField.getESDocFieldName() : null;
   }
 
   async getFieldFormatter(fieldName) {
