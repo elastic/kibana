@@ -79,8 +79,6 @@ export class ESSearchSource extends AbstractESSource {
   }
 
   renderSourceSettingsEditor({ onChange }) {
-
-
     return (
       <UpdateSourceEditor
         source={this}

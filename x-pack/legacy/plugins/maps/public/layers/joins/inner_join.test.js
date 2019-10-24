@@ -25,10 +25,22 @@ const rightSource = {
   term: 'geo.dest',
 };
 
+const mockSource = {
+  getInspectorAdapters() {
+  },
+  createField(name) {
+    return {
+      getName() {
+        return name;
+      }
+    };
+  }
+};
+
 const leftJoin = new InnerJoin({
   leftField: 'iso2',
   right: rightSource
-});
+}, mockSource);
 const COUNT_PROPERTY_NAME = '__kbnjoin__count_groupby_kibana_sample_data_logs.geo.dest';
 
 describe('joinPropertiesToFeature', () => {
@@ -76,7 +88,7 @@ describe('joinPropertiesToFeature', () => {
     const leftJoin = new InnerJoin({
       leftField: 'zipcode',
       right: rightSource
-    });
+    }, mockSource);
 
     const feature = {
       properties: {
@@ -118,7 +130,7 @@ describe('joinPropertiesToFeature', () => {
     const leftJoin = new InnerJoin({
       leftField: 'code',
       right: rightSource
-    });
+    }, mockSource);
 
     const feature = {
       properties: {
