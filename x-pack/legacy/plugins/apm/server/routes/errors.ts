@@ -21,7 +21,7 @@ export const errorsRoute = createRoute(core => ({
     query: t.intersection([
       t.partial({
         sortField: t.string,
-        sortDirection: t.string
+        sortDirection: t.union([t.literal('asc'), t.literal('desc')])
       }),
       uiFiltersRt,
       rangeRt

@@ -8,17 +8,13 @@ import moment from 'moment';
 import KbnServer, { Server } from 'src/legacy/server/kbn_server';
 import { CoreSetup } from 'src/core/server';
 import { CallClusterOptions } from 'src/legacy/core_plugins/elasticsearch';
-// This import has the side effect of allowing us to use the elasticsearch type
-// extensions below. Without this import, the compiler is unable to find these
-// in tests
-import {} from '../../../apm/typings/elasticsearch';
 import {
   SearchParams,
   DeleteDocumentByQueryParams,
   SearchResponse,
   DeleteDocumentByQueryResponse,
-  AggregationSearchResponseWithTotalHitsAsInt,
 } from 'elasticsearch';
+import { ESSearchResponse } from '../../../apm/typings/elasticsearch';
 import { XPackMainPlugin } from '../../../xpack_main/xpack_main';
 import { RunContext } from '../../../task_manager';
 import { getVisualizationCounts } from './visualization_counts';
@@ -135,11 +131,12 @@ export async function getDailyEvents(
     },
   };
 
-  const metrics: AggregationSearchResponseWithTotalHitsAsInt<
+  const metrics: ESSearchResponse<
     unknown,
     {
       body: { aggs: typeof aggs };
-    }
+    },
+    { restTotalHitsAsInt: true }
   > = await callCluster('search', {
     index: kibanaIndex,
     rest_total_hits_as_int: true,
