@@ -15,7 +15,11 @@ import { Editor, Props } from '.';
 
 describe('Editor Component', () => {
   it('renders', async () => {
-    const props: Props = { licenseEnabled: true };
+    const props: Props = {
+      initialValue: '',
+      licenseEnabled: true,
+      valueGetterRef: { current: null } as any,
+    };
     // Ignore the warning about Worker not existing for now...
     const init = registerTestBed(Editor);
     await init(props);
