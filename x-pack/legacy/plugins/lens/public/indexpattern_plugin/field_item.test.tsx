@@ -14,12 +14,13 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 jest.mock('ui/new_platform');
 
 // Formatter must be mocked to return a string, or the rendering will fail
-jest.mock('../../../../../../src/legacy/ui/public/registry/field_formats', () => ({
-  fieldFormats: {
+jest.mock('../../../../../../src/plugins/data/public', () => ({
+  ...jest.requireActual('../../../../../../plugins/data/public/'),
+  getFieldFormats: jest.fn(() => ({
     getDefaultInstance: jest.fn().mockReturnValue({
       convert: jest.fn().mockReturnValue((s: unknown) => JSON.stringify(s)),
     }),
-  },
+  })),
 }));
 
 const waitForPromises = () => new Promise(resolve => setTimeout(resolve));

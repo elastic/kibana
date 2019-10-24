@@ -15,9 +15,6 @@ import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { ChangeIndexPattern } from './change_indexpattern';
 import { EuiProgress } from '@elastic/eui';
 
-jest.mock('ui/new_platform');
-jest.mock('../../../../../../src/legacy/ui/public/registry/field_formats');
-
 const initialState: IndexPatternPrivateState = {
   indexPatternRefs: [],
   existingFields: {},

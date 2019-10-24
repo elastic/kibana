@@ -20,11 +20,14 @@
 import sinon from 'sinon';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
+import { npSetup } from 'ui/new_platform';
 import { VisProvider } from '..';
 import { AggType } from '../../agg_types/agg_type';
 import { AggConfig } from '../../agg_types/agg_config';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { fieldFormats } from '../../registry/field_formats';
+import { FieldFormatRegisty } from '../../../../../plugins/data/public';
+
+const fieldFormats = new FieldFormatRegisty(npSetup.core.uiSettings);
 
 describe('AggConfig', function () {
 

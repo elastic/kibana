@@ -19,9 +19,8 @@
 
 import { forOwn, isFunction, memoize } from 'lodash';
 import { UiSettingsClientContract } from 'kibana/public';
-import { FieldFormat } from '../../common/field_formats';
 import { FIELD_FORMATS_IDS } from './types';
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../../common';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES, FieldFormat } from '../../common';
 
 interface FieldType {
   id: FIELD_FORMATS_IDS;

@@ -37,8 +37,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { Filter, buildEsQuery, getEsQueryConfig } from '@kbn/es-query';
 import { Query } from 'src/plugins/data/common';
-// @ts-ignore
-import { fieldFormats } from '../../../../../../src/legacy/ui/public/registry/field_formats';
+import { getFieldFormats } from '../../../../../../src/plugins/data/public';
 import { DraggedField } from './indexpattern';
 import { DragDrop } from '../drag_drop';
 import { DatasourceDataPanelProps, DataType } from '../types';
@@ -73,6 +72,8 @@ function wrapOnDot(str?: string) {
   // without us having to draw a lot of extra DOM elements, etc
   return str ? str.replace(/\./g, '.\u200B') : '';
 }
+
+const fieldFormats = getFieldFormats();
 
 export function FieldItem(props: FieldItemProps) {
   const { core, field, indexPattern, highlight, exists, query, dateRange, filters } = props;

@@ -20,9 +20,9 @@
 import { i18n } from '@kbn/i18n';
 import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
+import { getFieldFormats } from '../../../../../plugins/data/public';
 
-// @ts-ignore
-import { fieldFormats } from '../../registry/field_formats';
+const fieldFormats = getFieldFormats();
 
 export const countMetricAgg = new MetricAggType({
   name: METRIC_TYPES.COUNT,

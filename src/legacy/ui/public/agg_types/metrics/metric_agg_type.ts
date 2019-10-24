@@ -22,10 +22,9 @@ import { AggType, AggTypeConfig } from '../agg_type';
 import { AggParamType } from '../param_types/agg';
 import { AggConfig } from '../agg_config';
 import { METRIC_TYPES } from './metric_agg_types';
+import { KBN_FIELD_TYPES, getFieldFormats } from '../../../../../plugins/data/public';
 
-// @ts-ignore
-import { fieldFormats } from '../../registry/field_formats';
-import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
+const fieldFormats = getFieldFormats();
 
 export type IMetricAggConfig = AggConfig;
 

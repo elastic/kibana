@@ -77,7 +77,7 @@ import { normalizeSortRequest } from './_normalize_sort_request';
 
 import { fetchSoon } from '../fetch';
 import { fieldWildcardFilter } from '../../field_wildcard';
-import { getHighlightRequest } from '../../../../../plugins/data/common/field_formats';
+import { getHighlightRequest } from '../../../../../plugins/data/common';
 import { npSetup } from 'ui/new_platform';
 import chrome from '../../chrome';
 import { RequestFailure } from '../fetch/errors';

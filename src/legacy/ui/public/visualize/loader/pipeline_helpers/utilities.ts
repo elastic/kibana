@@ -22,12 +22,10 @@ import { identity } from 'lodash';
 import { AggConfig, Vis } from 'ui/vis';
 import { SerializedFieldFormat } from 'src/plugins/expressions/common/expressions/types/common';
 
-import { FieldFormat } from '../../../../../../plugins/data/common/field_formats';
+import { FieldFormat, getFieldFormats } from '../../../../../../plugins/data/public';
 
 import { tabifyGetColumns } from '../../../agg_response/tabify/_get_columns';
 import chrome from '../../../chrome';
-// @ts-ignore
-import { fieldFormats } from '../../../registry/field_formats';
 import { dateRange } from '../../../utils/date_range';
 import { ipRange } from '../../../utils/ip_range';
 import { DateRangeKey } from '../../../agg_types/buckets/date_range';
@@ -46,6 +44,7 @@ function isTermsFieldFormat(
 }
 
 const config = chrome.getUiSettingsClient();
+const fieldFormats = getFieldFormats();
 
 const getConfig = (...args: any[]): any => config.get(...args);
 const getDefaultFieldFormat = () => ({ convert: identity });
