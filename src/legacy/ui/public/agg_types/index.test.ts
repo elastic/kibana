@@ -26,6 +26,12 @@ const bucketAggs = aggTypes.buckets;
 const metricAggs = aggTypes.metrics;
 
 jest.mock('ui/new_platform');
+jest.mock('../../../../plugins/data/public', () => ({
+  ...jest.requireActual('../../../../plugins/data/public'),
+  getFieldFormats: jest.fn(() => ({
+    getDefaultInstance: jest.fn(() => 'default'),
+  })),
+}));
 
 describe('AggTypesComponent', () => {
   describe('bucket aggs', () => {
