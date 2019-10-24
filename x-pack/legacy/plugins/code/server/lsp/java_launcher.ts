@@ -25,10 +25,10 @@ export class JavaLauncher extends AbstractLauncher {
   private readonly gradleHomeFolder = '.gradle';
   private readonly mavenSettingsFile = path.resolve('settings', 'settings.xml');
   constructor(
-    readonly targetHost: string,
-    readonly options: ServerOptions,
-    readonly loggerFactory: LoggerFactory,
-    readonly installationPath: string
+    public readonly targetHost: string,
+    public readonly options: ServerOptions,
+    public readonly loggerFactory: LoggerFactory,
+    public readonly installationPath: string
   ) {
     super('java', targetHost, options, loggerFactory);
   }

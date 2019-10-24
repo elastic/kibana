@@ -50,7 +50,7 @@ export async function getTransactionBreakdown({
         field: SPAN_TYPE,
         size: 20,
         order: {
-          _count: 'desc'
+          _count: 'desc' as const
         }
       },
       aggs: {
@@ -60,7 +60,7 @@ export async function getTransactionBreakdown({
             missing: '',
             size: 20,
             order: {
-              _count: 'desc'
+              _count: 'desc' as const
             }
           },
           aggs: {
@@ -117,11 +117,11 @@ export async function getTransactionBreakdown({
 
     const breakdowns = flatten(
       aggs.types.buckets.map(bucket => {
-        const type = bucket.key;
+        const type = bucket.key as string;
 
         return bucket.subtypes.buckets.map(subBucket => {
           return {
-            name: subBucket.key || type,
+            name: (subBucket.key as string) || type,
             percentage:
               (subBucket.total_self_time_per_subtype.value || 0) /
               sumAllSelfTimes

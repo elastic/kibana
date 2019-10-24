@@ -9,7 +9,7 @@ import { Endpoint } from './resource_locator';
 import { RequestContext } from './service_definition';
 
 export class LocalEndpoint implements Endpoint {
-  constructor(readonly httpRequest: KibanaRequest, readonly resource: string) {}
+  constructor(public readonly httpRequest: KibanaRequest, public readonly resource: string) {}
 
   toContext(): RequestContext {
     return {

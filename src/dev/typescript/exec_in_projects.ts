@@ -45,6 +45,7 @@ export function execInProjects(
           cwd: process.cwd(),
           env: chalk.enabled ? { FORCE_COLOR: 'true' } : {},
           stdio: ['ignore', 'pipe', 'pipe'],
+          preferLocal: true,
         }).catch(error => {
           throw new ProjectFailure(project, error);
         }),

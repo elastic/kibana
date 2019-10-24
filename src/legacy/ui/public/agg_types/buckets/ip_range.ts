@@ -17,11 +17,15 @@
  * under the License.
  */
 
-import { get, noop, map, omit, isNull } from 'lodash';
+import { noop, map, omit, isNull } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
 import { IpRangeTypeParamEditor } from '../../vis/editors/default/controls/ip_range_type';
 import { IpRangesParamEditor } from '../../vis/editors/default/controls/ip_ranges';
+// @ts-ignore
+import { fieldFormats } from '../../registry/field_formats';
+import { FieldFormat } from '../../../../../plugins/data/common/field_formats';
+import { ipRange } from '../../utils/ip_range';
 import { BUCKET_TYPES } from './bucket_agg_types';
 
 // @ts-ignore
@@ -32,16 +36,26 @@ const ipRangeTitle = i18n.translate('common.ui.aggTypes.buckets.ipRangeTitle', {
   defaultMessage: 'IPv4 Range',
 });
 
+export type IpRangeKey =
+  | { type: 'mask'; mask: string }
+  | { type: 'range'; from: string; to: string };
+
 export const ipRangeBucketAgg = new BucketAggType({
   name: BUCKET_TYPES.IP_RANGE,
   title: ipRangeTitle,
   createFilter: createFilterIpRange,
-  getKey(bucket, key) {
-    if (key) return key;
-    const from = get(bucket, 'from', '-Infinity');
-    const to = get(bucket, 'to', 'Infinity');
-
-    return `${from} to ${to}`;
+  getKey(bucket, key, agg): IpRangeKey {
+    if (agg.params.ipRangeType === 'mask') {
+      return { type: 'mask', mask: key };
+    }
+    return { type: 'range', from: bucket.from, to: bucket.to };
+  },
+  getFormat(agg) {
+    const formatter = agg.fieldOwnFormatter('text', fieldFormats.getDefaultInstance('ip'));
+    const IpRangeFormat = FieldFormat.from(function(range: IpRangeKey) {
+      return ipRange.toString(range, formatter);
+    });
+    return new IpRangeFormat();
   },
   makeLabel(aggConfig) {
     return i18n.translate('common.ui.aggTypes.buckets.ipRangeLabel', {

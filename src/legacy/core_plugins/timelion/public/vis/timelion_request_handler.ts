@@ -50,7 +50,7 @@ export interface TimelionSuccessResponse {
 }
 
 export function getTimelionRequestHandler(dependencies: TimelionVisualizationDependencies) {
-  const { uiSettings, http } = dependencies;
+  const { uiSettings, http, timefilter } = dependencies;
   const timezone = timezoneProvider(uiSettings)();
 
   return async function({
@@ -77,6 +77,9 @@ export function getTimelionRequestHandler(dependencies: TimelionVisualizationDep
 
     const esQueryConfigs = getEsQueryConfig(uiSettings);
 
+    // parse the time range client side to make sure it behaves like other charts
+    const timeRangeBounds = timefilter.timefilter.calculateBounds(timeRange);
+
     try {
       return await http.post('../api/timelion/run', {
         body: JSON.stringify({
@@ -86,7 +89,12 @@ export function getTimelionRequestHandler(dependencies: TimelionVisualizationDep
               filter: buildEsQuery(undefined, query, filters, esQueryConfigs),
             },
           },
-          time: { ...timeRange, interval: visParams.interval, timezone },
+          time: {
+            from: timeRangeBounds.min,
+            to: timeRangeBounds.max,
+            interval: visParams.interval,
+            timezone,
+          },
         }),
       });
     } catch (e) {
