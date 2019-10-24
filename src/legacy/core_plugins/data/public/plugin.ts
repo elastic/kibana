@@ -28,6 +28,7 @@ import {
   LegacyDependenciesPluginStart,
 } from './shim/legacy_dependencies_plugin';
 import { DataPublicPluginStart } from '../../../../plugins/data/public';
+import { initLegacyModule } from './shim/legacy_module';
 import { IUiActionsSetup } from '../../../../plugins/ui_actions/public';
 import {
   createFilterAction,
@@ -133,6 +134,8 @@ export class DataPlugin
       http,
       notifications,
     });
+
+    initLegacyModule(indexPatternsService.indexPatterns);
 
     const SearchBar = createSearchBar({
       core,
