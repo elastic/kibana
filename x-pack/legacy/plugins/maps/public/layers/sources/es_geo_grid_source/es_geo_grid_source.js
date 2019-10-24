@@ -25,8 +25,6 @@ import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { AbstractESAggSource } from '../es_agg_source';
 
-const COUNT_PROP_LABEL = 'count';
-const COUNT_PROP_NAME = 'doc_count';
 const MAX_GEOTILE_LEVEL = 29;
 
 const aggSchemas = new Schemas([
@@ -177,12 +175,6 @@ export class ESGeoGridSource extends AbstractESAggSource {
     }));
   }
 
-  async getNumberFields() {
-    return this.getMetricFields().map(({ propertyKey: name, propertyLabel: label }) => {
-      return { label, name };
-    });
-  }
-
   async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback) {
     const indexPattern = await this.getIndexPattern();
     const searchSource  = await this._makeSearchSource(searchFilters, 0);
@@ -212,14 +204,6 @@ export class ESGeoGridSource extends AbstractESAggSource {
 
   isFilterByMapBounds() {
     return true;
-  }
-
-  _formatMetricKey(metric) {
-    return metric.type !== 'count' ? `${metric.type}_of_${metric.field}` : COUNT_PROP_NAME;
-  }
-
-  _formatMetricLabel(metric) {
-    return metric.type !== 'count' ? `${metric.type} of ${metric.field}` : COUNT_PROP_LABEL;
   }
 
   _makeAggConfigs(precision) {
@@ -270,8 +254,8 @@ export class ESGeoGridSource extends AbstractESAggSource {
         type: VectorStyle.STYLE_TYPE.DYNAMIC,
         options: {
           field: {
-            label: COUNT_PROP_LABEL,
-            name: COUNT_PROP_NAME,
+            label: AbstractESAggSource.COUNT_PROP_LABEL,
+            name: AbstractESAggSource.COUNT_PROP_NANE,
             origin: SOURCE_DATA_ID_ORIGIN
           },
           color: 'Blues'
@@ -281,8 +265,8 @@ export class ESGeoGridSource extends AbstractESAggSource {
         type: VectorStyle.STYLE_TYPE.DYNAMIC,
         options: {
           field: {
-            label: COUNT_PROP_LABEL,
-            name: COUNT_PROP_NAME,
+            label: AbstractESAggSource.COUNT_PROP_LABEL,
+            name: AbstractESAggSource.COUNT_PROP_NANE,
             origin: SOURCE_DATA_ID_ORIGIN
           },
           minSize: 4,

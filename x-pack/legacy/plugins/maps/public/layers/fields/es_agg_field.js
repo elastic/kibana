@@ -12,11 +12,12 @@ export class ESAggMetricField extends AbstractField {
 
   static type = 'ES_AGG';
 
-  constructor({ fieldName, label, source, aggType, esDocField }) {
-    super({ fieldName, source });
+  constructor({ label, source, aggType, esDocField }) {
+    super({});
     this._label = label;
     this._aggType = aggType;
     this._esDocField = esDocField;
+    this._source = source;
   }
 
   async getLabel() {
@@ -30,7 +31,5 @@ export class ESAggMetricField extends AbstractField {
   getESDocField() {
     return this._esDocField;
   }
-
-
 
 }

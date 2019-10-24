@@ -84,13 +84,13 @@ export class ESTermSource extends AbstractESAggSource {
     return this._descriptor.whereQuery;
   }
 
-  _formatMetricKey(metric) {
-    const metricKey = metric.type !== 'count' ? `${metric.type}_of_${metric.field}` : metric.type;
+  formatMetricKey(type, fieldName) {
+    const metricKey = type !== 'count' ? `${type}_of_${fieldName}` : type;
     return `__kbnjoin__${metricKey}_groupby_${this._descriptor.indexPatternTitle}.${this._termField.getName()}`;
   }
 
-  _formatMetricLabel(metric) {
-    const metricLabel = metric.type !== 'count' ? `${metric.type} ${metric.field}` : 'count';
+  formatMetricLabel(type, fieldName) {
+    const metricLabel = type !== 'count' ? `${type} ${fieldName}` : 'count';
     return `${metricLabel} of ${this._descriptor.indexPatternTitle}:${this._termField.getName()}`;
   }
 

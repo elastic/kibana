@@ -21,8 +21,6 @@ import { Schemas } from 'ui/vis/editors/default/schemas';
 import { AggConfigs } from 'ui/agg_types';
 import { AbstractESAggSource } from '../es_agg_source';
 
-const COUNT_PROP_LABEL = 'count';
-const COUNT_PROP_NAME = 'doc_count';
 const MAX_GEOTILE_LEVEL = 29;
 
 const aggSchemas = new Schemas([
@@ -96,12 +94,6 @@ export class ESPewPewSource extends AbstractESAggSource {
     return true;
   }
 
-  async getNumberFields() {
-    return this.getMetricFields().map(({ propertyKey: name, propertyLabel: label }) => {
-      return { label, name };
-    });
-  }
-
   async getSupportedShapeTypes() {
     return [VECTOR_SHAPE_TYPES.LINE];
   }
@@ -146,8 +138,8 @@ export class ESPewPewSource extends AbstractESAggSource {
         type: VectorStyle.STYLE_TYPE.DYNAMIC,
         options: {
           field: {
-            label: COUNT_PROP_LABEL,
-            name: COUNT_PROP_NAME,
+            label: AbstractESAggSource.COUNT_PROP_LABEL,
+            name: AbstractESAggSource.COUNT_PROP_NANE,
             origin: SOURCE_DATA_ID_ORIGIN
           },
           color: 'Blues'
@@ -157,8 +149,8 @@ export class ESPewPewSource extends AbstractESAggSource {
         type: VectorStyle.STYLE_TYPE.DYNAMIC,
         options: {
           field: {
-            label: COUNT_PROP_LABEL,
-            name: COUNT_PROP_NAME,
+            label: AbstractESAggSource.COUNT_PROP_LABEL,
+            name: AbstractESAggSource.COUNT_PROP_NANE,
             origin: SOURCE_DATA_ID_ORIGIN
           },
           minSize: 4,
@@ -249,14 +241,6 @@ export class ESPewPewSource extends AbstractESAggSource {
         areResultsTrimmed: false
       }
     };
-  }
-
-  _formatMetricKey(metric) {
-    return metric.type !== 'count' ? `${metric.type}_of_${metric.field}` : COUNT_PROP_NAME;
-  }
-
-  _formatMetricLabel(metric) {
-    return metric.type !== 'count' ? `${metric.type} of ${metric.field}` : COUNT_PROP_LABEL;
   }
 
   async _getGeoField() {
