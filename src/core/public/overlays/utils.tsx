@@ -42,5 +42,5 @@ export const mountForComponent = (component: React.ReactElement): MountPoint => 
 export const MountWrapper: React.FunctionComponent<{ mount: MountPoint }> = ({ mount }) => {
   const element = useRef(null);
   useEffect(() => mount(element.current!), [mount]);
-  return <div ref={element} />;
+  return <div className="kbnMountWrapper" ref={element} />;
 };

@@ -32,7 +32,9 @@ describe('MountWrapper', () => {
     };
     const wrapper = <MountWrapper mount={mountPoint} />;
     const container = mount(wrapper);
-    expect(container.html()).toMatchInlineSnapshot(`"<div><p class=\\"bar\\">hello</p></div>"`);
+    expect(container.html()).toMatchInlineSnapshot(
+      `"<div class=\\"kbnMountWrapper\\"><p class=\\"bar\\">hello</p></div>"`
+    );
   });
 
   it('updates the react tree when the mounted element changes', () => {
@@ -46,17 +48,23 @@ describe('MountWrapper', () => {
 
     const wrapper = <MountWrapper mount={mountPoint} />;
     const container = mount(wrapper);
-    expect(container.html()).toMatchInlineSnapshot(`"<div><p>initial</p></div>"`);
+    expect(container.html()).toMatchInlineSnapshot(
+      `"<div class=\\"kbnMountWrapper\\"><p>initial</p></div>"`
+    );
 
     el.textContent = 'changed';
     container.update();
-    expect(container.html()).toMatchInlineSnapshot(`"<div><p>changed</p></div>"`);
+    expect(container.html()).toMatchInlineSnapshot(
+      `"<div class=\\"kbnMountWrapper\\"><p>changed</p></div>"`
+    );
   });
 
   it('can render a detached react component', () => {
     const mountPoint = mountForComponent(<span>detached</span>);
     const wrapper = <MountWrapper mount={mountPoint} />;
     const container = mount(wrapper);
-    expect(container.html()).toMatchInlineSnapshot(`"<div><span>detached</span></div>"`);
+    expect(container.html()).toMatchInlineSnapshot(
+      `"<div class=\\"kbnMountWrapper\\"><span>detached</span></div>"`
+    );
   });
 });
