@@ -24,6 +24,7 @@ import { useDispatch } from '../../../../mappings_state';
 import { TYPE_DEFINITION } from '../../../../constants';
 import { Field, NormalizedField, MainType, SubType } from '../../../../types';
 import { fieldSerializer, fieldDeserializer, getTypeDocLink } from '../../../../lib';
+import { getParametersFormForType } from '../../field_types';
 import { UpdateFieldProvider, UpdateFieldFunc } from './update_field_provider';
 import { EditFieldHeaderForm } from './edit_field_header_form';
 import { EditFieldSection } from './edit_field_section';
@@ -85,6 +86,7 @@ export const EditField = React.memo(({ field }: Props) => {
             {({ type, subType }) => {
               const typeDefinition = TYPE_DEFINITION[type as MainType];
               const subTypeDefinition = TYPE_DEFINITION[subType as SubType];
+              const ParametersForm = getParametersFormForType(type, subType);
 
               if (typeDefinition === undefined) {
                 return null;
@@ -138,9 +140,7 @@ export const EditField = React.memo(({ field }: Props) => {
                       />
                     </EditFieldSection>
 
-                    <EditFieldSection>
-                      <p>Here will come the form for the parameters....</p>
-                    </EditFieldSection>
+                    {ParametersForm && <ParametersForm />}
                   </EuiFlyoutBody>
 
                   <EuiFlyoutFooter>

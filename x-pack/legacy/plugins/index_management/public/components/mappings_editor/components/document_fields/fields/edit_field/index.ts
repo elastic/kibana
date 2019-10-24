@@ -5,3 +5,5 @@
  */
 
 export * from './edit_field';
+
+export * from './edit_field_section';
