@@ -63,9 +63,9 @@ if [[ "$installNode" == "true" ]]; then
   echo " -- node: version=v${nodeVersion} dir=$nodeDir"
 
   echo " -- setting up node.js"
-  if [ -x "$nodeBin/node" ] && [ "$("$nodeBin/node" --version)" == "v$nodeVersion" ]; then
-    echo " -- reusing node.js install"
-  else
+  # if [ -x "$nodeBin/node" ] && [ "$("$nodeBin/node" --version)" == "v$nodeVersion" ]; then
+  #   echo " -- reusing node.js install"
+  # else
     if [ -d "$nodeDir" ]; then
       echo " -- clearing previous node.js install"
       rm -rf "$nodeDir"
@@ -81,7 +81,7 @@ if [[ "$installNode" == "true" ]]; then
     else
       curl --silent "$nodeUrl" | tar -xz -C "$nodeDir" --strip-components=1
     fi
-  fi
+  # fi
 fi
 
 ###
