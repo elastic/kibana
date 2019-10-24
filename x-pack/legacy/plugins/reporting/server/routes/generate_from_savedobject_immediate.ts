@@ -4,23 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request, ResponseObject, ResponseToolkit } from 'hapi';
-
 import { API_BASE_GENERATE_V1 } from '../../common/constants';
 import { createJobFactory, executeJobFactory } from '../../export_types/csv_from_savedobject';
 import {
-  KbnServer,
+  ServerFacade,
+  RequestFacade,
+  ResponseFacade,
+  ReportingResponseToolkit,
   Logger,
   JobDocPayload,
   JobIDForImmediate,
   JobDocOutputExecuted,
 } from '../../types';
-import { getRouteOptions } from './lib/route_config_factories';
+import { getRouteOptionsCsv } from './lib/route_config_factories';
 import { getJobParamsFromRequest } from '../../export_types/csv_from_savedobject/server/lib/get_job_params_from_request';
-
-interface KibanaResponse extends ResponseObject {
-  isBoom: boolean;
-}
 
 /*
  * This function registers API Endpoints for immediate Reporting jobs. The API inputs are:
@@ -32,10 +29,10 @@ interface KibanaResponse extends ResponseObject {
  *     - local (transient) changes the user made to the saved object
  */
 export function registerGenerateCsvFromSavedObjectImmediate(
-  server: KbnServer,
+  server: ServerFacade,
   parentLogger: Logger
 ) {
-  const routeOptions = getRouteOptions(server);
+  const routeOptions = getRouteOptionsCsv(server);
 
   /*
    * CSV export with the `immediate` option does not queue a job with Reporting's ESQueue to run the job async. Instead, this does:
@@ -46,7 +43,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(
     path: `${API_BASE_GENERATE_V1}/immediate/csv/saved-object/{savedObjectType}:{savedObjectId}`,
     method: 'POST',
     options: routeOptions,
-    handler: async (request: Request, h: ResponseToolkit) => {
+    handler: async (request: RequestFacade, h: ReportingResponseToolkit) => {
       const logger = parentLogger.clone(['savedobject-csv']);
       const jobParams = getJobParamsFromRequest(request, { isImmediate: true });
       const createJobFn = createJobFactory(server);
@@ -78,7 +75,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(
         .type(jobOutputContentType);
 
       // Set header for buffer download, not streaming
-      const { isBoom } = response as KibanaResponse;
+      const { isBoom } = response as ResponseFacade;
       if (isBoom == null) {
         response.header('accept-ranges', 'none');
       }

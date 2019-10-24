@@ -272,7 +272,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
         message={
           <FormattedMessage
             id="xpack.idxMgmt.templateList.table.noIndexTemplatesMessage"
-            defaultMessage="No templates found"
+            defaultMessage="No index templates found"
           />
         }
       />
