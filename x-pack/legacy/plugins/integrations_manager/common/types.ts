@@ -45,7 +45,7 @@ export interface ServiceVersion {
   version: RequirementVersionRange;
 }
 
-export interface ServiceRequirements {
+export interface RequirementVersionRange {
   min: RequirementVersion;
   max: RequirementVersion;
 }
