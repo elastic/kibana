@@ -1,0 +1,56 @@
+.prfDevTool__panel {
+  border-bottom: $euiBorderThin;
+}
+
+.prfDevTool__panelBody {
+  margin-top: $euiSizeS;
+  margin-left: $euiSizeL;
+}
+
+// Breakdown table
+.prfDevTool__breakdown {
+  width:100%;
+}
+
+@include euiBreakpoint('xs', 's') {
+  .prfDevTool__shardDetailsWrapper {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+.prfDevTool__main {
+  order: 2;
+  margin-left: $euiSize;
+  display: flex;
+  overflow: hidden;
+  flex-direction: column;
+
+  // Make only the tab content scroll
+  .search-profiler-tabs {
+    flex-shrink: 0;
+  }
+
+  &__profiletree {
+    overflow-y: auto;
+    flex-grow: 1;
+  }
+
+  &__emptyTreePlaceholder {
+    h1 {
+      font-size: $euiSizeL;
+      color: $euiColorMediumShade;
+    }
+    p {
+      font-size: $euiSize;
+      color: $euiColorMediumShade;
+    }
+    h1, p {
+      cursor: default;
+      user-select: none;
+    }
+    // Slight offset from the top.
+    margin: 5% 0 auto;
+    text-align: center;
+  }
+}

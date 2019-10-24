@@ -1,11 +1,3 @@
-.prfDevTool__panel {
-  border-bottom: $euiBorderThin;
-}
-
-.prfDevTool__panelBody {
-  margin-top: $euiSizeS;
-  margin-left: $euiSizeL;
-}
 
 // Profile details treeview
 .prfDevTool__shardDetailsWrapper {
@@ -115,21 +107,4 @@
   width: $euiSize * 15.5;
   // Force text to always be dark on top of white -> pink color
   color: lightOrDarkTheme($euiColorDarkestShade, $euiColorLightestShade);
-}
-
-// Breakdown table
-.prfDevTool__breakdown {
-  width:100%;
-}
-
-.prfDevTool__flyoutSubtitle {
-  margin-bottom: $euiSizeS;
-  display: inline-block;
-}
-
-@include euiBreakpoint('xs', 's') {
-  .prfDevTool__shardDetailsWrapper {
-    flex-direction: column;
-    align-items: flex-start;
-  }
 }

@@ -1,0 +1,31 @@
+
+.prfDevTool__sense {
+  flex: 1;
+  order: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+
+  > * {
+    flex-shrink: 0;
+  }
+
+  .kuiTextInput {
+    width: 100%;
+  }
+
+  // Ace Editor overrides
+  .ace_editor {
+    min-height: $euiSize * 10;
+    flex-grow: 1;
+    margin-bottom: $euiSize;
+    margin-top: $euiSize;
+    outline: solid 1px $euiColorLightShade;
+  }
+
+  .errorMarker {
+    position: absolute;
+    background: rgba($euiColorDanger, .5);
+    z-index: 20;
+  }
+}

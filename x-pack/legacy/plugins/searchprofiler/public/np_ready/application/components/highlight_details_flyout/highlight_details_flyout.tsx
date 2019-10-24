@@ -35,7 +35,7 @@ const DefEntry = ({ title, body }: { title: string | JSX.Element; body: string |
 
 export const HighlightDetailsFlyout = ({ indexName, operation, shard, onClose }: Props) => {
   return (
-    <EuiFlyout onClose={() => onClose()}>
+    <EuiFlyout className="prfDevTool__details" onClose={() => onClose()}>
       <EuiFlyoutHeader hasBorder={true}>
         <EuiText size="s">{indexName}</EuiText>
         <EuiText>

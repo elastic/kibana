@@ -5,7 +5,15 @@
  */
 import React, { useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiForm, EuiFieldText, EuiFormRow, EuiButton, EuiText } from '@elastic/eui';
+import {
+  EuiForm,
+  EuiFieldText,
+  EuiFormRow,
+  EuiButton,
+  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { Editor } from '../editor';
 import { useDoProfile } from '../hooks';
 import { ShardSerialized } from '../types';
@@ -46,23 +54,33 @@ export const ProfileQueryEditor = ({ onResponse, onProfileClick }: Props) => {
   };
 
   return (
-    <>
+    <div className="prfDevTool__sense">
       <EuiForm>
-        <EuiFormRow
-          label={i18n.translate('xpack.searchProfiler.formIndexLabel', { defaultMessage: 'Index' })}
-        >
-          <EuiFieldText
-            inputRef={ref => {
-              indexInputRef.current = ref!;
-              ref!.value = DEFAULT_INDEX_VALUE;
-            }}
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate('xpack.searchProfiler.formTypeLabel', { defaultMessage: 'Type' })}
-        >
-          <EuiFieldText inputRef={ref => (typeInputRef.current = ref!)} />
-        </EuiFormRow>
+        <EuiFlexGroup direction="row" gutterSize="s">
+          <EuiFlexItem grow={1}>
+            <EuiFormRow
+              label={i18n.translate('xpack.searchProfiler.formIndexLabel', {
+                defaultMessage: 'Index',
+              })}
+            >
+              <EuiFieldText
+                inputRef={ref => {
+                  indexInputRef.current = ref!;
+                  ref!.value = DEFAULT_INDEX_VALUE;
+                }}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem grow={1}>
+            <EuiFormRow
+              label={i18n.translate('xpack.searchProfiler.formTypeLabel', {
+                defaultMessage: 'Type',
+              })}
+            >
+              <EuiFieldText inputRef={ref => (typeInputRef.current = ref!)} />
+            </EuiFormRow>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiForm>
       <Editor
         valueGetterRef={editorValueGetter}
@@ -76,6 +94,6 @@ export const ProfileQueryEditor = ({ onResponse, onProfileClick }: Props) => {
           })}
         </EuiText>
       </EuiButton>
-    </>
+    </div>
   );
 };
