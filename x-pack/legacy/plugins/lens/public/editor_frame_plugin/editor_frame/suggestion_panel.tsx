@@ -261,7 +261,7 @@ export function SuggestionPanel({
           <EuiFlexItem grow={false}>
             <EuiToolTip
               content={i18n.translate('xpack.lens.suggestion.refreshSuggestionTooltip', {
-                defaultMessage: 'Refresh the suggestions based on the selected visualization',
+                defaultMessage: 'Refresh the suggestions based on the selected visualization.',
               })}
             >
               <EuiButtonEmpty

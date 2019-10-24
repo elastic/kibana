@@ -20,7 +20,6 @@ import {
   EuiSpacer,
   EuiButtonEmpty,
   EuiPopoverFooter,
-  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import { State, SeriesType, LayerConfig, visualizationTypes } from './types';
