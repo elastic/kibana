@@ -7,7 +7,7 @@
 import fs from 'fs';
 import * as os from 'os';
 import path from 'path';
-import rimraf from 'rimraf';
+import del from 'del';
 import sinon from 'sinon';
 
 import { LanguageServerStatus } from '../../common/language_server';
@@ -109,7 +109,7 @@ beforeEach(async () => {
   );
 });
 afterAll(() => {
-  rimraf.sync(baseDir);
+  del.sync(baseDir, { force: true });
 });
 
 function mockRequest(repo: string, file: string) {

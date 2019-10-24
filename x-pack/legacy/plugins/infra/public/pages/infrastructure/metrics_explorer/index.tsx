@@ -11,6 +11,7 @@ import { StaticIndexPattern } from 'ui/index_patterns';
 import { DocumentTitle } from '../../../components/document_title';
 import { MetricsExplorerCharts } from '../../../components/metrics_explorer/charts';
 import { MetricsExplorerToolbar } from '../../../components/metrics_explorer/toolbar';
+import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { SourceQuery } from '../../../../common/graphql/types';
 import { NoData } from '../../../components/empty_states';
 import { useMetricsExplorerState } from './use_metric_explorer_state';
@@ -23,7 +24,7 @@ interface MetricsExplorerPageProps {
 
 export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExplorerPageProps) => {
   if (!source) {
-    return null;
+    return <SourceLoadingPage />;
   }
 
   const {

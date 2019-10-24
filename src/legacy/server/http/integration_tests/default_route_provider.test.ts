@@ -45,11 +45,11 @@ describe('default route provider', () => {
           throw Error(`unsupported ui setting: ${key}`);
         },
         getDefaults: () => {
-          return Promise.resolve({
+          return {
             defaultRoute: {
               value: '/app/kibana',
             },
-          });
+          };
         },
       };
     });

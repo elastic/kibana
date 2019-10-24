@@ -18,7 +18,7 @@
  */
 
 import sinon from 'sinon';
-import rimraf from 'rimraf';
+import del from 'del';
 import Logger from '../lib/logger';
 import list from './list';
 import { join } from 'path';
@@ -46,14 +46,14 @@ describe('kibana cli', function () {
       logger = new Logger(settings);
       sinon.stub(logger, 'log');
       sinon.stub(logger, 'error');
-      rimraf.sync(pluginDir);
+      del.sync(pluginDir);
       mkdirSync(pluginDir, { recursive: true });
     });
 
     afterEach(function () {
       logger.log.restore();
       logger.error.restore();
-      rimraf.sync(pluginDir);
+      del.sync(pluginDir);
     });
 
     it('list all of the folders in the plugin folder', function () {

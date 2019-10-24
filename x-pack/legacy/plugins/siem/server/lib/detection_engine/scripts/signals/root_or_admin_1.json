@@ -1,12 +1,13 @@
 {
-  "id": "1",
+  "id": "rule-1",
   "description": "Detecting root and admin users",
   "index": ["auditbeat-*", "filebeat-*", "packetbeat-*", "winlogbeat-*"],
   "interval": "5m",
   "name": "Detect Root/Admin Users",
-  "severity": 1,
+  "severity": "high",
   "type": "kql",
   "from": "now-6m",
   "to": "now",
-  "kql": "user.name: root or user.name: admin"
+  "kql": "user.name: root or user.name: admin",
+  "references": ["http://www.example.com", "https://ww.example.com"]
 }

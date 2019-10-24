@@ -5,20 +5,19 @@
  */
 
 import { Filter as ESFilterType } from '@kbn/es-query';
+import { Query } from 'src/plugins/data/common';
 import { TimeRange } from 'src/plugins/data/public';
 import {
   EmbeddableInput,
   EmbeddableOutput,
   IEmbeddable,
+  EmbeddableFactory,
 } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import { inputsModel } from '../../store/inputs';
 
 export interface MapEmbeddableInput extends EmbeddableInput {
   filters: ESFilterType[];
-  query: {
-    query: string;
-    language: string;
-  };
+  query: Query;
   refreshConfig: {
     isPaused: boolean;
     interval: number;
@@ -72,3 +71,8 @@ export interface RenderTooltipContentParams {
 }
 
 export type MapToolTipProps = Partial<RenderTooltipContentParams>;
+
+export interface EmbeddableApi {
+  getEmbeddableFactory: (embeddableFactoryId: string) => EmbeddableFactory;
+  registerEmbeddableFactory: (id: string, factory: EmbeddableFactory) => void;
+}

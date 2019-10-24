@@ -10,7 +10,7 @@
  */
 
 import { idx } from '@kbn/elastic-idx';
-import { sum } from 'lodash';
+import { sum, round } from 'lodash';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { Setup } from '../../../../helpers/setup_request';
 import { getMetricsDateHistogramParams } from '../../../../helpers/metrics';
@@ -23,6 +23,7 @@ import {
   METRIC_JAVA_GC_COUNT,
   METRIC_JAVA_GC_TIME
 } from '../../../../../../common/elasticsearch_fieldnames';
+import { getBucketSize } from '../../../../helpers/get_bucket_size';
 
 const colors = [
   theme.euiColorVis0,
@@ -48,6 +49,8 @@ export async function fetchAndTransformGcMetrics({
   fieldName: typeof METRIC_JAVA_GC_COUNT | typeof METRIC_JAVA_GC_TIME;
 }) {
   const { start, end, client } = setup;
+
+  const { bucketSize } = getBucketSize(start, end, 'auto');
 
   const projection = getMetricsProjection({
     setup,
@@ -115,20 +118,20 @@ export async function fetchAndTransformGcMetrics({
   if (!aggregations) {
     return {
       ...chartBase,
-      totalHits: 0,
+      noHits: true,
       series: []
     };
   }
 
   const series = aggregations.per_pool.buckets.map((poolBucket, i) => {
-    const label = poolBucket.key;
+    const label = poolBucket.key as string;
     const timeseriesData = poolBucket.over_time;
 
     const data = (idx(timeseriesData, _ => _.buckets) || []).map(bucket => {
       // derivative/value will be undefined for the first hit and if the `max` value is null
       const y =
         'value' in bucket && bucket.value.value !== null
-          ? bucket.value.value
+          ? round(bucket.value.value * (60 / bucketSize), 1)
           : null;
 
       return {
@@ -153,7 +156,7 @@ export async function fetchAndTransformGcMetrics({
 
   return {
     ...chartBase,
-    totalHits: response.hits.total,
+    noHits: response.hits.total.value === 0,
     series
   };
 }
