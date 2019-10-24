@@ -71,7 +71,8 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
 
       const scroll = scrollLock ? scrollLock : '1m';
       const size = scrollSize ? scrollSize : 400;
-      services.savedObjectsClient.find('save_id');
+      // TODO: Fix this or remove it
+      // services.savedObjectsClient.find('save_id');
       const esFilter = getFilter(type, kql, filter, filters, save_id, query, index);
 
       // TODO: Turn these options being sent in into a template for the alert type
