@@ -14,8 +14,6 @@ import { useObservable } from '../../../../../../../src/plugins/kibana_react/pub
 
 import { chartTooltip$, ChartTooltipValue } from './chart_tooltip_service';
 
-const doc = document.documentElement;
-
 type RefValue = HTMLElement | null;
 
 function useRefWithCallback() {
@@ -34,21 +32,19 @@ function useRefWithCallback() {
       const parentBounding = node.parentElement.getBoundingClientRect();
 
       const { targetPosition, offset } = chartTooltipState;
-      let left = targetPosition.left + offset.x - parentBounding.left;
-
-      // Calculate top offset
-      const scrollTop = (window.pageYOffset || doc.scrollTop) - (doc.clientTop || 0);
-      const top = targetPosition.top + offset.y + scrollTop - parentBounding.top;
 
       const contentWidth = document.body.clientWidth - parentBounding.left;
       const tooltipWidth = node.clientWidth;
 
+      let left = targetPosition.left + offset.x - parentBounding.left;
       if (left + tooltipWidth > contentWidth) {
         // the tooltip is hanging off the side of the page,
         // so move it to the other side of the target
         const markerWidthAdjustment = 25;
         left = left - (tooltipWidth + offset.x + markerWidthAdjustment);
       }
+
+      const top = targetPosition.top + offset.y - parentBounding.top;
 
       if (
         chartTooltipState.tooltipPosition.left !== left ||

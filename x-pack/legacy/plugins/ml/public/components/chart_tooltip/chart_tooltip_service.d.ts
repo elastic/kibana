@@ -8,6 +8,8 @@ import { BehaviorSubject } from 'rxjs';
 
 import { TooltipValue, TooltipValueFormatter } from '@elastic/charts';
 
+export declare const getChartTooltipDefaultState: () => ChartTooltipState;
+
 export interface ChartTooltipValue extends TooltipValue {
   skipHeader?: boolean;
 }

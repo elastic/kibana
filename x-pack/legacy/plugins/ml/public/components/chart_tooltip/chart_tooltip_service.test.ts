@@ -15,7 +15,7 @@ describe('ML - mlChartTooltipService', () => {
 
   it('should fail silently when target is not defined', () => {
     expect(() => {
-      mlChartTooltipService.show(getChartTooltipDefaultState(), null);
+      mlChartTooltipService.show(getChartTooltipDefaultState().tooltipData, null);
     }).not.toThrow('Call to show() should fail silently.');
   });
 });
