@@ -44,8 +44,13 @@ async function startApp(libs: FrontendLibs) {
                       iconType="help"
                     >
                       <p>
-                        Beats central management is now deprecated. We’re working on a comprehensive
-                        solution to replace this feature.
+                        We have ceased development on Beats central management and
+                        are working on a comprehensive solution to replace it.
+                        Thank you for participating in the beta and providing feedback.
+                        If you have any questions or concerns, please reach out to us on the
+                        <a href="https://discuss.elastic.co/c/beats">Discuss forum</a>.
+                        
+                     
                       </p>
                     </EuiCallOut>
                     <AppRouter libs={libs} beatsContainer={beats} tagsContainer={tags} />
