@@ -95,51 +95,21 @@ export class TaskPool {
     const [tasksToRun, leftOverTasks] = partitionListByCount(tasks, this.availableWorkers);
     if (tasksToRun.length) {
       performance.mark('attemptToRun_start');
-      const taskRunResults = await Promise.all(
-        tasksToRun.map(task =>
-          task
+      await Promise.all(
+        tasksToRun.map(async task => {
+          const result = await task
             .markTaskAsRunning()
             .then((hasTaskBeenMarkAsRunning: boolean) =>
               hasTaskBeenMarkAsRunning
                 ? (asOk(task) as Ok<TaskRunner>)
                 : (asErr([task, { message: VERSION_CONFLICT_MESSAGE }]) as Err<[TaskRunner, Error]>)
             )
-            .catch((ex: Error) => asErr([task, ex]) as Err<[TaskRunner, Error]>)
-        )
+            .catch((ex: Error) => asErr([task, ex]) as Err<[TaskRunner, Error]>);
+
+          this.handleMarkAsRunning(result);
+        })
       );
 
-      taskRunResults.forEach(
-        either(
-          task => {
-            this.running.add(task);
-            task
-              .run()
-              .catch(err => {
-                this.logger.warn(
-                  i18n.translate('xpack.taskManager.taskPool.runAttempt.genericError', {
-                    defaultMessage: 'Task {task} failed in attempt to run: {message}',
-                    values: {
-                      message: err.message,
-                      task: task.toString(),
-                    },
-                  })
-                );
-              })
-              .then(() => this.running.delete(task));
-          },
-          ([task, err]) => {
-            this.logger.error(
-              i18n.translate('xpack.taskManager.taskPool.markAsRunning.genericError', {
-                defaultMessage: 'Failed to mark Task {task} as running: {message}',
-                values: {
-                  message: err.message,
-                  task: task.toString(),
-                },
-              })
-            );
-          }
-        )
-      );
       performance.mark('attemptToRun_stop');
       performance.measure('taskPool.attemptToRun', 'attemptToRun_start', 'attemptToRun_stop');
     }
@@ -151,6 +121,40 @@ export class TaskPool {
       return TaskPoolRunResult.RanOutOfCapacity;
     }
     return TaskPoolRunResult.RunningAllClaimedTasks;
+  }
+
+  private handleMarkAsRunning(result: Ok<TaskRunner> | Err<[TaskRunner, Error]>) {
+    either<TaskRunner, [TaskRunner, Error], void>(
+      task => {
+        this.running.add(task);
+        task
+          .run()
+          .catch(err => {
+            this.logger.warn(
+              i18n.translate('xpack.taskManager.taskPool.runAttempt.genericError', {
+                defaultMessage: 'Task {task} failed in attempt to run: {message}',
+                values: {
+                  message: err.message,
+                  task: task.toString(),
+                },
+              })
+            );
+          })
+          .then(() => this.running.delete(task));
+      },
+      ([task, err]) => {
+        this.logger.error(
+          i18n.translate('xpack.taskManager.taskPool.markAsRunning.genericError', {
+            defaultMessage: 'Failed to mark Task {task} as running: {message}',
+            values: {
+              message: err.message,
+              task: task.toString(),
+            },
+          })
+        );
+      },
+      result
+    );
   }
 
   private cancelExpiredTasks() {
