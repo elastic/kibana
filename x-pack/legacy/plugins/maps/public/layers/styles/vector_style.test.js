@@ -7,20 +7,23 @@
 import { VectorStyle } from './vector_style';
 import { DataRequest } from '../util/data_request';
 import { VECTOR_SHAPE_TYPES } from '../sources/vector_feature_types';
+import { DynamicStyleProperty } from './vector/properties/dynamic_style_property';
+import { StaticStyleProperty } from './vector/properties/static_style_property';
+
 
 describe('getDescriptorWithMissingStylePropsRemoved', () => {
   const fieldName = 'doIStillExist';
   const properties = {
     fillColor: {
-      type: VectorStyle.STYLE_TYPE.STATIC,
+      type: StaticStyleProperty.type,
       options: {}
     },
     lineColor: {
-      type: VectorStyle.STYLE_TYPE.DYNAMIC,
+      type: DynamicStyleProperty.type,
       options: {}
     },
     iconSize: {
-      type: VectorStyle.STYLE_TYPE.DYNAMIC,
+      type: DynamicStyleProperty.type,
       options: {
         color: 'a color',
         field: { name: fieldName }
@@ -180,7 +183,7 @@ describe('pluckStyleMetaFromSourceDataRequest', () => {
       const vectorStyle = new VectorStyle({
         properties: {
           fillColor: {
-            type: VectorStyle.STYLE_TYPE.DYNAMIC,
+            type: DynamicStyleProperty.type,
             options: {
               field: {
                 name: 'myDynamicFieldWithNoValues'
@@ -202,7 +205,7 @@ describe('pluckStyleMetaFromSourceDataRequest', () => {
       const vectorStyle = new VectorStyle({
         properties: {
           fillColor: {
-            type: VectorStyle.STYLE_TYPE.DYNAMIC,
+            type: DynamicStyleProperty.type,
             options: {
               field: {
                 name: 'myDynamicField'

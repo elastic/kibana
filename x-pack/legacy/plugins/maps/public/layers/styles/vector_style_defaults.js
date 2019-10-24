@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { VectorStyle } from './vector_style';
+import { DynamicStyleProperty } from './vector/properties/dynamic_style_property';
+import { StaticStyleProperty } from './vector/properties/static_style_property';
 import { SYMBOLIZE_AS_CIRCLE, DEFAULT_ICON_SIZE } from './vector_constants';
 import {
   COLOR_GRADIENTS,
@@ -49,31 +50,31 @@ export function getDefaultStaticProperties(mapColors = []) {
 
   return {
     [vectorStyles.FILL_COLOR]: {
-      type: VectorStyle.STYLE_TYPE.STATIC,
+      type: StaticStyleProperty.type,
       options: {
         color: nextFillColor,
       }
     },
     [vectorStyles.LINE_COLOR]: {
-      type: VectorStyle.STYLE_TYPE.STATIC,
+      type: StaticStyleProperty.type,
       options: {
         color: nextLineColor
       }
     },
     [vectorStyles.LINE_WIDTH]: {
-      type: VectorStyle.STYLE_TYPE.STATIC,
+      type: StaticStyleProperty.type,
       options: {
         size: 1
       }
     },
     [vectorStyles.ICON_SIZE]: {
-      type: VectorStyle.STYLE_TYPE.STATIC,
+      type: StaticStyleProperty.type,
       options: {
         size: DEFAULT_ICON_SIZE
       }
     },
     [vectorStyles.ICON_ORIENTATION]: {
-      type: VectorStyle.STYLE_TYPE.STATIC,
+      type: StaticStyleProperty.type,
       options: {
         orientation: 0
       }
@@ -84,21 +85,21 @@ export function getDefaultStaticProperties(mapColors = []) {
 export function getDefaultDynamicProperties() {
   return {
     [vectorStyles.FILL_COLOR]: {
-      type: VectorStyle.STYLE_TYPE.DYNAMIC,
+      type: DynamicStyleProperty.type,
       options: {
         color: COLOR_GRADIENTS[0].value,
         field: undefined,
       }
     },
     [vectorStyles.LINE_COLOR]: {
-      type: VectorStyle.STYLE_TYPE.DYNAMIC,
+      type: DynamicStyleProperty.type,
       options: {
         color: COLOR_GRADIENTS[0].value,
         field: undefined,
       }
     },
     [vectorStyles.LINE_WIDTH]: {
-      type: VectorStyle.STYLE_TYPE.DYNAMIC,
+      type: DynamicStyleProperty.type,
       options: {
         minSize: DEFAULT_MIN_SIZE,
         maxSize: DEFAULT_MAX_SIZE,
@@ -106,7 +107,7 @@ export function getDefaultDynamicProperties() {
       }
     },
     [vectorStyles.ICON_SIZE]: {
-      type: VectorStyle.STYLE_TYPE.DYNAMIC,
+      type: DynamicStyleProperty.type,
       options: {
         minSize: DEFAULT_MIN_SIZE,
         maxSize: DEFAULT_MAX_SIZE,
@@ -114,7 +115,7 @@ export function getDefaultDynamicProperties() {
       }
     },
     [vectorStyles.ICON_ORIENTATION]: {
-      type: VectorStyle.STYLE_TYPE.STATIC,
+      type: StaticStyleProperty.type,
       options: {
         field: undefined,
       }

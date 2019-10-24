@@ -5,7 +5,8 @@
  */
 
 import React from 'react';
-import { VectorStyle } from '../vector_style';
+import { DynamicStyleProperty } from '../vector/properties/dynamic_style_property';
+import { StaticStyleProperty } from '../vector/properties/static_style_property';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 
@@ -25,7 +26,7 @@ export class StaticDynamicStyleRow extends React.Component {
     if (!this.props.styleDescriptor) {
       return false;
     }
-    return this.props.styleDescriptor.type === VectorStyle.STYLE_TYPE.DYNAMIC;
+    return this.props.styleDescriptor.type === DynamicStyleProperty.type;
   }
 
   _getStyleOptions() {
@@ -34,7 +35,7 @@ export class StaticDynamicStyleRow extends React.Component {
 
   _onStaticStyleChange = options => {
     const styleDescriptor = {
-      type: VectorStyle.STYLE_TYPE.STATIC,
+      type: StaticStyleProperty.type,
       options,
     };
     this.props.handlePropertyChange(this.props.property, styleDescriptor);
@@ -42,7 +43,7 @@ export class StaticDynamicStyleRow extends React.Component {
 
   _onDynamicStyleChange = options => {
     const styleDescriptor = {
-      type: VectorStyle.STYLE_TYPE.DYNAMIC,
+      type: DynamicStyleProperty.type,
       options,
     };
     this.props.handlePropertyChange(this.props.property, styleDescriptor);

@@ -5,12 +5,12 @@
  */
 
 import React from 'react';
-import { GRID_RESOLUTION } from '../grid_resolution';
-import { AbstractStyle } from './abstract_style';
-import { HeatmapStyleEditor } from './components/heatmap/heatmap_style_editor';
-import { HeatmapLegend } from './components/heatmap/legend/heatmap_legend';
-import { DEFAULT_HEATMAP_COLOR_RAMP_NAME } from './components/heatmap/heatmap_constants';
-import { getColorRampStops } from './color_utils';
+import { GRID_RESOLUTION } from '../../grid_resolution';
+import { AbstractStyle } from '../abstract_style';
+import { HeatmapStyleEditor } from '../components/heatmap/heatmap_style_editor';
+import { HeatmapLegend } from '../components/heatmap/legend/heatmap_legend';
+import { DEFAULT_HEATMAP_COLOR_RAMP_NAME } from '../components/heatmap/heatmap_constants';
+import { getColorRampStops } from '../color_utils';
 import { i18n } from '@kbn/i18n';
 import { EuiIcon } from '@elastic/eui';
 

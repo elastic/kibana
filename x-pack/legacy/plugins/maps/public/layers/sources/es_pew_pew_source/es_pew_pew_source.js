@@ -20,6 +20,7 @@ import { convertToLines } from './convert_to_lines';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { AggConfigs } from 'ui/agg_types';
 import { AbstractESAggSource } from '../es_agg_source';
+import { DynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
 
 const MAX_GEOTILE_LEVEL = 29;
 
@@ -135,7 +136,7 @@ export class ESPewPewSource extends AbstractESAggSource {
   createDefaultLayer(options) {
     const styleDescriptor = VectorStyle.createDescriptor({
       [vectorStyles.LINE_COLOR]: {
-        type: VectorStyle.STYLE_TYPE.DYNAMIC,
+        type: DynamicStyleProperty.type,
         options: {
           field: {
             label: AbstractESAggSource.COUNT_PROP_LABEL,
@@ -146,7 +147,7 @@ export class ESPewPewSource extends AbstractESAggSource {
         }
       },
       [vectorStyles.LINE_WIDTH]: {
-        type: VectorStyle.STYLE_TYPE.DYNAMIC,
+        type: DynamicStyleProperty.type,
         options: {
           field: {
             label: AbstractESAggSource.COUNT_PROP_LABEL,

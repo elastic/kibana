@@ -8,7 +8,8 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { VectorIcon } from './vector_icon';
-import { VectorStyle } from '../../../vector_style';
+import { StaticStyleProperty } from '../../../vector/properties/static_style_property';
+import { DynamicStyleProperty } from '../../../vector/properties/dynamic_style_property';
 
 let isPointsOnly = false;
 let isLinesOnly = false;
@@ -16,13 +17,13 @@ const defaultProps = {
   loadIsPointsOnly: () => { return isPointsOnly; },
   loadIsLinesOnly: () => { return isLinesOnly; },
   fillColor: {
-    type: VectorStyle.STYLE_TYPE.STATIC,
+    type: StaticStyleProperty.type,
     options: {
       color: '#ff0000',
     }
   },
   lineColor: {
-    type: VectorStyle.STYLE_TYPE.DYNAMIC,
+    type: DynamicStyleProperty.type,
     options: {
       color: 'Blues',
       field: {

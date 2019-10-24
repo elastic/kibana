@@ -6,7 +6,7 @@
 
 import { AbstractLayer } from './layer';
 import { VectorLayer } from './vector_layer';
-import { HeatmapStyle } from './styles/heatmap_style';
+import { HeatmapStyle } from './styles/heatmap/heatmap_style';
 import { EMPTY_FEATURE_COLLECTION, LAYER_TYPE } from '../../common/constants';
 
 const SCALED_PROPERTY_NAME = '__kbn_heatmap_weight__';//unique name to store scaled value for weighting

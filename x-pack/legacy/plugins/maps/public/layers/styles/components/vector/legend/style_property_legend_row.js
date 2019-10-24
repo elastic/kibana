@@ -9,7 +9,7 @@ import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 
 import { styleOptionShapes, rangeShape } from '../style_option_shapes';
-import { VectorStyle } from '../../../vector_style';
+import { StaticStyleProperty } from '../../../vector/properties/static_style_property';
 import { ColorGradient } from '../../color_gradient';
 import { CircleIcon } from './circle_icon';
 import { getVectorStyleLabel } from '../get_vector_style_label';
@@ -121,7 +121,7 @@ export class StylePropertyLegendRow extends Component {
   }
 
   _isStatic() {
-    return this.props.type === VectorStyle.STYLE_TYPE.STATIC ||
+    return this.props.type === StaticStyleProperty.type ||
         !this.props.options.field || !this.props.options.field.name;
   }
 

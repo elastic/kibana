@@ -22,6 +22,7 @@ import {
   SMALL_MAKI_ICON_SIZE,
   HALF_LARGE_MAKI_ICON_SIZE
 } from './symbol_utils';
+import { DynamicStyleProperty } from './vector/properties/dynamic_style_property';
 
 export class VectorStyle extends AbstractStyle {
 
@@ -43,6 +44,9 @@ export class VectorStyle extends AbstractStyle {
       ...descriptor,
       ...VectorStyle.createDescriptor(descriptor.properties),
     };
+
+
+
   }
 
   static createDescriptor(properties = {}) {
@@ -116,7 +120,7 @@ export class VectorStyle extends AbstractStyle {
       }
 
       updatedProperties[propertyName] = {
-        type: VectorStyle.STYLE_TYPE.DYNAMIC,
+        type: DynamicStyleProperty.type,
         options: {
           ...originalProperties[propertyName].options
         }
@@ -248,7 +252,7 @@ export class VectorStyle extends AbstractStyle {
 
   _isPropertyDynamic(propertyName) {
     const { type, options } = _.get(this._descriptor, ['properties', propertyName], {});
-    return type === VectorStyle.STYLE_TYPE.DYNAMIC && options.field && options.field.name;
+    return type === DynamicStyleProperty.type && options.field && options.field.name;
   }
 
   _checkIfOnlyFeatureType = async (featureType) => {
@@ -462,7 +466,7 @@ export class VectorStyle extends AbstractStyle {
   }
 
   _getMBColor(styleName, styleDescriptor) {
-    const isStatic = styleDescriptor.type === VectorStyle.STYLE_TYPE.STATIC;
+    const isStatic = styleDescriptor.type === DynamicStyleProperty.type;
     if (isStatic) {
       return _.get(styleDescriptor, 'options.color', null);
     }
@@ -503,7 +507,7 @@ export class VectorStyle extends AbstractStyle {
   }
 
   _getMbSize(styleName, styleDescriptor) {
-    if (styleDescriptor.type === VectorStyle.STYLE_TYPE.STATIC) {
+    if (styleDescriptor.type === DynamicStyleProperty.type) {
       return styleDescriptor.options.size;
     }
 
@@ -595,7 +599,7 @@ export class VectorStyle extends AbstractStyle {
     // circle sizing is by radius
     // to make icons be similiar in size to circles then have to deal with icon in half width measurements
     const iconSize = this._descriptor.properties.iconSize;
-    if (iconSize.type === VectorStyle.STYLE_TYPE.STATIC) {
+    if (iconSize.type === DynamicStyleProperty.type) {
       const iconPixels = iconSize.options.size >= HALF_LARGE_MAKI_ICON_SIZE
         ? LARGE_MAKI_ICON_SIZE
         : SMALL_MAKI_ICON_SIZE;
@@ -622,7 +626,7 @@ export class VectorStyle extends AbstractStyle {
     }
 
     const iconOrientation = this._descriptor.properties.iconOrientation;
-    if (iconOrientation.type === VectorStyle.STYLE_TYPE.STATIC) {
+    if (iconOrientation.type === DynamicStyleProperty.type) {
       mbMap.setLayoutProperty(symbolLayerId, 'icon-rotate', iconOrientation.options.orientation);
     } else if (_.has(iconOrientation, 'options.field.name')) {
       const targetName = VectorStyle.getComputedFieldName(vectorStyles.ICON_ORIENTATION, iconOrientation.options.field.name);

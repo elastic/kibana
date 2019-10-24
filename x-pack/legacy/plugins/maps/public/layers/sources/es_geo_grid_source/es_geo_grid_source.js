@@ -24,6 +24,7 @@ import { SOURCE_DATA_ID_ORIGIN, ES_GEO_GRID } from '../../../../common/constants
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { AbstractESAggSource } from '../es_agg_source';
+import { DynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
 
 const MAX_GEOTILE_LEVEL = 29;
 
@@ -236,7 +237,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
     });
     descriptor.style = VectorStyle.createDescriptor({
       [vectorStyles.FILL_COLOR]: {
-        type: VectorStyle.STYLE_TYPE.DYNAMIC,
+        type: DynamicStyleProperty.type,
         options: {
           field: {
             label: AbstractESAggSource.COUNT_PROP_LABEL,
@@ -247,7 +248,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
         }
       },
       [vectorStyles.ICON_SIZE]: {
-        type: VectorStyle.STYLE_TYPE.DYNAMIC,
+        type: DynamicStyleProperty.type,
         options: {
           field: {
             label: AbstractESAggSource.COUNT_PROP_LABEL,

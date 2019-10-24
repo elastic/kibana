@@ -12,7 +12,7 @@ import { CircleIcon } from './circle_icon';
 import { LineIcon } from './line_icon';
 import { PolygonIcon } from './polygon_icon';
 import { SymbolIcon } from './symbol_icon';
-import { VectorStyle } from '../../../vector_style';
+import { StaticStyleProperty } from '../../../vector/properties/static_style_property';
 import { getColorRampCenterColor } from '../../../color_utils';
 
 export class VectorIcon extends Component {
@@ -87,7 +87,7 @@ function extractColorFromStyleProperty(colorStyleProperty, defaultColor) {
     return defaultColor;
   }
 
-  if (colorStyleProperty.type === VectorStyle.STYLE_TYPE.STATIC) {
+  if (colorStyleProperty.type === StaticStyleProperty.type) {
     return colorStyleProperty.options.color;
   }
 
