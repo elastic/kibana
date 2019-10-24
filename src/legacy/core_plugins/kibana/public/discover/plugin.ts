@@ -49,10 +49,12 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
   setup(core: CoreSetup, plugins: DiscoverSetupPlugins): DiscoverSetup {
     registerFeature();
     require('./angular');
+    // TODO enable this once possible (currently this causes a functional testing error)
     // this.factory = new SearchEmbeddableFactory(plugins.uiActions.executeTriggerActions);
   }
 
   start(core: CoreStart, plugins: DiscoverStartPlugins): DiscoverStart {
+    // see above
     // if (this.factory) {
     //  plugins.embeddable.registerEmbeddableFactory(this.factory.type, this.factory);
     // }
