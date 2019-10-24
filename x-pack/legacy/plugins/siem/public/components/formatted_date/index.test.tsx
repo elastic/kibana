@@ -14,7 +14,7 @@ import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
 import { mockFrameworks, TestProviders, MockFrameworks, getMockKibanaUiSetting } from '../../mock';
 
 import { PreferenceFormattedDate, FormattedDate, FormattedRelativePreferenceDate } from '.';
-import { getEmptyValue } from '../empty_value';
+import { getEmptyString, getEmptyValue } from '../empty_value';
 
 const mockUseKibanaUiSetting: jest.Mock = useKibanaUiSetting as jest.Mock;
 jest.mock('../../lib/settings/use_kibana_ui_setting', () => ({
@@ -174,6 +174,32 @@ describe('formatted_date', () => {
         const timeTwelveMinutesAgo = new Date(new Date().getTime() - 12 * 60 * 1000).toISOString();
         const wrapper = shallow(<FormattedRelativePreferenceDate value={timeTwelveMinutesAgo} />);
         expect(wrapper.find('[data-test-subj="relative-time"]').exists()).toBe(true);
+      });
+      test('renders empty string value correctly', () => {
+        const wrapper = mount(
+          <TestProviders>
+            <FormattedRelativePreferenceDate value={''} />
+          </TestProviders>
+        );
+        expect(wrapper.text()).toBe(getEmptyString());
+      });
+
+      test('renders undefined value correctly', () => {
+        const wrapper = mount(
+          <TestProviders>
+            <FormattedRelativePreferenceDate />
+          </TestProviders>
+        );
+        expect(wrapper.text()).toBe(getEmptyValue());
+      });
+
+      test('renders null value correctly', () => {
+        const wrapper = mount(
+          <TestProviders>
+            <FormattedRelativePreferenceDate value={null} />
+          </TestProviders>
+        );
+        expect(wrapper.text()).toBe(getEmptyValue());
       });
     });
   });

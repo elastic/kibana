@@ -79,20 +79,20 @@ export const FormattedRelativePreferenceDate = ({ value }: { value?: string | nu
   if (value == null) {
     return getOrEmptyTagFromValue(value);
   }
-  const DATE = getMaybeDate(value);
-  const TO = moment(new Date());
-  const FROM = TO.clone().subtract(1, 'hours');
-  const date = DATE.toDate();
-
-  return DATE.isValid() ? (
+  const maybeDate = getMaybeDate(value);
+  if (!maybeDate.isValid()) {
+    return getOrEmptyTagFromValue(value);
+  }
+  const date = maybeDate.toDate();
+  return (
     <LocalizedDateTooltip date={date}>
-      {DATE.isBetween(FROM, TO) ? (
-        <FormattedRelative data-test-subj="relative-time" value={date} />
-      ) : (
+      {moment(date)
+        .add(1, 'hours')
+        .isBefore(new Date()) ? (
         <PreferenceFormattedDate data-test-subj="preference-time" value={date} />
+      ) : (
+        <FormattedRelative data-test-subj="relative-time" value={date} />
       )}
     </LocalizedDateTooltip>
-  ) : (
-    getOrEmptyTagFromValue(value)
   );
 };
