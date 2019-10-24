@@ -143,5 +143,5 @@ beforeAll(() => {
 });
 
 afterAll(() => {
-  del.sync(baseDir);
+  del.sync(baseDir, { force: true });
 });

@@ -109,7 +109,7 @@ beforeEach(async () => {
   );
 });
 afterAll(() => {
-  del.sync(baseDir);
+  del.sync(baseDir, { force: true });
 });
 
 function mockRequest(repo: string, file: string) {

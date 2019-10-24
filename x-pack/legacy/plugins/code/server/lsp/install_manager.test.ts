@@ -46,7 +46,7 @@ beforeAll(() => {
 });
 
 afterAll(() => {
-  del.sync(fakeTestDir);
+  del.sync(fakeTestDir, { force: true });
 });
 
 test('install language server by plugin', async () => {
