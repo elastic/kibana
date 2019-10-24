@@ -14,7 +14,7 @@ export function scheduleTask(server) {
   const taskManager = server.plugins.task_manager;
 
   if (!taskManager) {
-    server.log(['warning', 'telemetry'], `Task manager is not available`);
+    server.log(['debug', 'telemetry'], `Task manager is not available`);
     return;
   }
 
@@ -45,7 +45,7 @@ export function registerMapsTelemetryTask(server) {
   const taskManager = server.plugins.task_manager;
 
   if (!taskManager) {
-    server.log(['warning', 'telemetry'], `Task manager is not available`);
+    server.log(['debug', 'telemetry'], `Task manager is not available`);
     return;
   }
 

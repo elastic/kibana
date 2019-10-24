@@ -48,7 +48,7 @@ function registerLensTelemetryTask(core: CoreSetup, { server }: { server: Server
   const taskManager = server.plugins.task_manager;
 
   if (!taskManager) {
-    server.log(['warning', 'telemetry'], `Task manager is not available`);
+    server.log(['debug', 'telemetry'], `Task manager is not available`);
     return;
   }
 
@@ -86,7 +86,7 @@ function scheduleTasks(server: Server) {
           });
         }
       } catch (e) {
-        server.log(['warning', 'telemetry'], `Error scheduling task, received ${e.message}`);
+        server.log(['debug', 'telemetry'], `Error scheduling task, received ${e.message}`);
       }
     })();
   });
