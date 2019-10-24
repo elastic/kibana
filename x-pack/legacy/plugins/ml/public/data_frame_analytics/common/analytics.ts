@@ -91,6 +91,16 @@ export const getPredictionFieldName = (analysis: AnalysisConfig) => {
   return predictionFieldName;
 };
 
+export const getPredictedFieldName = (resultsField: string, analysis: AnalysisConfig) => {
+  // default is 'ml'
+  const predictionFieldName = getPredictionFieldName(analysis);
+  const defaultPredictionField = `${getDependentVar(analysis)}_prediction`;
+  const predictedField = `${resultsField}.${
+    predictionFieldName ? predictionFieldName : defaultPredictionField
+  }`;
+  return predictedField;
+};
+
 export const isOutlierAnalysis = (arg: any): arg is OutlierAnalysis => {
   const keys = Object.keys(arg);
   return keys.length === 1 && keys[0] === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION;

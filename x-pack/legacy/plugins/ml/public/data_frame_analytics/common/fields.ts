@@ -5,6 +5,7 @@
  */
 
 import { getNestedProperty } from '../../util/object_utils';
+import { DataFrameAnalyticsConfig, getPredictedFieldName, getDependentVar } from './analytics';
 
 export type EsId = string;
 export type EsDocSource = Record<string, any>;
@@ -83,6 +84,34 @@ export function getFlattenedFields(obj: EsDocSource, resultsField: string): EsFi
   });
   return flatDocFields.filter(f => f !== ML__ID_COPY);
 }
+
+export const getDefaultRegressionFields = (
+  docs: EsDoc[],
+  jobConfig: DataFrameAnalyticsConfig
+): EsFieldName[] => {
+  const resultsField = jobConfig.dest.results_field;
+  if (docs.length === 0) {
+    return [];
+  }
+
+  const newDocFields = getFlattenedFields(docs[0]._source, resultsField);
+  return newDocFields.filter(k => {
+    // predicted value of dependent variable
+    if (k === getPredictedFieldName(resultsField, jobConfig.analysis)) {
+      return true;
+    }
+    // actual value of dependent variable
+    if (k === getDependentVar(jobConfig.analysis)) {
+      return true;
+    }
+    if (k === `${resultsField}.is_training`) {
+      return true;
+    }
+    if (k.split('.')[0] === resultsField) {
+      return false;
+    }
+  });
+};
 
 export const getDefaultSelectableFields = (docs: EsDoc[], resultsField: string): EsFieldName[] => {
   if (docs.length === 0) {

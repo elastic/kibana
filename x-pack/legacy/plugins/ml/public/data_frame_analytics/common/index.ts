@@ -21,10 +21,12 @@ export {
   getValuesFromResponse,
   loadEvalData,
   Eval,
+  getPredictedFieldName,
 } from './analytics';
 
 export {
   getDefaultSelectableFields,
+  getDefaultRegressionFields,
   getFlattenedFields,
   sortColumns,
   toggleSelectedField,

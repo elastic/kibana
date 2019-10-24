@@ -5,17 +5,22 @@
  */
 
 import React, { FC, Fragment, useState, useEffect } from 'react';
-// import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
 import { ml } from '../../../../../services/ml_api_service';
 import { DataFrameAnalyticsConfig } from '../../../../common';
 import { EvaluatePanel } from './evaluate_panel';
-// import { ResultsTable } from './results_table';
+import { ResultsTable } from './results_table';
 
 interface GetDataFrameAnalyticsResponse {
   count: number;
   data_frame_analytics: DataFrameAnalyticsConfig[];
 }
+
+const LoadingPanel: FC = () => (
+  <EuiPanel>
+    <EuiLoadingSpinner className="mlRegressionExploration__evaluateLoadingSpinner" size="xl" />
+  </EuiPanel>
+);
 
 interface Props {
   jobId: string;
@@ -43,19 +48,15 @@ export const RegressionExploration: FC<Props> = ({ jobId }) => {
 
   return (
     <Fragment>
-      {isLoadingJobConfig === true && jobConfig === undefined && (
-        <EuiPanel>
-          <EuiLoadingSpinner
-            className="mlRegressionExploration__evaluateLoadingSpinner"
-            size="xl"
-          />
-        </EuiPanel>
-      )}
+      {isLoadingJobConfig === true && jobConfig === undefined && <LoadingPanel />}
       {isLoadingJobConfig === false && jobConfig !== undefined && (
         <EvaluatePanel jobConfig={jobConfig} />
       )}
       <EuiSpacer />
-      {/* <ResultsTable jobId={jobId} /> */}
+      {isLoadingJobConfig === true && jobConfig === undefined && <LoadingPanel />}
+      {isLoadingJobConfig === false && jobConfig !== undefined && (
+        <ResultsTable jobConfig={jobConfig} />
+      )}
     </Fragment>
   );
 };
