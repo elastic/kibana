@@ -76,6 +76,7 @@ describe('TaskStore', () => {
 
     test('serializes the params and state', async () => {
       const task = {
+        id: 'id',
         params: { hello: 'world' },
         state: { foo: 'bar' },
         taskType: 'report',
@@ -98,7 +99,10 @@ describe('TaskStore', () => {
           taskType: 'report',
           user: undefined,
         },
-        {}
+        {
+          id: 'id',
+          refresh: false,
+        }
       );
 
       expect(result).toEqual({
@@ -699,7 +703,7 @@ describe('TaskStore', () => {
           user: undefined,
           ownerId: null,
         },
-        { version: '123' }
+        { version: '123', refresh: false }
       );
 
       expect(result).toEqual({
