@@ -60,7 +60,7 @@ export interface CategorySummaryItem {
   count: number;
 }
 
-export type RequirementsByServiceName = Record<ServiceName, ServiceVersion>;
+export type RequirementsByServiceName = Record<ServiceName, ServiceRequirements>;
 export interface AssetParts {
   pkgkey: string;
   service: ServiceName;
