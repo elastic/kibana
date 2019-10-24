@@ -140,18 +140,21 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
       );
     const intervalIsRestricted =
       field!.aggregationRestrictions && field!.aggregationRestrictions.date_histogram;
-    const isValid = isValidInterval(currentColumn.params.interval, restrictedInterval(
-      field!.aggregationRestrictions
-    ) as string);
-
-    function onChangeAutoInterval(ev: React.ChangeEvent<HTMLInputElement>) {
-      const interval = ev.target.checked ? autoIntervalFromDateRange(dateRange) : autoInterval;
-      setState(
-        updateColumnParam({ state, layerId, currentColumn, paramName: 'interval', value: interval })
-      );
-    }
 
     const interval = parseInterval(currentColumn.params.interval);
+
+    // We force the interval value to 1 if it's empty, since that is the ES behavior,
+    // and the isValidInterval function doesn't handle the empty case properly. Fixing
+    // isValidInterval involves breaking changes in other areas.
+    const isValid = isValidInterval(
+      `${interval.value === '' ? '1' : interval.value}${interval.unit}`,
+      restrictedInterval(field!.aggregationRestrictions) as string
+    );
+
+    function onChangeAutoInterval(ev: React.ChangeEvent<HTMLInputElement>) {
+      const value = ev.target.checked ? autoIntervalFromDateRange(dateRange) : autoInterval;
+      setState(updateColumnParam({ state, layerId, currentColumn, paramName: 'interval', value }));
+    }
 
     const setInterval = (newInterval: typeof interval) => {
       const isCalendarInterval = calendarOnlyIntervals.has(newInterval.unit);

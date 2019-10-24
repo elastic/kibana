@@ -16,12 +16,12 @@ import {
 } from 'src/core/public';
 import { Storage } from 'ui/storage';
 import { createMockedIndexPattern } from '../../mocks';
-import { IndexPatternPrivateState, IndexPatternPersistedState } from '../../types';
+import { IndexPatternPrivateState } from '../../types';
 
 jest.mock('ui/new_platform');
 jest.mock('ui/chrome', () => ({
   getUiSettingsClient: () => ({
-    get(path) {
+    get(path: string) {
       if (path === 'histogram:maxBars') {
         return 10;
       }
@@ -131,6 +131,27 @@ describe('date_histogram', () => {
       },
     };
   });
+
+  function stateWithInterval(interval: string) {
+    return ({
+      ...state,
+      layers: {
+        ...state.layers,
+        first: {
+          ...state.layers.first,
+          columns: {
+            ...state.layers.first.columns,
+            col1: {
+              ...state.layers.first.columns.col1,
+              params: {
+                interval,
+              },
+            },
+          },
+        },
+      },
+    } as unknown) as IndexPatternPrivateState;
+  }
 
   describe('buildColumn', () => {
     it('should create column object with auto interval for primary time field', () => {
@@ -439,46 +460,52 @@ describe('date_histogram', () => {
           value: '2',
         },
       } as React.ChangeEvent<HTMLInputElement>);
-      expect(setStateSpy).toHaveBeenCalledWith({
-        ...state,
-        layers: {
-          ...state.layers,
-          first: {
-            ...state.layers.first,
-            columns: {
-              ...state.layers.first.columns,
-              col1: {
-                ...state.layers.first.columns.col1,
-                params: {
-                  interval: '1w',
-                },
-              },
-            },
-          },
-        },
-      });
+      expect(setStateSpy).toHaveBeenCalledWith(stateWithInterval('1w'));
     });
 
     it('should display error if an invalid interval is specified', () => {
       const setStateSpy = jest.fn();
-      const testState = ({
-        ...state,
-        layers: {
-          ...state.layers,
-          first: {
-            ...state.layers.first,
-            columns: {
-              ...state.layers.first.columns,
-              col1: {
-                ...state.layers.first.columns.col1,
-                params: {
-                  interval: '4quid',
-                },
-              },
-            },
-          },
-        },
-      } as unknown) as IndexPatternPrivateState;
+      const testState = stateWithInterval('4quid');
+      const instance = shallow(
+        <InlineOptions
+          state={testState}
+          setState={setStateSpy}
+          columnId="col1"
+          layerId="first"
+          currentColumn={testState.layers.first.columns.col1 as DateHistogramIndexPatternColumn}
+          storage={{} as Storage}
+          uiSettings={{} as UiSettingsClientContract}
+          savedObjectsClient={{} as SavedObjectsClientContract}
+          dateRange={dateRange}
+          http={{} as HttpServiceBase}
+        />
+      );
+      expect(instance.find('[data-test-subj="lensDateHistogramError"]').exists()).toBeTruthy();
+    });
+
+    it('should not display error if interval value is blank', () => {
+      const setStateSpy = jest.fn();
+      const testState = stateWithInterval('d');
+      const instance = shallow(
+        <InlineOptions
+          state={testState}
+          setState={setStateSpy}
+          columnId="col1"
+          layerId="first"
+          currentColumn={testState.layers.first.columns.col1 as DateHistogramIndexPatternColumn}
+          storage={{} as Storage}
+          uiSettings={{} as UiSettingsClientContract}
+          savedObjectsClient={{} as SavedObjectsClientContract}
+          dateRange={dateRange}
+          http={{} as HttpServiceBase}
+        />
+      );
+      expect(instance.find('[data-test-subj="lensDateHistogramError"]').exists()).toBeFalsy();
+    });
+
+    it('should display error if interval value is 0', () => {
+      const setStateSpy = jest.fn();
+      const testState = stateWithInterval('0d');
       const instance = shallow(
         <InlineOptions
           state={testState}
@@ -517,46 +544,12 @@ describe('date_histogram', () => {
           value: 'd',
         },
       } as React.ChangeEvent<HTMLInputElement>);
-      expect(setStateSpy).toHaveBeenCalledWith({
-        ...state,
-        layers: {
-          ...state.layers,
-          first: {
-            ...state.layers.first,
-            columns: {
-              ...state.layers.first.columns,
-              col1: {
-                ...state.layers.first.columns.col1,
-                params: {
-                  interval: '42d',
-                },
-              },
-            },
-          },
-        },
-      });
+      expect(setStateSpy).toHaveBeenCalledWith(stateWithInterval('42d'));
     });
 
     it('should update the value', () => {
       const setStateSpy = jest.fn();
-      const testState = ({
-        ...state,
-        layers: {
-          ...state.layers,
-          first: {
-            ...state.layers.first,
-            columns: {
-              ...state.layers.first.columns,
-              col1: {
-                ...state.layers.first.columns.col1,
-                params: {
-                  interval: '42d',
-                },
-              },
-            },
-          },
-        },
-      } as unknown) as IndexPatternPrivateState;
+      const testState = stateWithInterval('42d');
 
       const instance = shallow(
         <InlineOptions
@@ -577,24 +570,7 @@ describe('date_histogram', () => {
           value: '9',
         },
       } as React.ChangeEvent<HTMLInputElement>);
-      expect(setStateSpy).toHaveBeenCalledWith({
-        ...state,
-        layers: {
-          ...state.layers,
-          first: {
-            ...state.layers.first,
-            columns: {
-              ...state.layers.first.columns,
-              col1: {
-                ...state.layers.first.columns.col1,
-                params: {
-                  interval: '9d',
-                },
-              },
-            },
-          },
-        },
-      });
+      expect(setStateSpy).toHaveBeenCalledWith(stateWithInterval('9d'));
     });
 
     it('should not render options if they are restricted', () => {
