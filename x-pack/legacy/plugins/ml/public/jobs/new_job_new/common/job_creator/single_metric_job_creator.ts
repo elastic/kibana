@@ -186,7 +186,7 @@ export class SingleMetricJobCreator extends JobCreator {
   public cloneFromExistingJob(job: Job, datafeed: Datafeed) {
     this._overrideConfigs(job, datafeed);
     this.createdBy = CREATED_BY_LABEL.SINGLE_METRIC;
-    const detectors = getRichDetectors(job, datafeed, false);
+    const detectors = getRichDetectors(job, datafeed, this.scriptFields, false);
 
     this.removeAllDetectors();
 
