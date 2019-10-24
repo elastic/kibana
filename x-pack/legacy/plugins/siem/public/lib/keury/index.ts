@@ -107,7 +107,10 @@ export const convertToBuildEsQuery = ({
 
   try {
     return JSON.stringify(
-      buildEsQuery(indexPattern, queries, filters.filter(f => f.meta.disabled === false), config)
+      buildEsQuery(indexPattern, queries, filters.filter(f => f.meta.disabled === false), {
+        ...config,
+        dateFormatTZ: null,
+      })
     );
   } catch (exp) {
     return '';

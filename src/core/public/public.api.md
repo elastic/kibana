@@ -488,6 +488,7 @@ export interface HttpResponse extends InterceptedHttpResponse {
 // @public (undocumented)
 export interface HttpServiceBase {
     addLoadingCount(countSource$: Observable<number>): void;
+    anonymousPaths: IAnonymousPaths;
     basePath: IBasePath;
     delete: HttpHandler;
     fetch: HttpHandler;
@@ -515,6 +516,14 @@ export interface I18nStart {
     Context: ({ children }: {
         children: React.ReactNode;
     }) => JSX.Element;
+}
+
+// Warning: (ae-missing-release-tag) "IAnonymousPaths" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public
+export interface IAnonymousPaths {
+    isAnonymous(path: string): boolean;
+    register(path: string): void;
 }
 
 // @public
