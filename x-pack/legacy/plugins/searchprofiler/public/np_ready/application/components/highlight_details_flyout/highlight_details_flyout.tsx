@@ -57,7 +57,7 @@ export const HighlightDetailsFlyout = ({ indexName, operation, shard, onClose }:
               title={i18n.translate('xpack.searchProfiler.highlightDetails.descriptionTitle', {
                 defaultMessage: 'Description',
               })}
-              body={<EuiCodeBlock>{operation.lucene!}</EuiCodeBlock>}
+              body={<EuiCodeBlock paddingSize="s">{operation.lucene!}</EuiCodeBlock>}
             />
             {/* Total Time Entry */}
             <DefEntry

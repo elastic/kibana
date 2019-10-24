@@ -110,7 +110,7 @@
 
 .prfDevTool__progress--percent {
   @include prfDevToolProgress;
-  width: $euiSize * 4;
+  width: $euiSize * 4.5;
 }
 
 .prfDevTool__progress--time {

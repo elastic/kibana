@@ -51,14 +51,29 @@ export const ShardDetailsTreeNode = ({ operation, index, shard }: Props) => {
           {op.query_type}
         </EuiLink>
       </div>
+      {/* Self Time Badge */}
       <div className="prfDevTool__cell prfDevTool__time">
         <EuiBadge className="prfDevTool__badge" style={{ backgroundColor: op.absoluteColor }}>
           {msToPretty(op.selfTime!, 1)}
         </EuiBadge>
       </div>
+      {/* Total Time Badge */}
       <div className="prfDevTool__cell prfDevTool__totalTime">
         <EuiBadge className="prfDevTool__badge" style={{ backgroundColor: op.absoluteColor }}>
           {msToPretty(op.time!, 1)}
+        </EuiBadge>
+      </div>
+      {/* Time percentage Badge */}
+      <div className="prfDevTool__cell prfDevTool__percentage">
+        <EuiBadge
+          className="prfDevTool__progress--percent"
+          style={{ '--prfDevToolProgressPercentage': op.timePercentage } as any}
+        >
+          <span
+            className="prfDevTool__progress--percent-ie"
+            style={{ width: op.timePercentage + '%' }}
+          />
+          <span className="prfDevTool__progressText">{op.timePercentage + '%'}</span>
         </EuiBadge>
       </div>
     </div>
