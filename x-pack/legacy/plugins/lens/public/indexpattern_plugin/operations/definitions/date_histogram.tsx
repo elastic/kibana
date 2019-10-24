@@ -174,7 +174,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
           <EuiFormRow>
             <EuiSwitch
               label={i18n.translate('xpack.lens.indexPattern.dateHistogram.autoInterval', {
-                defaultMessage: 'Customize time intervals',
+                defaultMessage: 'Customize time interval',
               })}
               checked={currentColumn.params.interval !== autoInterval}
               onChange={onChangeAutoInterval}
@@ -184,7 +184,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
         {currentColumn.params.interval !== autoInterval && (
           <EuiFormRow
             label={i18n.translate('xpack.lens.indexPattern.dateHistogram.interval', {
-              defaultMessage: 'Time intervals',
+              defaultMessage: 'Time interval',
             })}
           >
             {intervalIsRestricted ? (

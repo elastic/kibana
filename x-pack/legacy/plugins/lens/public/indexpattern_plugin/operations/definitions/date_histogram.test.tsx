@@ -374,7 +374,7 @@ describe('date_histogram', () => {
       expect(instance.find('[data-test-subj="lensDateHistogramUnit"]').prop('value')).toEqual('d');
     });
 
-    it('should render disabled switch and no time intervals control for auto interval', () => {
+    it('should render disabled switch and no time interval control for auto interval', () => {
       const instance = shallow(
         <InlineOptions
           state={state}
