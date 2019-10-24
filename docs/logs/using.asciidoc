@@ -80,7 +80,7 @@ This automatically adds a search filter to the logs stream to filter the entries
 
 [float]
 === View log anomalies
-If you have a license that includes the machine learning features, you can click *Analysis* to <<xpack-logs-analysis-tab, use machine learning to detect and inspect anomalies>> in your log data.
+If you have a license that includes the machine learning features, you can click *Analysis* to <<xpack-logs-analysis-page, use machine learning to detect and inspect anomalies>> in your log data.
 
 [float]
 === Other actions
