@@ -41,7 +41,7 @@ export interface ScreenshotItem {
 export type ServiceName = 'kibana' | 'elasticsearch' | 'filebeat' | 'metricbeat';
 export type RequirementVersion = string;
 
-export interface ServiceVersion {
+export interface ServiceRequirements {
   version: RequirementVersionRange;
 }
 
