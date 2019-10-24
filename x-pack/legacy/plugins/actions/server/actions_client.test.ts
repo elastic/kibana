@@ -265,6 +265,11 @@ describe('find()', () => {
       defaultKibanaIndex,
     });
     savedObjectsClient.find.mockResolvedValueOnce(expectedResult);
+    scopedClusterClient.callAsCurrentUser.mockResolvedValueOnce({
+      aggregations: {
+        '1': { doc_count: 6 },
+      },
+    });
     const result = await actionsClient.find({});
     expect(result).toEqual({
       total: 1,
@@ -276,6 +281,7 @@ describe('find()', () => {
           config: {
             foo: 'bar',
           },
+          referencedByCount: 6,
         },
       ],
     });
