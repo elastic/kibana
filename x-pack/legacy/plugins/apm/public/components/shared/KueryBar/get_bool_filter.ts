@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ESFilter } from 'elasticsearch';
 import {
   TRANSACTION_TYPE,
   ERROR_GROUP_ID,
@@ -11,27 +12,34 @@ import {
   TRANSACTION_NAME,
   SERVICE_NAME
 } from '../../../../common/elasticsearch_fieldnames';
+import { IUrlParams } from '../../../context/UrlParamsContext/types';
 
-export function getBoolFilter(urlParams) {
-  const boolFilter = [
+export function getBoolFilter(urlParams: IUrlParams) {
+  const { start, end, serviceName, processorEvent } = urlParams;
+
+  if (!start || !end) {
+    throw new Error('Date range was not defined');
+  }
+
+  const boolFilter: ESFilter[] = [
     {
       range: {
         '@timestamp': {
-          gte: new Date(urlParams.start).getTime(),
-          lte: new Date(urlParams.end).getTime(),
+          gte: new Date(start).getTime(),
+          lte: new Date(end).getTime(),
           format: 'epoch_millis'
         }
       }
     }
   ];
 
-  if (urlParams.serviceName) {
+  if (serviceName) {
     boolFilter.push({
-      term: { [SERVICE_NAME]: urlParams.serviceName }
+      term: { [SERVICE_NAME]: serviceName }
     });
   }
 
-  switch (urlParams.processorEvent) {
+  switch (processorEvent) {
     case 'transaction':
       boolFilter.push({
         term: { [PROCESSOR_EVENT]: 'transaction' }
@@ -62,12 +70,19 @@ export function getBoolFilter(urlParams) {
       }
       break;
 
+    case 'metric':
+      boolFilter.push({
+        term: { [PROCESSOR_EVENT]: 'metric' }
+      });
+      break;
+
     default:
       boolFilter.push({
         bool: {
           should: [
             { term: { [PROCESSOR_EVENT]: 'error' } },
-            { term: { [PROCESSOR_EVENT]: 'transaction' } }
+            { term: { [PROCESSOR_EVENT]: 'transaction' } },
+            { term: { [PROCESSOR_EVENT]: 'metric' } }
           ]
         }
       });
