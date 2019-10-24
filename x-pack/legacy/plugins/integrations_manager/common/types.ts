@@ -40,9 +40,14 @@ export interface ScreenshotItem {
 // https://github.com/elastic/integrations-registry/blob/master/docs/api/package.json
 export type ServiceName = 'kibana' | 'elasticsearch' | 'filebeat' | 'metricbeat';
 export type RequirementVersion = string;
+
 export interface ServiceRequirements {
-  'version.min': RequirementVersion;
-  'version.max': RequirementVersion;
+  version: RequirementVersionRange;
+}
+
+export interface RequirementVersionRange {
+  min: RequirementVersion;
+  max: RequirementVersion;
 }
 
 // from /categories

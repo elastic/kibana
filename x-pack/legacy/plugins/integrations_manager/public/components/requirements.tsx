@@ -39,9 +39,9 @@ export function Requirements(props: RequirementsProps) {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <div>
-              <VersionBadge version={requirement['version.min']} />
+              <VersionBadge version={requirement.version.min} />
               <span>{' - '}</span>
-              <VersionBadge version={requirement['version.max']} />
+              <VersionBadge version={requirement.version.max} />
             </div>
           </EuiFlexItem>
         </EuiFlexGroup>
