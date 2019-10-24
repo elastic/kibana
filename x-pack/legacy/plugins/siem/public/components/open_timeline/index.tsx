@@ -236,7 +236,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
           ],
         });
       },
-      [apolloClient, createNewTimeline]
+      [apolloClient, createNewTimeline, timeline]
     );
 
     useEffect(() => {
