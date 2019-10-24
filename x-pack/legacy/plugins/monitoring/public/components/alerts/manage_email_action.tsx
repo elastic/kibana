@@ -35,7 +35,6 @@ export interface EmailActionData {
 
 interface ManageActionModalProps {
   createEmailAction: (handler: EmailActionData) => void;
-  deleteEmailAction: () => void;
   cancel?: () => void;
   isNew: boolean;
   action?: ActionResult | null;
@@ -57,9 +56,6 @@ const CREATE_LABEL = i18n.translate('xpack.monitoring.alerts.migrate.manageActio
 const SAVE_LABEL = i18n.translate('xpack.monitoring.alerts.migrate.manageAction.saveLabel', {
   defaultMessage: 'Save email action',
 });
-const DELETE_LABEL = i18n.translate('xpack.monitoring.alerts.migrate.manageAction.deleteLabel', {
-  defaultMessage: 'Delete',
-});
 const CANCEL_LABEL = i18n.translate('xpack.monitoring.alerts.migrate.manageAction.cancelLabel', {
   defaultMessage: 'Cancel',
 });
@@ -67,7 +63,7 @@ const CANCEL_LABEL = i18n.translate('xpack.monitoring.alerts.migrate.manageActio
 export const ManageEmailAction: React.FC<ManageActionModalProps> = (
   props: ManageActionModalProps
 ) => {
-  const { createEmailAction, deleteEmailAction, cancel, isNew, action } = props;
+  const { createEmailAction, cancel, isNew, action } = props;
 
   const defaultData = Object.assign({}, DEFAULT_DATA, action ? action.config : {});
   const [isSaving, setIsSaving] = React.useState(false);
@@ -81,12 +77,19 @@ export const ManageEmailAction: React.FC<ManageActionModalProps> = (
     setErrors(getMissingFieldErrors(data, DEFAULT_DATA));
   }, [data]);
 
-  function saveEmailAction() {
+  async function saveEmailAction() {
     setShowErrors(true);
     if (!hasErrors(errors)) {
       setShowErrors(false);
       setIsSaving(true);
-      createEmailAction(data);
+      try {
+        await createEmailAction(data);
+      } catch (err) {
+        setErrors({
+          general: err.body.message,
+        });
+      }
+      setIsSaving(false);
     }
   }
 
@@ -223,13 +226,6 @@ export const ManageEmailAction: React.FC<ManageActionModalProps> = (
         {!action || isNew ? null : (
           <EuiFlexItem grow={false}>
             <EuiButton onClick={cancel}>{CANCEL_LABEL}</EuiButton>
-          </EuiFlexItem>
-        )}
-        {isNew ? null : (
-          <EuiFlexItem grow={false}>
-            <EuiButton onClick={deleteEmailAction} color="danger" isLoading={isSaving}>
-              {DELETE_LABEL}
-            </EuiButton>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

@@ -24,14 +24,14 @@ import {
   KIBANA_ALERTING_ENABLED,
   ALERT_TYPE_PREFIX,
 } from '../../../common/constants';
-import { Migration } from './migration';
+import { AlertsConfiguration } from './configuration';
 
-interface MigrationStatusProps {
+interface AlertsStatusProps {
   clusterUuid: string;
   emailAddress: string;
 }
 
-export const MigrationStatus: React.FC<MigrationStatusProps> = (props: MigrationStatusProps) => {
+export const AlertsStatus: React.FC<AlertsStatusProps> = (props: AlertsStatusProps) => {
   const { clusterUuid, emailAddress } = props;
 
   const [setupModeEnabled, setSetupModeEnabled] = React.useState(getSetupModeState().enabled);
@@ -40,7 +40,7 @@ export const MigrationStatus: React.FC<MigrationStatusProps> = (props: Migration
   const [showMigrationFlyout, setShowMigrationFlyout] = React.useState(false);
 
   React.useEffect(() => {
-    async function fetchMigrationStatus() {
+    async function fetchAlertsStatus() {
       const alerts = await kfetch({ method: 'GET', pathname: `/api/alert/_find` });
       const monitoringAlerts = alerts.data.filter((alert: Alert) =>
         alert.alertTypeId.startsWith(ALERT_TYPE_PREFIX)
@@ -48,7 +48,7 @@ export const MigrationStatus: React.FC<MigrationStatusProps> = (props: Migration
       setKibanaAlerts(monitoringAlerts);
     }
 
-    fetchMigrationStatus();
+    fetchAlertsStatus();
   }, [clusterUuid, setupModeEnabled, showMigrationFlyout]);
 
   addSetupModeCallback(() => setSetupModeEnabled(getSetupModeState().enabled));
@@ -61,21 +61,21 @@ export const MigrationStatus: React.FC<MigrationStatusProps> = (props: Migration
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
               <h2>
-                {i18n.translate('xpack.monitoring.alerts.migration.flyoutTitle', {
-                  defaultMessage: 'Alerting migration',
+                {i18n.translate('xpack.monitoring.alerts.status.flyoutTitle', {
+                  defaultMessage: 'Monitoring alerts',
                 })}
               </h2>
             </EuiTitle>
             <EuiText>
               <p>
-                {i18n.translate('xpack.monitoring.alerts.migration.flyoutSubtitle', {
+                {i18n.translate('xpack.monitoring.alerts.status.flyoutSubtitle', {
                   defaultMessage: 'Configure an email server and email address to receive alerts.',
                 })}
               </p>
             </EuiText>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
-            <Migration
+            <AlertsConfiguration
               clusterUuid={clusterUuid}
               emailAddress={emailAddress}
               onDone={() => setShowMigrationFlyout(false)}
@@ -92,15 +92,15 @@ export const MigrationStatus: React.FC<MigrationStatusProps> = (props: Migration
           <Fragment>
             <EuiCallOut
               color="success"
-              title={i18n.translate('xpack.monitoring.alerts.migrate.upToDate', {
+              title={i18n.translate('xpack.monitoring.alerts.status.upToDate', {
                 defaultMessage: 'Kibana alerting is up to date!',
               })}
               iconType="flag"
             >
               <p>
                 <EuiButtonEmpty onClick={() => setShowMigrationFlyout(true)}>
-                  {i18n.translate('xpack.monitoring.alerts.migrate.manage', {
-                    defaultMessage: 'Manage email action and/or receiving email address',
+                  {i18n.translate('xpack.monitoring.alerts.status.manage', {
+                    defaultMessage: 'Want to make changes? Click here.',
                   })}
                 </EuiButtonEmpty>
               </p>
@@ -114,13 +114,13 @@ export const MigrationStatus: React.FC<MigrationStatusProps> = (props: Migration
         <Fragment>
           <EuiCallOut
             color="warning"
-            title={i18n.translate('xpack.monitoring.alerts.migrate.needToMigrateTitle', {
+            title={i18n.translate('xpack.monitoring.alerts.status.needToMigrateTitle', {
               defaultMessage: 'Hey! We made alerting better!',
             })}
           >
             <p>
               <EuiButtonEmpty onClick={() => setShowMigrationFlyout(true)}>
-                {i18n.translate('xpack.monitoring.alerts.migrate.needToMigrate', {
+                {i18n.translate('xpack.monitoring.alerts.status.needToMigrate', {
                   defaultMessage:
                     'Click here to migrate cluster alerts to our new alerting platform.',
                 })}

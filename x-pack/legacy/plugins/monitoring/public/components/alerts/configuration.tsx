@@ -12,7 +12,6 @@ import {
   EuiSpacer,
   EuiText,
   EuiSuperSelect,
-  EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -28,36 +27,41 @@ import { toggleSetupMode } from '../../lib/setup_mode';
 import { EmailActionData, ManageEmailAction } from './manage_email_action';
 import { getMissingFieldErrors } from '../../lib/form_validation';
 
-interface MigrationProps {
+interface AlertsConfigurationProps {
   clusterUuid: string;
   emailAddress: string;
   onDone: Function;
 }
 
-interface MigrationForm {
+interface AlertsConfigurationForm {
   email: string | null;
 }
 
 const NEW_ACTION_ID = '__new__';
 
-export const Migration: React.FC<MigrationProps> = (props: MigrationProps) => {
+export const AlertsConfiguration: React.FC<AlertsConfigurationProps> = (
+  props: AlertsConfigurationProps
+) => {
   const { clusterUuid, onDone } = props;
 
   const [emailActions, setEmailActions] = React.useState<ActionResult[]>([]);
   const [editAction, setEditAction] = React.useState<ActionResult | null>(null);
   const [selectedEmailActionId, setSelectedEmailActionId] = React.useState('');
   const [emailAddress, setEmailAddress] = React.useState(props.emailAddress);
-  const [formErrors, setFormErrors] = React.useState<MigrationForm>({ email: null });
+  const [formErrors, setFormErrors] = React.useState<AlertsConfigurationForm>({ email: null });
   const [showFormErrors, setShowFormErrors] = React.useState(false);
   const [isSaving, setIsSaving] = React.useState(false);
+  const [isTesting, setIsTesting] = React.useState(false);
+  const [isDeleting, setIsDeleting] = React.useState(false);
+  const [testingStatus, setTestingStatus] = React.useState<string | boolean | null>(null);
 
   React.useEffect(() => {
-    async function fetchMigrationStatus() {
+    async function fetchData() {
       await fetchEmailActions();
       await toggleSetupMode(true);
     }
 
-    fetchMigrationStatus();
+    fetchData();
   }, [clusterUuid]);
 
   React.useEffect(() => {
@@ -95,9 +99,12 @@ export const Migration: React.FC<MigrationProps> = (props: MigrationProps) => {
         method: 'POST',
         pathname: '/api/action',
         body: JSON.stringify({
-          description: i18n.translate('xpack.monitoring.alerts.actions.emailAction.description', {
-            defaultMessage: 'Kibana alerting is up to date!',
-          }),
+          description: i18n.translate(
+            'xpack.monitoring.alerts.configuration.emailAction.description',
+            {
+              defaultMessage: 'Kibana alerting is up to date!',
+            }
+          ),
           actionTypeId: ALERT_ACTION_TYPE_EMAIL,
           config: omit(data, ['user', 'password']),
           secrets: pick(data, ['user', 'password']),
@@ -108,21 +115,23 @@ export const Migration: React.FC<MigrationProps> = (props: MigrationProps) => {
     await fetchEmailActions();
   }
 
-  async function deleteEmailAction() {
-    if (!editAction) {
-      return null;
-    }
+  async function deleteEmailAction(id: string) {
+    setIsDeleting(true);
 
     await kfetch({
       method: 'DELETE',
-      pathname: `/api/action/${editAction.id}`,
+      pathname: `/api/action/${id}`,
     });
 
-    setEditAction(null);
-    if (selectedEmailActionId === editAction.id) {
+    if (editAction && editAction.id === id) {
+      setEditAction(null);
+    }
+    if (selectedEmailActionId === id) {
       setSelectedEmailActionId('');
     }
     await fetchEmailActions();
+    setIsDeleting(false);
+    setTestingStatus(null);
   }
 
   async function save() {
@@ -142,8 +151,31 @@ export const Migration: React.FC<MigrationProps> = (props: MigrationProps) => {
     onDone();
   }
 
+  async function testEmailAction() {
+    setIsTesting(true);
+    setTestingStatus(null);
+
+    const params = {
+      subject: 'Kibana alerting test configuration',
+      message: `This is a test for the configured email action for Kibana alerting.`,
+      to: [emailAddress],
+    };
+
+    const result = await kfetch({
+      method: 'POST',
+      pathname: `/api/action/${selectedEmailActionId}/_execute`,
+      body: JSON.stringify({ params }),
+    });
+    if (result.status === 'ok') {
+      setTestingStatus(true);
+    } else {
+      setTestingStatus(result.message);
+    }
+    setIsTesting(false);
+  }
+
   function getStep1() {
-    const title = i18n.translate('xpack.monitoring.alerts.migration.selectEmailAction', {
+    const title = i18n.translate('xpack.monitoring.alerts.configuration.selectEmailAction', {
       defaultMessage: 'Select email action',
     });
 
@@ -154,7 +186,7 @@ export const Migration: React.FC<MigrationProps> = (props: MigrationProps) => {
           <Fragment>
             <EuiText>
               <p>
-                {i18n.translate('xpack.monitoring.alerts.migration.step2.noActions', {
+                {i18n.translate('xpack.monitoring.alerts.configuration.step2.noActions', {
                   defaultMessage: 'Edit the action below.',
                 })}
               </p>
@@ -162,7 +194,6 @@ export const Migration: React.FC<MigrationProps> = (props: MigrationProps) => {
             <EuiSpacer />
             <ManageEmailAction
               createEmailAction={async (data: EmailActionData) => await createEmailAction(data)}
-              deleteEmailAction={deleteEmailAction}
               cancel={() => setEditAction(null)}
               isNew={false}
               action={editAction}
@@ -176,7 +207,7 @@ export const Migration: React.FC<MigrationProps> = (props: MigrationProps) => {
     const options = [
       ...emailActions.map(action => {
         const actionLabel = i18n.translate(
-          'xpack.monitoring.alerts.migrate.selectAction.inputDisplay',
+          'xpack.monitoring.alerts.configuration.selectAction.inputDisplay',
           {
             defaultMessage: 'From: {from}, Service: {service}',
             values: {
@@ -189,30 +220,21 @@ export const Migration: React.FC<MigrationProps> = (props: MigrationProps) => {
         return {
           value: action.id,
           inputDisplay: <EuiText>{actionLabel}</EuiText>,
-          dropdownDisplay: (
-            <EuiFlexGroup justifyContent="spaceBetween">
-              <EuiFlexItem grow={false}>
-                <EuiText>{actionLabel}</EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="documentEdit" onClick={() => setEditAction(action)} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ),
+          dropdownDisplay: <EuiText>{actionLabel}</EuiText>,
         };
       }),
       {
         value: NEW_ACTION_ID,
         inputDisplay: (
           <EuiText>
-            {i18n.translate('xpack.monitoring.alerts.migration.newActionInputDisplay', {
+            {i18n.translate('xpack.monitoring.alerts.configuration.newActionInputDisplay', {
               defaultMessage: 'Creating new action...',
             })}
           </EuiText>
         ),
         dropdownDisplay: (
           <EuiText>
-            {i18n.translate('xpack.monitoring.alerts.migration.newActionDropdownDisplay', {
+            {i18n.translate('xpack.monitoring.alerts.configuration.newActionDropdownDisplay', {
               defaultMessage: 'Create new email action...',
             })}
           </EuiText>
@@ -228,7 +250,6 @@ export const Migration: React.FC<MigrationProps> = (props: MigrationProps) => {
           <EuiPanel>
             <ManageEmailAction
               createEmailAction={async (data: EmailActionData) => await createEmailAction(data)}
-              deleteEmailAction={deleteEmailAction}
               isNew={true}
             />
           </EuiPanel>
@@ -236,19 +257,103 @@ export const Migration: React.FC<MigrationProps> = (props: MigrationProps) => {
       );
     }
 
+    let manageConfiguration = null;
+    const selectedEmailAction = emailActions.find(action => action.id === selectedEmailActionId);
+    if (selectedEmailActionId !== NEW_ACTION_ID && selectedEmailActionId && selectedEmailAction) {
+      let testingStatusUi = null;
+      if (testingStatus === true) {
+        testingStatusUi = (
+          <Fragment>
+            <EuiSpacer />
+            <EuiText color="secondary">
+              <p>
+                {i18n.translate('xpack.monitoring.alerts.configuration.testConfiguration.success', {
+                  defaultMessage: 'Looks good on our end!',
+                })}
+              </p>
+            </EuiText>
+          </Fragment>
+        );
+      } else if (testingStatus !== null) {
+        testingStatusUi = (
+          <Fragment>
+            <EuiSpacer />
+            <EuiText color="danger">
+              <p>
+                {i18n.translate('xpack.monitoring.alerts.configuration.testConfiguration.error', {
+                  defaultMessage: 'Uh oh, something went wrong. Error: {error}',
+                  values: {
+                    error: testingStatus,
+                  },
+                })}
+              </p>
+            </EuiText>
+          </Fragment>
+        );
+      }
+
+      manageConfiguration = (
+        <Fragment>
+          <EuiSpacer />
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                size="s"
+                iconType="pencil"
+                onClick={() => setEditAction(selectedEmailAction)}
+              >
+                {i18n.translate(
+                  'xpack.monitoring.alerts.configuration.editConfiguration.buttonText',
+                  {
+                    defaultMessage: 'Edit',
+                  }
+                )}
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton size="s" iconType="play" onClick={testEmailAction} isLoading={isTesting}>
+                {i18n.translate(
+                  'xpack.monitoring.alerts.configuration.testConfiguration.buttonText',
+                  {
+                    defaultMessage: 'Test',
+                  }
+                )}
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                size="s"
+                iconType="cross"
+                onClick={() => deleteEmailAction(selectedEmailActionId)}
+                isLoading={isDeleting}
+              >
+                {i18n.translate(
+                  'xpack.monitoring.alerts.configuration.deleteConfiguration.buttonText',
+                  {
+                    defaultMessage: 'Delete',
+                  }
+                )}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          {testingStatusUi}
+        </Fragment>
+      );
+    }
+
     return {
       title,
       children: (
-        <div style={{ width: 500 }}>
+        <Fragment>
           <EuiSuperSelect
-            fullWidth
             options={options}
             valueOfSelected={selectedEmailActionId}
             onChange={id => setSelectedEmailActionId(id)}
             hasDividers
           />
+          {manageConfiguration}
           {createNew}
-        </div>
+        </Fragment>
       ),
       status: selectedEmailActionId ? 'complete' : 'incomplete',
     };
@@ -256,16 +361,25 @@ export const Migration: React.FC<MigrationProps> = (props: MigrationProps) => {
 
   function getStep2() {
     const isDisabled = !!editAction || !selectedEmailActionId;
+    let status;
+    if (isDisabled) {
+      status = 'disabled';
+    } else if (emailAddress && emailAddress.length) {
+      status = 'complete';
+    } else {
+      status = 'incomplete';
+    }
+
     return {
-      title: i18n.translate('xpack.monitoring.alerts.migration.setEmailAddress', {
+      title: i18n.translate('xpack.monitoring.alerts.configuration.setEmailAddress', {
         defaultMessage: 'Set the email to receive alerts',
       }),
-      status: isDisabled ? 'disabled' : 'incomplete',
+      status,
       children: (
         <Fragment>
           <EuiForm isInvalid={showFormErrors}>
             <EuiFormRow
-              label={i18n.translate('xpack.monitoring.alerts.migration.emailAddressLabel', {
+              label={i18n.translate('xpack.monitoring.alerts.configuration.emailAddressLabel', {
                 defaultMessage: 'Email address',
               })}
               error={formErrors.email}
@@ -285,15 +399,24 @@ export const Migration: React.FC<MigrationProps> = (props: MigrationProps) => {
 
   function getStep3() {
     const isDisabled = !!editAction || !selectedEmailActionId;
+    let status;
+    if (isDisabled) {
+      status = 'disabled';
+    } else if (emailAddress && emailAddress.length) {
+      status = 'complete';
+    } else {
+      status = 'incomplete';
+    }
+
     return {
-      title: i18n.translate('xpack.monitoring.alerts.migration.setEmailAddress', {
+      title: i18n.translate('xpack.monitoring.alerts.configuration.setEmailAddress', {
         defaultMessage: 'Confirm and save',
       }),
-      status: isDisabled ? 'disabled' : 'incomplete',
+      status,
       children: (
         <Fragment>
           <EuiButton isLoading={isSaving} isDisabled={isDisabled} onClick={save}>
-            {i18n.translate('xpack.monitoring.alerts.migration.save', {
+            {i18n.translate('xpack.monitoring.alerts.configuration.save', {
               defaultMessage: 'Save',
             })}
           </EuiButton>
