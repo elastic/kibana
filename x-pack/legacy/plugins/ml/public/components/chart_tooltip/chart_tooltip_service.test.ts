@@ -4,21 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
-
-import { mlChartTooltipService } from '../chart_tooltip_service';
+import { getChartTooltipDefaultState, mlChartTooltipService } from './chart_tooltip_service';
 
 describe('ML - mlChartTooltipService', () => {
   it('service API duck typing', () => {
-    expect(mlChartTooltipService).to.be.an('object');
-    expect(mlChartTooltipService.show).to.be.a('function');
-    expect(mlChartTooltipService.hide).to.be.a('function');
+    expect(typeof mlChartTooltipService).toBe('object');
+    expect(typeof mlChartTooltipService.show).toBe('function');
+    expect(typeof mlChartTooltipService.hide).toBe('function');
   });
 
   it('should fail silently when target is not defined', () => {
-    mlChartTooltipService.element = {};
     expect(() => {
-      mlChartTooltipService.show('', undefined);
-    }).to.not.throwError('Call to show() should fail silently.');
+      mlChartTooltipService.show(getChartTooltipDefaultState().tooltipData, null);
+    }).not.toThrow('Call to show() should fail silently.');
   });
 });

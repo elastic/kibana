@@ -1106,6 +1106,9 @@ export class TimeSeriesExplorer extends React.Component {
 
         {(jobs.length > 0 && (fullRefresh === false || loading === false) && hasResults === true) && (
           <EuiText className="results-container">
+            {/* Make sure ChartTooltip is inside this plain wrapping element so positioning can be infered correctly. */}
+            <ChartTooltip />
+
             <span className="panel-title">
               {i18n.translate('xpack.ml.timeSeriesExplorer.singleTimeSeriesAnalysisTitle', {
                 defaultMessage: 'Single time series analysis of {functionLabel}',
