@@ -111,6 +111,7 @@ export {
   HttpHandler,
   HttpBody,
   IBasePath,
+  IAnonymousPaths,
   IHttpInterceptController,
   IHttpFetchError,
   InterceptedHttpResponse,

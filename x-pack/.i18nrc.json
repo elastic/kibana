@@ -31,7 +31,7 @@
     "xpack.rollupJobs": "legacy/plugins/rollup",
     "xpack.searchProfiler": "legacy/plugins/searchprofiler",
     "xpack.siem": "legacy/plugins/siem",
-    "xpack.security": "legacy/plugins/security",
+    "xpack.security": ["legacy/plugins/security", "plugins/security"],
     "xpack.server": "legacy/server",
     "xpack.snapshotRestore": "legacy/plugins/snapshot_restore",
     "xpack.spaces": ["legacy/plugins/spaces", "plugins/spaces"],

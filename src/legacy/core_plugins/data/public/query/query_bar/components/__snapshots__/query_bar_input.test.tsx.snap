@@ -229,10 +229,20 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
             },
             "http": Object {
               "addLoadingCount": [MockFunction],
-              "basePath": Object {
-                "get": [MockFunction],
-                "prepend": [MockFunction],
-                "remove": [MockFunction],
+              "anonymousPaths": AnonymousPaths {
+                "basePath": BasePath {
+                  "basePath": "",
+                  "get": [Function],
+                  "prepend": [Function],
+                  "remove": [Function],
+                },
+                "paths": Set {},
+              },
+              "basePath": BasePath {
+                "basePath": "",
+                "get": [Function],
+                "prepend": [Function],
+                "remove": [Function],
               },
               "delete": [MockFunction],
               "fetch": [MockFunction],
@@ -775,10 +785,20 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
                     },
                     "http": Object {
                       "addLoadingCount": [MockFunction],
-                      "basePath": Object {
-                        "get": [MockFunction],
-                        "prepend": [MockFunction],
-                        "remove": [MockFunction],
+                      "anonymousPaths": AnonymousPaths {
+                        "basePath": BasePath {
+                          "basePath": "",
+                          "get": [Function],
+                          "prepend": [Function],
+                          "remove": [Function],
+                        },
+                        "paths": Set {},
+                      },
+                      "basePath": BasePath {
+                        "basePath": "",
+                        "get": [Function],
+                        "prepend": [Function],
+                        "remove": [Function],
                       },
                       "delete": [MockFunction],
                       "fetch": [MockFunction],
@@ -1309,10 +1329,20 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
             },
             "http": Object {
               "addLoadingCount": [MockFunction],
-              "basePath": Object {
-                "get": [MockFunction],
-                "prepend": [MockFunction],
-                "remove": [MockFunction],
+              "anonymousPaths": AnonymousPaths {
+                "basePath": BasePath {
+                  "basePath": "",
+                  "get": [Function],
+                  "prepend": [Function],
+                  "remove": [Function],
+                },
+                "paths": Set {},
+              },
+              "basePath": BasePath {
+                "basePath": "",
+                "get": [Function],
+                "prepend": [Function],
+                "remove": [Function],
               },
               "delete": [MockFunction],
               "fetch": [MockFunction],
@@ -1852,10 +1882,20 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
                     },
                     "http": Object {
                       "addLoadingCount": [MockFunction],
-                      "basePath": Object {
-                        "get": [MockFunction],
-                        "prepend": [MockFunction],
-                        "remove": [MockFunction],
+                      "anonymousPaths": AnonymousPaths {
+                        "basePath": BasePath {
+                          "basePath": "",
+                          "get": [Function],
+                          "prepend": [Function],
+                          "remove": [Function],
+                        },
+                        "paths": Set {},
+                      },
+                      "basePath": BasePath {
+                        "basePath": "",
+                        "get": [Function],
+                        "prepend": [Function],
+                        "remove": [Function],
                       },
                       "delete": [MockFunction],
                       "fetch": [MockFunction],
@@ -2386,10 +2426,20 @@ exports[`QueryBarInput Should render the given query 1`] = `
             },
             "http": Object {
               "addLoadingCount": [MockFunction],
-              "basePath": Object {
-                "get": [MockFunction],
-                "prepend": [MockFunction],
-                "remove": [MockFunction],
+              "anonymousPaths": AnonymousPaths {
+                "basePath": BasePath {
+                  "basePath": "",
+                  "get": [Function],
+                  "prepend": [Function],
+                  "remove": [Function],
+                },
+                "paths": Set {},
+              },
+              "basePath": BasePath {
+                "basePath": "",
+                "get": [Function],
+                "prepend": [Function],
+                "remove": [Function],
               },
               "delete": [MockFunction],
               "fetch": [MockFunction],
@@ -2929,10 +2979,20 @@ exports[`QueryBarInput Should render the given query 1`] = `
                     },
                     "http": Object {
                       "addLoadingCount": [MockFunction],
-                      "basePath": Object {
-                        "get": [MockFunction],
-                        "prepend": [MockFunction],
-                        "remove": [MockFunction],
+                      "anonymousPaths": AnonymousPaths {
+                        "basePath": BasePath {
+                          "basePath": "",
+                          "get": [Function],
+                          "prepend": [Function],
+                          "remove": [Function],
+                        },
+                        "paths": Set {},
+                      },
+                      "basePath": BasePath {
+                        "basePath": "",
+                        "get": [Function],
+                        "prepend": [Function],
+                        "remove": [Function],
                       },
                       "delete": [MockFunction],
                       "fetch": [MockFunction],
