@@ -155,6 +155,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
       partitionField,
       excludeFrequent: excludeFrequentOption.label !== '' ? excludeFrequentOption.label : null,
       description: descriptionOption !== '' ? descriptionOption : null,
+      customRules: null,
     };
     setDetector(dtr);
     setDescriptionPlaceholder(dtr);

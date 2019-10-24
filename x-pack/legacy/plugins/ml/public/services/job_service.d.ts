@@ -13,7 +13,6 @@ export interface ExistingJobsAndGroups {
 }
 
 declare interface JobService {
-  currentJob: any;
   createResultsUrlForJobs: (jobs: any[], target: string) => string;
   tempJobCloningObjects: {
     job: any;
