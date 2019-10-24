@@ -201,7 +201,7 @@ describe('kuery AST API', function () {
     it('should support nested queries indicated by curly braces', () => {
       const expected = nodeTypes.function.buildNode(
         'nested',
-        nodeTypes.literal.buildNode('nestedField'),
+        'nestedField',
         nodeTypes.function.buildNode('is', 'childOfNested', 'foo')
       );
       const actual = ast.fromKueryExpression('nestedField:{ childOfNested: foo }');
@@ -215,7 +215,7 @@ describe('kuery AST API', function () {
           nodeTypes.function.buildNode('is', 'response', '200'),
           nodeTypes.function.buildNode(
             'nested',
-            nodeTypes.literal.buildNode('nestedField'),
+            'nestedField',
             nodeTypes.function.buildNode('or', [
               nodeTypes.function.buildNode('is', 'childOfNested', 'foo'),
               nodeTypes.function.buildNode('is', 'childOfNested', 'bar'),
@@ -233,12 +233,12 @@ describe('kuery AST API', function () {
           nodeTypes.function.buildNode('or', [
             nodeTypes.function.buildNode(
               'nested',
-              nodeTypes.literal.buildNode('nestedField'),
+              'nestedField',
               nodeTypes.function.buildNode('is', 'childOfNested', 'foo')
             ),
             nodeTypes.function.buildNode(
               'nested',
-              nodeTypes.literal.buildNode('nestedField'),
+              'nestedField',
               nodeTypes.function.buildNode('is', 'childOfNested', 'bar')
             ),
           ])
@@ -250,10 +250,10 @@ describe('kuery AST API', function () {
     it('should support nested groups inside other nested groups', () => {
       const expected = nodeTypes.function.buildNode(
         'nested',
-        nodeTypes.literal.buildNode('nestedField'),
+        'nestedField',
         nodeTypes.function.buildNode(
           'nested',
-          nodeTypes.literal.buildNode('nestedChild'),
+          'nestedChild',
           nodeTypes.function.buildNode('is', 'doublyNestedChild', 'foo')
         )
       );
