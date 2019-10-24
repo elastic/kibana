@@ -3,14 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment, useContext, useState, useCallback, useReducer, useEffect } from 'react';
-import { HttpServiceBase } from 'kibana/public';
+import React, { Fragment, useContext, useState, useReducer, useEffect } from 'react';
 import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
-  EuiTitle,
   EuiForm,
   EuiCallOut,
   EuiLink,
@@ -18,15 +15,13 @@ import {
   EuiSpacer,
   EuiButtonEmpty,
   EuiFlyoutFooter,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiFlyout,
   EuiFieldText,
+  EuiFlyoutBody,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { saveAction } from '../../lib/api';
-import { SectionError, ErrableFormRow } from '../../../application/components/page_error';
+import { SectionError, ErrableFormRow } from '../../components/page_error';
 import { useAppDependencies } from '../..';
 import { actionReducer } from './action_reducer';
 import { ActionsContext } from '../../context/actions_context';
@@ -34,15 +29,18 @@ import { ActionType, Action } from '../../../types';
 
 interface Props {
   actionType: ActionType;
-  refreshList: () => Promise<void>;
 }
 
-export const ActionAdd = ({ actionType, refreshList }: Props) => {
+interface IErrorObject {
+  [key: string]: string[];
+}
+
+export const ActionAddForm = ({ actionType }: Props) => {
   const {
     core: { http },
     plugins: { toastNotifications },
   } = useAppDependencies();
-  const { flyoutVisible, setFlyoutVisibility, actionTypeRegistry } = useContext(ActionsContext);
+  const { setFlyoutVisibility, actionTypeRegistry, loadActions } = useContext(ActionsContext);
   // hooks
   const [{ action }, dispatch] = useReducer(actionReducer, {
     action: { actionTypeId: actionType.id, config: {}, secrets: {} },
@@ -70,17 +68,12 @@ export const ActionAdd = ({ actionType, refreshList }: Props) => {
   useEffect(() => {
     getAction();
     setServerError(null);
-  }, [flyoutVisible]);
+  }, [actionType]);
 
-  const closeFlyout = useCallback(() => setFlyoutVisibility(false), []);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [serverError, setServerError] = useState<{
     body: { message: string; error: string };
   } | null>(null);
-
-  if (!flyoutVisible) {
-    return null;
-  }
 
   function validateBaseProperties(actionObject: Action) {
     const validationResult = { errors: {} };
@@ -104,7 +97,7 @@ export const ActionAdd = ({ actionType, refreshList }: Props) => {
   const errors = {
     ...actionTypeRegisterd.validate(action).errors,
     ...validateBaseProperties(action).errors,
-  };
+  } as IErrorObject;
   const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
 
   async function onActionSave(): Promise<any> {
@@ -127,24 +120,7 @@ export const ActionAdd = ({ actionType, refreshList }: Props) => {
   }
 
   return (
-    <EuiFlyout onClose={closeFlyout} aria-labelledby="flyoutActionAddTitle" size="m">
-      <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiIcon type={actionTypeRegisterd.iconClass} size="m" />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiTitle size="s">
-              <h3 id="flyoutTitle">
-                <FormattedMessage
-                  defaultMessage={`Create action ${actionType.name}`}
-                  id="xpack.alertingUI.sections.actionAdd.flyoutTitle"
-                />
-              </h3>
-            </EuiTitle>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutHeader>
+    <Fragment>
       <EuiFlyoutBody>
         <EuiForm>
           {serverError && (
@@ -263,7 +239,7 @@ export const ActionAdd = ({ actionType, refreshList }: Props) => {
                   return setServerError(savedAction.error);
                 }
                 setFlyoutVisibility(false);
-                refreshList();
+                loadActions();
               }}
             >
               <FormattedMessage
@@ -274,6 +250,6 @@ export const ActionAdd = ({ actionType, refreshList }: Props) => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
-    </EuiFlyout>
+    </Fragment>
   );
 };

@@ -4,4 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ActionAddFlyout } from './action_add_flyout';
+import { AlertTypeModel } from '../../../../types';
+
+export function getActionType(): AlertTypeModel {
+  return { id: 'threshold' };
+}

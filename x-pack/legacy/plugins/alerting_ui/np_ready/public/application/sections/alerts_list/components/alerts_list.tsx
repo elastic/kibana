@@ -208,6 +208,7 @@ export const AlertsList: React.FunctionComponent = () => {
                 />
               </EuiButton>,
               <EuiButton
+                key="create-alert"
                 data-test-subj="createAlertButton"
                 fill
                 iconType="plusInCircleFilled"
@@ -215,7 +216,7 @@ export const AlertsList: React.FunctionComponent = () => {
                 onClick={() => setAlertFlyoutVisibility(true)}
               >
                 <FormattedMessage
-                  id="xpack.alertingUI.sections.actionsList.addActionButtonLabel"
+                  id="xpack.alertingUI.sections.alertsList.addActionButtonLabel"
                   defaultMessage="Create"
                 />
               </EuiButton>,

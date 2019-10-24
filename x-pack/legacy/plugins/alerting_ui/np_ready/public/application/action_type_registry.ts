@@ -24,7 +24,7 @@ export class ActionTypeRegistry {
     if (this.has(actionType.id)) {
       throw new Error(
         i18n.translate(
-          'xpack.actions.actionTypeRegistry.register.duplicateActionTypeErrorMessage',
+          'xpack.alertingUI.actionTypeRegistry.register.duplicateActionTypeErrorMessage',
           {
             defaultMessage: 'Action type "{id}" is already registered.',
             values: {

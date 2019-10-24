@@ -21,6 +21,7 @@ import { breadcrumbService } from './application/lib/breadcrumb';
 import { docTitleService } from './application/lib/doc_title';
 import { ActionTypeRegistry } from './application/action_type_registry';
 import { registerBuiltInActionTypes } from './application/sections/action_add/buildin_action_types';
+import { AlertTypeRegistry } from './application/alert_type_registry';
 
 export type Setup = void;
 export type Start = void;
@@ -29,6 +30,7 @@ const REACT_ROOT_ID = 'alertingRoot';
 
 export class Plugin implements CorePlugin<Setup, Start> {
   private actionTypeRegistry?: ActionTypeRegistry;
+  private alertTypeRegistry?: AlertTypeRegistry;
 
   constructor(initializerContext: PluginInitializerContext) {}
 
@@ -49,6 +51,8 @@ export class Plugin implements CorePlugin<Setup, Start> {
     if (canShowActions || canShowAlerts) {
       const actionTypeRegistry = new ActionTypeRegistry();
       this.actionTypeRegistry = actionTypeRegistry;
+
+      this.alertTypeRegistry = new AlertTypeRegistry();
 
       registerBuiltInActionTypes({
         actionTypeRegistry,
@@ -112,8 +116,14 @@ export class Plugin implements CorePlugin<Setup, Start> {
           $scope.$$postDigest(() => {
             unmountReactApp();
             const elReactRoot = document.getElementById(REACT_ROOT_ID);
-            if (elReactRoot && this.actionTypeRegistry) {
-              renderReact(elReactRoot, core, plugins, this.actionTypeRegistry);
+            if (elReactRoot && this.actionTypeRegistry && this.alertTypeRegistry) {
+              renderReact(
+                elReactRoot,
+                core,
+                plugins,
+                this.actionTypeRegistry,
+                this.alertTypeRegistry
+              );
             }
           });
         };

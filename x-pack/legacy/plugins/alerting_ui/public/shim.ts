@@ -10,6 +10,7 @@ import { CoreStart } from 'kibana/public';
 import { toastNotifications } from 'ui/notify';
 import { docTitle } from 'ui/doc_title/doc_title';
 import { ActionTypeRegistry } from '../np_ready/public/application/action_type_registry';
+import { AlertTypeRegistry } from '../np_ready/public/application/alert_type_registry';
 
 export interface AppPlugins {
   management: {
@@ -24,6 +25,7 @@ export interface AppDependencies {
   core: CoreStart;
   plugins: AppPlugins;
   actionTypeRegistry: ActionTypeRegistry;
+  alertTypeRegistry: AlertTypeRegistry;
 }
 
 export function createShim() {
