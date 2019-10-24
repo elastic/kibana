@@ -205,20 +205,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
   }
 
   _makeAggConfigs(precision) {
-    const metricAggConfigs = this.getMetricFields2().map(esAggMetricField => {
-      const metricAggConfig = {
-        id: esAggMetricField.getPropertyKey(),
-        enabled: true,
-        type: esAggMetricField.getAggType(),
-        schema: 'metric',
-        params: {}
-      };
-      if (esAggMetricField.getAggType() !== 'count') {
-        metricAggConfig.params = { field: esAggMetricField.getESDocFieldName() };
-      }
-      return metricAggConfig;
-    });
-
+    const metricAggConfigs = this.createMetricAggConfigs();
     return [
       ...metricAggConfigs,
       {

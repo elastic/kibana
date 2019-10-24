@@ -151,20 +151,7 @@ export class ESTermSource extends AbstractESAggSource {
   }
 
   _makeAggConfigs() {
-    const metricAggConfigs = this.getMetricFields2().map(esAggMetric => {
-      const metricAggConfig = {
-        id: esAggMetric.getPropertyKey(),
-        enabled: true,
-        type: esAggMetric.getAggType(),
-        schema: 'metric',
-        params: {}
-      };
-      if (esAggMetric.getAggType() !== 'count') {
-        metricAggConfig.params = { field: esAggMetric.getESDocFieldName() };
-      }
-      return metricAggConfig;
-    });
-
+    const metricAggConfigs = this.createMetricAggConfigs();
     return [
       ...metricAggConfigs,
       {

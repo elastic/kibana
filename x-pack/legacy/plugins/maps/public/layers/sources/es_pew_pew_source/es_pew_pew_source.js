@@ -176,20 +176,9 @@ export class ESPewPewSource extends AbstractESAggSource {
   }
 
   async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback) {
+
+    const metricAggConfigs = this.createMetricAggConfigs();
     const indexPattern = await this.getIndexPattern();
-    const metricAggConfigs = this.getMetricFields2().map(esAggMetricField => {
-      const metricAggConfig = {
-        id: esAggMetricField.getPropertyKey(),
-        enabled: true,
-        type: esAggMetricField.getAggType(),
-        schema: 'metric',
-        params: {}
-      };
-      if (esAggMetricField.getAggType() !== 'count') {
-        metricAggConfig.params = { field: esAggMetricField.getESDocFieldName() };
-      }
-      return metricAggConfig;
-    });
     const aggConfigs = new AggConfigs(indexPattern, metricAggConfigs, aggSchemas.all);
 
     const searchSource  = await this._makeSearchSource(searchFilters, 0);

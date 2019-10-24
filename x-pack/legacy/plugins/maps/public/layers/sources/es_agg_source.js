@@ -53,6 +53,10 @@ export class AbstractESAggSource extends AbstractESSource {
     return type !== 'count' ? `${type} of ${fieldName}` : COUNT_PROP_LABEL;
   }
 
+  createMetricAggConfigs() {
+    return this.getMetricFields2().map(esAggMetric => esAggMetric.makeMetricAggConfig());
+  }
+
   getMetricFields() {
     return this._getValidMetrics().map(esAggMetric => {
       const metricKey = esAggMetric.getPropertyKey();

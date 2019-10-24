@@ -47,4 +47,18 @@ export class ESAggMetricField extends AbstractField {
     return this.getAggType() !== 'count' ? `${this.getAggType()} ${this.getESDocFieldName()}` : 'count';
   }
 
+  makeMetricAggConfig() {
+    const metricAggConfig = {
+      id: this.getPropertyKey(),
+      enabled: true,
+      type: this.getAggType(),
+      schema: 'metric',
+      params: {}
+    };
+    if (this.getAggType() !== 'count') {
+      metricAggConfig.params = { field: this.getESDocFieldName() };
+    }
+    return metricAggConfig;
+  }
+
 }
