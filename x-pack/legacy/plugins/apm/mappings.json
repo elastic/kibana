@@ -47,25 +47,25 @@
       "apm_oss": {
         "properties": {
           "sourcemapIndices": {
-            "type": "text"
+            "type": "keyword"
           },
           "errorIndices": {
-            "type": "text"
+            "type": "keyword"
           },
           "onboardingIndices": {
-            "type": "text"
+            "type": "keyword"
           },
           "spanIndices": {
-            "type": "text"
+            "type": "keyword"
           },
           "transactionIndices": {
-            "type": "text"
+            "type": "keyword"
           },
           "metricsIndices": {
-            "type": "text"
+            "type": "keyword"
           },
           "apmAgentConfigurationIndex": {
-            "type": "text"
+            "type": "keyword"
           }
         }
       }

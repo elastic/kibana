@@ -6,7 +6,7 @@
 
 import { Server } from 'hapi';
 import { set } from 'lodash';
-import { storeApmUiIndicesSavedObject } from '../../helpers/apm_ui_indices';
+import { storeApmUiIndicesSavedObject } from './apm_ui_indices';
 import { StringMap } from '../../../../typings/common';
 
 export async function saveUiIndices({

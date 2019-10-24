@@ -99,7 +99,7 @@ export function UiIndices() {
 
   const callApmApiFromHook = useCallApmApi();
 
-  const { data = [], refetch } = useFetcher(
+  const { data = [], status, refetch } = useFetcher(
     callApmApi => callApmApi({ pathname: `/api/apm/settings/ui-indices` }),
     []
   );
@@ -236,6 +236,7 @@ export function UiIndices() {
                     fill
                     onClick={handleApplyChangesEvent}
                     isLoading={isSaving}
+                    disabled={status !== 'success'}
                   >
                     {i18n.translate(
                       'xpack.apm.settings.uiIndices.applyButton',

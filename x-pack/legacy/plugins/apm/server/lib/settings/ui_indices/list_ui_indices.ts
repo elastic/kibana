@@ -10,7 +10,8 @@ import { Setup } from '../../helpers/setup_request';
 import {
   getApmUiIndicesSavedObject,
   getApmUiIndicesConfig
-} from '../../helpers/apm_ui_indices';
+} from './apm_ui_indices';
+import { PromiseReturnType } from '../../../../typings/common';
 
 const APM_UI_INDICES = [
   'apm_oss.sourcemapIndices',
@@ -30,7 +31,18 @@ export async function listUiIndices({
   server: Server;
 }) {
   const { config } = setup;
-  const apmUiIndicesSavedObject = await getApmUiIndicesSavedObject(server);
+  let apmUiIndicesSavedObject: PromiseReturnType<
+    typeof getApmUiIndicesSavedObject
+  >;
+  try {
+    apmUiIndicesSavedObject = await getApmUiIndicesSavedObject(server);
+  } catch (error) {
+    if (error.output && error.output.statusCode === 404) {
+      apmUiIndicesSavedObject = { apm_oss: {} };
+    } else {
+      throw error;
+    }
+  }
   const apmUiIndicesConfig = getApmUiIndicesConfig(config);
 
   return APM_UI_INDICES.map(configurationName => ({

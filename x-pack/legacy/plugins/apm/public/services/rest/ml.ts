@@ -32,6 +32,20 @@ interface StartedMLJobApiResponse {
   jobs: MlResponseItem[];
 }
 
+async function getTransactionIndices(http: HttpServiceBase) {
+  const callApmApi: APMClient = createCallApmApi(http);
+  const apmIndicesSettings = await callApmApi({
+    pathname: `/api/apm/settings/ui-indices`
+  });
+  const indexSetting = apmIndicesSettings.find(
+    ({ configuration }) => configuration === 'apm_oss.transactionIndices'
+  );
+  if (!indexSetting) {
+    return 'apm-*';
+  }
+  return indexSetting.savedValue || indexSetting.defaultValue;
+}
+
 export async function startMLJob({
   serviceName,
   transactionType,
@@ -41,16 +55,7 @@ export async function startMLJob({
   transactionType: string;
   http: HttpServiceBase;
 }) {
-  const callApmApi: APMClient = createCallApmApi(http);
-  const indexPatternName = await callApmApi({
-    pathname: `/api/apm/settings/ui-indices/{indexConfigurationName}`,
-    params: {
-      path: {
-        indexConfigurationName: 'apm_oss.transactionIndices'
-      }
-    }
-  });
-
+  const transactionIndices = await getTransactionIndices(http);
   const groups = ['apm', serviceName.toLowerCase()];
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
@@ -64,7 +69,7 @@ export async function startMLJob({
     body: JSON.stringify({
       prefix: getMlPrefix(serviceName, transactionType),
       groups,
-      indexPatternName,
+      indexPatternName: transactionIndices,
       startDatafeed: true,
       query: {
         bool: {

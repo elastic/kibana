@@ -7,7 +7,7 @@
 import { Server } from 'hapi';
 import { merge } from 'lodash';
 import { KibanaConfig } from 'src/legacy/server/kbn_server';
-import { getSavedObjectsClient } from './saved_objects_client';
+import { getSavedObjectsClient } from '../../helpers/saved_objects_client';
 
 interface ApmOssIndices {
   sourcemapIndices: string;
@@ -66,12 +66,6 @@ export async function getApmIndices(server: Server) {
   } catch (error) {
     return getApmUiIndicesConfig(server.config());
   }
-}
-
-export async function getApmIndicesList(server: Server) {
-  const apmIndices = await getApmIndices(server);
-  const set = new Set<string>(Object.values(apmIndices.apm_oss)); // ensure unique values
-  return Array.from(set);
 }
 
 export async function storeApmUiIndicesSavedObject(

@@ -5,11 +5,10 @@
  */
 
 import * as t from 'io-ts';
-import { setupRequest } from '../lib/helpers/setup_request';
-import { createRoute } from './create_route';
-import { listUiIndices } from '../lib/settings/ui_indices/list_ui_indices';
-import { getUiIndex } from '../lib/settings/ui_indices/get_ui_index';
-import { saveUiIndices } from '../lib/settings/ui_indices/save_ui_indices';
+import { setupRequest } from '../../lib/helpers/setup_request';
+import { createRoute } from '../create_route';
+import { listUiIndices } from '../../lib/settings/ui_indices/list_ui_indices';
+import { saveUiIndices } from '../../lib/settings/ui_indices/save_ui_indices';
 
 // get list of ui indices and values
 export const uiIndicesRoute = createRoute(core => ({
@@ -19,23 +18,6 @@ export const uiIndicesRoute = createRoute(core => ({
     const { server } = core.http;
     const setup = await setupRequest(req);
     return await listUiIndices({ setup, server });
-  }
-}));
-
-// get configured APM index
-export const uiIndexRoute = createRoute(core => ({
-  method: 'GET',
-  path: '/api/apm/settings/ui-indices/{indexConfigurationName}',
-  params: {
-    path: t.type({
-      indexConfigurationName: t.string
-    })
-  },
-  handler: async (req, { path }) => {
-    const { server } = core.http;
-    const setup = await setupRequest(req);
-    const { indexConfigurationName } = path;
-    return await getUiIndex({ setup, server, indexConfigurationName });
   }
 }));
 

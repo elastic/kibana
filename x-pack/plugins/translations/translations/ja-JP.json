@@ -3455,8 +3455,6 @@
     "xpack.apm.settings.agentConf.configTable.serviceNameColumnLabel": "サービス名",
     "xpack.apm.settings.agentConf.configurationsPanelTitle": "構成",
     "xpack.apm.settings.agentConf.createConfigButtonLabel": "構成の作成",
-    "xpack.apm.settings.agentConf.pageTitle": "設定",
-    "xpack.apm.settings.agentConf.returnToOverviewLinkLabel": "概要に戻る",
     "xpack.apm.transactionDetails.traceNotFound": "選択されたトレースが見つかりません",
     "xpack.apm.transactionDetails.traceSampleTitle": "トレースのサンプル",
     "xpack.apm.transactionsTable.notFoundLabel": "トランザクションが見つかりませんでした。",
