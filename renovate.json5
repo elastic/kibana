@@ -528,14 +528,6 @@
         ],
       },
       {
-        groupSlug: 'rimraf',
-        groupName: 'rimraf related packages',
-        packageNames: [
-          'rimraf',
-          '@types/rimraf',
-        ],
-      },
-      {
         groupSlug: 'selenium-webdriver',
         groupName: 'selenium-webdriver related packages',
         packageNames: [
