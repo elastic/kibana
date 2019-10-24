@@ -49,8 +49,6 @@ async function startApp(libs: FrontendLibs) {
                         Thank you for participating in the beta and providing feedback.
                         If you have any questions or concerns, please reach out to us on the
                         <a href="https://discuss.elastic.co/c/beats">Discuss forum</a>.
-                        
-                     
                       </p>
                     </EuiCallOut>
                     <AppRouter libs={libs} beatsContainer={beats} tagsContainer={tags} />
