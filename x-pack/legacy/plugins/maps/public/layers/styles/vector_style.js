@@ -23,11 +23,11 @@ import {
   HALF_LARGE_MAKI_ICON_SIZE
 } from './symbol_utils';
 import { DynamicStyleProperty } from './vector/properties/dynamic_style_property';
+import { StaticStyleProperty } from './vector/properties/static_style_property';
 
 export class VectorStyle extends AbstractStyle {
 
   static type = 'VECTOR';
-  static STYLE_TYPE = { 'DYNAMIC': 'DYNAMIC', 'STATIC': 'STATIC' };
 
   static getComputedFieldName(styleName, fieldName) {
     return `${VectorStyle.getComputedFieldNamePrefix(fieldName)}__${styleName}`;
@@ -466,7 +466,7 @@ export class VectorStyle extends AbstractStyle {
   }
 
   _getMBColor(styleName, styleDescriptor) {
-    const isStatic = styleDescriptor.type === DynamicStyleProperty.type;
+    const isStatic = styleDescriptor.type === StaticStyleProperty.type;
     if (isStatic) {
       return _.get(styleDescriptor, 'options.color', null);
     }
@@ -507,7 +507,7 @@ export class VectorStyle extends AbstractStyle {
   }
 
   _getMbSize(styleName, styleDescriptor) {
-    if (styleDescriptor.type === DynamicStyleProperty.type) {
+    if (styleDescriptor.type === StaticStyleProperty.type) {
       return styleDescriptor.options.size;
     }
 
