@@ -12,8 +12,16 @@ import { EuiBasicTable, EuiButton, EuiSearchBar, EuiSpacer } from '@elastic/eui'
 import { AlertsContext } from '../../../context/alerts_context';
 import { useAppDependencies } from '../../../index';
 import { Alert, AlertTableItem, AlertTypeIndex, Pagination } from '../../../../types';
-import { deleteAlerts, loadAlerts, loadAlertTypes } from '../../../lib/api';
 import { AlertAdd } from '../../alert_add';
+import {
+  deleteAlerts,
+  disableAlert,
+  enableAlert,
+  loadAlerts,
+  loadAlertTypes,
+  muteAllAlertInstances,
+  unmuteAllAlertInstances,
+} from '../../../lib/api';
 
 export const AlertsList: React.FunctionComponent = () => {
   const {
@@ -21,6 +29,7 @@ export const AlertsList: React.FunctionComponent = () => {
     plugins: { capabilities, toastNotifications },
   } = useAppDependencies();
   const canDelete = capabilities.get().alerting.delete;
+  const canSave = capabilities.get().alerting.save;
 
   const [alertTypesIndex, setAlertTypesIndex] = useState<AlertTypeIndex | undefined>(undefined);
   const [alerts, setAlerts] = useState<Alert[]>([]);
@@ -28,7 +37,7 @@ export const AlertsList: React.FunctionComponent = () => {
   const [selectedItems, setSelectedItems] = useState<AlertTableItem[]>([]);
   const [isLoadingAlertTypes, setIsLoadingAlertTypes] = useState<boolean>(false);
   const [isLoadingAlerts, setIsLoadingAlerts] = useState<boolean>(false);
-  const [isDeletingActions, setIsDeletingActions] = useState<boolean>(false);
+  const [isPerformingAction, setIsPerformingAction] = useState<boolean>(false);
   const [totalItemCount, setTotalItemCount] = useState<number>(0);
   const [page, setPage] = useState<Pagination>({ index: 0, size: 10 });
   const [searchText, setSearchText] = useState<string | undefined>(undefined);
@@ -93,7 +102,7 @@ export const AlertsList: React.FunctionComponent = () => {
   }
 
   async function deleteItems(items: AlertTableItem[]) {
-    setIsDeletingActions(true);
+    setIsPerformingAction(true);
     const ids = items.map(item => item.id);
     try {
       await deleteAlerts({ http, ids });
@@ -107,7 +116,7 @@ export const AlertsList: React.FunctionComponent = () => {
       // Refresh the alerts from the server, some alerts may have been deleted
       await loadAlertsData();
     } finally {
-      setIsDeletingActions(false);
+      setIsPerformingAction(false);
     }
   }
 
@@ -141,6 +150,9 @@ export const AlertsList: React.FunctionComponent = () => {
       actions: [
         {
           enabled: () => canDelete,
+          type: 'icon',
+          icon: 'trash',
+          onClick: (item: AlertTableItem) => deleteItems([item]),
           name: i18n.translate(
             'xpack.alertingUI.sections.alertsList.alertsListTable.columns.actions.deleteAlertName',
             { defaultMessage: 'Delete' }
@@ -154,9 +166,98 @@ export const AlertsList: React.FunctionComponent = () => {
                 'xpack.alertingUI.sections.alertsList.alertsListTable.columns.actions.deleteAlertDisabledDescription',
                 { defaultMessage: 'Unable to delete alerts' }
               ),
-          type: 'icon',
-          icon: 'trash',
-          onClick: (item: AlertTableItem) => deleteItems([item]),
+        },
+        {
+          enabled: () => canSave,
+          available: (item: AlertTableItem) => !item.enabled,
+          onClick: async (item: AlertTableItem) => {
+            setIsPerformingAction(true);
+            await enableAlert({ http, id: item.id });
+            await loadAlertsData();
+            setIsPerformingAction(false);
+          },
+          name: i18n.translate(
+            'xpack.alertingUI.sections.alertsList.alertsListTable.columns.actions.enableAlertTitle',
+            { defaultMessage: 'Enable' }
+          ),
+          description: canSave
+            ? i18n.translate(
+                'xpack.alertingUI.sections.alertsList.alertsListTable.columns.actions.enableAlertDescription',
+                { defaultMessage: 'Enable this alert' }
+              )
+            : i18n.translate(
+                'xpack.alertingUI.sections.alertsList.alertsListTable.columns.actions.enableAlertDisabledDescription',
+                { defaultMessage: 'Unable to enable alerts' }
+              ),
+        },
+        {
+          enabled: () => canSave,
+          available: (item: AlertTableItem) => item.enabled,
+          onClick: async (item: AlertTableItem) => {
+            setIsPerformingAction(true);
+            await disableAlert({ http, id: item.id });
+            await loadAlertsData();
+            setIsPerformingAction(false);
+          },
+          name: i18n.translate(
+            'xpack.alertingUI.sections.alertsList.alertsListTable.columns.actions.disableAlertTitle',
+            { defaultMessage: 'Disable' }
+          ),
+          description: canSave
+            ? i18n.translate(
+                'xpack.alertingUI.sections.alertsList.alertsListTable.columns.actions.disableAlertDescription',
+                { defaultMessage: 'Disable this alert' }
+              )
+            : i18n.translate(
+                'xpack.alertingUI.sections.alertsList.alertsListTable.columns.actions.disableAlertDisabledDescription',
+                { defaultMessage: 'Unable to disable alerts' }
+              ),
+        },
+        {
+          enabled: () => canSave,
+          available: (item: AlertTableItem) => !item.muteAll,
+          onClick: async (item: AlertTableItem) => {
+            setIsPerformingAction(true);
+            await muteAllAlertInstances({ http, id: item.id });
+            await loadAlertsData();
+            setIsPerformingAction(false);
+          },
+          name: i18n.translate(
+            'xpack.alertingUI.sections.alertsList.alertsListTable.columns.actions.muteAllAlertInstancesTitle',
+            { defaultMessage: 'Mute all' }
+          ),
+          description: canSave
+            ? i18n.translate(
+                'xpack.alertingUI.sections.alertsList.alertsListTable.columns.actions.muteAllAlertInstancesDescription',
+                { defaultMessage: 'Mute all alert instances' }
+              )
+            : i18n.translate(
+                'xpack.alertingUI.sections.alertsList.alertsListTable.columns.actions.muteAllAlertInstancesDisabledDescription',
+                { defaultMessage: 'Unable to mute all alert instances' }
+              ),
+        },
+        {
+          enabled: () => canSave,
+          available: (item: AlertTableItem) => item.muteAll,
+          onClick: async (item: AlertTableItem) => {
+            setIsPerformingAction(true);
+            await unmuteAllAlertInstances({ http, id: item.id });
+            await loadAlertsData();
+            setIsPerformingAction(false);
+          },
+          name: i18n.translate(
+            'xpack.alertingUI.sections.alertsList.alertsListTable.columns.actions.unmuteAllAlertInstancesTitle',
+            { defaultMessage: 'Unmute all' }
+          ),
+          description: canSave
+            ? i18n.translate(
+                'xpack.alertingUI.sections.alertsList.alertsListTable.columns.actions.unmuteAllAlertInstancesDescription',
+                { defaultMessage: 'Unmute all alert instances' }
+              )
+            : i18n.translate(
+                'xpack.alertingUI.sections.alertsList.alertsListTable.columns.actions.unmuteAllAlertInstancesDisabledDescription',
+                { defaultMessage: 'Unable to unmute all alert instances' }
+              ),
         },
       ],
     },
@@ -227,7 +328,7 @@ export const AlertsList: React.FunctionComponent = () => {
           <EuiSpacer size="l" />
 
           <EuiBasicTable
-            loading={isLoadingAlerts || isLoadingAlertTypes || isDeletingActions}
+            loading={isLoadingAlerts || isLoadingAlertTypes || isPerformingAction}
             items={data}
             itemId="id"
             columns={alertsTableColumns}

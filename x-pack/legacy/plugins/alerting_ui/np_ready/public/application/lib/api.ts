@@ -125,3 +125,43 @@ export async function saveAlert({
     body: JSON.stringify(alert),
   });
 }
+
+export async function enableAlert({
+  id,
+  http,
+}: {
+  id: string;
+  http: HttpServiceBase;
+}): Promise<void> {
+  await http.post(`${BASE_ALERT_API_PATH}/${id}/_enable`);
+}
+
+export async function disableAlert({
+  id,
+  http,
+}: {
+  id: string;
+  http: HttpServiceBase;
+}): Promise<void> {
+  await http.post(`${BASE_ALERT_API_PATH}/${id}/_disable`);
+}
+
+export async function muteAllAlertInstances({
+  id,
+  http,
+}: {
+  id: string;
+  http: HttpServiceBase;
+}): Promise<void> {
+  await http.post(`${BASE_ALERT_API_PATH}/${id}/_mute_all`);
+}
+
+export async function unmuteAllAlertInstances({
+  id,
+  http,
+}: {
+  id: string;
+  http: HttpServiceBase;
+}): Promise<void> {
+  await http.post(`${BASE_ALERT_API_PATH}/${id}/_unmute_all`);
+}
