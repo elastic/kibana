@@ -36,23 +36,32 @@ import { EmbeddableHeader } from './embeddable_header';
 const EmbeddableMap = styled.div.attrs({
   className: 'siemEmbeddable__map',
 })`
-  padding-top: calc(9 / 21 * 100%); //21:9 ratio
-  position: relative;
+  ${({ theme }) => css`
+    padding-top: calc(3 / 4 * 100%); //4:3 (standard) ratio
+    position: relative;
 
-  .euiPanel {
-    border: none;
-    box-shadow: none;
+    @media only screen and (min-width: ${theme.eui.euiBreakpoints.m}) {
+      padding-top: calc(9 / 32 * 100%); //32:9 (ultra widescreen) ratio
+    }
 
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-  }
+    @media only screen and (min-width: 1441px) and (min-height: 901px) {
+      padding-top: calc(9 / 21 * 100%); //21:9 (ultrawide) ratio
+    }
 
-  .mapToolbarOverlay__button {
-    display: none;
-  }
+    .euiPanel {
+      border: none;
+      bottom: 0;
+      box-shadow: none;
+      left: 0;
+      position: absolute;
+      right: 0;
+      top: 0;
+    }
+
+    .mapToolbarOverlay__button {
+      display: none;
+    }
+  `}
 `;
 EmbeddableMap.displayName = 'EmbeddableMap';
 
