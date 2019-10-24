@@ -26,10 +26,12 @@ export const searchprofiler = (kibana: any) => {
     publicDir: publicSrc,
 
     uiExports: {
+      // NP Ready
       devTools: ['plugins/searchprofiler/legacy.ts'],
+      styleSheetPaths: `${publicSrc}/np_ready/application/index.scss`,
+      // Legacy
       hacks: ['plugins/searchprofiler/register.js'],
       home: ['plugins/searchprofiler/register_feature.js'],
-      styleSheetPaths: `${publicSrc}/np_ready/application/index.scss`,
     },
     init(server: any) {
       const thisPlugin = this;

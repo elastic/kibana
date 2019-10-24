@@ -1,6 +1,0 @@
-{
-  "id": "searchprofiler",
-  "version": "kibana",
-  "server": true,
-  "ui": true
-}
