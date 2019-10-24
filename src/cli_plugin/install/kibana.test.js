@@ -17,18 +17,18 @@
  * under the License.
  */
 
-jest.mock('fs', () => ({
-  statSync: jest.fn().mockImplementation(() => require('fs').statSync),
-  unlinkSync: jest.fn().mockImplementation(() => require('fs').unlinkSync),
-  mkdirSync: jest.fn().mockImplementation(() => require('fs').mkdirSync),
-}));
-
 import sinon from 'sinon';
 import Logger from '../lib/logger';
 import { join } from 'path';
 import del from 'del';
 import fs from 'fs';
 import { existingInstall, assertVersion } from './kibana';
+
+jest.spyOn(fs, 'statSync');
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
 
 describe('kibana cli', function () {
 
@@ -124,14 +124,14 @@ describe('kibana cli', function () {
         });
 
         it('should throw an error if the plugin already exists.', function () {
-          fs.statSync = jest.fn().mockImplementationOnce(() => true);
+          fs.statSync.mockImplementationOnce(() => true);
           existingInstall(settings, logger);
           expect(logger.error.firstCall.args[0]).toMatch(/already exists/);
           expect(process.exit.called).toBe(true);
         });
 
         it('should not throw an error if the plugin does not exist.', function () {
-          fs.statSync = jest.fn().mockImplementationOnce(() => {
+          fs.statSync.mockImplementationOnce(() => {
             throw { code: 'ENOENT' };
           });
           existingInstall(settings, logger);
