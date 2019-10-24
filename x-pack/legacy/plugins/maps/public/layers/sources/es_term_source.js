@@ -151,16 +151,16 @@ export class ESTermSource extends AbstractESAggSource {
   }
 
   _makeAggConfigs() {
-    const metricAggConfigs = this.getMetricFields().map(metric => {
+    const metricAggConfigs = this.getMetricFields2().map(esAggMetric => {
       const metricAggConfig = {
-        id: metric.propertyKey,
+        id: esAggMetric.getPropertyKey(),
         enabled: true,
-        type: metric.type,
+        type: esAggMetric.getAggType(),
         schema: 'metric',
         params: {}
       };
-      if (metric.type !== 'count') {
-        metricAggConfig.params = { field: metric.field };
+      if (esAggMetric.getAggType() !== 'count') {
+        metricAggConfig.params = { field: esAggMetric.getESDocFieldName() };
       }
       return metricAggConfig;
     });
@@ -190,8 +190,6 @@ export class ESTermSource extends AbstractESAggSource {
   }
 
   getFieldNames() {
-    return this.getMetricFields().map(({ propertyKey }) => {
-      return propertyKey;
-    });
+    return this.getMetricFields2().map(esAggMetricField => esAggMetricField.getPropertyKey());
   }
 }

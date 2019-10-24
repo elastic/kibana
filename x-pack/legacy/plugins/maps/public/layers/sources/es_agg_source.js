@@ -86,20 +86,20 @@ export class AbstractESAggSource extends AbstractESSource {
     }
 
 
-    const metricFields = this.getMetricFields();
+    const metricFields = this.getMetricFields2();
     const tooltipProperties = [];
     metricFields.forEach((metricField) => {
       let value;
       for (const key in properties) {
-        if (properties.hasOwnProperty(key) && metricField.propertyKey === key) {
+        if (properties.hasOwnProperty(key) && metricField.getPropertyKey() === key) {
           value = properties[key];
           break;
         }
       }
 
       const tooltipProperty  = new ESAggMetricTooltipProperty(
-        metricField.propertyKey,
-        metricField.propertyLabel,
+        metricField.getPropertyKey(),
+        metricField.getPropertyLabel(),
         value,
         indexPattern,
         metricField
