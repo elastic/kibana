@@ -23,7 +23,6 @@ interface Opts {
 export enum TaskPoolRunResult {
   RunningAllClaimedTasks = 'RunningAllClaimedTasks',
   RanOutOfCapacity = 'RanOutOfCapacity',
-  RanOutOfTasks = 'RanOutOfTasks',
 }
 
 const VERSION_CONFLICT_MESSAGE = i18n.translate(
