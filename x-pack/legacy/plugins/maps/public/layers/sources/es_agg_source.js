@@ -55,9 +55,8 @@ export class AbstractESAggSource extends AbstractESSource {
 
   getMetricFields() {
     return this._getValidMetrics().map(esAggMetric => {
-      const metricKey = this.formatMetricKey(esAggMetric.getAggType(), esAggMetric._getESDocFieldName());
-      // eslint-disable-next-line max-len
-      const metricLabel = esAggMetric.getLabelSync() ? esAggMetric.getLabelSync() : this.formatMetricLabel(esAggMetric.getAggType(), esAggMetric._getESDocFieldName());
+      const metricKey = esAggMetric.getPropertyKey();
+      const metricLabel = esAggMetric.getPropertyLabel();
       return {
         type: esAggMetric.getAggType(),
         field: esAggMetric._getESDocFieldName(),

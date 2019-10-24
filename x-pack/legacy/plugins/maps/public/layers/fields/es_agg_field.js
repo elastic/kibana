@@ -23,10 +23,6 @@ export class ESAggMetricField extends AbstractField {
     return this._label;
   }
 
-  getLabelSync() {
-    return this._label;
-  }
-
   getAggType() {
     return this._aggType;
   }
@@ -36,9 +32,11 @@ export class ESAggMetricField extends AbstractField {
   }
 
   getPropertyKey() {
+    return this._source.formatMetricKey(this.getAggType(), this._getESDocFieldName());
   }
 
   getPropertyLabel() {
+    return this._label ? this._label : this._source.formatMetricLabel(this.getAggType(), this._getESDocFieldName());
   }
 
   _getESDocFieldName() {
