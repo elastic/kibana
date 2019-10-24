@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { SessionExpirationWarning } from './session_expiration_warning';
+export type BrowserType = 'chromium';
