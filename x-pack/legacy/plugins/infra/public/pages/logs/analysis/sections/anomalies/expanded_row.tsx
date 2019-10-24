@@ -65,8 +65,10 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
         />
       </EuiFlexItem>
       <EuiFlexItem>
+        <EuiSpacer size="m" />
         <EuiStat
           title={numeral(totalNumberOfLogEntries).format('0.00a')}
+          titleSize='m'
           description={i18n.translate(
             'xpack.infra.logs.analysis.anomaliesExpandedRowNumberOfLogEntriesDescription',
             {
@@ -75,17 +77,7 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
           )}
           reverse
         />
-        <EuiStat
-          title={formatAnomalyScore(topAnomalyScore)}
-          description={i18n.translate(
-            'xpack.infra.logs.analysis.anomaliesExpandedRowTopAnomalyScoreDescription',
-            {
-              defaultMessage: 'Max anomaly score',
-            }
-          )}
-          reverse
-        />
-        <EuiSpacer size="s" />
+        <EuiSpacer size="m" />
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <AnalyzeInMlButton jobId={jobId} timeRange={timeRange} partition={partitionId} />

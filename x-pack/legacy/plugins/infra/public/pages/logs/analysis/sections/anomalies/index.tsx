@@ -168,6 +168,7 @@ export const AnomaliesResults: React.FunctionComponent<{
             <EuiFlexItem grow={2}>
               <EuiStat
                 title={numeral(results.totalNumberOfLogEntries).format('0.00a')}
+                titleSize='m'
                 description={i18n.translate(
                   'xpack.infra.logs.analysis.overallAnomaliesNumberOfLogEntriesDescription',
                   {
@@ -178,6 +179,7 @@ export const AnomaliesResults: React.FunctionComponent<{
               />
               <EuiStat
                 title={topAnomalyScore ? formatAnomalyScore(topAnomalyScore) : null}
+                titleSize='m'
                 description={i18n.translate(
                   'xpack.infra.logs.analysis.overallAnomaliesTopAnomalyScoreDescription',
                   {
