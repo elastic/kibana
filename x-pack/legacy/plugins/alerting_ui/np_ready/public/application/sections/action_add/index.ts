@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ActionAdd } from './action_add';
+export { ActionAddFlyout } from './action_add_flyout';

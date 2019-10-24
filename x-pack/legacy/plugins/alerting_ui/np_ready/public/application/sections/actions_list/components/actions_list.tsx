@@ -10,10 +10,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ActionsContext } from '../../../context/actions_context';
 import { useAppDependencies } from '../../../index';
-import { AlertingActionsDropdown } from './create_menu_popover';
-import { ActionAdd } from '../../action_add';
 import { deleteActions, loadAllActions, loadActionTypes } from '../../../lib/api';
-import { ActionType, Action, ActionTableItem, ActionTypeIndex } from '../../../../types';
+import { Action, ActionTableItem, ActionTypeIndex } from '../../../../types';
+import { ActionAddFlyout } from '../../action_add';
 
 export const ActionsList: React.FunctionComponent = () => {
   const {
@@ -31,7 +30,6 @@ export const ActionsList: React.FunctionComponent = () => {
   const [isLoadingActions, setIsLoadingActions] = useState<boolean>(false);
   const [isDeletingActions, setIsDeletingActions] = useState<boolean>(false);
   const [flyoutVisible, setFlyoutVisibility] = useState<boolean>(false);
-  const [actionType, setActionTypeId] = useState<ActionType | null>(null);
 
   useEffect(() => {
     loadActions();
@@ -169,21 +167,19 @@ export const ActionsList: React.FunctionComponent = () => {
     },
   ];
 
-  function createAction(actionTypeItem: ActionType) {
-    setFlyoutVisibility(true);
-    setActionTypeId(actionTypeItem);
-  }
-
-  let flyout = null;
-  if (actionType) {
-    flyout = <ActionAdd actionType={actionType} refreshList={loadActions} />;
-  }
-
   return (
     <section data-test-subj="actionsList">
       <Fragment>
         <EuiSpacer size="m" />
-        <ActionsContext.Provider value={{ flyoutVisible, setFlyoutVisibility, actionTypeRegistry }}>
+        <ActionsContext.Provider
+          value={{
+            flyoutVisible,
+            setFlyoutVisibility,
+            actionTypeRegistry,
+            actionTypesIndex,
+            loadActions,
+          }}
+        >
           <EuiInMemoryTable
             loading={isLoadingActions || isLoadingActionTypes || isDeletingActions}
             items={data}
@@ -242,15 +238,23 @@ export const ActionsList: React.FunctionComponent = () => {
                     defaultMessage="Delete"
                   />
                 </EuiButton>,
-                <AlertingActionsDropdown
+                <EuiButton
+                  data-test-subj="createActionButton"
                   key="create-action"
-                  actionTypesIndex={actionTypesIndex}
-                  createAction={createAction}
-                ></AlertingActionsDropdown>,
+                  fill
+                  iconType="plusInCircleFilled"
+                  iconSide="left"
+                  onClick={() => setFlyoutVisibility(true)}
+                >
+                  <FormattedMessage
+                    id="xpack.alertingUI.sections.actionsList.addActionButtonLabel"
+                    defaultMessage="Create"
+                  />
+                </EuiButton>,
               ],
             }}
           />
-          {flyout}
+          <ActionAddFlyout />
         </ActionsContext.Provider>
       </Fragment>
     </section>
