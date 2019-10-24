@@ -41,7 +41,8 @@ function normalize(
   indexPattern: IndexPattern | string | undefined,
   defaultSortOptions: any
 ) {
-  const [[sortField, order]] = Object.entries(sortable);
+  const [[sortField, sortOrder]] = Object.entries(sortable);
+  const order = typeof sortOrder === 'object' ? sortOrder : { order: sortOrder };
 
   if (indexPattern && typeof indexPattern !== 'string') {
     const indexField = indexPattern.fields.find(({ name }) => name === sortField);
@@ -53,7 +54,7 @@ function normalize(
             lang: indexField.lang,
           },
           type: castSortType(indexField.type),
-          order,
+          ...order,
         },
       };
     }
@@ -62,7 +63,7 @@ function normalize(
   // Don't include unmapped_type for _score field
   const { unmapped_type, ...otherSortOptions } = defaultSortOptions;
   return {
-    [sortField]: { order, ...(sortField === '_score' ? otherSortOptions : defaultSortOptions) },
+    [sortField]: { ...order, ...(sortField === '_score' ? otherSortOptions : defaultSortOptions) },
   };
 }
 
