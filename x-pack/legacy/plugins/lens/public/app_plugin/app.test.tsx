@@ -92,6 +92,11 @@ describe('Lens App', () => {
           },
         },
       },
+      data: {
+        query: {
+          filterManager: createMockFilterManager(),
+        },
+      },
       dataShim: {
         indexPatterns: {
           indexPatterns: {
@@ -101,9 +106,6 @@ describe('Lens App', () => {
           },
         },
         timefilter: { history: {} },
-        filter: {
-          filterManager: createMockFilterManager(),
-        },
       },
       store: {
         get: jest.fn(),
