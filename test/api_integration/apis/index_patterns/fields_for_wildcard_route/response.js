@@ -71,6 +71,21 @@ export default function ({ getService }) {
               name: 'foo',
               readFromDocValues: true,
             },
+            {
+              aggregatable: true,
+              esTypes: [
+                'keyword'
+              ],
+              name: 'nestedField.child',
+              readFromDocValues: true,
+              searchable: true,
+              subType: {
+                nested: {
+                  path: 'nestedField'
+                }
+              },
+              type: 'string',
+            },
           ],
         })
         .then(ensureFieldsAreSorted));
@@ -139,6 +154,21 @@ export default function ({ getService }) {
               aggregatable: true,
               name: 'foo',
               readFromDocValues: true,
+            },
+            {
+              aggregatable: true,
+              esTypes: [
+                'keyword'
+              ],
+              name: 'nestedField.child',
+              readFromDocValues: true,
+              searchable: true,
+              subType: {
+                nested: {
+                  path: 'nestedField'
+                }
+              },
+              type: 'string',
             },
           ],
         })
