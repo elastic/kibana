@@ -13,7 +13,7 @@ exports[`should enable sort order select when sort field provided 1`] = `
     <TooltipSelector
       fields={null}
       onChange={[Function]}
-      tooltipProperties={Array []}
+      tooltipFields={Array []}
     />
   </EuiFormRow>
   <EuiFormRow
@@ -112,7 +112,7 @@ exports[`should render top hits form when useTopHits is true 1`] = `
     <TooltipSelector
       fields={null}
       onChange={[Function]}
-      tooltipProperties={Array []}
+      tooltipFields={Array []}
     />
   </EuiFormRow>
   <EuiFormRow
@@ -250,7 +250,7 @@ exports[`should render update source editor 1`] = `
     <TooltipSelector
       fields={null}
       onChange={[Function]}
-      tooltipProperties={Array []}
+      tooltipFields={Array []}
     />
   </EuiFormRow>
   <EuiFormRow
