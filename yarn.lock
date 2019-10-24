@@ -1153,10 +1153,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@14.5.0":
-  version "14.5.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-14.5.0.tgz#1b27559cd644403e2692cab1549082cbd3421dab"
-  integrity sha512-QpmfO6Unt4evb4P18CyWzassLFrw/4CUPFYZXQK12IChDOs6GrwQ6xZM8f0wjN/NXwjRjlWzMhtCWHYmrI6NGg==
+"@elastic/eui@14.5.1":
+  version "14.5.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-14.5.1.tgz#40c3cef866e6aae26cc3892ffbf9d6645d6b4dea"
+  integrity sha512-HuNKFfJq+tV6s+D8KAXCQfZW5PAeQqt/HzeAva6DbGduoRzk+SyCxJ0D0Ppm9dMBEiL7CuMAijWq3nxQH0SYUA==
   dependencies:
     "@types/lodash" "^4.14.116"
     "@types/numeral" "^0.0.25"
@@ -23158,10 +23158,10 @@ react-resize-detector@^4.0.5, react-resize-detector@^4.2.0:
     raf-schd "^4.0.0"
     resize-observer-polyfill "^1.5.1"
 
-react-reverse-portal@^1.0.2:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/react-reverse-portal/-/react-reverse-portal-1.0.3.tgz#38cd2d40f40862352dd63905f9b923f9c41f474b"
-  integrity sha512-mCtpp3BzPedmGTAMqT2v5U1hwnAvRfSqMusriON/GxnedT9gvNNTvai24NnrfKfQ78zqPo4e3N5nWPLpY7bORQ==
+react-reverse-portal@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/react-reverse-portal/-/react-reverse-portal-1.0.4.tgz#d127d2c9147549b25c4959aba1802eca4b144cd4"
+  integrity sha512-WESex/wSjxHwdG7M0uwPNkdQXaLauXNHi4INQiRybmFIXVzAqgf/Ak2OzJ4MLf4UuCD/IzEwJOkML2SxnnontA==
 
 react-router-dom@4.2.2:
   version "4.2.2"
