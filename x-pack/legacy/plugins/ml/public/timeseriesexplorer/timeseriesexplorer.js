@@ -1179,6 +1179,7 @@ export class TimeSeriesExplorer extends React.Component {
 
         {(arePartitioningFieldsProvided && jobs.length > 0 && loading === false && hasResults === true) && (
           <EuiText className="results-container">
+            {/* Make sure ChartTooltip is inside this plain wrapping element so positioning can be infered correctly. */}
             <ChartTooltip />
 
             <span className="panel-title">
