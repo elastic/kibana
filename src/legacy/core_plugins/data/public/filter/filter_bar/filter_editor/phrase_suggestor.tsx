@@ -18,6 +18,7 @@
  */
 
 import { Component } from 'react';
+import { debounce } from 'lodash';
 import { Field, IndexPattern } from '../../../index_patterns';
 import {
   withKibana,
@@ -65,7 +66,7 @@ export class PhraseSuggestorUI<T extends PhraseSuggestorProps> extends Component
     this.updateSuggestions(`${value}`);
   };
 
-  protected async updateSuggestions(value: string = '') {
+  protected updateSuggestions = debounce(async (value: string = '') => {
     const { indexPattern, field } = this.props as PhraseSuggestorProps;
     if (!field || !this.isSuggestingValues()) {
       return;
@@ -73,7 +74,7 @@ export class PhraseSuggestorUI<T extends PhraseSuggestorProps> extends Component
     this.setState({ isLoading: true });
     const suggestions = await this.services.data.getSuggestions(indexPattern.title, field, value);
     this.setState({ suggestions, isLoading: false });
-  }
+  }, 500);
 }
 
 export const PhraseSuggestor = withKibana(PhraseSuggestorUI);

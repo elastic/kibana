@@ -318,7 +318,7 @@ export class GitOperations {
     const git = await this.openGit(uri);
     const commit = await this.getCommitOr404(uri, revision);
     if (!revision.includes('..')) {
-      revision = `${revision}..${revision}~1`;
+      revision = `${revision}~1..${revision}`;
     }
     const diffs = await git.diffSummary([revision]);
 
@@ -506,7 +506,7 @@ export class GitOperations {
     const options: any = {
       n: count,
       format: {
-        updated: '%ai',
+        updated: '%aI',
         message: '%B',
         author: '%an',
         authorEmail: '%ae',

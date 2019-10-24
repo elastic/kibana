@@ -13,7 +13,7 @@ let globalPid = 0;
 export abstract class EmbedProgram implements ControlledProgram {
   private eventEmitter = new EventEmitter();
   private _killed: boolean = false;
-  protected constructor(readonly log: Logger) {
+  protected constructor(public readonly log: Logger) {
     this.pid = globalPid++;
   }
 
