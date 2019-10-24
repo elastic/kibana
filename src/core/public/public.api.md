@@ -111,12 +111,9 @@ export interface ChromeDocTitle {
     __legacy: {
         setBaseTitle(baseTitle: string): void;
     };
-    change(newTitle: ChromeDocTitleChange): void;
+    change(newTitle: string | string[]): void;
     reset(): void;
 }
-
-// @public
-export type ChromeDocTitleChange = string | string[];
 
 // @public (undocumented)
 export type ChromeHelpExtension = (element: HTMLDivElement) => () => void;

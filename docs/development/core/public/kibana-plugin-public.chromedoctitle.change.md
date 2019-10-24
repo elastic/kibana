@@ -9,14 +9,14 @@ Changes the current document title.
 <b>Signature:</b>
 
 ```typescript
-change(newTitle: ChromeDocTitleChange): void;
+change(newTitle: string | string[]): void;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  newTitle | <code>ChromeDocTitleChange</code> |  |
+|  newTitle | <code>string &#124; string[]</code> |  |
 
 <b>Returns:</b>
 

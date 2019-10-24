@@ -53,7 +53,7 @@ export interface ChromeDocTitle {
    *
    * @param newTitle The new title to set, either a string or string array
    */
-  change(newTitle: ChromeDocTitleChange): void;
+  change(newTitle: string | string[]): void;
   /**
    * Resets the document title to it's initial value.
    * (meaning the one present in the title meta at application load.)
@@ -66,14 +66,7 @@ export interface ChromeDocTitle {
   };
 }
 
-/**
- * Composed type for the {@link ChromeDocTitle#change} possible inputs.
- *
- * @public
- */
-export type ChromeDocTitleChange = string | string[];
-
-const defaultTitle: ChromeDocTitleChange = [];
+const defaultTitle: string[] = [];
 const titleSeparator = ' - ';
 
 /** @internal */
@@ -86,7 +79,7 @@ export class DocTitleService {
     this.baseTitle = document.title;
 
     return {
-      change: (title: ChromeDocTitleChange) => {
+      change: (title: string | string[]) => {
         this.applyTitle(title);
       },
       reset: () => {
@@ -100,11 +93,11 @@ export class DocTitleService {
     };
   }
 
-  private applyTitle(title: ChromeDocTitleChange) {
+  private applyTitle(title: string | string[]) {
     this.document.title = this.render(title);
   }
 
-  private render(title: ChromeDocTitleChange) {
+  private render(title: string | string[]) {
     const parts = [...(isString(title) ? [title] : title), this.baseTitle];
     // ensuring compat with legacy that might be passing nested arrays
     return compact(flattenDeep(parts)).join(titleSeparator);
