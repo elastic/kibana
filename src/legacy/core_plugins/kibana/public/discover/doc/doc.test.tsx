@@ -24,11 +24,18 @@ import { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { Doc, DocProps } from './doc';
 
+jest.mock('../doc_viewer/doc_viewer', () => ({
+  DocViewer: 'test',
+}));
+
 jest.mock('../kibana_services', () => {
   return {
     getServices: () => ({
       metadata: {
         branch: 'test',
+      },
+      getDocViewsSorted: () => {
+        return [];
       },
     }),
   };
@@ -105,7 +112,7 @@ describe('Test of <Doc /> of Discover', () => {
     expect(findTestSubject(comp, 'doc-msg-error').length).toBe(1);
   });
   // TODO check why this test suddenly fails
-  test.skip('renders elasticsearch hit ', async () => {
+  test('renders elasticsearch hit ', async () => {
     const hit = { hits: { total: 1, hits: [{ _id: 1, _source: { test: 1 } }] } };
     const search = jest.fn(() => Promise.resolve(hit));
     const comp = await mountDoc(search, true);
