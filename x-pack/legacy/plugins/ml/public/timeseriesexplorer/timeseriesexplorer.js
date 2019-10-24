@@ -1100,11 +1100,11 @@ export class TimeSeriesExplorer extends React.Component {
           />
         )}
 
-        {(jobs.length > 0 && loading === false && hasResults === false) && (
+        {(jobs.length > 0 && (fullRefresh === false || loading === false) && hasResults === false) && (
           <TimeseriesexplorerNoChartData dataNotChartable={dataNotChartable} entities={entities} />
         )}
 
-        {(jobs.length > 0 && loading === false && hasResults === true) && (
+        {(jobs.length > 0 && (fullRefresh === false || loading === false) && hasResults === true) && (
           <EuiText className="results-container">
             <span className="panel-title">
               {i18n.translate('xpack.ml.timeSeriesExplorer.singleTimeSeriesAnalysisTitle', {
