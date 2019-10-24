@@ -26,7 +26,9 @@ You need the following permissions to use the Data Visualizer with file upload:
 `manage_index_templates`
 * index privileges: `manage`, `index`
 
-For more information, see <<security-privileges>> and <<built-in-roles>>.
+For more information, see {ref}/security-privileges.html[Security privileges] 
+and {ref}/built-in-roles.html[Built-in roles].
+
 
 [float]
 [[xpack-ml-anomalies]]
