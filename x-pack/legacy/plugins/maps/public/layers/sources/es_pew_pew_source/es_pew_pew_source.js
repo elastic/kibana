@@ -8,7 +8,6 @@ import React from 'react';
 import uuid from 'uuid/v4';
 
 import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
-import { AbstractESSource } from '../es_source';
 import { VectorLayer } from '../../vector_layer';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
@@ -20,6 +19,7 @@ import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { convertToLines } from './convert_to_lines';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { AggConfigs } from 'ui/agg_types';
+import { AbstractESAggSource } from '../es_agg_source';
 
 const COUNT_PROP_LABEL = 'count';
 const COUNT_PROP_NAME = 'doc_count';
@@ -39,7 +39,7 @@ const aggSchemas = new Schemas([
   }
 ]);
 
-export class ESPewPewSource extends AbstractESSource {
+export class ESPewPewSource extends AbstractESAggSource {
 
   static type = ES_PEW_PEW;
   static title = i18n.translate('xpack.maps.source.pewPewTitle', {

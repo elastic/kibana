@@ -6,12 +6,12 @@
 
 import _ from 'lodash';
 
-import { AbstractESSource } from './es_source';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { AggConfigs } from 'ui/agg_types';
 import { i18n } from '@kbn/i18n';
 import { ES_SIZE_LIMIT } from '../../../common/constants';
 import { ESDocField } from '../fields/es_doc_field';
+import { AbstractESAggSource } from './es_agg_source';
 
 const TERMS_AGG_NAME = 'join';
 
@@ -54,7 +54,7 @@ export function extractPropertiesMap(rawEsData, propertyNames, countPropertyName
   return propertiesMap;
 }
 
-export class ESTermSource extends AbstractESSource {
+export class ESTermSource extends AbstractESAggSource {
 
   static type = 'ES_TERM_SOURCE';
 
