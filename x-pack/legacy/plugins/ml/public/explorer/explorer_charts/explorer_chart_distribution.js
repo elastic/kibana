@@ -498,8 +498,8 @@ export const ExplorerChartDistribution = injectI18n(class ExplorerChartDistribut
       }
 
       mlChartTooltipService.show(tooltipData, circle, {
-        x: LINE_CHART_ANOMALY_RADIUS * 2,
-        y: 0
+        x: LINE_CHART_ANOMALY_RADIUS * 3,
+        y: LINE_CHART_ANOMALY_RADIUS * 2,
       });
     }
   }

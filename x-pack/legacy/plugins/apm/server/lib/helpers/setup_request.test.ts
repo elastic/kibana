@@ -31,7 +31,7 @@ describe('setupRequest', () => {
   it('should call callWithRequest with default args', async () => {
     const { mockRequest, callWithRequestSpy } = getMockRequest();
     const { client } = await setupRequest(mockRequest);
-    await client.search({ index: 'apm-*', body: { foo: 'bar' } });
+    await client.search({ index: 'apm-*', body: { foo: 'bar' } } as any);
     expect(callWithRequestSpy).toHaveBeenCalledWith(mockRequest, 'search', {
       index: 'apm-*',
       body: {
