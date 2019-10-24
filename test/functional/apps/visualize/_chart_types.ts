@@ -26,7 +26,8 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'visualize']);
   let isOss = true;
 
-  describe('chart types', function() {
+  // FLAKY: https://github.com/elastic/kibana/issues/49088
+  describe.skip('chart types', function() {
     before(async function() {
       log.debug('navigateToApp visualize');
       isOss = await PageObjects.common.isOss();
