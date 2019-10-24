@@ -6,7 +6,10 @@
 
 import moment from 'moment';
 import { getLicenseExpiration } from './license_expiration';
-import { ALERT_TYPE_LICENSE_EXPIRATION } from '../../common/constants';
+import {
+  ALERT_TYPE_LICENSE_EXPIRATION,
+  MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS,
+} from '../../common/constants';
 import { Logger } from 'src/core/server';
 import { AlertServices } from '../../../alerting/server/types';
 import { SavedObjectsClientMock } from 'src/core/server/mocks';
@@ -27,24 +30,6 @@ function fillLicense(license: any) {
   };
 }
 
-function fillEmailAddress(emailAddress: string) {
-  return {
-    hits: {
-      hits: [
-        {
-          _source: {
-            kibana_settings: {
-              xpack: {
-                default_admin_email: emailAddress,
-              },
-            },
-          },
-        },
-      ],
-    },
-  };
-}
-
 describe('getLicenseExpiration', () => {
   const getMonitoringCluster: () => void = jest.fn();
   const logger: Logger = {
@@ -56,7 +41,7 @@ describe('getLicenseExpiration', () => {
     fatal: jest.fn(),
     info: jest.fn(),
   };
-  const getLogger: Function<Logger> = () => logger;
+  const getLogger = (): Logger => logger;
 
   afterEach(() => {
     (logger.warn as jest.Mock).mockClear();
@@ -155,6 +140,17 @@ describe('getLicenseExpiration', () => {
     const emailAddress = 'foo@foo.com';
     const alert = getLicenseExpiration(getMonitoringCluster, getLogger);
 
+    const savedObjectsClient = SavedObjectsClientMock.create();
+    savedObjectsClient.get.mockReturnValue(
+      new Promise(resolve => {
+        const savedObject: T = {
+          attributes: {
+            [MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS]: emailAddress,
+          },
+        };
+        resolve(savedObject);
+      })
+    );
     const services = {
       callCluster: jest.fn(
         (method: string, params): Promise<any> => {
@@ -170,17 +166,12 @@ describe('getLicenseExpiration', () => {
                 })
               );
             }
-            if (
-              params.filterPath === 'hits.hits._source.kibana_settings.xpack.default_admin_email'
-            ) {
-              resolve(fillEmailAddress(emailAddress));
-            }
             resolve({});
           });
         }
       ),
       alertInstanceFactory,
-      savedObjectsClient: SavedObjectsClientMock.create(),
+      savedObjectsClient,
     };
 
     const params = {
@@ -216,6 +207,17 @@ describe('getLicenseExpiration', () => {
     const emailAddress = 'foo@foo.com';
     const alert = getLicenseExpiration(getMonitoringCluster, getLogger);
 
+    const savedObjectsClient = SavedObjectsClientMock.create();
+    savedObjectsClient.get.mockReturnValue(
+      new Promise(resolve => {
+        const savedObject: T = {
+          attributes: {
+            [MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS]: emailAddress,
+          },
+        };
+        resolve(savedObject);
+      })
+    );
     const services = {
       callCluster: jest.fn(
         (method: string, params): Promise<any> => {
@@ -231,17 +233,12 @@ describe('getLicenseExpiration', () => {
                 })
               );
             }
-            if (
-              params.filterPath === 'hits.hits._source.kibana_settings.xpack.default_admin_email'
-            ) {
-              resolve(fillEmailAddress(emailAddress));
-            }
             resolve({});
           });
         }
       ),
       alertInstanceFactory,
-      savedObjectsClient: SavedObjectsClientMock.create(),
+      savedObjectsClient,
     };
 
     const params = {
@@ -281,6 +278,17 @@ describe('getLicenseExpiration', () => {
     const emailAddress = 'foo@foo.com';
     const alert = getLicenseExpiration(getMonitoringCluster, getLogger);
 
+    const savedObjectsClient = SavedObjectsClientMock.create();
+    savedObjectsClient.get.mockReturnValue(
+      new Promise(resolve => {
+        const savedObject: T = {
+          attributes: {
+            [MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS]: emailAddress,
+          },
+        };
+        resolve(savedObject);
+      })
+    );
     const services = {
       callCluster: jest.fn(
         (method: string, params): Promise<any> => {
@@ -296,17 +304,12 @@ describe('getLicenseExpiration', () => {
                 })
               );
             }
-            if (
-              params.filterPath === 'hits.hits._source.kibana_settings.xpack.default_admin_email'
-            ) {
-              resolve(fillEmailAddress(emailAddress));
-            }
             resolve({});
           });
         }
       ),
       alertInstanceFactory,
-      savedObjectsClient: SavedObjectsClientMock.create(),
+      savedObjectsClient,
     };
 
     const params = {
@@ -337,6 +340,17 @@ describe('getLicenseExpiration', () => {
     const emailAddress = 'foo@foo.com';
     const alert = getLicenseExpiration(getMonitoringCluster, getLogger);
 
+    const savedObjectsClient = SavedObjectsClientMock.create();
+    savedObjectsClient.get.mockReturnValue(
+      new Promise(resolve => {
+        const savedObject: T = {
+          attributes: {
+            [MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS]: emailAddress,
+          },
+        };
+        resolve(savedObject);
+      })
+    );
     const services = {
       callCluster: jest.fn(
         (method: string, params): Promise<any> => {
@@ -352,17 +366,12 @@ describe('getLicenseExpiration', () => {
                 })
               );
             }
-            if (
-              params.filterPath === 'hits.hits._source.kibana_settings.xpack.default_admin_email'
-            ) {
-              resolve(fillEmailAddress(emailAddress));
-            }
             resolve({});
           });
         }
       ),
       alertInstanceFactory,
-      savedObjectsClient: SavedObjectsClientMock.create(),
+      savedObjectsClient,
     };
 
     const params = {
