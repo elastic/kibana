@@ -6,7 +6,6 @@
 
 
 import { AbstractESSource } from './es_source';
-import _ from 'lodash';
 import { ESAggMetricTooltipProperty } from '../tooltips/es_aggmetric_tooltip_property';
 import { ESAggMetricField } from '../fields/es_agg_field';
 import { ESDocField } from '../fields/es_doc_field';
@@ -22,7 +21,7 @@ export class AbstractESAggSource extends AbstractESSource {
   constructor(descriptor, inspectorAdapters) {
     super(descriptor, inspectorAdapters);
     this._metricFields = this._descriptor.metrics ? this._descriptor.metrics.map(metric => {
-      const esDocField = new ESDocField({ fieldName: metric.field });
+      const esDocField = metric.field ? new ESDocField({ fieldName: metric.field }) : null;
       return new ESAggMetricField({
         label: metric.label,
         esDocField: esDocField,
@@ -33,11 +32,15 @@ export class AbstractESAggSource extends AbstractESSource {
   }
 
   _getValidMetrics() {
-    const metrics = _.get(this._descriptor, 'metrics', []).filter(({ type, field }) => {
-      return (type === 'count')  ? true : !!field;
+    const metrics = this._metricFields.filter(esAggField => {
+      return (esAggField.getAggType() === 'count')  ? true : !!esAggField.getESDocField();
     });
     if (metrics.length === 0) {
-      metrics.push({ type: 'count' });
+      // metrics.push({ type: 'count' });
+      metrics.push(new ESAggMetricField({
+        aggType: 'count',
+        source: this
+      }));
     }
     return metrics;
   }
@@ -51,13 +54,13 @@ export class AbstractESAggSource extends AbstractESSource {
   }
 
   getMetricFields() {
-    return this._getValidMetrics().map(metric => {
-      const metricKey = this.formatMetricKey(metric.type, metric.field);
-      const metricLabel = metric.label ? metric.label : this.formatMetricLabel(metric.type, metric.field);
-      const metricCopy = { ...metric };
-      delete metricCopy.label;
+    return this._getValidMetrics().map(esAggMetric => {
+      const metricKey = this.formatMetricKey(esAggMetric.getAggType(), esAggMetric._getESDocFieldName());
+      // eslint-disable-next-line max-len
+      const metricLabel = esAggMetric.getLabelSync() ? esAggMetric.getLabelSync() : this.formatMetricLabel(esAggMetric.getAggType(), esAggMetric._getESDocFieldName());
       return {
-        ...metricCopy,
+        type: esAggMetric.getAggType(),
+        field: esAggMetric._getESDocFieldName(),
         propertyKey: metricKey,
         propertyLabel: metricLabel
       };

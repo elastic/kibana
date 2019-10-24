@@ -13,14 +13,17 @@ export class ESAggMetricField extends AbstractField {
   static type = 'ES_AGG';
 
   constructor({ label, source, aggType, esDocField }) {
-    super({});
+    super({ source });
     this._label = label;
     this._aggType = aggType;
     this._esDocField = esDocField;
-    this._source = source;
   }
 
   async getLabel() {
+    return this._label;
+  }
+
+  getLabelSync() {
     return this._label;
   }
 
@@ -30,6 +33,20 @@ export class ESAggMetricField extends AbstractField {
 
   getESDocField() {
     return this._esDocField;
+  }
+
+  getPropertyKey() {
+  }
+
+  getPropertyLabel() {
+  }
+
+  _getESDocFieldName() {
+    return this._esDocField ? this._esDocField.getName() : '';
+  }
+
+  getRequestDescription() {
+    return this.getAggType() !== 'count' ? `${this.getAggType()} ${this._getESDocFieldName()}` : 'count';
   }
 
 }

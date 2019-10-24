@@ -131,9 +131,7 @@ export class ESTermSource extends AbstractESAggSource {
   }
 
   _getRequestDescription(leftSourceName, leftFieldName) {
-    const metrics = this._getValidMetrics().map(metric => {
-      return metric.type !== 'count' ? `${metric.type} ${metric.field}` : 'count';
-    });
+    const metrics = this._getValidMetrics().map(esAggMetric => esAggMetric.getRequestDescription());
     const joinStatement = [];
     joinStatement.push(i18n.translate('xpack.maps.source.esJoin.joinLeftDescription', {
       defaultMessage: `Join {leftSourceName}:{leftFieldName} with`,
