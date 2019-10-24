@@ -131,7 +131,7 @@ export class TaskStore {
     const savedObject = await this.savedObjectsRepository.create(
       'task',
       taskInstanceToAttributes(taskInstance),
-      { id: taskInstance.id }
+      { id: taskInstance.id, refresh: false }
     );
 
     return savedObjectToConcreteTaskInstance(savedObject);
