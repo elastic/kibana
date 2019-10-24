@@ -206,12 +206,12 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiTitle>
-            <h3>
+            <h2>
               <FormattedMessage
                 id="xpack.snapshotRestore.policyForm.stepRetentionTitle"
                 defaultMessage="Snapshot retention (optional)"
               />
-            </h3>
+            </h2>
           </EuiTitle>
         </EuiFlexItem>
 

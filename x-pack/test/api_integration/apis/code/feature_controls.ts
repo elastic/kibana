@@ -121,7 +121,8 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     }
   }
 
-  describe('feature controls', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/48617
+  describe.skip('feature controls', () => {
     const codeAdminUsername = 'code_admin_user';
     const codeAdminRoleName = 'code_admin_role';
     const codeAdminUserPassword = `${codeAdminUsername}-password`;
