@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import rimraf from 'rimraf';
+import del from 'del';
 import path from 'path';
 import os from 'os';
 import glob from 'glob';
@@ -38,7 +38,7 @@ describe('kibana cli', function () {
     });
 
     afterEach(() => {
-      rimraf.sync(tempPath);
+      del.sync(tempPath, { force: true });
     });
 
     describe('analyzeArchive', function () {
