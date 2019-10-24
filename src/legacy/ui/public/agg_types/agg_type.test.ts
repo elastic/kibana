@@ -22,10 +22,11 @@ import { AggConfig } from './agg_config';
 
 jest.mock('ui/new_platform');
 
-jest.mock('ui/registry/field_formats', () => ({
-  fieldFormats: {
+jest.mock('../../../../plugins/data/public', () => ({
+  ...jest.requireActual('../../../../plugins/data/public'),
+  getFieldFormats: jest.fn(() => ({
     getDefaultInstance: jest.fn(() => 'default'),
-  },
+  })),
 }));
 
 describe('AggType Class', () => {

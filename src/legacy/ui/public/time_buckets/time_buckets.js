@@ -26,9 +26,10 @@ import {
   convertDurationToNormalizedEsInterval,
   convertIntervalToEsInterval,
 } from './calc_es_interval';
-import { fieldFormats } from '../registry/field_formats';
+import { getFieldFormats } from '../../../../plugins/data/public';
 
 const config = chrome.getUiSettingsClient();
+const fieldFormats = getFieldFormats();
 
 const getConfig = (...args) => config.get(...args);
 

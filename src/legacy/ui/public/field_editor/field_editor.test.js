@@ -54,25 +54,24 @@ jest.mock('ui/scripting_languages', () => ({
   getDeprecatedScriptingLanguages: () => ['testlang'],
 }));
 
-jest.mock('ui/registry/field_formats', () => {
-  class Format {
-    static id = 'test_format'; static title = 'Test format';
-    params() {}
-  }
+jest.mock('../../../../plugins/data/public', () => ({
+  ...jest.requireActual('../../../../plugins/data/public'),
+  getFieldFormats: jest.fn(() => {
+    class Format {
+      static id = 'test_format'; static title = 'Test format';
+      params() {}
+    }
 
-  return {
-    fieldFormats: {
-      getDefaultType: () => {
-        return Format;
-      },
-      getByFieldType: (fieldType) => {
+    return ({
+      getDefaultType: jest.fn(() => Format),
+      getByFieldType: jest.fn((fieldType) => {
         if(fieldType === 'number') {
           return [Format];
         }
-      }
-    },
-  };
-});
+      }),
+    });
+  }),
+}));
 
 jest.mock('ui/documentation_links', () => ({
   getDocLink: (doc) => `(docLink for ${doc})`,

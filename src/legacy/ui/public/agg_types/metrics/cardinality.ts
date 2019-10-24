@@ -19,9 +19,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { MetricAggType } from './metric_agg_type';
-// @ts-ignore
-import { fieldFormats } from '../../registry/field_formats';
+import { getFieldFormats } from '../../../../../plugins/data/public';
 import { METRIC_TYPES } from './metric_agg_types';
+
+const fieldFormats = getFieldFormats();
 
 const uniqueCountTitle = i18n.translate('common.ui.aggTypes.metrics.uniqueCountTitle', {
   defaultMessage: 'Unique Count',

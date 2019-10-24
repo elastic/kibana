@@ -26,14 +26,8 @@ import { DashboardAppState } from './types';
 import { TimeRange } from 'src/plugins/data/public';
 import { ViewMode } from 'src/plugins/embeddable/public';
 import { InputTimeRange } from 'ui/timefilter';
-
-jest.mock('ui/registry/field_formats', () => ({
-  fieldFormats: {
-    getDefaultInstance: jest.fn(),
-  },
-}));
-
 import { dataPluginMock } from '../../../../core_plugins/data/public/mocks';
+
 const dataSetupMock = dataPluginMock.createSetup();
 
 describe('DashboardState', function() {

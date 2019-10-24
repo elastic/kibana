@@ -24,7 +24,7 @@ import { BUCKET_TYPES } from './bucket_agg_types';
 import { BucketAggType } from './_bucket_agg_type';
 import { createFilterDateRange } from './create_filter/date_range';
 import { AggConfig } from '../agg_config';
-import { FieldFormat } from '../../../../../plugins/data/common/field_formats';
+import { FieldFormat } from '../../../../../plugins/data/common/';
 import { DateRangesParamEditor } from '../../vis/editors/default/controls/date_ranges';
 
 // @ts-ignore

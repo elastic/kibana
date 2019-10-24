@@ -33,10 +33,11 @@ import { setNotifications } from '../services';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { notificationServiceMock } from '../../../../../../core/public/notifications/notifications_service.mock';
 
-jest.mock('ui/registry/field_formats', () => ({
-  fieldFormats: {
+jest.mock('../../../../../../plugins/data/public/', () => ({
+  ...jest.requireActual('../../../../../../plugins/data/public/'),
+  getFieldFormats: jest.fn(() => ({
     getDefaultInstance: jest.fn(),
-  },
+  })),
 }));
 
 jest.mock('../../../../../../plugins/kibana_utils/public', () => {
@@ -114,10 +115,6 @@ const apiClient = {
   getFieldsForWildcard: jest.fn(),
 };
 
-const fieldFormats = {
-  getDefaultInstance: jest.fn(),
-} as any;
-
 // helper function to create index patterns
 function create(id: string, payload?: any): Promise<IndexPattern> {
   const indexPattern = new IndexPattern(
@@ -125,8 +122,7 @@ function create(id: string, payload?: any): Promise<IndexPattern> {
     (cfg: any) => config.get(cfg),
     savedObjectsClient as any,
     apiClient,
-    patternCache,
-    fieldFormats
+    patternCache
   );
 
   setDocsourcePayload(id, payload);
@@ -392,8 +388,7 @@ describe('IndexPattern', () => {
       (cfg: any) => config.get(cfg),
       savedObjectsClient as any,
       apiClient,
-      patternCache,
-      fieldFormats
+      patternCache
     );
     await pattern.init();
 
@@ -405,8 +400,7 @@ describe('IndexPattern', () => {
       (cfg: any) => config.get(cfg),
       savedObjectsClient as any,
       apiClient,
-      patternCache,
-      fieldFormats
+      patternCache
     );
     await samePattern.init();
 

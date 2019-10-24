@@ -24,13 +24,12 @@ import { getResponseAggConfigClass, IResponseAggConfig } from './get_response_ag
 
 import { getPercentileValue } from './percentiles_get_value';
 import { METRIC_TYPES } from './metric_agg_types';
-// @ts-ignore
-import { fieldFormats } from '../../registry/field_formats';
-import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
+import { KBN_FIELD_TYPES, getFieldFormats } from '../../../../../plugins/data/public';
 
 // required by the values editor
-
 type IPercentileRanksAggConfig = IResponseAggConfig;
+
+const fieldFormats = getFieldFormats();
 
 const valueProps = {
   makeLabel(this: IPercentileRanksAggConfig) {

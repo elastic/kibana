@@ -27,8 +27,9 @@ import { SearchSource } from '../courier';
 import { Adapters } from '../inspector';
 import { BaseParamType } from './param_types/base';
 
-// @ts-ignore
-import { FieldFormat, fieldFormats } from '../registry/field_formats';
+import { getFieldFormats, FieldFormat } from '../../../../plugins/data/public';
+
+const fieldFormats = getFieldFormats();
 
 export interface AggTypeConfig<
   TAggConfig extends AggConfig = AggConfig,

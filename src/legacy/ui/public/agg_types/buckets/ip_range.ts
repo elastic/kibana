@@ -22,9 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
 import { IpRangeTypeParamEditor } from '../../vis/editors/default/controls/ip_range_type';
 import { IpRangesParamEditor } from '../../vis/editors/default/controls/ip_ranges';
-// @ts-ignore
-import { fieldFormats } from '../../registry/field_formats';
-import { FieldFormat } from '../../../../../plugins/data/common/field_formats';
+import { FieldFormat, getFieldFormats } from '../../../../../plugins/data/public';
 import { ipRange } from '../../utils/ip_range';
 import { BUCKET_TYPES } from './bucket_agg_types';
 
@@ -51,6 +49,7 @@ export const ipRangeBucketAgg = new BucketAggType({
     return { type: 'range', from: bucket.from, to: bucket.to };
   },
   getFormat(agg) {
+    const fieldFormats = getFieldFormats();
     const formatter = agg.fieldOwnFormatter('text', fieldFormats.getDefaultInstance('ip'));
     const IpRangeFormat = FieldFormat.from(function(range: IpRangeKey) {
       return ipRange.toString(range, formatter);
