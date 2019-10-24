@@ -49,10 +49,10 @@ describe('context app', function () {
       const filterManagerAddStub = filterManagerStub.addFilters;
       //get the generated filter
       const generatedFilter = filterManagerAddStub.firstCall.args[0][0];
-      const queryKeys = Object.keys(generatedFilter.query.match);
+      const queryKeys = Object.keys(generatedFilter.query.match_phrase);
       expect(filterManagerAddStub.calledOnce).to.be(true);
       expect(queryKeys[0]).to.eql('FIELD_NAME');
-      expect(generatedFilter.query.match[queryKeys[0]].query).to.eql('FIELD_VALUE');
+      expect(generatedFilter.query.match_phrase[queryKeys[0]]).to.eql('FIELD_VALUE');
     });
 
     it('should pass the index pattern id to the filterManager', function () {

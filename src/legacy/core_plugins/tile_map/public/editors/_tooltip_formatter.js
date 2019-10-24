@@ -31,15 +31,15 @@ export function TileMapTooltipFormatterProvider($injector) {
 
   $compile($el)($tooltipScope);
 
-  return function tooltipFormatter(aggConfig, metricAgg, feature) {
+  return function tooltipFormatter(metricTitle, metricFormat, feature) {
     if (!feature) {
       return '';
     }
 
     $tooltipScope.details = [
       {
-        label: metricAgg.makeLabel(),
-        value: metricAgg.fieldFormatter()(feature.properties.value)
+        label: metricTitle,
+        value: metricFormat(feature.properties.value)
       },
       {
         label: i18n.translate('tileMap.tooltipFormatter.latitudeLabel', { defaultMessage: 'Latitude' }),
