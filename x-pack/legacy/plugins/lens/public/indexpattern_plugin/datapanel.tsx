@@ -23,6 +23,7 @@ import {
   EuiSwitch,
   EuiFacetButton,
   EuiIcon,
+  EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -38,6 +39,7 @@ import {
 import { trackUiEvent } from '../lens_ui_telemetry';
 import { syncExistingFields } from './loader';
 import { fieldExists } from './pure_helpers';
+import { Loader } from '../loader';
 
 export type Props = DatasourceDataPanelProps<IndexPatternPrivateState> & {
   changeIndexPattern: (
@@ -86,9 +88,16 @@ export function IndexPatternDataPanel({
     [state, setState]
   );
 
-  const onToggleEmptyFields = useCallback(() => {
-    setState(prevState => ({ ...prevState, showEmptyFields: !prevState.showEmptyFields }));
-  }, [setState]);
+  const onToggleEmptyFields = useCallback(
+    (showEmptyFields?: boolean) => {
+      setState(prevState => ({
+        ...prevState,
+        showEmptyFields:
+          showEmptyFields === undefined ? !prevState.showEmptyFields : showEmptyFields,
+      }));
+    },
+    [setState]
+  );
 
   const indexPatternList = uniq(
     Object.values(state.layers)
@@ -102,34 +111,38 @@ export function IndexPatternDataPanel({
       timeFieldName: indexPatterns[id].timeFieldName,
     }));
 
-  useEffect(() => {
-    syncExistingFields({
-      dateRange,
-      setState,
-      indexPatterns: indexPatternList,
-      fetchJson: core.http.get,
-    });
-  }, [
-    dateRange.fromDate,
-    dateRange.toDate,
-    indexPatternList.map(x => `${x.title}:${x.timeFieldName}`).join(','),
-  ]);
-
   return (
-    <MemoizedDataPanel
-      currentIndexPatternId={currentIndexPatternId}
-      indexPatternRefs={indexPatternRefs}
-      indexPatterns={indexPatterns}
-      query={query}
-      dateRange={dateRange}
-      filters={filters}
-      dragDropContext={dragDropContext}
-      showEmptyFields={state.showEmptyFields}
-      onToggleEmptyFields={onToggleEmptyFields}
-      core={core}
-      onChangeIndexPattern={onChangeIndexPattern}
-      existingFields={state.existingFields}
-    />
+    <>
+      <Loader
+        load={() =>
+          syncExistingFields({
+            dateRange,
+            setState,
+            indexPatterns: indexPatternList,
+            fetchJson: core.http.get,
+          })
+        }
+        loadDeps={[
+          dateRange.fromDate,
+          dateRange.toDate,
+          indexPatternList.map(x => `${x.title}:${x.timeFieldName}`).join(','),
+        ]}
+      />
+      <MemoizedDataPanel
+        currentIndexPatternId={currentIndexPatternId}
+        indexPatternRefs={indexPatternRefs}
+        indexPatterns={indexPatterns}
+        query={query}
+        dateRange={dateRange}
+        filters={filters}
+        dragDropContext={dragDropContext}
+        showEmptyFields={state.showEmptyFields}
+        onToggleEmptyFields={onToggleEmptyFields}
+        core={core}
+        onChangeIndexPattern={onChangeIndexPattern}
+        existingFields={state.existingFields}
+      />
+    </>
   );
 }
 
@@ -158,7 +171,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   indexPatterns: Record<string, IndexPattern>;
   dragDropContext: DragContextState;
   showEmptyFields: boolean;
-  onToggleEmptyFields: () => void;
+  onToggleEmptyFields: (showEmptyFields?: boolean) => void;
   onChangeIndexPattern: (newId: string) => void;
   existingFields: IndexPatternPrivateState['existingFields'];
 }) {
@@ -201,6 +214,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   const currentIndexPattern = indexPatterns[currentIndexPatternId];
   const allFields = currentIndexPattern.fields;
   const fieldByName = indexBy(allFields, 'name');
+  const clearLocalState = () => setLocalState(s => ({ ...s, nameFilter: '', typeFilter: [] }));
 
   const lazyScroll = () => {
     if (scrollContainer) {
@@ -279,12 +293,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
               indexPatternRefs={indexPatternRefs}
               onChangeIndexPattern={(newId: string) => {
                 onChangeIndexPattern(newId);
-
-                setLocalState(s => ({
-                  ...s,
-                  nameFilter: '',
-                  typeFilter: [],
-                }));
+                clearLocalState();
               }}
             />
           </div>
@@ -303,11 +312,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 }),
                 onClick: () => {
                   trackUiEvent('indexpattern_filters_cleared');
-                  setLocalState(s => ({
-                    ...s,
-                    nameFilter: '',
-                    typeFilter: [],
-                  }));
+                  clearLocalState();
                 },
               }}
             >
@@ -448,6 +453,22 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                           })}
                     </strong>
                   </p>
+                  {(!showEmptyFields ||
+                    localState.typeFilter.length ||
+                    localState.nameFilter.length) && (
+                    <EuiButton
+                      data-test-subj="lnsDataPanelShowAllFields"
+                      onClick={() => {
+                        trackUiEvent('show_empty_fields_clicked');
+                        clearLocalState();
+                        onToggleEmptyFields(true);
+                      }}
+                    >
+                      {i18n.translate('xpack.lens.indexPatterns.showAllFields.buttonText', {
+                        defaultMessage: 'Show All Fields',
+                      })}
+                    </EuiButton>
+                  )}
                 </EuiText>
               )}
             </div>
