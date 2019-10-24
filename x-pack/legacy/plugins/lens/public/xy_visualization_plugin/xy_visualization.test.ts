@@ -56,7 +56,7 @@ describe('xy_visualization', () => {
       // 'test-file-stub' is a hack, but it at least means we aren't using
       // a standard icon here.
       expect(desc.icon).toEqual('test-file-stub');
-      expect(desc.label).toEqual('Bar Chart');
+      expect(desc.label).toEqual('Bar chart');
     });
 
     it('should show mixed horizontal bar chart when multiple horizontal bar types', () => {
@@ -119,7 +119,7 @@ describe('xy_visualization', () => {
             "position": "right",
           },
           "preferredSeriesType": "bar_stacked",
-          "title": "Empty XY Chart",
+          "title": "Empty XY chart",
         }
       `);
     });
