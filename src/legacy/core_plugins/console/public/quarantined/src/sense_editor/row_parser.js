@@ -23,9 +23,14 @@ const MODE = {
   MULTI_DOC_CUR_DOC_END: 8,
   REQUEST_END: 16,
   BETWEEN_REQUESTS: 32
-
 };
 
+/**
+ * The RowParser is still using Ace editor directly for now.
+ *
+ * This will be cleaned up when we implement the editor interface everywhere
+ * in the next pass.
+ */
 function RowParser(editor) {
   const defaultEditor = editor;
 
@@ -132,7 +137,7 @@ function RowParser(editor) {
   this.prevNonEmptyToken = function (tokenIter) {
     let t = tokenIter.stepBackward();
     // empty rows return null token.
-    while ((t || tokenIter.getCurrentTokenRow() > 0) && this.isEmptyToken(t)) t = tokenIter.stepBackward();
+    while ((t || tokenIter.getCurrentPosition().lineNumber > 1) && this.isEmptyToken(t)) t = tokenIter.stepBackward();
     return t;
   };
 }

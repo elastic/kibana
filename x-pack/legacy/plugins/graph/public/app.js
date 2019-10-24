@@ -562,6 +562,18 @@ export function initGraphApp(angularModule, deps) {
       },
     });
 
+    // Allow URLs to include a user-defined text query
+    if ($route.current.params.query) {
+      $scope.initialQuery = $route.current.params.query;
+      const unbind = $scope.$watch('workspace', () => {
+        if (!$scope.workspace) {
+          return;
+        }
+        unbind();
+        $scope.submit($route.current.params.query);
+      });
+    }
+
     $scope.menus = {
       showSettings: false,
     };
