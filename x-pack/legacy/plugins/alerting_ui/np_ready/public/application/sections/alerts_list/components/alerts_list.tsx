@@ -169,6 +169,8 @@ export const AlertsList: React.FunctionComponent = () => {
         },
         {
           enabled: () => canSave,
+          type: 'icon',
+          icon: 'play',
           available: (item: AlertTableItem) => !item.enabled,
           onClick: async (item: AlertTableItem) => {
             setIsPerformingAction(true);
@@ -192,6 +194,8 @@ export const AlertsList: React.FunctionComponent = () => {
         },
         {
           enabled: () => canSave,
+          type: 'icon',
+          icon: 'stop',
           available: (item: AlertTableItem) => item.enabled,
           onClick: async (item: AlertTableItem) => {
             setIsPerformingAction(true);
@@ -214,6 +218,7 @@ export const AlertsList: React.FunctionComponent = () => {
               ),
         },
         {
+          // TODO: Icon
           enabled: () => canSave,
           available: (item: AlertTableItem) => !item.muteAll,
           onClick: async (item: AlertTableItem) => {
@@ -238,6 +243,8 @@ export const AlertsList: React.FunctionComponent = () => {
         },
         {
           enabled: () => canSave,
+          type: 'icon',
+          icon: 'bell',
           available: (item: AlertTableItem) => item.muteAll,
           onClick: async (item: AlertTableItem) => {
             setIsPerformingAction(true);
