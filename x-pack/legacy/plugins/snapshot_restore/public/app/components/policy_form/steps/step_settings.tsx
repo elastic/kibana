@@ -425,12 +425,12 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiTitle>
-            <h3>
+            <h2>
               <FormattedMessage
                 id="xpack.snapshotRestore.policyForm.stepSettingsTitle"
                 defaultMessage="Snapshot settings"
               />
-            </h3>
+            </h2>
           </EuiTitle>
         </EuiFlexItem>
 
