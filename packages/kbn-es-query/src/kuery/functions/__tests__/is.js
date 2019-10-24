@@ -264,6 +264,47 @@ describe('kuery functions', function () {
         );
         expect(result).to.eql(expected);
       });
+
+      it('should support wildcard field names', function () {
+        const expected = {
+          bool: {
+            should: [
+              { match: { extension: 'jpg' } },
+            ],
+            minimum_should_match: 1
+          }
+        };
+
+        const node = nodeTypes.function.buildNode('is', 'ext*', 'jpg');
+        const result = is.toElasticsearchQuery(node, indexPattern);
+        expect(result).to.eql(expected);
+      });
+
+      it('should automatically add a nested query when a wildcard field name covers a nested field', () => {
+        const expected = {
+          bool: {
+            should: [
+              {
+                nested: {
+                  path: 'nestedField.nestedChild',
+                  query: {
+                    match: {
+                      'nestedField.nestedChild.doublyNestedChild': 'foo'
+                    }
+                  },
+                  score_mode: 'none'
+                }
+              }
+            ],
+            minimum_should_match: 1
+          }
+        };
+
+
+        const node = nodeTypes.function.buildNode('is', '*doublyNested*', 'foo');
+        const result = is.toElasticsearchQuery(node, indexPattern);
+        expect(result).to.eql(expected);
+      });
     });
   });
 });
