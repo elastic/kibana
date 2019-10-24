@@ -54,7 +54,7 @@ image:management/snapshot-restore/images/repository_list.png["Repository list"]
 === View your snapshots
 
 A snapshot is a backup taken from a running {es} cluster. You'll find an overview of 
-your snapshots in the *Snapshots* view. You can drill down 
+your snapshots in the *Snapshots* view, and you can drill down 
 into each snapshot for further investigation.
 
 [role="screenshot"]
@@ -75,7 +75,7 @@ the new data.
 === Restore a snapshot
 
 The information stored in a snapshot is not tied to a specific 
-cluster or a cluster name. This structure enables you to
+cluster or a cluster name. This enables you to
 restore a snapshot made from one cluster to another cluster. You might 
 use the restore operation to:
 
@@ -102,8 +102,9 @@ image:management/snapshot-restore/images/snapshot-restore.png["Snapshot details"
 [[kib-snapshot-policy]]
 === Create a snapshot lifecycle policy
 
-Use a {ref}/snapshot-lifecycle-management-api.html[snapshot lifecycle policy] to automate the creation and deletion 
-of the snapshots of your cluster. Taking automatic snapshots:
+Use a {ref}/snapshot-lifecycle-management-api.html[snapshot lifecycle policy] 
+to automate the creation and deletion 
+of cluster snapshots. Taking automatic snapshots:
 
 * Ensures your {es} indices and clusters are backed up on a regular basis
 * Ensures a recent and relevant snapshot is available if a situation 
@@ -112,8 +113,8 @@ arises where a cluster needs to be recovered
 third-party tool
  
 If you don’t have any snapshot policies, follow the 
-*Create policy* wizard.  It walks you through defining the 
-snapshots and repository, when to take snapshots, the settings you want, 
+*Create policy* wizard.  It walks you through defining 
+when and where to take snapshots, the settings you want, 
 and how long to retain snapshots.
 
 [role="screenshot"]
@@ -132,8 +133,6 @@ This action does not cancel any currently ongoing snapshots or remove any previo
 
 [role="screenshot"]
 image:management/snapshot-restore/images/create-policy.png["Snapshot details"]
-
-
 
 [float]
 [[kib-delete-snapshot]]
@@ -157,10 +156,10 @@ Ready to try *Snapshot and Restore*? In this tutorial, you'll learn to:
 
 ==== Before you begin
 
-This example shows how to register a shared file system repository 
+This example shows you how to register a shared file system repository 
 and store snapshots.
 Before you begin, you must register the location of the repository in the 
-`path.repo` setting on 
+{ref}/modules-snapshots.html#_shared_file_system_repository[path.repo] setting on 
 your master and data nodes.  You can do this in one of two ways:
 
 * Edit  your `elasticsearch.yml` to include the `path.repo` setting.
@@ -187,8 +186,7 @@ image:management/snapshot-restore/images/register_repo.png["Register repository"
 . Click *Next*.
 . In *File system location*, enter the path to the snapshot repository, `/tmp/es-backups`.
 . In *Chunk size*, enter `100mb` so that snapshot files are not bigger than that size.
-. Use the defaults for all other fields.
-. Click *Register*.
+. Use the defaults for all other fields, and then click *Register*.
 +
 Your new repository is listed on the *Repositories* view.
 The repository currently doesn’t have any snapshots.
@@ -199,11 +197,10 @@ The repository currently doesn’t have any snapshots.
 Use the {ref}//modules-snapshots.html#snapshots-take-snapshot[snapshot API] to create a snapshot.
 
 . Go to *Dev Tools > Console*.
-. Create the snapshot by entering the following in the editor pane. 
+. Create the snapshot:
 +
 [source,js]
-PUT /_snapshot/my_backup/2019-04-25_snapshot
-  ?wait_for_completion=true
+PUT /_snapshot/my_backup/2019-04-25_snapshot?wait_for_completion=true
 +
 In this example, the snapshot name is `2019-04-25_snapshot`. You can also 
 use {ref}//date-math-index-names.html[date math expression] for the snapshot name.
@@ -227,7 +224,7 @@ using the repository created in the previous example.
 [role="screenshot"]
 image:management/snapshot-restore/images/create-policy-example.png["Create policy wizard"]
 
-. As you step through the wizard, enter the following values:
+. As you walk through the wizard, enter the following values:
 +
 |===
 |*Logistics* |
@@ -263,7 +260,7 @@ image:management/snapshot-restore/images/create-policy-example.png["Create polic
 
 . Review your input, and then click *Create policy*.
 +
-Your new policy is listed on the *Policies* tab and you see a summary of its details.
+Your new policy is listed on the *Policies* tab. and you see a summary of its details.
 
 [[restore-snapshot-example]]
 ==== Restore a snapshot
@@ -271,7 +268,7 @@ Finally, you'll restore indices from an existing snapshot.
 
 . In the *Snapshots* view, find the snapshot you want to restore, for example `2019-04-25_snapshot`.
 . Click the restore icon in the *Actions* column.
-. As you step through the wizard, enter the following values:
+. As you walk through the wizard, enter the following values:
 +
 |===
 |*Logistics* |
@@ -289,7 +286,7 @@ Finally, you'll restore indices from an existing snapshot.
 
 |Modify&nbsp;index&nbsp;settings
 |Toggle to overwrite index settings when they are restored, 
-or leave in place to keep existing settings. are backed up.
+or leave in place to keep existing settings.
 
 |Reset&nbsp;index&nbsp;settings
 |Toggle to reset index settings back to the default when they are restored, 
@@ -299,6 +296,6 @@ or leave in place to keep existing settings.
 . Review your restore settings, and then click *Restore snapshot*.
 +
 The operation loads for a few seconds, 
-then you’re navigated to *Restore Status*, 
+and then you’re navigated to *Restore Status*, 
 where you can monitor the status of your restored indices.
 
