@@ -1,6 +1,6 @@
 [role="xpack"]
 [[logs-ui-settings-kb]]
-=== Logs UI settings in Kibana
+=== Logs app settings in Kibana
 ++++
 <titleabbrev>Logs settings</titleabbrev>
 ++++
