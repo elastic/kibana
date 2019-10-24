@@ -104,36 +104,29 @@ export const EditField = React.memo(({ field }: Props) => {
                     <EuiTitle size="m">
                       <h2>Edit field '{field.source.name}'</h2>
                     </EuiTitle>
-                    <EuiFlexGroup justifyContent="spaceBetween">
-                      <EuiFlexItem grow={false}>
-                        <EuiCode>{field.path}</EuiCode>
-                      </EuiFlexItem>
-
-                      {/* Type documentation link */}
-                      {linkDocumentation && (
-                        <EuiFlexItem grow={false}>
-                          <EuiButtonEmpty
-                            size="s"
-                            flush="right"
-                            href={linkDocumentation}
-                            target="_blank"
-                            iconType="help"
-                          >
-                            {i18n.translate(
-                              'xpack.idxMgmt.mappingsEditor.editField.typeDocumentation',
-                              {
-                                defaultMessage: '{type} documentation',
-                                values: {
-                                  type: subTypeDefinition
-                                    ? subTypeDefinition.label
-                                    : typeDefinition.label,
-                                },
-                              }
-                            )}
-                          </EuiButtonEmpty>
-                        </EuiFlexItem>
-                      )}
-                    </EuiFlexGroup>
+                    <EuiCode>{field.path}</EuiCode>
+                    <EuiSpacer size="s" />
+                    <div>
+                      <EuiButtonEmpty
+                        size="s"
+                        flush="right"
+                        href={linkDocumentation}
+                        target="_blank"
+                        iconType="help"
+                      >
+                        {i18n.translate(
+                          'xpack.idxMgmt.mappingsEditor.editField.typeDocumentation',
+                          {
+                            defaultMessage: '{type} documentation',
+                            values: {
+                              type: subTypeDefinition
+                                ? subTypeDefinition.label
+                                : typeDefinition.label,
+                            },
+                          }
+                        )}
+                      </EuiButtonEmpty>
+                    </div>
                   </EuiFlyoutHeader>
 
                   <EuiFlyoutBody>
