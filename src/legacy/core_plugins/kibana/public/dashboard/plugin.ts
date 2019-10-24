@@ -18,6 +18,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin, SavedObjectsClientContract } from 'kibana/public';
+import { Storage } from 'ui/storage';
 import { RenderDeps } from './render_app';
 import { LocalApplicationService } from '../local_application_service';
 import { DataStart } from '../../../data/public';
@@ -58,7 +59,7 @@ export class DashboardPlugin implements Plugin {
       __LEGACY: { localApplicationService, getAngularDependencies, ...legacyServices },
     }: DashboardPluginSetupDependencies
   ) {
-    localApplicationService.forwardApp('dashboard', 'dashboards');
+    localApplicationService.forwardApp('dashboard', 'dashboards', { keepPrefix: true });
     localApplicationService.register({
       id: 'dashboards',
       title: 'Dashboards',
@@ -76,6 +77,7 @@ export class DashboardPlugin implements Plugin {
           savedQueryService: this.savedQueryService!,
           embeddables: this.embeddables!,
           dashboardCapabilities: contextCore.application.capabilities.dashboard,
+          localStorage: new Storage(localStorage),
         };
         const { renderApp } = await import('./render_app');
         return renderApp(params.element, params.appBasePath, deps);

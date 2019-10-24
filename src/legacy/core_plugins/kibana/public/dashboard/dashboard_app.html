@@ -4,11 +4,11 @@
 >
   <!-- Local nav. -->
   <kbn-top-nav
-    ng-show="chrome.getVisible()"
+    ng-show="isVisible"
     app-name="'dashboard'"
     config="topNavMenu"
 
-    show-search-bar="chrome.getVisible()"
+    show-search-bar="isVisible"
     show-filter-bar="showFilterBar()"
     show-save-query="showSaveQuery"
 
@@ -35,7 +35,7 @@
   we show the filter bar on its own here if the chrome is not visible.
 -->
   <filter-bar
-    ng-if="showFilterBar() && !chrome.getVisible()"
+    ng-if="showFilterBar() && !isVisible"
     class-name="'globalFilterGroup__filterBar'"
     filters="model.filters"
     on-filters-updated="onFiltersUpdated"

@@ -20,11 +20,14 @@
 import { EuiConfirmModal } from '@elastic/eui';
 import angular from 'angular';
 import { IPrivate } from 'ui/private';
+import { Storage } from 'ui/storage';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/src/angular';
 // @ts-ignore
 import { GlobalStateProvider } from 'ui/state_management/global_state';
 // @ts-ignore
 import { StateManagementConfigProvider } from 'ui/state_management/config_provider';
+// @ts-ignore
+import { AppStateProvider } from 'ui/state_management/app_state';
 // @ts-ignore
 import { PrivateProvider } from 'ui/private/private';
 // @ts-ignore
@@ -50,7 +53,13 @@ import { configureAppAngularModule } from 'ui/legacy_compat';
 
 // @ts-ignore
 import { initDashboardApp } from './app';
-import { DataStart } from '../../../data/public';
+import {
+  createApplyFiltersPopoverDirective,
+  createApplyFiltersPopoverHelper,
+  createFilterBarDirective,
+  createFilterBarHelper,
+  DataStart,
+} from '../../../data/public';
 import { SavedQueryService } from '../../../data/public/search/search_bar/lib/saved_query_service';
 import { EmbeddablePublicPlugin } from '../../../../../plugins/embeddable/public';
 
@@ -68,14 +77,17 @@ export interface RenderDeps {
   uiSettings: UiSettingsClientContract;
   chrome: ChromeStart;
   addBasePath: (path: string) => string;
-  getFeatureCatalogueRegistryProvider: () => any;
+  FeatureCatalogueRegistryProvider: any;
   savedQueryService: SavedQueryService;
   embeddables: ReturnType<EmbeddablePublicPlugin['start']>;
+  localStorage: Storage;
 }
 
 export const renderApp = (element: HTMLElement, appBasePath: string, deps: RenderDeps) => {
   const dashboardAngularModule = createLocalAngularModule(deps.core);
+  // global routing stuff
   configureAppAngularModule(dashboardAngularModule);
+  // custom routing stuff
   initDashboardApp(dashboardAngularModule, deps);
   const $injector = mountDashboardApp(appBasePath, element);
   return () => $injector.get('$rootScope').$destroy();
@@ -111,39 +123,48 @@ function createLocalAngularModule(core: AppMountContext['core']) {
   createLocalPromiseModule();
   createLocalConfigModule(core);
   createLocalKbnUrlModule();
+  createLocalStateModule();
   createLocalPersistedStateModule();
   createLocalTopNavModule();
-  createLocalGlobalStateModule();
   createLocalConfirmModalModule();
+  createLocalFilterBarModule();
 
   const dashboardAngularModule = angular.module(moduleName, [
     ...thirdPartyAngularDependencies,
-    'dashboardConfig',
-    'dashboardI18n',
-    'dashboardPrivate',
-    'dashboardPersistedState',
-    'dashboardTopNav',
-    'dashboardGlobalState',
-    'dashboardConfirmModal',
+    'app/dashboard/Config',
+    'app/dashboard/I18n',
+    'app/dashboard/Private',
+    'app/dashboard/PersistedState',
+    'app/dashboard/TopNav',
+    'app/dashboard/State',
+    'app/dashboard/ConfirmModal',
+    'app/dashboard/FilterBar',
   ]);
   return dashboardAngularModule;
 }
 
 function createLocalConfirmModalModule() {
   angular
-    .module('dashboardConfirmModal', ['react'])
+    .module('app/dashboard/ConfirmModal', ['react'])
     .factory('confirmModal', confirmModalFactory)
     .directive('confirmModal', reactDirective => reactDirective(EuiConfirmModal));
 }
 
-function createLocalGlobalStateModule() {
+function createLocalStateModule() {
   angular
-    .module('dashboardGlobalState', [
-      'dashboardPrivate',
-      'dashboardConfig',
-      'dashboardKbnUrl',
-      'dashboardPromise',
+    .module('app/dashboard/State', [
+      'app/dashboard/Private',
+      'app/dashboard/Config',
+      'app/dashboard/KbnUrl',
+      'app/dashboard/Promise',
+      'app/dashboard/PersistedState',
     ])
+    .factory('AppState', function(Private: any) {
+      return Private(AppStateProvider);
+    })
+    .service('getAppState', function(Private: any) {
+      return Private(AppStateProvider).getAppState;
+    })
     .service('globalState', function(Private: any) {
       return Private(GlobalStateProvider);
     });
@@ -151,7 +172,7 @@ function createLocalGlobalStateModule() {
 
 function createLocalPersistedStateModule() {
   angular
-    .module('dashboardPersistedState', ['dashboardPrivate', 'dashboardPromise'])
+    .module('app/dashboard/PersistedState', ['app/dashboard/Private', 'app/dashboard/Promise'])
     .factory('PersistedState', (Private: IPrivate) => {
       const Events = Private(EventsProvider);
       return class AngularPersistedState extends PersistedState {
@@ -164,14 +185,14 @@ function createLocalPersistedStateModule() {
 
 function createLocalKbnUrlModule() {
   angular
-    .module('dashboardKbnUrl', ['dashboardPrivate', 'ngRoute'])
+    .module('app/dashboard/KbnUrl', ['app/dashboard/Private', 'ngRoute'])
     .service('kbnUrl', (Private: IPrivate) => Private(KbnUrlProvider))
     .service('redirectWhenMissing', (Private: IPrivate) => Private(RedirectWhenMissingProvider));
 }
 
 function createLocalConfigModule(core: AppMountContext['core']) {
   angular
-    .module('dashboardConfig', ['dashboardPrivate'])
+    .module('app/dashboard/Config', ['app/dashboard/Private'])
     .provider('stateManagementConfig', StateManagementConfigProvider)
     .provider('config', () => {
       return {
@@ -183,23 +204,32 @@ function createLocalConfigModule(core: AppMountContext['core']) {
 }
 
 function createLocalPromiseModule() {
-  angular.module('dashboardPromise', []).service('Promise', PromiseServiceCreator);
+  angular.module('app/dashboard/Promise', []).service('Promise', PromiseServiceCreator);
 }
 
 function createLocalPrivateModule() {
-  angular.module('dashboardPrivate', []).provider('Private', PrivateProvider);
+  angular.module('app/dashboard/Private', []).provider('Private', PrivateProvider);
 }
 
 function createLocalTopNavModule() {
   angular
-    .module('dashboardTopNav', ['react'])
+    .module('app/dashboard/TopNav', ['react'])
     .directive('kbnTopNav', createTopNavDirective)
     .directive('kbnTopNavHelper', createTopNavHelper);
 }
 
+function createLocalFilterBarModule() {
+  angular
+    .module('app/dashboard/FilterBar', ['react'])
+    .directive('filterBar', createFilterBarDirective)
+    .directive('filterBarHelper', createFilterBarHelper)
+    .directive('applyFiltersPopover', createApplyFiltersPopoverDirective)
+    .directive('applyFiltersPopoverHelper', createApplyFiltersPopoverHelper);
+}
+
 function createLocalI18nModule() {
   angular
-    .module('dashboardI18n', [])
+    .module('app/dashboard/I18n', [])
     .provider('i18n', I18nProvider)
     .filter('i18n', i18nFilter)
     .directive('i18nId', i18nDirective);

@@ -31,19 +31,13 @@ import {
   SavedObjectNotFound,
 } from '../../../../../plugins/kibana_utils/public';
 import { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
-import { SavedObjectsClientProvider } from 'ui/saved_objects';
-import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import { DashboardListing, EMPTY_FILTER } from './listing/dashboard_listing';
-import 'ui/capabilities/route_setup';
 import { addHelpMenuToAppChrome } from './help_menu/help_menu_util';
-
-// load directives
-import '../../../data/public';
 
 export function initDashboardApp(app, deps) {
   initDashboardAppDirective(app, deps);
 
-  app.directive('dashboardListing', function(reactDirective) {
+  app.directive('dashboardListing', function (reactDirective) {
     return reactDirective(wrapInI18nContext(DashboardListing));
   });
 
@@ -56,6 +50,7 @@ export function initDashboardApp(app, deps) {
 
   app.config(function ($routeProvider) {
     const defaults = {
+      reloadOnSearch: false,
       requireDefaultIndex: true,
       requireUICapability: 'dashboard.show',
       badge: () => {
@@ -74,7 +69,11 @@ export function initDashboardApp(app, deps) {
         };
       },
     };
+
     $routeProvider
+      // migrate old URLs
+      .when('/dashboards/dashboard', { redirectTo: (_params, _path, query) => `/dashboards/create?${query}` })
+      .when('/dashboards/dashboard/:id', { redirectTo: (params, _path, query) => `/dashboards/edit/${params.id}?${query}` })
       .when(DashboardConstants.LANDING_PAGE_PATH, {
         ...defaults,
         template: dashboardListingTemplate,
@@ -111,7 +110,7 @@ export function initDashboardApp(app, deps) {
           addHelpMenuToAppChrome(deps.chrome);
         },
         resolve: {
-          dash: function ($route/*, redirectWhenMissing, kbnUrl*/) {
+          dash: function ($route, redirectWhenMissing, kbnUrl) {
             const savedObjectsClient = deps.savedObjectsClient;
             const title = $route.current.params.title;
             if (title) {

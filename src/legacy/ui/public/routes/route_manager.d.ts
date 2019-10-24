@@ -23,7 +23,7 @@
 
 import { ChromeBreadcrumb } from '../../../../core/public';
 
-interface RouteConfiguration {
+export interface RouteConfiguration {
   controller?: string | ((...args: any[]) => void);
   redirectTo?: string | ((...args: any[]) => string);
   reloadOnSearch?: boolean;
@@ -32,6 +32,7 @@ interface RouteConfiguration {
   template?: string;
   k7Breadcrumbs?: (...args: any[]) => ChromeBreadcrumb[];
   requireUICapability?: string;
+  requireDefaultIndex?: boolean;
   outerAngularWrapperRoute?: boolean;
 }
 

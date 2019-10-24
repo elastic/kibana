@@ -9,7 +9,6 @@
 import { uiModules } from 'ui/modules';
 import { i18n } from '@kbn/i18n';
 import uiRoutes from 'ui/routes';
-import 'ui/capabilities/route_setup';
 import { toastNotifications } from 'ui/notify';
 import { formatAngularHttpError } from 'ui/notify/lib';
 

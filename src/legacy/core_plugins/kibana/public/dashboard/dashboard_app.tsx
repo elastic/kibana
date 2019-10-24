@@ -27,7 +27,6 @@ import {
 import { KbnUrl } from 'ui/url/kbn_url';
 import { Filter } from '@kbn/es-query';
 import { TimeRange } from 'src/plugins/data/public';
-import { IPrivate } from 'ui/private';
 import { StaticIndexPattern, Query, SavedQuery } from 'plugins/data';
 import moment from 'moment';
 import { Subscription } from 'rxjs';
@@ -84,6 +83,7 @@ export interface DashboardAppScope extends ng.IScope {
   kbnTopNav: any;
   enterEditMode: () => void;
   timefilterSubscriptions$: Subscription;
+  isVisible: boolean;
 }
 
 export function initDashboardAppDirective(app: any, deps: RenderDeps) {
@@ -104,12 +104,6 @@ export function initDashboardAppDirective(app: any, deps: RenderDeps) {
         },
         getAppState: {
           previouslyStored: () => TAppState | undefined;
-        },
-        dashboardConfig: {
-          getHideWriteControls: () => boolean;
-        },
-        localStorage: {
-          get: (prop: string) => unknown;
         }
       ) =>
         new DashboardAppController({
@@ -117,8 +111,6 @@ export function initDashboardAppDirective(app: any, deps: RenderDeps) {
           $scope,
           $routeParams,
           getAppState,
-          dashboardConfig,
-          localStorage,
           kbnUrl,
           AppStateClass: AppState,
           config,

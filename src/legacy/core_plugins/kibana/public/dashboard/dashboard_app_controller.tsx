@@ -23,7 +23,6 @@ import React from 'react';
 import angular from 'angular';
 import { uniq } from 'lodash';
 
-import chrome from 'ui/chrome';
 import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 import { toastNotifications } from 'ui/notify';
 
@@ -38,7 +37,6 @@ import { showShareContextMenu } from 'ui/share';
 import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 
 import { timefilter } from 'ui/timefilter';
-
 
 import {
   AppStateClass as TAppStateClass,
@@ -95,9 +93,6 @@ export interface DashboardAppControllerDependencies extends RenderDeps {
     getDefault: () => Promise<IndexPattern>;
   };
   dashboardConfig: any;
-  localStorage: {
-    get: (prop: string) => unknown;
-  };
   kbnUrl: KbnUrl;
   AppStateClass: TAppStateClass<DashboardAppState>;
   config: any;
@@ -128,7 +123,7 @@ export class DashboardAppController {
     savedQueryService,
     embeddables,
     dashboardCapabilities,
-    core: { notifications, overlays },
+    core: { notifications, overlays, chrome },
   }: DashboardAppControllerDependencies) {
     let lastReloadRequestTime = 0;
 
@@ -332,7 +327,7 @@ export class DashboardAppController {
 
     // Push breadcrumbs to new header navigation
     const updateBreadcrumbs = () => {
-      chrome.breadcrumbs.set([
+      chrome.setBreadcrumbs([
         {
           text: i18n.translate('kbn.dashboard.dashboardAppBreadcrumbsTitle', {
             defaultMessage: 'Dashboard',
@@ -814,8 +809,13 @@ export class DashboardAppController {
       },
     });
 
+    const visibleSubscription = chrome.getIsVisible$().subscribe(isVisible => {
+      $scope.isVisible = isVisible;
+    });
+
     $scope.$on('$destroy', () => {
       updateSubscription.unsubscribe();
+      visibleSubscription.unsubscribe();
       $scope.timefilterSubscriptions$.unsubscribe();
 
       dashboardStateManager.destroy();
