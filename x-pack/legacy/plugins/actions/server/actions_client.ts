@@ -224,7 +224,7 @@ async function injectExtraFindData(
       },
     };
   }
-  const aggregationResult = await scopedClusterClient.callAsCurrentUser('search', {
+  const aggregationResult = await scopedClusterClient.callAsInternalUser('search', {
     index: defaultKibanaIndex,
     body: {
       aggs,

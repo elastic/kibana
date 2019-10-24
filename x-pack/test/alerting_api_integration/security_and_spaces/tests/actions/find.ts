@@ -73,6 +73,7 @@ export default function findActionTests({ getService }: FtrProviderContext) {
                     config: {
                       unencrypted: `This value shouldn't get encrypted`,
                     },
+                    referencedByCount: 0,
                   },
                 ],
               });
@@ -133,6 +134,7 @@ export default function findActionTests({ getService }: FtrProviderContext) {
                     config: {
                       unencrypted: `This value shouldn't get encrypted`,
                     },
+                    referencedByCount: 0,
                   },
                 ],
               });

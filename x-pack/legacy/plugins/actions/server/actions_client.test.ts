@@ -265,7 +265,7 @@ describe('find()', () => {
       defaultKibanaIndex,
     });
     savedObjectsClient.find.mockResolvedValueOnce(expectedResult);
-    scopedClusterClient.callAsCurrentUser.mockResolvedValueOnce({
+    scopedClusterClient.callAsInternalUser.mockResolvedValueOnce({
       aggregations: {
         '1': { doc_count: 6 },
       },
