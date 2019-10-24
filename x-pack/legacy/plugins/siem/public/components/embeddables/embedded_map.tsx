@@ -10,6 +10,7 @@ import React, { useEffect, useState } from 'react';
 import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
 import { createPortalNode, InPortal } from 'react-reverse-portal';
 import { Query } from 'src/plugins/data/common';
+import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
 
 import styled, { css } from 'styled-components';
 import { start } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
@@ -33,34 +34,44 @@ import { MapToolTip } from './map_tool_tip/map_tool_tip';
 import { Embeddable } from './embeddable';
 import { EmbeddableHeader } from './embeddable_header';
 
+interface EmbeddableMapProps {
+  maintainRatio?: boolean;
+}
+
 const EmbeddableMap = styled.div.attrs({
   className: 'siemEmbeddable__map',
-})`
-  ${({ theme }) => css`
-    padding-top: calc(3 / 4 * 100%); //4:3 (standard) ratio
-    position: relative;
-
-    @media only screen and (min-width: ${theme.eui.euiBreakpoints.m}) {
-      padding-top: calc(9 / 32 * 100%); //32:9 (ultra widescreen) ratio
-    }
-
-    @media only screen and (min-width: 1441px) and (min-height: 901px) {
-      padding-top: calc(9 / 21 * 100%); //21:9 (ultrawide) ratio
-    }
-
+})<EmbeddableMapProps>`
+  ${({ maintainRatio, theme }) => css`
     .euiPanel {
       border: none;
-      bottom: 0;
       box-shadow: none;
-      left: 0;
-      position: absolute;
-      right: 0;
-      top: 0;
     }
 
     .mapToolbarOverlay__button {
       display: none;
     }
+
+    ${maintainRatio &&
+      css`
+        padding-top: calc(3 / 4 * 100%); //4:3 (standard) ratio
+        position: relative;
+
+        @media only screen and (min-width: ${theme.eui.euiBreakpoints.m}) {
+          padding-top: calc(9 / 32 * 100%); //32:9 (ultra widescreen) ratio
+        }
+
+        @media only screen and (min-width: 1441px) and (min-height: 901px) {
+          padding-top: calc(9 / 21 * 100%); //21:9 (ultrawide) ratio
+        }
+
+        .euiPanel {
+          bottom: 0;
+          left: 0;
+          position: absolute;
+          right: 0;
+          top: 0;
+        }
+      `}
   `}
 `;
 EmbeddableMap.displayName = 'EmbeddableMap';
@@ -178,13 +189,13 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
 
     return isError ? null : (
       <Embeddable>
-        <EmbeddableHeader title="Network map">
+        <EmbeddableHeader title={i18n.EMBEDDABLE_HEADER_TITLE}>
           <EuiText size="xs">
             <EuiLink
-              href="https://www.elastic.co/guide/en/siem/guide/7.4/conf-map-ui.html#private-network"
+              href={`${ELASTIC_WEBSITE_URL}guide/en/siem/guide/${DOC_LINK_VERSION}/conf-map-ui.html`}
               target="_blank"
             >
-              {'Why is my data not displayed?'}
+              {i18n.EMBEDDABLE_HEADER_HELP}
             </EuiLink>
           </EuiText>
         </EmbeddableHeader>
@@ -193,7 +204,7 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
           <MapToolTip />
         </InPortal>
 
-        <EmbeddableMap>
+        <EmbeddableMap maintainRatio={!isIndexError}>
           {embeddable != null ? (
             <EmbeddablePanel
               data-test-subj="embeddable-panel"

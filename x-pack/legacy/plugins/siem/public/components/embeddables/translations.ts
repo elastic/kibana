@@ -6,6 +6,20 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const EMBEDDABLE_HEADER_TITLE = i18n.translate(
+  'xpack.siem.components.embeddables.embeddedMap.embeddableHeaderTitle',
+  {
+    defaultMessage: 'Network map',
+  }
+);
+
+export const EMBEDDABLE_HEADER_HELP = i18n.translate(
+  'xpack.siem.components.embeddables.embeddedMap.embeddableHeaderHelp',
+  {
+    defaultMessage: 'Map configuration help',
+  }
+);
+
 export const MAP_TITLE = i18n.translate(
   'xpack.siem.components.embeddables.embeddedMap.embeddablePanelTitle',
   {
@@ -51,7 +65,7 @@ export const ERROR_CREATING_EMBEDDABLE = i18n.translate(
 export const ERROR_TITLE = i18n.translate(
   'xpack.siem.components.embeddables.indexPatternsMissingPrompt.errorTitle',
   {
-    defaultMessage: 'Required Index Patterns Not Configured',
+    defaultMessage: 'Required index patterns not configured',
   }
 );
 
