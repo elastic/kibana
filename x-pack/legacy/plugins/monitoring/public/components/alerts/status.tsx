@@ -13,7 +13,7 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
-  EuiButtonEmpty,
+  EuiLink,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -98,11 +98,11 @@ export const AlertsStatus: React.FC<AlertsStatusProps> = (props: AlertsStatusPro
               iconType="flag"
             >
               <p>
-                <EuiButtonEmpty onClick={() => setShowMigrationFlyout(true)}>
+                <EuiLink onClick={() => setShowMigrationFlyout(true)}>
                   {i18n.translate('xpack.monitoring.alerts.status.manage', {
                     defaultMessage: 'Want to make changes? Click here.',
                   })}
-                </EuiButtonEmpty>
+                </EuiLink>
               </p>
             </EuiCallOut>
             {flyout}
@@ -119,12 +119,11 @@ export const AlertsStatus: React.FC<AlertsStatusProps> = (props: AlertsStatusPro
             })}
           >
             <p>
-              <EuiButtonEmpty onClick={() => setShowMigrationFlyout(true)}>
+              <EuiLink onClick={() => setShowMigrationFlyout(true)}>
                 {i18n.translate('xpack.monitoring.alerts.status.needToMigrate', {
-                  defaultMessage:
-                    'Click here to migrate cluster alerts to our new alerting platform.',
+                  defaultMessage: 'Migrate cluster alerts to our new alerting platform.',
                 })}
-              </EuiButtonEmpty>
+              </EuiLink>
             </p>
           </EuiCallOut>
           {flyout}

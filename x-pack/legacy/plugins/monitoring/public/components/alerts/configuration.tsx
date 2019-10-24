@@ -79,6 +79,8 @@ export const AlertsConfiguration: React.FC<AlertsConfigurationProps> = (
     );
     if (actions.length > 0) {
       setSelectedEmailActionId(actions[0].id);
+    } else {
+      setSelectedEmailActionId(NEW_ACTION_ID);
     }
     setEmailActions(actions);
   }
@@ -228,7 +230,7 @@ export const AlertsConfiguration: React.FC<AlertsConfigurationProps> = (
         inputDisplay: (
           <EuiText>
             {i18n.translate('xpack.monitoring.alerts.configuration.newActionInputDisplay', {
-              defaultMessage: 'Creating new action...',
+              defaultMessage: 'Configure a new email action service',
             })}
           </EuiText>
         ),
@@ -372,7 +374,8 @@ export const AlertsConfiguration: React.FC<AlertsConfigurationProps> = (
   }
 
   function getStep2() {
-    const isDisabled = !!editAction || !selectedEmailActionId;
+    const isDisabled =
+      !!editAction || !selectedEmailActionId || selectedEmailActionId === NEW_ACTION_ID;
 
     return {
       title: i18n.translate('xpack.monitoring.alerts.configuration.setEmailAddress', {
@@ -402,7 +405,8 @@ export const AlertsConfiguration: React.FC<AlertsConfigurationProps> = (
   }
 
   function getStep3() {
-    const isDisabled = !!editAction || !selectedEmailActionId;
+    const isDisabled =
+      !!editAction || !selectedEmailActionId || selectedEmailActionId === NEW_ACTION_ID;
 
     return {
       title: i18n.translate('xpack.monitoring.alerts.configuration.setEmailAddress', {
