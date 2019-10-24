@@ -23,6 +23,7 @@ const rightSource = {
   indexPatternId: '90943e30-9a47-11e8-b64d-95841ca0b247',
   indexPatternTitle: 'kibana_sample_data_logs',
   term: 'geo.dest',
+  metrics: [{ type: 'count' }]
 };
 
 const mockSource = {

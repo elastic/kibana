@@ -30,7 +30,7 @@ export class InnerJoin {
   }
 
   getRightMetricFields() {
-    return this._rightSource.getMetricFields();
+    return this._rightSource.getMetricFields2();
   }
 
   getJoinFields() {
@@ -50,10 +50,11 @@ export class InnerJoin {
     return this._leftField;
   }
 
-  joinPropertiesToFeature(feature, propertiesMap, rightMetricFields) {
+  joinPropertiesToFeature(feature, propertiesMap) {
+    const rightMetricFields = this._rightSource.getMetricFields2();
     // delete feature properties added by previous join
     for (let j = 0; j < rightMetricFields.length; j++) {
-      const { propertyKey: metricPropertyKey } = rightMetricFields[j];
+      const metricPropertyKey  = rightMetricFields[j].getPropertyKey();
       delete feature.properties[metricPropertyKey];
 
       // delete all dynamic properties for metric field
