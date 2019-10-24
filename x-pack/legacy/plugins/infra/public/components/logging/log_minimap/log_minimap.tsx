@@ -80,7 +80,8 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
   }
 
   public handleClick = (event: MouseEvent) => {
-    const { svgPosition } = this.state;
+    if (!this.dragTargetArea) return;
+    const svgPosition = this.dragTargetArea.getBoundingClientRect();
     const clickedYPosition = event.clientY - svgPosition.top;
     const clickedTime = Math.floor(this.getYScale().invert(clickedYPosition));
     this.setState({
