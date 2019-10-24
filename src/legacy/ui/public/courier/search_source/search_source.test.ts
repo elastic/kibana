@@ -18,55 +18,49 @@
  */
 
 import { SearchSource } from '../search_source';
+import { IndexPattern } from '../../../../core_plugins/data/public/index_patterns';
 
-jest.mock('ui/new_platform', () => ({
-  npSetup: {
-    core: {
-      injectedMetadata: {
-        getInjectedVar: () => 0,
-      }
-    }
-  }
-}));
+jest.mock('ui/new_platform');
 
 jest.mock('../fetch', () => ({
-  fetchSoon: jest.fn(),
+  fetchSoon: jest.fn().mockResolvedValue({}),
 }));
 
-const indexPattern = { title: 'foo' };
-const indexPattern2 = { title: 'foo' };
+jest.mock('../../chrome', () => ({
+  dangerouslyGetActiveInjector: () => ({
+    get: jest.fn(),
+  }),
+}));
 
-describe('SearchSource', function () {
-  describe('#setField()', function () {
-    it('sets the value for the property', function () {
+const getComputedFields = () => ({
+  storedFields: [],
+  scriptFields: [],
+  docvalueFields: [],
+});
+const indexPattern = ({ title: 'foo', getComputedFields } as unknown) as IndexPattern;
+const indexPattern2 = ({ title: 'foo', getComputedFields } as unknown) as IndexPattern;
+
+describe('SearchSource', function() {
+  describe('#setField()', function() {
+    it('sets the value for the property', function() {
       const searchSource = new SearchSource();
       searchSource.setField('aggs', 5);
       expect(searchSource.getField('aggs')).toBe(5);
     });
-
-    it('throws an error if the property is not accepted', function () {
-      const searchSource = new SearchSource();
-      expect(() => searchSource.setField('index', 5)).toThrow();
-    });
   });
 
-  describe('#getField()', function () {
-    it('gets the value for the property', function () {
+  describe('#getField()', function() {
+    it('gets the value for the property', function() {
       const searchSource = new SearchSource();
       searchSource.setField('aggs', 5);
       expect(searchSource.getField('aggs')).toBe(5);
     });
-
-    it('throws an error if the property is not accepted', function () {
-      const searchSource = new SearchSource();
-      expect(() => searchSource.getField('unacceptablePropName')).toThrow();
-    });
   });
 
-  describe(`#setField('index')`, function () {
-    describe('auto-sourceFiltering', function () {
-      describe('new index pattern assigned', function () {
-        it('generates a searchSource filter', function () {
+  describe(`#setField('index')`, function() {
+    describe('auto-sourceFiltering', function() {
+      describe('new index pattern assigned', function() {
+        it('generates a searchSource filter', function() {
           const searchSource = new SearchSource();
           expect(searchSource.getField('index')).toBe(undefined);
           expect(searchSource.getField('source')).toBe(undefined);
@@ -75,17 +69,17 @@ describe('SearchSource', function () {
           expect(typeof searchSource.getField('source')).toBe('function');
         });
 
-        it('removes created searchSource filter on removal', function () {
+        it('removes created searchSource filter on removal', function() {
           const searchSource = new SearchSource();
           searchSource.setField('index', indexPattern);
-          searchSource.setField('index', null);
+          searchSource.setField('index', undefined);
           expect(searchSource.getField('index')).toBe(undefined);
           expect(searchSource.getField('source')).toBe(undefined);
         });
       });
 
-      describe('new index pattern assigned over another', function () {
-        it('replaces searchSource filter with new', function () {
+      describe('new index pattern assigned over another', function() {
+        it('replaces searchSource filter with new', function() {
           const searchSource = new SearchSource();
           searchSource.setField('index', indexPattern);
           const searchSourceFilter1 = searchSource.getField('source');
@@ -95,18 +89,18 @@ describe('SearchSource', function () {
           expect(searchSource.getField('source')).not.toBe(searchSourceFilter1);
         });
 
-        it('removes created searchSource filter on removal', function () {
+        it('removes created searchSource filter on removal', function() {
           const searchSource = new SearchSource();
           searchSource.setField('index', indexPattern);
           searchSource.setField('index', indexPattern2);
-          searchSource.setField('index', null);
+          searchSource.setField('index', undefined);
           expect(searchSource.getField('index')).toBe(undefined);
           expect(searchSource.getField('source')).toBe(undefined);
         });
       });
 
-      describe('ip assigned before custom searchSource filter', function () {
-        it('custom searchSource filter becomes new searchSource', function () {
+      describe('ip assigned before custom searchSource filter', function() {
+        it('custom searchSource filter becomes new searchSource', function() {
           const searchSource = new SearchSource();
           const football = {};
           searchSource.setField('index', indexPattern);
@@ -116,19 +110,19 @@ describe('SearchSource', function () {
           expect(searchSource.getField('source')).toBe(football);
         });
 
-        it('custom searchSource stays after removal', function () {
+        it('custom searchSource stays after removal', function() {
           const searchSource = new SearchSource();
           const football = {};
           searchSource.setField('index', indexPattern);
           searchSource.setField('source', football);
-          searchSource.setField('index', null);
+          searchSource.setField('index', undefined);
           expect(searchSource.getField('index')).toBe(undefined);
           expect(searchSource.getField('source')).toBe(football);
         });
       });
 
-      describe('ip assigned after custom searchSource filter', function () {
-        it('leaves the custom filter in place', function () {
+      describe('ip assigned after custom searchSource filter', function() {
+        it('leaves the custom filter in place', function() {
           const searchSource = new SearchSource();
           const football = {};
           searchSource.setField('source', football);
@@ -137,12 +131,12 @@ describe('SearchSource', function () {
           expect(searchSource.getField('source')).toBe(football);
         });
 
-        it('custom searchSource stays after removal', function () {
+        it('custom searchSource stays after removal', function() {
           const searchSource = new SearchSource();
           const football = {};
           searchSource.setField('source', football);
           searchSource.setField('index', indexPattern);
-          searchSource.setField('index', null);
+          searchSource.setField('index', undefined);
           expect(searchSource.getField('index')).toBe(undefined);
           expect(searchSource.getField('source')).toBe(football);
         });
@@ -151,40 +145,42 @@ describe('SearchSource', function () {
   });
 
   describe('#onRequestStart()', () => {
-    it('should be called when starting a request', () => {
-      const searchSource = new SearchSource();
+    it('should be called when starting a request', async () => {
+      const searchSource = new SearchSource({ index: indexPattern });
       const fn = jest.fn();
       searchSource.onRequestStart(fn);
       const options = {};
-      searchSource.fetch(options);
+      await searchSource.fetch(options);
       expect(fn).toBeCalledWith(searchSource, options);
     });
 
-    it('should not be called on parent searchSource', () => {
+    it('should not be called on parent searchSource', async () => {
       const parent = new SearchSource();
-      const searchSource = new SearchSource().setParent(parent);
+      const searchSource = new SearchSource({ index: indexPattern });
 
       const fn = jest.fn();
       searchSource.onRequestStart(fn);
       const parentFn = jest.fn();
       parent.onRequestStart(parentFn);
       const options = {};
-      searchSource.fetch(options);
+      await searchSource.fetch(options);
 
       expect(fn).toBeCalledWith(searchSource, options);
       expect(parentFn).not.toBeCalled();
     });
 
-    it('should be called on parent searchSource if callParentStartHandlers is true', () => {
+    it('should be called on parent searchSource if callParentStartHandlers is true', async () => {
       const parent = new SearchSource();
-      const searchSource = new SearchSource().setParent(parent, { callParentStartHandlers: true });
+      const searchSource = new SearchSource({ index: indexPattern }).setParent(parent, {
+        callParentStartHandlers: true,
+      });
 
       const fn = jest.fn();
       searchSource.onRequestStart(fn);
       const parentFn = jest.fn();
       parent.onRequestStart(parentFn);
       const options = {};
-      searchSource.fetch(options);
+      await searchSource.fetch(options);
 
       expect(fn).toBeCalledWith(searchSource, options);
       expect(parentFn).toBeCalledWith(searchSource, options);
