@@ -6,45 +6,15 @@
 
 import { resolve } from 'path';
 import JoiNamespace from 'joi';
-import { BehaviorSubject } from 'rxjs';
+import { Legacy } from 'kibana';
 import { LegacyPluginInitializer, LegacyPluginOptions } from 'src/legacy/types';
-import { Feature } from '../../../plugins/features/server/feature';
 import { PLUGIN } from './common/constants';
 import manifest from './kibana.json';
-import { CoreSetup, Plugin as ServerPlugin, EPMPluginInitializerContext } from './server/plugin';
-import { mappings, savedObjectSchemas } from './server/saved_objects';
 import { getConfigSchema } from './server/config';
+import { Plugin, createSetupShim } from './server/plugin';
+import { mappings, savedObjectSchemas } from './server/saved_objects';
 
 const ROOT = `plugins/${PLUGIN.ID}`;
-
-const feature: Feature = {
-  id: PLUGIN.ID,
-  name: PLUGIN.TITLE,
-  icon: PLUGIN.ICON,
-  navLinkId: PLUGIN.ID,
-  app: [PLUGIN.ID, 'kibana'],
-  catalogue: [PLUGIN.ID],
-  privileges: {
-    all: {
-      api: [PLUGIN.ID],
-      catalogue: [PLUGIN.ID],
-      savedObject: {
-        all: [],
-        read: [],
-      },
-      ui: ['show', 'save'],
-    },
-    read: {
-      api: [PLUGIN.ID],
-      catalogue: [PLUGIN.ID],
-      savedObject: {
-        all: [],
-        read: [],
-      },
-      ui: ['show'],
-    },
-  },
-};
 
 const pluginOptions: LegacyPluginOptions = {
   id: PLUGIN.ID,
@@ -71,34 +41,10 @@ const pluginOptions: LegacyPluginOptions = {
   },
   deprecations: undefined,
   preInit: undefined,
-  // yes, any. See https://github.com/elastic/kibana/blob/master/x-pack/legacy/plugins/infra/server/lib/adapters/configuration/kibana_configuration_adapter.ts#L49-L58
-  // for a way around it, but this is Legacy Platform and I'm not sure these hoops are worth jumping through.
-  init(server: any) {
-    const { newPlatform } = server;
-    const npSetup = newPlatform.setup;
-    const featuresPlugin = npSetup.plugins.features;
-
-    if (!featuresPlugin) {
-      throw new Error('New Platform XPack Features plugin is not available.');
-    }
-    featuresPlugin.registerFeature(feature);
-
-    const getConfig$ = () =>
-      new BehaviorSubject(server.config().get(PLUGIN.CONFIG_PREFIX)).asObservable();
-
-    const initializerContext: EPMPluginInitializerContext = {
-      config: {
-        create: getConfig$,
-        createIfExists: getConfig$,
-      },
-    };
-
-    const coreSetup: CoreSetup = {
-      elasticsearch: npSetup.core.elasticsearch,
-      hapiServer: newPlatform.__internals.hapiServer,
-    };
-
-    new ServerPlugin(initializerContext).setup(coreSetup);
+  init(server: Legacy.Server) {
+    const { initializerContext, coreSetup, pluginsSetup } = createSetupShim(server);
+    const plugin = new Plugin(initializerContext);
+    plugin.setup(coreSetup, pluginsSetup);
   },
   postInit: undefined,
   isEnabled: false,
