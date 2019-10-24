@@ -192,9 +192,9 @@ const getGeoItem = (result: NetworkTopNFlowBuckets): GeoItem | null =>
       }
     : null;
 
-const getAsItem = (result: NetworkTopNFlowBuckets): AutonomousSystemItem | null => {
-  return result.autonomous_system.top_as.hits.hits.length > 0 &&
-    result.autonomous_system.top_as.hits.hits[0]._source
+const getAsItem = (result: NetworkTopNFlowBuckets): AutonomousSystemItem | null =>
+  result.autonomous_system.top_as.hits.hits.length > 0 &&
+  result.autonomous_system.top_as.hits.hits[0]._source
     ? {
         number: getOr(
           null,
@@ -212,7 +212,6 @@ const getAsItem = (result: NetworkTopNFlowBuckets): AutonomousSystemItem | null 
         ),
       }
     : null;
-};
 
 const formatTopNFlowEdges = (
   buckets: NetworkTopNFlowBuckets[],
