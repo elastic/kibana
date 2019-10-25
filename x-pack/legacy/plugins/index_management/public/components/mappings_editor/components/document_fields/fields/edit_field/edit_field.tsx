@@ -140,7 +140,7 @@ export const EditField = React.memo(({ field }: Props) => {
                       />
                     </EditFieldSection>
 
-                    {ParametersForm && <ParametersForm />}
+                    {ParametersForm && <ParametersForm field={field} />}
                   </EuiFlyoutBody>
 
                   <EuiFlyoutFooter>

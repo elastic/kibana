@@ -3,22 +3,19 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { FIELD_TYPES, fieldValidators, fieldFormatters, FieldConfig } from '../shared_imports';
-import { ParameterName, Parameter } from '../types';
+import {
+  FIELD_TYPES,
+  fieldValidators,
+  ValidationFunc,
+  ValidationFuncArg,
+  fieldFormatters,
+} from '../shared_imports';
 import { INDEX_DEFAULT } from '../constants';
 
 const { toInt } = fieldFormatters;
 const { emptyField, containsCharsField } = fieldValidators;
 
-interface ValidatorArg<T> {
-  value: T;
-  path: string;
-  formData: { [key: string]: any };
-}
-
-export const PARAMETERS_DEFINITION: {
-  [key in ParameterName]: Parameter;
-} = {
+export const PARAMETERS_DEFINITION = {
   name: {
     fieldConfig: {
       label: 'Field name',
@@ -51,7 +48,6 @@ export const PARAMETERS_DEFINITION: {
   },
   store: {
     fieldConfig: {
-      label: 'Store',
       type: FIELD_TYPES.CHECKBOX,
       defaultValue: true,
     },
@@ -73,7 +69,6 @@ export const PARAMETERS_DEFINITION: {
   },
   fielddata: {
     fieldConfig: {
-      label: 'Fielddata',
       type: FIELD_TYPES.CHECKBOX,
       defaultValue: false,
     },
@@ -108,16 +103,16 @@ export const PARAMETERS_DEFINITION: {
       formatters: [toInt],
       validations: [
         {
-          validator: ({ value }: ValidatorArg<number>) => {
+          validator: (({ value }: ValidationFuncArg<any, number>) => {
             if (value < 0) {
               return {
                 message: 'The value must be greater or equal than 0.',
               };
             }
-          },
+          }) as ValidationFunc,
         },
       ],
-    } as FieldConfig,
+    },
   },
   dynamic: {
     fieldConfig: {
@@ -232,19 +227,20 @@ export const PARAMETERS_DEFINITION: {
           validator: emptyField('Set a position increment gap value.'),
         },
         {
-          validator: ({ value }: ValidatorArg<number>) => {
+          validator: (({ value }: ValidationFuncArg<any, number>) => {
             if (value < 0) {
               return {
                 message: 'The value must be greater or equal than 0.',
               };
             }
-          },
+          }) as ValidationFunc,
         },
       ],
-    } as FieldConfig,
+    },
   },
   index_prefixes: {
-    fieldConfig: {
+    fieldConfig: { defaultValue: null }, // TODO for now this is required...
+    props: {
       min_chars: {
         type: FIELD_TYPES.NUMBER,
         defaultValue: 2,
@@ -255,7 +251,7 @@ export const PARAMETERS_DEFINITION: {
             validator: emptyField('Set a min value.'),
           },
           {
-            validator: ({ value }: ValidatorArg<number>) => {
+            validator: ({ value }: ValidationFuncArg<any, number>) => {
               if (value < 0) {
                 return {
                   message: 'The value must be greater or equal than zero.',
@@ -264,7 +260,7 @@ export const PARAMETERS_DEFINITION: {
             },
           },
           {
-            validator: ({ value, path, formData }: ValidatorArg<number>) => {
+            validator: ({ value, path, formData }: ValidationFuncArg<any, number>) => {
               const maxPath = path.replace('.min', '.max');
               const maxValue: number | string = formData[maxPath];
 
@@ -291,7 +287,7 @@ export const PARAMETERS_DEFINITION: {
             validator: emptyField('Set a max value.'),
           },
           {
-            validator: ({ value }: ValidatorArg<number>) => {
+            validator: ({ value }: ValidationFuncArg<any, number>) => {
               if (value > 20) {
                 return {
                   message: 'The value must be smaller or equal than 20.',
@@ -300,14 +296,12 @@ export const PARAMETERS_DEFINITION: {
             },
           },
           {
-            validator: ({ value, path, formData }: ValidatorArg<number>) => {
+            validator: ({ value, path, formData }: ValidationFuncArg<any, number>) => {
               const minPath = path.replace('.max', '.min');
               const minValue: number | string = formData[minPath];
-
               if (minValue === '') {
                 return;
               }
-
               if (value <= minValue) {
                 return {
                   message: 'The value must be greater than the min value.',
@@ -317,7 +311,7 @@ export const PARAMETERS_DEFINITION: {
           },
         ],
       },
-    } as { [key: string]: FieldConfig },
+    },
   },
   similarity: {
     fieldConfig: {
@@ -341,15 +335,15 @@ export const PARAMETERS_DEFINITION: {
       formatters: [toInt],
       validations: [
         {
-          validator: ({ value }: ValidatorArg<number>) => {
+          validator: (({ value }: ValidationFuncArg<any, number>) => {
             if ((value as number) < 0) {
               return {
                 message: 'The value must be greater or equal than 0.',
               };
             }
-          },
+          }) as ValidationFunc,
         },
       ],
-    } as FieldConfig,
+    },
   },
 };

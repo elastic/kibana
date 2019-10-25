@@ -5,38 +5,41 @@
  */
 import React from 'react';
 
+import { NormalizedField } from '../../../../types';
 import { EditFieldSection, EditFieldFormRow } from '../edit_field';
 
-export const TextType = () => {
+interface Props {
+  field: NormalizedField;
+}
+
+export const TextType = React.memo(({ field }: Props) => {
   return (
     <>
       <EditFieldSection>
-        <EditFieldFormRow title={<h3>Hello world</h3>} description="This is description text.">
-          Content to be shown on the right
-        </EditFieldFormRow>
+        <EditFieldFormRow
+          title={<h3>Store field value</h3>}
+          description="This is description text."
+          formFieldPath="store"
+        />
 
-        <EditFieldFormRow withToggle={false}>
-          This one has no toggle, no title and not description!
+        <EditFieldFormRow
+          title={<h3>Searchable</h3>}
+          description="This is description text."
+          formFieldPath="index"
+          direction="column"
+        >
+          Index option drop down here...
         </EditFieldFormRow>
 
         <EditFieldFormRow
-          title={<h3>Form index</h3>}
+          title={<h3>Fielddata</h3>}
           description="This is description text."
+          formFieldPath="fielddata"
           direction="column"
-          formFieldPath="index"
         >
-          This one has the content shown below the toggle.
-        </EditFieldFormRow>
-
-        <EditFieldFormRow title={<h3>Other prop</h3>}>
-          {isOn => (
-            <>
-              <div>Custom behaviour to control what is shown.</div>
-              {isOn && <div>Hello I'm here!</div>}
-            </>
-          )}
+          Field data frequency filter component here...
         </EditFieldFormRow>
       </EditFieldSection>
     </>
   );
-};
+});

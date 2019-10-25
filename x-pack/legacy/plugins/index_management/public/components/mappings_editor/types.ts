@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { FieldConfig } from './shared_imports';
+import { PARAMETERS_DEFINITION } from './constants';
 
 export interface DataTypeDefinition {
   label: string;
@@ -96,22 +97,28 @@ export type ParameterName =
   | 'split_queries_on_whitespace';
 
 export interface Parameter {
-  fieldConfig?: FieldConfig | { [key: string]: FieldConfig };
+  fieldConfig: FieldConfig;
   paramName?: string;
   docs?: string;
+  props?: { [key: string]: FieldConfig };
 }
 
 export interface Fields {
   [key: string]: Omit<Field, 'name'>;
 }
 
-export interface Field {
+interface FieldBasic {
   name: string;
   type: DataType;
   subType?: SubType;
   properties?: { [key: string]: Omit<Field, 'name'> };
   fields?: { [key: string]: Omit<Field, 'name'> };
 }
+
+type FieldParams = {
+  [K in ParameterName]: typeof PARAMETERS_DEFINITION[K]['fieldConfig']['defaultValue'];
+};
+export type Field = FieldBasic & FieldParams;
 
 export interface FieldMeta {
   childFieldsName: ChildFieldName | undefined;
