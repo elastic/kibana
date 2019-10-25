@@ -18,7 +18,6 @@
  */
 
 import { debounce } from 'lodash';
-import 'angular-sanitize';
 
 import { getServices, VisEditorTypesRegistryProvider } from '../kibana_services';
 

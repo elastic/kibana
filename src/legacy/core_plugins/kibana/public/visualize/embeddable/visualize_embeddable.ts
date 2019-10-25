@@ -18,6 +18,7 @@
  */
 
 import _ from 'lodash';
+import { EmbeddedVisualizeHandler } from 'ui/visualize/loader/embedded_visualize_handler';
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
 import { Filter } from '@kbn/es-query';
@@ -32,7 +33,6 @@ import { Query, onlyDisabledFiltersChanged } from '../../../../data/public';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 
 import {
-  EmbeddedVisualizeHandler,
   PersistedState,
   StaticIndexPattern,
   VisSavedObject,

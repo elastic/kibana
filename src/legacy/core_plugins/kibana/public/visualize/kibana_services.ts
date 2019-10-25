@@ -17,10 +17,11 @@
  * under the License.
  */
 
-import 'ui/directives/kbn_href';
+import 'angular-sanitize'; // used in visualization_editor.js
+import 'ui/collapsible_sidebar'; // used in default editor
 
 import { npStart } from 'ui/new_platform';
-import angular from 'angular';
+import angular from 'angular'; // just used in editor.js
 
 import uiRoutes from 'ui/routes';
 
@@ -40,18 +41,23 @@ import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { SavedObjectProvider } from 'ui/saved_objects/saved_object';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 
+import { createUiStatsReporter, METRIC_TYPE } from '../../../ui_metric/public';
+import { start as visualizations } from '../../../visualizations/public/np_ready/public/legacy';
+
 const services = {
   // new platform
   addBasePath: npStart.core.http.basePath.prepend,
   capabilities: npStart.core.application.capabilities,
   chrome: npStart.core.chrome,
   docLinks: npStart.core.docLinks,
+  embeddable: npStart.plugins.embeddable,
   savedObjectsClient: npStart.core.savedObjects.client,
   toastNotifications: npStart.core.notifications.toasts,
   uiSettings: npStart.core.uiSettings,
 
+  visualizations,
+
   // legacy
-  angular,
   docTitle,
   FeatureCatalogueRegistryProvider,
   FilterBarQueryFilterProvider,
@@ -63,6 +69,8 @@ const services = {
   uiModules,
   uiRoutes,
   wrapInI18nContext,
+
+  createUiStatsReporter,
 };
 
 export function getServices() {
@@ -70,6 +78,7 @@ export function getServices() {
 }
 
 // export legacy static dependencies
+export { angular };
 export { getFromSavedObject } from 'ui/index_patterns';
 export { PersistedState } from 'ui/persisted_state';
 // @ts-ignore
@@ -87,14 +96,15 @@ export { getVisualizeLoader } from 'ui/visualize/loader';
 export { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 
 // export types
+export { METRIC_TYPE };
 export { StaticIndexPattern } from 'ui/index_patterns';
+export { VisType } from 'ui/vis';
 export { VisualizeLoader } from 'ui/visualize/loader';
 export {
   VisSavedObject,
   VisualizeLoaderParams,
   VisualizeUpdateParams,
 } from 'ui/visualize/loader/types';
-export { EmbeddedVisualizeHandler } from 'ui/visualize/loader/embedded_visualize_handler';
 
 // export const
 export { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';

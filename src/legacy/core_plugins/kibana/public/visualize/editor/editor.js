@@ -22,9 +22,6 @@ import { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import '../saved_visualizations/saved_visualizations';
 import './visualization_editor';
-import 'ui/vis/editors/default/sidebar';
-import 'ui/visualize';
-import 'ui/collapsible_sidebar';
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -35,12 +32,12 @@ import { VisualizeConstants } from '../visualize_constants';
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
 import { extractTimeFilter, changeTimeFilter } from '../../../../data/public';
 import { start as data } from '../../../../data/public/legacy';
-import { start as visualizations } from '../../../../visualizations/public/np_ready/public/legacy';
 
 import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
 
 import {
   getServices,
+  angular,
   absoluteToParsedUrl,
   getUnhashableStatesProvider,
   getVisualizeLoader,
@@ -54,7 +51,6 @@ import {
 } from '../kibana_services';
 
 const {
-  angular,
   capabilities,
   chrome,
   docTitle,
@@ -65,6 +61,7 @@ const {
   timefilter,
   uiModules,
   uiRoutes,
+  visualizations,
 } = getServices();
 
 const { savedQueryService } = data.search.services;

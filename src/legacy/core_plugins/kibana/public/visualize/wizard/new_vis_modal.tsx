@@ -23,14 +23,13 @@ import { EuiModal, EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { VisualizeConstants } from '../visualize_constants';
-import { createUiStatsReporter, METRIC_TYPE } from '../../../../ui_metric/public';
 import { SearchSelection } from './search_selection';
 import { TypeSelection } from './type_selection';
 import { TypesStart, VisTypeAlias } from '../../../../visualizations/public/np_ready/public/types';
 
-import { getServices, VisType } from '../kibana_services';
+import { getServices, METRIC_TYPE, VisType } from '../kibana_services';
 
-const { addBasePath, uiSettings } = getServices();
+const { addBasePath, createUiStatsReporter, uiSettings } = getServices();
 
 interface TypeSelectionProps {
   isOpen: boolean;

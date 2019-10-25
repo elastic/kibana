@@ -21,7 +21,6 @@ import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
 import { VisualizeListingTable } from './visualize_listing_table';
 import { NewVisModal } from '../wizard/new_vis_modal';
 import { VisualizeConstants } from '../visualize_constants';
-import { start as visualizations } from '../../../../visualizations/public/np_ready/public/legacy';
 import { i18n } from '@kbn/i18n';
 
 import { getServices } from '../kibana_services';
@@ -35,6 +34,7 @@ const {
   toastNotifications,
   uiModules,
   wrapInI18nContext,
+  visualizations,
 } = getServices();
 
 const app = uiModules.get('app/visualize', ['ngRoute', 'react']);
