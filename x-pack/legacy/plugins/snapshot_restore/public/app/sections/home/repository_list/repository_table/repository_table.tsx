@@ -9,8 +9,6 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiInMemoryTable,
   EuiLink,
   EuiToolTip,
