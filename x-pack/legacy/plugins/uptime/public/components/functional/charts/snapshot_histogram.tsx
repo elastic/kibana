@@ -151,7 +151,7 @@ export const SnapshotHistogramComponent = ({
             xDomain={{
               minInterval: interval,
               min: absoluteStartDate,
-              max: absoluteEndDate + interval,
+              max: absoluteEndDate,
             }}
             showLegend={false}
           />
