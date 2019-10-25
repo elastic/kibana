@@ -64,29 +64,32 @@ const PreviewRenderer = ({
   ExpressionRendererComponent: ExpressionRenderer;
 }) => {
   return (
-    <ExpressionRendererComponent
+    <div
       className={classNames('lnsSuggestionPanel__chartWrapper', {
         'lnsSuggestionPanel__chartWrapper--withLabel': withLabel,
       })}
-      expression={expression}
-      renderError={() => {
-        return (
-          <div className="lnsSuggestionPanel__suggestionIcon">
-            <EuiIconTip
-              size="xl"
-              color="danger"
-              type="alert"
-              aria-label={i18n.translate('xpack.lens.editorFrame.previewErrorLabel', {
-                defaultMessage: 'Preview rendering failed',
-              })}
-              content={i18n.translate('xpack.lens.editorFrame.previewErrorLabel', {
-                defaultMessage: 'Preview rendering failed',
-              })}
-            />
-          </div>
-        );
-      }}
-    />
+    >
+      <ExpressionRendererComponent
+        expression={expression}
+        renderError={() => {
+          return (
+            <div className="lnsSuggestionPanel__suggestionIcon">
+              <EuiIconTip
+                size="xl"
+                color="danger"
+                type="alert"
+                aria-label={i18n.translate('xpack.lens.editorFrame.previewErrorLabel', {
+                  defaultMessage: 'Preview rendering failed',
+                })}
+                content={i18n.translate('xpack.lens.editorFrame.previewErrorLabel', {
+                  defaultMessage: 'Preview rendering failed',
+                })}
+              />
+            </div>
+          );
+        }}
+      />
+    </div>
   );
 };
 

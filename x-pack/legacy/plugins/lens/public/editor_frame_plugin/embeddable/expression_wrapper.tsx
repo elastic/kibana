@@ -48,11 +48,12 @@ export function ExpressionWrapper({
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
-        <ExpressionRendererComponent
-          className="lnsExpressionRenderer"
-          expression={expression}
-          searchContext={{ ...context, type: 'kibana_context' }}
-        />
+        <div className="lnsExpressionRenderer">
+          <ExpressionRendererComponent
+            expression={expression}
+            searchContext={{ ...context, type: 'kibana_context' }}
+          />
+        </div>
       )}
     </I18nProvider>
   );

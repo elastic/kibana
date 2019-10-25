@@ -211,43 +211,44 @@ export function InnerWorkspacePanel({
     }
 
     return (
-      <ExpressionRendererComponent
-        className="lnsExpressionRenderer"
-        expression={expression!}
-        renderError={(errorMessage?: string | null) => {
-          return (
-            <EuiFlexGroup direction="column" alignItems="center">
-              <EuiFlexItem>
-                <EuiIcon type="alert" size="xl" color="danger" />
-              </EuiFlexItem>
-              <EuiFlexItem data-test-subj="expression-failure">
-                <FormattedMessage
-                  id="xpack.lens.editorFrame.dataFailure"
-                  defaultMessage="An error occurred when loading data."
-                />
-              </EuiFlexItem>
-              {errorMessage ? (
-                <EuiFlexItem className="eui-textBreakAll" grow={false}>
-                  <EuiButtonEmpty
-                    onClick={() => {
-                      setLocalState(prevState => ({
-                        ...prevState,
-                        expandError: !prevState.expandError,
-                      }));
-                    }}
-                  >
-                    {i18n.translate('xpack.lens.editorFrame.expandRenderingErrorButton', {
-                      defaultMessage: 'Show details of error',
-                    })}
-                  </EuiButtonEmpty>
-
-                  {localState.expandError ? errorMessage : null}
+      <div className="lnsExpressionRenderer">
+        <ExpressionRendererComponent
+          expression={expression!}
+          renderError={(errorMessage?: string | null) => {
+            return (
+              <EuiFlexGroup direction="column" alignItems="center">
+                <EuiFlexItem>
+                  <EuiIcon type="alert" size="xl" color="danger" />
                 </EuiFlexItem>
-              ) : null}
-            </EuiFlexGroup>
-          );
-        }}
-      />
+                <EuiFlexItem data-test-subj="expression-failure">
+                  <FormattedMessage
+                    id="xpack.lens.editorFrame.dataFailure"
+                    defaultMessage="An error occurred when loading data."
+                  />
+                </EuiFlexItem>
+                {errorMessage ? (
+                  <EuiFlexItem className="eui-textBreakAll" grow={false}>
+                    <EuiButtonEmpty
+                      onClick={() => {
+                        setLocalState(prevState => ({
+                          ...prevState,
+                          expandError: !prevState.expandError,
+                        }));
+                      }}
+                    >
+                      {i18n.translate('xpack.lens.editorFrame.expandRenderingErrorButton', {
+                        defaultMessage: 'Show details of error',
+                      })}
+                    </EuiButtonEmpty>
+
+                    {localState.expandError ? errorMessage : null}
+                  </EuiFlexItem>
+                ) : null}
+              </EuiFlexGroup>
+            );
+          }}
+        />
+      </div>
     );
   }
 

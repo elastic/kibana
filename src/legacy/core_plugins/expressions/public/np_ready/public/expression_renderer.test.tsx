@@ -52,7 +52,7 @@ describe('ExpressionRenderer', () => {
       };
     });
 
-    const instance = mount(<ExpressionRendererImplementation className="renderer" expression="" />);
+    const instance = mount(<ExpressionRendererImplementation expression="" />);
 
     loadingSubject.next();
     instance.update();
@@ -94,7 +94,7 @@ describe('ExpressionRenderer', () => {
       };
     });
 
-    const instance = mount(<ExpressionRendererImplementation className="renderer" expression="" />);
+    const instance = mount(<ExpressionRendererImplementation expression="" />);
 
     dataSubject.next('good data');
     renderSubject.next({
@@ -127,11 +127,7 @@ describe('ExpressionRenderer', () => {
     const renderErrorFn = jest.fn().mockReturnValue(null);
 
     const instance = mount(
-      <ExpressionRendererImplementation
-        className="renderer"
-        expression=""
-        renderError={renderErrorFn}
-      />
+      <ExpressionRendererImplementation expression="" renderError={renderErrorFn} />
     );
 
     renderSubject.next({
