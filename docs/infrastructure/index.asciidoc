@@ -4,7 +4,7 @@
 
 [partintro]
 --
-The Metrics app enables you to monitor for metrics your infrastructure and identify problems in real time.
+The Metrics app enables you to monitor your infrastructure metrics and identify problems in real time.
 You start with a visual summary of your infrastructure where you can view basic metrics for common servers, containers, and services.
 Then you can drill down to view more detailed metrics or other information for that component.
 
