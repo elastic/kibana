@@ -14,7 +14,8 @@ import {
   getMapReady,
   getWaitingForMapReadyLayerListRaw,
   getTransientLayerId,
-  getTooltipState
+  getTooltipState,
+  getQuery,
 } from '../selectors/map_selectors';
 import { FLYOUT_STATE } from '../reducers/ui';
 import {
@@ -645,15 +646,19 @@ function removeLayerFromLayerList(layerId) {
   };
 }
 
-export function setQuery({ query, timeFilters, filters = [] }) {
+export function setQuery({ query, timeFilters, filters = [], refresh = false }) {
   return async (dispatch, getState) => {
+    const prevQuery = getQuery(getState());
+    const queryLastTriggeredAt = refresh
+      ? (new Date()).toISOString() // ensure query changes to trigger re-fetch when "Refresh" clicked
+      : prevQuery.queryLastTriggeredAt;
+
     dispatch({
       type: SET_QUERY,
       timeFilters,
       query: {
         ...query,
-        // ensure query changes to trigger re-fetch even when query is the same because "Refresh" clicked
-        queryLastTriggeredAt: (new Date()).toISOString(),
+        queryLastTriggeredAt,
       },
       filters,
     });
