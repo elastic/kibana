@@ -24,6 +24,7 @@ export function Readme({ readmePath }: { readmePath: string }) {
         <ReactMarkdown renderers={markdownRenderers} source={markdown} />
       ) : (
         <EuiText>
+          {/* simulates a long page of text loading */}
           <p>
             <EuiLoadingContent lines={5} />
           </p>
