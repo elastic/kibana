@@ -31,23 +31,11 @@ exports[`render symbol tree correctly 1`] = `
     </button>
     <div
       className="euiSideNav__content"
-      role="menubar"
     >
       <div
         className="euiSideNavItem euiSideNavItem--root euiSideNavItem--hasChildItems"
       >
         <div
-          aria-label={
-            <span
-              className="euiSideNavItemButton__content"
-            >
-              <span
-                className="euiSideNavItemButton__label"
-              >
-                
-              </span>
-            </span>
-          }
           className="euiSideNavItemButton"
         >
           <span

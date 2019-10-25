@@ -7,11 +7,11 @@
 import _ from 'lodash';
 import sinon from 'sinon';
 import { TaskManager, claimAvailableTasks } from './task_manager';
-import { SavedObjectsClientMock } from 'src/core/server/mocks';
+import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { SavedObjectsSerializer, SavedObjectsSchema } from 'src/core/server';
 import { mockLogger } from './test_utils';
 
-const savedObjectsClient = SavedObjectsClientMock.create();
+const savedObjectsClient = savedObjectsClientMock.create();
 const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
 
 describe('TaskManager', () => {
