@@ -18,7 +18,7 @@
  */
 
 import { getSortedObjectsForExport } from './get_sorted_objects_for_export';
-import { SavedObjectsClientMock } from '../service/saved_objects_client.mock';
+import { savedObjectsClientMock } from '../service/saved_objects_client.mock';
 import { Readable } from 'stream';
 import { createPromiseFromStreams, createConcatStream } from '../../../../legacy/utils/streams';
 
@@ -27,7 +27,7 @@ async function readStreamToCompletion(stream: Readable) {
 }
 
 describe('getSortedObjectsForExport()', () => {
-  const savedObjectsClient = SavedObjectsClientMock.create();
+  const savedObjectsClient = savedObjectsClientMock.create();
 
   afterEach(() => {
     savedObjectsClient.find.mockReset();

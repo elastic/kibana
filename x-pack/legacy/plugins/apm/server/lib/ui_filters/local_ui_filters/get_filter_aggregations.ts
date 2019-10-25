@@ -53,7 +53,7 @@ export const getFilterAggregations = async ({
               terms: {
                 field: field.fieldName,
                 order: {
-                  _count: 'desc'
+                  _count: 'desc' as const
                 }
               },
               ...bucketCountAggregation
