@@ -9,7 +9,7 @@ import fs from 'fs';
 import { Server } from 'hapi';
 import os from 'os';
 import path from 'path';
-import rimraf from 'rimraf';
+import del from 'del';
 
 import { LanguageServers } from './language_servers';
 import { InstallManager } from './install_manager';
@@ -46,7 +46,7 @@ beforeAll(() => {
 });
 
 afterAll(() => {
-  rimraf.sync(fakeTestDir);
+  del.sync(fakeTestDir, { force: true });
 });
 
 test('install language server by plugin', async () => {

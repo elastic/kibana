@@ -45,6 +45,7 @@ import {
   ChromeNavLink,
   ChromeNavLinks,
   ChromeNavLinkUpdateableFields,
+  ChromeDocTitle,
   ChromeStart,
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
@@ -110,8 +111,10 @@ export {
   HttpHandler,
   HttpBody,
   IBasePath,
+  IAnonymousPaths,
   IHttpInterceptController,
   IHttpFetchError,
+  InterceptedHttpResponse,
 } from './http';
 
 export {
@@ -248,6 +251,7 @@ export {
   ChromeNavLink,
   ChromeNavLinks,
   ChromeNavLinkUpdateableFields,
+  ChromeDocTitle,
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
   ChromeStart,

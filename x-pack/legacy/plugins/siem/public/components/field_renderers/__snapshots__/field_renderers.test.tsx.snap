@@ -35,8 +35,7 @@ exports[`Field Renderers #autonomousSystemRenderer it renders correctly against 
 
 exports[`Field Renderers #dateRenderer it renders correctly against snapshot 1`] = `
 <Component>
-  <FormattedDate
-    fieldName="firstSeen"
+  <FormattedRelativePreferenceDate
     value="2019-02-07T17:19:41.636Z"
   />
 </Component>

@@ -19,8 +19,8 @@ const BUCKET_SIZE = 3600;
 const BUCKET_NUMBER = 24;
 
 export class KibanaTelemetryAdapter {
-  public static initUsageCollector(server: any) {
-    const { collectorSet } = server.usage;
+  public static initUsageCollector(usageCollector: any) {
+    const { collectorSet } = usageCollector;
     return collectorSet.makeUsageCollector({
       type: 'uptime',
       fetch: async () => {
