@@ -269,6 +269,33 @@ export const ResultsTable: FC<Props> = React.memo(({ jobConfig }) => {
     hidePerPageOptions: false,
   };
 
+  const search = {
+    // onChange: (onQueryChange),
+    box: {
+      incremental: true,
+    },
+    filters: [
+      {
+        type: 'field_value_toggle_group',
+        field: `${jobConfig.dest.results_field}.is_training`,
+        items: [
+          {
+            value: false,
+            name: i18n.translate('xpack.ml.dataframe.analyticsList.isTestingLabel', {
+              defaultMessage: 'Testing',
+            }),
+          },
+          {
+            value: true,
+            name: i18n.translate('xpack.ml.dataframe.analyticsList.isTrainingLabel', {
+              defaultMessage: 'Training',
+            }),
+          },
+        ],
+      },
+    ],
+  };
+
   if (jobConfig === undefined) {
     return null;
   }
@@ -392,6 +419,7 @@ export const ResultsTable: FC<Props> = React.memo(({ jobConfig }) => {
           onTableChange={onTableChange}
           pagination={pagination}
           responsive={false}
+          search={search}
           sorting={sorting}
         />
       )}
