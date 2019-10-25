@@ -17,9 +17,10 @@
  * under the License.
  */
 // @ts-ignore
-import { uiModules } from 'ui/modules';
-import { wrapInI18nContext } from 'ui/i18n';
+import { getServices } from '../../kibana_services';
 import { DiscoverIndexPattern } from './discover_index_pattern';
+
+const { wrapInI18nContext, uiModules } = getServices();
 
 const app = uiModules.get('apps/discover');
 

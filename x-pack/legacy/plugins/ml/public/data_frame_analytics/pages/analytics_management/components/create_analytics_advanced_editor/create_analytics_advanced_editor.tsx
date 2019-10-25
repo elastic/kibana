@@ -127,6 +127,7 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = ({ ac
                 fontSize: '12px',
                 maxLines: 20,
               }}
+              theme="textmate"
               aria-label={i18n.translate(
                 'xpack.ml.dataframe.analytics.create.advancedEditor.codeEditorAriaLabel',
                 {
