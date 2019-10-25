@@ -25,6 +25,7 @@ import { RecreateMLJobsButton } from './recreate_ml_jobs_button';
 interface ProcessStepProps {
   cleanupAndSetup: () => void;
   errorMessages: string[];
+  mlSetupErrorMessages: string[];
   isConfigurationValid: boolean;
   setup: () => void;
   setupStatus: SetupStatus;
@@ -34,6 +35,7 @@ interface ProcessStepProps {
 export const ProcessStep: React.FunctionComponent<ProcessStepProps> = ({
   cleanupAndSetup,
   errorMessages,
+  mlSetupErrorMessages,
   isConfigurationValid,
   setup,
   setupStatus,
@@ -90,7 +92,12 @@ export const ProcessStep: React.FunctionComponent<ProcessStepProps> = ({
       ) : setupStatus === 'requiredForUpdate' || setupStatus === 'requiredForReconfiguration' ? (
         <RecreateMLJobsButton isDisabled={!isConfigurationValid} onClick={cleanupAndSetup} />
       ) : (
-        <CreateMLJobsButton isDisabled={!isConfigurationValid} onClick={setup} />
+        <>
+          {mlSetupErrorMessages.length > 0 ? (
+            <MlSetupErrors messages={mlSetupErrorMessages} />
+          ) : null}
+          <CreateMLJobsButton isDisabled={!isConfigurationValid} onClick={setup} />
+        </>
       )}
     </EuiText>
   );
@@ -102,3 +109,25 @@ const errorCalloutTitle = i18n.translate(
     defaultMessage: 'An error occurred',
   }
 );
+
+const errorSetupTitle = i18n.translate(
+  'xpack.infra.analysisSetup.steps.setupProcess.errorSetupTitle',
+  {
+    defaultMessage: 'Check your settings',
+  }
+);
+
+const MlSetupErrors = ({ messages }: { messages: string[] }) => {
+  return (
+    <>
+      <EuiCallOut color="danger" iconType="alert" title={errorSetupTitle}>
+        <ul>
+          {messages.map((message, i) => (
+            <li key={i}>{message}</li>
+          ))}
+        </ul>
+      </EuiCallOut>
+      <EuiSpacer />
+    </>
+  );
+};

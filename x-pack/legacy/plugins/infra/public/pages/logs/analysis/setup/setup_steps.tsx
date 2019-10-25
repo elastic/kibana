@@ -53,7 +53,7 @@ export const AnalysisSetupSteps: React.FunctionComponent<AnalysisSetupStepsProps
     cleanupAndSetupModule,
   });
 
-  const { validMlSetup } = useContext(LogAnalysisJobs.Context);
+  const { validMlSetup, mlSetupErrors } = useContext(LogAnalysisJobs.Context);
 
   const steps = [
     {
@@ -80,6 +80,7 @@ export const AnalysisSetupSteps: React.FunctionComponent<AnalysisSetupStepsProps
         <ProcessStep
           cleanupAndSetup={cleanupAndSetup}
           errorMessages={errorMessages}
+          mlSetupErrorMessages={mlSetupErrors.map(error => error.message)}
           isConfigurationValid={validMlSetup && validationErrors.length <= 0}
           setup={setup}
           setupStatus={setupStatus}

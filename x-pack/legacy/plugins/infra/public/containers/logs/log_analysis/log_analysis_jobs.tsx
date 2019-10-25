@@ -14,6 +14,7 @@ import { callJobsSummaryAPI } from './api/ml_get_jobs_summary_api';
 import { callSetupMlModuleAPI, SetupMlModuleResponsePayload } from './api/ml_setup_module_api';
 import { useLogAnalysisCleanup } from './log_analysis_cleanup';
 import { useStatusState } from './log_analysis_status_state';
+import { useMlValidateModule } from './ml_validate_module';
 
 const MODULE_ID = 'logs_ui_analysis';
 
@@ -104,9 +105,20 @@ export const useLogAnalysisJobs = ({
     [spaceId, sourceId]
   );
 
+  const {
+    getMlValidateModule,
+    isLoading: mlValidateIsLoading,
+    mlValidateModuleErrors,
+  } = useMlValidateModule({
+    timestamp: timeField,
+    indexPatternName: indexPattern,
+  });
+
   const isLoadingSetupStatus = useMemo(
     () =>
-      fetchJobStatusRequest.state === 'pending' || fetchModuleDefinitionRequest.state === 'pending',
+      fetchJobStatusRequest.state === 'pending' ||
+      fetchModuleDefinitionRequest.state === 'pending' ||
+      mlValidateIsLoading === true,
     [fetchJobStatusRequest.state, fetchModuleDefinitionRequest.state]
   );
 
@@ -142,14 +154,15 @@ export const useLogAnalysisJobs = ({
     fetchModuleDefinition();
   }, [fetchModuleDefinition]);
 
+  useEffect(() => {
+    getMlValidateModule();
+  }, [getMlValidateModule]);
+
   const jobIds = useMemo(() => {
     return {
       'log-entry-rate': getJobId(spaceId, sourceId, 'log-entry-rate'),
     };
   }, [sourceId, spaceId]);
-
-  const validMlSetup = false;
-  const mlSetupErrors = [{ field: 'timestamp', message: 'Timestamp is not a valid time field' }];
 
   return {
     availableIndices,
@@ -165,8 +178,8 @@ export const useLogAnalysisJobs = ({
     viewSetupForUpdate,
     viewResults,
     jobIds,
-    validMlSetup,
-    mlSetupErrors,
+    mlSetupErrors: mlValidateModuleErrors,
+    validMlSetup: mlValidateModuleErrors.length === 0,
   };
 };
 
