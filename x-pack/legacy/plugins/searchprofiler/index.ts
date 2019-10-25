@@ -7,14 +7,10 @@
 import { resolve } from 'path';
 import Boom from 'boom';
 
-// @ts-ignore
-import { profileRoute } from './server/routes/profile';
-
-// License
-// @ts-ignore
-import { checkLicense } from './server/lib/check_license';
-// @ts-ignore
-import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
+import { CoreSetup } from 'src/core/server';
+import { Server } from 'src/legacy/server/kbn_server';
+import { LegacySetup } from './server/np_ready/types';
+import { plugin } from './server/np_ready';
 
 export const searchprofiler = (kibana: any) => {
   const publicSrc = resolve(__dirname, 'public');
@@ -33,23 +29,14 @@ export const searchprofiler = (kibana: any) => {
       hacks: ['plugins/searchprofiler/register.js'],
       home: ['plugins/searchprofiler/register_feature.js'],
     },
-    init(server: any) {
+    init(server: Server) {
+      const serverPlugin = plugin();
       const thisPlugin = this;
-      const xpackMainPlugin = server.plugins.xpack_main;
-      mirrorPluginStatus(xpackMainPlugin, thisPlugin);
-      xpackMainPlugin.status.once('green', () => {
-        // Register a function that is called whenever the xpack info changes,
-        // to re-compute the license check results for this plugin
-        xpackMainPlugin.info
-          .feature(thisPlugin.id)
-          .registerLicenseCheckResultsGenerator(checkLicense);
-      });
 
-      // Add server routes and initialize the plugin here
       const commonRouteConfig = {
         pre: [
           function forbidApiAccess() {
-            const licenseCheckResults = xpackMainPlugin.info
+            const licenseCheckResults = server.plugins.xpack_main.info
               .feature(thisPlugin.id)
               .getLicenseCheckResults();
             if (licenseCheckResults.showAppLink && licenseCheckResults.enableAppLink) {
@@ -60,7 +47,19 @@ export const searchprofiler = (kibana: any) => {
           },
         ],
       };
-      profileRoute(server, commonRouteConfig);
+
+      const legacySetup: LegacySetup = {
+        route: (args: Parameters<typeof server.route>[0]) => server.route(args),
+        plugins: {
+          __LEGACY: {
+            thisPlugin,
+            xpackMain: server.plugins.xpack_main,
+            elasticsearch: server.plugins.elasticsearch,
+            commonRouteConfig,
+          },
+        },
+      };
+      serverPlugin.setup({} as CoreSetup, legacySetup);
     },
   });
 };

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { IndexDetails } from './index_details';
@@ -19,7 +19,7 @@ export interface Props {
   onHighlight: (args: OnHighlightChangeArgs) => void;
 }
 
-export const ProfileTree = ({ data, target, onHighlight }: Props) => {
+export const ProfileTree = memo(({ data, target, onHighlight }: Props) => {
   if (!data || data.length === 0) {
     return null;
   }
@@ -61,4 +61,4 @@ export const ProfileTree = ({ data, target, onHighlight }: Props) => {
       </EuiFlexGroup>
     </HighlightContextProvider>
   );
-};
+});

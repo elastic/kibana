@@ -70,7 +70,7 @@ export const HighlightDetailsFlyout = ({ indexName, operation, shard, onClose }:
                     type="iInCircle"
                     color="subdued"
                     content={i18n.translate(
-                      'xpack.searchProfiler.highlightDetails.totalTimeTooltip',
+                      'xpack.searchProfiler.highlightDetails.totalTimeInclusiveTooltip',
                       {
                         defaultMessage:
                           'The total time spent at this query component, inclusive of children',
@@ -92,7 +92,7 @@ export const HighlightDetailsFlyout = ({ indexName, operation, shard, onClose }:
                     type="iInCircle"
                     color="subdued"
                     content={i18n.translate(
-                      'xpack.searchProfiler.highlightDetails.totalTimeTooltip',
+                      'xpack.searchProfiler.highlightDetails.totalTimeExclusiveTooltip',
                       {
                         defaultMessage:
                           'The time spent by this query component alone, exclusive of children',

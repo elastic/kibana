@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useRef } from 'react';
+import React, { useRef, memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiForm,
@@ -32,7 +32,7 @@ const INITIAL_EDITOR_VALUE = `{
   }
 }`;
 
-export const ProfileQueryEditor = ({ onResponse, onProfileClick }: Props) => {
+export const ProfileQueryEditor = memo(({ onResponse, onProfileClick }: Props) => {
   const editorValueGetter = useRef<() => string>(null as any);
   const indexInputRef = useRef<HTMLInputElement>(null as any);
   const typeInputRef = useRef<HTMLInputElement>(null as any);
@@ -64,6 +64,7 @@ export const ProfileQueryEditor = ({ onResponse, onProfileClick }: Props) => {
               })}
             >
               <EuiFieldText
+                disabled={!licenseEnabled}
                 inputRef={ref => {
                   indexInputRef.current = ref!;
                   ref!.value = DEFAULT_INDEX_VALUE;
@@ -77,7 +78,10 @@ export const ProfileQueryEditor = ({ onResponse, onProfileClick }: Props) => {
                 defaultMessage: 'Type',
               })}
             >
-              <EuiFieldText inputRef={ref => (typeInputRef.current = ref!)} />
+              <EuiFieldText
+                disabled={!licenseEnabled}
+                inputRef={ref => (typeInputRef.current = ref!)}
+              />
             </EuiFormRow>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -87,7 +91,7 @@ export const ProfileQueryEditor = ({ onResponse, onProfileClick }: Props) => {
         licenseEnabled={licenseEnabled}
         initialValue={INITIAL_EDITOR_VALUE}
       />
-      <EuiButton onClick={() => handleProfileClick()}>
+      <EuiButton disabled={!licenseEnabled} onClick={() => handleProfileClick()}>
         <EuiText>
           {i18n.translate('xpack.searchProfiler.formProfileButtonLabel', {
             defaultMessage: 'Profile',
@@ -96,4 +100,4 @@ export const ProfileQueryEditor = ({ onResponse, onProfileClick }: Props) => {
       </EuiButton>
     </div>
   );
-};
+});

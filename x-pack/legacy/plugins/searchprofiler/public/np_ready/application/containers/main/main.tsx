@@ -14,6 +14,7 @@ import {
   EuiPageContentBody,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSpacer,
 } from '@elastic/eui';
 import { ProfileQueryEditor } from '../';
 
@@ -22,7 +23,10 @@ import {
   ProfileTree,
   HighlightDetailsFlyout,
   OnHighlightChangeArgs,
+  LicenseWarningNotice,
 } from '../../components';
+
+import { useAppContext } from '../../app_context';
 
 import { EmptyTreePlaceHolder } from './components';
 import { Targets, ShardSerialized } from '../../types';
@@ -38,33 +42,62 @@ function hasAggregations(profileResponse: ShardSerialized[]) {
 }
 
 export const Main = () => {
+  const { licenseEnabled } = useAppContext();
+
   const [activeTab, setActiveTab] = useState<Targets | null>(null);
   const [showDetailsFlyout, setShowDetailsFlyout] = useState<boolean>(false);
   const [currentResponse, setCurrentResponse] = useState<ShardSerialized[] | null>(null);
-
   const [highlightedDetails, setHighlightedDetails] = useState<OnHighlightChangeArgs | null>(null);
 
   const onHighlight = useCallback(
     (args: OnHighlightChangeArgs) => {
-      setHighlightedDetails(args);
-      setShowDetailsFlyout(true);
+      setHighlightedDetails(() => args);
+      setShowDetailsFlyout(() => true);
     },
     [currentResponse]
   );
 
-  const onProfileClick = () => {
-    setHighlightedDetails(null);
+  const onProfileClick = useCallback(() => {
+    setHighlightedDetails(() => null);
+  }, []);
+
+  const onResponse = useCallback((resp: ShardSerialized[]) => {
+    setCurrentResponse(() => resp);
+    setActiveTab(() => 'searches');
+  }, []);
+
+  const setActiveTabCb = useCallback((target: Targets) => setActiveTab(() => target), []);
+
+  const renderLicenseWarning = () => {
+    return !licenseEnabled ? (
+      <>
+        <LicenseWarningNotice />
+        <EuiSpacer size="s" />
+      </>
+    ) : null;
   };
 
-  const onResponse = (resp: ShardSerialized[]) => {
-    setCurrentResponse(resp);
-    setActiveTab('searches');
+  const renderProfileTreeArea = () => {
+    if (activeTab) {
+      return (
+        <div className="prfDevTool__main__profiletree">
+          <ProfileTree onHighlight={onHighlight} target={activeTab} data={currentResponse} />
+        </div>
+      );
+    }
+
+    if (licenseEnabled) {
+      return <EmptyTreePlaceHolder />;
+    }
+
+    return null;
   };
 
   return (
     <>
       <EuiPage className="prfDevTool__page">
         <EuiPageBody className="prfDevTool__page__pageBody">
+          {renderLicenseWarning()}
           <EuiPageContent className="prfDevTool__page__pageBodyContent">
             <EuiPageContentBody className="prfDevTool__page__pageBodyContentBody">
               <EuiFlexGroup gutterSize="s" direction="row" className="prfDevTool__page__bodyGroup">
@@ -75,23 +108,13 @@ export const Main = () => {
                   <EuiFlexGroup className="prfDevTool__main" gutterSize="none" direction="column">
                     <SearchProfilerTabs
                       activeTab={activeTab}
-                      activateTab={(target: Targets) => setActiveTab(target)}
+                      activateTab={setActiveTabCb}
                       has={{
                         aggregations: Boolean(currentResponse && hasAggregations(currentResponse)),
                         searches: Boolean(currentResponse && hasSearch(currentResponse)),
                       }}
                     />
-                    {activeTab ? (
-                      <div className="prfDevTool__main__profiletree">
-                        <ProfileTree
-                          onHighlight={onHighlight}
-                          target={activeTab}
-                          data={currentResponse}
-                        />
-                      </div>
-                    ) : (
-                      <EmptyTreePlaceHolder />
-                    )}
+                    {renderProfileTreeArea()}
                   </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>

@@ -5,8 +5,9 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiText, EuiIcon } from '@elastic/eui';
+import { EuiCallOut, EuiText, EuiLink, EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export const LicenseWarningNotice = () => {
   const registerLicenseLinkLabel = i18n.translate('xpack.searchProfiler.registerLicenseLinkLabel', {
@@ -26,37 +27,46 @@ export const LicenseWarningNotice = () => {
   });
 
   return (
-    <EuiCallOut color="warning" style={{ padding: '16px' }}>
-      <EuiText>
-        <h2>
-          <EuiIcon type="alert" />
-          {i18n.translate('xpack.searchProfiler.licenseErrorMessageTitle', {
-            defaultMessage: 'License error',
-          })}
-        </h2>
-      </EuiText>
-
-      <EuiText>
-        <p>
-          {i18n.translate('xpack.searchProfiler.licenseErrorMessageDescription', {
-            defaultMessage:
-              'The Profiler Visualization requires an active license ({licenseTypeList} or {platinumLicenseType}), but none were found in your cluster.',
-            values: {
-              licenseTypeList: `<code>${trialLicense}</code>, <code>${basicLicense}</code>, <code>${goldLicense}</code>`,
-              platinumLicenseType: `<code>${platinumLicense}</code>`,
-            },
-          })}
-        </p>
-      </EuiText>
-
-      <p>
-        {i18n.translate('xpack.searchProfiler.registerLicenseDescription', {
-          defaultMessage: 'Please {registerLicenseLink} to continue using the Search Profiler',
-          values: {
-            registerLicenseLink: `<a class='kuiLink' href='https://www.elastic.co/subscriptions' rel='noopener'>${registerLicenseLinkLabel}</a>`,
-          },
+    <div className="prfDevTool__licenseWarning__container">
+      <EuiCallOut
+        title={i18n.translate('xpack.searchProfiler.licenseErrorMessageTitle', {
+          defaultMessage: 'License error',
         })}
-      </p>
-    </EuiCallOut>
+        color="warning"
+        iconType="alert"
+        style={{ padding: '16px' }}
+      >
+        <EuiText size="s">
+          <p>
+            <FormattedMessage
+              id="xpack.searchProfiler.licenseErrorMessageDescription"
+              defaultMessage="The Profiler Visualization requires an active license ({licenseTypeList} or {platinumLicenseType}), but none were found in your cluster."
+              values={{
+                licenseTypeList: (
+                  <>
+                    <EuiCode>{trialLicense}</EuiCode>, <EuiCode>{basicLicense}</EuiCode>,{' '}
+                    <EuiCode>{goldLicense}</EuiCode>
+                  </>
+                ),
+                platinumLicenseType: <EuiCode>{platinumLicense}</EuiCode>,
+              }}
+            />
+          </p>
+          <p>
+            <FormattedMessage
+              id="xpack.searchProfiler.registerLicenseDescription"
+              defaultMessage="Please {registerLicenseLink} to continue using the Search Profiler"
+              values={{
+                registerLicenseLink: (
+                  <EuiLink href="https://www.elastic.co/subscriptions" rel="noopener">
+                    {registerLicenseLinkLabel}
+                  </EuiLink>
+                ),
+              }}
+            />
+          </p>
+        </EuiText>
+      </EuiCallOut>
+    </div>
   );
 };
