@@ -25,6 +25,32 @@ A † denotes an argument can be passed multiple times.
 
 Returns `true` if all of the conditions are met. See also <<any_fn>>.
 
+*Expression syntax*
+[source,js]
+----
+all {neq “foo”} {neq “bar”} {neq “fizz”}
+all condition={gt 10} condition={lt 20}
+----
+
+*Code example*
+[source,text]
+----
+filters
+| demodata
+| math "mean(percent_uptime)"
+| formatnumber "0.0%"
+| metric "Average uptime"
+  metricFont={
+    font size=48 family="'Open Sans', Helvetica, Arial, sans-serif"
+    color={
+      if {all {gte 0} {lt 0.8}} then="red" else="green"
+    }
+    align="center" lHeight=48
+  }
+| render
+----
+This sets the color of the metric text to `”red”` if the context passed into `metric` is greater than or equal to 0 and less than 0.8. Otherwise, the color is set to `"green"`.
+
 *Accepts:* `null`
 
 [cols="3*^<"]
@@ -46,6 +72,24 @@ Alias: `condition`
 === `alterColumn`
 
 Converts between core types, including `string`, `number`, `null`, `boolean`, and `date`, and renames columns. See also <<mapColumn_fn>> and <<staticColumn_fn>>.
+
+*Expression syntax*
+[source,js]
+----
+alterColumn “cost” type=”string”
+alterColumn column=”@timestamp” name=”foo”
+----
+
+*Code example*
+[source,text]
+----
+filters
+| demodata
+| alterColumn “time” name=”time_in_ms” type=”number”
+| table
+| render
+----
+This renames the `time` column to `time_in_ms` and converts the type of the column’s values from `date` to `number`.
 
 *Accepts:* `datatable`
 
@@ -77,6 +121,27 @@ Alias: `column`
 
 Returns `true` if at least one of the conditions is met. See also <<all_fn>>.
 
+*Expression syntax*
+[source,js]
+----
+any {eq “foo”} {eq “bar”} {eq “fizz”}
+any condition={lte 10} condition={gt 30}
+----
+
+*Code example*
+[source,text]
+----
+filters
+| demodata
+| filterrows {
+    getCell "project" | any {eq "elasticsearch"} {eq "kibana"} {eq "x-pack"}
+  }
+| pointseries color="project" size="max(price)"
+| pie
+| render
+----
+This filters out any rows that don’t contain `“elasticsearch”`, `“kibana”` or `“x-pack”` in the `project` field.
+
 *Accepts:* `null`
 
 [cols="3*^<"]
@@ -98,6 +163,28 @@ Alias: `condition`
 === `as`
 
 Creates a `datatable` with a single value. See also <<getCell_fn>>.
+
+*Expression syntax*
+[source,js]
+----
+as 
+as “foo”
+as name=”bar”
+----
+
+*Code example*
+[source,text]
+----
+filters
+| demodata
+| ply by="project" fn={math "count(username)" | as "num_users"} fn={math "mean(price)" | as "price"}
+| pointseries x="project" y="num_users" size="price" color="project"
+| plot
+| render
+----
+`as` casts any primitive value (`string`, `number`, `date`, `null`) into a `datatable` with a single row and a single column with the given name (or defaults to `"value"` if no name is provided). This is useful when piping a primitive value into a function that only takes `datatable` as an input. 
+
+In the example above, `ply` expects each `fn` subexpression to return a `datatable` in order to merge the results of each `fn` back into a `datatable`, but using a `math` aggregation in the subexpressions returns a single `math` value, which is then cast into a `datatable` using `as`.
 
 *Accepts:* `string`, `boolean`, `number`, `null`
 
@@ -123,6 +210,21 @@ Default: `"value"`
 
 Retrieves Canvas workpad asset objects to provide as argument values. Usually images.
 
+*Expression syntax*
+[source,js]
+----
+asset "asset-52f14f2b-fee6-4072-92e8-cd2642665d02"
+asset id="asset-498f7429-4d56-42a2-a7e4-8bf08d98d114"
+----
+
+*Code example*
+[source,text]
+----
+image dataurl={asset "asset-c661a7cc-11be-45a1-a401-d7592ea7917a"} mode="contain"
+| render
+----
+The image asset stored with the ID `“asset-c661a7cc-11be-45a1-a401-d7592ea7917a”` is passed into the `dataurl` argument of the `image` function to display the stored asset.
+
 *Accepts:* `null`
 
 [cols="3*^<"]
@@ -144,6 +246,27 @@ Alias: `id`
 === `axisConfig`
 
 Configures the axis of a visualization. Only used with <<plot_fn>>.
+
+*Expression syntax*
+[source,js]
+----
+axisConfig show=false
+axisConfig position=”right” min=0 max=10 tickSize=1
+----
+
+*Code example*
+[source,text]
+----
+filters
+| demodata
+| pointseries x="size(cost)" y="project" color="project"
+| plot defaultStyle={seriesStyle bars=0.75 horizontalBars=true} 
+  legend=false 
+  xaxis={axisConfig position="top" min=0 max=400 tickSize=100} 
+  yaxis={axisConfig position="right"}
+| render
+----
+This sets the `x-axis` to display on the top of the chart and sets the range of values to `0-400` with ticks displayed at `100` intervals. The `y-axis` is configured to display on the `right`.
 
 *Accepts:* `null`
 
@@ -188,6 +311,34 @@ Default: `true`
 
 Builds a `case` (including a condition/result) to pass to the <<switch_fn>> function.
 
+*Expression syntax*
+[source,js]
+----
+case 0 then=”red”
+case when=5 then=”yellow”
+case if={lte 50} then=”green”
+----
+
+*Code example*
+[source,text]
+----
+math "random()"
+| progress shape="gauge" label={formatnumber "0%"} 
+  font={font size=24 family="'Open Sans', Helvetica, Arial, sans-serif" align="center" 
+    color={
+      switch {case if={lte 0.5} then="green"} 
+        {case if={all {gt 0.5} {lte 0.75}} then="orange"} 
+        default="red"
+    }} 
+  valueColor={
+    switch {case if={lte 0.5} then="green"} 
+      {case if={all {gt 0.5} {lte 0.75}} then="orange"} 
+      default="red"
+  }
+| render
+----
+This sets the color of the progress indicator and the color of the label to `"green"` if the value is less than or equal to `0.5`, `"orange"` if the value is greater than `0.5` and less than or equal to `0.75`, and `"red"` if `none` of the case conditions are met.
+
 *Accepts:* `any`
 
 [cols="3*^<"]
@@ -229,6 +380,24 @@ Clears the _context_, and returns `null`.
 
 Includes or excludes columns from a data table. If you specify both, this will exclude first.
 
+*Expression syntax*
+[source,js]
+----
+columns include=”@timestamp, projects, cost”
+columns exclude=”username, country, age”
+----
+
+*Code example*
+[source,text]
+----
+filters
+| demodata
+| columns include="price, cost, state, project"
+| table
+| render
+----
+This only keeps the `price`, `cost`, `state`, and `project` columns from the `demodata` data source and removes all other columns.
+
 *Accepts:* `datatable`
 
 [cols="3*^<"]
@@ -256,6 +425,31 @@ Alias: `include`
 Compares the _context_ to specified value to determine `true` or `false`. 
 Usually used in combination with <<if_fn>> or <<case_fn>>. This only works with primitive types, 
 such as `number`, `string`, and `boolean`. See also <<eq_fn>>, <<gt_fn>>, <<gte_fn>>, <<lt_fn>>, <<lte_fn>>, and <<neq_fn>>.
+
+*Expression syntax*
+[source,js]
+----
+compare “neq” to=”elasticsearch”
+compare op=”lte” to=100
+----
+
+*Code example*
+[source,text]
+----
+filters
+| demodata
+| mapColumn project 
+  fn=${getCell project | 
+    switch 
+      {case if={compare eq to=kibana} then=kibana}
+      {case if={compare eq to=elasticsearch} then=elasticsearch}
+      default="other"
+  }
+| pointseries size="size(cost)" color="project"
+| pie 
+| render
+----
+This maps all `project` values that aren’t `“kibana”` and `“elasticsearch”` to `“other”`. Alternatively, you can use the individual comparator functions instead of compare. See <<eq_fn>>, <<neq_fn>>, <<lt_fn>>, <<lte_fn>>, <<gt_fn>>, and <<gte_fn>>.
 
 *Accepts:* `string`, `number`, `boolean`, `null`
 
@@ -286,6 +480,35 @@ Alias: `this`, `b`
 === `containerStyle`
 
 Creates an object used for styling an element's container, including background, border, and opacity.
+
+*Expression syntax*
+[source,js]
+----
+containerStyle backgroundColor=”red”’
+containerStyle borderRadius=”50px”
+containerStyle border=”1px solid black”
+containerStyle padding=”5px”
+containerStyle opacity=”0.5”
+containerStyle overflow=”hidden”
+containerStyle backgroundImage={asset id=asset-f40d2292-cf9e-4f2c-8c6f-a504a25e949c} 
+  backgroundRepeat="no-repeat" 
+  backgroundSize="cover" 
+----
+
+*Code example*
+[source,text]
+----
+shape "star" fill="#E61D35" maintainAspect=true
+| render 
+  containerStyle={
+    containerStyle backgroundColor="#F8D546" 
+      borderRadius="200px" 
+      border="4px solid #05509F" 
+      padding="0px"
+      opacity="0.9" 
+      overflow="hidden"
+  }
+----
 
 *Accepts:* `null`
 
@@ -346,6 +569,22 @@ Default: `"hidden"`
 Returns whatever you pass into it. This can be useful when you need to use the 
 _context_ as an argument to a function as a sub-expression.
 
+*Expression syntax*
+[source,js]
+----
+context
+----
+
+*Code example*
+[source,text]
+----
+date
+| formatdate "LLLL"
+| markdown "Last updated: " {context} 
+| render
+----
+Using the `context` function allows us to pass the output, or _context_, of the previous function as a value to an argument in the next function. Here we get the formatted date string from the previous function and pass it as `content` for the markdown element.
+
 *Accepts:* `any`
 
 *Returns:* Original _context_
@@ -355,6 +594,26 @@ _context_ as an argument to a function as a sub-expression.
 === `csv` 
 
 Creates a `datatable` from CSV input.
+
+*Expression syntax*
+[source,js]
+----
+csv “fruit, stock
+     kiwi, 10
+     Banana, 5”
+----
+
+*Code example*
+[source,text]
+----
+csv "fruit,stock
+     kiwi,10
+     banana,5"
+| pointseries color=fruit size=stock
+| pie
+| render
+----
+This is useful for quickly mocking data.
 
 *Accepts:* `null`
 
@@ -390,6 +649,30 @@ Alias: `data`
 
 Returns the current time, or a time parsed from a `string`, as milliseconds since epoch.
 
+*Expression syntax*
+[source,js]
+----
+date
+date value=1558735195
+date “2019-05-24T21:59:55+0000”
+date “01/31/2019” format=”MM/DD/YYYY”
+----
+
+*Code example*
+[source,text]
+----
+date
+| formatdate "LLL"
+| markdown {context} 
+  font={font family="Arial, sans-serif" size=30 align="left" 
+    color="#000000" 
+    weight="normal" 
+    underline=false 
+    italic=false}
+| render
+----
+Using `date` without passing any arguments will return the current date and time.
+
 *Accepts:* `null`
 
 [cols="3*^<"]
@@ -418,6 +701,24 @@ using the `format` argument. Must be an ISO8601 string or you must provide the f
 
 A mock data set that includes project CI times with usernames, countries, and run phases.
 
+*Expression syntax*
+[source,js]
+----
+demodata
+demodata “ci”
+demodata type=”shirts”
+----
+
+*Code example*
+[source,text]
+----
+filters
+| demodata 
+| table
+| render
+----
+`demodata` is a mock data set that you can use to start playing around in Canvas.
+
 *Accepts:* `filter`
 
 [cols="3*^<"]
@@ -442,6 +743,23 @@ Default: `"ci"`
 
 Executes multiple sub-expressions, then returns the original _context_. Use for running functions that produce an action or side effect without changing the original _context_.
 
+*Expression syntax*
+[source,js]
+----
+do fn={something cool}
+----
+
+*Code example*
+[source,text]
+----
+filters
+| demodata 
+| do fn={something cool} 
+| table
+| render
+----
+`do` should be used to invoke a function that produces as a side effect without changing the `context`.
+
 *Accepts:* `any`
 
 [cols="3*^<"]
@@ -463,6 +781,22 @@ Aliases: `expression`, `exp`, `fn`, `function`
 === `dropdownControl`
 
 Configures a dropdown filter control element.
+
+*Expression syntax*
+[source,js]
+----
+dropdownControl valueColumn=project filterColumn=project
+dropdownControl valueColumn=agent filterColumn=agent.keyword filterGroup=group1
+----
+
+*Code example*
+[source,text]
+----
+demodata
+| dropdownControl valueColumn=project filterColumn=project 
+| render
+----
+This creates a dropdown filter element. It requires a data source and uses the unique values from the given `valueColumn` (i.e. `project`) and applies the filter to the `project` column. Note: `filterColumn` should point to a keyword type field for Elasticsearch data sources.
 
 *Accepts:* `datatable`
 
@@ -496,6 +830,33 @@ Configures a dropdown filter control element.
 
 Returns whether the _context_ is equal to the argument.
 
+*Expression syntax*
+[source,js]
+----
+eq true
+eq null
+eq 10
+eq “foo”
+----
+
+*Code example*
+[source,text]
+----
+filters
+| demodata
+| mapColumn project 
+  fn=${getCell project | 
+    switch 
+      {case if={eq kibana} then=kibana}
+      {case if={eq elasticsearch} then=elasticsearch}
+      default="other"
+  }
+| pointseries size="size(cost)" color="project"
+| pie 
+| render
+----
+This changes all values in the project column that don’t equal `“kibana”` or `“elasticsearch”` to `“other”`.
+
 *Accepts:* `boolean`, `number`, `string`, `null`
 
 [cols="3*^<"]
@@ -517,6 +878,28 @@ Alias: `value`
 === `escount`
 
 Queries {es} for the number of hits matching the specified query.
+
+*Expression syntax*
+[source,js]
+----
+escount index=”logstash-*”
+escount "currency:\"EUR\"" index=”kibana_sample_data_ecommerce” 
+escount query="response:404" index=”kibana_sample_data_logs” 
+----
+
+*Code example*
+[source,text]
+----
+filters
+| escount "Cancelled:true" index="kibana_sample_data_flights"
+| math "value"
+| progress shape="semicircle" 
+  label={formatnumber 0,0} 
+  font={font size=24 family="'Open Sans', Helvetica, Arial, sans-serif" color="#000000" align=center} 
+  max={filters | escount index="kibana_sample_data_flights"}
+| render
+----
+The first `escount` expression retrieves the number of flights that were cancelled. The second `escount` expression retrieves the total number of flights.
 
 *Accepts:* `filter`
 
@@ -548,6 +931,34 @@ Default: `_all`
 
 Queries {es} for raw documents. Specify the fields you want to retrieve, 
 especially if you are asking for a lot of rows.
+
+*Expression syntax*
+[source,js]
+----
+esdocs index=”logstash-*”
+esdocs "currency:\"EUR\"" index=”kibana_sample_data_ecommerce” 
+esdocs query="response:404" index=”kibana_sample_data_logs” 
+esdocs index=”kibana_sample_data_flights” count=100 
+esdocs index="kibana_sample_data_flights" sort="AvgTicketPrice, asc"
+----
+
+*Code example*
+[source,text]
+----
+filters
+| esdocs index="kibana_sample_data_ecommerce" 
+  fields="customer_gender, taxful_total_price, order_date" 
+  sort="order_date, asc" 
+  count=10000
+| mapColumn "order_date" 
+  fn={getCell "order_date" | date {context} | rounddate "YYYY-MM-DD"}
+| alterColumn "order_date" type="date"
+| pointseries x="order_date" y="sum(taxful_total_price)" color="customer_gender"
+| plot defaultStyle={seriesStyle lines=3} 
+  palette={palette "#7ECAE3" "#003A4D" gradient=true}
+| render
+----
+This retrieves the latest 10000 documents data from the `kibana_sample_data_ecommerce` index sorted by `order_date` in ascending order and only requests the `customer_gender`, `taxful_total_price`, and `order_date` fields.
 
 *Accepts:* `filter`
 
@@ -593,6 +1004,21 @@ Default: `"_all"`
 
 Queries {es} using {es} SQL.
 
+*Expression syntax*
+[source,js]
+----
+essql query=”SELECT * FROM \”logstash*\”” 
+essql “SELECT * FROM \”apm*\”” count=10000
+----
+
+*Code example*
+[source,text]
+----
+filters
+| essql query="SELECT Carrier, FlightDelayMin, AvgTicketPrice FROM   \"kibana_sample_data_flights\""
+----
+This retrieves the `Carrier`, `FlightDelayMin`, and `AvgTicketPrice` fields from the “kibana_sample_data_flights” index.
+
 *Accepts:* `filter`
 
 [cols="3*^<"]
@@ -626,6 +1052,26 @@ Default: `UTC`
 === `exactly`
 
 Creates a filter that matches a given column to an exact value.
+
+*Expression syntax*
+[source,js]
+----
+exactly “state” value=”running”
+exactly “age” value=50 filterGroup=”group2”
+exactly column=“project” value=”beats”
+----
+
+*Code example*
+[source,text]
+----
+filters
+| exactly column=project value=elasticsearch
+| demodata
+| pointseries x=project y="mean(age)"
+| plot defaultStyle={seriesStyle bars=1}
+| render
+----
+The `exactly` filter here is added to existing filters retrieved by the `filters` function and further filters down the data to only have `”elasticsearch”` data. The `exactly` filter only applies to this one specific element and will not affect other elements in the workpad.
 
 *Accepts:* `filter`
 
@@ -664,6 +1110,29 @@ capitalization.
 
 Filters rows in a `datatable` based on the return value of a sub-expression.
 
+*Expression syntax*
+[source,js]
+----
+filterrows {getCell “project” | eq “kibana”}
+filterrows fn={getCell “age” | gt 50}
+----
+
+*Code example*
+[source,text]
+----
+filters
+| demodata
+| filterrows {getCell "country" | any {eq "IN"} {eq "US"} {eq "CN"}}
+| mapColumn "@timestamp" 
+  fn={getCell "@timestamp" | rounddate "YYYY-MM"}
+| alterColumn "@timestamp" type="date"
+| pointseries x="@timestamp" y="mean(cost)" color="country"
+| plot defaultStyle={seriesStyle points="2" lines="1"} 
+  palette={palette "#01A4A4" "#CC6666" "#D0D102" "#616161" "#00A1CB" "#32742C" "#F18D05" "#113F8C" "#61AE24" "#D70060" gradient=false}
+| render
+----
+This uses `filterrows` to only keep data from India (`IN`), the United States (`US`), and China (`CN`).
+
 *Accepts:* `datatable`
 
 [cols="3*^<"]
@@ -687,6 +1156,34 @@ and a `false` value removes it.
 === `filters`
 
 Aggregates element filters from the workpad for use elsewhere, usually a data source.
+
+*Expression syntax*
+[source,js]
+----
+filters
+filters group=”timefilter1”
+filters group=”timefilter2” group=”dropdownfilter1” ungrouped=true
+----
+
+*Code example*
+[source,text]
+----
+filters group=group2 ungrouped=true
+| demodata
+| pointseries x="project" y="size(cost)" color="project"
+| plot defaultStyle={seriesStyle bars=0.75} legend=false 
+  font={
+    font size=14 
+    family="'Open Sans', Helvetica, Arial, sans-serif" 
+    align="left" 
+    color="#FFFFFF" 
+    weight="lighter" 
+    underline=true 
+    italic=true
+  }
+| render
+----
+`filters` sets the existing filters as context and accepts `group` parameter to create filter groups.
 
 *Accepts:* `null`
 
@@ -717,6 +1214,38 @@ Default: `false`
 === `font`
 
 Creates a font style.
+
+*Expression syntax*
+[source,js]
+----
+font size=12
+font family=Arial
+font align=middle
+font color=pink
+font weight=lighter
+font underline=true
+font italic=false
+font lHeight=32
+----
+
+*Code example*
+[source,text]
+----
+filters
+| demodata
+| pointseries x="project" y="size(cost)" color="project"
+| plot defaultStyle={seriesStyle bars=0.75} legend=false 
+  font={
+    font size=14 
+    family="'Open Sans', Helvetica, Arial, sans-serif" 
+    align="left" 
+    color="#FFFFFF" 
+    weight="lighter" 
+    underline=true 
+    italic=true
+  }
+| render
+----
 
 *Accepts:* `null`
 
@@ -781,6 +1310,25 @@ Default: `"normal"`
 
 Formats an ISO8601 date string or a date in milliseconds since epoch using MomentJS. See https://momentjs.com/docs/#/displaying/.
 
+*Expression syntax*
+[source,js]
+----
+formatdate format=”YYYY-MM-DD”
+formatdate “MM/DD/YYYY”
+----
+
+*Code example*
+[source,text]
+----
+filters
+| demodata
+| mapColumn "time" fn={getCell time | formatdate "MMM 'YY"}
+| pointseries x="time" y="sum(price)" color="state"
+| plot defaultStyle={seriesStyle points=5}
+| render
+----
+This transforms the dates in the `time` field into strings that look like `“Jan ‘19”`, `“Feb ‘19”`, etc. using a MomentJS format.
+
 *Accepts:* `number`, `string`
 
 [cols="3*^<"]
@@ -802,6 +1350,26 @@ Alias: `format`
 === `formatnumber`
 
 Formats a `number` into a formatted `string` using NumeralJS. See http://numeraljs.com/#format.
+
+*Expression syntax*
+[source,js]
+----
+formatnumber format=”$0,0.00”
+fortmatnumber “0.0a”
+----
+
+*Code example*
+[source,text]
+----
+filters
+| demodata
+| math "mean(percent_uptime)"
+| progress shape="gauge" 
+  label={formatnumber "0%"} 
+  font={font size=24 family="'Open Sans', Helvetica, Arial, sans-serif" color="#000000" align="center"}
+| render
+----
+The `formatnumber` subexpression receives the same `context` as the `progress` function, which is the output of the `math` function. It formats the value into a percentage.
 
 *Accepts:* `number`
 
