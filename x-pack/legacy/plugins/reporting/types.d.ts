@@ -326,3 +326,10 @@ export { CancellationToken } from './common/cancellation_token';
 
 // Prefer to import this type using: `import { LevelLogger } from 'relative/path/server/lib';`
 export { LevelLogger as Logger } from './server/lib/level_logger';
+
+export interface AbsoluteURLFactory {
+  defaultBasePath: string;
+  protocol: string;
+  hostname: string;
+  port: string | number;
+}
