@@ -28,9 +28,6 @@ import { getLandingBreadcrumbs, getWizardStep1Breadcrumbs } from './breadcrumbs'
 
 import { getServices, FeatureCatalogueCategory } from './kibana_services';
 
-// load directives
-import '../../../data/public';
-
 const { FeatureCatalogueRegistryProvider, uiRoutes } = getServices();
 
 uiRoutes

@@ -20,6 +20,8 @@
 import 'angular-sanitize'; // used in visualization_editor.js
 import 'ui/collapsible_sidebar'; // used in default editor
 import 'ui/vis/editors/default/sidebar';
+// load directives
+import '../../../data/public';
 
 import { npStart } from 'ui/new_platform';
 import angular from 'angular'; // just used in editor.js
