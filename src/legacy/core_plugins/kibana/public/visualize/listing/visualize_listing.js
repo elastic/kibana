@@ -27,14 +27,14 @@ import { i18n } from '@kbn/i18n';
 import { getServices } from '../kibana_services';
 
 const {
-  uiModules,
-  SavedObjectRegistryProvider,
-  timefilter,
+  addBasePath,
   chrome,
-  toastNotifications,
-  wrapInI18nContext,
+  SavedObjectRegistryProvider,
   SavedObjectsClientProvider,
-  addBasePath
+  timefilter,
+  toastNotifications,
+  uiModules,
+  wrapInI18nContext,
 } = getServices();
 
 const app = uiModules.get('app/visualize', ['ngRoute', 'react']);

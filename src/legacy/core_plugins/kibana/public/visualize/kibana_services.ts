@@ -20,52 +20,81 @@
 import 'ui/directives/kbn_href';
 
 import { npStart } from 'ui/new_platform';
-import chromeLegacy from 'ui/chrome';
 import angular from 'angular';
 
 import uiRoutes from 'ui/routes';
-import { wrapInI18nContext } from 'ui/i18n';
 
+// @ts-ignore
+import { docTitle } from 'ui/doc_title';
+import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
+import { wrapInI18nContext } from 'ui/i18n';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
 import { FeatureCatalogueRegistryProvider } from 'ui/registry/feature_catalogue';
-
-// Filters
+import { ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
 import { timefilter } from 'ui/timefilter';
 
 // Saved objects
-import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 // @ts-ignore
 import { SavedObjectProvider } from 'ui/saved_objects/saved_object';
+import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 
 const services = {
   // new platform
+  addBasePath: npStart.core.http.basePath.prepend,
   capabilities: npStart.core.application.capabilities,
   chrome: npStart.core.chrome,
   docLinks: npStart.core.docLinks,
+  savedObjectsClient: npStart.core.savedObjects.client,
   toastNotifications: npStart.core.notifications.toasts,
   uiSettings: npStart.core.uiSettings,
-  savedObjectsClient: npStart.core.savedObjects.client,
-  addBasePath: npStart.core.http.basePath.prepend,
 
   // legacy
   angular,
-  uiRoutes,
-  uiModules,
+  docTitle,
   FeatureCatalogueRegistryProvider,
+  FilterBarQueryFilterProvider,
+  SavedObjectProvider,
   SavedObjectRegistryProvider,
   SavedObjectsClientProvider,
-  SavedObjectProvider,
+  ShareContextMenuExtensionsRegistryProvider,
   timefilter,
+  uiModules,
+  uiRoutes,
   wrapInI18nContext,
 };
+
 export function getServices() {
   return services;
 }
 
-// export types
-export { VisSavedObject } from 'ui/visualize/loader/types';
+// export legacy static dependencies
+export { getFromSavedObject } from 'ui/index_patterns';
+export { PersistedState } from 'ui/persisted_state';
+// @ts-ignore
+export { VisEditorTypesRegistryProvider } from 'ui/registry/vis_editor_types';
+// @ts-ignore
+export { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
+export { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
+export { showShareContextMenu } from 'ui/share';
+export { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
+export { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
+export { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
+export { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
+export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
+export { getVisualizeLoader } from 'ui/visualize/loader';
+export { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 
-// const
+// export types
+export { StaticIndexPattern } from 'ui/index_patterns';
+export { VisualizeLoader } from 'ui/visualize/loader';
+export {
+  VisSavedObject,
+  VisualizeLoaderParams,
+  VisualizeUpdateParams,
+} from 'ui/visualize/loader/types';
+export { EmbeddedVisualizeHandler } from 'ui/visualize/loader/embedded_visualize_handler';
+
+// export const
 export { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';

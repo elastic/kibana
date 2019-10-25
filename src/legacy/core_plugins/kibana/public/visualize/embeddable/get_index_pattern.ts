@@ -17,12 +17,14 @@
  * under the License.
  */
 
-import { StaticIndexPattern, getFromSavedObject } from 'ui/index_patterns';
-import { VisSavedObject } from 'ui/visualize/loader/types';
+import {
+  getServices,
+  getFromSavedObject,
+  StaticIndexPattern,
+  VisSavedObject,
+} from '../kibana_services';
 
-import { getServices } from '../kibana_services';
-
-const { uiSettings, savedObjectsClient } = getServices();
+const { savedObjectsClient, uiSettings } = getServices();
 
 export async function getIndexPattern(
   savedVis: VisSavedObject

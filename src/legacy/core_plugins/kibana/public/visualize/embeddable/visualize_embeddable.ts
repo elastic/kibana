@@ -18,15 +18,6 @@
  */
 
 import _ from 'lodash';
-import { StaticIndexPattern } from 'ui/index_patterns';
-import { PersistedState } from 'ui/persisted_state';
-import { VisualizeLoader } from 'ui/visualize/loader';
-import { EmbeddedVisualizeHandler } from 'ui/visualize/loader/embedded_visualize_handler';
-import {
-  VisSavedObject,
-  VisualizeLoaderParams,
-  VisualizeUpdateParams,
-} from 'ui/visualize/loader/types';
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
 import { Filter } from '@kbn/es-query';
@@ -39,6 +30,16 @@ import {
 } from '../../../../../../plugins/embeddable/public';
 import { Query, onlyDisabledFiltersChanged } from '../../../../data/public';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
+
+import {
+  EmbeddedVisualizeHandler,
+  PersistedState,
+  StaticIndexPattern,
+  VisSavedObject,
+  VisualizeLoader,
+  VisualizeLoaderParams,
+  VisualizeUpdateParams,
+} from '../kibana_services';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 

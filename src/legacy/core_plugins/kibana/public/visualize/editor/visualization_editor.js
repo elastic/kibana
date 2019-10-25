@@ -18,9 +18,11 @@
  */
 
 import { debounce } from 'lodash';
-import { uiModules } from 'ui/modules';
 import 'angular-sanitize';
-import { VisEditorTypesRegistryProvider } from 'ui/registry/vis_editor_types';
+
+import { getServices, VisEditorTypesRegistryProvider } from '../kibana_services';
+
+const { uiModules } = getServices();
 
 uiModules
   .get('kibana/directive', ['ngSanitize'])

@@ -31,7 +31,7 @@ import { getServices, FeatureCatalogueCategory } from './kibana_services';
 // load directives
 import '../../../data/public';
 
-const { uiRoutes, FeatureCatalogueRegistryProvider } = getServices();
+const { FeatureCatalogueRegistryProvider, uiRoutes } = getServices();
 
 uiRoutes
   .defaults(/visualize/, {

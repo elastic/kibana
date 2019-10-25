@@ -37,11 +37,6 @@ import 'uiExports/visualize';
 
 import { i18n } from '@kbn/i18n';
 
-import { capabilities } from 'ui/capabilities';
-
-import chrome from 'ui/chrome';
-import { getVisualizeLoader } from 'ui/visualize/loader';
-
 import { Legacy } from 'kibana';
 
 import { SavedObjectAttributes } from 'kibana/server';
@@ -61,9 +56,9 @@ import { VisualizeEmbeddable, VisualizeInput, VisualizeOutput } from './visualiz
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import { TypesStart } from '../../../../visualizations/public/np_ready/public/types';
 
-import { getServices } from '../kibana_services';
+import { getServices, getVisualizeLoader } from '../kibana_services';
 
-const { addBasePath } = getServices();
+const { addBasePath, capabilities, chrome, uiSettings } = getServices();
 
 interface VisualizationAttributes extends SavedObjectAttributes {
   visState: string;
@@ -113,7 +108,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
           if (!visType) {
             return false;
           }
-          if (chrome.getUiSettingsClient().get('visualize:enableLabs')) {
+          if (uiSettings.get('visualize:enableLabs')) {
             return true;
           }
           return visType.stage !== 'experimental';
