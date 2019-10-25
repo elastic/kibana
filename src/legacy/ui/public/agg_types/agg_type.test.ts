@@ -19,15 +19,9 @@
 
 import { AggType, AggTypeConfig } from './agg_type';
 import { AggConfig } from './agg_config';
+import { npSetup } from 'ui/new_platform';
 
 jest.mock('ui/new_platform');
-
-jest.mock('../../../../plugins/data/public', () => ({
-  ...jest.requireActual('../../../../plugins/data/public'),
-  getFieldFormats: jest.fn(() => ({
-    getDefaultInstance: jest.fn(() => 'default'),
-  })),
-}));
 
 describe('AggType Class', () => {
   describe('constructor', () => {
@@ -159,6 +153,8 @@ describe('AggType Class', () => {
       });
 
       it('returns default formatter', () => {
+        npSetup.plugins.data.fieldFormats.getDefaultInstance = jest.fn(() => 'default') as any;
+
         const aggType = new AggType({
           name: 'name',
           title: 'title',

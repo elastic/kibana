@@ -18,19 +18,20 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { npSetup } from 'ui/new_platform';
 import { PercentileRanksEditor } from '../../vis/editors/default/controls/percentile_ranks';
 import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
 import { getResponseAggConfigClass, IResponseAggConfig } from './lib/get_response_agg_config_class';
 
 import { getPercentileValue } from './percentiles_get_value';
 import { METRIC_TYPES } from './metric_agg_types';
-import { KBN_FIELD_TYPES, getFieldFormats } from '../../../../../plugins/data/public';
+import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
 
 // required by the values editor
 
 export type IPercentileRanksAggConfig = IResponseAggConfig;
 
-const fieldFormats = getFieldFormats();
+const fieldFormats = npSetup.plugins.data.fieldFormats;
 
 const valueProps = {
   makeLabel(this: IPercentileRanksAggConfig) {

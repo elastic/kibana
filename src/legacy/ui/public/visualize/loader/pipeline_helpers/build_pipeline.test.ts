@@ -36,12 +36,6 @@ jest.mock('ui/agg_types/buckets/date_histogram', () => ({
   dateHistogramBucketAgg: () => {},
   isDateHistogramBucketAggConfig: () => true,
 }));
-jest.mock('../../../../../../plugins/data/public', () => ({
-  ...jest.requireActual('../../../../../../plugins/data/public'),
-  getFieldFormats: jest.fn(() => ({
-    getDefaultInstance: jest.fn(() => 'default'),
-  })),
-}));
 
 describe('visualize loader pipeline helpers: build pipeline', () => {
   describe('prepareJson', () => {

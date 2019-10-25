@@ -17,6 +17,41 @@
  * under the License.
  */
 
-import { createGetterSetter } from '../../../../plugins/kibana_utils/public';
+import { FieldFormatRegisty } from './field_formats';
+import {
+  BoolFormat,
+  BytesFormat,
+  ColorFormat,
+  DateFormat,
+  DateNanosFormat,
+  DurationFormat,
+  IpFormat,
+  NumberFormat,
+  PercentFormat,
+  RelativeDateFormat,
+  SourceFormat,
+  StaticLookupFormat,
+  StringFormat,
+  TruncateFormat,
+  UrlFormat,
+} from '../../common/';
 
-export const [getFieldFormats, setFieldFormats] = createGetterSetter<any>('FieldFormats');
+export function registerConverters(fieldFormats: FieldFormatRegisty): void {
+  fieldFormats.register([
+    UrlFormat,
+    StringFormat,
+    NumberFormat,
+    BytesFormat,
+    TruncateFormat,
+    RelativeDateFormat,
+    PercentFormat,
+    IpFormat,
+    DurationFormat,
+    DateNanosFormat,
+    DateFormat,
+    ColorFormat,
+    BoolFormat,
+    SourceFormat,
+    StaticLookupFormat,
+  ]);
+}

@@ -33,12 +33,14 @@ import { setNotifications } from '../services';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { notificationServiceMock } from '../../../../../../core/public/notifications/notifications_service.mock';
 
-jest.mock('../../../../../../plugins/data/public/', () => ({
-  ...jest.requireActual('../../../../../../plugins/data/public/'),
+jest.mock('../services', () => ({
+  ...jest.requireActual('../services'),
   getFieldFormats: jest.fn(() => ({
     getDefaultInstance: jest.fn(),
   })),
 }));
+
+jest.mock('ui/new_platform');
 
 jest.mock('../../../../../../plugins/kibana_utils/public', () => {
   const originalModule = jest.requireActual('../../../../../../plugins/kibana_utils/public');

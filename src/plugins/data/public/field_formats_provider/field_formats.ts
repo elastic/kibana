@@ -29,24 +29,26 @@ interface FieldType {
 }
 
 export class FieldFormatRegisty {
-  private fieldFormats: Map<FIELD_FORMATS_IDS, typeof FieldFormat>;
-  private uiSettings: UiSettingsClientContract;
-  private getConfig: Function;
+  private fieldFormats: Map<FIELD_FORMATS_IDS, FieldFormat['constructor']>;
+  private uiSettings!: UiSettingsClientContract;
   private defaultMap: { [key in ES_FIELD_TYPES | KBN_FIELD_TYPES]?: FieldType } & {
     _default_: FieldType;
   };
 
-  constructor(uiSettings: UiSettingsClientContract) {
+  constructor() {
     this.fieldFormats = new Map();
-    this.uiSettings = uiSettings;
-    this.getConfig = (key: string, override?: any) => this.uiSettings.get(key, override);
     this.defaultMap = {
       _default_: { id: FIELD_FORMATS_IDS.STRING, params: {} },
     };
-    this.init();
   }
 
-  init() {
+  getConfig(key: string, override?: any) {
+    return this.uiSettings.get(key, override);
+  }
+
+  init(uiSettings: UiSettingsClientContract) {
+    this.uiSettings = uiSettings;
+
     this.parseDefaultTypeMap(this.uiSettings.get('format:defaultTypeMap'));
 
     this.uiSettings.getUpdate$().subscribe(({ key, newValue }) => {
@@ -73,11 +75,11 @@ export class FieldFormatRegisty {
   /**
    * Get a FieldFormat type (class) by its id.
    *
-   * @param  {FIELD_FORMATS_IDS} formatId - the format id
+   * @param  {string} formatId - the format id
    * @return {FieldFormat}
    */
-  getType = (formatId: FIELD_FORMATS_IDS): typeof FieldFormat => {
-    return this.fieldFormats.get(formatId) as typeof FieldFormat;
+  getType = (formatId: string): any => {
+    return this.fieldFormats.get(formatId);
   };
 
   /**
@@ -85,11 +87,11 @@ export class FieldFormatRegisty {
    * a field type, using the format:defaultTypeMap.
    * used by the field editor
    *
-   * @param  {KBN_FIELD_TYPES} fieldType
-   * @param  {ES_FIELD_TYPES[]} esTypes - Array of ES data types
+   * @param  {string} fieldType
+   * @param  {string[]} esTypes - Array of ES data types
    * @return {FieldFormat}
    */
-  getDefaultType = (fieldType: KBN_FIELD_TYPES, esTypes: ES_FIELD_TYPES[]): typeof FieldFormat => {
+  getDefaultType = (fieldType: string, esTypes: string[]): FieldFormat['constructor'] => {
     const config = this.getDefaultConfig(fieldType, esTypes) as FieldType;
 
     return this.getType(config.id);
@@ -99,10 +101,10 @@ export class FieldFormatRegisty {
    * Get the name of the default type for ES types like date_nanos
    * using the format:defaultTypeMap config map
    *
-   * @param  {ES_FIELD_TYPES[]} esTypes - Array of ES data types
-   * @return {ES_FIELD_TYPES | String}
+   * @param  {string[]} esTypes - Array of ES data types
+   * @return {String}
    */
-  getTypeNameByEsTypes = (esTypes: ES_FIELD_TYPES[]): ES_FIELD_TYPES | string => {
+  getTypeNameByEsTypes = (esTypes: string[]): string => {
     if (!Array.isArray(esTypes)) {
       return '';
     }
@@ -184,9 +186,9 @@ export class FieldFormatRegisty {
    * @param  {String} fieldType
    * @return {FieldFormat[]}
    */
-  getByFieldType(fieldType: KBN_FIELD_TYPES) {
+  getByFieldType(fieldType: KBN_FIELD_TYPES): Array<FieldFormat['constructor']> {
     return [...this.fieldFormats.values()].filter(
-      format => format.fieldType.indexOf(fieldType) !== -1
+      (format: any) => format.fieldType.indexOf(fieldType) !== -1
     );
   }
 
@@ -194,8 +196,8 @@ export class FieldFormatRegisty {
    * Get the default fieldFormat instance for a field format.
    * It's a memoized function that builds and reads a cache
    *
-   * @param  {String} fieldType
-   * @param  {String[]} esTypes
+   * @param  {KBN_FIELD_TYPES} fieldType
+   * @param  {ES_FIELD_TYPES[]} esTypes
    * @return {FieldFormat}
    */
   getDefaultInstance = memoize(this.getDefaultInstancePlain, this.getDefaultInstanceCacheResolver);

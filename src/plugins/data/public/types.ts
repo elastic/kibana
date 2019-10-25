@@ -19,18 +19,25 @@
 
 export * from './autocomplete_provider/types';
 
-import { AutocompletePublicPluginSetup, AutocompletePublicPluginStart } from '.';
+import {
+  AutocompletePublicPluginSetup,
+  AutocompletePublicPluginStart,
+  FieldFormatRegisty,
+} from '.';
 import { ISearchSetup, ISearchStart } from './search';
 import { IGetSuggestions } from './suggestions_provider/types';
+
 export interface DataPublicPluginSetup {
   autocomplete: AutocompletePublicPluginSetup;
   search: ISearchSetup;
+  fieldFormats: FieldFormatRegisty;
 }
 
 export interface DataPublicPluginStart {
   autocomplete: AutocompletePublicPluginStart;
   getSuggestions: IGetSuggestions;
   search: ISearchStart;
+  fieldFormats: FieldFormatRegisty;
 }
 
 export { IGetSuggestions } from './suggestions_provider/types';

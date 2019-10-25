@@ -20,9 +20,10 @@
 import { i18n } from '@kbn/i18n';
 import { identity } from 'lodash';
 import { AggConfig, Vis } from 'ui/vis';
+import { npSetup } from 'ui/new_platform';
 import { SerializedFieldFormat } from 'src/plugins/expressions/common/expressions/types/common';
 
-import { FieldFormat, getFieldFormats } from '../../../../../../plugins/data/public';
+import { FieldFormat } from '../../../../../../plugins/data/public';
 
 import { tabifyGetColumns } from '../../../agg_response/tabify/_get_columns';
 import chrome from '../../../chrome';
@@ -44,12 +45,12 @@ function isTermsFieldFormat(
 }
 
 const config = chrome.getUiSettingsClient();
-const fieldFormats = getFieldFormats();
+const fieldFormats = npSetup.plugins.data.fieldFormats;
 
 const getConfig = (...args: any[]): any => config.get(...args);
 const getDefaultFieldFormat = () => ({ convert: identity });
 
-const getFieldFormat = (id: string | undefined, params: object = {}) => {
+const getFieldFormat = (id: string, params: object = {}) => {
   const Format = fieldFormats.getType(id);
   if (Format) {
     return new Format(params, getConfig);

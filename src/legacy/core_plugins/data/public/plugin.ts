@@ -27,26 +27,7 @@ import {
   LegacyDependenciesPluginSetup,
   LegacyDependenciesPluginStart,
 } from './shim/legacy_dependencies_plugin';
-import {
-  DataPublicPluginStart,
-  FieldFormatRegisty,
-  StaticLookupFormat,
-  NumberFormat,
-  SourceFormat,
-  BoolFormat,
-  ColorFormat,
-  DateFormat,
-  DateNanosFormat,
-  DurationFormat,
-  IpFormat,
-  PercentFormat,
-  RelativeDateFormat,
-  TruncateFormat,
-  BytesFormat,
-  StringFormat,
-  UrlFormat,
-  setFieldFormats,
-} from '../../../../plugins/data/public';
+import { DataPublicPluginStart } from '../../../../plugins/data/public';
 import { initLegacyModule } from './shim/legacy_module';
 import { IUiActionsSetup } from '../../../../plugins/ui_actions/public';
 import {
@@ -133,28 +114,6 @@ export class DataPlugin
       uiSettings,
     });
 
-    const fieldFormats = new FieldFormatRegisty(uiSettings);
-
-    fieldFormats.register([
-      UrlFormat,
-      StringFormat,
-      NumberFormat,
-      BytesFormat,
-      TruncateFormat,
-      RelativeDateFormat,
-      PercentFormat,
-      IpFormat,
-      DurationFormat,
-      DateNanosFormat,
-      DateFormat,
-      ColorFormat,
-      BoolFormat,
-      SourceFormat,
-      StaticLookupFormat,
-    ]);
-
-    setFieldFormats(fieldFormats);
-
     this.setupApi = {
       indexPatterns: this.indexPatterns.setup(),
       query: this.query.setup(),
@@ -176,6 +135,7 @@ export class DataPlugin
       savedObjectsClient: savedObjects.client,
       http,
       notifications,
+      fieldFormats: data.fieldFormats,
     });
 
     initLegacyModule(indexPatternsService.indexPatterns);

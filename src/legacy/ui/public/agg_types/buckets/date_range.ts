@@ -19,12 +19,12 @@
 import { get } from 'lodash';
 import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
-import { npStart } from 'ui/new_platform';
+import { npStart, npSetup } from 'ui/new_platform';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { BucketAggType } from './_bucket_agg_type';
 import { createFilterDateRange } from './create_filter/date_range';
 import { AggConfig } from '../agg_config';
-import { FieldFormat, getFieldFormats } from '../../../../../plugins/data/public';
+import { FieldFormat } from '../../../../../plugins/data/public';
 import { DateRangesParamEditor } from '../../vis/editors/default/controls/date_ranges';
 
 // @ts-ignore
@@ -35,7 +35,7 @@ const dateRangeTitle = i18n.translate('common.ui.aggTypes.buckets.dateRangeTitle
   defaultMessage: 'Date Range',
 });
 
-const fieldFormats = getFieldFormats();
+const fieldFormats = npSetup.plugins.data.fieldFormats;
 
 export interface DateRangeKey {
   from: number;
@@ -50,7 +50,10 @@ export const dateRangeBucketAgg = new BucketAggType({
     return { from, to };
   },
   getFormat(agg) {
-    const formatter = agg.fieldOwnFormatter('text', fieldFormats.getDefaultInstance('date'));
+    const formatter = agg.fieldOwnFormatter(
+      'text',
+      fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.DATE, [])
+    );
     const DateRangeFormat = FieldFormat.from(function(range: DateRangeKey) {
       return dateRange.toString(range, formatter);
     });

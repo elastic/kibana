@@ -35,6 +35,8 @@ import {
   toastNotifications
 } from 'ui/notify';
 
+import { npSetup } from 'ui/new_platform';
+
 import {
   EuiBasicTable,
   EuiButton,
@@ -73,8 +75,6 @@ import {
 
 import { FIELD_TYPES_BY_LANG, DEFAULT_FIELD_TYPES } from './constants';
 import { copyField, getDefaultFormat, executeScript, isScriptValid } from './lib';
-
-import { getFieldFormats } from '../../../../plugins/data/public';
 
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
@@ -122,7 +122,7 @@ export class FieldEditorComponent extends PureComponent {
     };
     this.supportedLangs = getSupportedScriptingLanguages();
     this.deprecatedLangs = getDeprecatedScriptingLanguages();
-    this.fieldFormats = getFieldFormats();
+    this.fieldFormats = npSetup.plugins.data.fieldFormats;
     this.init();
   }
 

@@ -20,17 +20,17 @@
 import _, { isArray, last, get } from 'lodash';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { npSetup } from 'ui/new_platform';
 import { createTickFormatter } from '../../lib/tick_formatter';
 import { calculateLabel } from '../../../../common/calculate_label';
 import { isSortable } from './is_sortable';
 import { EuiToolTip, EuiIcon } from '@elastic/eui';
 import { replaceVars } from '../../lib/replace_vars';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { getFieldFormats } from '../../../../../../../plugins/data/public';
 
 import { METRIC_TYPES } from '../../../../common/metric_types';
 
-const fieldFormats = getFieldFormats();
+const fieldFormats = npSetup.plugins.data.fieldFormats;
 const DateFormat = fieldFormats.getType('date');
 
 function getColor(rules, colorKey, value) {

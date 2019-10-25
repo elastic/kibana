@@ -19,10 +19,11 @@
 
 import { noop, map, omit, isNull } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { npSetup } from 'ui/new_platform';
 import { BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
 import { IpRangeTypeParamEditor } from '../../vis/editors/default/controls/ip_range_type';
 import { IpRangesParamEditor } from '../../vis/editors/default/controls/ip_ranges';
-import { FieldFormat, getFieldFormats } from '../../../../../plugins/data/public';
+import { FieldFormat } from '../../../../../plugins/data/public';
 import { ipRange } from '../../utils/ip_range';
 import { BUCKET_TYPES } from './bucket_agg_types';
 
@@ -49,8 +50,11 @@ export const ipRangeBucketAgg = new BucketAggType({
     return { type: 'range', from: bucket.from, to: bucket.to };
   },
   getFormat(agg) {
-    const fieldFormats = getFieldFormats();
-    const formatter = agg.fieldOwnFormatter('text', fieldFormats.getDefaultInstance('ip'));
+    const fieldFormats = npSetup.plugins.data.fieldFormats;
+    const formatter = agg.fieldOwnFormatter(
+      'text',
+      fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.IP, [])
+    );
     const IpRangeFormat = FieldFormat.from(function(range: IpRangeKey) {
       return ipRange.toString(range, formatter);
     });

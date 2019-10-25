@@ -19,4 +19,4 @@
 
 export { FieldFormatRegisty } from './field_formats';
 export { FIELD_FORMATS_IDS } from './types';
-export { getFieldFormats, setFieldFormats } from './service';
+export { registerConverters } from './registry';

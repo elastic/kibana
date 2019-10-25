@@ -23,3 +23,5 @@ import { createGetterSetter } from '../../../../../plugins/kibana_utils/public';
 export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(
   'Notifications'
 );
+
+export const [getFieldFormats, setFieldFormats] = createGetterSetter<any>('FieldFormats');

@@ -19,6 +19,7 @@
 
 import { constant, noop, identity } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { npSetup } from 'ui/new_platform';
 import { AggParam, initParams } from './agg_params';
 
 import { AggConfig } from '../vis';
@@ -27,9 +28,9 @@ import { SearchSource } from '../courier';
 import { Adapters } from '../inspector';
 import { BaseParamType } from './param_types/base';
 
-import { getFieldFormats, FieldFormatRegisty, FieldFormat } from '../../../../plugins/data/public';
+import { FieldFormatRegisty, FieldFormat, KBN_FIELD_TYPES } from '../../../../plugins/data/public';
 
-const fieldFormats = getFieldFormats();
+const fieldFormats = npSetup.plugins.data.fieldFormats;
 
 export interface AggTypeConfig<
   TAggConfig extends AggConfig = AggConfig,
@@ -64,7 +65,7 @@ export interface AggTypeConfig<
 const getFormat = (agg: AggConfig) => {
   const field = agg.getField();
 
-  return field ? field.format : fieldFormats.getDefaultInstance('string');
+  return field ? field.format : fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING, []);
 };
 
 export class AggType<TAggConfig extends AggConfig = AggConfig, TParam extends AggParam = AggParam> {

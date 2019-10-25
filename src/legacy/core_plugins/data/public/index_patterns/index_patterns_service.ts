@@ -23,10 +23,11 @@ import {
   HttpServiceBase,
   NotificationsStart,
 } from 'src/core/public';
+import { FieldFormatRegisty } from '../../../../../plugins/data/public';
 import { Field, FieldList, FieldListInterface, FieldType } from './fields';
 import { createFlattenHitWrapper } from './index_patterns';
 import { createIndexPatternSelect } from './components';
-import { setNotifications } from './services';
+import { setNotifications, setFieldFormats } from './services';
 
 import {
   formatHitProvider,
@@ -40,6 +41,7 @@ export interface IndexPatternDependencies {
   savedObjectsClient: SavedObjectsClientContract;
   http: HttpServiceBase;
   notifications: NotificationsStart;
+  fieldFormats: FieldFormatRegisty;
 }
 
 /**
@@ -64,8 +66,15 @@ export class IndexPatternsService {
     return this.setupApi;
   }
 
-  public start({ uiSettings, savedObjectsClient, http, notifications }: IndexPatternDependencies) {
+  public start({
+    uiSettings,
+    savedObjectsClient,
+    http,
+    notifications,
+    fieldFormats,
+  }: IndexPatternDependencies) {
     setNotifications(notifications);
+    setFieldFormats(fieldFormats);
 
     return {
       ...this.setupApi,

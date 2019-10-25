@@ -20,9 +20,11 @@
 jest.mock('ui/kfetch', () => ({}));
 
 import React from 'react';
+import { npSetup } from 'ui/new_platform';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 jest.mock('brace/mode/groovy', () => ({}));
+jest.mock('ui/new_platform');
 
 import { FieldEditorComponent } from './field_editor';
 
@@ -52,25 +54,6 @@ jest.mock('ui/scripting_languages', () => ({
   GetEnabledScriptingLanguagesProvider: jest.fn().mockImplementation(() => () => ['painless', 'testlang']),
   getSupportedScriptingLanguages: () => ['painless'],
   getDeprecatedScriptingLanguages: () => ['testlang'],
-}));
-
-jest.mock('../../../../plugins/data/public', () => ({
-  ...jest.requireActual('../../../../plugins/data/public'),
-  getFieldFormats: jest.fn(() => {
-    class Format {
-      static id = 'test_format'; static title = 'Test format';
-      params() {}
-    }
-
-    return ({
-      getDefaultType: jest.fn(() => Format),
-      getByFieldType: jest.fn((fieldType) => {
-        if(fieldType === 'number') {
-          return [Format];
-        }
-      }),
-    });
-  }),
 }));
 
 jest.mock('ui/documentation_links', () => ({
@@ -132,6 +115,13 @@ describe('FieldEditor', () => {
     indexPattern = {
       fields,
     };
+
+    npSetup.plugins.data.fieldFormats.getDefaultType = jest.fn(() => Format);
+    npSetup.plugins.data.fieldFormats.getByFieldType = jest.fn((fieldType) => {
+      if(fieldType === 'number') {
+        return [Format];
+      }
+    });
   });
 
   it('should render create new scripted field correctly', async () => {

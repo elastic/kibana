@@ -18,13 +18,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { npSetup } from 'ui/new_platform';
 import { AggType, AggTypeConfig } from '../agg_type';
 import { AggParamType } from '../param_types/agg';
 import { AggConfig } from '../agg_config';
 import { METRIC_TYPES } from './metric_agg_types';
-import { KBN_FIELD_TYPES, getFieldFormats } from '../../../../../plugins/data/public';
+import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
 
-const fieldFormats = getFieldFormats();
+const fieldFormats = npSetup.plugins.data.fieldFormats;
 
 export type IMetricAggConfig = AggConfig;
 
@@ -71,7 +72,7 @@ export class MetricAggType<
       config.getFormat ||
       (agg => {
         const field = agg.getField();
-        return field ? field.format : fieldFormats.getDefaultInstance('number');
+        return field ? field.format : fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.NUMBER, []);
       });
 
     this.subtype =

@@ -20,16 +20,16 @@
 import _ from 'lodash';
 import moment from 'moment';
 import chrome from '../chrome';
+import { npSetup } from 'ui/new_platform';
 import { parseInterval } from '../utils/parse_interval';
 import { calcAutoIntervalLessThan, calcAutoIntervalNear } from './calc_auto_interval';
 import {
   convertDurationToNormalizedEsInterval,
   convertIntervalToEsInterval,
 } from './calc_es_interval';
-import { getFieldFormats } from '../../../../plugins/data/public';
 
 const config = chrome.getUiSettingsClient();
-const fieldFormats = getFieldFormats();
+const fieldFormats = npSetup.plugins.data.fieldFormats;
 
 const getConfig = (...args) => config.get(...args);
 

@@ -36,8 +36,8 @@ import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
 import { IIndexPatternsApiClient } from './index_patterns_api_client';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../../../../../../plugins/data/common';
-import { getNotifications } from '../services';
-import { getFieldFormats, FieldFormatRegisty } from '../../../../../../plugins/data/public/';
+import { getNotifications, getFieldFormats } from '../services';
+import { FieldFormatRegisty } from '../../../../../../plugins/data/public/';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const type = 'index-pattern';
@@ -64,7 +64,6 @@ export class IndexPattern implements StaticIndexPattern {
   public formatField: any;
   public flattenHit: any;
   public metaFields: string[];
-  public fieldFormats: FieldFormatRegisty;
 
   private version: string | undefined;
   private savedObjectsClient: SavedObjectsClientContract;
@@ -74,6 +73,7 @@ export class IndexPattern implements StaticIndexPattern {
   private originalBody: { [key: string]: any } = {};
   private fieldsFetcher: any;
   private shortDotsEnable: boolean = false;
+  private fieldFormats: FieldFormatRegisty = getFieldFormats();
 
   private mapping: MappingObject = expandShorthand({
     title: ES_FIELD_TYPES.TEXT,
@@ -117,7 +117,6 @@ export class IndexPattern implements StaticIndexPattern {
     this.fields = new FieldList(this, [], this.shortDotsEnable);
     this.fieldsFetcher = createFieldsFetcher(this, apiClient, this.getConfig('metaFields'));
     this.flattenHit = flattenHitWrapper(this, this.getConfig('metaFields'));
-    this.fieldFormats = getFieldFormats();
     this.formatHit = formatHitProvider(
       this,
       this.fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING, [])

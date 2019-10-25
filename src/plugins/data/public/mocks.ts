@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Plugin } from '.';
+import { FieldFormatRegisty, Plugin } from '.';
 import { searchSetupMock } from './search/mocks';
 
 export type Setup = jest.Mocked<ReturnType<Plugin['setup']>>;
@@ -28,10 +28,28 @@ const autocompleteMock: any = {
   clearProviders: jest.fn(),
 };
 
+const fieldFormatsMock: PublicMethodsOf<FieldFormatRegisty> = {
+  getByFieldType: jest.fn(),
+  getConfig: jest.fn(),
+  getDefaultConfig: jest.fn(),
+  getDefaultInstance: jest.fn() as any,
+  getDefaultInstanceCacheResolver: jest.fn(),
+  getDefaultInstancePlain: jest.fn(),
+  getDefaultType: jest.fn(),
+  getDefaultTypeName: jest.fn(),
+  getInstance: jest.fn() as any,
+  getType: jest.fn(),
+  getTypeNameByEsTypes: jest.fn(),
+  init: jest.fn(),
+  register: jest.fn(),
+  parseDefaultTypeMap: jest.fn(),
+};
+
 const createSetupContract = (): Setup => {
   const setupContract: Setup = {
     autocomplete: autocompleteMock as Setup['autocomplete'],
     search: searchSetupMock,
+    fieldFormats: fieldFormatsMock as Setup['fieldFormats'],
   };
 
   return setupContract;
@@ -42,6 +60,7 @@ const createStartContract = (): Start => {
     autocomplete: autocompleteMock as Start['autocomplete'],
     getSuggestions: jest.fn(),
     search: { search: jest.fn() },
+    fieldFormats: fieldFormatsMock as Setup['fieldFormats'],
   };
   return startContract;
 };
