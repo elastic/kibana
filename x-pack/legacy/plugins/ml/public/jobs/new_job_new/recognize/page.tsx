@@ -154,6 +154,9 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
     const resultTimeRange = await getTimeRange(useFullIndexData, timeRange);
 
     try {
+      let jobOverridesPayload: JobOverride[] | null = Object.values(jobOverrides);
+      jobOverridesPayload = jobOverridesPayload.length > 0 ? jobOverridesPayload : null;
+
       const response: DataRecognizerConfigResponse = await ml.setupDataRecognizerConfig({
         moduleId,
         prefix: resultJobPrefix,
@@ -161,7 +164,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
         indexPatternName: indexPattern.title,
         useDedicatedIndex,
         startDatafeed: startDatafeedAfterSave,
-        jobOverrides: Object.values(jobOverrides),
+        ...(jobOverridesPayload !== null ? { jobOverrides: jobOverridesPayload } : {}),
         ...resultTimeRange,
       });
       const { datafeeds: datafeedsResponse, jobs: jobsResponse, kibana: kibanaResponse } = response;
