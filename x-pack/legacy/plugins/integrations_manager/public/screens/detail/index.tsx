@@ -46,9 +46,11 @@ export function DetailLayout(props: LayoutProps) {
     padding-bottom: ${theme.eui.paddingSizes.xl};
   `;
 
+  const paddingSizeTop: number = parseInt(theme.eui.paddingSizes.xl, 10) * 1.25;
   const FullWidthContent = styled(EuiPage)`
     background-color: ${theme.eui.euiColorEmptyShade};
     height: 100%;
+    padding-top: ${paddingSizeTop}px;
   `;
 
   return (
