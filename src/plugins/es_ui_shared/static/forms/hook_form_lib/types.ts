@@ -140,13 +140,17 @@ export interface ValidationError<T = string> {
   [key: string]: any;
 }
 
-export type ValidationFunc<T extends object = any, E = string> = (data: {
+export interface ValidationFuncArg<T extends object, V = unknown> {
   path: string;
-  value: unknown;
+  value: V;
   form: FormHook<T>;
   formData: T;
   errors: readonly ValidationError[];
-}) => ValidationError<E> | void | undefined | Promise<ValidationError<E> | void | undefined>;
+}
+
+export type ValidationFunc<T extends object = any, E = string> = (
+  data: ValidationFuncArg<T>
+) => ValidationError<E> | void | undefined | Promise<ValidationError<E> | void | undefined>;
 
 export interface FieldValidateResponse {
   isValid: boolean;
