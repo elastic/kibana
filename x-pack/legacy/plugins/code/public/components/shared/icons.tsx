@@ -166,8 +166,8 @@ export const BinaryFileIcon = () => (
         y2="27.5787"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#EBEBEB" />
-        <stop offset="1" stop-color="#C0C8D6" />
+        <stop stopColor="#EBEBEB" />
+        <stop offset="1" stopColor="#C0C8D6" />
       </linearGradient>
       <linearGradient
         id="paint1_linear"
@@ -177,8 +177,8 @@ export const BinaryFileIcon = () => (
         y2="10626"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#EBEBEB" />
-        <stop offset="1" stop-color="#C0C8D6" />
+        <stop stopColor="#EBEBEB" />
+        <stop offset="1" stopColor="#C0C8D6" />
       </linearGradient>
       <linearGradient
         id="paint2_linear"
@@ -188,8 +188,8 @@ export const BinaryFileIcon = () => (
         y2="-2079.65"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#EBEBEB" />
-        <stop offset="1" stop-color="#C0C8D6" />
+        <stop stopColor="#EBEBEB" />
+        <stop offset="1" stopColor="#C0C8D6" />
       </linearGradient>
       <linearGradient
         id="paint3_linear"
@@ -199,8 +199,8 @@ export const BinaryFileIcon = () => (
         y2="-2632.38"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#EBEBEB" />
-        <stop offset="1" stop-color="#C0C8D6" />
+        <stop stopColor="#EBEBEB" />
+        <stop offset="1" stopColor="#C0C8D6" />
       </linearGradient>
     </defs>
   </svg>
@@ -303,8 +303,8 @@ export const ErrorIcon = () => (
         y2="27.5787"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#EBEBEB" />
-        <stop offset="1" stop-color="#C0C8D6" />
+        <stop stopColor="#EBEBEB" />
+        <stop offset="1" stopColor="#C0C8D6" />
       </linearGradient>
       <linearGradient
         id="paint1_linear"
@@ -314,8 +314,8 @@ export const ErrorIcon = () => (
         y2="10626"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#EBEBEB" />
-        <stop offset="1" stop-color="#C0C8D6" />
+        <stop stopColor="#EBEBEB" />
+        <stop offset="1" stopColor="#C0C8D6" />
       </linearGradient>
       <linearGradient
         id="paint2_linear"
@@ -325,8 +325,8 @@ export const ErrorIcon = () => (
         y2="-2079.65"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#EBEBEB" />
-        <stop offset="1" stop-color="#C0C8D6" />
+        <stop stopColor="#EBEBEB" />
+        <stop offset="1" stopColor="#C0C8D6" />
       </linearGradient>
       <linearGradient
         id="paint3_linear"
@@ -336,8 +336,8 @@ export const ErrorIcon = () => (
         y2="-2632.38"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#EBEBEB" />
-        <stop offset="1" stop-color="#C0C8D6" />
+        <stop stopColor="#EBEBEB" />
+        <stop offset="1" stopColor="#C0C8D6" />
       </linearGradient>
     </defs>
   </svg>
