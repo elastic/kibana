@@ -5,50 +5,34 @@
  */
 
 import { License } from './license';
+import { PublicLicense } from '../server/types';
 import { hasLicenseInfoChanged } from './has_license_info_changed';
 
-function license({ error, ...rawLicense }: { error?: Error; [key: string]: any } = {}) {
+function license({ error, ...customLicense }: { error?: Error; [key: string]: any } = {}) {
+  const defaultLicense: PublicLicense['license'] = {
+    uid: 'uid-000000001234',
+    status: 'active',
+    type: 'basic',
+    expiryDateInMillis: 1000,
+  };
+
   return new License({
     error,
-    license: Object.keys(rawLicense).length ? rawLicense : undefined,
+    license: Object.assign(defaultLicense, customLicense),
+    signature: 'aaaaaaa',
   });
 }
 
 // Each test should ensure that left-to-right and right-to-left comparisons are captured.
-
 describe('has license info changed', () => {
-  describe('undefined', () => {
-    test('undefined <-> undefined', async () => {
-      expect(hasLicenseInfoChanged(undefined, undefined)).toBe(false);
-    });
-
+  describe('License', () => {
     test('undefined <-> License', async () => {
       expect(hasLicenseInfoChanged(undefined, license())).toBe(true);
-      expect(hasLicenseInfoChanged(license(), undefined)).toBe(true);
-    });
-  });
-
-  describe('License', () => {
-    test('License <-> available License', async () => {
-      expect(hasLicenseInfoChanged(license(), license({ uid: 'alpha' }))).toBe(true);
-      expect(hasLicenseInfoChanged(license(), license({ uid: 'alpha' }))).toBe(true);
     });
 
-    test('uid License <-> uid License', async () => {
-      expect(hasLicenseInfoChanged(license({ uid: 'alpha' }), license({ uid: 'alpha' }))).toBe(
-        false
-      );
-      expect(hasLicenseInfoChanged(license({ uid: 'alpha' }), license({ uid: 'beta' }))).toBe(
-        false
-      );
-      expect(hasLicenseInfoChanged(license({ uid: 'beta' }), license({ uid: 'alpha' }))).toBe(
-        false
-      );
-    });
-
-    test('License <-> type License', async () => {
-      expect(hasLicenseInfoChanged(license({ type: 'basic' }), license())).toBe(true);
-      expect(hasLicenseInfoChanged(license(), license({ type: 'basic' }))).toBe(true);
+    test('the same License', async () => {
+      const licenseInstance = license();
+      expect(hasLicenseInfoChanged(licenseInstance, licenseInstance)).toBe(false);
     });
 
     test('type License <-> type License | mismatched type', async () => {
@@ -60,11 +44,6 @@ describe('has license info changed', () => {
       );
     });
 
-    test('License <-> status License', async () => {
-      expect(hasLicenseInfoChanged(license({ status: 'active' }), license())).toBe(true);
-      expect(hasLicenseInfoChanged(license(), license({ status: 'active' }))).toBe(true);
-    });
-
     test('status License <-> status License | mismatched status', async () => {
       expect(
         hasLicenseInfoChanged(license({ status: 'active' }), license({ status: 'inactive' }))
@@ -74,22 +53,17 @@ describe('has license info changed', () => {
       ).toBe(true);
     });
 
-    test('License <-> expiry License', async () => {
-      expect(hasLicenseInfoChanged(license({ expiry_date_in_millis: 100 }), license())).toBe(true);
-      expect(hasLicenseInfoChanged(license(), license({ expiry_date_in_millis: 100 }))).toBe(true);
-    });
-
     test('expiry License <-> expiry License | mismatched expiry', async () => {
       expect(
         hasLicenseInfoChanged(
-          license({ expiry_date_in_millis: 100 }),
-          license({ expiry_date_in_millis: 200 })
+          license({ expiryDateInMillis: 100 }),
+          license({ expiryDateInMillis: 200 })
         )
       ).toBe(true);
       expect(
         hasLicenseInfoChanged(
-          license({ expiry_date_in_millis: 200 }),
-          license({ expiry_date_in_millis: 100 })
+          license({ expiryDateInMillis: 200 }),
+          license({ expiryDateInMillis: 100 })
         )
       ).toBe(true);
     });
@@ -97,15 +71,15 @@ describe('has license info changed', () => {
 
   describe('error License', () => {
     test('License <-> error License', async () => {
-      expect(hasLicenseInfoChanged(license({ error: new Error('alpha') }), license())).toBe(true);
-      expect(hasLicenseInfoChanged(license(), license({ error: new Error('alpha') }))).toBe(true);
+      expect(hasLicenseInfoChanged(license({ error: new Error('reason') }), license())).toBe(true);
+      expect(hasLicenseInfoChanged(license(), license({ error: new Error('reason') }))).toBe(true);
     });
 
     test('error License <-> error License | matched messages', async () => {
       expect(
         hasLicenseInfoChanged(
-          license({ error: new Error('alpha') }),
-          license({ error: new Error('alpha') })
+          license({ error: new Error('reason-1') }),
+          license({ error: new Error('reason-1') })
         )
       ).toBe(false);
     });
@@ -113,14 +87,14 @@ describe('has license info changed', () => {
     test('error License <-> error License | mismatched messages', async () => {
       expect(
         hasLicenseInfoChanged(
-          license({ error: new Error('alpha') }),
-          license({ error: new Error('beta') })
+          license({ error: new Error('reason-1') }),
+          license({ error: new Error('reason-2') })
         )
       ).toBe(true);
       expect(
         hasLicenseInfoChanged(
-          license({ error: new Error('beta') }),
-          license({ error: new Error('alpha') })
+          license({ error: new Error('reason-2') }),
+          license({ error: new Error('reason-1') })
         )
       ).toBe(true);
     });
