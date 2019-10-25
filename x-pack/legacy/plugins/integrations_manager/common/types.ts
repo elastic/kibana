@@ -73,6 +73,7 @@ export interface RegistryPackage {
   name: string;
   version: string;
   description: string;
+  readme?: string;
   icon: string;
   requirement: RequirementsByServiceName;
   title?: string;

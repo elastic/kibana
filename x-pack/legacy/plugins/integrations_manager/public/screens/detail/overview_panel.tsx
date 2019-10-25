@@ -4,21 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment } from 'react';
-import { EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiSpacer, EuiText } from '@elastic/eui';
 import { PackageInfo } from '../../../common/types';
 import { Screenshots } from './screenshots';
+import { Readme } from './readme';
 
 export function OverviewPanel(props: PackageInfo) {
-  const { description, screenshots } = props;
+  const { screenshots, readme } = props;
   return (
     <Fragment>
-      <EuiTitle size="s">
-        <h3>About</h3>
-      </EuiTitle>
-      <EuiText>
-        <p>{description}</p>
-        <p>Still need a) longer descriptions b) component to show/hide</p>
-      </EuiText>
+      <EuiText>{readme && <Readme readmePath={readme} />}</EuiText>
       <EuiSpacer size="xl" />
       {screenshots && <Screenshots images={screenshots} />}
     </Fragment>

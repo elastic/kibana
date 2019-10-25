@@ -12,6 +12,7 @@ import {
   getListPath,
   getRemovePath,
   ListParams,
+  getFilePath,
 } from '../common/routes';
 import {
   CategorySummaryList,
@@ -72,10 +73,15 @@ export async function getPackageInfoByKey(pkgkey: string): Promise<PackageInfo> 
 
 export async function installPackage(pkgkey: string) {
   const path = getInstallPath(pkgkey);
-  return await _fetch(path);
+  return _fetch(path);
 }
 
 export async function removePackage(pkgkey: string) {
   const path = getRemovePath(pkgkey);
-  return await _fetch(path);
+  return _fetch(path);
+}
+
+export async function getFileByPath(filePath: string): Promise<string> {
+  const path = getFilePath(filePath);
+  return _fetch(path);
 }
