@@ -1,5 +1,5 @@
 {
-  "id": "saved-query-1",
+  "id": "query-filtering",
   "description": "Detecting root and admin users",
   "index": ["auditbeat-*", "filebeat-*", "packetbeat-*", "winlogbeat-*"],
   "interval": "5m",
@@ -8,7 +8,6 @@
   "type": "query",
   "from": "now-6m",
   "to": "now",
-  "save_id": "Frank Query From SIEM",
   "query": "user.name: root or user.name: admin",
   "filters": [
     {
