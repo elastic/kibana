@@ -27,26 +27,35 @@ export const ShardDetailTree = ({ data, index, shard }: Props) => {
   };
 
   return (
-    <div className="prfDevTool__panelBody">
+    <div className="prfDevTool__profileTree__panelBody">
       <EuiFlexGroup gutterSize="none" direction="column">
         <EuiFlexItem>
-          <div className="prfDevTool__tvHeader">
-            <EuiText size="s" className="prfDevTool__cell prfDevTool__description">
+          <div className="prfDevTool__profileTree__tvHeader">
+            <EuiText
+              size="s"
+              className="prfDevTool__profileTree__description prfDevTool__profileTree__cell"
+            >
               {i18n.translate('xpack.searchProfiler.profileTree.header.typeTitle', {
                 defaultMessage: 'Type and description',
               })}
             </EuiText>
-            <EuiText size="s" className="prfDevTool__cell prfDevTool__time">
+            <EuiText
+              size="s"
+              className="prfDevTool__profileTree__cell prfDevTool__profileTree__time"
+            >
               {i18n.translate('xpack.searchProfiler.profileTree.header.selfTimeTitle', {
                 defaultMessage: 'Self time',
               })}
             </EuiText>
-            <EuiText size="s" className="prfDevTool__cell prfDevTool__time">
+            <EuiText
+              size="s"
+              className="prfDevTool__profileTree__cell prfDevTool__profileTree__time"
+            >
               {i18n.translate('xpack.searchProfiler.profileTree.header.totalTimeTitle', {
                 defaultMessage: 'Total time',
               })}
             </EuiText>
-            <div className="prfDevTool__cell prfDevTool__percentage" />
+            <div className="prfDevTool__profileTree__cell prfDevTool__profileTree__percentage" />
           </div>
         </EuiFlexItem>
 

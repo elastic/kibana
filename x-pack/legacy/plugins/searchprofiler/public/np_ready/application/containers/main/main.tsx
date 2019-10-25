@@ -72,30 +72,26 @@ export const Main = () => {
                   <ProfileQueryEditor onProfileClick={onProfileClick} onResponse={onResponse} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={3}>
-                  <EuiFlexGroup gutterSize="none" direction="column">
-                    <div className="prfDevTool__main">
-                      <SearchProfilerTabs
-                        activeTab={activeTab}
-                        activateTab={(target: Targets) => setActiveTab(target)}
-                        has={{
-                          aggregations: Boolean(
-                            currentResponse && hasAggregations(currentResponse)
-                          ),
-                          searches: Boolean(currentResponse && hasSearch(currentResponse)),
-                        }}
-                      />
-                      {activeTab ? (
-                        <div className="prfDevTool__main__profiletree">
-                          <ProfileTree
-                            onHighlight={onHighlight}
-                            target={activeTab}
-                            data={currentResponse}
-                          />
-                        </div>
-                      ) : (
-                        <EmptyTreePlaceHolder />
-                      )}
-                    </div>
+                  <EuiFlexGroup className="prfDevTool__main" gutterSize="none" direction="column">
+                    <SearchProfilerTabs
+                      activeTab={activeTab}
+                      activateTab={(target: Targets) => setActiveTab(target)}
+                      has={{
+                        aggregations: Boolean(currentResponse && hasAggregations(currentResponse)),
+                        searches: Boolean(currentResponse && hasSearch(currentResponse)),
+                      }}
+                    />
+                    {activeTab ? (
+                      <div className="prfDevTool__main__profiletree">
+                        <ProfileTree
+                          onHighlight={onHighlight}
+                          target={activeTab}
+                          data={currentResponse}
+                        />
+                      </div>
+                    ) : (
+                      <EmptyTreePlaceHolder />
+                    )}
                   </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>

@@ -25,19 +25,19 @@ export const ShardDetails = ({ index, shard, operations }: Props) => {
   return (
     <>
       <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" direction="row">
-        <EuiFlexItem grow={false} className="prfDevTool__shard__header-flex-item">
+        <EuiFlexItem grow={false} className="prfDevTool__profileTree__shard__header-flex-item">
           <EuiLink
-            className="prfDevTool__shardDetails"
+            className="prfDevTool__profileTree__shardDetails"
             onClick={() => setShardVisibility(!shardVisibility)}
           >
             <EuiIcon type={shardVisibility ? 'arrowDown' : 'arrowRight'} />[{shard.id[0]}][
             {shard.id[2]}]
           </EuiLink>
         </EuiFlexItem>
-        <EuiFlexItem grow={false} className="prfDevTool__shard__header-flex-item">
-          <EuiText className="prfDevTool__shardDetails--dim prfDevTool__shard__header">
+        <EuiFlexItem grow={false} className="prfDevTool__profileTree__shard__header-flex-item">
+          <EuiText className="prfDevTool__shardDetails--dim">
             <EuiBadge
-              className="prfDevTool__progress--time"
+              className="prfDevTool__profileTree__progress--time"
               style={{ '--prfDevToolProgressPercentage': relative + '%' } as any}
             >
               <span

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useRef, useEffect, useState, MutableRefObject } from 'react';
+import React, { memo, useRef, useEffect, useState, MutableRefObject } from 'react';
 import { Editor as AceEditor } from 'brace';
 
 import { initializeEditor } from './init_editor';
@@ -20,7 +20,7 @@ export interface Props {
   valueGetterRef: MutableRefObject<() => string | null>;
 }
 
-export const Editor = ({ licenseEnabled, initialValue, valueGetterRef }: Props) => {
+export const Editor = memo(({ licenseEnabled, initialValue, valueGetterRef }: Props) => {
   const containerRef = useRef<HTMLDivElement>(null as any);
   const editorInstanceRef = useRef<AceEditor>(null as any);
   const [textArea, setTextArea] = useState<HTMLTextAreaElement | null>(null);
@@ -33,4 +33,4 @@ export const Editor = ({ licenseEnabled, initialValue, valueGetterRef }: Props) 
     setTextArea(containerRef.current!.querySelector('textarea'));
   });
   return <div ref={containerRef} />;
-};
+});

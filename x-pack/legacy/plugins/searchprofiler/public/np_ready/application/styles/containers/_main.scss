@@ -7,6 +7,7 @@
 }
 
 .prfDevTool__main {
+  height: 100%;
   order: 2;
   margin-left: $euiSize;
   display: flex;
@@ -19,6 +20,7 @@
   }
 
   &__profiletree {
+    height: 100%;
     overflow-y: auto;
     flex-grow: 1;
   }
@@ -41,3 +43,21 @@
     text-align: center;
   }
 }
+
+@include euiPanel('prfDevTool__main');
+
+@include euiBreakpoint('xs', 's') {
+  .prfDevTool__container {
+    flex-direction: column;
+  }
+
+  .prfDevTool__sense,
+  .prfDevTool__main {
+    flex: 0 0 auto;
+  }
+
+  .prfDevTool__main {
+    margin: $euiSize 0;
+  }
+}
+

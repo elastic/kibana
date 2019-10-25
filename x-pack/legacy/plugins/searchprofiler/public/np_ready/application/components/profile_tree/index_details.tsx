@@ -22,7 +22,7 @@ export const IndexDetails = ({ index, target }: Props) => {
     <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" direction="row">
       {/* Index Title group */}
       <EuiFlexItem grow={false}>
-        <EuiText className="prfDevTool__shardDetails">
+        <EuiText className="prfDevTool__profileTree__shardDetails">
           <h3>
             <b>
               {i18n.translate('xpack.searchProfiler.profileTree.indexTitle', {
@@ -34,8 +34,8 @@ export const IndexDetails = ({ index, target }: Props) => {
         </EuiText>
       </EuiFlexItem>
       {/* Time details group */}
-      <EuiFlexItem grow={false} className="prfDevTool__indexDetails">
-        <EuiText className="prfDevTool__shardDetails--dim">
+      <EuiFlexItem grow={false} className="prfDevTool__profileTree__indexDetails">
+        <EuiText className="prfDevTool__profileTree__shardDetails--dim">
           <EuiToolTip
             position="bottom"
             content={i18n.translate('xpack.searchProfiler.profileTree.cumulativeTimeTooltip', {

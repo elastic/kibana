@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import React from 'react';
 
 import { EuiTabs, EuiTab } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 import { Targets } from '../types';
 
@@ -29,20 +28,18 @@ export const SearchProfilerTabs = ({ activeTab, activateTab, has }: Props) => {
         disabled={!has.searches}
         onClick={() => activateTab('searches')}
       >
-        <FormattedMessage
-          id="xpack.searchProfiler.queryProfileTabTitle"
-          defaultMessage="Query Profile"
-        />
+        {i18n.translate('xpack.searchProfiler.queryProfileTabTitle', {
+          defaultMessage: 'Query Profile',
+        })}
       </EuiTab>
       <EuiTab
         isSelected={activeTab === 'aggregations'}
         disabled={!has.aggregations}
         onClick={() => activateTab('aggregations')}
       >
-        <FormattedMessage
-          id="xpack.searchProfiler.aggregationProfileTabTitle"
-          defaultMessage="Aggregation Profile"
-        />
+        {i18n.translate('xpack.searchProfiler.aggregationProfileTabTitle', {
+          defaultMessage: 'Aggregation Profile',
+        })}
       </EuiTab>
     </EuiTabs>
   );

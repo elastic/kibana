@@ -36,7 +36,7 @@ export const HighlightDetailsTable = ({ breakdown }: Props) => {
       name: 'Precentage',
       render: (item: BreakdownItem) => (
         <EuiBadge
-          className="prfDevTool__progress--percent"
+          className="prfDevTool__profileTree__progress--percent"
           style={{ '--prfDevToolProgressPercentage': item.relative + ' %' } as any}
         >
           <span

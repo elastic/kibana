@@ -28,11 +28,15 @@ export const ProfileTree = ({ data, target, onHighlight }: Props) => {
 
   return (
     <HighlightContextProvider onHighlight={onHighlight}>
-      <EuiFlexGroup gutterSize="none" direction="column">
+      <EuiFlexGroup
+        className="prfDevTool__profileTree__container"
+        gutterSize="none"
+        direction="column"
+      >
         {sortedIndices.map(index => (
           <EuiFlexItem key={index.name} grow={false}>
             <EuiFlexGroup
-              className="prfDevTool__panel prfDevTool__index"
+              className="prfDevTool__profileTree__panel prfDevTool__profileTree__index"
               gutterSize="none"
               key={index.name}
               direction="column"

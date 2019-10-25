@@ -34,10 +34,10 @@ export const ShardDetailsTreeNode = ({ operation, index, shard }: Props) => {
   const { highlight, isHighlighted, id } = useHighlightTreeNode();
 
   const renderTimeRow = (op: Operation) => (
-    <div className="prfDevTool__tvRow">
-      <div className="prfDevTool__cell prfDevTool__description">
+    <div className="prfDevTool__profileTree__tvRow">
+      <div className="prfDevTool__profileTree__cell prfDevTool__profileTree__description">
         <EuiLink
-          className="prfDevTool__shardDetails"
+          className="prfDevTool__profileTree__shardDetails"
           disabled={!op.hasChildren}
           onClick={() => setChildrenVisible(!childrenVisible)}
         >
@@ -52,21 +52,27 @@ export const ShardDetailsTreeNode = ({ operation, index, shard }: Props) => {
         </EuiLink>
       </div>
       {/* Self Time Badge */}
-      <div className="prfDevTool__cell prfDevTool__time">
-        <EuiBadge className="prfDevTool__badge" style={{ backgroundColor: op.absoluteColor }}>
+      <div className="prfDevTool__profileTree__cell prfDevTool__profileTree__time">
+        <EuiBadge
+          className="prfDevTool__profileTree__badge"
+          style={{ backgroundColor: op.absoluteColor }}
+        >
           {msToPretty(op.selfTime!, 1)}
         </EuiBadge>
       </div>
       {/* Total Time Badge */}
-      <div className="prfDevTool__cell prfDevTool__totalTime">
-        <EuiBadge className="prfDevTool__badge" style={{ backgroundColor: op.absoluteColor }}>
+      <div className="prfDevTool__profileTree__cell prfDevTool__profileTree__totalTime">
+        <EuiBadge
+          className="prfDevTool__profileTree__badge"
+          style={{ backgroundColor: op.absoluteColor }}
+        >
           {msToPretty(op.time!, 1)}
         </EuiBadge>
       </div>
       {/* Time percentage Badge */}
-      <div className="prfDevTool__cell prfDevTool__percentage">
+      <div className="prfDevTool__profileTree__cell prfDevTool__profileTree__percentage">
         <EuiBadge
-          className="prfDevTool__progress--percent"
+          className="prfDevTool__profileTree__progress--percent"
           style={{ '--prfDevToolProgressPercentage': op.timePercentage } as any}
         >
           <span
@@ -86,8 +92,8 @@ export const ShardDetailsTreeNode = ({ operation, index, shard }: Props) => {
         className={isHighlighted() ? 'prfDevTool__tvRow--last' : ''}
         style={{ paddingLeft: operation.depth! * TAB_WIDTH_PX + 'px' }}
       >
-        <div className="prfDevTool__tvRow">{renderTimeRow(operation)}</div>
-        <div className="prfDevTool__tvRow">
+        <div className="prfDevTool__profileTree__tvRow">{renderTimeRow(operation)}</div>
+        <div className="prfDevTool__profileTree__tvRow">
           <span className="prfDevTool__detail">
             <EuiCodeBlock paddingSize="none">
               {limitString(operation.lucene || '', 120)}
