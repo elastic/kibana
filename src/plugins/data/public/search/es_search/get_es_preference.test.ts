@@ -21,7 +21,7 @@ import { getEsPreference } from './get_es_preference';
 
 jest.useFakeTimers();
 
-describe('Get ES search params', () => {
+describe('Get ES preference', () => {
   test('returns the session ID if set to sessionId', () => {
     const setPreference = 'sessionId';
     const customPreference = 'foobar';
