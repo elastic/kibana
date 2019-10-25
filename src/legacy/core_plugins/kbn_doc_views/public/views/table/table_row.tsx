@@ -36,7 +36,6 @@ export interface Props {
   isCollapsible: boolean;
   isColumnActive: boolean;
   isCollapsed: boolean;
-  isFormatted: boolean;
   onToggleCollapse: () => void;
   onFilter?: DocViewFilterFn;
   onToggleColumn?: () => void;
@@ -52,7 +51,6 @@ export function DocViewTableRow({
   isCollapsible,
   isCollapsed,
   isColumnActive,
-  isFormatted,
   onFilter,
   onToggleCollapse,
   onToggleColumn,
@@ -95,17 +93,11 @@ export function DocViewTableRow({
         )}
         {displayUnderscoreWarning && <DocViewTableRowIconUnderscore />}
         {displayNoMappingWarning && <DocViewTableRowIconNoMapping />}
-        {isFormatted ? (
-          <div
-            className={valueClassName}
-            data-test-subj={`tableDocViewRow-${field}-value`}
-            dangerouslySetInnerHTML={{ __html: value as string }}
-          />
-        ) : (
-          <div className={valueClassName} data-test-subj={`tableDocViewRow-${field}-value`}>
-            {value}
-          </div>
-        )}
+        <div
+          className={valueClassName}
+          data-test-subj={`tableDocViewRow-${field}-value`}
+          dangerouslySetInnerHTML={{ __html: value as string }}
+        />
       </td>
     </tr>
   );

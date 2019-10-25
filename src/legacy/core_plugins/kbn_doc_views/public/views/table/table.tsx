@@ -19,7 +19,7 @@
 import React, { useState } from 'react';
 import { DocViewRenderProps } from 'ui/registry/doc_views';
 import { DocViewTableRow } from './table_row';
-import { arrayContainsObjects } from './table_helper';
+import { arrayContainsObjects, trimAngularSpan } from './table_helper';
 
 const COLLAPSE_LINE_LENGTH = 350;
 
@@ -47,15 +47,10 @@ export function DocViewTable({
         {Object.keys(flattened)
           .sort()
           .map(field => {
-            function trimAngularSpan(text: string) {
-              return text.replace('<span ng-non-bindable>', '').replace('</span>', '');
-            }
             const valueRaw = flattened[field];
-            const valueFormattedTrimmed = trimAngularSpan(formatted[field]);
-            const isFormatted = valueRaw !== valueFormattedTrimmed;
-            const value = isFormatted ? valueFormattedTrimmed : valueRaw;
+            const value = trimAngularSpan(String(formatted[field]));
 
-            const isCollapsible = typeof value === 'string' && value.length > COLLAPSE_LINE_LENGTH;
+            const isCollapsible = value.length > COLLAPSE_LINE_LENGTH;
             const isCollapsed = isCollapsible && !fieldRowOpen[field];
             const toggleColumn =
               onRemoveColumn && onAddColumn && Array.isArray(columns)
@@ -83,7 +78,6 @@ export function DocViewTable({
                 isCollapsed={isCollapsed}
                 isCollapsible={isCollapsible}
                 isColumnActive={Array.isArray(columns) && columns.includes(field)}
-                isFormatted={isFormatted}
                 onFilter={filter}
                 onToggleCollapse={() => toggleValueCollapse(field)}
                 onToggleColumn={toggleColumn}
