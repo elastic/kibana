@@ -76,7 +76,22 @@ export default function({ getService }: FtrProviderContext) {
       influencers: ['airline'],
       bucketSpan: '15m',
       memoryLimit: '20mb',
+      queryDelay: '55s',
+      frequency: '350s',
+      scrollSize: '999',
       expected: {
+        wizard: {
+          datafeedQuery: `{
+  "bool": {
+    "must": [
+      {
+        "match_all": {}
+      }
+    ]
+  }
+}`,
+          timeField: '@timestamp',
+        },
         row: {
           recordCount: '86,274',
           memoryStatus: 'ok',
@@ -148,6 +163,33 @@ export default function({ getService }: FtrProviderContext) {
 
         it('job creation displays the configure datafeed step', async () => {
           await ml.jobWizardCommon.assertConfigureDatafeedSectionExists();
+        });
+
+        it('job creation pre-fills the datafeed query editor', async () => {
+          await ml.jobWizardAdvanced.assertDatafeedQueryEditorExists();
+          await ml.jobWizardAdvanced.assertDatafeedQueryEditorValue(
+            testData.expected.wizard.datafeedQuery
+          );
+        });
+
+        it('job creation inputs the query delay', async () => {
+          await ml.jobWizardAdvanced.assertQueryDelayInputExists();
+          await ml.jobWizardAdvanced.setQueryDelay(testData.queryDelay);
+        });
+
+        it('job creation inputs the frequency', async () => {
+          await ml.jobWizardAdvanced.assertFrequencyInputExists();
+          await ml.jobWizardAdvanced.setFrequency(testData.frequency);
+        });
+
+        it('job creation inputs the scroll size', async () => {
+          await ml.jobWizardAdvanced.assertScrollSizeInputExists();
+          await ml.jobWizardAdvanced.setScrollSize(testData.scrollSize);
+        });
+
+        it('job creation pre-fills the time field', async () => {
+          await ml.jobWizardAdvanced.assertTimeFieldInputExists();
+          await ml.jobWizardAdvanced.assertTimeFieldSelection(testData.expected.wizard.timeField);
         });
 
         it('job creation displays the pick fields step', async () => {
@@ -335,6 +377,33 @@ export default function({ getService }: FtrProviderContext) {
 
         it('job cloning displays the configure datafeed step', async () => {
           await ml.jobWizardCommon.assertConfigureDatafeedSectionExists();
+        });
+
+        it('job cloning pre-fills the datafeed query editor', async () => {
+          await ml.jobWizardAdvanced.assertDatafeedQueryEditorExists();
+          await ml.jobWizardAdvanced.assertDatafeedQueryEditorValue(
+            testData.expected.wizard.datafeedQuery
+          );
+        });
+
+        it('job cloning pre-fills the query delay', async () => {
+          await ml.jobWizardAdvanced.assertQueryDelayInputExists();
+          await ml.jobWizardAdvanced.assertQueryDelayValue(testData.queryDelay);
+        });
+
+        it('job cloning pre-fills the frequency', async () => {
+          await ml.jobWizardAdvanced.assertFrequencyInputExists();
+          await ml.jobWizardAdvanced.assertFrequencyValue(testData.frequency);
+        });
+
+        it('job cloning pre-fills the scroll size', async () => {
+          await ml.jobWizardAdvanced.assertScrollSizeInputExists();
+          await ml.jobWizardAdvanced.assertScrollSizeValue(testData.scrollSize);
+        });
+
+        it('job creation pre-fills the time field', async () => {
+          await ml.jobWizardAdvanced.assertTimeFieldInputExists();
+          await ml.jobWizardAdvanced.assertTimeFieldSelection(testData.expected.wizard.timeField);
         });
 
         it('job cloning displays the pick fields step', async () => {

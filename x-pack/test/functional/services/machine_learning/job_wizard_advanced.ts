@@ -11,8 +11,91 @@ export function MachineLearningJobWizardAdvancedProvider({ getService }: FtrProv
   const comboBox = getService('comboBox');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const aceEditor = getService('aceEditor');
 
   return {
+    async assertDatafeedQueryEditorExists() {
+      await testSubjects.existOrFail('mlAdvancedDatafeedQueryEditor > codeEditorContainer');
+    },
+
+    async assertDatafeedQueryEditorValue(expectedValue: string) {
+      const actualValue = await aceEditor.getValue(
+        'mlAdvancedDatafeedQueryEditor > codeEditorContainer'
+      );
+      expect(actualValue).to.eql(expectedValue);
+    },
+
+    async assertQueryDelayInputExists() {
+      await testSubjects.existOrFail('mlJobWizardInputQueryDelay');
+    },
+
+    async assertQueryDelayValue(expectedValue: string) {
+      const actualQueryDelay = await testSubjects.getAttribute(
+        'mlJobWizardInputQueryDelay',
+        'value'
+      );
+      expect(actualQueryDelay).to.eql(expectedValue);
+    },
+
+    async setQueryDelay(queryDelay: string) {
+      await testSubjects.setValue('mlJobWizardInputQueryDelay', queryDelay, {
+        clearWithKeyboard: true,
+      });
+      await this.assertQueryDelayValue(queryDelay);
+    },
+
+    async assertFrequencyInputExists() {
+      await testSubjects.existOrFail('mlJobWizardInputFrequency');
+    },
+
+    async assertFrequencyValue(expectedValue: string) {
+      const actualFrequency = await testSubjects.getAttribute('mlJobWizardInputFrequency', 'value');
+      expect(actualFrequency).to.eql(expectedValue);
+    },
+
+    async setFrequency(frequency: string) {
+      await testSubjects.setValue('mlJobWizardInputFrequency', frequency, {
+        clearWithKeyboard: true,
+      });
+      await this.assertFrequencyValue(frequency);
+    },
+
+    async assertScrollSizeInputExists() {
+      await testSubjects.existOrFail('mlJobWizardInputScrollSize');
+    },
+
+    async assertScrollSizeValue(expectedValue: string) {
+      const actualScrollSize = await testSubjects.getAttribute(
+        'mlJobWizardInputScrollSize',
+        'value'
+      );
+      expect(actualScrollSize).to.eql(expectedValue);
+    },
+
+    async setScrollSize(scrollSize: string) {
+      await testSubjects.setValue('mlJobWizardInputScrollSize', scrollSize, {
+        clearWithKeyboard: true,
+      });
+      await this.assertScrollSizeValue(scrollSize);
+    },
+
+    async assertTimeFieldInputExists() {
+      await testSubjects.existOrFail('mlTimeFieldNameSelect > comboBoxInput');
+    },
+
+    async assertTimeFieldSelection(identifier: string) {
+      const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
+        'mlTimeFieldNameSelect > comboBoxInput'
+      );
+      expect(comboBoxSelectedOptions.length).to.eql(1);
+      expect(comboBoxSelectedOptions[0]).to.eql(identifier);
+    },
+
+    async selectTimeField(identifier: string) {
+      await comboBox.set('mlTimeFieldNameSelect > comboBoxInput', identifier);
+      await this.assertTimeFieldSelection(identifier);
+    },
+
     async assertCategorizationFieldInputExists() {
       await testSubjects.existOrFail('mlCategorizationFieldNameSelect > comboBoxInput');
     },
