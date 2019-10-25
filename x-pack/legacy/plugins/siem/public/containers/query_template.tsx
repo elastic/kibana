@@ -17,7 +17,6 @@ export interface QueryTemplateProps {
   skip?: boolean;
   sourceId: string;
   startDate?: number;
-  timezone?: string;
 }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type FetchMoreOptionsArgs<TData, TVariables> = FetchMoreQueryOptions<any, any> &
