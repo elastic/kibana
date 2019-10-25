@@ -9,12 +9,11 @@ import { indexBy } from 'lodash';
 
 const watchID = 'watchID';
 const watchName = 'testWatch';
+// const indexToWatchName = '';
 const updatedName = 'updatedName';
 export default function ({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const log = getService('log');
-  //TODO: Add test data to be used for threshold watch.
-  // const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['security', 'common', 'header', 'settings', 'watcher']);
 
   describe('threshold watch', function () {
@@ -24,7 +23,6 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('create and save a new threshold watch', async () => {
-      //TODO: Continue modifying this method for the threshold alert.
       // await PageObjects.watcher.createThresholdAlert(watchName, index, timeField, timeUnit);
       const watch = await PageObjects.watcher.getWatch(watchID);
       expect(watch.id).to.be(watchID);
