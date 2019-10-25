@@ -55,6 +55,7 @@ const services = {
   chrome: npStart.core.chrome,
   docLinks: npStart.core.docLinks,
   embeddable: npStart.plugins.embeddable,
+  getBasePath: npStart.core.http.basePath.get,
   savedObjectsClient: npStart.core.savedObjects.client,
   toastNotifications: npStart.core.notifications.toasts,
   uiSettings: npStart.core.uiSettings,

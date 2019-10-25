@@ -41,7 +41,6 @@ import { getServices, getVisualizeLoader } from '../kibana_services';
 const {
   addBasePath,
   capabilities,
-  chrome,
   embeddable,
   getInjector,
   uiSettings,

@@ -60,7 +60,7 @@ export function VisualizeListingController($injector, createNewVis) {
 
   this.editItem = ({ editUrl }) => {
     // for visualizations the edit and view URLs are the same
-    window.location = addBasePath(editUrl);
+    window.location.href = addBasePath(editUrl);
   };
 
   this.getViewUrl = ({ editUrl }) => {

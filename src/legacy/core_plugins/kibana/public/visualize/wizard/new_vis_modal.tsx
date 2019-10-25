@@ -124,7 +124,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
     this.trackUiMetric(METRIC_TYPE.CLICK, visType.name);
 
     if ('aliasUrl' in visType) {
-      window.location = addBasePath(visType.aliasUrl);
+      window.location.href = addBasePath(visType.aliasUrl);
 
       return;
     }
