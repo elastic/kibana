@@ -260,7 +260,7 @@ image:management/snapshot-restore/images/create-policy-example.png["Create polic
 
 . Review your input, and then click *Create policy*.
 +
-Your new policy is listed on the *Policies* tab. and you see a summary of its details.
+Your new policy is listed in the *Policies* view, and you see a summary of its details.
 
 [[restore-snapshot-example]]
 ==== Restore a snapshot
