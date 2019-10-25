@@ -36,6 +36,7 @@ export interface Props {
   isCollapsible: boolean;
   isColumnActive: boolean;
   isCollapsed: boolean;
+  isFormatted: boolean;
   onToggleCollapse: () => void;
   onFilter?: DocViewFilterFn;
   onToggleColumn?: () => void;
@@ -51,6 +52,7 @@ export function DocViewTableRow({
   isCollapsible,
   isCollapsed,
   isColumnActive,
+  isFormatted,
   onFilter,
   onToggleCollapse,
   onToggleColumn,
@@ -85,7 +87,7 @@ export function DocViewTableRow({
         </td>
       )}
       <td className="kbnDocViewer__field">
-        <FieldName field={fieldMapping} fieldName={field}></FieldName>
+        <FieldName field={fieldMapping} fieldName={field} />
       </td>
       <td>
         {isCollapsible && (
@@ -93,11 +95,17 @@ export function DocViewTableRow({
         )}
         {displayUnderscoreWarning && <DocViewTableRowIconUnderscore />}
         {displayNoMappingWarning && <DocViewTableRowIconNoMapping />}
-        <div
-          className={valueClassName}
-          data-test-subj={`tableDocViewRow-${field}-value`}
-          dangerouslySetInnerHTML={{ __html: value as string }}
-        />
+        {isFormatted ? (
+          <div
+            className={valueClassName}
+            data-test-subj={`tableDocViewRow-${field}-value`}
+            dangerouslySetInnerHTML={{ __html: value as string }}
+          />
+        ) : (
+          <div className={valueClassName} data-test-subj={`tableDocViewRow-${field}-value`}>
+            {value}
+          </div>
+        )}
       </td>
     </tr>
   );
