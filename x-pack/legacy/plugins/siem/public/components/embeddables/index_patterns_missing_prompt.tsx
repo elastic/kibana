@@ -42,7 +42,7 @@ export const IndexPatternsMissingPrompt = React.memo(() => (
         <p>
           <FormattedMessage
             defaultMessage="You can also configure them manually in Kibana."
-            id="xpack.siem.components.embeddables.indexPatternsMissingPrompt.errorDescription"
+            id="xpack.siem.components.embeddables.indexPatternsMissingPrompt.errorDescription2"
           />
         </p>
       </>
