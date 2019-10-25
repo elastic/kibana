@@ -46,7 +46,7 @@ const steps = [
           />
         </p>
         <pre>
-          <code>xpack.code.codeNodeUrl: 'http://$YourCodeNodeAddress'</code>
+          <code>xpack.code.codeNodeUrl: &apos;http://$YourCodeNodeAddress&apos;</code>
         </pre>
         <p>
           <FormattedMessage

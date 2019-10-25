@@ -18,11 +18,11 @@ export const EmptyPlaceholder = (props: any) => {
         className="eui-textTruncate"
         style={{ fontSize: '24px', color: '#98A2B3' }}
       >
-        "
+        &quot;
         <span className="eui-textTruncate eui-displayInlineBlock" style={{ maxWidth: '90%' }}>
           {props.query}
         </span>
-        "
+        &quot;
       </EuiText>
       <EuiSpacer size="xl" />
       <EuiText textAlign="center" style={{ fontSize: '28px', color: '#1A1A1A' }}>
