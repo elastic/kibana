@@ -122,7 +122,6 @@
     "base64url": "^3.0.1",
     "chalk": "^2.4.2",
     "chance": "1.0.18",
-    "checksum": "0.1.1",
     "cheerio": "0.22.0",
     "commander": "3.0.0",
     "copy-webpack-plugin": "^5.0.4",
