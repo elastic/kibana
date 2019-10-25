@@ -28,9 +28,8 @@ const REL_NOREFERRER = 'noreferrer';
 // skipping images for now
 const WrappedEuiImage = ({alt, src, title}: any) => {
     const { toImage } = useLinks();
-    const url = toImage('/package/iptables-1.0.4/img/kibana-iptables-ubiquiti.png');
-    //return <EuiImage url={'/package/iptables-1.0.4/img/kibana-iptables-ubiquiti.png'} alt={alt} size="fullWidth" />
-    return <EuiImage url={'https://source.unsplash.com/400x300/?Nature'} alt={alt} size="original" caption={title} hasShadow/>
+    const url = toImage(src);
+    return <EuiImage url={url} alt={alt} size="original" caption={title} />
 }
 */
 

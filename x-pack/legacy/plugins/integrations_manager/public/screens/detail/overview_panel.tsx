@@ -13,9 +13,7 @@ export function OverviewPanel(props: PackageInfo) {
   const { screenshots, readme } = props;
   return (
     <Fragment>
-      <EuiText>
-        {readme && <Readme readmePath={readme} />}
-      </EuiText>
+      <EuiText>{readme && <Readme readmePath={readme} />}</EuiText>
       <EuiSpacer size="xl" />
       {screenshots && <Screenshots images={screenshots} />}
     </Fragment>
