@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
-import { loadingCount } from 'ui/chrome';
+import { getStartPlugins } from '../legacy';
 
 let isActive = false;
 
@@ -17,13 +16,13 @@ export interface LoadingIndicatorInterface {
 export const loadingIndicator = {
   show: () => {
     if (!isActive) {
-      loadingCount.increment();
+      getStartPlugins().__LEGACY.loadingCount.increment();
       isActive = true;
     }
   },
   hide: () => {
     if (isActive) {
-      loadingCount.decrement();
+      getStartPlugins().__LEGACY.loadingCount.decrement();
       isActive = false;
     }
   },

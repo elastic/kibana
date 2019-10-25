@@ -22,7 +22,7 @@ export function canvas(kibana) {
         description: 'Data driven workpads',
         icon: 'plugins/canvas/icon.svg',
         euiIconType: 'canvasApp',
-        main: 'plugins/canvas/app',
+        main: 'plugins/canvas/legacy_start',
       },
       interpreter: [
         'plugins/canvas/browser_functions',

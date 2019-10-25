@@ -5,16 +5,15 @@
  */
 
 import { get } from 'lodash';
-import chrome from 'ui/chrome';
-import { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
 import { getWindow } from '../../lib/get_window';
 import { CANVAS_APP } from '../../../common/lib/constants';
+import { getCoreStart, getStartPlugins } from '../../legacy';
 
 export function trackRouteChange() {
-  const basePath = chrome.getBasePath();
+  const basePath = getCoreStart().http.basePath.get();
   // storage.set(LOCALSTORAGE_LASTPAGE, pathname);
-  chrome.trackSubUrlForApp(
+  getStartPlugins().__LEGACY.trackSubUrlForApp(
     CANVAS_APP,
-    absoluteToParsedUrl(get(getWindow(), 'location.href'), basePath)
+    getStartPlugins().__LEGACY.absoluteToParsedUrl(get(getWindow(), 'location.href'), basePath)
   );
 }

@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './state_management'; // Requires 6.2.0+
-import './location_provider';
+export * from './state_management'; // Requires 6.2.0+
+export * from './location_provider';

@@ -5,7 +5,7 @@
  */
 
 import { handleActions } from 'redux-actions';
-import { npStart } from 'ui/new_platform';
+import { getCoreStart } from '../../legacy';
 import { getDefaultWorkpad } from '../defaults';
 import {
   setWorkpad,
@@ -22,7 +22,7 @@ import { APP_ROUTE_WORKPAD } from '../../../common/lib/constants';
 export const workpadReducer = handleActions(
   {
     [setWorkpad]: (workpadState, { payload }) => {
-      npStart.core.chrome.recentlyAccessed.add(
+      getCoreStart().chrome.recentlyAccessed.add(
         `${APP_ROUTE_WORKPAD}/${payload.id}`,
         payload.name,
         payload.id
@@ -39,7 +39,7 @@ export const workpadReducer = handleActions(
     },
 
     [setName]: (workpadState, { payload }) => {
-      npStart.core.chrome.recentlyAccessed.add(
+      getCoreStart().chrome.recentlyAccessed.add(
         `${APP_ROUTE_WORKPAD}/${workpadState.id}`,
         payload,
         workpadState.id

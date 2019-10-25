@@ -4,15 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import 'ui/autoload/all';
-import './angular/config';
-import './angular/services';
-import React from 'react';
-import ReactDOM from 'react-dom';
-import chrome from 'ui/chrome';
-import { CanvasRootController } from './angular/controllers';
-
+// TODO: These are legacy imports.  We should work to have all of these come from New Platform
 // Import the uiExports that the application uses
+// These will go away as these plugins are converted to NP
+import 'ui/autoload/all';
 import 'uiExports/visTypes';
 import 'uiExports/visResponseHandlers';
 import 'uiExports/visRequestHandlers';
@@ -24,16 +19,13 @@ import 'uiExports/embeddableFactories';
 import 'uiExports/interpreter';
 
 // load application code
-import './lib/load_expression_types';
-import './lib/load_transitions';
 import 'uiExports/canvas';
 
-import { HelpMenu } from './components/help_menu/help_menu';
+import { PluginInitializerContext } from '../../../../../src/core/public';
+import { plugin } from './';
+import { getCoreStart, getStartPlugins, getSetupPlugins, getCoreSetup } from './legacy';
+const pluginInstance = plugin({} as PluginInitializerContext);
 
-// load the application
-chrome.setRootController('canvas', CanvasRootController);
-
-// add Canvas docs to help menu in global nav
-chrome.helpExtension.set(domNode => {
-  ReactDOM.render(<HelpMenu />, domNode);
-});
+// Setup and Startup the plugin
+export const setup = pluginInstance.setup(getCoreSetup(), getSetupPlugins());
+export const start = pluginInstance.start(getCoreStart(), getStartPlugins());

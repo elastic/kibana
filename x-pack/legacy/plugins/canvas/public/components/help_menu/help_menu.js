@@ -6,7 +6,7 @@
 
 import React, { Fragment, PureComponent } from 'react';
 import { EuiButton, EuiHorizontalRule, EuiText, EuiSpacer, EuiPortal } from '@elastic/eui';
-import { documentationLinks } from '../../lib/documentation_links';
+import { getDocumentationLinks } from '../../lib/documentation_links';
 import { KeyboardShortcutsDoc } from '../keyboard_shortcuts_doc';
 import { ComponentStrings } from '../../../i18n';
 
@@ -32,7 +32,7 @@ export class HelpMenu extends PureComponent {
           <p>{strings.getHelpMenuDescription()}</p>
         </EuiText>
         <EuiSpacer />
-        <EuiButton fill iconType="popout" href={documentationLinks.canvas} target="_blank">
+        <EuiButton fill iconType="popout" href={getDocumentationLinks().canvas} target="_blank">
           {strings.getDocumentationLinkLabel()}
         </EuiButton>
         <EuiSpacer />
