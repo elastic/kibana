@@ -103,6 +103,13 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
             },
             "chrome": Object {
               "addApplicationClass": [MockFunction],
+              "docTitle": Object {
+                "__legacy": Object {
+                  "setBaseTitle": [MockFunction],
+                },
+                "change": [MockFunction],
+                "reset": [MockFunction],
+              },
               "getApplicationClasses$": [MockFunction],
               "getBadge$": [MockFunction],
               "getBrand$": [MockFunction],
@@ -659,6 +666,13 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
                     },
                     "chrome": Object {
                       "addApplicationClass": [MockFunction],
+                      "docTitle": Object {
+                        "__legacy": Object {
+                          "setBaseTitle": [MockFunction],
+                        },
+                        "change": [MockFunction],
+                        "reset": [MockFunction],
+                      },
                       "getApplicationClasses$": [MockFunction],
                       "getBadge$": [MockFunction],
                       "getBrand$": [MockFunction],
@@ -1203,6 +1217,13 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
             },
             "chrome": Object {
               "addApplicationClass": [MockFunction],
+              "docTitle": Object {
+                "__legacy": Object {
+                  "setBaseTitle": [MockFunction],
+                },
+                "change": [MockFunction],
+                "reset": [MockFunction],
+              },
               "getApplicationClasses$": [MockFunction],
               "getBadge$": [MockFunction],
               "getBrand$": [MockFunction],
@@ -1756,6 +1777,13 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
                     },
                     "chrome": Object {
                       "addApplicationClass": [MockFunction],
+                      "docTitle": Object {
+                        "__legacy": Object {
+                          "setBaseTitle": [MockFunction],
+                        },
+                        "change": [MockFunction],
+                        "reset": [MockFunction],
+                      },
                       "getApplicationClasses$": [MockFunction],
                       "getBadge$": [MockFunction],
                       "getBrand$": [MockFunction],
@@ -2300,6 +2328,13 @@ exports[`QueryBarInput Should render the given query 1`] = `
             },
             "chrome": Object {
               "addApplicationClass": [MockFunction],
+              "docTitle": Object {
+                "__legacy": Object {
+                  "setBaseTitle": [MockFunction],
+                },
+                "change": [MockFunction],
+                "reset": [MockFunction],
+              },
               "getApplicationClasses$": [MockFunction],
               "getBadge$": [MockFunction],
               "getBrand$": [MockFunction],
@@ -2853,6 +2888,13 @@ exports[`QueryBarInput Should render the given query 1`] = `
                     },
                     "chrome": Object {
                       "addApplicationClass": [MockFunction],
+                      "docTitle": Object {
+                        "__legacy": Object {
+                          "setBaseTitle": [MockFunction],
+                        },
+                        "change": [MockFunction],
+                        "reset": [MockFunction],
+                      },
                       "getApplicationClasses$": [MockFunction],
                       "getBadge$": [MockFunction],
                       "getBrand$": [MockFunction],

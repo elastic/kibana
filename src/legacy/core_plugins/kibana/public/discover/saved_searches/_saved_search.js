@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import 'ui/notify';
-import { uiModules } from 'ui/modules';
 import { createLegacyClass } from 'ui/utils/legacy_class';
-import { SavedObjectProvider } from 'ui/saved_objects/saved_object';
+import { getServices } from '../kibana_services';
+
+const { uiModules, SavedObjectProvider } = getServices();
 
 const module = uiModules.get('discover/saved_searches', []);
 
@@ -40,7 +40,7 @@ module.factory('SavedSearch', function (Private) {
         columns: [],
         hits: 0,
         sort: [],
-        version: 1
+        version: 1,
       },
     });
 
@@ -55,7 +55,7 @@ module.factory('SavedSearch', function (Private) {
     hits: 'integer',
     columns: 'keyword',
     sort: 'keyword',
-    version: 'integer'
+    version: 'integer',
   };
 
   // Order these fields to the top, the rest are alphabetical

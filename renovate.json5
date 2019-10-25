@@ -402,14 +402,6 @@
         ],
       },
       {
-        groupSlug: 'humps',
-        groupName: 'humps related packages',
-        packageNames: [
-          'humps',
-          '@types/humps',
-        ],
-      },
-      {
         groupSlug: 'jquery',
         groupName: 'jquery related packages',
         packageNames: [

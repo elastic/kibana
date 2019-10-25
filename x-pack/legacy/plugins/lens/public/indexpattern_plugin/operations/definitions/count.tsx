@@ -9,7 +9,7 @@ import { OperationDefinition } from '.';
 import { ParameterlessIndexPatternColumn, BaseIndexPatternColumn } from './column_types';
 
 const countLabel = i18n.translate('xpack.lens.indexPattern.countOf', {
-  defaultMessage: 'Count of documents',
+  defaultMessage: 'Count of records',
 });
 
 export type CountIndexPatternColumn = ParameterlessIndexPatternColumn<

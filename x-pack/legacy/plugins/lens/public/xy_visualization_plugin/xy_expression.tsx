@@ -98,9 +98,9 @@ export const getXyChartRenderer = (dependencies: {
   timeZone: string;
 }): IInterpreterRenderFunction<XYChartProps> => ({
   name: 'lens_xy_chart_renderer',
-  displayName: 'XY Chart',
+  displayName: 'XY chart',
   help: i18n.translate('xpack.lens.xyChart.renderer.help', {
-    defaultMessage: 'X/Y Chart Renderer',
+    defaultMessage: 'X/Y chart renderer',
   }),
   validate: () => {},
   reuseDomNode: true,
@@ -238,7 +238,7 @@ export function XYChart({ data, args, formatFactory, timeZone }: XYChartRenderPr
           const rows = data.tables[layerId].rows.map(row => {
             const newRow: typeof row = {};
 
-            // Remap data to { 'Count of documents': 5 }
+            // Remap data to { 'Count of records': 5 }
             Object.keys(row).forEach(key => {
               if (columnToLabelMap[key]) {
                 newRow[columnToLabelMap[key]] = row[key];
