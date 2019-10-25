@@ -4,24 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginInitializerContext } from 'src/core/server';
-import { TypeOf } from '@kbn/config-schema';
-import { schema } from './schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 
-/**
- * Container class for server licensing plugin configuration.
- */
-export class LicensingConfig {
-  public isEnabled: boolean;
-  public clusterSource: string;
-  public pollingFrequency: number;
+const SECOND = 1000;
+export const config = {
+  schema: schema.object({
+    pollingFrequency: schema.number({ defaultValue: 30 * SECOND }),
+  }),
+};
 
-  /**
-   * @internal
-   */
-  constructor(rawConfig: TypeOf<typeof schema>, env: PluginInitializerContext['env']) {
-    this.isEnabled = rawConfig.isEnabled;
-    this.clusterSource = rawConfig.clusterSource;
-    this.pollingFrequency = rawConfig.pollingFrequency;
-  }
-}
+export type LicenseConfigType = TypeOf<typeof config.schema>;
