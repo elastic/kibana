@@ -17,7 +17,7 @@ import {
   EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import styled, { injectGlobal } from 'styled-components';
 
 import { BrowserFields } from '../../containers/source';
@@ -101,7 +101,7 @@ export const StatefulEditDataProvider = React.memo<Props>(
     const [updatedValue, setUpdatedValue] = useState<string | number>(value);
 
     /** Focuses the Value input if it is visible, falling back to the Save button if it's not */
-    function focusInput() {
+    const focusInput = () => {
       const elements = document.getElementsByClassName(VALUE_INPUT_CLASS_NAME);
 
       if (elements.length > 0) {
@@ -113,25 +113,25 @@ export const StatefulEditDataProvider = React.memo<Props>(
           (saveElements[0] as HTMLElement).focus();
         }
       }
-    }
+    };
 
-    function onFieldSelected(selectedField: EuiComboBoxOptionProps[]) {
+    const onFieldSelected = useCallback((selectedField: EuiComboBoxOptionProps[]) => {
       setUpdatedField(selectedField);
 
       focusInput();
-    }
+    }, []);
 
-    function onOperatorSelected(operatorSelected: EuiComboBoxOptionProps[]) {
+    const onOperatorSelected = useCallback((operatorSelected: EuiComboBoxOptionProps[]) => {
       setUpdatedOperator(operatorSelected);
 
       focusInput();
-    }
+    }, []);
 
-    function onValueChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const onValueChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
       setUpdatedValue(e.target.value);
-    }
+    }, []);
 
-    function disableScrolling() {
+    const disableScrolling = () => {
       const x =
         window.pageXOffset !== undefined
           ? window.pageXOffset
@@ -143,11 +143,11 @@ export const StatefulEditDataProvider = React.memo<Props>(
           : (document.documentElement || document.body.parentNode || document.body).scrollTop;
 
       window.onscroll = () => window.scrollTo(x, y);
-    }
+    };
 
-    function enableScrolling() {
+    const enableScrolling = () => {
       window.onscroll = () => noop;
-    }
+    };
 
     useEffect(() => {
       disableScrolling();

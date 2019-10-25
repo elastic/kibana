@@ -357,14 +357,6 @@
         ],
       },
       {
-        groupSlug: 'execa',
-        groupName: 'execa related packages',
-        packageNames: [
-          'execa',
-          '@types/execa',
-        ],
-      },
-      {
         groupSlug: 'fetch-mock',
         groupName: 'fetch-mock related packages',
         packageNames: [
@@ -538,14 +530,6 @@
         packageNames: [
           'request',
           '@types/request',
-        ],
-      },
-      {
-        groupSlug: 'rimraf',
-        groupName: 'rimraf related packages',
-        packageNames: [
-          'rimraf',
-          '@types/rimraf',
         ],
       },
       {

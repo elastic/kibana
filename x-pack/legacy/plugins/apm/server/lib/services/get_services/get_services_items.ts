@@ -28,6 +28,7 @@ export async function getServicesItems(setup: Setup) {
       aggs: {
         services: {
           terms: {
+            ...projection.body.aggs.services.terms,
             size: 500
           },
           aggs: {
@@ -69,12 +70,14 @@ export async function getServicesItems(setup: Setup) {
 
     const environmentsBuckets = bucket.environments.buckets;
     const environments = environmentsBuckets.map(
-      environmentBucket => environmentBucket.key
+      environmentBucket => environmentBucket.key as string
     );
 
     return {
-      serviceName: bucket.key,
-      agentName: idx(bucket, _ => _.agents.buckets[0].key),
+      serviceName: bucket.key as string,
+      agentName: idx(bucket, _ => _.agents.buckets[0].key) as
+        | string
+        | undefined,
       transactionsPerMinute,
       errorsPerMinute,
       avgResponseTime: bucket.avg.value,

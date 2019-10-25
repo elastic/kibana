@@ -5,7 +5,7 @@
  */
 
 import { defaultTo, noop } from 'lodash/fp';
-import * as React from 'react';
+import React, { useCallback } from 'react';
 import { DragDropContext, DropResult, DragStart } from 'react-beautiful-dnd';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
@@ -59,22 +59,25 @@ const onDragEndHandler = ({
  */
 export const DragDropContextWrapperComponent = React.memo<Props>(
   ({ browserFields, children, dataProviders, dispatch }) => {
-    function onDragEnd(result: DropResult) {
-      enableScrolling();
+    const onDragEnd = useCallback(
+      (result: DropResult) => {
+        enableScrolling();
 
-      if (dataProviders != null) {
-        onDragEndHandler({
-          browserFields,
-          result,
-          dataProviders,
-          dispatch,
-        });
-      }
+        if (dataProviders != null) {
+          onDragEndHandler({
+            browserFields,
+            result,
+            dataProviders,
+            dispatch,
+          });
+        }
 
-      if (!draggableIsField(result)) {
-        document.body.classList.remove(IS_DRAGGING_CLASS_NAME);
-      }
-    }
+        if (!draggableIsField(result)) {
+          document.body.classList.remove(IS_DRAGGING_CLASS_NAME);
+        }
+      },
+      [browserFields, dataProviders]
+    );
     return (
       <DragDropContext onDragEnd={onDragEnd} onDragStart={onDragStart}>
         {children}
