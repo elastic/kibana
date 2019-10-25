@@ -38,7 +38,15 @@ import { TypesStart } from '../../../../visualizations/public/np_ready/public/ty
 
 import { getServices, getVisualizeLoader } from '../kibana_services';
 
-const { addBasePath, capabilities, chrome, embeddable, uiSettings, visualizations } = getServices();
+const {
+  addBasePath,
+  capabilities,
+  chrome,
+  embeddable,
+  getInjector,
+  uiSettings,
+  visualizations,
+} = getServices();
 
 interface VisualizationAttributes extends SavedObjectAttributes {
   visState: string;
@@ -100,7 +108,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
   }
 
   public isEditable() {
-    return capabilities.get().visualize.save as boolean;
+    return capabilities.visualize.save as boolean;
   }
 
   public getDisplayName() {
@@ -114,7 +122,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
     input: Partial<VisualizeInput> & { id: string },
     parent?: Container
   ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> {
-    const $injector = await chrome.dangerouslyGetActiveInjector();
+    const $injector = await getInjector();
     const config = $injector.get<Legacy.KibanaConfig>('config');
     const savedVisualizations = $injector.get<SavedVisualizations>('savedVisualizations');
 

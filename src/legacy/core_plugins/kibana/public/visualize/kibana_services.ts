@@ -19,9 +19,11 @@
 
 import 'angular-sanitize'; // used in visualization_editor.js
 import 'ui/collapsible_sidebar'; // used in default editor
+import 'ui/vis/editors/default/sidebar';
 
 import { npStart } from 'ui/new_platform';
 import angular from 'angular'; // just used in editor.js
+import chromeLegacy from 'ui/chrome';
 
 import uiRoutes from 'ui/routes';
 
@@ -61,6 +63,9 @@ const services = {
   docTitle,
   FeatureCatalogueRegistryProvider,
   FilterBarQueryFilterProvider,
+  getInjector: () => {
+    return chromeLegacy.dangerouslyGetActiveInjector();
+  },
   SavedObjectProvider,
   SavedObjectRegistryProvider,
   SavedObjectsClientProvider,
