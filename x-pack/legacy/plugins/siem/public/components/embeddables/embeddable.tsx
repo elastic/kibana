@@ -8,9 +8,7 @@ import { EuiPanel } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 
-const Panel = styled(EuiPanel).attrs({
-  paddingSize: 'none',
-})`
+const Panel = styled(EuiPanel)`
   overflow: hidden;
 `;
 Panel.displayName = 'Panel';
@@ -21,7 +19,7 @@ export interface EmbeddableProps {
 
 export const Embeddable = React.memo<EmbeddableProps>(({ children }) => (
   <section className="siemEmbeddable">
-    <Panel>{children}</Panel>
+    <Panel paddingSize="none">{children}</Panel>
   </section>
 ));
 Embeddable.displayName = 'Embeddable';
