@@ -68,8 +68,19 @@ export const getFieldMeta = (field: Field, isMultiField?: boolean): FieldMeta =>
   };
 };
 
-export const getFieldConfig = (param: ParameterName): FieldConfig =>
-  PARAMETERS_DEFINITION[param].fieldConfig || {};
+export const getFieldConfig = (param: ParameterName, prop?: string): FieldConfig => {
+  if (prop !== undefined) {
+    if (
+      !(PARAMETERS_DEFINITION[param] as any).props ||
+      !(PARAMETERS_DEFINITION[param] as any).props[prop]
+    ) {
+      throw new Error(`No field config found for prop "${prop}" on param "${param}" `);
+    }
+    return (PARAMETERS_DEFINITION[param] as any).props[prop].fieldConfig || {};
+  }
+
+  return (PARAMETERS_DEFINITION[param] as any).fieldConfig || {};
+};
 
 /**
  * Return a map of subType -> mainType

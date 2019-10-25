@@ -4,10 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiRange,
+  EuiDualRange,
+  EuiFormRow,
+} from '@elastic/eui';
 
 import { NormalizedField } from '../../../../types';
-import { UseField, Field } from '../../../../shared_imports';
+import { UseField, Field, FieldHook } from '../../../../shared_imports';
 import { getFieldConfig } from '../../../../lib';
 import { PARAMETERS_OPTIONS } from '../../../../constants';
 import { EditFieldSection, EditFieldFormRow, AdvancedSettingsWrapper } from '../edit_field';
@@ -17,6 +25,14 @@ interface Props {
 }
 
 export const TextType = React.memo(({ field }: Props) => {
+  const onFrequencyFilterChange = (minField: FieldHook, maxField: FieldHook) => ([
+    min,
+    max,
+  ]: any) => {
+    minField.setValue(min === '' ? '' : parseInt(min, 10));
+    maxField.setValue(max === '' ? '' : parseInt(max, 10));
+  };
+
   return (
     <>
       <EditFieldSection>
@@ -59,9 +75,36 @@ export const TextType = React.memo(({ field }: Props) => {
           title={<h3>Fielddata</h3>}
           description="This is description text."
           formFieldPath="fielddata"
-          direction="column"
         >
-          Field data frequency filter component here...
+          <EuiFormRow label="Range (Min/Max %):">
+            <UseField
+              path="fielddata_frequency_filter.min"
+              config={getFieldConfig('fielddata_frequency_filter', 'min')}
+            >
+              {minField => (
+                <UseField
+                  path="fielddata_frequency_filter.max"
+                  config={getFieldConfig('fielddata_frequency_filter', 'max')}
+                >
+                  {maxField => (
+                    <EuiDualRange
+                      min={0}
+                      max={100}
+                      value={[minField.value as number, maxField.value as number]}
+                      onChange={onFrequencyFilterChange(minField, maxField)}
+                      showInput
+                    />
+                  )}
+                </UseField>
+              )}
+            </UseField>
+          </EuiFormRow>
+
+          <UseField
+            path="fielddata_frequency_filter.min_segment_size"
+            config={getFieldConfig('fielddata_frequency_filter', 'min_segment_size')}
+            component={Field}
+          />
         </EditFieldFormRow>
       </EditFieldSection>
 
