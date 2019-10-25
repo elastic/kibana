@@ -56,6 +56,7 @@ export const EditJob: FC<EditJobProps> = ({ job, jobOverride, existingGroupIds, 
 
     setValidationResult({
       jobGroups: jobGroupsValidationResult,
+      formValid: jobGroupsValidationResult.length === 0,
     });
   };
 
@@ -118,12 +119,18 @@ export const EditJob: FC<EditJobProps> = ({ job, jobOverride, existingGroupIds, 
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty iconType="cross" onClick={() => onClose(null)} flush="left">
-              Close
+              <FormattedMessage
+                id="xpack.ml.newJob.recognize.cancelJobOverrideLabel"
+                defaultMessage="Close"
+              />
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={() => onSave()} fill>
-              Save
+            <EuiButton onClick={() => onSave()} fill disabled={!validationResult.formValid}>
+              <FormattedMessage
+                id="xpack.ml.newJob.recognize.saveJobOverrideLabel"
+                defaultMessage="Save"
+              />
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
