@@ -74,6 +74,7 @@ import { addHelpMenuToAppChrome } from '../components/help_menu/help_menu_util';
 import { extractTimeFilter, changeTimeFilter } from '../../../../data/public';
 import { start as data } from '../../../../data/public/legacy';
 import { npStart } from 'ui/new_platform';
+import { ensureDefaultIndexPattern } from '../../../../../ui/public/legacy_compat/utils';
 
 const { savedQueryService } = data.search.services;
 
@@ -90,7 +91,6 @@ const app = uiModules.get('apps/discover', [
 
 uiRoutes
   .defaults(/^\/discover(\/|$)/, {
-    requireDefaultIndex: true,
     requireUICapability: 'discover.show',
     k7Breadcrumbs: ($route, $injector) =>
       $injector.invoke(
@@ -118,50 +118,53 @@ uiRoutes
     template: indexTemplate,
     reloadOnSearch: false,
     resolve: {
-      ip: function (Promise, indexPatterns, config, Private) {
+      savedObjects: function (Promise, indexPatterns, config, Private, $rootScope, kbnUrl, redirectWhenMissing, savedSearches, $route) {
         const State = Private(StateProvider);
-        return indexPatterns.getCache().then((savedObjects)=> {
-          /**
-           *  In making the indexPattern modifiable it was placed in appState. Unfortunately,
-           *  the load order of AppState conflicts with the load order of many other things
-           *  so in order to get the name of the index we should use, and to switch to the
-           *  default if necessary, we parse the appState with a temporary State object and
-           *  then destroy it immediatly after we're done
-           *
-           *  @type {State}
-           */
-          const state = new State('_a', {});
+        const savedSearchId = $route.current.params.id;
 
-          const specified = !!state.index;
-          const exists = _.findIndex(savedObjects, o => o.id === state.index) > -1;
-          const id = exists ? state.index : config.get('defaultIndex');
-          state.destroy();
-
+        return ensureDefaultIndexPattern(npStart.core, data, $rootScope, kbnUrl).then(() => {
           return Promise.props({
-            list: savedObjects,
-            loaded: indexPatterns.get(id),
-            stateVal: state.index,
-            stateValFound: specified && exists
+            ip: indexPatterns.getCache().then((savedObjects) => {
+              /**
+               *  In making the indexPattern modifiable it was placed in appState. Unfortunately,
+               *  the load order of AppState conflicts with the load order of many other things
+               *  so in order to get the name of the index we should use, and to switch to the
+               *  default if necessary, we parse the appState with a temporary State object and
+               *  then destroy it immediatly after we're done
+               *
+               *  @type {State}
+               */
+              const state = new State('_a', {});
+
+              const specified = !!state.index;
+              const exists = _.findIndex(savedObjects, o => o.id === state.index) > -1;
+              const id = exists ? state.index : config.get('defaultIndex');
+              state.destroy();
+
+              return Promise.props({
+                list: savedObjects,
+                loaded: indexPatterns.get(id),
+                stateVal: state.index,
+                stateValFound: specified && exists
+              });
+            }),
+            savedSearch: savedSearches.get(savedSearchId)
+              .then((savedSearch) => {
+                if (savedSearchId) {
+                  npStart.core.chrome.recentlyAccessed.add(
+                    savedSearch.getFullPath(),
+                    savedSearch.title,
+                    savedSearchId);
+                }
+                return savedSearch;
+              })
+              .catch(redirectWhenMissing({
+                'search': '/discover',
+                'index-pattern': '/management/kibana/objects/savedSearches/' + $route.current.params.id
+              }))
           });
         });
       },
-      savedSearch: function (redirectWhenMissing, savedSearches, $route) {
-        const savedSearchId = $route.current.params.id;
-        return savedSearches.get(savedSearchId)
-          .then((savedSearch) => {
-            if (savedSearchId) {
-              npStart.core.chrome.recentlyAccessed.add(
-                savedSearch.getFullPath(),
-                savedSearch.title,
-                savedSearchId);
-            }
-            return savedSearch;
-          })
-          .catch(redirectWhenMissing({
-            'search': '/discover',
-            'index-pattern': '/management/kibana/objects/savedSearches/' + $route.current.params.id
-          }));
-      }
     }
   });
 
@@ -228,7 +231,7 @@ function discoverController(
   };
 
   // the saved savedSearch
-  const savedSearch = $route.current.locals.savedSearch;
+  const savedSearch = $route.current.locals.savedObjects.savedSearch;
 
   let abortController;
   $scope.$on('$destroy', () => {
@@ -544,7 +547,7 @@ function discoverController(
     sampleSize: config.get('discover:sampleSize'),
     timefield: isDefaultTypeIndexPattern($scope.indexPattern) && $scope.indexPattern.timeFieldName,
     savedSearch: savedSearch,
-    indexPatternList: $route.current.locals.ip.list,
+    indexPatternList: $route.current.locals.savedObjects.ip.list,
   };
 
   const shouldSearchOnPageLoad = () => {
@@ -1059,7 +1062,7 @@ function discoverController(
       loaded: loadedIndexPattern,
       stateVal,
       stateValFound,
-    } = $route.current.locals.ip;
+    } = $route.current.locals.savedObjects.ip;
 
     const ownIndexPattern = $scope.searchSource.getOwnField('index');
 
@@ -1107,12 +1110,12 @@ function discoverController(
   // Block the UI from loading if the user has loaded a rollup index pattern but it isn't
   // supported.
   $scope.isUnsupportedIndexPattern = (
-    !isDefaultTypeIndexPattern($route.current.locals.ip.loaded)
-    && !hasSearchStategyForIndexPattern($route.current.locals.ip.loaded)
+    !isDefaultTypeIndexPattern($route.current.locals.savedObjects.ip.loaded)
+    && !hasSearchStategyForIndexPattern($route.current.locals.savedObjects.ip.loaded)
   );
 
   if ($scope.isUnsupportedIndexPattern) {
-    $scope.unsupportedIndexPatternType = $route.current.locals.ip.loaded.type;
+    $scope.unsupportedIndexPatternType = $route.current.locals.savedObjects.ip.loaded.type;
     return;
   }
 

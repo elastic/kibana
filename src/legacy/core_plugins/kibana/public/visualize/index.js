@@ -30,10 +30,12 @@ import { getLandingBreadcrumbs, getWizardStep1Breadcrumbs } from './breadcrumbs'
 
 // load directives
 import '../../../data/public';
+import { ensureDefaultIndexPattern } from '../../../../ui/public/legacy_compat/utils';
+import { npStart } from '../../../../ui/public/new_platform';
+import { start as data } from '../../../data/public/legacy';
 
 uiRoutes
   .defaults(/visualize/, {
-    requireDefaultIndex: true,
     requireUICapability: 'visualize.show',
     badge: uiCapabilities => {
       if (uiCapabilities.visualize.save) {
@@ -58,6 +60,7 @@ uiRoutes
     controllerAs: 'listingController',
     resolve: {
       createNewVis: () => false,
+      hasDefaultIndex: ($rootScope, kbnUrl) => ensureDefaultIndexPattern(npStart.core, data, $rootScope, kbnUrl)
     },
   })
   .when(VisualizeConstants.WIZARD_STEP_1_PAGE_PATH, {
@@ -67,6 +70,7 @@ uiRoutes
     controllerAs: 'listingController',
     resolve: {
       createNewVis: () => true,
+      hasDefaultIndex: ($rootScope, kbnUrl) => ensureDefaultIndexPattern(npStart.core, data, $rootScope, kbnUrl)
     },
   });
 

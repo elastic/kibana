@@ -26,15 +26,13 @@ import {
   IModule,
   IRootScopeService,
 } from 'angular';
-import { EuiCallOut } from '@elastic/eui';
-import ReactDOM from 'react-dom';
 import $ from 'jquery';
 import _, { cloneDeep, forOwn, get, set } from 'lodash';
 import React, { Fragment } from 'react';
 import * as Rx from 'rxjs';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { CoreStart, LegacyCoreStart } from 'kibana/public';
 
 import { fatalError } from 'ui/notify';
@@ -45,15 +43,10 @@ import { modifyUrl } from 'ui/url';
 import { UrlOverflowService } from '../error_url_overflow';
 // @ts-ignore
 import { isSystemApiRequest } from '../system_api';
-import { DataStart } from '../../../core_plugins/data/public';
 
 const URL_LIMIT_WARN_WITHIN = 1000;
 
-export const configureAppAngularModule = (
-  angularModule: IModule,
-  newPlatform: LegacyCoreStart,
-  dataStart: DataStart
-) => {
+export const configureAppAngularModule = (angularModule: IModule, newPlatform: LegacyCoreStart) => {
   const legacyMetadata = newPlatform.injectedMetadata.getLegacyMetadata();
 
   forOwn(newPlatform.injectedMetadata.getInjectedVars(), (val, name) => {
@@ -78,8 +71,7 @@ export const configureAppAngularModule = (
     .run($setupBadgeAutoClear(newPlatform))
     .run($setupHelpExtensionAutoClear(newPlatform))
     .run($setupUrlOverflowHandling(newPlatform))
-    .run($setupUICapabilityRedirect(newPlatform))
-    .run($setupDefaultIndexRedirect(newPlatform, dataStart));
+    .run($setupUICapabilityRedirect(newPlatform));
 };
 
 const getEsUrl = (newPlatform: CoreStart) => {
@@ -198,91 +190,6 @@ const $setupUICapabilityRedirect = (newPlatform: CoreStart) => (
         $injector.get('kbnUrl').change('/home');
         event.preventDefault();
       }
-    }
-  );
-};
-
-let bannerId: string;
-let timeoutId: NodeJS.Timeout | undefined;
-
-/**
- * integrates with angular to automatically redirect to management if no default
- * index pattern is configured when a route flag is set.
- */
-const $setupDefaultIndexRedirect = (newPlatform: CoreStart, data: DataStart) => (
-  $rootScope: IRootScopeService,
-  $injector: any
-) => {
-  const isKibanaAppRoute = window.location.pathname.endsWith('/app/kibana');
-  // this feature only works within kibana app for now after everything is
-  // switched to the application service, this can be changed to handle all
-  // apps.
-  if (!isKibanaAppRoute) {
-    return;
-  }
-
-  $rootScope.$on(
-    '$routeChangeStart',
-    (event, { $$route: route }: { $$route?: RouteConfiguration } = {}) => {
-      if (!route || !route.requireDefaultIndex) {
-        return;
-      }
-
-      return data.indexPatterns.indexPatterns.getIds().then(function(patterns: string[]) {
-        let defaultId = newPlatform.uiSettings.get('defaultIndex');
-        let defined = !!defaultId;
-        const exists = _.contains(patterns, defaultId);
-
-        if (defined && !exists) {
-          newPlatform.uiSettings.remove('defaultIndex');
-          defaultId = defined = false;
-        }
-
-        if (!defined) {
-          // If there is any index pattern created, set the first as default
-          if (patterns.length >= 1) {
-            defaultId = patterns[0];
-            newPlatform.uiSettings.set('defaultIndex', defaultId);
-          } else {
-            const canManageIndexPatterns =
-              newPlatform.application.capabilities.management.kibana.index_patterns;
-            const redirectTarget = canManageIndexPatterns
-              ? '/management/kibana/index_pattern'
-              : '/home';
-
-            $injector.get('kbnUrl').change(redirectTarget);
-            $rootScope.$digest();
-            if (timeoutId) {
-              clearTimeout(timeoutId);
-            }
-
-            // Avoid being hostile to new users who don't have an index pattern setup yet
-            // give them a friendly info message instead of a terse error message
-            bannerId = newPlatform.overlays.banners.replace(bannerId, (element: HTMLElement) => {
-              ReactDOM.render(
-                <I18nProvider>
-                  <EuiCallOut
-                    color="warning"
-                    iconType="iInCircle"
-                    title={i18n.translate('kbn.management.indexPattern.bannerLabel', {
-                      defaultMessage:
-                        "In order to visualize and explore data in Kibana, you'll need to create an index pattern to retrieve data from Elasticsearch.",
-                    })}
-                  />
-                </I18nProvider>,
-                element
-              );
-              return () => ReactDOM.unmountComponentAtNode(element);
-            });
-
-            // hide the message after the user has had a chance to acknowledge it -- so it doesn't permanently stick around
-            timeoutId = setTimeout(() => {
-              newPlatform.overlays.banners.remove(bannerId);
-              timeoutId = undefined;
-            }, 15000);
-          }
-        }
-      });
     }
   );
 };

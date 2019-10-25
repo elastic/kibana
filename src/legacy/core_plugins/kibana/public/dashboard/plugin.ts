@@ -18,6 +18,7 @@
  */
 
 import {
+  App,
   CoreSetup,
   CoreStart,
   LegacyCoreStart,
@@ -66,9 +67,8 @@ export class DashboardPlugin implements Plugin {
       __LEGACY: { localApplicationService, getAngularDependencies, ...legacyServices },
     }: DashboardPluginSetupDependencies
   ) {
-    localApplicationService.forwardApp('dashboard', 'dashboards', { keepPrefix: true });
-    localApplicationService.register({
-      id: 'dashboards',
+    const app: App = {
+      id: '',
       title: 'Dashboards',
       mount: async ({ core: contextCore }, params) => {
         if (this.startDependencies === null) {
@@ -94,7 +94,9 @@ export class DashboardPlugin implements Plugin {
         const { renderApp } = await import('./render_app');
         return renderApp(params.element, params.appBasePath, deps);
       },
-    });
+    };
+    localApplicationService.register({ ...app, id: 'dashboard' });
+    localApplicationService.register({ ...app, id: 'dashboards' });
   }
 
   start(

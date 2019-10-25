@@ -58,6 +58,7 @@ import { start as data } from '../../../../data/public/legacy';
 import { start as visualizations } from '../../../../visualizations/public/np_ready/public/legacy';
 
 import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
+import { ensureDefaultIndexPattern } from '../../../../../ui/public/legacy_compat/utils';
 
 const { savedQueryService } = data.search.services;
 
@@ -66,7 +67,7 @@ uiRoutes
     template: editorTemplate,
     k7Breadcrumbs: getCreateBreadcrumbs,
     resolve: {
-      savedVis: function (savedVisualizations, redirectWhenMissing, $route) {
+      savedVis: function (savedVisualizations, redirectWhenMissing, $route, $rootScope, kbnUrl) {
         const visTypes = visualizations.types.all();
         const visType = _.find(visTypes, { name: $route.current.params.type });
         const shouldHaveIndex = visType.requiresSearch && visType.options.showIndexSelection;
@@ -79,7 +80,7 @@ uiRoutes
           );
         }
 
-        return savedVisualizations.get($route.current.params)
+        return ensureDefaultIndexPattern(npStart.core, data, $rootScope, kbnUrl).then(() => savedVisualizations.get($route.current.params))
           .then(savedVis => {
             if (savedVis.vis.type.setup) {
               return savedVis.vis.type.setup(savedVis)
@@ -97,28 +98,33 @@ uiRoutes
     template: editorTemplate,
     k7Breadcrumbs: getEditBreadcrumbs,
     resolve: {
-      savedVis: function (savedVisualizations, redirectWhenMissing, $route) {
-        return savedVisualizations.get($route.current.params.id)
-          .then((savedVis) => {
+      savedVis: function (savedVisualizations, redirectWhenMissing, $route, $rootScope, kbnUrl) {
+        return ensureDefaultIndexPattern(npStart.core, data, $rootScope, kbnUrl)
+          .then(() => savedVisualizations.get($route.current.params.id))
+          .then(savedVis => {
             npStart.core.chrome.recentlyAccessed.add(
               savedVis.getFullPath(),
               savedVis.title,
-              savedVis.id);
+              savedVis.id
+            );
             return savedVis;
           })
           .then(savedVis => {
             if (savedVis.vis.type.setup) {
-              return savedVis.vis.type.setup(savedVis)
-                .catch(() => savedVis);
+              return savedVis.vis.type.setup(savedVis).catch(() => savedVis);
             }
             return savedVis;
           })
-          .catch(redirectWhenMissing({
-            'visualization': '/visualize',
-            'search': '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
-            'index-pattern': '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
-            'index-pattern-field': '/management/kibana/objects/savedVisualizations/' + $route.current.params.id
-          }));
+          .catch(
+            redirectWhenMissing({
+              visualization: '/visualize',
+              search: '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
+              'index-pattern':
+                '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
+              'index-pattern-field':
+                '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
+            })
+          );
       }
     }
   });

@@ -89,7 +89,7 @@ export interface RenderDeps {
 export const renderApp = (element: HTMLElement, appBasePath: string, deps: RenderDeps) => {
   const dashboardAngularModule = createLocalAngularModule(deps.core);
   // global routing stuff
-  configureAppAngularModule(dashboardAngularModule, deps.core as LegacyCoreStart, deps.dataStart);
+  configureAppAngularModule(dashboardAngularModule, deps.core as LegacyCoreStart);
   // custom routing stuff
   initDashboardApp(dashboardAngularModule, deps);
   const $injector = mountDashboardApp(appBasePath, element);

@@ -32,7 +32,6 @@ export interface RouteConfiguration {
   template?: string;
   k7Breadcrumbs?: (...args: any[]) => ChromeBreadcrumb[];
   requireUICapability?: string;
-  requireDefaultIndex?: boolean;
   outerAngularWrapperRoute?: boolean;
 }
 
