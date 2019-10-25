@@ -108,3 +108,6 @@ export class SearchEmbeddableFactory extends EmbeddableFactory<
     return new ErrorEmbeddable('Saved searches can only be created from a saved object', input);
   }
 }
+
+const factory = new SearchEmbeddableFactory(getServices().uiActions.executeTriggerActions);
+getServices().embeddable.registerEmbeddableFactory(factory.type, factory);

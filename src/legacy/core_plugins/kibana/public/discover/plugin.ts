@@ -21,7 +21,6 @@ import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/p
 import { IUiActionsStart } from 'src/plugins/ui_actions/public';
 import { registerFeature } from './helpers/register_feature';
 import './kibana_services';
-import { SearchEmbeddableFactory } from './embeddable';
 import {
   Start as EmbeddableStart,
   Setup as EmbeddableSetup,
@@ -51,8 +50,10 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
   }
 
   start(core: CoreStart, plugins: DiscoverStartPlugins): DiscoverStart {
-    const factory = new SearchEmbeddableFactory(plugins.uiActions.executeTriggerActions);
-    plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
+    // TODO enable this when possible, seems it broke a functional test:
+    // dashboard mode Dashboard View Mode Dashboard viewer can paginate on a saved search
+    // const factory = new SearchEmbeddableFactory(plugins.uiActions.executeTriggerActions);
+    // plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
   }
 
   stop() {}

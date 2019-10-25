@@ -55,6 +55,8 @@ const services = {
   metadata: npStart.core.injectedMetadata.getLegacyMetadata(),
   toastNotifications: npStart.core.notifications.toasts,
   uiSettings: npStart.core.uiSettings,
+  uiActions: npStart.plugins.uiActions,
+  embeddable: npStart.plugins.embeddable,
   // legacy
   docTitle,
   docViewsRegistry,
