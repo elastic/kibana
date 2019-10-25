@@ -5,8 +5,9 @@
  */
 
 import React, { useContext } from 'react';
+import { get } from 'lodash';
 import { EuiHealth, EuiSpacer } from '@elastic/eui';
-import { CheckMonitor, Check } from '../../../../../common/graphql/types';
+import { Check } from '../../../../../common/graphql/types';
 import { UptimeSettingsContext } from '../../../../contexts';
 
 interface MonitorStatusListProps {
@@ -21,23 +22,25 @@ export const MonitorStatusList = ({ checks }: MonitorStatusListProps) => {
     colors: { success, danger },
   } = useContext(UptimeSettingsContext);
 
-  const upChecks: CheckMonitor[] = [];
-  const downChecks: CheckMonitor[] = [];
+  const upChecks: string[] = [];
+  const downChecks: string[] = [];
 
   checks.forEach((check: Check) => {
+    const location = get<string>(check, 'observer.geo.name', 'unnamed-location');
+
     if (check.monitor.status === 'up') {
-      upChecks.push(check.monitor);
+      upChecks.push(location);
     }
     if (check.monitor.status === 'down') {
-      downChecks.push(check.monitor);
+      downChecks.push(location);
     }
   });
-  const displayMonitorStatus = (checksList: CheckMonitor[], color: string, titleTxt: string) => {
+
+  const displayMonitorStatus = (checksList: string[], color: string, titleTxt: string) => {
     return (
       <>
         <EuiHealth color={color}>
-          {titleTxt} in{' '}
-          {checksList.map((check, index) => (index ? ', ' : '') + (check.ip || check.name))}
+          {titleTxt} in {checksList.map((location, index) => (index ? ', ' : '') + location)}
         </EuiHealth>
         <EuiSpacer size="s" />
       </>

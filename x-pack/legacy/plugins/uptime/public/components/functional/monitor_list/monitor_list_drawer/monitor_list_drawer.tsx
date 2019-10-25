@@ -61,15 +61,11 @@ export function MonitorListDrawerComponent({
   return (
     <ContainerDiv>
       <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={true}>
           <EuiLink href={monitorUrl} target="_blank">
             {monitorUrl}
             <EuiIcon size="s" type="popout" color="subbdued" />
           </EuiLink>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiIcon type={'visMapCoordinate'} />
-          <LocationLink location={location} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton size="s">Actions</EuiButton>
