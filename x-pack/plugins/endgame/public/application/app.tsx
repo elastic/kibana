@@ -9,7 +9,7 @@ import ReactDOM from 'react-dom';
 import { BrowserRouter, Route, withRouter, RouteComponentProps, Switch } from 'react-router-dom';
 import { EuiPage, EuiPageSideBar, EuiSideNav, EuiImage, EuiCallOut } from '@elastic/eui';
 import { EndgameAppContext } from '../common/app_context';
-import LogoUrl from '../static/images/logo.png';
+// import LogoUrl from '../static/images/logo.png';
 import { routePaths } from '../common/route_paths';
 import { Page } from '../components/page';
 
