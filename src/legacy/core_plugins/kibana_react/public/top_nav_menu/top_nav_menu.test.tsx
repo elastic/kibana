@@ -38,7 +38,7 @@ jest.mock('../../../../../../src/legacy/core_plugins/data/public/legacy', () => 
 
 jest.mock('../../../../core_plugins/data/public', () => {
   return {
-    SearchBar: () => <div className="searchBar"></div>,
+    SearchBar: () => <div className="searchBar" />,
     SearchBarProps: {},
   };
 });

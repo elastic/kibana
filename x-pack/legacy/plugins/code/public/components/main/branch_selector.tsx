@@ -45,7 +45,7 @@ export const BranchSelector = (props: Props) => {
         key={b}
         href={props.getHrefFromRevision(b)}
         data-test-subj={`codeBranchSelectOption-${b}Active`}
-      ></EuiListGroupItem>
+      />
     ) : (
       <EuiListGroupItem
         size="s"
@@ -55,7 +55,7 @@ export const BranchSelector = (props: Props) => {
         href={props.getHrefFromRevision(b)}
         iconType="empty"
         data-test-subj={`codeBranchSelectOption-${b}`}
-      ></EuiListGroupItem>
+      />
     );
   const tabs = [
     {
@@ -107,7 +107,7 @@ export const BranchSelector = (props: Props) => {
           data-test-subj="codeBranchSelector"
           valueOfSelected={props.revision}
           options={[{ value: props.revision, inputDisplay: props.revision }]}
-        ></EuiSuperSelect>
+        />
       }
       closePopover={() => togglePopoverOpen(false)}
     >

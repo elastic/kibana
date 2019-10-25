@@ -79,7 +79,7 @@ export class CodeSymbolTree extends React.PureComponent<Props, { activeSymbol?: 
           })}
           className="code-symbol-link codeFileTree__node--link"
           onClick={this.getClickHandler({ name, range })}
-        ></Link>
+        />
         <div className={isContainer ? 'codeSymbol' : 'codeSymbol codeSymbol--nested'}>
           {isContainer &&
             (forceOpen ? (

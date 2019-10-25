@@ -237,7 +237,7 @@ const AnnotationTooltip: React.FunctionComponent<{ details: string }> = ({ detai
 const renderAnnotationTooltip = (details?: string) => {
   // Note: Seems to be necessary to get things typed correctly all the way through to elastic-charts components
   if (!details) {
-    return <div></div>;
+    return <div />;
   }
   return <AnnotationTooltip details={details} />;
 };

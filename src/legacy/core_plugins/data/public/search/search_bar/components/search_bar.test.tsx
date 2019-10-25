@@ -33,14 +33,14 @@ const timefilterSetupMock = timefilterServiceMock.createSetupContract();
 
 jest.mock('../../../../../data/public', () => {
   return {
-    FilterBar: () => <div className="filterBar"></div>,
-    QueryBarInput: () => <div className="queryBar"></div>,
+    FilterBar: () => <div className="filterBar" />,
+    QueryBarInput: () => <div className="queryBar" />,
   };
 });
 
 jest.mock('../../../query/query_bar', () => {
   return {
-    QueryBarTopRow: () => <div className="queryBar"></div>,
+    QueryBarTopRow: () => <div className="queryBar" />,
   };
 });
 
