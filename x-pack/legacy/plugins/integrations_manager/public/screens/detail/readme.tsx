@@ -3,13 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Fragment } from 'react';
+import { EuiLoadingContent, EuiText } from '@elastic/eui';
 import ReactMarkdown from 'react-markdown';
 import { getFileByPath } from '../../data';
 import { markdownRenderers } from './markdown_renderers';
 
 export function Readme({ readmePath }: { readmePath: string }) {
-  const [markdown, setMarkdown] = useState<string>('');
+  const [markdown, setMarkdown] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     getFileByPath(readmePath).then(res => {
@@ -17,5 +18,23 @@ export function Readme({ readmePath }: { readmePath: string }) {
     });
   }, []);
 
-  return <ReactMarkdown renderers={markdownRenderers} source={markdown} />;
+  return (
+    <Fragment>
+      {markdown ? (
+        <ReactMarkdown renderers={markdownRenderers} source={markdown} />
+      ) : (
+        <EuiText>
+          <p>
+            <EuiLoadingContent lines={5} />
+          </p>
+          <p>
+            <EuiLoadingContent lines={6} />
+          </p>
+          <p>
+            <EuiLoadingContent lines={4} />
+          </p>
+        </EuiText>
+      )}
+    </Fragment>
+  );
 }
