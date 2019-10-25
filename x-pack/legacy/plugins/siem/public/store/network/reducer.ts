@@ -45,7 +45,7 @@ export const initialNetworkState: NetworkState = {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         sort: {
-          field: NetworkTopTablesFields.bytes_out,
+          field: NetworkTopTablesFields.bytes_in,
           direction: Direction.desc,
         },
       },
@@ -78,7 +78,7 @@ export const initialNetworkState: NetworkState = {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         sort: {
-          field: NetworkTopTablesFields.bytes_out,
+          field: NetworkTopTablesFields.bytes_in,
           direction: Direction.desc,
         },
       },
@@ -98,7 +98,7 @@ export const initialNetworkState: NetworkState = {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         sort: {
-          field: NetworkTopTablesFields.bytes_out,
+          field: NetworkTopTablesFields.bytes_in,
           direction: Direction.desc,
         },
       },
@@ -114,7 +114,7 @@ export const initialNetworkState: NetworkState = {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         sort: {
-          field: NetworkTopTablesFields.bytes_out,
+          field: NetworkTopTablesFields.bytes_in,
           direction: Direction.desc,
         },
       },
