@@ -647,18 +647,24 @@ function removeLayerFromLayerList(layerId) {
 }
 
 export function setQuery({ query, timeFilters, filters = [], refresh = false }) {
+  function generateQueryTimestamp() {
+    return (new Date()).toISOString();
+  }
   return async (dispatch, getState) => {
     const prevQuery = getQuery(getState());
-    const queryLastTriggeredAt = refresh
-      ? (new Date()).toISOString() // ensure query changes to trigger re-fetch when "Refresh" clicked
-      : prevQuery.queryLastTriggeredAt;
+    const prevTriggeredAt = prevQuery && prevQuery.queryLastTriggeredAt
+      ? prevQuery.queryLastTriggeredAt
+      : generateQueryTimestamp();
 
     dispatch({
       type: SET_QUERY,
       timeFilters,
       query: {
         ...query,
-        queryLastTriggeredAt,
+        // ensure query changes to trigger re-fetch when "Refresh" clicked
+        queryLastTriggeredAt: refresh
+          ? generateQueryTimestamp()
+          : prevTriggeredAt,
       },
       filters,
     });
