@@ -5,7 +5,7 @@
  */
 
 import theme from '@elastic/eui/dist/eui_theme_light.json';
-import React, { useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import { EuiAccordion } from '@elastic/eui';
 import {
@@ -21,19 +21,11 @@ import { FrameHeading } from './FrameHeading';
 import { Context } from './Context';
 import { Variables } from './Variables';
 
-const CodeHeader = styled.div<{ isOpen: boolean }>`
-  border: ${props =>
-    props.isOpen ? `1px solid ${theme.euiColorLightShade}` : 'none'};
-  border-width: ${props => (props.isOpen ? '1px 1px 0 1px' : '0')};
-  border-radius: ${borderRadius} ${borderRadius} 0 0;
-`;
-
 const ContextContainer = styled.div<{ isLibraryFrame: boolean }>`
   position: relative;
   font-family: ${fontFamilyCode};
   font-size: ${fontSize};
   border: 1px solid ${theme.euiColorLightShade};
-  border-top: none;
   border-radius: ${borderRadius};
   background: ${props =>
     props.isLibraryFrame
@@ -56,8 +48,6 @@ export function Stackframe({
   initialIsOpen = false,
   isLibraryFrame = false
 }: Props) {
-  const [isOpen, setIsOpen] = useState(initialIsOpen);
-
   if (!hasLineContext(stackframe)) {
     return (
       <FrameHeading stackframe={stackframe} isLibraryFrame={isLibraryFrame} />
@@ -67,16 +57,10 @@ export function Stackframe({
   return (
     <EuiAccordion
       buttonContent={
-        <CodeHeader isOpen={isOpen}>
-          <FrameHeading
-            stackframe={stackframe}
-            isLibraryFrame={isLibraryFrame}
-          />
-        </CodeHeader>
+        <FrameHeading stackframe={stackframe} isLibraryFrame={isLibraryFrame} />
       }
       id={id}
       initialIsOpen={initialIsOpen}
-      onToggle={setIsOpen}
     >
       <ContextContainer isLibraryFrame={isLibraryFrame}>
         <Context

@@ -40,6 +40,7 @@ import { TimestampTooltip } from '../../../shared/TimestampTooltip';
 import { HttpInfoSummaryItem } from '../../../shared/Summary/HttpInfoSummaryItem';
 import { TransactionDetailLink } from '../../../shared/Links/apm/TransactionDetailLink';
 import { UserAgentSummaryItem } from '../../../shared/Summary/UserAgentSummaryItem';
+import { ExceptionStacktrace } from './ExceptionStacktrace';
 
 const HeaderContainer = styled.div`
   display: flex;
@@ -187,9 +188,8 @@ function TabContent({
   error: APMError;
   currentTab: ErrorTab;
 }) {
-  const title = idx(error, _ => _.error.exception[0].message);
   const codeLanguage = idx(error, _ => _.service.language.name);
-  const excStackframes = idx(error, _ => _.error.exception[0].stacktrace);
+  const exceptionList = idx(error, _ => _.error.exception) || [];
   const logStackframes = idx(error, _ => _.error.log.stacktrace);
 
   switch (currentTab.key) {
@@ -199,16 +199,10 @@ function TabContent({
       );
     case exceptionStacktraceTab.key:
       return (
-        <>
-          <EuiTitle size="xs">
-            <h4>{title}</h4>
-          </EuiTitle>
-          <EuiSpacer size="l" />
-          <Stacktrace
-            stackframes={excStackframes}
-            codeLanguage={codeLanguage}
-          />
-        </>
+        <ExceptionStacktrace
+          codeLanguage={codeLanguage}
+          exceptionList={exceptionList}
+        />
       );
     default:
       return <ErrorMetadata error={error} />;

@@ -10,7 +10,7 @@ import { isEmpty, last } from 'lodash';
 import React, { Fragment } from 'react';
 import { IStackframe } from '../../../../typings/es_schemas/raw/fields/Stackframe';
 import { EmptyMessage } from '../../shared/EmptyMessage';
-import { LibraryStackFrames } from './LibraryStackFrames';
+import { LibraryStacktrace } from './LibraryStacktrace';
 import { Stackframe } from './Stackframe';
 
 interface Props {
@@ -34,7 +34,6 @@ export function Stacktrace({ stackframes = [], codeLanguage }: Props) {
   }
 
   const groups = getGroupedStackframes(stackframes);
-  console.log({ groups, stackframes, codeLanguage });
 
   return (
     <Fragment>
@@ -44,7 +43,7 @@ export function Stacktrace({ stackframes = [], codeLanguage }: Props) {
           return (
             <Fragment key={i}>
               <EuiSpacer size="m" />
-              <LibraryStackFrames
+              <LibraryStacktrace
                 id={i.toString()}
                 stackframes={group.stackframes}
                 codeLanguage={codeLanguage}
@@ -61,7 +60,7 @@ export function Stacktrace({ stackframes = [], codeLanguage }: Props) {
             <Stackframe
               codeLanguage={codeLanguage}
               id={`${i}-${idx}`}
-              initialIsOpen={i === 0}
+              initialIsOpen={i === 0 && groups.length > 1}
               stackframe={stackframe}
             />
           </Fragment>

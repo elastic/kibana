@@ -69,7 +69,7 @@ export function DatabaseContext({ dbContext }: Props) {
       </EuiTitle>
       <EuiSpacer size="m" />
       <DatabaseStatement>
-        <TruncateHeightSection previewHeight={10 * dbSyntaxLineHeight}>
+        <TruncateHeightSection previewHeight={10}>
           <SyntaxHighlighter
             language={'sql'}
             style={xcode}

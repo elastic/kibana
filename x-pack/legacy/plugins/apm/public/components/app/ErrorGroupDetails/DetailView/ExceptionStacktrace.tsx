@@ -7,20 +7,20 @@
 import React from 'react';
 import { EuiTitle, EuiSpacer } from '@elastic/eui';
 import { idx } from '@kbn/elastic-idx/target';
-import { ErrorRaw } from '../../../../../typings/es_schemas/raw/ErrorRaw';
+import { Exception } from '../../../../../typings/es_schemas/raw/ErrorRaw';
 import { Stacktrace } from '../../../shared/Stacktrace';
-import { CauseStacktrace } from './CauseStacktrace';
+import { CauseStacktrace } from '../../../shared/Stacktrace/CauseStacktrace';
 
 interface ExceptionStacktraceProps {
   codeLanguage?: string;
-  exception: ErrorRaw['error']['exception'];
+  exceptionList: Exception[];
 }
 
 export function ExceptionStacktrace({
   codeLanguage,
-  exception
+  exceptionList
 }: ExceptionStacktraceProps) {
-  const title = idx(exception, _ => _[0].message);
+  const title = idx(exceptionList, _ => _[0].message);
 
   return (
     <>
@@ -28,7 +28,7 @@ export function ExceptionStacktrace({
         <h4>{title}</h4>
       </EuiTitle>
       <EuiSpacer size="l" />
-      {(exception || []).map((ex, index) => {
+      {exceptionList.map((ex, index) => {
         return index === 0 ? (
           <Stacktrace
             key={index}
@@ -37,9 +37,10 @@ export function ExceptionStacktrace({
           />
         ) : (
           <CauseStacktrace
-            key={index}
-            exception={ex}
             codeLanguage={codeLanguage}
+            key={index}
+            message={ex.message}
+            stackframes={ex.stacktrace}
           />
         );
       })}

@@ -11,10 +11,31 @@ import { ExceptionStacktrace } from './ExceptionStacktrace';
 describe('ExceptionStacktrace', () => {
   describe('render', () => {
     it('renders', () => {
-      const props = { exception: [] };
+      const props = { exceptionList: [] };
+
       expect(() =>
         shallow(<ExceptionStacktrace {...props} />)
       ).not.toThrowError();
+    });
+
+    describe('with a stacktrace', () => {
+      it('renders the stacktrace', () => {
+        const props = { exceptionList: [{}] };
+
+        expect(
+          shallow(<ExceptionStacktrace {...props} />).find('Stacktrace')
+        ).toHaveLength(1);
+      });
+    });
+
+    describe('with more than one stacktrace', () => {
+      it('renders a cause stacktrace', () => {
+        const props = { exceptionList: [{}, {}] };
+
+        expect(
+          shallow(<ExceptionStacktrace {...props} />).find('CauseStacktrace')
+        ).toHaveLength(1);
+      });
     });
   });
 });
