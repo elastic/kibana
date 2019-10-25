@@ -89,13 +89,14 @@ export const StepCreateForm: SFC<Props> = React.memo(
 
       try {
         const resp = await api.createTransform(transformId, transformConfig);
-
-        if (resp.errors !== undefined) {
-          if (Array.isArray(resp.errors) && resp.errors.length === 1) {
+        if (resp.errors !== undefined && Array.isArray(resp.errors)) {
+          if (resp.errors.length === 1) {
             throw resp.errors[0];
           }
 
-          throw resp.errors;
+          if (resp.errors.length > 1) {
+            throw resp.errors;
+          }
         }
 
         toastNotifications.addSuccess(

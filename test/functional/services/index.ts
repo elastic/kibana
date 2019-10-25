@@ -24,6 +24,7 @@ import { BrowserProvider } from './browser';
 import { ComboBoxProvider } from './combo_box';
 import {
   DashboardAddPanelProvider,
+  DashboardReplacePanelProvider,
   DashboardExpectProvider,
   DashboardPanelActionsProvider,
   DashboardVisualizationProvider,
@@ -66,6 +67,7 @@ export const services = {
   failureDebugging: FailureDebuggingProvider,
   visualizeListingTable: VisualizeListingTableProvider,
   dashboardAddPanel: DashboardAddPanelProvider,
+  dashboardReplacePanel: DashboardReplacePanelProvider,
   dashboardPanelActions: DashboardPanelActionsProvider,
   flyout: FlyoutProvider,
   comboBox: ComboBoxProvider,

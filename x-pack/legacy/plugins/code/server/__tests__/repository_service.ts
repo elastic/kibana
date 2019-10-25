@@ -9,7 +9,7 @@ import assert from 'assert';
 import fs from 'fs';
 import * as os from 'os';
 import path from 'path';
-import rimraf from 'rimraf';
+import del from 'del';
 import { RepositoryUtils } from '../../common/repository_utils';
 import { RepositoryService } from '../repository_service';
 import { ConsoleLogger } from '../utils/console_logger';
@@ -26,8 +26,9 @@ describe('repository service test', () => {
   });
   // @ts-ignore
   after(() => {
-    return rimraf.sync(baseDir);
+    del.sync(baseDir);
   });
+
   const service = new RepositoryService(repoDir, credsDir, log);
 
   it('can not clone a repo by ssh without a key', async () => {

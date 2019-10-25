@@ -44,5 +44,5 @@ export async function getExistingEnvironmentsForService({
 
   const resp = await client.search(params);
   const buckets = idx(resp.aggregations, _ => _.environments.buckets) || [];
-  return buckets.map(bucket => bucket.key);
+  return buckets.map(bucket => bucket.key as string);
 }
