@@ -10,7 +10,7 @@ jest.mock('./lib/send_email', () => ({
 
 import { ActionType, ActionTypeExecutorOptions } from '../types';
 import { validateConfig, validateParams } from '../lib';
-import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks';
+import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import { createActionTypeRegistry } from './index.test';
 import { ActionParamsType, ActionTypeConfigType } from './es_index';
 
@@ -20,7 +20,7 @@ const NO_OP_FN = () => {};
 const services = {
   log: NO_OP_FN,
   callCluster: jest.fn(),
-  savedObjectsClient: SavedObjectsClientMock.create(),
+  savedObjectsClient: savedObjectsClientMock.create(),
 };
 
 let actionType: ActionType;
