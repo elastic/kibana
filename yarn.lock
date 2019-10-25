@@ -5655,55 +5655,6 @@ async-settle@^1.0.0:
   dependencies:
     async-done "^1.2.2"
 
-async.queue@^0.5.2:
-  version "0.5.2"
-  resolved "https://registry.yarnpkg.com/async.queue/-/async.queue-0.5.2.tgz#8d5d90812e1481066bc0904e8cc1712b17c3bd7c"
-  integrity sha1-jV2QgS4UgQZrwJBOjMFxKxfDvXw=
-  dependencies:
-    async.util.queue "0.5.2"
-
-async.util.arrayeach@0.5.2:
-  version "0.5.2"
-  resolved "https://registry.yarnpkg.com/async.util.arrayeach/-/async.util.arrayeach-0.5.2.tgz#58c4e98028d55d69bfb05aeb3af44e0a555a829c"
-  integrity sha1-WMTpgCjVXWm/sFrrOvROClVagpw=
-
-async.util.isarray@0.5.2:
-  version "0.5.2"
-  resolved "https://registry.yarnpkg.com/async.util.isarray/-/async.util.isarray-0.5.2.tgz#e62dac8f2636f65875dcf7521c2d24d0dfb2bbdf"
-  integrity sha1-5i2sjyY29lh13PdSHC0k0N+yu98=
-
-async.util.map@0.5.2:
-  version "0.5.2"
-  resolved "https://registry.yarnpkg.com/async.util.map/-/async.util.map-0.5.2.tgz#e588ef86e0b3ab5f027d97af4d6835d055ca69d6"
-  integrity sha1-5YjvhuCzq18CfZevTWg10FXKadY=
-
-async.util.noop@0.5.2:
-  version "0.5.2"
-  resolved "https://registry.yarnpkg.com/async.util.noop/-/async.util.noop-0.5.2.tgz#bdd62b97cb0aa3f60b586ad148468698975e58b9"
-  integrity sha1-vdYrl8sKo/YLWGrRSEaGmJdeWLk=
-
-async.util.onlyonce@0.5.2:
-  version "0.5.2"
-  resolved "https://registry.yarnpkg.com/async.util.onlyonce/-/async.util.onlyonce-0.5.2.tgz#b8e6fc004adc923164d79e32f2813ee465c24ff2"
-  integrity sha1-uOb8AErckjFk154y8oE+5GXCT/I=
-
-async.util.queue@0.5.2:
-  version "0.5.2"
-  resolved "https://registry.yarnpkg.com/async.util.queue/-/async.util.queue-0.5.2.tgz#57f65abe1a3cdf273d31abd28ab95425f8222ee5"
-  integrity sha1-V/Zavho83yc9MavSirlUJfgiLuU=
-  dependencies:
-    async.util.arrayeach "0.5.2"
-    async.util.isarray "0.5.2"
-    async.util.map "0.5.2"
-    async.util.noop "0.5.2"
-    async.util.onlyonce "0.5.2"
-    async.util.setimmediate "0.5.2"
-
-async.util.setimmediate@0.5.2:
-  version "0.5.2"
-  resolved "https://registry.yarnpkg.com/async.util.setimmediate/-/async.util.setimmediate-0.5.2.tgz#2812ebabf2a58027758d4bc7793d1ccfaf10255f"
-  integrity sha1-KBLrq/KlgCd1jUvHeT0cz68QJV8=
-
 async@1.x, async@^1.4.2, async@^1.5.2, async@~1.5.2:
   version "1.5.2"
   resolved "https://registry.yarnpkg.com/async/-/async-1.5.2.tgz#ec6a61ae56480c0c3cb241c95618e20892f9672a"
@@ -6116,11 +6067,6 @@ babel-plugin-minify-type-constructors@^0.4.3:
   integrity sha1-G8bxW4f3qxCF1CszC3F2V6IVZQA=
   dependencies:
     babel-helper-is-void-0 "^0.4.3"
-
-babel-plugin-mock-imports@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/babel-plugin-mock-imports/-/babel-plugin-mock-imports-1.0.1.tgz#1476ed4de911347d344fc81caab4beced80804b1"
-  integrity sha512-Nu4unCGKeqOfLlfnLPnv/pEHancdAGTqFqyArZ27gsKIiKxeZvMr87IHB8BxhMu3Bfc8fA8bx7hWt32aZbEwpQ==
 
 babel-plugin-named-asset-import@^0.3.1:
   version "0.3.3"
@@ -14216,13 +14162,6 @@ gulp-mocha@^7.0.2:
     plugin-error "^1.0.1"
     supports-color "^7.0.0"
     through2 "^3.0.1"
-
-gulp-multi-process@1.3.1:
-  version "1.3.1"
-  resolved "https://registry.yarnpkg.com/gulp-multi-process/-/gulp-multi-process-1.3.1.tgz#e12aa818e4c234357ad99d5caff8df8a18f46e9e"
-  integrity sha512-okxYy3mxUkekM0RNjkBg8OPuzpnD2yXMAdnGOaQPSJ2wzBdE9R9pkTV+tzPZ65ORK7b57YUc6s+gROA4+EIOLg==
-  dependencies:
-    async.queue "^0.5.2"
 
 gulp-rename@1.4.0:
   version "1.4.0"
