@@ -189,10 +189,8 @@ export function FieldItem(props: FieldItemProps) {
                   togglePopover();
                 }
               }}
-              aria-label={i18n.translate('xpack.lens.indexPattern.fieldStatsButtonAriaLabel', {
-                defaultMessage:
-                  'Click or press Enter for information about {fieldName}. Or, drag field into visualization.',
-                values: { fieldName: field.name },
+              aria-label={i18n.translate('xpack.lens.indexPattern.fieldStatsButtonLabel', {
+                defaultMessage: 'Click for a field preview. Or, drag and drop to visualize.',
               })}
             >
               <LensFieldIcon type={field.type as DataType} />
@@ -206,13 +204,11 @@ export function FieldItem(props: FieldItemProps) {
                 content={
                   hideDetails
                     ? i18n.translate('xpack.lens.indexPattern.fieldItemTooltip', {
-                        defaultMessage: 'Drag field into visualization.',
+                        defaultMessage: 'Drag and drop to visualize.',
                         values: { fieldName: field.name },
                       })
-                    : i18n.translate('xpack.lens.indexPattern.fieldItemTooltipWithInfo', {
-                        defaultMessage:
-                          'Click for information about {fieldName}, or, drag field into visualization.',
-                        values: { fieldName: field.name },
+                    : i18n.translate('xpack.lens.indexPattern.fieldStatsButtonLabel', {
+                        defaultMessage: 'Click for a field preview, or drag and drop to visualize.',
                       })
                 }
                 type="iInCircle"
@@ -248,7 +244,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
     return (
       <EuiText size="s">
         {i18n.translate('xpack.lens.indexPattern.fieldStatsNoData', {
-          defaultMessage: 'No data to display',
+          defaultMessage: 'No data to display.',
         })}
       </EuiText>
     );
