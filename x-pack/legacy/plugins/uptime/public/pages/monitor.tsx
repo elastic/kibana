@@ -46,7 +46,7 @@ export const MonitorPage = ({
   // decode 64 base string, it was decoded to make it a valid url, since monitor id can be a url
   const monitorId = atob(match.params.monitorId);
   const [pingListPageCount, setPingListPageCount] = useState<number>(10);
-  const { colors, refreshApp, setHeadingText } = useContext(UptimeSettingsContext);
+  const { basePath, colors, refreshApp, setHeadingText } = useContext(UptimeSettingsContext);
   const [getUrlParams, updateUrlParams] = useUrlParams();
   const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = getUrlParams();
   const { dateRangeStart, dateRangeEnd, selectedPingStatus } = params;
@@ -67,7 +67,7 @@ export const MonitorPage = ({
       const { name, url, id } = result.data.monitorPageTitle;
       const heading: string = name || url || id;
       document.title = getTitle(name);
-      setBreadcrumbs(getMonitorPageBreadcrumb(heading, stringifyUrlParams(params)));
+      setBreadcrumbs(getMonitorPageBreadcrumb(heading, stringifyUrlParams(params), basePath));
       if (setHeadingText) {
         setHeadingText(heading);
       }

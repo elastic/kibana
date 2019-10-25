@@ -76,7 +76,7 @@ export const OverviewPage = ({
 
   useEffect(() => {
     getIndexPattern(basePath, setIndexPattern);
-    setBreadcrumbs(getOverviewPageBreadcrumbs());
+    setBreadcrumbs(getOverviewPageBreadcrumbs(undefined, basePath));
     logOverviewPageLoad();
     if (setHeadingText) {
       setHeadingText(

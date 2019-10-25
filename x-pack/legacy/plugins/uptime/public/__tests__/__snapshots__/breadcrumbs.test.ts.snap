@@ -1,0 +1,85 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getMonitorPageBreadcrumb creates a monitor page breadcrumb with a basepath a search 1`] = `
+Array [
+  Object {
+    "href": "/xyz/app/uptime/?dateRangeStart=now-15m&dateRangeEnd=now",
+    "text": "Uptime",
+  },
+  Object {
+    "text": "monitor-id-1234",
+  },
+]
+`;
+
+exports[`getMonitorPageBreadcrumb creates a monitor page breadcrumb with a basepath but no search 1`] = `
+Array [
+  Object {
+    "href": "/xyz/app/uptime/",
+    "text": "Uptime",
+  },
+  Object {
+    "text": "monitor-id-1234",
+  },
+]
+`;
+
+exports[`getMonitorPageBreadcrumb creates a monitor page breadcrumb with a search but no basepath 1`] = `
+Array [
+  Object {
+    "href": "/app/uptime/?dateRangeEnd=now&dateRangeStart=now-15m",
+    "text": "Uptime",
+  },
+  Object {
+    "text": "monitor-id-1234",
+  },
+]
+`;
+
+exports[`getMonitorPageBreadcrumb creates a monitor page breadcrumb with no search or basepath 1`] = `
+Array [
+  Object {
+    "href": "/app/uptime/",
+    "text": "Uptime",
+  },
+  Object {
+    "text": "monitor-id-1234",
+  },
+]
+`;
+
+exports[`getOverviewPageBreadcrumbs creates the expected breadcrumb when there is a basepath but no search 1`] = `
+Array [
+  Object {
+    "href": "/xyz/app/uptime/",
+    "text": "Uptime",
+  },
+]
+`;
+
+exports[`getOverviewPageBreadcrumbs creates the expected breadcrumb with a basepath and a search 1`] = `
+Array [
+  Object {
+    "href": "/xyz/app/uptime/?dateRangeStart=now-15m&dateRangeEnd=now",
+    "text": "Uptime",
+  },
+]
+`;
+
+exports[`getOverviewPageBreadcrumbs creates the expected breadcrumb with no basepath but has a search 1`] = `
+Array [
+  Object {
+    "href": "/app/uptime/?dateRangeStart=now-15m&dateRangeEnd=now",
+    "text": "Uptime",
+  },
+]
+`;
+
+exports[`getOverviewPageBreadcrumbs creates the expected breadcrumb with no search or basepath 1`] = `
+Array [
+  Object {
+    "href": "/app/uptime/",
+    "text": "Uptime",
+  },
+]
+`;
