@@ -193,13 +193,13 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
                           content={
                             Boolean(inProgress)
                               ? i18n.translate(
-                                'xpack.snapshotRestore.policyList.table.actionExecuteDisabledTooltip',
-                                { defaultMessage: 'Policy is running' }
-                              )
+                                  'xpack.snapshotRestore.policyList.table.actionExecuteDisabledTooltip',
+                                  { defaultMessage: 'Policy is running' }
+                                )
                               : i18n.translate(
-                                'xpack.snapshotRestore.policyList.table.actionExecuteTooltip',
-                                { defaultMessage: 'Run now' }
-                              )
+                                  'xpack.snapshotRestore.policyList.table.actionExecuteTooltip',
+                                  { defaultMessage: 'Run now' }
+                                )
                           }
                         >
                           <EuiButtonIcon
@@ -325,8 +325,8 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
         }}
       </PolicyDeleteProvider>
     ) : (
-        undefined
-      ),
+      undefined
+    ),
     toolsRight: [
       <EuiButton
         color="secondary"
