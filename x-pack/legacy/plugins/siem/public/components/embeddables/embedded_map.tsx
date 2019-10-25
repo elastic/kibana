@@ -39,7 +39,7 @@ const EmbeddableMap = styled.div.attrs({
   className: 'siemEmbeddable__map',
 })<EmbeddableMapProps>`
   ${({ maintainRatio, theme }) => css`
-    .euiPanel {
+    .embPanel {
       border: none;
       box-shadow: none;
     }
@@ -61,7 +61,7 @@ const EmbeddableMap = styled.div.attrs({
           padding-top: calc(9 / 21 * 100%); //21:9 (ultrawide) ratio
         }
 
-        .euiPanel {
+        .embPanel {
           bottom: 0;
           left: 0;
           position: absolute;
