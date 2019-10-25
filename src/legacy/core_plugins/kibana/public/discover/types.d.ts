@@ -18,8 +18,8 @@
  */
 
 import { SearchSourceContract } from 'ui/courier';
-import { SortOrder } from './doc_table/components/table_header/helpers';
-export { SortOrder } from './doc_table/components/table_header/helpers';
+import { SortOrder } from './angular/doc_table/components/table_header/helpers';
+export { SortOrder } from './angular/doc_table/components/table_header/helpers';
 
 export interface SavedSearch {
   readonly id: string;
