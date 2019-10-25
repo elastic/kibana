@@ -4,10 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export async function fetchAliases(callWithRequest) {
+export async function fetchAliases(callWithRequest: any) {
   const results = await callWithRequest('cat.aliases', { format: 'json' });
-  return results.reduce((hash, { index, alias }) => {
-    (hash[index] = hash[index] || []).push(alias);
-    return hash;
-  }, {});
+  return results.reduce(
+    (hash: { [key: string]: any }, { index, alias }: { index: string; alias: string }) => {
+      (hash[index] = hash[index] || []).push(alias);
+      return hash;
+    },
+    {}
+  );
 }

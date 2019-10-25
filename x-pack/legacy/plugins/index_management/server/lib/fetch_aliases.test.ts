@@ -17,7 +17,9 @@ describe('fetching aliases', () => {
       { index: 'test3Index', alias: 'test2Alias' },
       { index: 'test3Index', alias: 'test3Alias' },
     ];
-    const mockCallWithRequest = sinon.spy(() => {return retVal;});
+    const mockCallWithRequest = sinon.spy(() => {
+      return retVal;
+    });
 
     const results = await fetchFn(mockCallWithRequest);
 
@@ -28,11 +30,12 @@ describe('fetching aliases', () => {
       test2Index: ['test1Alias'],
       test3Index: ['test2Alias', 'test3Alias'],
     });
-
   });
 
   test('should return an empty object if no aliases exist', async () => {
-    const mockCallWithRequest = sinon.spy(() => {return [];});
+    const mockCallWithRequest = sinon.spy(() => {
+      return [];
+    });
 
     const results = await fetchFn(mockCallWithRequest);
 

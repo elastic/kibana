@@ -4,9 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Router, RouterRouteHandler } from '../../../../../../server/lib/create_router';
 
-const handler = async (request, callWithRequest, h) => {
-  const { indices = [] } = request.payload;
+interface ReqPayload {
+  indices: string[];
+}
+
+const handler: RouterRouteHandler = async (request, callWithRequest, h) => {
+  const { indices = [] } = request.payload as ReqPayload;
   const params = {
     path: `/${encodeURIComponent(indices.join(','))}/_unfreeze`,
     method: 'POST',
@@ -15,6 +20,7 @@ const handler = async (request, callWithRequest, h) => {
   await callWithRequest('transport.request', params);
   return h.response();
 };
-export function registerUnfreezeRoute(router) {
+
+export function registerUnfreezeRoute(router: Router) {
   router.post('indices/unfreeze', handler);
 }

@@ -3,14 +3,16 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { Router, RouterRouteHandler } from '../../../../../../server/lib/create_router';
 
-function formatHit(hit, indexName) {
+function formatHit(hit: { [key: string]: { mappings: any } }, indexName: string) {
   const mapping = hit[indexName].mappings;
   return {
-    mapping
+    mapping,
   };
 }
-const handler = async (request, callWithRequest) => {
+
+const handler: RouterRouteHandler = async (request, callWithRequest) => {
   const { indexName } = request.params;
   const params = {
     expand_wildcards: 'none',
@@ -21,6 +23,7 @@ const handler = async (request, callWithRequest) => {
   const response = formatHit(hit, indexName);
   return response;
 };
-export function registerMappingRoute(router) {
+
+export function registerMappingRoute(router: Router) {
   router.get('mapping/{indexName}', handler);
 }

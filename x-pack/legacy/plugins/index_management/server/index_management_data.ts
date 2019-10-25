@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const indexManagementDataEnrichers = [];
-export const addIndexManagementDataEnricher = (enricher) => {
+const indexManagementDataEnrichers: any[] = [];
+
+export const addIndexManagementDataEnricher = (enricher: any) => {
   indexManagementDataEnrichers.push(enricher);
 };
 export const getIndexManagementDataEnrichers = () => {

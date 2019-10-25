@@ -3,19 +3,25 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { Router, RouterRouteHandler } from '../../../../../../server/lib/create_router';
 
+interface ReqPayload {
+  indices: string[];
+}
 
-const handler = async (request, callWithRequest, h) => {
-  const indices = request.payload.indices || [];
+const handler: RouterRouteHandler = async (request, callWithRequest, h) => {
+  const payload = request.payload as ReqPayload;
+  const { indices = [] } = payload;
+
   const params = {
     expandWildcards: 'none',
     format: 'json',
-    index: indices
+    index: indices,
   };
   await callWithRequest('indices.open', params);
   return h.response();
 };
-export function registerOpenRoute(router) {
+
+export function registerOpenRoute(router: Router) {
   router.post('indices/open', handler);
 }
-
