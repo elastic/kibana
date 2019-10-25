@@ -24,7 +24,7 @@ interface Aliases {
 interface Params {
   format: string;
   h: string;
-  index?: any; // todo
+  index?: string[];
 }
 
 const enrichResponse = async (response: any, callWithRequest: any) => {

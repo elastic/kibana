@@ -7,7 +7,7 @@
 import axios from 'axios';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 import { init as initHttpRequests } from './http_requests';
-import { setHttpClient } from '../../../public/services/api';
+import { setHttpClient } from '../../../public/app/services/api';
 
 const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
 
