@@ -1,0 +1,18 @@
+.expExpressionRenderer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.expExpressionRenderer__expression {
+  width: 100%;
+  height: 100%;
+}
+
+.expExpressionRenderer-isLoading .expExpressionRenderer__expression,
+.expExpressionRenderer-hasError .expExpressionRenderer__expression {
+  display: none;
+}
