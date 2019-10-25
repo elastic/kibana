@@ -12,8 +12,10 @@ import { MockedProvider } from 'react-apollo/test-utils';
 import { timelineQuery } from '../../containers/timeline/index.gql_query';
 import { mockBrowserFields } from '../../containers/source/mock';
 import { Direction } from '../../graphql/types';
+import { useKibanaCore } from '../../lib/compose/kibana_core';
 import { defaultHeaders, mockTimelineData, mockIndexPattern } from '../../mock';
 import { TestProviders } from '../../mock/test_providers';
+import { mockUiSettings } from '../../mock/ui_settings';
 import { flyoutHeaderHeight } from '../flyout';
 
 import {
@@ -26,6 +28,12 @@ import { Sort } from './body/sort';
 import { mockDataProviders } from './data_providers/mock/mock_data_providers';
 
 const testFlyoutHeight = 980;
+
+const mockUseKibanaCore = useKibanaCore as jest.Mock;
+jest.mock('../../lib/compose/kibana_core');
+mockUseKibanaCore.mockImplementation(() => ({
+  uiSettings: mockUiSettings,
+}));
 
 describe('Timeline', () => {
   const sort: Sort = {
@@ -113,7 +121,7 @@ describe('Timeline', () => {
       expect(wrapper.find('[data-test-subj="timelineHeader"]').exists()).toEqual(true);
     });
 
-    test('it renders the timeline body', () => {
+    test('it renders the timeline table', () => {
       const wrapper = mount(
         <TestProviders>
           <MockedProvider mocks={mocks}>
@@ -148,7 +156,7 @@ describe('Timeline', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="horizontal-scroll"]').exists()).toEqual(true);
+      expect(wrapper.find('[data-test-subj="events-table"]').exists()).toEqual(true);
     });
 
     test('it does NOT render the paging footer when you do NOT have any data providers', () => {

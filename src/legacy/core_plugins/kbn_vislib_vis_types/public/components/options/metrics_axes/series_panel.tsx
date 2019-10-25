@@ -27,7 +27,7 @@ import { BasicVislibParams } from '../../../types';
 import { ChartOptions } from './chart_options';
 import { SetParamByIndex, ChangeValueAxis } from './';
 
-interface SeriesPanelProps extends VisOptionsProps<BasicVislibParams> {
+export interface SeriesPanelProps extends VisOptionsProps<BasicVislibParams> {
   changeValueAxis: ChangeValueAxis;
   setParamByIndex: SetParamByIndex;
 }
@@ -38,12 +38,12 @@ function SeriesPanel(props: SeriesPanelProps) {
   return (
     <EuiPanel paddingSize="s">
       <EuiTitle size="xs">
-        <h2>
+        <h3>
           <FormattedMessage
             id="kbnVislibVisTypes.controls.pointSeries.series.metricsTitle"
             defaultMessage="Metrics"
           />
-        </h2>
+        </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
 

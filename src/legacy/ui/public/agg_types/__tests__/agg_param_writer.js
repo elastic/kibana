@@ -77,12 +77,12 @@ export default function AggParamWriterHelper(Private) {
       if (this.aggType.paramByName('field') && !paramValues.field) {
         // pick a field rather than force a field to be specified everywhere
         if (this.aggType.type === AggGroupNames.Metrics) {
-          paramValues.field = _.sample(this.indexPattern.fields.byType.number);
+          paramValues.field = _.sample(this.indexPattern.fields.getByType('number'));
         } else {
           const type = this.aggType.paramByName('field').filterFieldTypes || 'string';
           let field;
           do {
-            field = _.sample(this.indexPattern.fields.byType[type]);
+            field = _.sample(this.indexPattern.fields.getByType(type));
           } while (!field.aggregatable);
           paramValues.field = field.name;
         }

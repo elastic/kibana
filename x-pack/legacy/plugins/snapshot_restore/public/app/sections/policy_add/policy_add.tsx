@@ -8,12 +8,13 @@ import { RouteComponentProps } from 'react-router-dom';
 
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { SlmPolicyPayload } from '../../../../common/types';
+import { TIME_UNITS } from '../../../../common/constants';
 
 import { PolicyForm, SectionError, SectionLoading, Error } from '../../components';
 import { useAppDependencies } from '../../index';
 import { BASE_PATH, DEFAULT_POLICY_SCHEDULE } from '../../constants';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
-import { addPolicy, useLoadIndicies } from '../../services/http';
+import { addPolicy, useLoadIndices } from '../../services/http';
 
 export const PolicyAdd: React.FunctionComponent<RouteComponentProps> = ({
   history,
@@ -33,7 +34,7 @@ export const PolicyAdd: React.FunctionComponent<RouteComponentProps> = ({
     data: { indices } = {
       indices: [],
     },
-  } = useLoadIndicies();
+  } = useLoadIndices();
 
   // Set breadcrumb and page title
   useEffect(() => {
@@ -64,6 +65,12 @@ export const PolicyAdd: React.FunctionComponent<RouteComponentProps> = ({
     schedule: DEFAULT_POLICY_SCHEDULE,
     repository: '',
     config: {},
+    retention: {
+      expireAfterValue: '',
+      expireAfterUnit: TIME_UNITS.DAY,
+      maxCount: '',
+      minCount: '',
+    },
   };
 
   const renderSaveError = () => {

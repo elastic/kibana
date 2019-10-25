@@ -4,24 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('../lib/execute', () => ({
-  execute: jest.fn(),
-}));
-
 import { createMockServer } from './_mock_server';
-import { executeRoute } from './execute';
+import { getExecuteActionRoute } from './execute';
+import { actionExecutorMock } from '../lib/action_executor.mock';
 
 const getServices = jest.fn();
 
-const { server, actionTypeRegistry } = createMockServer();
-executeRoute({ server, actionTypeRegistry, getServices });
+const { server } = createMockServer();
+const mockedActionExecutor = actionExecutorMock.create();
+server.route(getExecuteActionRoute(mockedActionExecutor));
 
 beforeEach(() => jest.resetAllMocks());
 
 it('executes an action with proper parameters', async () => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { execute } = require('../lib/execute');
-
   const request = {
     method: 'POST',
     url: '/api/action/1/_execute',
@@ -36,20 +31,15 @@ it('executes an action with proper parameters', async () => {
     callCluster: jest.fn(),
     savedObjectsClient: jest.fn(),
   });
-  execute.mockResolvedValueOnce({ success: true });
+  mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok' });
 
   const { payload, statusCode } = await server.inject(request);
   expect(statusCode).toBe(200);
-  expect(payload).toBe('{"success":true}');
+  expect(payload).toBe('{"status":"ok"}');
 
-  expect(execute).toHaveBeenCalledTimes(1);
-  const executeCall = execute.mock.calls[0][0];
-  expect(executeCall.params).toEqual({
-    foo: true,
+  expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
+    actionId: '1',
+    params: { foo: true },
+    request: expect.anything(),
   });
-  expect(executeCall.actionTypeRegistry).toBeTruthy();
-  expect(executeCall.actionId).toBe('1');
-  expect(executeCall.namespace).toBeUndefined();
-  expect(executeCall.services).toBeTruthy();
-  expect(executeCall.encryptedSavedObjectsPlugin).toBeTruthy();
 });

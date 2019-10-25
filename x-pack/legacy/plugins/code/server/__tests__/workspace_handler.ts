@@ -6,17 +6,16 @@
 import fs from 'fs';
 import path from 'path';
 
-import Git from '@elastic/nodegit';
 import assert from 'assert';
-import mkdirp from 'mkdirp';
 import * as os from 'os';
-import rimraf from 'rimraf';
+import del from 'del';
 import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
 
 import { LspRequest } from '../../model';
 import { GitOperations } from '../git_operations';
 import { WorkspaceHandler } from '../lsp/workspace_handler';
 import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
+import { prepareProjectByInit } from '../test_utils';
 
 const baseDir = fs.mkdtempSync(path.join(os.tmpdir(), 'code_test'));
 const workspaceDir = path.join(baseDir, 'workspace');
@@ -51,7 +50,7 @@ describe('workspace_handler tests', () => {
     file = 'src/controllers/user.ts'
   ) {
     const fullPath = path.join(workspacePath, repo, '__randomString', revision, file);
-    mkdirp.sync(path.dirname(fullPath));
+    fs.mkdirSync(path.dirname(fullPath), { recursive: true });
     fs.writeFileSync(fullPath, '');
     const strInUrl = fullPath
       .split(path.sep)
@@ -119,27 +118,12 @@ describe('workspace_handler tests', () => {
   });
 
   async function prepareProject(repoPath: string) {
-    mkdirp.sync(repoPath);
-    const repo = await Git.Repository.init(repoPath, 0);
-    const content = 'console.log("test")';
-    const subFolder = 'src';
-    fs.mkdirSync(path.join(repo.workdir(), subFolder));
-    fs.writeFileSync(path.join(repo.workdir(), 'src/app.ts'), content, 'utf8');
-
-    const index = await repo.refreshIndex();
-    await index.addByPath('src/app.ts');
-    index.write();
-    const treeId = await index.writeTree();
-    const committer = Git.Signature.create('tester', 'test@test.com', Date.now() / 1000, 60);
-    const commit = await repo.createCommit(
-      'HEAD',
-      committer,
-      committer,
-      'commit for test',
-      treeId,
-      []
-    );
-    return { repo, commit };
+    fs.mkdirSync(repoPath, { recursive: true });
+    await prepareProjectByInit(repoPath, {
+      'commit for test': {
+        'src/app.ts': 'console.log("test")',
+      },
+    });
   }
 
   it('should throw a error if file path is external', async () => {
@@ -173,12 +157,12 @@ describe('workspace_handler tests', () => {
 
   // @ts-ignore
   before(() => {
-    mkdirp.sync(workspaceDir);
-    mkdirp.sync(repoDir);
+    fs.mkdirSync(workspaceDir, { recursive: true });
+    fs.mkdirSync(repoDir, { recursive: true });
   });
 
   // @ts-ignore
   after(() => {
-    rimraf.sync(baseDir);
+    del.sync(baseDir);
   });
 });

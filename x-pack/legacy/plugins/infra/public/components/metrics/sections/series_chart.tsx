@@ -16,20 +16,20 @@ import {
   BarSeriesStyle,
   AreaSeriesStyle,
 } from '@elastic/charts';
-import { InfraMetricLayoutVisualizationType } from '../../../pages/metrics/layouts/types';
 import { InfraDataSeries } from '../../../graphql/types';
+import { InventoryVisType } from '../../../../common/inventory_models/types';
 
 interface Props {
   id: string;
   name: string;
-  color: string;
+  color: string | null;
   series: InfraDataSeries;
-  type: InfraMetricLayoutVisualizationType;
+  type: InventoryVisType;
   stack: boolean | undefined;
 }
 
 export const SeriesChart = (props: Props) => {
-  if (props.type === InfraMetricLayoutVisualizationType.bar) {
+  if (props.type === 'bar') {
     return <BarChart {...props} />;
   }
   return <AreaChart {...props} />;
@@ -39,10 +39,10 @@ export const AreaChart = ({ id, color, series, name, type, stack }: Props) => {
   const style: RecursivePartial<AreaSeriesStyle> = {
     area: {
       opacity: 1,
-      visible: InfraMetricLayoutVisualizationType.area === type,
+      visible: 'area' === type,
     },
     line: {
-      strokeWidth: InfraMetricLayoutVisualizationType.area === type ? 1 : 2,
+      strokeWidth: 'area' === type ? 1 : 2,
       visible: true,
     },
     point: {
@@ -57,7 +57,7 @@ export const AreaChart = ({ id, color, series, name, type, stack }: Props) => {
     specId: getSpecId(id),
   };
   const customColors: CustomSeriesColorsMap = new Map();
-  customColors.set(colors, color);
+  customColors.set(colors, color || '#999');
   return (
     <AreaSeries
       id={getSpecId(id)}
@@ -68,7 +68,7 @@ export const AreaChart = ({ id, color, series, name, type, stack }: Props) => {
       yAccessors={['value']}
       data={series.data}
       areaSeriesStyle={style}
-      customSeriesColors={customColors}
+      customSeriesColors={color ? customColors : void 0}
       stackAccessors={stack ? ['timestamp'] : void 0}
     />
   );
@@ -77,7 +77,7 @@ export const AreaChart = ({ id, color, series, name, type, stack }: Props) => {
 export const BarChart = ({ id, color, series, name, type, stack }: Props) => {
   const style: RecursivePartial<BarSeriesStyle> = {
     rectBorder: {
-      stroke: color,
+      stroke: color || void 0,
       strokeWidth: 1,
       visible: true,
     },
@@ -90,7 +90,7 @@ export const BarChart = ({ id, color, series, name, type, stack }: Props) => {
     specId: getSpecId(id),
   };
   const customColors: CustomSeriesColorsMap = new Map();
-  customColors.set(colors, color);
+  customColors.set(colors, color || '#999');
   return (
     <BarSeries
       id={getSpecId(id)}

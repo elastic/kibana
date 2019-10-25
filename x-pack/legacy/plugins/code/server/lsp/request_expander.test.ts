@@ -5,8 +5,7 @@
  */
 
 import fs from 'fs';
-import mkdirp from 'mkdirp';
-import rimraf from 'rimraf';
+import del from 'del';
 import sinon from 'sinon';
 import { pathToFileURL } from 'url';
 
@@ -22,14 +21,12 @@ const options: ServerOptions = {
 beforeEach(async () => {
   sinon.reset();
   if (!fs.existsSync(options.workspacePath)) {
-    mkdirp.sync(options.workspacePath);
+    fs.mkdirSync(options.workspacePath, { recursive: true });
   }
 });
 
-afterEach(() => {
-  return new Promise(resolve => {
-    rimraf(options.workspacePath, resolve);
-  });
+afterEach(async () => {
+  await del(options.workspacePath, { force: true });
 });
 
 function createMockProxy(initDelay: number = 0, requestDelay: number = 0) {
@@ -80,8 +77,8 @@ test('be able to open multiple workspace', async () => {
     params: [],
     workspacePath: '/tmp/test/workspace/2',
   };
-  mkdirp.sync(request1.workspacePath);
-  mkdirp.sync(request2.workspacePath);
+  fs.mkdirSync(request1.workspacePath, { recursive: true });
+  fs.mkdirSync(request2.workspacePath, { recursive: true });
   await expander.handleRequest(request1);
   await expander.handleRequest(request2);
   expect(proxyStub.initialize.called);
@@ -125,8 +122,8 @@ test('be able to swap workspace', async () => {
     params: [],
     workspacePath: '/tmp/test/workspace/2',
   };
-  mkdirp.sync(request1.workspacePath);
-  mkdirp.sync(request2.workspacePath);
+  fs.mkdirSync(request1.workspacePath, { recursive: true });
+  fs.mkdirSync(request2.workspacePath, { recursive: true });
   await expander.handleRequest(request1);
   await expander.handleRequest(request2);
   expect(proxyStub.initialize.called);
@@ -166,7 +163,7 @@ test('requests should be cancelled if workspace is unloaded', async () => {
     params: [],
     workspacePath: workspace1,
   };
-  mkdirp.sync(workspace1);
+  fs.mkdirSync(workspace1, { recursive: true });
   const promise1 = expander.handleRequest(request);
   const promise2 = expander.handleRequest(request);
   setTimeout(() => expander.unloadWorkspace(workspace1), 1);

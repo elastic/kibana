@@ -4,8 +4,16 @@
 
 ## ElasticsearchServiceSetup.adminClient$ property
 
+Observable of clients for the `admin` cluster. Observable emits when Elasticsearch config changes on the Kibana server. See [IClusterClient](./kibana-plugin-server.iclusterclient.md)<!-- -->.
+
+
+```js
+const client = await elasticsearch.adminClient$.pipe(take(1)).toPromise();
+
+```
+
 <b>Signature:</b>
 
 ```typescript
-readonly adminClient$: Observable<ClusterClient>;
+readonly adminClient$: Observable<IClusterClient>;
 ```

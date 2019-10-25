@@ -11,12 +11,12 @@ import angular from 'angular';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 
-import { parseInterval } from 'ui/utils/parse_interval';
 import { ml } from './ml_api_service';
 
-import { mlMessageBarService } from '../components/messagebar/messagebar_service';
-import { isWebUrl } from '../util/string_utils';
+import { mlMessageBarService } from '../components/messagebar';
+import { isWebUrl } from '../util/url_utils';
 import { ML_DATA_PREVIEW_COUNT } from '../../common/util/job_utils';
+import { parseInterval } from '../../common/util/parse_interval';
 
 const msgs = mlMessageBarService;
 let jobs = [];
@@ -24,13 +24,11 @@ let datafeedIds = {};
 
 class JobService {
   constructor() {
-    // currentJob -> used to pass a job object between the job management page and
+    // tempJobCloningObjects -> used to pass a job object between the job management page and
     // and the advanced wizard.
     // if populated when loading the advanced wizard, the job is used for cloning.
     // if populated when loading the job management page, the start datafeed modal
     // is automatically opened.
-    this.currentJob = undefined;
-
     this.tempJobCloningObjects = {
       job: undefined,
       skipTimeRangeStep: false,
@@ -404,7 +402,6 @@ class JobService {
     // return the promise chain
     return ml.validateJob(obj)
       .then((messages) => {
-        console.log('validate job', messages);
         return { success: true, messages };
       }).catch((err) => {
         msgs.error(i18n.translate('xpack.ml.jobService.jobValidationErrorMessage', {

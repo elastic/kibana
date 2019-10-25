@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Git, { CloneOptions } from '@elastic/nodegit';
 import assert from 'assert';
-import fs from 'fs';
 import path from 'path';
-import rimraf from 'rimraf';
+import del from 'del';
 import sinon from 'sinon';
+import { prepareProjectByCloning as prepareProject } from '../test_utils';
 
 import { GitOperations } from '../git_operations';
 import { WorkerReservedProgress } from '../../model';
@@ -36,39 +35,14 @@ const esClient = {
   },
 };
 
-function prepareProject(url: string, p: string) {
-  const opts: CloneOptions = {
-    bare: 1,
-    fetchOpts: {
-      callbacks: {
-        certificateCheck: () => 0,
-      },
-    },
-  };
-
-  return new Promise(resolve => {
-    if (!fs.existsSync(p)) {
-      rimraf(p, error => {
-        Git.Clone.clone(url, p, opts).then(repo => {
-          resolve(repo);
-        });
-      });
-    } else {
-      resolve();
-    }
-  });
-}
-
 const repoUri = 'github.com/elastic/TypeScript-Node-Starter';
 
 const serverOptions = createTestServerOption();
 const server = createTestHapiServer();
 const gitOps = new GitOperations(serverOptions.repoPath);
 
-function cleanWorkspace() {
-  return new Promise(resolve => {
-    rimraf(serverOptions.workspacePath, resolve);
-  });
+async function cleanWorkspace() {
+  await del(serverOptions.workspacePath);
 }
 
 function setupEsClientSpy() {
@@ -134,22 +108,18 @@ describe('LSP indexer unit tests', function(this: any) {
 
   // @ts-ignore
   before(async () => {
-    return new Promise(resolve => {
-      rimraf(serverOptions.repoPath, resolve);
-    });
+    await del(serverOptions.repoPath);
   });
 
   beforeEach(async function() {
     // @ts-ignore
     this.timeout(200000);
-    return await prepareProject(
-      `https://${repoUri}.git`,
-      path.join(serverOptions.repoPath, repoUri)
-    );
+    await prepareProject(`https://${repoUri}.git`, path.join(serverOptions.repoPath, repoUri));
   });
+
   // @ts-ignore
-  after(() => {
-    return cleanWorkspace();
+  after(async () => {
+    await cleanWorkspace();
   });
 
   afterEach(() => {

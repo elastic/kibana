@@ -4,30 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionType, Services } from '../types';
+import { ActionType } from '../types';
 import { validateParams } from '../lib';
-import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks';
+import { Logger } from '../../../../../../src/core/server';
+import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import { createActionTypeRegistry } from './index.test';
 
 const ACTION_TYPE_ID = '.server-log';
-const NO_OP_FN = () => {};
-
-const services: Services = {
-  log: NO_OP_FN,
-  callCluster: async (path: string, opts: any) => {},
-  savedObjectsClient: SavedObjectsClientMock.create(),
-};
 
 let actionType: ActionType;
+let mockedLogger: jest.Mocked<Logger>;
 
 beforeAll(() => {
-  const actionTypeRegistry = createActionTypeRegistry();
+  const { logger, actionTypeRegistry } = createActionTypeRegistry();
   actionType = actionTypeRegistry.get(ACTION_TYPE_ID);
+  mockedLogger = logger;
   expect(actionType).toBeTruthy();
-});
-
-beforeEach(() => {
-  services.log = NO_OP_FN;
 });
 
 describe('get()', () => {
@@ -39,18 +31,18 @@ describe('get()', () => {
 
 describe('validateParams()', () => {
   test('should validate and pass when params is valid', () => {
-    expect(validateParams(actionType, { message: 'a message' })).toEqual({
+    expect(validateParams(actionType, { message: 'a message', level: 'info' })).toEqual({
       message: 'a message',
-      tags: ['info', 'alerting'],
+      level: 'info',
     });
     expect(
       validateParams(actionType, {
         message: 'a message',
-        tags: ['info', 'blorg'],
+        level: 'info',
       })
     ).toEqual({
       message: 'a message',
-      tags: ['info', 'blorg'],
+      level: 'info',
     });
   });
 
@@ -68,54 +60,44 @@ describe('validateParams()', () => {
     );
 
     expect(() => {
-      validateParams(actionType, { message: 'x', tags: 2 });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: [tags]: expected value of type [array] but got [number]"`
-    );
+      validateParams(actionType, { message: 'x', level: 2 });
+    }).toThrowErrorMatchingInlineSnapshot(`
+"error validating action params: [level]: types that failed validation:
+- [level.0]: expected value to equal [trace] but got [2]
+- [level.1]: expected value to equal [debug] but got [2]
+- [level.2]: expected value to equal [info] but got [2]
+- [level.3]: expected value to equal [warn] but got [2]
+- [level.4]: expected value to equal [error] but got [2]
+- [level.5]: expected value to equal [fatal] but got [2]"
+`);
 
     expect(() => {
-      validateParams(actionType, { message: 'x', tags: [2] });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: [tags.0]: expected value of type [string] but got [number]"`
-    );
+      validateParams(actionType, { message: 'x', level: 'foo' });
+    }).toThrowErrorMatchingInlineSnapshot(`
+"error validating action params: [level]: types that failed validation:
+- [level.0]: expected value to equal [trace] but got [foo]
+- [level.1]: expected value to equal [debug] but got [foo]
+- [level.2]: expected value to equal [info] but got [foo]
+- [level.3]: expected value to equal [warn] but got [foo]
+- [level.4]: expected value to equal [error] but got [foo]
+- [level.5]: expected value to equal [fatal] but got [foo]"
+`);
   });
 });
 
 describe('execute()', () => {
   test('calls the executor with proper params', async () => {
-    const mockLog = jest.fn().mockResolvedValueOnce({ success: true });
-
-    services.log = mockLog;
-    const id = 'some-id';
+    const actionId = 'some-id';
     await actionType.executor({
-      id,
+      actionId,
       services: {
-        log: mockLog,
         callCluster: async (path: string, opts: any) => {},
-        savedObjectsClient: SavedObjectsClientMock.create(),
+        savedObjectsClient: savedObjectsClientMock.create(),
       },
-      params: { message: 'message text here', tags: ['tag1', 'tag2'] },
+      params: { message: 'message text here', level: 'info' },
       config: {},
       secrets: {},
     });
-    expect(mockLog).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Array [
-        "tag1",
-        "tag2",
-      ],
-      "message text here",
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
-  ],
-}
-`);
+    expect(mockedLogger.info).toHaveBeenCalledWith('message text here');
   });
 });

@@ -116,7 +116,10 @@ Check out [TYPESCRIPT.md](TYPESCRIPT.md) for help with this process.
 You should prefer modern language features in a lot of cases, e.g.:
 
 * Prefer `class` over `prototype` inheritance
+* Prefer arrow function over function expressions
+* Prefer arrow function over storing `this` (no `const self = this;`)
 * Prefer template strings over string concatenation
+* Prefer the spread operator for copying arrays (`[...arr]`) over `arr.slice()`
 
 ### Avoid mutability and state
 
@@ -137,6 +140,39 @@ function addBar(foos, foo) {
   foos.push(foo);
 }
 ```
+
+### Avoid `any` whenever possible
+
+Since TypeScript 3.0 and the introduction of the
+[`unknown` type](https://mariusschulz.com/blog/the-unknown-type-in-typescript) there are rarely any
+reasons to use `any` as a type. Nearly all places of former `any` usage can be replace by either a
+generic or `unknown` (in cases the type is really not known).
+
+You should always prefer using those mechanisms over using `any`, since they are stricter typed and
+less likely to introduce bugs in the future due to insufficient types.
+
+If you’re not having `any` in your plugin or are starting a new plugin, you should enable the
+[`@typescript-eslint/no-explicit-any`](https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-explicit-any.md)
+linting rule for your plugin via the [`.eslintrc.js`](https://github.com/elastic/kibana/blob/master/.eslintrc.js) config.
+
+### Avoid non-null assertions
+
+You should try avoiding non-null assertions (`!.`) wherever possible. By using them you tell
+TypeScript, that something is not null even though by it’s type it could be. Usage of non-null
+assertions is most often a side-effect of you actually checked that the variable is not `null`
+but TypeScript doesn’t correctly carry on that information till the usage of the variable.
+
+In most cases it’s possible to replace the non-null assertion by structuring your code/checks slightly different
+or using [user defined type guards](https://www.typescriptlang.org/docs/handbook/advanced-types.html#user-defined-type-guards)
+to properly tell TypeScript what type a variable has.
+
+Using non-null assertion increases the risk for future bugs. In case the condition under which we assumed that the
+variable can’t be null has changed (potentially even due to changes in compeltely different files), the non-null
+assertion would now wrongly disable proper type checking for us.
+
+If you’re not using non-null assertions in your plugin or are starting a new plugin, consider enabling the
+[`@typescript-eslint/no-non-null-assertion`](https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-non-null-assertion.md)
+linting rule for you plugin in the [`.eslintrc.js`](https://github.com/elastic/kibana/blob/master/.eslintrc.js) config.
 
 ### Return/throw early from functions
 
@@ -209,21 +245,6 @@ const [first, second] = arr;
 // bad
 const first = arr[0];
 const second = arr[1];
-```
-
-### Declare one variable per line, wherever it makes the most sense
-
-This makes it easier to re-order the lines. However, declari variables
-wherever it makes sense (not necessairly on the top of a function).
-
-```js
-// good
-const keys = ['foo', 'bar'];
-const values = [23, 42];
-
-// bad
-const keys = ['foo', 'bar'],
-      values = [23, 42];
 ```
 
 ### Magic numbers/strings
@@ -303,54 +324,6 @@ import inSibling from '../foo/child';
 Don't do this. Everything should be wrapped in a module that can be depended on
 by other modules. Even things as simple as a single value should be a module.
 
-### Arrow functions
-
-If you must use a function expression, then use an arrow function:
-
-```js
-// good
-[1, 2, 3].map((n) => {
-  const m = doSomething(n);
-  return m - n;
-});
-
-// bad
-[1, 2, 3].map(function (n) {
-  const m = doSomething(n);
-  return m - n;
-});
-```
-
-If your arrow function is only returning an object literal, then wrap the
-object in parentheses rather than using an explicit return:
-
-```js
-// good
-() => ({
-  foo: 'bar'
-})
-
-// bad
-() => {
-  return {
-    foo: 'bar'
-  };
-}
-```
-
-### Use the spread operator (`...`) for copying arrays
-
-This helps with expressiveness and readability.
-
-```js
-const arr = [1, 2, 3];
-
-// good
-const arrCopy = [...arr];
-
-// bad
-const arrCopy = arr.slice();
-```
 
 ### Only use ternary operators for small, simple code
 
@@ -364,18 +337,6 @@ const foo = (a === b) ? 1 : 2;
 
 // bad
 const foo = (a === b) ? 1 : (a === c) ? 2 : 3;
-```
-
-### Do not extend built-in prototypes
-
-Do not extend the prototype of native JavaScript objects. Your future self will
-be forever grateful.
-
-```js
-// bad
-Array.prototype.empty = function () {
-  return !this.length;
-}
 ```
 
 ### Use descriptive conditions
@@ -559,31 +520,6 @@ const isSessionValid = (session.expires < Date.now());
 // If the session is valid
 if (isSessionValid) {
   ...
-}
-```
-
-### Do not alias `this`
-
-Try not to rely on `this` at all, but if you must, then use arrow functions
-instead of aliasing it.
-
-```js
-// good
-class Users {
-  add(user) {
-    return createUser(user)
-      .then(response => this.users.push(response.user));
-  }
-}
-
-// bad
-class Users {
-  add(user) {
-    const self = this;
-    return createUser(user).then(function (response) {
-      self.users.push(response.user);
-    });
-  }
 }
 ```
 

@@ -20,23 +20,17 @@
 import { resolve } from 'path';
 import { Legacy } from 'kibana';
 
-// @ts-ignore
-import { EMSClient } from './common/ems_client';
-
 import { LegacyPluginApi, LegacyPluginInitializer } from '../../../../src/legacy/types';
 
 const tileMapPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPluginApi) =>
   new Plugin({
     id: 'tile_map',
-    require: ['kibana', 'elasticsearch', 'visualizations', 'interpreter', 'expressions'],
+    require: ['kibana', 'elasticsearch', 'interpreter', 'expressions'],
     publicDir: resolve(__dirname, 'public'),
     uiExports: {
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       hacks: [resolve(__dirname, 'public/legacy')],
       injectDefaultVars: server => ({}),
-    },
-    init: (server: Legacy.Server) => {
-      server.expose('EMSClient', EMSClient);
     },
     config(Joi: any) {
       return Joi.object({

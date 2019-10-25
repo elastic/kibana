@@ -19,15 +19,14 @@
 
 // @ts-ignore
 import { fieldFormats } from 'ui/registry/field_formats';
-import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { ObjDefine } from './obj_define';
-// @ts-ignore
 import { FieldFormat } from '../../../../../../plugins/data/common/field_formats';
 // @ts-ignore
 import { shortenDottedString } from '../../../../../core_plugins/kibana/common/utils/shorten_dotted_string';
 import { IndexPattern } from '../index_patterns';
+import { getNotifications } from '../services';
 
 import { getKbnFieldType } from '../../../../../../plugins/data/public';
 
@@ -106,8 +105,9 @@ export class Field implements FieldType {
         values: { name: spec.name, title: indexPattern.title },
         defaultMessage: 'Field {name} in indexPattern {title} is using an unknown field type.',
       });
+      const { toasts } = getNotifications();
 
-      toastNotifications.addDanger({
+      toasts.addDanger({
         title,
         text,
       });

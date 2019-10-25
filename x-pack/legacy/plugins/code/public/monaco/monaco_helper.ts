@@ -5,7 +5,8 @@
  */
 
 import { editor } from 'monaco-editor';
-import { ResizeChecker } from 'ui/resize_checker';
+
+import { ResizeChecker } from '../components/shared/resize_checker';
 import { EditorActions } from '../components/editor/editor';
 
 import { toCanonicalUrl } from '../../common/uri_util';
@@ -135,8 +136,8 @@ export class MonacoHelper {
         range: new this.monaco!.Range(line, 0, line, 0),
         options: {
           isWholeLine: true,
-          className: `code-monaco-highlight-line code-line-number-${line}`,
-          linesDecorationsClassName: 'code-mark-line-number',
+          className: 'codeBlock__line--highlighted',
+          linesDecorationsClassName: 'codeBlock__line--highlighted',
         },
       },
     ]);

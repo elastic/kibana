@@ -18,13 +18,12 @@
  */
 
 import { memoize, forOwn, isFunction } from 'lodash';
-import chrome from '../chrome';
-import { FieldFormat } from '../../../../plugins/data/common/field_formats';
+import { npStart } from 'ui/new_platform';
 
 class FieldFormatRegistry {
   constructor() {
     this.fieldFormats = new Map();
-    this._uiSettings = chrome.getUiSettingsClient();
+    this._uiSettings = npStart.core.uiSettings;
     this.getConfig = (...args) => this._uiSettings.get(...args);
     this._defaultMap = [];
     this.init();
@@ -177,9 +176,9 @@ class FieldFormatRegistry {
     });
   }
 
-  register = (module) => {
-    const fieldFormatInstance = module(FieldFormat);
-    this.fieldFormats.set(fieldFormatInstance.id, fieldFormatInstance);
+  register = derivedFieldFormat => {
+    this.fieldFormats.set(derivedFieldFormat.id, derivedFieldFormat);
+
     return this;
   };
 }

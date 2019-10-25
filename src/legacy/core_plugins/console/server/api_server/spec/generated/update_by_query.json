@@ -32,6 +32,7 @@
         "dfs_query_then_fetch"
       ],
       "search_timeout": "",
+      "size": "",
       "max_docs": "all documents",
       "sort": [],
       "_source": [],
@@ -54,7 +55,8 @@
       "POST"
     ],
     "patterns": [
-      "{indices}/_update_by_query"
+      "{indices}/_update_by_query",
+      "{indices}/{type}/_update_by_query"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-update-by-query.html"
   }

@@ -18,24 +18,11 @@
  */
 
 import { resolve, dirname } from 'path';
+import { PackageInfo, EnvironmentMode } from './types';
 
 // `require` is necessary for this to work inside x-pack code as well
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const pkg = require('../../../../package.json');
-
-export interface PackageInfo {
-  version: string;
-  branch: string;
-  buildNum: number;
-  buildSha: string;
-  dist: boolean;
-}
-
-export interface EnvironmentMode {
-  name: 'development' | 'production';
-  dev: boolean;
-  prod: boolean;
-}
 
 /** @internal */
 export interface EnvOptions {
@@ -109,7 +96,7 @@ export class Env {
   /**
    * @internal
    */
-  constructor(readonly homeDir: string, options: EnvOptions) {
+  constructor(public readonly homeDir: string, options: EnvOptions) {
     this.configDir = resolve(this.homeDir, 'config');
     this.binDir = resolve(this.homeDir, 'bin');
     this.logDir = resolve(this.homeDir, 'log');

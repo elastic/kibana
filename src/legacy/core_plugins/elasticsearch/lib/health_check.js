@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Promise from 'bluebird';
+import Bluebird from 'bluebird';
 import kibanaVersion from './kibana_version';
 import { ensureEsVersion } from './ensure_es_version';
 
@@ -25,7 +25,7 @@ export default function (plugin, server, requestDelay) {
   plugin.status.yellow('Waiting for Elasticsearch');
 
   function waitUntilReady() {
-    return new Promise((resolve) => {
+    return new Bluebird((resolve) => {
       plugin.status.once('green', resolve);
     });
   }

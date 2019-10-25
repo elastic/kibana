@@ -6,13 +6,13 @@
 
 import React, { FunctionComponent } from 'react';
 import { EuiText } from '@elastic/eui';
+import { ComponentStrings } from '../../../i18n';
+
+const { MultiElementSettings: strings } = ComponentStrings;
 
 export const MultiElementSettings: FunctionComponent = () => (
   <EuiText size="s">
-    <p>Multiple elements are currently selected.</p>
-    <p>
-      Deselect these elements to edit their individual settings, press (G) to group them, or save
-      this selection as a new element to re-use it throughout your workpad.
-    </p>
+    <p>{strings.getMultipleElementsDescription()}</p>
+    <p>{strings.getMultipleElementsActionsDescription()}</p>
   </EuiText>
 );

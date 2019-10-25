@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Git, { CloneOptions } from '@elastic/nodegit';
 import assert from 'assert';
-import fs from 'fs';
 import path from 'path';
-import rimraf from 'rimraf';
+import del from 'del';
 import sinon from 'sinon';
 
 import { DiffKind } from '../../common/git_diff';
@@ -23,6 +21,7 @@ import { LspService } from '../lsp/lsp_service';
 import { RepositoryConfigController } from '../repository_config_controller';
 import { createTestServerOption, emptyAsyncFunc, createTestHapiServer } from '../test_utils';
 import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
+import { prepareProjectByCloning as prepareProject } from '../test_utils';
 
 const log: Logger = new ConsoleLoggerFactory().getLogger(['test']);
 
@@ -37,39 +36,14 @@ const esClient = {
   },
 };
 
-function prepareProject(url: string, p: string) {
-  const opts: CloneOptions = {
-    bare: 1,
-    fetchOpts: {
-      callbacks: {
-        certificateCheck: () => 0,
-      },
-    },
-  };
-
-  return new Promise(resolve => {
-    if (!fs.existsSync(p)) {
-      rimraf(p, error => {
-        Git.Clone.clone(url, p, opts).then(repo => {
-          resolve(repo);
-        });
-      });
-    } else {
-      resolve();
-    }
-  });
-}
-
 const repoUri = 'github.com/elastic/TypeScript-Node-Starter';
 
 const serverOptions = createTestServerOption();
 const server = createTestHapiServer();
 const gitOps = new GitOperations(serverOptions.repoPath);
 
-function cleanWorkspace() {
-  return new Promise(resolve => {
-    rimraf(serverOptions.workspacePath, resolve);
-  });
+async function cleanWorkspace() {
+  await del(serverOptions.workspacePath);
 }
 
 function setupEsClientSpy() {
@@ -133,9 +107,7 @@ function setupLsServiceSendRequestSpy(): sinon.SinonSpy {
 describe('LSP incremental indexer unit tests', () => {
   // @ts-ignore
   before(async () => {
-    return new Promise(resolve => {
-      rimraf(serverOptions.repoPath, resolve);
-    });
+    await del(serverOptions.repoPath);
   });
 
   beforeEach(async function() {
@@ -196,7 +168,7 @@ describe('LSP incremental indexer unit tests', () => {
 
     // DeletebyQuery is called 10 times (1 file + 1 symbol reuqests per diff item)
     // for 5 MODIFIED items
-    assert.strictEqual(deleteByQuerySpy.callCount, 10);
+    assert.strictEqual(deleteByQuerySpy.callCount, 5);
 
     // There are 5 MODIFIED items and 1 ADDED item. Only 1 file is in supported
     // language. Each file with supported language has 1 file + 1 symbol + 1 reference.
@@ -207,7 +179,7 @@ describe('LSP incremental indexer unit tests', () => {
     for (let i = 0; i < bulkSpy.callCount; i++) {
       total += bulkSpy.getCall(i).args[0].body.length;
     }
-    assert.strictEqual(total, 16);
+    assert.strictEqual(total, 8);
 
     // @ts-ignore
   }).timeout(20000);
@@ -313,8 +285,8 @@ describe('LSP incremental indexer unit tests', () => {
     for (let i = 0; i < bulkSpy.callCount; i++) {
       total += bulkSpy.getCall(i).args[0].body.length;
     }
-    assert.strictEqual(total, 5 * 2);
-    assert.strictEqual(deleteByQuerySpy.callCount, 4);
+    assert.strictEqual(total, 4 * 2);
+    assert.strictEqual(deleteByQuerySpy.callCount, 1);
     // @ts-ignore
   }).timeout(20000);
   // @ts-ignore

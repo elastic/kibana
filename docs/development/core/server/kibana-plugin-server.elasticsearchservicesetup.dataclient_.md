@@ -4,8 +4,16 @@
 
 ## ElasticsearchServiceSetup.dataClient$ property
 
+Observable of clients for the `data` cluster. Observable emits when Elasticsearch config changes on the Kibana server. See [IClusterClient](./kibana-plugin-server.iclusterclient.md)<!-- -->.
+
+
+```js
+const client = await elasticsearch.dataClient$.pipe(take(1)).toPromise();
+
+```
+
 <b>Signature:</b>
 
 ```typescript
-readonly dataClient$: Observable<ClusterClient>;
+readonly dataClient$: Observable<IClusterClient>;
 ```
