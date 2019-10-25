@@ -6,8 +6,8 @@
 
 import createSagaMiddleware, { SagaMiddleware } from 'redux-saga';
 import { combineReducers, createStore, Store, AnyAction, Dispatch, applyMiddleware } from 'redux';
+import { ChromeStart } from 'kibana/public';
 import { CoreStart } from 'src/core/public';
-import { Chrome } from 'ui/chrome';
 import {
   fieldsReducer,
   FieldsState,
@@ -15,13 +15,14 @@ import {
   syncFieldsSaga,
   updateSaveButtonSaga,
 } from './fields';
-import { UrlTemplatesState, urlTemplatesReducer } from './url_templates';
+import { UrlTemplatesState, urlTemplatesReducer, syncTemplatesSaga } from './url_templates';
 import {
   AdvancedSettingsState,
   advancedSettingsReducer,
   syncSettingsSaga,
 } from './advanced_settings';
-import { DatasourceState, datasourceReducer, datasourceSaga } from './datasource';
+import { DatasourceState, datasourceReducer } from './datasource';
+import { datasourceSaga } from './datasource.sagas';
 import {
   IndexPatternProvider,
   Workspace,
@@ -30,9 +31,11 @@ import {
   GraphWorkspaceSavedObject,
   AdvancedSettings,
   WorkspaceField,
+  UrlTemplate,
 } from '../types';
 import { loadingSaga, savingSaga } from './persistence';
 import { metaDataReducer, MetaDataState, syncBreadcrumbSaga } from './meta_data';
+import { fillWorkspaceSaga } from './workspace';
 
 export interface GraphState {
   fields: FieldsState;
@@ -50,12 +53,15 @@ export interface GraphStoreDependencies {
   getWorkspace: () => Workspace | null;
   getSavedWorkspace: () => GraphWorkspaceSavedObject;
   notifications: CoreStart['notifications'];
+  http: CoreStart['http'];
   showSaveModal: (el: React.ReactNode) => void;
   savePolicy: GraphSavePolicy;
   changeUrl: (newUrl: string) => void;
   notifyAngular: () => void;
   setLiveResponseFields: (fields: WorkspaceField[]) => void;
-  chrome: Chrome;
+  setUrlTemplates: (templates: UrlTemplate[]) => void;
+  setWorkspaceInitialized: () => void;
+  chrome: ChromeStart;
 }
 
 export function createRootReducer(basePath: string) {
@@ -68,10 +74,7 @@ export function createRootReducer(basePath: string) {
   });
 }
 
-export function registerSagas(
-  sagaMiddleware: SagaMiddleware<object>,
-  deps: GraphStoreDependencies
-) {
+function registerSagas(sagaMiddleware: SagaMiddleware<object>, deps: GraphStoreDependencies) {
   sagaMiddleware.run(datasourceSaga(deps));
   sagaMiddleware.run(loadingSaga(deps));
   sagaMiddleware.run(savingSaga(deps));
@@ -80,6 +83,8 @@ export function registerSagas(
   sagaMiddleware.run(syncSettingsSaga(deps));
   sagaMiddleware.run(updateSaveButtonSaga(deps));
   sagaMiddleware.run(syncBreadcrumbSaga(deps));
+  sagaMiddleware.run(syncTemplatesSaga(deps));
+  sagaMiddleware.run(fillWorkspaceSaga(deps));
 }
 
 export const createGraphStore = (deps: GraphStoreDependencies) => {

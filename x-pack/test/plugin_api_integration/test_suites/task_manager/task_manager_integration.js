@@ -9,6 +9,8 @@ import expect from '@kbn/expect';
 import url from 'url';
 import supertestAsPromised from 'supertest-as-promised';
 
+const { task: { properties: taskManagerIndexMapping } } = require('../../../../legacy/plugins/task_manager/mappings.json');
+
 export default function ({ getService }) {
   const es = getService('es');
   const log = getService('log');
@@ -29,6 +31,15 @@ export default function ({ getService }) {
           index: testHistoryIndex,
           q: 'type:task',
           refresh: true,
+        });
+      } else {
+        await es.indices.create({
+          index: testHistoryIndex,
+          body: {
+            mappings: {
+              properties: taskManagerIndexMapping
+            },
+          },
         });
       }
     });

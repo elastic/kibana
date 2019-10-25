@@ -3,13 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-/* eslint-disable no-console */
 
 import fs from 'fs';
-import Git from '@elastic/nodegit';
-import rimraf from 'rimraf';
+import del from 'del';
 
 import { TestConfig, Repo } from '../../model/test_config';
+import { prepareProjectByCloning } from '../test_utils';
 
 export class TestRepoManager {
   private repos: Repo[];
@@ -20,46 +19,20 @@ export class TestRepoManager {
 
   public async importAllRepos() {
     for (const repo of this.repos) {
-      await this.importRepo(repo.url, repo.path);
+      await prepareProjectByCloning(repo.url, repo.path);
     }
   }
 
-  public importRepo(url: string, path: string) {
-    return new Promise(resolve => {
-      if (!fs.existsSync(path)) {
-        rimraf(path, error => {
-          console.log(`begin to import ${url} to ${path}`);
-          Git.Clone.clone(url, path, {
-            fetchOpts: {
-              callbacks: {
-                certificateCheck: () => 0,
-              },
-            },
-          }).then(repo => {
-            console.log(`import ${url} done`);
-            resolve(repo);
-          });
-        });
-      } else {
-        resolve();
-      }
-    });
-  }
-
   public async cleanAllRepos() {
-    this.repos.forEach(repo => {
-      this.cleanRepo(repo.path);
-    });
+    for (const repo of this.repos) {
+      await this.cleanRepo(repo.path);
+    }
   }
 
-  public async cleanRepo(path: string) {
-    return new Promise(resolve => {
-      if (fs.existsSync(path)) {
-        rimraf(path, resolve);
-      } else {
-        resolve(true);
-      }
-    });
+  private async cleanRepo(path: string) {
+    if (fs.existsSync(path)) {
+      await del(path);
+    }
   }
 
   public getRepo(language: string): Repo {

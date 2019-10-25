@@ -6,10 +6,10 @@
 
 import { taskManagerMock } from '../../task_manager/task_manager.mock';
 import { createExecuteFunction } from './create_execute_function';
-import { SavedObjectsClientMock } from '../../../../../src/core/server/mocks';
+import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
 
 const mockTaskManager = taskManagerMock.create();
-const savedObjectsClient = SavedObjectsClientMock.create();
+const savedObjectsClient = savedObjectsClientMock.create();
 const getBasePath = jest.fn();
 
 beforeEach(() => jest.resetAllMocks());
@@ -18,7 +18,6 @@ describe('execute()', () => {
   test('schedules the action with all given parameters', async () => {
     const executeFn = createExecuteFunction({
       getBasePath,
-      isSecurityEnabled: true,
       taskManager: mockTaskManager,
       getScopedSavedObjectsClient: jest.fn().mockReturnValueOnce(savedObjectsClient),
     });
@@ -72,7 +71,6 @@ describe('execute()', () => {
       getBasePath,
       taskManager: mockTaskManager,
       getScopedSavedObjectsClient,
-      isSecurityEnabled: true,
     });
     savedObjectsClient.get.mockResolvedValueOnce({
       id: '123',
@@ -101,13 +99,22 @@ describe('execute()', () => {
         // base64 encoded "123:abc"
         authorization: 'ApiKey MTIzOmFiYw==',
       },
+      path: '/',
+      route: { settings: {} },
+      url: {
+        href: '/',
+      },
+      raw: {
+        req: {
+          url: '/',
+        },
+      },
     });
   });
 
   test(`doesn't use API keys when not provided`, async () => {
     const getScopedSavedObjectsClient = jest.fn().mockReturnValueOnce(savedObjectsClient);
     const executeFn = createExecuteFunction({
-      isSecurityEnabled: false,
       getBasePath,
       taskManager: mockTaskManager,
       getScopedSavedObjectsClient,
@@ -135,24 +142,16 @@ describe('execute()', () => {
     expect(getScopedSavedObjectsClient).toHaveBeenCalledWith({
       getBasePath: expect.anything(),
       headers: {},
+      path: '/',
+      route: { settings: {} },
+      url: {
+        href: '/',
+      },
+      raw: {
+        req: {
+          url: '/',
+        },
+      },
     });
-  });
-
-  test(`throws an error when isSecurityEnabled is true and key not passed in`, async () => {
-    const executeFn = createExecuteFunction({
-      getBasePath,
-      taskManager: mockTaskManager,
-      getScopedSavedObjectsClient: jest.fn().mockReturnValueOnce(savedObjectsClient),
-      isSecurityEnabled: true,
-    });
-    await expect(
-      executeFn({
-        id: '123',
-        params: { baz: false },
-        spaceId: 'default',
-      })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"API key is required. The attribute \\"apiKey\\" is missing."`
-    );
   });
 });

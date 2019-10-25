@@ -41,6 +41,7 @@ const generateId = htmlIdGenerator();
 const isEmpty = (value: any) => value === undefined || value === null;
 
 export interface RangeValues {
+  type?: 'range';
   from?: number;
   to?: number;
 }

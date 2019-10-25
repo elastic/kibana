@@ -108,9 +108,7 @@ export default () => Joi.object({
     ssl: HANDLED_IN_NEW_PLATFORM,
   }).default(),
 
-  uiSettings: Joi.object().keys({
-    overrides: Joi.object().unknown(true).default()
-  }).default(),
+  uiSettings: HANDLED_IN_NEW_PLATFORM,
 
   logging: Joi.object().keys({
     silent: Joi.boolean().default(false),
@@ -167,7 +165,7 @@ export default () => Joi.object({
     watchPort: Joi.number().default(5602),
     watchHost: Joi.string().hostname().default('localhost'),
     watchPrebuild: Joi.boolean().default(false),
-    watchProxyTimeout: Joi.number().default(5 * 60000),
+    watchProxyTimeout: Joi.number().default(10 * 60000),
     useBundleCache: Joi.boolean().default(Joi.ref('$prod')),
     sourceMaps: Joi.when('$prod', {
       is: true,
@@ -178,7 +176,7 @@ export default () => Joi.object({
           Joi.string().required(),
           Joi.boolean()
         )
-        .default('#cheap-source-map'),
+        .default(!!process.env.CODE_COVERAGE ? 'true' : '#cheap-source-map'),
     }),
     workers: Joi.number().min(1),
     profile: Joi.boolean().default(false)

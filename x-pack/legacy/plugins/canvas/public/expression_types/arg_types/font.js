@@ -10,6 +10,9 @@ import { get, mapValues, set } from 'lodash';
 import { openSans } from '../../../common/lib/fonts';
 import { templateFromReactComponent } from '../../lib/template_from_react_component';
 import { TextStylePicker } from '../../components/text_style_picker';
+import { ArgTypesStrings } from '../../../i18n';
+
+const { Font: strings } = ArgTypesStrings;
 
 export const FontArgInput = props => {
   const { onValueChange, argValue, workpad } = props;
@@ -53,8 +56,8 @@ FontArgInput.displayName = 'FontArgInput';
 
 export const font = () => ({
   name: 'font',
-  displayName: 'Text settings',
-  help: 'Set the font, size and color',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelp(),
   template: templateFromReactComponent(FontArgInput),
   default: `{font size=14 family="${openSans.value}" color="#000000" align=left}`,
 });

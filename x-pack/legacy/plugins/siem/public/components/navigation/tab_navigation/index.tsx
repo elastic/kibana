@@ -51,7 +51,9 @@ export const TabNavigation = React.memo<TabNavigationProps>(props => {
     if (currentTabSelected !== selectedTabId) {
       setSelectedTabId(currentTabSelected);
     }
-  }, [pageName, tabName]);
+
+    // we do need navTabs in case the selectedTabId appears after initial load (ex. checking permissions for anomalies)
+  }, [pageName, tabName, navTabs]);
 
   const renderTabs = (): JSX.Element[] =>
     Object.values(navTabs).map(tab => (

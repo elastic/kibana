@@ -13,7 +13,7 @@ export class RepositoryConfigController {
   private repositoryConfigCache: { [repoUri: string]: RepositoryConfig } = {};
   private repoObjectClient: RepositoryObjectClient;
 
-  constructor(readonly esClient: EsClient) {
+  constructor(public readonly esClient: EsClient) {
     this.repoObjectClient = new RepositoryObjectClient(esClient);
   }
 

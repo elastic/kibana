@@ -7,7 +7,9 @@
 import React, { FunctionComponent, ChangeEvent } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
+import { ArgTypesStrings } from '../../../../i18n';
 
+const { ContainerStyle: strings } = ArgTypesStrings;
 type Overflow = 'hidden' | 'visible';
 
 export interface Arguments {
@@ -23,8 +25,8 @@ interface Props extends Arguments {
 }
 
 const overflows: Array<{ value: Overflow; text: string }> = [
-  { value: 'hidden', text: 'Hidden' },
-  { value: 'visible', text: 'Visible' },
+  { value: 'hidden', text: strings.getOverflowHiddenOption() },
+  { value: 'visible', text: strings.getOverflowVisibleOption() },
 ];
 
 const opacities = [
@@ -59,12 +61,12 @@ export const AppearanceForm: FunctionComponent<Props> = ({
   return (
     <EuiFlexGroup gutterSize="s" justify-content="spaceBetween">
       <EuiFlexItem grow={2}>
-        <EuiFormRow label="Padding" display="rowCompressed">
+        <EuiFormRow label={strings.getPaddingLabel()} display="rowCompressed">
           <EuiFieldNumber compressed value={Number(padding)} onChange={namedChange('padding')} />
         </EuiFormRow>
       </EuiFlexItem>
       <EuiFlexItem grow={3}>
-        <EuiFormRow label="Opacity" display="rowCompressed">
+        <EuiFormRow label={strings.getOpacityLabel()} display="rowCompressed">
           <EuiSelect
             compressed
             value={opacity}
@@ -74,7 +76,7 @@ export const AppearanceForm: FunctionComponent<Props> = ({
         </EuiFormRow>
       </EuiFlexItem>
       <EuiFlexItem grow={3}>
-        <EuiFormRow label="Overflow" display="rowCompressed">
+        <EuiFormRow label={strings.getOverflowLabel()} display="rowCompressed">
           <EuiSelect
             compressed
             value={overflow}

@@ -8,7 +8,9 @@ export interface CommitInfo {
   updated: Date;
   message: string;
   committer: string;
+  committerEmail?: string;
   author: string;
+  authorEmail?: string;
   id: string;
   parents: string[];
   treeId: string;
@@ -17,7 +19,7 @@ export interface CommitInfo {
 export interface ReferenceInfo {
   name: string;
   reference: string;
-  commit: CommitInfo;
+  commit?: CommitInfo;
   type: ReferenceType;
 }
 

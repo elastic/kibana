@@ -9,11 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 
-interface Props {
-  children: JSX.Element;
-}
-
-export const Description: FC<Props> = memo(({ children }) => {
+export const Description: FC = memo(({ children }) => {
   const title = i18n.translate(
     'xpack.ml.newJob.wizard.jobDetailsStep.advancedSection.enableModelPlot.title',
     {
@@ -32,7 +28,7 @@ export const Description: FC<Props> = memo(({ children }) => {
       }
     >
       <EuiFormRow label={title} describedByIds={['description']}>
-        {children}
+        <>{children}</>
       </EuiFormRow>
     </EuiDescribedFormGroup>
   );

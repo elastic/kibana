@@ -34,8 +34,14 @@ export function createMockServer(config: Record<string, any> = defaultConfig) {
   server.register({
     name: 'alerting',
     register(pluginServer: Hapi.Server) {
-      pluginServer.expose('registerType', alertTypeRegistry.register);
-      pluginServer.expose('listTypes', alertTypeRegistry.list);
+      pluginServer.expose({
+        setup: {
+          registerType: alertTypeRegistry.register,
+        },
+        start: {
+          listTypes: alertTypeRegistry.list,
+        },
+      });
     },
   });
 

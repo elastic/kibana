@@ -1,7 +1,7 @@
 {
   "monitorPageTitle": {
-    "id": "auto-http-0X131221E73F825974",
-    "url": "https://www.google.com/",
+    "id": "0002-up",
+    "url": "http://localhost:5678/pattern?r=200x1",
     "name": ""
   }
 }

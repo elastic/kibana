@@ -308,7 +308,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
                 >
                   <FormattedMessage
                     id="xpack.snapshotRestore.policyForm.stepLogistics.policySnapshotNameHelpTextDocLink"
-                    defaultMessage="Learn more"
+                    defaultMessage="Learn more."
                   />
                 </EuiLink>
               ),
@@ -382,7 +382,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
                     <EuiLink href={documentationLinksService.getCronUrl()} target="_blank">
                       <FormattedMessage
                         id="xpack.snapshotRestore.policyForm.stepLogistics.policyScheduleHelpTextDocLink"
-                        defaultMessage="Learn more"
+                        defaultMessage="Learn more."
                       />
                     </EuiLink>
                   ),
@@ -476,12 +476,12 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiTitle>
-            <h3>
+            <h2>
               <FormattedMessage
                 id="xpack.snapshotRestore.policyForm.stepLogisticsTitle"
                 defaultMessage="Logistics"
               />
-            </h3>
+            </h2>
           </EuiTitle>
         </EuiFlexItem>
 

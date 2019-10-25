@@ -13,15 +13,8 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
   const testSubjects = getService('testSubjects');
 
   return {
-    async waitForNextButtonVisible() {
-      await retry.waitFor(
-        'next button to be visible',
-        async () => await testSubjects.isDisplayed('mlJobWizardNavButtonNext')
-      );
-    },
-
     async clickNextButton() {
-      await this.waitForNextButtonVisible();
+      await testSubjects.existOrFail('mlJobWizardNavButtonNext');
       await testSubjects.clickWhenNotDisabled('mlJobWizardNavButtonNext');
     },
 
@@ -77,17 +70,16 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
       await testSubjects.existOrFail('mlJobWizardAggSelection > comboBoxInput');
     },
 
-    async assertAggAndFieldSelection(expectedIdentifier: string) {
+    async assertAggAndFieldSelection(expectedIdentifier: string[]) {
       const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
         'mlJobWizardAggSelection > comboBoxInput'
       );
-      expect(comboBoxSelectedOptions.length).to.eql(1);
-      expect(comboBoxSelectedOptions[0]).to.eql(expectedIdentifier);
+      expect(comboBoxSelectedOptions).to.eql(expectedIdentifier);
     },
 
     async selectAggAndField(identifier: string, isIdentifierKeptInField: boolean) {
       await comboBox.set('mlJobWizardAggSelection > comboBoxInput', identifier);
-      await this.assertAggAndFieldSelection(isIdentifierKeptInField ? identifier : '');
+      await this.assertAggAndFieldSelection(isIdentifierKeptInField ? [identifier] : []);
     },
 
     async assertBucketSpanInputExists() {
@@ -103,7 +95,10 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
     },
 
     async setBucketSpan(bucketSpan: string) {
-      await testSubjects.setValue('mlJobWizardInputBucketSpan', bucketSpan, { withKeyboard: true });
+      await testSubjects.setValue('mlJobWizardInputBucketSpan', bucketSpan, {
+        clearWithKeyboard: true,
+        typeCharByChar: true,
+      });
       await this.assertBucketSpanValue(bucketSpan);
     },
 
@@ -117,7 +112,7 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
     },
 
     async setJobId(jobId: string) {
-      await testSubjects.setValue('mlJobWizardInputJobId', jobId, { withKeyboard: true });
+      await testSubjects.setValue('mlJobWizardInputJobId', jobId, { clearWithKeyboard: true });
       await this.assertJobIdValue(jobId);
     },
 
@@ -134,7 +129,7 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
 
     async setJobDescription(jobDescription: string) {
       await testSubjects.setValue('mlJobWizardInputJobDescription', jobDescription, {
-        withKeyboard: true,
+        clearWithKeyboard: true,
       });
       await this.assertJobDescriptionValue(jobDescription);
     },
@@ -224,7 +219,7 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
 
     async setModelMemoryLimit(modelMemoryLimit: string) {
       await testSubjects.setValue('mlJobWizardInputModelMemoryLimit', modelMemoryLimit, {
-        withKeyboard: true,
+        clearWithKeyboard: true,
       });
       await this.assertModelMemoryLimitValue(modelMemoryLimit);
     },
@@ -283,9 +278,11 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
     },
 
     async assertDateRangeSelection(expectedStartDate: string, expectedEndDate: string) {
-      expect(await this.getSelectedDateRange()).to.eql({
-        startDate: expectedStartDate,
-        endDate: expectedEndDate,
+      await retry.tryForTime(5000, async () => {
+        expect(await this.getSelectedDateRange()).to.eql({
+          startDate: expectedStartDate,
+          endDate: expectedEndDate,
+        });
       });
     },
 
@@ -295,21 +292,17 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
     },
 
     async ensureAdvancedSectionOpen() {
-      await retry.try(async () => {
+      await retry.tryForTime(5000, async () => {
         if ((await testSubjects.exists('mlJobWizardAdvancedSection')) === false) {
           await testSubjects.click('mlJobWizardToggleAdvancedSection');
-          await testSubjects.existOrFail('mlJobWizardAdvancedSection');
+          await testSubjects.existOrFail('mlJobWizardAdvancedSection', { timeout: 1000 });
         }
       });
     },
 
     async createJobAndWaitForCompletion() {
       await testSubjects.clickWhenNotDisabled('mlJobWizardButtonCreateJob');
-      await retry.waitForWithTimeout(
-        'job processing to finish',
-        5 * 60 * 1000,
-        async () => await testSubjects.exists('mlJobWizardButtonRunInRealTime')
-      );
+      await testSubjects.existOrFail('mlJobWizardButtonRunInRealTime', { timeout: 5 * 60 * 1000 });
     },
   };
 }

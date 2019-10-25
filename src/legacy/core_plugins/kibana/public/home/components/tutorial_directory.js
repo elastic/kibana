@@ -22,7 +22,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Synopsis } from './synopsis';
 import { SampleDataSetCards } from './sample_data_set_cards';
-import chrome from 'ui/chrome';
+import { getServices } from '../kibana_services';
 
 import {
   EuiPage,
@@ -64,7 +64,7 @@ class TutorialDirectoryUi extends React.Component {
         id: 'logging',
         name: this.props.intl.formatMessage({
           id: 'kbn.home.tutorial.tabs.loggingTitle',
-          defaultMessage: 'Logging',
+          defaultMessage: 'Logs',
         }),
       },
       {
@@ -112,7 +112,7 @@ class TutorialDirectoryUi extends React.Component {
   async componentDidMount() {
     this._isMounted = true;
 
-    chrome.breadcrumbs.set([
+    getServices().chrome.setBreadcrumbs([
       {
         text: homeTitle,
         href: '#/home',

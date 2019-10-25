@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Axis, ValueAxis, SeriesParam } from '../../../types';
+import { Axis, ValueAxis, SeriesParam, Style } from '../../../types';
 import {
   ChartTypes,
   ChartModes,
@@ -31,7 +31,7 @@ const defaultValueAxisId = 'ValueAxis-1';
 
 const axis = {
   show: true,
-  style: {},
+  style: {} as Style,
   title: {
     text: '',
   },

@@ -8,7 +8,7 @@ import { createMockServer } from './_mock_server';
 import { muteAlertInstanceRoute } from './mute_instance';
 
 const { server, alertsClient } = createMockServer();
-muteAlertInstanceRoute(server);
+server.route(muteAlertInstanceRoute);
 
 test('mutes an alert instance', async () => {
   const request = {

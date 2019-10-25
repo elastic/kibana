@@ -5,7 +5,7 @@
  */
 
 import Hapi from 'hapi';
-import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks';
+import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import { actionsClientMock } from '../actions_client.mock';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/plugin.mock';
@@ -21,7 +21,7 @@ export function createMockServer(config: Record<string, any> = defaultConfig) {
 
   const actionsClient = actionsClientMock.create();
   const actionTypeRegistry = actionTypeRegistryMock.create();
-  const savedObjectsClient = SavedObjectsClientMock.create();
+  const savedObjectsClient = savedObjectsClientMock.create();
   const encryptedSavedObjects = encryptedSavedObjectsMock.create();
 
   server.config = () => {
@@ -38,8 +38,14 @@ export function createMockServer(config: Record<string, any> = defaultConfig) {
   server.register({
     name: 'actions',
     register(pluginServer: Hapi.Server) {
-      pluginServer.expose('registerType', actionTypeRegistry.register);
-      pluginServer.expose('listTypes', actionTypeRegistry.list);
+      pluginServer.expose({
+        setup: {
+          registerType: actionTypeRegistry.register.bind(actionTypeRegistry),
+        },
+        start: {
+          listTypes: actionTypeRegistry.list.bind(actionTypeRegistry),
+        },
+      });
     },
   });
 
@@ -59,5 +65,5 @@ export function createMockServer(config: Record<string, any> = defaultConfig) {
   server.decorate('request', 'getActionsClient', () => actionsClient);
   server.decorate('request', 'getBasePath', () => '/s/my-space');
 
-  return { server, savedObjectsClient, actionsClient, actionTypeRegistry };
+  return { server, savedObjectsClient, actionsClient, actionTypeRegistry, encryptedSavedObjects };
 }

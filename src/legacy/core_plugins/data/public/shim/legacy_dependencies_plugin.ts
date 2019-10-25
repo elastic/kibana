@@ -17,14 +17,12 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
 import { Storage } from 'ui/storage';
 import { Plugin } from '../../../../../../src/core/public';
-import { initLegacyModule } from './legacy_module';
 
 /** @internal */
 export interface LegacyDependenciesPluginSetup {
-  savedObjectsClient: any;
+  storage: Storage;
 }
 
 export interface LegacyDependenciesPluginStart {
@@ -33,10 +31,8 @@ export interface LegacyDependenciesPluginStart {
 
 export class LegacyDependenciesPlugin implements Plugin<any, any> {
   public setup() {
-    initLegacyModule();
-
     return {
-      savedObjectsClient: chrome.getSavedObjectsClient(),
+      storage: new Storage(window.localStorage),
     } as LegacyDependenciesPluginSetup;
   }
 

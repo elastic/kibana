@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PluginInitializer } from 'kibana/public';
+import { PluginInitializer, PluginInitializerContext } from 'kibana/public';
 import {
   CorePluginBDeps,
   CorePluginBPlugin,
@@ -29,4 +29,4 @@ export const plugin: PluginInitializer<
   CorePluginBPluginSetup,
   CorePluginBPluginStart,
   CorePluginBDeps
-> = () => new CorePluginBPlugin();
+> = (context: PluginInitializerContext) => new CorePluginBPlugin(context);

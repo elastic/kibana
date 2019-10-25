@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ESFilter } from 'elasticsearch';
 import { idx } from '@kbn/elastic-idx';
+import { ESFilter } from '../../../../typings/elasticsearch';
 import {
   ERROR_GROUP_ID,
   PROCESSOR_EVENT,
@@ -72,7 +72,7 @@ export async function getBuckets({
   }));
 
   return {
-    totalHits: resp.hits.total,
+    noHits: resp.hits.total.value === 0,
     buckets
   };
 }

@@ -19,7 +19,8 @@ exports[`Storyshots arguments/SeriesStyle simple 1`] = `
       <div
         className="euiText euiText--small"
       >
-        Color 
+        Color
+         
       </div>
     </div>
     <div
@@ -70,7 +71,8 @@ exports[`Storyshots arguments/SeriesStyle/components simple: defaults 1`] = `
       <div
         className="euiText euiText--small"
       >
-        Color 
+        Color
+         
       </div>
     </div>
     <div
@@ -121,7 +123,8 @@ exports[`Storyshots arguments/SeriesStyle/components simple: no labels 1`] = `
       <div
         className="euiText euiText--small"
       >
-        Color 
+        Color
+         
       </div>
     </div>
     <div
@@ -172,7 +175,8 @@ exports[`Storyshots arguments/SeriesStyle/components simple: no series 1`] = `
       <div
         className="euiText euiText--small"
       >
-        Color 
+        Color
+         
       </div>
     </div>
     <div
@@ -246,7 +250,8 @@ exports[`Storyshots arguments/SeriesStyle/components simple: with series 1`] = `
       <div
         className="euiText euiText--small"
       >
-        Color 
+        Color
+         
       </div>
     </div>
     <div

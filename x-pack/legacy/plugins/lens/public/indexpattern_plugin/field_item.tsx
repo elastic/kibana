@@ -39,11 +39,13 @@ import { Filter, buildEsQuery, getEsQueryConfig } from '@kbn/es-query';
 import { Query } from 'src/plugins/data/common';
 // @ts-ignore
 import { fieldFormats } from '../../../../../../src/legacy/ui/public/registry/field_formats';
-import { IndexPattern, IndexPatternField, DraggedField } from './indexpattern';
+import { DraggedField } from './indexpattern';
 import { DragDrop } from '../drag_drop';
-import { FieldIcon, getColorForDataType } from './field_icon';
 import { DatasourceDataPanelProps, DataType } from '../types';
 import { BucketedAggregation, FieldStatsResponse } from '../../common';
+import { IndexPattern, IndexPatternField } from './types';
+import { LensFieldIcon, getColorForDataType } from './lens_field_icon';
+import { trackUiEvent } from '../lens_ui_telemetry';
 
 export interface FieldItemProps {
   core: DatasourceDataPanelProps['core'];
@@ -140,6 +142,7 @@ export function FieldItem(props: FieldItemProps) {
   function togglePopover() {
     setOpen(!infoIsOpen);
     if (!infoIsOpen) {
+      trackUiEvent('indexpattern_field_info_click');
       fetchData();
     }
   }
@@ -171,13 +174,11 @@ export function FieldItem(props: FieldItemProps) {
                   togglePopover();
                 }
               }}
-              aria-label={i18n.translate('xpack.lens.indexPattern.fieldStatsButtonAriaLabel', {
-                defaultMessage:
-                  'Click or press Enter for information about {fieldName}. Or, drag field into visualization.',
-                values: { fieldName: field.name },
+              aria-label={i18n.translate('xpack.lens.indexPattern.fieldStatsButtonLabel', {
+                defaultMessage: 'Click for a field preview. Or, drag and drop to visualize.',
               })}
             >
-              <FieldIcon type={field.type as DataType} />
+              <LensFieldIcon type={field.type as DataType} />
 
               <span className="lnsFieldItem__name" title={field.name}>
                 {wrappableHighlightableFieldName}
@@ -185,10 +186,8 @@ export function FieldItem(props: FieldItemProps) {
 
               <EuiIconTip
                 anchorClassName="lnsFieldItem__infoIcon"
-                content={i18n.translate('xpack.lens.indexPattern.fieldStatsButton', {
-                  defaultMessage:
-                    'Click for information about {fieldName}. Or, drag field into visualization.',
-                  values: { fieldName: field.name },
+                content={i18n.translate('xpack.lens.indexPattern.fieldStatsButtonLabel', {
+                  defaultMessage: 'Click for a field preview. Or, drag and drop to visualize.',
                 })}
                 type="iInCircle"
                 color="subdued"
@@ -223,7 +222,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
     return (
       <EuiText size="s">
         {i18n.translate('xpack.lens.indexPattern.fieldStatsNoData', {
-          defaultMessage: 'No data to display',
+          defaultMessage: 'No data to display.',
         })}
       </EuiText>
     );
@@ -362,11 +361,11 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
         defaultMessage: 'Count',
       })
     );
-    const expectedColor = getColorForDataType(field.type);
     const colors: DataSeriesColorsValues = {
       colorValues: [],
       specId,
     };
+    const expectedColor = getColorForDataType(field.type);
 
     const seriesColors = new Map([[colors, expectedColor]]);
 
@@ -446,7 +445,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
               <EuiFlexGroup alignItems="stretch" key={topValue.key} gutterSize="xs">
                 <EuiFlexItem grow={true} className="eui-textTruncate">
                   {formatted === '' ? (
-                    <EuiText size="s" color="subdued">
+                    <EuiText size="xs" color="subdued">
                       <em>
                         {i18n.translate('xpack.lens.indexPattern.fieldPanelEmptyStringValue', {
                           defaultMessage: 'Empty string',
@@ -455,7 +454,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
                     </EuiText>
                   ) : (
                     <EuiToolTip content={formatted} delay="long">
-                      <EuiText size="s" className="eui-textTruncate">
+                      <EuiText size="xs" color="subdued" className="eui-textTruncate">
                         {formatted}
                       </EuiText>
                     </EuiToolTip>
@@ -482,7 +481,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
           <>
             <EuiFlexGroup alignItems="stretch" gutterSize="xs">
               <EuiFlexItem grow={true} className="eui-textTruncate">
-                <EuiText size="s" className="eui-textTruncate" color="subdued">
+                <EuiText size="xs" className="eui-textTruncate" color="subdued">
                   {i18n.translate('xpack.lens.indexPattern.otherDocsLabel', {
                     defaultMessage: 'Other',
                   })}

@@ -9,11 +9,51 @@ import { Server } from 'hapi';
 import * as os from 'os';
 import path from 'path';
 
+import { simplegit } from '@elastic/simple-git/dist';
+import del from 'del';
 import { AnyObject } from './lib/esqueue';
 import { ServerOptions } from './server_options';
 import { ServerFacade } from '..';
 
-// TODO migrate other duplicate classes, functions
+export async function prepareProjectByCloning(url: string, p: string) {
+  if (fs.existsSync(p)) {
+    return;
+  }
+
+  await del(p);
+  fs.mkdirSync(p, { recursive: true });
+  const git = simplegit(p);
+  return await git.clone(url, p, ['--bare']);
+}
+
+export async function prepareProjectByInit(
+  repoPath: string,
+  commits: { [commitMessage: string]: { [path: string]: string } }
+) {
+  if (!fs.existsSync(repoPath)) fs.mkdirSync(repoPath, { recursive: true });
+  const git = simplegit(repoPath);
+  await git.init();
+  await git.addConfig('user.email', 'test@test.com');
+  await git.addConfig('user.name', 'tester');
+  const results: string[] = [];
+  for (const [message, commit] of Object.entries(commits)) {
+    const files = [];
+    for (const [file, content] of Object.entries(commit)) {
+      const filePath = path.join(repoPath, file);
+      const dir = path.dirname(filePath);
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      fs.writeFileSync(filePath, content, 'utf8');
+      files.push(file);
+      await git.add(file);
+    }
+    await git.commit(message, files);
+    const c = await git.revparse(['HEAD']);
+    results.push(c);
+  }
+  return { git, commits: results };
+}
 
 export const emptyAsyncFunc = async (_: AnyObject): Promise<any> => {
   Promise.resolve({});
@@ -34,8 +74,8 @@ const TEST_OPTIONS = {
     enableMavenImport: true,
     enableGradleImport: true,
     installNodeDependency: true,
-    enableGitCertCheck: true,
     gitProtocolWhitelist: ['ssh', 'https', 'git'],
+    enableJavaSecurityManager: true,
   },
   disk: {
     thresholdEnabled: true,
