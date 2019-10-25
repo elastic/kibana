@@ -11,9 +11,12 @@ import {
 } from '../../../../../src/core/public';
 import { CanvasSetup, CanvasStart, CanvasSetupDeps, CanvasStartDeps, CanvasPlugin } from './plugin';
 
-export const plugin: PluginInitializer<void, void, CanvasSetupDeps, CanvasStartDeps> = (
-  initializerContext: PluginInitializerContext
-) => {
+export const plugin: PluginInitializer<
+  CanvasSetup,
+  CanvasStart,
+  CanvasSetupDeps,
+  CanvasStartDeps
+> = (initializerContext: PluginInitializerContext) => {
   return new CanvasPlugin();
 };
 
