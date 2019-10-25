@@ -21,7 +21,6 @@ import {
   mockResultIp,
   mockTopNFlowQueryDsl,
 } from './mock';
-import toJson from 'enzyme-to-json';
 
 jest.mock('./query_top_n_flow.dsl', () => {
   const r = jest.requireActual('./query_top_n_flow.dsl');
