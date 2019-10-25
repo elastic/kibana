@@ -22,7 +22,17 @@ import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { NewVisHelp } from './new_vis_help';
 import chrome from 'ui/chrome';
 
-jest.doMock('ui/chrome');
+jest.mock('../../kibana_services', () => {
+  return {
+    getServices: () => ({
+      addBasePath: jest.fn(url => `testbasepath${url}`),
+    }),
+  };
+});
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
 
 describe('NewVisHelp', () => {
   it('should render as expected', () => {
@@ -36,7 +46,7 @@ describe('NewVisHelp', () => {
               aliasUrl: '/my/fancy/new/thing',
               description: 'Some desc',
               highlighted: false,
-              icon: 'wahtever',
+              icon: 'whatever',
               name: 'whatever',
               promotion: {
                 buttonText: 'Do it now!',
