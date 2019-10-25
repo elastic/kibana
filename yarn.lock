@@ -6240,11 +6240,6 @@ babel-plugin-minify-type-constructors@^0.4.3:
   dependencies:
     babel-helper-is-void-0 "^0.4.3"
 
-babel-plugin-mock-imports@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/babel-plugin-mock-imports/-/babel-plugin-mock-imports-1.0.1.tgz#1476ed4de911347d344fc81caab4beced80804b1"
-  integrity sha512-Nu4unCGKeqOfLlfnLPnv/pEHancdAGTqFqyArZ27gsKIiKxeZvMr87IHB8BxhMu3Bfc8fA8bx7hWt32aZbEwpQ==
-
 babel-plugin-named-asset-import@^0.3.1:
   version "0.3.3"
   resolved "https://registry.yarnpkg.com/babel-plugin-named-asset-import/-/babel-plugin-named-asset-import-0.3.3.tgz#9ba2f3ac4dc78b042651654f07e847adfe50667c"
