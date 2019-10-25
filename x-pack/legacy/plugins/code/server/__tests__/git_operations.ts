@@ -9,7 +9,7 @@ import assert from 'assert';
 import { execSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
-import rimraf from 'rimraf';
+import del from 'del';
 import { GitOperations } from '../git_operations';
 import { createTestServerOption } from '../test_utils';
 import { prepareProjectByCloning as cloneProject, prepareProjectByInit } from '../test_utils';
@@ -40,7 +40,7 @@ describe('git_operations', () => {
       const headCommit = await g.getCommitInfo(repoUri, 'HEAD');
       assert.strictEqual(headRevision, headCommit!.id);
     } finally {
-      rimraf.sync(repoDir);
+      del.sync(repoDir);
     }
   });
 
