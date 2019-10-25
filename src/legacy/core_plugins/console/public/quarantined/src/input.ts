@@ -36,7 +36,9 @@ export function initializeEditor($el: JQuery<HTMLElement>, $actionsEl: JQuery<HT
     parser: input.parser,
     execCommand: (cmd: string) => input.execCommand(cmd),
     getCursor: () => input.selection.lead,
-    isCompleteActive: () => input.__ace.completer && input.__ace.completer.activated,
+    isCompleterActive: () => {
+      return Boolean(input.__ace.completer && input.__ace.completer.activated);
+    },
     addChangeListener: (fn: any) => input.on('changeSelection', fn),
     removeChangeListener: (fn: any) => input.off('changeSelection', fn),
   };

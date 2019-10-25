@@ -318,7 +318,7 @@ export default function({
   parser,
   execCommand,
   getCursor,
-  isCompleteActive,
+  isCompleterActive,
   addChangeListener,
   removeChangeListener,
 }: {
@@ -326,7 +326,7 @@ export default function({
   parser: any;
   execCommand: (cmd: string) => void;
   getCursor: () => any;
-  isCompleteActive: () => boolean;
+  isCompleterActive: () => boolean;
   addChangeListener: (fn: any) => void;
   removeChangeListener: (fn: any) => void;
 }) {
@@ -970,10 +970,12 @@ export default function({
 
   function editorChangeListener() {
     const cursor = getCursor();
-    if (isCompleteActive()) {
-      return;
+    if (cursor && !isCompleterActive()) {
+      evaluateCurrentTokenAfterAChange({
+        column: cursor.column + 1,
+        lineNumber: cursor.row + 1,
+      });
     }
-    evaluateCurrentTokenAfterAChange(cursor);
   }
 
   function getCompletions(
