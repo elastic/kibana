@@ -110,7 +110,7 @@ export const ModuleJobs: FC<ModuleJobsProps> = ({
         {jobs.map((job, i) => (
           <li key={job.id}>
             <EuiFlexGroup>
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem>
                 <JobItem
                   jobPrefix={jobPrefix}
                   job={job}
