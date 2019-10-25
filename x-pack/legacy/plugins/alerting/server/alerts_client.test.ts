@@ -43,6 +43,7 @@ const mockedDate = new Date('2019-02-12T21:01:22.479Z');
 function getMockData(overwrites: Record<string, any> = {}) {
   return {
     enabled: true,
+    tags: ['foo'],
     alertTypeId: '123',
     interval: '10s',
     throttle: null,
@@ -172,6 +173,9 @@ describe('create()', () => {
         "interval": "10s",
         "muteAll": false,
         "mutedInstanceIds": Array [],
+        "tags": Array [
+          "foo",
+        ],
         "throttle": null,
         "updatedBy": "elastic",
       }
@@ -514,6 +518,7 @@ describe('create()', () => {
         throttle: null,
         muteAll: false,
         mutedInstanceIds: [],
+        tags: ['foo'],
       },
       {
         references: [
@@ -1173,6 +1178,7 @@ describe('update()', () => {
       id: '1',
       data: {
         interval: '10s',
+        tags: ['foo'],
         alertTypeParams: {
           bar: true,
         },
@@ -1231,6 +1237,9 @@ describe('update()', () => {
         "enabled": true,
         "interval": "10s",
         "scheduledTaskId": "task-123",
+        "tags": Array [
+          "foo",
+        ],
         "updatedBy": "elastic",
       }
     `);
@@ -1304,6 +1313,7 @@ describe('update()', () => {
       id: '1',
       data: {
         interval: '10s',
+        tags: ['foo'],
         alertTypeParams: {
           bar: true,
         },
@@ -1363,6 +1373,9 @@ describe('update()', () => {
         "enabled": true,
         "interval": "10s",
         "scheduledTaskId": "task-123",
+        "tags": Array [
+          "foo",
+        ],
         "updatedBy": "elastic",
       }
     `);
@@ -1406,6 +1419,7 @@ describe('update()', () => {
         id: '1',
         data: {
           interval: '10s',
+          tags: ['foo'],
           alertTypeParams: {
             bar: true,
           },

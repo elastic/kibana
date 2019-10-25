@@ -4,6 +4,9 @@
       "enabled": {
         "type": "boolean"
       },
+      "tags": {
+        "type": "keyword"
+      },
       "alertTypeId": {
         "type": "keyword"
       },

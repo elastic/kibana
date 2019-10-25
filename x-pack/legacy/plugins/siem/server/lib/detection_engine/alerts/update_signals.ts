@@ -93,6 +93,7 @@ export const updateSignal = async ({
   return alertsClient.update({
     id: signal.id,
     data: {
+      tags: [],
       interval: calculateInterval(interval, signal.interval),
       actions,
       alertTypeParams: nextAlertTypeParams,

@@ -180,6 +180,7 @@ export class AlertUtils {
       enabled: true,
       interval: '1m',
       throttle: '1m',
+      tags: [],
       alertTypeId: 'test.always-firing',
       alertTypeParams: {
         index: ES_TEST_INDEX_NAME,

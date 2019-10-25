@@ -54,6 +54,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
               objectRemover.add(space.id, response.body.id, 'alert');
               expect(response.body).to.eql({
                 id: response.body.id,
+                tags: ['foo'],
                 actions: [],
                 enabled: true,
                 alertTypeId: 'test.noop',

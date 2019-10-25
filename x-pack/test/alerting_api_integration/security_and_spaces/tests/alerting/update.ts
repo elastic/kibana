@@ -31,6 +31,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           objectRemover.add(space.id, createdAlert.id, 'alert');
 
           const updatedData = {
+            tags: ['bar'],
             alertTypeParams: {
               foo: true,
             },
@@ -89,6 +90,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send({
+              tags: ['bar'],
               alertTypeParams: {
                 foo: true,
               },
@@ -134,6 +136,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send({
+              tags: ['bar'],
               throttle: '1m',
               alertTypeId: '1',
               alertTypeParams: {
@@ -197,10 +200,10 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 statusCode: 400,
                 error: 'Bad Request',
                 message:
-                  'child "throttle" fails because ["throttle" is required]. child "interval" fails because ["interval" is required]. child "alertTypeParams" fails because ["alertTypeParams" is required]. child "actions" fails because ["actions" is required]',
+                  'child "throttle" fails because ["throttle" is required]. child "tags" fails because ["tags" is required]. child "interval" fails because ["interval" is required]. child "alertTypeParams" fails because ["alertTypeParams" is required]. child "actions" fails because ["actions" is required]',
                 validation: {
                   source: 'payload',
-                  keys: ['throttle', 'interval', 'alertTypeParams', 'actions'],
+                  keys: ['throttle', 'tags', 'interval', 'alertTypeParams', 'actions'],
                 },
               });
               break;
@@ -229,6 +232,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send({
+              tags: ['bar'],
               interval: '10s',
               throttle: '1m',
               alertTypeParams: {},
