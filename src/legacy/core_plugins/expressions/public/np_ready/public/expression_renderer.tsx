@@ -111,7 +111,7 @@ export const ExpressionRendererImplementation = ({
   }, []);
 
   const classes = classNames('expExpressionRenderer', {
-    'expExpressionRenderer-isLoading': state.isLoading,
+    'expExpressionRenderer-isEmpty': state.isEmpty,
     'expExpressionRenderer-hasError': !!state.error,
   });
 

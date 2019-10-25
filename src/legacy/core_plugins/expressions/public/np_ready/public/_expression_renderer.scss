@@ -12,7 +12,9 @@
   height: 100%;
 }
 
-.expExpressionRenderer-isLoading .expExpressionRenderer__expression,
-.expExpressionRenderer-hasError .expExpressionRenderer__expression {
-  display: none;
+.expExpressionRenderer-isEmpty,
+.expExpressionRenderer-hasError {
+  .expExpressionRenderer__expression {
+    display: none;
+  }
 }
