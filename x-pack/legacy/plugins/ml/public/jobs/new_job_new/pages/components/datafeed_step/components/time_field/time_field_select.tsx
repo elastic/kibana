@@ -19,11 +19,10 @@ interface Props {
 export const TimeFieldSelect: FC<Props> = ({ fields, changeHandler, selectedField }) => {
   const options: EuiComboBoxOptionProps[] = createFieldOptions(fields);
 
-  const selection: EuiComboBoxOptionProps[] = [
-    {
-      label: selectedField !== null ? selectedField : '',
-    },
-  ];
+  const selection: EuiComboBoxOptionProps[] = [];
+  if (selectedField !== null) {
+    selection.push({ label: selectedField });
+  }
 
   function onChange(selectedOptions: EuiComboBoxOptionProps[]) {
     const option = selectedOptions[0];
