@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
+import { EuiSpacer } from '@elastic/eui';
 
 import { NormalizedField } from '../../../../types';
-import { EditFieldSection, EditFieldFormRow } from '../edit_field';
+import { EditFieldSection, EditFieldFormRow, AdvancedSettingsWrapper } from '../edit_field';
 
 interface Props {
   field: NormalizedField;
@@ -40,6 +41,12 @@ export const TextType = React.memo(({ field }: Props) => {
           Field data frequency filter component here...
         </EditFieldFormRow>
       </EditFieldSection>
+
+      <EuiSpacer size="m" />
+
+      <AdvancedSettingsWrapper>
+        <div>Here will come the advanced settings</div>
+      </AdvancedSettingsWrapper>
     </>
   );
 });
