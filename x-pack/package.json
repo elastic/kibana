@@ -155,7 +155,6 @@
     "mocha-multi-reporters": "^1.1.7",
     "mochawesome": "^4.1.0",
     "mochawesome-merge": "^2.0.1",
-    "mochawesome-report-generator": "^4.0.1",
     "mustache": "^2.3.0",
     "mutation-observer": "^1.0.3",
     "node-fetch": "^2.6.0",
