@@ -37,7 +37,7 @@ export function Detail({ pkgkey, panel = DEFAULT_PANEL }: DetailProps) {
 
 type LayoutProps = PackageInfo & Pick<DetailProps, 'panel'> & EuiPageWidthProps;
 export function DetailLayout(props: LayoutProps) {
-  const { name, restrictWidth, panel } = props;
+  const { name, restrictWidth } = props;
   const { theme } = useCore();
   const iconType = ICON_TYPES.find(key => key.toLowerCase() === `logo${name}`);
 
@@ -47,7 +47,8 @@ export function DetailLayout(props: LayoutProps) {
   `;
 
   const FullWidthContent = styled(EuiPage)`
-    background-color: ${panel === 'overview' ? theme.eui.euiColorEmptyShade : 'none'};
+    background-color: ${theme.eui.euiColorEmptyShade};
+    height: 100%;
   `;
 
   return (

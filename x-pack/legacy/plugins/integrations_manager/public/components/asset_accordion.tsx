@@ -35,61 +35,59 @@ export function AssetAccordion({ assets }: { assets: AssetsGroupedByServiceByTyp
       {entries(assets).map(([service, typeToParts], assetIndex) => {
         return (
           <Fragment key={service}>
-            <EuiPanel grow={false} paddingSize="none">
-              <FlexGroup gutterSize="s" alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type={ServiceIcons[service]} />
-                </EuiFlexItem>
+            <FlexGroup gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiIcon type={ServiceIcons[service]} />
+              </EuiFlexItem>
 
-                <EuiFlexItem>
-                  <EuiTitle key={service}>
+              <EuiFlexItem>
+                <EuiTitle key={service}>
+                  <EuiText>
+                    <h4>{ServiceTitleMap[service]} Assets</h4>
+                  </EuiText>
+                </EuiTitle>
+              </EuiFlexItem>
+            </FlexGroup>
+            <EuiHorizontalRule margin="none" />
+
+            {entries(typeToParts).map(([type, parts], typeIndex, typeEntries) => {
+              const iconType = AssetIcons[type];
+              // @types/styled-components@3 does yet support `defaultProps`, which EuiAccordion uses
+              // Ref: https://github.com/DefinitelyTyped/DefinitelyTyped/pull/31903
+              // we're a major version behind; nearly 2
+              return (
+                <Fragment key={type}>
+                  <EuiAccordion
+                    style={{ margin: theme.eui.euiFormControlPadding }}
+                    id={type}
+                    buttonContent={
+                      <EuiFlexGroup gutterSize="s" alignItems="center">
+                        <EuiFlexItem grow={false}>
+                          {iconType ? <EuiIcon type={iconType} size="s" /> : ''}
+                        </EuiFlexItem>
+
+                        <EuiFlexItem>
+                          <EuiText color="secondary">{AssetTitleMap[type]}</EuiText>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    }
+                    paddingSize="m"
+                    extraAction={
+                      <EuiNotificationBadge color="subdued" size="m">
+                        {parts.length}
+                      </EuiNotificationBadge>
+                    }
+                  >
                     <EuiText>
-                      <h4>{ServiceTitleMap[service]} Assets</h4>
+                      <span role="img" aria-label="woman shrugging">
+                        🤷
+                      </span>
                     </EuiText>
-                  </EuiTitle>
-                </EuiFlexItem>
-              </FlexGroup>
-              <EuiHorizontalRule margin="none" />
-
-              {entries(typeToParts).map(([type, parts], typeIndex, typeEntries) => {
-                const iconType = AssetIcons[type];
-                // @types/styled-components@3 does yet support `defaultProps`, which EuiAccordion uses
-                // Ref: https://github.com/DefinitelyTyped/DefinitelyTyped/pull/31903
-                // we're a major version behind; nearly 2
-                return (
-                  <Fragment key={type}>
-                    <EuiAccordion
-                      style={{ margin: theme.eui.euiFormControlPadding }}
-                      id={type}
-                      buttonContent={
-                        <EuiFlexGroup gutterSize="s" alignItems="center">
-                          <EuiFlexItem grow={false}>
-                            {iconType ? <EuiIcon type={iconType} size="s" /> : ''}
-                          </EuiFlexItem>
-
-                          <EuiFlexItem>
-                            <EuiText color="secondary">{AssetTitleMap[type]}</EuiText>
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
-                      }
-                      paddingSize="m"
-                      extraAction={
-                        <EuiNotificationBadge color="subdued" size="m">
-                          {parts.length}
-                        </EuiNotificationBadge>
-                      }
-                    >
-                      <EuiText>
-                        <span role="img" aria-label="woman shrugging">
-                          🤷
-                        </span>
-                      </EuiText>
-                    </EuiAccordion>
-                    {typeIndex < typeEntries.length - 1 ? <EuiHorizontalRule margin="none" /> : ''}
-                  </Fragment>
-                );
-              })}
-            </EuiPanel>
+                  </EuiAccordion>
+                  {typeIndex < typeEntries.length - 1 ? <EuiHorizontalRule margin="none" /> : ''}
+                </Fragment>
+              );
+            })}
             <EuiSpacer size="l" />
           </Fragment>
         );

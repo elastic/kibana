@@ -64,11 +64,9 @@ export function ContentPanel(props: ContentPanelProps) {
       return <AssetAccordion assets={assets} />;
     case 'data-sources':
       return (
-        <EuiPanel>
-          <EuiTitle size="xs">
-            <span>Data Sources</span>
-          </EuiTitle>
-        </EuiPanel>
+        <EuiTitle size="xs">
+          <span>Data Sources</span>
+        </EuiTitle>
       );
     case 'overview':
     default:
