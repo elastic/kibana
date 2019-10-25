@@ -82,12 +82,12 @@ export class StepHistogramUi extends Component {
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiTitle data-test-subj="rollupJobCreateHistogramTitle">
-              <h3>
+              <h2>
                 <FormattedMessage
                   id="xpack.rollupJobs.create.stepHistogramTitle"
                   defaultMessage="Histogram (optional)"
                 />
-              </h3>
+              </h2>
             </EuiTitle>
 
             <EuiSpacer size="s" />
@@ -179,12 +179,12 @@ export class StepHistogramUi extends Component {
         <EuiDescribedFormGroup
           title={(
             <EuiTitle size="s">
-              <h4>
+              <h3>
                 <FormattedMessage
                   id="xpack.rollupJobs.create.stepHistogram.sectionHistogramIntervalTitle"
                   defaultMessage="Histogram interval"
                 />
-              </h4>
+              </h3>
             </EuiTitle>
           )}
           description={(
