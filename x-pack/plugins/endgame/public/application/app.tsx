@@ -57,8 +57,8 @@ class EndgameApp extends PureComponent<{
               <NavBar />
             </EuiPageSideBar>
             <Switch>
-              {routePaths.map(({ id, path, component }) => (
-                <Route path={path} exact component={component} key={id} />
+              {routePaths.map(({ id, path, exact, component }) => (
+                <Route path={path} exact={exact} component={component} key={id} />
               ))}
               <Route path="*">
                 <Page>
