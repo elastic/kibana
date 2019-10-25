@@ -298,11 +298,6 @@ describe('getOperationTypesForField', () => {
                 "operationType": "sum",
                 "type": "field",
               },
-              Object {
-                "field": "Records",
-                "operationType": "count",
-                "type": "field",
-              },
             ],
           },
         ]

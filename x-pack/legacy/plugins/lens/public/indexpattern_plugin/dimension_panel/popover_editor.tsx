@@ -33,7 +33,6 @@ import { deleteColumn, changeColumn } from '../state_helpers';
 import { FieldSelect } from './field_select';
 import { hasField } from '../utils';
 import { BucketNestingEditor } from './bucket_nesting_editor';
-import { documentField } from '../document_field';
 import { IndexPattern, IndexPatternField } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 
@@ -85,7 +84,6 @@ export function PopoverEditor(props: PopoverEditorProps) {
     currentIndexPattern.fields.forEach(field => {
       fields[field.name] = field;
     });
-    fields[documentField.name] = documentField;
     return fields;
   }, [currentIndexPattern]);
 
@@ -144,8 +142,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
                       layerId: props.layerId,
                       op: operationType,
                       indexPattern: currentIndexPattern,
-                      field:
-                        possibleFields.length === 1 ? fieldMap[possibleFields[0]] : documentField,
+                      field: fieldMap[possibleFields[0]],
                     }),
                   })
                 );
@@ -172,9 +169,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
               layerId: props.layerId,
               op: operationType,
               indexPattern: currentIndexPattern,
-              field: hasField(selectedColumn)
-                ? fieldMap[selectedColumn.sourceField]
-                : documentField,
+              field: fieldMap[selectedColumn.sourceField],
             });
             trackUiEvent(
               `indexpattern_dimension_operation_from_${selectedColumn.operationType}_to_${operationType}`
@@ -297,7 +292,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
                   }
                   column = buildColumn({
                     columns: props.state.layers[props.layerId].columns,
-                    field: 'field' in choice ? fieldMap[choice.field] : documentField,
+                    field: fieldMap[choice.field],
                     indexPattern: currentIndexPattern,
                     layerId: props.layerId,
                     suggestedPriority: props.suggestedPriority,

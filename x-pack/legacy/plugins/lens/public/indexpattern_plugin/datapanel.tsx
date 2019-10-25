@@ -52,7 +52,6 @@ export type Props = DatasourceDataPanelProps<IndexPatternPrivateState> & {
 };
 import { LensFieldIcon } from './lens_field_icon';
 import { ChangeIndexPattern } from './change_indexpattern';
-import { documentField } from './document_field';
 
 // TODO the typings for EuiContextMenuPanel are incorrect - watchedItemProps is missing. This can be removed when the types are adjusted
 const FixedEuiContextMenuPanel = (EuiContextMenuPanel as unknown) as React.FunctionComponent<
@@ -259,7 +258,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     if (!showEmptyFields) {
       const indexField = currentIndexPattern && fieldByName[field.name];
       const exists =
-        indexField && fieldExists(existingFields, currentIndexPattern.title, indexField.name);
+        field.type === 'document' ||
+        (indexField && fieldExists(existingFields, currentIndexPattern.title, indexField.name));
       if (localState.typeFilter.length > 0) {
         return exists && localState.typeFilter.includes(field.type as DataType);
       }
@@ -274,7 +274,12 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     return true;
   });
 
-  const paginatedFields = displayedFields.sort(sortFields).slice(0, pageSize);
+  const specialFields = displayedFields.filter(f => f.type === 'document');
+  const paginatedFields = displayedFields
+    .filter(f => f.type !== 'document')
+    .sort(sortFields)
+    .slice(0, pageSize);
+  const hilight = localState.nameFilter.toLowerCase();
 
   return (
     <ChildDragDropProvider {...dragDropContext}>
@@ -422,18 +427,22 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
             onScroll={lazyScroll}
           >
             <div className="lnsInnerIndexPatternDataPanel__list">
-              {paginatedFields.length > 0 && (
+              {specialFields.map(field => (
+                <FieldItem
+                  core={core}
+                  key={field.name}
+                  indexPattern={currentIndexPattern}
+                  field={field}
+                  highlight={hilight}
+                  exists={paginatedFields.length > 0}
+                  dateRange={dateRange}
+                  query={query}
+                  filters={filters}
+                  hideDetails={true}
+                />
+              ))}
+              {specialFields.length > 0 && specialFields.length > 0 && (
                 <>
-                  <FieldItem
-                    core={core}
-                    indexPattern={currentIndexPattern}
-                    field={documentField}
-                    exists={documentField.exists}
-                    dateRange={dateRange}
-                    query={query}
-                    filters={filters}
-                    hideDetails={true}
-                  />
                   <EuiSpacer size="s" />
                   <EuiFormLabel>
                     {i18n.translate('xpack.lens.indexPattern.individualFieldsLabel', {
@@ -451,7 +460,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                     indexPattern={currentIndexPattern}
                     key={field.name}
                     field={field}
-                    highlight={localState.nameFilter.toLowerCase()}
+                    highlight={hilight}
                     exists={
                       overallField &&
                       fieldExists(existingFields, currentIndexPattern.title, overallField.name)

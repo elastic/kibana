@@ -480,8 +480,8 @@ function getNestedTitle([outerBucket, innerBucket]: IndexPatternColumn[]) {
   return i18n.translate('xpack.lens.indexpattern.suggestions.nestingChangeLabel', {
     defaultMessage: '{innerOperation} for each {outerOperation}',
     values: {
-      innerOperation: hasField(innerBucket) ? innerBucket.sourceField : innerBucket.label,
-      outerOperation: hasField(outerBucket) ? outerBucket.sourceField : outerBucket.label,
+      innerOperation: innerBucket.sourceField,
+      outerOperation: outerBucket.sourceField,
     },
   });
 }

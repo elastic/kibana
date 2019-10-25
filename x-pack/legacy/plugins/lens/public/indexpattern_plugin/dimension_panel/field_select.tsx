@@ -20,8 +20,6 @@ import { OperationFieldSupportMatrix } from './dimension_panel';
 import { IndexPattern, IndexPatternField, IndexPatternPrivateState } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import { fieldExists } from '../pure_helpers';
-import { documentField } from '../document_field';
-import { isDocumentOperation } from '../operations';
 
 export interface FieldChoice {
   type: 'field';
@@ -55,9 +53,6 @@ export function FieldSelect({
   existingFields,
 }: FieldSelectProps) {
   const { operationByField } = operationFieldSupportMatrix;
-  const isDocumentOperationType = isDocumentOperation((incompatibleSelectedOperationType ||
-    selectedColumnOperationType) as string);
-
   const memoizedFieldOptions = useMemo(() => {
     const fields = Object.keys(operationByField).sort();
 
@@ -71,56 +66,58 @@ export function FieldSelect({
       );
     }
 
-    const fieldOptions = [];
+    const [specialFields, normalFields] = _.partition(
+      fields,
+      field => fieldMap[field].type === 'document'
+    );
+
+    function fieldNamesToOptions(items: string[]) {
+      return items
+        .map(field => ({
+          label: field,
+          value: {
+            type: 'field',
+            field,
+            dataType: fieldMap[field].type,
+            operationType:
+              selectedColumnOperationType && isCompatibleWithCurrentOperation(field)
+                ? selectedColumnOperationType
+                : undefined,
+          },
+          exists:
+            fieldMap[field].type === 'document' ||
+            fieldExists(existingFields, currentIndexPattern.title, field),
+          compatible: isCompatibleWithCurrentOperation(field),
+        }))
+        .filter(field => showEmptyFields || field.exists)
+        .sort((a, b) => {
+          if (a.compatible && !b.compatible) {
+            return -1;
+          }
+          if (!a.compatible && b.compatible) {
+            return 1;
+          }
+          return 0;
+        })
+        .map(({ label, value, compatible, exists }) => ({
+          label,
+          value,
+          className: classNames({
+            'lnFieldSelect__option--incompatible': !compatible,
+            'lnFieldSelect__option--nonExistant': !exists,
+          }),
+          'data-test-subj': `lns-fieldOption${compatible ? '' : 'Incompatible'}-${label}`,
+        }));
+    }
+
+    const fieldOptions: unknown[] = fieldNamesToOptions(specialFields);
 
     if (fields.length > 0) {
-      fieldOptions.push({
-        label: documentField.name,
-        value: { type: 'document', dataType: 'document' },
-        className: classNames({
-          'lnFieldSelect__option--incompatible': !isDocumentOperationType,
-        }),
-        'data-test-subj': `lns-documentOption${isDocumentOperationType ? '' : 'Incompatible'}`,
-      });
-
       fieldOptions.push({
         label: i18n.translate('xpack.lens.indexPattern.individualFieldsLabel', {
           defaultMessage: 'Individual fields',
         }),
-        options: fields
-          .map(field => ({
-            label: field,
-            value: {
-              type: 'field',
-              field,
-              dataType: fieldMap[field].type,
-              operationType:
-                selectedColumnOperationType && isCompatibleWithCurrentOperation(field)
-                  ? selectedColumnOperationType
-                  : undefined,
-            },
-            exists: fieldExists(existingFields, currentIndexPattern.title, field),
-            compatible: isCompatibleWithCurrentOperation(field),
-          }))
-          .filter(field => showEmptyFields || field.exists)
-          .sort((a, b) => {
-            if (a.compatible && !b.compatible) {
-              return -1;
-            }
-            if (!a.compatible && b.compatible) {
-              return 1;
-            }
-            return 0;
-          })
-          .map(({ label, value, compatible, exists }) => ({
-            label,
-            value,
-            className: classNames({
-              'lnFieldSelect__option--incompatible': !compatible,
-              'lnFieldSelect__option--nonExistant': !exists,
-            }),
-            'data-test-subj': `lns-fieldOption${compatible ? '' : 'Incompatible'}-${label}`,
-          })),
+        options: fieldNamesToOptions(normalFields),
       });
     }
 

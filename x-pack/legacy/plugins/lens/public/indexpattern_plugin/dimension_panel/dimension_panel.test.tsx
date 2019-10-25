@@ -20,6 +20,7 @@ import {
 } from 'src/core/public';
 import { Storage } from 'ui/storage';
 import { IndexPatternPrivateState } from '../types';
+import { documentField } from '../document_field';
 
 jest.mock('ui/new_platform');
 jest.mock('../loader');
@@ -66,6 +67,7 @@ const expectedIndexPatterns = {
         searchable: true,
         exists: true,
       },
+      documentField,
     ],
   },
 };
@@ -261,7 +263,7 @@ describe('IndexPatternDimensionPanel', () => {
 
     const options = wrapper.find(EuiComboBox).prop('options');
 
-    expect(options![0]['data-test-subj']).toEqual('lns-documentOptionIncompatible');
+    expect(options![0]['data-test-subj']).toEqual('lns-fieldOptionIncompatible-Records');
 
     expect(
       options![1].options!.filter(({ label }) => label === 'timestamp')[0]['data-test-subj']
@@ -657,6 +659,7 @@ describe('IndexPatternDimensionPanel', () => {
                 isBucketed: false,
                 label: '',
                 operationType: 'count',
+                sourceField: 'Records',
               },
             },
           },
@@ -851,6 +854,7 @@ describe('IndexPatternDimensionPanel', () => {
               isBucketed: false,
               label: '',
               operationType: 'count',
+              sourceField: 'Records',
             },
           },
         },

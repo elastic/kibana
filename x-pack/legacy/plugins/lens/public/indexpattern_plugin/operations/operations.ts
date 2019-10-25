@@ -132,11 +132,6 @@ export function getAvailableOperationsByMetadata(indexPattern: IndexPattern) {
   };
 
   operationDefinitions.forEach(operationDefinition => {
-    addToMap(
-      { type: 'field', operationType: operationDefinition.type, field: documentField.name },
-      getPossibleOperationForField(operationDefinition, documentField)
-    );
-
     indexPattern.fields.forEach(field => {
       addToMap(
         {
@@ -219,10 +214,6 @@ export function buildColumn({
 
   if (op) {
     operationDefinition = operationDefinitionMap[op];
-  } else if (field.type === 'document') {
-    operationDefinition = getDefinition(definition =>
-      Boolean(getPossibleOperationForField(definition, documentField))
-    );
   } else if (field) {
     operationDefinition = getDefinition(definition =>
       Boolean(getPossibleOperationForField(definition, field))

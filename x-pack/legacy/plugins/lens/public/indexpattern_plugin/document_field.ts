@@ -17,5 +17,4 @@ export const documentField = {
   type: 'document',
   aggregatable: true,
   searchable: true,
-  exists: true,
 };

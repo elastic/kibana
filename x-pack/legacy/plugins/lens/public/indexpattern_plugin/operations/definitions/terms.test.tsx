@@ -40,8 +40,6 @@ describe('terms', () => {
               label: 'Top value of category',
               dataType: 'string',
               isBucketed: true,
-
-              // Private
               operationType: 'terms',
               params: {
                 orderBy: { type: 'alphabetical' },
@@ -54,8 +52,7 @@ describe('terms', () => {
               label: 'Count',
               dataType: 'number',
               isBucketed: false,
-
-              // Private
+              sourceField: 'Records',
               operationType: 'count',
             },
           },
@@ -206,8 +203,7 @@ describe('terms', () => {
             label: 'Count',
             dataType: 'number',
             isBucketed: false,
-
-            // Private
+            sourceField: 'Records',
             operationType: 'count',
           },
         },
@@ -247,8 +243,7 @@ describe('terms', () => {
           label: 'Count',
           dataType: 'number',
           isBucketed: false,
-
-          // Private
+          sourceField: 'Records',
           operationType: 'count',
         },
       });

@@ -8,7 +8,6 @@ import { i18n } from '@kbn/i18n';
 import { OperationDefinition } from '.';
 import { ParameterlessIndexPatternColumn, BaseIndexPatternColumn } from './column_types';
 import { IndexPatternField } from '../../types';
-import { documentField } from '../../document_field';
 
 const countLabel = i18n.translate('xpack.lens.indexPattern.countOfRecords', {
   defaultMessage: 'Count of Records',
@@ -41,7 +40,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
       };
     }
   },
-  buildColumn({ suggestedPriority }) {
+  buildColumn({ suggestedPriority, field }) {
     return {
       label: countLabel,
       dataType: 'number',
@@ -49,7 +48,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
       suggestedPriority,
       isBucketed: false,
       scale: 'ratio',
-      sourceField: documentField.name,
+      sourceField: field.name,
     };
   },
   toEsAggsConfig: (column, columnId) => ({
