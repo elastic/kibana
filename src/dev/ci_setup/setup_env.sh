@@ -53,10 +53,10 @@ nodeDir="$cacheDir/node/$nodeVersion"
 
 if [[ "$OS" == "win" ]]; then
   nodeBin="$HOME/node"
-  nodeUrl="https://nodejs.org/dist/v$nodeVersion/node-v$nodeVersion-win-x64.zip"
+  nodeUrl="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/dist/v$nodeVersion/node-v$nodeVersion-win-x64.zip"
 else
   nodeBin="$nodeDir/bin"
-  nodeUrl="https://nodejs.org/dist/v$nodeVersion/node-v$nodeVersion-linux-x64.tar.gz"
+  nodeUrl="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/dist/v$nodeVersion/node-v$nodeVersion-linux-x64.tar.gz"
 fi
 
 if [[ "$installNode" == "true" ]]; then
@@ -75,11 +75,11 @@ if [[ "$installNode" == "true" ]]; then
     mkdir -p "$nodeDir"
     if [[ "$OS" == "win" ]]; then
       nodePkg="$nodeDir/${nodeUrl##*/}"
-      curl --silent -o "$nodePkg" "$nodeUrl"
+      curl --silent -L -o "$nodePkg" "$nodeUrl"
       unzip -qo "$nodePkg" -d "$nodeDir"
       mv "${nodePkg%.*}" "$nodeBin"
     else
-      curl --silent "$nodeUrl" | tar -xz -C "$nodeDir" --strip-components=1
+      curl --silent -L "$nodeUrl" | tar -xz -C "$nodeDir" --strip-components=1
     fi
   fi
 fi

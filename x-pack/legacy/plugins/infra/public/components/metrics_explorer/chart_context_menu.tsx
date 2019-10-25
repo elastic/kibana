@@ -96,7 +96,7 @@ export const MetricsExplorerChartContextMenu = ({
           name: i18n.translate('xpack.infra.metricsExplorer.filterByLabel', {
             defaultMessage: 'Add filter',
           }),
-          icon: 'infraApp',
+          icon: 'metricsApp',
           onClick: handleFilter,
           'data-test-subj': 'metricsExplorerAction-AddFilter',
         },
@@ -111,7 +111,7 @@ export const MetricsExplorerChartContextMenu = ({
             defaultMessage: 'View metrics for {name}',
             values: { name: nodeType },
           }),
-          icon: 'infraApp',
+          icon: 'metricsApp',
           href: createNodeDetailLink(nodeType, series.id, timeRange.from, timeRange.to),
           'data-test-subj': 'metricsExplorerAction-ViewNodeMetrics',
         },

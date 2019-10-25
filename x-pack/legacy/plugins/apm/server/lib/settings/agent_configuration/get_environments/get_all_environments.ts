@@ -58,6 +58,6 @@ export async function getAllEnvironments({
 
   const resp = await client.search(params);
   const buckets = idx(resp.aggregations, _ => _.environments.buckets) || [];
-  const environments = buckets.map(bucket => bucket.key);
+  const environments = buckets.map(bucket => bucket.key as string);
   return [ALL_OPTION_VALUE, ...environments];
 }

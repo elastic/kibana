@@ -17,17 +17,14 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
-import routes from 'ui/routes';
+import { getServices  } from './kibana_services';
 import template from './home_ng_wrapper.html';
-import { FeatureCatalogueRegistryProvider } from 'ui/registry/feature_catalogue';
-import { wrapInI18nContext } from 'ui/i18n';
-import { uiModules } from 'ui/modules';
 import {
   HomeApp
 } from './components/home_app';
 import { i18n } from '@kbn/i18n';
-import { npStart } from 'ui/new_platform';
+
+const { wrapInI18nContext, uiRoutes, uiModules  } = getServices();
 
 const app = uiModules.get('apps/home', []);
 app.directive('homeApp', function (reactDirective) {
@@ -39,10 +36,14 @@ const homeTitle = i18n.translate('kbn.home.breadcrumbs.homeTitle', { defaultMess
 function getRoute() {
   return {
     template,
-    controller($scope, Private) {
-      $scope.directories = Private(FeatureCatalogueRegistryProvider).inTitleOrder;
-      $scope.recentlyAccessed = npStart.core.chrome.recentlyAccessed.get().map(item => {
-        item.link = chrome.addBasePath(item.link);
+    controller($scope) {
+      const { chrome, addBasePath, getFeatureCatalogueRegistryProvider } = getServices();
+      getFeatureCatalogueRegistryProvider().then(catalogue => {
+        $scope.directories = catalogue.inTitleOrder;
+        $scope.$digest();
+      });
+      $scope.recentlyAccessed = chrome.recentlyAccessed.get().map(item => {
+        item.link = addBasePath(item.link);
         return item;
       });
     },
@@ -54,7 +55,7 @@ function getRoute() {
 
 // All routing will be handled inside HomeApp via react, we just need to make sure angular doesn't
 // redirect us to the default page by encountering a url it isn't marked as being able to handle.
-routes.when('/home', getRoute());
-routes.when('/home/feature_directory', getRoute());
-routes.when('/home/tutorial_directory/:tab?', getRoute());
-routes.when('/home/tutorial/:id', getRoute());
+uiRoutes.when('/home', getRoute());
+uiRoutes.when('/home/feature_directory', getRoute());
+uiRoutes.when('/home/tutorial_directory/:tab?', getRoute());
+uiRoutes.when('/home/tutorial/:id', getRoute());

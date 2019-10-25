@@ -28,11 +28,11 @@ interface MockLastEventTimeQuery {
   };
 }
 
-const getTimeTwelveDaysAgo = () => {
+const getTimeTwelveMinutesAgo = () => {
   const d = new Date();
   const ts = d.getTime();
-  const twelveDays = ts - 12 * 24 * 60 * 60 * 1000;
-  return new Date(twelveDays).toISOString();
+  const twelveMinutes = ts - 12 * 60 * 1000;
+  return new Date(twelveMinutes).toISOString();
 };
 
 export const mockLastEventTimeQuery: MockLastEventTimeQuery[] = [
@@ -51,7 +51,7 @@ export const mockLastEventTimeQuery: MockLastEventTimeQuery[] = [
         source: {
           id: 'default',
           LastEventTime: {
-            lastSeen: getTimeTwelveDaysAgo(),
+            lastSeen: getTimeTwelveMinutesAgo(),
             errorMessage: null,
           },
         },

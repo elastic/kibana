@@ -7,7 +7,7 @@ import fs from 'fs';
 import path from 'path';
 
 import * as os from 'os';
-import rimraf from 'rimraf';
+import del from 'del';
 import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
 
 import { LspRequest } from '../../model';
@@ -143,5 +143,5 @@ beforeAll(() => {
 });
 
 afterAll(() => {
-  rimraf.sync(baseDir);
+  del.sync(baseDir, { force: true });
 });

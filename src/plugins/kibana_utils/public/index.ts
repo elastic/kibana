@@ -17,6 +17,7 @@
  * under the License.
  */
 
+export * from './core';
 export * from './store';
 export * from './parse';
 export * from './render_complete';
