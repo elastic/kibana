@@ -13,7 +13,7 @@ import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import { actionExecutorMock } from './action_executor.mock';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/plugin.mock';
 import {
-  SavedObjectsClientMock,
+  savedObjectsClientMock,
   loggingServiceMock,
 } from '../../../../../../src/core/server/mocks';
 
@@ -54,7 +54,7 @@ afterAll(() => fakeTimer.restore());
 const services = {
   log: jest.fn(),
   callCluster: jest.fn(),
-  savedObjectsClient: SavedObjectsClientMock.create(),
+  savedObjectsClient: savedObjectsClientMock.create(),
 };
 const actionExecutorInitializerParams = {
   logger: loggingServiceMock.create().get(),

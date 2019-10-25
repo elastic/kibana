@@ -10,12 +10,12 @@ import { ActionExecutor } from './action_executor';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/plugin.mock';
 import {
-  SavedObjectsClientMock,
+  savedObjectsClientMock,
   loggingServiceMock,
 } from '../../../../../../src/core/server/mocks';
 
 const actionExecutor = new ActionExecutor();
-const savedObjectsClient = SavedObjectsClientMock.create();
+const savedObjectsClient = savedObjectsClientMock.create();
 
 function getServices() {
   return {
