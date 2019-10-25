@@ -348,7 +348,7 @@ export class QueryBarInputUI extends Component<Props, State> {
       suggestion.field.subType.nested &&
       !this.services.store.get('kibana.KQLNestedQuerySyntaxInfoOptOut')
     ) {
-      const { notifications } = this.props.kibana.services;
+      const notifications = this.services.notifications;
 
       const onKQLNestedQuerySyntaxInfoOptOut = (toast: Toast) => {
         if (!this.services.store) return;
