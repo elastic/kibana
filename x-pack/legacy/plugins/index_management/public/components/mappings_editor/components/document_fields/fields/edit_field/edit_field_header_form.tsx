@@ -7,19 +7,16 @@
 import React, { ChangeEvent } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { SelectField, UseField, FieldConfig, FieldHook } from '../../../../shared_imports';
-import { MainType, SubType, ParameterName, Field } from '../../../../types';
+import { SelectField, UseField, FieldHook } from '../../../../shared_imports';
+import { MainType, SubType, Field } from '../../../../types';
+import { getFieldConfig } from '../../../../lib';
 import {
   TYPE_DEFINITION,
   FIELD_TYPES_OPTIONS,
   MULTIFIELD_TYPES_OPTIONS,
-  PARAMETERS_DEFINITION,
 } from '../../../../constants';
 
 import { NameParameter } from '../../field_parameters';
-
-const getFieldConfig = (param: ParameterName): FieldConfig =>
-  PARAMETERS_DEFINITION[param].fieldConfig || {};
 
 interface Props {
   type: MainType;

@@ -15,32 +15,21 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 
-import {
-  useForm,
-  Form,
-  FormDataProvider,
-  SelectField,
-  UseField,
-  FieldConfig,
-} from '../../../shared_imports';
+import { useForm, Form, FormDataProvider, SelectField, UseField } from '../../../shared_imports';
 
 import {
   TYPE_DEFINITION,
   FIELD_TYPES_OPTIONS,
   MULTIFIELD_TYPES_OPTIONS,
-  PARAMETERS_DEFINITION,
   EUI_SIZE,
 } from '../../../constants';
 
 import { useDispatch } from '../../../mappings_state';
-import { fieldSerializer } from '../../../lib';
-import { Field, ParameterName, MainType } from '../../../types';
+import { fieldSerializer, getFieldConfig } from '../../../lib';
+import { Field, MainType } from '../../../types';
 import { NameParameter } from '../field_parameters';
 
 const formWrapper = (props: any) => <form {...props} />;
-
-const getFieldConfig = (param: ParameterName): FieldConfig =>
-  PARAMETERS_DEFINITION[param].fieldConfig || {};
 
 interface Props {
   isMultiField?: boolean;
