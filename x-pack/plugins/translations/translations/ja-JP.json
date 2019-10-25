@@ -854,7 +854,6 @@
     "data.search.searchBar.savedQueryPopoverSavedQueryListItemSelectedButtonAriaLabel": "選択されたクエリボタン {savedQueryName} を保存しました。変更を破棄するには押してください。",
     "data.search.searchBar.savedQueryPopoverTitleText": "保存されたクエリ",
     "embeddableApi.actions.applyFilterActionTitle": "現在のビューにフィルターを適用",
-    "embeddableApi.addPanel.createNew": "新規 {factoryName} を作成",
     "embeddableApi.addPanel.createNewDefaultOption": "新規作成...",
     "embeddableApi.addPanel.displayName": "パネルの追加",
     "embeddableApi.addPanel.savedObjectAddedToContainerSuccessMessageTitle": "{savedObjectName} が追加されました",
