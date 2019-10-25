@@ -241,7 +241,6 @@
     "cytoscape-dagre": "^2.2.2",
     "d3": "3.5.17",
     "d3-scale": "1.0.7",
-    "dataloader": "^1.4.0",
     "dedent": "^0.7.0",
     "del": "^5.1.0",
     "dragselect": "1.13.1",
