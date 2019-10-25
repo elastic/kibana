@@ -27,11 +27,22 @@ const actionTypeRegistryParams = {
   taskRunnerFactory: new TaskRunnerFactory(new ActionExecutor()),
 };
 
+let actionsClient: ActionsClient;
+let actionTypeRegistry: ActionTypeRegistry;
 const executor: ExecutorType = async options => {
   return { status: 'ok' };
 };
 
-beforeEach(() => jest.resetAllMocks());
+beforeEach(() => {
+  jest.resetAllMocks();
+  actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+  actionsClient = new ActionsClient({
+    actionTypeRegistry,
+    savedObjectsClient,
+    scopedClusterClient,
+    defaultKibanaIndex,
+  });
+});
 
 describe('create()', () => {
   test('creates an action with all given properties', async () => {
@@ -45,17 +56,10 @@ describe('create()', () => {
       },
       references: [],
     };
-    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
       executor,
-    });
-    const actionsClient = new ActionsClient({
-      actionTypeRegistry,
-      savedObjectsClient,
-      scopedClusterClient,
-      defaultKibanaIndex,
     });
     savedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
     const result = await actionsClient.create({
@@ -87,13 +91,6 @@ describe('create()', () => {
   });
 
   test('validates config', async () => {
-    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
-    const actionsClient = new ActionsClient({
-      actionTypeRegistry,
-      savedObjectsClient,
-      scopedClusterClient,
-      defaultKibanaIndex,
-    });
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
@@ -119,13 +116,6 @@ describe('create()', () => {
   });
 
   test(`throws an error when an action type doesn't exist`, async () => {
-    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
-    const actionsClient = new ActionsClient({
-      actionTypeRegistry,
-      savedObjectsClient,
-      scopedClusterClient,
-      defaultKibanaIndex,
-    });
     await expect(
       actionsClient.create({
         action: {
@@ -141,17 +131,10 @@ describe('create()', () => {
   });
 
   test('encrypts action type options unless specified not to', async () => {
-    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
       executor,
-    });
-    const actionsClient = new ActionsClient({
-      actionTypeRegistry,
-      savedObjectsClient,
-      scopedClusterClient,
-      defaultKibanaIndex,
     });
     savedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
@@ -211,13 +194,6 @@ describe('create()', () => {
 
 describe('get()', () => {
   test('calls savedObjectsClient with id', async () => {
-    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
-    const actionsClient = new ActionsClient({
-      actionTypeRegistry,
-      savedObjectsClient,
-      scopedClusterClient,
-      defaultKibanaIndex,
-    });
     savedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
       type: 'type',
@@ -257,13 +233,6 @@ describe('find()', () => {
         },
       ],
     };
-    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
-    const actionsClient = new ActionsClient({
-      actionTypeRegistry,
-      savedObjectsClient,
-      scopedClusterClient,
-      defaultKibanaIndex,
-    });
     savedObjectsClient.find.mockResolvedValueOnce(expectedResult);
     scopedClusterClient.callAsInternalUser.mockResolvedValueOnce({
       aggregations: {
@@ -299,13 +268,6 @@ describe('find()', () => {
 describe('delete()', () => {
   test('calls savedObjectsClient with id', async () => {
     const expectedResult = Symbol();
-    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
-    const actionsClient = new ActionsClient({
-      actionTypeRegistry,
-      savedObjectsClient,
-      scopedClusterClient,
-      defaultKibanaIndex,
-    });
     savedObjectsClient.delete.mockResolvedValueOnce(expectedResult);
     const result = await actionsClient.delete({ id: '1' });
     expect(result).toEqual(expectedResult);
@@ -321,17 +283,10 @@ describe('delete()', () => {
 
 describe('update()', () => {
   test('updates an action with all given properties', async () => {
-    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
       executor,
-    });
-    const actionsClient = new ActionsClient({
-      actionTypeRegistry,
-      savedObjectsClient,
-      scopedClusterClient,
-      defaultKibanaIndex,
     });
     savedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
@@ -389,13 +344,6 @@ describe('update()', () => {
   });
 
   test('validates config', async () => {
-    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
-    const actionsClient = new ActionsClient({
-      actionTypeRegistry,
-      savedObjectsClient,
-      scopedClusterClient,
-      defaultKibanaIndex,
-    });
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
@@ -429,17 +377,10 @@ describe('update()', () => {
   });
 
   test('encrypts action type options unless specified not to', async () => {
-    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
       executor,
-    });
-    const actionsClient = new ActionsClient({
-      actionTypeRegistry,
-      savedObjectsClient,
-      scopedClusterClient,
-      defaultKibanaIndex,
     });
     savedObjectsClient.get.mockResolvedValueOnce({
       id: 'my-action',
