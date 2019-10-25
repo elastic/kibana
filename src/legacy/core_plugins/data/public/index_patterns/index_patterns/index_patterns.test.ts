@@ -23,7 +23,6 @@ import {
   SavedObjectsClientContract,
   UiSettingsClientContract,
   HttpServiceBase,
-  NotificationsSetup,
 } from 'kibana/public';
 
 jest.mock('../errors', () => ({
@@ -65,14 +64,15 @@ describe('IndexPatterns', () => {
     const savedObjectsClient = {} as SavedObjectsClientContract;
     const uiSettings = {} as UiSettingsClientContract;
     const http = {} as HttpServiceBase;
-    const notifications = {} as NotificationsSetup;
 
-    indexPatterns = new IndexPatterns(uiSettings, savedObjectsClient, http, notifications);
+    indexPatterns = new IndexPatterns(uiSettings, savedObjectsClient, http);
   });
 
-  test('does cache gets for the same id', () => {
+  test('does cache gets for the same id', async () => {
     const id = '1';
+    const indexPattern = await indexPatterns.get(id);
 
-    expect(indexPatterns.get(id)).toBe(indexPatterns.get(id));
+    expect(indexPattern).toBeDefined();
+    expect(indexPattern).toBe(await indexPatterns.get(id));
   });
 });

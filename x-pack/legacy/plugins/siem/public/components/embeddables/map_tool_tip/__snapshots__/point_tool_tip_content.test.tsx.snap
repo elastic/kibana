@@ -3,7 +3,6 @@
 exports[`PointToolTipContent renders correctly against snapshot 1`] = `
 <Component>
   <PointToolTipContent
-    addFilters={[MockFunction]}
     closeTooltip={[MockFunction]}
     contextId="contextId"
     featureProps={
@@ -14,11 +13,6 @@ exports[`PointToolTipContent renders correctly against snapshot 1`] = `
           "getESFilters": [Function],
         },
       ]
-    }
-    featurePropsFilters={
-      Object {
-        "host.name": Object {},
-      }
     }
   />
 </Component>

@@ -18,7 +18,16 @@ image::user/ml/images/ml-data-visualizer-sample.jpg[Data Visualizer for sample f
 
 experimental[] You can also upload a CSV, NDJSON, or log file (up to 100 MB in 
 size). The *Data Visualizer* identifies the file format and field mappings. You 
-can then optionally import that data into an {es} index.  
+can then optionally import that data into an {es} index.
+
+You need the following permissions to use the Data Visualizer with file upload:
+
+* cluster privileges: `monitor`, `manage_index_pipelines`
+* index privileges: `read`, `manage`, `index`
+
+For more information, see {ref}/security-privileges.html[Security privileges] 
+and {ref}/built-in-roles.html[Built-in roles].
+
 
 [float]
 [[xpack-ml-anomalies]]

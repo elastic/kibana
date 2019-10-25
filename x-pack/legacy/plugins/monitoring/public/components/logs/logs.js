@@ -169,7 +169,7 @@ export class Logs extends PureComponent {
         title={i18n.translate('xpack.monitoring.logs.listing.calloutTitle', {
           defaultMessage: 'Want to see more log entries?'
         })}
-        iconType="loggingApp"
+        iconType="logsApp"
       >
         <p>
           <FormattedMessage
