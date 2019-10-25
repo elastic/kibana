@@ -19,10 +19,6 @@ import { AlertsClient } from '../../../../../alerting/server/alerts_client';
 import { ActionsClient } from '../../../../../actions/server/actions_client';
 import { SearchResponse } from '../../types';
 
-export interface Filters {
-  meta: {};
-}
-
 export interface SignalAlertParams {
   description: string;
   from: string;
