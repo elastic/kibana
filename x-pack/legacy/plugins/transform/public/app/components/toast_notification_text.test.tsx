@@ -25,6 +25,8 @@ describe('ToastNotificationText', () => {
         'a text message that is longer than 140 characters. a text message that is longer than 140 characters. a text message that is longer than 140 characters. ',
     };
     const { container } = render(<ToastNotificationText {...props} />);
-    expect(container.textContent).toBe('View details');
+    expect(container.textContent).toBe(
+      'a text message that is longer than 140 characters. a text message that is longer than 140 characters. a text message that is longer than 140 ...View details'
+    );
   });
 });

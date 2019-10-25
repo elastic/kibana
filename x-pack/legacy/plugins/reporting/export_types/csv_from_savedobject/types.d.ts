@@ -5,11 +5,11 @@
  */
 
 import { CancellationToken } from '../../common/cancellation_token';
-import { JobParamPostPayload, JobDocPayload, KbnServer } from '../../types';
+import { JobParamPostPayload, JobDocPayload, ServerFacade } from '../../types';
 
 export interface FakeRequest {
   headers: any;
-  server: KbnServer;
+  server: ServerFacade;
 }
 
 export interface JobParamsPostPayloadPanelCsv extends JobParamPostPayload {

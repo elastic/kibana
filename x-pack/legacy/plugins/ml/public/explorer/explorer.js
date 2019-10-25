@@ -1169,8 +1169,9 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
       return (
         <ExplorerPage jobSelectorProps={jobSelectorProps}>
-          <ChartTooltip />
           <div className="results-container">
+            {/* Make sure ChartTooltip is inside this plain wrapping div so positioning can be infered correctly. */}
+            <ChartTooltip />
 
             {noInfluencersConfigured === false &&
             influencers !== undefined &&

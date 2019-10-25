@@ -258,7 +258,7 @@ export const PopoverForm: React.SFC<Props> = ({
           <EuiSpacer size="m" />
           <EuiCodeEditor
             mode="json"
-            theme="github"
+            theme="textmate"
             width="100%"
             height="200px"
             value={JSON.stringify(getEsAggFromGroupByConfig(defaultData), null, 2)}
