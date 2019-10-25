@@ -62,7 +62,7 @@ SubQuery
   / NestedQuery
 
 NestedQuery
-  = field:Field':{' Space* query:OrQuery trailing:OptionalSpace '}' {
+  = field:Field Space* ':' Space* '{' Space* query:OrQuery trailing:OptionalSpace '}' {
       if (query.type === 'cursor') {
         return {
           ...query,
