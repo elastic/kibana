@@ -55,7 +55,7 @@ describe('getFullFieldNameNode', function () {
     expect(getFullFieldNameNode)
       .withArgs(nameNode, indexPattern)
       .to
-      .throwException(/nestedField.child is a nested field but is not included in a nested group in the KQL expression/);
+      .throwException(/nestedField.child is a nested field, but is not in a nested group in the KQL expression./);
   });
 
   it('should throw an error if a nested field is passed with the wrong path', () => {
