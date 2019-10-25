@@ -53,6 +53,7 @@ import {
 const {
   capabilities,
   chrome,
+  chromeLegacy,
   docTitle,
   FilterBarQueryFilterProvider,
   getBasePath,
@@ -596,7 +597,7 @@ function VisEditor(
               // Since we aren't reloading the page, only inserting a new browser history item, we need to manually update
               // the last url for this app, so directly clicking on the Visualize tab will also bring the user to the saved
               // url, not the unsaved one.
-              chrome.trackSubUrlForApp('kibana:visualize', savedVisualizationParsedUrl);
+              chromeLegacy.trackSubUrlForApp('kibana:visualize', savedVisualizationParsedUrl);
 
               const lastDashboardAbsoluteUrl = chrome.navLinks.get('kibana:dashboard').url;
               const dashboardParsedUrl = absoluteToParsedUrl(lastDashboardAbsoluteUrl, getBasePath());

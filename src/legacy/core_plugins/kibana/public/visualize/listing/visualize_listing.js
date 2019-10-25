@@ -28,6 +28,7 @@ import { getServices } from '../kibana_services';
 const {
   addBasePath,
   chrome,
+  chromeLegacy,
   SavedObjectRegistryProvider,
   SavedObjectsClientProvider,
   timefilter,
@@ -106,7 +107,7 @@ export function VisualizeListingController($injector, createNewVis) {
       })
     )
       .then(() => {
-        chrome.untrackNavLinksForDeletedSavedObjects(selectedItems.map(item => item.id));
+        chromeLegacy.untrackNavLinksForDeletedSavedObjects(selectedItems.map(item => item.id));
       })
       .catch(error => {
         toastNotifications.addError(error, {

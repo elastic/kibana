@@ -63,6 +63,7 @@ const services = {
   visualizations,
 
   // legacy
+  chromeLegacy,
   docTitle,
   FeatureCatalogueRegistryProvider,
   FilterBarQueryFilterProvider,
