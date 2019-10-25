@@ -7,13 +7,14 @@
 import { routePathsById } from '../../common/route_paths';
 import { EndpointListView1 } from './endpoint_list_view_1';
 
-const endpointsRoute = routePathsById.endpoints;
+const { path: endpointsBasePath } = routePathsById.endpoints;
 
 export const endpointsSubRoutes = [
   {
     name: 'Endpoints List',
     id: 'endpoints_list_1',
-    path: endpointsRoute.path, // Default view - matches higher level base route
+    icon: 'list', // An icon from Eui (ref:
+    path: endpointsBasePath, // Default view - matches higher level base route
     component: EndpointListView1,
   },
 ];

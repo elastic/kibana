@@ -6,15 +6,19 @@
 
 import React, { PureComponent } from 'react';
 import { Switch, Route } from 'react-router-dom';
+import { EuiSpacer } from '@elastic/eui';
 
 import { Page } from '../../components/page';
 import { RouteNotFound } from '../../components/route_not_found';
 import { endpointsSubRoutes } from './endpoints_sub_route_paths';
+import { PocSelectorConnected } from './poc_selector';
 
 export class EndpointsPage extends PureComponent {
   render() {
     return (
       <Page title="Endpoints">
+        <PocSelectorConnected />
+        <EuiSpacer size="xxl" />
         <Switch>
           {endpointsSubRoutes.map(({ id, path, component }) => (
             <Route path={path} key={id} component={component} />
