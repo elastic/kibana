@@ -51,7 +51,7 @@ exports[`IndexPatternsMissingPrompt renders correctly against snapshot 1`] = `
   iconType="gisApp"
   title={
     <h2>
-      Required Index Patterns Not Configured
+      Required index patterns not configured
     </h2>
   }
   titleSize="xs"

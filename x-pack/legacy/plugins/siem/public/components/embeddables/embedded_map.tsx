@@ -7,32 +7,29 @@
 import { EuiLink, EuiText } from '@elastic/eui';
 import { Filter } from '@kbn/es-query';
 import React, { useEffect, useState } from 'react';
-import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
 import { createPortalNode, InPortal } from 'react-reverse-portal';
 import { Query } from 'src/plugins/data/common';
-import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
-
 import styled, { css } from 'styled-components';
-import { start } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
-import { EmbeddablePanel } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
+import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
 
+import { EmbeddablePanel } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import { start } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
+import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import { getIndexPatternTitleIdMapping } from '../../hooks/api/helpers';
 import { useIndexPatterns } from '../../hooks/use_index_patterns';
-import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
-import { DEFAULT_INDEX_KEY } from '../../../common/constants';
-import { useKibanaPlugins } from '../../lib/compose/kibana_plugins';
 import { useKibanaCore } from '../../lib/compose/kibana_core';
-import { useStateToaster } from '../toasters';
+import { useKibanaPlugins } from '../../lib/compose/kibana_plugins';
+import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
 import { Loader } from '../loader';
-import { IndexPatternsMissingPrompt } from './index_patterns_missing_prompt';
-import { MapEmbeddable, SetQuery } from './types';
-import * as i18n from './translations';
-
-import { createEmbeddable, displayErrorToast, setupEmbeddablesAPI } from './embedded_map_helpers';
-import { MapToolTip } from './map_tool_tip/map_tool_tip';
-
+import { useStateToaster } from '../toasters';
 import { Embeddable } from './embeddable';
 import { EmbeddableHeader } from './embeddable_header';
+import { createEmbeddable, displayErrorToast, setupEmbeddablesAPI } from './embedded_map_helpers';
+import { IndexPatternsMissingPrompt } from './index_patterns_missing_prompt';
+import { MapToolTip } from './map_tool_tip/map_tool_tip';
+import * as i18n from './translations';
+import { MapEmbeddable, SetQuery } from './types';
 
 interface EmbeddableMapProps {
   maintainRatio?: boolean;

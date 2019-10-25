@@ -16,7 +16,7 @@ const Panel = styled(EuiPanel).attrs({
 Panel.displayName = 'Panel';
 
 export interface EmbeddableProps {
-  children?: React.ReactNode;
+  children: React.ReactNode;
 }
 
 export const Embeddable = React.memo<EmbeddableProps>(({ children }) => (
