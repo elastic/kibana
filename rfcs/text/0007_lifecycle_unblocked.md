@@ -95,7 +95,7 @@ coreSetup.http.registerRouteHandlerContext(coreId, 'core', async (context, req) 
       // (3.1.1) We can expose a convenient API by doing a lot of work
       adminClient: () => {
         callAsInternalUser: async (...args) => {
-          adminClient = await coreSetup.elasticsearch.adminClient$.pipe(take(1)).toPromise();
+          const adminClient = await coreSetup.elasticsearch.adminClient$.pipe(take(1)).toPromise();
           return adminClient.asScoped(req).callAsinternalUser(args);
         },
         callAsCurrentUser: async (...args) => {
@@ -135,7 +135,7 @@ export class Plugin {
 *(4.2) Exposing an API from a plugin's setup lifecycle*
 ```ts
 export class Plugin {
-  public async setup(core: CoreSetup) {
+  public setup(core: CoreSetup) {
     return {
       ping: async () => {
         // async & await isn't necessary here, but makes example a bit clearer.
