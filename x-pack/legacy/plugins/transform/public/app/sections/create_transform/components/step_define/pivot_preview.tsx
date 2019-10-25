@@ -18,7 +18,6 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiProgress,
-  EuiTitle,
 } from '@elastic/eui';
 
 import { ColumnType, MlInMemoryTableBasic, SORT_DIRECTION } from '../../../../../shared_imports';
@@ -75,15 +74,7 @@ const PreviewTitle: SFC<PreviewTitleProps> = ({ previewRequest }) => {
 
   return (
     <EuiFlexGroup>
-      <EuiFlexItem>
-        <EuiTitle size="xs">
-          <span>
-            {i18n.translate('xpack.transform.pivotPreview.PivotPreviewTitle', {
-              defaultMessage: 'Transform pivot preview',
-            })}
-          </span>
-        </EuiTitle>
-      </EuiFlexItem>
+      <EuiFlexItem></EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiCopy
           beforeMessage={euiCopyText}
@@ -158,7 +149,7 @@ export const PivotPreview: SFC<PivotPreviewProps> = React.memo(({ aggs, groupBy,
 
   if (status === PIVOT_PREVIEW_STATUS.ERROR) {
     return (
-      <EuiPanel grow={false}>
+      <>
         <PreviewTitle previewRequest={previewRequest} />
         <EuiCallOut
           title={i18n.translate('xpack.transform.pivotPreview.PivotPreviewError', {
@@ -169,7 +160,7 @@ export const PivotPreview: SFC<PivotPreviewProps> = React.memo(({ aggs, groupBy,
         >
           <ErrorMessage message={errorMessage} />
         </EuiCallOut>
-      </EuiPanel>
+      </>
     );
   }
 
@@ -192,17 +183,14 @@ export const PivotPreview: SFC<PivotPreviewProps> = React.memo(({ aggs, groupBy,
       );
     }
     return (
-      <EuiPanel grow={false}>
-        <PreviewTitle previewRequest={previewRequest} />
-        <EuiCallOut
-          title={i18n.translate('xpack.transform.pivotPreview.PivotPreviewNoDataCalloutTitle', {
-            defaultMessage: 'Pivot preview not available',
-          })}
-          color="primary"
-        >
-          <p>{noDataMessage}</p>
-        </EuiCallOut>
-      </EuiPanel>
+      <EuiCallOut
+        title={i18n.translate('xpack.transform.pivotPreview.PivotPreviewNoDataCalloutTitle', {
+          defaultMessage: 'Pivot preview not available',
+        })}
+        color="primary"
+      >
+        <p>{noDataMessage}</p>
+      </EuiCallOut>
     );
   }
 
@@ -257,25 +245,27 @@ export const PivotPreview: SFC<PivotPreviewProps> = React.memo(({ aggs, groupBy,
   };
 
   return (
-    <EuiPanel>
+    <>
       <PreviewTitle previewRequest={previewRequest} />
-      {status === PIVOT_PREVIEW_STATUS.LOADING && <EuiProgress size="xs" color="accent" />}
-      {status !== PIVOT_PREVIEW_STATUS.LOADING && (
-        <EuiProgress size="xs" color="accent" max={1} value={0} />
-      )}
-      {previewData.length > 0 && clearTable === false && columns.length > 0 && (
-        <MlInMemoryTableBasic
-          allowNeutralSort={false}
-          compressed
-          items={previewData}
-          columns={columns}
-          pagination={{
-            initialPageSize: 5,
-            pageSizeOptions: [5, 10, 25],
-          }}
-          sorting={sorting}
-        />
-      )}
-    </EuiPanel>
+      <EuiPanel grow={false} paddingSize="none">
+        {status === PIVOT_PREVIEW_STATUS.LOADING && <EuiProgress size="xs" color="accent" />}
+        {status !== PIVOT_PREVIEW_STATUS.LOADING && (
+          <EuiProgress size="xs" color="accent" max={1} value={0} />
+        )}
+        {previewData.length > 0 && clearTable === false && columns.length > 0 && (
+          <MlInMemoryTableBasic
+            allowNeutralSort={false}
+            compressed
+            items={previewData}
+            columns={columns}
+            pagination={{
+              initialPageSize: 5,
+              pageSizeOptions: [5, 10, 25],
+            }}
+            sorting={sorting}
+          />
+        )}
+      </EuiPanel>
+    </>
   );
 });

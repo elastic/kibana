@@ -24,7 +24,6 @@ import {
   EuiPopoverTitle,
   EuiProgress,
   EuiText,
-  EuiTitle,
   EuiToolTip,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
@@ -57,20 +56,6 @@ import { SOURCE_INDEX_STATUS, useSourceIndexData } from './use_source_index_data
 type ItemIdToExpandedRowMap = Dictionary<JSX.Element>;
 
 const CELL_CLICK_ENABLED = false;
-
-interface SourceIndexPreviewTitle {
-  indexPatternTitle: string;
-}
-const SourceIndexPreviewTitle: React.SFC<SourceIndexPreviewTitle> = ({ indexPatternTitle }) => (
-  <EuiTitle size="xs">
-    <span>
-      {i18n.translate('xpack.transform.sourceIndexPreview.sourceIndexPatternTitle', {
-        defaultMessage: 'Source index {indexPatternTitle}',
-        values: { indexPatternTitle },
-      })}
-    </span>
-  </EuiTitle>
-);
 
 interface Props {
   query: PivotQuery;
@@ -134,8 +119,8 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
 
   if (status === SOURCE_INDEX_STATUS.ERROR) {
     return (
-      <EuiPanel grow={false}>
-        <SourceIndexPreviewTitle indexPatternTitle={indexPattern.title} />
+      <>
+        <EuiBadge>{indexPattern.title}</EuiBadge>
         <EuiCallOut
           title={i18n.translate('xpack.transform.sourceIndexPreview.sourceIndexPatternError', {
             defaultMessage: 'An error occurred loading the source index data.',
@@ -147,14 +132,14 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
             {errorMessage}
           </EuiCodeBlock>
         </EuiCallOut>
-      </EuiPanel>
+      </>
     );
   }
 
   if (status === SOURCE_INDEX_STATUS.LOADED && tableItems.length === 0) {
     return (
-      <EuiPanel grow={false}>
-        <SourceIndexPreviewTitle indexPatternTitle={indexPattern.title} />
+      <>
+        <EuiBadge>{indexPattern.title}</EuiBadge>
         <EuiCallOut
           title={i18n.translate(
             'xpack.transform.sourceIndexPreview.SourceIndexNoDataCalloutTitle',
@@ -171,7 +156,7 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
             })}
           </p>
         </EuiCallOut>
-      </EuiPanel>
+      </>
     );
   }
 
@@ -320,10 +305,10 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
   });
 
   return (
-    <EuiPanel grow={false}>
+    <>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <SourceIndexPreviewTitle indexPatternTitle={indexPattern.title} />
+          <EuiBadge>{indexPattern.title}</EuiBadge>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup alignItems="center" gutterSize="xs">
@@ -391,28 +376,30 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {status === SOURCE_INDEX_STATUS.LOADING && <EuiProgress size="xs" color="accent" />}
-      {status !== SOURCE_INDEX_STATUS.LOADING && (
-        <EuiProgress size="xs" color="accent" max={1} value={0} />
-      )}
-      {clearTable === false && columns.length > 0 && sorting !== false && (
-        <MlInMemoryTableBasic
-          allowNeutralSort={false}
-          compressed
-          items={tableItems}
-          columns={columns}
-          pagination={{
-            initialPageSize: 5,
-            pageSizeOptions: [5, 10, 25],
-          }}
-          hasActions={false}
-          isSelectable={false}
-          itemId="_id"
-          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-          isExpandable={true}
-          sorting={sorting}
-        />
-      )}
-    </EuiPanel>
+      <EuiPanel grow={false} paddingSize="none">
+        {status === SOURCE_INDEX_STATUS.LOADING && <EuiProgress size="xs" color="accent" />}
+        {status !== SOURCE_INDEX_STATUS.LOADING && (
+          <EuiProgress size="xs" color="accent" max={1} value={0} />
+        )}
+        {clearTable === false && columns.length > 0 && sorting !== false && (
+          <MlInMemoryTableBasic
+            allowNeutralSort={false}
+            compressed
+            items={tableItems}
+            columns={columns}
+            pagination={{
+              initialPageSize: 5,
+              pageSizeOptions: [5, 10, 25],
+            }}
+            hasActions={false}
+            isSelectable={false}
+            itemId="_id"
+            itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+            isExpandable={true}
+            sorting={sorting}
+          />
+        )}
+      </EuiPanel>
+    </>
   );
 });
