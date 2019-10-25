@@ -37,7 +37,7 @@ export class ExpressionLoader {
   private dataSubject: Subject<Data>;
   private loadingSubject: Subject<void>;
   private data: Data;
-  private params: IExpressionLoaderParams;
+  private params: IExpressionLoaderParams = {};
 
   constructor(
     element: HTMLElement,
@@ -63,10 +63,7 @@ export class ExpressionLoader {
       this.render(data);
     });
 
-    this.params = {
-      searchContext: { type: 'kibana_context', ...(params.searchContext || {}) },
-      extraHandlers: params.extraHandlers,
-    };
+    this.setParams(params);
 
     this.loadData(expression, this.params);
   }
@@ -118,13 +115,7 @@ export class ExpressionLoader {
   }
 
   update(expression?: string | ExpressionAST, params?: IExpressionLoaderParams): void {
-    if (params && params.searchContext && this.params.searchContext) {
-      this.params.searchContext = _.defaults(
-        {},
-        params.searchContext,
-        this.params.searchContext
-      ) as any;
-    }
+    this.setParams(params);
 
     if (expression) {
       this.loadData(expression, this.params);
@@ -141,6 +132,7 @@ export class ExpressionLoader {
     if (this.dataHandler) {
       this.dataHandler.cancel();
     }
+    this.setParams(params);
     this.dataHandler = new ExpressionDataHandler(expression, params);
     const data = await this.dataHandler.getData();
     this.dataSubject.next(data);
@@ -149,6 +141,30 @@ export class ExpressionLoader {
   private render(data: Data): void {
     this.loadingSubject.next();
     this.renderHandler.render(data, this.params.extraHandlers);
+  }
+
+  private setParams(params?: IExpressionLoaderParams) {
+    if (!params || !Object.keys(params).length) {
+      return;
+    }
+
+    if (params.searchContext && this.params.searchContext) {
+      this.params.searchContext = _.defaults(
+        {},
+        params.searchContext,
+        this.params.searchContext
+      ) as any;
+    }
+    if (params.extraHandlers && this.params) {
+      this.params.extraHandlers = params.extraHandlers;
+    }
+
+    if (!Object.keys(this.params).length) {
+      this.params = {
+        ...params,
+        searchContext: { type: 'kibana_context', ...(params.searchContext || {}) },
+      };
+    }
   }
 }
 

@@ -49,6 +49,7 @@ const defaultState: State = {
 export const ExpressionRendererImplementation = ({
   dataAttrs,
   expression,
+  renderError,
   ...options
 }: ExpressionRendererProps) => {
   const mountpoint: React.MutableRefObject<null | HTMLDivElement> = useRef(null);
@@ -119,8 +120,8 @@ export const ExpressionRendererImplementation = ({
       {state.isEmpty ? <EuiLoadingChart mono size="l" /> : null}
       {state.isLoading ? <EuiProgress size="xs" color="accent" position="absolute" /> : null}
       {!state.isLoading && state.error ? (
-        options.renderError ? (
-          options.renderError(state.error.message)
+        renderError ? (
+          renderError(state.error.message)
         ) : (
           <div data-test-subj="expression-renderer-error">{state.error.message}</div>
         )

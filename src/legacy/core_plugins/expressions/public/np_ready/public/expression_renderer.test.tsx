@@ -77,7 +77,7 @@ describe('ExpressionRenderer', () => {
     expect(instance.find(EuiProgress)).toHaveLength(0);
   });
 
-  it('should display a default error message when the expression fails', () => {
+  it('should display an error message when the expression fails', () => {
     const dataSubject = new Subject();
     const data$ = dataSubject.asObservable().pipe(share());
     const renderSubject = new Subject();
