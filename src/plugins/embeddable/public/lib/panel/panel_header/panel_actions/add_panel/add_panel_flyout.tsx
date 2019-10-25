@@ -25,8 +25,6 @@ import {
   EuiButton,
   EuiContextMenuItem,
   EuiContextMenuPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
@@ -161,32 +159,28 @@ export class AddPanelFlyout extends React.Component<Props, State> {
         </EuiFlyoutHeader>
         <EuiFlyoutBody>{savedObjectsFinder}</EuiFlyoutBody>
         <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="flexEnd">
-            <EuiFlexItem grow={true}>
-              <EuiPopover
-                id="createNew"
-                button={
-                  <EuiButton
-                    data-test-subj="createNew"
-                    iconType="arrowDown"
-                    iconSide="right"
-                    onClick={this.toggleCreateMenu}
-                  >
-                    <FormattedMessage
-                      id="embeddableApi.addPanel.createNewDefaultOption"
-                      defaultMessage="Create new"
-                    />
-                  </EuiButton>
-                }
-                isOpen={this.state.isCreateMenuOpen}
-                closePopover={this.closeCreateMenu}
-                panelPaddingSize="none"
-                anchorPosition="upLeft"
+          <EuiPopover
+            id="createNew"
+            button={
+              <EuiButton
+                data-test-subj="createNew"
+                iconType="arrowDown"
+                iconSide="right"
+                onClick={this.toggleCreateMenu}
               >
-                <EuiContextMenuPanel items={this.getCreateMenuItems()} />
-              </EuiPopover>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+                <FormattedMessage
+                  id="embeddableApi.addPanel.createNewDefaultOption"
+                  defaultMessage="Create new"
+                />
+              </EuiButton>
+            }
+            isOpen={this.state.isCreateMenuOpen}
+            closePopover={this.closeCreateMenu}
+            panelPaddingSize="none"
+            anchorPosition="upLeft"
+          >
+            <EuiContextMenuPanel items={this.getCreateMenuItems()} />
+          </EuiPopover>
         </EuiFlyoutFooter>
       </EuiFlyout>
     );
