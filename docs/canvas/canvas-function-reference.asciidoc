@@ -464,7 +464,7 @@ filters
 | pie 
 | render
 ----
-This maps all `project` values that aren’t `“kibana”` and `“elasticsearch”` to `“other”`. Alternatively, you can use the individual comparator functions instead of compare. See `eq`, `neq`, `lt`, `lte`, `gt`, and `gte`.
+This maps all `project` values that aren’t `“kibana”` and `“elasticsearch”` to `“other”`. Alternatively, you can use the individual comparator functions instead of compare. See <<eq_fn>>, <<neq_fn>>, <<lt_fn>>, <<lte_fn>>, <<gt_fn>>, and <<gte_fn>>.
 
 *Accepts:* `string`, `number`, `boolean`, `null`
 
@@ -598,7 +598,7 @@ date
 | markdown "Last updated: " {context} 
 | render
 ----
-Using `context` allows us to pass the output of the previous function as a value to an argument in the next function. Here we get the formatted date string from the previous function and pass it as `content` for the markdown element.
+Using the `context` function allows us to pass the output, or _context_, of the previous function as a value to an argument in the next function. Here we get the formatted date string from the previous function and pass it as `content` for the markdown element.
 
 *Accepts:* `any`
 
