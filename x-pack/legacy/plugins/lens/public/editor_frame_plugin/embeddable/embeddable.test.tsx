@@ -10,7 +10,6 @@ import { Query } from 'src/legacy/core_plugins/data/public';
 import { ExpressionRendererProps } from 'src/legacy/core_plugins/expressions/public';
 import { Filter } from '@kbn/es-query';
 import { Document } from '../../persistence';
-import { act } from 'react-dom/test-utils';
 
 jest.mock('../../../../../../../src/legacy/ui/public/inspector', () => ({
   isAvailable: false,
@@ -59,25 +58,6 @@ describe('embeddable', () => {
 
     expect(expressionRenderer).toHaveBeenCalledTimes(1);
     expect(expressionRenderer.mock.calls[0][0]!.expression).toEqual(savedVis.expression);
-  });
-
-  it('should display error if expression renderering fails', () => {
-    const embeddable = new Embeddable(
-      expressionRenderer,
-      {
-        editUrl: '',
-        editable: true,
-        savedVis,
-      },
-      { id: '123' }
-    );
-    embeddable.render(mountpoint);
-
-    act(() => {
-      expressionRenderer.mock.calls[0][0]!.onRenderFailure!({ type: 'error' });
-    });
-
-    expect(mountpoint.innerHTML).toContain("Visualization couldn't be displayed");
   });
 
   it('should re-render if new input is pushed', () => {
