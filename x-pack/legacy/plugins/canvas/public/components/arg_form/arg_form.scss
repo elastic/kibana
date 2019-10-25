@@ -8,15 +8,27 @@
 
 .canvasSidebar__panel {
   .canvasArg--expandable:last-child {
+    .canvasArg__accordion {
+      margin-bottom: (-$euiSizeS);
+    }
+
+    .canvasArg__accordion:after {
+      content: none;
+    }
+
     .canvasArg__accordion.euiAccordion-isOpen:after {
       display: none;
     }
   }
 }
 
-.canvasArg {
-  margin-top: $euiSize;
+.canvasSidebar__panelTitleHeading {
+  color: $euiColorDarkShade;
+  text-transform: uppercase;
+}
 
+.canvasArg {
+  margin-top: $euiSizeS;
 
   .canvasArg--remove {
     visibility: hidden;
@@ -60,8 +72,8 @@
 }
 
 .canvasArg__accordion {
-  padding: $euiSizeS $euiSize;
-  margin: 0 (-$euiSize);
+  padding: $euiSizeS $euiSizeM;
+  margin: 0 (-$euiSizeM);
   background: $euiColorLightestShade;
   position: relative;
 
@@ -96,4 +108,9 @@
   &:after {
     bottom: 0;
   }
+}
+
+// this is a workaround since an EuiFormRow label cannot be passed in toggle.js
+.canvasArg__switch {
+  padding-top: calc(#{$euiSizeS} * .75);
 }

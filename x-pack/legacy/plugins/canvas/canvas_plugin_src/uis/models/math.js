@@ -17,7 +17,7 @@ export const math = () => ({
     {
       name: '_',
       displayName: strings.getValueDisplayName(),
-      help: strings.getValueHelp(),
+      help: '',
       argType: 'datacolumn',
       options: {
         onlyMath: false,

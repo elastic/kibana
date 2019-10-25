@@ -21,22 +21,42 @@ export const ElementConfig = ({ elementStats }) => {
 
   return (
     <Fragment>
-      <EuiTitle size="xs">
+      <EuiTitle size="xxxs" className="canvasSidebar__panelTitleHeading">
         <h4>{strings.getTitle()}</h4>
       </EuiTitle>
-      <EuiSpacer size="m" />
+      <EuiSpacer size="s" />
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiStat title={total} description={strings.getTotalLabel()} titleSize="s" />
+          <EuiStat
+            title={total}
+            description={strings.getTotalLabel()}
+            titleSize="xs"
+            textAlign="right"
+          />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiStat title={ready} description={strings.getLoadedLabel()} titleSize="s" />
+          <EuiStat
+            title={ready}
+            description={strings.getLoadedLabel()}
+            titleSize="xs"
+            textAlign="right"
+          />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiStat title={error} description={strings.getFailedLabel()} titleSize="s" />
+          <EuiStat
+            title={error}
+            description={strings.getFailedLabel()}
+            titleSize="xs"
+            textAlign="right"
+          />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiStat title={progress + '%'} description={strings.getProgressLabel()} titleSize="s" />
+          <EuiStat
+            title={progress + '%'}
+            description={strings.getProgressLabel()}
+            titleSize="xs"
+            textAlign="right"
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </Fragment>

@@ -59,7 +59,7 @@ const FilterGroupInput = ({ onValueChange, argValue, argId, filterGroups }) => {
             onChange={ev => setInputValue(ev.target.value)}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} className="canvasSidebar__panel-noMinWidth">
           <EuiButton type="submit" size="s" onClick={handleAddGroup}>
             Set
           </EuiButton>

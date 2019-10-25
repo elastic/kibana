@@ -8,17 +8,23 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiCard, EuiIcon } from '@elastic/eui';
 
-export const DatasourceSelector = ({ onSelect, datasources }) => (
-  <div>
+export const DatasourceSelector = ({ onSelect, datasources, current }) => (
+  <div className="canvasDataSource__list">
     {datasources.map(d => (
       <EuiCard
         key={d.name}
         title={d.displayName}
-        icon={<EuiIcon type={d.image} size="xxl" />}
-        onClick={() => onSelect(d.name)}
+        titleElement="h5"
+        icon={<EuiIcon type={d.image} size="l" />}
+        // onClick={() => onSelect(d.name)}
         description={d.help}
         layout="horizontal"
         className="canvasDataSource__card"
+        // className={`canvasDataSource__card ${d.name === current ? 'canvasDataSource__card--isCurrent' : null}`}
+        selectable={{
+          isSelected: d.name === current ? true : false,
+          onClick: () => onSelect(d.name),
+        }}
       />
     ))}
   </div>
@@ -27,4 +33,5 @@ export const DatasourceSelector = ({ onSelect, datasources }) => (
 DatasourceSelector.propTypes = {
   onSelect: PropTypes.func.isRequired,
   datasources: PropTypes.array.isRequired,
+  current: PropTypes.string.isRequired,
 };

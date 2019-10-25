@@ -46,19 +46,19 @@ export const SimpleTemplate: FunctionComponent<Props> = props => {
   };
 
   return (
-    <EuiFlexGroup gutterSize="none" alignItems="center" className="canvasArgSeries__colorPicker">
+    <EuiFlexGroup gutterSize="s" alignItems="center" className="canvasArgSeries__colorPicker">
       {!color || color.length === 0 ? (
         <Fragment>
           <EuiFlexItem grow={false}>
-            <EuiText size="s">{strings.getColorLabel()}&nbsp;</EuiText>
+            <EuiText size="xs">{strings.getColorLabel()}</EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiText size="s">
+            <EuiText size="xs">
               <EuiLink
                 aria-label={`${strings.getColorLabel()}: Auto`}
                 onClick={() => handleChange('color', '#000000')}
               >
-                Auto <EuiIcon type="bolt" />
+                Auto
               </EuiLink>
             </EuiText>
           </EuiFlexItem>
@@ -67,7 +67,7 @@ export const SimpleTemplate: FunctionComponent<Props> = props => {
         <Fragment>
           <EuiFlexItem grow={false}>
             <label htmlFor="series-style">
-              <EuiText size="s">{strings.getColorLabel()}&nbsp;</EuiText>
+              <EuiText size="xs">{strings.getColorLabel()}</EuiText>
             </label>
           </EuiFlexItem>
           <EuiFlexItem style={{ fontSize: 0 }}>
