@@ -22,6 +22,7 @@ import { DashboardConstants } from '../../../src/legacy/core_plugins/kibana/publ
 
 export const PIE_CHART_VIS_NAME = 'Visualization PieChart';
 export const AREA_CHART_VIS_NAME = 'Visualization漢字 AreaChart';
+export const LINE_CHART_VIS_NAME = 'Visualization漢字 LineChart';
 
 export function DashboardPageProvider({ getService, getPageObjects }) {
   const log = getService('log');
@@ -41,15 +42,10 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
   class DashboardPage {
     async initTests({
       kibanaIndex = 'dashboard/legacy',
-      dataIndex = 'logstash_functional',
       defaultIndex = 'logstash-*',
     } = {}) {
       log.debug('load kibana index with visualizations and log data');
-      await Promise.all([
-        esArchiver.load(kibanaIndex),
-        esArchiver.loadIfNeeded(dataIndex)
-      ]);
-
+      await esArchiver.load(kibanaIndex);
       await kibanaServer.uiSettings.replace({
         'defaultIndex': defaultIndex,
       });
@@ -504,7 +500,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         { name: 'Visualization☺ VerticalBarChart', description: 'VerticalBarChart' },
         { name: AREA_CHART_VIS_NAME, description: 'AreaChart' },
         { name: 'Visualization☺漢字 DataTable', description: 'DataTable' },
-        { name: 'Visualization漢字 LineChart', description: 'LineChart' },
+        { name: LINE_CHART_VIS_NAME, description: 'LineChart' },
         { name: 'Visualization TileMap', description: 'TileMap' },
         { name: 'Visualization MetricChart', description: 'MetricChart' }
       ];

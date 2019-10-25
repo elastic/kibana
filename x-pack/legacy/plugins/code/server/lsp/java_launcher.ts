@@ -24,10 +24,10 @@ export class JavaLauncher extends AbstractLauncher {
   private needModuleArguments: boolean = true;
   private readonly gradleHomeFolder = '.gradle';
   constructor(
-    readonly targetHost: string,
-    readonly options: ServerOptions,
-    readonly loggerFactory: LoggerFactory,
-    readonly installationPath: string
+    public readonly targetHost: string,
+    public readonly options: ServerOptions,
+    public readonly loggerFactory: LoggerFactory,
+    public readonly installationPath: string
   ) {
     super('java', targetHost, options, loggerFactory);
   }

@@ -12,7 +12,53 @@ import { TooltipValueFormatter } from '@elastic/charts';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { useObservable } from '../../../../../../../src/plugins/kibana_react/public/util/use_observable';
 
-import { chartTooltip$, mlChartTooltipService, ChartTooltipValue } from './chart_tooltip_service';
+import { chartTooltip$, ChartTooltipValue } from './chart_tooltip_service';
+
+type RefValue = HTMLElement | null;
+
+function useRefWithCallback() {
+  const chartTooltipState = useObservable(chartTooltip$);
+  const ref = useRef<RefValue>(null);
+
+  return (node: RefValue) => {
+    ref.current = node;
+
+    if (
+      node !== null &&
+      node.parentElement !== null &&
+      chartTooltipState !== undefined &&
+      chartTooltipState.isTooltipVisible
+    ) {
+      const parentBounding = node.parentElement.getBoundingClientRect();
+
+      const { targetPosition, offset } = chartTooltipState;
+
+      const contentWidth = document.body.clientWidth - parentBounding.left;
+      const tooltipWidth = node.clientWidth;
+
+      let left = targetPosition.left + offset.x - parentBounding.left;
+      if (left + tooltipWidth > contentWidth) {
+        // the tooltip is hanging off the side of the page,
+        // so move it to the other side of the target
+        const markerWidthAdjustment = 25;
+        left = left - (tooltipWidth + offset.x + markerWidthAdjustment);
+      }
+
+      const top = targetPosition.top + offset.y - parentBounding.top;
+
+      if (
+        chartTooltipState.tooltipPosition.left !== left ||
+        chartTooltipState.tooltipPosition.top !== top
+      ) {
+        // render the tooltip with adjusted position.
+        chartTooltip$.next({
+          ...chartTooltipState,
+          tooltipPosition: { left, top },
+        });
+      }
+    }
+  };
+}
 
 const renderHeader = (headerData?: ChartTooltipValue, formatter?: TooltipValueFormatter) => {
   if (!headerData) {
@@ -23,24 +69,18 @@ const renderHeader = (headerData?: ChartTooltipValue, formatter?: TooltipValueFo
 };
 
 export const ChartTooltip: FC = () => {
-  const chartTooltipElement = useRef(null);
-
-  mlChartTooltipService.element = chartTooltipElement.current;
-
   const chartTooltipState = useObservable(chartTooltip$);
+  const chartTooltipElement = useRefWithCallback();
 
   if (chartTooltipState === undefined || !chartTooltipState.isTooltipVisible) {
     return <div className="mlChartTooltip mlChartTooltip--hidden" ref={chartTooltipElement} />;
   }
 
   const { tooltipData, tooltipHeaderFormatter, tooltipPosition } = chartTooltipState;
+  const transform = `translate(${tooltipPosition.left}px, ${tooltipPosition.top}px)`;
 
   return (
-    <div
-      className="mlChartTooltip"
-      style={{ transform: tooltipPosition.transform }}
-      ref={chartTooltipElement}
-    >
+    <div className="mlChartTooltip" style={{ transform }} ref={chartTooltipElement}>
       {tooltipData.length > 0 && tooltipData[0].skipHeader === undefined && (
         <div className="mlChartTooltip__header">
           {renderHeader(tooltipData[0], tooltipHeaderFormatter)}
