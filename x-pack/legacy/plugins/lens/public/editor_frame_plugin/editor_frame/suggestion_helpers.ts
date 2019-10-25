@@ -65,12 +65,6 @@ export function getSuggestions({
     ([datasourceId]) => datasourceStates[datasourceId] && !datasourceStates[datasourceId].isLoading
   );
 
-  // const allLayerIds = _.flatten(
-  //   datasources.map(([datasourceId, datasource]) =>
-  //     datasource.getLayers(datasourceStates[datasourceId].state)
-  //   )
-  // );
-
   // Collect all table suggestions from available datasources
   const datasourceTableSuggestions = _.flatten(
     datasources.map(([datasourceId, datasource]) => {
@@ -91,18 +85,12 @@ export function getSuggestions({
           const table = datasourceSuggestion.table;
           const currentVisualizationState =
             visualizationId === activeVisualizationId ? visualizationState : undefined;
-          // const keptLayerIds =
-          //   visualizationId !== activeVisualizationId
-          //     ? [datasourceSuggestion.table.layerId]
-          //     : allLayerIds;
-          console.log(visualizationId);
           return getVisualizationSuggestions(
             visualization,
             table,
             visualizationId,
             datasourceSuggestion,
             currentVisualizationState
-            // keptLayerIds
           );
         })
       )
@@ -122,7 +110,6 @@ function getVisualizationSuggestions(
   visualizationId: string,
   datasourceSuggestion: DatasourceSuggestion & { datasourceId: string },
   currentVisualizationState: unknown
-  // keptLayerIds: string[]
 ) {
   return visualization
     .getSuggestions({
@@ -135,7 +122,6 @@ function getVisualizationSuggestions(
       visualizationId,
       visualizationState: state,
       keptLayerIds: datasourceSuggestion.keptLayerIds,
-      // keptLayerIds,
       datasourceState: datasourceSuggestion.state,
       datasourceId: datasourceSuggestion.datasourceId,
       columns: table.columns.length,
@@ -148,7 +134,6 @@ export function switchToSuggestion(
   dispatch: (action: Action) => void,
   suggestion: Pick<
     Suggestion,
-    // 'visualizationId' | 'visualizationState' | 'datasourceState' | 'datasourceId' | 'keptLayerIds'
     'visualizationId' | 'visualizationState' | 'datasourceState' | 'datasourceId'
   >,
   type: 'SWITCH_VISUALIZATION' | 'SELECT_SUGGESTION' = 'SELECT_SUGGESTION'
@@ -160,12 +145,5 @@ export function switchToSuggestion(
     datasourceState: suggestion.datasourceState,
     datasourceId: suggestion.datasourceId!,
   };
-  console.log('dispatching', action);
   dispatch(action);
-  // const layerIds = Object.keys(frame.datasourceLayers).filter(id => {
-  //   return !suggestion.keptLayerIds.includes(id);
-  // });
-  // if (layerIds.length > 0) {
-  //   frame.removeLayers(layerIds);
-  // }
 }

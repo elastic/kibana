@@ -36,7 +36,6 @@ export function getSuggestions({
   state,
   keptLayerIds,
 }: SuggestionRequest<State>): Array<VisualizationSuggestion<State>> {
-  debugger;
   if (
     // We only render line charts for multi-row queries. We require at least
     // two columns: one for x and at least one for y, and y columns must be numeric.
@@ -369,11 +368,7 @@ function buildSuggestion({
   const state: State = {
     legend: currentState ? currentState.legend : { isVisible: true, position: Position.Right },
     preferredSeriesType: seriesType,
-    layers: [
-      // ...(currentState ? currentState.layers.filter(layer => layer.layerId !== layerId) : []),
-      ...keptLayers,
-      newLayer,
-    ],
+    layers: [...keptLayers, newLayer],
   };
 
   return {

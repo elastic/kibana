@@ -32,7 +32,7 @@ function buildSuggestion({
   layerId,
   label,
   changeType,
-  layerBehavior = 'replace',
+  layerBehavior = 'add',
 }: {
   state: IndexPatternPrivateState;
   layerId: string;
@@ -369,14 +369,42 @@ export function getDatasourceSuggestionsFromCurrentState(
   const layers = Object.entries(state.layers || {});
   if (layers.length > 1) {
     // Return only two suggestions: each layer individually
-    return layers.map(([layerId, layer]) =>
-      // also suggest simple current state
-      buildSuggestion({
-        state,
-        layerId,
-        changeType: 'unchanged',
+    return layers
+      .map(([layerId, layer], index) => {
+        const hasMatchingLayer = layers.some(
+          ([otherLayerId, otherLayer]) =>
+            !(otherLayerId === layerId) && otherLayer.indexPatternId === layer.indexPatternId
+        );
+
+        const suggestionTitle = hasMatchingLayer
+          ? i18n.translate('xpack.lens.indexPatternSuggestion.removeLayerPositionLabel', {
+              defaultMessage: 'Show only layer {layerNumber}',
+              values: { layerNumber: index + 1 },
+            })
+          : i18n.translate('xpack.lens.indexPatternSuggestion.removeLayerLabel', {
+              defaultMessage: 'Show only {indexPatternTitle}',
+              values: { indexPatternTitle: state.indexPatterns[layer.indexPatternId].title },
+            });
+
+        return buildSuggestion({
+          state: {
+            ...state,
+            layers: {
+              [layerId]: layer,
+            },
+          },
+          layerId,
+          changeType: 'layers',
+          label: suggestionTitle,
+        });
       })
-    );
+      .concat([
+        buildSuggestion({
+          state,
+          layerId: layers[0][0],
+          changeType: 'unchanged',
+        }),
+      ]);
   }
   return _.flatten(
     Object.entries(state.layers || {})
