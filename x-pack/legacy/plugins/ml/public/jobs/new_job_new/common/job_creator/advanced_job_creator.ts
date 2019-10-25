@@ -9,7 +9,7 @@ import { IndexPattern } from 'ui/index_patterns';
 
 import { JobCreator } from './job_creator';
 import { Field, Aggregation, SplitField } from '../../../../../common/types/fields';
-import { Job, Datafeed, Detector } from './configs';
+import { Job, Datafeed, Detector, CustomRule } from './configs';
 import { createBasicDetector } from './util/default_configs';
 import { JOB_TYPE } from './util/constants';
 import { getRichDetectors } from './util/general';
@@ -23,6 +23,8 @@ export interface RichDetector {
   overField: SplitField;
   partitionField: SplitField;
   excludeFrequent: string | null;
+  description: string | null;
+  customRules: CustomRule[] | null;
 }
 
 export class AdvancedJobCreator extends JobCreator {
@@ -30,7 +32,6 @@ export class AdvancedJobCreator extends JobCreator {
   private _richDetectors: RichDetector[] = [];
   private _queryString: string;
 
-  // TODO - remove constructor if it isn't needed
   constructor(indexPattern: IndexPattern, savedSearch: SavedSearch, query: object) {
     super(indexPattern, savedSearch, query);
 
@@ -43,15 +44,21 @@ export class AdvancedJobCreator extends JobCreator {
     byField: SplitField,
     overField: SplitField,
     partitionField: SplitField,
-    excludeFrequent: string | null
+    excludeFrequent: string | null,
+    description: string | null
   ) {
+    // addDetector doesn't support adding new custom rules.
+    // this will be added in the future once it's supported in the UI
+    const customRules = null;
     const { detector, richDetector } = this._createDetector(
       agg,
       field,
       byField,
       overField,
       partitionField,
-      excludeFrequent
+      excludeFrequent,
+      description,
+      customRules
     );
 
     this._addDetector(detector, agg, field);
@@ -65,15 +72,21 @@ export class AdvancedJobCreator extends JobCreator {
     overField: SplitField,
     partitionField: SplitField,
     excludeFrequent: string | null,
+    description: string | null,
     index: number
   ) {
+    const customRules =
+      this._detectors[index] !== undefined ? this._detectors[index].custom_rules || null : null;
+
     const { detector, richDetector } = this._createDetector(
       agg,
       field,
       byField,
       overField,
       partitionField,
-      excludeFrequent
+      excludeFrequent,
+      description,
+      customRules
     );
 
     this._editDetector(detector, agg, field, index);
@@ -89,7 +102,9 @@ export class AdvancedJobCreator extends JobCreator {
     byField: SplitField,
     overField: SplitField,
     partitionField: SplitField,
-    excludeFrequent: string | null
+    excludeFrequent: string | null,
+    description: string | null,
+    customRules: CustomRule[] | null
   ): { detector: Detector; richDetector: RichDetector } {
     const detector: Detector = createBasicDetector(agg, field);
 
@@ -105,6 +120,12 @@ export class AdvancedJobCreator extends JobCreator {
     if (excludeFrequent !== null) {
       detector.exclude_frequent = excludeFrequent;
     }
+    if (description !== null) {
+      detector.detector_description = description;
+    }
+    if (customRules !== null) {
+      detector.custom_rules = customRules;
+    }
 
     const richDetector: RichDetector = {
       agg,
@@ -113,6 +134,8 @@ export class AdvancedJobCreator extends JobCreator {
       overField,
       partitionField,
       excludeFrequent,
+      description,
+      customRules,
     };
 
     return { detector, richDetector };
@@ -156,7 +179,10 @@ export class AdvancedJobCreator extends JobCreator {
 
   public cloneFromExistingJob(job: Job, datafeed: Datafeed) {
     this._overrideConfigs(job, datafeed);
-    const detectors = getRichDetectors(job, datafeed, true);
+    const detectors = getRichDetectors(job, datafeed, this.scriptFields, true);
+
+    // keep track of the custom rules for each detector
+    const customRules = this._detectors.map(d => d.custom_rules);
 
     this.removeAllDetectors();
     this._richDetectors.length = 0;
@@ -170,8 +196,16 @@ export class AdvancedJobCreator extends JobCreator {
           dtr.byField,
           dtr.overField,
           dtr.partitionField,
-          dtr.excludeFrequent
+          dtr.excludeFrequent,
+          dtr.description
         );
+      }
+    });
+
+    // re-apply custom rules
+    customRules.forEach((cr, i) => {
+      if (cr !== undefined) {
+        this._detectors[i].custom_rules = cr;
       }
     });
   }

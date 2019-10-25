@@ -26,6 +26,8 @@ const emptyRichDetector: RichDetector = {
   overField: null,
   partitionField: null,
   excludeFrequent: null,
+  description: null,
+  customRules: null,
 };
 
 export const AdvancedDetectors: FC<Props> = ({ setIsValid }) => {
@@ -47,7 +49,8 @@ export const AdvancedDetectors: FC<Props> = ({ setIsValid }) => {
         dtr.byField,
         dtr.overField,
         dtr.partitionField,
-        dtr.excludeFrequent
+        dtr.excludeFrequent,
+        dtr.description
       );
     } else {
       jobCreator.editDetector(
@@ -57,6 +60,7 @@ export const AdvancedDetectors: FC<Props> = ({ setIsValid }) => {
         dtr.overField,
         dtr.partitionField,
         dtr.excludeFrequent,
+        dtr.description,
         index
       );
     }
@@ -82,7 +86,7 @@ export const AdvancedDetectors: FC<Props> = ({ setIsValid }) => {
 
   return (
     <Fragment>
-      <DetectorList onEditJob={onEditJob} onDeleteJob={onDeleteJob} />
+      <DetectorList isActive={true} onEditJob={onEditJob} onDeleteJob={onDeleteJob} />
       <MetricSelector
         payload={modalPayload}
         fields={fields}

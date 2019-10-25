@@ -15,7 +15,9 @@ export class Cancelable<T> {
   private _cancel: Cancel | undefined = undefined;
   private resolved: boolean = false;
 
-  constructor(readonly fn: (resolve: Resolve<T>, reject: Reject, onCancel: OnCancel) => void) {
+  constructor(
+    public readonly fn: (resolve: Resolve<T>, reject: Reject, onCancel: OnCancel) => void
+  ) {
     this.promise = new Promise<T>((resolve, reject) => {
       this.resolve = resolve;
       this.reject = reject;

@@ -16,6 +16,11 @@ export type EsIndexName = string;
 export type DependentVariable = string;
 export type IndexPatternTitle = string;
 export type AnalyticsJobType = JOB_TYPES | undefined;
+type IndexPatternId = string;
+export type SourceIndexMap = Record<
+  IndexPatternTitle,
+  { label: IndexPatternTitle; value: IndexPatternId }
+>;
 
 export interface FormMessage {
   error?: string;
@@ -50,13 +55,13 @@ export interface State {
     sourceIndex: EsIndexName;
     sourceIndexNameEmpty: boolean;
     sourceIndexNameValid: boolean;
+    sourceIndexContainsNumericalFields: boolean;
+    sourceIndexFieldsCheckFailed: boolean;
     trainingPercent: number;
   };
   disabled: boolean;
   indexNames: EsIndexName[];
-  indexPatternsMap: any; // TODO: update type
-  indexPatternTitles: IndexPatternTitle[];
-  indexPatternsWithNumericFields: IndexPatternTitle[];
+  indexPatternsMap: SourceIndexMap;
   isAdvancedEditorEnabled: boolean;
   isJobCreated: boolean;
   isJobStarted: boolean;
@@ -91,6 +96,8 @@ export const getInitialState = (): State => ({
     sourceIndex: '',
     sourceIndexNameEmpty: true,
     sourceIndexNameValid: false,
+    sourceIndexContainsNumericalFields: true,
+    sourceIndexFieldsCheckFailed: false,
     trainingPercent: 80,
   },
   jobConfig: {},
@@ -99,8 +106,6 @@ export const getInitialState = (): State => ({
     !checkPermission('canStartStopDataFrameAnalytics'),
   indexNames: [],
   indexPatternsMap: {},
-  indexPatternTitles: [],
-  indexPatternsWithNumericFields: [],
   isAdvancedEditorEnabled: false,
   isJobCreated: false,
   isJobStarted: false,
