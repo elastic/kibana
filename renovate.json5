@@ -722,14 +722,6 @@
         ],
       },
       {
-        groupSlug: 'nock',
-        groupName: 'nock related packages',
-        packageNames: [
-          'nock',
-          '@types/nock',
-        ],
-      },
-      {
         groupSlug: 'node-fetch',
         groupName: 'node-fetch related packages',
         packageNames: [
