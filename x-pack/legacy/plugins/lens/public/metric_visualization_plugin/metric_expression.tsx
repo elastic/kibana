@@ -76,8 +76,8 @@ export const getMetricChartRenderer = (
   formatFactory: FormatFactory
 ): IInterpreterRenderFunction<MetricChartProps> => ({
   name: 'lens_metric_chart_renderer',
-  displayName: 'Metric Chart',
-  help: 'Metric Chart Renderer',
+  displayName: 'Metric chart',
+  help: 'Metric chart renderer',
   validate: () => {},
   reuseDomNode: true,
   render: async (domNode: Element, config: MetricChartProps, _handlers: unknown) => {
