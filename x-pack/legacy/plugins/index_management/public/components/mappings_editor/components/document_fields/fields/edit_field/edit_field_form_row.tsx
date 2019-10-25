@@ -6,20 +6,14 @@
 
 import React, { useState } from 'react';
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTitle,
-  EuiText,
-  EuiFormRow,
-  EuiSwitch,
-  EuiDescribedFormGroup,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiText, EuiSwitch } from '@elastic/eui';
 
 import { ToggleField, UseField, FieldHook, FieldConfig } from '../../../../shared_imports';
 
 import { PARAMETERS_DEFINITION } from '../../../../constants';
 import { ParameterName } from '../../../../types';
+
+type ChildrenFunc = (isOn: boolean) => React.ReactNode;
 
 interface Props {
   title?: JSX.Element;
@@ -28,7 +22,7 @@ interface Props {
   ariaId?: string;
   description?: string | JSX.Element;
   formFieldPath?: ParameterName;
-  children?: React.ReactNode;
+  children?: React.ReactNode | ChildrenFunc;
 }
 
 const PADDING_LEFT_NO_TOGGLE = '66px';
@@ -52,14 +46,16 @@ export const EditFieldFormRow = ({
 
   const [isContentVisible, setIsContentVisible] = useState<boolean>(initialVisibleState);
 
+  const isChildrenFunction = typeof children === 'function';
+
   const onToggle = () => {
     setIsContentVisible(!isContentVisible);
   };
 
-  const onFormToggleChange = (field: FieldHook) => (e: any) => {
-    // We both set the form field value + set the isContentVisible
+  const onFormToggleChange = (field: FieldHook) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const isSelected = e.target.checked;
 
+    // We both set the form field value + set the isContentVisible
     field.setValue(isSelected);
     setIsContentVisible(isSelected);
   };
@@ -106,13 +102,13 @@ export const EditFieldFormRow = ({
               )}
             </EuiFlexItem>
           )}
-          {isContentVisible && (
+          {(isContentVisible || isChildrenFunction) && (
             <EuiFlexItem
               style={{
                 paddingLeft: withToggle === false ? PADDING_LEFT_NO_TOGGLE : undefined,
               }}
             >
-              {children}
+              {isChildrenFunction ? (children as ChildrenFunc)(isContentVisible) : children}
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
