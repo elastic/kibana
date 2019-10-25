@@ -145,7 +145,10 @@ and then click *Delete snapshots*.
 
 [[snapshot-repositories-example]]
 
+[role="xpack"]
+[[snapshot-restore-tutorial]]
 === Tutorial:  Snapshot and Restore
+
 
 Ready to try *Snapshot and Restore*? In this tutorial, you'll learn to:
 
