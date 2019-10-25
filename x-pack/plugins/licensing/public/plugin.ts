@@ -4,30 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BehaviorSubject, Subject, merge, of } from 'rxjs';
-import { filter, map, pairwise, switchMap, takeUntil, tap } from 'rxjs/operators';
-import {
-  CoreSetup,
-  CoreStart,
-  Plugin as CorePlugin,
-  PluginInitializerContext,
-} from 'src/core/public';
-import { LicensingPluginSetup, IObjectifiedLicense } from '../common/types';
-import {
-  API_ROUTE,
-  LICENSING_SESSION,
-  LICENSING_SESSION_SIGNATURE,
-  SIGNATURE_HEADER,
-} from '../common/constants';
+import { Subject, Subscription, merge } from 'rxjs';
+import { takeUntil, tap } from 'rxjs/operators';
+
+import { CoreSetup, Plugin, PluginInitializerContext } from 'src/core/public';
+
+import { ILicense, LicensingPluginSetup } from '../server/types';
+import { createLicenseUpdate } from '../common/license_update';
 import { License } from '../common/license';
-import { hasLicenseInfoChanged } from '../common/has_license_info_changed';
+
+export const licensingSessionStorageKey = 'xpack.licensing';
 
 /**
  * @public
  * A plugin for fetching, refreshing, and receiving information about the license for the
  * current Kibana instance.
  */
-export class Plugin implements CorePlugin<LicensingPluginSetup> {
+export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
   /**
    * Used as a flag to halt all other plugin observables.
    */
@@ -36,121 +29,113 @@ export class Plugin implements CorePlugin<LicensingPluginSetup> {
   /**
    * A function to execute once the plugin's HTTP interceptor needs to stop listening.
    */
-  private removeInterceptor!: () => void;
+  private removeInterceptor?: () => void;
+  private licenseFetchSubscription?: Subscription;
+
+  private infoEndpoint = '/api/xpack/v1/info';
+  private prevSignature?: string;
+
+  constructor(
+    context: PluginInitializerContext,
+    private readonly storage: Storage = sessionStorage
+  ) {}
 
   /**
-   * Used to trigger manual fetches of the license information from the server.
+   * Fetch the objectified license and signature from storage.
    */
-  private refresher$ = new BehaviorSubject(true);
-
-  constructor(context: PluginInitializerContext) {}
-
-  /**
-   * Fetch the objectified license and signature from session storage.
-   */
-  private getSession(): { objectified?: IObjectifiedLicense; signature: string } {
-    const raw = sessionStorage.getItem(LICENSING_SESSION);
-    const signature = sessionStorage.getItem(LICENSING_SESSION_SIGNATURE) || '';
-    const objectified = raw && JSON.parse(raw);
-
-    return { objectified, signature };
+  private getSaved(): ILicense | undefined {
+    const raw = this.storage.getItem(licensingSessionStorageKey);
+    if (!raw) return;
+    return License.fromJSON(JSON.parse(raw));
   }
 
   /**
-   * Store the given license and signature in session storage.
+   * Store the given license and signature in storage.
    */
-  private setSession = (license: License, signature: string) => {
-    sessionStorage.setItem(LICENSING_SESSION, JSON.stringify(license.toObject()));
-
-    if (signature) {
-      sessionStorage.setItem(LICENSING_SESSION_SIGNATURE, signature);
-    }
-  };
-
-  /**
-   * Clear license and signature information from session storage.
-   */
-  private clearSession() {
-    sessionStorage.removeItem(LICENSING_SESSION);
-    sessionStorage.removeItem(LICENSING_SESSION_SIGNATURE);
+  private save(license: ILicense) {
+    this.storage.setItem(licensingSessionStorageKey, JSON.stringify(license));
   }
 
   /**
-   * Initialize the plugin for consumption.
-   * @param core
+   * Clear license and signature information from storage.
    */
+  private removeSaved() {
+    this.storage.removeItem(licensingSessionStorageKey);
+  }
+
   public setup(core: CoreSetup) {
-    const session = this.getSession();
-    const initial$ = of(
-      session.objectified
-        ? License.fromObjectified(session.objectified)
-        : new License({ features: {} })
+    const manualRefresh$ = new Subject();
+    const signatureUpdated$ = new Subject();
+    const refresh$ = merge(signatureUpdated$, manualRefresh$).pipe(takeUntil(this.stop$));
+
+    const savedLicense = this.getSaved();
+    const { update$, fetchSubscription } = createLicenseUpdate(
+      refresh$,
+      () => this.fetchLicense(core),
+      savedLicense
     );
-    const setup = {
-      refresh: () => this.refresher$.next(true),
-      license$: initial$,
-    };
+    this.licenseFetchSubscription = fetchSubscription;
+
+    const license$ = update$.pipe(
+      tap(license => {
+        if (license.error) {
+          this.prevSignature = undefined;
+          // Prevent reusing stale license if the fetch operation fails
+          this.removeSaved();
+        } else {
+          this.prevSignature = license.signature;
+          this.save(license);
+        }
+      })
+    );
 
     this.removeInterceptor = core.http.intercept({
-      response: httpResponse => {
-        const signatureHeader =
-          (httpResponse.response && httpResponse.response.headers.get(SIGNATURE_HEADER)) || '';
-
-        if (signatureHeader !== session.signature) {
-          session.signature = signatureHeader;
-
-          if (httpResponse.request && !httpResponse.request.url.includes(API_ROUTE)) {
-            setup.refresh();
+      response: async httpResponse => {
+        if (httpResponse.response) {
+          const signatureHeader = httpResponse.response.headers.get('kbn-xpack-sig');
+          if (this.prevSignature !== signatureHeader) {
+            if (!httpResponse.request!.url.includes(this.infoEndpoint)) {
+              signatureUpdated$.next();
+            }
           }
         }
+        return httpResponse;
       },
     });
 
-    // The license fetches occur in a defer/repeatWhen pair to avoid race conditions between refreshes and timers
-    const licenseFetches$ = this.refresher$.pipe(
-      takeUntil(this.stop$),
-      switchMap(async () => {
-        try {
-          const response = await core.http.get(API_ROUTE);
-          const rawLicense = response && response.license;
-          const features = (response && response.features) || {};
-
-          return new License({ license: rawLicense, features });
-        } catch (err) {
-          // Prevent reusing stale license if the fetch operation fails
-          this.clearSession();
-          return new License({ features: {}, error: err });
-        }
-      })
-    );
-    const updates$ = merge(initial$, licenseFetches$).pipe(
-      takeUntil(this.stop$),
-      pairwise(),
-      filter(([previous, next]) => hasLicenseInfoChanged(previous, next)),
-      map(([, next]) => next)
-    );
-
-    setup.license$ = merge(initial$, updates$).pipe(
-      takeUntil(this.stop$),
-      tap(license => {
-        this.setSession(license, session.signature);
-      })
-    );
-
-    return setup;
+    return {
+      refresh: () => {
+        manualRefresh$.next();
+      },
+      license$,
+    };
   }
 
-  public async start(core: CoreStart) {}
+  public async start() {}
 
-  /**
-   * Halt the plugin's operations and observables.
-   */
   public stop() {
     this.stop$.next();
     this.stop$.complete();
 
-    if (this.removeInterceptor) {
+    if (this.removeInterceptor !== undefined) {
       this.removeInterceptor();
     }
+    if (this.licenseFetchSubscription !== undefined) {
+      this.licenseFetchSubscription.unsubscribe();
+      this.licenseFetchSubscription = undefined;
+    }
   }
+
+  private fetchLicense = async (core: CoreSetup): Promise<ILicense> => {
+    try {
+      const response = await core.http.get(this.infoEndpoint);
+      return new License({
+        license: response.license,
+        features: response.features,
+        signature: response.signature,
+      });
+    } catch (error) {
+      return new License({ error, signature: '' });
+    }
+  };
 }

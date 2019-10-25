@@ -5,8 +5,7 @@
  */
 
 import { PluginInitializerContext } from 'src/core/public';
-import { Plugin } from './plugin';
+import { LicensingPlugin } from './plugin';
 
-export * from '../common/types';
-export * from '../common/constants';
-export const plugin = (context: PluginInitializerContext) => new Plugin(context);
+export * from '../server/types';
+export const plugin = (context: PluginInitializerContext) => new LicensingPlugin(context);
