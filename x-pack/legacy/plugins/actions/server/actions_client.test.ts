@@ -13,11 +13,11 @@ import { ActionExecutor, TaskRunnerFactory } from './lib';
 import { taskManagerMock } from '../../task_manager/task_manager.mock';
 import {
   elasticsearchServiceMock,
-  SavedObjectsClientMock,
+  savedObjectsClientMock,
 } from '../../../../../src/core/server/mocks';
 
 const defaultKibanaIndex = '.kibana';
-const savedObjectsClient = SavedObjectsClientMock.create();
+const savedObjectsClient = savedObjectsClientMock.create();
 const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
 
 const mockTaskManager = taskManagerMock.create();

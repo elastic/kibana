@@ -591,6 +591,7 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
                     setOptions={{
                       fontSize: '12px',
                     }}
+                    theme="textmate"
                     aria-label={i18n.translate(
                       'xpack.transform.stepDefineForm.advancedSourceEditorAriaLabel',
                       {
@@ -751,6 +752,7 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
                     setOptions={{
                       fontSize: '12px',
                     }}
+                    theme="textmate"
                     aria-label={i18n.translate(
                       'xpack.transform.stepDefineForm.advancedEditorAriaLabel',
                       {

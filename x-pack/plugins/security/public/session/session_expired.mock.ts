@@ -4,14 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { uiModules } from 'ui/modules';
-import template from '../templates/inspect.html';
-const app = uiModules.get('app/graph');
+import { ISessionExpired } from './session_expired';
 
-app.directive('graphInspect', function () {
+export function createSessionExpiredMock() {
   return {
-    replace: true,
-    restrict: 'E',
-    template,
-  };
-});
+    logout: jest.fn(),
+  } as jest.Mocked<ISessionExpired>;
+}
