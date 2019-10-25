@@ -4,99 +4,33 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiTitle } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
-import React, { MouseEvent } from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiText,
+  EuiBadge,
+  EuiNotificationBadge,
+} from '@elastic/eui';
+import React from 'react';
 import { connect } from 'react-redux';
 import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
-import styled from 'styled-components';
 import { CommitDiff, FileDiff } from '../../../common/git_diff';
-import { SearchScope } from '../../../model';
+import { SearchScope, SearchOptions } from '../../../model';
 import { changeSearchScope } from '../../actions';
 import { RootState } from '../../reducers';
-// import { SearchBar } from '../search_bar';
+import { SearchBar } from '../search_bar';
 import { DiffEditor } from './diff_editor';
+import { Accordion } from './accordion';
 
 const COMMIT_ID_LENGTH = 16;
-
-const B = styled.b`
-  font-weight: bold;
-`;
-
-const PrimaryB = styled(B)`
-  color: ${theme.euiColorPrimary};
-`;
-
-const CommitId = styled.span`
-  display: inline-block;
-  padding: 0 ${theme.paddingSizes.xs};
-  border: ${theme.euiBorderThin};
-`;
-
-const Addition = styled.div`
-  padding: ${theme.paddingSizes.xs} ${theme.paddingSizes.s};
-  border-radius: ${theme.euiSizeXS};
-  color: white;
-  margin-right: ${theme.euiSizeS};
-  background-color: ${theme.euiColorDanger};
-`;
-
-const Deletion = styled(Addition)`
-  background-color: ${theme.euiColorVis0};
-`;
-
-const Container = styled.div`
-  padding: ${theme.paddingSizes.xs} ${theme.paddingSizes.m};
-`;
-
-const TopBarContainer = styled.div`
-  height: calc(48rem / 14);
-  border-bottom: ${theme.euiBorderThin};
-  padding: 0 ${theme.paddingSizes.m};
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-`;
-
-// @types/styled-components@3.0.1 does not yet support `defaultProps`, which EuiAccordion uses
-// Ref: https://github.com/DefinitelyTyped/DefinitelyTyped/pull/31903
-// const Accordion = styled(EuiAccordion)`
-//   border: ${theme.euiBorderThick};
-//   border-radius: ${theme.euiSizeS};
-//   margin-bottom: ${theme.euiSize};
-// `;
-const accordionStyles = {
-  border: theme.euiBorderThick,
-  borderRadius: theme.euiSizeS,
-  marginBottom: theme.euiSize,
-};
-
-const Icon = styled(EuiIcon)`
-  margin-right: ${theme.euiSizeS};
-`;
-
-const Parents = styled.div`
-  border-left: ${theme.euiBorderThin};
-  height: calc(32rem / 14);
-  line-height: calc(32rem / 14);
-  padding-left: ${theme.paddingSizes.s};
-  margin: ${theme.euiSizeS} 0;
-`;
-
-const H4 = styled.h4`
-  height: 100%;
-  line-height: calc(48rem / 14);
-`;
-
-const ButtonContainer = styled.div`
-  cursor: default;
-`;
 
 interface Props extends RouteComponentProps<{ resource: string; org: string; repo: string }> {
   commit: CommitDiff | null;
   query: string;
   onSearchScopeChanged: (s: SearchScope) => void;
   repoScope: string[];
+  searchOptions: SearchOptions;
 }
 
 export enum DiffLayout {
@@ -104,37 +38,48 @@ export enum DiffLayout {
   Split,
 }
 
-const onClick = (e: MouseEvent<HTMLDivElement>) => {
-  e.preventDefault();
-  e.stopPropagation();
-};
-
-const Difference = (props: { fileDiff: FileDiff; repoUri: string; revision: string }) => (
-  <EuiAccordion
-    style={accordionStyles}
-    initialIsOpen={true}
-    id={props.fileDiff.path}
-    buttonContent={
-      <ButtonContainer role="button" onClick={onClick}>
-        <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="none">
-              <Addition>{props.fileDiff.additions}</Addition>
-              <Deletion>{props.fileDiff.deletions}</Deletion>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem>{props.fileDiff.path}</EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <div className="euiButton euiButton--primary euiButton--small" role="button">
-              <span className="euiButton__content">
-                <Link to={`/${props.repoUri}/blob/${props.revision}/${props.fileDiff.path}`}>
-                  View File
-                </Link>
-              </span>
-            </div>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </ButtonContainer>
+const Difference = (props: {
+  fileDiff: FileDiff;
+  repoUri: string;
+  revision: string;
+  initialIsOpen: boolean;
+}) => (
+  <Accordion
+    initialIsOpen={props.initialIsOpen}
+    className="codeAccordion"
+    title={
+      <EuiFlexGroup
+        gutterSize="none"
+        alignItems="center"
+        justifyContent="spaceBetween"
+        className="codeDiff__header"
+      >
+        <EuiFlexItem>
+          <EuiFlexGroup gutterSize="none" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="none">
+                <EuiNotificationBadge size="m">{props.fileDiff.additions}</EuiNotificationBadge>
+                <EuiNotificationBadge className="codeDiffDeletion" size="m">
+                  {props.fileDiff.deletions}
+                </EuiNotificationBadge>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem>{props.fileDiff.path}</EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <div
+            className="euiButton euiButton--primary euiButton--small codeViewFile__button"
+            role="button"
+          >
+            <span className="euiButton__content">
+              <Link to={`/${props.repoUri}/blob/${props.revision}/${props.fileDiff.path}`}>
+                View File
+              </Link>
+            </span>
+          </div>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     }
   >
     <DiffEditor
@@ -143,7 +88,7 @@ const Difference = (props: { fileDiff: FileDiff; repoUri: string; revision: stri
       language={props.fileDiff.language!}
       renderSideBySide={true}
     />
-  </EuiAccordion>
+  </Accordion>
 );
 
 export class DiffPage extends React.Component<Props> {
@@ -160,6 +105,7 @@ export class DiffPage extends React.Component<Props> {
   };
 
   public render() {
+    const DEFAULT_OPEN_FILE_DIFF_COUNT = 1;
     const { commit, match } = this.props;
     const { repo, org, resource } = match.params;
     const repoUri = `${resource}/${org}/${repo}`;
@@ -167,68 +113,46 @@ export class DiffPage extends React.Component<Props> {
       return null;
     }
     const { additions, deletions, files } = commit;
-    const { parents } = commit.commit;
-    const title = commit.commit.message.split('\n')[0];
-    let parentsLinks = null;
-    if (parents.length > 1) {
-      const [p1, p2] = parents;
-      parentsLinks = (
-        <React.Fragment>
-          <Link to={`/${repoUri}/commit/${p1}`}>{p1}</Link>+
-          <Link to={`/${repoUri}/commit/${p2}`}>{p2}</Link>
-        </React.Fragment>
-      );
-    } else if (parents.length === 1) {
-      parentsLinks = <Link to={`/${repoUri}/commit/${parents[0]}`}>{parents[0]}</Link>;
-    }
-    const topBar = (
-      <TopBarContainer>
-        <div>
-          <EuiTitle size="xs">
-            <H4>{title}</H4>
-          </EuiTitle>
-        </div>
-        <div>
-          <Parents>Parents: {parentsLinks}</Parents>
-        </div>
-      </TopBarContainer>
-    );
     const fileCount = files.length;
-    const diffs = commit.files.map(file => (
-      <Difference repoUri={repoUri} revision={commit.commit.id} fileDiff={file} key={file.path} />
+    const diffs = commit.files.map((file, index) => (
+      <Difference
+        repoUri={repoUri}
+        revision={commit.commit.id}
+        fileDiff={file}
+        key={file.path}
+        initialIsOpen={index < DEFAULT_OPEN_FILE_DIFF_COUNT}
+      />
     ));
     return (
-      <div className="diff">
-        {/* <SearchBar
-          repoScope={this.props.repoScope}
+      <div>
+        <SearchBar
           query={this.props.query}
           onSearchScopeChanged={this.props.onSearchScopeChanged}
-        /> */}
-        {topBar}
-        <Container>
-          <EuiText>{commit.commit.message}</EuiText>
-        </Container>
-        <Container>
-          <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiText>
-                <Icon type="dataVisualizer" />
-                Showing
-                <PrimaryB> {fileCount} Changed files </PrimaryB>
-                with
-                <B> {additions} additions</B> and <B>{deletions} deletions </B>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText>
-                Committed by
-                <PrimaryB> {commit.commit.committer} </PrimaryB>
-                <CommitId>{commit.commit.id.substr(0, COMMIT_ID_LENGTH)}</CommitId>
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </Container>
-        <Container>{diffs}</Container>
+          searchOptions={this.props.searchOptions}
+          enableSubmitWhenOptionsChanged={false}
+        />
+        <div className="codeDiffCommitMessage">
+          <EuiText size="s">{commit.commit.message}</EuiText>
+        </div>
+        <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" className="codeDiffMetadata">
+          <EuiFlexItem grow={false}>
+            <EuiText size="s">
+              <EuiIcon type="dataVisualizer" color="subdued" className="codeVisualizerIcon" />
+              Showing
+              <b className="codeDiffChangedFiles"> {fileCount} Changed files </b>
+              with
+              <b> {additions} additions</b> and <b>{deletions} deletions </b>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="s">
+              Committed by
+              <b> {commit.commit.committer} </b>
+              <EuiBadge color="hollow">{commit.commit.id.substr(0, COMMIT_ID_LENGTH)}</EuiBadge>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <div className="codeDiff__panel">{diffs}</div>
       </div>
     );
   }
@@ -238,6 +162,7 @@ const mapStateToProps = (state: RootState) => ({
   commit: state.commit.commit,
   query: state.search.query,
   repoScope: state.search.searchOptions.repoScope.map(r => r.uri),
+  searchOptions: state.search.searchOptions,
 });
 
 const mapDispatchToProps = {

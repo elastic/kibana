@@ -9,11 +9,12 @@ import * as React from 'react';
 import { pure } from 'recompose';
 
 import { encodeIpv6 } from '../../lib/helpers';
+import { getHostDetailsUrl, getIPDetailsUrl } from '../link_to';
 
 // Internal Links
 export const HostDetailsLink = pure<{ children?: React.ReactNode; hostName: string }>(
   ({ children, hostName }) => (
-    <EuiLink href={`#/link-to/hosts/${encodeURIComponent(hostName)}`}>
+    <EuiLink href={getHostDetailsUrl(encodeURIComponent(hostName))}>
       {children ? children : hostName}
     </EuiLink>
   )
@@ -23,7 +24,7 @@ HostDetailsLink.displayName = 'HostDetailsLink';
 
 export const IPDetailsLink = pure<{ children?: React.ReactNode; ip: string }>(
   ({ children, ip }) => (
-    <EuiLink href={`#/link-to/network/ip/${encodeURIComponent(encodeIpv6(ip))}`}>
+    <EuiLink href={`${getIPDetailsUrl(encodeURIComponent(encodeIpv6(ip)))}`}>
       {children ? children : ip}
     </EuiLink>
   )

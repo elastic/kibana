@@ -12,10 +12,11 @@ import { validateIndexPattern } from 'ui/index_patterns';
 import { isValidIndexName } from '../../../../../../common/util/es_utils';
 
 import { Action, ACTION } from './actions';
-import { getInitialState, getJobConfigFromFormState, State } from './state';
+import { getInitialState, getJobConfigFromFormState, State, JOB_TYPES } from './state';
 import { isJobIdValid } from '../../../../../../common/util/job_utils';
 import { maxLengthValidator } from '../../../../../../common/util/validators';
 import { JOB_ID_MAX_LENGTH } from '../../../../../../common/constants/validation';
+import { getDependentVar, isRegressionAnalysis } from '../../../../common/analytics';
 
 const getSourceIndexString = (state: State) => {
   const { jobConfig } = state;
@@ -34,7 +35,7 @@ const getSourceIndexString = (state: State) => {
 };
 
 export const validateAdvancedEditor = (state: State): State => {
-  const { jobIdEmpty, jobIdValid, jobIdExists, createIndexPattern } = state.form;
+  const { jobIdEmpty, jobIdValid, jobIdExists, jobType, createIndexPattern } = state.form;
   const { jobConfig } = state;
 
   state.advancedEditorMessages = [];
@@ -60,9 +61,14 @@ export const validateAdvancedEditor = (state: State): State => {
   const destinationIndexName = idx(jobConfig, _ => _.dest.index) || '';
   const destinationIndexNameEmpty = destinationIndexName === '';
   const destinationIndexNameValid = isValidIndexName(destinationIndexName);
-  const destinationIndexPatternTitleExists = state.indexPatternTitles.some(
-    name => destinationIndexName === name
-  );
+  const destinationIndexPatternTitleExists =
+    state.indexPatternsMap[destinationIndexName] !== undefined;
+
+  let dependentVariableEmpty = false;
+  if (isRegressionAnalysis(jobConfig.analysis)) {
+    const dependentVariableName = getDependentVar(jobConfig.analysis) || '';
+    dependentVariableEmpty = jobType === JOB_TYPES.REGRESSION && dependentVariableName === '';
+  }
 
   if (sourceIndexNameEmpty) {
     state.advancedEditorMessages.push({
@@ -108,6 +114,18 @@ export const validateAdvancedEditor = (state: State): State => {
     });
   }
 
+  if (dependentVariableEmpty) {
+    state.advancedEditorMessages.push({
+      error: i18n.translate(
+        'xpack.ml.dataframe.analytics.create.advancedEditorMessage.dependentVariableEmpty',
+        {
+          defaultMessage: 'The dependent variable field must not be empty.',
+        }
+      ),
+      message: '',
+    });
+  }
+
   state.isValid =
     !jobIdEmpty &&
     jobIdValid &&
@@ -116,6 +134,7 @@ export const validateAdvancedEditor = (state: State): State => {
     sourceIndexNameValid &&
     !destinationIndexNameEmpty &&
     destinationIndexNameValid &&
+    !dependentVariableEmpty &&
     (!destinationIndexPatternTitleExists || !createIndexPattern);
 
   return state;
@@ -126,13 +145,17 @@ const validateForm = (state: State): State => {
     jobIdEmpty,
     jobIdValid,
     jobIdExists,
+    jobType,
     sourceIndexNameEmpty,
     sourceIndexNameValid,
     destinationIndexNameEmpty,
     destinationIndexNameValid,
     destinationIndexPatternTitleExists,
     createIndexPattern,
+    dependentVariable,
   } = state.form;
+
+  const dependentVariableEmpty = jobType === JOB_TYPES.REGRESSION && dependentVariable === '';
 
   state.isValid =
     !jobIdEmpty &&
@@ -142,6 +165,7 @@ const validateForm = (state: State): State => {
     sourceIndexNameValid &&
     !destinationIndexNameEmpty &&
     destinationIndexNameValid &&
+    !dependentVariableEmpty &&
     (!destinationIndexPatternTitleExists || !createIndexPattern);
 
   return state;
@@ -182,9 +206,8 @@ export function reducer(state: State, action: Action): State {
         );
         newFormState.destinationIndexNameEmpty = newFormState.destinationIndex === '';
         newFormState.destinationIndexNameValid = isValidIndexName(newFormState.destinationIndex);
-        newFormState.destinationIndexPatternTitleExists = state.indexPatternTitles.some(
-          name => newFormState.destinationIndex === name
-        );
+        newFormState.destinationIndexPatternTitleExists =
+          state.indexPatternsMap[newFormState.destinationIndex] !== undefined;
       }
 
       if (action.payload.jobId !== undefined) {
@@ -219,9 +242,8 @@ export function reducer(state: State, action: Action): State {
         ...state,
         ...action.payload,
       };
-      newState.form.destinationIndexPatternTitleExists = newState.indexPatternTitles.some(
-        name => newState.form.destinationIndex === name
-      );
+      newState.form.destinationIndexPatternTitleExists =
+        newState.indexPatternsMap[newState.form.destinationIndex] !== undefined;
       return newState;
     }
 

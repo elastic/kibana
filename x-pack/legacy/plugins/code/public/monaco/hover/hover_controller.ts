@@ -17,7 +17,7 @@ export class HoverController implements Editor.IEditorContribution {
   private contentWidget: ContentHoverWidget;
   private disposables: IDisposable[];
 
-  constructor(readonly editor: Editor.ICodeEditor) {
+  constructor(public readonly editor: Editor.ICodeEditor) {
     this.disposables = [
       this.editor.onMouseMove((e: Editor.IEditorMouseEvent) => this.onEditorMouseMove(e)),
       this.editor.onKeyDown((e: IKeyboardEvent) => this.onKeyDown(e)),

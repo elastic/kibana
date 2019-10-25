@@ -23,6 +23,8 @@ import { errorToToaster } from '../ml/api/error_to_toaster';
 import { METRIC_TYPE, TELEMETRY_EVENT, trackUiAction as track } from '../../lib/track_usage';
 import { useSiemJobs } from './hooks/use_siem_jobs';
 import { filterJobs } from './helpers';
+import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
+import { DEFAULT_KBN_VERSION } from '../../../common/constants';
 
 const PopoverContentsDiv = styled.div`
   max-width: 684px;
@@ -93,6 +95,7 @@ export const MlPopover = React.memo(() => {
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [filterProperties, setFilterProperties] = useState(defaultFilterProps);
+  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
   const [isLoadingSiemJobs, siemJobs] = useSiemJobs(refreshToggle);
   const [, dispatchToaster] = useStateToaster();
   const capabilities = useContext(MlCapabilitiesContext);
@@ -108,6 +111,7 @@ export const MlPopover = React.memo(() => {
           indexPatternName: job.defaultIndexPattern,
           jobIdErrorFilter: [job.id],
           groups: job.groups,
+          kbnVersion,
         });
       } catch (error) {
         errorToToaster({ title: i18n.CREATE_JOB_FAILURE, error, dispatchToaster });
@@ -125,14 +129,14 @@ export const MlPopover = React.memo(() => {
     if (enable) {
       const startTime = Math.max(latestTimestampMs, maxStartTime);
       try {
-        await startDatafeeds({ datafeedIds: [`datafeed-${job.id}`], start: startTime });
+        await startDatafeeds({ datafeedIds: [`datafeed-${job.id}`], kbnVersion, start: startTime });
       } catch (error) {
         track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.JOB_ENABLE_FAILURE);
         errorToToaster({ title: i18n.START_JOB_FAILURE, error, dispatchToaster });
       }
     } else {
       try {
-        await stopDatafeeds({ datafeedIds: [`datafeed-${job.id}`] });
+        await stopDatafeeds({ datafeedIds: [`datafeed-${job.id}`], kbnVersion });
       } catch (error) {
         track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.JOB_DISABLE_FAILURE);
         errorToToaster({ title: i18n.STOP_JOB_FAILURE, error, dispatchToaster });

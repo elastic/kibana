@@ -4,40 +4,40 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchResponse, SearchHit, SignalHit } from '../../types';
+import { SignalHit } from '../../types';
 import { Logger } from '../../../../../../../../src/core/server';
 import { AlertServices } from '../../../../../alerting/server/types';
+import { SignalSourceHit, SignalSearchResponse, SignalAlertParams } from './types';
 
 // format scroll search result for signals index.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const buildBulkBody = (doc: SearchHit, signalParams: Record<string, any>): SignalHit => {
-  const indexPatterns = signalParams.index.map((element: string) => `"${element}"`).join(',');
-  const refs = signalParams.references.map((element: string) => `"${element}"`).join(',');
+export const buildBulkBody = (doc: SignalSourceHit, signalParams: SignalAlertParams): SignalHit => {
   return {
     ...doc._source,
     signal: {
+      '@timestamp': new Date().toISOString(),
       rule_revision: 1,
       rule_id: signalParams.id,
       rule_type: signalParams.type,
       parent: {
         id: doc._id,
         type: 'event',
+        index: doc._index,
         depth: 1,
       },
       name: signalParams.name,
       severity: signalParams.severity,
       description: signalParams.description,
-      time_detected: Date.now(),
-      index_patterns: indexPatterns,
-      references: refs,
+      original_time: doc._source['@timestamp'],
+      index_patterns: signalParams.index,
+      references: signalParams.references,
     },
   };
 };
 
 // Bulk Index documents.
 export const singleBulkIndex = async (
-  sr: SearchResponse<object>,
-  params: Record<string, any>, // eslint-disable-line @typescript-eslint/no-explicit-any
+  sr: SignalSearchResponse,
+  params: SignalAlertParams,
   service: AlertServices,
   logger: Logger
 ): Promise<boolean> => {
@@ -45,7 +45,7 @@ export const singleBulkIndex = async (
     logger.warn('First search result yielded 0 documents');
     return false;
   }
-  const bulkBody = sr.hits.hits.flatMap((doc: SearchHit) => [
+  const bulkBody = sr.hits.hits.flatMap(doc => [
     {
       index: {
         _index: process.env.SIGNALS_INDEX || '.siem-signals-10-01-2019',
@@ -68,10 +68,10 @@ export const singleBulkIndex = async (
 // Given a scroll id, grab the next set of documents
 export const singleScroll = async (
   scrollId: string | undefined,
-  params: Record<string, any>, // eslint-disable-line @typescript-eslint/no-explicit-any
+  params: SignalAlertParams & { scrollLock?: number }, // TODO: Finish plumbing the scrollLock all the way to the REST endpoint if this algorithm continues to use it.
   service: AlertServices,
   logger: Logger
-): Promise<SearchResponse<object>> => {
+): Promise<SignalSearchResponse> => {
   const scroll = params.scrollLock ? params.scrollLock : '1m';
   try {
     const nextScrollResult = await service.callCluster('scroll', {
@@ -87,8 +87,8 @@ export const singleScroll = async (
 
 // scroll through documents and re-index using bulk endpoint.
 export const scrollAndBulkIndex = async (
-  someResult: SearchResponse<object>,
-  params: Record<string, any>, // eslint-disable-line @typescript-eslint/no-explicit-any
+  someResult: SignalSearchResponse,
+  params: SignalAlertParams,
   service: AlertServices,
   logger: Logger
 ): Promise<boolean> => {
