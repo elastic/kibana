@@ -18,3 +18,4 @@
  */
 
 export { ExpandPanelAction, EXPAND_PANEL_ACTION } from './expand_panel_action';
+export { ReplacePanelAction, REPLACE_PANEL_ACTION } from './replace_panel_action';

@@ -23,7 +23,7 @@ import { FieldBrowserProps } from './types';
 const fieldsButtonClassName = 'fields-button';
 
 /** wait this many ms after the user completes typing before applying the filter input */
-const INPUT_TIMEOUT = 250;
+export const INPUT_TIMEOUT = 250;
 
 const FieldsBrowserButtonContainer = styled.div`
   position: relative;
@@ -94,19 +94,18 @@ export const StatefulFieldsBrowserComponent = React.memo<FieldBrowserProps & Dis
       if (inputTimeoutId.current !== 0) {
         clearTimeout(inputTimeoutId.current); // ⚠️ mutation: cancel any previous timers
       }
-
       // ⚠️ mutation: schedule a new timer that will apply the filter when it fires:
       inputTimeoutId.current = window.setTimeout(() => {
         const newFilteredBrowserFields = filterBrowserFieldsByFieldName({
           browserFields: mergeBrowserFieldsWithDefaultCategory(browserFields),
-          substring: filterInput,
+          substring: newFilterInput,
         });
 
         setFilteredBrowserFields(newFilteredBrowserFields);
         setIsSearching(false);
 
         const newSelectedCategoryId =
-          filterInput === '' || Object.keys(newFilteredBrowserFields).length === 0
+          newFilterInput === '' || Object.keys(newFilteredBrowserFields).length === 0
             ? DEFAULT_CATEGORY_NAME
             : Object.keys(newFilteredBrowserFields)
                 .sort()
@@ -114,8 +113,8 @@ export const StatefulFieldsBrowserComponent = React.memo<FieldBrowserProps & Dis
                   (selected, category) =>
                     newFilteredBrowserFields[category].fields != null &&
                     newFilteredBrowserFields[selected].fields != null &&
-                    newFilteredBrowserFields[category].fields!.length >
-                      newFilteredBrowserFields[selected].fields!.length
+                    Object.keys(newFilteredBrowserFields[category].fields!).length >
+                      Object.keys(newFilteredBrowserFields[selected].fields!).length
                       ? category
                       : selected,
                   Object.keys(newFilteredBrowserFields)[0]
