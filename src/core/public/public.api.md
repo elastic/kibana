@@ -105,6 +105,16 @@ export interface ChromeBrand {
 // @public (undocumented)
 export type ChromeBreadcrumb = Breadcrumb;
 
+// @public
+export interface ChromeDocTitle {
+    // @internal (undocumented)
+    __legacy: {
+        setBaseTitle(baseTitle: string): void;
+    };
+    change(newTitle: string | string[]): void;
+    reset(): void;
+}
+
 // @public (undocumented)
 export type ChromeHelpExtension = (element: HTMLDivElement) => () => void;
 
@@ -186,6 +196,7 @@ export interface ChromeRecentlyAccessedHistoryItem {
 // @public
 export interface ChromeStart {
     addApplicationClass(className: string): void;
+    docTitle: ChromeDocTitle;
     getApplicationClasses$(): Observable<string[]>;
     getBadge$(): Observable<ChromeBadge | undefined>;
     getBrand$(): Observable<ChromeBrand>;
