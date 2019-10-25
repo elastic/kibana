@@ -17,14 +17,18 @@
  * under the License.
  */
 
-import { DevToolsRegistryProvider } from 'ui/registry/dev_tools';
-import { i18n } from '@kbn/i18n';
+import { npSetup } from 'ui/new_platform';
+import { FeatureCatalogueRegistryProvider } from 'ui/registry/feature_catalogue';
 
-DevToolsRegistryProvider.register(() => ({
-  order: 1,
-  name: 'console',
-  display: i18n.translate('console.consoleDisplayName', {
-    defaultMessage: 'Console',
-  }),
-  url: '#/dev_tools/console',
-}));
+import { DevToolsPlugin } from './plugin';
+import { localApplicationService } from '../local_application_service';
+
+const instance = new DevToolsPlugin();
+
+export const devToolsSetup = instance.setup(npSetup.core, {
+  __LEGACY: {
+    localApplicationService,
+    FeatureCatalogueRegistryProvider,
+  },
+});
+instance.start();

@@ -27,17 +27,28 @@ export class ConsoleUIPlugin implements Plugin<any, any> {
   // @ts-ignore
   constructor(private readonly ctx: PluginInitializerContext) {}
 
-  async setup({ application, notifications }: CoreSetup, pluginSet: XPluginSet) {
+  async setup({ notifications }: CoreSetup, pluginSet: XPluginSet) {
     const {
-      __LEGACY: { docLinkVersion, I18nContext, ResizeChecker },
+      __LEGACY: { I18nContext, ResizeChecker },
+      devTools,
     } = pluginSet;
 
-    application.register({
+    devTools.register({
       id: 'console',
       order: 1,
       title: 'Console',
+      enableRouting: false,
       mount(ctx, { element }) {
-        render(boot({ docLinkVersion, I18nContext, ResizeChecker, notifications }), element);
+        // todo make the loading of this async and load via hacks
+        render(
+          boot({
+            docLinkVersion: ctx.core.docLinks.DOC_LINK_VERSION,
+            I18nContext,
+            ResizeChecker,
+            notifications,
+          }),
+          element
+        );
         return () => {
           unmountComponentAtNode(element);
         };

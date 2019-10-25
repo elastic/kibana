@@ -34,7 +34,7 @@ import 'ui/autoload/all';
 import template from './templates/index.html';
 import { defaultQuery } from './templates/default_query';
 
-uiRoutes.when('/dev_tools/searchprofiler', {
+uiRoutes.when('/XXX/dev_tools/searchprofiler', {
   template: template,
   requireUICapability: 'dev_tools.show',
   controller: $scope => {

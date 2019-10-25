@@ -182,7 +182,6 @@ export default function(kibana: any) {
 
     uiExports: {
       apps,
-      hacks: ['plugins/console/quarantined/hacks/register'],
       devTools: [`${npSrc}/legacy`],
       styleSheetPaths: resolve(__dirname, 'public/quarantined/index.scss'),
 

@@ -20,7 +20,6 @@ export const grokdebugger = (kibana) => new kibana.Plugin({
     }).default();
   },
   uiExports: {
-    devTools: ['plugins/grokdebugger/sections/grokdebugger'],
     hacks: ['plugins/grokdebugger/sections/grokdebugger/register'],
     home: ['plugins/grokdebugger/register_feature'],
   },
