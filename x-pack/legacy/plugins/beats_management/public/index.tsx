@@ -44,10 +44,10 @@ async function startApp(libs: FrontendLibs) {
                       iconType="help"
                     >
                       <p>
-                        We have ceased development on Beats central management and
-                        are working on a comprehensive solution to replace it.
-                        Thank you for participating in the beta and providing feedback.
-                        If you have any questions or concerns, please reach out to us on the
+                        We have ceased development on Beats central management and are working on a
+                        comprehensive solution to replace it. Thank you for participating in the
+                        beta and providing feedback. If you have any questions or concerns, please
+                        reach out to us on the
                         <a href="https://discuss.elastic.co/c/beats">Discuss forum</a>.
                       </p>
                     </EuiCallOut>
