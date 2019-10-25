@@ -10,6 +10,8 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
+import { i18n } from '@kbn/i18n';
+
 import { InfraBackendLibs } from '../../../lib/infra_types';
 import {
   LOG_ANALYSIS_VALIDATE_ML_MODULE_PATH,
@@ -42,7 +44,10 @@ export const initMlValidateModuleRoute = ({ framework }: InfraBackendLibs) => {
       if (indexNames.length === 0) {
         errors.push({
           field: 'indexPatternName',
-          message: `No indices match the pattern \`${indexPatternName}\`.`,
+          message: i18n.translate('xpack.infra.mlValidation.noIndexFound', {
+            defaultMessage: 'No indices match the pattern {indexPatternName}',
+            values: { indexPatternName },
+          }),
         });
       } else {
         for (const index of indexNames) {
@@ -50,12 +55,20 @@ export const initMlValidateModuleRoute = ({ framework }: InfraBackendLibs) => {
           if (!metadata.mappings.properties[timestamp]) {
             errors.push({
               field: 'timestamp',
-              message: `Index \`${index}\` has no field \`${timestamp}\`. Ensure the "Timestamp" field in your settings exists in all indices.`,
+              message: i18n.translate('xpack.infra.mlValidation.noTimestampField', {
+                defaultMessage:
+                  'Index `{index}` has no field `{timestamp}`. Ensure the "Timestamp" field in your settings exists in all indices.',
+                values: { index, timestamp },
+              }),
             });
           } else if (metadata.mappings.properties[timestamp].type !== 'date') {
             errors.push({
               field: 'timestamp',
-              message: `Field \`${timestamp}\` in index \`${index}\` is not of type \`date\`. Ensure the "Timestamp" field in your settings has \`date\` type.`,
+              message: i18n.translate('xpack.infra.mlValidation.invalidTimestampField', {
+                defaultMessage:
+                  'Field `{timestamp}` in index `{index}` is not of type `date`. Ensure the "Timestamp" field in your settings has `date` type.',
+                values: { index, timestamp },
+              }),
             });
           }
         }
