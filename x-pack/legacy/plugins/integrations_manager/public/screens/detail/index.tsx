@@ -46,12 +46,9 @@ export function DetailLayout(props: LayoutProps) {
     padding-bottom: ${theme.eui.paddingSizes.xl};
   `;
 
-  const FullWidthRemainingHeight = styled(EuiPage)`
-    background-color: ${theme.eui.euiColorEmptyShade};
-    height: calc(100vh - ${topBarsHeight()}px);
+  const FullWidthContent = styled(EuiPage)`
+    background-color: ${panel === 'overview' ? theme.eui.euiColorEmptyShade : 'none'};
   `;
-
-  const FullWidthContent = panel === 'overview' ? FullWidthRemainingHeight : EuiPage;
 
   return (
     <Fragment>
@@ -67,15 +64,4 @@ export function DetailLayout(props: LayoutProps) {
       </FullWidthContent>
     </Fragment>
   );
-}
-
-function topBarsHeight() {
-  const { theme } = useCore();
-  const globalNav = parseInt(theme.eui.euiHeaderChildSize, 10);
-  const pageTopNav = /* line-height */ 24 + /* padding-top */ 16 + /* padding-bottom */ 16;
-  const title = /* line-height */ 48;
-  const header = /* padding-top */ 16 + pageTopNav + title + /* padding-bottom */ 16;
-  const topBarsTotal = globalNav + header;
-
-  return topBarsTotal;
 }
