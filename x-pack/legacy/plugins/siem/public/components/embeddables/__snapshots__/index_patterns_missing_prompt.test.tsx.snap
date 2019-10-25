@@ -40,7 +40,7 @@ exports[`IndexPatternsMissingPrompt renders correctly against snapshot 1`] = `
       <p>
         <FormattedMessage
           defaultMessage="You can also configure them manually in Kibana."
-          id="xpack.siem.components.embeddables.indexPatternsMissingPrompt.errorDescription"
+          id="xpack.siem.components.embeddables.indexPatternsMissingPrompt.errorDescription2"
           values={Object {}}
         />
       </p>
