@@ -52,7 +52,7 @@ interface HostsComponentDispatchProps {
   }>;
 }
 
-export type HostsQueryProps = { timezone?: string } & GlobalTimeArgs;
+export type HostsQueryProps = GlobalTimeArgs;
 
 export type HostsComponentProps = HostsComponentReduxProps &
   HostsComponentDispatchProps &

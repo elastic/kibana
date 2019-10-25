@@ -21,7 +21,6 @@ export const EventsQueryTabBody = ({
   filterQuery,
   setQuery,
   startDate,
-  timezone,
   updateDateRange = () => {},
 }: HostsComponentsQueryProps) => {
   return (
@@ -31,7 +30,6 @@ export const EventsQueryTabBody = ({
         filterQuery={filterQuery}
         sourceId="default"
         startDate={startDate}
-        timezone={timezone}
         type={hostsModel.HostsType.page}
       >
         {({ eventsOverTime, loading, id, inspect, refetch, totalCount }) => (
