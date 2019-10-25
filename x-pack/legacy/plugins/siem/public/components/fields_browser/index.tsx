@@ -91,40 +91,37 @@ export const StatefulFieldsBrowserComponent = React.memo<FieldBrowserProps & Dis
       (newFilterInput: string) => {
         setFilterInput(newFilterInput);
         setIsSearching(true);
-
         if (inputTimeoutId.current !== 0) {
           clearTimeout(inputTimeoutId.current); // ⚠️ mutation: cancel any previous timers
         }
-
         // ⚠️ mutation: schedule a new timer that will apply the filter when it fires:
         inputTimeoutId.current = window.setTimeout(() => {
           const newFilteredBrowserFields = filterBrowserFieldsByFieldName({
             browserFields: mergeBrowserFieldsWithDefaultCategory(browserFields),
-            substring: filterInput,
+            substring: newFilterInput,
           });
-
           setFilteredBrowserFields(newFilteredBrowserFields);
           setIsSearching(false);
 
           const newSelectedCategoryId =
-            filterInput === '' || Object.keys(newFilteredBrowserFields).length === 0
+            newFilterInput === '' || Object.keys(newFilteredBrowserFields).length === 0
               ? DEFAULT_CATEGORY_NAME
               : Object.keys(newFilteredBrowserFields)
-                .sort()
-                .reduce<string>(
-                  (selected, category) =>
-                    newFilteredBrowserFields[category].fields != null &&
+                  .sort()
+                  .reduce<string>(
+                    (selected, category) =>
+                      newFilteredBrowserFields[category].fields != null &&
                       newFilteredBrowserFields[selected].fields != null &&
                       Object.keys(newFilteredBrowserFields[category].fields!).length >
-                      Object.keys(newFilteredBrowserFields[selected].fields!).length
-                      ? category
-                      : selected,
-                  Object.keys(newFilteredBrowserFields)[0]
-                );
+                        Object.keys(newFilteredBrowserFields[selected].fields!).length
+                        ? category
+                        : selected,
+                    Object.keys(newFilteredBrowserFields)[0]
+                  );
           setSelectedCategoryId(newSelectedCategoryId);
         }, INPUT_TIMEOUT);
       },
-      [browserFields, filterInput, inputTimeoutId]
+      [browserFields, filterInput, inputTimeoutId.current]
     );
 
     /**
@@ -172,16 +169,16 @@ export const StatefulFieldsBrowserComponent = React.memo<FieldBrowserProps & Dis
                 onClick={toggleShow}
               />
             ) : (
-                <EuiButtonEmpty
-                  className={fieldsButtonClassName}
-                  data-test-subj="show-field-browser"
-                  iconType="list"
-                  onClick={toggleShow}
-                  size="xs"
-                >
-                  {i18n.FIELDS}
-                </EuiButtonEmpty>
-              )}
+              <EuiButtonEmpty
+                className={fieldsButtonClassName}
+                data-test-subj="show-field-browser"
+                iconType="list"
+                onClick={toggleShow}
+                size="xs"
+              >
+                {i18n.FIELDS}
+              </EuiButtonEmpty>
+            )}
           </EuiToolTip>
 
           {show && (
