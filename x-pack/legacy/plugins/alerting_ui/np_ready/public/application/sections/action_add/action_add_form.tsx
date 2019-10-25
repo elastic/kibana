@@ -39,8 +39,9 @@ export const ActionAddForm = ({ actionType }: Props) => {
   const {
     core: { http },
     plugins: { toastNotifications },
+    actionTypeRegistry,
   } = useAppDependencies();
-  const { setFlyoutVisibility, actionTypeRegistry, loadActions } = useContext(ActionsContext);
+  const { setFlyoutVisibility, loadActions } = useContext(ActionsContext);
   // hooks
   const [{ action }, dispatch] = useReducer(actionReducer, {
     action: { actionTypeId: actionType.id, config: {}, secrets: {} },

@@ -82,4 +82,6 @@ export interface AlertTableItem extends Alert {
 
 export interface AlertTypeModel {
   id: string;
+  name: string;
+  iconClass: string;
 }

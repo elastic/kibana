@@ -175,7 +175,6 @@ export const ActionsList: React.FunctionComponent = () => {
           value={{
             flyoutVisible,
             setFlyoutVisibility,
-            actionTypeRegistry,
             actionTypesIndex,
             loadActions,
           }}

@@ -7,5 +7,9 @@
 import { AlertTypeModel } from '../../../../types';
 
 export function getActionType(): AlertTypeModel {
-  return { id: 'threshold' };
+  return {
+    id: 'threshold',
+    name: 'Index Threshold',
+    iconClass: 'alert',
+  };
 }

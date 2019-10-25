@@ -5,14 +5,12 @@
  */
 
 import React from 'react';
-import { ActionTypeRegistry } from '../action_type_registry';
 import { ActionType } from '../../types';
 export const ActionsContext = React.createContext({} as IActionContext);
 
 export interface IActionContext {
   flyoutVisible: boolean;
   setFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
-  actionTypeRegistry: ActionTypeRegistry;
   actionTypesIndex: Record<string, ActionType> | undefined;
   loadActions: () => Promise<void>;
 }

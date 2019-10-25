@@ -17,13 +17,15 @@ import {
 import { i18n } from '@kbn/i18n';
 import { ActionType } from '../../../types';
 import { ActionsContext } from '../../context/actions_context';
+import { useAppDependencies } from '../..';
 
 interface Props {
   setActionType: React.Dispatch<React.SetStateAction<ActionType | undefined>>;
 }
 
 export const ActionTypeMenu = ({ setActionType }: Props) => {
-  const { actionTypesIndex, actionTypeRegistry, setFlyoutVisibility } = useContext(ActionsContext);
+  const { actionTypeRegistry } = useAppDependencies();
+  const { actionTypesIndex, setFlyoutVisibility } = useContext(ActionsContext);
   if (!actionTypesIndex) {
     return null;
   }

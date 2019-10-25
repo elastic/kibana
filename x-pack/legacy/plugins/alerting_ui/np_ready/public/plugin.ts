@@ -22,6 +22,7 @@ import { docTitleService } from './application/lib/doc_title';
 import { ActionTypeRegistry } from './application/action_type_registry';
 import { registerBuiltInActionTypes } from './application/sections/action_add/buildin_action_types';
 import { AlertTypeRegistry } from './application/alert_type_registry';
+import { registerAlertTypes } from './application/sections/alert_add/alert_types';
 
 export type Setup = void;
 export type Start = void;
@@ -52,10 +53,15 @@ export class Plugin implements CorePlugin<Setup, Start> {
       const actionTypeRegistry = new ActionTypeRegistry();
       this.actionTypeRegistry = actionTypeRegistry;
 
-      this.alertTypeRegistry = new AlertTypeRegistry();
+      const alertTypeRegistry = new AlertTypeRegistry();
+      this.alertTypeRegistry = alertTypeRegistry;
 
       registerBuiltInActionTypes({
         actionTypeRegistry,
+      });
+
+      registerAlertTypes({
+        alertTypeRegistry,
       });
 
       const kbnSection = getSection('kibana');
