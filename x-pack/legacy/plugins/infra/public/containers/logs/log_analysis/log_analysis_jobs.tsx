@@ -148,6 +148,9 @@ export const useLogAnalysisJobs = ({
     };
   }, [sourceId, spaceId]);
 
+  const validMlSetup = false;
+  const mlSetupErrors = [{ field: 'timestamp', message: 'Timestamp is not a valid time field' }];
+
   return {
     availableIndices,
     fetchJobStatus,
@@ -162,6 +165,8 @@ export const useLogAnalysisJobs = ({
     viewSetupForUpdate,
     viewResults,
     jobIds,
+    validMlSetup,
+    mlSetupErrors,
   };
 };
 

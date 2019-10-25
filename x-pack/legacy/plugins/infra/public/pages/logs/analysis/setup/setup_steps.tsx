@@ -6,12 +6,13 @@
 
 import { EuiSteps, EuiStepStatus } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useContext } from 'react';
 
 import { SetupStatus } from '../../../../../common/log_analysis';
 import { useAnalysisSetupState } from '../../../../containers/logs/log_analysis/log_analysis_setup_state';
 import { InitialConfigurationStep } from './initial_configuration_step';
 import { ProcessStep } from './process_step';
+import { LogAnalysisJobs } from '../../../../containers/logs/log_analysis';
 
 type SetupHandler = (
   indices: string[],
@@ -52,6 +53,8 @@ export const AnalysisSetupSteps: React.FunctionComponent<AnalysisSetupStepsProps
     cleanupAndSetupModule,
   });
 
+  const { validMlSetup } = useContext(LogAnalysisJobs.Context);
+
   const steps = [
     {
       title: i18n.translate('xpack.infra.analysisSetup.configurationStepTitle', {
@@ -77,7 +80,7 @@ export const AnalysisSetupSteps: React.FunctionComponent<AnalysisSetupStepsProps
         <ProcessStep
           cleanupAndSetup={cleanupAndSetup}
           errorMessages={errorMessages}
-          isConfigurationValid={validationErrors.length <= 0}
+          isConfigurationValid={validMlSetup && validationErrors.length <= 0}
           setup={setup}
           setupStatus={setupStatus}
           viewResults={viewResults}
