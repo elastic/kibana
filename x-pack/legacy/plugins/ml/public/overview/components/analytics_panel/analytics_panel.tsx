@@ -19,7 +19,10 @@ import { AnalyticsTable } from './table';
 import { getAnalyticsFactory } from '../../../data_frame_analytics/pages/analytics_management/services/analytics_service';
 import { DataFrameAnalyticsListRow } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
 
-export const AnalyticsPanel: FC = () => {
+interface Props {
+  jobCreationDisabled: boolean;
+}
+export const AnalyticsPanel: FC<Props> = ({ jobCreationDisabled }) => {
   const [analytics, setAnalytics] = useState<DataFrameAnalyticsListRow[]>([]);
   const [errorMessage, setErrorMessage] = useState<any>(undefined);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -67,7 +70,7 @@ export const AnalyticsPanel: FC = () => {
           title={
             <h2>
               {i18n.translate('xpack.ml.overview.analyticsList.createFirstJobMessage', {
-                defaultMessage: 'Create your first analytics job.',
+                defaultMessage: 'Create your first analytics job',
               })}
             </h2>
           }
@@ -81,7 +84,13 @@ export const AnalyticsPanel: FC = () => {
             </Fragment>
           }
           actions={
-            <EuiButton href="#/data_frame_analytics?" color="primary" fill iconType="plusInCircle">
+            <EuiButton
+              href="#/data_frame_analytics?"
+              color="primary"
+              fill
+              iconType="plusInCircle"
+              isDisabled={jobCreationDisabled}
+            >
               {i18n.translate('xpack.ml.overview.analyticsList.createJobButtonText', {
                 defaultMessage: 'Create job',
               })}
