@@ -36,7 +36,7 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
   const jobCreator = jc as PopulationJobCreator;
 
   const { fields } = newJobCapsService;
-  const [selectedOptions, setSelectedOptions] = useState<DropDownProps>([{ label: '' }]);
+  const [selectedOptions, setSelectedOptions] = useState<DropDownProps>([]);
   const [aggFieldPairList, setAggFieldPairList] = useState<AggFieldPair[]>(
     jobCreator.aggFieldPairs
   );
@@ -62,7 +62,7 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
       if (typeof option !== 'undefined') {
         const newPair = { agg: option.agg, field: option.field, by: { field: null, value: null } };
         setAggFieldPairList([...aggFieldPairList, newPair]);
-        setSelectedOptions([{ label: '' }]);
+        setSelectedOptions([]);
       } else {
         setAggFieldPairList([]);
       }
