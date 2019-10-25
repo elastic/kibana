@@ -20,6 +20,7 @@
 import { Observable } from 'rxjs';
 import { ES_SEARCH_STRATEGY, IEsSearchResponse } from '../../../common/search';
 import { SYNC_SEARCH_STRATEGY } from '../sync_search_strategy';
+import { getEsPreference } from './get_es_preference';
 import { TSearchStrategyProvider, ISearchStrategy, ISearchGeneric, ISearchContext } from '..';
 
 export const esSearchStrategyProvider: TSearchStrategyProvider<typeof ES_SEARCH_STRATEGY> = (
@@ -27,11 +28,17 @@ export const esSearchStrategyProvider: TSearchStrategyProvider<typeof ES_SEARCH_
   search: ISearchGeneric
 ): ISearchStrategy<typeof ES_SEARCH_STRATEGY> => {
   return {
-    search: (request, options) =>
-      search(
+    search: (request, options) => {
+      if (typeof request.params.preference === 'undefined') {
+        const setPreference = context.core.uiSettings.get('courier:setRequestPreference');
+        const customPreference = context.core.uiSettings.get('courier:customRequestPreference');
+        request.params.preference = getEsPreference(setPreference, customPreference);
+      }
+      return search(
         { ...request, serverStrategy: ES_SEARCH_STRATEGY },
         options,
         SYNC_SEARCH_STRATEGY
-      ) as Observable<IEsSearchResponse>,
+      ) as Observable<IEsSearchResponse>;
+    },
   };
 };
