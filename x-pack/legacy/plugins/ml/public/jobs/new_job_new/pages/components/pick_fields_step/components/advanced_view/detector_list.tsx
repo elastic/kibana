@@ -108,9 +108,11 @@ export const DetectorList: FC<Props> = ({ isActive, onEditJob, onDeleteJob }) =>
                     detectorToString(d)
                   )}
                 </EuiFlexItem>
-                <EuiFlexItem grow={false} style={{ margin: '8px' }}>
-                  <Buttons index={i} />
-                </EuiFlexItem>
+                {isActive && (
+                  <EuiFlexItem grow={false} style={{ margin: '8px' }}>
+                    <Buttons index={i} />
+                  </EuiFlexItem>
+                )}
               </EuiFlexGroup>
               {d.detector_description !== undefined && (
                 <Fragment>
