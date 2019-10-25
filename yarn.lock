@@ -23265,15 +23265,6 @@ react-reconciler@^0.20.1:
     prop-types "^15.6.2"
     scheduler "^0.13.6"
 
-react-redux-request@^1.5.6:
-  version "1.5.6"
-  resolved "https://registry.yarnpkg.com/react-redux-request/-/react-redux-request-1.5.6.tgz#8c514dc88264d225e113b4b54a265064e8020651"
-  integrity sha512-mzdG41GSLwynFI7DII3XNJxkABLD++I3Q1zlZWpcqycWSzWSYkjPUEz7M8r6aIIMzruANHQZX+asulvoaiwFRg==
-  dependencies:
-    lodash.get "^4.4.2"
-    lodash.isequal "^4.5.0"
-    prop-types "^15.6.1"
-
 react-redux@^5.0.6, react-redux@^5.0.7:
   version "5.0.7"
   resolved "https://registry.yarnpkg.com/react-redux/-/react-redux-5.0.7.tgz#0dc1076d9afb4670f993ffaef44b8f8c1155a4c8"
