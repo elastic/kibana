@@ -8,10 +8,10 @@ import React, { useState } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiText, EuiSwitch } from '@elastic/eui';
 
-import { ToggleField, UseField, FieldConfig, FormDataProvider } from '../../../../shared_imports';
+import { ToggleField, UseField, FormDataProvider } from '../../../../shared_imports';
 
-import { PARAMETERS_DEFINITION } from '../../../../constants';
 import { ParameterName } from '../../../../types';
+import { getFieldConfig } from '../../../../lib';
 
 type ChildrenFunc = (isOn: boolean) => React.ReactNode;
 
@@ -26,9 +26,6 @@ interface Props {
 }
 
 const PADDING_LEFT_NO_TOGGLE = '66px';
-
-const getFieldConfig = (param: ParameterName): FieldConfig =>
-  PARAMETERS_DEFINITION[param].fieldConfig || {};
 
 export const EditFieldFormRow = React.memo(
   ({

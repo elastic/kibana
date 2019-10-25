@@ -15,10 +15,17 @@ import {
   MainType,
   SubType,
   ChildFieldName,
+  ParameterName,
 } from '../types';
 
-import { MAIN_DATA_TYPE_DEFINITION, MAX_DEPTH_DEFAULT_EDITOR } from '../constants';
+import {
+  MAIN_DATA_TYPE_DEFINITION,
+  MAX_DEPTH_DEFAULT_EDITOR,
+  PARAMETERS_DEFINITION,
+} from '../constants';
+
 import { State } from '../reducer';
+import { FieldConfig } from '../shared_imports';
 import { TreeItem } from '../components/tree';
 
 export const getUniqueId = () => {
@@ -60,6 +67,9 @@ export const getFieldMeta = (field: Field, isMultiField?: boolean): FieldMeta =>
     isExpanded: false,
   };
 };
+
+export const getFieldConfig = (param: ParameterName): FieldConfig =>
+  PARAMETERS_DEFINITION[param].fieldConfig || {};
 
 /**
  * Return a map of subType -> mainType

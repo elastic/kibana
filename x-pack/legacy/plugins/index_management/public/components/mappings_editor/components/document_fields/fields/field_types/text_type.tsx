@@ -4,9 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
 import { NormalizedField } from '../../../../types';
+import { UseField, Field } from '../../../../shared_imports';
+import { getFieldConfig } from '../../../../lib';
+import { PARAMETERS_OPTIONS } from '../../../../constants';
 import { EditFieldSection, EditFieldFormRow, AdvancedSettingsWrapper } from '../edit_field';
 
 interface Props {
@@ -29,7 +32,27 @@ export const TextType = React.memo(({ field }: Props) => {
           formFieldPath="index"
           direction="column"
         >
-          Index option drop down here...
+          {/* Index options */}
+          <EuiFlexGroup alignItems="center">
+            <EuiFlexItem>
+              <UseField
+                path="index_options"
+                config={getFieldConfig('index_options')}
+                component={Field}
+                componentProps={{
+                  euiFieldProps: {
+                    options: PARAMETERS_OPTIONS.index_options,
+                    style: { maxWidth: 300 },
+                  },
+                }}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText size="s" color="subdued">
+                This is description text.
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EditFieldFormRow>
 
         <EditFieldFormRow
