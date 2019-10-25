@@ -7,11 +7,11 @@
 import _ from 'lodash';
 import sinon from 'sinon';
 import { TaskManager, claimAvailableTasks } from './task_manager';
-import { SavedObjectsClientMock } from 'src/core/server/mocks';
+import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { SavedObjectsSerializer, SavedObjectsSchema } from 'src/core/server';
 import { mockLogger } from './test_utils';
 
-const savedObjectsClient = SavedObjectsClientMock.create();
+const savedObjectsClient = savedObjectsClientMock.create();
 const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
 
 describe('TaskManager', () => {
@@ -24,6 +24,9 @@ describe('TaskManager', () => {
         max_attempts: 9,
         poll_interval: 6000000,
       },
+    },
+    server: {
+      uuid: 'some-uuid',
     },
   };
   const config = {
@@ -42,6 +45,29 @@ describe('TaskManager', () => {
   });
 
   afterEach(() => clock.restore());
+
+  test('throws if no valid UUID is available', async () => {
+    expect(() => {
+      const configWithoutServerUUID = {
+        xpack: {
+          task_manager: {
+            max_workers: 10,
+            index: 'foo',
+            max_attempts: 9,
+            poll_interval: 6000000,
+          },
+        },
+      };
+      new TaskManager({
+        ...taskManagerOpts,
+        config: {
+          get: (path: string) => _.get(configWithoutServerUUID, path),
+        },
+      });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"TaskManager is unable to start as Kibana has no valid UUID assigned to it."`
+    );
+  });
 
   test('allows and queues scheduling tasks before starting', async () => {
     const client = new TaskManager(taskManagerOpts);

@@ -15,7 +15,7 @@ import { AggFieldPair } from '../../../../../../../../common/types/fields';
 import { getChartSettings, defaultChartSettings } from '../../../charts/common/settings';
 import { MetricSelector } from './metric_selector';
 import { ChartGrid } from './chart_grid';
-import { mlMessageBarService } from '../../../../../../../components/messagebar/messagebar_service';
+import { mlMessageBarService } from '../../../../../../../components/messagebar';
 
 interface Props {
   setIsValid: (na: boolean) => void;
@@ -33,7 +33,7 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
   const jobCreator = jc as MultiMetricJobCreator;
 
   const { fields } = newJobCapsService;
-  const [selectedOptions, setSelectedOptions] = useState<DropDownProps>([{ label: '' }]);
+  const [selectedOptions, setSelectedOptions] = useState<DropDownProps>([]);
   const [aggFieldPairList, setAggFieldPairList] = useState<AggFieldPair[]>(
     jobCreator.aggFieldPairs
   );
@@ -57,7 +57,7 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
       if (typeof option !== 'undefined') {
         const newPair = { agg: option.agg, field: option.field };
         setAggFieldPairList([...aggFieldPairList, newPair]);
-        setSelectedOptions([{ label: '' }]);
+        setSelectedOptions([]);
       } else {
         setAggFieldPairList([]);
       }

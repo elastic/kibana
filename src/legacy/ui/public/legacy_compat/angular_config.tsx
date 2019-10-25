@@ -64,7 +64,6 @@ export const configureAppAngularModule = (angularModule: IModule) => {
     .value('buildNum', legacyMetadata.buildNum)
     .value('buildSha', legacyMetadata.buildSha)
     .value('serverName', legacyMetadata.serverName)
-    .value('sessionId', Date.now())
     .value('esUrl', getEsUrl(newPlatform))
     .value('uiCapabilities', capabilities.get())
     .config(setupCompileProvider(newPlatform))
@@ -287,14 +286,12 @@ const $setupHelpExtensionAutoClear = (newPlatform: CoreStart) => (
 
 const $setupUrlOverflowHandling = (newPlatform: CoreStart) => (
   $location: ILocationService,
-  $rootScope: IRootScopeService,
-  Private: any,
-  config: any
+  $rootScope: IRootScopeService
 ) => {
   const urlOverflow = new UrlOverflowService();
   const check = () => {
     // disable long url checks when storing state in session storage
-    if (config.get('state:storeInSessionStorage')) {
+    if (newPlatform.uiSettings.get('state:storeInSessionStorage')) {
       return;
     }
 

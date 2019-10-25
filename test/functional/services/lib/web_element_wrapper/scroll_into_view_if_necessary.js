@@ -1,7 +1,6 @@
 /* eslint-disable @kbn/eslint/require-license-header */
 
-/**
- * @notice
+/* @notice
  * Based on the scroll-into-view-if-necessary module from npm
  * https://github.com/stipsan/compute-scroll-into-view/blob/master/src/index.ts#L269-L340
  *
