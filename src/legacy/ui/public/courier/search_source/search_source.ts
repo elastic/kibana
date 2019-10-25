@@ -413,6 +413,8 @@ export class SearchSource {
       delete searchRequest.highlightAll;
     }
 
+    const translateToQuery = (filter: any) => filter && (filter.query || filter);
+
     // re-write filters within filter aggregations
     (function recurse(aggBranch) {
       if (!aggBranch) return;
@@ -423,7 +425,7 @@ export class SearchSource {
           // translate filters aggregations
           const { filters: aggFilters } = agg.filters;
           Object.keys(aggFilters).forEach(filterId => {
-            aggFilters[filterId] = buildEsQuery(index, [], [aggFilters[filterId]], esQueryConfigs);
+            aggFilters[filterId] = translateToQuery(aggFilters[filterId]);
           });
         }
 
