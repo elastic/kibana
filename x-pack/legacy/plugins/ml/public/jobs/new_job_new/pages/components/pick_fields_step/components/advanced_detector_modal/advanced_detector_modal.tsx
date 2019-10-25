@@ -301,6 +301,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
                 placeholder={descriptionPlaceholder}
                 value={descriptionOption}
                 onChange={e => setDescriptionOption(e.target.value)}
+                data-test-subj="mlAdvancedDetectorDescriptionInput"
               />
             </DescriptionDescription>
           </EuiFlexItem>

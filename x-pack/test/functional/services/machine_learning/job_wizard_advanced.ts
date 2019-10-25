@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export function MachineLearningJobWizardAdvancedProvider({ getService }: FtrProviderContext) {
   const comboBox = getService('comboBox');
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
   return {
     async assertCategorizationFieldInputExists() {
@@ -56,7 +57,10 @@ export function MachineLearningJobWizardAdvancedProvider({ getService }: FtrProv
     },
 
     async assertCreateDetectorModalExists() {
-      await testSubjects.existOrFail('mlCreateDetectorModal');
+      // this retry can be removed as soon as #48734 is merged
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.existOrFail('mlCreateDetectorModal');
+      });
     },
 
     async assertDetectorFunctionInputExists() {
@@ -161,13 +165,49 @@ export function MachineLearningJobWizardAdvancedProvider({ getService }: FtrProv
       await this.assertDetectorExcludeFrequentSelection(identifier);
     },
 
+    async assertDetectorDescriptionInputExists() {
+      await testSubjects.existOrFail('mlAdvancedDetectorDescriptionInput');
+    },
+
+    async assertDetectorDescriptionValue(expectedValue: string) {
+      const actualDetectorDescription = await testSubjects.getAttribute(
+        'mlAdvancedDetectorDescriptionInput',
+        'value'
+      );
+      expect(actualDetectorDescription).to.eql(expectedValue);
+    },
+
+    async setDetectorDescription(description: string) {
+      await testSubjects.setValue('mlAdvancedDetectorDescriptionInput', description, {
+        clearWithKeyboard: true,
+      });
+      await this.assertDetectorDescriptionValue(description);
+    },
+
     async confirmAddDetectorModal() {
       await testSubjects.clickWhenNotDisabled('mlCreateDetectorModalSaveButton');
       await testSubjects.missingOrFail('mlCreateDetectorModal');
     },
 
-    async assertDetectorEntryExists(detectorName: string) {
+    async cancelAddDetectorModal() {
+      await testSubjects.clickWhenNotDisabled('mlCreateDetectorModalCancelButton');
+      await testSubjects.missingOrFail('mlCreateDetectorModal');
+    },
+
+    async assertDetectorEntryExists(detectorName: string, expectedDetectorDescription?: string) {
       await testSubjects.existOrFail(`mlAdvancedDetector ${detectorName}`);
+      if (expectedDetectorDescription !== undefined) {
+        await testSubjects.existOrFail(`mlAdvancedDetector ${detectorName} > detectorDescription`);
+        const actualDetectorDescription = await testSubjects.getVisibleText(
+          `mlAdvancedDetector ${detectorName} > detectorDescription`
+        );
+        expect(actualDetectorDescription).to.eql(expectedDetectorDescription);
+      }
+    },
+
+    async clickEditDetector(detectorName: string) {
+      await testSubjects.click(`mlAdvancedDetector ${detectorName} > mlAdvancedDetectorEditButton`);
+      await this.assertCreateDetectorModalExists();
     },
 
     async createJob() {

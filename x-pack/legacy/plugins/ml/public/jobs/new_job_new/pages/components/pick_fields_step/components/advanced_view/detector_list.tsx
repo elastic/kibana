@@ -105,7 +105,9 @@ export const DetectorList: FC<Props> = ({ isActive, onEditJob, onDeleteJob }) =>
               <EuiFlexGroup>
                 <EuiFlexItem>
                   {d.detector_description !== undefined ? (
-                    <div style={{ fontWeight: 'bold' }}>{d.detector_description}</div>
+                    <div style={{ fontWeight: 'bold' }} data-test-subj="detectorDescription">
+                      {d.detector_description}
+                    </div>
                   ) : (
                     detectorToString(d)
                   )}
