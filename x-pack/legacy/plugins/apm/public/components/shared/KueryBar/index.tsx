@@ -20,7 +20,6 @@ import { useUrlParams } from '../../../hooks/useUrlParams';
 import { history } from '../../../utils/history';
 import { AutocompleteSuggestion } from '../../../../../../../../src/plugins/data/public';
 import { useKueryBarIndexPattern } from '../../../hooks/useKueryBarIndexPattern';
-import { defaultExample, processorEventLabels } from './processorEventLabels';
 
 const Container = styled.div`
   margin-bottom: 10px;
@@ -80,16 +79,17 @@ export function KueryBar() {
 
   const { processorEvent } = urlParams;
 
-  const { example = defaultExample } = processorEvent
-    ? processorEventLabels[processorEvent]
-    : {};
+  const examples = {
+    transaction: 'transaction.duration.us > 300000',
+    error: 'http.response.status_code >= 400',
+    metric: 'process.pid = "1234"',
+    defaults:
+      'transaction.duration.us > 300000 AND http.response.status_code >= 400'
+  };
+
+  const example = examples[processorEvent || 'defaults'];
 
   const { indexPattern } = useKueryBarIndexPattern(processorEvent);
-
-  const processorEventsForExample = (processorEvent
-    ? [processorEvent]
-    : ['transaction' as const, 'error' as const, 'metric' as const]
-  ).map(event => processorEventLabels[event].label);
 
   async function onChange(inputValue: string, selectionStart: number) {
     if (indexPattern == null) {
@@ -155,18 +155,16 @@ export function KueryBar() {
         onSubmit={onSubmit}
         suggestions={state.suggestions}
         placeholder={i18n.translate('xpack.apm.kueryBar.placeholder', {
-          defaultMessage: `Search {numProcessorEvents, plural,
-            one {{0}}
-            two {{0} and {1}}
-            other {{0}, {1} and {2}}
+          defaultMessage: `Search {event, select,
+            transaction {transactions}
+            metric {metrics}
+            error {errors}
+            other {transactions, errors and metrics}
           } (E.g. {queryExample})`,
-          values: Object.assign(
-            {
-              numProcessorEvents: processorEventsForExample.length,
-              queryExample: example
-            },
-            processorEventsForExample
-          )
+          values: {
+            queryExample: example,
+            event: processorEvent
+          }
         })}
       />
     </Container>
