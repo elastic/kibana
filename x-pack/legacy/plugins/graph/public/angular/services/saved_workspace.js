@@ -4,15 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { uiModules } from 'ui/modules';
 import { SavedObjectProvider } from 'ui/saved_objects/saved_object';
 import { i18n } from '@kbn/i18n';
 import {
   extractReferences,
   injectReferences,
 } from './saved_workspace_references';
-
-const module = uiModules.get('app/dashboard');
 
 export function SavedWorkspaceProvider(Private) {
   // SavedWorkspace constructor. Usually you'd interact with an instance of this.
@@ -68,8 +65,3 @@ export function SavedWorkspaceProvider(Private) {
   SavedWorkspace.searchsource = false;
   return SavedWorkspace;
 }
-
-// Used only by the savedDashboards service, usually no reason to change this
-module.factory('SavedGraphWorkspace', function (Private) {
-  return Private(SavedWorkspaceProvider);
-});
