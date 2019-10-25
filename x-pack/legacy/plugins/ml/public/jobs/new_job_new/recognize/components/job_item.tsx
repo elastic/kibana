@@ -13,8 +13,10 @@ import {
   EuiIcon,
   EuiLoadingSpinner,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { ModuleJobUI } from '../page';
 import { SETUP_RESULTS_WIDTH } from './module_jobs';
 import { tabColor } from '../../../../../common/util/group_color_utils';
@@ -55,7 +57,26 @@ export const JobItem: FC<JobItemProps> = memo(
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon iconType="pencil" onClick={() => onEditRequest(job)} />
+              <EuiToolTip
+                position="right"
+                content={
+                  <FormattedMessage
+                    id="xpack.ml.newJob.recognize.job.overrideJobConfigurationLabel"
+                    defaultMessage="Override job configuration"
+                  />
+                }
+              >
+                <EuiButtonIcon
+                  aria-label={i18n.translate(
+                    'xpack.ml.newJob.recognize.job.overrideJobConfigurationLabel',
+                    {
+                      defaultMessage: 'Override job configuration',
+                    }
+                  )}
+                  iconType="pencil"
+                  onClick={() => onEditRequest(job)}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
 
