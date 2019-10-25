@@ -6157,7 +6157,7 @@ babel-plugin-transform-property-literals@^6.9.4:
   dependencies:
     esutils "^2.0.2"
 
-babel-plugin-transform-react-remove-prop-types@0.4.24, babel-plugin-transform-react-remove-prop-types@^0.4.24:
+babel-plugin-transform-react-remove-prop-types@0.4.24:
   version "0.4.24"
   resolved "https://registry.yarnpkg.com/babel-plugin-transform-react-remove-prop-types/-/babel-plugin-transform-react-remove-prop-types-0.4.24.tgz#f2edaf9b4c6a5fbe5c1d678bfb531078c1555f3a"
   integrity sha512-eqj0hVcJUR57/Ug2zE1Yswsw4LhuqqHhD+8v120T1cl3kjg76QwtyBrdIk4WVwK+lAhBJVYCd/v+4nc4y+8JsA==
@@ -19372,7 +19372,7 @@ mochawesome-merge@^2.0.1:
     uuid "^3.3.2"
     yargs "^12.0.5"
 
-mochawesome-report-generator@^4.0.0, mochawesome-report-generator@^4.0.1:
+mochawesome-report-generator@^4.0.0:
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/mochawesome-report-generator/-/mochawesome-report-generator-4.0.1.tgz#0a010d1ecf379eb26ba05300feb59e2665076080"
   integrity sha512-hQbmQt8/yCT68GjrQFat+Diqeuka3haNllexYfja1+y0hpwi3yCJwFpQCdWK9ezzcXL3Nu80f2I6SZeyspwsqg==
@@ -21655,7 +21655,7 @@ polished@^3.3.1:
   dependencies:
     "@babel/runtime" "^7.4.5"
 
-popper.js@^1.14.1, popper.js@^1.14.3, popper.js@^1.14.7:
+popper.js@^1.14.1, popper.js@^1.14.7:
   version "1.15.0"
   resolved "https://registry.yarnpkg.com/popper.js/-/popper.js-1.15.0.tgz#5560b99bbad7647e9faa475c6b8056621f5a4ff2"
   integrity sha512-w010cY1oCUmI+9KwwlWki+r5jxKfTFDVoadl7MSrIujHU5MJ5OR6HTDj6Xo8aoR/QsA56x8jKjA59qGH4ELtrA==
@@ -23051,15 +23051,6 @@ react-reconciler@^0.20.1:
     object-assign "^4.1.1"
     prop-types "^15.6.2"
     scheduler "^0.13.6"
-
-react-redux-request@^1.5.6:
-  version "1.5.6"
-  resolved "https://registry.yarnpkg.com/react-redux-request/-/react-redux-request-1.5.6.tgz#8c514dc88264d225e113b4b54a265064e8020651"
-  integrity sha512-mzdG41GSLwynFI7DII3XNJxkABLD++I3Q1zlZWpcqycWSzWSYkjPUEz7M8r6aIIMzruANHQZX+asulvoaiwFRg==
-  dependencies:
-    lodash.get "^4.4.2"
-    lodash.isequal "^4.5.0"
-    prop-types "^15.6.1"
 
 react-redux@^5.0.6, react-redux@^5.0.7:
   version "5.0.7"
@@ -26029,11 +26020,6 @@ stream-spigot@~2.1.2:
   integrity sha1-feFF6Bn43Q20UJDRPc9zqO08wDU=
   dependencies:
     readable-stream "~1.1.0"
-
-stream-stream@^1.2.6:
-  version "1.2.6"
-  resolved "https://registry.yarnpkg.com/stream-stream/-/stream-stream-1.2.6.tgz#a9ae071c64c11b8584f52973f7715e37e5144c43"
-  integrity sha1-qa4HHGTBG4WE9Slz93FeN+UUTEM=
 
 stream-to-observable@^0.1.0:
   version "0.1.0"
