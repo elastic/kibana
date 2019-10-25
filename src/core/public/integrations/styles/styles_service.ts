@@ -18,7 +18,6 @@
  */
 
 import { Subscription } from 'rxjs';
-import { tap } from 'rxjs/operators';
 
 import { UiSettingsClientContract } from '../../ui_settings';
 import { CoreService } from '../../../types';
@@ -46,8 +45,7 @@ export class StylesService implements CoreService {
 
     this.uiSettingsSubscription = uiSettings
       .get$('accessibility:disableAnimations')
-      .pipe(tap(setDisableAnimations))
-      .subscribe();
+      .subscribe(setDisableAnimations);
   }
 
   public async stop() {
