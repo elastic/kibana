@@ -264,7 +264,7 @@ export default function({ getService }: FtrProviderContext) {
 
     it('job cloning pre-fills the split field', async () => {
       await ml.jobWizardMultiMetric.assertSplitFieldInputExists();
-      await ml.jobWizardMultiMetric.assertSplitFieldSelection(splitField);
+      await ml.jobWizardMultiMetric.assertSplitFieldSelection([splitField]);
     });
 
     it('job cloning pre-fills influencers', async () => {

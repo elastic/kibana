@@ -7,7 +7,11 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export function MachineLearningJobWizardAdvancedProvider({ getService }: FtrProviderContext) {
+export function MachineLearningJobWizardAdvancedProvider({
+  getService,
+  getPageObjects,
+}: FtrProviderContext) {
+  const PageObjects = getPageObjects(['header']);
   const comboBox = getService('comboBox');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
@@ -89,51 +93,48 @@ export function MachineLearningJobWizardAdvancedProvider({ getService }: FtrProv
       await testSubjects.existOrFail('mlTimeFieldNameSelect > comboBoxInput');
     },
 
-    async assertTimeFieldSelection(identifier: string) {
+    async assertTimeFieldSelection(expectedIdentifier: string[]) {
       const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
         'mlTimeFieldNameSelect > comboBoxInput'
       );
-      expect(comboBoxSelectedOptions.length).to.eql(1);
-      expect(comboBoxSelectedOptions[0]).to.eql(identifier);
+      expect(comboBoxSelectedOptions).to.eql(expectedIdentifier);
     },
 
     async selectTimeField(identifier: string) {
       await comboBox.set('mlTimeFieldNameSelect > comboBoxInput', identifier);
-      await this.assertTimeFieldSelection(identifier);
+      await this.assertTimeFieldSelection([identifier]);
     },
 
     async assertCategorizationFieldInputExists() {
       await testSubjects.existOrFail('mlCategorizationFieldNameSelect > comboBoxInput');
     },
 
-    async assertCategorizationFieldSelection(identifier: string) {
+    async assertCategorizationFieldSelection(expectedIdentifier: string[]) {
       const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
         'mlCategorizationFieldNameSelect > comboBoxInput'
       );
-      expect(comboBoxSelectedOptions.length).to.eql(1);
-      expect(comboBoxSelectedOptions[0]).to.eql(identifier);
+      expect(comboBoxSelectedOptions).to.eql(expectedIdentifier);
     },
 
     async selectCategorizationField(identifier: string) {
       await comboBox.set('mlCategorizationFieldNameSelect > comboBoxInput', identifier);
-      await this.assertCategorizationFieldSelection(identifier);
+      await this.assertCategorizationFieldSelection([identifier]);
     },
 
     async assertSummaryCountFieldInputExists() {
       await testSubjects.existOrFail('mlSummaryCountFieldNameSelect > comboBoxInput');
     },
 
-    async assertSummaryCountFieldSelection(identifier: string) {
+    async assertSummaryCountFieldSelection(expectedIdentifier: string[]) {
       const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
         'mlSummaryCountFieldNameSelect > comboBoxInput'
       );
-      expect(comboBoxSelectedOptions.length).to.eql(1);
-      expect(comboBoxSelectedOptions[0]).to.eql(identifier);
+      expect(comboBoxSelectedOptions).to.eql(expectedIdentifier);
     },
 
     async selectSummaryCountField(identifier: string) {
       await comboBox.set('mlSummaryCountFieldNameSelect > comboBoxInput', identifier);
-      await this.assertSummaryCountFieldSelection(identifier);
+      await this.assertSummaryCountFieldSelection([identifier]);
     },
 
     async assertAddDetectorButtonExists() {
@@ -156,102 +157,96 @@ export function MachineLearningJobWizardAdvancedProvider({ getService }: FtrProv
       await testSubjects.existOrFail('mlAdvancedFunctionSelect > comboBoxInput');
     },
 
-    async assertDetectorFunctionSelection(identifier: string) {
+    async assertDetectorFunctionSelection(expectedIdentifier: string[]) {
       const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
         'mlAdvancedFunctionSelect > comboBoxInput'
       );
-      expect(comboBoxSelectedOptions.length).to.eql(1);
-      expect(comboBoxSelectedOptions[0]).to.eql(identifier);
+      expect(comboBoxSelectedOptions).to.eql(expectedIdentifier);
     },
 
     async selectDetectorFunction(identifier: string) {
       await comboBox.set('mlAdvancedFunctionSelect > comboBoxInput', identifier);
-      await this.assertDetectorFunctionSelection(identifier);
+      await this.assertDetectorFunctionSelection([identifier]);
     },
 
     async assertDetectorFieldInputExists() {
       await testSubjects.existOrFail('mlAdvancedFieldSelect > comboBoxInput');
     },
 
-    async assertDetectorFieldSelection(identifier: string) {
+    async assertDetectorFieldSelection(expectedIdentifier: string[]) {
       const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
         'mlAdvancedFieldSelect > comboBoxInput'
       );
-      expect(comboBoxSelectedOptions.length).to.eql(1);
-      expect(comboBoxSelectedOptions[0]).to.eql(identifier);
+      expect(comboBoxSelectedOptions).to.eql(expectedIdentifier);
     },
 
     async selectDetectorField(identifier: string) {
       await comboBox.set('mlAdvancedFieldSelect > comboBoxInput', identifier);
-      await this.assertDetectorFieldSelection(identifier);
+      await this.assertDetectorFieldSelection([identifier]);
     },
 
     async assertDetectorByFieldInputExists() {
       await testSubjects.existOrFail('mlAdvancedByFieldSelect > comboBoxInput');
     },
 
-    async assertDetectorByFieldSelection(identifier: string) {
+    async assertDetectorByFieldSelection(expectedIdentifier: string[]) {
       const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
         'mlAdvancedByFieldSelect > comboBoxInput'
       );
-      expect(comboBoxSelectedOptions.length).to.eql(1);
-      expect(comboBoxSelectedOptions[0]).to.eql(identifier);
+      expect(comboBoxSelectedOptions).to.eql(expectedIdentifier);
     },
 
     async selectDetectorByField(identifier: string) {
       await comboBox.set('mlAdvancedByFieldSelect > comboBoxInput', identifier);
-      await this.assertDetectorByFieldSelection(identifier);
+      await this.assertDetectorByFieldSelection([identifier]);
     },
 
     async assertDetectorOverFieldInputExists() {
       await testSubjects.existOrFail('mlAdvancedOverFieldSelect > comboBoxInput');
     },
 
-    async assertDetectorOverFieldSelection(identifier: string) {
+    async assertDetectorOverFieldSelection(expectedIdentifier: string[]) {
       const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
         'mlAdvancedOverFieldSelect > comboBoxInput'
       );
-      expect(comboBoxSelectedOptions.length).to.eql(1);
-      expect(comboBoxSelectedOptions[0]).to.eql(identifier);
+      expect(comboBoxSelectedOptions).to.eql(expectedIdentifier);
     },
 
     async selectDetectorOverField(identifier: string) {
       await comboBox.set('mlAdvancedOverFieldSelect > comboBoxInput', identifier);
-      await this.assertDetectorOverFieldSelection(identifier);
+      await this.assertDetectorOverFieldSelection([identifier]);
     },
 
     async assertDetectorPartitionFieldInputExists() {
       await testSubjects.existOrFail('mlAdvancedPartitionFieldSelect > comboBoxInput');
     },
 
-    async assertDetectorPartitionFieldSelection(identifier: string) {
+    async assertDetectorPartitionFieldSelection(expectedIdentifier: string[]) {
       const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
         'mlAdvancedPartitionFieldSelect > comboBoxInput'
       );
-      expect(comboBoxSelectedOptions.length).to.eql(1);
-      expect(comboBoxSelectedOptions[0]).to.eql(identifier);
+      expect(comboBoxSelectedOptions).to.eql(expectedIdentifier);
     },
 
     async selectDetectorPartitionField(identifier: string) {
       await comboBox.set('mlAdvancedPartitionFieldSelect > comboBoxInput', identifier);
-      await this.assertDetectorPartitionFieldSelection(identifier);
+      await this.assertDetectorPartitionFieldSelection([identifier]);
     },
 
     async assertDetectorExcludeFrequentInputExists() {
       await testSubjects.existOrFail('mlAdvancedExcludeFrequentSelect > comboBoxInput');
     },
 
-    async assertDetectorExcludeFrequentSelection(identifier: string) {
+    async assertDetectorExcludeFrequentSelection(expectedIdentifier: string[]) {
       const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
         'mlAdvancedExcludeFrequentSelect > comboBoxInput'
       );
-      expect(comboBoxSelectedOptions.length).to.eql(1);
-      expect(comboBoxSelectedOptions[0]).to.eql(identifier);
+      expect(comboBoxSelectedOptions).to.eql(expectedIdentifier);
     },
 
     async selectDetectorExcludeFrequent(identifier: string) {
       await comboBox.set('mlAdvancedExcludeFrequentSelect > comboBoxInput', identifier);
-      await this.assertDetectorExcludeFrequentSelection(identifier);
+      await this.assertDetectorExcludeFrequentSelection([identifier]);
     },
 
     async assertDetectorDescriptionInputExists() {
@@ -301,6 +296,7 @@ export function MachineLearningJobWizardAdvancedProvider({ getService }: FtrProv
 
     async createJob() {
       await testSubjects.clickWhenNotDisabled('mlJobWizardButtonCreateJob');
+      await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
       await testSubjects.existOrFail('mlStartDatafeedModal');
     },
   };

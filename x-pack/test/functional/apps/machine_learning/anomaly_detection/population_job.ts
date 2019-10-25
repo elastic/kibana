@@ -281,14 +281,16 @@ export default function({ getService }: FtrProviderContext) {
 
     it('job cloning pre-fills the population field', async () => {
       await ml.jobWizardPopulation.assertPopulationFieldInputExists();
-      await ml.jobWizardPopulation.assertPopulationFieldSelection(populationField);
+      await ml.jobWizardPopulation.assertPopulationFieldSelection([populationField]);
     });
 
     it('job cloning pre-fills detectors and shows preview with split cards', async () => {
       for (const [index, detector] of detectors.entries()) {
         await ml.jobWizardCommon.assertDetectorPreviewExists(detector.identifier, index, 'SCATTER');
 
-        await ml.jobWizardPopulation.assertDetectorSplitFieldSelection(index, detector.splitField);
+        await ml.jobWizardPopulation.assertDetectorSplitFieldSelection(index, [
+          detector.splitField,
+        ]);
         await ml.jobWizardPopulation.assertDetectorSplitExists(index);
         await ml.jobWizardPopulation.assertDetectorSplitFrontCardTitle(
           index,

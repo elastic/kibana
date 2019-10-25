@@ -75,6 +75,18 @@ const isDatafeedConfigWithScrollSize = (
   return arg.hasOwnProperty('scrollSize');
 };
 
+// PickFieldsConfig
+const isPickFieldsConfigWithCategorizationField = (
+  arg: any
+): arg is Required<Pick<PickFieldsConfig, 'categorizationField'>> => {
+  return arg.hasOwnProperty('categorizationField');
+};
+const isPickFieldsConfigWithSummaryCountField = (
+  arg: any
+): arg is Required<Pick<PickFieldsConfig, 'summaryCountField'>> => {
+  return arg.hasOwnProperty('summaryCountField');
+};
+
 // eslint-disable-next-line import/no-default-export
 export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -242,23 +254,52 @@ export default function({ getService }: FtrProviderContext) {
 
         it('job creation pre-fills the time field', async () => {
           await ml.jobWizardAdvanced.assertTimeFieldInputExists();
-          await ml.jobWizardAdvanced.assertTimeFieldSelection(testData.expected.wizard.timeField);
+          await ml.jobWizardAdvanced.assertTimeFieldSelection([testData.expected.wizard.timeField]);
         });
 
         it('job creation displays the pick fields step', async () => {
           await ml.jobWizardCommon.advanceToPickFieldsSection();
         });
 
+        it('job creation selects the categorization field', async () => {
+          await ml.jobWizardAdvanced.assertCategorizationFieldInputExists();
+          if (isPickFieldsConfigWithCategorizationField(testData.pickFieldsConfig)) {
+            await ml.jobWizardAdvanced.selectCategorizationField(
+              testData.pickFieldsConfig.categorizationField
+            );
+          } else {
+            await ml.jobWizardAdvanced.assertCategorizationFieldSelection([]);
+          }
+        });
+
+        it('job creation selects the summary count field', async () => {
+          await ml.jobWizardAdvanced.assertSummaryCountFieldInputExists();
+          if (isPickFieldsConfigWithSummaryCountField(testData.pickFieldsConfig)) {
+            await ml.jobWizardAdvanced.selectSummaryCountField(
+              testData.pickFieldsConfig.summaryCountField
+            );
+          } else {
+            await ml.jobWizardAdvanced.assertSummaryCountFieldSelection([]);
+          }
+        });
+
         it('job creation adds detectors', async () => {
           for (const detector of testData.pickFieldsConfig.detectors) {
             await ml.jobWizardAdvanced.openCreateDetectorModal();
             await ml.jobWizardAdvanced.assertDetectorFunctionInputExists();
+            await ml.jobWizardAdvanced.assertDetectorFunctionSelection(['']);
             await ml.jobWizardAdvanced.assertDetectorFieldInputExists();
+            await ml.jobWizardAdvanced.assertDetectorFieldSelection(['']);
             await ml.jobWizardAdvanced.assertDetectorByFieldInputExists();
+            await ml.jobWizardAdvanced.assertDetectorByFieldSelection(['']);
             await ml.jobWizardAdvanced.assertDetectorOverFieldInputExists();
+            await ml.jobWizardAdvanced.assertDetectorOverFieldSelection(['']);
             await ml.jobWizardAdvanced.assertDetectorPartitionFieldInputExists();
+            await ml.jobWizardAdvanced.assertDetectorPartitionFieldSelection(['']);
             await ml.jobWizardAdvanced.assertDetectorExcludeFrequentInputExists();
+            await ml.jobWizardAdvanced.assertDetectorExcludeFrequentSelection(['']);
             await ml.jobWizardAdvanced.assertDetectorDescriptionInputExists();
+            await ml.jobWizardAdvanced.assertDetectorDescriptionValue('');
 
             await ml.jobWizardAdvanced.selectDetectorFunction(detector.function);
             if (isDetectorWithField(detector)) {
@@ -466,11 +507,29 @@ export default function({ getService }: FtrProviderContext) {
 
         it('job creation pre-fills the time field', async () => {
           await ml.jobWizardAdvanced.assertTimeFieldInputExists();
-          await ml.jobWizardAdvanced.assertTimeFieldSelection(testData.expected.wizard.timeField);
+          await ml.jobWizardAdvanced.assertTimeFieldSelection([testData.expected.wizard.timeField]);
         });
 
         it('job cloning displays the pick fields step', async () => {
           await ml.jobWizardCommon.advanceToPickFieldsSection();
+        });
+
+        it('job cloning pre-fills the categorization field', async () => {
+          await ml.jobWizardAdvanced.assertCategorizationFieldInputExists();
+          await ml.jobWizardAdvanced.assertCategorizationFieldSelection(
+            isPickFieldsConfigWithCategorizationField(testData.pickFieldsConfig)
+              ? [testData.pickFieldsConfig.categorizationField]
+              : []
+          );
+        });
+
+        it('job cloning pre-fills the summary count field', async () => {
+          await ml.jobWizardAdvanced.assertSummaryCountFieldInputExists();
+          await ml.jobWizardAdvanced.assertSummaryCountFieldSelection(
+            isPickFieldsConfigWithSummaryCountField(testData.pickFieldsConfig)
+              ? [testData.pickFieldsConfig.summaryCountField]
+              : []
+          );
         });
 
         it('job cloning pre-fills detectors', async () => {
@@ -489,21 +548,21 @@ export default function({ getService }: FtrProviderContext) {
             await ml.jobWizardAdvanced.assertDetectorExcludeFrequentInputExists();
             await ml.jobWizardAdvanced.assertDetectorDescriptionInputExists();
 
-            await ml.jobWizardAdvanced.assertDetectorFunctionSelection(detector.function);
+            await ml.jobWizardAdvanced.assertDetectorFunctionSelection([detector.function]);
             await ml.jobWizardAdvanced.assertDetectorFieldSelection(
-              isDetectorWithField(detector) ? detector.field : ''
+              isDetectorWithField(detector) ? [detector.field] : ['']
             );
             await ml.jobWizardAdvanced.assertDetectorByFieldSelection(
-              isDetectorWithByField(detector) ? detector.byField : ''
+              isDetectorWithByField(detector) ? [detector.byField] : ['']
             );
             await ml.jobWizardAdvanced.assertDetectorOverFieldSelection(
-              isDetectorWithOverField(detector) ? detector.overField : ''
+              isDetectorWithOverField(detector) ? [detector.overField] : ['']
             );
             await ml.jobWizardAdvanced.assertDetectorPartitionFieldSelection(
-              isDetectorWithPartitionField(detector) ? detector.partitionField : ''
+              isDetectorWithPartitionField(detector) ? [detector.partitionField] : ['']
             );
             await ml.jobWizardAdvanced.assertDetectorExcludeFrequentSelection(
-              isDetectorWithExcludeFrequent(detector) ? detector.excludeFrequent : ''
+              isDetectorWithExcludeFrequent(detector) ? [detector.excludeFrequent] : ['']
             );
             await ml.jobWizardAdvanced.assertDetectorDescriptionValue(
               isDetectorWithDescription(detector) ? detector.description : detector.identifier
