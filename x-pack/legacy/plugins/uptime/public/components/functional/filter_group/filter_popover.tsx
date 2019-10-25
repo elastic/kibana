@@ -54,7 +54,10 @@ export const FilterPopover = ({
           isSelected={tempSelectedItems.length > 0}
           numFilters={items.length}
           numActiveFilters={tempSelectedItems.length}
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={() => {
+            setIsOpen(!isOpen);
+            onFilterFieldChange(fieldName, tempSelectedItems);
+          }}
           title={title}
         />
       }

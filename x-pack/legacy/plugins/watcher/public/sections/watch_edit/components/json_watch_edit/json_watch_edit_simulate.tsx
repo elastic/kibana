@@ -158,12 +158,12 @@ export const JsonWatchEditSimulate = ({
         <EuiDescribedFormGroup
           fullWidth
           title={
-            <h3>
+            <h2>
               {i18n.translate(
                 'xpack.watcher.sections.watchEdit.simulate.form.triggerOverridesTitle',
                 { defaultMessage: 'Trigger' }
               )}
-            </h3>
+            </h2>
           }
           description={i18n.translate(
             'xpack.watcher.sections.watchEdit.simulate.form.triggerOverridesDescription',
@@ -247,12 +247,12 @@ export const JsonWatchEditSimulate = ({
         <EuiDescribedFormGroup
           fullWidth
           title={
-            <h3>
+            <h2>
               {i18n.translate(
                 'xpack.watcher.sections.watchEdit.simulate.form.conditionOverridesTitle',
                 { defaultMessage: 'Condition' }
               )}
-            </h3>
+            </h2>
           }
           description={i18n.translate(
             'xpack.watcher.sections.watchEdit.simulate.form.conditionOverridesDescription',
@@ -283,12 +283,12 @@ export const JsonWatchEditSimulate = ({
           fullWidth
           idAria="simulateExecutionActionModesDescription"
           title={
-            <h3>
+            <h2>
               {i18n.translate(
                 'xpack.watcher.sections.watchEdit.simulate.form.actionOverridesTitle',
                 { defaultMessage: 'Actions' }
               )}
-            </h3>
+            </h2>
           }
           description={
             <FormattedMessage
@@ -331,12 +331,12 @@ export const JsonWatchEditSimulate = ({
           fullWidth
           idAria="simulateExecutionInputOverridesDescription"
           title={
-            <h3>
+            <h2>
               {i18n.translate(
                 'xpack.watcher.sections.watchEdit.simulate.form.inputOverridesTitle',
                 { defaultMessage: 'Input' }
               )}
-            </h3>
+            </h2>
           }
           description={i18n.translate(
             'xpack.watcher.sections.watchEdit.simulate.form.inputOverridesDescription',

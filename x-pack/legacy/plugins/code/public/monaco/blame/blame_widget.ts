@@ -18,9 +18,9 @@ export class BlameWidget implements Editor.IContentWidget {
   private containerNode: HTMLDivElement;
 
   constructor(
-    readonly blame: GitBlame,
-    readonly isFirstLine: boolean,
-    readonly editor: Editor.IStandaloneCodeEditor
+    public readonly blame: GitBlame,
+    public readonly isFirstLine: boolean,
+    public readonly editor: Editor.IStandaloneCodeEditor
   ) {
     this.containerNode = document.createElement('div');
     this.domNode = document.createElement('div');
