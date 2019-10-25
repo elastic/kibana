@@ -6,13 +6,13 @@
 
 import { schema } from '@kbn/config-schema';
 import { AlertsClient } from './alerts_client';
-import { SavedObjectsClientMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
+import { savedObjectsClientMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
 import { taskManagerMock } from '../../task_manager/task_manager.mock';
 import { alertTypeRegistryMock } from './alert_type_registry.mock';
 
 const taskManager = taskManagerMock.create();
 const alertTypeRegistry = alertTypeRegistryMock.create();
-const savedObjectsClient = SavedObjectsClientMock.create();
+const savedObjectsClient = savedObjectsClientMock.create();
 
 const alertsClientParams = {
   taskManager,
