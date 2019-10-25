@@ -20,7 +20,7 @@ import d3 from 'd3';
 // 'http://www.google.co.uk/#q=airline+code+AAL'.
 // If a corresponding key is not found in valuesByTokenName, then the String is not replaced.
 export function replaceStringTokens(str, valuesByTokenName, encodeForURI) {
-  return String(str).replace((/\$([^?&$\'"]{1,40})\$/g), (match, name) => {
+  return String(str).replace((/\$([^?&$\'"]+)\$/g), (match, name) => {
     // Use lodash get to allow nested JSON fields to be retrieved.
     let tokenValue = _.get(valuesByTokenName, name, null);
     if (encodeForURI === true && tokenValue !== null) {

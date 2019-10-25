@@ -1064,13 +1064,12 @@
     debug "^3.1.0"
     lodash.once "^4.1.1"
 
-"@elastic/charts@^13.5.1":
-  version "13.5.1"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-13.5.1.tgz#feba462fa1699430db60b55827fea52444b34df1"
-  integrity sha512-kIwZ5q+8pBdISJZJYwZWvK5ZGYj7+GHnCWE7YFi68pZ99MTsmE1UEEXbDM9iYa+ru2/ALkcVr2zg72sjEsbeyA==
+"@elastic/charts@^13.5.7":
+  version "13.5.7"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-13.5.7.tgz#97ba458059613efd542ae68d7d2da059aac38484"
+  integrity sha512-8ibgrEJD3fpoLurB/DnNaWRmMGxAPHdtvCiPl1saPIjvlmGlrUNlXMneVgsPLqerNT0vuJDgqfQHHQcef/S2Hw==
   dependencies:
     "@types/d3-shape" "^1.3.1"
-    "@types/luxon" "^1.11.1"
     classnames "^2.2.6"
     d3-array "^1.2.4"
     d3-collection "^1.0.7"
@@ -1078,7 +1077,6 @@
     d3-shape "^1.3.4"
     fp-ts "^1.14.2"
     konva "^2.6.0"
-    luxon "^1.11.3"
     mobx "^4.9.2"
     mobx-react "^5.4.3"
     newtype-ts "^0.2.4"
@@ -1153,10 +1151,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@14.5.0":
-  version "14.5.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-14.5.0.tgz#1b27559cd644403e2692cab1549082cbd3421dab"
-  integrity sha512-QpmfO6Unt4evb4P18CyWzassLFrw/4CUPFYZXQK12IChDOs6GrwQ6xZM8f0wjN/NXwjRjlWzMhtCWHYmrI6NGg==
+"@elastic/eui@14.5.1":
+  version "14.5.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-14.5.1.tgz#40c3cef866e6aae26cc3892ffbf9d6645d6b4dea"
+  integrity sha512-HuNKFfJq+tV6s+D8KAXCQfZW5PAeQqt/HzeAva6DbGduoRzk+SyCxJ0D0Ppm9dMBEiL7CuMAijWq3nxQH0SYUA==
   dependencies:
     "@types/lodash" "^4.14.116"
     "@types/numeral" "^0.0.25"
@@ -3612,11 +3610,6 @@
   version "5.1.0"
   resolved "https://registry.yarnpkg.com/@types/lru-cache/-/lru-cache-5.1.0.tgz#57f228f2b80c046b4a1bd5cac031f81f207f4f03"
   integrity sha512-RaE0B+14ToE4l6UqdarKPnXwVDuigfFv+5j9Dze/Nqr23yyuqdNvzcZi3xB+3Agvi5R4EOgAksfv3lXX4vBt9w==
-
-"@types/luxon@^1.11.1":
-  version "1.12.0"
-  resolved "https://registry.yarnpkg.com/@types/luxon/-/luxon-1.12.0.tgz#acf14294d18e6eba427a5e5d7dfce0f5cd2a9400"
-  integrity sha512-+UzPmwHSEEyv7aGlNkVpuFxp/BirXgl8NnPGCtmyx2KXIzAapoW3IqSVk87/Z3PUk8vEL8Pe1HXEMJbNBOQgtg==
 
 "@types/mapbox-gl@^0.54.1":
   version "0.54.3"
@@ -18558,11 +18551,6 @@ lru-queue@0.1:
   dependencies:
     es5-ext "~0.10.2"
 
-luxon@^1.11.3:
-  version "1.13.1"
-  resolved "https://registry.yarnpkg.com/luxon/-/luxon-1.13.1.tgz#b7fb7ba1e5c93ebda098af8d579314797e0a0d69"
-  integrity sha512-IQKRIiz9ldUrgcozN13SAeNZVYfD3bEI9X6TcrGu+dkgE4GR/Iik03ozbTM5cTr0lz8ucYPL2jtYT7Va2Flbsg==
-
 lz-string@^1.4.4:
   version "1.4.4"
   resolved "https://registry.yarnpkg.com/lz-string/-/lz-string-1.4.4.tgz#c0d8eaf36059f705796e1e344811cf4c498d3a26"
@@ -23158,10 +23146,10 @@ react-resize-detector@^4.0.5, react-resize-detector@^4.2.0:
     raf-schd "^4.0.0"
     resize-observer-polyfill "^1.5.1"
 
-react-reverse-portal@^1.0.2:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/react-reverse-portal/-/react-reverse-portal-1.0.3.tgz#38cd2d40f40862352dd63905f9b923f9c41f474b"
-  integrity sha512-mCtpp3BzPedmGTAMqT2v5U1hwnAvRfSqMusriON/GxnedT9gvNNTvai24NnrfKfQ78zqPo4e3N5nWPLpY7bORQ==
+react-reverse-portal@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/react-reverse-portal/-/react-reverse-portal-1.0.4.tgz#d127d2c9147549b25c4959aba1802eca4b144cd4"
+  integrity sha512-WESex/wSjxHwdG7M0uwPNkdQXaLauXNHi4INQiRybmFIXVzAqgf/Ak2OzJ4MLf4UuCD/IzEwJOkML2SxnnontA==
 
 react-router-dom@4.2.2:
   version "4.2.2"
