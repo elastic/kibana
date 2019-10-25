@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchParams } from 'elasticsearch';
 import {
   PROCESSOR_EVENT,
   TRACE_ID,
@@ -21,10 +20,10 @@ export async function getTraceItems(traceId: string, setup: Setup) {
   const { start, end, client, config } = setup;
   const maxTraceItems = config.get<number>('xpack.apm.ui.maxTraceItems');
 
-  const params: SearchParams = {
+  const params = {
     index: [
-      config.get('apm_oss.spanIndices'),
-      config.get('apm_oss.transactionIndices')
+      config.get<string>('apm_oss.spanIndices'),
+      config.get<string>('apm_oss.transactionIndices')
     ],
     body: {
       size: maxTraceItems,
@@ -41,9 +40,9 @@ export async function getTraceItems(traceId: string, setup: Setup) {
         }
       },
       sort: [
-        { _score: { order: 'asc' } },
-        { [TRANSACTION_DURATION]: { order: 'desc' } },
-        { [SPAN_DURATION]: { order: 'desc' } }
+        { _score: { order: 'asc' as const } },
+        { [TRANSACTION_DURATION]: { order: 'desc' as const } },
+        { [SPAN_DURATION]: { order: 'desc' as const } }
       ],
       track_total_hits: true
     }
