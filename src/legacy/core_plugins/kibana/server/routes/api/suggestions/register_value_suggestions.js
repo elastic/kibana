@@ -33,7 +33,7 @@ export function registerValueSuggestions(server) {
 
       const savedObjectsClient = req.getSavedObjectsClient();
       const savedObjectsResponse = await savedObjectsClient.find(
-        { type: 'index-pattern', fields: ['fields'], search: index, searchFields: ['title'] }
+        { type: 'index-pattern', fields: ['fields'], search: `"${index}"`, searchFields: ['title'] }
       );
       const indexPattern = savedObjectsResponse.total > 0 ? savedObjectsResponse.saved_objects[0] : null;
       const fields = indexPattern ? JSON.parse(indexPattern.attributes.fields) : null;
