@@ -133,15 +133,15 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
                   const label =
                     name !== managedRepository
                       ? i18n.translate(
-                          'xpack.snapshotRestore.repositoryList.table.actionRemoveTooltip',
-                          { defaultMessage: 'Remove' }
-                        )
+                        'xpack.snapshotRestore.repositoryList.table.actionRemoveTooltip',
+                        { defaultMessage: 'Remove' }
+                      )
                       : i18n.translate(
-                          'xpack.snapshotRestore.repositoryList.table.deleteManagedRepositoryTooltip',
-                          {
-                            defaultMessage: 'You cannot delete a managed repository.',
-                          }
-                        );
+                        'xpack.snapshotRestore.repositoryList.table.deleteManagedRepositoryTooltip',
+                        {
+                          defaultMessage: 'You cannot delete a managed repository.',
+                        }
+                      );
                   return (
                     <EuiToolTip content={label}>
                       <EuiButtonIcon
@@ -223,48 +223,42 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
                   defaultMessage="Remove repository"
                 />
               ) : (
-                <FormattedMessage
-                  id="xpack.snapshotRestore.repositoryList.table.deleteMultipleRepositoriesButton"
-                  defaultMessage="Remove repositories"
-                />
-              )}
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.repositoryList.table.deleteMultipleRepositoriesButton"
+                    defaultMessage="Remove repositories"
+                  />
+                )}
             </EuiButton>
           );
         }}
       </RepositoryDeleteProvider>
     ) : (
-      undefined
-    ),
-    toolsRight: (
-      <EuiFlexGroup gutterSize="m" justifyContent="spaceAround">
-        <EuiFlexItem>
-          <EuiButton
-            color="secondary"
-            iconType="refresh"
-            onClick={reload}
-            data-test-subj="reloadButton"
-          >
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryList.table.reloadRepositoriesButton"
-              defaultMessage="Reload"
-            />
-          </EuiButton>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiButton
-            href={linkToAddRepository()}
-            fill
-            iconType="plusInCircle"
-            data-test-subj="registerRepositoryButton"
-          >
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryList.addRepositoryButtonLabel"
-              defaultMessage="Register a repository"
-            />
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    ),
+        undefined
+      ),
+    toolsRight: [
+      <EuiButton
+        color="secondary"
+        iconType="refresh"
+        onClick={reload}
+        data-test-subj="reloadButton"
+      >
+        <FormattedMessage
+          id="xpack.snapshotRestore.repositoryList.table.reloadRepositoriesButton"
+          defaultMessage="Reload"
+        />
+      </EuiButton>,
+      <EuiButton
+        href={linkToAddRepository()}
+        fill
+        iconType="plusInCircle"
+        data-test-subj="registerRepositoryButton"
+      >
+        <FormattedMessage
+          id="xpack.snapshotRestore.repositoryList.addRepositoryButtonLabel"
+          defaultMessage="Register a repository"
+        />
+      </EuiButton>,
+    ],
     box: {
       incremental: true,
       schema: true,

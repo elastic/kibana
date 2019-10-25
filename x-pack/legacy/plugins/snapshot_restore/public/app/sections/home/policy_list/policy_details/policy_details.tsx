@@ -303,42 +303,42 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({
       maxWidth={550}
     >
       <EuiFlyoutHeader>
-  <EuiTitle size="m">
-    <h2 id="srPolicyDetailsFlyoutTitle" data-test-subj="title">
-      {policyName}{' '}
-      <EuiButtonIcon
-        iconType="refresh"
-        color="subdued"
-        aria-label={i18n.translate(
-          'xpack.snapshotRestore.policyDetails.reloadButtonAriaLabel',
-          { defaultMessage: 'Reload' }
-        )}
-        onClick={() => reload()}
-      />
-    </h2>
-  </EuiTitle>
-  {policyDetails && policyDetails.policy && policyDetails.policy.inProgress ? (
-    <>
-      <EuiSpacer size="s" />
-      <SectionLoading inline={true} size="s">
-        <EuiLink
-          href={linkToSnapshot(
-            policyDetails.policy.repository,
-            policyDetails.policy.inProgress.snapshotName
-          )}
-          data-test-subj="inProgressSnapshotLink"
-        >
-          <FormattedMessage
-            id="xpack.snapshotRestore.policyDetails.inProgressSnapshotLinkText"
-            defaultMessage="'{snapshotName}' in progress"
-            values={{ snapshotName: policyDetails.policy.inProgress.snapshotName }}
-          />
-        </EuiLink>
-      </SectionLoading>
-    </>
-  ) : null}
-  {renderTabs()}
-</EuiFlyoutHeader>
+        <EuiTitle size="m">
+          <h2 id="srPolicyDetailsFlyoutTitle" data-test-subj="title">
+            {policyName}{' '}
+            <EuiButtonIcon
+              iconType="refresh"
+              color="subdued"
+              aria-label={i18n.translate(
+                'xpack.snapshotRestore.policyDetails.reloadButtonAriaLabel',
+                { defaultMessage: 'Reload' }
+              )}
+              onClick={() => reload()}
+            />
+          </h2>
+        </EuiTitle>
+        {policyDetails && policyDetails.policy && policyDetails.policy.inProgress ? (
+          <>
+            <EuiSpacer size="s" />
+            <SectionLoading inline={true} size="s">
+              <EuiLink
+                href={linkToSnapshot(
+                  policyDetails.policy.repository,
+                  policyDetails.policy.inProgress.snapshotName
+                )}
+                data-test-subj="inProgressSnapshotLink"
+              >
+                <FormattedMessage
+                  id="xpack.snapshotRestore.policyDetails.inProgressSnapshotLinkText"
+                  defaultMessage="'{snapshotName}' in progress"
+                  values={{ snapshotName: policyDetails.policy.inProgress.snapshotName }}
+                />
+              </EuiLink>
+            </SectionLoading>
+          </>
+        ) : null}
+        {renderTabs()}
+      </EuiFlyoutHeader>
 
       <EuiFlyoutBody data-test-subj="content">{renderBody()}</EuiFlyoutBody>
 

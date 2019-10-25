@@ -193,13 +193,13 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
                           content={
                             Boolean(inProgress)
                               ? i18n.translate(
-                                  'xpack.snapshotRestore.policyList.table.actionExecuteDisabledTooltip',
-                                  { defaultMessage: 'Policy is running' }
-                                )
+                                'xpack.snapshotRestore.policyList.table.actionExecuteDisabledTooltip',
+                                { defaultMessage: 'Policy is running' }
+                              )
                               : i18n.translate(
-                                  'xpack.snapshotRestore.policyList.table.actionExecuteTooltip',
-                                  { defaultMessage: 'Run now' }
-                                )
+                                'xpack.snapshotRestore.policyList.table.actionExecuteTooltip',
+                                { defaultMessage: 'Run now' }
+                              )
                           }
                         >
                           <EuiButtonIcon
@@ -325,38 +325,32 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
         }}
       </PolicyDeleteProvider>
     ) : (
-      undefined
-    ),
-    toolsRight: (
-      <EuiFlexGroup gutterSize="m" justifyContent="spaceAround">
-        <EuiFlexItem>
-          <EuiButton
-            color="secondary"
-            iconType="refresh"
-            onClick={reload}
-            data-test-subj="reloadButton"
-          >
-            <FormattedMessage
-              id="xpack.snapshotRestore.policyList.table.reloadPoliciesButton"
-              defaultMessage="Reload"
-            />
-          </EuiButton>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiButton
-            href={linkToAddPolicy()}
-            fill
-            iconType="plusInCircle"
-            data-test-subj="createPolicyButton"
-          >
-            <FormattedMessage
-              id="xpack.snapshotRestore.policyList.table.addPolicyButton"
-              defaultMessage="Create a policy"
-            />
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    ),
+        undefined
+      ),
+    toolsRight: [
+      <EuiButton
+        color="secondary"
+        iconType="refresh"
+        onClick={reload}
+        data-test-subj="reloadButton"
+      >
+        <FormattedMessage
+          id="xpack.snapshotRestore.policyList.table.reloadPoliciesButton"
+          defaultMessage="Reload"
+        />
+      </EuiButton>,
+      <EuiButton
+        href={linkToAddPolicy()}
+        fill
+        iconType="plusInCircle"
+        data-test-subj="createPolicyButton"
+      >
+        <FormattedMessage
+          id="xpack.snapshotRestore.policyList.table.addPolicyButton"
+          defaultMessage="Create a policy"
+        />
+      </EuiButton>,
+    ],
     box: {
       incremental: true,
       schema: true,
