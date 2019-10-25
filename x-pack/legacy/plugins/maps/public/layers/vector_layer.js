@@ -137,11 +137,21 @@ export class VectorLayer extends AbstractLayer {
     if (!featureCollection) {
       return null;
     }
-    // Set default visible property on data
-    featureCollection.features.forEach(
-      feature => _.set(feature, `properties.${FEATURE_VISIBLE_PROPERTY_NAME}`, true)
-    );
-    return featureCollection;
+    const copiedPropsFeatures = featureCollection.features
+      .map(feature => ({
+        type: 'Feature',
+        geometry: feature.geometry,
+        properties: feature.properties
+          ? {
+            ...feature.properties,
+            [FEATURE_VISIBLE_PROPERTY_NAME]: true
+          }
+          : {}
+      }));
+    return {
+      type: 'FeatureCollection',
+      features: copiedPropsFeatures
+    };
   }
 
   getCustomIconAndTooltipContent() {
