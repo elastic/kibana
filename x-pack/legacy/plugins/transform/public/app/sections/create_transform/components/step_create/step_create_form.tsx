@@ -88,7 +88,17 @@ export const StepCreateForm: SFC<Props> = React.memo(
       setCreated(true);
 
       try {
-        await api.createTransform(transformId, transformConfig);
+        const resp = await api.createTransform(transformId, transformConfig);
+        if (resp.errors !== undefined && Array.isArray(resp.errors)) {
+          if (resp.errors.length === 1) {
+            throw resp.errors[0];
+          }
+
+          if (resp.errors.length > 1) {
+            throw resp.errors;
+          }
+        }
+
         toastNotifications.addSuccess(
           i18n.translate('xpack.transform.stepCreateForm.createTransformSuccessMessage', {
             defaultMessage: 'Request to create transform {transformId} acknowledged.',
@@ -234,11 +244,7 @@ export const StepCreateForm: SFC<Props> = React.memo(
     }
 
     function getTransformConfigDevConsoleStatement() {
-      return `PUT _data_frame/transforms/${transformId}\n${JSON.stringify(
-        transformConfig,
-        null,
-        2
-      )}\n\n`;
+      return `PUT _transform/${transformId}\n${JSON.stringify(transformConfig, null, 2)}\n\n`;
     }
 
     // TODO move this to SASS

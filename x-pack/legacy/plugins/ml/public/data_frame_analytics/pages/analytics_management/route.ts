@@ -12,7 +12,6 @@ import { checkGetJobsPrivilege } from '../../../privilege/check_privilege';
 import {
   loadCurrentIndexPattern,
   loadCurrentSavedSearch,
-  loadIndexPatterns,
   // @ts-ignore
 } from '../../../util/index_utils';
 import { getDataFrameAnalyticsBreadcrumbs } from '../../breadcrumbs';
@@ -26,7 +25,6 @@ uiRoutes.when('/data_frame_analytics/?', {
     CheckLicense: checkFullLicense,
     privileges: checkGetJobsPrivilege,
     indexPattern: loadCurrentIndexPattern,
-    indexPatterns: loadIndexPatterns,
     savedSearch: loadCurrentSavedSearch,
   },
 });

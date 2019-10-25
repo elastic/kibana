@@ -29,3 +29,4 @@ The index must contain at least 2 fields mapped as {ref}/geo-point.html[geo_poin
 
 include::vector-style.asciidoc[]
 include::vector-style-properties.asciidoc[]
+include::vector-tooltips.asciidoc[]

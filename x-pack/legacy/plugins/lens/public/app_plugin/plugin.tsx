@@ -72,7 +72,6 @@ export class AppPlugin {
     setReportManager(
       new LensReportManager({
         storage: new Storage(localStorage),
-        basePath: core.http.basePath.get(),
         http: core.http,
       })
     );

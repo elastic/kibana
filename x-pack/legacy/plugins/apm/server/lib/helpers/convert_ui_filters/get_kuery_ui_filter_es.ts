@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ESFilter } from 'elasticsearch';
 import { Server } from 'hapi';
 import { idx } from '@kbn/elastic-idx';
 import { toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
+import { ESFilter } from '../../../../typings/elasticsearch';
 import { ISavedObject } from '../../../../public/services/rest/savedObjects';
 import { StaticIndexPattern } from '../../../../../../../../src/legacy/core_plugins/data/public';
 import { getAPMIndexPattern } from '../../../lib/index_pattern';
