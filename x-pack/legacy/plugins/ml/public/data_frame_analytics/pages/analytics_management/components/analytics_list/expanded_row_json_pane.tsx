@@ -28,6 +28,7 @@ export const ExpandedRowJsonPane: FC<Props> = ({ json }) => {
           readOnly={true}
           mode="json"
           style={{ width: '100%' }}
+          theme="textmate"
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>&nbsp;</EuiFlexItem>
