@@ -201,7 +201,6 @@
     "@kbn/interpreter": "1.0.0",
     "@kbn/ui-framework": "1.0.0",
     "@mapbox/mapbox-gl-draw": "^1.1.1",
-    "@samverschueren/stream-to-observable": "^0.3.0",
     "@scant/router": "^0.1.0",
     "@slack/webhook": "^5.0.0",
     "@turf/boolean-contains": "6.0.1",
