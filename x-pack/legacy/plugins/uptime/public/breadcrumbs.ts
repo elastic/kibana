@@ -11,7 +11,7 @@ const makeOverviewBreadcrumb = (search?: string): ChromeBreadcrumb => ({
   text: i18n.translate('xpack.uptime.breadcrumbs.overviewBreadcrumbText', {
     defaultMessage: 'Uptime',
   }),
-  href: `#/${search ? search : ''}`,
+  href: `/app/uptime/${search ? search : ''}`,
 });
 
 export const getOverviewPageBreadcrumbs = (search?: string): ChromeBreadcrumb[] => [
