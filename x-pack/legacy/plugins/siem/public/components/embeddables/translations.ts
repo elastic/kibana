@@ -69,14 +69,6 @@ export const ERROR_TITLE = i18n.translate(
   }
 );
 
-export const ERROR_DESCRIPTION = i18n.translate(
-  'xpack.siem.components.embeddables.indexPatternsMissingPrompt.errorDescription',
-  {
-    defaultMessage:
-      'An ECS compliant Kibana index pattern must be configured to view event data on the map. When using beats, you can run the following setup commands to create the required Kibana index patterns, otherwise you can configure them manually within Kibana settings.',
-  }
-);
-
 export const ERROR_BUTTON = i18n.translate(
   'xpack.siem.components.embeddables.indexPatternsMissingPrompt.errorButtonLabel',
   {
