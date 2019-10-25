@@ -31,7 +31,7 @@ import {
   UNINSTALLED_STATUS,
 } from './sample_data_set_card';
 
-import { toastNotifications } from 'ui/notify';
+import { getServices } from '../kibana_services';
 
 import {
   listSampleDataSets,
@@ -40,14 +40,13 @@ import {
 } from '../sample_data_client';
 
 import { i18n } from '@kbn/i18n';
-import chrome from 'ui/chrome';
-
-const IS_DARK_THEME = chrome.getUiSettingsClient().get('theme:darkMode');
 
 export class SampleDataSetCards extends React.Component {
 
   constructor(props) {
     super(props);
+
+    this.toastNotifications = getServices().toastNotifications;
 
     this.state = {
       sampleDataSets: [],
@@ -70,7 +69,7 @@ export class SampleDataSetCards extends React.Component {
     try {
       sampleDataSets = await listSampleDataSets();
     } catch (fetchError) {
-      toastNotifications.addDanger({
+      this.toastNotifications.addDanger({
         title: i18n.translate('kbn.home.sampleDataSet.unableToLoadListErrorMessage', {
           defaultMessage: 'Unable to load sample data sets list' }
         ),
@@ -109,7 +108,7 @@ export class SampleDataSetCards extends React.Component {
           processingStatus: { ...prevState.processingStatus, [id]: false }
         }));
       }
-      toastNotifications.addDanger({
+      this.toastNotifications.addDanger({
         title: i18n.translate('kbn.home.sampleDataSet.unableToInstallErrorMessage', {
           defaultMessage: 'Unable to install sample data set: {name}', values: { name: targetSampleDataSet.name } }
         ),
@@ -130,7 +129,7 @@ export class SampleDataSetCards extends React.Component {
       }));
     }
 
-    toastNotifications.addSuccess({
+    this.toastNotifications.addSuccess({
       title: i18n.translate('kbn.home.sampleDataSet.installedLabel', {
         defaultMessage: '{name} installed', values: { name: targetSampleDataSet.name } }
       ),
@@ -155,7 +154,7 @@ export class SampleDataSetCards extends React.Component {
           processingStatus: { ...prevState.processingStatus, [id]: false }
         }));
       }
-      toastNotifications.addDanger({
+      this.toastNotifications.addDanger({
         title: i18n.translate('kbn.home.sampleDataSet.unableToUninstallErrorMessage', {
           defaultMessage: 'Unable to uninstall sample data set: {name}', values: { name: targetSampleDataSet.name } }
         ),
@@ -176,7 +175,7 @@ export class SampleDataSetCards extends React.Component {
       }));
     }
 
-    toastNotifications.addSuccess({
+    this.toastNotifications.addSuccess({
       title: i18n.translate('kbn.home.sampleDataSet.uninstalledLabel', {
         defaultMessage: '{name} uninstalled', values: { name: targetSampleDataSet.name } }
       ),
@@ -185,7 +184,9 @@ export class SampleDataSetCards extends React.Component {
   }
 
   lightOrDarkImage = (sampleDataSet) => {
-    return IS_DARK_THEME && sampleDataSet.darkPreviewImagePath ? sampleDataSet.darkPreviewImagePath : sampleDataSet.previewImagePath;
+    return getServices().uiSettings.get('theme:darkMode') && sampleDataSet.darkPreviewImagePath
+      ? sampleDataSet.darkPreviewImagePath
+      : sampleDataSet.previewImagePath;
   }
 
   render() {
