@@ -369,21 +369,6 @@ Alias: `when`
 
 Clears the _context_, and returns `null`.
 
-*Expression syntax*
-[source,js]
-----
-clear
-----
-
-*Code example*
-[source,text]
-----
-filters 
-| demodata
-| clear
-| render
-----
-
 *Accepts:* `null`
 
 *Returns:* `null`
@@ -1086,7 +1071,7 @@ filters
 | plot defaultStyle={seriesStyle bars=1}
 | render
 ----
-The `exactly` filter here is added to existing filters retrieved by the `filters` function and further filters down the data to only have `”elasticsearch”` data. 
+The `exactly` filter here is added to existing filters retrieved by the `filters` function and further filters down the data to only have `”elasticsearch”` data. The `exactly` filter only applies to this one specific element and will not affect other elements in the workpad.
 
 *Accepts:* `filter`
 
