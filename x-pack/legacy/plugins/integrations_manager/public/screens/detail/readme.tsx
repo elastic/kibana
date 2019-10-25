@@ -8,7 +8,7 @@ import ReactMarkdown from 'react-markdown';
 import { getFileByPath } from '../../data';
 import { markdownRenderers } from './markdown_renderers';
 
-export function MarkdownDescription({ readmePath }: { readmePath: string }) {
+export function Readme({ readmePath }: { readmePath: string }) {
   const [markdown, setMarkdown] = useState<string>('');
 
   useEffect(() => {
