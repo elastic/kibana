@@ -33,15 +33,19 @@ import { deleteColumn, changeColumn } from '../state_helpers';
 import { FieldSelect } from './field_select';
 import { hasField } from '../utils';
 import { BucketNestingEditor } from './bucket_nesting_editor';
+import { documentField } from '../document_field';
 import { IndexPattern, IndexPatternField } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 
 const operationPanels = getOperationDisplay();
 
-export function asOperationOptions(
-  operationTypes: OperationType[],
-  compatibleWithCurrentField: boolean
-) {
+export interface PopoverEditorProps extends IndexPatternDimensionPanelProps {
+  selectedColumn?: IndexPatternColumn;
+  operationFieldSupportMatrix: OperationFieldSupportMatrix;
+  currentIndexPattern: IndexPattern;
+}
+
+function asOperationOptions(operationTypes: OperationType[], compatibleWithCurrentField: boolean) {
   return [...operationTypes]
     .sort((opType1, opType2) => {
       return operationPanels[opType1].displayName.localeCompare(
@@ -52,12 +56,6 @@ export function asOperationOptions(
       operationType,
       compatibleWithCurrentField,
     }));
-}
-
-export interface PopoverEditorProps extends IndexPatternDimensionPanelProps {
-  selectedColumn?: IndexPatternColumn;
-  operationFieldSupportMatrix: OperationFieldSupportMatrix;
-  currentIndexPattern: IndexPattern;
 }
 
 export function PopoverEditor(props: PopoverEditorProps) {
@@ -72,7 +70,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
     uniqueLabel,
     hideGrouping,
   } = props;
-  const { operationByDocument, operationByField, fieldByOperation } = operationFieldSupportMatrix;
+  const { operationByField, fieldByOperation } = operationFieldSupportMatrix;
   const [isPopoverOpen, setPopoverOpen] = useState(false);
   const [
     incompatibleSelectedOperationType,
@@ -87,19 +85,13 @@ export function PopoverEditor(props: PopoverEditorProps) {
     currentIndexPattern.fields.forEach(field => {
       fields[field.name] = field;
     });
-
+    fields[documentField.name] = documentField;
     return fields;
   }, [currentIndexPattern]);
 
   function getOperationTypes() {
-    const possibleOperationTypes = Object.keys(fieldByOperation).concat(
-      operationByDocument
-    ) as OperationType[];
-
+    const possibleOperationTypes = Object.keys(fieldByOperation) as OperationType[];
     const validOperationTypes: OperationType[] = [];
-    if (!selectedColumn || !hasField(selectedColumn)) {
-      validOperationTypes.push(...operationByDocument);
-    }
 
     if (!selectedColumn) {
       validOperationTypes.push(...(Object.keys(fieldByOperation) as OperationType[]));
@@ -139,12 +131,8 @@ export function PopoverEditor(props: PopoverEditorProps) {
           onClick() {
             if (!selectedColumn) {
               const possibleFields = fieldByOperation[operationType] || [];
-              const isFieldlessPossible = operationByDocument.includes(operationType);
 
-              if (
-                possibleFields.length === 1 ||
-                (possibleFields.length === 0 && isFieldlessPossible)
-              ) {
+              if (possibleFields.length === 1) {
                 setState(
                   changeColumn({
                     state,
@@ -156,8 +144,8 @@ export function PopoverEditor(props: PopoverEditorProps) {
                       layerId: props.layerId,
                       op: operationType,
                       indexPattern: currentIndexPattern,
-                      field: possibleFields.length === 1 ? fieldMap[possibleFields[0]] : undefined,
-                      asDocumentOperation: possibleFields.length === 0,
+                      field:
+                        possibleFields.length === 1 ? fieldMap[possibleFields[0]] : documentField,
                     }),
                   })
                 );
@@ -184,7 +172,9 @@ export function PopoverEditor(props: PopoverEditorProps) {
               layerId: props.layerId,
               op: operationType,
               indexPattern: currentIndexPattern,
-              field: hasField(selectedColumn) ? fieldMap[selectedColumn.sourceField] : undefined,
+              field: hasField(selectedColumn)
+                ? fieldMap[selectedColumn.sourceField]
+                : documentField,
             });
             trackUiEvent(
               `indexpattern_dimension_operation_from_${selectedColumn.operationType}_to_${operationType}`
@@ -307,12 +297,11 @@ export function PopoverEditor(props: PopoverEditorProps) {
                   }
                   column = buildColumn({
                     columns: props.state.layers[props.layerId].columns,
-                    field: 'field' in choice ? fieldMap[choice.field] : undefined,
+                    field: 'field' in choice ? fieldMap[choice.field] : documentField,
                     indexPattern: currentIndexPattern,
                     layerId: props.layerId,
                     suggestedPriority: props.suggestedPriority,
                     op: operation as OperationType,
-                    asDocumentOperation: choice.type === 'document',
                   });
                 }
 

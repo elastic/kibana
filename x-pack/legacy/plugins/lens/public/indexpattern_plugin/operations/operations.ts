@@ -14,6 +14,7 @@ import {
   IndexPatternColumn,
 } from './definitions';
 import { IndexPattern, IndexPatternField } from '../types';
+import { documentField } from '../document_field';
 
 /**
  * Returns all available operation types as a list at runtime.
@@ -68,9 +69,21 @@ export function getOperationTypesForField(field: IndexPatternField) {
     .map(({ type }) => type);
 }
 
-type OperationFieldTuple =
-  | { type: 'field'; operationType: OperationType; field: string }
-  | { type: 'document'; operationType: OperationType };
+let documentOperations: Set<string>;
+
+export function isDocumentOperation(type: string) {
+  // This can't be done at the root level, because it breaks tests, thanks to mocking oddities
+  // so we do it here, and cache the result.
+  documentOperations =
+    documentOperations || new Set(getOperationTypesForField(documentField) as string[]);
+  return documentOperations.has(type);
+}
+
+interface OperationFieldTuple {
+  type: 'field';
+  operationType: OperationType;
+  field: string;
+}
 
 /**
  * Returns all possible operations (matches between operations and fields of the index
@@ -120,8 +133,8 @@ export function getAvailableOperationsByMetadata(indexPattern: IndexPattern) {
 
   operationDefinitions.forEach(operationDefinition => {
     addToMap(
-      { type: 'document', operationType: operationDefinition.type },
-      getPossibleOperationForDocument(operationDefinition, indexPattern)
+      { type: 'field', operationType: operationDefinition.type, field: documentField.name },
+      getPossibleOperationForField(operationDefinition, documentField)
     );
 
     indexPattern.fields.forEach(field => {
@@ -137,15 +150,6 @@ export function getAvailableOperationsByMetadata(indexPattern: IndexPattern) {
   });
 
   return Object.values(operationByMetadata);
-}
-
-function getPossibleOperationForDocument(
-  operationDefinition: GenericOperationDefinition,
-  indexPattern: IndexPattern
-): OperationMetadata | undefined {
-  return 'getPossibleOperationForDocument' in operationDefinition
-    ? operationDefinition.getPossibleOperationForDocument(indexPattern)
-    : undefined;
 }
 
 function getPossibleOperationForField(
@@ -203,23 +207,21 @@ export function buildColumn({
   layerId,
   indexPattern,
   suggestedPriority,
-  asDocumentOperation,
 }: {
   op?: OperationType;
   columns: Partial<Record<string, IndexPatternColumn>>;
   suggestedPriority: DimensionPriority | undefined;
   layerId: string;
   indexPattern: IndexPattern;
-  field?: IndexPatternField;
-  asDocumentOperation?: boolean;
+  field: IndexPatternField;
 }): IndexPatternColumn {
   let operationDefinition: GenericOperationDefinition | undefined;
 
   if (op) {
     operationDefinition = operationDefinitionMap[op];
-  } else if (asDocumentOperation) {
+  } else if (field.type === 'document') {
     operationDefinition = getDefinition(definition =>
-      Boolean(getPossibleOperationForDocument(definition, indexPattern))
+      Boolean(getPossibleOperationForField(definition, documentField))
     );
   } else if (field) {
     operationDefinition = getDefinition(definition =>
@@ -238,19 +240,14 @@ export function buildColumn({
     indexPattern,
   };
 
-  // check for the operation for field getter to determine whether
-  // this is a field based operation type
-  if ('getPossibleOperationForField' in operationDefinition) {
-    if (!field) {
-      throw new Error(`Invariant error: ${operationDefinition.type} operation requires field`);
-    }
-    return operationDefinition.buildColumn({
-      ...baseOptions,
-      field,
-    });
-  } else {
-    return operationDefinition.buildColumn(baseOptions);
+  if (!field) {
+    throw new Error(`Invariant error: ${operationDefinition.type} operation requires field`);
   }
+
+  return operationDefinition.buildColumn({
+    ...baseOptions,
+    field,
+  });
 }
 
 export { operationDefinitionMap } from './definitions';

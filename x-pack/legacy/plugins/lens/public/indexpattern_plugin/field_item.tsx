@@ -56,6 +56,7 @@ export interface FieldItemProps {
   query: Query;
   dateRange: DatasourceDataPanelProps['dateRange'];
   filters: Filter[];
+  hideDetails?: boolean;
 }
 
 interface State {
@@ -75,7 +76,17 @@ function wrapOnDot(str?: string) {
 }
 
 export function FieldItem(props: FieldItemProps) {
-  const { core, field, indexPattern, highlight, exists, query, dateRange, filters } = props;
+  const {
+    core,
+    field,
+    indexPattern,
+    highlight,
+    exists,
+    query,
+    dateRange,
+    filters,
+    hideDetails,
+  } = props;
 
   const [infoIsOpen, setOpen] = useState(false);
 
@@ -140,6 +151,10 @@ export function FieldItem(props: FieldItemProps) {
   }
 
   function togglePopover() {
+    if (hideDetails) {
+      return;
+    }
+
     setOpen(!infoIsOpen);
     if (!infoIsOpen) {
       trackUiEvent('indexpattern_field_info_click');
@@ -188,11 +203,18 @@ export function FieldItem(props: FieldItemProps) {
 
               <EuiIconTip
                 anchorClassName="lnsFieldItem__infoIcon"
-                content={i18n.translate('xpack.lens.indexPattern.fieldStatsButton', {
-                  defaultMessage:
-                    'Click for information about {fieldName}. Or, drag field into visualization.',
-                  values: { fieldName: field.name },
-                })}
+                content={
+                  hideDetails
+                    ? i18n.translate('xpack.lens.indexPattern.fieldItemTooltip', {
+                        defaultMessage: 'Drag field into visualization.',
+                        values: { fieldName: field.name },
+                      })
+                    : i18n.translate('xpack.lens.indexPattern.fieldItemTooltipWithInfo', {
+                        defaultMessage:
+                          'Click for information about {fieldName}, or, drag field into visualization.',
+                        values: { fieldName: field.name },
+                      })
+                }
                 type="iInCircle"
                 color="subdued"
                 size="s"

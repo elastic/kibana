@@ -565,6 +565,7 @@ describe('IndexPattern Data Panel', () => {
       );
 
       expect(wrapper.find(FieldItem).map(fieldItem => fieldItem.prop('field').name)).toEqual([
+        'Records',
         'bytes',
         'client',
         'memory',
@@ -585,6 +586,7 @@ describe('IndexPattern Data Panel', () => {
       });
 
       expect(wrapper.find(FieldItem).map(fieldItem => fieldItem.prop('field').name)).toEqual([
+        'Records',
         'memory',
       ]);
     });
@@ -605,6 +607,7 @@ describe('IndexPattern Data Panel', () => {
         .simulate('click');
 
       expect(wrapper.find(FieldItem).map(fieldItem => fieldItem.prop('field').name)).toEqual([
+        'Records',
         'bytes',
         'memory',
       ]);
@@ -630,6 +633,7 @@ describe('IndexPattern Data Panel', () => {
         .simulate('click');
 
       expect(wrapper.find(FieldItem).map(fieldItem => fieldItem.prop('field').name)).toEqual([
+        'Records',
         'bytes',
         'client',
         'memory',
@@ -660,6 +664,7 @@ describe('IndexPattern Data Panel', () => {
         .simulate('click');
 
       expect(wrapper.find(FieldItem).map(fieldItem => fieldItem.prop('field').name)).toEqual([
+        'Records',
         'memory',
       ]);
     });
@@ -698,6 +703,7 @@ describe('IndexPattern Data Panel', () => {
       const wrapper = shallowWithIntl(<InnerIndexPatternDataPanel {...props} />);
 
       expect(wrapper.find(FieldItem).map(fieldItem => fieldItem.prop('field').name)).toEqual([
+        'Records',
         'bytes',
         'memory',
       ]);
@@ -715,6 +721,7 @@ describe('IndexPattern Data Panel', () => {
       });
 
       expect(wrapper.find(FieldItem).map(fieldItem => fieldItem.prop('field').name)).toEqual([
+        'Records',
         'memory',
       ]);
     });

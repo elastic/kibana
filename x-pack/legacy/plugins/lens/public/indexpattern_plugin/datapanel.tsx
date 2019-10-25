@@ -24,6 +24,8 @@ import {
   EuiFacetButton,
   EuiIcon,
   EuiButton,
+  EuiFormLabel,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -50,6 +52,7 @@ export type Props = DatasourceDataPanelProps<IndexPatternPrivateState> & {
 };
 import { LensFieldIcon } from './lens_field_icon';
 import { ChangeIndexPattern } from './change_indexpattern';
+import { documentField } from './document_field';
 
 // TODO the typings for EuiContextMenuPanel are incorrect - watchedItemProps is missing. This can be removed when the types are adjusted
 const FixedEuiContextMenuPanel = (EuiContextMenuPanel as unknown) as React.FunctionComponent<
@@ -60,10 +63,11 @@ function sortFields(fieldA: IndexPatternField, fieldB: IndexPatternField) {
   return fieldA.name.localeCompare(fieldB.name, undefined, { sensitivity: 'base' });
 }
 
-const supportedFieldTypes = new Set(['string', 'number', 'boolean', 'date', 'ip']);
+const supportedFieldTypes = new Set(['string', 'number', 'boolean', 'date', 'ip', 'document']);
 const PAGINATION_SIZE = 50;
 
 const fieldTypeNames: Record<DataType, string> = {
+  document: i18n.translate('xpack.lens.datatypes.record', { defaultMessage: 'record' }),
   string: i18n.translate('xpack.lens.datatypes.string', { defaultMessage: 'string' }),
   number: i18n.translate('xpack.lens.datatypes.number', { defaultMessage: 'number' }),
   boolean: i18n.translate('xpack.lens.datatypes.boolean', { defaultMessage: 'boolean' }),
@@ -418,6 +422,27 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
             onScroll={lazyScroll}
           >
             <div className="lnsInnerIndexPatternDataPanel__list">
+              {paginatedFields.length > 0 && (
+                <>
+                  <FieldItem
+                    core={core}
+                    indexPattern={currentIndexPattern}
+                    field={documentField}
+                    exists={documentField.exists}
+                    dateRange={dateRange}
+                    query={query}
+                    filters={filters}
+                    hideDetails={true}
+                  />
+                  <EuiSpacer size="s" />
+                  <EuiFormLabel>
+                    {i18n.translate('xpack.lens.indexPattern.individualFieldsLabel', {
+                      defaultMessage: 'Individual fields',
+                    })}
+                  </EuiFormLabel>
+                  <EuiSpacer size="s" />
+                </>
+              )}
               {paginatedFields.map(field => {
                 const overallField = fieldByName[field.name];
                 return (

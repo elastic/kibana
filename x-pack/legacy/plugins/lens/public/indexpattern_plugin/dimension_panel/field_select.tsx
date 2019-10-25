@@ -20,10 +20,14 @@ import { OperationFieldSupportMatrix } from './dimension_panel';
 import { IndexPattern, IndexPatternField, IndexPatternPrivateState } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import { fieldExists } from '../pure_helpers';
+import { documentField } from '../document_field';
+import { isDocumentOperation } from '../operations';
 
-export type FieldChoice =
-  | { type: 'field'; field: string; operationType?: OperationType }
-  | { type: 'document' };
+export interface FieldChoice {
+  type: 'field';
+  field: string;
+  operationType?: OperationType;
+}
 
 export interface FieldSelectProps {
   currentIndexPattern: IndexPattern;
@@ -50,7 +54,9 @@ export function FieldSelect({
   onDeleteColumn,
   existingFields,
 }: FieldSelectProps) {
-  const { operationByDocument, operationByField } = operationFieldSupportMatrix;
+  const { operationByField } = operationFieldSupportMatrix;
+  const isDocumentOperationType = isDocumentOperation((incompatibleSelectedOperationType ||
+    selectedColumnOperationType) as string);
 
   const memoizedFieldOptions = useMemo(() => {
     const fields = Object.keys(operationByField).sort();
@@ -65,30 +71,18 @@ export function FieldSelect({
       );
     }
 
-    const isCurrentOperationApplicableWithoutField =
-      (!selectedColumnOperationType && !incompatibleSelectedOperationType) ||
-      operationByDocument.includes(
-        incompatibleSelectedOperationType || selectedColumnOperationType!
-      );
-
     const fieldOptions = [];
 
-    if (operationByDocument.length > 0) {
-      fieldOptions.push({
-        label: i18n.translate('xpack.lens.indexPattern.documentField', {
-          defaultMessage: 'Document',
-        }),
-        value: { type: 'document' },
-        className: classNames({
-          'lnFieldSelect__option--incompatible': !isCurrentOperationApplicableWithoutField,
-        }),
-        'data-test-subj': `lns-documentOption${
-          isCurrentOperationApplicableWithoutField ? '' : 'Incompatible'
-        }`,
-      });
-    }
-
     if (fields.length > 0) {
+      fieldOptions.push({
+        label: documentField.name,
+        value: { type: 'document', dataType: 'document' },
+        className: classNames({
+          'lnFieldSelect__option--incompatible': !isDocumentOperationType,
+        }),
+        'data-test-subj': `lns-documentOption${isDocumentOperationType ? '' : 'Incompatible'}`,
+      });
+
       fieldOptions.push({
         label: i18n.translate('xpack.lens.indexPattern.individualFieldsLabel', {
           defaultMessage: 'Individual fields',
