@@ -49,6 +49,9 @@ import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plug
 import { ContextSetup } from './context';
 import { SavedObjectsServiceStart } from './saved_objects';
 
+import { InternalUiSettingsServiceSetup } from './ui_settings';
+import { SavedObjectsClientContract } from './saved_objects/types';
+
 export { bootstrap } from './bootstrap';
 export { ConfigPath, ConfigService, EnvironmentMode, PackageInfo } from './config';
 export {
@@ -135,7 +138,10 @@ export {
 export {
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
+  SavedObjectsBulkUpdateObject,
+  SavedObjectsBulkUpdateOptions,
   SavedObjectsBulkResponse,
+  SavedObjectsBulkUpdateResponse,
   SavedObjectsClient,
   SavedObjectsClientProviderOptions,
   SavedObjectsClientWrapperFactory,
@@ -143,6 +149,7 @@ export {
   SavedObjectsCreateOptions,
   SavedObjectsErrorHelpers,
   SavedObjectsExportOptions,
+  SavedObjectsExportResultDetails,
   SavedObjectsFindResponse,
   SavedObjectsImportConflictError,
   SavedObjectsImportError,
@@ -160,7 +167,15 @@ export {
   SavedObjectsLegacyService,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
+  SavedObjectsDeleteOptions,
 } from './saved_objects';
+
+export {
+  IUiSettingsClient,
+  UiSettingsParams,
+  InternalUiSettingsServiceSetup,
+  UiSettingsType,
+} from './ui_settings';
 
 export { RecursiveReadonly } from '../utils';
 
@@ -171,6 +186,7 @@ export {
   SavedObjectAttributeSingle,
   SavedObjectReference,
   SavedObjectsBaseOptions,
+  MutatingOperationRefreshSetting,
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
   SavedObjectsMigrationVersion,
@@ -180,10 +196,22 @@ export { LegacyServiceSetupDeps, LegacyServiceStartDeps } from './legacy';
 
 /**
  * Plugin specific context passed to a route handler.
+ *
+ * Provides the following clients:
+ *    - {@link SavedObjectsClient | savedObjects.client} - Saved Objects client
+ *      which uses the credentials of the incoming request
+ *    - {@link ScopedClusterClient | elasticsearch.dataClient} - Elasticsearch
+ *      data client which uses the credentials of the incoming request
+ *    - {@link ScopedClusterClient | elasticsearch.adminClient} - Elasticsearch
+ *      admin client which uses the credentials of the incoming request
+ *
  * @public
  */
 export interface RequestHandlerContext {
   core: {
+    savedObjects: {
+      client: SavedObjectsClientContract;
+    };
     elasticsearch: {
       dataClient: IScopedClusterClient;
       adminClient: IScopedClusterClient;
@@ -217,6 +245,7 @@ export interface InternalCoreSetup {
   context: ContextSetup;
   http: InternalHttpServiceSetup;
   elasticsearch: InternalElasticsearchServiceSetup;
+  uiSettings: InternalUiSettingsServiceSetup;
 }
 
 /**

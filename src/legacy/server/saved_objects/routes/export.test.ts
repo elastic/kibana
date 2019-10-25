@@ -28,20 +28,15 @@ import * as exportMock from '../../../../core/server/saved_objects/export';
 import { createMockServer } from './_mock_server';
 import { createExportRoute } from './export';
 import { createListStream } from '../../../utils/streams';
+import { savedObjectsClientMock } from '../../../../core/server/mocks';
 
 const getSortedObjectsForExport = exportMock.getSortedObjectsForExport as jest.Mock;
 
 describe('POST /api/saved_objects/_export', () => {
   let server: Hapi.Server;
   const savedObjectsClient = {
+    ...savedObjectsClientMock.create(),
     errors: {} as any,
-    bulkCreate: jest.fn(),
-    bulkGet: jest.fn(),
-    create: jest.fn(),
-    delete: jest.fn(),
-    find: jest.fn(),
-    get: jest.fn(),
-    update: jest.fn(),
   };
 
   beforeEach(() => {
@@ -157,12 +152,14 @@ describe('POST /api/saved_objects/_export', () => {
         "calls": Array [
           Array [
             Object {
+              "excludeExportDetails": false,
               "exportSizeLimit": 10000,
               "includeReferencesDeep": true,
               "objects": undefined,
               "savedObjectsClient": Object {
                 "bulkCreate": [MockFunction],
                 "bulkGet": [MockFunction],
+                "bulkUpdate": [MockFunction],
                 "create": [MockFunction],
                 "delete": [MockFunction],
                 "errors": Object {},

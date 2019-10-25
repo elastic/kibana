@@ -92,7 +92,7 @@ export const histogramBucketAgg = new BucketAggType<IBucketHistogramAggConfig>({
       modifyAggConfigOnSearchRequestStart(
         aggConfig: IBucketHistogramAggConfig,
         searchSource: any,
-        searchRequest: any
+        options: any
       ) {
         const field = aggConfig.getField();
         const aggBody = field.scripted
@@ -111,10 +111,8 @@ export const histogramBucketAgg = new BucketAggType<IBucketHistogramAggConfig>({
             },
           });
 
-        searchRequest.whenAborted(() => childSearchSource.cancelQueued());
-
         return childSearchSource
-          .fetch()
+          .fetch(options)
           .then((resp: any) => {
             aggConfig.setAutoBounds({
               min: _.get(resp, 'aggregations.minAgg.value'),

@@ -6,7 +6,7 @@
 
 import { Legacy } from 'kibana';
 import { setupRequest } from './setup_request';
-import { uiSettingsServiceMock } from '../../../../../../../src/legacy/ui/ui_settings/ui_settings_service.mock';
+import { uiSettingsServiceMock } from 'src/core/server/mocks';
 
 function getMockRequest() {
   const callWithRequestSpy = jest.fn();
@@ -31,7 +31,7 @@ describe('setupRequest', () => {
   it('should call callWithRequest with default args', async () => {
     const { mockRequest, callWithRequestSpy } = getMockRequest();
     const { client } = await setupRequest(mockRequest);
-    await client.search({ index: 'apm-*', body: { foo: 'bar' } });
+    await client.search({ index: 'apm-*', body: { foo: 'bar' } } as any);
     expect(callWithRequestSpy).toHaveBeenCalledWith(mockRequest, 'search', {
       index: 'apm-*',
       body: {
@@ -125,7 +125,7 @@ describe('setupRequest', () => {
     it('should set `ignore_throttled=true` if `includeFrozen=false`', async () => {
       const { mockRequest, callWithRequestSpy } = getMockRequest();
 
-      const uiSettingsService = uiSettingsServiceMock.create();
+      const uiSettingsService = uiSettingsServiceMock.createClient();
       // mock includeFrozen to return false
       uiSettingsService.get.mockResolvedValue(false);
       mockRequest.getUiSettingsService = () => uiSettingsService;
@@ -138,7 +138,7 @@ describe('setupRequest', () => {
     it('should set `ignore_throttled=false` if `includeFrozen=true`', async () => {
       const { mockRequest, callWithRequestSpy } = getMockRequest();
 
-      const uiSettingsService = uiSettingsServiceMock.create();
+      const uiSettingsService = uiSettingsServiceMock.createClient();
       // mock includeFrozen to return true
       uiSettingsService.get.mockResolvedValue(true);
       mockRequest.getUiSettingsService = () => uiSettingsService;

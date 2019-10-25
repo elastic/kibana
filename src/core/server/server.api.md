@@ -50,7 +50,6 @@ import { GetSourceParams } from 'elasticsearch';
 import { GetTemplateParams } from 'elasticsearch';
 import { IncomingHttpHeaders } from 'http';
 import { IndexDocumentParams } from 'elasticsearch';
-import { IndexPatternsService } from 'src/legacy/server/index_patterns';
 import { IndicesAnalyzeParams } from 'elasticsearch';
 import { IndicesClearCacheParams } from 'elasticsearch';
 import { IndicesCloseParams } from 'elasticsearch';
@@ -465,7 +464,7 @@ export function bootstrap({ configs, cliArgs, applyConfigOverrides, features, }:
 // @public
 export interface CallAPIOptions {
     signal?: AbortSignal;
-    wrap401Errors: boolean;
+    wrap401Errors?: boolean;
 }
 
 // @public
@@ -723,6 +722,8 @@ export interface InternalCoreSetup {
     // 
     // (undocumented)
     http: InternalHttpServiceSetup;
+    // (undocumented)
+    uiSettings: InternalUiSettingsServiceSetup;
 }
 
 // @internal (undocumented)
@@ -731,6 +732,12 @@ export interface InternalCoreStart {
     // 
     // (undocumented)
     savedObjects: SavedObjectsServiceStart;
+}
+
+// @internal (undocumented)
+export interface InternalUiSettingsServiceSetup {
+    asScopedToClient(savedObjectsClient: SavedObjectsClientContract): IUiSettingsClient;
+    setDefaults(values: Record<string, UiSettingsParams>): void;
 }
 
 // @public
@@ -751,6 +758,22 @@ export type IsAuthenticated = (request: KibanaRequest | LegacyRequest) => boolea
 
 // @public
 export type IScopedClusterClient = Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
+
+// @public
+export interface IUiSettingsClient {
+    get: <T extends SavedObjectAttribute = any>(key: string) => Promise<T>;
+    getAll: <T extends SavedObjectAttribute = any>() => Promise<Record<string, T>>;
+    getDefaults: () => Record<string, UiSettingsParams>;
+    getUserProvided: <T extends SavedObjectAttribute = any>() => Promise<Record<string, {
+        userValue?: T;
+        isOverridden?: boolean;
+    }>>;
+    isOverridden: (key: string) => boolean;
+    remove: (key: string) => Promise<void>;
+    removeMany: (keys: string[]) => Promise<void>;
+    set: <T extends SavedObjectAttribute = any>(key: string, value: T) => Promise<void>;
+    setMany: <T extends SavedObjectAttribute = any>(changes: Record<string, T>) => Promise<void>;
+}
 
 // @public
 export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
@@ -919,6 +942,9 @@ export type MIGRATION_ASSISTANCE_INDEX_ACTION = 'upgrade' | 'reindex';
 // @public (undocumented)
 export type MIGRATION_DEPRECATION_LEVEL = 'none' | 'info' | 'warning' | 'critical';
 
+// @public
+export type MutatingOperationRefreshSetting = boolean | 'wait_for';
+
 // Warning: (ae-forgotten-export) The symbol "OnPostAuthResult" needs to be exported by the entry point index.d.ts
 // 
 // @public
@@ -1041,6 +1067,9 @@ export type RequestHandler<P extends ObjectType, Q extends ObjectType, B extends
 export interface RequestHandlerContext {
     // (undocumented)
     core: {
+        savedObjects: {
+            client: SavedObjectsClientContract;
+        };
         elasticsearch: {
             dataClient: IScopedClusterClient;
             adminClient: IScopedClusterClient;
@@ -1163,14 +1192,33 @@ export interface SavedObjectsBulkResponse<T extends SavedObjectAttributes = any>
     saved_objects: Array<SavedObject<T>>;
 }
 
-// @internal (undocumented)
+// @public (undocumented)
+export interface SavedObjectsBulkUpdateObject<T extends SavedObjectAttributes = any> extends Pick<SavedObjectsUpdateOptions, 'version' | 'references'> {
+    attributes: Partial<T>;
+    id: string;
+    type: string;
+}
+
+// @public (undocumented)
+export interface SavedObjectsBulkUpdateOptions extends SavedObjectsBaseOptions {
+    refresh?: MutatingOperationRefreshSetting;
+}
+
+// @public (undocumented)
+export interface SavedObjectsBulkUpdateResponse<T extends SavedObjectAttributes = any> {
+    // (undocumented)
+    saved_objects: Array<SavedObjectsUpdateResponse<T>>;
+}
+
+// @public (undocumented)
 export class SavedObjectsClient {
     // Warning: (ae-forgotten-export) The symbol "SavedObjectsRepository" needs to be exported by the entry point index.d.ts
     constructor(repository: SavedObjectsRepository);
     bulkCreate<T extends SavedObjectAttributes = any>(objects: Array<SavedObjectsBulkCreateObject<T>>, options?: SavedObjectsCreateOptions): Promise<SavedObjectsBulkResponse<T>>;
     bulkGet<T extends SavedObjectAttributes = any>(objects?: SavedObjectsBulkGetObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsBulkResponse<T>>;
+    bulkUpdate<T extends SavedObjectAttributes = any>(objects: Array<SavedObjectsBulkUpdateObject<T>>, options?: SavedObjectsBulkUpdateOptions): Promise<SavedObjectsBulkUpdateResponse<T>>;
     create<T extends SavedObjectAttributes = any>(type: string, attributes: T, options?: SavedObjectsCreateOptions): Promise<SavedObject<T>>;
-    delete(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<{}>;
+    delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{}>;
     // (undocumented)
     errors: typeof SavedObjectsErrorHelpers;
     // (undocumented)
@@ -1180,8 +1228,6 @@ export class SavedObjectsClient {
     update<T extends SavedObjectAttributes = any>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions): Promise<SavedObjectsUpdateResponse<T>>;
 }
 
-// Warning: (ae-incompatible-release-tags) The symbol "SavedObjectsClientContract" is marked as @public, but its signature references "SavedObjectsClient" which is marked as @internal
-// 
 // @public
 export type SavedObjectsClientContract = Pick<SavedObjectsClient, keyof SavedObjectsClient>;
 
@@ -1209,6 +1255,12 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
     overwrite?: boolean;
     // (undocumented)
     references?: SavedObjectReference[];
+    refresh?: MutatingOperationRefreshSetting;
+}
+
+// @public (undocumented)
+export interface SavedObjectsDeleteOptions extends SavedObjectsBaseOptions {
+    refresh?: MutatingOperationRefreshSetting;
 }
 
 // @public (undocumented)
@@ -1263,6 +1315,7 @@ export class SavedObjectsErrorHelpers {
 
 // @public
 export interface SavedObjectsExportOptions {
+    excludeExportDetails?: boolean;
     exportSizeLimit: number;
     includeReferencesDeep?: boolean;
     namespace?: string;
@@ -1273,6 +1326,16 @@ export interface SavedObjectsExportOptions {
     savedObjectsClient: SavedObjectsClientContract;
     search?: string;
     types?: string[];
+}
+
+// @public
+export interface SavedObjectsExportResultDetails {
+    exportedCount: number;
+    missingRefCount: number;
+    missingReferences: Array<{
+        id: string;
+        type: string;
+    }>;
 }
 
 // @public (undocumented)
@@ -1407,14 +1470,14 @@ export interface SavedObjectsImportUnsupportedTypeError {
 
 // @internal @deprecated (undocumented)
 export interface SavedObjectsLegacyService<Request = any> {
-    // Warning: (ae-forgotten-export) The symbol "ScopedSavedObjectsClientProvider" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "SavedObjectsClientProvider" needs to be exported by the entry point index.d.ts
     // 
     // (undocumented)
-    addScopedSavedObjectsClientWrapperFactory: ScopedSavedObjectsClientProvider<Request>['addClientWrapperFactory'];
+    addScopedSavedObjectsClientWrapperFactory: SavedObjectsClientProvider<Request>['addClientWrapperFactory'];
     // (undocumented)
     getSavedObjectsRepository(...rest: any[]): any;
     // (undocumented)
-    getScopedSavedObjectsClient: ScopedSavedObjectsClientProvider<Request>['getClient'];
+    getScopedSavedObjectsClient: SavedObjectsClientProvider<Request>['getClient'];
     // (undocumented)
     importExport: {
         objectLimit: number;
@@ -1504,8 +1567,8 @@ export class SavedObjectsSerializer {
 
 // @public (undocumented)
 export interface SavedObjectsUpdateOptions extends SavedObjectsBaseOptions {
-    // (undocumented)
     references?: SavedObjectReference[];
+    refresh?: MutatingOperationRefreshSetting;
     version?: string;
 }
 
@@ -1544,6 +1607,22 @@ export interface SessionStorageFactory<T> {
     // (undocumented)
     asScoped: (request: KibanaRequest) => SessionStorage<T>;
 }
+
+// @public
+export interface UiSettingsParams {
+    category: string[];
+    description: string;
+    name: string;
+    optionLabels?: Record<string, string>;
+    options?: string[];
+    readonly?: boolean;
+    requiresPageReload?: boolean;
+    type?: UiSettingsType;
+    value: SavedObjectAttribute;
+}
+
+// @public
+export type UiSettingsType = 'json' | 'markdown' | 'number' | 'select' | 'boolean' | 'string';
 
 
 // Warnings were encountered during analysis:

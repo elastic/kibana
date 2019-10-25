@@ -56,7 +56,7 @@ export const getActions = () => {
     AnalyticsViewAction,
     {
       render: (item: DataFrameAnalyticsListRow) => {
-        if (!isDataFrameAnalyticsRunning(item.stats)) {
+        if (!isDataFrameAnalyticsRunning(item.stats.state)) {
           return <StartAction item={item} />;
         }
 
