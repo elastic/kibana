@@ -29,7 +29,7 @@ export interface ElasticsearchError extends Error {
 export type LicenseType = keyof typeof LICENSE_TYPE;
 
 /** @public */
-export type LicenseStatus = 'active' | null;
+export type LicenseStatus = 'active' | 'invalid' | 'expired';
 
 /**
  * @internal
