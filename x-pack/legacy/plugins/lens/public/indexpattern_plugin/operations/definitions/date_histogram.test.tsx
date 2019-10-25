@@ -29,9 +29,15 @@ jest.mock('ui/chrome', () => ({
   }),
 }));
 
-const dateRange = {
-  fromDate: 'now-1y',
-  toDate: 'now',
+const defaultOptions = {
+  storage: {} as Storage,
+  uiSettings: {} as UiSettingsClientContract,
+  savedObjectsClient: {} as SavedObjectsClientContract,
+  dateRange: {
+    fromDate: 'now-1y',
+    toDate: 'now',
+  },
+  http: {} as HttpServiceBase,
 };
 
 describe('date_histogram', () => {
@@ -357,16 +363,12 @@ describe('date_histogram', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
         <InlineOptions
+          {...defaultOptions}
           state={state}
           setState={setStateSpy}
           columnId="col1"
           layerId="first"
           currentColumn={state.layers.first.columns.col1 as DateHistogramIndexPatternColumn}
-          storage={{} as Storage}
-          uiSettings={{} as UiSettingsClientContract}
-          savedObjectsClient={{} as SavedObjectsClientContract}
-          dateRange={dateRange}
-          http={{} as HttpServiceBase}
         />
       );
 
@@ -378,16 +380,12 @@ describe('date_histogram', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
         <InlineOptions
+          {...defaultOptions}
           state={state}
           setState={setStateSpy}
           columnId="col2"
           currentColumn={state.layers.second.columns.col2 as DateHistogramIndexPatternColumn}
           layerId="second"
-          storage={{} as Storage}
-          uiSettings={{} as UiSettingsClientContract}
-          savedObjectsClient={{} as SavedObjectsClientContract}
-          dateRange={dateRange}
-          http={{} as HttpServiceBase}
         />
       );
 
@@ -398,16 +396,12 @@ describe('date_histogram', () => {
     it('should render disabled switch and no time interval control for auto interval', () => {
       const instance = shallow(
         <InlineOptions
+          {...defaultOptions}
           state={state}
           setState={jest.fn()}
           columnId="col1"
           currentColumn={state.layers.third.columns.col1 as DateHistogramIndexPatternColumn}
           layerId="third"
-          storage={{} as Storage}
-          uiSettings={{} as UiSettingsClientContract}
-          savedObjectsClient={{} as SavedObjectsClientContract}
-          dateRange={dateRange}
-          http={{} as HttpServiceBase}
         />
       );
       expect(instance.find('[data-test-subj="lensDateHistogramValue"]').exists()).toBeFalsy();
@@ -419,16 +413,12 @@ describe('date_histogram', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
         <InlineOptions
+          {...defaultOptions}
           state={state}
           setState={setStateSpy}
           columnId="col1"
           layerId="third"
           currentColumn={state.layers.third.columns.col1 as DateHistogramIndexPatternColumn}
-          storage={{} as Storage}
-          uiSettings={{} as UiSettingsClientContract}
-          savedObjectsClient={{} as SavedObjectsClientContract}
-          dateRange={dateRange}
-          http={{} as HttpServiceBase}
         />
       );
       instance.find(EuiSwitch).prop('onChange')!({
@@ -443,16 +433,12 @@ describe('date_histogram', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
         <InlineOptions
+          {...defaultOptions}
           state={state}
           setState={setStateSpy}
           columnId="col1"
           layerId="first"
           currentColumn={state.layers.first.columns.col1 as DateHistogramIndexPatternColumn}
-          storage={{} as Storage}
-          uiSettings={{} as UiSettingsClientContract}
-          savedObjectsClient={{} as SavedObjectsClientContract}
-          dateRange={dateRange}
-          http={{} as HttpServiceBase}
         />
       );
       instance.find('[data-test-subj="lensDateHistogramValue"]').prop('onChange')!({
@@ -468,16 +454,12 @@ describe('date_histogram', () => {
       const testState = stateWithInterval('4quid');
       const instance = shallow(
         <InlineOptions
+          {...defaultOptions}
           state={testState}
           setState={setStateSpy}
           columnId="col1"
           layerId="first"
           currentColumn={testState.layers.first.columns.col1 as DateHistogramIndexPatternColumn}
-          storage={{} as Storage}
-          uiSettings={{} as UiSettingsClientContract}
-          savedObjectsClient={{} as SavedObjectsClientContract}
-          dateRange={dateRange}
-          http={{} as HttpServiceBase}
         />
       );
       expect(instance.find('[data-test-subj="lensDateHistogramError"]').exists()).toBeTruthy();
@@ -488,16 +470,12 @@ describe('date_histogram', () => {
       const testState = stateWithInterval('d');
       const instance = shallow(
         <InlineOptions
+          {...defaultOptions}
           state={testState}
           setState={setStateSpy}
           columnId="col1"
           layerId="first"
           currentColumn={testState.layers.first.columns.col1 as DateHistogramIndexPatternColumn}
-          storage={{} as Storage}
-          uiSettings={{} as UiSettingsClientContract}
-          savedObjectsClient={{} as SavedObjectsClientContract}
-          dateRange={dateRange}
-          http={{} as HttpServiceBase}
         />
       );
       expect(instance.find('[data-test-subj="lensDateHistogramError"]').exists()).toBeFalsy();
@@ -508,16 +486,12 @@ describe('date_histogram', () => {
       const testState = stateWithInterval('0d');
       const instance = shallow(
         <InlineOptions
+          {...defaultOptions}
           state={testState}
           setState={setStateSpy}
           columnId="col1"
           layerId="first"
           currentColumn={testState.layers.first.columns.col1 as DateHistogramIndexPatternColumn}
-          storage={{} as Storage}
-          uiSettings={{} as UiSettingsClientContract}
-          savedObjectsClient={{} as SavedObjectsClientContract}
-          dateRange={dateRange}
-          http={{} as HttpServiceBase}
         />
       );
       expect(instance.find('[data-test-subj="lensDateHistogramError"]').exists()).toBeTruthy();
@@ -527,16 +501,12 @@ describe('date_histogram', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
         <InlineOptions
+          {...defaultOptions}
           state={state}
           setState={setStateSpy}
           columnId="col1"
           layerId="first"
           currentColumn={state.layers.first.columns.col1 as DateHistogramIndexPatternColumn}
-          storage={{} as Storage}
-          uiSettings={{} as UiSettingsClientContract}
-          savedObjectsClient={{} as SavedObjectsClientContract}
-          dateRange={dateRange}
-          http={{} as HttpServiceBase}
         />
       );
       instance.find('[data-test-subj="lensDateHistogramUnit"]').prop('onChange')!({
@@ -553,16 +523,12 @@ describe('date_histogram', () => {
 
       const instance = shallow(
         <InlineOptions
+          {...defaultOptions}
           state={testState}
           setState={setStateSpy}
           columnId="col1"
           layerId="first"
           currentColumn={testState.layers.first.columns.col1 as DateHistogramIndexPatternColumn}
-          storage={{} as Storage}
-          uiSettings={{} as UiSettingsClientContract}
-          savedObjectsClient={{} as SavedObjectsClientContract}
-          dateRange={dateRange}
-          http={{} as HttpServiceBase}
         />
       );
       instance.find('[data-test-subj="lensDateHistogramValue"]').prop('onChange')!({
@@ -577,6 +543,7 @@ describe('date_histogram', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
         <InlineOptions
+          {...defaultOptions}
           state={{
             ...state,
             indexPatterns: {
@@ -601,11 +568,6 @@ describe('date_histogram', () => {
           columnId="col1"
           layerId="first"
           currentColumn={state.layers.first.columns.col1 as DateHistogramIndexPatternColumn}
-          storage={{} as Storage}
-          uiSettings={{} as UiSettingsClientContract}
-          savedObjectsClient={{} as SavedObjectsClientContract}
-          dateRange={dateRange}
-          http={{} as HttpServiceBase}
         />
       );
 
