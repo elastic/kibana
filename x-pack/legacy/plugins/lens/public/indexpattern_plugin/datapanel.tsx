@@ -339,7 +339,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
               id="dataPanelTypeFilter"
               panelClassName="euiFilterGroup__popoverPanel"
               panelPaddingSize="none"
-              anchorPosition="downLeft"
+              anchorPosition="rightDown"
               display="block"
               isOpen={localState.isTypeFilterOpen}
               closePopover={() => setLocalState(() => ({ ...localState, isTypeFilterOpen: false }))}
