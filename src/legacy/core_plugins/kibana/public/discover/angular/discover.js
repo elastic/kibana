@@ -54,6 +54,7 @@ import { StateProvider } from 'ui/state_management/state';
 import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 import { getFilterGenerator } from 'ui/filter_manager';
+import { ensureDefaultIndexPattern } from 'ui/legacy_compat';
 
 import { getDocLink } from 'ui/documentation_links';
 import '../components/fetch_error';
@@ -74,7 +75,6 @@ import { addHelpMenuToAppChrome } from '../components/help_menu/help_menu_util';
 import { extractTimeFilter, changeTimeFilter } from '../../../../data/public';
 import { start as data } from '../../../../data/public/legacy';
 import { npStart } from 'ui/new_platform';
-import { ensureDefaultIndexPattern } from '../../../../../ui/public/legacy_compat/utils';
 
 const { savedQueryService } = data.search.services;
 

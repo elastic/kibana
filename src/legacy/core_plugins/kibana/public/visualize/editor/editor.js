@@ -26,6 +26,7 @@ import 'ui/vis/editors/default/sidebar';
 import 'ui/visualize';
 import 'ui/collapsible_sidebar';
 
+import { ensureDefaultIndexPattern } from 'ui/legacy_compat';
 import { capabilities } from 'ui/capabilities';
 import chrome from 'ui/chrome';
 import React from 'react';
@@ -58,7 +59,6 @@ import { start as data } from '../../../../data/public/legacy';
 import { start as visualizations } from '../../../../visualizations/public/np_ready/public/legacy';
 
 import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
-import { ensureDefaultIndexPattern } from '../../../../../ui/public/legacy_compat/utils';
 
 const { savedQueryService } = data.search.services;
 

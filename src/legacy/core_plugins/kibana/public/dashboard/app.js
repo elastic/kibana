@@ -19,6 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { wrapInI18nContext } from 'ui/i18n';
+import { ensureDefaultIndexPattern } from 'ui/legacy_compat';
 
 import dashboardTemplate from './dashboard_app.html';
 import dashboardListingTemplate from './listing/dashboard_listing_ng_wrapper.html';
@@ -32,7 +33,6 @@ import {
 import { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import { DashboardListing, EMPTY_FILTER } from './listing/dashboard_listing';
 import { addHelpMenuToAppChrome } from './help_menu/help_menu_util';
-import { ensureDefaultIndexPattern } from '../../../../ui/public/legacy_compat/utils';
 import { start as data } from '../../../data/public/legacy';
 
 export function initDashboardApp(app, deps) {

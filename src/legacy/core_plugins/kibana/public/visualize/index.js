@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { ensureDefaultIndexPattern } from 'ui/legacy_compat';
 import './editor/editor';
 import { i18n } from '@kbn/i18n';
 import './saved_visualizations/_saved_vis';
@@ -30,7 +31,6 @@ import { getLandingBreadcrumbs, getWizardStep1Breadcrumbs } from './breadcrumbs'
 
 // load directives
 import '../../../data/public';
-import { ensureDefaultIndexPattern } from '../../../../ui/public/legacy_compat/utils';
 import { npStart } from '../../../../ui/public/new_platform';
 import { start as data } from '../../../data/public/legacy';
 

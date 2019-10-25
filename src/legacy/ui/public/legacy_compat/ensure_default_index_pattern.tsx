@@ -31,9 +31,12 @@ let bannerId: string;
 let timeoutId: NodeJS.Timeout | undefined;
 
 /**
- * Makes sure a default index pattern is set and defines one otherwise.
- * if there are no index patterns, redirect to management page and show
- * banner.
+ * Checks whether a default index pattern is set and exists and defines
+ * one otherwise.
+ *
+ * If there are no index patterns, redirect to management page and show
+ * banner. In this case the promise returned from this function will never
+ * resolve to wait for the URL change to happen.
  */
 export async function ensureDefaultIndexPattern(
   newPlatform: CoreStart,
