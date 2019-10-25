@@ -12,14 +12,11 @@ import { Setup } from '../../helpers/setup_request';
 
 // returns true if 6.x data is found
 export async function getLegacyDataStatus(setup: Setup) {
-  const {
-    client,
-    indices: { apm_oss }
-  } = setup;
+  const { client, indices } = setup;
 
   const params = {
     terminateAfter: 1,
-    index: apm_oss.transactionIndices,
+    index: indices['apm_oss.transactionIndices'],
     body: {
       size: 0,
       query: {

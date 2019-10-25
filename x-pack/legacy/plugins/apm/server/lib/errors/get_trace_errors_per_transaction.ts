@@ -24,15 +24,10 @@ export async function getTraceErrorsPerTransaction(
   traceId: string,
   setup: Setup
 ): Promise<ErrorsPerTransaction> {
-  const {
-    start,
-    end,
-    client,
-    indices: { apm_oss }
-  } = setup;
+  const { start, end, client, indices } = setup;
 
   const params = {
-    index: apm_oss.errorIndices,
+    index: indices['apm_oss.errorIndices'],
     body: {
       size: 0,
       query: {

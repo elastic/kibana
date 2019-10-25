@@ -103,15 +103,13 @@ interface MockSetup {
   };
   uiFiltersES: ESFilter[];
   indices: {
-    apm_oss: {
-      sourcemapIndices: string;
-      errorIndices: string;
-      onboardingIndices: string;
-      spanIndices: string;
-      transactionIndices: string;
-      metricsIndices: string;
-      apmAgentConfigurationIndex: string;
-    };
+    'apm_oss.sourcemapIndices': string;
+    'apm_oss.errorIndices': string;
+    'apm_oss.onboardingIndices': string;
+    'apm_oss.spanIndices': string;
+    'apm_oss.transactionIndices': string;
+    'apm_oss.metricsIndices': string;
+    'apm_oss.apmAgentConfigurationIndex': string;
   };
 }
 
@@ -140,15 +138,13 @@ export async function inspectSearchParams(
       }
     ],
     indices: {
-      apm_oss: {
-        sourcemapIndices: 'myIndex',
-        errorIndices: 'myIndex',
-        onboardingIndices: 'myIndex',
-        spanIndices: 'myIndex',
-        transactionIndices: 'myIndex',
-        metricsIndices: 'myIndex',
-        apmAgentConfigurationIndex: 'myIndex'
-      }
+      'apm_oss.sourcemapIndices': 'myIndex',
+      'apm_oss.errorIndices': 'myIndex',
+      'apm_oss.onboardingIndices': 'myIndex',
+      'apm_oss.spanIndices': 'myIndex',
+      'apm_oss.transactionIndices': 'myIndex',
+      'apm_oss.metricsIndices': 'myIndex',
+      'apm_oss.apmAgentConfigurationIndex': 'myIndex'
     }
   };
   try {

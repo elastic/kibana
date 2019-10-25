@@ -10,7 +10,7 @@ import moment from 'moment';
 import { getESClient } from './es_client';
 import { getUiFiltersES } from './convert_ui_filters/get_ui_filters_es';
 import { PromiseReturnType } from '../../../typings/common';
-import { getApmIndices } from '../settings/ui_indices/apm_ui_indices';
+import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 
 function decodeUiFilters(server: Server, uiFiltersEncoded?: string) {
   if (!uiFiltersEncoded) {

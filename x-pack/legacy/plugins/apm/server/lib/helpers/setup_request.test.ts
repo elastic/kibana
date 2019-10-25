@@ -7,19 +7,16 @@ import { Legacy } from 'kibana';
 import { setupRequest } from './setup_request';
 import { uiSettingsServiceMock } from 'src/core/server/mocks';
 
-jest.mock('../settings/ui_indices/apm_ui_indices', () => ({
+jest.mock('../settings/apm_indices/get_apm_indices', () => ({
   getApmIndices: async () => ({
-    apm_oss: {
-      sourcemapIndices: 'apm-*',
-      errorIndices: 'apm-*',
-      onboardingIndices: 'apm-*',
-      spanIndices: 'apm-*',
-      transactionIndices: 'apm-*',
-      metricsIndices: 'apm-*',
-      apmAgentConfigurationIndex: 'apm-*'
-    }
-  }),
-  getApmIndicesList: async () => ['apm-*']
+    'apm_oss.sourcemapIndices': 'apm-*',
+    'apm_oss.errorIndices': 'apm-*',
+    'apm_oss.onboardingIndices': 'apm-*',
+    'apm_oss.spanIndices': 'apm-*',
+    'apm_oss.transactionIndices': 'apm-*',
+    'apm_oss.metricsIndices': 'apm-*',
+    'apm_oss.apmAgentConfigurationIndex': 'apm-*'
+  })
 }));
 
 function getMockRequest() {

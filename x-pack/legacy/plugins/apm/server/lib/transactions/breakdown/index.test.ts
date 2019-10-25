@@ -9,6 +9,16 @@ import * as constants from './constants';
 import noDataResponse from './mock-responses/noData.json';
 import dataResponse from './mock-responses/data.json';
 
+const mockIndices = {
+  'apm_oss.sourcemapIndices': 'myIndex',
+  'apm_oss.errorIndices': 'myIndex',
+  'apm_oss.onboardingIndices': 'myIndex',
+  'apm_oss.spanIndices': 'myIndex',
+  'apm_oss.transactionIndices': 'myIndex',
+  'apm_oss.metricsIndices': 'myIndex',
+  'apm_oss.apmAgentConfigurationIndex': 'myIndex'
+};
+
 describe('getTransactionBreakdown', () => {
   it('returns an empty array if no data is available', async () => {
     const clientSpy = jest.fn().mockReturnValueOnce(noDataResponse);
@@ -25,17 +35,7 @@ describe('getTransactionBreakdown', () => {
           has: () => true
         },
         uiFiltersES: [],
-        indices: {
-          apm_oss: {
-            sourcemapIndices: 'myIndex',
-            errorIndices: 'myIndex',
-            onboardingIndices: 'myIndex',
-            spanIndices: 'myIndex',
-            transactionIndices: 'myIndex',
-            metricsIndices: 'myIndex',
-            apmAgentConfigurationIndex: 'myIndex'
-          }
-        }
+        indices: mockIndices
       }
     });
 
@@ -59,17 +59,7 @@ describe('getTransactionBreakdown', () => {
           has: () => true
         },
         uiFiltersES: [],
-        indices: {
-          apm_oss: {
-            sourcemapIndices: 'myIndex',
-            errorIndices: 'myIndex',
-            onboardingIndices: 'myIndex',
-            spanIndices: 'myIndex',
-            transactionIndices: 'myIndex',
-            metricsIndices: 'myIndex',
-            apmAgentConfigurationIndex: 'myIndex'
-          }
-        }
+        indices: mockIndices
       }
     });
 
@@ -110,17 +100,7 @@ describe('getTransactionBreakdown', () => {
           has: () => true
         },
         uiFiltersES: [],
-        indices: {
-          apm_oss: {
-            sourcemapIndices: 'myIndex',
-            errorIndices: 'myIndex',
-            onboardingIndices: 'myIndex',
-            spanIndices: 'myIndex',
-            transactionIndices: 'myIndex',
-            metricsIndices: 'myIndex',
-            apmAgentConfigurationIndex: 'myIndex'
-          }
-        }
+        indices: mockIndices
       }
     });
 
@@ -160,17 +140,7 @@ describe('getTransactionBreakdown', () => {
           has: () => true
         },
         uiFiltersES: [],
-        indices: {
-          apm_oss: {
-            sourcemapIndices: 'myIndex',
-            errorIndices: 'myIndex',
-            onboardingIndices: 'myIndex',
-            spanIndices: 'myIndex',
-            transactionIndices: 'myIndex',
-            metricsIndices: 'myIndex',
-            apmAgentConfigurationIndex: 'myIndex'
-          }
-        }
+        indices: mockIndices
       }
     });
 
@@ -194,17 +164,7 @@ describe('getTransactionBreakdown', () => {
           has: () => true
         },
         uiFiltersES: [],
-        indices: {
-          apm_oss: {
-            sourcemapIndices: 'myIndex',
-            errorIndices: 'myIndex',
-            onboardingIndices: 'myIndex',
-            spanIndices: 'myIndex',
-            transactionIndices: 'myIndex',
-            metricsIndices: 'myIndex',
-            apmAgentConfigurationIndex: 'myIndex'
-          }
-        }
+        indices: mockIndices
       }
     });
 

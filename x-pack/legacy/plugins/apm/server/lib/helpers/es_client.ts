@@ -15,7 +15,7 @@ import { Legacy } from 'kibana';
 import { cloneDeep, has, isString, set } from 'lodash';
 import { OBSERVER_VERSION_MAJOR } from '../../../common/elasticsearch_fieldnames';
 import { StringMap, Omit } from '../../../typings/common';
-import { getApmIndices } from '../settings/ui_indices/apm_ui_indices';
+import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import {
   ESSearchResponse,
   ESSearchRequest
@@ -72,11 +72,7 @@ async function getParamsForSearchRequest(
     uiSettings.get('search:includeFrozen')
   ]);
   return {
-    ...addFilterForLegacyData(
-      Object.values(apmIndices.apm_oss),
-      params,
-      apmOptions
-    ), // filter out pre-7.0 data
+    ...addFilterForLegacyData(Object.values(apmIndices), params, apmOptions), // filter out pre-7.0 data
     ignore_throttled: !includeFrozen // whether to query frozen indices or not
   };
 }

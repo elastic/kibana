@@ -50,9 +50,9 @@ export const Settings: React.FC = props => {
                     name: 'Indices',
                     id: '2',
                     // @ts-ignore
-                    href: getAPMHref('/settings/indices', search),
+                    href: getAPMHref('/settings/apm-indices', search),
                     // @ts-ignore
-                    isSelected: pathname === '/settings/indices'
+                    isSelected: pathname === '/settings/apm-indices'
                   }
                 ]
               }

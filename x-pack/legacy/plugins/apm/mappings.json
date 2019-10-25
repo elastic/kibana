@@ -42,32 +42,28 @@
       }
     }
   },
-  "apm-ui-indices": {
+  "apm-indices": {
     "properties": {
-      "apm_oss": {
-        "properties": {
-          "sourcemapIndices": {
-            "type": "keyword"
-          },
-          "errorIndices": {
-            "type": "keyword"
-          },
-          "onboardingIndices": {
-            "type": "keyword"
-          },
-          "spanIndices": {
-            "type": "keyword"
-          },
-          "transactionIndices": {
-            "type": "keyword"
-          },
-          "metricsIndices": {
-            "type": "keyword"
-          },
-          "apmAgentConfigurationIndex": {
-            "type": "keyword"
-          }
-        }
+      "apm_oss.sourcemapIndices": {
+        "type": "keyword"
+      },
+      "apm_oss.errorIndices": {
+        "type": "keyword"
+      },
+      "apm_oss.onboardingIndices": {
+        "type": "keyword"
+      },
+      "apm_oss.spanIndices": {
+        "type": "keyword"
+      },
+      "apm_oss.transactionIndices": {
+        "type": "keyword"
+      },
+      "apm_oss.metricsIndices": {
+        "type": "keyword"
+      },
+      "apm_oss.apmAgentConfigurationIndex": {
+        "type": "keyword"
       }
     }
   }

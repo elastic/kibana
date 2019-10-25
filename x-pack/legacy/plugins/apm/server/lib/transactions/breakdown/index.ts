@@ -32,13 +32,7 @@ export async function getTransactionBreakdown({
   transactionName?: string;
   transactionType: string;
 }) {
-  const {
-    uiFiltersES,
-    client,
-    start,
-    end,
-    indices: { apm_oss }
-  } = setup;
+  const { uiFiltersES, client, start, end, indices } = setup;
 
   const subAggs = {
     sum_all_self_times: {
@@ -94,7 +88,7 @@ export async function getTransactionBreakdown({
   }
 
   const params = {
-    index: apm_oss.metricsIndices,
+    index: indices['apm_oss.metricsIndices'],
     body: {
       size: 0,
       query: {

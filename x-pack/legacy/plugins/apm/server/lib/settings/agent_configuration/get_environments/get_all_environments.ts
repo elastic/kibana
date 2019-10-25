@@ -20,10 +20,7 @@ export async function getAllEnvironments({
   serviceName: string | undefined;
   setup: Setup;
 }) {
-  const {
-    client,
-    indices: { apm_oss }
-  } = setup;
+  const { client, indices } = setup;
 
   // omit filter for service.name if "All" option is selected
   const serviceNameFilter = serviceName
@@ -32,9 +29,9 @@ export async function getAllEnvironments({
 
   const params = {
     index: [
-      apm_oss.metricsIndices,
-      apm_oss.errorIndices,
-      apm_oss.transactionIndices
+      indices['apm_oss.metricsIndices'],
+      indices['apm_oss.errorIndices'],
+      indices['apm_oss.transactionIndices']
     ],
     body: {
       size: 0,

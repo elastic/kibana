@@ -13,19 +13,14 @@ import { rangeFilter } from '../helpers/range_filter';
 import { Setup } from '../helpers/setup_request';
 
 export async function getServiceAgentName(serviceName: string, setup: Setup) {
-  const {
-    start,
-    end,
-    client,
-    indices: { apm_oss }
-  } = setup;
+  const { start, end, client, indices } = setup;
 
   const params = {
     terminateAfter: 1,
     index: [
-      apm_oss.errorIndices,
-      apm_oss.transactionIndices,
-      apm_oss.metricsIndices
+      indices['apm_oss.errorIndices'],
+      indices['apm_oss.transactionIndices'],
+      indices['apm_oss.metricsIndices']
     ],
     body: {
       size: 0,

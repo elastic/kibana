@@ -19,16 +19,10 @@ export async function getDistributionMax(
   transactionType: string,
   setup: Setup
 ) {
-  const {
-    start,
-    end,
-    uiFiltersES,
-    client,
-    indices: { apm_oss }
-  } = setup;
+  const { start, end, uiFiltersES, client, indices } = setup;
 
   const params = {
-    index: apm_oss.transactionIndices,
+    index: indices['apm_oss.transactionIndices'],
     body: {
       size: 0,
       query: {

@@ -16,15 +16,10 @@ export async function getServiceTransactionTypes(
   serviceName: string,
   setup: Setup
 ) {
-  const {
-    start,
-    end,
-    client,
-    indices: { apm_oss }
-  } = setup;
+  const { start, end, client, indices } = setup;
 
   const params = {
-    index: apm_oss.transactionIndices,
+    index: indices['apm_oss.transactionIndices'],
     body: {
       size: 0,
       query: {

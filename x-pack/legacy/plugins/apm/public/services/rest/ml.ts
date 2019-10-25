@@ -34,16 +34,11 @@ interface StartedMLJobApiResponse {
 
 async function getTransactionIndices(http: HttpServiceBase) {
   const callApmApi: APMClient = createCallApmApi(http);
-  const apmIndicesSettings = await callApmApi({
-    pathname: `/api/apm/settings/ui-indices`
+  const indices = await callApmApi({
+    method: 'GET',
+    pathname: `/api/apm/settings/apm-indices`
   });
-  const indexSetting = apmIndicesSettings.find(
-    ({ configuration }) => configuration === 'apm_oss.transactionIndices'
-  );
-  if (!indexSetting) {
-    return 'apm-*';
-  }
-  return indexSetting.savedValue || indexSetting.defaultValue;
+  return indices['apm_oss.transactionIndices'];
 }
 
 export async function startMLJob({

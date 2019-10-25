@@ -29,16 +29,10 @@ export async function getErrorGroup({
   groupId: string;
   setup: Setup;
 }) {
-  const {
-    start,
-    end,
-    uiFiltersES,
-    client,
-    indices: { apm_oss }
-  } = setup;
+  const { start, end, uiFiltersES, client, indices } = setup;
 
   const params = {
-    index: apm_oss.errorIndices,
+    index: indices['apm_oss.errorIndices'],
     body: {
       size: 1,
       query: {

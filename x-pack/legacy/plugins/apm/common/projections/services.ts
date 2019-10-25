@@ -9,18 +9,13 @@ import { SERVICE_NAME, PROCESSOR_EVENT } from '../elasticsearch_fieldnames';
 import { rangeFilter } from '../../server/lib/helpers/range_filter';
 
 export function getServicesProjection({ setup }: { setup: Setup }) {
-  const {
-    start,
-    end,
-    uiFiltersES,
-    indices: { apm_oss }
-  } = setup;
+  const { start, end, uiFiltersES, indices } = setup;
 
   return {
     index: [
-      apm_oss.metricsIndices,
-      apm_oss.errorIndices,
-      apm_oss.transactionIndices
+      indices['apm_oss.metricsIndices'],
+      indices['apm_oss.errorIndices'],
+      indices['apm_oss.transactionIndices']
     ],
     body: {
       size: 0,

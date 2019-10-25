@@ -26,7 +26,11 @@ import {
   updateAgentConfigurationRoute,
   agentConfigurationAgentNameRoute
 } from './settings/agent_configuration';
-import { uiIndicesRoute, saveUiIndicesRoute } from './settings/ui_indices';
+import {
+  apmIndexSettingsRoute,
+  apmIndicesRoute,
+  saveApmIndicesRoute
+} from './settings/apm_indices';
 import { metricsChartsRoute } from './metrics';
 import { serviceNodesRoute } from './service_nodes';
 import { tracesRoute, tracesByIdRoute } from './traces';
@@ -76,9 +80,10 @@ const createApmApi = () => {
     .add(listAgentConfigurationServicesRoute)
     .add(updateAgentConfigurationRoute)
 
-    // UI indices
-    .add(uiIndicesRoute)
-    .add(saveUiIndicesRoute)
+    // APM indices
+    .add(apmIndexSettingsRoute)
+    .add(apmIndicesRoute)
+    .add(saveApmIndicesRoute)
 
     // Metrics
     .add(metricsChartsRoute)

@@ -21,14 +21,11 @@ export async function createOrUpdateConfiguration({
   >;
   setup: Setup;
 }) {
-  const {
-    client,
-    indices: { apm_oss }
-  } = setup;
+  const { client, indices } = setup;
 
   const params: APMIndexDocumentParams<AgentConfiguration> = {
     refresh: true,
-    index: apm_oss.apmAgentConfigurationIndex,
+    index: indices['apm_oss.apmAgentConfigurationIndex'],
     body: {
       agent_name: configuration.agent_name,
       service: {
