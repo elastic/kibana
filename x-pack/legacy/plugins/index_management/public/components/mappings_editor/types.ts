@@ -72,6 +72,7 @@ export type ParameterName =
   | 'store'
   | 'index'
   | 'fielddata'
+  | 'fielddata_frequency_filter'
   | 'doc_values'
   | 'coerce'
   | 'ignore_malformed'

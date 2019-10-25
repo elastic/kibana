@@ -74,6 +74,28 @@ export const PARAMETERS_DEFINITION = {
     },
     docs: 'https://www.elastic.co/guide/en/elasticsearch/reference/current/doc-values.html',
   },
+  fielddata_frequency_filter: {
+    props: {
+      min: {
+        fieldConfig: {
+          defaultValue: 5,
+        },
+      },
+      max: {
+        fieldConfig: {
+          defaultValue: 85,
+        },
+      },
+      min_segment_size: {
+        fieldConfig: {
+          type: FIELD_TYPES.NUMBER,
+          label: 'Minimum segment size:',
+          defaultValue: 50,
+          formatters: [toInt],
+        },
+      },
+    },
+  },
   coerce: {
     fieldConfig: {
       label: 'Coerce',
