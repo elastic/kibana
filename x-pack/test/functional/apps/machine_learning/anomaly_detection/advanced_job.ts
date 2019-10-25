@@ -18,7 +18,23 @@ interface Detector {
   description?: string;
 }
 
+interface DatafeedConfig {
+  queryDelay?: string;
+  frequency?: string;
+  scrollSize?: string;
+}
+
+interface PickFieldsConfig {
+  detectors: Detector[];
+  influencers: string[];
+  bucketSpan: string;
+  memoryLimit: string;
+  categorizationField?: string;
+  summaryCountField?: string;
+}
+
 // type guards
+// Detector
 const isDetectorWithField = (arg: any): arg is Required<Pick<Detector, 'field'>> => {
   return arg.hasOwnProperty('field');
 };
@@ -42,10 +58,42 @@ const isDetectorWithDescription = (arg: any): arg is Required<Pick<Detector, 'de
   return arg.hasOwnProperty('description');
 };
 
+// DatafeedConfig
+const isDatafeedConfigWithQueryDelay = (
+  arg: any
+): arg is Required<Pick<DatafeedConfig, 'queryDelay'>> => {
+  return arg.hasOwnProperty('queryDelay');
+};
+const isDatafeedConfigWithFrequency = (
+  arg: any
+): arg is Required<Pick<DatafeedConfig, 'frequency'>> => {
+  return arg.hasOwnProperty('frequency');
+};
+const isDatafeedConfigWithScrollSize = (
+  arg: any
+): arg is Required<Pick<DatafeedConfig, 'scrollSize'>> => {
+  return arg.hasOwnProperty('scrollSize');
+};
+
 // eslint-disable-next-line import/no-default-export
 export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
+
+  const defaultValues = {
+    datafeedQuery: `{
+  "bool": {
+    "must": [
+      {
+        "match_all": {}
+      }
+    ]
+  }
+}`,
+    queryDelay: '60s',
+    frequency: '450s',
+    scrollSize: '1000',
+  };
 
   const testDataList = [
     {
@@ -60,36 +108,31 @@ export default function({ getService }: FtrProviderContext) {
       get jobGroupsClone(): string[] {
         return [...this.jobGroups, 'clone'];
       },
-      detectors: [
-        {
-          identifier: 'count',
-          function: 'count',
-          description: 'count detector without split',
-        } as Detector,
-        {
-          identifier: 'mean(responsetime) by airline',
-          function: 'mean',
-          field: 'responsetime',
-          byField: 'airline',
-        } as Detector,
-      ],
-      influencers: ['airline'],
-      bucketSpan: '15m',
-      memoryLimit: '20mb',
-      queryDelay: '55s',
-      frequency: '350s',
-      scrollSize: '999',
+      pickFieldsConfig: {
+        detectors: [
+          {
+            identifier: 'count',
+            function: 'count',
+            description: 'count detector without split',
+          } as Detector,
+          {
+            identifier: 'mean(responsetime) by airline',
+            function: 'mean',
+            field: 'responsetime',
+            byField: 'airline',
+          } as Detector,
+        ],
+        influencers: ['airline'],
+        bucketSpan: '15m',
+        memoryLimit: '20mb',
+      } as PickFieldsConfig,
+      datafeedConfig: {
+        queryDelay: '55s',
+        frequency: '350s',
+        scrollSize: '999',
+      } as DatafeedConfig,
       expected: {
         wizard: {
-          datafeedQuery: `{
-  "bool": {
-    "must": [
-      {
-        "match_all": {}
-      }
-    ]
-  }
-}`,
           timeField: '@timestamp',
         },
         row: {
@@ -167,24 +210,34 @@ export default function({ getService }: FtrProviderContext) {
 
         it('job creation pre-fills the datafeed query editor', async () => {
           await ml.jobWizardAdvanced.assertDatafeedQueryEditorExists();
-          await ml.jobWizardAdvanced.assertDatafeedQueryEditorValue(
-            testData.expected.wizard.datafeedQuery
-          );
+          await ml.jobWizardAdvanced.assertDatafeedQueryEditorValue(defaultValues.datafeedQuery);
         });
 
         it('job creation inputs the query delay', async () => {
           await ml.jobWizardAdvanced.assertQueryDelayInputExists();
-          await ml.jobWizardAdvanced.setQueryDelay(testData.queryDelay);
+          if (isDatafeedConfigWithQueryDelay(testData.datafeedConfig)) {
+            await ml.jobWizardAdvanced.setQueryDelay(testData.datafeedConfig.queryDelay);
+          } else {
+            await ml.jobWizardAdvanced.assertQueryDelayValue(defaultValues.queryDelay);
+          }
         });
 
         it('job creation inputs the frequency', async () => {
           await ml.jobWizardAdvanced.assertFrequencyInputExists();
-          await ml.jobWizardAdvanced.setFrequency(testData.frequency);
+          if (isDatafeedConfigWithFrequency(testData.datafeedConfig)) {
+            await ml.jobWizardAdvanced.setFrequency(testData.datafeedConfig.frequency);
+          } else {
+            await ml.jobWizardAdvanced.assertFrequencyValue(defaultValues.frequency);
+          }
         });
 
         it('job creation inputs the scroll size', async () => {
           await ml.jobWizardAdvanced.assertScrollSizeInputExists();
-          await ml.jobWizardAdvanced.setScrollSize(testData.scrollSize);
+          if (isDatafeedConfigWithScrollSize(testData.datafeedConfig)) {
+            await ml.jobWizardAdvanced.setScrollSize(testData.datafeedConfig.scrollSize);
+          } else {
+            await ml.jobWizardAdvanced.assertScrollSizeValue(defaultValues.scrollSize);
+          }
         });
 
         it('job creation pre-fills the time field', async () => {
@@ -197,7 +250,7 @@ export default function({ getService }: FtrProviderContext) {
         });
 
         it('job creation adds detectors', async () => {
-          for (const detector of testData.detectors) {
+          for (const detector of testData.pickFieldsConfig.detectors) {
             await ml.jobWizardAdvanced.openCreateDetectorModal();
             await ml.jobWizardAdvanced.assertDetectorFunctionInputExists();
             await ml.jobWizardAdvanced.assertDetectorFieldInputExists();
@@ -232,7 +285,7 @@ export default function({ getService }: FtrProviderContext) {
         });
 
         it('job creation displays detector entries', async () => {
-          for (const detector of testData.detectors) {
+          for (const detector of testData.pickFieldsConfig.detectors) {
             await ml.jobWizardAdvanced.assertDetectorEntryExists(
               detector.identifier,
               isDetectorWithDescription(detector) ? detector.description : undefined
@@ -242,13 +295,13 @@ export default function({ getService }: FtrProviderContext) {
 
         it('job creation inputs the bucket span', async () => {
           await ml.jobWizardCommon.assertBucketSpanInputExists();
-          await ml.jobWizardCommon.setBucketSpan(testData.bucketSpan);
+          await ml.jobWizardCommon.setBucketSpan(testData.pickFieldsConfig.bucketSpan);
         });
 
         it('job creation inputs influencers', async () => {
           await ml.jobWizardCommon.assertInfluencerInputExists();
           await ml.jobWizardCommon.assertInfluencerSelection([]);
-          for (const influencer of testData.influencers) {
+          for (const influencer of testData.pickFieldsConfig.influencers) {
             await ml.jobWizardCommon.addInfluencer(influencer);
           }
         });
@@ -257,7 +310,7 @@ export default function({ getService }: FtrProviderContext) {
           await ml.jobWizardCommon.assertModelMemoryLimitInputExists({
             withAdvancedSection: false,
           });
-          await ml.jobWizardCommon.setModelMemoryLimit(testData.memoryLimit, {
+          await ml.jobWizardCommon.setModelMemoryLimit(testData.pickFieldsConfig.memoryLimit, {
             withAdvancedSection: false,
           });
         });
@@ -365,7 +418,7 @@ export default function({ getService }: FtrProviderContext) {
         });
 
         it('job creation has detector results', async () => {
-          for (let i = 0; i < testData.detectors.length; i++) {
+          for (let i = 0; i < testData.pickFieldsConfig.detectors.length; i++) {
             await ml.api.assertDetectorResultsExist(testData.jobId, i);
           }
         });
@@ -381,24 +434,34 @@ export default function({ getService }: FtrProviderContext) {
 
         it('job cloning pre-fills the datafeed query editor', async () => {
           await ml.jobWizardAdvanced.assertDatafeedQueryEditorExists();
-          await ml.jobWizardAdvanced.assertDatafeedQueryEditorValue(
-            testData.expected.wizard.datafeedQuery
-          );
+          await ml.jobWizardAdvanced.assertDatafeedQueryEditorValue(defaultValues.datafeedQuery);
         });
 
         it('job cloning pre-fills the query delay', async () => {
           await ml.jobWizardAdvanced.assertQueryDelayInputExists();
-          await ml.jobWizardAdvanced.assertQueryDelayValue(testData.queryDelay);
+          await ml.jobWizardAdvanced.assertQueryDelayValue(
+            isDatafeedConfigWithQueryDelay(testData.datafeedConfig)
+              ? testData.datafeedConfig.queryDelay
+              : defaultValues.queryDelay
+          );
         });
 
         it('job cloning pre-fills the frequency', async () => {
           await ml.jobWizardAdvanced.assertFrequencyInputExists();
-          await ml.jobWizardAdvanced.assertFrequencyValue(testData.frequency);
+          await ml.jobWizardAdvanced.assertFrequencyValue(
+            isDatafeedConfigWithFrequency(testData.datafeedConfig)
+              ? testData.datafeedConfig.frequency
+              : defaultValues.frequency
+          );
         });
 
         it('job cloning pre-fills the scroll size', async () => {
           await ml.jobWizardAdvanced.assertScrollSizeInputExists();
-          await ml.jobWizardAdvanced.assertScrollSizeValue(testData.scrollSize);
+          await ml.jobWizardAdvanced.assertScrollSizeValue(
+            isDatafeedConfigWithScrollSize(testData.datafeedConfig)
+              ? testData.datafeedConfig.scrollSize
+              : defaultValues.scrollSize
+          );
         });
 
         it('job creation pre-fills the time field', async () => {
@@ -411,7 +474,7 @@ export default function({ getService }: FtrProviderContext) {
         });
 
         it('job cloning pre-fills detectors', async () => {
-          for (const detector of testData.detectors) {
+          for (const detector of testData.pickFieldsConfig.detectors) {
             await ml.jobWizardAdvanced.assertDetectorEntryExists(
               detector.identifier,
               isDetectorWithDescription(detector) ? detector.description : undefined
@@ -452,21 +515,24 @@ export default function({ getService }: FtrProviderContext) {
 
         it('job cloning pre-fills the bucket span', async () => {
           await ml.jobWizardCommon.assertBucketSpanInputExists();
-          await ml.jobWizardCommon.assertBucketSpanValue(testData.bucketSpan);
+          await ml.jobWizardCommon.assertBucketSpanValue(testData.pickFieldsConfig.bucketSpan);
         });
 
         it('job cloning pre-fills influencers', async () => {
           await ml.jobWizardCommon.assertInfluencerInputExists();
-          await ml.jobWizardCommon.assertInfluencerSelection(testData.influencers);
+          await ml.jobWizardCommon.assertInfluencerSelection(testData.pickFieldsConfig.influencers);
         });
 
         it('job cloning pre-fills the model memory limit', async () => {
           await ml.jobWizardCommon.assertModelMemoryLimitInputExists({
             withAdvancedSection: false,
           });
-          await ml.jobWizardCommon.assertModelMemoryLimitValue(testData.memoryLimit, {
-            withAdvancedSection: false,
-          });
+          await ml.jobWizardCommon.assertModelMemoryLimitValue(
+            testData.pickFieldsConfig.memoryLimit,
+            {
+              withAdvancedSection: false,
+            }
+          );
         });
 
         it('job cloning displays the job details step', async () => {
@@ -584,7 +650,7 @@ export default function({ getService }: FtrProviderContext) {
         });
 
         it('job creation has detector results', async () => {
-          for (let i = 0; i < testData.detectors.length; i++) {
+          for (let i = 0; i < testData.pickFieldsConfig.detectors.length; i++) {
             await ml.api.assertDetectorResultsExist(testData.jobIdClone, i);
           }
         });

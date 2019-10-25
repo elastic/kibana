@@ -14,6 +14,15 @@ export function MachineLearningJobWizardAdvancedProvider({ getService }: FtrProv
   const aceEditor = getService('aceEditor');
 
   return {
+    async getValueOrPlaceholder(inputLocator: string): Promise<string> {
+      const value = await testSubjects.getAttribute(inputLocator, 'value');
+      if (value !== '') {
+        return value;
+      } else {
+        return await testSubjects.getAttribute(inputLocator, 'placeholder');
+      }
+    },
+
     async assertDatafeedQueryEditorExists() {
       await testSubjects.existOrFail('mlAdvancedDatafeedQueryEditor > codeEditorContainer');
     },
@@ -30,16 +39,14 @@ export function MachineLearningJobWizardAdvancedProvider({ getService }: FtrProv
     },
 
     async assertQueryDelayValue(expectedValue: string) {
-      const actualQueryDelay = await testSubjects.getAttribute(
-        'mlJobWizardInputQueryDelay',
-        'value'
-      );
+      const actualQueryDelay = await this.getValueOrPlaceholder('mlJobWizardInputQueryDelay');
       expect(actualQueryDelay).to.eql(expectedValue);
     },
 
     async setQueryDelay(queryDelay: string) {
       await testSubjects.setValue('mlJobWizardInputQueryDelay', queryDelay, {
         clearWithKeyboard: true,
+        typeCharByChar: true,
       });
       await this.assertQueryDelayValue(queryDelay);
     },
@@ -49,13 +56,14 @@ export function MachineLearningJobWizardAdvancedProvider({ getService }: FtrProv
     },
 
     async assertFrequencyValue(expectedValue: string) {
-      const actualFrequency = await testSubjects.getAttribute('mlJobWizardInputFrequency', 'value');
+      const actualFrequency = await this.getValueOrPlaceholder('mlJobWizardInputFrequency');
       expect(actualFrequency).to.eql(expectedValue);
     },
 
     async setFrequency(frequency: string) {
       await testSubjects.setValue('mlJobWizardInputFrequency', frequency, {
         clearWithKeyboard: true,
+        typeCharByChar: true,
       });
       await this.assertFrequencyValue(frequency);
     },
@@ -65,16 +73,14 @@ export function MachineLearningJobWizardAdvancedProvider({ getService }: FtrProv
     },
 
     async assertScrollSizeValue(expectedValue: string) {
-      const actualScrollSize = await testSubjects.getAttribute(
-        'mlJobWizardInputScrollSize',
-        'value'
-      );
+      const actualScrollSize = await this.getValueOrPlaceholder('mlJobWizardInputScrollSize');
       expect(actualScrollSize).to.eql(expectedValue);
     },
 
     async setScrollSize(scrollSize: string) {
       await testSubjects.setValue('mlJobWizardInputScrollSize', scrollSize, {
         clearWithKeyboard: true,
+        typeCharByChar: true,
       });
       await this.assertScrollSizeValue(scrollSize);
     },
