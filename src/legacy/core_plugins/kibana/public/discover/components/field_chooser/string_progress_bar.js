@@ -16,13 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-
-import { wrapInI18nContext } from 'ui/i18n';
-import { uiModules } from 'ui/modules';
-
 import React from 'react';
-
+import { getServices } from '../../kibana_services';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -31,6 +26,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
+const { wrapInI18nContext, uiModules } = getServices();
 const module = uiModules.get('discover/field_chooser');
 
 function StringFieldProgressBar(props) {
