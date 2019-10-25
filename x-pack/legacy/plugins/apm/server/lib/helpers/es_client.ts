@@ -9,13 +9,19 @@ import {
   SearchParams,
   IndexDocumentParams,
   IndicesDeleteParams,
-  IndicesCreateParams,
-  AggregationSearchResponseWithTotalHitsAsObject
+  IndicesCreateParams
 } from 'elasticsearch';
 import { Legacy } from 'kibana';
 import { cloneDeep, has, isString, set } from 'lodash';
 import { OBSERVER_VERSION_MAJOR } from '../../../common/elasticsearch_fieldnames';
 import { StringMap } from '../../../typings/common';
+import {
+  ESSearchResponse,
+  ESSearchRequest
+} from '../../../typings/elasticsearch';
+
+// `type` was deprecated in 7.0
+export type APMIndexDocumentParams<T> = Omit<IndexDocumentParams<T>, 'type'>;
 
 function getApmIndices(config: Legacy.KibanaConfig) {
   return [
@@ -89,10 +95,13 @@ export function getESClient(req: Legacy.Request) {
   const query = req.query as StringMap;
 
   return {
-    search: async <Hits = unknown, U extends SearchParams = {}>(
-      params: U,
+    search: async <
+      TDocument = unknown,
+      TSearchRequest extends ESSearchRequest = {}
+    >(
+      params: TSearchRequest,
       apmOptions?: APMOptions
-    ): Promise<AggregationSearchResponseWithTotalHitsAsObject<Hits, U>> => {
+    ): Promise<ESSearchResponse<TDocument, TSearchRequest>> => {
       const nextParams = await getParamsForSearchRequest(
         req,
         params,
@@ -114,11 +123,9 @@ export function getESClient(req: Legacy.Request) {
         req,
         'search',
         nextParams
-      ) as unknown) as Promise<
-        AggregationSearchResponseWithTotalHitsAsObject<Hits, U>
-      >;
+      ) as unknown) as Promise<ESSearchResponse<TDocument, TSearchRequest>>;
     },
-    index: <Body>(params: IndexDocumentParams<Body>) => {
+    index: <Body>(params: APMIndexDocumentParams<Body>) => {
       return cluster.callWithRequest(req, 'index', params);
     },
     delete: (params: IndicesDeleteParams) => {

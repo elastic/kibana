@@ -10,7 +10,7 @@ import uuid from 'uuid';
 import { TaskDictionary, TaskDefinition, TaskInstance, TaskStatus } from './task';
 import { FetchOpts, StoreOpts, OwnershipClaimingOpts, TaskStore } from './task_store';
 import { mockLogger } from './test_utils';
-import { SavedObjectsClientMock } from 'src/core/server/mocks';
+import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { SavedObjectsSerializer, SavedObjectsSchema, SavedObjectAttributes } from 'src/core/server';
 
 const taskDefinitions: TaskDictionary<TaskDefinition> = {
@@ -31,7 +31,7 @@ const taskDefinitions: TaskDictionary<TaskDefinition> = {
   },
 };
 
-const savedObjectsClient = SavedObjectsClientMock.create();
+const savedObjectsClient = savedObjectsClientMock.create();
 const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
 
 beforeEach(() => jest.resetAllMocks());

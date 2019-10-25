@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { SearchSource } from 'ui/courier';
-import { SortOrder } from './doc_table/components/table_header/helpers';
+import { SearchSource } from './kibana_services';
+import { SortOrder } from './angular/doc_table/components/table_header/helpers';
 
 export interface SavedSearch {
   readonly id: string;

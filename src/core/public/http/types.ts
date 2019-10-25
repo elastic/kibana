@@ -30,6 +30,11 @@ export interface HttpServiceBase {
   basePath: IBasePath;
 
   /**
+   * APIs for denoting certain paths for not requiring authentication
+   */
+  anonymousPaths: IAnonymousPaths;
+
+  /**
    * Adds a new {@link HttpInterceptor} to the global HTTP client.
    * @param interceptor a {@link HttpInterceptor}
    * @returns a function for removing the attached interceptor.
@@ -90,6 +95,21 @@ export interface IBasePath {
    * Removes the prepended basePath from the `path`.
    */
   remove: (url: string) => string;
+}
+
+/**
+ * APIs for denoting paths as not requiring authentication
+ */
+export interface IAnonymousPaths {
+  /**
+   * Determines whether the provided path doesn't require authentication. `path` should include the current basePath.
+   */
+  isAnonymous(path: string): boolean;
+
+  /**
+   * Register `path` as not requiring authentication. `path` should not include the current basePath.
+   */
+  register(path: string): void;
 }
 
 /**
@@ -226,25 +246,34 @@ export type HttpHandler = (path: string, options?: HttpFetchOptions) => Promise<
 export type HttpBody = BodyInit | null | any;
 
 /** @public */
-export interface HttpResponse {
-  request?: Request;
+export interface InterceptedHttpResponse {
   response?: Response;
   body?: HttpBody;
+}
+
+/** @public */
+export interface HttpResponse extends InterceptedHttpResponse {
+  request: Readonly<Request>;
 }
 
 /** @public */
 export interface IHttpFetchError extends Error {
   readonly request: Request;
   readonly response?: Response;
+  /**
+   * @deprecated Provided for legacy compatibility. Prefer the `request` property instead.
+   */
+  readonly req: Request;
+  /**
+   * @deprecated Provided for legacy compatibility. Prefer the `response` property instead.
+   */
+  readonly res?: Response;
   readonly body?: any;
 }
 
 /** @public */
-export interface HttpErrorResponse {
+export interface HttpErrorResponse extends HttpResponse {
   error: Error | IHttpFetchError;
-  request?: Request;
-  response?: Response;
-  body?: HttpBody;
 }
 /** @public */
 export interface HttpErrorRequest {
@@ -287,7 +316,7 @@ export interface HttpInterceptor {
   response?(
     httpResponse: HttpResponse,
     controller: IHttpInterceptController
-  ): Promise<HttpResponse> | HttpResponse | void;
+  ): Promise<InterceptedHttpResponse> | InterceptedHttpResponse | void;
 
   /**
    * Define an interceptor to be executed if a response interceptor throws an error or returns a rejected Promise.
@@ -297,7 +326,7 @@ export interface HttpInterceptor {
   responseError?(
     httpErrorResponse: HttpErrorResponse,
     controller: IHttpInterceptController
-  ): Promise<HttpResponse> | HttpResponse | void;
+  ): Promise<InterceptedHttpResponse> | InterceptedHttpResponse | void;
 }
 
 /**
