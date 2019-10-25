@@ -190,7 +190,7 @@ export function FieldItem(props: FieldItemProps) {
                 }
               }}
               aria-label={i18n.translate('xpack.lens.indexPattern.fieldStatsButtonLabel', {
-                defaultMessage: 'Click for a field preview. Or, drag and drop to visualize.',
+                defaultMessage: 'Click for a field preview, or drag and drop to visualize.',
               })}
             >
               <LensFieldIcon type={field.type as DataType} />
@@ -205,7 +205,6 @@ export function FieldItem(props: FieldItemProps) {
                   hideDetails
                     ? i18n.translate('xpack.lens.indexPattern.fieldItemTooltip', {
                         defaultMessage: 'Drag and drop to visualize.',
-                        values: { fieldName: field.name },
                       })
                     : i18n.translate('xpack.lens.indexPattern.fieldStatsButtonLabel', {
                         defaultMessage: 'Click for a field preview, or drag and drop to visualize.',
