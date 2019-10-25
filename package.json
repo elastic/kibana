@@ -85,7 +85,6 @@
     "**/typescript": "3.5.3",
     "**/graphql-toolkit/lodash": "^4.17.13",
     "**/isomorphic-git/**/base64-js": "^1.2.1",
-    "**/babel-plugin-inline-react-svg/svgo/js-yaml": "^3.13.1",
     "**/image-diff/gm/debug": "^2.6.9"
   },
   "workspaces": {
@@ -107,7 +106,7 @@
   "dependencies": {
     "@babel/core": "^7.5.5",
     "@babel/register": "^7.5.5",
-    "@elastic/charts": "^13.5.7",
+    "@elastic/charts": "^13.5.8",
     "@elastic/datemath": "5.0.2",
     "@elastic/ems-client": "1.0.5",
     "@elastic/eui": "14.7.0",
@@ -237,7 +236,6 @@
     "rxjs": "^6.2.1",
     "script-loader": "0.7.2",
     "semver": "^5.5.0",
-    "stream-stream": "^1.2.6",
     "style-it": "^2.1.3",
     "style-loader": "0.23.1",
     "symbol-observable": "^1.2.0",
