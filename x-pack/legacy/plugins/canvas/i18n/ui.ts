@@ -635,7 +635,7 @@ export const ViewStrings = {
       }),
     getLabelHelp: () =>
       i18n.translate('xpack.canvas.uis.views.metric.args.labelArgLabel', {
-        defaultMessage: 'Describes the metric',
+        defaultMessage: 'Enter a text label for the metric value',
       }),
     getMetricFontDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.metric.args.metricFontTitle', {
@@ -651,7 +651,7 @@ export const ViewStrings = {
       }),
     getMetricFormatHelp: () =>
       i18n.translate('xpack.canvas.uis.views.metric.args.metricFormatLabel', {
-        defaultMessage: 'Fonts, alignment and color',
+        defaultMessage: 'Select a format for the metric value',
       }),
   },
   Pie: {

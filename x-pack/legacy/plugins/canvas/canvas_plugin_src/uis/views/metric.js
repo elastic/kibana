@@ -19,14 +19,14 @@ export const metric = () => ({
     {
       name: 'metricFormat',
       displayName: strings.getMetricFormatDisplayName(),
-      help: '',
+      help: strings.getMetricFormatHelp(),
       argType: 'numberFormat',
       default: `"${AdvancedSettings.get('format:number:defaultPattern')}"`,
     },
     {
       name: '_',
       displayName: strings.getLabelDisplayName(),
-      help: '',
+      help: strings.getLabelHelp(),
       argType: 'string',
       default: '""',
     },
