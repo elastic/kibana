@@ -1,12 +1,12 @@
 {
-  "id": "saved-query-2",
+  "id": "saved-query-1",
   "description": "Detecting root and admin users",
   "index": ["auditbeat-*", "filebeat-*", "packetbeat-*", "winlogbeat-*"],
   "interval": "5m",
   "name": "Detect Root/Admin Users",
   "severity": "high",
-  "type": "saved-query",
+  "type": "saved_query",
   "from": "now-6m",
   "to": "now",
-  "save_id": "Frank Query From SIEM"
+  "saved_id": "Test Query From SIEM"
 }

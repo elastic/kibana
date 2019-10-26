@@ -33,7 +33,8 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
         id: schema.string(),
         index: schema.arrayOf(schema.string()),
         kql: schema.nullable(schema.string()),
-        save_id: schema.nullable(schema.string()),
+        language: schema.nullable(schema.string()),
+        saved_id: schema.nullable(schema.string()),
         query: schema.nullable(schema.string()),
         filters: schema.nullable(schema.arrayOf(schema.object({}, { allowUnknowns: true }))),
         maxSignals: schema.number({ defaultValue: 100 }),
@@ -57,7 +58,8 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
         index,
         kql,
         filters,
-        save_id,
+        language,
+        saved_id: savedId,
         query,
         maxSignals,
         name,
@@ -71,9 +73,18 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
 
       const scroll = scrollLock ? scrollLock : '1m';
       const size = scrollSize ? scrollSize : 400;
-      // TODO: Fix this or remove it
-      // services.savedObjectsClient.find('save_id');
-      const esFilter = getFilter(type, kql, filter, filters, save_id, query, index);
+
+      const esFilter = await getFilter(
+        type,
+        kql,
+        filter,
+        filters,
+        language,
+        query,
+        savedId,
+        services,
+        index
+      );
 
       // TODO: Turn these options being sent in into a template for the alert type
       const noReIndex = buildEventsScrollQuery({

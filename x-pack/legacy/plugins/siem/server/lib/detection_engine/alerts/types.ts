@@ -19,6 +19,8 @@ import { AlertsClient } from '../../../../../alerting/server/alerts_client';
 import { ActionsClient } from '../../../../../actions/server/actions_client';
 import { SearchResponse } from '../../types';
 
+export type PartialFilter = Partial<Filter>;
+
 export interface SignalAlertParams {
   description: string;
   from: string;
@@ -29,12 +31,13 @@ export interface SignalAlertParams {
   filter: Record<string, {}> | undefined;
   kql: string | undefined;
   query: string | undefined;
-  save_id: string | undefined;
-  filters: Filter[] | undefined;
+  language: string | undefined;
+  saved_id: string | undefined;
+  filters: PartialFilter[] | undefined;
   maxSignals: string;
   name: string;
   severity: string;
-  type: 'filter' | 'kql' | 'query';
+  type: 'filter' | 'kql' | 'query' | 'saved_query';
   to: string;
   references: string[];
 }

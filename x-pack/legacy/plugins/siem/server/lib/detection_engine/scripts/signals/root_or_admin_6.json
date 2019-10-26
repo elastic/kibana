@@ -1,14 +1,15 @@
 {
-  "id": "query-filtering",
+  "id": "rule-6",
   "description": "Detecting root and admin users",
   "index": ["auditbeat-*", "filebeat-*", "packetbeat-*", "winlogbeat-*"],
   "interval": "5m",
   "name": "Detect Root/Admin Users",
   "severity": "high",
   "type": "query",
-  "from": "now-6m",
+  "from": "now-24h",
   "to": "now",
   "query": "user.name: root or user.name: admin",
+  "language": "kuery",
   "filters": [
     {
       "$state": {

@@ -22,13 +22,14 @@ export const schema = Joi.object({
   // TODO: Change kql to be just query?
   kql: Joi.string(),
   query: Joi.string(),
-  save_id: Joi.string(),
+  language: Joi.string(),
+  saved_id: Joi.string(),
   max_signals: Joi.number().default(100),
   name: Joi.string().required(),
   severity: Joi.string().required(),
   to: Joi.string().required(),
   type: Joi.string()
-    .valid('filter', 'kql', 'query')
+    .valid('filter', 'kql', 'query', 'saved_query')
     .required(),
   references: Joi.array().default([]),
 });
@@ -53,7 +54,8 @@ export const createCreateSignalsRoute: Hapi.ServerRoute = {
       kql,
       from,
       query,
-      save_id,
+      language,
+      saved_id,
       filters,
       id,
       index,
@@ -83,7 +85,8 @@ export const createCreateSignalsRoute: Hapi.ServerRoute = {
       filter,
       from,
       query,
-      save_id,
+      language,
+      saved_id,
       filters,
       id,
       index,

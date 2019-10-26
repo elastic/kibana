@@ -86,6 +86,20 @@ export const convertToBuildEsQuery = ({
   filters: Filter[];
 }) => {
   try {
+    console.log('queries is:', queries);
+    console.log('filters are:', filters);
+    console.log('indexes are:', indexPattern);
+    console.log(
+      'everything is:',
+      JSON.stringify(
+        buildEsQuery(indexPattern, queries, filters.filter(f => f.meta.disabled === false), {
+          ...config,
+          dateFormatTZ: null,
+        }),
+        null,
+        2
+      )
+    );
     return JSON.stringify(
       buildEsQuery(indexPattern, queries, filters.filter(f => f.meta.disabled === false), {
         ...config,

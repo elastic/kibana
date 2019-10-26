@@ -10,6 +10,28 @@ import { isFunction } from 'lodash/fp';
 import { updateSignal } from '../alerts/update_signals';
 import { SignalsRequest } from '../alerts/types';
 
+export const schema = Joi.object({
+  description: Joi.string(),
+  enabled: Joi.boolean(),
+  filter: Joi.object(),
+  filters: Joi.array(),
+  from: Joi.string(),
+  id: Joi.string(),
+  index: Joi.array(),
+  interval: Joi.string(),
+  // TODO: Change kql to be just query?
+  kql: Joi.string(),
+  query: Joi.string(),
+  language: Joi.string(),
+  saved_id: Joi.string(),
+  max_signals: Joi.number().default(100),
+  name: Joi.string(),
+  severity: Joi.string(),
+  to: Joi.string(),
+  type: Joi.string().valid('filter', 'kql', 'saved_query', 'query'),
+  references: Joi.array().default([]),
+});
+
 export const createUpdateSignalsRoute: Hapi.ServerRoute = {
   method: 'PUT',
   path: '/api/siem/signals/{id?}',
@@ -26,22 +48,7 @@ export const createUpdateSignalsRoute: Hapi.ServerRoute = {
           otherwise: Joi.string().required(),
         }),
       },
-      payload: Joi.object({
-        description: Joi.string(),
-        enabled: Joi.boolean(),
-        filter: Joi.object(),
-        from: Joi.string(),
-        id: Joi.string(),
-        index: Joi.array(),
-        interval: Joi.string(),
-        kql: Joi.string(),
-        max_signals: Joi.number().default(100),
-        name: Joi.string(),
-        severity: Joi.string(),
-        to: Joi.string(),
-        type: Joi.string().valid('filter', 'kql'),
-        references: Joi.array().default([]),
-      }).nand('filter', 'kql'),
+      payload: schema,
     },
   },
   async handler(request: SignalsRequest, headers) {
@@ -52,7 +59,8 @@ export const createUpdateSignalsRoute: Hapi.ServerRoute = {
       kql,
       from,
       query,
-      save_id,
+      language,
+      saved_id,
       filters,
       id,
       index,
@@ -81,7 +89,8 @@ export const createUpdateSignalsRoute: Hapi.ServerRoute = {
       filter,
       from,
       query,
-      save_id,
+      language,
+      saved_id,
       filters,
       id: request.params.id ? request.params.id : id,
       index,
