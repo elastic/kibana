@@ -317,7 +317,7 @@ export default function({
   coreEditor: editor,
   parser,
   execCommand,
-  getCursor,
+  getCursorPosition,
   isCompleterActive,
   addChangeListener,
   removeChangeListener,
@@ -325,7 +325,7 @@ export default function({
   coreEditor: LegacyEditor;
   parser: any;
   execCommand: (cmd: string) => void;
-  getCursor: () => any;
+  getCursorPosition: () => Position | null;
   isCompleterActive: () => boolean;
   addChangeListener: (fn: any) => void;
   removeChangeListener: (fn: any) => void;
@@ -969,12 +969,9 @@ export default function({
   100);
 
   function editorChangeListener() {
-    const cursor = getCursor();
-    if (cursor && !isCompleterActive()) {
-      evaluateCurrentTokenAfterAChange({
-        column: cursor.column + 1,
-        lineNumber: cursor.row + 1,
-      });
+    const position = getCursorPosition();
+    if (position && !isCompleterActive()) {
+      evaluateCurrentTokenAfterAChange(position);
     }
   }
 
