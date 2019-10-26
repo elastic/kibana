@@ -59,7 +59,7 @@ const fullyMatchingIds = async (
   const mostRecentQueryResult = await mostRecentCheckGroups(queryContext, potentialMatchMonitorIDs);
 
   const matching = new Map<string, MonitorLocCheckGroup[]>();
-  MonitorLoop: for (const monBucket of mostRecentQueryResult.aggregations.monitor.buckets) {
+  MonitorLoop: for (const monBucket of mostRecentQueryResult.aggregations.recent.monitor.buckets) {
     const monitorId: string = monBucket.key;
     const groups: MonitorLocCheckGroup[] = [];
 
@@ -111,19 +111,31 @@ export const mostRecentCheckGroups = async (
         },
       },
       aggs: {
-        monitor: {
-          terms: { field: 'monitor.id', size: potentialMatchMonitorIDs.length },
+        recent: {
+          filter: {
+            "range": {
+              "monitor.quantized_grace_range": {
+                "gte": queryContext.dateRangeEnd,
+                "lte": queryContext.dateRangeEnd,
+              }
+            }
+          },
           aggs: {
-            location: {
-              terms: { field: 'observer.geo.name', missing: 'N/A', size: 100 },
+            monitor: {
+              terms: {field: 'monitor.id', size: potentialMatchMonitorIDs.length},
               aggs: {
-                top: {
-                  top_hits: {
-                    sort: [{ '@timestamp': 'desc' }],
-                    _source: {
-                      includes: ['monitor.check_group', '@timestamp', 'summary.up', 'summary.down'],
+                location: {
+                  terms: {field: 'observer.geo.name', missing: 'N/A', size: 100},
+                  aggs: {
+                    top: {
+                      top_hits: {
+                        sort: [{'@timestamp': 'desc'}],
+                        _source: {
+                          includes: ['monitor.check_group', '@timestamp', 'summary.up', 'summary.down'],
+                        },
+                        size: 1,
+                      },
                     },
-                    size: 1,
                   },
                 },
               },
@@ -134,5 +146,6 @@ export const mostRecentCheckGroups = async (
     },
   };
 
+  console.log("QQQ", JSON.stringify(params.body))
   return await queryContext.database.search(queryContext.request, params);
 };

@@ -77,6 +77,16 @@ const queryBody = (queryContext: QueryContext, searchAfter: any, size: number) =
   if (queryContext.statusFilter) {
     filters.push({ match: { 'monitor.status': queryContext.statusFilter } });
   }
+  if (filters.length > 1) {
+    filters.push({
+      "range": {
+        "monitor.quantized_grace_range": {
+          "gte": queryContext.dateRangeEnd,
+          "lte": queryContext.dateRangeEnd,
+        }
+      }
+    });
+  }
 
   const body = {
     size: 0,
