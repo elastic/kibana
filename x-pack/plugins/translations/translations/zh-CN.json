@@ -9331,7 +9331,6 @@
     "xpack.siem.anomaliesTable.table.unit": "{totalCount, plural, =1 {anomaly} other {anomalies}}",
     "xpack.siem.clipboard.copy.to.the.clipboard": "复制到剪贴板",
     "xpack.siem.components.embeddables.indexPatternsMissingPrompt.errorButtonLabel": "配置索引模式",
-    "xpack.siem.components.embeddables.indexPatternsMissingPrompt.errorDescription": "必须配置符合 ECS 的 Kibana 索引模式，才能查看地图上的数据。使用 Beats 时，您可以运行以下设置命令来创建所需的 Kibana 索引模式，否则只能在 Kibana 设置内手动配置。",
     "xpack.siem.components.embeddables.indexPatternsMissingPrompt.errorTitle": "未配置所需的索引模式",
     "xpack.siem.components.ml.anomaly.errors.anomaliesTableFetchFailureTitle": "异常表提取失败",
     "xpack.siem.components.ml.api.errors.networkErrorFailureTitle": "网络错误：",
