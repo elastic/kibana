@@ -30,7 +30,7 @@ const path = require('path');
 // into another repository.
 const INTERVAL = '24h';
 const SEVERITY = 'low';
-const TYPE = 'kql';
+const TYPE = 'query';
 const FROM = 'now-24h';
 const TO = 'now';
 const INDEX = ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'];
@@ -70,20 +70,33 @@ async function main() {
   const files = process.argv[2];
   const outputDir = process.argv[3];
 
-  const savedSearchesJson = walk(files).filter(file => file.endsWith('.ndjson'));
+  const savedSearchesJson = walk(files).filter(file => {
+    return !path.basename(file).startsWith('.') && file.endsWith('.ndjson');
+  });
 
   const savedSearchesParsed = savedSearchesJson.reduce((accum, json) => {
     const jsonFile = fs.readFileSync(json, 'utf8');
-    try {
-      const parsedFile = JSON.parse(jsonFile);
-      parsedFile._file = json;
-      parsedFile.attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.parse(
-        parsedFile.attributes.kibanaSavedObjectMeta.searchSourceJSON
-      );
-      return [...accum, parsedFile];
-    } catch (err) {
-      return accum;
-    }
+    const jsonLines = jsonFile.split(/\r{0,1}\n/);
+    const parsedLines = jsonLines.reduce((accum, line, index) => {
+      try {
+        const parsedLine = JSON.parse(line);
+        if (index !== 0) {
+          parsedLine._file = `${json.substring(0, json.length - '.ndjson'.length)}_${String(
+            index
+          )}.ndjson`;
+        } else {
+          parsedLine._file = json;
+        }
+        parsedLine.attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.parse(
+          parsedLine.attributes.kibanaSavedObjectMeta.searchSourceJSON
+        );
+        return [...accum, parsedLine];
+      } catch (err) {
+        console.log('error parsing a line in this file:', json);
+        return accum;
+      }
+    }, []);
+    return [...accum, ...parsedLines];
   }, []);
 
   savedSearchesParsed.forEach(savedSearch => {
@@ -101,7 +114,9 @@ async function main() {
         type: TYPE,
         from: FROM,
         to: TO,
-        kql: savedSearch.attributes.kibanaSavedObjectMeta.searchSourceJSON.query.query,
+        query: savedSearch.attributes.kibanaSavedObjectMeta.searchSourceJSON.query.query,
+        language: savedSearch.attributes.kibanaSavedObjectMeta.searchSourceJSON.query.language,
+        filters: savedSearch.attributes.kibanaSavedObjectMeta.searchSourceJSON.filter,
       };
 
       fs.writeFileSync(`${outputDir}/${fileToWrite}.json`, JSON.stringify(outputMessage, null, 2));

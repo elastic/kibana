@@ -32,7 +32,6 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
         filter: schema.nullable(schema.object({}, { allowUnknowns: true })),
         id: schema.string(),
         index: schema.arrayOf(schema.string()),
-        kql: schema.nullable(schema.string()),
         language: schema.nullable(schema.string()),
         saved_id: schema.nullable(schema.string()),
         query: schema.nullable(schema.string()),
@@ -56,7 +55,6 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
         from,
         id,
         index,
-        kql,
         filters,
         language,
         saved_id: savedId,
@@ -76,7 +74,6 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
 
       const esFilter = await getFilter(
         type,
-        kql,
         filter,
         filters,
         language,

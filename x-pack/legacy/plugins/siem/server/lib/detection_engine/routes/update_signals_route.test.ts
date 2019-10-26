@@ -21,6 +21,7 @@ import {
   getUpdateRequest,
 } from './__mocks__/request_responses';
 
+// TODO: Fix all these tests as they are all wrong now
 describe('update_signals', () => {
   let { server, alertsClient, actionsClient } = createMockServer();
 
@@ -31,7 +32,7 @@ describe('update_signals', () => {
   });
 
   describe('status codes with actionClient and alertClient', () => {
-    it('returns 200 when deleting a single signal with a valid actionClient and alertClient', async () => {
+    it('returns 200 when updating a single signal with a valid actionClient and alertClient', async () => {
       alertsClient.find.mockResolvedValue(getFindResult());
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.update.mockResolvedValue(updateActionResult());
@@ -78,10 +79,11 @@ describe('update_signals', () => {
           interval: '5m',
           name: 'Detect Root/Admin Users',
           severity: 'high',
-          type: 'kql',
+          type: 'query',
           from: 'now-6m',
           to: 'now',
-          kql: 'user.name: root or user.name: admin',
+          query: 'user.name: root or user.name: admin',
+          language: 'kuery',
         },
       };
       const { statusCode } = await server.inject(request);
@@ -103,10 +105,11 @@ describe('update_signals', () => {
           interval: '5m',
           name: 'Detect Root/Admin Users',
           severity: 'high',
-          type: 'kql',
+          type: 'query',
           from: 'now-6m',
           to: 'now',
-          kql: 'user.name: root or user.name: admin',
+          query: 'user.name: root or user.name: admin',
+          language: 'kuery',
         },
       };
       const { statusCode } = await server.inject(request);
@@ -131,7 +134,8 @@ describe('update_signals', () => {
           type: 'filter',
           from: 'now-6m',
           to: 'now',
-          kql: 'user.name: root or user.name: admin',
+          query: 'user.name: root or user.name: admin',
+          language: 'kuery',
         },
       };
       const { statusCode } = await server.inject(request);
@@ -156,7 +160,8 @@ describe('update_signals', () => {
           type: 'something-made-up', // This is a made up type that causes the 400
           from: 'now-6m',
           to: 'now',
-          kql: 'user.name: root or user.name: admin',
+          query: 'user.name: root or user.name: admin',
+          language: 'kuery',
         },
       };
       const { statusCode } = await server.inject(request);
@@ -178,10 +183,11 @@ describe('update_signals', () => {
           interval: '5m',
           name: 'Detect Root/Admin Users',
           severity: 'high',
-          type: 'kql',
+          type: 'query',
           from: 'now-6m',
           to: 'now',
-          kql: 'user.name: root or user.name: admin',
+          query: 'user.name: root or user.name: admin',
+          language: 'kuery',
         },
       };
       const { statusCode } = await server.inject(request);

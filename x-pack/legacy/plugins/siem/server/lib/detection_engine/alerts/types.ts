@@ -29,7 +29,6 @@ export interface SignalAlertParams {
   interval: string;
   enabled: boolean;
   filter: Record<string, {}> | undefined;
-  kql: string | undefined;
   query: string | undefined;
   language: string | undefined;
   saved_id: string | undefined;
@@ -37,7 +36,7 @@ export interface SignalAlertParams {
   maxSignals: string;
   name: string;
   severity: string;
-  type: 'filter' | 'kql' | 'query' | 'saved_query';
+  type: 'filter' | 'query' | 'saved_query';
   to: string;
   references: string[];
 }

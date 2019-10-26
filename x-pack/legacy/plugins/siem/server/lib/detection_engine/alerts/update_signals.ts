@@ -22,19 +22,6 @@ export const calculateInterval = (
   }
 };
 
-export const calculateKqlAndFilter = (
-  kql: string | undefined,
-  filter: {} | undefined
-): { kql: string | null | undefined; filter: {} | null | undefined } => {
-  if (filter != null) {
-    return { kql: null, filter };
-  } else if (kql != null) {
-    return { kql, filter: null };
-  } else {
-    return { kql: undefined, filter: undefined };
-  }
-};
-
 export const updateSignal = async ({
   alertsClient,
   actionsClient, // TODO: Use this whenever we add feature support for different action types
@@ -49,7 +36,6 @@ export const updateSignal = async ({
   id,
   index,
   interval,
-  kql,
   maxSignals,
   name,
   severity,
@@ -67,22 +53,20 @@ export const updateSignal = async ({
 
   const alertTypeParams = signal.alertTypeParams || {};
 
-  const { kql: nextKql, filter: nextFilter } = calculateKqlAndFilter(kql, filter);
-
+  // TODO: Fix these updates below
   const nextAlertTypeParams = defaults(
     {
       ...alertTypeParams,
     },
     {
       description,
-      filter: nextFilter,
+      filter,
       from,
       query,
       language,
       saved_id,
       filters,
       index,
-      kql: nextKql,
       maxSignals,
       name,
       severity,
