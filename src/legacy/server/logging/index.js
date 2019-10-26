@@ -23,7 +23,7 @@ import { logWithMetadata } from './log_with_metadata';
 import { setupLoggingRotate } from './rotate';
 
 export async function setupLogging(server, config) {
-  setupLoggingRotate(config);
+  await setupLoggingRotate(config);
   return await server.register({
     plugin: good,
     options: loggingConfiguration(config)

@@ -22,7 +22,7 @@ import { LogRotator } from './log_rotator';
 
 let logRotator = null;
 
-export function setupLoggingRotate(config) {
+export async function setupLoggingRotate(config) {
   // If log rotate is not enabled we skip
   if (!config.get('logging.rotate.enable')) {
     return;
@@ -50,7 +50,7 @@ export function setupLoggingRotate(config) {
   // so we'll need to assure it only loads once.
   if (!logRotator) {
     logRotator = new LogRotator(config);
-    logRotator.start();
+    await logRotator.start();
   }
 
   return logRotator;
