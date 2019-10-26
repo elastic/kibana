@@ -52,7 +52,7 @@ describe('Legacy Editor', () => {
   };
 
   // This is to ensure that we are correctly importing Ace's Range component
-  it('handles updates to ranges', () => {
+  it('smoke tests for updates to ranges', () => {
     const legacyEditor = new LegacyEditor(aceMock);
     legacyEditor.getValueInRange({
       start: { lineNumber: 1, column: 1 },
