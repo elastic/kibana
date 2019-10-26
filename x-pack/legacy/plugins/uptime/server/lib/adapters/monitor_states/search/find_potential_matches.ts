@@ -37,7 +37,7 @@ export const findPotentialMatches = async (
     if (b.doc_count > 0) {
       // Here we grab the most recent 2 check groups per location and add them to the list.
       // Why 2? Because the most recent one may be a partial result from mode: all, and hence not match a summary doc.
-      b.locations.buckets.forEach((lb: any) => {
+      b.recent.locations.buckets.forEach((lb: any) => {
         lb.ips.buckets.forEach((ib: any) => {
           ib.top.hits.hits.forEach((h: any) => {
             checkGroups.add(h._source.monitor.check_group);
@@ -62,8 +62,12 @@ const query = async (queryContext: QueryContext, searchAfter: any, size: number)
     body,
   };
 
-  return await queryContext.database.search(queryContext.request, params);
-};
+  const start = new Date();
+  const res = await queryContext.database.search(queryContext.request, params);
+  console.log("INIT Q", JSON.stringify(params.body));
+  console.log("POTENTIAL", new Date() - start);
+  return res;
+}
 
 const queryBody = (queryContext: QueryContext, searchAfter: any, size: number) => {
   const compositeOrder = cursorDirectionToOrder(queryContext.pagination.cursorDirection);
@@ -76,16 +80,6 @@ const queryBody = (queryContext: QueryContext, searchAfter: any, size: number) =
   }
   if (queryContext.statusFilter) {
     filters.push({ match: { 'monitor.status': queryContext.statusFilter } });
-  }
-  if (filters.length > 1) {
-    filters.push({
-      "range": {
-        "monitor.quantized_grace_range": {
-          "gte": queryContext.dateRangeEnd,
-          "lte": queryContext.dateRangeEnd,
-        }
-      }
-    });
   }
 
   const body = {
@@ -102,26 +96,38 @@ const queryBody = (queryContext: QueryContext, searchAfter: any, size: number) =
           ],
         },
         aggs: {
-          // Here we grab the most recent 2 check groups per location.
-          // Why 2? Because the most recent one may not be for a summary, it may be incomplete.
-          locations: {
-            terms: { field: 'observer.geo.name', missing: '__missing__' },
+          recent: {
+            filter: {
+              "range": {
+                "monitor.quantized_grace_range": {
+                  "gte": queryContext.dateRangeEnd,
+                  "lte": queryContext.dateRangeEnd,
+                }
+              }
+            },
             aggs: {
-              ips: {
-                terms: { field: 'monitor.ip', missing: '0.0.0.0' },
+              // Here we grab the most recent 2 check groups per location.
+              // Why 2? Because the most recent one may not be for a summary, it may be incomplete.
+              locations: {
+                terms: { field: 'observer.geo.name', missing: '__missing__' },
                 aggs: {
-                  top: {
-                    top_hits: {
-                      sort: [{ '@timestamp': 'desc' }],
-                      _source: {
-                        includes: ['monitor.check_group', '@timestamp'],
+                  ips: {
+                    terms: { field: 'monitor.ip', missing: '0.0.0.0' },
+                    aggs: {
+                      top: {
+                        top_hits: {
+                          sort: [{ '@timestamp': 'desc' }],
+                          _source: {
+                            includes: ['monitor.check_group', '@timestamp'],
+                          },
+                          size: 2,
+                        },
                       },
-                      size: 2,
                     },
                   },
                 },
               },
-            },
+            }
           },
         },
       },
