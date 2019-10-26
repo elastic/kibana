@@ -17,12 +17,12 @@
  * under the License.
  */
 // @ts-ignore
-import { getServices } from '../../kibana_services';
+import { getAngularModule, getServices } from '../../kibana_services';
 import { DiscoverIndexPattern } from './discover_index_pattern';
 
-const { wrapInI18nContext, uiModules } = getServices();
+const { wrapInI18nContext } = getServices();
 
-const app = uiModules.get('apps/discover');
+const app = getAngularModule();
 
 app.directive('discoverIndexPatternSelect', function(reactDirective: any) {
   return reactDirective(wrapInI18nContext(DiscoverIndexPattern), [

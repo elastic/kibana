@@ -44,7 +44,17 @@ import { docTitle } from 'ui/doc_title';
 // @ts-ignore
 import * as docViewsRegistry from 'ui/registry/doc_views';
 
-const services = {
+export let angularModule: any = null;
+
+export function setAngularModule(module: any) {
+  angularModule = module;
+}
+
+export function getAngularModule() {
+  return angularModule;
+}
+
+let services = {
   // new plattform
   addBasePath: npStart.core.http.basePath.prepend,
   capabilities: npStart.core.application.capabilities,
@@ -74,6 +84,10 @@ const services = {
 };
 export function getServices() {
   return services;
+}
+
+export function setServices(newServices: any) {
+  services = Object.assign({}, services, newServices);
 }
 
 // EXPORT legacy static dependencies

@@ -18,9 +18,9 @@
  */
 
 import $ from 'jquery';
-import { getServices } from '../../kibana_services';
+import { getAngularModule } from '../../kibana_services';
 
-const module = getServices().uiModules.get('app/discover');
+const module = getAngularModule();
 
 module.directive('kbnInfiniteScroll', function () {
   return {

@@ -21,11 +21,12 @@ import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/p
 import { IUiActionsStart } from 'src/plugins/ui_actions/public';
 import { registerFeature } from './helpers/register_feature';
 import './kibana_services';
-import { SearchEmbeddableFactory } from './embeddable';
+// import { SearchEmbeddableFactory } from './embeddable';
 import {
   Start as EmbeddableStart,
   Setup as EmbeddableSetup,
 } from '../../../../../plugins/embeddable/public';
+import { LocalApplicationService } from '../local_application_service';
 
 /**
  * These are the interfaces with your public contracts. You should export these
@@ -37,6 +38,7 @@ export type DiscoverStart = void;
 interface DiscoverSetupPlugins {
   uiActions: IUiActionsStart;
   embeddable: EmbeddableSetup;
+  localApplicationService: LocalApplicationService;
 }
 interface DiscoverStartPlugins {
   uiActions: IUiActionsStart;
@@ -47,12 +49,21 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
   constructor(initializerContext: PluginInitializerContext) {}
   setup(core: CoreSetup, plugins: DiscoverSetupPlugins): DiscoverSetup {
     registerFeature();
-    require('./angular');
+    plugins.localApplicationService.register({
+      id: 'discover',
+      title: 'Discover',
+      order: -1004,
+      euiIconType: 'discoverApp',
+      mount: async (context, params) => {
+        const { renderApp } = await import('./render_app');
+        return renderApp(params.element, params.appBasePath, context);
+      },
+    });
   }
 
   start(core: CoreStart, plugins: DiscoverStartPlugins): DiscoverStart {
-    const factory = new SearchEmbeddableFactory(plugins.uiActions.executeTriggerActions);
-    plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
+    // const factory = new SearchEmbeddableFactory(plugins.uiActions.executeTriggerActions);
+    // plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
   }
 
   stop() {}

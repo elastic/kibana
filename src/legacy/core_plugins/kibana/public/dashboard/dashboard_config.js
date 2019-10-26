@@ -20,24 +20,26 @@
 import { uiModules } from 'ui/modules';
 import { capabilities } from 'ui/capabilities';
 
-uiModules.get('kibana')
-  .provider('dashboardConfig', () => {
-    let hideWriteControls = !capabilities.get().dashboard.showWriteControls;
+export function dashboardConfigProvider() {
+  let hideWriteControls = !capabilities.get().dashboard.showWriteControls;
 
-    return {
-      /**
-       * Part of the exposed plugin API - do not remove without careful consideration.
-       * @type {boolean}
-       */
-      turnHideWriteControlsOn() {
-        hideWriteControls = true;
-      },
-      $get() {
-        return {
-          getHideWriteControls() {
-            return hideWriteControls;
-          }
-        };
-      }
-    };
-  });
+  return {
+    /**
+     * Part of the exposed plugin API - do not remove without careful consideration.
+     * @type {boolean}
+     */
+    turnHideWriteControlsOn() {
+      hideWriteControls = true;
+    },
+    $get() {
+      return {
+        getHideWriteControls() {
+          return hideWriteControls;
+        }
+      };
+    }
+  };
+}
+
+uiModules.get('kibana')
+  .provider('dashboardConfig', dashboardConfigProvider);

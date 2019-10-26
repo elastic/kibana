@@ -59,8 +59,11 @@ import 'ui/agg_types';
 import { showAppRedirectNotification } from 'ui/notify';
 import 'leaflet';
 
-routes.enable();
+import { localApplicationService } from './local_application_service';
 
+localApplicationService.registerWithAngularRouter(routes);
+
+routes.enable();
 
 routes
   .otherwise({

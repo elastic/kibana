@@ -18,32 +18,33 @@
  */
 
 import './_saved_search';
-import 'ui/notify';
 import { uiModules } from 'ui/modules';
 import { SavedObjectLoader, SavedObjectsClientProvider } from 'ui/saved_objects';
 import { savedObjectManagementRegistry } from '../../management/saved_object_registry';
-const module = uiModules.get('discover/saved_searches');
+
 
 // Register this service with the saved object registry so it can be
 // edited by the object editor.
 savedObjectManagementRegistry.register({
   service: 'savedSearches',
-  title: 'searches'
+  title: 'searches',
 });
 
-module.service('savedSearches', function (Private, SavedSearch, kbnUrl, chrome) {
+export function createSavedSearchesService(Private, SavedSearch, kbnUrl, chrome) {
   const savedObjectClient = Private(SavedObjectsClientProvider);
   const savedSearchLoader = new SavedObjectLoader(SavedSearch, kbnUrl, chrome, savedObjectClient);
   // Customize loader properties since adding an 's' on type doesn't work for type 'search' .
   savedSearchLoader.loaderProperties = {
     name: 'searches',
     noun: 'Saved Search',
-    nouns: 'saved searches'
+    nouns: 'saved searches',
   };
 
-  savedSearchLoader.urlFor = function (id) {
+  savedSearchLoader.urlFor = (id) => {
     return kbnUrl.eval('#/discover/{{id}}', { id: id });
   };
 
   return savedSearchLoader;
-});
+}
+const module = uiModules.get('discover/saved_searches');
+module.service('savedSearches', createSavedSearchesService);

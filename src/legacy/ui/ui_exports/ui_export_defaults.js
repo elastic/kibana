@@ -55,7 +55,6 @@ export const UI_EXPORT_DEFAULTS = {
     ],
     embeddableFactories: [
       'plugins/kibana/visualize/embeddable/visualize_embeddable_factory',
-      'plugins/kibana/discover/embeddable/search_embeddable_factory',
     ],
     search: [
       'ui/courier/search_strategy/default_search_strategy',

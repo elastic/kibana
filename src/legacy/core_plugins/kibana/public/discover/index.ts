@@ -18,6 +18,7 @@
  */
 import { PluginInitializer, PluginInitializerContext } from 'kibana/public';
 import { npSetup, npStart } from 'ui/new_platform';
+import { localApplicationService } from '../local_application_service';
 import { DiscoverPlugin, DiscoverSetup, DiscoverStart } from './plugin';
 
 // Core will be looking for this when loading our plugin in the new platform
@@ -28,5 +29,8 @@ export const plugin: PluginInitializer<DiscoverSetup, DiscoverStart> = (
 };
 
 const pluginInstance = plugin({} as PluginInitializerContext);
-export const setup = pluginInstance.setup(npSetup.core, npSetup.plugins);
+export const setup = pluginInstance.setup(npSetup.core, {
+  ...npSetup.plugins,
+  ...{ localApplicationService },
+});
 export const start = pluginInstance.start(npStart.core, npStart.plugins);

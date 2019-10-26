@@ -23,15 +23,13 @@ import './infinite_scroll';
 import './components/table_header';
 import './components/table_row';
 import { dispatchRenderComplete } from '../../../../../../../plugins/kibana_utils/public';
-import { getServices } from '../../kibana_services';
+import { getAngularModule } from '../../kibana_services';
 import './components/pager';
 import './lib/pager';
 
 import { getLimitedSearchResultsMessage } from './doc_table_strings';
 
-const { uiModules } = getServices();
-
-uiModules.get('app/discover')
+getAngularModule()
   .directive('docTable', function (config, getAppState, pagerFactory, $filter) {
     return {
       restrict: 'E',

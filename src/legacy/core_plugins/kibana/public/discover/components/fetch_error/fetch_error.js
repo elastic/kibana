@@ -19,8 +19,8 @@
 import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiCallOut, EuiCodeBlock, EuiSpacer } from '@elastic/eui';
-import { getServices } from '../../kibana_services';
-const { uiModules, wrapInI18nContext, chrome } = getServices();
+import { getAngularModule, getServices } from '../../kibana_services';
+const {  wrapInI18nContext, chrome } = getServices();
 
 const DiscoverFetchError = ({ fetchError }) => {
   if (!fetchError) {
@@ -80,7 +80,7 @@ const DiscoverFetchError = ({ fetchError }) => {
   );
 };
 
-const app = uiModules.get('apps/discover', ['react']);
+const app = getAngularModule();
 
 app.directive('discoverFetchError', reactDirective =>
   reactDirective(wrapInI18nContext(DiscoverFetchError))

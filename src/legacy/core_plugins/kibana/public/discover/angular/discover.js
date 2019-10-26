@@ -59,6 +59,7 @@ import {
   vislibSeriesResponseHandlerProvider,
   VisProvider,
   SavedObjectSaveModal,
+  getAngularModule,
 } from '../kibana_services';
 
 const {
@@ -69,9 +70,8 @@ const {
   StateProvider,
   timefilter,
   toastNotifications,
-  uiModules,
-  uiRoutes,
-}  = getServices();
+  uiSettings
+} = getServices();
 
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../breadcrumbs';
 import { extractTimeFilter, changeTimeFilter } from '../../../../data/public';
@@ -86,21 +86,13 @@ const fetchStatuses = {
   COMPLETE: 'complete',
 };
 
-const app = uiModules.get('apps/discover', [
-  'kibana/url',
-  'kibana/index_patterns'
-]);
-
-uiRoutes
-  .defaults(/^\/discover(\/|$)/, {
+const app = getAngularModule();
+app.config($routeProvider => {
+  const defaults = {
     requireDefaultIndex: true,
     requireUICapability: 'discover.show',
     k7Breadcrumbs: ($route, $injector) =>
-      $injector.invoke(
-        $route.current.params.id
-          ? getSavedSearchBreadcrumbs
-          : getRootBreadcrumbs
-      ),
+      $injector.invoke($route.current.params.id ? getSavedSearchBreadcrumbs : getRootBreadcrumbs),
     badge: uiCapabilities => {
       if (uiCapabilities.discover.save) {
         return undefined;
@@ -113,17 +105,19 @@ uiRoutes
         tooltip: i18n.translate('kbn.discover.badge.readOnly.tooltip', {
           defaultMessage: 'Unable to save searches',
         }),
-        iconType: 'glasses'
+        iconType: 'glasses',
       };
-    }
-  })
-  .when('/discover/:id?', {
+    },
+  };
+  $routeProvider.when('/discover/:id?', {
+    ...defaults,
     template: indexTemplate,
     reloadOnSearch: false,
     resolve: {
-      ip: function (Promise, indexPatterns, config, Private) {
+      ip: function (Promise, Private) {
         const State = Private(StateProvider);
-        return indexPatterns.getCache().then((savedObjects)=> {
+        const indexPatterns = data.indexPatterns.indexPatterns;
+        return indexPatterns.getCache().then((savedObjects) => {
           /**
            *  In making the indexPattern modifiable it was placed in appState. Unfortunately,
            *  the load order of AppState conflicts with the load order of many other things
@@ -134,17 +128,16 @@ uiRoutes
            *  @type {State}
            */
           const state = new State('_a', {});
-
           const specified = !!state.index;
           const exists = _.findIndex(savedObjects, o => o.id === state.index) > -1;
-          const id = exists ? state.index : config.get('defaultIndex');
+          const id = exists ? state.index : uiSettings.get('defaultIndex');
           state.destroy();
 
           return Promise.props({
             list: savedObjects,
             loaded: indexPatterns.get(id),
             stateVal: state.index,
-            stateValFound: specified && exists
+            stateValFound: specified && exists,
           });
         });
       },
@@ -167,6 +160,7 @@ uiRoutes
       }
     }
   });
+});
 
 app.directive('discoverApp', function () {
   return {

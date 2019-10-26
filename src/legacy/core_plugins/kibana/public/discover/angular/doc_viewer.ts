@@ -18,12 +18,10 @@
  */
 
 // @ts-ignore
-import { getServices } from '../kibana_services';
+import { getAngularModule } from '../kibana_services';
 import { DocViewer } from '../doc_viewer/doc_viewer';
 
-const { uiModules } = getServices();
-
-uiModules.get('apps/discover').directive('docViewer', (reactDirective: any) => {
+getAngularModule().directive('docViewer', (reactDirective: any) => {
   return reactDirective(
     DocViewer,
     [
