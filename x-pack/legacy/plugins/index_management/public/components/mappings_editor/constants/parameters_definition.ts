@@ -176,21 +176,51 @@ export const PARAMETERS_DEFINITION = {
     fieldConfig: {
       label: 'Analyzer',
       defaultValue: INDEX_DEFAULT,
-      type: FIELD_TYPES.SELECT,
+      validations: [
+        {
+          validator: emptyField('Give a name to the analyzer'),
+        },
+        {
+          validator: containsCharsField({
+            chars: ' ',
+            message: 'Spaces are not allowed in the analyzer.',
+          }),
+        },
+      ],
     },
   },
   search_analyzer: {
     fieldConfig: {
       label: 'Search analyzer',
       defaultValue: INDEX_DEFAULT,
-      type: FIELD_TYPES.SELECT,
+      validations: [
+        {
+          validator: emptyField('Give a name to the analyzer'),
+        },
+        {
+          validator: containsCharsField({
+            chars: ' ',
+            message: 'Spaces are not allowed in the analyzer.',
+          }),
+        },
+      ],
     },
   },
   search_quote_analyzer: {
     fieldConfig: {
       label: 'Search quote analyzer',
       defaultValue: INDEX_DEFAULT,
-      type: FIELD_TYPES.SELECT,
+      validations: [
+        {
+          validator: emptyField('Give a name to the analyzer'),
+        },
+        {
+          validator: containsCharsField({
+            chars: ' ',
+            message: 'Spaces are not allowed in the analyzer.',
+          }),
+        },
+      ],
     },
   },
   normalizer: {
