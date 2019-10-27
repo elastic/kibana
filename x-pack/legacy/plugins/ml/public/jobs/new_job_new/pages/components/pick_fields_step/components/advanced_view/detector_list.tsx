@@ -18,10 +18,12 @@ import {
   EuiSpacer,
   EuiCallOut,
   EuiHorizontalRule,
+  EuiFormRow,
 } from '@elastic/eui';
 
 import { JobCreatorContext } from '../../../job_creator_context';
 import { AdvancedJobCreator } from '../../../../../common/job_creator';
+import { Validation } from '../../../../../common/job_validator';
 import { detectorToString } from '../../../../../../../util/string_utils';
 
 interface Props {
@@ -31,13 +33,20 @@ interface Props {
 }
 
 export const DetectorList: FC<Props> = ({ isActive, onEditJob, onDeleteJob }) => {
-  const { jobCreator: jc, jobCreatorUpdated } = useContext(JobCreatorContext);
+  const { jobCreator: jc, jobCreatorUpdated, jobValidator, jobValidatorUpdated } = useContext(
+    JobCreatorContext
+  );
   const jobCreator = jc as AdvancedJobCreator;
   const [detectors, setDetectors] = useState(jobCreator.detectors);
+  const [validation, setValidation] = useState(jobValidator.duplicateDetectors);
 
   useEffect(() => {
     setDetectors(jobCreator.detectors);
   }, [jobCreatorUpdated]);
+
+  useEffect(() => {
+    setValidation(jobValidator.duplicateDetectors);
+  }, [jobValidatorUpdated]);
 
   const Buttons: FC<{ index: number }> = ({ index }) => {
     return (
@@ -99,9 +108,11 @@ export const DetectorList: FC<Props> = ({ isActive, onEditJob, onDeleteJob }) =>
                     detectorToString(d)
                   )}
                 </EuiFlexItem>
-                <EuiFlexItem grow={false} style={{ margin: '8px' }}>
-                  <Buttons index={i} />
-                </EuiFlexItem>
+                {isActive && (
+                  <EuiFlexItem grow={false} style={{ margin: '8px' }}>
+                    <Buttons index={i} />
+                  </EuiFlexItem>
+                )}
               </EuiFlexGroup>
               {d.detector_description !== undefined && (
                 <Fragment>
@@ -113,6 +124,7 @@ export const DetectorList: FC<Props> = ({ isActive, onEditJob, onDeleteJob }) =>
           </EuiFlexItem>
         ))}
       </EuiFlexGrid>
+      <DuplicateDetectorsWarning validation={validation} />
     </Fragment>
   );
 };
@@ -136,6 +148,20 @@ const NoDetectorsWarning: FC<{ show: boolean }> = ({ show }) => {
           defaultMessage="At least one detector is needed to create a job."
         />
       </EuiCallOut>
+      <EuiSpacer size="s" />
+    </Fragment>
+  );
+};
+
+const DuplicateDetectorsWarning: FC<{ validation: Validation }> = ({ validation }) => {
+  if (validation.valid === true) {
+    return null;
+  }
+  return (
+    <Fragment>
+      <EuiFormRow error={validation.message} isInvalid={validation.valid === false}>
+        <Fragment />
+      </EuiFormRow>
       <EuiSpacer size="s" />
     </Fragment>
   );

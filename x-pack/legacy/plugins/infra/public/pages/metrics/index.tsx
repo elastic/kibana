@@ -34,14 +34,14 @@ import {
   WithMetricsTimeUrlState,
 } from '../../containers/metrics/with_metrics_time';
 import { InfraNodeType } from '../../graphql/types';
-import { Error, ErrorPageBody } from '../error';
-import { layoutCreators } from './layouts';
-import { InfraMetricLayoutSection } from './layouts/types';
+import { ErrorPageBody } from '../error';
 import { withMetricPageProviders } from './page_providers';
 import { useMetadata } from '../../containers/metadata/use_metadata';
 import { Source } from '../../containers/source';
 import { InfraLoadingPanel } from '../../components/loading';
 import { NodeDetails } from '../../components/metrics/node_details';
+import { findInventoryModel } from '../../../common/inventory_models';
+import { InventoryDetailSection } from '../../../common/inventory_models/types';
 
 const DetailPageContent = euiStyled(PageContent)`
   overflow: auto;
@@ -68,19 +68,8 @@ export const MetricDetail = withMetricPageProviders(
     withTheme(({ uiCapabilities, match, theme }: Props) => {
       const nodeId = match.params.node;
       const nodeType = match.params.type as InfraNodeType;
-      const layoutCreator = layoutCreators[nodeType];
-      if (!layoutCreator) {
-        return (
-          <Error
-            message={i18n.translate('xpack.infra.metricDetailPage.invalidNodeTypeErrorMessage', {
-              defaultMessage: '{nodeType} is not a valid node type',
-              values: {
-                nodeType: `"${nodeType}"`,
-              },
-            })}
-          />
-        );
-      }
+      const inventoryModel = findInventoryModel(nodeType);
+      const layoutCreator = inventoryModel.layout;
       const { sourceId } = useContext(Source.Context);
       const layouts = layoutCreator(theme);
       const { name, filteredLayouts, loading: metadataLoading, cloudId, metadata } = useMetadata(
@@ -100,7 +89,7 @@ export const MetricDetail = withMetricPageProviders(
       ];
 
       const handleClick = useCallback(
-        (section: InfraMetricLayoutSection) => () => {
+        (section: InventoryDetailSection) => () => {
           const id = section.linkToId || section.id;
           const el = document.getElementById(id);
           if (el) {
