@@ -16,7 +16,7 @@ import { IndexPattern } from '../../types';
 type PropType<C> = C extends React.ComponentType<infer P> ? P : unknown;
 
 const autoInterval = 'auto';
-const supportedIntervals = ['M', 'w', 'd', 'h'];
+const supportedIntervals = ['M', 'w', 'd', 'h', 'm'];
 const defaultCustomInterval = supportedIntervals[2];
 
 // Add ticks to EuiRange component props

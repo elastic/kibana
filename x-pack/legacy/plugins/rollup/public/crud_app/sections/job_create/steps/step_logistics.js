@@ -233,12 +233,12 @@ export class StepLogisticsUi extends Component {
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiTitle data-test-subj="rollupJobCreateLogisticsTitle">
-              <h3>
+              <h2>
                 <FormattedMessage
                   id="xpack.rollupJobs.create.stepLogisticsTitle"
                   defaultMessage="Logistics"
                 />
-              </h3>
+              </h2>
             </EuiTitle>
 
             <EuiSpacer size="s" />
@@ -276,12 +276,12 @@ export class StepLogisticsUi extends Component {
           <EuiDescribedFormGroup
             title={
               <EuiTitle size="s">
-                <h4>
+                <h3>
                   <FormattedMessage
                     id="xpack.rollupJobs.create.stepLogistics.sectionIdTitle"
                     defaultMessage="Name"
                   />
-                </h4>
+                </h3>
               </EuiTitle>
             }
             description={
@@ -316,12 +316,12 @@ export class StepLogisticsUi extends Component {
           <EuiDescribedFormGroup
             title={
               <EuiTitle size="s">
-                <h4>
+                <h3>
                   <FormattedMessage
                     id="xpack.rollupJobs.create.stepLogistics.sectionDataFlowTitle"
                     defaultMessage="Data flow"
                   />
-                </h4>
+                </h3>
               </EuiTitle>
             }
             description={
@@ -393,12 +393,12 @@ export class StepLogisticsUi extends Component {
           <EuiDescribedFormGroup
             title={
               <EuiTitle size="s">
-                <h4>
+                <h3>
                   <FormattedMessage
                     id="xpack.rollupJobs.create.stepLogistics.sectionScheduleTitle"
                     defaultMessage="Schedule"
                   />
-                </h4>
+                </h3>
               </EuiTitle>
             }
             description={
@@ -415,12 +415,12 @@ export class StepLogisticsUi extends Component {
           <EuiDescribedFormGroup
             title={
               <EuiTitle size="xs">
-                <h5>
+                <h4>
                   <FormattedMessage
                     id="xpack.rollupJobs.create.stepLogistics.sectionPageSizeTitle"
                     defaultMessage="How many documents do you want to roll up at a time?"
                   />
-                </h5>
+                </h4>
               </EuiTitle>
             }
             description={
@@ -456,12 +456,12 @@ export class StepLogisticsUi extends Component {
           <EuiDescribedFormGroup
             title={
               <EuiTitle size="xs">
-                <h5>
+                <h4>
                   <FormattedMessage
                     id="xpack.rollupJobs.create.stepLogistics.sectionDelayTitle"
                     defaultMessage="How long should the rollup job wait before rolling up new data?"
                   />
-                </h5>
+                </h4>
               </EuiTitle>
             }
             description={
