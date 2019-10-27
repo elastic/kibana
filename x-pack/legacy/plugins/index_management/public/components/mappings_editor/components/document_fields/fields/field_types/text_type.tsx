@@ -9,6 +9,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
+  EuiRange,
   EuiDualRange,
   EuiFormRow,
 } from '@elastic/eui';
@@ -116,6 +117,7 @@ export const TextType = React.memo(({ field }: Props) => {
       </EditFieldSection>
 
       <AdvancedSettingsWrapper>
+        {/* Analyzers */}
         <EditFieldSection title="Analysers">
           <EditFieldFormRow
             title={<h3>Use different analyzers for index and searching</h3>}
@@ -163,8 +165,29 @@ export const TextType = React.memo(({ field }: Props) => {
           </EditFieldFormRow>
         </EditFieldSection>
 
-        <EditFieldSection title="Another section">
-          <div>It will come here...</div>
+        <EditFieldSection>
+          {/* boost */}
+          <EditFieldFormRow
+            title={<h3>Set boost level</h3>}
+            description="This is description text."
+            toggleDefaultValue={
+              field.source.boost !== undefined &&
+              field.source.boost !== getFieldConfig('boost').defaultValue
+            }
+          >
+            {/* Boost level */}
+            <UseField path="boost" config={getFieldConfig('boost')}>
+              {boostField => (
+                <EuiRange
+                  min={1}
+                  max={20}
+                  value={boostField.value as string}
+                  onChange={boostField.onChange as any}
+                  showInput
+                />
+              )}
+            </UseField>
+          </EditFieldFormRow>
         </EditFieldSection>
       </AdvancedSettingsWrapper>
     </>
