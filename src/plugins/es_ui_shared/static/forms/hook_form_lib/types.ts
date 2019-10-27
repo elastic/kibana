@@ -163,7 +163,7 @@ export interface FormData {
   [key: string]: any;
 }
 
-type FormatterFunc = (value: any) => unknown;
+type FormatterFunc = (value: any, formData: FormData) => unknown;
 
 // We set it as unknown as a form field can be any of any type
 // string | number | boolean | string[] ...
