@@ -22,7 +22,7 @@ import { Subscription } from 'rxjs';
 import { Filter } from '@kbn/es-query';
 import { CoreStart } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { Storage } from '../../../types';
+import { IStorageWrapper } from '../../../../../../../plugins/kibana_utils/public';
 import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
 import { TimefilterSetup } from '../../../timefilter';
 import { FilterManager, SearchBar } from '../../../';
@@ -31,7 +31,7 @@ import { SearchBarOwnProps } from '.';
 interface StatefulSearchBarDeps {
   core: CoreStart;
   data: DataPublicPluginStart;
-  store: Storage;
+  storage: IStorageWrapper;
   timefilter: TimefilterSetup;
   filterManager: FilterManager;
 }
@@ -57,7 +57,7 @@ const defaultOnRefreshChange = (timefilter: TimefilterSetup) => {
 
 export function createSearchBar({
   core,
-  store,
+  storage,
   timefilter,
   filterManager,
   data,
@@ -113,7 +113,7 @@ export function createSearchBar({
         services={{
           appName: props.appName,
           data,
-          store,
+          storage,
           ...core,
         }}
       >

@@ -18,4 +18,4 @@
  */
 
 export { Storage } from './storage';
-export { IStorage } from './types';
+export { IStorage, IStorageWrapper } from './types';

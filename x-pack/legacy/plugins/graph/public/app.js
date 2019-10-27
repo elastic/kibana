@@ -33,7 +33,7 @@ import { npStart } from 'ui/new_platform';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import { capabilities } from 'ui/capabilities';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
-import { Storage } from 'ui/storage';
+import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 
@@ -98,7 +98,7 @@ app.directive('graphListing', function (reactDirective) {
 
 app.directive('graphApp', function (reactDirective) {
   return reactDirective(GraphApp, [
-    ['store', { watchDepth: 'reference' }],
+    ['storage', { watchDepth: 'reference' }],
     ['isInitialized', { watchDepth: 'reference' }],
     ['currentIndexPattern', { watchDepth: 'reference' }],
     ['indexPatternProvider', { watchDepth: 'reference' }],
@@ -322,7 +322,7 @@ app.controller('graphuiPlugin', function (
 
   // register things on scope passed down to react components
   $scope.pluginDataStart = npStart.plugins.data;
-  $scope.store = new Storage(window.localStorage);
+  $scope.storage = new Storage(window.localStorage);
   $scope.coreStart = npStart.core;
   $scope.loading = false;
   $scope.reduxStore = store;

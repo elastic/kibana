@@ -20,12 +20,12 @@
 import moment from 'moment';
 import { TimeRange } from 'src/plugins/data/public';
 import { PersistedLog } from '../query/persisted_log';
-import { Storage } from '../types';
+import { IStorageWrapper } from '../../../../../plugins/kibana_utils/public';
 
 export class TimeHistory {
   private history: PersistedLog<TimeRange>;
 
-  constructor(store: Storage) {
+  constructor(storage: IStorageWrapper) {
     const historyOptions = {
       maxLength: 10,
       filterDuplicates: true,
@@ -33,7 +33,7 @@ export class TimeHistory {
         return oldItem.from === newItem.from && oldItem.to === newItem.to;
       },
     };
-    this.history = new PersistedLog('kibana.timepicker.timeHistory', historyOptions, store);
+    this.history = new PersistedLog('kibana.timepicker.timeHistory', historyOptions, storage);
   }
 
   add(time: TimeRange) {

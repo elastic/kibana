@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Storage } from 'ui/storage';
 import {
   UiSettingsClientContract,
   SavedObjectsClientContract,
@@ -18,6 +17,7 @@ import { countOperation } from './count';
 import { DimensionPriority, StateSetter, OperationMetadata } from '../../../types';
 import { BaseIndexPatternColumn, FieldBasedIndexPatternColumn } from './column_types';
 import { IndexPatternPrivateState, IndexPattern, IndexPatternField } from '../../types';
+import { IStorageWrapper } from '../../../../../../../../src/plugins/kibana_utils/public';
 
 // List of all operation definitions registered to this data source.
 // If you want to implement a new operation, add it to this array and
@@ -48,7 +48,7 @@ export interface ParamEditorProps<C extends BaseIndexPatternColumn> {
   columnId: string;
   layerId: string;
   uiSettings: UiSettingsClientContract;
-  storage: Storage;
+  storage: IStorageWrapper;
   savedObjectsClient: SavedObjectsClientContract;
   http: HttpServiceBase;
 }

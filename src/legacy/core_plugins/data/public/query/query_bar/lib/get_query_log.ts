@@ -19,11 +19,11 @@
 
 import { UiSettingsClientContract } from 'src/core/public';
 import { PersistedLog } from '../../persisted_log';
-import { Storage } from '../../../types';
+import { IStorageWrapper } from '../../../../../../../plugins/kibana_utils/public';
 
 export function getQueryLog(
   uiSettings: UiSettingsClientContract,
-  store: Storage,
+  storage: IStorageWrapper,
   appName: string,
   language: string
 ) {
@@ -33,6 +33,6 @@ export function getQueryLog(
       maxLength: uiSettings.get('history:limit'),
       filterDuplicates: true,
     },
-    store
+    storage
   );
 }

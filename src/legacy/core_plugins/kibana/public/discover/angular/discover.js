@@ -34,6 +34,7 @@ import * as columnActions from '../doc_table/actions/columns';
 import * as filterActions from '../doc_table/actions/filter';
 
 import 'ui/directives/listen';
+import 'ui/directives/storage';
 import 'ui/visualize';
 import 'ui/fixed_scroll';
 import 'ui/index_patterns';

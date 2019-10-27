@@ -19,7 +19,7 @@
 
 import { UiSettingsClientContract } from 'src/core/public';
 import { TimeHistory, Timefilter, TimeHistoryContract, TimefilterContract } from './index';
-import { Storage } from '../types';
+import { IStorageWrapper } from '../../../../../plugins/kibana_utils/public';
 
 /**
  * Filter Service
@@ -28,16 +28,16 @@ import { Storage } from '../types';
 
 export interface TimeFilterServiceDependencies {
   uiSettings: UiSettingsClientContract;
-  store: Storage;
+  storage: IStorageWrapper;
 }
 
 export class TimefilterService {
-  public setup({ uiSettings, store }: TimeFilterServiceDependencies): TimefilterSetup {
+  public setup({ uiSettings, storage }: TimeFilterServiceDependencies): TimefilterSetup {
     const timefilterConfig = {
       timeDefaults: uiSettings.get('timepicker:timeDefaults'),
       refreshIntervalDefaults: uiSettings.get('timepicker:refreshIntervalDefaults'),
     };
-    const history = new TimeHistory(store);
+    const history = new TimeHistory(storage);
     const timefilter = new Timefilter(timefilterConfig, history);
 
     return {

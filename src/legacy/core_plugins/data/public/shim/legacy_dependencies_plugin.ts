@@ -17,17 +17,17 @@
  * under the License.
  */
 
-import { Storage } from 'ui/storage';
+import { IStorageWrapper, Storage } from '../../../../../../src/plugins/kibana_utils/public';
 import { Plugin } from '../../../../../../src/core/public';
 import { initLegacyModule } from './legacy_module';
 
 /** @internal */
 export interface LegacyDependenciesPluginSetup {
-  storage: Storage;
+  storage: IStorageWrapper;
 }
 
 export interface LegacyDependenciesPluginStart {
-  storage: Storage;
+  storage: IStorageWrapper;
 }
 
 export class LegacyDependenciesPlugin implements Plugin<any, any> {

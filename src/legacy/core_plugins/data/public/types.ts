@@ -26,6 +26,6 @@ export interface IDataPluginServices extends Partial<CoreStart> {
   savedObjects: CoreStart['savedObjects'];
   notifications: CoreStart['notifications'];
   http: CoreStart['http'];
-  store: Storage;
+  storage: Storage;
   data: DataPublicPluginStart;
 }

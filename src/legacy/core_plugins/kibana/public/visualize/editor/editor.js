@@ -25,6 +25,7 @@ import './visualization_editor';
 import 'ui/vis/editors/default/sidebar';
 import 'ui/visualize';
 import 'ui/collapsible_sidebar';
+import 'ui/directives/storage';
 
 import { capabilities } from 'ui/capabilities';
 import chrome from 'ui/chrome';

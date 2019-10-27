@@ -99,7 +99,7 @@ export class DataPlugin
 
     const timefilterService = this.timefilter.setup({
       uiSettings,
-      store: __LEGACY.storage,
+      storage: __LEGACY.storage,
     });
     const filterService = this.filter.setup({
       uiSettings,
@@ -127,7 +127,7 @@ export class DataPlugin
     const SearchBar = createSearchBar({
       core,
       data,
-      store: __LEGACY.storage,
+      storage: __LEGACY.storage,
       timefilter: this.setupApi.timefilter,
       filterManager: this.setupApi.filter.filterManager,
     });
