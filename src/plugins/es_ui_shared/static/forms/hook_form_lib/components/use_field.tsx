@@ -23,7 +23,7 @@ import { FieldHook, FieldConfig } from '../types';
 import { useField } from '../hooks';
 import { useFormContext } from '../form_context';
 
-interface Props {
+export interface Props {
   path: string;
   config?: FieldConfig<any>;
   defaultValue?: unknown;

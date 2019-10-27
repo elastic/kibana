@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { FieldConfig } from 'src/plugins/es_ui_shared/static/forms/hook_form_lib';
 import {
   FIELD_TYPES,
   fieldValidators,
@@ -78,13 +79,17 @@ export const PARAMETERS_DEFINITION = {
     props: {
       min: {
         fieldConfig: {
-          defaultValue: 5,
-        },
+          defaultValue: 0.01,
+          serializer: value => (value === '' ? '' : toInt(value) / 100),
+          deserializer: value => Math.round(value * 100),
+        } as FieldConfig,
       },
       max: {
         fieldConfig: {
-          defaultValue: 85,
-        },
+          defaultValue: 1,
+          serializer: value => (value === '' ? '' : toInt(value) / 100),
+          deserializer: value => Math.round(value * 100),
+        } as FieldConfig,
       },
       min_segment_size: {
         fieldConfig: {
