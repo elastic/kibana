@@ -4,11 +4,50 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getQueryFilter } from './get_filter';
+import { getQueryFilter, getFilter } from './get_filter';
+import { savedObjectsClientMock } from 'src/core/server/mocks';
+import { AlertServices } from '../../../../../alerting/server/types';
 
 describe('get_filter', () => {
+  let savedObjectsClient = savedObjectsClientMock.create();
+  savedObjectsClient.get = jest.fn().mockImplementation(() => ({
+    attributes: {
+      query: { query: 'host.name: linux', language: 'kuery' },
+      filters: [],
+    },
+  }));
+  let servicesMock: AlertServices = {
+    savedObjectsClient,
+    callCluster: jest.fn(),
+    alertInstanceFactory: jest.fn(),
+  };
+
+  beforeAll(() => {
+    jest.resetAllMocks();
+  });
+
+  beforeEach(() => {
+    savedObjectsClient = savedObjectsClientMock.create();
+    savedObjectsClient.get = jest.fn().mockImplementation(() => ({
+      attributes: {
+        query: { query: 'host.name: linux', language: 'kuery' },
+        language: 'kuery',
+        filters: [],
+      },
+    }));
+    servicesMock = {
+      savedObjectsClient,
+      callCluster: jest.fn(),
+      alertInstanceFactory: jest.fn(),
+    };
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
   describe('getQueryFilter', () => {
-    test('it should work with an empty filter', () => {
+    test('it should work with an empty filter as kuery', () => {
       const esQuery = getQueryFilter('host.name: linux', 'kuery', [], ['auditbeat-*']);
       expect(esQuery).toEqual({
         bool: {
@@ -27,6 +66,26 @@ describe('get_filter', () => {
               },
             },
           ],
+          should: [],
+          must_not: [],
+        },
+      });
+    });
+
+    test('it should work with an empty filter as lucene', () => {
+      const esQuery = getQueryFilter('host.name: linux', 'lucene', [], ['auditbeat-*']);
+      expect(esQuery).toEqual({
+        bool: {
+          must: [
+            {
+              query_string: {
+                query: 'host.name: linux',
+                analyze_wildcard: true,
+                time_zone: 'Zulu',
+              },
+            },
+          ],
+          filter: [],
           should: [],
           must_not: [],
         },
@@ -224,6 +283,149 @@ describe('get_filter', () => {
           must_not: [],
         },
       });
+    });
+  });
+
+  describe('getFilter', () => {
+    test('returns a filter if given a type of filter as is', async () => {
+      const filter = await getFilter(
+        'filter',
+        { something: '1' },
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        servicesMock,
+        ['auditbeat-*']
+      );
+      expect(filter).toEqual({
+        something: '1',
+      });
+    });
+
+    test('returns a query if given a type of query', async () => {
+      const filter = await getFilter(
+        'query',
+        undefined,
+        undefined,
+        'kuery',
+        'host.name: siem',
+        undefined,
+        servicesMock,
+        ['auditbeat-*']
+      );
+      expect(filter).toEqual({
+        bool: {
+          must: [],
+          filter: [
+            {
+              bool: {
+                should: [
+                  {
+                    match: {
+                      'host.name': 'siem',
+                    },
+                  },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+          ],
+          should: [],
+          must_not: [],
+        },
+      });
+    });
+
+    test('throws on type query if query is undefined', async () => {
+      await expect(
+        getFilter(
+          'query',
+          undefined,
+          undefined,
+          undefined,
+          'host.name: siem',
+          undefined,
+          servicesMock,
+          ['auditbeat-*']
+        )
+      ).rejects.toThrow('query, filters, and index parameter should be defined');
+    });
+
+    test('throws on type query if language is undefined', async () => {
+      await expect(
+        getFilter('query', undefined, undefined, 'kuery', undefined, undefined, servicesMock, [
+          'auditbeat-*',
+        ])
+      ).rejects.toThrow('query, filters, and index parameter should be defined');
+    });
+
+    test('throws on type query if index is undefined', async () => {
+      await expect(
+        getFilter(
+          'query',
+          undefined,
+          undefined,
+          'kuery',
+          'host.name: siem',
+          undefined,
+          servicesMock,
+          undefined
+        )
+      ).rejects.toThrow('query, filters, and index parameter should be defined');
+    });
+
+    test('returns a saved query if given a type of query', async () => {
+      const filter = await getFilter(
+        'saved_query',
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        'some-id',
+        servicesMock,
+        ['auditbeat-*']
+      );
+      expect(filter).toEqual({
+        bool: {
+          filter: [
+            { bool: { minimum_should_match: 1, should: [{ match: { 'host.name': 'linux' } }] } },
+          ],
+          must: [],
+          must_not: [],
+          should: [],
+        },
+      });
+    });
+
+    test('throws on saved query if saved_id is undefined', async () => {
+      await expect(
+        getFilter(
+          'saved_query',
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          servicesMock,
+          ['auditbeat-*']
+        )
+      ).rejects.toThrow('savedId parameter should be defined');
+    });
+
+    test('throws on saved query if index is undefined', async () => {
+      await expect(
+        getFilter(
+          'saved_query',
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          'some-id',
+          servicesMock,
+          undefined
+        )
+      ).rejects.toThrow('savedId parameter should be defined');
     });
   });
 });

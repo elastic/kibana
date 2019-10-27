@@ -44,7 +44,7 @@ export const getFilter = async (
   query: string | undefined,
   savedId: string | undefined,
   services: AlertServices,
-  index: string[]
+  index: string[] | undefined
 ): Promise<unknown> => {
   switch (type) {
     case 'query': {
@@ -55,7 +55,7 @@ export const getFilter = async (
       }
     }
     case 'saved_query': {
-      if (savedId != null) {
+      if (savedId != null && index != null) {
         const savedObject = await services.savedObjectsClient.get('query', savedId);
         return getQueryFilter(
           savedObject.attributes.query.query,
