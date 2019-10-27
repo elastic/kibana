@@ -109,7 +109,7 @@ export interface FieldHook {
     value?: unknown;
     validationType?: string;
   }) => FieldValidateResponse | Promise<FieldValidateResponse>;
-  reset: () => void;
+  reset: ({ resetValue }: { resetValue: boolean }) => void;
   __serializeOutput: (rawValue?: unknown) => unknown;
 }
 
