@@ -21,7 +21,6 @@ import {
   getUpdateRequest,
 } from './__mocks__/request_responses';
 
-// TODO: Fix all these tests as they are all wrong now
 describe('update_signals', () => {
   let { server, alertsClient, actionsClient } = createMockServer();
 
@@ -32,7 +31,7 @@ describe('update_signals', () => {
   });
 
   describe('status codes with actionClient and alertClient', () => {
-    it('returns 200 when updating a single signal with a valid actionClient and alertClient', async () => {
+    test('returns 200 when updating a single signal with a valid actionClient and alertClient', async () => {
       alertsClient.find.mockResolvedValue(getFindResult());
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.update.mockResolvedValue(updateActionResult());
@@ -41,21 +40,21 @@ describe('update_signals', () => {
       expect(statusCode).toBe(200);
     });
 
-    it('returns 404 if actionClient is not available on the route', async () => {
+    test('returns 404 if actionClient is not available on the route', async () => {
       const { serverWithoutActionClient } = createMockServerWithoutActionClientDecoration();
       updateSignalsRoute(serverWithoutActionClient);
       const { statusCode } = await serverWithoutActionClient.inject(getUpdateRequest());
       expect(statusCode).toBe(404);
     });
 
-    it('returns 404 if alertClient is not available on the route', async () => {
+    test('returns 404 if alertClient is not available on the route', async () => {
       const { serverWithoutAlertClient } = createMockServerWithoutAlertClientDecoration();
       updateSignalsRoute(serverWithoutAlertClient);
       const { statusCode } = await serverWithoutAlertClient.inject(getUpdateRequest());
       expect(statusCode).toBe(404);
     });
 
-    it('returns 404 if alertClient and actionClient are both not available on the route', async () => {
+    test('returns 404 if alertClient and actionClient are both not available on the route', async () => {
       const {
         serverWithoutActionOrAlertClient,
       } = createMockServerWithoutActionOrAlertClientDecoration();
@@ -66,7 +65,7 @@ describe('update_signals', () => {
   });
 
   describe('validation', () => {
-    it('returns 400 if id is not given in either the body or the url', async () => {
+    test('returns 400 if id is not given in either the body or the url', async () => {
       alertsClient.find.mockResolvedValue(getFindResult());
       alertsClient.get.mockResolvedValue(getResult());
       const request: ServerInjectOptions = {
@@ -90,7 +89,7 @@ describe('update_signals', () => {
       expect(statusCode).toBe(400);
     });
 
-    it('returns 200 if type is kql', async () => {
+    test('returns 200 if type is kql', async () => {
       alertsClient.find.mockResolvedValue(getFindResult());
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.update.mockResolvedValue(updateActionResult());
@@ -116,7 +115,7 @@ describe('update_signals', () => {
       expect(statusCode).toBe(200);
     });
 
-    it('returns 200 if type is filter', async () => {
+    test('returns 200 if type is filter', async () => {
       alertsClient.find.mockResolvedValue(getFindResult());
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.update.mockResolvedValue(updateActionResult());
@@ -134,15 +133,13 @@ describe('update_signals', () => {
           type: 'filter',
           from: 'now-6m',
           to: 'now',
-          query: 'user.name: root or user.name: admin',
-          language: 'kuery',
         },
       };
       const { statusCode } = await server.inject(request);
       expect(statusCode).toBe(200);
     });
 
-    it('returns 400 if type is not filter or kql', async () => {
+    test('returns 400 if type is not filter or kql', async () => {
       alertsClient.find.mockResolvedValue(getFindResult());
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.update.mockResolvedValue(updateActionResult());
@@ -168,7 +165,7 @@ describe('update_signals', () => {
       expect(statusCode).toBe(400);
     });
 
-    it('returns 200 if id is given in the url but not the payload', async () => {
+    test('returns 200 if id is given in the url but not the payload', async () => {
       alertsClient.find.mockResolvedValue(getFindResult());
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.update.mockResolvedValue(updateActionResult());

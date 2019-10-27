@@ -24,21 +24,32 @@ export type PartialFilter = Partial<Filter>;
 export interface SignalAlertParams {
   description: string;
   from: string;
+  to: string;
   id: string;
   index: string[];
   interval: string;
+  name: string;
+  severity: string;
+  type: 'filter' | 'query' | 'saved_query';
   enabled: boolean;
   filter: Record<string, {}> | undefined;
   query: string | undefined;
   language: string | undefined;
   saved_id: string | undefined;
   filters: PartialFilter[] | undefined;
-  maxSignals: string;
-  name: string;
-  severity: string;
-  type: 'filter' | 'query' | 'saved_query';
-  to: string;
+  maxSignals: number;
   references: string[];
+}
+
+export type SignalAlertParamsRest = Omit<SignalAlertParams, 'maxSignals'> & {
+  max_signals: SignalAlertParams['maxSignals'];
+};
+
+export interface FindParamsRest {
+  per_page: number;
+  page: number;
+  sort_field: string;
+  fields: string[];
 }
 
 export interface Clients {
@@ -80,7 +91,7 @@ export type SignalAlertType = Alert & {
 
 export interface SignalsRequest extends Hapi.Request {
   payload: Omit<SignalAlertParams, 'maxSignals'> & {
-    max_signals: string;
+    max_signals: number;
   };
 }
 

@@ -30,7 +30,7 @@ describe('create_signals', () => {
   });
 
   describe('status codes with actionClient and alertClient', () => {
-    it('returns 200 when creating a single signal with a valid actionClient and alertClient', async () => {
+    test('returns 200 when creating a single signal with a valid actionClient and alertClient', async () => {
       alertsClient.find.mockResolvedValue(getFindResult());
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.create.mockResolvedValue(createActionResult());
@@ -39,21 +39,21 @@ describe('create_signals', () => {
       expect(statusCode).toBe(200);
     });
 
-    it('returns 404 if actionClient is not available on the route', async () => {
+    test('returns 404 if actionClient is not available on the route', async () => {
       const { serverWithoutActionClient } = createMockServerWithoutActionClientDecoration();
       createSignalsRoute(serverWithoutActionClient);
       const { statusCode } = await serverWithoutActionClient.inject(getCreateRequest());
       expect(statusCode).toBe(404);
     });
 
-    it('returns 404 if alertClient is not available on the route', async () => {
+    test('returns 404 if alertClient is not available on the route', async () => {
       const { serverWithoutAlertClient } = createMockServerWithoutAlertClientDecoration();
       createSignalsRoute(serverWithoutAlertClient);
       const { statusCode } = await serverWithoutAlertClient.inject(getCreateRequest());
       expect(statusCode).toBe(404);
     });
 
-    it('returns 404 if alertClient and actionClient are both not available on the route', async () => {
+    test('returns 404 if alertClient and actionClient are both not available on the route', async () => {
       const {
         serverWithoutActionOrAlertClient,
       } = createMockServerWithoutActionOrAlertClientDecoration();
@@ -64,7 +64,7 @@ describe('create_signals', () => {
   });
 
   describe('validation', () => {
-    it('returns 400 if id is not given', async () => {
+    test('returns 400 if id is not given', async () => {
       alertsClient.find.mockResolvedValue(getFindResult());
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.create.mockResolvedValue(createActionResult());
@@ -90,7 +90,7 @@ describe('create_signals', () => {
       expect(statusCode).toBe(400);
     });
 
-    it('returns 200 if type is kql', async () => {
+    test('returns 200 if type is kql', async () => {
       alertsClient.find.mockResolvedValue(getFindResult());
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.create.mockResolvedValue(createActionResult());
@@ -116,12 +116,14 @@ describe('create_signals', () => {
       expect(statusCode).toBe(200);
     });
 
-    it('returns 200 if type is filter', async () => {
+    test('returns 200 if type is filter', async () => {
       alertsClient.find.mockResolvedValue(getFindResult());
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.create.mockResolvedValue(createActionResult());
       alertsClient.create.mockResolvedValue(createAlertResult());
-      const request: ServerInjectOptions = {
+      // Cannot type request with a ServerInjectOptions as the type system complains
+      // about the property filter involving Hapi types, so I left it off for now
+      const request = {
         method: 'POST',
         url: '/api/siem/signals',
         payload: {
@@ -134,15 +136,14 @@ describe('create_signals', () => {
           type: 'filter',
           from: 'now-6m',
           to: 'now',
-          query: 'user.name: root or user.name: admin',
-          language: 'kuery',
+          filter: {},
         },
       };
       const { statusCode } = await server.inject(request);
       expect(statusCode).toBe(200);
     });
 
-    it('returns 400 if type is not filter or kql', async () => {
+    test('returns 400 if type is not filter or kql', async () => {
       alertsClient.find.mockResolvedValue(getFindResult());
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.create.mockResolvedValue(createActionResult());

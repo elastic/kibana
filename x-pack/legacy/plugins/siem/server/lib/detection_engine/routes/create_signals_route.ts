@@ -5,32 +5,10 @@
  */
 
 import Hapi from 'hapi';
-import Joi from 'joi';
 import { isFunction } from 'lodash/fp';
 import { createSignals } from '../alerts/create_signals';
 import { SignalsRequest } from '../alerts/types';
-
-export const schema = Joi.object({
-  description: Joi.string().required(),
-  enabled: Joi.boolean().default(true),
-  filter: Joi.object(),
-  filters: Joi.array(),
-  from: Joi.string().required(),
-  id: Joi.string().required(),
-  index: Joi.array().required(),
-  interval: Joi.string().default('5m'),
-  query: Joi.string(),
-  language: Joi.string(),
-  saved_id: Joi.string(),
-  max_signals: Joi.number().default(100),
-  name: Joi.string().required(),
-  severity: Joi.string().required(),
-  to: Joi.string().required(),
-  type: Joi.string()
-    .valid('filter', 'query', 'saved_query')
-    .required(),
-  references: Joi.array().default([]),
-});
+import { createSignalsSchema } from './schemas';
 
 export const createCreateSignalsRoute: Hapi.ServerRoute = {
   method: 'POST',
@@ -41,7 +19,7 @@ export const createCreateSignalsRoute: Hapi.ServerRoute = {
       options: {
         abortEarly: false,
       },
-      payload: schema,
+      payload: createSignalsSchema,
     },
   },
   async handler(request: SignalsRequest, headers) {
@@ -67,7 +45,6 @@ export const createCreateSignalsRoute: Hapi.ServerRoute = {
     } = request.payload;
 
     const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-
     const actionsClient = isFunction(request.getActionsClient) ? request.getActionsClient() : null;
 
     if (!alertsClient || !actionsClient) {

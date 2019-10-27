@@ -7,21 +7,25 @@
 import { ServerInjectOptions } from 'hapi';
 import { ActionResult } from '../../../../../../actions/server/types';
 
+export const typicalPayload = () => ({
+  id: 'rule-1',
+  description: 'Detecting root and admin users',
+  index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+  interval: '5m',
+  name: 'Detect Root/Admin Users',
+  type: 'query',
+  from: 'now-6m',
+  to: 'now',
+  severity: 'high',
+  query: 'user.name: root or user.name: admin',
+  language: 'kuery',
+});
+
 export const getUpdateRequest = (): ServerInjectOptions => ({
   method: 'PUT',
   url: '/api/siem/signals',
   payload: {
-    id: 'rule-1',
-    description: 'Detecting root and admin users',
-    index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-    interval: '5m',
-    name: 'Detect Root/Admin Users',
-    severity: 'high',
-    type: 'query',
-    from: 'now-6m',
-    to: 'now',
-    query: 'user.name: root or user.name: admin',
-    language: 'kuery',
+    ...typicalPayload(),
   },
 });
 
@@ -51,17 +55,7 @@ export const getCreateRequest = (): ServerInjectOptions => ({
   method: 'POST',
   url: '/api/siem/signals',
   payload: {
-    id: 'rule-1',
-    description: 'Detecting root and admin users',
-    index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-    interval: '5m',
-    name: 'Detect Root/Admin Users',
-    severity: 'high',
-    type: 'query',
-    from: 'now-6m',
-    to: 'now',
-    query: 'user.name: root or user.name: admin',
-    language: 'kuery',
+    ...typicalPayload(),
   },
 });
 

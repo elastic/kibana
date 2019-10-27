@@ -15,7 +15,7 @@ interface BuildEventsReIndexParams {
   from: string;
   to: string;
   signalsIndex: string;
-  maxDocs: string;
+  maxDocs: number;
   filter: unknown;
   severity: string;
   name: string;

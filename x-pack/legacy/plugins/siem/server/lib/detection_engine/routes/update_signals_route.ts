@@ -9,26 +9,7 @@ import Joi from 'joi';
 import { isFunction } from 'lodash/fp';
 import { updateSignal } from '../alerts/update_signals';
 import { SignalsRequest } from '../alerts/types';
-
-export const schema = Joi.object({
-  description: Joi.string(),
-  enabled: Joi.boolean(),
-  filter: Joi.object(),
-  filters: Joi.array(),
-  from: Joi.string(),
-  id: Joi.string(),
-  index: Joi.array(),
-  interval: Joi.string(),
-  query: Joi.string(),
-  language: Joi.string(),
-  saved_id: Joi.string(),
-  max_signals: Joi.number().default(100),
-  name: Joi.string(),
-  severity: Joi.string(),
-  to: Joi.string(),
-  type: Joi.string().valid('filter', 'saved_query', 'query'),
-  references: Joi.array().default([]),
-});
+import { updateSignalSchema } from './schemas';
 
 export const createUpdateSignalsRoute: Hapi.ServerRoute = {
   method: 'PUT',
@@ -46,7 +27,7 @@ export const createUpdateSignalsRoute: Hapi.ServerRoute = {
           otherwise: Joi.string().required(),
         }),
       },
-      payload: schema,
+      payload: updateSignalSchema,
     },
   },
   async handler(request: SignalsRequest, headers) {
