@@ -7,6 +7,7 @@
 export {
   useForm,
   UseField,
+  UseMultiFields,
   getUseField,
   Form,
   FormDataProvider,

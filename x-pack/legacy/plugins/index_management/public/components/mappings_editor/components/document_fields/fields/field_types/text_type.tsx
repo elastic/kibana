@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 
 import { NormalizedField } from '../../../../types';
-import { UseField, Field, FieldHook } from '../../../../shared_imports';
+import { UseField, UseMultiFields, Field, FieldHook } from '../../../../shared_imports';
 import { getFieldConfig } from '../../../../lib';
 import { PARAMETERS_OPTIONS } from '../../../../constants';
 import { EditFieldSection, EditFieldFormRow, AdvancedSettingsWrapper } from '../edit_field';
@@ -29,26 +29,28 @@ export const TextType = React.memo(({ field }: Props) => {
     min,
     max,
   ]: any) => {
-    minField.setValue(min === '' ? '' : parseInt(min, 10));
-    maxField.setValue(max === '' ? '' : parseInt(max, 10));
+    minField.setValue(min);
+    maxField.setValue(max);
   };
 
   return (
     <>
       <EditFieldSection>
+        {/* store */}
         <EditFieldFormRow
           title={<h3>Store field value</h3>}
           description="This is description text."
           formFieldPath="store"
         />
 
+        {/* index */}
         <EditFieldFormRow
           title={<h3>Searchable</h3>}
           description="This is description text."
           formFieldPath="index"
           direction="column"
         >
-          {/* Index options */}
+          {/* index_options */}
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem>
               <UseField
@@ -71,34 +73,39 @@ export const TextType = React.memo(({ field }: Props) => {
           </EuiFlexGroup>
         </EditFieldFormRow>
 
+        {/* fielddata */}
         <EditFieldFormRow
           title={<h3>Fielddata</h3>}
           description="This is description text."
           formFieldPath="fielddata"
         >
-          <EuiFormRow label="Range (Min/Max %):">
-            <UseField
-              path="fielddata_frequency_filter.min"
-              config={getFieldConfig('fielddata_frequency_filter', 'min')}
+          {/* fielddata_frequency_filter */}
+          <EuiFormRow label="Range (Min / Max %):">
+            <UseMultiFields
+              fields={{
+                min: {
+                  path: 'fielddata_frequency_filter.min',
+                  config: getFieldConfig('fielddata_frequency_filter', 'min'),
+                },
+                max: {
+                  path: 'fielddata_frequency_filter.max',
+                  config: getFieldConfig('fielddata_frequency_filter', 'max'),
+                },
+              }}
             >
-              {minField => (
-                <UseField
-                  path="fielddata_frequency_filter.max"
-                  config={getFieldConfig('fielddata_frequency_filter', 'max')}
-                >
-                  {maxField => (
-                    <EuiDualRange
-                      min={0}
-                      max={100}
-                      value={[minField.value as number, maxField.value as number]}
-                      onChange={onFrequencyFilterChange(minField, maxField)}
-                      showInput
-                    />
-                  )}
-                </UseField>
+              {({ min, max }) => (
+                <EuiDualRange
+                  min={0}
+                  max={100}
+                  value={[min.value as number, max.value as number]}
+                  onChange={onFrequencyFilterChange(min, max)}
+                  showInput
+                />
               )}
-            </UseField>
+            </UseMultiFields>
           </EuiFormRow>
+
+          <EuiSpacer />
 
           <UseField
             path="fielddata_frequency_filter.min_segment_size"
