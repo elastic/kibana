@@ -9,7 +9,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
-  EuiRange,
   EuiDualRange,
   EuiFormRow,
 } from '@elastic/eui';
@@ -18,6 +17,7 @@ import { NormalizedField } from '../../../../types';
 import { UseField, UseMultiFields, Field, FieldHook } from '../../../../shared_imports';
 import { getFieldConfig } from '../../../../lib';
 import { PARAMETERS_OPTIONS } from '../../../../constants';
+import { SelectWithCustom } from '../../../form';
 import { EditFieldSection, EditFieldFormRow, AdvancedSettingsWrapper } from '../edit_field';
 
 interface Props {
@@ -115,10 +115,57 @@ export const TextType = React.memo(({ field }: Props) => {
         </EditFieldFormRow>
       </EditFieldSection>
 
-      <EuiSpacer size="m" />
-
       <AdvancedSettingsWrapper>
-        <div>Here will come the advanced settings</div>
+        <EditFieldSection title="Analysers">
+          <EditFieldFormRow
+            title={<h3>Use different analyzers for index and searching</h3>}
+            sizeTitle={'xxs'}
+            toggleDefaultValue={
+              field.source.search_analyzer !== undefined &&
+              field.source.search_analyzer !== field.source.analyzer
+            }
+          >
+            {isOn => (
+              <>
+                <div>
+                  <SelectWithCustom
+                    path="analyzer"
+                    label={isOn ? 'Index analyzer' : 'Index + search analyzer'}
+                    options={PARAMETERS_OPTIONS.analyzer!}
+                    config={getFieldConfig('analyzer')}
+                    defaultValue={field.source.analyzer}
+                  />
+                </div>
+                {isOn && (
+                  <>
+                    <EuiSpacer />
+                    <div>
+                      <SelectWithCustom
+                        path="search_analyzer"
+                        options={PARAMETERS_OPTIONS.analyzer!}
+                        config={getFieldConfig('search_analyzer')}
+                        defaultValue={field.source.search_analyzer}
+                      />
+                    </div>
+                  </>
+                )}
+                <EuiSpacer />
+                <div>
+                  <SelectWithCustom
+                    path="search_quote_analyzer"
+                    options={PARAMETERS_OPTIONS.analyzer!}
+                    config={getFieldConfig('search_quote_analyzer')}
+                    defaultValue={field.source.search_quote_analyzer}
+                  />
+                </div>
+              </>
+            )}
+          </EditFieldFormRow>
+        </EditFieldSection>
+
+        <EditFieldSection title="Another section">
+          <div>It will come here...</div>
+        </EditFieldSection>
       </AdvancedSettingsWrapper>
     </>
   );

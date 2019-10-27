@@ -89,12 +89,19 @@
   }
 
   &__edit-field {
+    min-width: 680px;
+
     &__section {
       border-bottom: $euiBorderThin;
-      padding: $euiSizeXL 0;
+      margin-bottom: $euiSizeXL;
+      padding-bottom: $euiSizeXL;
 
-      &:first-child {
-        padding-top: 0;
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      + .mappings-editor__edit-field__advanced-settings {
+        margin-top: $euiSizeL * -1;
       }
     }
 
@@ -108,6 +115,16 @@
         line-height: 1;
         margin-bottom: 8px;
       }
+    }
+  }
+
+  &__select-with-custom {
+    position: relative;
+
+    &__button {
+      position: absolute;
+      right: 0;
+      top: $euiSizeXS * -1;
     }
   }
 }

@@ -18,7 +18,9 @@ type ChildrenFunc = (isOn: boolean) => React.ReactNode;
 interface Props {
   title?: JSX.Element;
   withToggle?: boolean;
+  toggleDefaultValue?: boolean;
   direction?: 'row' | 'column';
+  sizeTitle?: 's' | 'xs' | 'xxs';
   ariaId?: string;
   description?: string | JSX.Element;
   formFieldPath?: ParameterName;
@@ -33,13 +35,15 @@ export const EditFieldFormRow = React.memo(
     description,
     ariaId,
     withToggle = true,
+    toggleDefaultValue = false,
     direction = 'row',
+    sizeTitle = 'xs',
     formFieldPath,
     children,
   }: Props) => {
     const initialVisibleState =
       formFieldPath === undefined
-        ? !Boolean(withToggle)
+        ? toggleDefaultValue
         : (getFieldConfig(formFieldPath).defaultValue! as boolean);
 
     const [isContentVisible, setIsContentVisible] = useState<boolean>(initialVisibleState);
@@ -79,7 +83,7 @@ export const EditFieldFormRow = React.memo(
                 {title && (
                   <EuiTitle
                     id={`${ariaId}-title`}
-                    size="xs"
+                    size={sizeTitle}
                     className="mappings-editor__edit-field__formRow__title"
                   >
                     {title}

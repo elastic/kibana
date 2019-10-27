@@ -151,3 +151,8 @@ export interface NormalizedField extends FieldMeta {
 export type ChildFieldName = 'properties' | 'fields';
 
 export type FieldsEditor = 'default' | 'json';
+
+export interface SelectOption {
+  value: any;
+  text: string;
+}
