@@ -35,13 +35,14 @@ export interface SignalAlertParams {
   filter: Record<string, {}> | undefined;
   query: string | undefined;
   language: string | undefined;
-  saved_id: string | undefined;
+  savedId: string | undefined;
   filters: PartialFilter[] | undefined;
   maxSignals: number;
   references: string[];
 }
 
-export type SignalAlertParamsRest = Omit<SignalAlertParams, 'maxSignals'> & {
+export type SignalAlertParamsRest = Omit<SignalAlertParams, 'maxSignals' | 'saved_id'> & {
+  saved_id: SignalAlertParams['savedId'];
   max_signals: SignalAlertParams['maxSignals'];
 };
 
@@ -90,9 +91,7 @@ export type SignalAlertType = Alert & {
 };
 
 export interface SignalsRequest extends Hapi.Request {
-  payload: Omit<SignalAlertParams, 'maxSignals'> & {
-    max_signals: number;
-  };
+  payload: SignalAlertParamsRest;
 }
 
 export type SignalExecutorOptions = Omit<AlertExecutorOptions, 'params'> & {

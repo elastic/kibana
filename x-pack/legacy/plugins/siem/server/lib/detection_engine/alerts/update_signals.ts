@@ -29,7 +29,7 @@ export const updateSignal = async ({
   enabled,
   query,
   language,
-  saved_id,
+  savedId,
   filters,
   filter,
   from,
@@ -53,7 +53,6 @@ export const updateSignal = async ({
 
   const alertTypeParams = signal.alertTypeParams || {};
 
-  // TODO: Fix these updates below
   const nextAlertTypeParams = defaults(
     {
       ...alertTypeParams,
@@ -64,7 +63,7 @@ export const updateSignal = async ({
       from,
       query,
       language,
-      saved_id,
+      savedId,
       filters,
       index,
       maxSignals,

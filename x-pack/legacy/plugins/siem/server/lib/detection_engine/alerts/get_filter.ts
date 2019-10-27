@@ -64,7 +64,7 @@ export const getFilter = async (
           index
         );
       } else {
-        throw new TypeError('savedId paramter should be defined');
+        throw new TypeError('savedId parameter should be defined');
       }
     }
     case 'filter': {
