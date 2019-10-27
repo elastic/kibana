@@ -19,9 +19,9 @@ import {
   Query,
 } from 'src/legacy/core_plugins/data/public';
 import { Filter } from '@kbn/es-query';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { TopNavMenu } from '../../../../../../src/legacy/core_plugins/kibana_react/public';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
-import { IStorageWrapper } from '../../../../../../src/plugins/kibana_utils/public';
 import { Document, SavedObjectStore } from '../persistence';
 import { EditorFrameInstance } from '../types';
 import { NativeRenderer } from '../native_renderer';

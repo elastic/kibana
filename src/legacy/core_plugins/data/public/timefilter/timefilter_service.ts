@@ -18,8 +18,8 @@
  */
 
 import { UiSettingsClientContract } from 'src/core/public';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { TimeHistory, Timefilter, TimeHistoryContract, TimefilterContract } from './index';
-import { IStorageWrapper } from '../../../../../plugins/kibana_utils/public';
 
 /**
  * Filter Service

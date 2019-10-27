@@ -10,7 +10,7 @@ import { render } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { CoreStart, SavedObjectsClientContract } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
-import { IStorageWrapper } from '../../../../../../src/plugins/kibana_utils/public';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import {
   DatasourceDimensionPanelProps,
   DatasourceDataPanelProps,

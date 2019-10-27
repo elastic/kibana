@@ -9,6 +9,7 @@ import {
   SavedObjectsClientContract,
   HttpServiceBase,
 } from 'src/core/public';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { termsOperation } from './terms';
 import { cardinalityOperation } from './cardinality';
 import { minOperation, averageOperation, sumOperation, maxOperation } from './metrics';
@@ -17,7 +18,6 @@ import { countOperation } from './count';
 import { DimensionPriority, StateSetter, OperationMetadata } from '../../../types';
 import { BaseIndexPatternColumn, FieldBasedIndexPatternColumn } from './column_types';
 import { IndexPatternPrivateState, IndexPattern, IndexPatternField } from '../../types';
-import { IStorageWrapper } from '../../../../../../../../src/plugins/kibana_utils/public';
 
 // List of all operation definitions registered to this data source.
 // If you want to implement a new operation, add it to this array and

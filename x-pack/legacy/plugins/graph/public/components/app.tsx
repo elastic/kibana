@@ -11,12 +11,12 @@ import { Provider } from 'react-redux';
 import React, { useState } from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { CoreStart } from 'kibana/public';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { FieldManager } from './field_manager';
 import { SearchBarProps, SearchBar } from './search_bar';
 import { GraphStore } from '../state_management';
 import { GuidancePanel } from './guidance_panel';
 
-import { IStorageWrapper } from '../../../../../../src/plugins/kibana_utils/public';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 
 export interface GraphAppProps extends SearchBarProps {

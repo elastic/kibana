@@ -19,8 +19,8 @@
 
 import moment from 'moment';
 import { TimeRange } from 'src/plugins/data/public';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { PersistedLog } from '../query/persisted_log';
-import { IStorageWrapper } from '../../../../../plugins/kibana_utils/public';
 
 export class TimeHistory {
   private history: PersistedLog<TimeRange>;

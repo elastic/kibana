@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import * as Rx from 'rxjs';
 import { map } from 'rxjs/operators';
-import { IStorageWrapper } from '../../../../../../plugins/kibana_utils/public';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 
 const defaultIsDuplicate = (oldItem: any, newItem: any) => {
   return _.isEqual(oldItem, newItem);
