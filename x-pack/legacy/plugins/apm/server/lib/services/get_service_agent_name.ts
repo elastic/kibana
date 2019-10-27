@@ -44,6 +44,8 @@ export async function getServiceAgentName(serviceName: string, setup: Setup) {
   };
 
   const { aggregations } = await client.search(params);
-  const agentName = idx(aggregations, _ => _.agents.buckets[0].key);
+  const agentName = idx(aggregations, _ => _.agents.buckets[0].key) as
+    | string
+    | undefined;
   return { agentName };
 }

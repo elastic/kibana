@@ -23,7 +23,7 @@ import { MockUiSettingsClientConstructor } from './ui_settings_service.test.mock
 import { UiSettingsService } from './ui_settings_service';
 import { httpServiceMock } from '../http/http_service.mock';
 import { loggingServiceMock } from '../logging/logging_service.mock';
-import { SavedObjectsClientMock } from '../mocks';
+import { savedObjectsClientMock } from '../mocks';
 import { mockCoreContext } from '../core_context.mock';
 
 const overrides = {
@@ -43,7 +43,7 @@ const coreContext = mockCoreContext.create();
 coreContext.configService.atPath.mockReturnValue(new BehaviorSubject({ overrides }));
 const httpSetup = httpServiceMock.createSetupContract();
 const setupDeps = { http: httpSetup };
-const savedObjectsClient = SavedObjectsClientMock.create();
+const savedObjectsClient = savedObjectsClientMock.create();
 
 afterEach(() => {
   MockUiSettingsClientConstructor.mockClear();
