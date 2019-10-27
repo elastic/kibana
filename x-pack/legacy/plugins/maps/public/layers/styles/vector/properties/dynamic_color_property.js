@@ -5,8 +5,11 @@
  */
 
 
+import { DynamicStyleProperty } from './dynamic_style_property';
 
 
-
-export class AbstractStyleProperty {
+export class DynamicColorProperty extends DynamicStyleProperty {
+  syncWithMb(layer, mbMap) {
+    super.syncWithMb(layer, mbMap);
+  }
 }

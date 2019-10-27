@@ -17,8 +17,8 @@ import {
   getDefaultStaticProperties,
   vectorStyles,
 } from '../../vector_style_defaults';
-import { DEFAULT_FILL_COLORS, DEFAULT_LINE_COLORS } from '../../color_utils';
-import { VECTOR_SHAPE_TYPES } from '../../../sources/vector_feature_types';
+import { DEFAULT_FILL_COLORS, DEFAULT_LINE_COLORS } from '../../../color_utils';
+import { VECTOR_SHAPE_TYPES } from '../../../../sources/vector_feature_types';
 import { SYMBOLIZE_AS_ICON } from '../../vector_constants';
 import { i18n } from '@kbn/i18n';
 import { SYMBOL_OPTIONS } from '../../symbol_utils';

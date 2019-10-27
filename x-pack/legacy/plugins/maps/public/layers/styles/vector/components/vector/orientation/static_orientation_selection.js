@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { staticOrientationShape } from '../style_option_shapes';
-import { ValidatedRange } from '../../../../../components/validated_range';
+import { ValidatedRange } from '../../../../../../components/validated_range';
 
 export function StaticOrientationSelection({ onChange, styleOptions }) {
   const onOrientationChange = orientation => {

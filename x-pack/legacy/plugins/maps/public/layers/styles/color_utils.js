@@ -8,7 +8,7 @@ import React from 'react';
 
 import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
 import { getLegendColors, getColor } from 'ui/vis/map/color_util';
-import { ColorGradient } from './components/color_gradient';
+import { ColorGradient } from './color_gradient';
 import { palettes } from '@elastic/eui/lib/services';
 import tinycolor from 'tinycolor2';
 import chroma from 'chroma-js';

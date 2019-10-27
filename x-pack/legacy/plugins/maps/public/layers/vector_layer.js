@@ -7,7 +7,7 @@
 import turf from 'turf';
 import React from 'react';
 import { AbstractLayer } from './layer';
-import { VectorStyle } from './styles/vector_style';
+import { VectorStyle } from './styles/vector/vector_style';
 import { InnerJoin } from './joins/inner_join';
 import {
   GEO_JSON_TYPE,

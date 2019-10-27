@@ -8,8 +8,8 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { VectorIcon } from './vector_icon';
-import { StaticStyleProperty } from '../../../vector/properties/static_style_property';
-import { DynamicStyleProperty } from '../../../vector/properties/dynamic_style_property';
+import { StaticStyleProperty } from '../../../properties/static_style_property';
+import { DynamicStyleProperty } from '../../../properties/dynamic_style_property';
 
 let isPointsOnly = false;
 let isLinesOnly = false;

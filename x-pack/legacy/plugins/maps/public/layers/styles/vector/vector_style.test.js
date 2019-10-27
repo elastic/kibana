@@ -5,10 +5,10 @@
  */
 
 import { VectorStyle } from './vector_style';
-import { DataRequest } from '../util/data_request';
-import { VECTOR_SHAPE_TYPES } from '../sources/vector_feature_types';
-import { DynamicStyleProperty } from './vector/properties/dynamic_style_property';
-import { StaticStyleProperty } from './vector/properties/static_style_property';
+import { DataRequest } from '../../util/data_request';
+import { VECTOR_SHAPE_TYPES } from '../../sources/vector_feature_types';
+import { DynamicStyleProperty } from './properties/dynamic_style_property';
+import { StaticStyleProperty } from './properties/static_style_property';
 
 
 describe('getDescriptorWithMissingStylePropsRemoved', () => {

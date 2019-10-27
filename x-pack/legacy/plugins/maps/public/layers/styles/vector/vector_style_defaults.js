@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DynamicStyleProperty } from './vector/properties/dynamic_style_property';
-import { StaticStyleProperty } from './vector/properties/static_style_property';
+import { DynamicStyleProperty } from './properties/dynamic_style_property';
+import { StaticStyleProperty } from './properties/static_style_property';
 import { SYMBOLIZE_AS_CIRCLE, DEFAULT_ICON_SIZE } from './vector_constants';
 import {
   COLOR_GRADIENTS,
   DEFAULT_FILL_COLORS,
   DEFAULT_LINE_COLORS
-} from './color_utils';
+} from '../color_utils';
 
 const DEFAULT_ICON = 'airfield';
 

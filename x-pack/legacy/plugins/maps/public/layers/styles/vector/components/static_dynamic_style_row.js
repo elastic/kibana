@@ -5,8 +5,8 @@
  */
 
 import React from 'react';
-import { DynamicStyleProperty } from '../vector/properties/dynamic_style_property';
-import { StaticStyleProperty } from '../vector/properties/static_style_property';
+import { DynamicStyleProperty } from '../properties/dynamic_style_property';
+import { StaticStyleProperty } from '../properties/static_style_property';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 

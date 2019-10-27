@@ -7,7 +7,7 @@
 
 import { VectorLayer } from '../vector_layer';
 import { TooltipProperty } from '../tooltips/tooltip_property';
-import { VectorStyle } from '../styles/vector_style';
+import { VectorStyle } from '../styles/vector/vector_style';
 import { AbstractSource } from './source';
 import * as topojson from 'topojson-client';
 import _ from 'lodash';

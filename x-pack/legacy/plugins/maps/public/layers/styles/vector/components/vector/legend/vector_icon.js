@@ -12,8 +12,8 @@ import { CircleIcon } from './circle_icon';
 import { LineIcon } from './line_icon';
 import { PolygonIcon } from './polygon_icon';
 import { SymbolIcon } from './symbol_icon';
-import { StaticStyleProperty } from '../../../vector/properties/static_style_property';
-import { getColorRampCenterColor } from '../../../color_utils';
+import { StaticStyleProperty } from '../../../properties/static_style_property';
+import { getColorRampCenterColor } from '../../../../color_utils';
 
 export class VectorIcon extends Component {
 

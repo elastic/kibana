@@ -8,7 +8,7 @@ import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 
 import { EuiSuperSelect, EuiSpacer } from '@elastic/eui';
-import { COLOR_GRADIENTS } from '../../../color_utils';
+import { COLOR_GRADIENTS } from '../../../../color_utils';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ColorStops } from './color_stops';
 

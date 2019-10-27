@@ -5,8 +5,11 @@
  */
 
 
+import { StaticStyleProperty } from './static_style_property';
 
 
-
-export class AbstractStyleProperty {
+export class StaticSizeProperty extends StaticStyleProperty {
+  syncWithMb(layer, mbMap) {
+    super.syncWithMb(layer, mbMap);
+  }
 }

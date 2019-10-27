@@ -7,14 +7,14 @@
 import _ from 'lodash';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { getColorRampStops } from './color_utils';
+import { getColorRampStops } from '../color_utils';
 import { VectorStyleEditor } from './components/vector/vector_style_editor';
 import { getDefaultProperties, vectorStyles } from './vector_style_defaults';
-import { AbstractStyle } from './abstract_style';
-import { SOURCE_DATA_ID_ORIGIN, GEO_JSON_TYPE } from '../../../common/constants';
+import { AbstractStyle } from '../abstract_style';
+import { SOURCE_DATA_ID_ORIGIN, GEO_JSON_TYPE } from '../../../../common/constants';
 import { VectorIcon } from './components/vector/legend/vector_icon';
 import { VectorStyleLegend } from './components/vector/legend/vector_style_legend';
-import { VECTOR_SHAPE_TYPES } from '../sources/vector_feature_types';
+import { VECTOR_SHAPE_TYPES } from '../../sources/vector_feature_types';
 import { SYMBOLIZE_AS_CIRCLE, SYMBOLIZE_AS_ICON } from './vector_constants';
 import {
   getMakiSymbolAnchor,
@@ -22,8 +22,8 @@ import {
   SMALL_MAKI_ICON_SIZE,
   HALF_LARGE_MAKI_ICON_SIZE
 } from './symbol_utils';
-import { DynamicStyleProperty } from './vector/properties/dynamic_style_property';
-import { StaticStyleProperty } from './vector/properties/static_style_property';
+import { DynamicStyleProperty } from './properties/dynamic_style_property';
+import { StaticStyleProperty } from './properties/static_style_property';
 
 export class VectorStyle extends AbstractStyle {
 

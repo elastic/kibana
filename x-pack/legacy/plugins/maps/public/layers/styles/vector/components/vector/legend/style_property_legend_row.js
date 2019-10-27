@@ -9,8 +9,8 @@ import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 
 import { styleOptionShapes, rangeShape } from '../style_option_shapes';
-import { StaticStyleProperty } from '../../../vector/properties/static_style_property';
-import { ColorGradient } from '../../color_gradient';
+import { StaticStyleProperty } from '../../../properties/static_style_property';
+import { ColorGradient } from '../../../../color_gradient';
 import { CircleIcon } from './circle_icon';
 import { getVectorStyleLabel } from '../get_vector_style_label';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';

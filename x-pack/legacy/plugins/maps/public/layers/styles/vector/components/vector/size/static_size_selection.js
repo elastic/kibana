@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { staticSizeShape } from '../style_option_shapes';
-import { ValidatedRange } from '../../../../../components/validated_range';
+import { ValidatedRange } from '../../../../../../components/validated_range';
 import { i18n } from '@kbn/i18n';
 
 export function StaticSizeSelection({ onChange, styleOptions }) {
