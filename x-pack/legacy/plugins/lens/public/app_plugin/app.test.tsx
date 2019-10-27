@@ -129,7 +129,7 @@ describe('Lens App', () => {
 
   beforeEach(() => {
     frame = createMockFrame();
-    core = coreMock.createStart();
+    core = coreMock.createStart({ basePath: '/testbasepath' });
 
     core.uiSettings.get.mockImplementation(
       jest.fn(type => {
@@ -142,9 +142,6 @@ describe('Lens App', () => {
         }
       })
     );
-
-    (core.http.basePath.get as jest.Mock).mockReturnValue(`/testbasepath`);
-    (core.http.basePath.prepend as jest.Mock).mockImplementation(s => `/testbasepath${s}`);
   });
 
   it('renders the editor frame', () => {

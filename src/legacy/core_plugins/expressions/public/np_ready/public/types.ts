@@ -52,16 +52,25 @@ export interface IExpressionLoaderParams {
 export interface IInterpreterHandlers {
   getInitialContext: IGetInitialContext;
   inspectorAdapters?: Adapters;
+  abortSignal?: AbortSignal;
 }
 
-export interface IInterpreterResult {
+export interface IInterpreterErrorResult {
+  type: 'error';
+  error: { message: string; name: string; stack: string };
+}
+
+export interface IInterpreterSuccessResult {
   type: string;
   as?: string;
   value?: unknown;
   error?: unknown;
 }
 
+export type IInterpreterResult = IInterpreterSuccessResult & IInterpreterErrorResult;
+
 export interface IInterpreterRenderHandlers {
+  // Done increments the number of rendering successes
   done: () => void;
   onDestroy: (fn: () => void) => void;
   reload: () => void;

@@ -29,8 +29,6 @@ export interface TimerangeInput {
   to: number;
   /** The beginning of the timerange */
   from: number;
-  /** The default browser set time zone */
-  timezone?: Maybe<string>;
 }
 
 export interface PaginationInputPaginated {
