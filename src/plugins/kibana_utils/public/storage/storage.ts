@@ -17,9 +17,6 @@
  * under the License.
  */
 
-// This is really silly, but I wasn't prepared to rename the kibana Storage class everywhere it is used
-// and this is the only way I could figure out how to use the type definition for a built in object
-// in a file that creates a type with the same name as that built in object.
 import { IStorage, IStorageWrapper } from './types';
 
 export class Storage implements IStorageWrapper {
