@@ -4,69 +4,58 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
-import { EuiButton, EuiEmptyPrompt, EuiLink } from '@elastic/eui';
-
+import { EuiButton, EuiCode, EuiEmptyPrompt } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import * as React from 'react';
 import chrome from 'ui/chrome';
+import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
 
 import * as i18n from './translations';
 
-interface DocMapping {
-  beat: string;
-  docLink: string;
-}
+export const IndexPatternsMissingPrompt = React.memo(() => (
+  <EuiEmptyPrompt
+    iconType="gisApp"
+    title={<h2>{i18n.ERROR_TITLE}</h2>}
+    titleSize="xs"
+    body={
+      <>
+        <p>
+          <FormattedMessage
+            defaultMessage="An ECS compliant Kibana index pattern must be configured to view events on the map. When using {beats}, you can run the {setup} command on your hosts to automatically create the index patterns. For example: {example}."
+            id="xpack.siem.components.embeddables.indexPatternsMissingPrompt.errorDescription1"
+            values={{
+              beats: (
+                <a
+                  href={`${ELASTIC_WEBSITE_URL}guide/en/beats/libbeat/${DOC_LINK_VERSION}/getting-started.html`}
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  {'beats'}
+                </a>
+              ),
+              setup: <EuiCode>{'setup'}</EuiCode>,
+              example: <EuiCode>{'./packetbeat setup'}</EuiCode>,
+            }}
+          />
+        </p>
 
-export const IndexPatternsMissingPrompt = React.memo(() => {
-  const beatsSetupDocMapping: DocMapping[] = [
-    {
-      beat: 'auditbeat',
-      docLink: `${ELASTIC_WEBSITE_URL}/guide/en/beats/auditbeat/${DOC_LINK_VERSION}/load-kibana-dashboards.html`,
-    },
-    {
-      beat: 'filebeat',
-      docLink: `${ELASTIC_WEBSITE_URL}/guide/en/beats/filebeat/${DOC_LINK_VERSION}/load-kibana-dashboards.html`,
-    },
-    {
-      beat: 'packetbeat',
-      docLink: `${ELASTIC_WEBSITE_URL}/guide/en/beats/packetbeat/${DOC_LINK_VERSION}/load-kibana-dashboards.html`,
-    },
-    {
-      beat: 'winlogbeat',
-      docLink: `${ELASTIC_WEBSITE_URL}/guide/en/beats/winlogbeat/${DOC_LINK_VERSION}/load-kibana-dashboards.html`,
-    },
-  ];
-
-  return (
-    <EuiEmptyPrompt
-      iconType="gisApp"
-      title={<h2>{i18n.ERROR_TITLE}</h2>}
-      titleSize="xs"
-      body={
-        <>
-          <p>{i18n.ERROR_DESCRIPTION}</p>
-
-          <p>
-            {beatsSetupDocMapping
-              .map<React.ReactNode>(v => (
-                <EuiLink key={v.beat} href={v.docLink} target="blank">
-                  {`${v.beat}-*`}
-                </EuiLink>
-              ))
-              .reduce((acc, v) => [acc, ', ', v])}
-          </p>
-        </>
-      }
-      actions={
-        <EuiButton
-          href={`${chrome.getBasePath()}/app/kibana#/management/kibana/index_patterns`}
-          color="primary"
-          target="_blank"
-          fill
-        >
-          {i18n.ERROR_BUTTON}
-        </EuiButton>
-      }
-    />
-  );
-});
+        <p>
+          <FormattedMessage
+            defaultMessage="You can also configure them manually in Kibana."
+            id="xpack.siem.components.embeddables.indexPatternsMissingPrompt.errorDescription2"
+          />
+        </p>
+      </>
+    }
+    actions={
+      <EuiButton
+        href={`${chrome.getBasePath()}/app/kibana#/management/kibana/index_patterns`}
+        color="primary"
+        target="_blank"
+        fill
+      >
+        {i18n.ERROR_BUTTON}
+      </EuiButton>
+    }
+  />
+));
