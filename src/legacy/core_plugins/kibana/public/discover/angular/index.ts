@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import './discover';
+// import './discover';
 import './doc';
-import './context';
+// import './context';
 import './doc_viewer';
 import './directives';

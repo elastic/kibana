@@ -142,6 +142,7 @@ export function createLocalAngularModule(core: AppMountContext['core']) {
     'discoverIndexPatterns',
     'discoverChrome',
     'discoverSavedSearches',
+    'discoverEs',
   ]);
 }
 

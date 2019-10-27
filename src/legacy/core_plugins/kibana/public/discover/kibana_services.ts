@@ -22,6 +22,7 @@ import 'ui/fixed_scroll';
 import 'ui/directives/css_truncate';
 
 import { npStart } from 'ui/new_platform';
+
 import chromeLegacy from 'ui/chrome';
 import angular from 'angular'; // just used in embeddables and discover controller
 import uiRoutes from 'ui/routes';
@@ -43,6 +44,7 @@ import { wrapInI18nContext } from 'ui/i18n';
 import { docTitle } from 'ui/doc_title';
 // @ts-ignore
 import * as docViewsRegistry from 'ui/registry/doc_views';
+import { start as data } from '../../../data/public/legacy';
 
 export let angularModule: any = null;
 
@@ -61,6 +63,7 @@ let services = {
   chrome: npStart.core.chrome,
   docLinks: npStart.core.docLinks,
   eui_utils: npStart.plugins.eui_utils,
+  indexPatterns: data.indexPatterns.indexPatterns,
   inspector: npStart.plugins.inspector,
   metadata: npStart.core.injectedMetadata.getLegacyMetadata(),
   toastNotifications: npStart.core.notifications.toasts,

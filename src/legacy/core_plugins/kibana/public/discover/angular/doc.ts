@@ -16,13 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { getAngularModule, getServices, IndexPatterns } from '../kibana_services';
+import { getAngularModule, getServices } from '../kibana_services';
 // @ts-ignore
 import { getRootBreadcrumbs } from '../breadcrumbs';
 import html from './doc.html';
 import { Doc } from '../doc/doc';
-const { uiRoutes, wrapInI18nContext, timefilter } = getServices();
-getAngularModule().directive('discoverDoc', function(reactDirective: any) {
+const { wrapInI18nContext, timefilter } = getServices();
+const app = getAngularModule();
+app.directive('discoverDoc', function(reactDirective: any) {
   return reactDirective(
     wrapInI18nContext(Doc),
     [
@@ -36,28 +37,28 @@ getAngularModule().directive('discoverDoc', function(reactDirective: any) {
   );
 });
 
-uiRoutes
-  // the old, pre 8.0 route, no longer used, keep it to stay compatible
-  // somebody might have bookmarked his favorite log messages
-  .when('/doc/:indexPattern/:index/:type', {
-    redirectTo: '/doc/:indexPattern/:index',
-  })
-  // the new route, es 7 deprecated types, es 8 removed them
-  .when('/doc/:indexPattern/:index', {
-    controller: ($scope: any, $route: any, es: any, indexPatterns: IndexPatterns) => {
-      timefilter.disableAutoRefreshSelector();
-      timefilter.disableTimeRangeSelector();
-      $scope.esClient = es;
-      $scope.id = $route.current.params.id;
-      $scope.index = $route.current.params.index;
-      $scope.indexPatternId = $route.current.params.indexPattern;
-      $scope.indexPatternService = indexPatterns;
-    },
-    template: html,
-    k7Breadcrumbs: ($route: any) => [
-      ...getRootBreadcrumbs(),
-      {
-        text: `${$route.current.params.index}#${$route.current.params.id}`,
+app.config(($routeProvider: any) => {
+  $routeProvider
+    .when('/doc/:indexPattern/:index/:type', {
+      redirectTo: '/doc/:indexPattern/:index',
+    })
+    // the new route, es 7 deprecated types, es 8 removed them
+    .when('/doc/:indexPattern/:index', {
+      controller: ($scope: any, $route: any, es: any) => {
+        timefilter.disableAutoRefreshSelector();
+        timefilter.disableTimeRangeSelector();
+        $scope.esClient = es;
+        $scope.id = $route.current.params.id;
+        $scope.index = $route.current.params.index;
+        $scope.indexPatternId = $route.current.params.indexPattern;
+        $scope.indexPatternService = getServices().indexPatterns;
       },
-    ],
-  });
+      template: html,
+      k7Breadcrumbs: ($route: any) => [
+        ...getRootBreadcrumbs(),
+        {
+          text: `${$route.current.params.index}#${$route.current.params.id}`,
+        },
+      ],
+    });
+});
