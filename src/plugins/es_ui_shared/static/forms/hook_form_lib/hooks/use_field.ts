@@ -78,7 +78,10 @@ export const useField = (form: FormHook, path: string, config: FieldConfig = {})
     if (isEmptyString) {
       return inputValue;
     }
-    return formatters.reduce((output, formatter) => formatter(output), inputValue);
+
+    const formData = form.getFormData({ unflatten: false });
+
+    return formatters.reduce((output, formatter) => formatter(output, formData), inputValue);
   };
 
   const onValueChange = async () => {
