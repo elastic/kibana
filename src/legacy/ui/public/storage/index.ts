@@ -18,5 +18,3 @@
  */
 
 import './directive';
-
-export { Storage } from './storage';

@@ -17,4 +17,16 @@
  * under the License.
  */
 
-export type WebStorage = Storage;
+export interface IStorageWrapper {
+  get: (key: string) => any;
+  set: (key: string, value: any) => void;
+  remove: (key: string) => any;
+  clear: () => void;
+}
+
+export interface IStorage {
+  getItem: (key: string) => any;
+  setItem: (key: string, value: any) => void;
+  removeItem: (key: string) => any;
+  clear: () => void;
+}

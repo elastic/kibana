@@ -20,13 +20,6 @@
 import { UiSettingsClientContract, CoreStart } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 
-export interface Storage {
-  get: (key: string) => any;
-  set: (key: string, value: any) => void;
-  remove: (key: string) => any;
-  clear: () => void;
-}
-
 export interface IDataPluginServices extends Partial<CoreStart> {
   appName: string;
   uiSettings: UiSettingsClientContract;
