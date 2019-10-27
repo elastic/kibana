@@ -16,22 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
-import { EuiCallOut, EuiCodeBlock } from '@elastic/eui';
-// @ts-ignore
-import { formatMsg, formatStack } from '../../../../ui/public/notify/lib';
 
-interface Props {
-  error: Error | string | null;
-}
+import './doc_viewer_directive';
 
-export function DocViewerError({ error }: Props) {
-  const errMsg = formatMsg(error);
-  const errStack = error ? formatStack(error) : '';
-
-  return (
-    <EuiCallOut title={errMsg} color="danger" iconType="cross" data-test-subj="docViewerError">
-      {errStack && <EuiCodeBlock>{errStack}</EuiCodeBlock>}
-    </EuiCallOut>
-  );
-}
+export * from './doc_viewer';
