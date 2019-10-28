@@ -100,7 +100,7 @@ export class SavedObjectsClientProvider<Request = unknown> {
     this._wrapperFactories.add(priority, { id, factory });
   }
 
-  setClientFactory(customClientFactory: SavedObjectsClientFactory) {
+  setClientFactory(customClientFactory: SavedObjectsClientFactory<Request>) {
     if (this._clientFactory !== this._originalClientFactory) {
       throw new Error(`custom client factory is already set, unable to replace the current one`);
     }
