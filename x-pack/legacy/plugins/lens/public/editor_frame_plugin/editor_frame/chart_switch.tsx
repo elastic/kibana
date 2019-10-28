@@ -52,8 +52,8 @@ function VisualizationSummary(props: Props) {
   if (!visualization) {
     return (
       <>
-        {i18n.translate('xpack.lens.configPanel.chooseVisualization', {
-          defaultMessage: 'Choose a visualization',
+        {i18n.translate('xpack.lens.configPanel.selectVisualization', {
+          defaultMessage: 'Select a visualization',
         })}
       </>
     );
@@ -201,8 +201,8 @@ export function ChartSwitch(props: Props) {
       anchorPosition="downLeft"
     >
       <EuiPopoverTitle>
-        {i18n.translate('xpack.lens.configPanel.chooseVisualization', {
-          defaultMessage: 'Choose a visualization',
+        {i18n.translate('xpack.lens.configPanel.selectVisualization', {
+          defaultMessage: 'Select a visualization',
         })}
       </EuiPopoverTitle>
       <EuiKeyPadMenu>
