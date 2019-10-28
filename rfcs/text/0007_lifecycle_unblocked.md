@@ -13,21 +13,27 @@ following changes:
 # Motivation
 Plugin lifecycle methods and context provider functions are async
 (promise-returning) functions. Core runs these functions in series and waits
-for each plugin's lifecycle function to resolve before calling the next. This
-allows plugins to depend on the API's returned from other plugins.
+for each plugin's lifecycle/context provider function to resolve before
+calling the next. This allows plugins to depend on the API's returned from
+other plugins.
 
 With the current design, a single lifecycle method or context provider that
-blocks will block all of Kibana from starting up.
+blocks will block all of Kibana from starting up. Plugins (including legacy
+plugins) rely heavily on this blocking behaviour to ensure that all conditions
+required for their plugin's operation are met before their plugin is started
+and exposes it's API's. This means a single plugin with a network error that
+isn't retried or a dependency on an external host that is down, could block
+all of Kibana from starting up.
 
-We should make it impossible for a single plugin lifecycle function to
-stall all of kibana.
+We should make it impossible for a single plugin lifecycle function to stall
+all of kibana.
 
 # Detailed design
 
 ### 1. Synchronous lifecycle methods
-Lifecycle methods are synchronous functions, they can perform asynchronous
-operations but Core doesn't wait for these to complete. This guarantees that
-no plugin lifecycle function can block other plugins or core from starting up.
+Lifecycle methods are synchronous functions, they can perform async operations
+but Core doesn't wait for these to complete. This guarantees that no plugin
+lifecycle function can block other plugins or core from starting up [1]. 
 
 Core will still expose special API's that are able block the setup lifecycle
 such as registering Saved Object migrations, but this will be limited to
@@ -36,34 +42,40 @@ operations where the risk of blocking all of kibana starting up is limited.
 ### 2. Synchronous Context Provider functions
 Making context provider functions synchronous guarantees that a context
 handler will never be blocked by registered context providers. They can expose
-asynchronous API's which could potentially have blocking behaviour. 
+async API's which could potentially have blocking behaviour. 
 
 ```ts
 export type IContextProvider<
-  TContext extends Record<string, any>,
-  TContextName extends keyof TContext,
-  TProviderParameters extends any[] = []
+  THandler extends HandlerFunction<any>,
+  TContextName extends keyof HandlerContextType<THandler>
 > = (
-  context: Partial<TContext>,
-  ...rest: TProviderParameters
-) => TContext[TContextName];
+  context: Partial<HandlerContextType<THandler>>,
+  ...rest: HandlerParameters<THandler>
+) =>
+  | HandlerContextType<THandler>[TContextName];
 ```
 
 ### 3. Core should not expose API's as observables
-All Core API's should be reactive, when internal state changes their behaviour
+All Core API's should be reactive: when internal state changes, their behaviour
 should change accordingly. But, exposing these internal state changes as part
 of the API contract leaks internal implementation details consumers can't do
 anything useful with and don't care about.
 
 For example: Core currently exposes `core.elasticsearch.adminClient$`, an
 Observable which emits a pre-configured elasticsearch client every time there's
-a configuration change. This includes changes such as the elasticsearch
-cluster `hosts` that alter the behaviour of the elasticsearch client. As a
-plugin author who wants to make search requests against elasticsearch I
-shouldn't have to care about, react to, or keep track of, how many times the
-underlying configuration has changed. I want to use the `callAsInternalUser`
-method and I expect Core to use the most up to date configuration to send this
-request to the correct `hosts`.
+a configuration change. This includes changes to the logging configuration and
+might in the future include updating the authentication headers sent to
+elasticsearch https://github.com/elastic/kibana/issues/19829. As a plugin
+author who wants to make search requests against elasticsearch I shouldn't
+have to care about, react to, or keep track of, how many times the underlying
+configuration has changed. I want to use the `callAsInternalUser` method and I
+expect Core to use the most up to date configuration to send this request.
+
+> Note: It would not be desirable for Core to dynamically load all
+> configuration changes. Changing the Elasticsearch `hosts` could mean Kibana
+> is pointing to a completely new Elasticsearch cluster. Since this is a risky
+> change to make and would likely require core and almost all plugins to
+> completely re-initialize, it's safer to require a complete Kibana restart.
 
 This does not mean we should remove all observables from Core's API's. When an
 API consumer is interested in the *state changes itself* it absolutely makes
@@ -76,7 +88,7 @@ handlers since exposing convenient API's become very ugly:
 
 *(3.1): exposing Observable-based API's through the route handler context:*
 ```ts
-// Before: Using an asynchronous context provider
+// Before: Using an async context provider
 coreSetup.http.registerRouteHandlerContext(coreId, 'core', async (context, req) => {
   const adminClient = await coreSetup.elasticsearch.adminClient$.pipe(take(1)).toPromise();
   const dataClient = await coreSetup.elasticsearch.dataClient$.pipe(take(1)).toPromise();
@@ -118,7 +130,7 @@ coreSetup.http.registerRouteHandlerContext(coreId, 'core', async (context, req) 
 ```ts
 export class Plugin {
   public setup(core: CoreSetup) {
-    // Async setup is possible and any operations involving asynchronous API's
+    // Async setup is possible and any operations involving async API's
     // will still block until these API's are ready, (savedObjects find only 
     // resolves once the elasticsearch client has established a connection to 
     // the cluster). The difference is that these details are now internal to
@@ -160,6 +172,25 @@ coreSetup.http.registerRouteHandlerContext(coreId, 'core', async (context, req) 
 });
 ```
 
+### 4. Core should expose a status signal for Core services & plugins
+Core should expose a global mechanism for core services and plugins to signal
+their status. This is equivalent to the legacy status API
+`kibana.Plugin.status` which allowed plugins to set their status to e.g. 'red'
+or 'green'. The exact design of this API is outside of the scope of this RFC.
+
+What is important, is that there is a global mechanism to signal status
+changes which Core then makes visible to system administrators in the Kibana
+logs and the `/status` HTTP API. Plugins should be able to inspect and
+subscribe to status changes from any of their dependencies.
+
+This will provide an obvious mechanism for plugins to signal that the
+conditions which are required for this plugin to operate are not currently
+present and manual intervention might be required. Status changes can happen
+in both setup and start lifecycles e.g.:
+ - [setup] a required remote host is down
+ - [start] a remote host which was up during setup, started returning
+   connection timeout errors.
+
 # Drawbacks
 Not being able to block on a lifecycle method means plugins can no longer be
 certain that all setup is "complete" before they expose their API's or reach
@@ -167,7 +198,17 @@ the start lifecycle.
 
 A plugin might want to poll an external host to ensure that the host is up in
 its setup lifecycle before making network requests to this host in it's start
-lifecycle. In effect, the plugin is polling the world to construct a snapshot
+lifecycle. 
+
+Even if Kibana was using a valid, but incorrect configuration for the remote
+host, with synchronous lifecycles Kibana would still start up. Although the
+status API and logs would indicate a problem, these might not be monitored
+leading to the error only being discovered once someone tries to use it's
+functionality. This is an acceptable drawback because it buys us isolation.
+Some problems might go unnoticed, but no single plugin should affect the
+availability of all other plugins.
+
+In effect, the plugin is polling the world to construct a snapshot
 of state which drives future behaviour. Modeling this with lifecycle functions
 is insufficient since it assumes that any state constructed in the setup
 lifecycle is static and won't and can't be changed in the future.
@@ -232,13 +273,14 @@ Drawbacks:
 1. A blocking setup lifecycle makes it easy for plugin authors to fall into
    the trap of assuming that their plugin's behaviour can continue to operate
    based on the snapshot of conditions present during setup.
-2. Since plugins load serially, even if they don't block startup, all the
-   delays add up and increase the startup time.
-3. This opens up the potential for a bug in Elastic or third-party plugins to
-   effectively "break" kibana which creates a bad user experience.
+2. This opens up the potential for a bug in Elastic or third-party plugins to
+   effectively "break" kibana. Instead of a single plugin being disabled all
+   of kibana would be down requiring manual intervention by a system
+   administrator. 
 
 # Adoption strategy
 Adoption and implementation should be handled as follows:
+
 a. Don't expose core API's as observables (3).
    This should be implemented first to improve the ergonomics of working with
    core API's from inside synchronous context providers and lifecycle functions.
@@ -251,11 +293,13 @@ a. Don't expose core API's as observables (3).
    - const adminClient = await coreSetup.elasticsearch.adminClient$.pipe(take(1)).toPromise();
    + const adminClient = coreSetup.elasticsearch.adminClient;
    ```
+
 b. Making context provider functions synchronous (2)
    Adoption of context provider functions is still fairly low, so the amount
    of change required by plugin authors should be limited.
+
 c. Synchronous lifecycle methods (1) will have the biggest impact on plugins
-   since many NP plugins and shims have been built with asynchronous lifecycle
+   since many NP plugins and shims have been built with async lifecycle
    methods in mind.
 
    The following New Platform plugins or shims currently rely on async lifecycle functions:
@@ -270,12 +314,12 @@ c. Synchronous lifecycle methods (1) will have the biggest impact on plugins
    9. [security](https://github.com/elastic/kibana/blob/0f2324e44566ce2cf083d89082841e57d2db6ef6/x-pack/plugins/security/server/plugin.ts#L96)
 
 Once this RFC has been merged we should educate teams on the implications to
-allow existing New Platform plugins to remove any asynchronous lifecycle
+allow existing New Platform plugins to remove any async lifecycle
 behaviour they're relying on before we change this in core.
 
 # How we teach this
 
-Plugin lifecycle methods in the New Platform are no longer asynchronous.
+Plugin lifecycle methods in the New Platform are no longer async.
 Plugins should treat the setup lifecycle as a place in time to register
 functionality with core or other plugins' API's and not as a mechanism to kick
 off and wait for any initialization that's required for the plugin to be able
@@ -283,8 +327,13 @@ to run.
 
 # Unresolved questions
 1. Are the drawbacks worth the benefits or can we live with Kibana potentially
-being blocked for the sake of convenient asynchronous lifecycle stages?
+being blocked for the sake of convenient async lifecycle stages?
 
 2. Should core provide conventions or patterns for plugins to construct a
    snapshot of state and reactively updating this state and the behaviour it
    drives as the state of the world changes?
+
+# Footnotes
+[1] Synchronous lifecycles can still be blocked by e.g. an infine for loop,
+but this would always be unintentional behaviour in contrast to intentional
+async behaviour like blocking until an external service becomes available. 
