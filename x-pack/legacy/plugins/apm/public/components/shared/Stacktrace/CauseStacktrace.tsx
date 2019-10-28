@@ -54,13 +54,13 @@ function CausedBy({ message }: { message: string }) {
 
 interface CauseStacktraceProps {
   codeLanguage?: string;
-  message: string;
+  message?: string;
   stackframes?: IStackframe[];
 }
 
 export function CauseStacktrace({
   codeLanguage,
-  message,
+  message = '…',
   stackframes
 }: CauseStacktraceProps) {
   return stackframes && stackframes.length > 0 ? (

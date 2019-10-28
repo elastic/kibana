@@ -10,13 +10,27 @@ import { CauseStacktrace } from './CauseStacktrace';
 
 describe('CauseStacktrace', () => {
   describe('render', () => {
-    describe('with  no stacktrace', () => {
+    describe('with no stacktrace', () => {
       it('renders without the accordion', () => {
         const props = { message: 'testMessage' };
 
         expect(
           mount(<CauseStacktrace {...props} />).find('CausedBy')
         ).toHaveLength(1);
+      });
+    });
+
+    describe('with no message and a stacktrace', () => {
+      it('says "Caused by …', () => {
+        const props = {
+          stackframes: [{ filename: 'testFilename', line: { number: 1 } }]
+        };
+
+        expect(
+          mount(<CauseStacktrace {...props} />)
+            .find('EuiTitle span')
+            .text()
+        ).toEqual('…');
       });
     });
 
