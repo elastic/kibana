@@ -459,16 +459,6 @@ export class VectorStyle extends AbstractStyle {
     this._iconSizeStyleProperty.syncIconImageAndSizeWithMb(symbolLayerId, mbMap, symbolId);
     this._iconOrientationProperty.syncIconRotationWithMb(symbolLayerId, mbMap);
 
-    // const iconOrientation = this._descriptor.properties.iconOrientation;
-    // if (iconOrientation.type === DynamicStyleProperty.type) {
-    //   mbMap.setLayoutProperty(symbolLayerId, 'icon-rotate', iconOrientation.options.orientation);
-    // } else if (_.has(iconOrientation, 'options.field.name')) {
-    //   const targetName = getComputedFieldName(vectorStyles.ICON_ORIENTATION, iconOrientation.options.field.name);
-    //   // Using property state instead of feature-state because layout properties do not support feature-state
-    //   mbMap.setLayoutProperty(symbolLayerId, 'icon-rotate', [
-    //     'coalesce', ['get', targetName], 0
-    //   ]);
-    // }
   }
 
   arePointsSymbolizedAsCircles() {
