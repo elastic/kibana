@@ -20,16 +20,10 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
-import { NotificationsStart } from 'src/core/public';
+import { NotificationsStart, Toast } from 'src/core/public';
 import { DashboardPanelState } from 'src/legacy/core_plugins/dashboard_embeddable_container/public/np_ready/public';
 
-import {
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiTitle,
-  EuiGlobalToastListToast as Toast,
-} from '@elastic/eui';
+import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 
 import { IContainer } from '../../../../../../embeddable_api/public/np_ready/public';
 import {
