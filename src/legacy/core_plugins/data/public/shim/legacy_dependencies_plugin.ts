@@ -19,7 +19,6 @@
 
 import { Storage } from 'ui/storage';
 import { Plugin } from '../../../../../../src/core/public';
-import { initLegacyModule } from './legacy_module';
 
 /** @internal */
 export interface LegacyDependenciesPluginSetup {
@@ -32,8 +31,6 @@ export interface LegacyDependenciesPluginStart {
 
 export class LegacyDependenciesPlugin implements Plugin<any, any> {
   public setup() {
-    initLegacyModule();
-
     return {
       storage: new Storage(window.localStorage),
     } as LegacyDependenciesPluginSetup;

@@ -20,6 +20,15 @@
 jest.mock('../../src/sense_editor/mode/worker', () => {
   return { workerModule: { id: 'sense_editor/mode/worker', src: '' } };
 });
+
+jest.mock('ui/chrome', () => {
+  return {
+    getInjected() {
+      return 'http://localhost:9200';
+    }
+  };
+});
+
 window.Worker = function () {
   this.postMessage = () => {};
   this.terminate = () => {};

@@ -6,8 +6,7 @@
 
 import * as Rx from 'rxjs';
 import { first, mergeMap } from 'rxjs/operators';
-import { KbnServer } from '../../../../types';
-import { HeadlessChromiumDriverFactory } from '../../../../server/browsers/chromium/driver_factory';
+import { ServerFacade, CaptureConfig } from '../../../../types';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers/chromium/driver';
 import {
   ElementsPositionAndAttribute,
@@ -25,17 +24,18 @@ import { waitForElementsToBeInDOM } from './wait_for_dom_elements';
 import { getTimeRange } from './get_time_range';
 import { getElementPositionAndAttributes } from './get_element_position_data';
 import { getScreenshots } from './get_screenshots';
+import { skipTelemetry } from './skip_telemetry';
 
 // NOTE: Typescript does not throw an error if this interface has errors!
 interface ScreenshotResults {
-  timeRange: TimeRange;
+  timeRang: TimeRange;
   screenshots: Screenshot[];
 }
 
-export function screenshotsObservableFactory(server: KbnServer) {
-  const browserDriverFactory: HeadlessChromiumDriverFactory = server.plugins.reporting.browserDriverFactory; // prettier-ignore
+export function screenshotsObservableFactory(server: ServerFacade) {
   const config = server.config();
-  const captureConfig = config.get('xpack.reporting.capture');
+  const captureConfig: CaptureConfig = config.get('xpack.reporting.capture');
+  const { browserDriverFactory } = server.plugins.reporting!;
 
   return function screenshotsObservable({
     logger,
@@ -54,6 +54,10 @@ export function screenshotsObservableFactory(server: KbnServer) {
         const screenshot$ = driver$.pipe(
           mergeMap(
             (browser: HeadlessBrowser) => openUrl(browser, url, conditionalHeaders, logger),
+            browser => browser
+          ),
+          mergeMap(
+            (browser: HeadlessBrowser) => skipTelemetry(browser, logger),
             browser => browser
           ),
           mergeMap(

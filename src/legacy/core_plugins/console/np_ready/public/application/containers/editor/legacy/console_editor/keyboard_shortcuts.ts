@@ -16,14 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { throttle } from 'lodash';
 
 interface Actions {
-  input: any;
+  input: any; // TODO: Wrap this in an editor interface
   sendCurrentRequestToES: () => void;
   openDocumentation: () => void;
 }
 
 export function registerCommands({ input, sendCurrentRequestToES, openDocumentation }: Actions) {
+  const throttledAutoIndent = throttle(() => input.autoIndent(), 500, {
+    leading: true,
+    trailing: true,
+  });
   input.commands.addCommand({
     name: 'send to elasticsearch',
     bindKey: { win: 'Ctrl-Enter', mac: 'Command-Enter' },
@@ -40,7 +45,7 @@ export function registerCommands({ input, sendCurrentRequestToES, openDocumentat
     name: 'auto indent request',
     bindKey: { win: 'Ctrl-I', mac: 'Command-I' },
     exec: () => {
-      input.autoIndent();
+      throttledAutoIndent();
     },
   });
   input.commands.addCommand({

@@ -11,7 +11,7 @@ import { Schemas } from 'ui/vis/editors/default/schemas';
 import { AggConfigs } from 'ui/agg_types';
 import { i18n } from '@kbn/i18n';
 import { ESTooltipProperty } from '../tooltips/es_tooltip_property';
-import { ES_SIZE_LIMIT } from '../../../common/constants';
+import { ES_SIZE_LIMIT, METRIC_TYPE } from '../../../common/constants';
 
 const TERMS_AGG_NAME = 'join';
 
@@ -22,9 +22,16 @@ const aggSchemas = new Schemas([
     title: 'Value',
     min: 1,
     max: Infinity,
-    aggFilter: ['avg', 'count', 'max', 'min', 'sum'],
+    aggFilter: [
+      METRIC_TYPE.AVG,
+      METRIC_TYPE.COUNT,
+      METRIC_TYPE.MAX,
+      METRIC_TYPE.MIN,
+      METRIC_TYPE.SUM,
+      METRIC_TYPE.UNIQUE_COUNT
+    ],
     defaults: [
-      { schema: 'metric', type: 'count' }
+      { schema: 'metric', type: METRIC_TYPE.COUNT }
     ]
   },
   {
@@ -81,12 +88,12 @@ export class ESTermSource extends AbstractESSource {
   }
 
   _formatMetricKey(metric) {
-    const metricKey = metric.type !== 'count' ? `${metric.type}_of_${metric.field}` : metric.type;
+    const metricKey = metric.type !== METRIC_TYPE.COUNT ? `${metric.type}_of_${metric.field}` : metric.type;
     return `__kbnjoin__${metricKey}_groupby_${this._descriptor.indexPatternTitle}.${this._descriptor.term}`;
   }
 
   _formatMetricLabel(metric) {
-    const metricLabel = metric.type !== 'count' ? `${metric.type} ${metric.field}` : 'count';
+    const metricLabel = metric.type !== METRIC_TYPE.COUNT ? `${metric.type} ${metric.field}` : 'count';
     return `${metricLabel} of ${this._descriptor.indexPatternTitle}:${this._descriptor.term}`;
   }
 
@@ -108,13 +115,13 @@ export class ESTermSource extends AbstractESSource {
 
     const metricPropertyNames = configStates
       .filter(configState => {
-        return configState.schema === 'metric' && configState.type !== 'count';
+        return configState.schema === 'metric' && configState.type !== METRIC_TYPE.COUNT;
       })
       .map(configState => {
         return configState.id;
       });
     const countConfigState = configStates.find(configState => {
-      return configState.type === 'count';
+      return configState.type === METRIC_TYPE.COUNT;
     });
     const countPropertyName = _.get(countConfigState, 'id');
     return {
@@ -128,7 +135,7 @@ export class ESTermSource extends AbstractESSource {
 
   _getRequestDescription(leftSourceName, leftFieldName) {
     const metrics = this._getValidMetrics().map(metric => {
-      return metric.type !== 'count' ? `${metric.type} ${metric.field}` : 'count';
+      return metric.type !== METRIC_TYPE.COUNT ? `${metric.type} ${metric.field}` : 'count';
     });
     const joinStatement = [];
     joinStatement.push(i18n.translate('xpack.maps.source.esJoin.joinLeftDescription', {
@@ -157,7 +164,7 @@ export class ESTermSource extends AbstractESSource {
         schema: 'metric',
         params: {}
       };
-      if (metric.type !== 'count') {
+      if (metric.type !== METRIC_TYPE.COUNT) {
         metricAggConfig.params = { field: metric.field };
       }
       return metricAggConfig;

@@ -32,3 +32,4 @@ export * from './log_legacy_import';
 export * from './process_import_response';
 export * from './get_default_title';
 export * from './find_objects';
+export * from './extract_export_details';

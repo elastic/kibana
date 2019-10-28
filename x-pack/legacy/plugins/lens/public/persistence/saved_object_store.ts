@@ -8,7 +8,6 @@
 import { SavedObjectAttributes } from 'src/core/server';
 import { Filter } from '@kbn/es-query';
 import { Query } from 'src/plugins/data/common';
-import { FramePublicAPI } from '../types';
 
 export interface Document {
   id?: string;
@@ -24,7 +23,6 @@ export interface Document {
     visualization: unknown;
     query: Query;
     filters: Filter[];
-    dateRange?: FramePublicAPI['dateRange'];
   };
 }
 

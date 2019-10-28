@@ -17,25 +17,26 @@
  * under the License.
  */
 
-export default function ({ getService, loadTestFile, getPageObjects }) {
+export default function ({ getService, loadTestFile }) {
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
-  const PageObjects = getPageObjects(['dashboard']);
 
   async function loadCurrentData() {
     await browser.setWindowSize(1300, 900);
-    await PageObjects.dashboard.initTests({
-      kibanaIndex: 'dashboard/current/kibana',
-      dataIndex: 'dashboard/current/data',
-      defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
-    });
-    await PageObjects.dashboard.preserveCrossAppState();
+    await esArchiver.loadIfNeeded('dashboard/current/data');
   }
 
   async function unloadCurrentData() {
-    await PageObjects.dashboard.clearSavedObjectsFromAppLinks();
-    await esArchiver.unload('dashboard/current/kibana');
     await esArchiver.unload('dashboard/current/data');
+  }
+
+  async function loadLogstash() {
+    await browser.setWindowSize(1200, 900);
+    await esArchiver.loadIfNeeded('logstash_functional');
+  }
+
+  async function unloadLogstash() {
+    await esArchiver.unload('logstash_functional');
   }
 
   describe('dashboard app', function () {
@@ -83,7 +84,8 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
     // legacy data only for specifically testing BWC situations.
     describe('using legacy data', function () {
       this.tags('ciGroup4');
-      before(() => browser.setWindowSize(1200, 900));
+      before(loadLogstash);
+      after(unloadLogstash);
 
       loadTestFile(require.resolve('./dashboard_time_picker'));
       loadTestFile(require.resolve('./bwc_shared_urls'));
@@ -93,7 +95,8 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
 
     describe('using legacy data', function () {
       this.tags('ciGroup5');
-      before(() => browser.setWindowSize(1200, 900));
+      before(loadLogstash);
+      after(unloadLogstash);
 
       loadTestFile(require.resolve('./dashboard_save'));
       loadTestFile(require.resolve('./dashboard_time'));

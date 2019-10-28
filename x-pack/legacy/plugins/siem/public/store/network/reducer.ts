@@ -5,41 +5,28 @@
  */
 
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
-
+import { get } from 'lodash/fp';
 import {
   Direction,
   FlowTarget,
   NetworkDnsFields,
-  NetworkTopNFlowFields,
+  NetworkTopTablesFields,
   TlsFields,
   UsersFields,
 } from '../../graphql/types';
 import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../constants';
 
 import {
-  applyNetworkFilterQuery,
   setIpDetailsTablesActivePageToZero,
-  setNetworkFilterQueryDraft,
   setNetworkTablesActivePageToZero,
-  updateDnsLimit,
-  updateDnsSort,
   updateIpDetailsFlowTarget,
-  updateIpDetailsTableActivePage,
-  updateIsPtrIncluded,
-  updateNetworkPageTableActivePage,
-  updateTlsLimit,
-  updateTlsSort,
-  updateTopNFlowLimit,
-  updateTopNFlowSort,
-  updateUsersLimit,
-  updateUsersSort,
+  updateNetworkTable,
 } from './actions';
-import { IpDetailsTableType, NetworkModel, NetworkTableType, NetworkType } from './model';
 import {
   setNetworkDetailsQueriesActivePageToZero,
   setNetworkPageQueriesActivePageToZero,
-  setNetworkQueriesActivePageToZero,
 } from './helpers';
+import { IpDetailsTableType, NetworkModel, NetworkTableType, NetworkType } from './model';
 
 export type NetworkState = NetworkModel;
 
@@ -49,54 +36,92 @@ export const initialNetworkState: NetworkState = {
       [NetworkTableType.topNFlowSource]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
-        topNFlowSort: {
-          field: NetworkTopNFlowFields.bytes_out,
+        sort: {
+          field: NetworkTopTablesFields.bytes_out,
           direction: Direction.desc,
         },
       },
       [NetworkTableType.topNFlowDestination]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
-        topNFlowSort: {
-          field: NetworkTopNFlowFields.bytes_out,
+        sort: {
+          field: NetworkTopTablesFields.bytes_in,
           direction: Direction.desc,
         },
       },
       [NetworkTableType.dns]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
-        dnsSortField: {
+        sort: {
           field: NetworkDnsFields.uniqueDomains,
           direction: Direction.desc,
         },
         isPtrIncluded: false,
       },
+      [NetworkTableType.tls]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+        sort: {
+          field: TlsFields._id,
+          direction: Direction.desc,
+        },
+      },
+      [NetworkTableType.topCountriesSource]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+        sort: {
+          field: NetworkTopTablesFields.bytes_out,
+          direction: Direction.desc,
+        },
+      },
+      [NetworkTableType.topCountriesDestination]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+        sort: {
+          field: NetworkTopTablesFields.bytes_in,
+          direction: Direction.desc,
+        },
+      },
     },
-    filterQuery: null,
-    filterQueryDraft: null,
   },
   details: {
     queries: {
+      [IpDetailsTableType.topCountriesSource]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+        sort: {
+          field: NetworkTopTablesFields.bytes_out,
+          direction: Direction.desc,
+        },
+      },
+      [IpDetailsTableType.topCountriesDestination]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+        sort: {
+          field: NetworkTopTablesFields.bytes_in,
+          direction: Direction.desc,
+        },
+      },
       [IpDetailsTableType.topNFlowSource]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
-        topNFlowSort: {
-          field: NetworkTopNFlowFields.bytes_out,
+        sort: {
+          field: NetworkTopTablesFields.bytes_out,
           direction: Direction.desc,
         },
       },
       [IpDetailsTableType.topNFlowDestination]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
-        topNFlowSort: {
-          field: NetworkTopNFlowFields.bytes_out,
+        sort: {
+          field: NetworkTopTablesFields.bytes_in,
           direction: Direction.desc,
         },
       },
       [IpDetailsTableType.tls]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
-        tlsSortField: {
+        sort: {
           field: TlsFields._id,
           direction: Direction.desc,
         },
@@ -104,19 +129,30 @@ export const initialNetworkState: NetworkState = {
       [IpDetailsTableType.users]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
-        usersSortField: {
+        sort: {
           field: UsersFields.name,
           direction: Direction.asc,
         },
       },
     },
-    filterQuery: null,
-    filterQueryDraft: null,
     flowTarget: FlowTarget.source,
   },
 };
 
 export const networkReducer = reducerWithInitialState(initialNetworkState)
+  .case(updateNetworkTable, (state, { networkType, tableType, updates }) => ({
+    ...state,
+    [networkType]: {
+      ...state[networkType],
+      queries: {
+        ...state[networkType].queries,
+        [tableType]: {
+          ...get([networkType, 'queries', tableType], state),
+          ...updates,
+        },
+      },
+    },
+  }))
   .case(setNetworkTablesActivePageToZero, state => ({
     ...state,
     page: {
@@ -135,222 +171,11 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       queries: setNetworkDetailsQueriesActivePageToZero(state),
     },
   }))
-  .case(updateIpDetailsTableActivePage, (state, { activePage, tableType }) => ({
-    ...state,
-    [NetworkType.details]: {
-      ...state[NetworkType.details],
-      queries: {
-        ...state[NetworkType.details].queries,
-        [tableType]: {
-          ...state[NetworkType.details].queries[tableType],
-          activePage,
-        },
-      },
-    },
-  }))
-  .case(updateNetworkPageTableActivePage, (state, { activePage, tableType }) => ({
-    ...state,
-    [NetworkType.page]: {
-      ...state[NetworkType.page],
-      queries: {
-        ...state[NetworkType.page].queries,
-        [tableType]: {
-          ...state[NetworkType.page].queries[tableType],
-          activePage,
-        },
-      },
-    },
-  }))
-  .case(updateDnsLimit, (state, { limit, networkType }) => ({
-    ...state,
-    [networkType]: {
-      ...state[networkType],
-      queries: {
-        ...state[networkType].queries,
-        [NetworkTableType.dns]: {
-          ...state[NetworkType.page].queries.dns,
-          limit,
-        },
-      },
-    },
-  }))
-  .case(updateDnsSort, (state, { dnsSortField, networkType }) => ({
-    ...state,
-    [networkType]: {
-      ...state[networkType],
-      queries: {
-        ...state[networkType].queries,
-        [NetworkTableType.dns]: {
-          ...state[NetworkType.page].queries.dns,
-          dnsSortField,
-        },
-      },
-    },
-  }))
-  .case(updateIsPtrIncluded, (state, { isPtrIncluded, networkType }) => ({
-    ...state,
-    [networkType]: {
-      ...state[networkType],
-      queries: {
-        ...state[networkType].queries,
-        [NetworkTableType.dns]: {
-          ...state[NetworkType.page].queries.dns,
-          isPtrIncluded,
-        },
-      },
-    },
-  }))
-  .case(updateTopNFlowLimit, (state, { limit, networkType, tableType }) => {
-    if (
-      networkType === NetworkType.page &&
-      (tableType === NetworkTableType.topNFlowSource ||
-        tableType === NetworkTableType.topNFlowDestination)
-    ) {
-      return {
-        ...state,
-        [networkType]: {
-          ...state[networkType],
-          queries: {
-            ...state[networkType].queries,
-            [tableType]: {
-              ...state[networkType].queries[tableType],
-              limit,
-            },
-          },
-        },
-      };
-    } else if (
-      tableType === IpDetailsTableType.topNFlowDestination ||
-      tableType === IpDetailsTableType.topNFlowSource
-    ) {
-      return {
-        ...state,
-        [NetworkType.details]: {
-          ...state[NetworkType.details],
-          queries: {
-            ...state[NetworkType.details].queries,
-            [tableType]: {
-              ...state[NetworkType.details].queries[tableType],
-              limit,
-            },
-          },
-        },
-      };
-    }
-    return state;
-  })
-  .case(updateTopNFlowSort, (state, { topNFlowSort, networkType, tableType }) => {
-    if (
-      networkType === NetworkType.page &&
-      (tableType === NetworkTableType.topNFlowSource ||
-        tableType === NetworkTableType.topNFlowDestination)
-    ) {
-      return {
-        ...state,
-        [networkType]: {
-          ...state[networkType],
-          queries: {
-            ...state[networkType].queries,
-            [tableType]: {
-              ...state[networkType].queries[tableType],
-              topNFlowSort,
-            },
-          },
-        },
-      };
-    } else if (
-      tableType === IpDetailsTableType.topNFlowDestination ||
-      tableType === IpDetailsTableType.topNFlowSource
-    ) {
-      return {
-        ...state,
-        [NetworkType.details]: {
-          ...state[NetworkType.details],
-          queries: {
-            ...state[NetworkType.details].queries,
-            [tableType]: {
-              ...state[NetworkType.details].queries[tableType],
-              topNFlowSort,
-            },
-          },
-        },
-      };
-    }
-    return state;
-  })
-  .case(setNetworkFilterQueryDraft, (state, { filterQueryDraft, networkType }) => ({
-    ...state,
-    [networkType]: {
-      ...state[networkType],
-      filterQueryDraft,
-    },
-  }))
-  .case(applyNetworkFilterQuery, (state, { filterQuery, networkType }) => ({
-    ...state,
-    [networkType]: {
-      ...state[networkType],
-      queries: setNetworkQueriesActivePageToZero(state, networkType),
-      filterQueryDraft: filterQuery.kuery,
-      filterQuery,
-    },
-  }))
   .case(updateIpDetailsFlowTarget, (state, { flowTarget }) => ({
     ...state,
     [NetworkType.details]: {
       ...state[NetworkType.details],
       flowTarget,
-    },
-  }))
-  .case(updateTlsLimit, (state, { limit }) => ({
-    ...state,
-    [NetworkType.details]: {
-      ...state[NetworkType.details],
-      queries: {
-        ...state[NetworkType.details].queries,
-        [IpDetailsTableType.tls]: {
-          ...state[NetworkType.details].queries.tls,
-          limit,
-        },
-      },
-    },
-  }))
-  .case(updateTlsSort, (state, { tlsSortField }) => ({
-    ...state,
-    [NetworkType.details]: {
-      ...state[NetworkType.details],
-      queries: {
-        ...state[NetworkType.details].queries,
-        [IpDetailsTableType.tls]: {
-          ...state[NetworkType.details].queries.tls,
-          tlsSortField,
-        },
-      },
-    },
-  }))
-  .case(updateUsersLimit, (state, { limit }) => ({
-    ...state,
-    [NetworkType.details]: {
-      ...state[NetworkType.details],
-      queries: {
-        ...state[NetworkType.details].queries,
-        [IpDetailsTableType.users]: {
-          ...state[NetworkType.details].queries.users,
-          limit,
-        },
-      },
-    },
-  }))
-  .case(updateUsersSort, (state, { usersSortField }) => ({
-    ...state,
-    [NetworkType.details]: {
-      ...state[NetworkType.details],
-      queries: {
-        ...state[NetworkType.details].queries,
-        [IpDetailsTableType.users]: {
-          ...state[NetworkType.details].queries.users,
-          usersSortField,
-        },
-      },
     },
   }))
   .build();

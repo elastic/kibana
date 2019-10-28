@@ -300,10 +300,6 @@ describe('getOperationTypesForField', () => {
                 "operationType": "count",
                 "type": "document",
               },
-              Object {
-                "operationType": "filter_ratio",
-                "type": "document",
-              },
             ],
           },
         ]

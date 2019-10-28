@@ -4,15 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'hapi';
-
 import { buildEsQuery } from '@kbn/es-query';
 // @ts-ignore no module definition
 import { createGenerateCsv } from '../../../csv/server/lib/generate_csv';
-
 import { CancellationToken } from '../../../../common/cancellation_token';
-
-import { KbnServer, Logger } from '../../../../types';
+import { ServerFacade, RequestFacade, Logger } from '../../../../types';
 import {
   IndexPatternSavedObject,
   SavedSearchObjectAttributes,
@@ -50,8 +46,8 @@ const getUiSettings = async (config: any) => {
 };
 
 export async function generateCsvSearch(
-  req: Request,
-  server: KbnServer,
+  req: RequestFacade,
+  server: ServerFacade,
   logger: Logger,
   searchPanel: SearchPanel,
   jobParams: JobParamsDiscoverCsv
@@ -140,7 +136,7 @@ export async function generateCsvSearch(
     },
   };
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
-  const callCluster = (...params: any[]) => callWithRequest(req, ...params);
+  const callCluster = (...params: [string, object]) => callWithRequest(req, ...params);
   const config = server.config();
   const uiSettings = await getUiSettings(uiConfig);
 

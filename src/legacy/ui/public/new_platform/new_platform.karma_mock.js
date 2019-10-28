@@ -96,6 +96,10 @@ export const npStart = {
 
 export function __setup__(coreSetup) {
   npSetup.core = coreSetup;
+
+  // no-op application register calls (this is overwritten to
+  // bootstrap an LP plugin outside of tests)
+  npSetup.core.application.register = () => {};
 }
 
 export function __start__(coreStart) {
