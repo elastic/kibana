@@ -112,6 +112,11 @@ Array [
                       data-test-subj="tableHeaderCell_object_title_0"
                       role="columnheader"
                       scope="col"
+                      style={
+                        Object {
+                          "width": undefined,
+                        }
+                      }
                     >
                       <div
                         className="euiTableCellContent"
@@ -134,6 +139,11 @@ Array [
                       data-test-subj="tableHeaderCell_created_at_1"
                       role="columnheader"
                       scope="col"
+                      style={
+                        Object {
+                          "width": undefined,
+                        }
+                      }
                     >
                       <div
                         className="euiTableCellContent"
@@ -156,6 +166,11 @@ Array [
                       data-test-subj="tableHeaderCell_status_2"
                       role="columnheader"
                       scope="col"
+                      style={
+                        Object {
+                          "width": undefined,
+                        }
+                      }
                     >
                       <div
                         className="euiTableCellContent"
@@ -176,6 +191,11 @@ Array [
                       className="euiTableHeaderCell"
                       role="columnheader"
                       scope="col"
+                      style={
+                        Object {
+                          "width": undefined,
+                        }
+                      }
                     >
                       <div
                         className="euiTableCellContent euiTableCellContent--alignRight"
@@ -205,6 +225,11 @@ Array [
                       <td
                         className="euiTableRowCell euiTableRowCell--isMobileFullWidth"
                         colSpan={4}
+                        style={
+                          Object {
+                            "width": undefined,
+                          }
+                        }
                       >
                         <div
                           className="euiTableCellContent euiTableCellContent--alignCenter"
@@ -362,6 +387,11 @@ Array [
                     data-test-subj="tableHeaderCell_object_title_0"
                     role="columnheader"
                     scope="col"
+                    style={
+                      Object {
+                        "width": undefined,
+                      }
+                    }
                   >
                     <div
                       className="euiTableCellContent"
@@ -384,6 +414,11 @@ Array [
                     data-test-subj="tableHeaderCell_created_at_1"
                     role="columnheader"
                     scope="col"
+                    style={
+                      Object {
+                        "width": undefined,
+                      }
+                    }
                   >
                     <div
                       className="euiTableCellContent"
@@ -406,6 +441,11 @@ Array [
                     data-test-subj="tableHeaderCell_status_2"
                     role="columnheader"
                     scope="col"
+                    style={
+                      Object {
+                        "width": undefined,
+                      }
+                    }
                   >
                     <div
                       className="euiTableCellContent"
@@ -426,6 +466,11 @@ Array [
                     className="euiTableHeaderCell"
                     role="columnheader"
                     scope="col"
+                    style={
+                      Object {
+                        "width": undefined,
+                      }
+                    }
                   >
                     <div
                       className="euiTableCellContent euiTableCellContent--alignRight"
@@ -455,6 +500,11 @@ Array [
                     <td
                       className="euiTableRowCell euiTableRowCell--isMobileFullWidth"
                       colSpan={4}
+                      style={
+                        Object {
+                          "width": undefined,
+                        }
+                      }
                     >
                       <div
                         className="euiTableCellContent euiTableCellContent--alignCenter"

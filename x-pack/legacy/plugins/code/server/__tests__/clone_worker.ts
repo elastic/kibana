@@ -7,7 +7,7 @@
 import assert from 'assert';
 import { delay } from 'bluebird';
 import path from 'path';
-import rimraf from 'rimraf';
+import del from 'del';
 import sinon from 'sinon';
 import { prepareProjectByCloning as prepareProject } from '../test_utils';
 import { CloneWorkerResult, Repository } from '../../model';
@@ -28,18 +28,14 @@ const esQueue = {};
 const serverOptions = createTestServerOption();
 const gitOps = new GitOperations(serverOptions.repoPath);
 
-function cleanWorkspace() {
-  return new Promise(resolve => {
-    rimraf(serverOptions.workspacePath, resolve);
-  });
+async function cleanWorkspace() {
+  await del(serverOptions.workspacePath);
 }
 
 describe('clone_worker_tests', () => {
   // @ts-ignore
   before(async () => {
-    return new Promise(resolve => {
-      rimraf(serverOptions.repoPath, resolve);
-    });
+    await del(serverOptions.repoPath);
   });
 
   beforeEach(async function() {
