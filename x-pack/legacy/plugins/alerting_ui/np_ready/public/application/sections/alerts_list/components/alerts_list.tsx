@@ -13,15 +13,8 @@ import { AlertsContext } from '../../../context/alerts_context';
 import { useAppDependencies } from '../../../index';
 import { Alert, AlertTableItem, AlertTypeIndex, Pagination } from '../../../../types';
 import { AlertAdd } from '../../alert_add';
-import {
-  deleteAlerts,
-  disableAlert,
-  enableAlert,
-  loadAlerts,
-  loadAlertTypes,
-  muteAllAlertInstances,
-  unmuteAllAlertInstances,
-} from '../../../lib/api';
+import { CollapsedItemActions } from './collapsed_item_actions';
+import { deleteAlerts, loadAlerts, loadAlertTypes } from '../../../lib/api';
 
 export const AlertsList: React.FunctionComponent = () => {
   const {
@@ -29,7 +22,6 @@ export const AlertsList: React.FunctionComponent = () => {
     plugins: { capabilities, toastNotifications },
   } = useAppDependencies();
   const canDelete = capabilities.get().alerting.delete;
-  const canSave = capabilities.get().alerting.save;
 
   const [alertTypesIndex, setAlertTypesIndex] = useState<AlertTypeIndex | undefined>(undefined);
   const [alerts, setAlerts] = useState<Alert[]>([]);
@@ -147,126 +139,14 @@ export const AlertsList: React.FunctionComponent = () => {
       name: i18n.translate('xpack.alertingUI.sections.alertsList.alertsListTable.columns.actions', {
         defaultMessage: 'Actions',
       }),
-      actions: [
-        {
-          enabled: () => canDelete,
-          type: 'icon',
-          icon: 'trash',
-          onClick: (item: AlertTableItem) => deleteItems([item]),
-          name: i18n.translate(
-            'xpack.alertingUI.sections.alertsList.alertsListTable.columns.actions.deleteAlertName',
-            { defaultMessage: 'Delete' }
-          ),
-          description: canDelete
-            ? i18n.translate(
-                'xpack.alertingUI.sections.alertsList.alertsListTable.columns.actions.deleteAlertDescription',
-                { defaultMessage: 'Delete this alert' }
-              )
-            : i18n.translate(
-                'xpack.alertingUI.sections.alertsList.alertsListTable.columns.actions.deleteAlertDisabledDescription',
-                { defaultMessage: 'Unable to delete alerts' }
-              ),
-        },
-        {
-          enabled: () => canSave,
-          type: 'icon',
-          icon: 'play',
-          available: (item: AlertTableItem) => !item.enabled,
-          onClick: async (item: AlertTableItem) => {
-            setIsPerformingAction(true);
-            await enableAlert({ http, id: item.id });
-            await loadAlertsData();
-            setIsPerformingAction(false);
-          },
-          name: i18n.translate(
-            'xpack.alertingUI.sections.alertsList.alertsListTable.columns.actions.enableAlertTitle',
-            { defaultMessage: 'Enable' }
-          ),
-          description: canSave
-            ? i18n.translate(
-                'xpack.alertingUI.sections.alertsList.alertsListTable.columns.actions.enableAlertDescription',
-                { defaultMessage: 'Enable this alert' }
-              )
-            : i18n.translate(
-                'xpack.alertingUI.sections.alertsList.alertsListTable.columns.actions.enableAlertDisabledDescription',
-                { defaultMessage: 'Unable to enable alerts' }
-              ),
-        },
-        {
-          enabled: () => canSave,
-          type: 'icon',
-          icon: 'stop',
-          available: (item: AlertTableItem) => item.enabled,
-          onClick: async (item: AlertTableItem) => {
-            setIsPerformingAction(true);
-            await disableAlert({ http, id: item.id });
-            await loadAlertsData();
-            setIsPerformingAction(false);
-          },
-          name: i18n.translate(
-            'xpack.alertingUI.sections.alertsList.alertsListTable.columns.actions.disableAlertTitle',
-            { defaultMessage: 'Disable' }
-          ),
-          description: canSave
-            ? i18n.translate(
-                'xpack.alertingUI.sections.alertsList.alertsListTable.columns.actions.disableAlertDescription',
-                { defaultMessage: 'Disable this alert' }
-              )
-            : i18n.translate(
-                'xpack.alertingUI.sections.alertsList.alertsListTable.columns.actions.disableAlertDisabledDescription',
-                { defaultMessage: 'Unable to disable alerts' }
-              ),
-        },
-        {
-          // TODO: Icon
-          enabled: () => canSave,
-          available: (item: AlertTableItem) => !item.muteAll,
-          onClick: async (item: AlertTableItem) => {
-            setIsPerformingAction(true);
-            await muteAllAlertInstances({ http, id: item.id });
-            await loadAlertsData();
-            setIsPerformingAction(false);
-          },
-          name: i18n.translate(
-            'xpack.alertingUI.sections.alertsList.alertsListTable.columns.actions.muteAllAlertInstancesTitle',
-            { defaultMessage: 'Mute all' }
-          ),
-          description: canSave
-            ? i18n.translate(
-                'xpack.alertingUI.sections.alertsList.alertsListTable.columns.actions.muteAllAlertInstancesDescription',
-                { defaultMessage: 'Mute all alert instances' }
-              )
-            : i18n.translate(
-                'xpack.alertingUI.sections.alertsList.alertsListTable.columns.actions.muteAllAlertInstancesDisabledDescription',
-                { defaultMessage: 'Unable to mute all alert instances' }
-              ),
-        },
-        {
-          enabled: () => canSave,
-          type: 'icon',
-          icon: 'bell',
-          available: (item: AlertTableItem) => item.muteAll,
-          onClick: async (item: AlertTableItem) => {
-            setIsPerformingAction(true);
-            await unmuteAllAlertInstances({ http, id: item.id });
-            await loadAlertsData();
-            setIsPerformingAction(false);
-          },
-          name: i18n.translate(
-            'xpack.alertingUI.sections.alertsList.alertsListTable.columns.actions.unmuteAllAlertInstancesTitle',
-            { defaultMessage: 'Unmute all' }
-          ),
-          description: canSave
-            ? i18n.translate(
-                'xpack.alertingUI.sections.alertsList.alertsListTable.columns.actions.unmuteAllAlertInstancesDescription',
-                { defaultMessage: 'Unmute all alert instances' }
-              )
-            : i18n.translate(
-                'xpack.alertingUI.sections.alertsList.alertsListTable.columns.actions.unmuteAllAlertInstancesDisabledDescription',
-                { defaultMessage: 'Unable to unmute all alert instances' }
-              ),
-        },
-      ],
+      render(item: AlertTableItem) {
+        return (
+          <CollapsedItemActions
+            item={item}
+            onDeleted={() => loadAlertsData()}
+          ></CollapsedItemActions>
+        );
+      },
     },
   ];
 
