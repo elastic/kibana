@@ -32,7 +32,7 @@ const createSetupContract = (): Setup => {
   const setupContract: Setup = {
     registerView: jest.fn(views.register.bind(views)),
 
-    __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: {
+    __LEGACY: {
       views,
     },
   };

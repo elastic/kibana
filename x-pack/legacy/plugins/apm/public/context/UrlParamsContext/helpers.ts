@@ -61,10 +61,17 @@ export function getPathParams(pathname: string = '') {
   const pageName = paths[0];
 
   // TODO: use react router's real match params instead of guessing the path order
+
   switch (pageName) {
     case 'services':
-      const servicePageName = paths[2];
+      let servicePageName = paths[2];
       const serviceName = paths[1];
+      const serviceNodeName = paths[3];
+
+      if (servicePageName === 'nodes' && paths.length > 3) {
+        servicePageName = 'metrics';
+      }
+
       switch (servicePageName) {
         case 'transactions':
           return {
@@ -80,6 +87,16 @@ export function getPathParams(pathname: string = '') {
         case 'metrics':
           return {
             processorEvent: 'metric',
+            serviceName,
+            serviceNodeName
+          };
+        case 'nodes':
+          return {
+            serviceName
+          };
+        case 'service-map':
+          return {
+            processorEvent: 'service-map',
             serviceName
           };
         default:

@@ -67,6 +67,8 @@ function AdvancedSettingsUi({
         />
       </EuiFormRow>
 
+      <EuiSpacer size="m" />
+
       <EuiCheckbox
         id="createIndexPattern"
         label={

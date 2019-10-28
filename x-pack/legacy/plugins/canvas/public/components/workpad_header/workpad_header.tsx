@@ -64,14 +64,14 @@ export class WorkpadHeader extends React.PureComponent<Props, State> {
       position="bottom"
       content={
         <span>
-          {strings.getFullScreenTooltipText()}{' '}
+          {strings.getFullScreenTooltip()}{' '}
           <ToolTipShortcut namespace="PRESENTATION" action="FULLSCREEN" />
         </span>
       }
     >
       <EuiButtonIcon
         iconType="fullScreen"
-        aria-label="View fullscreen"
+        aria-label={strings.getFullScreenButtonAriaLabel()}
         onClick={toggleFullscreen}
       />
     </EuiToolTip>
@@ -100,7 +100,7 @@ export class WorkpadHeader extends React.PureComponent<Props, State> {
         <ElementTypes onClose={this._hideElementModal} />
         <EuiModalFooter>
           <EuiButton size="s" onClick={this._hideElementModal}>
-            {strings.getAddElementModalCloseBtnText()}
+            {strings.getAddElementModalCloseButtonLabel()}
           </EuiButton>
         </EuiModalFooter>
       </EuiModal>
@@ -111,12 +111,12 @@ export class WorkpadHeader extends React.PureComponent<Props, State> {
 
   _getEditToggleToolTipText = () => {
     if (!this.props.canUserWrite) {
-      return strings.getNoWritePermText();
+      return strings.getNoWritePermissionTooltipText();
     }
 
     const content = this.props.isWriteable
-      ? strings.getHideEditControlText()
-      : strings.getShowEditControlText();
+      ? strings.getHideEditControlTooltip()
+      : strings.getShowEditControlTooltip();
 
     return content;
   };
@@ -196,7 +196,7 @@ export class WorkpadHeader extends React.PureComponent<Props, State> {
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty onClick={this._showEmbeddablePanel}>
-                    {strings.getEmbedObjectBtnText()}
+                    {strings.getEmbedObjectButtonLabel()}
                   </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -207,7 +207,7 @@ export class WorkpadHeader extends React.PureComponent<Props, State> {
                     data-test-subj="add-element-button"
                     onClick={this._showElementModal}
                   >
-                    {strings.getAddElementBtnText()}
+                    {strings.getAddElementButtonLabel()}
                   </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>

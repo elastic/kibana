@@ -2,17 +2,15 @@
 
 exports[`BasicLoginForm renders as expected 1`] = `
 <Fragment>
-  <EuiPanel
-    grow={true}
-    hasShadow={false}
-    paddingSize="m"
-  >
+  <EuiPanel>
     <form
       onSubmit={[Function]}
     >
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage
@@ -40,7 +38,9 @@ exports[`BasicLoginForm renders as expected 1`] = `
       </EuiFormRow>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage
@@ -70,10 +70,8 @@ exports[`BasicLoginForm renders as expected 1`] = `
         color="primary"
         data-test-subj="loginSubmit"
         fill={true}
-        iconSide="left"
         isLoading={false}
         onClick={[Function]}
-        size="m"
         type="submit"
       >
         <FormattedMessage

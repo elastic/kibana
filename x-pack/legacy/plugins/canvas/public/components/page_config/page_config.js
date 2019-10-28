@@ -8,6 +8,9 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { EuiCard, EuiFormRow, EuiTitle, EuiSpacer, EuiSelect } from '@elastic/eui';
 import { WorkpadColorPicker } from '../workpad_color_picker';
+import { ComponentStrings } from '../../../i18n';
+
+const { PageConfig: strings } = ComponentStrings;
 
 export const PageConfig = ({
   pageIndex,
@@ -20,26 +23,31 @@ export const PageConfig = ({
   return (
     <Fragment>
       <EuiTitle size="xs">
-        <h4>Page</h4>
+        <h4>{strings.getTitle()}</h4>
       </EuiTitle>
       <EuiSpacer size="m" />
-      <EuiFormRow label="Background color" helpText="Accepts HEX, RGB or HTML Color names">
+      <EuiFormRow
+        display="rowCompressed"
+        label={strings.getBackgroundColorLabel()}
+        helpText={strings.getBackgroundColorDescription()}
+      >
         <WorkpadColorPicker onChange={setBackground} value={background} />
       </EuiFormRow>
       {/* No need to show the transition for the first page because transitions occur when
         switching between pages (for example, when moving from the first page to the second
         page, we use the second page's transition) */}
       {pageIndex > 0 ? (
-        <div>
-          <EuiFormRow label="Transition" compressed>
+        <Fragment>
+          <EuiFormRow label={strings.getTransitionLabel()} display="rowCompressed">
             <EuiSelect
               value={transition ? transition.name : ''}
               options={transitions}
+              compressed
               onChange={e => setTransition(e.target.value)}
             />
           </EuiFormRow>
           {transition ? (
-            <EuiFormRow label="Preview">
+            <EuiFormRow label={strings.getTransitionPreviewLabel()} display="rowCompressed">
               <EuiCard
                 title=""
                 description=""
@@ -55,7 +63,7 @@ export const PageConfig = ({
           ) : (
             ''
           )}
-        </div>
+        </Fragment>
       ) : (
         ''
       )}

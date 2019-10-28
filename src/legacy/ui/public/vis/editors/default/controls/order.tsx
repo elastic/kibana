@@ -58,6 +58,7 @@ function OrderParamEditor({
           setValue(aggParam.options.find((opt: OptionedValueProp) => opt.value === ev.target.value))
         }
         fullWidth={true}
+        compressed
         isInvalid={showValidation ? !isValid : false}
         onBlur={setTouched}
       />

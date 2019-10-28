@@ -22,8 +22,9 @@ import { dirname } from 'path';
 
 import chalk from 'chalk';
 import { createHash } from 'crypto';
-import wreck from '@hapi/wreck';
-import mkdirp from 'mkdirp';
+import Axios from 'axios';
+
+import { mkdirp } from '../../lib';
 
 function tryUnlink(path) {
   try {
@@ -43,28 +44,31 @@ export async function download(options) {
   }
 
   // mkdirp and open file outside of try/catch, we don't retry for those errors
-  mkdirp.sync(dirname(destination));
+  await mkdirp(dirname(destination));
   const fileHandle = openSync(destination, 'w');
 
   let error;
   try {
     log.debug(`Attempting download of ${url}`, chalk.dim(sha256));
 
-    const response = await wreck.request('GET', url);
+    const response = await Axios.request({
+      url: url,
+      responseType: 'stream'
+    });
 
-    if (response.statusCode !== 200) {
-      throw new Error(`Unexpected status code ${response.statusCode} when downloading ${url}`);
+    if (response.status !== 200) {
+      throw new Error(`Unexpected status code ${response.status} when downloading ${url}`);
     }
 
     const hash = createHash('sha256');
     await new Promise((resolve, reject) => {
-      response.on('data', chunk => {
+      response.data.on('data', chunk => {
         hash.update(chunk);
         writeSync(fileHandle, chunk);
       });
 
-      response.on('error', reject);
-      response.on('end', resolve);
+      response.data.on('error', reject);
+      response.data.on('end', resolve);
     });
 
     const downloadedSha256 = hash.digest('hex');

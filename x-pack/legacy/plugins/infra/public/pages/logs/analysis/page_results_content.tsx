@@ -6,33 +6,37 @@
 
 import datemath from '@elastic/datemath';
 import {
-  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPage,
-  EuiPageBody,
-  EuiPageContent,
-  EuiPageContentBody,
   EuiPanel,
   EuiSuperDatePicker,
+  EuiBadge,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import numeral from '@elastic/numeral';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
-import React, { useCallback, useMemo, useState } from 'react';
-
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import euiStyled from '../../../../../../common/eui_styled_components';
 import { TimeRange } from '../../../../common/http_api/shared/time_range';
 import { bucketSpan } from '../../../../common/log_analysis';
 import { LoadingPage } from '../../../components/loading_page';
 import {
+  LogAnalysisJobs,
   StringTimeRange,
   useLogAnalysisResults,
   useLogAnalysisResultsUrlState,
 } from '../../../containers/logs/log_analysis';
+import { useInterval } from '../../../hooks/use_interval';
 import { useTrackPageview } from '../../../hooks/use_track_metric';
+import { useKibanaUiSetting } from '../../../utils/use_kibana_ui_setting';
 import { FirstUseCallout } from './first_use';
+import { AnomaliesResults } from './sections/anomalies';
 import { LogRateResults } from './sections/log_rate';
+
+const JOB_STATUS_POLLING_INTERVAL = 30000;
 
 export const AnalysisResultsContent = ({
   sourceId,
@@ -44,6 +48,8 @@ export const AnalysisResultsContent = ({
   useTrackPageview({ app: 'infra_logs', path: 'analysis_results' });
   useTrackPageview({ app: 'infra_logs', path: 'analysis_results', delay: 15000 });
 
+  const [dateFormat] = useKibanaUiSetting('dateFormat', 'MMMM D, YYYY h:mm A');
+
   const {
     timeRange: selectedTimeRange,
     setTimeRange: setSelectedTimeRange,
@@ -51,30 +57,37 @@ export const AnalysisResultsContent = ({
     setAutoRefresh,
   } = useLogAnalysisResultsUrlState();
 
-  const [queryTimeRange, setQueryTimeRange] = useState<TimeRange>(
-    stringToNumericTimeRange(selectedTimeRange)
-  );
+  const [queryTimeRange, setQueryTimeRange] = useState<{
+    value: TimeRange;
+    lastChangedTime: number;
+  }>(() => ({
+    value: stringToNumericTimeRange(selectedTimeRange),
+    lastChangedTime: Date.now(),
+  }));
 
   const bucketDuration = useMemo(() => {
     // This function takes the current time range in ms,
     // works out the bucket interval we'd need to always
-    // display 200 data points, and then takes that new
+    // display 100 data points, and then takes that new
     // value and works out the nearest multiple of
     // 900000 (15 minutes) to it, so that we don't end up with
     // jaggy bucket boundaries between the ML buckets and our
     // aggregation buckets.
-    const msRange = moment(queryTimeRange.endTime).diff(moment(queryTimeRange.startTime));
-    const bucketIntervalInMs = msRange / 200;
+    const msRange = moment(queryTimeRange.value.endTime).diff(
+      moment(queryTimeRange.value.startTime)
+    );
+    const bucketIntervalInMs = msRange / 100;
     const result = bucketSpan * Math.round(bucketIntervalInMs / bucketSpan);
     const roundedResult = parseInt(Number(result).toFixed(0), 10);
     return roundedResult < bucketSpan ? bucketSpan : roundedResult;
-  }, [queryTimeRange.startTime, queryTimeRange.endTime]);
+  }, [queryTimeRange.value.startTime, queryTimeRange.value.endTime]);
 
   const { isLoading, logEntryRate } = useLogAnalysisResults({
     sourceId,
-    startTime: queryTimeRange.startTime,
-    endTime: queryTimeRange.endTime,
+    startTime: queryTimeRange.value.startTime,
+    endTime: queryTimeRange.value.endTime,
     bucketDuration,
+    lastRequestTime: queryTimeRange.lastChangedTime,
   });
   const hasResults = useMemo(() => logEntryRate && logEntryRate.histogramBuckets.length > 0, [
     logEntryRate,
@@ -82,7 +95,10 @@ export const AnalysisResultsContent = ({
 
   const handleQueryTimeRangeChange = useCallback(
     ({ start: startTime, end: endTime }: { start: string; end: string }) => {
-      setQueryTimeRange(stringToNumericTimeRange({ startTime, endTime }));
+      setQueryTimeRange({
+        value: stringToNumericTimeRange({ startTime, endTime }),
+        lastChangedTime: Date.now(),
+      });
     },
     [setQueryTimeRange]
   );
@@ -101,6 +117,17 @@ export const AnalysisResultsContent = ({
     [setSelectedTimeRange, handleQueryTimeRangeChange]
   );
 
+  const handleChartTimeRangeChange = useCallback(
+    ({ startTime, endTime }: TimeRange) => {
+      handleSelectedTimeRangeChange({
+        end: new Date(endTime).toISOString(),
+        isInvalid: false,
+        start: new Date(startTime).toISOString(),
+      });
+    },
+    [handleSelectedTimeRangeChange]
+  );
+
   const handleAutoRefreshChange = useCallback(
     ({ isPaused, refreshInterval: interval }: { isPaused: boolean; refreshInterval: number }) => {
       setAutoRefresh({
@@ -111,20 +138,28 @@ export const AnalysisResultsContent = ({
     [setAutoRefresh]
   );
 
-  const anomaliesDetected = useMemo(() => {
-    if (!logEntryRate) {
-      return null;
-    } else {
-      if (logEntryRate.histogramBuckets && logEntryRate.histogramBuckets.length) {
-        return logEntryRate.histogramBuckets.reduce(
-          (acc, bucket) => acc + bucket.anomalies.length,
-          0
-        );
-      } else {
-        return null;
-      }
-    }
-  }, [logEntryRate]);
+  const {
+    fetchJobStatus,
+    jobStatus,
+    setupStatus,
+    viewSetupForReconfiguration,
+    viewSetupForUpdate,
+    jobIds,
+  } = useContext(LogAnalysisJobs.Context);
+
+  useInterval(() => {
+    fetchJobStatus();
+  }, JOB_STATUS_POLLING_INTERVAL);
+
+  useInterval(
+    () => {
+      handleQueryTimeRangeChange({
+        start: selectedTimeRange.startTime,
+        end: selectedTimeRange.endTime,
+      });
+    },
+    autoRefresh.isPaused ? null : autoRefresh.interval
+  );
 
   return (
     <>
@@ -136,59 +171,77 @@ export const AnalysisResultsContent = ({
         />
       ) : (
         <>
-          <EuiPage>
-            <EuiPanel paddingSize="l">
-              <EuiFlexGroup justifyContent="spaceBetween">
-                <EuiFlexItem grow={7}>
-                  <EuiFlexGroup alignItems="center">
+          <ResultsContentPage>
+            <EuiFlexGroup direction="column">
+              <EuiFlexItem grow={false}>
+                <EuiPanel paddingSize="l">
+                  <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                     <EuiFlexItem grow={false}>
-                      {anomaliesDetected !== null ? (
-                        <span>
+                      {!isLoading && logEntryRate ? (
+                        <EuiText size="s">
                           <FormattedMessage
-                            id="xpack.infra.logs.analysis.anomaliesDetectedText"
-                            defaultMessage="Detected {formattedNumber} {number, plural, one {anomaly} other {anomalies}}"
+                            id="xpack.infra.logs.analysis.logRateResultsToolbarText"
+                            defaultMessage="Analyzed {numberOfLogs} log entries from {startTime} to {endTime}"
                             values={{
-                              formattedNumber: (
-                                <EuiBadge color={anomaliesDetected === 0 ? 'default' : 'warning'}>
-                                  {anomaliesDetected}
+                              numberOfLogs: (
+                                <EuiBadge color="primary">
+                                  <EuiText size="s" color="ghost">
+                                    {numeral(logEntryRate.totalNumberOfLogEntries).format('0.00a')}
+                                  </EuiText>
                                 </EuiBadge>
                               ),
-                              number: anomaliesDetected,
+                              startTime: (
+                                <b>{moment(queryTimeRange.value.startTime).format(dateFormat)}</b>
+                              ),
+                              endTime: (
+                                <b>{moment(queryTimeRange.value.endTime).format(dateFormat)}</b>
+                              ),
                             }}
                           />
-                        </span>
+                        </EuiText>
                       ) : null}
                     </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiSuperDatePicker
+                        start={selectedTimeRange.startTime}
+                        end={selectedTimeRange.endTime}
+                        onTimeChange={handleSelectedTimeRangeChange}
+                        isPaused={autoRefresh.isPaused}
+                        refreshInterval={autoRefresh.interval}
+                        onRefreshChange={handleAutoRefreshChange}
+                      />
+                    </EuiFlexItem>
                   </EuiFlexGroup>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiSuperDatePicker
-                    start={selectedTimeRange.startTime}
-                    end={selectedTimeRange.endTime}
-                    onTimeChange={handleSelectedTimeRangeChange}
-                    isPaused={autoRefresh.isPaused}
-                    refreshInterval={autoRefresh.interval}
-                    onRefreshChange={handleAutoRefreshChange}
-                    onRefresh={handleQueryTimeRangeChange}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
-          </EuiPage>
-          <ExpandingPage>
-            <EuiPageBody>
-              <EuiPageContent>
-                <EuiPageContentBody>
+                </EuiPanel>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiPanel paddingSize="l">
                   {isFirstUse && !hasResults ? <FirstUseCallout /> : null}
                   <LogRateResults
                     isLoading={isLoading}
                     results={logEntryRate}
-                    timeRange={queryTimeRange}
+                    setTimeRange={handleChartTimeRangeChange}
+                    timeRange={queryTimeRange.value}
                   />
-                </EuiPageContentBody>
-              </EuiPageContent>
-            </EuiPageBody>
-          </ExpandingPage>
+                </EuiPanel>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiPanel paddingSize="l">
+                  <AnomaliesResults
+                    isLoading={isLoading}
+                    jobStatus={jobStatus['log-entry-rate']}
+                    viewSetupForReconfiguration={viewSetupForReconfiguration}
+                    viewSetupForUpdate={viewSetupForUpdate}
+                    results={logEntryRate}
+                    setTimeRange={handleChartTimeRangeChange}
+                    setupStatus={setupStatus}
+                    timeRange={queryTimeRange.value}
+                    jobId={jobIds['log-entry-rate']}
+                  />
+                </EuiPanel>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </ResultsContentPage>
         </>
       )}
     </>
@@ -209,6 +262,10 @@ const stringToNumericTimeRange = (timeRange: StringTimeRange): TimeRange => ({
   ).valueOf(),
 });
 
-const ExpandingPage = euiStyled(EuiPage)`
-  flex: 1 0 0%;
+// This is needed due to the flex-basis: 100% !important; rule that
+// kicks in on small screens via media queries breaking when using direction="column"
+export const ResultsContentPage = euiStyled(EuiPage)`
+  .euiFlexGroup--responsive > .euiFlexItem {
+    flex-basis: auto !important;
+  }
 `;

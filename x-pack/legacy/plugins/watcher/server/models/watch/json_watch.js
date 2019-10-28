@@ -7,6 +7,7 @@
 import { isEmpty, cloneDeep, has, merge } from 'lodash';
 import { BaseWatch } from './base_watch';
 import { WATCH_TYPES } from '../../../common/constants';
+import { serializeJsonWatch } from '../../../common/lib/serialization';
 
 export class JsonWatch extends BaseWatch {
   // This constructor should not be used directly.
@@ -19,13 +20,7 @@ export class JsonWatch extends BaseWatch {
   }
 
   get watchJson() {
-    const result = merge(
-      {},
-      super.watchJson,
-      this.watch
-    );
-
-    return result;
+    return serializeJsonWatch(this.name, this.watch);
   }
 
   // To Elasticsearch

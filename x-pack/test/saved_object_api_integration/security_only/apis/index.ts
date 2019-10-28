@@ -12,7 +12,7 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('saved objects security only enabled', function() {
-    this.tags('ciGroup4');
+    this.tags('ciGroup9');
 
     before(async () => {
       await createUsersAndRoles(es, supertest);
@@ -28,5 +28,6 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./import'));
     loadTestFile(require.resolve('./resolve_import_errors'));
     loadTestFile(require.resolve('./update'));
+    loadTestFile(require.resolve('./bulk_update'));
   });
 }

@@ -13,55 +13,52 @@ import {
   ConsoleMessage,
   Request as PuppeteerRequest,
 } from 'puppeteer';
-import rimraf from 'rimraf';
+import del from 'del';
 import * as Rx from 'rxjs';
 import { ignoreElements, mergeMap, tap } from 'rxjs/operators';
 import { InnerSubscriber } from 'rxjs/internal/InnerSubscriber';
 
-import { puppeteerLaunch } from '../puppeteer';
+import { BrowserConfig, NetworkPolicy } from '../../../../types';
 import { LevelLogger as Logger } from '../../../lib/level_logger';
 import { HeadlessChromiumDriver } from '../driver';
-import { args, IArgOptions } from './args';
 import { safeChildProcess } from '../../safe_child_process';
+import { puppeteerLaunch } from '../puppeteer';
 import { getChromeLogLocation } from '../paths';
+import { args } from './args';
 
 type binaryPath = string;
 type queueTimeout = number;
-interface IBrowserConfig {
-  [key: string]: any;
-}
 
 export class HeadlessChromiumDriverFactory {
   private binaryPath: binaryPath;
   private logger: Logger;
-  private browserConfig: IBrowserConfig;
+  private browserConfig: BrowserConfig;
   private queueTimeout: queueTimeout;
+  private networkPolicy: NetworkPolicy;
 
   constructor(
     binaryPath: binaryPath,
     logger: Logger,
-    browserConfig: IBrowserConfig,
-    queueTimeout: queueTimeout
+    browserConfig: BrowserConfig,
+    queueTimeout: queueTimeout,
+    networkPolicy: NetworkPolicy
   ) {
     this.binaryPath = binaryPath;
     this.browserConfig = browserConfig;
     this.queueTimeout = queueTimeout;
     this.logger = logger;
+    this.networkPolicy = networkPolicy;
   }
 
   type = 'chromium';
 
-  test(
-    { viewport, browserTimezone }: { viewport: IArgOptions['viewport']; browserTimezone: string },
-    logger: Logger
-  ) {
+  test({ viewport }: { viewport: BrowserConfig['viewport'] }, logger: Logger) {
     const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chromium-'));
     const chromiumArgs = args({
       userDataDir,
       viewport,
-      verboseLogging: true,
       disableSandbox: this.browserConfig.disableSandbox,
-      proxyConfig: this.browserConfig.proxy,
+      proxy: this.browserConfig.proxy,
     });
 
     return puppeteerLaunch({
@@ -69,9 +66,6 @@ export class HeadlessChromiumDriverFactory {
       executablePath: this.binaryPath,
       ignoreHTTPSErrors: true,
       args: chromiumArgs,
-      env: {
-        TZ: browserTimezone,
-      },
     } as LaunchOptions).catch((error: Error) => {
       logger.error(
         `The Reporting plugin encountered issues launching Chromium in a self-test. You may have trouble generating reports.`
@@ -86,7 +80,7 @@ export class HeadlessChromiumDriverFactory {
     viewport,
     browserTimezone,
   }: {
-    viewport: IArgOptions['viewport'];
+    viewport: BrowserConfig['viewport'];
     browserTimezone: string;
   }): Rx.Observable<{
     driver$: Rx.Observable<HeadlessChromiumDriver>;
@@ -99,9 +93,8 @@ export class HeadlessChromiumDriverFactory {
       const chromiumArgs = args({
         userDataDir,
         viewport,
-        verboseLogging: this.logger.isVerbose,
         disableSandbox: this.browserConfig.disableSandbox,
-        proxyConfig: this.browserConfig.proxy,
+        proxy: this.browserConfig.proxy,
       });
 
       let browser: Browser;
@@ -162,7 +155,7 @@ export class HeadlessChromiumDriverFactory {
       this.getBrowserLogger(page).subscribe();
       this.getProcessLogger(browser).subscribe();
 
-      const driver$ = Rx.of(new HeadlessChromiumDriver(page, { inspect: this.browserConfig.inspect })); //  prettier-ignore
+      const driver$ = Rx.of(new HeadlessChromiumDriver(page, { inspect: this.browserConfig.inspect, networkPolicy: this.networkPolicy })); //  prettier-ignore
 
       const exit$ = this.getPageExit(browser, page);
 
@@ -173,12 +166,8 @@ export class HeadlessChromiumDriverFactory {
         this.logger.debug(`deleting chromium user data directory at [${userDataDir}]`);
         // the unsubscribe function isn't `async` so we're going to make our best effort at
         // deleting the userDataDir and if it fails log an error.
-        rimraf(userDataDir, err => {
-          if (err) {
-            return this.logger.error(
-              `error deleting user data directory at [${userDataDir}]: [${err}]`
-            );
-          }
+        del(userDataDir).catch(error => {
+          this.logger.error(`error deleting user data directory at [${userDataDir}]: [${error}]`);
         });
       });
     });

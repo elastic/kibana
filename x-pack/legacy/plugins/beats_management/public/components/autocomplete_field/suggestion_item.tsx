@@ -8,8 +8,8 @@ import { EuiIcon } from '@elastic/eui';
 import { tint } from 'polished';
 import React from 'react';
 import styled from 'styled-components';
-// @ts-ignore
-import { AutocompleteSuggestion } from 'ui/autocomplete_providers';
+
+import { AutocompleteSuggestion } from '../../../../../../../src/plugins/data/public';
 
 interface SuggestionItemProps {
   isSelected?: boolean;

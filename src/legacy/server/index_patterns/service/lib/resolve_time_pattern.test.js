@@ -32,7 +32,7 @@ const TIME_PATTERN = '[logs-]dddd-YYYY.w';
 
 describe('server/index_patterns/service/lib/resolve_time_pattern', () => {
   let sandbox;
-  beforeEach(() => sandbox = sinon.createSandbox());
+  beforeEach(() => (sandbox = sinon.createSandbox()));
   afterEach(() => sandbox.restore());
 
   describe('resolveTimePattern()', () => {
@@ -47,8 +47,7 @@ describe('server/index_patterns/service/lib/resolve_time_pattern', () => {
         const timePattern = {};
         const wildcard = {};
 
-        sandbox.stub(timePatternToWildcardNS, 'timePatternToWildcard')
-          .returns(wildcard);
+        sandbox.stub(timePatternToWildcardNS, 'timePatternToWildcard').returns(wildcard);
 
         await resolveTimePattern(noop, timePattern);
         sinon.assert.calledOnce(timePatternToWildcard);
@@ -60,8 +59,7 @@ describe('server/index_patterns/service/lib/resolve_time_pattern', () => {
         const wildcard = {};
 
         sandbox.stub(callIndexAliasApiNS, 'callIndexAliasApi').returns({});
-        sandbox.stub(timePatternToWildcardNS, 'timePatternToWildcard')
-          .returns(wildcard);
+        sandbox.stub(timePatternToWildcardNS, 'timePatternToWildcard').returns(wildcard);
 
         await resolveTimePattern(noop, timePattern);
         sinon.assert.calledOnce(callIndexAliasApi);
@@ -110,7 +108,7 @@ describe('server/index_patterns/service/lib/resolve_time_pattern', () => {
         expect(resp.matches).toEqual([
           'logs-Saturday-2017.1',
           'logs-Friday-2017.1',
-          'logs-Sunday-2017.1'
+          'logs-Sunday-2017.1',
         ]);
       });
     });

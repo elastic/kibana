@@ -1,0 +1,13 @@
+// sass-lint:disable-block indentation, no-color-keywords
+
+// SASSTODO: Create this in EUI
+@mixin lnsOverflowShadowHorizontal {
+  $hideHeight: $euiScrollBarCorner * 1.25;
+  mask-image: linear-gradient(
+    to right,
+    transparentize(red, .9) 0%,
+    transparentize(red, 0) $hideHeight,
+    transparentize(red, 0) calc(100% - #{$hideHeight}),
+    transparentize(red, .9) 100%
+  );
+}

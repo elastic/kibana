@@ -32,7 +32,7 @@ export class MonitoringService {
 
     return this.clusterService.loadCluster()
       .then(cluster => {
-        const url = `${this.basePath}/v1/clusters/${cluster.uuid}/logstash/pipelines`;
+        const url = `${this.basePath}/v1/clusters/${cluster.uuid}/logstash/pipeline_ids`;
         const now = moment.utc();
         const body = {
           timeRange: {
@@ -42,7 +42,7 @@ export class MonitoringService {
         };
         return this.$http.post(url, body);
       })
-      .then(response => response.data.pipelines.map(pipeline => PipelineListItem.fromUpstreamMonitoringJSON(pipeline)))
+      .then(response => response.data.map(pipeline => PipelineListItem.fromUpstreamMonitoringJSON(pipeline)))
       .catch(() => []);
   }
 }

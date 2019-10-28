@@ -6,6 +6,7 @@
 
 import { extractReferences } from './common/migrations/references';
 import { emsRasterTileToEmsVectorTile } from './common/migrations/ems_raster_tile_to_ems_vector_tile';
+import { topHitsTimeToSort } from './common/migrations/top_hits_time_to_sort';
 
 export const migrations = {
   'map': {
@@ -20,6 +21,14 @@ export const migrations = {
     },
     '7.4.0': (doc) => {
       const attributes = emsRasterTileToEmsVectorTile(doc);
+
+      return {
+        ...doc,
+        attributes,
+      };
+    },
+    '7.5.0': (doc) => {
+      const attributes = topHitsTimeToSort(doc);
 
       return {
         ...doc,

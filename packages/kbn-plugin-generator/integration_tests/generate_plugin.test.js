@@ -21,11 +21,11 @@
 import { spawn } from 'child_process';
 import { resolve } from 'path';
 import util from 'util';
-import { stat } from 'fs';
+import { stat, readFileSync } from 'fs';
 import { snakeCase } from 'lodash';
 import del from 'del';
 import { withProcRunner, ToolingLog } from '@kbn/dev-utils';
-import { createEsTestCluster } from '@kbn/test';
+import { createLegacyEsTestCluster } from '@kbn/test';
 import execa from 'execa';
 
 const statP = util.promisify(stat);
@@ -61,6 +61,13 @@ describe(`running the plugin-generator via 'node scripts/generate_plugin.js plug
     expect(stats.isDirectory()).toBe(true);
   });
 
+  it(`should create an internationalization config file with a blank line appended to satisfy the parser`, async () => {
+    // Link to the error that happens when the blank line is not there:
+    // https://github.com/elastic/kibana/pull/45044#issuecomment-530092627
+    const intlFile = `${generatedPath}/.i18nrc.json`;
+    expect(readFileSync(intlFile, 'utf8').endsWith('\n\n')).toBe(true);
+  });
+
   describe(`then running`, () => {
     it(`'yarn test:browser' should exit 0`, async () => {
       await execa('yarn', ['test:browser'], { cwd: generatedPath });
@@ -74,20 +81,29 @@ describe(`running the plugin-generator via 'node scripts/generate_plugin.js plug
       await execa('yarn', ['build'], { cwd: generatedPath });
     });
 
-    it(`'yarn start' should result in the spec plugin being initialized on kibana's stdout`, async () => {
+    describe('with es instance', () => {
       const log = new ToolingLog();
-      const es = createEsTestCluster({ license: 'basic', log });
-      await es.start();
-      await withProcRunner(log, async proc => {
-        await proc.run('kibana', {
-          cmd: 'yarn',
-          args: ['start', '--optimize.enabled=false', '--logging.json=false'],
-          cwd: generatedPath,
-          wait: /ispec_plugin.+Status changed from uninitialized to green - Ready/,
+
+      const es = createLegacyEsTestCluster({ license: 'basic', log });
+      beforeAll(es.start);
+      afterAll(es.stop);
+
+      it(`'yarn start' should result in the spec plugin being initialized on kibana's stdout`, async () => {
+        await withProcRunner(log, async proc => {
+          await proc.run('kibana', {
+            cmd: 'yarn',
+            args: [
+              'start',
+              '--optimize.enabled=false',
+              '--logging.json=false',
+              '--migrations.skip=true',
+            ],
+            cwd: generatedPath,
+            wait: /ispec_plugin.+Status changed from uninitialized to green - Ready/,
+          });
+          await proc.stop('kibana');
         });
-        await proc.stop('kibana');
       });
-      await es.stop();
     });
 
     it(`'yarn preinstall' should exit 0`, async () => {

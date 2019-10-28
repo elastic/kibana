@@ -25,7 +25,7 @@ export function getDiscoverQuery(transaction: Transaction) {
     _a: {
       interval: 'auto',
       query: {
-        language: 'lucene',
+        language: 'kuery',
         query
       }
     }

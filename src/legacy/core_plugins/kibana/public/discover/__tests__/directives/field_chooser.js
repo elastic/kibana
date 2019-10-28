@@ -23,7 +23,6 @@ import _ from 'lodash';
 import sinon from 'sinon';
 import expect from '@kbn/expect';
 import $ from 'jquery';
-import 'ui/private';
 import '../../components/field_chooser/field_chooser';
 import FixturesHitsProvider from 'fixtures/hits';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
@@ -126,13 +125,6 @@ describe('discover field chooser directives', function () {
       unpopular: $('.dscFieldList--unpopular', ctx),
     };
   };
-
-  describe('Index list', function () {
-    it('should be in alphabetical order', function () {
-      $elem.find('.ui-select-toggle').click();
-      expect($elem.find('[role=option]').text().replace(/\W+/g, '')).to.be('abc');
-    });
-  });
 
   describe('Field listing', function () {
     it('should have Selected Fields, Fields and Popular Fields sections', function () {

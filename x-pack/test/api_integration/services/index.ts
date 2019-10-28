@@ -10,7 +10,7 @@ import { services as kibanaCommonServices } from '../../../../test/common/servic
 import { SecurityServiceProvider, SpacesServiceProvider } from '../../common/services';
 
 // @ts-ignore not ts yet
-import { EsProvider } from './es';
+import { LegacyEsProvider } from './legacy_es';
 // @ts-ignore not ts yet
 import { EsSupertestWithoutAuthProvider } from './es_supertest_without_auth';
 // @ts-ignore not ts yet
@@ -33,7 +33,7 @@ export const services = {
   kibanaServer: kibanaCommonServices.kibanaServer,
   retry: kibanaCommonServices.retry,
 
-  es: EsProvider,
+  es: LegacyEsProvider,
   esSupertestWithoutAuth: EsSupertestWithoutAuthProvider,
   infraOpsGraphQLClient: InfraOpsGraphQLClientProvider,
   infraOpsGraphQLClientFactory: InfraOpsGraphQLClientFactoryProvider,

@@ -28,10 +28,8 @@ exports[`LayerTocActions is rendered 1`] = `
         color="text"
         data-test-subj="layerTocActionsPanelToggleButtonlayer1"
         flush="left"
-        iconSide="left"
         onClick={[Function]}
         size="xs"
-        type="button"
       >
         <span
           className="mapTocEntry__layerNameIcon"
@@ -107,6 +105,15 @@ exports[`LayerTocActions is rendered 1`] = `
               "name": "Clone layer",
               "onClick": [Function],
             },
+            Object {
+              "data-test-subj": "removeLayerButton",
+              "icon": <EuiIcon
+                size="m"
+                type="trash"
+              />,
+              "name": "Remove layer",
+              "onClick": [Function],
+            },
           ],
           "title": "Layer actions",
         },
@@ -144,10 +151,8 @@ exports[`LayerTocActions should disable fit to data when supportsFitToBounds is 
         color="text"
         data-test-subj="layerTocActionsPanelToggleButtonlayer1"
         flush="left"
-        iconSide="left"
         onClick={[Function]}
         size="xs"
-        type="button"
       >
         <span
           className="mapTocEntry__layerNameIcon"
@@ -223,6 +228,15 @@ exports[`LayerTocActions should disable fit to data when supportsFitToBounds is 
               "name": "Clone layer",
               "onClick": [Function],
             },
+            Object {
+              "data-test-subj": "removeLayerButton",
+              "icon": <EuiIcon
+                size="m"
+                type="trash"
+              />,
+              "name": "Remove layer",
+              "onClick": [Function],
+            },
           ],
           "title": "Layer actions",
         },
@@ -260,10 +274,8 @@ exports[`LayerTocActions should not show edit actions in read only mode 1`] = `
         color="text"
         data-test-subj="layerTocActionsPanelToggleButtonlayer1"
         flush="left"
-        iconSide="left"
         onClick={[Function]}
         size="xs"
-        type="button"
       >
         <span
           className="mapTocEntry__layerNameIcon"

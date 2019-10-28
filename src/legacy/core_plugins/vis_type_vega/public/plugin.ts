@@ -24,7 +24,7 @@ import {
   UiSettingsClientContract,
 } from '../../../../core/public';
 import { LegacyDependenciesPlugin, LegacyDependenciesPluginSetup } from './shim';
-import { Plugin as DataPublicPlugin } from '../../../../plugins/data/public';
+import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
 import { VisualizationsSetup } from '../../visualizations/public';
 
 import { createVegaFn } from './vega_fn';
@@ -37,7 +37,7 @@ export interface VegaVisualizationDependencies extends LegacyDependenciesPluginS
 
 /** @internal */
 export interface VegaPluginSetupDependencies {
-  data: ReturnType<DataPublicPlugin['setup']>;
+  expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
   __LEGACY: LegacyDependenciesPlugin;
 }
@@ -52,14 +52,14 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
 
   public async setup(
     core: CoreSetup,
-    { data, visualizations, __LEGACY }: VegaPluginSetupDependencies
+    { expressions, visualizations, __LEGACY }: VegaPluginSetupDependencies
   ) {
     const visualizationDependencies: Readonly<VegaVisualizationDependencies> = {
       uiSettings: core.uiSettings,
       ...(await __LEGACY.setup()),
     };
 
-    data.expressions.registerFunction(() => createVegaFn(visualizationDependencies));
+    expressions.registerFunction(() => createVegaFn(visualizationDependencies));
 
     visualizations.types.registerVisualization(() =>
       createVegaTypeDefinition(visualizationDependencies)

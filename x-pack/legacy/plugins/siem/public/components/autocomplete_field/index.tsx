@@ -11,7 +11,7 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import React from 'react';
-import { AutocompleteSuggestion } from 'ui/autocomplete_providers';
+import { AutocompleteSuggestion } from '../../../../../../../src/plugins/data/public';
 
 import euiStyled from '../../../../../common/eui_styled_components';
 

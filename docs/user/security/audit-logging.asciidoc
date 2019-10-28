@@ -1,0 +1,36 @@
+[role="xpack"]
+[[xpack-security-audit-logging]]
+===  Audit Logging
+
+You can enable auditing to keep track of security-related events such as
+authorization success and failures. Logging these events enables you
+to monitor {kib} for suspicious activity and provides evidence in the
+event of an attack.
+
+Use the {kib} audit logs in conjunction with {es}'s
+audit logging to get a holistic view of all security related events. 
+{kib} defers to {es}'s security model for authentication, data
+index authorization, and features that are driven by cluster-wide privileges.
+For more information on enabling audit logging in {es}, see
+{ref}/auditing.html[Auditing security events].
+
+[IMPORTANT]
+============================================================================
+Audit logs are **disabled** by default. To enable this functionality, you
+must set `xpack.security.audit.enabled` to `true` in `kibana.yml`.
+============================================================================
+
+Audit logging uses the standard {kib} logging output, which can be configured
+in the `kibana.yml` and is discussed in <<settings>>.
+
+==== Audit event types
+
+When you are auditing security events, each request can generate 
+multiple audit events. The following is a list of the events that can be generated:
+
+|======
+| `saved_objects_authorization_success`    | Logged when a user is authorized to access a saved
+                                             objects when using a role with <<kibana-privileges>>
+| `saved_objects_authorization_failure`    | Logged when a user isn't authorized to access a saved
+                                             objects when using a role with <<kibana-privileges>>
+|======

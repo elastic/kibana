@@ -35,6 +35,7 @@ describe('Authentication Table Component', () => {
             data={mockData.Authentications.edges}
             fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.Authentications.pageInfo)}
             id="authentication"
+            isInspect={false}
             loading={false}
             loadPage={loadPage}
             showMorePagesIndicator={getOr(

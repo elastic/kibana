@@ -60,7 +60,7 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     expect(resp.body).to.eql({
       statusCode: 400,
       error: 'Bad Request',
-      message: `child \"objects\" fails because [\"objects\" at position 0 fails because [child \"type\" fails because [\"type\" must be one of [canvas-element, canvas-workpad, config, dashboard, globaltype, index-pattern, map, query, search, url, visualization]]]]`,
+      message: `child \"objects\" fails because [\"objects\" at position 0 fails because [child \"type\" fails because [\"type\" must be one of [canvas-element, canvas-workpad, config, dashboard, globaltype, index-pattern, lens, map, query, search, url, visualization]]]]`,
       validation: {
         source: 'payload',
         keys: ['objects.0.type'],
@@ -104,6 +104,7 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
           .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_export`)
           .send({
             type: 'visualization',
+            excludeExportDetails: true,
           })
           .auth(user.username, user.password)
           .expect(tests.spaceAwareType.statusCode)
@@ -120,6 +121,7 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
                 id: `${getIdPrefix(spaceId)}dd7caf20-9efd-11e7-acb3-3dab96693fab`,
               },
             ],
+            excludeExportDetails: true,
           })
           .auth(user.username, user.password)
           .expect(tests.spaceAwareType.statusCode)
@@ -137,6 +139,7 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
                   id: `hiddentype_1`,
                 },
               ],
+              excludeExportDetails: true,
             })
             .auth(user.username, user.password)
             .expect(tests.hiddenType.statusCode)

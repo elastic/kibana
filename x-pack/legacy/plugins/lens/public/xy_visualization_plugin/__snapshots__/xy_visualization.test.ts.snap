@@ -1,0 +1,84 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`xy_visualization #toExpression should map to a valid AST 1`] = `
+Object {
+  "chain": Array [
+    Object {
+      "arguments": Object {
+        "layers": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "accessors": Array [
+                    "b",
+                    "c",
+                  ],
+                  "columnToLabel": Array [
+                    "{\\"b\\":\\"col_b\\",\\"c\\":\\"col_c\\",\\"d\\":\\"col_d\\"}",
+                  ],
+                  "hide": Array [
+                    false,
+                  ],
+                  "isHistogram": Array [
+                    false,
+                  ],
+                  "layerId": Array [
+                    "first",
+                  ],
+                  "seriesType": Array [
+                    "area",
+                  ],
+                  "splitAccessor": Array [
+                    "d",
+                  ],
+                  "xAccessor": Array [
+                    "a",
+                  ],
+                  "xScaleType": Array [
+                    "linear",
+                  ],
+                  "yScaleType": Array [
+                    "linear",
+                  ],
+                },
+                "function": "lens_xy_layer",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
+        "legend": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "isVisible": Array [
+                    true,
+                  ],
+                  "position": Array [
+                    "bottom",
+                  ],
+                },
+                "function": "lens_xy_legendConfig",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
+        "xTitle": Array [
+          "col_a",
+        ],
+        "yTitle": Array [
+          "col_b",
+        ],
+      },
+      "function": "lens_xy_chart",
+      "type": "function",
+    },
+  ],
+  "type": "expression",
+}
+`;

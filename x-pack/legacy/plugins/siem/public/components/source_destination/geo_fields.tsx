@@ -5,8 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { get } from 'lodash/fp';
-import { uniq } from 'lodash/fp';
+import { get, uniq } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';

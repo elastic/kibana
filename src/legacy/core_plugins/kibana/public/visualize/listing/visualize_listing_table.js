@@ -50,6 +50,7 @@ class VisualizeListingTableUi extends Component {
         editItem={capabilities.get().visualize.save ? this.props.editItem : null}
         tableColumns={this.getTableColumns()}
         listingLimit={this.props.listingLimit}
+        selectable={item => item.canDelete}
         initialFilter={''}
         noItemsFragment={this.getNoItemsMessage()}
         entityName={
@@ -104,7 +105,20 @@ class VisualizeListingTableUi extends Component {
           <span>
             {this.renderItemTypeIcon(record)}
             {record.typeTitle}
-            {this.getExperimentalBadge(record)}
+            {this.getBadge(record)}
+          </span>
+        )
+      },
+      {
+        field: 'description',
+        name: intl.formatMessage({
+          id: 'kbn.dashboard.listing.table.descriptionColumnName',
+          defaultMessage: 'Description',
+        }),
+        sortable: true,
+        render: (field, record) =>  (
+          <span>
+            {record.description}
           </span>
         )
       },
@@ -198,9 +212,24 @@ class VisualizeListingTableUi extends Component {
     return icon;
   }
 
-  getExperimentalBadge(item) {
-    return item.isExperimental && (
-      <EuiBetaBadge
+  getBadge(item) {
+    if (item.stage === 'beta') {
+      return (<EuiBetaBadge
+        className="visListingTable__betaIcon"
+        label="B"
+        title={i18n.translate('kbn.visualize.listing.betaTitle', {
+          defaultMessage: 'Beta',
+        })}
+        tooltipContent={
+          i18n.translate('kbn.visualize.listing.betaTooltip', {
+            defaultMessage: 'This visualization is in beta and is subject to change. The design and code is less mature than official GA ' +
+            'features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA ' +
+            'features',
+          })
+        }
+      />);
+    } else if (item.stage === 'experimental') {
+      return (<EuiBetaBadge
         className="visListingTable__experimentalIcon"
         label="E"
         title={i18n.translate('kbn.visualize.listing.experimentalTitle', {
@@ -211,8 +240,8 @@ class VisualizeListingTableUi extends Component {
             defaultMessage: 'This visualization might be changed or removed in a future release and is not subject to the support SLA.',
           })
         }
-      />
-    );
+      />);
+    }
   }
 }
 

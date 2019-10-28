@@ -30,15 +30,16 @@ import dashboardTemplate from './dashboard_app.html';
 import dashboardListingTemplate from './listing/dashboard_listing_ng_wrapper.html';
 
 import { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
-import { InvalidJSONProperty, SavedObjectNotFound } from 'ui/errors';
+import { InvalidJSONProperty, SavedObjectNotFound } from '../../../../../plugins/kibana_utils/public';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
-import { recentlyAccessed } from 'ui/persisted_log';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import { DashboardListing, EMPTY_FILTER } from './listing/dashboard_listing';
 import { uiModules } from 'ui/modules';
 import 'ui/capabilities/route_setup';
 import { addHelpMenuToAppChrome } from './help_menu/help_menu_util';
+
+import { npStart } from 'ui/new_platform';
 
 // load directives
 import '../../../data/public';
@@ -159,7 +160,7 @@ uiRoutes
 
         return savedDashboards.get(id)
           .then((savedDashboard) => {
-            recentlyAccessed.add(savedDashboard.getFullPath(), savedDashboard.title, id);
+            npStart.core.chrome.recentlyAccessed.add(savedDashboard.getFullPath(), savedDashboard.title, id);
             return savedDashboard;
           })
           .catch((error) => {

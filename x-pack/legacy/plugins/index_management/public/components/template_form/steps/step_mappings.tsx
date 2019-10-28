@@ -20,26 +20,31 @@ import {
 } from '@elastic/eui';
 import { mappingDocumentationLink } from '../../../lib/documentation_links';
 import { StepProps } from '../types';
+import { useJsonStep } from './use_json_step';
 
 export const StepMappings: React.FunctionComponent<StepProps> = ({
   template,
-  updateTemplate,
-  errors,
+  setDataGetter,
+  onStepValidityChange,
 }) => {
-  const { mappings } = template;
-  const { mappings: mappingsError } = errors;
+  const { content, setContent, error } = useJsonStep({
+    prop: 'mappings',
+    defaultValue: template.mappings,
+    setDataGetter,
+    onStepValidityChange,
+  });
 
   return (
     <div data-test-subj="stepMappings">
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiTitle>
-            <h3 data-test-subj="stepTitle">
+            <h2 data-test-subj="stepTitle">
               <FormattedMessage
                 id="xpack.idxMgmt.templateForm.stepMappings.stepTitle"
                 defaultMessage="Mappings (optional)"
               />
-            </h3>
+            </h2>
           </EuiTitle>
 
           <EuiSpacer size="s" />
@@ -97,8 +102,8 @@ export const StepMappings: React.FunctionComponent<StepProps> = ({
             }}
           />
         }
-        isInvalid={Boolean(mappingsError)}
-        error={mappingsError}
+        isInvalid={Boolean(error)}
+        error={error}
         fullWidth
       >
         <EuiCodeEditor
@@ -121,9 +126,9 @@ export const StepMappings: React.FunctionComponent<StepProps> = ({
               defaultMessage: 'Mappings editor',
             }
           )}
-          value={mappings}
-          onChange={(newMappings: string) => {
-            updateTemplate({ mappings: newMappings });
+          value={content}
+          onChange={(udpated: string) => {
+            setContent(udpated);
           }}
           data-test-subj="mappingsEditor"
         />

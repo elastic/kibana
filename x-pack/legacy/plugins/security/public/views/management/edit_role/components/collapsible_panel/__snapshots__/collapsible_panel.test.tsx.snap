@@ -1,11 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`it renders without blowing up 1`] = `
-<EuiPanel
-  grow={true}
-  hasShadow={false}
-  paddingSize="m"
->
+<EuiPanel>
   <EuiFlexGroup
     alignItems="baseline"
     gutterSize="s"
@@ -30,9 +26,7 @@ exports[`it renders without blowing up 1`] = `
       grow={false}
     >
       <EuiLink
-        color="primary"
         onClick={[Function]}
-        type="button"
       >
         <FormattedMessage
           defaultMessage="hide"

@@ -16,6 +16,6 @@ export class UncommonProcesses {
     req: FrameworkRequest,
     options: RequestOptionsPaginated
   ): Promise<UncommonProcessesData> {
-    return await this.adapter.getUncommonProcesses(req, options);
+    return this.adapter.getUncommonProcesses(req, options);
   }
 }

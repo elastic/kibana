@@ -20,4 +20,4 @@
 // @ts-ignore
 import { legacyResponseHandlerProvider } from 'ui/vis/response_handlers/legacy';
 
-export const createTableVisResponseHandler = () => legacyResponseHandlerProvider().handler;
+export const tableVisResponseHandler = legacyResponseHandlerProvider().handler;

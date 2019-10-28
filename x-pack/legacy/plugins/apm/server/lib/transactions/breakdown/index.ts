@@ -13,17 +13,13 @@ import {
   SPAN_SELF_TIME_SUM,
   TRANSACTION_TYPE,
   TRANSACTION_NAME,
-  TRANSACTION_BREAKDOWN_COUNT
+  TRANSACTION_BREAKDOWN_COUNT,
+  PROCESSOR_EVENT
 } from '../../../../common/elasticsearch_fieldnames';
-import { PromiseReturnType } from '../../../../typings/common';
 import { Setup } from '../../helpers/setup_request';
 import { rangeFilter } from '../../helpers/range_filter';
 import { getMetricsDateHistogramParams } from '../../helpers/metrics';
 import { MAX_KPIS, COLORS } from './constants';
-
-export type TransactionBreakdownAPIResponse = PromiseReturnType<
-  typeof getTransactionBreakdown
->;
 
 export async function getTransactionBreakdown({
   setup,
@@ -54,7 +50,7 @@ export async function getTransactionBreakdown({
         field: SPAN_TYPE,
         size: 20,
         order: {
-          _count: 'desc'
+          _count: 'desc' as const
         }
       },
       aggs: {
@@ -64,7 +60,7 @@ export async function getTransactionBreakdown({
             missing: '',
             size: 20,
             order: {
-              _count: 'desc'
+              _count: 'desc' as const
             }
           },
           aggs: {
@@ -82,6 +78,7 @@ export async function getTransactionBreakdown({
   const filters = [
     { term: { [SERVICE_NAME]: serviceName } },
     { term: { [TRANSACTION_TYPE]: transactionType } },
+    { term: { [PROCESSOR_EVENT]: 'metric' } },
     { range: rangeFilter(start, end) },
     ...uiFiltersES
   ];
@@ -120,11 +117,11 @@ export async function getTransactionBreakdown({
 
     const breakdowns = flatten(
       aggs.types.buckets.map(bucket => {
-        const type = bucket.key;
+        const type = bucket.key as string;
 
         return bucket.subtypes.buckets.map(subBucket => {
           return {
-            name: subBucket.key || type,
+            name: (subBucket.key as string) || type,
             percentage:
               (subBucket.total_self_time_per_subtype.value || 0) /
               sumAllSelfTimes

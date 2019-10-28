@@ -105,7 +105,14 @@ describe('OIDCAuthenticationProvider', () => {
         sinon.assert.calledWithExactly(
           mockOptions.client.callAsInternalUser,
           'shield.oidcAuthenticate',
-          { body: { state: 'statevalue', nonce: 'noncevalue', redirect_uri: expectedRedirectURI } }
+          {
+            body: {
+              state: 'statevalue',
+              nonce: 'noncevalue',
+              redirect_uri: expectedRedirectURI,
+              realm: 'oidc1',
+            },
+          }
         );
 
         expect(authenticationResult.redirected()).toBe(true);
@@ -180,7 +187,14 @@ describe('OIDCAuthenticationProvider', () => {
         sinon.assert.calledWithExactly(
           mockOptions.client.callAsInternalUser,
           'shield.oidcAuthenticate',
-          { body: { state: 'statevalue', nonce: 'noncevalue', redirect_uri: expectedRedirectURI } }
+          {
+            body: {
+              state: 'statevalue',
+              nonce: 'noncevalue',
+              redirect_uri: expectedRedirectURI,
+              realm: 'oidc1',
+            },
+          }
         );
 
         expect(authenticationResult.failed()).toBe(true);

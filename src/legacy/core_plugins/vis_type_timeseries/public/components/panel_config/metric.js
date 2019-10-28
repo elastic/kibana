@@ -129,7 +129,7 @@ export class MetricPanelConfig extends Component {
                     defaultMessage="Ignore global filter?"
                   />
                 </EuiFormLabel>
-                <EuiSpacer size="s" />
+                <EuiSpacer size="m" />
                 <YesNo
                   value={model.ignore_global_filter}
                   name="ignore_global_filter"

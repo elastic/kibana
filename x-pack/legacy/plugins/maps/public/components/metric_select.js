@@ -8,34 +8,52 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 import { EuiComboBox } from '@elastic/eui';
+import { METRIC_TYPE } from '../../common/constants';
 
 const AGG_OPTIONS = [
-  { label: i18n.translate('xpack.maps.metricSelect.averageDropDownOptionLabel', {
-    defaultMessage: 'Average'
-  }),
-  value: 'avg' },
-  { label: i18n.translate('xpack.maps.metricSelect.countDropDownOptionLabel', {
-    defaultMessage: 'Count'
-  }),
-  value: 'count' },
-  { label: i18n.translate('xpack.maps.metricSelect.maxDropDownOptionLabel', {
-    defaultMessage: 'Max'
-  }),
-  value: 'max' },
-  { label: i18n.translate('xpack.maps.metricSelect.minDropDownOptionLabel', {
-    defaultMessage: 'Min'
-  }),
-  value: 'min' },
-  { label: i18n.translate('xpack.maps.metricSelect.sumDropDownOptionLabel', {
-    defaultMessage: 'Sum'
-  }),
-  value: 'sum' },
+  {
+    label: i18n.translate('xpack.maps.metricSelect.averageDropDownOptionLabel', {
+      defaultMessage: 'Average',
+    }),
+    value: METRIC_TYPE.AVG,
+  },
+  {
+    label: i18n.translate('xpack.maps.metricSelect.countDropDownOptionLabel', {
+      defaultMessage: 'Count',
+    }),
+    value: METRIC_TYPE.COUNT,
+  },
+  {
+    label: i18n.translate('xpack.maps.metricSelect.maxDropDownOptionLabel', {
+      defaultMessage: 'Max',
+    }),
+    value: METRIC_TYPE.MAX,
+  },
+  {
+    label: i18n.translate('xpack.maps.metricSelect.minDropDownOptionLabel', {
+      defaultMessage: 'Min',
+    }),
+    value: METRIC_TYPE.MIN,
+  },
+  {
+    label: i18n.translate('xpack.maps.metricSelect.sumDropDownOptionLabel', {
+      defaultMessage: 'Sum',
+    }),
+    value: METRIC_TYPE.SUM,
+  },
+  {
+    label: i18n.translate('xpack.maps.metricSelect.cardinalityDropDownOptionLabel', {
+      defaultMessage: 'Unique count',
+    }),
+    value: METRIC_TYPE.UNIQUE_COUNT,
+  },
 ];
 
-export const METRIC_AGGREGATION_VALUES = AGG_OPTIONS.map(({ value }) => { return value; });
+export const METRIC_AGGREGATION_VALUES = AGG_OPTIONS.map(({ value }) => {
+  return value;
+});
 
-export function MetricSelect({ value, onChange, metricsFilter }) {
-
+export function MetricSelect({ value, onChange, metricsFilter, ...rest }) {
   function onAggChange(selectedOptions) {
     if (selectedOptions.length === 0) {
       return;
@@ -49,11 +67,9 @@ export function MetricSelect({ value, onChange, metricsFilter }) {
 
   return (
     <EuiComboBox
-      placeholder={
-        i18n.translate('xpack.maps.metricSelect.selectAggregationPlaceholder', {
-          defaultMessage: 'Select aggregation'
-        })
-      }
+      placeholder={i18n.translate('xpack.maps.metricSelect.selectAggregationPlaceholder', {
+        defaultMessage: 'Select aggregation',
+      })}
       singleSelection={true}
       isClearable={false}
       options={options}
@@ -61,6 +77,7 @@ export function MetricSelect({ value, onChange, metricsFilter }) {
         return value === option.value;
       })}
       onChange={onAggChange}
+      {...rest}
     />
   );
 }

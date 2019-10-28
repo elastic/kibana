@@ -33,6 +33,7 @@ import {
   EuiComboBox,
   EuiFormLabel,
   EuiFormRow,
+  EuiSpacer,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
@@ -52,7 +53,9 @@ const StandardSiblingAggUi = props => {
       <EuiFlexItem grow={false}>
         <EuiFormRow
           id={htmlId('sigma')}
-          label={<FormattedMessage id="visTypeTimeseries.stdSibling.sigmaLabel" defaultMessage="Sigma" />}
+          label={
+            <FormattedMessage id="visTypeTimeseries.stdSibling.sigmaLabel" defaultMessage="Sigma" />
+          }
         >
           <EuiFieldText value={model.sigma} onChange={handleTextChange('sigma')} />
         </EuiFormRow>
@@ -97,7 +100,9 @@ const StandardSiblingAggUi = props => {
       <EuiFlexItem>
         <EuiFormRow
           id={htmlId('mode')}
-          label={<FormattedMessage id="visTypeTimeseries.stdSibling.modeLabel" defaultMessage="Mode" />}
+          label={
+            <FormattedMessage id="visTypeTimeseries.stdSibling.modeLabel" defaultMessage="Mode" />
+          }
         >
           <EuiComboBox
             options={modeOptions}
@@ -122,8 +127,12 @@ const StandardSiblingAggUi = props => {
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
           <EuiFormLabel htmlFor={htmlId('aggregation')}>
-            <FormattedMessage id="visTypeTimeseries.stdSibling.aggregationLabel" defaultMessage="Aggregation" />
+            <FormattedMessage
+              id="visTypeTimeseries.stdSibling.aggregationLabel"
+              defaultMessage="Aggregation"
+            />
           </EuiFormLabel>
+          <EuiSpacer size="xs" />
           <AggSelect
             id={htmlId('aggregation')}
             panelType={props.panel.type}
@@ -136,7 +145,12 @@ const StandardSiblingAggUi = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('metric')}
-            label={<FormattedMessage id="visTypeTimeseries.stdSibling.metricLabel" defaultMessage="Metric" />}
+            label={
+              <FormattedMessage
+                id="visTypeTimeseries.stdSibling.metricLabel"
+                defaultMessage="Metric"
+              />
+            }
           >
             <MetricSelect
               onChange={handleSelectChange('field')}

@@ -5,10 +5,10 @@
  */
 
 import { memoize, MemoizedFunction } from 'lodash';
-import { KbnServer } from '../../types';
+import { ServerFacade } from '../../types';
 
-type ServerFn = (server: KbnServer) => any;
-type Memo = ((server: KbnServer) => any) & MemoizedFunction;
+type ServerFn = (server: ServerFacade) => any;
+type Memo = ((server: ServerFacade) => any) & MemoizedFunction;
 
 /**
  * allow this function to be called multiple times, but
@@ -22,7 +22,7 @@ type Memo = ((server: KbnServer) => any) & MemoizedFunction;
  * @return {any}
  */
 export function oncePerServer(fn: ServerFn) {
-  const memoized: Memo = memoize(function(server: KbnServer) {
+  const memoized: Memo = memoize(function(server: ServerFacade) {
     if (arguments.length !== 1) {
       throw new TypeError('This function expects to be called with a single argument');
     }

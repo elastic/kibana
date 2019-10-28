@@ -119,7 +119,7 @@ export function createTileMapTypeDefinition(dependencies) {
         ],
         tmsLayers: [],
       },
-      optionsTemplate: props => <TileMapOptions {...props} serviceSettings={serviceSettings} />,
+      optionsTemplate: (props) => <TileMapOptions {...props} />,
       schemas: new Schemas([
         {
           group: 'metrics',
@@ -143,6 +143,22 @@ export function createTileMapTypeDefinition(dependencies) {
           max: 1,
         },
       ]),
+    },
+    setup: async (savedVis) => {
+      const vis = savedVis.vis;
+      let tmsLayers;
+
+      try {
+        tmsLayers = await serviceSettings.getTMSServices();
+      } catch (e) {
+        return savedVis;
+      }
+
+      vis.type.editorConfig.collections.tmsLayers = tmsLayers;
+      if (!vis.params.wms.selectedTmsLayer && tmsLayers.length) {
+        vis.params.wms.selectedTmsLayer = tmsLayers[0];
+      }
+      return savedVis;
     },
   });
 }

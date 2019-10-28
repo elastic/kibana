@@ -11,13 +11,13 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 import { Embeddable, APPLY_FILTER_TRIGGER } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import { start } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import { onlyDisabledFiltersChanged } from '../../../../../../src/legacy/core_plugins/data/public';
 
 import { I18nContext } from 'ui/i18n';
 
 import { GisMap } from '../connected_components/gis_map';
 import { createMapStore } from '../reducers/store';
+import { npStart } from 'ui/new_platform';
 import {
   setGotoWithCenter,
   replaceLayerList,
@@ -38,17 +38,18 @@ import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 export class MapEmbeddable extends Embeddable {
   type = MAP_SAVED_OBJECT_TYPE;
 
-  constructor(config, initialInput, parent) {
+  constructor(config, initialInput, parent, renderTooltipContent) {
     super(
       initialInput,
       {
         editUrl: config.editUrl,
         indexPatterns: config.indexPatterns,
         editable: config.editable,
-        defaultTitle: config.title
+        defaultTitle: config.title,
       },
       parent);
 
+    this._renderTooltipContent = renderTooltipContent;
     this._layerList = config.layerList;
     this._store = createMapStore();
 
@@ -124,7 +125,10 @@ export class MapEmbeddable extends Embeddable {
     render(
       <Provider store={this._store}>
         <I18nContext>
-          <GisMap addFilters={this.input.hideFilterActions ? null : this.addFilters}/>
+          <GisMap
+            addFilters={this.input.hideFilterActions ? null : this.addFilters}
+            renderTooltipContent={this._renderTooltipContent}
+          />
         </I18nContext>
       </Provider>,
       this._domNode
@@ -136,11 +140,9 @@ export class MapEmbeddable extends Embeddable {
   }
 
   addFilters = filters => {
-    start.executeTriggerActions(APPLY_FILTER_TRIGGER, {
+    npStart.plugins.uiActions.executeTriggerActions(APPLY_FILTER_TRIGGER, {
       embeddable: this,
-      triggerContext: {
-        filters,
-      },
+      filters,
     });
   }
 

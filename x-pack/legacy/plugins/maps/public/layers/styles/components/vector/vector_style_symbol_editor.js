@@ -10,7 +10,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiSelect,
+  EuiButtonGroup,
   EuiSpacer,
   EuiComboBox,
 } from '@elastic/eui';
@@ -21,40 +21,47 @@ import { SymbolIcon } from './legend/symbol_icon';
 
 const SYMBOLIZE_AS_OPTIONS = [
   {
-    value: SYMBOLIZE_AS_CIRCLE,
-    text: i18n.translate('xpack.maps.vector.symbolAs.circleLabel', {
-      defaultMessage: 'circle marker'
-    })
+    id: SYMBOLIZE_AS_CIRCLE,
+    label: i18n.translate('xpack.maps.vector.symbolAs.circleLabel', {
+      defaultMessage: 'circle marker',
+    }),
   },
   {
-    value: SYMBOLIZE_AS_ICON,
-    text: i18n.translate('xpack.maps.vector.symbolAs.IconLabel', {
-      defaultMessage: 'icon'
-    })
+    id: SYMBOLIZE_AS_ICON,
+    label: i18n.translate('xpack.maps.vector.symbolAs.IconLabel', {
+      defaultMessage: 'icon',
+    }),
   },
 ];
 
-export function VectorStyleSymbolEditor({ styleOptions, handlePropertyChange, symbolOptions, isDarkMode }) {
+export function VectorStyleSymbolEditor({
+  styleOptions,
+  handlePropertyChange,
+  symbolOptions,
+  isDarkMode,
+}) {
   const renderSymbolizeAsSelect = () => {
-    const selectedOption = SYMBOLIZE_AS_OPTIONS.find(({ value }) => {
-      return value === styleOptions.symbolizeAs;
+    const selectedOption = SYMBOLIZE_AS_OPTIONS.find(({ id }) => {
+      return id === styleOptions.symbolizeAs;
     });
 
-    const onSymbolizeAsChange = e => {
+    const onSymbolizeAsChange = optionId => {
       const styleDescriptor = {
         options: {
           ...styleOptions,
-          symbolizeAs: e.target.value
-        }
+          symbolizeAs: optionId,
+        },
       };
       handlePropertyChange('symbol', styleDescriptor);
     };
 
     return (
-      <EuiSelect
+      <EuiButtonGroup
+        buttonSize="compressed"
         options={SYMBOLIZE_AS_OPTIONS}
-        value={selectedOption ? selectedOption.value : undefined}
+        idSelected={selectedOption ? selectedOption.id : undefined}
         onChange={onSymbolizeAsChange}
+        isFullWidth
       />
     );
   };
@@ -72,8 +79,8 @@ export function VectorStyleSymbolEditor({ styleOptions, handlePropertyChange, sy
       const styleDescriptor = {
         options: {
           ...styleOptions,
-          symbolId: selectedOptions[0].value
-        }
+          symbolId: selectedOptions[0].value,
+        },
       };
       handlePropertyChange('symbol', styleDescriptor);
     };
@@ -89,9 +96,7 @@ export function VectorStyleSymbolEditor({ styleOptions, handlePropertyChange, sy
               strokeWidth={'1px'}
             />
           </EuiFlexItem>
-          <EuiFlexItem>
-            {label}
-          </EuiFlexItem>
+          <EuiFlexItem>{label}</EuiFlexItem>
         </EuiFlexGroup>
       );
     };
@@ -104,31 +109,28 @@ export function VectorStyleSymbolEditor({ styleOptions, handlePropertyChange, sy
         singleSelection={true}
         isClearable={false}
         renderOption={renderOption}
+        compressed
       />
     );
   };
 
-  const renderFormRowContent = () => {
-    if (styleOptions.symbolizeAs === SYMBOLIZE_AS_CIRCLE) {
-      return renderSymbolizeAsSelect();
-    }
-
-    return (
-      <Fragment>
-        {renderSymbolizeAsSelect()}
-        <EuiSpacer size="s" />
-        {renderSymbolSelect()}
-      </Fragment>
-    );
-  };
-
   return (
-    <EuiFormRow
-      label={i18n.translate('xpack.maps.vector.symbolLabel', {
-        defaultMessage: 'Symbol type'
-      })}
-    >
-      {renderFormRowContent()}
-    </EuiFormRow>
+    <Fragment>
+      <EuiFormRow
+        label={i18n.translate('xpack.maps.vector.symbolLabel', {
+          defaultMessage: 'Symbol type',
+        })}
+        display="columnCompressed"
+      >
+        {renderSymbolizeAsSelect()}
+      </EuiFormRow>
+
+      {styleOptions.symbolizeAs !== SYMBOLIZE_AS_CIRCLE && (
+        <Fragment>
+          <EuiSpacer size="s" />
+          {renderSymbolSelect()}
+        </Fragment>
+      )}
+    </Fragment>
   );
 }

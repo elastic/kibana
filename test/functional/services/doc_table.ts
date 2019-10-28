@@ -37,7 +37,7 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
     public async getRowsText() {
       const table = await this.getTable();
       const $ = await table.parseDomContent();
-      return $.findTestSubjects('docTableRow')
+      return $.findTestSubjects('~docTableRow')
         .toArray()
         .map((row: any) =>
           $(row)
@@ -96,7 +96,7 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
     public async getFields(options: { isAnchorRow: boolean } = { isAnchorRow: false }) {
       const table = await this.getTable();
       const $ = await table.parseDomContent();
-      const rowLocator = options.isAnchorRow ? 'docTableAnchorRow' : 'docTableRow';
+      const rowLocator = options.isAnchorRow ? '~docTableAnchorRow' : '~docTableRow';
       const rows = $.findTestSubjects(rowLocator).toArray();
       const fields = rows.map((row: any) =>
         $(row)
@@ -110,7 +110,7 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
     public async getHeaderFields(): Promise<string[]> {
       const table = await this.getTable();
       const $ = await table.parseDomContent();
-      return $.findTestSubjects('docTableHeaderField')
+      return $.findTestSubjects('~docTableHeaderField')
         .toArray()
         .map((field: any) =>
           $(field)

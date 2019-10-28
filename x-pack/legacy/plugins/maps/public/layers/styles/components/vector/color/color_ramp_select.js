@@ -15,7 +15,6 @@ import { ColorStops } from './color_stops';
 const CUSTOM_COLOR_RAMP = 'CUSTOM_COLOR_RAMP';
 
 export class ColorRampSelect extends Component {
-
   state = {};
 
   static getDerivedStateFromProps(nextProps, prevState) {
@@ -29,7 +28,7 @@ export class ColorRampSelect extends Component {
     return null;
   }
 
-  _onColorRampSelect = (selectedValue) => {
+  _onColorRampSelect = selectedValue => {
     const useCustomColorRamp = selectedValue === CUSTOM_COLOR_RAMP;
     this.props.onChange({
       color: useCustomColorRamp ? null : selectedValue,
@@ -50,11 +49,19 @@ export class ColorRampSelect extends Component {
   };
 
   render() {
+    const {
+      color,
+      onChange, // eslint-disable-line no-unused-vars
+      useCustomColorRamp,
+      customColorRamp, // eslint-disable-line no-unused-vars
+      ...rest
+    } = this.props;
+
     let colorStopsInput;
-    if (this.props.useCustomColorRamp) {
+    if (useCustomColorRamp) {
       colorStopsInput = (
         <Fragment>
-          <EuiSpacer size="m" />
+          <EuiSpacer size="s" />
           <ColorStops
             colorStops={this.state.customColorRamp}
             onChange={this._onCustomColorRampChange}
@@ -71,9 +78,9 @@ export class ColorRampSelect extends Component {
             id="xpack.maps.style.customColorRampLabel"
             defaultMessage="Custom color ramp"
           />
-        )
+        ),
       },
-      ...COLOR_GRADIENTS
+      ...COLOR_GRADIENTS,
     ];
 
     return (
@@ -81,8 +88,9 @@ export class ColorRampSelect extends Component {
         <EuiSuperSelect
           options={colorRampOptions}
           onChange={this._onColorRampSelect}
-          valueOfSelected={this.props.useCustomColorRamp ? CUSTOM_COLOR_RAMP : this.props.color}
+          valueOfSelected={useCustomColorRamp ? CUSTOM_COLOR_RAMP : color}
           hasDividers={true}
+          {...rest}
         />
         {colorStopsInput}
       </Fragment>

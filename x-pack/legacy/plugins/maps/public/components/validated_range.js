@@ -20,7 +20,6 @@ function isWithinRange(min, max, value) {
 // TODO move to EUI
 // Wrapper around EuiRange that ensures onChange callback is only called when value is number and within min/max
 export class ValidatedRange extends React.Component {
-
   state = {};
 
   static getDerivedStateFromProps(nextProps, prevState) {
@@ -35,16 +34,14 @@ export class ValidatedRange extends React.Component {
     return null;
   }
 
-  _onRangeChange = (e) => {
+  _onRangeChange = e => {
     const sanitizedValue = parseFloat(e.target.value, 10);
     let newValue = isNaN(sanitizedValue) ? '' : sanitizedValue;
     // work around for https://github.com/elastic/eui/issues/1458
     // TODO remove once above EUI issue is resolved
     newValue = Number(newValue);
 
-    const isValid = isWithinRange(this.props.min, this.props.max, newValue)
-      ? true
-      : false;
+    const isValid = isWithinRange(this.props.min, this.props.max, newValue) ? true : false;
 
     this.setState({
       value: newValue,

@@ -9,7 +9,11 @@ import { EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 import turf from 'turf';
 import turfBooleanContains from '@turf/boolean-contains';
 import { DataRequest } from './util/data_request';
-import { MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER, SOURCE_DATA_ID_ORIGIN } from '../../common/constants';
+import { InjectedData } from './util/injected_data';
+import {
+  MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER,
+  SOURCE_DATA_ID_ORIGIN
+} from '../../common/constants';
 import uuid from 'uuid/v4';
 import { copyPersistentState } from '../reducers/util';
 import { i18n } from '@kbn/i18n';
@@ -28,6 +32,11 @@ export class AbstractLayer {
     } else {
       this._dataRequests = [];
     }
+    if (this._descriptor.__injectedData) {
+      this._injectedData = new InjectedData(this._descriptor.__injectedData);
+    } else {
+      this._injectedData = null;
+    }
   }
 
   static getBoundDataForSource(mbMap, sourceId) {
@@ -39,6 +48,7 @@ export class AbstractLayer {
     const layerDescriptor = { ...options };
 
     layerDescriptor.__dataRequests = _.get(options, '__dataRequests', []);
+    layerDescriptor.__injectedData = _.get(options, '__injectedData', null);
     layerDescriptor.id = _.get(options, 'id', uuid());
     layerDescriptor.label = options.label && options.label.length > 0 ? options.label : null;
     layerDescriptor.minZoom = _.get(options, 'minZoom', 0);
@@ -52,7 +62,7 @@ export class AbstractLayer {
   }
 
   destroy() {
-    if(this._source) {
+    if (this._source) {
       this._source.destroy();
     }
   }
@@ -251,12 +261,34 @@ export class AbstractLayer {
     return this._source.renderSourceSettingsEditor({ onChange });
   };
 
+  getPrevRequestToken(dataId) {
+    const prevDataRequest = this.getDataRequest(dataId);
+    if (!prevDataRequest) {
+      return;
+    }
+
+    return prevDataRequest.getRequestToken();
+  }
+
+  getInFlightRequestTokens() {
+    if (!this._dataRequests) {
+      return [];
+    }
+
+    const requestTokens = this._dataRequests.map(dataRequest => dataRequest.getRequestToken());
+    return _.compact(requestTokens);
+  }
+
   getSourceDataRequest() {
     return this.getDataRequest(SOURCE_DATA_ID_ORIGIN);
   }
 
   getDataRequest(id) {
     return this._dataRequests.find(dataRequest => dataRequest.getDataId() === id);
+  }
+
+  getInjectedData() {
+    return this._injectedData ? this._injectedData.getData() : null;
   }
 
   isLayerLoading() {
@@ -373,7 +405,11 @@ export class AbstractLayer {
     return [];
   }
 
-  async getOrdinalFields() {
+  async getDateFields() {
+    return [];
+  }
+
+  async getNumberFields() {
     return [];
   }
 

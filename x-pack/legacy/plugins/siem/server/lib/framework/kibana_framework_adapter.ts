@@ -5,6 +5,7 @@
  */
 
 import { GenericParams } from 'elasticsearch';
+import { EnvironmentMode } from 'kibana/public';
 import { GraphQLSchema } from 'graphql';
 import { Legacy } from 'kibana';
 
@@ -28,9 +29,11 @@ interface CallWithRequestParams extends GenericParams {
 
 export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
   public version: string;
+  public envMode: EnvironmentMode;
 
   constructor(private server: Legacy.Server) {
     this.version = server.config().get('pkg.version');
+    this.envMode = server.newPlatform.env.mode;
   }
 
   public async callWithRequest(
@@ -44,19 +47,20 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
     const { elasticsearch } = internalRequest.server.plugins;
     const { callWithRequest } = elasticsearch.getCluster('data');
     const includeFrozen = await internalRequest.getUiSettingsService().get('search:includeFrozen');
-
-    if (endpoint === 'msearch') {
-      const maxConcurrentShardRequests = await internalRequest
-        .getUiSettingsService()
-        .get('courier:maxConcurrentShardRequests');
-      if (maxConcurrentShardRequests > 0) {
-        params = { ...params, max_concurrent_shard_requests: maxConcurrentShardRequests };
-      }
-    }
+    const maxConcurrentShardRequests =
+      endpoint === 'msearch'
+        ? await internalRequest.getUiSettingsService().get('courier:maxConcurrentShardRequests')
+        : 0;
     const fields = await callWithRequest(
       internalRequest,
       endpoint,
-      { ...params, ignore_throttled: !includeFrozen },
+      {
+        ...params,
+        ignore_throttled: !includeFrozen,
+        ...(maxConcurrentShardRequests > 0
+          ? { max_concurrent_shard_requests: maxConcurrentShardRequests }
+          : {}),
+      },
       ...rest
     );
     return fields;
@@ -89,19 +93,21 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
       plugin: graphqlHapi,
     });
 
-    this.server.register<HapiGraphiQLPluginOptions>({
-      options: {
-        graphiqlOptions: {
-          endpointURL: routePath,
-          passHeader: `'kbn-version': '${this.version}'`,
+    if (!this.envMode.prod) {
+      this.server.register<HapiGraphiQLPluginOptions>({
+        options: {
+          graphiqlOptions: {
+            endpointURL: routePath,
+            passHeader: `'kbn-version': '${this.version}'`,
+          },
+          path: `${routePath}/graphiql`,
+          route: {
+            tags: ['access:siem'],
+          },
         },
-        path: `${routePath}/graphiql`,
-        route: {
-          tags: ['access:siem'],
-        },
-      },
-      plugin: graphiqlHapi,
-    });
+        plugin: graphiqlHapi,
+      });
+    }
   }
 
   public getIndexPatternsService(

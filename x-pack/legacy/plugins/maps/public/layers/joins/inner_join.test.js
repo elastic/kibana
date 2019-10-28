@@ -13,7 +13,7 @@ jest.mock('ui/vis/editors/default/schemas', () => {
   };
 });
 jest.mock('../../kibana_services', () => {});
-jest.mock('ui/vis/agg_configs', () => {});
+jest.mock('ui/agg_types', () => {});
 jest.mock('ui/timefilter', () => {});
 jest.mock('../vector_layer', () => {});
 
@@ -97,7 +97,7 @@ describe('joinPropertiesToFeature', () => {
 
   it('Should handle undefined values', () => {
 
-    const feature = {//this feature does not have the iso2 field
+    const feature = { //this feature does not have the iso2 field
       properties: {
         zipcode: 40204
       }

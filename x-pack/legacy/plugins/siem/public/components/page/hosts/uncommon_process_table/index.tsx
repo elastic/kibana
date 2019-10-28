@@ -24,6 +24,7 @@ interface OwnProps {
   data: UncommonProcessesEdges[];
   fakeTotalCount: number;
   id: string;
+  isInspect: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
   showMorePagesIndicator: boolean;
@@ -32,6 +33,7 @@ interface OwnProps {
 }
 
 interface UncommonProcessTableReduxProps {
+  activePage: number;
   limit: number;
 }
 
@@ -82,9 +84,11 @@ export const getArgs = (args: string[] | null | undefined): string | null => {
 
 const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
   ({
+    activePage,
     data,
     fakeTotalCount,
     id,
+    isInspect,
     limit,
     loading,
     loadPage,
@@ -95,11 +99,14 @@ const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
     type,
   }) => (
     <PaginatedTable
+      activePage={activePage}
       columns={getUncommonColumnsCurated(type)}
+      dataTestSubj={`table-${tableType}`}
       headerCount={totalCount}
       headerTitle={i18n.UNCOMMON_PROCESSES}
       headerUnit={i18n.UNIT(totalCount)}
       id={id}
+      isInspect={isInspect}
       itemsPerRow={rowItems}
       limit={limit}
       loading={loading}
@@ -121,7 +128,6 @@ const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
           tableType,
         })
       }
-      updateProps={{ totalCount }}
     />
   )
 );
@@ -152,19 +158,23 @@ const getUncommonColumns = (): UncommonProcessTableColumns => [
         attrName: 'process.name',
         idPrefix: `uncommon-process-table-${node._id}-processName`,
       }),
-    width: '15%',
+    width: '20%',
   },
   {
+    align: 'right',
     name: i18n.NUMBER_OF_HOSTS,
     truncateText: false,
     hideForMobile: false,
     render: ({ node }) => <>{node.hosts != null ? node.hosts.length : getEmptyValue()}</>,
+    width: '8%',
   },
   {
+    align: 'right',
     name: i18n.NUMBER_OF_INSTANCES,
     truncateText: false,
     hideForMobile: false,
     render: ({ node }) => defaultToEmptyTag(node.instances),
+    width: '8%',
   },
   {
     name: i18n.HOSTS,
@@ -177,7 +187,7 @@ const getUncommonColumns = (): UncommonProcessTableColumns => [
         idPrefix: `uncommon-process-table-${node._id}-processHost`,
         render: item => <HostDetailsLink hostName={item} />,
       }),
-    width: '15%',
+    width: '25%',
   },
   {
     name: i18n.LAST_COMMAND,
@@ -190,7 +200,7 @@ const getUncommonColumns = (): UncommonProcessTableColumns => [
         idPrefix: `uncommon-process-table-${node._id}-processArgs`,
         displayCount: 1, // TODO: Change this back once we have improved the UI
       }),
-    width: '35%',
+    width: '25%',
   },
   {
     name: i18n.LAST_USER,

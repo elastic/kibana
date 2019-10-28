@@ -39,10 +39,15 @@ const chartBase: ChartBase = {
   series
 };
 
-export async function getThreadCountChart(setup: Setup, serviceName: string) {
+export async function getThreadCountChart(
+  setup: Setup,
+  serviceName: string,
+  serviceNodeName?: string
+) {
   return fetchAndTransformMetrics({
     setup,
     serviceName,
+    serviceNodeName,
     chartBase,
     aggs: {
       threadCount: { avg: { field: METRIC_JAVA_THREAD_COUNT } },

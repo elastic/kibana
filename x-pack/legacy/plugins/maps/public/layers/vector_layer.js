@@ -15,13 +15,15 @@ import {
   SOURCE_DATA_ID_ORIGIN,
   FEATURE_VISIBLE_PROPERTY_NAME,
   EMPTY_FEATURE_COLLECTION,
-  LAYER_TYPE
+  LAYER_TYPE,
+  FIELD_ORIGIN,
 } from '../../common/constants';
 import _ from 'lodash';
 import { JoinTooltipProperty } from './tooltips/join_tooltip_property';
 import { isRefreshOnlyQuery } from './util/is_refresh_only_query';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { DataRequestAbortError } from './util/data_request';
 
 const VISIBILITY_FILTER_CLAUSE = ['all',
   [
@@ -130,9 +132,20 @@ export class VectorLayer extends AbstractLayer {
     return true;
   }
 
+  getInjectedData() {
+    const featureCollection = super.getInjectedData();
+    if (!featureCollection) {
+      return null;
+    }
+    // Set default visible property on data
+    featureCollection.features.forEach(
+      feature => _.set(feature, `properties.${FEATURE_VISIBLE_PROPERTY_NAME}`, true)
+    );
+    return featureCollection;
+  }
+
   getCustomIconAndTooltipContent() {
-    const sourceDataRequest = this.getSourceDataRequest();
-    const featureCollection = sourceDataRequest ? sourceDataRequest.getData() : null;
+    const featureCollection = this._getSourceFeatureCollection();
 
     const noResultsIcon = (
       <EuiIcon
@@ -144,9 +157,10 @@ export class VectorLayer extends AbstractLayer {
     if (!featureCollection || featureCollection.features.length === 0) {
       return {
         icon: noResultsIcon,
-        tooltipContent: i18n.translate('xpack.maps.vectorLayer.noResultsFoundTooltip', {
-          defaultMessage: `No results found.`
-        })
+        tooltipContent: i18n.translate(
+          'xpack.maps.vectorLayer.noResultsFoundTooltip', {
+            defaultMessage: `No results found.`
+          })
       };
     }
 
@@ -161,7 +175,7 @@ export class VectorLayer extends AbstractLayer {
       };
     }
 
-
+    const sourceDataRequest = this.getSourceDataRequest();
     const { tooltipContent, areResultsTrimmed } = this._source.getSourceTooltipContent(sourceDataRequest);
     return {
       icon: this._style.getIcon(),
@@ -181,7 +195,7 @@ export class VectorLayer extends AbstractLayer {
 
   getLegendDetails() {
     const getFieldLabel = async fieldName => {
-      const ordinalFields = await this.getOrdinalFields();
+      const ordinalFields = await this._getOrdinalFields();
       const field = ordinalFields.find(({ name }) => {
         return name === fieldName;
       });
@@ -189,7 +203,16 @@ export class VectorLayer extends AbstractLayer {
       return field ? field.label : fieldName;
     };
 
-    return this._style.getLegendDetails(getFieldLabel);
+    const getFieldFormatter = async field => {
+      const source = this._getFieldSource(field);
+      if (!source) {
+        return null;
+      }
+
+      return await source.getFieldFormatter(field.name);
+    };
+
+    return this._style.getLegendDetails(getFieldLabel, getFieldFormatter);
   }
 
   _getBoundsBasedOnData() {
@@ -230,13 +253,26 @@ export class VectorLayer extends AbstractLayer {
     return this._source.getDisplayName();
   }
 
-  async getOrdinalFields() {
+
+  async getDateFields() {
+    const timeFields = await this._source.getDateFields();
+    return timeFields.map(({ label, name }) => {
+      return {
+        label,
+        name,
+        origin: SOURCE_DATA_ID_ORIGIN
+      };
+    });
+  }
+
+
+  async getNumberFields() {
     const numberFields = await this._source.getNumberFields();
     const numberFieldOptions = numberFields.map(({ label, name }) => {
       return {
         label,
         name,
-        origin: SOURCE_DATA_ID_ORIGIN
+        origin: FIELD_ORIGIN.SOURCE
       };
     });
     const joinFields = [];
@@ -244,13 +280,20 @@ export class VectorLayer extends AbstractLayer {
       const fields = join.getJoinFields().map(joinField => {
         return {
           ...joinField,
-          origin: 'join',
+          origin: FIELD_ORIGIN.JOIN,
         };
       });
       joinFields.push(...fields);
     });
 
     return [...numberFieldOptions, ...joinFields];
+  }
+
+  async _getOrdinalFields() {
+    return [
+      ... await this.getDateFields(),
+      ... await this.getNumberFields()
+    ];
   }
 
   getIndexPatternIds() {
@@ -348,7 +391,7 @@ export class VectorLayer extends AbstractLayer {
       && !updateDueToSourceMetaChange;
   }
 
-  async _syncJoin({ join, startLoading, stopLoading, onLoadError, dataFilters }) {
+  async _syncJoin({ join, startLoading, stopLoading, onLoadError, registerCancelCallback, dataFilters }) {
 
     const joinSource = join.getRightJoinSource();
     const sourceDataId = join.getSourceId();
@@ -376,7 +419,11 @@ export class VectorLayer extends AbstractLayer {
       const leftSourceName = await this.getSourceName();
       const {
         propertiesMap
-      } = await joinSource.getPropertiesMap(searchFilters, leftSourceName, join.getLeftFieldName());
+      } = await joinSource.getPropertiesMap(
+        searchFilters,
+        leftSourceName,
+        join.getLeftFieldName(),
+        registerCancelCallback.bind(null, requestToken));
       stopLoading(sourceDataId, requestToken, propertiesMap);
       return {
         dataHasChanged: true,
@@ -384,7 +431,9 @@ export class VectorLayer extends AbstractLayer {
         propertiesMap: propertiesMap,
       };
     } catch (e) {
-      onLoadError(sourceDataId, requestToken, `Join error: ${e.message}`);
+      if (!(e instanceof DataRequestAbortError)) {
+        onLoadError(sourceDataId, requestToken, `Join error: ${e.message}`);
+      }
       return {
         dataHasChanged: true,
         join: join,
@@ -393,9 +442,9 @@ export class VectorLayer extends AbstractLayer {
     }
   }
 
-  async _syncJoins({ startLoading, stopLoading, onLoadError, dataFilters }) {
+  async _syncJoins(syncContext) {
     const joinSyncs = this.getValidJoins().map(async join => {
-      return this._syncJoin({ join, startLoading, stopLoading, onLoadError, dataFilters });
+      return this._syncJoin({ join, ...syncContext });
     });
 
     return await Promise.all(joinSyncs);
@@ -457,7 +506,17 @@ export class VectorLayer extends AbstractLayer {
     }
   }
 
-  async _syncSource({ startLoading, stopLoading, onLoadError, dataFilters }) {
+  async _syncSource({
+    startLoading, stopLoading, onLoadError, registerCancelCallback, dataFilters
+  }) {
+
+    if (this._source.isInjectedData()) {
+      const featureCollection = this.getInjectedData();
+      return {
+        refreshed: false,
+        featureCollection
+      };
+    }
 
     const requestToken = Symbol(`layer-source-refresh:${ this.getId()} - source`);
 
@@ -474,7 +533,10 @@ export class VectorLayer extends AbstractLayer {
     try {
       startLoading(SOURCE_DATA_ID_ORIGIN, requestToken, searchFilters);
       const layerName = await this.getDisplayName();
-      const { data: featureCollection, meta } = await this._source.getGeoJsonWithMeta(layerName, searchFilters);
+      const { data: featureCollection, meta } =
+        await this._source.getGeoJsonWithMeta(layerName, searchFilters,
+          registerCancelCallback.bind(null, requestToken)
+        );
       this._assignIdsToFeatures(featureCollection);
       stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, featureCollection, meta);
       return {
@@ -482,7 +544,9 @@ export class VectorLayer extends AbstractLayer {
         featureCollection: featureCollection
       };
     } catch (error) {
-      onLoadError(SOURCE_DATA_ID_ORIGIN, requestToken, error.message);
+      if (!(error instanceof DataRequestAbortError)) {
+        onLoadError(SOURCE_DATA_ID_ORIGIN, requestToken, error.message);
+      }
       return {
         refreshed: false
       };
@@ -510,30 +574,32 @@ export class VectorLayer extends AbstractLayer {
     for (let i = 0; i < featureCollection.features.length; i++) {
       const id = randomizedIds[i];
       const feature = featureCollection.features[i];
-      feature.properties[FEATURE_ID_PROPERTY_NAME] = id;
-      feature.id = id;
+      feature.id = id; // Mapbox feature state id, must be integer
     }
-
   }
 
-  async syncData({ startLoading, stopLoading, onLoadError, dataFilters, updateSourceData }) {
-    if (!this.isVisible() || !this.showAtZoomLevel(dataFilters.zoom)) {
+  async syncData(syncContext) {
+    if (!this.isVisible() || !this.showAtZoomLevel(syncContext.dataFilters.zoom)) {
       return;
     }
 
-    const sourceResult = await this._syncSource({ startLoading, stopLoading, onLoadError, dataFilters });
+    const sourceResult = await this._syncSource(syncContext);
     if (!sourceResult.featureCollection || !sourceResult.featureCollection.features.length) {
       return;
     }
 
-    const joinStates = await this._syncJoins({ startLoading, stopLoading, onLoadError, dataFilters });
-    await this._performInnerJoins(sourceResult, joinStates, updateSourceData);
+    const joinStates = await this._syncJoins(syncContext);
+    await this._performInnerJoins(sourceResult, joinStates, syncContext.updateSourceData);
 
   }
 
   _getSourceFeatureCollection() {
-    const sourceDataRequest = this.getSourceDataRequest();
-    return sourceDataRequest ? sourceDataRequest.getData() : null;
+    if (this._source.isInjectedData()) {
+      return this.getInjectedData();
+    } else {
+      const sourceDataRequest = this.getSourceDataRequest();
+      return sourceDataRequest ? sourceDataRequest.getData() : null;
+    }
   }
 
   _syncFeatureCollectionWithMb(mbMap) {
@@ -756,6 +822,29 @@ export class VectorLayer extends AbstractLayer {
     return featureCollection.features.find((feature) => {
       return feature.properties[FEATURE_ID_PROPERTY_NAME] === id;
     });
+  }
+
+  _getFieldSource(field) {
+    if (!field) {
+      return null;
+    }
+
+    if (field.origin === FIELD_ORIGIN.SOURCE) {
+      return this._source;
+    }
+
+    const join = this.getValidJoins().find(join => {
+      const matchingField = join.getJoinFields().find(joinField => {
+        return joinField.name === field.name;
+      });
+      return !!matchingField;
+    });
+
+    if (!join) {
+      return null;
+    }
+
+    return join.getRightJoinSource();
   }
 
 }

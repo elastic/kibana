@@ -8,7 +8,8 @@
 
 import fs from 'fs';
 import Boom from 'boom';
-import { merge } from 'lodash';
+import numeral from '@elastic/numeral';
+import { merge, get } from 'lodash';
 import { getLatestDataOrBucketTimestamp, prefixDatafeedId } from '../../../common/util/job_utils';
 import { mlLog } from '../../client/log';
 import { jobServiceProvider } from '../job_service';
@@ -308,6 +309,7 @@ export class DataRecognizer {
     this.applyDatafeedConfigOverrides(moduleConfig, datafeedOverrides, jobPrefix);
     this.updateDatafeedIndices(moduleConfig);
     this.updateJobUrlIndexPatterns(moduleConfig);
+    await this.updateModelMemoryLimits(moduleConfig);
 
     // create the jobs
     if (moduleConfig.jobs && moduleConfig.jobs.length) {
@@ -765,6 +767,30 @@ export class DataRecognizer {
           }
         });
       });
+    }
+  }
+
+  // ensure the model memory limit for each job is not greater than
+  // the max model memory setting for the cluster
+  async updateModelMemoryLimits(moduleConfig) {
+    const { limits } = await this.callWithRequest('ml.info');
+    const maxMml = limits.max_model_memory_limit;
+    if (maxMml !== undefined) {
+      const maxBytes = numeral(maxMml.toUpperCase()).value();
+
+      if (Array.isArray(moduleConfig.jobs)) {
+        moduleConfig.jobs.forEach((job) => {
+          const mml = get(job, 'config.analysis_limits.model_memory_limit');
+          if (mml !== undefined) {
+            const mmlBytes = numeral(mml.toUpperCase()).value();
+            if (mmlBytes > maxBytes) {
+              // if the job's mml is over the max,
+              // so set the jobs mml to be the max
+              job.config.analysis_limits.model_memory_limit = maxMml;
+            }
+          }
+        });
+      }
     }
   }
 

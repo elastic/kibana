@@ -18,10 +18,8 @@
  */
 
 import { getDefaultFormat } from '../get_default_format';
-import { FieldFormat } from '../../../../field_formats';
-import { createNumberFormat } from '../../../../../core_plugins/kibana/common/field_formats/types/number';
+import { NumberFormat } from '../../../../../../plugins/data/public';
 
-const Format = createNumberFormat(FieldFormat);
 const getConfig = () => {
   return '0,0.[000]';
 };
@@ -29,12 +27,12 @@ const getConfig = () => {
 describe('getDefaultFormat', () => {
 
   it('should create default format', () => {
-    const DefaultFormat = getDefaultFormat(Format);
+    const DefaultFormat = getDefaultFormat(NumberFormat);
     const defaultFormatObject = new DefaultFormat(null, getConfig);
-    const formatObject = new Format(null, getConfig);
+    const formatObject = new NumberFormat(null, getConfig);
 
     expect(DefaultFormat.id).toEqual('');
-    expect(DefaultFormat.resolvedTitle).toEqual(Format.title);
+    expect(DefaultFormat.resolvedTitle).toEqual(NumberFormat.title);
     expect(DefaultFormat.title).toEqual('- Default -');
     expect(JSON.stringify(defaultFormatObject.params())).toEqual(JSON.stringify(formatObject.params()));
   });

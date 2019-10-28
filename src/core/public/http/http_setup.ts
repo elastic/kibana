@@ -36,9 +36,18 @@ import { HttpInterceptController } from './http_intercept_controller';
 import { HttpFetchError } from './http_fetch_error';
 import { HttpInterceptHaltError } from './http_intercept_halt_error';
 import { BasePath } from './base_path_service';
+import { AnonymousPaths } from './anonymous_paths';
 
 const JSON_CONTENT = /^(application\/(json|x-javascript)|text\/(x-)?javascript|x-json)(;.*)?$/;
 const NDJSON_CONTENT = /^(application\/ndjson)(;.*)?$/;
+
+function checkHalt(controller: HttpInterceptController, error?: Error) {
+  if (error instanceof HttpInterceptHaltError) {
+    throw error;
+  } else if (controller.halted) {
+    throw new HttpInterceptHaltError();
+  }
+}
 
 export const setup = (
   injectedMetadata: InjectedMetadataSetup,
@@ -49,6 +58,7 @@ export const setup = (
   const interceptors = new Set<HttpInterceptor>();
   const kibanaVersion = injectedMetadata.getKibanaVersion();
   const basePath = new BasePath(injectedMetadata.getBasePath());
+  const anonymousPaths = new AnonymousPaths(basePath);
 
   function intercept(interceptor: HttpInterceptor) {
     interceptors.add(interceptor);
@@ -102,24 +112,17 @@ export const setup = (
       (promise, interceptor) =>
         promise.then(
           async (current: Request) => {
-            if (controller.halted) {
-              throw new HttpInterceptHaltError();
-            }
+            next = current;
+            checkHalt(controller);
 
             if (!interceptor.request) {
               return current;
             }
 
-            next = (await interceptor.request(current, controller)) || current;
-
-            return next;
+            return (await interceptor.request(current, controller)) || current;
           },
           async error => {
-            if (error instanceof HttpInterceptHaltError) {
-              throw error;
-            } else if (controller.halted) {
-              throw new HttpInterceptHaltError();
-            }
+            checkHalt(controller, error);
 
             if (!interceptor.requestError) {
               throw error;
@@ -147,42 +150,55 @@ export const setup = (
     responsePromise: Promise<HttpResponse>,
     controller: HttpInterceptController
   ) {
-    let current: HttpResponse;
+    let current: HttpResponse | undefined;
 
     const finalHttpResponse = await [...interceptors].reduce(
       (promise, interceptor) =>
         promise.then(
           async httpResponse => {
-            if (controller.halted) {
-              throw new HttpInterceptHaltError();
-            }
+            current = httpResponse;
+            checkHalt(controller);
 
             if (!interceptor.response) {
               return httpResponse;
             }
 
-            current = (await interceptor.response(httpResponse, controller)) || httpResponse;
-
-            return current;
+            return {
+              ...httpResponse,
+              ...((await interceptor.response(httpResponse, controller)) || {}),
+            };
           },
           async error => {
-            if (error instanceof HttpInterceptHaltError) {
-              throw error;
-            } else if (controller.halted) {
-              throw new HttpInterceptHaltError();
-            }
+            const request = error.request || (current && current.request);
+
+            checkHalt(controller, error);
 
             if (!interceptor.responseError) {
               throw error;
             }
 
-            const next = await interceptor.responseError({ ...current, error }, controller);
+            try {
+              const next = await interceptor.responseError(
+                {
+                  error,
+                  request,
+                  response: error.response || (current && current.response),
+                  body: error.body || (current && current.body),
+                },
+                controller
+              );
 
-            if (!next) {
-              throw error;
+              checkHalt(controller, error);
+
+              if (!next) {
+                throw error;
+              }
+
+              return { ...next, request };
+            } catch (err) {
+              checkHalt(controller, err);
+              throw err;
             }
-
-            return next;
           }
         ),
       responsePromise
@@ -198,7 +214,7 @@ export const setup = (
     try {
       response = await window.fetch(request);
     } catch (err) {
-      throw new HttpFetchError(err.message);
+      throw new HttpFetchError(err.message, request);
     }
 
     const contentType = response.headers.get('Content-Type') || '';
@@ -218,24 +234,41 @@ export const setup = (
         }
       }
     } catch (err) {
-      throw new HttpFetchError(err.message, response, body);
+      throw new HttpFetchError(err.message, request, response, body);
     }
 
     if (!response.ok) {
-      throw new HttpFetchError(response.statusText, response, body);
+      throw new HttpFetchError(response.statusText, request, response, body);
     }
 
     return { response, body, request };
   }
 
-  function fetch(path: string, options: HttpFetchOptions = {}) {
+  async function fetch(path: string, options: HttpFetchOptions = {}) {
     const controller = new HttpInterceptController();
     const initialRequest = createRequest(path, options);
 
-    return interceptResponse(
-      interceptRequest(initialRequest, controller).then(fetcher),
-      controller
-    );
+    // We wrap the interception in a separate promise to ensure that when
+    // a halt is called we do not resolve or reject, halting handling of the promise.
+    return new Promise(async (resolve, reject) => {
+      function rejectIfNotHalted(err: any) {
+        if (!(err instanceof HttpInterceptHaltError)) {
+          reject(err);
+        }
+      }
+
+      try {
+        const request = await interceptRequest(initialRequest, controller);
+
+        try {
+          resolve(await interceptResponse(fetcher(request), controller));
+        } catch (err) {
+          rejectIfNotHalted(err);
+        }
+      } catch (err) {
+        rejectIfNotHalted(err);
+      }
+    });
   }
 
   function shorthand(method: string) {
@@ -287,6 +320,7 @@ export const setup = (
   return {
     stop,
     basePath,
+    anonymousPaths,
     intercept,
     removeAllInterceptors,
     fetch,

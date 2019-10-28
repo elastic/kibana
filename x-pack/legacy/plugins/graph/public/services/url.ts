@@ -5,8 +5,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Chrome } from 'ui/chrome';
-import { SavedGraphWorkspace } from '../types/persistence';
+import { ChromeStart } from 'kibana/public';
+import { GraphWorkspaceSavedObject } from '../types';
+import { MetaDataState } from '../state_management';
 
 export function getHomePath() {
   return '/home';
@@ -16,27 +17,30 @@ export function getNewPath() {
   return '/workspace';
 }
 
-export function getEditPath({ id }: SavedGraphWorkspace) {
+export function getEditPath({ id }: GraphWorkspaceSavedObject) {
   return `/workspace/${id}`;
 }
 
-export function getEditUrl(chrome: Chrome, workspace: SavedGraphWorkspace) {
-  return chrome.addBasePath(`#${getEditPath(workspace)}`);
+export function getEditUrl(
+  addBasePath: (url: string) => string,
+  workspace: GraphWorkspaceSavedObject
+) {
+  return addBasePath(`#${getEditPath(workspace)}`);
 }
 
 export type SetBreadcrumbOptions =
   | {
-      chrome: Chrome;
+      chrome: ChromeStart;
     }
   | {
-      chrome: Chrome;
-      savedWorkspace?: SavedGraphWorkspace;
+      chrome: ChromeStart;
+      metaData: MetaDataState;
       navigateTo: (path: string) => void;
     };
 
 export function setBreadcrumbs(options: SetBreadcrumbOptions) {
-  if ('savedWorkspace' in options) {
-    options.chrome.breadcrumbs.set([
+  if ('metaData' in options) {
+    options.chrome.setBreadcrumbs([
       {
         text: i18n.translate('xpack.graph.home.breadcrumb', {
           defaultMessage: 'Graph',
@@ -47,16 +51,12 @@ export function setBreadcrumbs(options: SetBreadcrumbOptions) {
         'data-test-subj': 'graphHomeBreadcrumb',
       },
       {
-        text: options.savedWorkspace
-          ? options.savedWorkspace.title
-          : i18n.translate('xpack.graph.newWorkspaceTitle', {
-              defaultMessage: 'Unsaved workspace',
-            }),
-        'data-test-subj': 'graphCurrentWorkspaceBreadcrumb',
+        text: options.metaData.title,
+        'data-test-subj': 'graphCurrentGraphBreadcrumb',
       },
     ]);
   } else {
-    options.chrome.breadcrumbs.set([
+    options.chrome.setBreadcrumbs([
       {
         text: i18n.translate('xpack.graph.home.breadcrumb', {
           defaultMessage: 'Graph',

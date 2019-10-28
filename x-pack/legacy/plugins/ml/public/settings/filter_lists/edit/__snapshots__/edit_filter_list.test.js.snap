@@ -80,10 +80,7 @@ exports[`EditFilterList adds new items to filter list 1`] = `
           grow={false}
         >
           <EuiButtonEmpty
-            color="primary"
-            iconSide="left"
             onClick={[Function]}
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Cancel"
@@ -96,13 +93,9 @@ exports[`EditFilterList adds new items to filter list 1`] = `
           grow={false}
         >
           <EuiButton
-            color="primary"
             disabled={false}
             fill={true}
-            iconSide="left"
             onClick={[Function]}
-            size="m"
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Save"
@@ -199,10 +192,7 @@ exports[`EditFilterList renders after selecting an item and deleting it 1`] = `
           grow={false}
         >
           <EuiButtonEmpty
-            color="primary"
-            iconSide="left"
             onClick={[Function]}
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Cancel"
@@ -215,13 +205,9 @@ exports[`EditFilterList renders after selecting an item and deleting it 1`] = `
           grow={false}
         >
           <EuiButton
-            color="primary"
             disabled={false}
             fill={true}
-            iconSide="left"
             onClick={[Function]}
-            size="m"
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Save"
@@ -313,10 +299,7 @@ exports[`EditFilterList renders after selecting an item and deleting it 2`] = `
           grow={false}
         >
           <EuiButtonEmpty
-            color="primary"
-            iconSide="left"
             onClick={[Function]}
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Cancel"
@@ -329,13 +312,9 @@ exports[`EditFilterList renders after selecting an item and deleting it 2`] = `
           grow={false}
         >
           <EuiButton
-            color="primary"
             disabled={false}
             fill={true}
-            iconSide="left"
             onClick={[Function]}
-            size="m"
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Save"
@@ -411,10 +390,7 @@ exports[`EditFilterList renders the edit page for a new filter list and updates 
           grow={false}
         >
           <EuiButtonEmpty
-            color="primary"
-            iconSide="left"
             onClick={[Function]}
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Cancel"
@@ -427,13 +403,9 @@ exports[`EditFilterList renders the edit page for a new filter list and updates 
           grow={false}
         >
           <EuiButton
-            color="primary"
             disabled={true}
             fill={true}
-            iconSide="left"
             onClick={[Function]}
-            size="m"
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Save"
@@ -509,10 +481,7 @@ exports[`EditFilterList renders the edit page for a new filter list and updates 
           grow={false}
         >
           <EuiButtonEmpty
-            color="primary"
-            iconSide="left"
             onClick={[Function]}
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Cancel"
@@ -525,13 +494,9 @@ exports[`EditFilterList renders the edit page for a new filter list and updates 
           grow={false}
         >
           <EuiButton
-            color="primary"
             disabled={false}
             fill={true}
-            iconSide="left"
             onClick={[Function]}
-            size="m"
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Save"
@@ -624,10 +589,7 @@ exports[`EditFilterList renders the edit page for an existing filter list and up
           grow={false}
         >
           <EuiButtonEmpty
-            color="primary"
-            iconSide="left"
             onClick={[Function]}
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Cancel"
@@ -640,13 +602,9 @@ exports[`EditFilterList renders the edit page for an existing filter list and up
           grow={false}
         >
           <EuiButton
-            color="primary"
             disabled={false}
             fill={true}
-            iconSide="left"
             onClick={[Function]}
-            size="m"
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Save"
@@ -739,10 +697,7 @@ exports[`EditFilterList renders the edit page for an existing filter list and up
           grow={false}
         >
           <EuiButtonEmpty
-            color="primary"
-            iconSide="left"
             onClick={[Function]}
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Cancel"
@@ -755,13 +710,9 @@ exports[`EditFilterList renders the edit page for an existing filter list and up
           grow={false}
         >
           <EuiButton
-            color="primary"
             disabled={false}
             fill={true}
-            iconSide="left"
             onClick={[Function]}
-            size="m"
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Save"
@@ -854,10 +805,7 @@ exports[`EditFilterList updates the items per page 1`] = `
           grow={false}
         >
           <EuiButtonEmpty
-            color="primary"
-            iconSide="left"
             onClick={[Function]}
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Cancel"
@@ -870,13 +818,9 @@ exports[`EditFilterList updates the items per page 1`] = `
           grow={false}
         >
           <EuiButton
-            color="primary"
             disabled={false}
             fill={true}
-            iconSide="left"
             onClick={[Function]}
-            size="m"
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Save"

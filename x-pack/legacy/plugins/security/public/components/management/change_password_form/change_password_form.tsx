@@ -314,7 +314,7 @@ export class ChangePasswordForm extends Component<Props, State> {
   };
 
   private handleChangePasswordFailure = (error: Record<string, any>) => {
-    if (error.body && error.body.statusCode === 401) {
+    if (error.body && error.body.statusCode === 403) {
       this.setState({ currentPasswordError: true });
     } else {
       toastNotifications.addDanger(

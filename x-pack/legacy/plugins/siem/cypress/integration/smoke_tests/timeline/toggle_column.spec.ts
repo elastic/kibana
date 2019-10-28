@@ -31,7 +31,7 @@ describe('toggle column in timeline', () => {
     cy.get(`[data-test-subj="toggle-field-${timestampField}"]`).should('be.checked');
   });
 
-  it('displays an UNchecked Toggle field checkbox for `_id`, because it is NOT a default timeline column', () => {
+  it('displays an Unchecked Toggle field checkbox for `_id`, because it is NOT a default timeline column', () => {
     populateTimeline();
 
     cy.get(`[data-test-subj="timeline"] [data-test-subj="toggle-field-${idField}"]`).should(

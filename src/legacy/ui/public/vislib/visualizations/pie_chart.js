@@ -21,7 +21,7 @@ import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
 import numeral from 'numeral';
-import { PieContainsAllZeros, ContainerTooSmall } from '../../errors';
+import { PieContainsAllZeros, ContainerTooSmall } from '../errors';
 import { Chart } from './_chart';
 import { truncateLabel } from '../components/labels/truncate_labels';
 

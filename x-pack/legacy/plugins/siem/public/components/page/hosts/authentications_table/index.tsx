@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiToolTip } from '@elastic/eui';
-import { FormattedRelative } from '@kbn/i18n/react';
 import { has } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -18,6 +16,7 @@ import { hostsModel, hostsSelectors, State } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { getEmptyTagValue } from '../../../empty_value';
+import { FormattedRelativePreferenceDate } from '../../../formatted_date';
 import { HostDetailsLink, IPDetailsLink } from '../../../links';
 import { Columns, ItemsPerRow, PaginatedTable } from '../../../paginated_table';
 import { IS_OPERATOR } from '../../../timeline/data_providers/data_provider';
@@ -34,12 +33,14 @@ interface OwnProps {
   loading: boolean;
   loadPage: (newActivePage: number) => void;
   id: string;
+  isInspect: boolean;
   showMorePagesIndicator: boolean;
   totalCount: number;
   type: hostsModel.HostsType;
 }
 
 interface AuthenticationTableReduxProps {
+  activePage: number;
   limit: number;
 }
 
@@ -85,9 +86,11 @@ const rowItems: ItemsPerRow[] = [
 
 const AuthenticationTableComponent = pure<AuthenticationTableProps>(
   ({
+    activePage,
     data,
     fakeTotalCount,
     id,
+    isInspect,
     limit,
     loading,
     loadPage,
@@ -98,11 +101,14 @@ const AuthenticationTableComponent = pure<AuthenticationTableProps>(
     updateTableLimit,
   }) => (
     <PaginatedTable
+      activePage={activePage}
       columns={getAuthenticationColumnsCurated(type)}
+      dataTestSubj={`table-${tableType}`}
       headerCount={totalCount}
       headerTitle={i18n.AUTHENTICATIONS}
       headerUnit={i18n.UNIT(totalCount)}
       id={id}
+      isInspect={isInspect}
       itemsPerRow={rowItems}
       limit={limit}
       loading={loading}
@@ -124,7 +130,6 @@ const AuthenticationTableComponent = pure<AuthenticationTableProps>(
           tableType,
         })
       }
-      updateProps={{ totalCount }}
     />
   )
 );
@@ -194,6 +199,7 @@ const getAuthenticationColumns = (): AuthTableColumns => [
         />
       );
     },
+    width: '8%',
   },
   {
     name: i18n.FAILURES,
@@ -231,16 +237,15 @@ const getAuthenticationColumns = (): AuthTableColumns => [
         />
       );
     },
+    width: '8%',
   },
   {
     name: i18n.LAST_SUCCESSFUL_TIME,
     truncateText: false,
     hideForMobile: false,
     render: ({ node }) =>
-      has('lastSuccess.timestamp', node) ? (
-        <EuiToolTip position="bottom" content={node.lastSuccess!.timestamp!}>
-          <FormattedRelative value={new Date(node.lastSuccess!.timestamp!)} />
-        </EuiToolTip>
+      has('lastSuccess.timestamp', node) && node.lastSuccess!.timestamp != null ? (
+        <FormattedRelativePreferenceDate value={node.lastSuccess!.timestamp} />
       ) : (
         getEmptyTagValue()
       ),
@@ -285,9 +290,7 @@ const getAuthenticationColumns = (): AuthTableColumns => [
     hideForMobile: false,
     render: ({ node }) =>
       has('lastFailure.timestamp', node) && node.lastFailure!.timestamp != null ? (
-        <EuiToolTip position="bottom" content={node.lastFailure!.timestamp!}>
-          <FormattedRelative value={new Date(node.lastFailure!.timestamp!)} />
-        </EuiToolTip>
+        <FormattedRelativePreferenceDate value={node.lastFailure!.timestamp} />
       ) : (
         getEmptyTagValue()
       ),

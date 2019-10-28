@@ -22,6 +22,10 @@ import {
   removeGlobalLinkTo,
   addGlobalLinkTo,
   addTimelineLinkTo,
+  deleteOneQuery,
+  setFilterQuery,
+  setSavedQuery,
+  setSearchBarFilter,
 } from './actions';
 import {
   setIsInspected,
@@ -32,6 +36,7 @@ import {
   addGlobalLink,
   removeTimelineLink,
   addTimelineLink,
+  deleteOneQuery as helperDeleteOneQuery,
 } from './helpers';
 import { InputsModel, TimeRange } from './model';
 import {
@@ -54,12 +59,17 @@ export const initialInputsState: InputsState = {
       from: getDefaultFromValue(),
       to: getDefaultToValue(),
     },
-    query: [],
+    queries: [],
     policy: {
       kind: getDefaultIntervalKind(),
       duration: getDefaultIntervalDuration(),
     },
     linkTo: ['timeline'],
+    query: {
+      query: '',
+      language: 'kuery',
+    },
+    filters: [],
   },
   timeline: {
     timerange: {
@@ -69,12 +79,17 @@ export const initialInputsState: InputsState = {
       from: getDefaultFromValue(),
       to: getDefaultToValue(),
     },
-    query: [],
+    queries: [],
     policy: {
       kind: getDefaultIntervalKind(),
       duration: getDefaultIntervalDuration(),
     },
     linkTo: ['global'],
+    query: {
+      query: '',
+      language: 'kuery',
+    },
+    filters: [],
   },
 };
 
@@ -123,12 +138,13 @@ export const inputsReducer = reducerWithInitialState(initialInputsState)
     ...state,
     [id]: {
       ...get(id, state),
-      query: state.global.query.slice(state.global.query.length),
+      queries: state.global.queries.slice(state.global.queries.length),
     },
   }))
   .case(setQuery, (state, { inputId, id, inspect, loading, refetch }) =>
     upsertQuery({ inputId, id, inspect, loading, refetch, state })
   )
+  .case(deleteOneQuery, (state, { inputId, id }) => helperDeleteOneQuery({ inputId, id, state }))
   .case(setDuration, (state, { id, duration }) => ({
     ...state,
     [id]: {
@@ -167,4 +183,28 @@ export const inputsReducer = reducerWithInitialState(initialInputsState)
   .case(addGlobalLinkTo, (state, { linkToId }) => addGlobalLink(linkToId, state))
   .case(removeTimelineLinkTo, state => removeTimelineLink(state))
   .case(addTimelineLinkTo, (state, { linkToId }) => addTimelineLink(linkToId, state))
+  .case(setFilterQuery, (state, { id, query, language }) => ({
+    ...state,
+    [id]: {
+      ...get(id, state),
+      query: {
+        query,
+        language,
+      },
+    },
+  }))
+  .case(setSavedQuery, (state, { id, savedQuery }) => ({
+    ...state,
+    [id]: {
+      ...get(id, state),
+      savedQuery,
+    },
+  }))
+  .case(setSearchBarFilter, (state, { id, filters }) => ({
+    ...state,
+    [id]: {
+      ...get(id, state),
+      filters,
+    },
+  }))
   .build();

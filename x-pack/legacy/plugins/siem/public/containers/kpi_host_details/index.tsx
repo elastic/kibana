@@ -14,7 +14,7 @@ import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import { KpiHostDetailsData, GetKpiHostDetailsQuery } from '../../graphql/types';
 import { inputsModel, inputsSelectors, State } from '../../store';
-import { createFilter } from '../helpers';
+import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { QueryTemplateProps } from '../query_template';
 
 import { kpiHostDetailsQuery } from './index.gql_query';
@@ -41,7 +41,7 @@ const KpiHostDetailsComponentQuery = pure<QueryKpiHostDetailsProps & KpiHostDeta
   ({ id = ID, children, endDate, filterQuery, isInspected, skip, sourceId, startDate }) => (
     <Query<GetKpiHostDetailsQuery.Query, GetKpiHostDetailsQuery.Variables>
       query={kpiHostDetailsQuery}
-      fetchPolicy="cache-and-network"
+      fetchPolicy={getDefaultFetchPolicy()}
       notifyOnNetworkStatusChange
       skip={skip}
       variables={{

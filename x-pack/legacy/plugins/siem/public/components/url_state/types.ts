@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Filter } from '@kbn/es-query';
+import ApolloClient from 'apollo-client';
 import { ActionCreator } from 'typescript-fsa';
 import { StaticIndexPattern } from 'ui/index_patterns';
-import { Dispatch } from 'redux';
+import { Query } from 'src/plugins/data/common';
 
-import { hostsModel, KueryFilterQuery, networkModel, SerializedFilterQuery } from '../../store';
 import { UrlInputsModel } from '../../store/inputs/model';
-import { InputsModelId } from '../../store/inputs/constants';
 import { RouteSpyState } from '../../utils/route/types';
 import { DispatchUpdateTimeline } from '../open_timeline/types';
 import { NavTab } from '../navigation/types';
@@ -18,16 +18,30 @@ import { NavTab } from '../navigation/types';
 import { CONSTANTS, UrlStateType } from './constants';
 
 export const ALL_URL_STATE_KEYS: KeyUrlState[] = [
-  CONSTANTS.kqlQuery,
+  CONSTANTS.appQuery,
+  CONSTANTS.filters,
+  CONSTANTS.savedQuery,
   CONSTANTS.timerange,
-  CONSTANTS.timelineId,
+  CONSTANTS.timeline,
 ];
 
 export const URL_STATE_KEYS: Record<UrlStateType, KeyUrlState[]> = {
-  host: [CONSTANTS.kqlQuery, CONSTANTS.timerange, CONSTANTS.timelineId],
-  network: [CONSTANTS.kqlQuery, CONSTANTS.timerange, CONSTANTS.timelineId],
-  timeline: [CONSTANTS.timelineId, CONSTANTS.timerange],
-  overview: [CONSTANTS.timelineId, CONSTANTS.timerange],
+  host: [
+    CONSTANTS.appQuery,
+    CONSTANTS.filters,
+    CONSTANTS.savedQuery,
+    CONSTANTS.timerange,
+    CONSTANTS.timeline,
+  ],
+  network: [
+    CONSTANTS.appQuery,
+    CONSTANTS.filters,
+    CONSTANTS.savedQuery,
+    CONSTANTS.timerange,
+    CONSTANTS.timeline,
+  ],
+  timeline: [CONSTANTS.timeline, CONSTANTS.timerange],
+  overview: [CONSTANTS.timeline, CONSTANTS.timerange],
 };
 
 export type LocationTypes =
@@ -39,15 +53,17 @@ export type LocationTypes =
   | CONSTANTS.timelinePage
   | CONSTANTS.unknown;
 
-export interface KqlQuery {
-  filterQuery: KueryFilterQuery | null;
-  queryLocation: LocationTypes | null;
+export interface Timeline {
+  id: string;
+  isOpen: boolean;
 }
 
 export interface UrlState {
-  [CONSTANTS.kqlQuery]: KqlQuery;
+  [CONSTANTS.appQuery]?: Query;
+  [CONSTANTS.filters]?: Filter[];
+  [CONSTANTS.savedQuery]?: string;
   [CONSTANTS.timerange]: UrlInputsModel;
-  [CONSTANTS.timelineId]: string;
+  [CONSTANTS.timeline]: Timeline;
 }
 export type KeyUrlState = keyof UrlState;
 
@@ -63,39 +79,15 @@ export interface UrlStateStateToPropsType {
   urlState: UrlState;
 }
 
+export interface UpdateTimelineIsLoading {
+  id: string;
+  isLoading: boolean;
+}
+
 export interface UrlStateDispatchToPropsType {
-  addGlobalLinkTo: ActionCreator<{ linkToId: InputsModelId }>;
-  addTimelineLinkTo: ActionCreator<{ linkToId: InputsModelId }>;
-  dispatch: Dispatch;
-  removeGlobalLinkTo: ActionCreator<void>;
-  removeTimelineLinkTo: ActionCreator<void>;
-  setHostsKql: ActionCreator<{
-    filterQuery: SerializedFilterQuery;
-    hostsType: hostsModel.HostsType;
-  }>;
-  setNetworkKql: ActionCreator<{
-    filterQuery: SerializedFilterQuery;
-    networkType: networkModel.NetworkType;
-  }>;
-  setAbsoluteTimerange: ActionCreator<{
-    from: number;
-    fromStr: undefined;
-    id: InputsModelId;
-    to: number;
-    toStr: undefined;
-  }>;
-  setRelativeTimerange: ActionCreator<{
-    from: number;
-    fromStr: string;
-    id: InputsModelId;
-    to: number;
-    toStr: string;
-  }>;
+  setInitialStateFromUrl: DispatchSetInitialStateFromUrl;
   updateTimeline: DispatchUpdateTimeline;
-  updateTimelineIsLoading: ActionCreator<{
-    id: string;
-    isLoading: boolean;
-  }>;
+  updateTimelineIsLoading: ActionCreator<UpdateTimelineIsLoading>;
 }
 
 export type UrlStateContainerPropTypes = RouteSpyState &
@@ -107,3 +99,28 @@ export interface PreviousLocationUrlState {
   pathName: string | undefined;
   urlState: UrlState;
 }
+
+export interface UrlStateToRedux {
+  urlKey: KeyUrlState;
+  newUrlStateString: string;
+}
+
+export interface SetInitialStateFromUrl<TCache> {
+  apolloClient: ApolloClient<TCache> | ApolloClient<{}> | undefined;
+  detailName: string | undefined;
+  indexPattern: StaticIndexPattern | undefined;
+  pageName: string;
+  updateTimeline: DispatchUpdateTimeline;
+  updateTimelineIsLoading: ActionCreator<UpdateTimelineIsLoading>;
+  urlStateToUpdate: UrlStateToRedux[];
+}
+
+export type DispatchSetInitialStateFromUrl = <TCache>({
+  apolloClient,
+  detailName,
+  indexPattern,
+  pageName,
+  updateTimeline,
+  updateTimelineIsLoading,
+  urlStateToUpdate,
+}: SetInitialStateFromUrl<TCache>) => () => void;

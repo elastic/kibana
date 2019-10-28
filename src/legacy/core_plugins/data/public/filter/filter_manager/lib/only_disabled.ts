@@ -17,20 +17,20 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import { Filter } from '@kbn/es-query';
+import { filter, isEqual } from 'lodash';
 
-const isEnabled = function(filter: Filter) {
-  return filter && filter.meta && !filter.meta.disabled;
-};
+const isEnabled = (f: Filter) => f && f.meta && !f.meta.disabled;
+
 /**
  * Checks to see if only disabled filters have been changed
+ *
  * @returns {bool} Only disabled filters
  */
-export function onlyDisabledFiltersChanged(newFilters?: Filter[], oldFilters?: Filter[]) {
+export const onlyDisabledFiltersChanged = (newFilters?: Filter[], oldFilters?: Filter[]) => {
   // If it's the same - compare only enabled filters
-  const newEnabledFilters = _.filter(newFilters || [], isEnabled);
-  const oldEnabledFilters = _.filter(oldFilters || [], isEnabled);
+  const newEnabledFilters = filter(newFilters || [], isEnabled);
+  const oldEnabledFilters = filter(oldFilters || [], isEnabled);
 
-  return _.isEqual(oldEnabledFilters, newEnabledFilters);
-}
+  return isEqual(oldEnabledFilters, newEnabledFilters);
+};

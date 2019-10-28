@@ -11,7 +11,6 @@ query FilterBar($dateRangeStart: String!, $dateRangeEnd: String!) {
   filterBar: getFilterBar(dateRangeStart: $dateRangeStart, dateRangeEnd: $dateRangeEnd) {
     ids
     locations
-    names
     ports
     schemes
     urls

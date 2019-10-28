@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { JsonObject } from '..';
+
 /**
  * WARNING: these typings are incomplete
  */
@@ -30,20 +32,11 @@ export interface KueryParseOptions {
   startRule: string;
 }
 
-type JsonValue = null | boolean | number | string | JsonObject | JsonArray;
-
-interface JsonObject {
-  [key: string]: JsonValue;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface JsonArray extends Array<JsonValue> {}
-
 export function fromKueryExpression(
   expression: string,
   parseOptions?: KueryParseOptions
 ): KueryNode;
 
-export function toElasticsearchQuery(node: KueryNode, indexPattern: any): JsonObject;
+export function toElasticsearchQuery(node: KueryNode, indexPattern?: any): JsonObject;
 
 export function doesKueryExpressionHaveLuceneSyntaxError(expression: string): boolean;

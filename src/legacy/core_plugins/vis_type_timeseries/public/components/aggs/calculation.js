@@ -38,6 +38,7 @@ import {
   EuiTextArea,
   EuiFormRow,
   EuiCode,
+  EuiSpacer,
 } from '@elastic/eui';
 
 export class CalculationAgg extends Component {
@@ -80,6 +81,7 @@ export class CalculationAgg extends Component {
                 defaultMessage="Aggregation"
               />
             </EuiFormLabel>
+            <EuiSpacer size="xs" />
             <AggSelect
               id={htmlId('aggregation')}
               panelType={this.props.panel.type}
@@ -91,8 +93,12 @@ export class CalculationAgg extends Component {
 
           <EuiFlexItem>
             <EuiFormLabel htmlFor={htmlId('variables')}>
-              <FormattedMessage id="visTypeTimeseries.calculation.variablesLabel" defaultMessage="Variables" />
+              <FormattedMessage
+                id="visTypeTimeseries.calculation.variablesLabel"
+                defaultMessage="Variables"
+              />
             </EuiFormLabel>
+            <EuiSpacer size="xs" />
             <CalculationVars
               id={htmlId('variables')}
               metrics={siblings}

@@ -120,7 +120,7 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
       Array [
         Object {
           "children": <React.Fragment>
-            <EuiFlexGroup
+            <ForwardRef
               alignItems="center"
               justifyContent="spaceBetween"
             >
@@ -135,26 +135,20 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
                 grow={false}
               >
                 <EuiButton
-                  color="primary"
                   data-test-subj="loadSavedObjects"
-                  fill={false}
-                  iconSide="left"
                   isLoading={false}
                   onClick={[Function]}
-                  size="m"
-                  type="button"
                 >
                   Load Kibana objects
                 </EuiButton>
               </EuiFlexItem>
-            </EuiFlexGroup>
+            </ForwardRef>
             <EuiSpacer
               size="s"
             />
             <EuiCallOut
               color="warning"
               data-test-subj="loadSavedObjects_failed"
-              size="m"
               title="Request failed, Error: simulated bulkRequest error"
             />
           </React.Fragment>,
@@ -246,14 +240,9 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
                     className="euiFlexItem euiFlexItem--flexGrowZero"
                   >
                     <EuiButton
-                      color="primary"
                       data-test-subj="loadSavedObjects"
-                      fill={false}
-                      iconSide="left"
                       isLoading={false}
                       onClick={[Function]}
-                      size="m"
-                      type="button"
                     >
                       <button
                         className="euiButton euiButton--primary"
@@ -286,7 +275,6 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
             <EuiCallOut
               color="warning"
               data-test-subj="loadSavedObjects_failed"
-              size="m"
               title="Request failed, Error: simulated bulkRequest error"
             >
               <div
@@ -432,7 +420,7 @@ exports[`bulkCreate should display success message when bulkCreate is successful
       Array [
         Object {
           "children": <React.Fragment>
-            <EuiFlexGroup
+            <ForwardRef
               alignItems="center"
               justifyContent="spaceBetween"
             >
@@ -447,26 +435,20 @@ exports[`bulkCreate should display success message when bulkCreate is successful
                 grow={false}
               >
                 <EuiButton
-                  color="primary"
                   data-test-subj="loadSavedObjects"
-                  fill={false}
-                  iconSide="left"
                   isLoading={false}
                   onClick={[Function]}
-                  size="m"
-                  type="button"
                 >
                   Load Kibana objects
                 </EuiButton>
               </EuiFlexItem>
-            </EuiFlexGroup>
+            </ForwardRef>
             <EuiSpacer
               size="s"
             />
             <EuiCallOut
               color="success"
               data-test-subj="loadSavedObjects_success"
-              size="m"
               title="1 saved objects successfully added"
             />
           </React.Fragment>,
@@ -592,14 +574,9 @@ exports[`bulkCreate should display success message when bulkCreate is successful
                     className="euiFlexItem euiFlexItem--flexGrowZero"
                   >
                     <EuiButton
-                      color="primary"
                       data-test-subj="loadSavedObjects"
-                      fill={false}
-                      iconSide="left"
                       isLoading={false}
                       onClick={[Function]}
-                      size="m"
-                      type="button"
                     >
                       <button
                         className="euiButton euiButton--primary"
@@ -632,7 +609,6 @@ exports[`bulkCreate should display success message when bulkCreate is successful
             <EuiCallOut
               color="success"
               data-test-subj="loadSavedObjects_success"
-              size="m"
               title="1 saved objects successfully added"
             >
               <div
@@ -664,7 +640,7 @@ exports[`renders 1`] = `
     Array [
       Object {
         "children": <React.Fragment>
-          <EuiFlexGroup
+          <ForwardRef
             alignItems="center"
             justifyContent="spaceBetween"
           >
@@ -679,19 +655,14 @@ exports[`renders 1`] = `
               grow={false}
             >
               <EuiButton
-                color="primary"
                 data-test-subj="loadSavedObjects"
-                fill={false}
-                iconSide="left"
                 isLoading={false}
                 onClick={[Function]}
-                size="m"
-                type="button"
               >
                 Load Kibana objects
               </EuiButton>
             </EuiFlexItem>
-          </EuiFlexGroup>
+          </ForwardRef>
           <EuiSpacer
             size="s"
           />

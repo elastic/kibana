@@ -26,7 +26,7 @@ import AggParamWriterProvider from '../../agg_param_writer';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import chrome from '../../../../chrome';
 import { aggTypes } from '../../..';
-import { AggConfig } from '../../../../vis/agg_config';
+import { AggConfig } from '../../../agg_config';
 import { timefilter } from 'ui/timefilter';
 
 const config = chrome.getUiSettingsClient();
@@ -48,8 +48,8 @@ describe('date_histogram params', function () {
     timeField = indexPattern.timeFieldName;
 
     paramWriter = new AggParamWriter({ aggType: 'date_histogram' });
-    writeInterval = function (interval, timeRange) {
-      return paramWriter.write({ interval: interval, field: timeField, timeRange: timeRange });
+    writeInterval = function (interval, timeRange, params = {}) {
+      return paramWriter.write({ ...params, interval: interval, field: timeField, timeRange: timeRange });
     };
     write = (params) => {
       return paramWriter.write({ interval: '10s', ...params });
@@ -87,56 +87,59 @@ describe('date_histogram params', function () {
       expect(output.params).to.have.property('fixed_interval', '30s');
     });
 
-    it('scales up the interval if it will make too many buckets', function () {
-      const timeBounds = getTimeBounds(30, 'm');
-      const output = writeInterval('s', timeBounds);
-      expect(output.params).to.have.property('fixed_interval', '10s');
-      expect(output.metricScaleText).to.be('second');
-      expect(output.metricScale).to.be(0.1);
-    });
-
-    it('does not scale down the interval', function () {
+    it('does not scale down the interval', () => {
       const timeBounds = getTimeBounds(1, 'm');
       const output = writeInterval('h', timeBounds);
       expect(output.params).to.have.property('calendar_interval', '1h');
-      expect(output.metricScaleText).to.be(undefined);
-      expect(output.metricScale).to.be(undefined);
+      expect(output).not.to.have.property('metricScaleText');
+      expect(output).not.to.have.property('metricScale');
     });
 
-    describe('only scales when all metrics are sum or count', function () {
-      const tests = [
-        [ false, 'avg', 'count', 'sum' ],
-        [ true, 'count', 'sum' ],
-        [ false, 'count', 'cardinality' ]
-      ];
+    describe('scaling behavior', () => {
 
-      tests.forEach(function (test) {
-        const should = test.shift();
-        const typeNames = test.slice();
+      it('should not scale without scaleMetricValues: true', function () {
+        const timeBounds = getTimeBounds(30, 'm');
+        const output = writeInterval('s', timeBounds);
+        expect(output.params).to.have.property('fixed_interval', '10s');
+        expect(output).not.to.have.property('metricScaleText');
+        expect(output).not.to.property('metricScale');
+      });
 
-        it(typeNames.join(', ') + ' should ' + (should ? '' : 'not') + ' scale', function () {
-          const timeBounds = getTimeBounds(1, 'y');
+      describe('only scales when all metrics are sum or count', function () {
+        const tests = [
+          [ false, 'avg', 'count', 'sum' ],
+          [ true, 'count', 'sum' ],
+          [ false, 'count', 'cardinality' ]
+        ];
 
-          const vis = paramWriter.vis;
-          vis.aggs.aggs.splice(0);
+        tests.forEach(function (test) {
+          const should = test.shift();
+          const typeNames = test.slice();
 
-          const histoConfig = new AggConfig(vis.aggs, {
-            type: aggTypes.buckets.find(agg => agg.name === 'date_histogram'),
-            schema: 'segment',
-            params: { interval: 's', field: timeField, timeRange: timeBounds }
+          it(typeNames.join(', ') + ' should ' + (should ? '' : 'not') + ' scale', function () {
+            const timeBounds = getTimeBounds(1, 'y');
+
+            const vis = paramWriter.vis;
+            vis.aggs.aggs.splice(0);
+
+            const histoConfig = new AggConfig(vis.aggs, {
+              type: aggTypes.buckets.find(agg => agg.name === 'date_histogram'),
+              schema: 'segment',
+              params: { interval: 's', field: timeField, timeRange: timeBounds, scaleMetricValues: true }
+            });
+
+            vis.aggs.aggs.push(histoConfig);
+
+            typeNames.forEach(function (type) {
+              vis.aggs.aggs.push(new AggConfig(vis.aggs, {
+                type: aggTypes.metrics.find(agg => agg.name === type),
+                schema: 'metric'
+              }));
+            });
+
+            const output = histoConfig.write(vis.aggs);
+            expect(_.has(output, 'metricScale')).to.be(should);
           });
-
-          vis.aggs.aggs.push(histoConfig);
-
-          typeNames.forEach(function (type) {
-            vis.aggs.aggs.push(new AggConfig(vis.aggs, {
-              type: aggTypes.metrics.find(agg => agg.name === type),
-              schema: 'metric'
-            }));
-          });
-
-          const output = histoConfig.write(vis.aggs);
-          expect(_.has(output, 'metricScale')).to.be(should);
         });
       });
     });

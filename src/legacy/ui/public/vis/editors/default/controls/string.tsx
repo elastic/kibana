@@ -39,6 +39,7 @@ function StringParamEditor({
 
   return (
     <EuiFormRow
+      className="visEditorAggParam__string"
       label={aggParam.displayName || aggParam.name}
       fullWidth={true}
       compressed
@@ -49,6 +50,7 @@ function StringParamEditor({
         data-test-subj={`visEditorStringInput${agg.id}${aggParam.name}`}
         onChange={ev => setValue(ev.target.value)}
         fullWidth={true}
+        compressed
         onBlur={setTouched}
         isInvalid={showValidation ? !isValid : false}
       />

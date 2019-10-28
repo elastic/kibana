@@ -10,7 +10,6 @@ import { wrapInI18nContext } from 'ui/i18n';
 import { i18n } from '@kbn/i18n';
 
 // import the uiExports that we want to "use"
-import 'uiExports/autocompleteProviders';
 import 'uiExports/fieldFormats';
 import 'uiExports/inspectorViews';
 import 'uiExports/search';
@@ -33,7 +32,7 @@ import './angular/map_controller';
 import listingTemplate from './angular/listing_ng_wrapper.html';
 import mapTemplate from './angular/map.html';
 import { MapListing } from './components/map_listing';
-import { recentlyAccessed } from 'ui/persisted_log';
+import { npStart } from 'ui/new_platform';
 
 const app = uiModules.get('app/maps', ['ngRoute', 'react']);
 
@@ -106,7 +105,7 @@ routes
         const id = $route.current.params.id;
         return gisMapSavedObjectLoader.get(id)
           .then((savedMap) => {
-            recentlyAccessed.add(savedMap.getFullPath(), savedMap.title, id);
+            npStart.core.chrome.recentlyAccessed.add(savedMap.getFullPath(), savedMap.title, id);
             docTitle.change(savedMap.title);
             return savedMap;
           })

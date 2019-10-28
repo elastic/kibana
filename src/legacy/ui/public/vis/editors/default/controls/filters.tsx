@@ -29,7 +29,7 @@ import { AggParamEditorProps } from '..';
 const generateId = htmlIdGenerator();
 const config = chrome.getUiSettingsClient();
 
-interface FilterValue {
+export interface FilterValue {
   input: Query;
   label: string;
   id: string;
@@ -86,6 +86,7 @@ function FiltersParamEditor({ agg, value = [], setValue }: AggParamEditorProps<F
 
   return (
     <>
+      <EuiSpacer size="m" />
       {filters.map(({ input, label, id }, arrayIndex) => (
         <FilterRow
           key={id}

@@ -60,12 +60,9 @@ exports[`Filter Lists Header renders header 1`] = `
           grow={false}
         >
           <EuiButtonEmpty
-            color="primary"
-            iconSide="left"
             iconType="refresh"
             onClick={[Function]}
             size="s"
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Refresh"
@@ -92,18 +89,16 @@ You can use the same filter list in multiple jobs.{br}{learnMoreLink}"
           values={
             Object {
               "br": <br />,
-              "learnMoreLink": <EuiLink
-                color="primary"
+              "learnMoreLink": <ForwardRef
                 href="https://www.elastic.co/guide/en/elastic-stack-overview/jest-metadata-mock-branch/ml-rules.html"
                 target="_blank"
-                type="button"
               >
                 <FormattedMessage
                   defaultMessage="Learn more"
                   id="xpack.ml.settings.filterLists.listHeader.filterListsContainsNotAllowedValuesDescription.learnMoreLinkText"
                   values={Object {}}
                 />
-              </EuiLink>,
+              </ForwardRef>,
             }
           }
         />

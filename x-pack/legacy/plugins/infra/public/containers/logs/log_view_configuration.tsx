@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import createContainer from 'constate-latest';
+import createContainer from 'constate';
 import { useState } from 'react';
 
 export type TextScale = 'small' | 'medium' | 'large';

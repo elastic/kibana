@@ -121,14 +121,16 @@ export const addTimelineToStore = ({
   ...timelineById,
   [id]: {
     ...timeline,
-    show: true,
+    isLoading: timelineById[id].isLoading,
   },
 });
 
 interface AddNewTimelineParams {
   columns: ColumnHeader[];
   id: string;
+  itemsPerPage?: number;
   show?: boolean;
+  sort?: Sort;
   timelineById: TimelineById;
 }
 
@@ -136,6 +138,8 @@ interface AddNewTimelineParams {
 export const addNewTimeline = ({
   columns,
   id,
+  itemsPerPage = timelineDefaults.itemsPerPage,
+  sort = timelineDefaults.sort,
   show = false,
   timelineById,
 }: AddNewTimelineParams): TimelineById => ({
@@ -144,6 +148,8 @@ export const addNewTimeline = ({
     id,
     ...timelineDefaults,
     columns,
+    itemsPerPage,
+    sort,
     show,
     savedObjectId: null,
     version: null,

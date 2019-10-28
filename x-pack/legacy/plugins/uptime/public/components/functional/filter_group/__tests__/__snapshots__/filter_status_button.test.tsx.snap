@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FilterStatusButton renders without errors for valid props 1`] = `
+<EuiFilterButton
+  color="text"
+  grow={true}
+  hasActiveFilters={false}
+  iconSide="right"
+  onClick={[Function]}
+  type="button"
+  withNext={true}
+>
+  Up
+</EuiFilterButton>
+`;

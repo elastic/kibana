@@ -21,44 +21,46 @@ import { mount } from 'enzyme';
 import { IndexPattern } from 'ui/index_patterns';
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
-// @ts-ignore
 import { flattenHitWrapper } from '../../../../data/public/index_patterns/index_patterns/flatten_hit';
 import { DocViewTable } from './table';
 
 // @ts-ignore
 const indexPattern = {
   fields: {
-    byName: {
-      _index: {
-        name: '_index',
-        type: 'string',
-        scripted: false,
-        filterable: true,
-      },
-      message: {
-        name: 'message',
-        type: 'string',
-        scripted: false,
-        filterable: false,
-      },
-      extension: {
-        name: 'extension',
-        type: 'string',
-        scripted: false,
-        filterable: true,
-      },
-      bytes: {
-        name: 'bytes',
-        type: 'number',
-        scripted: false,
-        filterable: true,
-      },
-      scripted: {
-        name: 'scripted',
-        type: 'number',
-        scripted: true,
-        filterable: false,
-      },
+    getByName: (name: string) => {
+      const fields: { [name: string]: {} } = {
+        _index: {
+          name: '_index',
+          type: 'string',
+          scripted: false,
+          filterable: true,
+        },
+        message: {
+          name: 'message',
+          type: 'string',
+          scripted: false,
+          filterable: false,
+        },
+        extension: {
+          name: 'extension',
+          type: 'string',
+          scripted: false,
+          filterable: true,
+        },
+        bytes: {
+          name: 'bytes',
+          type: 'number',
+          scripted: false,
+          filterable: true,
+        },
+        scripted: {
+          name: 'scripted',
+          type: 'number',
+          scripted: true,
+          filterable: false,
+        },
+      };
+      return fields[name];
     },
   },
   metaFields: ['_index', '_score'],

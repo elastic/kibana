@@ -32,7 +32,12 @@ export function settingsRoute(server, kbnServer) {
         }
         const uuid = await getClusterUuid(callCluster);
 
-        const kibana = getKibanaInfoForStats(server, kbnServer);
+        const kibana = getKibanaInfoForStats({
+          kbnServerStatus: kbnServer.status,
+          kbnServerVersion: kbnServer.version,
+          config: server.config()
+        });
+
         return {
           cluster_uuid: uuid,
           settings: {

@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 const { readdirSync } = require('fs');
 const { resolve } = require('path');
 
@@ -149,6 +168,10 @@ module.exports = {
                   'src/core/server/**/*',
                   '!src/core/server/index.ts',
                   '!src/core/server/mocks.ts',
+                  '!src/core/server/types.ts',
+                  // for absolute imports until fixed in
+                  // https://github.com/elastic/kibana/issues/36096
+                  '!src/core/server/types',
                   '!src/core/server/*.test.mocks.ts',
 
                   'src/plugins/**/public/**/*',
@@ -510,6 +533,10 @@ module.exports = {
       // typescript and javascript for front and back end
       files: ['x-pack/legacy/plugins/siem/**/*.{js,ts,tsx}'],
       plugins: ['eslint-plugin-node', 'react'],
+      env: {
+        mocha: true,
+        jest: true,
+      },
       rules: {
         'accessor-pairs': 'error',
         'array-callback-return': 'error',
@@ -537,8 +564,7 @@ module.exports = {
         'no-continue': 'error',
         'no-dupe-keys': 'error',
         'no-duplicate-case': 'error',
-        // This will be turned on after bug fixes are mostly completed
-        // 'no-duplicate-imports': 'warn',
+        'no-duplicate-imports': 'error',
         'no-empty-character-class': 'error',
         'no-empty-pattern': 'error',
         'no-ex-assign': 'error',
@@ -557,18 +583,15 @@ module.exports = {
         'no-misleading-character-class': 'error',
         'no-new-symbol': 'error',
         'no-obj-calls': 'error',
-        // This will be turned on after bug fixes are mostly complete
-        // 'no-param-reassign': 'warn',
+        'no-param-reassign': 'error',
         'no-process-exit': 'error',
         'no-prototype-builtins': 'error',
-        // This will be turned on after bug fixes are mostly complete
-        // 'no-return-await': 'warn',
+        'no-return-await': 'error',
         'no-self-compare': 'error',
         'no-shadow-restricted-names': 'error',
         'no-sparse-arrays': 'error',
         'no-this-before-super': 'error',
-        // This will be turned on after bug fixes are mostly complete
-        // 'no-undef': 'warn',
+        'no-undef': 'error',
         'no-unreachable': 'error',
         'no-unsafe-finally': 'error',
         'no-useless-call': 'error',
@@ -618,7 +641,6 @@ module.exports = {
         // will introduced after the other warns are fixed
         // 'react/sort-comp': 'error',
         'react/void-dom-elements-no-children': 'error',
-        'react/jsx-boolean-value': ['error', 'warn'],
         // will introduced after the other warns are fixed
         // 'react/jsx-no-bind': 'error',
         'react/jsx-no-comment-textnodes': 'error',
@@ -634,6 +656,16 @@ module.exports = {
         'symbol-description': 'error',
         'template-curly-spacing': 'error',
         'vars-on-top': 'error',
+      },
+    },
+
+    /**
+     * Lens overrides
+     */
+    {
+      files: ['x-pack/legacy/plugins/lens/**/*.ts', 'x-pack/legacy/plugins/lens/**/*.tsx'],
+      rules: {
+        '@typescript-eslint/no-explicit-any': 'error',
       },
     },
 

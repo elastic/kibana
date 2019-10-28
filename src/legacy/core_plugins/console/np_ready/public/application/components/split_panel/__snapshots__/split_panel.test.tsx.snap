@@ -1,0 +1,93 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Split panel should render correctly 1`] = `
+<PanelsContainer>
+  <PanelContextProvider
+    registry={
+      PanelRegistry {
+        "panels": Array [
+          Object {
+            "getWidth": [Function],
+            "initialWidth": "100%",
+            "setWidth": [Function],
+          },
+          Object {
+            "getWidth": [Function],
+            "initialWidth": "100%",
+            "setWidth": [Function],
+          },
+        ],
+      }
+    }
+  >
+    <div
+      onMouseMove={[Function]}
+      onMouseUp={[Function]}
+      style={
+        Object {
+          "display": "flex",
+          "height": "100%",
+          "width": "100%",
+        }
+      }
+    >
+      <Panel
+        key=".0"
+      >
+        <div
+          style={
+            Object {
+              "display": "flex",
+              "width": "100%",
+            }
+          }
+        >
+          <p
+            style={
+              Object {
+                "width": "50px",
+              }
+            }
+          >
+            A
+          </p>
+        </div>
+      </Panel>
+      <Resizer
+        key="resizer"
+        onMouseDown={[Function]}
+      >
+        <div
+          className="conApp__resizer"
+          data-test-subj="splitPanelResizer"
+          onMouseDown={[Function]}
+        >
+          ︙
+        </div>
+      </Resizer>
+      <Panel
+        key=".1"
+      >
+        <div
+          style={
+            Object {
+              "display": "flex",
+              "width": "100%",
+            }
+          }
+        >
+          <p
+            style={
+              Object {
+                "width": "50px",
+              }
+            }
+          >
+            B
+          </p>
+        </div>
+      </Panel>
+    </div>
+  </PanelContextProvider>
+</PanelsContainer>
+`;

@@ -6,7 +6,7 @@
 
 Start a new reindex or resume a paused reindex.
 
-experimental[This API is *experimental* and may be changed or removed completely in a future release. The underlying Upgrade Assistant concepts are stable, but the APIs for managing Upgrade Assistant are currently experimental.]
+experimental["The underlying Upgrade Assistant concepts are stable, but the APIs for managing Upgrade Assistant are experimental."]
 
 [[start-resume-reindex-request]]
 ==== Request

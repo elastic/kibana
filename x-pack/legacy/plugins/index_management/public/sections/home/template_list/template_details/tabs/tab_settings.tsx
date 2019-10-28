@@ -16,10 +16,10 @@ interface Props {
 export const TabSettings: React.FunctionComponent<Props> = ({ templateDetails }) => {
   const { settings } = templateDetails;
 
-  if (settings) {
+  if (settings && Object.keys(settings).length) {
     return (
       <div data-test-subj="settingsTab">
-        <EuiCodeBlock lang="json">{settings}</EuiCodeBlock>
+        <EuiCodeBlock lang="json">{JSON.stringify(settings, null, 2)}</EuiCodeBlock>
       </div>
     );
   }
