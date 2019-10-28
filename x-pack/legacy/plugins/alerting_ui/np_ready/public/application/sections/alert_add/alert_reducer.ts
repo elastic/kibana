@@ -19,5 +19,36 @@ export const alertReducer = (state: any, action: any) => {
         ...state,
         alert: payload,
       };
+    case 'setProperty': {
+      const { property, value } = payload;
+      if (isEqual(alert[property], value)) {
+        return state;
+      } else {
+        return {
+          ...state,
+          alert: {
+            ...alert,
+            [property]: value,
+          },
+        };
+      }
+    }
+    case 'setAlertTypeParams': {
+      const { property, value } = payload;
+      if (isEqual(alert.alertTypeParams[property], value)) {
+        return state;
+      } else {
+        return {
+          ...state,
+          alert: {
+            ...alert,
+            alertTypeParams: {
+              ...alert.alertTypeParams,
+              [property]: value,
+            },
+          },
+        };
+      }
+    }
   }
 };

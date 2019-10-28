@@ -54,25 +54,50 @@ export const AlertAdd = ({ refreshList }: Props) => {
       validate: () => {
         return { errors: {} };
       },
+      alertTypeParams: {},
     },
   });
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [selectedTabId, setSelectedTabId] = useState<string>('alert');
   const [alertType, setAlertType] = useState<AlertTypeModel | undefined>(undefined);
+  const getAlert = () => {
+    dispatch({
+      command: 'setAlert',
+      payload: {
+        validate: () => {
+          return { errors: {} };
+        },
+        alertTypeParams: {},
+        alertTypeId: alertType ? alertType.id : null,
+        actions: [],
+      },
+    });
+  };
+
+  useEffect(() => {
+    getAlert();
+  }, [alertType]);
+
   const closeFlyout = useCallback(() => setAlertFlyoutVisibility(false), []);
 
   const setAlertProperty = (property: string, value: any) => {
     dispatch({ command: 'setProperty', payload: { property, value } });
   };
 
+  const setAlertTypeParams = (property: string, value: any) => {
+    dispatch({ command: 'setAlertTypeParams', payload: { property, value } });
+  };
+
   if (!alertFlyoutVisible) {
     return null;
   }
-  const { errors } = alert.validate();
-  const tagsOptions = [];
+  const tagsOptions = []; // TODO: move to alert instande when the server side will be done
+  const AlertTypeParamsExpressionComponent = alertType ? alertType.alertTypeParamsExpression : null;
 
+  const { errors } = alert.validate(); // TODO: decide how beter define the Alert UI validation
   const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
 
+  // TODO: define constants for the action groups
   const tabs = [
     {
       id: 'alert',
@@ -108,14 +133,14 @@ export const AlertAdd = ({ refreshList }: Props) => {
     }
   }
 
-  const alertTypeNodes = alertTypeRegistry.list().map(function(item, index): any {
+  const alertTypeNodes = alertTypeRegistry.list().map(function(item, index) {
     return (
       <EuiFlexItem key={index}>
         <EuiCard
           icon={<EuiIcon size="xl" type={item.iconClass} />}
           title={item.name}
           description={''}
-          onClick={() => setAlertType(item)}
+          onClick={() => setAlertType(item.alertType)}
         />
       </EuiFlexItem>
     );
@@ -156,6 +181,14 @@ export const AlertAdd = ({ refreshList }: Props) => {
           </EuiLink>
         </EuiFlexItem>
       </EuiFlexGroup>
+      {AlertTypeParamsExpressionComponent ? (
+        <AlertTypeParamsExpressionComponent
+          alert={alert}
+          errors={errors}
+          setAlertTypeParams={setAlertTypeParams}
+          hasErrors={hasErrors}
+        ></AlertTypeParamsExpressionComponent>
+      ) : null}
     </Fragment>
   );
 
@@ -182,6 +215,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
   if (alertType) {
     alertTypeArea = (
       <Fragment>
+        <EuiSpacer size="m" />
         <EuiTabs>{alertTabs}</EuiTabs>
         <EuiSpacer size="m" />
         {selectedTabContent}

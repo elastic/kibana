@@ -17,7 +17,6 @@ import { ActionAddFlyout } from '../../action_add';
 export const ActionsList: React.FunctionComponent = () => {
   const {
     core: { http },
-    actionTypeRegistry,
     plugins: { capabilities, toastNotifications },
   } = useAppDependencies();
   const canDelete = capabilities.get().actions.delete;

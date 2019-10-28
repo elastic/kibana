@@ -40,6 +40,7 @@ export class AlertTypeRegistry {
       id: alertTypeId,
       name: alertType.name,
       iconClass: alertType.iconClass,
+      alertType,
     }));
   }
 }

@@ -84,4 +84,6 @@ export interface AlertTypeModel {
   id: string;
   name: string;
   iconClass: string;
+  aggType: string;
+  alertTypeParamsExpression: React.FunctionComponent<any>;
 }

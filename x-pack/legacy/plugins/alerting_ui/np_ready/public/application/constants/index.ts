@@ -14,3 +14,10 @@ export type Section = 'actions' | 'alerts';
 export const routeToHome = `${BASE_PATH}`;
 export const routeToActions = `${BASE_PATH}/actions`;
 export const routeToAlerts = `${BASE_PATH}/alerts`;
+
+export { COMPARATORS } from './comparators';
+export { AGGREGATION_TYPES } from './aggregation_types';
+export const SORT_ORDERS: { [key: string]: string } = {
+  ASCENDING: 'asc',
+  DESCENDING: 'desc',
+};
