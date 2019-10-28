@@ -30,4 +30,9 @@ image::maps/images/inspector.png[]
 * Ensure your tile server has configured https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS[Cross-Origin Resource Sharing (CORS)] so tile requests from your Kibana domain have permission to access your tile server domain.
 * Ensure tiles have the required coordinate system. Vector data must use EPSG:4326 and tiles must use EPSG:3857.
 
+[float]
+==== Why can't I create new coordinate map and region map visualizations
+
+Kibana's out-of-the-box settings do not display coordinate map or region map in the create visualization menu.
+Set `xpack.maps.showMapVisualizationTypes` to `true` to show coordinate map and region map in the create visualization menu.
 
