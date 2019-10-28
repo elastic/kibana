@@ -277,7 +277,7 @@ setting specifies the port to use.
 
 `server.rewriteBasePath:`:: *Default: false* Deprecated setting that specifies if Kibana should
 rewrite requests that are prefixed with `server.basePath`, or require that they
-are rewritten by your reverse proxy. 
+are rewritten by your reverse proxy.
 
 `server.socketTimeout:`:: *Default: "120000"* The number of milliseconds to wait before closing an
 inactive socket.
@@ -326,7 +326,6 @@ Rollup user interface.
 
 
 include::{docdir}/settings/apm-settings.asciidoc[]
-include::{docdir}/settings/code-settings.asciidoc[]
 include::{docdir}/settings/dev-settings.asciidoc[]
 include::{docdir}/settings/graph-settings.asciidoc[]
 include::{docdir}/settings/infrastructure-ui-settings.asciidoc[]
