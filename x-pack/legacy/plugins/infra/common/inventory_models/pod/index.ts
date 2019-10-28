@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { layout } from './layout';
 import { metrics } from './metrics';
 import { InventoryModel } from '../types';
 import { nginx as nginxRequiredMetrics } from '../shared/metrics/required_metrics';
@@ -12,7 +11,6 @@ import { nginx as nginxRequiredMetrics } from '../shared/metrics/required_metric
 export const pod: InventoryModel = {
   id: 'pod',
   requiredModules: ['kubernetes'],
-  layout,
   metrics,
   requiredMetrics: [
     'podOverview',

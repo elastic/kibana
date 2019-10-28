@@ -15,9 +15,9 @@ import { idx } from '@kbn/elastic-idx';
 import { i18n } from '@kbn/i18n';
 
 import { ReactNode, FunctionComponent } from 'react';
-import { Layout as HostLayout } from './host/layout.v2';
-import { Layout as PodLayout } from './pod/layout.v2';
-import { Layout as ContainerLayout } from './container/layout.v2';
+import { Layout as HostLayout } from './host/layout';
+import { Layout as PodLayout } from './pod/layout';
+import { Layout as ContainerLayout } from './container/layout';
 import { InventoryItemType } from './types';
 import { LayoutProps } from '../../public/pages/metrics/types';
 

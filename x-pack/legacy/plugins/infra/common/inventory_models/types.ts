@@ -5,7 +5,6 @@
  */
 
 import * as rt from 'io-ts';
-import { EuiTheme } from '../../../../common/eui_styled_components';
 
 export const ItemTypeRT = rt.keyof({
   host: null,
@@ -35,60 +34,47 @@ export const InventoryFormatterTypeRT = rt.keyof({
 export type InventoryFormatterType = rt.TypeOf<typeof InventoryFormatterTypeRT>;
 export type InventoryItemType = rt.TypeOf<typeof ItemTypeRT>;
 
-export const InventoryMetricRT = rt.string;
+export const InventoryMetricRT = rt.keyof({
+  hostSystemOverview: null,
+  hostCpuUsage: null,
+  hostFilesystem: null,
+  hostK8sOverview: null,
+  hostK8sCpuCap: null,
+  hostK8sDiskCap: null,
+  hostK8sMemoryCap: null,
+  hostK8sPodCap: null,
+  hostLoad: null,
+  hostMemoryUsage: null,
+  hostNetworkTraffic: null,
+  hostDockerOverview: null,
+  hostDockerInfo: null,
+  hostDockerTop5ByCpu: null,
+  hostDockerTop5ByMemory: null,
+  podOverview: null,
+  podCpuUsage: null,
+  podMemoryUsage: null,
+  podLogUsage: null,
+  podNetworkTraffic: null,
+  containerOverview: null,
+  containerCpuKernel: null,
+  containerCpuUsage: null,
+  containerDiskIOOps: null,
+  containerDiskIOBytes: null,
+  containerMemory: null,
+  containerNetworkTraffic: null,
+  nginxHits: null,
+  nginxRequestRate: null,
+  nginxActiveConnections: null,
+  nginxRequestsPerConnection: null,
+  awsOverview: null,
+  awsCpuUtilization: null,
+  awsNetworkBytes: null,
+  awsNetworkPackets: null,
+  awsDiskioBytes: null,
+  awsDiskioOps: null,
+  custom: null,
+});
 export type InventoryMetric = rt.TypeOf<typeof InventoryMetricRT>;
-
-export const SeriesOverridesRT = rt.intersection([
-  rt.type({
-    color: rt.string,
-  }),
-  rt.partial({
-    type: InventoryVisTypeRT,
-    name: rt.string,
-    formatter: InventoryFormatterTypeRT,
-    formatterTemplate: rt.string,
-    gaugeMax: rt.number,
-  }),
-]);
-
-export const VisConfigRT = rt.partial({
-  stacked: rt.boolean,
-  type: InventoryVisTypeRT,
-  formatter: InventoryFormatterTypeRT,
-  formatterTemplate: rt.string,
-  seriesOverrides: rt.record(rt.string, rt.union([rt.undefined, SeriesOverridesRT])),
-});
-
-export const InventorySectionTypeRT = rt.keyof({
-  chart: null,
-  gauges: null,
-});
-
-export type InventorySectionType = rt.TypeOf<typeof InventorySectionTypeRT>;
-
-export const SectionRT = rt.intersection([
-  rt.type({
-    id: InventoryMetricRT,
-    label: rt.string,
-    requires: rt.array(rt.string),
-    visConfig: VisConfigRT,
-    type: InventorySectionTypeRT,
-  }),
-  rt.partial({
-    linkToId: rt.string,
-  }),
-]);
-
-export const InventoryDetailLayoutRT = rt.type({
-  id: rt.string,
-  label: rt.string,
-  sections: rt.array(SectionRT),
-});
-
-export type InventoryDetailSection = rt.TypeOf<typeof SectionRT>;
-export type InventoryDetailLayout = rt.TypeOf<typeof InventoryDetailLayoutRT>;
-
-export type InventoryDetailLayoutCreator = (theme: EuiTheme) => InventoryDetailLayout[];
 
 export const TSVBMetricTypeRT = rt.keyof({
   avg: null,
@@ -281,7 +267,6 @@ export interface InventoryMetrics {
 export interface InventoryModel {
   id: string;
   requiredModules: string[];
-  layout: InventoryDetailLayoutCreator;
   metrics: InventoryMetrics;
   requiredMetrics: InventoryMetric[];
 }

@@ -4,14 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const nginx = [
+import { InventoryMetric } from '../../types';
+
+export const nginx: InventoryMetric[] = [
   'nginxHits',
   'nginxRequestRate',
   'nginxActiveConnections',
   'nginxRequestsPerConnection',
 ];
 
-export const aws = [
+export const aws: InventoryMetric[] = [
   'awsOverview',
   'awsCpuUtilization',
   'awsNetworkBytes',

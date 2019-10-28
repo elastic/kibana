@@ -63,16 +63,14 @@ export const MetricDetail = withMetricPageProviders(
       const nodeId = match.params.node;
       const nodeType = match.params.type as InfraNodeType;
       const inventoryModel = findInventoryModel(nodeType);
-      const layoutCreator = inventoryModel.layout;
       const { sourceId } = useContext(Source.Context);
-      const layouts = layoutCreator(theme);
       const {
         name,
         filteredRequiredMetrics,
         loading: metadataLoading,
         cloudId,
         metadata,
-      } = useMetadata(nodeId, nodeType, layouts, inventoryModel.requiredMetrics, sourceId);
+      } = useMetadata(nodeId, nodeType, inventoryModel.requiredMetrics, sourceId);
 
       const [sideNav, setSideNav] = useState<NavItem[]>([]);
 

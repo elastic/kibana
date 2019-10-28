@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { layout } from './layout';
 import { metrics } from './metrics';
 import { InventoryModel } from '../types';
 import {
@@ -15,7 +14,6 @@ import {
 export const host: InventoryModel = {
   id: 'host',
   requiredModules: ['system'],
-  layout,
   metrics,
   requiredMetrics: [
     'hostSystemOverview',
