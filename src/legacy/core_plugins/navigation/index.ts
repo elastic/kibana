@@ -17,12 +17,26 @@
  * under the License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('core plugins', () => {
-    loadTestFile(require.resolve('./applications'));
-    loadTestFile(require.resolve('./legacy_plugins'));
-    loadTestFile(require.resolve('./server_plugins'));
-    loadTestFile(require.resolve('./ui_plugins'));
-    loadTestFile(require.resolve('./top_nav'));
-  });
+import { resolve } from 'path';
+import { Legacy } from '../../../../kibana';
+
+// eslint-disable-next-line import/no-default-export
+export default function NavigationPlugin(kibana: any) {
+  const config: Legacy.PluginSpecOptions = {
+    id: 'navigation',
+    require: [],
+    publicDir: resolve(__dirname, 'public'),
+    config: (Joi: any) => {
+      return Joi.object({
+        enabled: Joi.boolean().default(true),
+      }).default();
+    },
+    init: (server: Legacy.Server) => ({}),
+    uiExports: {
+      injectDefaultVars: () => ({}),
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
+    },
+  };
+
+  return new kibana.Plugin(config);
 }
