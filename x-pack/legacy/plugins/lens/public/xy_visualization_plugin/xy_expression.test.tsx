@@ -339,8 +339,8 @@ describe('xy_expression', () => {
         <XYChart data={data} args={args} formatFactory={getFormatSpy} timeZone="UTC" />
       );
       expect(component.find(LineSeries).prop('data')).toEqual([
-        { 'Label A': 1, 'Label B': 2, c: 'I' },
-        { 'Label A': 1, 'Label B': 5, c: 'J' },
+        { 'Label A': 1, 'Label B': 2, c: 'I', 'Label D': 'Foo', d: 'Foo' },
+        { 'Label A': 1, 'Label B': 5, c: 'J', 'Label D': 'Bar', d: 'Bar' },
       ]);
     });
 
