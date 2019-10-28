@@ -562,7 +562,8 @@ export class VectorStyle extends AbstractStyle {
       mbMap.setPaintProperty(pointLayerId, 'circle-stroke-opacity', 0);
     }
 
-    this._lineWidthStyleProperty.syncHaloWidthWithMb(pointLayerId, mbMap);
+    this._lineWidthStyleProperty.syncCircleStrokeWidthWithMb(pointLayerId, mbMap);
+
 
 
     if (this._descriptor.properties.iconSize) {
@@ -584,7 +585,7 @@ export class VectorStyle extends AbstractStyle {
     mbMap.setPaintProperty(symbolLayerId, 'icon-color', color);
     mbMap.setPaintProperty(symbolLayerId, 'icon-halo-color', haloColor);
 
-    this._lineWidthStyleProperty.syncCircleStrokeWidthWithMb(symbolLayerId, mbMap);
+    this._lineWidthStyleProperty.syncHaloWidthWithMb(symbolLayerId, mbMap);
 
     mbMap.setPaintProperty(symbolLayerId, 'icon-opacity', alpha);
 
