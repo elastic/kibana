@@ -96,16 +96,13 @@ export interface IExpressionLoaderParams {
 export interface IInterpreterHandlers {
   getInitialContext: IGetInitialContext;
   inspectorAdapters?: Adapters;
-}
-
-export interface IInterpreterResult {
-  type: string;
-  as?: string;
-  value?: unknown;
-  error?: unknown;
+  abortSignal?: AbortSignal;
 }
 
 export interface IInterpreterRenderHandlers {
+  /**
+   * Done increments the number of rendering successes
+   */
   done: () => void;
   onDestroy: (fn: () => void) => void;
   reload: () => void;
@@ -120,4 +117,26 @@ export interface IInterpreterRenderFunction<T = unknown> {
   validate: () => void;
   reuseDomNode: boolean;
   render: (domNode: Element, data: T, handlers: IInterpreterRenderHandlers) => void | Promise<void>;
+}
+
+export interface IInterpreterErrorResult {
+  type: 'error';
+  error: { message: string; name: string; stack: string };
+}
+
+export interface IInterpreterSuccessResult {
+  type: string;
+  as?: string;
+  value?: unknown;
+  error?: unknown;
+}
+
+export type IInterpreterResult = IInterpreterSuccessResult & IInterpreterErrorResult;
+
+export interface IInterpreter {
+  interpretAst(
+    ast: ExpressionAST,
+    context: Context,
+    handlers: IInterpreterHandlers
+  ): Promise<IInterpreterResult>;
 }
