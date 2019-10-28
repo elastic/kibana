@@ -29,7 +29,10 @@ export const security = (kibana) => new kibana.Plugin({
       enabled: Joi.boolean().default(true),
       cookieName: Joi.any().description('This key is handled in the new platform security plugin ONLY'),
       encryptionKey: Joi.any().description('This key is handled in the new platform security plugin ONLY'),
-      sessionTimeout: Joi.any().description('This key is handled in the new platform security plugin ONLY'),
+      session: Joi.object({
+        idleTimeout: Joi.any().description('This key is handled in the new platform security plugin ONLY'),
+        lifespan: Joi.any().description('This key is handled in the new platform security plugin ONLY'),
+      }).default(),
       secureCookies: Joi.any().description('This key is handled in the new platform security plugin ONLY'),
       authorization: Joi.object({
         legacyFallback: Joi.object({
@@ -43,9 +46,10 @@ export const security = (kibana) => new kibana.Plugin({
     }).default();
   },
 
-  deprecations: function ({ unused }) {
+  deprecations: function ({ rename, unused }) {
     return [
       unused('authorization.legacyFallback.enabled'),
+      rename('sessionTimeout', 'session.idleTimeout'),
     ];
   },
 
@@ -88,7 +92,10 @@ export const security = (kibana) => new kibana.Plugin({
 
       return {
         secureCookies: securityPlugin.__legacyCompat.config.secureCookies,
-        sessionTimeout: securityPlugin.__legacyCompat.config.sessionTimeout,
+        session: {
+          idleTimeout: securityPlugin.__legacyCompat.config.session.idleTimeout,
+          lifespan: securityPlugin.__legacyCompat.config.session.lifespan,
+        },
         enableSpaceAwarePrivileges: server.config().get('xpack.spaces.enabled'),
       };
     },

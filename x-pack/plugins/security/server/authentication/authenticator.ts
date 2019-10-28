@@ -48,6 +48,12 @@ export interface ProviderSession {
   expires: number | null;
 
   /**
+   * The Unix time in ms which is the max total lifespan of the session. If `null`, session expire
+   * time can be extended indefinitely.
+   */
+  maxExpires: number | null;
+
+  /**
    * Session value that is fed to the authentication provider. The shape is unknown upfront and
    * entirely determined by the authentication provider that owns the current session.
    */
@@ -77,7 +83,7 @@ export interface ProviderLoginAttempt {
 }
 
 export interface AuthenticatorOptions {
-  config: Pick<ConfigType, 'sessionTimeout' | 'authc'>;
+  config: Pick<ConfigType, 'session' | 'authc'>;
   basePath: HttpServiceSetup['basePath'];
   loggers: LoggerFactory;
   clusterClient: IClusterClient;
@@ -153,9 +159,14 @@ export class Authenticator {
   private readonly providers: Map<string, BaseAuthenticationProvider>;
 
   /**
-   * Session duration in ms. If `null` session will stay active until the browser is closed.
+   * Session timeout in ms. If `null` session will stay active until the browser is closed.
    */
-  private readonly ttl: number | null = null;
+  private readonly idleTimeout: number | null = null;
+
+  /**
+   * Session max lifespan in ms. If `null` session may live indefinitely.
+   */
+  private readonly lifespan: number | null = null;
 
   /**
    * Internal authenticator logger.
@@ -202,7 +213,9 @@ export class Authenticator {
       })
     );
 
-    this.ttl = this.options.config.sessionTimeout;
+    // only set these vars if they are defined in options (otherwise coalesce to existing/default)
+    this.idleTimeout = this.options.config.session.idleTimeout || this.idleTimeout;
+    this.lifespan = this.options.config.session.lifespan || this.lifespan;
   }
 
   /**
@@ -257,10 +270,12 @@ export class Authenticator {
     if (existingSession && shouldClearSession) {
       sessionStorage.clear();
     } else if (!attempt.stateless && authenticationResult.shouldUpdateState()) {
+      const { expires, maxExpires } = this.calculateExpiry(existingSession);
       sessionStorage.set({
         state: authenticationResult.state,
         provider: attempt.provider,
-        expires: this.ttl && Date.now() + this.ttl,
+        expires,
+        maxExpires,
       });
     }
 
@@ -410,13 +425,34 @@ export class Authenticator {
     ) {
       sessionStorage.clear();
     } else if (sessionCanBeUpdated) {
+      const { expires, maxExpires } = this.calculateExpiry(existingSession);
       sessionStorage.set({
         state: authenticationResult.shouldUpdateState()
           ? authenticationResult.state
           : existingSession!.state,
         provider: providerType,
-        expires: this.ttl && Date.now() + this.ttl,
+        expires,
+        maxExpires,
       });
     }
+  }
+
+  private calculateExpiry(
+    existingSession: ProviderSession | null
+  ): { expires: number | null; maxExpires: number | null } {
+    const maxExpires = existingSession
+      ? existingSession.maxExpires
+      : this.lifespan && Date.now() + this.lifespan;
+    let expires = this.idleTimeout && Date.now() + this.idleTimeout;
+
+    if (expires && maxExpires && expires > maxExpires) {
+      // renewed expiration exceeds lifespan
+      expires = maxExpires;
+    } else if (!expires && maxExpires) {
+      // idleTimeout is not set, but lifespan is, so expiration should equal lifespan
+      expires = maxExpires;
+    }
+
+    return { expires, maxExpires };
   }
 }

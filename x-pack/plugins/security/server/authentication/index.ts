@@ -68,7 +68,7 @@ export async function setupAuthentication({
   const authenticator = new Authenticator({
     clusterClient,
     basePath: http.basePath,
-    config: { sessionTimeout: config.sessionTimeout, authc: config.authc },
+    config: { session: config.session, authc: config.authc },
     isSystemAPIRequest: (request: KibanaRequest) => getLegacyAPI().isSystemAPIRequest(request),
     loggers,
     sessionStorageFactory: await http.createCookieSessionStorageFactory({

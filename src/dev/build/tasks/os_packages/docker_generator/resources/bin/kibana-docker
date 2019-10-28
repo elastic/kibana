@@ -179,7 +179,8 @@ kibana_vars=(
     xpack.security.enabled
     xpack.security.encryptionKey
     xpack.security.secureCookies
-    xpack.security.sessionTimeout
+    xpack.security.session.timeout
+    xpack.security.session.lifespan
     telemetry.enabled
     telemetry.sendUsageFrom
 )

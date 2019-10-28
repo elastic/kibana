@@ -23,7 +23,7 @@ export class SecurityPlugin implements Plugin<SecurityPluginSetup, SecurityPlugi
     const sessionExpired = new SessionExpired(basePath);
     http.intercept(new UnauthorizedResponseHttpInterceptor(sessionExpired, anonymousPaths));
     const sessionTimeout = new SessionTimeout(
-      injectedMetadata.getInjectedVar('sessionTimeout', null) as number | null,
+      injectedMetadata.getInjectedVar('session.idleTimeout', null) as number | null,
       notifications,
       sessionExpired,
       http
