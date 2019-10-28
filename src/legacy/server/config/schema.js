@@ -100,8 +100,6 @@ export default () => Joi.object({
       otherwise: Joi.default(false),
     }),
 
-    ignoreElasticsearchVersionMismatch: Joi.boolean().default(false),
-
     autoListen: HANDLED_IN_NEW_PLATFORM,
     cors: HANDLED_IN_NEW_PLATFORM,
     keepaliveTimeout: HANDLED_IN_NEW_PLATFORM,

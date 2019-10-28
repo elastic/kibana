@@ -65,6 +65,7 @@ export const config = {
     }),
     apiVersion: schema.string({ defaultValue: DEFAULT_API_VERSION }),
     healthCheck: schema.object({ delay: schema.duration({ defaultValue: 2500 }) }),
+    ignoreVersionMismatch: schema.boolean({ defaultValue: false }),
   }),
 };
 

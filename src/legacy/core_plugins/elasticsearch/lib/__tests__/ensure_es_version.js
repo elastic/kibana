@@ -105,12 +105,12 @@ describe('plugins/elasticsearch', () => {
       }
     });
 
-    it('does not throw on outdated nodes, if `ignoreElasticsearchVersionMismatch:true` and `env.dev:true`', async () => {
+    it('does not throw on outdated nodes, if `ignoreVersionMismatch:true` and `env.dev:true`', async () => {
       // set config values
       server.config = () => ({
         get: name => {
           switch (name) {
-            case 'server.ignoreElasticsearchVersionMismatch':
+            case 'elasticsearch.ignoreVersionMismatch':
             case 'env.dev':
               return true;
             default:

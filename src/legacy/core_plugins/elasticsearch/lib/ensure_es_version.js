@@ -116,5 +116,5 @@ export function ensureEsVersion(server, kibanaVersion) {
 }
 
 function shouldIgnoreVersionMismatch(server) {
-  return server.config().get('env.dev') && server.config().get('server.ignoreElasticsearchVersionMismatch');
+  return server.config().get('env.dev') && server.config().get('elasticsearch.ignoreVersionMismatch');
 }
