@@ -310,7 +310,6 @@ export const PARAMETERS_DEFINITION = {
   },
   similarity: {
     fieldConfig: {
-      label: 'Similarity algorithm',
       defaultValue: 'BM25',
       type: FIELD_TYPES.SELECT,
     },

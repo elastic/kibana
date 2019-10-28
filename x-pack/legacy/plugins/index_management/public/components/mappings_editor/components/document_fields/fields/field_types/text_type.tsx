@@ -32,13 +32,15 @@ interface Props {
   field: NormalizedField;
 }
 
-const getDefaultValueToggle = (toggleId: string, field: FieldType) => {
-  switch (toggleId) {
+const getDefaultValueToggle = (param: string, field: FieldType) => {
+  switch (param) {
+    case 'boost':
+    case 'position_increment_gap':
+    case 'similarity': {
+      return field[param] !== undefined && field[param] !== getFieldConfig(param).defaultValue;
+    }
     case 'analyzers': {
       return field.search_analyzer !== undefined && field.search_analyzer !== field.analyzer;
-    }
-    case 'boost': {
-      return field.boost !== undefined && field.boost !== getFieldConfig('boost').defaultValue;
     }
     case 'indexPrefixes': {
       return (
@@ -47,12 +49,6 @@ const getDefaultValueToggle = (toggleId: string, field: FieldType) => {
           getFieldConfig('index_prefixes', 'min_chars').defaultValue ||
           (field.index_prefixes as any).max_chars !==
             getFieldConfig('index_prefixes', 'max_chars').defaultValue)
-      );
-    }
-    case 'positionIncrementGap': {
-      return (
-        field.position_increment_gap !== undefined &&
-        field.position_increment_gap !== getFieldConfig('position_increment_gap').defaultValue
       );
     }
     default:
@@ -288,7 +284,7 @@ export const TextType = React.memo(({ field }: Props) => {
           <EditFieldFormRow
             title={<h3>Set position increment gap</h3>}
             description="This is description text."
-            toggleDefaultValue={getDefaultValueToggle('positionIncrementGap', field.source)}
+            toggleDefaultValue={getDefaultValueToggle('position_increment_gap', field.source)}
           >
             <FormDataProvider pathsToWatch="index_options">
               {formData => {
@@ -324,6 +320,37 @@ export const TextType = React.memo(({ field }: Props) => {
                 );
               }}
             </FormDataProvider>
+          </EditFieldFormRow>
+        </EditFieldSection>
+
+        <EditFieldSection>
+          {/* similarity */}
+          <EditFieldFormRow
+            title={<h3>Set similarity</h3>}
+            description="This is description text."
+            direction="column"
+            toggleDefaultValue={getDefaultValueToggle('similarity', field.source)}
+          >
+            <EuiFlexGroup alignItems="center">
+              <EuiFlexItem>
+                <UseField
+                  path="similarity"
+                  config={getFieldConfig('similarity')}
+                  component={Field}
+                  componentProps={{
+                    euiFieldProps: {
+                      options: PARAMETERS_OPTIONS.similarity,
+                      style: { maxWidth: 300 },
+                    },
+                  }}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText size="s" color="subdued">
+                  This is description text.
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EditFieldFormRow>
         </EditFieldSection>
       </AdvancedSettingsWrapper>
