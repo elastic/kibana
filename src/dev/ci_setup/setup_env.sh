@@ -2,6 +2,10 @@
 
 set -e
 
+if [[ "$CI_ENV_SETUP" ]]; then
+  return 0
+fi
+
 installNode=$1
 
 dir="$(pwd)"
@@ -75,11 +79,11 @@ if [[ "$installNode" == "true" ]]; then
     mkdir -p "$nodeDir"
     if [[ "$OS" == "win" ]]; then
       nodePkg="$nodeDir/${nodeUrl##*/}"
-      curl --silent -o "$nodePkg" "$nodeUrl"
+      curl --silent -L -o "$nodePkg" "$nodeUrl"
       unzip -qo "$nodePkg" -d "$nodeDir"
       mv "${nodePkg%.*}" "$nodeBin"
     else
-      curl --silent "$nodeUrl" | tar -xz -C "$nodeDir" --strip-components=1
+      curl --silent -L "$nodeUrl" | tar -xz -C "$nodeDir" --strip-components=1
     fi
   fi
 fi
@@ -152,3 +156,5 @@ if [[ -d "$ES_DIR" && -f "$ES_JAVA_PROP_PATH" ]]; then
   echo "Setting JAVA_HOME=$HOME/.java/$ES_BUILD_JAVA"
   export JAVA_HOME=$HOME/.java/$ES_BUILD_JAVA
 fi
+
+export CI_ENV_SETUP=true

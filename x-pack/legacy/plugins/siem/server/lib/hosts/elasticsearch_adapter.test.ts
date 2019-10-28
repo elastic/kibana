@@ -49,41 +49,33 @@ describe('hosts elasticsearch_adapter', () => {
   describe('#formatHostsData', () => {
     const buckets: HostAggEsItem = {
       key: 'zeek-london',
-      host_os_version: {
-        buckets: [
-          {
-            key: '18.04.2 LTS (Bionic Beaver)',
-            doc_count: 1467783,
-            timestamp: { value: 1554516350177, value_as_string: '2019-04-06T02:05:50.177Z' },
+      os: {
+        hits: {
+          total: {
+            value: 242338,
+            relation: 'eq',
           },
-        ],
-      },
-      host_os_name: {
-        buckets: [
-          {
-            key: 'Ubuntu',
-            doc_count: 1467783,
-            timestamp: { value: 1554516350177, value_as_string: '2019-04-06T02:05:50.177Z' },
-          },
-        ],
-      },
-      host_name: {
-        buckets: [
-          {
-            key: 'zeek-london',
-            doc_count: 1467783,
-            timestamp: { value: 1554516350177, value_as_string: '2019-04-06T02:05:50.177Z' },
-          },
-        ],
-      },
-      host_id: {
-        buckets: [
-          {
-            key: '7c21f5ed03b04d0299569d221fe18bbc',
-            doc_count: 1467783,
-            timestamp: { value: 1554516350177, value_as_string: '2019-04-06T02:05:50.177Z' },
-          },
-        ],
+          max_score: null,
+          hits: [
+            {
+              _index: 'auditbeat-8.0.0-2019.09.06-000022',
+              _id: 'dl0T_m0BHe9nqdOiF2A8',
+              _score: null,
+              _source: {
+                host: {
+                  os: {
+                    kernel: '5.0.0-1013-gcp',
+                    name: 'Ubuntu',
+                    family: 'debian',
+                    version: '18.04.2 LTS (Bionic Beaver)',
+                    platform: 'ubuntu',
+                  },
+                },
+              },
+              sort: [1571925726017],
+            },
+          ],
+        },
       },
     };
 

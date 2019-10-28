@@ -47,7 +47,7 @@ describe('xy_visualization', () => {
     it('should show mixed xy chart when multilple series types', () => {
       const desc = xyVisualization.getDescription(mixedState('bar', 'line'));
 
-      expect(desc.label).toEqual('Mixed XY Chart');
+      expect(desc.label).toEqual('Mixed XY chart');
     });
 
     it('should show the preferredSeriesType if there are no layers', () => {
@@ -56,7 +56,7 @@ describe('xy_visualization', () => {
       // 'test-file-stub' is a hack, but it at least means we aren't using
       // a standard icon here.
       expect(desc.icon).toEqual('test-file-stub');
-      expect(desc.label).toEqual('Bar Chart');
+      expect(desc.label).toEqual('Bar chart');
     });
 
     it('should show mixed horizontal bar chart when multiple horizontal bar types', () => {
@@ -64,23 +64,23 @@ describe('xy_visualization', () => {
         mixedState('bar_horizontal', 'bar_horizontal_stacked')
       );
 
-      expect(desc.label).toEqual('Mixed Horizontal Bar Chart');
+      expect(desc.label).toEqual('Mixed horizontal bar chart');
     });
 
     it('should show bar chart when bar only', () => {
       const desc = xyVisualization.getDescription(mixedState('bar_horizontal', 'bar_horizontal'));
 
-      expect(desc.label).toEqual('Horizontal Bar Chart');
+      expect(desc.label).toEqual('Horizontal bar chart');
     });
 
     it('should show the chart description if not mixed', () => {
-      expect(xyVisualization.getDescription(mixedState('area')).label).toEqual('Area Chart');
-      expect(xyVisualization.getDescription(mixedState('line')).label).toEqual('Line Chart');
+      expect(xyVisualization.getDescription(mixedState('area')).label).toEqual('Area chart');
+      expect(xyVisualization.getDescription(mixedState('line')).label).toEqual('Line chart');
       expect(xyVisualization.getDescription(mixedState('area_stacked')).label).toEqual(
-        'Stacked Area Chart'
+        'Stacked area chart'
       );
       expect(xyVisualization.getDescription(mixedState('bar_horizontal_stacked')).label).toEqual(
-        'Stacked Horizontal Bar Chart'
+        'Stacked horizontal bar chart'
       );
     });
   });
@@ -119,7 +119,7 @@ describe('xy_visualization', () => {
             "position": "right",
           },
           "preferredSeriesType": "bar_stacked",
-          "title": "Empty XY Chart",
+          "title": "Empty XY chart",
         }
       `);
     });
