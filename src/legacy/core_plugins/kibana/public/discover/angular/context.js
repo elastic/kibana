@@ -44,10 +44,10 @@ const k7Breadcrumbs = $route => {
   ];
 };
 
-getAngularModule().config(($routeProvider) => {
+getAngularModule().config($routeProvider => {
   $routeProvider
-  // deprecated route, kept for compatibility
-  // should be removed in the future
+    // deprecated route, kept for compatibility
+    // should be removed in the future
     .when('/discover/context/:indexPatternId/:type/:id*', {
       redirectTo: '/discover/context/:indexPatternId/:id',
     })
@@ -56,14 +56,16 @@ getAngularModule().config(($routeProvider) => {
       k7Breadcrumbs,
       controllerAs: 'contextAppRoute',
       resolve: {
-        indexPattern: function ($route, indexPatterns) {
-          return indexPatterns.get($route.current.params.indexPatternId);
+        indexPattern: function ($route, Promise) {
+          const indexPattern = getServices().indexPatterns.get(
+            $route.current.params.indexPatternId
+          );
+          return Promise.props(indexPattern);
         },
       },
       template: contextAppRouteTemplate,
     });
 });
-
 
 function ContextAppRouteController($routeParams, $scope, AppState, config, indexPattern, Private) {
   const queryFilter = Private(FilterBarQueryFilterProvider);
