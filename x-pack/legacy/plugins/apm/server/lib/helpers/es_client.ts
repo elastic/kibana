@@ -12,7 +12,7 @@ import {
   IndicesCreateParams
 } from 'elasticsearch';
 import { Legacy } from 'kibana';
-import { cloneDeep, has, isString, set } from 'lodash';
+import { cloneDeep, has, isString, set, pick } from 'lodash';
 import { OBSERVER_VERSION_MAJOR } from '../../../common/elasticsearch_fieldnames';
 import { StringMap, Omit } from '../../../typings/common';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
@@ -67,12 +67,24 @@ async function getParamsForSearchRequest(
   apmOptions?: APMOptions
 ) {
   const uiSettings = req.getUiSettingsService();
-  const [apmIndices, includeFrozen] = await Promise.all([
+  const [indices, includeFrozen] = await Promise.all([
     getApmIndices(req.server),
     uiSettings.get('search:includeFrozen')
   ]);
+
+  // Get indices for legacy data filter (only those which apply)
+  const apmIndices: string[] = Object.values(
+    pick(indices, [
+      'apm_oss.sourcemapIndices',
+      'apm_oss.errorIndices',
+      'apm_oss.onboardingIndices',
+      'apm_oss.spanIndices',
+      'apm_oss.transactionIndices',
+      'apm_oss.metricsIndices'
+    ])
+  );
   return {
-    ...addFilterForLegacyData(Object.values(apmIndices), params, apmOptions), // filter out pre-7.0 data
+    ...addFilterForLegacyData(apmIndices, params, apmOptions), // filter out pre-7.0 data
     ignore_throttled: !includeFrozen // whether to query frozen indices or not
   };
 }
