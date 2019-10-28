@@ -130,7 +130,6 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig }) => {
               )}
             </span>
           </EuiTitle>
-          <EuiSpacer />
           <EuiFlexGroup>
             {generalizationEval.error !== null && <ErrorCallout error={generalizationEval.error} />}
             {generalizationEval.error === null && (
@@ -168,7 +167,6 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig }) => {
               )}
             </span>
           </EuiTitle>
-          <EuiSpacer />
           <EuiFlexGroup>
             {trainingEval.error !== null && <ErrorCallout error={trainingEval.error} />}
             {trainingEval.error === null && (

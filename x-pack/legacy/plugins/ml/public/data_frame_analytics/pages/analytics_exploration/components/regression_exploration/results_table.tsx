@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import React, { Fragment, FC, useEffect, useState } from 'react';
 import moment from 'moment-timezone';
 
 import { i18n } from '@kbn/i18n';
-
 import {
   EuiBadge,
   EuiButtonIcon,
@@ -20,10 +19,14 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiProgress,
+  EuiSpacer,
   EuiText,
   EuiTitle,
   EuiToolTip,
+  Query,
 } from '@elastic/eui';
+
+import { Query as QueryType } from '../../../analytics_management/components/analytics_list/common';
 
 import {
   ColumnType,
@@ -34,6 +37,7 @@ import {
 } from '../../../../../components/ml_in_memory_table';
 
 import { formatHumanReadableDateTimeSeconds } from '../../../../../util/date_utils';
+import { SavedSearchQuery } from '../../../../../contexts/kibana';
 
 import {
   sortColumns,
@@ -45,14 +49,14 @@ import {
   getPredictedFieldName,
 } from '../../../../common';
 
-import { INDEX_STATUS, useExploreData } from './use_explore_data';
+import { INDEX_STATUS, useExploreData, defaultSearchQuery } from './use_explore_data';
 
 const PAGE_SIZE_OPTIONS = [5, 10, 25, 50];
 
 const ExplorationTitle: React.SFC<{ jobId: string }> = ({ jobId }) => (
   <EuiTitle size="xs">
     <span>
-      {i18n.translate('xpack.ml.dataframe.analytics.exploration.jobIdTitle', {
+      {i18n.translate('xpack.ml.dataframe.analytics.regressionExploration.jobIdTitle', {
         defaultMessage: 'Job ID {jobId}',
         values: { jobId },
       })}
@@ -70,6 +74,8 @@ export const ResultsTable: FC<Props> = React.memo(({ jobConfig }) => {
   const [clearTable, setClearTable] = useState(false);
   const [selectedFields, setSelectedFields] = useState([] as EsFieldName[]);
   const [isColumnsPopoverVisible, setColumnsPopoverVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState<SavedSearchQuery>(defaultSearchQuery);
+  const [searchError, setSearchError] = useState<any>(undefined);
 
   // EuiInMemoryTable has an issue with dynamic sortable columns
   // and will trigger a full page Kibana error in such a case.
@@ -139,7 +145,7 @@ export const ResultsTable: FC<Props> = React.memo(({ jobConfig }) => {
             return (
               <EuiToolTip
                 content={i18n.translate(
-                  'xpack.ml.dataframe.analytics.exploration.indexArrayToolTipContent',
+                  'xpack.ml.dataframe.analytics.regressionExploration.indexArrayToolTipContent',
                   {
                     defaultMessage:
                       'The full content of this array based column cannot be displayed.',
@@ -148,7 +154,7 @@ export const ResultsTable: FC<Props> = React.memo(({ jobConfig }) => {
               >
                 <EuiBadge>
                   {i18n.translate(
-                    'xpack.ml.dataframe.analytics.exploration.indexArrayBadgeContent',
+                    'xpack.ml.dataframe.analytics.regressionExploration.indexArrayBadgeContent',
                     {
                       defaultMessage: 'array',
                     }
@@ -162,7 +168,7 @@ export const ResultsTable: FC<Props> = React.memo(({ jobConfig }) => {
             return (
               <EuiToolTip
                 content={i18n.translate(
-                  'xpack.ml.dataframe.analytics.exploration.indexObjectToolTipContent',
+                  'xpack.ml.dataframe.analytics.regressionExploration.indexObjectToolTipContent',
                   {
                     defaultMessage:
                       'The full content of this object based column cannot be displayed.',
@@ -171,7 +177,7 @@ export const ResultsTable: FC<Props> = React.memo(({ jobConfig }) => {
               >
                 <EuiBadge>
                   {i18n.translate(
-                    'xpack.ml.dataframe.analytics.exploration.indexObjectBadgeContent',
+                    'xpack.ml.dataframe.analytics.regressionExploration.indexObjectBadgeContent',
                     {
                       defaultMessage: 'object',
                     }
@@ -218,6 +224,21 @@ export const ResultsTable: FC<Props> = React.memo(({ jobConfig }) => {
   }
 
   useEffect(() => {
+    if (jobConfig !== undefined) {
+      const predictedFieldName = getPredictedFieldName(
+        jobConfig.dest.results_field,
+        jobConfig.analysis
+      );
+      const predictedFieldSelected = selectedFields.includes(predictedFieldName);
+
+      const field = predictedFieldSelected ? predictedFieldName : selectedFields[0];
+      const direction = predictedFieldSelected ? SORT_DIRECTION.DESC : SORT_DIRECTION.ASC;
+      loadExploreData({ field, direction, searchQuery });
+      return;
+    }
+  }, [JSON.stringify(searchQuery)]);
+
+  useEffect(() => {
     // by default set the sorting to descending on the prediction field (`<dependent_varible or prediction_field_name>_prediction`).
     // if that's not available sort ascending on the first column.
     // also check if the current sorting field is still available.
@@ -230,7 +251,7 @@ export const ResultsTable: FC<Props> = React.memo(({ jobConfig }) => {
 
       const field = predictedFieldSelected ? predictedFieldName : selectedFields[0];
       const direction = predictedFieldSelected ? SORT_DIRECTION.DESC : SORT_DIRECTION.ASC;
-      loadExploreData({ field, direction });
+      loadExploreData({ field, direction, searchQuery });
       return;
     }
   }, [jobConfig, columns.length, sortField, sortDirection, tableItems.length]);
@@ -238,7 +259,7 @@ export const ResultsTable: FC<Props> = React.memo(({ jobConfig }) => {
   let sorting: SortingPropType = false;
   let onTableChange;
 
-  if (columns.length > 0 && sortField !== '') {
+  if (columns.length > 0 && sortField !== '' && sortField !== undefined) {
     sorting = {
       sort: {
         field: sortField,
@@ -256,7 +277,7 @@ export const ResultsTable: FC<Props> = React.memo(({ jobConfig }) => {
 
       if (sort.field !== sortField || sort.direction !== sortDirection) {
         setClearTable(true);
-        loadExploreData(sort);
+        loadExploreData({ ...sort, searchQuery });
       }
     };
   }
@@ -269,10 +290,24 @@ export const ResultsTable: FC<Props> = React.memo(({ jobConfig }) => {
     hidePerPageOptions: false,
   };
 
+  const onQueryChange = ({ query, error }: { query: QueryType; error: any }) => {
+    if (error) {
+      setSearchError(error.message);
+    } else {
+      try {
+        const esQueryDsl = Query.toESQuery(query);
+        setSearchQuery(esQueryDsl);
+        setSearchError(undefined);
+      } catch (e) {
+        setSearchError(e.toString());
+      }
+    }
+  };
+
   const search = {
-    // onChange: (onQueryChange),
+    onChange: onQueryChange,
     box: {
-      incremental: true,
+      incremental: false,
     },
     filters: [
       {
@@ -281,15 +316,21 @@ export const ResultsTable: FC<Props> = React.memo(({ jobConfig }) => {
         items: [
           {
             value: false,
-            name: i18n.translate('xpack.ml.dataframe.analyticsList.isTestingLabel', {
-              defaultMessage: 'Testing',
-            }),
+            name: i18n.translate(
+              'xpack.ml.dataframe.analytics.regressionExploration.isTestingLabel',
+              {
+                defaultMessage: 'Testing',
+              }
+            ),
           },
           {
             value: true,
-            name: i18n.translate('xpack.ml.dataframe.analyticsList.isTrainingLabel', {
-              defaultMessage: 'Training',
-            }),
+            name: i18n.translate(
+              'xpack.ml.dataframe.analytics.regressionExploration.isTrainingLabel',
+              {
+                defaultMessage: 'Training',
+              }
+            ),
           },
         ],
       },
@@ -305,34 +346,13 @@ export const ResultsTable: FC<Props> = React.memo(({ jobConfig }) => {
       <EuiPanel grow={false}>
         <ExplorationTitle jobId={jobConfig.id} />
         <EuiCallOut
-          title={i18n.translate('xpack.ml.dataframe.analytics.exploration.indexError', {
+          title={i18n.translate('xpack.ml.dataframe.analytics.regressionExploration.indexError', {
             defaultMessage: 'An error occurred loading the index data.',
           })}
           color="danger"
           iconType="cross"
         >
           <p>{errorMessage}</p>
-        </EuiCallOut>
-      </EuiPanel>
-    );
-  }
-
-  if (status === INDEX_STATUS.LOADED && tableItems.length === 0) {
-    return (
-      <EuiPanel grow={false}>
-        <ExplorationTitle jobId={jobConfig.id} />
-        <EuiCallOut
-          title={i18n.translate('xpack.ml.dataframe.analytics.exploration.noDataCalloutTitle', {
-            defaultMessage: 'Empty index query result.',
-          })}
-          color="primary"
-        >
-          <p>
-            {i18n.translate('xpack.ml.dataframe.analytics.exploration.noDataCalloutBody', {
-              defaultMessage:
-                'The query for the index returned no results. Please make sure the index contains documents and your query is not too restrictive.',
-            })}
-          </p>
         </EuiCallOut>
       </EuiPanel>
     );
@@ -349,11 +369,14 @@ export const ResultsTable: FC<Props> = React.memo(({ jobConfig }) => {
             <EuiFlexItem style={{ textAlign: 'right' }}>
               {docFieldsCount > MAX_COLUMNS && (
                 <EuiText size="s">
-                  {i18n.translate('xpack.ml.dataframe.analytics.exploration.fieldSelection', {
-                    defaultMessage:
-                      '{selectedFieldsLength, number} of {docFieldsCount, number} {docFieldsCount, plural, one {field} other {fields}} selected',
-                    values: { selectedFieldsLength: selectedFields.length, docFieldsCount },
-                  })}
+                  {i18n.translate(
+                    'xpack.ml.dataframe.analytics.regressionExploration.fieldSelection',
+                    {
+                      defaultMessage:
+                        '{selectedFieldsLength, number} of {docFieldsCount, number} {docFieldsCount, plural, one {field} other {fields}} selected',
+                      values: { selectedFieldsLength: selectedFields.length, docFieldsCount },
+                    }
+                  )}
                 </EuiText>
               )}
             </EuiFlexItem>
@@ -366,7 +389,7 @@ export const ResultsTable: FC<Props> = React.memo(({ jobConfig }) => {
                       iconType="gear"
                       onClick={toggleColumnsPopover}
                       aria-label={i18n.translate(
-                        'xpack.ml.dataframe.analytics.exploration.selectColumnsAriaLabel',
+                        'xpack.ml.dataframe.analytics.regressionExploration.selectColumnsAriaLabel',
                         {
                           defaultMessage: 'Select columns',
                         }
@@ -379,7 +402,7 @@ export const ResultsTable: FC<Props> = React.memo(({ jobConfig }) => {
                 >
                   <EuiPopoverTitle>
                     {i18n.translate(
-                      'xpack.ml.dataframe.analytics.exploration.selectFieldsPopoverTitle',
+                      'xpack.ml.dataframe.analytics.regressionExploration.selectFieldsPopoverTitle',
                       {
                         defaultMessage: 'Select fields',
                       }
@@ -407,21 +430,24 @@ export const ResultsTable: FC<Props> = React.memo(({ jobConfig }) => {
       {status !== INDEX_STATUS.LOADING && (
         <EuiProgress size="xs" color="accent" max={1} value={0} />
       )}
-      {clearTable === false && columns.length > 0 && sortField !== '' && (
-        <MlInMemoryTableBasic
-          allowNeutralSort={false}
-          className="mlDataFrameAnalyticsExploration"
-          columns={columns}
-          compressed
-          hasActions={false}
-          isSelectable={false}
-          items={tableItems}
-          onTableChange={onTableChange}
-          pagination={pagination}
-          responsive={false}
-          search={search}
-          sorting={sorting}
-        />
+      {clearTable === false && (columns.length > 0 || searchQuery !== defaultSearchQuery) && (
+        <Fragment>
+          <EuiSpacer />
+          <MlInMemoryTableBasic
+            allowNeutralSort={false}
+            columns={columns}
+            compressed
+            hasActions={false}
+            isSelectable={false}
+            items={tableItems}
+            onTableChange={onTableChange}
+            pagination={pagination}
+            responsive={false}
+            search={search}
+            error={searchError}
+            sorting={sorting}
+          />
+        </Fragment>
       )}
     </EuiPanel>
   );
