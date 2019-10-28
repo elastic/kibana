@@ -10,7 +10,7 @@ import { CauseStacktrace } from './CauseStacktrace';
 
 describe('CauseStacktrace', () => {
   describe('render', () => {
-    describe('with no stacktrace', () => {
+    describe('with no stack trace', () => {
       it('renders without the accordion', () => {
         const props = { message: 'testMessage' };
 
@@ -20,7 +20,7 @@ describe('CauseStacktrace', () => {
       });
     });
 
-    describe('with no message and a stacktrace', () => {
+    describe('with no message and a stack trace', () => {
       it('says "Caused by …', () => {
         const props = {
           stackframes: [{ filename: 'testFilename', line: { number: 1 } }]
@@ -34,7 +34,7 @@ describe('CauseStacktrace', () => {
       });
     });
 
-    describe('with a message and a stacktrace', () => {
+    describe('with a message and a stack trace', () => {
       it('renders with the accordion', () => {
         const props = {
           message: 'testMessage',

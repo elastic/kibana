@@ -18,8 +18,8 @@ describe('ExceptionStacktrace', () => {
       ).not.toThrowError();
     });
 
-    describe('with a stacktrace', () => {
-      it('renders the stacktrace', () => {
+    describe('with a stack trace', () => {
+      it('renders the stack trace', () => {
         const props = { exceptionList: [{}] };
 
         expect(
@@ -28,8 +28,8 @@ describe('ExceptionStacktrace', () => {
       });
     });
 
-    describe('with more than one stacktrace', () => {
-      it('renders a cause stacktrace', () => {
+    describe('with more than one stack trace', () => {
+      it('renders a cause stack trace', () => {
         const props = { exceptionList: [{}, {}] };
 
         expect(
