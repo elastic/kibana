@@ -4,44 +4,55 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-const summaryExtensions = [];
-export const addSummaryExtension = summaryExtension => {
+
+const summaryExtensions: any[] = [];
+export const addSummaryExtension = (summaryExtension: any) => {
   summaryExtensions.push(summaryExtension);
 };
+
 export const getSummaryExtensions = () => {
   return summaryExtensions;
 };
-const actionExtensions = [];
-export const addActionExtension = actionExtension => {
+
+const actionExtensions: any[] = [];
+export const addActionExtension = (actionExtension: any) => {
   actionExtensions.push(actionExtension);
 };
+
 export const getActionExtensions = () => {
   return actionExtensions;
 };
-const bannerExtensions = [];
-export const addBannerExtension = actionExtension => {
+
+const bannerExtensions: any[] = [];
+export const addBannerExtension = (actionExtension: any) => {
   bannerExtensions.push(actionExtension);
 };
+
 export const getBannerExtensions = () => {
   return bannerExtensions;
 };
-const filterExtensions = [];
-export const addFilterExtension = filterExtension => {
+
+const filterExtensions: any[] = [];
+export const addFilterExtension = (filterExtension: any) => {
   filterExtensions.push(filterExtension);
 };
+
 export const getFilterExtensions = () => {
   return filterExtensions;
 };
-const toggleExtensions = [];
-export const addToggleExtension = toggleExtension => {
+
+const toggleExtensions: any[] = [];
+export const addToggleExtension = (toggleExtension: any) => {
   toggleExtensions.push(toggleExtension);
 };
+
 export const getToggleExtensions = () => {
   return toggleExtensions;
 };
+
 const badgeExtensions = [
   {
-    matchIndex: index => {
+    matchIndex: (index: { isFrozen: boolean }) => {
       return index.isFrozen;
     },
     label: i18n.translate('xpack.idxMgmt.frozenBadgeLabel', {
@@ -51,9 +62,11 @@ const badgeExtensions = [
     color: 'primary',
   },
 ];
-export const addBadgeExtension = badgeExtension => {
+
+export const addBadgeExtension = (badgeExtension: any) => {
   badgeExtensions.push(badgeExtension);
 };
+
 export const getBadgeExtensions = () => {
   return badgeExtensions;
 };

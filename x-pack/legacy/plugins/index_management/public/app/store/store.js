@@ -6,7 +6,7 @@
 
 import { createStore, applyMiddleware, compose } from 'redux';
 import thunk from 'redux-thunk';
-import { getToggleExtensions } from '../index_management_extensions';
+import { getToggleExtensions } from '../../index_management_extensions';
 import { defaultTableState } from './reducers/table_state';
 
 import { indexManagement } from './reducers/';

@@ -42,7 +42,7 @@ import {
   getBannerExtensions,
   getFilterExtensions,
   getToggleExtensions,
-} from '../../../../index_management_extensions';
+} from '../../../../../index_management_extensions';
 import { renderBadges } from '../../../../lib/render_badges';
 import { NoMatch, PageErrorForbidden } from '../../../../components';
 import { IndexActionsContextMenu } from '../index_actions_context_menu';

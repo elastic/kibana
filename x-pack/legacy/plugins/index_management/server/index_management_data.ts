@@ -9,6 +9,7 @@ const indexManagementDataEnrichers: any[] = [];
 export const addIndexManagementDataEnricher = (enricher: any) => {
   indexManagementDataEnrichers.push(enricher);
 };
+
 export const getIndexManagementDataEnrichers = () => {
   return indexManagementDataEnrichers;
 };

@@ -32,27 +32,35 @@ const renderReact = async () => {
   );
 };
 
-routes.when(`${BASE_PATH}:view?/:action?/:id?`, {
-  template,
-  controller: ($scope: any, $route: any, $http: ng.IHttpService, kbnUrl: any, $rootScope: any) => {
-    // clean up previously rendered React app if one exists
-    // this happens because of React Router redirects
-    if (elem) {
-      unmountComponentAtNode(elem);
-    }
-    // NOTE: We depend upon Angular's $http service because it's decorated with interceptors,
-    // e.g. to check license status per request.
-    setHttpClient($http);
-    setUrlService({
-      change(url: string) {
-        kbnUrl.change(url);
-        $rootScope.$digest();
-      },
-    });
-    $scope.$$postDigest(() => {
-      elem = document.getElementById('indexManagementReactRoot');
-      renderReact();
-      manageAngularLifecycle($scope, $route, elem);
-    });
-  },
-});
+export const registerRoutes = () => {
+  routes.when(`${BASE_PATH}:view?/:action?/:id?`, {
+    template,
+    controller: (
+      $scope: any,
+      $route: any,
+      $http: ng.IHttpService,
+      kbnUrl: any,
+      $rootScope: any
+    ) => {
+      // clean up previously rendered React app if one exists
+      // this happens because of React Router redirects
+      if (elem) {
+        unmountComponentAtNode(elem);
+      }
+      // NOTE: We depend upon Angular's $http service because it's decorated with interceptors,
+      // e.g. to check license status per request.
+      setHttpClient($http);
+      setUrlService({
+        change(url: string) {
+          kbnUrl.change(url);
+          $rootScope.$digest();
+        },
+      });
+      $scope.$$postDigest(() => {
+        elem = document.getElementById('indexManagementReactRoot');
+        renderReact();
+        manageAngularLifecycle($scope, $route, elem);
+      });
+    },
+  });
+};

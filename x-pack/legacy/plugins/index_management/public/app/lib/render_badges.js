@@ -8,7 +8,7 @@
 import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBadge, EuiSearchBar } from '@elastic/eui';
-import { getBadgeExtensions } from '../index_management_extensions';
+import { getBadgeExtensions } from '../../index_management_extensions';
 export const renderBadges = (index, filterChanged) => {
   const badgeLabels = [];
   getBadgeExtensions().forEach(({ matchIndex, label, color, filterExpression }) => {

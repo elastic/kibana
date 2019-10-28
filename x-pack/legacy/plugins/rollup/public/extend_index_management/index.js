@@ -7,7 +7,7 @@ import { i18n } from '@kbn/i18n';
 import {
   addToggleExtension,
   addBadgeExtension
-} from '../../../index_management/public/app/index_management_extensions';
+} from '../../../index_management/public/index_management_extensions';
 import { get } from 'lodash';
 
 const propertyPath = 'isRollupIndex';

@@ -20,7 +20,7 @@ import {
   EuiSpacer,
   EuiTitle
 } from '@elastic/eui';
-import { getSummaryExtensions } from '../../../../../index_management_extensions';
+import { getSummaryExtensions } from '../../../../../../index_management_extensions';
 const getHeaders = () =>{
   return {
     health: i18n.translate('xpack.idxMgmt.summary.headers.healthHeader', {

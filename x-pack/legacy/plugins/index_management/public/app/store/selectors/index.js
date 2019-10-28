@@ -8,7 +8,7 @@ import { Pager, EuiSearchBar } from '@elastic/eui';
 import { createSelector } from 'reselect';
 import { indexStatusLabels } from '../../lib/index_status_labels';
 import { sortTable } from '../../services';
-import { getToggleExtensions } from '../../index_management_extensions';
+import { getToggleExtensions } from '../../../index_management_extensions';
 
 export const getDetailPanelData = (state) => state.detailPanel.data;
 export const getDetailPanelError = (state) => state.detailPanel.error;
