@@ -57,9 +57,13 @@ export const AnalysisResultsContent = ({
     setAutoRefresh,
   } = useLogAnalysisResultsUrlState();
 
-  const [queryTimeRange, setQueryTimeRange] = useState<TimeRange>(
-    stringToNumericTimeRange(selectedTimeRange)
-  );
+  const [queryTimeRange, setQueryTimeRange] = useState<{
+    value: TimeRange;
+    lastChangedTime: number;
+  }>(() => ({
+    value: stringToNumericTimeRange(selectedTimeRange),
+    lastChangedTime: Date.now(),
+  }));
 
   const bucketDuration = useMemo(() => {
     // This function takes the current time range in ms,
@@ -69,18 +73,21 @@ export const AnalysisResultsContent = ({
     // 900000 (15 minutes) to it, so that we don't end up with
     // jaggy bucket boundaries between the ML buckets and our
     // aggregation buckets.
-    const msRange = moment(queryTimeRange.endTime).diff(moment(queryTimeRange.startTime));
+    const msRange = moment(queryTimeRange.value.endTime).diff(
+      moment(queryTimeRange.value.startTime)
+    );
     const bucketIntervalInMs = msRange / 100;
     const result = bucketSpan * Math.round(bucketIntervalInMs / bucketSpan);
     const roundedResult = parseInt(Number(result).toFixed(0), 10);
     return roundedResult < bucketSpan ? bucketSpan : roundedResult;
-  }, [queryTimeRange.startTime, queryTimeRange.endTime]);
+  }, [queryTimeRange.value.startTime, queryTimeRange.value.endTime]);
 
   const { isLoading, logEntryRate } = useLogAnalysisResults({
     sourceId,
-    startTime: queryTimeRange.startTime,
-    endTime: queryTimeRange.endTime,
+    startTime: queryTimeRange.value.startTime,
+    endTime: queryTimeRange.value.endTime,
     bucketDuration,
+    lastRequestTime: queryTimeRange.lastChangedTime,
   });
   const hasResults = useMemo(() => logEntryRate && logEntryRate.histogramBuckets.length > 0, [
     logEntryRate,
@@ -88,7 +95,10 @@ export const AnalysisResultsContent = ({
 
   const handleQueryTimeRangeChange = useCallback(
     ({ start: startTime, end: endTime }: { start: string; end: string }) => {
-      setQueryTimeRange(stringToNumericTimeRange({ startTime, endTime }));
+      setQueryTimeRange({
+        value: stringToNumericTimeRange({ startTime, endTime }),
+        lastChangedTime: Date.now(),
+      });
     },
     [setQueryTimeRange]
   );
@@ -141,6 +151,16 @@ export const AnalysisResultsContent = ({
     fetchJobStatus();
   }, JOB_STATUS_POLLING_INTERVAL);
 
+  useInterval(
+    () => {
+      handleQueryTimeRangeChange({
+        start: selectedTimeRange.startTime,
+        end: selectedTimeRange.endTime,
+      });
+    },
+    autoRefresh.isPaused ? null : autoRefresh.interval
+  );
+
   return (
     <>
       {isLoading && !logEntryRate ? (
@@ -171,9 +191,11 @@ export const AnalysisResultsContent = ({
                                 </EuiBadge>
                               ),
                               startTime: (
-                                <b>{moment(queryTimeRange.startTime).format(dateFormat)}</b>
+                                <b>{moment(queryTimeRange.value.startTime).format(dateFormat)}</b>
                               ),
-                              endTime: <b>{moment(queryTimeRange.endTime).format(dateFormat)}</b>,
+                              endTime: (
+                                <b>{moment(queryTimeRange.value.endTime).format(dateFormat)}</b>
+                              ),
                             }}
                           />
                         </EuiText>
@@ -187,7 +209,6 @@ export const AnalysisResultsContent = ({
                         isPaused={autoRefresh.isPaused}
                         refreshInterval={autoRefresh.interval}
                         onRefreshChange={handleAutoRefreshChange}
-                        onRefresh={handleQueryTimeRangeChange}
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>
@@ -200,7 +221,7 @@ export const AnalysisResultsContent = ({
                     isLoading={isLoading}
                     results={logEntryRate}
                     setTimeRange={handleChartTimeRangeChange}
-                    timeRange={queryTimeRange}
+                    timeRange={queryTimeRange.value}
                   />
                 </EuiPanel>
               </EuiFlexItem>
@@ -214,7 +235,7 @@ export const AnalysisResultsContent = ({
                     results={logEntryRate}
                     setTimeRange={handleChartTimeRangeChange}
                     setupStatus={setupStatus}
-                    timeRange={queryTimeRange}
+                    timeRange={queryTimeRange.value}
                     jobId={jobIds['log-entry-rate']}
                   />
                 </EuiPanel>
