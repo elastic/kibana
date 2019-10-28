@@ -28,5 +28,5 @@ export function arrayContainsObjects(value: unknown[]): boolean {
  * Removes markup added by kibana fields html formatter
  */
 export function trimAngularSpan(text: string): string {
-  return text.replace('<span ng-non-bindable>', '').replace('</span>', '');
+  return text.replace(/^<span ng-non-bindable>/, '').replace(/<\/span>$/, '');
 }
