@@ -44,7 +44,6 @@ export const ProfileQueryEditor = memo(() => {
 
   const handleProfileClick = async () => {
     dispatch({ type: 'setProfiling', value: true });
-    dispatch({ type: 'setHighlightDetails', value: null });
     try {
       const { current: editor } = editorRef;
       editor.clearErrorAnnotations();
@@ -62,7 +61,6 @@ export const ProfileQueryEditor = memo(() => {
         return;
       }
       dispatch({ type: 'setCurrentResponse', value: result });
-      dispatch({ type: 'setActiveTab', value: 'searches' });
     } finally {
       dispatch({ type: 'setProfiling', value: false });
     }

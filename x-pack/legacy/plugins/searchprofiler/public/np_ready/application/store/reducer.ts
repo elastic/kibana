@@ -27,6 +27,10 @@ export const reducer: Reducer<State, Action> = (state, action) =>
 
     if (action.type === 'setProfiling') {
       draft.profiling = action.value;
+      if (draft.profiling) {
+        draft.currentResponse = null;
+        draft.highlightDetails = null;
+      }
       return;
     }
 
@@ -42,6 +46,10 @@ export const reducer: Reducer<State, Action> = (state, action) =>
 
     if (action.type === 'setCurrentResponse') {
       draft.currentResponse = action.value;
+      if (draft.currentResponse) {
+        // Default to the searches tab
+        draft.activeTab = 'searches';
+      }
       return;
     }
 
