@@ -80,9 +80,13 @@ export const Page: FC = () => {
                   />
                 </h1>
               </EuiTitle>
+              {stats && (
+                <div style={{ margin: '0 -14px' }}>
+                  <StatsBar stats={stats} dataTestSub={'mlAnalyticsStatsBar'} />
+                </div>
+              )}
             </EuiPageContentHeaderSection>
             <EuiPageContentHeaderSection>
-              {stats && <StatsBar stats={stats} dataTestSub={'mlAnalyticsStatsBar'} />}
               <EuiFlexGroup alignItems="center">
                 {/* grow={false} fixes IE11 issue with nested flex */}
                 <EuiFlexItem grow={false}>
