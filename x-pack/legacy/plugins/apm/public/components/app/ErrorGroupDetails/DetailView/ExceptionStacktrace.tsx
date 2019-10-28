@@ -13,14 +13,14 @@ import { CauseStacktrace } from '../../../shared/Stacktrace/CauseStacktrace';
 
 interface ExceptionStacktraceProps {
   codeLanguage?: string;
-  exceptionList: Exception[];
+  exceptions: Exception[];
 }
 
 export function ExceptionStacktrace({
   codeLanguage,
-  exceptionList
+  exceptions
 }: ExceptionStacktraceProps) {
-  const title = idx(exceptionList, _ => _[0].message);
+  const title = idx(exceptions, _ => _[0].message);
 
   return (
     <>
@@ -28,7 +28,7 @@ export function ExceptionStacktrace({
         <h4>{title}</h4>
       </EuiTitle>
       <EuiSpacer size="l" />
-      {exceptionList.map((ex, index) => {
+      {exceptions.map((ex, index) => {
         return index === 0 ? (
           <Stacktrace
             key={index}
@@ -39,6 +39,7 @@ export function ExceptionStacktrace({
           <CauseStacktrace
             codeLanguage={codeLanguage}
             key={index}
+            id={index.toString()}
             message={ex.message}
             stackframes={ex.stacktrace}
           />

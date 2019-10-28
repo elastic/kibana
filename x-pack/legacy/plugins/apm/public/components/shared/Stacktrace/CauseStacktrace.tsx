@@ -54,22 +54,26 @@ function CausedBy({ message }: { message: string }) {
 
 interface CauseStacktraceProps {
   codeLanguage?: string;
+  id: string;
   message?: string;
   stackframes?: IStackframe[];
 }
 
 export function CauseStacktrace({
   codeLanguage,
+  id,
   message = '…',
-  stackframes
+  stackframes = []
 }: CauseStacktraceProps) {
-  return stackframes && stackframes.length > 0 ? (
-    <Accordion buttonContent={<CausedBy message={message} />}>
+  if (stackframes.length === 0) {
+    return <CausedBy message={message} />;
+  }
+
+  return (
+    <Accordion buttonContent={<CausedBy message={message} />} id={id}>
       <FramesContainer>
         <Stacktrace stackframes={stackframes} codeLanguage={codeLanguage} />
       </FramesContainer>
     </Accordion>
-  ) : (
-    <CausedBy message={message} />
   );
 }

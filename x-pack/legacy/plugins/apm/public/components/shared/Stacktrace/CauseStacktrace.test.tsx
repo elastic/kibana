@@ -12,7 +12,7 @@ describe('CauseStacktrace', () => {
   describe('render', () => {
     describe('with no stack trace', () => {
       it('renders without the accordion', () => {
-        const props = { message: 'testMessage' };
+        const props = { id: 'testId', message: 'testMessage' };
 
         expect(
           mount(<CauseStacktrace {...props} />).find('CausedBy')
@@ -23,6 +23,7 @@ describe('CauseStacktrace', () => {
     describe('with no message and a stack trace', () => {
       it('says "Caused by …', () => {
         const props = {
+          id: 'testId',
           stackframes: [{ filename: 'testFilename', line: { number: 1 } }]
         };
 
@@ -37,6 +38,7 @@ describe('CauseStacktrace', () => {
     describe('with a message and a stack trace', () => {
       it('renders with the accordion', () => {
         const props = {
+          id: 'testId',
           message: 'testMessage',
           stackframes: [{ filename: 'testFilename', line: { number: 1 } }]
         };

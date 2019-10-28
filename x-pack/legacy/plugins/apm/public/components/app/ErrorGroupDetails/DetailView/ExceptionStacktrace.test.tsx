@@ -11,7 +11,7 @@ import { ExceptionStacktrace } from './ExceptionStacktrace';
 describe('ExceptionStacktrace', () => {
   describe('render', () => {
     it('renders', () => {
-      const props = { exceptionList: [] };
+      const props = { exceptions: [] };
 
       expect(() =>
         shallow(<ExceptionStacktrace {...props} />)
@@ -20,7 +20,7 @@ describe('ExceptionStacktrace', () => {
 
     describe('with a stack trace', () => {
       it('renders the stack trace', () => {
-        const props = { exceptionList: [{}] };
+        const props = { exceptions: [{}] };
 
         expect(
           shallow(<ExceptionStacktrace {...props} />).find('Stacktrace')
@@ -30,7 +30,7 @@ describe('ExceptionStacktrace', () => {
 
     describe('with more than one stack trace', () => {
       it('renders a cause stack trace', () => {
-        const props = { exceptionList: [{}, {}] };
+        const props = { exceptions: [{}, {}] };
 
         expect(
           shallow(<ExceptionStacktrace {...props} />).find('CauseStacktrace')

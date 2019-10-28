@@ -189,7 +189,7 @@ function TabContent({
   currentTab: ErrorTab;
 }) {
   const codeLanguage = idx(error, _ => _.service.language.name);
-  const exceptionList = idx(error, _ => _.error.exception) || [];
+  const exceptions = idx(error, _ => _.error.exception) || [];
   const logStackframes = idx(error, _ => _.error.log.stacktrace);
 
   switch (currentTab.key) {
@@ -201,7 +201,7 @@ function TabContent({
       return (
         <ExceptionStacktrace
           codeLanguage={codeLanguage}
-          exceptionList={exceptionList}
+          exceptions={exceptions}
         />
       );
     default:
