@@ -86,6 +86,22 @@ describe('ExpressionDataHandler', () => {
     expect(response).toEqual({ type: 'render', as: 'test' });
   });
 
+  it('emits on loading$ when starting to load', async () => {
+    const expressionLoader = new ExpressionLoader(element, expressionString, {});
+    let loadingPromise = expressionLoader.loading$.pipe(first()).toPromise();
+    expressionLoader.update('test');
+    let response = await loadingPromise;
+    expect(response).toBeUndefined();
+    loadingPromise = expressionLoader.loading$.pipe(first()).toPromise();
+    expressionLoader.update('');
+    response = await loadingPromise;
+    expect(response).toBeUndefined();
+    loadingPromise = expressionLoader.loading$.pipe(first()).toPromise();
+    expressionLoader.update();
+    response = await loadingPromise;
+    expect(response).toBeUndefined();
+  });
+
   it('emits on render$ when rendering is done', async () => {
     const expressionLoader = new ExpressionLoader(element, expressionString, {});
     const response = await expressionLoader.render$.pipe(first()).toPromise();
