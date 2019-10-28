@@ -100,6 +100,8 @@ export const NumericType = ({ field }: Props) => {
                 toggleDefaultValue={getDefaultValueToggle('ignore_malformed', field.source)}
               >
                 {isOn => {
+                  // As we labeled the field "Reject malformed" instead of "Ignore..."
+                  // we invert the value.
                   ignoreMalformedField.setValue(!isOn);
                   return null;
                 }}
