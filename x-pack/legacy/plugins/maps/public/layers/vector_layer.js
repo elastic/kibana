@@ -132,28 +132,6 @@ export class VectorLayer extends AbstractLayer {
     return true;
   }
 
-  getInjectedData() {
-    const featureCollection = super.getInjectedData();
-    if (!featureCollection) {
-      return null;
-    }
-    const copiedPropsFeatures = featureCollection.features
-      .map(feature => ({
-        type: 'Feature',
-        geometry: feature.geometry,
-        properties: feature.properties
-          ? {
-            ...feature.properties,
-            [FEATURE_VISIBLE_PROPERTY_NAME]: true
-          }
-          : {}
-      }));
-    return {
-      type: 'FeatureCollection',
-      features: copiedPropsFeatures
-    };
-  }
-
   getCustomIconAndTooltipContent() {
     const featureCollection = this._getSourceFeatureCollection();
 
@@ -520,16 +498,7 @@ export class VectorLayer extends AbstractLayer {
     startLoading, stopLoading, onLoadError, registerCancelCallback, dataFilters
   }) {
 
-    if (this._source.isInjectedData()) {
-      const featureCollection = this.getInjectedData();
-      return {
-        refreshed: false,
-        featureCollection
-      };
-    }
-
     const requestToken = Symbol(`layer-source-refresh:${ this.getId()} - source`);
-
     const searchFilters = this._getSearchFilters(dataFilters);
     const canSkip = await this._canSkipSourceUpdate(this._source, SOURCE_DATA_ID_ORIGIN, searchFilters);
     if (canSkip) {
@@ -604,12 +573,8 @@ export class VectorLayer extends AbstractLayer {
   }
 
   _getSourceFeatureCollection() {
-    if (this._source.isInjectedData()) {
-      return this.getInjectedData();
-    } else {
-      const sourceDataRequest = this.getSourceDataRequest();
-      return sourceDataRequest ? sourceDataRequest.getData() : null;
-    }
+    const sourceDataRequest = this.getSourceDataRequest();
+    return sourceDataRequest ? sourceDataRequest.getData() : null;
   }
 
   _syncFeatureCollectionWithMb(mbMap) {
