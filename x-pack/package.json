@@ -191,7 +191,6 @@
     "@elastic/maki": "6.1.0",
     "@elastic/node-crypto": "^1.0.0",
     "@elastic/numeral": "2.3.3",
-    "@elastic/simple-git": "1.124.0-elastic.15",
     "@kbn/babel-preset": "1.0.0",
     "@kbn/config-schema": "1.0.0",
     "@kbn/elastic-idx": "1.0.0",
