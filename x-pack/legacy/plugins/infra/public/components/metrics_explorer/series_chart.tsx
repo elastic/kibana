@@ -64,7 +64,7 @@ export const MetricsExplorerAreaChart = ({ metric, id, series, type, stack }: Pr
       visible: type === MetricsExplorerChartType.area,
     },
     point: {
-      visible: true,
+      visible: false,
       radius: 2,
       strokeWidth: 2,
       opacity: 1,
