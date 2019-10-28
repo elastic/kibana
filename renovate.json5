@@ -402,14 +402,6 @@
         ],
       },
       {
-        groupSlug: 'humps',
-        groupName: 'humps related packages',
-        packageNames: [
-          'humps',
-          '@types/humps',
-        ],
-      },
-      {
         groupSlug: 'jquery',
         groupName: 'jquery related packages',
         packageNames: [
@@ -527,14 +519,6 @@
         packageNames: [
           'request',
           '@types/request',
-        ],
-      },
-      {
-        groupSlug: 'rimraf',
-        groupName: 'rimraf related packages',
-        packageNames: [
-          'rimraf',
-          '@types/rimraf',
         ],
       },
       {

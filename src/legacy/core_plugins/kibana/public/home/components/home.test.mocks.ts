@@ -17,7 +17,12 @@
  * under the License.
  */
 
-import { notificationServiceMock, overlayServiceMock } from '../../../../../../core/public/mocks';
+import {
+  notificationServiceMock,
+  overlayServiceMock,
+  httpServiceMock,
+  injectedMetadataServiceMock,
+} from '../../../../../../core/public/mocks';
 
 jest.doMock('ui/new_platform', () => {
   return {
@@ -29,22 +34,9 @@ jest.doMock('ui/new_platform', () => {
     npStart: {
       core: {
         overlays: overlayServiceMock.createStartContract(),
+        http: httpServiceMock.createStartContract({ basePath: 'path' }),
+        injectedMetadata: injectedMetadataServiceMock.createStartContract(),
       },
     },
   };
 });
-
-jest.doMock(
-  'ui/chrome',
-  () => ({
-    getBasePath: jest.fn(() => 'path'),
-    getInjected: jest.fn(() => ''),
-  }),
-  { virtual: true }
-);
-
-jest.doMock('ui/capabilities', () => ({
-  catalogue: {},
-  management: {},
-  navLinks: {},
-}));
