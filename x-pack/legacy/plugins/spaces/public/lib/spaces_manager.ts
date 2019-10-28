@@ -29,7 +29,7 @@ export class SpacesManager extends EventEmitter {
 
   public async getActiveSpace(forceRefresh: boolean = false): Promise<Space> {
     if (!this.activeSpace || forceRefresh) {
-      this.activeSpace = (await this.http.get('/api/spaces/_active_space')) as Space;
+      this.activeSpace = (await this.http.get('/internal/spaces/_active_space')) as Space;
     }
     return this.activeSpace;
   }

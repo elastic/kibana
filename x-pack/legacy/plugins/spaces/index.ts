@@ -7,14 +7,12 @@
 import { resolve } from 'path';
 import KbnServer, { Server } from 'src/legacy/server/kbn_server';
 import { Legacy } from 'kibana';
-import { KibanaRequest } from '../../../../src/core/server';
 import { SpacesServiceSetup } from '../../../plugins/spaces/server/spaces_service/spaces_service';
 import { SpacesPluginSetup } from '../../../plugins/spaces/server';
 import { createOptionalPlugin } from '../../server/lib/optional_plugin';
 // @ts-ignore
 import { AuditLogger } from '../../server/lib/audit_logger';
 import mappings from './mappings.json';
-import { wrapError } from './server/lib/errors';
 import { migrateToKibana660 } from './server/lib/migrations';
 import { SecurityPlugin } from '../security';
 // @ts-ignore

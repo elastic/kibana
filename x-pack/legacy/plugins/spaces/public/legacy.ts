@@ -9,7 +9,10 @@ import { FeatureCatalogueRegistryProvider } from 'ui/registry/feature_catalogue'
 import { plugin } from './index';
 import { SpacesPlugin, PluginsSetup } from './plugin';
 
-const spacesPlugin: SpacesPlugin = plugin({ opaqueId: Symbol('spaces plugin') });
+const spacesPlugin: SpacesPlugin = plugin({
+  opaqueId: Symbol('spaces plugin'),
+  env: null as any,
+});
 
 const plugins: PluginsSetup = {
   kibana: {

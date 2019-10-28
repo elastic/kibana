@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UICapabilities } from 'ui/capabilities';
 import { Feature } from '../../../../plugins/features/server';
 import { Space } from '../../common/model/space';
 import { toggleUICapabilities } from './toggle_ui_capabilities';
