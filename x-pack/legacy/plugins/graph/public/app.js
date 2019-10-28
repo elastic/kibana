@@ -11,7 +11,7 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { isColorDark, hexToRgb } from '@elastic/eui';
 
-import { mountForComponent } from '../../../../../src/plugins/kibana_react/public';
+import { reactMount } from '../../../../../src/plugins/kibana_react/public';
 import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { formatAngularHttpError } from 'ui/notify/lib';
@@ -550,7 +550,7 @@ export function initGraphApp(angularModule, deps) {
           canEditDrillDownUrls: canEditDrillDownUrls
         }), $scope.$digest.bind($scope));
         coreStart.overlays.openFlyout(
-          mountForComponent(
+          reactMount(
             <Provider store={store}>
               <Settings observable={settingsObservable} />
             </Provider>

@@ -18,7 +18,7 @@
  */
 import React from 'react';
 import { CoreStart } from 'src/core/public';
-import { mountForComponent } from '../../../../../../../../plugins/kibana_react/public';
+import { reactMount } from '../../../../../../../../plugins/kibana_react/public';
 import { ReplacePanelFlyout } from './replace_panel_flyout';
 
 import {
@@ -39,7 +39,7 @@ export async function openReplacePanelFlyout(options: {
 }) {
   const { embeddable, core, panelToRemove, savedObjectFinder, notifications } = options;
   const flyoutSession = core.overlays.openFlyout(
-    mountForComponent(
+    reactMount(
       <ReplacePanelFlyout
         container={embeddable}
         onClose={() => {

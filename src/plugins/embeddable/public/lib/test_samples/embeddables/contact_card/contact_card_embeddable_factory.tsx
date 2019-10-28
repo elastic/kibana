@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { TExecuteTriggerActions } from 'src/plugins/ui_actions/public';
 
 import { CoreStart } from 'src/core/public';
-import { mountForComponent } from '../../../../../../kibana_react/public';
+import { reactMount } from '../../../../../../kibana_react/public';
 import { EmbeddableFactory } from '../../../embeddables';
 import { Container } from '../../../containers';
 import { ContactCardEmbeddable, ContactCardEmbeddableInput } from './contact_card_embeddable';
@@ -55,7 +55,7 @@ export class ContactCardEmbeddableFactory extends EmbeddableFactory<ContactCardE
   public getExplicitInput(): Promise<Partial<ContactCardEmbeddableInput>> {
     return new Promise(resolve => {
       const modalSession = this.overlays.openModal(
-        mountForComponent(
+        reactMount(
           <ContactCardInitializer
             onCancel={() => {
               modalSession.close();

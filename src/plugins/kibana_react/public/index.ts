@@ -23,3 +23,4 @@ export * from './context';
 export * from './overlays';
 export * from './ui_settings';
 export * from './field_icon';
+export { reactMount } from './util';

@@ -26,7 +26,7 @@ import {
   IAction,
 } from '../ui_actions';
 import { CoreStart, OverlayStart } from '../../../../../core/public';
-import { mountForComponent } from '../../../../kibana_react/public';
+import { reactMount } from '../../../../kibana_react/public';
 
 import { Start as InspectorStartContract } from '../inspector';
 import { CONTEXT_MENU_TRIGGER, PANEL_BADGE_TRIGGER } from '../triggers';
@@ -205,7 +205,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       async function getUserData(context: { embeddable: IEmbeddable }) {
         return new Promise<{ title: string | undefined }>(resolve => {
           const session = overlays.openModal(
-            mountForComponent(
+            reactMount(
               <CustomizePanelModal
                 embeddable={context.embeddable}
                 updateTitle={title => {

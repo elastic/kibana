@@ -27,9 +27,7 @@ import { MountPoint } from 'kibana/public';
  *
  * @param component to get a mount for
  */
-export const mountForComponent = (component: React.ReactNode): MountPoint => (
-  element: HTMLElement
-) => {
+export const reactMount = (component: React.ReactNode): MountPoint => (element: HTMLElement) => {
   ReactDOM.render(<I18nProvider>{component}</I18nProvider>, element);
   return () => ReactDOM.unmountComponentAtNode(element);
 };

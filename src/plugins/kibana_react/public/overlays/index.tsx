@@ -19,4 +19,3 @@
 
 export * from './types';
 export * from './create_react_overlays';
-export * from './mount_for_component';

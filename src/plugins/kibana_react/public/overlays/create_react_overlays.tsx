@@ -20,7 +20,7 @@
 import * as React from 'react';
 import { KibanaServices } from '../context/types';
 import { KibanaReactOverlays } from './types';
-import { mountForComponent } from './mount_for_component';
+import { reactMount } from '../util';
 
 export const createReactOverlays = (services: KibanaServices): KibanaReactOverlays => {
   const checkCoreService = () => {
@@ -31,12 +31,12 @@ export const createReactOverlays = (services: KibanaServices): KibanaReactOverla
 
   const openFlyout: KibanaReactOverlays['openFlyout'] = (node, options?) => {
     checkCoreService();
-    return services.overlays!.openFlyout(mountForComponent(<>{node}</>), options);
+    return services.overlays!.openFlyout(reactMount(<>{node}</>), options);
   };
 
   const openModal: KibanaReactOverlays['openModal'] = (node, options?) => {
     checkCoreService();
-    return services.overlays!.openModal(mountForComponent(<>{node}</>), options);
+    return services.overlays!.openModal(reactMount(<>{node}</>), options);
   };
 
   const overlays: KibanaReactOverlays = {

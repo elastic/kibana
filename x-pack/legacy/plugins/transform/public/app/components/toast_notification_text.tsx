@@ -19,7 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { npStart } from 'ui/new_platform';
-import { mountForComponent } from '../../../../../../../src/plugins/kibana_react/public';
+import { reactMount } from '../../../../../../../src/plugins/kibana_react/public';
 
 const MAX_SIMPLE_MESSAGE_LENGTH = 140;
 
@@ -44,7 +44,7 @@ export const ToastNotificationText: FC<{ text: any }> = ({ text }) => {
 
   const openModal = () => {
     const modal = npStart.core.overlays.openModal(
-      mountForComponent(
+      reactMount(
         <EuiModal onClose={() => modal.close()}>
           <EuiModalHeader>
             <EuiModalHeaderTitle>
