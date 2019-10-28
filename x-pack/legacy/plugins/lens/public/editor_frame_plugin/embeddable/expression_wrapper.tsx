@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 
 import { I18nProvider } from '@kbn/i18n/react';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -31,16 +31,9 @@ export function ExpressionWrapper({
   expression,
   context,
 }: ExpressionWrapperProps) {
-  const [expressionError, setExpressionError] = useState<unknown>(undefined);
-  useEffect(() => {
-    // reset expression error if component attempts to run it again
-    if (expressionError) {
-      setExpressionError(undefined);
-    }
-  }, [expression, context]);
   return (
     <I18nProvider>
-      {expression === '' || expressionError ? (
+      {expression === '' ? (
         <EuiFlexGroup direction="column" alignItems="center" justifyContent="center">
           <EuiFlexItem>
             <EuiIcon type="alert" color="danger" />
@@ -55,14 +48,12 @@ export function ExpressionWrapper({
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
-        <ExpressionRendererComponent
-          className="lnsExpressionRenderer"
-          expression={expression}
-          onRenderFailure={(e: unknown) => {
-            setExpressionError(e);
-          }}
-          searchContext={{ ...context, type: 'kibana_context' }}
-        />
+        <div className="lnsExpressionRenderer">
+          <ExpressionRendererComponent
+            expression={expression}
+            searchContext={{ ...context, type: 'kibana_context' }}
+          />
+        </div>
       )}
     </I18nProvider>
   );
