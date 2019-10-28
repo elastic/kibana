@@ -73,7 +73,7 @@ export const EditFieldFormRow = React.memo(
           </EuiFlexItem>
         )}
         <EuiFlexItem>
-          <EuiFlexGroup direction={direction}>
+          <EuiFlexGroup direction={direction} gutterSize="s">
             {(title || description) && (
               <EuiFlexItem
                 style={{
