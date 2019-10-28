@@ -257,16 +257,13 @@ export const PARAMETERS_DEFINITION = {
   },
   norms: {
     fieldConfig: {
-      label: 'Norms',
-      type: FIELD_TYPES.CHECKBOX,
       defaultValue: true,
     },
   },
   term_vector: {
     fieldConfig: {
-      label: 'Term vectors',
-      type: FIELD_TYPES.CHECKBOX,
-      defaultValue: false,
+      type: FIELD_TYPES.SELECT,
+      defaultValue: 'no',
     },
   },
   position_increment_gap: {
