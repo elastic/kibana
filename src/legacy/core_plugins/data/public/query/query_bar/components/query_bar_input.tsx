@@ -367,9 +367,9 @@ export class QueryBarInputUI extends Component<Props, State> {
               <p>
                 <FormattedMessage
                   id="data.query.queryBar.KQLNestedQuerySyntaxInfoText"
-                  defaultMessage="It looks like you're querying on a nested field for the first time. Nested queries need
-                   to be constructed in different ways depending on what results you're looking for. KQL has a special
-                   syntax that gives you full control over your nested queries. Read all about it in the {link}."
+                  defaultMessage="It looks like you're querying on a nested field.
+                  You can construct KQL syntax for nested queries in different ways, depending on the results you want.
+                  Learn more in our {link}."
                   values={{
                     link: (
                       <EuiLink href={documentationLinks.query.kueryQuerySyntax} target="_blank">
