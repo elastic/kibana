@@ -49,7 +49,6 @@ function isTermsFieldFormat(
 }
 
 const config = chrome.getUiSettingsClient();
-const fieldFormats = npSetup.plugins.data.fieldFormats;
 
 const getConfig = (...args: any[]): any => config.get(...args);
 const getDefaultFieldFormat = () => ({ convert: identity });
@@ -58,6 +57,7 @@ const getFieldFormat = (
   id?: FIELD_FORMAT_IDS | string,
   params: object = {}
 ): FIELD_FORMATS_INSTANCES[number] | Record<string, any> => {
+  const fieldFormats = npSetup.plugins.data.fieldFormats;
   const Format = fieldFormats.getType(id as FIELD_FORMAT_IDS);
 
   if (Format) {

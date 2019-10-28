@@ -81,6 +81,8 @@ import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 // This loads Ace editor's "groovy" mode, used below to highlight the script.
 import 'brace/mode/groovy';
 
+const getFieldFormats = () => npSetup.plugins.data.fieldFormats;
+
 export class FieldEditorComponent extends PureComponent {
   static propTypes = {
     indexPattern: PropTypes.object.isRequired,
@@ -122,7 +124,6 @@ export class FieldEditorComponent extends PureComponent {
     };
     this.supportedLangs = getSupportedScriptingLanguages();
     this.deprecatedLangs = getDeprecatedScriptingLanguages();
-    this.fieldFormats = npSetup.plugins.data.fieldFormats;
     this.init();
   }
 
@@ -139,10 +140,10 @@ export class FieldEditorComponent extends PureComponent {
     const fieldTypes = get(FIELD_TYPES_BY_LANG, field.lang, DEFAULT_FIELD_TYPES);
     field.type = fieldTypes.includes(field.type) ? field.type : fieldTypes[0];
 
-    const DefaultFieldFormat = this.fieldFormats.getDefaultType(field.type, field.esTypes);
+    const DefaultFieldFormat = getFieldFormats().getDefaultType(field.type, field.esTypes);
     const fieldTypeFormats = [
       getDefaultFormat(DefaultFieldFormat),
-      ...this.fieldFormats.getByFieldType(field.type),
+      ...getFieldFormats().getByFieldType(field.type),
     ];
 
     this.setState({
@@ -167,12 +168,12 @@ export class FieldEditorComponent extends PureComponent {
   onTypeChange = (type) => {
     const { getConfig } = this.props.helpers;
     const { field } = this.state;
-    const DefaultFieldFormat = this.fieldFormats.getDefaultType(type);
+    const DefaultFieldFormat = getFieldFormats().getDefaultType(type);
     field.type = type;
 
     const fieldTypeFormats = [
       getDefaultFormat(DefaultFieldFormat),
-      ...this.fieldFormats.getByFieldType(field.type),
+      ...getFieldFormats().getByFieldType(field.type),
     ];
 
     const FieldFormat = fieldTypeFormats[0];

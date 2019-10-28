@@ -24,4 +24,5 @@ export const [getNotifications, setNotifications] = createGetterSetter<Notificat
   'Notifications'
 );
 
+// TODO: Replace 'any' type.
 export const [getFieldFormats, setFieldFormats] = createGetterSetter<any>('FieldFormats');

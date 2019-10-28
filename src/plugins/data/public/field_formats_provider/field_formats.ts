@@ -36,7 +36,7 @@ interface FieldType {
 export class FieldFormatRegisty {
   private fieldFormats: Map<FIELD_FORMAT_IDS, DERIVED_FIELD_FORMATS[number]>;
   private uiSettings!: UiSettingsClientContract;
-  private defaultMap: { [key in ES_FIELD_TYPES | string]?: FieldType } & {
+  private defaultMap: Record<string, FieldType> & {
     _default_: FieldType;
   };
 

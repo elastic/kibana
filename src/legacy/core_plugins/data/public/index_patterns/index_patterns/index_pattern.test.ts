@@ -27,18 +27,11 @@ import mockLogStashFields from '../../../../../../fixtures/logstash_fields';
 
 import { stubbedSavedObjectIndexPattern } from '../../../../../../fixtures/stubbed_saved_object_index_pattern';
 import { Field } from '../index_patterns_service';
-import { setNotifications } from '../services';
+import { setNotifications, setFieldFormats } from '../services';
 
 // Temporary disable eslint, will be removed after moving to new platform folder
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { notificationServiceMock } from '../../../../../../core/public/notifications/notifications_service.mock';
-
-jest.mock('../services', () => ({
-  ...jest.requireActual('../services'),
-  getFieldFormats: jest.fn(() => ({
-    getDefaultInstance: jest.fn(),
-  })),
-}));
 
 jest.mock('ui/new_platform');
 
@@ -145,6 +138,9 @@ describe('IndexPattern', () => {
   // create an indexPattern instance for each test
   beforeEach(() => {
     setNotifications(notifications);
+    setFieldFormats({
+      getDefaultInstance: jest.fn(),
+    });
 
     return create(indexPatternId).then((pattern: IndexPattern) => {
       indexPattern = pattern;

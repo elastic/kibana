@@ -18,14 +18,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { npSetup } from 'ui/new_platform';
 // @ts-ignore
 import { ObjDefine } from './obj_define';
 import { FieldFormat } from '../../../../../../plugins/data/public';
 // @ts-ignore
 import { shortenDottedString } from '../../../../../core_plugins/kibana/common/utils/shorten_dotted_string';
 import { IndexPattern } from '../index_patterns';
-import { getNotifications } from '../services';
+import { getNotifications, getFieldFormats } from '../services';
 
 import { getKbnFieldType } from '../../../../../../plugins/data/public';
 
@@ -116,7 +115,7 @@ export class Field implements FieldType {
 
     let format = spec.format;
     if (!format || !(format instanceof FieldFormat)) {
-      const fieldFormats = npSetup.plugins.data.fieldFormats;
+      const fieldFormats = getFieldFormats();
 
       format =
         indexPattern.fieldFormatMap[spec.name] ||
