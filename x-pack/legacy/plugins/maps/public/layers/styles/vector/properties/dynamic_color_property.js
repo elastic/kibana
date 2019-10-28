@@ -25,10 +25,16 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     mbMap.setPaintProperty(pointLayerId, 'circle-stroke-opacity', alpha);
   }
 
-  syncLineColorWithMb(lineLayerId, mbMap, alpha) {
+  syncFillColorWithMb(mbLayerId, mbMap, alpha) {
     const color = this._getMbColor();
-    mbMap.setPaintProperty(lineLayerId, 'line-color', color);
-    mbMap.setPaintProperty(lineLayerId, 'line-opacity', alpha);
+    mbMap.setPaintProperty(mbLayerId, 'fill-color', color);
+    mbMap.setPaintProperty(mbLayerId, 'fill-opacity', alpha);
+  }
+
+  syncLineColorWithMb(mbLayerId, mbMap, alpha) {
+    const color = this._getMbColor();
+    mbMap.setPaintProperty(mbLayerId, 'line-color', color);
+    mbMap.setPaintProperty(mbLayerId, 'line-opacity', alpha);
   }
 
   _getMbColor() {

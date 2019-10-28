@@ -489,15 +489,7 @@ export class VectorStyle extends AbstractStyle {
   }
 
   setMBPaintProperties({ alpha, mbMap, fillLayerId, lineLayerId }) {
-    if (this._descriptor.properties.fillColor) {
-      const color = this._getMBColor(vectorStyles.FILL_COLOR, this._descriptor.properties.fillColor);
-      mbMap.setPaintProperty(fillLayerId, 'fill-color', color);
-      mbMap.setPaintProperty(fillLayerId, 'fill-opacity', alpha);
-    } else {
-      mbMap.setPaintProperty(fillLayerId, 'fill-color', null);
-      mbMap.setPaintProperty(fillLayerId, 'fill-opacity', 0);
-    }
-
+    this._fillColorStyleProperty.syncFillColorWithMb(fillLayerId, mbMap, alpha);
     this._lineColorStyleProperty.syncLineColorWithMb(lineLayerId, mbMap, alpha);
     this._lineWidthStyleProperty.syncLineWidthWithMb(lineLayerId, mbMap);
   }
