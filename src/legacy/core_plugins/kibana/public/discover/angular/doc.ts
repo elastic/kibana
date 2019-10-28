@@ -39,11 +39,11 @@ app.directive('discoverDoc', function(reactDirective: any) {
 
 app.config(($routeProvider: any) => {
   $routeProvider
-    .when('/doc/:indexPattern/:index/:type', {
-      redirectTo: '/doc/:indexPattern/:index',
+    .when('/discover/doc/:indexPattern/:index/:type', {
+      redirectTo: '/discover/doc/:indexPattern/:index',
     })
     // the new route, es 7 deprecated types, es 8 removed them
-    .when('/doc/:indexPattern/:index', {
+    .when('/discover/doc/:indexPattern/:index', {
       controller: ($scope: any, $route: any, es: any) => {
         timefilter.disableAutoRefreshSelector();
         timefilter.disableTimeRangeSelector();

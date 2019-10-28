@@ -19,12 +19,12 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { getServices, subscribeWithScope } from './../kibana_services';
+import { getAngularModule, getServices, subscribeWithScope } from './../kibana_services';
 
 import './context_app';
 import contextAppRouteTemplate from './context.html';
 import { getRootBreadcrumbs } from '../breadcrumbs';
-const { FilterBarQueryFilterProvider, uiRoutes, chrome } = getServices();
+const { FilterBarQueryFilterProvider, chrome } = getServices();
 
 const k7Breadcrumbs = $route => {
   const { indexPattern } = $route.current.locals;
@@ -44,23 +44,26 @@ const k7Breadcrumbs = $route => {
   ];
 };
 
-uiRoutes
+getAngularModule().config(($routeProvider) => {
+  $routeProvider
   // deprecated route, kept for compatibility
   // should be removed in the future
-  .when('/context/:indexPatternId/:type/:id*', {
-    redirectTo: '/context/:indexPatternId/:id',
-  })
-  .when('/context/:indexPatternId/:id*', {
-    controller: ContextAppRouteController,
-    k7Breadcrumbs,
-    controllerAs: 'contextAppRoute',
-    resolve: {
-      indexPattern: function ($route, indexPatterns) {
-        return indexPatterns.get($route.current.params.indexPatternId);
+    .when('/discover/context/:indexPatternId/:type/:id*', {
+      redirectTo: '/discover/context/:indexPatternId/:id',
+    })
+    .when('/discover/context/:indexPatternId/:id*', {
+      controller: ContextAppRouteController,
+      k7Breadcrumbs,
+      controllerAs: 'contextAppRoute',
+      resolve: {
+        indexPattern: function ($route, indexPatterns) {
+          return indexPatterns.get($route.current.params.indexPatternId);
+        },
       },
-    },
-    template: contextAppRouteTemplate,
-  });
+      template: contextAppRouteTemplate,
+    });
+});
+
 
 function ContextAppRouteController($routeParams, $scope, AppState, config, indexPattern, Private) {
   const queryFilter = Private(FilterBarQueryFilterProvider);
