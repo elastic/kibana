@@ -663,11 +663,11 @@ export interface AuthenticationsOverTimeData {
 }
 
 export interface MatrixOverTimeHistogramData {
-  x: number;
+  x?: Maybe<number>;
 
-  y: number;
+  y?: Maybe<number>;
 
-  g: string;
+  g?: Maybe<string>;
 }
 
 export interface TimelineData {
@@ -1584,6 +1584,8 @@ export interface NetworkDnsData {
   pageInfo: PageInfoPaginated;
 
   inspect?: Maybe<Inspect>;
+
+  histogram: MatrixOverOrdinalHistogramData[];
 }
 
 export interface NetworkDnsEdges {
@@ -1604,6 +1606,14 @@ export interface NetworkDnsItem {
   queryCount?: Maybe<number>;
 
   uniqueDomains?: Maybe<number>;
+}
+
+export interface MatrixOverOrdinalHistogramData {
+  x?: Maybe<string>;
+
+  y?: Maybe<number>;
+
+  g?: Maybe<string>;
 }
 
 export interface NetworkHttpData {
@@ -3773,25 +3783,25 @@ export namespace AuthenticationsOverTimeDataResolvers {
 
 export namespace MatrixOverTimeHistogramDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = MatrixOverTimeHistogramData> {
-    x?: XResolver<number, TypeParent, TContext>;
+    x?: XResolver<Maybe<number>, TypeParent, TContext>;
 
-    y?: YResolver<number, TypeParent, TContext>;
+    y?: YResolver<Maybe<number>, TypeParent, TContext>;
 
-    g?: GResolver<string, TypeParent, TContext>;
+    g?: GResolver<Maybe<string>, TypeParent, TContext>;
   }
 
   export type XResolver<
-    R = number,
+    R = Maybe<number>,
     Parent = MatrixOverTimeHistogramData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
   export type YResolver<
-    R = number,
+    R = Maybe<number>,
     Parent = MatrixOverTimeHistogramData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
   export type GResolver<
-    R = string,
+    R = Maybe<string>,
     Parent = MatrixOverTimeHistogramData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -6861,6 +6871,8 @@ export namespace NetworkDnsDataResolvers {
     pageInfo?: PageInfoResolver<PageInfoPaginated, TypeParent, TContext>;
 
     inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
+
+    histogram?: HistogramResolver<MatrixOverOrdinalHistogramData[], TypeParent, TContext>;
   }
 
   export type EdgesResolver<
@@ -6880,6 +6892,11 @@ export namespace NetworkDnsDataResolvers {
   > = Resolver<R, Parent, TContext>;
   export type InspectResolver<
     R = Maybe<Inspect>,
+    Parent = NetworkDnsData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type HistogramResolver<
+    R = MatrixOverOrdinalHistogramData[],
     Parent = NetworkDnsData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -6947,6 +6964,32 @@ export namespace NetworkDnsItemResolvers {
   export type UniqueDomainsResolver<
     R = Maybe<number>,
     Parent = NetworkDnsItem,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
+
+export namespace MatrixOverOrdinalHistogramDataResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = MatrixOverOrdinalHistogramData> {
+    x?: XResolver<Maybe<string>, TypeParent, TContext>;
+
+    y?: YResolver<Maybe<number>, TypeParent, TContext>;
+
+    g?: GResolver<Maybe<string>, TypeParent, TContext>;
+  }
+
+  export type XResolver<
+    R = Maybe<string>,
+    Parent = MatrixOverOrdinalHistogramData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type YResolver<
+    R = Maybe<number>,
+    Parent = MatrixOverOrdinalHistogramData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type GResolver<
+    R = Maybe<string>,
+    Parent = MatrixOverOrdinalHistogramData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
 }
@@ -8466,6 +8509,7 @@ export type IResolvers<TContext = SiemContext> = {
   NetworkDnsData?: NetworkDnsDataResolvers.Resolvers<TContext>;
   NetworkDnsEdges?: NetworkDnsEdgesResolvers.Resolvers<TContext>;
   NetworkDnsItem?: NetworkDnsItemResolvers.Resolvers<TContext>;
+  MatrixOverOrdinalHistogramData?: MatrixOverOrdinalHistogramDataResolvers.Resolvers<TContext>;
   NetworkHttpData?: NetworkHttpDataResolvers.Resolvers<TContext>;
   NetworkHttpEdges?: NetworkHttpEdgesResolvers.Resolvers<TContext>;
   NetworkHttpItem?: NetworkHttpItemResolvers.Resolvers<TContext>;

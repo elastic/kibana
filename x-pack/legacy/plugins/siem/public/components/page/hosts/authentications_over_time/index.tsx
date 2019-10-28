@@ -8,16 +8,19 @@ import React from 'react';
 
 import * as i18n from './translation';
 import { getCustomChartData } from './utils';
-import { MatrixOverTimeHistogram, MatrixOverTimeBasicProps } from '../../../matrix_over_time';
+import { MatrixHistogram, MatrixHistogramBasicProps } from '../../../matrix_over_time';
+import { MatrixOverTimeHistogramData } from '../../../../graphql/types';
 
-export const AuthenticationsOverTimeHistogram = (props: MatrixOverTimeBasicProps) => {
+export const AuthenticationsOverTimeHistogram = (
+  props: MatrixHistogramBasicProps<MatrixOverTimeHistogramData>
+) => {
   const dataKey = 'authenticationsOverTime';
   const { data, ...matrixOverTimeProps } = props;
 
   const customChartData = getCustomChartData(data);
 
   return (
-    <MatrixOverTimeHistogram
+    <MatrixHistogram
       title={i18n.AUTHENTICATIONS_COUNT}
       dataKey={dataKey}
       data={data}

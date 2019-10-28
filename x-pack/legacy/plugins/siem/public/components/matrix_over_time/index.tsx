@@ -7,22 +7,21 @@
 import React, { useState, useEffect } from 'react';
 import { ScaleType, niceTimeFormatter, Position } from '@elastic/charts';
 
-import { getOr, head, last } from 'lodash/fp';
 import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 import { EuiLoadingContent } from '@elastic/eui';
 import { BarChart } from '../charts/barchart';
 import { HeaderPanel } from '../header_panel';
 import { ChartSeriesData, UpdateDateRange } from '../charts/common';
-import { MatrixOverTimeHistogramData } from '../../graphql/types';
+import { MatrixOverTimeHistogramData, MatrixOverOrdinalHistogramData } from '../../graphql/types';
 import { DEFAULT_DARK_MODE } from '../../../common/constants';
 import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
 import { Loader } from '../loader';
 import { Panel } from '../panel';
 
-export interface MatrixOverTimeBasicProps {
+export interface MatrixHistogramBasicProps<T> {
   id: string;
-  data: MatrixOverTimeHistogramData[];
+  data: T[];
   loading: boolean;
   startDate: number;
   endDate: number;
@@ -30,21 +29,27 @@ export interface MatrixOverTimeBasicProps {
   totalCount: number;
 }
 
-export interface MatrixOverTimeProps extends MatrixOverTimeBasicProps {
+export interface MatrixHistogramProps<T> extends MatrixHistogramBasicProps<T> {
   customChartData?: ChartSeriesData[];
   title: string;
   subtitle?: string;
   dataKey: string;
+  scaleType?: ScaleType;
 }
 
-const getBarchartConfigs = (from: number, to: number, onBrushEnd: UpdateDateRange) => ({
+const getBarchartConfigs = (
+  from: number,
+  to: number,
+  onBrushEnd: UpdateDateRange,
+  scaleType: ScaleType = ScaleType.Time
+) => ({
   series: {
-    xScaleType: ScaleType.Time,
+    xScaleType: ScaleType.Ordinal,
     yScaleType: ScaleType.Linear,
     stackAccessors: ['g'],
   },
   axis: {
-    xTickFormatter: niceTimeFormatter([from, to]),
+    xTickFormatter: scaleType === ScaleType.Time ? niceTimeFormatter([from, to]) : undefined,
     yTickFormatter: (value: string | number): string => value.toLocaleString(),
     tickSize: 8,
   },
@@ -73,7 +78,7 @@ const getBarchartConfigs = (from: number, to: number, onBrushEnd: UpdateDateRang
   customHeight: 324,
 });
 
-export const MatrixOverTimeHistogram = ({
+export const MatrixHistogram = ({
   customChartData,
   id,
   loading,
@@ -85,10 +90,9 @@ export const MatrixOverTimeHistogram = ({
   title,
   subtitle,
   totalCount,
-}: MatrixOverTimeProps) => {
-  const bucketStartDate = getOr(startDate, 'x', head(data));
-  const bucketEndDate = getOr(endDate, 'x', last(data));
-  const barchartConfigs = getBarchartConfigs(bucketStartDate!, bucketEndDate!, updateDateRange);
+  scaleType,
+}: MatrixHistogramProps<MatrixOverTimeHistogramData | MatrixOverOrdinalHistogramData>) => {
+  const barchartConfigs = getBarchartConfigs(startDate!, endDate!, updateDateRange, scaleType);
   const [showInspect, setShowInspect] = useState(false);
   const [darkMode] = useKibanaUiSetting(DEFAULT_DARK_MODE);
   const [loadingInitial, setLoadingInitial] = useState(false);

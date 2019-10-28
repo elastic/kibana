@@ -69,9 +69,9 @@ export const eventsSchema = gql`
   }
 
   type MatrixOverTimeHistogramData {
-    x: Float!
-    y: Float!
-    g: String!
+    x: Float
+    y: Float
+    g: String
   }
 
   type EventsOverTimeData {

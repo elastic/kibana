@@ -661,11 +661,11 @@ export interface AuthenticationsOverTimeData {
 }
 
 export interface MatrixOverTimeHistogramData {
-  x: number;
+  x?: Maybe<number>;
 
-  y: number;
+  y?: Maybe<number>;
 
-  g: string;
+  g?: Maybe<string>;
 }
 
 export interface TimelineData {
@@ -1582,6 +1582,8 @@ export interface NetworkDnsData {
   pageInfo: PageInfoPaginated;
 
   inspect?: Maybe<Inspect>;
+
+  histogram: MatrixOverOrdinalHistogramData[];
 }
 
 export interface NetworkDnsEdges {
@@ -1602,6 +1604,14 @@ export interface NetworkDnsItem {
   queryCount?: Maybe<number>;
 
   uniqueDomains?: Maybe<number>;
+}
+
+export interface MatrixOverOrdinalHistogramData {
+  x?: Maybe<string>;
+
+  y?: Maybe<number>;
+
+  g?: Maybe<string>;
 }
 
 export interface NetworkHttpData {
@@ -2359,11 +2369,11 @@ export namespace GetAuthenticationsOverTimeQuery {
   export type _AuthenticationsOverTime = {
     __typename?: 'MatrixOverTimeHistogramData';
 
-    x: number;
+    x: Maybe<number>;
 
-    y: number;
+    y: Maybe<number>;
 
-    g: string;
+    g: Maybe<string>;
   };
 
   export type Inspect = {
@@ -2550,11 +2560,11 @@ export namespace GetEventsOverTimeQuery {
   export type _EventsOverTime = {
     __typename?: 'MatrixOverTimeHistogramData';
 
-    x: number;
+    x: Maybe<number>;
 
-    y: number;
+    y: Maybe<number>;
 
-    g: string;
+    g: Maybe<string>;
   };
 
   export type Inspect = {
@@ -3223,6 +3233,8 @@ export namespace GetNetworkDnsQuery {
     pageInfo: PageInfo;
 
     inspect: Maybe<Inspect>;
+
+    histogram: Histogram[];
   };
 
   export type Edges = {
@@ -3271,6 +3283,16 @@ export namespace GetNetworkDnsQuery {
     dsl: string[];
 
     response: string[];
+  };
+
+  export type Histogram = {
+    __typename?: 'MatrixOverOrdinalHistogramData';
+
+    x: Maybe<string>;
+
+    y: Maybe<number>;
+
+    g: Maybe<string>;
   };
 }
 

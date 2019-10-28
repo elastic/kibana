@@ -16,6 +16,7 @@ import {
   NetworkDnsEdges,
   NetworkDnsSortField,
   PageInfoPaginated,
+  MatrixOverOrdinalHistogramData,
 } from '../../graphql/types';
 import { inputsModel, networkModel, networkSelectors, State, inputsSelectors } from '../../store';
 import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
@@ -35,6 +36,7 @@ export interface NetworkDnsArgs {
   pageInfo: PageInfoPaginated;
   refetch: inputsModel.Refetch;
   totalCount: number;
+  histogram: MatrixOverOrdinalHistogramData[];
 }
 
 export interface OwnProps extends QueryTemplatePaginatedProps {
@@ -129,6 +131,7 @@ class NetworkDnsComponentQuery extends QueryTemplatePaginated<
             pageInfo: getOr({}, 'source.NetworkDns.pageInfo', data),
             refetch: this.memoizedRefetchQuery(variables, limit, refetch),
             totalCount: getOr(-1, 'source.NetworkDns.totalCount', data),
+            histogram: getOr(null, 'source.NetworkDns.histogram', data),
           });
         }}
       </Query>

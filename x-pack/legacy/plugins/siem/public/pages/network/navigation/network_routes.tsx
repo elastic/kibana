@@ -43,6 +43,17 @@ export const NetworkRoutes = ({
     [scoreIntervalToDateTime, setAbsoluteRangeDatePicker]
   );
 
+  const updateDateRange = useCallback(
+    (score, interval) => {
+      setAbsoluteRangeDatePicker({
+        id: 'global',
+        from,
+        to,
+      });
+    },
+    [setAbsoluteRangeDatePicker]
+  );
+
   const tabProps = {
     networkPagePath,
     type,
@@ -52,6 +63,7 @@ export const NetworkRoutes = ({
     from,
     indexPattern,
     setQuery,
+    updateDateRange,
   };
 
   const anomaliesProps = {
