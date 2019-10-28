@@ -20,13 +20,13 @@ export function Screenshots(props: ScreenshotProps) {
 
   // for now, just get first image
   const image = images[0];
-  const hasCaption: boolean = images[0].title ? true : false;
+  const hasCaption = image.title ? true : false;
 
   const horizontalPadding: number = parseInt(theme.eui.paddingSizes.xl, 10) * 2;
-  const fullVerticalPadding: number = parseInt(theme.eui.paddingSizes.xl, 10) * 1.75;
+  const verticalPadding: number = parseInt(theme.eui.paddingSizes.xl, 10) * 1.75;
   const padding = hasCaption
-    ? `${theme.eui.paddingSizes.xl} ${horizontalPadding}px ${fullVerticalPadding}px`
-    : `${fullVerticalPadding}px ${horizontalPadding}px`;
+    ? `${theme.eui.paddingSizes.xl} ${horizontalPadding}px ${verticalPadding}px`
+    : `${verticalPadding}px ${horizontalPadding}px`;
 
   const ScreenshotsContainer = styled(EuiFlexGroup)`
     background: linear-gradient(360deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0) 100%),
@@ -48,7 +48,7 @@ export function Screenshots(props: ScreenshotProps) {
       <ScreenshotsContainer gutterSize="none" direction="column" alignItems="center">
         {hasCaption && (
           <NestedEuiFlexItem>
-            <EuiText color="ghost" aria-label="screenschot image caption">
+            <EuiText color="ghost" aria-label="screenshot image caption">
               {image.title}
             </EuiText>
             <EuiSpacer />
@@ -57,7 +57,7 @@ export function Screenshots(props: ScreenshotProps) {
         <NestedEuiFlexItem>
           <EuiImage
             url={toImage(image.src)}
-            alt="screenhot image preview"
+            alt="screenshot image preview"
             size="l"
             allowFullScreen
           />
