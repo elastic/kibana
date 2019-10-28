@@ -17,16 +17,17 @@
  * under the License.
  */
 
-import * as React from 'react';
-import { CoreStart } from '../../../../core/public';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { I18nProvider } from '@kbn/i18n/react';
+import { MountPoint } from 'kibana/public';
 
-export interface KibanaReactOverlays {
-  openFlyout: (
-    node: React.ReactNode,
-    options?: Parameters<CoreStart['overlays']['openFlyout']>['1']
-  ) => ReturnType<CoreStart['overlays']['openFlyout']>;
-  openModal: (
-    node: React.ReactNode,
-    options?: Parameters<CoreStart['overlays']['openFlyout']>['1']
-  ) => ReturnType<CoreStart['overlays']['openModal']>;
-}
+/**
+ * Mount converter for react components.
+ *
+ * @param component to get a mount for
+ */
+export const reactMount = (component: React.ReactNode): MountPoint => (element: HTMLElement) => {
+  ReactDOM.render(<I18nProvider>{component}</I18nProvider>, element);
+  return () => ReactDOM.unmountComponentAtNode(element);
+};
