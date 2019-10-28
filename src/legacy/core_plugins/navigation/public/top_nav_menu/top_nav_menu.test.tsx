@@ -27,21 +27,11 @@ const timefilterSetupMock = timefilterServiceMock.createSetupContract();
 
 jest.mock('ui/new_platform');
 
-jest.mock('../../../../../../src/legacy/core_plugins/data/public/legacy', () => ({
-  start: {
-    ui: {
-      SearchBar: () => {},
-    },
-  },
-  setup: {},
-}));
-
-jest.mock('../../../../core_plugins/data/public', () => {
-  return {
+const dataShim = {
+  ui: {
     SearchBar: () => <div className="searchBar"></div>,
-    SearchBarProps: {},
-  };
-});
+  },
+};
 
 describe('TopNavMenu', () => {
   const TOP_NAV_ITEM_SELECTOR = 'TopNavMenuItem';
@@ -84,7 +74,12 @@ describe('TopNavMenu', () => {
 
   it('Should render search bar', () => {
     const component = shallowWithIntl(
-      <TopNavMenu appName={'test'} showSearchBar={true} timeHistory={timefilterSetupMock.history} />
+      <TopNavMenu
+        appName={'test'}
+        showSearchBar={true}
+        timeHistory={timefilterSetupMock.history}
+        data={dataShim as any}
+      />
     );
 
     expect(component.find(TOP_NAV_ITEM_SELECTOR).length).toBe(0);

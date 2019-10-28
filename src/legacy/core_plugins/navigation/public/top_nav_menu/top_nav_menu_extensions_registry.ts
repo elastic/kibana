@@ -17,12 +17,30 @@
  * under the License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('core plugins', () => {
-    loadTestFile(require.resolve('./applications'));
-    loadTestFile(require.resolve('./legacy_plugins'));
-    loadTestFile(require.resolve('./server_plugins'));
-    loadTestFile(require.resolve('./ui_plugins'));
-    loadTestFile(require.resolve('./top_nav'));
-  });
+import { TopNavMenuData } from './top_nav_menu_data';
+
+export class TopNavMenuExtensionsRegistry {
+  private menuItems: TopNavMenuData[];
+
+  constructor() {
+    this.menuItems = [];
+  }
+
+  /** @public **/
+  // Items registered into this registry will be appended to any TopNavMenu rendered in any application.
+  public register(menuItem: TopNavMenuData) {
+    this.menuItems.push(menuItem);
+  }
+
+  /** @internal **/
+  public getAll() {
+    return this.menuItems;
+  }
+
+  /** @internal **/
+  public clear() {
+    this.menuItems.length = 0;
+  }
 }
+
+export type TopNavMenuExtensionsRegistrySetup = Pick<TopNavMenuExtensionsRegistry, 'register'>;
