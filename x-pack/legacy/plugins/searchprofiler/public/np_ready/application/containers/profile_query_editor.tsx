@@ -14,7 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { Editor } from '../editor';
+import { Editor, EditorInstance } from '../editor';
 import { useDoProfile } from '../hooks';
 import { ShardSerialized } from '../types';
 import { useAppContext } from '../app_context';
@@ -33,7 +33,7 @@ const INITIAL_EDITOR_VALUE = `{
 }`;
 
 export const ProfileQueryEditor = memo(({ onResponse, onProfileClick }: Props) => {
-  const editorValueGetter = useRef<() => string>(null as any);
+  const editorRef = useRef<EditorInstance>(null as any);
   const indexInputRef = useRef<HTMLInputElement>(null as any);
   const typeInputRef = useRef<HTMLInputElement>(null as any);
 
@@ -42,11 +42,18 @@ export const ProfileQueryEditor = memo(({ onResponse, onProfileClick }: Props) =
 
   const handleProfileClick = async () => {
     onProfileClick();
-    const result = await doProfile({
-      query: editorValueGetter.current!(),
+    const { current: editor } = editorRef;
+    editor.clearErrorAnnotations();
+    const { data: result, error } = await doProfile({
+      query: editorRef.current.getValue(),
       index: indexInputRef.current.value,
       type: typeInputRef.current.value,
     });
+    if (error) {
+      editor.addErrorAnnotation(error);
+      editor.focus();
+      return;
+    }
     if (result === null) {
       return;
     }
@@ -87,7 +94,7 @@ export const ProfileQueryEditor = memo(({ onResponse, onProfileClick }: Props) =
         </EuiFlexGroup>
       </EuiForm>
       <Editor
-        valueGetterRef={editorValueGetter}
+        onEditorReady={editorInstance => (editorRef.current = editorInstance)}
         licenseEnabled={licenseEnabled}
         initialValue={INITIAL_EDITOR_VALUE}
       />

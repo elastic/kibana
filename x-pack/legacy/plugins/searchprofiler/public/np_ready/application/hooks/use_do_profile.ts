@@ -15,11 +15,18 @@ interface Args {
   type: string;
 }
 
+interface ReturnValue {
+  data: ShardSerialized[] | null;
+  error?: {
+    row: number;
+  };
+}
+
 export const useDoProfile = () => {
   const { http, notifications, formatAngularHttpError, licenseEnabled } = useAppContext();
-  return async ({ query, index, type }: Args): Promise<ShardSerialized[] | null> => {
+  return async ({ query, index, type }: Args): Promise<ReturnValue> => {
     if (!licenseEnabled) {
-      return null;
+      return { data: null };
     }
     const { error, parsed } = checkForParseErrors(query);
     if (error) {
@@ -28,11 +35,11 @@ export const useDoProfile = () => {
           defaultMessage: 'JSON parse error',
         }),
       });
-      return null;
+      return { data: null };
     }
     // Shortcut the network request if we have json with shards already...
     if (parsed.profile && parsed.profile.shards) {
-      return parsed.profile.shards;
+      return { data: parsed.profile.shards };
     }
 
     const payload: Record<string, any> = { query };
@@ -54,20 +61,19 @@ export const useDoProfile = () => {
       });
 
       if (!resp.ok) {
-        notifications.toasts.addDanger(resp.data.err.msg);
-        // TODO: Get this error feedback working again
-        // try {
-        // const regex = /line=([0-9]+) col=([0-9]+)/g;
-        // const [, row, column] = regex.exec(resp.data.err.msg);
-        //
-        // $scope.markers.push($scope.ace.session.addMarker(
-        //   new Range(row - 1, 0, row - 1, column), 'errorMarker', 'fullLine'));
-        // } catch (e) {
-        // Best attempt, not a big deal if we can't highlight the line
-        // }
-        return null;
+        notifications.toasts.addDanger(resp.err.msg);
+        // Very lame way to get the column and line from the error message
+        const regex = /line=([0-9]+)/g;
+        const match = regex.exec(resp.err.msg);
+        if (!match) {
+          // Best attempt, not a big deal if we can't highlight the line
+          return { data: null };
+        }
+        const [, lineNumber] = match;
+        return { data: null, error: { row: parseInt(lineNumber - 1, 10) } };
       }
-      return resp.resp.profile.shards;
+
+      return { data: resp.resp.profile.shards };
     } catch (e) {
       try {
         // Is this a known error type?
@@ -81,7 +87,7 @@ export const useDoProfile = () => {
           }),
         });
       }
-      return null;
+      return { data: null };
     }
   };
 };

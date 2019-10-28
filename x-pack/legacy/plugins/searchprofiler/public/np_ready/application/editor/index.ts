@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { Editor, Props } from './editor';
+export { Editor, Props, EditorInstance } from './editor';

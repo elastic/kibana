@@ -4,33 +4,77 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo, useRef, useEffect, useState, MutableRefObject } from 'react';
-import { Editor as AceEditor } from 'brace';
+import React, { memo, useRef, useEffect, useState } from 'react';
+import ace, { Editor as AceEditor } from 'brace';
+
+const _AceRange = ace.acequire('ace/range').Range;
 
 import { initializeEditor } from './init_editor';
 import { useUIAceKeyboardMode } from './use_ui_ace_keyboard_mode';
 
+interface EditorShim {
+  addErrorAnnotation: (pos: { row: number }) => void;
+  clearErrorAnnotations: () => void;
+  getValue(): string;
+  focus(): void;
+}
+
+export type EditorInstance = EditorShim;
+
 export interface Props {
   licenseEnabled: boolean;
   initialValue: string;
-  /**
-   * Hack to expose the editor instance's getValue(). This could be probably be better placed
-   * in React.Context.
-   */
-  valueGetterRef: MutableRefObject<() => string | null>;
+  onEditorReady: (editor: EditorShim) => void;
 }
 
-export const Editor = memo(({ licenseEnabled, initialValue, valueGetterRef }: Props) => {
+const clearErrorAnnotations = (aceEditor: AceEditor) => {
+  const markerIds = aceEditor.session.getMarkers(true);
+  if (markerIds) {
+    Object.keys(markerIds).forEach(id => aceEditor.session.removeMarker(parseInt(id, 10)));
+  }
+};
+
+const createEditorShim = (aceEditor: AceEditor): EditorShim => {
+  return {
+    clearErrorAnnotations() {
+      clearErrorAnnotations(aceEditor);
+    },
+    addErrorAnnotation({ row }) {
+      const lineLength = aceEditor.session.getLine(row).length - 1;
+      aceEditor.session.addMarker(
+        new _AceRange(row, 0, row, lineLength),
+        'errorMarker',
+        'fullLine',
+        true
+      );
+    },
+    getValue() {
+      return aceEditor.getValue();
+    },
+    focus() {
+      aceEditor.focus();
+    },
+  };
+};
+
+export const Editor = memo(({ licenseEnabled, initialValue, onEditorReady }: Props) => {
   const containerRef = useRef<HTMLDivElement>(null as any);
   const editorInstanceRef = useRef<AceEditor>(null as any);
+
   const [textArea, setTextArea] = useState<HTMLTextAreaElement | null>(null);
   useUIAceKeyboardMode(textArea);
+
   useEffect(() => {
     const divEl = containerRef.current;
     editorInstanceRef.current = initializeEditor({ el: divEl, licenseEnabled });
     editorInstanceRef.current.setValue(initialValue, 1);
-    valueGetterRef.current = () => editorInstanceRef.current.getValue() as string;
+    editorInstanceRef.current.on('change', () => {
+      clearErrorAnnotations(editorInstanceRef.current);
+    });
     setTextArea(containerRef.current!.querySelector('textarea'));
+
+    onEditorReady(createEditorShim(editorInstanceRef.current));
   });
+
   return <div ref={containerRef} />;
 });
