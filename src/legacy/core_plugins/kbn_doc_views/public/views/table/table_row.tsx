@@ -93,11 +93,9 @@ export function DocViewTableRow({
         )}
         {displayUnderscoreWarning && <DocViewTableRowIconUnderscore />}
         {displayNoMappingWarning && <DocViewTableRowIconNoMapping />}
-        <div
-          className={valueClassName}
-          data-test-subj={`tableDocViewRow-${field}-value`}
-          dangerouslySetInnerHTML={{ __html: value as string }}
-        />
+        <div className={valueClassName} data-test-subj={`tableDocViewRow-${field}-value`}>
+          {value}
+        </div>
       </td>
     </tr>
   );
