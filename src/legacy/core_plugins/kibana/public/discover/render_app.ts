@@ -120,7 +120,6 @@ export function createLocalAngularModule(core: AppMountContext['core']) {
   createLocalTopNavModule();
   createLocalGlobalStateModule();
   createLocalAppStateModule();
-  // createLocalCourierModule();
   createLocalStorageModule();
   createElasticSearchModule();
   createDashboardConfigModule();
@@ -141,7 +140,6 @@ export function createLocalAngularModule(core: AppMountContext['core']) {
     'discoverDashboardConfigProvider',
     'discoverIndexPatterns',
     'discoverChrome',
-    'discoverSavedSearches',
     'discoverEs',
   ]);
 }
@@ -233,12 +231,6 @@ function createLocalAppStateModule() {
       return Private(AppStateProvider).getAppState;
     });
 }
-
-/** function createLocalModule() {
-  angular
-    .module('discoverCourierProvider', ['discoverPrivate'])
-    .service('courier', (Private: IPrivate) => Private(createCourierService));
-}**/
 
 function createLocalStorageModule() {
   angular
