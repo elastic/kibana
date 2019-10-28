@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
 import { EditorFrameProps } from '../editor_frame';
 import { Document } from '../../persistence/saved_object_store';
 
