@@ -31,8 +31,8 @@ image::maps/images/inspector.png[]
 * Ensure tiles have the required coordinate system. Vector data must use EPSG:4326 and tiles must use EPSG:3857.
 
 [float]
-==== Why can't I create new coordinate map and region map visualizations
+==== Coordinate and region map visualizations not available in New Visualization menu
 
-Kibana's out-of-the-box settings do not display coordinate map or region map in the create visualization menu.
-Set `xpack.maps.showMapVisualizationTypes` to `true` to show coordinate map and region map in the create visualization menu.
+Kibana’s out-of-the-box settings no longer offers coordinate and region maps as a choice in the New Visualization menu because you can create these maps in *Elastic Maps*.
+If you want to create new coordinate and region map visualizations, set `xpack.maps.showMapVisualizationTypes` to `true`.
 

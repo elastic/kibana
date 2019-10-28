@@ -5,8 +5,8 @@ Region maps are thematic maps in which boundary vector shapes are colored using 
 higher intensity colors indicate larger values, and lower intensity colors indicate smaller values.
 These are also known as choropleth maps.
 
-Kibana's out-of-the-box settings do not display region map in the create visualization menu.
-Set `xpack.maps.showMapVisualizationTypes` to `true` to show coordinate map and region map in the create visualization menu.
+Kibana’s out-of-the-box settings do not show region map in the New Visualization menu. Use <<maps>> instead, which offers more functionality and is easier to use.
+If you want to create new region map visualizations, set `xpack.maps.showMapVisualizationTypes` to `true`.
 
 image::images/regionmap.png[]
 
