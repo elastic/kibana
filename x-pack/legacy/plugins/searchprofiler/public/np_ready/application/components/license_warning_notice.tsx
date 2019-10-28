@@ -13,15 +13,19 @@ export const LicenseWarningNotice = () => {
   const registerLicenseLinkLabel = i18n.translate('xpack.searchProfiler.registerLicenseLinkLabel', {
     defaultMessage: 'register a license',
   });
+
   const trialLicense = i18n.translate('xpack.searchProfiler.trialLicenseTitle', {
     defaultMessage: 'Trial',
   });
+
   const basicLicense = i18n.translate('xpack.searchProfiler.basicLicenseTitle', {
     defaultMessage: 'Basic',
   });
+
   const goldLicense = i18n.translate('xpack.searchProfiler.goldLicenseTitle', {
     defaultMessage: 'Gold',
   });
+
   const platinumLicense = i18n.translate('xpack.searchProfiler.platinumLicenseTitle', {
     defaultMessage: 'Platinum',
   });

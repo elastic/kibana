@@ -62,7 +62,10 @@ export const Editor = memo(({ licenseEnabled, initialValue, onEditorReady }: Pro
   const editorInstanceRef = useRef<AceEditor>(null as any);
 
   const [textArea, setTextArea] = useState<HTMLTextAreaElement | null>(null);
-  useUIAceKeyboardMode(textArea);
+
+  if (licenseEnabled) {
+    useUIAceKeyboardMode(textArea);
+  }
 
   useEffect(() => {
     const divEl = containerRef.current;
@@ -74,7 +77,7 @@ export const Editor = memo(({ licenseEnabled, initialValue, onEditorReady }: Pro
     setTextArea(containerRef.current!.querySelector('textarea'));
 
     onEditorReady(createEditorShim(editorInstanceRef.current));
-  });
+  }, []);
 
   return <div ref={containerRef} />;
 });

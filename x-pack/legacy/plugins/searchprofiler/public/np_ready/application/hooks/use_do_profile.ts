@@ -70,7 +70,7 @@ export const useDoProfile = () => {
           return { data: null };
         }
         const [, lineNumber] = match;
-        return { data: null, error: { row: parseInt(lineNumber - 1, 10) } };
+        return { data: null, error: { row: parseInt(lineNumber, 10) - 1 } };
       }
 
       return { data: resp.resp.profile.shards };

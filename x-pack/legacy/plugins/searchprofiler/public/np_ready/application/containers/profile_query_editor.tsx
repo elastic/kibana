@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useRef, memo } from 'react';
+import React, { useRef, memo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiForm,
@@ -60,6 +60,8 @@ export const ProfileQueryEditor = memo(({ onResponse, onProfileClick }: Props) =
     onResponse(result);
   };
 
+  const onEditorReady = useCallback(editorInstance => (editorRef.current = editorInstance), []);
+
   return (
     <div className="prfDevTool__sense">
       <EuiForm>
@@ -94,7 +96,7 @@ export const ProfileQueryEditor = memo(({ onResponse, onProfileClick }: Props) =
         </EuiFlexGroup>
       </EuiForm>
       <Editor
-        onEditorReady={editorInstance => (editorRef.current = editorInstance)}
+        onEditorReady={onEditorReady}
         licenseEnabled={licenseEnabled}
         initialValue={INITIAL_EDITOR_VALUE}
       />

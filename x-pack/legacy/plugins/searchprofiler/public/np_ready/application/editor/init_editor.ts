@@ -23,6 +23,10 @@ export function initializeEditor({
     editor.setReadOnly(true);
     editor.container.style.pointerEvents = 'none';
     editor.container.style.opacity = '0.5';
+    const textArea = editor.container.querySelector('textarea');
+    if (textArea) {
+      textArea.setAttribute('tabindex', '-1');
+    }
     editor.renderer.setStyle('disabled');
     editor.blur();
   }
