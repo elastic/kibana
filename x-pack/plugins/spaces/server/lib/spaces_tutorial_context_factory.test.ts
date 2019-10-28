@@ -12,9 +12,9 @@ import { SavedObjectsLegacyService } from 'src/core/server';
 import { SpacesAuditLogger } from './audit_logger';
 import { elasticsearchServiceMock, coreMock } from '../../../../../src/core/server/mocks';
 import { spacesServiceMock } from '../spaces_service/spaces_service.mock';
-import { createOptionalPlugin } from '../../../../legacy/server/lib/optional_plugin';
 import { LegacyAPI } from '../plugin';
 import { spacesConfig } from './__fixtures__';
+import { securityMock } from '../../../security/server/mocks';
 
 const log = {
   log: jest.fn(),
@@ -55,8 +55,7 @@ describe('createSpacesTutorialContextFactory', () => {
     const spacesService = await service.setup({
       http: coreMock.createSetup().http,
       elasticsearch: elasticsearchServiceMock.createSetupContract(),
-      getSecurity: () =>
-        createOptionalPlugin({ get: () => null }, 'xpack.security', {}, 'security'),
+      authorization: securityMock.createSetup().authz,
       getSpacesAuditLogger: () => ({} as SpacesAuditLogger),
       config$: Rx.of(spacesConfig),
     });

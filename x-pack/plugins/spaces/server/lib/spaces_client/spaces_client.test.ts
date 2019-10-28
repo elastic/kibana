@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { PluginSetupContract as SecuritySetupContract } from '../../../../security/server';
 import { SpacesClient } from './spaces_client';
-import { AuthorizationService } from '../../../../../legacy/plugins/security/server/lib/authorization/service';
-import { actionsFactory } from '../../../../../legacy/plugins/security/server/lib/authorization/actions';
 import { ConfigType, ConfigSchema } from '../../config';
 import { GetSpacePurpose } from '../../../common/model/types';
+
+import { securityMock } from '../../../../security/server/mocks';
 
 const createMockAuditLogger = () => {
   return {
@@ -21,45 +22,17 @@ const createMockDebugLogger = () => {
   return jest.fn();
 };
 
-interface MockedAuthorization extends AuthorizationService {
-  mode: {
-    useRbacForRequest: jest.Mock<any>;
-  };
-}
 const createMockAuthorization = () => {
   const mockCheckPrivilegesAtSpace = jest.fn();
   const mockCheckPrivilegesAtSpaces = jest.fn();
   const mockCheckPrivilegesGlobally = jest.fn();
 
-  // mocking base path
-  const mockConfig = { get: jest.fn().mockReturnValue('/') };
-  const mockAuthorization: MockedAuthorization = {
-    actions: actionsFactory(mockConfig),
-    application: '',
-    checkPrivilegesDynamicallyWithRequest: jest.fn().mockImplementation(() => {
-      throw new Error(
-        'checkPrivilegesDynamicallyWithRequest should not be called from this test suite'
-      );
-    }),
-    checkSavedObjectsPrivilegesWithRequest: jest.fn().mockImplementation(() => {
-      throw new Error(
-        'checkSavedObjectsPrivilegesWithRequest should not be called from this test suite'
-      );
-    }),
-    privileges: {
-      get: jest.fn().mockImplementation(() => {
-        throw new Error('privileges.get() should not be called from this test suite');
-      }),
-    },
-    checkPrivilegesWithRequest: jest.fn(() => ({
-      atSpaces: mockCheckPrivilegesAtSpaces,
-      atSpace: mockCheckPrivilegesAtSpace,
-      globally: mockCheckPrivilegesGlobally,
-    })),
-    mode: {
-      useRbacForRequest: jest.fn(),
-    },
-  };
+  const mockAuthorization = securityMock.createSetup().authz;
+  mockAuthorization.checkPrivilegesWithRequest.mockImplementation(() => ({
+    atSpaces: mockCheckPrivilegesAtSpaces,
+    atSpace: mockCheckPrivilegesAtSpace,
+    globally: mockCheckPrivilegesGlobally,
+  }));
 
   return {
     mockCheckPrivilegesAtSpaces,
@@ -251,17 +224,17 @@ describe('#getAll', () => {
     [
       {
         purpose: undefined,
-        expectedPrivilege: (mockAuthorization: MockedAuthorization) =>
+        expectedPrivilege: (mockAuthorization: SecuritySetupContract['authz']) =>
           mockAuthorization.actions.login,
       },
       {
         purpose: 'any',
-        expectedPrivilege: (mockAuthorization: MockedAuthorization) =>
+        expectedPrivilege: (mockAuthorization: SecuritySetupContract['authz']) =>
           mockAuthorization.actions.login,
       },
       {
         purpose: 'copySavedObjectsIntoSpace',
-        expectedPrivilege: (mockAuthorization: MockedAuthorization) =>
+        expectedPrivilege: (mockAuthorization: SecuritySetupContract['authz']) =>
           mockAuthorization.actions.ui.get('savedObjectsManagement', 'copyIntoSpace'),
       },
     ].forEach(scenario => {

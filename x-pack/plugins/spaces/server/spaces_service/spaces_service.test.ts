@@ -5,7 +5,7 @@
  */
 import * as Rx from 'rxjs';
 import { SpacesService } from './spaces_service';
-import { coreMock, elasticsearchServiceMock } from 'src/core/server/mocks';
+import { coreMock, elasticsearchServiceMock, httpServerMock } from 'src/core/server/mocks';
 import { SpacesAuditLogger } from '../lib/audit_logger';
 import {
   KibanaRequest,
@@ -16,8 +16,8 @@ import {
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { getSpaceIdFromPath } from '../../common/lib/spaces_url_parser';
 import { LegacyAPI } from '../plugin';
-import { createOptionalPlugin } from '../../../../legacy/server/lib/optional_plugin';
 import { spacesConfig } from '../lib/__fixtures__';
+import { securityMock } from '../../../security/server/mocks';
 
 const mockLogger = {
   trace: jest.fn(),
@@ -79,7 +79,7 @@ const createService = async (serverBasePath: string = '') => {
     http: httpSetup,
     elasticsearch: elasticsearchServiceMock.createSetupContract(),
     config$: Rx.of(spacesConfig),
-    getSecurity: () => createOptionalPlugin({ get: () => null }, 'xpack.security', {}, 'security'),
+    authorization: securityMock.createSetup().authz,
     getSpacesAuditLogger: () => new SpacesAuditLogger({}),
   });
 
@@ -183,9 +183,7 @@ describe('SpacesService', () => {
   describe('#getActiveSpace', () => {
     it('returns the default space when in the default space', async () => {
       const spacesServiceSetup = await createService();
-      const request = {
-        url: { path: 'app/kibana' },
-      } as KibanaRequest;
+      const request = httpServerMock.createKibanaRequest({ path: 'app/kibana' });
 
       const activeSpace = await spacesServiceSetup.getActiveSpace(request);
       expect(activeSpace).toEqual({
@@ -198,9 +196,7 @@ describe('SpacesService', () => {
 
     it('returns the space for the current (non-default) space', async () => {
       const spacesServiceSetup = await createService();
-      const request = {
-        url: { path: '/s/foo/app/kibana' },
-      } as KibanaRequest;
+      const request = httpServerMock.createKibanaRequest({ path: '/s/foo/app/kibana' });
 
       const activeSpace = await spacesServiceSetup.getActiveSpace(request);
       expect(activeSpace).toEqual({
@@ -212,11 +208,11 @@ describe('SpacesService', () => {
 
     it('propagates errors from the repository', async () => {
       const spacesServiceSetup = await createService();
-      const request = {
-        url: { path: '/s/unknown-space/app/kibana' },
-      } as KibanaRequest;
+      const request = httpServerMock.createKibanaRequest({ path: '/s/unknown-space/app/kibana' });
 
-      expect(spacesServiceSetup.getActiveSpace(request)).rejects.toThrowErrorMatchingInlineSnapshot(
+      await expect(
+        spacesServiceSetup.getActiveSpace(request)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Saved object [space/unknown-space] not found"`
       );
     });

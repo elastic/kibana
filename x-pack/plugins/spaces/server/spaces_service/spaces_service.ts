@@ -7,9 +7,8 @@
 import { map, take } from 'rxjs/operators';
 import { Observable, Subscription, combineLatest } from 'rxjs';
 import { Legacy } from 'kibana';
-import { Logger, KibanaRequest, CoreSetup } from 'src/core/server';
-import { SecurityPlugin } from '../../../../legacy/plugins/security';
-import { OptionalPlugin } from '../../../../legacy/server/lib/optional_plugin';
+import { Logger, KibanaRequest, CoreSetup } from '../../../../../src/core/server';
+import { PluginSetupContract as SecurityPluginSetup } from '../../../security/server';
 import { LegacyAPI } from '../plugin';
 import { SpacesClient } from '../lib/spaces_client';
 import { ConfigType } from '../config';
@@ -39,7 +38,7 @@ export interface SpacesServiceSetup {
 interface SpacesServiceDeps {
   http: CoreSetup['http'];
   elasticsearch: CoreSetup['elasticsearch'];
-  getSecurity: () => OptionalPlugin<SecurityPlugin>;
+  authorization: SecurityPluginSetup['authz'] | null;
   config$: Observable<ConfigType>;
   getSpacesAuditLogger(): any;
 }
@@ -52,7 +51,7 @@ export class SpacesService {
   public async setup({
     http,
     elasticsearch,
-    getSecurity,
+    authorization,
     config$,
     getSpacesAuditLogger,
   }: SpacesServiceDeps): Promise<SpacesServiceSetup> {
@@ -69,7 +68,7 @@ export class SpacesService {
       return spaceId;
     };
 
-    const getScopedClient = async (request: RequestFacade) => {
+    const getScopedClient = async (request: KibanaRequest) => {
       return combineLatest(elasticsearch.adminClient$, config$)
         .pipe(
           map(([clusterClient, config]) => {
@@ -84,10 +83,6 @@ export class SpacesService {
               callCluster,
               ['space']
             );
-
-            const security = getSecurity();
-
-            const authorization = security.isEnabled ? security.authorization : null;
 
             return new SpacesClient(
               getSpacesAuditLogger(),
@@ -124,7 +119,9 @@ export class SpacesService {
       scopedClient: getScopedClient,
       getActiveSpace: async (request: RequestFacade) => {
         const spaceId = getSpaceId(request);
-        const spacesClient = await getScopedClient(request);
+        const spacesClient = await getScopedClient(
+          request instanceof KibanaRequest ? request : KibanaRequest.from(request)
+        );
         return spacesClient.get(spaceId);
       },
     };

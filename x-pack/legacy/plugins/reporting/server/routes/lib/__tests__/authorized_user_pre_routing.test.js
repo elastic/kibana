@@ -15,7 +15,7 @@ describe('authorized_user_pre_routing', function () {
   // so createMockServer reuses the same 'instance' of the server and overwrites
   // the properties to contain different values
   const createMockServer = (function () {
-    const callWithRequestStub = sinon.stub();
+    const getUserStub = sinon.stub();
     let mockConfig;
 
     const mockServer = {
@@ -30,13 +30,7 @@ describe('authorized_user_pre_routing', function () {
       log: function () {},
       plugins: {
         xpack_main: {},
-        elasticsearch: {
-          createCluster: function () {
-            return {
-              callWithRequest: callWithRequestStub
-            };
-          }
-        }
+        security: { getUser: getUserStub },
       }
     };
 
@@ -57,8 +51,8 @@ describe('authorized_user_pre_routing', function () {
         }
       };
 
-      callWithRequestStub.resetHistory();
-      callWithRequestStub.returns(Promise.resolve(user));
+      getUserStub.resetHistory();
+      getUserStub.resolves(user);
       return mockServer;
     };
   }());
