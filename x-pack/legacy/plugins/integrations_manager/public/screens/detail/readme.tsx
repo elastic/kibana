@@ -15,12 +15,13 @@ export function Readme({ readmePath }: { readmePath: string }) {
   useEffect(() => {
     getFileByPath(readmePath).then(res => {
       setMarkdown(res);
-    });
+    })
   }, []);
 
   return (
     <Fragment>
-      {markdown ? (
+      { // checking against undefined because currently some readme paths exist with empty response
+        markdown !== undefined ? (
         <ReactMarkdown renderers={markdownRenderers} source={markdown} />
       ) : (
         <EuiText>
