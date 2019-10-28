@@ -25,6 +25,7 @@ exports[`FilterPopover component does not show item list when loading 1`] = `
   <EuiPopoverTitle>
     <EuiFieldSearch
       compressed={false}
+      disabled={false}
       fullWidth={false}
       incremental={false}
       isLoading={false}
@@ -60,6 +61,7 @@ exports[`FilterPopover component renders without errors for valid props 1`] = `
   <EuiPopoverTitle>
     <EuiFieldSearch
       compressed={false}
+      disabled={false}
       fullWidth={false}
       incremental={false}
       isLoading={false}
