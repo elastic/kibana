@@ -7,15 +7,12 @@
 import url from 'url';
 import { ServerFacade } from '../types';
 
-export function getAbsoluteUrlFactory(server: ServerFacade) {
-  const config = server.config();
-
 export const getAbsoluteUrlFactory = ({
   protocol,
   hostname,
   port,
   defaultBasePath,
-}: AbsoluteURLFactory) => {
+}: AbsoluteURLFactoryOptions) => {
   return function getAbsoluteUrl({
     basePath = defaultBasePath,
     hash = '',
