@@ -38,20 +38,20 @@ import {
 
 export function registerConverters(fieldFormats: FieldFormatRegisty): void {
   fieldFormats.register([
-    UrlFormat,
-    StringFormat,
-    NumberFormat,
-    BytesFormat,
-    TruncateFormat,
-    RelativeDateFormat,
-    PercentFormat,
-    IpFormat,
-    DurationFormat,
-    DateNanosFormat,
-    DateFormat,
-    ColorFormat,
     BoolFormat,
+    BytesFormat,
+    ColorFormat,
+    DateFormat,
+    DateNanosFormat,
+    DurationFormat,
+    IpFormat,
+    NumberFormat,
+    PercentFormat,
+    RelativeDateFormat,
     SourceFormat,
     StaticLookupFormat,
+    StringFormat,
+    TruncateFormat,
+    UrlFormat,
   ]);
 }

@@ -21,7 +21,7 @@ import moment, { Moment } from 'moment';
 import { memoize, noop } from 'lodash';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import { FieldFormat } from '../field_format';
-import { TextContextTypeConvert } from '../types';
+import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 
 /**
  * Analyse the given moment.js format pattern for the fractional sec part (S,SS,SSS...)
@@ -69,7 +69,7 @@ export function formatWithNanos(
 }
 
 export class DateNanosFormat extends FieldFormat {
-  static id = 'date_nanos';
+  static id = FIELD_FORMAT_IDS.DATE_NANOS;
   static title = 'Date Nanos';
   static fieldType = KBN_FIELD_TYPES.DATE;
 

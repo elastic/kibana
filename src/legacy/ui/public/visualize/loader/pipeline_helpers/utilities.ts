@@ -23,7 +23,11 @@ import { AggConfig, Vis } from 'ui/vis';
 import { npSetup } from 'ui/new_platform';
 import { SerializedFieldFormat } from 'src/plugins/expressions/common/expressions/types/common';
 
-import { FieldFormat } from '../../../../../../plugins/data/public';
+import {
+  FIELD_FORMAT_IDS,
+  FIELD_FORMATS_INSTANCES,
+  FieldFormat,
+} from '../../../../../../plugins/data/public';
 
 import { tabifyGetColumns } from '../../../agg_response/tabify/_get_columns';
 import chrome from '../../../chrome';
@@ -50,8 +54,12 @@ const fieldFormats = npSetup.plugins.data.fieldFormats;
 const getConfig = (...args: any[]): any => config.get(...args);
 const getDefaultFieldFormat = () => ({ convert: identity });
 
-const getFieldFormat = (id: string, params: object = {}) => {
-  const Format = fieldFormats.getType(id);
+const getFieldFormat = (
+  id?: FIELD_FORMAT_IDS | string,
+  params: object = {}
+): FIELD_FORMATS_INSTANCES[number] | Record<string, any> => {
+  const Format = fieldFormats.getType(id as FIELD_FORMAT_IDS);
+
   if (Format) {
     return new Format(params, getConfig);
   } else {
@@ -93,7 +101,7 @@ export const createFormat = (agg: AggConfig): SerializedFieldFormat => {
 
 export type FormatFactory = (mapping?: SerializedFieldFormat) => FieldFormat;
 
-export const getFormat: FormatFactory = (mapping = {}) => {
+export const getFormat: FormatFactory = (mapping = {}): any => {
   if (!mapping) {
     return getDefaultFieldFormat();
   }

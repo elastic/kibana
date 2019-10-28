@@ -36,7 +36,7 @@ import {
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { buildEsQuery, Filter, getEsQueryConfig } from '@kbn/es-query';
-import { ES_FIELD_TYPES, Query, KBN_FIELD_TYPES } from 'src/plugins/data/common';
+import { ES_FIELD_TYPES, Query, KBN_FIELD_TYPES, FIELD_FORMAT_IDS } from 'src/plugins/data/common';
 import { npSetup } from 'ui/new_platform';
 import { DraggedField } from './indexpattern';
 import { DragDrop } from '../drag_drop';
@@ -254,10 +254,11 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
 
   let formatter: { convert: (data: unknown) => string };
   if (indexPattern.fieldFormatMap && indexPattern.fieldFormatMap[field.name]) {
-    const FormatType = fieldFormats.getType(indexPattern.fieldFormatMap[field.name].id);
+    const FormatType = fieldFormats.getType(indexPattern.fieldFormatMap[field.name]
+      .id as FIELD_FORMAT_IDS);
     if (FormatType) {
       formatter = new FormatType(
-        indexPattern.fieldFormatMap[field.name].params,
+        indexPattern.fieldFormatMap[field.name].params as Record<string, unknown>,
         core.uiSettings.get.bind(core.uiSettings)
       );
     } else {

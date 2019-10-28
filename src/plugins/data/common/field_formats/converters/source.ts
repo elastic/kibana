@@ -24,7 +24,7 @@ import { noWhiteSpace } from '../../../../../legacy/core_plugins/kibana/common/u
 import { shortenDottedString } from '../../../../../legacy/core_plugins/kibana/common/utils/shorten_dotted_string';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import { FieldFormat } from '../field_format';
-import { TextContextTypeConvert, HtmlContextTypeConvert } from '../types';
+import { TextContextTypeConvert, HtmlContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 
 const templateHtml = `
   <dl class="source truncate-by-height">
@@ -37,7 +37,7 @@ const templateHtml = `
 const doTemplate = template(noWhiteSpace(templateHtml));
 
 export class SourceFormat extends FieldFormat {
-  static id = '_source';
+  static id = FIELD_FORMAT_IDS._SOURCE;
   static title = '_source';
   static fieldType = KBN_FIELD_TYPES._SOURCE;
 

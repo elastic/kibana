@@ -19,26 +19,31 @@
 
 import { forOwn, isFunction, memoize } from 'lodash';
 import { UiSettingsClientContract } from 'kibana/public';
-import { FIELD_FORMATS_IDS } from './types';
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES, FieldFormat } from '../../common';
+import {
+  ES_FIELD_TYPES,
+  KBN_FIELD_TYPES,
+  FIELD_FORMAT_IDS,
+  DERIVED_FIELD_FORMATS,
+  FIELD_FORMATS_INSTANCES,
+} from '../../common';
 
 interface FieldType {
-  id: FIELD_FORMATS_IDS;
+  id: FIELD_FORMAT_IDS;
   params: Record<string, any>;
   es?: boolean;
 }
 
 export class FieldFormatRegisty {
-  private fieldFormats: Map<FIELD_FORMATS_IDS, FieldFormat['constructor']>;
+  private fieldFormats: Map<FIELD_FORMAT_IDS, DERIVED_FIELD_FORMATS[number]>;
   private uiSettings!: UiSettingsClientContract;
-  private defaultMap: { [key in ES_FIELD_TYPES | KBN_FIELD_TYPES]?: FieldType } & {
+  private defaultMap: { [key in ES_FIELD_TYPES | string]?: FieldType } & {
     _default_: FieldType;
   };
 
   constructor() {
     this.fieldFormats = new Map();
     this.defaultMap = {
-      _default_: { id: FIELD_FORMATS_IDS.STRING, params: {} },
+      _default_: { id: FIELD_FORMAT_IDS.STRING, params: {} },
     };
   }
 
@@ -73,12 +78,12 @@ export class FieldFormatRegisty {
   };
 
   /**
-   * Get a FieldFormat type (class) by its id.
+   * Get a derived FieldFormat class by its id.
    *
-   * @param  {string} formatId - the format id
+   * @param  {FIELD_FORMAT_IDS} formatId - the format id
    * @return {FieldFormat}
    */
-  getType = (formatId: string): any => {
+  getType = (formatId: FIELD_FORMAT_IDS): DERIVED_FIELD_FORMATS[number] | undefined => {
     return this.fieldFormats.get(formatId);
   };
 
@@ -87,12 +92,15 @@ export class FieldFormatRegisty {
    * a field type, using the format:defaultTypeMap.
    * used by the field editor
    *
-   * @param  {string} fieldType
-   * @param  {string[]} esTypes - Array of ES data types
+   * @param  {KBN_FIELD_TYPES} fieldType
+   * @param  {ES_FIELD_TYPES[]} esTypes - Array of ES data types
    * @return {FieldFormat}
    */
-  getDefaultType = (fieldType: string, esTypes: string[]): FieldFormat['constructor'] => {
-    const config = this.getDefaultConfig(fieldType, esTypes) as FieldType;
+  getDefaultType = (
+    fieldType: KBN_FIELD_TYPES,
+    esTypes: ES_FIELD_TYPES[]
+  ): DERIVED_FIELD_FORMATS[number] | undefined => {
+    const config = this.getDefaultConfig(fieldType, esTypes);
 
     return this.getType(config.id);
   };
@@ -101,15 +109,15 @@ export class FieldFormatRegisty {
    * Get the name of the default type for ES types like date_nanos
    * using the format:defaultTypeMap config map
    *
-   * @param  {string[]} esTypes - Array of ES data types
-   * @return {String}
+   * @param  {ES_FIELD_TYPES[]} esTypes - Array of ES data types
+   * @return {ES_FIELD_TYPES | undefined}
    */
-  getTypeNameByEsTypes = (esTypes: string[]): string => {
+  getTypeNameByEsTypes = (esTypes: ES_FIELD_TYPES[]): ES_FIELD_TYPES | undefined => {
     if (!Array.isArray(esTypes)) {
-      return '';
+      return;
     }
 
-    return esTypes.find(type => this.defaultMap[type] && this.defaultMap[type]!.es) || '';
+    return esTypes.find(type => this.defaultMap[type] && this.defaultMap[type]!.es);
   };
 
   /**
@@ -118,13 +126,13 @@ export class FieldFormatRegisty {
    *
    * @param  {KBN_FIELD_TYPES} fieldType
    * @param  {ES_FIELD_TYPES[]} esTypes
-   * @return {KBN_FIELD_TYPES | ES_FIELD_TYPES}
+   * @return {ES_FIELD_TYPES | String}
    */
   getDefaultTypeName = (
     fieldType: KBN_FIELD_TYPES,
     esTypes: ES_FIELD_TYPES[]
-  ): KBN_FIELD_TYPES | ES_FIELD_TYPES => {
-    const esType = this.getTypeNameByEsTypes(esTypes) as ES_FIELD_TYPES;
+  ): ES_FIELD_TYPES | KBN_FIELD_TYPES => {
+    const esType = this.getTypeNameByEsTypes(esTypes);
 
     return esType || fieldType;
   };
@@ -133,33 +141,31 @@ export class FieldFormatRegisty {
    * Get the singleton instance of the FieldFormat type by its id.
    *
    * @param  {FIELD_FORMATS_IDS} formatId
-   * @return {FieldFormat}
+   * @return {FIELD_FORMATS_INSTANCES[number]}
    */
-  getInstance = memoize(
-    (formatId: FIELD_FORMATS_IDS): FieldFormat => {
-      const DerivedFieldFormat = this.getType(formatId);
+  getInstance = memoize((formatId: FIELD_FORMAT_IDS): FIELD_FORMATS_INSTANCES[number] => {
+    const DerivedFieldFormat = this.getType(formatId);
 
-      if (!DerivedFieldFormat) {
-        throw new Error(`Field Format '${formatId}' not found!`);
-      }
-
-      // @ts-ignore
-      return new DerivedFieldFormat({}, this.getConfig);
+    if (!DerivedFieldFormat) {
+      throw new Error(`Field Format '${formatId}' not found!`);
     }
-  );
+
+    // @ts-ignore
+    return new DerivedFieldFormat({}, this.getConfig);
+  });
 
   /**
    * Get the default fieldFormat instance for a field format.
    *
    * @param  {KBN_FIELD_TYPES} fieldType
    * @param  {ES_FIELD_TYPES[]} esTypes
-   * @return {FieldFormat}
+   * @return {@instance DERIVED_FIELD_FORMATS[number]}
    */
   getDefaultInstancePlain(fieldType: KBN_FIELD_TYPES, esTypes: ES_FIELD_TYPES[]) {
-    const conf = this.getDefaultConfig(fieldType, esTypes) as FieldType;
-    const DerivedFieldFormat = this.getType(conf.id);
+    const conf = this.getDefaultConfig(fieldType, esTypes);
 
-    // @ts-ignore
+    const DerivedFieldFormat = this.getType(conf.id) as DERIVED_FIELD_FORMATS[number];
+
     return new DerivedFieldFormat(conf.params, this.getConfig);
   }
   /**
@@ -171,9 +177,9 @@ export class FieldFormatRegisty {
    *
    * @param  {KBN_FIELD_TYPES} fieldType
    * @param  {ES_FIELD_TYPES[]} esTypes
-   * @return {string}
+   * @return {String}
    */
-  getDefaultInstanceCacheResolver(fieldType: KBN_FIELD_TYPES, esTypes: ES_FIELD_TYPES[]) {
+  getDefaultInstanceCacheResolver(fieldType: KBN_FIELD_TYPES, esTypes: ES_FIELD_TYPES[]): string {
     // @ts-ignore
     return Array.isArray(esTypes) && esTypes.indexOf(fieldType) === -1
       ? [fieldType, ...esTypes].join('-')
@@ -183,12 +189,12 @@ export class FieldFormatRegisty {
   /**
    * Get filtered list of field formats by format type
    *
-   * @param  {String} fieldType
+   * @param  {KBN_FIELD_TYPES} fieldType
    * @return {FieldFormat[]}
    */
-  getByFieldType(fieldType: KBN_FIELD_TYPES): Array<FieldFormat['constructor']> {
+  getByFieldType(fieldType: KBN_FIELD_TYPES): Array<DERIVED_FIELD_FORMATS[number]> {
     return [...this.fieldFormats.values()].filter(
-      (format: any) => format.fieldType.indexOf(fieldType) !== -1
+      (format: DERIVED_FIELD_FORMATS[number]) => format.fieldType.indexOf(fieldType) !== -1
     );
   }
 
@@ -213,8 +219,7 @@ export class FieldFormatRegisty {
     });
   }
 
-  // any = DerivedFieldFormat
-  register = (fieldFormats: any[] = []) => {
+  register = (fieldFormats: DERIVED_FIELD_FORMATS) => {
     fieldFormats.forEach(fieldFormat => {
       this.fieldFormats.set(fieldFormat.id, fieldFormat);
     });
