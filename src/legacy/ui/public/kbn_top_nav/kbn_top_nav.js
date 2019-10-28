@@ -20,7 +20,7 @@
 import 'ngreact';
 import { wrapInI18nContext } from 'ui/i18n';
 import { uiModules } from 'ui/modules';
-import { TopNavMenu } from '../../../core_plugins/kibana_react/public';
+import { start as navigation } from '../../../core_plugins/navigation/public/legacy';
 
 const module = uiModules.get('kibana');
 
@@ -76,6 +76,7 @@ export function createTopNavDirective() {
 module.directive('kbnTopNav', createTopNavDirective);
 
 export function createTopNavHelper(reactDirective) {
+  const { TopNavMenu } = navigation.ui;
   return reactDirective(
     wrapInI18nContext(TopNavMenu),
     [

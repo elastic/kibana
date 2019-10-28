@@ -17,12 +17,15 @@
  * under the License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('core plugins', () => {
-    loadTestFile(require.resolve('./applications'));
-    loadTestFile(require.resolve('./legacy_plugins'));
-    loadTestFile(require.resolve('./server_plugins'));
-    loadTestFile(require.resolve('./ui_plugins'));
-    loadTestFile(require.resolve('./top_nav'));
-  });
+import React from 'react';
+import { TopNavMenuProps, TopNavMenu } from './top_nav_menu';
+import { TopNavMenuData } from './top_nav_menu_data';
+import { DataStart } from '../../../../core_plugins/data/public';
+
+export function createTopNav(data: DataStart, extraConfig: TopNavMenuData[]) {
+  return (props: TopNavMenuProps) => {
+    const config = (props.config || []).concat(extraConfig);
+
+    return <TopNavMenu {...props} data={data} config={config} />;
+  };
 }
