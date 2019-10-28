@@ -4,80 +4,40 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonEmpty, EuiModal, EuiOverlayMask } from '@elastic/eui';
-import React, { useCallback, useState } from 'react';
+import { EuiModal, EuiOverlayMask } from '@elastic/eui';
+import React from 'react';
 
 import { ApolloConsumer } from 'react-apollo';
 import * as i18n from '../translations';
 import { StatefulOpenTimeline } from '..';
 
-export interface OpenTimelineModalButtonProps {
-  /**
-   * An optional callback that if specified, will perform arbitrary IO before
-   * this component updates its internal toggle state.
-   */
-  onToggle?: () => void;
+export interface OpenTimelineModalProps {
+  onClose: () => void;
 }
 
 const DEFAULT_SEARCH_RESULTS_PER_PAGE = 10;
 const OPEN_TIMELINE_MODAL_WIDTH = 1000; // px
 
-/**
- * Renders a button that when clicked, displays the `Open Timelines` modal
- */
-export const OpenTimelineModalButton = React.memo<OpenTimelineModalButtonProps>(({ onToggle }) => {
-  const [showModal, setShowModal] = useState(false);
+export const OpenTimelineModal = React.memo<OpenTimelineModalProps>(({ onClose }) => (
+  <ApolloConsumer>
+    {client => (
+      <EuiOverlayMask>
+        <EuiModal
+          data-test-subj="open-timeline-modal"
+          maxWidth={OPEN_TIMELINE_MODAL_WIDTH}
+          onClose={onClose}
+        >
+          <StatefulOpenTimeline
+            apolloClient={client}
+            closeModalTimeline={onClose}
+            isModal={true}
+            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+            title={i18n.OPEN_TIMELINE_TITLE}
+          />
+        </EuiModal>
+      </EuiOverlayMask>
+    )}
+  </ApolloConsumer>
+));
 
-  /** shows or hides the `Open Timeline` modal */
-  const openModal = useCallback(() => {
-    if (onToggle != null) {
-      onToggle();
-    }
-    setShowModal(true);
-  }, [onToggle]);
-
-  const closeModal = useCallback(() => {
-    if (onToggle != null) {
-      onToggle();
-    }
-    setShowModal(false);
-  }, [onToggle]);
-
-  return (
-    <ApolloConsumer>
-      {client => (
-        <>
-          <EuiButtonEmpty
-            color="text"
-            data-test-subj="open-timeline-button"
-            iconSide="left"
-            iconType="folderOpen"
-            onClick={openModal}
-          >
-            {i18n.OPEN_TIMELINE}
-          </EuiButtonEmpty>
-
-          {showModal && (
-            <EuiOverlayMask>
-              <EuiModal
-                data-test-subj="open-timeline-modal"
-                maxWidth={OPEN_TIMELINE_MODAL_WIDTH}
-                onClose={closeModal}
-              >
-                <StatefulOpenTimeline
-                  apolloClient={client}
-                  closeModalTimeline={closeModal}
-                  isModal={true}
-                  defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-                  title={i18n.OPEN_TIMELINE_TITLE}
-                />
-              </EuiModal>
-            </EuiOverlayMask>
-          )}
-        </>
-      )}
-    </ApolloConsumer>
-  );
-});
-
-OpenTimelineModalButton.displayName = 'OpenTimelineModalButton';
+OpenTimelineModal.displayName = 'OpenTimelineModal';

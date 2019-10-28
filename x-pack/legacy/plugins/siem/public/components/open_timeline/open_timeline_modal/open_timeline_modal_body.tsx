@@ -20,7 +20,7 @@ export const HeaderContainer = styled.div`
 
 HeaderContainer.displayName = 'HeaderContainer';
 
-export const OpenTimelineModal = pure<OpenTimelineProps>(
+export const OpenTimelineModalBody = pure<OpenTimelineProps>(
   ({
     deleteTimelines,
     defaultPageSize,
@@ -91,4 +91,4 @@ export const OpenTimelineModal = pure<OpenTimelineProps>(
   )
 );
 
-OpenTimelineModal.displayName = 'OpenTimelineModal';
+OpenTimelineModalBody.displayName = 'OpenTimelineModalBody';
