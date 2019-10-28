@@ -20,17 +20,15 @@ import { DynamicStyleProperty } from './properties/dynamic_style_property';
 import { StaticStyleProperty } from './properties/static_style_property';
 import { DynamicSizeProperty } from './properties/dynamic_size_property';
 import { StaticSizeProperty } from './properties/static_size_property';
-import { getComputedFieldName, getComputedFieldNamePrefix } from './style_util';
+import { getComputedFieldName } from './style_util';
 import { StaticColorProperty } from './properties/static_color_property';
 import { DynamicColorProperty } from './properties/dynamic_color_property';
+import { StaticOrientationProperty } from './properties/static_orientation_property';
+import { DynamicOrientationProperty } from './properties/dynamic_orientation_property';
 
 export class VectorStyle extends AbstractStyle {
 
   static type = 'VECTOR';
-
-  //todo: remove these static props
-  static getComputedFieldName = getComputedFieldName;
-  static getComputedFieldNamePrefix = getComputedFieldNamePrefix;
 
   constructor(descriptor = {}, source) {
     super();
@@ -44,6 +42,9 @@ export class VectorStyle extends AbstractStyle {
     this._fillColorStyleProperty = this._makeStyleProperty(vectorStyles.FILL_COLOR, this._descriptor.properties[vectorStyles.FILL_COLOR]);
     this._lineWidthStyleProperty = this._makeStyleProperty(vectorStyles.LINE_WIDTH, this._descriptor.properties[vectorStyles.LINE_WIDTH]);
     this._iconSizeStyleProperty = this._makeStyleProperty(vectorStyles.ICON_SIZE, this._descriptor.properties[vectorStyles.ICON_SIZE]);
+    // eslint-disable-next-line max-len
+    this._iconOrientationProperty = this._makeStyleProperty(vectorStyles.ICON_ORIENTATION, this._descriptor.properties[vectorStyles.ICON_ORIENTATION]);
+
   }
 
   static createDescriptor(properties = {}) {
@@ -456,18 +457,18 @@ export class VectorStyle extends AbstractStyle {
     this._lineColorStyleProperty.syncHaloBorderColorWithMb(symbolLayerId, mbMap);
     this._lineWidthStyleProperty.syncHaloWidthWithMb(symbolLayerId, mbMap);
     this._iconSizeStyleProperty.syncIconImageAndSizeWithMb(symbolLayerId, mbMap, symbolId);
+    this._iconOrientationProperty.syncIconRotationWithMb(symbolLayerId, mbMap);
 
-
-    const iconOrientation = this._descriptor.properties.iconOrientation;
-    if (iconOrientation.type === DynamicStyleProperty.type) {
-      mbMap.setLayoutProperty(symbolLayerId, 'icon-rotate', iconOrientation.options.orientation);
-    } else if (_.has(iconOrientation, 'options.field.name')) {
-      const targetName = getComputedFieldName(vectorStyles.ICON_ORIENTATION, iconOrientation.options.field.name);
-      // Using property state instead of feature-state because layout properties do not support feature-state
-      mbMap.setLayoutProperty(symbolLayerId, 'icon-rotate', [
-        'coalesce', ['get', targetName], 0
-      ]);
-    }
+    // const iconOrientation = this._descriptor.properties.iconOrientation;
+    // if (iconOrientation.type === DynamicStyleProperty.type) {
+    //   mbMap.setLayoutProperty(symbolLayerId, 'icon-rotate', iconOrientation.options.orientation);
+    // } else if (_.has(iconOrientation, 'options.field.name')) {
+    //   const targetName = getComputedFieldName(vectorStyles.ICON_ORIENTATION, iconOrientation.options.field.name);
+    //   // Using property state instead of feature-state because layout properties do not support feature-state
+    //   mbMap.setLayoutProperty(symbolLayerId, 'icon-rotate', [
+    //     'coalesce', ['get', targetName], 0
+    //   ]);
+    // }
   }
 
   arePointsSymbolizedAsCircles() {
@@ -498,6 +499,21 @@ export class VectorStyle extends AbstractStyle {
     }
   }
 
+  _makeOrientationProperty(descriptor, styleName) {
+
+
+    if (!descriptor || !descriptor.options) {
+      return new StaticOrientationProperty({ orientation: 0 });
+    } else if (descriptor.type === StaticStyleProperty.type) {
+      return new StaticOrientationProperty(descriptor.options);
+    } else if (descriptor.type === DynamicStyleProperty.type) {
+      return new DynamicOrientationProperty(descriptor.options, styleName);
+    } else {
+      throw new Error(`${descriptor} not implemented`);
+    }
+
+  }
+
   _makeStyleProperty(propertyName, descriptor) {
 
     if (propertyName === vectorStyles.LINE_WIDTH) {
@@ -508,6 +524,8 @@ export class VectorStyle extends AbstractStyle {
       return this._makeColorProperty(descriptor, vectorStyles.LINE_COLOR);
     } else if (propertyName === vectorStyles.FILL_COLOR) {
       return this._makeColorProperty(descriptor, vectorStyles.FILL_COLOR);
+    } else if (propertyName === vectorStyles.ICON_ORIENTATION) {
+      return this._makeOrientationProperty(descriptor, vectorStyles.ICON_ORIENTATION);
     }
 
     throw new Error(`${propertyName} not implemented`);
