@@ -102,7 +102,7 @@ export function ensureEsVersion(server, kibanaVersion) {
         }
       }
 
-      if (incompatibleNodes.length) {
+      if (incompatibleNodes.length && !shouldIgnoreVersionMismatch(server)) {
         const incompatibleNodeNames = getHumanizedNodeNames(incompatibleNodes);
         throw new Error(
           `This version of Kibana requires Elasticsearch v` +
@@ -113,4 +113,8 @@ export function ensureEsVersion(server, kibanaVersion) {
 
       return true;
     });
+}
+
+function shouldIgnoreVersionMismatch(server) {
+  return server.config().get('env.dev') && server.config().get('server.ignoreElasticsearchVersionMismatch');
 }

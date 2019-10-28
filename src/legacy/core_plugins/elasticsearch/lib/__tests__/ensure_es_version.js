@@ -105,6 +105,27 @@ describe('plugins/elasticsearch', () => {
       }
     });
 
+    it('does not throw on outdated nodes, if `ignoreElasticsearchVersionMismatch:true` and `env.dev:true`', async () => {
+      // set config values
+      server.config = () => ({
+        get: name => {
+          switch (name) {
+            case 'server.ignoreElasticsearchVersionMismatch':
+            case 'env.dev':
+              return true;
+            default:
+              throw new Error(`Unknown option "${name}"`);
+          }
+        },
+      });
+
+      // 5.0.0 ES is too old to work with a 5.1.0 version of Kibana.
+      setNodes('5.1.0', '5.2.0', '5.0.0');
+
+      const result =  await ensureEsVersion(server, KIBANA_VERSION);
+      expect(result).to.be(true);
+    });
+
     it('fails if that single node is a client node', async () => {
       setNodes(
         '5.1.0',
