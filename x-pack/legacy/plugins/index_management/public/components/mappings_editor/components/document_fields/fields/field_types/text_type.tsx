@@ -36,7 +36,8 @@ const getDefaultValueToggle = (param: string, field: FieldType) => {
   switch (param) {
     case 'boost':
     case 'position_increment_gap':
-    case 'similarity': {
+    case 'similarity':
+    case 'term_vector': {
       return field[param] !== undefined && field[param] !== getFieldConfig(param).defaultValue;
     }
     case 'analyzers': {
@@ -351,6 +352,37 @@ export const TextType = React.memo(({ field }: Props) => {
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
+          </EditFieldFormRow>
+
+          {/* term vector */}
+          <EditFieldFormRow
+            title={<h3>Set term vector</h3>}
+            description="This is description text."
+            direction="column"
+            toggleDefaultValue={getDefaultValueToggle('term_vector', field.source)}
+          >
+            <FormDataProvider pathsToWatch="term_vector">
+              {formData => (
+                <>
+                  <UseField
+                    path="term_vector"
+                    config={getFieldConfig('term_vector')}
+                    component={Field}
+                    componentProps={{ euiFieldProps: { options: PARAMETERS_OPTIONS.term_vector } }}
+                  />
+                  {formData.term_vector === 'with_positions_offsets' && (
+                    <>
+                      <EuiSpacer size="s" />
+                      <EuiCallOut color="warning">
+                        <p>
+                          Setting "With positions offsets" will double the size of a field’s index.
+                        </p>
+                      </EuiCallOut>
+                    </>
+                  )}
+                </>
+              )}
+            </FormDataProvider>
           </EditFieldFormRow>
         </EditFieldSection>
       </AdvancedSettingsWrapper>

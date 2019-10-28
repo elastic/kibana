@@ -44,4 +44,13 @@ export const PARAMETERS_OPTIONS: { [key in ParameterName]?: SelectOption[] } = {
     { value: 'fingerprint', text: 'Fingerprint' },
   ],
   similarity: [{ value: 'BM25', text: 'BM25' }, { value: 'boolean', text: 'Boolean' }],
+  term_vector: [
+    { value: 'no', text: 'No' },
+    { value: 'yes', text: 'Yes' },
+    { value: 'with_positions', text: 'With positions' },
+    { value: 'with_offsets', text: 'With offsets' },
+    { value: 'with_positions_offsets', text: 'With positions offsets' },
+    { value: 'with_positions_payloads', text: 'With positions payloads' },
+    { value: 'with_positions_offsets_payloads', text: 'With positions offsets payloads' },
+  ],
 };
