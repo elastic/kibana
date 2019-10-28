@@ -10,13 +10,6 @@ import { isSystemApiRequest } from 'ui/system_api';
 import { Path } from 'plugins/xpack_main/services/path';
 import { npSetup } from 'ui/new_platform';
 
-/**
- * Client session timeout is decreased by this number so that Kibana server
- * can still access session content during logout request to properly clean
- * user session up (invalidate access tokens, redirect to logout portal etc.).
- * @type {number}
- */
-
 const module = uiModules.get('security', []);
 module.config(($httpProvider) => {
   $httpProvider.interceptors.push((
