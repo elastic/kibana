@@ -17,12 +17,38 @@
  * under the License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('core plugins', () => {
-    loadTestFile(require.resolve('./applications'));
-    loadTestFile(require.resolve('./legacy_plugins'));
-    loadTestFile(require.resolve('./server_plugins'));
-    loadTestFile(require.resolve('./ui_plugins'));
-    loadTestFile(require.resolve('./top_nav'));
-  });
+import React, { Component } from 'react';
+import {
+  setup as navSetup,
+  start as navStart,
+} from '../../../../../src/legacy/core_plugins/navigation/public/legacy';
+
+const customExtension = {
+  id: 'registered-prop',
+  label: 'Registered Button',
+  description: 'Registered Demo',
+  run() {},
+  testId: 'demoRegisteredNewButton',
+};
+
+navSetup.registerMenuItem(customExtension);
+
+export class AppWithTopNav extends Component {
+  public render() {
+    const { TopNavMenu } = navStart.ui;
+    const config = [
+      {
+        id: 'new',
+        label: 'New Button',
+        description: 'New Demo',
+        run() {},
+        testId: 'demoNewButton',
+      },
+    ];
+    return (
+      <TopNavMenu appName="demo-app" config={config}>
+        Hey
+      </TopNavMenu>
+    );
+  }
 }
