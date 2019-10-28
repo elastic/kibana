@@ -317,16 +317,16 @@ export default function({
   coreEditor: editor,
   parser,
   execCommand,
-  getCursor,
-  isCompleteActive,
+  getCursorPosition,
+  isCompleterActive,
   addChangeListener,
   removeChangeListener,
 }: {
   coreEditor: LegacyEditor;
   parser: any;
   execCommand: (cmd: string) => void;
-  getCursor: () => any;
-  isCompleteActive: () => boolean;
+  getCursorPosition: () => Position | null;
+  isCompleterActive: () => boolean;
   addChangeListener: (fn: any) => void;
   removeChangeListener: (fn: any) => void;
 }) {
@@ -969,11 +969,10 @@ export default function({
   100);
 
   function editorChangeListener() {
-    const cursor = getCursor();
-    if (isCompleteActive()) {
-      return;
+    const position = getCursorPosition();
+    if (position && !isCompleterActive()) {
+      evaluateCurrentTokenAfterAChange(position);
     }
-    evaluateCurrentTokenAfterAChange(cursor);
   }
 
   function getCompletions(
