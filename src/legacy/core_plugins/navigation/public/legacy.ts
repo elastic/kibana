@@ -17,5 +17,14 @@
  * under the License.
  */
 
-export { TopNavMenu } from './top_nav_menu';
-export { TopNavMenuData } from './top_nav_menu_data';
+import { npSetup, npStart } from 'ui/new_platform';
+import { start as dataShim } from '../../data/public/legacy';
+import { plugin } from '.';
+
+const navPlugin = plugin();
+
+export const setup = navPlugin.setup(npSetup.core);
+
+export const start = navPlugin.start(npStart.core, {
+  data: dataShim,
+});
