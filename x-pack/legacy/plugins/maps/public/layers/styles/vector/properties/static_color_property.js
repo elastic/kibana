@@ -10,6 +10,11 @@ import { StaticStyleProperty } from './static_style_property';
 
 export class StaticColorProperty extends StaticStyleProperty {
 
+  syncCircleColorWithMb(mbLayerId, mbMap, alpha) {
+    mbMap.setPaintProperty(mbLayerId, 'circle-color', this._options.color);
+    mbMap.setPaintProperty(mbLayerId, 'circle-opacity', alpha);
+  }
+
   syncFillColorWithMb(mbLayerId, mbMap, alpha) {
     mbMap.setPaintProperty(mbLayerId, 'fill-color', this._options.color);
     mbMap.setPaintProperty(mbLayerId, 'fill-opacity', alpha);

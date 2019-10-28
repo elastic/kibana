@@ -14,6 +14,12 @@ import { getColorRampStops } from '../../color_utils';
 export class DynamicColorProperty extends DynamicStyleProperty {
 
 
+  syncCircleColorWithMb(mbLayerId, mbMap, alpha) {
+    const color = this._getMbColor();
+    mbMap.setPaintProperty(mbLayerId, 'circle-color', color);
+    mbMap.setPaintProperty(mbLayerId, 'circle-opacity', alpha);
+  }
+
   syncHaloBorderColorWithMb(mbLayerId, mbMap) {
     const color = this._getMbColor();
     mbMap.setPaintProperty(mbLayerId, 'icon-halo-color', color);

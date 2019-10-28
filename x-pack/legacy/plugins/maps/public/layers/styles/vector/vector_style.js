@@ -495,19 +495,10 @@ export class VectorStyle extends AbstractStyle {
   }
 
   setMBPaintPropertiesForPoints({ alpha, mbMap, pointLayerId }) {
-    if (this._descriptor.properties.fillColor) {
-      const color = this._getMBColor(vectorStyles.FILL_COLOR, this._descriptor.properties.fillColor);
-      mbMap.setPaintProperty(pointLayerId, 'circle-color', color);
-      mbMap.setPaintProperty(pointLayerId, 'circle-opacity', alpha);
-    } else {
-      mbMap.setPaintProperty(pointLayerId, 'circle-color', null);
-      mbMap.setPaintProperty(pointLayerId, 'circle-opacity', 0);
-    }
-
+    this._fillColorStyleProperty.syncCircleColorWithMb(pointLayerId, mbMap, alpha);
     this._lineColorStyleProperty.syncCircleStrokeWithMb(pointLayerId, mbMap, alpha);
     this._lineWidthStyleProperty.syncCircleStrokeWidthWithMb(pointLayerId, mbMap);
     this._iconSizeStyleProperty.syncCircleRadiusWithMb(pointLayerId, mbMap);
-
   }
 
   async setMBSymbolPropertiesForPoints({ mbMap, symbolLayerId, alpha }) {
