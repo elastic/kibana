@@ -12,6 +12,7 @@
 /src/plugins/expressions/ @elastic/kibana-app-arch
 /src/plugins/kibana_react/ @elastic/kibana-app-arch
 /src/plugins/kibana_utils/ @elastic/kibana-app-arch
+/src/plugins/navigation/ @elastic/kibana-app-arch
 /src/plugins/ui_actions/ @elastic/kibana-app-arch
 /src/plugins/visualizations/ @elastic/kibana-app-arch
 /x-pack/plugins/advanced_ui_actions/ @elastic/kibana-app-arch

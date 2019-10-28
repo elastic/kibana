@@ -19,6 +19,7 @@
 
 export * from './core';
 export * from './errors';
+export * from './store';
 export * from './parse';
 export * from './render_complete';
 export * from './store';

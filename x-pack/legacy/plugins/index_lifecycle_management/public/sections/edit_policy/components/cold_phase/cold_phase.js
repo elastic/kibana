@@ -58,12 +58,12 @@ export class ColdPhase extends PureComponent {
         <EuiDescribedFormGroup
           title={
             <div>
-              <span className="eui-displayInlineBlock eui-alignMiddle">
+              <h2 className="eui-displayInlineBlock eui-alignMiddle">
                 <FormattedMessage
                   id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.coldPhaseLabel"
                   defaultMessage="Cold phase"
                 />
-              </span>{' '}
+              </h2>{' '}
               {phaseData[PHASE_ENABLED] && !isShowingErrors ? <ActiveBadge /> : null}
               <PhaseErrorMessage isShowingErrors={isShowingErrors} />
             </div>
@@ -162,12 +162,12 @@ export class ColdPhase extends PureComponent {
           <Fragment>
             <EuiDescribedFormGroup
               title={
-                <p>
+                <h3>
                   <FormattedMessage
                     id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.freezeText"
                     defaultMessage="Freeze"
                   />
-                </p>
+                </h3>
               }
               description={
                 <EuiTextColor color="subdued">
