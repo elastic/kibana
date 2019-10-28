@@ -6,7 +6,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import { px } from '../../../../../code/public/style/variables';
+import { px } from '../../../../public/style/variables';
 import { ErrorCountBadge } from '../../app/TransactionDetails/WaterfallWithSummmary/ErrorCountBadge';
 import { units } from '../../../style/variables';
 
