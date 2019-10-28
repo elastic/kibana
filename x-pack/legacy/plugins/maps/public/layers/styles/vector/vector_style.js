@@ -540,13 +540,6 @@ export class VectorStyle extends AbstractStyle {
       mbMap.setPaintProperty(lineLayerId, 'line-opacity', 0);
     }
 
-    // if (this._descriptor.properties.lineWidth) {
-    //   const lineWidth = this._getMbSize(vectorStyles.LINE_WIDTH, this._descriptor.properties.lineWidth);
-    //   mbMap.setPaintProperty(lineLayerId, 'line-width', lineWidth);
-    // } else {
-    //   mbMap.setPaintProperty(lineLayerId, 'line-width', 0);
-    // }
-
     this._lineWidthStyleProperty.syncWithMbForShapes(lineLayerId, mbMap);
   }
 
@@ -568,12 +561,10 @@ export class VectorStyle extends AbstractStyle {
       mbMap.setPaintProperty(pointLayerId, 'circle-stroke-color', null);
       mbMap.setPaintProperty(pointLayerId, 'circle-stroke-opacity', 0);
     }
-    if (this._descriptor.properties.lineWidth) {
-      const lineWidth = this._getMbSize(vectorStyles.LINE_WIDTH, this._descriptor.properties.lineWidth);
-      mbMap.setPaintProperty(pointLayerId, 'circle-stroke-width', lineWidth);
-    } else {
-      mbMap.setPaintProperty(pointLayerId, 'circle-stroke-width', 0);
-    }
+
+    this._lineWidthStyleProperty.syncWithMbForCircles(pointLayerId, mbMap);
+
+
     if (this._descriptor.properties.iconSize) {
       const iconSize = this._getMbSize(vectorStyles.ICON_SIZE, this._descriptor.properties.iconSize);
       mbMap.setPaintProperty(pointLayerId, 'circle-radius', iconSize);
@@ -589,11 +580,12 @@ export class VectorStyle extends AbstractStyle {
     mbMap.setLayoutProperty(symbolLayerId, 'icon-anchor', getMakiSymbolAnchor(symbolId));
     const color = this._getMBColor(vectorStyles.FILL_COLOR, this._descriptor.properties.fillColor);
     const haloColor = this._getMBColor(vectorStyles.LINE_COLOR, this._descriptor.properties.lineColor);
-    const haloWidth = this._getMbSize(vectorStyles.LINE_WIDTH, this._descriptor.properties.lineWidth);
     // icon-color is only supported on SDF icons.
     mbMap.setPaintProperty(symbolLayerId, 'icon-color', color);
     mbMap.setPaintProperty(symbolLayerId, 'icon-halo-color', haloColor);
-    mbMap.setPaintProperty(symbolLayerId, 'icon-halo-width', haloWidth);
+
+    this._lineWidthStyleProperty.syncWithMbForHaloWidth(symbolLayerId, mbMap);
+
     mbMap.setPaintProperty(symbolLayerId, 'icon-opacity', alpha);
 
     // circle sizing is by radius

@@ -10,12 +10,14 @@ import { getComputedFieldName } from '../style_util';
 
 export class DynamicSizeProperty extends DynamicStyleProperty {
 
-  syncWithMbForPoints() {
-
+  syncWithMbForHaloWidth(mbLayerId, mbMap) {
+    const haloWidth = this._getMbSize();
+    mbMap.setPaintProperty(mbLayerId, 'icon-halo-width', haloWidth);
   }
 
-  syncWithMbForSymbols() {
-
+  syncWithMbForCircles(mbLayerId, mbMap) {
+    const lineWidth = this._getMbSize();
+    mbMap.setPaintProperty(mbLayerId, 'circle-stroke-width', lineWidth);
   }
 
   syncWithMbForShapes(mbLayerId, mbMap) {
