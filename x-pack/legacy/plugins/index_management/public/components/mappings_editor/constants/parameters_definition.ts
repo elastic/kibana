@@ -247,15 +247,11 @@ export const PARAMETERS_DEFINITION = {
   },
   eager_global_ordinals: {
     fieldConfig: {
-      label: 'Eager global ordinals',
-      type: FIELD_TYPES.CHECKBOX,
       defaultValue: false,
     },
   },
   index_phrases: {
     fieldConfig: {
-      label: 'Index phrases',
-      type: FIELD_TYPES.CHECKBOX,
       defaultValue: false,
     },
   },
@@ -296,77 +292,20 @@ export const PARAMETERS_DEFINITION = {
     },
   },
   index_prefixes: {
-    fieldConfig: { defaultValue: null }, // TODO for now this is required...
     props: {
       min_chars: {
-        type: FIELD_TYPES.NUMBER,
-        defaultValue: 2,
-        helpText: 'Min chars.',
-        formatters: [toInt],
-        validations: [
-          {
-            validator: emptyField('Set a min value.'),
-          },
-          {
-            validator: ({ value }: ValidationFuncArg<any, number>) => {
-              if (value < 0) {
-                return {
-                  message: 'The value must be greater or equal than zero.',
-                };
-              }
-            },
-          },
-          {
-            validator: ({ value, path, formData }: ValidationFuncArg<any, number>) => {
-              const maxPath = path.replace('.min', '.max');
-              const maxValue: number | string = formData[maxPath];
-
-              if (maxValue === '') {
-                return;
-              }
-
-              if (value >= maxValue) {
-                return {
-                  message: 'The value must be smaller than the max value.',
-                };
-              }
-            },
-          },
-        ],
+        fieldConfig: {
+          type: FIELD_TYPES.NUMBER,
+          defaultValue: 2,
+          serializer: value => (value === '' ? '' : toInt(value)),
+        } as FieldConfig,
       },
       max_chars: {
-        type: FIELD_TYPES.NUMBER,
-        defaultValue: 5,
-        helpText: 'Max chars.',
-        formatters: [toInt],
-        validations: [
-          {
-            validator: emptyField('Set a max value.'),
-          },
-          {
-            validator: ({ value }: ValidationFuncArg<any, number>) => {
-              if (value > 20) {
-                return {
-                  message: 'The value must be smaller or equal than 20.',
-                };
-              }
-            },
-          },
-          {
-            validator: ({ value, path, formData }: ValidationFuncArg<any, number>) => {
-              const minPath = path.replace('.max', '.min');
-              const minValue: number | string = formData[minPath];
-              if (minValue === '') {
-                return;
-              }
-              if (value <= minValue) {
-                return {
-                  message: 'The value must be greater than the min value.',
-                };
-              }
-            },
-          },
-        ],
+        fieldConfig: {
+          type: FIELD_TYPES.NUMBER,
+          defaultValue: 5,
+          serializer: value => (value === '' ? '' : toInt(value)),
+        } as FieldConfig,
       },
     },
   },
