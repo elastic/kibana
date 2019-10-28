@@ -18,15 +18,15 @@ export class StaticSizeProperty extends StaticStyleProperty {
     }
   }
 
-  syncWithMbForHaloWidth(mbLayerId, mbMap) {
+  syncHaloWidthWithMb(mbLayerId, mbMap) {
     mbMap.setPaintProperty(mbLayerId, 'icon-halo-width', this._options.size);
   }
 
-  syncWithMbForCircles(mbLayerId, mbMap) {
+  syncCircleStrokeWidthWithMb(mbLayerId, mbMap) {
     mbMap.setPaintProperty(mbLayerId, 'circle-stroke-width', this._options.size);
   }
 
-  syncWithMbForShapes(mbLayerId, mbMap) {
+  syncLineWidthWithMb(mbLayerId, mbMap) {
     mbMap.setPaintProperty(mbLayerId, 'line-width', this._options.size);
   }
 
