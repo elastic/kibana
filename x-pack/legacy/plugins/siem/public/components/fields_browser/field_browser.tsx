@@ -5,7 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiOutsideClickDetector } from '@elastic/eui';
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { noop } from 'lodash/fp';
 import styled, { css } from 'styled-components';
 
@@ -122,7 +122,7 @@ export const FieldsBrowser = React.memo<Props>(
     width,
   }) => {
     /** Focuses the input that filters the field browser */
-    function focusInput() {
+    const focusInput = () => {
       const elements = document.getElementsByClassName(
         getFieldBrowserSearchInputClassName(timelineId)
       );
@@ -130,22 +130,28 @@ export const FieldsBrowser = React.memo<Props>(
       if (elements.length > 0) {
         (elements[0] as HTMLElement).focus(); // this cast is required because focus() does not exist on every `Element` returned by `getElementsByClassName`
       }
-    }
+    };
 
     /** Invoked when the user types in the input to filter the field browser */
-    function onInputChange(event: React.ChangeEvent<HTMLInputElement>) {
-      onSearchInputChange(event.target.value);
-    }
+    const onInputChange = useCallback(
+      (event: React.ChangeEvent<HTMLInputElement>) => {
+        onSearchInputChange(event.target.value);
+      },
+      [onSearchInputChange]
+    );
 
-    function selectFieldAndHide(fieldId: string) {
-      if (onFieldSelected != null) {
-        onFieldSelected(fieldId);
-      }
+    const selectFieldAndHide = useCallback(
+      (fieldId: string) => {
+        if (onFieldSelected != null) {
+          onFieldSelected(fieldId);
+        }
 
-      onHideFieldBrowser();
-    }
+        onHideFieldBrowser();
+      },
+      [onFieldSelected, onHideFieldBrowser]
+    );
 
-    function scrollViews() {
+    const scrollViews = () => {
       if (selectedCategoryId !== '') {
         const categoryPaneTitles = document.getElementsByClassName(
           getCategoryPaneCategoryClassName({
@@ -171,7 +177,7 @@ export const FieldsBrowser = React.memo<Props>(
       }
 
       focusInput(); // always re-focus the input to enable additional filtering
-    }
+    };
 
     useEffect(() => {
       scrollViews();
