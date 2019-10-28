@@ -6,11 +6,42 @@
 
 
 import { DynamicStyleProperty } from './dynamic_style_property';
-
+import { getComputedFieldName } from '../style_util';
 
 export class DynamicSizeProperty extends DynamicStyleProperty {
 
-  syncWithMb(layer, mbMap) {
-    super.syncWithMb(layer, mbMap);
+  syncWithMbForPoints() {
+
   }
+
+  syncWithMbForSymbols() {
+
+  }
+
+  syncWithMbForShapes(mbLayerId, mbMap) {
+    const lineWidth = this._getMbSize();
+    mbMap.setPaintProperty(mbLayerId, 'line-width', lineWidth);
+  }
+
+  _getMbSize() {
+    if (this._isSizeDynamicConfigComplete(this._options)) {
+      return this._getMbDataDrivenSize({
+        targetName: getComputedFieldName(this._styleName, this._options.field.name),
+        minSize: this._options.minSize,
+        maxSize: this._options.maxSize,
+      });
+    }
+    return null;
+  }
+
+  _getMbDataDrivenSize({ targetName, minSize, maxSize }) {
+    return   [
+      'interpolate',
+      ['linear'],
+      ['coalesce', ['feature-state', targetName], 0],
+      0, minSize,
+      1, maxSize
+    ];
+  }
+
 }

@@ -9,7 +9,18 @@ import { StaticStyleProperty } from './static_style_property';
 
 
 export class StaticSizeProperty extends StaticStyleProperty {
-  syncWithMb(layer, mbMap) {
-    super.syncWithMb(layer, mbMap);
+
+  constructor(options) {
+    if (typeof options.size !== 'number') {
+      super({ size: 1 });
+    } else {
+      super(options);
+    }
   }
+
+  syncWithMbForShapes(mbLayerId, mbMap) {
+    mbMap.setPaintProperty(mbLayerId, 'line-width', this._options.size);
+  }
+
+
 }

@@ -24,18 +24,17 @@ import {
 } from './symbol_utils';
 import { DynamicStyleProperty } from './properties/dynamic_style_property';
 import { StaticStyleProperty } from './properties/static_style_property';
+import { DynamicSizeProperty } from './properties/dynamic_size_property';
+import { StaticSizeProperty } from './properties/static_size_property';
+import { getComputedFieldName, getComputedFieldNamePrefix } from './style_util';
 
 export class VectorStyle extends AbstractStyle {
 
   static type = 'VECTOR';
 
-  static getComputedFieldName(styleName, fieldName) {
-    return `${VectorStyle.getComputedFieldNamePrefix(fieldName)}__${styleName}`;
-  }
-
-  static getComputedFieldNamePrefix(fieldName) {
-    return `__kbn__dynamic__${fieldName}`;
-  }
+  //todo: remove these static props
+  static getComputedFieldName = getComputedFieldName;
+  static getComputedFieldNamePrefix = getComputedFieldNamePrefix;
 
   constructor(descriptor = {}, source) {
     super();
@@ -44,9 +43,7 @@ export class VectorStyle extends AbstractStyle {
       ...descriptor,
       ...VectorStyle.createDescriptor(descriptor.properties),
     };
-
-
-
+    this._lineWidthStyleProperty = this._getStyleProperty('lineWidth', this._descriptor.properties.lineWidth);
   }
 
   static createDescriptor(properties = {}) {
@@ -456,6 +453,7 @@ export class VectorStyle extends AbstractStyle {
   }
 
   _getMbDataDrivenSize({ targetName, minSize, maxSize }) {
+    console.warn('todo: remove', targetName, minSize, maxSize);
     return   [
       'interpolate',
       ['linear'],
@@ -542,12 +540,14 @@ export class VectorStyle extends AbstractStyle {
       mbMap.setPaintProperty(lineLayerId, 'line-opacity', 0);
     }
 
-    if (this._descriptor.properties.lineWidth) {
-      const lineWidth = this._getMbSize(vectorStyles.LINE_WIDTH, this._descriptor.properties.lineWidth);
-      mbMap.setPaintProperty(lineLayerId, 'line-width', lineWidth);
-    } else {
-      mbMap.setPaintProperty(lineLayerId, 'line-width', 0);
-    }
+    // if (this._descriptor.properties.lineWidth) {
+    //   const lineWidth = this._getMbSize(vectorStyles.LINE_WIDTH, this._descriptor.properties.lineWidth);
+    //   mbMap.setPaintProperty(lineLayerId, 'line-width', lineWidth);
+    // } else {
+    //   mbMap.setPaintProperty(lineLayerId, 'line-width', 0);
+    // }
+
+    this._lineWidthStyleProperty.syncWithMbForShapes(lineLayerId, mbMap);
   }
 
   setMBPaintPropertiesForPoints({ alpha, mbMap, pointLayerId }) {
@@ -640,4 +640,26 @@ export class VectorStyle extends AbstractStyle {
   arePointsSymbolizedAsCircles() {
     return this._descriptor.properties.symbol.options.symbolizeAs === SYMBOLIZE_AS_CIRCLE;
   }
+
+  _getSizeProperty(descriptor, styleName) {
+    if (!descriptor || !descriptor.options) {
+      return new StaticSizeProperty({ size: 0 });
+    } else if (descriptor.type === StaticStyleProperty.type) {
+      return new StaticSizeProperty(descriptor.options);
+    } else if (descriptor.type === DynamicStyleProperty.type) {
+      return new DynamicSizeProperty(descriptor.options, styleName);
+    } else {
+      throw new Error(`${descriptor} not implemented`);
+    }
+  }
+
+  _getStyleProperty(propertyName, descriptor) {
+
+    if (propertyName === 'lineWidth') {
+      return this._getSizeProperty(descriptor, vectorStyles.LINE_WIDTH);
+    }
+
+    throw new Error(`${propertyName} not implemented`);
+  }
+
 }

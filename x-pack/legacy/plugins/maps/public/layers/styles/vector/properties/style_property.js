@@ -9,4 +9,8 @@
 
 
 export class AbstractStyleProperty {
+
+  constructor(options) {
+    this._options = options;
+  }
 }

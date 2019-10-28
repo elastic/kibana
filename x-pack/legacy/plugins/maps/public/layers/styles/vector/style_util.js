@@ -5,9 +5,10 @@
  */
 
 
-import { StaticStyleProperty } from './static_style_property';
+export function getComputedFieldName(styleName, fieldName) {
+  return `${getComputedFieldNamePrefix(fieldName)}__${styleName}`;
+}
 
-
-export class StaticSizeProperty extends StaticStyleProperty {
-
+export function getComputedFieldNamePrefix(fieldName) {
+  return `__kbn__dynamic__${fieldName}`;
 }
