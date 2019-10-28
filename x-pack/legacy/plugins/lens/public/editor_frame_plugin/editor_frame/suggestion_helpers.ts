@@ -21,7 +21,6 @@ export interface Suggestion {
   visualizationId: string;
   datasourceState?: unknown;
   datasourceId?: string;
-  // keptLayerIds: string[];
   columns: number;
   score: number;
   title: string;
@@ -30,6 +29,7 @@ export interface Suggestion {
   previewIcon: IconType;
   hide?: boolean;
   changeType: TableChangeType;
+  keptLayerIds: string[];
 }
 
 /**

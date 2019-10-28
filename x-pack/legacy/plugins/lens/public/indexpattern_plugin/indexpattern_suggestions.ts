@@ -104,9 +104,8 @@ export function getDatasourceSuggestionsForField(
   const layerIds = layers.filter(id => state.layers[id].indexPatternId === indexPatternId);
 
   if (layerIds.length === 0) {
-    // The field we're suggesting on does not match any existing layer. This will always add
-    // a new layer if possible, but that might not be desirable if the layers are too complicated
-    // already
+    // The field we're suggesting on does not match any existing layer. This will add
+    // a new layer.
     return getEmptyLayerSuggestionsForField(state, generateId(), indexPatternId, field);
   } else {
     // The field we're suggesting on matches an existing layer. In this case we find the layer with
@@ -368,7 +367,7 @@ export function getDatasourceSuggestionsFromCurrentState(
 ): Array<DatasourceSuggestion<IndexPatternPrivateState>> {
   const layers = Object.entries(state.layers || {});
   if (layers.length > 1) {
-    // Return only two suggestions: each layer individually
+    // Return suggestions that reduce the data to each layer individually
     return layers
       .map(([layerId, layer], index) => {
         const hasMatchingLayer = layers.some(

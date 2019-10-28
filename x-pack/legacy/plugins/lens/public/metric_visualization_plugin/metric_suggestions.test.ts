@@ -80,7 +80,9 @@ describe('metric_suggestions', () => {
           layerId: 'l1',
           changeType: 'unchanged',
         },
-      ] as TableSuggestion[]).map(table => expect(getSuggestions({ table })).toEqual([]))
+      ] as TableSuggestion[]).map(table =>
+        expect(getSuggestions({ table, keptLayerIds: ['l1'] })).toEqual([])
+      )
     );
   });
 
@@ -92,6 +94,7 @@ describe('metric_suggestions', () => {
         layerId: 'l1',
         changeType: 'unchanged',
       },
+      keptLayerIds: [],
     });
 
     expect(rest).toHaveLength(0);

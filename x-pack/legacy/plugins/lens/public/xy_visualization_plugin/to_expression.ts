@@ -38,37 +38,28 @@ export const toExpression = (state: State, frame: FramePublicAPI): Ast | null =>
 
   const stateWithValidAccessors = {
     ...state,
-    layers: state.layers
-      .map(layer => {
-        const datasource = frame.datasourceLayers[layer.layerId];
+    layers: state.layers.map(layer => {
+      const datasource = frame.datasourceLayers[layer.layerId];
 
-        if (!datasource) {
-          return;
-        }
+      const newLayer = { ...layer };
 
-        const newLayer = { ...layer };
+      if (!datasource.getOperationForColumnId(layer.splitAccessor)) {
+        delete newLayer.splitAccessor;
+      }
 
-        if (!datasource.getOperationForColumnId(layer.splitAccessor)) {
-          delete newLayer.splitAccessor;
-        }
-
-        return {
-          ...newLayer,
-          accessors: layer.accessors.filter(accessor =>
-            Boolean(datasource.getOperationForColumnId(accessor))
-          ),
-        };
-      })
-      .filter(s => !!s),
+      return {
+        ...newLayer,
+        accessors: layer.accessors.filter(accessor =>
+          Boolean(datasource.getOperationForColumnId(accessor))
+        ),
+      };
+    }),
   };
 
   const metadata: Record<string, Record<string, OperationMetadata | null>> = {};
   state.layers.forEach(layer => {
     metadata[layer.layerId] = {};
     const datasource = frame.datasourceLayers[layer.layerId];
-    if (!datasource) {
-      return;
-    }
     datasource.getTableSpec().forEach(column => {
       const operation = frame.datasourceLayers[layer.layerId].getOperationForColumnId(
         column.columnId

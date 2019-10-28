@@ -35,6 +35,7 @@ function generateSuggestion(state = {}): DatasourceSuggestion {
       layerId: 'first',
       changeType: 'unchanged',
     },
+    keptLayerIds: ['first'],
   };
 }
 
@@ -917,6 +918,7 @@ describe('editor_frame', () => {
             layerId: 'first',
             changeType: 'unchanged',
           },
+          keptLayerIds: [],
         },
       ]);
 
@@ -1062,6 +1064,7 @@ describe('editor_frame', () => {
             isMultiRow: true,
             layerId: 'first',
           },
+          keptLayerIds: [],
         },
       ]);
       mount(

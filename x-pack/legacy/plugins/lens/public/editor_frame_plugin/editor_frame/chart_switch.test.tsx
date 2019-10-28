@@ -94,6 +94,7 @@ describe('chart_switch', () => {
           layerId: 'a',
           changeType: 'unchanged',
         },
+        keptLayerIds: ['a'],
       },
     ]);
     return {
@@ -219,6 +220,7 @@ describe('chart_switch', () => {
           isMultiRow: true,
           changeType: 'unchanged',
         },
+        keptLayerIds: [],
       },
     ]);
     datasourceMap.testDatasource.publicAPIMock.getTableSpec.mockReturnValue([
@@ -332,31 +334,7 @@ describe('chart_switch', () => {
     expect(getMenuItem('subvisC2', component).prop('betaBadgeIconType')).toBeUndefined();
   });
 
-  it('should remove unused layers', () => {
-    const removeLayers = jest.fn();
-    const frame = {
-      ...mockFrame(['a', 'b', 'c']),
-      removeLayers,
-    };
-    const component = mount(
-      <ChartSwitch
-        visualizationId="visA"
-        visualizationState={{}}
-        visualizationMap={mockVisualizations()}
-        dispatch={jest.fn()}
-        framePublicAPI={frame}
-        datasourceMap={mockDatasourceMap()}
-        datasourceStates={mockDatasourceStates()}
-      />
-    );
-
-    switchTo('subvisB', component);
-
-    expect(removeLayers).toHaveBeenCalledTimes(1);
-    expect(removeLayers).toHaveBeenCalledWith(['b', 'c']);
-  });
-
-  it('should remove all layers if there is no suggestion', () => {
+  it('should switch even if there is no suggestion', () => {
     const dispatch = jest.fn();
     const visualizations = mockVisualizations();
     visualizations.visB.getSuggestions.mockReturnValueOnce([]);
@@ -376,17 +354,23 @@ describe('chart_switch', () => {
 
     switchTo('subvisB', component);
 
-    expect(frame.removeLayers).toHaveBeenCalledTimes(1);
-    expect(frame.removeLayers).toHaveBeenCalledWith(['a', 'b', 'c']);
+    expect(visualizations.visB.getSuggestions).toHaveBeenCalledWith(
+      expect.objectContaining({
+        keptLayerIds: ['a'],
+      })
+    );
+
+    expect(dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'SWITCH_VISUALIZATION',
+        initialState: 'visB initial state',
+      })
+    );
   });
 
   it('should not remove layers if the visualization is not changing', () => {
     const dispatch = jest.fn();
-    const removeLayers = jest.fn();
-    const frame = {
-      ...mockFrame(['a', 'b', 'c']),
-      removeLayers,
-    };
+    const frame = mockFrame(['a', 'b', 'c']);
     const visualizations = mockVisualizations();
     const switchVisualizationType = jest.fn(() => 'therebedragons');
 
@@ -405,7 +389,6 @@ describe('chart_switch', () => {
     );
 
     switchTo('subvisC2', component);
-    expect(removeLayers).not.toHaveBeenCalled();
     expect(switchVisualizationType).toHaveBeenCalledWith('subvisC2', 'therebegriffins');
     expect(dispatch).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -447,6 +430,7 @@ describe('chart_switch', () => {
           isMultiRow: true,
           changeType: 'unchanged',
         },
+        keptLayerIds: [],
       },
     ]);
 
