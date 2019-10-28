@@ -18,26 +18,6 @@
  */
 
 module.exports = (_, options = {}) => {
-  const plugins = [
-    [
-      require.resolve('babel-plugin-transform-define'),
-      {
-        'global.__BUILT_WITH_BABEL__': 'true',
-      },
-    ],
-  ];
-
-  if (!process.env.ALLOW_PERFORMANCE_HOOKS) {
-    plugins.push([
-      'filter-imports',
-      {
-        imports: {
-          perf_hooks: ['performance'],
-        },
-      },
-    ]);
-  }
-
   return {
     presets: [
       [
@@ -59,11 +39,18 @@ module.exports = (_, options = {}) => {
           modules: 'cjs',
           corejs: 3,
 
-          ...(options['@babel/preset-env'] || {}),
+          ...(options['@babel/preset-env'] || {})
         },
       ],
       require('./common_preset'),
     ],
-    plugins,
+    plugins: [
+      [
+        require.resolve('babel-plugin-transform-define'),
+        {
+          'global.__BUILT_WITH_BABEL__': 'true'
+        }
+      ]
+    ]
   };
 };
