@@ -109,34 +109,56 @@ export default function({ getService }: FtrProviderContext) {
 
   const testDataList = [
     {
-      suiteTitle: 'with by field detector',
-      jobSource: 'farequote',
-      jobId: `fq_advanced_1_${Date.now()}`,
+      suiteTitle: 'with multiple metric detectors and custom datafeed settings',
+      jobSource: 'ecommerce',
+      jobId: `ec_advanced_1_${Date.now()}`,
       get jobIdClone(): string {
         return `${this.jobId}_clone`;
       },
-      jobDescription: 'Create advanced job from farequote dataset with a by field detector',
-      jobGroups: ['automated', 'farequote', 'advanced'],
+      jobDescription:
+        'Create advanced job from ecommerce dataset with multiple metric detectors and custom datafeed settings',
+      jobGroups: ['automated', 'ecommerce', 'advanced'],
       get jobGroupsClone(): string[] {
         return [...this.jobGroups, 'clone'];
       },
       pickFieldsConfig: {
         detectors: [
           {
-            identifier: 'count',
-            function: 'count',
-            description: 'count detector without split',
+            identifier: 'high_count',
+            function: 'high_count',
+            description: 'high_count detector without split',
           } as Detector,
           {
-            identifier: 'mean(responsetime) by airline',
+            identifier: 'mean("products.base_price") by "category.keyword"',
             function: 'mean',
-            field: 'responsetime',
-            byField: 'airline',
+            field: 'products.base_price',
+            byField: 'category.keyword',
+          } as Detector,
+          {
+            identifier: 'sum("products.discount_amount") over customer_id',
+            function: 'sum',
+            field: 'products.discount_amount',
+            overField: 'customer_id',
+          } as Detector,
+          {
+            identifier: 'median(total_quantity) partition_field_name=customer_gender',
+            function: 'median',
+            field: 'total_quantity',
+            partitionField: 'customer_gender',
+          } as Detector,
+          {
+            identifier:
+              'max(total_quantity) by "geoip.continent_name" over customer_id partition_field_name=customer_gender',
+            function: 'max',
+            field: 'total_quantity',
+            byField: 'geoip.continent_name',
+            overField: 'customer_id',
+            partitionField: 'customer_gender',
           } as Detector,
         ],
-        influencers: ['airline'],
-        bucketSpan: '15m',
-        memoryLimit: '20mb',
+        influencers: ['customer_id', 'category.keyword', 'geoip.continent_name', 'customer_gender'],
+        bucketSpan: '1h',
+        memoryLimit: '10mb',
       } as PickFieldsConfig,
       datafeedConfig: {
         queryDelay: '55s',
@@ -145,57 +167,124 @@ export default function({ getService }: FtrProviderContext) {
       } as DatafeedConfig,
       expected: {
         wizard: {
-          timeField: '@timestamp',
+          timeField: 'order_date',
         },
         row: {
-          recordCount: '86,274',
+          recordCount: '4,675',
           memoryStatus: 'ok',
           jobState: 'closed',
           datafeedState: 'stopped',
-          latestTimestamp: '2016-02-11 23:59:54',
+          latestTimestamp: '2019-07-12 23:45:36',
         },
         counts: {
-          processed_record_count: '86,274',
-          processed_field_count: '172,548',
-          input_bytes: '6.4 MB',
-          input_field_count: '172,548',
+          processed_record_count: '4,675',
+          processed_field_count: '32,725',
+          input_bytes: '1.1 MB',
+          input_field_count: '32,725',
           invalid_date_count: '0',
           missing_field_count: '0',
           out_of_order_timestamp_count: '0',
           empty_bucket_count: '0',
           sparse_bucket_count: '0',
-          bucket_count: '479',
-          earliest_record_timestamp: '2016-02-07 00:00:00',
-          latest_record_timestamp: '2016-02-11 23:59:54',
-          input_record_count: '86,274',
-          latest_bucket_timestamp: '2016-02-11 23:45:00',
+          bucket_count: '743',
+          earliest_record_timestamp: '2019-06-12 00:04:19',
+          latest_record_timestamp: '2019-07-12 23:45:36',
+          input_record_count: '4,675',
+          latest_bucket_timestamp: '2019-07-12 23:00:00',
         },
         modelSizeStats: {
           result_type: 'model_size_stats',
           model_bytes_exceeded: '0',
-          model_bytes_memory_limit: '20971520',
-          total_by_field_count: '22',
-          total_over_field_count: '0',
-          total_partition_field_count: '3',
+          model_bytes_memory_limit: '10485760',
+          total_by_field_count: '37',
+          total_over_field_count: '92',
+          total_partition_field_count: '8',
           bucket_allocation_failures_count: '0',
           memory_status: 'ok',
-          timestamp: '2016-02-11 23:30:00',
+          timestamp: '2019-07-12 22:00:00',
+        },
+      },
+    },
+    {
+      suiteTitle: 'with categorization detector and default datafeed settings',
+      jobSource: 'ecommerce',
+      jobId: `ec_advanced_2_${Date.now()}`,
+      get jobIdClone(): string {
+        return `${this.jobId}_clone`;
+      },
+      jobDescription:
+        'Create advanced job from ecommerce dataset with a categorization detector and default datafeed settings',
+      jobGroups: ['automated', 'ecommerce', 'advanced'],
+      get jobGroupsClone(): string[] {
+        return [...this.jobGroups, 'clone'];
+      },
+      pickFieldsConfig: {
+        categorizationField: 'products.product_name',
+        detectors: [
+          {
+            identifier: 'count by mlcategory',
+            function: 'count',
+            byField: 'mlcategory',
+          } as Detector,
+        ],
+        influencers: ['mlcategory'],
+        bucketSpan: '12h',
+        memoryLimit: '100mb',
+      } as PickFieldsConfig,
+      datafeedConfig: {} as DatafeedConfig,
+      expected: {
+        wizard: {
+          timeField: 'order_date',
+        },
+        row: {
+          recordCount: '4,675',
+          memoryStatus: 'ok',
+          jobState: 'closed',
+          datafeedState: 'stopped',
+          latestTimestamp: '2019-07-12 23:45:36',
+        },
+        counts: {
+          processed_record_count: '4,675',
+          processed_field_count: '4,588',
+          input_bytes: '4.4 MB',
+          input_field_count: '6,154',
+          invalid_date_count: '0',
+          missing_field_count: '87',
+          out_of_order_timestamp_count: '0',
+          empty_bucket_count: '0',
+          sparse_bucket_count: '0',
+          bucket_count: '61',
+          earliest_record_timestamp: '2019-06-12 00:04:19',
+          latest_record_timestamp: '2019-07-12 23:45:36',
+          input_record_count: '4,675',
+          latest_bucket_timestamp: '2019-07-12 12:00:00',
+        },
+        modelSizeStats: {
+          result_type: 'model_size_stats',
+          model_bytes_exceeded: '0',
+          model_bytes_memory_limit: '104857600',
+          total_by_field_count: '3,787',
+          total_over_field_count: '0',
+          total_partition_field_count: '2',
+          bucket_allocation_failures_count: '0',
+          memory_status: 'ok',
+          timestamp: '2019-07-12 00:00:00',
         },
       },
     },
   ];
 
-  describe('advanced job', function() {
+  // eslint-disable-next-line ban/ban
+  describe.only('advanced job', function() {
     this.tags(['smoke', 'mlqa']);
-
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/farequote');
+      await esArchiver.load('ml/ecommerce');
     });
 
-    after(async () => {
-      await esArchiver.unload('ml/farequote');
-      await ml.api.cleanMlIndices();
-    });
+    // after(async () => {
+    //   await esArchiver.unload('ml/ecommerce');
+    //   await ml.api.cleanMlIndices();
+    // });
 
     for (const testData of testDataList) {
       describe(`${testData.suiteTitle}`, function() {
@@ -227,28 +316,25 @@ export default function({ getService }: FtrProviderContext) {
 
         it('job creation inputs the query delay', async () => {
           await ml.jobWizardAdvanced.assertQueryDelayInputExists();
+          await ml.jobWizardAdvanced.assertQueryDelayValue(defaultValues.queryDelay);
           if (isDatafeedConfigWithQueryDelay(testData.datafeedConfig)) {
             await ml.jobWizardAdvanced.setQueryDelay(testData.datafeedConfig.queryDelay);
-          } else {
-            await ml.jobWizardAdvanced.assertQueryDelayValue(defaultValues.queryDelay);
           }
         });
 
         it('job creation inputs the frequency', async () => {
           await ml.jobWizardAdvanced.assertFrequencyInputExists();
+          await ml.jobWizardAdvanced.assertFrequencyValue(defaultValues.frequency);
           if (isDatafeedConfigWithFrequency(testData.datafeedConfig)) {
             await ml.jobWizardAdvanced.setFrequency(testData.datafeedConfig.frequency);
-          } else {
-            await ml.jobWizardAdvanced.assertFrequencyValue(defaultValues.frequency);
           }
         });
 
         it('job creation inputs the scroll size', async () => {
           await ml.jobWizardAdvanced.assertScrollSizeInputExists();
+          await ml.jobWizardAdvanced.assertScrollSizeValue(defaultValues.scrollSize);
           if (isDatafeedConfigWithScrollSize(testData.datafeedConfig)) {
             await ml.jobWizardAdvanced.setScrollSize(testData.datafeedConfig.scrollSize);
-          } else {
-            await ml.jobWizardAdvanced.assertScrollSizeValue(defaultValues.scrollSize);
           }
         });
 
@@ -287,17 +373,17 @@ export default function({ getService }: FtrProviderContext) {
           for (const detector of testData.pickFieldsConfig.detectors) {
             await ml.jobWizardAdvanced.openCreateDetectorModal();
             await ml.jobWizardAdvanced.assertDetectorFunctionInputExists();
-            await ml.jobWizardAdvanced.assertDetectorFunctionSelection(['']);
+            await ml.jobWizardAdvanced.assertDetectorFunctionSelection([]);
             await ml.jobWizardAdvanced.assertDetectorFieldInputExists();
-            await ml.jobWizardAdvanced.assertDetectorFieldSelection(['']);
+            await ml.jobWizardAdvanced.assertDetectorFieldSelection([]);
             await ml.jobWizardAdvanced.assertDetectorByFieldInputExists();
-            await ml.jobWizardAdvanced.assertDetectorByFieldSelection(['']);
+            await ml.jobWizardAdvanced.assertDetectorByFieldSelection([]);
             await ml.jobWizardAdvanced.assertDetectorOverFieldInputExists();
-            await ml.jobWizardAdvanced.assertDetectorOverFieldSelection(['']);
+            await ml.jobWizardAdvanced.assertDetectorOverFieldSelection([]);
             await ml.jobWizardAdvanced.assertDetectorPartitionFieldInputExists();
-            await ml.jobWizardAdvanced.assertDetectorPartitionFieldSelection(['']);
+            await ml.jobWizardAdvanced.assertDetectorPartitionFieldSelection([]);
             await ml.jobWizardAdvanced.assertDetectorExcludeFrequentInputExists();
-            await ml.jobWizardAdvanced.assertDetectorExcludeFrequentSelection(['']);
+            await ml.jobWizardAdvanced.assertDetectorExcludeFrequentSelection([]);
             await ml.jobWizardAdvanced.assertDetectorDescriptionInputExists();
             await ml.jobWizardAdvanced.assertDetectorDescriptionValue('');
 
@@ -326,8 +412,9 @@ export default function({ getService }: FtrProviderContext) {
         });
 
         it('job creation displays detector entries', async () => {
-          for (const detector of testData.pickFieldsConfig.detectors) {
+          for (const [index, detector] of testData.pickFieldsConfig.detectors.entries()) {
             await ml.jobWizardAdvanced.assertDetectorEntryExists(
+              index,
               detector.identifier,
               isDetectorWithDescription(detector) ? detector.description : undefined
             );
@@ -480,20 +567,16 @@ export default function({ getService }: FtrProviderContext) {
 
         it('job cloning pre-fills the query delay', async () => {
           await ml.jobWizardAdvanced.assertQueryDelayInputExists();
-          await ml.jobWizardAdvanced.assertQueryDelayValue(
-            isDatafeedConfigWithQueryDelay(testData.datafeedConfig)
-              ? testData.datafeedConfig.queryDelay
-              : defaultValues.queryDelay
-          );
+          if (isDatafeedConfigWithQueryDelay(testData.datafeedConfig)) {
+            await ml.jobWizardAdvanced.assertQueryDelayValue(testData.datafeedConfig.queryDelay);
+          }
         });
 
         it('job cloning pre-fills the frequency', async () => {
           await ml.jobWizardAdvanced.assertFrequencyInputExists();
-          await ml.jobWizardAdvanced.assertFrequencyValue(
-            isDatafeedConfigWithFrequency(testData.datafeedConfig)
-              ? testData.datafeedConfig.frequency
-              : defaultValues.frequency
-          );
+          if (isDatafeedConfigWithFrequency(testData.datafeedConfig)) {
+            await ml.jobWizardAdvanced.assertFrequencyValue(testData.datafeedConfig.frequency);
+          }
         });
 
         it('job cloning pre-fills the scroll size', async () => {
@@ -533,12 +616,13 @@ export default function({ getService }: FtrProviderContext) {
         });
 
         it('job cloning pre-fills detectors', async () => {
-          for (const detector of testData.pickFieldsConfig.detectors) {
+          for (const [index, detector] of testData.pickFieldsConfig.detectors.entries()) {
             await ml.jobWizardAdvanced.assertDetectorEntryExists(
+              index,
               detector.identifier,
               isDetectorWithDescription(detector) ? detector.description : undefined
             );
-            await ml.jobWizardAdvanced.clickEditDetector(detector.identifier);
+            await ml.jobWizardAdvanced.clickEditDetector(index);
 
             await ml.jobWizardAdvanced.assertDetectorFunctionInputExists();
             await ml.jobWizardAdvanced.assertDetectorFieldInputExists();
@@ -550,22 +634,25 @@ export default function({ getService }: FtrProviderContext) {
 
             await ml.jobWizardAdvanced.assertDetectorFunctionSelection([detector.function]);
             await ml.jobWizardAdvanced.assertDetectorFieldSelection(
-              isDetectorWithField(detector) ? [detector.field] : ['']
+              isDetectorWithField(detector) ? [detector.field] : []
             );
             await ml.jobWizardAdvanced.assertDetectorByFieldSelection(
-              isDetectorWithByField(detector) ? [detector.byField] : ['']
+              isDetectorWithByField(detector) ? [detector.byField] : []
             );
             await ml.jobWizardAdvanced.assertDetectorOverFieldSelection(
-              isDetectorWithOverField(detector) ? [detector.overField] : ['']
+              isDetectorWithOverField(detector) ? [detector.overField] : []
             );
             await ml.jobWizardAdvanced.assertDetectorPartitionFieldSelection(
-              isDetectorWithPartitionField(detector) ? [detector.partitionField] : ['']
+              isDetectorWithPartitionField(detector) ? [detector.partitionField] : []
             );
             await ml.jobWizardAdvanced.assertDetectorExcludeFrequentSelection(
-              isDetectorWithExcludeFrequent(detector) ? [detector.excludeFrequent] : ['']
+              isDetectorWithExcludeFrequent(detector) ? [detector.excludeFrequent] : []
             );
+            // Currently, a description different form the identifier is generated for detectors with partition field
             await ml.jobWizardAdvanced.assertDetectorDescriptionValue(
-              isDetectorWithDescription(detector) ? detector.description : detector.identifier
+              isDetectorWithDescription(detector)
+                ? detector.description
+                : detector.identifier.replace('partition_field_name', 'partitionfield')
             );
 
             await ml.jobWizardAdvanced.cancelAddDetectorModal();

@@ -211,7 +211,7 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
     }
 
     public async clickActionsMenu(jobId: string) {
-      retry.tryForTime(30 * 1000, async () => {
+      await retry.tryForTime(30 * 1000, async () => {
         if (!(await testSubjects.exists('mlActionButtonDeleteJob'))) {
           await testSubjects.click(this.rowSelector(jobId, 'euiCollapsedItemActionsButton'));
           await testSubjects.existOrFail('mlActionButtonDeleteJob', { timeout: 5000 });

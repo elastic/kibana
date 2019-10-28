@@ -25,6 +25,7 @@ import { JobCreatorContext } from '../../../job_creator_context';
 import { AdvancedJobCreator } from '../../../../../common/job_creator';
 import { Validation } from '../../../../../common/job_validator';
 import { detectorToString } from '../../../../../../../util/string_utils';
+import { Detector } from '../../../../../common/job_creator/configs';
 
 interface Props {
   isActive: boolean;
@@ -100,7 +101,7 @@ export const DetectorList: FC<Props> = ({ isActive, onEditJob, onDeleteJob }) =>
 
       <EuiFlexGrid columns={3}>
         {detectors.map((d, i) => (
-          <EuiFlexItem key={i} data-test-subj={`mlAdvancedDetector ${detectorToString(d)}`}>
+          <EuiFlexItem key={i} data-test-subj={`mlAdvancedDetector ${i}`}>
             <EuiPanel paddingSize="m">
               <EuiFlexGroup>
                 <EuiFlexItem>
@@ -109,7 +110,7 @@ export const DetectorList: FC<Props> = ({ isActive, onEditJob, onDeleteJob }) =>
                       {d.detector_description}
                     </div>
                   ) : (
-                    detectorToString(d)
+                    <DetectorIdentifier detector={d} />
                   )}
                 </EuiFlexItem>
                 {isActive && (
@@ -121,7 +122,7 @@ export const DetectorList: FC<Props> = ({ isActive, onEditJob, onDeleteJob }) =>
               {d.detector_description !== undefined && (
                 <Fragment>
                   <EuiHorizontalRule margin="s" />
-                  {detectorToString(d)}
+                  <DetectorIdentifier detector={d} />
                 </Fragment>
               )}
             </EuiPanel>
@@ -170,4 +171,8 @@ const DuplicateDetectorsWarning: FC<{ validation: Validation }> = ({ validation 
       <EuiSpacer size="s" />
     </Fragment>
   );
+};
+
+const DetectorIdentifier: FC<{ detector: Detector }> = ({ detector }) => {
+  return <div data-test-subj="detectorIdentifier">{detectorToString(detector)}</div>;
 };

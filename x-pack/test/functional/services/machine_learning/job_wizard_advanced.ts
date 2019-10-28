@@ -11,7 +11,6 @@ export function MachineLearningJobWizardAdvancedProvider({
   getService,
   getPageObjects,
 }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['header']);
   const comboBox = getService('comboBox');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
@@ -278,26 +277,39 @@ export function MachineLearningJobWizardAdvancedProvider({
       await testSubjects.missingOrFail('mlCreateDetectorModal');
     },
 
-    async assertDetectorEntryExists(detectorName: string, expectedDetectorDescription?: string) {
-      await testSubjects.existOrFail(`mlAdvancedDetector ${detectorName}`);
+    async assertDetectorEntryExists(
+      detectorIndex: number,
+      expectedDetectorName: string,
+      expectedDetectorDescription?: string
+    ) {
+      await testSubjects.existOrFail(`mlAdvancedDetector ${detectorIndex}`);
+
+      const actualDetectorIdentifier = await testSubjects.getVisibleText(
+        `mlAdvancedDetector ${detectorIndex} > detectorIdentifier`
+      );
+      expect(actualDetectorIdentifier).to.eql(expectedDetectorName);
+
       if (expectedDetectorDescription !== undefined) {
-        await testSubjects.existOrFail(`mlAdvancedDetector ${detectorName} > detectorDescription`);
         const actualDetectorDescription = await testSubjects.getVisibleText(
-          `mlAdvancedDetector ${detectorName} > detectorDescription`
+          `mlAdvancedDetector ${detectorIndex} > detectorDescription`
         );
         expect(actualDetectorDescription).to.eql(expectedDetectorDescription);
       }
     },
 
-    async clickEditDetector(detectorName: string) {
-      await testSubjects.click(`mlAdvancedDetector ${detectorName} > mlAdvancedDetectorEditButton`);
+    async clickEditDetector(detectorIndex: number) {
+      await testSubjects.click(
+        `mlAdvancedDetector ${detectorIndex} > mlAdvancedDetectorEditButton`
+      );
       await this.assertCreateDetectorModalExists();
     },
 
     async createJob() {
       await testSubjects.clickWhenNotDisabled('mlJobWizardButtonCreateJob');
-      await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
-      await testSubjects.existOrFail('mlStartDatafeedModal');
+      // this retry can be removed as soon as #48734 is merged
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.existOrFail('mlStartDatafeedModal');
+      });
     },
   };
 }
