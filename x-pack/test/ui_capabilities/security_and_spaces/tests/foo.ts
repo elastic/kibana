@@ -70,9 +70,7 @@ export default function fooTests({ getService }: FtrProviderContext) {
               show: false,
             });
             break;
-          // if we don't have access at the space itself, we're
-          // redirected to the space selector and the ui capabilities
-          // are largely irrelevant because they won't be consumed
+          // if we don't have access at the space itself, security interceptor responds with 404.
           case 'no_kibana_privileges at everything_space':
           case 'no_kibana_privileges at nothing_space':
           case 'legacy_all at everything_space':
@@ -82,9 +80,7 @@ export default function fooTests({ getService }: FtrProviderContext) {
           case 'nothing_space_all at everything_space':
           case 'nothing_space_read at everything_space':
             expect(uiCapabilities.success).to.be(false);
-            expect(uiCapabilities.failureReason).to.be(
-              GetUICapabilitiesFailureReason.RedirectedToSpaceSelector
-            );
+            expect(uiCapabilities.failureReason).to.be(GetUICapabilitiesFailureReason.NotFound);
             break;
           default:
             throw new UnreachableError(scenario);
