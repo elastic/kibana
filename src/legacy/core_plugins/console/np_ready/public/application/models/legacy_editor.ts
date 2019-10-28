@@ -17,9 +17,12 @@
  * under the License.
  */
 
-import { Editor as IAceEditor, Range as AceRange } from 'brace';
+import ace from 'brace';
+import { Editor as IAceEditor } from 'brace';
 import { CoreEditor, Position, Range, Token, TokensProvider } from '../../types';
 import { AceTokensProvider } from '../../lib/ace_token_provider';
+
+const _AceRange = ace.acequire('ace/range').Range;
 
 export class LegacyEditor implements CoreEditor {
   constructor(private readonly editor: IAceEditor) {}
@@ -31,7 +34,7 @@ export class LegacyEditor implements CoreEditor {
 
   getValueInRange({ start, end }: Range): string {
     const session = this.editor.getSession();
-    const aceRange = new AceRange(
+    const aceRange = new _AceRange(
       start.lineNumber - 1,
       start.column - 1,
       end.lineNumber - 1,
@@ -90,7 +93,7 @@ export class LegacyEditor implements CoreEditor {
   }
 
   replace({ start, end }: Range, value: string): void {
-    const aceRange = new AceRange(
+    const aceRange = new _AceRange(
       start.lineNumber - 1,
       start.column - 1,
       end.lineNumber - 1,
