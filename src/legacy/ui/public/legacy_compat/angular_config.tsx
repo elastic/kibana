@@ -302,9 +302,7 @@ const $setupHelpExtensionAutoClear = (newPlatform: CoreStart) => (
 const $setupUrlOverflowHandling = (newPlatform: CoreStart) => (
   $location: ILocationService,
   $rootScope: IRootScopeService,
-  $injector: any,
-  Private: any,
-  config: any
+  $injector: any
 ) => {
   const $route = $injector.has('$route') ? $injector.get('$route') : {};
   const urlOverflow = new UrlOverflowService();
@@ -313,7 +311,7 @@ const $setupUrlOverflowHandling = (newPlatform: CoreStart) => (
       return;
     }
     // disable long url checks when storing state in session storage
-    if (config.get('state:storeInSessionStorage')) {
+    if (newPlatform.uiSettings.get('state:storeInSessionStorage')) {
       return;
     }
 

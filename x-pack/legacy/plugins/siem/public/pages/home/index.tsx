@@ -34,6 +34,13 @@ import { SiemPageName } from './types';
 import { UseUrlState } from '../../components/url_state';
 import { SpyRoute } from '../../utils/route/spy_routes';
 
+/*
+ * This is import is important to keep because if we do not have it
+ * we will loose the map embeddable until they move to the New Platform
+ * we need to have it
+ */
+import 'uiExports/embeddableFactories';
+
 const WrappedByAutoSizer = styled.div`
   height: 100%;
 `;
