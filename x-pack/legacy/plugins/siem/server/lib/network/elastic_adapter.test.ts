@@ -91,7 +91,7 @@ describe('Network Top N flow elasticsearch_adapter with FlowTarget=source', () =
     const mockNoGeoDataResponse = cloneDeep(mockResponse);
     // sometimes bad things happen to good ecs
     mockNoGeoDataResponse.aggregations[
-      FlowTargetSourceDest.source
+      FlowTargetNew.source
     ].buckets[0].location.top_geo.hits.hits = [];
     mockCallWithRequest.mockResolvedValue(mockNoGeoDataResponse);
     const mockFramework: FrameworkAdapter = {
