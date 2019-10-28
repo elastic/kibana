@@ -171,16 +171,16 @@ export const normalize = (fieldsToNormalize: Fields): NormalizedFields => {
       idsArray.push(id);
       const field = { name: propName, ...value } as Field;
       const meta = getFieldMeta(field, isMultiField);
-      const { childFieldsName } = meta;
+      const { childFieldsName, hasChildFields, hasMultiFields } = meta;
 
-      if (childFieldsName && field[childFieldsName]) {
+      if (hasChildFields || hasMultiFields) {
         const nextDepth =
           meta.canHaveChildFields || meta.canHaveMultiFields ? nestedDepth + 1 : nestedDepth;
         meta.childFields = [];
         maxNestedDepth = Math.max(maxNestedDepth, nextDepth);
 
         normalizeFields(
-          field[meta.childFieldsName!]!,
+          field[childFieldsName!]!,
           to,
           [...paths, propName],
           meta.childFields,

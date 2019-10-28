@@ -62,8 +62,6 @@ export const PARAMETERS_DEFINITION = {
   },
   doc_values: {
     fieldConfig: {
-      label: 'Doc values',
-      type: FIELD_TYPES.CHECKBOX,
       defaultValue: true,
     },
     docs: 'https://www.elastic.co/guide/en/elasticsearch/reference/current/doc-values.html',
@@ -117,9 +115,13 @@ export const PARAMETERS_DEFINITION = {
   },
   null_value: {
     fieldConfig: {
-      label: 'Null value',
       defaultValue: '',
       type: FIELD_TYPES.TEXT,
+      validations: [
+        {
+          validator: emptyField('Specify a null value.'),
+        },
+      ],
     },
   },
   boost: {
@@ -212,7 +214,7 @@ export const PARAMETERS_DEFINITION = {
       defaultValue: INDEX_DEFAULT,
       validations: [
         {
-          validator: emptyField('Give a name to the analyzer'),
+          validator: emptyField('Give a name to the analyzer.'),
         },
         {
           validator: containsCharsField({
@@ -229,6 +231,9 @@ export const PARAMETERS_DEFINITION = {
       defaultValue: '',
       type: FIELD_TYPES.TEXT,
       validations: [
+        {
+          validator: emptyField('Give a name to the normalizer.'),
+        },
         {
           validator: containsCharsField({
             chars: ' ',
@@ -313,15 +318,12 @@ export const PARAMETERS_DEFINITION = {
   },
   split_queries_on_whitespace: {
     fieldConfig: {
-      label: 'Split queries on whitespace',
-      type: FIELD_TYPES.CHECKBOX,
       defaultValue: false,
     },
   },
   ignore_above: {
     fieldConfig: {
-      label: 'Ignore above',
-      defaultValue: 256,
+      defaultValue: 2147483647,
       type: FIELD_TYPES.NUMBER,
       formatters: [toInt],
       validations: [

@@ -26,6 +26,14 @@ import {
 import { getFieldConfig } from '../../../../lib';
 import { PARAMETERS_OPTIONS } from '../../../../constants';
 import { SelectWithCustom } from '../../../form';
+import {
+  StoreParameter,
+  IndexParameter,
+  BoostParameter,
+  EagerGlobalOrdinalsParameter,
+  NormsParameter,
+  SimilarityParameter,
+} from '../../field_parameters';
 import { EditFieldSection, EditFieldFormRow, AdvancedSettingsWrapper } from '../edit_field';
 
 interface Props {
@@ -78,41 +86,10 @@ export const TextType = React.memo(({ field }: Props) => {
     <>
       <EditFieldSection>
         {/* store */}
-        <EditFieldFormRow
-          title={<h3>Store field value</h3>}
-          description="This is description text."
-          formFieldPath="store"
-        />
+        <StoreParameter />
 
         {/* index */}
-        <EditFieldFormRow
-          title={<h3>Searchable</h3>}
-          description="This is description text."
-          formFieldPath="index"
-          direction="column"
-        >
-          {/* index_options */}
-          <EuiFlexGroup alignItems="center">
-            <EuiFlexItem>
-              <UseField
-                path="index_options"
-                config={getFieldConfig('index_options')}
-                component={Field}
-                componentProps={{
-                  euiFieldProps: {
-                    options: PARAMETERS_OPTIONS.index_options,
-                    style: { maxWidth: 300 },
-                  },
-                }}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText size="s" color="subdued">
-                This is description text.
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EditFieldFormRow>
+        <IndexParameter />
 
         {/* fielddata */}
         <EditFieldFormRow
@@ -204,31 +181,10 @@ export const TextType = React.memo(({ field }: Props) => {
 
         <EditFieldSection>
           {/* boost */}
-          <EditFieldFormRow
-            title={<h3>Set boost level</h3>}
-            description="This is description text."
-            toggleDefaultValue={getDefaultValueToggle('boost', field.source)}
-          >
-            {/* Boost level */}
-            <UseField path="boost" config={getFieldConfig('boost')}>
-              {boostField => (
-                <EuiRange
-                  min={1}
-                  max={20}
-                  value={boostField.value as string}
-                  onChange={boostField.onChange as any}
-                  showInput
-                />
-              )}
-            </UseField>
-          </EditFieldFormRow>
+          <BoostParameter defaultToggleValue={getDefaultValueToggle('boost', field.source)} />
 
           {/* eager_global_ordinals */}
-          <EditFieldFormRow
-            title={<h3>Use eager global ordinals</h3>}
-            description="This is description text."
-            formFieldPath="eager_global_ordinals"
-          />
+          <EagerGlobalOrdinalsParameter />
 
           {/* index_phrases */}
           <EditFieldFormRow
@@ -270,16 +226,7 @@ export const TextType = React.memo(({ field }: Props) => {
           </EditFieldFormRow>
 
           {/* norms */}
-          <EditFieldFormRow
-            title={<h3>Use norms</h3>}
-            description="This is description text."
-            formFieldPath="norms"
-            direction="column"
-          >
-            <EuiCallOut color="warning">
-              <p>Enabling norms requires a lot of disk use.</p>
-            </EuiCallOut>
-          </EditFieldFormRow>
+          <NormsParameter />
 
           {/* position_increment_gap */}
           <EditFieldFormRow
@@ -326,33 +273,9 @@ export const TextType = React.memo(({ field }: Props) => {
 
         <EditFieldSection>
           {/* similarity */}
-          <EditFieldFormRow
-            title={<h3>Set similarity</h3>}
-            description="This is description text."
-            direction="column"
-            toggleDefaultValue={getDefaultValueToggle('similarity', field.source)}
-          >
-            <EuiFlexGroup alignItems="center">
-              <EuiFlexItem>
-                <UseField
-                  path="similarity"
-                  config={getFieldConfig('similarity')}
-                  component={Field}
-                  componentProps={{
-                    euiFieldProps: {
-                      options: PARAMETERS_OPTIONS.similarity,
-                      style: { maxWidth: 300 },
-                    },
-                  }}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiText size="s" color="subdued">
-                  This is description text.
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EditFieldFormRow>
+          <SimilarityParameter
+            defaultToggleValue={getDefaultValueToggle('similarity', field.source)}
+          />
 
           {/* term vector */}
           <EditFieldFormRow
