@@ -65,11 +65,6 @@ export interface HomeKibanaServices {
 let services: HomeKibanaServices | null = null;
 
 export function setServices(newServices: HomeKibanaServices) {
-  if (services) {
-    throw new Error(
-      'Kibana services already set - are you trying to import this module from outside of the home app?'
-    );
-  }
   services = newServices;
 }
 
@@ -80,8 +75,4 @@ export function getServices() {
     );
   }
   return services;
-}
-
-export function clearServices() {
-  services = null;
 }
