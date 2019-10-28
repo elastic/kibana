@@ -14,7 +14,7 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 
-import { NormalizedField } from '../../../../types';
+import { NormalizedField, Field as FieldType } from '../../../../types';
 import { UseField, UseMultiFields, Field, FieldHook } from '../../../../shared_imports';
 import { getFieldConfig } from '../../../../lib';
 import { PARAMETERS_OPTIONS } from '../../../../constants';
@@ -25,8 +25,38 @@ interface Props {
   field: NormalizedField;
 }
 
+const getDefaultValueToggle = (toggleId: string, field: FieldType) => {
+  switch (toggleId) {
+    case 'analyzers': {
+      return field.search_analyzer !== undefined && field.search_analyzer !== field.analyzer;
+    }
+    case 'boost': {
+      return field.boost !== undefined && field.boost !== getFieldConfig('boost').defaultValue;
+    }
+    case 'indexPrefixes': {
+      return (
+        field.index_prefixes !== undefined &&
+        (field.index_prefixes.min_chars !==
+          getFieldConfig('index_prefixes', 'min_chars').defaultValue ||
+          (field.index_prefixes as any).max_chars !==
+            getFieldConfig('index_prefixes', 'max_chars').defaultValue)
+      );
+    }
+    default:
+      return false;
+  }
+};
+
 export const TextType = React.memo(({ field }: Props) => {
   const onFrequencyFilterChange = (minField: FieldHook, maxField: FieldHook) => ([
+    min,
+    max,
+  ]: any) => {
+    minField.setValue(min);
+    maxField.setValue(max);
+  };
+
+  const onIndexPrefixesChanage = (minField: FieldHook, maxField: FieldHook) => ([
     min,
     max,
   ]: any) => {
@@ -122,10 +152,7 @@ export const TextType = React.memo(({ field }: Props) => {
           <EditFieldFormRow
             title={<h3>Use different analyzers for index and searching</h3>}
             sizeTitle={'xxs'}
-            toggleDefaultValue={
-              field.source.search_analyzer !== undefined &&
-              field.source.search_analyzer !== field.source.analyzer
-            }
+            toggleDefaultValue={getDefaultValueToggle('analyzers', field.source)}
           >
             {isOn => (
               <>
@@ -170,10 +197,7 @@ export const TextType = React.memo(({ field }: Props) => {
           <EditFieldFormRow
             title={<h3>Set boost level</h3>}
             description="This is description text."
-            toggleDefaultValue={
-              field.source.boost !== undefined &&
-              field.source.boost !== getFieldConfig('boost').defaultValue
-            }
+            toggleDefaultValue={getDefaultValueToggle('boost', field.source)}
           >
             {/* Boost level */}
             <UseField path="boost" config={getFieldConfig('boost')}>
@@ -187,6 +211,52 @@ export const TextType = React.memo(({ field }: Props) => {
                 />
               )}
             </UseField>
+          </EditFieldFormRow>
+
+          {/* eager_global_ordinals */}
+          <EditFieldFormRow
+            title={<h3>Use eager global ordinals</h3>}
+            description="This is description text."
+            formFieldPath="eager_global_ordinals"
+          />
+
+          {/* index_phrases */}
+          <EditFieldFormRow
+            title={<h3>Index phrases</h3>}
+            description="This is description text."
+            formFieldPath="index_phrases"
+          />
+
+          {/* index_prefixes */}
+          <EditFieldFormRow
+            title={<h3>Set index prefixes</h3>}
+            description="This is description text."
+            toggleDefaultValue={getDefaultValueToggle('indexPrefixes', field.source)}
+          >
+            <EuiFormRow label="Range (Min / Max):">
+              <UseMultiFields
+                fields={{
+                  min: {
+                    path: 'index_prefixes.min_chars',
+                    config: getFieldConfig('index_prefixes', 'min_chars'),
+                  },
+                  max: {
+                    path: 'index_prefixes.max_chars',
+                    config: getFieldConfig('index_prefixes', 'max_chars'),
+                  },
+                }}
+              >
+                {({ min, max }) => (
+                  <EuiDualRange
+                    min={0}
+                    max={20}
+                    value={[min.value as number, max.value as number]}
+                    onChange={onIndexPrefixesChanage(min, max)}
+                    showInput
+                  />
+                )}
+              </UseMultiFields>
+            </EuiFormRow>
           </EditFieldFormRow>
         </EditFieldSection>
       </AdvancedSettingsWrapper>
