@@ -36,12 +36,12 @@ const homeTitle = i18n.translate('kbn.home.breadcrumbs.homeTitle', { defaultMess
 function getRoute() {
   return {
     template,
-    controller($scope) {
-      const { chrome, addBasePath, getFeatureCatalogueRegistryProvider } = getServices();
-      getFeatureCatalogueRegistryProvider().then(catalogue => {
-        $scope.directories = catalogue.inTitleOrder;
-        $scope.$digest();
-      });
+    resolve: {
+      directories: () => getServices().getFeatureCatalogueRegistryProvider().then(catalogue => catalogue.inTitleOrder)
+    },
+    controller($scope, $route) {
+      const { chrome, addBasePath } = getServices();
+      $scope.directories = $route.current.locals.directories;
       $scope.recentlyAccessed = chrome.recentlyAccessed.get().map(item => {
         item.link = addBasePath(item.link);
         return item;

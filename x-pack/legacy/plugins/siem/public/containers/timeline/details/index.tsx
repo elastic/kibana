@@ -28,11 +28,12 @@ export interface TimelineDetailsProps {
   sourceId: string;
 }
 
+const getDetailsEvent = memoizeOne(
+  (variables: string, detail: DetailItem[]): DetailItem[] => detail
+);
+
 export const TimelineDetailsComponentQuery = React.memo<TimelineDetailsProps>(
   ({ children, indexName, eventId, executeQuery, sourceId }) => {
-    const getDetailsEvent = (variables: string, detail: DetailItem[]): DetailItem[] => detail;
-    const getDetailsEventMemo = memoizeOne(getDetailsEvent);
-
     const variables: GetTimelineDetailsQuery.Variables = {
       sourceId,
       indexName,
@@ -49,7 +50,7 @@ export const TimelineDetailsComponentQuery = React.memo<TimelineDetailsProps>(
         {({ data, loading, refetch }) => {
           return children!({
             loading,
-            detailsData: getDetailsEventMemo(
+            detailsData: getDetailsEvent(
               JSON.stringify(variables),
               getOr([], 'source.TimelineDetails.data', data)
             ),
