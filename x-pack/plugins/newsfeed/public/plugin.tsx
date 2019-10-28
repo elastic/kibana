@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import * as Rx from 'rxjs';
+import { catchError, takeUntil } from 'rxjs/operators';
 import ReactDOM from 'react-dom';
 import React from 'react';
 import {
@@ -12,12 +14,15 @@ import {
   CoreStart,
   Plugin,
 } from '../../../../src/core/public';
+import { getApi } from './lib/api';
 import { MailNavButton } from './components/spaces_header_nav_button';
 
 export type Setup = void;
 export type Start = void;
 
 export class NewsfeedPublicPlugin implements Plugin<Setup, Start> {
+  private readonly stop$ = new Rx.ReplaySubject(1);
+
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup): Setup {}
@@ -32,5 +37,22 @@ export class NewsfeedPublicPlugin implements Plugin<Setup, Start> {
       order: 1000,
       mount,
     });
+
+    const { http } = core;
+    const api$ = getApi(http).pipe(
+      takeUntil(this.stop$), // stop the interval when stop method is called
+      catchError(() => {
+        // show a message to try again later?
+        // do not throw error
+        return Rx.of(null);
+      })
+    );
+
+    // TODO: pass to component?
+    api$.subscribe();
+  }
+
+  public stop() {
+    this.stop$.next();
   }
 }
