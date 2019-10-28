@@ -45,5 +45,6 @@ export function migrateFilter(filter, indexPattern) {
 }
 
 function isMatchPhraseFilter(filter, fieldName) {
-  return _.get(filter, ['match', fieldName, 'type']) === 'phrase';
+  const type = _.get(filter, ['match', fieldName, 'type']) || _.get(filter, ['nested', 'query', 'match', fieldName, 'type']);
+  return type === 'phrase';
 }

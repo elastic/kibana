@@ -20,6 +20,8 @@
 import _ from 'lodash';
 import { migrateFilter } from './migrate_filter';
 import { filterMatchesIndex } from './filter_matches_index';
+import { handleNestedFilter } from './handle_nested_filter';
+import { cleanFilter } from './clean_filter';
 
 /**
  * Create a filter that can be reversed for filters with negate set
@@ -50,15 +52,6 @@ const translateToQuery = function (filter) {
   return filter;
 };
 
-/**
- * Clean out any invalid attributes from the filters
- * @param {object} filter The filter to clean
- * @returns {object}
- */
-const cleanFilter = function (filter) {
-  return _.omit(filter, ['meta', '$state']);
-};
-
 export function buildQueryFromFilters(filters = [], indexPattern, ignoreFilterIfFieldNotInIndex) {
   filters = filters.filter(filter => filter && !_.get(filter, ['meta', 'disabled']));
   return {
@@ -66,6 +59,7 @@ export function buildQueryFromFilters(filters = [], indexPattern, ignoreFilterIf
     filter: filters
       .filter(filterNegate(false))
       .filter(filter => !ignoreFilterIfFieldNotInIndex || filterMatchesIndex(filter, indexPattern))
+      .map((filter) => handleNestedFilter(filter, indexPattern))
       .map(translateToQuery)
       .map(cleanFilter)
       .map(filter => {
@@ -75,6 +69,7 @@ export function buildQueryFromFilters(filters = [], indexPattern, ignoreFilterIf
     must_not: filters
       .filter(filterNegate(true))
       .filter(filter => !ignoreFilterIfFieldNotInIndex || filterMatchesIndex(filter, indexPattern))
+      .map((filter) => handleNestedFilter(filter, indexPattern))
       .map(translateToQuery)
       .map(cleanFilter)
       .map(filter => {

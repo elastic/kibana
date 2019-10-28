@@ -31,3 +31,7 @@ export type ExistsFilter = Filter & {
 };
 
 export const isExistsFilter = (filter: any): filter is ExistsFilter => filter && filter.exists;
+
+export const getExistsFilterField = (filter: ExistsFilter) => {
+  return filter.exists && filter.exists.field;
+};

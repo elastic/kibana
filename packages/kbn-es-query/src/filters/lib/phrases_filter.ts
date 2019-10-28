@@ -29,4 +29,10 @@ export type PhrasesFilter = Filter & {
 };
 
 export const isPhrasesFilter = (filter: any): filter is PhrasesFilter =>
-  filter && filter.meta.type === 'phrases';
+  filter && filter.meta && filter.meta.type === 'phrases';
+
+export const getPhrasesFilterField = (filter: PhrasesFilter) => {
+  // Phrases is a newer filter type that has always been created via a constructor that ensures
+  // `meta.key` is set to the field name
+  return filter.meta.key;
+};

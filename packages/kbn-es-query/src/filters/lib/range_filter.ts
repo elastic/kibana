@@ -56,3 +56,7 @@ export const isScriptedRangeFilter = (filter: any): filter is RangeFilter => {
 
   return hasRangeKeys(params);
 };
+
+export const getRangeFilterField = (filter: RangeFilter) => {
+  return filter.range && Object.keys(filter.range)[0];
+};

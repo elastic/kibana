@@ -17,24 +17,13 @@
  * under the License.
  */
 
-import { Filter, FilterMeta, LatLon } from './meta_filter';
+import { omit } from 'lodash';
 
-export type GeoPolygonFilterMeta = FilterMeta & {
-  params: {
-    points: LatLon[];
-  };
-};
-
-export type GeoPolygonFilter = Filter & {
-  meta: GeoPolygonFilterMeta;
-  geo_polygon: any;
-};
-
-export const isGeoPolygonFilter = (filter: any): filter is GeoPolygonFilter =>
-  filter && filter.geo_polygon;
-
-export const getGeoPolygonFilterField = (filter: GeoPolygonFilter) => {
-  return (
-    filter.geo_polygon && Object.keys(filter.geo_polygon).find(key => key !== 'ignore_unmapped')
-  );
+/**
+   * Clean out any invalid attributes from the filters
+   * @param {object} filter The filter to clean
+   * @returns {object}
+   */
+export const cleanFilter = function (filter) {
+  return omit(filter, ['meta', '$state']);
 };
