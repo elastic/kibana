@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { SignalHit } from '../../types';
+import { performance } from 'perf_hooks';
+import { SignalHit, TotalValue } from '../../types';
 import { Logger } from '../../../../../../../../src/core/server';
 import { AlertServices } from '../../../../../alerting/server/types';
 import { SignalSourceHit, SignalSearchResponse, SignalAlertParams } from './types';
@@ -55,10 +55,15 @@ export const singleBulkIndex = async (
     },
     buildBulkBody(doc, params),
   ]);
+  const time1 = performance.now();
   const firstResult = await service.callCluster('bulk', {
-    refresh: true,
+    index: '.siem-signals-10-01-2019',
+    refresh: false,
     body: bulkBody,
   });
+  const time2 = performance.now();
+  logger.info(`individual bulk process time took: ${time2 - time1} milliseconds`);
+  logger.info(`took property says bulk took: ${firstResult.took} milliseconds`);
   if (firstResult.errors) {
     logger.error(`[-] bulkResponse had errors: ${JSON.stringify(firstResult.errors, null, 2)}}`);
     return false;
@@ -91,6 +96,10 @@ export const singleSearchAfter = async (
   }
 };
 
+const isTotalValueObject = (tv: number | TotalValue): tv is TotalValue => {
+  return (tv as TotalValue).value !== undefined;
+};
+
 // search_after through documents and re-index using bulk endpoint.
 export const searchAfterAndBulkIndex = async (
   someResult: SignalSearchResponse,
@@ -104,6 +113,7 @@ export const searchAfterAndBulkIndex = async (
     logger.warn('First bulk index was unsuccessful');
     return false;
   }
+  const totalHits = someResult.hits.total.value; // eslint-ignore
   let size = someResult.hits.hits.length - 1;
   logger.info(`first size: ${size}`);
   let sortIds = someResult.hits.hits[0].sort;
@@ -112,7 +122,7 @@ export const searchAfterAndBulkIndex = async (
     return false;
   }
   let sortId = sortIds[0];
-  while (true) {
+  while (size < totalHits) {
     // utilize track_total_hits instead of true
     try {
       logger.info(`sortIds: ${sortIds}`);
@@ -122,11 +132,7 @@ export const searchAfterAndBulkIndex = async (
         service,
         logger
       );
-      size = searchAfterResult.hits.hits.length - 1;
-      if (size <= 0) {
-        logger.info('No more hits');
-        return false;
-      }
+      size += searchAfterResult.hits.hits.length - 1;
       logger.info(`size: ${size}`);
       sortIds = searchAfterResult.hits.hits[0].sort;
       if (sortIds == null) {
@@ -145,4 +151,6 @@ export const searchAfterAndBulkIndex = async (
       return false;
     }
   }
+  logger.info(`[+] completed bulk index of ${totalHits}`);
+  return true;
 };
