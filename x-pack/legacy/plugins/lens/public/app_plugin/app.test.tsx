@@ -494,6 +494,8 @@ describe('Lens App', () => {
       expect(TopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
           query: { query: '', language: 'kuery' },
+          dateRangeFrom: 'now-7d',
+          dateRangeTo: 'now',
         }),
         {}
       );
@@ -568,6 +570,8 @@ describe('Lens App', () => {
       expect(TopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
           query: { query: 'new', language: 'lucene' },
+          dateRangeFrom: 'now-14d',
+          dateRangeTo: 'now-7d',
         }),
         {}
       );
