@@ -5,11 +5,11 @@
  */
 
 import React, { useContext, createContext } from 'react';
-import { HttpSetup, NotificationsSetup } from 'src/core/public';
+import { HttpSetup, ToastsSetup } from 'src/core/public';
 
 export interface ContextValue {
   http: HttpSetup;
-  notifications: NotificationsSetup;
+  notifications: ToastsSetup;
   licenseEnabled: boolean;
   formatAngularHttpError: (error: any) => string;
 }

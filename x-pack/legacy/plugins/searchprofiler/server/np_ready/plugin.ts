@@ -29,7 +29,7 @@ export class SearchProfilerServerPlugin implements Plugin {
       xpackMain.info.feature(thisPlugin.id).registerLicenseCheckResultsGenerator(checkLicense);
     });
 
-    profileRoute.register({ elasticsearch, xpackMain }, route, commonRouteConfig);
+    profileRoute.register({ elasticsearch }, route, commonRouteConfig);
   }
 
   async start() {}

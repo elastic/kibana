@@ -9,7 +9,7 @@ import {
   CoreStart,
   CoreSetup,
   PluginInitializerContext,
-  NotificationsSetup,
+  ToastsStart,
 } from 'src/core/public';
 
 import { boot } from './application/boot';
@@ -23,7 +23,7 @@ export class SearchProfilerUIPlugin implements Plugin {
       __LEGACY: {
         I18nContext: any;
         licenseEnabled: boolean;
-        notifications: NotificationsSetup;
+        notifications: ToastsStart;
         formatAngularHttpError: any;
         el: HTMLElement;
       };
@@ -37,7 +37,6 @@ export class SearchProfilerUIPlugin implements Plugin {
       id: 'searchprofiler',
       title: 'SearchProfiler',
       mount(ctx, params) {
-        // TODO: Figure out how to use the existing core.application.register shim
         return boot({
           http,
           licenseEnabled,

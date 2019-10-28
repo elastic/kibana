@@ -5,7 +5,7 @@
  */
 import { render, unmountComponentAtNode } from 'react-dom';
 import React from 'react';
-import { HttpStart as Http, NotificationsSetup } from 'src/core/public';
+import { HttpStart as Http, ToastsSetup } from 'src/core/public';
 import { App } from '.';
 
 export interface Dependencies {
@@ -13,7 +13,7 @@ export interface Dependencies {
   http: Http;
   licenseEnabled: boolean;
   I18nContext: any;
-  notifications: NotificationsSetup;
+  notifications: ToastsSetup;
   formatAngularHttpError: any;
 }
 

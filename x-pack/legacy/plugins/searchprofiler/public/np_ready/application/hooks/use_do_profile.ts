@@ -30,7 +30,7 @@ export const useDoProfile = () => {
     }
     const { error, parsed } = checkForParseErrors(query);
     if (error) {
-      notifications.toasts.addError(error, {
+      notifications.addError(error, {
         title: i18n.translate('xpack.searchProfiler.errorToastTitle', {
           defaultMessage: 'JSON parse error',
         }),
@@ -61,7 +61,7 @@ export const useDoProfile = () => {
       });
 
       if (!resp.ok) {
-        notifications.toasts.addDanger(resp.err.msg);
+        notifications.addDanger(resp.err.msg);
         // Very lame way to get the column and line from the error message
         const regex = /line=([0-9]+)/g;
         const match = regex.exec(resp.err.msg);
@@ -78,10 +78,10 @@ export const useDoProfile = () => {
       try {
         // Is this a known error type?
         const errorString = formatAngularHttpError(e);
-        notifications.toasts.addError(e, { title: errorString });
+        notifications.addError(e, { title: errorString });
       } catch (_) {
         // Otherwise just report the original error
-        notifications.toasts.addError(e, {
+        notifications.addError(e, {
           title: i18n.translate('xpack.searchProfiler.errorSomethingWentWrongTitle', {
             defaultMessage: 'Something went wrong',
           }),

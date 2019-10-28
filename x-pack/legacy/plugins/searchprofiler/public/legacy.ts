@@ -9,7 +9,6 @@ import { npSetup } from 'ui/new_platform';
 import { I18nContext } from 'ui/i18n';
 import uiRoutes from 'ui/routes';
 import 'ui/capabilities/route_setup';
-import { toastNotifications } from 'ui/notify';
 // @ts-ignore
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 // @ts-ignore
@@ -17,7 +16,7 @@ import { formatAngularHttpError } from 'ui/notify/lib';
 import 'ui/autoload/all';
 /* eslint-enable @kbn/eslint/no-restricted-paths */
 
-import { NotificationsSetup, ApplicationSetup } from 'src/core/public';
+import { ApplicationSetup } from 'src/core/public';
 import { plugin } from './np_ready';
 
 const pluginInstance = plugin({} as any);
@@ -55,7 +54,7 @@ uiRoutes.when('/dev_tools/searchprofiler', {
           __LEGACY: {
             I18nContext,
             licenseEnabled: xpackInfo.get('features.searchprofiler.enableAppLink'),
-            notifications: (toastNotifications as unknown) as NotificationsSetup,
+            notifications: npSetup.core.notifications.toasts,
             formatAngularHttpError,
             el,
           },

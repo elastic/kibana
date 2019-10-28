@@ -26,7 +26,6 @@ export interface LegacySetup {
 
 export interface ServerShim {
   elasticsearch: ElasticsearchPlugin;
-  xpackMain: XPackMainPlugin;
 }
 
 export interface RequestShim extends Request {
