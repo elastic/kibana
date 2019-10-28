@@ -19,11 +19,9 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCallOut, EuiLink, EuiLoadingSpinner, EuiPageContent } from '@elastic/eui';
-import { IndexPatterns } from 'ui/index_patterns';
-import { metadata } from 'ui/metadata';
-import { ElasticSearchHit } from 'ui/registry/doc_views_types';
-import { DocViewer } from '../doc_viewer';
+import { DocViewer } from '../doc_viewer/doc_viewer';
 import { ElasticRequestState, useEsDocSearch } from './use_es_doc_search';
+import { IndexPatterns, ElasticSearchHit, getServices } from '../kibana_services';
 
 export interface ElasticSearchResult {
   hits: {
@@ -117,7 +115,9 @@ export function Doc(props: DocProps) {
             values={{ indexName: props.index }}
           />{' '}
           <EuiLink
-            href={`https://www.elastic.co/guide/en/elasticsearch/reference/${metadata.branch}/indices-exists.html`}
+            href={`https://www.elastic.co/guide/en/elasticsearch/reference/${
+              getServices().metadata.branch
+            }/indices-exists.html`}
             target="_blank"
           >
             <FormattedMessage

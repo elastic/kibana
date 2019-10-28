@@ -124,7 +124,7 @@ export async function fetchAndTransformGcMetrics({
   }
 
   const series = aggregations.per_pool.buckets.map((poolBucket, i) => {
-    const label = poolBucket.key;
+    const label = poolBucket.key as string;
     const timeseriesData = poolBucket.over_time;
 
     const data = (idx(timeseriesData, _ => _.buckets) || []).map(bucket => {
