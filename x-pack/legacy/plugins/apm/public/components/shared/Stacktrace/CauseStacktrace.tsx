@@ -39,7 +39,7 @@ function CausedBy({ message }: { message: string }) {
     <CausedByContainer>
       <CausedByHeading>
         {i18n.translate(
-          'xpack.apm.stacktraceTab.libraryFramesToogleButtonLabel',
+          'xpack.apm.stacktraceTab.causedByFramesToogleButtonLabel',
           {
             defaultMessage: 'Caused By'
           }
