@@ -766,10 +766,7 @@ export interface IUiSettingsClient {
     get: <T extends SavedObjectAttribute = any>(key: string) => Promise<T>;
     getAll: <T extends SavedObjectAttribute = any>() => Promise<Record<string, T>>;
     getRegistered: () => Readonly<Record<string, UiSettingsParams>>;
-    getUserProvided: <T extends SavedObjectAttribute = any>() => Promise<Record<string, {
-        userValue?: T;
-        isOverridden?: boolean;
-    }>>;
+    getUserProvided: <T extends SavedObjectAttribute = any>() => Promise<Record<string, UserProvidedValues<T>>>;
     isOverridden: (key: string) => boolean;
     remove: (key: string) => Promise<void>;
     removeMany: (keys: string[]) => Promise<void>;
@@ -1615,15 +1612,15 @@ export interface SessionStorageFactory<T> {
 
 // @public
 export interface UiSettingsParams {
-    category: string[];
-    description: string;
-    name: string;
+    category?: string[];
+    description?: string;
+    name?: string;
     optionLabels?: Record<string, string>;
     options?: string[];
     readonly?: boolean;
     requiresPageReload?: boolean;
     type?: UiSettingsType;
-    value: SavedObjectAttribute;
+    value?: SavedObjectAttribute;
 }
 
 // @public (undocumented)
@@ -1633,6 +1630,14 @@ export interface UiSettingsServiceSetup {
 
 // @public
 export type UiSettingsType = 'json' | 'markdown' | 'number' | 'select' | 'boolean' | 'string';
+
+// @public
+export interface UserProvidedValues<T extends SavedObjectAttribute = any> {
+    // (undocumented)
+    isOverridden?: boolean;
+    // (undocumented)
+    userValue?: T;
+}
 
 
 // Warnings were encountered during analysis:

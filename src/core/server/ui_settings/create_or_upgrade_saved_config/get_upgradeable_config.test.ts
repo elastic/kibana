@@ -17,11 +17,11 @@
  * under the License.
  */
 import { getUpgradeableConfig } from './get_upgradeable_config';
-import { SavedObjectsClientMock } from '../../saved_objects/service/saved_objects_client.mock';
+import { savedObjectsClientMock } from '../../saved_objects/service/saved_objects_client.mock';
 
 describe('getUpgradeableConfig', () => {
   it('finds saved objects with type "config"', async () => {
-    const savedObjectsClient = SavedObjectsClientMock.create();
+    const savedObjectsClient = savedObjectsClientMock.create();
     savedObjectsClient.find.mockResolvedValue({
       saved_objects: [{ id: '7.5.0' }],
     } as any);
@@ -32,7 +32,7 @@ describe('getUpgradeableConfig', () => {
 
   it('finds saved config with version < than Kibana version', async () => {
     const savedConfig = { id: '7.4.0' };
-    const savedObjectsClient = SavedObjectsClientMock.create();
+    const savedObjectsClient = savedObjectsClientMock.create();
     savedObjectsClient.find.mockResolvedValue({
       saved_objects: [savedConfig],
     } as any);
@@ -43,7 +43,7 @@ describe('getUpgradeableConfig', () => {
 
   it('finds saved config with RC version === Kibana version', async () => {
     const savedConfig = { id: '7.5.0-rc1' };
-    const savedObjectsClient = SavedObjectsClientMock.create();
+    const savedObjectsClient = savedObjectsClientMock.create();
     savedObjectsClient.find.mockResolvedValue({
       saved_objects: [savedConfig],
     } as any);
@@ -54,7 +54,7 @@ describe('getUpgradeableConfig', () => {
 
   it('does not find saved config with version === Kibana version', async () => {
     const savedConfig = { id: '7.5.0' };
-    const savedObjectsClient = SavedObjectsClientMock.create();
+    const savedObjectsClient = savedObjectsClientMock.create();
     savedObjectsClient.find.mockResolvedValue({
       saved_objects: [savedConfig],
     } as any);
@@ -65,7 +65,7 @@ describe('getUpgradeableConfig', () => {
 
   it('does not find saved config with version > Kibana version', async () => {
     const savedConfig = { id: '7.6.0' };
-    const savedObjectsClient = SavedObjectsClientMock.create();
+    const savedObjectsClient = savedObjectsClientMock.create();
     savedObjectsClient.find.mockResolvedValue({
       saved_objects: [savedConfig],
     } as any);
@@ -75,7 +75,7 @@ describe('getUpgradeableConfig', () => {
   });
 
   it('handles empty config', async () => {
-    const savedObjectsClient = SavedObjectsClientMock.create();
+    const savedObjectsClient = savedObjectsClientMock.create();
     savedObjectsClient.find.mockResolvedValue({
       saved_objects: [],
     } as any);

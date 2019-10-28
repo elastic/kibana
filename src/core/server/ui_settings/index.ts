@@ -28,4 +28,5 @@ export {
   UiSettingsParams,
   InternalUiSettingsServiceSetup,
   UiSettingsType,
+  UserProvidedValues,
 } from './types';

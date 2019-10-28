@@ -180,6 +180,7 @@ export {
   InternalUiSettingsServiceSetup,
   UiSettingsType,
   UiSettingsServiceSetup,
+  UserProvidedValues,
 } from './ui_settings';
 
 export { RecursiveReadonly } from '../utils';

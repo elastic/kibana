@@ -18,7 +18,10 @@
  */
 import { SavedObjectsClientContract, SavedObjectAttribute } from '../saved_objects/types';
 /**
- * Client that provides access to the UiSettings stored in elasticsearch.
+ * Server-side client that provides access to the advanced settings stored in elasticsearch.
+ * The settings provide control over the behavior of the Kibana application.
+ * For example, a user can specify how to display numeric or date fields.
+ * Users can adjust the settings via Management UI.
  *
  * @public
  */
@@ -39,7 +42,7 @@ export interface IUiSettingsClient {
    * Retrieves a set of all uiSettings values set by the user.
    */
   getUserProvided: <T extends SavedObjectAttribute = any>() => Promise<
-    Record<string, { userValue?: T; isOverridden?: boolean }>
+    Record<string, UserProvidedValues<T>>
   >;
   /**
    * Writes multiple uiSettings values and marks them as set by the user.
@@ -64,6 +67,15 @@ export interface IUiSettingsClient {
 }
 
 /**
+ * Describes the values explicitly set by user.
+ * @public
+ * */
+export interface UserProvidedValues<T extends SavedObjectAttribute = any> {
+  userValue?: T;
+  isOverridden?: boolean;
+}
+
+/**
  * UI element type to represent the settings.
  * @public
  * */
@@ -75,14 +87,14 @@ export type UiSettingsType = 'json' | 'markdown' | 'number' | 'select' | 'boolea
  * */
 export interface UiSettingsParams {
   /** title in the UI */
-  name: string;
+  name?: string;
   /** default value to fall back to if a user doesn't provide any */
-  value: SavedObjectAttribute;
+  value?: SavedObjectAttribute;
   /** description provided to a user in UI */
-  description: string;
+  description?: string;
   /** used to group the configured setting in the UI */
-  category: string[];
-  /** a range of valid values */
+  category?: string[];
+  /** array of permitted values for this setting */
   options?: string[];
   /** text labels for 'select' type UI element */
   optionLabels?: Record<string, string>;
@@ -113,6 +125,17 @@ export interface UiSettingsServiceSetup {
   /**
    * Sets settings with default values for the uiSettings.
    * @param settings
+   *
+   * @example
+   * setup(core: CoreSetup){
+   *  core.uiSettings.register([{
+   *   foo: {
+   *    name: i18n.translate('my foo settings'),
+   *    value: true,
+   *    description: 'add some awesomeness',
+   *   },
+   *  }]);
+   * }
    */
   register(settings: Record<string, UiSettingsParams>): void;
 }
