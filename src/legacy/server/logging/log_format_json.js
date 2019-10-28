@@ -28,6 +28,7 @@ export default class KbnLoggerJsonFormat extends LogFormat {
   format(data) {
     data.message = stripColors(data.message);
     data['@timestamp'] = this.extractAndFormatTimestamp(data);
+    data.tags = data.tags.map(tag => tag.__kibanaContext__ ? tag.value : tag);
     return stringify(data);
   }
 }

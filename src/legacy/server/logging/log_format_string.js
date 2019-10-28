@@ -70,12 +70,23 @@ export default class KbnLoggerStringFormat extends LogFormat {
     const time = color('time')(this.extractAndFormatTimestamp(data, 'HH:mm:ss.SSS'));
     const msg = data.error ? color('error')(data.error.stack) : color('message')(data.message);
 
-    const tags = _(data.tags)
-      .sortBy(function (tag) {
-        if (color(tag) === _.identity) return `2${tag}`;
-        if (_.includes(statuses, tag)) return `0${tag}`;
-        return `1${tag}`;
-      })
+    const isColor = tag => color(tag) === _.identity;
+    const isStatus = tag => _.includes(statuses, tag);
+    const isContext = tag => tag.__kibanaContext__ === true;
+
+    const contextTags = data.tags.filter(isContext).map(tag => tag.value);
+    const nonContextTags = data.tags.filter(tag => !isContext(tag));
+
+    const coloredTags = nonContextTags.filter(isColor).sort();
+    const statusTags = nonContextTags.filter(isStatus).sort();
+    const otherTags = nonContextTags.filter(tag => !isColor(tag) && !isStatus(tag) && !isContext(tag)).sort();
+
+    const tags = [
+      ...coloredTags,
+      ...statusTags,
+      ...contextTags,
+      ...otherTags,
+    ]
       .reduce(function (s, t) {
         return s + `[${ color(t)(t) }]`;
       }, '');

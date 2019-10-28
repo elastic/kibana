@@ -19,6 +19,7 @@
 
 import { ServerExtType } from 'hapi';
 import Podium from 'podium';
+import chalk from 'chalk';
 // @ts-ignore: implicit any for JS file
 import { Config, transformDeprecations } from '../../../../legacy/server/config';
 // @ts-ignore: implicit any for JS file
@@ -111,7 +112,15 @@ export class LegacyLoggingServer {
 
     this.events.emit('log', {
       data: getDataToLog(error, metadata, message),
-      tags: [getLegacyLogLevel(level), ...context.split('.'), ...tags],
+      tags: [
+        getLegacyLogLevel(level),
+        // Wrap context tags with special property for Legacy logger to read for sorting purposes.
+        ...context.split('.').map(contextPart => ({
+          __kibanaContext__: true,
+          value: chalk.magenta(contextPart),
+        })),
+        ...tags,
+      ],
       timestamp: timestamp.getTime(),
     });
   }
