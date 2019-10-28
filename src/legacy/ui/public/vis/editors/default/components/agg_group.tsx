@@ -82,13 +82,13 @@ function DefaultEditorAggGroup({
 
   const [aggsState, setAggsState] = useReducer(aggGroupReducer, group, initAggsState);
 
-  let bucketsError;
-  if (lastParentPipelineAggTitle && groupName === AggGroupNames.Buckets && !group.length) {
-    bucketsError = i18n.translate('common.ui.aggTypes.buckets.mustHaveBucketErrorMessage', {
-      defaultMessage: 'Add a bucket with "Date Histogram" or "Histogram" aggregation.',
-      description: 'Date Histogram and Histogram should not be translated',
-    });
-  }
+  const bucketsError =
+    lastParentPipelineAggTitle && groupName === AggGroupNames.Buckets && !group.length
+      ? i18n.translate('common.ui.aggTypes.buckets.mustHaveBucketErrorMessage', {
+          defaultMessage: 'Add a bucket with "Date Histogram" or "Histogram" aggregation.',
+          description: 'Date Histogram and Histogram should not be translated',
+        })
+      : undefined;
 
   const isGroupValid = !bucketsError && Object.values(aggsState).every(item => item.valid);
   const isAllAggsTouched = isInvalidAggsTouched(aggsState);
