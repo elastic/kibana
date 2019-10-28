@@ -6,10 +6,83 @@
 
 
 import { DynamicStyleProperty } from './dynamic_style_property';
+import _ from 'lodash';
+import { getComputedFieldName } from '../style_util';
+import { getColorRampStops } from '../../color_utils';
 
 
 export class DynamicColorProperty extends DynamicStyleProperty {
-  syncWithMb(layer, mbMap) {
-    super.syncWithMb(layer, mbMap);
+
+
+  syncHaloBorderColorWithMb(mbLayerId, mbMap) {
+    const color = this._getMbColor();
+    mbMap.setPaintProperty(mbLayerId, 'icon-halo-color', color);
   }
+
+  syncCircleStrokeWithMb(pointLayerId, mbMap, alpha) {
+    const color = this._getMbColor();
+    mbMap.setPaintProperty(pointLayerId, 'circle-stroke-color', color);
+    mbMap.setPaintProperty(pointLayerId, 'circle-stroke-opacity', alpha);
+  }
+
+  syncLineColorWithMb(lineLayerId, mbMap, alpha) {
+    const color = this._getMbColor();
+    mbMap.setPaintProperty(lineLayerId, 'line-color', color);
+    mbMap.setPaintProperty(lineLayerId, 'line-opacity', alpha);
+  }
+
+  _getMbColor() {
+    const isDynamicConfigComplete = _.has(this._options, 'field.name') && _.has(this._options, 'color');
+    if (!isDynamicConfigComplete) {
+      return null;
+    }
+
+    if (this._options.useCustomColorRamp && (!this._options.customColorRamp || !this._options.customColorRamp.length)) {
+      return null;
+    }
+
+    return this._getMBDataDrivenColor({
+      targetName: getComputedFieldName(this._styleName, this._options.field.name),
+      colorStops: this._getMBColorStops(),
+      isSteps: this._options.useCustomColorRamp,
+    });
+  }
+
+  _getMBDataDrivenColor({ targetName, colorStops, isSteps }) {
+    if (isSteps) {
+      const firstStopValue = colorStops[0];
+      const lessThenFirstStopValue = firstStopValue - 1;
+      return [
+        'step',
+        ['coalesce', ['feature-state', targetName], lessThenFirstStopValue],
+        'rgba(0,0,0,0)', // MB will assign the base value to any features that is below the first stop value
+        ...colorStops
+      ];
+    }
+
+    return [
+      'interpolate',
+      ['linear'],
+      ['coalesce', ['feature-state', targetName], -1],
+      -1, 'rgba(0,0,0,0)',
+      ...colorStops
+    ];
+  }
+
+
+  _getMBColorStops() {
+
+    if (this._options.useCustomColorRamp) {
+      return this._options.customColorRamp.reduce((accumulatedStops, nextStop) => {
+        return [...accumulatedStops, nextStop.stop, nextStop.color];
+      }, []);
+    }
+
+    return getColorRampStops(this._options.color);
+  }
+
 }
+
+
+
+

@@ -16,17 +16,14 @@ import { VectorIcon } from './components/vector/legend/vector_icon';
 import { VectorStyleLegend } from './components/vector/legend/vector_style_legend';
 import { VECTOR_SHAPE_TYPES } from '../../sources/vector_feature_types';
 import { SYMBOLIZE_AS_CIRCLE, SYMBOLIZE_AS_ICON } from './vector_constants';
-import {
-  getMakiSymbolAnchor,
-  LARGE_MAKI_ICON_SIZE,
-  SMALL_MAKI_ICON_SIZE,
-  HALF_LARGE_MAKI_ICON_SIZE
-} from './symbol_utils';
+import { getMakiSymbolAnchor } from './symbol_utils';
 import { DynamicStyleProperty } from './properties/dynamic_style_property';
 import { StaticStyleProperty } from './properties/static_style_property';
 import { DynamicSizeProperty } from './properties/dynamic_size_property';
 import { StaticSizeProperty } from './properties/static_size_property';
 import { getComputedFieldName, getComputedFieldNamePrefix } from './style_util';
+import { StaticColorProperty } from './properties/static_color_property';
+import { DynamicColorProperty } from './properties/dynamic_color_property';
 
 export class VectorStyle extends AbstractStyle {
 
@@ -43,7 +40,11 @@ export class VectorStyle extends AbstractStyle {
       ...descriptor,
       ...VectorStyle.createDescriptor(descriptor.properties),
     };
-    this._lineWidthStyleProperty = this._getStyleProperty('lineWidth', this._descriptor.properties.lineWidth);
+
+    this._lineColorStyleProperty = this._makeStyleProperty(vectorStyles.LINE_COLOR, this._descriptor.properties[vectorStyles.LINE_COLOR]);
+    this._fillColorStyleProperty = this._makeStyleProperty(vectorStyles.FILL_COLOR, this._descriptor.properties[vectorStyles.FILL_COLOR]);
+    this._lineWidthStyleProperty = this._makeStyleProperty(vectorStyles.LINE_WIDTH, this._descriptor.properties[vectorStyles.LINE_WIDTH]);
+    this._iconSizeStyleProperty = this._makeStyleProperty(vectorStyles.ICON_SIZE, this._descriptor.properties[vectorStyles.ICON_SIZE]);
   }
 
   static createDescriptor(properties = {}) {
@@ -334,11 +335,11 @@ export class VectorStyle extends AbstractStyle {
         // To work around this limitation, some styling values must fall back to geojson property values.
         let supportsFeatureState;
         let isScaled;
-        if (styleName === 'iconSize'
+        if (styleName === vectorStyles.ICON_SIZE
           && this._descriptor.properties.symbol.options.symbolizeAs === SYMBOLIZE_AS_ICON) {
           supportsFeatureState = false;
           isScaled = true;
-        } else if (styleName === 'iconOrientation') {
+        } else if (styleName === vectorStyles.ICON_ORIENTATION) {
           supportsFeatureState = false;
           isScaled = false;
         } else if ((styleName === vectorStyles.FILL_COLOR || styleName === vectorStyles.LINE_COLOR)
@@ -452,17 +453,6 @@ export class VectorStyle extends AbstractStyle {
     ];
   }
 
-  _getMbDataDrivenSize({ targetName, minSize, maxSize }) {
-    console.warn('todo: remove', targetName, minSize, maxSize);
-    return   [
-      'interpolate',
-      ['linear'],
-      ['coalesce', ['feature-state', targetName], 0],
-      0, minSize,
-      1, maxSize
-    ];
-  }
-
   _getMBColor(styleName, styleDescriptor) {
     const isStatic = styleDescriptor.type === StaticStyleProperty.type;
     if (isStatic) {
@@ -498,28 +488,6 @@ export class VectorStyle extends AbstractStyle {
     return getColorRampStops(styleDescriptor.options.color);
   }
 
-  _isSizeDynamicConfigComplete(styleDescriptor) {
-    return _.has(styleDescriptor, 'options.field.name')
-      && _.has(styleDescriptor, 'options.minSize')
-      && _.has(styleDescriptor, 'options.maxSize');
-  }
-
-  _getMbSize(styleName, styleDescriptor) {
-    if (styleDescriptor.type === StaticStyleProperty.type) {
-      return styleDescriptor.options.size;
-    }
-
-    if (this._isSizeDynamicConfigComplete(styleDescriptor)) {
-      return this._getMbDataDrivenSize({
-        targetName: VectorStyle.getComputedFieldName(styleName, styleDescriptor.options.field.name),
-        minSize: styleDescriptor.options.minSize,
-        maxSize: styleDescriptor.options.maxSize,
-      });
-    }
-
-    return null;
-  }
-
   setMBPaintProperties({ alpha, mbMap, fillLayerId, lineLayerId }) {
     if (this._descriptor.properties.fillColor) {
       const color = this._getMBColor(vectorStyles.FILL_COLOR, this._descriptor.properties.fillColor);
@@ -530,16 +498,7 @@ export class VectorStyle extends AbstractStyle {
       mbMap.setPaintProperty(fillLayerId, 'fill-opacity', 0);
     }
 
-    if (this._descriptor.properties.lineColor) {
-      const color = this._getMBColor(vectorStyles.LINE_COLOR, this._descriptor.properties.lineColor);
-      mbMap.setPaintProperty(lineLayerId, 'line-color', color);
-      mbMap.setPaintProperty(lineLayerId, 'line-opacity', alpha);
-
-    } else {
-      mbMap.setPaintProperty(lineLayerId, 'line-color', null);
-      mbMap.setPaintProperty(lineLayerId, 'line-opacity', 0);
-    }
-
+    this._lineColorStyleProperty.syncLineColorWithMb(lineLayerId, mbMap, alpha);
     this._lineWidthStyleProperty.syncLineWidthWithMb(lineLayerId, mbMap);
   }
 
@@ -552,26 +511,11 @@ export class VectorStyle extends AbstractStyle {
       mbMap.setPaintProperty(pointLayerId, 'circle-color', null);
       mbMap.setPaintProperty(pointLayerId, 'circle-opacity', 0);
     }
-    if (this._descriptor.properties.lineColor) {
-      const color = this._getMBColor(vectorStyles.LINE_COLOR, this._descriptor.properties.lineColor);
-      mbMap.setPaintProperty(pointLayerId, 'circle-stroke-color', color);
-      mbMap.setPaintProperty(pointLayerId, 'circle-stroke-opacity', alpha);
 
-    } else {
-      mbMap.setPaintProperty(pointLayerId, 'circle-stroke-color', null);
-      mbMap.setPaintProperty(pointLayerId, 'circle-stroke-opacity', 0);
-    }
-
+    this._lineColorStyleProperty.syncCircleStrokeWithMb(pointLayerId, mbMap, alpha);
     this._lineWidthStyleProperty.syncCircleStrokeWidthWithMb(pointLayerId, mbMap);
+    this._iconSizeStyleProperty.syncCircleRadiusWithMb(pointLayerId, mbMap);
 
-
-
-    if (this._descriptor.properties.iconSize) {
-      const iconSize = this._getMbSize(vectorStyles.ICON_SIZE, this._descriptor.properties.iconSize);
-      mbMap.setPaintProperty(pointLayerId, 'circle-radius', iconSize);
-    } else {
-      mbMap.setPaintProperty(pointLayerId, 'circle-radius', 0);
-    }
   }
 
   async setMBSymbolPropertiesForPoints({ mbMap, symbolLayerId, alpha }) {
@@ -580,43 +524,14 @@ export class VectorStyle extends AbstractStyle {
     const symbolId = this._descriptor.properties.symbol.options.symbolId;
     mbMap.setLayoutProperty(symbolLayerId, 'icon-anchor', getMakiSymbolAnchor(symbolId));
     const color = this._getMBColor(vectorStyles.FILL_COLOR, this._descriptor.properties.fillColor);
-    const haloColor = this._getMBColor(vectorStyles.LINE_COLOR, this._descriptor.properties.lineColor);
     // icon-color is only supported on SDF icons.
     mbMap.setPaintProperty(symbolLayerId, 'icon-color', color);
-    mbMap.setPaintProperty(symbolLayerId, 'icon-halo-color', haloColor);
 
+    this._lineColorStyleProperty.syncHaloBorderColorWithMb(symbolLayerId, mbMap);
     this._lineWidthStyleProperty.syncHaloWidthWithMb(symbolLayerId, mbMap);
-
+    this._iconSizeStyleProperty.syncIconImageAndSizeWithMb(symbolLayerId, mbMap, symbolId);
     mbMap.setPaintProperty(symbolLayerId, 'icon-opacity', alpha);
 
-    // circle sizing is by radius
-    // to make icons be similiar in size to circles then have to deal with icon in half width measurements
-    const iconSize = this._descriptor.properties.iconSize;
-    if (iconSize.type === StaticStyleProperty.type) {
-      const iconPixels = iconSize.options.size >= HALF_LARGE_MAKI_ICON_SIZE
-        ? LARGE_MAKI_ICON_SIZE
-        : SMALL_MAKI_ICON_SIZE;
-      mbMap.setLayoutProperty(symbolLayerId, 'icon-image', `${symbolId}-${iconPixels}`);
-
-      const halfIconPixels = iconPixels / 2;
-      mbMap.setLayoutProperty(symbolLayerId, 'icon-size', iconSize.options.size / halfIconPixels);
-    } else if (this._isSizeDynamicConfigComplete(iconSize)) {
-      const iconPixels = iconSize.options.maxSize >= HALF_LARGE_MAKI_ICON_SIZE
-        ? LARGE_MAKI_ICON_SIZE
-        : SMALL_MAKI_ICON_SIZE;
-      mbMap.setLayoutProperty(symbolLayerId, 'icon-image', `${symbolId}-${iconPixels}`);
-
-      const halfIconPixels = iconPixels / 2;
-      const targetName = VectorStyle.getComputedFieldName(vectorStyles.ICON_SIZE, iconSize.options.field.name);
-      // Using property state instead of feature-state because layout properties do not support feature-state
-      mbMap.setLayoutProperty(symbolLayerId, 'icon-size', [
-        'interpolate',
-        ['linear'],
-        ['coalesce', ['get', targetName], 0],
-        0, iconSize.options.minSize / halfIconPixels,
-        1, iconSize.options.maxSize / halfIconPixels
-      ]);
-    }
 
     const iconOrientation = this._descriptor.properties.iconOrientation;
     if (iconOrientation.type === DynamicStyleProperty.type) {
@@ -634,7 +549,7 @@ export class VectorStyle extends AbstractStyle {
     return this._descriptor.properties.symbol.options.symbolizeAs === SYMBOLIZE_AS_CIRCLE;
   }
 
-  _getSizeProperty(descriptor, styleName) {
+  _makeSizeProperty(descriptor, styleName) {
     if (!descriptor || !descriptor.options) {
       return new StaticSizeProperty({ size: 0 });
     } else if (descriptor.type === StaticStyleProperty.type) {
@@ -646,10 +561,28 @@ export class VectorStyle extends AbstractStyle {
     }
   }
 
-  _getStyleProperty(propertyName, descriptor) {
+  _makeColorProperty(descriptor, styleName) {
+    if (!descriptor || !descriptor.options) {
+      return new StaticColorProperty({ color: null });
+    } else if (descriptor.type === StaticStyleProperty.type) {
+      return new StaticColorProperty(descriptor.options);
+    } else if (descriptor.type === DynamicStyleProperty.type) {
+      return new DynamicColorProperty(descriptor.options, styleName);
+    } else {
+      throw new Error(`${descriptor} not implemented`);
+    }
+  }
 
-    if (propertyName === 'lineWidth') {
-      return this._getSizeProperty(descriptor, vectorStyles.LINE_WIDTH);
+  _makeStyleProperty(propertyName, descriptor) {
+
+    if (propertyName === vectorStyles.LINE_WIDTH) {
+      return this._makeSizeProperty(descriptor, vectorStyles.LINE_WIDTH);
+    } else if (propertyName === vectorStyles.ICON_SIZE) {
+      return this._makeSizeProperty(descriptor, vectorStyles.ICON_SIZE);
+    } else if (propertyName === vectorStyles.LINE_COLOR) {
+      return this._makeColorProperty(descriptor, vectorStyles.LINE_COLOR);
+    } else if (propertyName === vectorStyles.FILL_COLOR) {
+      return this._makeColorProperty(descriptor, vectorStyles.FILL_COLOR);
     }
 
     throw new Error(`${propertyName} not implemented`);

@@ -6,7 +6,6 @@
 
 
 import { AbstractStyleProperty } from './style_property';
-import _ from 'lodash';
 
 export class DynamicStyleProperty extends AbstractStyleProperty {
     static type = 'DYNAMIC';
@@ -14,10 +13,6 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     constructor(options, styleName) {
       super(options);
       this._styleName = styleName;
-    }
-
-    _isSizeDynamicConfigComplete() {
-      return _.has(this._options, 'field.name') && _.has(this._options, 'minSize') && _.has(this._options, 'maxSize');
     }
 
 

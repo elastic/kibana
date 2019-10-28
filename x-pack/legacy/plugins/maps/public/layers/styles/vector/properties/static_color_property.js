@@ -8,6 +8,21 @@
 import { StaticStyleProperty } from './static_style_property';
 
 
-export class StaticSizeProperty extends StaticStyleProperty {
+export class StaticColorProperty extends StaticStyleProperty {
+
+
+  syncHaloBorderColorWithMb(mbLayerId, mbMap) {
+    mbMap.setPaintProperty(mbLayerId, 'icon-halo-color', this._options.color);
+  }
+
+  syncLineColorWithMb(mbLayerId, mbMap, alpha) {
+    mbMap.setPaintProperty(mbLayerId, 'line-color', this._options.color);
+    mbMap.setPaintProperty(mbLayerId, 'line-opacity', alpha);
+  }
+
+  syncCircleStrokeWithMb(pointLayerId, mbMap, alpha) {
+    mbMap.setPaintProperty(pointLayerId, 'circle-stroke-color', this._options.color);
+    mbMap.setPaintProperty(pointLayerId, 'circle-stroke-opacity', alpha);
+  }
 
 }
