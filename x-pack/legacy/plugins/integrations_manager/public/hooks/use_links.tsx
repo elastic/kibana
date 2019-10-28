@@ -9,8 +9,8 @@ import { PLUGIN } from '../../common/constants';
 import { API_ROOT } from '../../common/routes';
 import { patterns } from '../routes';
 import { useCore } from '.';
+import { removeRelativePath } from '../utils/remove_relative_path';
 import { DetailViewPanelName } from '..';
-
 // TODO: get this from server/packages/handlers.ts (move elsewhere?)
 // seems like part of the name@version change
 interface DetailParams {
@@ -33,6 +33,10 @@ export function useLinks() {
   return {
     toAssets: (path: string) => addBasePath(`/plugins/${PLUGIN.ID}/assets/${path}`),
     toImage: (path: string) => addBasePath(`${API_ROOT}${path}`),
+    toRelativeImage: ({ path, pkg }: { path: string; pkg: string }) => {
+      const imagePath = removeRelativePath(path);
+      return addBasePath(`${API_ROOT}/package/${pkg}/${imagePath}`);
+    },
     toListView: () => appRoot(patterns.LIST_VIEW),
     toDetailView: ({ name, version, panel }: DetailParams) => {
       // panel is optional, but `generatePath` won't accept `path: undefined`

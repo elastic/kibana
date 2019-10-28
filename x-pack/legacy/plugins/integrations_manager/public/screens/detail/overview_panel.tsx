@@ -10,10 +10,12 @@ import { Screenshots } from './screenshots';
 import { Readme } from './readme';
 
 export function OverviewPanel(props: PackageInfo) {
-  const { screenshots, readme } = props;
+  const { screenshots, readme, name, version } = props;
   return (
     <Fragment>
-      <EuiText>{readme && <Readme readmePath={readme} />}</EuiText>
+      <EuiText>
+        {readme && <Readme readmePath={readme} packageName={name} version={version} />}
+      </EuiText>
       <EuiSpacer size="xl" />
       {screenshots && <Screenshots images={screenshots} />}
     </Fragment>

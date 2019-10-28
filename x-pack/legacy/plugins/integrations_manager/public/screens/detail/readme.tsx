@@ -7,9 +7,17 @@ import React, { useEffect, useState, Fragment } from 'react';
 import { EuiLoadingContent, EuiText } from '@elastic/eui';
 import ReactMarkdown from 'react-markdown';
 import { getFileByPath } from '../../data';
-import { markdownRenderers } from './markdown_renderers';
+import { markdownRenderers, WrappedEuiImage } from './markdown_renderers';
 
-export function Readme({ readmePath }: { readmePath: string }) {
+export function Readme({
+  readmePath,
+  packageName,
+  version,
+}: {
+  readmePath: string;
+  packageName: string;
+  version: string;
+}) {
   const [markdown, setMarkdown] = useState<string | undefined>(undefined);
 
   useEffect(() => {
@@ -20,9 +28,17 @@ export function Readme({ readmePath }: { readmePath: string }) {
 
   return (
     <Fragment>
-      {// checking against undefined because currently some readme paths exist with empty response
-      markdown !== undefined ? (
-        <ReactMarkdown renderers={markdownRenderers} source={markdown} />
+      {markdown !== undefined ? (
+        // pass down package name and version props to the image renderer to create image path
+        <ReactMarkdown
+          renderers={{
+            image: ({ ...props }) => (
+              <WrappedEuiImage {...props} packageName={packageName} version={version} />
+            ),
+            ...markdownRenderers,
+          }}
+          source={markdown}
+        />
       ) : (
         <EuiText>
           {/* simulates a long page of text loading */}
