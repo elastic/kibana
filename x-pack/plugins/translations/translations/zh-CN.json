@@ -855,7 +855,6 @@
     "data.search.searchBar.savedQueryPopoverSavedQueryListItemSelectedButtonAriaLabel": "已保存查询按钮已选择 {savedQueryName}。按下可清除任何更改。",
     "data.search.searchBar.savedQueryPopoverTitleText": "已保存查询",
     "embeddableApi.actions.applyFilterActionTitle": "将筛选应用于当前视图",
-    "embeddableApi.addPanel.createNew": "创建新的{factoryName}",
     "embeddableApi.addPanel.createNewDefaultOption": "创建新的......",
     "embeddableApi.addPanel.displayName": "添加面板",
     "embeddableApi.addPanel.savedObjectAddedToContainerSuccessMessageTitle": "{savedObjectName} 已添加",
