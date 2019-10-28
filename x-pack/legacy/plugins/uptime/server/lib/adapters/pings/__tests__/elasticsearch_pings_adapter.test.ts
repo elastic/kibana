@@ -88,7 +88,7 @@ describe('ElasticsearchPingsAdapter class', () => {
   });
 
   describe('getPingHistogram', () => {
-    it('returns an empty array for <= 1 bucket', async () => {
+    it('returns a single bucket if array has 1', async () => {
       expect.assertions(2);
       const search = jest.fn();
       search.mockReturnValue({
@@ -116,7 +116,7 @@ describe('ElasticsearchPingsAdapter class', () => {
       const pingAdapter = new ElasticsearchPingsAdapter(pingDatabase);
       const result = await pingAdapter.getPingHistogram(serverRequest, 'now-15m', 'now', null);
       expect(pingDatabase.search).toHaveBeenCalledTimes(1);
-      expect(result).toEqual([]);
+      expect(result).toMatchSnapshot();
     });
 
     it('returns expected result for no status filter', async () => {

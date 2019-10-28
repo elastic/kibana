@@ -16,6 +16,8 @@ import {
 } from '@elastic/eui';
 import { MetricsEditor } from '../../../../components/metrics_editor';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { METRIC_TYPE } from '../../../../../common/constants';
+
 export class MetricsExpression extends Component {
 
   state = {
@@ -58,7 +60,7 @@ export class MetricsExpression extends Component {
   render() {
     const metricExpressions = this.props.metrics
       .filter(({ type, field }) => {
-        if (type === 'count') {
+        if (type === METRIC_TYPE.COUNT) {
           return true;
         }
 
@@ -69,7 +71,7 @@ export class MetricsExpression extends Component {
       })
       .map(({ type, field }) => {
         // do not use metric label so field and aggregation are not obscured.
-        if (type === 'count') {
+        if (type === METRIC_TYPE.COUNT) {
           return 'count';
         }
 
@@ -127,6 +129,6 @@ MetricsExpression.propTypes = {
 
 MetricsExpression.defaultProps = {
   metrics: [
-    { type: 'count' }
+    { type: METRIC_TYPE.COUNT }
   ]
 };
