@@ -11,30 +11,96 @@ import {
   ML_JOB_AGGREGATION,
   SPARSE_DATA_AGGREGATIONS,
 } from '../../../../../../common/constants/aggregation_types';
-import { EVENT_RATE_FIELD_ID, AggFieldPair } from '../../../../../../common/types/fields';
+import { MLCATEGORY } from '../../../../../../common/constants/field_types';
+import {
+  EVENT_RATE_FIELD_ID,
+  Field,
+  AggFieldPair,
+  mlCategory,
+} from '../../../../../../common/types/fields';
 import { mlJobService } from '../../../../../services/job_service';
 import { JobCreatorType, isMultiMetricJobCreator, isPopulationJobCreator } from '../';
 import { CREATED_BY_LABEL, JOB_TYPE } from './constants';
 
+const getFieldByIdFactory = (scriptFields: Field[]) => (id: string) => {
+  let field = newJobCapsService.getFieldById(id);
+  // if no field could be found it may be a pretend field, like mlcategory or a script field
+  if (field === null) {
+    if (id === MLCATEGORY) {
+      field = mlCategory;
+    } else if (scriptFields.length) {
+      field = scriptFields.find(f => f.id === id) || null;
+    }
+  }
+  return field;
+};
+
 // populate the detectors with Field and Agg objects loaded from the job capabilities service
-export function getRichDetectors(job: Job, datafeed: Datafeed, advanced: boolean = false) {
+export function getRichDetectors(
+  job: Job,
+  datafeed: Datafeed,
+  scriptFields: Field[],
+  advanced: boolean = false
+) {
   const detectors = advanced ? getDetectorsAdvanced(job, datafeed) : getDetectors(job, datafeed);
+
+  const getFieldById = getFieldByIdFactory(scriptFields);
+
   return detectors.map(d => {
+    let field = null;
+    let byField = null;
+    let overField = null;
+    let partitionField = null;
+
+    if (d.field_name !== undefined) {
+      field = getFieldById(d.field_name);
+    }
+    if (d.by_field_name !== undefined) {
+      byField = getFieldById(d.by_field_name);
+    }
+    if (d.over_field_name !== undefined) {
+      overField = getFieldById(d.over_field_name);
+    }
+    if (d.partition_field_name !== undefined) {
+      partitionField = getFieldById(d.partition_field_name);
+    }
+
     return {
       agg: newJobCapsService.getAggById(d.function),
-      field: d.field_name !== undefined ? newJobCapsService.getFieldById(d.field_name) : null,
-      byField:
-        d.by_field_name !== undefined ? newJobCapsService.getFieldById(d.by_field_name) : null,
-      overField:
-        d.over_field_name !== undefined ? newJobCapsService.getFieldById(d.over_field_name) : null,
-      partitionField:
-        d.partition_field_name !== undefined
-          ? newJobCapsService.getFieldById(d.partition_field_name)
-          : null,
+      field,
+      byField,
+      overField,
+      partitionField,
       excludeFrequent: d.exclude_frequent || null,
       description: d.detector_description || null,
     };
   });
+}
+
+export function createFieldOptions(fields: Field[]) {
+  return fields
+    .filter(f => f.id !== EVENT_RATE_FIELD_ID)
+    .map(f => ({
+      label: f.name,
+    }))
+    .sort((a, b) => a.label.localeCompare(b.label));
+}
+
+export function createScriptFieldOptions(scriptFields: Field[]) {
+  return scriptFields.map(f => ({
+    label: f.id,
+  }));
+}
+
+export function createMlcategoryFieldOption(categorizationFieldName: string | null) {
+  if (categorizationFieldName === null) {
+    return [];
+  }
+  return [
+    {
+      label: MLCATEGORY,
+    },
+  ];
 }
 
 function getDetectorsAdvanced(job: Job, datafeed: Datafeed) {
@@ -146,33 +212,29 @@ export function isSparseDataJob(job: Job, datafeed: Datafeed): boolean {
 function stashCombinedJob(
   jobCreator: JobCreatorType,
   skipTimeRangeStep: boolean = false,
-  advanced: boolean = false,
   includeTimeRange: boolean = false
 ) {
   const combinedJob = {
     ...jobCreator.jobConfig,
     datafeed_config: jobCreator.datafeedConfig,
   };
-  if (advanced === true) {
-    mlJobService.currentJob = combinedJob;
-  } else {
-    mlJobService.tempJobCloningObjects.job = combinedJob;
 
-    // skip over the time picker step of the wizard
-    mlJobService.tempJobCloningObjects.skipTimeRangeStep = skipTimeRangeStep;
+  mlJobService.tempJobCloningObjects.job = combinedJob;
 
-    if (includeTimeRange === true) {
-      // auto select the start and end dates of the time picker
-      mlJobService.tempJobCloningObjects.start = jobCreator.start;
-      mlJobService.tempJobCloningObjects.end = jobCreator.end;
-    }
+  // skip over the time picker step of the wizard
+  mlJobService.tempJobCloningObjects.skipTimeRangeStep = skipTimeRangeStep;
+
+  if (includeTimeRange === true) {
+    // auto select the start and end dates of the time picker
+    mlJobService.tempJobCloningObjects.start = jobCreator.start;
+    mlJobService.tempJobCloningObjects.end = jobCreator.end;
   }
 }
 
 export function convertToMultiMetricJob(jobCreator: JobCreatorType) {
   jobCreator.createdBy = CREATED_BY_LABEL.MULTI_METRIC;
   jobCreator.modelPlot = false;
-  stashCombinedJob(jobCreator, true, false, true);
+  stashCombinedJob(jobCreator, true, true);
 
   window.location.href = window.location.href.replace(
     JOB_TYPE.SINGLE_METRIC,
@@ -182,7 +244,7 @@ export function convertToMultiMetricJob(jobCreator: JobCreatorType) {
 
 export function convertToAdvancedJob(jobCreator: JobCreatorType) {
   jobCreator.createdBy = null;
-  stashCombinedJob(jobCreator, true, false, false);
+  stashCombinedJob(jobCreator, true, true);
 
   let jobType = JOB_TYPE.SINGLE_METRIC;
   if (isMultiMetricJobCreator(jobCreator)) {
@@ -196,13 +258,13 @@ export function convertToAdvancedJob(jobCreator: JobCreatorType) {
 
 export function resetJob(jobCreator: JobCreatorType) {
   jobCreator.jobId = '';
-  stashCombinedJob(jobCreator, true, false, true);
+  stashCombinedJob(jobCreator, true, true);
 
   window.location.href = '#/jobs/new_job';
 }
 
 export function advancedStartDatafeed(jobCreator: JobCreatorType) {
-  stashCombinedJob(jobCreator, false, true, false);
+  stashCombinedJob(jobCreator, false, false);
   window.location.href = '#/jobs';
 }
 
