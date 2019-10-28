@@ -17,7 +17,7 @@ import { routes } from './routes';
 export type DetailViewPanelName = 'overview' | 'assets' | 'data-sources';
 
 const REACT_APP_ROOT_ID = 'epm__root';
-const template = `<div id="${REACT_APP_ROOT_ID}" style="flex-grow: 1"></div>`;
+const template = `<div id="${REACT_APP_ROOT_ID}" style="flex-grow: 1; display: flex; flex-direction: column"></div>`;
 const getRootEl = () => document.getElementById(REACT_APP_ROOT_ID);
 
 main();

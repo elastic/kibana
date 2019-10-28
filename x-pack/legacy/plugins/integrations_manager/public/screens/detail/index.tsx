@@ -51,6 +51,7 @@ export function DetailLayout(props: LayoutProps) {
     background-color: ${theme.eui.euiColorEmptyShade};
     height: 100%;
     padding-top: ${paddingSizeTop}px;
+    flex-grow: 1;
   `;
 
   return (
