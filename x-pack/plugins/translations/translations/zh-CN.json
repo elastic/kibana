@@ -8669,7 +8669,7 @@
     "xpack.searchProfiler.highlightDetails.totalTimeTooltip": "此查询组件花费的总时间（包括子项）",
     "xpack.searchProfiler.highlightDetails.typeTitle": "类型",
     "xpack.searchProfiler.licenseErrorMessageDescription": "分析器可视化需要有效的许可（{licenseTypeList}或{platinumLicenseType}，但在您的集群中未找到任何许可。",
-    "xpack.searchProfiler.licenseErrorMessageTitle": "{warningIcon} 许可错误",
+    "xpack.searchProfiler.licenseErrorMessageTitle": "许可错误",
     "xpack.searchProfiler.licenseHasExpiredMessage": "Search Profiler 不可用 - 许可已过期。",
     "xpack.searchProfiler.pageDisplayName": "Search Profiler",
     "xpack.searchProfiler.platinumLicenseTitle": "白金级",

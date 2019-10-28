@@ -26,7 +26,13 @@ export interface Props {
   onClose: () => void;
 }
 
-const DefEntry = ({ title, body }: { title: string | JSX.Element; body: string | JSX.Element }) => (
+const FlyoutEntry = ({
+  title,
+  body,
+}: {
+  title: string | JSX.Element;
+  body: string | JSX.Element;
+}) => (
   <>
     <dt>{title}</dt>
     <dd>{body}</dd>
@@ -46,21 +52,21 @@ export const HighlightDetailsFlyout = ({ indexName, operation, shard, onClose }:
         <EuiText>
           <dl>
             {/* Type Entry */}
-            <DefEntry
+            <FlyoutEntry
               title={i18n.translate('xpack.searchProfiler.highlightDetails.typeTitle', {
                 defaultMessage: 'Type',
               })}
               body={operation.query_type!}
             />
             {/* Description Entry */}
-            <DefEntry
+            <FlyoutEntry
               title={i18n.translate('xpack.searchProfiler.highlightDetails.descriptionTitle', {
                 defaultMessage: 'Description',
               })}
               body={<EuiCodeBlock paddingSize="s">{operation.lucene!}</EuiCodeBlock>}
             />
             {/* Total Time Entry */}
-            <DefEntry
+            <FlyoutEntry
               title={
                 <>
                   {i18n.translate('xpack.searchProfiler.highlightDetails.totalTimeTitle', {
@@ -70,7 +76,7 @@ export const HighlightDetailsFlyout = ({ indexName, operation, shard, onClose }:
                     type="iInCircle"
                     color="subdued"
                     content={i18n.translate(
-                      'xpack.searchProfiler.highlightDetails.totalTimeInclusiveTooltip',
+                      'xpack.searchProfiler.highlightDetails.totalTimeTooltip',
                       {
                         defaultMessage:
                           'The total time spent at this query component, inclusive of children',
@@ -82,17 +88,17 @@ export const HighlightDetailsFlyout = ({ indexName, operation, shard, onClose }:
               body={msToPretty(operation.time, 3)}
             />
             {/* Self Time Entry */}
-            <DefEntry
+            <FlyoutEntry
               title={
                 <>
-                  {i18n.translate('xpack.searchProfiler.highlightDetails.selfTimeTooltip', {
+                  {i18n.translate('xpack.searchProfiler.highlightDetails.selfTimeTitle', {
                     defaultMessage: 'Total Time',
                   })}
                   <EuiIconTip
                     type="iInCircle"
                     color="subdued"
                     content={i18n.translate(
-                      'xpack.searchProfiler.highlightDetails.totalTimeExclusiveTooltip',
+                      'xpack.searchProfiler.highlightDetails.selfTimeTooltip',
                       {
                         defaultMessage:
                           'The time spent by this query component alone, exclusive of children',
@@ -103,8 +109,14 @@ export const HighlightDetailsFlyout = ({ indexName, operation, shard, onClose }:
               }
               body={msToPretty(operation.selfTime!, 3)}
             />
+            {/* Breakdown Table Entry */}
+            <FlyoutEntry
+              title={i18n.translate('xpack.searchProfiler.highlightDetails.timingBreakdownTitle', {
+                defaultMessage: 'Timing Breakdown',
+              })}
+              body={<HighlightDetailsTable breakdown={operation.breakdown} />}
+            />
           </dl>
-          <HighlightDetailsTable breakdown={operation.breakdown} />
         </EuiText>
       </EuiFlyoutBody>
     </EuiFlyout>
