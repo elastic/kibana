@@ -20,7 +20,7 @@
 import sinon from 'sinon';
 import nock from 'nock';
 import glob from 'glob-all';
-import rimraf from 'rimraf';
+import del from 'del';
 import Fs from 'fs';
 import Logger from '../lib/logger';
 import { UnsupportedProtocolError } from '../lib/errors';
@@ -63,14 +63,14 @@ describe('kibana cli', function () {
     beforeEach(function () {
       sinon.stub(logger, 'log');
       sinon.stub(logger, 'error');
-      rimraf.sync(testWorkingPath);
+      del.sync(testWorkingPath);
       Fs.mkdirSync(testWorkingPath, { recursive: true });
     });
 
     afterEach(function () {
       logger.log.restore();
       logger.error.restore();
-      rimraf.sync(testWorkingPath);
+      del.sync(testWorkingPath);
     });
 
     describe('_downloadSingle', function () {

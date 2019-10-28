@@ -584,7 +584,7 @@ describe('IndexPatternDimensionPanel', () => {
       const comboBox = wrapper.find(EuiComboBox);
       const options = comboBox.prop('options');
 
-      //options[1][2] is a `source` field of type `string` which doesn't support `avg` operation
+      // options[1][2] is a `source` field of type `string` which doesn't support `avg` operation
       act(() => {
         comboBox.prop('onChange')!([options![1].options![2]]);
       });

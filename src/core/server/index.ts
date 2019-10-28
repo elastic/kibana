@@ -143,6 +143,7 @@ export {
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
   SavedObjectsBulkUpdateObject,
+  SavedObjectsBulkUpdateOptions,
   SavedObjectsBulkResponse,
   SavedObjectsBulkUpdateResponse,
   SavedObjectsClient,
@@ -170,6 +171,7 @@ export {
   SavedObjectsLegacyService,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
+  SavedObjectsDeleteOptions,
 } from './saved_objects';
 
 export {
@@ -189,6 +191,7 @@ export {
   SavedObjectAttributeSingle,
   SavedObjectReference,
   SavedObjectsBaseOptions,
+  MutatingOperationRefreshSetting,
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
   SavedObjectsMigrationVersion,

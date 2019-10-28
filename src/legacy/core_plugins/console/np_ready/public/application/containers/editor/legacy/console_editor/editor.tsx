@@ -33,7 +33,7 @@ import { registerCommands } from './keyboard_shortcuts';
 import { applyCurrentSettings } from './apply_editor_settings';
 
 // @ts-ignore
-import { initializeInput } from '../../../../../../../public/quarantined/src/input';
+import { initializeEditor } from '../../../../../../../public/quarantined/src/input';
 // @ts-ignore
 import mappings from '../../../../../../../public/quarantined/src/mappings';
 
@@ -88,7 +88,7 @@ function _Editor({ previousStateLocation = 'stored' }: EditorProps) {
   useEffect(() => {
     const $editor = $(editorRef.current!);
     const $actions = $(actionsRef.current!);
-    editorInstanceRef.current = initializeInput($editor, $actions);
+    editorInstanceRef.current = initializeEditor($editor, $actions);
 
     if (previousStateLocation === 'stored') {
       const { content } = history.getSavedEditorState() || {

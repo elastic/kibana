@@ -944,6 +944,9 @@ export type MIGRATION_ASSISTANCE_INDEX_ACTION = 'upgrade' | 'reindex';
 // @public (undocumented)
 export type MIGRATION_DEPRECATION_LEVEL = 'none' | 'info' | 'warning' | 'critical';
 
+// @public
+export type MutatingOperationRefreshSetting = boolean | 'wait_for';
+
 // Warning: (ae-forgotten-export) The symbol "OnPostAuthResult" needs to be exported by the entry point index.d.ts
 // 
 // @public
@@ -1202,6 +1205,11 @@ export interface SavedObjectsBulkUpdateObject<T extends SavedObjectAttributes = 
 }
 
 // @public (undocumented)
+export interface SavedObjectsBulkUpdateOptions extends SavedObjectsBaseOptions {
+    refresh?: MutatingOperationRefreshSetting;
+}
+
+// @public (undocumented)
 export interface SavedObjectsBulkUpdateResponse<T extends SavedObjectAttributes = any> {
     // (undocumented)
     saved_objects: Array<SavedObjectsUpdateResponse<T>>;
@@ -1213,9 +1221,9 @@ export class SavedObjectsClient {
     constructor(repository: SavedObjectsRepository);
     bulkCreate<T extends SavedObjectAttributes = any>(objects: Array<SavedObjectsBulkCreateObject<T>>, options?: SavedObjectsCreateOptions): Promise<SavedObjectsBulkResponse<T>>;
     bulkGet<T extends SavedObjectAttributes = any>(objects?: SavedObjectsBulkGetObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsBulkResponse<T>>;
-    bulkUpdate<T extends SavedObjectAttributes = any>(objects: Array<SavedObjectsBulkUpdateObject<T>>, options?: SavedObjectsBaseOptions): Promise<SavedObjectsBulkUpdateResponse<T>>;
+    bulkUpdate<T extends SavedObjectAttributes = any>(objects: Array<SavedObjectsBulkUpdateObject<T>>, options?: SavedObjectsBulkUpdateOptions): Promise<SavedObjectsBulkUpdateResponse<T>>;
     create<T extends SavedObjectAttributes = any>(type: string, attributes: T, options?: SavedObjectsCreateOptions): Promise<SavedObject<T>>;
-    delete(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<{}>;
+    delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{}>;
     // (undocumented)
     errors: typeof SavedObjectsErrorHelpers;
     // (undocumented)
@@ -1252,6 +1260,12 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
     overwrite?: boolean;
     // (undocumented)
     references?: SavedObjectReference[];
+    refresh?: MutatingOperationRefreshSetting;
+}
+
+// @public (undocumented)
+export interface SavedObjectsDeleteOptions extends SavedObjectsBaseOptions {
+    refresh?: MutatingOperationRefreshSetting;
 }
 
 // @public (undocumented)
@@ -1559,6 +1573,7 @@ export class SavedObjectsSerializer {
 // @public (undocumented)
 export interface SavedObjectsUpdateOptions extends SavedObjectsBaseOptions {
     references?: SavedObjectReference[];
+    refresh?: MutatingOperationRefreshSetting;
     version?: string;
 }
 
