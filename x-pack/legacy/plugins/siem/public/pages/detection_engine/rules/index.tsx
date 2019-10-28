@@ -22,6 +22,7 @@ import {
   EuiTabbedContent,
   EuiTextColor,
 } from '@elastic/eui';
+import moment from 'moment';
 import React, { useState } from 'react';
 import styled, { css } from 'styled-components';
 
@@ -39,230 +40,235 @@ import {
 import { SpyRoute } from '../../../utils/route/spy_routes';
 import * as i18n from './translations';
 
-const TableCards = styled.table.attrs({
-  className: 'siemTableCards',
-})`
-  ${({ theme }) => css`
-    display: block;
-  `}
-`;
-TableCards.displayName = 'TableCards';
-
-const TableCardsThead = styled.thead.attrs({
-  className: 'siemTableCards__thead',
-})`
-  ${({ theme }) => css`
-    display: block;
-  `}
-`;
-TableCardsThead.displayName = 'TableCardsThead';
-
-const TableCardsTbody = styled.tbody.attrs({
-  className: 'siemTableCards__tbody',
-})`
-  ${({ theme }) => css`
-    display: block;
-  `}
-`;
-TableCardsTbody.displayName = 'TableCardsTbody';
-
-const TableCardsRow = styled.tr.attrs({
-  className: 'siemTableCards__tr',
-})`
-  ${({ theme }) => css`
-    border-collapse: separate;
-    display: table;
-    table-layout: fixed;
-    width: 100%;
-
-    .siemTableCards__thead & {
-      border: ${theme.eui.euiBorderWidthThin} solid transparent;
-      border-left-width: ${theme.eui.euiSizeXS};
-    }
-
-    .siemTableCards__tbody & {
-      background-color: ${theme.eui.euiColorEmptyShade};
-      border: ${theme.eui.euiBorderThin};
-      border-left-color: ${theme.eui.euiColorSuccess};
-      border-left-width: ${theme.eui.euiSizeXS};
-      border-radius: ${theme.eui.euiBorderRadius};
-    }
-
-    .siemTableCards__tbody & + & {
-      margin-top: ${theme.eui.euiSizeS};
-    }
-  `}
-`;
-TableCardsRow.displayName = 'TableCardsRow';
-
-const TableCardsTh = styled.th.attrs({
-  className: 'siemTableCards__th',
-})`
-  ${({ theme }) => css`
-    font-size: ${theme.eui.euiFontSizeXS};
-    font-weight: ${theme.eui.euiFontWeightSemiBold};
-    line-height: ${theme.eui.euiLineHeight};
-    padding: ${theme.eui.paddingSizes.s};
-    text-align: left;
-    vertical-align: middle;
-
-    .siemTableCards__tbody & {
-      font-size: ${theme.eui.euiFontSizeS};
-      font-weight: ${theme.eui.euiFontWeightRegular};
-    }
-  `}
-`;
-TableCardsTh.displayName = 'TableCardsTh';
-
-const TableCardsTd = styled.td.attrs({
-  className: 'siemTableCards__td',
-})`
-  ${({ theme }) => css`
-    font-size: ${theme.eui.euiFontSizeS};
-    line-height: ${theme.eui.euiLineHeight};
-    padding: ${theme.eui.paddingSizes.s};
-    vertical-align: middle;
-  `}
-`;
-TableCardsTd.displayName = 'TableCardsTd';
+// Will need to change this to get the current datetime format from Kibana settings.
+const dateTimeFormat = (value: string) => {
+  return moment(value).format('M/D/YYYY, h:mm A');
+};
 
 const AllRules = React.memo(() => {
+  interface ColumnTypes {
+    id: number;
+    rule: string;
+    method: string;
+    severity: string;
+    lastCompletedRun: string;
+    lastResponse: string;
+    tags: string;
+    activate: boolean;
+  }
+
+  interface PageTypes {
+    index: number;
+    size: number;
+  }
+
+  interface SortTypes {
+    field: string;
+    direction: string;
+  }
+
+  const actions = [
+    {
+      name: 'Edit rule settings',
+      description: 'Edit rule settings',
+      icon: 'visControls',
+      onClick: () => {},
+    },
+    {
+      name: 'Run rule manually…',
+      description: 'Run rule manually…',
+      icon: 'play',
+      onClick: () => {},
+    },
+    {
+      name: 'Duplicate rule…',
+      description: 'Duplicate rule…',
+      icon: 'copy',
+      onClick: () => {},
+    },
+    {
+      name: 'Export rule',
+      description: 'Export rule',
+      icon: 'export',
+      onClick: () => {},
+    },
+    {
+      name: 'Delete rule…',
+      description: 'Delete rule…',
+      icon: 'trash',
+      onClick: () => {},
+    },
+  ];
+
+  const columns = [
+    {
+      field: 'rule',
+      name: 'Rule',
+      render: (value: string) => (
+        <EuiLink href="#/detection-engine/rules/rule-details">{value}</EuiLink>
+      ),
+      sortable: true,
+      truncateText: true,
+    },
+    {
+      field: 'method',
+      name: 'Method',
+      sortable: true,
+      truncateText: true,
+    },
+    {
+      field: 'severity',
+      name: 'Severity',
+      render: (value: string) => <EuiHealth color="warning">{value}</EuiHealth>,
+      sortable: true,
+      truncateText: true,
+    },
+    {
+      field: 'lastCompletedRun',
+      name: 'Last completed run',
+      render: (value: string) => <time dateTime={value}>{dateTimeFormat(value)}</time>,
+      sortable: true,
+      truncateText: true,
+    },
+    {
+      field: 'lastResponse',
+      name: 'Last response',
+      render: (value: string | undefined) => {
+        return value === undefined ? (
+          getEmptyTagValue()
+        ) : (
+          <>
+            {value === 'Fail' ? (
+              <EuiTextColor color="danger">
+                {value} <EuiIconTip content="Full fail message here." size="s" type="iInCircle" />
+              </EuiTextColor>
+            ) : (
+              <EuiTextColor color="secondary">{value}</EuiTextColor>
+            )}
+          </>
+        );
+      },
+      sortable: true,
+      truncateText: true,
+    },
+    {
+      field: 'tags',
+      name: 'Tags',
+      render: (value: string) => <EuiBadge color="hollow">{value}</EuiBadge>,
+      sortable: true,
+      truncateText: true,
+    },
+    {
+      align: 'center',
+      field: 'activate',
+      name: 'Activate',
+      render: (value: boolean) => <EuiSwitch checked={value} />,
+      sortable: true,
+    },
+    {
+      actions,
+    },
+  ];
+
+  const sampleTableData = [
+    {
+      id: 1,
+      rule: 'Automated exfiltration',
+      method: 'Custom query',
+      severity: 'Medium',
+      lastCompletedRun: '2019-12-28 00:00:00.000-05:00',
+      lastResponse: 'Success',
+      tags: 'attack.t1234',
+      activate: true,
+    },
+    {
+      id: 2,
+      rule: 'Automated exfiltration',
+      method: 'Custom query',
+      severity: 'Medium',
+      lastCompletedRun: '2019-12-28 00:00:00.000-05:00',
+      lastResponse: 'Fail',
+      tags: 'attack.t1234',
+      activate: true,
+    },
+    {
+      id: 3,
+      rule: 'Automated exfiltration',
+      method: 'Custom query',
+      severity: 'Medium',
+      lastCompletedRun: '2019-12-28 00:00:00.000-05:00',
+      lastResponse: 'Success',
+      tags: 'attack.t1234',
+      activate: false,
+    },
+  ];
+
+  const [itemsTotalState, setItemsTotalState] = useState<number>(sampleTableData.length);
+  const [pageState, setPageState] = useState<PageTypes>({ index: 0, size: 20 });
+  const [selectedState, setSelectedState] = useState<ColumnTypes[]>([]);
+  const [sortState, setSortState] = useState<SortTypes>({ field: 'ran', direction: 'desc' });
+
   return (
     <>
       <EuiSpacer />
 
-      <HeaderSection split title="All rules">
-        <EuiFieldSearch
-          aria-label="Search rules"
-          fullWidth
-          placeholder="e.g. rule name or description"
+      <EuiPanel>
+        <HeaderSection split title="All rules">
+          <EuiFieldSearch aria-label="Search rules" fullWidth placeholder="e.g. rule name" />
+        </HeaderSection>
+
+        <UtilityBar border>
+          <UtilityBarSection>
+            <UtilityBarGroup>
+              <UtilityBarText>{'Showing: 39 rules'}</UtilityBarText>
+            </UtilityBarGroup>
+
+            <UtilityBarGroup>
+              <UtilityBarText>{'Selected: 2 rules'}</UtilityBarText>
+
+              <UtilityBarAction
+                iconSide="right"
+                iconType="arrowDown"
+                popoverContent={<p>{'Batch actions context menu here.'}</p>}
+              >
+                {'Batch actions'}
+              </UtilityBarAction>
+            </UtilityBarGroup>
+
+            <UtilityBarGroup>
+              <UtilityBarAction iconType="cross">{'Clear 7 filters'}</UtilityBarAction>
+            </UtilityBarGroup>
+          </UtilityBarSection>
+        </UtilityBar>
+
+        <EuiBasicTable
+          columns={columns}
+          compressed
+          // hasActions={false}
+          isSelectable
+          itemId="id"
+          items={sampleTableData}
+          onChange={({ page, sort }: { page: PageTypes; sort: SortTypes }) => {
+            setPageState(page);
+            setSortState(sort);
+          }}
+          pagination={{
+            pageIndex: pageState.index,
+            pageSize: pageState.size,
+            totalItemCount: itemsTotalState,
+            pageSizeOptions: [5, 10, 20],
+          }}
+          selection={{
+            selectable: () => true,
+            onSelectionChange: (selectedItems: ColumnTypes[]) => {
+              setSelectedState(selectedItems);
+            },
+          }}
+          sorting={{
+            sort: sortState,
+          }}
         />
-      </HeaderSection>
-
-      <UtilityBar border>
-        <UtilityBarSection>
-          <UtilityBarGroup>
-            <UtilityBarText>{'Showing: 39 rules'}</UtilityBarText>
-          </UtilityBarGroup>
-
-          <UtilityBarGroup>
-            <UtilityBarText>{'Selected: 2 rules'}</UtilityBarText>
-
-            <UtilityBarAction
-              iconSide="right"
-              iconType="arrowDown"
-              popoverContent={<p>{'Batch actions context menu here.'}</p>}
-            >
-              {'Batch actions'}
-            </UtilityBarAction>
-          </UtilityBarGroup>
-
-          <UtilityBarGroup>
-            <UtilityBarAction iconType="cross">{'Clear 7 filters'}</UtilityBarAction>
-          </UtilityBarGroup>
-        </UtilityBarSection>
-      </UtilityBar>
-
-      {/* Example of potentially new TableCards component. This new table type may no longer be required for implementation, given the requirements changes that have been made over time. At present, the only afforded benefits of using it are 1) differentiation from regular tables and 2) the presence of a colored status bar on the left of each row. Neither are dealbreakers in my mind. If creating a new table component is out of the question for MVP, go with a standard EUI basic table. */}
-
-      <TableCards>
-        <TableCardsThead>
-          <TableCardsRow>
-            <TableCardsTh scope="col" style={{ width: '32px' }}>
-              <EuiCheckbox
-                id="test"
-                onChange={() => {
-                  return null;
-                }}
-              />
-            </TableCardsTh>
-            <TableCardsTh scope="col">{'Rule'}</TableCardsTh>
-            <TableCardsTh scope="col">{'Method'}</TableCardsTh>
-            <TableCardsTh scope="col">{'Severity'}</TableCardsTh>
-            <TableCardsTh scope="col">{'Last completed run'}</TableCardsTh>
-            <TableCardsTh scope="col">{'Last response'}</TableCardsTh>
-            <TableCardsTh scope="col">{'Tags'}</TableCardsTh>
-            <TableCardsTh scope="col" style={{ width: '48px' }}>
-              {'Activate'}
-            </TableCardsTh>
-            <TableCardsTh scope="col" style={{ width: '40px' }}></TableCardsTh>
-          </TableCardsRow>
-        </TableCardsThead>
-
-        <TableCardsTbody>
-          <TableCardsRow>
-            <TableCardsTd style={{ width: '32px' }}>
-              <EuiCheckbox
-                id="test"
-                onChange={() => {
-                  return null;
-                }}
-              />
-            </TableCardsTd>
-            <TableCardsTh scope="row">
-              <EuiLink href="#/detection-engine/rules/rule-details">
-                {'Automated exfiltration'}
-              </EuiLink>{' '}
-              <EuiBadge color="hollow">{'Experimental'}</EuiBadge>
-            </TableCardsTh>
-            <TableCardsTd>{'Kibana Query Language'}</TableCardsTd>
-            <TableCardsTd>
-              <EuiHealth color="warning">{'Medium'}</EuiHealth>
-            </TableCardsTd>
-            <TableCardsTd>
-              <time>{'12/28/2019, 12:00 PM'}</time>
-            </TableCardsTd>
-            <TableCardsTd>
-              <span>{'Success'}</span>
-            </TableCardsTd>
-            <TableCardsTd>
-              <EuiBadge color="hollow">{'attack.t1234'}</EuiBadge>
-            </TableCardsTd>
-            <TableCardsTd style={{ width: '48px' }}>
-              <EuiSwitch />
-            </TableCardsTd>
-            <TableCardsTd style={{ width: '40px' }}>
-              <EuiButtonIcon aria-label="Rule options" iconType="boxesVertical" />
-            </TableCardsTd>
-          </TableCardsRow>
-
-          <TableCardsRow>
-            <TableCardsTd style={{ width: '32px' }}>
-              <EuiCheckbox
-                id="test"
-                onChange={() => {
-                  return null;
-                }}
-              />
-            </TableCardsTd>
-            <TableCardsTh scope="row">
-              <EuiLink href="#/detection-engine/rules/rule-details">
-                {'Automated exfiltration'}
-              </EuiLink>{' '}
-              <EuiBadge color="hollow">{'Experimental'}</EuiBadge>
-            </TableCardsTh>
-            <TableCardsTd>{'Kibana Query Language'}</TableCardsTd>
-            <TableCardsTd>
-              <EuiHealth color="warning">{'Medium'}</EuiHealth>
-            </TableCardsTd>
-            <TableCardsTd>
-              <time>{'12/28/2019, 12:00 PM'}</time>
-            </TableCardsTd>
-            <TableCardsTd>
-              <span>{'Fail'}</span>
-            </TableCardsTd>
-            <TableCardsTd>
-              <EuiBadge color="hollow">{'attack.t1234'}</EuiBadge>
-            </TableCardsTd>
-            <TableCardsTd style={{ width: '48px' }}>
-              <EuiSwitch />
-            </TableCardsTd>
-            <TableCardsTd style={{ width: '40px' }}>
-              <EuiButtonIcon aria-label="Rule options" iconType="boxesVertical" />
-            </TableCardsTd>
-          </TableCardsRow>
-        </TableCardsTbody>
-      </TableCards>
+      </EuiPanel>
     </>
   );
 });
@@ -275,7 +281,6 @@ const ActivityMonitor = React.memo(() => {
     ran: string;
     lookedBackTo: string;
     status: string;
-    actions: string;
   }
 
   interface PageTypes {
@@ -315,12 +320,14 @@ const ActivityMonitor = React.memo(() => {
     {
       field: 'ran',
       name: 'Ran',
+      render: (value: string) => <time dateTime={value}>{dateTimeFormat(value)}</time>,
       sortable: true,
       truncateText: true,
     },
     {
       field: 'lookedBackTo',
       name: 'Looked back to',
+      render: (value: string) => <time dateTime={value}>{dateTimeFormat(value)}</time>,
       sortable: true,
       truncateText: true,
     },
@@ -361,168 +368,166 @@ const ActivityMonitor = React.memo(() => {
     {
       id: 1,
       rule: 'Automated exfiltration',
-      ran: '12/28/2019, 12:00 PM',
-      lookedBackTo: '12/28/2019, 12:00 PM',
+      ran: '2019-12-28 00:00:00.000-05:00',
+      lookedBackTo: '2019-12-28 00:00:00.000-05:00',
       status: 'Running',
-      actions: 'Stop',
     },
     {
       id: 2,
       rule: 'Automated exfiltration',
-      ran: '12/28/2019, 12:00 PM',
-      lookedBackTo: '12/28/2019, 12:00 PM',
+      ran: '2019-12-28 00:00:00.000-05:00',
+      lookedBackTo: '2019-12-28 00:00:00.000-05:00',
       status: 'Stopped',
-      actions: 'Resume',
     },
     {
       id: 3,
       rule: 'Automated exfiltration',
-      ran: '12/28/2019, 12:00 PM',
-      lookedBackTo: '12/28/2019, 12:00 PM',
+      ran: '2019-12-28 00:00:00.000-05:00',
+      lookedBackTo: '2019-12-28 00:00:00.000-05:00',
       status: 'Completed',
       response: 'Fail',
     },
     {
       id: 4,
       rule: 'Automated exfiltration',
-      ran: '12/28/2019, 12:00 PM',
-      lookedBackTo: '12/28/2019, 12:00 PM',
+      ran: '2019-12-28 00:00:00.000-05:00',
+      lookedBackTo: '2019-12-28 00:00:00.000-05:00',
       status: 'Completed',
       response: 'Success',
     },
     {
       id: 5,
       rule: 'Automated exfiltration',
-      ran: '12/28/2019, 12:00 PM',
-      lookedBackTo: '12/28/2019, 12:00 PM',
+      ran: '2019-12-28 00:00:00.000-05:00',
+      lookedBackTo: '2019-12-28 00:00:00.000-05:00',
       status: 'Completed',
       response: 'Success',
     },
     {
       id: 6,
       rule: 'Automated exfiltration',
-      ran: '12/28/2019, 12:00 PM',
-      lookedBackTo: '12/28/2019, 12:00 PM',
+      ran: '2019-12-28 00:00:00.000-05:00',
+      lookedBackTo: '2019-12-28 00:00:00.000-05:00',
       status: 'Completed',
       response: 'Success',
     },
     {
       id: 7,
       rule: 'Automated exfiltration',
-      ran: '12/28/2019, 12:00 PM',
-      lookedBackTo: '12/28/2019, 12:00 PM',
+      ran: '2019-12-28 00:00:00.000-05:00',
+      lookedBackTo: '2019-12-28 00:00:00.000-05:00',
       status: 'Completed',
       response: 'Success',
     },
     {
       id: 8,
       rule: 'Automated exfiltration',
-      ran: '12/28/2019, 12:00 PM',
-      lookedBackTo: '12/28/2019, 12:00 PM',
+      ran: '2019-12-28 00:00:00.000-05:00',
+      lookedBackTo: '2019-12-28 00:00:00.000-05:00',
       status: 'Completed',
       response: 'Success',
     },
     {
       id: 9,
       rule: 'Automated exfiltration',
-      ran: '12/28/2019, 12:00 PM',
-      lookedBackTo: '12/28/2019, 12:00 PM',
+      ran: '2019-12-28 00:00:00.000-05:00',
+      lookedBackTo: '2019-12-28 00:00:00.000-05:00',
       status: 'Completed',
       response: 'Success',
     },
     {
       id: 10,
       rule: 'Automated exfiltration',
-      ran: '12/28/2019, 12:00 PM',
-      lookedBackTo: '12/28/2019, 12:00 PM',
+      ran: '2019-12-28 00:00:00.000-05:00',
+      lookedBackTo: '2019-12-28 00:00:00.000-05:00',
       status: 'Completed',
       response: 'Success',
     },
     {
       id: 11,
       rule: 'Automated exfiltration',
-      ran: '12/28/2019, 12:00 PM',
-      lookedBackTo: '12/28/2019, 12:00 PM',
+      ran: '2019-12-28 00:00:00.000-05:00',
+      lookedBackTo: '2019-12-28 00:00:00.000-05:00',
       status: 'Completed',
       response: 'Success',
     },
     {
       id: 12,
       rule: 'Automated exfiltration',
-      ran: '12/28/2019, 12:00 PM',
-      lookedBackTo: '12/28/2019, 12:00 PM',
+      ran: '2019-12-28 00:00:00.000-05:00',
+      lookedBackTo: '2019-12-28 00:00:00.000-05:00',
       status: 'Completed',
       response: 'Success',
     },
     {
       id: 13,
       rule: 'Automated exfiltration',
-      ran: '12/28/2019, 12:00 PM',
-      lookedBackTo: '12/28/2019, 12:00 PM',
+      ran: '2019-12-28 00:00:00.000-05:00',
+      lookedBackTo: '2019-12-28 00:00:00.000-05:00',
       status: 'Completed',
       response: 'Success',
     },
     {
       id: 14,
       rule: 'Automated exfiltration',
-      ran: '12/28/2019, 12:00 PM',
-      lookedBackTo: '12/28/2019, 12:00 PM',
+      ran: '2019-12-28 00:00:00.000-05:00',
+      lookedBackTo: '2019-12-28 00:00:00.000-05:00',
       status: 'Completed',
       response: 'Success',
     },
     {
       id: 15,
       rule: 'Automated exfiltration',
-      ran: '12/28/2019, 12:00 PM',
-      lookedBackTo: '12/28/2019, 12:00 PM',
+      ran: '2019-12-28 00:00:00.000-05:00',
+      lookedBackTo: '2019-12-28 00:00:00.000-05:00',
       status: 'Completed',
       response: 'Success',
     },
     {
       id: 16,
       rule: 'Automated exfiltration',
-      ran: '12/28/2019, 12:00 PM',
-      lookedBackTo: '12/28/2019, 12:00 PM',
+      ran: '2019-12-28 00:00:00.000-05:00',
+      lookedBackTo: '2019-12-28 00:00:00.000-05:00',
       status: 'Completed',
       response: 'Success',
     },
     {
       id: 17,
       rule: 'Automated exfiltration',
-      ran: '12/28/2019, 12:00 PM',
-      lookedBackTo: '12/28/2019, 12:00 PM',
+      ran: '2019-12-28 00:00:00.000-05:00',
+      lookedBackTo: '2019-12-28 00:00:00.000-05:00',
       status: 'Completed',
       response: 'Success',
     },
     {
       id: 18,
       rule: 'Automated exfiltration',
-      ran: '12/28/2019, 12:00 PM',
-      lookedBackTo: '12/28/2019, 12:00 PM',
+      ran: '2019-12-28 00:00:00.000-05:00',
+      lookedBackTo: '2019-12-28 00:00:00.000-05:00',
       status: 'Completed',
       response: 'Success',
     },
     {
       id: 19,
       rule: 'Automated exfiltration',
-      ran: '12/28/2019, 12:00 PM',
-      lookedBackTo: '12/28/2019, 12:00 PM',
+      ran: '2019-12-28 00:00:00.000-05:00',
+      lookedBackTo: '2019-12-28 00:00:00.000-05:00',
       status: 'Completed',
       response: 'Success',
     },
     {
       id: 20,
       rule: 'Automated exfiltration',
-      ran: '12/28/2019, 12:00 PM',
-      lookedBackTo: '12/28/2019, 12:00 PM',
+      ran: '2019-12-28 00:00:00.000-05:00',
+      lookedBackTo: '2019-12-28 00:00:00.000-05:00',
       status: 'Completed',
       response: 'Success',
     },
     {
       id: 21,
       rule: 'Automated exfiltration',
-      ran: '12/28/2019, 12:00 PM',
-      lookedBackTo: '12/28/2019, 12:00 PM',
+      ran: '2019-12-28 00:00:00.000-05:00',
+      lookedBackTo: '2019-12-28 00:00:00.000-05:00',
       status: 'Completed',
       response: 'Success',
     },
@@ -591,7 +596,7 @@ const ActivityMonitor = React.memo(() => {
     </>
   );
 });
-AllRules.displayName = 'AllRules';
+ActivityMonitor.displayName = 'ActivityMonitor';
 
 export const RulesComponent = React.memo(() => {
   return (
