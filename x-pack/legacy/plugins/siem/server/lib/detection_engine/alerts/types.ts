@@ -23,22 +23,22 @@ export type PartialFilter = Partial<Filter>;
 
 export interface SignalAlertParams {
   description: string;
-  from: string;
-  to: string;
-  id: string;
-  index: string[];
-  interval: string;
-  name: string;
-  severity: string;
-  type: 'filter' | 'query' | 'saved_query';
   enabled: boolean;
   filter: Record<string, {}> | undefined;
-  query: string | undefined;
-  language: string | undefined;
-  savedId: string | undefined;
   filters: PartialFilter[] | undefined;
+  from: string;
+  index: string[];
+  interval: string;
+  id: string;
+  language: string | undefined;
   maxSignals: number;
+  name: string;
+  query: string | undefined;
   references: string[];
+  savedId: string | undefined;
+  severity: string;
+  to: string;
+  type: 'filter' | 'query' | 'saved_query';
 }
 
 export type SignalAlertParamsRest = Omit<SignalAlertParams, 'maxSignals' | 'saved_id'> & {
