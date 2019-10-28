@@ -502,18 +502,17 @@ export class VectorStyle extends AbstractStyle {
   }
 
   async setMBSymbolPropertiesForPoints({ mbMap, symbolLayerId, alpha }) {
-    mbMap.setLayoutProperty(symbolLayerId, 'icon-ignore-placement', true);
 
     const symbolId = this._descriptor.properties.symbol.options.symbolId;
+    mbMap.setLayoutProperty(symbolLayerId, 'icon-ignore-placement', true);
     mbMap.setLayoutProperty(symbolLayerId, 'icon-anchor', getMakiSymbolAnchor(symbolId));
-    const color = this._getMBColor(vectorStyles.FILL_COLOR, this._descriptor.properties.fillColor);
-    // icon-color is only supported on SDF icons.
-    mbMap.setPaintProperty(symbolLayerId, 'icon-color', color);
+    mbMap.setPaintProperty(symbolLayerId, 'icon-opacity', alpha);
 
+    // icon-color is only supported on SDF icons.
+    this._fillColorStyleProperty.syncIconColorWithMb(symbolLayerId, mbMap);
     this._lineColorStyleProperty.syncHaloBorderColorWithMb(symbolLayerId, mbMap);
     this._lineWidthStyleProperty.syncHaloWidthWithMb(symbolLayerId, mbMap);
     this._iconSizeStyleProperty.syncIconImageAndSizeWithMb(symbolLayerId, mbMap, symbolId);
-    mbMap.setPaintProperty(symbolLayerId, 'icon-opacity', alpha);
 
 
     const iconOrientation = this._descriptor.properties.iconOrientation;

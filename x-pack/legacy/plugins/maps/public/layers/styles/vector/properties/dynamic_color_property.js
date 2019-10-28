@@ -20,6 +20,11 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     mbMap.setPaintProperty(mbLayerId, 'circle-opacity', alpha);
   }
 
+  syncIconColorWithMb(mbLayerId, mbMap) {
+    const color = this._getMbColor();
+    mbMap.setPaintProperty(mbLayerId, 'icon-color', color);
+  }
+
   syncHaloBorderColorWithMb(mbLayerId, mbMap) {
     const color = this._getMbColor();
     mbMap.setPaintProperty(mbLayerId, 'icon-halo-color', color);

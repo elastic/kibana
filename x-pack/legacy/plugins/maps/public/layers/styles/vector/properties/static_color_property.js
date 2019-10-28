@@ -20,6 +20,10 @@ export class StaticColorProperty extends StaticStyleProperty {
     mbMap.setPaintProperty(mbLayerId, 'fill-opacity', alpha);
   }
 
+  syncIconColorWithMb(mbLayerId, mbMap) {
+    mbMap.setPaintProperty(mbLayerId, 'icon-color', this._options.color);
+  }
+
   syncHaloBorderColorWithMb(mbLayerId, mbMap) {
     mbMap.setPaintProperty(mbLayerId, 'icon-halo-color', this._options.color);
   }
