@@ -57,30 +57,28 @@ interface WithSourceProps {
   sourceId: string;
 }
 
-export const WithSource = React.memo<WithSourceProps>(({ children, sourceId }) => {
-  const getIndexFields = (title: string, fields: IndexField[]): StaticIndexPattern =>
+const getIndexFields = memoizeOne(
+  (title: string, fields: IndexField[]): StaticIndexPattern =>
     fields && fields.length > 0
       ? {
           fields: fields.map(field => pick(['name', 'searchable', 'type', 'aggregatable'], field)),
           title,
         }
-      : { fields: [], title };
+      : { fields: [], title }
+);
 
-  const getBrowserFields = (fields: IndexField[]): BrowserFields =>
+const getBrowserFields = memoizeOne(
+  (fields: IndexField[]): BrowserFields =>
     fields && fields.length > 0
       ? fields.reduce<BrowserFields>(
           (accumulator: BrowserFields, field: IndexField) =>
             set([field.category, 'fields', field.name], field, accumulator),
           {}
         )
-      : {};
-  const getBrowserFieldsMemo: (fields: IndexField[]) => BrowserFields = memoizeOne(
-    getBrowserFields
-  );
-  const getIndexFieldsMemo: (
-    title: string,
-    fields: IndexField[]
-  ) => StaticIndexPattern = memoizeOne(getIndexFields);
+      : {}
+);
+
+export const WithSource = React.memo<WithSourceProps>(({ children, sourceId }) => {
   return (
     <Query<SourceQuery.Query, SourceQuery.Variables>
       query={sourceQuery}
@@ -94,8 +92,8 @@ export const WithSource = React.memo<WithSourceProps>(({ children, sourceId }) =
       {({ data }) =>
         children({
           indicesExist: get('source.status.indicesExist', data),
-          browserFields: getBrowserFieldsMemo(get('source.status.indexFields', data)),
-          indexPattern: getIndexFieldsMemo(
+          browserFields: getBrowserFields(get('source.status.indexFields', data)),
+          indexPattern: getIndexFields(
             chrome
               .getUiSettingsClient()
               .get(DEFAULT_INDEX_KEY)

@@ -20,7 +20,7 @@
 import sinon from 'sinon';
 import expect from '@kbn/expect';
 
-import { SavedObjectsClientMock } from '../../../../core/server/mocks';
+import { savedObjectsClientMock } from '../../../../core/server/mocks';
 import * as uiSettingsServiceFactoryNS from '../ui_settings_service_factory';
 import * as getUiSettingsServiceForRequestNS from '../ui_settings_service_for_request';
 // @ts-ignore
@@ -129,7 +129,7 @@ describe('uiSettingsMixin()', () => {
 
       sinon.assert.notCalled(uiSettingsServiceFactoryStub);
 
-      const savedObjectsClient = SavedObjectsClientMock.create();
+      const savedObjectsClient = savedObjectsClientMock.create();
       decorations.server.uiSettingsServiceFactory({
         savedObjectsClient,
       });

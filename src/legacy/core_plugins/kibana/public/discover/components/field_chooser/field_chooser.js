@@ -16,20 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import 'ui/directives/css_truncate';
+//field_name directive will be replaced very soon
 import 'ui/directives/field_name';
 import './discover_field';
-import 'ui/angular_ui_select';
 import './discover_field_search_directive';
 import './discover_index_pattern_directive';
 import _ from 'lodash';
 import $ from 'jquery';
 import rison from 'rison-node';
 import { fieldCalculator } from './lib/field_calculator';
-import { FieldList } from 'ui/index_patterns';
-import { uiModules } from 'ui/modules';
+import {
+  getServices,
+  FieldList
+} from '../../kibana_services';
 import fieldChooserTemplate from './field_chooser.html';
+
+const { uiModules } =  getServices();
 const app = uiModules.get('apps/discover');
 
 app.directive('discFieldChooser', function ($location, config, $route) {

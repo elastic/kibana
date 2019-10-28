@@ -29,7 +29,7 @@ export { configServiceMock } from './config/config_service.mock';
 export { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.mock';
 export { httpServiceMock } from './http/http_service.mock';
 export { loggingServiceMock } from './logging/logging_service.mock';
-export { SavedObjectsClientMock } from './saved_objects/service/saved_objects_client.mock';
+export { savedObjectsClientMock } from './saved_objects/service/saved_objects_client.mock';
 export { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 
 export function pluginInitializerContextConfigMock<T>(config: T) {
