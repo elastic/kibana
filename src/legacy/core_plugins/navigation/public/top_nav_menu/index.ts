@@ -17,12 +17,6 @@
  * under the License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('core plugins', () => {
-    loadTestFile(require.resolve('./applications'));
-    loadTestFile(require.resolve('./legacy_plugins'));
-    loadTestFile(require.resolve('./server_plugins'));
-    loadTestFile(require.resolve('./ui_plugins'));
-    loadTestFile(require.resolve('./top_nav'));
-  });
-}
+export { TopNavMenu } from './top_nav_menu';
+export { TopNavMenuData } from './top_nav_menu_data';
+export * from './top_nav_menu_extensions_registry';

@@ -17,12 +17,16 @@
  * under the License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('core plugins', () => {
-    loadTestFile(require.resolve('./applications'));
-    loadTestFile(require.resolve('./legacy_plugins'));
-    loadTestFile(require.resolve('./server_plugins'));
-    loadTestFile(require.resolve('./ui_plugins'));
-    loadTestFile(require.resolve('./top_nav'));
-  });
+// TODO these are imports from the old plugin world.
+// Once the new platform is ready, they can get removed
+// and handled by the platform itself in the setup method
+// of the ExpressionExectorService
+
+/** @public types */
+export { TopNavMenu, TopNavMenuData } from './top_nav_menu';
+export { NavigationSetup, NavigationStart } from './plugin';
+
+import { NavigationPlugin as Plugin } from './plugin';
+export function plugin() {
+  return new Plugin();
 }
