@@ -274,17 +274,16 @@ export default function({ getService }: FtrProviderContext) {
     },
   ];
 
-  // eslint-disable-next-line ban/ban
-  describe.only('advanced job', function() {
+  describe('advanced job', function() {
     this.tags(['smoke', 'mlqa']);
     before(async () => {
       await esArchiver.load('ml/ecommerce');
     });
 
-    // after(async () => {
-    //   await esArchiver.unload('ml/ecommerce');
-    //   await ml.api.cleanMlIndices();
-    // });
+    after(async () => {
+      await esArchiver.unload('ml/ecommerce');
+      await ml.api.cleanMlIndices();
+    });
 
     for (const testData of testDataList) {
       describe(`${testData.suiteTitle}`, function() {
