@@ -17,20 +17,11 @@
  * under the License.
  */
 
-import { npSetup, npStart } from 'ui/new_platform';
-import { FeatureCatalogueRegistryProvider } from 'ui/registry/feature_catalogue';
-
+import { PluginInitializerContext } from 'kibana/public';
 import { DevToolsPlugin } from './plugin';
-import { localApplicationService } from '../local_application_service';
 
-const instance = new DevToolsPlugin();
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new DevToolsPlugin();
+}
 
-export const devToolsSetup = instance.setup(npSetup.core, {
-  __LEGACY: {
-    localApplicationService,
-    FeatureCatalogueRegistryProvider,
-  },
-});
-instance.start(npStart.core, {
-  newPlatformDevTools: npStart.plugins.devTools,
-});
+export * from './plugin';

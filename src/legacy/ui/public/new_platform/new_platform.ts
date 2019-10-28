@@ -28,6 +28,7 @@ import {
   Start as InspectorStart,
 } from '../../../../plugins/inspector/public';
 import { EuiUtilsStart } from '../../../../plugins/eui_utils/public';
+import { DevToolsSetup, DevToolsStart } from '../../../../plugins/dev_tools/public';
 
 export interface PluginsSetup {
   data: ReturnType<DataPlugin['setup']>;
@@ -35,6 +36,7 @@ export interface PluginsSetup {
   expressions: ReturnType<ExpressionsPlugin['setup']>;
   inspector: InspectorSetup;
   uiActions: IUiActionsSetup;
+  devTools: DevToolsSetup;
 }
 
 export interface PluginsStart {
@@ -44,6 +46,7 @@ export interface PluginsStart {
   expressions: ReturnType<ExpressionsPlugin['start']>;
   inspector: InspectorStart;
   uiActions: IUiActionsStart;
+  devTools: DevToolsStart;
 }
 
 export const npSetup = {

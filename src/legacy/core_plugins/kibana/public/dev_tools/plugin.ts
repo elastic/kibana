@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { sortBy } from 'lodash';
-import { App, CoreSetup, Plugin } from 'kibana/public';
+import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
 import { LocalApplicationService } from '../local_application_service';
+import { DevTool, DevToolsStart } from '../../../../../plugins/dev_tools/public';
 
 export interface DevToolsPluginSetupDependencies {
   __LEGACY: {
@@ -31,27 +31,12 @@ export interface DevToolsPluginSetupDependencies {
   };
 }
 
-export interface DevToolsSetup {
-  register: (devTool: DevTool) => void;
+export interface DevToolsPluginStartDependencies {
+  newPlatformDevTools: DevToolsStart;
 }
 
-export interface DevTool {
-  id: string;
-  title: string;
-  mount: App['mount'];
-  disabled?: boolean;
-  tooltipContent?: string;
-  enableRouting: boolean;
-  order: number;
-}
-
-export class DevToolsPlugin implements Plugin<DevToolsSetup> {
-  private devTools: DevTool[] = [];
-
-  private getSortedDevTools() {
-    // TODO make sure this works
-    return sortBy(this.devTools, 'order');
-  }
+export class DevToolsPlugin implements Plugin {
+  private getSortedDevTools: (() => DevTool[]) | null = null;
 
   public setup(
     core: CoreSetup,
@@ -78,8 +63,9 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup> {
       id: 'dev_tools',
       title: 'Dev Tools',
       mount: async (appMountContext, params) => {
-        // TODO check capabilities whether this page is allowed to be rendered
-        // TODO badge and breadcrumb handling
+        if (!this.getSortedDevTools) {
+          throw new Error('not started yet');
+        }
         const { renderApp } = await import('./render_app');
         return renderApp(
           params.element,
@@ -89,13 +75,9 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup> {
         );
       },
     });
-
-    return {
-      register: (devTool: DevTool) => {
-        this.devTools.push(devTool);
-      },
-    };
   }
 
-  start() {}
+  start(core: CoreStart, { newPlatformDevTools }: DevToolsPluginStartDependencies) {
+    this.getSortedDevTools = newPlatformDevTools.getSortedDevTools;
+  }
 }

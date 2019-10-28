@@ -18,6 +18,7 @@
  */
 
 import { I18nProvider } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { EuiTab, EuiTabs } from '@elastic/eui';
 import { HashRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
 import * as React from 'react';
@@ -25,8 +26,7 @@ import ReactDOM from 'react-dom';
 import { useEffect, useRef } from 'react';
 
 import { AppMountContext } from 'kibana/public';
-
-import { DevTool } from './plugin';
+import { DevTool } from '../../../../../plugins/dev_tools/public';
 
 interface DevToolsWrapperProps {
   devTools: DevTool[];
@@ -107,12 +107,47 @@ function DevToolsWrapper({
   );
 }
 
+function redirectOnMissingCapabilities(appMountContext: AppMountContext) {
+  if (!appMountContext.core.application.capabilities.dev_tools.show) {
+    window.location.hash = '/home';
+  }
+}
+
+function setBadge(appMountContext: AppMountContext) {
+  if (appMountContext.core.application.capabilities.dev_tools.save) {
+    return;
+  }
+  appMountContext.core.chrome.setBadge({
+    text: i18n.translate('kbn.devTools.badge.readOnly.text', {
+      defaultMessage: 'Read only',
+    }),
+    tooltip: i18n.translate('kbn.devTools.badge.readOnly.tooltip', {
+      defaultMessage: 'Unable to save',
+    }),
+    iconType: 'glasses',
+  });
+}
+
+function setBreadcrumbs(appMountContext: AppMountContext) {
+  appMountContext.core.chrome.setBreadcrumbs([
+    {
+      text: i18n.translate('kbn.devTools.k7BreadcrumbsDevToolsLabel', {
+        defaultMessage: 'Dev Tools',
+      }),
+      href: '#/dev_tools',
+    },
+  ]);
+}
+
 export function renderApp(
   element: HTMLElement,
   appMountContext: AppMountContext,
   basePath: string,
   devTools: DevTool[]
 ) {
+  redirectOnMissingCapabilities(appMountContext);
+  setBadge(appMountContext);
+  setBreadcrumbs(appMountContext);
   ReactDOM.render(
     <I18nProvider>
       <Router>
