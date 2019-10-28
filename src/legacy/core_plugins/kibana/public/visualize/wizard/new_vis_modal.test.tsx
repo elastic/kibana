@@ -21,6 +21,7 @@ import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { NewVisModal } from './new_vis_modal';
+import { VisType } from '../kibana_services';
 import { TypesStart } from '../../../../visualizations/public/np_ready/public/types';
 
 jest.mock('../kibana_services', () => {
@@ -44,7 +45,7 @@ beforeEach(() => {
 });
 
 describe('NewVisModal', () => {
-  const settingsGet = getServices().uiSettings.get;
+  const settingsGet = getServices().uiSettings.get as jest.Mock;
 
   const defaultVisTypeParams = {
     hidden: false,
