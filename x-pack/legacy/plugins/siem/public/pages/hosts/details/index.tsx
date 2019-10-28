@@ -96,97 +96,94 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
               ],
             });
             return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
-              <>
-                <StickyContainer>
-                  <FiltersGlobal>
-                    <SiemSearchBar indexPattern={indexPattern} id="global" />
-                  </FiltersGlobal>
+              <StickyContainer>
+                <FiltersGlobal>
+                  <SiemSearchBar indexPattern={indexPattern} id="global" />
+                </FiltersGlobal>
 
-                  <HeaderPage
-                    border
-                    subtitle={
-                      <LastEventTime
-                        indexKey={LastEventIndexKey.hostDetails}
-                        hostName={detailName}
-                      />
-                    }
-                    title={detailName}
-                  />
+                <HeaderPage
+                  border
+                  subtitle={
+                    <LastEventTime indexKey={LastEventIndexKey.hostDetails} hostName={detailName} />
+                  }
+                  title={detailName}
+                />
 
-                  <HostOverviewByNameQuery
-                    sourceId="default"
-                    hostName={detailName}
-                    skip={isInitializing}
-                    startDate={from}
-                    endDate={to}
-                  >
-                    {({ hostOverview, loading, id, inspect, refetch }) => (
-                      <AnomalyTableProvider
-                        criteriaFields={hostToCriteria(hostOverview)}
-                        startDate={from}
-                        endDate={to}
-                        skip={isInitializing}
-                      >
-                        {({ isLoadingAnomaliesData, anomaliesData }) => (
-                          <HostOverviewManage
-                            id={id}
-                            inspect={inspect}
-                            refetch={refetch}
-                            setQuery={setQuery}
-                            data={hostOverview}
-                            anomaliesData={anomaliesData}
-                            isLoadingAnomaliesData={isLoadingAnomaliesData}
-                            loading={loading}
-                            startDate={from}
-                            endDate={to}
-                            narrowDateRange={(score, interval) => {
-                              const fromTo = scoreIntervalToDateTime(score, interval);
-                              setAbsoluteRangeDatePicker({
-                                id: 'global',
-                                from: fromTo.from,
-                                to: fromTo.to,
-                              });
-                            }}
-                          />
-                        )}
-                      </AnomalyTableProvider>
-                    )}
-                  </HostOverviewByNameQuery>
+                <HostOverviewByNameQuery
+                  sourceId="default"
+                  hostName={detailName}
+                  skip={isInitializing}
+                  startDate={from}
+                  endDate={to}
+                >
+                  {({ hostOverview, loading, id, inspect, refetch }) => (
+                    <AnomalyTableProvider
+                      criteriaFields={hostToCriteria(hostOverview)}
+                      startDate={from}
+                      endDate={to}
+                      skip={isInitializing}
+                    >
+                      {({ isLoadingAnomaliesData, anomaliesData }) => (
+                        <HostOverviewManage
+                          id={id}
+                          inspect={inspect}
+                          refetch={refetch}
+                          setQuery={setQuery}
+                          data={hostOverview}
+                          anomaliesData={anomaliesData}
+                          isLoadingAnomaliesData={isLoadingAnomaliesData}
+                          loading={loading}
+                          startDate={from}
+                          endDate={to}
+                          narrowDateRange={(score, interval) => {
+                            const fromTo = scoreIntervalToDateTime(score, interval);
+                            setAbsoluteRangeDatePicker({
+                              id: 'global',
+                              from: fromTo.from,
+                              to: fromTo.to,
+                            });
+                          }}
+                        />
+                      )}
+                    </AnomalyTableProvider>
+                  )}
+                </HostOverviewByNameQuery>
 
-                  <EuiHorizontalRule />
+                <EuiHorizontalRule />
 
-                  <KpiHostDetailsQuery
-                    sourceId="default"
-                    filterQuery={filterQuery}
-                    skip={isInitializing}
-                    startDate={from}
-                    endDate={to}
-                  >
-                    {({ kpiHostDetails, id, inspect, loading, refetch }) => (
-                      <KpiHostDetailsManage
-                        data={kpiHostDetails}
-                        from={from}
-                        id={id}
-                        inspect={inspect}
-                        loading={loading}
-                        refetch={refetch}
-                        setQuery={setQuery}
-                        to={to}
-                        narrowDateRange={(min: number, max: number) => {
-                          setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
-                        }}
-                      />
-                    )}
-                  </KpiHostDetailsQuery>
+                <KpiHostDetailsQuery
+                  sourceId="default"
+                  filterQuery={filterQuery}
+                  skip={isInitializing}
+                  startDate={from}
+                  endDate={to}
+                >
+                  {({ kpiHostDetails, id, inspect, loading, refetch }) => (
+                    <KpiHostDetailsManage
+                      data={kpiHostDetails}
+                      from={from}
+                      id={id}
+                      inspect={inspect}
+                      loading={loading}
+                      refetch={refetch}
+                      setQuery={setQuery}
+                      to={to}
+                      narrowDateRange={(min: number, max: number) => {
+                        setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
+                      }}
+                    />
+                  )}
+                </KpiHostDetailsQuery>
 
-                  <EuiSpacer />
+                <EuiSpacer />
 
-                  <SiemNavigation
-                    navTabs={navTabsHostDetails(detailName, hasMlUserPermissions(capabilities))}
-                    display="default"
-                    showBorder={true}
-                  />
-                </StickyContainer>
+                <SiemNavigation
+                  navTabs={navTabsHostDetails(detailName, hasMlUserPermissions(capabilities))}
+                  display="default"
+                  showBorder={true}
+                />
+
+                <EuiSpacer />
 
                 <HostDetailsTabs
                   isInitializing={isInitializing}
@@ -201,7 +198,7 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
                   indexPattern={indexPattern}
                   setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
                 />
-              </>
+              </StickyContainer>
             ) : (
               <>
                 <HeaderPage border title={detailName} />

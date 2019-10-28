@@ -63,50 +63,50 @@ const HostsComponent = React.memo<HostsComponentProps>(
               filters,
             });
             return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
-              <>
-                <StickyContainer>
-                  <FiltersGlobal>
-                    <SiemSearchBar indexPattern={indexPattern} id="global" />
-                  </FiltersGlobal>
+              <StickyContainer>
+                <FiltersGlobal>
+                  <SiemSearchBar indexPattern={indexPattern} id="global" />
+                </FiltersGlobal>
 
-                  <HeaderPage
-                    border
-                    subtitle={<LastEventTime indexKey={LastEventIndexKey.hosts} />}
-                    title={i18n.PAGE_TITLE}
-                  />
+                <HeaderPage
+                  border
+                  subtitle={<LastEventTime indexKey={LastEventIndexKey.hosts} />}
+                  title={i18n.PAGE_TITLE}
+                />
 
-                  <KpiHostsQuery
-                    endDate={to}
-                    filterQuery={filterQuery}
-                    skip={isInitializing}
-                    sourceId="default"
-                    startDate={from}
-                  >
-                    {({ kpiHosts, loading, id, inspect, refetch }) => (
-                      <KpiHostsComponentManage
-                        data={kpiHosts}
-                        from={from}
-                        id={id}
-                        inspect={inspect}
-                        loading={loading}
-                        refetch={refetch}
-                        setQuery={setQuery}
-                        to={to}
-                        narrowDateRange={(min: number, max: number) => {
-                          setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
-                        }}
-                      />
-                    )}
-                  </KpiHostsQuery>
+                <KpiHostsQuery
+                  endDate={to}
+                  filterQuery={filterQuery}
+                  skip={isInitializing}
+                  sourceId="default"
+                  startDate={from}
+                >
+                  {({ kpiHosts, loading, id, inspect, refetch }) => (
+                    <KpiHostsComponentManage
+                      data={kpiHosts}
+                      from={from}
+                      id={id}
+                      inspect={inspect}
+                      loading={loading}
+                      refetch={refetch}
+                      setQuery={setQuery}
+                      to={to}
+                      narrowDateRange={(min: number, max: number) => {
+                        setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
+                      }}
+                    />
+                  )}
+                </KpiHostsQuery>
 
-                  <EuiSpacer />
+                <EuiSpacer />
 
-                  <SiemNavigation
-                    navTabs={navTabsHosts(hasMlUserPermissions(capabilities))}
-                    display="default"
-                    showBorder={true}
-                  />
-                </StickyContainer>
+                <SiemNavigation
+                  navTabs={navTabsHosts(hasMlUserPermissions(capabilities))}
+                  display="default"
+                  showBorder={true}
+                />
+
+                <EuiSpacer />
 
                 <HostsTabs
                   deleteQuery={deleteQuery}
@@ -120,10 +120,11 @@ const HostsComponent = React.memo<HostsComponentProps>(
                   setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
                   hostsPagePath={hostsPagePath}
                 />
-              </>
+              </StickyContainer>
             ) : (
               <>
                 <HeaderPage border title={i18n.PAGE_TITLE} />
+
                 <HostsEmptyPage />
               </>
             );
