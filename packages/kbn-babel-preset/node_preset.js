@@ -18,24 +18,23 @@
  */
 
 module.exports = (_, options = {}) => {
-  const plugins = [
-    [
-      require.resolve('babel-plugin-transform-define'),
+  const overrides = [];
+  if (!process.env.ALLOW_PERFORMANCE_HOOKS_IN_TASK_MANAGER) {
+    overrides.push(
       {
-        'global.__BUILT_WITH_BABEL__': 'true',
-      },
-    ],
-  ];
-
-  if (!process.env.ALLOW_PERFORMANCE_HOOKS) {
-    plugins.push([
-      'filter-imports',
-      {
-        imports: {
-          perf_hooks: ['performance'],
-        },
-      },
-    ]);
+        test: [/x-pack[\/\\]legacy[\/\\]plugins[\/\\]task_manager/],
+        plugins: [
+          [
+            'filter-imports',
+            {
+              imports: {
+                perf_hooks: ['performance'],
+              },
+            },
+          ],
+        ],
+      }
+    );
   }
 
   return {
@@ -64,6 +63,14 @@ module.exports = (_, options = {}) => {
       ],
       require('./common_preset'),
     ],
-    plugins,
+    plugins: [
+      [
+        require.resolve('babel-plugin-transform-define'),
+        {
+          'global.__BUILT_WITH_BABEL__': 'true',
+        },
+      ],
+    ],
+    overrides,
   };
 };
