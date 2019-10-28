@@ -102,6 +102,11 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
         targetId: null,
         items: [],
       };
+    } else if (hasItems && nextItems.length > prevState.items.length) {
+      return {
+        ...prevState,
+        items: nextItems,
+      };
     }
 
     return null;
@@ -180,6 +185,7 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
                         hideScrollbar={true}
                         data-test-subj={'logStream'}
                         isLocked={scrollLock.isEnabled}
+                        entriesCount={items.length}
                       >
                         {registerChild => (
                           <>
