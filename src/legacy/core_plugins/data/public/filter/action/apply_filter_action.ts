@@ -25,8 +25,12 @@ import {
   createAction,
   IncompatibleActionError,
 } from '../../../../../../plugins/ui_actions/public';
-import { FilterManager } from '../../../../../../plugins/data/public';
-import { TimefilterContract, changeTimeFilter, extractTimeFilter } from '../../timefilter';
+import {
+  FilterManager,
+  TimefilterContract,
+  changeTimeFilter,
+  extractTimeFilter,
+} from '../../../../../../plugins/data/public';
 import { applyFiltersPopover } from '../apply_filters/apply_filters_popover';
 import { IndexPatternsStart } from '../../index_patterns';
 export const GLOBAL_APPLY_FILTER_ACTION = 'GLOBAL_APPLY_FILTER_ACTION';

@@ -41,6 +41,10 @@ export const npSetup = {
     data: {
       query: {
         filterManager: sinon.fake(),
+        timefilter: {
+          timefilter: sinon.fake(),
+          history: sinon.fake(),
+        }
       },
     },
     inspector: {

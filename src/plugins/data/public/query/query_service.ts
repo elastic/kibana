@@ -18,7 +18,9 @@
  */
 
 import { UiSettingsClientContract } from 'src/core/public';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { FilterManager } from './filter_manager';
+import { TimefilterService, TimefilterSetup } from './timefilter';
 
 /**
  * Query Service
@@ -26,23 +28,33 @@ import { FilterManager } from './filter_manager';
  */
 
 export interface QueryServiceDependencies {
+  storage: IStorageWrapper;
   uiSettings: UiSettingsClientContract;
 }
 
 export class QueryService {
   filterManager!: FilterManager;
+  timefilter!: TimefilterSetup;
 
-  public setup({ uiSettings }: QueryServiceDependencies) {
+  public setup({ uiSettings, storage }: QueryServiceDependencies) {
     this.filterManager = new FilterManager(uiSettings);
+
+    const timefilterService = new TimefilterService();
+    this.timefilter = timefilterService.setup({
+      uiSettings,
+      storage,
+    });
 
     return {
       filterManager: this.filterManager,
+      timefilter: this.timefilter,
     };
   }
 
   public start() {
     return {
       filterManager: this.filterManager,
+      timefilter: this.timefilter,
     };
   }
 

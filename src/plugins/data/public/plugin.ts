@@ -18,6 +18,7 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
+import { Storage } from '../../kibana_utils/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from './types';
 import { AutocompleteProviderRegister } from './autocomplete_provider';
 import { getSuggestionsProvider } from './suggestions_provider';
@@ -35,11 +36,13 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
   }
 
   public setup(core: CoreSetup): DataPublicPluginSetup {
+    const storage = new Storage(window.localStorage);
     return {
       autocomplete: this.autocomplete,
       search: this.searchService.setup(core),
       query: this.queryService.setup({
         uiSettings: core.uiSettings,
+        storage,
       }),
     };
   }

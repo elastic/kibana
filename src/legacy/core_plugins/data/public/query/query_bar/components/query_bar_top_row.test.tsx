@@ -29,12 +29,11 @@ import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 import { I18nProvider } from '@kbn/i18n/react';
 const startMock = coreMock.createStart();
 
-import { timefilterServiceMock } from '../../../timefilter/timefilter_service.mock';
-const timefilterSetupMock = timefilterServiceMock.createSetupContract();
-
-timefilterSetupMock.history.get.mockImplementation(() => {
-  return [];
-});
+const mockTimeHistory = {
+  get: () => {
+    return [];
+  },
+};
 
 startMock.uiSettings.get.mockImplementation((key: string) => {
   switch (key) {
@@ -140,7 +139,7 @@ describe('QueryBarTopRowTopRow', () => {
         screenTitle: 'Another Screen',
         isDirty: false,
         indexPatterns: [mockIndexPattern],
-        timeHistory: timefilterSetupMock.history,
+        timeHistory: mockTimeHistory,
       })
     );
 
@@ -154,7 +153,7 @@ describe('QueryBarTopRowTopRow', () => {
         query: kqlQuery,
         screenTitle: 'Another Screen',
         indexPatterns: [mockIndexPattern],
-        timeHistory: timefilterSetupMock.history,
+        timeHistory: mockTimeHistory,
         disableAutoFocus: true,
         isDirty: false,
       })
@@ -167,7 +166,7 @@ describe('QueryBarTopRowTopRow', () => {
     const component = mount(
       wrapQueryBarTopRowInContext({
         isDirty: false,
-        timeHistory: timefilterSetupMock.history,
+        timeHistory: mockTimeHistory,
       })
     );
 
@@ -179,7 +178,7 @@ describe('QueryBarTopRowTopRow', () => {
     const component = mount(
       wrapQueryBarTopRowInContext({
         showDatePicker: false,
-        timeHistory: timefilterSetupMock.history,
+        timeHistory: mockTimeHistory,
         isDirty: false,
       })
     );
@@ -196,7 +195,7 @@ describe('QueryBarTopRowTopRow', () => {
         showDatePicker: true,
         dateRangeFrom: 'now-7d',
         dateRangeTo: 'now',
-        timeHistory: timefilterSetupMock.history,
+        timeHistory: mockTimeHistory,
       })
     );
 
@@ -212,7 +211,7 @@ describe('QueryBarTopRowTopRow', () => {
         showDatePicker: true,
         dateRangeFrom: 'now-7d',
         dateRangeTo: 'now',
-        timeHistory: timefilterSetupMock.history,
+        timeHistory: mockTimeHistory,
       })
     );
 
@@ -232,7 +231,7 @@ describe('QueryBarTopRowTopRow', () => {
         showDatePicker: false,
         dateRangeFrom: 'now-7d',
         dateRangeTo: 'now',
-        timeHistory: timefilterSetupMock.history,
+        timeHistory: mockTimeHistory,
       })
     );
 
@@ -249,7 +248,7 @@ describe('QueryBarTopRowTopRow', () => {
         indexPatterns: [mockIndexPattern],
         showQueryInput: false,
         showDatePicker: false,
-        timeHistory: timefilterSetupMock.history,
+        timeHistory: mockTimeHistory,
       })
     );
 
@@ -263,7 +262,7 @@ describe('QueryBarTopRowTopRow', () => {
         isDirty: false,
         screenTitle: 'Another Screen',
         showDatePicker: false,
-        timeHistory: timefilterSetupMock.history,
+        timeHistory: mockTimeHistory,
       })
     );
 

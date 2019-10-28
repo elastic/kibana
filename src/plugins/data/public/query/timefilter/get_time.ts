@@ -19,7 +19,9 @@
 
 import dateMath from '@elastic/datemath';
 import { TimeRange } from 'src/plugins/data/public';
-import { IndexPattern, Field } from '../index_patterns';
+
+// TODO: remove this
+import { IndexPattern, Field } from '../../../../../legacy/core_plugins/data/public/index_patterns';
 
 interface CalculateBoundsOptions {
   forceNow?: Date;

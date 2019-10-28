@@ -18,20 +18,20 @@
  */
 
 import uiRoutes from 'ui/routes';
-import { TimefilterContract, TimeHistoryContract } from '../../../core_plugins/data/public';
+import { npStart } from 'ui/new_platform';
+import { TimefilterContract, TimeHistoryContract } from '../../../../plugins/data/public';
 import { registerTimefilterWithGlobalState } from './setup_router';
-import { start as data } from '../../../core_plugins/data/public/legacy';
 
 export {
   getTime,
   InputTimeRange,
   TimeHistoryContract,
   TimefilterContract,
-} from '../../../core_plugins/data/public';
+} from '../../../../plugins/data/public';
 export type Timefilter = TimefilterContract;
 export type TimeHistory = TimeHistoryContract;
-export const timeHistory = data.timefilter.history;
-export const timefilter = data.timefilter.timefilter;
+export const timeHistory = npStart.plugins.data.query.timefilter.history;
+export const timefilter = npStart.plugins.data.query.timefilter.timefilter;
 
 uiRoutes.addSetupWork((globalState, $rootScope) => {
   return registerTimefilterWithGlobalState(timefilter, globalState, $rootScope);

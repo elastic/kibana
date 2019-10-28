@@ -19,7 +19,7 @@
 
 import { UiSettingsClientContract } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { PersistedLog } from '../../persisted_log';
+import { PersistedLog } from '../../../../../../../plugins/data/public';
 
 export function getQueryLog(
   uiSettings: UiSettingsClientContract,
