@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { compact, isObject, isEmpty } from 'lodash';
+import { compact, isObject } from 'lodash';
 
 export interface KeyValuePair {
   key: string;
@@ -12,23 +12,24 @@ export interface KeyValuePair {
 }
 
 export const flattenObject = (
-  item: Record<string, any>,
+  item: Record<string, any | any[]> | null | undefined,
   parentKey?: string
 ): KeyValuePair[] => {
-  if (isEmpty(item)) {
-    return [];
+  if (item) {
+    const isArrayWithSingleValue = Array.isArray(item) && item.length === 1;
+    return Object.keys(item)
+      .sort()
+      .reduce((acc: KeyValuePair[], key) => {
+        const childKey = isArrayWithSingleValue ? '' : key;
+        const currentKey = compact([parentKey, childKey]).join('.');
+        // item[key] can be a primitive (string, number, boolean, null, undefined) or Object or Array
+        if (isObject(item[key])) {
+          return acc.concat(flattenObject(item[key], currentKey));
+        } else {
+          acc.push({ key: currentKey, value: item[key] });
+          return acc;
+        }
+      }, []);
   }
-  const isArrayWithSingleValue = Array.isArray(item) && item.length === 1;
-  return Object.keys(item)
-    .sort()
-    .reduce((acc: KeyValuePair[], key) => {
-      const childKey = isArrayWithSingleValue ? '' : key;
-      const currentKey = compact([parentKey, childKey]).join('.');
-      if (isObject(item[key])) {
-        return acc.concat(flattenObject(item[key], currentKey));
-      } else {
-        acc.push({ key: currentKey, value: item[key] });
-        return acc;
-      }
-    }, []);
+  return [];
 };

@@ -35,9 +35,7 @@ describe('FlattenObject', () => {
   });
   it('returns an empty array if no valid object is provided', () => {
     expect(flattenObject({})).toEqual([]);
-    // @ts-ignore
     expect(flattenObject(null)).toEqual([]);
-    // @ts-ignore
     expect(flattenObject(undefined)).toEqual([]);
   });
 });
