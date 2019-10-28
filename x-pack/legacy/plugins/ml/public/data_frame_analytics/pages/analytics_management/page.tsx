@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, Fragment, useEffect, useState } from 'react';
+import React, { FC, Fragment, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -30,7 +30,6 @@ import { RefreshAnalyticsListButton } from './components/refresh_analytics_list_
 import { useRefreshInterval } from './components/analytics_list/use_refresh_interval';
 import { useCreateAnalyticsForm } from './hooks/use_create_analytics_form';
 import { AnalyticStatsBarStats, StatsBar } from '../../../components/stats_bar';
-import { getAnalyticsJobsStats } from './resolvers';
 
 export const Page: FC = () => {
   const [blockRefresh, setBlockRefresh] = useState(false);
@@ -39,14 +38,6 @@ export const Page: FC = () => {
   );
 
   useRefreshInterval(setBlockRefresh);
-
-  const setAnalyticsJobsStats = async () => {
-    setStats(await getAnalyticsJobsStats());
-  };
-
-  useEffect(() => {
-    setAnalyticsJobsStats();
-  }, []);
 
   const createAnalyticsForm = useCreateAnalyticsForm();
 
@@ -105,6 +96,9 @@ export const Page: FC = () => {
               <DataFrameAnalyticsList
                 blockRefresh={blockRefresh}
                 openCreateJobModal={createAnalyticsForm.actions.openModal}
+                onJobStatsChange={analyticsStats => {
+                  setStats(analyticsStats);
+                }}
               />
             </EuiPanel>
           </EuiPageContentBody>

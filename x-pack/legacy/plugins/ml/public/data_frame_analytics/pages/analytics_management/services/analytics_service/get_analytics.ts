@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import {
   GetDataFrameAnalyticsStatsResponse,
   GetDataFrameAnalyticsStatsResponseError,
@@ -19,8 +20,12 @@ import {
 import {
   DATA_FRAME_MODE,
   DataFrameAnalyticsListRow,
+  isDataFrameAnalyticsFailed,
+  isDataFrameAnalyticsRunning,
   isDataFrameAnalyticsStats,
+  isDataFrameAnalyticsStopped,
 } from '../../components/analytics_list/common';
+import { AnalyticStatsBarStats } from '../../../../../components/stats_bar';
 
 interface GetDataFrameAnalyticsResponse {
   count: number;
@@ -39,8 +44,68 @@ export const isGetDataFrameAnalyticsStatsResponseOk = (
 
 export type GetAnalytics = (forceRefresh?: boolean) => void;
 
+/**
+ * Gets initial object for analytics stats.
+ */
+export function getInitialAnalyticsStats(): AnalyticStatsBarStats {
+  return {
+    total: {
+      label: i18n.translate('xpack.ml.overview.statsBar.totalAnalyticsLabel', {
+        defaultMessage: 'Total analytics jobs',
+      }),
+      value: 0,
+      show: true,
+    },
+    started: {
+      label: i18n.translate('xpack.ml.overview.statsBar.runningAnalyticsLabel', {
+        defaultMessage: 'Running',
+      }),
+      value: 0,
+      show: true,
+    },
+    stopped: {
+      label: i18n.translate('xpack.ml.overview.statsBar.stoppedAnalyticsLabel', {
+        defaultMessage: 'Stopped',
+      }),
+      value: 0,
+      show: true,
+    },
+    failed: {
+      label: i18n.translate('xpack.ml.overview.statsBar.failedAnalyticsLabel', {
+        defaultMessage: 'Failed',
+      }),
+      value: 0,
+      show: false,
+    },
+  };
+}
+
+/**
+ * Gets analytics jobs stats formatted for the stats bar.
+ */
+export function getAnalyticsJobsStats(
+  analyticsStats: GetDataFrameAnalyticsStatsResponseOk
+): AnalyticStatsBarStats | undefined {
+  const resultStats: AnalyticStatsBarStats = analyticsStats.data_frame_analytics.reduce(
+    (acc, { state }) => {
+      if (isDataFrameAnalyticsFailed(state)) {
+        acc.failed.value = ++acc.failed.value;
+      } else if (isDataFrameAnalyticsRunning(state)) {
+        acc.started.value = ++acc.started.value;
+      } else if (isDataFrameAnalyticsStopped(state)) {
+        acc.stopped.value = ++acc.stopped.value;
+      }
+      return acc;
+    },
+    getInitialAnalyticsStats()
+  );
+  resultStats.total.value = analyticsStats.count;
+  return resultStats;
+}
+
 export const getAnalyticsFactory = (
   setAnalytics: React.Dispatch<React.SetStateAction<DataFrameAnalyticsListRow[]>>,
+  setAnalyticsStats: React.Dispatch<React.SetStateAction<AnalyticStatsBarStats | undefined>>,
   setErrorMessage: React.Dispatch<
     React.SetStateAction<GetDataFrameAnalyticsStatsResponseError | undefined>
   >,
@@ -61,6 +126,10 @@ export const getAnalyticsFactory = (
       try {
         const analyticsConfigs: GetDataFrameAnalyticsResponse = await ml.dataFrameAnalytics.getDataFrameAnalytics();
         const analyticsStats: GetDataFrameAnalyticsStatsResponse = await ml.dataFrameAnalytics.getDataFrameAnalyticsStats();
+
+        const analyticsStatsResult = isGetDataFrameAnalyticsStatsResponseOk(analyticsStats)
+          ? getAnalyticsJobsStats(analyticsStats)
+          : undefined;
 
         const tableRows = analyticsConfigs.data_frame_analytics.reduce(
           (reducedtableRows, config) => {
@@ -88,6 +157,7 @@ export const getAnalyticsFactory = (
         );
 
         setAnalytics(tableRows);
+        setAnalyticsStats(analyticsStatsResult);
         setErrorMessage(undefined);
         setIsInitialized(true);
         refreshAnalyticsList$.next(REFRESH_ANALYTICS_LIST_STATE.IDLE);
@@ -97,6 +167,7 @@ export const getAnalyticsFactory = (
         refreshAnalyticsList$.next(REFRESH_ANALYTICS_LIST_STATE.ERROR);
         refreshAnalyticsList$.next(REFRESH_ANALYTICS_LIST_STATE.IDLE);
         setAnalytics([]);
+        setAnalyticsStats(undefined);
         setErrorMessage(e);
         setIsInitialized(true);
       }

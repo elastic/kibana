@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FC, useState } from 'react';
+import React, { Fragment, FC, useState, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -33,6 +33,7 @@ import {
   SortDirection,
   SORT_DIRECTION,
 } from '../../../../../components/ml_in_memory_table';
+import { AnalyticStatsBarStats } from '../../../../../components/stats_bar';
 
 function getItemIdToExpandedRowMap(
   itemIds: DataFrameAnalyticsId[],
@@ -63,6 +64,7 @@ interface Props {
   isMlEnabledInSpace?: boolean;
   blockRefresh?: boolean;
   openCreateJobModal?: ActionDispatchers['openModal'];
+  onJobStatsChange?: (stats: AnalyticStatsBarStats | undefined) => void;
 }
 // isManagementTable - for use in Kibana managagement ML section
 export const DataFrameAnalyticsList: FC<Props> = ({
@@ -70,12 +72,16 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   isMlEnabledInSpace = true,
   blockRefresh = false,
   openCreateJobModal,
+  onJobStatsChange,
 }) => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [filterActive, setFilterActive] = useState(false);
 
   const [analytics, setAnalytics] = useState<DataFrameAnalyticsListRow[]>([]);
+  const [analyticsStats, setAnalyticsStats] = useState<AnalyticStatsBarStats | undefined>(
+    undefined
+  );
   const [filteredAnalytics, setFilteredAnalytics] = useState<DataFrameAnalyticsListRow[]>([]);
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<DataFrameAnalyticsId[]>([]);
 
@@ -94,10 +100,18 @@ export const DataFrameAnalyticsList: FC<Props> = ({
 
   const getAnalytics = getAnalyticsFactory(
     setAnalytics,
+    setAnalyticsStats,
     setErrorMessage,
     setIsInitialized,
     blockRefresh
   );
+
+  useEffect(() => {
+    if (onJobStatsChange) {
+      onJobStatsChange(analyticsStats);
+    }
+  }, [analyticsStats]);
+
   // Subscribe to the refresh observable to trigger reloading the analytics list.
   useRefreshAnalyticsList({
     isLoading: setIsLoading,
