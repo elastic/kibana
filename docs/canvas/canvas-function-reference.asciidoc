@@ -1355,7 +1355,7 @@ Formats a `number` into a formatted `string` using NumeralJS. See http://numeral
 [source,js]
 ----
 formatnumber format=”$0,0.00”
-fortmatnumber “0.0a”
+formatnumber “0.0a”
 ----
 
 *Code example*
