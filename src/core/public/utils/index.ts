@@ -19,3 +19,4 @@
 
 export { shareWeakReplay } from './share_weak_replay';
 export { Sha256 } from './crypto';
+export { MountPoint, MountWrapper, UnmountCallback, mountReact } from './mount_point';
