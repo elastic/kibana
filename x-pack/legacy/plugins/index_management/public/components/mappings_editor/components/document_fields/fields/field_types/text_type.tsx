@@ -12,6 +12,7 @@ import {
   EuiRange,
   EuiDualRange,
   EuiFormRow,
+  EuiCallOut,
 } from '@elastic/eui';
 
 import { NormalizedField, Field as FieldType } from '../../../../types';
@@ -36,7 +37,7 @@ const getDefaultValueToggle = (toggleId: string, field: FieldType) => {
     case 'indexPrefixes': {
       return (
         field.index_prefixes !== undefined &&
-        (field.index_prefixes.min_chars !==
+        ((field.index_prefixes as any).min_chars !==
           getFieldConfig('index_prefixes', 'min_chars').defaultValue ||
           (field.index_prefixes as any).max_chars !==
             getFieldConfig('index_prefixes', 'max_chars').defaultValue)
@@ -257,6 +258,18 @@ export const TextType = React.memo(({ field }: Props) => {
                 )}
               </UseMultiFields>
             </EuiFormRow>
+          </EditFieldFormRow>
+
+          {/* norms */}
+          <EditFieldFormRow
+            title={<h3>Use norms</h3>}
+            description="This is description text."
+            formFieldPath="norms"
+            direction="column"
+          >
+            <EuiCallOut color="warning">
+              <p>Enabling norms requires a lot of disk use.</p>
+            </EuiCallOut>
           </EditFieldFormRow>
         </EditFieldSection>
       </AdvancedSettingsWrapper>
