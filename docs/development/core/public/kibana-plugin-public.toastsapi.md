@@ -28,5 +28,5 @@ export declare class ToastsApi implements IToasts
 |  [addSuccess(toastOrTitle)](./kibana-plugin-public.toastsapi.addsuccess.md) |  | Adds a new toast pre-configured with the success color and check icon. |
 |  [addWarning(toastOrTitle)](./kibana-plugin-public.toastsapi.addwarning.md) |  | Adds a new toast pre-configured with the warning color and help icon. |
 |  [get$()](./kibana-plugin-public.toastsapi.get_.md) |  | Observable of the toast messages to show to the user. |
-|  [remove(toast)](./kibana-plugin-public.toastsapi.remove.md) |  | Removes a toast from the current array of toasts if present. |
+|  [remove(toastOrId)](./kibana-plugin-public.toastsapi.remove.md) |  | Removes a toast from the current array of toasts if present. |
 
