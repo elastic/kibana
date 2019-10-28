@@ -7,7 +7,6 @@
 import _ from 'lodash';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { getColorRampStops } from '../color_utils';
 import { VectorStyleEditor } from './components/vector/vector_style_editor';
 import { getDefaultProperties, vectorStyles } from './vector_style_defaults';
 import { AbstractStyle } from '../abstract_style';
@@ -356,7 +355,7 @@ export class VectorStyle extends AbstractStyle {
           isScaled,
           name,
           range: this._getFieldRange(name),
-          computedName: VectorStyle.getComputedFieldName(styleName, name),
+          computedName: getComputedFieldName(styleName, name),
         };
       });
   }
@@ -432,62 +431,6 @@ export class VectorStyle extends AbstractStyle {
     return hasGeoJsonProperties;
   }
 
-  _getMBDataDrivenColor({ targetName, colorStops, isSteps }) {
-    if (isSteps) {
-      const firstStopValue = colorStops[0];
-      const lessThenFirstStopValue = firstStopValue - 1;
-      return [
-        'step',
-        ['coalesce', ['feature-state', targetName], lessThenFirstStopValue],
-        'rgba(0,0,0,0)', // MB will assign the base value to any features that is below the first stop value
-        ...colorStops
-      ];
-    }
-
-    return [
-      'interpolate',
-      ['linear'],
-      ['coalesce', ['feature-state', targetName], -1],
-      -1, 'rgba(0,0,0,0)',
-      ...colorStops
-    ];
-  }
-
-  _getMBColor(styleName, styleDescriptor) {
-    const isStatic = styleDescriptor.type === StaticStyleProperty.type;
-    if (isStatic) {
-      return _.get(styleDescriptor, 'options.color', null);
-    }
-
-    const isDynamicConfigComplete = _.has(styleDescriptor, 'options.field.name')
-      && _.has(styleDescriptor, 'options.color');
-    if (!isDynamicConfigComplete) {
-      return null;
-    }
-
-    if (styleDescriptor.options.useCustomColorRamp &&
-      (!styleDescriptor.options.customColorRamp ||
-      !styleDescriptor.options.customColorRamp.length)) {
-      return null;
-    }
-
-    return this._getMBDataDrivenColor({
-      targetName: VectorStyle.getComputedFieldName(styleName, styleDescriptor.options.field.name),
-      colorStops: this._getMBColorStops(styleDescriptor),
-      isSteps: styleDescriptor.options.useCustomColorRamp,
-    });
-  }
-
-  _getMBColorStops(styleDescriptor) {
-    if (styleDescriptor.options.useCustomColorRamp) {
-      return styleDescriptor.options.customColorRamp.reduce((accumulatedStops, nextStop) => {
-        return [...accumulatedStops, nextStop.stop, nextStop.color];
-      }, []);
-    }
-
-    return getColorRampStops(styleDescriptor.options.color);
-  }
-
   setMBPaintProperties({ alpha, mbMap, fillLayerId, lineLayerId }) {
     this._fillColorStyleProperty.syncFillColorWithMb(fillLayerId, mbMap, alpha);
     this._lineColorStyleProperty.syncLineColorWithMb(lineLayerId, mbMap, alpha);
@@ -519,7 +462,7 @@ export class VectorStyle extends AbstractStyle {
     if (iconOrientation.type === DynamicStyleProperty.type) {
       mbMap.setLayoutProperty(symbolLayerId, 'icon-rotate', iconOrientation.options.orientation);
     } else if (_.has(iconOrientation, 'options.field.name')) {
-      const targetName = VectorStyle.getComputedFieldName(vectorStyles.ICON_ORIENTATION, iconOrientation.options.field.name);
+      const targetName = getComputedFieldName(vectorStyles.ICON_ORIENTATION, iconOrientation.options.field.name);
       // Using property state instead of feature-state because layout properties do not support feature-state
       mbMap.setLayoutProperty(symbolLayerId, 'icon-rotate', [
         'coalesce', ['get', targetName], 0
