@@ -20,11 +20,11 @@
 import 'ngreact';
 import { wrapInI18nContext } from 'ui/i18n';
 import { uiModules } from 'ui/modules';
-import { TopNavMenu } from '../../../core_plugins/kibana_react/public';
+import { start as navigation } from '../../../core_plugins/navigation/public/legacy';
 
 const module = uiModules.get('kibana');
 
-export const createTopNavDirective = () => {
+export function createTopNavDirective() {
   return {
     restrict: 'E',
     template: '',
@@ -71,11 +71,11 @@ export const createTopNavDirective = () => {
       return linkFn;
     }
   };
-};
+}
 
 module.directive('kbnTopNav', createTopNavDirective);
 
-export const createTopNavHelper = (reactDirective) => {
+export const createTopNavHelper = ({ TopNavMenu }) => (reactDirective) => {
   return reactDirective(
     wrapInI18nContext(TopNavMenu),
     [
@@ -117,4 +117,4 @@ export const createTopNavHelper = (reactDirective) => {
   );
 };
 
-module.directive('kbnTopNavHelper', createTopNavHelper);
+module.directive('kbnTopNavHelper', createTopNavHelper(navigation.ui));

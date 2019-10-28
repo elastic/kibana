@@ -18,63 +18,67 @@
  */
 
 import _ from 'lodash';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import angular from 'angular';
 import { Subscription } from 'rxjs';
 import moment from 'moment';
-import chrome from 'ui/chrome';
 import dateMath from '@elastic/datemath';
+import { i18n } from '@kbn/i18n';
+import '../saved_searches/saved_searches';
+import '../components/field_chooser/field_chooser';
 
 // doc table
-import '../doc_table';
-import { getSort } from '../doc_table/lib/get_sort';
-import { getSortForSearchSource } from '../doc_table/lib/get_sort_for_search_source';
-import * as columnActions from '../doc_table/actions/columns';
-import * as filterActions from '../doc_table/actions/filter';
+import './doc_table';
+import { getSort } from './doc_table/lib/get_sort';
+import { getSortForSearchSource } from './doc_table/lib/get_sort_for_search_source';
+import * as columnActions from './doc_table/actions/columns';
+import * as filterActions from './doc_table/actions/filter';
 
-import 'ui/directives/listen';
-import 'ui/visualize';
-import 'ui/fixed_scroll';
-import 'ui/index_patterns';
-import 'ui/state_management/app_state';
-import { timefilter } from 'ui/timefilter';
-import { hasSearchStategyForIndexPattern, isDefaultTypeIndexPattern } from 'ui/courier';
-import { toastNotifications } from 'ui/notify';
-import { VisProvider } from 'ui/vis';
-import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
-import { vislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
-import { docTitle } from 'ui/doc_title';
-import { intervalOptions } from 'ui/agg_types/buckets/_interval_options';
-import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
-import uiRoutes from 'ui/routes';
-import { uiModules } from 'ui/modules';
-import indexTemplate from '../index.html';
-import { StateProvider } from 'ui/state_management/state';
-import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
-import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
-import { getFilterGenerator } from 'ui/filter_manager';
-import { ensureDefaultIndexPattern } from 'ui/legacy_compat';
-
-import { getDocLink } from 'ui/documentation_links';
+import indexTemplate from './discover.html';
+import { showOpenSearchPanel } from '../top_nav/show_open_search_panel';
+import { addHelpMenuToAppChrome } from '../components/help_menu/help_menu_util';
 import '../components/fetch_error';
 import { getPainlessError } from './get_painless_error';
-import { showShareContextMenu, ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
-import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
-import { Inspector } from 'ui/inspector';
-import { RequestAdapter } from 'ui/inspector/adapters';
-import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
-import { showOpenSearchPanel } from '../top_nav/show_open_search_panel';
-import { tabifyAggResponse } from 'ui/agg_response/tabify';
-import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
-import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
-import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../breadcrumbs';
-import { buildVislibDimensions } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
-import { addHelpMenuToAppChrome } from '../components/help_menu/help_menu_util';
+import {
+  angular,
+  buildVislibDimensions,
+  getFilterGenerator,
+  getRequestInspectorStats,
+  getResponseInspectorStats,
+  getServices,
+  getUnhashableStatesProvider,
+  hasSearchStategyForIndexPattern,
+  intervalOptions,
+  isDefaultTypeIndexPattern,
+  migrateLegacyQuery,
+  RequestAdapter,
+  showSaveModal,
+  showShareContextMenu,
+  stateMonitorFactory,
+  subscribeWithScope,
+  tabifyAggResponse,
+  vislibSeriesResponseHandlerProvider,
+  VisProvider,
+  SavedObjectSaveModal,
+  ensureDefaultIndexPattern,
+} from '../kibana_services';
 
+const {
+  core,
+  chrome,
+  docTitle,
+  FilterBarQueryFilterProvider,
+  ShareContextMenuExtensionsRegistryProvider,
+  StateProvider,
+  timefilter,
+  toastNotifications,
+  uiModules,
+  uiRoutes,
+}  = getServices();
+
+import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../breadcrumbs';
 import { extractTimeFilter, changeTimeFilter } from '../../../../data/public';
 import { start as data } from '../../../../data/public/legacy';
-import { npStart } from 'ui/new_platform';
+
 
 const { savedQueryService } = data.search.services;
 
@@ -122,7 +126,7 @@ uiRoutes
         const State = Private(StateProvider);
         const savedSearchId = $route.current.params.id;
 
-        return ensureDefaultIndexPattern(npStart.core, data, $rootScope, kbnUrl).then(() => {
+        return ensureDefaultIndexPattern(core, data, $rootScope, kbnUrl).then(() => {
           return Promise.props({
             ip: indexPatterns.getCache().then((savedObjects) => {
               /**
@@ -151,7 +155,7 @@ uiRoutes
             savedSearch: savedSearches.get(savedSearchId)
               .then((savedSearch) => {
                 if (savedSearchId) {
-                  npStart.core.chrome.recentlyAccessed.add(
+                  chrome.recentlyAccessed.add(
                     savedSearch.getFullPath(),
                     savedSearch.title,
                     savedSearchId);
@@ -213,8 +217,6 @@ function discoverController(
       mode: 'absolute',
     });
   };
-
-  $scope.getDocLink = getDocLink;
   $scope.intervalOptions = intervalOptions;
   $scope.showInterval = false;
   $scope.minimumVisibleRows = 50;
@@ -356,7 +358,7 @@ function discoverController(
       }),
       testId: 'openInspectorButton',
       run() {
-        Inspector.open(inspectorAdapters, {
+        getServices().inspector.open(inspectorAdapters, {
           title: savedSearch.title
         });
       }
@@ -403,12 +405,12 @@ function discoverController(
   });
 
   if (savedSearch.id && savedSearch.title) {
-    chrome.breadcrumbs.set([{
+    chrome.setBreadcrumbs([{
       text: discoverBreadcrumbsTitle,
       href: '#/discover',
     }, { text: savedSearch.title }]);
   } else {
-    chrome.breadcrumbs.set([{
+    chrome.setBreadcrumbs([{
       text: discoverBreadcrumbsTitle,
     }]);
   }

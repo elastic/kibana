@@ -87,7 +87,7 @@ export interface RenderDeps {
 }
 
 export const renderApp = (element: HTMLElement, appBasePath: string, deps: RenderDeps) => {
-  const dashboardAngularModule = createLocalAngularModule(deps.core);
+  const dashboardAngularModule = createLocalAngularModule(deps.core, deps.dataStart);
   // global routing stuff
   configureAppAngularModule(dashboardAngularModule, deps.core as LegacyCoreStart);
   // custom routing stuff
@@ -120,7 +120,7 @@ function mountDashboardApp(appBasePath: string, element: HTMLElement) {
   return $injector;
 }
 
-function createLocalAngularModule(core: AppMountContext['core']) {
+function createLocalAngularModule(core: AppMountContext['core'], data: DataStart) {
   createLocalI18nModule();
   createLocalPrivateModule();
   createLocalPromiseModule();
@@ -128,7 +128,7 @@ function createLocalAngularModule(core: AppMountContext['core']) {
   createLocalKbnUrlModule();
   createLocalStateModule();
   createLocalPersistedStateModule();
-  createLocalTopNavModule();
+  createLocalTopNavModule(data);
   createLocalConfirmModalModule();
   createLocalFilterBarModule();
 
@@ -214,11 +214,11 @@ function createLocalPrivateModule() {
   angular.module('app/dashboard/Private', []).provider('Private', PrivateProvider);
 }
 
-function createLocalTopNavModule() {
+function createLocalTopNavModule(data: DataStart) {
   angular
     .module('app/dashboard/TopNav', ['react'])
     .directive('kbnTopNav', createTopNavDirective)
-    .directive('kbnTopNavHelper', createTopNavHelper);
+    .directive('kbnTopNavHelper', createTopNavHelper(data.ui));
 }
 
 function createLocalFilterBarModule() {

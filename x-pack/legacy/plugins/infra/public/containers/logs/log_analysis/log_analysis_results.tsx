@@ -14,11 +14,13 @@ export const useLogAnalysisResults = ({
   startTime,
   endTime,
   bucketDuration = 15 * 60 * 1000,
+  lastRequestTime,
 }: {
   sourceId: string;
   startTime: number;
   endTime: number;
   bucketDuration?: number;
+  lastRequestTime: number;
 }) => {
   const { isLoading: isLoadingLogEntryRate, logEntryRate, getLogEntryRate } = useLogEntryRate({
     sourceId,
@@ -31,7 +33,7 @@ export const useLogAnalysisResults = ({
 
   useEffect(() => {
     getLogEntryRate();
-  }, [sourceId, startTime, endTime, bucketDuration]);
+  }, [sourceId, startTime, endTime, bucketDuration, lastRequestTime]);
 
   return {
     isLoading,

@@ -46,6 +46,12 @@ import { isSystemApiRequest } from '../system_api';
 
 const URL_LIMIT_WARN_WITHIN = 1000;
 
+function isDummyWrapperRoute($route: any) {
+  return (
+    $route.current && $route.current.$$route && $route.current.$$route.outerAngularWrapperRoute
+  );
+}
+
 export const configureAppAngularModule = (angularModule: IModule, newPlatform: LegacyCoreStart) => {
   const legacyMetadata = newPlatform.injectedMetadata.getLegacyMetadata();
 
@@ -157,12 +163,6 @@ const capture$httpLoadingCount = (newPlatform: CoreStart) => (
     })
   );
 };
-
-function isDummyWrapperRoute($route: any) {
-  return (
-    $route.current && $route.current.$$route && $route.current.$$route.outerAngularWrapperRoute
-  );
-}
 
 /**
  * integrates with angular to automatically redirect to home if required
@@ -310,6 +310,9 @@ const $setupHelpExtensionAutoClear = (newPlatform: CoreStart) => (
   const $route = $injector.has('$route') ? $injector.get('$route') : {};
 
   $rootScope.$on('$routeChangeStart', () => {
+    if (isDummyWrapperRoute($route)) {
+      return;
+    }
     helpExtensionSetSinceRouteChange = false;
   });
 
@@ -330,8 +333,6 @@ const $setupHelpExtensionAutoClear = (newPlatform: CoreStart) => (
 const $setupUrlOverflowHandling = (newPlatform: CoreStart) => (
   $location: ILocationService,
   $rootScope: IRootScopeService,
-  Private: any,
-  config: any,
   $injector: any
 ) => {
   const $route = $injector.has('$route') ? $injector.get('$route') : {};
@@ -341,7 +342,7 @@ const $setupUrlOverflowHandling = (newPlatform: CoreStart) => (
       return;
     }
     // disable long url checks when storing state in session storage
-    if (config.get('state:storeInSessionStorage')) {
+    if (newPlatform.uiSettings.get('state:storeInSessionStorage')) {
       return;
     }
 

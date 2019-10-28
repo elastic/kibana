@@ -50,12 +50,12 @@ class EventsOverTimeComponentQuery extends QueryTemplate<
   public render() {
     const {
       children,
+      endDate,
       filterQuery,
       id = ID,
       isInspected,
       sourceId,
       startDate,
-      endDate,
     } = this.props;
     return (
       <Query<GetEventsOverTimeQuery.Query, GetEventsOverTimeQuery.Variables>
