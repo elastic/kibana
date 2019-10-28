@@ -67,7 +67,7 @@ export function* extractCodeMessages(buffer, reporter) {
   try {
     ast = parse(buffer.toString(), {
       sourceType: 'module',
-      plugins: ['jsx', 'typescript', 'objectRestSpread', 'classProperties', 'asyncGenerators'],
+      plugins: ['jsx', 'typescript', 'objectRestSpread', 'classProperties', 'asyncGenerators', 'dynamicImport'],
     });
   } catch (error) {
     if (error instanceof SyntaxError) {
