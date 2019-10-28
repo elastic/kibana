@@ -26,8 +26,9 @@ function sampleArgs() {
           },
           { id: 'b', name: 'b', formatHint: { id: 'number', params: { pattern: '000,0' } } },
           { id: 'c', name: 'c', formatHint: { id: 'string' } },
+          { id: 'd', name: 'ColD', formatHint: { id: 'string' } },
         ],
-        rows: [{ a: 1, b: 2, c: 'I' }, { a: 1, b: 5, c: 'J' }],
+        rows: [{ a: 1, b: 2, c: 'I', d: 'Foo' }, { a: 1, b: 5, c: 'J', d: 'Bar' }],
       },
     },
   };
@@ -407,7 +408,6 @@ describe('xy_expression', () => {
         />
       );
 
-      expect(getFormatSpy).toHaveBeenCalledTimes(2);
       expect(getFormatSpy).toHaveBeenCalledWith({ id: 'number' });
     });
 
