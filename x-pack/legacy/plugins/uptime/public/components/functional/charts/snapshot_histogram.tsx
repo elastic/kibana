@@ -20,13 +20,13 @@ import React, { useContext } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
 import styled from 'styled-components';
-import { HistogramDataPoint } from '../../../../common/graphql/types';
 import { getColorsMap } from './get_colors_map';
 import { getChartDateLabel } from '../../../lib/helper';
 import { withUptimeGraphQL, UptimeGraphQLQueryProps } from '../../higher_order';
 import { snapshotHistogramQuery } from '../../../queries/snapshot_histogram_query';
 import { ChartWrapper } from './chart_wrapper';
 import { UptimeSettingsContext } from '../../../contexts';
+import { HistogramResult } from '../../../../common/domain_types';
 
 const SnapshotHistogramWrapper = styled.div`
   margin-left: 120px;
@@ -56,7 +56,7 @@ export interface SnapshotHistogramProps {
 }
 
 interface SnapshotHistogramQueryResult {
-  histogram?: HistogramDataPoint[];
+  queryResult?: HistogramResult;
 }
 
 type Props = UptimeGraphQLQueryProps<SnapshotHistogramQueryResult> & SnapshotHistogramProps;
@@ -68,7 +68,7 @@ export const SnapshotHistogramComponent = ({
   loading = false,
   height,
 }: Props) => {
-  if (!data || !data.histogram)
+  if (!data || !data.queryResult)
     /**
      * TODO: the Fragment, EuiTitle, and EuiPanel should be extracted to a dumb component
      * that we can reuse in the subsequent return statement at the bottom of this function.
@@ -107,7 +107,9 @@ export const SnapshotHistogramComponent = ({
         </EuiPanel>
       </>
     );
-  const { histogram } = data;
+  const {
+    queryResult: { histogram, interval },
+  } = data;
 
   const {
     colors: { danger, gray },
@@ -145,7 +147,14 @@ export const SnapshotHistogramComponent = ({
         })}
       >
         <Chart>
-          <Settings xDomain={{ min: absoluteStartDate, max: absoluteEndDate }} showLegend={false} />
+          <Settings
+            xDomain={{
+              minInterval: interval,
+              min: absoluteStartDate,
+              max: absoluteEndDate,
+            }}
+            showLegend={false}
+          />
           <Axis
             id={getAxisId(
               i18n.translate('xpack.uptime.snapshotHistogram.xAxisId', {
