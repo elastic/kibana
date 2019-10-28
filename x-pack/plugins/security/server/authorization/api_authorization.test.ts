@@ -4,190 +4,152 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server } from 'hapi';
-import { AuthorizationService } from './service';
-
-import { actionsFactory } from './actions';
 import { initAPIAuthorization } from './api_authorization';
 
-const actions = actionsFactory({
-  get(key: string) {
-    if (key === 'pkg.version') {
-      return `1.0.0-zeta1`;
-    }
-
-    throw new Error(`Unexpected config key: ${key}`);
-  },
-});
+import {
+  coreMock,
+  httpServerMock,
+  httpServiceMock,
+  loggingServiceMock,
+} from '../../../../../src/core/server/mocks';
+import { authorizationMock } from './index.mock';
 
 describe('initAPIAuthorization', () => {
   test(`route that doesn't start with "/api/" continues`, async () => {
-    const server = new Server();
-    initAPIAuthorization(server, {} as AuthorizationService);
-    server.route([
-      {
-        method: 'GET',
-        path: '/app/foo',
-        handler: () => {
-          return 'foo app response';
-        },
-      },
-    ]);
-    const { result, statusCode } = await server.inject({
-      method: 'GET',
-      url: '/app/foo',
-    });
-    expect(result).toBe('foo app response');
-    expect(statusCode).toBe(200);
+    const mockHTTPSetup = coreMock.createSetup().http;
+    initAPIAuthorization(
+      mockHTTPSetup,
+      authorizationMock.create(),
+      loggingServiceMock.create().get()
+    );
+
+    const [[postAuthHandler]] = mockHTTPSetup.registerOnPostAuth.mock.calls;
+
+    const mockRequest = httpServerMock.createKibanaRequest({ method: 'get', path: '/app/foo' });
+    const mockResponse = httpServerMock.createResponseFactory();
+    const mockPostAuthToolkit = httpServiceMock.createOnPostAuthToolkit();
+
+    await postAuthHandler(mockRequest, mockResponse, mockPostAuthToolkit);
+
+    expect(mockResponse.notFound).not.toHaveBeenCalled();
+    expect(mockPostAuthToolkit.next).toHaveBeenCalledTimes(1);
   });
 
   test(`protected route that starts with "/api/", but "mode.useRbacForRequest()" returns false continues`, async () => {
-    const server = new Server();
-    const mockAuthorizationService: AuthorizationService = {
-      mode: {
-        useRbacForRequest: jest.fn().mockReturnValue(false),
-      },
-    } as any;
-    initAPIAuthorization(server, mockAuthorizationService);
-    server.route([
-      {
-        method: 'GET',
-        path: '/api/foo',
-        options: {
-          tags: ['access:foo'],
-        },
-        handler: () => {
-          return 'foo api response';
-        },
-      },
-    ]);
-    const { request, result, statusCode } = await server.inject({
-      method: 'GET',
-      url: '/api/foo',
+    const mockHTTPSetup = coreMock.createSetup().http;
+    const mockAuthz = authorizationMock.create();
+    initAPIAuthorization(mockHTTPSetup, mockAuthz, loggingServiceMock.create().get());
+
+    const [[postAuthHandler]] = mockHTTPSetup.registerOnPostAuth.mock.calls;
+
+    const mockRequest = httpServerMock.createKibanaRequest({
+      method: 'get',
+      path: '/api/foo',
+      routeTags: ['access:foo'],
     });
-    expect(result).toBe('foo api response');
-    expect(statusCode).toBe(200);
-    expect(mockAuthorizationService.mode.useRbacForRequest).toHaveBeenCalledWith(request);
+    const mockResponse = httpServerMock.createResponseFactory();
+    const mockPostAuthToolkit = httpServiceMock.createOnPostAuthToolkit();
+
+    mockAuthz.mode.useRbacForRequest.mockReturnValue(false);
+
+    await postAuthHandler(mockRequest, mockResponse, mockPostAuthToolkit);
+
+    expect(mockResponse.notFound).not.toHaveBeenCalled();
+    expect(mockPostAuthToolkit.next).toHaveBeenCalledTimes(1);
+    expect(mockAuthz.mode.useRbacForRequest).toHaveBeenCalledWith(mockRequest);
   });
 
   test(`unprotected route that starts with "/api/", but "mode.useRbacForRequest()" returns true continues`, async () => {
-    const server = new Server();
-    const mockAuthorizationService: AuthorizationService = {
-      mode: {
-        useRbacForRequest: jest.fn().mockReturnValue(true),
-      },
-    } as any;
-    initAPIAuthorization(server, mockAuthorizationService);
-    server.route([
-      {
-        method: 'GET',
-        path: '/api/foo',
-        options: {
-          tags: ['not-access:foo'],
-        },
-        handler: () => {
-          return 'foo api response';
-        },
-      },
-    ]);
-    const { request, result, statusCode } = await server.inject({
-      method: 'GET',
-      url: '/api/foo',
+    const mockHTTPSetup = coreMock.createSetup().http;
+    const mockAuthz = authorizationMock.create();
+    initAPIAuthorization(mockHTTPSetup, mockAuthz, loggingServiceMock.create().get());
+
+    const [[postAuthHandler]] = mockHTTPSetup.registerOnPostAuth.mock.calls;
+
+    const mockRequest = httpServerMock.createKibanaRequest({
+      method: 'get',
+      path: '/api/foo',
+      routeTags: ['not-access:foo'],
     });
-    expect(result).toBe('foo api response');
-    expect(statusCode).toBe(200);
-    expect(mockAuthorizationService.mode.useRbacForRequest).toHaveBeenCalledWith(request);
+    const mockResponse = httpServerMock.createResponseFactory();
+    const mockPostAuthToolkit = httpServiceMock.createOnPostAuthToolkit();
+
+    mockAuthz.mode.useRbacForRequest.mockReturnValue(true);
+
+    await postAuthHandler(mockRequest, mockResponse, mockPostAuthToolkit);
+
+    expect(mockResponse.notFound).not.toHaveBeenCalled();
+    expect(mockPostAuthToolkit.next).toHaveBeenCalledTimes(1);
+    expect(mockAuthz.mode.useRbacForRequest).toHaveBeenCalledWith(mockRequest);
   });
 
   test(`protected route that starts with "/api/", "mode.useRbacForRequest()" returns true and user is authorized continues`, async () => {
-    const headers = {
-      authorization: 'foo',
-    };
-    const server = new Server();
-    const mockCheckPrivileges = jest.fn().mockReturnValue({ hasAllRequested: true });
-    const mockAuthorizationService: AuthorizationService = {
-      actions,
-      checkPrivilegesDynamicallyWithRequest: (req: any) => {
-        // hapi conceals the actual "request" from us, so we make sure that the headers are passed to
-        // "checkPrivilegesDynamicallyWithRequest" because this is what we're really concerned with
-        expect(req.headers).toMatchObject(headers);
+    const mockHTTPSetup = coreMock.createSetup().http;
+    const mockAuthz = authorizationMock.create({ version: '1.0.0-zeta1' });
+    initAPIAuthorization(mockHTTPSetup, mockAuthz, loggingServiceMock.create().get());
 
-        return mockCheckPrivileges;
-      },
-      mode: {
-        useRbacForRequest: jest.fn().mockReturnValue(true),
-      },
-    } as any;
-    initAPIAuthorization(server, mockAuthorizationService);
-    server.route([
-      {
-        method: 'GET',
-        path: '/api/foo',
-        options: {
-          tags: ['access:foo'],
-        },
-        handler: () => {
-          return 'foo api response';
-        },
-      },
-    ]);
-    const { request, result, statusCode } = await server.inject({
-      method: 'GET',
-      url: '/api/foo',
+    const [[postAuthHandler]] = mockHTTPSetup.registerOnPostAuth.mock.calls;
+
+    const headers = { authorization: 'foo' };
+    const mockRequest = httpServerMock.createKibanaRequest({
+      method: 'get',
+      path: '/api/foo',
       headers,
+      routeTags: ['access:foo'],
     });
-    expect(result).toBe('foo api response');
-    expect(statusCode).toBe(200);
-    expect(mockCheckPrivileges).toHaveBeenCalledWith([actions.api.get('foo')]);
-    expect(mockAuthorizationService.mode.useRbacForRequest).toHaveBeenCalledWith(request);
+    const mockResponse = httpServerMock.createResponseFactory();
+    const mockPostAuthToolkit = httpServiceMock.createOnPostAuthToolkit();
+
+    const mockCheckPrivileges = jest.fn().mockReturnValue({ hasAllRequested: true });
+    mockAuthz.mode.useRbacForRequest.mockReturnValue(true);
+    mockAuthz.checkPrivilegesDynamicallyWithRequest.mockImplementation(request => {
+      // hapi conceals the actual "request" from us, so we make sure that the headers are passed to
+      // "checkPrivilegesDynamicallyWithRequest" because this is what we're really concerned with
+      expect(request.headers).toMatchObject(headers);
+
+      return mockCheckPrivileges;
+    });
+
+    await postAuthHandler(mockRequest, mockResponse, mockPostAuthToolkit);
+
+    expect(mockResponse.notFound).not.toHaveBeenCalled();
+    expect(mockPostAuthToolkit.next).toHaveBeenCalledTimes(1);
+    expect(mockCheckPrivileges).toHaveBeenCalledWith([mockAuthz.actions.api.get('foo')]);
+    expect(mockAuthz.mode.useRbacForRequest).toHaveBeenCalledWith(mockRequest);
   });
 
   test(`protected route that starts with "/api/", "mode.useRbacForRequest()" returns true and user isn't authorized responds with a 404`, async () => {
-    const headers = {
-      authorization: 'foo',
-    };
-    const server = new Server();
-    const mockCheckPrivileges = jest.fn().mockReturnValue({ hasAllRequested: false });
-    const mockAuthorizationService: AuthorizationService = {
-      actions,
-      checkPrivilegesDynamicallyWithRequest: (req: any) => {
-        // hapi conceals the actual "request" from us, so we make sure that the headers are passed to
-        // "checkPrivilegesDynamicallyWithRequest" because this is what we're really concerned with
-        expect(req.headers).toMatchObject(headers);
+    const mockHTTPSetup = coreMock.createSetup().http;
+    const mockAuthz = authorizationMock.create({ version: '1.0.0-zeta1' });
+    initAPIAuthorization(mockHTTPSetup, mockAuthz, loggingServiceMock.create().get());
 
-        return mockCheckPrivileges;
-      },
-      mode: {
-        useRbacForRequest: jest.fn().mockReturnValue(true),
-      },
-    } as any;
-    initAPIAuthorization(server, mockAuthorizationService);
-    server.route([
-      {
-        method: 'GET',
-        path: '/api/foo',
-        options: {
-          tags: ['access:foo'],
-        },
-        handler: () => {
-          return 'foo api response';
-        },
-      },
-    ]);
-    const { request, result, statusCode } = await server.inject({
-      method: 'GET',
-      url: '/api/foo',
+    const [[postAuthHandler]] = mockHTTPSetup.registerOnPostAuth.mock.calls;
+
+    const headers = { authorization: 'foo' };
+    const mockRequest = httpServerMock.createKibanaRequest({
+      method: 'get',
+      path: '/api/foo',
       headers,
+      routeTags: ['access:foo'],
     });
-    expect(result).toMatchInlineSnapshot(`
-Object {
-  "error": "Not Found",
-  "message": "Not Found",
-  "statusCode": 404,
-}
-`);
-    expect(statusCode).toBe(404);
-    expect(mockCheckPrivileges).toHaveBeenCalledWith([actions.api.get('foo')]);
-    expect(mockAuthorizationService.mode.useRbacForRequest).toHaveBeenCalledWith(request);
+    const mockResponse = httpServerMock.createResponseFactory();
+    const mockPostAuthToolkit = httpServiceMock.createOnPostAuthToolkit();
+
+    const mockCheckPrivileges = jest.fn().mockReturnValue({ hasAllRequested: false });
+    mockAuthz.mode.useRbacForRequest.mockReturnValue(true);
+    mockAuthz.checkPrivilegesDynamicallyWithRequest.mockImplementation(request => {
+      // hapi conceals the actual "request" from us, so we make sure that the headers are passed to
+      // "checkPrivilegesDynamicallyWithRequest" because this is what we're really concerned with
+      expect(request.headers).toMatchObject(headers);
+
+      return mockCheckPrivileges;
+    });
+
+    await postAuthHandler(mockRequest, mockResponse, mockPostAuthToolkit);
+
+    expect(mockResponse.notFound).toHaveBeenCalledTimes(1);
+    expect(mockPostAuthToolkit.next).not.toHaveBeenCalled();
+    expect(mockCheckPrivileges).toHaveBeenCalledWith([mockAuthz.actions.api.get('foo')]);
+    expect(mockAuthz.mode.useRbacForRequest).toHaveBeenCalledWith(mockRequest);
   });
 });

@@ -4,20 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getClient } from '../../../../../../../server/lib/get_client_shield';
-import { routePreCheckLicense } from '../../../../lib/route_pre_check_license';
-import { initGetRolesApi } from './get';
-import { initDeleteRolesApi } from './delete';
-import { initPutRolesApi } from './put';
+import { RouteDefinitionParams } from '../..';
+import { defineGetRolesRoutes } from './get';
+import { defineDeleteRolesRoutes } from './delete';
+import { definePutRolesRoutes } from './put';
+import { Role } from '../../../../common/model';
 
-export function initExternalRolesApi(server) {
-  const callWithRequest = getClient(server).callWithRequest;
-  const routePreCheckLicenseFn = routePreCheckLicense(server);
+export type ElasticsearchRole = Pick<Role, 'name' | 'metadata' | 'transient_metadata'> & {
+  applications: Array<{
+    application: string;
+    privileges: string[];
+    resources: string[];
+  }>;
+  cluster: Role['elasticsearch']['cluster'];
+  indices: Role['elasticsearch']['indices'];
+  run_as: Role['elasticsearch']['run_as'];
+};
 
-  const { authorization } = server.plugins.security;
-  const { application } = authorization;
-
-  initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn, application);
-  initPutRolesApi(server, callWithRequest, routePreCheckLicenseFn, authorization, application);
-  initDeleteRolesApi(server, callWithRequest, routePreCheckLicenseFn);
+export function defineRolesRoutes(params: RouteDefinitionParams) {
+  defineGetRolesRoutes(params);
+  defineDeleteRolesRoutes(params);
+  definePutRolesRoutes(params);
 }

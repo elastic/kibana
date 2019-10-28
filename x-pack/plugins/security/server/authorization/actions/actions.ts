@@ -36,18 +36,9 @@ export class Actions {
 
   public readonly version = `version:${this.versionNumber}`;
 
-  constructor(private readonly versionNumber: string) {}
-}
-
-export function actionsFactory(config: any) {
-  const version = config.get('pkg.version');
-  if (typeof version !== 'string') {
-    throw new Error('version should be a string');
+  constructor(private readonly versionNumber: string) {
+    if (versionNumber === '') {
+      throw new Error(`version can't be an empty string`);
+    }
   }
-
-  if (version === '') {
-    throw new Error(`version can't be an empty string`);
-  }
-
-  return new Actions(version);
 }

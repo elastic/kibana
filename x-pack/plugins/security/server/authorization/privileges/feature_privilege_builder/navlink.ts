@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Feature, FeatureKibanaPrivileges } from '../../../../../../../../plugins/features/server';
+import { Feature, FeatureKibanaPrivileges } from '../../../../../features/server';
 import { BaseFeaturePrivilegeBuilder } from './feature_privilege_builder';
 
 export class FeaturePrivilegeNavlinkBuilder extends BaseFeaturePrivilegeBuilder {

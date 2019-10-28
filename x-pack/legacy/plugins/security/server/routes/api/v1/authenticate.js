@@ -11,7 +11,7 @@ import { canRedirectRequest, wrapError, OIDCAuthenticationFlow } from '../../../
 import { KibanaRequest } from '../../../../../../../../src/core/server';
 import { createCSPRuleString } from '../../../../../../../../src/legacy/server/csp';
 
-export function initAuthenticateApi({ authc: { login, logout }, config }, server) {
+export function initAuthenticateApi({ authc: { login, logout }, __legacyCompat: { config } }, server) {
   function prepareCustomResourceResponse(response, contentType) {
     return response
       .header('cache-control', 'private, no-cache, no-store')

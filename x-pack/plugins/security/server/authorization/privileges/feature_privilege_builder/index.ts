@@ -5,7 +5,7 @@
  */
 
 import { flatten } from 'lodash';
-import { Feature, FeatureKibanaPrivileges } from '../../../../../../../../plugins/features/server';
+import { Feature, FeatureKibanaPrivileges } from '../../../../../features/server';
 import { Actions } from '../../actions';
 import { FeaturePrivilegeApiBuilder } from './api';
 import { FeaturePrivilegeAppBuilder } from './app';

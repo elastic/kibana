@@ -5,9 +5,11 @@
  */
 
 import { uniq } from 'lodash';
-import { GLOBAL_RESOURCE } from '../../../common/constants';
+import { GLOBAL_RESOURCE } from '../../common/constants';
 import { checkPrivilegesWithRequestFactory } from './check_privileges';
 import { HasPrivilegesResponse } from './types';
+
+import { elasticsearchServiceMock, httpServerMock } from '../../../../../src/core/server/mocks';
 
 const application = 'kibana-our_application';
 
@@ -18,14 +20,14 @@ const mockActions = {
 
 const savedObjectTypes = ['foo-type', 'bar-type'];
 
-const createMockShieldClient = (response: any) => {
-  const mockCallWithRequest = jest.fn();
+const createMockClusterClient = (response: any) => {
+  const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+  mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(response);
 
-  mockCallWithRequest.mockImplementationOnce(async () => response);
+  const mockClusterClient = elasticsearchServiceMock.createClusterClient();
+  mockClusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
 
-  return {
-    callWithRequest: mockCallWithRequest,
-  };
+  return { mockClusterClient, mockScopedClusterClient };
 };
 
 describe('#atSpace', () => {
@@ -40,13 +42,15 @@ describe('#atSpace', () => {
     }
   ) => {
     test(description, async () => {
-      const mockShieldClient = createMockShieldClient(options.esHasPrivilegesResponse);
+      const { mockClusterClient, mockScopedClusterClient } = createMockClusterClient(
+        options.esHasPrivilegesResponse
+      );
       const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(
         mockActions,
-        application,
-        mockShieldClient
+        mockClusterClient,
+        () => application
       );
-      const request = { foo: Symbol() };
+      const request = httpServerMock.createKibanaRequest();
       const checkPrivileges = checkPrivilegesWithRequest(request);
 
       let actualResult;
@@ -60,8 +64,7 @@ describe('#atSpace', () => {
         errorThrown = err;
       }
 
-      expect(mockShieldClient.callWithRequest).toHaveBeenCalledWith(
-        request,
+      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith(
         'shield.hasPrivileges',
         {
           body: {
@@ -281,13 +284,15 @@ describe('#atSpaces', () => {
     }
   ) => {
     test(description, async () => {
-      const mockShieldClient = createMockShieldClient(options.esHasPrivilegesResponse);
+      const { mockClusterClient, mockScopedClusterClient } = createMockClusterClient(
+        options.esHasPrivilegesResponse
+      );
       const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(
         mockActions,
-        application,
-        mockShieldClient
+        mockClusterClient,
+        () => application
       );
-      const request = { foo: Symbol() };
+      const request = httpServerMock.createKibanaRequest();
       const checkPrivileges = checkPrivilegesWithRequest(request);
 
       let actualResult;
@@ -301,8 +306,7 @@ describe('#atSpaces', () => {
         errorThrown = err;
       }
 
-      expect(mockShieldClient.callWithRequest).toHaveBeenCalledWith(
-        request,
+      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith(
         'shield.hasPrivileges',
         {
           body: {
@@ -760,13 +764,15 @@ describe('#globally', () => {
     }
   ) => {
     test(description, async () => {
-      const mockShieldClient = createMockShieldClient(options.esHasPrivilegesResponse);
+      const { mockClusterClient, mockScopedClusterClient } = createMockClusterClient(
+        options.esHasPrivilegesResponse
+      );
       const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(
         mockActions,
-        application,
-        mockShieldClient
+        mockClusterClient,
+        () => application
       );
-      const request = { foo: Symbol() };
+      const request = httpServerMock.createKibanaRequest();
       const checkPrivileges = checkPrivilegesWithRequest(request);
 
       let actualResult;
@@ -777,8 +783,7 @@ describe('#globally', () => {
         errorThrown = err;
       }
 
-      expect(mockShieldClient.callWithRequest).toHaveBeenCalledWith(
-        request,
+      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith(
         'shield.hasPrivileges',
         {
           body: {

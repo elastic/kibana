@@ -4,60 +4,83 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/**
- * @typedef {Object} LicenseCheckResult Result of the license check.
- * @property {boolean} showLogin Indicates whether we show login page or skip it.
- * @property {boolean} allowLogin Indicates whether we allow login or disable it on the login page.
- * @property {boolean} showLinks Indicates whether we show security links throughout the kibana app.
- * @property {boolean} allowRoleDocumentLevelSecurity Indicates whether we allow users to define document level
- * security in roles.
- * @property {boolean} allowRoleFieldLevelSecurity Indicates whether we allow users to define field level security
- * in roles
- * @property {string} [linksMessage] Message to show when security links are clicked throughout the kibana app.
- */
+import { deepFreeze } from '../../../../../src/core/utils';
+import { ILicense } from '../../../licensing/server';
+import { SecurityLicenseFeatures } from './license_features';
 
-/**
- * Returns object that defines behavior of the security related areas (login page, user management etc.) based
- * on the license information extracted from the xPackInfo.
- * @param {XPackInfo} xPackInfo XPackInfo instance to extract license information from.
- * @returns {LicenseCheckResult}
- */
-export function checkLicense(xPackInfo) {
-  // If, for some reason, we cannot get license information from Elasticsearch,
-  // assume worst-case and lock user at login screen.
-  if (!xPackInfo.isAvailable()) {
+export interface SecurityLicense {
+  isEnabled(): boolean;
+  getFeatures(): SecurityLicenseFeatures;
+}
+
+export class SecurityLicenseService {
+  public setup() {
+    let rawLicense: Readonly<ILicense> | undefined;
+
     return {
-      showLogin: true,
-      allowLogin: false,
-      showLinks: false,
-      allowRoleDocumentLevelSecurity: false,
-      allowRoleFieldLevelSecurity: false,
-      allowRbac: false,
-      layout: xPackInfo.isXpackUnavailable() ? 'error-xpack-unavailable' : 'error-es-unavailable'
+      update(newRawLicense: Readonly<ILicense>) {
+        rawLicense = newRawLicense;
+      },
+
+      license: deepFreeze({
+        isEnabled() {
+          if (!rawLicense) {
+            return false;
+          }
+
+          const securityFeature = rawLicense.getFeature('security');
+          return (
+            securityFeature !== undefined &&
+            securityFeature.isAvailable &&
+            securityFeature.isEnabled
+          );
+        },
+
+        /**
+         * Returns up-do-date Security related features based on the last known license.
+         */
+        getFeatures(): SecurityLicenseFeatures {
+          // If, for some reason, we cannot get license information from Elasticsearch,
+          // assume worst-case and lock user at login screen.
+          if (rawLicense === undefined || !rawLicense.isAvailable) {
+            return {
+              showLogin: true,
+              allowLogin: false,
+              showLinks: false,
+              allowRoleDocumentLevelSecurity: false,
+              allowRoleFieldLevelSecurity: false,
+              allowRbac: false,
+              layout:
+                rawLicense !== undefined && !rawLicense.isAvailable
+                  ? 'error-xpack-unavailable'
+                  : 'error-es-unavailable',
+            };
+          }
+
+          if (!this.isEnabled()) {
+            return {
+              showLogin: false,
+              allowLogin: false,
+              showLinks: false,
+              allowRoleDocumentLevelSecurity: false,
+              allowRoleFieldLevelSecurity: false,
+              allowRbac: false,
+              linksMessage: 'Access is denied because Security is disabled in Elasticsearch.',
+            };
+          }
+
+          const isLicensePlatinumOrTrial = rawLicense.isOneOf(['platinum', 'trial']);
+          return {
+            showLogin: true,
+            allowLogin: true,
+            showLinks: true,
+            // Only platinum and trial licenses are compliant with field- and document-level security.
+            allowRoleDocumentLevelSecurity: isLicensePlatinumOrTrial,
+            allowRoleFieldLevelSecurity: isLicensePlatinumOrTrial,
+            allowRbac: true,
+          };
+        },
+      }),
     };
   }
-
-  const isEnabledInES = xPackInfo.feature('security').isEnabled();
-  if (!isEnabledInES) {
-    return {
-      showLogin: false,
-      allowLogin: false,
-      showLinks: false,
-      allowRoleDocumentLevelSecurity: false,
-      allowRoleFieldLevelSecurity: false,
-      allowRbac: false,
-      linksMessage: 'Access is denied because Security is disabled in Elasticsearch.'
-    };
-  }
-
-  const isLicensePlatinumOrTrial = xPackInfo.license.isOneOf(['platinum', 'trial']);
-  return {
-    showLogin: true,
-    allowLogin: true,
-    showLinks: true,
-    // Only platinum and trial licenses are compliant with field- and document-level security.
-    allowRoleDocumentLevelSecurity: isLicensePlatinumOrTrial,
-    allowRoleFieldLevelSecurity: isLicensePlatinumOrTrial,
-    allowRbac: true,
-  };
 }

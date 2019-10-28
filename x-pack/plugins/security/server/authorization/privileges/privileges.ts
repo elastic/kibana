@@ -5,22 +5,22 @@
  */
 
 import { flatten, mapValues, uniq } from 'lodash';
-import { Feature } from '../../../../../../../plugins/features/server';
-import { XPackMainPlugin } from '../../../../../xpack_main/xpack_main';
-import { RawKibanaFeaturePrivileges, RawKibanaPrivileges } from '../../../../common/model';
+import { Feature } from '../../../../features/server';
+import { RawKibanaFeaturePrivileges, RawKibanaPrivileges } from '../../../common/model';
 import { Actions } from '../actions';
 import { featurePrivilegeBuilderFactory } from './feature_privilege_builder';
+import { FeaturesService } from '../../plugin';
 
 export interface PrivilegesService {
   get(): RawKibanaPrivileges;
 }
 
-export function privilegesFactory(actions: Actions, xpackMainPlugin: XPackMainPlugin) {
+export function privilegesFactory(actions: Actions, featuresService: FeaturesService) {
   const featurePrivilegeBuilder = featurePrivilegeBuilderFactory(actions);
 
   return {
     get() {
-      const features = xpackMainPlugin.getFeatures();
+      const features = featuresService.getFeatures();
       const basePrivilegeFeatures = features.filter(feature => !feature.excludeFromBasePrivileges);
 
       const allActions = uniq(

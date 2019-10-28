@@ -4,22 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
-import { Request, ResponseToolkit, Server } from 'hapi';
-import { flatten } from 'lodash';
-import { XPackMainPlugin } from '../../../../xpack_main/xpack_main';
-import { AuthorizationService } from './service';
+import { CoreSetup, Logger } from '../../../../../src/core/server';
+import { FeaturesService } from '../plugin';
+import { Authorization } from '.';
+
 class ProtectedApplications {
   private applications: Set<string> | null = null;
-  constructor(private readonly xpackMainPlugin: XPackMainPlugin) {}
+  constructor(private readonly featuresService: FeaturesService) {}
 
   public shouldProtect(appId: string) {
     // Currently, once we get the list of features we essentially "lock" additional
-    // features from being added. This is enforced by the xpackMain plugin. As such,
+    // features from being added. This is enforced by the Features plugin. As such,
     // we wait until we actually need to consume these before getting them
     if (this.applications == null) {
       this.applications = new Set(
-        flatten(this.xpackMainPlugin.getFeatures().map(feature => feature.app))
+        this.featuresService
+          .getFeatures()
+          .map(feature => feature.app)
+          .flat()
       );
     }
 
@@ -28,45 +30,49 @@ class ProtectedApplications {
 }
 
 export function initAppAuthorization(
-  server: Server,
-  xpackMainPlugin: XPackMainPlugin,
-  authorization: AuthorizationService
+  http: CoreSetup['http'],
+  {
+    actions,
+    checkPrivilegesDynamicallyWithRequest,
+    mode,
+  }: Pick<Authorization, 'actions' | 'checkPrivilegesDynamicallyWithRequest' | 'mode'>,
+  logger: Logger,
+  featuresService: FeaturesService
 ) {
-  const { actions, checkPrivilegesDynamicallyWithRequest, mode } = authorization;
-  const protectedApplications = new ProtectedApplications(xpackMainPlugin);
-  const log = (msg: string) => server.log(['security', 'app-authorization', 'debug'], msg);
+  const protectedApplications = new ProtectedApplications(featuresService);
 
-  server.ext('onPostAuth', async (request: Request, h: ResponseToolkit) => {
-    const { path } = request;
+  http.registerOnPostAuth(async (request, response, toolkit) => {
+    const path = request.url.pathname!;
+
     // if the path doesn't start with "/app/", just continue
     if (!path.startsWith('/app/')) {
-      return h.continue;
+      return toolkit.next();
     }
 
     // if we aren't using RBAC, just continue
     if (!mode.useRbacForRequest(request)) {
-      return h.continue;
+      return toolkit.next();
     }
 
     const appId = path.split('/', 3)[2];
 
     if (!protectedApplications.shouldProtect(appId)) {
-      log(`not authorizing - "${appId}" isn't a protected application`);
-      return h.continue;
+      logger.debug(`not authorizing - "${appId}" isn't a protected application`);
+      return toolkit.next();
     }
 
     const checkPrivileges = checkPrivilegesDynamicallyWithRequest(request);
     const appAction = actions.app.get(appId);
     const checkPrivilegesResponse = await checkPrivileges(appAction);
 
-    log(`authorizing access to "${appId}"`);
+    logger.debug(`authorizing access to "${appId}"`);
     // we've actually authorized the request
     if (checkPrivilegesResponse.hasAllRequested) {
-      log(`authorized for "${appId}"`);
-      return h.continue;
+      logger.debug(`authorized for "${appId}"`);
+      return toolkit.next();
     }
 
-    log(`not authorized for "${appId}"`);
-    return Boom.notFound();
+    logger.debug(`not authorized for "${appId}"`);
+    return response.notFound();
   });
 }

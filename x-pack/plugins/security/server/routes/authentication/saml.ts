@@ -5,19 +5,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { RouteDefinitionParams } from '.';
-import { SAMLLoginStep } from '../authentication';
-
-export function defineAuthenticationRoutes(params: RouteDefinitionParams) {
-  if (params.config.authc.providers.includes('saml')) {
-    defineSAMLRoutes(params);
-  }
-}
+import { SAMLLoginStep } from '../../authentication';
+import { RouteDefinitionParams } from '..';
 
 /**
  * Defines routes required for SAML authentication.
  */
-function defineSAMLRoutes({
+export function defineSAMLRoutes({
   router,
   logger,
   authc,

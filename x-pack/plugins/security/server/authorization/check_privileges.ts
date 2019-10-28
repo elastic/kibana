@@ -5,7 +5,8 @@
  */
 
 import { pick, transform, uniq } from 'lodash';
-import { GLOBAL_RESOURCE } from '../../../common/constants';
+import { IClusterClient, KibanaRequest } from '../../../../../src/core/server';
+import { GLOBAL_RESOURCE } from '../../common/constants';
 import { ResourceSerializer } from './resource_serializer';
 import { HasPrivilegesResponse, HasPrivilegesResponseApplication } from './types';
 import { validateEsPrivilegeResponse } from './validate_es_response';
@@ -43,7 +44,7 @@ export interface CheckPrivilegesAtSpacesResponse {
   };
 }
 
-export type CheckPrivilegesWithRequest = (request: Record<string, any>) => CheckPrivileges;
+export type CheckPrivilegesWithRequest = (request: KibanaRequest) => CheckPrivileges;
 
 export interface CheckPrivileges {
   atSpace(
@@ -59,12 +60,10 @@ export interface CheckPrivileges {
 
 export function checkPrivilegesWithRequestFactory(
   actions: CheckPrivilegesActions,
-  application: string,
-  shieldClient: any
+  clusterClient: IClusterClient,
+  getApplicationName: () => string
 ) {
-  const { callWithRequest } = shieldClient;
-
-  const hasIncompatibileVersion = (
+  const hasIncompatibleVersion = (
     applicationPrivilegesResponse: HasPrivilegesResponseApplication
   ) => {
     return Object.values(applicationPrivilegesResponse).some(
@@ -72,7 +71,7 @@ export function checkPrivilegesWithRequestFactory(
     );
   };
 
-  return function checkPrivilegesWithRequest(request: Record<string, any>): CheckPrivileges {
+  return function checkPrivilegesWithRequest(request: KibanaRequest): CheckPrivileges {
     const checkPrivilegesAtResources = async (
       resources: string[],
       privilegeOrPrivileges: string | string[]
@@ -82,21 +81,14 @@ export function checkPrivilegesWithRequestFactory(
         : [privilegeOrPrivileges];
       const allApplicationPrivileges = uniq([actions.version, actions.login, ...privileges]);
 
-      const hasPrivilegesResponse: HasPrivilegesResponse = await callWithRequest(
-        request,
-        'shield.hasPrivileges',
-        {
+      const application = getApplicationName();
+      const hasPrivilegesResponse = (await clusterClient
+        .asScoped(request)
+        .callAsCurrentUser('shield.hasPrivileges', {
           body: {
-            applications: [
-              {
-                application,
-                resources,
-                privileges: allApplicationPrivileges,
-              },
-            ],
+            applications: [{ application, resources, privileges: allApplicationPrivileges }],
           },
-        }
-      );
+        })) as HasPrivilegesResponse;
 
       validateEsPrivilegeResponse(
         hasPrivilegesResponse,
@@ -107,7 +99,7 @@ export function checkPrivilegesWithRequestFactory(
 
       const applicationPrivilegesResponse = hasPrivilegesResponse.application[application];
 
-      if (hasIncompatibileVersion(applicationPrivilegesResponse)) {
+      if (hasIncompatibleVersion(applicationPrivilegesResponse)) {
         throw new Error(
           'Multiple versions of Kibana are running against the same Elasticsearch cluster, unable to authorize user.'
         );

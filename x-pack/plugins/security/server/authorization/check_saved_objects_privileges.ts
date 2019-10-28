@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Legacy } from 'kibana';
-import { LegacySpacesPlugin } from '../../../../spaces';
-import { OptionalPlugin } from '../../../../../server/lib/optional_plugin';
+import { KibanaRequest } from '../../../../../src/core/server';
+import { SpacesService } from '../plugin';
 import { CheckPrivilegesAtResourceResponse, CheckPrivilegesWithRequest } from './check_privileges';
 
 export type CheckSavedObjectsPrivilegesWithRequest = (
-  request: Legacy.Request
+  request: KibanaRequest
 ) => CheckSavedObjectsPrivileges;
 export type CheckSavedObjectsPrivileges = (
   actions: string | string[],
@@ -19,20 +18,20 @@ export type CheckSavedObjectsPrivileges = (
 
 export const checkSavedObjectsPrivilegesWithRequestFactory = (
   checkPrivilegesWithRequest: CheckPrivilegesWithRequest,
-  spaces: OptionalPlugin<LegacySpacesPlugin>
+  getSpacesService: () => SpacesService | undefined
 ): CheckSavedObjectsPrivilegesWithRequest => {
-  return function checkSavedObjectsPrivilegesWithRequest(request: Legacy.Request) {
+  return function checkSavedObjectsPrivilegesWithRequest(request: KibanaRequest) {
     return async function checkSavedObjectsPrivileges(
       actions: string | string[],
       namespace?: string
     ) {
-      if (spaces.isEnabled) {
-        return checkPrivilegesWithRequest(request).atSpace(
-          spaces.namespaceToSpaceId(namespace),
-          actions
-        );
-      }
-      return checkPrivilegesWithRequest(request).globally(actions);
+      const spacesService = getSpacesService();
+      return spacesService
+        ? await checkPrivilegesWithRequest(request).atSpace(
+            spacesService.namespaceToSpaceId(namespace),
+            actions
+          )
+        : await checkPrivilegesWithRequest(request).globally(actions);
     };
   };
 };

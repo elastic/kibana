@@ -4,26 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
-import { Request, ResponseToolkit, Server } from 'hapi';
-import { AuthorizationService } from './service';
+import { CoreSetup, Logger } from '../../../../../src/core/server';
+import { Authorization } from '.';
 
-export function initAPIAuthorization(server: Server, authorization: AuthorizationService) {
-  const { actions, checkPrivilegesDynamicallyWithRequest, mode } = authorization;
-
-  server.ext('onPostAuth', async (request: Request, h: ResponseToolkit) => {
+export function initAPIAuthorization(
+  http: CoreSetup['http'],
+  { actions, checkPrivilegesDynamicallyWithRequest, mode }: Authorization,
+  logger: Logger
+) {
+  http.registerOnPostAuth(async (request, response, toolkit) => {
     // if the api doesn't start with "/api/" or we aren't using RBAC for this request, just continue
-    if (!request.path.startsWith('/api/') || !mode.useRbacForRequest(request)) {
-      return h.continue;
+    if (!request.url.path!.startsWith('/api/') || !mode.useRbacForRequest(request)) {
+      return toolkit.next();
     }
 
-    const { tags = [] } = request.route.settings;
+    const tags = request.route.options.tags;
     const tagPrefix = 'access:';
     const actionTags = tags.filter(tag => tag.startsWith(tagPrefix));
 
     // if there are no tags starting with "access:", just continue
     if (actionTags.length === 0) {
-      return h.continue;
+      logger.debug('API endpoint is not marked with "access:" tags, skipping.');
+      return toolkit.next();
     }
 
     const apiActions = actionTags.map(tag => actions.api.get(tag.substring(tagPrefix.length)));
@@ -32,9 +34,11 @@ export function initAPIAuthorization(server: Server, authorization: Authorizatio
 
     // we've actually authorized the request
     if (checkPrivilegesResponse.hasAllRequested) {
-      return h.continue;
+      logger.debug(`authorized for "${request.url.path}"`);
+      return toolkit.next();
     }
 
-    return Boom.notFound();
+    logger.debug(`not authorized for "${request.url.path}"`);
+    return response.notFound();
   });
 }

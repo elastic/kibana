@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { isString } from 'lodash';
-import { UICapabilities } from 'ui/capabilities';
-import { uiCapabilitiesRegex } from '../../../../../../../plugins/features/server';
+import { Capabilities as UICapabilities } from '../../../../../../src/core/public';
+import { uiCapabilitiesRegex } from '../../../../features/server';
 
 export class UIActions {
   private readonly prefix: string;
@@ -26,7 +26,7 @@ export class UIActions {
     return `${this.prefix}catalogue/*`;
   }
 
-  public get allManagmentLinks(): string {
+  public get allManagementLinks(): string {
     return `${this.prefix}management/*`;
   }
 

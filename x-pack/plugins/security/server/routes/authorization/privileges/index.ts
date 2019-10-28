@@ -3,12 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-// @ts-ignore
-import { routePreCheckLicense } from '../../../../lib/route_pre_check_license';
-import { initGetPrivilegesApi } from './get';
 
-export function initPrivilegesApi(server: Record<string, any>) {
-  const routePreCheckLicenseFn = routePreCheckLicense(server);
+import { RouteDefinitionParams } from '../..';
+import { defineGetPrivilegesRoutes } from './get';
+import { defineGetBuiltinPrivilegesRoutes } from './get_builtin';
 
-  initGetPrivilegesApi(server, routePreCheckLicenseFn);
+export function definePrivilegesRoutes(params: RouteDefinitionParams) {
+  defineGetPrivilegesRoutes(params);
+  defineGetBuiltinPrivilegesRoutes(params);
 }

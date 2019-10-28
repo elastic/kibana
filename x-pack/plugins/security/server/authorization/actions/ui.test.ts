@@ -29,10 +29,10 @@ describe('#allCatalogueEntries', () => {
   });
 });
 
-describe('#allManagmentLinks', () => {
+describe('#allManagementLinks', () => {
   test('returns `ui:${version}:management/*`', () => {
     const uiActions = new UIActions(version);
-    expect(uiActions.allManagmentLinks).toBe('ui:1.0.0-zeta1:management/*');
+    expect(uiActions.allManagementLinks).toBe('ui:1.0.0-zeta1:management/*');
   });
 });
 

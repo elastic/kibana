@@ -5,18 +5,21 @@
  */
 
 import { Type } from '@kbn/config-schema';
-import { Authentication, AuthenticationResult, SAMLLoginStep } from '../authentication';
-import { defineAuthenticationRoutes } from './authentication';
+import { Authentication, AuthenticationResult, SAMLLoginStep } from '../../authentication';
+import { defineSAMLRoutes } from './saml';
+import { ConfigType } from '../../config';
+import { IRouter, RequestHandler, RouteConfig } from '../../../../../../src/core/server';
+import { LegacyAPI } from '../../plugin';
+
 import {
+  elasticsearchServiceMock,
   httpServerMock,
   httpServiceMock,
   loggingServiceMock,
-} from '../../../../../src/core/server/mocks';
-import { ConfigType } from '../config';
-import { IRouter, RequestHandler, RouteConfig } from '../../../../../src/core/server';
-import { LegacyAPI } from '../plugin';
-import { authenticationMock } from '../authentication/index.mock';
-import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
+} from '../../../../../../src/core/server/mocks';
+import { authenticationMock } from '../../authentication/index.mock';
+import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
+import { authorizationMock } from '../../authorization/index.mock';
 
 describe('SAML authentication routes', () => {
   let router: jest.Mocked<IRouter>;
@@ -25,33 +28,16 @@ describe('SAML authentication routes', () => {
     router = httpServiceMock.createRouter();
     authc = authenticationMock.create();
 
-    defineAuthenticationRoutes({
+    defineSAMLRoutes({
       router,
+      clusterClient: elasticsearchServiceMock.createClusterClient(),
       basePath: httpServiceMock.createBasePath(),
       logger: loggingServiceMock.create().get(),
       config: { authc: { providers: ['saml'] } } as ConfigType,
       authc,
+      authz: authorizationMock.create(),
       getLegacyAPI: () => ({ cspRules: 'test-csp-rule' } as LegacyAPI),
     });
-  });
-
-  it('does not register any SAML related routes if SAML auth provider is not enabled', () => {
-    const testRouter = httpServiceMock.createRouter();
-    defineAuthenticationRoutes({
-      router: testRouter,
-      basePath: httpServiceMock.createBasePath(),
-      logger: loggingServiceMock.create().get(),
-      config: { authc: { providers: ['basic'] } } as ConfigType,
-      authc: authenticationMock.create(),
-      getLegacyAPI: () => ({ cspRules: 'test-csp-rule' } as LegacyAPI),
-    });
-
-    const samlRoutePathPredicate = ([{ path }]: [{ path: string }, any]) =>
-      path.startsWith('/api/security/saml/');
-    expect(testRouter.get.mock.calls.find(samlRoutePathPredicate)).toBeUndefined();
-    expect(testRouter.post.mock.calls.find(samlRoutePathPredicate)).toBeUndefined();
-    expect(testRouter.put.mock.calls.find(samlRoutePathPredicate)).toBeUndefined();
-    expect(testRouter.delete.mock.calls.find(samlRoutePathPredicate)).toBeUndefined();
   });
 
   describe('Assertion consumer service endpoint', () => {

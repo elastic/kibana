@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LegacySpacesPlugin } from '../../../../spaces';
-import { OptionalPlugin } from '../../../../../server/lib/optional_plugin';
 import { checkPrivilegesDynamicallyWithRequestFactory } from './check_privileges_dynamically';
+
+import { httpServerMock } from '../../../../../src/core/server/mocks';
 
 test(`checkPrivileges.atSpace when spaces is enabled`, async () => {
   const expectedResult = Symbol();
@@ -15,21 +15,15 @@ test(`checkPrivileges.atSpace when spaces is enabled`, async () => {
     atSpace: jest.fn().mockReturnValue(expectedResult),
   };
   const mockCheckPrivilegesWithRequest = jest.fn().mockReturnValue(mockCheckPrivileges);
-  const mockSpaces = {
-    isEnabled: true,
-    getSpaceId: jest.fn().mockReturnValue(spaceId),
-    spaceIdToNamespace: jest.fn(),
-    namespaceToSpaceId: jest.fn(),
-    getBasePath: jest.fn(),
-    getScopedSpacesClient: jest.fn(),
-    getActiveSpace: jest.fn(),
-  } as OptionalPlugin<LegacySpacesPlugin>;
-  const request = Symbol();
+  const request = httpServerMock.createKibanaRequest();
   const privilegeOrPrivileges = ['foo', 'bar'];
   const checkPrivilegesDynamically = checkPrivilegesDynamicallyWithRequestFactory(
     mockCheckPrivilegesWithRequest,
-    mockSpaces
-  )(request as any);
+    () => ({
+      getSpaceId: jest.fn().mockReturnValue(spaceId),
+      namespaceToSpaceId: jest.fn(),
+    })
+  )(request);
   const result = await checkPrivilegesDynamically(privilegeOrPrivileges);
 
   expect(result).toBe(expectedResult);
@@ -43,15 +37,12 @@ test(`checkPrivileges.globally when spaces is disabled`, async () => {
     globally: jest.fn().mockReturnValue(expectedResult),
   };
   const mockCheckPrivilegesWithRequest = jest.fn().mockReturnValue(mockCheckPrivileges);
-  const mockSpaces = {
-    isEnabled: false,
-  } as OptionalPlugin<LegacySpacesPlugin>;
-  const request = Symbol();
+  const request = httpServerMock.createKibanaRequest();
   const privilegeOrPrivileges = ['foo', 'bar'];
   const checkPrivilegesDynamically = checkPrivilegesDynamicallyWithRequestFactory(
     mockCheckPrivilegesWithRequest,
-    mockSpaces
-  )(request as any);
+    () => undefined
+  )(request);
   const result = await checkPrivilegesDynamically(privilegeOrPrivileges);
 
   expect(result).toBe(expectedResult);

@@ -4,20 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Feature } from '../../../../../../plugins/features/server';
-import { actionsFactory } from './actions';
+import { Feature } from '../../../features/server';
+import { Actions } from './actions';
 import { validateFeaturePrivileges } from './validate_feature_privileges';
 
-const mockConfig = {
-  get: (key: string) => {
-    if (key === 'pkg.version') {
-      return `1.0.0-zeta1`;
-    }
-
-    throw new Error(`Mock config doesn't know about key ${key}`);
-  },
-};
-const actions = actionsFactory(mockConfig);
+const actions = new Actions('1.0.0-zeta1');
 
 it(`doesn't allow read to grant privileges which aren't also included in all`, () => {
   const feature: Feature = {

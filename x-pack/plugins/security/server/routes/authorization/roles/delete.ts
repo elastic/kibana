@@ -4,30 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Joi from 'joi';
-import { wrapError } from '../../../../../../../../plugins/security/server';
+import { schema } from '@kbn/config-schema';
+import { RouteDefinitionParams } from '../../index';
+import { createLicensedRouteHandler } from '../../licensed_route_handler';
+import { wrapError } from '../../../errors';
 
-export function initDeleteRolesApi(server, callWithRequest, routePreCheckLicenseFn) {
-  server.route({
-    method: 'DELETE',
-    path: '/api/security/role/{name}',
-    handler(request, h) {
-      const { name } = request.params;
-      return callWithRequest(request, 'shield.deleteRole', { name }).then(
-        () => h.response().code(204),
-        wrapError
-      );
+export function defineDeleteRolesRoutes({ router, clusterClient }: RouteDefinitionParams) {
+  router.delete(
+    {
+      path: '/api/security/role/{name}',
+      validate: { params: schema.object({ name: schema.string({ minLength: 1 }) }) },
     },
-    config: {
-      validate: {
-        params: Joi.object()
-          .keys({
-            name: Joi.string()
-              .required(),
-          })
-          .required(),
-      },
-      pre: [routePreCheckLicenseFn]
-    }
-  });
+    createLicensedRouteHandler(async (context, request, response) => {
+      try {
+        await clusterClient.asScoped(request).callAsCurrentUser('shield.deleteRole', {
+          name: request.params.name,
+        });
+
+        return response.noContent();
+      } catch (error) {
+        const wrappedError = wrapError(error);
+        return response.customError({
+          body: wrappedError,
+          statusCode: wrappedError.output.statusCode,
+        });
+      }
+    })
+  );
 }

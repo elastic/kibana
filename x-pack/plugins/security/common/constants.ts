@@ -5,6 +5,5 @@
  */
 
 export const GLOBAL_RESOURCE = '*';
-export const IGNORED_TYPES = ['space'];
 export const APPLICATION_PREFIX = 'kibana-';
 export const RESERVED_PRIVILEGES_APPLICATION_WILDCARD = 'kibana-*';

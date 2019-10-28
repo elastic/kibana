@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { licenseMock } from '../licensing/index.mock';
+
 jest.mock('./api_keys');
 jest.mock('./authenticator');
 
@@ -41,32 +43,19 @@ import {
   InvalidateAPIKeyResult,
   InvalidateAPIKeyParams,
 } from './api_keys';
-
-function mockXPackFeature({ isEnabled = true }: Partial<{ isEnabled: boolean }> = {}) {
-  return {
-    isEnabled: jest.fn().mockReturnValue(isEnabled),
-    isAvailable: jest.fn().mockReturnValue(true),
-    registerLicenseCheckResultsGenerator: jest.fn(),
-    getLicenseCheckResults: jest.fn(),
-  };
-}
+import { SecurityLicense } from '../licensing';
 
 describe('setupAuthentication()', () => {
   let mockSetupAuthenticationParams: {
     config: ConfigType;
     loggers: LoggerFactory;
-    getLegacyAPI(): LegacyAPI;
-    core: MockedKeys<CoreSetup>;
+    getLegacyAPI(): Pick<LegacyAPI, 'isSystemAPIRequest'>;
+    http: jest.Mocked<CoreSetup['http']>;
     clusterClient: jest.Mocked<IClusterClient>;
+    license: jest.Mocked<SecurityLicense>;
   };
-  let mockXpackInfo: jest.Mocked<LegacyAPI['xpackInfo']>;
   let mockScopedClusterClient: jest.Mocked<PublicMethodsOf<ScopedClusterClient>>;
   beforeEach(async () => {
-    mockXpackInfo = {
-      isAvailable: jest.fn().mockReturnValue(true),
-      feature: jest.fn().mockReturnValue(mockXPackFeature()),
-    };
-
     const mockConfig$ = createConfig$(
       coreMock.createPluginInitializerContext({
         encryptionKey: 'ab'.repeat(16),
@@ -77,11 +66,12 @@ describe('setupAuthentication()', () => {
       true
     );
     mockSetupAuthenticationParams = {
-      core: coreMock.createSetup(),
+      http: coreMock.createSetup().http,
       config: await mockConfig$.pipe(first()).toPromise(),
       clusterClient: elasticsearchServiceMock.createClusterClient(),
+      license: licenseMock.create(),
       loggers: loggingServiceMock.create(),
-      getLegacyAPI: jest.fn().mockReturnValue({ xpackInfo: mockXpackInfo }),
+      getLegacyAPI: jest.fn(),
     };
 
     mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
@@ -102,16 +92,16 @@ describe('setupAuthentication()', () => {
 
     await setupAuthentication(mockSetupAuthenticationParams);
 
-    expect(mockSetupAuthenticationParams.core.http.registerAuth).toHaveBeenCalledTimes(1);
-    expect(mockSetupAuthenticationParams.core.http.registerAuth).toHaveBeenCalledWith(
+    expect(mockSetupAuthenticationParams.http.registerAuth).toHaveBeenCalledTimes(1);
+    expect(mockSetupAuthenticationParams.http.registerAuth).toHaveBeenCalledWith(
       expect.any(Function)
     );
 
     expect(
-      mockSetupAuthenticationParams.core.http.createCookieSessionStorageFactory
+      mockSetupAuthenticationParams.http.createCookieSessionStorageFactory
     ).toHaveBeenCalledTimes(1);
     expect(
-      mockSetupAuthenticationParams.core.http.createCookieSessionStorageFactory
+      mockSetupAuthenticationParams.http.createCookieSessionStorageFactory
     ).toHaveBeenCalledWith({
       encryptionKey: config.encryptionKey,
       isSecure: config.secureCookies,
@@ -129,7 +119,7 @@ describe('setupAuthentication()', () => {
 
       await setupAuthentication(mockSetupAuthenticationParams);
 
-      authHandler = mockSetupAuthenticationParams.core.http.registerAuth.mock.calls[0][0];
+      authHandler = mockSetupAuthenticationParams.http.registerAuth.mock.calls[0][0];
       authenticate = jest.requireMock('./authenticator').Authenticator.mock.instances[0]
         .authenticate;
     });
@@ -138,7 +128,7 @@ describe('setupAuthentication()', () => {
       const mockRequest = httpServerMock.createKibanaRequest();
       const mockResponse = httpServerMock.createLifecycleResponseFactory();
 
-      mockXpackInfo.feature.mockReturnValue(mockXPackFeature({ isEnabled: false }));
+      mockSetupAuthenticationParams.license.isEnabled.mockReturnValue(false);
 
       await authHandler(mockRequest, mockResponse, mockAuthToolkit);
 
@@ -302,7 +292,7 @@ describe('setupAuthentication()', () => {
     });
 
     it('returns `null` if Security is disabled', async () => {
-      mockXpackInfo.feature.mockReturnValue(mockXPackFeature({ isEnabled: false }));
+      mockSetupAuthenticationParams.license.isEnabled.mockReturnValue(false);
 
       await expect(getCurrentUser(httpServerMock.createKibanaRequest())).resolves.toBe(null);
     });
@@ -331,7 +321,7 @@ describe('setupAuthentication()', () => {
     });
 
     it('returns `true` if Security is disabled', async () => {
-      mockXpackInfo.feature.mockReturnValue(mockXPackFeature({ isEnabled: false }));
+      mockSetupAuthenticationParams.license.isEnabled.mockReturnValue(false);
 
       await expect(isAuthenticated(httpServerMock.createKibanaRequest())).resolves.toBe(true);
     });

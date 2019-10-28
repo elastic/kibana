@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LegacySpacesPlugin } from '../../../../spaces';
-import { OptionalPlugin } from '../../../../../server/lib/optional_plugin';
 import { checkSavedObjectsPrivilegesWithRequestFactory } from './check_saved_objects_privileges';
+
+import { httpServerMock } from '../../../../../src/core/server/mocks';
 
 test(`checkPrivileges.atSpace when spaces is enabled`, async () => {
   const expectedResult = Symbol();
@@ -15,19 +15,17 @@ test(`checkPrivileges.atSpace when spaces is enabled`, async () => {
     atSpace: jest.fn().mockReturnValue(expectedResult),
   };
   const mockCheckPrivilegesWithRequest = jest.fn().mockReturnValue(mockCheckPrivileges);
-
-  const mockSpaces = ({
-    isEnabled: true,
-    namespaceToSpaceId: jest.fn().mockReturnValue(spaceId),
-  } as unknown) as OptionalPlugin<LegacySpacesPlugin>;
-  const request = Symbol();
-
+  const request = httpServerMock.createKibanaRequest();
   const privilegeOrPrivileges = ['foo', 'bar'];
+  const mockSpacesService = {
+    getSpaceId: jest.fn(),
+    namespaceToSpaceId: jest.fn().mockReturnValue(spaceId),
+  };
 
   const checkSavedObjectsPrivileges = checkSavedObjectsPrivilegesWithRequestFactory(
     mockCheckPrivilegesWithRequest,
-    mockSpaces
-  )(request as any);
+    () => mockSpacesService
+  )(request);
 
   const namespace = 'foo';
 
@@ -36,7 +34,7 @@ test(`checkPrivileges.atSpace when spaces is enabled`, async () => {
   expect(result).toBe(expectedResult);
   expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(request);
   expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, privilegeOrPrivileges);
-  expect(mockSpaces.namespaceToSpaceId).toBeCalledWith(namespace);
+  expect(mockSpacesService.namespaceToSpaceId).toBeCalledWith(namespace);
 });
 
 test(`checkPrivileges.globally when spaces is disabled`, async () => {
@@ -45,21 +43,15 @@ test(`checkPrivileges.globally when spaces is disabled`, async () => {
     globally: jest.fn().mockReturnValue(expectedResult),
   };
   const mockCheckPrivilegesWithRequest = jest.fn().mockReturnValue(mockCheckPrivileges);
-  const mockSpaces = ({
-    isEnabled: false,
-    namespaceToSpaceId: jest.fn().mockImplementation(() => {
-      throw new Error('should not be called');
-    }),
-  } as unknown) as OptionalPlugin<LegacySpacesPlugin>;
 
-  const request = Symbol();
+  const request = httpServerMock.createKibanaRequest();
 
   const privilegeOrPrivileges = ['foo', 'bar'];
 
   const checkSavedObjectsPrivileges = checkSavedObjectsPrivilegesWithRequestFactory(
     mockCheckPrivilegesWithRequest,
-    mockSpaces
-  )(request as any);
+    () => undefined
+  )(request);
 
   const namespace = 'foo';
 
@@ -68,5 +60,4 @@ test(`checkPrivileges.globally when spaces is disabled`, async () => {
   expect(result).toBe(expectedResult);
   expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(request);
   expect(mockCheckPrivileges.globally).toHaveBeenCalledWith(privilegeOrPrivileges);
-  expect(mockSpaces.namespaceToSpaceId).not.toHaveBeenCalled();
 });

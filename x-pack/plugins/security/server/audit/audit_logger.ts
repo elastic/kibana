@@ -4,13 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export class SecurityAuditLogger {
-  constructor(auditLogger) {
-    this._auditLogger = auditLogger;
-  }
+import { LegacyAPI } from '../plugin';
 
-  savedObjectsAuthorizationFailure(username, action, types, missing, args) {
-    this._auditLogger.log(
+export class SecurityAuditLogger {
+  constructor(private readonly auditLogger: LegacyAPI['auditLogger']) {}
+
+  savedObjectsAuthorizationFailure(
+    username: string,
+    action: string,
+    types: string[],
+    missing: string[],
+    args?: Record<string, unknown>
+  ) {
+    this.auditLogger.log(
       'saved_objects_authorization_failure',
       `${username} unauthorized to ${action} ${types.join(',')}, missing ${missing.join(',')}`,
       {
@@ -18,13 +24,18 @@ export class SecurityAuditLogger {
         action,
         types,
         missing,
-        args
+        args,
       }
     );
   }
 
-  savedObjectsAuthorizationSuccess(username, action, types, args) {
-    this._auditLogger.log(
+  savedObjectsAuthorizationSuccess(
+    username: string,
+    action: string,
+    types: string[],
+    args?: Record<string, unknown>
+  ) {
+    this.auditLogger.log(
       'saved_objects_authorization_success',
       `${username} authorized to ${action} ${types.join(',')}`,
       {

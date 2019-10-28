@@ -4,15 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { difference, isEmpty, isEqual } from 'lodash';
-import { getClient } from '../../../../../server/lib/get_client_shield';
+import { isEqual, difference } from 'lodash';
+import { IClusterClient, Logger } from '../../../../../src/core/server';
+
 import { serializePrivileges } from './privileges_serializer';
+import { PrivilegesService } from './privileges';
 
-export async function registerPrivilegesWithCluster(server) {
-
-  const { application, privileges } = server.plugins.security.authorization;
-
-  const arePrivilegesEqual = (existingPrivileges, expectedPrivileges) => {
+export async function registerPrivilegesWithCluster(
+  logger: Logger,
+  privileges: PrivilegesService,
+  application: string,
+  clusterClient: IClusterClient
+) {
+  const arePrivilegesEqual = (
+    existingPrivileges: Record<string, unknown>,
+    expectedPrivileges: Record<string, unknown>
+  ) => {
     // when comparing privileges, the order of the actions doesn't matter, lodash's isEqual
     // doesn't know how to compare Sets
     return isEqual(existingPrivileges, expectedPrivileges, (value, other, key) => {
@@ -22,52 +29,64 @@ export async function registerPrivilegesWithCluster(server) {
         // before comparing.
         return isEqual([...value].sort(), [...other].sort());
       }
+
+      // Lodash types aren't correct, `undefined` should be supported as a return value here and it
+      // has special meaning.
+      return undefined as any;
     });
   };
 
-  const getPrivilegesToDelete = (existingPrivileges, expectedPrivileges) => {
-    if (isEmpty(existingPrivileges)) {
+  const getPrivilegesToDelete = (
+    existingPrivileges: Record<string, object>,
+    expectedPrivileges: Record<string, object>
+  ) => {
+    if (Object.keys(existingPrivileges).length === 0) {
       return [];
     }
 
-    return difference(Object.keys(existingPrivileges[application]), Object.keys(expectedPrivileges[application]));
+    return difference(
+      Object.keys(existingPrivileges[application]),
+      Object.keys(expectedPrivileges[application])
+    );
   };
 
   const expectedPrivileges = serializePrivileges(application, privileges.get());
 
-  server.log(['security', 'debug'], `Registering Kibana Privileges with Elasticsearch for ${application}`);
-
-  const callCluster = getClient(server).callWithInternalUser;
+  logger.debug(`Registering Kibana Privileges with Elasticsearch for ${application}`);
 
   try {
     // we only want to post the privileges when they're going to change as Elasticsearch has
     // to clear the role cache to get these changes reflected in the _has_privileges API
-    const existingPrivileges = await callCluster(`shield.getPrivilege`, { privilege: application });
+    const existingPrivileges = await clusterClient.callAsInternalUser('shield.getPrivilege', {
+      privilege: application,
+    });
     if (arePrivilegesEqual(existingPrivileges, expectedPrivileges)) {
-      server.log(['security', 'debug'], `Kibana Privileges already registered with Elasticearch for ${application}`);
+      logger.debug(`Kibana Privileges already registered with Elasticearch for ${application}`);
       return;
     }
 
     const privilegesToDelete = getPrivilegesToDelete(existingPrivileges, expectedPrivileges);
     for (const privilegeToDelete of privilegesToDelete) {
-      server.log(['security', 'debug'], `Deleting Kibana Privilege ${privilegeToDelete} from Elasticearch for ${application}`);
+      logger.debug(
+        `Deleting Kibana Privilege ${privilegeToDelete} from Elasticearch for ${application}`
+      );
       try {
-        await callCluster('shield.deletePrivilege', {
+        await clusterClient.callAsInternalUser('shield.deletePrivilege', {
           application,
-          privilege: privilegeToDelete
+          privilege: privilegeToDelete,
         });
       } catch (err) {
-        server.log(['security', 'error'], `Error deleting Kibana Privilege ${privilegeToDelete}`);
+        logger.error(`Error deleting Kibana Privilege ${privilegeToDelete}`);
         throw err;
       }
     }
 
-    await callCluster('shield.postPrivileges', {
-      body: expectedPrivileges
-    });
-    server.log(['security', 'debug'], `Updated Kibana Privileges with Elasticearch for ${application}`);
+    await clusterClient.callAsInternalUser('shield.postPrivileges', { body: expectedPrivileges });
+    logger.debug(`Updated Kibana Privileges with Elasticsearch for ${application}`);
   } catch (err) {
-    server.log(['security', 'error'], `Error registering Kibana Privileges with Elasticsearch for ${application}: ${err.message}`);
+    logger.error(
+      `Error registering Kibana Privileges with Elasticsearch for ${application}: ${err.message}`
+    );
     throw err;
   }
 }

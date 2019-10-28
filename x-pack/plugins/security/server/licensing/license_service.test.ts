@@ -4,33 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
-import sinon from 'sinon';
-import { checkLicense } from '../check_license';
+import { ILicense } from '../../../licensing/server';
+import { SecurityLicenseService } from './license_service';
 
-describe('check_license', function () {
+function getMockRawLicense({ isAvailable = false } = {}) {
+  return ({
+    isAvailable,
+    isOneOf: jest.fn(),
+    getFeature: jest.fn(),
+  } as unknown) as jest.Mocked<ILicense>;
+}
 
-  let mockXPackInfo;
-
-  beforeEach(function () {
-    mockXPackInfo = {
-      isAvailable: sinon.stub(),
-      isXpackUnavailable: sinon.stub(),
-      feature: sinon.stub(),
-      license: sinon.stub({
-        isOneOf() { },
-      })
-    };
-
-    mockXPackInfo.isAvailable.returns(true);
-  });
-
+describe('license features', function() {
   it('should display error when ES is unavailable', () => {
-    mockXPackInfo.isAvailable.returns(false);
-    mockXPackInfo.isXpackUnavailable.returns(false);
-
-    const licenseCheckResults = checkLicense(mockXPackInfo);
-    expect(licenseCheckResults).to.be.eql({
+    const serviceSetup = new SecurityLicenseService().setup();
+    expect(serviceSetup.license.getFeatures()).toEqual({
       showLogin: true,
       allowLogin: false,
       showLinks: false,
@@ -42,11 +30,9 @@ describe('check_license', function () {
   });
 
   it('should display error when X-Pack is unavailable', () => {
-    mockXPackInfo.isAvailable.returns(false);
-    mockXPackInfo.isXpackUnavailable.returns(true);
-
-    const licenseCheckResults = checkLicense(mockXPackInfo);
-    expect(licenseCheckResults).to.be.eql({
+    const serviceSetup = new SecurityLicenseService().setup();
+    serviceSetup.update(getMockRawLicense({ isAvailable: false }));
+    expect(serviceSetup.license.getFeatures()).toEqual({
       showLogin: true,
       allowLogin: false,
       showLinks: false,
@@ -57,52 +43,16 @@ describe('check_license', function () {
     });
   });
 
+  it('should show login page and other security elements, allow RBAC but forbid document level security if license is not platinum or trial.', () => {
+    const mockRawLicense = getMockRawLicense({ isAvailable: true });
+    mockRawLicense.isOneOf.mockImplementation(licenses =>
+      Array.isArray(licenses) ? licenses.includes('basic') : licenses === 'basic'
+    );
+    mockRawLicense.getFeature.mockReturnValue({ isEnabled: true, isAvailable: true } as any);
 
-  it('should show login page and other security elements if license is basic and security is enabled.', () => {
-    mockXPackInfo.license.isOneOf.withArgs(['basic']).returns(true);
-    mockXPackInfo.license.isOneOf.withArgs(['platinum', 'trial']).returns(false);
-    mockXPackInfo.feature.withArgs('security').returns({
-      isEnabled: () => { return true; }
-    });
-
-    const licenseCheckResults = checkLicense(mockXPackInfo);
-    expect(licenseCheckResults).to.be.eql({
-      showLogin: true,
-      allowLogin: true,
-      showLinks: true,
-      allowRoleDocumentLevelSecurity: false,
-      allowRoleFieldLevelSecurity: false,
-      allowRbac: true
-    });
-  });
-
-  it('should not show login page or other security elements if security is disabled in Elasticsearch.', () => {
-    mockXPackInfo.license.isOneOf.withArgs(['basic']).returns(false);
-    mockXPackInfo.feature.withArgs('security').returns({
-      isEnabled: () => { return false; }
-    });
-
-    const licenseCheckResults = checkLicense(mockXPackInfo);
-    expect(licenseCheckResults).to.be.eql({
-      showLogin: false,
-      allowLogin: false,
-      showLinks: false,
-      allowRoleDocumentLevelSecurity: false,
-      allowRoleFieldLevelSecurity: false,
-      allowRbac: false,
-      linksMessage: 'Access is denied because Security is disabled in Elasticsearch.'
-    });
-  });
-
-  it('should allow to login and allow RBAC but forbid document level security if license is not platinum or trial.', () => {
-    mockXPackInfo.license.isOneOf
-      .returns(false)
-      .withArgs(['platinum', 'trial']).returns(false);
-    mockXPackInfo.feature.withArgs('security').returns({
-      isEnabled: () => { return true; }
-    });
-
-    expect(checkLicense(mockXPackInfo)).to.be.eql({
+    const serviceSetup = new SecurityLicenseService().setup();
+    serviceSetup.update(mockRawLicense);
+    expect(serviceSetup.license.getFeatures()).toEqual({
       showLogin: true,
       allowLogin: true,
       showLinks: true,
@@ -110,17 +60,39 @@ describe('check_license', function () {
       allowRoleFieldLevelSecurity: false,
       allowRbac: true,
     });
+    expect(mockRawLicense.getFeature).toHaveBeenCalledTimes(1);
+    expect(mockRawLicense.getFeature).toHaveBeenCalledWith('security');
+  });
+
+  it('should not show login page or other security elements if security is disabled in Elasticsearch.', () => {
+    const mockRawLicense = getMockRawLicense({ isAvailable: true });
+    mockRawLicense.isOneOf.mockReturnValue(false);
+    mockRawLicense.getFeature.mockReturnValue({ isEnabled: false, isAvailable: true } as any);
+
+    const serviceSetup = new SecurityLicenseService().setup();
+    serviceSetup.update(mockRawLicense);
+    expect(serviceSetup.license.getFeatures()).toEqual({
+      showLogin: false,
+      allowLogin: false,
+      showLinks: false,
+      allowRoleDocumentLevelSecurity: false,
+      allowRoleFieldLevelSecurity: false,
+      allowRbac: false,
+      linksMessage: 'Access is denied because Security is disabled in Elasticsearch.',
+    });
   });
 
   it('should allow to login, allow RBAC and document level security if license is platinum or trial.', () => {
-    mockXPackInfo.license.isOneOf
-      .returns(false)
-      .withArgs(['platinum', 'trial']).returns(true);
-    mockXPackInfo.feature.withArgs('security').returns({
-      isEnabled: () => { return true; }
+    const mockRawLicense = getMockRawLicense({ isAvailable: true });
+    mockRawLicense.isOneOf.mockImplementation(licenses => {
+      const licenseArray = [licenses].flat();
+      return licenseArray.includes('trial') || licenseArray.includes('platinum');
     });
+    mockRawLicense.getFeature.mockReturnValue({ isEnabled: true, isAvailable: true } as any);
 
-    expect(checkLicense(mockXPackInfo)).to.be.eql({
+    const serviceSetup = new SecurityLicenseService().setup();
+    serviceSetup.update(mockRawLicense);
+    expect(serviceSetup.license.getFeatures()).toEqual({
       showLogin: true,
       allowLogin: true,
       showLinks: true,
@@ -129,5 +101,4 @@ describe('check_license', function () {
       allowRbac: true,
     });
   });
-
 });

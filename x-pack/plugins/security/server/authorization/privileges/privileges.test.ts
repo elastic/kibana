@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Feature } from '../../../../../../../plugins/features/server';
+import { Feature } from '../../../../features/server';
 import { Actions } from '../actions';
 import { privilegesFactory } from './privileges';
 
@@ -42,11 +42,8 @@ describe('features', () => {
       },
     ];
 
-    const mockXPackMainPlugin = {
-      getFeatures: jest.fn().mockReturnValue(features),
-    };
-
-    const privileges = privilegesFactory(actions, mockXPackMainPlugin as any);
+    const mockFeaturesService = { getFeatures: jest.fn().mockReturnValue(features) };
+    const privileges = privilegesFactory(actions, mockFeaturesService);
 
     const actual = privileges.get();
     expect(actual).toHaveProperty('features.foo-feature', {

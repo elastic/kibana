@@ -11,10 +11,10 @@ export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('Builtin ES Privileges', () => {
-    describe('GET /api/security/v1/esPrivileges/builtin', () => {
+    describe('GET /api/security/esPrivileges/builtin', () => {
       it('should return a list of available builtin privileges', async () => {
         await supertest
-          .get('/api/security/v1/esPrivileges/builtin')
+          .get('/api/security/esPrivileges/builtin')
           .set('kbn-xsrf', 'xxx')
           .send()
           .expect(200)

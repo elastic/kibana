@@ -3,11 +3,16 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import Boom from 'boom';
-import { Server } from 'hapi';
-import { RawKibanaPrivileges } from '../../../../../common/model';
-import { initGetPrivilegesApi } from './get';
-import { AuthorizationService } from '../../../../lib/authorization/service';
+
+import { RequestHandlerContext } from '../../../../../../../src/core/server';
+import { ILicenseCheck } from '../../../../../licensing/server';
+// TODO, require from licensing plugin root once https://github.com/elastic/kibana/pull/44922 is merged.
+import { LICENSE_STATUS } from '../../../../../licensing/server/constants';
+import { RawKibanaPrivileges } from '../../../../common/model';
+import { defineGetPrivilegesRoutes } from './get';
+
+import { httpServerMock } from '../../../../../../../src/core/server/mocks';
+import { routeDefinitionParamsMock } from '../../index.mock';
 
 const createRawKibanaPrivileges: () => RawKibanaPrivileges = () => {
   return {
@@ -34,80 +39,63 @@ const createRawKibanaPrivileges: () => RawKibanaPrivileges = () => {
   };
 };
 
-const createMockServer = () => {
-  const mockServer = new Server({ debug: false, port: 8080 });
-
-  mockServer.plugins.security = {
-    authorization: ({
-      privileges: {
-        get: jest.fn().mockImplementation(() => {
-          return createRawKibanaPrivileges();
-        }),
-      },
-    } as unknown) as AuthorizationService,
-  } as any;
-  return mockServer;
-};
-
 interface TestOptions {
-  preCheckLicenseImpl?: () => void;
+  licenseCheckResult?: ILicenseCheck;
   includeActions?: boolean;
-  asserts: {
-    statusCode: number;
-    result: Record<string, any>;
-  };
+  asserts: { statusCode: 200 | 403; result: Record<string, any> };
 }
 
 describe('GET privileges', () => {
   const getPrivilegesTest = (
     description: string,
-    { preCheckLicenseImpl = () => null, includeActions, asserts }: TestOptions
+    { licenseCheckResult = { check: LICENSE_STATUS.Valid }, includeActions, asserts }: TestOptions
   ) => {
     test(description, async () => {
-      const mockServer = createMockServer();
-      const pre = jest.fn().mockImplementation(preCheckLicenseImpl);
+      const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
+      mockRouteDefinitionParams.authz.privileges.get.mockImplementation(() =>
+        createRawKibanaPrivileges()
+      );
 
-      initGetPrivilegesApi(mockServer, pre);
-      const headers = {
-        authorization: 'foo',
-      };
+      defineGetPrivilegesRoutes(mockRouteDefinitionParams);
+      const [[, handler]] = mockRouteDefinitionParams.router.get.mock.calls;
 
-      const url = `/api/security/privileges${includeActions ? '?includeActions=true' : ''}`;
-
-      const request = {
-        method: 'GET',
-        url,
+      const headers = { authorization: 'foo' };
+      const mockRequest = httpServerMock.createKibanaRequest({
+        method: 'get',
+        path: `/api/security/privileges${includeActions ? '?includeActions=true' : ''}`,
+        query: includeActions ? { includeActions: 'true' } : undefined,
         headers,
-      };
-      const { result, statusCode } = await mockServer.inject(request);
+      });
+      const mockContext = ({
+        licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } },
+      } as unknown) as RequestHandlerContext;
 
-      expect(pre).toHaveBeenCalled();
-      expect(statusCode).toBe(asserts.statusCode);
-      expect(result).toEqual(asserts.result);
+      const mockResponseResult = { status: asserts.statusCode, options: {} };
+      const mockResponse = httpServerMock.createResponseFactory();
+      const mockResponseFactory =
+        asserts.statusCode === 200 ? mockResponse.ok : mockResponse.forbidden;
+      mockResponseFactory.mockReturnValue(mockResponseResult);
+
+      const response = handler(mockContext, mockRequest, mockResponse);
+
+      expect(response).toBe(mockResponseResult);
+      expect(mockResponseFactory).toHaveBeenCalledTimes(1);
+      expect(mockResponseFactory).toHaveBeenCalledWith(asserts.result);
+      expect(mockContext.licensing.license.check).toHaveBeenCalledWith('security', 'basic');
     });
   };
 
   describe('failure', () => {
     getPrivilegesTest(`returns result of routePreCheckLicense`, {
-      preCheckLicenseImpl: () => Boom.forbidden('test forbidden message'),
-      asserts: {
-        statusCode: 403,
-        result: {
-          error: 'Forbidden',
-          statusCode: 403,
-          message: 'test forbidden message',
-        },
-      },
+      licenseCheckResult: { check: LICENSE_STATUS.Invalid, message: 'test forbidden message' },
+      asserts: { statusCode: 403, result: { body: { message: 'test forbidden message' } } },
     });
   });
 
   describe('success', () => {
     getPrivilegesTest(`returns registered application privileges with actions when requested`, {
       includeActions: true,
-      asserts: {
-        statusCode: 200,
-        result: createRawKibanaPrivileges(),
-      },
+      asserts: { statusCode: 200, result: { body: createRawKibanaPrivileges() } },
     });
 
     getPrivilegesTest(`returns registered application privileges without actions`, {
@@ -115,13 +103,12 @@ describe('GET privileges', () => {
       asserts: {
         statusCode: 200,
         result: {
-          global: ['all', 'read'],
-          space: ['all', 'read'],
-          features: {
-            feature1: ['all'],
-            feature2: ['all'],
+          body: {
+            global: ['all', 'read'],
+            space: ['all', 'read'],
+            features: { feature1: ['all'], feature2: ['all'] },
+            reserved: ['customApplication1', 'customApplication2'],
           },
-          reserved: ['customApplication1', 'customApplication2'],
         },
       },
     });

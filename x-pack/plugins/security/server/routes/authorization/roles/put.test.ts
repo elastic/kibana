@@ -4,29 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
-import Boom from 'boom';
-import { initPutRolesApi } from './put';
-import { defaultValidationErrorHandler } from '../../../../../../../../../src/core/server/http/http_tools';
-import { GLOBAL_RESOURCE } from '../../../../../common/constants';
+import { Type } from '@kbn/config-schema';
+import { RequestHandlerContext } from '../../../../../../../src/core/server';
+import { ILicenseCheck } from '../../../../../licensing/server';
+import { LICENSE_STATUS } from '../../../../../licensing/server/constants';
+import { GLOBAL_RESOURCE } from '../../../../common/constants';
+import { definePutRolesRoutes } from './put';
+
+import {
+  elasticsearchServiceMock,
+  httpServerMock,
+} from '../../../../../../../src/core/server/mocks';
+import { routeDefinitionParamsMock } from '../../index.mock';
 
 const application = 'kibana-.kibana';
-
-const createMockServer = () => {
-  const mockServer = new Hapi.Server({
-    debug: false,
-    port: 8080,
-    routes: {
-      validate: {
-        failAction: defaultValidationErrorHandler
-      }
-    }
-  });
-  return mockServer;
-};
-
-const defaultPreCheckLicenseImpl = () => null;
-
 const privilegeMap = {
   global: {
     all: [],
@@ -44,418 +35,363 @@ const privilegeMap = {
     bar: {
       'bar-privilege-1': [],
       'bar-privilege-2': [],
-    }
+    },
   },
   reserved: {
     customApplication1: [],
     customApplication2: [],
-  }
+  },
 };
 
+interface TestOptions {
+  name: string;
+  licenseCheckResult?: ILicenseCheck;
+  apiResponses?: Array<() => Promise<unknown>>;
+  payload?: Record<string, any>;
+  asserts: { statusCode: 204 | 403; result?: Record<string, any>; apiArguments?: unknown[][] };
+}
+
 const putRoleTest = (
-  description,
-  { name, payload, preCheckLicenseImpl, callWithRequestImpls = [], asserts }
+  description: string,
+  {
+    name,
+    payload,
+    licenseCheckResult = { check: LICENSE_STATUS.Valid },
+    apiResponses = [],
+    asserts,
+  }: TestOptions
 ) => {
   test(description, async () => {
-    const mockServer = createMockServer();
-    const mockPreCheckLicense = jest
-      .fn()
-      .mockImplementation(preCheckLicenseImpl);
-    const mockCallWithRequest = jest.fn();
-    for (const impl of callWithRequestImpls) {
-      mockCallWithRequest.mockImplementationOnce(impl);
-    }
-    const mockAuthorization = {
-      privileges: {
-        get: () => privilegeMap
-      }
-    };
-    initPutRolesApi(
-      mockServer,
-      mockCallWithRequest,
-      mockPreCheckLicense,
-      mockAuthorization,
-      application,
-    );
-    const headers = {
-      authorization: 'foo',
-    };
+    const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
+    mockRouteDefinitionParams.authz.getApplicationName.mockReturnValue(application);
+    mockRouteDefinitionParams.authz.privileges.get.mockReturnValue(privilegeMap);
 
-    const request = {
-      method: 'PUT',
-      url: `/api/security/role/${name}`,
+    const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+    mockRouteDefinitionParams.clusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
+    for (const apiResponse of apiResponses) {
+      mockScopedClusterClient.callAsCurrentUser.mockImplementationOnce(apiResponse);
+    }
+
+    definePutRolesRoutes(mockRouteDefinitionParams);
+    const [[{ validate }, handler]] = mockRouteDefinitionParams.router.put.mock.calls;
+
+    const headers = { authorization: 'foo' };
+    const mockRequest = httpServerMock.createKibanaRequest({
+      method: 'put',
+      path: `/api/security/role/${name}`,
+      params: { name },
+      body: payload !== undefined ? (validate as any).body.validate(payload) : undefined,
       headers,
-      payload,
-    };
-    const response = await mockServer.inject(request);
-    const { result, statusCode } = response;
+    });
+    const mockContext = ({
+      licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } },
+    } as unknown) as RequestHandlerContext;
 
-    expect(result).toEqual(asserts.result);
-    expect(statusCode).toBe(asserts.statusCode);
-    if (preCheckLicenseImpl) {
-      expect(mockPreCheckLicense).toHaveBeenCalled();
+    const mockResponseResult = { status: asserts.statusCode, options: {} };
+    const mockResponse = httpServerMock.createResponseFactory();
+    let mockResponseFactory;
+    if (asserts.statusCode === 204) {
+      mockResponseFactory = mockResponse.noContent;
+    } else if (asserts.statusCode === 403) {
+      mockResponseFactory = mockResponse.forbidden;
     } else {
-      expect(mockPreCheckLicense).not.toHaveBeenCalled();
+      mockResponseFactory = mockResponse.customError;
     }
-    if (asserts.callWithRequests) {
-      for (const args of asserts.callWithRequests) {
-        expect(mockCallWithRequest).toHaveBeenCalledWith(
-          expect.objectContaining({
-            headers: expect.objectContaining({
-              authorization: headers.authorization,
-            }),
-          }),
-          ...args
-        );
+    mockResponseFactory.mockReturnValue(mockResponseResult);
+
+    const response = await handler(mockContext, mockRequest, mockResponse);
+
+    expect(response).toBe(mockResponseResult);
+    expect(mockResponseFactory).toHaveBeenCalledTimes(1);
+    if (asserts.result !== undefined) {
+      expect(mockResponseFactory).toHaveBeenCalledWith(asserts.result);
+    }
+
+    if (Array.isArray(asserts.apiArguments)) {
+      for (const apiArguments of asserts.apiArguments) {
+        expect(mockRouteDefinitionParams.clusterClient.asScoped).toHaveBeenCalledWith(mockRequest);
+        expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith(...apiArguments);
       }
     } else {
-      expect(mockCallWithRequest).not.toHaveBeenCalled();
+      expect(mockScopedClusterClient.callAsCurrentUser).not.toHaveBeenCalled();
     }
+    expect(mockContext.licensing.license.check).toHaveBeenCalledWith('security', 'basic');
   });
 };
 
 describe('PUT role', () => {
-  describe('failure', () => {
-    putRoleTest(`requires name in params`, {
-      name: '',
-      payload: {},
-      asserts: {
-        statusCode: 404,
-        result: {
-          error: 'Not Found',
-          message: 'Not Found',
-          statusCode: 404,
-        },
-      },
+  describe('request validation', () => {
+    let requestBodySchema: Type<any>;
+    let requestParamsSchema: Type<any>;
+    beforeEach(() => {
+      const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
+      mockRouteDefinitionParams.authz.privileges.get.mockReturnValue(privilegeMap);
+      definePutRolesRoutes(mockRouteDefinitionParams);
+
+      const [[{ validate }]] = mockRouteDefinitionParams.router.put.mock.calls;
+      requestBodySchema = (validate as any).body;
+      requestParamsSchema = (validate as any).params;
     });
 
-    putRoleTest(`requires name in params to not exceed 1024 characters`, {
-      name: 'a'.repeat(1025),
-      payload: {},
-      asserts: {
-        statusCode: 400,
-        result: {
-          error: 'Bad Request',
-          message: `child "name" fails because ["name" length must be less than or equal to 1024 characters long]`,
-          statusCode: 400,
-          validation: {
-            keys: ['name'],
-            source: 'params',
-          },
-        },
-      },
+    test('requires name in params', () => {
+      expect(() =>
+        requestParamsSchema.validate({}, {}, 'request params')
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[request params.name]: expected value of type [string] but got [undefined]"`
+      );
+
+      expect(() =>
+        requestParamsSchema.validate({ name: '' }, {}, 'request params')
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[request params.name]: value is [] but it must have a minimum length of [1]."`
+      );
     });
 
-    putRoleTest(`only allows features that match the pattern`, {
-      name: 'foo-role',
-      payload: {
-        kibana: [
+    test('requires name in params to not exceed 1024 characters', () => {
+      expect(() =>
+        requestParamsSchema.validate({ name: 'a'.repeat(1025) }, {}, 'request params')
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[request params.name]: value is [aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa] but it must have a maximum length of [1024]."`
+      );
+    });
+
+    test('only allows features that match the pattern', () => {
+      expect(() =>
+        requestBodySchema.validate(
           {
-            feature: {
-              '!foo': ['foo']
-            }
-          }
-        ]
-      },
-      asserts: {
-        statusCode: 400,
-        result: {
-          error: 'Bad Request',
-          //eslint-disable-next-line max-len
-          message: `child \"kibana\" fails because [\"kibana\" at position 0 fails because [child \"feature\" fails because [\"!foo\" is not allowed]]]`,
-          statusCode: 400,
-          validation: {
-            keys: ['kibana.0.feature.&#x21;foo'],
-            source: 'payload',
+            kibana: [
+              {
+                feature: {
+                  '!foo': ['foo'],
+                },
+              },
+            ],
           },
-        },
-      },
+          {},
+          'request body'
+        )
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[request body.kibana.0.feature.key(\\"!foo\\")]: only a-z, A-Z, 0-9, '_', and '-' are allowed"`
+      );
     });
 
-    putRoleTest(`only allows feature privileges that match the pattern`, {
-      name: 'foo-role',
-      payload: {
-        kibana: [
+    test('only allows feature privileges that match the pattern', () => {
+      expect(() =>
+        requestBodySchema.validate(
           {
-            feature: {
-              foo: ['!foo']
-            }
-          }
-        ]
-      },
-      asserts: {
-        statusCode: 400,
-        result: {
-          error: 'Bad Request',
-          //eslint-disable-next-line max-len
-          message: `child \"kibana\" fails because [\"kibana\" at position 0 fails because [child \"feature\" fails because [child \"foo\" fails because [\"foo\" at position 0 fails because [\"0\" with value \"!foo\" fails to match the required pattern: /^[a-zA-Z0-9_-]+$/]]]]]`,
-          statusCode: 400,
-          validation: {
-            keys: ['kibana.0.feature.foo.0'],
-            source: 'payload',
+            kibana: [
+              {
+                feature: {
+                  foo: ['!foo'],
+                },
+              },
+            ],
           },
-        },
-      },
+          {},
+          'request body'
+        )
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[request body.kibana.0.feature.foo]: only a-z, A-Z, 0-9, '_', and '-' are allowed"`
+      );
     });
 
-    putRoleTest(`doesn't allow both base and feature in the same entry`, {
-      name: 'foo-role',
-      payload: {
-        kibana: [
+    test(`doesn't allow both base and feature in the same entry`, () => {
+      expect(() =>
+        requestBodySchema.validate(
           {
-            base: ['all'],
-            feature: {
-              foo: ['foo']
-            }
-          }
-        ]
-      },
-      asserts: {
-        statusCode: 400,
-        result: {
-          error: 'Bad Request',
-          //eslint-disable-next-line max-len
-          message: `child \"kibana\" fails because [\"kibana\" at position 0 fails because [\"base\" conflict with forbidden peer \"feature\"]]`,
-          statusCode: 400,
-          validation: {
-            keys: ['kibana.0.base'],
-            source: 'payload',
+            kibana: [
+              {
+                base: ['all'],
+                feature: {
+                  foo: ['foo'],
+                },
+              },
+            ],
           },
-        },
-      },
+          {},
+          'request body'
+        )
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[request body.kibana.0]: definition of [feature] isn't allowed when non-empty [base] is defined."`
+      );
     });
 
     describe('global', () => {
-      putRoleTest(`only allows known Kibana global base privileges`, {
-        name: 'foo-role',
-        payload: {
-          kibana: [
+      test(`only allows known Kibana global base privileges`, () => {
+        expect(() =>
+          requestBodySchema.validate(
             {
-              base: ['foo'],
-              spaces: ['*']
-            }
-          ]
-        },
-        asserts: {
-          statusCode: 400,
-          result: {
-            error: 'Bad Request',
-            //eslint-disable-next-line max-len
-            message: `child \"kibana\" fails because [\"kibana\" at position 0 fails because [child \"base\" fails because [\"base\" at position 0 fails because [\"0\" must be one of [all, read]]]]]`,
-            statusCode: 400,
-            validation: {
-              keys: ['kibana.0.base.0'],
-              source: 'payload',
+              kibana: [
+                {
+                  base: ['foo'],
+                  spaces: ['*'],
+                },
+              ],
             },
-          },
-        },
+            {},
+            'request body'
+          )
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"[request body.kibana.0.base.0]: unknown global privilege \\"foo\\", must be one of [all,read]"`
+        );
       });
 
-      putRoleTest(`doesn't allow Kibana reserved privileges`, {
-        name: 'foo-role',
-        payload: {
-          kibana: [
+      test(`doesn't allow Kibana reserved privileges`, () => {
+        expect(() =>
+          requestBodySchema.validate(
             {
-              _reserved: ['customApplication1'],
-              spaces: ['*']
-            }
-          ]
-        },
-        asserts: {
-          statusCode: 400,
-          result: {
-            error: 'Bad Request',
-            //eslint-disable-next-line max-len
-            message: `child \"kibana\" fails because [\"kibana\" at position 0 fails because [\"_reserved\" is not allowed]]`,
-            statusCode: 400,
-            validation: {
-              keys: ['kibana.0._reserved'],
-              source: 'payload',
+              kibana: [
+                {
+                  _reserved: ['customApplication1'],
+                  spaces: ['*'],
+                },
+              ],
             },
-          },
-        },
+            {},
+            'request body'
+          )
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"[request body.kibana.0._reserved]: definition for this key is missing"`
+        );
       });
 
-      putRoleTest(`only allows one global entry`, {
-        name: 'foo-role',
-        payload: {
-          kibana: [
+      test(`only allows one global entry`, () => {
+        expect(() =>
+          requestBodySchema.validate(
             {
-              feature: {
-                foo: ['foo-privilege-1']
-              },
-              spaces: ['*']
+              kibana: [
+                {
+                  feature: {
+                    foo: ['foo-privilege-1'],
+                  },
+                  spaces: ['*'],
+                },
+                {
+                  feature: {
+                    bar: ['bar-privilege-1'],
+                  },
+                  spaces: ['*'],
+                },
+              ],
             },
-            {
-              feature: {
-                bar: ['bar-privilege-1']
-              },
-              spaces: ['*']
-            }
-          ]
-        },
-        asserts: {
-          statusCode: 400,
-          result: {
-            error: 'Bad Request',
-            //eslint-disable-next-line max-len
-            message: `child \"kibana\" fails because [\"kibana\" position 1 contains a duplicate value]`,
-            statusCode: 400,
-            validation: {
-              keys: ['kibana.1'],
-              source: 'payload'
-            }
-          },
-        },
+            {},
+            'request body'
+          )
+        ).toThrowErrorMatchingInlineSnapshot(`"[request body.kibana]: values are not unique"`);
       });
     });
 
     describe('space', () => {
-
-      putRoleTest(`doesn't allow * in a space ID`, {
-        name: 'foo-role',
-        payload: {
-          kibana: [
+      test(`doesn't allow * in a space ID`, () => {
+        expect(() =>
+          requestBodySchema.validate(
             {
-              spaces: ['foo-*']
-            }
-          ],
-        },
-        asserts: {
-          statusCode: 400,
-          result: {
-            error: 'Bad Request',
-            //eslint-disable-next-line max-len
-            message: `child \"kibana\" fails because [\"kibana\" at position 0 fails because [child \"spaces\" fails because [\"spaces\" at position 0 fails because [\"0\" must be one of [*]], \"spaces\" at position 0 fails because [\"0\" with value \"foo-*\" fails to match the required pattern: /^[a-z0-9_-]+$/]]]]`,
-            statusCode: 400,
-            validation: {
-              keys: ['kibana.0.spaces.0', 'kibana.0.spaces.0'],
-              source: 'payload',
+              kibana: [
+                {
+                  spaces: ['foo-*'],
+                },
+              ],
             },
-          },
-        },
+            {},
+            'request body'
+          )
+        ).toThrowErrorMatchingInlineSnapshot(`
+"[request body.kibana.0.spaces]: types that failed validation:
+- [request body.kibana.0.spaces.0.0]: expected value to equal [*] but got [foo-*]
+- [request body.kibana.0.spaces.1.0]: must be lower case, a-z, 0-9, '_', and '-' are allowed"
+`);
       });
 
-      putRoleTest(`can't assign space and global in same entry`, {
-        name: 'foo-role',
-        payload: {
-          kibana: [
+      test(`can't assign space and global in same entry`, () => {
+        expect(() =>
+          requestBodySchema.validate(
             {
-              spaces: ['*', 'foo-space']
-            }
-          ],
-        },
-        asserts: {
-          statusCode: 400,
-          result: {
-            error: 'Bad Request',
-            //eslint-disable-next-line max-len
-            message: `child \"kibana\" fails because [\"kibana\" at position 0 fails because [child \"spaces\" fails because [\"spaces\" at position 1 fails because [\"1\" must be one of [*]], \"spaces\" at position 0 fails because [\"0\" with value \"*\" fails to match the required pattern: /^[a-z0-9_-]+$/]]]]`,
-            statusCode: 400,
-            validation: {
-              keys: ['kibana.0.spaces.1', 'kibana.0.spaces.0'],
-              source: 'payload',
+              kibana: [
+                {
+                  spaces: ['*', 'foo-space'],
+                },
+              ],
             },
-          },
-        },
+            {},
+            'request body'
+          )
+        ).toThrowErrorMatchingInlineSnapshot(`
+"[request body.kibana.0.spaces]: types that failed validation:
+- [request body.kibana.0.spaces.0.1]: expected value to equal [*] but got [foo-space]
+- [request body.kibana.0.spaces.1.0]: must be lower case, a-z, 0-9, '_', and '-' are allowed"
+`);
       });
 
-      putRoleTest(`only allows known Kibana space base privileges`, {
-        name: 'foo-role',
-        payload: {
-          kibana: [
+      test(`only allows known Kibana space base privileges`, () => {
+        expect(() =>
+          requestBodySchema.validate(
             {
-              base: ['foo'],
-              spaces: ['foo-space']
-            }
-          ],
-        },
-        asserts: {
-          statusCode: 400,
-          result: {
-            error: 'Bad Request',
-            //eslint-disable-next-line max-len
-            message: `child \"kibana\" fails because [\"kibana\" at position 0 fails because [child \"base\" fails because [\"base\" at position 0 fails because [\"0\" must be one of [all, read]]]]]`,
-            statusCode: 400,
-            validation: {
-              keys: ['kibana.0.base.0'],
-              source: 'payload',
+              kibana: [
+                {
+                  base: ['foo'],
+                  spaces: ['foo-space'],
+                },
+              ],
             },
-          },
-        },
+            {},
+            'request body'
+          )
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"[request body.kibana.0.base.0]: unknown space privilege \\"foo\\", must be one of [all,read]"`
+        );
       });
 
-      putRoleTest(`only allows space to be in one entry`, {
-        name: 'foo-role',
-        payload: {
-          kibana: [
+      test(`only allows space to be in one entry`, () => {
+        expect(() =>
+          requestBodySchema.validate(
             {
-              feature: {
-                foo: ['foo-privilege-1']
-              },
-              spaces: ['marketing']
+              kibana: [
+                {
+                  feature: {
+                    foo: ['foo-privilege-1'],
+                  },
+                  spaces: ['marketing'],
+                },
+                {
+                  feature: {
+                    bar: ['bar-privilege-1'],
+                  },
+                  spaces: ['sales', 'marketing'],
+                },
+              ],
             },
-            {
-              feature: {
-                bar: ['bar-privilege-1']
-              },
-              spaces: ['sales', 'marketing']
-            }
-          ]
-        },
-        asserts: {
-          statusCode: 400,
-          result: {
-            error: 'Bad Request',
-            //eslint-disable-next-line max-len
-            message: `child \"kibana\" fails because [\"kibana\" position 1 contains a duplicate value]`,
-            statusCode: 400,
-            validation: {
-              keys: ['kibana.1'],
-              source: 'payload'
-            }
-          },
-        },
+            {},
+            'request body'
+          )
+        ).toThrowErrorMatchingInlineSnapshot(`"[request body.kibana]: values are not unique"`);
       });
 
-      putRoleTest(`doesn't allow Kibana reserved privileges`, {
-        name: 'foo-role',
-        payload: {
-          kibana: [
+      test(`doesn't allow Kibana reserved privileges`, () => {
+        expect(() =>
+          requestBodySchema.validate(
             {
-              _reserved: ['customApplication1'],
-              spaces: ['marketing']
+              kibana: [
+                {
+                  _reserved: ['customApplication1'],
+                  spaces: ['marketing'],
+                },
+              ],
             },
-          ]
-        },
-        asserts: {
-          statusCode: 400,
-          result: {
-            error: 'Bad Request',
-            //eslint-disable-next-line max-len
-            message: `child \"kibana\" fails because [\"kibana\" at position 0 fails because [\"_reserved\" is not allowed]]`,
-            statusCode: 400,
-            validation: {
-              keys: ['kibana.0._reserved'],
-              source: 'payload'
-            }
-          },
-        },
+            {},
+            'request body'
+          )
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"[request body.kibana.0._reserved]: definition for this key is missing"`
+        );
       });
     });
+  });
 
-    putRoleTest(`returns result of routePreCheckLicense`, {
+  describe('failure', () => {
+    putRoleTest(`returns result of license checker`, {
       name: 'foo-role',
-      payload: {},
-      preCheckLicenseImpl: () => Boom.forbidden('test forbidden message'),
-      asserts: {
-        statusCode: 403,
-        result: {
-          error: 'Forbidden',
-          statusCode: 403,
-          message: 'test forbidden message',
-        },
-      },
+      licenseCheckResult: { check: LICENSE_STATUS.Invalid, message: 'test forbidden message' },
+      asserts: { statusCode: 403, result: { body: { message: 'test forbidden message' } } },
     });
   });
 
@@ -463,10 +399,9 @@ describe('PUT role', () => {
     putRoleTest(`creates empty role`, {
       name: 'foo-role',
       payload: {},
-      preCheckLicenseImpl: defaultPreCheckLicenseImpl,
-      callWithRequestImpls: [async () => ({}), async () => { }],
+      apiResponses: [async () => ({}), async () => {}],
       asserts: {
-        callWithRequests: [
+        apiArguments: [
           ['shield.getRole', { name: 'foo-role', ignore: [404] }],
           [
             'shield.putRole',
@@ -482,23 +417,22 @@ describe('PUT role', () => {
           ],
         ],
         statusCode: 204,
-        result: null,
+        result: undefined,
       },
     });
 
-    putRoleTest(`if spaces isn't specifed, defaults to global`, {
+    putRoleTest(`if spaces isn't specified, defaults to global`, {
       name: 'foo-role',
       payload: {
         kibana: [
           {
             base: ['all'],
-          }
-        ]
+          },
+        ],
       },
-      preCheckLicenseImpl: defaultPreCheckLicenseImpl,
-      callWithRequestImpls: [async () => ({}), async () => { }],
+      apiResponses: [async () => ({}), async () => {}],
       asserts: {
-        callWithRequests: [
+        apiArguments: [
           ['shield.getRole', { name: 'foo-role', ignore: [404] }],
           [
             'shield.putRole',
@@ -511,9 +445,7 @@ describe('PUT role', () => {
                 applications: [
                   {
                     application,
-                    privileges: [
-                      'all',
-                    ],
+                    privileges: ['all'],
                     resources: [GLOBAL_RESOURCE],
                   },
                 ],
@@ -522,7 +454,7 @@ describe('PUT role', () => {
           ],
         ],
         statusCode: 204,
-        result: null,
+        result: undefined,
       },
     });
 
@@ -533,15 +465,14 @@ describe('PUT role', () => {
           {
             base: [],
             feature: {
-              foo: ['foo']
-            }
-          }
-        ]
+              foo: ['foo'],
+            },
+          },
+        ],
       },
-      preCheckLicenseImpl: defaultPreCheckLicenseImpl,
-      callWithRequestImpls: [async () => ({}), async () => { }],
+      apiResponses: [async () => ({}), async () => {}],
       asserts: {
-        callWithRequests: [
+        apiArguments: [
           ['shield.getRole', { name: 'foo-role', ignore: [404] }],
           [
             'shield.putRole',
@@ -554,9 +485,7 @@ describe('PUT role', () => {
                 applications: [
                   {
                     application,
-                    privileges: [
-                      'feature_foo.foo',
-                    ],
+                    privileges: ['feature_foo.foo'],
                     resources: [GLOBAL_RESOURCE],
                   },
                 ],
@@ -565,7 +494,7 @@ describe('PUT role', () => {
           ],
         ],
         statusCode: 204,
-        result: null,
+        result: undefined,
       },
     });
 
@@ -575,14 +504,13 @@ describe('PUT role', () => {
         kibana: [
           {
             base: ['all'],
-            feature: {}
-          }
-        ]
+            feature: {},
+          },
+        ],
       },
-      preCheckLicenseImpl: defaultPreCheckLicenseImpl,
-      callWithRequestImpls: [async () => ({}), async () => { }],
+      apiResponses: [async () => ({}), async () => {}],
       asserts: {
-        callWithRequests: [
+        apiArguments: [
           ['shield.getRole', { name: 'foo-role', ignore: [404] }],
           [
             'shield.putRole',
@@ -595,9 +523,7 @@ describe('PUT role', () => {
                 applications: [
                   {
                     application,
-                    privileges: [
-                      'all',
-                    ],
+                    privileges: ['all'],
                     resources: [GLOBAL_RESOURCE],
                   },
                 ],
@@ -606,7 +532,7 @@ describe('PUT role', () => {
           ],
         ],
         statusCode: 204,
-        result: null,
+        result: undefined,
       },
     });
 
@@ -622,7 +548,7 @@ describe('PUT role', () => {
             {
               field_security: {
                 grant: ['test-field-security-grant-1', 'test-field-security-grant-2'],
-                except: ['test-field-security-except-1', 'test-field-security-except-2']
+                except: ['test-field-security-except-1', 'test-field-security-except-2'],
               },
               names: ['test-index-name-1', 'test-index-name-2'],
               privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
@@ -638,20 +564,19 @@ describe('PUT role', () => {
           },
           {
             base: ['all', 'read'],
-            spaces: ['test-space-1', 'test-space-2']
+            spaces: ['test-space-1', 'test-space-2'],
           },
           {
             feature: {
               foo: ['foo-privilege-1', 'foo-privilege-2'],
             },
-            spaces: ['test-space-3']
-          }
-        ]
+            spaces: ['test-space-3'],
+          },
+        ],
       },
-      preCheckLicenseImpl: defaultPreCheckLicenseImpl,
-      callWithRequestImpls: [async () => ({}), async () => { }],
+      apiResponses: [async () => ({}), async () => {}],
       asserts: {
-        callWithRequests: [
+        apiArguments: [
           ['shield.getRole', { name: 'foo-role', ignore: [404] }],
           [
             'shield.putRole',
@@ -661,27 +586,18 @@ describe('PUT role', () => {
                 applications: [
                   {
                     application,
-                    privileges: [
-                      'all',
-                      'read',
-                    ],
+                    privileges: ['all', 'read'],
                     resources: [GLOBAL_RESOURCE],
                   },
                   {
                     application,
-                    privileges: [
-                      'space_all',
-                      'space_read',
-                    ],
-                    resources: ['space:test-space-1', 'space:test-space-2']
+                    privileges: ['space_all', 'space_read'],
+                    resources: ['space:test-space-1', 'space:test-space-2'],
                   },
                   {
                     application,
-                    privileges: [
-                      'feature_foo.foo-privilege-1',
-                      'feature_foo.foo-privilege-2',
-                    ],
-                    resources: ['space:test-space-3']
+                    privileges: ['feature_foo.foo-privilege-1', 'feature_foo.foo-privilege-2'],
+                    resources: ['space:test-space-3'],
                   },
                 ],
                 cluster: ['test-cluster-privilege'],
@@ -689,13 +605,10 @@ describe('PUT role', () => {
                   {
                     field_security: {
                       grant: ['test-field-security-grant-1', 'test-field-security-grant-2'],
-                      except: ['test-field-security-except-1', 'test-field-security-except-2']
+                      except: ['test-field-security-except-1', 'test-field-security-except-2'],
                     },
                     names: ['test-index-name-1', 'test-index-name-2'],
-                    privileges: [
-                      'test-index-privilege-1',
-                      'test-index-privilege-2',
-                    ],
+                    privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
                     query: `{ "match": { "title": "foo" } }`,
                   },
                 ],
@@ -706,7 +619,7 @@ describe('PUT role', () => {
           ],
         ],
         statusCode: 204,
-        result: null,
+        result: undefined,
       },
     });
 
@@ -722,7 +635,7 @@ describe('PUT role', () => {
             {
               field_security: {
                 grant: ['test-field-security-grant-1', 'test-field-security-grant-2'],
-                except: ['test-field-security-except-1', 'test-field-security-except-2']
+                except: ['test-field-security-except-1', 'test-field-security-except-2'],
               },
               names: ['test-index-name-1', 'test-index-name-2'],
               privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
@@ -735,24 +648,23 @@ describe('PUT role', () => {
           {
             feature: {
               foo: ['foo-privilege-1'],
-              bar: ['bar-privilege-1']
+              bar: ['bar-privilege-1'],
             },
-            spaces: ['*']
+            spaces: ['*'],
           },
           {
             base: ['all'],
-            spaces: ['test-space-1', 'test-space-2']
+            spaces: ['test-space-1', 'test-space-2'],
           },
           {
             feature: {
-              bar: ['bar-privilege-2']
+              bar: ['bar-privilege-2'],
             },
-            spaces: ['test-space-3']
-          }
+            spaces: ['test-space-3'],
+          },
         ],
       },
-      preCheckLicenseImpl: defaultPreCheckLicenseImpl,
-      callWithRequestImpls: [
+      apiResponses: [
         async () => ({
           'foo-role': {
             metadata: {
@@ -766,7 +678,7 @@ describe('PUT role', () => {
               {
                 field_security: {
                   grant: ['old-field-security-grant-1', 'old-field-security-grant-2'],
-                  except: ['old-field-security-except-1', 'old-field-security-except-2']
+                  except: ['old-field-security-except-1', 'old-field-security-except-2'],
                 },
                 names: ['old-index-name'],
                 privileges: ['old-privilege'],
@@ -783,10 +695,10 @@ describe('PUT role', () => {
             ],
           },
         }),
-        async () => { },
+        async () => {},
       ],
       asserts: {
-        callWithRequests: [
+        apiArguments: [
           ['shield.getRole', { name: 'foo-role', ignore: [404] }],
           [
             'shield.putRole',
@@ -796,25 +708,18 @@ describe('PUT role', () => {
                 applications: [
                   {
                     application,
-                    privileges: [
-                      'feature_foo.foo-privilege-1',
-                      'feature_bar.bar-privilege-1',
-                    ],
+                    privileges: ['feature_foo.foo-privilege-1', 'feature_bar.bar-privilege-1'],
                     resources: [GLOBAL_RESOURCE],
                   },
                   {
                     application,
-                    privileges: [
-                      'space_all',
-                    ],
-                    resources: ['space:test-space-1', 'space:test-space-2']
+                    privileges: ['space_all'],
+                    resources: ['space:test-space-1', 'space:test-space-2'],
                   },
                   {
                     application,
-                    privileges: [
-                      'feature_bar.bar-privilege-2',
-                    ],
-                    resources: ['space:test-space-3']
+                    privileges: ['feature_bar.bar-privilege-2'],
+                    resources: ['space:test-space-3'],
                   },
                 ],
                 cluster: ['test-cluster-privilege'],
@@ -822,13 +727,10 @@ describe('PUT role', () => {
                   {
                     field_security: {
                       grant: ['test-field-security-grant-1', 'test-field-security-grant-2'],
-                      except: ['test-field-security-except-1', 'test-field-security-except-2']
+                      except: ['test-field-security-except-1', 'test-field-security-except-2'],
                     },
                     names: ['test-index-name-1', 'test-index-name-2'],
-                    privileges: [
-                      'test-index-privilege-1',
-                      'test-index-privilege-2',
-                    ],
+                    privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
                     query: `{ "match": { "title": "foo" } }`,
                   },
                 ],
@@ -839,125 +741,112 @@ describe('PUT role', () => {
           ],
         ],
         statusCode: 204,
-        result: null,
+        result: undefined,
       },
     });
 
-    putRoleTest(
-      `updates role which has existing other application privileges`,
-      {
-        name: 'foo-role',
-        payload: {
-          metadata: {
-            foo: 'test-metadata',
+    putRoleTest(`updates role which has existing other application privileges`, {
+      name: 'foo-role',
+      payload: {
+        metadata: {
+          foo: 'test-metadata',
+        },
+        elasticsearch: {
+          cluster: ['test-cluster-privilege'],
+          indices: [
+            {
+              names: ['test-index-name-1', 'test-index-name-2'],
+              privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
+            },
+          ],
+          run_as: ['test-run-as-1', 'test-run-as-2'],
+        },
+        kibana: [
+          {
+            base: ['all', 'read'],
+            spaces: ['*'],
           },
-          elasticsearch: {
-            cluster: ['test-cluster-privilege'],
+        ],
+      },
+      apiResponses: [
+        async () => ({
+          'foo-role': {
+            metadata: {
+              bar: 'old-metadata',
+            },
+            transient_metadata: {
+              enabled: true,
+            },
+            cluster: ['old-cluster-privilege'],
             indices: [
               {
-                names: ['test-index-name-1', 'test-index-name-2'],
-                privileges: [
-                  'test-index-privilege-1',
-                  'test-index-privilege-2',
-                ],
+                names: ['old-index-name'],
+                privileges: ['old-privilege'],
               },
             ],
-            run_as: ['test-run-as-1', 'test-run-as-2'],
-          },
-          kibana: [
-            {
-              base: ['all', 'read'],
-              spaces: ['*']
-            }
-          ]
-        },
-        preCheckLicenseImpl: defaultPreCheckLicenseImpl,
-        callWithRequestImpls: [
-          async () => ({
-            'foo-role': {
-              metadata: {
-                bar: 'old-metadata',
-              },
-              transient_metadata: {
-                enabled: true,
-              },
-              cluster: ['old-cluster-privilege'],
-              indices: [
-                {
-                  names: ['old-index-name'],
-                  privileges: ['old-privilege'],
-                },
-              ],
-              run_as: ['old-run-as'],
-              applications: [
-                {
-                  application,
-                  privileges: ['old-kibana-privilege'],
-                  resources: ['old-resource'],
-                },
-                {
-                  application: 'logstash-foo',
-                  privileges: ['logstash-privilege'],
-                  resources: ['logstash-resource'],
-                },
-                {
-                  application: 'beats-foo',
-                  privileges: ['beats-privilege'],
-                  resources: ['beats-resource'],
-                },
-              ],
-            },
-          }),
-          async () => { },
-        ],
-        asserts: {
-          callWithRequests: [
-            ['shield.getRole', { name: 'foo-role', ignore: [404] }],
-            [
-              'shield.putRole',
+            run_as: ['old-run-as'],
+            applications: [
               {
-                name: 'foo-role',
-                body: {
-                  applications: [
-                    {
-                      application,
-                      privileges: [
-                        'all',
-                        'read',
-                      ],
-                      resources: [GLOBAL_RESOURCE],
-                    },
-                    {
-                      application: 'logstash-foo',
-                      privileges: ['logstash-privilege'],
-                      resources: ['logstash-resource'],
-                    },
-                    {
-                      application: 'beats-foo',
-                      privileges: ['beats-privilege'],
-                      resources: ['beats-resource'],
-                    },
-                  ],
-                  cluster: ['test-cluster-privilege'],
-                  indices: [
-                    {
-                      names: ['test-index-name-1', 'test-index-name-2'],
-                      privileges: [
-                        'test-index-privilege-1',
-                        'test-index-privilege-2',
-                      ],
-                    },
-                  ],
-                  metadata: { foo: 'test-metadata' },
-                  run_as: ['test-run-as-1', 'test-run-as-2'],
-                },
+                application,
+                privileges: ['old-kibana-privilege'],
+                resources: ['old-resource'],
+              },
+              {
+                application: 'logstash-foo',
+                privileges: ['logstash-privilege'],
+                resources: ['logstash-resource'],
+              },
+              {
+                application: 'beats-foo',
+                privileges: ['beats-privilege'],
+                resources: ['beats-resource'],
               },
             ],
+          },
+        }),
+        async () => {},
+      ],
+      asserts: {
+        apiArguments: [
+          ['shield.getRole', { name: 'foo-role', ignore: [404] }],
+          [
+            'shield.putRole',
+            {
+              name: 'foo-role',
+              body: {
+                applications: [
+                  {
+                    application,
+                    privileges: ['all', 'read'],
+                    resources: [GLOBAL_RESOURCE],
+                  },
+                  {
+                    application: 'logstash-foo',
+                    privileges: ['logstash-privilege'],
+                    resources: ['logstash-resource'],
+                  },
+                  {
+                    application: 'beats-foo',
+                    privileges: ['beats-privilege'],
+                    resources: ['beats-resource'],
+                  },
+                ],
+                cluster: ['test-cluster-privilege'],
+                indices: [
+                  {
+                    names: ['test-index-name-1', 'test-index-name-2'],
+                    privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
+                  },
+                ],
+                metadata: { foo: 'test-metadata' },
+                run_as: ['test-run-as-1', 'test-run-as-2'],
+              },
+            },
           ],
-          statusCode: 204,
-          result: null,
-        },
-      }
-    );
+        ],
+        statusCode: 204,
+        result: undefined,
+      },
+    });
   });
 });
