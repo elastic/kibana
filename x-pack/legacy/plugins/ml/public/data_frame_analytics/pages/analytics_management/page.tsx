@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FC, useState } from 'react';
+import React, { FC, Fragment, useEffect, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -29,11 +29,24 @@ import { DataFrameAnalyticsList } from './components/analytics_list';
 import { RefreshAnalyticsListButton } from './components/refresh_analytics_list_button';
 import { useRefreshInterval } from './components/analytics_list/use_refresh_interval';
 import { useCreateAnalyticsForm } from './hooks/use_create_analytics_form';
+import { AnalyticStatsBarStats, StatsBar } from '../../../components/stats_bar';
+import { getAnalyticsJobsStats } from './resolvers';
 
 export const Page: FC = () => {
   const [blockRefresh, setBlockRefresh] = useState(false);
+  const [stats, setStats] = useState<AnalyticStatsBarStats | undefined>(
+    {} as AnalyticStatsBarStats
+  );
 
   useRefreshInterval(setBlockRefresh);
+
+  const setAnalyticsJobsStats = async () => {
+    setStats(await getAnalyticsJobsStats());
+  };
+
+  useEffect(() => {
+    setAnalyticsJobsStats();
+  }, []);
 
   const createAnalyticsForm = useCreateAnalyticsForm();
 
@@ -69,6 +82,7 @@ export const Page: FC = () => {
               </EuiTitle>
             </EuiPageContentHeaderSection>
             <EuiPageContentHeaderSection>
+              {stats && <StatsBar stats={stats} dataTestSub={'mlAnalyticsStatsBar'} />}
               <EuiFlexGroup alignItems="center">
                 {/* grow={false} fixes IE11 issue with nested flex */}
                 <EuiFlexItem grow={false}>

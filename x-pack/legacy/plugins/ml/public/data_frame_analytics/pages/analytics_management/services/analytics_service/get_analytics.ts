@@ -4,17 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ml } from '../../../../../services/ml_api_service';
+import {
+  GetDataFrameAnalyticsStatsResponse,
+  GetDataFrameAnalyticsStatsResponseError,
+  GetDataFrameAnalyticsStatsResponseOk,
+  ml,
+} from '../../../../../services/ml_api_service';
 import {
   DataFrameAnalyticsConfig,
-  refreshAnalyticsList$,
   REFRESH_ANALYTICS_LIST_STATE,
+  refreshAnalyticsList$,
 } from '../../../../common';
 
 import {
-  DataFrameAnalyticsListRow,
-  DataFrameAnalyticsStats,
   DATA_FRAME_MODE,
+  DataFrameAnalyticsListRow,
   isDataFrameAnalyticsStats,
 } from '../../components/analytics_list/common';
 
@@ -23,13 +27,7 @@ interface GetDataFrameAnalyticsResponse {
   data_frame_analytics: DataFrameAnalyticsConfig[];
 }
 
-interface GetDataFrameAnalyticsStatsResponseOk {
-  node_failures?: object;
-  count: number;
-  data_frame_analytics: DataFrameAnalyticsStats[];
-}
-
-const isGetDataFrameAnalyticsStatsResponseOk = (
+export const isGetDataFrameAnalyticsStatsResponseOk = (
   arg: any
 ): arg is GetDataFrameAnalyticsStatsResponseOk => {
   return (
@@ -38,16 +36,6 @@ const isGetDataFrameAnalyticsStatsResponseOk = (
     Array.isArray(arg.data_frame_analytics)
   );
 };
-
-interface GetDataFrameAnalyticsStatsResponseError {
-  statusCode: number;
-  error: string;
-  message: string;
-}
-
-type GetDataFrameAnalyticsStatsResponse =
-  | GetDataFrameAnalyticsStatsResponseOk
-  | GetDataFrameAnalyticsStatsResponseError;
 
 export type GetAnalytics = (forceRefresh?: boolean) => void;
 

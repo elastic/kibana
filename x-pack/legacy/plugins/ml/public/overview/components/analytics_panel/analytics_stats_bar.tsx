@@ -14,8 +14,11 @@ import {
   DataFrameAnalyticsListRow,
 } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
 
-function getAnalyticsStats(analyticsList: any[]) {
-  const analyticsStats = {
+/**
+ * Gets initial object for analytics stats.
+ */
+export function getInitialAnalyticsStats(): AnalyticStatsBarStats {
+  return {
     total: {
       label: i18n.translate('xpack.ml.overview.statsBar.totalAnalyticsLabel', {
         defaultMessage: 'Total analytics jobs',
@@ -45,6 +48,10 @@ function getAnalyticsStats(analyticsList: any[]) {
       show: false,
     },
   };
+}
+
+function getAnalyticsStats(analyticsList: any[]) {
+  const analyticsStats = getInitialAnalyticsStats();
 
   if (analyticsList === undefined) {
     return analyticsStats;
