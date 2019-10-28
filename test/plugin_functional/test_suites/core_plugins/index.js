@@ -23,5 +23,6 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./legacy_plugins'));
     loadTestFile(require.resolve('./server_plugins'));
     loadTestFile(require.resolve('./ui_plugins'));
+    loadTestFile(require.resolve('./top_nav'));
   });
 }

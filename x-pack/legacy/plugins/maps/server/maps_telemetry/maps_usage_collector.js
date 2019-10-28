@@ -9,7 +9,7 @@ import { TASK_ID, scheduleTask, registerMapsTelemetryTask } from './telemetry_ta
 
 export function initTelemetryCollection(server) {
   registerMapsTelemetryTask(server);
-  scheduleTask(server, server.plugins.task_manager);
+  scheduleTask(server);
   registerMapsUsageCollector(server);
 }
 
@@ -21,6 +21,11 @@ async function isTaskManagerReady(server) {
 async function fetch(server) {
   let docs;
   const taskManager = server.plugins.task_manager;
+
+  if (!taskManager) {
+    return null;
+  }
+
   try {
     ({ docs } = await taskManager.fetch({
       query: {
