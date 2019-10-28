@@ -16,19 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Legacy } from 'kibana';
 
-async function handleRequest(request: Legacy.Request) {
-  const uiSettings = request.getUiSettingsService();
-  return {
-    settings: await uiSettings.getUserProvided(),
-  };
+import { CoreSetup, Plugin } from 'kibana/public';
+
+declare global {
+  interface Window {
+    uiSettingsPlugin?: Record<string, any>;
+    uiSettingsPluginValue?: string;
+  }
 }
 
-export const getRoute = {
-  path: '/api/kibana/settings',
-  method: 'GET',
-  handler(request: Legacy.Request) {
-    return handleRequest(request);
-  },
-};
+export class UiSettingsPlugin implements Plugin {
+  public setup(core: CoreSetup) {
+    window.uiSettingsPlugin = core.uiSettings.getAll().ui_settings_plugin;
+    window.uiSettingsPluginValue = core.uiSettings.get('ui_settings_plugin');
+  }
+
+  public start() {}
+  public stop() {}
+}
