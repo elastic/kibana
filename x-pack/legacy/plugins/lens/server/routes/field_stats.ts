@@ -7,8 +7,8 @@
 import Boom from 'boom';
 import DateMath from '@elastic/datemath';
 import { schema } from '@kbn/config-schema';
-import { AggregationSearchResponseWithTotalHitsAsInt } from 'elasticsearch';
 import { CoreSetup } from 'src/core/server';
+import { ESSearchResponse } from '../../../apm/typings/elasticsearch';
 import { FieldStatsResponse, BASE_API_URL } from '../../common';
 
 const SHARD_SIZE = 5000;
@@ -135,9 +135,11 @@ export async function getNumberHistogram(
     },
   };
 
-  const minMaxResult = (await aggSearchWithBody(
-    searchBody
-  )) as AggregationSearchResponseWithTotalHitsAsInt<unknown, { body: { aggs: typeof searchBody } }>;
+  const minMaxResult = (await aggSearchWithBody(searchBody)) as ESSearchResponse<
+    unknown,
+    { body: { aggs: typeof searchBody } },
+    { restTotalHitsAsInt: true }
+  >;
 
   const minValue = minMaxResult.aggregations!.sample.min_value.value;
   const maxValue = minMaxResult.aggregations!.sample.max_value.value;
@@ -178,11 +180,10 @@ export async function getNumberHistogram(
       },
     },
   };
-  const histogramResult = (await aggSearchWithBody(
-    histogramBody
-  )) as AggregationSearchResponseWithTotalHitsAsInt<
+  const histogramResult = (await aggSearchWithBody(histogramBody)) as ESSearchResponse<
     unknown,
-    { body: { aggs: typeof histogramBody } }
+    { body: { aggs: typeof histogramBody } },
+    { restTotalHitsAsInt: true }
   >;
 
   return {
@@ -214,11 +215,10 @@ export async function getStringSamples(
       },
     },
   };
-  const topValuesResult = (await aggSearchWithBody(
-    topValuesBody
-  )) as AggregationSearchResponseWithTotalHitsAsInt<
+  const topValuesResult = (await aggSearchWithBody(topValuesBody)) as ESSearchResponse<
     unknown,
-    { body: { aggs: typeof topValuesBody } }
+    { body: { aggs: typeof topValuesBody } },
+    { restTotalHitsAsInt: true }
   >;
 
   return {
@@ -263,11 +263,10 @@ export async function getDateHistogram(
   const histogramBody = {
     histo: { date_histogram: { field: field.name, fixed_interval: fixedInterval } },
   };
-  const results = (await aggSearchWithBody(
-    histogramBody
-  )) as AggregationSearchResponseWithTotalHitsAsInt<
+  const results = (await aggSearchWithBody(histogramBody)) as ESSearchResponse<
     unknown,
-    { body: { aggs: typeof histogramBody } }
+    { body: { aggs: typeof histogramBody } },
+    { restTotalHitsAsInt: true }
   >;
 
   return {

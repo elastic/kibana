@@ -20,17 +20,17 @@
 import { has } from 'lodash';
 import { Legacy } from 'kibana';
 import { FieldFormatsService } from './field_formats_service';
-import { FieldFormat } from '../../../../plugins/data/common/field_formats';
+import { FieldFormat } from '../../../../plugins/data/public';
 
 export function fieldFormatsMixin(kbnServer: any, server: Legacy.Server) {
-  const fieldFormatClasses: FieldFormat[] = [];
+  const fieldFormatClasses: Array<FieldFormat['constructor']> = [];
 
   // for use outside of the request context, for special cases
   server.decorate('server', 'fieldFormatServiceFactory', async function(uiSettings) {
     const uiConfigs = await uiSettings.getAll();
-    const uiSettingDefaults = uiSettings.getDefaults();
-    Object.keys(uiSettingDefaults).forEach(key => {
-      if (has(uiConfigs, key) && uiSettingDefaults[key].type === 'json') {
+    const registeredUiSettings = uiSettings.getRegistered();
+    Object.keys(registeredUiSettings).forEach(key => {
+      if (has(uiConfigs, key) && registeredUiSettings[key].type === 'json') {
         uiConfigs[key] = JSON.parse(uiConfigs[key]);
       }
     });
@@ -39,7 +39,7 @@ export function fieldFormatsMixin(kbnServer: any, server: Legacy.Server) {
     return new FieldFormatsService(fieldFormatClasses, getConfig);
   });
 
-  server.decorate('server', 'registerFieldFormat', createFormat => {
-    fieldFormatClasses.push(createFormat(FieldFormat));
+  server.decorate('server', 'registerFieldFormat', customFieldFormat => {
+    fieldFormatClasses.push(customFieldFormat);
   });
 }

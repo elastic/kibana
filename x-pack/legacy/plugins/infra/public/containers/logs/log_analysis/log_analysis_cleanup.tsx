@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import createContainer from 'constate-latest';
+import createContainer from 'constate';
 import { useMemo } from 'react';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { callDeleteJobs, callStopDatafeed, callGetJobDeletionTasks } from './api/ml_cleanup';

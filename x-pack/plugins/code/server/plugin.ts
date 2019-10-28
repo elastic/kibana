@@ -4,30 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
 import { first } from 'rxjs/operators';
 import { TypeOf } from '@kbn/config-schema';
-import {
-  CoreSetup,
-  LoggerFactory,
-  PluginInitializerContext,
-  RecursiveReadonly,
-} from 'src/core/server';
-import { deepFreeze } from '../../../../src/core/utils';
-import { PluginSetupContract as FeaturesSetupContract } from '../../features/server';
+import { PluginInitializerContext } from 'src/core/server';
 import { CodeConfigSchema } from './config';
-import { SAVED_OBJ_REPO } from '../../../legacy/plugins/code/common/constants';
-
-/**
- * Describes public Code plugin contract returned at the `setup` stage.
- */
-export interface PluginSetupContract {
-  /** @deprecated */
-  legacy: {
-    config: TypeOf<typeof CodeConfigSchema>;
-    logger: LoggerFactory;
-  };
-}
 
 /**
  * Represents Code Plugin instance that will be managed by the Kibana plugin system.
@@ -35,59 +15,23 @@ export interface PluginSetupContract {
 export class CodePlugin {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
-  public async setup(
-    coreSetup: CoreSetup,
-    { features }: { features: FeaturesSetupContract }
-  ): Promise<RecursiveReadonly<PluginSetupContract>> {
+  public async setup() {
     const config = await this.initializerContext.config
       .create<TypeOf<typeof CodeConfigSchema>>()
       .pipe(first())
       .toPromise();
 
-    features.registerFeature({
-      id: 'code',
-      name: i18n.translate('xpack.code.featureRegistry.codeFeatureName', {
-        defaultMessage: 'Code',
-      }),
-      icon: 'codeApp',
-      navLinkId: 'code',
-      app: ['code', 'kibana'],
-      catalogue: [], // TODO add catalogue here
-      privileges: {
-        all: {
-          excludeFromBasePrivileges: true,
-          api: ['code_user', 'code_admin'],
-          savedObject: {
-            all: [SAVED_OBJ_REPO],
-            read: ['config'],
-          },
-          ui: ['show', 'user', 'admin'],
-        },
-        read: {
-          api: ['code_user'],
-          savedObject: {
-            all: [],
-            read: ['config', SAVED_OBJ_REPO],
-          },
-          ui: ['show', 'user'],
-        },
-      },
-    });
-
-    return deepFreeze({
-      /** @deprecated */
-      legacy: {
-        config,
-        logger: this.initializerContext.logger,
-      },
-    });
+    if (config && Object.keys(config).length > 0) {
+      this.initializerContext.logger
+        .get('config', 'deprecation')
+        .warn(
+          'The experimental app "Code" has been removed from Kibana. Remove all xpack.code.* ' +
+            'configurations from kibana.yml so Kibana does not fail to start up in the next major version.'
+        );
+    }
   }
 
-  public start() {
-    this.initializerContext.logger.get().debug('Starting Code plugin');
-  }
+  public start() {}
 
-  public stop() {
-    this.initializerContext.logger.get().debug('Stopping Code plugin');
-  }
+  public stop() {}
 }

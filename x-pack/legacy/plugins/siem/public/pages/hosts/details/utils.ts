@@ -6,7 +6,7 @@
 
 import { Breadcrumb } from 'ui/chrome';
 
-import { hostsModel, inputsSelectors, State } from '../../../store';
+import { hostsModel } from '../../../store';
 import { HostsTableType } from '../../../store/hosts/model';
 import { getHostsUrl, getHostDetailsUrl } from '../../../components/link_to/redirect_to_hosts';
 
@@ -14,15 +14,6 @@ import * as i18n from '../translations';
 import { RouteSpyState } from '../../../utils/route/types';
 
 export const type = hostsModel.HostsType.details;
-
-export const makeMapStateToProps = () => {
-  const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
-  const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
-  return (state: State) => ({
-    query: getGlobalQuerySelector(state),
-    filters: getGlobalFiltersQuerySelector(state),
-  });
-};
 
 const TabNameMappedToI18nKey = {
   [HostsTableType.hosts]: i18n.NAVIGATION_ALL_HOSTS_TITLE,
