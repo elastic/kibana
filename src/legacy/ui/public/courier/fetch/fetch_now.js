@@ -24,6 +24,7 @@ import { ContinueIncompleteProvider } from './continue_incomplete';
 import { RequestStatus } from './req_status';
 import { i18n } from '@kbn/i18n';
 
+import _ from 'lodash';
 import moment from 'moment';
 import { auditSearch } from '@logrhythm/nm-web-shared/services/audit';
 
@@ -115,13 +116,20 @@ export function FetchNowProvider(Private, Promise) {
     const searchSourceFields = searchSource.getFields();
 
     let queryToAudit = '';
+    let queryVal;
     if(Array.isArray(searchSourceFields.query)) {
-      queryToAudit = searchSourceFields.query[searchSourceFields.query.length - 1].query || '';
+      queryVal = searchSourceFields.query[searchSourceFields.query.length - 1].query || '';
     } else {
-      queryToAudit = searchSourceFields.query.query || '';
+      queryVal = searchSourceFields.query.query || '';
     }
 
-    const dateFilter = Object.values(searchSource.getParent().getFields().filter().range)[0];
+    if(queryVal) {
+      queryToAudit = typeof queryVal === 'string' ? queryVal : _.get(queryVal, 'query_string.query', '');
+    }
+
+    const fields = searchSource.getParent().getFields();
+    const filter = fields && typeof fields.filter === 'function' ? fields.filter() : null;
+    const dateFilter = filter ? Object.values(searchSource.getParent().getFields().filter().range)[0] : null;
 
     if (
       !queryToAudit ||
@@ -146,7 +154,8 @@ export function FetchNowProvider(Private, Promise) {
   function startRequests(searchRequests) {
     if(searchRequests.length > 0) {
       try {
-        auditFetch(searchRequests[0].source);
+        auditFetch(searchRequests[0].source)
+          .catch(err => console.warn('An error occurred trying to audit the query.', err)); // eslint-disable-line
       } catch (err) {
         console.warn('An error occurred trying to audit the query.', err); // eslint-disable-line
       }
