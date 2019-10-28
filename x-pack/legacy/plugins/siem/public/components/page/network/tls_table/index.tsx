@@ -5,7 +5,7 @@
  */
 
 import { isEqual } from 'lodash/fp';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { ActionCreator } from 'typescript-fsa';
@@ -78,22 +78,26 @@ const TlsTableComponent = React.memo<TlsTableProps>(
       type === networkModel.NetworkType.page
         ? networkModel.NetworkTableType.tls
         : networkModel.IpDetailsTableType.tls;
-    const onChange = (criteria: Criteria) => {
-      if (criteria.sort != null) {
-        const splitField = criteria.sort.field.split('.');
-        const newTlsSort: TlsSortField = {
-          field: getSortFromString(splitField[splitField.length - 1]),
-          direction: criteria.sort.direction,
-        };
-        if (!isEqual(newTlsSort, sort)) {
-          updateNetworkTable({
-            networkType: type,
-            tableType,
-            updates: { sort: newTlsSort },
-          });
+
+    const onChange = useCallback(
+      (criteria: Criteria) => {
+        if (criteria.sort != null) {
+          const splitField = criteria.sort.field.split('.');
+          const newTlsSort: TlsSortField = {
+            field: getSortFromString(splitField[splitField.length - 1]),
+            direction: criteria.sort.direction,
+          };
+          if (!isEqual(newTlsSort, sort)) {
+            updateNetworkTable({
+              networkType: type,
+              tableType,
+              updates: { sort: newTlsSort },
+            });
+          }
         }
-      }
-    };
+      },
+      [sort, type]
+    );
     return (
       <PaginatedTable
         activePage={activePage}
