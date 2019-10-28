@@ -6,8 +6,12 @@
 
 import { ServerInjectOptions } from 'hapi';
 import { ActionResult } from '../../../../../../actions/server/types';
+import { SignalAlertParamsRest } from '../../alerts/types';
 
-export const typicalPayload = () => ({
+// The Omit of filter is because of a Hapi Server Typing issue that I am unclear
+// where it comes from. I would hope to remove the "filter" as an omit at some point
+// when we upgrade and Hapi Server is ok with the filter.
+export const typicalPayload = (): Partial<Omit<SignalAlertParamsRest, 'filter'>> => ({
   id: 'rule-1',
   description: 'Detecting root and admin users',
   index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],

@@ -72,7 +72,7 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
       const scroll = scrollLock ? scrollLock : '1m';
       const size = scrollSize ? scrollSize : 400;
 
-      const esFilter = await getFilter(
+      const esFilter = await getFilter({
         type,
         filter,
         filters,
@@ -80,8 +80,8 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
         query,
         savedId,
         services,
-        index
-      );
+        index,
+      });
 
       // TODO: Turn these options being sent in into a template for the alert type
       const noReIndex = buildEventsScrollQuery({

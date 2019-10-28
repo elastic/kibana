@@ -36,16 +36,27 @@ export const getQueryFilter = (
   return esQuery;
 };
 
-export const getFilter = async (
-  type: SignalAlertParams['type'],
-  filter: Record<string, {}> | undefined,
-  filters: PartialFilter[] | undefined,
-  language: string | undefined,
-  query: string | undefined,
-  savedId: string | undefined,
-  services: AlertServices,
-  index: string[] | undefined
-): Promise<unknown> => {
+interface GetFilterArgs {
+  type: SignalAlertParams['type'];
+  filter: Record<string, {}> | undefined;
+  filters: PartialFilter[] | undefined;
+  language: string | undefined;
+  query: string | undefined;
+  savedId: string | undefined;
+  services: AlertServices;
+  index: string[] | undefined;
+}
+
+export const getFilter = async ({
+  filter,
+  filters,
+  index,
+  language,
+  savedId,
+  services,
+  type,
+  query,
+}: GetFilterArgs): Promise<unknown> => {
   switch (type) {
     case 'query': {
       if (query != null && language != null && index != null) {

@@ -18,6 +18,7 @@ import {
   createActionResult,
   createAlertResult,
   getCreateRequest,
+  typicalPayload,
 } from './__mocks__/request_responses';
 
 describe('create_signals', () => {
@@ -69,47 +70,29 @@ describe('create_signals', () => {
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.create.mockResolvedValue(createActionResult());
       alertsClient.create.mockResolvedValue(createAlertResult());
+      // missing id should throw a 400
+      const { id, ...noId } = typicalPayload();
       const request: ServerInjectOptions = {
         method: 'POST',
         url: '/api/siem/signals',
-        payload: {
-          // missing id should throw a 400
-          description: 'Detecting root and admin users',
-          index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-          interval: '5m',
-          name: 'Detect Root/Admin Users',
-          severity: 'high',
-          type: 'query',
-          from: 'now-6m',
-          to: 'now',
-          query: 'user.name: root or user.name: admin',
-          language: 'kuery',
-        },
+        payload: noId,
       };
       const { statusCode } = await server.inject(request);
       expect(statusCode).toBe(400);
     });
 
-    test('returns 200 if type is kql', async () => {
+    test('returns 200 if type is query', async () => {
       alertsClient.find.mockResolvedValue(getFindResult());
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.create.mockResolvedValue(createActionResult());
       alertsClient.create.mockResolvedValue(createAlertResult());
+      const { type, ...noType } = typicalPayload();
       const request: ServerInjectOptions = {
         method: 'POST',
         url: '/api/siem/signals',
         payload: {
-          id: 'rule-1',
-          description: 'Detecting root and admin users',
-          index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-          interval: '5m',
-          name: 'Detect Root/Admin Users',
-          severity: 'high',
+          ...noType,
           type: 'query',
-          from: 'now-6m',
-          to: 'now',
-          query: 'user.name: root or user.name: admin',
-          language: 'kuery',
         },
       };
       const { statusCode } = await server.inject(request);
@@ -123,19 +106,13 @@ describe('create_signals', () => {
       alertsClient.create.mockResolvedValue(createAlertResult());
       // Cannot type request with a ServerInjectOptions as the type system complains
       // about the property filter involving Hapi types, so I left it off for now
+      const { language, query, type, ...noType } = typicalPayload();
       const request = {
         method: 'POST',
         url: '/api/siem/signals',
         payload: {
-          id: 'rule-1',
-          description: 'Detecting root and admin users',
-          index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-          interval: '5m',
-          name: 'Detect Root/Admin Users',
-          severity: 'high',
+          ...noType,
           type: 'filter',
-          from: 'now-6m',
-          to: 'now',
           filter: {},
         },
       };
@@ -148,21 +125,13 @@ describe('create_signals', () => {
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.create.mockResolvedValue(createActionResult());
       alertsClient.create.mockResolvedValue(createAlertResult());
+      const { type, ...noType } = typicalPayload();
       const request: ServerInjectOptions = {
         method: 'POST',
         url: '/api/siem/signals',
         payload: {
-          id: 'rule-1',
-          description: 'Detecting root and admin users',
-          index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-          interval: '5m',
-          name: 'Detect Root/Admin Users',
-          severity: 'high',
-          type: 'something-made-up', // This is a made up type that causes the 400
-          from: 'now-6m',
-          to: 'now',
-          query: 'user.name: root or user.name: admin',
-          language: 'kuery',
+          ...noType,
+          type: 'something-made-up',
         },
       };
       const { statusCode } = await server.inject(request);

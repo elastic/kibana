@@ -288,32 +288,32 @@ describe('get_filter', () => {
 
   describe('getFilter', () => {
     test('returns a filter if given a type of filter as is', async () => {
-      const filter = await getFilter(
-        'filter',
-        { something: '1' },
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        servicesMock,
-        ['auditbeat-*']
-      );
+      const filter = await getFilter({
+        type: 'filter',
+        filter: { something: '1' },
+        filters: undefined,
+        language: undefined,
+        query: undefined,
+        savedId: undefined,
+        services: servicesMock,
+        index: ['auditbeat-*'],
+      });
       expect(filter).toEqual({
         something: '1',
       });
     });
 
     test('returns a query if given a type of query', async () => {
-      const filter = await getFilter(
-        'query',
-        undefined,
-        undefined,
-        'kuery',
-        'host.name: siem',
-        undefined,
-        servicesMock,
-        ['auditbeat-*']
-      );
+      const filter = await getFilter({
+        type: 'query',
+        filter: undefined,
+        filters: undefined,
+        language: 'kuery',
+        query: 'host.name: siem',
+        savedId: undefined,
+        services: servicesMock,
+        index: ['auditbeat-*'],
+      });
       expect(filter).toEqual({
         bool: {
           must: [],
@@ -339,53 +339,60 @@ describe('get_filter', () => {
 
     test('throws on type query if query is undefined', async () => {
       await expect(
-        getFilter(
-          'query',
-          undefined,
-          undefined,
-          undefined,
-          'host.name: siem',
-          undefined,
-          servicesMock,
-          ['auditbeat-*']
-        )
+        getFilter({
+          type: 'query',
+          filter: undefined,
+          filters: undefined,
+          language: undefined,
+          query: 'host.name: siem',
+          savedId: undefined,
+          services: servicesMock,
+          index: ['auditbeat-*'],
+        })
       ).rejects.toThrow('query, filters, and index parameter should be defined');
     });
 
     test('throws on type query if language is undefined', async () => {
       await expect(
-        getFilter('query', undefined, undefined, 'kuery', undefined, undefined, servicesMock, [
-          'auditbeat-*',
-        ])
+        getFilter({
+          type: 'query',
+          filter: undefined,
+          filters: undefined,
+          language: 'kuery',
+          query: undefined,
+          savedId: undefined,
+          services: servicesMock,
+          index: ['auditbeat-*'],
+        })
       ).rejects.toThrow('query, filters, and index parameter should be defined');
     });
 
     test('throws on type query if index is undefined', async () => {
       await expect(
-        getFilter(
-          'query',
-          undefined,
-          undefined,
-          'kuery',
-          'host.name: siem',
-          undefined,
-          servicesMock,
-          undefined
-        )
+        getFilter({
+          type: 'query',
+          filter: undefined,
+          filters: undefined,
+          language: 'kuery',
+          query: 'host.name: siem',
+          savedId: undefined,
+          services: servicesMock,
+          index: undefined,
+        })
       ).rejects.toThrow('query, filters, and index parameter should be defined');
     });
 
     test('returns a saved query if given a type of query', async () => {
-      const filter = await getFilter(
-        'saved_query',
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        'some-id',
-        servicesMock,
-        ['auditbeat-*']
-      );
+      const filter = await getFilter({
+        type: 'saved_query',
+        filter: undefined,
+        filters: undefined,
+        language: undefined,
+        query: undefined,
+        savedId: 'some-id',
+        services: servicesMock,
+        index: ['auditbeat-*'],
+      });
       expect(filter).toEqual({
         bool: {
           filter: [
@@ -400,31 +407,31 @@ describe('get_filter', () => {
 
     test('throws on saved query if saved_id is undefined', async () => {
       await expect(
-        getFilter(
-          'saved_query',
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          servicesMock,
-          ['auditbeat-*']
-        )
+        getFilter({
+          type: 'saved_query',
+          filter: undefined,
+          filters: undefined,
+          language: undefined,
+          query: undefined,
+          savedId: undefined,
+          services: servicesMock,
+          index: ['auditbeat-*'],
+        })
       ).rejects.toThrow('savedId parameter should be defined');
     });
 
     test('throws on saved query if index is undefined', async () => {
       await expect(
-        getFilter(
-          'saved_query',
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          'some-id',
-          servicesMock,
-          undefined
-        )
+        getFilter({
+          type: 'saved_query',
+          filter: undefined,
+          filters: undefined,
+          language: undefined,
+          query: undefined,
+          savedId: 'some-id',
+          services: servicesMock,
+          index: undefined,
+        })
       ).rejects.toThrow('savedId parameter should be defined');
     });
   });

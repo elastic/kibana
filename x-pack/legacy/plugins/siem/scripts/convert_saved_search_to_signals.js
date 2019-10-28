@@ -99,29 +99,45 @@ async function main() {
     return [...accum, ...parsedLines];
   }, []);
 
-  savedSearchesParsed.forEach(savedSearch => {
-    const fileToWrite = cleanupFileName(savedSearch._file);
+  savedSearchesParsed.forEach(
+    ({
+      _file,
+      attributes: {
+        description,
+        title,
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: {
+            query: { query, language },
+            filter,
+          },
+        },
+      },
+    }) => {
+      const fileToWrite = cleanupFileName(_file);
 
-    const query = savedSearch.attributes.kibanaSavedObjectMeta.searchSourceJSON.query.query;
-    if (query != null && query.trim() !== '') {
-      const outputMessage = {
-        id: fileToWrite,
-        description: savedSearch.attributes.description || savedSearch.attributes.title,
-        index: INDEX,
-        interval: INTERVAL,
-        name: savedSearch.attributes.title,
-        severity: SEVERITY,
-        type: TYPE,
-        from: FROM,
-        to: TO,
-        query: savedSearch.attributes.kibanaSavedObjectMeta.searchSourceJSON.query.query,
-        language: savedSearch.attributes.kibanaSavedObjectMeta.searchSourceJSON.query.language,
-        filters: savedSearch.attributes.kibanaSavedObjectMeta.searchSourceJSON.filter,
-      };
+      if (query != null && query.trim() !== '') {
+        const outputMessage = {
+          id: fileToWrite,
+          description: description || title,
+          index: INDEX,
+          interval: INTERVAL,
+          name: title,
+          severity: SEVERITY,
+          type: TYPE,
+          from: FROM,
+          to: TO,
+          query,
+          language,
+          filters: filter,
+        };
 
-      fs.writeFileSync(`${outputDir}/${fileToWrite}.json`, JSON.stringify(outputMessage, null, 2));
+        fs.writeFileSync(
+          `${outputDir}/${fileToWrite}.json`,
+          JSON.stringify(outputMessage, null, 2)
+        );
+      }
     }
-  });
+  );
 }
 
 if (require.main === module) {
