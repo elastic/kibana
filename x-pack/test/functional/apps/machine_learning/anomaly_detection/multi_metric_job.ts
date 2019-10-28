@@ -74,7 +74,7 @@ export default function({ getService }: FtrProviderContext) {
   describe('multi metric', function() {
     this.tags(['smoke', 'mlqa']);
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/farequote');
+      await esArchiver.load('ml/farequote');
     });
 
     after(async () => {
