@@ -47,7 +47,6 @@ export class IndexPatterns {
     http: HttpServiceBase
   ) {
     this.apiClient = new IndexPatternsApiClient(http);
-
     this.config = config;
     this.savedObjectsClient = savedObjectsClient;
   }
@@ -118,18 +117,26 @@ export class IndexPatterns {
     return null;
   };
 
-  get = (id: string) => {
+  get = async (id: string): Promise<IndexPattern> => {
     const cache = indexPatternCache.get(id);
-    return cache || indexPatternCache.set(id, this.make(id));
+    if (cache) {
+      return cache;
+    }
+
+    const indexPattern = await this.make(id);
+
+    return indexPatternCache.set(id, indexPattern);
   };
 
   make = (id?: string): Promise<IndexPattern> => {
-    return new IndexPattern(
+    const indexPattern = new IndexPattern(
       id,
       (cfg: any) => this.config.get(cfg),
       this.savedObjectsClient,
       this.apiClient,
       indexPatternCache
-    ).init();
+    );
+
+    return indexPattern.init();
   };
 }

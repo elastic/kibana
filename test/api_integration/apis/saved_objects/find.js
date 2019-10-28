@@ -141,9 +141,7 @@ export default function ({ getService }) {
                         id: '91200a00-9efd-11e7-acb3-3dab96693fab',
                       }
                     ],
-                    migrationVersion: {
-                      visualization: '7.3.1',
-                    },
+                    migrationVersion: resp.body.saved_objects[0].migrationVersion,
                     updated_at: '2017-09-21T18:51:23.794Z',
                     version: 'WzIsMV0=',
                   },
@@ -161,6 +159,22 @@ export default function ({ getService }) {
               expect(resp.body).to.eql({
                 error: 'Bad Request',
                 message: 'This type dashboard is not allowed: Bad Request',
+                statusCode: 400,
+              });
+            })
+        ));
+
+        it('KQL syntax error should return 400 with Bad Request', async () => (
+          await supertest
+            .get('/api/saved_objects/_find?type=dashboard&filter=dashboard.attributes.title:foo<invalid')
+            .expect(400)
+            .then(resp => {
+              console.log('body', JSON.stringify(resp.body));
+              expect(resp.body).to.eql({
+                error: 'Bad Request',
+                message: 'KQLSyntaxError: Expected AND, OR, end of input, ' +
+                'whitespace but \"<\" found.\ndashboard.attributes.title:foo' +
+                '<invalid\n------------------------------^: Bad Request',
                 statusCode: 400,
               });
             })

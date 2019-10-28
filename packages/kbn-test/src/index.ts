@@ -47,3 +47,5 @@ export {
   setupJUnitReportGeneration,
   escapeCdata,
 } from './mocha';
+
+export { runFailedTestsReporterCli } from './failed_tests_reporter';

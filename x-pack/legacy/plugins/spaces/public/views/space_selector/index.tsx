@@ -6,7 +6,6 @@
 
 // @ts-ignore
 import template from 'plugins/spaces/views/space_selector/space_selector.html';
-import 'ui/autoload/styles';
 import chrome from 'ui/chrome';
 import { I18nContext } from 'ui/i18n';
 // @ts-ignore

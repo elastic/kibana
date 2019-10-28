@@ -10,7 +10,7 @@ import { IndexPattern, IndexPatterns } from 'ui/index_patterns';
 import { SavedObjectAttributes, SimpleSavedObject } from 'kibana/public';
 import chrome from 'ui/chrome';
 import { SavedSearchLoader } from '../../../../../../src/legacy/core_plugins/kibana/public/discover/types';
-import { setup as data } from '../../../../../../src/legacy/core_plugins/data/public/legacy';
+import { start as data } from '../../../../../../src/legacy/core_plugins/data/public/legacy';
 
 type IndexPatternSavedObject = SimpleSavedObject<SavedObjectAttributes>;
 
@@ -70,7 +70,7 @@ export function loadCurrentIndexPattern(indexPatterns: IndexPatterns, $route: Re
   return fullIndexPatterns.get($route.current.params.index);
 }
 
-export function getIndexPatternById(id: string): IndexPattern {
+export function getIndexPatternById(id: string): Promise<IndexPattern> {
   if (fullIndexPatterns !== null) {
     return fullIndexPatterns.get(id);
   } else {

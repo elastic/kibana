@@ -18,6 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { Visualization, FramePublicAPI, Datasource } from '../../types';
 import { Action } from './state_management';
 import { getSuggestions, switchToSuggestion, Suggestion } from './suggestion_helpers';
+import { trackUiEvent } from '../../lens_ui_telemetry';
 
 interface VisualizationSelection {
   visualizationId: string;
@@ -51,8 +52,8 @@ function VisualizationSummary(props: Props) {
   if (!visualization) {
     return (
       <>
-        {i18n.translate('xpack.lens.configPanel.chooseVisualization', {
-          defaultMessage: 'Choose a visualization',
+        {i18n.translate('xpack.lens.configPanel.selectVisualization', {
+          defaultMessage: 'Select a visualization',
         })}
       </>
     );
@@ -75,6 +76,8 @@ export function ChartSwitch(props: Props) {
 
   const commitSelection = (selection: VisualizationSelection) => {
     setFlyoutOpen(false);
+
+    trackUiEvent(`chart_switch`);
 
     switchToSuggestion(
       props.framePublicAPI,
@@ -198,8 +201,8 @@ export function ChartSwitch(props: Props) {
       anchorPosition="downLeft"
     >
       <EuiPopoverTitle>
-        {i18n.translate('xpack.lens.configPanel.chooseVisualization', {
-          defaultMessage: 'Choose a visualization',
+        {i18n.translate('xpack.lens.configPanel.selectVisualization', {
+          defaultMessage: 'Select a visualization',
         })}
       </EuiPopoverTitle>
       <EuiKeyPadMenu>

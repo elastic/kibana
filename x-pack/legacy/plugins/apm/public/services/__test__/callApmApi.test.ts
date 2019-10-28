@@ -5,15 +5,19 @@
  */
 
 import * as callApiExports from '../rest/callApi';
-import { callApmApi } from '../rest/callApmApi';
-
-jest.mock('ui/kfetch');
+import { createCallApmApi, APMClient } from '../rest/createCallApmApi';
+import { HttpServiceBase } from 'kibana/public';
 
 const callApi = jest
   .spyOn(callApiExports, 'callApi')
   .mockImplementation(() => Promise.resolve(null));
 
 describe('callApmApi', () => {
+  let callApmApi: APMClient;
+  beforeEach(() => {
+    callApmApi = createCallApmApi({} as HttpServiceBase);
+  });
+
   afterEach(() => {
     callApi.mockClear();
   });
@@ -30,6 +34,7 @@ describe('callApmApi', () => {
     } as never);
 
     expect(callApi).toHaveBeenCalledWith(
+      {},
       expect.objectContaining({
         pathname: '/api/apm/foo/to/bar'
       })
@@ -48,6 +53,7 @@ describe('callApmApi', () => {
     } as never);
 
     expect(callApi).toHaveBeenCalledWith(
+      {},
       expect.objectContaining({
         pathname: '/api/apm',
         query: {
@@ -71,6 +77,7 @@ describe('callApmApi', () => {
     } as never);
 
     expect(callApi).toHaveBeenCalledWith(
+      {},
       expect.objectContaining({
         pathname: '/api/apm',
         method: 'POST',

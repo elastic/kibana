@@ -49,6 +49,7 @@ exports[`ConfirmDeleteModal renders as expected 1`] = `
           display="row"
           error="Space names do not match."
           fullWidth={false}
+          hasChildLabel={true}
           hasEmptyLabelSpace={false}
           isInvalid={false}
           label="Confirm space name to delete"

@@ -38,7 +38,8 @@ describe('Significant Terms Agg', function () {
           $rootScope.agg = {
             id: 'test',
             params: aggParams,
-            type: significantTerms
+            type: significantTerms,
+            getParam: key => aggParams[key],
           };
         });
       }

@@ -8,7 +8,8 @@
   flex-direction: column;
 
   .lnsWorkspacePanelWrapper__pageContentHeader {
-    padding: $euiSizeS;
+    @include euiTitle('xs');
+    padding: $euiSizeM;
     border-bottom: $euiBorderThin;
     // override EuiPage
     margin-bottom: 0 !important; // sass-lint:disable-line no-important
@@ -21,6 +22,7 @@
     align-items: stretch;
     justify-content: stretch;
     overflow: auto;
+    position: relative;
 
     > * {
       flex: 1 1 100%;
@@ -30,12 +32,4 @@
       overflow-x: hidden;
     }
   }
-}
-
-.lnsWorkspacePanelWrapper__titleInput {
-  @include euiTitle('xs');
-  width: 100%;
-  max-width: none;
-  background: transparent;
-  box-shadow: none;
 }

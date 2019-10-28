@@ -60,22 +60,20 @@ describe('Field Renderers', () => {
   describe('#dateRenderer', () => {
     test('it renders correctly against snapshot', () => {
       const wrapper = shallow(
-        <TestProviders>{dateRenderer('firstSeen', mockData.complete.source!)}</TestProviders>
+        <TestProviders>{dateRenderer(mockData.complete.source!.firstSeen)}</TestProviders>
       );
 
       expect(toJson(wrapper)).toMatchSnapshot();
     });
 
     test('it renders emptyTagValue when invalid field provided', () => {
-      const wrapper = mount(
-        <TestProviders>{dateRenderer('geo.spark_plug', mockData.complete.source!)}</TestProviders>
-      );
+      const wrapper = mount(<TestProviders>{dateRenderer(null)}</TestProviders>);
       expect(wrapper.text()).toEqual(getEmptyValue());
     });
   });
 
   describe('#autonomousSystemRenderer', () => {
-    const emptyMock: AutonomousSystem = { organization: {}, number: null };
+    const emptyMock: AutonomousSystem = { organization: { name: null }, number: null };
     const halfEmptyMock: AutonomousSystem = { organization: { name: 'Test Org' }, number: null };
 
     test('it renders correctly against snapshot', () => {

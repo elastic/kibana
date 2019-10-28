@@ -13,7 +13,7 @@ import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import { actionExecutorMock } from './action_executor.mock';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/plugin.mock';
 import {
-  SavedObjectsClientMock,
+  savedObjectsClientMock,
   loggingServiceMock,
 } from '../../../../../../src/core/server/mocks';
 
@@ -54,7 +54,7 @@ afterAll(() => fakeTimer.restore());
 const services = {
   log: jest.fn(),
   callCluster: jest.fn(),
-  savedObjectsClient: SavedObjectsClientMock.create(),
+  savedObjectsClient: savedObjectsClientMock.create(),
 };
 const actionExecutorInitializerParams = {
   logger: loggingServiceMock.create().get(),
@@ -67,7 +67,6 @@ const taskRunnerFactoryInitializerParams = {
   spaceIdToNamespace,
   encryptedSavedObjectsPlugin: mockedEncryptedSavedObjectsPlugin,
   getBasePath: jest.fn().mockReturnValue(undefined),
-  isSecurityEnabled: true,
 };
 
 beforeEach(() => {
@@ -217,10 +216,7 @@ test('uses API key when provided', async () => {
 
 test(`doesn't use API key when not provided`, async () => {
   const factory = new TaskRunnerFactory(mockedActionExecutor);
-  factory.initialize({
-    ...taskRunnerFactoryInitializerParams,
-    isSecurityEnabled: false,
-  });
+  factory.initialize(taskRunnerFactoryInitializerParams);
   const taskRunner = factory.create({ taskInstance: mockedTaskInstance });
 
   mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok' });
@@ -255,69 +251,4 @@ test(`doesn't use API key when not provided`, async () => {
       },
     },
   });
-});
-
-test(`doesn't use API key when provided and isSecurityEnabled is set to false`, async () => {
-  const factory = new TaskRunnerFactory(mockedActionExecutor);
-  factory.initialize({
-    ...taskRunnerFactoryInitializerParams,
-    isSecurityEnabled: false,
-  });
-  const taskRunner = factory.create({ taskInstance: mockedTaskInstance });
-
-  mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok' });
-  spaceIdToNamespace.mockReturnValueOnce('namespace-test');
-  mockedEncryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
-    id: '3',
-    type: 'action_task_params',
-    attributes: {
-      actionId: '2',
-      params: { baz: true },
-      apiKey: Buffer.from('123:abc').toString('base64'),
-    },
-    references: [],
-  });
-
-  await taskRunner.run();
-
-  expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
-    actionId: '2',
-    params: { baz: true },
-    request: {
-      getBasePath: expect.anything(),
-      headers: {},
-      path: '/',
-      route: { settings: {} },
-      url: {
-        href: '/',
-      },
-      raw: {
-        req: {
-          url: '/',
-        },
-      },
-    },
-  });
-});
-
-test(`throws an error when isSecurityEnabled is true but key isn't provided`, async () => {
-  const taskRunner = taskRunnerFactory.create({
-    taskInstance: mockedTaskInstance,
-  });
-
-  mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok' });
-  spaceIdToNamespace.mockReturnValueOnce('namespace-test');
-  mockedEncryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
-    id: '3',
-    type: 'action_task_params',
-    attributes: {
-      actionId: '2',
-      params: { baz: true },
-    },
-    references: [],
-  });
-
-  await expect(taskRunner.run()).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"API key is required. The attribute \\"apiKey\\" is missing."`
-  );
 });

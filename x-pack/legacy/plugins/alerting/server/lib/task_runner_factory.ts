@@ -24,7 +24,6 @@ import {
 
 export interface TaskRunnerContext {
   logger: Logger;
-  isSecurityEnabled: boolean;
   getServices: GetServicesFunction;
   executeAction: ActionsPluginStartContract['execute'];
   encryptedSavedObjectsPlugin: EncryptedSavedObjectsStartContract;
@@ -51,7 +50,6 @@ export class TaskRunnerFactory {
 
     const {
       logger,
-      isSecurityEnabled,
       getServices,
       executeAction,
       encryptedSavedObjectsPlugin,
@@ -74,9 +72,7 @@ export class TaskRunnerFactory {
           { namespace }
         );
 
-        if (isSecurityEnabled && !apiKey) {
-          throw new Error('API key is required. The attribute "apiKey" is missing.');
-        } else if (isSecurityEnabled) {
+        if (apiKey) {
           requestHeaders.authorization = `ApiKey ${apiKey}`;
         }
 

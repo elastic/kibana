@@ -7,7 +7,6 @@
 import template from 'plugins/spaces/views/management/template.html';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import 'ui/autoload/styles';
 import { I18nContext } from 'ui/i18n';
 // @ts-ignore
 import routes from 'ui/routes';

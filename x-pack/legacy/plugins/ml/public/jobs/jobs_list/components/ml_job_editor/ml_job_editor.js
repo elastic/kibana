@@ -21,6 +21,7 @@ export function MLJobEditor({
   mode = EDITOR_MODE.JSON,
   readOnly = false,
   syntaxChecking = true,
+  theme = 'textmate',
   onChange = () => {}
 }) {
   return (
@@ -32,8 +33,13 @@ export function MLJobEditor({
       readOnly={readOnly}
       wrapEnabled={true}
       showPrintMargin={false}
+      theme={theme}
       editorProps={{ $blockScrolling: true }}
-      setOptions={{ useWorker: syntaxChecking }}
+      setOptions={{
+        useWorker: syntaxChecking,
+        tabSize: 2,
+        useSoftTabs: true
+      }}
       onChange={onChange}
     />
   );
@@ -44,5 +50,7 @@ MLJobEditor.propTypes = {
   width: PropTypes.string,
   mode: PropTypes.string,
   readOnly: PropTypes.bool,
+  syntaxChecking: PropTypes.bool,
+  theme: PropTypes.string,
   onChange: PropTypes.func,
 };

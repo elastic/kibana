@@ -11,7 +11,7 @@ import { ConcreteTaskInstance } from '../../../task_manager';
 import { TaskRunnerContext, TaskRunnerFactory } from './task_runner_factory';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/plugin.mock';
 import {
-  SavedObjectsClientMock,
+  savedObjectsClientMock,
   loggingServiceMock,
 } from '../../../../../../src/core/server/mocks';
 
@@ -51,7 +51,7 @@ beforeAll(() => {
 
 afterAll(() => fakeTimer.restore());
 
-const savedObjectsClient = SavedObjectsClientMock.create();
+const savedObjectsClient = savedObjectsClientMock.create();
 const encryptedSavedObjectsPlugin = encryptedSavedObjectsMock.create();
 const services = {
   log: jest.fn(),
@@ -60,7 +60,6 @@ const services = {
 };
 
 const taskRunnerFactoryInitializerParams: jest.Mocked<TaskRunnerContext> = {
-  isSecurityEnabled: true,
   getServices: jest.fn().mockReturnValue(services),
   executeAction: jest.fn(),
   encryptedSavedObjectsPlugin,
@@ -315,10 +314,7 @@ test('uses API key when provided', async () => {
 
 test(`doesn't use API key when not provided`, async () => {
   const factory = new TaskRunnerFactory();
-  factory.initialize({
-    ...taskRunnerFactoryInitializerParams,
-    isSecurityEnabled: false,
-  });
+  factory.initialize(taskRunnerFactoryInitializerParams);
   const taskRunner = factory.create(alertType, {
     taskInstance: mockedTaskInstance,
   });

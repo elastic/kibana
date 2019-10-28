@@ -2,8 +2,7 @@
   "id": "code",
   "version": "8.0.0",
   "kibanaVersion": "kibana",
-  "configPath": ["x-pack", "code"],
+  "configPath": ["xpack", "code"],
   "server": true,
-  "ui": false,
-  "requiredPlugins": ["features"]
+  "ui": false
 }

@@ -6,12 +6,7 @@
 
 import * as i18n from './translations';
 import { StatItems } from '../../../stat_items';
-
-const euiColorVis0 = '#00B3A4';
-const euiColorVis1 = '#3185FC';
-const euiColorVis2 = '#DB1374';
-const euiColorVis3 = '#490092';
-const euiColorVis9 = '#920000';
+import { KpiHostsChartColors } from './types';
 
 export const kpiHostsMapping: Readonly<StatItems[]> = [
   {
@@ -21,7 +16,7 @@ export const kpiHostsMapping: Readonly<StatItems[]> = [
       {
         key: 'hosts',
         value: null,
-        color: euiColorVis1,
+        color: KpiHostsChartColors.hosts,
         icon: 'storage',
       },
     ],
@@ -38,7 +33,7 @@ export const kpiHostsMapping: Readonly<StatItems[]> = [
         name: i18n.SUCCESS_CHART_LABEL,
         description: i18n.SUCCESS_UNIT_LABEL,
         value: null,
-        color: euiColorVis0,
+        color: KpiHostsChartColors.authSuccess,
         icon: 'check',
       },
       {
@@ -46,7 +41,7 @@ export const kpiHostsMapping: Readonly<StatItems[]> = [
         name: i18n.FAIL_CHART_LABEL,
         description: i18n.FAIL_UNIT_LABEL,
         value: null,
-        color: euiColorVis9,
+        color: KpiHostsChartColors.authFailure,
         icon: 'cross',
       },
     ],
@@ -64,7 +59,7 @@ export const kpiHostsMapping: Readonly<StatItems[]> = [
         name: i18n.SOURCE_CHART_LABEL,
         description: i18n.SOURCE_UNIT_LABEL,
         value: null,
-        color: euiColorVis2,
+        color: KpiHostsChartColors.uniqueSourceIps,
         icon: 'visMapCoordinate',
       },
       {
@@ -72,7 +67,7 @@ export const kpiHostsMapping: Readonly<StatItems[]> = [
         name: i18n.DESTINATION_CHART_LABEL,
         description: i18n.DESTINATION_UNIT_LABEL,
         value: null,
-        color: euiColorVis3,
+        color: KpiHostsChartColors.uniqueDestinationIps,
         icon: 'visMapCoordinate',
       },
     ],

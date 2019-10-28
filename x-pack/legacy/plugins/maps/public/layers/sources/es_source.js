@@ -19,7 +19,7 @@ import { ESAggMetricTooltipProperty } from '../tooltips/es_aggmetric_tooltip_pro
 
 import uuid from 'uuid/v4';
 import { copyPersistentState } from '../../reducers/util';
-import { ES_GEO_FIELD_TYPE } from '../../../common/constants';
+import { ES_GEO_FIELD_TYPE, METRIC_TYPE } from '../../../common/constants';
 import { DataRequestAbortError } from '../util/data_request';
 
 export class AbstractESSource extends AbstractVectorSource {
@@ -59,7 +59,7 @@ export class AbstractESSource extends AbstractVectorSource {
 
   _getValidMetrics() {
     const metrics = _.get(this._descriptor, 'metrics', []).filter(({ type, field }) => {
-      if (type === 'count') {
+      if (type === METRIC_TYPE.COUNT) {
         return true;
       }
 
@@ -69,7 +69,7 @@ export class AbstractESSource extends AbstractVectorSource {
       return false;
     });
     if (metrics.length === 0) {
-      metrics.push({ type: 'count' });
+      metrics.push({ type: METRIC_TYPE.COUNT });
     }
     return metrics;
   }
@@ -133,10 +133,8 @@ export class AbstractESSource extends AbstractVectorSource {
 
 
   async _runEsQuery(requestName, searchSource, registerCancelCallback, requestDescription) {
-    const cancel = () => {
-      searchSource.cancelQueued();
-    };
-    registerCancelCallback(cancel);
+    const abortController = new AbortController();
+    registerCancelCallback(() => abortController.abort());
 
     try {
       return await fetchSearchSourceAndRecordWithInspector({
@@ -144,7 +142,8 @@ export class AbstractESSource extends AbstractVectorSource {
         searchSource,
         requestName,
         requestId: this.getId(),
-        requestDesc: requestDescription
+        requestDesc: requestDescription,
+        abortSignal: abortController.signal,
       });
     } catch(error) {
       if (error.name === 'AbortError') {
@@ -158,7 +157,7 @@ export class AbstractESSource extends AbstractVectorSource {
     }
   }
 
-  async _makeSearchSource(searchFilters, limit) {
+  async _makeSearchSource(searchFilters, limit, initialSearchContext) {
     const indexPattern = await this._getIndexPattern();
     const isTimeAware = await this.isTimeAware();
     const applyGlobalQuery = _.get(searchFilters, 'applyGlobalQuery', true);
@@ -172,7 +171,7 @@ export class AbstractESSource extends AbstractVectorSource {
       allFilters.push(timefilter.createFilter(indexPattern, searchFilters.timeFilters));
     }
 
-    const searchSource = new SearchSource();
+    const searchSource = new SearchSource(initialSearchContext);
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', limit);
     searchSource.setField('filter', allFilters);
@@ -273,7 +272,7 @@ export class AbstractESSource extends AbstractVectorSource {
 
   async _getGeoField() {
     const indexPattern = await this._getIndexPattern();
-    const geoField = indexPattern.fields.byName[this._descriptor.geoField];
+    const geoField = indexPattern.fields.getByName(this._descriptor.geoField);
     if (!geoField) {
       throw new Error(i18n.translate('xpack.maps.source.esSource.noGeoFieldErrorMessage', {
         defaultMessage: `Index pattern {indexPatternTitle} no longer contains the geo field {geoField}`,
@@ -301,4 +300,31 @@ export class AbstractESSource extends AbstractVectorSource {
     return this._descriptor.id;
   }
 
+  async getFieldFormatter(fieldName) {
+    const metricField = this.getMetricFields().find(({ propertyKey }) => {
+      return propertyKey === fieldName;
+    });
+
+    // Do not use field formatters for counting metrics
+    if (metricField && metricField.type === METRIC_TYPE.COUNT || metricField.type === METRIC_TYPE.UNIQUE_COUNT) {
+      return null;
+    }
+
+    let indexPattern;
+    try {
+      indexPattern = await this._getIndexPattern();
+    } catch(error) {
+      return null;
+    }
+
+    const realFieldName = metricField
+      ? metricField.field
+      : fieldName;
+    const fieldFromIndexPattern = indexPattern.fields.getByName(realFieldName);
+    if (!fieldFromIndexPattern) {
+      return null;
+    }
+
+    return fieldFromIndexPattern.format.getConverterFor('text');
+  }
 }

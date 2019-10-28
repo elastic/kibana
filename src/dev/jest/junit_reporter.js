@@ -109,13 +109,7 @@ export default class JestJUnitReporter {
       `TEST-${process.env.JOB ? process.env.JOB + '-' : ''}${reportName}.xml`
     );
 
-    const reportXML = root.end({
-      pretty: true,
-      indent: '  ',
-      newline: '\n',
-      spacebeforeslash: '',
-    });
-
+    const reportXML = root.end();
     mkdirSync(dirname(reportPath), { recursive: true });
     writeFileSync(reportPath, reportXML, 'utf8');
   }

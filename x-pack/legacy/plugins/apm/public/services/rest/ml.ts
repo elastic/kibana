@@ -5,7 +5,7 @@
  */
 
 import { npStart } from 'ui/new_platform';
-import { ESFilter } from 'elasticsearch';
+import { HttpServiceBase } from 'kibana/public';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
@@ -13,6 +13,7 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { getMlJobId, getMlPrefix } from '../../../common/ml_job_constants';
 import { callApi } from './callApi';
+import { ESFilter } from '../../../typings/elasticsearch';
 
 interface MlResponseItem {
   id: string;
@@ -35,10 +36,12 @@ const { core } = npStart;
 
 export async function startMLJob({
   serviceName,
-  transactionType
+  transactionType,
+  http
 }: {
   serviceName: string;
   transactionType: string;
+  http: HttpServiceBase;
 }) {
   const indexPatternName = core.injectedMetadata.getInjectedVar(
     'apmTransactionIndices'
@@ -50,7 +53,7 @@ export async function startMLJob({
     { term: { [TRANSACTION_TYPE]: transactionType } }
   ];
   groups.push(transactionType.toLowerCase());
-  return callApi<StartedMLJobApiResponse>({
+  return callApi<StartedMLJobApiResponse>(http, {
     method: 'POST',
     pathname: `/api/ml/modules/setup/apm_transaction`,
     body: JSON.stringify({
@@ -77,13 +80,15 @@ export interface MLJobApiResponse {
 
 export async function getHasMLJob({
   serviceName,
-  transactionType
+  transactionType,
+  http
 }: {
   serviceName: string;
   transactionType: string;
+  http: HttpServiceBase;
 }) {
   try {
-    await callApi<MLJobApiResponse>({
+    await callApi<MLJobApiResponse>(http, {
       method: 'GET',
       pathname: `/api/ml/anomaly_detectors/${getMlJobId(
         serviceName,

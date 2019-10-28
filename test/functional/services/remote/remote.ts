@@ -17,15 +17,27 @@
  * under the License.
  */
 
+import Fs from 'fs';
+import { resolve } from 'path';
+
+import * as Rx from 'rxjs';
+import { mergeMap } from 'rxjs/operators';
+import { logging } from 'selenium-webdriver';
+
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { initWebDriver } from './webdriver';
 import { Browsers } from './browsers';
+import { pollForLogEntry$ } from './poll_for_log_entry';
 
 export async function RemoteProvider({ getService }: FtrProviderContext) {
   const lifecycle = getService('lifecycle');
   const log = getService('log');
   const config = getService('config');
   const browserType: Browsers = config.get('browser.type');
+  const collectCoverage: boolean = !!process.env.CODE_COVERAGE;
+  const coveragePrefix = 'coveragejson:';
+  const coverageDir = resolve(__dirname, '../../../../target/kibana-coverage/functional');
+  let logSubscription: undefined | Rx.Subscription;
 
   const { driver, By, until, consoleLog$ } = await initWebDriver(
     log,
@@ -42,8 +54,49 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
 
   if (browserType === Browsers.Chrome) {
     log.info(
-      `Chromedriver version: ${caps.get('chrome').chromedriverVersion}, w3c=${isW3CEnabled}`
+      `Chromedriver version: ${
+        caps.get('chrome').chromedriverVersion
+      }, w3c=${isW3CEnabled}, codeCoverage=${collectCoverage}`
     );
+
+    if (collectCoverage) {
+      let coverageCounter = 1;
+      // We are running xpack tests with different configs and cleanup will delete collected coverage
+      // del.sync(coverageDir);
+      Fs.mkdirSync(coverageDir, { recursive: true });
+
+      logSubscription = pollForLogEntry$(
+        driver,
+        logging.Type.BROWSER,
+        config.get('browser.logPollingMs'),
+        lifecycle.cleanup$ as any
+      )
+        .pipe(
+          mergeMap(logEntry => {
+            if (logEntry.message.includes(coveragePrefix)) {
+              const id = coverageCounter++;
+              const timestamp = Date.now();
+              const path = resolve(coverageDir, `${id}.${timestamp}.coverage.json`);
+              const [, coverageJsonBase64] = logEntry.message.split(coveragePrefix);
+              const coverageJson = Buffer.from(coverageJsonBase64, 'base64').toString('utf8');
+
+              log.info('writing coverage to', path);
+              Fs.writeFileSync(path, JSON.stringify(JSON.parse(coverageJson), null, 2));
+
+              // filter out this message
+              return [];
+            }
+
+            return [logEntry];
+          })
+        )
+        .subscribe({
+          next({ message, level: { name: level } }) {
+            const msg = message.replace(/\\n/g, '\n');
+            log[level === 'SEVERE' ? 'error' : 'debug'](`browser[${level}] ${msg}`);
+          },
+        });
+    }
   }
 
   lifecycle.on('beforeTests', async () => {
@@ -75,9 +128,17 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
       .manage()
       .window()
       .setRect({ width, height });
+    await driver.executeScript('window.sessionStorage.clear();');
+    await driver.executeScript('window.localStorage.clear();');
   });
 
-  lifecycle.on('cleanup', async () => await driver.quit());
+  lifecycle.on('cleanup', async () => {
+    if (logSubscription) {
+      await new Promise(r => logSubscription!.add(r));
+    }
+
+    await driver.quit();
+  });
 
   return { driver, By, until, browserType, consoleLog$ };
 }

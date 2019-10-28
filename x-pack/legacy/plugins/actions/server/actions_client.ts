@@ -36,6 +36,7 @@ interface FindOptions {
       id: string;
     };
     fields?: string[];
+    filter?: string;
   };
 }
 
