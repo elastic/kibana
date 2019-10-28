@@ -95,7 +95,8 @@ export type ParameterName =
   | 'similarity'
   | 'normalizer'
   | 'ignore_above'
-  | 'split_queries_on_whitespace';
+  | 'split_queries_on_whitespace'
+  | 'scaling_factor';
 
 export interface Parameter {
   fieldConfig: FieldConfig;

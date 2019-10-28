@@ -4,28 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import {
-  EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiRange,
-  EuiDualRange,
-  EuiFormRow,
-  EuiCallOut,
-} from '@elastic/eui';
 
 import { NormalizedField, Field as FieldType } from '../../../../types';
-import {
-  UseField,
-  UseMultiFields,
-  Field,
-  FieldHook,
-  FormDataProvider,
-} from '../../../../shared_imports';
+import { UseField, Field } from '../../../../shared_imports';
 import { getFieldConfig } from '../../../../lib';
 import { PARAMETERS_OPTIONS } from '../../../../constants';
-import { SelectWithCustom } from '../../../form';
 import {
   StoreParameter,
   IndexParameter,

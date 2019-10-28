@@ -74,6 +74,7 @@ export const PARAMETERS_DEFINITION = {
     docs: 'https://www.elastic.co/guide/en/elasticsearch/reference/current/doc-values.html',
   },
   fielddata_frequency_filter: {
+    fieldConfig: { defaultValue: {} }, // Needed for FieldParams typing
     props: {
       min: {
         fieldConfig: {
@@ -101,15 +102,11 @@ export const PARAMETERS_DEFINITION = {
   },
   coerce: {
     fieldConfig: {
-      label: 'Coerce',
-      type: FIELD_TYPES.CHECKBOX,
       defaultValue: true,
     },
   },
   ignore_malformed: {
     fieldConfig: {
-      label: 'Ignore malformed',
-      type: FIELD_TYPES.CHECKBOX,
       defaultValue: true,
     },
   },
@@ -126,22 +123,39 @@ export const PARAMETERS_DEFINITION = {
   },
   boost: {
     fieldConfig: {
-      label: 'Boost',
       defaultValue: 1.0,
       type: FIELD_TYPES.NUMBER,
       formatters: [toInt],
       validations: [
         {
-          validator: (({ value }: ValidationFuncArg<any, number>) => {
+          validator: ({ value }: ValidationFuncArg<any, number>) => {
             if (value < 0) {
               return {
                 message: 'The value must be greater or equal than 0.',
               };
             }
-          }) as ValidationFunc,
+          },
         },
       ],
-    },
+    } as FieldConfig,
+  },
+  scaling_factor: {
+    fieldConfig: {
+      defaultValue: 1.0,
+      type: FIELD_TYPES.NUMBER,
+      formatters: [toInt],
+      validations: [
+        {
+          validator: ({ value }: ValidationFuncArg<any, number>) => {
+            if (value < 0) {
+              return {
+                message: 'The value must be greater or equal than 0.',
+              };
+            }
+          },
+        },
+      ],
+    } as FieldConfig,
   },
   dynamic: {
     fieldConfig: {
@@ -293,6 +307,7 @@ export const PARAMETERS_DEFINITION = {
     },
   },
   index_prefixes: {
+    fieldConfig: { defaultValue: {} }, // Needed for FieldParams typing
     props: {
       min_chars: {
         fieldConfig: {
