@@ -206,7 +206,9 @@ export function initDashboardApp(app, deps) {
               );
           },
         },
-      });
+      })
+      .when(`dashboard/:tail*?`, { redirectTo: `/${deps.core.injectedMetadata.getInjectedVar('kbnDefaultAppId')}` })
+      .when(`dashboards/:tail*?`, { redirectTo: `/${deps.core.injectedMetadata.getInjectedVar('kbnDefaultAppId')}` });
   });
 
   deps.FeatureCatalogueRegistryProvider.register(() => {
