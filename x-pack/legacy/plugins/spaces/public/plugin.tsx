@@ -5,19 +5,17 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { FeatureCatalogueRegistryFunction } from 'ui/registry/feature_catalogue';
+import { FeatureCatalogueSetup } from 'src/plugins/feature_catalogue/public';
 import { SpacesManager } from './lib';
 import { initSpacesNavControl } from './views/nav_control';
-import { createSpacesFeatureCatalogueEntry } from './register_feature';
+import { createSpacesFeatureCatalogueEntry } from './create_feature_catalogue_entry';
 
 export interface SpacesPluginStart {
   spacesManager: SpacesManager;
 }
 
 export interface PluginsSetup {
-  kibana: {
-    registerCatalogueFeature: (fn: FeatureCatalogueRegistryFunction) => void;
-  };
+  feature_catalogue?: FeatureCatalogueSetup;
 }
 
 export class SpacesPlugin implements Plugin<{}, SpacesPluginStart, PluginsSetup> {
@@ -31,7 +29,9 @@ export class SpacesPlugin implements Plugin<{}, SpacesPluginStart, PluginsSetup>
     this.spacesManager = new SpacesManager(serverBasePath, core.http);
 
     initSpacesNavControl(this.spacesManager, core);
-    plugins.kibana.registerCatalogueFeature(createSpacesFeatureCatalogueEntry);
+    if (plugins.feature_catalogue) {
+      plugins.feature_catalogue.register(createSpacesFeatureCatalogueEntry());
+    }
 
     return {
       spacesManager: this.spacesManager,
