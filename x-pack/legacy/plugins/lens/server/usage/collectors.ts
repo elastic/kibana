@@ -89,7 +89,11 @@ async function isTaskManagerReady(server: Server) {
 }
 
 async function getLatestTaskState(server: Server) {
-  const taskManager = server.plugins.task_manager!;
+  const taskManager = server.plugins.task_manager;
+
+  if (!taskManager) {
+    return null;
+  }
 
   try {
     const result = await taskManager.fetch({
