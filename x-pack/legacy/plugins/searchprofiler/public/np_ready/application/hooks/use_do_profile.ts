@@ -5,7 +5,7 @@
  */
 import { i18n } from '@kbn/i18n';
 
-import { useAppContext } from '../app_context';
+import { useAppContext } from '../contexts/app_context';
 import { checkForParseErrors } from '../utils';
 import { ShardSerialized } from '../types';
 

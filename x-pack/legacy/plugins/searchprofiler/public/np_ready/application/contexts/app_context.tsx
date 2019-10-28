@@ -5,7 +5,7 @@
  */
 
 import React, { useContext, createContext } from 'react';
-import { HttpSetup, ToastsSetup } from 'src/core/public';
+import { HttpSetup, ToastsSetup } from 'kibana/public';
 
 export interface ContextValue {
   http: HttpSetup;

@@ -5,7 +5,8 @@
  */
 import React from 'react';
 import { Main } from './containers';
-import { AppContextProvider } from './app_context';
+import { AppContextProvider } from './contexts/app_context';
+import { ProfileContextProvider } from './contexts/profiler_context';
 
 import { AppDependencies } from './boot';
 
@@ -19,7 +20,9 @@ export function App({
   return (
     <I18nContext>
       <AppContextProvider value={{ licenseEnabled, notifications, http, formatAngularHttpError }}>
-        <Main />
+        <ProfileContextProvider>
+          <Main />
+        </ProfileContextProvider>
       </AppContextProvider>
     </I18nContext>
   );

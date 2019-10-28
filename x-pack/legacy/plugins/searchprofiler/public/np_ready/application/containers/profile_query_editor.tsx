@@ -16,13 +16,8 @@ import {
 } from '@elastic/eui';
 import { Editor, EditorInstance } from '../editor';
 import { useDoProfile } from '../hooks';
-import { ShardSerialized } from '../types';
-import { useAppContext } from '../app_context';
-
-interface Props {
-  onProfileClick: () => void;
-  onResponse: (response: ShardSerialized[]) => void;
-}
+import { useAppContext } from '../contexts/app_context';
+import { useProfilerActionContext } from '../contexts/profiler_context';
 
 const DEFAULT_INDEX_VALUE = '_all';
 
@@ -32,32 +27,45 @@ const INITIAL_EDITOR_VALUE = `{
   }
 }`;
 
-export const ProfileQueryEditor = memo(({ onResponse, onProfileClick }: Props) => {
+/**
+ * This component should only need to render once.
+ *
+ * Drives state changes for mine via profiler action context.
+ */
+export const ProfileQueryEditor = memo(() => {
   const editorRef = useRef<EditorInstance>(null as any);
   const indexInputRef = useRef<HTMLInputElement>(null as any);
   const typeInputRef = useRef<HTMLInputElement>(null as any);
+
+  const dispatch = useProfilerActionContext();
 
   const { licenseEnabled } = useAppContext();
   const doProfile = useDoProfile();
 
   const handleProfileClick = async () => {
-    onProfileClick();
-    const { current: editor } = editorRef;
-    editor.clearErrorAnnotations();
-    const { data: result, error } = await doProfile({
-      query: editorRef.current.getValue(),
-      index: indexInputRef.current.value,
-      type: typeInputRef.current.value,
-    });
-    if (error) {
-      editor.addErrorAnnotation(error);
-      editor.focus();
-      return;
+    dispatch({ type: 'setProfiling', value: true });
+    dispatch({ type: 'setHighlightDetails', value: null });
+    try {
+      const { current: editor } = editorRef;
+      editor.clearErrorAnnotations();
+      const { data: result, error } = await doProfile({
+        query: editorRef.current.getValue(),
+        index: indexInputRef.current.value,
+        type: typeInputRef.current.value,
+      });
+      if (error) {
+        editor.addErrorAnnotation(error);
+        editor.focus();
+        return;
+      }
+      if (result === null) {
+        return;
+      }
+      dispatch({ type: 'setCurrentResponse', value: result });
+      dispatch({ type: 'setActiveTab', value: 'searches' });
+    } finally {
+      dispatch({ type: 'setProfiling', value: false });
     }
-    if (result === null) {
-      return;
-    }
-    onResponse(result);
   };
 
   const onEditorReady = useCallback(editorInstance => (editorRef.current = editorInstance), []);

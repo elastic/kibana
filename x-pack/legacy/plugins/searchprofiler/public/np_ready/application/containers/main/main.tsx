@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import _ from 'lodash';
 
 import {
@@ -22,14 +22,14 @@ import {
   SearchProfilerTabs,
   ProfileTree,
   HighlightDetailsFlyout,
-  OnHighlightChangeArgs,
   LicenseWarningNotice,
 } from '../../components';
 
-import { useAppContext } from '../../app_context';
+import { useAppContext } from '../../contexts/app_context';
 
-import { EmptyTreePlaceHolder } from './components';
+import { EmptyTreePlaceHolder, ProfileLoadingPlaceholder } from './components';
 import { Targets, ShardSerialized } from '../../types';
+import { useProfilerActionContext, useProfilerReadContext } from '../../contexts/profiler_context';
 
 function hasSearch(profileResponse: ShardSerialized[]) {
   const aggs = _.get(profileResponse, '[0].searches', []);
@@ -44,29 +44,23 @@ function hasAggregations(profileResponse: ShardSerialized[]) {
 export const Main = () => {
   const { licenseEnabled } = useAppContext();
 
-  const [activeTab, setActiveTab] = useState<Targets | null>(null);
-  const [showDetailsFlyout, setShowDetailsFlyout] = useState<boolean>(false);
-  const [currentResponse, setCurrentResponse] = useState<ShardSerialized[] | null>(null);
-  const [highlightedDetails, setHighlightedDetails] = useState<OnHighlightChangeArgs | null>(null);
+  const {
+    activeTab,
+    currentResponse,
+    highlightDetails,
+    pristine,
+    profiling,
+  } = useProfilerReadContext();
+  const dispatch = useProfilerActionContext();
 
-  const onHighlight = useCallback(
-    (args: OnHighlightChangeArgs) => {
-      setHighlightedDetails(() => args);
-      setShowDetailsFlyout(() => true);
-    },
-    [currentResponse]
+  const setActiveTab = useCallback(
+    (target: Targets) => dispatch({ type: 'setActiveTab', value: target }),
+    [dispatch]
   );
 
-  const onProfileClick = useCallback(() => {
-    setHighlightedDetails(() => null);
-  }, []);
-
-  const onResponse = useCallback((resp: ShardSerialized[]) => {
-    setCurrentResponse(() => resp);
-    setActiveTab(() => 'searches');
-  }, []);
-
-  const setActiveTabCb = useCallback((target: Targets) => setActiveTab(() => target), []);
+  const onHighlight = useCallback(value => dispatch({ type: 'setHighlightDetails', value }), [
+    dispatch,
+  ]);
 
   const renderLicenseWarning = () => {
     return !licenseEnabled ? (
@@ -78,6 +72,10 @@ export const Main = () => {
   };
 
   const renderProfileTreeArea = () => {
+    if (profiling) {
+      return <ProfileLoadingPlaceholder />;
+    }
+
     if (activeTab) {
       return (
         <div className="prfDevTool__main__profiletree">
@@ -86,7 +84,7 @@ export const Main = () => {
       );
     }
 
-    if (licenseEnabled) {
+    if (licenseEnabled && pristine) {
       return <EmptyTreePlaceHolder />;
     }
 
@@ -102,13 +100,13 @@ export const Main = () => {
             <EuiPageContentBody className="prfDevTool__page__pageBodyContentBody">
               <EuiFlexGroup gutterSize="s" direction="row" className="prfDevTool__page__bodyGroup">
                 <EuiFlexItem>
-                  <ProfileQueryEditor onProfileClick={onProfileClick} onResponse={onResponse} />
+                  <ProfileQueryEditor />
                 </EuiFlexItem>
                 <EuiFlexItem grow={3}>
                   <EuiFlexGroup className="prfDevTool__main" gutterSize="none" direction="column">
                     <SearchProfilerTabs
                       activeTab={activeTab}
-                      activateTab={setActiveTabCb}
+                      activateTab={setActiveTab}
                       has={{
                         aggregations: Boolean(currentResponse && hasAggregations(currentResponse)),
                         searches: Boolean(currentResponse && hasSearch(currentResponse)),
@@ -118,10 +116,10 @@ export const Main = () => {
                   </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>
-              {showDetailsFlyout ? (
+              {highlightDetails ? (
                 <HighlightDetailsFlyout
-                  {...highlightedDetails!}
-                  onClose={() => setShowDetailsFlyout(false)}
+                  {...highlightDetails}
+                  onClose={() => dispatch({ type: 'setHighlightDetails', value: null })}
                 />
               ) : null}
             </EuiPageContentBody>
