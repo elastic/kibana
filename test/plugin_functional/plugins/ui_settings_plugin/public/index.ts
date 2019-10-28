@@ -16,40 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Legacy } from 'kibana';
-import Joi from 'joi';
+import { UiSettingsPlugin } from './plugin';
 
-async function handleRequest(request: Legacy.Request) {
-  const { key } = request.params;
-  const { value } = request.payload as any;
-  const uiSettings = request.getUiSettingsService();
-
-  await uiSettings.set(key, value);
-
-  return {
-    settings: await uiSettings.getUserProvided(),
-  };
-}
-
-export const setRoute = {
-  path: '/api/kibana/settings/{key}',
-  method: 'POST',
-  config: {
-    validate: {
-      params: Joi.object()
-        .keys({
-          key: Joi.string().required(),
-        })
-        .default(),
-
-      payload: Joi.object()
-        .keys({
-          value: Joi.any().required(),
-        })
-        .required(),
-    },
-    handler(request: Legacy.Request) {
-      return handleRequest(request);
-    },
-  },
-};
+export const plugin = () => new UiSettingsPlugin();

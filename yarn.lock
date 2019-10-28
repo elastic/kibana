@@ -3045,6 +3045,11 @@
   resolved "https://registry.yarnpkg.com/@types/base64-js/-/base64-js-1.2.5.tgz#582b2476169a6cba460a214d476c744441d873d5"
   integrity sha1-WCskdhaabLpGCiFNR2x0REHYc9U=
 
+"@types/bluebird@*":
+  version "3.5.28"
+  resolved "https://registry.yarnpkg.com/@types/bluebird/-/bluebird-3.5.28.tgz#04c1a520ff076649236bc8ca21198542ce2bdb09"
+  integrity sha512-0Vk/kqkukxPKSzP9c8WJgisgGDx5oZDbsLLWIP5t70yThO/YleE+GEm2S1GlRALTaack3O7U5OS5qEm7q2kciA==
+
 "@types/bluebird@^3.1.1":
   version "3.5.20"
   resolved "https://registry.yarnpkg.com/@types/bluebird/-/bluebird-3.5.20.tgz#f6363172add6f4eabb8cada53ca9af2781e8d6a1"
@@ -3985,6 +3990,22 @@
   dependencies:
     "@types/cookiejar" "*"
     "@types/node" "*"
+
+"@types/supertest-as-promised@^2.0.38":
+  version "2.0.38"
+  resolved "https://registry.yarnpkg.com/@types/supertest-as-promised/-/supertest-as-promised-2.0.38.tgz#5077adf2a31429e06ba8de6799ebdb796ad50fc7"
+  integrity sha512-2vdlnsZBIgaX0DFNOACK4xFDqvoA1sAR78QD3LiDWGmzSfrRCNt1WFyUYe2Vf0QS03tZf6XC8bNlLaLYXhZbGA==
+  dependencies:
+    "@types/bluebird" "*"
+    "@types/superagent" "*"
+    "@types/supertest" "*"
+
+"@types/supertest@*":
+  version "2.0.8"
+  resolved "https://registry.yarnpkg.com/@types/supertest/-/supertest-2.0.8.tgz#23801236e2b85204ed771a8e7c40febba7da2bda"
+  integrity sha512-wcax7/ip4XSSJRLbNzEIUVy2xjcBIZZAuSd2vtltQfRK7kxhx5WMHbLHkYdxN3wuQCrwpYrg86/9byDjPXoGMA==
+  dependencies:
+    "@types/superagent" "*"
 
 "@types/supertest@^2.0.5":
   version "2.0.5"

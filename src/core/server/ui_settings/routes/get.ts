@@ -16,9 +16,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { IRouter } from '../../http';
+import { SavedObjectsErrorHelpers } from '../../saved_objects';
 
-import { KibanaSupertestProvider } from './supertest';
+export function registerGetRoute(router: IRouter) {
+  router.get(
+    { path: '/api/kibana/settings', validate: false },
+    async (context, request, response) => {
+      try {
+        const uiSettingsClient = context.core.uiSettings.client;
+        return response.ok({
+          body: {
+            settings: await uiSettingsClient.getUserProvided(),
+          },
+        });
+      } catch (error) {
+        if (SavedObjectsErrorHelpers.isSavedObjectsClientError(error)) {
+          return response.customError({
+            body: error,
+            statusCode: error.output.statusCode,
+          });
+        }
 
-export const services = {
-  supertest: KibanaSupertestProvider,
-};
+        throw error;
+      }
+    }
+  );
+}

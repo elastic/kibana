@@ -16,22 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Legacy } from 'kibana';
+import { PluginFunctionalProviderContext } from '../../services';
 
-async function handleRequest(request: Legacy.Request) {
-  const { key } = request.params;
-  const uiSettings = request.getUiSettingsService();
-
-  await uiSettings.remove(key);
-  return {
-    settings: await uiSettings.getUserProvided(),
-  };
+// eslint-disable-next-line import/no-default-export
+export default function({ loadTestFile }: PluginFunctionalProviderContext) {
+  describe('core plugins', () => {
+    loadTestFile(require.resolve('./applications'));
+    loadTestFile(require.resolve('./legacy_plugins'));
+    loadTestFile(require.resolve('./server_plugins'));
+    loadTestFile(require.resolve('./ui_plugins'));
+    loadTestFile(require.resolve('./ui_settings'));
+    loadTestFile(require.resolve('./top_nav'));
+  });
 }
-
-export const deleteRoute = {
-  path: '/api/kibana/settings/{key}',
-  method: 'DELETE',
-  handler: async (request: Legacy.Request) => {
-    return await handleRequest(request);
-  },
-};

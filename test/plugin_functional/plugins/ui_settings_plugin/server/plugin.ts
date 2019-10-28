@@ -17,19 +17,28 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import { Plugin, CoreSetup } from 'kibana/server';
 
-export default function ({ getService, getPageObjects }) {
-  const PageObjects = getPageObjects(['common']);
-  const browser = getService('browser');
-
-  describe('server plugins', function describeIndexTests() {
-    it('extend request handler context', async () => {
-      const url = `${PageObjects.common.getHostPort()}/core_plugin_b/`;
-      await browser.get(url);
-
-      const pageSource = await browser.execute('return window.document.body.textContent;');
-      expect(pageSource).to.equal('Pong via plugin A: true');
+export class UiSettingsPlugin implements Plugin {
+  public setup(core: CoreSetup) {
+    core.uiSettings.register({
+      ui_settings_plugin: {
+        name: 'from_ui_settings_plugin',
+        description: 'just for testing',
+        value: '2',
+        category: ['any'],
+      },
     });
-  });
+
+    const router = core.http.createRouter();
+    router.get({ path: '/api/ui-settings-plugin', validate: false }, async (context, req, res) => {
+      const uiSettingsValue = await context.core.uiSettings.client.get<number>(
+        'ui_settings_plugin'
+      );
+      return res.ok({ body: { uiSettingsValue } });
+    });
+  }
+
+  public start() {}
+  public stop() {}
 }

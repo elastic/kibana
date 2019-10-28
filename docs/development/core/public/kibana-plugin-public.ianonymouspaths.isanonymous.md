@@ -4,7 +4,7 @@
 
 ## IAnonymousPaths.isAnonymous() method
 
-Determines whether the provided path doesn't require authentication
+Determines whether the provided path doesn't require authentication. `path` should include the current basePath.
 
 <b>Signature:</b>
 

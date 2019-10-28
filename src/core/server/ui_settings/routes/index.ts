@@ -16,8 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { IRouter } from 'src/core/server';
 
-export { deleteRoute } from './delete';
-export { getRoute } from './get';
-export { setManyRoute } from './set_many';
-export { setRoute } from './set';
+import { registerDeleteRoute } from './delete';
+import { registerGetRoute } from './get';
+import { registerSetManyRoute } from './set_many';
+import { registerSetRoute } from './set';
+
+export function registerRoutes(router: IRouter) {
+  registerGetRoute(router);
+  registerDeleteRoute(router);
+  registerSetRoute(router);
+  registerSetManyRoute(router);
+}
