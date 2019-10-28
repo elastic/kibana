@@ -233,6 +233,7 @@ export function initGraphApp(angularModule, deps) {
         .catch(handleHttpError)
         .finally(() => {
           $scope.loading = false;
+          $scope.$digest();
         });
     }
 
@@ -251,6 +252,7 @@ export function initGraphApp(angularModule, deps) {
         .catch(handleHttpError)
         .finally(() => {
           $scope.loading = false;
+          $scope.$digest();
         });
     };
 
