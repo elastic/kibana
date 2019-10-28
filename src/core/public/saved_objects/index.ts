@@ -30,7 +30,7 @@ export {
   SavedObjectsBulkUpdateOptions,
 } from './saved_objects_client';
 export { SimpleSavedObject } from './simple_saved_object';
-export { SavedObjectsStart } from './saved_objects_service';
+export { SavedObjectsStart, SavedObjectsService } from './saved_objects_service';
 export {
   SavedObject,
   SavedObjectAttribute,
