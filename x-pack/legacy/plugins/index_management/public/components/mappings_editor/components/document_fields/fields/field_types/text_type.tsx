@@ -4,16 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import {
-  EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiRange,
-  EuiDualRange,
-  EuiFormRow,
-  EuiCallOut,
-} from '@elastic/eui';
+import { EuiSpacer, EuiRange, EuiDualRange, EuiFormRow, EuiCallOut } from '@elastic/eui';
 
 import { NormalizedField, Field as FieldType } from '../../../../types';
 import {
