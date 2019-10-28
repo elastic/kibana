@@ -18,11 +18,11 @@
  */
 
 import { Observable, Subject } from 'rxjs';
-import { first, share } from 'rxjs/operators';
+import { share } from 'rxjs/operators';
 import { Adapters, InspectorSession } from '../../../../../../plugins/inspector/public';
-import { execute, ExpressionDataHandler } from './execute';
+import { ExpressionDataHandler } from './execute';
 import { ExpressionRenderHandler } from './render';
-import { RenderId, Data, IExpressionLoaderParams, ExpressionAST } from './types';
+import { Data, IExpressionLoaderParams, ExpressionAST } from './types';
 import { getInspector } from './services';
 
 export class ExpressionLoader {
@@ -32,12 +32,12 @@ export class ExpressionLoader {
   events$: ExpressionRenderHandler['events$'];
   loading$: Observable<void>;
 
-  private dataHandler!: ExpressionDataHandler;
+  private dataHandler: ExpressionDataHandler | undefined;
   private renderHandler: ExpressionRenderHandler;
   private dataSubject: Subject<Data>;
   private loadingSubject: Subject<void>;
   private data: Data;
-  private params: IExpressionLoaderParams;
+  private params: IExpressionLoaderParams = {};
 
   constructor(
     element: HTMLElement,
@@ -63,76 +63,108 @@ export class ExpressionLoader {
       this.render(data);
     });
 
-    this.params = {
-      searchContext: { type: 'kibana_context' },
-      extraHandlers: params.extraHandlers,
-    };
+    this.setParams(params);
 
-    this.execute(expression, params);
+    this.loadData(expression, this.params);
   }
 
-  destroy() {}
+  destroy() {
+    this.dataSubject.complete();
+    this.loadingSubject.complete();
+    this.renderHandler.destroy();
+    if (this.dataHandler) {
+      this.dataHandler.cancel();
+    }
+  }
 
   cancel() {
-    this.dataHandler.cancel();
+    if (this.dataHandler) {
+      this.dataHandler.cancel();
+    }
   }
 
-  getExpression(): string {
-    return this.dataHandler.getExpression();
+  getExpression(): string | undefined {
+    if (this.dataHandler) {
+      return this.dataHandler.getExpression();
+    }
   }
 
-  getAst(): ExpressionAST {
-    return this.dataHandler.getAst();
+  getAst(): ExpressionAST | undefined {
+    if (this.dataHandler) {
+      return this.dataHandler.getAst();
+    }
   }
 
   getElement(): HTMLElement {
     return this.renderHandler.getElement();
   }
 
-  openInspector(title: string): InspectorSession {
-    return getInspector().open(this.inspect(), {
-      title,
-    });
+  openInspector(title: string): InspectorSession | undefined {
+    const inspector = this.inspect();
+    if (inspector) {
+      return getInspector().open(inspector, {
+        title,
+      });
+    }
   }
 
-  inspect(): Adapters {
-    return this.dataHandler.inspect();
+  inspect(): Adapters | undefined {
+    if (this.dataHandler) {
+      return this.dataHandler.inspect();
+    }
   }
 
-  update(expression?: string | ExpressionAST, params?: IExpressionLoaderParams): Promise<RenderId> {
-    const promise = this.render$.pipe(first()).toPromise();
-    if (params && params.searchContext && this.params.searchContext) {
+  update(expression?: string | ExpressionAST, params?: IExpressionLoaderParams): void {
+    this.setParams(params);
+
+    if (expression) {
+      this.loadData(expression, this.params);
+    } else {
+      this.render(this.data);
+    }
+  }
+
+  private loadData = async (
+    expression: string | ExpressionAST,
+    params: IExpressionLoaderParams
+  ): Promise<void> => {
+    this.loadingSubject.next();
+    if (this.dataHandler) {
+      this.dataHandler.cancel();
+    }
+    this.setParams(params);
+    this.dataHandler = new ExpressionDataHandler(expression, params);
+    const data = await this.dataHandler.getData();
+    this.dataSubject.next(data);
+  };
+
+  private render(data: Data): void {
+    this.loadingSubject.next();
+    this.renderHandler.render(data, this.params.extraHandlers);
+  }
+
+  private setParams(params?: IExpressionLoaderParams) {
+    if (!params || !Object.keys(params).length) {
+      return;
+    }
+
+    if (params.searchContext && this.params.searchContext) {
       this.params.searchContext = _.defaults(
         {},
         params.searchContext,
         this.params.searchContext
       ) as any;
     }
-
-    this.loadingSubject.next();
-    if (expression) {
-      this.execute(expression, this.params);
-    } else {
-      this.render(this.data);
+    if (params.extraHandlers && this.params) {
+      this.params.extraHandlers = params.extraHandlers;
     }
-    return promise;
-  }
 
-  private execute = async (
-    expression: string | ExpressionAST,
-    params?: IExpressionLoaderParams
-  ): Promise<Data> => {
-    if (this.dataHandler) {
-      this.dataHandler.cancel();
+    if (!Object.keys(this.params).length) {
+      this.params = {
+        ...params,
+        searchContext: { type: 'kibana_context', ...(params.searchContext || {}) },
+      };
     }
-    this.dataHandler = execute(expression, params);
-    this.data = await this.dataHandler.getData();
-    this.dataSubject.next(this.data);
-    return this.data;
-  };
-
-  private async render(data: Data): Promise<RenderId> {
-    return this.renderHandler.render(data, this.params.extraHandlers);
   }
 }
 

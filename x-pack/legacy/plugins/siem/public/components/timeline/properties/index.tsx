@@ -5,7 +5,7 @@
  */
 
 import { EuiAvatar, EuiFlexItem, EuiIcon } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import styled, { injectGlobal } from 'styled-components';
 
 import { Note } from '../../../lib/note';
@@ -114,17 +114,17 @@ export const Properties = React.memo<Props>(
     const [showActions, setShowActions] = useState(false);
     const [showNotes, setShowNotes] = useState(false);
 
-    const onButtonClick = () => {
+    const onButtonClick = useCallback(() => {
       setShowActions(!showActions);
-    };
+    }, [showActions]);
 
-    const onToggleShowNotes = () => {
+    const onToggleShowNotes = useCallback(() => {
       setShowNotes(!showNotes);
-    };
+    }, [showNotes]);
 
-    const onClosePopover = () => {
+    const onClosePopover = useCallback(() => {
       setShowActions(false);
-    };
+    }, []);
 
     const datePickerWidth =
       width -
