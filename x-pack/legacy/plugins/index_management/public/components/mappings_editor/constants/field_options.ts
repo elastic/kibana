@@ -43,4 +43,5 @@ export const PARAMETERS_OPTIONS: { [key in ParameterName]?: SelectOption[] } = {
     { value: 'pattern', text: 'Pattern' },
     { value: 'fingerprint', text: 'Fingerprint' },
   ],
+  similarity: [{ value: 'BM25', text: 'BM25' }, { value: 'boolean', text: 'Boolean' }],
 };
