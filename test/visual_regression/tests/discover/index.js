@@ -17,7 +17,7 @@
 * under the License.
 */
 
-import { DEFAULT_OPTIONS} from '../../services/visual_testing/visual_testing';
+import { DEFAULT_OPTIONS } from '../../services/visual_testing/visual_testing';
 
 
 // Width must be the same as visual_testing or canvas image widths will get skewed
