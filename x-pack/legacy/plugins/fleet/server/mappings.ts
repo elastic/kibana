@@ -19,7 +19,7 @@ export const mappings = {
       enrolled_at: {
         type: 'date',
       },
-      access_token: {
+      access_api_key_id: {
         type: 'keyword',
       },
       version: {
@@ -55,15 +55,15 @@ export const mappings = {
       },
     },
   },
-  tokens: {
+  enrollment_api_keys: {
     properties: {
-      type: {
+      name: {
         type: 'keyword',
       },
-      token: {
+      api_key: {
         type: 'binary',
       },
-      tokenHash: {
+      api_key_id: {
         type: 'keyword',
       },
       policy_id: {

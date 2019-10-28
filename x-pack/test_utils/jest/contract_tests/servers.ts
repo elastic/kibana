@@ -64,7 +64,13 @@ export async function _createSharedServer() {
   const servers = await kbnTestServer.createTestServers({
     // adjustTimeout function is required by createTestServers fn
     adjustTimeout: (t: number) => {},
-    settings: TestKbnServerConfig,
+    settings: {
+      ...TestKbnServerConfig,
+      es: {
+        ...TestKbnServerConfig.es,
+        esArgs: ['xpack.security.authc.api_key.enabled=true'],
+      },
+    },
   });
   ESServer = await servers.startES();
   const { hosts, username, password } = ESServer;

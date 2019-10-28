@@ -5,15 +5,15 @@
  */
 
 import { AgentLib } from './agent';
-import { TokenLib } from './token';
+import { ApiKeyLib } from './api_keys';
 import { PolicyLib } from './policy';
 import { ArtifactLib } from './artifact';
 import { InstallLib } from './install';
 import { FrameworkLib } from './framework';
 
 export interface FleetServerLib {
+  apiKeys: ApiKeyLib;
   agents: AgentLib;
-  tokens: TokenLib;
   policies: PolicyLib;
   artifacts: ArtifactLib;
   install: InstallLib;

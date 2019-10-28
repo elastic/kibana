@@ -5,16 +5,51 @@
  */
 
 import expect from '@kbn/expect';
+import uuid from 'uuid';
+import * as legacyElasticsearch from 'elasticsearch';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
+import { getSupertestWithoutAuth } from './services';
 
-export default function({ getService }: FtrProviderContext) {
+export default function(providerContext: FtrProviderContext) {
+  const { getService } = providerContext;
+
   const esArchiver = getService('esArchiver');
-  const supertest = getService('supertest');
+  const esClient = getService('es') as legacyElasticsearch.Client;
 
-  describe('fleet_enroll_agent', () => {
+  const supertest = getSupertestWithoutAuth(providerContext);
+  let apiKey: { id: string; api_key: string };
+
+  describe('fleet_agents_enroll', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('fleet/agents');
+
+      const options = {
+        method: 'POST',
+        path: '/_security/api_key',
+        body: {
+          name: `test enrollment api key: ${uuid.v4()}`,
+        },
+      };
+
+      // @ts-ignore
+      apiKey = await esClient.transport.request(options);
+      const { _source: enrollmentApiKeyDoc } = await esClient.get({
+        index: '.kibana',
+        id: 'enrollment_api_keys:ed22ca17-e178-4cfe-8b02-54ea29fbd6d0',
+        type: '_doc',
+      });
+      // @ts-ignore
+      enrollmentApiKeyDoc.enrollment_api_keys.api_key_id = apiKey.id;
+      await esClient.update({
+        index: '.kibana',
+        id: 'enrollment_api_keys:ed22ca17-e178-4cfe-8b02-54ea29fbd6d0',
+        type: '_doc',
+        body: {
+          doc: enrollmentApiKeyDoc,
+        },
+        refresh: true,
+      });
     });
     after(async () => {
       await esArchiver.unload('fleet/agents');
@@ -24,7 +59,7 @@ export default function({ getService }: FtrProviderContext) {
       const { body: apiResponse } = await supertest
         .post(`/api/fleet/agents/enroll`)
         .set('kbn-xsrf', 'xxx')
-        .set('kbn-fleet-enrollment-token', 'NotavalidJSONTOKEN')
+        .set('Authorization', 'ApiKey NOTAVALIDKEY')
         .send({
           type: 'PERMANENT',
           metadata: {
@@ -34,7 +69,7 @@ export default function({ getService }: FtrProviderContext) {
         })
         .expect(401);
 
-      expect(apiResponse.message).to.match(/Enrollment token is not valid/);
+      expect(apiResponse.message).to.match(/Enrollment apiKey is not valid:/);
     });
 
     it('should not allow to enroll an agent with a shared id if it already exists ', async () => {
@@ -42,8 +77,8 @@ export default function({ getService }: FtrProviderContext) {
         .post(`/api/fleet/agents/enroll`)
         .set('kbn-xsrf', 'xxx')
         .set(
-          'kbn-fleet-enrollment-token',
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiRU5ST0xMTUVOVF9UT0tFTiIsInBvbGljeV9pZCI6InBvbGljeToxIiwiaWF0IjoxNTcwNzI1MDcyfQ.H41P_J2wsjfeZDOEAMYPj9TMRhCsUY3NZoLGZ9VQWpg'
+          'authorization',
+          `ApiKey ${Buffer.from(`${apiKey.id}:${apiKey.api_key}`).toString('base64')}`
         )
         .send({
           shared_id: 'agent2_filebeat',
@@ -62,8 +97,8 @@ export default function({ getService }: FtrProviderContext) {
         .post(`/api/fleet/agents/enroll`)
         .set('kbn-xsrf', 'xxx')
         .set(
-          'kbn-fleet-enrollment-token',
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiRU5ST0xMTUVOVF9UT0tFTiIsInBvbGljeV9pZCI6InBvbGljeToxIiwiaWF0IjoxNTcwNzI1MDcyfQ.H41P_J2wsjfeZDOEAMYPj9TMRhCsUY3NZoLGZ9VQWpg'
+          'Authorization',
+          `ApiKey ${Buffer.from(`${apiKey.id}:${apiKey.api_key}`).toString('base64')}`
         )
         .send({
           type: 'PERMANENT',
@@ -74,7 +109,7 @@ export default function({ getService }: FtrProviderContext) {
         })
         .expect(200);
       expect(apiResponse.success).to.eql(true);
-      expect(apiResponse.item).to.have.keys('id', 'active', 'access_token', 'type', 'policy_id');
+      expect(apiResponse.item).to.have.keys('id', 'active', 'access_api_key', 'type', 'policy_id');
     });
   });
 }

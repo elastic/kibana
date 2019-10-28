@@ -10,16 +10,16 @@ import { isLeft } from 'fp-ts/lib/Either';
 import { FrameworkRequest } from '../../adapters/framework/adapter_types';
 import { ReturnTypeList, ReturnTypeCreate, ReturnTypeDelete } from '../../../common/return_types';
 import { FleetServerLib } from '../../libs/types';
-import { RuntimeEnrollmentRuleData } from '../../repositories/tokens/types';
+import { RuntimeEnrollmentRuleData } from '../../repositories/enrollment_api_keys/types';
 
 export const createPostEnrollmentRulesRoute = (libs: FleetServerLib) => ({
   method: 'POST',
-  path: '/api/policy/{policyId}/enrollment-rules',
+  path: '/api/fleet/enrollment-api-keys/{keyId}/enrollment-rules',
   config: {},
   handler: async (
-    request: FrameworkRequest<{ params: { policyId: string } }>
+    request: FrameworkRequest<{ params: { keyId: string } }>
   ): Promise<ReturnTypeCreate<any>> => {
-    const { policyId } = request.params;
+    const { keyId } = request.params;
 
     const result = RuntimeEnrollmentRuleData.decode(request.payload);
     if (isLeft(result)) {
@@ -27,7 +27,7 @@ export const createPostEnrollmentRulesRoute = (libs: FleetServerLib) => ({
         `Malformed request, action is invalid, (${PathReporter.report(result)})`
       );
     }
-    const rule = await libs.tokens.addEnrollmentRuleForPolicy(request.user, policyId, result.right);
+    const rule = await libs.apiKeys.addEnrollmentRule(request.user, keyId, result.right);
 
     return { item: rule, success: true, action: 'created' };
   },
@@ -35,37 +35,37 @@ export const createPostEnrollmentRulesRoute = (libs: FleetServerLib) => ({
 
 export const createGetEnrollmentRulesRoute = (libs: FleetServerLib) => ({
   method: 'GET',
-  path: '/api/policy/{policyId}/enrollment-rules',
+  path: '/api/fleet/enrollment-api-keys/{keyId}/enrollment-rules',
   config: {},
   handler: async (
-    request: FrameworkRequest<{ params: { policyId: string } }>
+    request: FrameworkRequest<{ params: { keyId: string } }>
   ): Promise<ReturnTypeList<any>> => {
-    const { policyId } = request.params;
-    const token = await libs.tokens.getEnrollmentTokenForPolicy(request.user, policyId);
+    const { keyId } = request.params;
+    const apiKey = await libs.apiKeys.getEnrollmentApiKey(request.user, keyId);
 
-    if (!token) {
-      throw Boom.notFound(`token not found for policy ${policyId}`);
+    if (!apiKey) {
+      throw Boom.notFound('Enrollement api key not found');
     }
 
     return {
-      list: token.enrollment_rules,
+      list: apiKey.enrollment_rules,
       page: 1,
-      total: token.enrollment_rules.length,
+      total: apiKey.enrollment_rules.length,
       success: true,
-      perPage: token.enrollment_rules.length,
+      perPage: apiKey.enrollment_rules.length,
     };
   },
 });
 
 export const createDeleteEnrollmentRuleRoute = (libs: FleetServerLib) => ({
   method: 'DELETE',
-  path: '/api/policy/{policyId}/enrollment-rules/{ruleId}',
+  path: '/api/fleet/enrollment-api-keys/{keyId}/enrollment-rules/{ruleId}',
   config: {},
   handler: async (
-    request: FrameworkRequest<{ params: { policyId: string; ruleId: string } }>
+    request: FrameworkRequest<{ params: { keyId: string; ruleId: string } }>
   ): Promise<ReturnTypeDelete> => {
-    const { policyId, ruleId } = request.params;
-    await libs.tokens.deleteEnrollmentRuleForPolicy(request.user, policyId, ruleId);
+    const { keyId, ruleId } = request.params;
+    await libs.apiKeys.deleteEnrollmentRule(request.user, keyId, ruleId);
 
     return {
       success: true,

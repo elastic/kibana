@@ -5,6 +5,7 @@
  */
 
 import { FrameworkAdapter } from '../adapters/framework/default';
+import { FrameworkUser } from '../adapters/framework/adapter_types';
 
 export class FrameworkLib {
   constructor(private readonly adapter: FrameworkAdapter) {}
@@ -23,6 +24,12 @@ export class FrameworkLib {
       protocol: this.adapter.getServerInfo().protocol,
       port: this.adapter.getSetting('server.port'),
       basePath: this.adapter.getSetting('server.basePath'),
+    };
+  }
+
+  public getInternalUser(): FrameworkUser {
+    return {
+      kind: 'internal',
     };
   }
 }

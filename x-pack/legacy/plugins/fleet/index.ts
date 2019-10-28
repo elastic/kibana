@@ -58,8 +58,8 @@ export function fleet(kibana: any) {
     configPrefix: CONFIG_PREFIX,
     init(server: any) {
       server.plugins.encrypted_saved_objects.registerType({
-        type: 'tokens',
-        attributesToEncrypt: new Set(['token']),
+        type: 'enrollment_api_keys',
+        attributesToEncrypt: new Set(['api_key']),
         attributesToExcludeFromAAD: new Set(['enrollment_rules']),
       });
       server.plugins.xpack_main.registerFeature({

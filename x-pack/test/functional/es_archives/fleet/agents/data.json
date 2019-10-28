@@ -6,7 +6,7 @@
     "source": {
       "type": "agents",
       "agents": {
-        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiQUNDRVNTX1RPS0VOIiwiYWdlbnRJZCI6ImIzNWQ2ZDIwLWQwYTAtMTFlOS1iNTkwLThiMGEzYWY4NzUwZCIsImNvbmZpZyI6eyJpZCI6ImNvbmZpZzEiLCJzaGFyZWRJZCI6ImNvbmZpZzEifSwiaWF0IjoxNTY3NzcyNDIzfQ.UQJjI9Ki6JL3iX6zMGhd-LFZynq8a6-Fti1qcq9poFQ",
+        "access_api_key_id": "api-key-2",
         "active": true,
         "shared_id": "agent1_filebeat",
         "policy_id": "1",
@@ -37,7 +37,7 @@
     "source": {
       "type": "agents",
       "agents": {
-        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjcmVhdGVkIjoiMjAxOC0wNi0zMFQwMzo0MjoxNS4yMzBaIiwiaWF0IjoxNTMwMzMwMTM1fQ.SSsX2Byyo1B1bGxV8C3G4QldhE5iH87EY_1r21-bwbI",
+        "access_api_key_id": "api-key-2",
         "active": true,
         "shared_id": "agent2_filebeat",
         "type": "PERMANENT",
@@ -57,7 +57,7 @@
     "source": {
       "type": "agents",
       "agents": {
-        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjcmVhdGVkIjoiMjAxOC0wNi0zMFQwMzo0MjoxNS4yMzBaIiwiaWF0IjoxNTMwMzMwMTM1fQ.SSsX2Byyo1B1bGxV8C3G4QldhE5iH87EY_1r21-bwbI",
+        "access_api_key_id": "api-key-3",
         "active": true,
         "shared_id": "agent3_metricbeat",
         "type": "PERMANENT",
@@ -77,7 +77,7 @@
     "source": {
       "type": "agents",
       "agents": {
-        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjcmVhdGVkIjoiMjAxOC0wNi0zMFQwMzo0MjoxNS4yMzBaIiwiaWF0IjoxNTMwMzMwMTM1fQ.SSsX2Byyo1B1bGxV8C3G4QldhE5iH87EY_1r21-bwbI",
+        "access_api_key_id": "api-key-4",
         "active": true,
         "shared_id": "agent4_metricbeat",
         "type": "PERMANENT",
@@ -92,14 +92,13 @@
 {
   "type": "doc",
   "value": {
-    "id": "tokens:ed22ca17-e178-4cfe-8b02-54ea29fbd6d0",
+    "id": "enrollment_api_keys:ed22ca17-e178-4cfe-8b02-54ea29fbd6d0",
     "index": ".kibana",
     "source": {
-      "tokens" :  {
+      "enrollment_api_keys" :  {
         "created_at" : "2019-10-10T16:31:12.518Z",
-        "type" : "ENROLLMENT_TOKEN",
-        "token" : "RQVHuNv3+KS82GnUHjgjdQFhJ8GOMBa5qMnfYEYdfalg5JChSAUmZNxt8rK9WQTEvQmoXCcoRgJK/4/vfmF8W0bZyTPlm8vVdci53nz03L2bfSlYExZ+0Dbjc+8e04DWQP06Qu+3Nx0OmDDRvRjTdJkrnz+xayHH0pZ7M3mjEd5gO7GBdn6OgM/J0kgqPCJEkKk4uxqu7PieX7miyYX9+paDcmuSMrWf83l43ocreWxXLlhZKFhHL2ed2thr4zixD/2Y+1j3WSWXsU5cIBfOeyfw8DLd0+ssLWPZue9MKqLfwvz4vuhDHFzFeIyYq3/8pRKZ7vmixDh0npy3m1QiHT0LFj8mAG/Fwg==",
-        "tokenHash" : "911e4ef197d476522e8fe65f3790cc39061a828924b1f9cfc9b16e5ed5e261ea84d4b1dc5319ced5cca7510ec360f2af3b048403dac133cfca90ea23da0d6db4",
+        "name": "FleetEnrollmentKey:1",
+        "api_key_id" : "key",
         "policy_id" : "policy:1",
         "active" : true,
         "enrollment_rules" : [{
@@ -108,7 +107,7 @@
           "created_at" : "2019-09-20T01:57:50.986Z"
         }]
       },
-      "type" : "tokens",
+      "type" : "enrollment_api_keys",
       "references": []
     }
   }

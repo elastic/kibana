@@ -8,6 +8,8 @@ import * as t from 'io-ts';
 import { FrameworkUser } from '../../adapters/framework/adapter_types';
 import { RuntimeAgentType } from '../agents/types';
 
+export const SAVED_OBJECT_TYPE = 'enrollment_api_keys';
+
 export interface EnrollmentTokenData {
   policy_id: string;
 }
@@ -39,16 +41,20 @@ export type EnrollmentRule = EnrollmentRuleData & {
   updated_at?: string;
 };
 
-export type TokenVerificationResponse =
+export type EnrollmentApiKeyVerificationResponse =
   | {
       valid: true;
-      type: TokenType.ENROLLMENT_TOKEN;
-      token: EnrollmentTokenData;
+      enrollmentApiKey: EnrollmentApiKey;
     }
   | {
+      valid: false;
+      reason: string;
+    };
+
+export type AccessApiKeyVerificationResponse =
+  | {
       valid: true;
-      type: TokenType.ACCESS_TOKEN;
-      token: AccessTokenData;
+      accessApiKeyId: string;
     }
   | {
       valid: false;
@@ -60,49 +66,58 @@ export enum TokenType {
   ACCESS_TOKEN = 'ACCESS_TOKEN',
 }
 
-export interface Token {
+export interface EnrollmentApiKey {
   id: string;
-  type: TokenType;
-  token: string;
-  tokenHash: string;
+  api_key_id: string;
+  api_key: string;
+  name?: string;
   created_at: string;
   expire_at?: string;
   active: boolean;
   enrollment_rules: EnrollmentRule[];
-  policy_id: string;
+  policy_id?: string;
   [k: string]: any; // allow to use it as saved object attributes type
 }
 
-export interface TokensRepository {
+export interface EnrollmentApiKeysRepository {
+  list(
+    user: FrameworkUser<any>,
+    options: {
+      page?: number;
+      perPage?: number;
+      kuery?: string;
+      showInactive?: boolean;
+    }
+  ): Promise<{ items: EnrollmentApiKey[]; total: any; page: any; perPage: any }>;
   create(
     user: FrameworkUser,
     data: {
-      type: TokenType;
-      token: string;
-      tokenHash: string;
+      apiKeyId: string;
+      apiKey: string;
       active: boolean;
-      policyId: string;
       expire_at?: string;
+      policyId?: string;
+      name?: string;
     }
-  ): Promise<Token>;
+  ): Promise<EnrollmentApiKey>;
 
   /**
-   * Get a token by token.
+   * Get a key for a given apiKey Id.
    * @param token
    */
-  getByTokenHash(user: FrameworkUser, tokenHash: string): Promise<Token | null>;
+  getById(user: FrameworkUser, id: string): Promise<EnrollmentApiKey | null>;
 
   /**
-   * Get a token by token.
+   * Get a key for a given apiKey Id.
    * @param token
    */
-  getByPolicyId(user: FrameworkUser, policyId: string): Promise<Token | null>;
+  getByApiKeyId(user: FrameworkUser, apiKeyId: string): Promise<EnrollmentApiKey | null>;
 
   /**
    * Update a token
    * @param token
    */
-  update(user: FrameworkUser, id: string, newData: Partial<Token>): Promise<void>;
+  update(user: FrameworkUser, id: string, newData: Partial<EnrollmentApiKey>): Promise<void>;
 
   /**
    * Delete a token

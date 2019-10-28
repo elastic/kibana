@@ -5,19 +5,48 @@
  */
 
 import expect from '@kbn/expect';
+import uuid from 'uuid';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
+import { getSupertestWithoutAuth } from './services';
 
-const VALID_ACCESS_TOKEN =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiQUNDRVNTX1RPS0VOIiwiYWdlbnRJZCI6ImIzNWQ2ZDIwLWQwYTAtMTFlOS1iNTkwLThiMGEzYWY4NzUwZCIsImNvbmZpZyI6eyJpZCI6ImNvbmZpZzEiLCJzaGFyZWRJZCI6ImNvbmZpZzEifSwiaWF0IjoxNTY3NzcyNDIzfQ.UQJjI9Ki6JL3iX6zMGhd-LFZynq8a6-Fti1qcq9poFQ';
-
-export default function({ getService }: FtrProviderContext) {
+export default function(providerContext: FtrProviderContext) {
+  const { getService } = providerContext;
   const esArchiver = getService('esArchiver');
-  const supertest = getService('supertest');
+  const esClient = getService('es');
+
+  const supertest = getSupertestWithoutAuth(providerContext);
+  let apiKey: { id: string; api_key: string };
 
   describe('fleet_agent_checkin', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('fleet/agents');
+      const options = {
+        method: 'POST',
+        path: '/_security/api_key',
+        body: {
+          name: `test access api key: ${uuid.v4()}`,
+        },
+      };
+
+      // @ts-ignore
+      apiKey = await esClient.transport.request(options);
+      const { _source: agentDoc } = await esClient.get({
+        index: '.kibana',
+        id: 'agents:agent1',
+        type: '_doc',
+      });
+      // @ts-ignore
+      agentDoc.agents.access_api_key_id = apiKey.id;
+      await esClient.update({
+        index: '.kibana',
+        id: 'agents:agent1',
+        type: '_doc',
+        body: {
+          doc: agentDoc,
+        },
+        refresh: true,
+      });
     });
     after(async () => {
       await esArchiver.unload('fleet/agents');
@@ -27,7 +56,7 @@ export default function({ getService }: FtrProviderContext) {
       await supertest
         .post(`/api/fleet/agents/agent1/checkin`)
         .set('kbn-xsrf', 'xx')
-        .set('kbn-fleet-access-token', 'i-am-not-a-valid-token')
+        .set('Authorization', 'ApiKey NOT_A_VALID_TOKEN')
         .send({
           events: [],
         })
@@ -38,7 +67,10 @@ export default function({ getService }: FtrProviderContext) {
       await supertest
         .post(`/api/fleet/agents/agent1/checkin`)
         .set('kbn-xsrf', 'xx')
-        .set('kbn-fleet-access-token', VALID_ACCESS_TOKEN)
+        .set(
+          'Authorization',
+          `ApiKey ${Buffer.from(`${apiKey.id}:${apiKey.api_key}`).toString('base64')}`
+        )
         .send({
           events: ['i-am-not-valid-event'],
           metadata: {},
@@ -50,7 +82,10 @@ export default function({ getService }: FtrProviderContext) {
       const { body: apiResponse } = await supertest
         .post(`/api/fleet/agents/agent1/checkin`)
         .set('kbn-xsrf', 'xx')
-        .set('kbn-fleet-access-token', VALID_ACCESS_TOKEN)
+        .set(
+          'Authorization',
+          `ApiKey ${Buffer.from(`${apiKey.id}:${apiKey.api_key}`).toString('base64')}`
+        )
         .send({
           events: [
             {

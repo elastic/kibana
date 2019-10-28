@@ -9,7 +9,7 @@ Report current state of a Fleet agent.
 
 ## Headers
 
-- `kbn-fleet-access-token` (Required, string) A fleet agent access token.
+- `Authorization` (Required, string) A valid fleet access api key..
 
 ## Request body
 
@@ -25,6 +25,7 @@ Report current state of a Fleet agent.
 
 ```js
 POST /api/fleet/agents/a4937110-e53e-11e9-934f-47a8e38a522c/checkin
+Authorization: ApiKey VALID_ACCESS_API_KEY
 {
   "events": [{
     "type": "STATE",

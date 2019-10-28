@@ -8,7 +8,7 @@ Enroll agent
 
 ## Headers
 
-- `kbn-fleet-enrollment-token` (Required, string) A fleet enrollment token.
+- `Authorization` (Required, string) a valid enrollemnt api key.
 
 ## Request body
 
@@ -26,6 +26,7 @@ Enroll agent
 
 ```js
 POST /api/fleet/agents/enroll
+Authorization: ApiKey VALID_API_KEY
 {
   "type": "PERMANENT",
   "metadata": {
@@ -50,7 +51,7 @@ The API returns the following:
     "user_provided_metadata": {},
     "local_metadata": {},
     "actions": [],
-    "access_token": "ACCESS_TOKEN"
+    "access_api_key": "ACCESS_API_KEY"
   }
 }
 ```
@@ -63,7 +64,7 @@ The API will return a response with a `401` status code and an error if the enro
 {
   "statusCode": 401,
   "error": "Unauthorized",
-  "message": "Enrollment token is not valid: invalid token"
+  "message": "Enrollment apiKey is not valid: Enrollement api key does not exists or is not active"
 }
 ```
 

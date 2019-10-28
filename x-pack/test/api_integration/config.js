@@ -7,7 +7,9 @@
 import { services } from './services';
 
 export async function getApiIntegrationConfig({ readConfigFile }) {
-  const xPackFunctionalTestsConfig = await readConfigFile(require.resolve('../functional/config.js'));
+  const xPackFunctionalTestsConfig = await readConfigFile(
+    require.resolve('../functional/config.js')
+  );
 
   return {
     testFiles: [require.resolve('./apis')],
@@ -28,7 +30,8 @@ export async function getApiIntegrationConfig({ readConfigFile }) {
       ...xPackFunctionalTestsConfig.get('esTestCluster'),
       serverArgs: [
         ...xPackFunctionalTestsConfig.get('esTestCluster.serverArgs'),
-        'node.attr.name=apiIntegrationTestNode'
+        'node.attr.name=apiIntegrationTestNode',
+        'xpack.security.authc.api_key.enabled=true',
       ],
     },
   };
