@@ -73,11 +73,7 @@ export const EditJob: FC<EditJobProps> = ({ job, jobOverride, existingGroupIds, 
   };
 
   return (
-    <EuiFlyout
-      onClose={() => onClose(null)}
-      hideCloseButton
-      aria-labelledby="flyoutComplicatedTitle"
-    >
+    <EuiFlyout onClose={() => onClose(null)} aria-labelledby="flyoutComplicatedTitle">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2 id="flyoutComplicatedTitle">
