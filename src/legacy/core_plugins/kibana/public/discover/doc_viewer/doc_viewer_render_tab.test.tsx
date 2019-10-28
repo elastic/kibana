@@ -19,7 +19,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { DocViewRenderTab } from './doc_viewer_render_tab';
-import { DocViewRenderProps } from 'ui/registry/doc_views';
+import { DocViewRenderProps } from '../kibana_services';
 
 test('Mounting and unmounting DocViewerRenderTab', () => {
   const unmountFn = jest.fn();
