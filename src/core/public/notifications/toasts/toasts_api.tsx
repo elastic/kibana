@@ -17,11 +17,13 @@
  * under the License.
  */
 
-import { EuiGlobalToastListToast as Toast } from '@elastic/eui';
+import { EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
 import React from 'react';
 import * as Rx from 'rxjs';
+import { isString } from 'lodash';
 
 import { ErrorToast } from './error_toast';
+import { MountPoint, mountReact } from '../../utils';
 import { UiSettingsClientContract } from '../../ui_settings';
 import { OverlayStart } from '../../overlays';
 
@@ -33,13 +35,20 @@ import { OverlayStart } from '../../overlays';
  *
  * @public
  */
-export type ToastInputFields = Pick<Toast, Exclude<keyof Toast, 'id'>>;
+export type ToastInputFields = Pick<EuiToast, Exclude<keyof EuiToast, 'id' | 'text' | 'title'>> & {
+  title?: string | MountPoint;
+  text?: string | MountPoint;
+};
+
+export type Toast = ToastInputFields & {
+  id: string;
+};
 
 /**
  * Inputs for {@link IToasts} APIs.
  * @public
  */
-export type ToastInput = string | ToastInputFields | Promise<ToastInputFields>;
+export type ToastInput = string | ToastInputFields;
 
 /**
  * Options available for {@link IToasts} APIs.
@@ -59,13 +68,12 @@ export interface ErrorToastOptions {
   toastMessage?: string;
 }
 
-const normalizeToast = (toastOrTitle: ToastInput) => {
+const normalizeToast = (toastOrTitle: ToastInput): ToastInputFields => {
   if (typeof toastOrTitle === 'string') {
     return {
       title: toastOrTitle,
     };
   }
-
   return toastOrTitle;
 };
 
@@ -123,11 +131,12 @@ export class ToastsApi implements IToasts {
 
   /**
    * Removes a toast from the current array of toasts if present.
-   * @param toast - a {@link Toast} returned by {@link ToastApi.add}
+   * @param toastOrId - a {@link Toast} returned by {@link ToastsApi.add} or it's id
    */
-  public remove(toast: Toast) {
+  public remove(toastOrId: Toast | string) {
+    const toRemove = isString(toastOrId) ? toastOrId : toastOrId.id;
     const list = this.toasts$.getValue();
-    const listWithoutToast = list.filter(t => t !== toast);
+    const listWithoutToast = list.filter(t => t.id !== toRemove);
     if (listWithoutToast.length !== list.length) {
       this.toasts$.next(listWithoutToast);
     }
@@ -191,7 +200,7 @@ export class ToastsApi implements IToasts {
       iconType: 'alert',
       title: options.title,
       toastLifeTimeMs: this.uiSettings.get('notifications:lifetime:error'),
-      text: (
+      text: mountReact(
         <ErrorToast
           openModal={this.openModal.bind(this)}
           error={error}

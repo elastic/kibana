@@ -91,7 +91,7 @@ describe('#get$()', () => {
     toasts.add('foo');
     onToasts.mockClear();
 
-    toasts.remove({ id: 'bar' });
+    toasts.remove('bar');
     expect(onToasts).not.toHaveBeenCalled();
   });
 });
@@ -136,7 +136,7 @@ describe('#remove()', () => {
   it('ignores unknown toast', async () => {
     const toasts = new ToastsApi(toastDeps());
     toasts.add('Test');
-    toasts.remove({ id: 'foo' });
+    toasts.remove('foo');
 
     const currentToasts = await getCurrentToasts(toasts);
     expect(currentToasts).toHaveLength(1);
