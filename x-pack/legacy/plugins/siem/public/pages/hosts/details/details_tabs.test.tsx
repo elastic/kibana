@@ -7,20 +7,24 @@
 import { mount } from 'enzyme';
 import React from 'react';
 import { StaticIndexPattern } from 'ui/index_patterns';
-import { npSetup } from 'ui/new_platform';
 import { MemoryRouter } from 'react-router-dom';
 
 import { mockIndexPattern } from '../../../mock/index_pattern';
 import { TestProviders } from '../../../mock/test_providers';
-import { mockUiSettings, MockNpSetUp } from '../../../mock/ui_settings';
+import { mockUiSettings } from '../../../mock/ui_settings';
 import { HostDetailsTabs } from './details_tabs';
 import { SetAbsoluteRangeDatePicker } from './types';
 import { hostDetailsPagePath } from '../types';
 import { type } from './utils';
+import { useKibanaCore } from '../../../lib/compose/kibana_core';
 
-const mockNpSetup: MockNpSetUp = (npSetup as unknown) as MockNpSetUp;
-jest.mock('ui/new_platform');
-mockNpSetup.core.uiSettings = mockUiSettings;
+jest.mock('../../../lib/settings/use_kibana_ui_setting');
+
+const mockUseKibanaCore = useKibanaCore as jest.Mock;
+jest.mock('../../../lib/compose/kibana_core');
+mockUseKibanaCore.mockImplementation(() => ({
+  uiSettings: mockUiSettings,
+}));
 
 jest.mock('../../../containers/source', () => ({
   indicesExistOrDataTemporarilyUnavailable: () => true,
@@ -34,55 +38,71 @@ jest.mock('../../../containers/source', () => ({
   }) => children({ indicesExist: true, indexPattern: mockIndexPattern }),
 }));
 
-describe('body', () => {
-  test('it should pass expected object properties to children', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <MemoryRouter initialEntries={[`/hosts/host-1/authentications`]}>
-          <HostDetailsTabs
-            from={0}
-            isInitializing={false}
-            detailName={'host-1'}
-            setQuery={() => {}}
-            to={0}
-            setAbsoluteRangeDatePicker={(jest.fn() as unknown) as SetAbsoluteRangeDatePicker}
-            hostDetailsPagePath={hostDetailsPagePath}
-            indexPattern={mockIndexPattern}
-            type={type}
-            filterQuery='{"bool":{"must":[],"filter":[{"match_all":{}},{"match_phrase":{"host.name":{"query":"host-1"}}}],"should":[],"must_not":[]}}'
-          />
-        </MemoryRouter>
-      </TestProviders>
-    );
+// Test will fail because we will to need to mock some core services to make the test work
+// For now let's forget about SiemSearchBar
+jest.mock('../../../components/search_bar', () => ({
+  SiemSearchBar: () => null,
+}));
 
-    // match against everything but the functions to ensure they are there as expected
-    expect(wrapper.find('AuthenticationsQueryTabBody').props()).toMatchObject({
-      endDate: 0,
-      filterQuery:
-        '{"bool":{"must":[],"filter":[{"match_all":{}},{"match_phrase":{"host.name":{"query":"host-1"}}}],"should":[],"must_not":[]}}',
-      skip: false,
-      startDate: 0,
-      type: 'details',
-      indexPattern: {
-        fields: [
-          { name: '@timestamp', searchable: true, type: 'date', aggregatable: true },
-          { name: '@version', searchable: true, type: 'string', aggregatable: true },
-          { name: 'agent.ephemeral_id', searchable: true, type: 'string', aggregatable: true },
-          { name: 'agent.hostname', searchable: true, type: 'string', aggregatable: true },
-          { name: 'agent.id', searchable: true, type: 'string', aggregatable: true },
-          { name: 'agent.test1', searchable: true, type: 'string', aggregatable: true },
-          { name: 'agent.test2', searchable: true, type: 'string', aggregatable: true },
-          { name: 'agent.test3', searchable: true, type: 'string', aggregatable: true },
-          { name: 'agent.test4', searchable: true, type: 'string', aggregatable: true },
-          { name: 'agent.test5', searchable: true, type: 'string', aggregatable: true },
-          { name: 'agent.test6', searchable: true, type: 'string', aggregatable: true },
-          { name: 'agent.test7', searchable: true, type: 'string', aggregatable: true },
-          { name: 'agent.test8', searchable: true, type: 'string', aggregatable: true },
-          { name: 'host.name', searchable: true, type: 'string', aggregatable: true },
-        ],
-        title: 'filebeat-*,auditbeat-*,packetbeat-*',
-      },
-      hostName: 'host-1',
-    });
-  });
+describe('body', () => {
+  const scenariosMap = {
+    authentications: 'AuthenticationsQueryTabBody',
+    allHosts: 'HostsQueryTabBody',
+    uncommonProcesses: 'UncommonProcessQueryTabBody',
+    anomalies: 'AnomaliesQueryTabBody',
+    events: 'EventsQueryTabBody',
+  };
+
+  Object.entries(scenariosMap).forEach(([path, componentName]) =>
+    test(`it should pass expected object properties to ${componentName}`, () => {
+      const wrapper = mount(
+        <TestProviders>
+          <MemoryRouter initialEntries={[`/hosts/host-1/${path}`]}>
+            <HostDetailsTabs
+              from={0}
+              isInitializing={false}
+              detailName={'host-1'}
+              setQuery={() => {}}
+              to={0}
+              setAbsoluteRangeDatePicker={(jest.fn() as unknown) as SetAbsoluteRangeDatePicker}
+              hostDetailsPagePath={hostDetailsPagePath}
+              indexPattern={mockIndexPattern}
+              type={type}
+              filterQuery='{"bool":{"must":[],"filter":[{"match_all":{}},{"match_phrase":{"host.name":{"query":"host-1"}}}],"should":[],"must_not":[]}}'
+            />
+          </MemoryRouter>
+        </TestProviders>
+      );
+
+      // match against everything but the functions to ensure they are there as expected
+      expect(wrapper.find(componentName).props()).toMatchObject({
+        endDate: 0,
+        filterQuery:
+          '{"bool":{"must":[],"filter":[{"match_all":{}},{"match_phrase":{"host.name":{"query":"host-1"}}}],"should":[],"must_not":[]}}',
+        skip: false,
+        startDate: 0,
+        type: 'details',
+        indexPattern: {
+          fields: [
+            { name: '@timestamp', searchable: true, type: 'date', aggregatable: true },
+            { name: '@version', searchable: true, type: 'string', aggregatable: true },
+            { name: 'agent.ephemeral_id', searchable: true, type: 'string', aggregatable: true },
+            { name: 'agent.hostname', searchable: true, type: 'string', aggregatable: true },
+            { name: 'agent.id', searchable: true, type: 'string', aggregatable: true },
+            { name: 'agent.test1', searchable: true, type: 'string', aggregatable: true },
+            { name: 'agent.test2', searchable: true, type: 'string', aggregatable: true },
+            { name: 'agent.test3', searchable: true, type: 'string', aggregatable: true },
+            { name: 'agent.test4', searchable: true, type: 'string', aggregatable: true },
+            { name: 'agent.test5', searchable: true, type: 'string', aggregatable: true },
+            { name: 'agent.test6', searchable: true, type: 'string', aggregatable: true },
+            { name: 'agent.test7', searchable: true, type: 'string', aggregatable: true },
+            { name: 'agent.test8', searchable: true, type: 'string', aggregatable: true },
+            { name: 'host.name', searchable: true, type: 'string', aggregatable: true },
+          ],
+          title: 'filebeat-*,auditbeat-*,packetbeat-*',
+        },
+        hostName: 'host-1',
+      });
+    })
+  );
 });

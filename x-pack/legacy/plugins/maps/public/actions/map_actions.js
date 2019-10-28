@@ -143,7 +143,7 @@ export function removeTrackedLayerStateForSelectedLayer() {
 export function replaceLayerList(newLayerList) {
   return (dispatch, getState) => {
     getLayerListRaw(getState()).forEach(({ id }) => {
-      dispatch(removeLayer(id));
+      dispatch(removeLayerFromLayerList(id));
     });
 
     newLayerList.forEach(layerDescriptor => {
@@ -282,7 +282,7 @@ export function removeTransientLayer() {
   return async (dispatch, getState) => {
     const transientLayerId = getTransientLayerId(getState());
     if (transientLayerId) {
-      await dispatch(removeLayer(transientLayerId));
+      await dispatch(removeLayerFromLayerList(transientLayerId));
       await dispatch(setTransientLayer(null));
     }
   };
@@ -611,11 +611,22 @@ export function removeSelectedLayer() {
     const state = getState();
     const layerId = getSelectedLayerId(state);
     dispatch(removeLayer(layerId));
-    dispatch(setSelectedLayer(null));
   };
 }
 
 export function removeLayer(layerId) {
+  return async (dispatch, getState) => {
+    const state = getState();
+    const selectedLayerId = getSelectedLayerId(state);
+    if (layerId === selectedLayerId) {
+      dispatch(updateFlyout(FLYOUT_STATE.NONE));
+      await dispatch(setSelectedLayer(null));
+    }
+    dispatch(removeLayerFromLayerList(layerId));
+  };
+}
+
+function removeLayerFromLayerList(layerId) {
   return (dispatch, getState) => {
     const layerGettingRemoved = getLayerById(layerId, getState());
     if (!layerGettingRemoved) {
@@ -682,7 +693,10 @@ export function clearMissingStyleProperties(layerId) {
     if (!style) {
       return;
     }
-    const ordinalFields = await targetLayer.getOrdinalFields();
+
+    const dateFields = await targetLayer.getDateFields();
+    const numberFields = await targetLayer.getNumberFields();
+    const ordinalFields = [...dateFields, ...numberFields];
     const { hasChanges, nextStyleDescriptor } = style.getDescriptorWithMissingStylePropsRemoved(ordinalFields);
     if (hasChanges) {
       dispatch(updateLayerStyle(layerId, nextStyleDescriptor));

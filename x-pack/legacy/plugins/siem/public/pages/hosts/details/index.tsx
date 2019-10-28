@@ -5,6 +5,7 @@
  */
 
 import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
+import { getEsQueryConfig } from '@kbn/es-query';
 import React, { useContext, useEffect } from 'react';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
@@ -33,6 +34,7 @@ import { LastEventIndexKey } from '../../../graphql/types';
 import { convertToBuildEsQuery } from '../../../lib/keury';
 import { setAbsoluteRangeDatePicker as dispatchAbsoluteRangeDatePicker } from '../../../store/inputs/actions';
 import { SpyRoute } from '../../../utils/route/spy_routes';
+import { useKibanaCore } from '../../../lib/compose/kibana_core';
 
 import { HostsEmptyPage } from '../hosts_empty_page';
 import { navTabsHostDetails } from './nav_tabs';
@@ -61,12 +63,13 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
       setHostDetailsTablesActivePageToZero(null);
     }, [detailName]);
     const capabilities = useContext(MlCapabilitiesContext);
-
+    const core = useKibanaCore();
     return (
       <>
         <WithSource sourceId="default">
           {({ indicesExist, indexPattern }) => {
             const filterQuery = convertToBuildEsQuery({
+              config: getEsQueryConfig(core.uiSettings),
               indexPattern,
               queries: [query],
               filters: [

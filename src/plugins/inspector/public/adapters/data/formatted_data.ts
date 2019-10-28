@@ -18,7 +18,7 @@
  */
 
 class FormattedData {
-  constructor(readonly raw: any, readonly formatted: any) {}
+  constructor(public readonly raw: any, public readonly formatted: any) {}
 }
 
 export { FormattedData };

@@ -34,10 +34,10 @@ import {
 } from '../../../../../../plugins/inspector/public';
 import { IInterpreter } from './types';
 import { setInterpreter, setInspector, setRenderersRegistry } from './services';
-import { createRenderer } from './expression_renderer';
-import { loader } from './loader';
-import { execute } from './execute';
-import { render } from './render';
+import { ExpressionRendererImplementation } from './expression_renderer';
+import { ExpressionLoader, loader } from './loader';
+import { ExpressionDataHandler, execute } from './execute';
+import { ExpressionRenderHandler, render } from './render';
 
 export interface ExpressionsSetupDeps {
   inspector: InspectorSetup;
@@ -77,14 +77,16 @@ export class ExpressionsPublicPlugin
   }
 
   public start(core: CoreStart, { inspector }: ExpressionsStartDeps) {
-    const ExpressionRenderer = createRenderer(loader);
     setInspector(inspector);
 
     return {
       execute,
       render,
       loader,
-      ExpressionRenderer,
+      ExpressionRenderer: ExpressionRendererImplementation,
+      ExpressionDataHandler,
+      ExpressionRenderHandler,
+      ExpressionLoader,
     };
   }
 
