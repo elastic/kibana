@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Setup } from '../../server/lib/helpers/setup_request';
+import { SetupWithAllFilters } from '../../server/lib/helpers/setup_request';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
@@ -16,7 +16,7 @@ export function getErrorGroupsProjection({
   setup,
   serviceName
 }: {
-  setup: Setup;
+  setup: SetupWithAllFilters;
   serviceName: string;
 }) {
   const { start, end, uiFiltersES, indices } = setup;

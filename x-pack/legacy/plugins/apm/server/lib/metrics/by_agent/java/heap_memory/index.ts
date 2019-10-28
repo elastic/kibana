@@ -12,7 +12,7 @@ import {
   METRIC_JAVA_HEAP_MEMORY_USED,
   SERVICE_AGENT_NAME
 } from '../../../../../../common/elasticsearch_fieldnames';
-import { Setup } from '../../../../helpers/setup_request';
+import { SetupWithAllFilters } from '../../../../helpers/setup_request';
 import { fetchAndTransformMetrics } from '../../../fetch_and_transform_metrics';
 import { ChartBase } from '../../../types';
 
@@ -51,7 +51,7 @@ const chartBase: ChartBase = {
 };
 
 export async function getHeapMemoryChart(
-  setup: Setup,
+  setup: SetupWithAllFilters,
   serviceName: string,
   serviceNodeName?: string
 ) {

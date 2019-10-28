@@ -16,7 +16,7 @@ import {
 import { PromiseReturnType } from '../../../../../typings/common';
 import { getBucketSize } from '../../../helpers/get_bucket_size';
 import { rangeFilter } from '../../../helpers/range_filter';
-import { Setup } from '../../../helpers/setup_request';
+import { SetupWithAllFilters } from '../../../helpers/setup_request';
 
 export type ESResponse = PromiseReturnType<typeof timeseriesFetcher>;
 export function timeseriesFetcher({
@@ -28,7 +28,7 @@ export function timeseriesFetcher({
   serviceName: string;
   transactionType: string | undefined;
   transactionName: string | undefined;
-  setup: Setup;
+  setup: SetupWithAllFilters;
 }) {
   const { start, end, uiFiltersES, client, indices } = setup;
   const { intervalString } = getBucketSize(start, end, 'auto');

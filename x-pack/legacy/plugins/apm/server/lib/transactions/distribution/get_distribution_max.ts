@@ -11,13 +11,13 @@ import {
   TRANSACTION_NAME,
   TRANSACTION_TYPE
 } from '../../../../common/elasticsearch_fieldnames';
-import { Setup } from '../../helpers/setup_request';
+import { SetupWithAllFilters } from '../../helpers/setup_request';
 
 export async function getDistributionMax(
   serviceName: string,
   transactionName: string,
   transactionType: string,
-  setup: Setup
+  setup: SetupWithAllFilters
 ) {
   const { start, end, uiFiltersES, client, indices } = setup;
 

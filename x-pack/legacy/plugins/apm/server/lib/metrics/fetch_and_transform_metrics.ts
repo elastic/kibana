@@ -5,7 +5,7 @@
  */
 
 import { Unionize } from 'utility-types';
-import { Setup } from '../helpers/setup_request';
+import { SetupWithAllFilters } from '../helpers/setup_request';
 import { getMetricsDateHistogramParams } from '../helpers/metrics';
 import { ChartBase } from './types';
 import { transformDataToMetricsChart } from './transform_metrics_chart';
@@ -39,7 +39,7 @@ export async function fetchAndTransformMetrics<T extends Aggs>({
   aggs,
   additionalFilters = []
 }: {
-  setup: Setup;
+  setup: SetupWithAllFilters;
   serviceName: string;
   serviceNodeName?: string;
   chartBase: ChartBase;

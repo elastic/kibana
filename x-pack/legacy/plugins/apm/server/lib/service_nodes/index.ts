@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Setup } from '../helpers/setup_request';
+import { SetupWithAllFilters } from '../helpers/setup_request';
 import { getServiceNodesProjection } from '../../../common/projections/service_nodes';
 import { mergeProjection } from '../../../common/projections/util/merge_projection';
 import { SERVICE_NODE_NAME_MISSING } from '../../../common/service_nodes';
@@ -19,7 +19,7 @@ const getServiceNodes = async ({
   setup,
   serviceName
 }: {
-  setup: Setup;
+  setup: SetupWithAllFilters;
   serviceName: string;
 }) => {
   const { client } = setup;

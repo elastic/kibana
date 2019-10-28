@@ -5,7 +5,7 @@
  */
 
 import { getHeapMemoryChart } from './heap_memory';
-import { Setup } from '../../../helpers/setup_request';
+import { SetupWithAllFilters } from '../../../helpers/setup_request';
 import { getNonHeapMemoryChart } from './non_heap_memory';
 import { getThreadCountChart } from './thread_count';
 import { getCPUChartData } from '../shared/cpu';
@@ -14,7 +14,7 @@ import { getGcRateChart } from './gc/getGcRateChart';
 import { getGcTimeChart } from './gc/getGcTimeChart';
 
 export async function getJavaMetricsCharts(
-  setup: Setup,
+  setup: SetupWithAllFilters,
   serviceName: string,
   serviceNodeName?: string
 ) {

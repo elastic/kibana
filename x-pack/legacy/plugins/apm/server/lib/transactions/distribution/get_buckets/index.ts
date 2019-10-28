@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Setup } from '../../../helpers/setup_request';
+import { SetupWithAllFilters } from '../../../helpers/setup_request';
 import { bucketFetcher } from './fetcher';
 import { bucketTransformer } from './transform';
 
@@ -16,7 +16,7 @@ export async function getBuckets(
   traceId: string,
   distributionMax: number,
   bucketSize: number,
-  setup: Setup
+  setup: SetupWithAllFilters
 ) {
   const response = await bucketFetcher(
     serviceName,

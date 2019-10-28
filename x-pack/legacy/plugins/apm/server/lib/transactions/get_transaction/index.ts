@@ -11,12 +11,12 @@ import {
 } from '../../../../common/elasticsearch_fieldnames';
 import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
 import { rangeFilter } from '../../helpers/range_filter';
-import { Setup } from '../../helpers/setup_request';
+import { SetupWithAllFilters } from '../../helpers/setup_request';
 
 export async function getTransaction(
   transactionId: string,
   traceId: string,
-  setup: Setup
+  setup: SetupWithAllFilters
 ) {
   const { start, end, uiFiltersES, client, indices } = setup;
 

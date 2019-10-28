@@ -12,11 +12,11 @@ import {
   TRANSACTION_DURATION
 } from '../../../../common/elasticsearch_fieldnames';
 import { PromiseReturnType } from '../../../../typings/common';
-import { Setup } from '../../helpers/setup_request';
+import { SetupWithAllFilters } from '../../helpers/setup_request';
 import { getServicesProjection } from '../../../../common/projections/services';
 
 export type ServiceListAPIResponse = PromiseReturnType<typeof getServicesItems>;
-export async function getServicesItems(setup: Setup) {
+export async function getServicesItems(setup: SetupWithAllFilters) {
   const { start, end, client } = setup;
 
   const projection = getServicesProjection({ setup });

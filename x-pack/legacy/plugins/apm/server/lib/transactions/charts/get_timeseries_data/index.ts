@@ -5,7 +5,7 @@
  */
 
 import { getBucketSize } from '../../../helpers/get_bucket_size';
-import { Setup } from '../../../helpers/setup_request';
+import { SetupWithAllFilters } from '../../../helpers/setup_request';
 import { timeseriesFetcher } from './fetcher';
 import { timeseriesTransformer } from './transform';
 
@@ -13,7 +13,7 @@ export async function getApmTimeseriesData(options: {
   serviceName: string;
   transactionType: string | undefined;
   transactionName: string | undefined;
-  setup: Setup;
+  setup: SetupWithAllFilters;
 }) {
   const { start, end } = options.setup;
   const { bucketSize } = getBucketSize(start, end, 'auto');

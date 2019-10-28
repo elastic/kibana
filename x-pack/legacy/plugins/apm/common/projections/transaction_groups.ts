@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { omit } from 'lodash';
-import { Setup } from '../../server/lib/helpers/setup_request';
+import { SetupWithAllFilters } from '../../server/lib/helpers/setup_request';
 import { TRANSACTION_NAME, PARENT_ID } from '../elasticsearch_fieldnames';
 import { Options } from '../../server/lib/transaction_groups/fetcher';
 import { getTransactionsProjection } from './transactions';
@@ -14,7 +14,7 @@ export function getTransactionGroupsProjection({
   setup,
   options
 }: {
-  setup: Setup;
+  setup: SetupWithAllFilters;
   options: Options;
 }) {
   const transactionsProjection = getTransactionsProjection({

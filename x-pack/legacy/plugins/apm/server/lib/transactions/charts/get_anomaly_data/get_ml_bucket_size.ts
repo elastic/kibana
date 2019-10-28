@@ -5,12 +5,12 @@
  */
 
 import { getMlIndex } from '../../../../../common/ml_job_constants';
-import { Setup } from '../../../helpers/setup_request';
+import { SetupWithTimeRange } from '../../../helpers/setup_request';
 
 interface IOptions {
   serviceName: string;
   transactionType: string;
-  setup: Setup;
+  setup: SetupWithTimeRange;
 }
 
 interface ESResponse {

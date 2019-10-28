@@ -5,16 +5,14 @@
  */
 
 import { PromiseReturnType } from '../../../../typings/common';
-import { Setup } from '../../helpers/setup_request';
+import { Setup, SetupWithAllFilters } from '../../helpers/setup_request';
 import { getBuckets } from './get_buckets';
 import { getDistributionMax } from './get_distribution_max';
 import { roundToNearestFiveOrTen } from '../../helpers/round_to_nearest_five_or_ten';
 
 function getBucketSize(max: number, { config }: Setup) {
-  const minBucketSize: number = config.get<number>(
-    'xpack.apm.minimumBucketSize'
-  );
-  const bucketTargetCount = config.get<number>('xpack.apm.bucketTargetCount');
+  const minBucketSize = config['xpack.apm.minimumBucketSize'];
+  const bucketTargetCount = config['xpack.apm.bucketTargetCount'];
   const bucketSize = max / bucketTargetCount;
   return roundToNearestFiveOrTen(
     bucketSize > minBucketSize ? bucketSize : minBucketSize
@@ -37,7 +35,7 @@ export async function getTransactionDistribution({
   transactionType: string;
   transactionId: string;
   traceId: string;
-  setup: Setup;
+  setup: SetupWithAllFilters;
 }) {
   const distributionMax = await getDistributionMax(
     serviceName,

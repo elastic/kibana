@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Setup } from '../helpers/setup_request';
+import { SetupWithAllFilters } from '../helpers/setup_request';
 import {
   HOST_NAME,
   CONTAINER_ID
@@ -20,7 +20,7 @@ export async function getServiceNodeMetadata({
 }: {
   serviceName: string;
   serviceNodeName: string;
-  setup: Setup;
+  setup: SetupWithAllFilters;
 }) {
   const { client } = setup;
 

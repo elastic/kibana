@@ -11,7 +11,7 @@ import { getUiFiltersES } from '../../helpers/convert_ui_filters/get_ui_filters_
 import { localUIFilters, LocalUIFilterName } from './config';
 import { StaticIndexPattern } from '../../../../../../../../src/legacy/core_plugins/data/public';
 
-export const getFilterAggregations = async ({
+export const getFilterAggregations = ({
   indexPattern,
   uiFilters,
   projection,
@@ -24,49 +24,44 @@ export const getFilterAggregations = async ({
 }) => {
   const mappedFilters = localFilterNames.map(name => localUIFilters[name]);
 
-  const aggs = await Promise.all(
-    mappedFilters.map(async field => {
-      const filter = await getUiFiltersES(
-        indexPattern,
-        omit(uiFilters, field.name)
-      );
+  const aggs = mappedFilters.map(field => {
+    const filter = getUiFiltersES(indexPattern, omit(uiFilters, field.name));
 
-      const bucketCountAggregation = projection.body.aggs
-        ? {
-            aggs: {
-              bucket_count: {
-                cardinality: {
-                  field:
-                    projection.body.aggs[Object.keys(projection.body.aggs)[0]]
-                      .terms.field
-                }
+    const bucketCountAggregation = projection.body.aggs
+      ? {
+          aggs: {
+            bucket_count: {
+              cardinality: {
+                field:
+                  projection.body.aggs[Object.keys(projection.body.aggs)[0]]
+                    .terms.field
               }
             }
           }
-        : {};
+        }
+      : {};
 
-      return {
-        [field.name]: {
-          filter: {
-            bool: {
-              filter
-            }
-          },
-          aggs: {
-            by_terms: {
-              terms: {
-                field: field.fieldName,
-                order: {
-                  _count: 'desc' as const
-                }
-              },
-              ...bucketCountAggregation
-            }
+    return {
+      [field.name]: {
+        filter: {
+          bool: {
+            filter
+          }
+        },
+        aggs: {
+          by_terms: {
+            terms: {
+              field: field.fieldName,
+              order: {
+                _count: 'desc' as const
+              }
+            },
+            ...bucketCountAggregation
           }
         }
-      };
-    })
-  );
+      }
+    };
+  });
 
   const mergedAggregations = Object.assign({}, ...aggs) as Partial<
     Record<LocalUIFilterName, typeof aggs[0]['']>
