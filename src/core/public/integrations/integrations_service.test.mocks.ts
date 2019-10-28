@@ -17,19 +17,22 @@
  * under the License.
  */
 
-import 'ui/i18n';
-import chrome from 'ui/chrome';
-import { npStart } from 'ui/new_platform';
-import { destroyStatusPage, renderStatusPage } from './components/render';
-import template from 'plugins/status_page/status_page.html';
+import { CoreService } from '../../types';
 
-npStart.core.chrome.navLinks.enableForcedAppSwitcherNavigation();
+const createCoreServiceMock = (): jest.Mocked<CoreService> => {
+  return {
+    setup: jest.fn(),
+    start: jest.fn(),
+    stop: jest.fn(),
+  };
+};
 
-chrome
-  .setRootTemplate(template)
-  .setRootController('ui', function ($scope, buildNum, buildSha) {
-    $scope.$$postDigest(() => {
-      renderStatusPage(buildNum, buildSha.substr(0, 8));
-      $scope.$on('$destroy', destroyStatusPage);
-    });
-  });
+export const styleServiceMock = createCoreServiceMock();
+jest.doMock('./styles', () => ({
+  StylesService: jest.fn(() => styleServiceMock),
+}));
+
+export const momentServiceMock = createCoreServiceMock();
+jest.doMock('./moment', () => ({
+  MomentService: jest.fn(() => momentServiceMock),
+}));

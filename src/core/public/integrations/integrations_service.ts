@@ -17,19 +17,33 @@
  * under the License.
  */
 
-import 'ui/i18n';
-import chrome from 'ui/chrome';
-import { npStart } from 'ui/new_platform';
-import { destroyStatusPage, renderStatusPage } from './components/render';
-import template from 'plugins/status_page/status_page.html';
+import { UiSettingsClientContract } from '../ui_settings';
+import { CoreService } from '../../types';
 
-npStart.core.chrome.navLinks.enableForcedAppSwitcherNavigation();
+import { MomentService } from './moment';
+import { StylesService } from './styles';
 
-chrome
-  .setRootTemplate(template)
-  .setRootController('ui', function ($scope, buildNum, buildSha) {
-    $scope.$$postDigest(() => {
-      renderStatusPage(buildNum, buildSha.substr(0, 8));
-      $scope.$on('$destroy', destroyStatusPage);
-    });
-  });
+interface Deps {
+  uiSettings: UiSettingsClientContract;
+}
+
+/** @internal */
+export class IntegrationsService implements CoreService {
+  private readonly styles = new StylesService();
+  private readonly moment = new MomentService();
+
+  public async setup() {
+    await this.styles.setup();
+    await this.moment.setup();
+  }
+
+  public async start({ uiSettings }: Deps) {
+    await this.styles.start({ uiSettings });
+    await this.moment.start({ uiSettings });
+  }
+
+  public async stop() {
+    await this.styles.stop();
+    await this.moment.stop();
+  }
+}
