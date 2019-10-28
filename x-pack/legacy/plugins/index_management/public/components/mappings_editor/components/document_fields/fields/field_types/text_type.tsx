@@ -16,7 +16,13 @@ import {
 } from '@elastic/eui';
 
 import { NormalizedField, Field as FieldType } from '../../../../types';
-import { UseField, UseMultiFields, Field, FieldHook } from '../../../../shared_imports';
+import {
+  UseField,
+  UseMultiFields,
+  Field,
+  FieldHook,
+  FormDataProvider,
+} from '../../../../shared_imports';
 import { getFieldConfig } from '../../../../lib';
 import { PARAMETERS_OPTIONS } from '../../../../constants';
 import { SelectWithCustom } from '../../../form';
@@ -41,6 +47,12 @@ const getDefaultValueToggle = (toggleId: string, field: FieldType) => {
           getFieldConfig('index_prefixes', 'min_chars').defaultValue ||
           (field.index_prefixes as any).max_chars !==
             getFieldConfig('index_prefixes', 'max_chars').defaultValue)
+      );
+    }
+    case 'positionIncrementGap': {
+      return (
+        field.position_increment_gap !== undefined &&
+        field.position_increment_gap !== getFieldConfig('position_increment_gap').defaultValue
       );
     }
     default:
@@ -270,6 +282,48 @@ export const TextType = React.memo(({ field }: Props) => {
             <EuiCallOut color="warning">
               <p>Enabling norms requires a lot of disk use.</p>
             </EuiCallOut>
+          </EditFieldFormRow>
+
+          {/* position_increment_gap */}
+          <EditFieldFormRow
+            title={<h3>Set position increment gap</h3>}
+            description="This is description text."
+            toggleDefaultValue={getDefaultValueToggle('positionIncrementGap', field.source)}
+          >
+            <FormDataProvider pathsToWatch="index_options">
+              {formData => {
+                return (
+                  <>
+                    <UseField
+                      path="position_increment_gap"
+                      config={getFieldConfig('position_increment_gap')}
+                    >
+                      {positionIncrementGapField => (
+                        <EuiRange
+                          min={0}
+                          max={200}
+                          value={positionIncrementGapField.value as string}
+                          onChange={positionIncrementGapField.onChange as any}
+                          showInput
+                        />
+                      )}
+                    </UseField>
+                    {formData.index_options !== 'positions' &&
+                      formData.index_options !== 'offsets' && (
+                        <>
+                          <EuiSpacer size="s" />
+                          <EuiCallOut title="Postions not enabled." color="danger" iconType="alert">
+                            <p>
+                              You need to set the index options to "positions" or "offsets" in order
+                              to be able to change the position increment gap.
+                            </p>
+                          </EuiCallOut>
+                        </>
+                      )}
+                  </>
+                );
+              }}
+            </FormDataProvider>
           </EditFieldFormRow>
         </EditFieldSection>
       </AdvancedSettingsWrapper>

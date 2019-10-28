@@ -271,7 +271,6 @@ export const PARAMETERS_DEFINITION = {
   },
   position_increment_gap: {
     fieldConfig: {
-      label: 'Position increment gap',
       type: FIELD_TYPES.NUMBER,
       defaultValue: 100,
       formatters: [toInt],
