@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import expect from '@kbn/expect';
 import { DataRecognizer } from '../data_recognizer';
 
@@ -36,10 +34,41 @@ describe('ML - data recognizer', () => {
     expect(ids.join()).to.equal(moduleIds.join());
   });
 
-
   it('getModule - load a single module', async () => {
     const module = await dr.getModule(moduleIds[0]);
     expect(module.id).to.equal(moduleIds[0]);
   });
 
+  describe('jobOverrides', () => {
+    it('should apply job overrides correctly', () => {
+      const prefix = 'pre-';
+      const testJobId = 'test-job';
+      const moduleConfig = {
+        jobs: [
+          {
+            id: `${prefix}${testJobId}`,
+            groups: ['nginx'],
+          },
+        ],
+      };
+      const jobOverrides = [
+        {
+          job_id: testJobId,
+          groups: [],
+        },
+      ];
+      dr.applyJobConfigOverrides(moduleConfig, jobOverrides, prefix);
+      expect(moduleConfig.jobs).to.eql([
+        {
+          config: {
+            groups: []
+          },
+          groups: [
+            'nginx'
+          ],
+          id: 'pre-test-job'
+        }
+      ]);
+    });
+  });
 });
