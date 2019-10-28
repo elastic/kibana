@@ -17,5 +17,5 @@ const plugins: PluginsSetup = {
   feature_catalogue: npSetup.plugins.feature_catalogue,
 };
 
-export const setup = spacesPlugin.setup(npSetup.core);
-export const start = spacesPlugin.start(npStart.core, plugins);
+export const setup = spacesPlugin.setup(npSetup.core, plugins);
+export const start = spacesPlugin.start(npStart.core);

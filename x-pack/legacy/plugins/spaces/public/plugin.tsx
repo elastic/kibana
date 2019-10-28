@@ -21,22 +21,22 @@ export interface PluginsSetup {
 export class SpacesPlugin implements Plugin<{}, SpacesPluginStart, PluginsSetup> {
   private spacesManager: SpacesManager | undefined;
 
-  // @ts-ignore
-  constructor(private readonly initializerContext: PluginInitializerContext) {}
+  constructor(initializerContext: PluginInitializerContext) {}
 
-  public async start(core: CoreStart, plugins: PluginsSetup) {
+  public async start(core: CoreStart) {
     const serverBasePath = core.injectedMetadata.getInjectedVar('serverBasePath') as string;
     this.spacesManager = new SpacesManager(serverBasePath, core.http);
 
     initSpacesNavControl(this.spacesManager, core);
-    if (plugins.feature_catalogue) {
-      plugins.feature_catalogue.register(createSpacesFeatureCatalogueEntry());
-    }
 
     return {
       spacesManager: this.spacesManager,
     };
   }
 
-  public async setup(core: CoreSetup) {}
+  public async setup(core: CoreSetup, plugins: PluginsSetup) {
+    if (plugins.feature_catalogue) {
+      plugins.feature_catalogue.register(createSpacesFeatureCatalogueEntry());
+    }
+  }
 }
