@@ -112,6 +112,11 @@ export interface QueueConfig {
   timeout: number;
 }
 
+export interface ScrollConfig {
+  duration: string;
+  size: number;
+}
+
 export interface ElementPosition {
   boundingClientRect: {
     // modern browsers support x/y, but older ones don't
@@ -247,6 +252,8 @@ export interface ExportTypeDefinition {
 export interface ExportTypesRegistry {
   register: (exportTypeDefinition: ExportTypeDefinition) => void;
 }
+
+export { CancellationToken } from './common/cancellation_token';
 
 // Prefer to import this type using: `import { LevelLogger } from 'relative/path/server/lib';`
 export { LevelLogger as Logger } from './server/lib/level_logger';

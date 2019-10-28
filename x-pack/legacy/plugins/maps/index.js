@@ -23,7 +23,8 @@ import _ from 'lodash';
 export function maps(kibana) {
 
   return new kibana.Plugin({
-    require: ['kibana', 'elasticsearch', 'xpack_main', 'tile_map', 'task_manager'],
+    // task_manager could be required, but is only used for telemetry
+    require: ['kibana', 'elasticsearch', 'xpack_main', 'tile_map'],
     id: APP_ID,
     configPrefix: 'xpack.maps',
     publicDir: resolve(__dirname, 'public'),
