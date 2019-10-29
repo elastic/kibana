@@ -8,6 +8,7 @@ import {
   EuiBasicTable,
   EuiButton,
   EuiButtonIcon,
+  EuiCallOut,
   EuiFilterButton,
   EuiFilterGroup,
   EuiFlexGroup,
@@ -161,7 +162,7 @@ const Signals = React.memo(() => {
       <EuiSpacer />
 
       <EuiPanel>
-        <HeaderSection title="All signals">
+        <HeaderSection title="Signals">
           <EuiFilterGroup>
             <EuiFilterButton
               hasActiveFilters={filterGroupState === filterGroupOptions[0]}
@@ -531,6 +532,17 @@ export const RuleDetailsComponent = React.memo(() => {
             </EuiFlexItem>
           </EuiFlexGroup>
         </HeaderPage>
+
+        <EuiCallOut
+          color="danger"
+          iconType="alert"
+          size="s"
+          title="Rule failed to run on 12/28/2019, 12:00 PM"
+        >
+          <p>{'Full fail message here.'}</p>
+        </EuiCallOut>
+
+        <EuiSpacer />
 
         <EuiFlexGroup>
           <EuiFlexItem grow={1}>
