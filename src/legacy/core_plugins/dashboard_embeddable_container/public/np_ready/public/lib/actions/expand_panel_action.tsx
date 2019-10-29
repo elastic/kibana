@@ -17,4 +17,5 @@
  * under the License.
  */
 
+// eslint-disable-next-line
 export * from '../../../../../../../../plugins/dashboard_embeddable_container/public/actions/expand_panel_action';

@@ -17,5 +17,5 @@
  * under the License.
  */
 
-// eslint-disable-next-line
-export * from '../../../../../../../../plugins/dashboard_embeddable_container/public/actions/open_replace_panel_flyout';
+export { ExpandPanelAction, EXPAND_PANEL_ACTION } from './expand_panel_action';
+export { ReplacePanelAction, REPLACE_PANEL_ACTION } from './replace_panel_action';
