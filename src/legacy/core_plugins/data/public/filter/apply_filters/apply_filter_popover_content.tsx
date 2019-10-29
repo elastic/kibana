@@ -33,7 +33,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import { IndexPattern } from '../../index_patterns';
 import { getFilterDisplayText } from '../filter_bar/filter_editor/lib/get_filter_display_text';
-import { mapAndFlattenFilters } from '../filter_manager/lib/map_and_flatten_filters';
+import { mapAndFlattenFilters } from '../../../../../../plugins/data/public';
 import { getDisplayValueFromFilter } from '../filter_bar/filter_editor/lib/get_display_value';
 
 interface Props {

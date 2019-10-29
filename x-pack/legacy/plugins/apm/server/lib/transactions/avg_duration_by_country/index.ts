@@ -21,9 +21,9 @@ export async function getTransactionAvgDurationByCountry({
   setup: Setup;
   serviceName: string;
 }) {
-  const { uiFiltersES, client, config, start, end } = setup;
+  const { uiFiltersES, client, start, end, indices } = setup;
   const params = {
-    index: config.get<string>('apm_oss.transactionIndices'),
+    index: indices['apm_oss.transactionIndices'],
     body: {
       size: 0,
       query: {

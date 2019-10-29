@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-
 // TODO: Re-index is just a temporary solution in order to speed up development
 // of any front end pieces. This should be replaced with a combination of the file
 // build_events_query.ts and any scrolling/scaling solutions from that particular
@@ -17,9 +15,8 @@ interface BuildEventsReIndexParams {
   from: string;
   to: string;
   signalsIndex: string;
-  maxDocs: string;
-  filter: Record<string, {}> | undefined;
-  kql: string | undefined;
+  maxDocs: number;
+  filter: unknown;
   severity: string;
   name: string;
   timeDetected: string;
@@ -29,17 +26,6 @@ interface BuildEventsReIndexParams {
   references: string[];
 }
 
-export const getFilter = (kql: string | undefined, filter: Record<string, {}> | undefined) => {
-  if (kql != null) {
-    return toElasticsearchQuery(fromKueryExpression(kql), null);
-  } else if (filter != null) {
-    return filter;
-  } else {
-    // TODO: Re-visit this error (which should never happen) when we do signal errors for the UI
-    throw new TypeError('either kql or filter should be set');
-  }
-};
-
 export const buildEventsReIndex = ({
   description,
   index,
@@ -48,7 +34,6 @@ export const buildEventsReIndex = ({
   signalsIndex,
   maxDocs,
   filter,
-  kql,
   severity,
   name,
   timeDetected,
@@ -57,11 +42,10 @@ export const buildEventsReIndex = ({
   type,
   references,
 }: BuildEventsReIndexParams) => {
-  const kqlOrFilter = getFilter(kql, filter);
   const indexPatterns = index.map(element => `"${element}"`).join(',');
   const refs = references.map(element => `"${element}"`).join(',');
   const filterWithTime = [
-    kqlOrFilter,
+    filter,
     {
       bool: {
         filter: [
