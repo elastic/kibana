@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { first, last } from 'lodash';
 
-import { metricsQuery } from '../../../../legacy/plugins/infra/public/containers/metrics/metrics.gql_query';
+import { metricsQuery } from '../../../../legacy/plugins/infra/public/pages/metrics/containers/metrics.gql_query';
 import { MetricsQuery } from '../../../../legacy/plugins/infra/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
