@@ -6,7 +6,7 @@
 
 import React, { Fragment, FunctionComponent } from 'react';
 import PropTypes from 'prop-types';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiButtonIcon, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiButtonIcon, EuiText } from '@elastic/eui';
 import immutable from 'object-path-immutable';
 import { get } from 'lodash';
 import { ColorPickerPopover } from '../../../components/color_picker_popover';
