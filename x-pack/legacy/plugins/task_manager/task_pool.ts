@@ -12,8 +12,6 @@ import { performance } from 'perf_hooks';
 import { Logger } from './types';
 import { TaskRunner } from './task_runner';
 
-import { either, asErr, asOk, Ok, Err } from './lib/result_type';
-
 interface Opts {
   maxWorkers: number;
   logger: Logger;
@@ -86,18 +84,20 @@ export class TaskPool {
     if (tasksToRun.length) {
       performance.mark('attemptToRun_start');
       await Promise.all(
-        tasksToRun.map(async task => {
-          const result = await task
-            .markTaskAsRunning()
-            .then((hasTaskBeenMarkAsRunning: boolean) =>
-              hasTaskBeenMarkAsRunning
-                ? (asOk(task) as Ok<TaskRunner>)
-                : (asErr([task, { message: VERSION_CONFLICT_MESSAGE }]) as Err<[TaskRunner, Error]>)
-            )
-            .catch((ex: Error) => asErr([task, ex]) as Err<[TaskRunner, Error]>);
-
-          this.handleMarkAsRunning(result);
-        })
+        tasksToRun.map(
+          async task =>
+            await task
+              .markTaskAsRunning()
+              .then((hasTaskBeenMarkAsRunning: boolean) =>
+                hasTaskBeenMarkAsRunning
+                  ? this.handleMarkAsRunning(task)
+                  : this.handleFailureOfMarkAsRunning(task, {
+                      name: 'TaskPoolVersionConflictError',
+                      message: VERSION_CONFLICT_MESSAGE,
+                    })
+              )
+              .catch(ex => this.handleFailureOfMarkAsRunning(task, ex))
+        )
       );
 
       performance.mark('attemptToRun_stop');
@@ -113,22 +113,18 @@ export class TaskPool {
     return TaskPoolRunResult.RunningAllClaimedTasks;
   }
 
-  private handleMarkAsRunning(result: Ok<TaskRunner> | Err<[TaskRunner, Error]>) {
-    either<TaskRunner, [TaskRunner, Error], void>(
-      task => {
-        this.running.add(task);
-        task
-          .run()
-          .catch(err => {
-            this.logger.warn(`Task ${task.toString()} failed in attempt to run: ${err.message}`);
-          })
-          .then(() => this.running.delete(task));
-      },
-      ([task, err]) => {
-        this.logger.error(`Failed to mark Task ${task.toString()} as running: ${err.message}`);
-      },
-      result
-    );
+  private handleMarkAsRunning(task: TaskRunner) {
+    this.running.add(task);
+    task
+      .run()
+      .catch(err => {
+        this.logger.warn(`Task ${task.toString()} failed in attempt to run: ${err.message}`);
+      })
+      .then(() => this.running.delete(task));
+  }
+
+  private handleFailureOfMarkAsRunning(task: TaskRunner, err: Error) {
+    this.logger.error(`Failed to mark Task ${task.toString()} as running: ${err.message}`);
   }
 
   private cancelExpiredTasks() {
