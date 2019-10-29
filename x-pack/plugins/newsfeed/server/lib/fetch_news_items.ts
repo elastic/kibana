@@ -7,7 +7,7 @@
 import request from 'request';
 import { HttpResponseOptions } from '../../../../../src/core/server';
 
-const NEWSFEED_SERVICE_URL_TEMPLATE = 'https://feeds.elastic.co/kibana/v7.4.1.json';
+const NEWSFEED_SERVICE_URL_TEMPLATE = 'https://feeds.elastic.co/kibana/v7.4.1.json'; // FIXME
 
 export function fetchNewsItems(kibanaVersion: string): Promise<HttpResponseOptions> {
   return new Promise((resolve, reject) => {
