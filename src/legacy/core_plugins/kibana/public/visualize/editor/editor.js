@@ -404,9 +404,14 @@ function VisEditor(
       $appStatus.dirty = status.dirty || !savedVis.id;
     });
 
-    $scope.$watch('state.query', (newQuery) => {
-      const query = migrateLegacyQuery(newQuery);
-      $scope.updateQueryAndFetch({ query });
+    $scope.$watch('state.query', (newQuery, oldQuery) => {
+      if (!_.isEqual(newQuery, oldQuery)) {
+        const query = migrateLegacyQuery(newQuery);
+        if (!_.isEqual(query, newQuery)) {
+          $state.query = query;
+        }
+        $scope.fetch();
+      }
     });
 
     $state.replace();
@@ -470,7 +475,9 @@ function VisEditor(
     timefilter.setTime(dateRange);
 
     // If nothing has changed, trigger the fetch manually, otherwise it will happen as a result of the changes
-    if (!isUpdate) $scope.fetch();
+    if (!isUpdate) {
+      $scope.vis.forceReload();
+    }
   };
 
   $scope.onRefreshChange = function ({ isPaused, refreshInterval }) {
