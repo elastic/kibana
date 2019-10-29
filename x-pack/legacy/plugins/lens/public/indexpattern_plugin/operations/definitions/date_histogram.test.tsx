@@ -30,7 +30,7 @@ jest.mock('ui/chrome', () => ({
 }));
 
 const defaultOptions = {
-  storage: {} as Storage,
+  storage: {} as IStorageWrapper,
   uiSettings: {} as UiSettingsClientContract,
   savedObjectsClient: {} as SavedObjectsClientContract,
   dateRange: {

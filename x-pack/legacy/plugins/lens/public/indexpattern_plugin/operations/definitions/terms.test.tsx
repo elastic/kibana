@@ -21,7 +21,7 @@ import { IndexPatternPrivateState } from '../../types';
 jest.mock('ui/new_platform');
 
 const defaultProps = {
-  storage: {} as Storage,
+  storage: {} as IStorageWrapper,
   uiSettings: {} as UiSettingsClientContract,
   savedObjectsClient: {} as SavedObjectsClientContract,
   dateRange: { fromDate: 'now-1d', toDate: 'now' },
