@@ -18,9 +18,9 @@
  */
 
 import { createLegacyClass } from 'ui/utils/legacy_class';
-import { getServices } from '../kibana_services';
+import { SavedObjectProvider } from 'ui/saved_objects/saved_object';
 
-const { uiModules, SavedObjectProvider } = getServices();
+import { uiModules } from 'ui/modules';
 
 const module = uiModules.get('discover/saved_searches', []);
 
@@ -62,7 +62,7 @@ export function createSavedSearchFactory(Private) {
 
   SavedSearch.searchSource = true;
 
-  SavedSearch.prototype.getFullPath = function () {
+  SavedSearch.prototype.getFullPath = () => {
     return `/app/kibana#/discover/${this.id}`;
   };
 

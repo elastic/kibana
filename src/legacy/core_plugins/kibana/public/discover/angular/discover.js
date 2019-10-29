@@ -23,7 +23,6 @@ import { Subscription } from 'rxjs';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
-import '../saved_searches/saved_searches';
 import '../components/field_chooser/field_chooser';
 
 // doc table
@@ -132,7 +131,6 @@ app.config($routeProvider => {
           const exists = _.findIndex(savedObjects, o => o.id === state.index) > -1;
           const id = exists ? state.index : uiSettings.get('defaultIndex');
           state.destroy();
-
           return Promise.props({
             list: savedObjects,
             loaded: indexPatterns.get(id),
@@ -141,9 +139,9 @@ app.config($routeProvider => {
           });
         });
       },
-      savedSearch: function (redirectWhenMissing, savedSearches, $route) {
+      savedSearch: function (redirectWhenMissing, $route, kbnUrl, Promise) {
         const savedSearchId = $route.current.params.id;
-        return savedSearches.get(savedSearchId)
+        const entry = getServices().getSavedSearchById(savedSearchId, kbnUrl)
           .then((savedSearch) => {
             if (savedSearchId) {
               chrome.recentlyAccessed.add(
@@ -157,6 +155,7 @@ app.config($routeProvider => {
             'search': '/discover',
             'index-pattern': '/management/kibana/objects/savedSearches/' + $route.current.params.id
           }));
+        return Promise.props({ entry  });
       }
     }
   });
@@ -223,7 +222,7 @@ function discoverController(
   };
 
   // the saved savedSearch
-  const savedSearch = $route.current.locals.savedSearch;
+  const savedSearch = $route.current.locals.savedSearch.entry;
 
   let abortController;
   $scope.$on('$destroy', () => {

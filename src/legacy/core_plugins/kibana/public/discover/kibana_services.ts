@@ -22,7 +22,8 @@ import 'ui/fixed_scroll';
 import 'ui/directives/css_truncate';
 
 import { npStart } from 'ui/new_platform';
-
+import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing/get_unhashable_states_provider';
+import { IPrivate } from 'ui/private';
 import chromeLegacy from 'ui/chrome';
 import angular from 'angular'; // just used in embeddables and discover controller
 import uiRoutes from 'ui/routes';
@@ -45,6 +46,10 @@ import { docTitle } from 'ui/doc_title';
 // @ts-ignore
 import * as docViewsRegistry from 'ui/registry/doc_views';
 import { start as data } from '../../../data/public/legacy';
+// @ts-ignore
+import { createSavedSearchesService } from './saved_searches/saved_searches';
+// @ts-ignore
+import { createSavedSearchFactory } from './saved_searches/_saved_search';
 
 export let angularModule: any = null;
 
@@ -54,6 +59,28 @@ export function setAngularModule(module: any) {
 
 export function getAngularModule() {
   return angularModule;
+}
+
+/**
+ * Get dependencies relying on the global angular context.
+ * They also have to get resolved together with the legacy imports
+ */
+export async function getAngularDependencies(): Promise<any> {
+  const injector = await chromeLegacy.dangerouslyGetActiveInjector();
+
+  const Private = injector.get<IPrivate>('Private');
+
+  const queryFilter = Private(FilterBarQueryFilterProvider);
+  const getUnhashableStates = Private(getUnhashableStatesProvider);
+  const shareContextMenuExtensions = Private(ShareContextMenuExtensionsRegistryProvider);
+  const savedObjectRegistry = Private(SavedObjectRegistryProvider);
+
+  return {
+    queryFilter,
+    getUnhashableStates,
+    shareContextMenuExtensions,
+    savedObjectRegistry,
+  };
 }
 
 let services = {
@@ -75,7 +102,14 @@ let services = {
   getInjector: () => {
     return chromeLegacy.dangerouslyGetActiveInjector();
   },
-  SavedObjectRegistryProvider,
+  getSavedSearchById: async (id: string, kbnUrl: unknown) => {
+    const injector = await chromeLegacy.dangerouslyGetActiveInjector();
+    const Private = injector.get<IPrivate>('Private');
+    const SavedSearch = createSavedSearchFactory(Private);
+
+    const service = createSavedSearchesService(Private, SavedSearch, kbnUrl, chromeLegacy);
+    return service.get(id);
+  },
   SavedObjectProvider,
   SearchSource,
   ShareContextMenuExtensionsRegistryProvider,

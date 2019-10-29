@@ -58,10 +58,6 @@ import { AppMountContext } from 'kibana/public';
 import { setAngularModule } from './kibana_services';
 // @ts-ignore
 import { dashboardConfigProvider } from '../dashboard/dashboard_config';
-// @ts-ignore
-import { createSavedSearchesService } from './saved_searches/saved_searches';
-// @ts-ignore
-import { createSavedSearchFactory } from './saved_searches/_saved_search';
 
 const moduleName = 'app/discover';
 const thirdPartyAngularDependencies = [
@@ -82,7 +78,8 @@ export function getDiscoverModule(core: AppMountContext['core']) {
 export async function renderApp(
   element: HTMLElement,
   appBasePath: string,
-  { core }: AppMountContext
+  { core }: AppMountContext,
+  angularDeps: any
 ) {
   getDiscoverModule(core);
   require('./angular');
@@ -125,8 +122,6 @@ export function createLocalAngularModule(core: AppMountContext['core']) {
   createDashboardConfigModule();
   createIndexPatternsModule();
   createChromeModule(core.chrome);
-  createSavedSearchModule();
-  createSavedSearchesModule();
 
   return angular.module(moduleName, [
     ...thirdPartyAngularDependencies,
@@ -264,21 +259,4 @@ function createIndexPatternsModule() {
 
 function createChromeModule(chrome: any) {
   angular.module('discoverChrome', []).service('chrome', chrome);
-}
-
-function createSavedSearchModule() {
-  angular
-    .module('discoverSavedSearch', ['discoverPrivate'])
-    .factory('SavedSearch', createSavedSearchFactory);
-}
-
-function createSavedSearchesModule() {
-  angular
-    .module('discoverSavedSearches', [
-      'discoverPrivate',
-      'discoverSavedSearch',
-      'discoverKbnUrl',
-      'discoverChrome',
-    ])
-    .service('savedSearches', createSavedSearchesService);
 }
