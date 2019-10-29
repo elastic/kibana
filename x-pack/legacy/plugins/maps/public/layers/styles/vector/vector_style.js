@@ -25,6 +25,8 @@ import { StaticColorProperty } from './properties/static_color_property';
 import { DynamicColorProperty } from './properties/dynamic_color_property';
 import { StaticOrientationProperty } from './properties/static_orientation_property';
 import { DynamicOrientationProperty } from './properties/dynamic_orientation_property';
+import {ESDocField} from "../../fields/es_doc_field";
+import {ESAggMetricField} from "../../fields/es_agg_field";
 
 const POINTS = [GEO_JSON_TYPE.POINT, GEO_JSON_TYPE.MULTI_POINT];
 const LINES = [GEO_JSON_TYPE.LINE_STRING, GEO_JSON_TYPE.MULTI_LINE_STRING];
@@ -468,6 +470,11 @@ export class VectorStyle extends AbstractStyle {
 
   _makeField(field) {
 
+    if (!this._layer) {
+      console.warn('should be instantiated with layer');
+      return null;
+    }
+
     if (!field || !field.name) {
       return null;
     }
@@ -479,8 +486,17 @@ export class VectorStyle extends AbstractStyle {
       });
     } else if (field.origin === FIELD_ORIGIN.JOIN) {
 
+      let matchingField = null;
+      this._layer.getValidJoins().forEach(join => {
+        console.log('kj', join);
+        matchingField = join.getRightJoinSource().find(source => {
+          return source.getMetricFieldForName(field.name);
+        });
+        return !!matchingField;
+      });
 
-      return null;
+      console.log('found matching field', matchingField);
+      return matchingField;
 
     } else {
       throw new Error(`Unknown origin-type ${field.origin}`);

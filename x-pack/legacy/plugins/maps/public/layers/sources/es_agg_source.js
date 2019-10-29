@@ -31,6 +31,12 @@ export class AbstractESAggSource extends AbstractESSource {
     }) : [];
   }
 
+  getMetricFieldForName(fieldName) {
+    return this._metricFields.find(metricField => {
+      return metricField.getName() === fieldName;
+    });
+  }
+
   getMetricFields() {
     const metrics = this._metricFields.filter(esAggField => {
       return (esAggField.getAggType() === 'count')  ? true : !!esAggField.getESDocField();

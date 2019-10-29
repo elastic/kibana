@@ -6,7 +6,7 @@
 
 
 import { ESTermSource } from '../sources/es_term_source';
-import { VectorStyle } from '../styles/vector/vector_style';
+import { getComputedFieldNamePrefix } from '../styles/vector/style_util';
 
 export class InnerJoin {
 
@@ -54,7 +54,7 @@ export class InnerJoin {
       delete feature.properties[metricPropertyKey];
 
       // delete all dynamic properties for metric field
-      const stylePropertyPrefix = VectorStyle.getComputedFieldNamePrefix(metricPropertyKey);
+      const stylePropertyPrefix = getComputedFieldNamePrefix(metricPropertyKey);
       Object.keys(feature.properties).forEach(featurePropertyKey => {
         if (featurePropertyKey.length >= stylePropertyPrefix.length &&
           featurePropertyKey.substring(0, stylePropertyPrefix.length) === stylePropertyPrefix) {
