@@ -42,7 +42,7 @@ export const ProfileTree = memo(({ data, target, onHighlight }: Props) => {
               direction="column"
             >
               <EuiFlexItem grow={false}>
-                <IndexDetails index={index} target={target} />
+                <IndexDetails index={index} />
               </EuiFlexItem>
               <EuiSpacer size="s" />
               <EuiFlexItem grow={false}>

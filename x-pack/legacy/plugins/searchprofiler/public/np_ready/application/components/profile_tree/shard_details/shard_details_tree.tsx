@@ -31,10 +31,7 @@ export const ShardDetailTree = ({ data, index, shard }: Props) => {
       <EuiFlexGroup gutterSize="none" direction="column">
         <EuiFlexItem>
           <div className="prfDevTool__profileTree__tvHeader">
-            <EuiText
-              size="s"
-              className="prfDevTool__profileTree__description prfDevTool__profileTree__cell"
-            >
+            <EuiText size="s" className="euiTextAlign--left prfDevTool__profileTree__cell">
               {i18n.translate('xpack.searchProfiler.profileTree.header.typeTitle', {
                 defaultMessage: 'Type and description',
               })}

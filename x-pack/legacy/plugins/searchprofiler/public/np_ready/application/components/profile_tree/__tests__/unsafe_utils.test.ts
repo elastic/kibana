@@ -6,12 +6,9 @@
 
 import expect from '@kbn/expect';
 import * as util from '../unsafe_utils';
-// @ts-ignore
-import { normalized, breakdown } from './fixtures/breakdown.js';
-// @ts-ignore
-import { inputTimes, normalizedTimes } from './fixtures/normalize_times.js';
-// @ts-ignore
-import { inputIndices, normalizedIndices } from './fixtures/normalize_indices.js';
+import { normalized, breakdown } from './fixtures/breakdown';
+import { inputTimes, normalizedTimes } from './fixtures/normalize_times';
+import { inputIndices, normalizedIndices } from './fixtures/normalize_indices';
 
 describe('normalizeBreakdown', function() {
   it('returns correct breakdown', function() {
@@ -30,17 +27,6 @@ describe('normalizeTimes', function() {
 
     // Modifies in place, so inputTimes will change
     expect(input).to.eql(normalizedTimes);
-  });
-});
-
-// TODO: Revive this test
-xdescribe('initTree', function() {
-  it('returns initialised shards tree', function() {
-    // Deep clone the object to preserve the original
-    const input = JSON.parse(JSON.stringify(normalizedTimes));
-    const flat: any = [];
-    util.initTree(input, 0);
-    expect(JSON.parse(JSON.stringify(flat))).to.eql(null);
   });
 });
 

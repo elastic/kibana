@@ -70,8 +70,8 @@ export const HighlightDetailsFlyout = ({ indexName, operation, shard, onClose }:
               title={
                 <>
                   {i18n.translate('xpack.searchProfiler.highlightDetails.totalTimeTitle', {
-                    defaultMessage: 'Total Time',
-                  })}
+                    defaultMessage: 'Total time',
+                  })}{' '}
                   <EuiIconTip
                     type="iInCircle"
                     color="subdued"
@@ -92,8 +92,8 @@ export const HighlightDetailsFlyout = ({ indexName, operation, shard, onClose }:
               title={
                 <>
                   {i18n.translate('xpack.searchProfiler.highlightDetails.selfTimeTitle', {
-                    defaultMessage: 'Total Time',
-                  })}
+                    defaultMessage: 'Self time',
+                  })}{' '}
                   <EuiIconTip
                     type="iInCircle"
                     color="subdued"
@@ -107,12 +107,12 @@ export const HighlightDetailsFlyout = ({ indexName, operation, shard, onClose }:
                   />
                 </>
               }
-              body={msToPretty(operation.selfTime!, 3)}
+              body={msToPretty(operation.selfTime || 0, 3)}
             />
             {/* Breakdown Table Entry */}
             <FlyoutEntry
               title={i18n.translate('xpack.searchProfiler.highlightDetails.timingBreakdownTitle', {
-                defaultMessage: 'Timing Breakdown',
+                defaultMessage: 'Timing breakdown',
               })}
               body={<HighlightDetailsTable breakdown={operation.breakdown} />}
             />

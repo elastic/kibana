@@ -35,52 +35,54 @@ export const ShardDetailsTreeNode = ({ operation, index, shard }: Props) => {
 
   const renderTimeRow = (op: Operation) => (
     <div className="prfDevTool__profileTree__tvRow">
-      <div className="prfDevTool__profileTree__cell prfDevTool__profileTree__description">
-        <EuiLink
-          className="prfDevTool__profileTree__shardDetails"
-          disabled={!op.hasChildren}
-          onClick={() => setChildrenVisible(!childrenVisible)}
-        >
-          {op.hasChildren ? (
+      <div className="prfDevTool__profileTree__cell euiTextAlign--left">
+        {op.hasChildren ? (
+          <EuiLink
+            className="prfDevTool__profileTree__shardDetails"
+            disabled={!op.hasChildren}
+            onClick={() => setChildrenVisible(!childrenVisible)}
+          >
             <EuiIcon type={childrenVisible ? 'arrowDown' : 'arrowRight'} />
-          ) : (
-            // Use dot icon for alignment if arrow isn't there
-            <EuiIcon type={'dot'} />
-          )}
 
-          {op.query_type}
-        </EuiLink>
+            {' ' + op.query_type}
+          </EuiLink>
+        ) : (
+          <>
+            <EuiIcon type="dot" />
+            {' ' + op.query_type}
+          </>
+        )}
       </div>
       {/* Self Time Badge */}
-      <div className="prfDevTool__profileTree__cell prfDevTool__profileTree__time">
+      <div className="prfDevTool__profileTree__cell prfDevTool__profileTree__time euiTextAlign--center">
         <EuiBadge
-          className="prfDevTool__profileTree__badge"
+          className="prfDevTool__profileTree__badge euiTextAlign--center"
           style={{ backgroundColor: op.absoluteColor }}
         >
-          {msToPretty(op.selfTime!, 1)}
+          {msToPretty(op.selfTime || 0, 1)}
         </EuiBadge>
       </div>
       {/* Total Time Badge */}
       <div className="prfDevTool__profileTree__cell prfDevTool__profileTree__totalTime">
         <EuiBadge
-          className="prfDevTool__profileTree__badge"
+          className="prfDevTool__profileTree__badge euiTextAlign--center"
           style={{ backgroundColor: op.absoluteColor }}
         >
-          {msToPretty(op.time!, 1)}
+          {msToPretty(op.time, 1)}
         </EuiBadge>
       </div>
       {/* Time percentage Badge */}
       <div className="prfDevTool__profileTree__cell prfDevTool__profileTree__percentage">
         <EuiBadge
-          className="prfDevTool__profileTree__progress--percent"
-          style={{ '--prfDevToolProgressPercentage': op.timePercentage } as any}
+          className="prfDevTool__profileTree__progress--percent euiTextAlign--center"
+          style={{ '--prfDevToolProgressPercentage': op.timePercentage + '%' } as any}
         >
-          <span
-            className="prfDevTool__progress--percent-ie"
-            style={{ width: op.timePercentage + '%' }}
-          />
           <span className="prfDevTool__progressText">{op.timePercentage + '%'}</span>
         </EuiBadge>
+        <span
+          className="prfDevTool__progress--percent-ie"
+          style={{ width: op.timePercentage + '%' }}
+        />
       </div>
     </div>
   );
@@ -103,7 +105,7 @@ export const ShardDetailsTreeNode = ({ operation, index, shard }: Props) => {
               onClick={() => highlight({ indexName: index.name, operation, shard })}
             >
               {i18n.translate('xpack.searchProfiler.profileTree.body.viewDetailsLabel', {
-                defaultMessage: 'View Details',
+                defaultMessage: 'View details',
               })}
             </EuiLink>
           </span>

@@ -12,7 +12,6 @@ import { ShardSerialized } from '../types';
 interface Args {
   query: string;
   index: string;
-  type: string;
 }
 
 interface ReturnValue {
@@ -22,9 +21,9 @@ interface ReturnValue {
   };
 }
 
-export const useDoProfile = () => {
+export const useRequestProfile = () => {
   const { http, notifications, formatAngularHttpError, licenseEnabled } = useAppContext();
-  return async ({ query, index, type }: Args): Promise<ReturnValue> => {
+  return async ({ query, index }: Args): Promise<ReturnValue> => {
     if (!licenseEnabled) {
       return { data: null };
     }
@@ -48,10 +47,6 @@ export const useDoProfile = () => {
       payload.index = '_all';
     } else {
       payload.index = index;
-    }
-
-    if (type != null && type !== '') {
-      payload.type = type;
     }
 
     try {

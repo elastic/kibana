@@ -1,18 +1,8 @@
 
 .prfDevTool__sense {
-  flex: 1;
   order: 1;
+  // To anchor ace editor
   position: relative;
-  display: flex;
-  flex-direction: column;
-
-  > * {
-    flex-shrink: 0;
-  }
-
-  .kuiTextInput {
-    width: 100%;
-  }
 
   // Ace Editor overrides
   .ace_editor {
@@ -28,4 +18,8 @@
     background: rgba($euiColorDanger, .5);
     z-index: 20;
   }
+}
+
+.prfDevTool__profileButtonContainer {
+  flex-shrink: 1;
 }

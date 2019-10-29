@@ -12,11 +12,10 @@ import { msToPretty } from '../../utils';
 import { Index } from '../../types';
 
 export interface Props {
-  target: string;
   index: Index;
 }
 
-export const IndexDetails = ({ index, target }: Props) => {
+export const IndexDetails = ({ index }: Props) => {
   const { time, name } = index;
   return (
     <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" direction="row">
@@ -45,7 +44,7 @@ export const IndexDetails = ({ index, target }: Props) => {
           >
             <small>
               {i18n.translate('xpack.searchProfiler.profileTree.cumulativeTimeTitle', {
-                defaultMessage: 'Cumulative Time:',
+                defaultMessage: 'Cumulative time:',
               })}
             </small>
           </EuiToolTip>

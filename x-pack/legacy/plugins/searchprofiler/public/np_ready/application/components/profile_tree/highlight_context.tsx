@@ -24,7 +24,7 @@ export const HighlightContextProvider = ({
   children,
   onHighlight,
 }: {
-  children: any;
+  children: React.ReactNode;
   onHighlight: OnHighlightChangeHandler;
 }) => {
   const [selectedRow, setSelectedRow] = useState<string>('');

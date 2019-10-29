@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { useDoProfile } from './use_do_profile';
+export { useRequestProfile } from './use_request_profile';

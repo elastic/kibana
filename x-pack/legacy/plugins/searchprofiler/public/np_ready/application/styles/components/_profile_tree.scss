@@ -1,4 +1,6 @@
 
+$badgeSize: $euiSize * 5.5;
+
 // Profile details treeview
 
 .prfDevTool__profileTree {
@@ -58,14 +60,10 @@
     color: $euiColorDarkShade;
   }
 
-  &__description {
-    text-align: left;
-  }
-
   &__time,
   &__totalTime,
   &__percentage {
-    width: $euiSize * 5.5;
+    width: $badgeSize;
   }
 
   // BADGES (and those used for progress)
@@ -78,13 +76,14 @@
 
   &__progress--percent {
     @include prfDevToolProgress;
-    width: $euiSize * 4.5;
+    width: $badgeSize;
   }
 
   &__progress--time {
     @include prfDevToolProgress(#FFAFAF);
     background-color: #F5F5F5; // Must be light at all times
-    width: $euiSize * 15.5;
+    // Width of 3 badges, with the last child not having padding on the left
+    width: ($badgeSize * 3) - ($euiSizeXS * .75);
     // Force text to always be dark on top of white -> pink color
     color: lightOrDarkTheme($euiColorDarkestShade, $euiColorLightestShade);
   }

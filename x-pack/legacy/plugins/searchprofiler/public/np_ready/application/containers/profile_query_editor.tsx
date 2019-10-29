@@ -12,10 +12,11 @@ import {
   EuiButton,
   EuiText,
   EuiFlexGroup,
+  EuiSpacer,
   EuiFlexItem,
 } from '@elastic/eui';
 import { Editor, EditorInstance } from '../editor';
-import { useDoProfile } from '../hooks';
+import { useRequestProfile } from '../hooks';
 import { useAppContext } from '../contexts/app_context';
 import { useProfilerActionContext } from '../contexts/profiler_context';
 
@@ -35,22 +36,20 @@ const INITIAL_EDITOR_VALUE = `{
 export const ProfileQueryEditor = memo(() => {
   const editorRef = useRef<EditorInstance>(null as any);
   const indexInputRef = useRef<HTMLInputElement>(null as any);
-  const typeInputRef = useRef<HTMLInputElement>(null as any);
 
   const dispatch = useProfilerActionContext();
 
   const { licenseEnabled } = useAppContext();
-  const doProfile = useDoProfile();
+  const requestProfile = useRequestProfile();
 
   const handleProfileClick = async () => {
     dispatch({ type: 'setProfiling', value: true });
     try {
       const { current: editor } = editorRef;
       editor.clearErrorAnnotations();
-      const { data: result, error } = await doProfile({
+      const { data: result, error } = await requestProfile({
         query: editorRef.current.getValue(),
         index: indexInputRef.current.value,
-        type: typeInputRef.current.value,
       });
       if (error) {
         editor.addErrorAnnotation(error);
@@ -69,50 +68,60 @@ export const ProfileQueryEditor = memo(() => {
   const onEditorReady = useCallback(editorInstance => (editorRef.current = editorInstance), []);
 
   return (
-    <div className="prfDevTool__sense">
-      <EuiForm>
-        <EuiFlexGroup direction="row" gutterSize="s">
-          <EuiFlexItem grow={1}>
-            <EuiFormRow
-              label={i18n.translate('xpack.searchProfiler.formIndexLabel', {
-                defaultMessage: 'Index',
-              })}
-            >
-              <EuiFieldText
-                disabled={!licenseEnabled}
-                inputRef={ref => {
-                  indexInputRef.current = ref!;
-                  ref!.value = DEFAULT_INDEX_VALUE;
-                }}
-              />
-            </EuiFormRow>
+    <EuiFlexGroup className="prfDevTool__sense" gutterSize="none" direction="column">
+      {/* Form */}
+      <EuiFlexItem grow={false}>
+        <EuiForm>
+          <EuiFlexGroup direction="row" gutterSize="s">
+            <EuiFlexItem>
+              <EuiFormRow
+                label={i18n.translate('xpack.searchProfiler.formIndexLabel', {
+                  defaultMessage: 'Index',
+                })}
+              >
+                <EuiFieldText
+                  disabled={!licenseEnabled}
+                  inputRef={ref => {
+                    indexInputRef.current = ref!;
+                    ref!.value = DEFAULT_INDEX_VALUE;
+                  }}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiForm>
+      </EuiFlexItem>
+
+      {/* Editor */}
+      <EuiFlexItem grow={10}>
+        <Editor
+          onEditorReady={onEditorReady}
+          licenseEnabled={licenseEnabled}
+          initialValue={INITIAL_EDITOR_VALUE}
+        />
+      </EuiFlexItem>
+
+      {/* Button */}
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup
+          className="prfDevTool__profileButtonContainer"
+          gutterSize="none"
+          direction="row"
+        >
+          <EuiFlexItem grow={5}>
+            <EuiSpacer size="s" />
           </EuiFlexItem>
-          <EuiFlexItem grow={1}>
-            <EuiFormRow
-              label={i18n.translate('xpack.searchProfiler.formTypeLabel', {
-                defaultMessage: 'Type',
-              })}
-            >
-              <EuiFieldText
-                disabled={!licenseEnabled}
-                inputRef={ref => (typeInputRef.current = ref!)}
-              />
-            </EuiFormRow>
+          <EuiFlexItem grow={5}>
+            <EuiButton fill disabled={!licenseEnabled} onClick={() => handleProfileClick()}>
+              <EuiText>
+                {i18n.translate('xpack.searchProfiler.formProfileButtonLabel', {
+                  defaultMessage: 'Profile',
+                })}
+              </EuiText>
+            </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiForm>
-      <Editor
-        onEditorReady={onEditorReady}
-        licenseEnabled={licenseEnabled}
-        initialValue={INITIAL_EDITOR_VALUE}
-      />
-      <EuiButton disabled={!licenseEnabled} onClick={() => handleProfileClick()}>
-        <EuiText>
-          {i18n.translate('xpack.searchProfiler.formProfileButtonLabel', {
-            defaultMessage: 'Profile',
-          })}
-        </EuiText>
-      </EuiButton>
-    </div>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 });

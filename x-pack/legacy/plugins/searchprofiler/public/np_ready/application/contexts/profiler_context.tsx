@@ -10,7 +10,7 @@ import { useStore, State, Action } from '../store';
 const ProfilerReadContext = createContext<State>(null as any);
 const ProfilerActionContext = createContext<Dispatch<Action>>(null as any);
 
-export const ProfileContextProvider = ({ children }: { children: any }) => {
+export const ProfileContextProvider = ({ children }: { children: React.ReactNode }) => {
   const { dispatch, state } = useStore();
   return (
     <ProfilerReadContext.Provider value={state}>

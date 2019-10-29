@@ -37,7 +37,7 @@ export const ShardDetails = ({ index, shard, operations }: Props) => {
         <EuiFlexItem grow={false} className="prfDevTool__profileTree__shard__header-flex-item">
           <EuiText className="prfDevTool__shardDetails--dim">
             <EuiBadge
-              className="prfDevTool__profileTree__progress--time"
+              className="prfDevTool__profileTree__progress--time euiTextAlign--center"
               style={{ '--prfDevToolProgressPercentage': relative + '%' } as any}
             >
               <span
