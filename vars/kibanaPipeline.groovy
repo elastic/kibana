@@ -126,6 +126,7 @@ def jobRunner(label, useRamDisk, closure) {
             ln -s /dev/shm/workspace '${originalWorkspace}'
           """,
           label: "Move workspace to RAM - /dev/shm/workspace"
+        )
       }
     }
 
