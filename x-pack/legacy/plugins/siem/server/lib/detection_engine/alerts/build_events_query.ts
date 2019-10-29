@@ -15,17 +15,6 @@ interface BuildEventsSearchQuery {
   searchAfterSortId?: string;
 }
 
-export const getFilter = (kql: string | undefined, filter: Record<string, {}> | undefined) => {
-  if (kql != null) {
-    return toElasticsearchQuery(fromKueryExpression(kql), null);
-  } else if (filter != null) {
-    return filter;
-  } else {
-    // TODO: Re-visit this error (which should never happen) when we do signal errors for the UI
-    throw new TypeError('either kql or filter should be set');
-  }
-};
-
 export const buildEventsSearchQuery = ({
   index,
   from,
