@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { EuiTitle, EuiSpacer } from '@elastic/eui';
+import { EuiTitle } from '@elastic/eui';
 import { idx } from '@kbn/elastic-idx/target';
 import { Exception } from '../../../../../typings/es_schemas/raw/ErrorRaw';
 import { Stacktrace } from '../../../shared/Stacktrace';
