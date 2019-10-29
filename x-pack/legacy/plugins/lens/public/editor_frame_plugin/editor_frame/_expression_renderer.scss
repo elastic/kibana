@@ -1,11 +1,12 @@
 .lnsExpressionRenderer {
+  position: relative;
   width: 100%;
   height: 100%;
   display: flex;
   overflow-x: hidden;
   padding: $euiSize;
-}
 
-.lnsExpressionRenderer > * {
-  flex: 1;
+  > .expExpressionRenderer {
+    position: static; // Let the progress indicator position itself against the outer parent
+  }
 }

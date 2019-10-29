@@ -14,7 +14,7 @@ import {
   SavedObjectsClientContract,
   HttpServiceBase,
 } from 'src/core/public';
-import { Storage } from 'ui/storage';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { createMockedIndexPattern } from '../../mocks';
 import { IndexPatternPrivateState } from '../../types';
 

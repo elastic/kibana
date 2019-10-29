@@ -354,7 +354,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
                       defaultMessage: 'To use this function, select a field.',
                     })}
                     iconType="sortUp"
-                  ></EuiCallOut>
+                  />
                 )}
                 {!incompatibleSelectedOperationType && ParamEditor && (
                   <>

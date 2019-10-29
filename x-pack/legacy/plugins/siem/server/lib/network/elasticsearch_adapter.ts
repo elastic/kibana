@@ -193,19 +193,20 @@ const getGeoItem = (result: NetworkTopNFlowBuckets): GeoItem | null =>
     : null;
 
 const getAsItem = (result: NetworkTopNFlowBuckets): AutonomousSystemItem | null =>
-  result.autonomous_system.top_as.hits.hits.length > 0
+  result.autonomous_system.top_as.hits.hits.length > 0 &&
+  result.autonomous_system.top_as.hits.hits[0]._source
     ? {
         number: getOr(
           null,
           `autonomous_system.top_as.hits.hits[0]._source.${
-            Object.keys(result.location.top_geo.hits.hits[0]._source)[0]
+            Object.keys(result.autonomous_system.top_as.hits.hits[0]._source)[0]
           }.as.number`,
           result
         ),
         name: getOr(
           '',
           `autonomous_system.top_as.hits.hits[0]._source.${
-            Object.keys(result.location.top_geo.hits.hits[0]._source)[0]
+            Object.keys(result.autonomous_system.top_as.hits.hits[0]._source)[0]
           }.as.organization.name`,
           result
         ),

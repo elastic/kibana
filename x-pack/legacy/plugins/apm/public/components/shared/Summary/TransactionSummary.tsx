@@ -61,7 +61,7 @@ const TransactionSummary = ({
     ) : null
   ];
 
-  return <Summary items={items}></Summary>;
+  return <Summary items={items} />;
 };
 
 export { TransactionSummary };

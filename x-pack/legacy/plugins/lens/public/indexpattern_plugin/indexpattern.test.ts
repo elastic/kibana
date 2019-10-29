@@ -5,7 +5,7 @@
  */
 
 import chromeMock from 'ui/chrome';
-import { Storage } from 'ui/storage';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { SavedObjectsClientContract } from 'kibana/public';
 import { getIndexPatternDatasource, IndexPatternColumn, uniqueLabels } from './indexpattern';
 import { DatasourcePublicAPI, Operation, Datasource } from '../types';
@@ -143,7 +143,7 @@ describe('IndexPattern Data Source', () => {
   beforeEach(() => {
     indexPatternDatasource = getIndexPatternDatasource({
       chrome: chromeMock,
-      storage: {} as Storage,
+      storage: {} as IStorageWrapper,
       core: coreMock.createStart(),
       savedObjectsClient: {} as SavedObjectsClientContract,
       data: pluginsMock.createStart().data,
