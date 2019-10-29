@@ -7,13 +7,13 @@
 import _ from 'lodash';
 import React, { memo, useMemo } from 'react';
 import { EuiButtonIcon } from '@elastic/eui';
-import { Storage } from 'ui/storage';
 import { i18n } from '@kbn/i18n';
 import {
   UiSettingsClientContract,
   SavedObjectsClientContract,
   HttpServiceBase,
 } from 'src/core/public';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { DatasourceDimensionPanelProps, StateSetter } from '../../types';
 import { IndexPatternColumn, OperationType } from '../indexpattern';
 import { getAvailableOperationsByMetadata, buildColumn, changeField } from '../operations';
@@ -29,7 +29,7 @@ export type IndexPatternDimensionPanelProps = DatasourceDimensionPanelProps & {
   setState: StateSetter<IndexPatternPrivateState>;
   dragDropContext: DragContextState;
   uiSettings: UiSettingsClientContract;
-  storage: Storage;
+  storage: IStorageWrapper;
   savedObjectsClient: SavedObjectsClientContract;
   layerId: string;
   http: HttpServiceBase;
