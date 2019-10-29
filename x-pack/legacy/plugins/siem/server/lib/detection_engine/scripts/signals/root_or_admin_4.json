@@ -1,6 +1,6 @@
 {
-  "id": "rule-1",
-  "description": "Detecting root and admin users",
+  "id": "rule-4",
+  "description": "Detecting root and admin users with lucene",
   "index": ["auditbeat-*", "filebeat-*", "packetbeat-*", "winlogbeat-*"],
   "interval": "5m",
   "name": "Detect Root/Admin Users",
@@ -9,6 +9,6 @@
   "from": "now-6m",
   "to": "now",
   "query": "user.name: root or user.name: admin",
-  "language": "kuery",
+  "language": "lucene",
   "references": ["http://www.example.com", "https://ww.example.com"]
 }
