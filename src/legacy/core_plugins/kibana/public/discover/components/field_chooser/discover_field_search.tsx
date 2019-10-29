@@ -184,6 +184,7 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
           values: { id },
         })}
         data-test-subj={`${id}Select`}
+        compressed
       />
     );
   };
@@ -196,6 +197,7 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
           label={i18n.translate('kbn.discover.fieldChooser.filter.aggregatableLabel', {
             defaultMessage: 'Aggregatable',
           })}
+          display="columnCompressed"
         >
           {select('aggregatable', options, values.aggregatable)}
         </EuiFormRow>
@@ -204,6 +206,7 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
           label={i18n.translate('kbn.discover.fieldChooser.filter.searchableLabel', {
             defaultMessage: 'Searchable',
           })}
+          display="columnCompressed"
         >
           {select('searchable', options, values.searchable)}
         </EuiFormRow>
@@ -212,6 +215,7 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
           label={i18n.translate('kbn.discover.fieldChooser.filter.typeLabel', {
             defaultMessage: 'Type',
           })}
+          display="columnCompressed"
         >
           {select('type', typeOptions, values.type)}
         </EuiFormRow>
