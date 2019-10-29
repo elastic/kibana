@@ -23,11 +23,7 @@ import { AggConfig, Vis } from 'ui/vis';
 import { npSetup } from 'ui/new_platform';
 import { SerializedFieldFormat } from 'src/plugins/expressions/common/expressions/types/common';
 
-import {
-  FIELD_FORMAT_IDS,
-  FIELD_FORMATS_INSTANCES,
-  FieldFormat,
-} from '../../../../../../plugins/data/public';
+import { FIELD_FORMAT_IDS, FieldFormat } from '../../../../../../plugins/data/public';
 
 import { tabifyGetColumns } from '../../../agg_response/tabify/_get_columns';
 import chrome from '../../../chrome';
@@ -51,12 +47,9 @@ function isTermsFieldFormat(
 const config = chrome.getUiSettingsClient();
 
 const getConfig = (...args: any[]): any => config.get(...args);
-const getDefaultFieldFormat = () => ({ convert: identity });
+const getDefaultFieldFormat = () => (({ convert: identity } as unknown) as FieldFormat);
 
-const getFieldFormat = (
-  id?: FIELD_FORMAT_IDS | string,
-  params: object = {}
-): FIELD_FORMATS_INSTANCES[number] | Record<string, any> => {
+const getFieldFormat = (id?: FIELD_FORMAT_IDS | string, params: object = {}): FieldFormat => {
   const fieldFormats = npSetup.plugins.data.fieldFormats;
   const Format = fieldFormats.getType(id as FIELD_FORMAT_IDS);
 
@@ -121,21 +114,21 @@ export const getFormat: FormatFactory = (mapping = {}): any => {
         },
       });
     });
-    return new RangeFormat();
+    return new RangeFormat({}, npSetup.core.uiSettings.get);
   } else if (id === 'date_range') {
     const nestedFormatter = mapping.params as SerializedFieldFormat;
     const DateRangeFormat = FieldFormat.from((range: DateRangeKey) => {
       const format = getFieldFormat(nestedFormatter.id, nestedFormatter.params);
       return dateRange.toString(range, format.convert.bind(format));
     });
-    return new DateRangeFormat();
+    return new DateRangeFormat({}, npSetup.core.uiSettings.get);
   } else if (id === 'ip_range') {
     const nestedFormatter = mapping.params as SerializedFieldFormat;
     const IpRangeFormat = FieldFormat.from((range: IpRangeKey) => {
       const format = getFieldFormat(nestedFormatter.id, nestedFormatter.params);
       return ipRange.toString(range, format.convert.bind(format));
     });
-    return new IpRangeFormat();
+    return new IpRangeFormat({}, npSetup.core.uiSettings.get);
   } else if (isTermsFieldFormat(mapping) && mapping.params) {
     const params = mapping.params;
     return {
@@ -153,6 +146,7 @@ export const getFormat: FormatFactory = (mapping = {}): any => {
             pathname: window.location.pathname,
             basePath: chrome.getBasePath(),
           };
+          // @ts-ignore
           return format.convert(val, undefined, undefined, parsedUrl);
         };
       },
@@ -169,6 +163,7 @@ export const getFormat: FormatFactory = (mapping = {}): any => {
           pathname: window.location.pathname,
           basePath: chrome.getBasePath(),
         };
+        // @ts-ignore
         return format.convert(val, type, undefined, parsedUrl);
       },
     };

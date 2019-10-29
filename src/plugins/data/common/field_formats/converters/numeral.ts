@@ -37,13 +37,6 @@ export abstract class NumeralFormat extends FieldFormat {
   abstract id: string;
   abstract title: string;
 
-  protected getConfig: Function;
-
-  constructor(params: Record<string, any>, getConfig: Function) {
-    super(params);
-    this.getConfig = getConfig;
-  }
-
   getParamDefaults = () => ({
     pattern: this.getConfig(`format:${this.id}:defaultPattern`),
   });

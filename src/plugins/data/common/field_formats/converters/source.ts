@@ -41,14 +41,6 @@ export class SourceFormat extends FieldFormat {
   static title = '_source';
   static fieldType = KBN_FIELD_TYPES._SOURCE;
 
-  private getConfig: Function;
-
-  constructor(params: Record<string, any>, getConfig: Function) {
-    super(params);
-
-    this.getConfig = getConfig;
-  }
-
   textConvert: TextContextTypeConvert = value => JSON.stringify(value);
 
   htmlConvert: HtmlContextTypeConvert = (value, field, hit) => {
@@ -62,7 +54,7 @@ export class SourceFormat extends FieldFormat {
     const formatted = field.indexPattern.formatHit(hit);
     const highlightPairs: any[] = [];
     const sourcePairs: any[] = [];
-    const isShortDots = this.getConfig('shortDots:enable');
+    const isShortDots = this.getConfig!('shortDots:enable');
 
     keys(formatted).forEach(key => {
       const pairs = highlights[key] ? highlightPairs : sourcePairs;

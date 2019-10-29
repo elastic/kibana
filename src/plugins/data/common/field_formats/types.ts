@@ -17,24 +17,6 @@
  * under the License.
  */
 
-import {
-  UrlFormat,
-  DateFormat,
-  NumberFormat,
-  SourceFormat,
-  PercentFormat,
-  BytesFormat,
-  BoolFormat,
-  StringFormat,
-  TruncateFormat,
-  RelativeDateFormat,
-  IpFormat,
-  DurationFormat,
-  DateNanosFormat,
-  ColorFormat,
-  StaticLookupFormat,
-} from './converters';
-
 /** @public **/
 export type ContentType = 'html' | 'text';
 
@@ -80,39 +62,3 @@ export enum FIELD_FORMAT_IDS {
   TRUNCATE = 'truncate',
   URL = 'url',
 }
-
-export type DERIVED_FIELD_FORMATS = [
-  typeof BoolFormat,
-  typeof BytesFormat,
-  typeof ColorFormat,
-  typeof DateFormat,
-  typeof DateNanosFormat,
-  typeof DurationFormat,
-  typeof IpFormat,
-  typeof NumberFormat,
-  typeof PercentFormat,
-  typeof RelativeDateFormat,
-  typeof SourceFormat,
-  typeof StaticLookupFormat,
-  typeof StringFormat,
-  typeof TruncateFormat,
-  typeof UrlFormat
-];
-
-export type FIELD_FORMATS_INSTANCES = [
-  BoolFormat,
-  BytesFormat,
-  ColorFormat,
-  DateFormat,
-  DateNanosFormat,
-  DurationFormat,
-  IpFormat,
-  NumberFormat,
-  PercentFormat,
-  RelativeDateFormat,
-  SourceFormat,
-  StaticLookupFormat,
-  StringFormat,
-  TruncateFormat,
-  UrlFormat
-];

@@ -27,10 +27,6 @@ export class RelativeDateFormat extends FieldFormat {
   static title = 'Relative Date';
   static fieldType = KBN_FIELD_TYPES.DATE;
 
-  constructor(params: Record<string, any>) {
-    super(params);
-  }
-
   textConvert: TextContextTypeConvert = val => {
     if (val === null || val === undefined) {
       return '-';

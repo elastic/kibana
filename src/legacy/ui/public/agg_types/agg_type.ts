@@ -28,7 +28,7 @@ import { SearchSource } from '../courier';
 import { Adapters } from '../inspector';
 import { BaseParamType } from './param_types/base';
 
-import { KBN_FIELD_TYPES, FIELD_FORMATS_INSTANCES } from '../../../../plugins/data/public';
+import { KBN_FIELD_TYPES, FieldFormat } from '../../../../plugins/data/public';
 
 const fieldFormats = npSetup.plugins.data.fieldFormats;
 
@@ -57,7 +57,7 @@ export interface AggTypeConfig<
     inspectorAdapters: Adapters,
     abortSignal?: AbortSignal
   ) => Promise<any>;
-  getFormat?: (agg: TAggConfig) => FIELD_FORMATS_INSTANCES[number];
+  getFormat?: (agg: TAggConfig) => FieldFormat;
   getValue?: (agg: TAggConfig, bucket: any) => any;
   getKey?: (bucket: any, key: any, agg: TAggConfig) => any;
 }
@@ -190,7 +190,7 @@ export class AggType<TAggConfig extends AggConfig = AggConfig, TParam extends Ag
    * @param  {agg} agg - the agg to pick a format for
    * @return {FieldFormat}
    */
-  getFormat: (agg: TAggConfig) => FIELD_FORMATS_INSTANCES[number];
+  getFormat: (agg: TAggConfig) => FieldFormat;
 
   getValue: (agg: TAggConfig, bucket: any) => any;
 

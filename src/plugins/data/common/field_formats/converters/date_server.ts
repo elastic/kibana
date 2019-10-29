@@ -28,15 +28,13 @@ export class DateFormat extends FieldFormat {
   static title = 'Date';
   static fieldType = KBN_FIELD_TYPES.DATE;
 
-  private getConfig: Function;
   private memoizedConverter: Function = noop;
   private memoizedPattern: string = '';
   private timeZone: string = '';
 
   constructor(params: Record<string, any>, getConfig: Function) {
-    super(params);
+    super(params, getConfig);
 
-    this.getConfig = getConfig;
     this.memoizedConverter = memoize((val: any) => {
       if (val == null) {
         return '-';

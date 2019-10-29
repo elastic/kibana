@@ -57,7 +57,7 @@ export const dateRangeBucketAgg = new BucketAggType({
     const DateRangeFormat = FieldFormat.from(function(range: DateRangeKey) {
       return dateRange.toString(range, formatter);
     });
-    return new DateRangeFormat();
+    return new DateRangeFormat({}, npSetup.core.uiSettings.get);
   },
   makeLabel(aggConfig) {
     return aggConfig.getFieldDisplayName() + ' date ranges';

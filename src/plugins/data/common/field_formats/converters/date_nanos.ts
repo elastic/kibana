@@ -73,16 +73,9 @@ export class DateNanosFormat extends FieldFormat {
   static title = 'Date Nanos';
   static fieldType = KBN_FIELD_TYPES.DATE;
 
-  private getConfig: Function;
   private memoizedConverter: Function = noop;
   private memoizedPattern: string = '';
   private timeZone: string = '';
-
-  constructor(params: Record<string, any>, getConfig: Function) {
-    super(params);
-
-    this.getConfig = getConfig;
-  }
 
   getParamDefaults() {
     return {

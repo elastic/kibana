@@ -23,8 +23,8 @@ import {
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
   FIELD_FORMAT_IDS,
-  DERIVED_FIELD_FORMATS,
-  FIELD_FORMATS_INSTANCES,
+  IFieldFormatType,
+  FieldFormat,
 } from '../../common';
 
 interface FieldType {
@@ -34,7 +34,7 @@ interface FieldType {
 }
 
 export class FieldFormatRegisty {
-  private fieldFormats: Map<FIELD_FORMAT_IDS, DERIVED_FIELD_FORMATS[number]>;
+  private fieldFormats: Map<FIELD_FORMAT_IDS, IFieldFormatType>;
   private uiSettings!: UiSettingsClientContract;
   private defaultMap: Record<string, FieldType> & {
     _default_: FieldType;
@@ -83,7 +83,7 @@ export class FieldFormatRegisty {
    * @param  {FIELD_FORMAT_IDS} formatId - the format id
    * @return {FieldFormat}
    */
-  getType = (formatId: FIELD_FORMAT_IDS): DERIVED_FIELD_FORMATS[number] | undefined => {
+  getType = (formatId: FIELD_FORMAT_IDS): IFieldFormatType | undefined => {
     return this.fieldFormats.get(formatId);
   };
 
@@ -99,7 +99,7 @@ export class FieldFormatRegisty {
   getDefaultType = (
     fieldType: KBN_FIELD_TYPES,
     esTypes: ES_FIELD_TYPES[]
-  ): DERIVED_FIELD_FORMATS[number] | undefined => {
+  ): IFieldFormatType | undefined => {
     const config = this.getDefaultConfig(fieldType, esTypes);
 
     return this.getType(config.id);
@@ -110,7 +110,7 @@ export class FieldFormatRegisty {
    * using the format:defaultTypeMap config map
    *
    * @param  {ES_FIELD_TYPES[]} esTypes - Array of ES data types
-   * @return {ES_FIELD_TYPES | undefined}
+   * @return {ES_FIELD_TYPES}
    */
   getTypeNameByEsTypes = (esTypes: ES_FIELD_TYPES[]): ES_FIELD_TYPES | undefined => {
     if (!Array.isArray(esTypes)) {
@@ -143,28 +143,34 @@ export class FieldFormatRegisty {
    * @param  {FIELD_FORMATS_IDS} formatId
    * @return {FIELD_FORMATS_INSTANCES[number]}
    */
-  getInstance = memoize((formatId: FIELD_FORMAT_IDS): FIELD_FORMATS_INSTANCES[number] => {
-    const DerivedFieldFormat = this.getType(formatId);
+  getInstance = memoize(
+    (formatId: FIELD_FORMAT_IDS): FieldFormat => {
+      const DerivedFieldFormat = this.getType(formatId);
 
-    if (!DerivedFieldFormat) {
-      throw new Error(`Field Format '${formatId}' not found!`);
+      if (!DerivedFieldFormat) {
+        throw new Error(`Field Format '${formatId}' not found!`);
+      }
+
+      // @ts-ignore
+      return new DerivedFieldFormat({}, this.getConfig);
     }
-
-    // @ts-ignore
-    return new DerivedFieldFormat({}, this.getConfig);
-  });
+  );
 
   /**
    * Get the default fieldFormat instance for a field format.
    *
    * @param  {KBN_FIELD_TYPES} fieldType
    * @param  {ES_FIELD_TYPES[]} esTypes
-   * @return {@instance DERIVED_FIELD_FORMATS[number]}
+   * @return {FieldFormat}
    */
-  getDefaultInstancePlain(fieldType: KBN_FIELD_TYPES, esTypes: ES_FIELD_TYPES[]) {
+  getDefaultInstancePlain(fieldType: KBN_FIELD_TYPES, esTypes: ES_FIELD_TYPES[]): FieldFormat {
     const conf = this.getDefaultConfig(fieldType, esTypes);
 
-    const DerivedFieldFormat = this.getType(conf.id) as DERIVED_FIELD_FORMATS[number];
+    const DerivedFieldFormat = this.getType(conf.id);
+
+    if (!DerivedFieldFormat) {
+      throw new Error(`Field Format '${conf.id}' not found!`);
+    }
 
     return new DerivedFieldFormat(conf.params, this.getConfig);
   }
@@ -192,9 +198,9 @@ export class FieldFormatRegisty {
    * @param  {KBN_FIELD_TYPES} fieldType
    * @return {FieldFormat[]}
    */
-  getByFieldType(fieldType: KBN_FIELD_TYPES): Array<DERIVED_FIELD_FORMATS[number]> {
+  getByFieldType(fieldType: KBN_FIELD_TYPES): IFieldFormatType[] {
     return [...this.fieldFormats.values()].filter(
-      (format: DERIVED_FIELD_FORMATS[number]) => format.fieldType.indexOf(fieldType) !== -1
+      (format: IFieldFormatType) => format.fieldType.indexOf(fieldType) !== -1
     );
   }
 
@@ -219,7 +225,7 @@ export class FieldFormatRegisty {
     });
   }
 
-  register = (fieldFormats: DERIVED_FIELD_FORMATS) => {
+  register = (fieldFormats: IFieldFormatType[]) => {
     fieldFormats.forEach(fieldFormat => {
       this.fieldFormats.set(fieldFormat.id, fieldFormat);
     });

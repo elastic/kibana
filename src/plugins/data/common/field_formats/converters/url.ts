@@ -64,8 +64,8 @@ export class UrlFormat extends FieldFormat {
   ];
   static urlTypes = URL_TYPES;
 
-  constructor(params: Record<string, any>) {
-    super(params);
+  constructor(params: Record<string, any>, getConfig: Function) {
+    super(params, getConfig);
     this.compileTemplate = memoize(this.compileTemplate);
   }
 

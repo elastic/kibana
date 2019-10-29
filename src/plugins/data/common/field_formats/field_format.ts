@@ -19,7 +19,12 @@
 
 import { transform, size, cloneDeep, get, defaults } from 'lodash';
 import { createCustomFieldFormat } from './converters/custom';
-import { ContentType, FieldFormatConvert, FieldFormatConvertFunction } from './types';
+import {
+  ContentType,
+  FIELD_FORMAT_IDS,
+  FieldFormatConvert,
+  FieldFormatConvertFunction,
+} from './types';
 import {
   htmlContentTypeSetup,
   textContentTypeSetup,
@@ -68,7 +73,7 @@ export abstract class FieldFormat {
    */
   public type: any = this.constructor;
 
-  constructor(public _params: any = {}) {}
+  constructor(public _params: any = {}, protected getConfig: Function) {}
 
   /**
    * Convert a raw value to a formatted string
@@ -183,3 +188,7 @@ export abstract class FieldFormat {
 }
 
 export type IFieldFormat = PublicMethodsOf<FieldFormat>;
+export type IFieldFormatType = (new (params: any, getConfig: Function) => FieldFormat) & {
+  id: FIELD_FORMAT_IDS;
+  fieldType: string | string[];
+};
