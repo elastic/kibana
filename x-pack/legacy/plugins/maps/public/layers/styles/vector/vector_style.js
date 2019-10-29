@@ -26,6 +26,10 @@ import { DynamicColorProperty } from './properties/dynamic_color_property';
 import { StaticOrientationProperty } from './properties/static_orientation_property';
 import { DynamicOrientationProperty } from './properties/dynamic_orientation_property';
 
+const POINTS = [GEO_JSON_TYPE.POINT, GEO_JSON_TYPE.MULTI_POINT];
+const LINES = [GEO_JSON_TYPE.LINE_STRING, GEO_JSON_TYPE.MULTI_LINE_STRING];
+const POLYGONS = [GEO_JSON_TYPE.POLYGON, GEO_JSON_TYPE.MULTI_POLYGON];
+
 export class VectorStyle extends AbstractStyle {
 
   static type = 'VECTOR';
@@ -159,10 +163,10 @@ export class VectorStyle extends AbstractStyle {
       return {};
     }
 
-    const scaledFields = this.getDynamicPropertiesArray()
-      .map(({ options }) => {
+    const scaledFields = this.getDynamicPropertiesArray2()
+      .map(styleProperty => {
         return {
-          name: options.field.name,
+          name: styleProperty.getFieldConfig().name,
           min: Infinity,
           max: -Infinity
         };
@@ -181,13 +185,13 @@ export class VectorStyle extends AbstractStyle {
     let hasPolygons = false;
     for (let i = 0; i < features.length; i++) {
       const feature = features[i];
-      if (!hasPoints && [GEO_JSON_TYPE.POINT, GEO_JSON_TYPE.MULTI_POINT].includes(feature.geometry.type)) {
+      if (!hasPoints && POINTS.includes(feature.geometry.type)) {
         hasPoints = true;
       }
-      if (!hasLines && [GEO_JSON_TYPE.LINE_STRING, GEO_JSON_TYPE.MULTI_LINE_STRING].includes(feature.geometry.type)) {
+      if (!hasLines && LINES.includes(feature.geometry.type)) {
         hasLines = true;
       }
-      if (!hasPolygons && [GEO_JSON_TYPE.POLYGON, GEO_JSON_TYPE.MULTI_POLYGON].includes(feature.geometry.type)) {
+      if (!hasPolygons && POLYGONS.includes(feature.geometry.type)) {
         hasPolygons = true;
       }
 
@@ -235,22 +239,6 @@ export class VectorStyle extends AbstractStyle {
 
   getProperties() {
     return this._descriptor.properties || {};
-  }
-
-  getDynamicPropertiesArray() {
-    const styles = this.getProperties();
-    return Object.keys(styles)
-      .map(styleName => {
-        const { type, options } = styles[styleName];
-        return {
-          styleName,
-          type,
-          options
-        };
-      })
-      .filter(({ styleName }) => {
-        return this._isPropertyDynamic(styleName);
-      });
   }
 
   getDynamicPropertiesArray2() {
@@ -394,7 +382,6 @@ export class VectorStyle extends AbstractStyle {
     }
 
     const styleFields  = this._getStyleFields();
-    console.log('stylefields', styleFields);
     if (styleFields.length === 0) {
       return;
     }
