@@ -51,7 +51,7 @@ export function asAbsoluteTime({
 
   if (endTime) {
     const formattedEndTime = moment(endTime).format(
-      getPreciseTime('minutes', '-')
+      getPreciseTime(precision, '-')
     );
     format = `${format} ${formattedEndTime}`;
   }
