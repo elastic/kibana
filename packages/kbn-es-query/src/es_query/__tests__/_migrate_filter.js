@@ -24,20 +24,26 @@ import { migrateFilter } from '../migrate_filter';
 describe('migrateFilter', function () {
 
   const oldMatchPhraseFilter = {
-    match: {
-      fieldFoo: {
-        query: 'foobar',
-        type: 'phrase'
+    query: {
+      match: {
+        fieldFoo: {
+          query: 'foobar',
+          type: 'phrase'
+        }
       }
-    }
+    },
+    meta: {}
   };
 
   const newMatchPhraseFilter = {
-    match_phrase: {
-      fieldFoo: {
-        query: 'foobar'
+    query: {
+      match_phrase: {
+        fieldFoo: {
+          query: 'foobar'
+        }
       }
-    }
+    },
+    meta: {}
   };
 
   // https://github.com/elastic/elasticsearch/pull/17508

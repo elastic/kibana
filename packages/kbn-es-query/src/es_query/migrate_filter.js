@@ -21,12 +21,12 @@ import _ from 'lodash';
 import { getConvertedValueForField } from '../filters';
 
 export function migrateFilter(filter, indexPattern) {
-  if (filter.match) {
-    const fieldName = Object.keys(filter.match)[0];
+  if (filter && filter.query && filter.query.match) {
+    const fieldName = Object.keys(filter.query.match)[0];
 
 
     if (isMatchPhraseFilter(filter, fieldName)) {
-      const params = _.get(filter, ['match', fieldName]);
+      const params = _.get(filter, ['query', 'match', fieldName]);
       if (indexPattern) {
         const field = indexPattern.fields.find(f => f.name === fieldName);
         if (field) {
@@ -34,9 +34,12 @@ export function migrateFilter(filter, indexPattern) {
         }
       }
       return {
-        match_phrase: {
-          [fieldName]: _.omit(params, 'type'),
-        },
+        ...filter,
+        query: {
+          match_phrase: {
+            [fieldName]: _.omit(params, 'type'),
+          },
+        }
       };
     }
   }
@@ -45,6 +48,5 @@ export function migrateFilter(filter, indexPattern) {
 }
 
 function isMatchPhraseFilter(filter, fieldName) {
-  const type = _.get(filter, ['match', fieldName, 'type']) || _.get(filter, ['nested', 'query', 'match', fieldName, 'type']);
-  return type === 'phrase';
+  return _.get(filter, ['query', 'match', fieldName, 'type']) === 'phrase';
 }

@@ -59,21 +59,21 @@ export function buildQueryFromFilters(filters = [], indexPattern, ignoreFilterIf
     filter: filters
       .filter(filterNegate(false))
       .filter(filter => !ignoreFilterIfFieldNotInIndex || filterMatchesIndex(filter, indexPattern))
-      .map((filter) => handleNestedFilter(filter, indexPattern))
-      .map(translateToQuery)
-      .map(cleanFilter)
       .map(filter => {
         return migrateFilter(filter, indexPattern);
-      }),
+      })
+      .map((filter) => handleNestedFilter(filter, indexPattern))
+      .map(translateToQuery)
+      .map(cleanFilter),
     should: [],
     must_not: filters
       .filter(filterNegate(true))
       .filter(filter => !ignoreFilterIfFieldNotInIndex || filterMatchesIndex(filter, indexPattern))
-      .map((filter) => handleNestedFilter(filter, indexPattern))
-      .map(translateToQuery)
-      .map(cleanFilter)
       .map(filter => {
         return migrateFilter(filter, indexPattern);
-      }),
+      })
+      .map((filter) => handleNestedFilter(filter, indexPattern))
+      .map(translateToQuery)
+      .map(cleanFilter),
   };
 }
