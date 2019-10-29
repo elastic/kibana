@@ -17,6 +17,7 @@ import {
   EuiFlexItem,
   EuiCode,
   EuiSpacer,
+  EuiCallOut,
 } from '@elastic/eui';
 
 import { useForm, Form, FormDataProvider } from '../../../../shared_imports';
@@ -145,12 +146,34 @@ export const EditField = React.memo(({ field }: Props) => {
                   </EuiFlyoutBody>
 
                   <EuiFlyoutFooter>
+                    {form.isSubmitted && !form.isValid && (
+                      <>
+                        <EuiCallOut
+                          title={i18n.translate(
+                            'xpack.idxMgmt.mappingsEditor.editFieldFlyout.validationErrorTitle',
+                            {
+                              defaultMessage: 'Fix errors in form before continuing.',
+                            }
+                          )}
+                          color="danger"
+                          iconType="cross"
+                          data-test-subj="formError"
+                        />
+                        <EuiSpacer size="m" />
+                      </>
+                    )}
+
                     <EuiFlexGroup justifyContent="flexEnd">
                       <EuiFlexItem grow={false}>
                         <EuiButtonEmpty onClick={cancel}>Cancel</EuiButtonEmpty>
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
-                        <EuiButton fill onClick={getSubmitForm(updateField)} type="submit">
+                        <EuiButton
+                          fill
+                          onClick={getSubmitForm(updateField)}
+                          type="submit"
+                          disabled={form.isSubmitted && !form.isValid}
+                        >
                           Update
                         </EuiButton>
                       </EuiFlexItem>
