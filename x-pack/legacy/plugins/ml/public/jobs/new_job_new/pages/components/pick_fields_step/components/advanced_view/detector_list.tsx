@@ -106,7 +106,7 @@ export const DetectorList: FC<Props> = ({ isActive, onEditJob, onDeleteJob }) =>
               <EuiFlexGroup>
                 <EuiFlexItem>
                   {d.detector_description !== undefined ? (
-                    <div style={{ fontWeight: 'bold' }} data-test-subj="detectorDescription">
+                    <div style={{ fontWeight: 'bold' }} data-test-subj="mlDetectorDescription">
                       {d.detector_description}
                     </div>
                   ) : (
@@ -174,5 +174,5 @@ const DuplicateDetectorsWarning: FC<{ validation: Validation }> = ({ validation 
 };
 
 const StringifiedDetector: FC<{ detector: Detector }> = ({ detector }) => {
-  return <div data-test-subj="detectorIdentifier">{detectorToString(detector)}</div>;
+  return <div data-test-subj="mlDetectorIdentifier">{detectorToString(detector)}</div>;
 };

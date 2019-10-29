@@ -285,13 +285,13 @@ export function MachineLearningJobWizardAdvancedProvider({
       await testSubjects.existOrFail(`mlAdvancedDetector ${detectorIndex}`);
 
       const actualDetectorIdentifier = await testSubjects.getVisibleText(
-        `mlAdvancedDetector ${detectorIndex} > detectorIdentifier`
+        `mlAdvancedDetector ${detectorIndex} > mlDetectorIdentifier`
       );
       expect(actualDetectorIdentifier).to.eql(expectedDetectorName);
 
       if (expectedDetectorDescription !== undefined) {
         const actualDetectorDescription = await testSubjects.getVisibleText(
-          `mlAdvancedDetector ${detectorIndex} > detectorDescription`
+          `mlAdvancedDetector ${detectorIndex} > mlDetectorDescription`
         );
         expect(actualDetectorDescription).to.eql(expectedDetectorDescription);
       }
