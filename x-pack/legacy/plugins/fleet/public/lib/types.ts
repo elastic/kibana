@@ -7,6 +7,7 @@ import { IModule, IScope } from 'angular';
 import { AxiosRequestConfig } from 'axios';
 import { FrameworkAdapter } from './adapters/framework/adapter_types';
 import { AgentsLib } from './agent';
+import { PoliciesLib } from './policy';
 import { ElasticsearchLib } from './elasticsearch';
 import { FrameworkLib } from './framework';
 
@@ -14,6 +15,7 @@ export interface FrontendLibs {
   elasticsearch: ElasticsearchLib;
   framework: FrameworkLib;
   agents: AgentsLib;
+  policies: PoliciesLib;
 }
 
 export type FramworkAdapterConstructable = new (uiModule: IModule) => FrameworkAdapter;

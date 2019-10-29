@@ -30,13 +30,13 @@
                 "schema": {
                   "oneOf": [
                     {
-                      "$ref": "./models/policy.v1.json"
-                    },
-                    {
                       "type": "array",
                       "items": {
                         "$ref": "./models/policy.v1.json"
                       }
+                    },
+                    {
+                      "$ref": "./models/policy.v1.json"
                     }
                   ]
                 }
