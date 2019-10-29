@@ -16,13 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { format as formatUrl } from 'url';
+import { FtrProviderContext } from 'test/functional/ftr_provider_context';
 
-export default function ({ loadTestFile }) {
-  describe('core plugins', () => {
-    loadTestFile(require.resolve('./applications'));
-    loadTestFile(require.resolve('./legacy_plugins'));
-    loadTestFile(require.resolve('./server_plugins'));
-    loadTestFile(require.resolve('./ui_plugins'));
-    loadTestFile(require.resolve('./top_nav'));
-  });
+import supertestAsPromised from 'supertest-as-promised';
+
+export function KibanaSupertestProvider({ getService }: FtrProviderContext) {
+  const config = getService('config');
+  const kibanaServerUrl = formatUrl(config.get('servers.kibana'));
+  return supertestAsPromised(kibanaServerUrl);
 }

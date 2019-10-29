@@ -16,35 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Legacy } from 'kibana';
-import Joi from 'joi';
+import { PluginFunctionalProviderContext } from '../../services';
 
-async function handleRequest(request: Legacy.Request) {
-  const { changes } = request.payload as any;
-  const uiSettings = request.getUiSettingsService();
+// eslint-disable-next-line import/no-default-export
+export default function({ getService }: PluginFunctionalProviderContext) {
+  const supertest = getService('supertest');
 
-  await uiSettings.setMany(changes);
-
-  return {
-    settings: await uiSettings.getUserProvided(),
-  };
+  describe('server plugins', function describeIndexTests() {
+    it('extend request handler context', async () => {
+      await supertest
+        .get('/core_plugin_b')
+        .expect(200)
+        .expect('Pong via plugin A: true');
+    });
+  });
 }
-
-export const setManyRoute = {
-  path: '/api/kibana/settings',
-  method: 'POST',
-  config: {
-    validate: {
-      payload: Joi.object()
-        .keys({
-          changes: Joi.object()
-            .unknown(true)
-            .required(),
-        })
-        .required(),
-    },
-    handler(request: Legacy.Request) {
-      return handleRequest(request);
-    },
-  },
-};

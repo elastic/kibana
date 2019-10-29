@@ -18,12 +18,14 @@
  */
 
 import expect from '@kbn/expect';
+import { PluginFunctionalProviderContext } from '../../services';
 
-export default function ({ getService, getPageObjects }) {
+// eslint-disable-next-line import/no-default-export
+export default function({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const PageObjects = getPageObjects(['common']);
   const browser = getService('browser');
 
-  describe('ui plugins', function () {
+  describe('ui plugins', function() {
     describe('loading', function describeIndexTests() {
       before(async () => {
         await PageObjects.common.navigateToApp('settings');
@@ -40,7 +42,9 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should attach string to window.corePluginB', async () => {
-        const hasAccessToInjectedMetadata = await browser.execute('return window.hasAccessToInjectedMetadata');
+        const hasAccessToInjectedMetadata = await browser.execute(
+          'return window.hasAccessToInjectedMetadata'
+        );
         expect(hasAccessToInjectedMetadata).to.equal(true);
       });
     });
@@ -50,7 +54,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should attach pluginContext to window.corePluginB', async () => {
-        const envData = await browser.execute('return window.env');
+        const envData: any = await browser.execute('return window.env');
         expect(envData.mode.dev).to.be(true);
         expect(envData.packageInfo.version).to.be.a('string');
       });

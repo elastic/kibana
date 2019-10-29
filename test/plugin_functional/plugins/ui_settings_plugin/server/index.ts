@@ -17,13 +17,6 @@
  * under the License.
  */
 
+import { UiSettingsPlugin } from './plugin';
 
-import { format as formatUrl } from 'url';
-
-import supertestAsPromised from 'supertest-as-promised';
-
-export function KibanaSupertestProvider({ getService }) {
-  const config = getService('config');
-  const kibanaServerUrl = formatUrl(config.get('servers.kibana'));
-  return supertestAsPromised(kibanaServerUrl);
-}
+export const plugin = () => new UiSettingsPlugin();
