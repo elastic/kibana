@@ -110,7 +110,7 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
       };
 
       $scope.getContextAppHref = () => {
-        const path = kbnUrl.eval('#/context/{{ indexPattern }}/{{ anchorId }}', {
+        const path = kbnUrl.eval('#/discover/context/{{ indexPattern }}/{{ anchorId }}', {
           anchorId: $scope.row._id,
           indexPattern: $scope.indexPattern.id,
         });

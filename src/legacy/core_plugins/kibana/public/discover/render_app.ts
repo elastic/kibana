@@ -54,6 +54,10 @@ import { configureAppAngularModule } from 'ui/legacy_compat';
 // type imports
 import { IPrivate } from 'ui/private';
 import { AppMountContext } from 'kibana/public';
+// @ts-ignore
+import { watchMultiDecorator } from 'ui/directives/watch_multi/watch_multi';
+// @ts-ignore
+import { registerListenEventListener } from 'ui/directives/listen/listen';
 
 import { setAngularModule } from './kibana_services';
 // @ts-ignore
@@ -123,20 +127,23 @@ export function createLocalAngularModule(core: AppMountContext['core']) {
   createIndexPatternsModule();
   createChromeModule(core.chrome);
 
-  return angular.module(moduleName, [
-    ...thirdPartyAngularDependencies,
-    'discoverI18n',
-    'discoverPrivate',
-    'discoverPersistedState',
-    'discoverTopNav',
-    'discoverGlobalState',
-    'discoverAppState',
-    'discoverLocalStorageProvider',
-    'discoverDashboardConfigProvider',
-    'discoverIndexPatterns',
-    'discoverChrome',
-    'discoverEs',
-  ]);
+  return angular
+    .module(moduleName, [
+      ...thirdPartyAngularDependencies,
+      'discoverI18n',
+      'discoverPrivate',
+      'discoverPersistedState',
+      'discoverTopNav',
+      'discoverGlobalState',
+      'discoverAppState',
+      'discoverLocalStorageProvider',
+      'discoverDashboardConfigProvider',
+      'discoverIndexPatterns',
+      'discoverChrome',
+      'discoverEs',
+    ])
+    .config(watchMultiDecorator)
+    .run(registerListenEventListener);
 }
 
 export function createLocalGlobalStateModule() {
