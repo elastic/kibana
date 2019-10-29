@@ -146,6 +146,23 @@ describe('Datatable Visualization', () => {
       expect(suggestions).toEqual([]);
     });
 
+    it('should not make suggestions when the suggestion keeps a different layer', () => {
+      const suggestions = datatableVisualization.getSuggestions({
+        state: {
+          layers: [{ layerId: 'older', columns: ['col1'] }],
+        },
+        table: {
+          isMultiRow: true,
+          layerId: 'newer',
+          changeType: 'initial',
+          columns: [numCol('col1'), strCol('col2')],
+        },
+        keptLayerIds: ['older'],
+      });
+
+      expect(suggestions).toEqual([]);
+    });
+
     it('should suggest unchanged tables when the state is not passed in', () => {
       const suggestions = datatableVisualization.getSuggestions({
         table: {

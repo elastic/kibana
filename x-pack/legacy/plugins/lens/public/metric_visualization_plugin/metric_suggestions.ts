@@ -22,6 +22,7 @@ export function getSuggestions({
   if (
     table.isMultiRow ||
     keptLayerIds.length > 1 ||
+    (keptLayerIds.length && table.layerId !== keptLayerIds[0]) ||
     table.columns.length !== 1 ||
     table.columns[0].operation.dataType !== 'number'
   ) {

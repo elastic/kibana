@@ -138,7 +138,11 @@ export const datatableVisualization: Visualization<
   }: SuggestionRequest<DatatableVisualizationState>): Array<
     VisualizationSuggestion<DatatableVisualizationState>
   > {
-    if (keptLayerIds.length > 1 || (state && table.changeType === 'unchanged')) {
+    if (
+      keptLayerIds.length > 1 ||
+      (keptLayerIds.length && table.layerId !== keptLayerIds[0]) ||
+      (state && table.changeType === 'unchanged')
+    ) {
       return [];
     }
     const title =

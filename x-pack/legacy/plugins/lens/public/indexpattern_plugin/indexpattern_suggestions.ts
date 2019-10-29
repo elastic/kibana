@@ -501,7 +501,6 @@ function createMetricSuggestion(
     state,
     changeType: 'initial',
     updatedLayer: {
-      ...layer,
       indexPatternId: indexPattern.id,
       columns: {
         [newId]:

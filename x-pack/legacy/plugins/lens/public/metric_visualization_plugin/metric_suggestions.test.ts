@@ -124,4 +124,18 @@ describe('metric_suggestions', () => {
 
     expect(suggestions).toHaveLength(0);
   });
+
+  test('does not suggest when the suggestion keeps a different layer', () => {
+    const suggestions = getSuggestions({
+      table: {
+        columns: [numCol('bytes')],
+        isMultiRow: false,
+        layerId: 'newer',
+        changeType: 'initial',
+      },
+      keptLayerIds: ['older'],
+    });
+
+    expect(suggestions).toHaveLength(0);
+  });
 });
