@@ -59,7 +59,7 @@ export const useMeasuredCharacterDimensions = (scale: TextScale) => {
 
   const CharacterDimensionsProbe = useMemo(
     () => () => (
-      <MonospaceCharacterDimensionsProbe scale={scale} innerRef={measureElement}>
+      <MonospaceCharacterDimensionsProbe scale={scale} ref={measureElement}>
         X
       </MonospaceCharacterDimensionsProbe>
     ),
@@ -72,11 +72,13 @@ export const useMeasuredCharacterDimensions = (scale: TextScale) => {
   };
 };
 
-const MonospaceCharacterDimensionsProbe = euiStyled.div.attrs<{
+interface MonospaceCharacterDimensionsProbe {
   scale: TextScale;
-}>({
+}
+
+const MonospaceCharacterDimensionsProbe = euiStyled.div.attrs(props => ({
   'aria-hidden': true,
-})`
+}))<MonospaceCharacterDimensionsProbe>`
   visibility: hidden;
   position: absolute;
   height: auto;

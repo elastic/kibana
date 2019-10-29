@@ -18,7 +18,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { FunctionComponent, useCallback, useEffect, useState } from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
@@ -55,7 +55,16 @@ const LoadingPanelContainer = styled.div`
 
 LoadingPanelContainer.displayName = 'LoadingPanelContainer';
 
-const PopoverRowItems = styled(EuiPopover)`
+interface PopoverRowItemsProps {
+  className: string;
+  id: string;
+  isOpen: boolean;
+  closePopover: () => void;
+  button: JSX.Element;
+  panelPaddingSize: string;
+}
+
+const PopoverRowItems = styled((EuiPopover as unknown) as FunctionComponent)<PopoverRowItemsProps>`
   .euiButtonEmpty__content {
     padding: 0px 0px;
   }

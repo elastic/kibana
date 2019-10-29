@@ -192,7 +192,7 @@ const DraggableWrapperComponent = React.memo<Props>(
                     <ProviderContainer
                       {...provided.draggableProps}
                       {...provided.dragHandleProps}
-                      innerRef={provided.innerRef}
+                      ref={provided.innerRef}
                       data-test-subj="providerContainer"
                       isDragging={snapshot.isDragging}
                       style={{

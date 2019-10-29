@@ -27,12 +27,10 @@ interface IContainerStyleProps {
 
 interface IBarStyleProps {
   type: ItemType;
-  left: number;
-  width: number;
   color: string;
 }
 
-const Container = styled<IContainerStyleProps, 'div'>('div')`
+const Container = styled.div<IContainerStyleProps>`
   position: relative;
   display: block;
   user-select: none;
@@ -50,7 +48,7 @@ const Container = styled<IContainerStyleProps, 'div'>('div')`
   }
 `;
 
-const ItemBar = styled<IBarStyleProps, any>('div')`
+const ItemBar = styled.div<IBarStyleProps>`
   box-sizing: border-box;
   position: relative;
   height: ${px(unit)};

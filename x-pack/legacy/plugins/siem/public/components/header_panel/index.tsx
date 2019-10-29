@@ -14,9 +14,9 @@ interface HeaderProps {
   border?: boolean;
 }
 
-const Header = styled.header.attrs({
+const Header = styled.header.attrs(props => ({
   className: 'siemHeaderPanel',
-})<HeaderProps>`
+}))<HeaderProps>`
   ${props => css`
     margin-bottom: ${props.theme.eui.euiSizeL};
     user-select: text;

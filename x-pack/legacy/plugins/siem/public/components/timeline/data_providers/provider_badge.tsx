@@ -7,7 +7,7 @@
 import { EuiBadge } from '@elastic/eui';
 import classNames from 'classnames';
 import { isString } from 'lodash/fp';
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
@@ -16,7 +16,25 @@ import { EXISTS_OPERATOR, QueryOperator } from './data_provider';
 
 import * as i18n from './translations';
 
-const ProviderBadgeStyled = styled(EuiBadge)`
+interface ProviderBadgeStyledProps {
+  id: string;
+  className: string;
+  color: string;
+  title: string;
+  iconOnClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
+  iconOnClickAriaLabel: string;
+  iconType: string;
+  iconSide: string;
+  onClick?: () => void;
+  onClickAriaLabel: string;
+  closeButtonProps: {
+    tabIndex: number;
+  };
+}
+
+const ProviderBadgeStyled = styled((EuiBadge as unknown) as FunctionComponent)<
+  ProviderBadgeStyledProps
+>`
   .euiToolTipAnchor {
     &::after {
       font-style: normal;

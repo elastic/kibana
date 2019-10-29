@@ -5,24 +5,26 @@
  */
 
 import React from 'react';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
 interface RowProps {
   rowHeight?: string;
   rowPadding?: string;
 }
 
-const Row = styled.div.attrs({
+const Row = styled.div.attrs<RowProps>(props => ({
   className: 'siemSkeletonRow',
-})<RowProps>`
-  ${({ rowHeight, rowPadding, theme }) => css`
-    border-bottom: ${theme.eui.euiBorderThin};
-    display: flex;
-    height: ${rowHeight ? rowHeight : theme.eui.euiSizeXL};
-    padding: ${rowPadding
-      ? rowPadding
-      : theme.eui.paddingSizes.s + ' ' + theme.eui.paddingSizes.xs};
-  `}
+  style: {
+    background: 'red',
+  },
+  rowHeight: props.rowHeight || props.theme.eui.euiSizeXL,
+  rowPadding:
+    props.rowPadding || props.theme.eui.paddingSizes.s + ' ' + props.theme.eui.paddingSizes.xs,
+}))<RowProps>`
+  border-bottom: ${props => props.theme.eui.euiBorderThin};
+  display: flex;
+  height: ${props => props.rowHeight};
+  padding: ${props => props.rowPadding};
 `;
 Row.displayName = 'Row';
 
@@ -31,18 +33,18 @@ interface CellProps {
   cellMargin?: string;
 }
 
-const Cell = styled.div.attrs({
+const Cell = styled.div.attrs<CellProps>(({ cellColor, cellMargin, theme }) => ({
   className: 'siemSkeletonRow__cell',
-})<CellProps>`
-  ${({ cellColor, cellMargin, theme }) => css`
-    background-color: ${cellColor ? cellColor : theme.eui.euiColorLightestShade};
-    border-radius: 2px;
-    flex: 1;
+  cellColor: cellColor || theme.eui.euiColorLightestShade,
+  cellMargin: cellMargin || theme.eui.gutterTypes.gutterSmall,
+}))<CellProps>`
+  background-color: ${props => props.cellColor};
+  border-radius: 2px;
+  flex: 1;
 
-    & + & {
-      margin-left: ${cellMargin ? cellMargin : theme.eui.gutterTypes.gutterSmall};
-    }
-  `}
+  & + & {
+    margin-left: ${props => props.cellMargin};
+  }
 `;
 Cell.displayName = 'Cell';
 

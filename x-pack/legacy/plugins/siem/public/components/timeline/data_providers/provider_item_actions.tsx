@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { EuiContextMenu, EuiContextMenuPanelDescriptor, EuiPopover } from '@elastic/eui';
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../../containers/source';
@@ -41,7 +41,16 @@ interface OwnProps {
   value: string | number;
 }
 
-const MyEuiPopover = styled(EuiPopover)`
+interface MyEuiPopoverProps {
+  id: string;
+  isOpen: boolean;
+  closePopover: () => void;
+  button: JSX.Element;
+  anchorPosition: string;
+  panelPaddingSize: string;
+}
+
+const MyEuiPopover = styled((EuiPopover as unknown) as FunctionComponent)<MyEuiPopoverProps>`
   height: 100%;
   user-select: none;
 `;

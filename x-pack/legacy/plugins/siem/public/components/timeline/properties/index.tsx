@@ -6,7 +6,7 @@
 
 import { EuiAvatar, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import React, { useState, useCallback } from 'react';
-import styled, { injectGlobal } from 'styled-components';
+import styled, { createGlobalStyle } from 'styled-components';
 
 import { Note } from '../../../lib/note';
 import { InputsModelId } from '../../../store/inputs/constants';
@@ -22,10 +22,10 @@ type UpdateTitle = ({ id, title }: { id: string; title: string }) => void;
 type UpdateDescription = ({ id, description }: { id: string; description: string }) => void;
 type ToggleLock = ({ linkToId }: { linkToId: InputsModelId }) => void;
 
-// SIDE EFFECT: the following `injectGlobal` overrides `EuiPopover`
+// SIDE EFFECT: the following `createGlobalStyle` overrides `EuiPopover`
 // and `EuiToolTip` global styles:
 // eslint-disable-next-line no-unused-expressions
-injectGlobal`
+createGlobalStyle`
   .euiPopover__panel.euiPopover__panel-isOpen {
     z-index: 9900 !important;
   }

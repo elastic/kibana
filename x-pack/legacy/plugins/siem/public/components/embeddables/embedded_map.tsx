@@ -35,9 +35,9 @@ interface EmbeddableMapProps {
   maintainRatio?: boolean;
 }
 
-const EmbeddableMap = styled.div.attrs({
+const EmbeddableMap = styled.div.attrs(props => ({
   className: 'siemEmbeddable__map',
-})<EmbeddableMapProps>`
+}))<EmbeddableMapProps>`
   ${({ maintainRatio, theme }) => css`
     .embPanel {
       border: none;

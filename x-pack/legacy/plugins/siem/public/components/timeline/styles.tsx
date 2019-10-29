@@ -18,9 +18,9 @@ export const OFFSET_SCROLLBAR = 17;
  * TIMELINE BODY
  */
 
-export const TimelineBody = styled.div.attrs({
+export const TimelineBody = styled.div.attrs(props => ({
   className: 'siemTimeline__body',
-})<{ bodyHeight: number }>`
+}))<{ bodyHeight: number }>`
   ${({ bodyHeight, theme }) => css`
     height: ${bodyHeight + 'px'};
     overflow: auto;
@@ -49,18 +49,18 @@ TimelineBody.displayName = 'TimelineBody';
  * EVENTS TABLE
  */
 
-export const EventsTable = styled.div.attrs({
+export const EventsTable = styled.div.attrs(props => ({
   className: 'siemEventsTable',
   role: 'table',
-})``;
+}))``;
 EventsTable.displayName = 'EventsTable';
 
 /* EVENTS HEAD */
 
-export const EventsThead = styled.div.attrs({
+export const EventsThead = styled.div.attrs(props => ({
   className: 'siemEventsTable__thead',
   role: 'rowgroup',
-})`
+}))`
   ${({ theme }) => css`
     background-color: ${theme.eui.euiColorEmptyShade};
     border-bottom: ${theme.eui.euiBorderWidthThick} solid ${theme.eui.euiColorLightShade};
@@ -71,17 +71,17 @@ export const EventsThead = styled.div.attrs({
 `;
 EventsThead.displayName = 'EventsThead';
 
-export const EventsTrHeader = styled.div.attrs({
+export const EventsTrHeader = styled.div.attrs(props => ({
   className: 'siemEventsTable__trHeader',
   role: 'row',
-})`
+}))`
   display: flex;
 `;
 EventsTrHeader.displayName = 'EventsTrHeader';
 
-export const EventsThGroupActions = styled.div.attrs({
+export const EventsThGroupActions = styled.div.attrs(props => ({
   className: 'siemEventsTable__thGroupActions',
-})<{ actionsColumnWidth: number }>`
+}))<{ actionsColumnWidth: number }>`
   display: flex;
   flex: 0 0 ${({ actionsColumnWidth }) => actionsColumnWidth + 'px'};
   justify-content: space-between;
@@ -89,17 +89,17 @@ export const EventsThGroupActions = styled.div.attrs({
 `;
 EventsThGroupActions.displayName = 'EventsThGroupActions';
 
-export const EventsThGroupData = styled.div.attrs({
+export const EventsThGroupData = styled.div.attrs(props => ({
   className: 'siemEventsTable__thGroupData',
-})`
+}))`
   display: flex;
 `;
 EventsThGroupData.displayName = 'EventsThGroupData';
 
-export const EventsTh = styled.div.attrs({
+export const EventsTh = styled.div.attrs(props => ({
   className: 'siemEventsTable__th',
   role: 'columnheader',
-})<{ isDragging?: boolean; position?: string }>`
+}))<{ isDragging?: boolean; position?: string }>`
   align-items: center;
   display: flex;
   flex-shrink: 0;
@@ -118,9 +118,9 @@ export const EventsTh = styled.div.attrs({
 `;
 EventsTh.displayName = 'EventsTh';
 
-export const EventsThContent = styled.div.attrs({
+export const EventsThContent = styled.div.attrs(props => ({
   className: 'siemEventsTable__thContent',
-})<{ textAlign?: string }>`
+}))<{ textAlign?: string }>`
   ${({ textAlign, theme }) => css`
     font-size: ${theme.eui.euiFontSizeXS};
     font-weight: ${theme.eui.euiFontWeightSemiBold};
@@ -135,17 +135,17 @@ EventsThContent.displayName = 'EventsThContent';
 
 /* EVENTS BODY */
 
-export const EventsTbody = styled.div.attrs({
+export const EventsTbody = styled.div.attrs(props => ({
   className: 'siemEventsTable__tbody',
   role: 'rowgroup',
-})`
+}))`
   overflow-x: hidden;
 `;
 EventsTbody.displayName = 'EventsTbody';
 
-export const EventsTrGroup = styled.div.attrs({
-  className: 'siemEventsTable__trGroup',
-})<{ className?: string }>`
+export const EventsTrGroup = styled.div.attrs(props => ({
+  className: props.className || 'siemEventsTable__trGroup',
+}))<{ className?: string }>`
   ${({ theme }) => css`
     border-bottom: ${theme.eui.euiBorderWidthThin} solid ${theme.eui.euiColorLightShade};
 
@@ -156,17 +156,17 @@ export const EventsTrGroup = styled.div.attrs({
 `;
 EventsTrGroup.displayName = 'EventsTrGroup';
 
-export const EventsTrData = styled.div.attrs({
+export const EventsTrData = styled.div.attrs(props => ({
   className: 'siemEventsTable__trData',
   role: 'row',
-})`
+}))`
   display: flex;
 `;
 EventsTrData.displayName = 'EventsTrData';
 
-export const EventsTrSupplement = styled.div.attrs({
-  className: 'siemEventsTable__trSupplement',
-})<{ className: string }>`
+export const EventsTrSupplement = styled.div.attrs(props => ({
+  className: props.className || 'siemEventsTable__trSupplement',
+}))<{ className: string }>`
   ${({ theme }) => css`
     font-size: ${theme.eui.euiFontSizeXS};
     line-height: ${theme.eui.euiLineHeight};
@@ -175,9 +175,9 @@ export const EventsTrSupplement = styled.div.attrs({
 `;
 EventsTrSupplement.displayName = 'EventsTrSupplement';
 
-export const EventsTdGroupActions = styled.div.attrs({
+export const EventsTdGroupActions = styled.div.attrs(props => ({
   className: 'siemEventsTable__tdGroupActions',
-})<{ actionsColumnWidth: number }>`
+}))<{ actionsColumnWidth: number }>`
   display: flex;
   justify-content: space-between;
   flex: 0 0 ${({ actionsColumnWidth }) => actionsColumnWidth + 'px'};
@@ -185,17 +185,17 @@ export const EventsTdGroupActions = styled.div.attrs({
 `;
 EventsTdGroupActions.displayName = 'EventsTdGroupActions';
 
-export const EventsTdGroupData = styled.div.attrs({
+export const EventsTdGroupData = styled.div.attrs(props => ({
   className: 'siemEventsTable__tdGroupData',
-})`
+}))`
   display: flex;
 `;
 EventsTdGroupData.displayName = 'EventsTdGroupData';
 
-export const EventsTd = styled.div.attrs({
+export const EventsTd = styled.div.attrs(props => ({
   className: 'siemEventsTable__td',
   role: 'cell',
-})`
+}))`
   align-items: center;
   display: flex;
   flex-shrink: 0;
@@ -207,9 +207,9 @@ export const EventsTd = styled.div.attrs({
 `;
 EventsTd.displayName = 'EventsTd';
 
-export const EventsTdContent = styled.div.attrs({
+export const EventsTdContent = styled.div.attrs(props => ({
   className: 'siemEventsTable__tdContent',
-})<{ textAlign?: string }>`
+}))<{ textAlign?: string }>`
   ${({ textAlign, theme }) => css`
     font-size: ${theme.eui.euiFontSizeXS};
     line-height: ${theme.eui.euiLineHeight};
@@ -225,9 +225,9 @@ EventsTdContent.displayName = 'EventsTdContent';
  * EVENTS HEADING
  */
 
-export const EventsHeading = styled.div.attrs({
+export const EventsHeading = styled.div.attrs(props => ({
   className: 'siemEventsHeading',
-})<{ isLoading: boolean }>`
+}))<{ isLoading: boolean }>`
   align-items: center;
   display: flex;
 
@@ -237,10 +237,10 @@ export const EventsHeading = styled.div.attrs({
 `;
 EventsHeading.displayName = 'EventsHeading';
 
-export const EventsHeadingTitleButton = styled.button.attrs({
+export const EventsHeadingTitleButton = styled.button.attrs(props => ({
   className: 'siemEventsHeading__title siemEventsHeading__title--aggregatable',
   type: 'button',
-})`
+}))`
   ${({ theme }) => css`
     align-items: center;
     display: flex;
@@ -264,16 +264,16 @@ export const EventsHeadingTitleButton = styled.button.attrs({
 `;
 EventsHeadingTitleButton.displayName = 'EventsHeadingTitleButton';
 
-export const EventsHeadingTitleSpan = styled.span.attrs({
+export const EventsHeadingTitleSpan = styled.span.attrs(props => ({
   className: 'siemEventsHeading__title siemEventsHeading__title--notAggregatable',
-})`
+}))`
   min-width: 0;
 `;
 EventsHeadingTitleSpan.displayName = 'EventsHeadingTitleSpan';
 
-export const EventsHeadingExtra = styled.div.attrs({
-  className: 'siemEventsHeading__extra',
-})<{ className?: string }>`
+export const EventsHeadingExtra = styled.div.attrs(props => ({
+  className: props.className || 'siemEventsHeading__extra',
+}))`
   ${({ theme }) => css`
     margin-left: auto;
 
@@ -291,9 +291,9 @@ export const EventsHeadingExtra = styled.div.attrs({
 `;
 EventsHeadingExtra.displayName = 'EventsHeadingExtra';
 
-export const EventsHeadingHandle = styled.div.attrs({
+export const EventsHeadingHandle = styled.div.attrs(props => ({
   className: 'siemEventsHeading__handle',
-})`
+}))`
   ${({ theme }) => css`
     background-color: ${theme.eui.euiBorderColor};
     height: 100%;

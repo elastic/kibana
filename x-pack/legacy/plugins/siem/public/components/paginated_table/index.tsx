@@ -317,10 +317,10 @@ const BasicTable = styled(EuiBasicTable)`
 
 BasicTable.displayName = 'BasicTable';
 
-const FooterAction = styled(EuiFlexGroup).attrs({
+const FooterAction = styled(EuiFlexGroup).attrs(props => ({
   alignItems: 'center',
   responsive: false,
-})`
+}))`
   margin-top: ${props => props.theme.eui.euiSizeXS};
 `;
 

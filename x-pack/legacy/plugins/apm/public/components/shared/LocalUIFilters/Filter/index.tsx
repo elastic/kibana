@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { FunctionComponent, useState, useMemo, useEffect } from 'react';
 import {
   EuiTitle,
   EuiPopover,
@@ -23,13 +23,26 @@ import { FilterBadgeList } from './FilterBadgeList';
 import { unit, px } from '../../../../style/variables';
 import { FilterTitleButton } from './FilterTitleButton';
 
-const Popover = styled(EuiPopover).attrs({
-  anchorClassName: 'anchor'
-})`
+interface PopoverProps {
+  anchorClassName?: string;
+  id: string;
+  isOpen: boolean;
+  closePopover: () => void;
+  button: JSX.Element;
+  anchorPosition: string;
+  panelPaddingSize: string;
+}
+
+const Popover = styled((EuiPopover as unknown) as FunctionComponent)<
+  PopoverProps
+>`
   .anchor {
     display: block;
   }
 `;
+Popover.defaultProps = {
+  anchorClassName: 'anchor'
+};
 
 const SelectContainer = styled.div`
   width: ${px(unit * 16)};

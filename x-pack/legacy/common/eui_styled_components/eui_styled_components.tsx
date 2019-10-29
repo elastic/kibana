@@ -16,10 +16,12 @@ export interface EuiTheme {
   darkMode: boolean;
 }
 
-const EuiThemeProvider = <T extends any>({
+type EuiThemeProvider = Partial<ThemeProviderProps<EuiTheme>>;
+
+const EuiThemeProvider = ({
   darkMode = false,
   ...otherProps
-}: ThemeProviderProps<T & EuiTheme> & {
+}: EuiThemeProvider & {
   darkMode?: boolean;
   children?: React.ReactNode;
 }) => (
@@ -35,9 +37,9 @@ const EuiThemeProvider = <T extends any>({
 const {
   default: euiStyled,
   css,
-  injectGlobal,
+  createGlobalStyle,
   keyframes,
   withTheme,
 } = styledComponents as ThemedStyledComponentsModule<EuiTheme>;
 
-export { css, euiStyled, EuiThemeProvider, injectGlobal, keyframes, withTheme };
+export { css, euiStyled, EuiThemeProvider, createGlobalStyle, keyframes, withTheme };

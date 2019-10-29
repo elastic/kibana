@@ -101,7 +101,7 @@ export const EventsViewer = React.memo<Props>(
         <AutoSizer detectAnyWindowResize={true} content>
           {({ measureRef, content: { width = 0 } }) => (
             <>
-              <WrappedByAutoSizer innerRef={measureRef}>
+              <WrappedByAutoSizer ref={measureRef}>
                 <div
                   data-test-subj="events-viewer-measured"
                   style={{ height: '0px', width: '100%' }}

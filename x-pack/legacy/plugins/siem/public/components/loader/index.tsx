@@ -38,12 +38,12 @@ const Aside = styled.aside<{ overlay?: boolean; overlayBackground?: string }>`
 
 Aside.displayName = 'Aside';
 
-const FlexGroup = styled(EuiFlexGroup).attrs({
+const FlexGroup = styled(EuiFlexGroup).attrs(props => ({
   alignItems: 'center',
   direction: 'column',
   gutterSize: 's',
   justifyContent: 'center',
-})<{ overlay: { overlay?: boolean } }>`
+}))<{ overlay: { overlay?: boolean } }>`
   ${({ overlay }) =>
     overlay &&
     `

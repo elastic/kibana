@@ -69,7 +69,7 @@ export const Resizeable = React.memo<Props>(
     const dragEventTargets = useRef<Array<{ htmlElement: HTMLElement; prevCursor: string }>>([]);
     const dragSubscription = useRef<Subscription | null>(null);
     const prevX = useRef(0);
-    const ref = useRef<React.RefObject<HTMLElement>>(React.createRef<HTMLElement>());
+    const ref = useRef(null);
     const upSubscription = useRef<Subscription | null>(null);
     const isResizingRef = useRef(false);
 
@@ -80,7 +80,7 @@ export const Resizeable = React.memo<Props>(
     };
     useEffect(() => {
       const move$ = fromEvent<MouseEvent>(document, 'mousemove');
-      const down$ = fromEvent<MouseEvent>(ref.current.current!, 'mousedown');
+      const down$ = fromEvent<MouseEvent>(ref.current!, 'mousedown');
       const up$ = fromEvent<MouseEvent>(document, 'mouseup');
 
       drag$.current = down$.pipe(concatMap(() => move$.pipe(takeUntil(up$))));
@@ -131,7 +131,7 @@ export const Resizeable = React.memo<Props>(
           bottom={bottom}
           data-test-subj="resize-handle-container"
           height={height}
-          innerRef={ref.current}
+          ref={ref}
           left={left}
           positionAbsolute={positionAbsolute}
           right={right}

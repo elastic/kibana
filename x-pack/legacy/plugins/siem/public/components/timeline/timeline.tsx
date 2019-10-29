@@ -135,7 +135,7 @@ export const Timeline = React.memo<Props>(
             gutterSize="none"
             justifyContent="flexStart"
           >
-            <WrappedByAutoSizer innerRef={measureRef}>
+            <WrappedByAutoSizer ref={measureRef}>
               <TimelineHeader
                 browserFields={browserFields}
                 id={id}

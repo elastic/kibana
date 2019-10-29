@@ -65,7 +65,7 @@ interface InnerProps {
   isChild?: boolean;
 }
 
-const Inner = euiStyled<InnerProps, 'div'>('div')`
+const Inner = euiStyled.div<InnerProps>`
   border: 1px solid ${props => props.theme.eui.euiBorderColor};
   background-color: ${props =>
     props.isChild ? props.theme.eui.euiColorLightestShade : props.theme.eui.euiColorEmptyShade};

@@ -200,7 +200,7 @@ export const StatefulEvent = React.memo<Props>(
                   <EventsTrGroup
                     className={STATEFUL_EVENT_CSS_CLASS_NAME}
                     data-test-subj="event"
-                    innerRef={c => {
+                    ref={c => {
                       if (c != null) {
                         divElement.current = c;
                       }
