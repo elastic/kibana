@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { FilterService, FilterStart, FilterSetup } from '.';
+import { QueryService, QueryStart, QuerySetup } from '.';
 
-type FilterServiceClientContract = PublicMethodsOf<FilterService>;
+type QueryServiceClientContract = PublicMethodsOf<QueryService>;
 
 const createSetupContractMock = () => {
-  const setupContract: jest.Mocked<FilterSetup> = {
+  const setupContract: jest.Mocked<QuerySetup> = {
     filterManager: jest.fn() as any,
   };
 
@@ -30,7 +30,7 @@ const createSetupContractMock = () => {
 };
 
 const createStartContractMock = () => {
-  const startContract: jest.Mocked<FilterStart> = {
+  const startContract: jest.Mocked<QueryStart> = {
     filterManager: jest.fn() as any,
   };
 
@@ -38,7 +38,7 @@ const createStartContractMock = () => {
 };
 
 const createMock = () => {
-  const mocked: jest.Mocked<FilterServiceClientContract> = {
+  const mocked: jest.Mocked<QueryServiceClientContract> = {
     setup: jest.fn(),
     start: jest.fn(),
     stop: jest.fn(),
@@ -49,7 +49,7 @@ const createMock = () => {
   return mocked;
 };
 
-export const filterServiceMock = {
+export const queryServiceMock = {
   create: createMock,
   createSetupContract: createSetupContractMock,
   createStartContract: createStartContractMock,

@@ -55,6 +55,7 @@ import {
 } from '../../common/constants';
 import { FilterStateStore } from '@kbn/es-query';
 import { start as data } from '../../../../../../src/legacy/core_plugins/data/public/legacy';
+import { npStart } from 'ui/new_platform';
 
 const { savedQueryService } = data.search.services;
 
@@ -63,7 +64,7 @@ const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-maps-root';
 const app = uiModules.get(MAP_APP_PATH, []);
 
 app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppState, globalState) => {
-
+  const { filterManager } = npStart.plugins.data.query;
   const savedMap = $route.current.locals.map;
   let unsubscribe;
   let initialLayerListConfig;
@@ -99,7 +100,7 @@ app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppSta
     $scope.$evalAsync(() => {
       // appState
       $state.query = $scope.query;
-      $state.filters = data.filter.filterManager.getAppFilters();
+      $state.filters = filterManager.getAppFilters();
       $state.save();
 
       // globalState
@@ -108,7 +109,7 @@ app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppSta
         pause: $scope.refreshConfig.isPaused,
         value: $scope.refreshConfig.interval,
       };
-      globalState.filters = data.filter.filterManager.getGlobalFilters();
+      globalState.filters = filterManager.getGlobalFilters();
       globalState.save();
     });
   }
@@ -199,8 +200,8 @@ app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppSta
   /* End of Saved Queries */
   async function onQueryChange({ filters, query, time }) {
     if (filters) {
-      await data.filter.filterManager.setFilters(filters); // Maps and merges filters
-      $scope.filters = data.filter.filterManager.getFilters();
+      filterManager.setFilters(filters); // Maps and merges filters
+      $scope.filters = filterManager.getFilters();
     }
     if (query) {
       $scope.query = query;

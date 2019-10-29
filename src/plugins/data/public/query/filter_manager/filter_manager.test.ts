@@ -22,15 +22,11 @@ import sinon from 'sinon';
 
 import { Subscription } from 'rxjs';
 import { Filter, FilterStateStore } from '@kbn/es-query';
-
-import { FilterStateManager } from './filter_state_manager';
 import { FilterManager } from './filter_manager';
-
 import { getFilter } from './test_helpers/get_stub_filter';
-import { StubState } from './test_helpers/stub_state';
 import { getFiltersArray } from './test_helpers/get_filters_array';
 
-import { coreMock } from '../../../../../../core/public/mocks';
+import { coreMock } from '../../../../../core/public/mocks';
 const setupMock = coreMock.createSetup();
 
 setupMock.uiSettings.get.mockImplementation((key: string) => {
@@ -38,9 +34,6 @@ setupMock.uiSettings.get.mockImplementation((key: string) => {
 });
 
 describe('filter_manager', () => {
-  let appStateStub: StubState;
-  let globalStateStub: StubState;
-
   let updateSubscription: Subscription | undefined;
   let fetchSubscription: Subscription | undefined;
   let updateListener: sinon.SinonSpy<any[], any>;
@@ -50,20 +43,8 @@ describe('filter_manager', () => {
 
   beforeEach(() => {
     updateListener = sinon.stub();
-    appStateStub = new StubState();
-    globalStateStub = new StubState();
     filterManager = new FilterManager(setupMock.uiSettings);
     readyFilters = getFiltersArray();
-
-    // FilterStateManager is tested indirectly.
-    // Therefore, we don't need it's instance.
-    new FilterStateManager(
-      globalStateStub,
-      () => {
-        return appStateStub;
-      },
-      filterManager
-    );
   });
 
   afterEach(async () => {
@@ -83,32 +64,6 @@ describe('filter_manager', () => {
       fetchSubscription = filterManager.getUpdates$().subscribe(() => {});
       expect(updateSubscription).toBeInstanceOf(Subscription);
       expect(fetchSubscription).toBeInstanceOf(Subscription);
-    });
-
-    test('should observe global state', done => {
-      updateSubscription = filterManager.getUpdates$().subscribe(() => {
-        expect(filterManager.getGlobalFilters()).toHaveLength(1);
-        if (updateSubscription) {
-          updateSubscription.unsubscribe();
-        }
-        done();
-      });
-
-      const f1 = getFilter(FilterStateStore.GLOBAL_STATE, true, true, 'age', 34);
-      globalStateStub.filters.push(f1);
-    });
-
-    test('should observe app state', done => {
-      updateSubscription = filterManager.getUpdates$().subscribe(() => {
-        expect(filterManager.getAppFilters()).toHaveLength(1);
-        if (updateSubscription) {
-          updateSubscription.unsubscribe();
-        }
-        done();
-      });
-
-      const f1 = getFilter(FilterStateStore.APP_STATE, false, false, 'age', 34);
-      appStateStub.filters.push(f1);
     });
   });
 
@@ -222,10 +177,11 @@ describe('filter_manager', () => {
       updateSubscription = filterManager.getUpdates$().subscribe(updateListener);
       const f1 = getFilter(FilterStateStore.APP_STATE, false, false, 'age', 34);
       filterManager.addFilters(f1);
-      expect(filterManager.getAppFilters()).toHaveLength(1);
+      const appFilters = filterManager.getAppFilters();
+      expect(appFilters).toHaveLength(1);
+      expect(appFilters[0]).toEqual(f1);
       expect(filterManager.getGlobalFilters()).toHaveLength(0);
       expect(updateListener.callCount).toBe(1);
-      expect(appStateStub.filters.length).toBe(1);
     });
 
     test('app state should accept array', async () => {
@@ -233,9 +189,10 @@ describe('filter_manager', () => {
       const f2 = getFilter(FilterStateStore.APP_STATE, false, false, 'gender', 'female');
       filterManager.addFilters([f1]);
       filterManager.addFilters([f2]);
-      expect(filterManager.getAppFilters()).toHaveLength(2);
+      const appFilters = filterManager.getAppFilters();
+      expect(appFilters).toHaveLength(2);
+      expect(appFilters).toEqual([f2, f1]);
       expect(filterManager.getGlobalFilters()).toHaveLength(0);
-      expect(appStateStub.filters.length).toBe(2);
     });
 
     test('global state should accept a single filer', async () => {
@@ -243,9 +200,10 @@ describe('filter_manager', () => {
       const f1 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'age', 34);
       filterManager.addFilters(f1);
       expect(filterManager.getAppFilters()).toHaveLength(0);
-      expect(filterManager.getGlobalFilters()).toHaveLength(1);
+      const globalFilters = filterManager.getGlobalFilters();
+      expect(globalFilters).toHaveLength(1);
+      expect(globalFilters[0]).toEqual(f1);
       expect(updateListener.callCount).toBe(1);
-      expect(globalStateStub.filters.length).toBe(1);
     });
 
     test('global state should be accept array', async () => {
@@ -253,8 +211,9 @@ describe('filter_manager', () => {
       const f2 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'gender', 'female');
       filterManager.addFilters([f1, f2]);
       expect(filterManager.getAppFilters()).toHaveLength(0);
-      expect(filterManager.getGlobalFilters()).toHaveLength(2);
-      expect(globalStateStub.filters.length).toBe(2);
+      const globalFilters = filterManager.getGlobalFilters();
+      expect(globalFilters).toHaveLength(2);
+      expect(globalFilters).toEqual([f2, f1]);
     });
 
     test('add multiple filters at once', async () => {
@@ -370,7 +329,6 @@ describe('filter_manager', () => {
 
       filterManager.addFilters(negatedFilter);
       // The negated filter should overwrite the positive one
-      expect(globalStateStub.filters.length).toBe(1);
       expect(filterManager.getFilters()).toHaveLength(1);
       expect(filterManager.getFilters()[0]).toEqual(negatedFilter);
     });
@@ -383,16 +341,16 @@ describe('filter_manager', () => {
       filterManager.addFilters(negatedFilter);
 
       // The negated filter should overwrite the positive one
-      expect(globalStateStub.filters.length).toBe(1);
-      expect(globalStateStub.filters[0]).toEqual(negatedFilter);
+      expect(filterManager.getFilters()).toHaveLength(1);
+      expect(filterManager.getFilters()[0]).toEqual(negatedFilter);
 
       // Add negate: false version of the filter
       const filter = _.cloneDeep(readyFilters[0]);
       filter.meta.negate = false;
 
       filterManager.addFilters(filter);
-      expect(globalStateStub.filters.length).toBe(1);
-      expect(globalStateStub.filters[0]).toEqual(filter);
+      expect(filterManager.getFilters()).toHaveLength(1);
+      expect(filterManager.getFilters()[0]).toEqual(filter);
     });
 
     test('should fire the update and fetch events', async function() {
@@ -409,10 +367,6 @@ describe('filter_manager', () => {
 
       filterManager.addFilters(readyFilters);
 
-      // updates should trigger state saves
-      expect(appStateStub.save.callCount).toBe(1);
-      expect(globalStateStub.save.callCount).toBe(1);
-
       // this time, events should be emitted
       expect(fetchStub).toBeCalledTimes(1);
       expect(updateStub).toBeCalledTimes(1);
@@ -420,25 +374,25 @@ describe('filter_manager', () => {
   });
 
   describe('filter reconciliation', function() {
-    test('should de-dupe appStateStub filters being added', async function() {
+    test('should de-dupe app filters being added', async function() {
       const newFilter = _.cloneDeep(readyFilters[1]);
       filterManager.addFilters(readyFilters, false);
-      expect(appStateStub.filters.length).toBe(3);
+      expect(filterManager.getFilters()).toHaveLength(3);
 
       filterManager.addFilters(newFilter, false);
-      expect(appStateStub.filters.length).toBe(3);
+      expect(filterManager.getFilters()).toHaveLength(3);
     });
 
-    test('should de-dupe globalStateStub filters being added', async function() {
+    test('should de-dupe global filters being added', async function() {
       const newFilter = _.cloneDeep(readyFilters[1]);
       filterManager.addFilters(readyFilters, true);
-      expect(globalStateStub.filters.length).toBe(3);
+      expect(filterManager.getFilters()).toHaveLength(3);
 
       filterManager.addFilters(newFilter, true);
-      expect(globalStateStub.filters.length).toBe(3);
+      expect(filterManager.getFilters()).toHaveLength(3);
     });
 
-    test('should de-dupe globalStateStub filters being set', async () => {
+    test('should de-dupe global filters being set', async () => {
       const f1 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'age', 34);
       const f2 = _.cloneDeep(f1);
       filterManager.setFilters([f1, f2]);
@@ -447,7 +401,7 @@ describe('filter_manager', () => {
       expect(filterManager.getFilters()).toHaveLength(1);
     });
 
-    test('should de-dupe appStateStub filters being set', async () => {
+    test('should de-dupe app filters being set', async () => {
       const f1 = getFilter(FilterStateStore.APP_STATE, false, false, 'age', 34);
       const f2 = _.cloneDeep(f1);
       filterManager.setFilters([f1, f2]);
@@ -475,7 +429,7 @@ describe('filter_manager', () => {
       });
     });
 
-    test('should merge conflicting appStateStub filters', async function() {
+    test('should merge conflicting app filters', async function() {
       filterManager.addFilters(readyFilters, true);
       const appFilter = _.cloneDeep(readyFilters[1]);
       appFilter.meta.negate = true;
@@ -580,16 +534,16 @@ describe('filter_manager', () => {
 
     test('should remove the filter from appStateStub', async function() {
       filterManager.addFilters(readyFilters, false);
-      expect(appStateStub.filters).toHaveLength(3);
+      expect(filterManager.getAppFilters()).toHaveLength(3);
       filterManager.removeFilter(readyFilters[0]);
-      expect(appStateStub.filters).toHaveLength(2);
+      expect(filterManager.getAppFilters()).toHaveLength(2);
     });
 
     test('should remove the filter from globalStateStub', async function() {
       filterManager.addFilters(readyFilters, true);
-      expect(globalStateStub.filters).toHaveLength(3);
+      expect(filterManager.getGlobalFilters()).toHaveLength(3);
       filterManager.removeFilter(readyFilters[0]);
-      expect(globalStateStub.filters).toHaveLength(2);
+      expect(filterManager.getGlobalFilters()).toHaveLength(2);
     });
 
     test('should fire the update and fetch events', async function() {
@@ -619,8 +573,8 @@ describe('filter_manager', () => {
 
       filterManager.removeFilter(readyFilters[0]);
 
-      expect(globalStateStub.filters).toHaveLength(1);
-      expect(appStateStub.filters).toHaveLength(1);
+      expect(filterManager.getAppFilters()).toHaveLength(1);
+      expect(filterManager.getGlobalFilters()).toHaveLength(1);
     });
 
     test('should remove matching filters by comparison', async function() {
@@ -629,12 +583,12 @@ describe('filter_manager', () => {
 
       filterManager.removeFilter(_.cloneDeep(readyFilters[0]));
 
-      expect(globalStateStub.filters).toHaveLength(1);
-      expect(appStateStub.filters).toHaveLength(1);
+      expect(filterManager.getAppFilters()).toHaveLength(1);
+      expect(filterManager.getGlobalFilters()).toHaveLength(1);
 
       filterManager.removeFilter(_.cloneDeep(readyFilters[2]));
-      expect(globalStateStub.filters).toHaveLength(1);
-      expect(appStateStub.filters).toHaveLength(0);
+      expect(filterManager.getAppFilters()).toHaveLength(0);
+      expect(filterManager.getGlobalFilters()).toHaveLength(1);
     });
 
     test('should do nothing with a non-matching filter', async function() {
@@ -645,19 +599,19 @@ describe('filter_manager', () => {
       missedFilter.meta.negate = !readyFilters[0].meta.negate;
 
       filterManager.removeFilter(missedFilter);
-      expect(globalStateStub.filters).toHaveLength(2);
-      expect(appStateStub.filters).toHaveLength(1);
+      expect(filterManager.getAppFilters()).toHaveLength(1);
+      expect(filterManager.getGlobalFilters()).toHaveLength(2);
     });
 
     test('should remove all the filters from both states', async function() {
       filterManager.addFilters([readyFilters[0], readyFilters[1]], true);
       filterManager.addFilters([readyFilters[2]], false);
-      expect(globalStateStub.filters).toHaveLength(2);
-      expect(appStateStub.filters).toHaveLength(1);
+      expect(filterManager.getAppFilters()).toHaveLength(1);
+      expect(filterManager.getGlobalFilters()).toHaveLength(2);
 
       filterManager.removeAll();
-      expect(globalStateStub.filters).toHaveLength(0);
-      expect(appStateStub.filters).toHaveLength(0);
+      expect(filterManager.getAppFilters()).toHaveLength(0);
+      expect(filterManager.getGlobalFilters()).toHaveLength(0);
     });
   });
 
