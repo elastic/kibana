@@ -4,21 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import {
-  EuiBadge,
   EuiBasicTable,
   EuiButton,
   EuiButtonIcon,
-  EuiFieldSearch,
   EuiFilterButton,
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHealth,
   EuiIconTip,
-  EuiLink,
   EuiPanel,
+  EuiSelect,
   EuiSpacer,
   EuiSwitch,
   EuiTabbedContent,
@@ -32,6 +28,7 @@ import { getEmptyTagValue } from '../../../components/empty_value';
 import { FiltersGlobal } from '../../../components/filters_global';
 import { HeaderPage } from '../../../components/header_page';
 import { HeaderSection } from '../../../components/header_section';
+import { HistogramSignals } from '../../../components/page/detection_engine/histogram_signals';
 import {
   UtilityBar,
   UtilityBarAction,
@@ -131,11 +128,36 @@ const ClosedSignals = React.memo(() => {
 });
 
 const Signals = React.memo(() => {
+  const sampleChartOptions = [
+    { text: 'Risk scores', value: 'risk_scores' },
+    { text: 'Severities', value: 'severities' },
+    { text: 'Top destination IPs', value: 'destination_ips' },
+    { text: 'Top event actions', value: 'event_actions' },
+    { text: 'Top event categories', value: 'event_categories' },
+    { text: 'Top host names', value: 'host_names' },
+    { text: 'Top source IPs', value: 'source_ips' },
+    { text: 'Top users', value: 'users' },
+  ];
+
   const filterGroupOptions = ['open', 'closed'];
   const [filterGroupState, setFilterGroupState] = useState(filterGroupOptions[0]);
 
   return (
     <>
+      <EuiSpacer />
+
+      <EuiPanel>
+        <HeaderSection title="Signal detection frequency">
+          <EuiSelect
+            options={sampleChartOptions}
+            prepend="Stack by"
+            value={sampleChartOptions[0].value}
+          />
+        </HeaderSection>
+
+        <HistogramSignals />
+      </EuiPanel>
+
       <EuiSpacer />
 
       <EuiPanel>
