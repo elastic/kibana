@@ -18,6 +18,7 @@ import {
   createActionResult,
   createAlertResult,
   getCreateRequest,
+  typicalPayload,
 } from './__mocks__/request_responses';
 
 describe('create_signals', () => {
@@ -30,7 +31,7 @@ describe('create_signals', () => {
   });
 
   describe('status codes with actionClient and alertClient', () => {
-    it('returns 200 when deleting a single signal with a valid actionClient and alertClient', async () => {
+    test('returns 200 when creating a single signal with a valid actionClient and alertClient', async () => {
       alertsClient.find.mockResolvedValue(getFindResult());
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.create.mockResolvedValue(createActionResult());
@@ -39,21 +40,21 @@ describe('create_signals', () => {
       expect(statusCode).toBe(200);
     });
 
-    it('returns 404 if actionClient is not available on the route', async () => {
+    test('returns 404 if actionClient is not available on the route', async () => {
       const { serverWithoutActionClient } = createMockServerWithoutActionClientDecoration();
       createSignalsRoute(serverWithoutActionClient);
       const { statusCode } = await serverWithoutActionClient.inject(getCreateRequest());
       expect(statusCode).toBe(404);
     });
 
-    it('returns 404 if alertClient is not available on the route', async () => {
+    test('returns 404 if alertClient is not available on the route', async () => {
       const { serverWithoutAlertClient } = createMockServerWithoutAlertClientDecoration();
       createSignalsRoute(serverWithoutAlertClient);
       const { statusCode } = await serverWithoutAlertClient.inject(getCreateRequest());
       expect(statusCode).toBe(404);
     });
 
-    it('returns 404 if alertClient and actionClient are both not available on the route', async () => {
+    test('returns 404 if alertClient and actionClient are both not available on the route', async () => {
       const {
         serverWithoutActionOrAlertClient,
       } = createMockServerWithoutActionOrAlertClientDecoration();
@@ -64,100 +65,73 @@ describe('create_signals', () => {
   });
 
   describe('validation', () => {
-    it('returns 400 if id is not given', async () => {
+    test('returns 400 if id is not given', async () => {
       alertsClient.find.mockResolvedValue(getFindResult());
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.create.mockResolvedValue(createActionResult());
       alertsClient.create.mockResolvedValue(createAlertResult());
+      // missing id should throw a 400
+      const { id, ...noId } = typicalPayload();
       const request: ServerInjectOptions = {
         method: 'POST',
         url: '/api/siem/signals',
-        payload: {
-          // missing id should throw a 400
-          description: 'Detecting root and admin users',
-          index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-          interval: '5m',
-          name: 'Detect Root/Admin Users',
-          severity: 'high',
-          type: 'kql',
-          from: 'now-6m',
-          to: 'now',
-          kql: 'user.name: root or user.name: admin',
-        },
+        payload: noId,
       };
       const { statusCode } = await server.inject(request);
       expect(statusCode).toBe(400);
     });
 
-    it('returns 200 if type is kql', async () => {
+    test('returns 200 if type is query', async () => {
       alertsClient.find.mockResolvedValue(getFindResult());
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.create.mockResolvedValue(createActionResult());
       alertsClient.create.mockResolvedValue(createAlertResult());
+      const { type, ...noType } = typicalPayload();
       const request: ServerInjectOptions = {
         method: 'POST',
         url: '/api/siem/signals',
         payload: {
-          id: 'rule-1',
-          description: 'Detecting root and admin users',
-          index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-          interval: '5m',
-          name: 'Detect Root/Admin Users',
-          severity: 'high',
-          type: 'kql',
-          from: 'now-6m',
-          to: 'now',
-          kql: 'user.name: root or user.name: admin',
+          ...noType,
+          type: 'query',
         },
       };
       const { statusCode } = await server.inject(request);
       expect(statusCode).toBe(200);
     });
 
-    it('returns 200 if type is filter', async () => {
+    test('returns 200 if type is filter', async () => {
       alertsClient.find.mockResolvedValue(getFindResult());
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.create.mockResolvedValue(createActionResult());
       alertsClient.create.mockResolvedValue(createAlertResult());
-      const request: ServerInjectOptions = {
+      // Cannot type request with a ServerInjectOptions as the type system complains
+      // about the property filter involving Hapi types, so I left it off for now
+      const { language, query, type, ...noType } = typicalPayload();
+      const request = {
         method: 'POST',
         url: '/api/siem/signals',
         payload: {
-          id: 'rule-1',
-          description: 'Detecting root and admin users',
-          index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-          interval: '5m',
-          name: 'Detect Root/Admin Users',
-          severity: 'high',
+          ...noType,
           type: 'filter',
-          from: 'now-6m',
-          to: 'now',
-          kql: 'user.name: root or user.name: admin',
+          filter: {},
         },
       };
       const { statusCode } = await server.inject(request);
       expect(statusCode).toBe(200);
     });
 
-    it('returns 400 if type is not filter or kql', async () => {
+    test('returns 400 if type is not filter or kql', async () => {
       alertsClient.find.mockResolvedValue(getFindResult());
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.create.mockResolvedValue(createActionResult());
       alertsClient.create.mockResolvedValue(createAlertResult());
+      const { type, ...noType } = typicalPayload();
       const request: ServerInjectOptions = {
         method: 'POST',
         url: '/api/siem/signals',
         payload: {
-          id: 'rule-1',
-          description: 'Detecting root and admin users',
-          index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-          interval: '5m',
-          name: 'Detect Root/Admin Users',
-          severity: 'high',
-          type: 'something-made-up', // This is a made up type that causes the 400
-          from: 'now-6m',
-          to: 'now',
-          kql: 'user.name: root or user.name: admin',
+          ...noType,
+          type: 'something-made-up',
         },
       };
       const { statusCode } = await server.inject(request);

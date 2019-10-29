@@ -1,5 +1,5 @@
 {
-  "id": "rule-1",
+  "id": "rule-8",
   "description": "Detecting root and admin users",
   "index": ["auditbeat-*", "filebeat-*", "packetbeat-*", "winlogbeat-*"],
   "interval": "5m",
@@ -10,5 +10,6 @@
   "to": "now",
   "query": "user.name: root or user.name: admin",
   "language": "kuery",
+  "enabled": false,
   "references": ["http://www.example.com", "https://ww.example.com"]
 }
