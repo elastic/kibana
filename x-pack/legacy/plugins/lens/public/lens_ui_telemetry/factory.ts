@@ -45,21 +45,11 @@ export class LensReportManager {
 
   private storage: Storage;
   private http: HttpServiceBase;
-  private basePath: string;
   private timer: ReturnType<typeof setInterval>;
 
-  constructor({
-    storage,
-    http,
-    basePath,
-  }: {
-    storage: Storage;
-    http: HttpServiceBase;
-    basePath: string;
-  }) {
+  constructor({ storage, http }: { storage: Storage; http: HttpServiceBase }) {
     this.storage = storage;
     this.http = http;
-    this.basePath = basePath;
 
     this.readFromStorage();
 
@@ -96,7 +86,7 @@ export class LensReportManager {
     this.readFromStorage();
     if (Object.keys(this.events).length || Object.keys(this.suggestionEvents).length) {
       try {
-        await this.http.post(`${this.basePath}${BASE_API_URL}/telemetry`, {
+        await this.http.post(`${BASE_API_URL}/telemetry`, {
           body: JSON.stringify({
             events: this.events,
             suggestionEvents: this.suggestionEvents,
