@@ -840,9 +840,19 @@ export class DataRecognizer {
     });
 
     function processArrayValues(source, update) {
+      if (typeof source !== 'object' || typeof update !== 'object') {
+        return;
+      }
       Object.keys(source).forEach(key => {
         const value = source[key];
-        if (Array.isArray(value)) {
+
+        if (typeof value !== 'object' || value === null) {
+          return;
+        }
+
+        if (!Array.isArray(value)) {
+          processArrayValues(value, update[key]);
+        } else {
           source[key] = update[key];
         }
       });

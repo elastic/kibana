@@ -54,7 +54,10 @@ describe('ML - data recognizer', () => {
                 bucket_span: '1h'
               },
               analysis_limits: {
-                model_memory_limit: '256mb'
+                model_memory_limit: '256mb',
+                influencers: [
+                  'region'
+                ]
               }
             }
           },
@@ -63,7 +66,8 @@ describe('ML - data recognizer', () => {
       const jobOverrides = [
         {
           analysis_limits: {
-            model_memory_limit: '512mb'
+            model_memory_limit: '512mb',
+            influencers: [],
           }
         },
         {
@@ -81,7 +85,8 @@ describe('ML - data recognizer', () => {
               bucket_span: '1h'
             },
             analysis_limits: {
-              model_memory_limit: '512mb'
+              model_memory_limit: '512mb',
+              influencers: [],
             },
             groups: []
           },
