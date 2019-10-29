@@ -29,12 +29,11 @@ interface Props {
 
 export const FormDataProvider = ({ children, pathsToWatch }: Props) => {
   const [formData, setFormData] = useState<FormData>({});
-  const previsouRawData = useRef<FormData>({});
+  const previousRawData = useRef<FormData>({});
   const form = useFormContext();
 
   useEffect(() => {
     const subscription = form.subscribe(({ data: { raw } }) => {
-      // subscription.current = form.__formData$.current.subscribe(data => {
       // To avoid re-rendering the children for updates on the form data
       // that we are **not** interested in, we can specify one or multiple path(s)
       // to watch.
@@ -42,8 +41,8 @@ export const FormDataProvider = ({ children, pathsToWatch }: Props) => {
         const valuesToWatchArray = Array.isArray(pathsToWatch)
           ? (pathsToWatch as string[])
           : ([pathsToWatch] as string[]);
-        if (valuesToWatchArray.some(value => previsouRawData.current[value] !== raw[value])) {
-          previsouRawData.current = raw;
+        if (valuesToWatchArray.some(value => previousRawData.current[value] !== raw[value])) {
+          previousRawData.current = raw;
           setFormData(raw);
         }
       } else {

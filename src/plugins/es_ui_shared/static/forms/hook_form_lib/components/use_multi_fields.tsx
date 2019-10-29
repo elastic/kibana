@@ -49,5 +49,9 @@ export const UseMultiFields = ({ fields, children }: Props) => {
     );
   };
 
+  if (!Boolean(fieldsArray.length)) {
+    return null;
+  }
+
   return renderField(0);
 };
