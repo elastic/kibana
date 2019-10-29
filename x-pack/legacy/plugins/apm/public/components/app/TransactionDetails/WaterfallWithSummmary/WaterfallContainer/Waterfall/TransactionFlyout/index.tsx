@@ -41,7 +41,6 @@ function TransactionPropertiesTable({
       <EuiTitle size="s">
         <h4>Metadata</h4>
       </EuiTitle>
-      <EuiSpacer />
       <TransactionMetadata transaction={transaction} />
     </div>
   );
