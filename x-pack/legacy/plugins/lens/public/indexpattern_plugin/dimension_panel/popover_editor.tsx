@@ -368,6 +368,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
                       savedObjectsClient={props.savedObjectsClient}
                       layerId={layerId}
                       http={props.http}
+                      dateRange={props.dateRange}
                     />
                     <EuiSpacer size="m" />
                   </>
