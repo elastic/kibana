@@ -8,22 +8,18 @@ import {
   // @ts-ignore
   EuiHeaderSectionItemButton,
 } from '@elastic/eui';
-import React, { Component } from 'react';
+import React from 'react';
 import { ButtonProps } from '../types';
 
-export class SpacesHeaderNavButton extends Component<ButtonProps> {
-  public render() {
-    return (
-      <EuiHeaderSectionItemButton
-        aria-controls="headerSpacesMenuList"
-        aria-expanded={this.props.spaceSelectorShown}
-        aria-haspopup="true"
-        aria-label={this.props.linkTitle}
-        title={this.props.linkTitle}
-        onClick={this.props.toggleSpaceSelector}
-      >
-        {this.props.linkIcon}
-      </EuiHeaderSectionItemButton>
-    );
-  }
-}
+export const SpacesHeaderNavButton: React.SFC<ButtonProps> = props => (
+  <EuiHeaderSectionItemButton
+    aria-controls="headerSpacesMenuList"
+    aria-expanded={props.spaceSelectorShown}
+    aria-haspopup="true"
+    aria-label={props.linkTitle}
+    title={props.linkTitle}
+    onClick={props.toggleSpaceSelector}
+  >
+    {props.linkIcon}
+  </EuiHeaderSectionItemButton>
+);
