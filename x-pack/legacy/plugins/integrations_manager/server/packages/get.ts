@@ -10,7 +10,7 @@ import { InstallationAttributes } from '../../common/types';
 import * as Registry from '../registry';
 import { createInstallableFrom } from './index';
 
-export { SearchParams } from '../registry';
+export { SearchParams, fetchFile as getFile } from '../registry';
 
 function nameAsTitle(name: string) {
   return name.charAt(0).toUpperCase() + name.substr(1).toLowerCase();
@@ -67,9 +67,6 @@ export async function getPackageInfo(options: {
 
   return createInstallableFrom(updated, savedObject);
 }
-
-export const getImage = async (options: Registry.ImageRequestParams) =>
-  Registry.fetchImage(options);
 
 export async function getInstallationObject(options: {
   savedObjectsClient: SavedObjectsClientContract;
