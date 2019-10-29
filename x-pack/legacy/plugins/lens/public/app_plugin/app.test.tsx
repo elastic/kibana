@@ -17,16 +17,21 @@ import { mount } from 'enzyme';
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
 const dataStartMock = dataPluginMock.createStartContract();
 
-import {
-  TopNavMenu,
-  TopNavMenuData,
-} from '../../../../../../src/legacy/core_plugins/kibana_react/public';
+import { TopNavMenuData } from '../../../../../../src/legacy/core_plugins/navigation/public';
 import { DataStart } from '../../../../../../src/legacy/core_plugins/data/public';
 import { coreMock } from 'src/core/public/mocks';
 
-jest.mock('../../../../../../src/legacy/core_plugins/kibana_react/public', () => ({
-  TopNavMenu: jest.fn(() => null),
+jest.mock('../../../../../../src/legacy/core_plugins/navigation/public/legacy', () => ({
+  start: {
+    ui: {
+      TopNavMenu: jest.fn(() => null),
+    },
+  },
 }));
+
+import { start as navigation } from '../../../../../../src/legacy/core_plugins/navigation/public/legacy';
+
+const { TopNavMenu } = navigation.ui;
 
 jest.mock('ui/new_platform');
 jest.mock('../persistence');

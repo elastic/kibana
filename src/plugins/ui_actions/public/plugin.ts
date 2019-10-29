@@ -50,5 +50,8 @@ export class UiActionsPlugin implements Plugin<IUiActionsSetup, IUiActionsStart>
     return this.api;
   }
 
-  public stop() {}
+  public stop() {
+    this.actions.clear();
+    this.triggers.clear();
+  }
 }
