@@ -18,7 +18,6 @@ import { dashboardMode } from './legacy/plugins/dashboard_mode';
 import { logstash } from './legacy/plugins/logstash';
 import { beats } from './legacy/plugins/beats_management';
 import { apm } from './legacy/plugins/apm';
-import { code } from './legacy/plugins/code';
 import { maps } from './legacy/plugins/maps';
 import { licenseManagement } from './legacy/plugins/license_management';
 import { cloud } from './legacy/plugins/cloud';
@@ -62,7 +61,6 @@ module.exports = function (kibana) {
     logstash(kibana),
     beats(kibana),
     apm(kibana),
-    code(kibana),
     maps(kibana),
     canvas(kibana),
     licenseManagement(kibana),
