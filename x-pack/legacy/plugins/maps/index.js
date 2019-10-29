@@ -43,6 +43,7 @@ export function maps(kibana) {
         const mapConfig = serverConfig.get('map');
 
         return {
+          showMapVisualizationTypes: serverConfig.get('xpack.maps.showMapVisualizationTypes'),
           showMapsInspectorAdapter: serverConfig.get('xpack.maps.showMapsInspectorAdapter'),
           preserveDrawingBuffer: serverConfig.get('xpack.maps.preserveDrawingBuffer'),
           isEmsEnabled: mapConfig.includeElasticMapsService,
@@ -92,6 +93,7 @@ export function maps(kibana) {
     config(Joi) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
+        showMapVisualizationTypes: Joi.boolean().default(false),
         showMapsInspectorAdapter: Joi.boolean().default(false), // flag used in functional testing
         preserveDrawingBuffer: Joi.boolean().default(false), // flag used in functional testing
       }).default();
