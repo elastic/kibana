@@ -93,8 +93,7 @@ export class ExpressionRenderHandler {
       return;
     }
 
-    const renderer = getRenderersRegistry().get(data.as);
-    if (!renderer) {
+    if (!getRenderersRegistry().get(data.as)) {
       this.renderSubject.next({
         type: 'error',
         error: { message: `invalid renderer id '${data.as}'` },
@@ -104,7 +103,9 @@ export class ExpressionRenderHandler {
 
     try {
       // Rendering is asynchronous, completed by handlers.done()
-      renderer.render(this.element, data.value, { ...this.handlers, ...extraHandlers });
+      getRenderersRegistry()
+        .get(data.as)!
+        .render(this.element, data.value, { ...this.handlers, ...extraHandlers });
     } catch (e) {
       this.renderSubject.next({
         type: 'error',
