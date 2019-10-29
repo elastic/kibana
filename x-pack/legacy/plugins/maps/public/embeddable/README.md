@@ -66,7 +66,7 @@ const eventHandlers = {
   onDataLoad: (layerId: string, dataId: string) => {
     // take action on data load
   },
-  onDataLoadEnd: (layerId: string, dataId: string, featureCount: number) => {
+  onDataLoadEnd: (layerId: string, dataId: string, featuresCount: number) => {
     // take action on data load end
   },
   onDataLoadError: (layerId: string, dataId: string, errorMessage: string) => {
