@@ -15,7 +15,6 @@ import {
   ELASTICSEARCH_SHORT,
   HEX,
   HTML,
-  KIBANA,
   LUCENE,
   MARKDOWN,
   MOMENTJS,
@@ -348,7 +347,6 @@ export const DataSourceStrings = {
           'Use {timelion} queries to pull back timeseries data that can be used with {canvas} elements.',
         values: {
           timelion: TIMELION,
-          kibanaTimelion: `${KIBANA}'s ${TIMELION}`,
           canvas: CANVAS,
         },
       }),
@@ -364,7 +362,6 @@ export const DataSourceStrings = {
         defaultMessage:
           'Use date math like {weeksExample}, {daysExample}, {secondsExample}, or {auto}',
         values: {
-          elasticsearch: ELASTICSEARCH,
           secondsExample: '10s',
           daysExample: '5d',
           weeksExample: '1w',
@@ -968,9 +965,6 @@ export const ViewStrings = {
     getMaintainAspectHelp: () =>
       i18n.translate('xpack.canvas.uis.views.shape.args.maintainAspectLabel', {
         defaultMessage: `Enable to maintain aspect ratio`,
-        values: {
-          true: BOOLEAN_TRUE,
-        },
       }),
     getShapeDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.shape.args.shapeTitle', {

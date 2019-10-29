@@ -8,7 +8,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText } from '@elastic/eui';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
-import { ComponentStrings, CANVAS, DataSourceStrings } from '../../../i18n';
+import { CANVAS, DataSourceStrings } from '../../../i18n';
 
 const { DemoData: strings } = DataSourceStrings;
 
@@ -20,9 +20,6 @@ const DemodataDatasource = () => (
         defaultMessage="By default, every {canvas} element is connected to the demo data source. Change the data source, above, to connect your own data."
         values={{
           canvas: CANVAS,
-          clickText: (
-            <strong>{ComponentStrings.DatasourceDatasourceComponent.getChangeButtonLabel()}</strong>
-          ),
         }}
       />
     </p>
