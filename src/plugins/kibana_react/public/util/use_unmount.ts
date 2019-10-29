@@ -20,5 +20,5 @@
 import { useEffect } from 'react';
 
 export function useUnmount(fn: () => void): void {
-  useEffect(() => fn, [fn]);
+  useEffect(() => fn, []);
 }
