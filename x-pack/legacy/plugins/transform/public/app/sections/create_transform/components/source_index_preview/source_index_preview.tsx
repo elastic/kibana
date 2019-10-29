@@ -15,6 +15,7 @@ import {
   EuiButtonIcon,
   EuiCallOut,
   EuiCheckbox,
+  EuiCodeBlock,
   EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
@@ -142,7 +143,9 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
           color="danger"
           iconType="cross"
         >
-          <p>{errorMessage}</p>
+          <EuiCodeBlock language="json" fontSize="s" paddingSize="s" isCopyable>
+            {errorMessage}
+          </EuiCodeBlock>
         </EuiCallOut>
       </EuiPanel>
     );
@@ -164,7 +167,7 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
           <p>
             {i18n.translate('xpack.transform.sourceIndexPreview.SourceIndexNoDataCalloutBody', {
               defaultMessage:
-                'The query for the source index returned no results. Please make sure the index contains documents and your query is not too restrictive.',
+                'The query for the source index returned no results. Please make sure you have sufficient permissions, the index contains documents and your query is not too restrictive.',
             })}
           </p>
         </EuiCallOut>

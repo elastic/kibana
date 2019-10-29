@@ -5,7 +5,7 @@
  */
 
 import { EuiButtonEmpty, EuiModal, EuiOverlayMask } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import { ApolloConsumer } from 'react-apollo';
 import * as i18n from '../translations';
@@ -29,16 +29,20 @@ export const OpenTimelineModalButton = React.memo<OpenTimelineModalButtonProps>(
   const [showModal, setShowModal] = useState(false);
 
   /** shows or hides the `Open Timeline` modal */
-  function toggleShowModal() {
+  const openModal = useCallback(() => {
     if (onToggle != null) {
       onToggle();
     }
-    setShowModal(!showModal);
-  }
+    setShowModal(true);
+  }, [onToggle]);
 
-  function closeModalTimeline() {
-    toggleShowModal();
-  }
+  const closeModal = useCallback(() => {
+    if (onToggle != null) {
+      onToggle();
+    }
+    setShowModal(false);
+  }, [onToggle]);
+
   return (
     <ApolloConsumer>
       {client => (
@@ -48,7 +52,7 @@ export const OpenTimelineModalButton = React.memo<OpenTimelineModalButtonProps>(
             data-test-subj="open-timeline-button"
             iconSide="left"
             iconType="folderOpen"
-            onClick={toggleShowModal}
+            onClick={openModal}
           >
             {i18n.OPEN_TIMELINE}
           </EuiButtonEmpty>
@@ -58,11 +62,11 @@ export const OpenTimelineModalButton = React.memo<OpenTimelineModalButtonProps>(
               <EuiModal
                 data-test-subj="open-timeline-modal"
                 maxWidth={OPEN_TIMELINE_MODAL_WIDTH}
-                onClose={toggleShowModal}
+                onClose={closeModal}
               >
                 <StatefulOpenTimeline
                   apolloClient={client}
-                  closeModalTimeline={closeModalTimeline}
+                  closeModalTimeline={closeModal}
                   isModal={true}
                   defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
                   title={i18n.OPEN_TIMELINE_TITLE}

@@ -143,6 +143,12 @@ export interface SavedObjectsBaseOptions {
 }
 
 /**
+ * Elasticsearch Refresh setting for mutating operation
+ * @public
+ */
+export type MutatingOperationRefreshSetting = boolean | 'wait_for';
+
+/**
  * Saved Objects is Kibana's data persisentence mechanism allowing plugins to
  * use Elasticsearch for storing plugin state.
  *

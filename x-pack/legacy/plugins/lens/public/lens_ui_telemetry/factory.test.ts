@@ -45,7 +45,6 @@ describe('Lens UI telemetry', () => {
     const fakeManager = new LensReportManager({
       http,
       storage,
-      basePath: '/basepath',
     });
     setReportManager(fakeManager);
   });
@@ -84,7 +83,7 @@ describe('Lens UI telemetry', () => {
 
     jest.runOnlyPendingTimers();
 
-    expect(http.post).toHaveBeenCalledWith(`/basepath/api/lens/telemetry`, {
+    expect(http.post).toHaveBeenCalledWith(`/api/lens/telemetry`, {
       body: JSON.stringify({
         events: {
           '2019-10-23': {

@@ -20,7 +20,7 @@ export interface UiSettingsParams
 |  [description](./kibana-plugin-server.uisettingsparams.description.md) | <code>string</code> | description provided to a user in UI |
 |  [name](./kibana-plugin-server.uisettingsparams.name.md) | <code>string</code> | title in the UI |
 |  [optionLabels](./kibana-plugin-server.uisettingsparams.optionlabels.md) | <code>Record&lt;string, string&gt;</code> | text labels for 'select' type UI element |
-|  [options](./kibana-plugin-server.uisettingsparams.options.md) | <code>string[]</code> | a range of valid values |
+|  [options](./kibana-plugin-server.uisettingsparams.options.md) | <code>string[]</code> | array of permitted values for this setting |
 |  [readonly](./kibana-plugin-server.uisettingsparams.readonly.md) | <code>boolean</code> | a flag indicating that value cannot be changed |
 |  [requiresPageReload](./kibana-plugin-server.uisettingsparams.requirespagereload.md) | <code>boolean</code> | a flag indicating whether new value applying requires page reloading |
 |  [type](./kibana-plugin-server.uisettingsparams.type.md) | <code>UiSettingsType</code> | defines a type of UI element [UiSettingsType](./kibana-plugin-server.uisettingstype.md) |
