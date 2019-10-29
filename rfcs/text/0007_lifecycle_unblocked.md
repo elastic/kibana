@@ -281,7 +281,7 @@ Drawbacks:
 # Adoption strategy
 Adoption and implementation should be handled as follows:
 
-a. Don't expose core API's as observables (3).
+1. Don't expose core API's as observables (3).
    This should be implemented first to improve the ergonomics of working with
    core API's from inside synchronous context providers and lifecycle functions.
    
@@ -294,11 +294,11 @@ a. Don't expose core API's as observables (3).
    + const adminClient = coreSetup.elasticsearch.adminClient;
    ```
 
-b. Making context provider functions synchronous (2)
+2. Making context provider functions synchronous (2)
    Adoption of context provider functions is still fairly low, so the amount
    of change required by plugin authors should be limited.
 
-c. Synchronous lifecycle methods (1) will have the biggest impact on plugins
+3. Synchronous lifecycle methods (1) will have the biggest impact on plugins
    since many NP plugins and shims have been built with async lifecycle
    methods in mind.
 
