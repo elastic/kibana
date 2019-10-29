@@ -15,10 +15,17 @@ import {
   MainType,
   SubType,
   ChildFieldName,
+  ParameterName,
 } from '../types';
 
-import { MAIN_DATA_TYPE_DEFINITION, MAX_DEPTH_DEFAULT_EDITOR } from '../constants';
+import {
+  MAIN_DATA_TYPE_DEFINITION,
+  MAX_DEPTH_DEFAULT_EDITOR,
+  PARAMETERS_DEFINITION,
+} from '../constants';
+
 import { State } from '../reducer';
+import { FieldConfig } from '../shared_imports';
 import { TreeItem } from '../components/tree';
 
 export const getUniqueId = () => {
@@ -59,6 +66,20 @@ export const getFieldMeta = (field: Field, isMultiField?: boolean): FieldMeta =>
     hasMultiFields,
     isExpanded: false,
   };
+};
+
+export const getFieldConfig = (param: ParameterName, prop?: string): FieldConfig => {
+  if (prop !== undefined) {
+    if (
+      !(PARAMETERS_DEFINITION[param] as any).props ||
+      !(PARAMETERS_DEFINITION[param] as any).props[prop]
+    ) {
+      throw new Error(`No field config found for prop "${prop}" on param "${param}" `);
+    }
+    return (PARAMETERS_DEFINITION[param] as any).props[prop].fieldConfig || {};
+  }
+
+  return (PARAMETERS_DEFINITION[param] as any).fieldConfig || {};
 };
 
 /**
@@ -150,16 +171,16 @@ export const normalize = (fieldsToNormalize: Fields): NormalizedFields => {
       idsArray.push(id);
       const field = { name: propName, ...value } as Field;
       const meta = getFieldMeta(field, isMultiField);
-      const { childFieldsName } = meta;
+      const { childFieldsName, hasChildFields, hasMultiFields } = meta;
 
-      if (childFieldsName && field[childFieldsName]) {
+      if (hasChildFields || hasMultiFields) {
         const nextDepth =
           meta.canHaveChildFields || meta.canHaveMultiFields ? nestedDepth + 1 : nestedDepth;
         meta.childFields = [];
         maxNestedDepth = Math.max(maxNestedDepth, nextDepth);
 
         normalizeFields(
-          field[meta.childFieldsName!]!,
+          field[childFieldsName!]!,
           to,
           [...paths, propName],
           meta.childFields,

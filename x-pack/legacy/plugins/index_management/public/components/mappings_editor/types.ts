@@ -4,34 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { FieldConfig } from './shared_imports';
+import { PARAMETERS_DEFINITION } from './constants';
 
 export interface DataTypeDefinition {
   label: string;
   value: DataType;
+  docUri?: string;
   subTypes?: { label: string; types: SubType[] };
-  configuration?: ParameterName[];
-  basicParameters?: ParameterName[] | ParameterName[][];
-  hasAdvancedParameters?: boolean;
-  hasMultiFields?: boolean;
 }
 
 export type MainType =
   | 'text'
   | 'keyword'
   | 'numeric'
-  | 'date'
   | 'binary'
   | 'boolean'
   | 'range'
   | 'object'
   | 'nested'
-  | 'ip'
-  | 'rank_feature'
-  | 'rank_features'
-  | 'dense_vector'
-  | 'sparse_vector';
+  | 'date_type'
+  | 'geo'
+  | 'specialised';
 
-export type SubType = NumericType | DateType | RangeType;
+export type SubType = NumericType | DateType | RangeType | GeoType | SpecialisedType;
 
 export type DataType = MainType | SubType;
 
@@ -54,12 +49,30 @@ export type RangeType =
   | 'double_range'
   | 'date_range';
 
+export type GeoType = 'geo_point' | 'geo_shape';
+
+export type SpecialisedType =
+  | 'alias'
+  | 'completion'
+  | 'dense_vector'
+  | 'flattened'
+  | 'ip'
+  | 'join'
+  | 'percolator'
+  | 'rank_feature'
+  | 'rank_features'
+  | 'search_as_you_type'
+  | 'shape'
+  | 'sparse_vector'
+  | 'token_count';
+
 export type ParameterName =
   | 'name'
   | 'type'
   | 'store'
   | 'index'
   | 'fielddata'
+  | 'fielddata_frequency_filter'
   | 'doc_values'
   | 'coerce'
   | 'ignore_malformed'
@@ -82,25 +95,32 @@ export type ParameterName =
   | 'similarity'
   | 'normalizer'
   | 'ignore_above'
-  | 'split_queries_on_whitespace';
+  | 'split_queries_on_whitespace'
+  | 'scaling_factor';
 
 export interface Parameter {
-  fieldConfig?: FieldConfig | { [key: string]: FieldConfig };
+  fieldConfig: FieldConfig;
   paramName?: string;
   docs?: string;
+  props?: { [key: string]: FieldConfig };
 }
 
 export interface Fields {
   [key: string]: Omit<Field, 'name'>;
 }
 
-export interface Field {
+interface FieldBasic {
   name: string;
   type: DataType;
   subType?: SubType;
   properties?: { [key: string]: Omit<Field, 'name'> };
   fields?: { [key: string]: Omit<Field, 'name'> };
 }
+
+type FieldParams = {
+  [K in ParameterName]: typeof PARAMETERS_DEFINITION[K]['fieldConfig']['defaultValue'];
+};
+export type Field = FieldBasic & FieldParams;
 
 export interface FieldMeta {
   childFieldsName: ChildFieldName | undefined;
@@ -132,3 +152,8 @@ export interface NormalizedField extends FieldMeta {
 export type ChildFieldName = 'properties' | 'fields';
 
 export type FieldsEditor = 'default' | 'json';
+
+export interface SelectOption {
+  value: any;
+  text: string;
+}

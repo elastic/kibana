@@ -7,6 +7,7 @@
 export {
   useForm,
   UseField,
+  UseMultiFields,
   getUseField,
   Form,
   FormDataProvider,
@@ -16,6 +17,7 @@ export {
   VALIDATION_TYPES,
   OnFormUpdateArg,
   ValidationFunc,
+  ValidationFuncArg,
   SerializerFunc,
   FieldConfig,
 } from '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
@@ -25,6 +27,7 @@ export {
   Field,
   TextField,
   SelectField,
+  ToggleField,
 } from '../../../../../../../src/plugins/es_ui_shared/static/forms/components';
 
 export {

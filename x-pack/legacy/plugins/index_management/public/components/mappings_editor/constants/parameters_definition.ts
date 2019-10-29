@@ -3,22 +3,20 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { FIELD_TYPES, fieldValidators, fieldFormatters, FieldConfig } from '../shared_imports';
-import { ParameterName, Parameter } from '../types';
+import { FieldConfig } from 'src/plugins/es_ui_shared/static/forms/hook_form_lib';
+import {
+  FIELD_TYPES,
+  fieldValidators,
+  ValidationFunc,
+  ValidationFuncArg,
+  fieldFormatters,
+} from '../shared_imports';
 import { INDEX_DEFAULT } from '../constants';
 
 const { toInt } = fieldFormatters;
 const { emptyField, containsCharsField } = fieldValidators;
 
-interface ValidatorArg<T> {
-  value: T;
-  path: string;
-  formData: { [key: string]: any };
-}
-
-export const PARAMETERS_DEFINITION: {
-  [key in ParameterName]: Parameter;
-} = {
+export const PARAMETERS_DEFINITION = {
   name: {
     fieldConfig: {
       label: 'Field name',
@@ -51,7 +49,6 @@ export const PARAMETERS_DEFINITION: {
   },
   store: {
     fieldConfig: {
-      label: 'Store',
       type: FIELD_TYPES.CHECKBOX,
       defaultValue: true,
     },
@@ -59,57 +56,97 @@ export const PARAMETERS_DEFINITION: {
   },
   index: {
     fieldConfig: {
-      label: 'Index',
       type: FIELD_TYPES.CHECKBOX,
       defaultValue: true,
     },
   },
   doc_values: {
     fieldConfig: {
-      label: 'Doc values',
-      type: FIELD_TYPES.CHECKBOX,
       defaultValue: true,
     },
     docs: 'https://www.elastic.co/guide/en/elasticsearch/reference/current/doc-values.html',
   },
   fielddata: {
     fieldConfig: {
-      label: 'Fielddata',
       type: FIELD_TYPES.CHECKBOX,
       defaultValue: false,
     },
     docs: 'https://www.elastic.co/guide/en/elasticsearch/reference/current/doc-values.html',
   },
+  fielddata_frequency_filter: {
+    fieldConfig: { defaultValue: {} }, // Needed for FieldParams typing
+    props: {
+      min: {
+        fieldConfig: {
+          defaultValue: 0.01,
+          serializer: value => (value === '' ? '' : toInt(value) / 100),
+          deserializer: value => Math.round(value * 100),
+        } as FieldConfig,
+      },
+      max: {
+        fieldConfig: {
+          defaultValue: 1,
+          serializer: value => (value === '' ? '' : toInt(value) / 100),
+          deserializer: value => Math.round(value * 100),
+        } as FieldConfig,
+      },
+      min_segment_size: {
+        fieldConfig: {
+          type: FIELD_TYPES.NUMBER,
+          label: 'Minimum segment size:',
+          defaultValue: 50,
+          formatters: [toInt],
+        },
+      },
+    },
+  },
   coerce: {
     fieldConfig: {
-      label: 'Coerce',
-      type: FIELD_TYPES.CHECKBOX,
       defaultValue: true,
     },
   },
   ignore_malformed: {
     fieldConfig: {
-      label: 'Ignore malformed',
-      type: FIELD_TYPES.CHECKBOX,
       defaultValue: true,
     },
   },
   null_value: {
     fieldConfig: {
-      label: 'Null value',
       defaultValue: '',
       type: FIELD_TYPES.TEXT,
+      validations: [
+        {
+          validator: emptyField('Specify a null value.'),
+        },
+      ],
     },
   },
   boost: {
     fieldConfig: {
-      label: 'Boost',
       defaultValue: 1.0,
       type: FIELD_TYPES.NUMBER,
       formatters: [toInt],
       validations: [
         {
-          validator: ({ value }: ValidatorArg<number>) => {
+          validator: ({ value }: ValidationFuncArg<any, number>) => {
+            if (value < 0) {
+              return {
+                message: 'The value must be greater or equal than 0.',
+              };
+            }
+          },
+        },
+      ],
+    } as FieldConfig,
+  },
+  scaling_factor: {
+    fieldConfig: {
+      defaultValue: 1.0,
+      type: FIELD_TYPES.NUMBER,
+      formatters: [toInt],
+      validations: [
+        {
+          validator: ({ value }: ValidationFuncArg<any, number>) => {
             if (value < 0) {
               return {
                 message: 'The value must be greater or equal than 0.',
@@ -155,21 +192,51 @@ export const PARAMETERS_DEFINITION: {
     fieldConfig: {
       label: 'Analyzer',
       defaultValue: INDEX_DEFAULT,
-      type: FIELD_TYPES.SELECT,
+      validations: [
+        {
+          validator: emptyField('Give a name to the analyzer'),
+        },
+        {
+          validator: containsCharsField({
+            chars: ' ',
+            message: 'Spaces are not allowed in the analyzer.',
+          }),
+        },
+      ],
     },
   },
   search_analyzer: {
     fieldConfig: {
       label: 'Search analyzer',
       defaultValue: INDEX_DEFAULT,
-      type: FIELD_TYPES.SELECT,
+      validations: [
+        {
+          validator: emptyField('Give a name to the analyzer'),
+        },
+        {
+          validator: containsCharsField({
+            chars: ' ',
+            message: 'Spaces are not allowed in the analyzer.',
+          }),
+        },
+      ],
     },
   },
   search_quote_analyzer: {
     fieldConfig: {
       label: 'Search quote analyzer',
       defaultValue: INDEX_DEFAULT,
-      type: FIELD_TYPES.SELECT,
+      validations: [
+        {
+          validator: emptyField('Give a name to the analyzer.'),
+        },
+        {
+          validator: containsCharsField({
+            chars: ' ',
+            message: 'Spaces are not allowed in the analyzer.',
+          }),
+        },
+      ],
     },
   },
   normalizer: {
@@ -178,6 +245,9 @@ export const PARAMETERS_DEFINITION: {
       defaultValue: '',
       type: FIELD_TYPES.TEXT,
       validations: [
+        {
+          validator: emptyField('Give a name to the normalizer.'),
+        },
         {
           validator: containsCharsField({
             chars: ' ',
@@ -196,35 +266,27 @@ export const PARAMETERS_DEFINITION: {
   },
   eager_global_ordinals: {
     fieldConfig: {
-      label: 'Eager global ordinals',
-      type: FIELD_TYPES.CHECKBOX,
       defaultValue: false,
     },
   },
   index_phrases: {
     fieldConfig: {
-      label: 'Index phrases',
-      type: FIELD_TYPES.CHECKBOX,
       defaultValue: false,
     },
   },
   norms: {
     fieldConfig: {
-      label: 'Norms',
-      type: FIELD_TYPES.CHECKBOX,
-      defaultValue: true,
+      defaultValue: false,
     },
   },
   term_vector: {
     fieldConfig: {
-      label: 'Term vectors',
-      type: FIELD_TYPES.CHECKBOX,
-      defaultValue: false,
+      type: FIELD_TYPES.SELECT,
+      defaultValue: 'no',
     },
   },
   position_increment_gap: {
     fieldConfig: {
-      label: 'Position increment gap',
       type: FIELD_TYPES.NUMBER,
       defaultValue: 100,
       formatters: [toInt],
@@ -233,124 +295,63 @@ export const PARAMETERS_DEFINITION: {
           validator: emptyField('Set a position increment gap value.'),
         },
         {
-          validator: ({ value }: ValidatorArg<number>) => {
+          validator: (({ value }: ValidationFuncArg<any, number>) => {
             if (value < 0) {
               return {
                 message: 'The value must be greater or equal than 0.',
               };
             }
-          },
+          }) as ValidationFunc,
         },
       ],
-    } as FieldConfig,
+    },
   },
   index_prefixes: {
-    fieldConfig: {
+    fieldConfig: { defaultValue: {} }, // Needed for FieldParams typing
+    props: {
       min_chars: {
-        type: FIELD_TYPES.NUMBER,
-        defaultValue: 2,
-        helpText: 'Min chars.',
-        formatters: [toInt],
-        validations: [
-          {
-            validator: emptyField('Set a min value.'),
-          },
-          {
-            validator: ({ value }: ValidatorArg<number>) => {
-              if (value < 0) {
-                return {
-                  message: 'The value must be greater or equal than zero.',
-                };
-              }
-            },
-          },
-          {
-            validator: ({ value, path, formData }: ValidatorArg<number>) => {
-              const maxPath = path.replace('.min', '.max');
-              const maxValue: number | string = formData[maxPath];
-
-              if (maxValue === '') {
-                return;
-              }
-
-              if (value >= maxValue) {
-                return {
-                  message: 'The value must be smaller than the max value.',
-                };
-              }
-            },
-          },
-        ],
+        fieldConfig: {
+          type: FIELD_TYPES.NUMBER,
+          defaultValue: 2,
+          serializer: value => (value === '' ? '' : toInt(value)),
+        } as FieldConfig,
       },
       max_chars: {
-        type: FIELD_TYPES.NUMBER,
-        defaultValue: 5,
-        helpText: 'Max chars.',
-        formatters: [toInt],
-        validations: [
-          {
-            validator: emptyField('Set a max value.'),
-          },
-          {
-            validator: ({ value }: ValidatorArg<number>) => {
-              if (value > 20) {
-                return {
-                  message: 'The value must be smaller or equal than 20.',
-                };
-              }
-            },
-          },
-          {
-            validator: ({ value, path, formData }: ValidatorArg<number>) => {
-              const minPath = path.replace('.max', '.min');
-              const minValue: number | string = formData[minPath];
-
-              if (minValue === '') {
-                return;
-              }
-
-              if (value <= minValue) {
-                return {
-                  message: 'The value must be greater than the min value.',
-                };
-              }
-            },
-          },
-        ],
+        fieldConfig: {
+          type: FIELD_TYPES.NUMBER,
+          defaultValue: 5,
+          serializer: value => (value === '' ? '' : toInt(value)),
+        } as FieldConfig,
       },
-    } as { [key: string]: FieldConfig },
+    },
   },
   similarity: {
     fieldConfig: {
-      label: 'Similarity algorithm',
       defaultValue: 'BM25',
       type: FIELD_TYPES.SELECT,
     },
   },
   split_queries_on_whitespace: {
     fieldConfig: {
-      label: 'Split queries on whitespace',
-      type: FIELD_TYPES.CHECKBOX,
       defaultValue: false,
     },
   },
   ignore_above: {
     fieldConfig: {
-      label: 'Ignore above',
-      defaultValue: 256,
+      defaultValue: 2147483647,
       type: FIELD_TYPES.NUMBER,
       formatters: [toInt],
       validations: [
         {
-          validator: ({ value }: ValidatorArg<number>) => {
+          validator: (({ value }: ValidationFuncArg<any, number>) => {
             if ((value as number) < 0) {
               return {
                 message: 'The value must be greater or equal than 0.',
               };
             }
-          },
+          }) as ValidationFunc,
         },
       ],
-    } as FieldConfig,
+    },
   },
 };

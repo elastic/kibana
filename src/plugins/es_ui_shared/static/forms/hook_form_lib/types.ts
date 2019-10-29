@@ -109,7 +109,7 @@ export interface FieldHook {
     value?: unknown;
     validationType?: string;
   }) => FieldValidateResponse | Promise<FieldValidateResponse>;
-  reset: () => void;
+  reset: ({ resetValue }: { resetValue: boolean }) => void;
   __serializeOutput: (rawValue?: unknown) => unknown;
 }
 
@@ -140,13 +140,17 @@ export interface ValidationError<T = string> {
   [key: string]: any;
 }
 
-export type ValidationFunc<T extends object = any, E = string> = (data: {
+export interface ValidationFuncArg<T extends object, V = unknown> {
   path: string;
-  value: unknown;
+  value: V;
   form: FormHook<T>;
   formData: T;
   errors: readonly ValidationError[];
-}) => ValidationError<E> | void | undefined | Promise<ValidationError<E> | void | undefined>;
+}
+
+export type ValidationFunc<T extends object = any, E = string> = (
+  data: ValidationFuncArg<T>
+) => ValidationError<E> | void | undefined | Promise<ValidationError<E> | void | undefined>;
 
 export interface FieldValidateResponse {
   isValid: boolean;
@@ -159,7 +163,7 @@ export interface FormData {
   [key: string]: any;
 }
 
-type FormatterFunc = (value: any) => unknown;
+type FormatterFunc = (value: any, formData: FormData) => unknown;
 
 // We set it as unknown as a form field can be any of any type
 // string | number | boolean | string[] ...

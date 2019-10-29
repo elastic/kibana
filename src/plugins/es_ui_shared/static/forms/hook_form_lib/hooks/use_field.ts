@@ -78,7 +78,10 @@ export const useField = (form: FormHook, path: string, config: FieldConfig = {})
     if (isEmptyString) {
       return inputValue;
     }
-    return formatters.reduce((output, formatter) => formatter(output), inputValue);
+
+    const formData = form.getFormData({ unflatten: false });
+
+    return formatters.reduce((output, formatter) => formatter(output, formData), inputValue);
   };
 
   const onValueChange = async () => {
@@ -359,13 +362,16 @@ export const useField = (form: FormHook, path: string, config: FieldConfig = {})
     return errorMessages ? errorMessages : null;
   };
 
-  const reset = () => {
+  const reset: FieldHook['reset'] = ({ resetValue } = { resetValue: true }) => {
     setPristine(true);
     setValidating(false);
     setIsChangingValue(false);
     setIsValidated(false);
     setErrors([]);
-    setValue(initialValue);
+
+    if (resetValue) {
+      setValue(initialValue);
+    }
   };
 
   const serializeOutput: FieldHook['__serializeOutput'] = (rawValue = value) =>

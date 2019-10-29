@@ -5,3 +5,19 @@
  */
 
 export * from './name_parameter';
+
+export * from './index_parameter';
+
+export * from './store_parameter';
+
+export * from './doc_values_parameter';
+
+export * from './boost_parameter';
+
+export * from './null_value_parameter';
+
+export * from './eager_global_ordinals_parameter';
+
+export * from './norms_parameter';
+
+export * from './similarity_parameter';
