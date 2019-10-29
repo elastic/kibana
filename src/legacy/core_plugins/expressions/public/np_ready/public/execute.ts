@@ -20,7 +20,12 @@
 import { fromExpression } from '@kbn/interpreter/target/common';
 import { DataAdapter, RequestAdapter, Adapters } from '../../../../../../plugins/inspector/public';
 import { getInterpreter } from './services';
-import { ExpressionAST, IExpressionLoaderParams, IInterpreterResult } from './types';
+import {
+  ExpressionAST,
+  IExpressionLoaderParams,
+  IInterpreterResult,
+  IInterpreterErrorResult,
+} from './types';
 
 /**
  * The search context describes a specific context (filters, time range and query)
@@ -69,14 +74,14 @@ export class ExpressionDataHandler {
     this.abortController.abort();
   };
 
-  getData = async () => {
+  getData = async (): Promise<IInterpreterResult | IInterpreterErrorResult> => {
     try {
       return await this.promise;
     } catch (e) {
       return {
         type: 'error',
         error: {
-          type: e.type,
+          name: e.type,
           message: e.message,
           stack: e.stack,
         },

@@ -64,7 +64,6 @@ export interface IInterpreterSuccessResult {
   type: string;
   as?: string;
   value?: unknown;
-  error?: unknown;
 }
 
 export type IInterpreterResult = IInterpreterSuccessResult & IInterpreterErrorResult;

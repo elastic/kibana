@@ -142,7 +142,7 @@ describe('ExpressionLoader', () => {
     expect(cancelMock).toHaveBeenCalledTimes(1);
   });
 
-  it('does not send an observable message if a request was aborted', () => {
+  it('does not send any message if a request was aborted', () => {
     const cancelMock = jest.fn();
 
     const getData = jest
@@ -174,9 +174,6 @@ describe('ExpressionLoader', () => {
         expect(data).toEqual({
           type: 'real',
         });
-      },
-      error() {
-        expect(false).toEqual('Should not be called');
       },
     });
 

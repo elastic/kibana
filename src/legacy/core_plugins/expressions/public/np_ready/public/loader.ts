@@ -135,6 +135,9 @@ export class ExpressionLoader {
     this.setParams(params);
     this.dataHandler = new ExpressionDataHandler(expression, params);
     const data = await this.dataHandler.getData();
+    if (data.type === 'error' && data.error.name === 'AbortError') {
+      return;
+    }
     this.dataSubject.next(data);
   };
 
