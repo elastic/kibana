@@ -22,10 +22,7 @@ import sinon from 'sinon';
 
 import { Subscription } from 'rxjs';
 import { Filter, FilterStateStore } from '@kbn/es-query';
-
-// import { FilterStateManager } from './filter_state_manager';
 import { FilterManager } from './filter_manager';
-
 import { getFilter } from './test_helpers/get_stub_filter';
 import { getFiltersArray } from './test_helpers/get_filters_array';
 
