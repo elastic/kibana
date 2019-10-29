@@ -37,7 +37,7 @@ export function Detail({ pkgkey, panel = DEFAULT_PANEL }: DetailProps) {
 
 type LayoutProps = PackageInfo & Pick<DetailProps, 'panel'> & EuiPageWidthProps;
 export function DetailLayout(props: LayoutProps) {
-  const { name, restrictWidth, panel } = props;
+  const { name, restrictWidth } = props;
   const { theme } = useCore();
   const iconType = ICON_TYPES.find(key => key.toLowerCase() === `logo${name}`);
 
@@ -46,12 +46,13 @@ export function DetailLayout(props: LayoutProps) {
     padding-bottom: ${theme.eui.paddingSizes.xl};
   `;
 
-  const FullWidthRemainingHeight = styled(EuiPage)`
+  const paddingSizeTop: number = parseInt(theme.eui.paddingSizes.xl, 10) * 1.25;
+  const FullWidthContent = styled(EuiPage)`
     background-color: ${theme.eui.euiColorEmptyShade};
-    height: calc(100vh - ${topBarsHeight()}px);
+    height: 100%;
+    padding-top: ${paddingSizeTop}px;
+    flex-grow: 1;
   `;
-
-  const FullWidthContent = panel === 'overview' ? FullWidthRemainingHeight : EuiPage;
 
   return (
     <Fragment>
@@ -67,15 +68,4 @@ export function DetailLayout(props: LayoutProps) {
       </FullWidthContent>
     </Fragment>
   );
-}
-
-function topBarsHeight() {
-  const { theme } = useCore();
-  const globalNav = parseInt(theme.eui.euiHeaderChildSize, 10);
-  const pageTopNav = /* line-height */ 24 + /* padding-top */ 16 + /* padding-bottom */ 16;
-  const title = /* line-height */ 48;
-  const header = /* padding-top */ 16 + pageTopNav + title + /* padding-bottom */ 16;
-  const topBarsTotal = globalNav + header;
-
-  return topBarsTotal;
 }

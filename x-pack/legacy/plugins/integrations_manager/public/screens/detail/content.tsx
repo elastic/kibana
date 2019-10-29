@@ -6,14 +6,7 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiPanel,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { SideNavLinks } from './side_nav_links';
 import { PackageInfo } from '../../../common/types';
 import { AssetAccordion } from '../../components/asset_accordion';
@@ -21,18 +14,16 @@ import { AssetsFacetGroup } from '../../components/assets_facet_group';
 import { Requirements } from '../../components/requirements';
 import { CenterColumn, LeftColumn, RightColumn } from './layout';
 import { OverviewPanel } from './overview_panel';
-import { useCore } from '../../hooks/use_core';
 import { DEFAULT_PANEL, DetailProps } from '.';
 
 type ContentProps = PackageInfo & Pick<DetailProps, 'panel'> & { hasIconPanel: boolean };
 export function Content(props: ContentProps) {
   const { hasIconPanel, name, panel, version } = props;
-  const { theme } = useCore();
   const SideNavColumn = hasIconPanel
     ? styled(LeftColumn)`
         /* 🤢🤷 https://www.styled-components.com/docs/faqs#how-can-i-override-styles-with-higher-specificity */
         &&& {
-          margin-top: ${theme.eui.euiKeyPadMenuSize};
+          margin-top: 77px;
         }
       `
     : LeftColumn;
@@ -64,11 +55,9 @@ export function ContentPanel(props: ContentPanelProps) {
       return <AssetAccordion assets={assets} />;
     case 'data-sources':
       return (
-        <EuiPanel>
-          <EuiTitle size="xs">
-            <span>Data Sources</span>
-          </EuiTitle>
-        </EuiPanel>
+        <EuiTitle size="xs">
+          <span>Data Sources</span>
+        </EuiTitle>
       );
     case 'overview':
     default:
