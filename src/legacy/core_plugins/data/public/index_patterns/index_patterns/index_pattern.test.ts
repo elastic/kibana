@@ -32,6 +32,7 @@ import { setNotifications, setFieldFormats } from '../services';
 // Temporary disable eslint, will be removed after moving to new platform folder
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { notificationServiceMock } from '../../../../../../core/public/notifications/notifications_service.mock';
+import { FieldFormatRegisty } from '../../../../../../plugins/data/public';
 
 jest.mock('ui/new_platform');
 
@@ -138,9 +139,9 @@ describe('IndexPattern', () => {
   // create an indexPattern instance for each test
   beforeEach(() => {
     setNotifications(notifications);
-    setFieldFormats({
+    setFieldFormats(({
       getDefaultInstance: jest.fn(),
-    });
+    } as unknown) as FieldFormatRegisty);
 
     return create(indexPatternId).then((pattern: IndexPattern) => {
       indexPattern = pattern;
