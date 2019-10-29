@@ -236,7 +236,7 @@ test('handleCheckboxOptionChange - multiselect', async () => {
   component.update();
 
   const checkbox = findTestSubject(component, 'listControlMultiselectInput');
-  checkbox.simulate('change', { target: { checked: true } });
+  checkbox.simulate('click');
   sinon.assert.notCalled(handleFieldNameChange);
   sinon.assert.notCalled(handleIndexPatternChange);
   sinon.assert.notCalled(handleNumberOptionChange);
@@ -247,7 +247,9 @@ test('handleCheckboxOptionChange - multiselect', async () => {
     expectedControlIndex,
     expectedOptionName,
     sinon.match((evt) => {
-      if (evt.target.checked === true) {
+      // Synthetic `evt.target.checked` does not get altered by EuiSwitch,
+      // but its aria attribute is correctly updated
+      if (evt.target.getAttribute('aria-checked') === 'true') {
         return true;
       }
       return false;

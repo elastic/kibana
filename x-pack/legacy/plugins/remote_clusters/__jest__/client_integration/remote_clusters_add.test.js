@@ -42,11 +42,11 @@ describe('Create Remote cluster', () => {
       expect(exists('remoteClusterFormSkipUnavailableFormToggle')).toBe(true);
 
       // By default it should be set to "false"
-      expect(find('remoteClusterFormSkipUnavailableFormToggle').props().checked).toBe(false);
+      expect(find('remoteClusterFormSkipUnavailableFormToggle').props()['aria-checked']).toBe(false);
 
       form.toggleEuiSwitch('remoteClusterFormSkipUnavailableFormToggle');
 
-      expect(find('remoteClusterFormSkipUnavailableFormToggle').props().checked).toBe(true);
+      expect(find('remoteClusterFormSkipUnavailableFormToggle').props()['aria-checked']).toBe(true);
     });
 
     test('should display errors and disable the save button when clicking "save" without filling the form', () => {

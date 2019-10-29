@@ -59,9 +59,9 @@ describe('JobsTable', () => {
       <JobsTable isLoading={false} jobs={siemJobs} onJobStateChange={onJobStateChangeMock} />
     );
     wrapper
-      .find('[data-test-subj="job-switch"] input')
+      .find('button[data-test-subj="job-switch"]')
       .first()
-      .simulate('change', {
+      .simulate('click', {
         target: { checked: true },
       });
     expect(onJobStateChangeMock.mock.calls[0]).toEqual([siemJobs[0], 1571022859393, true]);

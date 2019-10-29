@@ -16,6 +16,7 @@ import {
   EuiPopoverTitle,
   EuiSpacer,
   EuiSwitch,
+  EuiSwitchEvent,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -48,8 +49,8 @@ export const LegendControls = ({ autoBounds, boundsOverride, onChange, dataBound
     />
   );
 
-  const handleAutoChange = (e: SyntheticEvent<HTMLInputElement>) => {
-    setDraftAuto(e.currentTarget.checked);
+  const handleAutoChange = (e: EuiSwitchEvent) => {
+    setDraftAuto(e.target.checked);
   };
 
   const createBoundsHandler = (name: string) => (e: SyntheticEvent<HTMLInputElement>) => {

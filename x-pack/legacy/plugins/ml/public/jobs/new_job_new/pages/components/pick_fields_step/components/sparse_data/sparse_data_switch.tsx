@@ -43,6 +43,8 @@ export const SparseDataSwitch: FC = () => {
         checked={sparseData}
         onChange={toggleSparseData}
         data-test-subj="mlJobWizardSwitchSparseData"
+        showLabel={false}
+        label="" // TODO: Add label for a11y
       />
     </Description>
   );

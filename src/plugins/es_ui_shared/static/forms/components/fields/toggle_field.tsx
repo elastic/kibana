@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiSwitch } from '@elastic/eui';
+import { EuiFormRow, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 
 import { FieldHook } from '../../hook_form_lib';
 import { getFieldValidityAndErrorMessage } from '../helpers';
@@ -33,6 +33,14 @@ interface Props {
 export const ToggleField = ({ field, euiFieldProps = {}, ...rest }: Props) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
+  // Shim for sufficient overlap between EuiSwitchEvent and FieldHook[onChange] event
+  const onChange = (e: EuiSwitchEvent) => {
+    const event = ({ ...e, value: `${e.target.checked}` } as unknown) as React.ChangeEvent<{
+      value: string;
+    }>;
+    field.onChange(event);
+  };
+
   return (
     <EuiFormRow
       helpText={field.helpText}
@@ -45,7 +53,7 @@ export const ToggleField = ({ field, euiFieldProps = {}, ...rest }: Props) => {
       <EuiSwitch
         label={field.label}
         checked={field.value as boolean}
-        onChange={field.onChange}
+        onChange={onChange}
         data-test-subj="input"
         {...euiFieldProps}
       />

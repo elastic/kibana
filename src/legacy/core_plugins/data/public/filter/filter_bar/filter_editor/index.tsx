@@ -30,6 +30,7 @@ import {
   EuiPopoverTitle,
   EuiSpacer,
   EuiSwitch,
+  EuiSwitchEvent,
 } from '@elastic/eui';
 import { FieldFilter, Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
@@ -429,7 +430,7 @@ class FilterEditorUI extends Component<Props, State> {
     this.setState({ selectedOperator, params });
   };
 
-  private onCustomLabelSwitchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  private onCustomLabelSwitchChange = (event: EuiSwitchEvent) => {
     const useCustomLabel = event.target.checked;
     const customLabel = event.target.checked ? '' : null;
     this.setState({ useCustomLabel, customLabel });

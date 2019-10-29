@@ -27,7 +27,7 @@ export const setup = (props) => {
   };
 
   const toggleAdvancedSettings = () => {
-    testBed.form.selectCheckBox('advancedSettingsToggle');
+    testBed.form.toggleEuiSwitch('advancedSettingsToggle');
   };
 
   return {

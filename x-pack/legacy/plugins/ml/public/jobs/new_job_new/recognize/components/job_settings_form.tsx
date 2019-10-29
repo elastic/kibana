@@ -284,6 +284,8 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
                     useDedicatedIndex: checked,
                   });
                 }}
+                showLabel={false}
+                label="" // TODO: Add label for a11y
               />
             </EuiFormRow>
           </EuiDescribedFormGroup>

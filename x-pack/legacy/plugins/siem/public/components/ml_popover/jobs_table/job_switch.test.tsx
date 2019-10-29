@@ -42,9 +42,9 @@ describe('JobSwitch', () => {
     );
 
     wrapper
-      .find('[data-test-subj="job-switch"] input')
+      .find('button[data-test-subj="job-switch"]')
       .first()
-      .simulate('change', {
+      .simulate('click', {
         target: { checked: true },
       });
 
