@@ -9,7 +9,6 @@ import sinon from 'sinon';
 import uuid from 'uuid';
 import { TaskDictionary, TaskDefinition, TaskInstance, TaskStatus } from './task';
 import { FetchOpts, StoreOpts, OwnershipClaimingOpts, TaskStore } from './task_store';
-import { mockLogger } from './test_utils';
 import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { SavedObjectsSerializer, SavedObjectsSchema, SavedObjectAttributes } from 'src/core/server';
 
