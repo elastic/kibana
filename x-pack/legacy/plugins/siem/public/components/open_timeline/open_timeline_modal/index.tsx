@@ -7,7 +7,7 @@
 import { EuiModal, EuiOverlayMask } from '@elastic/eui';
 import React from 'react';
 
-import { ApolloConsumer } from 'react-apollo';
+import { useApolloClient } from '../../../utils/apollo_context';
 import * as i18n from '../translations';
 import { StatefulOpenTimeline } from '..';
 
@@ -18,26 +18,28 @@ export interface OpenTimelineModalProps {
 const DEFAULT_SEARCH_RESULTS_PER_PAGE = 10;
 const OPEN_TIMELINE_MODAL_WIDTH = 1000; // px
 
-export const OpenTimelineModal = React.memo<OpenTimelineModalProps>(({ onClose }) => (
-  <ApolloConsumer>
-    {client => (
-      <EuiOverlayMask>
-        <EuiModal
-          data-test-subj="open-timeline-modal"
-          maxWidth={OPEN_TIMELINE_MODAL_WIDTH}
-          onClose={onClose}
-        >
-          <StatefulOpenTimeline
-            apolloClient={client}
-            closeModalTimeline={onClose}
-            isModal={true}
-            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            title={i18n.OPEN_TIMELINE_TITLE}
-          />
-        </EuiModal>
-      </EuiOverlayMask>
-    )}
-  </ApolloConsumer>
-));
+export const OpenTimelineModal = React.memo<OpenTimelineModalProps>(({ onClose }) => {
+  const apolloClient = useApolloClient();
+
+  if (!apolloClient) return null;
+
+  return (
+    <EuiOverlayMask>
+      <EuiModal
+        data-test-subj="open-timeline-modal"
+        maxWidth={OPEN_TIMELINE_MODAL_WIDTH}
+        onClose={onClose}
+      >
+        <StatefulOpenTimeline
+          apolloClient={apolloClient}
+          closeModalTimeline={onClose}
+          isModal={true}
+          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+          title={i18n.OPEN_TIMELINE_TITLE}
+        />
+      </EuiModal>
+    </EuiOverlayMask>
+  );
+});
 
 OpenTimelineModal.displayName = 'OpenTimelineModal';
