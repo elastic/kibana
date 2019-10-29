@@ -4,7 +4,7 @@ exports[`getMetrics and getSeries should return metrics with derivative metric 1
 Object {
   "cluster_search_request_rate": Array [
     Object {
-      "bucket_size": "10 min",
+      "bucket_size": "10 mins",
       "data": Array [
         Array [
           1498968000000,
@@ -388,7 +388,7 @@ exports[`getMetrics and getSeries should return metrics with metric containing c
 Object {
   "cluster_index_latency": Array [
     Object {
-      "bucket_size": "10 min",
+      "bucket_size": "10 mins",
       "data": Array [
         Array [
           1498968000000,
@@ -767,7 +767,7 @@ exports[`getMetrics and getSeries should return metrics with metric that uses de
 Object {
   "kibana_max_response_times": Array [
     Object {
-      "bucket_size": "10 min",
+      "bucket_size": "10 mins",
       "data": Array [
         Array [
           1498968000000,
@@ -1143,7 +1143,7 @@ exports[`getMetrics and getSeries should return metrics with non-derivative metr
 Object {
   "node_cpu_utilization": Array [
     Object {
-      "bucket_size": "10 min",
+      "bucket_size": "10 mins",
       "data": Array [
         Array [
           1498968000000,
@@ -1518,7 +1518,7 @@ exports[`getMetrics and getSeries should return metrics with object structure fo
 Object {
   "index_1": Array [
     Object {
-      "bucket_size": "10 min",
+      "bucket_size": "10 mins",
       "data": Array [
         Array [
           1498968000000,
@@ -1887,7 +1887,7 @@ Object {
       },
     },
     Object {
-      "bucket_size": "10 min",
+      "bucket_size": "10 mins",
       "data": Array [
         Array [
           1498968000000,
@@ -2256,7 +2256,7 @@ Object {
       },
     },
     Object {
-      "bucket_size": "10 min",
+      "bucket_size": "10 mins",
       "data": Array [
         Array [
           1498968000000,
@@ -2625,7 +2625,7 @@ Object {
       },
     },
     Object {
-      "bucket_size": "10 min",
+      "bucket_size": "10 mins",
       "data": Array [
         Array [
           1498968000000,

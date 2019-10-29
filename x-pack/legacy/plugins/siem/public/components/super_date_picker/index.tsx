@@ -13,7 +13,7 @@ import {
   OnTimeChangeProps,
 } from '@elastic/eui';
 import { getOr, take } from 'lodash/fp';
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { connect } from 'react-redux';
 
 import { Dispatch } from 'redux';
@@ -103,76 +103,86 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
     const [recentlyUsedRanges, setRecentlyUsedRanges] = useState<EuiSuperDatePickerRecentRange[]>(
       []
     );
-    const onRefresh = ({ start: newStart, end: newEnd }: OnRefreshProps): void => {
-      updateReduxTime({
-        end: newEnd,
-        id,
-        isInvalid: false,
-        isQuickSelection,
-        kql: kqlQuery,
-        start: newStart,
-        timelineId,
-      });
-      const currentStart = formatDate(newStart);
-      const currentEnd = isQuickSelection
-        ? formatDate(newEnd, { roundUp: true })
-        : formatDate(newEnd);
-      if (!isQuickSelection || (start === currentStart && end === currentEnd)) {
-        refetchQuery(queries);
-      }
-    };
+    const onRefresh = useCallback(
+      ({ start: newStart, end: newEnd }: OnRefreshProps): void => {
+        updateReduxTime({
+          end: newEnd,
+          id,
+          isInvalid: false,
+          isQuickSelection,
+          kql: kqlQuery,
+          start: newStart,
+          timelineId,
+        });
+        const currentStart = formatDate(newStart);
+        const currentEnd = isQuickSelection
+          ? formatDate(newEnd, { roundUp: true })
+          : formatDate(newEnd);
+        if (!isQuickSelection || (start === currentStart && end === currentEnd)) {
+          refetchQuery(queries);
+        }
+      },
+      [end, id, isQuickSelection, kqlQuery, start, timelineId]
+    );
 
-    const onRefreshChange = ({ isPaused, refreshInterval }: OnRefreshChangeProps): void => {
-      if (duration !== refreshInterval) {
-        setDuration({ id, duration: refreshInterval });
-      }
+    const onRefreshChange = useCallback(
+      ({ isPaused, refreshInterval }: OnRefreshChangeProps): void => {
+        if (duration !== refreshInterval) {
+          setDuration({ id, duration: refreshInterval });
+        }
 
-      if (isPaused && policy === 'interval') {
-        stopAutoReload({ id });
-      } else if (!isPaused && policy === 'manual') {
-        startAutoReload({ id });
-      }
+        if (isPaused && policy === 'interval') {
+          stopAutoReload({ id });
+        } else if (!isPaused && policy === 'manual') {
+          startAutoReload({ id });
+        }
 
-      if (!isPaused && (!isQuickSelection || (isQuickSelection && toStr !== 'now'))) {
-        refetchQuery(queries);
-      }
-    };
+        if (!isPaused && (!isQuickSelection || (isQuickSelection && toStr !== 'now'))) {
+          refetchQuery(queries);
+        }
+      },
+      [id, isQuickSelection, duration, policy, toStr]
+    );
 
     const refetchQuery = (newQueries: inputsModel.GlobalGraphqlQuery[]) => {
       newQueries.forEach(q => q.refetch && (q.refetch as inputsModel.Refetch)());
     };
 
-    const onTimeChange = ({
-      start: newStart,
-      end: newEnd,
-      isQuickSelection: newIsQuickSelection,
-      isInvalid,
-    }: OnTimeChangeProps) => {
-      if (!isInvalid) {
-        updateReduxTime({
-          end: newEnd,
-          id,
-          isInvalid,
-          isQuickSelection: newIsQuickSelection,
-          kql: kqlQuery,
-          start: newStart,
-          timelineId,
-        });
-        const newRecentlyUsedRanges = [
-          { start: newStart, end: newEnd },
-          ...take(
-            MAX_RECENTLY_USED_RANGES,
-            recentlyUsedRanges.filter(
-              recentlyUsedRange =>
-                !(recentlyUsedRange.start === newStart && recentlyUsedRange.end === newEnd)
-            )
-          ),
-        ];
+    const onTimeChange = useCallback(
+      ({
+        start: newStart,
+        end: newEnd,
+        isQuickSelection: newIsQuickSelection,
+        isInvalid,
+      }: OnTimeChangeProps) => {
+        if (!isInvalid) {
+          updateReduxTime({
+            end: newEnd,
+            id,
+            isInvalid,
+            isQuickSelection: newIsQuickSelection,
+            kql: kqlQuery,
+            start: newStart,
+            timelineId,
+          });
+          const newRecentlyUsedRanges = [
+            { start: newStart, end: newEnd },
+            ...take(
+              MAX_RECENTLY_USED_RANGES,
+              recentlyUsedRanges.filter(
+                recentlyUsedRange =>
+                  !(recentlyUsedRange.start === newStart && recentlyUsedRange.end === newEnd)
+              )
+            ),
+          ];
 
-        setRecentlyUsedRanges(newRecentlyUsedRanges);
-        setIsQuickSelection(newIsQuickSelection);
-      }
-    };
+          setRecentlyUsedRanges(newRecentlyUsedRanges);
+          setIsQuickSelection(newIsQuickSelection);
+        }
+      },
+      [recentlyUsedRanges, kqlQuery]
+    );
+
     const endDate = kind === 'relative' ? toStr : new Date(end).toISOString();
     const startDate = kind === 'relative' ? fromStr : new Date(start).toISOString();
 
