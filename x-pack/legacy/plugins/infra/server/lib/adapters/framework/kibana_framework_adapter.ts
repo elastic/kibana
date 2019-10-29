@@ -116,40 +116,37 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
           },
         });
       } catch (error) {
-        return response.internalError({
-          body: { ...error, temporary: 'this is just a temporary error catch' },
+        const errorBody = {
+          message: error.message,
+        };
+
+        if ('HttpQueryError' !== error.name) {
+          return response.internalError({
+            body: errorBody,
+          });
+        }
+
+        if (error.isGraphQLError === true) {
+          return response.customError({
+            statusCode: error.statusCode,
+            body: errorBody,
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+        }
+
+        const { headers = [], statusCode = 500 } = error;
+        return response.customError({
+          statusCode,
+          headers,
+          body: errorBody,
         });
-        // NP_TODO handle errors! (see below for previously handled error cases)
+
+        // NP_TODO: Do we still need to re-throw this error in this case? if we do, can we
+        // still call the response.customError method to control the HTTP response?
+        // throw error;
       }
-
-      //   if ('HttpQueryError' !== error.name) {
-      //     const queryError = Boom.boomify(error);
-
-      //     queryError.output.payload.message = error.message;
-
-      //     return queryError;
-      //   }
-
-      //   if (error.isGraphQLError === true) {
-      //     return h
-      //       .response(error.message)
-      //       .code(error.statusCode)
-      //       .type('application/json');
-      //   }
-
-      //   const genericError = new Boom(error.message, { statusCode: error.statusCode });
-
-      //   if (error.headers) {
-      //     Object.keys(error.headers).forEach(header => {
-      //       genericError.output.headers[header] = error.headers[header];
-      //     });
-      //   }
-
-      //   // Boom hides the error when status code is 500
-      //   genericError.output.payload.message = error.message;
-
-      //   throw genericError;
-      // }
     }
     this.router.post(routeOptions, handler);
     this.router.get(routeOptions, handler);
