@@ -227,7 +227,7 @@ export function loadIndexTemplate(name: Template['name']) {
 export async function saveTemplate(template: Template, isClone?: boolean) {
   const result = sendRequest(`${API_BASE_PATH}/templates`, {
     method: 'put',
-    body: template,
+    body: JSON.stringify(template),
   });
 
   const uimActionType = isClone ? UIM_TEMPLATE_CLONE : UIM_TEMPLATE_CREATE;
@@ -241,7 +241,7 @@ export async function updateTemplate(template: Template) {
   const { name } = template;
   const result = sendRequest(`${API_BASE_PATH}/templates/${encodeURIComponent(name)}`, {
     method: 'put',
-    body: template,
+    body: JSON.stringify(template),
   });
 
   trackUiMetric(METRIC_TYPE.COUNT, UIM_TEMPLATE_UPDATE);

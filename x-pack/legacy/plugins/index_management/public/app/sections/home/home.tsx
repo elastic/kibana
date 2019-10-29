@@ -22,7 +22,7 @@ import { BASE_PATH } from '../../../../common/constants';
 import { idxMgmtDocumentationLink } from '../../lib/documentation_links';
 import { IndexList } from './index_list';
 import { TemplateList } from './template_list';
-import { setBreadcrumbs } from '../../services/set_breadcrumbs';
+import { breadcrumbService } from '../../services/set_breadcrumbs';
 
 type Section = 'indices' | 'templates';
 
@@ -57,7 +57,7 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
   };
 
   useEffect(() => {
-    setBreadcrumbs();
+    breadcrumbService.setBreadcrumbs();
   }, []);
 
   return (
