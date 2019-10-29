@@ -58,7 +58,7 @@ const createMockWebStorage = () => ({
 });
 
 const createMockStorage = () => ({
-  store: createMockWebStorage(),
+  storage: createMockWebStorage(),
   get: jest.fn(),
   set: jest.fn(),
   remove: jest.fn(),
@@ -80,19 +80,16 @@ const mockIndexPattern = {
   ],
 } as IndexPattern;
 
-function wrapQueryBarInputInContext(testProps: any, store?: any) {
+function wrapQueryBarInputInContext(testProps: any, storage?: any) {
   const defaultOptions = {
     screenTitle: 'Another Screen',
     intl: null as any,
   };
 
   const services = {
+    ...startMock,
     appName: testProps.appName || 'test',
-    uiSettings: startMock.uiSettings,
-    savedObjects: startMock.savedObjects,
-    notifications: startMock.notifications,
-    http: startMock.http,
-    store: store || createMockStorage(),
+    storage: storage || createMockStorage(),
   };
 
   return (

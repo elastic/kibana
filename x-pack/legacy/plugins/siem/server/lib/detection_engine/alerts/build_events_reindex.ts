@@ -10,42 +10,42 @@
 // file.
 
 interface BuildEventsReIndexParams {
+  description: string;
   index: string[];
-  from: number;
-  to: number;
+  from: string;
+  to: string;
   signalsIndex: string;
   maxDocs: number;
-  kqlFilter: {};
-  severity: number;
-  description: string;
+  filter: unknown;
+  severity: string;
   name: string;
-  timeDetected: number;
+  timeDetected: string;
   ruleRevision: number;
-  ruleId: string;
-  ruleType: string;
+  id: string;
+  type: string;
   references: string[];
 }
 
 export const buildEventsReIndex = ({
+  description,
   index,
   from,
   to,
   signalsIndex,
   maxDocs,
-  kqlFilter,
+  filter,
   severity,
-  description,
   name,
   timeDetected,
   ruleRevision,
-  ruleId,
-  ruleType,
+  id,
+  type,
   references,
 }: BuildEventsReIndexParams) => {
   const indexPatterns = index.map(element => `"${element}"`).join(',');
   const refs = references.map(element => `"${element}"`).join(',');
-  const filter = [
-    kqlFilter,
+  const filterWithTime = [
+    filter,
     {
       bool: {
         filter: [
@@ -96,7 +96,7 @@ export const buildEventsReIndex = ({
         query: {
           bool: {
             filter: [
-              ...filter,
+              ...filterWithTime,
               {
                 match_all: {},
               },
@@ -115,23 +115,25 @@ export const buildEventsReIndex = ({
           def parent = [
             "id": ctx._id,
             "type": "event",
+            "index": ctx._index,
             "depth": 1
           ];
 
           def signal = [
             "rule_revision": "${ruleRevision}",
-            "rule_id": "${ruleId}",
-            "rule_type": "${ruleType}",
+            "rule_id": "${id}",
+            "rule_type": "${type}",
             "parent": parent,
             "name": "${name}",
-            "severity": ${severity},
+            "severity": "${severity}",
             "description": "${description}",
-            "time_detected": "${timeDetected}",
+            "original_time": ctx._source['@timestamp'],
             "index_patterns": indexPatterns,
             "references": references
           ];
 
           ctx._source.signal = signal;
+          ctx._source['@timestamp'] = "${timeDetected}";
         `,
         lang: 'painless',
       },

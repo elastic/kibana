@@ -22,7 +22,7 @@ import ReactDOM from 'react-dom';
 
 import { I18nContext } from 'ui/i18n';
 import { NewVisModal } from './new_vis_modal';
-import { TypesStart } from '../../../../visualizations/public/np_ready/types';
+import { TypesStart } from '../../../../visualizations/public/np_ready/public/types';
 
 interface ShowNewVisModalParams {
   editorParams?: string[];

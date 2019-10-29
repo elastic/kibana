@@ -55,6 +55,24 @@ export function getUiSettingDefaults() {
     'buildNum': {
       readonly: true
     },
+    'defaultRoute': {
+      name: i18n.translate('kbn.advancedSettings.defaultRoute.defaultRouteTitle', {
+        defaultMessage: 'Default route',
+      }),
+      value: '/app/kibana',
+      validation: {
+        regexString: '^\/',
+        message: i18n.translate('kbn.advancedSettings.defaultRoute.defaultRouteValidationMessage', {
+          defaultMessage: 'The route must start with a slash ("/")',
+        }),
+      },
+      description:
+        i18n.translate('kbn.advancedSettings.defaultRoute.defaultRouteText', {
+          defaultMessage: 'This setting specifies the default route when opening Kibana. ' +
+          'You can use this setting to modify the landing page when opening Kibana. ' +
+          'The route must start with a slash ("/").',
+        }),
+    },
     'query:queryString:options': {
       name: i18n.translate('kbn.advancedSettings.query.queryStringOptionsTitle', {
         defaultMessage: 'Query string options',
@@ -422,7 +440,7 @@ export function getUiSettingDefaults() {
       name: i18n.translate('kbn.advancedSettings.courier.batchSearchesTitle', {
         defaultMessage: 'Batch concurrent searches',
       }),
-      value: true,
+      value: false,
       type: 'boolean',
       description: i18n.translate('kbn.advancedSettings.courier.batchSearchesText', {
         defaultMessage:

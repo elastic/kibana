@@ -43,7 +43,7 @@ export const apm: LegacyPluginInitializer = kibana => {
           apmUiEnabled: config.get('xpack.apm.ui.enabled'),
           // TODO: rename to apm_oss.indexPatternTitle in 7.0 (breaking change)
           apmIndexPatternTitle: config.get('apm_oss.indexPattern'),
-          apmTransactionIndices: config.get('apm_oss.transactionIndices')
+          apmServiceMapEnabled: config.get('xpack.apm.serviceMapEnabled')
         };
       },
       hacks: ['plugins/apm/hacks/toggle_app_link_in_nav'],
@@ -70,7 +70,10 @@ export const apm: LegacyPluginInitializer = kibana => {
 
         // buckets
         minimumBucketSize: Joi.number().default(15),
-        bucketTargetCount: Joi.number().default(15)
+        bucketTargetCount: Joi.number().default(15),
+
+        // service map
+        serviceMapEnabled: Joi.boolean().default(false)
       }).default();
     },
 

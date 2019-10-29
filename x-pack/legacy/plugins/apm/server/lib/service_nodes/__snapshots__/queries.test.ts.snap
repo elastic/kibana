@@ -1,0 +1,202 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`service node queries fetches metadata for a service node 1`] = `
+Object {
+  "body": Object {
+    "aggs": Object {
+      "containerId": Object {
+        "terms": Object {
+          "field": "container.id",
+          "size": 1,
+        },
+      },
+      "host": Object {
+        "terms": Object {
+          "field": "host.hostname",
+          "size": 1,
+        },
+      },
+      "nodes": Object {
+        "terms": Object {
+          "field": "service.node.name",
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "term": Object {
+              "service.name": "foo",
+            },
+          },
+          Object {
+            "term": Object {
+              "processor.event": "metric",
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 1528113600000,
+                "lte": 1528977600000,
+              },
+            },
+          },
+          Object {
+            "term": Object {
+              "service.node.name": "bar",
+            },
+          },
+          Object {
+            "term": Object {
+              "service.environment": "prod",
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+  },
+  "index": "myIndex",
+}
+`;
+
+exports[`service node queries fetches metadata for unidentified service nodes 1`] = `
+Object {
+  "body": Object {
+    "aggs": Object {
+      "containerId": Object {
+        "terms": Object {
+          "field": "container.id",
+          "size": 1,
+        },
+      },
+      "host": Object {
+        "terms": Object {
+          "field": "host.hostname",
+          "size": 1,
+        },
+      },
+      "nodes": Object {
+        "terms": Object {
+          "field": "service.node.name",
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "term": Object {
+              "service.name": "foo",
+            },
+          },
+          Object {
+            "term": Object {
+              "processor.event": "metric",
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 1528113600000,
+                "lte": 1528977600000,
+              },
+            },
+          },
+          Object {
+            "bool": Object {
+              "must_not": Array [
+                Object {
+                  "exists": Object {
+                    "field": "service.node.name",
+                  },
+                },
+              ],
+            },
+          },
+          Object {
+            "term": Object {
+              "service.environment": "prod",
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+  },
+  "index": "myIndex",
+}
+`;
+
+exports[`service node queries fetches services nodes 1`] = `
+Object {
+  "body": Object {
+    "aggs": Object {
+      "nodes": Object {
+        "aggs": Object {
+          "cpu": Object {
+            "avg": Object {
+              "field": "system.process.cpu.total.norm.pct",
+            },
+          },
+          "heapMemory": Object {
+            "avg": Object {
+              "field": "jvm.memory.heap.used",
+            },
+          },
+          "nonHeapMemory": Object {
+            "avg": Object {
+              "field": "jvm.memory.non_heap.used",
+            },
+          },
+          "threadCount": Object {
+            "max": Object {
+              "field": "jvm.thread.count",
+            },
+          },
+        },
+        "terms": Object {
+          "field": "service.node.name",
+          "missing": "_service_node_name_missing_",
+          "size": 10000,
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "term": Object {
+              "service.name": "foo",
+            },
+          },
+          Object {
+            "term": Object {
+              "processor.event": "metric",
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 1528113600000,
+                "lte": 1528977600000,
+              },
+            },
+          },
+          Object {
+            "term": Object {
+              "service.environment": "prod",
+            },
+          },
+        ],
+      },
+    },
+  },
+  "index": "myIndex",
+}
+`;

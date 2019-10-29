@@ -8,7 +8,7 @@ import { createMockServer } from './_mock_server';
 import { muteAllAlertRoute } from './mute_all';
 
 const { server, alertsClient } = createMockServer();
-muteAllAlertRoute(server);
+server.route(muteAllAlertRoute);
 
 test('mutes an alert', async () => {
   const request = {

@@ -22,10 +22,8 @@ interface Props {
   timelineId: string;
 }
 
-export class DataDrivenColumns extends React.PureComponent<Props> {
-  public render() {
-    const { _id, columnHeaders, columnRenderers, data, timelineId } = this.props;
-
+export const DataDrivenColumns = React.memo<Props>(
+  ({ _id, columnHeaders, columnRenderers, data, timelineId }) => {
     // Passing the styles directly to the component because the width is
     // being calculated and is recommended by Styled Components for performance
     // https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
@@ -51,7 +49,9 @@ export class DataDrivenColumns extends React.PureComponent<Props> {
       </EventsTdGroupData>
     );
   }
-}
+);
+
+DataDrivenColumns.displayName = 'DataDrivenColumns';
 
 const getMappedNonEcsValue = ({
   data,

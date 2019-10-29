@@ -26,9 +26,12 @@ type TimeUrlParams = Pick<
 >;
 
 export function resolveUrlParams(location: Location, state: TimeUrlParams) {
-  const { processorEvent, serviceName, errorGroupId } = getPathParams(
-    location.pathname
-  );
+  const {
+    processorEvent,
+    serviceName,
+    serviceNodeName,
+    errorGroupId
+  } = getPathParams(location.pathname);
 
   const query = toQuery(location.search);
 
@@ -83,6 +86,9 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     processorEvent,
     serviceName,
     errorGroupId,
+    serviceNodeName: serviceNodeName
+      ? decodeURIComponent(serviceNodeName)
+      : serviceNodeName,
 
     // ui filters
     environment,

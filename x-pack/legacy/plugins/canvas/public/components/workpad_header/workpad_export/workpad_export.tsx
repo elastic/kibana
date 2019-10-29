@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FunctionComponent, MouseEvent } from 'react';
+import React, { FunctionComponent, useState, MouseEvent } from 'react';
 import PropTypes from 'prop-types';
 import { EuiButtonIcon, EuiContextMenu, EuiIcon } from '@elastic/eui';
 // @ts-ignore Untyped local
 import { Popover } from '../../popover';
 import { DisabledPanel } from './disabled_panel';
 import { PDFPanel } from './pdf_panel';
+import { ShareWebsiteFlyout } from './flyout';
 
 import { ComponentStrings } from '../../../../i18n';
 const { WorkpadHeaderWorkpadExport: strings } = ComponentStrings;
@@ -20,9 +21,11 @@ type ClosePopoverFn = () => void;
 type CopyTypes = 'pdf' | 'reportingConfig';
 type ExportTypes = 'pdf' | 'json';
 type ExportUrlTypes = 'pdf';
+type CloseTypes = 'share';
 
 export type OnCopyFn = (type: CopyTypes) => void;
 export type OnExportFn = (type: ExportTypes) => void;
+export type OnCloseFn = (type: CloseTypes) => void;
 export type GetExportUrlFn = (type: ExportUrlTypes) => string;
 
 export interface Props {
@@ -45,6 +48,12 @@ export const WorkpadExport: FunctionComponent<Props> = ({
   onExport,
   getExportUrl,
 }) => {
+  const [showFlyout, setShowFlyout] = useState(false);
+
+  const onClose = () => {
+    setShowFlyout(false);
+  };
+
   // TODO: Fix all of this magic from EUI; this code is boilerplate from
   // EUI examples and isn't easily typed.
   const flattenPanelTree = (tree: any, array: any[] = []) => {
@@ -109,6 +118,14 @@ export const WorkpadExport: FunctionComponent<Props> = ({
           ),
         },
       },
+      {
+        name: strings.getShareWebsiteTitle(),
+        icon: <EuiIcon type="globe" size="m" />,
+        onClick: () => {
+          setShowFlyout(true);
+          closePopover();
+        },
+      },
     ],
   });
 
@@ -120,17 +137,25 @@ export const WorkpadExport: FunctionComponent<Props> = ({
     />
   );
 
+  const flyout = showFlyout ? <ShareWebsiteFlyout onClose={onClose} /> : null;
+
   return (
-    <Popover
-      button={exportControl}
-      panelPaddingSize="none"
-      tooltip={strings.getShareWorkpadMessage()}
-      tooltipPosition="bottom"
-    >
-      {({ closePopover }: { closePopover: ClosePopoverFn }) => (
-        <EuiContextMenu initialPanelId={0} panels={flattenPanelTree(getPanelTree(closePopover))} />
-      )}
-    </Popover>
+    <div>
+      <Popover
+        button={exportControl}
+        panelPaddingSize="none"
+        tooltip={strings.getShareWorkpadMessage()}
+        tooltipPosition="bottom"
+      >
+        {({ closePopover }: { closePopover: ClosePopoverFn }) => (
+          <EuiContextMenu
+            initialPanelId={0}
+            panels={flattenPanelTree(getPanelTree(closePopover))}
+          />
+        )}
+      </Popover>
+      {flyout}
+    </div>
   );
 };
 

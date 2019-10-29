@@ -19,7 +19,8 @@
 
 import { omit } from 'lodash';
 
-import { DiscoveredPlugin, PluginOpaqueId } from '../../server';
+import { DiscoveredPlugin } from '../../server';
+import { PluginOpaqueId, PackageInfo, EnvironmentMode } from '../../server/types';
 import { CoreContext } from '../core_system';
 import { PluginWrapper } from './plugin';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
@@ -35,6 +36,10 @@ export interface PluginInitializerContext {
    * A symbol used to identify this plugin in the system. Needed when registering handlers or context providers.
    */
   readonly opaqueId: PluginOpaqueId;
+  readonly env: {
+    mode: Readonly<EnvironmentMode>;
+    packageInfo: Readonly<PackageInfo>;
+  };
 }
 
 /**
@@ -52,6 +57,7 @@ export function createPluginInitializerContext(
 ): PluginInitializerContext {
   return {
     opaqueId,
+    env: coreContext.env,
   };
 }
 
@@ -86,6 +92,9 @@ export function createPluginSetupContext<
     http: deps.http,
     notifications: deps.notifications,
     uiSettings: deps.uiSettings,
+    injectedMetadata: {
+      getInjectedVar: deps.injectedMetadata.getInjectedVar,
+    },
   };
 }
 
@@ -125,5 +134,8 @@ export function createPluginStartContext<
     overlays: deps.overlays,
     uiSettings: deps.uiSettings,
     savedObjects: deps.savedObjects,
+    injectedMetadata: {
+      getInjectedVar: deps.injectedMetadata.getInjectedVar,
+    },
   };
 }

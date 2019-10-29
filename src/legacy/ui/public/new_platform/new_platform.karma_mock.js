@@ -31,8 +31,17 @@ export const npSetup = {
       registerFunction: sinon.fake(),
       registerRenderer: sinon.fake(),
       registerType: sinon.fake(),
+      __LEGACY: {
+        renderers: {
+          register: () => undefined,
+          get: () => null,
+        },
+      },
     },
     data: {
+      query: {
+        filterManager: sinon.fake(),
+      },
     },
     inspector: {
       registerView: () => undefined,
@@ -65,7 +74,27 @@ export const npStart = {
       registerRenderer: sinon.fake(),
       registerType: sinon.fake(),
     },
-    data: {},
+    data: {
+      getSuggestions: sinon.fake(),
+      query: {
+        filterManager: {
+          getFetches$: sinon.fake(),
+          getFilters: sinon.fake(),
+          getAppFilters: sinon.fake(),
+          getGlobalFilters: sinon.fake(),
+          removeFilter: sinon.fake(),
+          addFilters: sinon.fake(),
+          setFilters: sinon.fake(),
+          removeAll: sinon.fake(),
+          getUpdates$: () => {
+            return {
+              subscribe: () => {}
+            };
+          },
+
+        },
+      },
+    },
     inspector: {
       isAvailable: () => false,
       open: () => ({
@@ -88,6 +117,10 @@ export const npStart = {
 
 export function __setup__(coreSetup) {
   npSetup.core = coreSetup;
+
+  // no-op application register calls (this is overwritten to
+  // bootstrap an LP plugin outside of tests)
+  npSetup.core.application.register = () => {};
 }
 
 export function __start__(coreStart) {

@@ -18,7 +18,6 @@ import { dashboardMode } from './legacy/plugins/dashboard_mode';
 import { logstash } from './legacy/plugins/logstash';
 import { beats } from './legacy/plugins/beats_management';
 import { apm } from './legacy/plugins/apm';
-import { code } from './legacy/plugins/code';
 import { maps } from './legacy/plugins/maps';
 import { licenseManagement } from './legacy/plugins/license_management';
 import { cloud } from './legacy/plugins/cloud';
@@ -38,9 +37,9 @@ import { upgradeAssistant } from './legacy/plugins/upgrade_assistant';
 import { uptime } from './legacy/plugins/uptime';
 import { ossTelemetry } from './legacy/plugins/oss_telemetry';
 import { fileUpload } from './legacy/plugins/file_upload';
-import { telemetry } from './legacy/plugins/telemetry';
 import { encryptedSavedObjects } from './legacy/plugins/encrypted_saved_objects';
 import { snapshotRestore } from './legacy/plugins/snapshot_restore';
+import { transform } from './legacy/plugins/transform';
 import { actions } from './legacy/plugins/actions';
 import { alerting } from './legacy/plugins/alerting';
 import { lens } from './legacy/plugins/lens';
@@ -48,7 +47,6 @@ import { lens } from './legacy/plugins/lens';
 module.exports = function (kibana) {
   return [
     xpackMain(kibana),
-    telemetry(kibana),
     graph(kibana),
     monitoring(kibana),
     reporting(kibana),
@@ -63,7 +61,6 @@ module.exports = function (kibana) {
     logstash(kibana),
     beats(kibana),
     apm(kibana),
-    code(kibana),
     maps(kibana),
     canvas(kibana),
     licenseManagement(kibana),
@@ -75,6 +72,7 @@ module.exports = function (kibana) {
     infra(kibana),
     taskManager(kibana),
     rollup(kibana),
+    transform(kibana),
     siem(kibana),
     remoteClusters(kibana),
     crossClusterReplication(kibana),

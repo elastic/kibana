@@ -31,3 +31,8 @@ export * from '../common';
 export * from './autocomplete_provider';
 
 export * from './types';
+
+export { IRequestTypesMap, IResponseTypesMap } from './search';
+export * from './search';
+
+export * from './query';

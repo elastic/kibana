@@ -59,4 +59,4 @@ report from the Kibana UI.
 NOTE: Reporting is integrated with Watcher only as an email attachment type.
 
 For more information about configuring watches, see
-{stack-ov}/how-watcher-works.html[How Watcher Works].
+{ref}/how-watcher-works.html[How Watcher works].

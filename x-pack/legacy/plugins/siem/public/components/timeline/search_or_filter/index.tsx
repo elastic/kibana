@@ -5,7 +5,7 @@
  */
 
 import { getOr } from 'lodash/fp';
-import * as React from 'react';
+import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 import { StaticIndexPattern } from 'ui/index_patterns';
@@ -45,39 +45,43 @@ interface DispatchProps {
 
 type Props = OwnProps & StateReduxProps & DispatchProps;
 
-class StatefulSearchOrFilterComponent extends React.PureComponent<Props> {
-  public render() {
-    const {
-      applyKqlFilterQuery,
-      indexPattern,
-      filterQueryDraft,
-      isFilterQueryDraftValid,
-      kqlMode,
-      timelineId,
-      setKqlFilterQueryDraft,
-      updateKqlMode,
-    } = this.props;
+const StatefulSearchOrFilterComponent = React.memo<Props>(
+  ({
+    applyKqlFilterQuery,
+    filterQueryDraft,
+    indexPattern,
+    isFilterQueryDraftValid,
+    kqlMode,
+    setKqlFilterQueryDraft,
+    timelineId,
+    updateKqlMode,
+  }) => {
+    const applyFilterQueryFromKueryExpression = useCallback(
+      (expression: string) =>
+        applyKqlFilterQuery({
+          id: timelineId,
+          filterQuery: {
+            kuery: {
+              kind: 'kuery',
+              expression,
+            },
+            serializedQuery: convertKueryToElasticSearchQuery(expression, indexPattern),
+          },
+        }),
+      [indexPattern, timelineId]
+    );
 
-    const applyFilterQueryFromKueryExpression = (expression: string) =>
-      applyKqlFilterQuery({
-        id: timelineId,
-        filterQuery: {
-          kuery: {
+    const setFilterQueryDraftFromKueryExpression = useCallback(
+      (expression: string) =>
+        setKqlFilterQueryDraft({
+          id: timelineId,
+          filterQueryDraft: {
             kind: 'kuery',
             expression,
           },
-          serializedQuery: convertKueryToElasticSearchQuery(expression, indexPattern),
-        },
-      });
-
-    const setFilterQueryDraftFromKueryExpression = (expression: string) =>
-      setKqlFilterQueryDraft({
-        id: timelineId,
-        filterQueryDraft: {
-          kind: 'kuery',
-          expression,
-        },
-      });
+        }),
+      [timelineId]
+    );
 
     return (
       <SearchOrFilter
@@ -86,13 +90,14 @@ class StatefulSearchOrFilterComponent extends React.PureComponent<Props> {
         indexPattern={indexPattern}
         isFilterQueryDraftValid={isFilterQueryDraftValid}
         kqlMode={kqlMode!}
+        setKqlFilterQueryDraft={setFilterQueryDraftFromKueryExpression!}
         timelineId={timelineId}
         updateKqlMode={updateKqlMode!}
-        setKqlFilterQueryDraft={setFilterQueryDraftFromKueryExpression!}
       />
     );
   }
-}
+);
+StatefulSearchOrFilterComponent.displayName = 'StatefulSearchOrFilterComponent';
 
 const makeMapStateToProps = () => {
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
@@ -101,9 +106,9 @@ const makeMapStateToProps = () => {
   const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
     const timeline: TimelineModel | {} = getTimeline(state, timelineId);
     return {
-      kqlMode: getOr('filter', 'kqlMode', timeline),
       filterQueryDraft: getKqlFilterQueryDraft(state, timelineId),
       isFilterQueryDraftValid: isFilterQueryDraftValid(state, timelineId),
+      kqlMode: getOr('filter', 'kqlMode', timeline),
     };
   };
   return mapStateToProps;

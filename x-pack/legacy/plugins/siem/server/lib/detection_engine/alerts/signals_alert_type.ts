@@ -4,79 +4,152 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import moment from 'moment';
-import { APP_ID } from '../../../../common/constants';
-import { AlertType, AlertExecutorOptions } from '../../../../../alerting';
+import { schema } from '@kbn/config-schema';
+import { SIGNALS_ID } from '../../../../common/constants';
+import { Logger } from '../../../../../../../../src/core/server';
 
 // TODO: Remove this for the build_events_query call eventually
 import { buildEventsReIndex } from './build_events_reindex';
 
 // TODO: Comment this in and use this instead of the reIndex API
 // once scrolling and other things are done with it.
-// import { buildEventsQuery } from './build_events_query';
+import { buildEventsScrollQuery } from './build_events_query';
 
-export const signalsAlertType: AlertType = {
-  id: `${APP_ID}.signals`,
-  name: 'SIEM Signals',
-  actionGroups: ['default'],
-  async executor({ services, params, state }: AlertExecutorOptions) {
-    // TODO: We need to swap out this arbitrary number of siem-signal id for an injected
-    // data driven instance id through passed in parameters.
-    const instance = services.alertInstanceFactory('siem-signals');
+// bulk scroll class
+import { scrollAndBulkIndex } from './utils';
+import { SignalAlertTypeDefinition } from './types';
+import { getFilter } from './get_filter';
 
-    // TODO: Comment this in eventually and use the buildEventsQuery()
-    // for scrolling and other fun stuff instead of using the buildEventsReIndex()
-    // const query = buildEventsQuery();
+export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTypeDefinition => {
+  return {
+    id: SIGNALS_ID,
+    name: 'SIEM Signals',
+    actionGroups: ['default'],
+    validate: {
+      params: schema.object({
+        description: schema.string(),
+        from: schema.string(),
+        filter: schema.nullable(schema.object({}, { allowUnknowns: true })),
+        id: schema.string(),
+        index: schema.arrayOf(schema.string()),
+        language: schema.nullable(schema.string()),
+        savedId: schema.nullable(schema.string()),
+        query: schema.nullable(schema.string()),
+        filters: schema.nullable(schema.arrayOf(schema.object({}, { allowUnknowns: true }))),
+        maxSignals: schema.number({ defaultValue: 100 }),
+        name: schema.string(),
+        severity: schema.string(),
+        to: schema.string(),
+        type: schema.string(),
+        references: schema.arrayOf(schema.string(), { defaultValue: [] }),
+        scrollSize: schema.maybe(schema.number()),
+        scrollLock: schema.maybe(schema.string()),
+      }),
+    },
+    async executor({ services, params }) {
+      const instance = services.alertInstanceFactory('siem-signals');
 
-    // TODO: Turn these options being sent in into a template for the alert type
-    const reIndex = buildEventsReIndex({
-      index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-      from: moment()
-        .subtract(5, 'minutes')
-        .valueOf(),
-      to: Date.now(),
-      signalsIndex: '.siem-signals-10-01-2019',
-      severity: 2,
-      description: 'User root activity',
-      name: 'User Rule',
-      timeDetected: Date.now(),
-      kqlFilter: {
-        bool: {
-          should: [
-            {
-              match_phrase: {
-                'user.name': 'root',
-              },
-            },
-          ],
-          minimum_should_match: 1,
-        },
-      },
-      maxDocs: 100,
-      ruleRevision: 1,
-      ruleId: '1',
-      ruleType: 'KQL',
-      references: ['https://www.elastic.co', 'https://example.com'],
-    });
+      const {
+        description,
+        filter,
+        from,
+        id,
+        index,
+        filters,
+        language,
+        savedId,
+        query,
+        maxSignals,
+        name,
+        references,
+        severity,
+        to,
+        type,
+        scrollSize,
+        scrollLock,
+      } = params;
 
-    try {
-      services.log(['info', 'SIEM'], 'Starting SIEM signal job');
+      const scroll = scrollLock ? scrollLock : '1m';
+      const size = scrollSize ? scrollSize : 400;
 
-      // TODO: Comment this in eventually and use this for manual insertion of the
-      // signals instead of the ReIndex() api
-      // const result = await services.callCluster('search', query);
-      // eslint-disable-next-line
-      const result = await services.callCluster('reindex', reIndex);
+      const esFilter = await getFilter({
+        type,
+        filter,
+        filters,
+        language,
+        query,
+        savedId,
+        services,
+        index,
+      });
 
-      // TODO: Error handling here and writing of any errors that come back from ES by
-      services.log(['info', 'SIEM'], `Result of reindex: ${JSON.stringify(result, null, 2)}`);
-    } catch (err) {
-      // TODO: Error handling and writing of errors into a signal that has error
-      // handling/conditions
-      services.log(['error', 'SIEM'], `You encountered an error of: ${err.message}`);
-    }
+      // TODO: Turn these options being sent in into a template for the alert type
+      const noReIndex = buildEventsScrollQuery({
+        index,
+        from,
+        to,
+        filter: esFilter,
+        size,
+        scroll,
+      });
 
-    // Schedule the default action which is nothing if it's a plain signal.
-    instance.scheduleActions('default');
-  },
+      const reIndex = buildEventsReIndex({
+        index,
+        from,
+        to,
+        // TODO: Change this out once we have solved
+        // https://github.com/elastic/kibana/issues/47002
+        signalsIndex: process.env.SIGNALS_INDEX || '.siem-signals-10-01-2019',
+        severity,
+        description,
+        name,
+        timeDetected: new Date().toISOString(),
+        filter: esFilter,
+        maxDocs: maxSignals,
+        ruleRevision: 1,
+        id,
+        type,
+        references,
+      });
+
+      try {
+        logger.info('Starting SIEM signal job');
+
+        // TODO: Comment this in eventually and use this for manual insertion of the
+        // signals instead of the ReIndex() api
+
+        if (process.env.USE_REINDEX_API === 'true') {
+          const result = await services.callCluster('reindex', reIndex);
+
+          // TODO: Error handling here and writing of any errors that come back from ES by
+          logger.info(`Result of reindex: ${JSON.stringify(result, null, 2)}`);
+        } else {
+          logger.info(`[+] Initial search call`);
+
+          const noReIndexResult = await services.callCluster('search', noReIndex);
+          logger.info(`Total docs to reindex: ${noReIndexResult.hits.total.value}`);
+
+          const bulkIndexResult = await scrollAndBulkIndex(
+            noReIndexResult,
+            params,
+            services,
+            logger
+          );
+
+          if (bulkIndexResult) {
+            logger.info('Finished SIEM signal job');
+          } else {
+            logger.error('Error processing SIEM signal job');
+          }
+        }
+      } catch (err) {
+        // TODO: Error handling and writing of errors into a signal that has error
+        // handling/conditions
+        logger.error(`You encountered an error of: ${err.message}`);
+      }
+
+      // Schedule the default action which is nothing if it's a plain signal.
+      instance.scheduleActions('default');
+    },
+  };
 };

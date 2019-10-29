@@ -30,46 +30,33 @@ jest.mock('./plugins/find_legacy_plugin_specs.ts', () => ({
   }),
 }));
 
-import { LegacyService } from '.';
+import { LegacyService, LegacyServiceSetupDeps, LegacyServiceStartDeps } from '.';
 // @ts-ignore: implicit any for JS file
 import MockClusterManager from '../../../cli/cluster/cluster_manager';
 import KbnServer from '../../../legacy/server/kbn_server';
 import { Config, Env, ObjectToConfigAdapter } from '../config';
-import { ContextSetup } from '../context';
 import { contextServiceMock } from '../context/context_service.mock';
 import { getEnvOptions } from '../config/__mocks__/env';
 import { configServiceMock } from '../config/config_service.mock';
-import { ElasticsearchServiceSetup } from '../elasticsearch';
-import { HttpServiceStart, BasePathProxyServer } from '../http';
+
+import { BasePathProxyServer } from '../http';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { DiscoveredPlugin, DiscoveredPluginInternal } from '../plugins';
-import { PluginsServiceSetup, PluginsServiceStart } from '../plugins/plugins_service';
-import { SavedObjectsServiceStart } from 'src/core/server/saved_objects/saved_objects_service';
+
 import { KibanaMigrator } from '../saved_objects/migrations';
+import { ISavedObjectsClientProvider } from '../saved_objects';
+import { httpServiceMock } from '../http/http_service.mock';
+import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
 
 const MockKbnServer: jest.Mock<KbnServer> = KbnServer as any;
 
 let coreId: symbol;
 let env: Env;
 let config$: BehaviorSubject<Config>;
-let setupDeps: {
-  core: {
-    context: ContextSetup;
-    elasticsearch: ElasticsearchServiceSetup;
-    http: any;
-    plugins: PluginsServiceSetup;
-  };
-  plugins: Record<string, unknown>;
-};
 
-let startDeps: {
-  core: {
-    http: HttpServiceStart;
-    savedObjects: SavedObjectsServiceStart;
-    plugins: PluginsServiceStart;
-  };
-  plugins: Record<string, unknown>;
-};
+let setupDeps: LegacyServiceSetupDeps;
+
+let startDeps: LegacyServiceStartDeps;
 
 const logger = loggingServiceMock.create();
 let configService: ReturnType<typeof configServiceMock.create>;
@@ -85,11 +72,14 @@ beforeEach(() => {
     core: {
       context: contextServiceMock.createSetupContract(),
       elasticsearch: { legacy: {} } as any,
+      uiSettings: uiSettingsServiceMock.createSetupContract(),
       http: {
+        ...httpServiceMock.createSetupContract(),
         auth: {
           getAuthHeaders: () => undefined,
-        },
+        } as any,
       },
+
       plugins: {
         contracts: new Map([['plugin-id', 'plugin-value']]),
         uiPlugins: {
@@ -103,11 +93,9 @@ beforeEach(() => {
 
   startDeps = {
     core: {
-      http: {
-        isListening: () => true,
-      },
       savedObjects: {
         migrator: {} as KibanaMigrator,
+        clientProvider: {} as ISavedObjectsClientProvider,
       },
       plugins: { contracts: new Map() },
     },
@@ -146,12 +134,7 @@ describe('once LegacyService is set up with connection info', () => {
     expect(MockKbnServer).toHaveBeenCalledWith(
       { server: { autoListen: true } },
       { server: { autoListen: true } },
-      {
-        setupDeps,
-        startDeps,
-        handledConfigPaths: ['foo.bar'],
-        logger,
-      },
+      expect.any(Object),
       { disabledPluginSpecs: [], pluginSpecs: [], uiExports: [] }
     );
 
@@ -176,12 +159,7 @@ describe('once LegacyService is set up with connection info', () => {
     expect(MockKbnServer).toHaveBeenCalledWith(
       { server: { autoListen: true } },
       { server: { autoListen: true } },
-      {
-        setupDeps,
-        startDeps,
-        handledConfigPaths: ['foo.bar'],
-        logger,
-      },
+      expect.any(Object),
       { disabledPluginSpecs: [], pluginSpecs: [], uiExports: [] }
     );
 
@@ -311,12 +289,7 @@ describe('once LegacyService is set up without connection info', () => {
     expect(MockKbnServer).toHaveBeenCalledWith(
       { server: { autoListen: true } },
       { server: { autoListen: true } },
-      {
-        setupDeps,
-        startDeps,
-        handledConfigPaths: ['foo.bar'],
-        logger,
-      },
+      expect.any(Object),
       { disabledPluginSpecs: [], pluginSpecs: [], uiExports: [] }
     );
   });

@@ -17,16 +17,18 @@ import {
   EuiPanel,
   EuiButtonIcon,
   EuiPopover,
-  EuiSwitch,
   EuiSpacer,
   EuiButtonEmpty,
   EuiPopoverFooter,
+  EuiToolTip,
 } from '@elastic/eui';
 import { State, SeriesType, LayerConfig, visualizationTypes } from './types';
 import { VisualizationProps, OperationMetadata } from '../types';
 import { NativeRenderer } from '../native_renderer';
 import { MultiColumnEditor } from '../multi_column_editor';
 import { generateId } from '../id_generator';
+import { isHorizontalChart, isHorizontalSeries } from './state_helpers';
+import { trackUiEvent } from '../lens_ui_telemetry';
 
 const isNumericMetric = (op: OperationMetadata) => !op.isBucketed && op.dataType === 'number';
 const isBucketed = (op: OperationMetadata) => op.isBucketed;
@@ -55,10 +57,12 @@ function newLayerState(seriesType: SeriesType, layerId: string): LayerConfig {
 
 function LayerSettings({
   layer,
+  horizontalOnly,
   setSeriesType,
   removeLayer,
 }: {
   layer: LayerConfig;
+  horizontalOnly: boolean;
   setSeriesType: (seriesType: SeriesType) => void;
   removeLayer: () => void;
 }) {
@@ -96,13 +100,20 @@ function LayerSettings({
           name="chartType"
           className="eui-displayInlineBlock"
           data-test-subj="lnsXY_seriesType"
-          options={visualizationTypes.map(t => ({
-            ...t,
-            iconType: t.icon || 'empty',
-          }))}
+          options={visualizationTypes
+            .filter(t => isHorizontalSeries(t.id as SeriesType) === horizontalOnly)
+            .map(t => ({
+              id: t.id,
+              label: t.label,
+              iconType: t.icon || 'empty',
+            }))}
           idSelected={layer.seriesType}
-          onChange={seriesType => setSeriesType(seriesType as SeriesType)}
+          onChange={seriesType => {
+            trackUiEvent('xy_change_layer_display');
+            setSeriesType(seriesType as SeriesType);
+          }}
           isIconOnly
+          buttonSize="compressed"
         />
       </EuiFormRow>
       <EuiPopoverFooter className="eui-textCenter">
@@ -113,8 +124,8 @@ function LayerSettings({
           data-test-subj="lnsXY_layer_remove"
           onClick={removeLayer}
         >
-          {i18n.translate('xpack.lens.xyChart.removeLayer', {
-            defaultMessage: 'Remove layer',
+          {i18n.translate('xpack.lens.xyChart.deleteLayer', {
+            defaultMessage: 'Delete layer',
           })}
         </EuiButtonEmpty>
       </EuiPopoverFooter>
@@ -124,44 +135,10 @@ function LayerSettings({
 
 export function XYConfigPanel(props: VisualizationProps<State>) {
   const { state, setState, frame } = props;
-  const [isChartOptionsOpen, setIsChartOptionsOpen] = useState(false);
+  const horizontalOnly = isHorizontalChart(state.layers);
 
   return (
     <EuiForm className="lnsConfigPanel">
-      <EuiPopover
-        id="lnsXY_chartConfig"
-        isOpen={isChartOptionsOpen}
-        closePopover={() => setIsChartOptionsOpen(false)}
-        button={
-          <EuiButtonIcon
-            iconType="gear"
-            size="s"
-            data-test-subj="lnsXY_chart_settings"
-            onClick={() => setIsChartOptionsOpen(!isChartOptionsOpen)}
-            aria-label={i18n.translate('xpack.lens.xyChart.chartSettings', {
-              defaultMessage: 'Chart Settings',
-            })}
-            title={i18n.translate('xpack.lens.xyChart.chartSettings', {
-              defaultMessage: 'Chart Settings',
-            })}
-          />
-        }
-      >
-        <EuiSwitch
-          label={i18n.translate('xpack.lens.xyChart.isHorizontalSwitch', {
-            defaultMessage: 'Rotate chart 90º',
-          })}
-          checked={state.isHorizontal}
-          onChange={() => {
-            setState({
-              ...state,
-              isHorizontal: !state.isHorizontal,
-            });
-          }}
-          data-test-subj="lnsXY_chart_horizontal"
-        />
-      </EuiPopover>
-
       {state.layers.map((layer, index) => (
         <EuiPanel
           className="lnsConfigPanel__panel"
@@ -173,10 +150,12 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
             <EuiFlexItem grow={false}>
               <LayerSettings
                 layer={layer}
+                horizontalOnly={horizontalOnly}
                 setSeriesType={seriesType =>
                   setState(updateLayer(state, { ...layer, seriesType }, index))
                 }
                 removeLayer={() => {
+                  trackUiEvent('xy_layer_removed');
                   frame.removeLayers([layer.layerId]);
                   setState({ ...state, layers: state.layers.filter(l => l !== layer) });
                 }}
@@ -209,6 +188,7 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
                 filterOperations: isBucketed,
                 suggestedPriority: 1,
                 layerId: layer.layerId,
+                hideGrouping: true,
               }}
             />
           </EuiFormRow>
@@ -256,7 +236,7 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
           <EuiFormRow
             className="lnsConfigPanel__axis"
             label={i18n.translate('xpack.lens.xyChart.splitSeries', {
-              defaultMessage: 'Split series',
+              defaultMessage: 'Break down by',
             })}
           >
             <NativeRenderer
@@ -274,32 +254,44 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
         </EuiPanel>
       ))}
 
-      <EuiButton
-        className="lnsConfigPanel__addLayerBtn"
-        fullWidth
-        size="s"
-        data-test-subj={`lnsXY_layer_add`}
-        aria-label={i18n.translate('xpack.lens.xyChart.addLayerButton', {
-          defaultMessage: 'Add layer',
-        })}
-        title={i18n.translate('xpack.lens.xyChart.addLayerButton', {
-          defaultMessage: 'Add layer',
-        })}
-        onClick={() => {
-          const usedSeriesTypes = _.uniq(state.layers.map(layer => layer.seriesType));
-          setState({
-            ...state,
-            layers: [
-              ...state.layers,
-              newLayerState(
-                usedSeriesTypes.length === 1 ? usedSeriesTypes[0] : state.preferredSeriesType,
-                frame.addNewLayer()
-              ),
-            ],
-          });
-        }}
-        iconType="plusInCircleFilled"
-      />
+      <EuiFlexItem grow={true}>
+        <EuiToolTip
+          className="eui-fullWidth"
+          content={i18n.translate('xpack.lens.xyChart.addLayerTooltip', {
+            defaultMessage:
+              'Use multiple layers to combine chart types or visualize different index patterns.',
+          })}
+          position="bottom"
+        >
+          <EuiButton
+            className="lnsConfigPanel__addLayerBtn"
+            fullWidth
+            size="s"
+            data-test-subj={`lnsXY_layer_add`}
+            aria-label={i18n.translate('xpack.lens.xyChart.addLayerButton', {
+              defaultMessage: 'Add layer',
+            })}
+            title={i18n.translate('xpack.lens.xyChart.addLayerButton', {
+              defaultMessage: 'Add layer',
+            })}
+            onClick={() => {
+              trackUiEvent('xy_layer_added');
+              const usedSeriesTypes = _.uniq(state.layers.map(layer => layer.seriesType));
+              setState({
+                ...state,
+                layers: [
+                  ...state.layers,
+                  newLayerState(
+                    usedSeriesTypes.length === 1 ? usedSeriesTypes[0] : state.preferredSeriesType,
+                    frame.addNewLayer()
+                  ),
+                ],
+              });
+            }}
+            iconType="plusInCircleFilled"
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
     </EuiForm>
   );
 }

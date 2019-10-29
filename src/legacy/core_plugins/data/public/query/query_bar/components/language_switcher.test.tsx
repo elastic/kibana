@@ -17,43 +17,50 @@
  * under the License.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
 import { QueryLanguageSwitcher } from './language_switcher';
+import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
+import { coreMock } from '../../../../../../../core/public/mocks';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
+const startMock = coreMock.createStart();
 
 describe('LanguageSwitcher', () => {
+  function wrapInContext(testProps: any) {
+    const services = {
+      uiSettings: startMock.uiSettings,
+      docLinks: startMock.docLinks,
+    };
+
+    return (
+      <KibanaContextProvider services={services}>
+        <QueryLanguageSwitcher {...testProps} />
+      </KibanaContextProvider>
+    );
+  }
+
   it('should toggle off if language is lucene', () => {
-    const component = shallow(
-      <QueryLanguageSwitcher
-        language="lucene"
-        onSelectLanguage={() => {
+    const component = mountWithIntl(
+      wrapInContext({
+        language: 'lucene',
+        onSelectLanguage: () => {
           return;
-        }}
-      />
+        },
+      })
     );
 
     expect(component).toMatchSnapshot();
   });
 
   it('should toggle on if language is kuery', () => {
-    const component = shallow(
-      <QueryLanguageSwitcher
-        language="kuery"
-        onSelectLanguage={() => {
+    const component = mountWithIntl(
+      wrapInContext({
+        language: 'kuery',
+        onSelectLanguage: () => {
           return;
-        }}
-      />
+        },
+      })
     );
 
     expect(component).toMatchSnapshot();
-  });
-
-  it('call onSelectLanguage when the toggle is clicked', () => {
-    const callback = jest.fn();
-    const component = shallow(
-      <QueryLanguageSwitcher language="kuery" onSelectLanguage={callback} />
-    );
-    component.find('[data-test-subj="languageToggle"]').simulate('change');
-    expect(callback).toHaveBeenCalledTimes(1);
   });
 });

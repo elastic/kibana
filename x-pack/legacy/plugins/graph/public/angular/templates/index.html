@@ -4,29 +4,76 @@
   </kbn-top-nav>
 
   <div class="gphGraph__menus" ng-show="menus.showInspect">
-    <graph-inspect ng-show="menus.showInspect"></graph-inspect>
+    <div>
+      <div
+        class="kuiLocalDropdownTitle"
+        i18n-id="xpack.graph.inspect.title"
+        i18n-default-message="Inspect"
+      ></div>
+
+      <div
+        class="list-group-item"
+        ng-if="(workspace !== null)"
+      >
+        <small class="help-block">http://host:port/{{ selectedIndex.name }}/_graph/explore</small>
+        <ul class="nav nav-tabs">
+          <li ng-class="{active: spymode === 'request'}">
+            <a
+              ng-click="spymode='request'"
+              i18n-id="xpack.graph.inspect.requestTabTitle"
+              i18n-default-message="Request"
+            ></a>
+          </li>
+          <li ng-class="{active: spymode === 'response'}">
+            <a
+              ng-click="spymode='response'"
+              i18n-id="xpack.graph.inspect.responseTabTitle"
+              i18n-default-message="Response"
+            ></a>
+          </li>
+        </ul>
+
+        <div
+          ng-show="spymode == 'request'"
+          ui-ace="{ onLoad: aceLoaded, mode: 'json', advanced: { readOnly: true } }"
+          ng-model="workspace.lastRequest"
+          class="gphSettings__jsonView"
+        ></div>
+        <div
+          ng-show="spymode == 'response'"
+          ui-ace="{ onLoad: aceLoaded, mode: 'json', advanced: { readOnly: true } }"
+          ng-model="workspace.lastResponse"
+          class="gphSettings__jsonView"
+        ></div>
+      </div>
+    </div>
   </div>
 
-  <graph-app
+  <div
+    graph-app
     current-index-pattern="selectedIndex"
-    on-index-pattern-selected="uiSelectIndex"
     on-query-submit="submit"
+    index-pattern-provider="indexPatternProvider"
+    redux-store="reduxStore"
+    confirm-wipe-workspace="confirmWipeWorkspace"
     is-loading="loading"
+    is-initialized="workspaceInitialized || savedWorkspace.id"
     initial-query="initialQuery"
-    state="reduxState"
-    dispatch="reduxDispatch"
-    autocomplete-start="autocompleteStart"
+    plugin-data-start="pluginDataStart"
     core-start="coreStart"
-    store="store"
-  ></graph-app>
+    storage="storage"
+    no-index-patterns="noIndexPatterns"
+  ></div>
 
-  <div class="gphGraph__container" id="GraphSvgContainer" ng-click="hideAllConfigPanels()">
-    <graph-visualization
+  <div class="gphGraph__container" id="GraphSvgContainer" ng-if="workspaceInitialized || savedWorkspace.id">
+    <div
+      class="gphVisualization"
+      graph-visualization
       nodes="workspace.nodes"
       edges="workspace.edges"
       edge-click="clickEdge"
       node-click="nodeClick"
-    ></graph-visualization>
+    ></div>
 
     <div id="sidebar" class="gphSidebar" ng-if="workspace !== null">
 
@@ -102,7 +149,6 @@
 
       <div>
         <div class="gphSidebar__header">
-          <span class="kuiIcon fa-shopping-cart"></span>
           {{ ::'xpack.graph.sidebar.selectionsTitle' | i18n: { defaultMessage: 'Selections' } }}
         </div>
 
@@ -145,7 +191,7 @@
             ng-if="workspace.selectedNodes.length === 0"
             class="help-block"
             i18n-id="xpack.graph.sidebar.selections.noSelectionsHelpText"
-            i18n-default-message="No selections. Click on vertices to add"
+            i18n-default-message="No selections. Click on vertices to add."
           ></p>
 
           <div ng-repeat="n in workspace.selectedNodes" class="gphSelectionList__field" ng-class="{'gphSelectionList__field--selected': isSelectedSelected(n)}"
@@ -154,7 +200,15 @@
               <circle class="gphNode__circle " r="10" cx="12" cy="12" ng-attr-style="fill:{{n.color}}"
                 ng-click="workspace.deselectNode(n)" />
 
-              <text ng-if="n.icon" class="fa gphNode__text" text-anchor="middle" x="12" y="17" ng-click="workspace.deselectNode(n)">{{n.icon.code}}</text>
+              <text
+                ng-if="n.icon"
+                class="fa gphNode__text gphSelectionList__icon"
+                text-anchor="middle"
+                x="12"
+                y="16"
+                ng-click="workspace.deselectNode(n)"
+                ng-class="{'gphNode__text--inverse': isColorDark(n.color)}"
+              >{{n.icon.code}}</text>
             </svg>
             <span>{{n.label}}</span>
             <span ng-if="n.numChildren>0"> (+{{n.numChildren}})</span>
@@ -260,7 +314,7 @@
               <div
                 class="help-block"
                 i18n-id="xpack.graph.sidebar.displayLabelHelpText"
-                i18n-default-message="Change the label for this vertex"
+                i18n-default-message="Change the label for this vertex."
               ></div>
             </div>
           </div>

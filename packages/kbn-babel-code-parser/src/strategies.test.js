@@ -59,8 +59,8 @@ describe('Code Parser Strategies', () => {
       cb(null, `require('dep_from_node_modules')`);
     });
 
-    canRequire.mockImplementation((mockCwd, entry) => {
-      if (entry === `${mockCwd}dep1/dep_from_node_modules`) {
+    canRequire.mockImplementation((entry, cwd) => {
+      if (entry === `${cwd}dep1/dep_from_node_modules`) {
         return false;
       }
 
@@ -78,7 +78,7 @@ describe('Code Parser Strategies', () => {
       cb(null, `require('./relative_dep')`);
     });
 
-    canRequire.mockImplementation((mockCwd, entry) => {
+    canRequire.mockImplementation((entry) => {
       if (entry === `${mockCwd}dep1/relative_dep`) {
         return `${entry}/index.js`;
       }

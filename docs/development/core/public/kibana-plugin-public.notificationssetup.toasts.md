@@ -4,6 +4,8 @@
 
 ## NotificationsSetup.toasts property
 
+[ToastsSetup](./kibana-plugin-public.toastssetup.md)
+
 <b>Signature:</b>
 
 ```typescript

@@ -8,7 +8,7 @@ import React, { Fragment, FC, useContext, useEffect, useState, useReducer } from
 import { EuiHorizontalRule } from '@elastic/eui';
 
 import { JobCreatorContext } from '../../../job_creator_context';
-import { PopulationJobCreator, isPopulationJobCreator } from '../../../../../common/job_creator';
+import { PopulationJobCreator } from '../../../../../common/job_creator';
 import { LineChartData } from '../../../../../common/chart_loader';
 import { DropDownLabel, DropDownProps } from '../agg_select';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
@@ -17,7 +17,7 @@ import { getChartSettings, defaultChartSettings } from '../../../charts/common/s
 import { MetricSelector } from './metric_selector';
 import { SplitFieldSelector } from '../split_field';
 import { ChartGrid } from './chart_grid';
-import { mlMessageBarService } from '../../../../../../../components/messagebar/messagebar_service';
+import { mlMessageBarService } from '../../../../../../../components/messagebar';
 
 interface Props {
   setIsValid: (na: boolean) => void;
@@ -33,14 +33,10 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
     chartLoader,
     chartInterval,
   } = useContext(JobCreatorContext);
-
-  if (isPopulationJobCreator(jc) === false) {
-    return null;
-  }
   const jobCreator = jc as PopulationJobCreator;
 
   const { fields } = newJobCapsService;
-  const [selectedOptions, setSelectedOptions] = useState<DropDownProps>([{ label: '' }]);
+  const [selectedOptions, setSelectedOptions] = useState<DropDownProps>([]);
   const [aggFieldPairList, setAggFieldPairList] = useState<AggFieldPair[]>(
     jobCreator.aggFieldPairs
   );
@@ -66,7 +62,7 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
       if (typeof option !== 'undefined') {
         const newPair = { agg: option.agg, field: option.field, by: { field: null, value: null } };
         setAggFieldPairList([...aggFieldPairList, newPair]);
-        setSelectedOptions([{ label: '' }]);
+        setSelectedOptions([]);
       } else {
         setAggFieldPairList([]);
       }

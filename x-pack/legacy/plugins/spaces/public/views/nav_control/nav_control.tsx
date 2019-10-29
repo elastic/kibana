@@ -54,9 +54,9 @@ chromeHeaderNavControlsRegistry.register((chrome: any, activeSpace: any) => ({
       return;
     }
 
-    const spaceSelectorURL = chrome.getInjected('spaceSelectorURL');
+    const serverBasePath = chrome.getInjected('serverBasePath');
 
-    spacesManager = new SpacesManager(spaceSelectorURL);
+    spacesManager = new SpacesManager(serverBasePath);
 
     ReactDOM.render(
       <I18nContext>

@@ -17,6 +17,12 @@
  * under the License.
  */
 
+declare module '*.html' {
+  const template: string;
+  // eslint-disable-next-line import/no-default-export
+  export default template;
+}
+
 type MethodKeysOf<T> = {
   [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never;
 }[keyof T];

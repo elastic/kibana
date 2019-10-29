@@ -185,7 +185,7 @@ export function uiRenderMixin(kbnServer, server, config) {
   async function getUiSettings({ request, includeUserProvidedConfig }) {
     const uiSettings = request.getUiSettingsService();
     return props({
-      defaults: uiSettings.getDefaults(),
+      defaults: uiSettings.getRegistered(),
       user: includeUserProvidedConfig && uiSettings.getUserProvided()
     });
   }
@@ -221,7 +221,7 @@ export function uiRenderMixin(kbnServer, server, config) {
     // Get the list of new platform plugins.
     // Convert the Map into an array of objects so it is JSON serializable and order is preserved.
     const uiPlugins = [
-      ...kbnServer.newPlatform.setup.core.plugins.uiPlugins.public.entries()
+      ...kbnServer.newPlatform.__internals.uiPlugins.public.entries()
     ].map(([id, plugin]) => ({ id, plugin }));
 
     const response = h.view('ui_app', {
@@ -237,6 +237,7 @@ export function uiRenderMixin(kbnServer, server, config) {
         buildNumber: config.get('pkg.buildNum'),
         branch: config.get('pkg.branch'),
         basePath,
+        env: kbnServer.newPlatform.env,
         legacyMode: app.getId() !== 'core',
         i18n: {
           translationsUrl: `${basePath}/translations/${i18n.getLocale()}.json`,

@@ -4,21 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Storage } from 'ui/storage';
 import {
   UiSettingsClientContract,
   SavedObjectsClientContract,
   HttpServiceBase,
 } from 'src/core/public';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { termsOperation } from './terms';
 import { cardinalityOperation } from './cardinality';
 import { minOperation, averageOperation, sumOperation, maxOperation } from './metrics';
 import { dateHistogramOperation } from './date_histogram';
 import { countOperation } from './count';
-import { filterRatioOperation } from './filter_ratio';
 import { DimensionPriority, StateSetter, OperationMetadata } from '../../../types';
 import { BaseIndexPatternColumn, FieldBasedIndexPatternColumn } from './column_types';
-import { IndexPatternPrivateState, IndexPattern, IndexPatternField } from '../../indexpattern';
+import { IndexPatternPrivateState, IndexPattern, IndexPatternField } from '../../types';
+import { DateRange } from '../../../../common';
 
 // List of all operation definitions registered to this data source.
 // If you want to implement a new operation, add it to this array and
@@ -32,14 +32,12 @@ const internalOperationDefinitions = [
   cardinalityOperation,
   sumOperation,
   countOperation,
-  filterRatioOperation,
 ];
 
 export { termsOperation } from './terms';
 export { dateHistogramOperation } from './date_histogram';
 export { minOperation, averageOperation, sumOperation, maxOperation } from './metrics';
 export { countOperation } from './count';
-export { filterRatioOperation } from './filter_ratio';
 
 /**
  * Properties passed to the operation-specific part of the popover editor
@@ -51,9 +49,10 @@ export interface ParamEditorProps<C extends BaseIndexPatternColumn> {
   columnId: string;
   layerId: string;
   uiSettings: UiSettingsClientContract;
-  storage: Storage;
+  storage: IStorageWrapper;
   savedObjectsClient: SavedObjectsClientContract;
   http: HttpServiceBase;
+  dateRange: DateRange;
 }
 
 interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
