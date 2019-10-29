@@ -21,7 +21,11 @@ import Joi from 'joi';
 import { boomify } from 'boom';
 import { CoreSetup } from 'src/core/server';
 
-export function registerOptInRoutes(core: CoreSetup) {
+interface RegisterOptInRoutesParams {
+  core: CoreSetup;
+  currentKibanaVersion: string;
+}
+export function registerOptInRoutes({ core, currentKibanaVersion }: RegisterOptInRoutesParams) {
   const { server } = core.http as any;
 
   server.route({
@@ -36,13 +40,12 @@ export function registerOptInRoutes(core: CoreSetup) {
     },
     handler: async (req: any, h: any) => {
       const savedObjectsClient = req.getSavedObjectsClient();
-      const lastVersionChecked = server.config().get('pkg.version');
       try {
         await savedObjectsClient.create(
           'telemetry',
           {
             enabled: req.payload.enabled,
-            lastVersionChecked,
+            lastVersionChecked: currentKibanaVersion,
           },
           {
             id: 'telemetry',

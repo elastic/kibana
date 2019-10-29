@@ -17,7 +17,19 @@
  * under the License.
  */
 
-export async function getTelemetryOptIn(request: any): Promise<boolean | null> {
+import semver from 'semver';
+
+interface GetTelemetryOptIn {
+  request: any;
+  currentKibanaVersion: string;
+}
+
+// Returns whether telemetry has been opt'ed into or not.
+// Returns null not set, meaning Kibana should prompt in the UI.
+export async function getTelemetryOptIn({
+  request,
+  currentKibanaVersion,
+}: GetTelemetryOptIn): Promise<boolean | null> {
   const isRequestingApplication = request.path.startsWith('/app');
 
   // Prevent interstitial screens (such as the space selector) from prompting for telemetry
@@ -45,14 +57,58 @@ export async function getTelemetryOptIn(request: any): Promise<boolean | null> {
   }
 
   const { attributes } = savedObject;
+
+  // return `enabled` attribute, unless it's false ...
   if (attributes.enabled !== false) return attributes.enabled;
 
-  // Additional check if they've already opted out (enabled: false) - if the
-  // Kibana version has changed since they opted out, set them back to the null
-  // state to get prompted again.
-  const config = request.server.config();
-  const kibanaVersion = config.get('pkg.version');
-  if (kibanaVersion !== attributes.lastVersionChecked) return null;
+  // Additional check if they've already opted out (enabled: false):
+  // - if the Kibana version has changed by at least a minor version,
+  //   set them back to the null state to get prompted again.
 
+  const lastKibanaVersion = attributes.lastVersionChecked;
+
+  // if version hasn't changed, just return enabled value
+  if (lastKibanaVersion === currentKibanaVersion) return attributes.enabled;
+
+  const lastSemver = parseSemver(lastKibanaVersion);
+  const currentSemver = parseSemver(currentKibanaVersion);
+
+  // if both versions aren't valid, just return the current enabled value
+  if (lastSemver == null && currentSemver == null) {
+    return attributes.enabled;
+  }
+
+  // if one version is valid and one isn't, return null to force re-prompt
+  if (lastSemver == null || currentSemver == null) {
+    return null;
+  }
+
+  // actual major/minor version comparison, for cases when to return null
+  if (currentSemver.major > lastSemver.major) return null;
+  if (currentSemver.major === lastSemver.major) {
+    if (currentSemver.minor > lastSemver.minor) return null;
+  }
+
+  // current version X.Y is not greater than last version X.Y, return enabled
   return attributes.enabled;
+}
+
+function parseSemver(version: string | null): semver.SemVer | null {
+  if (version == null) return null;
+
+  // semver functions both return nulls AND throw exceptions: "it depends!"
+  let validated: string | null;
+  try {
+    validated = semver.valid(version);
+  } catch (err) {
+    return null;
+  }
+
+  if (validated == null) return null;
+
+  try {
+    return semver.parse(version);
+  } catch (err) {
+    return null;
+  }
 }
