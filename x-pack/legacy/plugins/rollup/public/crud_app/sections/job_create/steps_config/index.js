@@ -9,7 +9,7 @@ import get from 'lodash/object/get';
 import pick from 'lodash/object/pick';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { WEEK } from '../../../../../../../../../src/plugins/es_ui_shared/public/components/cron_editor';
+import { WEEK } from 'src/plugins/es_ui_shared/public/components/cron_editor';
 
 import { validateId } from './validate_id';
 import { validateIndexPattern } from './validate_index_pattern';

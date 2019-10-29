@@ -18,7 +18,7 @@
  */
 
 // @ts-ignore
-import { createTransform, Deprecations } from '../../../../../../src/legacy/deprecation';
+import { createTransform, Deprecations } from 'src/legacy/deprecation';
 
 type DeprecationTransformer = (
   settings: object,

@@ -13,7 +13,7 @@ import {
   KibanaRequest,
   Logger,
   PluginInitializerContext,
-} from '../../../../src/core/server';
+} from 'src/core/server';
 import { SecurityPlugin } from '../../../legacy/plugins/security';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';

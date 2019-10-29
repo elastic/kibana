@@ -16,16 +16,13 @@ import { EuiErrorBoundary } from '@elastic/eui';
 import { UICapabilitiesProvider } from 'ui/capabilities/react';
 import { I18nContext } from 'ui/i18n';
 import { npStart } from 'ui/new_platform';
+import { useUiSetting$, KibanaContextProvider } from 'src/plugins/kibana_react/public';
 import { EuiThemeProvider } from '../../../../common/eui_styled_components';
 import { InfraFrontendLibs } from '../lib/lib';
 import { PageRouter } from '../routes';
 import { createStore } from '../store';
 import { ApolloClientContext } from '../utils/apollo_context';
 import { HistoryContext } from '../utils/history_context';
-import {
-  useUiSetting$,
-  KibanaContextProvider,
-} from '../../../../../../src/plugins/kibana_react/public';
 
 const { uiSettings } = npStart.core;
 

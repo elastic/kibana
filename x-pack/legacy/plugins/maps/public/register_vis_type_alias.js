@@ -5,7 +5,7 @@
  */
 
 import chrome from 'ui/chrome';
-import { setup as visualizationsSetup } from '../../../../../src/legacy/core_plugins/visualizations/public/np_ready/public/legacy';
+import { setup as visualizationsSetup } from 'src/legacy/core_plugins/visualizations/public/np_ready/public/legacy';
 import { i18n } from '@kbn/i18n';
 import { APP_ID, APP_ICON, MAP_BASE_URL } from '../common/constants';
 

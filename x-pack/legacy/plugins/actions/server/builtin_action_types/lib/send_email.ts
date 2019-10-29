@@ -9,7 +9,7 @@ import nodemailer from 'nodemailer';
 
 import { default as MarkdownIt } from 'markdown-it';
 
-import { Logger } from '../../../../../../../src/core/server';
+import { Logger } from 'src/core/server';
 
 // an email "service" which doesn't actually send, just returns what it would send
 export const JSON_TRANSPORT_SERVICE = '__json';

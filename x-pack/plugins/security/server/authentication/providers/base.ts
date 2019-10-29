@@ -4,13 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  KibanaRequest,
-  Logger,
-  HttpServiceSetup,
-  IClusterClient,
-  Headers,
-} from '../../../../../../src/core/server';
+import { KibanaRequest, Logger, HttpServiceSetup, IClusterClient, Headers } from 'src/core/server';
 import { AuthenticatedUser } from '../../../common/model';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';

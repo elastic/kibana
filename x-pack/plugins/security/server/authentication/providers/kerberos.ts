@@ -5,11 +5,7 @@
  */
 
 import Boom from 'boom';
-import {
-  ElasticsearchError,
-  ElasticsearchErrorHelpers,
-  KibanaRequest,
-} from '../../../../../../src/core/server';
+import { ElasticsearchError, ElasticsearchErrorHelpers, KibanaRequest } from 'src/core/server';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { BaseAuthenticationProvider } from './base';

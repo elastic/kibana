@@ -11,7 +11,7 @@ import { CoreStart } from 'src/core/public';
 import { act } from 'react-dom/test-utils';
 import { QueryBarInput, IndexPattern } from 'src/legacy/core_plugins/data/public';
 
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 import { I18nProvider } from '@kbn/i18n/react';
 
 jest.mock('ui/new_platform');

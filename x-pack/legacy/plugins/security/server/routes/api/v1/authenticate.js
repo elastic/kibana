@@ -8,8 +8,8 @@ import Boom from 'boom';
 import Joi from 'joi';
 import { schema } from '@kbn/config-schema';
 import { canRedirectRequest, wrapError, OIDCAuthenticationFlow } from '../../../../../../../plugins/security/server';
-import { KibanaRequest } from '../../../../../../../../src/core/server';
-import { createCSPRuleString } from '../../../../../../../../src/legacy/server/csp';
+import { KibanaRequest } from 'src/core/server';
+import { createCSPRuleString } from 'src/legacy/server/csp';
 
 export function initAuthenticateApi({ authc: { login, logout }, config }, server) {
   function prepareCustomResourceResponse(response, contentType) {

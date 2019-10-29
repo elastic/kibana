@@ -12,17 +12,17 @@ import { toastNotifications } from 'ui/notify';
 import chrome from 'ui/chrome';
 
 import { npSetup } from 'ui/new_platform';
-import { IAction, IncompatibleActionError } from '../../../../../../src/plugins/ui_actions/public';
+import { IAction, IncompatibleActionError } from 'src/plugins/ui_actions/public';
 
 import {
   ViewMode,
   IEmbeddable,
   CONTEXT_MENU_TRIGGER,
-} from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+} from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import {
   ISearchEmbeddable,
   SEARCH_EMBEDDABLE_TYPE,
-} from '../../../../../../src/legacy/core_plugins/kibana/public/discover/embeddable';
+} from 'src/legacy/core_plugins/kibana/public/discover/embeddable';
 import { API_BASE_URL_V1 } from '../../common/constants';
 
 const API_BASE_URL = `${API_BASE_URL_V1}/generate/immediate/csv/saved-object`;

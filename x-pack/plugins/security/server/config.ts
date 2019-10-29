@@ -8,7 +8,7 @@ import crypto from 'crypto';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { schema, Type, TypeOf } from '@kbn/config-schema';
-import { PluginInitializerContext } from '../../../../src/core/server';
+import { PluginInitializerContext } from 'src/core/server';
 
 export type ConfigType = ReturnType<typeof createConfig$> extends Observable<infer P>
   ? P

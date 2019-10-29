@@ -7,7 +7,7 @@
 import { resolve } from 'path';
 import { Legacy } from 'kibana';
 
-import { LegacyPluginApi, LegacyPluginInitializer } from '../../../../src/legacy/types';
+import { LegacyPluginApi, LegacyPluginInitializer } from 'src/legacy/types';
 
 export const kueryAutocompleteInitializer: LegacyPluginInitializer = ({
   Plugin,

@@ -7,9 +7,9 @@
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { isEmpty } from 'lodash';
 import { npStart } from 'ui/new_platform';
+import { AutocompleteSuggestion } from 'src/plugins/data/public';
 import { RestAPIAdapter } from '../rest_api/adapter_types';
 import { ElasticsearchAdapter } from './adapter_types';
-import { AutocompleteSuggestion } from '../../../../../../../../src/plugins/data/public';
 
 const getAutocompleteProvider = (language: string) =>
   npStart.plugins.data.autocomplete.getProvider(language);

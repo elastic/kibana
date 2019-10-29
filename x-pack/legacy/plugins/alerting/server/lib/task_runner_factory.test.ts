@@ -10,10 +10,7 @@ import { AlertExecutorOptions } from '../types';
 import { ConcreteTaskInstance } from '../../../task_manager';
 import { TaskRunnerContext, TaskRunnerFactory } from './task_runner_factory';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/plugin.mock';
-import {
-  savedObjectsClientMock,
-  loggingServiceMock,
-} from '../../../../../../src/core/server/mocks';
+import { savedObjectsClientMock, loggingServiceMock } from 'src/core/server/mocks';
 
 const alertType = {
   id: 'test',

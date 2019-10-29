@@ -10,7 +10,7 @@ import { Filter } from '@kbn/es-query';
 import { CoreSetup } from 'src/core/public';
 import { Query } from 'src/plugins/data/common';
 import { SavedQuery } from 'src/legacy/core_plugins/data/public';
-import { KibanaDatatable } from '../../../../../src/legacy/core_plugins/interpreter/common';
+import { KibanaDatatable } from 'src/legacy/core_plugins/interpreter/common';
 import { DragContextState } from './drag_drop';
 import { Document } from './persistence';
 

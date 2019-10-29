@@ -7,7 +7,7 @@
 import sinon from 'sinon';
 import Boom from 'boom';
 
-import { httpServerMock } from '../../../../../../src/core/server/mocks';
+import { httpServerMock } from 'src/core/server/mocks';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import {
   MockAuthenticationProviderOptions,
@@ -15,7 +15,7 @@ import {
   mockScopedClusterClient,
 } from './base.mock';
 
-import { KibanaRequest } from '../../../../../../src/core/server';
+import { KibanaRequest } from 'src/core/server';
 import { OIDCAuthenticationProvider, OIDCAuthenticationFlow, ProviderLoginAttempt } from './oidc';
 
 describe('OIDCAuthenticationProvider', () => {

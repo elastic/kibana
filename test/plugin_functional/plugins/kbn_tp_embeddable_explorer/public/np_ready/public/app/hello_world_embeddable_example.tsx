@@ -22,11 +22,11 @@ import {
   EmbeddablePanel,
   GetEmbeddableFactory,
   GetEmbeddableFactories,
-} from '../../../../../../../../src/plugins/embeddable/public';
-import { HelloWorldEmbeddable } from '../../../../../../../../src/plugins/embeddable/public/lib/test_samples';
-import { TGetActionsCompatibleWithTrigger } from '../../../../../../../../src/plugins/ui_actions/public';
-import { CoreStart } from '../../../../../../../../src/core/public';
-import { Start as InspectorStartContract } from '../../../../../../../../src/plugins/inspector/public';
+} from 'src/plugins/embeddable/public';
+import { HelloWorldEmbeddable } from 'src/plugins/embeddable/public/lib/test_samples';
+import { TGetActionsCompatibleWithTrigger } from 'src/plugins/ui_actions/public';
+import { CoreStart } from 'src/core/public';
+import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 
 interface Props {
   getActions: TGetActionsCompatibleWithTrigger;

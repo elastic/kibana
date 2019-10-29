@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaRequest } from '../../../../../src/core/server';
+import { KibanaRequest } from 'src/core/server';
 
 const ROUTE_TAG_API = 'api';
 const KIBANA_XSRF_HEADER = 'kbn-xsrf';

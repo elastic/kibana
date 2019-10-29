@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { getContentType } from '../../src/es';
+import { getContentType } from 'src/legacy/core_plugins/console/public/quarantined/src/es';
 
 const APPLICATION_JSON = 'application/json';
 describe('Content type', () => {

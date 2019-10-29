@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { typesRegistry } from '../../../../../src/legacy/core_plugins/interpreter/public/registries';
+import { typesRegistry } from 'src/legacy/core_plugins/interpreter/public/registries';
 import { typeFunctions } from '../canvas_plugin_src/expression_types';
 
 typeFunctions.forEach(r => {

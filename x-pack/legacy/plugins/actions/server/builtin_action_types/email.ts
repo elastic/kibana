@@ -9,10 +9,10 @@ import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import nodemailerServices from 'nodemailer/lib/well-known/services.json';
 
+import { Logger } from 'src/core/server';
 import { sendEmail, JSON_TRANSPORT_SERVICE } from './lib/send_email';
 import { nullableType } from './lib/nullable';
 import { portSchema } from './lib/schemas';
-import { Logger } from '../../../../../../src/core/server';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 
 // config definition

@@ -15,12 +15,9 @@ import {
   SavedObjectsErrorHelpers,
   IBasePath,
   IRouter,
-} from '../../../../../../src/core/server';
-import {
-  elasticsearchServiceMock,
-  loggingServiceMock,
-} from '../../../../../../src/core/server/mocks';
-import * as kbnTestServer from '../../../../../../src/test_utils/kbn_server';
+} from 'src/core/server';
+import { elasticsearchServiceMock, loggingServiceMock } from 'src/core/server/mocks';
+import * as kbnTestServer from 'src/test_utils/kbn_server';
 import { LegacyAPI, PluginsSetup } from '../../plugin';
 import { SpacesService } from '../../spaces_service';
 import { SpacesAuditLogger } from '../audit_logger';

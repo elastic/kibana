@@ -10,11 +10,11 @@ import { skip } from 'rxjs/operators';
 import * as Rx from 'rxjs';
 import { mount } from 'enzyme';
 
-import { EmbeddableFactory } from '../../../../src/plugins/embeddable/public';
+import { EmbeddableFactory } from 'src/plugins/embeddable/public';
 import { TimeRangeEmbeddable, TimeRangeContainer, TIME_RANGE_EMBEDDABLE } from './test_helpers';
 import { TimeRangeEmbeddableFactory } from './test_helpers/time_range_embeddable_factory';
 import { CustomTimeRangeAction } from './custom_time_range_action';
-import { coreMock } from '../../../../src/core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 /* eslint-disable */
 import {
   HelloWorldEmbeddableFactory,

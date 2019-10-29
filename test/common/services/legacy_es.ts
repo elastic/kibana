@@ -21,7 +21,7 @@ import { format as formatUrl } from 'url';
 
 import * as legacyElasticsearch from 'elasticsearch';
 
-import { DEFAULT_API_VERSION } from '../../../src/core/server/elasticsearch/elasticsearch_config';
+import { DEFAULT_API_VERSION } from 'src/core/server/elasticsearch/elasticsearch_config';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function LegacyEsProvider({ getService }: FtrProviderContext): legacyElasticsearch.Client {

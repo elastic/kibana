@@ -7,9 +7,9 @@
 import { CoreSetup } from 'src/core/public';
 import { getFormat, FormatFactory } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import { npSetup } from 'ui/new_platform';
+import { ExpressionsSetup } from 'src/legacy/core_plugins/expressions/public';
+import { setup as expressionsSetup } from 'src/legacy/core_plugins/expressions/public/legacy';
 import { datatableVisualization } from './visualization';
-import { ExpressionsSetup } from '../../../../../../src/legacy/core_plugins/expressions/public';
-import { setup as expressionsSetup } from '../../../../../../src/legacy/core_plugins/expressions/public/legacy';
 import { datatable, datatableColumns, getDatatableRenderer } from './expression';
 
 export interface DatatableVisualizationPluginSetupPlugins {

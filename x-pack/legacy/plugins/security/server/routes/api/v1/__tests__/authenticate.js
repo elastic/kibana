@@ -13,7 +13,7 @@ import { serverFixture } from '../../../../lib/__tests__/__fixtures__/server';
 import { requestFixture } from '../../../../lib/__tests__/__fixtures__/request';
 import { AuthenticationResult, DeauthenticationResult } from '../../../../../../../../plugins/security/server';
 import { initAuthenticateApi } from '../authenticate';
-import { KibanaRequest } from '../../../../../../../../../src/core/server';
+import { KibanaRequest } from 'src/core/server';
 
 describe('Authentication routes', () => {
   let serverStub;

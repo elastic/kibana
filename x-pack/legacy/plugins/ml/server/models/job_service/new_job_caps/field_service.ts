@@ -6,6 +6,7 @@
 
 import { cloneDeep } from 'lodash';
 import { Request } from 'src/legacy/server/kbn_server';
+import { ES_FIELD_TYPES } from 'src/plugins/data/common';
 import {
   Field,
   Aggregation,
@@ -13,7 +14,6 @@ import {
   NewJobCaps,
   METRIC_AGG_TYPE,
 } from '../../../../common/types/fields';
-import { ES_FIELD_TYPES } from '../../../../../../../../src/plugins/data/common';
 import { ML_JOB_AGGREGATION } from '../../../../common/constants/aggregation_types';
 import { rollupServiceProvider, RollupJob, RollupFields } from './rollup';
 import { aggregations, mlOnlyAggregations } from './aggregations';

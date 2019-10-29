@@ -38,7 +38,7 @@ import { i18n } from '@kbn/i18n';
 import { Filter, buildEsQuery, getEsQueryConfig } from '@kbn/es-query';
 import { Query } from 'src/plugins/data/common';
 // @ts-ignore
-import { fieldFormats } from '../../../../../../src/legacy/ui/public/registry/field_formats';
+import { fieldFormats } from 'src/legacy/ui/public/registry/field_formats';
 import { DraggedField } from './indexpattern';
 import { DragDrop } from '../drag_drop';
 import { DatasourceDataPanelProps, DataType } from '../types';

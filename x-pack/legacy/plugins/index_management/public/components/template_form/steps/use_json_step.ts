@@ -7,7 +7,7 @@
 import { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { isJSON } from '../../../../../../../../src/plugins/es_ui_shared/static/validators/string';
+import { isJSON } from 'src/plugins/es_ui_shared/static/validators/string';
 import { StepProps } from '../types';
 
 interface Parameters {

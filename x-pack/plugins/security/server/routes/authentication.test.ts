@@ -7,13 +7,9 @@
 import { Type } from '@kbn/config-schema';
 import { Authentication, AuthenticationResult, SAMLLoginStep } from '../authentication';
 import { defineAuthenticationRoutes } from './authentication';
-import {
-  httpServerMock,
-  httpServiceMock,
-  loggingServiceMock,
-} from '../../../../../src/core/server/mocks';
+import { httpServerMock, httpServiceMock, loggingServiceMock } from 'src/core/server/mocks';
 import { ConfigType } from '../config';
-import { IRouter, RequestHandler, RouteConfig } from '../../../../../src/core/server';
+import { IRouter, RequestHandler, RouteConfig } from 'src/core/server';
 import { LegacyAPI } from '../plugin';
 import { authenticationMock } from '../authentication/index.mock';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';

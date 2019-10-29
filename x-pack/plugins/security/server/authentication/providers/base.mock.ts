@@ -5,13 +5,13 @@
  */
 
 import sinon from 'sinon';
-import { ScopedClusterClient } from '../../../../../../src/core/server';
+import { ScopedClusterClient } from 'src/core/server';
 import { Tokens } from '../tokens';
 import {
   loggingServiceMock,
   httpServiceMock,
   elasticsearchServiceMock,
-} from '../../../../../../src/core/server/mocks';
+} from 'src/core/server/mocks';
 
 export type MockAuthenticationProviderOptions = ReturnType<
   typeof mockAuthenticationProviderOptions

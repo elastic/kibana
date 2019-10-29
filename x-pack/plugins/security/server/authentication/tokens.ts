@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IClusterClient, Logger } from '../../../../../src/core/server';
+import { IClusterClient, Logger } from 'src/core/server';
 import { getErrorStatusCode } from '../errors';
 
 /**

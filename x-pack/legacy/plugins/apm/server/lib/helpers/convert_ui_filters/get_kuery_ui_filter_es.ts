@@ -7,9 +7,9 @@
 import { Server } from 'hapi';
 import { idx } from '@kbn/elastic-idx';
 import { toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
+import { StaticIndexPattern } from 'src/legacy/core_plugins/data/public';
 import { ESFilter } from '../../../../typings/elasticsearch';
 import { ISavedObject } from '../../../../public/services/rest/savedObjects';
-import { StaticIndexPattern } from '../../../../../../../../src/legacy/core_plugins/data/public';
 import { getAPMIndexPattern } from '../../../lib/index_pattern';
 
 export async function getKueryUiFilterES(

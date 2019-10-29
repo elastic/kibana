@@ -5,10 +5,7 @@
  */
 
 import { useEffect } from 'react';
-import {
-  createUiStatsReporter,
-  METRIC_TYPE,
-} from '../../../../../../src/legacy/core_plugins/ui_metric/public';
+import { createUiStatsReporter, METRIC_TYPE } from 'src/legacy/core_plugins/ui_metric/public';
 
 /**
  * Note: The UI Metric plugin will take care of sending this data to the telemetry server.

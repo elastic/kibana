@@ -12,7 +12,7 @@ import {
   Logger,
   HttpServiceSetup,
   IClusterClient,
-} from '../../../../../src/core/server';
+} from 'src/core/server';
 import { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';
 

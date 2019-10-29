@@ -21,7 +21,7 @@ import './setup_mocks';
 import ace from 'brace';
 import 'brace/mode/json';
 import $ from 'jquery';
-import { initializeEditor } from '../../src/input';
+import { initializeEditor } from 'src/legacy/core_plugins/console/public/quarantined/src/input';
 
 const tokenIterator = ace.acequire('ace/token_iterator');
 

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup, IRouter, Logger } from '../../../../../src/core/server';
+import { CoreSetup, IRouter, Logger } from 'src/core/server';
 import { Authentication } from '../authentication';
 import { ConfigType } from '../config';
 import { defineAuthenticationRoutes } from './authentication';

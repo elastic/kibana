@@ -18,11 +18,11 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
+import { Storage, IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { SearchService, SearchStart, createSearchBar, StatetfulSearchBarProps } from './search';
 import { QueryService, QuerySetup } from './query';
 import { TimefilterService, TimefilterSetup } from './timefilter';
 import { IndexPatternsService, IndexPatternsSetup, IndexPatternsStart } from './index_patterns';
-import { Storage, IStorageWrapper } from '../../../../../src/plugins/kibana_utils/public';
 import { DataPublicPluginStart } from '../../../../plugins/data/public';
 import { initLegacyModule } from './shim/legacy_module';
 import { IUiActionsSetup } from '../../../../plugins/ui_actions/public';

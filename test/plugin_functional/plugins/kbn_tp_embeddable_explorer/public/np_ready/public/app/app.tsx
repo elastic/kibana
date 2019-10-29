@@ -23,11 +23,11 @@ import {
   GetEmbeddableFactory,
   GetEmbeddableFactories,
 } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import { TGetActionsCompatibleWithTrigger } from '../../../../../../../../src/plugins/ui_actions/public';
+import { TGetActionsCompatibleWithTrigger } from 'src/plugins/ui_actions/public';
+import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import { ContactCardEmbeddableExample } from './hello_world_embeddable_example';
 import { HelloWorldContainerExample } from './hello_world_container_example';
 import { DashboardContainerExample } from './dashboard_container_example';
-import { Start as InspectorStartContract } from '../../../../../../../../src/plugins/inspector/public';
 
 export interface AppProps {
   getActions: TGetActionsCompatibleWithTrigger;

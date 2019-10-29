@@ -22,7 +22,7 @@ import _ from 'lodash';
 import ace from 'brace';
 import 'brace/mode/json';
 
-import { initializeEditor } from '../../src/input';
+import { initializeEditor } from 'src/legacy/core_plugins/console/public/quarantined/src/input';
 const editorInput1 = require('./editor_input1.txt');
 const utils = require('../../src/utils');
 

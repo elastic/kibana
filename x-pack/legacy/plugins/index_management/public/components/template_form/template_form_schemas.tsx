@@ -12,12 +12,9 @@ import {
   FormSchema,
   FIELD_TYPES,
   VALIDATION_TYPES,
-} from '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
+} from 'src/plugins/es_ui_shared/static/forms/hook_form_lib';
 
-import {
-  fieldFormatters,
-  fieldValidators,
-} from '../../../../../../../src/plugins/es_ui_shared/static/forms/helpers';
+import { fieldFormatters, fieldValidators } from 'src/plugins/es_ui_shared/static/forms/helpers';
 
 import {
   INVALID_INDEX_PATTERN_CHARS,

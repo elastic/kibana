@@ -4,12 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { UnwrapPromise } from '@kbn/utility-types';
-import {
-  IClusterClient,
-  CoreSetup,
-  KibanaRequest,
-  LoggerFactory,
-} from '../../../../../src/core/server';
+import { IClusterClient, CoreSetup, KibanaRequest, LoggerFactory } from 'src/core/server';
 import { AuthenticatedUser } from '../../common/model';
 import { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';

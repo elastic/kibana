@@ -5,8 +5,8 @@
  */
 
 // @ts-ignore
+import { getLocalStats } from 'src/legacy/core_plugins/telemetry/server/telemetry_collection';
 import { getXPack } from './get_xpack';
-import { getLocalStats } from '../../../../../../src/legacy/core_plugins/telemetry/server/telemetry_collection';
 
 /**
  * Get the telemetry data.

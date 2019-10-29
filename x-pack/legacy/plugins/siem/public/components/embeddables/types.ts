@@ -12,7 +12,7 @@ import {
   EmbeddableOutput,
   IEmbeddable,
   EmbeddableFactory,
-} from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+} from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import { inputsModel } from '../../store/inputs';
 
 export interface MapEmbeddableInput extends EmbeddableInput {

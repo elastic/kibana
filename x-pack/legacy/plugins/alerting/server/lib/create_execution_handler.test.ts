@@ -6,7 +6,7 @@
 
 import { AlertType } from '../types';
 import { createExecutionHandler } from './create_execution_handler';
-import { loggingServiceMock } from '../../../../../../src/core/server/mocks';
+import { loggingServiceMock } from 'src/core/server/mocks';
 
 const alertType: AlertType = {
   id: 'test',

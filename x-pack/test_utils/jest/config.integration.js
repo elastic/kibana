@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RESERVED_DIR_JEST_INTEGRATION_TESTS } from '../../../src/dev/constants';
+import { RESERVED_DIR_JEST_INTEGRATION_TESTS } from 'src/dev/constants';
 import config from './config';
 
 export default {

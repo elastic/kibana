@@ -7,18 +7,14 @@
 import Hapi from 'hapi';
 import { Legacy } from 'kibana';
 import * as Rx from 'rxjs';
+import KbnServer from 'src/legacy/server/kbn_server';
+import { CoreSetup, LoggerFactory, SavedObjectsLegacyService } from 'src/core/server';
 import { ActionsConfigType } from './types';
 import { TaskManager } from '../../task_manager';
 import { XPackMainPlugin } from '../../xpack_main/xpack_main';
-import KbnServer from '../../../../../src/legacy/server/kbn_server';
 import { LegacySpacesPlugin as SpacesPluginStartContract } from '../../spaces';
 import { EncryptedSavedObjectsPlugin } from '../../encrypted_saved_objects';
 import { PluginSetupContract as SecurityPlugin } from '../../../../plugins/security/server';
-import {
-  CoreSetup,
-  LoggerFactory,
-  SavedObjectsLegacyService,
-} from '../../../../../src/core/server';
 
 // Extend PluginProperties to indicate which plugins are guaranteed to exist
 // due to being marked as dependencies

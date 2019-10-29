@@ -6,8 +6,8 @@
 
 import { ActionType } from '../types';
 import { validateParams } from '../lib';
-import { Logger } from '../../../../../../src/core/server';
-import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
+import { Logger } from 'src/core/server';
+import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { createActionTypeRegistry } from './index.test';
 
 const ACTION_TYPE_ID = '.server-log';

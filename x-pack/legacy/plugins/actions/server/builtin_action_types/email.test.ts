@@ -10,7 +10,7 @@ jest.mock('./lib/send_email', () => ({
 
 import { ActionType, ActionTypeExecutorOptions } from '../types';
 import { validateConfig, validateSecrets, validateParams } from '../lib';
-import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
+import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { createActionTypeRegistry } from './index.test';
 import { sendEmail } from './lib/send_email';
 import { ActionParamsType, ActionTypeConfigType, ActionTypeSecretsType } from './email';

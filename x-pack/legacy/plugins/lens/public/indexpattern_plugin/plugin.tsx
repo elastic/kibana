@@ -9,9 +9,9 @@ import { CoreSetup } from 'src/core/public';
 // The following dependencies on ui/* and src/legacy/core_plugins must be mocked when testing
 import chrome, { Chrome } from 'ui/chrome';
 import { npSetup, npStart } from 'ui/new_platform';
-import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
-import { ExpressionFunction } from '../../../../../../src/legacy/core_plugins/interpreter/public';
-import { functionsRegistry } from '../../../../../../src/legacy/core_plugins/interpreter/public/registries';
+import { Storage } from 'src/plugins/kibana_utils/public';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+import { functionsRegistry } from 'src/legacy/core_plugins/interpreter/public/registries';
 import { getIndexPatternDatasource } from './indexpattern';
 import { renameColumns } from './rename_columns';
 import { autoDate } from './auto_date';

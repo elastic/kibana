@@ -10,9 +10,6 @@ export {
   UseRequestConfig,
   sendRequest,
   useRequest,
-} from '../../../../../src/plugins/es_ui_shared/public/request';
+} from 'src/plugins/es_ui_shared/public/request';
 
-export {
-  CronEditor,
-  DAY,
-} from '../../../../../src/plugins/es_ui_shared/public/components/cron_editor';
+export { CronEditor, DAY } from 'src/plugins/es_ui_shared/public/components/cron_editor';

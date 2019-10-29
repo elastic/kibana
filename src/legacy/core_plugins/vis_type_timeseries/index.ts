@@ -22,10 +22,9 @@ import { Legacy } from 'kibana';
 import { PluginInitializerContext } from 'src/core/server';
 import { CoreSetup } from 'src/core/server';
 
+import { LegacyPluginApi, LegacyPluginInitializer } from 'src/legacy/types';
 import { plugin } from './server/';
 import { CustomCoreSetup } from './server/plugin';
-
-import { LegacyPluginApi, LegacyPluginInitializer } from '../../../../src/legacy/types';
 
 const metricsPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPluginApi) =>
   new Plugin({

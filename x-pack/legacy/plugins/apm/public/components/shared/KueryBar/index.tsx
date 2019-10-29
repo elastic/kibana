@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { npStart } from 'ui/new_platform';
 import { StaticIndexPattern, getFromSavedObject } from 'ui/index_patterns';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { AutocompleteSuggestion } from 'src/plugins/data/public';
 import { fromQuery, toQuery } from '../Links/url_helpers';
 import { KibanaLink } from '../Links/KibanaLink';
 // @ts-ignore
@@ -26,7 +27,6 @@ import { useMatchedRoutes } from '../../../hooks/useMatchedRoutes';
 import { RouteName } from '../../app/Main/route_config/route_names';
 import { useKibanaCore } from '../../../../../observability/public';
 import { ISavedObject } from '../../../services/rest/savedObjects';
-import { AutocompleteSuggestion } from '../../../../../../../../src/plugins/data/public';
 import { FETCH_STATUS } from '../../../hooks/useFetcher';
 import { useAPMIndexPattern } from '../../../hooks/useAPMIndexPattern';
 

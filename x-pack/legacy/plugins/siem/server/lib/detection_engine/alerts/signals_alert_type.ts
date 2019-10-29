@@ -5,8 +5,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { Logger } from 'src/core/server';
 import { SIGNALS_ID } from '../../../../common/constants';
-import { Logger } from '../../../../../../../../src/core/server';
 
 // TODO: Remove this for the build_events_query call eventually
 import { buildEventsReIndex } from './build_events_reindex';

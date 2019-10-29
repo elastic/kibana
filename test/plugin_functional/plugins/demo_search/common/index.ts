@@ -17,10 +17,7 @@
  * under the License.
  */
 
-import {
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
-} from '../../../../../src/plugins/data/common/search';
+import { IKibanaSearchRequest, IKibanaSearchResponse } from 'src/plugins/data/common/search';
 
 export const DEMO_SEARCH_STRATEGY = 'DEMO_SEARCH_STRATEGY';
 

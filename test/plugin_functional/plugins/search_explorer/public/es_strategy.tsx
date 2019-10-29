@@ -25,11 +25,7 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
 } from '@elastic/eui';
-import {
-  ISearchGeneric,
-  IEsSearchResponse,
-  IEsSearchRequest,
-} from '../../../../../src/plugins/data/public';
+import { ISearchGeneric, IEsSearchResponse, IEsSearchRequest } from 'src/plugins/data/public';
 import { DoSearch } from './do_search';
 import { GuideSection } from './guide_section';
 

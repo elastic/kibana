@@ -19,7 +19,7 @@
 
 import rison from 'rison-node';
 
-import getUrl from '../../../src/test_utils/get_url';
+import getUrl from 'src/test_utils/get_url';
 
 const DEFAULT_INITIAL_STATE = {
   columns: ['@message'],

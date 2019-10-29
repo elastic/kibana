@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { AutocompleteSuggestion } from '../../../../../../src/plugins/data/public';
+import { AutocompleteSuggestion } from 'src/plugins/data/public';
 
 import { FrontendLibs } from '../lib/types';
 import { RendererFunction } from '../utils/typed_react';

@@ -13,7 +13,7 @@ import { requestFixture } from '../../../../lib/__tests__/__fixtures__/request';
 import { AuthenticationResult } from '../../../../../../../../plugins/security/server';
 import { initUsersApi } from '../users';
 import * as ClientShield from '../../../../../../../server/lib/get_client_shield';
-import { KibanaRequest } from '../../../../../../../../../src/core/server';
+import { KibanaRequest } from 'src/core/server';
 
 describe('User routes', () => {
   const sandbox = sinon.createSandbox();

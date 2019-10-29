@@ -31,8 +31,8 @@ import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status
 import { SecureSavedObjectsClientWrapper } from './server/lib/saved_objects_client/secure_saved_objects_client_wrapper';
 import { deepFreeze } from './server/lib/deep_freeze';
 import { createOptionalPlugin } from '../../server/lib/optional_plugin';
-import { KibanaRequest } from '../../../../src/core/server';
-import { createCSPRuleString } from '../../../../src/legacy/server/csp';
+import { KibanaRequest } from 'src/core/server';
+import { createCSPRuleString } from 'src/legacy/server/csp';
 
 export const security = (kibana) => new kibana.Plugin({
   id: 'security',

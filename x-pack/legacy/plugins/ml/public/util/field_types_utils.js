@@ -9,7 +9,7 @@ import {
   ML_JOB_FIELD_TYPES,
 } from './../../common/constants/field_types';
 
-import { KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
+import { KBN_FIELD_TYPES } from 'src/plugins/data/public';
 
 // convert kibana types to ML Job types
 // this is needed because kibana types only have string and not text and keyword.

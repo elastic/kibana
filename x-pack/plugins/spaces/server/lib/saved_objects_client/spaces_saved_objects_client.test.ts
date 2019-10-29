@@ -7,7 +7,7 @@
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { SpacesSavedObjectsClient } from './spaces_saved_objects_client';
 import { spacesServiceMock } from '../../spaces_service/spaces_service.mock';
-import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
+import { savedObjectsClientMock } from 'src/core/server/mocks';
 
 const types = ['foo', 'bar', 'space'];
 

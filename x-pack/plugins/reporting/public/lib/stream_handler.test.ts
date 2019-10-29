@@ -5,7 +5,7 @@
  */
 
 import sinon, { stub } from 'sinon';
-import { HttpServiceBase, NotificationsStart } from '../../../../../src/core/public';
+import { HttpServiceBase, NotificationsStart } from 'src/core/public';
 import { SourceJob, JobSummary, HttpService } from '../../index.d';
 import { JobQueue } from './job_queue';
 import { ReportingNotifierStreamHandler } from './stream_handler';

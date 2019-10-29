@@ -8,7 +8,7 @@ import * as legacyElasticsearch from 'elasticsearch';
 import { ToolingLog } from '@kbn/dev-utils';
 import { resolve } from 'path';
 import * as fs from 'fs';
-import { EsArchiver } from '../../../../../src/es_archiver/es_archiver';
+import { EsArchiver } from 'src/es_archiver/es_archiver';
 
 interface ESServerConfig {
   hosts: string[];

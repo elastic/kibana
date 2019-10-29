@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AutocompleteSuggestion } from '../../../../../../../../src/plugins/data/public';
+import { AutocompleteSuggestion } from 'src/plugins/data/public';
 import { ElasticsearchAdapter } from './adapter_types';
 
 export class MemoryElasticsearchAdapter implements ElasticsearchAdapter {

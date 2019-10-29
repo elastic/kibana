@@ -17,7 +17,7 @@ import {
   httpServerMock,
   httpServiceMock,
   elasticsearchServiceMock,
-} from '../../../../../src/core/server/mocks';
+} from 'src/core/server/mocks';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 
 import {
@@ -29,7 +29,7 @@ import {
   KibanaRequest,
   LoggerFactory,
   ScopedClusterClient,
-} from '../../../../../src/core/server';
+} from 'src/core/server';
 import { AuthenticatedUser } from '../../common/model';
 import { ConfigType, createConfig$ } from '../config';
 import { LegacyAPI } from '../plugin';

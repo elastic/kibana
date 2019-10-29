@@ -20,7 +20,7 @@ import {
   EuiCodeBlock,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { serializers } from '../../../../../../../../src/plugins/es_ui_shared/static/forms/helpers';
+import { serializers } from 'src/plugins/es_ui_shared/static/forms/helpers';
 
 import { serializeTemplate } from '../../../../common/lib/template_serialization';
 import { Template } from '../../../../common/types';

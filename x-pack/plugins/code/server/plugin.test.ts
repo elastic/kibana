@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { coreMock } from '../../../../src/core/server/mocks';
+import { coreMock } from 'src/core/server/mocks';
 
 import { CodePlugin } from './plugin';
 

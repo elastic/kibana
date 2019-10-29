@@ -6,8 +6,8 @@
 
 import Boom from 'boom';
 import type from 'type-detect';
+import { KibanaRequest } from 'src/core/server';
 import { canRedirectRequest } from '../';
-import { KibanaRequest } from '../../../../../../src/core/server';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { Tokens, TokenPair } from '../tokens';

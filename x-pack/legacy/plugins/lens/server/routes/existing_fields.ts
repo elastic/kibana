@@ -10,11 +10,8 @@ import { SearchResponse } from 'elasticsearch';
 import _ from 'lodash';
 import { IScopedClusterClient } from 'src/core/server';
 import { CoreSetup } from 'src/core/server';
+import { FieldDescriptor, IndexPatternsService } from 'src/legacy/server/index_patterns/service';
 import { BASE_API_URL } from '../../common';
-import {
-  FieldDescriptor,
-  IndexPatternsService,
-} from '../../../../../../src/legacy/server/index_patterns/service';
 
 /**
  * The number of docs to sample to determine field empty status.

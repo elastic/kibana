@@ -20,7 +20,7 @@
 import { delay } from 'bluebird';
 import expect from '@kbn/expect';
 import fetch from 'node-fetch';
-import getUrl from '../../../src/test_utils/get_url';
+import getUrl from 'src/test_utils/get_url';
 
 export function CommonPageProvider({ getService, getPageObjects }) {
   const log = getService('log');

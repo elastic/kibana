@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { httpServiceMock, httpServerMock } from '../../../../../src/core/server/mocks';
+import { httpServiceMock, httpServerMock } from 'src/core/server/mocks';
 import { registerSearchRoute } from './routes';
 import { IRouter, ScopedClusterClient, RequestHandlerContext } from 'kibana/server';
 

@@ -11,7 +11,7 @@ import { EuiEmptyPrompt, EuiLink, EuiButton } from '@elastic/eui';
 
 import { CoreStart, ApplicationStart } from 'kibana/public';
 // @ts-ignore
-import { TableListView } from '../../../../../../src/legacy/core_plugins/kibana/public/table_list_view/table_list_view';
+import { TableListView } from 'src/legacy/core_plugins/kibana/public/table_list_view/table_list_view';
 import { GraphWorkspaceSavedObject } from '../types';
 
 export interface ListingProps {

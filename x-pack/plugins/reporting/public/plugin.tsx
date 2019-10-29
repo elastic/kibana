@@ -7,12 +7,7 @@
 import * as Rx from 'rxjs';
 import { catchError, filter, map, mergeMap, takeUntil } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
-import {
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  PluginInitializerContext,
-} from '../../../../src/core/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
 import {
   JOB_COMPLETION_NOTIFICATIONS_POLLER_CONFIG,
   JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY,

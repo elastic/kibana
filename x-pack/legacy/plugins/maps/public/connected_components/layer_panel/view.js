@@ -29,8 +29,8 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
-import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
+import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
+import { Storage } from 'src/plugins/kibana_utils/public';
 
 const localStorage = new Storage(window.localStorage);
 

@@ -7,6 +7,7 @@
 import { IndexPattern, IndexPatterns } from 'ui/index_patterns';
 import { SavedSearchLoader } from 'src/legacy/core_plugins/kibana/public/discover/types';
 
+import { ES_FIELD_TYPES } from 'src/plugins/data/public';
 import {
   Field,
   Aggregation,
@@ -15,7 +16,6 @@ import {
   NewJobCaps,
   EVENT_RATE_FIELD_ID,
 } from '../../common/types/fields';
-import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
 import { ml } from './ml_api_service';
 
 // called in the angular routing resolve block to initialize the

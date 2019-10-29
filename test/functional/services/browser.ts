@@ -23,7 +23,7 @@ import { Key, Origin } from 'selenium-webdriver';
 import { LegacyActionSequence } from 'selenium-webdriver/lib/actions';
 
 import Jimp from 'jimp';
-import { modifyUrl } from '../../../src/core/utils';
+import { modifyUrl } from 'src/core/utils';
 import { WebElementWrapper } from './lib/web_element_wrapper';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { Browsers } from './remote/browsers';

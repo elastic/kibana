@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { populateContext } from '../../src/autocomplete/engine';
+import { populateContext } from 'src/legacy/core_plugins/console/public/quarantined/src/autocomplete/engine';
 
 import './setup_mocks';
 import 'brace';

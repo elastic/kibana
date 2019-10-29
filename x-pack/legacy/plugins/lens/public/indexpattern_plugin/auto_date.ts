@@ -6,10 +6,7 @@
 
 import { TimeBuckets } from 'ui/time_buckets';
 import dateMath from '@elastic/datemath';
-import {
-  ExpressionFunction,
-  KibanaContext,
-} from '../../../../../../src/plugins/expressions/common';
+import { ExpressionFunction, KibanaContext } from 'src/plugins/expressions/common';
 
 interface LensAutoDateProps {
   aggConfigs: string;

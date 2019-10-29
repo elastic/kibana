@@ -24,15 +24,15 @@ import {
   EmbeddablePanel,
   GetEmbeddableFactory,
   GetEmbeddableFactories,
-} from '../../../../../../../../src/plugins/embeddable/public';
+} from 'src/plugins/embeddable/public';
 import {
   HelloWorldContainer,
   CONTACT_CARD_EMBEDDABLE,
   HELLO_WORLD_EMBEDDABLE_TYPE,
-} from '../../../../../../../../src/plugins/embeddable/public/lib/test_samples';
-import { TGetActionsCompatibleWithTrigger } from '../../../../../../../../src/plugins/ui_actions/public';
-import { CoreStart } from '../../../../../../../../src/core/public';
-import { Start as InspectorStartContract } from '../../../../../../../../src/plugins/inspector/public';
+} from 'src/plugins/embeddable/public/lib/test_samples';
+import { TGetActionsCompatibleWithTrigger } from 'src/plugins/ui_actions/public';
+import { CoreStart } from 'src/core/public';
+import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 
 interface Props {
   getActions: TGetActionsCompatibleWithTrigger;

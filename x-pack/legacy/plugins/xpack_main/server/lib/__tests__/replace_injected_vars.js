@@ -8,7 +8,7 @@ import sinon from 'sinon';
 import expect from '@kbn/expect';
 
 import { replaceInjectedVars } from '../replace_injected_vars';
-import { KibanaRequest } from '../../../../../../../src/core/server';
+import { KibanaRequest } from 'src/core/server';
 
 const buildRequest = (path = '/app/kibana') => {
   const get = sinon.stub();

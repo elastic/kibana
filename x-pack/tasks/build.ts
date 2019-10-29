@@ -15,7 +15,7 @@ import del from 'del';
 import fancyLog from 'fancy-log';
 import chalk from 'chalk';
 
-import { generateNoticeFromSource } from '../../src/dev/notice';
+import { generateNoticeFromSource } from 'src/dev/notice';
 import { prepareTask } from './prepare';
 import { gitInfo } from './helpers/git_info';
 import { PKG_NAME } from './helpers/pkg';

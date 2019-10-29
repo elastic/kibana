@@ -19,8 +19,8 @@
 
 import { first } from 'rxjs/operators';
 import { TypeOf } from '@kbn/config-schema';
-import { PluginInitializerContext, RecursiveReadonly } from '../../../../src/core/server';
-import { deepFreeze } from '../../../../src/core/utils';
+import { PluginInitializerContext, RecursiveReadonly } from 'src/core/server';
+import { deepFreeze } from 'src/core/utils';
 import { ConfigSchema } from './config';
 
 /**
