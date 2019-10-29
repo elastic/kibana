@@ -1151,10 +1151,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@14.7.0":
-  version "14.7.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-14.7.0.tgz#dcbd3e9a9307e52a2fdca5833a116de5940de06d"
-  integrity sha512-IjYjUqhfqjqG6cbaTANiuHyWq3U62ODzcOnIKACxHOGCK2JVwiDvtDByAuj3PvD0wG/cDN49oNbUZ/o0QCapVw==
+"@elastic/eui@14.8.0":
+  version "14.8.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-14.8.0.tgz#777d29852998e52e8fc6dfb1869a4b32d74c72bb"
+  integrity sha512-p6TZv6Z+ENzw6JnCyXVQtvEOo7eEct8Qb/S4aS4EXK1WIyGB35Ra/a/pb3bLQbbZ2mSZtCr1sk+XVUq0qDpytw==
   dependencies:
     "@types/lodash" "^4.14.116"
     "@types/numeral" "^0.0.25"
@@ -1173,7 +1173,7 @@
     react-is "~16.3.0"
     react-virtualized "^9.18.5"
     resize-observer-polyfill "^1.5.0"
-    tabbable "^1.1.0"
+    tabbable "^3.0.0"
     uuid "^3.1.0"
 
 "@elastic/filesaver@1.1.2":
@@ -26475,6 +26475,11 @@ tabbable@^1.0.3:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/tabbable/-/tabbable-1.1.2.tgz#b171680aea6e0a3e9281ff23532e2e5de11c0d94"
   integrity sha512-77oqsKEPrxIwgRcXUwipkj9W5ItO97L6eUT1Ar7vh+El16Zm4M6V+YU1cbipHEa6q0Yjw8O3Hoh8oRgatV5s7A==
+
+tabbable@^3.0.0:
+  version "3.1.2"
+  resolved "https://registry.yarnpkg.com/tabbable/-/tabbable-3.1.2.tgz#f2d16cccd01f400e38635c7181adfe0ad965a4a2"
+  integrity sha512-wjB6puVXTYO0BSFtCmWQubA/KIn7Xvajw0x0l6eJUudMG/EAiJvIUnyNX6xO4NpGrJ16lbD0eUseB9WxW0vlpQ==
 
 table@^3.7.8:
   version "3.8.3"
