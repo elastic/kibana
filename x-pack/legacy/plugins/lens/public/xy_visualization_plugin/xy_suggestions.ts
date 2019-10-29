@@ -19,11 +19,12 @@ import { generateId } from '../id_generator';
 import { getIconForSeries } from './state_helpers';
 
 const columnSortOrder = {
-  date: 0,
-  string: 1,
-  ip: 2,
-  boolean: 3,
-  number: 4,
+  document: 0,
+  date: 1,
+  string: 2,
+  ip: 3,
+  boolean: 4,
+  number: 5,
 };
 
 /**

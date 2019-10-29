@@ -230,12 +230,6 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/legacy/plugins/spaces/**/*.{js,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
       files: ['x-pack/legacy/plugins/transform/**/*.{js,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
