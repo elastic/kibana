@@ -17,22 +17,12 @@
  * under the License.
  */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
-import { MountPoint } from 'kibana/public';
-
-/**
- * Mount converter for react components.
- *
- * @param component to get a mount for
- */
-export const reactMount = (component: React.ReactNode): MountPoint => {
-  const mount = (element: HTMLElement) => {
-    ReactDOM.render(<I18nProvider>{component}</I18nProvider>, element);
-    return () => ReactDOM.unmountComponentAtNode(element);
-  };
-  // used for proper snapshot serialization
-  mount.__reactMount__ = component;
-  return mount;
+// eslint-disable-next-line import/no-default-export
+export default {
+  test(value: any) {
+    return value && value.__reactMount__;
+  },
+  print(value: any, serialize: any, indent: any) {
+    return `reactMount(${serialize(value.__reactMount__)})`;
+  },
 };
