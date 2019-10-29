@@ -25,10 +25,10 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiPopover,
+  EuiPopoverFooter,
   EuiPopoverTitle,
   EuiSelect,
   EuiSwitch,
-  EuiSpacer,
   EuiForm,
   EuiFormRow,
 } from '@elastic/eui';
@@ -215,15 +215,6 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
         >
           {select('type', typeOptions, values.type)}
         </EuiFormRow>
-        <EuiSpacer size="s" />
-        <EuiSwitch
-          label={i18n.translate('kbn.discover.fieldChooser.filter.hideMissingFieldsLabel', {
-            defaultMessage: 'Hide missing fields',
-          })}
-          checked={values.missing}
-          onChange={handleMissingChange}
-          data-test-subj="missingSwitch"
-        />
       </EuiForm>
     </div>
   );
@@ -260,6 +251,16 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
             })}
           </EuiPopoverTitle>
           {selectionPanel}
+          <EuiPopoverFooter>
+            <EuiSwitch
+              label={i18n.translate('kbn.discover.fieldChooser.filter.hideMissingFieldsLabel', {
+                defaultMessage: 'Hide missing fields',
+              })}
+              checked={values.missing}
+              onChange={handleMissingChange}
+              data-test-subj="missingSwitch"
+            />
+          </EuiPopoverFooter>
         </EuiPopover>
       </div>
     </React.Fragment>
