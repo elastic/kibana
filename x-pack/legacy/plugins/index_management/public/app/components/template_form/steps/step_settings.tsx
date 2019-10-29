@@ -18,7 +18,7 @@ import {
   EuiCode,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { settingsDocumentationLink } from '../../../lib/documentation_links';
+import { documentationService } from '../../../services/documentation';
 import { StepProps } from '../types';
 import { useJsonStep } from './use_json_step';
 
@@ -63,7 +63,7 @@ export const StepSettings: React.FunctionComponent<StepProps> = ({
           <EuiButtonEmpty
             size="s"
             flush="right"
-            href={settingsDocumentationLink}
+            href={documentationService.getSettingsDocumentationLink()}
             target="_blank"
             iconType="help"
           >

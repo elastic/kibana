@@ -16,7 +16,7 @@ import {
   getFormRow,
   Field,
 } from '../../../../../../../../../src/plugins/es_ui_shared/static/forms/components';
-import { templatesDocumentationLink } from '../../../lib/documentation_links';
+import { documentationService } from '../../../services/documentation';
 import { StepProps } from '../types';
 import { schemas } from '../template_form_schemas';
 
@@ -110,7 +110,7 @@ export const StepLogistics: React.FunctionComponent<StepProps> = ({
           <EuiButtonEmpty
             size="s"
             flush="right"
-            href={templatesDocumentationLink}
+            href={documentationService.getTemplatesDocumentationLink()}
             target="_blank"
             iconType="help"
           >

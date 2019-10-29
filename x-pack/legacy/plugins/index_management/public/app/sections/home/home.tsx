@@ -19,7 +19,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { BASE_PATH } from '../../../../common/constants';
-import { idxMgmtDocumentationLink } from '../../lib/documentation_links';
+import { documentationService } from '../../services/documentation';
 import { IndexList } from './index_list';
 import { TemplateList } from './template_list';
 import { breadcrumbService } from '../../services/set_breadcrumbs';
@@ -75,7 +75,7 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                href={idxMgmtDocumentationLink}
+                href={documentationService.getIdxMgmtDocumentationLink()}
                 target="_blank"
                 iconType="help"
                 data-test-subj="documentationLink"

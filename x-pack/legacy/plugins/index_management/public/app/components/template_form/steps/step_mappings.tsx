@@ -18,7 +18,7 @@ import {
   EuiCodeEditor,
   EuiCode,
 } from '@elastic/eui';
-import { mappingDocumentationLink } from '../../../lib/documentation_links';
+import { documentationService } from '../../../services/documentation';
 import { StepProps } from '../types';
 import { useJsonStep } from './use_json_step';
 
@@ -63,7 +63,7 @@ export const StepMappings: React.FunctionComponent<StepProps> = ({
           <EuiButtonEmpty
             size="s"
             flush="right"
-            href={mappingDocumentationLink}
+            href={documentationService.getMappingDocumentationLink()}
             target="_blank"
             iconType="help"
           >

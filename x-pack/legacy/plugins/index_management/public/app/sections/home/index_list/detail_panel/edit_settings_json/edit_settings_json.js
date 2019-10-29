@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { settingsDocumentationLink } from '../../../../../lib/documentation_links';
+import { documentationService } from '../../../../../services/documentation';
 
 import {
   EuiButton,
@@ -144,7 +144,7 @@ export class EditSettingsJson extends React.PureComponent {
         </EuiFlexGroup>
         <EuiSpacer />
         <EuiLink
-          href={settingsDocumentationLink}
+          href={documentationService.getSettingsDocumentationLink()}
           target="_blank"
           rel="noopener"
         >

@@ -11,15 +11,17 @@ import { LegacyStart } from './legacy';
 
 import { httpService } from './app/services/http';
 import { breadcrumbService } from './app/services/set_breadcrumbs';
+import { documentationService } from './app/services/documentation';
 
 export class IndexMgmtPlugin {
   public start(core: CoreStart, plugins: {}, __LEGACY: LegacyStart) {
     const { management } = __LEGACY;
-    const { http, chrome } = core;
+    const { http, chrome, docLinks } = core;
 
     // Initialize services
     httpService.init(http);
     breadcrumbService.init(chrome, management.constants.BREADCRUMB);
+    documentationService.init(docLinks);
 
     // Register management section and Angular route
     registerManagementSection(management.getSection('elasticsearch'));
