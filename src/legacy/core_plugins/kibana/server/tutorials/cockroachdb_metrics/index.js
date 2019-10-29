@@ -43,7 +43,7 @@ export function cockroachdbMetricsSpecProvider(server, context) {
     artifacts: {
       dashboards: [
         {
-          id: '496910f0-b952-11e9-a579-f5c0a5d81340',
+          id: 'e3ba0c30-9766-11e9-9eea-6f554992ec1f',
           linkLabel: i18n.translate('kbn.server.tutorials.cockroachdbMetrics.artifacts.dashboards.linkLabel', {
             defaultMessage: 'CockroachDB metrics dashboard',
           }),
