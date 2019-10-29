@@ -36,7 +36,12 @@ module.exports = {
           from: Path.resolve(REPO_ROOT, 'src'),
           filter: (node) => /^((\.\/)|(\.\.\/)+)src\//.test(node.value) && (node.parent.type === 'ImportDeclaration' || node.parent.type.startsWith('Export')),
           to: 'src'
-        }
+        },
+        {
+          from: Path.resolve(REPO_ROOT, 'x-pack'),
+          filter: (node) => /^((\.\/)|(\.\.\/)+)x-pack\//.test(node.value) && (node.parent.type === 'ImportDeclaration' || node.parent.type.startsWith('Export')),
+          to: 'x-pack'
+        },
       ],
     ],
   }
