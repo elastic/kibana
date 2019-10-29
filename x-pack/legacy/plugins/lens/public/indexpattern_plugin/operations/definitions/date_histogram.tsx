@@ -151,7 +151,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
     // isValidInterval involves breaking changes in other areas.
     const isValid = isValidInterval(
       `${interval.value === '' ? '1' : interval.value}${interval.unit}`,
-      restrictedInterval(field!.aggregationRestrictions) as string
+      restrictedInterval(field!.aggregationRestrictions)
     );
 
     function onChangeAutoInterval(ev: React.ChangeEvent<HTMLInputElement>) {
@@ -189,8 +189,8 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
         )}
         {currentColumn.params.interval !== autoInterval && (
           <EuiFormRow
-            label={i18n.translate('xpack.lens.indexPattern.dateHistogram.interval', {
-              defaultMessage: 'Time interval',
+            label={i18n.translate('xpack.lens.indexPattern.dateHistogram.minimumInterval', {
+              defaultMessage: 'Minimum interval',
             })}
           >
             {intervalIsRestricted ? (

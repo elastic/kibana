@@ -837,7 +837,8 @@ describe('editor_frame', () => {
 
       mount(
         <EditorFrame
-          {...{ ...getDefaultProps(), dateRange }}
+          {...getDefaultProps()}
+          dateRange={dateRange}
           visualizationMap={{
             testVis: mockVisualization,
           }}
