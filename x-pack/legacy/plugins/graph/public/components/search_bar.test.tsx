@@ -48,7 +48,7 @@ function wrapSearchBarInContext(testProps: OuterSearchBarProps) {
     } as CoreStart['docLinks'],
     http: {} as CoreStart['http'],
     overlays: {} as CoreStart['overlays'],
-    store: {
+    storage: {
       get: () => {},
     },
   };

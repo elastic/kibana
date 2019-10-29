@@ -21,7 +21,7 @@ export const getGeneralErrorToast = (errorText: string, err: Error): ToastInput 
       <FormattedMessage
         id="xpack.reporting.publicNotifier.error.tryRefresh"
         defaultMessage="Try refreshing the page."
-      ></FormattedMessage>
+      />
     </Fragment>
   ),
   iconType: undefined,

@@ -304,12 +304,12 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
                 "update": [MockFunction],
               },
             },
-            "store": Object {
+            "storage": Object {
               "clear": [MockFunction],
               "get": [MockFunction],
               "remove": [MockFunction],
               "set": [MockFunction],
-              "store": Object {
+              "storage": Object {
                 "clear": [MockFunction],
                 "getItem": [MockFunction],
                 "key": [MockFunction],
@@ -867,12 +867,12 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
                         "update": [MockFunction],
                       },
                     },
-                    "store": Object {
+                    "storage": Object {
                       "clear": [MockFunction],
                       "get": [MockFunction],
                       "remove": [MockFunction],
                       "set": [MockFunction],
-                      "store": Object {
+                      "storage": Object {
                         "clear": [MockFunction],
                         "getItem": [MockFunction],
                         "key": [MockFunction],
@@ -1418,12 +1418,12 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
                 "update": [MockFunction],
               },
             },
-            "store": Object {
+            "storage": Object {
               "clear": [MockFunction],
               "get": [MockFunction],
               "remove": [MockFunction],
               "set": [MockFunction],
-              "store": Object {
+              "storage": Object {
                 "clear": [MockFunction],
                 "getItem": [MockFunction],
                 "key": [MockFunction],
@@ -1978,12 +1978,12 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
                         "update": [MockFunction],
                       },
                     },
-                    "store": Object {
+                    "storage": Object {
                       "clear": [MockFunction],
                       "get": [MockFunction],
                       "remove": [MockFunction],
                       "set": [MockFunction],
-                      "store": Object {
+                      "storage": Object {
                         "clear": [MockFunction],
                         "getItem": [MockFunction],
                         "key": [MockFunction],
@@ -2529,12 +2529,12 @@ exports[`QueryBarInput Should render the given query 1`] = `
                 "update": [MockFunction],
               },
             },
-            "store": Object {
+            "storage": Object {
               "clear": [MockFunction],
               "get": [MockFunction],
               "remove": [MockFunction],
               "set": [MockFunction],
-              "store": Object {
+              "storage": Object {
                 "clear": [MockFunction],
                 "getItem": [MockFunction],
                 "key": [MockFunction],
@@ -3089,12 +3089,12 @@ exports[`QueryBarInput Should render the given query 1`] = `
                         "update": [MockFunction],
                       },
                     },
-                    "store": Object {
+                    "storage": Object {
                       "clear": [MockFunction],
                       "get": [MockFunction],
                       "remove": [MockFunction],
                       "set": [MockFunction],
-                      "store": Object {
+                      "storage": Object {
                         "clear": [MockFunction],
                         "getItem": [MockFunction],
                         "key": [MockFunction],
