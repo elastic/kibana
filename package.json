@@ -341,6 +341,7 @@
     "@types/strip-ansi": "^3.0.0",
     "@types/styled-components": "^3.0.2",
     "@types/supertest": "^2.0.5",
+    "@types/supertest-as-promised": "^2.0.38",
     "@types/type-detect": "^4.0.1",
     "@types/uuid": "^3.4.4",
     "@types/vinyl-fs": "^2.4.11",
