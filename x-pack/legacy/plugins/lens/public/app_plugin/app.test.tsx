@@ -97,6 +97,11 @@ describe('Lens App', () => {
           },
         },
       },
+      data: {
+        query: {
+          filterManager: createMockFilterManager(),
+        },
+      },
       dataShim: {
         indexPatterns: {
           indexPatterns: {
@@ -106,9 +111,6 @@ describe('Lens App', () => {
           },
         },
         timefilter: { history: {} },
-        filter: {
-          filterManager: createMockFilterManager(),
-        },
       },
       store: {
         get: jest.fn(),
@@ -496,6 +498,8 @@ describe('Lens App', () => {
       expect(TopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
           query: { query: '', language: 'kuery' },
+          dateRangeFrom: 'now-7d',
+          dateRangeTo: 'now',
         }),
         {}
       );
@@ -570,6 +574,8 @@ describe('Lens App', () => {
       expect(TopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
           query: { query: 'new', language: 'lucene' },
+          dateRangeFrom: 'now-14d',
+          dateRangeTo: 'now-7d',
         }),
         {}
       );
@@ -588,7 +594,7 @@ describe('Lens App', () => {
 
       const instance = mount(<App {...args} />);
 
-      args.dataShim.filter.filterManager.setFilters([
+      args.data.query.filterManager.setFilters([
         buildExistsFilter({ name: 'myfield' }, { id: 'index1' }),
       ]);
 
@@ -719,7 +725,7 @@ describe('Lens App', () => {
         query: { query: 'new', language: 'lucene' },
       });
 
-      args.dataShim.filter.filterManager.setFilters([
+      args.data.query.filterManager.setFilters([
         buildExistsFilter({ name: 'myfield' }, { id: 'index1' }),
       ]);
       instance.update();

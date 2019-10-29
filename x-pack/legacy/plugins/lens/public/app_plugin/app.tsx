@@ -82,10 +82,9 @@ export function App({
   const { lastKnownDoc } = state;
 
   useEffect(() => {
-    const subscription = dataShim.filter.filterManager.getUpdates$().subscribe({
+    const subscription = data.query.filterManager.getUpdates$().subscribe({
       next: () => {
-        setState(s => ({ ...s, filters: dataShim.filter.filterManager.getFilters() }));
-
+        setState(s => ({ ...s, filters: data.query.filterManager.getFilters() }));
         trackUiEvent('app_filters_updated');
       },
     });
@@ -227,9 +226,7 @@ export function App({
                 setState(s => ({ ...s, savedQuery }));
               }}
               onSavedQueryUpdated={savedQuery => {
-                dataShim.filter.filterManager.setFilters(
-                  savedQuery.attributes.filters || state.filters
-                );
+                data.query.filterManager.setFilters(savedQuery.attributes.filters || state.filters);
                 setState(s => ({
                   ...s,
                   savedQuery: { ...savedQuery }, // Shallow query for reference issues
@@ -242,7 +239,7 @@ export function App({
                 }));
               }}
               onClearSavedQuery={() => {
-                dataShim.filter.filterManager.removeAll();
+                data.query.filterManager.removeAll();
                 setState(s => ({
                   ...s,
                   savedQuery: undefined,
@@ -256,6 +253,8 @@ export function App({
                 }));
               }}
               query={state.query}
+              dateRangeFrom={state.dateRange.fromDate}
+              dateRangeTo={state.dateRange.toDate}
             />
           </div>
 
