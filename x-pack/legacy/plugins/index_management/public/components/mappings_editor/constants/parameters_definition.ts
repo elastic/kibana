@@ -276,7 +276,7 @@ export const PARAMETERS_DEFINITION = {
   },
   norms: {
     fieldConfig: {
-      defaultValue: true,
+      defaultValue: false,
     },
   },
   term_vector: {

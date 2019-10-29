@@ -112,7 +112,7 @@ export const KeywordType = ({ field }: Props) => {
 
           {/* split_queries_on_whitespace */}
           <EditFieldFormRow
-            title={<h3>Split queries on whitetspace</h3>}
+            title={<h3>Split queries on whitespace</h3>}
             description="This is description text."
             formFieldPath="split_queries_on_whitespace"
           />
