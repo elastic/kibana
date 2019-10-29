@@ -5080,7 +5080,6 @@
     "xpack.infra.logs.index.documentTitle": "ログ",
     "xpack.infra.logs.index.settingsTabTitle": "設定",
     "xpack.infra.logs.index.streamTabTitle": "ストリーム",
-    "xpack.infra.logs.logsAnalysisResults.loadingMessage": "結果を読み込み中...",
     "xpack.infra.logs.logsAnalysisResults.onboardingSuccessContent": "機械学習ロボットがデータの収集を開始するまでしばらくお待ちください。",
     "xpack.infra.logs.logsAnalysisResults.onboardingSuccessTitle": "成功！",
     "xpack.infra.logs.streamPage.documentTitle": "{previousTitle} | ストリーム",
