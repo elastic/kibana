@@ -116,5 +116,13 @@ export function ensureEsVersion(server, kibanaVersion) {
 }
 
 function shouldIgnoreVersionMismatch(server) {
-  return server.config().get('env.dev') && server.config().get('elasticsearch.ignoreVersionMismatch');
+  const optionName = 'elasticsearch.ignoreVersionMismatch';
+  const isDevMode = server.config().get('env.dev');
+  const ignoreVersionMismatch =  server.config().get(optionName);
+
+  if(!isDevMode && ignoreVersionMismatch) {
+    throw new Error(`Option "${optionName}" can only be used in development mode`);
+  }
+
+  return isDevMode && ignoreVersionMismatch;
 }
