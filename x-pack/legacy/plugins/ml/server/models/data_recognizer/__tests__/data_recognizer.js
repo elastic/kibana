@@ -58,7 +58,8 @@ describe('ML - data recognizer', () => {
                 influencers: [
                   'region'
                 ]
-              }
+              },
+              calendars: ['calendar-1'],
             }
           },
         ],
@@ -88,7 +89,8 @@ describe('ML - data recognizer', () => {
               model_memory_limit: '512mb',
               influencers: [],
             },
-            groups: []
+            groups: [],
+            calendars: ['calendar-1'],
           },
           id: 'pre-test-job'
         }

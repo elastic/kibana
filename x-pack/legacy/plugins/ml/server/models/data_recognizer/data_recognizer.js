@@ -843,17 +843,24 @@ export class DataRecognizer {
       if (typeof source !== 'object' || typeof update !== 'object') {
         return;
       }
-      Object.keys(source).forEach(key => {
-        const value = source[key];
 
-        if (typeof value !== 'object' || value === null) {
+      Object.keys(source).forEach(key => {
+        const sourceValue = source[key];
+        const updateValue = update[key];
+
+        if (
+          typeof sourceValue !== 'object' ||
+          sourceValue === null ||
+          typeof updateValue !== 'object' ||
+          updateValue === null
+        ) {
           return;
         }
 
-        if (!Array.isArray(value)) {
-          processArrayValues(value, update[key]);
+        if (Array.isArray(sourceValue) && Array.isArray(updateValue)) {
+          source[key] = updateValue;
         } else {
-          source[key] = update[key];
+          processArrayValues(sourceValue, updateValue);
         }
       });
     }
