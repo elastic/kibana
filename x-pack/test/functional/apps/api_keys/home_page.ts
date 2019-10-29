@@ -8,10 +8,10 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  const pageObjects = getPageObjects(["common", 'apiKeys']);
+  const pageObjects = getPageObjects(['common', 'apiKeys']);
   const log = getService('log');
 
-  describe('Home page', function () {
+  describe('Home page', function() {
     this.tags('smoke');
     before(async () => {
       await pageObjects.common.navigateToApp('apiKeys');
