@@ -42,68 +42,66 @@ export default function({ getService }: { getService: (service: string) => any }
         .expect(200)
         .then((response: any) => response.body);
 
-      log.debug(cyan(`Stress Test Result:`));
-      log.debug(
+      log.info(cyan(`Stress Test Result:`));
+      log.info(
         `Average number of tasks executed per second: ${bright(runningAverageTasksPerSecond)}`
       );
-      log.debug(
+      log.info(
         `Average time between a task's "runAt" scheduled time and the time it actually ran: ${bright(
           runningAverageLeadTime
         )}`
       );
 
       if (params.trackExecutionTimeline) {
-        log.debug(
+        log.info(
           `Overall number of tasks ran in ${bright(params.durationInSeconds)} seconds: ${bright(
             numberOfTasksRanOverall
           )}`
         );
-        log.debug(`Average time between stages:`);
-        log.debug(
+        log.info(`Average time between stages:`);
+        log.info(
           `Schedule ---[${descMetric(
             timeUntilFirstMarkAsRun
           )}]--> first markAsRunning ---[${descMetric(firstMarkAsRunningTillRan)}]--> first run`
         );
-        log.debug(
+        log.info(
           `markAsRunning ---[${descMetric(timeFromMarkAsRunTillRun)}]--> run ---[${descMetric(
             timeFromRunTillNextMarkAsRun
           )}]---> next markAsRunning`
         );
-        log.debug(`Duration of Perf Test: ${bright(perfTestDuration)}`);
-        log.debug(`Activity within Task Poller: ${bright(activityDuration)}`);
-        log.debug(`Inactivity due to Sleep: ${bright(sleepDuration)}`);
-        log.debug(
-          `Polling Cycles: ${colorizeCycles(fillPoolStarts, fillPoolCycles, fillPoolBail)}`
-        );
+        log.info(`Duration of Perf Test: ${bright(perfTestDuration)}`);
+        log.info(`Activity within Task Poller: ${bright(activityDuration)}`);
+        log.info(`Inactivity due to Sleep: ${bright(sleepDuration)}`);
+        log.info(`Polling Cycles: ${colorizeCycles(fillPoolStarts, fillPoolCycles, fillPoolBail)}`);
         if (fillPoolBail > 0) {
-          log.debug(`  ⮑ Bailed due to:`);
+          log.info(`  ⮑ Bailed due to:`);
           if (fillPoolBailNoTasks > 0) {
-            log.debug(`     ⮑ No Tasks To Process:`);
+            log.info(`     ⮑ No Tasks To Process:`);
             if (claimAvailableTasksNoTasks > 0) {
-              log.debug(`       ⮑ ${claimAvailableTasksNoTasks} Times, due to No Tasks Claimed`);
+              log.info(`       ⮑ ${claimAvailableTasksNoTasks} Times, due to No Tasks Claimed`);
             }
             if (claimAvailableTasksNoAvailableWorkers > 0) {
-              log.debug(
+              log.info(
                 `       ⮑ ${claimAvailableTasksNoAvailableWorkers} Times, due to having No Available Worker Capacity`
               );
             }
           }
           if (fillPoolBail - fillPoolBailNoTasks > 0) {
-            log.debug(
+            log.info(
               `     ⮑ Exhausted Available Workers due to on going Task runs ${fillPoolBail -
                 fillPoolBailNoTasks}`
             );
           }
         }
-        log.debug(
+        log.info(
           `average duration taken to Claim Available Tasks: ${descMetric(claimAvailableTasks)}`
         );
-        log.debug(
+        log.info(
           `average duration taken to Mark claimed Tasks as Running in Task Pool: ${descMetric(
             taskPoolAttemptToRun
           )}`
         );
-        log.debug(
+        log.info(
           `average duration taken to Mark individual Tasks as Running in Task Runner: ${descMetric(
             taskRunnerMarkTaskAsRunning
           )}`
