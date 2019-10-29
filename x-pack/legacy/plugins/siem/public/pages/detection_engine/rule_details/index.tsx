@@ -508,22 +508,26 @@ export const RuleDetailsComponent = React.memo(() => {
           subtitle2="Last signal: 23 minutes ago"
           title="Automated exfiltration"
         >
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
+          <EuiFlexGroup alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiSwitch label="Activate rule" />
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <EuiButton
-                href="#detection-engine/rules/rule-details/edit-rule"
-                iconType="visControls"
-              >
-                {'Edit rule settings'}
-              </EuiButton>
-            </EuiFlexItem>
+              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    href="#detection-engine/rules/rule-details/edit-rule"
+                    iconType="visControls"
+                  >
+                    {'Edit rule settings'}
+                  </EuiButton>
+                </EuiFlexItem>
 
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon iconType="boxesHorizontal" aria-label="Additional actions" />
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon iconType="boxesHorizontal" aria-label="Additional actions" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
         </HeaderPage>
