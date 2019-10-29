@@ -83,7 +83,6 @@ export const singleSearchAfter = async (
       index: params.index,
       from: params.from,
       to: params.to,
-      kql: params.kql,
       filter: params.filter,
       size: params.size ? params.size : 1000,
       searchAfterSortId,
