@@ -58,7 +58,8 @@ export class DashboardEmbeddableContainerPublicPlugin
     const changeViewAction = new ReplacePanelAction(
       core,
       __LEGACY.SavedObjectFinder,
-      notifications
+      notifications,
+      plugins.embeddable.getEmbeddableFactories
     );
     uiActions.registerAction(changeViewAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, changeViewAction.id);

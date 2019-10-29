@@ -17,8 +17,11 @@
  * under the License.
  */
 
-import { ViewMode, EmbeddableInput } from '../embeddable_api';
-import { DashboardContainerInput, DashboardPanelState } from '../embeddable';
+import { ViewMode, EmbeddableInput } from '../embeddable_plugin';
+// import { DashboardContainerInput, DashboardPanelState } from '../embeddable';
+
+type DashboardContainerInput = any;
+type DashboardPanelState<T = any> = any;
 
 export function getSampleDashboardInput(
   overrides?: Partial<DashboardContainerInput>

@@ -24,6 +24,7 @@ import {
   IEmbeddable,
   EmbeddableInput,
   EmbeddableOutput,
+  Start as EmbeddableStart,
 } from '../../../../../../embeddable_api/public/np_ready/public';
 
 import { IContainer } from '../../../../../../embeddable_api/public/np_ready/public';
@@ -35,8 +36,16 @@ export async function openReplacePanelFlyout(options: {
   savedObjectFinder: React.ComponentType<any>;
   notifications: NotificationsStart;
   panelToRemove: IEmbeddable<EmbeddableInput, EmbeddableOutput>;
+  getEmbeddableFactories: EmbeddableStart['getEmbeddableFactories'];
 }) {
-  const { embeddable, core, panelToRemove, savedObjectFinder, notifications } = options;
+  const {
+    embeddable,
+    core,
+    panelToRemove,
+    savedObjectFinder,
+    notifications,
+    getEmbeddableFactories,
+  } = options;
   const flyoutSession = core.overlays.openFlyout(
     <ReplacePanelFlyout
       container={embeddable}
@@ -48,6 +57,7 @@ export async function openReplacePanelFlyout(options: {
       panelToRemove={panelToRemove}
       savedObjectsFinder={savedObjectFinder}
       notifications={notifications}
+      getEmbeddableFactories={getEmbeddableFactories}
     />,
     {
       'data-test-subj': 'replacePanelFlyout',

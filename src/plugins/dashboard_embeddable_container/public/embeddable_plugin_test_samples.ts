@@ -18,4 +18,4 @@
  */
 
 // eslint-disable-next-line
-export * from '../../../../../../../../plugins/dashboard_embeddable_container/public/actions/replace_panel_flyout';
+export * from '../../../plugins/embeddable/public/lib/test_samples';

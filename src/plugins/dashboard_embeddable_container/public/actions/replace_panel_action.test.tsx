@@ -17,6 +17,7 @@
  * under the License.
  */
 
+/*
 import { isErrorEmbeddable, EmbeddableFactory } from '../embeddable_api';
 import { ReplacePanelAction } from './replace_panel_action';
 import { DashboardContainer } from '../embeddable';
@@ -127,3 +128,4 @@ test('Returns an icon', async () => {
   const action = new ReplacePanelAction(core, SavedObjectFinder, notifications);
   expect(action.getIconType({ embeddable })).toBeDefined();
 });
+*/

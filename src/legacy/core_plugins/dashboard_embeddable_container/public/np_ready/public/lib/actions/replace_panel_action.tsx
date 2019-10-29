@@ -20,7 +20,11 @@
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'src/core/public';
 
-import { IEmbeddable, ViewMode } from '../../../../../../embeddable_api/public/np_ready/public';
+import {
+  IEmbeddable,
+  ViewMode,
+  Start as EmbeddableStart,
+} from '../../../../../../embeddable_api/public/np_ready/public';
 import { DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '../embeddable';
 import {
   IAction,
@@ -47,7 +51,8 @@ export class ReplacePanelAction implements IAction<ActionContext> {
   constructor(
     private core: CoreStart,
     private savedobjectfinder: React.ComponentType<any>,
-    private notifications: NotificationsStart
+    private notifications: NotificationsStart,
+    private getEmbeddableFactories: EmbeddableStart['getEmbeddableFactories']
   ) {}
 
   public getDisplayName({ embeddable }: ActionContext) {
@@ -89,6 +94,7 @@ export class ReplacePanelAction implements IAction<ActionContext> {
       savedObjectFinder: this.savedobjectfinder,
       notifications: this.notifications,
       panelToRemove: view,
+      getEmbeddableFactories: this.getEmbeddableFactories,
     });
   }
 }
