@@ -56,7 +56,7 @@ const createMockWebStorage = () => ({
 });
 
 const createMockStorage = () => ({
-  store: createMockWebStorage(),
+  storage: createMockWebStorage(),
   get: jest.fn(),
   set: jest.fn(),
   remove: jest.fn(),
@@ -95,7 +95,7 @@ function wrapSearchBarInContext(testProps: any) {
     savedObjects: startMock.savedObjects,
     notifications: startMock.notifications,
     http: startMock.http,
-    store: createMockStorage(),
+    storage: createMockStorage(),
   };
 
   return (

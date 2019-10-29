@@ -17,28 +17,16 @@
  * under the License.
  */
 
-import { Storage } from 'ui/storage';
-import { Plugin } from '../../../../../../src/core/public';
-
-/** @internal */
-export interface LegacyDependenciesPluginSetup {
-  storage: Storage;
+export interface IStorageWrapper {
+  get: (key: string) => any;
+  set: (key: string, value: any) => void;
+  remove: (key: string) => any;
+  clear: () => void;
 }
 
-export interface LegacyDependenciesPluginStart {
-  storage: Storage;
-}
-
-export class LegacyDependenciesPlugin implements Plugin<any, any> {
-  public setup() {
-    return {
-      storage: new Storage(window.localStorage),
-    } as LegacyDependenciesPluginSetup;
-  }
-
-  public start() {
-    return {
-      storage: new Storage(window.localStorage),
-    } as LegacyDependenciesPluginStart;
-  }
+export interface IStorage {
+  getItem: (key: string) => any;
+  setItem: (key: string, value: any) => void;
+  removeItem: (key: string) => any;
+  clear: () => void;
 }

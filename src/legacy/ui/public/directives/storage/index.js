@@ -18,8 +18,8 @@
  */
 
 
-import { uiModules } from '../modules';
-import { Storage } from './storage';
+import { uiModules } from '../../modules';
+import { Storage } from '../../../../../plugins/kibana_utils/public';
 
 const createService = function (type) {
   return function ($window) {
