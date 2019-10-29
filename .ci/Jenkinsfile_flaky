@@ -79,9 +79,9 @@ def getWorkerFromParams(isXpack, job, ciGroup) {
   }
 }
 
-def getWorkerMap(agentNumber, numberOfExecutions, worker, workerFailures, maxWorkers = 8) {
+def getWorkerMap(agentNumber, numberOfExecutions, worker, workerFailures, maxWorkerProcesses = 12) {
   def workerMap = [:]
-  def numberOfWorkers = Math.min(numberOfExecutions, maxWorkers)
+  def numberOfWorkers = Math.min(numberOfExecutions, maxWorkerProcesses)
 
   for(def i = 1; i <= numberOfWorkers; i++) {
     def workerExecutions = numberOfExecutions/numberOfWorkers + (i <= numberOfExecutions%numberOfWorkers ? 1 : 0)
@@ -110,8 +110,8 @@ def getWorkerMap(agentNumber, numberOfExecutions, worker, workerFailures, maxWor
 }
 
 def getAgentCount(executions) {
-  // Increase agent count every 40 workers, up to 3 agents maximum
-  return Math.min(3, 1 + floor(executions/40))
+  // Increase agent count every 24 worker processess, up to 3 agents maximum
+  return Math.min(3, 1 + floor(executions/24))
 }
 
 def trunc(str, length) {
