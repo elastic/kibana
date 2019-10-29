@@ -38,7 +38,13 @@ export class GeojsonFileSource extends AbstractVectorSource {
   static createDescriptor(geoJson, name) {
     // Wrap feature as feature collection if needed
     let featureCollection;
-    if (geoJson.type === 'FeatureCollection') {
+
+    if (!geoJson) {
+      featureCollection = {
+        type: 'FeatureCollection',
+        features: []
+      };
+    } else if (geoJson.type === 'FeatureCollection') {
       featureCollection = geoJson;
     } else if (geoJson.type === 'Feature') {
       featureCollection = {
