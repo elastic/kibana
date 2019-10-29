@@ -63,7 +63,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [IKibanaSocket](./kibana-plugin-server.ikibanasocket.md) | A tiny abstraction for TCP socket. |
 |  [IndexSettingsDeprecationInfo](./kibana-plugin-server.indexsettingsdeprecationinfo.md) |  |
 |  [IRouter](./kibana-plugin-server.irouter.md) | Registers route handlers for specified resource path and method. See [RouteConfig](./kibana-plugin-server.routeconfig.md) and [RequestHandler](./kibana-plugin-server.requesthandler.md) for more information about arguments to route registrations. |
-|  [IUiSettingsClient](./kibana-plugin-server.iuisettingsclient.md) | Service that provides access to the UiSettings stored in elasticsearch. |
+|  [IUiSettingsClient](./kibana-plugin-server.iuisettingsclient.md) | Server-side client that provides access to the advanced settings stored in elasticsearch. The settings provide control over the behavior of the Kibana application. For example, a user can specify how to display numeric or date fields. Users can adjust the settings via Management UI. |
 |  [KibanaRequestRoute](./kibana-plugin-server.kibanarequestroute.md) | Request specific route information exposed to a handler. |
 |  [LegacyRequest](./kibana-plugin-server.legacyrequest.md) |  |
 |  [LegacyServiceSetupDeps](./kibana-plugin-server.legacyservicesetupdeps.md) |  |
@@ -118,6 +118,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SessionStorageCookieOptions](./kibana-plugin-server.sessionstoragecookieoptions.md) | Configuration used to create HTTP session storage based on top of cookie mechanism. |
 |  [SessionStorageFactory](./kibana-plugin-server.sessionstoragefactory.md) | SessionStorage factory to bind one to an incoming request |
 |  [UiSettingsParams](./kibana-plugin-server.uisettingsparams.md) | UiSettings parameters defined by the plugins. |
+|  [UiSettingsServiceSetup](./kibana-plugin-server.uisettingsservicesetup.md) |  |
+|  [UserProvidedValues](./kibana-plugin-server.userprovidedvalues.md) | Describes the values explicitly set by user. |
 
 ## Variables
 
