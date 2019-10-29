@@ -22,6 +22,7 @@ import { loggingServiceMock } from './logging/logging_service.mock';
 import { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.mock';
 import { httpServiceMock } from './http/http_service.mock';
 import { contextServiceMock } from './context/context_service.mock';
+import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 
 export { httpServerMock } from './http/http_server.mocks';
 export { sessionStorageMock } from './http/cookie_session_storage.mocks';
@@ -79,10 +80,14 @@ function createCoreSetupMock() {
   };
   httpMock.createRouter.mockImplementation(() => httpService.createRouter(''));
 
+  const uiSettingsMock = {
+    register: uiSettingsServiceMock.createSetupContract().register,
+  };
   const mock: MockedKeys<CoreSetup> = {
     context: contextServiceMock.createSetupContract(),
     elasticsearch: elasticsearchServiceMock.createSetupContract(),
     http: httpMock,
+    uiSettings: uiSettingsMock,
   };
 
   return mock;
@@ -94,8 +99,19 @@ function createCoreStartMock() {
   return mock;
 }
 
+function createInternalCoreSetupMock() {
+  const setupDeps = {
+    context: contextServiceMock.createSetupContract(),
+    elasticsearch: elasticsearchServiceMock.createSetupContract(),
+    http: httpServiceMock.createSetupContract(),
+    uiSettings: uiSettingsServiceMock.createSetupContract(),
+  };
+  return setupDeps;
+}
+
 export const coreMock = {
   createSetup: createCoreSetupMock,
   createStart: createCoreStartMock,
+  createInternalSetup: createInternalCoreSetupMock,
   createPluginInitializerContext: pluginInitializerContextMock,
 };
