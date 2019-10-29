@@ -41,34 +41,54 @@ describe('ML - data recognizer', () => {
 
   describe('jobOverrides', () => {
     it('should apply job overrides correctly', () => {
+      // arrange
       const prefix = 'pre-';
       const testJobId = 'test-job';
       const moduleConfig = {
         jobs: [
           {
             id: `${prefix}${testJobId}`,
-            groups: ['nginx'],
+            config: {
+              groups: ['nginx'],
+              analysis_config: {
+                bucket_span: '1h'
+              },
+              analysis_limits: {
+                model_memory_limit: '256mb'
+              }
+            }
           },
         ],
       };
       const jobOverrides = [
         {
+          analysis_limits: {
+            model_memory_limit: '512mb'
+          }
+        },
+        {
           job_id: testJobId,
           groups: [],
         },
       ];
+      // act
       dr.applyJobConfigOverrides(moduleConfig, jobOverrides, prefix);
+      // assert
       expect(moduleConfig.jobs).to.eql([
         {
           config: {
+            analysis_config: {
+              bucket_span: '1h'
+            },
+            analysis_limits: {
+              model_memory_limit: '512mb'
+            },
             groups: []
           },
-          groups: [
-            'nginx'
-          ],
           id: 'pre-test-job'
         }
       ]);
     });
   });
 });
+

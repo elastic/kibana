@@ -839,12 +839,19 @@ export class DataRecognizer {
       }
     });
 
+    function processArrayValues(source, update) {
+      Object.keys(source).forEach(key => {
+        const value = source[key];
+        if (Array.isArray(value)) {
+          source[key] = update[key];
+        }
+      });
+    }
+
     generalOverrides.forEach(generalOverride => {
       jobs.forEach(job => {
-        job.config = {
-          ...job.config,
-          ...generalOverride
-        };
+        merge(job.config, generalOverride);
+        processArrayValues(job.config, generalOverride);
       });
     });
 
@@ -855,10 +862,8 @@ export class DataRecognizer {
       if (job !== undefined) {
         // delete the job_id in the override as this shouldn't be overridden
         delete jobSpecificOverride.job_id;
-        job.config = {
-          ...job.config,
-          ...jobSpecificOverride,
-        };
+        merge(job.config, jobSpecificOverride);
+        processArrayValues(job.config, jobSpecificOverride);
       }
     });
   }
