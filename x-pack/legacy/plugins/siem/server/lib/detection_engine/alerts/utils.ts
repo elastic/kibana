@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { performance } from 'perf_hooks';
-import { SignalHit, TotalValue } from '../../types';
+import { SignalHit } from '../../types';
 import { Logger } from '../../../../../../../../src/core/server';
 import { AlertServices } from '../../../../../alerting/server/types';
 import { SignalSourceHit, SignalSearchResponse, SignalAlertParams } from './types';
