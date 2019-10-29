@@ -17,21 +17,6 @@
  * under the License.
  */
 
-import moment from 'moment';
-import { keys } from 'lodash';
-import { RangeFilter } from '@kbn/es-query';
-import { TimefilterContract } from '../../../timefilter';
+export * from './query_service';
 
-export function convertRangeFilterToTimeRange(filter: RangeFilter) {
-  const key = keys(filter.range)[0];
-  const values = filter.range[key];
-
-  return {
-    from: moment(values.gt || values.gte),
-    to: moment(values.lt || values.lte),
-  };
-}
-
-export function changeTimeFilter(timeFilter: TimefilterContract, filter: RangeFilter) {
-  timeFilter.setTime(convertRangeFilterToTimeRange(filter));
-}
+export * from './filter_manager';
