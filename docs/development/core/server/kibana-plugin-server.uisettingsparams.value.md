@@ -9,5 +9,5 @@ default value to fall back to if a user doesn't provide any
 <b>Signature:</b>
 
 ```typescript
-value: SavedObjectAttribute;
+value?: SavedObjectAttribute;
 ```

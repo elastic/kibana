@@ -60,6 +60,7 @@ import { getIndexPattern } from './get_index_pattern';
 import { VisualizeEmbeddable, VisualizeInput, VisualizeOutput } from './visualize_embeddable';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import { TypesStart } from '../../../../visualizations/public/np_ready/public/types';
+import { VisSavedObject } from '../../../../../ui/public/visualize/loader/types';
 
 interface VisualizationAttributes extends SavedObjectAttributes {
   visState: string;
@@ -130,8 +131,8 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
     });
   }
 
-  public async createFromSavedObject(
-    savedObjectId: string,
+  public async createFromObject(
+    savedObject: VisSavedObject,
     input: Partial<VisualizeInput> & { id: string },
     parent?: Container
   ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> {
@@ -140,11 +141,12 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
     const savedVisualizations = $injector.get<SavedVisualizations>('savedVisualizations');
 
     try {
-      const visId = savedObjectId;
+      const visId = savedObject.id as string;
 
-      const editUrl = chrome.addBasePath(`/app/kibana${savedVisualizations.urlFor(visId)}`);
+      const editUrl = visId
+        ? chrome.addBasePath(`/app/kibana${savedVisualizations.urlFor(visId)}`)
+        : '';
       const loader = await getVisualizeLoader();
-      const savedObject = await savedVisualizations.get(visId);
       const isLabsEnabled = config.get<boolean>('visualize:enableLabs');
 
       if (!isLabsEnabled && savedObject.vis.type.stage === 'experimental') {
@@ -160,10 +162,31 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
           indexPatterns,
           editUrl,
           editable: this.isEditable(),
+          appState: input.appState,
+          uiState: input.uiState,
         },
         input,
         parent
       );
+    } catch (e) {
+      console.error(e); // eslint-disable-line no-console
+      return new ErrorEmbeddable(e, input, parent);
+    }
+  }
+
+  public async createFromSavedObject(
+    savedObjectId: string,
+    input: Partial<VisualizeInput> & { id: string },
+    parent?: Container
+  ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> {
+    const $injector = await chrome.dangerouslyGetActiveInjector();
+    const savedVisualizations = $injector.get<SavedVisualizations>('savedVisualizations');
+
+    try {
+      const visId = savedObjectId;
+
+      const savedObject = await savedVisualizations.get(visId);
+      return this.createFromObject(savedObject, input, parent);
     } catch (e) {
       console.error(e); // eslint-disable-line no-console
       return new ErrorEmbeddable(e, input, parent);

@@ -136,6 +136,7 @@ export class StartDatafeedModal extends Component {
             onClose={this.closeModal}
             style={{ width: '850px' }}
             maxWidth={false}
+            data-test-subj="mlStartDatafeedModal"
           >
             <EuiModalHeader>
               <EuiModalHeaderTitle>
@@ -178,6 +179,7 @@ export class StartDatafeedModal extends Component {
             <EuiModalFooter>
               <EuiButtonEmpty
                 onClick={this.closeModal}
+                data-test-subj="mlStartDatafeedModalCancelButton"
               >
                 <FormattedMessage
                   id="xpack.ml.jobsList.startDatafeedModal.cancelButtonLabel"
@@ -189,6 +191,7 @@ export class StartDatafeedModal extends Component {
                 onClick={this.save}
                 isDisabled={startDisabled}
                 fill
+                data-test-subj="mlStartDatafeedModalStartButton"
               >
                 <FormattedMessage
                   id="xpack.ml.jobsList.startDatafeedModal.startButtonLabel"

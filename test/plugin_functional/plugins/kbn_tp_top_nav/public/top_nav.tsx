@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { Component } from 'react';
+import React from 'react';
 import {
   setup as navSetup,
   start as navStart,
@@ -33,22 +33,21 @@ const customExtension = {
 
 navSetup.registerMenuItem(customExtension);
 
-export class AppWithTopNav extends Component {
-  public render() {
-    const { TopNavMenu } = navStart.ui;
-    const config = [
-      {
-        id: 'new',
-        label: 'New Button',
-        description: 'New Demo',
-        run() {},
-        testId: 'demoNewButton',
-      },
-    ];
-    return (
-      <TopNavMenu appName="demo-app" config={config}>
-        Hey
-      </TopNavMenu>
-    );
-  }
-}
+export const AppWithTopNav = () => {
+  const { TopNavMenu } = navStart.ui;
+  const config = [
+    {
+      id: 'new',
+      label: 'New Button',
+      description: 'New Demo',
+      run() {},
+      testId: 'demoNewButton',
+    },
+  ];
+
+  return (
+    <TopNavMenu appName="demo-app" config={config}>
+      Hey
+    </TopNavMenu>
+  );
+};

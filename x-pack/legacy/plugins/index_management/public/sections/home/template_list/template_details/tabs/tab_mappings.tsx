@@ -34,6 +34,6 @@ export const TabMappings: React.FunctionComponent<Props> = ({ templateDetails })
       }
       iconType="pin"
       data-test-subj="noMappingsCallout"
-    ></EuiCallOut>
+    />
   );
 };

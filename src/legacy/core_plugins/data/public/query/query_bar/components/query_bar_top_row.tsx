@@ -73,7 +73,7 @@ function QueryBarTopRowUI(props: Props) {
   const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
 
   const kibana = useKibana<IDataPluginServices>();
-  const { uiSettings, notifications, store, appName, docLinks } = kibana.services;
+  const { uiSettings, notifications, storage, appName, docLinks } = kibana.services;
 
   const kueryQuerySyntaxLink: string = docLinks!.links.query.kueryQuerySyntax;
 
@@ -82,7 +82,7 @@ function QueryBarTopRowUI(props: Props) {
 
   useEffect(() => {
     if (!props.query) return;
-    persistedLog = getQueryLog(uiSettings!, store, appName, props.query.language);
+    persistedLog = getQueryLog(uiSettings!, storage, appName, props.query.language);
   }, [queryLanguage]);
 
   function onClickSubmitButton(event: React.MouseEvent<HTMLButtonElement>) {
@@ -211,7 +211,7 @@ function QueryBarTopRowUI(props: Props) {
   }
 
   function shouldRenderQueryInput(): boolean {
-    return Boolean(props.showQueryInput && props.indexPatterns && props.query && store);
+    return Boolean(props.showQueryInput && props.indexPatterns && props.query && storage);
   }
 
   function renderUpdateButton() {
@@ -293,7 +293,7 @@ function QueryBarTopRowUI(props: Props) {
     if (
       language === 'kuery' &&
       typeof query === 'string' &&
-      (!store || !store.get('kibana.luceneSyntaxWarningOptOut')) &&
+      (!storage || !storage.get('kibana.luceneSyntaxWarningOptOut')) &&
       doesKueryExpressionHaveLuceneSyntaxError(query)
     ) {
       const toast = notifications!.toasts.addWarning({
@@ -337,8 +337,8 @@ function QueryBarTopRowUI(props: Props) {
   }
 
   function onLuceneSyntaxWarningOptOut(toast: Toast) {
-    if (!store) return;
-    store.set('kibana.luceneSyntaxWarningOptOut', true);
+    if (!storage) return;
+    storage.set('kibana.luceneSyntaxWarningOptOut', true);
     notifications!.toasts.remove(toast);
   }
 
