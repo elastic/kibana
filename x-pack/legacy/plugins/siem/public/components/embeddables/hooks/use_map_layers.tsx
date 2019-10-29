@@ -51,11 +51,6 @@ export const useMapLayers = (): Return => {
 
   const eventHandlers: MapLayerEventHandlers = {
     onDataLoad: ({ layerId, dataId }: OnDataLoadProps) => {
-      // TODO: Ask maps team why root layer is includes onDataLoad but not onDataLoadEnd
-      if (layerId.startsWith('root-layer')) {
-        return;
-      }
-
       setMapLayers(prevMapLayers => mergeMapLayers(prevMapLayers, dataId, layerId, true));
     },
     onDataLoadEnd: ({ layerId, dataId, featuresCount }: OnDataLoadEndProps) => {
@@ -72,7 +67,7 @@ export const useMapLayers = (): Return => {
 
   useEffect(() => {
     setIsLoading(isMapLoading(mapLayers));
-  }, [setIsLoading(isMapLoading(mapLayers))]);
+  }, [isMapLoading(mapLayers)]);
 
   return [isLoading, mapLayers, eventHandlers];
 };
