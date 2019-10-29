@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable @typescript-eslint/array-type */
+
 import { GenericParams } from 'elasticsearch';
 import { GraphQLSchema } from 'graphql';
 import { Legacy } from 'kibana';
-import { get } from 'lodash';
 import { runHttpQuery } from 'apollo-server-core';
-import { schema, TypeOf, ObjectType } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 import { first } from 'rxjs/operators';
 import {
   InfraBackendFrameworkAdapter,
@@ -19,10 +20,9 @@ import {
 } from './adapter_types';
 import { TSVBMetricModel } from '../../../../common/inventory_models/types';
 import {
-  InternalCoreSetup,
+  CoreSetup,
   IRouter,
   KibanaRequest,
-  RequestHandler,
   RequestHandlerContext,
   KibanaResponseFactory,
 } from '../../../../../../../../src/core/server';
@@ -32,29 +32,28 @@ interface CallWithRequestParams extends GenericParams {
   max_concurrent_shard_requests?: number;
 }
 
-const anyObject = schema.object({}, { allowUnknowns: true });
+// const anyObject = schema.object({}, { allowUnknowns: true });
 
-type AnyObject = typeof anyObject;
+// type AnyObject = typeof anyObject;
 
-interface BasicRoute<
-  P extends ObjectType = AnyObject,
-  Q extends ObjectType = AnyObject,
-  B extends ObjectType = AnyObject
-> {
-  method: 'get' | 'put' | 'post' | 'delete';
-  path: string;
-  handler: RequestHandler<P, Q, B>;
-  options?: any;
-}
+// interface BasicRoute<
+//   P extends ObjectType = AnyObject,
+//   Q extends ObjectType = AnyObject,
+//   B extends ObjectType = AnyObject
+// > {
+//   method: 'get' | 'put' | 'post' | 'delete';
+//   path: string;
+//   handler: RequestHandler<P, Q, B>;
+//   options?: any;
+// }
 
-export class InfraKibanaBackendFrameworkAdapter
-  implements InfraBackendFrameworkAdapter<BasicRoute> {
+export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFrameworkAdapter {
   public router: IRouter;
-  private core: InternalCoreSetup;
+  private core: CoreSetup;
   private plugins: InfraServerPluginDeps;
 
-  constructor(core: InternalCoreSetup, config: InfraConfig, plugins: InfraServerPluginDeps) {
-    this.router = core.http.createRouter('/api/infra');
+  constructor(core: CoreSetup, config: InfraConfig, plugins: InfraServerPluginDeps) {
+    this.router = core.http.createRouter();
     this.core = core;
     this.plugins = plugins;
   }
@@ -85,7 +84,7 @@ export class InfraKibanaBackendFrameworkAdapter
     type Body = TypeOf<typeof body>;
 
     const routeOptions = {
-      path: routePath,
+      path: `/api/infra${routePath}`, // NP_TODO: figure out how to not hard-code this path prefix
       validate: {
         body,
       },
@@ -154,49 +153,7 @@ export class InfraKibanaBackendFrameworkAdapter
     }
     this.router.post(routeOptions, handler);
     this.router.get(routeOptions, handler);
-
-    // NP_TODO: Re-enable graphiql endpoint?
-    // this.server.route({
-    //   options: {
-    //     tags: ['access:infra'],
-    //   },
-    //   handler: async (request: Request, h: ResponseToolkit) => {
-    //     const graphiqlString = await GraphiQL.resolveGraphiQLString(
-    //       request.query,
-    //       (req: Legacy.Request) => ({
-    //         endpointURL: req ? `${req.getBasePath()}${routePath}` : routePath,
-    //         // passHeader: `'kbn-version': '${this.version}'`, // not sure this is necessary, removing for now
-    //       }),
-    //       request
-    //     );
-
-    //     return h.response(graphiqlString).type('text/html');
-    //   },
-    //   method: 'GET',
-    //   path: routePath ? `${routePath}/graphiql` : '/graphiql',
-    // });
   }
-
-  // public registerRoute<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
-  //   route: RouteConfig<P, Q, B>,
-  //   handler: RequestHandler<P, Q, B>
-  // ) {
-  //   // NP_TODO: Our current routes all use POST, but we need to expand this,
-  //   // but the types make it hell so I'm skipping for now
-  //   this.router.post(
-  //     {
-  //       validate: VALIDATE_PLACEHOLDER,
-  //       path: route.path,
-  //     },
-  //     route.handler
-  //   );
-  //   // this.legacyServer.route({
-  //   //   handler: wrappedHandler,
-  //   //   options: route.options,
-  //   //   method: route.method,
-  //   //   path: route.path,
-  //   // });
-  // }
 
   public async callWithRequest<Hit = {}, Aggregation = undefined>(
     request: KibanaRequest | Legacy.Request,
@@ -238,21 +195,10 @@ export class InfraKibanaBackendFrameworkAdapter
         }
       : {};
 
-    const fields = await client.callAsCurrentUser(
-      endpoint,
-      {
-        ...params,
-        ...frozenIndicesParams,
-        // NP_TODO not sure how to use config auth automatically??
-        headers: {
-          Authorization: 'Basic ZWxhc3RpYzpjaGFuZ2VtZQ==', // 8.0 shared 'Basic YWRtaW46dkw0MVpiREpoNWtuUUE=',
-        },
-      },
-      // NP_TODO: not sure we need this?
-      {
-        wrap401Errors: true,
-      }
-    );
+    const fields = await client.callAsCurrentUser(endpoint, {
+      ...params,
+      ...frozenIndicesParams,
+    });
     return fields as Promise<InfraDatabaseSearchResponse<Hit, Aggregation>>;
   }
 
@@ -288,15 +234,12 @@ export class InfraKibanaBackendFrameworkAdapter
     timerange: { min: number; max: number },
     filters: any[]
   ) {
-    const server = request.server;
-    const getVisData = get(server, 'plugins.metrics.getVisData');
+    const { getVisData } = this.plugins.metrics;
     if (typeof getVisData !== 'function') {
       throw new Error('TSVB is not available');
     }
 
-    // getBasePath returns randomized base path AND spaces path
-    const basePath = request.getBasePath();
-    const url = `${basePath}/api/metrics/vis/data`;
+    const url = this.core.http.basePath.prepend('/api/metrics/vis/data');
 
     // For the following request we need a copy of the instnace of the internal request
     // but modified for our TSVB request. This will ensure all the instance methods
@@ -314,16 +257,3 @@ export class InfraKibanaBackendFrameworkAdapter
     return result as InfraTSVBResponse;
   }
 }
-
-// export function wrapRequest<InternalRequest extends InfraWrappableRequest>(
-//   req: InternalRequest
-// ): InfraFrameworkRequest<InternalRequest> {
-//   const { params, payload, query } = req;
-
-//   return {
-//     [internalInfraFrameworkRequest]: req,
-//     params,
-//     payload,
-//     query,
-//   };
-// }

@@ -11,8 +11,9 @@ import { Legacy } from 'kibana';
 import { identity, constant } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fold } from 'fp-ts/lib/Either';
+import { KibanaRequest } from 'src/core/server';
 import { Pick3 } from '../../../common/utility_types';
-import { InfraFrameworkRequest, internalInfraFrameworkRequest } from '../adapters/framework';
+import { InfraFrameworkRequest } from '../adapters/framework';
 import { defaultSourceConfiguration } from './defaults';
 import { NotFoundError } from './errors';
 import { infraSourceConfigurationSavedObjectType } from './saved_object_mappings';
@@ -40,7 +41,7 @@ export class InfraSources {
     this.libs = libs;
   }
 
-  public async getSourceConfiguration(request: InfraFrameworkRequest, sourceId: string) {
+  public async getSourceConfiguration(request: KibanaRequest, sourceId: string) {
     const staticDefaultSourceConfiguration = await this.getStaticDefaultSourceConfiguration();
 
     const savedSourceConfiguration = await this.getInternalSourceConfiguration(sourceId)
@@ -80,7 +81,7 @@ export class InfraSources {
     return savedSourceConfiguration;
   }
 
-  public async getAllSourceConfigurations(request: InfraFrameworkRequest) {
+  public async getAllSourceConfigurations(request: KibanaRequest) {
     const staticDefaultSourceConfiguration = await this.getStaticDefaultSourceConfiguration();
 
     const savedSourceConfigurations = await this.getAllSavedSourceConfigurations(request);
@@ -95,7 +96,7 @@ export class InfraSources {
   }
 
   public async createSourceConfiguration(
-    request: InfraFrameworkRequest,
+    request: KibanaRequest,
     sourceId: string,
     source: InfraSavedSourceConfiguration
   ) {
@@ -132,7 +133,7 @@ export class InfraSources {
   }
 
   public async updateSourceConfiguration(
-    request: InfraFrameworkRequest,
+    request: KibanaRequest,
     sourceId: string,
     sourceProperties: InfraSavedSourceConfiguration
   ) {
@@ -202,7 +203,7 @@ export class InfraSources {
     return mergeSourceConfiguration(defaultSourceConfiguration, staticSourceConfiguration);
   }
 
-  private async getSavedSourceConfiguration(request: InfraFrameworkRequest, sourceId: string) {
+  private async getSavedSourceConfiguration(request: KibanaRequest, sourceId: string) {
     const savedObjectsClient = this.libs.savedObjects.getScopedSavedObjectsClient(request);
 
     const savedObject = await savedObjectsClient.get(
@@ -213,7 +214,7 @@ export class InfraSources {
     return convertSavedObjectToSavedSourceConfiguration(savedObject);
   }
 
-  private async getAllSavedSourceConfigurations(request: InfraFrameworkRequest) {
+  private async getAllSavedSourceConfigurations(request: KibanaRequest) {
     const savedObjectsClient = this.libs.savedObjects.getScopedSavedObjectsClient(request);
 
     const savedObjects = await savedObjectsClient.find({
