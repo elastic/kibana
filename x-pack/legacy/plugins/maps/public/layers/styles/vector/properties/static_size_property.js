@@ -11,11 +11,11 @@ import { HALF_LARGE_MAKI_ICON_SIZE, LARGE_MAKI_ICON_SIZE, SMALL_MAKI_ICON_SIZE }
 
 export class StaticSizeProperty extends StaticStyleProperty {
 
-  constructor(options) {
+  constructor(options, styleName) {
     if (typeof options.size !== 'number') {
-      super({ size: 1 });
+      super({ size: 1 }, styleName);
     } else {
-      super(options);
+      super(options, styleName);
     }
   }
 

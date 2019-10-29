@@ -10,11 +10,11 @@ import { StaticStyleProperty } from './static_style_property';
 
 export class StaticOrientationProperty extends StaticStyleProperty {
 
-  constructor(options) {
+  constructor(options, styleName) {
     if (typeof options.orientation !== 'number') {
-      super({ orientation: 0 });
+      super({ orientation: 0 }, styleName);
     } else {
-      super(options);
+      super(options, styleName);
     }
   }
 

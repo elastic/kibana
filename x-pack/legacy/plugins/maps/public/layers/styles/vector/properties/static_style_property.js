@@ -9,4 +9,5 @@ import { AbstractStyleProperty } from './style_property';
 
 export class StaticStyleProperty extends AbstractStyleProperty {
   static type = 'STATIC';
+
 }

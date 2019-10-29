@@ -10,7 +10,16 @@
 
 export class AbstractStyleProperty {
 
-  constructor(options) {
+  constructor(options, styleName) {
     this._options = options;
+    this._styleName = styleName;
+  }
+
+  isDynamic() {
+    return false;
+  }
+
+  getStyleName() {
+    return this._styleName;
   }
 }

@@ -30,22 +30,6 @@ export class VectorStyle extends AbstractStyle {
 
   static type = 'VECTOR';
 
-  constructor(descriptor = {}, source) {
-    super();
-    this._source = source;
-    this._descriptor = {
-      ...descriptor,
-      ...VectorStyle.createDescriptor(descriptor.properties),
-    };
-
-    this._lineColorStyleProperty = this._makeStyleProperty(vectorStyles.LINE_COLOR, this._descriptor.properties[vectorStyles.LINE_COLOR]);
-    this._fillColorStyleProperty = this._makeStyleProperty(vectorStyles.FILL_COLOR, this._descriptor.properties[vectorStyles.FILL_COLOR]);
-    this._lineWidthStyleProperty = this._makeStyleProperty(vectorStyles.LINE_WIDTH, this._descriptor.properties[vectorStyles.LINE_WIDTH]);
-    this._iconSizeStyleProperty = this._makeStyleProperty(vectorStyles.ICON_SIZE, this._descriptor.properties[vectorStyles.ICON_SIZE]);
-    // eslint-disable-next-line max-len
-    this._iconOrientationProperty = this._makeStyleProperty(vectorStyles.ICON_ORIENTATION, this._descriptor.properties[vectorStyles.ICON_ORIENTATION]);
-
-  }
 
   static createDescriptor(properties = {}) {
     return {
@@ -65,6 +49,33 @@ export class VectorStyle extends AbstractStyle {
   }
 
   static description = '';
+
+
+  constructor(descriptor = {}, source) {
+    super();
+    this._source = source;
+    this._descriptor = {
+      ...descriptor,
+      ...VectorStyle.createDescriptor(descriptor.properties),
+    };
+
+    this._lineColorStyleProperty = this._makeStyleProperty(vectorStyles.LINE_COLOR, this._descriptor.properties[vectorStyles.LINE_COLOR]);
+    this._fillColorStyleProperty = this._makeStyleProperty(vectorStyles.FILL_COLOR, this._descriptor.properties[vectorStyles.FILL_COLOR]);
+    this._lineWidthStyleProperty = this._makeStyleProperty(vectorStyles.LINE_WIDTH, this._descriptor.properties[vectorStyles.LINE_WIDTH]);
+    this._iconSizeStyleProperty = this._makeStyleProperty(vectorStyles.ICON_SIZE, this._descriptor.properties[vectorStyles.ICON_SIZE]);
+    // eslint-disable-next-line max-len
+    this._iconOrientationProperty = this._makeStyleProperty(vectorStyles.ICON_ORIENTATION, this._descriptor.properties[vectorStyles.ICON_ORIENTATION]);
+  }
+
+  _getAllStyleProperties() {
+    return [
+      this._lineColorStyleProperty,
+      this._fillColorStyleProperty,
+      this._lineWidthStyleProperty,
+      this._iconSizeStyleProperty,
+      this._iconOrientationProperty
+    ];
+  }
 
   renderEditor({ layer, onStyleDescriptorChange }) {
     const styleProperties = { ...this.getProperties() };
@@ -212,19 +223,13 @@ export class VectorStyle extends AbstractStyle {
   }
 
   getSourceFieldNames() {
-    const properties = this.getProperties();
     const fieldNames = [];
-    Object.keys(properties).forEach(propertyName => {
-      if (!this._isPropertyDynamic(propertyName)) {
-        return;
-      }
-
-      const field = _.get(properties[propertyName], 'options.field', {});
+    this.getDynamicPropertiesArray2().forEach(styleProperty => {
+      const field = styleProperty.getFieldConfig();
       if (field.origin === SOURCE_DATA_ID_ORIGIN && field.name) {
         fieldNames.push(field.name);
       }
     });
-
     return fieldNames;
   }
 
@@ -246,6 +251,11 @@ export class VectorStyle extends AbstractStyle {
       .filter(({ styleName }) => {
         return this._isPropertyDynamic(styleName);
       });
+  }
+
+  getDynamicPropertiesArray2() {
+    const styleProperties = this._getAllStyleProperties();
+    return styleProperties.filter(styleProperty => styleProperty.isDynamic());
   }
 
   _isPropertyDynamic(propertyName) {
@@ -445,7 +455,7 @@ export class VectorStyle extends AbstractStyle {
     this._iconSizeStyleProperty.syncCircleRadiusWithMb(pointLayerId, mbMap);
   }
 
-  async setMBSymbolPropertiesForPoints({ mbMap, symbolLayerId, alpha }) {
+  setMBSymbolPropertiesForPoints({ mbMap, symbolLayerId, alpha }) {
 
     const symbolId = this._descriptor.properties.symbol.options.symbolId;
     mbMap.setLayoutProperty(symbolLayerId, 'icon-ignore-placement', true);
@@ -467,9 +477,9 @@ export class VectorStyle extends AbstractStyle {
 
   _makeSizeProperty(descriptor, styleName) {
     if (!descriptor || !descriptor.options) {
-      return new StaticSizeProperty({ size: 0 });
+      return new StaticSizeProperty({ size: 0 }, styleName);
     } else if (descriptor.type === StaticStyleProperty.type) {
-      return new StaticSizeProperty(descriptor.options);
+      return new StaticSizeProperty(descriptor.options, styleName);
     } else if (descriptor.type === DynamicStyleProperty.type) {
       return new DynamicSizeProperty(descriptor.options, styleName);
     } else {
@@ -479,9 +489,9 @@ export class VectorStyle extends AbstractStyle {
 
   _makeColorProperty(descriptor, styleName) {
     if (!descriptor || !descriptor.options) {
-      return new StaticColorProperty({ color: null });
+      return new StaticColorProperty({ color: null }, styleName);
     } else if (descriptor.type === StaticStyleProperty.type) {
-      return new StaticColorProperty(descriptor.options);
+      return new StaticColorProperty(descriptor.options, styleName);
     } else if (descriptor.type === DynamicStyleProperty.type) {
       return new DynamicColorProperty(descriptor.options, styleName);
     } else {
@@ -491,9 +501,9 @@ export class VectorStyle extends AbstractStyle {
 
   _makeOrientationProperty(descriptor, styleName) {
     if (!descriptor || !descriptor.options) {
-      return new StaticOrientationProperty({ orientation: 0 });
+      return new StaticOrientationProperty({ orientation: 0 }, styleName);
     } else if (descriptor.type === StaticStyleProperty.type) {
-      return new StaticOrientationProperty(descriptor.options);
+      return new StaticOrientationProperty(descriptor.options, styleName);
     } else if (descriptor.type === DynamicStyleProperty.type) {
       return new DynamicOrientationProperty(descriptor.options, styleName);
     } else {
