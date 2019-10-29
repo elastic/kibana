@@ -7,14 +7,16 @@
 import { ComponentType } from 'react';
 import { MainType, SubType, DataType, NormalizedField } from '../../../../types';
 
-import { TextType } from './text_type';
+import { AliasType } from './alias_type';
 import { KeywordType } from './keyword_type';
 import { NumericType } from './numeric_type';
+import { TextType } from './text_type';
 
-const typeMapToParametersForm: { [key in DataType]?: ComponentType<any> } = {
-  text: TextType,
+const typeToParametersFormMap: { [key in DataType]?: ComponentType<any> } = {
+  alias: AliasType,
   keyword: KeywordType,
   numeric: NumericType,
+  text: TextType,
 };
 
 export const getParametersFormForType = (
@@ -22,5 +24,5 @@ export const getParametersFormForType = (
   subType?: SubType
 ): ComponentType<{ field: NormalizedField }> | undefined =>
   subType === undefined
-    ? typeMapToParametersForm[type]
-    : typeMapToParametersForm[subType] || typeMapToParametersForm[type];
+    ? typeToParametersFormMap[type]
+    : typeToParametersFormMap[subType] || typeToParametersFormMap[type];
