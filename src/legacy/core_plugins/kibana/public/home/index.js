@@ -37,7 +37,7 @@ function getRoute() {
   return {
     template,
     resolve: {
-      directories: () => getServices().getFeatureCatalogueRegistryProvider().then(catalogue => catalogue.inTitleOrder)
+      directories: () => getServices().getFeatureCatalogueEntries()
     },
     controller($scope, $route) {
       const { chrome, addBasePath } = getServices();
