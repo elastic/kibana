@@ -440,7 +440,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                   hideDetails={true}
                 />
               ))}
-              {specialFields.length > 0 && specialFields.length > 0 && (
+              {specialFields.length > 0 && (
                 <>
                   <EuiSpacer size="s" />
                   <EuiFormLabel>
