@@ -274,7 +274,7 @@ export default function({ getService }: FtrProviderContext) {
   describe('saved search', function() {
     this.tags(['smoke', 'mlqa']);
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/farequote');
+      await esArchiver.load('ml/farequote');
     });
 
     after(async () => {

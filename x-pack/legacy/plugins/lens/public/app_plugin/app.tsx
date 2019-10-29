@@ -20,7 +20,7 @@ import {
   Query,
 } from 'src/legacy/core_plugins/data/public';
 import { Filter } from '@kbn/es-query';
-import { TopNavMenu } from '../../../../../../src/legacy/core_plugins/kibana_react/public';
+import { start as navigation } from '../../../../../../src/legacy/core_plugins/navigation/public/legacy';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { Document, SavedObjectStore } from '../persistence';
 import { EditorFrameInstance } from '../types';
@@ -163,6 +163,8 @@ export function App({
     []
   );
 
+  const { TopNavMenu } = navigation.ui;
+
   return (
     <I18nProvider>
       <KibanaContextProvider
@@ -254,6 +256,8 @@ export function App({
                 }));
               }}
               query={state.query}
+              dateRangeFrom={state.dateRange.fromDate}
+              dateRangeTo={state.dateRange.toDate}
             />
           </div>
 

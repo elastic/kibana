@@ -19,7 +19,6 @@ import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
-import { HistogramDataPoint } from '../../../../common/graphql/types';
 import { getColorsMap } from './get_colors_map';
 import { getChartDateLabel } from '../../../lib/helper';
 import { withUptimeGraphQL, UptimeGraphQLQueryProps } from '../../higher_order';
@@ -27,6 +26,7 @@ import { snapshotHistogramQuery } from '../../../queries/snapshot_histogram_quer
 import { ChartWrapper } from './chart_wrapper';
 import { UptimeSettingsContext } from '../../../contexts';
 import { ResponsiveWrapperProps, withResponsiveWrapper } from '../../higher_order';
+import { HistogramResult } from '../../../../common/domain_types';
 
 interface HistogramProps {
   /**
@@ -47,7 +47,7 @@ interface HistogramProps {
 export type SnapshotHistogramProps = HistogramProps & ResponsiveWrapperProps;
 
 interface SnapshotHistogramQueryResult {
-  histogram?: HistogramDataPoint[];
+  queryResult?: HistogramResult;
 }
 
 type Props = UptimeGraphQLQueryProps<SnapshotHistogramQueryResult> &
@@ -61,7 +61,7 @@ export const SnapshotHistogramComponent: React.FC<Props> = ({
   loading = false,
   height,
 }: Props) => {
-  if (!data || !data.histogram)
+  if (!data || !data.queryResult)
     /**
      * TODO: the Fragment, EuiTitle, and EuiPanel should be extracted to a dumb component
      * that we can reuse in the subsequent return statement at the bottom of this function.
@@ -100,7 +100,9 @@ export const SnapshotHistogramComponent: React.FC<Props> = ({
         </EuiPanel>
       </>
     );
-  const { histogram } = data;
+  const {
+    queryResult: { histogram, interval },
+  } = data;
 
   const {
     colors: { danger, gray },
@@ -138,7 +140,14 @@ export const SnapshotHistogramComponent: React.FC<Props> = ({
         })}
       >
         <Chart>
-          <Settings xDomain={{ min: absoluteStartDate, max: absoluteEndDate }} showLegend={false} />
+          <Settings
+            xDomain={{
+              minInterval: interval,
+              min: absoluteStartDate,
+              max: absoluteEndDate,
+            }}
+            showLegend={false}
+          />
           <Axis
             id={getAxisId(
               i18n.translate('xpack.uptime.snapshotHistogram.xAxisId', {
