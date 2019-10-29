@@ -5,18 +5,18 @@
  */
 
 import * as t from 'io-ts';
-import { setupRequest } from '../lib/helpers/setup_request';
-import { getServiceNames } from '../lib/settings/agent_configuration/get_service_names';
-import { createOrUpdateConfiguration } from '../lib/settings/agent_configuration/create_or_update_configuration';
-import { searchConfigurations } from '../lib/settings/agent_configuration/search';
-import { listConfigurations } from '../lib/settings/agent_configuration/list_configurations';
-import { getEnvironments } from '../lib/settings/agent_configuration/get_environments';
-import { deleteConfiguration } from '../lib/settings/agent_configuration/delete_configuration';
-import { createRoute } from './create_route';
-import { transactionSampleRateRt } from '../../common/runtime_types/transaction_sample_rate_rt';
-import { transactionMaxSpansRt } from '../../common/runtime_types/transaction_max_spans_rt';
-import { getAgentNameByService } from '../lib/settings/agent_configuration/get_agent_name_by_service';
-import { markAppliedByAgent } from '../lib/settings/agent_configuration/mark_applied_by_agent';
+import { setupRequest } from '../../lib/helpers/setup_request';
+import { getServiceNames } from '../../lib/settings/agent_configuration/get_service_names';
+import { createOrUpdateConfiguration } from '../../lib/settings/agent_configuration/create_or_update_configuration';
+import { searchConfigurations } from '../../lib/settings/agent_configuration/search';
+import { listConfigurations } from '../../lib/settings/agent_configuration/list_configurations';
+import { getEnvironments } from '../../lib/settings/agent_configuration/get_environments';
+import { deleteConfiguration } from '../../lib/settings/agent_configuration/delete_configuration';
+import { createRoute } from '../create_route';
+import { transactionSampleRateRt } from '../../../common/runtime_types/transaction_sample_rate_rt';
+import { transactionMaxSpansRt } from '../../../common/runtime_types/transaction_max_spans_rt';
+import { getAgentNameByService } from '../../lib/settings/agent_configuration/get_agent_name_by_service';
+import { markAppliedByAgent } from '../../lib/settings/agent_configuration/mark_applied_by_agent';
 
 // get list of configurations
 export const agentConfigurationRoute = createRoute(core => ({

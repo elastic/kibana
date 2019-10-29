@@ -28,7 +28,7 @@ import { compareFilters } from './lib/compare_filters';
 import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
 import { uniqFilters } from './lib/uniq_filters';
 import { onlyDisabledFiltersChanged } from './lib/only_disabled';
-import { PartitionedFilters } from './partitioned_filters';
+import { PartitionedFilters } from './types';
 
 export class FilterManager {
   private filters: Filter[] = [];

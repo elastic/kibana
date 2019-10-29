@@ -18,6 +18,7 @@ import { buildEventsScrollQuery } from './build_events_query';
 // bulk scroll class
 import { scrollAndBulkIndex } from './utils';
 import { SignalAlertTypeDefinition } from './types';
+import { getFilter } from './get_filter';
 
 export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTypeDefinition => {
   return {
@@ -31,7 +32,10 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
         filter: schema.nullable(schema.object({}, { allowUnknowns: true })),
         id: schema.string(),
         index: schema.arrayOf(schema.string()),
-        kql: schema.nullable(schema.string()),
+        language: schema.nullable(schema.string()),
+        savedId: schema.nullable(schema.string()),
+        query: schema.nullable(schema.string()),
+        filters: schema.nullable(schema.arrayOf(schema.object({}, { allowUnknowns: true }))),
         maxSignals: schema.number({ defaultValue: 100 }),
         name: schema.string(),
         severity: schema.string(),
@@ -51,7 +55,10 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
         from,
         id,
         index,
-        kql,
+        filters,
+        language,
+        savedId,
+        query,
         maxSignals,
         name,
         references,
@@ -65,13 +72,23 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
       const scroll = scrollLock ? scrollLock : '1m';
       const size = scrollSize ? scrollSize : 400;
 
+      const esFilter = await getFilter({
+        type,
+        filter,
+        filters,
+        language,
+        query,
+        savedId,
+        services,
+        index,
+      });
+
       // TODO: Turn these options being sent in into a template for the alert type
       const noReIndex = buildEventsScrollQuery({
         index,
         from,
         to,
-        kql,
-        filter,
+        filter: esFilter,
         size,
         scroll,
       });
@@ -79,7 +96,6 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
       const reIndex = buildEventsReIndex({
         index,
         from,
-        kql,
         to,
         // TODO: Change this out once we have solved
         // https://github.com/elastic/kibana/issues/47002
@@ -88,7 +104,7 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
         description,
         name,
         timeDetected: new Date().toISOString(),
-        filter,
+        filter: esFilter,
         maxDocs: maxSignals,
         ruleRevision: 1,
         id,
