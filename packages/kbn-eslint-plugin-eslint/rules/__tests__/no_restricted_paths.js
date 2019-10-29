@@ -32,7 +32,7 @@ const { RuleTester } = require('eslint');
 const rule = require('../no_restricted_paths');
 
 const ruleTester = new RuleTester({
-  parser: 'babel-eslint',
+  parser: require.resolve('babel-eslint'),
   parserOptions: {
     sourceType: 'module',
     ecmaVersion: 2018,

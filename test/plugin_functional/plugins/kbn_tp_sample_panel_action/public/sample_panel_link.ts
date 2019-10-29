@@ -18,7 +18,7 @@
  */
 import { npStart } from 'ui/new_platform';
 import { IAction, createAction } from '../../../../../src/plugins/ui_actions/public';
-import { CONTEXT_MENU_TRIGGER } from '../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import { CONTEXT_MENU_TRIGGER } from '../../../../../src/plugins/embeddable/public';
 
 export const createSamplePanelLink = (): IAction =>
   createAction({

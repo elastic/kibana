@@ -15,6 +15,7 @@ export interface SavedObjectsUpdateOptions extends SavedObjectsBaseOptions
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [references](./kibana-plugin-server.savedobjectsupdateoptions.references.md) | <code>SavedObjectReference[]</code> |  |
-|  [version](./kibana-plugin-server.savedobjectsupdateoptions.version.md) | <code>string</code> | Ensures version matches that of persisted object |
+|  [references](./kibana-plugin-server.savedobjectsupdateoptions.references.md) | <code>SavedObjectReference[]</code> | A reference to another saved object. |
+|  [refresh](./kibana-plugin-server.savedobjectsupdateoptions.refresh.md) | <code>MutatingOperationRefreshSetting</code> | The Elasticsearch Refresh setting for this operation |
+|  [version](./kibana-plugin-server.savedobjectsupdateoptions.version.md) | <code>string</code> | An opaque version number which changes on each successful write operation. Can be used for implementing optimistic concurrency control. |
 

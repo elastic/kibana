@@ -28,8 +28,6 @@ import 'ui/directives/paginate';
 // @ts-ignore
 import { TableVisController } from '../table_vis_controller.js';
 // @ts-ignore
-import { TableVisParams } from '../table_vis_params';
-// @ts-ignore
 import { KbnAggTable } from '../agg_table/agg_table';
 // @ts-ignore
 import { KbnAggTableGroup } from '../agg_table/agg_table_group';
@@ -43,7 +41,6 @@ export const initTableVisLegacyModule = once((): void => {
   uiModules
     .get('kibana/table_vis', ['kibana', 'RecursionHelper'])
     .controller('KbnTableVisController', TableVisController)
-    .directive('tableVisParams', TableVisParams)
     .directive('kbnAggTable', KbnAggTable)
     .directive('kbnAggTableGroup', KbnAggTableGroup)
     .directive('kbnRows', KbnRows)

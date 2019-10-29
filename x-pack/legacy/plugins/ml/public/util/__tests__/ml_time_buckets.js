@@ -10,9 +10,9 @@ import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
 import moment from 'moment';
 import {
-  MlTimeBuckets,
+  TimeBuckets,
   getBoundsRoundedToInterval,
-  calcEsInterval } from '../ml_time_buckets';
+  calcEsInterval } from '../time_buckets';
 
 describe('ML - time buckets', () => {
 
@@ -23,10 +23,10 @@ describe('ML - time buckets', () => {
     ngMock.module('kibana');
     ngMock.inject(() => {
 
-      autoBuckets = new MlTimeBuckets();
+      autoBuckets = new TimeBuckets();
       autoBuckets.setInterval('auto');
 
-      customBuckets = new MlTimeBuckets();
+      customBuckets = new TimeBuckets();
       customBuckets.setInterval('auto');
       customBuckets.setBarTarget(500);
       customBuckets.setMaxBars(550);

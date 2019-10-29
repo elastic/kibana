@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { searchSourceMock } from '../../../../../ui/public/courier/search_source/mocks';
 import { SavedObjectDashboard } from '../saved_dashboard/saved_dashboard';
 
 export function getSavedDashboardMock(
@@ -26,10 +27,7 @@ export function getSavedDashboardMock(
     id: '123',
     title: 'my dashboard',
     panelsJSON: '[]',
-    searchSource: {
-      getOwnField: (param: any) => param,
-      setField: () => {},
-    },
+    searchSource: searchSourceMock,
     copyOnSave: false,
     timeRestore: false,
     timeTo: 'now',

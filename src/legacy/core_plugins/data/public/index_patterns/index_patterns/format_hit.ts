@@ -27,7 +27,7 @@ const partialFormattedCache = new WeakMap();
 // returns a formatted version
 export function formatHitProvider(indexPattern: IndexPattern, defaultFormat: any) {
   function convert(hit: Record<string, any>, val: any, fieldName: string, type: string = 'html') {
-    const field = indexPattern.fields.byName[fieldName];
+    const field = indexPattern.fields.getByName(fieldName);
     if (!field) return defaultFormat.convert(val, type);
     const parsedUrl = {
       origin: window.location.origin,

@@ -15,7 +15,6 @@ interface Props {
   fieldValues: string[];
   splitField: SplitField;
   numberOfDetectors: number;
-  children: JSX.Element;
   jobType: JOB_TYPE;
   animate?: boolean;
 }
@@ -70,10 +69,14 @@ export const SplitCards: FC<Props> = memo(
         };
         return (
           <div key={fieldName} ref={ref => storePanels(ref, marginBottom)} style={style}>
-            <EuiPanel paddingSize="m" style={{ paddingTop: '4px' }} data-test-subj="splitCard back">
+            <EuiPanel
+              paddingSize="m"
+              style={{ paddingTop: '4px' }}
+              data-test-subj="mlSplitCard back"
+            >
               <div
                 style={{ fontWeight: 'bold', fontSize: 'small' }}
-                data-test-subj="splitCardTitle"
+                data-test-subj="mlSplitCardTitle"
               >
                 {fieldName}
               </div>
@@ -85,15 +88,15 @@ export const SplitCards: FC<Props> = memo(
 
     return (
       <EuiFlexGroup>
-        <EuiFlexItem data-test-subj="dataSplit">
-          {(fieldValues.length === 0 || numberOfDetectors === 0) && <Fragment>{children}</Fragment>}
+        <EuiFlexItem data-test-subj="mlDataSplit">
+          {(fieldValues.length === 0 || numberOfDetectors === 0) && <>{children}</>}
           {fieldValues.length > 0 && numberOfDetectors > 0 && splitField !== null && (
             <Fragment>
               {jobType === JOB_TYPE.MULTI_METRIC && (
                 <Fragment>
                   <div
                     style={{ fontSize: 'small' }}
-                    data-test-subj={`dataSplitTitle ${splitField.name}`}
+                    data-test-subj={`mlDataSplitTitle ${splitField.name}`}
                   >
                     <FormattedMessage
                       id="xpack.ml.newJob.wizard.pickFieldsStep.splitCards.dataSplitBy"
@@ -109,16 +112,16 @@ export const SplitCards: FC<Props> = memo(
               <EuiPanel
                 paddingSize="m"
                 style={{ paddingTop: '4px' }}
-                data-test-subj="splitCard front"
+                data-test-subj="mlSplitCard front"
               >
                 <div
                   style={{ fontWeight: 'bold', fontSize: 'small' }}
-                  data-test-subj="splitCardTitle"
+                  data-test-subj="mlSplitCardTitle"
                 >
                   {fieldValues[0]}
                 </div>
                 <EuiHorizontalRule margin="s" />
-                {children}
+                <>{children}</>
               </EuiPanel>
             </Fragment>
           )}

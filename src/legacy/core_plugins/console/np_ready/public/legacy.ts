@@ -24,17 +24,17 @@ import 'brace/mode/json';
 import 'brace/mode/text';
 
 /* eslint-disable @kbn/eslint/no-restricted-paths */
+import { toastNotifications as notifications } from 'ui/notify';
 import { npSetup, npStart } from 'ui/new_platform';
 import uiRoutes from 'ui/routes';
 import { DOC_LINK_VERSION } from 'ui/documentation_links';
 import { I18nContext } from 'ui/i18n';
 import { ResizeChecker } from 'ui/resize_checker';
-import 'ui/autoload/styles';
 import 'ui/capabilities/route_setup';
 /* eslint-enable @kbn/eslint/no-restricted-paths */
 
 import template from '../../public/quarantined/index.html';
-import { App, AppUnmount } from '../../../../../core/public';
+import { App, AppUnmount, NotificationsSetup } from '../../../../../core/public';
 
 export interface XPluginSet {
   __LEGACY: {
@@ -68,6 +68,7 @@ uiRoutes.when('/dev_tools/console', {
 
       const mockedSetupCore = {
         ...npSetup.core,
+        notifications: (notifications as unknown) as NotificationsSetup,
         application: {
           register(app: App): void {
             try {

@@ -6,6 +6,7 @@
 
 
 import { ESTooltipProperty } from './es_tooltip_property';
+import { METRIC_TYPE } from '../../../common/constants';
 
 export class ESAggMetricTooltipProperty extends ESTooltipProperty {
 
@@ -21,10 +22,10 @@ export class ESAggMetricTooltipProperty extends ESTooltipProperty {
     if (typeof this._rawValue === 'undefined') {
       return '-';
     }
-    if (this._metricField.type === 'count') {
+    if (this._metricField.type === METRIC_TYPE.COUNT || this._metricField.type === METRIC_TYPE.UNIQUE_COUNT) {
       return this._rawValue;
     }
-    const indexPatternField = this._indexPattern.fields.byName[this._metricField.field];
+    const indexPatternField = this._indexPattern.fields.getByName(this._metricField.field);
     if (!indexPatternField) {
       return this._rawValue;
     }

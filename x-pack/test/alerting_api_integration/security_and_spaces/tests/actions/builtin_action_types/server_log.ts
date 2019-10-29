@@ -56,6 +56,7 @@ export default function serverLogTest({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
+            level: 'info',
             message: 'message posted by firing an action during a test',
           },
         })

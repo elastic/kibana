@@ -79,8 +79,11 @@ class FieldFormatService {
     // e.g. distinct_count(clientip) should be formatted as a count, not as an IP address.
     let fieldFormat = undefined;
     if (esAggName !== 'cardinality') {
-      const indexPatternFields = _.get(fullIndexPattern, 'fields.byName', []);
-      fieldFormat = _.get(indexPatternFields, [fieldName, 'format']);
+      const fieldList = _.get(fullIndexPattern, 'fields', []);
+      const field = fieldList.getByName(fieldName);
+      if (field !== undefined) {
+        fieldFormat = field.format;
+      }
     }
 
     return fieldFormat;
@@ -99,13 +102,16 @@ class FieldFormatService {
         getIndexPatternById(indexPatternId)
           .then((indexPatternData) => {
             // Store the FieldFormat for each job by detector_index.
-            const fieldsByName = _.get(indexPatternData, 'fields.byName', []);
+            const fieldList = _.get(indexPatternData, 'fields', []);
             _.each(detectors, (dtr) => {
               const esAgg = mlFunctionToESAggregation(dtr.function);
               // distinct_count detectors should fall back to the default
               // formatter as the values are just counts.
               if (dtr.field_name !== undefined && esAgg !== 'cardinality') {
-                formatsByDetector[dtr.detector_index] = _.get(fieldsByName, [dtr.field_name, 'format']);
+                const field = fieldList.getByName(dtr.field_name);
+                if (field !== undefined) {
+                  formatsByDetector[dtr.detector_index] = field.format;
+                }
               }
             });
 

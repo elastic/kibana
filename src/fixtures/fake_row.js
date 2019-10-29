@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import _ from 'lodash';
 const longString = Array(200).join('_');
 
 export function getFakeRowVals(type, id, mapping) {
-  return _.mapValues(mapping, function (f, c) {
-    return c + '_' + type + '_' + id + longString;
-  });
+  return mapping.reduce((collector, field) => {
+    collector[field.name] = `${field.name}_${type}_${id}_${longString}`;
+    return collector;
+  }, {});
 }
 
 export function getFakeRow(id, mapping) {

@@ -18,11 +18,12 @@ export function initRoutes(server, performanceState) {
         payload: Joi.object({
           tasksToSpawn: Joi.number().required(),
           durationInSeconds: Joi.number().required(),
+          trackExecutionTimeline: Joi.boolean().default(false).required(),
         }),
       },
     },
     async handler(request) {
-      const { tasksToSpawn, durationInSeconds } = request.payload;
+      const { tasksToSpawn, durationInSeconds, trackExecutionTimeline } = request.payload;
       const tasks = [];
 
       for (let taskIndex = 0; taskIndex < tasksToSpawn; taskIndex++) {
@@ -30,7 +31,7 @@ export function initRoutes(server, performanceState) {
           await taskManager.schedule(
             {
               taskType: 'performanceTestTask',
-              params: { taskIndex },
+              params: { taskIndex, trackExecutionTimeline },
               scope: [scope],
             },
             { request }

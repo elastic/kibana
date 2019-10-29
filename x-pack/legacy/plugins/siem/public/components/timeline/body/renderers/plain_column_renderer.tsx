@@ -7,7 +7,6 @@
 import { isNumber } from 'lodash/fp';
 import React from 'react';
 
-import { EuiText } from '@elastic/eui';
 import { TimelineNonEcsData } from '../../../../graphql/types';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
@@ -16,13 +15,11 @@ import { FormattedIp } from '../../../formatted_ip';
 import { IS_OPERATOR, DataProvider } from '../../data_providers/data_provider';
 import { Provider } from '../../data_providers/provider';
 import { ColumnHeader } from '../column_headers/column_header';
-import { FormattedFieldValue } from './formatted_field';
 import { ColumnRenderer } from './column_renderer';
+import { IP_FIELD_TYPE, MESSAGE_FIELD_NAME } from './constants';
+import { FormattedFieldValue } from './formatted_field';
 import { parseQueryValue } from './parse_query_value';
 import { parseValue } from './parse_value';
-import { TruncatableText } from '../../../truncatable_text';
-
-import { IP_FIELD_TYPE, MESSAGE_FIELD_NAME } from './constants';
 
 export const dataExistsAtColumn = (columnName: string, data: TimelineNonEcsData[]): boolean =>
   data.findIndex(item => item.field === columnName) !== -1;
@@ -37,17 +34,17 @@ export const plainColumnRenderer: ColumnRenderer = {
   renderColumn: ({
     columnName,
     eventId,
-    values,
     field,
-    width,
     timelineId,
+    truncate,
+    values,
   }: {
     columnName: string;
     eventId: string;
-    values: string[] | undefined | null;
     field: ColumnHeader;
-    width?: string;
     timelineId: string;
+    truncate?: boolean;
+    values: string[] | undefined | null;
   }) =>
     values != null
       ? values.map(value => {
@@ -75,47 +72,38 @@ export const plainColumnRenderer: ColumnRenderer = {
                 fieldName={field.id}
                 key={`plain-column-renderer-formatted-ip-${timelineId}-${columnName}-${eventId}-${field.id}-${value}`}
                 value={!isNumber(value) ? value : String(value)}
-                width={width}
+                truncate={truncate}
               />
             );
           }
 
           if (columnNamesNotDraggable.includes(columnName)) {
-            if (width != null) {
+            if (truncate) {
               return (
-                <TruncatableText
-                  size="xs"
-                  width={width}
+                <FormattedFieldValue
+                  contextId={`plain-column-renderer-truncatable-formatted-field-value-${timelineId}`}
+                  eventId={eventId}
+                  fieldFormat={field.format || ''}
+                  fieldName={columnName}
+                  fieldType={field.type || ''}
                   key={`plain-column-renderer-truncatable-formatted-field-value-${timelineId}-${columnName}-${eventId}-${field.id}-${value}`}
-                >
-                  <FormattedFieldValue
-                    contextId={`plain-column-renderer-truncatable-formatted-field-value-${timelineId}`}
-                    eventId={eventId}
-                    fieldFormat={field.format || ''}
-                    fieldName={columnName}
-                    fieldType={field.type || ''}
-                    value={parseValue(value)}
-                    width={width}
-                  />
-                </TruncatableText>
+                  truncate={truncate}
+                  value={parseValue(value)}
+                />
               );
             } else {
               return (
-                <EuiText
+                <FormattedFieldValue
+                  contextId={`plain-column-renderer-text-formatted-field-value-${timelineId}`}
                   data-test-subj="draggable-content"
-                  size="xs"
+                  eventId={eventId}
+                  fieldFormat={field.format || ''}
+                  fieldName={columnName}
+                  fieldType={field.type || ''}
                   key={`plain-column-renderer-text-${timelineId}-${columnName}-${eventId}-${field.id}-${value}`}
-                >
-                  <FormattedFieldValue
-                    contextId={`plain-column-renderer-text-formatted-field-value-${timelineId}`}
-                    eventId={eventId}
-                    fieldFormat={field.format || ''}
-                    fieldName={columnName}
-                    fieldType={field.type || ''}
-                    value={parseValue(value)}
-                    width={width}
-                  />
-                </EuiText>
+                  truncate={truncate}
+                  value={parseValue(value)}
+                />
               );
             }
           }
@@ -123,8 +111,8 @@ export const plainColumnRenderer: ColumnRenderer = {
           // because we pass a width to enable text truncation, and we will show empty values
           return (
             <DraggableWrapper
-              key={`plain-column-renderer-draggable-wrapper-${timelineId}-${columnName}-${eventId}-${field.id}-${value}`}
               dataProvider={itemDataProvider}
+              key={`plain-column-renderer-draggable-wrapper-${timelineId}-${columnName}-${eventId}-${field.id}-${value}`}
               render={(dataProvider, _, snapshot) =>
                 snapshot.isDragging ? (
                   <DragEffects>
@@ -138,11 +126,10 @@ export const plainColumnRenderer: ColumnRenderer = {
                     fieldName={columnName}
                     fieldType={field.type || ''}
                     value={parseValue(value)}
-                    width={width}
                   />
                 )
               }
-              width={width}
+              truncate={truncate}
             />
           );
         })

@@ -36,9 +36,9 @@ export function useFirstLastSeenHostQuery<TCache = object>(
   apolloClient: ApolloClient<TCache>
 ) {
   const [loading, updateLoading] = useState(false);
-  const [firstSeen, updateFirstSeen] = useState(null);
-  const [lastSeen, updateLastSeen] = useState(null);
-  const [errorMessage, updateErrorMessage] = useState(null);
+  const [firstSeen, updateFirstSeen] = useState<Date | null>(null);
+  const [lastSeen, updateLastSeen] = useState<Date | null>(null);
+  const [errorMessage, updateErrorMessage] = useState<string | null>(null);
 
   async function fetchFirstLastSeenHost(signal: AbortSignal) {
     updateLoading(true);

@@ -19,7 +19,7 @@
 
 import Url from 'url';
 
-import React, { Component, createRef, Fragment } from 'react';
+import React, { Component, createRef } from 'react';
 import * as Rx from 'rxjs';
 
 import {
@@ -376,7 +376,7 @@ class HeaderUI extends Component<Props, State> {
     ];
 
     return (
-      <Fragment>
+      <header>
         <EuiHeader>
           <EuiHeaderSection grow={false}>
             <EuiShowFor sizes={['xs', 's']}>
@@ -406,12 +406,26 @@ class HeaderUI extends Component<Props, State> {
           data-test-subj="navDrawer"
           isLocked={isLocked}
           onIsLockedUpdate={onIsLockedUpdate}
+          aria-label={i18n.translate('core.ui.primaryNav.screenReaderLabel', {
+            defaultMessage: 'Primary',
+          })}
         >
-          <EuiNavDrawerGroup listItems={recentLinksArray} />
+          <EuiNavDrawerGroup
+            listItems={recentLinksArray}
+            aria-label={i18n.translate('core.ui.recentLinks.screenReaderLabel', {
+              defaultMessage: 'Recently viewed links, navigation',
+            })}
+          />
           <EuiHorizontalRule margin="none" />
-          <EuiNavDrawerGroup data-test-subj="navDrawerAppsMenu" listItems={navLinksArray} />
+          <EuiNavDrawerGroup
+            data-test-subj="navDrawerAppsMenu"
+            listItems={navLinksArray}
+            aria-label={i18n.translate('core.ui.primaryNavList.screenReaderLabel', {
+              defaultMessage: 'Primary navigation links',
+            })}
+          />
         </EuiNavDrawer>
-      </Fragment>
+      </header>
     );
   }
 

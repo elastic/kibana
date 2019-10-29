@@ -10,8 +10,6 @@ import React from 'react';
 import { mockMoment } from '../../../../utils/testHelpers';
 import { DetailView } from './index';
 
-jest.mock('ui/kfetch');
-
 describe('DetailView', () => {
   beforeEach(() => {
     // Avoid timezone issues
@@ -34,7 +32,9 @@ describe('DetailView', () => {
       occurrencesCount: 10,
       transaction: undefined,
       error: {
-        '@timestamp': 'myTimestamp',
+        timestamp: {
+          us: 0
+        },
         http: { request: { method: 'GET' } },
         url: { full: 'myUrl' },
         service: { name: 'myService' },
@@ -56,10 +56,14 @@ describe('DetailView', () => {
     expect(wrapper).toMatchSnapshot();
   });
 
-  it('should render StickyProperties', () => {
+  it('should render a Summary', () => {
     const errorGroup = {
       occurrencesCount: 10,
-      error: {} as any,
+      error: {
+        timestamp: {
+          us: 0
+        }
+      } as any,
       transaction: undefined
     };
     const wrapper = shallow(
@@ -68,7 +72,7 @@ describe('DetailView', () => {
         urlParams={{}}
         location={{} as Location}
       />
-    ).find('StickyErrorProperties');
+    ).find('Summary');
 
     expect(wrapper.exists()).toBe(true);
   });
@@ -78,7 +82,9 @@ describe('DetailView', () => {
       occurrencesCount: 10,
       transaction: undefined,
       error: {
-        '@timestamp': 'myTimestamp',
+        timestamp: {
+          us: 0
+        },
         service: {},
         user: {}
       } as any
@@ -100,7 +106,9 @@ describe('DetailView', () => {
       occurrencesCount: 10,
       transaction: undefined,
       error: {
-        '@timestamp': 'myTimestamp',
+        timestamp: {
+          us: 0
+        },
         context: {}
       } as any
     };

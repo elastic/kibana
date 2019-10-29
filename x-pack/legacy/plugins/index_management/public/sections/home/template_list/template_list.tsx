@@ -16,7 +16,7 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
 } from '@elastic/eui';
-import { SectionError, SectionLoading } from '../../../components';
+import { SectionError, SectionLoading, Error } from '../../../components';
 import { TemplateTable } from './template_table';
 import { loadIndexTemplates } from '../../../services/api';
 import { Template } from '../../../../common/types';
@@ -87,7 +87,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
             defaultMessage="Error loading templates"
           />
         }
-        error={error}
+        error={error as Error}
       />
     );
   } else if (Array.isArray(templates) && templates.length === 0) {
@@ -114,7 +114,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
               <EuiText color="subdued">
                 <FormattedMessage
                   id="xpack.idxMgmt.home.indexTemplatesDescription"
-                  defaultMessage="Use templates to automatically apply settings, mappings, and aliases to indices."
+                  defaultMessage="Use index templates to automatically apply settings, mappings, and aliases to indices."
                 />
               </EuiText>
             </EuiTitle>

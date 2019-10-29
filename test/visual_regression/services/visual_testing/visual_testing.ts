@@ -18,8 +18,10 @@
  */
 
 import { postSnapshot } from '@percy/agent/dist/utils/sdk-utils';
-
 import { Test } from 'mocha';
+import _ from 'lodash';
+
+import testSubjSelector from '@kbn/test-subj-selector';
 
 import { pkg } from '../../../../src/legacy/utils/package_json';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -30,6 +32,21 @@ import { takePercySnapshot, takePercySnapshotWithAgent } from './take_percy_snap
 export const DEFAULT_OPTIONS = {
   widths: [1200],
 };
+
+export interface SnapshotOptions {
+  /**
+   * name to append to visual test name
+   */
+  name?: string;
+  /**
+   * test subject selectiors to __show__ in screenshot
+   */
+  show?: string[];
+  /**
+   * test subject selectiors to __hide__ in screenshot
+   */
+  hide?: string[];
+}
 
 export async function VisualTestingProvider({ getService }: FtrProviderContext) {
   const browser = getService('browser');
@@ -53,18 +70,21 @@ export async function VisualTestingProvider({ getService }: FtrProviderContext) 
   }
 
   return new (class VisualTesting {
-    public async snapshot(name?: string) {
+    public async snapshot(options: SnapshotOptions = {}) {
       log.debug('Capturing percy snapshot');
 
       if (!currentTest) {
         throw new Error('unable to determine current test');
       }
 
-      const [domSnapshot, url] = await Promise.all([this.getSnapshot(), browser.getCurrentUrl()]);
-
+      const [domSnapshot, url] = await Promise.all([
+        this.getSnapshot(options.show, options.hide),
+        browser.getCurrentUrl(),
+      ]);
       const stats = getStats(currentTest);
       stats.snapshotCount += 1;
 
+      const { name } = options;
       const success = await postSnapshot({
         name: `${currentTest.fullTitle()} [${name ? name : stats.snapshotCount}]`,
         url,
@@ -78,11 +98,21 @@ export async function VisualTestingProvider({ getService }: FtrProviderContext) 
       }
     }
 
-    private async getSnapshot() {
-      const snapshot = await browser.execute<[], string | false>(takePercySnapshot);
+    private async getSnapshot(show: string[] = [], hide: string[] = []) {
+      const showSelectors = show.map(testSubjSelector);
+      const hideSelectors = hide.map(testSubjSelector);
+      const snapshot = await browser.execute<[string[], string[]], string | false>(
+        takePercySnapshot,
+        showSelectors,
+        hideSelectors
+      );
       return snapshot !== false
         ? snapshot
-        : await browser.execute<[], string>(takePercySnapshotWithAgent);
+        : await browser.execute<[string[], string[]], string>(
+            takePercySnapshotWithAgent,
+            showSelectors,
+            hideSelectors
+          );
     }
   })();
 }

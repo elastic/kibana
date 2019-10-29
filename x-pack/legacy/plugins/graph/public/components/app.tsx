@@ -4,24 +4,70 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React from 'react';
-import { FieldManagerProps, FieldManager } from './field_manager';
-import { SearchBarProps, SearchBar } from './search_bar';
+import { EuiSpacer } from '@elastic/eui';
 
-export interface GraphAppProps extends FieldManagerProps, SearchBarProps {}
+import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { Provider } from 'react-redux';
+import React, { useState } from 'react';
+import { I18nProvider } from '@kbn/i18n/react';
+import { CoreStart } from 'kibana/public';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { FieldManager } from './field_manager';
+import { SearchBarProps, SearchBar } from './search_bar';
+import { GraphStore } from '../state_management';
+import { GuidancePanel } from './guidance_panel';
+
+import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+
+export interface GraphAppProps extends SearchBarProps {
+  coreStart: CoreStart;
+  // This is not named dataStart because of Angular treating data- prefix differently
+  pluginDataStart: DataPublicPluginStart;
+  storage: IStorageWrapper;
+  reduxStore: GraphStore;
+  isInitialized: boolean;
+  noIndexPatterns: boolean;
+}
 
 export function GraphApp(props: GraphAppProps) {
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const {
+    coreStart,
+    pluginDataStart,
+    storage,
+    reduxStore,
+    noIndexPatterns,
+    ...searchBarProps
+  } = props;
+
   return (
-    <div className="gphGraph__bar">
-      <EuiFlexGroup direction="column" gutterSize="s">
-        <EuiFlexItem>
-          <SearchBar {...props} />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <FieldManager {...props} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </div>
+    <I18nProvider>
+      <KibanaContextProvider
+        services={{
+          appName: 'graph',
+          storage,
+          data: pluginDataStart,
+          ...coreStart,
+        }}
+      >
+        <Provider store={reduxStore}>
+          <>
+            <div className="gphGraph__bar">
+              <SearchBar {...searchBarProps} />
+              <EuiSpacer size="s" />
+              <FieldManager pickerOpen={pickerOpen} setPickerOpen={setPickerOpen} />
+            </div>
+            {!props.isInitialized && (
+              <GuidancePanel
+                noIndexPatterns={noIndexPatterns}
+                onOpenFieldPicker={() => {
+                  setPickerOpen(true);
+                }}
+              />
+            )}
+          </>
+        </Provider>
+      </KibanaContextProvider>
+    </I18nProvider>
   );
 }

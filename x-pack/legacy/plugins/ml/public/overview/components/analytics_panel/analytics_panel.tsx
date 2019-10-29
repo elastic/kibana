@@ -19,7 +19,10 @@ import { AnalyticsTable } from './table';
 import { getAnalyticsFactory } from '../../../data_frame_analytics/pages/analytics_management/services/analytics_service';
 import { DataFrameAnalyticsListRow } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
 
-export const AnalyticsPanel: FC = () => {
+interface Props {
+  jobCreationDisabled: boolean;
+}
+export const AnalyticsPanel: FC<Props> = ({ jobCreationDisabled }) => {
   const [analytics, setAnalytics] = useState<DataFrameAnalyticsListRow[]>([]);
   const [errorMessage, setErrorMessage] = useState<any>(undefined);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -52,17 +55,22 @@ export const AnalyticsPanel: FC = () => {
     </Fragment>
   );
 
+  const panelClass = isInitialized === false ? 'mlOverviewPanel__isLoading' : 'mlOverviewPanel';
+
   return (
-    <EuiPanel className="mlOverviewPanel">
+    <EuiPanel className={panelClass}>
       {typeof errorMessage !== 'undefined' && errorDisplay}
-      {isInitialized === false && <EuiLoadingSpinner />}     
+      {isInitialized === false && (
+        <EuiLoadingSpinner className="mlOverviewPanel__spinner" size="xl" />
+      )}
+          
       {isInitialized === true && analytics.length === 0 && (
         <EuiEmptyPrompt
           iconType="createAdvancedJob"
           title={
             <h2>
               {i18n.translate('xpack.ml.overview.analyticsList.createFirstJobMessage', {
-                defaultMessage: 'Create your first analytics job.',
+                defaultMessage: 'Create your first analytics job',
               })}
             </h2>
           }
@@ -76,9 +84,15 @@ export const AnalyticsPanel: FC = () => {
             </Fragment>
           }
           actions={
-            <EuiButton href="#/data_frame_analytics?" color="primary" fill>
+            <EuiButton
+              href="#/data_frame_analytics?"
+              color="primary"
+              fill
+              iconType="plusInCircle"
+              isDisabled={jobCreationDisabled}
+            >
               {i18n.translate('xpack.ml.overview.analyticsList.createJobButtonText', {
-                defaultMessage: 'Create job.',
+                defaultMessage: 'Create job',
               })}
             </EuiButton>
           }
@@ -89,7 +103,7 @@ export const AnalyticsPanel: FC = () => {
           <AnalyticsTable items={analytics} />
           <EuiSpacer size="m" />
           <div className="mlOverviewPanel__buttons">
-            <EuiButtonEmpty size="s" onClick={onRefresh}>
+            <EuiButtonEmpty size="s" onClick={onRefresh} className="mlOverviewPanel__refreshButton">
               {i18n.translate('xpack.ml.overview.analyticsList.refreshJobsButtonText', {
                 defaultMessage: 'Refresh',
               })}

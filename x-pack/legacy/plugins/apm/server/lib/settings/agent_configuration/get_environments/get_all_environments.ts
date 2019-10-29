@@ -11,22 +11,27 @@ import {
   SERVICE_NAME,
   SERVICE_ENVIRONMENT
 } from '../../../../../common/elasticsearch_fieldnames';
-import { ENVIRONMENT_NOT_DEFINED } from '../../../../../common/environment_filter_values';
+import { ALL_OPTION_VALUE } from '../../../../../common/agent_configuration_constants';
 
 export async function getAllEnvironments({
   serviceName,
   setup
 }: {
-  serviceName: string;
+  serviceName: string | undefined;
   setup: Setup;
 }) {
-  const { client, config } = setup;
+  const { client, indices } = setup;
+
+  // omit filter for service.name if "All" option is selected
+  const serviceNameFilter = serviceName
+    ? [{ term: { [SERVICE_NAME]: serviceName } }]
+    : [];
 
   const params = {
     index: [
-      config.get<string>('apm_oss.metricsIndices'),
-      config.get<string>('apm_oss.errorIndices'),
-      config.get<string>('apm_oss.transactionIndices')
+      indices['apm_oss.metricsIndices'],
+      indices['apm_oss.errorIndices'],
+      indices['apm_oss.transactionIndices']
     ],
     body: {
       size: 0,
@@ -36,7 +41,7 @@ export async function getAllEnvironments({
             {
               terms: { [PROCESSOR_EVENT]: ['transaction', 'error', 'metric'] }
             },
-            { term: { [SERVICE_NAME]: serviceName } }
+            ...serviceNameFilter
           ]
         }
       },
@@ -44,7 +49,6 @@ export async function getAllEnvironments({
         environments: {
           terms: {
             field: SERVICE_ENVIRONMENT,
-            missing: ENVIRONMENT_NOT_DEFINED,
             size: 100
           }
         }
@@ -54,5 +58,6 @@ export async function getAllEnvironments({
 
   const resp = await client.search(params);
   const buckets = idx(resp.aggregations, _ => _.environments.buckets) || [];
-  return buckets.map(bucket => bucket.key);
+  const environments = buckets.map(bucket => bucket.key as string);
+  return [ALL_OPTION_VALUE, ...environments];
 }

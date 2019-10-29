@@ -28,4 +28,6 @@ export type IUrlParams = {
   waterfallItemId?: string;
   page?: number;
   pageSize?: number;
+  serviceNodeName?: string;
+  searchTerm?: string;
 } & Partial<Record<LocalUIFilterName, string>>;
