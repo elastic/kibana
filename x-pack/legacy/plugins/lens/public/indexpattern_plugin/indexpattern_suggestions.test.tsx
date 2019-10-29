@@ -563,7 +563,7 @@ describe('IndexPattern Data Source suggestions', () => {
         );
       });
 
-      it('creates a new layer if no match is found', () => {
+      it('creates a new layer and replaces layer if no match is found', () => {
         const suggestions = getDatasourceSuggestionsForField(stateWithEmptyLayer(), '2', {
           name: 'source',
           type: 'string',
@@ -591,6 +591,30 @@ describe('IndexPattern Data Source suggestions', () => {
               layerId: 'id1',
             },
             keptLayerIds: ['previousLayer'],
+          })
+        );
+
+        expect(suggestions).toContainEqual(
+          expect.objectContaining({
+            state: expect.objectContaining({
+              layers: {
+                id1: expect.objectContaining({
+                  indexPatternId: '2',
+                }),
+              },
+            }),
+            table: {
+              changeType: 'initial',
+              label: undefined,
+              isMultiRow: false,
+              columns: expect.arrayContaining([
+                expect.objectContaining({
+                  columnId: expect.any(String),
+                }),
+              ]),
+              layerId: 'id1',
+            },
+            keptLayerIds: [],
           })
         );
       });

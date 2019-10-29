@@ -110,4 +110,18 @@ describe('metric_suggestions', () => {
       }
     `);
   });
+
+  test('does not suggest for multiple layers', () => {
+    const suggestions = getSuggestions({
+      table: {
+        columns: [numCol('bytes')],
+        isMultiRow: false,
+        layerId: 'l1',
+        changeType: 'unchanged',
+      },
+      keptLayerIds: ['l1', 'l2'],
+    });
+
+    expect(suggestions).toHaveLength(0);
+  });
 });

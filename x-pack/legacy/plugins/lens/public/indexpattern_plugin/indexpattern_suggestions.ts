@@ -94,9 +94,13 @@ export function getDatasourceSuggestionsForField(
   const layerIds = layers.filter(id => state.layers[id].indexPatternId === indexPatternId);
 
   if (layerIds.length === 0) {
-    // The field we're suggesting on does not match any existing layer. This will add
-    // a new layer.
-    return getEmptyLayerSuggestionsForField(state, generateId(), indexPatternId, field);
+    // The field we're suggesting on does not match any existing layer.
+    // This generates a set of suggestions where we add a layer.
+    // A second set of suggestions is generated for visualizations that don't work with layers
+    const newId = generateId();
+    return getEmptyLayerSuggestionsForField(state, newId, indexPatternId, field).concat(
+      getEmptyLayerSuggestionsForField({ ...state, layers: {} }, newId, indexPatternId, field)
+    );
   } else {
     // The field we're suggesting on matches an existing layer. In this case we find the layer with
     // the fewest configured columns and try to add the field to this table. If this layer does not
