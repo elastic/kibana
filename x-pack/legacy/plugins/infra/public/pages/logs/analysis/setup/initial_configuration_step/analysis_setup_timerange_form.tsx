@@ -6,6 +6,7 @@
 
 import {
   EuiDatePicker,
+  EuiDatePickerProps,
   EuiDescribedFormGroup,
   EuiFlexGroup,
   EuiFormControlLayout,
@@ -85,18 +86,13 @@ export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
           <EuiFormControlLayout
             clear={startTime ? { onClick: () => setStartTime(undefined) } : undefined}
           >
-            <WithFixedDatepickerZIndex>
-              {popperClassName => (
-                <EuiDatePicker
-                  showTimeSelect
-                  selected={startTimeValue}
-                  onChange={date => setStartTime(selectedDateToParam(date))}
-                  placeholder={startTimeDefaultDescription}
-                  popperClassName={popperClassName}
-                  maxDate={now}
-                />
-              )}
-            </WithFixedDatepickerZIndex>
+            <FixedDatePicker
+              showTimeSelect
+              selected={startTimeValue}
+              onChange={date => setStartTime(selectedDateToParam(date))}
+              placeholder={startTimeDefaultDescription}
+              maxDate={now}
+            />
           </EuiFormControlLayout>
         </EuiFlexGroup>
       </EuiFormRow>
@@ -111,29 +107,24 @@ export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
           <EuiFormControlLayout
             clear={endTime ? { onClick: () => setEndTime(undefined) } : undefined}
           >
-            <WithFixedDatepickerZIndex>
-              {popperClassName => (
-                <EuiDatePicker
-                  showTimeSelect
-                  selected={endTimeValue}
-                  onChange={date => setEndTime(selectedDateToParam(date))}
-                  placeholder={endTimeDefaultDescription}
-                  openToDate={now}
-                  minDate={startTimeValue}
-                  minTime={
-                    selectedEndTimeIsToday
-                      ? now
-                      : moment()
-                          .hour(0)
-                          .minutes(0)
-                  }
-                  maxTime={moment()
-                    .hour(23)
-                    .minutes(59)}
-                  popperClassName={popperClassName}
-                />
-              )}
-            </WithFixedDatepickerZIndex>
+            <FixedDatePicker
+              showTimeSelect
+              selected={endTimeValue}
+              onChange={date => setEndTime(selectedDateToParam(date))}
+              placeholder={endTimeDefaultDescription}
+              openToDate={now}
+              minDate={startTimeValue}
+              minTime={
+                selectedEndTimeIsToday
+                  ? now
+                  : moment()
+                      .hour(0)
+                      .minutes(0)
+              }
+              maxTime={moment()
+                .hour(23)
+                .minutes(59)}
+            />
           </EuiFormControlLayout>
         </EuiFlexGroup>
       </EuiFormRow>
@@ -141,14 +132,17 @@ export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
   );
 };
 
-const WithFixedDatepickerZIndex = euiStyled(
+const FixedDatePicker = euiStyled(
   ({
-    children,
     className,
+    inputClassName,
+    ...datePickerProps
   }: {
-    children: (className?: string) => React.ReactElement<any>;
     className?: string;
-  }) => children(className)
+    inputClassName?: string;
+  } & EuiDatePickerProps) => (
+    <EuiDatePicker {...datePickerProps} className={inputClassName} popperClassName={className} />
+  )
 )`
   z-index: 3 !important;
 `;
