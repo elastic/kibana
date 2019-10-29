@@ -16,9 +16,10 @@ import {
 } from '../mocks';
 import { act } from 'react-dom/test-utils';
 import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/expressions/public';
-import { InnerSuggestionPanel, SuggestionPanelProps } from './suggestion_panel';
+import { SuggestionPanel, SuggestionPanelProps } from './suggestion_panel';
 import { getSuggestions, Suggestion } from './suggestion_helpers';
 import { EuiIcon, EuiPanel, EuiToolTip } from '@elastic/eui';
+import chartTableSVG from '../../..assets/chart_datatable.svg';
 
 jest.mock('./suggestion_helpers');
 
@@ -87,7 +88,7 @@ describe('suggestion_panel', () => {
   });
 
   it('should list passed in suggestions', () => {
-    const wrapper = mount(<InnerSuggestionPanel {...defaultProps} />);
+    const wrapper = mount(<SuggestionPanel {...defaultProps} />);
 
     expect(
       wrapper
@@ -125,7 +126,7 @@ describe('suggestion_panel', () => {
     });
 
     it('should not update suggestions if current state is moved to staged preview', () => {
-      const wrapper = mount(<InnerSuggestionPanel {...defaultProps} />);
+      const wrapper = mount(<SuggestionPanel {...defaultProps} />);
       getSuggestionsMock.mockClear();
       wrapper.setProps({
         stagedPreview,
@@ -136,7 +137,7 @@ describe('suggestion_panel', () => {
     });
 
     it('should update suggestions if staged preview is removed', () => {
-      const wrapper = mount(<InnerSuggestionPanel {...defaultProps} />);
+      const wrapper = mount(<SuggestionPanel {...defaultProps} />);
       getSuggestionsMock.mockClear();
       wrapper.setProps({
         stagedPreview,
@@ -152,7 +153,7 @@ describe('suggestion_panel', () => {
     });
 
     it('should highlight currently active suggestion', () => {
-      const wrapper = mount(<InnerSuggestionPanel {...defaultProps} />);
+      const wrapper = mount(<SuggestionPanel {...defaultProps} />);
 
       act(() => {
         wrapper
@@ -172,7 +173,7 @@ describe('suggestion_panel', () => {
     });
 
     it('should rollback suggestion if current panel is clicked', () => {
-      const wrapper = mount(<InnerSuggestionPanel {...defaultProps} />);
+      const wrapper = mount(<SuggestionPanel {...defaultProps} />);
 
       act(() => {
         wrapper
@@ -199,7 +200,7 @@ describe('suggestion_panel', () => {
   });
 
   it('should dispatch visualization switch action if suggestion is clicked', () => {
-    const wrapper = mount(<InnerSuggestionPanel {...defaultProps} />);
+    const wrapper = mount(<SuggestionPanel {...defaultProps} />);
 
     act(() => {
       wrapper
@@ -221,7 +222,7 @@ describe('suggestion_panel', () => {
     defaultProps.frame.datasourceLayers.a = mockDatasource.publicAPIMock;
     defaultProps.frame.datasourceLayers.b = mockDatasource.publicAPIMock;
     const wrapper = mount(
-      <InnerSuggestionPanel
+      <SuggestionPanel
         {...defaultProps}
         stagedPreview={{ visualization: { state: {}, activeId: 'vis' }, datasourceStates: {} }}
         activeVisualizationId="vis2"
@@ -272,66 +273,17 @@ describe('suggestion_panel', () => {
     (mockVisualization.toPreviewExpression as jest.Mock).mockReturnValueOnce('test | expression');
     mockDatasource.toExpression.mockReturnValue('datasource_expression');
 
-    mount(<InnerSuggestionPanel {...defaultProps} />);
+    mount(<SuggestionPanel {...defaultProps} />);
 
     expect(expressionRendererMock).toHaveBeenCalledTimes(1);
     const passedExpression = (expressionRendererMock as jest.Mock).mock.calls[0][0].expression;
 
     expect(passedExpression).toMatchInlineSnapshot(`
-      Object {
-        "chain": Array [
-          Object {
-            "arguments": Object {},
-            "function": "kibana",
-            "type": "function",
-          },
-          Object {
-            "arguments": Object {
-              "filters": Array [],
-              "query": Array [
-                "{\\"query\\":\\"\\",\\"language\\":\\"lucene\\"}",
-              ],
-              "timeRange": Array [
-                "{\\"from\\":\\"now-7d\\",\\"to\\":\\"now\\"}",
-              ],
-            },
-            "function": "kibana_context",
-            "type": "function",
-          },
-          Object {
-            "arguments": Object {
-              "layerIds": Array [
-                "first",
-              ],
-              "tables": Array [
-                Object {
-                  "chain": Array [
-                    Object {
-                      "arguments": Object {},
-                      "function": "datasource_expression",
-                      "type": "function",
-                    },
-                  ],
-                  "type": "expression",
-                },
-              ],
-            },
-            "function": "lens_merge_tables",
-            "type": "function",
-          },
-          Object {
-            "arguments": Object {},
-            "function": "test",
-            "type": "function",
-          },
-          Object {
-            "arguments": Object {},
-            "function": "expression",
-            "type": "function",
-          },
-        ],
-        "type": "expression",
-      }
+      "kibana
+      | kibana_context timeRange=\\"{\\\\\\"from\\\\\\":\\\\\\"now-7d\\\\\\",\\\\\\"to\\\\\\":\\\\\\"now\\\\\\"}\\" query=\\"{\\\\\\"query\\\\\\":\\\\\\"\\\\\\",\\\\\\"language\\\\\\":\\\\\\"lucene\\\\\\"}\\" filters=\\"[]\\"
+      | lens_merge_tables layerIds=\\"first\\" tables={datasource_expression}
+      | test
+      | expression"
     `);
   });
 
@@ -340,7 +292,7 @@ describe('suggestion_panel', () => {
     getSuggestionsMock.mockReturnValue([
       {
         datasourceState: {},
-        previewIcon: 'visTable',
+        previewIcon: chartTableSVG,
         score: 0.5,
         visualizationState: suggestion1State,
         visualizationId: 'vis',
@@ -365,9 +317,9 @@ describe('suggestion_panel', () => {
 
     mockDatasource.toExpression.mockReturnValue('datasource_expression');
 
-    const wrapper = mount(<InnerSuggestionPanel {...defaultProps} />);
+    const wrapper = mount(<SuggestionPanel {...defaultProps} />);
 
     expect(wrapper.find(EuiIcon)).toHaveLength(1);
-    expect(wrapper.find(EuiIcon).prop('type')).toEqual('visTable');
+    expect(wrapper.find(EuiIcon).prop('type')).toEqual(chartTableSVG);
   });
 });

@@ -18,13 +18,8 @@
  */
 
 import { Writer } from 'mustache';
-import chrome from 'ui/chrome';
-import { metadata } from 'ui/metadata';
-import {
-  DOC_LINK_VERSION,
-  ELASTIC_WEBSITE_URL,
-  documentationLinks
-} from 'ui/documentation_links/documentation_links';
+import { getServices } from '../../kibana_services';
+
 
 const TEMPLATE_TAGS = ['{', '}'];
 
@@ -39,6 +34,8 @@ mustacheWriter.escapedValue = function escapedValue(token, context) {
 };
 
 export function replaceTemplateStrings(text, params = {}) {
+  const { getInjected, metadata, docLinks } = getServices();
+
   const variables = {
     // '{' and '}' can not be used in template since they are used as template tags.
     // Must use '{curlyOpen}'' and '{curlyClose}'
@@ -46,20 +43,20 @@ export function replaceTemplateStrings(text, params = {}) {
     curlyClose: '}',
     config: {
       cloud: {
-        id: chrome.getInjected('cloudId')
+        id: getInjected('cloudId')
       },
       docs: {
-        base_url: ELASTIC_WEBSITE_URL,
+        base_url: docLinks.ELASTIC_WEBSITE_URL,
         beats: {
-          filebeat: documentationLinks.filebeat.base,
-          metricbeat: documentationLinks.metricbeat.base,
-          heartbeat: documentationLinks.heartbeat.base,
-          functionbeat: documentationLinks.functionbeat.base,
-          winlogbeat: documentationLinks.winlogbeat.base,
-          auditbeat: documentationLinks.auditbeat.base,
+          filebeat: docLinks.links.filebeat.base,
+          metricbeat: docLinks.links.metricbeat.base,
+          heartbeat: docLinks.links.heartbeat.base,
+          functionbeat: docLinks.links.functionbeat.base,
+          winlogbeat: docLinks.links.winlogbeat.base,
+          auditbeat: docLinks.links.auditbeat.base,
         },
-        logstash: documentationLinks.logstash.base,
-        version: DOC_LINK_VERSION
+        logstash: docLinks.links.logstash.base,
+        version: docLinks.DOC_LINK_VERSION
       },
       kibana: {
         version: metadata.version

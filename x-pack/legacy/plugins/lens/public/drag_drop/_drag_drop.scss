@@ -1,7 +1,9 @@
-.lnsDragDrop-isDropTarget {
+// Fix specificity by chaining classes
+
+.lnsDragDrop.lnsDragDrop-isDropTarget {
   background-color: transparentize($euiColorSecondary, .9);
 }
 
-.lnsDragDrop-isActiveDropTarget {
+.lnsDragDrop.lnsDragDrop-isActiveDropTarget {
   background-color: transparentize($euiColorSecondary, .75);
 }

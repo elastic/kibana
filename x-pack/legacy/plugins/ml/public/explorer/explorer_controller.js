@@ -24,7 +24,7 @@ import { getAnomalyExplorerBreadcrumbs } from './breadcrumbs';
 import { checkFullLicense } from '../license/check_license';
 import { checkGetJobsPrivilege } from '../privilege/check_privilege';
 import { getIndexPatterns, loadIndexPatterns } from '../util/index_utils';
-import { MlTimeBuckets } from 'plugins/ml/util/ml_time_buckets';
+import { TimeBuckets } from 'plugins/ml/util/time_buckets';
 import { explorer$ } from './explorer_dashboard_service';
 import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
 import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
@@ -39,7 +39,7 @@ import { subscribeAppStateToObservable } from '../util/app_state_utils';
 
 import { APP_STATE_ACTION, EXPLORER_ACTION } from './explorer_constants';
 
-const template = `<ml-chart-tooltip /><ml-explorer-react-wrapper class="ml-explorer" data-test-subj="mlPageAnomalyExplorer" />`;
+const template = `<ml-explorer-react-wrapper class="ml-explorer" data-test-subj="mlPageAnomalyExplorer" />`;
 
 uiRoutes
   .when('/explorer/?', {
@@ -74,7 +74,7 @@ module.controller('MlExplorerController', function (
   timefilter.enableTimeRangeSelector();
   timefilter.enableAutoRefreshSelector();
 
-  $scope.MlTimeBuckets = MlTimeBuckets;
+  $scope.TimeBuckets = TimeBuckets;
 
   let resizeTimeout = null;
 

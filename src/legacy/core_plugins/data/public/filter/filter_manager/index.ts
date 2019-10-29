@@ -17,9 +17,4 @@
  * under the License.
  */
 
-export { FilterManager } from './filter_manager';
 export { FilterStateManager } from './filter_state_manager';
-
-// @ts-ignore
-export { uniqFilters } from './lib/uniq_filters';
-export { onlyDisabledFiltersChanged } from './lib/only_disabled';

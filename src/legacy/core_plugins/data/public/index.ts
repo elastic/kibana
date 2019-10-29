@@ -18,7 +18,7 @@
  */
 
 // /// Define plugin function
-import { DataPlugin as Plugin, DataSetup } from './plugin';
+import { DataPlugin as Plugin, DataSetup, DataStart } from './plugin';
 
 export function plugin() {
   return new Plugin();
@@ -27,12 +27,13 @@ export function plugin() {
 // /// Export types & static code
 
 /** @public types */
-export type DataSetup = DataSetup;
+export { DataSetup, DataStart };
 
 export { FilterBar, ApplyFiltersPopover } from './filter';
 export {
   Field,
   FieldType,
+  FieldListInterface,
   IndexPattern,
   IndexPatterns,
   StaticIndexPattern,
@@ -42,12 +43,7 @@ export { SearchBar, SearchBarProps, SavedQueryAttributes, SavedQuery } from './s
 
 /** @public static code */
 export * from '../common';
-export {
-  FilterManager,
-  FilterStateManager,
-  uniqFilters,
-  onlyDisabledFiltersChanged,
-} from './filter/filter_manager';
+export { FilterStateManager } from './filter/filter_manager';
 export {
   CONTAINS_SPACES,
   getFromSavedObject,
@@ -66,4 +62,11 @@ export {
   mockIndexPattern,
 } from './index_patterns';
 
-export { TimeHistoryContract, TimefilterContract, getTime, InputTimeRange } from './timefilter';
+export {
+  TimeHistoryContract,
+  TimefilterContract,
+  getTime,
+  InputTimeRange,
+  extractTimeFilter,
+  changeTimeFilter,
+} from './timefilter';

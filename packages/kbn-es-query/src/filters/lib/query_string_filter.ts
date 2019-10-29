@@ -23,4 +23,12 @@ export type QueryStringFilterMeta = FilterMeta;
 
 export type QueryStringFilter = Filter & {
   meta: QueryStringFilterMeta;
+  query?: {
+    query_string: {
+      query: string;
+    };
+  };
 };
+
+export const isQueryStringFilter = (filter: any): filter is QueryStringFilter =>
+  filter && filter.query && filter.query.query_string;

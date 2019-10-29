@@ -18,7 +18,6 @@
  */
 
 import { defaultSearchStrategy } from './default_search_strategy';
-import { Promise } from 'bluebird';
 
 const { search } = defaultSearchStrategy;
 
@@ -29,9 +28,7 @@ function getConfigStub(config = {}) {
 }
 
 describe('defaultSearchStrategy', function () {
-
   describe('search', function () {
-
     let searchArgs;
 
     beforeEach(() => {
@@ -44,8 +41,6 @@ describe('defaultSearchStrategy', function () {
           msearch: msearchMock,
           search: searchMock,
         },
-        Promise,
-        serializeFetchParams: () => Promise.resolve('pretend this is a valid request body'),
       };
     });
 
@@ -78,7 +73,5 @@ describe('defaultSearchStrategy', function () {
       await search(searchArgs);
       expect(searchArgs.es.msearch.mock.calls[0][0]).toHaveProperty('ignore_throttled', false);
     });
-
   });
-
 });

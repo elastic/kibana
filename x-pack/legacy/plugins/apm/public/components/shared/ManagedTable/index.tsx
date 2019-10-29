@@ -6,7 +6,7 @@
 
 import { EuiBasicTable } from '@elastic/eui';
 import { sortByOrder } from 'lodash';
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, ReactNode } from 'react';
 import { idx } from '@kbn/elastic-idx';
 import { StringMap } from '../../../../typings/common';
 import { useUrlParams } from '../../../hooks/useUrlParams';
@@ -15,7 +15,7 @@ import { fromQuery, toQuery } from '../Links/url_helpers';
 
 // TODO: this should really be imported from EUI
 export interface ITableColumn<T> {
-  name: string;
+  name: ReactNode;
   actions?: StringMap[];
   field?: string;
   dataType?: string;

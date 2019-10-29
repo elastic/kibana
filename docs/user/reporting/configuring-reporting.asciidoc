@@ -8,6 +8,7 @@ screenshots. See <<reporting-settings-kb, Reporting Settings>> for the complete
 list of settings.
 
 [float]
+[[encryption-keys]]
 === Encryption keys for multiple {kib} instances
 
 By default, a new encryption key is generated for {reporting} each time
@@ -30,6 +31,7 @@ xpack.reporting.encryptionKey: "something_secret"
 --------------------------------------------------------------------------------
 
 [float]
+[[report-indices]]
 === Report indices for multiple {kib} workspaces
 
 If you divide workspaces in an Elastic cluster using multiple {kib} instances
@@ -59,6 +61,7 @@ with `.reporting-` in order for the `kibana_system` role to have the necessary
 privileges over the index.
 
 [float]
+[[using-reverse-proxies]]
 === Use reverse proxies
 
 If your {kib} instance requires a reverse proxy (NGINX, Apache, etc.) for

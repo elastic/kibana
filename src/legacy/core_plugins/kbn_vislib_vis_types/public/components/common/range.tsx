@@ -27,6 +27,8 @@ interface RangeOptionProps<ParamName extends string> {
   min: number;
   paramName: ParamName;
   showInput?: boolean;
+  showLabels?: boolean;
+  showValue?: boolean;
   step?: number;
   value: '' | number;
   setValue: (paramName: ParamName, value: number) => void;
@@ -37,6 +39,8 @@ function RangeOption<ParamName extends string>({
   max,
   min,
   showInput,
+  showLabels,
+  showValue = true,
   step,
   paramName,
   value,
@@ -65,10 +69,11 @@ function RangeOption<ParamName extends string>({
       <EuiRange
         compressed
         fullWidth
-        showValue
         max={max}
         min={min}
         showInput={showInput}
+        showLabels={showLabels}
+        showValue={showValue}
         step={step}
         value={stateValue}
         onChange={onChangeHandler}

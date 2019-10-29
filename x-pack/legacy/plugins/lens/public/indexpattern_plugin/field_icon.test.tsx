@@ -48,7 +48,7 @@ describe('FieldIcon', () => {
       <EuiIcon
         className="lnsFieldListPanel__fieldIcon lnsFieldListPanel__fieldIcon--ip"
         color="#7B000B"
-        type="storage"
+        type="ip"
       />
     `);
   });

@@ -71,6 +71,8 @@ export const useAnomaliesTableData = ({
   const [anomalyScore] = useKibanaUiSetting(DEFAULT_ANOMALY_SCORE);
   const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
 
+  const siemJobIds = siemJobs.filter(job => job.isInstalled).map(job => job.id);
+
   useEffect(() => {
     let isSubscribed = true;
     const abortCtrl = new AbortController();
@@ -82,11 +84,11 @@ export const useAnomaliesTableData = ({
       earliestMs: number,
       latestMs: number
     ) {
-      if (userPermissions && !skip && siemJobs.length > 0) {
+      if (userPermissions && !skip && siemJobIds.length > 0) {
         try {
           const data = await anomaliesTableData(
             {
-              jobIds: siemJobs,
+              jobIds: siemJobIds,
               criteriaFields: criteriaFieldsInput,
               aggregationInterval: 'auto',
               threshold: getThreshold(anomalyScore, threshold),
@@ -97,9 +99,7 @@ export const useAnomaliesTableData = ({
               maxRecords: 500,
               maxExamples: 10,
             },
-            {
-              'kbn-version': kbnVersion,
-            },
+            kbnVersion,
             abortCtrl.signal
           );
           if (isSubscribed) {
@@ -114,7 +114,7 @@ export const useAnomaliesTableData = ({
         }
       } else if (!userPermissions && isSubscribed) {
         setLoading(false);
-      } else if (siemJobs.length === 0 && isSubscribed) {
+      } else if (siemJobIds.length === 0 && isSubscribed) {
         setLoading(false);
       } else if (isSubscribed) {
         setTableData(null);
@@ -134,7 +134,7 @@ export const useAnomaliesTableData = ({
     endDate,
     skip,
     userPermissions,
-    siemJobs.join(),
+    siemJobIds.sort().join(),
   ]);
 
   return [loading, tableData];

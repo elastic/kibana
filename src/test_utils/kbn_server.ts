@@ -16,10 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { Client } from 'elasticsearch';
 import { ToolingLog } from '@kbn/dev-utils';
 import {
-  createEsTestCluster,
+  createLegacyEsTestCluster,
   DEFAULT_SUPERUSER_PASS,
   esTestConfig,
   kbnTestConfig,
@@ -35,6 +35,8 @@ import supertest from 'supertest';
 import { CliArgs, Env } from '../core/server/config';
 import { LegacyObjectToConfigAdapter } from '../core/server/legacy';
 import { Root } from '../core/server/root';
+import KbnServer from '../legacy/server/kbn_server';
+import { CallCluster } from '../legacy/core_plugins/elasticsearch';
 
 type HttpMethod = 'delete' | 'get' | 'head' | 'post' | 'put';
 
@@ -131,7 +133,7 @@ export function createRootWithCorePlugins(settings = {}, cliArgs: Partial<CliArg
  * Returns `kbnServer` instance used in the "legacy" Kibana.
  * @param root
  */
-export function getKbnServer(root: Root) {
+export function getKbnServer(root: Root): KbnServer {
   return (root as any).server.legacy.kbnServer;
 }
 
@@ -145,6 +147,35 @@ export const request: Record<
   post: (root, path) => getSupertest(root, 'post', path),
   put: (root, path) => getSupertest(root, 'put', path),
 };
+
+export interface TestElasticsearchServer {
+  getStartTimeout: () => number;
+  start: (esArgs: string[], esEnvVars: Record<string, string>) => Promise<void>;
+  stop: () => Promise<void>;
+  cleanup: () => Promise<void>;
+  getClient: () => Client;
+  getCallCluster: () => CallCluster;
+  getUrl: () => string;
+}
+
+export interface TestElasticsearchUtils {
+  stop: () => Promise<void>;
+  es: TestElasticsearchServer;
+  hosts: string[];
+  username: string;
+  password: string;
+}
+
+export interface TestKibanaUtils {
+  root: Root;
+  kbnServer: KbnServer;
+  stop: () => Promise<void>;
+}
+
+export interface TestUtils {
+  startES: () => Promise<TestElasticsearchUtils>;
+  startKibana: () => Promise<TestKibanaUtils>;
+}
 
 /**
  * Creates an instance of the Root, including all of the core "legacy" plugins,
@@ -160,7 +191,7 @@ export function createTestServers({
   settings = {},
 }: {
   adjustTimeout: (timeout: number) => void;
-  settings: {
+  settings?: {
     es?: {
       license: 'oss' | 'basic' | 'gold' | 'trial';
       [key: string]: any;
@@ -181,7 +212,7 @@ export function createTestServers({
      */
     users?: Array<{ username: string; password: string; roles: string[] }>;
   };
-}) {
+}): TestUtils {
   if (!adjustTimeout) {
     throw new Error('adjustTimeout is required in order to avoid flaky tests');
   }
@@ -204,7 +235,7 @@ export function createTestServers({
   log.info('starting elasticsearch');
   log.indent(4);
 
-  const es = createEsTestCluster(
+  const es = createLegacyEsTestCluster(
     defaultsDeep({}, get(settings, 'es', {}), {
       log,
       license,

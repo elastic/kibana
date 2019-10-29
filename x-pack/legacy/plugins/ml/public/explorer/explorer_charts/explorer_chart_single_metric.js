@@ -22,6 +22,7 @@ import moment from 'moment';
 import { formatHumanReadableDateTime } from '../../util/date_utils';
 import { formatValue } from '../../formatters/format_value';
 import {
+  getSeverityColor,
   getSeverityWithLow,
   getMultiBucketImpactLabel,
 } from '../../../common/util/anomaly_utils';
@@ -36,8 +37,8 @@ import {
   showMultiBucketAnomalyMarker,
   showMultiBucketAnomalyTooltip,
 } from '../../util/chart_utils';
-import { TimeBuckets } from 'ui/time_buckets';
 import { LoadingIndicator } from '../../components/loading_indicator/loading_indicator';
+import { TimeBuckets } from '../../util/time_buckets';
 import { mlEscape } from '../../util/string_utils';
 import { mlFieldFormatService } from '../../services/field_format_service';
 import { mlChartTooltipService } from '../../components/chart_tooltip/chart_tooltip_service';
@@ -194,7 +195,7 @@ export const ExplorerChartSingleMetric = injectI18n(class ExplorerChartSingleMet
       const xAxisTickFormat = timeBuckets.getScaledDateFormat();
 
       const tickValuesStart = Math.max(config.selectedEarliest, config.plotEarliest);
-      // +1 ms to account for the ms that was substracted for query aggregations.
+      // +1 ms to account for the ms that was subtracted for query aggregations.
       const interval = config.selectedLatest - config.selectedEarliest + 1;
       const tickValues = getTickValues(tickValuesStart, interval, config.plotEarliest, config.plotLatest);
 
@@ -340,23 +341,32 @@ export const ExplorerChartSingleMetric = injectI18n(class ExplorerChartSingleMet
       // Show the time and metric values in the tooltip.
       // Uses date, value, upper, lower and anomalyScore (optional) marker properties.
       const formattedDate = formatHumanReadableDateTime(marker.date);
-      let contents = formattedDate + '<br/><hr/>';
+      const tooltipData = [{ name: formattedDate }];
+      const seriesKey = config.detectorLabel;
 
       if (_.has(marker, 'anomalyScore')) {
         const score = parseInt(marker.anomalyScore);
         const displayScore = (score > 0 ? score : '< 1');
-        contents += intl.formatMessage({
-          id: 'xpack.ml.explorer.singleMetricChart.anomalyScoreLabel',
-          defaultMessage: 'anomaly score: {displayScore}'
-        }, { displayScore });
+        tooltipData.push({
+          name: intl.formatMessage({
+            id: 'xpack.ml.explorer.singleMetricChart.anomalyScoreLabel',
+            defaultMessage: 'anomaly score'
+          }),
+          value: displayScore,
+          color: getSeverityColor(score),
+          seriesKey,
+          yAccessor: 'anomaly_score'
+        });
 
         if (showMultiBucketAnomalyTooltip(marker) === true) {
-          contents += intl.formatMessage({
-            id: 'xpack.ml.explorer.singleMetricChart.multiBucketImpactLabel',
-            defaultMessage: '{br}multi-bucket impact: {multiBucketImpactLabel}'
-          }, {
-            br: '<br />',
-            multiBucketImpactLabel: getMultiBucketImpactLabel(marker.multiBucketImpact)
+          tooltipData.push({
+            name: intl.formatMessage({
+              id: 'xpack.ml.explorer.singleMetricChart.multiBucketImpactLabel',
+              defaultMessage: 'multi-bucket impact'
+            }),
+            value: getMultiBucketImpactLabel(marker.multiBucketImpact),
+            seriesKey,
+            yAccessor: 'multi_bucket_impact'
           });
         }
 
@@ -366,66 +376,76 @@ export const ExplorerChartSingleMetric = injectI18n(class ExplorerChartSingleMet
         if (_.has(marker, 'actual') && config.functionDescription !== 'rare') {
           // Display the record actual in preference to the chart value, which may be
           // different depending on the aggregation interval of the chart.
-          contents += intl.formatMessage({
-            id: 'xpack.ml.explorer.singleMetricChart.actualLabel',
-            defaultMessage: '{br}actual: {actualValue}'
-          }, {
-            br: '<br />',
-            actualValue: formatValue(marker.actual, config.functionDescription, fieldFormat)
+          tooltipData.push({
+            name: intl.formatMessage({
+              id: 'xpack.ml.explorer.singleMetricChart.actualLabel',
+              defaultMessage: 'actual'
+            }),
+            value: formatValue(marker.actual, config.functionDescription, fieldFormat),
+            seriesKey,
+            yAccessor: 'actual'
           });
-          contents += intl.formatMessage({
-            id: 'xpack.ml.explorer.singleMetricChart.typicalLabel',
-            defaultMessage: '{br}typical: {typicalValue}'
-          }, {
-            br: '<br />',
-            typicalValue: formatValue(marker.typical, config.functionDescription, fieldFormat)
+          tooltipData.push({
+            name: intl.formatMessage({
+              id: 'xpack.ml.explorer.singleMetricChart.typicalLabel',
+              defaultMessage: 'typical'
+            }),
+            value: formatValue(marker.typical, config.functionDescription, fieldFormat),
+            seriesKey,
+            yAccessor: 'typical'
           });
         } else {
-          contents += intl.formatMessage({
-            id: 'xpack.ml.explorer.singleMetricChart.valueLabel',
-            defaultMessage: '{br}value: {value}'
-          }, {
-            br: '<br />',
-            value: formatValue(marker.value, config.functionDescription, fieldFormat)
+          tooltipData.push({
+            name: intl.formatMessage({
+              id: 'xpack.ml.explorer.singleMetricChart.valueLabel',
+              defaultMessage: 'value'
+            }),
+            value: formatValue(marker.value, config.functionDescription, fieldFormat),
+            seriesKey,
+            yAccessor: 'value'
           });
           if (_.has(marker, 'byFieldName') && _.has(marker, 'numberOfCauses')) {
-            const numberOfCauses = marker.numberOfCauses;
-            const byFieldName = mlEscape(marker.byFieldName);
-            intl.formatMessage({
-              id: 'xpack.ml.explorer.singleMetricChart.unusualByFieldValuesLabel',
-              defaultMessage:
-                '{br} { numberOfCauses, plural, one {# unusual {byFieldName} value} other {#{plusSign} unusual {byFieldName} values}}'
-            }, {
-              br: '<br />',
-              numberOfCauses,
-              byFieldName,
-              // Maximum of 10 causes are stored in the record, so '10' may mean more than 10.
-              plusSign: numberOfCauses < 10 ? '' : '+',
+            tooltipData.push({
+              name: intl.formatMessage({
+                id: 'xpack.ml.explorer.distributionChart.unusualByFieldValuesLabel',
+                defaultMessage:
+                  '{ numberOfCauses, plural, one {# unusual {byFieldName} value} other {#{plusSign} unusual {byFieldName} values}}'
+              }, {
+                numberOfCauses: marker.numberOfCauses,
+                byFieldName: marker.byFieldName,
+                // Maximum of 10 causes are stored in the record, so '10' may mean more than 10.
+                plusSign: marker.numberOfCauses < 10 ? '' : '+',
+              }),
+              seriesKey,
+              yAccessor: 'numberOfCauses'
             });
           }
         }
       } else {
-        contents += intl.formatMessage({
-          id: 'xpack.ml.explorer.singleMetricChart.valueWithoutAnomalyScoreLabel',
-          defaultMessage: 'value: {value}'
-        }, {
-          value: formatValue(marker.value, config.functionDescription, fieldFormat)
+        tooltipData.push({
+          name: intl.formatMessage({
+            id: 'xpack.ml.explorer.singleMetricChart.valueWithoutAnomalyScoreLabel',
+            defaultMessage: 'value'
+          }),
+          value: formatValue(marker.value, config.functionDescription, fieldFormat),
+          seriesKey,
+          yAccessor: 'value'
         });
       }
 
       if (_.has(marker, 'scheduledEvents')) {
-        contents += '<br/><hr/>' + intl.formatMessage({
-          id: 'xpack.ml.explorer.singleMetricChart.scheduledEventsLabel',
-          defaultMessage: 'Scheduled events:{br}{scheduledEventsValue}'
-        }, {
-          br: '<br />',
-          scheduledEventsValue: marker.scheduledEvents.map(mlEscape).join('<br/>')
+        tooltipData.push({
+          name: intl.formatMessage({
+            id: 'xpack.ml.explorer.singleMetricChart.scheduledEventsLabel',
+            defaultMessage: 'Scheduled events'
+          }),
+          value: marker.scheduledEvents.map(mlEscape).join('<br/>')
         });
       }
 
-      mlChartTooltipService.show(contents, circle, {
-        x: LINE_CHART_ANOMALY_RADIUS * 2,
-        y: 0
+      mlChartTooltipService.show(tooltipData, circle, {
+        x: LINE_CHART_ANOMALY_RADIUS * 3,
+        y: LINE_CHART_ANOMALY_RADIUS * 2,
       });
     }
   }

@@ -24,7 +24,7 @@ import { getAppStateMock, getSavedDashboardMock } from './__tests__';
 import { AppStateClass } from 'ui/state_management/app_state';
 import { DashboardAppState } from './types';
 import { TimeRange } from 'src/plugins/data/public';
-import { ViewMode } from '../../../embeddable_api/public/np_ready/public';
+import { ViewMode } from 'src/plugins/embeddable/public';
 import { InputTimeRange } from 'ui/timefilter';
 
 jest.mock('ui/registry/field_formats', () => ({

@@ -35,12 +35,6 @@ jest.mock('ui/registry/field_formats', () => ({
   },
 }));
 
-jest.mock('ui/notify', () => ({
-  toastNotifications: {
-    addDanger: jest.fn(),
-  },
-}));
-
 jest.mock('./index_pattern', () => {
   class IndexPattern {
     init = async () => {
@@ -74,9 +68,11 @@ describe('IndexPatterns', () => {
     indexPatterns = new IndexPatterns(uiSettings, savedObjectsClient, http);
   });
 
-  test('does cache gets for the same id', () => {
+  test('does cache gets for the same id', async () => {
     const id = '1';
+    const indexPattern = await indexPatterns.get(id);
 
-    expect(indexPatterns.get(id)).toBe(indexPatterns.get(id));
+    expect(indexPattern).toBeDefined();
+    expect(indexPattern).toBe(await indexPatterns.get(id));
   });
 });

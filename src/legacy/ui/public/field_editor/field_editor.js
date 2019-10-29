@@ -143,12 +143,12 @@ export class FieldEditorComponent extends PureComponent {
     const DefaultFieldFormat = fieldFormats.getDefaultType(field.type, field.esTypes);
     const fieldTypeFormats = [
       getDefaultFormat(DefaultFieldFormat),
-      ...fieldFormats.byFieldType[field.type],
+      ...fieldFormats.getByFieldType(field.type),
     ];
 
     this.setState({
       isReady: true,
-      isCreating: !indexPattern.fields.byName[field.name],
+      isCreating: !indexPattern.fields.getByName(field.name),
       isDeprecatedLang: this.deprecatedLangs.includes(field.lang),
       errors: [],
       scriptingLangs,
@@ -173,7 +173,7 @@ export class FieldEditorComponent extends PureComponent {
 
     const fieldTypeFormats = [
       getDefaultFormat(DefaultFieldFormat),
-      ...fieldFormats.byFieldType[field.type],
+      ...fieldFormats.getByFieldType(field.type),
     ];
 
     const FieldFormat = fieldTypeFormats[0];
@@ -673,7 +673,7 @@ export class FieldEditorComponent extends PureComponent {
     const { redirectAway } = this.props.helpers;
     const { indexPattern, intl } = this.props;
     const { field } = this.state;
-    const remove = indexPattern.removeScriptedField(field.name);
+    const remove = indexPattern.removeScriptedField(field);
 
     if(remove) {
       remove.then(() => {
@@ -718,9 +718,9 @@ export class FieldEditorComponent extends PureComponent {
     const index = indexPattern.fields.findIndex(f => f.name === field.name);
 
     if (index > -1) {
-      indexPattern.fields.splice(index, 1, field);
+      indexPattern.fields.update(field);
     } else {
-      indexPattern.fields.push(field);
+      indexPattern.fields.add(field);
     }
 
     if (!fieldFormatId) {

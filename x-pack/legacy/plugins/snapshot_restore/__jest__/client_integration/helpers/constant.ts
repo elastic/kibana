@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getRepository } from '../../../test/fixtures';
+import { getRepository, getPolicy } from '../../../test/fixtures';
+
 export const REPOSITORY_NAME = 'my-test-repository';
 
 export const REPOSITORY_EDIT = getRepository({ name: REPOSITORY_NAME });
+
+export const POLICY_NAME = 'my-test-policy';
+
+export const POLICY_EDIT = getPolicy({ name: POLICY_NAME });

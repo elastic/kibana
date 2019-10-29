@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { defaultIndexPattern } from '../../../default_index_pattern';
 import { RequestBasicOptions } from '../framework/types';
 
 export const mockOptionsNetwork: RequestBasicOptions = {
-  defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+  defaultIndex: defaultIndexPattern,
   sourceConfiguration: {
     fields: {
       container: 'docker.container.name',
@@ -80,7 +81,7 @@ export const mockResultNetwork = {
 };
 
 export const mockOptionsHost: RequestBasicOptions = {
-  defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+  defaultIndex: defaultIndexPattern,
   sourceConfiguration: {
     fields: {
       container: 'docker.container.name',
@@ -117,6 +118,16 @@ export const mockResponseHost = {
   hits: { total: { value: 950867, relation: 'eq' }, max_score: null, hits: [] },
   aggregations: {
     auditd_count: { doc_count: 73847 },
+    endgame_module: {
+      doc_count: 6258,
+      dns_event_count: { doc_count: 891 },
+      file_event_count: { doc_count: 892 },
+      image_load_event_count: { doc_count: 893 },
+      network_event_count: { doc_count: 894 },
+      process_event_count: { doc_count: 895 },
+      registry_event: { doc_count: 896 },
+      security_event_count: { doc_count: 897 },
+    },
     fim_count: { doc_count: 107307 },
     system_module: {
       doc_count: 20000000,
@@ -141,6 +152,13 @@ export const mockResultHost = {
   auditbeatPackage: 2003,
   auditbeatProcess: 1200,
   auditbeatUser: 1979,
+  endgameDns: 891,
+  endgameFile: 892,
+  endgameImageLoad: 893,
+  endgameNetwork: 894,
+  endgameProcess: 895,
+  endgameRegistry: 896,
+  endgameSecurity: 897,
   filebeatSystemModule: 225,
   winlogbeat: 737,
 };

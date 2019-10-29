@@ -5,7 +5,6 @@ exports[`DeleteRuleModal renders as delete button after opening and closing moda
   <EuiLink
     color="danger"
     onClick={[Function]}
-    type="button"
   >
     <FormattedMessage
       defaultMessage="Delete rule"
@@ -21,7 +20,6 @@ exports[`DeleteRuleModal renders as delete button when not visible 1`] = `
   <EuiLink
     color="danger"
     onClick={[Function]}
-    type="button"
   >
     <FormattedMessage
       defaultMessage="Delete rule"
@@ -37,7 +35,6 @@ exports[`DeleteRuleModal renders modal after clicking delete rule link 1`] = `
   <EuiLink
     color="danger"
     onClick={[Function]}
-    type="button"
   >
     <FormattedMessage
       defaultMessage="Delete rule"

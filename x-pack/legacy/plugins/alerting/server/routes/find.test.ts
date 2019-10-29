@@ -5,10 +5,10 @@
  */
 
 import { createMockServer } from './_mock_server';
-import { findRoute } from './find';
+import { findAlertRoute } from './find';
 
 const { server, alertsClient } = createMockServer();
-findRoute(server);
+server.route(findAlertRoute);
 
 beforeEach(() => jest.resetAllMocks());
 
@@ -40,23 +40,24 @@ test('sends proper arguments to alert find function', async () => {
   expect(response).toEqual(expectedResult);
   expect(alertsClient.find).toHaveBeenCalledTimes(1);
   expect(alertsClient.find.mock.calls[0]).toMatchInlineSnapshot(`
-Array [
-  Object {
-    "options": Object {
-      "defaultSearchOperator": "AND",
-      "fields": Array [
-        "description",
-      ],
-      "hasReference": undefined,
-      "page": 1,
-      "perPage": 1,
-      "search": "text*",
-      "searchFields": Array [
-        "description",
-      ],
-      "sortField": "description",
-    },
-  },
-]
-`);
+    Array [
+      Object {
+        "options": Object {
+          "defaultSearchOperator": "AND",
+          "fields": Array [
+            "description",
+          ],
+          "filter": undefined,
+          "hasReference": undefined,
+          "page": 1,
+          "perPage": 1,
+          "search": "text*",
+          "searchFields": Array [
+            "description",
+          ],
+          "sortField": "description",
+        },
+      },
+    ]
+  `);
 });

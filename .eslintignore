@@ -33,12 +33,14 @@ bower_components
 /x-pack/legacy/plugins/**/__tests__/fixtures/**
 /packages/kbn-interpreter/src/common/lib/grammar.js
 /x-pack/legacy/plugins/canvas/canvas_plugin
+/x-pack/legacy/plugins/canvas/shareable_runtime/build
 /x-pack/legacy/plugins/canvas/storybook
 /x-pack/legacy/plugins/canvas/canvas_plugin_src/lib/flot-charts
 /x-pack/legacy/plugins/infra/common/graphql/types.ts
 /x-pack/legacy/plugins/infra/public/graphql/types.ts
 /x-pack/legacy/plugins/infra/server/graphql/types.ts
 /x-pack/legacy/plugins/apm/cypress/**/snapshots.js
+/src/legacy/plugin_discovery/plugin_pack/__tests__/fixtures/plugins/broken
 **/graphql/types.ts
 **/*.js.snap
 !/.eslintrc.js

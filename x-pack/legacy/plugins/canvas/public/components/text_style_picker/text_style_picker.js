@@ -7,9 +7,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiSpacer, EuiButtonGroup } from '@elastic/eui';
+import { ComponentStrings } from '../../../i18n';
 import { FontPicker } from '../font_picker';
 import { ColorPickerPopover } from '../color_picker_popover';
 import { fontSizes } from './font_sizes';
+
+const { TextStylePicker: strings } = ComponentStrings;
 
 export const TextStylePicker = ({
   family,
@@ -25,17 +28,17 @@ export const TextStylePicker = ({
   const alignmentButtons = [
     {
       id: 'left',
-      label: 'Align left',
+      label: strings.getAlignLeftOption(),
       iconType: 'editorAlignLeft',
     },
     {
       id: 'center',
-      label: 'Align center',
+      label: strings.getAlignCenterOption(),
       iconType: 'editorAlignCenter',
     },
     {
       id: 'right',
-      label: 'Align right',
+      label: strings.getAlignRightOption(),
       iconType: 'editorAlignRight',
     },
   ];
@@ -43,17 +46,17 @@ export const TextStylePicker = ({
   const styleButtons = [
     {
       id: 'bold',
-      label: 'Bold',
+      label: strings.getStyleBoldOption(),
       iconType: 'editorBold',
     },
     {
       id: 'italic',
-      label: 'Italic',
+      label: strings.getStyleItalicOption(),
       iconType: 'editorItalic',
     },
     {
       id: 'underline',
-      label: 'Underline',
+      label: strings.getStyleUnderlineOption(),
       iconType: 'editorUnderline',
     },
   ];
@@ -101,7 +104,7 @@ export const TextStylePicker = ({
 
   return (
     <div className="canvasTextStylePicker">
-      <EuiFlexGroup gutterSize="m">
+      <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiSelect
             compressed
@@ -117,10 +120,11 @@ export const TextStylePicker = ({
 
       <EuiSpacer size="m" />
 
-      <EuiFlexGroup gutterSize="m" alignItems="center">
+      <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiButtonGroup
             options={styleButtons}
+            buttonSize="compressed"
             idToSelectedMap={stylesSelectedMap}
             onChange={onStyleChange}
             type="multi"
@@ -130,6 +134,7 @@ export const TextStylePicker = ({
         <EuiFlexItem grow={false}>
           <EuiButtonGroup
             options={alignmentButtons}
+            buttonSize="compressed"
             isIconOnly
             idSelected={align}
             onChange={onAlignmentChange}

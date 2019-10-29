@@ -8,13 +8,7 @@ import _, { partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { generateId } from '../id_generator';
 import { DatasourceSuggestion, TableChangeType } from '../types';
-import {
-  columnToOperation,
-  IndexPatternField,
-  IndexPatternLayer,
-  IndexPatternPrivateState,
-  IndexPattern,
-} from './indexpattern';
+import { columnToOperation } from './indexpattern';
 import {
   buildColumn,
   getOperationTypesForField,
@@ -22,6 +16,15 @@ import {
   IndexPatternColumn,
 } from './operations';
 import { hasField } from './utils';
+import { operationDefinitions } from './operations/definitions';
+import {
+  IndexPattern,
+  IndexPatternPrivateState,
+  IndexPatternLayer,
+  IndexPatternField,
+} from './types';
+
+type IndexPatternSugestion = DatasourceSuggestion<IndexPatternPrivateState>;
 
 function buildSuggestion({
   state,
@@ -84,7 +87,7 @@ export function getDatasourceSuggestionsForField(
   state: IndexPatternPrivateState,
   indexPatternId: string,
   field: IndexPatternField
-): Array<DatasourceSuggestion<IndexPatternPrivateState>> {
+): IndexPatternSugestion[] {
   const layers = Object.keys(state.layers);
   const layerIds = layers.filter(id => state.layers[id].indexPatternId === indexPatternId);
 
@@ -122,23 +125,39 @@ function getExistingLayerSuggestionsForField(
   const fieldInUse = Object.values(layer.columns).some(
     column => hasField(column) && column.sourceField === field.name
   );
-  let updatedLayer: IndexPatternLayer | undefined;
+  const suggestions: IndexPatternSugestion[] = [];
+
   if (usableAsBucketOperation && !fieldInUse) {
-    updatedLayer = addFieldAsBucketOperation(layer, layerId, indexPattern, field);
-  } else if (!usableAsBucketOperation && operations.length > 0) {
-    updatedLayer = addFieldAsMetricOperation(layer, layerId, indexPattern, field);
+    suggestions.push(
+      buildSuggestion({
+        state,
+        updatedLayer: addFieldAsBucketOperation(layer, layerId, indexPattern, field),
+        layerId,
+        changeType: 'extended',
+      })
+    );
   }
 
-  return updatedLayer
-    ? [
+  if (!usableAsBucketOperation && operations.length > 0) {
+    const updatedLayer = addFieldAsMetricOperation(layer, layerId, indexPattern, field);
+    if (updatedLayer) {
+      suggestions.push(
         buildSuggestion({
           state,
           updatedLayer,
           layerId,
           changeType: 'extended',
-        }),
-      ]
-    : [];
+        })
+      );
+    }
+  }
+
+  const metricSuggestion = createMetricSuggestion(indexPattern, layerId, state, field);
+  if (metricSuggestion) {
+    suggestions.push(metricSuggestion);
+  }
+
+  return suggestions;
 }
 
 function addFieldAsMetricOperation(
@@ -238,7 +257,8 @@ function getEmptyLayerSuggestionsForField(
   } else if (indexPattern.timeFieldName && getOperationTypesForField(field).length > 0) {
     newLayer = createNewLayerWithMetricAggregation(layerId, indexPattern, field);
   }
-  return newLayer
+
+  const newLayerSuggestions = newLayer
     ? [
         buildSuggestion({
           state,
@@ -248,6 +268,10 @@ function getEmptyLayerSuggestionsForField(
         }),
       ]
     : [];
+
+  const metricLayer = createMetricSuggestion(indexPattern, layerId, state, field);
+
+  return metricLayer ? newLayerSuggestions.concat(metricLayer) : newLayerSuggestions;
 }
 
 function createNewLayerWithBucketAggregation(
@@ -397,11 +421,48 @@ function createChangedNestingSuggestion(state: IndexPatternPrivateState, layerId
   });
 }
 
+function createMetricSuggestion(
+  indexPattern: IndexPattern,
+  layerId: string,
+  state: IndexPatternPrivateState,
+  field: IndexPatternField
+) {
+  const layer = state.layers[layerId];
+  const operationDefinitionsMap = _.indexBy(operationDefinitions, 'type');
+  const [column] = getOperationTypesForField(field)
+    .map(type =>
+      operationDefinitionsMap[type].buildColumn({
+        field,
+        indexPattern,
+        layerId,
+        columns: {},
+        suggestedPriority: 0,
+      })
+    )
+    .filter(op => op.dataType === 'number' && !op.isBucketed);
+
+  if (!column) {
+    return;
+  }
+
+  const newId = generateId();
+  return buildSuggestion({
+    layerId,
+    state,
+    changeType: 'initial',
+    updatedLayer: {
+      ...layer,
+      columns: { [newId]: column },
+      columnOrder: [newId],
+    },
+  });
+}
+
 function getNestedTitle([outerBucket, innerBucket]: IndexPatternColumn[]) {
   return i18n.translate('xpack.lens.indexpattern.suggestions.nestingChangeLabel', {
-    defaultMessage: '{innerOperation} per each {outerOperation}',
+    defaultMessage: '{innerOperation} for each {outerOperation}',
     values: {
-      innerOperation: innerBucket.label,
+      innerOperation: hasField(innerBucket) ? innerBucket.sourceField : innerBucket.label,
       outerOperation: hasField(outerBucket) ? outerBucket.sourceField : outerBucket.label,
     },
   });
@@ -530,7 +591,7 @@ function createSimplifiedTableSuggestions(state: IndexPatternPrivateState, layer
 }
 
 function getMetricSuggestionTitle(layer: IndexPatternLayer, onlyMetric: boolean) {
-  const { operationType, label } = Object.values(layer.columns)[0];
+  const { operationType, label } = layer.columns[layer.columnOrder[0]];
   return i18n.translate('xpack.lens.indexpattern.suggestions.overallLabel', {
     defaultMessage: '{operation} overall',
     values: {

@@ -13,6 +13,7 @@ import {
   getUrlPrefix,
   getTestAlertData,
   ObjectRemover,
+  AlertUtils,
 } from '../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
@@ -38,57 +39,42 @@ export default function alertTests({ getService }: FtrProviderContext) {
       await es.indices.delete({ index: authorizationIndex });
     });
 
-    async function createIndexRecordAction(spaceId: string) {
-      const { body: createdAction } = await supertest
-        .post(`${getUrlPrefix(spaceId)}/api/action`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          description: 'My action',
-          actionTypeId: 'test.index-record',
-          config: {
-            unencrypted: `This value shouldn't get encrypted`,
-          },
-          secrets: {
-            encrypted: 'This value should be encrypted',
-          },
-        })
-        .expect(200);
-      objectRemover.add(spaceId, createdAction.id, 'action');
-      return createdAction;
-    }
-
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
+
       describe(scenario.id, () => {
-        it('should schedule task, run alert and schedule actions when appropriate', async () => {
-          const reference = `create-test-1:${user.username}`;
-          const createdAction = await createIndexRecordAction(space.id);
-          const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/alert`)
+        let alertUtils: AlertUtils;
+        let indexRecordActionId: string;
+
+        before(async () => {
+          const { body: createdAction } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/action`)
             .set('kbn-xsrf', 'foo')
-            .auth(user.username, user.password)
-            .send(
-              getTestAlertData({
-                interval: '1m',
-                alertTypeId: 'test.always-firing',
-                alertTypeParams: {
-                  index: ES_TEST_INDEX_NAME,
-                  reference,
-                },
-                actions: [
-                  {
-                    group: 'default',
-                    id: createdAction.id,
-                    params: {
-                      index: ES_TEST_INDEX_NAME,
-                      reference,
-                      message:
-                        'instanceContextValue: {{context.instanceContextValue}}, instanceStateValue: {{state.instanceStateValue}}',
-                    },
-                  },
-                ],
-              })
-            );
+            .send({
+              description: 'My action',
+              actionTypeId: 'test.index-record',
+              config: {
+                unencrypted: `This value shouldn't get encrypted`,
+              },
+              secrets: {
+                encrypted: 'This value should be encrypted',
+              },
+            })
+            .expect(200);
+          indexRecordActionId = createdAction.id;
+          alertUtils = new AlertUtils({
+            user,
+            space,
+            supertestWithoutAuth,
+            indexRecordActionId,
+            objectRemover,
+          });
+        });
+        after(() => objectRemover.add(space.id, indexRecordActionId, 'action'));
+
+        it('should schedule task, run alert and schedule actions when appropriate', async () => {
+          const reference = alertUtils.generateReference();
+          const response = await alertUtils.createAlwaysFiringAction({ reference });
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
@@ -104,7 +90,6 @@ export default function alertTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
-              objectRemover.add(space.id, response.body.id, 'alert');
               const alertTestRecord = (await esTestIndexTool.waitForDocs(
                 'alert:test.always-firing',
                 reference
@@ -160,7 +145,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             .expect(200);
           objectRemover.add(space.id, createdAction.id, 'action');
 
-          const reference = `create-test-2:${user.username}`;
+          const reference = alertUtils.generateReference();
           const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/api/alert`)
             .set('kbn-xsrf', 'foo')
@@ -248,7 +233,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
         it('should have proper callCluster and savedObjectsClient authorization for alert type executor when appropriate', async () => {
           let alertTestRecord: any;
-          const reference = `create-test-3:${user.username}`;
+          const reference = alertUtils.generateReference();
           const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/api/alert`)
             .set('kbn-xsrf', 'foo')
@@ -326,7 +311,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
         it('should have proper callCluster and savedObjectsClient authorization for action type executor when appropriate', async () => {
           let actionTestRecord: any;
-          const reference = `create-test-4:${user.username}`;
+          const reference = alertUtils.generateReference();
           const { body: createdAction } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/action`)
             .set('kbn-xsrf', 'foo')
@@ -422,34 +407,13 @@ export default function alertTests({ getService }: FtrProviderContext) {
         });
 
         it('should throttle alerts when appropriate', async () => {
-          const reference = `create-test-5:${user.username}`;
-          const createdAction = await createIndexRecordAction(space.id);
-          const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/alert`)
-            .set('kbn-xsrf', 'foo')
-            .auth(user.username, user.password)
-            .send(
-              getTestAlertData({
-                interval: '1s',
-                throttle: '1m',
-                alertTypeId: 'test.always-firing',
-                alertTypeParams: {
-                  index: ES_TEST_INDEX_NAME,
-                  reference,
-                },
-                actions: [
-                  {
-                    group: 'default',
-                    id: createdAction.id,
-                    params: {
-                      index: ES_TEST_INDEX_NAME,
-                      reference,
-                      message: '',
-                    },
-                  },
-                ],
-              })
-            );
+          const reference = alertUtils.generateReference();
+          const response = await alertUtils.createAlwaysFiringAction({
+            reference,
+            overwrites: {
+              interval: '1s',
+            },
+          });
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
@@ -478,44 +442,38 @@ export default function alertTests({ getService }: FtrProviderContext) {
         });
 
         it('should not throttle when changing groups', async () => {
-          const reference = `create-test-6:${user.username}`;
-          const createdAction = await createIndexRecordAction(space.id);
-          const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/alert`)
-            .set('kbn-xsrf', 'foo')
-            .auth(user.username, user.password)
-            .send(
-              getTestAlertData({
-                interval: '1s',
-                throttle: '1m',
-                alertTypeId: 'test.always-firing',
-                alertTypeParams: {
-                  index: ES_TEST_INDEX_NAME,
-                  reference,
-                  groupsToScheduleActionsInSeries: ['default', 'other'],
+          const reference = alertUtils.generateReference();
+          const response = await alertUtils.createAlwaysFiringAction({
+            reference,
+            overwrites: {
+              interval: '1s',
+              alertTypeParams: {
+                index: ES_TEST_INDEX_NAME,
+                reference,
+                groupsToScheduleActionsInSeries: ['default', 'other'],
+              },
+              actions: [
+                {
+                  group: 'default',
+                  id: indexRecordActionId,
+                  params: {
+                    index: ES_TEST_INDEX_NAME,
+                    reference,
+                    message: 'from:default',
+                  },
                 },
-                actions: [
-                  {
-                    group: 'default',
-                    id: createdAction.id,
-                    params: {
-                      index: ES_TEST_INDEX_NAME,
-                      reference,
-                      message: 'from:default',
-                    },
+                {
+                  group: 'other',
+                  id: indexRecordActionId,
+                  params: {
+                    index: ES_TEST_INDEX_NAME,
+                    reference,
+                    message: 'from:other',
                   },
-                  {
-                    group: 'other',
-                    id: createdAction.id,
-                    params: {
-                      index: ES_TEST_INDEX_NAME,
-                      reference,
-                      message: 'from:other',
-                    },
-                  },
-                ],
-              })
-            );
+                },
+              ],
+            },
+          });
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
@@ -548,35 +506,18 @@ export default function alertTests({ getService }: FtrProviderContext) {
         });
 
         it('should reset throttle window when not firing', async () => {
-          const reference = `create-test-7:${user.username}`;
-          const createdAction = await createIndexRecordAction(space.id);
-          const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/alert`)
-            .set('kbn-xsrf', 'foo')
-            .auth(user.username, user.password)
-            .send(
-              getTestAlertData({
-                interval: '1s',
-                throttle: '1m',
-                alertTypeId: 'test.always-firing',
-                alertTypeParams: {
-                  index: ES_TEST_INDEX_NAME,
-                  reference,
-                  groupsToScheduleActionsInSeries: ['default', null, 'default'],
-                },
-                actions: [
-                  {
-                    group: 'default',
-                    id: createdAction.id,
-                    params: {
-                      index: ES_TEST_INDEX_NAME,
-                      reference,
-                      message: 'from:default',
-                    },
-                  },
-                ],
-              })
-            );
+          const reference = alertUtils.generateReference();
+          const response = await alertUtils.createAlwaysFiringAction({
+            reference,
+            overwrites: {
+              interval: '1s',
+              alertTypeParams: {
+                index: ES_TEST_INDEX_NAME,
+                reference,
+                groupsToScheduleActionsInSeries: ['default', null, 'default'],
+              },
+            },
+          });
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
@@ -598,6 +539,122 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 reference
               );
               expect(executedActionsResult.hits.total.value).to.eql(2);
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it(`shouldn't schedule actions when alert is muted`, async () => {
+          const reference = alertUtils.generateReference();
+          const response = await alertUtils.createAlwaysFiringAction({
+            reference,
+            overwrites: {
+              enabled: false,
+              interval: '1s',
+            },
+          });
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'global_read at space1':
+              expect(response.statusCode).to.eql(404);
+              expect(response.body).to.eql({
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Not Found',
+              });
+              break;
+            case 'space_1_all at space1':
+            case 'superuser at space1':
+              await alertUtils.muteAll(response.body.id);
+              await alertUtils.enable(response.body.id);
+              // Wait until alerts schedule actions twice to ensure actions had a chance to skip execution once
+              await esTestIndexTool.waitForDocs('alert:test.always-firing', reference, 2);
+              const executedActionsResult = await esTestIndexTool.search(
+                'action:test.index-record',
+                reference
+              );
+              expect(executedActionsResult.hits.total.value).to.eql(0);
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it(`shouldn't schedule actions when alert instance is muted`, async () => {
+          const reference = alertUtils.generateReference();
+          const response = await alertUtils.createAlwaysFiringAction({
+            reference,
+            overwrites: {
+              enabled: false,
+              interval: '1s',
+            },
+          });
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'global_read at space1':
+              expect(response.statusCode).to.eql(404);
+              expect(response.body).to.eql({
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Not Found',
+              });
+              break;
+            case 'space_1_all at space1':
+            case 'superuser at space1':
+              await alertUtils.muteInstance(response.body.id, '1');
+              await alertUtils.enable(response.body.id);
+              // Wait until alerts scheduled actions twice to ensure actions had a chance to execute once
+              await esTestIndexTool.waitForDocs('alert:test.always-firing', reference, 2);
+              const executedActionsResult = await esTestIndexTool.search(
+                'action:test.index-record',
+                reference
+              );
+              expect(executedActionsResult.hits.total.value).to.eql(0);
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it(`should unmute all instances when unmuting an alert`, async () => {
+          const reference = alertUtils.generateReference();
+          const response = await alertUtils.createAlwaysFiringAction({
+            reference,
+            overwrites: {
+              enabled: false,
+              interval: '1s',
+            },
+          });
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'global_read at space1':
+              expect(response.statusCode).to.eql(404);
+              expect(response.body).to.eql({
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Not Found',
+              });
+              break;
+            case 'space_1_all at space1':
+            case 'superuser at space1':
+              await alertUtils.muteInstance(response.body.id, '1');
+              await alertUtils.muteAll(response.body.id);
+              await alertUtils.unmuteAll(response.body.id);
+              await alertUtils.enable(response.body.id);
+              // Wait until alerts scheduled actions twice to ensure actions had a chance to execute once
+              await esTestIndexTool.waitForDocs('alert:test.always-firing', reference, 2);
+              const executedActionsResult = await esTestIndexTool.search(
+                'action:test.index-record',
+                reference
+              );
+              expect(executedActionsResult.hits.total.value).to.eql(1);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);

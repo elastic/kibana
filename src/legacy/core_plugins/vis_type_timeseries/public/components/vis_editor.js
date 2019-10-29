@@ -32,9 +32,10 @@ import { fetchFields } from '../lib/fetch_fields';
 import { extractIndexPatterns } from '../../common/extract_index_patterns';
 
 import { npStart } from 'ui/new_platform';
-import { Storage } from 'ui/storage';
+
 import { CoreStartContextProvider } from '../contexts/query_input_bar_context';
-const localStorage = new Storage(window.localStorage);
+import { KibanaContextProvider } from '../../../../../plugins/kibana_react/public';
+import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { timefilter } from 'ui/timefilter';
 
 const VIS_STATE_DEBOUNCE_DELAY = 200;
@@ -45,6 +46,7 @@ export class VisEditor extends Component {
     super(props);
     const { vis } = props;
     this.appState = vis.API.getAppState();
+    this.localStorage = new Storage(window.localStorage);
     this.state = {
       model: props.visParams,
       dirty: false,
@@ -62,7 +64,7 @@ export class VisEditor extends Component {
       appName: APP_NAME,
       uiSettings: npStart.core.uiSettings,
       savedObjectsClient: npStart.core.savedObjects.client,
-      store: localStorage,
+      store: this.localStorage,
     };
   }
 
@@ -163,38 +165,48 @@ export class VisEditor extends Component {
     const { model } = this.state;
 
     if (model) {
+      //TODO: Remove CoreStartContextProvider, KibanaContextProvider should be raised to the top of the plugin.
       return (
-        <div className="tvbEditor" data-test-subj="tvbVisEditor">
-          <div className="tvbEditor--hideForReporting">
-            <VisPicker model={model} onChange={this.handleChange} />
+        <KibanaContextProvider
+          services={{
+            appName: APP_NAME,
+            storage: this.localStorage,
+            data: npStart.plugins.data,
+            ...npStart.core,
+          }}
+        >
+          <div className="tvbEditor" data-test-subj="tvbVisEditor">
+            <div className="tvbEditor--hideForReporting">
+              <VisPicker model={model} onChange={this.handleChange} />
+            </div>
+            <VisEditorVisualization
+              dirty={this.state.dirty}
+              autoApply={this.state.autoApply}
+              model={model}
+              appState={this.appState}
+              savedObj={this.props.savedObj}
+              timeRange={this.props.timeRange}
+              uiState={this.uiState}
+              onCommit={this.handleCommit}
+              onToggleAutoApply={this.handleAutoApplyToggle}
+              title={this.props.vis.title}
+              description={this.props.vis.description}
+              onDataChange={this.onDataChange}
+            />
+            <div className="tvbEditor--hideForReporting">
+              <CoreStartContextProvider value={this.coreContext}>
+                <PanelConfig
+                  fields={this.state.visFields}
+                  model={model}
+                  visData$={this.visData$}
+                  dateFormat={this.props.config.get('dateFormat')}
+                  onChange={this.handleChange}
+                  getConfig={this.getConfig}
+                />
+              </CoreStartContextProvider>
+            </div>
           </div>
-          <VisEditorVisualization
-            dirty={this.state.dirty}
-            autoApply={this.state.autoApply}
-            model={model}
-            appState={this.appState}
-            savedObj={this.props.savedObj}
-            timeRange={this.props.timeRange}
-            uiState={this.uiState}
-            onCommit={this.handleCommit}
-            onToggleAutoApply={this.handleAutoApplyToggle}
-            title={this.props.vis.title}
-            description={this.props.vis.description}
-            onDataChange={this.onDataChange}
-          />
-          <div className="tvbEditor--hideForReporting">
-            <CoreStartContextProvider value={this.coreContext}>
-              <PanelConfig
-                fields={this.state.visFields}
-                model={model}
-                visData$={this.visData$}
-                dateFormat={this.props.config.get('dateFormat')}
-                onChange={this.handleChange}
-                getConfig={this.getConfig}
-              />
-            </CoreStartContextProvider>
-          </div>
-        </div>
+        </KibanaContextProvider>
       );
     }
 

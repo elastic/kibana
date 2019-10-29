@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
 import React, { Component, Fragment } from 'react';
 
 import {
@@ -22,12 +21,11 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { indexPatternService } from '../../../kibana_services';
-import { Storage } from 'ui/storage';
 
-import { SearchBar } from 'plugins/data';
+import { start as data } from '../../../../../../../../src/legacy/core_plugins/data/public/legacy';
+const { SearchBar } = data.ui;
 
-const settings = chrome.getUiSettingsClient();
-const localStorage = new Storage(window.localStorage);
+import { npStart } from 'ui/new_platform';
 
 export class FilterEditor extends Component {
   state = {
@@ -82,6 +80,7 @@ export class FilterEditor extends Component {
 
   _renderQueryPopover() {
     const layerQuery = this.props.layer.getQuery();
+    const { uiSettings } = npStart.core;
 
     return (
       <EuiPopover
@@ -93,19 +92,16 @@ export class FilterEditor extends Component {
       >
         <div className="mapFilterEditor" data-test-subj="mapFilterEditor">
           <SearchBar
-            uiSettings={settings}
             showFilterBar={false}
             showDatePicker={false}
             showQueryInput={true}
             query={
               layerQuery
                 ? layerQuery
-                : { language: settings.get('search:queryLanguage'), query: '' }
+                : { language: uiSettings.get('search:queryLanguage'), query: '' }
             }
             onQuerySubmit={this._onQueryChange}
-            appName="maps"
             indexPatterns={this.state.indexPatterns}
-            store={localStorage}
             customSubmitButton={
               <EuiButton fill data-test-subj="mapFilterEditorSubmitButton">
                 <FormattedMessage

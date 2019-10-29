@@ -6,7 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { EuiSpacer, EuiButtonGroup } from '@elastic/eui';
+import { EuiSpacer, EuiFormRow, EuiButtonGroup } from '@elastic/eui';
 import { get } from 'lodash';
 import { AssetPicker } from '../../../../public/components/asset_picker';
 import { elasticOutline } from '../../../lib/elastic_outline';
@@ -15,7 +15,7 @@ import { isValidHttpUrl } from '../../../../common/lib/httpurl';
 import { encode } from '../../../../common/lib/dataurl';
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
 import { VALID_IMAGE_TYPES } from '../../../../common/lib/constants';
-import { ArgumentStrings } from '../../../strings';
+import { ArgumentStrings } from '../../../../i18n';
 import { FileForm, LinkForm } from './forms';
 
 const { ImageUpload: strings } = ArgumentStrings;
@@ -123,13 +123,15 @@ class ImageUpload extends React.Component {
     }
 
     const selectUrlType = (
-      <EuiButtonGroup
-        buttonSize="s"
-        options={urlTypeOptions}
-        idSelected={urlType}
-        onChange={this.changeUrlType}
-        isFullWidth
-      />
+      <EuiFormRow display="rowCompressed">
+        <EuiButtonGroup
+          buttonSize="compressed"
+          options={urlTypeOptions}
+          idSelected={urlType}
+          onChange={this.changeUrlType}
+          isFullWidth
+        />
+      </EuiFormRow>
     );
 
     const forms = {

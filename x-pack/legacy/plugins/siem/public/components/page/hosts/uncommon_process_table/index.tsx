@@ -158,19 +158,23 @@ const getUncommonColumns = (): UncommonProcessTableColumns => [
         attrName: 'process.name',
         idPrefix: `uncommon-process-table-${node._id}-processName`,
       }),
-    width: '15%',
+    width: '20%',
   },
   {
+    align: 'right',
     name: i18n.NUMBER_OF_HOSTS,
     truncateText: false,
     hideForMobile: false,
     render: ({ node }) => <>{node.hosts != null ? node.hosts.length : getEmptyValue()}</>,
+    width: '8%',
   },
   {
+    align: 'right',
     name: i18n.NUMBER_OF_INSTANCES,
     truncateText: false,
     hideForMobile: false,
     render: ({ node }) => defaultToEmptyTag(node.instances),
+    width: '8%',
   },
   {
     name: i18n.HOSTS,
@@ -183,7 +187,7 @@ const getUncommonColumns = (): UncommonProcessTableColumns => [
         idPrefix: `uncommon-process-table-${node._id}-processHost`,
         render: item => <HostDetailsLink hostName={item} />,
       }),
-    width: '15%',
+    width: '25%',
   },
   {
     name: i18n.LAST_COMMAND,
@@ -196,7 +200,7 @@ const getUncommonColumns = (): UncommonProcessTableColumns => [
         idPrefix: `uncommon-process-table-${node._id}-processArgs`,
         displayCount: 1, // TODO: Change this back once we have improved the UI
       }),
-    width: '35%',
+    width: '25%',
   },
   {
     name: i18n.LAST_USER,
