@@ -19,12 +19,11 @@
 
 import { uiModules } from 'ui/modules';
 import 'angular-sanitize';
-import { VisEditorTypesRegistryProvider } from 'ui/registry/vis_editor_types';
+import { start as embeddables } from '../../../../../core_plugins/embeddable_api/public/np_ready/public/legacy';
 
 uiModules
   .get('kibana/directive', ['ngSanitize'])
-  .directive('visualizationEditor', function (Private, $timeout, getAppState) {
-    const editorTypes = Private(VisEditorTypesRegistryProvider);
+  .directive('visualizationEmbedded', function (Private, $timeout, getAppState) {
 
     return {
       restrict: 'E',
@@ -36,19 +35,24 @@ uiModules
         query: '=',
       },
       link: function ($scope, element) {
-        const editorType = $scope.savedObj.vis.type.editor;
-        const Editor = typeof editorType === 'function' ? editorType :
-          editorTypes.find(editor => editor.key === editorType);
-        const editor = new Editor(element[0], $scope.savedObj);
+        $scope.renderFunction = async () => {
+          if (!$scope._handler) {
+            $scope._handler = await embeddables.getEmbeddableFactory('visualization').createFromObject($scope.savedObj, {
+              timeRange: $scope.timeRange,
+              filters: $scope.filters || [],
+              query: $scope.query,
+              appState: getAppState(),
+              uiState: $scope.uiState,
+            });
+            $scope._handler.render(element[0]);
 
-        $scope.renderFunction = () => {
-          editor.render({
-            uiState: $scope.uiState,
-            timeRange: $scope.timeRange,
-            filters: $scope.filters,
-            query: $scope.query,
-            appState: getAppState(),
-          });
+          } else {
+            $scope._handler.updateInput({
+              timeRange: $scope.timeRange,
+              filters: $scope.filters || [],
+              query: $scope.query,
+            });
+          }
         };
 
         $scope.$on('render', (event) => {
@@ -57,7 +61,7 @@ uiModules
         });
 
         $scope.$on('$destroy', () => {
-          editor.destroy();
+          $scope._handler.destroy();
         });
       }
     };
