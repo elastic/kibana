@@ -6,16 +6,16 @@
 
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { AppWithoutRouter } from '../../public/app';
+import { AppWithoutRouter } from '../../public/app/app';
 import { Provider } from 'react-redux';
-import { loadIndicesSuccess } from '../../public/store/actions';
-import { indexManagementStore } from '../../public/store';
+import { loadIndicesSuccess } from '../../public/app/store/actions';
+import { indexManagementStore } from '../../public/app/store';
 import { BASE_PATH } from '../../common/constants';
 import { mountWithIntl } from '../../../../../test_utils/enzyme_helpers';
 // axios has a $http like interface so using it to simulate $http
 import axios from 'axios';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
-import { setHttpClient } from '../../public/services/api';
+import { setHttpClient } from '../../public/app/services/api';
 import sinon from 'sinon';
 import { findTestSubject } from '@elastic/eui/lib/test';
 

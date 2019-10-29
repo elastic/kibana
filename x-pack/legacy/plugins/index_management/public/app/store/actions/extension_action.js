@@ -6,11 +6,10 @@
 
 import { reloadIndices } from '../actions';
 import { toastNotifications } from 'ui/notify';
-import { getHttpClient } from '../../services/api';
 
 export const performExtensionAction = ({ requestMethod, indexNames, successMessage }) => async (dispatch) => {
   try {
-    await requestMethod(indexNames, getHttpClient());
+    await requestMethod(indexNames);
   } catch (error) {
     toastNotifications.addDanger(error.data.message);
     return;

@@ -5,16 +5,6 @@
  */
 import { BASE_PATH } from '../../../common/constants';
 
-let urlService: any;
-
-export const setUrlService = (aUrlService: any) => {
-  urlService = aUrlService;
-};
-
-export const getUrlService = () => {
-  return urlService;
-};
-
 export const getIndexListUri = (filter: any) => {
   if (filter) {
     // React router tries to decode url params but it can't because the browser partially

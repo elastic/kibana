@@ -32,7 +32,7 @@ jest.mock('ui/chrome', () => ({
   addBasePath: (path: string) => path || '/api/index_management',
 }));
 
-jest.mock('../../public/services/api', () => ({
+jest.mock('../../public/app/services/api', () => ({
   ...jest.requireActual('../../public/services/api'),
   getHttpClient: () => mockHttpClient,
 }));

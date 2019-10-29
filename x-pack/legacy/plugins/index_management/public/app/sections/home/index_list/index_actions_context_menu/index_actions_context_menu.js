@@ -25,7 +25,6 @@ import {
 import { flattenPanelTree } from '../../../../lib/flatten_panel_tree';
 import { INDEX_OPEN } from '../../../../../../common/constants';
 import { getActionExtensions } from '../../../../../index_management_extensions';
-import { getHttpClient } from '../../../../services/api';
 
 export class IndexActionsContextMenu extends Component {
   constructor(props) {
@@ -726,7 +725,7 @@ export class IndexActionsContextMenu extends Component {
 
     return (
       <div>
-        {this.state.renderConfirmModal ? this.state.renderConfirmModal(this.closeConfirmModal, getHttpClient()) : null}
+        {this.state.renderConfirmModal ? this.state.renderConfirmModal(this.closeConfirmModal) : null}
         <EuiPopover
           id="contextMenuIndices"
           button={button}
