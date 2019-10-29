@@ -14,7 +14,7 @@ import {
   SavedObjectsClientContract,
   HttpServiceBase,
 } from 'src/core/public';
-import { Storage } from 'ui/storage';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { createMockedIndexPattern } from '../../mocks';
 import { IndexPatternPrivateState } from '../../types';
 
@@ -327,7 +327,7 @@ describe('date_histogram', () => {
           columnId="col1"
           layerId="first"
           currentColumn={state.layers.first.columns.col1 as DateHistogramIndexPatternColumn}
-          storage={{} as Storage}
+          storage={{} as IStorageWrapper}
           uiSettings={{} as UiSettingsClientContract}
           savedObjectsClient={{} as SavedObjectsClientContract}
           http={{} as HttpServiceBase}
@@ -346,7 +346,7 @@ describe('date_histogram', () => {
           columnId="col2"
           currentColumn={state.layers.second.columns.col2 as DateHistogramIndexPatternColumn}
           layerId="second"
-          storage={{} as Storage}
+          storage={{} as IStorageWrapper}
           uiSettings={{} as UiSettingsClientContract}
           savedObjectsClient={{} as SavedObjectsClientContract}
           http={{} as HttpServiceBase}
@@ -364,7 +364,7 @@ describe('date_histogram', () => {
           columnId="col1"
           currentColumn={state.layers.third.columns.col1 as DateHistogramIndexPatternColumn}
           layerId="third"
-          storage={{} as Storage}
+          storage={{} as IStorageWrapper}
           uiSettings={{} as UiSettingsClientContract}
           savedObjectsClient={{} as SavedObjectsClientContract}
           http={{} as HttpServiceBase}
@@ -383,7 +383,7 @@ describe('date_histogram', () => {
           columnId="col1"
           layerId="third"
           currentColumn={state.layers.third.columns.col1 as DateHistogramIndexPatternColumn}
-          storage={{} as Storage}
+          storage={{} as IStorageWrapper}
           uiSettings={{} as UiSettingsClientContract}
           savedObjectsClient={{} as SavedObjectsClientContract}
           http={{} as HttpServiceBase}
@@ -406,7 +406,7 @@ describe('date_histogram', () => {
           columnId="col1"
           layerId="first"
           currentColumn={state.layers.first.columns.col1 as DateHistogramIndexPatternColumn}
-          storage={{} as Storage}
+          storage={{} as IStorageWrapper}
           uiSettings={{} as UiSettingsClientContract}
           savedObjectsClient={{} as SavedObjectsClientContract}
           http={{} as HttpServiceBase}
@@ -469,7 +469,7 @@ describe('date_histogram', () => {
           columnId="col1"
           layerId="first"
           currentColumn={state.layers.first.columns.col1 as DateHistogramIndexPatternColumn}
-          storage={{} as Storage}
+          storage={{} as IStorageWrapper}
           uiSettings={{} as UiSettingsClientContract}
           savedObjectsClient={{} as SavedObjectsClientContract}
           http={{} as HttpServiceBase}

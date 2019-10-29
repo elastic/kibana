@@ -24,29 +24,27 @@ interface Props {
   vars: IStackframe['vars'];
 }
 
-export class Variables extends React.Component<Props> {
-  public render() {
-    if (!this.props.vars) {
-      return null;
-    }
-
-    return (
-      <React.Fragment>
-        <VariablesContainer>
-          <EuiAccordion
-            id="local-variables"
-            className="euiAccordion"
-            buttonContent={i18n.translate(
-              'xpack.apm.stacktraceTab.localVariablesToogleButtonLabel',
-              { defaultMessage: 'Local variables' }
-            )}
-          >
-            <React.Fragment>
-              <DottedKeyValueTable data={this.props.vars} maxDepth={5} />
-            </React.Fragment>
-          </EuiAccordion>
-        </VariablesContainer>
-      </React.Fragment>
-    );
+export const Variables: React.SFC<Props> = props => {
+  if (!props.vars) {
+    return null;
   }
-}
+
+  return (
+    <React.Fragment>
+      <VariablesContainer>
+        <EuiAccordion
+          id="local-variables"
+          className="euiAccordion"
+          buttonContent={i18n.translate(
+            'xpack.apm.stacktraceTab.localVariablesToogleButtonLabel',
+            { defaultMessage: 'Local variables' }
+          )}
+        >
+          <React.Fragment>
+            <DottedKeyValueTable data={props.vars} maxDepth={5} />
+          </React.Fragment>
+        </EuiAccordion>
+      </VariablesContainer>
+    </React.Fragment>
+  );
+};
