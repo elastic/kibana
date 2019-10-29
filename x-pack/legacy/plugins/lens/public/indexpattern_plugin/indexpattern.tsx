@@ -16,6 +16,7 @@ import {
   DatasourceDataPanelProps,
   Operation,
   DatasourceLayerPanelProps,
+  PublicAPIProps,
 } from '../types';
 import { loadInitialState, changeIndexPattern, changeLayerIndexPattern } from './loader';
 import { toExpression } from './to_expression';
@@ -196,11 +197,12 @@ export function getIndexPatternDatasource({
       );
     },
 
-    getPublicAPI(
-      state: IndexPatternPrivateState,
-      setState: StateSetter<IndexPatternPrivateState>,
-      layerId: string
-    ) {
+    getPublicAPI({
+      state,
+      setState,
+      layerId,
+      dateRange,
+    }: PublicAPIProps<IndexPatternPrivateState>) {
       const columnLabelMap = uniqueLabels(state.layers);
 
       return {
@@ -237,6 +239,7 @@ export function getIndexPatternDatasource({
                   layerId={props.layerId}
                   http={core.http}
                   uniqueLabel={columnLabelMap[props.columnId]}
+                  dateRange={dateRange}
                   {...props}
                 />
               </KibanaContextProvider>

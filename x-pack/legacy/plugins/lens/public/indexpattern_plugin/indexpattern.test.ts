@@ -414,7 +414,15 @@ describe('IndexPattern Data Source', () => {
 
     beforeEach(async () => {
       const initialState = stateFromPersistedState(persistedState);
-      publicAPI = indexPatternDatasource.getPublicAPI(initialState, () => {}, 'first');
+      publicAPI = indexPatternDatasource.getPublicAPI({
+        state: initialState,
+        setState: () => {},
+        layerId: 'first',
+        dateRange: {
+          fromDate: 'now-30d',
+          toDate: 'now',
+        },
+      });
     });
 
     describe('getTableSpec', () => {
@@ -453,8 +461,8 @@ describe('IndexPattern Data Source', () => {
             suggestedPriority: 2,
           },
         };
-        const api = indexPatternDatasource.getPublicAPI(
-          {
+        const api = indexPatternDatasource.getPublicAPI({
+          state: {
             ...initialState,
             layers: {
               first: {
@@ -465,8 +473,12 @@ describe('IndexPattern Data Source', () => {
             },
           },
           setState,
-          'first'
-        );
+          layerId: 'first',
+          dateRange: {
+            fromDate: 'now-1y',
+            toDate: 'now',
+          },
+        });
 
         api.removeColumnInTableSpec('b');
 
