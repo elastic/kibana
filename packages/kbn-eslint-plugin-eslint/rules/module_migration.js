@@ -17,10 +17,34 @@
  * under the License.
  */
 
-const path = require('path');
-const KIBANA_ROOT = path.resolve(__dirname, '../../..');
+const Path = require('path');
+const { REPO_ROOT } = require('@kbn/dev-utils');
+
+function checkModuleNameRelative(context, mappings, node) {
+  const requestAbsolute = Path.resolve(Path.dirname(context.getFilename()), node.value);
+  const mapping = mappings.find(
+    mapping => Path.isAbsolute(mapping.from) && requestAbsolute.startsWith(mapping.from)
+  );
+
+  if (!mapping) {
+    return;
+  }
+
+  context.report({
+    message: `Relative imports to "${Path.relative(REPO_ROOT, mapping.from)}" is not allowed`,
+    loc: node.loc,
+    fix(fixer) {
+      const subReq = requestAbsolute.replace(mapping.from, '').replace(/\\/g, '/');
+      return fixer.replaceText(node, subReq ? `'${mapping.to}${subReq}'` : mapping.to);
+    },
+  });
+}
 
 function checkModuleNameNode(context, mappings, node) {
+  if (node.value.startsWith('../') || node.value.startsWith('./')) {
+    return checkModuleNameRelative(context, mappings, node);
+  }
+
   const mapping = mappings.find(
     mapping => mapping.from === node.value || node.value.startsWith(`${mapping.from}/`)
   );
@@ -42,10 +66,10 @@ function checkModuleNameNode(context, mappings, node) {
   // support for toRelative added to migrate away from X-Pack being bundled
   // within node modules. after that migration, this can be removed.
   if (mapping.toRelative) {
-    const sourceDirectory = path.dirname(context.getFilename());
+    const sourceDirectory = Path.dirname(context.getFilename());
     const localModulePath = node.value.replace(new RegExp(`^${mapping.from}\/`), '');
-    const modulePath = path.resolve(KIBANA_ROOT, mapping.toRelative, localModulePath);
-    const relativePath = path.relative(sourceDirectory, modulePath);
+    const modulePath = Path.resolve(REPO_ROOT, mapping.toRelative, localModulePath);
+    const relativePath = Path.relative(sourceDirectory, modulePath);
 
     newSource = relativePath.startsWith('.') ? relativePath : `./${relativePath}`;
   } else {

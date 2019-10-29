@@ -1,3 +1,7 @@
+const Path = require('path')
+
+const { REPO_ROOT } = require('@kbn/dev-utils')
+
 module.exports = {
   extends: [
     './javascript.js',
@@ -29,9 +33,9 @@ module.exports = {
           disallowedMessage: `Don't use 'mkdirp', use the new { recursive: true } option of Fs.mkdir instead`
         },
         {
-          from: 'x-pack',
-          toRelative: 'x-pack',
-        },
+          from: Path.resolve(REPO_ROOT, 'src'),
+          to: 'src'
+        }
       ],
     ],
   }
