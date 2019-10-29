@@ -17,4 +17,13 @@
  * under the License.
  */
 
-export * from '../../../../../../../../plugins/dashboard_embeddable_container/public/actions/expand_panel_action';
+import { PluginInitializerContext } from '../../../core/public';
+import { DashboardEmbeddableContainerPublicPlugin } from './plugin';
+
+// export * from './lib';
+
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new DashboardEmbeddableContainerPublicPlugin(initializerContext);
+}
+
+export { DashboardEmbeddableContainerPublicPlugin as Plugin };

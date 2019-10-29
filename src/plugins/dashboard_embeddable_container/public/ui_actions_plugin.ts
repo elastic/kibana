@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export * from '../../../../../../../../plugins/dashboard_embeddable_container/public/actions/expand_panel_action';
+export * from '../../../plugins/ui_actions/public';

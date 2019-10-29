@@ -17,4 +17,27 @@
  * under the License.
  */
 
-export * from '../../../../../../../../plugins/dashboard_embeddable_container/public/actions/expand_panel_action';
+import { PluginInitializerContext, Plugin } from 'src/core/public';
+
+type SetupDependencies = any;
+type StartDependencies = any;
+
+export type Setup = void;
+export type Start = void;
+
+export class DashboardEmbeddableContainerPublicPlugin
+  implements Plugin<Setup, Start, SetupDependencies, StartDependencies> {
+  constructor(initializerContext: PluginInitializerContext) {}
+
+  public setup(): Setup {
+    // eslint-disable-next-line
+    console.log('SETUP');
+  }
+
+  public start(): Start {
+    // eslint-disable-next-line
+    console.log('START');
+  }
+
+  public stop() {}
+}
