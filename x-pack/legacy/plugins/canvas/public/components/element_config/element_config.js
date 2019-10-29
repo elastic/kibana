@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiStat, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiAccordion, EuiText, EuiSpacer } from '@elastic/eui';
 import PropTypes from 'prop-types';
-import React, { Fragment } from 'react';
+import React from 'react';
 import { ComponentStrings } from '../../../i18n';
 
 const { ElementConfig: strings } = ComponentStrings;
@@ -20,18 +20,23 @@ export const ElementConfig = ({ elementStats }) => {
   const progress = total > 0 ? Math.round(((ready + error) / total) * 100) : 100;
 
   return (
-    <Fragment>
-      <EuiTitle size="xxxs" className="canvasSidebar__panelTitleHeading">
-        <h4>{strings.getTitle()}</h4>
-      </EuiTitle>
+    <EuiAccordion
+      id="canvas-element-stats"
+      buttonContent={
+        <EuiText size="s" color="subdued">
+          {strings.getTitle()}
+        </EuiText>
+      }
+      initialIsOpen={false}
+    >
       <EuiSpacer size="s" />
-      <EuiFlexGroup>
+      <EuiFlexGroup gutterSize="none">
         <EuiFlexItem>
           <EuiStat
             title={total}
             description={strings.getTotalLabel()}
             titleSize="xs"
-            textAlign="right"
+            textAlign="center"
           />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -39,7 +44,7 @@ export const ElementConfig = ({ elementStats }) => {
             title={ready}
             description={strings.getLoadedLabel()}
             titleSize="xs"
-            textAlign="right"
+            textAlign="center"
           />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -47,7 +52,7 @@ export const ElementConfig = ({ elementStats }) => {
             title={error}
             description={strings.getFailedLabel()}
             titleSize="xs"
-            textAlign="right"
+            textAlign="center"
           />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -55,11 +60,11 @@ export const ElementConfig = ({ elementStats }) => {
             title={progress + '%'}
             description={strings.getProgressLabel()}
             titleSize="xs"
-            textAlign="right"
+            textAlign="center"
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </Fragment>
+    </EuiAccordion>
   );
 };
 
