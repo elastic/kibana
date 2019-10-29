@@ -3,16 +3,14 @@
 
 beta[]
 
-*Lens* provides you with a simple way to create basic visualizations.
+*Lens* provides you with a simple and fast way to create visualizations that allow you to easily make sense of your Elasticsearch data.
 
 With Lens, you can:
 
-* Easily make sense of your data with basic visualizations.
+* Easily change the search query that retrieves the data you want to display.
 * Use aggregations to plot any data set, no matter how large.
-* Focus the data you want to display with searches.
-* Add your visualizations to Dashboards and Discover.
-
-//TODO For an overview of Lens, watch <<Lens video, Getting started with Lens>>.
+* Focus the data you want to display with searches and filters.
+* Easily change the type of visualization that you want to use to display your data.
 
 [float]
 [[choose-lens-visualization]]
@@ -29,7 +27,7 @@ image::images/lens_bar_chart.png[Lens bar chart]
 Stacked Bar:: Display numerical comparisons across multiple categories, with the
 added ability to compare the different parts of a particular category. In
 stacked bar charts, each bar represents a particular category, and the segments
-of the bar represent the sub categories of that bar.
+of the bar represent the subcategories of that bar.
 +
 [role="screenshot"]
 image::images/lens_stacked_bar_chart.png[Lens stacked bar chart]
@@ -70,22 +68,14 @@ image::images/lens_metric.png[Lens metric]
 To create your Lens visualizations, use the visualization builder.
 
 [float]
-[[change-index]]
-==== Change the index
-
-If you change your mind about the index pattern that you want to use, change your index right from the visualization builder.
-
-To change the index, click *change* next to the index name, then select the index.
-[role="screenshot"]
-image::images/lens_change_index.gif[Change index]
-
-[float]
 [[choose-your-data]]
 ==== Choose the data you want to display
 
-The available data fields appear in the editor on the left.
+The available data fields appear in the editor on the left. If you want to use a different search query to retrieve the data for your visualization, click *change* next to the index name, then select the index.
+[role="screenshot"]
+image::images/lens_change_index.gif[Change index]
 
-If you want to see the top values of a field, click *i* next to the field.
+To see the top values of a field, click *i* next to the field.
 [role="screenshot"]
 image::images/lens_top_values.gif[Top values]
 
@@ -93,7 +83,7 @@ To narrow the data fields that are displayed:
 
 * Enter the field name in *Search for fields*.
 
-* Click *Fields filtered*, then click the filter type.
+* Click *Filter by type*, then click the filter.
 +
 [role="screenshot"]
 image::images/lens_fields_filtered.png[Fields filtered]
@@ -102,42 +92,28 @@ image::images/lens_fields_filtered.png[Fields filtered]
 [[add-data]]
 ==== Add the data you want to display
 
-To add data to the Lens visualization builder, drag and drop the data fields to one of these locations:
+Add your data to the Lens visualization builder by simply dragging and dropping the data fields to the *Create a visualization* pane. Lens does the hard work for you and figures out the data to apply to the x- and y-axises.
 
-* *Create a visualization* window
-+
 [role="screenshot"]
 image::images/lens_data_fields.gif[Data fields]
 
-* *X-axis* and *Y-axis* fields
-+
-[role="screenshot"]
-image::images/lens_data_fields2.gif[Data fields]
+You can also drag and drop the data fields to the *X-axis* and *Y-axis* fields.
+
+To refresh the data that is displayed, click *Refresh*.
 
 [float]
 [[change-visualization-type]]
 ==== Change the visualization type
 
-If you want to display your data in a different visualization, use one of the following options:
+When you add your data, Lens creates _Suggestions_, which are automatically generated visualizations that best display your data.
 
-* Next to the visualization type, click *change*, then select the visualization.
-+
-[role="screenshot"]
-image::images/lens_change_visualization.gif[Visualization types]
+To quickly see the visualization that best displays your data, click on each of the *Suggestions*.
 
-* Click the *Suggestions*
-+
 [role="screenshot"]
 image::images/lens_suggestions.gif[Suggestions]
 
+To manually change the visualization type, click *change* in the editor on the right, then select the visualization.
+
 [float]
-[[lens-next-steps]]
-==== Next steps
-
-When you've finished making changes to the visualization, *Save* it, then add your Lens visualizations to:
-
-* <<discover, Discover>>
-
-* <<dashboard, Dashboard>>
-
-//* <<canvas, Canvas>>
+[[lens-tutorial]]
+== Lens tutorial
