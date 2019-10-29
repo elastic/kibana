@@ -23,6 +23,7 @@ import {
 import { updateLayerIndexPattern } from './state_helpers';
 import { DateRange, ExistingFields } from '../../common/types';
 import { BASE_API_URL } from '../../common';
+import { documentField } from './document_field';
 
 interface SavedIndexPatternAttributes extends SavedObjectAttributes {
   title: string;
@@ -278,10 +279,12 @@ function fromSavedObject(
     id,
     type,
     title: attributes.title,
-    fields: (JSON.parse(attributes.fields) as IndexPatternField[]).filter(
-      ({ type: fieldType, esTypes }) =>
-        fieldType !== 'string' || (esTypes && esTypes.includes('keyword'))
-    ),
+    fields: (JSON.parse(attributes.fields) as IndexPatternField[])
+      .filter(
+        ({ type: fieldType, esTypes }) =>
+          fieldType !== 'string' || (esTypes && esTypes.includes('keyword'))
+      )
+      .concat(documentField),
     typeMeta: attributes.typeMeta
       ? (JSON.parse(attributes.typeMeta) as SavedRestrictionsInfo)
       : undefined,
