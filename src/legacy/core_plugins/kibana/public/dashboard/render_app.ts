@@ -18,7 +18,7 @@
  */
 
 import { EuiConfirmModal } from '@elastic/eui';
-import angular from 'angular';
+import angular, { IModule } from 'angular';
 import { IPrivate } from 'ui/private';
 import { Storage } from 'ui/storage';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/src/angular';
@@ -86,12 +86,16 @@ export interface RenderDeps {
   localStorage: Storage;
 }
 
+let angularModuleInstance: IModule | null = null;
+
 export const renderApp = (element: HTMLElement, appBasePath: string, deps: RenderDeps) => {
-  const dashboardAngularModule = createLocalAngularModule(deps.core, deps.dataStart);
-  // global routing stuff
-  configureAppAngularModule(dashboardAngularModule, deps.core as LegacyCoreStart);
-  // custom routing stuff
-  initDashboardApp(dashboardAngularModule, deps);
+  if (!angularModuleInstance) {
+    angularModuleInstance = createLocalAngularModule(deps.core, deps.dataStart);
+    // global routing stuff
+    configureAppAngularModule(angularModuleInstance, deps.core as LegacyCoreStart);
+    // custom routing stuff
+    initDashboardApp(angularModuleInstance, deps);
+  }
   const $injector = mountDashboardApp(appBasePath, element);
   return () => $injector.get('$rootScope').$destroy();
 };
