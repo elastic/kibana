@@ -113,7 +113,10 @@ export const searchAfterAndBulkIndex = async (
     logger.warn('First bulk index was unsuccessful');
     return false;
   }
-  const totalHits = someResult.hits.total.value; // eslint-ignore
+
+  const totalHits = isTotalValueObject(someResult.hits.total)
+    ? someResult.hits.total.value
+    : someResult.hits.total;
   let size = someResult.hits.hits.length - 1;
   logger.info(`first size: ${size}`);
   let sortIds = someResult.hits.hits[0].sort;
