@@ -17,22 +17,40 @@
  * under the License.
  */
 
-import { UiSettingsClientContract } from 'src/core/public';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { PersistedLog } from '../../../../../../../plugins/data/public';
+import _ from 'lodash';
 
-export function getQueryLog(
-  uiSettings: UiSettingsClientContract,
-  storage: IStorageWrapper,
-  appName: string,
-  language: string
-) {
-  return new PersistedLog(
-    `typeahead:${appName}-${language}`,
-    {
-      maxLength: uiSettings.get('history:limit'),
-      filterDuplicates: true,
-    },
-    storage
-  );
+/**
+ * Take userInput from the user and make it into a query object
+ * @returns {object}
+ * @param userInput
+ */
+
+export function fromUser(userInput: object | string) {
+  const matchAll = '';
+
+  if (_.isEmpty(userInput)) {
+    return '';
+  }
+
+  if (_.isObject(userInput)) {
+    return userInput;
+  }
+
+  userInput = userInput || '';
+  if (typeof userInput === 'string') {
+    const trimmedUserInput = userInput.trim();
+    if (trimmedUserInput.length === 0) {
+      return matchAll;
+    }
+
+    if (trimmedUserInput[0] === '{') {
+      try {
+        return JSON.parse(trimmedUserInput);
+      } catch (e) {
+        return userInput;
+      }
+    } else {
+      return userInput;
+    }
+  }
 }
