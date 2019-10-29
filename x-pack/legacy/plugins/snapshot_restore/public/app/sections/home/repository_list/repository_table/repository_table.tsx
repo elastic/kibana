@@ -235,6 +235,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
     ),
     toolsRight: [
       <EuiButton
+        key="reloadButton"
         color="secondary"
         iconType="refresh"
         onClick={reload}
@@ -246,6 +247,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
         />
       </EuiButton>,
       <EuiButton
+        key="registerRepo"
         href={linkToAddRepository()}
         fill
         iconType="plusInCircle"

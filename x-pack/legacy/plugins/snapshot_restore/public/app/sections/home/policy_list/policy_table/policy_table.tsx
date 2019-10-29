@@ -329,6 +329,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
     ),
     toolsRight: [
       <EuiButton
+        key="reloadPolicies"
         color="secondary"
         iconType="refresh"
         onClick={reload}
@@ -340,6 +341,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
         />
       </EuiButton>,
       <EuiButton
+        key="createNewPolicy"
         href={linkToAddPolicy()}
         fill
         iconType="plusInCircle"
