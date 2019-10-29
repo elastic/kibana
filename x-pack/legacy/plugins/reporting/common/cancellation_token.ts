@@ -7,11 +7,11 @@
 import { isFunction } from 'lodash';
 
 export class CancellationToken {
-  private isCancelled: boolean;
+  private _isCancelled: boolean;
   private _callbacks: Function[];
 
   constructor() {
-    this.isCancelled = false;
+    this._isCancelled = false;
     this._callbacks = [];
   }
 
@@ -20,7 +20,7 @@ export class CancellationToken {
       throw new Error('Expected callback to be a function');
     }
 
-    if (this.isCancelled) {
+    if (this._isCancelled) {
       callback();
       return;
     }
@@ -29,7 +29,11 @@ export class CancellationToken {
   };
 
   public cancel = () => {
-    this.isCancelled = true;
+    this._isCancelled = true;
     this._callbacks.forEach(callback => callback());
   };
+
+  public isCancelled() {
+    return this._isCancelled;
+  }
 }

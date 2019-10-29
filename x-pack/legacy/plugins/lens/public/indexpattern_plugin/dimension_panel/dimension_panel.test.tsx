@@ -18,7 +18,7 @@ import {
   SavedObjectsClientContract,
   HttpServiceBase,
 } from 'src/core/public';
-import { Storage } from 'ui/storage';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { IndexPatternPrivateState } from '../types';
 
 jest.mock('ui/new_platform');
@@ -133,7 +133,7 @@ describe('IndexPatternDimensionPanel', () => {
       layerId: 'first',
       uniqueLabel: 'stuff',
       filterOperations: () => true,
-      storage: {} as Storage,
+      storage: {} as IStorageWrapper,
       uiSettings: {} as UiSettingsClientContract,
       savedObjectsClient: {} as SavedObjectsClientContract,
       http: {} as HttpServiceBase,
