@@ -163,7 +163,7 @@ export class VectorStyle extends AbstractStyle {
       return {};
     }
 
-    const scaledFields = this.getDynamicPropertiesArray2()
+    const scaledFields = this.getDynamicPropertiesArray()
       .map(styleProperty => {
         return {
           name: styleProperty.getFieldConfig().name,
@@ -228,7 +228,7 @@ export class VectorStyle extends AbstractStyle {
 
   getSourceFieldNames() {
     const fieldNames = [];
-    this.getDynamicPropertiesArray2().forEach(styleProperty => {
+    this.getDynamicPropertiesArray().forEach(styleProperty => {
       const field = styleProperty.getFieldConfig();
       if (field.origin === SOURCE_DATA_ID_ORIGIN && field.name) {
         fieldNames.push(field.name);
@@ -241,7 +241,7 @@ export class VectorStyle extends AbstractStyle {
     return this._descriptor.properties || {};
   }
 
-  getDynamicPropertiesArray2() {
+  getDynamicPropertiesArray() {
     const styleProperties = this._getAllStyleProperties();
     return styleProperties.filter(styleProperty => styleProperty.isDynamic());
   }
@@ -325,7 +325,7 @@ export class VectorStyle extends AbstractStyle {
   }
 
   _getStyleFields() {
-    return this.getDynamicPropertiesArray2()
+    return this.getDynamicPropertiesArray()
       .map(styleProperty => {
 
         const styleName = styleProperty.getStyleName();
