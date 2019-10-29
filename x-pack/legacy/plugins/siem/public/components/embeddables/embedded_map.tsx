@@ -30,6 +30,7 @@ import { IndexPatternsMissingPrompt } from './index_patterns_missing_prompt';
 import { MapToolTip } from './map_tool_tip/map_tool_tip';
 import * as i18n from './translations';
 import { MapEmbeddable, SetQuery } from './types';
+import { useMapLayers } from './hooks/use_map_layers';
 
 interface EmbeddableMapProps {
   maintainRatio?: boolean;
@@ -87,6 +88,7 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
     const [isLoading, setIsLoading] = useState(true);
     const [isError, setIsError] = useState(false);
     const [isIndexError, setIsIndexError] = useState(false);
+    const [isMapLoading, , mapLayerEventHandlers] = useMapLayers();
 
     const [, dispatchToaster] = useStateToaster();
     const [loadingKibanaIndexPatterns, kibanaIndexPatterns] = useIndexPatterns();
@@ -136,7 +138,8 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
             endDate,
             setQuery,
             portalNode,
-            plugins.embeddable
+            plugins.embeddable,
+            mapLayerEventHandlers
           );
           if (isSubscribed) {
             setEmbeddable(embeddableObject);
@@ -167,6 +170,7 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
       }
     }, [query]);
 
+    // filters updated useEffect
     useEffect(() => {
       if (embeddable != null) {
         embeddable.updateInput({ filters });
@@ -183,6 +187,11 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
         embeddable.updateInput({ timeRange });
       }
     }, [startDate, endDate]);
+
+    // map loading state changed useEffect
+    useEffect(() => {
+      // TODO: Update global refresh button
+    }, [isMapLoading]);
 
     return isError ? null : (
       <Embeddable>

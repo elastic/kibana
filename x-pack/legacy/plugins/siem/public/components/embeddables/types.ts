@@ -59,6 +59,36 @@ export interface FeatureGeometry {
   type: string;
 }
 
+export interface MapLayer {
+  layerId: string;
+  dataId: string;
+  errorMessage: string;
+  isLoading: boolean;
+}
+
+export interface OnDataLoadProps {
+  layerId: string;
+  dataId: string;
+}
+
+export interface OnDataLoadEndProps {
+  layerId: string;
+  dataId: string;
+  featuresCount: number;
+}
+
+export interface OnDataLoadErrorProps {
+  layerId: string;
+  dataId: string;
+  errorMessage: string;
+}
+
+export interface MapLayerEventHandlers {
+  onDataLoad({ layerId, dataId }: OnDataLoadProps): void;
+  onDataLoadEnd({ layerId, dataId, featuresCount }: OnDataLoadEndProps): void;
+  onDataLoadError({ layerId, dataId, errorMessage }: OnDataLoadErrorProps): void;
+}
+
 export interface RenderTooltipContentParams {
   addFilters(filter: object): void;
   closeTooltip(): void;

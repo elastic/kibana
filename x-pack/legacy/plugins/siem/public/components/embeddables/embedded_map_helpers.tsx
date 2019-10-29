@@ -18,11 +18,12 @@ import {
   ViewMode,
 } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import {
+  EmbeddableApi,
   IndexPatternMapping,
   MapEmbeddable,
+  MapLayerEventHandlers,
   RenderTooltipContentParams,
   SetQuery,
-  EmbeddableApi,
 } from './types';
 import { getLayerList } from './map_config';
 // @ts-ignore Missing type defs as maps moves to Typescript
@@ -82,6 +83,7 @@ export const setupEmbeddablesAPI = (plugins: PluginsStart) => {
  * @param setQuery function as provided by the GlobalTime component for reacting to refresh
  * @param portalNode wrapper for MapToolTip so it is not rendered in the embeddables component tree
  * @param embeddableApi
+ * @param mapLayerEventHandlers event handlers for map layer callbacks
  *
  * @throws Error if EmbeddableFactory does not exist
  */
@@ -93,7 +95,8 @@ export const createEmbeddable = async (
   endDate: number,
   setQuery: SetQuery,
   portalNode: PortalNode,
-  embeddableApi: EmbeddableApi
+  embeddableApi: EmbeddableApi,
+  mapLayerEventHandlers: MapLayerEventHandlers
 ): Promise<MapEmbeddable> => {
   const factory = embeddableApi.getEmbeddableFactory(MAP_SAVED_OBJECT_TYPE);
 
@@ -144,7 +147,8 @@ export const createEmbeddable = async (
     state,
     input,
     undefined,
-    renderTooltipContent
+    renderTooltipContent,
+    mapLayerEventHandlers
   );
 
   // Wire up to app refresh action

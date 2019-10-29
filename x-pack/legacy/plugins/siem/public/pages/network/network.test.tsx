@@ -17,6 +17,7 @@ import { useKibanaCore } from '../../lib/compose/kibana_core';
 import { TestProviders } from '../../mock';
 import { mockUiSettings } from '../../mock/ui_settings';
 import { Network } from './network';
+import { useMapLayers } from '../../components/embeddables/hooks/use_map_layers';
 
 jest.mock('../../lib/settings/use_kibana_ui_setting');
 
@@ -31,6 +32,10 @@ jest.mock('../../lib/compose/kibana_core');
 mockUseKibanaCore.mockImplementation(() => ({
   uiSettings: mockUiSettings,
 }));
+
+const mockUseMapLayers: jest.Mock = useMapLayers as jest.Mock;
+jest.mock('../../components/embeddables/hooks/use_map_layers');
+mockUseMapLayers.mockImplementation(() => [false, [], {}]);
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar

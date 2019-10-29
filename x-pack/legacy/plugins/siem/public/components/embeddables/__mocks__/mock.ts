@@ -50,7 +50,7 @@ export const mockSourceLayer = {
       },
     },
   },
-  id: 'uuid.v4()',
+  id: `filebeat-* | Source Point`,
   label: `filebeat-* | Source Point`,
   minZoom: 0,
   maxZoom: 24,
@@ -102,7 +102,7 @@ export const mockDestinationLayer = {
       },
     },
   },
-  id: 'uuid.v4()',
+  id: `filebeat-* | Destination Point`,
   label: `filebeat-* | Destination Point`,
   minZoom: 0,
   maxZoom: 24,
@@ -158,7 +158,7 @@ export const mockLineLayer = {
       },
     },
   },
-  id: 'uuid.v4()',
+  id: `filebeat-* | Line`,
   label: `filebeat-* | Line`,
   minZoom: 0,
   maxZoom: 24,
@@ -172,7 +172,7 @@ export const mockLineLayer = {
 export const mockLayerList = [
   {
     sourceDescriptor: { type: 'EMS_TMS', isAutoSelect: true },
-    id: 'uuid.v4()',
+    id: 'root-layer-uuid.v4()',
     label: null,
     minZoom: 0,
     maxZoom: 24,
@@ -190,7 +190,7 @@ export const mockLayerList = [
 export const mockLayerListDouble = [
   {
     sourceDescriptor: { type: 'EMS_TMS', isAutoSelect: true },
-    id: 'uuid.v4()',
+    id: 'root-layer-uuid.v4()',
     label: null,
     minZoom: 0,
     maxZoom: 24,
