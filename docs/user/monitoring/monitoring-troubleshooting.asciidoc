@@ -34,7 +34,7 @@ indices are corrupt.
 *Resolution*
 
  . Stop all your {filebeat} instances.
- - Delete indices beginning with `filebeat-$VERSION`, where `VERSION` corresponds
+ . Delete indices beginning with `filebeat-$VERSION`, where `VERSION` corresponds
    to the version of {filebeat} running.
 . Restart all your {filebeat} instances.
 
