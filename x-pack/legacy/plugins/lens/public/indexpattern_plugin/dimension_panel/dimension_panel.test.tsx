@@ -129,6 +129,7 @@ describe('IndexPatternDimensionPanel', () => {
       dragDropContext,
       state,
       setState,
+      dateRange: { fromDate: 'now-1d', toDate: 'now' },
       columnId: 'col1',
       layerId: 'first',
       uniqueLabel: 'stuff',
