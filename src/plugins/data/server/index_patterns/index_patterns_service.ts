@@ -18,15 +18,11 @@
  */
 
 import { CoreSetup } from 'kibana/server';
+import { Plugin } from '../../../../core/server';
 import { registerRoutes } from './routes';
 
-interface SetupDependencies {
-  http: CoreSetup['http'];
-  elasticsearch: CoreSetup['elasticsearch'];
-}
-
-export class IndexPatternsService {
-  public setup({ http, elasticsearch }: SetupDependencies) {
+export class IndexPatternsService implements Plugin<void> {
+  public setup({ http, elasticsearch }: CoreSetup) {
     registerRoutes(http, elasticsearch);
   }
 

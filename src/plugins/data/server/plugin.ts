@@ -32,10 +32,7 @@ export class DataServerPlugin implements Plugin<DataPluginSetup> {
     this.searchService = new SearchService(initializerContext);
   }
   public setup(core: CoreSetup) {
-    this.indexPatterns.setup({
-      http: core.http,
-      elasticsearch: core.elasticsearch,
-    });
+    this.indexPatterns.setup(core);
     return {
       search: this.searchService.setup(core),
     };
