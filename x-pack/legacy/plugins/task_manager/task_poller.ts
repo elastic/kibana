@@ -60,11 +60,14 @@ export class TaskPoller<T> {
 
       performance.mark('TaskPoller.sleep');
       if (this.isStarted) {
-        this.timeout = setTimeout(() => {
-          performance.mark('TaskPoller.poll');
-          performance.measure('TaskPoller.sleepDuration', 'TaskPoller.sleep', 'TaskPoller.poll');
-          poll();
-        }, this.pollInterval);
+        this.timeout = setTimeout(
+          tryAndLogOnError(() => {
+            performance.mark('TaskPoller.poll');
+            performance.measure('TaskPoller.sleepDuration', 'TaskPoller.sleep', 'TaskPoller.poll');
+            poll();
+          }, this.logger),
+          this.pollInterval
+        );
       }
     };
 
@@ -99,4 +102,14 @@ export class TaskPoller<T> {
       this.isWorking = false;
     }
   }
+}
+
+function tryAndLogOnError(fn: Function, logger: Logger): Function {
+  return () => {
+    try {
+      fn();
+    } catch (err) {
+      logger.error(`Task Poller polling phase failed: ${err}`);
+    }
+  };
 }
