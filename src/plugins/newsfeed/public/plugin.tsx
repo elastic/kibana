@@ -18,7 +18,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { catchError, takeUntil } from 'rxjs/operators';
+import { catchError, takeUntil, tap } from 'rxjs/operators';
 import ReactDOM from 'react-dom';
 import React from 'react';
 import {
@@ -35,8 +35,11 @@ export type Start = void;
 
 export class NewsfeedPublicPlugin implements Plugin<Setup, Start> {
   private readonly stop$ = new Rx.ReplaySubject(1);
+  private readonly kibanaVersion: string;
 
-  constructor(initializerContext: PluginInitializerContext) {}
+  constructor(initializerContext: PluginInitializerContext) {
+    this.kibanaVersion = initializerContext.env.packageInfo.version;
+  }
 
   public setup(core: CoreSetup): Setup {}
 
@@ -52,9 +55,13 @@ export class NewsfeedPublicPlugin implements Plugin<Setup, Start> {
     });
 
     const { http } = core;
-    const api$ = getApi(http).pipe(
+    const api$ = getApi(http, this.kibanaVersion).pipe(
       takeUntil(this.stop$), // stop the interval when stop method is called
-      catchError(() => {
+      tap(fetchResults => {
+        sessionStorage.setItem('debug', JSON.stringify(fetchResults));
+      }),
+      catchError(err => {
+        window.console.error(err);
         // show a message to try again later?
         // do not throw error
         return Rx.of(null);
