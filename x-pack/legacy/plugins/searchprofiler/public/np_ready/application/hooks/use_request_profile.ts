@@ -16,9 +16,7 @@ interface Args {
 
 interface ReturnValue {
   data: ShardSerialized[] | null;
-  error?: {
-    row: number;
-  };
+  error?: string;
 }
 
 export const useRequestProfile = () => {
@@ -56,16 +54,7 @@ export const useRequestProfile = () => {
       });
 
       if (!resp.ok) {
-        notifications.addDanger(resp.err.msg);
-        // Very lame way to get the column and line from the error message
-        const regex = /line=([0-9]+)/g;
-        const match = regex.exec(resp.err.msg);
-        if (!match) {
-          // Best attempt, not a big deal if we can't highlight the line
-          return { data: null };
-        }
-        const [, lineNumber] = match;
-        return { data: null, error: { row: parseInt(lineNumber, 10) - 1 } };
+        return { data: null, error: resp.err.msg };
       }
 
       return { data: resp.resp.profile.shards };

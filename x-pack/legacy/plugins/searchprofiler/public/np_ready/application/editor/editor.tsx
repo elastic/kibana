@@ -5,16 +5,12 @@
  */
 
 import React, { memo, useRef, useEffect, useState } from 'react';
-import ace, { Editor as AceEditor } from 'brace';
-
-const _AceRange = ace.acequire('ace/range').Range;
+import { Editor as AceEditor } from 'brace';
 
 import { initializeEditor } from './init_editor';
 import { useUIAceKeyboardMode } from './use_ui_ace_keyboard_mode';
 
 interface EditorShim {
-  addErrorAnnotation: (pos: { row: number }) => void;
-  clearErrorAnnotations: () => void;
   getValue(): string;
   focus(): void;
 }
@@ -27,27 +23,8 @@ export interface Props {
   onEditorReady: (editor: EditorShim) => void;
 }
 
-const clearErrorAnnotations = (aceEditor: AceEditor) => {
-  const markerIds = aceEditor.session.getMarkers(true);
-  if (markerIds) {
-    Object.keys(markerIds).forEach(id => aceEditor.session.removeMarker(parseInt(id, 10)));
-  }
-};
-
 const createEditorShim = (aceEditor: AceEditor): EditorShim => {
   return {
-    clearErrorAnnotations() {
-      clearErrorAnnotations(aceEditor);
-    },
-    addErrorAnnotation({ row }) {
-      const lineLength = aceEditor.session.getLine(row).length - 1;
-      aceEditor.session.addMarker(
-        new _AceRange(row, 0, row, lineLength),
-        'errorMarker',
-        'fullLine',
-        true
-      );
-    },
     getValue() {
       return aceEditor.getValue();
     },
@@ -71,9 +48,6 @@ export const Editor = memo(({ licenseEnabled, initialValue, onEditorReady }: Pro
     const divEl = containerRef.current;
     editorInstanceRef.current = initializeEditor({ el: divEl, licenseEnabled });
     editorInstanceRef.current.setValue(initialValue, 1);
-    editorInstanceRef.current.on('change', () => {
-      clearErrorAnnotations(editorInstanceRef.current);
-    });
     setTextArea(containerRef.current!.querySelector('textarea'));
 
     onEditorReady(createEditorShim(editorInstanceRef.current));

@@ -39,20 +39,19 @@ export const ProfileQueryEditor = memo(() => {
 
   const dispatch = useProfilerActionContext();
 
-  const { licenseEnabled } = useAppContext();
+  const { licenseEnabled, notifications } = useAppContext();
   const requestProfile = useRequestProfile();
 
   const handleProfileClick = async () => {
     dispatch({ type: 'setProfiling', value: true });
     try {
       const { current: editor } = editorRef;
-      editor.clearErrorAnnotations();
       const { data: result, error } = await requestProfile({
         query: editorRef.current.getValue(),
         index: indexInputRef.current.value,
       });
       if (error) {
-        editor.addErrorAnnotation(error);
+        notifications.addDanger(error);
         editor.focus();
         return;
       }
