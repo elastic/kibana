@@ -170,13 +170,6 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/legacy/plugins/code/**/*.{js,ts,tsx}'],
-      rules: {
-        'react/no-danger': 'off',
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
       files: ['x-pack/legacy/plugins/cross_cluster_replication/**/*.{js,ts,tsx}'],
       rules: {
         'jsx-a11y/click-events-have-key-events': 'off',
