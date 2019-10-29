@@ -43,13 +43,16 @@ const getDefaultValueToggle = (param: string, field: FieldType) => {
       return field.search_analyzer !== undefined && field.search_analyzer !== field.analyzer;
     }
     case 'indexPrefixes': {
-      return (
-        field.index_prefixes !== undefined &&
-        ((field.index_prefixes as any).min_chars !==
-          getFieldConfig('index_prefixes', 'min_chars').defaultValue ||
-          (field.index_prefixes as any).max_chars !==
-            getFieldConfig('index_prefixes', 'max_chars').defaultValue)
-      );
+      if (field.index_prefixes === undefined) {
+        return false;
+      }
+
+      const minCharsValue = (field.index_prefixes as any).min_chars;
+      const defaultMinCharsValue = getFieldConfig('index_prefixes', 'min_chars').defaultValue;
+      const maxCharsValue = (field.index_prefixes as any).max_chars;
+      const defaultMaxCharsValue = getFieldConfig('index_prefixes', 'min_chars').defaultValue;
+
+      return minCharsValue !== defaultMinCharsValue || maxCharsValue !== defaultMaxCharsValue;
     }
     default:
       return false;
