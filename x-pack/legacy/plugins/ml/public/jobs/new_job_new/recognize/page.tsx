@@ -59,7 +59,7 @@ interface PageProps {
   existingGroupIds: string[];
 }
 
-export type JobOverrides = Record<JobId, Partial<JobOverride>>;
+export type JobOverrides = Record<JobId, JobOverride>;
 
 export enum SAVE_STATE {
   NOT_SAVED,
@@ -139,7 +139,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
   }, []);
 
   /**
-   * Setups recognizer module configuration.
+   * Sets up recognizer module configuration.
    */
   const save = async (formValues: JobSettingsFormValues) => {
     setSaveState(SAVE_STATE.SAVING);

@@ -73,10 +73,10 @@ export const EditJob: FC<EditJobProps> = ({ job, jobOverride, existingGroupIds, 
   };
 
   return (
-    <EuiFlyout onClose={() => onClose(null)} aria-labelledby="flyoutComplicatedTitle">
+    <EuiFlyout onClose={() => onClose(null)}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2 id="flyoutComplicatedTitle">
+          <h2>
             <FormattedMessage
               id="xpack.ml.newJob.recognize.overrideConfigurationHeader"
               defaultMessage="Override configuration for {jobID}"
