@@ -39,11 +39,11 @@ export async function existingFieldsRoute(setup: CoreSetup) {
     async (context, req, res) => {
       const { indexPatternTitle } = req.params;
       const requestClient = context.core.elasticsearch.dataClient;
-      const IndexPatternsFetcher = new IndexPatternsFetcher(requestClient.callAsCurrentUser);
+      const indexPatternsFetcher = new IndexPatternsFetcher(requestClient.callAsCurrentUser);
       const { fromDate, toDate, timeFieldName } = req.query;
 
       try {
-        const fields = await IndexPatternsFetcher.getFieldsForWildcard({
+        const fields = await indexPatternsFetcher.getFieldsForWildcard({
           pattern: indexPatternTitle,
           // TODO: Pull this from kibana advanced settings
           metaFields: ['_source', '_id', '_type', '_index', '_score'],
