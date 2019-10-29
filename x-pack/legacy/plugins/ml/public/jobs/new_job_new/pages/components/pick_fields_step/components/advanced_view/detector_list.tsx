@@ -110,7 +110,7 @@ export const DetectorList: FC<Props> = ({ isActive, onEditJob, onDeleteJob }) =>
                       {d.detector_description}
                     </div>
                   ) : (
-                    <DetectorIdentifier detector={d} />
+                    <StringifiedDetector detector={d} />
                   )}
                 </EuiFlexItem>
                 {isActive && (
@@ -122,7 +122,7 @@ export const DetectorList: FC<Props> = ({ isActive, onEditJob, onDeleteJob }) =>
               {d.detector_description !== undefined && (
                 <Fragment>
                   <EuiHorizontalRule margin="s" />
-                  <DetectorIdentifier detector={d} />
+                  <StringifiedDetector detector={d} />
                 </Fragment>
               )}
             </EuiPanel>
@@ -173,6 +173,6 @@ const DuplicateDetectorsWarning: FC<{ validation: Validation }> = ({ validation 
   );
 };
 
-const DetectorIdentifier: FC<{ detector: Detector }> = ({ detector }) => {
+const StringifiedDetector: FC<{ detector: Detector }> = ({ detector }) => {
   return <div data-test-subj="detectorIdentifier">{detectorToString(detector)}</div>;
 };

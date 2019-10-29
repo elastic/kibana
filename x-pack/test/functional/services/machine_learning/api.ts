@@ -8,18 +8,7 @@ import expect from '@kbn/expect';
 import { isEmpty } from 'lodash';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export enum JobState {
-  opening = 'opening',
-  opened = 'opened',
-  closing = 'closing',
-  closed = 'closed',
-}
-
-export enum DatafeedState {
-  started = 'started',
-  stopping = 'stopping',
-  stopped = 'stopped',
-}
+import { JOB_STATE, DATAFEED_STATE } from '../../../../legacy/plugins/ml/common/constants/states';
 
 export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
   const es = getService('es');
@@ -142,7 +131,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       await this.deleteIndices('.ml-*');
     },
 
-    async getJobState(jobId: string): Promise<JobState | undefined> {
+    async getJobState(jobId: string): Promise<JOB_STATE> {
       log.debug(`Fetching job state for job ${jobId}`);
       const jobStats = await esSupertest
         .get(`/_ml/anomaly_detectors/${jobId}/_stats`)
@@ -150,16 +139,12 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         .then((res: any) => res.body);
 
       expect(jobStats.jobs).to.have.length(1);
-      const state = jobStats.jobs[0].state as JobState;
+      const state: JOB_STATE = jobStats.jobs[0].state;
 
-      if (state in JobState) {
-        return state;
-      }
-
-      return undefined;
+      return state;
     },
 
-    async waitForJobState(jobId: string, expectedJobState: JobState) {
+    async waitForJobState(jobId: string, expectedJobState: JOB_STATE) {
       await retry.waitForWithTimeout(
         `job state to be ${expectedJobState}`,
         2 * 60 * 1000,
@@ -174,7 +159,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       );
     },
 
-    async getDatafeedState(datafeedId: string): Promise<DatafeedState | undefined> {
+    async getDatafeedState(datafeedId: string): Promise<DATAFEED_STATE> {
       log.debug(`Fetching datafeed state for datafeed ${datafeedId}`);
       const datafeedStats = await esSupertest
         .get(`/_ml/datafeeds/${datafeedId}/_stats`)
@@ -182,16 +167,12 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         .then((res: any) => res.body);
 
       expect(datafeedStats.datafeeds).to.have.length(1);
-      const state = datafeedStats.datafeeds[0].state as DatafeedState;
+      const state: DATAFEED_STATE = datafeedStats.datafeeds[0].state;
 
-      if (state in DatafeedState) {
-        return state;
-      }
-
-      return undefined;
+      return state;
     },
 
-    async waitForDatafeedState(datafeedId: string, expectedDatafeedState: DatafeedState) {
+    async waitForDatafeedState(datafeedId: string, expectedDatafeedState: DATAFEED_STATE) {
       await retry.waitForWithTimeout(
         `datafeed state to be ${expectedDatafeedState}`,
         2 * 60 * 1000,

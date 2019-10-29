@@ -6,7 +6,9 @@
 import { ProvidedType } from '@kbn/test/types/ftr';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { MachineLearningAPIProvider, JobState, DatafeedState } from './api';
+import { MachineLearningAPIProvider } from './api';
+
+import { JOB_STATE, DATAFEED_STATE } from '../../../../legacy/plugins/ml/common/constants/states';
 
 export function MachineLearningJobManagementProvider(
   { getService }: FtrProviderContext,
@@ -46,8 +48,8 @@ export function MachineLearningJobManagementProvider(
     },
 
     async waitForJobCompletion(jobId: string) {
-      await mlApi.waitForDatafeedState(`datafeed-${jobId}`, DatafeedState.stopped);
-      await mlApi.waitForJobState(jobId, JobState.closed);
+      await mlApi.waitForDatafeedState(`datafeed-${jobId}`, DATAFEED_STATE.STOPPED);
+      await mlApi.waitForJobState(jobId, JOB_STATE.CLOSED);
     },
   };
 }
