@@ -127,6 +127,7 @@ function testInitialState(): IndexPatternPrivateState {
   return {
     currentIndexPatternId: '1',
     indexPatternRefs: [],
+    existingFields: {},
     indexPatterns: expectedIndexPatterns,
     layers: {
       first: {
@@ -306,6 +307,7 @@ describe('IndexPattern Data Source suggestions', () => {
       it('should make a metric suggestion for a number field if there is no time field', async () => {
         const state: IndexPatternPrivateState = {
           indexPatternRefs: [],
+          existingFields: {},
           currentIndexPatternId: '1',
           showEmptyFields: false,
           indexPatterns: {
@@ -509,6 +511,7 @@ describe('IndexPattern Data Source suggestions', () => {
       it('should make a metric suggestion for a number field if there is no time field', async () => {
         const state: IndexPatternPrivateState = {
           indexPatternRefs: [],
+          existingFields: {},
           currentIndexPatternId: '1',
           showEmptyFields: false,
           indexPatterns: {
@@ -719,7 +722,10 @@ describe('IndexPattern Data Source suggestions', () => {
           searchable: true,
         });
 
-        expect(suggestions).toHaveLength(0);
+        expect(suggestions).toHaveLength(1);
+        // Check that the suggestion is a single metric
+        expect(suggestions[0].table.columns).toHaveLength(1);
+        expect(suggestions[0].table.columns[0].operation.isBucketed).toBeFalsy();
       });
 
       it('prepends a terms column on string field', () => {
@@ -929,6 +935,7 @@ describe('IndexPattern Data Source suggestions', () => {
         getDatasourceSuggestionsFromCurrentState({
           showEmptyFields: false,
           indexPatternRefs: [],
+          existingFields: {},
           indexPatterns: expectedIndexPatterns,
           layers: {
             first: {
@@ -1049,7 +1056,7 @@ describe('IndexPattern Data Source suggestions', () => {
               {
                 columnId: 'id1',
                 operation: {
-                  label: 'Date histogram of timestamp',
+                  label: 'timestamp',
                   dataType: 'date',
                   isBucketed: true,
                   scale: 'interval',
@@ -1125,7 +1132,7 @@ describe('IndexPattern Data Source suggestions', () => {
               {
                 columnId: 'id1',
                 operation: {
-                  label: 'Date histogram of timestamp',
+                  label: 'timestamp',
                   dataType: 'date',
                   isBucketed: true,
                   scale: 'interval',
@@ -1179,6 +1186,7 @@ describe('IndexPattern Data Source suggestions', () => {
       const initialState = testInitialState();
       const state: IndexPatternPrivateState = {
         indexPatternRefs: [],
+        existingFields: {},
         currentIndexPatternId: '1',
         indexPatterns: {
           1: {
@@ -1316,6 +1324,7 @@ describe('IndexPattern Data Source suggestions', () => {
       const initialState = testInitialState();
       const state: IndexPatternPrivateState = {
         indexPatternRefs: [],
+        existingFields: {},
         currentIndexPatternId: '1',
         indexPatterns: {
           1: {
@@ -1375,6 +1384,7 @@ describe('IndexPattern Data Source suggestions', () => {
       const initialState = testInitialState();
       const state: IndexPatternPrivateState = {
         indexPatternRefs: [],
+        existingFields: {},
         currentIndexPatternId: '1',
         indexPatterns: {
           1: {

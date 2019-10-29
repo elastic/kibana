@@ -4,17 +4,19 @@
 
 ## HttpServiceBase.addLoadingCount() method
 
+Adds a new source of loading counts. Used to show the global loading indicator when sum of all observed counts are more than 0.
+
 <b>Signature:</b>
 
 ```typescript
-addLoadingCount(count$: Observable<number>): void;
+addLoadingCount(countSource$: Observable<number>): void;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  count$ | <code>Observable&lt;number&gt;</code> |  |
+|  countSource$ | <code>Observable&lt;number&gt;</code> |  |
 
 <b>Returns:</b>
 

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server } from 'hapi';
 import archiver from 'archiver';
 
 import {
@@ -19,29 +18,40 @@ import {
   SHAREABLE_RUNTIME_SRC,
 } from '../../shareable_runtime/constants';
 
-export function shareableWorkpads(server: Server) {
+import { CoreSetup } from '../shim';
+
+export function shareableWorkpads(route: CoreSetup['http']['route']) {
   // get runtime
-  server.route({
+  route({
     method: 'GET',
     path: API_ROUTE_SHAREABLE_RUNTIME,
+
     handler: {
-      file: SHAREABLE_RUNTIME_FILE,
+      file: {
+        path: SHAREABLE_RUNTIME_FILE,
+        // The option setting is not for typical use.  We're using it here to avoid
+        // problems in Cloud environments.  See elastic/kibana#47405.
+        confine: false,
+      },
     },
   });
 
   // download runtime
-  server.route({
+  route({
     method: 'GET',
     path: API_ROUTE_SHAREABLE_RUNTIME_DOWNLOAD,
+
     handler(_request, handler) {
+      // The option setting is not for typical use.  We're using it here to avoid
+      // problems in Cloud environments.  See elastic/kibana#47405.
       // @ts-ignore No type for inert Hapi handler
-      const file = handler.file(SHAREABLE_RUNTIME_FILE);
+      const file = handler.file(SHAREABLE_RUNTIME_FILE, { confine: false });
       file.type('application/octet-stream');
       return file;
     },
   });
 
-  server.route({
+  route({
     method: 'POST',
     path: API_ROUTE_SHAREABLE_ZIP,
     handler(request, handler) {

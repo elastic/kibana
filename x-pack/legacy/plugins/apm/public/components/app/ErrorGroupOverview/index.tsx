@@ -49,6 +49,8 @@ const ErrorGroupOverview: React.SFC = () => {
 
   const { data: errorGroupListData } = useFetcher(
     callApmApi => {
+      const normalizedSortDirection = sortDirection === 'asc' ? 'asc' : 'desc';
+
       if (serviceName && start && end) {
         return callApmApi({
           pathname: '/api/apm/services/{serviceName}/errors',
@@ -60,7 +62,7 @@ const ErrorGroupOverview: React.SFC = () => {
               start,
               end,
               sortField,
-              sortDirection,
+              sortDirection: normalizedSortDirection,
               uiFilters: JSON.stringify(uiFilters)
             }
           }

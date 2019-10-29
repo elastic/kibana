@@ -126,7 +126,7 @@ export class PopulationJobCreator extends JobCreator {
   public cloneFromExistingJob(job: Job, datafeed: Datafeed) {
     this._overrideConfigs(job, datafeed);
     this.createdBy = CREATED_BY_LABEL.POPULATION;
-    const detectors = getRichDetectors(job, datafeed);
+    const detectors = getRichDetectors(job, datafeed, this.scriptFields, false);
 
     this.removeAllDetectors();
 

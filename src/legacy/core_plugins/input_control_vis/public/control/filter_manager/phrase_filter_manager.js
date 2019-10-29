@@ -19,7 +19,13 @@
 
 import _ from 'lodash';
 import { FilterManager } from './filter_manager.js';
-import { buildPhraseFilter, buildPhrasesFilter } from '@kbn/es-query';
+import {
+  buildPhraseFilter,
+  buildPhrasesFilter,
+  getPhraseFilterField,
+  getPhraseFilterValue,
+  isPhraseFilter,
+} from '@kbn/es-query';
 
 export class PhraseFilterManager extends FilterManager {
   constructor(controlId, fieldName, indexPattern, queryFilter) {
@@ -38,12 +44,12 @@ export class PhraseFilterManager extends FilterManager {
     let newFilter;
     if (phrases.length === 1) {
       newFilter = buildPhraseFilter(
-        this.indexPattern.fields.byName[this.fieldName],
+        this.indexPattern.fields.getByName(this.fieldName),
         phrases[0],
         this.indexPattern);
     } else {
       newFilter = buildPhrasesFilter(
-        this.indexPattern.fields.byName[this.fieldName],
+        this.indexPattern.fields.getByName(this.fieldName),
         phrases,
         this.indexPattern);
     }
@@ -101,8 +107,12 @@ export class PhraseFilterManager extends FilterManager {
     }
 
     // single phrase filter
-    if (_.has(kbnFilter, ['query', 'match', this.fieldName])) {
-      return _.get(kbnFilter, ['query', 'match', this.fieldName, 'query']);
+    if (isPhraseFilter(kbnFilter)) {
+      if (getPhraseFilterField(kbnFilter) !== this.fieldName) {
+        return;
+      }
+
+      return getPhraseFilterValue(kbnFilter);
     }
 
     // single phrase filter from bool filter

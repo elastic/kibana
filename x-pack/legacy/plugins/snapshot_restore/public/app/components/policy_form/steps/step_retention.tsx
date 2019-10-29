@@ -70,7 +70,7 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
       description={
         <FormattedMessage
           id="xpack.snapshotRestore.policyForm.stepRetention.expirationDescription"
-          defaultMessage="Time period before a snapshot should be deleted."
+          defaultMessage="The time to wait before deleting snapshots."
         />
       }
       idAria="expirationDescription"
@@ -136,7 +136,7 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
       description={
         <FormattedMessage
           id="xpack.snapshotRestore.policyForm.stepRetention.countDescription"
-          defaultMessage="Configure the minimum and maximum number of snapshots to retain."
+          defaultMessage="The minimum and maximum number of snapshots to store in your cluster."
         />
       }
       idAria="countDescription"
@@ -206,12 +206,12 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiTitle>
-            <h3>
+            <h2>
               <FormattedMessage
                 id="xpack.snapshotRestore.policyForm.stepRetentionTitle"
                 defaultMessage="Snapshot retention (optional)"
               />
-            </h3>
+            </h2>
           </EuiTitle>
         </EuiFlexItem>
 

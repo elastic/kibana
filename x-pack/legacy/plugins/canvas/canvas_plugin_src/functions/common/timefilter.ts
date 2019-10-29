@@ -7,7 +7,7 @@
 import dateMath from '@elastic/datemath';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { Filter } from '../../../types';
-import { getFunctionHelp, getFunctionErrors } from '../../strings';
+import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 interface Arguments {
   column: string;

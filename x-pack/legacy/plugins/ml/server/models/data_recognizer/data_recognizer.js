@@ -9,8 +9,7 @@
 import fs from 'fs';
 import Boom from 'boom';
 import numeral from '@elastic/numeral';
-import { idx } from '@kbn/elastic-idx';
-import { merge } from 'lodash';
+import { merge, get } from 'lodash';
 import { getLatestDataOrBucketTimestamp, prefixDatafeedId } from '../../../common/util/job_utils';
 import { mlLog } from '../../client/log';
 import { jobServiceProvider } from '../job_service';
@@ -781,7 +780,7 @@ export class DataRecognizer {
 
       if (Array.isArray(moduleConfig.jobs)) {
         moduleConfig.jobs.forEach((job) => {
-          const mml = idx(job, _ => _.config.analysis_limits.model_memory_limit);
+          const mml = get(job, 'config.analysis_limits.model_memory_limit');
           if (mml !== undefined) {
             const mmlBytes = numeral(mml.toUpperCase()).value();
             if (mmlBytes > maxBytes) {

@@ -45,6 +45,7 @@ import { DatasourceDataPanelProps, DataType } from '../types';
 import { BucketedAggregation, FieldStatsResponse } from '../../common';
 import { IndexPattern, IndexPatternField } from './types';
 import { LensFieldIcon, getColorForDataType } from './lens_field_icon';
+import { trackUiEvent } from '../lens_ui_telemetry';
 
 export interface FieldItemProps {
   core: DatasourceDataPanelProps['core'];
@@ -141,6 +142,7 @@ export function FieldItem(props: FieldItemProps) {
   function togglePopover() {
     setOpen(!infoIsOpen);
     if (!infoIsOpen) {
+      trackUiEvent('indexpattern_field_info_click');
       fetchData();
     }
   }
@@ -172,10 +174,8 @@ export function FieldItem(props: FieldItemProps) {
                   togglePopover();
                 }
               }}
-              aria-label={i18n.translate('xpack.lens.indexPattern.fieldStatsButtonAriaLabel', {
-                defaultMessage:
-                  'Click or press Enter for information about {fieldName}. Or, drag field into visualization.',
-                values: { fieldName: field.name },
+              aria-label={i18n.translate('xpack.lens.indexPattern.fieldStatsButtonLabel', {
+                defaultMessage: 'Click for a field preview. Or, drag and drop to visualize.',
               })}
             >
               <LensFieldIcon type={field.type as DataType} />
@@ -186,10 +186,8 @@ export function FieldItem(props: FieldItemProps) {
 
               <EuiIconTip
                 anchorClassName="lnsFieldItem__infoIcon"
-                content={i18n.translate('xpack.lens.indexPattern.fieldStatsButton', {
-                  defaultMessage:
-                    'Click for information about {fieldName}. Or, drag field into visualization.',
-                  values: { fieldName: field.name },
+                content={i18n.translate('xpack.lens.indexPattern.fieldStatsButtonLabel', {
+                  defaultMessage: 'Click for a field preview. Or, drag and drop to visualize.',
                 })}
                 type="iInCircle"
                 color="subdued"
@@ -224,7 +222,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
     return (
       <EuiText size="s">
         {i18n.translate('xpack.lens.indexPattern.fieldStatsNoData', {
-          defaultMessage: 'No data to display',
+          defaultMessage: 'No data to display.',
         })}
       </EuiText>
     );
