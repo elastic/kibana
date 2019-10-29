@@ -228,8 +228,11 @@ def sendKibanaMail() {
   }
 }
 
-def bash(script) {
-  sh "#!/bin/bash\n${script}"
+def bash(script, label="") {
+  sh(
+    script: "#!/bin/bash\n${script}",
+    label: label
+  )
 }
 
 def doSetup() {
@@ -245,10 +248,10 @@ def buildXpack() {
 }
 
 def runErrorReporter() {
-  bash """
+  bash("""
     source src/dev/ci_setup/setup_env.sh
     node scripts/report_failed_tests
-  """
+  """, "Report failed tests, if necessary"
 }
 
 return this
