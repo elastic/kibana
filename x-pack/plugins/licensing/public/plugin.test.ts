@@ -253,6 +253,7 @@ describe('licensing plugin', () => {
   });
   describe('#stop', () => {
     it('stops polling', async () => {
+      const sessionStorage = coreMock.createStorage();
       plugin = new LicensingPlugin(coreMock.createPluginInitializerContext(), sessionStorage);
       const coreSetup = coreMock.createSetup();
       const { license$ } = await plugin.setup(coreSetup);
@@ -265,6 +266,7 @@ describe('licensing plugin', () => {
     });
 
     it('refresh does not trigger data re-fetch', async () => {
+      const sessionStorage = coreMock.createStorage();
       plugin = new LicensingPlugin(coreMock.createPluginInitializerContext(), sessionStorage);
       const coreSetup = coreMock.createSetup();
       const { refresh } = await plugin.setup(coreSetup);
@@ -277,6 +279,7 @@ describe('licensing plugin', () => {
     });
 
     it('removes http interceptor', async () => {
+      const sessionStorage = coreMock.createStorage();
       plugin = new LicensingPlugin(coreMock.createPluginInitializerContext(), sessionStorage);
 
       const coreSetup = coreMock.createSetup();
