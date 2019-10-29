@@ -77,17 +77,15 @@ function QueryBarTopRowUI(props: Props) {
 
   const kueryQuerySyntaxLink: string = docLinks!.links.query.kueryQuerySyntax;
 
-  const queryLanguage = props.query && props.query.language;
-  const persistedLog = React.useRef<PersistedLog | undefined>(undefined);
-
-  useEffect(() => {
-    if (!props.query) return;
-    persistedLog.current = getQueryLog(uiSettings!, store, appName, props.query.language);
-  }, [queryLanguage]);
+  const persistedLog: PersistedLog | undefined = React.useMemo(
+    () =>
+      props.query ? getQueryLog(uiSettings!, store, appName, props.query.language) : undefined,
+    [props.query]
+  );
 
   function onClickSubmitButton(event: React.MouseEvent<HTMLButtonElement>) {
-    if (persistedLog.current && props.query) {
-      persistedLog.current.add(props.query.query);
+    if (persistedLog && props.query) {
+      persistedLog.add(props.query.query);
     }
     event.preventDefault();
     onSubmit({ query: props.query, dateRange: getDateRange() });
@@ -184,7 +182,7 @@ function QueryBarTopRowUI(props: Props) {
           screenTitle={props.screenTitle}
           onChange={onQueryChange}
           onSubmit={onInputSubmit}
-          persistedLog={persistedLog.current}
+          persistedLog={persistedLog}
         />
       </EuiFlexItem>
     );
