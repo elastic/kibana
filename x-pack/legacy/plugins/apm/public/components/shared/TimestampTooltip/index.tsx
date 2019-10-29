@@ -18,17 +18,18 @@ interface Props {
 
 function getPreciseTime(
   precision: Props['precision'],
-  separator: string = ','
+  hasSeparator: boolean = true
 ) {
+  const separator = hasSeparator ? ', ' : '';
   switch (precision) {
     case 'days':
       return '';
     case 'minutes':
-      return `${separator} HH:mm`;
+      return `${separator}HH:mm`;
     case 'seconds':
-      return `${separator} HH:mm:ss`;
+      return `${separator}HH:mm:ss`;
     default:
-      return `${separator} HH:mm:ss.SSS`;
+      return `${separator}HH:mm:ss.SSS`;
   }
 }
 
@@ -47,16 +48,22 @@ export function asAbsoluteTime({
     ? withLeadingPlus(utcOffsetHours)
     : 'Z';
 
-  let format = `MMM D, YYYY${getPreciseTime(precision)}`;
+  const formattedStartTime = momentTime.format(
+    `MMM D, YYYY${getPreciseTime(precision)}`
+  );
 
+  const formattedTz = momentTime.format(`(UTC${utcOffsetFormatted})`);
+
+  // Format as range
   if (endTime) {
     const formattedEndTime = moment(endTime).format(
-      getPreciseTime(precision, '-')
+      getPreciseTime(precision, false)
     );
-    format = `${format} ${formattedEndTime}`;
+    return `${formattedStartTime} - ${formattedEndTime} ${formattedTz}`;
   }
 
-  return momentTime.format(`${format} (UTC${utcOffsetFormatted})`);
+  // format as single timezone
+  return `${formattedStartTime} ${formattedTz}`;
 }
 
 export function TimestampTooltip({ time, precision = 'milliseconds' }: Props) {
