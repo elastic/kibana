@@ -54,7 +54,7 @@ import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
 import { npStart } from 'ui/new_platform';
-import { extractTimeFilter, changeTimeFilter } from '../../../../data/public';
+import { extractTimeFilter, changeTimeFilter } from '../../../../../../plugins/data/public';
 import { start as data } from '../../../../data/public/legacy';
 import { start as visualizations } from '../../../../visualizations/public/np_ready/public/legacy';
 
