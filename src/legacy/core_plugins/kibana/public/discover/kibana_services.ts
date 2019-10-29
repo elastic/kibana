@@ -18,6 +18,7 @@
  */
 import 'ui/collapsible_sidebar';
 import 'ui/directives/listen';
+import 'ui/directives/storage';
 import 'ui/fixed_scroll';
 import 'ui/directives/css_truncate';
 

@@ -22,11 +22,12 @@ import { EmbeddedVisualizeHandler } from 'ui/visualize/loader/embedded_visualize
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
 import { Filter } from '@kbn/es-query';
-import { TimeRange } from '../../../../../../plugins/data/public';
-import { Query, onlyDisabledFiltersChanged } from '../../../../data/public';
+import { TimeRange, onlyDisabledFiltersChanged } from '../../../../../../plugins/data/public';
+import { Query } from '../../../../data/public';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 
 import {
+  AppState,
   Container,
   Embeddable,
   EmbeddableInput,
@@ -47,6 +48,8 @@ export interface VisualizeEmbeddableConfiguration {
   editUrl: string;
   loader: VisualizeLoader;
   editable: boolean;
+  appState?: AppState;
+  uiState?: PersistedState;
 }
 
 export interface VisualizeInput extends EmbeddableInput {
@@ -56,6 +59,8 @@ export interface VisualizeInput extends EmbeddableInput {
   vis?: {
     colors?: { [key: string]: string };
   };
+  appState?: AppState;
+  uiState?: PersistedState;
 }
 
 export interface VisualizeOutput extends EmbeddableOutput {
@@ -68,6 +73,7 @@ export interface VisualizeOutput extends EmbeddableOutput {
 export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOutput> {
   private savedVisualization: VisSavedObject;
   private loader: VisualizeLoader;
+  private appState: AppState | undefined;
   private uiState: PersistedState;
   private handler?: EmbeddedVisualizeHandler;
   private timeRange?: TimeRange;
@@ -85,6 +91,8 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       editUrl,
       indexPatterns,
       editable,
+      appState,
+      uiState,
     }: VisualizeEmbeddableConfiguration,
     initialInput: VisualizeInput,
     parent?: Container
@@ -104,12 +112,18 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     this.savedVisualization = savedVisualization;
     this.loader = loader;
 
-    const parsedUiState = savedVisualization.uiStateJSON
-      ? JSON.parse(savedVisualization.uiStateJSON)
-      : {};
-    this.uiState = new PersistedState(parsedUiState);
+    if (uiState) {
+      this.uiState = uiState;
+    } else {
+      const parsedUiState = savedVisualization.uiStateJSON
+        ? JSON.parse(savedVisualization.uiStateJSON)
+        : {};
+      this.uiState = new PersistedState(parsedUiState);
 
-    this.uiState.on('change', this.uiStateChangeHandler);
+      this.uiState.on('change', this.uiStateChangeHandler);
+    }
+
+    this.appState = appState;
 
     this.subscription = Rx.merge(this.getOutput$(), this.getInput$()).subscribe(() => {
       this.handleChanges();
@@ -148,7 +162,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
         });
         this.uiState.on('change', this.uiStateChangeHandler);
       }
-    } else {
+    } else if (!this.appState) {
       this.uiState.clearAllKeys();
     }
   }
@@ -210,6 +224,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     }
 
     const handlerParams: VisualizeLoaderParams = {
+      appState: this.appState,
       uiState: this.uiState,
       // Append visualization to container instead of replacing its content
       append: true,

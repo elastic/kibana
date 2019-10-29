@@ -88,7 +88,7 @@ export default function({ getService }: FtrProviderContext) {
   describe('population', function() {
     this.tags(['smoke', 'mlqa']);
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/ecommerce');
+      await esArchiver.load('ml/ecommerce');
     });
 
     after(async () => {
