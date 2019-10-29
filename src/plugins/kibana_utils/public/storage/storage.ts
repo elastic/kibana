@@ -17,17 +17,12 @@
  * under the License.
  */
 
-import angular from 'angular';
+import { IStorage, IStorageWrapper } from './types';
 
-// This is really silly, but I wasn't prepared to rename the kibana Storage class everywhere it is used
-// and this is the only way I could figure out how to use the type definition for a built in object
-// in a file that creates a type with the same name as that built in object.
-import { WebStorage } from './web_storage';
+export class Storage implements IStorageWrapper {
+  public store: IStorage;
 
-export class Storage {
-  public store: WebStorage;
-
-  constructor(store: WebStorage) {
+  constructor(store: IStorage) {
     this.store = store;
   }
 
@@ -50,7 +45,7 @@ export class Storage {
 
   public set = (key: string, value: any) => {
     try {
-      return this.store.setItem(key, angular.toJson(value));
+      return this.store.setItem(key, JSON.stringify(value));
     } catch (e) {
       return false;
     }

@@ -23,3 +23,4 @@ export * from './parse';
 export * from './render_complete';
 export * from './errors';
 export * from './field_mapping';
+export * from './storage';

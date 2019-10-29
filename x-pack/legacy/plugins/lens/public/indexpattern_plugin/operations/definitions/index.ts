@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Storage } from 'ui/storage';
 import {
   UiSettingsClientContract,
   SavedObjectsClientContract,
   HttpServiceBase,
 } from 'src/core/public';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { termsOperation } from './terms';
 import { cardinalityOperation } from './cardinality';
 import { minOperation, averageOperation, sumOperation, maxOperation } from './metrics';
@@ -48,7 +48,7 @@ export interface ParamEditorProps<C extends BaseIndexPatternColumn> {
   columnId: string;
   layerId: string;
   uiSettings: UiSettingsClientContract;
-  storage: Storage;
+  storage: IStorageWrapper;
   savedObjectsClient: SavedObjectsClientContract;
   http: HttpServiceBase;
 }

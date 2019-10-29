@@ -22,7 +22,7 @@ import { Subscription } from 'rxjs';
 import { Filter } from '@kbn/es-query';
 import { CoreStart } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { Storage } from '../../../types';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
 import { TimefilterSetup } from '../../../timefilter';
 import { SearchBar } from '../../../';
@@ -31,7 +31,7 @@ import { SearchBarOwnProps } from '.';
 interface StatefulSearchBarDeps {
   core: CoreStart;
   data: DataPublicPluginStart;
-  store: Storage;
+  storage: IStorageWrapper;
   timefilter: TimefilterSetup;
 }
 
@@ -54,7 +54,7 @@ const defaultOnRefreshChange = (timefilter: TimefilterSetup) => {
   };
 };
 
-export function createSearchBar({ core, store, timefilter, data }: StatefulSearchBarDeps) {
+export function createSearchBar({ core, storage, timefilter, data }: StatefulSearchBarDeps) {
   // App name should come from the core application service.
   // Until it's available, we'll ask the user to provide it for the pre-wired component.
   return (props: StatetfulSearchBarProps) => {
@@ -107,7 +107,7 @@ export function createSearchBar({ core, store, timefilter, data }: StatefulSearc
         services={{
           appName: props.appName,
           data,
-          store,
+          storage,
           ...core,
         }}
       >
