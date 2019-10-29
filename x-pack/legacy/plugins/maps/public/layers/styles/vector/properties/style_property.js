@@ -22,4 +22,7 @@ export class AbstractStyleProperty {
   getStyleName() {
     return this._styleName;
   }
+  getOptions() {
+    return this._options || {};
+  }
 }

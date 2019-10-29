@@ -308,8 +308,8 @@ export class VectorStyle extends AbstractStyle {
       <VectorIcon
         loadIsPointsOnly={this._getIsPointsOnly}
         loadIsLinesOnly={this._getIsLinesOnly}
-        fillColor={styles.fillColor}
-        lineColor={styles.lineColor}
+        fillColor={styles[vectorStyles.FILL_COLOR]}
+        lineColor={styles[vectorStyles.LINE_COLOR]}
         symbolId={symbolId}
       />
     );
@@ -337,8 +337,11 @@ export class VectorStyle extends AbstractStyle {
   }
 
   _getStyleFields() {
-    return this.getDynamicPropertiesArray()
-      .map(({ styleName, options }) => {
+    return this.getDynamicPropertiesArray2()
+      .map(styleProperty => {
+
+        const styleName = styleProperty.getStyleName();
+        const options = styleProperty.getOptions();
         const name = options.field.name;
 
         // "feature-state" data expressions are not supported with layout properties.
@@ -391,6 +394,7 @@ export class VectorStyle extends AbstractStyle {
     }
 
     const styleFields  = this._getStyleFields();
+    console.log('stylefields', styleFields);
     if (styleFields.length === 0) {
       return;
     }
