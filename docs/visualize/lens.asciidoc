@@ -18,10 +18,7 @@ With Lens, you can:
 
 Lens comes with these types of visualizations:
 
-[horizontal]
-Bar::
-
-Display numerical comparisons across multiple categories. In bar charts,
+Bar:: Display numerical comparisons across multiple categories. In bar charts,
 data is displayed using a number of bars that represent a particular category.
 +
 [role="screenshot"]
@@ -50,7 +47,7 @@ Area::
 Display one or more quantities over time. In area charts, points are
 plotted and connected by lines to show the value of a quantity at several
 different times.
-+
+
 [role="screenshot"]
 image::images/lens_area.png[Lens area chart]
 
@@ -58,21 +55,21 @@ Stacked Area::
 
 Display the evolution of numeric variables for several
 categories stacked on top of each other.
-+
+
 [role="screenshot"]
 image::images/lens_stacked_area.png[Lens stacked area chart]
 
 Data Table::
 
 Display your raw data or aggregation results in a tabular format.
-+
+
 [role="screenshot"]
 image::images/lens_data_table.png[Lens data table]
 
 Metric::
 
 Display the latest number in a data series.
-+
+
 [role="screenshot"]
 image::images/lens_metric.png[Lens metric]
 
@@ -86,36 +83,30 @@ To create your Lens visualizations, use the visualization builder.
 [[choose-your-data]]
 ==== Choose the data you want to display
 
-The data fields appear in the editor on the left.
+The data that you can add to the visualization builder appears in the left column.
 
-. If you want to use a different search query to retrieve the data for your visualization, click *change* next to the index name, then select the index.
-+
-[role="screenshot"]
-image::images/lens_change_index.gif[Change index]
-
-. To see the top values of a field, click *i* next to the field.
-+
-[role="screenshot"]
-image::images/lens_top_values.gif[Top values]
+. If you want to use a different index pattern, click the dropdown next to the index name, then select the index.
 
 . To narrow the data fields that are displayed:
 
 * Enter the field name in *Search for fields*.
 
-* Click *Filter by type*, then click the filter.
+* Click *Filter by type*, then click the filter
+
+. To see the top values of a field, click *i* next to the field.
 
 [float]
 [[add-data]]
 ==== Add the data you want to display
 
-Add your data to the Lens visualization builder by simply dragging and dropping the data fields to the *Create a visualization* pane. Lens does the hard work for you and figures out which data to apply to the x- and y-axises.
+Add your data to the Lens visualization builder by simply dragging and dropping the data fields to the visualization builder pane. Lens does the hard work for you and figures out which data to apply to the x- and y-axises.
 
 [role="screenshot"]
 image::images/lens_data_fields.gif[Data fields]
 
 If you already know the data you want to apply to the x- and y-axises, drag and drop the data fields to the *X-axis* and *Y-axis* fields.
 
-TIP: To refresh the data, click *Refresh*.
+To refresh the data, click *Refresh*.
 
 [float]
 [[change-visualization-type]]
@@ -130,4 +121,61 @@ To manually change the visualization type, click *change* in the editor on the r
 
 [float]
 [[lens-tutorial]]
-== Lens tutorial
+=== Lens tutorial
+
+Ready to create a visualization with Lens? Use the following tutorial to create a visualization that displays the average ticket price from the {kib} sample flight data.
+
+[float]
+[[lens-before-you-begin]]
+==== Before you begin
+
+For this tutorial, you'll need to add the <<add-sample-data, Sample flight data>>.
+
+[float]
+[[create-the-lens-visualization]]
+==== Create the visualization
+
+Your first step to working with Lens is to create a visualization.
+
+. Open *Visualize*.
+
+. Click *Create visualization*.
+
+. On the *New Visualization* window, click *Lens*.
+
+. Make sure that the kibana_sample_data_flights data appears in the left column.
+
+. Drag and drop the AvgTicketPrice data field to the visualization builder pane.
++
+[role="screenshot"]
+image::images/lens_tutorial_1.png[Lens tutorial]
+
+[float]
+[[customize-lens-visualization]]
+==== Customize the visualization
+
+Customize your visualization to look the way you want.
+
+. In the right column, click *timestamp*.
+
+.. Select *Customize time interval*.
+
+.. In the *Minimum interval* field, enter `1`, then select *days* from the dropdown.
+
+.. In the *Label* field, enter a name for the x-axis. For example, `Average`.
+
+. Click *Average of AvgTicketPrice*, then enter a name for the y-axis in the *Label* field. For example, `Average Ticket Price`.
+
+. Click image:images/time-filter-calendar.png[], then click *Last 7 days*.
++
+[role="screenshot"]
+image::images/lens_tutorial_2.png[Lens tutorial]
+
+[float]
+[[change-lens-visualization-type]]
+==== Change the visualization type
+
+To find the visualization that best displays your data, click on each of the *Suggestions*.
++
+[role="screenshot"]
+image::images/lens_tutorial_.gif[Lens tutorial]
