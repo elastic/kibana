@@ -47,6 +47,7 @@ import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_regis
 
 import { createUiStatsReporter, METRIC_TYPE } from '../../../ui_metric/public';
 import { start as visualizations } from '../../../visualizations/public/np_ready/public/legacy';
+import { start as data } from '../../../data/public/legacy';
 
 const services = {
   // new platform
@@ -60,6 +61,7 @@ const services = {
   toastNotifications: npStart.core.notifications.toasts,
   uiSettings: npStart.core.uiSettings,
 
+  data,
   visualizations,
 
   // legacy
@@ -103,6 +105,14 @@ export { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 export { getVisualizeLoader } from 'ui/visualize/loader';
 export { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
+export {
+  Container,
+  Embeddable,
+  EmbeddableFactory,
+  EmbeddableInput,
+  EmbeddableOutput,
+  ErrorEmbeddable,
+} from '../../../../../plugins/embeddable/public';
 
 // export types
 export { METRIC_TYPE };

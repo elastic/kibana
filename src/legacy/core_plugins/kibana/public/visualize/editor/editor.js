@@ -31,7 +31,6 @@ import { DashboardConstants } from '../../dashboard/dashboard_constants';
 import { VisualizeConstants } from '../visualize_constants';
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
 import { extractTimeFilter, changeTimeFilter } from '../../../../data/public';
-import { start as data } from '../../../../data/public/legacy';
 
 import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
 
@@ -54,6 +53,7 @@ const {
   capabilities,
   chrome,
   chromeLegacy,
+  data,
   docTitle,
   FilterBarQueryFilterProvider,
   getBasePath,

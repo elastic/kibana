@@ -22,12 +22,6 @@ import { i18n } from '@kbn/i18n';
 import { Legacy } from 'kibana';
 
 import { SavedObjectAttributes } from 'kibana/server';
-import {
-  EmbeddableFactory,
-  ErrorEmbeddable,
-  Container,
-  EmbeddableOutput,
-} from '../../../../../../plugins/embeddable/public';
 import { showNewVisModal } from '../wizard';
 import { SavedVisualizations } from '../types';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
@@ -36,7 +30,14 @@ import { VisualizeEmbeddable, VisualizeInput, VisualizeOutput } from './visualiz
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import { TypesStart } from '../../../../visualizations/public/np_ready/public/types';
 
-import { getServices, getVisualizeLoader } from '../kibana_services';
+import {
+  getServices,
+  Container,
+  EmbeddableFactory,
+  EmbeddableOutput,
+  ErrorEmbeddable,
+  getVisualizeLoader,
+} from '../kibana_services';
 
 const {
   addBasePath,

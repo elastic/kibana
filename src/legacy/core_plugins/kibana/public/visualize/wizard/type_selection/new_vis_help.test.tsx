@@ -20,12 +20,11 @@
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { NewVisHelp } from './new_vis_help';
-import chrome from 'ui/chrome';
 
 jest.mock('../../kibana_services', () => {
   return {
     getServices: () => ({
-      addBasePath: jest.fn(url => `testbasepath${url}`),
+      addBasePath: jest.fn((url: string) => `testbasepath${url}`),
     }),
   };
 });
@@ -36,8 +35,6 @@ beforeEach(() => {
 
 describe('NewVisHelp', () => {
   it('should render as expected', () => {
-    (chrome.addBasePath as unknown) = (url: string) => `testbasepath${url}`;
-
     expect(
       shallowWithIntl(
         <NewVisHelp
