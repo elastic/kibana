@@ -82,7 +82,7 @@ One main consideration is how to match parts of the nested query to the individu
 There are two main approaches to take:
 
 * *Parts of the query may only match a single nested document.* This is what most users want when querying on a nested field.
-*  *Parts of the query match different nested documents.* This is how a regular object field works. 
+* *Parts of the query can match different nested documents.* This is how a regular object field works. 
  Although generally less useful, there might be occasions where you want to query a nested field in this way.
 
 Let's take a look at the first approach. In the following document, `items` is a nested field:
