@@ -17,18 +17,18 @@ export const EmptyPrompt: React.FunctionComponent<Props> = ({ isAdmin }) => (
   <EuiEmptyPrompt
     iconType="managementApp"
     title={
-      <h1>
+      <h1 data-test-subj='NoApiKeysHeader'>
         {isAdmin ? (
           <FormattedMessage
             id="xpack.security.management.apiKeys.table.emptyPromptAdminTitle"
             defaultMessage="No API keys"
           />
         ) : (
-          <FormattedMessage
-            id="xpack.security.management.apiKeys.table.emptyPromptNonAdminTitle"
-            defaultMessage="You don't have any API keys"
-          />
-        )}
+            <FormattedMessage
+              id="xpack.security.management.apiKeys.table.emptyPromptNonAdminTitle"
+              defaultMessage="You don't have any API keys"
+            />
+          )}
       </h1>
     }
     body={
@@ -52,7 +52,7 @@ export const EmptyPrompt: React.FunctionComponent<Props> = ({ isAdmin }) => (
       </Fragment>
     }
     actions={
-      <EuiButton type="primary" href="#/dev_tools">
+      <EuiButton type="primary" href="#/dev_tools" data-test-subj="goToConsoleButton">
         <FormattedMessage
           id="xpack.security.management.apiKeys.table.emptyPromptConsoleButtonMessage"
           defaultMessage="Go to Console"
