@@ -13,7 +13,7 @@ import { ENTER_SPACE_PATH } from '../../common/constants';
 import { addSpaceIdToPath } from '../../../../../plugins/spaces/common';
 
 export class SpacesManager extends EventEmitter {
-  private activeSpace: Space | undefined;
+  private activeSpace: Promise<Space> | undefined;
 
   constructor(private readonly serverBasePath: string, private readonly http: HttpSetup) {
     super();
@@ -29,7 +29,7 @@ export class SpacesManager extends EventEmitter {
 
   public async getActiveSpace(forceRefresh: boolean = false): Promise<Space> {
     if (!this.activeSpace || forceRefresh) {
-      this.activeSpace = (await this.http.get('/internal/spaces/_active_space')) as Space;
+      this.activeSpace = this.http.get('/internal/spaces/_active_space') as Promise<Space>;
     }
     return this.activeSpace;
   }
