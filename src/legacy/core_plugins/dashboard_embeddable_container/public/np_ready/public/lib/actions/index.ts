@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export { ExpandPanelAction, EXPAND_PANEL_ACTION } from './expand_panel_action';
-export { ReplacePanelAction, REPLACE_PANEL_ACTION } from './replace_panel_action';
+// eslint-disable-next-line
+export * from '../../../../../../../../plugins/dashboard_embeddable_container/public/actions';
