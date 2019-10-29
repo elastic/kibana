@@ -23,7 +23,10 @@ const { REPO_ROOT } = require('@kbn/dev-utils');
 function checkModuleNameRelative(context, mappings, node) {
   const requestAbsolute = Path.resolve(Path.dirname(context.getFilename()), node.value);
   const mapping = mappings.find(
-    mapping => Path.isAbsolute(mapping.from) && requestAbsolute.startsWith(mapping.from)
+    mapping =>
+      Path.isAbsolute(mapping.from) &&
+      requestAbsolute.startsWith(mapping.from) &&
+      (!mapping.filter || mapping.filter(node, context))
   );
 
   if (!mapping) {
@@ -46,7 +49,9 @@ function checkModuleNameNode(context, mappings, node) {
   }
 
   const mapping = mappings.find(
-    mapping => mapping.from === node.value || node.value.startsWith(`${mapping.from}/`)
+    mapping =>
+      (mapping.from === node.value || node.value.startsWith(`${mapping.from}/`)) &&
+      (!mapping.filter || mapping.filter(node, context))
   );
 
   if (!mapping) {
@@ -113,6 +118,9 @@ module.exports = {
             disallowedMessage: {
               type: 'string',
             },
+            filter: {
+              type: 'function',
+            },
           },
           anyOf: [
             {
@@ -134,6 +142,20 @@ module.exports = {
 
     return {
       ImportDeclaration(node) {
+        checkModuleNameNode(context, mappings, node.source);
+      },
+      ExportNamedDeclaration(node) {
+        if (node.source) {
+          checkModuleNameNode(context, mappings, node.source);
+        }
+      },
+      ExportAllDeclaration(node) {
+        checkModuleNameNode(context, mappings, node.source);
+      },
+      ExportDefaultSpecifier(node) {
+        checkModuleNameNode(context, mappings, node.source);
+      },
+      ExportNamespaceSpecifier(node) {
         checkModuleNameNode(context, mappings, node.source);
       },
       CallExpression(node) {
