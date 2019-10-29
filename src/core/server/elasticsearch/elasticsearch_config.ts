@@ -76,6 +76,11 @@ export class ElasticsearchConfig {
   public readonly healthCheckDelay: Duration;
 
   /**
+   * Whether to allow kibana to connect to a non-compatible elasticsearch node.
+   */
+  public readonly ignoreVersionMismatch: boolean;
+
+  /**
    * Version of the Elasticsearch (6.7, 7.1 or `master`) client will be connecting to.
    */
   public readonly apiVersion: string;
@@ -162,6 +167,7 @@ export class ElasticsearchConfig {
   public readonly customHeaders: ElasticsearchConfigType['customHeaders'];
 
   constructor(rawConfig: ElasticsearchConfigType) {
+    this.ignoreVersionMismatch = rawConfig.ignoreVersionMismatch;
     this.apiVersion = rawConfig.apiVersion;
     this.logQueries = rawConfig.logQueries;
     this.hosts = Array.isArray(rawConfig.hosts) ? rawConfig.hosts : [rawConfig.hosts];
