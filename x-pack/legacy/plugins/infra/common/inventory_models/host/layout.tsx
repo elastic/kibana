@@ -11,7 +11,7 @@ import { SubSection } from '../../../public/pages/metrics/components/sub_section
 import { GaugesSectionVis } from '../../../public/pages/metrics/components/gauges_section_vis';
 import { ChartSectionVis } from '../../../public/pages/metrics/components/chart_section_vis';
 import { withTheme } from '../../../../../common/eui_styled_components';
-import * as AWS from '../shared/layouts/aws';
+import * as Aws from '../shared/layouts/aws';
 import * as Ngnix from '../shared/layouts/nginx';
 
 export const Layout = withTheme(({ metrics, theme }: LayoutPropsWithTheme) => (
@@ -346,7 +346,7 @@ export const Layout = withTheme(({ metrics, theme }: LayoutPropsWithTheme) => (
         />
       </SubSection>
     </Section>
-    <AWS.Layout metrics={metrics} />
+    <Aws.Layout metrics={metrics} />
     <Ngnix.Layout metrics={metrics} />
   </React.Fragment>
 ));
