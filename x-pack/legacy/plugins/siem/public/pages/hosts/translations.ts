@@ -17,7 +17,7 @@ export const PAGE_TITLE = i18n.translate('xpack.siem.hosts.pageTitle', {
 export const NAVIGATION_ALL_HOSTS_TITLE = i18n.translate(
   'xpack.siem.hosts.navigation.allHostsTitle',
   {
-    defaultMessage: 'All Hosts',
+    defaultMessage: 'All hosts',
   }
 );
 

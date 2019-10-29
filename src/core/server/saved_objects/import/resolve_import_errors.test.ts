@@ -20,7 +20,7 @@
 import { Readable } from 'stream';
 import { SavedObject } from '../types';
 import { resolveImportErrors } from './resolve_import_errors';
-import { SavedObjectsClientMock } from '../../mocks';
+import { savedObjectsClientMock } from '../../mocks';
 
 describe('resolveImportErrors()', () => {
   const savedObjects: SavedObject[] = [
@@ -63,7 +63,7 @@ describe('resolveImportErrors()', () => {
       ],
     },
   ];
-  const savedObjectsClient = SavedObjectsClientMock.create();
+  const savedObjectsClient = savedObjectsClientMock.create();
 
   beforeEach(() => {
     jest.resetAllMocks();
