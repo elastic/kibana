@@ -89,7 +89,7 @@ export function ChartSwitch(props: Props) {
       'SWITCH_VISUALIZATION'
     );
 
-    if (selection.dataLoss === 'everything') {
+    if (!selection.datasourceId || selection.dataLoss === 'everything') {
       props.framePublicAPI.removeLayers(Object.keys(props.framePublicAPI.datasourceLayers));
     }
   };

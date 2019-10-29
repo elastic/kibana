@@ -181,6 +181,8 @@ describe('chart_switch', () => {
 
     switchTo('subvisB', component);
 
+    expect(frame.removeLayers).toHaveBeenCalledWith(['a']);
+
     expect(dispatch).toHaveBeenCalledWith({
       initialState: 'visB initial state',
       newVisualizationId: 'visB',
@@ -309,11 +311,7 @@ describe('chart_switch', () => {
 
   it('should not indicate data loss if visualization is not changed', () => {
     const dispatch = jest.fn();
-    const removeLayers = jest.fn();
-    const frame = {
-      ...mockFrame(['a', 'b', 'c']),
-      removeLayers,
-    };
+    const frame = mockFrame(['a', 'b', 'c']);
     const visualizations = mockVisualizations();
     const switchVisualizationType = jest.fn(() => 'therebedragons');
 
