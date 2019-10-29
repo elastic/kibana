@@ -11,3 +11,12 @@ future versions to blend in more with the overall design of the Kibana managemen
 .mgtPage__body--transformWizard {
   max-width: 100%;
 }
+
+.transformDataGrid td {
+  border-right: 1px solid #d4dae5;
+}
+
+.transformDataGrid .euiTableCellContent {
+  padding-top: 0;
+  padding-bottom: 0;
+}

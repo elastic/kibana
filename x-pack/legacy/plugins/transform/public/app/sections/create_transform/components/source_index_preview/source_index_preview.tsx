@@ -51,6 +51,8 @@ import {
 
 import { getSourceIndexDevConsoleStatement } from './common';
 import { ExpandedRow } from './expanded_row';
+import { hoveredRow$ } from './column_chart';
+import { useColumnCharts } from './use_column_charts';
 import { SOURCE_INDEX_STATUS, useSourceIndexData } from './use_source_index_data';
 
 type ItemIdToExpandedRowMap = Dictionary<JSX.Element>;
@@ -117,6 +119,10 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
     setSelectedFields
   );
 
+  const columns: ColumnType[] = getColumns();
+
+  const sourceIndexTableElement = useColumnCharts(indexPattern, columns, query);
+
   if (status === SOURCE_INDEX_STATUS.ERROR) {
     return (
       <>
@@ -168,105 +174,110 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
     docFieldsCount = docFields.length;
   }
 
-  const columns: ColumnType[] = selectedFields.map(k => {
-    const column: ColumnType = {
-      field: `_source["${k}"]`,
-      name: k,
-      sortable: true,
-      truncateText: true,
-    };
+  function getColumns() {
+    return selectedFields.map(k => {
+      const column: ColumnType = {
+        field: `_source["${k}"]`,
+        name: k,
+        sortable: true,
+        truncateText: true,
+      };
 
-    const field = indexPattern.fields.find(f => f.name === k);
+      const field = indexPattern.fields.find(f => f.name === k);
 
-    const formatField = (d: string) => {
-      return field !== undefined && field.type === KBN_FIELD_TYPES.DATE
-        ? formatHumanReadableDateTimeSeconds(moment(d).unix() * 1000)
-        : d;
-    };
+      const formatField = (d: string) => {
+        return field !== undefined && field.type === KBN_FIELD_TYPES.DATE
+          ? formatHumanReadableDateTimeSeconds(moment(d).unix() * 1000)
+          : d;
+      };
 
-    const render = (d: any) => {
-      if (Array.isArray(d) && d.every(item => typeof item === 'string')) {
-        // If the cells data is an array of strings, return as a comma separated list.
-        // The list will get limited to 5 items with `…` at the end if there's more in the original array.
-        return `${d
-          .map(item => formatField(item))
-          .slice(0, 5)
-          .join(', ')}${d.length > 5 ? ', …' : ''}`;
-      } else if (Array.isArray(d)) {
-        // If the cells data is an array of e.g. objects, display a 'array' badge with a
-        // tooltip that explains that this type of field is not supported in this table.
-        return (
-          <EuiToolTip
-            content={i18n.translate(
-              'xpack.transform.sourceIndexPreview.SourceIndexArrayToolTipContent',
-              {
-                defaultMessage:
-                  'The full content of this array based column is available in the expanded row.',
-              }
-            )}
-          >
-            <EuiBadge>
-              {i18n.translate('xpack.transform.sourceIndexPreview.SourceIndexArrayBadgeContent', {
-                defaultMessage: 'array',
-              })}
-            </EuiBadge>
-          </EuiToolTip>
-        );
-      } else if (typeof d === 'object' && d !== null) {
-        // If the cells data is an object, display a 'object' badge with a
-        // tooltip that explains that this type of field is not supported in this table.
-        return (
-          <EuiToolTip
-            content={i18n.translate(
-              'xpack.transform.sourceIndexPreview.SourceIndexObjectToolTipContent',
-              {
-                defaultMessage:
-                  'The full content of this object based column is available in the expanded row.',
-              }
-            )}
-          >
-            <EuiBadge>
-              {i18n.translate('xpack.transform.sourceIndexPreview.SourceIndexObjectBadgeContent', {
-                defaultMessage: 'object',
-              })}
-            </EuiBadge>
-          </EuiToolTip>
+      const render = (d: any) => {
+        if (Array.isArray(d) && d.every(item => typeof item === 'string')) {
+          // If the cells data is an array of strings, return as a comma separated list.
+          // The list will get limited to 5 items with `…` at the end if there's more in the original array.
+          return `${d
+            .map(item => formatField(item))
+            .slice(0, 5)
+            .join(', ')}${d.length > 5 ? ', …' : ''}`;
+        } else if (Array.isArray(d)) {
+          // If the cells data is an array of e.g. objects, display a 'array' badge with a
+          // tooltip that explains that this type of field is not supported in this table.
+          return (
+            <EuiToolTip
+              content={i18n.translate(
+                'xpack.transform.sourceIndexPreview.SourceIndexArrayToolTipContent',
+                {
+                  defaultMessage:
+                    'The full content of this array based column is available in the expanded row.',
+                }
+              )}
+            >
+              <EuiBadge>
+                {i18n.translate('xpack.transform.sourceIndexPreview.SourceIndexArrayBadgeContent', {
+                  defaultMessage: 'array',
+                })}
+              </EuiBadge>
+            </EuiToolTip>
+          );
+        } else if (typeof d === 'object' && d !== null) {
+          // If the cells data is an object, display a 'object' badge with a
+          // tooltip that explains that this type of field is not supported in this table.
+          return (
+            <EuiToolTip
+              content={i18n.translate(
+                'xpack.transform.sourceIndexPreview.SourceIndexObjectToolTipContent',
+                {
+                  defaultMessage:
+                    'The full content of this object based column is available in the expanded row.',
+                }
+              )}
+            >
+              <EuiBadge>
+                {i18n.translate(
+                  'xpack.transform.sourceIndexPreview.SourceIndexObjectBadgeContent',
+                  {
+                    defaultMessage: 'object',
+                  }
+                )}
+              </EuiBadge>
+            </EuiToolTip>
+          );
+        }
+
+        return formatField(d);
+      };
+
+      if (typeof field !== 'undefined') {
+        switch (field.type) {
+          case KBN_FIELD_TYPES.BOOLEAN:
+            column.dataType = 'boolean';
+            break;
+          case KBN_FIELD_TYPES.DATE:
+            column.align = 'right';
+            column.render = (d: any) => formatHumanReadableDateTimeSeconds(moment(d).unix() * 1000);
+            break;
+          case KBN_FIELD_TYPES.NUMBER:
+            column.dataType = 'number';
+            break;
+          default:
+            column.render = render;
+            break;
+        }
+      } else {
+        column.render = render;
+      }
+
+      if (CELL_CLICK_ENABLED && cellClick) {
+        column.render = (d: string) => (
+          <EuiButtonEmpty size="xs" onClick={() => cellClick(`${k}:(${d})`)}>
+            {render(d)}
+          </EuiButtonEmpty>
         );
       }
 
-      return formatField(d);
-    };
-
-    if (typeof field !== 'undefined') {
-      switch (field.type) {
-        case KBN_FIELD_TYPES.BOOLEAN:
-          column.dataType = 'boolean';
-          break;
-        case KBN_FIELD_TYPES.DATE:
-          column.align = 'right';
-          column.render = (d: any) => formatHumanReadableDateTimeSeconds(moment(d).unix() * 1000);
-          break;
-        case KBN_FIELD_TYPES.NUMBER:
-          column.dataType = 'number';
-          break;
-        default:
-          column.render = render;
-          break;
-      }
-    } else {
-      column.render = render;
-    }
-
-    if (CELL_CLICK_ENABLED && cellClick) {
-      column.render = (d: string) => (
-        <EuiButtonEmpty size="xs" onClick={() => cellClick(`${k}:(${d})`)}>
-          {render(d)}
-        </EuiButtonEmpty>
-      );
-    }
-
-    return column;
-  });
+      return column;
+    });
+  }
 
   let sorting: SortingPropType = false;
 
@@ -303,6 +314,13 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
   const euiCopyText = i18n.translate('xpack.transform.sourceIndexPreview.copyClipboardTooltip', {
     defaultMessage: 'Copy Dev Console statement of the source index preview to the clipboard.',
   });
+
+  const getRowProps = (item: EsDoc) => {
+    return {
+      onMouseOver: () => hoveredRow$.next(item),
+      onMouseLeave: () => hoveredRow$.next(null),
+    };
+  };
 
   return (
     <>
@@ -382,22 +400,25 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
           <EuiProgress size="xs" color="accent" max={1} value={0} />
         )}
         {clearTable === false && columns.length > 0 && sorting !== false && (
-          <MlInMemoryTableBasic
-            allowNeutralSort={false}
-            compressed
-            items={tableItems}
-            columns={columns}
-            pagination={{
-              initialPageSize: 5,
-              pageSizeOptions: [5, 10, 25],
-            }}
-            hasActions={false}
-            isSelectable={false}
-            itemId="_id"
-            itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-            isExpandable={true}
-            sorting={sorting}
-          />
+          <div ref={sourceIndexTableElement} className="transformDataGrid">
+            <MlInMemoryTableBasic
+              allowNeutralSort={false}
+              compressed
+              items={tableItems}
+              columns={columns}
+              pagination={{
+                initialPageSize: 5,
+                pageSizeOptions: [5, 10, 25],
+              }}
+              hasActions={false}
+              isSelectable={false}
+              itemId="_id"
+              itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+              isExpandable={true}
+              rowProps={getRowProps}
+              sorting={sorting}
+            />
+          </div>
         )}
       </EuiPanel>
     </>

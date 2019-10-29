@@ -8,6 +8,7 @@ import React, { FC, useEffect, useState } from 'react';
 import moment from 'moment-timezone';
 
 import { i18n } from '@kbn/i18n';
+import { idx } from '@kbn/elastic-idx';
 
 import d3 from 'd3';
 
@@ -42,6 +43,10 @@ import { useUiChromeContext } from '../../../../../contexts/ui/use_ui_chrome_con
 
 import { formatHumanReadableDateTimeSeconds } from '../../../../../util/date_utils';
 import { ml } from '../../../../../services/ml_api_service';
+import { useKibanaContext } from '../../../../../contexts/kibana';
+
+import { hoveredRow$ } from './column_chart';
+import { useColumnCharts } from './use_column_charts';
 
 import {
   sortColumns,
@@ -91,6 +96,7 @@ interface Props {
 }
 
 export const Exploration: FC<Props> = React.memo(({ jobId }) => {
+  const kibanaContext = useKibanaContext();
   const [jobConfig, setJobConfig] = useState<DataFrameAnalyticsConfig | undefined>(undefined);
 
   const [pageIndex, setPageIndex] = useState(0);
@@ -166,144 +172,178 @@ export const Exploration: FC<Props> = React.memo(({ jobId }) => {
     docFieldsCount = docFields.length;
   }
 
-  const columns: ColumnType[] = [];
+  const columns: ColumnType[] = getColumns();
 
-  if (jobConfig !== undefined && selectedFields.length > 0 && tableItems.length > 0) {
-    // table cell color coding takes into account:
-    // - whether the theme is dark/light
-    // - the number of analysis features
-    // based on that
-    const cellBgColorScale = d3.scale
-      .linear()
-      .domain([0, 1])
-      // typings for .range() incorrectly don't allow passing in a color extent.
-      // @ts-ignore
-      .range([d3.rgb(euiTheme.euiColorEmptyShade), d3.rgb(euiTheme.euiColorVis1)]);
-    const featureCount = Object.keys(tableItems[0]).filter(key =>
-      key.includes(`${jobConfig.dest.results_field}.${FEATURE_INFLUENCE}.`)
-    ).length;
-    const customScale = customColorScaleFactory(featureCount);
-    const cellBgColor = (n: number) => cellBgColorScale(customScale(n));
+  const query = { match_all: {} };
+  const indexPatternTitle = jobConfig !== undefined ? jobConfig.dest.index : '';
 
-    columns.push(
-      ...selectedFields.sort(sortColumns(tableItems[0], jobConfig.dest.results_field)).map(k => {
-        const column: ColumnType = {
-          field: k,
-          name: k,
-          sortable: true,
-          truncateText: true,
-        };
-
-        const render = (d: any, fullItem: EsDoc) => {
-          if (Array.isArray(d) && d.every(item => typeof item === 'string')) {
-            // If the cells data is an array of strings, return as a comma separated list.
-            // The list will get limited to 5 items with `…` at the end if there's more in the original array.
-            return `${d.slice(0, 5).join(', ')}${d.length > 5 ? ', …' : ''}`;
-          } else if (Array.isArray(d)) {
-            // If the cells data is an array of e.g. objects, display a 'array' badge with a
-            // tooltip that explains that this type of field is not supported in this table.
-            return (
-              <EuiToolTip
-                content={i18n.translate(
-                  'xpack.ml.dataframe.analytics.exploration.indexArrayToolTipContent',
-                  {
-                    defaultMessage:
-                      'The full content of this array based column cannot be displayed.',
-                  }
-                )}
-              >
-                <EuiBadge>
-                  {i18n.translate(
-                    'xpack.ml.dataframe.analytics.exploration.indexArrayBadgeContent',
-                    {
-                      defaultMessage: 'array',
-                    }
-                  )}
-                </EuiBadge>
-              </EuiToolTip>
-            );
-          } else if (typeof d === 'object' && d !== null) {
-            // If the cells data is an object, display a 'object' badge with a
-            // tooltip that explains that this type of field is not supported in this table.
-            return (
-              <EuiToolTip
-                content={i18n.translate(
-                  'xpack.ml.dataframe.analytics.exploration.indexObjectToolTipContent',
-                  {
-                    defaultMessage:
-                      'The full content of this object based column cannot be displayed.',
-                  }
-                )}
-              >
-                <EuiBadge>
-                  {i18n.translate(
-                    'xpack.ml.dataframe.analytics.exploration.indexObjectBadgeContent',
-                    {
-                      defaultMessage: 'object',
-                    }
-                  )}
-                </EuiBadge>
-              </EuiToolTip>
-            );
-          }
-
-          const split = k.split('.');
-          let backgroundColor;
-          const color = undefined;
-          const resultsField = jobConfig.dest.results_field;
-
-          if (fullItem[`${resultsField}.${FEATURE_INFLUENCE}.${k}`] !== undefined) {
-            backgroundColor = cellBgColor(fullItem[`${resultsField}.${FEATURE_INFLUENCE}.${k}`]);
-          }
-
-          if (split.length > 2 && split[0] === resultsField && split[1] === FEATURE_INFLUENCE) {
-            backgroundColor = cellBgColor(d);
-          }
-
-          return (
-            <div
-              className="mlColoredTableCell"
-              style={{
-                backgroundColor,
-                color,
-              }}
-            >
-              {d}
-            </div>
-          );
-        };
-
-        let columnType;
-
-        if (tableItems.length > 0) {
-          columnType = typeof tableItems[0][k];
+  const [indexPattern, setIndexPattern] = useState(undefined);
+  const getIndexPattern = async () => {
+    const savedObjects = (await kibanaContext.indexPatterns.getCache()) || [];
+    const indexPatternSavedObject = savedObjects.find(obj => {
+      const title = idx(obj, _ => _.attributes.title);
+      if (title !== undefined && title === indexPatternTitle) {
+        const id = idx(obj, _ => _.id);
+        if (id !== undefined) {
+          return true;
         }
-
-        if (typeof columnType !== 'undefined') {
-          switch (columnType) {
-            case 'boolean':
-              column.dataType = 'boolean';
-              break;
-            case 'Date':
-              column.align = 'right';
-              column.render = (d: any) =>
-                formatHumanReadableDateTimeSeconds(moment(d).unix() * 1000);
-              break;
-            case 'number':
-              column.dataType = 'number';
-              column.render = render;
-              break;
-            default:
-              column.render = render;
-              break;
-          }
-        } else {
-          column.render = render;
-        }
-
-        return column;
-      })
+      }
+      return false;
+    });
+    if (indexPatternSavedObject === undefined) {
+      return;
+    }
+    const theIndexPattern: IndexPattern = await kibanaContext.indexPatterns.get(
+      indexPatternSavedObject.id
     );
+    setIndexPattern(theIndexPattern);
+  };
+
+  useEffect(() => {
+    getIndexPattern();
+  }, [indexPatternTitle]);
+
+  const sourceIndexTableElement = useColumnCharts(indexPattern, columns, query);
+
+  function getColumns() {
+    if (jobConfig !== undefined && selectedFields.length > 0 && tableItems.length > 0) {
+      // table cell color coding takes into account:
+      // - whether the theme is dark/light
+      // - the number of analysis features
+      // based on that
+      const cellBgColorScale = d3.scale
+        .linear()
+        .domain([0, 1])
+        // typings for .range() incorrectly don't allow passing in a color extent.
+        // @ts-ignore
+        .range([d3.rgb(euiTheme.euiColorEmptyShade), d3.rgb(euiTheme.euiColorVis1)]);
+      const featureCount = Object.keys(tableItems[0]).filter(key =>
+        key.includes(`${jobConfig.dest.results_field}.${FEATURE_INFLUENCE}.`)
+      ).length;
+      const customScale = customColorScaleFactory(featureCount);
+      const cellBgColor = (n: number) => cellBgColorScale(customScale(n));
+      return selectedFields
+        .sort(sortColumns(tableItems[0], jobConfig.dest.results_field))
+        .map(k => {
+          const column: ColumnType = {
+            field: k,
+            name: k,
+            sortable: true,
+            truncateText: true,
+          };
+
+          const render = (d: any, fullItem: EsDoc) => {
+            if (Array.isArray(d) && d.every(item => typeof item === 'string')) {
+              // If the cells data is an array of strings, return as a comma separated list.
+              // The list will get limited to 5 items with `…` at the end if there's more in the original array.
+              return `${d.slice(0, 5).join(', ')}${d.length > 5 ? ', …' : ''}`;
+            } else if (Array.isArray(d)) {
+              // If the cells data is an array of e.g. objects, display a 'array' badge with a
+              // tooltip that explains that this type of field is not supported in this table.
+              return (
+                <EuiToolTip
+                  content={i18n.translate(
+                    'xpack.ml.dataframe.analytics.exploration.indexArrayToolTipContent',
+                    {
+                      defaultMessage:
+                        'The full content of this array based column cannot be displayed.',
+                    }
+                  )}
+                >
+                  <EuiBadge>
+                    {i18n.translate(
+                      'xpack.ml.dataframe.analytics.exploration.indexArrayBadgeContent',
+                      {
+                        defaultMessage: 'array',
+                      }
+                    )}
+                  </EuiBadge>
+                </EuiToolTip>
+              );
+            } else if (typeof d === 'object' && d !== null) {
+              // If the cells data is an object, display a 'object' badge with a
+              // tooltip that explains that this type of field is not supported in this table.
+              return (
+                <EuiToolTip
+                  content={i18n.translate(
+                    'xpack.ml.dataframe.analytics.exploration.indexObjectToolTipContent',
+                    {
+                      defaultMessage:
+                        'The full content of this object based column cannot be displayed.',
+                    }
+                  )}
+                >
+                  <EuiBadge>
+                    {i18n.translate(
+                      'xpack.ml.dataframe.analytics.exploration.indexObjectBadgeContent',
+                      {
+                        defaultMessage: 'object',
+                      }
+                    )}
+                  </EuiBadge>
+                </EuiToolTip>
+              );
+            }
+
+            const split = k.split('.');
+            let backgroundColor;
+            const color = undefined;
+            const resultsField = jobConfig.dest.results_field;
+
+            if (fullItem[`${resultsField}.${FEATURE_INFLUENCE}.${k}`] !== undefined) {
+              backgroundColor = cellBgColor(fullItem[`${resultsField}.${FEATURE_INFLUENCE}.${k}`]);
+            }
+
+            if (split.length > 2 && split[0] === resultsField && split[1] === FEATURE_INFLUENCE) {
+              backgroundColor = cellBgColor(d);
+            }
+
+            return (
+              <div
+                className="mlColoredTableCell"
+                style={{
+                  backgroundColor,
+                  color,
+                }}
+              >
+                {d}
+              </div>
+            );
+          };
+
+          let columnType;
+
+          if (tableItems.length > 0) {
+            columnType = typeof tableItems[0][k];
+          }
+
+          if (typeof columnType !== 'undefined') {
+            switch (columnType) {
+              case 'boolean':
+                column.dataType = 'boolean';
+                break;
+              case 'Date':
+                column.align = 'right';
+                column.render = (d: any) =>
+                  formatHumanReadableDateTimeSeconds(moment(d).unix() * 1000);
+                break;
+              case 'number':
+                column.dataType = 'number';
+                column.render = render;
+                break;
+              default:
+                column.render = render;
+                break;
+            }
+          } else {
+            column.render = render;
+          }
+
+          return column;
+        });
+    }
+
+    return [];
   }
 
   useEffect(() => {
@@ -397,6 +437,13 @@ export const Exploration: FC<Props> = React.memo(({ jobId }) => {
     );
   }
 
+  const getRowProps = (item: any) => {
+    return {
+      onMouseOver: () => hoveredRow$.next(item),
+      onMouseLeave: () => hoveredRow$.next(null),
+    };
+  };
+
   return (
     <EuiPanel grow={false}>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
@@ -467,19 +514,22 @@ export const Exploration: FC<Props> = React.memo(({ jobId }) => {
         <EuiProgress size="xs" color="accent" max={1} value={0} />
       )}
       {clearTable === false && columns.length > 0 && sortField !== '' && (
-        <MlInMemoryTableBasic
-          allowNeutralSort={false}
-          className="mlDataFrameAnalyticsExploration"
-          columns={columns}
-          compressed
-          hasActions={false}
-          isSelectable={false}
-          items={tableItems}
-          onTableChange={onTableChange}
-          pagination={pagination}
-          responsive={false}
-          sorting={sorting}
-        />
+        <div ref={sourceIndexTableElement} className="transformDataGrid">
+          <MlInMemoryTableBasic
+            allowNeutralSort={false}
+            className="mlDataFrameAnalyticsExploration"
+            columns={columns}
+            compressed
+            hasActions={false}
+            isSelectable={false}
+            items={tableItems}
+            onTableChange={onTableChange}
+            pagination={pagination}
+            responsive={false}
+            sorting={sorting}
+            rowProps={getRowProps}
+          />
+        </div>
       )}
     </EuiPanel>
   );

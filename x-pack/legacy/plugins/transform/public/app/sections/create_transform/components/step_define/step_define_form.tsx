@@ -510,26 +510,6 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
     <EuiForm>
       {kibanaContext.currentSavedSearch === undefined && typeof searchString === 'string' && (
         <Fragment>
-          <EuiFormRow
-            fullWidth
-            label={i18n.translate('xpack.transform.stepDefineForm.indexPatternLabel', {
-              defaultMessage: 'Index pattern',
-            })}
-            helpText={
-              disabledQuery
-                ? i18n.translate('xpack.transform.stepDefineForm.indexPatternHelpText', {
-                    defaultMessage:
-                      'An optional query for this index pattern is not supported. The number of supported index fields is {maxIndexFields} whereas this index has {numIndexFields} fields.',
-                    values: {
-                      maxIndexFields,
-                      numIndexFields,
-                    },
-                  })
-                : ''
-            }
-          >
-            <EuiBadge>{indexPattern.title}</EuiBadge>
-          </EuiFormRow>
           {!disabledQuery && (
             <Fragment>
               {!isAdvancedSourceEditorEnabled && (
