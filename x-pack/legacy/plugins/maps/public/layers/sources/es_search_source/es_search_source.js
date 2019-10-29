@@ -71,7 +71,7 @@ export class ESSearchSource extends AbstractESSource {
     this._tooltipFields = this._descriptor.tooltipProperties.map((property) => this.createField(property));
   }
 
-  createField(fieldName) {
+  createField({ fieldName }) {
     return new ESDocField({
       fieldName,
       source: this

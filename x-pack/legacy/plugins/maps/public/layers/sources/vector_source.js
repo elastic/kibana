@@ -48,6 +48,10 @@ export class AbstractVectorSource extends AbstractSource {
     }));
   }
 
+  createField() {
+    return null;
+  }
+
   _createDefaultLayerDescriptor(options, mapColors) {
     return VectorLayer.createDescriptor(
       {

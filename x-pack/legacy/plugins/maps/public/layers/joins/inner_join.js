@@ -14,7 +14,7 @@ export class InnerJoin {
     this._descriptor = joinDescriptor;
     const inspectorAdapters = leftSource.getInspectorAdapters();
     this._rightSource = new ESTermSource(joinDescriptor.right, inspectorAdapters);
-    this._leftField = this._descriptor.leftField ? leftSource.createField(joinDescriptor.leftField) : null;
+    this._leftField = this._descriptor.leftField ? leftSource.createField({ fieldName: joinDescriptor.leftField }) : null;
   }
 
   destroy() {

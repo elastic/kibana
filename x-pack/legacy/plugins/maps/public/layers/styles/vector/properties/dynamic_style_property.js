@@ -9,6 +9,16 @@ import { AbstractStyleProperty } from './style_property';
 
 export class DynamicStyleProperty extends AbstractStyleProperty {
     static type = 'DYNAMIC';
+
+    constructor(options, styleName, field) {
+      super(options, styleName);
+      this._field = field;
+    }
+
+    getField() {
+      return this._field;
+    }
+
     isDynamic() {
       return this._options.field && this._options.field.name;
     }

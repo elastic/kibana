@@ -95,6 +95,10 @@ export class VectorLayer extends AbstractLayer {
         this._joins.push(join);
       });
     }
+
+    //todo: remove style-instance creation from selectors. Need to inject layer instance
+    this._style = new VectorStyle(this._descriptor.style, this._source, this);
+
   }
 
   destroy() {
