@@ -157,8 +157,8 @@ export class EditPolicy extends Component {
             verticalPosition="center"
             horizontalPosition="center"
           >
-            <EuiTitle>
-              <h4>
+            <EuiTitle size="l">
+              <h1>
                 {isNewPolicy
                   ? i18n.translate('xpack.indexLifecycleMgmt.editPolicy.createPolicyMessage', {
                     defaultMessage: 'Create an index lifecycle policy'
@@ -167,7 +167,7 @@ export class EditPolicy extends Component {
                     defaultMessage: 'Edit index lifecycle policy {originalPolicyName}',
                     values: { originalPolicyName }
                   })}
-              </h4>
+              </h1>
             </EuiTitle>
 
             <div className="euiAnimateContentLoad">

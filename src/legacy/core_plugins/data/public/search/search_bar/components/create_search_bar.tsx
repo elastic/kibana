@@ -25,7 +25,7 @@ import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { Storage } from '../../../types';
 import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
 import { TimefilterSetup } from '../../../timefilter';
-import { FilterManager, SearchBar } from '../../../';
+import { SearchBar } from '../../../';
 import { SearchBarOwnProps } from '.';
 
 interface StatefulSearchBarDeps {
@@ -33,16 +33,15 @@ interface StatefulSearchBarDeps {
   data: DataPublicPluginStart;
   store: Storage;
   timefilter: TimefilterSetup;
-  filterManager: FilterManager;
 }
 
 export type StatetfulSearchBarProps = SearchBarOwnProps & {
   appName: string;
 };
 
-const defaultFiltersUpdated = (filterManager: FilterManager) => {
+const defaultFiltersUpdated = (data: DataPublicPluginStart) => {
   return (filters: Filter[]) => {
-    filterManager.setFilters(filters);
+    data.query.filterManager.setFilters(filters);
   };
 };
 
@@ -55,16 +54,11 @@ const defaultOnRefreshChange = (timefilter: TimefilterSetup) => {
   };
 };
 
-export function createSearchBar({
-  core,
-  store,
-  timefilter,
-  filterManager,
-  data,
-}: StatefulSearchBarDeps) {
+export function createSearchBar({ core, store, timefilter, data }: StatefulSearchBarDeps) {
   // App name should come from the core application service.
   // Until it's available, we'll ask the user to provide it for the pre-wired component.
   return (props: StatetfulSearchBarProps) => {
+    const { filterManager } = data.query;
     const tfRefreshInterval = timefilter.timefilter.getRefreshInterval();
     const fmFilters = filterManager.getFilters();
     const [refreshInterval, setRefreshInterval] = useState(tfRefreshInterval.value);
@@ -124,7 +118,7 @@ export function createSearchBar({
           refreshInterval={refreshInterval}
           isRefreshPaused={refreshPaused}
           filters={filters}
-          onFiltersUpdated={defaultFiltersUpdated(filterManager)}
+          onFiltersUpdated={defaultFiltersUpdated(data)}
           onRefreshChange={defaultOnRefreshChange(timefilter)}
           {...props}
         />

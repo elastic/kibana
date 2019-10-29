@@ -12,7 +12,6 @@ import { LoginPage } from 'plugins/security/views/login/components';
 import template from 'plugins/security/views/login/login.html';
 import React from 'react';
 import { render } from 'react-dom';
-import 'ui/autoload/styles';
 import chrome from 'ui/chrome';
 import { I18nContext } from 'ui/i18n';
 import { parse } from 'url';
