@@ -33,7 +33,7 @@ indices are corrupt.
 
 *Resolution*
 
- - Stop all your Filebeat instances.
+ . Stop all your {filebeat} instances.
  - Delete indices beginning with `filebeat-$VERSION`, where `VERSION` corresponds
    to the version of Filebeat running.
 . Restart all your {filebeat} instances.
