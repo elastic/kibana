@@ -125,3 +125,20 @@ test('fails if not matching literal', () => {
 
   expect(() => type.validate('bar')).toThrowErrorMatchingSnapshot();
 });
+
+test('fails if nested union type fail', () => {
+  const type = schema.oneOf([
+    schema.oneOf([schema.boolean()]),
+    schema.oneOf([schema.oneOf([schema.object({}), schema.number()])]),
+  ]);
+
+  expect(() => type.validate('aaa')).toThrowErrorMatchingInlineSnapshot(`
+"types that failed validation:
+- [0]: types that failed validation:
+ - [0]: expected value of type [boolean] but got [string]
+- [1]: types that failed validation:
+ - [0]: types that failed validation:
+  - [0]: expected a plain object value, but found [string] instead.
+  - [1]: expected value of type [number] but got [string]"
+`);
+});

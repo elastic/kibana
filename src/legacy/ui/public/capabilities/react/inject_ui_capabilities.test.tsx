@@ -77,6 +77,7 @@ describe('injectUICapabilities', () => {
       uiCapabilities: UICapabilities;
     }
 
+    // eslint-disable-next-line react/prefer-stateless-function
     class MyClassComponent extends React.Component<ClassProps, {}> {
       public render() {
         return <span>{this.props.uiCapabilities.uiCapability2.nestedProp}</span>;

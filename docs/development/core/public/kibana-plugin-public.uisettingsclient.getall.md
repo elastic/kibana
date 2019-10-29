@@ -9,9 +9,9 @@ Gets the metadata about all uiSettings, including the type, default value, and u
 <b>Signature:</b>
 
 ```typescript
-getAll(): UiSettingsState;
+getAll(): Record<string, UiSettingsParams & UserProvidedValues<any>>;
 ```
 <b>Returns:</b>
 
-`UiSettingsState`
+`Record<string, UiSettingsParams & UserProvidedValues<any>>`
 

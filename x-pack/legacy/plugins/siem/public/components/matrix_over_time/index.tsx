@@ -31,8 +31,9 @@ export interface MatrixOverTimeBasicProps {
 }
 
 export interface MatrixOverTimeProps extends MatrixOverTimeBasicProps {
+  customChartData?: ChartSeriesData[];
   title: string;
-  subtitle: string;
+  subtitle?: string;
   dataKey: string;
 }
 
@@ -73,6 +74,7 @@ const getBarchartConfigs = (from: number, to: number, onBrushEnd: UpdateDateRang
 });
 
 export const MatrixOverTimeHistogram = ({
+  customChartData,
   id,
   loading,
   data,
@@ -91,7 +93,7 @@ export const MatrixOverTimeHistogram = ({
   const [darkMode] = useKibanaUiSetting(DEFAULT_DARK_MODE);
   const [loadingInitial, setLoadingInitial] = useState(false);
 
-  const barChartData: ChartSeriesData[] = [
+  const barChartData: ChartSeriesData[] = customChartData || [
     {
       key: dataKey,
       value: data,
