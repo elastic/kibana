@@ -490,8 +490,6 @@ export class VectorStyle extends AbstractStyle {
   }
 
   _makeOrientationProperty(descriptor, styleName) {
-
-
     if (!descriptor || !descriptor.options) {
       return new StaticOrientationProperty({ orientation: 0 });
     } else if (descriptor.type === StaticStyleProperty.type) {
@@ -501,7 +499,6 @@ export class VectorStyle extends AbstractStyle {
     } else {
       throw new Error(`${descriptor} not implemented`);
     }
-
   }
 
   _makeStyleProperty(propertyName, descriptor) {

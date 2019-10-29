@@ -13,11 +13,13 @@ import { vectorStyles } from '../vector_style_defaults';
 export class DynamicOrientationProperty extends DynamicStyleProperty {
 
   syncIconRotationWithMb(symbolLayerId, mbMap) {
-    const targetName = getComputedFieldName(vectorStyles.ICON_ORIENTATION, this._options.field.name);
-    // Using property state instead of feature-state because layout properties do not support feature-state
-    mbMap.setLayoutProperty(symbolLayerId, 'icon-rotate', [
-      'coalesce', ['get', targetName], 0
-    ]);
+    if (this._options.field && this._options.field.name) {
+      const targetName = getComputedFieldName(vectorStyles.ICON_ORIENTATION, this._options.field.name);
+      // Using property state instead of feature-state because layout properties do not support feature-state
+      mbMap.setLayoutProperty(symbolLayerId, 'icon-rotate', ['coalesce', ['get', targetName], 0]);
+    } else {
+      mbMap.setLayoutProperty(symbolLayerId, 'icon-rotate', 0);
+    }
   }
 
 
