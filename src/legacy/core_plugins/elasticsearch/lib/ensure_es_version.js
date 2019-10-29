@@ -36,7 +36,7 @@ import isEsCompatibleWithKibana from './is_es_compatible_with_kibana';
  */
 const lastWarnedNodesForServer = new WeakMap();
 
-export function ensureEsVersion(server, kibanaVersion, ignoreVersionMismatch) {
+export function ensureEsVersion(server, kibanaVersion, ignoreVersionMismatch = false) {
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
 
   server.logWithMetadata(['plugin', 'debug'], 'Checking Elasticsearch version');
@@ -117,8 +117,6 @@ export function ensureEsVersion(server, kibanaVersion, ignoreVersionMismatch) {
 
 function shouldIgnoreVersionMismatch(server, ignoreVersionMismatch) {
   const isDevMode = server.config().get('env.dev');
-  console.log({ ignoreVersionMismatch });
-
   if(!isDevMode && ignoreVersionMismatch) {
     throw new Error(`Option "elasticsearch.ignoreVersionMismatch" can only be used in development mode`);
   }

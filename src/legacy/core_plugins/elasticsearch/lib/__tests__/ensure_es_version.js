@@ -110,8 +110,6 @@ describe('plugins/elasticsearch', () => {
       server.config = () => ({
         get: name => {
           switch (name) {
-            case 'elasticsearch.ignoreVersionMismatch':
-              return true;
             case 'env.dev':
               return true;
             default:
@@ -123,7 +121,8 @@ describe('plugins/elasticsearch', () => {
       // 5.0.0 ES is too old to work with a 5.1.0 version of Kibana.
       setNodes('5.1.0', '5.2.0', '5.0.0');
 
-      const result =  await ensureEsVersion(server, KIBANA_VERSION);
+      const ignoreVersionMismatch = true;
+      const result =  await ensureEsVersion(server, KIBANA_VERSION, ignoreVersionMismatch);
       expect(result).to.be(true);
     });
 
@@ -132,8 +131,6 @@ describe('plugins/elasticsearch', () => {
       server.config = () => ({
         get: name => {
           switch (name) {
-            case 'elasticsearch.ignoreVersionMismatch':
-              return true;
             case 'env.dev':
               return false;
             default:
@@ -146,7 +143,8 @@ describe('plugins/elasticsearch', () => {
       setNodes('5.1.0', '5.2.0', '5.0.0');
 
       try {
-        await ensureEsVersion(server, KIBANA_VERSION);
+        const ignoreVersionMismatch = true;
+        await ensureEsVersion(server, KIBANA_VERSION, ignoreVersionMismatch);
       } catch (e) {
         expect(e).to.be.a(Error);
       }
