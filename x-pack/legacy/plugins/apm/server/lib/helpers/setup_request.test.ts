@@ -3,9 +3,21 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { Legacy } from 'kibana';
 import { setupRequest } from './setup_request';
+import { uiSettingsServiceMock } from 'src/core/server/mocks';
+
+jest.mock('../settings/apm_indices/get_apm_indices', () => ({
+  getApmIndices: async () => ({
+    'apm_oss.sourcemapIndices': 'apm-*',
+    'apm_oss.errorIndices': 'apm-*',
+    'apm_oss.onboardingIndices': 'apm-*',
+    'apm_oss.spanIndices': 'apm-*',
+    'apm_oss.transactionIndices': 'apm-*',
+    'apm_oss.metricsIndices': 'apm-*',
+    'apm_oss.apmAgentConfigurationIndex': 'apm-*'
+  })
+}));
 
 function getMockRequest() {
   const callWithRequestSpy = jest.fn();
@@ -30,7 +42,7 @@ describe('setupRequest', () => {
   it('should call callWithRequest with default args', async () => {
     const { mockRequest, callWithRequestSpy } = getMockRequest();
     const { client } = await setupRequest(mockRequest);
-    await client.search({ index: 'apm-*', body: { foo: 'bar' } });
+    await client.search({ index: 'apm-*', body: { foo: 'bar' } } as any);
     expect(callWithRequestSpy).toHaveBeenCalledWith(mockRequest, 'search', {
       index: 'apm-*',
       body: {
@@ -41,8 +53,7 @@ describe('setupRequest', () => {
           }
         }
       },
-      ignore_throttled: true,
-      rest_total_hits_as_int: true
+      ignore_throttled: true
     });
   });
 
@@ -125,8 +136,10 @@ describe('setupRequest', () => {
     it('should set `ignore_throttled=true` if `includeFrozen=false`', async () => {
       const { mockRequest, callWithRequestSpy } = getMockRequest();
 
+      const uiSettingsService = uiSettingsServiceMock.createClient();
       // mock includeFrozen to return false
-      mockRequest.getUiSettingsService = () => ({ get: async () => false });
+      uiSettingsService.get.mockResolvedValue(false);
+      mockRequest.getUiSettingsService = () => uiSettingsService;
       const { client } = await setupRequest(mockRequest);
       await client.search({});
       const params = callWithRequestSpy.mock.calls[0][2];
@@ -136,8 +149,10 @@ describe('setupRequest', () => {
     it('should set `ignore_throttled=false` if `includeFrozen=true`', async () => {
       const { mockRequest, callWithRequestSpy } = getMockRequest();
 
+      const uiSettingsService = uiSettingsServiceMock.createClient();
       // mock includeFrozen to return true
-      mockRequest.getUiSettingsService = () => ({ get: async () => true });
+      uiSettingsService.get.mockResolvedValue(true);
+      mockRequest.getUiSettingsService = () => uiSettingsService;
       const { client } = await setupRequest(mockRequest);
       await client.search({});
       const params = callWithRequestSpy.mock.calls[0][2];

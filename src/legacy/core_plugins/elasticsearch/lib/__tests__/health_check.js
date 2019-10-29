@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Promise from 'bluebird';
+import Bluebird from 'bluebird';
 import sinon from 'sinon';
 import expect from '@kbn/expect';
 
@@ -58,11 +58,11 @@ describe('plugins/elasticsearch', () => {
       };
 
       cluster = { callWithInternalUser: sinon.stub(), errors: { NoConnections } };
-      cluster.callWithInternalUser.withArgs('index', sinon.match.any).returns(Promise.resolve());
-      cluster.callWithInternalUser.withArgs('mget', sinon.match.any).returns(Promise.resolve({ ok: true }));
-      cluster.callWithInternalUser.withArgs('get', sinon.match.any).returns(Promise.resolve({ found: false }));
-      cluster.callWithInternalUser.withArgs('search', sinon.match.any).returns(Promise.resolve({ hits: { hits: [] } }));
-      cluster.callWithInternalUser.withArgs('nodes.info', sinon.match.any).returns(Promise.resolve({
+      cluster.callWithInternalUser.withArgs('index', sinon.match.any).returns(Bluebird.resolve());
+      cluster.callWithInternalUser.withArgs('mget', sinon.match.any).returns(Bluebird.resolve({ ok: true }));
+      cluster.callWithInternalUser.withArgs('get', sinon.match.any).returns(Bluebird.resolve({ found: false }));
+      cluster.callWithInternalUser.withArgs('search', sinon.match.any).returns(Bluebird.resolve({ hits: { hits: [] } }));
+      cluster.callWithInternalUser.withArgs('nodes.info', sinon.match.any).returns(Bluebird.resolve({
         nodes: {
           'node-01': {
             version: COMPATIBLE_VERSION_NUMBER,
@@ -108,7 +108,7 @@ describe('plugins/elasticsearch', () => {
     });
 
     it('should set the cluster green if everything is ready', function () {
-      cluster.callWithInternalUser.withArgs('ping').returns(Promise.resolve());
+      cluster.callWithInternalUser.withArgs('ping').returns(Bluebird.resolve());
 
       return health.run()
         .then(function () {

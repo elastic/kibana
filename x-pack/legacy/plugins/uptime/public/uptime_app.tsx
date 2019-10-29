@@ -13,8 +13,8 @@ import React, { useEffect, useState } from 'react';
 import { ApolloProvider } from 'react-apollo';
 import { Provider as ReduxProvider } from 'react-redux';
 import { BrowserRouter as Router, Route, RouteComponentProps, Switch } from 'react-router-dom';
-import { capabilities } from 'ui/capabilities';
-import { I18nContext } from 'ui/i18n';
+import { I18nStart, ChromeBreadcrumb } from 'src/core/public';
+import { AutocompleteProviderRegister } from 'src/plugins/data/public';
 import { UMGraphQLClient, UMUpdateBreadcrumbs, UMUpdateBadge } from './lib/lib';
 import { MonitorPage, OverviewPage, NotFoundPage } from './pages';
 import { UptimeRefreshContext, UptimeSettingsContext, UMSettingsContextValues } from './contexts';
@@ -25,6 +25,7 @@ import { store } from './state';
 export interface UptimeAppColors {
   danger: string;
   success: string;
+  gray: string;
   range: string;
   mean: string;
   warning: string;
@@ -32,11 +33,15 @@ export interface UptimeAppColors {
 
 export interface UptimeAppProps {
   basePath: string;
+  canSave: boolean;
   client: UMGraphQLClient;
   darkMode: boolean;
+  autocomplete: Pick<AutocompleteProviderRegister, 'getProvider'>;
+  i18n: I18nStart;
   isApmAvailable: boolean;
   isInfraAvailable: boolean;
   isLogsAvailable: boolean;
+  kibanaBreadcrumbs: ChromeBreadcrumb[];
   logMonitorPageLoad: () => void;
   logOverviewPageLoad: () => void;
   routerBasename: string;
@@ -47,9 +52,12 @@ export interface UptimeAppProps {
 
 const Application = (props: UptimeAppProps) => {
   const {
+    autocomplete,
     basePath,
+    canSave,
     client,
     darkMode,
+    i18n: i18nCore,
     isApmAvailable,
     isInfraAvailable,
     isLogsAvailable,
@@ -66,6 +74,7 @@ const Application = (props: UptimeAppProps) => {
     colors = {
       danger: euiDarkVars.euiColorDanger,
       mean: euiDarkVars.euiColorPrimary,
+      gray: euiDarkVars.euiColorLightShade,
       range: euiDarkVars.euiFocusBackgroundColor,
       success: euiDarkVars.euiColorSuccess,
       warning: euiDarkVars.euiColorWarning,
@@ -74,6 +83,7 @@ const Application = (props: UptimeAppProps) => {
     colors = {
       danger: euiLightVars.euiColorDanger,
       mean: euiLightVars.euiColorPrimary,
+      gray: euiLightVars.euiColorLightShade,
       range: euiLightVars.euiFocusBackgroundColor,
       success: euiLightVars.euiColorSuccess,
       warning: euiLightVars.euiColorWarning,
@@ -86,7 +96,7 @@ const Application = (props: UptimeAppProps) => {
   useEffect(() => {
     renderGlobalHelpControls();
     setBadge(
-      !capabilities.get().uptime.save
+      !canSave
         ? {
             text: i18n.translate('xpack.uptime.badge.readOnly.text', {
               defaultMessage: 'Read only',
@@ -133,7 +143,7 @@ const Application = (props: UptimeAppProps) => {
   };
 
   return (
-    <I18nContext>
+    <i18nCore.Context>
       <ReduxProvider store={store}>
         <Router basename={routerBasename}>
           <Route
@@ -144,13 +154,13 @@ const Application = (props: UptimeAppProps) => {
                   <UptimeRefreshContext.Provider value={{ lastRefresh, ...rootRouteProps }}>
                     <UptimeSettingsContext.Provider value={initializeSettingsContextValues()}>
                       <EuiPage className="app-wrapper-panel " data-test-subj="uptimeApp">
-                        <div>
+                        <main>
                           <EuiFlexGroup
                             alignItems="center"
                             justifyContent="spaceBetween"
                             gutterSize="s"
                           >
-                            <EuiFlexItem grow={false}>
+                            <EuiFlexItem>
                               <EuiTitle>
                                 <h1>{headingText}</h1>
                               </EuiTitle>
@@ -162,18 +172,6 @@ const Application = (props: UptimeAppProps) => {
                           <EuiSpacer size="s" />
                           <Switch>
                             <Route
-                              exact
-                              path="/"
-                              render={routerProps => (
-                                <OverviewPage
-                                  basePath={basePath}
-                                  logOverviewPageLoad={logOverviewPageLoad}
-                                  setBreadcrumbs={setBreadcrumbs}
-                                  {...routerProps}
-                                />
-                              )}
-                            />
-                            <Route
                               path="/monitor/:monitorId/:location?"
                               render={routerProps => (
                                 <MonitorPage
@@ -184,9 +182,21 @@ const Application = (props: UptimeAppProps) => {
                                 />
                               )}
                             />
+                            <Route
+                              path="/"
+                              render={routerProps => (
+                                <OverviewPage
+                                  autocomplete={autocomplete}
+                                  basePath={basePath}
+                                  logOverviewPageLoad={logOverviewPageLoad}
+                                  setBreadcrumbs={setBreadcrumbs}
+                                  {...routerProps}
+                                />
+                              )}
+                            />
                             <Route component={NotFoundPage} />
                           </Switch>
-                        </div>
+                        </main>
                       </EuiPage>
                     </UptimeSettingsContext.Provider>
                   </UptimeRefreshContext.Provider>
@@ -196,7 +206,7 @@ const Application = (props: UptimeAppProps) => {
           />
         </Router>
       </ReduxProvider>
-    </I18nContext>
+    </i18nCore.Context>
   );
 };
 

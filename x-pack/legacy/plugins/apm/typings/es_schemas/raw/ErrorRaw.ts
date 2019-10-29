@@ -51,7 +51,7 @@ export interface ErrorRaw extends APMBaseDoc {
     exception?: Exception[];
     page?: Page; // special property for RUM: shared by error and transaction
     log?: Log;
-    [key: string]: unknown;
+    custom?: Record<string, unknown>;
   };
   [key: string]: unknown;
 

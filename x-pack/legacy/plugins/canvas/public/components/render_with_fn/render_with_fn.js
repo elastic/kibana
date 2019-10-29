@@ -8,6 +8,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { isEqual, cloneDeep } from 'lodash';
 import { RenderToDom } from '../render_to_dom';
+import { ErrorStrings } from '../../../i18n';
+
+const { RenderWithFn: strings } = ErrorStrings;
 
 export class RenderWithFn extends React.Component {
   static propTypes = {
@@ -87,7 +90,7 @@ export class RenderWithFn extends React.Component {
       this.firstRender = false;
     } catch (err) {
       console.error('renderFn threw', err);
-      this.props.onError(err, { title: `Rendering '${functionName || 'function'}' failed` });
+      this.props.onError(err, { title: strings.getRenderErrorMessage(functionName) });
     }
   };
 

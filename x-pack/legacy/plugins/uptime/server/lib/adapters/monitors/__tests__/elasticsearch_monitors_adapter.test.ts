@@ -7,12 +7,8 @@
 import { get, set } from 'lodash';
 import { ElasticsearchMonitorsAdapter } from '../elasticsearch_monitors_adapter';
 import { CountParams, CountResponse } from 'elasticsearch';
-
-const assertCloseTo = (actual: number, expected: number, precision: number) => {
-  if (Math.abs(expected - actual) > precision) {
-    throw new Error(`expected [${actual}] to be within ${precision} of ${actual}`);
-  }
-};
+import mockChartsData from './monitor_charts_mock.json';
+import { assertCloseTo } from '../../../helper';
 
 // FIXME: there are many untested functions in this adapter. They should be tested.
 describe('ElasticsearchMonitorsAdapter', () => {
@@ -100,5 +96,17 @@ describe('ElasticsearchMonitorsAdapter', () => {
       '36000ms'
     );
     expect(searchMock.mock.calls[0]).toMatchSnapshot();
+  });
+
+  it('inserts empty buckets for missing data', async () => {
+    const searchMock = jest.fn();
+    searchMock.mockReturnValue(mockChartsData);
+    const database = {
+      search: searchMock,
+      count: jest.fn(),
+      head: jest.fn(),
+    };
+    const adapter = new ElasticsearchMonitorsAdapter(database);
+    expect(await adapter.getMonitorChartsData({}, 'id', 'now-15m', 'now')).toMatchSnapshot();
   });
 });

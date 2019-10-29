@@ -26,6 +26,7 @@ export const metricsQuery = gql`
         id
         series {
           id
+          label
           data {
             timestamp
             value

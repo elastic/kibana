@@ -14,9 +14,9 @@ import {
   METRIC_AGG_TYPE,
 } from '../../../../common/types/fields';
 import { ES_FIELD_TYPES } from '../../../../../../../../src/plugins/data/common';
-import { ES_AGGREGATION } from '../../../../common/constants/aggregation_types';
+import { ML_JOB_AGGREGATION } from '../../../../common/constants/aggregation_types';
 import { rollupServiceProvider, RollupJob, RollupFields } from './rollup';
-import { aggregations } from './aggregations';
+import { aggregations, mlOnlyAggregations } from './aggregations';
 
 const supportedTypes: string[] = [
   ES_FIELD_TYPES.DATE,
@@ -118,7 +118,7 @@ class FieldsService {
       }
     }
 
-    const aggs = cloneDeep(aggregations);
+    const aggs = cloneDeep([...aggregations, ...mlOnlyAggregations]);
     const fields: Field[] = await this.createFields();
 
     return await combineFieldsAndAggs(fields, aggs, rollupFields);
@@ -136,15 +136,15 @@ async function combineFieldsAndAggs(
   const numericalFields = getNumericalFields(fields);
   const ipFields = getIpFields(fields);
 
-  const mix = mixFactory(rollupFields);
+  const isRollup = Object.keys(rollupFields).length > 0;
+  const mix = mixFactory(isRollup, rollupFields);
 
   aggs.forEach(a => {
-    if (a.type === METRIC_AGG_TYPE) {
-      switch (a.dslName) {
-        case ES_AGGREGATION.COUNT:
-          // count doesn't take any fields, so break here
-          break;
-        case ES_AGGREGATION.CARDINALITY:
+    if (a.type === METRIC_AGG_TYPE && a.fields !== undefined) {
+      switch (a.id) {
+        case ML_JOB_AGGREGATION.DISTINCT_COUNT:
+        case ML_JOB_AGGREGATION.HIGH_DISTINCT_COUNT:
+        case ML_JOB_AGGREGATION.LOW_DISTINCT_COUNT:
           // distinct count (i.e. cardinality) takes keywords, ips
           // as well as numerical fields
           keywordFields.forEach(f => {
@@ -165,26 +165,21 @@ async function combineFieldsAndAggs(
   });
 
   return {
-    aggs: filterAggs(aggs),
-    fields: filterFields(fields),
+    aggs,
+    fields: isRollup ? filterFields(fields) : fields,
   };
 }
 
-// remove fields that have no aggs associated to them
+// remove fields that have no aggs associated to them, unless they are date fields
 function filterFields(fields: Field[]): Field[] {
-  return fields.filter(f => f.aggs && f.aggs.length);
-}
-
-// remove aggs that have no fields associated to them
-function filterAggs(aggs: Aggregation[]): Aggregation[] {
-  return aggs.filter(a => a.fields && a.fields.length);
+  return fields.filter(
+    f => f.aggs && (f.aggs.length > 0 || (f.aggs.length === 0 && f.type === ES_FIELD_TYPES.DATE))
+  );
 }
 
 // returns a mix function that is used to cross-reference aggs and fields.
 // wrapped in a provider to allow filtering based on rollup job capabilities
-function mixFactory(rollupFields: RollupFields) {
-  const isRollup = Object.keys(rollupFields).length > 0;
-
+function mixFactory(isRollup: boolean, rollupFields: RollupFields) {
   return function mix(field: Field, agg: Aggregation): void {
     if (
       isRollup === false ||

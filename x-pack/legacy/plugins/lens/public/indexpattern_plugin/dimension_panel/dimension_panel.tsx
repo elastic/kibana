@@ -15,18 +15,14 @@ import {
   HttpServiceBase,
 } from 'src/core/public';
 import { DatasourceDimensionPanelProps, StateSetter } from '../../types';
-import {
-  IndexPatternColumn,
-  IndexPatternPrivateState,
-  IndexPatternField,
-  OperationType,
-} from '../indexpattern';
-
+import { IndexPatternColumn, OperationType } from '../indexpattern';
 import { getAvailableOperationsByMetadata, buildColumn, changeField } from '../operations';
 import { PopoverEditor } from './popover_editor';
 import { DragContextState, ChildDragDropProvider, DragDrop } from '../../drag_drop';
 import { changeColumn, deleteColumn } from '../state_helpers';
 import { isDraggedField, hasField } from '../utils';
+import { IndexPatternPrivateState, IndexPatternField } from '../types';
+import { trackUiEvent } from '../../lens_ui_telemetry';
 
 export type IndexPatternDimensionPanelProps = DatasourceDimensionPanelProps & {
   state: IndexPatternPrivateState;
@@ -134,12 +130,17 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
           const newColumn = hasFieldChanged
             ? changeField(selectedColumn, currentIndexPattern, droppedItem.field)
             : buildColumn({
+                op: operationsForNewField ? operationsForNewField[0] : undefined,
                 columns: props.state.layers[props.layerId].columns,
                 indexPattern: currentIndexPattern,
                 layerId,
                 suggestedPriority: props.suggestedPriority,
                 field: droppedItem.field,
               });
+
+          trackUiEvent('drop_onto_dimension');
+          const hasData = Object.values(props.state.layers).some(({ columns }) => columns.length);
+          trackUiEvent(hasData ? 'drop_non_empty' : 'drop_empty');
 
           props.setState(
             changeColumn({
@@ -174,6 +175,7 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
               defaultMessage: 'Remove configuration',
             })}
             onClick={() => {
+              trackUiEvent('indexpattern_dimension_removed');
               props.setState(
                 deleteColumn({
                   state: props.state,

@@ -43,7 +43,7 @@ export interface TransactionRaw extends APMBaseDoc {
       dropped?: number;
     };
     type: string;
-    [key: string]: unknown;
+    custom?: Record<string, unknown>;
   };
   [key: string]: unknown;
 

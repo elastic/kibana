@@ -11,13 +11,8 @@ import {
   TRANSACTION_DURATION,
   TRANSACTION_TYPE
 } from '../../../../common/elasticsearch_fieldnames';
-import { PromiseReturnType } from '../../../../typings/common';
 import { Setup } from '../../helpers/setup_request';
 import { rangeFilter } from '../../helpers/range_filter';
-
-export type TransactionAvgDurationByCountryAPIResponse = PromiseReturnType<
-  typeof getTransactionAvgDurationByCountry
->;
 
 export async function getTransactionAvgDurationByCountry({
   setup,
@@ -26,9 +21,9 @@ export async function getTransactionAvgDurationByCountry({
   setup: Setup;
   serviceName: string;
 }) {
-  const { uiFiltersES, client, config, start, end } = setup;
+  const { uiFiltersES, client, start, end, indices } = setup;
   const params = {
-    index: config.get<string>('apm_oss.transactionIndices'),
+    index: indices['apm_oss.transactionIndices'],
     body: {
       size: 0,
       query: {
@@ -68,7 +63,7 @@ export async function getTransactionAvgDurationByCountry({
   const buckets = resp.aggregations.country_code.buckets;
   const avgDurationsByCountry = buckets.map(
     ({ key, doc_count, avg_duration: { value } }) => ({
-      key,
+      key: key as string,
       docCount: doc_count,
       value: value === null ? 0 : value
     })

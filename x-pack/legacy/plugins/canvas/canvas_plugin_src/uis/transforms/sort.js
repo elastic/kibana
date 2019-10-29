@@ -6,19 +6,22 @@
 
 import { get } from 'lodash';
 import { getState, getValue } from '../../../public/lib/resolved_arg';
+import { TransformStrings } from '../../../i18n';
+
+const { Sort: strings } = TransformStrings;
 
 export const sort = () => ({
   name: 'sort',
-  displayName: 'Datatable sorting',
+  displayName: strings.getDisplayName(),
   args: [
     {
       name: '_',
-      displayName: 'Sort field',
+      displayName: strings.getSortFieldDisplayName(),
       argType: 'datacolumn',
     },
     {
       name: 'reverse',
-      displayName: 'Descending',
+      displayName: strings.getReverseDisplayName(),
       argType: 'toggle',
     },
   ],

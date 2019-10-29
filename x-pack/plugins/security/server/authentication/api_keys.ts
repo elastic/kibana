@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ClusterClient, KibanaRequest, Logger } from '../../../../../src/core/server';
+import { IClusterClient, KibanaRequest, Logger } from '../../../../../src/core/server';
 
 /**
  * Represents the options to create an APIKey class instance that will be
@@ -12,7 +12,7 @@ import { ClusterClient, KibanaRequest, Logger } from '../../../../../src/core/se
  */
 export interface ConstructorOptions {
   logger: Logger;
-  clusterClient: PublicMethodsOf<ClusterClient>;
+  clusterClient: IClusterClient;
   isSecurityFeatureDisabled: () => boolean;
 }
 
@@ -91,7 +91,7 @@ export interface InvalidateAPIKeyResult {
  */
 export class APIKeys {
   private readonly logger: Logger;
-  private readonly clusterClient: PublicMethodsOf<ClusterClient>;
+  private readonly clusterClient: IClusterClient;
   private readonly isSecurityFeatureDisabled: () => boolean;
 
   constructor({ logger, clusterClient, isSecurityFeatureDisabled }: ConstructorOptions) {

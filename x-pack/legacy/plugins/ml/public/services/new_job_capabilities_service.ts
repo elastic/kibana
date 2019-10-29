@@ -16,11 +16,6 @@ import {
   EVENT_RATE_FIELD_ID,
 } from '../../common/types/fields';
 import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
-import {
-  ML_JOB_AGGREGATION,
-  KIBANA_AGGREGATION,
-  ES_AGGREGATION,
-} from '../../common/constants/aggregation_types';
 import { ml } from './ml_api_service';
 
 // called in the angular routing resolve block to initialize the
@@ -55,18 +50,23 @@ export function loadNewJobCapabilities(
 const categoryFieldTypes = [ES_FIELD_TYPES.TEXT, ES_FIELD_TYPES.KEYWORD, ES_FIELD_TYPES.IP];
 
 class NewJobCapsService {
-  private _fields: Field[];
-  private _aggs: Aggregation[];
-  private _includeCountAgg: boolean;
-
-  constructor(includeCountAgg = true) {
-    this._fields = [];
-    this._aggs = [];
-    this._includeCountAgg = includeCountAgg;
-  }
+  private _fields: Field[] = [];
+  private _catFields: Field[] = [];
+  private _dateFields: Field[] = [];
+  private _aggs: Aggregation[] = [];
+  private _includeEventRateField: boolean = true;
+  private _removeTextFields: boolean = true;
 
   public get fields(): Field[] {
     return this._fields;
+  }
+
+  public get catFields(): Field[] {
+    return this._catFields;
+  }
+
+  public get dateFields(): Field[] {
+    return this._dateFields;
   }
 
   public get aggs(): Aggregation[] {
@@ -84,19 +84,38 @@ class NewJobCapsService {
     return this._fields.filter(f => categoryFieldTypes.includes(f.type));
   }
 
-  public async initializeFromIndexPattern(indexPattern: IndexPattern) {
+  public async initializeFromIndexPattern(
+    indexPattern: IndexPattern,
+    includeEventRateField = true,
+    removeTextFields = true
+  ) {
     try {
+      this._includeEventRateField = includeEventRateField;
+      this._removeTextFields = removeTextFields;
+
       const resp = await ml.jobs.newJobCaps(indexPattern.title, indexPattern.type === 'rollup');
-      const { fields, aggs } = createObjects(resp, indexPattern.title);
+      const { fields: allFields, aggs } = createObjects(resp, indexPattern.title);
 
-      if (this._includeCountAgg === true) {
-        const { countField, countAggs } = createCountFieldAndAggs();
-
-        fields.splice(0, 0, countField);
-        aggs.push(...countAggs);
+      if (this._includeEventRateField === true) {
+        addEventRateField(aggs, allFields);
       }
 
+      const { fieldsPreferringKeyword, fieldsPreferringText } = processTextAndKeywordFields(
+        allFields
+      );
+      const catFields = fieldsPreferringText.filter(
+        f => f.type === ES_FIELD_TYPES.KEYWORD || f.type === ES_FIELD_TYPES.TEXT
+      );
+      const dateFields = fieldsPreferringText.filter(f => f.type === ES_FIELD_TYPES.DATE);
+      const fields = this._removeTextFields ? fieldsPreferringKeyword : allFields;
+
+      // set the main fields list to contain fields which have been filtered to prefer
+      // keyword fields over text fields.
+      // e.g. if foo.keyword and foo exist, don't add foo to the list.
       this._fields = fields;
+      // set the category fields to contain fields which have been filtered to prefer text fields.
+      this._catFields = catFields;
+      this._dateFields = dateFields;
       this._aggs = aggs;
     } catch (error) {
       console.error('Unable to load new job capabilities', error); // eslint-disable-line no-console
@@ -134,17 +153,18 @@ function createObjects(resp: any, indexPatternTitle: string) {
 
   if (results !== undefined) {
     results.aggs.forEach((a: Aggregation) => {
-      // copy the agg and add a Fields list
+      // create the aggs list
+      // only adding a fields list if there is a fieldIds list
       const agg: Aggregation = {
         ...a,
-        fields: [],
+        ...(a.fieldIds !== undefined ? { fields: [] } : {}),
       };
       aggMap[agg.id] = agg;
       aggs.push(agg);
     });
 
     results.fields.forEach((f: Field) => {
-      // copy the field and add an Aggregations list
+      // create the fields list
       const field: Field = {
         ...f,
         aggs: [],
@@ -186,8 +206,8 @@ function mix(field: Field, agg: Aggregation) {
   field.aggs.push(agg);
 }
 
-function createCountFieldAndAggs() {
-  const countField: Field = {
+function addEventRateField(aggs: Aggregation[], fields: Field[]) {
+  const eventRateField: Field = {
     id: EVENT_RATE_FIELD_ID,
     name: 'Event rate',
     type: ES_FIELD_TYPES.INTEGER,
@@ -195,53 +215,36 @@ function createCountFieldAndAggs() {
     aggs: [],
   };
 
-  const countAggs: Aggregation[] = [
-    {
-      id: ML_JOB_AGGREGATION.COUNT,
-      title: 'Count',
-      kibanaName: KIBANA_AGGREGATION.COUNT,
-      dslName: ES_AGGREGATION.COUNT,
-      type: 'metrics',
-      mlModelPlotAgg: {
-        min: 'min',
-        max: 'max',
-      },
-      fields: [countField],
-    },
-    {
-      id: ML_JOB_AGGREGATION.HIGH_COUNT,
-      title: 'High count',
-      kibanaName: KIBANA_AGGREGATION.COUNT,
-      dslName: ES_AGGREGATION.COUNT,
-      type: 'metrics',
-      mlModelPlotAgg: {
-        min: 'min',
-        max: 'max',
-      },
-      fields: [countField],
-    },
-    {
-      id: ML_JOB_AGGREGATION.LOW_COUNT,
-      title: 'Low count',
-      kibanaName: KIBANA_AGGREGATION.COUNT,
-      dslName: ES_AGGREGATION.COUNT,
-      type: 'metrics',
-      mlModelPlotAgg: {
-        min: 'min',
-        max: 'max',
-      },
-      fields: [countField],
-    },
-  ];
+  aggs.forEach(a => {
+    if (eventRateField.aggs !== undefined && a.fields === undefined) {
+      // if the agg's field list is undefined, it is a fieldless aggregation and
+      // so can only be used with the event rate field.
+      a.fields = [eventRateField];
+      eventRateField.aggs.push(a);
+    }
+  });
+  fields.splice(0, 0, eventRateField);
+}
 
-  if (countField.aggs !== undefined) {
-    countField.aggs.push(...countAggs);
-  }
+// create two lists, one removing text fields if there are keyword equivalents and vice versa
+function processTextAndKeywordFields(fields: Field[]) {
+  const keywordIds = fields.filter(f => f.type === ES_FIELD_TYPES.KEYWORD).map(f => f.id);
+  const textIds = fields.filter(f => f.type === ES_FIELD_TYPES.TEXT).map(f => f.id);
 
-  return {
-    countField,
-    countAggs,
-  };
+  const fieldsPreferringKeyword = fields.filter(
+    f =>
+      f.type !== ES_FIELD_TYPES.TEXT ||
+      (f.type === ES_FIELD_TYPES.TEXT && keywordIds.includes(`${f.id}.keyword`) === false)
+  );
+
+  const fieldsPreferringText = fields.filter(
+    f =>
+      f.type !== ES_FIELD_TYPES.KEYWORD ||
+      (f.type === ES_FIELD_TYPES.KEYWORD &&
+        textIds.includes(f.id.replace(/\.keyword$/, '')) === false)
+  );
+
+  return { fieldsPreferringKeyword, fieldsPreferringText };
 }
 
 export const newJobCapsService = new NewJobCapsService();

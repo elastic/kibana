@@ -20,14 +20,11 @@
 import 'ngreact';
 import { wrapInI18nContext } from 'ui/i18n';
 import { uiModules } from 'ui/modules';
-import { TopNavMenu } from '../../../core_plugins/kibana_react/public';
-import { Storage } from 'ui/storage';
-import { npStart } from 'ui/new_platform';
-import { start as data } from '../../../core_plugins/data/public/legacy';
+import { start as navigation } from '../../../core_plugins/navigation/public/legacy';
 
 const module = uiModules.get('kibana');
 
-module.directive('kbnTopNav', () => {
+export function createTopNavDirective() {
   return {
     restrict: 'E',
     template: '',
@@ -43,25 +40,10 @@ module.directive('kbnTopNav', () => {
       // of the config array's disableButton function return value changes.
       child.setAttribute('disabled-buttons', 'disabledButtons');
 
-      // Pass in storage
-      const localStorage = new Storage(window.localStorage);
-      child.setAttribute('http', 'http');
-      child.setAttribute('store', 'store');
-      child.setAttribute('time-history', 'timeHistory');
-      child.setAttribute('ui-settings', 'uiSettings');
-      child.setAttribute('saved-objects', 'savedObjects');
-      child.setAttribute('notifications', 'notifications');
-
       // Append helper directive
       elem.append(child);
 
       const linkFn = ($scope, _, $attr) => {
-        $scope.store = localStorage;
-        $scope.http = npStart.core.http;
-        $scope.uiSettings = npStart.core.uiSettings;
-        $scope.savedObjects = npStart.core.savedObjects;
-        $scope.notifications = npStart.core.notifications;
-        $scope.timeHistory = data.timefilter.history;
 
         // Watch config changes
         $scope.$watch(() => {
@@ -89,26 +71,21 @@ module.directive('kbnTopNav', () => {
       return linkFn;
     }
   };
-});
+}
 
-module.directive('kbnTopNavHelper', (reactDirective) => {
+module.directive('kbnTopNav', createTopNavDirective);
+
+export function createTopNavHelper(reactDirective) {
+  const { TopNavMenu } = navigation.ui;
   return reactDirective(
     wrapInI18nContext(TopNavMenu),
     [
-      ['name', { watchDepth: 'reference' }],
       ['config', { watchDepth: 'value' }],
       ['disabledButtons', { watchDepth: 'reference' }],
 
       ['query', { watchDepth: 'reference' }],
       ['savedQuery', { watchDepth: 'reference' }],
-      ['store', { watchDepth: 'reference' }],
-      ['uiSettings', { watchDepth: 'reference' }],
-      ['savedObjects', { watchDepth: 'reference' }],
-      ['notifications', { watchDepth: 'reference' }],
       ['intl', { watchDepth: 'reference' }],
-      ['timeHistory', { watchDepth: 'reference' }],
-      ['store', { watchDepth: 'reference' }],
-      ['http', { watchDepth: 'reference' }],
 
       ['onQuerySubmit', { watchDepth: 'reference' }],
       ['onFiltersUpdated', { watchDepth: 'reference' }],
@@ -139,4 +116,6 @@ module.directive('kbnTopNavHelper', (reactDirective) => {
       'showAutoRefreshOnly',
     ],
   );
-});
+}
+
+module.directive('kbnTopNavHelper', createTopNavHelper);

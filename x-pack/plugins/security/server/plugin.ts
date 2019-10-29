@@ -6,7 +6,7 @@
 
 import { first } from 'rxjs/operators';
 import {
-  ClusterClient,
+  IClusterClient,
   CoreSetup,
   KibanaRequest,
   Logger,
@@ -15,15 +15,9 @@ import {
 } from '../../../../src/core/server';
 import { deepFreeze } from '../../../../src/core/utils';
 import { XPackInfo } from '../../../legacy/plugins/xpack_main/server/lib/xpack_info';
-import { AuthenticatedUser } from '../common/model';
-import { Authenticator, setupAuthentication } from './authentication';
+import { setupAuthentication, Authentication } from './authentication';
 import { createConfig$ } from './config';
-import {
-  CreateAPIKeyParams,
-  CreateAPIKeyResult,
-  InvalidateAPIKeyParams,
-  InvalidateAPIKeyResult,
-} from './authentication/api_keys';
+import { defineRoutes } from './routes';
 
 /**
  * Describes a set of APIs that is available in the legacy platform only and required by this plugin
@@ -33,26 +27,14 @@ export interface LegacyAPI {
   xpackInfo: Pick<XPackInfo, 'isAvailable' | 'feature'>;
   serverConfig: { protocol: string; hostname: string; port: number };
   isSystemAPIRequest: (request: KibanaRequest) => boolean;
+  cspRules: string;
 }
 
 /**
  * Describes public Security plugin contract returned at the `setup` stage.
  */
 export interface PluginSetupContract {
-  authc: {
-    login: Authenticator['login'];
-    logout: Authenticator['logout'];
-    getCurrentUser: (request: KibanaRequest) => Promise<AuthenticatedUser | null>;
-    isAuthenticated: (request: KibanaRequest) => Promise<boolean>;
-    createAPIKey: (
-      request: KibanaRequest,
-      params: CreateAPIKeyParams
-    ) => Promise<CreateAPIKeyResult | null>;
-    invalidateAPIKey: (
-      request: KibanaRequest,
-      params: InvalidateAPIKeyParams
-    ) => Promise<InvalidateAPIKeyResult | null>;
-  };
+  authc: Authentication;
 
   config: RecursiveReadonly<{
     sessionTimeout: number | null;
@@ -68,7 +50,7 @@ export interface PluginSetupContract {
  */
 export class Plugin {
   private readonly logger: Logger;
-  private clusterClient?: ClusterClient;
+  private clusterClient?: IClusterClient;
 
   private legacyAPI?: LegacyAPI;
   private readonly getLegacyAPI = () => {
@@ -91,16 +73,26 @@ export class Plugin {
       plugins: [require('../../../legacy/server/lib/esjs_shield_plugin')],
     });
 
+    const authc = await setupAuthentication({
+      core,
+      config,
+      clusterClient: this.clusterClient,
+      loggers: this.initializerContext.logger,
+      getLegacyAPI: this.getLegacyAPI,
+    });
+
+    defineRoutes({
+      router: core.http.createRouter(),
+      basePath: core.http.basePath,
+      logger: this.initializerContext.logger.get('routes'),
+      config,
+      authc,
+      getLegacyAPI: this.getLegacyAPI,
+    });
+
     return deepFreeze({
       registerLegacyAPI: (legacyAPI: LegacyAPI) => (this.legacyAPI = legacyAPI),
-
-      authc: await setupAuthentication({
-        core,
-        config,
-        clusterClient: this.clusterClient,
-        loggers: this.initializerContext.logger,
-        getLegacyAPI: this.getLegacyAPI,
-      }),
+      authc,
 
       // We should stop exposing this config as soon as only new platform plugin consumes it. The only
       // exception may be `sessionTimeout` as other parts of the app may want to know it.

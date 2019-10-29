@@ -11,10 +11,13 @@ import { EuiSpacer } from '@elastic/eui';
 import { getSelectedToplevelNodes, getSelectedElementId } from '../../state/selectors/workpad';
 import { SidebarHeader } from '../sidebar_header';
 import { globalStateUpdater } from '../workpad_page/integration_utils';
+import { ComponentStrings } from '../../../i18n';
 import { MultiElementSettings } from './multi_element_settings';
 import { GroupSettings } from './group_settings';
 import { GlobalConfig } from './global_config';
 import { ElementSettings } from './element_settings';
+
+const { SidebarContent: strings } = ComponentStrings;
 
 const mapStateToProps = state => ({
   selectedToplevelNodes: getSelectedToplevelNodes(state),
@@ -42,7 +45,10 @@ const withGlobalState = (commit, updateGlobalState) => (type, payload) => {
 
 const MultiElementSidebar = ({ commit, updateGlobalState }) => (
   <Fragment>
-    <SidebarHeader title="Multiple elements" commit={withGlobalState(commit, updateGlobalState)} />
+    <SidebarHeader
+      title={strings.getMultiElementSidebarTitle()}
+      commit={withGlobalState(commit, updateGlobalState)}
+    />
     <EuiSpacer />
     <MultiElementSettings />
   </Fragment>
@@ -51,7 +57,7 @@ const MultiElementSidebar = ({ commit, updateGlobalState }) => (
 const GroupedElementSidebar = ({ commit, updateGlobalState }) => (
   <Fragment>
     <SidebarHeader
-      title="Grouped element"
+      title={strings.getGroupedElementSidebarTitle()}
       commit={withGlobalState(commit, updateGlobalState)}
       groupIsSelected
     />
@@ -62,7 +68,7 @@ const GroupedElementSidebar = ({ commit, updateGlobalState }) => (
 
 const SingleElementSidebar = ({ selectedElementId }) => (
   <Fragment>
-    <SidebarHeader title="Selected element" showLayerControls />
+    <SidebarHeader title={strings.getSingleElementSidebarTitle()} showLayerControls />
     <ElementSettings selectedElementId={selectedElementId} />
   </Fragment>
 );

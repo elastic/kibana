@@ -88,7 +88,8 @@ export default function({ getService }: FtrProviderContext) {
           }
         });
 
-        it('should return log highlights in a field column', async () => {
+        // FLAKY: https://github.com/elastic/kibana/issues/47209
+        it.skip('should return log highlights in a field column', async () => {
           const {
             data: {
               source: { logEntryHighlights },

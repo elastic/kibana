@@ -36,4 +36,5 @@ export const rangeFilter: RangeFilter = {
   $state: {
     store: FilterStateStore.APP_STATE,
   },
+  range: {},
 };

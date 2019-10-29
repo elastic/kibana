@@ -34,12 +34,12 @@ function StylePanel({ aggs, setGaugeValue, stateParams, vis }: GaugeOptionsInter
   return (
     <EuiPanel paddingSize="s">
       <EuiTitle size="xs">
-        <h2>
+        <h3>
           <FormattedMessage
             id="kbnVislibVisTypes.controls.gaugeOptions.styleTitle"
             defaultMessage="Style"
           />
-        </h2>
+        </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
 

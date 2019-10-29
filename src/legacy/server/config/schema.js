@@ -81,7 +81,7 @@ export default () => Joi.object({
   server: Joi.object({
     uuid: Joi.string().guid().default(),
     name: Joi.string().default(os.hostname()),
-    defaultRoute: Joi.string().default('/app/kibana').regex(/^\//, `start with a slash`),
+    defaultRoute: Joi.string().regex(/^\//, `start with a slash`),
     customResponseHeaders: Joi.object().unknown(true).default({}),
     xsrf: Joi.object({
       disableProtection: Joi.boolean().default(false),
@@ -111,9 +111,7 @@ export default () => Joi.object({
     ssl: HANDLED_IN_NEW_PLATFORM,
   }).default(),
 
-  uiSettings: Joi.object().keys({
-    overrides: Joi.object().unknown(true).default()
-  }).default(),
+  uiSettings: HANDLED_IN_NEW_PLATFORM,
 
   logging: Joi.object().keys({
     silent: Joi.boolean().default(false),
@@ -155,12 +153,6 @@ export default () => Joi.object({
 
   path: Joi.object({
     data: Joi.string().default(getData())
-  }).default(),
-
-  migrations: Joi.object({
-    batchSize: Joi.number().default(100),
-    scrollDuration: Joi.string().default('15m'),
-    pollInterval: Joi.number().default(1500),
   }).default(),
 
   stats: Joi.object({

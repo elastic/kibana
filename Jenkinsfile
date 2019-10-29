@@ -1,5 +1,7 @@
 #!/bin/groovy
 
+library 'kibana-pipeline-library'
+
 stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a little bit
   timeout(time: 180, unit: 'MINUTES') {
     timestamps {
@@ -54,7 +56,7 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
 
 def withWorkers(name, preWorkerClosure = {}, workerClosures = [:]) {
   return {
-    jobRunner('tests-xl') {
+    jobRunner('tests-xl', true) {
       try {
         doSetup()
         preWorkerClosure()
@@ -145,7 +147,7 @@ def legacyJobRunner(name) {
         withEnv([
           "JOB=${name}",
         ]) {
-          jobRunner('linux && immutable') {
+          jobRunner('linux && immutable', false) {
             try {
               runbld('.ci/run.sh', true)
             } finally {
@@ -166,8 +168,21 @@ def legacyJobRunner(name) {
   }
 }
 
-def jobRunner(label, closure) {
+def jobRunner(label, useRamDisk, closure) {
   node(label) {
+    if (useRamDisk) {
+      // Move to a temporary workspace, so that we can symlink the real workspace into /dev/shm
+      def originalWorkspace = env.WORKSPACE
+      ws('/tmp/workspace') {
+        sh """
+          mkdir -p /dev/shm/workspace
+          mkdir -p '${originalWorkspace}' # create all of the directories leading up to the workspace, if they don't exist
+          rm --preserve-root -rf '${originalWorkspace}' # then remove just the workspace, just in case there's stuff in it
+          ln -s /dev/shm/workspace '${originalWorkspace}'
+        """
+      }
+    }
+
     def scmVars = checkout scm
 
     withEnv([
@@ -246,10 +261,12 @@ def sendInfraMail() {
 
 def sendKibanaMail() {
   catchError {
-    if(params.NOTIFY_ON_FAILURE && currentBuild.result != 'SUCCESS' && currentBuild.result != 'ABORTED') {
+    def buildStatus = buildUtils.getBuildStatus()
+
+    if(params.NOTIFY_ON_FAILURE && buildStatus != 'SUCCESS' && buildStatus != 'ABORTED') {
       emailext(
         to: 'build-kibana@elastic.co',
-        subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - ${currentBuild.result}",
+        subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - ${buildStatus}",
         body: '${SCRIPT,template="groovy-html.template"}',
         mimeType: 'text/html',
       )
@@ -286,6 +303,6 @@ def buildXpack() {
 def runErrorReporter() {
   bash """
     source src/dev/ci_setup/setup_env.sh
-    node src/dev/failed_tests/cli
+    node scripts/report_failed_tests
   """
 }

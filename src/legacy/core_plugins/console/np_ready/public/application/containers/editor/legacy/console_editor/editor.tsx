@@ -17,26 +17,32 @@
  * under the License.
  */
 
-import React, { CSSProperties, useEffect, useRef, useState } from 'react';
+import React, { CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
 import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import $ from 'jquery';
 
-import { EuiIcon } from '@elastic/eui';
+import { EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useAppContext } from '../../../../context';
 import { useUIAceKeyboardMode } from '../use_ui_ace_keyboard_mode';
 import { ConsoleMenu } from '../../../../components';
+
 import { autoIndent, getDocumentation } from '../console_menu_actions';
 import { registerCommands } from './keyboard_shortcuts';
+import { applyCurrentSettings } from './apply_editor_settings';
 
 // @ts-ignore
-import { initializeInput } from '../../../../../../../public/quarantined/src/input';
+import { initializeEditor } from '../../../../../../../public/quarantined/src/input';
+// @ts-ignore
+import mappings from '../../../../../../../public/quarantined/src/mappings';
+
+import { useEditorActionContext, useEditorReadContext } from '../../context';
+import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
+import { loadRemoteState } from './load_remote_editor_state';
 
 export interface EditorProps {
-  onEditorReady?: (editor: any) => void;
-  sendCurrentRequest?: () => void;
-  docLinkVersion: string;
+  previousStateLocation?: 'stored' | string;
 }
 
 const abs: CSSProperties = {
@@ -47,10 +53,22 @@ const abs: CSSProperties = {
   right: '0',
 };
 
-function Component({ onEditorReady, docLinkVersion, sendCurrentRequest = () => {} }: EditorProps) {
+const DEFAULT_INPUT_VALUE = `GET _search
+{
+  "query": {
+    "match_all": {}
+  }
+}`;
+
+function _Editor({ previousStateLocation = 'stored' }: EditorProps) {
   const {
-    services: { history, settings },
+    services: { history, notifications },
+    ResizeChecker,
+    docLinkVersion,
   } = useAppContext();
+
+  const { settings } = useEditorReadContext();
+  const dispatch = useEditorActionContext();
 
   const editorRef = useRef<HTMLDivElement | null>(null);
   const actionsRef = useRef<HTMLDivElement | null>(null);
@@ -70,52 +88,128 @@ function Component({ onEditorReady, docLinkVersion, sendCurrentRequest = () => {
   useEffect(() => {
     const $editor = $(editorRef.current!);
     const $actions = $(actionsRef.current!);
-    editorInstanceRef.current = initializeInput($editor, $actions, history, settings);
-    if (onEditorReady) {
-      onEditorReady({ editor: editorInstanceRef.current, element: editorRef.current! });
+    editorInstanceRef.current = initializeEditor($editor, $actions);
+
+    if (previousStateLocation === 'stored') {
+      const { content } = history.getSavedEditorState() || {
+        content: DEFAULT_INPUT_VALUE,
+      };
+      editorInstanceRef.current.update(content);
+    } else {
+      loadRemoteState({ url: previousStateLocation, input: editorInstanceRef.current });
     }
 
+    function setupAutosave() {
+      let timer: number;
+      const saveDelay = 500;
+
+      return editorInstanceRef.current.getSession().on('change', function onChange() {
+        if (timer) {
+          clearTimeout(timer);
+        }
+        timer = window.setTimeout(saveCurrentState, saveDelay);
+      });
+    }
+
+    function saveCurrentState() {
+      try {
+        const content = editorInstanceRef.current.getValue();
+        history.updateCurrentState(content);
+      } catch (e) {
+        // Ignoring saving error
+      }
+    }
+
+    dispatch({
+      type: 'setInputEditor',
+      value: editorInstanceRef.current,
+    });
+
     setTextArea(editorRef.current!.querySelector('textarea'));
+
+    mappings.retrieveAutoCompleteInfo();
+
+    const unsubscribeResizer = subscribeResizeChecker(
+      ResizeChecker,
+      editorRef.current!,
+      editorInstanceRef.current
+    );
+    const unsubscribeAutoSave = setupAutosave();
+
+    return () => {
+      unsubscribeResizer();
+      unsubscribeAutoSave();
+      mappings.clearSubscriptions();
+    };
   }, []);
+
+  const sendCurrentRequestToES = useCallback(() => {
+    dispatch({
+      type: 'sendRequestToEs',
+      value: {
+        isUsingTripleQuotes: settings.tripleQuotes,
+        isPolling: settings.polling,
+        callback: (esPath: any, esMethod: any, esData: any) =>
+          history.addToHistory(esPath, esMethod, esData),
+      },
+    });
+  }, [settings]);
+
+  useEffect(() => {
+    applyCurrentSettings(editorInstanceRef.current!, settings);
+    // Preserve legacy focus behavior after settings have updated.
+    editorInstanceRef.current!.focus();
+  }, [settings]);
 
   useEffect(() => {
     registerCommands({
       input: editorInstanceRef.current,
-      sendCurrentRequestToES: sendCurrentRequest,
+      sendCurrentRequestToES,
       openDocumentation,
     });
-  }, [sendCurrentRequest]);
+  }, [sendCurrentRequestToES]);
 
   return (
     <div style={abs} className="conApp">
       <div className="conApp__editor">
         <ul className="conApp__autoComplete" id="autocomplete" />
-        <div ref={actionsRef} className="conApp__editorActions" id="ConAppEditorActions">
-          <EuiToolTip
-            content={i18n.translate('console.sendRequestButtonTooltip', {
-              defaultMessage: 'click to send request',
-            })}
-          >
-            <button
-              onClick={sendCurrentRequest}
-              data-test-subj="send-request-button"
-              className="conApp__editorActionButton conApp__editorActionButton--success"
+        <EuiFlexGroup
+          ref={actionsRef}
+          className="conApp__editorActions"
+          id="ConAppEditorActions"
+          gutterSize="none"
+          responsive={false}
+        >
+          <EuiFlexItem>
+            <EuiToolTip
+              content={i18n.translate('console.sendRequestButtonTooltip', {
+                defaultMessage: 'click to send request',
+              })}
             >
-              <EuiIcon type="play" />
-            </button>
-          </EuiToolTip>
-          <ConsoleMenu
-            getCurl={(cb: any) => {
-              editorInstanceRef.current!.getRequestsAsCURL(cb);
-            }}
-            getDocumentation={() => {
-              return getDocumentation(editorInstanceRef.current!, docLinkVersion);
-            }}
-            autoIndent={(event: any) => {
-              autoIndent(editorInstanceRef.current!, event);
-            }}
-          />
-        </div>
+              <button
+                onClick={sendCurrentRequestToES}
+                data-test-subj="sendRequestButton"
+                className="conApp__editorActionButton conApp__editorActionButton--success"
+              >
+                <EuiIcon type="play" />
+              </button>
+            </EuiToolTip>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <ConsoleMenu
+              getCurl={(cb: any) => {
+                editorInstanceRef.current!.getRequestsAsCURL(cb);
+              }}
+              getDocumentation={() => {
+                return getDocumentation(editorInstanceRef.current!, docLinkVersion);
+              }}
+              autoIndent={(event: any) => {
+                autoIndent(editorInstanceRef.current!, event);
+              }}
+              addNotification={({ title }) => notifications.toasts.add({ title })}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <div
           ref={editorRef}
           id="ConAppEditor"
@@ -127,4 +221,4 @@ function Component({ onEditorReady, docLinkVersion, sendCurrentRequest = () => {
   );
 }
 
-export const Editor = React.memo(Component);
+export const Editor = React.memo(_Editor);

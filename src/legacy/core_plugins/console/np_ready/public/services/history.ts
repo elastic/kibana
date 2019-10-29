@@ -17,51 +17,13 @@
  * under the License.
  */
 
+import { BehaviorSubject } from 'rxjs';
 import { Storage } from './index';
 
 export class History {
-  private editor: any;
-
   constructor(private readonly storage: Storage) {}
 
-  setEditor(editor: any) {
-    this.editor = editor;
-  }
-
-  // stupid simple restore function, called when the user
-  // chooses to restore a request from the history
-  // PREVENTS history from needing to know about the input
-  restoreFromHistory(req: any) {
-    const session = this.editor.getSession();
-    let pos = this.editor.getCursorPosition();
-    let prefix = '';
-    let suffix = '\n';
-    if (this.editor.parser.isStartRequestRow(pos.row)) {
-      pos.column = 0;
-      suffix += '\n';
-    } else if (this.editor.parser.isEndRequestRow(pos.row)) {
-      const line = session.getLine(pos.row);
-      pos.column = line.length;
-      prefix = '\n\n';
-    } else if (this.editor.parser.isInBetweenRequestsRow(pos.row)) {
-      pos.column = 0;
-    } else {
-      pos = this.editor.nextRequestEnd(pos);
-      prefix = '\n\n';
-    }
-
-    let s = prefix + req.method + ' ' + req.endpoint;
-    if (req.data) {
-      s += '\n' + req.data;
-    }
-
-    s += suffix;
-
-    session.insert(pos, s);
-    this.editor.clearSelection();
-    this.editor.moveCursorTo(pos.row + prefix.length, 0);
-    this.editor.focus();
-  }
+  private changeEmitter = new BehaviorSubject<any[]>(this.getHistory() || []);
 
   getHistoryKeys() {
     return this.storage
@@ -75,11 +37,21 @@ export class History {
     return this.getHistoryKeys().map(key => this.storage.get(key));
   }
 
+  // This is used as an optimization mechanism so that different components
+  // can listen for changes to history and update because changes to history can
+  // be triggered from different places in the app. The alternative would be to store
+  // this in state so that we hook into the React model, but it would require loading history
+  // every time the application starts even if a user is not going to view history.
+  change(listener: (reqs: any[]) => void) {
+    const subscription = this.changeEmitter.subscribe(listener);
+    return () => subscription.unsubscribe();
+  }
+
   addToHistory(endpoint: string, method: string, data: any) {
     const keys = this.getHistoryKeys();
     keys.splice(0, 500); // only maintain most recent X;
-    $.each(keys, (i, k) => {
-      this.storage.delete(k);
+    keys.forEach(key => {
+      this.storage.delete(key);
     });
 
     const timestamp = new Date().getTime();
@@ -90,6 +62,8 @@ export class History {
       method,
       data,
     });
+
+    this.changeEmitter.next(this.getHistory());
   }
 
   updateCurrentState(content: any) {

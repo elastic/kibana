@@ -26,7 +26,7 @@ import chalk from 'chalk';
 
 import treeKill from 'tree-kill';
 import { promisify } from 'util';
-const treeKillAsync = promisify(treeKill);
+const treeKillAsync = promisify((...args: [number, string, any]) => treeKill(...args));
 
 import { ToolingLog } from '../tooling_log';
 import { observeLines } from './observe_lines';
@@ -87,6 +87,7 @@ export function startProc(name: string, options: ProcOptions, log: ToolingLog) {
     cwd,
     env,
     stdio: ['pipe', 'pipe', 'pipe'],
+    preferLocal: true,
   });
 
   if (stdin) {

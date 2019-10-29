@@ -337,6 +337,8 @@ export interface InfraMetricData {
 export interface InfraDataSeries {
   id: string;
 
+  label: string;
+
   data: InfraDataPoint[];
 }
 
@@ -602,6 +604,10 @@ export enum InfraMetric {
   hostLoad = 'hostLoad',
   hostMemoryUsage = 'hostMemoryUsage',
   hostNetworkTraffic = 'hostNetworkTraffic',
+  hostDockerOverview = 'hostDockerOverview',
+  hostDockerInfo = 'hostDockerInfo',
+  hostDockerTop5ByCpu = 'hostDockerTop5ByCpu',
+  hostDockerTop5ByMemory = 'hostDockerTop5ByMemory',
   podOverview = 'podOverview',
   podCpuUsage = 'podCpuUsage',
   podMemoryUsage = 'podMemoryUsage',
@@ -1693,6 +1699,8 @@ export namespace InfraDataSeriesResolvers {
   export interface Resolvers<Context = InfraContext, TypeParent = InfraDataSeries> {
     id?: IdResolver<string, TypeParent, Context>;
 
+    label?: LabelResolver<string, TypeParent, Context>;
+
     data?: DataResolver<InfraDataPoint[], TypeParent, Context>;
   }
 
@@ -1701,6 +1709,11 @@ export namespace InfraDataSeriesResolvers {
     Parent,
     Context
   >;
+  export type LabelResolver<
+    R = string,
+    Parent = InfraDataSeries,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
   export type DataResolver<
     R = InfraDataPoint[],
     Parent = InfraDataSeries,

@@ -8,6 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { staticSizeShape } from '../style_option_shapes';
 import { ValidatedRange } from '../../../../../components/validated_range';
+import { i18n } from '@kbn/i18n';
 
 export function StaticSizeSelection({ onChange, styleOptions }) {
   const onSizeChange = size => {
@@ -23,6 +24,10 @@ export function StaticSizeSelection({ onChange, styleOptions }) {
       showInput
       showLabels
       compressed
+      append={i18n.translate('xpack.maps.vector.size.unitLabel', {
+        defaultMessage: 'px',
+        description: 'Shorthand for pixel',
+      })}
     />
   );
 }

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { memoize } from 'lodash';
 import moment from 'moment';
@@ -34,21 +34,29 @@ import {
 
 import { useAppContext } from '../../../../context';
 import { HistoryViewer } from './history_viewer';
+import { useEditorActionContext, useEditorReadContext } from '../../context';
 
 interface Props {
   close: () => void;
-  clearHistory: () => void;
-  restoreFromHistory: (req: any) => void;
-  requests: any[];
 }
 
 const CHILD_ELEMENT_PREFIX = 'historyReq';
 
-export function ConsoleHistory({ close, requests, clearHistory, restoreFromHistory }: Props) {
+export function ConsoleHistory({ close }: Props) {
   const {
-    services: { settings },
+    services: { history },
     ResizeChecker,
   } = useAppContext();
+
+  const dispatch = useEditorActionContext();
+  const { settings: readOnlySettings } = useEditorReadContext();
+
+  const [requests, setPastRequests] = useState<any[]>(history.getHistory());
+
+  const clearHistory = useCallback(() => {
+    history.clearHistory();
+    setPastRequests(history.getHistory());
+  }, []);
 
   const listRef = useRef<HTMLUListElement | null>(null);
 
@@ -96,12 +104,17 @@ export function ConsoleHistory({ close, requests, clearHistory, restoreFromHisto
   };
 
   const restore = (req: any = selectedReq.current) => {
-    restoreFromHistory(req);
+    dispatch({ type: 'restoreRequest', value: req });
   };
 
   useEffect(() => {
     initialize();
   }, [requests]);
+
+  useEffect(() => {
+    const done = history.change(setPastRequests);
+    return () => done();
+  }, []);
 
   /* eslint-disable */
   return (
@@ -184,7 +197,11 @@ export function ConsoleHistory({ close, requests, clearHistory, restoreFromHisto
 
           <div className="conHistory__body__spacer" />
 
-          <HistoryViewer settings={settings} req={viewingReq} ResizeChecker={ResizeChecker} />
+          <HistoryViewer
+            settings={readOnlySettings}
+            req={viewingReq}
+            ResizeChecker={ResizeChecker}
+          />
         </div>
 
         <EuiSpacer size="s" />

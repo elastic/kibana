@@ -32,7 +32,6 @@ import React from 'react';
 import angular from 'angular';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { toastNotifications } from 'ui/notify';
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { docTitle } from 'ui/doc_title';
 import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
@@ -46,7 +45,6 @@ import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 import { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
 import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
-import { recentlyAccessed } from 'ui/persisted_log';
 import { timefilter } from 'ui/timefilter';
 import { getVisualizeLoader } from '../../../../../ui/public/visualize/loader';
 import { showShareContextMenu, ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
@@ -55,7 +53,10 @@ import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
 import { npStart } from 'ui/new_platform';
-import { setup as data } from '../../../../../core_plugins/data/public/legacy';
+
+import { extractTimeFilter, changeTimeFilter } from '../../../../data/public';
+import { start as data } from '../../../../data/public/legacy';
+import { start as visualizations } from '../../../../visualizations/public/np_ready/public/legacy';
 
 const { savedQueryService } = data.search.services;
 
@@ -64,8 +65,8 @@ uiRoutes
     template: editorTemplate,
     k7Breadcrumbs: getCreateBreadcrumbs,
     resolve: {
-      savedVis: function (savedVisualizations, redirectWhenMissing, $route, Private) {
-        const visTypes = Private(VisTypesRegistryProvider);
+      savedVis: function (savedVisualizations, redirectWhenMissing, $route) {
+        const visTypes = visualizations.types.all();
         const visType = _.find(visTypes, { name: $route.current.params.type });
         const shouldHaveIndex = visType.requiresSearch && visType.options.showIndexSelection;
         const hasIndex = $route.current.params.indexPattern || $route.current.params.savedSearchId;
@@ -98,7 +99,7 @@ uiRoutes
       savedVis: function (savedVisualizations, redirectWhenMissing, $route) {
         return savedVisualizations.get($route.current.params.id)
           .then((savedVis) => {
-            recentlyAccessed.add(
+            npStart.core.chrome.recentlyAccessed.add(
               savedVis.getFullPath(),
               savedVis.title,
               savedVis.id);
@@ -148,9 +149,6 @@ function VisEditor(
   config,
   kbnBaseUrl,
   localStorage,
-  // unused but required to initialize auto refresh :-\
-  /* eslint-disable no-unused-vars */
-  courier,
 ) {
   const queryFilter = Private(FilterBarQueryFilterProvider);
   const getUnhashableStates = Private(getUnhashableStatesProvider);
@@ -196,12 +194,12 @@ function VisEditor(
           isTitleDuplicateConfirmed,
           onTitleDuplicate,
         };
-        return doSave(saveOptions).then(({ id, error }) => {
+        return doSave(saveOptions).then((response) => {
           // If the save wasn't successful, put the original values back.
-          if (!id || error) {
+          if (!response.id || response.error) {
             savedVis.title = currentTitle;
           }
-          return { id, error };
+          return response;
         });
       };
 
@@ -342,7 +340,9 @@ function VisEditor(
   };
 
   $scope.onApplyFilters = filters => {
-    queryFilter.addFiltersAndChangeTimeFilter(filters);
+    const { timeRangeFilter, restOfFilters } = extractTimeFilter($scope.indexPattern.timeFieldName, filters);
+    queryFilter.addFilters(restOfFilters);
+    if (timeRangeFilter) changeTimeFilter(timefilter, timeRangeFilter);
     $scope.state.$newFilters = [];
   };
 
@@ -513,6 +513,8 @@ function VisEditor(
 
   const updateStateFromSavedQuery = (savedQuery) => {
     $state.query = savedQuery.attributes.query;
+    $state.save();
+
     queryFilter.setFilters(savedQuery.attributes.filters || []);
 
     if (savedQuery.attributes.timefilter) {
@@ -541,7 +543,7 @@ function VisEditor(
       $scope.savedQuery = undefined;
       return;
     }
-    if ($scope.savedQuery && newSavedQueryId !== $scope.savedQuery.id) {
+    if (!$scope.savedQuery || newSavedQueryId !== $scope.savedQuery.id) {
       savedQueryService.getSavedQuery(newSavedQueryId).then((savedQuery) => {
         $scope.$evalAsync(() => {
           $scope.savedQuery = savedQuery;
@@ -597,6 +599,10 @@ function VisEditor(
             } else if (savedVis.id === $route.current.params.id) {
               docTitle.change(savedVis.lastSavedTitle);
               chrome.breadcrumbs.set($injector.invoke(getEditBreadcrumbs));
+              savedVis.vis.title = savedVis.title;
+              savedVis.vis.description = savedVis.description;
+              // it's needed to save the state to update url string
+              $state.save();
             } else {
               kbnUrl.change(`${VisualizeConstants.EDIT_PATH}/{{id}}`, { id: savedVis.id });
             }

@@ -59,8 +59,19 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
         const value = await PageObjects.visualBuilder.getMetricValue();
         expect(value).to.eql('157');
       });
+
+      it('should populate fields for basic functions', async () => {
+        const { visualBuilder } = PageObjects;
+
+        await visualBuilder.selectAggType('Average');
+        await visualBuilder.setFieldForAggregation('machine.ram');
+        const isFieldForAggregationValid = await visualBuilder.checkFieldForAggregationValidity();
+
+        expect(isFieldForAggregationValid).to.be(true);
+      });
     });
 
+    // FLAKY: https://github.com/elastic/kibana/issues/46677
     describe('gauge', () => {
       beforeEach(async () => {
         await PageObjects.visualBuilder.resetPage();
@@ -93,8 +104,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/44132
-    describe.skip('switch index patterns', () => {
+    describe('switch index patterns', () => {
       beforeEach(async () => {
         log.debug('Load kibana_sample_data_flights data');
         await esArchiver.loadIfNeeded('kibana_sample_data_flights');
@@ -105,7 +115,8 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       after(async () => {
         await esArchiver.unload('kibana_sample_data_flights');
       });
-      it('should be able to switch between index patterns', async () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/43150
+      it.skip('should be able to switch between index patterns', async () => {
         const value = await PageObjects.visualBuilder.getMetricValue();
         expect(value).to.eql('156');
         await PageObjects.visualBuilder.clickPanelOptions('metric');

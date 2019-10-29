@@ -38,7 +38,7 @@ image::images/dashboard-read-only-badge.png[Example of Dashboard's read only acc
 [[dashboard-getting-started]]
 === Interact with dashboards
 
-When you open *Dashhboard*, you're presented an overview of your dashboards. 
+When you open *Dashboard*, you're presented an overview of your dashboards. 
 If you don't have any dashboards, you can add 
 <<add-sample-data, sample data sets>>,
 which include pre-built dashboards. 

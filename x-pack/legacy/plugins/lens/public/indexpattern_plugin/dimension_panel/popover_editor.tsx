@@ -17,17 +17,11 @@ import {
   EuiFormRow,
   EuiFieldText,
   EuiLink,
-  EuiButtonIcon,
-  EuiTextColor,
+  EuiButtonEmpty,
   EuiSpacer,
 } from '@elastic/eui';
 import classNames from 'classnames';
-import {
-  IndexPatternColumn,
-  OperationType,
-  IndexPattern,
-  IndexPatternField,
-} from '../indexpattern';
+import { IndexPatternColumn, OperationType } from '../indexpattern';
 import { IndexPatternDimensionPanelProps, OperationFieldSupportMatrix } from './dimension_panel';
 import {
   operationDefinitionMap,
@@ -39,6 +33,8 @@ import { deleteColumn, changeColumn } from '../state_helpers';
 import { FieldSelect } from './field_select';
 import { hasField } from '../utils';
 import { BucketNestingEditor } from './bucket_nesting_editor';
+import { IndexPattern, IndexPatternField } from '../types';
+import { trackUiEvent } from '../../lens_ui_telemetry';
 
 const operationPanels = getOperationDisplay();
 
@@ -74,6 +70,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
     layerId,
     currentIndexPattern,
     uniqueLabel,
+    hideGrouping,
   } = props;
   const { operationByDocument, operationByField, fieldByOperation } = operationFieldSupportMatrix;
   const [isPopoverOpen, setPopoverOpen] = useState(false);
@@ -167,10 +164,12 @@ export function PopoverEditor(props: PopoverEditorProps) {
               } else {
                 setInvalidOperationType(operationType);
               }
+              trackUiEvent(`indexpattern_dimension_operation_${operationType}`);
               return;
             }
             if (!compatibleWithCurrentField) {
               setInvalidOperationType(operationType);
+              trackUiEvent(`indexpattern_dimension_operation_${operationType}`);
               return;
             }
             if (incompatibleSelectedOperationType) {
@@ -187,6 +186,9 @@ export function PopoverEditor(props: PopoverEditorProps) {
               indexPattern: currentIndexPattern,
               field: hasField(selectedColumn) ? fieldMap[selectedColumn.sourceField] : undefined,
             });
+            trackUiEvent(
+              `indexpattern_dimension_operation_from_${selectedColumn.operationType}_to_${operationType}`
+            );
             setState(
               changeColumn({
                 state,
@@ -225,7 +227,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
           </EuiLink>
         ) : (
           <>
-            <EuiButtonIcon
+            <EuiButtonEmpty
               iconType="plusInCircleFilled"
               data-test-subj="indexPattern-configure-dimension"
               aria-label={i18n.translate('xpack.lens.configure.addConfig', {
@@ -235,13 +237,13 @@ export function PopoverEditor(props: PopoverEditorProps) {
                 defaultMessage: 'Add a configuration',
               })}
               onClick={() => setPopoverOpen(!isPopoverOpen)}
-            />{' '}
-            <EuiTextColor color="subdued">
+              size="xs"
+            >
               <FormattedMessage
                 id="xpack.lens.configure.emptyConfig"
                 defaultMessage="Drop a field here"
               />
-            </EuiTextColor>
+            </EuiButtonEmpty>
           </>
         )
       }
@@ -259,6 +261,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
           <EuiFlexItem>
             <FieldSelect
               currentIndexPattern={currentIndexPattern}
+              existingFields={state.existingFields}
               showEmptyFields={state.showEmptyFields}
               fieldMap={fieldMap}
               operationFieldSupportMatrix={operationFieldSupportMatrix}
@@ -288,15 +291,27 @@ export function PopoverEditor(props: PopoverEditorProps) {
                   column = changeField(selectedColumn, currentIndexPattern, fieldMap[choice.field]);
                 } else {
                   // Otherwise we'll use the buildColumn method to calculate a new column
+                  const compatibleOperations =
+                    ('field' in choice &&
+                      operationFieldSupportMatrix.operationByField[choice.field]) ||
+                    [];
+                  let operation;
+                  if (compatibleOperations.length > 0) {
+                    operation =
+                      incompatibleSelectedOperationType &&
+                      compatibleOperations.includes(incompatibleSelectedOperationType)
+                        ? incompatibleSelectedOperationType
+                        : compatibleOperations[0];
+                  } else if ('field' in choice) {
+                    operation = choice.operationType;
+                  }
                   column = buildColumn({
                     columns: props.state.layers[props.layerId].columns,
                     field: 'field' in choice ? fieldMap[choice.field] : undefined,
                     indexPattern: currentIndexPattern,
                     layerId: props.layerId,
                     suggestedPriority: props.suggestedPriority,
-                    op:
-                      incompatibleSelectedOperationType ||
-                      ('field' in choice ? choice.operationType : undefined),
+                    op: operation as OperationType,
                     asDocumentOperation: choice.type === 'document',
                   });
                 }
@@ -324,28 +339,21 @@ export function PopoverEditor(props: PopoverEditorProps) {
                   <EuiCallOut
                     data-test-subj="indexPattern-invalid-operation"
                     title={i18n.translate('xpack.lens.indexPattern.invalidOperationLabel', {
-                      defaultMessage: 'Operation not applicable to field',
+                      defaultMessage: 'To use this function, select a different field.',
                     })}
-                    color="danger"
-                    iconType="cross"
+                    color="warning"
                     size="s"
-                  >
-                    <p>
-                      <FormattedMessage
-                        id="xpack.lens.indexPattern.invalidOperationDescription"
-                        defaultMessage="Please choose another field"
-                      />
-                    </p>
-                  </EuiCallOut>
+                    iconType="sortUp"
+                  />
                 )}
                 {incompatibleSelectedOperationType && !selectedColumn && (
                   <EuiCallOut
                     size="s"
                     data-test-subj="indexPattern-fieldless-operation"
                     title={i18n.translate('xpack.lens.indexPattern.fieldlessOperationLabel', {
-                      defaultMessage: 'Choose a field the operation is applied to',
+                      defaultMessage: 'To use this function, select a field.',
                     })}
-                    iconType="alert"
+                    iconType="sortUp"
                   ></EuiCallOut>
                 )}
                 {!incompatibleSelectedOperationType && ParamEditor && (
@@ -392,22 +400,25 @@ export function PopoverEditor(props: PopoverEditorProps) {
                     />
                   </EuiFormRow>
                 )}
-                <BucketNestingEditor
-                  layer={state.layers[props.layerId]}
-                  columnId={props.columnId}
-                  setColumns={columnOrder => {
-                    setState({
-                      ...state,
-                      layers: {
-                        ...state.layers,
-                        [props.layerId]: {
-                          ...state.layers[props.layerId],
-                          columnOrder,
+
+                {!hideGrouping && (
+                  <BucketNestingEditor
+                    layer={state.layers[props.layerId]}
+                    columnId={props.columnId}
+                    setColumns={columnOrder => {
+                      setState({
+                        ...state,
+                        layers: {
+                          ...state.layers,
+                          [props.layerId]: {
+                            ...state.layers[props.layerId],
+                            columnOrder,
+                          },
                         },
-                      },
-                    });
-                  }}
-                />
+                      });
+                    }}
+                  />
+                )}
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

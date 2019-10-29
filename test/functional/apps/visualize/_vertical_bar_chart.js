@@ -277,8 +277,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/45105
-    describe.skip('vertical bar with multiple splits', function () {
+    describe('vertical bar with multiple splits', function () {
       before(initBarChart);
 
       it('should show correct series', async function () {
@@ -305,6 +304,8 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should show correct series when disabling first agg', async function () {
+        // this will avoid issues with the play tooltip covering the disable agg button
+        await PageObjects.visualize.scrollSubjectIntoView('metricsAggGroup');
         await PageObjects.visualize.toggleDisabledAgg(3);
         await PageObjects.visualize.clickGo();
 
