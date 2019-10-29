@@ -353,6 +353,19 @@ export class Authenticator {
   }
 
   /**
+   * Returns session information for the current request.
+   * @param request Request instance.
+   */
+  async sessionInfo(request: KibanaRequest): Promise<ProviderSession | null> {
+    assertRequest(request);
+
+    const sessionStorage = this.options.sessionStorageFactory.asScoped(request);
+    const sessionValue = await this.getSessionValue(sessionStorage);
+
+    return sessionValue;
+  }
+
+  /**
    * Returns provider iterator where providers are sorted in the order of priority (based on the session ownership).
    * @param sessionValue Current session value.
    */

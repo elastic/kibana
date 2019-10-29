@@ -75,6 +75,7 @@ describe('Security Plugin', () => {
                   "isAuthenticated": [Function],
                   "login": [Function],
                   "logout": [Function],
+                  "sessionInfo": [Function],
                 },
                 "authz": Object {
                   "actions": Actions {
