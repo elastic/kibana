@@ -17,6 +17,5 @@
  * under the License.
  */
 
-import './directive';
-
 export { Storage } from './storage';
+export { IStorage, IStorageWrapper } from './types';
