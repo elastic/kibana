@@ -19,6 +19,7 @@
 
 import expect from '@kbn/expect';
 import { buildQueryFromFilters } from '../from_filters';
+import {  indexPatternResponse as indexPattern  } from '../../__fixtures__/index_pattern_response';
 
 describe('build query', function () {
   describe('buildQueryFromFilters', function () {
@@ -145,6 +146,31 @@ describe('build query', function () {
 
       const result = buildQueryFromFilters(filters);
 
+      expect(result.filter).to.eql(expectedESQueries);
+    });
+
+    it('should wrap filters targeting nested fields in a nested query', () => {
+      const filters = [
+        {
+          exists: { field: 'nestedField.child' },
+          meta: { type: 'exists' },
+        },
+      ];
+
+      const expectedESQueries = [
+        {
+          nested: {
+            path: 'nestedField',
+            query: {
+              exists: {
+                field: 'nestedField.child'
+              }
+            }
+          }
+        },
+      ];
+
+      const result = buildQueryFromFilters(filters, indexPattern);
       expect(result.filter).to.eql(expectedESQueries);
     });
   });
