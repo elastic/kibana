@@ -30,6 +30,7 @@ import { FiltersGlobal } from '../../../components/filters_global';
 import { HeaderPage } from '../../../components/header_page';
 import { HeaderSection } from '../../../components/header_section';
 import { HistogramSignals } from '../../../components/page/detection_engine/histogram_signals';
+import { SiemSearchBar } from '../../../components/search_bar';
 import {
   UtilityBar,
   UtilityBarAction,
@@ -37,8 +38,8 @@ import {
   UtilityBarSection,
   UtilityBarText,
 } from '../../../components/utility_bar';
+import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../../containers/source';
 import { SpyRoute } from '../../../utils/route/spy_routes';
-import { DetectionEngineKql } from '../kql';
 import * as i18n from './translations';
 
 // Michael: Will need to change this to get the current datetime format from Kibana settings.
@@ -493,94 +494,106 @@ ActivityMonitor.displayName = 'ActivityMonitor';
 export const RuleDetailsComponent = React.memo(() => {
   return (
     <>
-      <StickyContainer>
-        <FiltersGlobal>
-          <DetectionEngineKql />
-        </FiltersGlobal>
+      <WithSource sourceId="default">
+        {({ indicesExist, indexPattern }) => {
+          return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
+            <StickyContainer>
+              <FiltersGlobal>
+                <SiemSearchBar id="global" indexPattern={indexPattern} />
+              </FiltersGlobal>
 
-        <HeaderPage
-          backOptions={{ href: '#detection-engine/rules', text: 'Back to rules' }}
-          badgeOptions={{ text: 'Experimental' }}
-          border
-          subtitle={[
-            'Created by: mmarcialis on 12/28/2019, 12:00 PM',
-            'Updated by: agoldstein on 12/28/2019, 12:00 PM',
-          ]}
-          subtitle2="Last signal: 23 minutes ago"
-          title="Automated exfiltration"
-        >
-          <EuiFlexGroup alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiSwitch label="Activate rule" />
-            </EuiFlexItem>
+              <HeaderPage
+                backOptions={{ href: '#detection-engine/rules', text: 'Back to rules' }}
+                badgeOptions={{ text: 'Experimental' }}
+                border
+                subtitle={[
+                  'Created by: mmarcialis on 12/28/2019, 12:00 PM',
+                  'Updated by: agoldstein on 12/28/2019, 12:00 PM',
+                ]}
+                subtitle2="Last signal: 23 minutes ago"
+                title="Automated exfiltration"
+              >
+                <EuiFlexGroup alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiSwitch label="Activate rule" />
+                  </EuiFlexItem>
 
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    href="#detection-engine/rules/rule-details/edit-rule"
-                    iconType="visControls"
-                  >
-                    {'Edit rule settings'}
-                  </EuiButton>
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        <EuiButton
+                          href="#detection-engine/rules/rule-details/edit-rule"
+                          iconType="visControls"
+                        >
+                          {'Edit rule settings'}
+                        </EuiButton>
+                      </EuiFlexItem>
+
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonIcon iconType="boxesHorizontal" aria-label="Additional actions" />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </HeaderPage>
+
+              <EuiCallOut
+                color="danger"
+                iconType="alert"
+                size="s"
+                title="Rule failed to run on 12/28/2019, 12:00 PM"
+              >
+                <p>{'Full fail message here.'}</p>
+              </EuiCallOut>
+
+              <EuiSpacer />
+
+              <EuiFlexGroup>
+                <EuiFlexItem grow={1}>
+                  <EuiPanel>
+                    <HeaderSection title="Definition" />
+                  </EuiPanel>
                 </EuiFlexItem>
 
-                <EuiFlexItem grow={false}>
-                  <EuiButtonIcon iconType="boxesHorizontal" aria-label="Additional actions" />
+                <EuiFlexItem grow={2}>
+                  <EuiPanel>
+                    <HeaderSection title="About" />
+                  </EuiPanel>
+                </EuiFlexItem>
+
+                <EuiFlexItem grow={1}>
+                  <EuiPanel>
+                    <HeaderSection title="Schedule" />
+                  </EuiPanel>
                 </EuiFlexItem>
               </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </HeaderPage>
 
-        <EuiCallOut
-          color="danger"
-          iconType="alert"
-          size="s"
-          title="Rule failed to run on 12/28/2019, 12:00 PM"
-        >
-          <p>{'Full fail message here.'}</p>
-        </EuiCallOut>
+              <EuiSpacer />
 
-        <EuiSpacer />
+              <EuiTabbedContent
+                tabs={[
+                  {
+                    id: 'tabSignals',
+                    name: 'Signals',
+                    content: <Signals />,
+                  },
+                  {
+                    id: 'tabActivityMonitor',
+                    name: 'Activity monitor',
+                    content: <ActivityMonitor />,
+                  },
+                ]}
+              />
+            </StickyContainer>
+          ) : (
+            <>
+              <HeaderPage border title={i18n.PAGE_TITLE} />
 
-        <EuiFlexGroup>
-          <EuiFlexItem grow={1}>
-            <EuiPanel>
-              <HeaderSection title="Definition" />
-            </EuiPanel>
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={2}>
-            <EuiPanel>
-              <HeaderSection title="About" />
-            </EuiPanel>
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={1}>
-            <EuiPanel>
-              <HeaderSection title="Schedule" />
-            </EuiPanel>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
-        <EuiSpacer />
-
-        <EuiTabbedContent
-          tabs={[
-            {
-              id: 'tabSignals',
-              name: 'Signals',
-              content: <Signals />,
-            },
-            {
-              id: 'tabActivityMonitor',
-              name: 'Activity monitor',
-              content: <ActivityMonitor />,
-            },
-          ]}
-        />
-      </StickyContainer>
+              {/* <HostsEmptyPage /> */}
+            </>
+          );
+        }}
+      </WithSource>
 
       <SpyRoute />
     </>

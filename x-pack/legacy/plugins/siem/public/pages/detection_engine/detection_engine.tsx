@@ -19,6 +19,7 @@ import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
 import { HeaderSection } from '../../components/header_section';
 import { HistogramSignals } from '../../components/page/detection_engine/histogram_signals';
+import { SiemSearchBar } from '../../components/search_bar';
 import {
   UtilityBar,
   UtilityBarAction,
@@ -26,8 +27,8 @@ import {
   UtilityBarSection,
   UtilityBarText,
 } from '../../components/utility_bar';
+import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { SpyRoute } from '../../utils/route/spy_routes';
-import { DetectionEngineKql } from './kql';
 import * as i18n from './translations';
 
 const OpenSignals = React.memo(() => {
@@ -131,54 +132,66 @@ export const DetectionEngineComponent = React.memo(() => {
 
   return (
     <>
-      <StickyContainer>
-        <FiltersGlobal>
-          <DetectionEngineKql />
-        </FiltersGlobal>
+      <WithSource sourceId="default">
+        {({ indicesExist, indexPattern }) => {
+          return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
+            <StickyContainer>
+              <FiltersGlobal>
+                <SiemSearchBar id="global" indexPattern={indexPattern} />
+              </FiltersGlobal>
 
-        <HeaderPage border subtitle={i18n.PAGE_SUBTITLE} title={i18n.PAGE_TITLE}>
-          <EuiButton fill href="#/detection-engine/rules" iconType="gear">
-            {i18n.BUTTON_MANAGE_RULES}
-          </EuiButton>
-        </HeaderPage>
+              <HeaderPage border subtitle={i18n.PAGE_SUBTITLE} title={i18n.PAGE_TITLE}>
+                <EuiButton fill href="#/detection-engine/rules" iconType="gear">
+                  {i18n.BUTTON_MANAGE_RULES}
+                </EuiButton>
+              </HeaderPage>
 
-        <EuiPanel>
-          <HeaderSection title="Signal detection frequency">
-            <EuiSelect
-              options={sampleChartOptions}
-              prepend="Stack by"
-              value={sampleChartOptions[0].value}
-            />
-          </HeaderSection>
+              <EuiPanel>
+                <HeaderSection title="Signal detection frequency">
+                  <EuiSelect
+                    options={sampleChartOptions}
+                    prepend="Stack by"
+                    value={sampleChartOptions[0].value}
+                  />
+                </HeaderSection>
 
-          <HistogramSignals />
-        </EuiPanel>
+                <HistogramSignals />
+              </EuiPanel>
 
-        <EuiSpacer />
+              <EuiSpacer />
 
-        <EuiPanel>
-          <HeaderSection title="All signals">
-            <EuiFilterGroup>
-              <EuiFilterButton
-                hasActiveFilters={filterGroupState === filterGroupOptions[0]}
-                onClick={() => setFilterGroupState(filterGroupOptions[0])}
-                withNext
-              >
-                {'Open signals'}
-              </EuiFilterButton>
+              <EuiPanel>
+                <HeaderSection title="All signals">
+                  <EuiFilterGroup>
+                    <EuiFilterButton
+                      hasActiveFilters={filterGroupState === filterGroupOptions[0]}
+                      onClick={() => setFilterGroupState(filterGroupOptions[0])}
+                      withNext
+                    >
+                      {'Open signals'}
+                    </EuiFilterButton>
 
-              <EuiFilterButton
-                hasActiveFilters={filterGroupState === filterGroupOptions[1]}
-                onClick={() => setFilterGroupState(filterGroupOptions[1])}
-              >
-                {'Closed signals'}
-              </EuiFilterButton>
-            </EuiFilterGroup>
-          </HeaderSection>
+                    <EuiFilterButton
+                      hasActiveFilters={filterGroupState === filterGroupOptions[1]}
+                      onClick={() => setFilterGroupState(filterGroupOptions[1])}
+                    >
+                      {'Closed signals'}
+                    </EuiFilterButton>
+                  </EuiFilterGroup>
+                </HeaderSection>
 
-          {filterGroupState === filterGroupOptions[0] ? <OpenSignals /> : <ClosedSignals />}
-        </EuiPanel>
-      </StickyContainer>
+                {filterGroupState === filterGroupOptions[0] ? <OpenSignals /> : <ClosedSignals />}
+              </EuiPanel>
+            </StickyContainer>
+          ) : (
+            <>
+              <HeaderPage border title={i18n.PAGE_TITLE} />
+
+              {/* <HostsEmptyPage /> */}
+            </>
+          );
+        }}
+      </WithSource>
 
       <SpyRoute />
     </>
