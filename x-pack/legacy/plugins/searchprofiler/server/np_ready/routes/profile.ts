@@ -14,7 +14,6 @@ export const handler = async (server: ServerShim, request: RequestShim) => {
 
   const body = {
     index: request.payload.index,
-    type: request.payload.type,
     body: parsed,
   };
   try {
