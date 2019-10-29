@@ -27,7 +27,6 @@ export function ExceptionStacktrace({
       <EuiTitle size="xs">
         <h4>{title}</h4>
       </EuiTitle>
-      <EuiSpacer size="l" />
       {exceptions.map((ex, index) => {
         return index === 0 ? (
           <Stacktrace

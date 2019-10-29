@@ -2,20 +2,19 @@
 
 exports[`Stackframe when stackframe has source lines should render correctly 1`] = `
 .c0 {
-  color: #98a2b3;
-  padding: 8px;
+  color: #69707d;
+  padding: 8px 0;
   font-family: "SFMono-Regular",Consolas,"Liberation Mono",Menlo,Courier,monospace;
   font-size: 14px;
 }
 
 .c1 {
-  font-weight: bold;
   color: #000000;
 }
 
 .c3 {
   position: relative;
-  border-radius: 0 0 4px 4px;
+  border-radius: 4px;
 }
 
 .c4 {
@@ -31,7 +30,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
   position: absolute;
   top: 0;
   left: 0;
-  border-radius: 0 0 0 4px;
+  border-radius: 4px;
   background: #f5f7fa;
 }
 
