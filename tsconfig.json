@@ -3,10 +3,9 @@
     "baseUrl": ".",
     "paths": {
       // Allows for importing from `kibana` package for the exported types.
-      "kibana": ["./kibana"],
-      "kibana/public": ["src/core/public"],
-      "kibana/server": ["src/core/server"],
-      "plugins/*": ["src/legacy/core_plugins/*/public/"],
+      "@kbn/types": ["./kibana"],
+      "src/*": ["src/*"],
+      "x-pack/*": ["x-pack/*"],
       "ui/*": [
         "src/legacy/ui/public/*"
       ],

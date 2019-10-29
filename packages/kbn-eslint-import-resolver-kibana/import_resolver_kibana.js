@@ -17,7 +17,8 @@
  * under the License.
  */
 
-const { join, dirname, extname } = require('path');
+const Path = require('path');
+const { REPO_ROOT } = require('@kbn/dev-utils');
 
 const webpackResolver = require('eslint-import-resolver-webpack');
 const nodeResolver = require('eslint-import-resolver-node');
@@ -69,6 +70,14 @@ function tryNodeResolver(importRequest, file, config) {
 exports.resolve = function resolveKibanaPath(importRequest, file, config) {
   config = config || {};
 
+  if (importRequest.startsWith('src') || importRequest.startsWith('x-pack')) {
+    config = {
+      ...config,
+      forceNode: true,
+    };
+    importRequest = Path.resolve(REPO_ROOT, importRequest);
+  }
+
   if (config.forceNode) {
     return tryNodeResolver(importRequest, file, config);
   }
@@ -100,8 +109,8 @@ exports.resolve = function resolveKibanaPath(importRequest, file, config) {
   // we just resolve it. This is most helpful with relative imports for
   // .css and .html files because those don't work with the node resolver
   // and we can resolve them much quicker than webpack
-  if (isPathRequest && extname(importRequest)) {
-    const abs = join(dirname(file), importRequest);
+  if (isPathRequest && Path.extname(importRequest)) {
+    const abs = Path.resolve(Path.dirname(file), importRequest);
     if (isFile(abs)) {
       return {
         found: true,
