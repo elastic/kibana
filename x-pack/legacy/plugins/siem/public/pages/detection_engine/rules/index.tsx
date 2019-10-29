@@ -9,8 +9,6 @@ import {
   EuiBadge,
   EuiBasicTable,
   EuiButton,
-  EuiButtonIcon,
-  EuiCheckbox,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
@@ -25,12 +23,11 @@ import {
 } from '@elastic/eui';
 import moment from 'moment';
 import React, { useState } from 'react';
-import styled, { css } from 'styled-components';
 
 import { getEmptyTagValue } from '../../../components/empty_value';
 import { HeaderPage } from '../../../components/header_page';
 import { HeaderSection } from '../../../components/header_section';
-import { LinkIcon } from '../../../components/link_icon';
+// import { LinkIcon } from '../../../components/link_icon';
 import {
   UtilityBar,
   UtilityBarAction,

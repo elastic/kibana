@@ -87,7 +87,7 @@ const OpenSignals = React.memo(() => {
         </UtilityBarSection>
       </UtilityBar>
 
-      {/* Open signals datagrid here. Talk to Chandler Prall about possibility of early access. If not possible, use basic table. */}
+      {/* Michael: Open signals datagrid here. Talk to Chandler Prall about possibility of early access. If not possible, use basic table. */}
     </>
   );
 });
@@ -117,7 +117,7 @@ const ClosedSignals = React.memo(() => {
         </UtilityBarSection>
       </UtilityBar>
 
-      {/* Closed signals datagrid here. Talk to Chandler Prall about possibility of early access. If not possible, use basic table. */}
+      {/* Michael: Closed signals datagrid here. Talk to Chandler Prall about possibility of early access. If not possible, use basic table. */}
     </>
   );
 });
