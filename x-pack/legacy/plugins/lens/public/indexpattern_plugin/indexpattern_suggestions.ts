@@ -32,30 +32,21 @@ function buildSuggestion({
   layerId,
   label,
   changeType,
-  layerBehavior = 'add',
 }: {
   state: IndexPatternPrivateState;
   layerId: string;
   changeType: TableChangeType;
   updatedLayer?: IndexPatternLayer;
   label?: string;
-  layerBehavior?: 'replace' | 'add';
 }): DatasourceSuggestion<IndexPatternPrivateState> {
   const updatedState = updatedLayer
-    ? layerBehavior && layerBehavior === 'replace'
-      ? {
-          ...state,
-          layers: {
-            [layerId]: updatedLayer,
-          },
-        }
-      : {
-          ...state,
-          layers: {
-            ...state.layers,
-            [layerId]: updatedLayer,
-          },
-        }
+    ? {
+        ...state,
+        layers: {
+          ...state.layers,
+          [layerId]: updatedLayer,
+        },
+      }
     : state;
 
   // It's fairly easy to accidentally introduce a mismatch between
@@ -90,8 +81,7 @@ function buildSuggestion({
       label,
     },
 
-    // layerBehavior: layerBehavior || 'replace',
-    keptLayerIds: layerBehavior === 'add' ? Object.keys(state.layers) : [layerId],
+    keptLayerIds: Object.keys(state.layers),
   };
 }
 
@@ -372,7 +362,7 @@ export function getDatasourceSuggestionsFromCurrentState(
       .map(([layerId, layer], index) => {
         const hasMatchingLayer = layers.some(
           ([otherLayerId, otherLayer]) =>
-            !(otherLayerId === layerId) && otherLayer.indexPatternId === layer.indexPatternId
+            otherLayerId !== layerId && otherLayer.indexPatternId === layer.indexPatternId
         );
 
         const suggestionTitle = hasMatchingLayer
@@ -408,7 +398,7 @@ export function getDatasourceSuggestionsFromCurrentState(
   return _.flatten(
     Object.entries(state.layers || {})
       .filter(([_id, layer]) => layer.columnOrder.length && layer.indexPatternId)
-      .map(([layerId, layer], index) => {
+      .map(([layerId, layer]) => {
         const indexPattern = state.indexPatterns[layer.indexPatternId];
         const [buckets, metrics] = separateBucketColumns(layer);
         const timeDimension = layer.columnOrder.find(

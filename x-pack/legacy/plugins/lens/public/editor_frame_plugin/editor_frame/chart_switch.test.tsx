@@ -334,7 +334,7 @@ describe('chart_switch', () => {
     expect(getMenuItem('subvisC2', component).prop('betaBadgeIconType')).toBeUndefined();
   });
 
-  it('should switch even if there is no suggestion', () => {
+  it('should remove all layers if there is no suggestion', () => {
     const dispatch = jest.fn();
     const visualizations = mockVisualizations();
     visualizations.visB.getSuggestions.mockReturnValueOnce([]);
@@ -353,6 +353,9 @@ describe('chart_switch', () => {
     );
 
     switchTo('subvisB', component);
+
+    expect(frame.removeLayers).toHaveBeenCalledTimes(1);
+    expect(frame.removeLayers).toHaveBeenCalledWith(['a', 'b', 'c']);
 
     expect(visualizations.visB.getSuggestions).toHaveBeenCalledWith(
       expect.objectContaining({
