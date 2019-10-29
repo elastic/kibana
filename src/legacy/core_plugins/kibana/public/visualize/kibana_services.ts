@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import 'angular-sanitize'; // used in visualization_editor.js
+import 'angular-sanitize'; // used in visualization_editor.js and visualization.js
 import 'ui/collapsible_sidebar'; // used in default editor
 import 'ui/vis/editors/default/sidebar';
 // load directives
@@ -48,6 +48,7 @@ import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_regis
 import { createUiStatsReporter, METRIC_TYPE } from '../../../ui_metric/public';
 import { start as visualizations } from '../../../visualizations/public/np_ready/public/legacy';
 import { start as data } from '../../../data/public/legacy';
+import { start as embeddables } from '../../../../core_plugins/embeddable_api/public/np_ready/public/legacy';
 
 const services = {
   // new platform
@@ -62,6 +63,7 @@ const services = {
   uiSettings: npStart.core.uiSettings,
 
   data,
+  embeddables,
   visualizations,
 
   // legacy
@@ -117,6 +119,7 @@ export {
 // export types
 export { METRIC_TYPE };
 export { StaticIndexPattern } from 'ui/index_patterns';
+export { AppState } from 'ui/state_management/app_state';
 export { VisType } from 'ui/vis';
 export { VisualizeLoader } from 'ui/visualize/loader';
 export {
