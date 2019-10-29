@@ -16,7 +16,7 @@ import { minOperation, averageOperation, sumOperation, maxOperation } from './me
 import { dateHistogramOperation } from './date_histogram';
 import { countOperation } from './count';
 import { DimensionPriority, StateSetter, OperationMetadata } from '../../../types';
-import { BaseIndexPatternColumn, FieldBasedIndexPatternColumn } from './column_types';
+import { BaseIndexPatternColumn } from './column_types';
 import { IndexPatternPrivateState, IndexPattern, IndexPatternField } from '../../types';
 import { DateRange } from '../../../../common';
 
@@ -142,26 +142,14 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn>
   onFieldChange: (oldColumn: C, indexPattern: IndexPattern, field: IndexPatternField) => C;
 }
 
-interface DocumentBasedOperationDefinition<C extends BaseIndexPatternColumn>
-  extends BaseOperationDefinitionProps<C> {
-  /**
-   * Returns the meta data of the operation if applied to documents of the given index pattern.
-   * Undefined if the operation is not applicable to the index pattern.
-   */
-  getPossibleOperationForDocument: (indexPattern: IndexPattern) => OperationMetadata | undefined;
-  buildColumn: (arg: BaseBuildColumnArgs) => C;
-}
-
 /**
  * Shape of an operation definition. If the type parameter of the definition
  * indicates a field based column, `getPossibleOperationForField` has to be
  * specified, otherwise `getPossibleOperationForDocument` has to be defined.
  */
-export type OperationDefinition<
-  C extends BaseIndexPatternColumn
-> = C extends FieldBasedIndexPatternColumn
-  ? FieldBasedOperationDefinition<C>
-  : DocumentBasedOperationDefinition<C>;
+export type OperationDefinition<C extends BaseIndexPatternColumn> = FieldBasedOperationDefinition<
+  C
+>;
 
 // Helper to to infer the column type out of the operation definition.
 // This is done to avoid it to have to list out the column types along with
@@ -187,9 +175,7 @@ export type OperationType = (typeof internalOperationDefinitions)[number]['type'
  * This is an operation definition of an unspecified column out of all possible
  * column types. It
  */
-export type GenericOperationDefinition =
-  | FieldBasedOperationDefinition<IndexPatternColumn>
-  | DocumentBasedOperationDefinition<IndexPatternColumn>;
+export type GenericOperationDefinition = FieldBasedOperationDefinition<IndexPatternColumn>;
 
 /**
  * List of all available operation definitions
