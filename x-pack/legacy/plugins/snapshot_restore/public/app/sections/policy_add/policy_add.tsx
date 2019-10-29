@@ -10,7 +10,7 @@ import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { SlmPolicyPayload } from '../../../../common/types';
 import { TIME_UNITS } from '../../../../common/constants';
 
-import { PolicyForm, SectionError, SectionLoading } from '../../components';
+import { PolicyForm, SectionError, SectionLoading, Error } from '../../components';
 import { useAppDependencies } from '../../index';
 import { BASE_PATH, DEFAULT_POLICY_SCHEDULE } from '../../constants';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
@@ -119,7 +119,7 @@ export const PolicyAdd: React.FunctionComponent<RouteComponentProps> = ({
                 defaultMessage="Error loading available indices"
               />
             }
-            error={errorLoadingIndices}
+            error={errorLoadingIndices as Error}
           />
         ) : (
           <PolicyForm

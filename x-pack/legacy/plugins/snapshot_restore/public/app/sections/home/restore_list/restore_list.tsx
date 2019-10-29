@@ -18,7 +18,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { APP_RESTORE_INDEX_PRIVILEGES } from '../../../../../common/constants';
-import { SectionError, SectionLoading } from '../../../components';
+import { SectionError, SectionLoading, Error } from '../../../components';
 import { UIM_RESTORE_LIST_LOAD } from '../../../constants';
 import { useAppDependencies } from '../../../index';
 import { useLoadRestores } from '../../../services/http';
@@ -85,7 +85,7 @@ export const RestoreList: React.FunctionComponent = () => {
               defaultMessage="Error loading restores"
             />
           }
-          error={error}
+          error={error as Error}
         />
       );
     }
