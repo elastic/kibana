@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndexPatternMapping } from '../types';
+import {
+  IndexPatternMapping,
+  MapLayerEventHandlers,
+  OnDataLoadEndProps,
+  OnDataLoadErrorProps,
+  OnDataLoadProps,
+} from '../types';
 
 export const mockIndexPatternIds: IndexPatternMapping[] = [
   { title: 'filebeat-*', id: '8c7323ac-97ad-4b53-ac0a-40f8f691a918' },
@@ -207,3 +213,9 @@ export const mockLayerListDouble = [
   mockDestinationLayer,
   mockSourceLayer,
 ];
+
+export const mockMapLayerEventHandlers: MapLayerEventHandlers = {
+  onDataLoad: ({ layerId, dataId }: OnDataLoadProps) => {},
+  onDataLoadEnd: ({ layerId, dataId, featuresCount }: OnDataLoadEndProps) => {},
+  onDataLoadError: ({ layerId, dataId, errorMessage }: OnDataLoadErrorProps) => {},
+};

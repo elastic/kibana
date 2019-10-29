@@ -5,12 +5,37 @@
  */
 
 import { isMapLoading, mergeMapLayers } from './use_map_layers';
+import { MapLayer } from '../types';
 
-const mockMapLayer = [
-  { dataId: 'source', layerId: 'filebeat-* | Line', isLoading: false, errorMessage: '' },
-  { dataId: 'source', layerId: 'packetbeat-* | Line', isLoading: false, errorMessage: '' },
-  { dataId: 'source', layerId: 'winlogbeat-* | Line', isLoading: false, errorMessage: '' },
-  { dataId: 'source', layerId: 'endgame-* | Line', isLoading: false, errorMessage: '' },
+const mockMapLayer: MapLayer[] = [
+  {
+    dataId: 'source',
+    layerId: 'filebeat-* | Line',
+    isLoading: false,
+    featuresCount: 100,
+    errorMessage: '',
+  },
+  {
+    dataId: 'source',
+    layerId: 'packetbeat-* | Line',
+    isLoading: false,
+    featuresCount: 100,
+    errorMessage: '',
+  },
+  {
+    dataId: 'source',
+    layerId: 'winlogbeat-* | Line',
+    isLoading: false,
+    featuresCount: 100,
+    errorMessage: '',
+  },
+  {
+    dataId: 'source',
+    layerId: 'endgame-* | Line',
+    isLoading: false,
+    featuresCount: 100,
+    errorMessage: '',
+  },
 ];
 
 // TODO: Expand test coverage before taking out of draft
@@ -18,7 +43,13 @@ const mockMapLayer = [
 describe('useMapLayers', () => {
   describe('mergeMapLayers', () => {
     test('layer is not added when all fields match existing', () => {
-      const mergedMapLayers = mergeMapLayers(mockMapLayer, 'source', 'filebeat-* | Line', true);
+      const mergedMapLayers = mergeMapLayers(
+        mockMapLayer,
+        'source',
+        'filebeat-* | Line',
+        true,
+        100
+      );
       expect(mergedMapLayers).toEqual(mergedMapLayers);
     });
   });

@@ -20,14 +20,15 @@ export const mergeMapLayers = (
   dataId: string,
   layerId: string,
   isLoading: boolean,
+  featuresCount = 0,
   errorMessage = ''
-) => {
+): MapLayer[] => {
   if (prevMapLayers.find(ls => ls.layerId === layerId) === undefined) {
-    return [...prevMapLayers, { dataId, layerId, isLoading, errorMessage }];
+    return [...prevMapLayers, { dataId, layerId, isLoading, featuresCount, errorMessage }];
   } else {
     return prevMapLayers.map<MapLayer>(ml => {
       return ml.layerId === layerId
-        ? { dataId: ml.dataId, layerId: ml.layerId, isLoading, errorMessage }
+        ? { dataId: ml.dataId, layerId: ml.layerId, isLoading, featuresCount, errorMessage }
         : ml;
     });
   }
@@ -58,11 +59,13 @@ export const useMapLayers = (): Return => {
       setMapLayers(prevMapLayers => mergeMapLayers(prevMapLayers, dataId, layerId, true));
     },
     onDataLoadEnd: ({ layerId, dataId, featuresCount }: OnDataLoadEndProps) => {
-      setMapLayers(prevMapLayers => mergeMapLayers(prevMapLayers, dataId, layerId, false));
+      setMapLayers(prevMapLayers =>
+        mergeMapLayers(prevMapLayers, dataId, layerId, false, featuresCount)
+      );
     },
     onDataLoadError: ({ layerId, dataId, errorMessage }: OnDataLoadErrorProps) => {
       setMapLayers(prevMapLayers =>
-        mergeMapLayers(prevMapLayers, dataId, layerId, false, errorMessage)
+        mergeMapLayers(prevMapLayers, dataId, layerId, false, 0, errorMessage)
       );
     },
   };

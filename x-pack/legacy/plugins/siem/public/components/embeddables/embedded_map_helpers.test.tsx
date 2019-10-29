@@ -8,6 +8,7 @@ import { createEmbeddable, displayErrorToast, setupEmbeddablesAPI } from './embe
 import { createUiNewPlatformMock } from 'ui/new_platform/__mocks__/helpers';
 import { createPortalNode } from 'react-reverse-portal';
 import { PluginsStart } from 'ui/new_platform/new_platform';
+import { mockMapLayerEventHandlers } from './__mocks__/mock';
 
 jest.mock('ui/new_platform');
 jest.mock('../../lib/settings/use_kibana_ui_setting');
@@ -62,7 +63,8 @@ describe('embedded_map_helpers', () => {
         0,
         setQueryMock,
         createPortalNode(),
-        npStart.plugins.embeddable
+        npStart.plugins.embeddable,
+        mockMapLayerEventHandlers
       );
       expect(setQueryMock).toHaveBeenCalledTimes(1);
     });
@@ -77,7 +79,8 @@ describe('embedded_map_helpers', () => {
         0,
         setQueryMock,
         createPortalNode(),
-        npStart.plugins.embeddable
+        npStart.plugins.embeddable,
+        mockMapLayerEventHandlers
       );
       expect(setQueryMock.mock.calls[0][0].refetch).not.toBe(embeddable.reload);
       setQueryMock.mock.results[0].value();

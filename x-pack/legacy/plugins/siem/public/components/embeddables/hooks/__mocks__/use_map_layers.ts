@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// TODO: Provide accurate hook
+
 export const useMapLayers = () => {
   return [false, [], {}];
 };

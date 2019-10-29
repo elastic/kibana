@@ -62,6 +62,7 @@ export interface FeatureGeometry {
 export interface MapLayer {
   layerId: string;
   dataId: string;
+  featuresCount: number;
   errorMessage: string;
   isLoading: boolean;
 }
