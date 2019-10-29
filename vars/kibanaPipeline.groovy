@@ -248,10 +248,13 @@ def buildXpack() {
 }
 
 def runErrorReporter() {
-  bash("""
-    source src/dev/ci_setup/setup_env.sh
-    node scripts/report_failed_tests
-  """, "Report failed tests, if necessary"
+  bash(
+    """
+      source src/dev/ci_setup/setup_env.sh
+      node scripts/report_failed_tests
+    """,
+    "Report failed tests, if necessary"
+  )
 }
 
 return this
