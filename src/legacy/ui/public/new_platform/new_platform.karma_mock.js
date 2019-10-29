@@ -44,6 +44,9 @@ export const npSetup = {
       },
     },
     data: {
+      query: {
+        filterManager: sinon.fake(),
+      },
     },
     inspector: {
       registerView: () => undefined,
@@ -78,6 +81,24 @@ export const npStart = {
     },
     data: {
       getSuggestions: sinon.fake(),
+      query: {
+        filterManager: {
+          getFetches$: sinon.fake(),
+          getFilters: sinon.fake(),
+          getAppFilters: sinon.fake(),
+          getGlobalFilters: sinon.fake(),
+          removeFilter: sinon.fake(),
+          addFilters: sinon.fake(),
+          setFilters: sinon.fake(),
+          removeAll: sinon.fake(),
+          getUpdates$: () => {
+            return {
+              subscribe: () => {}
+            };
+          },
+
+        },
+      },
     },
     inspector: {
       isAvailable: () => false,
