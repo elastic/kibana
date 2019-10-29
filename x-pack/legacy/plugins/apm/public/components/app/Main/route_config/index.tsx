@@ -15,7 +15,9 @@ import { TransactionDetails } from '../../TransactionDetails';
 import { Home } from '../../Home';
 import { BreadcrumbRoute } from '../ProvideBreadcrumbs';
 import { RouteName } from './route_names';
+import { Settings } from '../../Settings';
 import { AgentConfigurations } from '../../Settings/AgentConfigurations';
+import { ApmIndices } from '../../Settings/ApmIndices';
 import { toQuery } from '../../../shared/Links/url_helpers';
 import { ServiceNodeMetrics } from '../../ServiceNodeMetrics';
 import { resolveUrlParams } from '../../../../context/UrlParamsContext/resolveUrlParams';
@@ -69,11 +71,40 @@ export const routes: BreadcrumbRoute[] = [
   {
     exact: true,
     path: '/settings',
-    component: AgentConfigurations,
+    render: renderAsRedirectTo('/settings/agent-configuration'),
     breadcrumb: i18n.translate('xpack.apm.breadcrumb.listSettingsTitle', {
       defaultMessage: 'Settings'
     }),
     name: RouteName.SETTINGS
+  },
+  {
+    exact: true,
+    path: '/settings/apm-indices',
+    component: () => (
+      <Settings>
+        <ApmIndices />
+      </Settings>
+    ),
+    breadcrumb: i18n.translate('xpack.apm.breadcrumb.settings.indicesTitle', {
+      defaultMessage: 'Indices'
+    }),
+    name: RouteName.INDICES
+  },
+  {
+    exact: true,
+    path: '/settings/agent-configuration',
+    component: () => (
+      <Settings>
+        <AgentConfigurations />
+      </Settings>
+    ),
+    breadcrumb: i18n.translate(
+      'xpack.apm.breadcrumb.settings.agentConfigurationTitle',
+      {
+        defaultMessage: 'Agent Configuration'
+      }
+    ),
+    name: RouteName.AGENT_CONFIGURATION
   },
   {
     exact: true,

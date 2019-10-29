@@ -12,13 +12,21 @@ import {
   SavedObjectsClientContract,
   HttpServiceBase,
 } from 'src/core/public';
-import { Storage } from 'ui/storage';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { createMockedIndexPattern } from '../../mocks';
 import { TermsIndexPatternColumn } from './terms';
 import { termsOperation } from '.';
 import { IndexPatternPrivateState } from '../../types';
 
 jest.mock('ui/new_platform');
+
+const defaultProps = {
+  storage: {} as IStorageWrapper,
+  uiSettings: {} as UiSettingsClientContract,
+  savedObjectsClient: {} as SavedObjectsClientContract,
+  dateRange: { fromDate: 'now-1d', toDate: 'now' },
+  http: {} as HttpServiceBase,
+};
 
 describe('terms', () => {
   let state: IndexPatternPrivateState;
@@ -324,15 +332,12 @@ describe('terms', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
         <InlineOptions
+          {...defaultProps}
           state={state}
           setState={setStateSpy}
           columnId="col1"
           currentColumn={state.layers.first.columns.col1 as TermsIndexPatternColumn}
           layerId="first"
-          storage={{} as Storage}
-          uiSettings={{} as UiSettingsClientContract}
-          savedObjectsClient={{} as SavedObjectsClientContract}
-          http={{} as HttpServiceBase}
         />
       );
 
@@ -350,15 +355,12 @@ describe('terms', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
         <InlineOptions
+          {...defaultProps}
           state={state}
           setState={setStateSpy}
           columnId="col1"
           currentColumn={state.layers.first.columns.col1 as TermsIndexPatternColumn}
           layerId="first"
-          storage={{} as Storage}
-          uiSettings={{} as UiSettingsClientContract}
-          savedObjectsClient={{} as SavedObjectsClientContract}
-          http={{} as HttpServiceBase}
         />
       );
 
@@ -398,15 +400,12 @@ describe('terms', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
         <InlineOptions
+          {...defaultProps}
           state={state}
           setState={setStateSpy}
           columnId="col1"
           layerId="first"
           currentColumn={state.layers.first.columns.col1 as TermsIndexPatternColumn}
-          storage={{} as Storage}
-          uiSettings={{} as UiSettingsClientContract}
-          savedObjectsClient={{} as SavedObjectsClientContract}
-          http={{} as HttpServiceBase}
         />
       );
 
@@ -422,15 +421,12 @@ describe('terms', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
         <InlineOptions
+          {...defaultProps}
           state={state}
           setState={setStateSpy}
           columnId="col1"
           layerId="first"
           currentColumn={state.layers.first.columns.col1 as TermsIndexPatternColumn}
-          storage={{} as Storage}
-          uiSettings={{} as UiSettingsClientContract}
-          savedObjectsClient={{} as SavedObjectsClientContract}
-          http={{} as HttpServiceBase}
         />
       );
 
@@ -467,15 +463,12 @@ describe('terms', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
         <InlineOptions
+          {...defaultProps}
           state={state}
           setState={setStateSpy}
           columnId="col1"
           layerId="first"
           currentColumn={state.layers.first.columns.col1 as TermsIndexPatternColumn}
-          storage={{} as Storage}
-          uiSettings={{} as UiSettingsClientContract}
-          savedObjectsClient={{} as SavedObjectsClientContract}
-          http={{} as HttpServiceBase}
         />
       );
 
@@ -486,15 +479,12 @@ describe('terms', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
         <InlineOptions
+          {...defaultProps}
           state={state}
           setState={setStateSpy}
           columnId="col1"
           layerId="first"
           currentColumn={state.layers.first.columns.col1 as TermsIndexPatternColumn}
-          storage={{} as Storage}
-          uiSettings={{} as UiSettingsClientContract}
-          savedObjectsClient={{} as SavedObjectsClientContract}
-          http={{} as HttpServiceBase}
         />
       );
 

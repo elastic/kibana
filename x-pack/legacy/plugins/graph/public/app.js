@@ -100,7 +100,7 @@ export function initGraphApp(angularModule, deps) {
 
   app.directive('graphApp', function (reactDirective) {
     return reactDirective(GraphApp, [
-      ['store', { watchDepth: 'reference' }],
+      ['storage', { watchDepth: 'reference' }],
       ['isInitialized', { watchDepth: 'reference' }],
       ['currentIndexPattern', { watchDepth: 'reference' }],
       ['indexPatternProvider', { watchDepth: 'reference' }],
@@ -310,7 +310,7 @@ export function initGraphApp(angularModule, deps) {
 
     // register things on scope passed down to react components
     $scope.pluginDataStart = npData;
-    $scope.store = new Storage(window.localStorage);
+    $scope.storage = new Storage(window.localStorage);
     $scope.coreStart = coreStart;
     $scope.loading = false;
     $scope.reduxStore = store;
