@@ -100,6 +100,7 @@ export function DocViewTableRow({
            * Justification for dangerouslySetInnerHTML:
            * We just use values encoded by our field formatters
            */
+          // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{ __html: value as string }}
         />
       </td>
