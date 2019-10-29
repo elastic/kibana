@@ -28,9 +28,9 @@ import {
 } from '../../../../core/server';
 import { IndexPatternsFetcher } from './fetcher';
 
-export function registerRoutes(core: CoreSetup) {
+export function registerRoutes(http: CoreSetup['http'], elasticsearch: CoreSetup['elasticsearch']) {
   const getIndexPatternsService = async (request: KibanaRequest): Promise<IndexPatternsFetcher> => {
-    const client = await core.elasticsearch.dataClient$.pipe(first()).toPromise();
+    const client = await elasticsearch.dataClient$.pipe(first()).toPromise();
     const callCluster: APICaller = (
       endpoint: string,
       params?: Record<string, any>,
@@ -49,7 +49,7 @@ export function registerRoutes(core: CoreSetup) {
     return parsedFields;
   };
 
-  const router = core.http.createRouter();
+  const router = http.createRouter();
   router.get(
     {
       path: '/api/index_patterns/_fields_for_wildcard',
