@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import {
   EuiBadge,
   EuiBasicTable,
@@ -40,7 +41,7 @@ import {
 import { SpyRoute } from '../../../utils/route/spy_routes';
 import * as i18n from './translations';
 
-// Will need to change this to get the current datetime format from Kibana settings.
+// Michael: Will need to change this to get the current datetime format from Kibana settings.
 const dateTimeFormat = (value: string) => {
   return moment(value).format('M/D/YYYY, h:mm A');
 };
@@ -52,13 +53,18 @@ const AllRules = React.memo(() => {
     status: string;
   }
 
+  interface LastResponseTypes {
+    type: string;
+    message?: string;
+  }
+
   interface ColumnTypes {
     id: number;
     rule: RuleTypes;
     method: string;
     severity: string;
     lastCompletedRun: string;
-    lastResponse: string;
+    lastResponse: LastResponseTypes;
     tags: string | string[];
     activate: boolean;
   }
@@ -75,48 +81,51 @@ const AllRules = React.memo(() => {
 
   const actions = [
     {
-      name: 'Edit rule settings',
       description: 'Edit rule settings',
       icon: 'visControls',
+      name: 'Edit rule settings',
       onClick: () => {},
     },
     {
-      name: 'Run rule manually…',
       description: 'Run rule manually…',
       icon: 'play',
+      name: 'Run rule manually…',
       onClick: () => {},
     },
     {
-      name: 'Duplicate rule…',
       description: 'Duplicate rule…',
       icon: 'copy',
+      name: 'Duplicate rule…',
       onClick: () => {},
     },
     {
-      name: 'Export rule',
       description: 'Export rule',
-      icon: 'export',
+      icon: 'exportAction',
+      name: 'Export rule',
       onClick: () => {},
     },
     {
-      name: 'Delete rule…',
       description: 'Delete rule…',
       icon: 'trash',
+      name: 'Delete rule…',
       onClick: () => {},
     },
   ];
 
+  // Michael: Are we able to do custom, in-table-header filters, as shown in my wireframes?
   const columns = [
     {
       field: 'rule',
       name: 'Rule',
       render: (value: ColumnTypes['rule']) => (
-        <>
-          <EuiLink href={value.href}>{value.name}</EuiLink> <EuiBadge>{value.status}</EuiBadge>
-        </>
+        <div>
+          <EuiLink href={value.href}>{value.name}</EuiLink>{' '}
+          <EuiBadge color="hollow">{value.status}</EuiBadge>
+        </div>
       ),
       sortable: true,
       truncateText: true,
+      width: '24%',
     },
     {
       field: 'method',
@@ -127,18 +136,37 @@ const AllRules = React.memo(() => {
     {
       field: 'severity',
       name: 'Severity',
-      render: (value: ColumnTypes['severity']) => <EuiHealth color="warning">{value}</EuiHealth>,
+      render: (value: ColumnTypes['severity']) => (
+        <EuiHealth
+          color={
+            value === 'Low'
+              ? euiLightVars.euiColorVis0
+              : value === 'Medium'
+              ? euiLightVars.euiColorVis5
+              : value === 'High'
+              ? euiLightVars.euiColorVis7
+              : euiLightVars.euiColorVis9
+          }
+        >
+          {value}
+        </EuiHealth>
+      ),
       sortable: true,
       truncateText: true,
     },
     {
       field: 'lastCompletedRun',
       name: 'Last completed run',
-      render: (value: ColumnTypes['lastCompletedRun']) => (
-        <time dateTime={value}>{dateTimeFormat(value)}</time>
-      ),
+      render: (value: ColumnTypes['lastCompletedRun']) => {
+        return value === undefined ? (
+          getEmptyTagValue()
+        ) : (
+          <time dateTime={value}>{dateTimeFormat(value)}</time>
+        );
+      },
       sortable: true,
       truncateText: true,
+      width: '16%',
     },
     {
       field: 'lastResponse',
@@ -148,12 +176,12 @@ const AllRules = React.memo(() => {
           getEmptyTagValue()
         ) : (
           <>
-            {value === 'Fail' ? (
+            {value.type === 'Fail' ? (
               <EuiTextColor color="danger">
-                {value} <EuiIconTip content="Full fail message here." size="s" type="iInCircle" />
+                {value.type} <EuiIconTip content={value.message} type="iInCircle" />
               </EuiTextColor>
             ) : (
-              <EuiTextColor color="secondary">{value}</EuiTextColor>
+              <EuiTextColor color="secondary">{value.type}</EuiTextColor>
             )}
           </>
         );
@@ -164,15 +192,22 @@ const AllRules = React.memo(() => {
     {
       field: 'tags',
       name: 'Tags',
-      render: (value: ColumnTypes['tags']) => {
-        if (typeof value !== 'string') {
-          return value.map(tag => <EuiBadge color="hollow">{tag}</EuiBadge>);
-        } else {
-          return <EuiBadge color="hollow">{value}</EuiBadge>;
-        }
-      },
+      render: (value: ColumnTypes['tags']) => (
+        <div>
+          {typeof value !== 'string' ? (
+            <>
+              {value.map(tag => (
+                <EuiBadge color="hollow">{tag}</EuiBadge>
+              ))}
+            </>
+          ) : (
+            <EuiBadge color="hollow">{value}</EuiBadge>
+          )}
+        </div>
+      ),
       sortable: true,
       truncateText: true,
+      width: '20%',
     },
     {
       align: 'center',
@@ -180,11 +215,11 @@ const AllRules = React.memo(() => {
       name: 'Activate',
       render: (value: ColumnTypes['activate']) => <EuiSwitch checked={value} />,
       sortable: true,
-      width: '57px',
+      width: '65px',
     },
     {
       actions,
-      width: '32px',
+      width: '40px',
     },
   ];
 
@@ -197,9 +232,11 @@ const AllRules = React.memo(() => {
         status: 'Experimental',
       },
       method: 'Custom query',
-      severity: 'Medium',
+      severity: 'Low',
       lastCompletedRun: '2019-12-28 00:00:00.000-05:00',
-      lastResponse: 'Success',
+      lastResponse: {
+        type: 'Success',
+      },
       tags: ['attack.t1234', 'attack.t4321'],
       activate: true,
     },
@@ -213,7 +250,10 @@ const AllRules = React.memo(() => {
       method: 'Custom query',
       severity: 'Medium',
       lastCompletedRun: '2019-12-28 00:00:00.000-05:00',
-      lastResponse: 'Fail',
+      lastResponse: {
+        type: 'Fail',
+        message: 'Full fail message here.',
+      },
       tags: 'attack.t1234',
       activate: true,
     },
@@ -225,18 +265,304 @@ const AllRules = React.memo(() => {
         status: 'Experimental',
       },
       method: 'Custom query',
-      severity: 'Medium',
-      lastCompletedRun: '2019-12-28 00:00:00.000-05:00',
-      lastResponse: 'Success',
+      severity: 'High',
       tags: 'attack.t1234',
       activate: false,
+    },
+    {
+      id: 4,
+      rule: {
+        href: '#/detection-engine/rules/rule-details',
+        name: 'Automated exfiltration',
+        status: 'Experimental',
+      },
+      method: 'Custom query',
+      severity: 'Critical',
+      lastCompletedRun: '2019-12-28 00:00:00.000-05:00',
+      lastResponse: {
+        type: 'Success',
+      },
+      tags: 'attack.t1234',
+      activate: true,
+    },
+    {
+      id: 5,
+      rule: {
+        href: '#/detection-engine/rules/rule-details',
+        name: 'Automated exfiltration',
+        status: 'Experimental',
+      },
+      method: 'Custom query',
+      severity: 'Critical',
+      lastCompletedRun: '2019-12-28 00:00:00.000-05:00',
+      lastResponse: {
+        type: 'Success',
+      },
+      tags: 'attack.t1234',
+      activate: true,
+    },
+    {
+      id: 6,
+      rule: {
+        href: '#/detection-engine/rules/rule-details',
+        name: 'Automated exfiltration',
+        status: 'Experimental',
+      },
+      method: 'Custom query',
+      severity: 'Critical',
+      lastCompletedRun: '2019-12-28 00:00:00.000-05:00',
+      lastResponse: {
+        type: 'Success',
+      },
+      tags: 'attack.t1234',
+      activate: true,
+    },
+    {
+      id: 7,
+      rule: {
+        href: '#/detection-engine/rules/rule-details',
+        name: 'Automated exfiltration',
+        status: 'Experimental',
+      },
+      method: 'Custom query',
+      severity: 'Critical',
+      lastCompletedRun: '2019-12-28 00:00:00.000-05:00',
+      lastResponse: {
+        type: 'Success',
+      },
+      tags: 'attack.t1234',
+      activate: true,
+    },
+    {
+      id: 8,
+      rule: {
+        href: '#/detection-engine/rules/rule-details',
+        name: 'Automated exfiltration',
+        status: 'Experimental',
+      },
+      method: 'Custom query',
+      severity: 'Critical',
+      lastCompletedRun: '2019-12-28 00:00:00.000-05:00',
+      lastResponse: {
+        type: 'Success',
+      },
+      tags: 'attack.t1234',
+      activate: true,
+    },
+    {
+      id: 9,
+      rule: {
+        href: '#/detection-engine/rules/rule-details',
+        name: 'Automated exfiltration',
+        status: 'Experimental',
+      },
+      method: 'Custom query',
+      severity: 'Critical',
+      lastCompletedRun: '2019-12-28 00:00:00.000-05:00',
+      lastResponse: {
+        type: 'Success',
+      },
+      tags: 'attack.t1234',
+      activate: true,
+    },
+    {
+      id: 10,
+      rule: {
+        href: '#/detection-engine/rules/rule-details',
+        name: 'Automated exfiltration',
+        status: 'Experimental',
+      },
+      method: 'Custom query',
+      severity: 'Critical',
+      lastCompletedRun: '2019-12-28 00:00:00.000-05:00',
+      lastResponse: {
+        type: 'Success',
+      },
+      tags: 'attack.t1234',
+      activate: true,
+    },
+    {
+      id: 11,
+      rule: {
+        href: '#/detection-engine/rules/rule-details',
+        name: 'Automated exfiltration',
+        status: 'Experimental',
+      },
+      method: 'Custom query',
+      severity: 'Critical',
+      lastCompletedRun: '2019-12-28 00:00:00.000-05:00',
+      lastResponse: {
+        type: 'Success',
+      },
+      tags: 'attack.t1234',
+      activate: true,
+    },
+    {
+      id: 12,
+      rule: {
+        href: '#/detection-engine/rules/rule-details',
+        name: 'Automated exfiltration',
+        status: 'Experimental',
+      },
+      method: 'Custom query',
+      severity: 'Critical',
+      lastCompletedRun: '2019-12-28 00:00:00.000-05:00',
+      lastResponse: {
+        type: 'Success',
+      },
+      tags: 'attack.t1234',
+      activate: true,
+    },
+    {
+      id: 13,
+      rule: {
+        href: '#/detection-engine/rules/rule-details',
+        name: 'Automated exfiltration',
+        status: 'Experimental',
+      },
+      method: 'Custom query',
+      severity: 'Critical',
+      lastCompletedRun: '2019-12-28 00:00:00.000-05:00',
+      lastResponse: {
+        type: 'Success',
+      },
+      tags: 'attack.t1234',
+      activate: true,
+    },
+    {
+      id: 14,
+      rule: {
+        href: '#/detection-engine/rules/rule-details',
+        name: 'Automated exfiltration',
+        status: 'Experimental',
+      },
+      method: 'Custom query',
+      severity: 'Critical',
+      lastCompletedRun: '2019-12-28 00:00:00.000-05:00',
+      lastResponse: {
+        type: 'Success',
+      },
+      tags: 'attack.t1234',
+      activate: true,
+    },
+    {
+      id: 15,
+      rule: {
+        href: '#/detection-engine/rules/rule-details',
+        name: 'Automated exfiltration',
+        status: 'Experimental',
+      },
+      method: 'Custom query',
+      severity: 'Critical',
+      lastCompletedRun: '2019-12-28 00:00:00.000-05:00',
+      lastResponse: {
+        type: 'Success',
+      },
+      tags: 'attack.t1234',
+      activate: true,
+    },
+    {
+      id: 16,
+      rule: {
+        href: '#/detection-engine/rules/rule-details',
+        name: 'Automated exfiltration',
+        status: 'Experimental',
+      },
+      method: 'Custom query',
+      severity: 'Critical',
+      lastCompletedRun: '2019-12-28 00:00:00.000-05:00',
+      lastResponse: {
+        type: 'Success',
+      },
+      tags: 'attack.t1234',
+      activate: true,
+    },
+    {
+      id: 17,
+      rule: {
+        href: '#/detection-engine/rules/rule-details',
+        name: 'Automated exfiltration',
+        status: 'Experimental',
+      },
+      method: 'Custom query',
+      severity: 'Critical',
+      lastCompletedRun: '2019-12-28 00:00:00.000-05:00',
+      lastResponse: {
+        type: 'Success',
+      },
+      tags: 'attack.t1234',
+      activate: true,
+    },
+    {
+      id: 18,
+      rule: {
+        href: '#/detection-engine/rules/rule-details',
+        name: 'Automated exfiltration',
+        status: 'Experimental',
+      },
+      method: 'Custom query',
+      severity: 'Critical',
+      lastCompletedRun: '2019-12-28 00:00:00.000-05:00',
+      lastResponse: {
+        type: 'Success',
+      },
+      tags: 'attack.t1234',
+      activate: true,
+    },
+    {
+      id: 19,
+      rule: {
+        href: '#/detection-engine/rules/rule-details',
+        name: 'Automated exfiltration',
+        status: 'Experimental',
+      },
+      method: 'Custom query',
+      severity: 'Critical',
+      lastCompletedRun: '2019-12-28 00:00:00.000-05:00',
+      lastResponse: {
+        type: 'Success',
+      },
+      tags: 'attack.t1234',
+      activate: true,
+    },
+    {
+      id: 20,
+      rule: {
+        href: '#/detection-engine/rules/rule-details',
+        name: 'Automated exfiltration',
+        status: 'Experimental',
+      },
+      method: 'Custom query',
+      severity: 'Critical',
+      lastCompletedRun: '2019-12-28 00:00:00.000-05:00',
+      lastResponse: {
+        type: 'Success',
+      },
+      tags: 'attack.t1234',
+      activate: true,
+    },
+    {
+      id: 21,
+      rule: {
+        href: '#/detection-engine/rules/rule-details',
+        name: 'Automated exfiltration',
+        status: 'Experimental',
+      },
+      method: 'Custom query',
+      severity: 'Critical',
+      lastCompletedRun: '2019-12-28 00:00:00.000-05:00',
+      lastResponse: {
+        type: 'Success',
+      },
+      tags: 'attack.t1234',
+      activate: true,
     },
   ];
 
   const [itemsTotalState, setItemsTotalState] = useState<number>(sampleTableData.length);
   const [pageState, setPageState] = useState<PageTypes>({ index: 0, size: 20 });
   const [selectedState, setSelectedState] = useState<ColumnTypes[]>([]);
-  const [sortState, setSortState] = useState<SortTypes>({ field: 'ran', direction: 'desc' });
+  const [sortState, setSortState] = useState<SortTypes>({ field: 'rule', direction: 'asc' });
 
   return (
     <>
@@ -273,7 +599,7 @@ const AllRules = React.memo(() => {
 
         <EuiBasicTable
           columns={columns}
-          compressed
+          // compressed
           // hasActions={false}
           isSelectable
           itemId="id"
@@ -329,20 +655,42 @@ const ActivityMonitor = React.memo(() => {
     direction: string;
   }
 
+  // const actions = [
+  //   {
+  //     render: (item: ColumnTypes) => {
+  //       if (item.status === 'Running') {
+  //         return <LinkIcon iconType="stop">{'Stop'}</LinkIcon>;
+  //       } else if (item.status === 'Stopped') {
+  //         return <LinkIcon iconType="play">{'Resume'}</LinkIcon>;
+  //       } else {
+  //         return <>{''}</>;
+  //       }
+  //     },
+  //   },
+  // ];
+
   const actions = [
     {
-      render: (item: ColumnTypes) => {
-        if (item.status === 'Running') {
-          return <LinkIcon iconType="stop">{'Stop'}</LinkIcon>;
-        } else if (item.status === 'Stopped') {
-          return <LinkIcon iconType="play">{'Resume'}</LinkIcon>;
-        } else {
-          return <>{''}</>;
-        }
-      },
+      available: (item: ColumnTypes) => item.status === 'Running',
+      description: 'Stop',
+      icon: 'stop',
+      isPrimary: true,
+      name: 'Stop',
+      onClick: () => {},
+      type: 'icon',
+    },
+    {
+      available: (item: ColumnTypes) => item.status === 'Stopped',
+      description: 'Resume',
+      icon: 'play',
+      isPrimary: true,
+      name: 'Resume',
+      onClick: () => {},
+      type: 'icon',
     },
   ];
 
+  // Michael: Are we able to do custom, in-table-header filters, as shown in my wireframes?
   const columns = [
     {
       field: 'rule',
@@ -383,7 +731,7 @@ const ActivityMonitor = React.memo(() => {
           <>
             {value === 'Fail' ? (
               <EuiTextColor color="danger">
-                {value} <EuiIconTip content="Full fail message here." size="s" type="iInCircle" />
+                {value} <EuiIconTip content="Full fail message here." type="iInCircle" />
               </EuiTextColor>
             ) : (
               <EuiTextColor color="secondary">{value}</EuiTextColor>
@@ -396,7 +744,7 @@ const ActivityMonitor = React.memo(() => {
     },
     {
       actions,
-      width: '70px',
+      width: '40px',
     },
   ];
 
@@ -664,8 +1012,8 @@ const ActivityMonitor = React.memo(() => {
 
         <EuiBasicTable
           columns={columns}
-          compressed
-          hasActions={false}
+          // compressed
+          // hasActions={false}
           isSelectable
           itemId="id"
           items={sampleTableData}
