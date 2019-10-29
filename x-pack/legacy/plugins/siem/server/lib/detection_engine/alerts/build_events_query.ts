@@ -67,7 +67,7 @@ export const buildEventsSearchQuery = ({
       query: {
         bool: {
           filter: [
-            ...[filterWithTime],
+            ...filterWithTime,
             {
               match_all: {},
             },
