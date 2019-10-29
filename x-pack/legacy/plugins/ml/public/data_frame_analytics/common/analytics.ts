@@ -29,6 +29,15 @@ interface RegressionAnalysis {
   };
 }
 
+export const SEARCH_SIZE = 1000;
+
+export enum INDEX_STATUS {
+  UNUSED,
+  LOADING,
+  LOADED,
+  ERROR,
+}
+
 export interface Eval {
   meanSquaredError: number | '';
   rSquared: number | '';

@@ -25,20 +25,13 @@ import {
   DataFrameAnalyticsConfig,
   EsFieldName,
   getPredictedFieldName,
+  INDEX_STATUS,
+  SEARCH_SIZE,
 } from '../../../../common';
-
-const SEARCH_SIZE = 1000;
 
 export const defaultSearchQuery = {
   match_all: {},
 };
-
-export enum INDEX_STATUS {
-  UNUSED,
-  LOADING,
-  LOADED,
-  ERROR,
-}
 
 type TableItem = Record<string, any>;
 

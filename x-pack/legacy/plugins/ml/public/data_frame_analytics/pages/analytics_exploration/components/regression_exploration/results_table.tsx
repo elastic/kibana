@@ -47,9 +47,10 @@ import {
   EsDoc,
   MAX_COLUMNS,
   getPredictedFieldName,
+  INDEX_STATUS,
 } from '../../../../common';
 
-import { INDEX_STATUS, useExploreData, defaultSearchQuery } from './use_explore_data';
+import { useExploreData, defaultSearchQuery } from './use_explore_data';
 
 const PAGE_SIZE_OPTIONS = [5, 10, 25, 50];
 

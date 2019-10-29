@@ -50,10 +50,11 @@ import {
   EsFieldName,
   EsDoc,
   MAX_COLUMNS,
+  INDEX_STATUS,
 } from '../../../../common';
 
 import { getOutlierScoreFieldName } from './common';
-import { INDEX_STATUS, useExploreData } from './use_explore_data';
+import { useExploreData } from './use_explore_data';
 
 const customColorScaleFactory = (n: number) => (t: number) => {
   if (t < 1 / n) {

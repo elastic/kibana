@@ -22,6 +22,8 @@ export {
   loadEvalData,
   Eval,
   getPredictedFieldName,
+  INDEX_STATUS,
+  SEARCH_SIZE,
 } from './analytics';
 
 export {
