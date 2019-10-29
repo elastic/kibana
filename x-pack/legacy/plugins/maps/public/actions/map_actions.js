@@ -491,7 +491,7 @@ export function endDataLoad(layerId, dataId, requestToken, data, meta) {
   return async (dispatch, getState) => {
     dispatch(unregisterCancelCallback(requestToken));
 
-    const features = data ? data.features : [];
+    const features = data && data.features ? data.features : [];
 
     const eventHandlers = getEventHandlers(getState());
     if (eventHandlers && eventHandlers.onDataLoadEnd) {
