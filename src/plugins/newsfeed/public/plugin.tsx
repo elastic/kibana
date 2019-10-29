@@ -35,11 +35,8 @@ export type Start = void;
 
 export class NewsfeedPublicPlugin implements Plugin<Setup, Start> {
   private readonly stop$ = new Rx.ReplaySubject(1);
-  private readonly kibanaVersion: string;
 
-  constructor(initializerContext: PluginInitializerContext) {
-    this.kibanaVersion = initializerContext.env.packageInfo.version;
-  }
+  constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup): Setup {}
 
@@ -55,13 +52,12 @@ export class NewsfeedPublicPlugin implements Plugin<Setup, Start> {
     });
 
     const { http } = core;
-    const api$ = getApi(http, this.kibanaVersion).pipe(
+    const api$ = getApi(http).pipe(
       takeUntil(this.stop$), // stop the interval when stop method is called
       tap(fetchResults => {
-        sessionStorage.setItem('debug', JSON.stringify(fetchResults));
+        sessionStorage.setItem('newsfeed.debug', JSON.stringify(fetchResults));
       }),
       catchError(err => {
-        window.console.error(err);
         // show a message to try again later?
         // do not throw error
         return Rx.of(null);
