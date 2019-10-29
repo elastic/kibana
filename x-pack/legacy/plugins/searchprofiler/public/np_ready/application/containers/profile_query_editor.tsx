@@ -68,7 +68,12 @@ export const ProfileQueryEditor = memo(() => {
   const onEditorReady = useCallback(editorInstance => (editorRef.current = editorInstance), []);
 
   return (
-    <EuiFlexGroup className="prfDevTool__sense" gutterSize="none" direction="column">
+    <EuiFlexGroup
+      responsive={false}
+      className="prfDevTool__sense"
+      gutterSize="none"
+      direction="column"
+    >
       {/* Form */}
       <EuiFlexItem grow={false}>
         <EuiForm>

@@ -98,7 +98,12 @@ export const Main = () => {
           {renderLicenseWarning()}
           <EuiPageContent className="prfDevTool__page__pageBodyContent">
             <EuiPageContentBody className="prfDevTool__page__pageBodyContentBody">
-              <EuiFlexGroup gutterSize="s" direction="row" className="prfDevTool__page__bodyGroup">
+              <EuiFlexGroup
+                responsive={false}
+                gutterSize="s"
+                direction="row"
+                className="prfDevTool__page__bodyGroup"
+              >
                 <EuiFlexItem>
                   <ProfileQueryEditor />
                 </EuiFlexItem>
