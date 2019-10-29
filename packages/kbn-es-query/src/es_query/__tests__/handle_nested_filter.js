@@ -29,7 +29,6 @@ describe('handleNestedFilter', function () {
     const field = getField('nestedField.child');
     const filter = buildPhraseFilter(field, 'foo', indexPattern);
     const result = handleNestedFilter(filter, indexPattern);
-    console.log(JSON.stringify(result, null, 2));
     expect(result).to.eql({
       nested: {
         path: 'nestedField',
