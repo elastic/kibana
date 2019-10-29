@@ -13,19 +13,24 @@ import { SavedQuery } from 'src/legacy/core_plugins/data/public';
 import { KibanaDatatable } from '../../../../../src/legacy/core_plugins/interpreter/common';
 import { DragContextState } from './drag_drop';
 import { Document } from './persistence';
+import { DateRange } from '../common';
 
 // eslint-disable-next-line
 export interface EditorFrameOptions {}
 
 export type ErrorCallback = (e: { message: string }) => void;
 
+export interface PublicAPIProps<T> {
+  state: T;
+  setState: StateSetter<T>;
+  layerId: string;
+  dateRange: DateRange;
+}
+
 export interface EditorFrameProps {
   onError: ErrorCallback;
   doc?: Document;
-  dateRange: {
-    fromDate: string;
-    toDate: string;
-  };
+  dateRange: DateRange;
   query: Query;
   filters: Filter[];
   savedQuery?: SavedQuery;
@@ -138,7 +143,7 @@ export interface Datasource<T = unknown, P = unknown> {
   getDatasourceSuggestionsForField: (state: T, field: unknown) => Array<DatasourceSuggestion<T>>;
   getDatasourceSuggestionsFromCurrentState: (state: T) => Array<DatasourceSuggestion<T>>;
 
-  getPublicAPI: (state: T, setState: StateSetter<T>, layerId: string) => DatasourcePublicAPI;
+  getPublicAPI: (props: PublicAPIProps<T>) => DatasourcePublicAPI;
 }
 
 /**
@@ -171,7 +176,7 @@ export interface DatasourceDataPanelProps<T = unknown> {
   setState: StateSetter<T>;
   core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
   query: Query;
-  dateRange: FramePublicAPI['dateRange'];
+  dateRange: DateRange;
   filters: Filter[];
 }
 
@@ -200,7 +205,7 @@ export interface DatasourceLayerPanelProps {
   layerId: string;
 }
 
-export type DataType = 'string' | 'number' | 'date' | 'boolean' | 'ip';
+export type DataType = 'document' | 'string' | 'number' | 'date' | 'boolean' | 'ip';
 
 // An operation represents a column in a table, not any information
 // about how the column was created such as whether it is a sum or average.
@@ -296,10 +301,7 @@ export interface VisualizationSuggestion<T = unknown> {
 export interface FramePublicAPI {
   datasourceLayers: Record<string, DatasourcePublicAPI>;
 
-  dateRange: {
-    fromDate: string;
-    toDate: string;
-  };
+  dateRange: DateRange;
   query: Query;
   filters: Filter[];
 
