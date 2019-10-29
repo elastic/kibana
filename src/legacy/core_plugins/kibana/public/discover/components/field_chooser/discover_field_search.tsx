@@ -68,7 +68,7 @@ export function DiscoverFieldSearch({
         defaultMessage: 'Show field filter settings',
       });
   const searchPlaceholder = i18n.translate('kbn.discover.fieldChooser.searchPlaceHolder', {
-    defaultMessage: 'Search for fields',
+    defaultMessage: 'Search field names',
   });
 
   return (

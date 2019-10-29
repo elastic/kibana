@@ -320,7 +320,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 className="euiFieldText euiFieldText--fullWidth lnsInnerIndexPatternDataPanel__textField"
                 data-test-subj="lnsIndexPatternFieldSearch"
                 placeholder={i18n.translate('xpack.lens.indexPatterns.filterByNameLabel', {
-                  defaultMessage: 'Search for fields',
+                  defaultMessage: 'Search field names',
                   description:
                     'Search the list of fields in the index pattern for the provided text',
                 })}
