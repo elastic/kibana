@@ -139,7 +139,7 @@ export class EsSearchTest extends React.Component<Props, State> {
             },
           ]}
           demo={this.renderDemo()}
-        ></GuideSection>
+        />
       </EuiPageContentBody>
     );
   }
