@@ -22,8 +22,8 @@ import { EmbeddedVisualizeHandler } from 'ui/visualize/loader/embedded_visualize
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
 import { Filter } from '@kbn/es-query';
-import { TimeRange } from '../../../../../../plugins/data/public';
-import { Query, onlyDisabledFiltersChanged } from '../../../../data/public';
+import { TimeRange, onlyDisabledFiltersChanged } from '../../../../../../plugins/data/public';
+import { Query } from '../../../../data/public';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 
 import {
