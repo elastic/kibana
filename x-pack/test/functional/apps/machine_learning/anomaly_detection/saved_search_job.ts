@@ -468,6 +468,12 @@ export default function({ getService }: FtrProviderContext) {
             }
           );
         });
+
+        it('has detector results', async () => {
+          for (let i = 0; i < testData.aggAndFieldIdentifiers.length; i++) {
+            await ml.api.assertDetectorResultsExist(testData.jobId, i);
+          }
+        });
       });
     }
   });
