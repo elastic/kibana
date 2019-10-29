@@ -29,7 +29,7 @@ exports[`stream handler showNotifications show csv formulas warning 1`] = `
 Array [
   Object {
     "data-test-subj": "completeReportCsvFormulasWarning",
-    "text": <React.Fragment>
+    "text": reactMount(<React.Fragment>
       <p>
         <FormattedMessage
           defaultMessage="The report contains characters which spreadsheet applications can interpret as formulas."
@@ -54,8 +54,8 @@ Array [
           }
         }
       />
-    </React.Fragment>,
-    "title": <FormattedMessage
+    </React.Fragment>),
+    "title": reactMount(<FormattedMessage
       defaultMessage="Report may contain formulas {reportObjectType} '{reportObjectTitle}'"
       id="xpack.reporting.publicNotifier.csvContainsFormulas.formulaReportTitle"
       values={
@@ -64,7 +64,7 @@ Array [
           "reportObjectType": "yas",
         }
       }
-    />,
+    />),
   },
 ]
 `;
@@ -74,7 +74,7 @@ Array [
   Object {
     "data-test-subj": "completeReportFailure",
     "iconType": undefined,
-    "text": <React.Fragment>
+    "text": reactMount(<React.Fragment>
       <EuiCallOut
         color="danger"
         iconType="alert"
@@ -101,8 +101,8 @@ Array [
           }
         />
       </p>
-    </React.Fragment>,
-    "title": <FormattedMessage
+    </React.Fragment>),
+    "title": reactMount(<FormattedMessage
       defaultMessage="Could not create report for {reportObjectType} '{reportObjectTitle}'."
       id="xpack.reporting.publicNotifier.error.couldNotCreateReportTitle"
       values={
@@ -111,7 +111,7 @@ Array [
           "reportObjectType": "yas",
         }
       }
-    />,
+    />),
   },
 ]
 `;
@@ -120,7 +120,7 @@ exports[`stream handler showNotifications show max length warning 1`] = `
 Array [
   Object {
     "data-test-subj": "completeReportMaxSizeWarning",
-    "text": <React.Fragment>
+    "text": reactMount(<React.Fragment>
       <p>
         <FormattedMessage
           defaultMessage="The report reached the max size and contains partial data."
@@ -145,8 +145,8 @@ Array [
           }
         }
       />
-    </React.Fragment>,
-    "title": <FormattedMessage
+    </React.Fragment>),
+    "title": reactMount(<FormattedMessage
       defaultMessage="Created partial report for {reportObjectType} '{reportObjectTitle}'"
       id="xpack.reporting.publicNotifier.maxSizeReached.partialReportTitle"
       values={
@@ -155,7 +155,7 @@ Array [
           "reportObjectType": "yas",
         }
       }
-    />,
+    />),
   },
 ]
 `;
@@ -165,7 +165,7 @@ Array [
   Object {
     "color": "success",
     "data-test-subj": "completeReportSuccess",
-    "text": <React.Fragment>
+    "text": reactMount(<React.Fragment>
       <p>
         <ReportLink
           getUrl={[Function]}
@@ -182,8 +182,8 @@ Array [
           }
         }
       />
-    </React.Fragment>,
-    "title": <FormattedMessage
+    </React.Fragment>),
+    "title": reactMount(<FormattedMessage
       defaultMessage="Created report for {reportObjectType} '{reportObjectTitle}'"
       id="xpack.reporting.publicNotifier.successfullyCreatedReportNotificationTitle"
       values={
@@ -192,7 +192,7 @@ Array [
           "reportObjectType": "yas",
         }
       }
-    />,
+    />),
   },
 ]
 `;

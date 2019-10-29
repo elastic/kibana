@@ -26,9 +26,9 @@ const expectWarningToast = (
     Array [
       Object {
         "color": "warning",
-        "text": <SessionTimeoutWarning
+        "text": reactMount(<SessionTimeoutWarning
           onRefreshSession={[Function]}
-        />,
+        />),
         "title": "Warning",
         "toastLifeTimeMs": ${toastLifeTimeMS},
       },
@@ -103,8 +103,8 @@ describe('warning toast', () => {
     expect(http.get).not.toHaveBeenCalled();
     const toastInput = notifications.toasts.add.mock.calls[0][0];
     expect(toastInput).toHaveProperty('text');
-    const reactComponent = (toastInput as any).text;
-    const wrapper = mountWithIntl(reactComponent);
+    const mountPoint = (toastInput as any).text;
+    const wrapper = mountWithIntl(mountPoint.__reactMount__);
     wrapper.find('EuiButton[data-test-subj="refreshSessionButton"]').simulate('click');
     expect(http.get).toHaveBeenCalled();
   });

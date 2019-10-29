@@ -67,10 +67,10 @@ test('can display React element as title', () => {
 
   expect(notifications.toasts.add).toHaveBeenCalledTimes(1);
   expect((notifications.toasts.add.mock.calls[0][0] as any).title).toMatchInlineSnapshot(`
-        <div>
-          bar
-        </div>
-    `);
+    reactMount(<div>
+      bar
+    </div>)
+  `);
 });
 
 test('can display React element as toast body', () => {
@@ -81,12 +81,12 @@ test('can display React element as toast body', () => {
 
   expect(notifications.toasts.add).toHaveBeenCalledTimes(1);
   expect((notifications.toasts.add.mock.calls[0][0] as any).text).toMatchInlineSnapshot(`
-        <React.Fragment>
-          <div>
-            baz
-          </div>
-        </React.Fragment>
-    `);
+    reactMount(<React.Fragment>
+      <div>
+        baz
+      </div>
+    </React.Fragment>)
+  `);
 });
 
 test('can set toast properties', () => {
@@ -102,17 +102,15 @@ test('can set toast properties', () => {
   });
 
   expect(notifications.toasts.add.mock.calls[0][0]).toMatchInlineSnapshot(`
-        Object {
-          "color": "danger",
-          "iconType": "foo",
-          "onClose": undefined,
-          "text": <React.Fragment>
-            1
-          </React.Fragment>,
-          "title": "2",
-          "toastLifeTimeMs": 3,
-        }
-    `);
+    Object {
+      "color": "danger",
+      "iconType": "foo",
+      "onClose": undefined,
+      "text": "1",
+      "title": "2",
+      "toastLifeTimeMs": 3,
+    }
+  `);
 });
 
 test('can display success, warning and danger toasts', () => {
@@ -148,6 +146,6 @@ test('if body is not set, renders it empty', () => {
   wrapper.toasts.success({ title: '1' });
 
   expect((notifications.toasts.add.mock.calls[0][0] as any).text).toMatchInlineSnapshot(
-    `<React.Fragment />`
+    `reactMount(<React.Fragment />)`
   );
 });
