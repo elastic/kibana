@@ -9,13 +9,14 @@ import React from 'react';
 import { render } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { CoreStart, SavedObjectsClientContract } from 'src/core/public';
-import { Storage } from 'ui/storage';
 import { i18n } from '@kbn/i18n';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import {
   DatasourceDimensionPanelProps,
   DatasourceDataPanelProps,
   Operation,
   DatasourceLayerPanelProps,
+  PublicAPIProps,
 } from '../types';
 import { loadInitialState, changeIndexPattern, changeLayerIndexPattern } from './loader';
 import { toExpression } from './to_expression';
@@ -104,7 +105,7 @@ export function getIndexPatternDatasource({
   // Core start is being required here because it contains the savedObject client
   // In the new platform, this plugin wouldn't be initialized until after setup
   core: CoreStart;
-  storage: Storage;
+  storage: IStorageWrapper;
   savedObjectsClient: SavedObjectsClientContract;
   data: ReturnType<DataPlugin['start']>;
 }) {
@@ -196,11 +197,12 @@ export function getIndexPatternDatasource({
       );
     },
 
-    getPublicAPI(
-      state: IndexPatternPrivateState,
-      setState: StateSetter<IndexPatternPrivateState>,
-      layerId: string
-    ) {
+    getPublicAPI({
+      state,
+      setState,
+      layerId,
+      dateRange,
+    }: PublicAPIProps<IndexPatternPrivateState>) {
       const columnLabelMap = uniqueLabels(state.layers);
 
       return {
@@ -221,7 +223,7 @@ export function getIndexPatternDatasource({
               <KibanaContextProvider
                 services={{
                   appName: 'lens',
-                  store: storage,
+                  storage,
                   uiSettings,
                   data,
                   savedObjects: core.savedObjects,
@@ -237,6 +239,7 @@ export function getIndexPatternDatasource({
                   layerId={props.layerId}
                   http={core.http}
                   uniqueLabel={columnLabelMap[props.columnId]}
+                  dateRange={dateRange}
                   {...props}
                 />
               </KibanaContextProvider>

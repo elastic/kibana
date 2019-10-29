@@ -7,13 +7,13 @@
 import _ from 'lodash';
 import React, { memo, useMemo } from 'react';
 import { EuiButtonIcon } from '@elastic/eui';
-import { Storage } from 'ui/storage';
 import { i18n } from '@kbn/i18n';
 import {
   UiSettingsClientContract,
   SavedObjectsClientContract,
   HttpServiceBase,
 } from 'src/core/public';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { DatasourceDimensionPanelProps, StateSetter } from '../../types';
 import { IndexPatternColumn, OperationType } from '../indexpattern';
 import { getAvailableOperationsByMetadata, buildColumn, changeField } from '../operations';
@@ -23,17 +23,19 @@ import { changeColumn, deleteColumn } from '../state_helpers';
 import { isDraggedField, hasField } from '../utils';
 import { IndexPatternPrivateState, IndexPatternField } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
+import { DateRange } from '../../../common';
 
 export type IndexPatternDimensionPanelProps = DatasourceDimensionPanelProps & {
   state: IndexPatternPrivateState;
   setState: StateSetter<IndexPatternPrivateState>;
   dragDropContext: DragContextState;
   uiSettings: UiSettingsClientContract;
-  storage: Storage;
+  storage: IStorageWrapper;
   savedObjectsClient: SavedObjectsClientContract;
   layerId: string;
   http: HttpServiceBase;
   uniqueLabel: string;
+  dateRange: DateRange;
 };
 
 export interface OperationFieldSupportMatrix {

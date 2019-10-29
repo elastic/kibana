@@ -9,8 +9,5 @@ Retrieves a set of all uiSettings values set by the user.
 <b>Signature:</b>
 
 ```typescript
-getUserProvided: <T extends SavedObjectAttribute = any>() => Promise<Record<string, {
-        userValue?: T;
-        isOverridden?: boolean;
-    }>>;
+getUserProvided: <T extends SavedObjectAttribute = any>() => Promise<Record<string, UserProvidedValues<T>>>;
 ```
