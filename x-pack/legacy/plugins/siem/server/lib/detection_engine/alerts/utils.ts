@@ -57,7 +57,7 @@ export const singleBulkIndex = async (
   ]);
   const time1 = performance.now();
   const firstResult = await service.callCluster('bulk', {
-    index: '.siem-signals-10-01-2019',
+    index: process.env.SIGNALS_INDEX || '.siem-signals-10-01-2019',
     refresh: false,
     body: bulkBody,
   });
