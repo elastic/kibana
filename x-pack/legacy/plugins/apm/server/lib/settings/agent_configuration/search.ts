@@ -20,7 +20,7 @@ export async function searchConfigurations({
   environment?: string;
   setup: Setup;
 }) {
-  const { client, config } = setup;
+  const { client, indices } = setup;
 
   // sorting order
   // 1. exact match: service.name AND service.environment (eg. opbeans-node / production)
@@ -33,7 +33,7 @@ export async function searchConfigurations({
     : [];
 
   const params = {
-    index: config.get<string>('apm_oss.apmAgentConfigurationIndex'),
+    index: indices['apm_oss.apmAgentConfigurationIndex'],
     body: {
       query: {
         bool: {

@@ -9,5 +9,5 @@ description provided to a user in UI
 <b>Signature:</b>
 
 ```typescript
-description: string;
+description?: string;
 ```

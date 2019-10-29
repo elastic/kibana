@@ -117,7 +117,6 @@ export const formatHostEdgesData = (fields: readonly string[], bucket: HostAggEs
       const hostId = get('key', bucket);
       flattenedFields.node._id = hostId || null;
       flattenedFields.cursor.value = hostId || '';
-
       const fieldValue = getHostFieldValue(fieldName, bucket);
       if (fieldValue != null) {
         return set(`node.${fieldName}`, fieldValue, flattenedFields);
@@ -164,6 +163,15 @@ const getHostFieldValue = (fieldName: string, bucket: HostAggEsItem): string | s
   } else if (has(aggField, bucket)) {
     const valueObj: HostValue = get(aggField, bucket);
     return valueObj.value_as_string;
+  } else if (['host.name', 'host.os.name', 'host.os.version'].includes(fieldName)) {
+    switch (fieldName) {
+      case 'host.name':
+        return get('key', bucket) || null;
+      case 'host.os.name':
+        return get('os.hits.hits[0]._source.host.os.name', bucket) || null;
+      case 'host.os.version':
+        return get('os.hits.hits[0]._source.host.os.version', bucket) || null;
+    }
   }
   return null;
 };
