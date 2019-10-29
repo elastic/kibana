@@ -48,6 +48,9 @@ const telemetry = (kibana: any) => {
         // `config` is used internally and not intended to be set
         config: Joi.string().default(Joi.ref('$defaultConfigPath')),
         banner: Joi.boolean().default(true),
+        lastVersionChecked: Joi.string()
+          .allow('')
+          .default(''),
         url: Joi.when('$dev', {
           is: true,
           then: Joi.string().default(

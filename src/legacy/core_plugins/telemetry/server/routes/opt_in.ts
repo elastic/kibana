@@ -36,11 +36,13 @@ export function registerOptInRoutes(core: CoreSetup) {
     },
     handler: async (req: any, h: any) => {
       const savedObjectsClient = req.getSavedObjectsClient();
+      const lastVersionChecked = server.config().get('pkg.version');
       try {
         await savedObjectsClient.create(
           'telemetry',
           {
             enabled: req.payload.enabled,
+            lastVersionChecked,
           },
           {
             id: 'telemetry',

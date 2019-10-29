@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export async function getTelemetryOptIn(request: any) {
+export async function getTelemetryOptIn(request: any): Promise<boolean | null> {
   const isRequestingApplication = request.path.startsWith('/app');
 
   // Prevent interstitial screens (such as the space selector) from prompting for telemetry
@@ -27,9 +27,9 @@ export async function getTelemetryOptIn(request: any) {
 
   const savedObjectsClient = request.getSavedObjectsClient();
 
+  let savedObject;
   try {
-    const { attributes } = await savedObjectsClient.get('telemetry', 'telemetry');
-    return attributes.enabled;
+    savedObject = await savedObjectsClient.get('telemetry', 'telemetry');
   } catch (error) {
     if (savedObjectsClient.errors.isNotFoundError(error)) {
       return null;
@@ -43,4 +43,16 @@ export async function getTelemetryOptIn(request: any) {
 
     throw error;
   }
+
+  const { attributes } = savedObject;
+  if (attributes.enabled !== false) return attributes.enabled;
+
+  // Additional check if they've already opted out (enabled: false) - if the
+  // Kibana version has changed since they opted out, set them back to the null
+  // state to get prompted again.
+  const config = request.server.config();
+  const kibanaVersion = config.get('pkg.version');
+  if (kibanaVersion !== attributes.lastVersionChecked) return null;
+
+  return attributes.enabled;
 }
