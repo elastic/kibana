@@ -41,7 +41,7 @@ PUT /_security/role/uptime
 [float]
 === Assign the role to a user
 
-Next, you'll need to create a user with both the `uptime` role, and another role with sufficient <<kibana-privileges, Kibana privileges>>,
+Next, you'll need to create a user with both the `uptime` role, and another role with sufficient {kibana-ref}/kibana-privileges.html[Kibana privileges],
 such as the `kibana_user` role.
 You can do this with the following request:
 
