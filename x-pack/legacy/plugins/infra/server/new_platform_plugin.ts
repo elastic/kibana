@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { InternalCoreSetup, PluginInitializerContext } from 'src/core/server';
+import { CoreSetup, PluginInitializerContext } from 'src/core/server';
 import { Server } from 'hapi';
 import { InfraConfig } from './new_platform_config.schema';
 import { Legacy } from '../../../../../kibana';
@@ -62,7 +62,7 @@ export class InfraServerPlugin {
     return this.libs;
   }
 
-  setup(core: InternalCoreSetup, plugins: InfraServerPluginDeps) {
+  setup(core: CoreSetup, plugins: InfraServerPluginDeps) {
     const framework = new InfraKibanaBackendFrameworkAdapter(core, this.config, plugins);
     const sources = new InfraSources({
       config: this.config,

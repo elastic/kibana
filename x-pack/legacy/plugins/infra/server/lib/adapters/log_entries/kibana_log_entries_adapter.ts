@@ -25,7 +25,7 @@ import {
   LogSummaryBucket,
 } from '../../domains/log_entries_domain';
 import { InfraSourceConfiguration } from '../../sources';
-import { InfraFrameworkRequest, SortedSearchHit } from '../framework';
+import { SortedSearchHit } from '../framework';
 import { InfraBackendFrameworkAdapter } from '../framework';
 
 const DAY_MILLIS = 24 * 60 * 60 * 1000;
@@ -43,7 +43,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
   constructor(private readonly framework: InfraBackendFrameworkAdapter) {}
 
   public async getAdjacentLogEntryDocuments(
-    request: InfraFrameworkRequest,
+    request: KibanaRequest,
     sourceConfiguration: InfraSourceConfiguration,
     fields: string[],
     start: TimeKey,
@@ -83,7 +83,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
   }
 
   public async getContainedLogEntryDocuments(
-    request: InfraFrameworkRequest,
+    request: KibanaRequest,
     sourceConfiguration: InfraSourceConfiguration,
     fields: string[],
     start: TimeKey,
@@ -107,7 +107,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
   }
 
   public async getContainedLogSummaryBuckets(
-    request: InfraFrameworkRequest,
+    request: KibanaRequest,
     sourceConfiguration: InfraSourceConfiguration,
     start: number,
     end: number,
@@ -180,7 +180,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
   }
 
   public async getLogItem(
-    request: InfraFrameworkRequest,
+    request: KibanaRequest,
     id: string,
     sourceConfiguration: InfraSourceConfiguration
   ) {

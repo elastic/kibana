@@ -7,6 +7,7 @@
 import stringify from 'json-stable-stringify';
 import { sortBy } from 'lodash';
 
+import { KibanaRequest } from 'src/core/server';
 import { TimeKey } from '../../../../common/time';
 import { JsonObject } from '../../../../common/typed_json';
 import {
@@ -16,7 +17,6 @@ import {
   InfraLogSummaryBucket,
   InfraLogSummaryHighlightBucket,
 } from '../../../graphql/types';
-import { InfraFrameworkRequest } from '../../adapters/framework';
 import {
   InfraSourceConfiguration,
   InfraSources,
@@ -40,7 +40,7 @@ export class InfraLogEntriesDomain {
   ) {}
 
   public async getLogEntriesAround(
-    request: InfraFrameworkRequest,
+    request: KibanaRequest,
     sourceId: string,
     key: TimeKey,
     maxCountBefore: number,
@@ -101,7 +101,7 @@ export class InfraLogEntriesDomain {
   }
 
   public async getLogEntriesBetween(
-    request: InfraFrameworkRequest,
+    request: KibanaRequest,
     sourceId: string,
     startKey: TimeKey,
     endKey: TimeKey,
@@ -129,7 +129,7 @@ export class InfraLogEntriesDomain {
   }
 
   public async getLogEntryHighlights(
-    request: InfraFrameworkRequest,
+    request: KibanaRequest,
     sourceId: string,
     startKey: TimeKey,
     endKey: TimeKey,
@@ -203,7 +203,7 @@ export class InfraLogEntriesDomain {
   }
 
   public async getLogSummaryBucketsBetween(
-    request: InfraFrameworkRequest,
+    request: KibanaRequest,
     sourceId: string,
     start: number,
     end: number,
@@ -223,7 +223,7 @@ export class InfraLogEntriesDomain {
   }
 
   public async getLogSummaryHighlightBucketsBetween(
-    request: InfraFrameworkRequest,
+    request: KibanaRequest,
     sourceId: string,
     start: number,
     end: number,
@@ -266,7 +266,7 @@ export class InfraLogEntriesDomain {
   }
 
   public async getLogItem(
-    request: InfraFrameworkRequest,
+    request: KibanaRequest,
     id: string,
     sourceConfiguration: InfraSourceConfiguration
   ): Promise<InfraLogItem> {
@@ -300,7 +300,7 @@ interface LogItemHit {
 
 export interface LogEntriesAdapter {
   getAdjacentLogEntryDocuments(
-    request: InfraFrameworkRequest,
+    request: KibanaRequest,
     sourceConfiguration: InfraSourceConfiguration,
     fields: string[],
     start: TimeKey,
@@ -311,7 +311,7 @@ export interface LogEntriesAdapter {
   ): Promise<LogEntryDocument[]>;
 
   getContainedLogEntryDocuments(
-    request: InfraFrameworkRequest,
+    request: KibanaRequest,
     sourceConfiguration: InfraSourceConfiguration,
     fields: string[],
     start: TimeKey,
@@ -321,7 +321,7 @@ export interface LogEntriesAdapter {
   ): Promise<LogEntryDocument[]>;
 
   getContainedLogSummaryBuckets(
-    request: InfraFrameworkRequest,
+    request: KibanaRequest,
     sourceConfiguration: InfraSourceConfiguration,
     start: number,
     end: number,
@@ -330,7 +330,7 @@ export interface LogEntriesAdapter {
   ): Promise<LogSummaryBucket[]>;
 
   getLogItem(
-    request: InfraFrameworkRequest,
+    request: KibanaRequest,
     id: string,
     source: InfraSourceConfiguration
   ): Promise<LogItemHit>;

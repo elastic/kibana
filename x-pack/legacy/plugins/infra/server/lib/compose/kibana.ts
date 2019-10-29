@@ -17,14 +17,14 @@ import { InfraSnapshot } from '../snapshot';
 import { InfraSourceStatus } from '../source_status';
 import { InfraSources } from '../sources';
 import { InfraConfig } from '../../new_platform_config.schema';
-import { InternalCoreSetup } from '../../../../../../../src/core/server';
-import { Legacy } from '../../../../../../../kibana';
+import { CoreSetup } from '../../../../../../../src/core/server';
+import { InfraServerPluginDeps } from '../adapters/framework/adapter_types';
 
-export function compose(core: InternalCoreSetup, config: InfraConfig, legacyServer: Legacy.Server) {
-  const framework = new InfraKibanaBackendFrameworkAdapter(core, config, legacyServer);
+export function compose(core: CoreSetup, config: InfraConfig, plugins: InfraServerPluginDeps) {
+  const framework = new InfraKibanaBackendFrameworkAdapter(core, config, plugins);
   const sources = new InfraSources({
     config,
-    savedObjects: legacyServer.savedObjects,
+    savedObjects: plugins.savedObjects,
   });
   const sourceStatus = new InfraSourceStatus(new InfraElasticsearchSourceStatusAdapter(framework), {
     sources,

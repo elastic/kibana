@@ -14,19 +14,21 @@ import { KibanaRequest } from '../../../../../../../../src/core/server';
 
 export const internalInfraFrameworkRequest = Symbol('internalInfraFrameworkRequest');
 
+// NP_TODO: Compose real types from plugins we depend on, no "any"
 export interface InfraServerPluginDeps {
   spaces: any;
+  metrics: {
+    getVisData: any;
+  };
   indexPatterns: {
     indexPatternsServiceFactory: any;
   };
+  savedObjects: any;
 }
 
 /* eslint-disable  @typescript-eslint/unified-signatures */
 export interface InfraBackendFrameworkAdapter<R = unknown> {
   registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void;
-  registerRoute<RouteRequest extends InfraWrappableRequest, RouteResponse extends InfraResponse>(
-    route: R
-  ): void;
   callWithRequest<Hit = {}, Aggregation = undefined>(
     req: KibanaRequest,
     method: 'search',

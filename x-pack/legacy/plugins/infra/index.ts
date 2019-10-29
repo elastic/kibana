@@ -93,7 +93,9 @@ export function infra(kibana: any) {
         indexPatterns: {
           indexPatternsServiceFactory: legacyServer.indexPatternsServiceFactory,
         },
+        metrics: legacyServer.plugins.metrics,
         spaces: legacyServer.plugins.spaces,
+        savedObjects: legacyServer.savedObjects,
       };
 
       const infraPluginInstance = plugin(initContext, legacyServer);
