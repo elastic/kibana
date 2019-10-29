@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiText, EuiSwitch } from '@elastic/eui';
 
-import { ToggleField, UseField, FormDataProvider } from '../../../../shared_imports';
+import { ToggleField, UseField, FormDataProvider, FieldHook } from '../../../../shared_imports';
 
 import { ParameterName } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
@@ -41,6 +41,8 @@ export const EditFieldFormRow = React.memo(
     formFieldPath,
     children,
   }: Props) => {
+    const toggleField = useRef<FieldHook | undefined>(undefined);
+
     const initialVisibleState =
       formFieldPath === undefined
         ? toggleDefaultValue
@@ -54,15 +56,24 @@ export const EditFieldFormRow = React.memo(
       setIsContentVisible(!isContentVisible);
     };
 
+    const onClickTitle = () => {
+      if (toggleField.current) {
+        toggleField.current.setValue(!toggleField.current.value);
+      } else {
+        onToggle();
+      }
+    };
+
     const renderToggleInput = () =>
       formFieldPath === undefined ? (
         <EuiSwitch checked={isContentVisible} onChange={onToggle} data-test-subj="input" />
       ) : (
-        <UseField
-          path={formFieldPath}
-          component={ToggleField}
-          config={getFieldConfig(formFieldPath)}
-        />
+        <UseField path={formFieldPath} config={getFieldConfig(formFieldPath)}>
+          {field => {
+            toggleField.current = field;
+            return <ToggleField field={field} />;
+          }}
+        </UseField>
       );
 
     const renderContent = () => (
@@ -81,13 +92,19 @@ export const EditFieldFormRow = React.memo(
                 }}
               >
                 {title && (
-                  <EuiTitle
-                    id={`${ariaId}-title`}
-                    size={sizeTitle}
-                    className="mappings-editor__edit-field__formRow__title"
+                  <button
+                    onClick={onClickTitle}
+                    type="button"
+                    className="mappings-editor__edit-field__formRow__btnTitle"
                   >
-                    {title}
-                  </EuiTitle>
+                    <EuiTitle
+                      id={`${ariaId}-title`}
+                      size={sizeTitle}
+                      className="mappings-editor__edit-field__formRow__title"
+                    >
+                      {title}
+                    </EuiTitle>
+                  </button>
                 )}
                 {description && (
                   <EuiText id={ariaId} size="s" color="subdued">

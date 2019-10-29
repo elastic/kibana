@@ -111,6 +111,14 @@
         margin-bottom: 0;
       }
 
+      &__btnTitle {
+        display: inherit;
+
+        &:focus {
+          animation: none !important;
+        }
+      }
+
       &__title {
         line-height: 1;
         margin-bottom: 8px;
