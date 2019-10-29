@@ -16,6 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { PanelState, EmbeddableInput } from '../embeddable_plugin';
+export type PanelId = string;
+export type SavedObjectId = string;
 
-// eslint-disable-next-line
-export * from '../../../../../../../../../plugins/dashboard_embeddable_container/public/embeddable/grid';
+export interface GridData {
+  w: number;
+  h: number;
+  x: number;
+  y: number;
+  i: string;
+}
+
+export interface DashboardPanelState<TEmbeddableInput extends EmbeddableInput = EmbeddableInput>
+  extends PanelState<TEmbeddableInput> {
+  readonly gridData: GridData;
+}

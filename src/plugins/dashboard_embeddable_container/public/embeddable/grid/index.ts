@@ -17,5 +17,4 @@
  * under the License.
  */
 
-// eslint-disable-next-line
-export * from '../../../../../../../../../plugins/dashboard_embeddable_container/public/embeddable/grid';
+export { DashboardGrid } from './dashboard_grid';

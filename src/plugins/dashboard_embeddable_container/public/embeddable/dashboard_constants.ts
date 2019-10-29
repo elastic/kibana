@@ -17,5 +17,7 @@
  * under the License.
  */
 
-// eslint-disable-next-line
-export * from '../../../../../../../../../plugins/dashboard_embeddable_container/public/embeddable/grid';
+export const DASHBOARD_GRID_COLUMN_COUNT = 48;
+export const DASHBOARD_GRID_HEIGHT = 20;
+export const DEFAULT_PANEL_WIDTH = DASHBOARD_GRID_COLUMN_COUNT / 2;
+export const DEFAULT_PANEL_HEIGHT = 15;
