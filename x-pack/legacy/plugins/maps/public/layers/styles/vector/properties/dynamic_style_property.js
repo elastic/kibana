@@ -20,10 +20,14 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     }
 
     isDynamic() {
-      return this._options.field && this._options.field.name;
+      return !!this._field || (this._options.field && this._options.field.name);
     }
 
     getFieldConfig() {
       return this._options.field || {};
+    }
+
+    getFieldOrigin() {
+      return this._options.field.origin;
     }
 }

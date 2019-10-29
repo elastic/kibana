@@ -230,9 +230,8 @@ export class VectorStyle extends AbstractStyle {
   getSourceFieldNames() {
     const fieldNames = [];
     this.getDynamicPropertiesArray().forEach(styleProperty => {
-      const field = styleProperty.getFieldConfig();
-      if (field.origin === SOURCE_DATA_ID_ORIGIN && field.name) {
-        fieldNames.push(field.name);
+      if (styleProperty.getFieldOrigin() === SOURCE_DATA_ID_ORIGIN) {
+        fieldNames.push(styleProperty.getField().getName());
       }
     });
     return fieldNames;
