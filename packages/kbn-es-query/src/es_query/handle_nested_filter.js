@@ -21,6 +21,8 @@ import { getFilterField } from '../filters/lib';
 import { cleanFilter } from './clean_filter';
 
 export const handleNestedFilter = (filter, indexPattern) => {
+  if (!indexPattern) return filter;
+
   const fieldName = getFilterField(filter);
   if (!fieldName) {
     return filter;
