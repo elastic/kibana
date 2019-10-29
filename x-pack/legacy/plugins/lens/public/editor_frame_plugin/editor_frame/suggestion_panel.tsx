@@ -367,7 +367,12 @@ function getPreviewExpression(
     const changedLayers = datasource.getLayers(visualizableState.datasourceState);
     changedLayers.forEach(layerId => {
       if (updatedLayerApis[layerId]) {
-        updatedLayerApis[layerId] = datasource.getPublicAPI(datasourceState, () => {}, layerId);
+        updatedLayerApis[layerId] = datasource.getPublicAPI({
+          layerId,
+          dateRange: frame.dateRange,
+          state: datasourceState,
+          setState: () => {},
+        });
       }
     });
   }

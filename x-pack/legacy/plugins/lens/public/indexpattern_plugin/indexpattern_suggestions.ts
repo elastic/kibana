@@ -23,6 +23,7 @@ import {
   IndexPatternLayer,
   IndexPatternField,
 } from './types';
+import { documentField } from './document_field';
 
 type IndexPatternSugestion = DatasourceSuggestion<IndexPatternPrivateState>;
 
@@ -285,6 +286,7 @@ function createNewLayerWithBucketAggregation(
     indexPattern,
     layerId,
     suggestedPriority: undefined,
+    field: documentField,
   });
 
   const col1 = generateId();
@@ -364,6 +366,9 @@ export function getDatasourceSuggestionsFromCurrentState(
           columnId =>
             layer.columns[columnId].isBucketed && layer.columns[columnId].dataType === 'date'
         );
+        const timeField = indexPattern.fields.find(
+          ({ name }) => name === indexPattern.timeFieldName
+        );
 
         const suggestions: Array<DatasourceSuggestion<IndexPatternPrivateState>> = [];
         if (metrics.length === 0) {
@@ -376,9 +381,9 @@ export function getDatasourceSuggestionsFromCurrentState(
             })
           );
         } else if (buckets.length === 0) {
-          if (indexPattern.timeFieldName) {
+          if (timeField) {
             // suggest current metric over time if there is a default time field
-            suggestions.push(createSuggestionWithDefaultDateHistogram(state, layerId));
+            suggestions.push(createSuggestionWithDefaultDateHistogram(state, layerId, timeField));
           }
           suggestions.push(...createAlternativeMetricSuggestions(indexPattern, layerId, state));
           // also suggest simple current state
@@ -392,10 +397,10 @@ export function getDatasourceSuggestionsFromCurrentState(
         } else {
           suggestions.push(...createSimplifiedTableSuggestions(state, layerId));
 
-          if (!timeDimension && indexPattern.timeFieldName) {
+          if (!timeDimension && timeField) {
             // suggest current configuration over time if there is a default time field
             // and no time dimension yet
-            suggestions.push(createSuggestionWithDefaultDateHistogram(state, layerId));
+            suggestions.push(createSuggestionWithDefaultDateHistogram(state, layerId, timeField));
           }
 
           if (buckets.length === 2) {
@@ -439,20 +444,33 @@ function createMetricSuggestion(
         suggestedPriority: 0,
       })
     )
-    .filter(op => op.dataType === 'number' && !op.isBucketed);
+    .filter(op => (op.dataType === 'number' || op.dataType === 'document') && !op.isBucketed);
 
   if (!column) {
     return;
   }
 
   const newId = generateId();
+
   return buildSuggestion({
     layerId,
     state,
     changeType: 'initial',
     updatedLayer: {
       ...layer,
-      columns: { [newId]: column },
+      columns: {
+        [newId]:
+          column.dataType !== 'document'
+            ? column
+            : buildColumn({
+                op: 'count',
+                columns: {},
+                indexPattern,
+                layerId,
+                suggestedPriority: undefined,
+                field: documentField,
+              }),
+      },
       columnOrder: [newId],
     },
   });
@@ -462,8 +480,8 @@ function getNestedTitle([outerBucket, innerBucket]: IndexPatternColumn[]) {
   return i18n.translate('xpack.lens.indexpattern.suggestions.nestingChangeLabel', {
     defaultMessage: '{innerOperation} for each {outerOperation}',
     values: {
-      innerOperation: hasField(innerBucket) ? innerBucket.sourceField : innerBucket.label,
-      outerOperation: hasField(outerBucket) ? outerBucket.sourceField : outerBucket.label,
+      innerOperation: innerBucket.sourceField,
+      outerOperation: outerBucket.sourceField,
     },
   });
 }
@@ -515,7 +533,8 @@ function createAlternativeMetricSuggestions(
 
 function createSuggestionWithDefaultDateHistogram(
   state: IndexPatternPrivateState,
-  layerId: string
+  layerId: string,
+  timeField: IndexPatternField
 ) {
   const layer = state.layers[layerId];
   const indexPattern = state.indexPatterns[layer.indexPatternId];
@@ -526,7 +545,7 @@ function createSuggestionWithDefaultDateHistogram(
     op: 'date_histogram',
     indexPattern,
     columns: layer.columns,
-    field: indexPattern.fields.find(({ name }) => name === indexPattern.timeFieldName),
+    field: timeField,
     suggestedPriority: undefined,
   });
   const updatedLayer = {
