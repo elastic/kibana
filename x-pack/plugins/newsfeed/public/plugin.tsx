@@ -15,7 +15,7 @@ import {
   Plugin,
 } from '../../../../src/core/public';
 import { getApi } from './lib/api';
-import { MailNavButton } from './components/spaces_header_nav_button';
+import { MailNavButton } from './components/newsfeed_header_nav_button';
 
 export type Setup = void;
 export type Start = void;
