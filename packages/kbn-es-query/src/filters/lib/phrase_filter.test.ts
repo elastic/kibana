@@ -17,30 +17,17 @@
  * under the License.
  */
 
-import { buildQueryFilter } from '../query';
-import { cloneDeep } from 'lodash';
-import expect from '@kbn/expect';
-import {  indexPatternResponse as indexPattern  } from '../../__fixtures__/index_pattern_response';
-import filterSkeleton from '../../__fixtures__/filter_skeleton';
+import { indexPatternResponse as indexPattern } from '../../__fixtures__/index_pattern_response';
+import { buildPhraseFilter } from '../index';
+import { getPhraseFilterField } from './phrase_filter';
 
-let expected;
-
-describe('Filter Manager', function () {
-  describe('Phrase filter builder', function () {
-    beforeEach(() => {
-      expected = cloneDeep(filterSkeleton);
+describe('Phrase filter', function() {
+  describe('getPhraseFilterField', function() {
+    it('should return the name of the field a phrase query is targeting', () => {
+      const field = indexPattern.fields.find(patternField => patternField.name === 'extension');
+      const filter = buildPhraseFilter(field, 'jpg', indexPattern);
+      const result = getPhraseFilterField(filter);
+      expect(result).toBe('extension');
     });
-
-    it('should be a function', function () {
-      expect(buildQueryFilter).to.be.a(Function);
-    });
-
-    it('should return a query filter when passed a standard field', function () {
-      expected.query = {
-        foo: 'bar'
-      };
-      expect(buildQueryFilter({ foo: 'bar' }, indexPattern.id)).to.eql(expected);
-    });
-
   });
 });

@@ -19,7 +19,7 @@
 
 
 import { handleNestedFilter } from '../handle_nested_filter';
-import indexPattern from '../../__fixtures__/index_pattern_response.json';
+import {  indexPatternResponse as indexPattern  } from '../../__fixtures__/index_pattern_response';
 import { buildPhraseFilter, buildQueryFilter } from '../../filters';
 import expect from '@kbn/expect';
 

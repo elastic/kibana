@@ -18,7 +18,7 @@
  */
 
 import { buildQueryFromKuery } from '../from_kuery';
-import indexPattern from '../../__fixtures__/index_pattern_response.json';
+import {  indexPatternResponse as indexPattern  } from '../../__fixtures__/index_pattern_response';
 import expect from '@kbn/expect';
 import { fromKueryExpression, toElasticsearchQuery } from '../../kuery';
 

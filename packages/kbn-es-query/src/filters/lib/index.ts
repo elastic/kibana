@@ -17,24 +17,16 @@
  * under the License.
  */
 
-import { Filter } from './meta_filter';
-
 // The interface the other filters extend
 export * from './meta_filter';
 
+export * from './get_filter_field';
+
 // The actual filter types
 import { CustomFilter } from './custom_filter';
-import { ExistsFilter, getExistsFilterField, isExistsFilter } from './exists_filter';
-import {
-  GeoBoundingBoxFilter,
-  getGeoBoundingBoxFilterField,
-  isGeoBoundingBoxFilter,
-} from './geo_bounding_box_filter';
-import {
-  GeoPolygonFilter,
-  getGeoPolygonFilterField,
-  isGeoPolygonFilter,
-} from './geo_polygon_filter';
+import { ExistsFilter, isExistsFilter } from './exists_filter';
+import { GeoBoundingBoxFilter, isGeoBoundingBoxFilter } from './geo_bounding_box_filter';
+import { GeoPolygonFilter, isGeoPolygonFilter } from './geo_polygon_filter';
 import {
   PhraseFilter,
   isPhraseFilter,
@@ -42,17 +34,16 @@ import {
   getPhraseFilterField,
   getPhraseFilterValue,
 } from './phrase_filter';
-import { PhrasesFilter, isPhrasesFilter, getPhrasesFilterField } from './phrases_filter';
+import { PhrasesFilter, isPhrasesFilter } from './phrases_filter';
 import { QueryStringFilter, isQueryStringFilter } from './query_string_filter';
 import {
   RangeFilter,
   isRangeFilter,
   isScriptedRangeFilter,
   RangeFilterParams,
-  getRangeFilterField,
 } from './range_filter';
 import { MatchAllFilter, isMatchAllFilter } from './match_all_filter';
-import { MissingFilter, isMissingFilter, getMissingFilterField } from './missing_filter';
+import { MissingFilter, isMissingFilter } from './missing_filter';
 
 export {
   CustomFilter,
@@ -104,29 +95,3 @@ export enum FILTERS {
   GEO_BOUNDING_BOX = 'geo_bounding_box',
   GEO_POLYGON = 'geo_polygon',
 }
-
-export const getFilterField = (filter: Filter) => {
-  if (isExistsFilter(filter)) {
-    return getExistsFilterField(filter);
-  }
-  if (isGeoBoundingBoxFilter(filter)) {
-    return getGeoBoundingBoxFilterField(filter);
-  }
-  if (isGeoPolygonFilter(filter)) {
-    return getGeoPolygonFilterField(filter);
-  }
-  if (isPhraseFilter(filter)) {
-    return getPhraseFilterField(filter);
-  }
-  if (isPhrasesFilter(filter)) {
-    return getPhrasesFilterField(filter);
-  }
-  if (isRangeFilter(filter)) {
-    return getRangeFilterField(filter);
-  }
-  if (isMissingFilter(filter)) {
-    return getMissingFilterField(filter);
-  }
-
-  return;
-};

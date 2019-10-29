@@ -21,7 +21,7 @@ import * as functionType from '../function';
 import _ from 'lodash';
 import expect from '@kbn/expect';
 import * as isFunction from '../../functions/is';
-import indexPatternResponse from '../../../__fixtures__/index_pattern_response.json';
+import { indexPatternResponse } from '../../../__fixtures__/index_pattern_response';
 
 import { nodeTypes } from '../../node_types';
 

@@ -19,7 +19,7 @@
 
 import { getFields } from '../../utils/get_fields';
 import expect from '@kbn/expect';
-import indexPatternResponse from '../../../../__fixtures__/index_pattern_response.json';
+import { indexPatternResponse } from '../../../../__fixtures__/index_pattern_response';
 
 import { nodeTypes } from '../../..';
 

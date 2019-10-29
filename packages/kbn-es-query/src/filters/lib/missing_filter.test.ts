@@ -17,30 +17,22 @@
  * under the License.
  */
 
-import { buildQueryFilter } from '../query';
-import { cloneDeep } from 'lodash';
-import expect from '@kbn/expect';
-import {  indexPatternResponse as indexPattern  } from '../../__fixtures__/index_pattern_response';
-import filterSkeleton from '../../__fixtures__/filter_skeleton';
+import { getMissingFilterField } from './missing_filter';
 
-let expected;
-
-describe('Filter Manager', function () {
-  describe('Phrase filter builder', function () {
-    beforeEach(() => {
-      expected = cloneDeep(filterSkeleton);
-    });
-
-    it('should be a function', function () {
-      expect(buildQueryFilter).to.be.a(Function);
-    });
-
-    it('should return a query filter when passed a standard field', function () {
-      expected.query = {
-        foo: 'bar'
+describe('missing filter', function() {
+  describe('getMissingFilterField', function() {
+    it('should return the name of the field an missing query is targeting', () => {
+      const filter = {
+        missing: {
+          field: 'extension',
+        },
+        meta: {
+          disabled: false,
+          negate: false,
+        },
       };
-      expect(buildQueryFilter({ foo: 'bar' }, indexPattern.id)).to.eql(expected);
+      const result = getMissingFilterField(filter);
+      expect(result).toBe('extension');
     });
-
   });
 });

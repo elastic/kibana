@@ -38,7 +38,7 @@ export interface FilterMeta {
   type?: string;
   disabled: boolean;
   negate: boolean;
-  alias: string | null;
+  alias?: string | null;
   key?: string;
   value?: string | ((formatter?: FilterValueFormatter) => string);
   params?: any;

@@ -21,7 +21,7 @@ import expect from '@kbn/expect';
 import * as not from '../not';
 import { nodeTypes } from '../../node_types';
 import * as ast from '../../ast';
-import indexPatternResponse from '../../../__fixtures__/index_pattern_response.json';
+import { indexPatternResponse } from '../../../__fixtures__/index_pattern_response';
 
 let indexPattern;
 

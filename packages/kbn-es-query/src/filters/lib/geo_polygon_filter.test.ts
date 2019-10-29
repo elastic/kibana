@@ -17,30 +17,28 @@
  * under the License.
  */
 
-import { buildQueryFilter } from '../query';
-import { cloneDeep } from 'lodash';
-import expect from '@kbn/expect';
-import {  indexPatternResponse as indexPattern  } from '../../__fixtures__/index_pattern_response';
-import filterSkeleton from '../../__fixtures__/filter_skeleton';
+import { getGeoPolygonFilterField } from './geo_polygon_filter';
 
-let expected;
-
-describe('Filter Manager', function () {
-  describe('Phrase filter builder', function () {
-    beforeEach(() => {
-      expected = cloneDeep(filterSkeleton);
-    });
-
-    it('should be a function', function () {
-      expect(buildQueryFilter).to.be.a(Function);
-    });
-
-    it('should return a query filter when passed a standard field', function () {
-      expected.query = {
-        foo: 'bar'
+describe('geo_polygon filter', function() {
+  describe('getGeoPolygonFilterField', function() {
+    it('should return the name of the field a geo_polygon query is targeting', () => {
+      const filter = {
+        geo_polygon: {
+          geoPointField: {
+            points: [{ lat: 1, lon: 1 }],
+          },
+          ignore_unmapped: true,
+        },
+        meta: {
+          disabled: false,
+          negate: false,
+          params: {
+            points: [{ lat: 1, lon: 1 }],
+          },
+        },
       };
-      expect(buildQueryFilter({ foo: 'bar' }, indexPattern.id)).to.eql(expected);
+      const result = getGeoPolygonFilterField(filter);
+      expect(result).toBe('geoPointField');
     });
-
   });
 });

@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 import { nodeTypes } from '../../../node_types';
-import indexPatternResponse from '../../../../__fixtures__/index_pattern_response.json';
+import { indexPatternResponse } from '../../../../__fixtures__/index_pattern_response';
 import { getFullFieldNameNode } from '../../utils/get_full_field_name_node';
 
 let indexPattern;
