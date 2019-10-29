@@ -28,7 +28,7 @@ To resolve this issue, upgrade {kib} to 6.3 or later. See
 
 *Symptoms:*
 
-The *Stack Monitoring* application displays an error indicating that Filebeat
+The *Stack Monitoring* application displays an error indicating that {filebeat}
 indices are corrupt.
 
 *Resolution*
