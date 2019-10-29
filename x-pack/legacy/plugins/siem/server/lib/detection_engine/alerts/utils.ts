@@ -95,10 +95,6 @@ export const singleSearchAfter = async (
   }
 };
 
-const isTotalValueObject = (tv: number | TotalValue): tv is TotalValue => {
-  return (tv as TotalValue).value !== undefined;
-};
-
 // search_after through documents and re-index using bulk endpoint.
 export const searchAfterAndBulkIndex = async (
   someResult: SignalSearchResponse,
@@ -113,9 +109,8 @@ export const searchAfterAndBulkIndex = async (
     return false;
   }
 
-  const totalHits = isTotalValueObject(someResult.hits.total)
-    ? someResult.hits.total.value
-    : someResult.hits.total;
+  const totalHits =
+    typeof someResult.hits.total === 'number' ? someResult.hits.total : someResult.hits.total.value;
   let size = someResult.hits.hits.length - 1;
   logger.info(`first size: ${size}`);
   let sortIds = someResult.hits.hits[0].sort;
