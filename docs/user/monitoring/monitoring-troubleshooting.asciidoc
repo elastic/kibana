@@ -24,7 +24,7 @@ To resolve this issue, upgrade {kib} to 6.3 or later. See
 {stack-ref}/upgrading-elastic-stack.html[Upgrading the {stack}]. 
 
 [float]
-=== Filebeat index is corrupt
+=== {filebeat} index is corrupt
 
 *Symptoms:*
 
