@@ -10,6 +10,7 @@ import React from 'react';
 // @ts-ignore
 import Histogram from '../../../shared/charts/Histogram';
 import { EmptyMessage } from '../../../shared/EmptyMessage';
+import { asAbsoluteTime } from '../../../shared/TimestampTooltip';
 
 interface IBucket {
   key: number;
@@ -51,6 +52,13 @@ interface Props {
   title: React.ReactNode;
 }
 
+const tooltipHeader = (bucket: FormattedBucket) =>
+  asAbsoluteTime({
+    time: bucket.x0,
+    endTime: bucket.x,
+    precision: 'seconds'
+  });
+
 export function ErrorDistribution({ distribution, title }: Props) {
   const buckets = getFormattedBuckets(
     distribution.buckets,
@@ -73,6 +81,7 @@ export function ErrorDistribution({ distribution, title }: Props) {
         <span>{title}</span>
       </EuiTitle>
       <Histogram
+        tooltipHeader={tooltipHeader}
         verticalLineHover={(bucket: FormattedBucket) => bucket.x}
         xType="time"
         buckets={buckets}

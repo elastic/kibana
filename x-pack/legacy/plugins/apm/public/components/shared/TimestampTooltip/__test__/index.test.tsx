@@ -7,8 +7,8 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 import moment from 'moment-timezone';
-import { TimestampTooltip, asAbsoluteTime } from './index';
-import { mockNow } from '../../../utils/testHelpers';
+import { TimestampTooltip, asAbsoluteTime } from '../index';
+import { mockNow } from '../../../../utils/testHelpers';
 
 describe('asAbsoluteTime', () => {
   afterAll(() => moment.tz.setDefault(''));
@@ -46,6 +46,16 @@ describe('asAbsoluteTime', () => {
     expect(asAbsoluteTime({ time: timeWithoutDST })).toBe(
       'Dec 1, 2019, 13:00:00.000 (UTC+1)'
     );
+  });
+  it('should show end time when available', () => {
+    moment.tz.setDefault('Europe/Copenhagen');
+    expect(
+      asAbsoluteTime({
+        time: 1572266880000,
+        endTime: 1572272640000,
+        precision: 'minutes'
+      })
+    ).toBe('Oct 28, 2019, 13:48 - 15:24 (UTC+1)');
   });
 });
 

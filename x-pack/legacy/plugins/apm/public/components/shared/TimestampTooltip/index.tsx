@@ -12,19 +12,23 @@ interface Props {
    * timestamp in milliseconds
    */
   time: number;
+  endTime?: number;
   precision?: 'days' | 'minutes' | 'seconds' | 'milliseconds';
 }
 
-function getPreciseTime(precision: Props['precision']) {
+function getPreciseTime(
+  precision: Props['precision'],
+  separator: string = ','
+) {
   switch (precision) {
     case 'days':
       return '';
     case 'minutes':
-      return ', HH:mm';
+      return `${separator} HH:mm`;
     case 'seconds':
-      return ', HH:mm:ss';
+      return `${separator} HH:mm:ss`;
     default:
-      return ', HH:mm:ss.SSS';
+      return `${separator} HH:mm:ss.SSS`;
   }
 }
 
@@ -32,16 +36,27 @@ function withLeadingPlus(value: number) {
   return value > 0 ? `+${value}` : value;
 }
 
-export function asAbsoluteTime({ time, precision = 'milliseconds' }: Props) {
+export function asAbsoluteTime({
+  time,
+  endTime,
+  precision = 'milliseconds'
+}: Props) {
   const momentTime = moment(time);
   const utcOffsetHours = momentTime.utcOffset() / 60;
   const utcOffsetFormatted = Number.isInteger(utcOffsetHours)
     ? withLeadingPlus(utcOffsetHours)
     : 'Z';
 
-  return momentTime.format(
-    `MMM D, YYYY${getPreciseTime(precision)} (UTC${utcOffsetFormatted})`
-  );
+  let format = `MMM D, YYYY${getPreciseTime(precision)}`;
+
+  if (endTime) {
+    const formattedEndTime = moment(endTime).format(
+      getPreciseTime('minutes', '-')
+    );
+    format = `${format} ${formattedEndTime}`;
+  }
+
+  return momentTime.format(`${format} (UTC${utcOffsetFormatted})`);
 }
 
 export function TimestampTooltip({ time, precision = 'milliseconds' }: Props) {
