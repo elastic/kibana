@@ -38,7 +38,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 
 let jobsRefreshInterval =  null;
@@ -443,15 +445,28 @@ export class JobsListView extends Component {
 
     return (
       <React.Fragment>
-        <JobStatsBar
-          jobsSummaryList={jobsSummaryList}
-        />
         <div className="job-management" data-test-subj="ml-jobs-list">
+          <EuiTitle>
+            <h1>
+              <FormattedMessage
+                id="xpack.ml.jobsList.title"
+                defaultMessage="Anomaly Detection"
+              />
+            </h1>
+          </EuiTitle>
+
           <NodeAvailableWarning />
+
           <UpgradeWarning />
-          <header>
-            <div className="job-buttons-container">
-              <EuiFlexGroup alignItems="center">
+
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <JobStatsBar
+                jobsSummaryList={jobsSummaryList}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="center" gutterSize="s">
                 <EuiFlexItem grow={false}>
                   <RefreshJobsListButton
                     onRefreshClick={this.onRefreshClick}
@@ -459,14 +474,12 @@ export class JobsListView extends Component {
                   />
                 </EuiFlexItem>
                 {isManagementTable === undefined &&
-                  <EuiFlexItem grow={false}>
-                    <NewJobButton />
-                  </EuiFlexItem>}
+                <EuiFlexItem grow={false}>
+                  <NewJobButton />
+                </EuiFlexItem>}
               </EuiFlexGroup>
-            </div>
-          </header>
-
-          <div className="clear" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
 
           <EuiSpacer size="s" />
 
