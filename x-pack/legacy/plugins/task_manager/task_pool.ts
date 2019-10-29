@@ -9,7 +9,6 @@
  * tasks at once in a given Kibana instance.
  */
 import { performance } from 'perf_hooks';
-import { i18n } from '@kbn/i18n';
 import { Logger } from './types';
 import { TaskRunner } from './task_runner';
 
@@ -25,12 +24,7 @@ export enum TaskPoolRunResult {
   RanOutOfCapacity = 'RanOutOfCapacity',
 }
 
-const VERSION_CONFLICT_MESSAGE = i18n.translate(
-  'xpack.taskManager.taskPool.runAttempt.versionConflict',
-  {
-    defaultMessage: 'Task has been claimed by another Kibana service',
-  }
-);
+const VERSION_CONFLICT_MESSAGE = 'Task has been claimed by another Kibana service';
 
 /**
  * Runs tasks in batches, taking costs into account.
@@ -81,11 +75,7 @@ export class TaskPool {
   };
 
   public cancelRunningTasks() {
-    this.logger.debug(
-      i18n.translate('xpack.taskManager.taskPool.cancelRunningTasks', {
-        defaultMessage: 'Cancelling running tasks.',
-      })
-    );
+    this.logger.debug('Cancelling running tasks.');
     for (const task of this.running) {
       this.cancelTask(task);
     }
@@ -130,28 +120,12 @@ export class TaskPool {
         task
           .run()
           .catch(err => {
-            this.logger.warn(
-              i18n.translate('xpack.taskManager.taskPool.runAttempt.genericError', {
-                defaultMessage: 'Task {task} failed in attempt to run: {message}',
-                values: {
-                  message: err.message,
-                  task: task.toString(),
-                },
-              })
-            );
+            this.logger.warn(`Task ${task.toString()} failed in attempt to run: ${err.message}`);
           })
           .then(() => this.running.delete(task));
       },
       ([task, err]) => {
-        this.logger.error(
-          i18n.translate('xpack.taskManager.taskPool.markAsRunning.genericError', {
-            defaultMessage: 'Failed to mark Task {task} as running: {message}',
-            values: {
-              message: err.message,
-              task: task.toString(),
-            },
-          })
-        );
+        this.logger.error(`Failed to mark Task ${task.toString()} as running: ${err.message}`);
       },
       result
     );
@@ -160,14 +134,7 @@ export class TaskPool {
   private cancelExpiredTasks() {
     for (const task of this.running) {
       if (task.isExpired) {
-        this.logger.debug(
-          i18n.translate('xpack.taskManager.taskPool.cancelExpiredTasks', {
-            defaultMessage: 'Cancelling expired task {task}.',
-            values: {
-              task: task.toString(),
-            },
-          })
-        );
+        this.logger.debug(`Cancelling expired task ${task.toString()}.`);
         this.cancelTask(task);
       }
     }
@@ -175,26 +142,11 @@ export class TaskPool {
 
   private async cancelTask(task: TaskRunner) {
     try {
-      this.logger.debug(
-        i18n.translate('xpack.taskManager.taskPool.cancelTask', {
-          defaultMessage: 'Cancelling task {task}.',
-          values: {
-            task: task.toString(),
-          },
-        })
-      );
+      this.logger.debug(`Cancelling task ${task.toString()}.`);
       this.running.delete(task);
       await task.cancel();
     } catch (err) {
-      this.logger.error(
-        i18n.translate('xpack.taskManager.taskPool.cancelTaskFailure', {
-          defaultMessage: 'Failed to cancel task {task}: {err}',
-          values: {
-            err,
-            task: task.toString(),
-          },
-        })
-      );
+      this.logger.error(`Failed to cancel task ${task.toString()}: ${err}`);
     }
   }
 }
