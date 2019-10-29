@@ -12,7 +12,6 @@ import {
   EuiHorizontalRule,
   EuiIcon,
   EuiNotificationBadge,
-  EuiPanel,
   EuiText,
   EuiTitle,
   EuiSpacer,
