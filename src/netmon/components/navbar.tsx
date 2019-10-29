@@ -28,6 +28,7 @@ import {
 import BlockingProcessModal from '@logrhythm/nm-web-shared/components/blocking_process/blocking_process_modal';
 import { Navbar } from '@logrhythm/nm-web-shared/components/navigation/navbar/navbar';
 import Auth from '@logrhythm/nm-web-shared/services/auth';
+import { useSessionSync } from '@logrhythm/nm-web-shared/hooks/session_sync_hooks';
 import NotificationHandler from './notification_handler';
 
 const useStyles = makeStyles(
@@ -52,6 +53,9 @@ const LogRhythmNavbar = () => {
 
   const [authState, setAuthState] = useState<AuthContextValue>(undefined);
 
+  const checkingToken = useSessionSync('token');
+  const checkingNotifications = useSessionSync('notificationsAlreadySeen');
+
   const [blockingProcessMsg, setBlockingProcessMsg] = useState<string>('');
   const blockingProcessContextState: BlockingProcessContextState = {
     message: blockingProcessMsg,
@@ -59,13 +63,20 @@ const LogRhythmNavbar = () => {
     unblock: () => setBlockingProcessMsg(''),
   };
 
-  useEffect(() => {
-    const unsub = Auth.subscribe(setAuthState);
+  useEffect(
+    () => {
+      if (checkingToken || checkingNotifications) {
+        return;
+      }
 
-    Auth.getCurrentUser();
+      const unsub = Auth.subscribe(setAuthState);
 
-    return unsub;
-  }, []);
+      Auth.getCurrentUser();
+
+      return unsub;
+    },
+    [checkingToken, checkingNotifications]
+  );
 
   if (authState === undefined) {
     return null;
