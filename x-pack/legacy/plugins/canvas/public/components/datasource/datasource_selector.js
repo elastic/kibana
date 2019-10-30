@@ -16,11 +16,9 @@ export const DatasourceSelector = ({ onSelect, datasources, current }) => (
         title={d.displayName}
         titleElement="h5"
         icon={<EuiIcon type={d.image} size="l" />}
-        // onClick={() => onSelect(d.name)}
         description={d.help}
         layout="horizontal"
         className="canvasDataSource__card"
-        // className={`canvasDataSource__card ${d.name === current ? 'canvasDataSource__card--isCurrent' : null}`}
         selectable={{
           isSelected: d.name === current ? true : false,
           onClick: () => onSelect(d.name),

@@ -309,6 +309,14 @@ export const DataSourceStrings = {
       i18n.translate('xpack.canvas.uis.dataSources.demoDataLabel', {
         defaultMessage: 'Mock data set with usernames, prices, projects, countries, and phases',
       }),
+    getDescription: () =>
+      i18n.translate('xpack.canvas.uis.dataSources.demoDataDescription', {
+        defaultMessage:
+          'By default, every {canvas} element is connected to the demo data source. Change the data source, above, to connect your own data.',
+        values: {
+          canvas: CANVAS,
+        },
+      }),
   },
   Essql: {
     getDisplayName: () =>
