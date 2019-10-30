@@ -77,15 +77,11 @@ export const handleGetFile = async (req: Request, extra: Extra) => {
 };
 
 export async function handleRequestInstall(req: InstallDeletePackageRequest, extra: Extra) {
-  const { pkgkey, asset } = req.params;
-
+  const { pkgkey } = req.params;
   const savedObjectsClient = getClient(req);
-  const callCluster = getClusterAccessor(extra.context.esClient, req);
   return await installPackage({
     savedObjectsClient,
     pkgkey,
-    asset,
-    callCluster,
   });
 }
 

@@ -8,37 +8,27 @@ import { SavedObject, SavedObjectsClientContract } from 'src/core/server/';
 import { SAVED_OBJECT_TYPE } from '../../common/constants';
 import { AssetReference, AssetType, InstallationAttributes } from '../../common/types';
 import * as Registry from '../registry';
-import { CallESAsCurrentUser, assetUsesObjects, getInstallationObject } from './index';
+import { assetUsesObjects, getInstallationObject } from './index';
 import { getObjects } from './get_objects';
 
 export async function installPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
-  asset?: AssetType;
-  callCluster: CallESAsCurrentUser;
 }) {
-  const { savedObjectsClient, pkgkey, asset, callCluster } = options;
-  const assets: AssetType[] = [];
+  const { savedObjectsClient, pkgkey } = options;
 
-  if (asset) {
-    assets.push(asset);
-  } else {
-    Object.values(AssetType).forEach(value => {
-      assets.push(value);
-    });
-  }
+  // Only install Kibana assets during package installation. All other asset types need special handling
+  const assetTypes: AssetType[] = [AssetType.visualization, AssetType.dashboard, AssetType.search];
 
   let result = {};
 
-  // install any assets (in ES, as Saved Objects, etc) as required. Get references to them
   // this is a for loop because using forEach with an async callback wouldn't wait for the
   // awaits to resolve, and we'd return an empty result
-  for (let i = 0; i < assets.length; i++) {
+  for (let i = 0; i < assetTypes.length; i++) {
     const toSave = await installAssets({
       savedObjectsClient,
       pkgkey,
-      asset: assets[i],
-      callCluster,
+      assetType: assetTypes[i],
     });
 
     if (toSave.length) {
@@ -60,16 +50,11 @@ export async function installPackage(options: {
 export async function installAssets(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
-  asset: AssetType;
-  callCluster: CallESAsCurrentUser;
+  assetType: AssetType;
 }) {
-  const { savedObjectsClient, pkgkey, asset, callCluster } = options;
-  if (assetUsesObjects(asset)) {
-    const references = await installObjects({ savedObjectsClient, pkgkey, asset });
-    return references;
-  }
-  if (asset === 'ingest-pipeline') {
-    const references = await installPipelines({ callCluster, pkgkey });
+  const { savedObjectsClient, pkgkey, assetType } = options;
+  if (assetUsesObjects(assetType)) {
+    const references = await installKibanaSavedObjects({ savedObjectsClient, pkgkey, assetType });
     return references;
   }
 
@@ -100,58 +85,65 @@ export async function saveInstallationReferences(options: {
   return results;
 }
 
-async function installObjects({
+async function installKibanaSavedObjects({
   savedObjectsClient,
   pkgkey,
-  asset,
+  assetType,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
-  asset: AssetType;
+  assetType: AssetType;
 }) {
-  const isSameType = ({ path }: Registry.ArchiveEntry) => asset === Registry.pathParts(path).type;
+  const isSameType = ({ path }: Registry.ArchiveEntry) =>
+    assetType === Registry.pathParts(path).type;
+
   const toBeSavedObjects = await getObjects(pkgkey, isSameType);
-  const createResults = await savedObjectsClient.bulkCreate(toBeSavedObjects, { overwrite: true });
-  const createdObjects = createResults.saved_objects;
-  const installed = createdObjects.map(toAssetReference);
-
-  return installed;
+  if (toBeSavedObjects.length === 0) {
+    return [];
+  } else {
+    const createResults = await savedObjectsClient.bulkCreate(toBeSavedObjects, {
+      overwrite: true,
+    });
+    const createdObjects = createResults.saved_objects;
+    const installed = createdObjects.map(toAssetReference);
+    return installed;
+  }
 }
 
-async function installPipelines({
-  callCluster,
-  pkgkey,
-}: {
-  callCluster: CallESAsCurrentUser;
-  pkgkey: string;
-}) {
-  const isPipeline = ({ path }: Registry.ArchiveEntry) =>
-    Registry.pathParts(path).type === 'ingest-pipeline';
-  const paths = await Registry.getArchiveInfo(pkgkey, isPipeline);
-  const installationPromises = paths.map(path => installPipeline({ callCluster, path }));
-  const references = await Promise.all(installationPromises);
+// async function installPipelines({
+//   callCluster,
+//   pkgkey,
+// }: {
+//   callCluster: CallESAsCurrentUser;
+//   pkgkey: string;
+// }) {
+//   const isPipeline = ({ path }: Registry.ArchiveEntry) =>
+//     Registry.pathParts(path).type === 'ingest-pipeline';
+//   const paths = await Registry.getArchiveInfo(pkgkey, isPipeline);
+//   const installationPromises = paths.map(path => installPipeline({ callCluster, path }));
+//   const references = await Promise.all(installationPromises);
 
-  return references;
-}
+//   return references;
+// }
 
-async function installPipeline({
-  callCluster,
-  path,
-}: {
-  callCluster: CallESAsCurrentUser;
-  path: string;
-}): Promise<AssetReference> {
-  const buffer = Registry.getAsset(path);
-  // sample data is invalid json. strip the offending parts before parsing
-  const json = buffer.toString('utf8').replace(/\\/g, '');
-  const pipeline = JSON.parse(json);
-  const { file, type } = Registry.pathParts(path);
-  const id = file.replace('.json', '');
-  // TODO: any sort of error, not "happy path", handling
-  await callCluster('ingest.putPipeline', { id, body: pipeline });
+// async function installPipeline({
+//   callCluster,
+//   path,
+// }: {
+//   callCluster: CallESAsCurrentUser;
+//   path: string;
+// }): Promise<AssetReference> {
+//   const buffer = Registry.getAsset(path);
+//   // sample data is invalid json. strip the offending parts before parsing
+//   const json = buffer.toString('utf8').replace(/\\/g, '');
+//   const pipeline = JSON.parse(json);
+//   const { file, type } = Registry.pathParts(path);
+//   const id = file.replace('.json', '');
+//   // TODO: any sort of error, not "happy path", handling
+//   await callCluster('ingest.putPipeline', { id, body: pipeline });
 
-  return { id, type };
-}
+//   return { id, type };
+// }
 
 function toAssetReference({ id, type }: SavedObject) {
   const reference: AssetReference = { id, type };
