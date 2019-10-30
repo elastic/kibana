@@ -20,12 +20,11 @@
 import { uiModules } from '../modules';
 const module = uiModules.get('kibana');
 
-module.directive('cssTruncate', function () {
+export function CssTruncateProvide() {
   return {
     restrict: 'A',
     scope: {},
     link: function ($scope, $elem, attrs) {
-
       $elem.css({
         overflow: 'hidden',
         'white-space': 'nowrap',
@@ -35,10 +34,12 @@ module.directive('cssTruncate', function () {
 
       if (attrs.cssTruncateExpandable != null) {
         $scope.$watch(
-          function () { return $elem.html(); },
+          function () {
+            return $elem.html();
+          },
           function () {
             if ($elem[0].offsetWidth < $elem[0].scrollWidth) {
-              $elem.css({ 'cursor': 'pointer' });
+              $elem.css({ cursor: 'pointer' });
               $elem.bind('click', function () {
                 $scope.toggle();
               });
@@ -59,6 +60,8 @@ module.directive('cssTruncate', function () {
         $elem.unbind('click');
         $elem.unbind('mouseenter');
       });
-    }
+    },
   };
-});
+}
+
+module.directive('cssTruncate', CssTruncateProvide);
