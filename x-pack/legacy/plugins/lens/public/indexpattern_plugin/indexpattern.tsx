@@ -16,6 +16,7 @@ import {
   DatasourceDataPanelProps,
   Operation,
   DatasourceLayerPanelProps,
+  PublicAPIProps,
 } from '../types';
 import { loadInitialState, changeIndexPattern, changeLayerIndexPattern } from './loader';
 import { toExpression } from './to_expression';
@@ -27,7 +28,7 @@ import {
   getDatasourceSuggestionsFromCurrentState,
 } from './indexpattern_suggestions';
 
-import { isDraggedField } from './utils';
+import { isDraggedField, normalizeOperationDataType } from './utils';
 import { LayerPanel } from './layerpanel';
 import { IndexPatternColumn } from './operations';
 import {
@@ -50,7 +51,7 @@ export interface DraggedField {
 export function columnToOperation(column: IndexPatternColumn, uniqueLabel?: string): Operation {
   const { dataType, label, isBucketed, scale } = column;
   return {
-    dataType,
+    dataType: normalizeOperationDataType(dataType),
     isBucketed,
     scale,
     label: uniqueLabel || label,
@@ -196,11 +197,12 @@ export function getIndexPatternDatasource({
       );
     },
 
-    getPublicAPI(
-      state: IndexPatternPrivateState,
-      setState: StateSetter<IndexPatternPrivateState>,
-      layerId: string
-    ) {
+    getPublicAPI({
+      state,
+      setState,
+      layerId,
+      dateRange,
+    }: PublicAPIProps<IndexPatternPrivateState>) {
       const columnLabelMap = uniqueLabels(state.layers);
 
       return {
@@ -237,6 +239,7 @@ export function getIndexPatternDatasource({
                   layerId={props.layerId}
                   http={core.http}
                   uniqueLabel={columnLabelMap[props.columnId]}
+                  dateRange={dateRange}
                   {...props}
                 />
               </KibanaContextProvider>
@@ -257,6 +260,7 @@ export function getIndexPatternDatasource({
                   state,
                   layerId: props.layerId,
                   onError: onIndexPatternLoadError,
+                  replaceIfPossible: true,
                 });
               }}
               {...props}
