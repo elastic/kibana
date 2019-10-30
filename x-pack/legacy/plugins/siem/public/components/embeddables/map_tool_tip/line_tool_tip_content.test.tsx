@@ -16,12 +16,10 @@ describe('LineToolTipContent', () => {
     {
       _propertyKey: SUM_OF_DESTINATION_BYTES,
       _rawValue: 'testPropValue',
-      getESFilters: () => new Promise(resolve => setTimeout(resolve)),
     },
     {
       _propertyKey: SUM_OF_SOURCE_BYTES,
       _rawValue: 'testPropValue',
-      getESFilters: () => new Promise(resolve => setTimeout(resolve)),
     },
   ];
 

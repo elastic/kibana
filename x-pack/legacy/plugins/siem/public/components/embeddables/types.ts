@@ -52,7 +52,6 @@ export interface LoadFeatureProps {
 export interface FeatureProperty {
   _propertyKey: string;
   _rawValue: string | string[];
-  getESFilters(): Promise<object>;
 }
 
 export interface FeatureGeometry {

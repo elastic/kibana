@@ -24,7 +24,6 @@ describe('PointToolTipContent', () => {
     {
       _propertyKey: 'host.name',
       _rawValue: 'testPropValue',
-      getESFilters: () => new Promise(resolve => setTimeout(resolve)),
     },
   ];
 
@@ -32,7 +31,6 @@ describe('PointToolTipContent', () => {
     {
       _propertyKey: 'host.name',
       _rawValue: ['testPropValue1', 'testPropValue2'],
-      getESFilters: () => new Promise(resolve => setTimeout(resolve)),
     },
   ];
 
