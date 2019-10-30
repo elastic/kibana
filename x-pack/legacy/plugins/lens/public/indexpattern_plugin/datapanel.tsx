@@ -18,12 +18,13 @@ import {
   EuiPopoverTitle,
   EuiPopoverFooter,
   EuiCallOut,
-  EuiText,
   EuiFormControlLayout,
   EuiSwitch,
   EuiFacetButton,
   EuiIcon,
-  EuiButton,
+  EuiButtonEmpty,
+  EuiSpacer,
+  EuiFormLabel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -60,10 +61,11 @@ function sortFields(fieldA: IndexPatternField, fieldB: IndexPatternField) {
   return fieldA.name.localeCompare(fieldB.name, undefined, { sensitivity: 'base' });
 }
 
-const supportedFieldTypes = new Set(['string', 'number', 'boolean', 'date', 'ip']);
+const supportedFieldTypes = new Set(['string', 'number', 'boolean', 'date', 'ip', 'document']);
 const PAGINATION_SIZE = 50;
 
 const fieldTypeNames: Record<DataType, string> = {
+  document: i18n.translate('xpack.lens.datatypes.record', { defaultMessage: 'record' }),
   string: i18n.translate('xpack.lens.datatypes.string', { defaultMessage: 'string' }),
   number: i18n.translate('xpack.lens.datatypes.number', { defaultMessage: 'number' }),
   boolean: i18n.translate('xpack.lens.datatypes.boolean', { defaultMessage: 'boolean' }),
@@ -255,7 +257,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     if (!showEmptyFields) {
       const indexField = currentIndexPattern && fieldByName[field.name];
       const exists =
-        indexField && fieldExists(existingFields, currentIndexPattern.title, indexField.name);
+        field.type === 'document' ||
+        (indexField && fieldExists(existingFields, currentIndexPattern.title, indexField.name));
       if (localState.typeFilter.length > 0) {
         return exists && localState.typeFilter.includes(field.type as DataType);
       }
@@ -270,7 +273,12 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     return true;
   });
 
-  const paginatedFields = displayedFields.sort(sortFields).slice(0, pageSize);
+  const specialFields = displayedFields.filter(f => f.type === 'document');
+  const paginatedFields = displayedFields
+    .filter(f => f.type !== 'document')
+    .sort(sortFields)
+    .slice(0, pageSize);
+  const hilight = localState.nameFilter.toLowerCase();
 
   return (
     <ChildDragDropProvider {...dragDropContext}>
@@ -418,6 +426,31 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
             onScroll={lazyScroll}
           >
             <div className="lnsInnerIndexPatternDataPanel__list">
+              {specialFields.map(field => (
+                <FieldItem
+                  core={core}
+                  key={field.name}
+                  indexPattern={currentIndexPattern}
+                  field={field}
+                  highlight={hilight}
+                  exists={paginatedFields.length > 0}
+                  dateRange={dateRange}
+                  query={query}
+                  filters={filters}
+                  hideDetails={true}
+                />
+              ))}
+              {specialFields.length > 0 && (
+                <>
+                  <EuiSpacer size="s" />
+                  <EuiFormLabel>
+                    {i18n.translate('xpack.lens.indexPattern.individualFieldsLabel', {
+                      defaultMessage: 'Individual fields',
+                    })}
+                  </EuiFormLabel>
+                  <EuiSpacer size="s" />
+                </>
+              )}
               {paginatedFields.map(field => {
                 const overallField = fieldByName[field.name];
                 return (
@@ -426,7 +459,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                     indexPattern={currentIndexPattern}
                     key={field.name}
                     field={field}
-                    highlight={localState.nameFilter.toLowerCase()}
+                    highlight={hilight}
                     exists={
                       overallField &&
                       fieldExists(existingFields, currentIndexPattern.title, overallField.name)
@@ -439,9 +472,11 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
               })}
 
               {paginatedFields.length === 0 && (
-                <EuiText size="s" color="subdued">
-                  <p>
-                    {showEmptyFields
+                <EuiCallOut
+                  size="s"
+                  color="warning"
+                  title={
+                    showEmptyFields
                       ? localState.typeFilter.length || localState.nameFilter.length
                         ? i18n.translate('xpack.lens.indexPatterns.noFilteredFieldsLabel', {
                             defaultMessage:
@@ -453,15 +488,17 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                       : i18n.translate('xpack.lens.indexPatterns.emptyFieldsWithDataLabel', {
                           defaultMessage:
                             'No fields have data with the current filters and time range. Try changing your filters or time range.',
-                        })}
-                  </p>
-
+                        })
+                  }
+                >
                   {(!showEmptyFields ||
                     localState.typeFilter.length ||
                     localState.nameFilter.length) && (
-                    <EuiButton
+                    <EuiButtonEmpty
+                      size="xs"
+                      color="primary"
+                      flush="left"
                       data-test-subj="lnsDataPanelShowAllFields"
-                      size="s"
                       onClick={() => {
                         trackUiEvent('indexpattern_show_all_fields_clicked');
                         clearLocalState();
@@ -471,9 +508,9 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                       {i18n.translate('xpack.lens.indexPatterns.showAllFields.buttonText', {
                         defaultMessage: 'Show all fields',
                       })}
-                    </EuiButton>
+                    </EuiButtonEmpty>
                   )}
-                </EuiText>
+                </EuiCallOut>
               )}
             </div>
           </div>
