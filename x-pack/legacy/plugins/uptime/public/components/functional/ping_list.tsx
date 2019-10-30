@@ -260,11 +260,12 @@ export const PingListComponent = ({
                           defaultMessage: 'Status',
                         })}
                         value={selectedOption}
-                        onChange={(selected) => {
+                        onChange={selected => {
                           if (typeof selected.target.value === 'string') {
                             onSelectedStatusChange(
-                              // @ts-ignore it's definitely a string
-                              selected.target !== '' ? selected.target.value : null
+                              !!selected.target && selected.target.value !== ''
+                                ? selected.target.value
+                                : null
                             );
                           }
                         }}
