@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge } from '@elastic/eui';
+import { EuiBadge, EuiBadgeProps } from '@elastic/eui';
 import classNames from 'classnames';
 import { isString } from 'lodash/fp';
 import React, { FunctionComponent } from 'react';
@@ -16,24 +16,8 @@ import { EXISTS_OPERATOR, QueryOperator } from './data_provider';
 
 import * as i18n from './translations';
 
-interface ProviderBadgeStyledProps {
-  id: string;
-  className: string;
-  color: string;
-  title: string;
-  iconOnClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
-  iconOnClickAriaLabel: string;
-  iconType: string;
-  iconSide: string;
-  onClick?: () => void;
-  onClickAriaLabel: string;
-  closeButtonProps: {
-    tabIndex: number;
-  };
-}
-
 const ProviderBadgeStyled = styled((EuiBadge as unknown) as FunctionComponent)<
-  ProviderBadgeStyledProps
+  EuiBadgeProps & { className?: string; id?: string }
 >`
   .euiToolTipAnchor {
     &::after {
@@ -71,7 +55,7 @@ interface ProviderBadgeProps {
   isEnabled: boolean;
   isExcluded: boolean;
   providerId: string;
-  togglePopover?: () => void;
+  togglePopover: () => void;
   val: string | number;
   operator: QueryOperator;
 }

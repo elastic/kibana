@@ -7,7 +7,7 @@
 import React, { useEffect, useRef } from 'react';
 import { fromEvent, Observable, Subscription } from 'rxjs';
 import { concatMap, takeUntil } from 'rxjs/operators';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
 export type OnResize = ({ delta, id }: { delta: number; id: string }) => void;
 

@@ -3,7 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiContextMenu, EuiContextMenuPanelDescriptor, EuiPopover } from '@elastic/eui';
+import {
+  EuiContextMenu,
+  EuiContextMenuPanelDescriptor,
+  EuiPopover,
+  EuiPopoverProps,
+} from '@elastic/eui';
 import React, { FunctionComponent } from 'react';
 import styled from 'styled-components';
 
@@ -41,16 +46,11 @@ interface OwnProps {
   value: string | number;
 }
 
-interface MyEuiPopoverProps {
-  id: string;
-  isOpen: boolean;
-  closePopover: () => void;
-  button: JSX.Element;
-  anchorPosition: string;
-  panelPaddingSize: string;
-}
-
-const MyEuiPopover = styled((EuiPopover as unknown) as FunctionComponent)<MyEuiPopoverProps>`
+const MyEuiPopover = styled((EuiPopover as unknown) as FunctionComponent)<
+  EuiPopoverProps & {
+    id?: string;
+  }
+>`
   height: 100%;
   user-select: none;
 `;

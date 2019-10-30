@@ -20,19 +20,18 @@ import styled, { css } from 'styled-components';
 const Aside = styled.aside<{ overlay?: boolean; overlayBackground?: string }>`
   padding: ${({ theme }) => theme.eui.paddingSizes.m};
 
-  ${({ overlay }) =>
+  ${({ overlay, overlayBackground, theme }) =>
     overlay &&
     css`
-      background: ${({ overlayBackground }) =>
-        overlayBackground
-          ? rgba(overlayBackground, 0.9)
-          : rgba(({ theme }) => theme.eui.euiColorEmptyShade, 0.9)};
+      background: ${overlayBackground
+        ? rgba(overlayBackground, 0.9)
+        : rgba(theme.eui.euiColorEmptyShade, 0.9)};
       bottom: 0;
       left: 0;
       position: absolute;
       right: 0;
       top: 0;
-      z-index: ${({ theme }) => theme.eui.euiZLevel1};
+      z-index: ${theme.eui.euiZLevel1};
     `}
 `;
 

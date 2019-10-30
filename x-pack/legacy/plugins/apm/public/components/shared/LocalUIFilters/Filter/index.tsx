@@ -8,6 +8,7 @@ import React, { FunctionComponent, useState, useMemo, useEffect } from 'react';
 import {
   EuiTitle,
   EuiPopover,
+  EuiPopoverProps,
   EuiSelectable,
   EuiSpacer,
   EuiHorizontalRule,
@@ -23,26 +24,15 @@ import { FilterBadgeList } from './FilterBadgeList';
 import { unit, px } from '../../../../style/variables';
 import { FilterTitleButton } from './FilterTitleButton';
 
-interface PopoverProps {
-  anchorClassName?: string;
-  id: string;
-  isOpen: boolean;
-  closePopover: () => void;
-  button: JSX.Element;
-  anchorPosition: string;
-  panelPaddingSize: string;
-}
-
-const Popover = styled((EuiPopover as unknown) as FunctionComponent)<
-  PopoverProps
->`
+const Popover = styled((EuiPopover as unknown) as FunctionComponent).attrs(
+  () => ({
+    anchorClassName: 'anchor'
+  })
+)<EuiPopoverProps & { className?: string; id?: string }>`
   .anchor {
     display: block;
   }
 `;
-Popover.defaultProps = {
-  anchorClassName: 'anchor'
-};
 
 const SelectContainer = styled.div`
   width: ${px(unit * 16)};

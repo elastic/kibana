@@ -12,16 +12,15 @@ interface RowProps {
   rowPadding?: string;
 }
 
-const Row = styled.div.attrs<RowProps>(props => ({
+const Row = styled.div.attrs<RowProps>(({ rowHeight, rowPadding, theme }) => ({
   className: 'siemSkeletonRow',
-  rowHeight: props.rowHeight || props.theme.eui.euiSizeXL,
-  rowPadding:
-    props.rowPadding || props.theme.eui.paddingSizes.s + ' ' + props.theme.eui.paddingSizes.xs,
+  rowHeight: rowHeight || theme.eui.euiSizeXL,
+  rowPadding: rowPadding || `${theme.eui.paddingSizes.s} ${theme.eui.paddingSizes.xs}`,
 }))<RowProps>`
-  border-bottom: ${props => props.theme.eui.euiBorderThin};
+  border-bottom: ${({ theme }) => theme.eui.euiBorderThin};
   display: flex;
-  height: ${props => props.rowHeight};
-  padding: ${props => props.rowPadding};
+  height: ${({ rowHeight }) => rowHeight};
+  padding: ${({ rowPadding }) => rowPadding};
 `;
 Row.displayName = 'Row';
 
@@ -35,12 +34,12 @@ const Cell = styled.div.attrs<CellProps>(({ cellColor, cellMargin, theme }) => (
   cellColor: cellColor || theme.eui.euiColorLightestShade,
   cellMargin: cellMargin || theme.eui.gutterTypes.gutterSmall,
 }))<CellProps>`
-  background-color: ${props => props.cellColor};
+  background-color: ${({ cellColor }) => cellColor};
   border-radius: 2px;
   flex: 1;
 
   & + & {
-    margin-left: ${props => props.cellMargin};
+    margin-left: ${({ cellMargin }) => cellMargin};
   }
 `;
 Cell.displayName = 'Cell';
