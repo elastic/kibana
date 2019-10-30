@@ -32,6 +32,7 @@ import {
   // @ts-ignore
   EuiHeaderSectionItemButton,
   EuiIcon,
+  EuiLink,
   EuiPopover,
   EuiPopoverTitle,
   EuiSpacer,
@@ -48,6 +49,7 @@ interface Props {
   kibanaVersion: string;
   useDefaultContent?: boolean;
   kibanaDocLink: string;
+  isCloudEnabled: boolean;
 }
 
 interface State {
@@ -98,6 +100,34 @@ class HeaderHelpMenuUI extends Component<Props, State> {
             />
           </p>
         </EuiText>
+
+        <EuiSpacer />
+
+        <EuiLink
+          target="_blank"
+          external={true}
+          href={
+            this.props.isCloudEnabled
+              ? 'https://support.elastic.co/'
+              : 'https://www.elastic.co/kibana/gethelp'
+          }
+        >
+          <EuiIcon type="questionInCircle" size="l" />
+          <FormattedMessage
+            id="core.ui.chrome.headerGlobalNav.helpMenuGetHelpDescription"
+            defaultMessage="Get Help"
+          />
+        </EuiLink>
+
+        <EuiSpacer />
+
+        <EuiLink target="_blank" external={true} href="https://www.elastic.co/kibana/feedback">
+          <EuiIcon type="editorComment" size="l" />
+          <FormattedMessage
+            id="core.ui.chrome.headerGlobalNav.helpMenuFeedbackDescription"
+            defaultMessage="Kibana Feedback"
+          />
+        </EuiLink>
 
         <EuiSpacer />
 
