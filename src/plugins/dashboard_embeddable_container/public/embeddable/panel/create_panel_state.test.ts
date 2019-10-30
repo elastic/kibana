@@ -20,9 +20,8 @@
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../dashboard_constants';
 import { DashboardPanelState } from '../types';
 import { createPanelState } from './create_panel_state';
-import { EmbeddableInput } from '../../embeddable_api';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { CONTACT_CARD_EMBEDDABLE } from '../../../../../../../embeddable_api/public/np_ready/public/lib/test_samples';
+import { EmbeddableInput } from '../../embeddable_plugin';
+import { CONTACT_CARD_EMBEDDABLE } from '../../embeddable_plugin_test_samples';
 
 interface TestInput extends EmbeddableInput {
   test: string;

@@ -17,5 +17,4 @@
  * under the License.
  */
 
-// eslint-disable-next-line
-export * from '../../../../../../../../../plugins/dashboard_embeddable_container/public/embeddable/panel';
+export { createPanelState } from './create_panel_state';
