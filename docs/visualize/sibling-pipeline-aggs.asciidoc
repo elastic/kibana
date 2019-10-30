@@ -1,0 +1,14 @@
+**Sibling Pipeline Aggregations:**
+
+Just like with parent pipeline aggregations you need to provide a metric for which to calculate the sibling aggregation.
+On top of that you also need to provide a bucket aggregation which will define the buckets on which the sibling
+aggregation will run
+
+*Average Bucket*:: The {ref}/search-aggregations-pipeline-avg-bucket-aggregation.html[_avg bucket_]
+calculates the (mean) average value of a specified metric in a sibling aggregation
+*Sum Bucket*:: The {ref}/search-aggregations-pipeline-avg-bucket-aggregation.html[_sum bucket_]
+calculates the sum of values of a specified metric in a sibling aggregation
+*Min Bucket*:: The {ref}/search-aggregations-pipeline-avg-bucket-aggregation.html[_min bucket_]
+calculates the minimum value of a specified metric in a sibling aggregation
+*Max Bucket*:: The {ref}/search-aggregations-pipeline-avg-bucket-aggregation.html[_max bucket_] 
+calculates the maximum value of a specified metric in a sibling aggregation

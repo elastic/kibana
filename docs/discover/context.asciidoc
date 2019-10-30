@@ -3,7 +3,7 @@
 
 For certain applications it can be useful to inspect a window of documents
 surrounding a specific event. The context view enables you to do just that for
-index patterns that are configured to contain time-based events.
+<<index-patterns, index patterns>> that are configured to contain time-based events.
 
 To show the context surrounding an anchor document, click the *Expand* button
 image:images/ExpandButton.jpg[Expand Button] to the left of the document's

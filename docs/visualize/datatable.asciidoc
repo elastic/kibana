@@ -1,47 +1,32 @@
 [[data-table]]
 == Data Table
 
-include::y-axis-aggs.asciidoc[]
+Datatable visualizations allow you to plot aggregated data from a saved query or index pattern.
+Datatables support multiple levels of {es} {ref}/search-aggregations-bucket.html[bucket]
+aggregations, and one level of {es} {ref}/search-aggregations-metrics.html[metric] aggregations.
 
-The rows of the data table are called _buckets_. You can define buckets to split the table into rows or to split
-the table into additional tables.
+. The nested structure of Elasticsearch responses is flattened into a table.
+Multiple tables can be displayed by configuring a bucket as a "Split table".
+
+Tables support these metrics which can be displayed in each row. If more than one metric is selected,
+you can use parent pipeline aggregations:
+
+include::metric-aggs.asciidoc[]
+include::parent-pipeline-aggs.asciidoc[]
+include::sibling-pipeline-aggs.asciidoc[]
+
+To add more rows to the table, or to create multiple tables, you need to use one of these bucket aggregations:
 
 Each bucket type supports the following aggregations:
 
-*Date Histogram*:: A {ref}/search-aggregations-bucket-datehistogram-aggregation.html[_date histogram_] is built from a
-numeric field and organized by date. You can specify a time frame for the intervals in seconds, minutes, hours, days,
-weeks, months, or years. You can also specify a custom interval frame by selecting *Custom* as the interval and
-specifying a number and a time unit in the text field. Custom interval time units are *s* for seconds, *m* for minutes,
-*h* for hours, *d* for days, *w* for weeks, and *y* for years. Different units support different levels of precision,
-down to one second. Intervals are labeled at the start of the interval, using the date-key returned by Elasticsearch.
-For example, the tooltip for a monthly interval will show the first day of the month.
-*Histogram*:: A standard {ref}/search-aggregations-bucket-histogram-aggregation.html[_histogram_] is built from a
-numeric field. Specify an integer interval for this field. Select the *Show empty buckets* checkbox to include empty
-intervals in the histogram.
-*Range*:: With a {ref}/search-aggregations-bucket-range-aggregation.html[_range_] aggregation, you can specify ranges
-of values for a numeric field. Click *Add Range* to add a set of range endpoints. Click the red *(x)* symbol to remove
-a range.
-*Date Range*:: A {ref}/search-aggregations-bucket-daterange-aggregation.html[_date range_] aggregation reports values
-that are within a range of dates that you specify. You can specify the ranges for the dates using
-{ref}/common-options.html#date-math[_date math_] expressions. Click *Add Range* to add a set of range endpoints.
-Click the red *(/)* symbol to remove a range.
-*IPv4 Range*:: The {ref}/search-aggregations-bucket-iprange-aggregation.html[_IPv4 range_] aggregation enables you to
-specify ranges of IPv4 addresses. Click *Add Range* to add a set of range endpoints. Click the red *(/)* symbol to
-remove a range.
-*Terms*:: A {ref}/search-aggregations-bucket-terms-aggregation.html[_terms_] aggregation enables you to specify the top
-or bottom _n_ elements of a  given field to display, ordered by count or a custom metric.
-*Filters*:: You can specify a set of {ref}/search-aggregations-bucket-filters-aggregation.html[_filters_] for the data.
-You can specify a filter as a query string or in JSON format, just as in the Discover search bar. Click *Add Filter* to
-add another filter. Click the image:images/labelbutton.png[] *label* button to open the label field, where you can type
-in a name to display on the visualization.
-*Significant Terms*:: Displays the results of the experimental
-{ref}/search-aggregations-bucket-significantterms-aggregation.html[_significant terms_] aggregation. The value of the
-*Size* parameter defines the number of entries this aggregation returns.
+include::bucket-aggs.asciidoc[]
 *Geohash*:: The {ref}/search-aggregations-bucket-geohashgrid-aggregation.html[_geohash_] aggregation displays points
-based on the geohash coordinates.
+based on a geohash.
+*Geotile*:: The {ref}/search-aggregations-bucket-geotilegrid-aggregation.html[_geotile] aggregation groups points
+based on web map tiling.
 
 Once you've specified a bucket type aggregation, you can define sub-buckets to refine the visualization. Click
-*+ Add sub-buckets* to define a sub-bucket, then choose *Split Rows* or *Split Table*, then select an
+*+ Add* to define a sub-bucket, then choose *Split rows* or *Split table*, then select an
 aggregation from the list of types.
 
 You can use the up or down arrows to the right of the aggregation's type to change the aggregation's priority.
@@ -52,16 +37,7 @@ You can click the *Advanced* link to display more customization options for your
 
 *Exclude Pattern*:: Specify a pattern in this field to exclude from the results.
 *Include Pattern*:: Specify a pattern in this field to include in the results.
-*JSON Input*:: A text field where you can add specific JSON-formatted properties to merge with the aggregation
-definition, as in the following example:
-
-[source,shell]
-{ "script" : "doc['grade'].value * 1.2" }
-
-NOTE: In Elasticsearch releases 1.4.3 and later, this functionality requires you to enable
-{ref}/modules-scripting.html[dynamic Groovy scripting].
-
-The availability of these options varies depending on the aggregation you choose.
+include::json-input.asciidoc[]
 
 Select the *Options* tab to change the following aspects of the table:
 

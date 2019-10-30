@@ -1,0 +1,14 @@
+**Parent Pipeline Aggregations:**
+
+For each of the parent pipeline aggregations you have to define the metric for which the aggregation is calculated.
+That could be one of your existing metrics or a new one. You can also nest this aggregations
+(for example to produce 3rd derivative)
+
+*Derivative*: The {ref}/search-aggregations-pipeline-derivative-aggregation.html[_derivative_] aggregation calculates
+the derivative of specific metrics.
+*Cumulative Sum*: The {ref}/search-aggregations-pipeline-cumulative-sum-aggregation.html[_cumulative sum_] aggregation
+calculates the cumulative sum of a specified metric in a parent histogram
+*Moving Average*: The {ref}/search-aggregations-pipeline-movavg-aggregation.html[_moving average_] aggregation  will
+slide a window across the data and emit the average value of that window
+*Serial Diff*: The {ref}/search-aggregations-pipeline-serialdiff-aggregation.html[_serial differencing_] is a technique
+where values in a time series are subtracted from itself at different time lags or period
