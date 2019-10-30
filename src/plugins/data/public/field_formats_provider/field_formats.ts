@@ -47,9 +47,7 @@ export class FieldFormatRegisty {
     };
   }
 
-  getConfig(key: string, override?: any) {
-    return this.uiSettings.get(key, override);
-  }
+  getConfig = (key: string, override?: any) => this.uiSettings.get(key, override);
 
   init(uiSettings: UiSettingsClientContract) {
     this.uiSettings = uiSettings;
