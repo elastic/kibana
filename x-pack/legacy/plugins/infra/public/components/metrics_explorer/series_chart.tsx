@@ -63,12 +63,6 @@ export const MetricsExplorerAreaChart = ({ metric, id, series, type, stack }: Pr
       opacity: 0.5,
       visible: type === MetricsExplorerChartType.area,
     },
-    point: {
-      visible: true,
-      radius: 2,
-      strokeWidth: 2,
-      opacity: 1,
-    },
   };
   return (
     <AreaSeries
@@ -87,7 +81,7 @@ export const MetricsExplorerAreaChart = ({ metric, id, series, type, stack }: Pr
   );
 };
 
-export const MetricsExplorerBarChart = ({ metric, id, series, type, stack }: Props) => {
+export const MetricsExplorerBarChart = ({ metric, id, series, stack }: Props) => {
   const color =
     (metric.color && colorTransformer(metric.color)) ||
     colorTransformer(MetricsExplorerColor.color0);
