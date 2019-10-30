@@ -5,22 +5,21 @@
  */
 
 import { Observable } from 'rxjs';
-import {
-  CoreSetup as _CoreSetup,
-  CoreStart,
-  IClusterClient,
-  PluginInitializerContext,
-} from 'src/core/server';
-import { EPMConfigSchema, epmConfigStore } from './config';
+import { CoreSetup, CoreStart, IClusterClient, PluginInitializerContext } from 'src/core/server';
 import { PLUGIN } from '../common/constants';
 import { Server } from '../common/types';
+import { EPMConfigSchema, epmConfigStore } from './config';
+import { feature } from './feature';
 import { fetchList } from './registry';
 import { routes } from './routes';
+import { PluginSetupContract } from '../../../../plugins/features/server';
+
+export { createSetupShim } from './shim';
 
 export type EPMPluginInitializerContext = Pick<PluginInitializerContext, 'config'>;
 
-export interface CoreSetup {
-  elasticsearch: _CoreSetup['elasticsearch'];
+export interface EPMCoreSetup {
+  elasticsearch: CoreSetup['elasticsearch'];
   hapiServer: Server;
 }
 
@@ -28,6 +27,10 @@ export type PluginSetup = ReturnType<Plugin['setup']>;
 export type PluginStart = ReturnType<Plugin['start']>;
 export interface PluginContext {
   esClient: IClusterClient;
+}
+
+export interface PluginsSetup {
+  features: PluginSetupContract;
 }
 
 export class Plugin {
@@ -39,7 +42,7 @@ export class Plugin {
       epmConfigStore.updateConfig(configValue);
     });
   }
-  public setup(core: CoreSetup) {
+  public setup(core: EPMCoreSetup, plugins: PluginsSetup) {
     const { elasticsearch, hapiServer } = core;
     const pluginContext: PluginContext = {
       esClient: elasticsearch.createClient(PLUGIN.ID),
@@ -60,6 +63,9 @@ export class Plugin {
 
     // map routes to handlers
     hapiServer.route(routesWithContext);
+
+    // register the plugin
+    plugins.features.registerFeature(feature);
 
     // the JS API for other consumers
     return {
