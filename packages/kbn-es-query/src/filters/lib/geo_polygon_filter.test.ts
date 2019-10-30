@@ -32,6 +32,7 @@ describe('geo_polygon filter', function() {
         meta: {
           disabled: false,
           negate: false,
+          alias: null,
           params: {
             points: [{ lat: 1, lon: 1 }],
           },

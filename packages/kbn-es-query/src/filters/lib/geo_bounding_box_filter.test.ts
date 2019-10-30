@@ -33,6 +33,7 @@ describe('geo_bounding_box filter', function() {
         meta: {
           disabled: false,
           negate: false,
+          alias: null,
           params: {
             bottom_right: { lat: 1, lon: 1 },
             top_left: { lat: 1, lon: 1 },

@@ -29,6 +29,7 @@ describe('missing filter', function() {
         meta: {
           disabled: false,
           negate: false,
+          alias: null,
         },
       };
       const result = getMissingFilterField(filter);
