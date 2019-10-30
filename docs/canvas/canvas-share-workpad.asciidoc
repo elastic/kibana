@@ -53,18 +53,43 @@ image::images/canvas-create-URL.gif[Create POST URL]
 
 [float]
 [[add-workpad-website]]
-=== Embed the workpad
+=== Share the workpad on a website
 
-beta[] To show off your workpad outside of {kib}, you can embed the workpad on a website.
+beta[] To show off your workpad outside of {kib}, share a static version of the workpad on an external website.
 
-To make sure that your data remains secure, the data in the JSON file is not connected to {kib}. When your workpad contains elements that manipulate the data, the element does not appear on the workpad.
+To make sure that your data remains secure, the data in the JSON file is not connected to {kib}. Canvas does not display elements that manipulate the data on the workpad.
 
 . If you are using a Gold or Platinum license, enable reporting in your `config/kibana.yml` file.
 
-. From your workpad, click the *Share workpad* icon in the upper left corner, then select *Embed on a website*.
+. From your workpad, click the *Share this workpad* icon in the upper left corner, then select *Share on a website*.
 
-. On the *Embed on a website* window, follow the instructions.
+. On the *Share on a website* pane, follow the instructions.
 +
-//TODO insert image
+[role="screenshot"]
+image::images/canvas-embed_workpad.gif[Share the workpad on a website]
 
-NOTE: Embedded workpads encode the current state of the workpad in the JSON file. When you make changes to the workpad, the changes do not automatically appear in the JSON file.
+NOTE: Shareable workpads encode the current state of the workpad in the JSON file. When you make changes to the workpad, the changes do not appear in the shareable workpad on your website.
+
+[float]
+[[shareable-workpad-enable-autoplay]]
+==== Enable autoplay
+
+Automatically cycle through the workpads pages.
+
+. In the lower right corner of the shareable workpad, click the settings icon.
+
+. Click *Auto Play*, then select *Cycle Slides*.
+
+. In the *Set a custom interval* field, enter the interval you want to use, then click *Set*.
+
+. To use the workpad animations, select *Animate cycle*.
+
+[float]
+[[hide-workpad-toolbar]]
+==== Hide the toolbar
+
+The toolbar displays the number of pages in your workpad, and the settings icon. If you don't want the toolbar to appear, you can hide it.
+
+. In the lower right corner, click the settings icon.
+
+. Click *Toolbar*, then select *Hide Toolbar*.
