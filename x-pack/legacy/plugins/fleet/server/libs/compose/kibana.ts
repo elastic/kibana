@@ -36,13 +36,13 @@ export function compose(server: any): FleetServerLib {
   const encryptedObjectAdapter = new EncryptedSavedObjects(server.plugins.encrypted_saved_objects);
   const agentsRepository = new AgentsRepository(soDatabaseAdapter);
   const agentEventsRepository = new AgentEventsRepository(soDatabaseAdapter);
-  const tokensRepository = new EnrollmentApiKeysRepository(
+  const enrollmentApiKeysRepository = new EnrollmentApiKeysRepository(
     soDatabaseAdapter,
     encryptedObjectAdapter
   );
 
   const policies = new PolicyLib(policyAdapter);
-  const apiKeys = new ApiKeyLib(tokensRepository, esAdapter, framework);
+  const apiKeys = new ApiKeyLib(enrollmentApiKeysRepository, esAdapter, framework);
   const agents = new AgentLib(agentsRepository, agentEventsRepository, apiKeys, policies);
 
   const artifactRepository = new FileSystemArtifactRepository(os.tmpdir());

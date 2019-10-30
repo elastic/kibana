@@ -278,17 +278,11 @@ export class ApiKeyLib {
     });
   }
 
-  /**
-   * Get the token for a given policy.
-   *
-   * @param user
-   * @param policyId
-   */
   private async _getEnrollemntApiKeyByIdOrThrow(user: FrameworkUser, id: string) {
-    const token = await this.enrollmentApiKeysRepository.getById(user, id);
-    if (!token) {
+    const apiKey = await this.enrollmentApiKeysRepository.getById(user, id);
+    if (!apiKey) {
       throw Boom.notFound(`No enrollment api key found`);
     }
-    return token;
+    return apiKey;
   }
 }

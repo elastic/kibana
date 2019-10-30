@@ -51,7 +51,7 @@ function getUser(apiKey?: string, apiKeyId?: string) {
 
 describe('Agent lib', () => {
   describe('Enroll', () => {
-    it('Should throw if the enrollment token is not valid', async () => {
+    it('Should throw if the enrollment api key is not valid', async () => {
       const { agentLib } = compose();
       let error: Error | null = null;
       try {

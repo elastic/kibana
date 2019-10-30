@@ -52,15 +52,15 @@ describe('ApiKeys Lib', () => {
         valid: true,
       });
     });
-    it('should not verify invalid token', async () => {
+    it('should not verify invalid ApiKey', async () => {
       const { apiKeys, esAdapter } = compose();
       esAdapter.authenticate = () => {
-        throw new Error('token not valid');
+        throw new Error('ApiKey not valid');
       };
       const res = await apiKeys.verifyAccessApiKey(getUserForApiKey('NOT_A_VALID_API_KEY'));
       expect(res).toMatchObject({
         valid: false,
-        reason: 'token not valid',
+        reason: 'ApiKey not valid',
       });
     });
   });
@@ -115,21 +115,21 @@ describe('ApiKeys Lib', () => {
       });
     });
 
-    it('should not verify invalid token', async () => {
+    it('should not verify invalid ApiKey', async () => {
       const { apiKeys, esAdapter } = compose();
       esAdapter.authenticate = () => {
-        throw new Error('token not valid');
+        throw new Error('ApiKey not valid');
       };
       const res = await apiKeys.verifyEnrollmentApiKey(getUserForApiKey('NOT_A_VALID_API_KEY'));
       expect(res).toMatchObject({
         valid: false,
-        reason: 'token not valid',
+        reason: 'ApiKey not valid',
       });
     });
   });
 
   describe('generateEnrollmentApiKey', () => {
-    it('should generate a valid token', async () => {
+    it('should generate a valid ApiKey', async () => {
       const { apiKeys } = compose();
 
       const apiKey = await apiKeys.generateEnrollmentApiKey(getUser(), {

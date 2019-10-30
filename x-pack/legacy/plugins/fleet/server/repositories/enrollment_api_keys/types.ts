@@ -10,14 +10,6 @@ import { RuntimeAgentType } from '../agents/types';
 
 export const SAVED_OBJECT_TYPE = 'enrollment_api_keys';
 
-export interface EnrollmentTokenData {
-  policy_id: string;
-}
-
-export interface AccessTokenData {
-  policy_id: string;
-}
-
 export const RuntimeEnrollmentRuleData = t.partial(
   {
     ip_ranges: t.array(t.string),
@@ -61,11 +53,6 @@ export type AccessApiKeyVerificationResponse =
       reason: string;
     };
 
-export enum TokenType {
-  ENROLLMENT_TOKEN = 'ENROLLMENT_TOKEN',
-  ACCESS_TOKEN = 'ACCESS_TOKEN',
-}
-
 export interface EnrollmentApiKey {
   id: string;
   api_key_id: string;
@@ -102,26 +89,22 @@ export interface EnrollmentApiKeysRepository {
   ): Promise<EnrollmentApiKey>;
 
   /**
-   * Get a key for a given apiKey Id.
-   * @param token
+   * Get a key for a given Id.
    */
   getById(user: FrameworkUser, id: string): Promise<EnrollmentApiKey | null>;
 
   /**
    * Get a key for a given apiKey Id.
-   * @param token
    */
   getByApiKeyId(user: FrameworkUser, apiKeyId: string): Promise<EnrollmentApiKey | null>;
 
   /**
-   * Update a token
-   * @param token
+   * Update an apiKey
    */
   update(user: FrameworkUser, id: string, newData: Partial<EnrollmentApiKey>): Promise<void>;
 
   /**
-   * Delete a token
-   * @param token
+   * Delete an apiKey
    */
   delete(user: FrameworkUser, id: string): Promise<void>;
 }

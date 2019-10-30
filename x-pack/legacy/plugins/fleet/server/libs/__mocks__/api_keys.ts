@@ -32,6 +32,11 @@ export class ApiKeyLib implements Interface<ApiKeyLibType> {
   ): Promise<{ items: any; total: any; page: any; perPage: any }> {
     throw new Error('Method not implemented.');
   }
+
+  public async deleteEnrollmentApiKey(user: FrameworkUser, id: string) {
+    throw new Error('Method not implemented.');
+  }
+
   public async getEnrollmentApiKey(
     user: FrameworkUser,
     keyId: string

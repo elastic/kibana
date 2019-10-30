@@ -57,10 +57,7 @@ function useAddMetadataForm(agent: Agent, done: () => void) {
   function setError(error: AxiosError) {
     setState({
       isLoading: false,
-      error:
-        error.isAxiosError && error.response && error.response.data
-          ? error.response.data.message
-          : error.message,
+      error: error.response && error.response.data ? error.response.data.message : error.message,
     });
   }
 
