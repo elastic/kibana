@@ -79,8 +79,7 @@ function QueryBarTopRowUI(props: Props) {
 
   const queryLanguage = props.query && props.query.language;
   const persistedLog: PersistedLog | undefined = React.useMemo(
-    () =>
-      queryLanguage ? getQueryLog(uiSettings!, store, appName, queryLanguage) : undefined,
+    () => (queryLanguage ? getQueryLog(uiSettings!, storage, appName, queryLanguage) : undefined),
     [queryLanguage]
   );
 
