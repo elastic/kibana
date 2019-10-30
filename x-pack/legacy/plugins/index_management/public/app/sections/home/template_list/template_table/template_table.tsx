@@ -11,7 +11,7 @@ import { EuiInMemoryTable, EuiIcon, EuiButton, EuiLink } from '@elastic/eui';
 import { TemplateListItem, Template } from '../../../../../../common/types';
 import { BASE_PATH, UIM_TEMPLATE_SHOW_DETAILS_CLICK } from '../../../../../../common/constants';
 import { TemplateDeleteModal } from '../../../../components';
-import { trackUiMetric, METRIC_TYPE } from '../../../../services/track_ui_metric';
+import { uiMetricService } from '../../../../services/ui_metric';
 import { getTemplateDetailsLink } from '../../../../services/routing';
 import { SendRequestResponse } from '../../../../../shared_imports';
 
@@ -45,7 +45,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
           <EuiLink
             href={getTemplateDetailsLink(name, true)}
             data-test-subj="templateDetailsLink"
-            onClick={() => trackUiMetric(METRIC_TYPE.CLICK, UIM_TEMPLATE_SHOW_DETAILS_CLICK)}
+            onClick={() => uiMetricService.track('click', UIM_TEMPLATE_SHOW_DETAILS_CLICK)}
           >
             {name}
           </EuiLink>

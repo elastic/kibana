@@ -34,7 +34,7 @@ import { Template } from '../../../../../../common/types';
 import { TemplateDeleteModal, SectionLoading, SectionError, Error } from '../../../../components';
 import { loadIndexTemplate } from '../../../../services/api';
 import { decodePath } from '../../../../services/routing';
-import { trackUiMetric, METRIC_TYPE } from '../../../../services/track_ui_metric';
+import { uiMetricService } from '../../../../services/ui_metric';
 import { SendRequestResponse } from '../../../../../shared_imports';
 import { TabSummary, TabMappings, TabSettings, TabAliases } from './tabs';
 
@@ -164,7 +164,7 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
           {TABS.map(tab => (
             <EuiTab
               onClick={() => {
-                trackUiMetric(METRIC_TYPE.CLICK, tabToUiMetricMap[tab.id]);
+                uiMetricService.track('click', tabToUiMetricMap[tab.id]);
                 setActiveTab(tab.id);
               }}
               isSelected={tab.id === activeTab}

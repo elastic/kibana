@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { management, MANAGEMENT_BREADCRUMB } from 'ui/management';
+import { createUiStatsReporter } from '../../../../../src/legacy/core_plugins/ui_metric/public';
 
 export interface LegacyStart {
   management: {
@@ -11,6 +12,9 @@ export interface LegacyStart {
     constants: {
       BREADCRUMB: typeof MANAGEMENT_BREADCRUMB;
     };
+  };
+  uiMetric: {
+    createUiStatsReporter: typeof createUiStatsReporter;
   };
 }
 
@@ -20,5 +24,8 @@ export const __LEGACYStart = {
     constants: {
       BREADCRUMB: MANAGEMENT_BREADCRUMB,
     },
+  },
+  uiMetric: {
+    createUiStatsReporter,
   },
 };

@@ -24,5 +24,4 @@ export {
   loadIndexTemplates,
 } from './api';
 export { healthToColor } from './health_to_color';
-export { trackUiMetric } from './track_ui_metric';
 export { sortTable } from './sort_table';

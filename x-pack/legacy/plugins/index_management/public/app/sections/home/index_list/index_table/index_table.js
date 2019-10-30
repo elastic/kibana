@@ -37,7 +37,8 @@ import {
 
 import { UIM_SHOW_DETAILS_CLICK } from '../../../../../../common/constants';
 import { REFRESH_RATE_INDEX_LIST } from '../../../../constants';
-import { healthToColor, trackUiMetric } from '../../../../services';
+import { healthToColor } from '../../../../services';
+import { uiMetricService } from '../../../../services/ui_metric';
 import {
   getBannerExtensions,
   getFilterExtensions,
@@ -221,7 +222,7 @@ export class IndexTable extends Component {
             className="indTable__link"
             data-test-subj="indexTableIndexNameLink"
             onClick={() => {
-              trackUiMetric('click', UIM_SHOW_DETAILS_CLICK);
+              uiMetricService.track('click', UIM_SHOW_DETAILS_CLICK);
               openDetailPanel(value);
             }}
           >

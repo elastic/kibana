@@ -19,7 +19,7 @@ import {
   TAB_STATS,
   TAB_EDIT_SETTINGS,
 } from '../../constants';
-import { trackUiMetric } from '../../services';
+import { uiMetricService } from '../../services/ui_metric';
 import { openDetailPanel, closeDetailPanel } from '../actions/detail_panel';
 import { loadIndexDataSuccess } from '../actions/load_index_data';
 import { updateIndexSettingsSuccess, updateIndexSettingsError } from '../actions/update_index_settings';
@@ -54,7 +54,7 @@ export const detailPanel = handleActions(
       };
 
       if (panelTypeToUiMetricMap[panelType]) {
-        trackUiMetric('count', panelTypeToUiMetricMap[panelType]);
+        uiMetricService.track('count', panelTypeToUiMetricMap[panelType]);
       }
 
       return {

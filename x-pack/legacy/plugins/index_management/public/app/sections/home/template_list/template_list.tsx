@@ -20,7 +20,7 @@ import { SectionError, SectionLoading, Error } from '../../../components';
 import { TemplateTable } from './template_table';
 import { loadIndexTemplates } from '../../../services/api';
 import { Template } from '../../../../../common/types';
-import { trackUiMetric, METRIC_TYPE } from '../../../services/track_ui_metric';
+import { uiMetricService } from '../../../services/ui_metric';
 import {
   getTemplateEditLink,
   getTemplateListLink,
@@ -66,7 +66,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
 
   // Track component loaded
   useEffect(() => {
-    trackUiMetric(METRIC_TYPE.LOADED, UIM_TEMPLATE_LIST_LOAD);
+    uiMetricService.track('loaded', UIM_TEMPLATE_LIST_LOAD);
   }, []);
 
   if (isLoading) {

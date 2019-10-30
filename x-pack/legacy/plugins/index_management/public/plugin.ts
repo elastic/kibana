@@ -13,10 +13,11 @@ import { httpService } from './app/services/http';
 import { breadcrumbService } from './app/services/set_breadcrumbs';
 import { documentationService } from './app/services/documentation';
 import { notificationService } from './app/services/notification';
+import { uiMetricService } from './app/services/ui_metric';
 
 export class IndexMgmtPlugin {
   public start(core: CoreStart, plugins: {}, __LEGACY: LegacyStart) {
-    const { management } = __LEGACY;
+    const { management, uiMetric } = __LEGACY;
     const { http, chrome, docLinks, notifications } = core;
 
     // Initialize services
@@ -24,6 +25,7 @@ export class IndexMgmtPlugin {
     breadcrumbService.init(chrome, management.constants.BREADCRUMB);
     documentationService.init(docLinks);
     notificationService.init(notifications);
+    uiMetricService.init(uiMetric.createUiStatsReporter);
 
     // Register management section and Angular route
     registerManagementSection(management.getSection('elasticsearch'));
