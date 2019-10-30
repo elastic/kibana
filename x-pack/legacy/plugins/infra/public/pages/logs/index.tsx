@@ -5,7 +5,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EuiBetaBadge } from '@elastic/eui';
 import React from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { UICapabilities } from 'ui/capabilities';
@@ -14,7 +13,7 @@ import { injectUICapabilities } from 'ui/capabilities/react';
 import { DocumentTitle } from '../../components/document_title';
 import { HelpCenterContent } from '../../components/help_center_content';
 import { Header } from '../../components/header';
-import { RoutedTabs } from '../../components/navigation/routed_tabs';
+import { RoutedTabs, TabBetaBadge } from '../../components/navigation/routed_tabs';
 import { ColumnarPage } from '../../components/page';
 import { SourceLoadingPage } from '../../components/source_loading_page';
 import { SourceErrorPage } from '../../components/source_error_page';
@@ -28,6 +27,7 @@ import {
   LogAnalysisCapabilities,
 } from '../../containers/logs/log_analysis';
 import { useSourceId } from '../../containers/source_id';
+import { RedirectWithQueryParams } from '../../utils/redirect_with_query_params';
 
 interface LogsPageProps extends RouteComponentProps {
   uiCapabilities: UICapabilities;
@@ -39,73 +39,32 @@ export const LogsPage = injectUICapabilities(({ match, uiCapabilities }: LogsPag
   const logAnalysisCapabilities = useLogAnalysisCapabilities();
 
   const streamTab = {
-    title: i18n.translate('xpack.infra.logs.index.streamTabTitle', { defaultMessage: 'Stream' }),
+    title: streamTabTitle,
     path: `${match.path}/stream`,
   };
-  const analysisBetaBadgeTitle = i18n.translate('xpack.infra.logs.index.analysisBetaBadgeTitle', {
-    defaultMessage: 'Analysis',
-  });
-  const analysisBetaBadgeLabel = i18n.translate('xpack.infra.logs.index.analysisBetaBadgeLabel', {
-    defaultMessage: 'Beta',
-  });
-  const analysisBetaBadgeTooltipContent = i18n.translate(
-    'xpack.infra.logs.index.analysisBetaBadgeTooltipContent',
-    {
-      defaultMessage:
-        'This feature is under active development. Extra functionality is coming, and some functionality may change.',
-    }
-  );
-  const analysisBetaBadge = (
-    <EuiBetaBadge
-      label={analysisBetaBadgeLabel}
-      aria-label={analysisBetaBadgeLabel}
-      title={analysisBetaBadgeTitle}
-      tooltipContent={analysisBetaBadgeTooltipContent}
-    />
-  );
-  const analysisTab = {
+
+  const logRateTab = {
     title: (
       <>
-        <span
-          style={{
-            display: 'inline-block',
-            position: 'relative',
-            top: '-4px',
-            marginRight: '5px',
-          }}
-        >
-          {i18n.translate('xpack.infra.logs.index.analysisTabTitle', {
-            defaultMessage: 'Analysis',
-          })}
-        </span>
-        {analysisBetaBadge}
+        {logRateTabTitle}
+        <TabBetaBadge title={logRateTabTitle} />
       </>
     ),
-    path: `${match.path}/analysis`,
+    path: `${match.path}/log-rate`,
   };
+
   const settingsTab = {
-    title: i18n.translate('xpack.infra.logs.index.settingsTabTitle', {
-      defaultMessage: 'Settings',
-    }),
+    title: settingsTabTitle,
     path: `${match.path}/settings`,
   };
+
   return (
     <Source.Context.Provider value={source}>
       <LogAnalysisCapabilities.Context.Provider value={logAnalysisCapabilities}>
         <ColumnarPage>
-          <DocumentTitle
-            title={i18n.translate('xpack.infra.logs.index.documentTitle', {
-              defaultMessage: 'Logs',
-            })}
-          />
+          <DocumentTitle title={pageTitle} />
 
-          <HelpCenterContent
-            feedbackLink="https://discuss.elastic.co/c/logs"
-            feedbackLinkText={i18n.translate(
-              'xpack.infra.logsPage.logsHelpContent.feedbackLinkText',
-              { defaultMessage: 'Provide feedback for Logs' }
-            )}
-          />
+          <HelpCenterContent feedbackLink={feedbackLinkUrl} feedbackLinkText={feedbackLinkText} />
 
           <Header
             breadcrumbs={[
@@ -133,16 +92,21 @@ export const LogsPage = injectUICapabilities(({ match, uiCapabilities }: LogsPag
                 <RoutedTabs
                   tabs={
                     logAnalysisCapabilities.hasLogAnalysisCapabilites
-                      ? [streamTab, analysisTab, settingsTab]
+                      ? [streamTab, logRateTab, settingsTab]
                       : [streamTab, settingsTab]
                   }
                 />
               </AppNavigation>
 
               <Switch>
-                <Route path={`${match.path}/stream`} component={StreamPage} />
-                <Route path={`${match.path}/analysis`} component={AnalysisPage} />
-                <Route path={`${match.path}/settings`} component={SettingsPage} />
+                <Route path={streamTab.path} component={StreamPage} />
+                <Route path={logRateTab.path} component={AnalysisPage} />
+                <Route path={settingsTab.path} component={SettingsPage} />
+                <RedirectWithQueryParams
+                  from={`${match.path}/analysis`}
+                  to={logRateTab.path}
+                  exact
+                />
               </Switch>
             </>
           )}
@@ -151,3 +115,25 @@ export const LogsPage = injectUICapabilities(({ match, uiCapabilities }: LogsPag
     </Source.Context.Provider>
   );
 });
+
+const pageTitle = i18n.translate('xpack.infra.header.logsTitle', {
+  defaultMessage: 'Logs',
+});
+
+const streamTabTitle = i18n.translate('xpack.infra.logs.index.streamTabTitle', {
+  defaultMessage: 'Stream',
+});
+
+const logRateTabTitle = i18n.translate('xpack.infra.logs.index.analysisBetaBadgeTitle', {
+  defaultMessage: 'Log Rate',
+});
+
+const settingsTabTitle = i18n.translate('xpack.infra.logs.index.settingsTabTitle', {
+  defaultMessage: 'Settings',
+});
+
+const feedbackLinkText = i18n.translate('xpack.infra.logsPage.logsHelpContent.feedbackLinkText', {
+  defaultMessage: 'Provide feedback for Logs',
+});
+
+const feedbackLinkUrl = 'https://discuss.elastic.co/c/logs';
