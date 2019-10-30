@@ -24,6 +24,7 @@ import sinon from 'sinon';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 
 import { UiSettingsClient } from './ui_settings_client';
+import { CannotOverrideError } from './ui_settings_errors';
 import * as createOrUpgradeSavedConfigNS from './create_or_upgrade_saved_config/create_or_upgrade_saved_config';
 import { createObjectsClientStub, savedObjectsClientErrors } from './create_objects_client_stub';
 
@@ -119,7 +120,12 @@ describe('ui settings', () => {
 
       await uiSettings.setMany({ foo: 'bar' });
       sinon.assert.calledTwice(savedObjectsClient.update);
+
       sinon.assert.calledOnce(createOrUpgradeSavedConfig);
+      sinon.assert.calledWith(
+        createOrUpgradeSavedConfig,
+        sinon.match({ handleWriteErrors: false })
+      );
     });
 
     it('only tried to auto create once and throws NotFound', async () => {
@@ -135,9 +141,14 @@ describe('ui settings', () => {
 
       sinon.assert.calledTwice(savedObjectsClient.update);
       sinon.assert.calledOnce(createOrUpgradeSavedConfig);
+
+      sinon.assert.calledWith(
+        createOrUpgradeSavedConfig,
+        sinon.match({ handleWriteErrors: false })
+      );
     });
 
-    it('throws an error if any key is overridden', async () => {
+    it('throws CannotOverrideError if the key is overridden', async () => {
       const { uiSettings } = setup({
         overrides: {
           foo: 'bar',
@@ -150,6 +161,7 @@ describe('ui settings', () => {
           foo: 'baz',
         });
       } catch (error) {
+        expect(error).to.be.a(CannotOverrideError);
         expect(error.message).to.be('Unable to update "foo" because it is overridden');
       }
     });
@@ -167,7 +179,7 @@ describe('ui settings', () => {
       assertUpdateQuery({ one: 'value' });
     });
 
-    it('throws an error if the key is overridden', async () => {
+    it('throws CannotOverrideError if the key is overridden', async () => {
       const { uiSettings } = setup({
         overrides: {
           foo: 'bar',
@@ -177,6 +189,7 @@ describe('ui settings', () => {
       try {
         await uiSettings.set('foo', 'baz');
       } catch (error) {
+        expect(error).to.be.a(CannotOverrideError);
         expect(error.message).to.be('Unable to update "foo" because it is overridden');
       }
     });
@@ -194,7 +207,7 @@ describe('ui settings', () => {
       assertUpdateQuery({ one: null });
     });
 
-    it('throws an error if the key is overridden', async () => {
+    it('throws CannotOverrideError if the key is overridden', async () => {
       const { uiSettings } = setup({
         overrides: {
           foo: 'bar',
@@ -204,6 +217,7 @@ describe('ui settings', () => {
       try {
         await uiSettings.remove('foo');
       } catch (error) {
+        expect(error).to.be.a(CannotOverrideError);
         expect(error.message).to.be('Unable to update "foo" because it is overridden');
       }
     });
@@ -227,7 +241,7 @@ describe('ui settings', () => {
       assertUpdateQuery({ one: null, two: null, three: null });
     });
 
-    it('throws an error if any key is overridden', async () => {
+    it('throws CannotOverrideError if any key is overridden', async () => {
       const { uiSettings } = setup({
         overrides: {
           foo: 'bar',
@@ -237,18 +251,18 @@ describe('ui settings', () => {
       try {
         await uiSettings.setMany({ baz: 'baz', foo: 'foo' });
       } catch (error) {
+        expect(error).to.be.a(CannotOverrideError);
         expect(error.message).to.be('Unable to update "foo" because it is overridden');
       }
     });
   });
 
-  describe('#getDefaults()', () => {
-    it('returns the defaults passed to the constructor', () => {
+  describe('#getRegistered()', () => {
+    it('returns the registered settings passed to the constructor', () => {
       const value = chance.word();
-      const { uiSettings } = setup({ defaults: { key: { value } } });
-      expect(uiSettings.getDefaults()).to.eql({
-        key: { value },
-      });
+      const defaults = { key: { value } };
+      const { uiSettings } = setup({ defaults });
+      expect(uiSettings.getRegistered()).to.be(defaults);
     });
   });
 
@@ -284,31 +298,48 @@ describe('ui settings', () => {
       });
     });
 
-    it.skip('returns an empty object on NotFound responses', async () => {
-      const { uiSettings, savedObjectsClient } = setup();
+    it('automatically creates the savedConfig if it is missing and returns empty object', async () => {
+      const { uiSettings, savedObjectsClient, createOrUpgradeSavedConfig } = setup();
+      savedObjectsClient.get
+        .onFirstCall()
+        .throws(savedObjectsClientErrors.createGenericNotFoundError())
+        .onSecondCall()
+        .returns({ attributes: {} });
 
-      const error = savedObjectsClientErrors.createGenericNotFoundError();
-      savedObjectsClient.get.throws(error);
+      expect(await uiSettings.getUserProvided()).to.eql({});
 
-      expect(await uiSettings.getUserProvided({})).to.eql({});
+      sinon.assert.calledTwice(savedObjectsClient.get);
+
+      sinon.assert.calledOnce(createOrUpgradeSavedConfig);
+      sinon.assert.calledWith(createOrUpgradeSavedConfig, sinon.match({ handleWriteErrors: true }));
+    });
+
+    it('returns result of savedConfig creation in case of notFound error', async () => {
+      const { uiSettings, savedObjectsClient, createOrUpgradeSavedConfig } = setup();
+      createOrUpgradeSavedConfig.resolves({ foo: 'bar ' });
+      savedObjectsClient.get.throws(savedObjectsClientErrors.createGenericNotFoundError());
+
+      expect(await uiSettings.getUserProvided()).to.eql({ foo: { userValue: 'bar ' } });
     });
 
     it('returns an empty object on Forbidden responses', async () => {
-      const { uiSettings, savedObjectsClient } = setup();
+      const { uiSettings, savedObjectsClient, createOrUpgradeSavedConfig } = setup();
 
       const error = savedObjectsClientErrors.decorateForbiddenError(new Error());
       savedObjectsClient.get.throws(error);
 
       expect(await uiSettings.getUserProvided()).to.eql({});
+      sinon.assert.notCalled(createOrUpgradeSavedConfig);
     });
 
     it('returns an empty object on EsUnavailable responses', async () => {
-      const { uiSettings, savedObjectsClient } = setup();
+      const { uiSettings, savedObjectsClient, createOrUpgradeSavedConfig } = setup();
 
       const error = savedObjectsClientErrors.decorateEsUnavailableError(new Error());
       savedObjectsClient.get.throws(error);
 
       expect(await uiSettings.getUserProvided()).to.eql({});
+      sinon.assert.notCalled(createOrUpgradeSavedConfig);
     });
 
     it('throws Unauthorized errors', async () => {
@@ -346,6 +377,7 @@ describe('ui settings', () => {
 
       const overrides = {
         foo: 'bar',
+        baz: null,
       };
 
       const { uiSettings } = setup({ esDocSource, overrides });
@@ -357,57 +389,7 @@ describe('ui settings', () => {
           userValue: 'bar',
           isOverridden: true,
         },
-      });
-    });
-  });
-
-  describe('#getRaw()', () => {
-    it('pulls user configuration from ES', async () => {
-      const esDocSource = {};
-      const { uiSettings, assertGetQuery } = setup({ esDocSource });
-      await uiSettings.getRaw();
-      assertGetQuery();
-    });
-
-    it(`without user configuration it's equal to the defaults`, async () => {
-      const esDocSource = {};
-      const defaults = { key: { value: chance.word() } };
-      const { uiSettings } = setup({ esDocSource, defaults });
-      const result = await uiSettings.getRaw();
-      expect(result).to.eql(defaults);
-    });
-
-    it(`user configuration gets merged with defaults`, async () => {
-      const esDocSource = { foo: 'bar' };
-      const defaults = { key: { value: chance.word() } };
-      const { uiSettings } = setup({ esDocSource, defaults });
-      const result = await uiSettings.getRaw();
-
-      expect(result).to.eql({
-        foo: {
-          userValue: 'bar',
-        },
-        key: {
-          value: defaults.key.value,
-        },
-      });
-    });
-
-    it('includes the values for overridden keys', async () => {
-      const esDocSource = { foo: 'bar' };
-      const defaults = { key: { value: chance.word() } };
-      const overrides = { foo: true };
-      const { uiSettings } = setup({ esDocSource, defaults, overrides });
-      const result = await uiSettings.getRaw();
-
-      expect(result).to.eql({
-        foo: {
-          userValue: true,
-          isOverridden: true,
-        },
-        key: {
-          value: defaults.key.value,
-        },
+        baz: { isOverridden: true },
       });
     });
   });
@@ -543,24 +525,6 @@ describe('ui settings', () => {
     it('returns true if overrides defined and key is overridden', () => {
       const { uiSettings } = setup({ overrides: { foo: true, bar: true } });
       expect(uiSettings.isOverridden('bar')).to.be(true);
-    });
-  });
-
-  describe('#assertUpdateAllowed()', () => {
-    it('returns false if no overrides defined', () => {
-      const { uiSettings } = setup();
-      expect(uiSettings.assertUpdateAllowed('foo')).to.be(undefined);
-    });
-    it('throws 400 Boom error when keys is overridden', () => {
-      const { uiSettings } = setup({ overrides: { foo: true } });
-      expect(() => uiSettings.assertUpdateAllowed('foo')).to.throwError(error => {
-        expect(error).to.have.property(
-          'message',
-          'Unable to update "foo" because it is overridden'
-        );
-        expect(error).to.have.property('isBoom', true);
-        expect(error.output).to.have.property('statusCode', 400);
-      });
     });
   });
 });

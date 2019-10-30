@@ -39,7 +39,16 @@ describe('timeseriesFetcher', () => {
           {
             term: { 'service.environment': 'prod' }
           }
-        ]
+        ],
+        indices: {
+          'apm_oss.sourcemapIndices': 'apm-*',
+          'apm_oss.errorIndices': 'apm-*',
+          'apm_oss.onboardingIndices': 'apm-*',
+          'apm_oss.spanIndices': 'apm-*',
+          'apm_oss.transactionIndices': 'apm-*',
+          'apm_oss.metricsIndices': 'apm-*',
+          'apm_oss.apmAgentConfigurationIndex': '.apm-agent-configuration'
+        }
       }
     });
   });

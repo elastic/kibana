@@ -3,7 +3,10 @@
 
 A coordinate map displays a geographic area overlaid with circles keyed to the data determined by the buckets you specify.
 
-NOTE: By default, Kibana uses the https://www.elastic.co/elastic-maps-service[Elastic Maps Service]
+Kibana’s out-of-the-box settings do not show a coordinate map in the New Visualization menu. Use <<maps>> instead, which offers more functionality and is easier to use.
+If you want to create new coordinate map visualizations, set `xpack.maps.showMapVisualizationTypes` to `true`.
+
+Kibana uses the https://www.elastic.co/elastic-maps-service[Elastic Maps Service]
 to display map tiles. To use other tile service providers, configure the <<tilemap-settings,tilemap settings>>
 in `kibana.yml`.
 
