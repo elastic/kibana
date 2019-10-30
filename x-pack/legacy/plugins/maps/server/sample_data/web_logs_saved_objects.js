@@ -100,6 +100,7 @@ const layerList = [
       'type': 'ES_SEARCH',
       'geoField': 'geo.coordinates',
       'limit': 2048,
+      'filterByMapBounds': true,
       'tooltipProperties': [
         'clientip',
         'timestamp',
