@@ -91,12 +91,10 @@ export function A11yProvider({ getService }: FtrProviderContext) {
       const axeOptions = {
         reporter: 'v2',
         runOnly: ['wcag2a', 'wcag2aa'],
+        exclude: ['.ace_scrollbar'],
         rules: {
           'color-contrast': {
             enabled: false,
-          },
-          'scrollable-region-focusable': {
-            selector: '.euiCodeEditorWrapper',
           },
         },
       };
