@@ -88,7 +88,10 @@ describe('get_telemetry_opt_in', () => {
     expect(result).toBe(true);
   });
 
-  const VersionChecks = [
+  // build a table of tests with version checks, with results for enabled false
+  type VersionCheckTable = Array<Partial<CallGetTelemetryOptInParams>>;
+
+  const EnabledFalseVersionChecks: VersionCheckTable = [
     { lastVersionChecked: '8.0.0', currentKibanaVersion: '8.0.0', result: false },
     { lastVersionChecked: '8.0.0', currentKibanaVersion: '8.0.1', result: false },
     { lastVersionChecked: '8.0.0', currentKibanaVersion: '8.1.0', result: null },
@@ -102,38 +105,41 @@ describe('get_telemetry_opt_in', () => {
     { lastVersionChecked: 'beta', currentKibanaVersion: '8.0.0', result: null },
     { lastVersionChecked: 'beta', currentKibanaVersion: 'beta', result: false },
     { lastVersionChecked: 'BETA', currentKibanaVersion: 'beta', result: null },
+  ].map(el => ({ ...el, enabled: false }));
+
+  // build a table of tests with version checks, with results for enabled true/null/undefined
+  const EnabledTrueVersionChecks: VersionCheckTable = EnabledFalseVersionChecks.map(el => ({
+    ...el,
+    enabled: true,
+    result: true,
+  }));
+
+  const EnabledNullVersionChecks: VersionCheckTable = EnabledFalseVersionChecks.map(el => ({
+    ...el,
+    enabled: null,
+    result: null,
+  }));
+
+  const EnabledUndefinedVersionChecks: VersionCheckTable = EnabledFalseVersionChecks.map(el => ({
+    ...el,
+    enabled: undefined,
+    result: null,
+  }));
+
+  const AllVersionChecks = [
+    ...EnabledFalseVersionChecks,
+    ...EnabledTrueVersionChecks,
+    ...EnabledNullVersionChecks,
+    ...EnabledUndefinedVersionChecks,
   ];
 
-  it(`returns expected results for version checks with enabled false`, async () => {
-    const enabled = false;
-    for (const versionCheck of VersionChecks) {
-      const params = getCallGetTelemetryOptInParams({ ...versionCheck, enabled });
-
-      const result = await callGetTelemetryOptIn(params);
-      const checkedResult = Object.assign({}, versionCheck, { result });
-
-      // if you'd like to prove these are being run ... :-)
-      // console.log(enabled, JSON.stringify(versionCheck));
-      expect(checkedResult).toStrictEqual(versionCheck);
+  test.each(AllVersionChecks)(
+    'returns expected result for version check with %j',
+    async (params: Partial<CallGetTelemetryOptInParams>) => {
+      const result = await callGetTelemetryOptIn({ ...DefaultParams, ...params });
+      expect(result).toBe(params.result);
     }
-  });
-
-  it(`returns expected results for version checks with enabled !false`, async () => {
-    for (const enabled of [true, null, undefined]) {
-      const thisResult = enabled === true ? true : null;
-      for (let versionCheck of VersionChecks) {
-        versionCheck = Object.assign({}, versionCheck, { enabled, result: thisResult });
-        const params = getCallGetTelemetryOptInParams({ ...versionCheck, enabled });
-
-        const result = await callGetTelemetryOptIn(params);
-        const checkedResult = Object.assign({}, versionCheck, { result });
-
-        // if you'd like to prove these are being run ... :-)
-        // console.log(enabled, JSON.stringify(versionCheck));
-        expect(checkedResult).toStrictEqual(versionCheck);
-      }
-    }
-  });
+  );
 });
 
 interface CallGetTelemetryOptInParams {
@@ -141,9 +147,10 @@ interface CallGetTelemetryOptInParams {
   savedObjectNotFound: boolean;
   savedObjectForbidden: boolean;
   savedObjectOtherError: boolean;
-  enabled: boolean | null;
+  enabled: boolean | null | undefined;
   lastVersionChecked?: any; // should be a string, but test with non-strings
   currentKibanaVersion: string;
+  result?: boolean | null;
 }
 
 const DefaultParams = {
@@ -159,7 +166,7 @@ const DefaultParams = {
 function getCallGetTelemetryOptInParams(
   overrides: Partial<CallGetTelemetryOptInParams>
 ): CallGetTelemetryOptInParams {
-  return Object.assign({}, DefaultParams, overrides);
+  return { ...DefaultParams, ...overrides };
 }
 
 async function callGetTelemetryOptIn(params: CallGetTelemetryOptInParams): Promise<boolean | null> {
