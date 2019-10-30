@@ -22,6 +22,7 @@
 // They can stay even after NP cutover
 import angular from 'angular';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
+import { EuiIcon } from '@elastic/eui';
 import 'ui/angular-bootstrap';
 import 'ui/kbn_top_nav';
 // @ts-ignore
@@ -143,7 +144,8 @@ export function createLocalAngularModule(core: AppMountContext['core']) {
       'discoverEs',
     ])
     .config(watchMultiDecorator)
-    .run(registerListenEventListener);
+    .run(registerListenEventListener)
+    .directive('icon', reactDirective => reactDirective(EuiIcon));
 }
 
 export function createLocalGlobalStateModule() {
