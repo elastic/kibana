@@ -16,6 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+/*
+export { DASHBOARD_CONTAINER_TYPE, DashboardContainerFactory } from './dashboard_container_factory';
+export { DashboardContainer, DashboardContainerInput } from './dashboard_container';
+export { createPanelState } from './panel';
 
-// eslint-disable-next-line
-export * from '../../../../../../../../../plugins/dashboard_embeddable_container/public/embeddable/viewport/dashboard_viewport';
+export { DashboardPanelState, GridData } from './types';
+
+export {
+  DASHBOARD_GRID_COLUMN_COUNT,
+  DEFAULT_PANEL_HEIGHT,
+  DEFAULT_PANEL_WIDTH,
+} from './dashboard_constants';
+*/

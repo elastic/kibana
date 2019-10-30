@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+/*
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 import React from 'react';
@@ -24,15 +24,15 @@ import { skip } from 'rxjs/operators';
 import { mount } from 'enzyme';
 import { I18nProvider } from '@kbn/i18n/react';
 import { nextTick } from 'test_utils/enzyme_helpers';
-import { EmbeddableFactory } from '../../embeddable_api';
+import { EmbeddableFactory } from '../../embeddable_plugin';
 import { DashboardViewport, DashboardViewportProps } from './dashboard_viewport';
 import { DashboardContainer, DashboardContainerOptions } from '../dashboard_container';
 import { getSampleDashboardInput } from '../../test_helpers';
 import {
   CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableFactory,
-} from '../../../../../../../embeddable_api/public/np_ready/public/lib/test_samples';
-import { KibanaContextProvider } from '../../../../../../../../../plugins/kibana_react/public';
+} from '../../embeddable_plugin_test_samples';
+import { KibanaContextProvider } from '../../../plugins/kibana_react/public';
 
 let dashboardContainer: DashboardContainer | undefined;
 
@@ -169,3 +169,4 @@ test('DashboardViewport unmount unsubscribes', async done => {
 
   props.container.updateInput({ panels: {} });
 });
+*/

@@ -20,7 +20,9 @@
 import { PluginInitializerContext } from '../../../core/public';
 import { DashboardEmbeddableContainerPublicPlugin } from './plugin';
 
-// export * from './lib';
+export * from './types';
+export * from './actions';
+export * from './embeddable';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DashboardEmbeddableContainerPublicPlugin(initializerContext);
