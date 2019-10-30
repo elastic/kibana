@@ -42,7 +42,7 @@ export const EuiHeaderAlert = ({
   badge,
   ...rest
 }: IEuiHeaderAlertProps) => {
-  const classes = classNames('euiHeaderAlert', className);
+  const classes = classNames('euiHeaderAlert', 'kbnNewsFeed__headerAlert', className);
 
   let badgeContent: JSX.Element | null;
   if (badge) {
@@ -62,7 +62,7 @@ export const EuiHeaderAlert = ({
             <EuiFlexItem grow={false}>{badgeContent}</EuiFlexItem>
           </EuiFlexGroup>
 
-          <div className="test_style">{title}</div>
+          <div className="euiHeaderAlert__title">{title}</div>
           <div className="euiHeaderAlert__text">{text}</div>
           <div className="euiHeaderAlert__action euiLink">{action}</div>
         </div>
