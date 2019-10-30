@@ -39,14 +39,12 @@ export interface XPluginSet {
 }
 
 import { plugin } from '.';
-import { DevToolsSetup } from '../../../kibana/public/dev_tools/plugin';
-import { devToolsSetup } from '../../../kibana/public/dev_tools';
+import { DevToolsSetup } from '../../../../../plugins/dev_tools/public';
 
 const pluginInstance = plugin({} as any);
 
 pluginInstance.setup(npSetup.core, {
   ...npSetup.plugins,
-  devTools: devToolsSetup,
   __LEGACY: {
     I18nContext,
     ResizeChecker,

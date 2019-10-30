@@ -6,16 +6,14 @@
 
 import { i18n } from '@kbn/i18n';
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
-import { devToolsSetup } from '../../../../../../../src/legacy/core_plugins/kibana/public/dev_tools';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { GrokDebugger } from './components/grok_debugger';
 import React from 'react';
 import { I18nContext } from 'ui/i18n';
-import  chrome  from 'ui/chrome';
-import { npStart } from 'ui/new_platform';
-import '../../services/grokdebugger';
+import { npSetup, npStart } from 'ui/new_platform';
+import { GrokdebuggerService } from '../../services/grokdebugger/grokdebugger_service';
 
-devToolsSetup.register({
+npSetup.plugins.devTools.register({
   order: 6,
   title: i18n.translate('xpack.grokDebugger.displayName', {
     defaultMessage: 'Grok Debugger',
@@ -34,11 +32,9 @@ devToolsSetup.register({
       window.location.hash = '/dev_tools';
       return () => {};
     }
-    const injector = await chrome.dangerouslyGetActiveInjector();
-    const grokdebuggerService = injector.get('grokdebuggerService');
     render(
       <I18nContext>
-        <GrokDebugger grokdebuggerService={grokdebuggerService} />
+        <GrokDebugger grokdebuggerService={new GrokdebuggerService(npStart.core.http)} />
       </I18nContext>,
       element
     );
