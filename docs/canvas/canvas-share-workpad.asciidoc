@@ -17,7 +17,7 @@ Create a JSON file of your workpad that you can export outside of {kib}.
 [role="screenshot"]
 image::images/canvas-export-workpad.png[Export single workpad]
 
-Want to export multiple workpads? Go to the *Canvas workpads* page, select the workpads you want to export, then click *Export*.
+Want to export multiple workpads? Go to the *Canvas workpads* view, select the workpads you want to export, then click *Export*.
 
 [float]
 [[create-workpad-pdf]]
@@ -38,7 +38,7 @@ image::images/canvas-generate-pdf.gif[Generate PDF]
 [[create-workpad-URL]]
 === Create a POST URL
 
-Create the POST URL that automatically generates PDF reports with Watcher or a script.
+Create a POST URL that you can use to automatically generate PDF reports using Watcher or a script.
 
 For more information, refer to <<automating-report-generation, Automating report generation>>.
 
@@ -55,9 +55,7 @@ image::images/canvas-create-URL.gif[Create POST URL]
 [[add-workpad-website]]
 === Share the workpad on a website
 
-beta[] To show off your workpad outside of {kib}, share a static version of the workpad on an external website.
-
-To make sure that your data remains secure, the data in the JSON file is not connected to {kib}. Canvas does not display elements that manipulate the data on the workpad.
+beta[] Download the workpad and share it on any website, then customize the workpad behavior to rotate or autoplay the pages.
 
 . If you are using a Gold or Platinum license, enable reporting in your `config/kibana.yml` file.
 
@@ -65,16 +63,24 @@ To make sure that your data remains secure, the data in the JSON file is not con
 
 . On the *Share on a website* pane, follow the instructions.
 +
+To make sure that your data remains secure, the data in the JSON file is not connected to {kib}. Canvas does not display elements that manipulate the data on the workpad.
++
 [role="screenshot"]
 image::images/canvas-embed_workpad.gif[Share the workpad on a website]
 
-NOTE: Shareable workpads encode the current state of the workpad in the JSON file. When you make changes to the workpad, the changes do not appear in the shareable workpad on your website.
+NOTE: Shareable workpads encode the current state of the workpad in a JSON file. When you make changes to the workpad, the changes do not appear in the shareable workpad on your website.
+
+[float]
+[[change-the-workpad-settings]]
+=== Change the shareable workpad settings
+
+After you've added the workpad to your website, you can enable autoplay or hide the toolbar.
 
 [float]
 [[shareable-workpad-enable-autoplay]]
 ==== Enable autoplay
 
-Automatically cycle through the workpads pages.
+Automatically cycle through the workpad pages.
 
 . In the lower right corner of the shareable workpad, click the settings icon.
 
