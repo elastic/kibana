@@ -150,8 +150,6 @@ export class LogRotator {
       return;
     }
 
-    console.log('AQUIIUIUIUIU');
-
     this.stalker.close();
     clearTimeout(this.stalkerUsePollingPolicyTestTimeout);
   }

@@ -18,12 +18,13 @@
  */
 
 import del from 'del';
-import {  existsSync, mkdtempSync, writeFileSync } from 'fs';
+import {  existsSync, mkdirSync, writeFileSync } from 'fs';
 import { LogRotator } from './log_rotator';
 import { tmpdir } from 'os';
-import { dirname, join } from 'path';
+import path, { dirname, join } from 'path';
 
-let testFilePath = null;
+const tempDir = path.join(tmpdir(), 'kbn_log_rotator_test');
+const testFilePath = join(tempDir, 'log_rotator_test_log_file.log');
 
 const createLogRotatorConfig = (logFilePath) => {
   return new Map([
@@ -37,8 +38,7 @@ const createLogRotatorConfig = (logFilePath) => {
 
 describe('LogRotator', () => {
   beforeEach(() => {
-    const tempDir = mkdtempSync(join(tmpdir(), 'log_rotator_test'));
-    testFilePath = join(tempDir, 'log_rotator_test_log_file.log');
+    mkdirSync(tempDir, { recursive: true });
     writeFileSync(testFilePath, '');
   });
 
