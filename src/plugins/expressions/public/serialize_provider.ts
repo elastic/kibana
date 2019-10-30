@@ -17,4 +17,21 @@
  * under the License.
  */
 
-export * from './expressions';
+import { get, identity } from 'lodash';
+import { getType } from './interpreter';
+
+export function serializeProvider(types: any) {
+  return {
+    serialize: provider('serialize'),
+    deserialize: provider('deserialize'),
+  };
+
+  function provider(key: any) {
+    return (context: any) => {
+      const type = getType(context);
+      const typeDef = types[type];
+      const fn: any = get(typeDef, key) || identity;
+      return fn(context);
+    };
+  }
+}

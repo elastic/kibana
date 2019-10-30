@@ -18,8 +18,10 @@
  */
 
 import { get } from 'lodash';
+import { AnyExpressionType } from './types';
+import { ExpressionValue } from './types/types';
 
-function getType(node: any) {
+export function getType(node: any) {
   if (node == null) return 'null';
   if (typeof node === 'object') {
     if (!node.type) throw new Error('Objects must have a type property');
@@ -28,30 +30,48 @@ function getType(node: any) {
   return typeof node;
 }
 
-export function Type(this: any, config: any) {
-  // Required
-  this.name = config.name;
+export class Type {
+  name: string;
 
-  // Optional
-  this.help = config.help || ''; // A short help text
+  /**
+   * A short help text.
+   */
+  help: string;
 
-  // Optional type validation, useful for checking function output
-  this.validate = config.validate || function validate() {};
+  /**
+   * Type validation, useful for checking function output.
+   */
+  validate: (type: any) => void | Error;
 
-  // Optional
-  this.create = config.create;
+  create: unknown;
 
-  // Optional serialization (used when passing context around client/server)
-  this.serialize = config.serialize;
-  this.deserialize = config.deserialize;
+  /**
+   * Optional serialization (used when passing context around client/server).
+   */
+  serialize?: (value: ExpressionValue) => any;
+  deserialize?: (serialized: any) => ExpressionValue;
 
-  const getToFn = (type: any) => get(config, ['to', type]) || get(config, ['to', '*']);
-  const getFromFn = (type: any) => get(config, ['from', type]) || get(config, ['from', '*']);
+  constructor(private readonly config: AnyExpressionType) {
+    const { name, help, deserialize, serialize, validate } = config;
 
-  this.castsTo = (type: any) => typeof getToFn(type) === 'function';
-  this.castsFrom = (type: any) => typeof getFromFn(type) === 'function';
+    this.name = name;
+    this.help = help || '';
+    this.validate = validate || (() => {});
 
-  this.to = (node: any, toTypeName: any, types: any) => {
+    // Optional
+    this.create = (config as any).create;
+
+    this.serialize = serialize;
+    this.deserialize = deserialize;
+  }
+
+  getToFn = (value: any) => get(this.config, ['to', value]) || get(this.config, ['to', '*']);
+  getFromFn = (value: any) => get(this.config, ['from', value]) || get(this.config, ['from', '*']);
+
+  castsTo = (value: any) => typeof this.getToFn(value) === 'function';
+  castsFrom = (value: any) => typeof this.getFromFn(value) === 'function';
+
+  to = (node: any, toTypeName: any, types: any) => {
     const typeName = getType(node);
     if (typeName !== this.name) {
       throw new Error(`Can not cast object of type '${typeName}' using '${this.name}'`);
@@ -59,13 +79,13 @@ export function Type(this: any, config: any) {
       throw new Error(`Can not cast '${typeName}' to '${toTypeName}'`);
     }
 
-    return (getToFn(toTypeName) as any)(node, types);
+    return (this.getToFn(toTypeName) as any)(node, types);
   };
 
-  this.from = (node: any, types: any) => {
+  from = (node: any, types: any) => {
     const typeName = getType(node);
     if (!this.castsFrom(typeName)) throw new Error(`Can not cast '${this.name}' from ${typeName}`);
 
-    return (getFromFn(typeName) as any)(node, types);
+    return (this.getFromFn(typeName) as any)(node, types);
   };
 }
