@@ -14,7 +14,7 @@ import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../../pages/timelines/timeli
 import { OpenTimelineResult } from '../types';
 import { TimelinesTableProps } from '../timelines_table';
 import { mockTimelineResults } from '../../../mock/timeline_results';
-import { OpenTimelineModal } from './open_timeline_modal';
+import { OpenTimelineModalBody } from './open_timeline_modal_body';
 import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '../constants';
 
 jest.mock('../../../lib/settings/use_kibana_ui_setting');
@@ -32,7 +32,7 @@ describe('OpenTimelineModal', () => {
   test('it renders the title row', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
-        <OpenTimelineModal
+        <OpenTimelineModalBody
           deleteTimelines={jest.fn()}
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           isLoading={false}
@@ -70,7 +70,7 @@ describe('OpenTimelineModal', () => {
   test('it renders the search row', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
-        <OpenTimelineModal
+        <OpenTimelineModalBody
           deleteTimelines={jest.fn()}
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           isLoading={false}
@@ -108,7 +108,7 @@ describe('OpenTimelineModal', () => {
   test('it renders the timelines table', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
-        <OpenTimelineModal
+        <OpenTimelineModalBody
           deleteTimelines={jest.fn()}
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           isLoading={false}
@@ -146,7 +146,7 @@ describe('OpenTimelineModal', () => {
   test('it shows extended columns and actions when onDeleteSelected and deleteTimelines are specified', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
-        <OpenTimelineModal
+        <OpenTimelineModalBody
           deleteTimelines={jest.fn()}
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           isLoading={false}
@@ -184,7 +184,7 @@ describe('OpenTimelineModal', () => {
   test('it does NOT show extended columns and actions when is onDeleteSelected undefined and deleteTimelines is specified', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
-        <OpenTimelineModal
+        <OpenTimelineModalBody
           deleteTimelines={jest.fn()}
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           isLoading={false}
@@ -221,7 +221,7 @@ describe('OpenTimelineModal', () => {
   test('it does NOT show extended columns and actions when is onDeleteSelected provided and deleteTimelines is undefined', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
-        <OpenTimelineModal
+        <OpenTimelineModalBody
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           isLoading={false}
           itemIdToExpandedNotesRowMap={{}}
@@ -258,7 +258,7 @@ describe('OpenTimelineModal', () => {
   test('it does NOT show extended columns and actions when both onDeleteSelected and deleteTimelines are undefined', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
-        <OpenTimelineModal
+        <OpenTimelineModalBody
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           isLoading={false}
           itemIdToExpandedNotesRowMap={{}}
