@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 import { FeatureProperty } from '../types';
@@ -28,6 +28,14 @@ describe('PointToolTipContent', () => {
     },
   ];
 
+  const mockFeaturePropsArrayValue: FeatureProperty[] = [
+    {
+      _propertyKey: 'host.name',
+      _rawValue: ['testPropValue1', 'testPropValue2'],
+      getESFilters: () => new Promise(resolve => setTimeout(resolve)),
+    },
+  ];
+
   test('renders correctly against snapshot', () => {
     const closeTooltip = jest.fn();
 
@@ -41,6 +49,32 @@ describe('PointToolTipContent', () => {
       </TestProviders>
     );
     expect(toJson(wrapper)).toMatchSnapshot();
+  });
+
+  test('renders array filter correctly', () => {
+    const closeTooltip = jest.fn();
+
+    const wrapper = mount(
+      <TestProviders>
+        <PointToolTipContent
+          contextId={'contextId'}
+          featureProps={mockFeaturePropsArrayValue}
+          closeTooltip={closeTooltip}
+        />
+      </TestProviders>
+    );
+    expect(wrapper.find('[data-test-subj="add-to-kql-host.name"]').prop('filter')).toEqual({
+      meta: {
+        alias: null,
+        disabled: false,
+        key: 'host.name',
+        negate: false,
+        params: { query: 'testPropValue1' },
+        type: 'phrase',
+        value: 'testPropValue1',
+      },
+      query: { match: { 'host.name': { query: 'testPropValue1', type: 'phrase' } } },
+    });
   });
 
   describe('#getRenderedFieldValue', () => {
