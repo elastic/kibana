@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Chrome } from 'ui/chrome';
 
-const docsPage = undefined;
+const docsPage = 'lens';
 
 export function addHelpMenuToAppChrome(chrome: Chrome) {
   chrome.helpExtension.set(domElement => {
@@ -47,7 +47,7 @@ function HelpMenu() {
       <EuiSpacer />
       <EuiText size="s">
         <EuiIcon type="logoGithub" color="primary" /> &nbsp;
-        <EuiLink href="https://github.com/elastic/kibana/issues/new" target="_blank">
+        <EuiLink href="https://github.com/elastic/kibana/issues/new/choose" target="_blank">
           {i18n.translate('xpack.lens.helpMenu.feedbackLinkText', {
             defaultMessage: 'Provide feedback for the Lens application',
           })}

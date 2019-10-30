@@ -13,19 +13,24 @@ import { SavedQuery } from 'src/legacy/core_plugins/data/public';
 import { KibanaDatatable } from '../../../../../src/legacy/core_plugins/interpreter/common';
 import { DragContextState } from './drag_drop';
 import { Document } from './persistence';
+import { DateRange } from '../common';
 
 // eslint-disable-next-line
 export interface EditorFrameOptions {}
 
 export type ErrorCallback = (e: { message: string }) => void;
 
+export interface PublicAPIProps<T> {
+  state: T;
+  setState: StateSetter<T>;
+  layerId: string;
+  dateRange: DateRange;
+}
+
 export interface EditorFrameProps {
   onError: ErrorCallback;
   doc?: Document;
-  dateRange: {
-    fromDate: string;
-    toDate: string;
-  };
+  dateRange: DateRange;
   query: Query;
   filters: Filter[];
   savedQuery?: SavedQuery;
@@ -99,12 +104,14 @@ export interface TableSuggestion {
  * * `unchanged` means the table is the same in the currently active configuration
  * * `reduced` means the table is a reduced version of the currently active table (some columns dropped, but not all of them)
  * * `extended` means the table is an extended version of the currently active table (added one or multiple additional columns)
+ * * `layers` means the change is a change to the layer structure, not to the table
  */
-export type TableChangeType = 'initial' | 'unchanged' | 'reduced' | 'extended';
+export type TableChangeType = 'initial' | 'unchanged' | 'reduced' | 'extended' | 'layers';
 
 export interface DatasourceSuggestion<T = unknown> {
   state: T;
   table: TableSuggestion;
+  keptLayerIds: string[];
 }
 
 export interface DatasourceMetaData {
@@ -138,7 +145,7 @@ export interface Datasource<T = unknown, P = unknown> {
   getDatasourceSuggestionsForField: (state: T, field: unknown) => Array<DatasourceSuggestion<T>>;
   getDatasourceSuggestionsFromCurrentState: (state: T) => Array<DatasourceSuggestion<T>>;
 
-  getPublicAPI: (state: T, setState: StateSetter<T>, layerId: string) => DatasourcePublicAPI;
+  getPublicAPI: (props: PublicAPIProps<T>) => DatasourcePublicAPI;
 }
 
 /**
@@ -171,7 +178,7 @@ export interface DatasourceDataPanelProps<T = unknown> {
   setState: StateSetter<T>;
   core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
   query: Query;
-  dateRange: FramePublicAPI['dateRange'];
+  dateRange: DateRange;
   filters: Filter[];
 }
 
@@ -200,7 +207,7 @@ export interface DatasourceLayerPanelProps {
   layerId: string;
 }
 
-export type DataType = 'string' | 'number' | 'date' | 'boolean' | 'ip';
+export type DataType = 'document' | 'string' | 'number' | 'date' | 'boolean' | 'ip';
 
 // An operation represents a column in a table, not any information
 // about how the column was created such as whether it is a sum or average.
@@ -257,6 +264,10 @@ export interface SuggestionRequest<T = unknown> {
    * State is only passed if the visualization is active.
    */
   state?: T;
+  /**
+   * The visualization needs to know which table is being suggested
+   */
+  keptLayerIds: string[];
 }
 
 /**
@@ -296,10 +307,7 @@ export interface VisualizationSuggestion<T = unknown> {
 export interface FramePublicAPI {
   datasourceLayers: Record<string, DatasourcePublicAPI>;
 
-  dateRange: {
-    fromDate: string;
-    toDate: string;
-  };
+  dateRange: DateRange;
   query: Query;
   filters: Filter[];
 
