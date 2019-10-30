@@ -68,7 +68,7 @@ export function DiscoverFieldSearch({
         defaultMessage: 'Show field filter settings',
       });
   const searchPlaceholder = i18n.translate('kbn.discover.fieldChooser.searchPlaceHolder', {
-    defaultMessage: 'Search fields',
+    defaultMessage: 'Search field names',
   });
 
   return (
@@ -97,7 +97,7 @@ export function DiscoverFieldSearch({
       >
         <FormattedMessage
           id="kbn.discover.fieldChooser.fieldFilterFacetButtonLabel"
-          defaultMessage="Fields filtered"
+          defaultMessage="Filter by type"
         />
       </EuiFacetButton>
     </React.Fragment>
