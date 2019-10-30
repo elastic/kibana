@@ -115,16 +115,16 @@ export class VectorStyle extends AbstractStyle {
   getDescriptorWithMissingStylePropsRemoved(nextOrdinalFields) {
     const originalProperties = this.getProperties();
     const updatedProperties = {};
-    Object.keys(originalProperties).forEach(propertyName => {
-      if (!this._isPropertyDynamic(propertyName)) {
+
+
+    this.getDynamicPropertiesArray().forEach(dynamicProperty =>{
+
+      const field = dynamicProperty.getField();
+      if (field || !field.isValid()) {
         return;
       }
 
-      const fieldName = _.get(originalProperties[propertyName], 'options.field.name');
-      if (!fieldName) {
-        return;
-      }
-
+      const fieldName = field.getName();
       const matchingOrdinalField = nextOrdinalFields.find(oridinalField => {
         return fieldName === oridinalField.name;
       });
@@ -133,13 +133,14 @@ export class VectorStyle extends AbstractStyle {
         return;
       }
 
-      updatedProperties[propertyName] = {
+      updatedProperties[dynamicProperty.getStyleName()] = {
         type: DynamicStyleProperty.type,
         options: {
-          ...originalProperties[propertyName].options
+          ...originalProperties[dynamicProperty.getStyleName()].options
         }
       };
-      delete updatedProperties[propertyName].options.field;
+      delete updatedProperties[dynamicProperty.getStyleName()].options.field;
+
     });
 
     if (Object.keys(updatedProperties).length === 0) {
@@ -156,6 +157,7 @@ export class VectorStyle extends AbstractStyle {
         ...updatedProperties,
       })
     };
+
   }
 
   async pluckStyleMetaFromSourceDataRequest(sourceDataRequest) {
@@ -247,8 +249,8 @@ export class VectorStyle extends AbstractStyle {
   }
 
   _isPropertyDynamic(propertyName) {
-    const { type, options } = _.get(this._descriptor, ['properties', propertyName], {});
-    return type === DynamicStyleProperty.type && options.field && options.field.name;
+    const styleProperty = this._getAllStyleProperties().find(styleProperty => styleProperty.getName() === propertyName);
+    return styleProperty.isDynamic();
   }
 
   _checkIfOnlyFeatureType = async (featureType) => {
@@ -464,7 +466,6 @@ export class VectorStyle extends AbstractStyle {
         label: fieldDescriptor.label
       });
     } else if (fieldDescriptor.origin === FIELD_ORIGIN.JOIN) {
-
       let matchingField = null;
       const joins = this._layer.getValidJoins();
       joins.find(join => {
@@ -472,9 +473,7 @@ export class VectorStyle extends AbstractStyle {
         matchingField = aggSource.getMetricFieldForName(fieldDescriptor.name);
         return !!matchingField;
       });
-
       return matchingField;
-
     } else {
       throw new Error(`Unknown origin-type ${fieldDescriptor.origin}`);
     }
