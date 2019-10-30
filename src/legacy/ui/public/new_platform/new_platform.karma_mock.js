@@ -73,6 +73,10 @@ export const npSetup = {
   },
 };
 
+let refreshInterval = undefined;
+let isTimeRangeSelectorEnabled = true;
+let isAutoRefreshSelectorEnabled = true;
+
 export const npStart = {
   core: {
     chrome: {}
@@ -113,13 +117,30 @@ export const npStart = {
             getEnabledUpdated$: mockObservable,
             getTimeUpdate$: mockObservable,
             getRefreshIntervalUpdate$: mockObservable,
-            isTimeRangeSelectorEnabled: sinon.fake(),
-            isAutoRefreshSelectorEnabled: sinon.fake(),
-            disableAutoRefreshSelector: sinon.fake(),
-            enableAutoRefreshSelector: sinon.fake(),
-            getRefreshInterval: sinon.fake(),
-            setRefreshInterval: sinon.fake(),
-            enableTimeRangeSelector: sinon.fake(),
+            isTimeRangeSelectorEnabled: () => {
+              return isTimeRangeSelectorEnabled;
+            },
+            isAutoRefreshSelectorEnabled: () => {
+              return isAutoRefreshSelectorEnabled;
+            },
+            disableAutoRefreshSelector: () => {
+              isAutoRefreshSelectorEnabled = false;
+            },
+            enableAutoRefreshSelector: () => {
+              isAutoRefreshSelectorEnabled = true;
+            },
+            getRefreshInterval: () => {
+              return refreshInterval;
+            },
+            setRefreshInterval: (interval) => {
+              refreshInterval = interval;
+            },
+            enableTimeRangeSelector: () => {
+              isTimeRangeSelectorEnabled = true;
+            },
+            disableTimeRangeSelector: () => {
+              isTimeRangeSelectorEnabled = false;
+            },
             getTime: sinon.fake(),
             setTime: sinon.fake(),
             getBounds: sinon.fake(),
