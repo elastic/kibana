@@ -1,0 +1,12 @@
+{
+  "name": "endpoint",
+  "version": "1.0.0",
+  "kibana": {
+    "version": "kibana",
+    "templateVersion": "1.0.0"
+  },
+  "license": "Apache-2.0",
+  "dependencies": {
+    "redux-devtools-extension": "^2.13.8"
+  }
+}

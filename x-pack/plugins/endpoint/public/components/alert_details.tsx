@@ -4,42 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import styled from 'styled-components';
-import { EuiPage, EuiTitle, EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
-import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
+import { EuiTitle, EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
 import { RouteComponentProps } from 'react-router';
-import { AppMountContext, AppMountParameters } from 'kibana/public';
+import { AppMountContext } from 'kibana/public';
+import * as alertDetailsSelectors from '../selectors/alert_details';
 
 export const AlertDetails = ({
   context,
   history,
   match,
 }: { context: AppMountContext } & RouteComponentProps<{ alertId: string }>) => {
-  interface AlertDetailsData {
-    alertData: object | null;
-  }
-  const [data, setData]: [AlertDetailsData, any] = useState({
-    alertData: null,
-  });
-
-  async function fetchAlertListData() {
-    const response = await context.core.http.get('/alerts/' + match.params.alertId, {});
-    setData({
-      alertData: response.elasticsearchResponse.hits.hits[0],
-    });
-  }
-
-  useEffect(() => {
-    fetchAlertListData();
-  }, [match.params.alertId]);
+  const dispatch = useDispatch();
+  const alertData = useSelector(alertDetailsSelectors.alertDetailsData);
 
   function closeFlyout() {
     history.push('/alerts');
   }
 
   function processName() {
-    const { alertData } = data;
     const targetProcess = alertData._source.endgame.data.alert_details.target_process;
     if (targetProcess) {
       return targetProcess.name;
@@ -47,7 +32,6 @@ export const AlertDetails = ({
     return null;
   }
 
-  const { alertData } = data;
   const DetailsTable = styled.table`
     td {
       padding-right: 10px;
@@ -56,6 +40,7 @@ export const AlertDetails = ({
       }
     }
   `;
+
   return (
     <EuiFlyout onClose={closeFlyout} aria-labelledby="flyoutTitle">
       <EuiFlyoutHeader hasBorder>
