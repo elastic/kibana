@@ -28,7 +28,9 @@ import { DashboardGrid } from '../grid';
 import { context } from '../../../../kibana_react/public';
 
 export interface DashboardViewportProps {
-  container: DashboardContainer;
+  // TODO: ...
+  // container: DashboardContainer;
+  container: any;
 }
 
 interface State {
