@@ -22,7 +22,7 @@ import {
 } from '../../store/timeline/actions';
 import { OpenTimeline } from './open_timeline';
 import { OPEN_TIMELINE_CLASS_NAME, queryTimelineById, dispatchUpdateTimeline } from './helpers';
-import { OpenTimelineModal } from './open_timeline_modal/open_timeline_modal';
+import { OpenTimelineModalBody } from './open_timeline_modal/open_timeline_modal_body';
 import {
   DeleteTimelines,
   EuiSearchBarQuery,
@@ -281,7 +281,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
               totalSearchResultsCount={totalCount}
             />
           ) : (
-            <OpenTimelineModal
+            <OpenTimelineModalBody
               data-test-subj={'open-timeline-modal'}
               deleteTimelines={onDeleteOneTimeline}
               defaultPageSize={defaultPageSize}
