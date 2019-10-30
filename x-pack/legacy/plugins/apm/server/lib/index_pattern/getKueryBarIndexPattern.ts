@@ -6,6 +6,7 @@
 
 import { Legacy } from 'kibana';
 import { StaticIndexPattern } from 'ui/index_patterns';
+import { APICaller } from 'src/core/server';
 import { IndexPatternsService } from '../../../../../../../src/legacy/server/index_patterns/service';
 import { Setup } from '../helpers/setup_request';
 
@@ -15,35 +16,37 @@ export const getKueryBarIndexPattern = async ({
   setup
 }: {
   request: Legacy.Request;
-  processorEvent?: string;
+  processorEvent?: 'transaction' | 'error' | 'metric';
   setup: Setup;
 }) => {
-  const { config } = setup;
+  const { indices } = setup;
 
   const indexPatternsService = new IndexPatternsService(
-    (...args: [any, any, any]) =>
+    (...rest: Parameters<APICaller>) =>
       request.server.plugins.elasticsearch
         .getCluster('data')
-        .callWithRequest(request, ...args)
+        .callWithRequest(request, ...rest)
   );
 
-  const indices = processorEvent
+  const indexNames = processorEvent
     ? [processorEvent]
-    : ['transaction', 'metric', 'error'];
+    : ['transaction' as const, 'metric' as const, 'error' as const];
 
-  const indicesFromConfig = indices.map(index =>
-    index === 'metric'
-      ? config.get<string>(`apm_oss.metricsIndices`)
-      : config.get<string>(`apm_oss.${index}Indices`)
-  );
+  const indicesMap = {
+    transaction: indices['apm_oss.transactionIndices'],
+    metric: indices['apm_oss.metricsIndices'],
+    error: indices['apm_oss.errorIndices']
+  };
+
+  const configuredIndices = indexNames.map(name => indicesMap[name]);
 
   const fields = await indexPatternsService.getFieldsForWildcard({
-    pattern: indicesFromConfig
+    pattern: configuredIndices
   });
 
   const pattern: StaticIndexPattern = {
     fields,
-    title: indicesFromConfig.join(',')
+    title: configuredIndices.join(',')
   };
 
   return pattern;
