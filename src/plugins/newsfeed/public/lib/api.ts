@@ -21,12 +21,7 @@ import * as Rx from 'rxjs';
 import moment from 'moment';
 import { filter, mergeMap, tap } from 'rxjs/operators';
 import { HttpServiceBase } from '../../../../../src/core/public';
-import { ApiItem, NewsfeedItem } from '../../types';
-
-export interface FetchResult {
-  hasNew: boolean;
-  feedItems: NewsfeedItem[];
-}
+import { ApiItem, NewsfeedItem, FetchResult } from '../../types';
 
 const DEFAULT_LANGUAGE = 'en'; // TODO: read from settings, default to en
 const NEWSFEED_MAIN_INTERVAL = 120000; // A main interval to check for need to refresh (2min)
@@ -102,13 +97,13 @@ class NewsfeedApiDriver {
         return accum; // ignore language mismatch
       }
 
-      const tempItem = {
+      const tempItem: NewsfeedItem = {
         title: it.title[DEFAULT_LANGUAGE],
         description: it.description[DEFAULT_LANGUAGE],
         linkText: it.link_text[DEFAULT_LANGUAGE],
         linkUrl: it.link_url[DEFAULT_LANGUAGE],
         badge: it.badge != null ? it.badge![DEFAULT_LANGUAGE] : it.badge,
-        languages: it.languages,
+        publishOn: moment(it.publish_on),
       };
 
       if (!this.validateItem(tempItem)) {
@@ -119,6 +114,7 @@ class NewsfeedApiDriver {
     }, []);
 
     return Rx.of({
+      kibanaVersion: this.kibanaVersion,
       hasNew,
       feedItems,
     });

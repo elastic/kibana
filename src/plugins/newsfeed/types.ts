@@ -17,9 +17,12 @@
  * under the License.
  */
 
+import { Moment } from 'moment';
+
 export interface ApiItem {
   hash: string;
   expire_on: Date;
+  publish_on: Date;
   title: { [lang: string]: string };
   description: { [lang: string]: string };
   link_text: { [lang: string]: string };
@@ -27,7 +30,6 @@ export interface ApiItem {
   badge: { [lang: string]: string } | null;
   languages: string[] | null;
   image_url?: null; // not used phase 1
-  publish_on?: null; // not used phase 1
 }
 
 export interface NewsfeedItem {
@@ -35,4 +37,12 @@ export interface NewsfeedItem {
   description: string;
   linkText: string;
   linkUrl: string;
+  badge: string | null;
+  publishOn: Moment;
+}
+
+export interface FetchResult {
+  kibanaVersion: string;
+  hasNew: boolean;
+  feedItems: NewsfeedItem[];
 }
