@@ -71,7 +71,7 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
     return null;
   }
   const searchPlaceholder = i18n.translate('kbn.discover.fieldChooser.searchPlaceHolder', {
-    defaultMessage: 'Search fields',
+    defaultMessage: 'Search field names',
   });
   const aggregatableLabel = i18n.translate('kbn.discover.fieldChooser.filter.aggregatableLabel', {
     defaultMessage: 'Aggregatable',
@@ -170,7 +170,7 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
     >
       <FormattedMessage
         id="kbn.discover.fieldChooser.fieldFilterFacetButtonLabel"
-        defaultMessage="Fields filtered"
+        defaultMessage="Filter by type"
       />
     </EuiFacetButton>
   );
@@ -245,7 +245,6 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
       </EuiForm>
     </div>
   );
-
   return (
     <React.Fragment>
       <EuiFlexGroup responsive={false} gutterSize={'s'}>
