@@ -35,19 +35,13 @@
  */
 
 import { npSetup, npStart } from 'ui/new_platform';
-// @ts-ignore
-import { getInterpreter } from 'plugins/interpreter/interpreter';
-import { LegacyDependenciesPlugin } from './shim/legacy_dependencies_plugin';
 import { plugin } from '.';
 
 const dataPlugin = plugin();
-const legacyPlugin = new LegacyDependenciesPlugin();
 
-export const setup = dataPlugin.setup(npSetup.core, {
-  __LEGACY: legacyPlugin.setup(),
-  inspector: npSetup.plugins.inspector,
-});
+export const setup = dataPlugin.setup(npSetup.core);
 
 export const start = dataPlugin.start(npStart.core, {
-  inspector: npStart.plugins.inspector,
+  data: npStart.plugins.data,
+  uiActions: npSetup.plugins.uiActions,
 });

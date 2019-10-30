@@ -6,6 +6,9 @@
 
 import { failure } from 'io-ts/lib/PathReporter';
 
+import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/lib/Either';
+import { identity } from 'rxjs';
 import { InfraSourceResolvers } from '../../graphql/types';
 import { InfraMetricsDomain } from '../../lib/domains/metrics_domain';
 import { SourceConfigurationRuntimeType } from '../../lib/sources';
@@ -31,11 +34,12 @@ export const createMetricResolvers = (
 } => ({
   InfraSource: {
     async metrics(source, args, { req }) {
-      const sourceConfiguration = SourceConfigurationRuntimeType.decode(
-        source.configuration
-      ).getOrElseL(errors => {
-        throw new Error(failure(errors).join('\n'));
-      });
+      const sourceConfiguration = pipe(
+        SourceConfigurationRuntimeType.decode(source.configuration),
+        fold(errors => {
+          throw new Error(failure(errors).join('\n'));
+        }, identity)
+      );
 
       UsageCollector.countNode(args.nodeType);
       const options = {

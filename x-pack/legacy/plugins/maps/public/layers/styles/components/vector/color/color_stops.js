@@ -14,22 +14,13 @@ import {
   EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonIcon
+  EuiButtonIcon,
 } from '@elastic/eui';
-import {
-  addRow,
-  removeRow,
-  isColorInvalid,
-  isStopInvalid,
-  isInvalid,
-} from './color_stops_utils';
+import { addRow, removeRow, isColorInvalid, isStopInvalid, isInvalid } from './color_stops_utils';
 
 const DEFAULT_COLOR = '#FF0000';
 
-export const ColorStops = ({
-  colorStops = [{ stop: 0, color: DEFAULT_COLOR }],
-  onChange,
-}) => {
+export const ColorStops = ({ colorStops = [{ stop: 0, color: DEFAULT_COLOR }], onChange }) => {
   function getStopInput(stop, index) {
     const onStopChange = e => {
       const newColorStops = _.cloneDeep(colorStops);
@@ -51,11 +42,7 @@ export const ColorStops = ({
     return {
       stopError: error,
       stopInput: (
-        <EuiFieldNumber
-          aria-label="Stop"
-          value={stop}
-          onChange={onStopChange}
-        />
+        <EuiFieldNumber aria-label="Stop" value={stop} onChange={onStopChange} compressed />
       ),
     };
   }
@@ -71,10 +58,8 @@ export const ColorStops = ({
     };
 
     return {
-      colorError: isColorInvalid(color)
-        ? 'Color must provide a valid hex value'
-        : undefined,
-      colorInput: <EuiColorPicker onChange={onColorChange} color={color} />,
+      colorError: isColorInvalid(color) ? 'Color must provide a valid hex value' : undefined,
+      colorInput: <EuiColorPicker onChange={onColorChange} color={color} compressed />,
     };
   }
 
@@ -125,6 +110,7 @@ export const ColorStops = ({
         className="mapColorStop"
         isInvalid={errors.length !== 0}
         error={errors}
+        display="rowCompressed"
       >
         <div>
           <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">

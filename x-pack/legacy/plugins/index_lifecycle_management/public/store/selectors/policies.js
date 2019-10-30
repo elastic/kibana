@@ -239,6 +239,13 @@ export const phaseToES = (phase, originalEsPhase) => {
     esPhase.min_age = `${phase[PHASE_ROLLOVER_MINIMUM_AGE]}${phase[PHASE_ROLLOVER_MINIMUM_AGE_UNITS]}`;
   }
 
+  // If warm phase on rollover is enabled, delete min age field
+  // An index lifecycle switches to warm phase when rollover occurs, so you cannot specify a warm phase time
+  // They are mutually exclusive
+  if (phase[WARM_PHASE_ON_ROLLOVER]) {
+    delete esPhase.min_age;
+  }
+
   esPhase.actions = esPhase.actions || {};
 
   if (phase[PHASE_ROLLOVER_ENABLED]) {

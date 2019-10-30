@@ -10,7 +10,14 @@ const TELEMETRY_TASK_TYPE = 'maps_telemetry';
 
 export const TASK_ID = `Maps-${TELEMETRY_TASK_TYPE}`;
 
-export function scheduleTask(server, taskManager) {
+export function scheduleTask(server) {
+  const taskManager = server.plugins.task_manager;
+
+  if (!taskManager) {
+    server.log(['debug', 'telemetry'], `Task manager is not available`);
+    return;
+  }
+
   const { kbnServer } = server.plugins.xpack_main.status.plugin;
 
   kbnServer.afterPluginsInit(() => {
@@ -36,12 +43,17 @@ export function scheduleTask(server, taskManager) {
 
 export function registerMapsTelemetryTask(server) {
   const taskManager = server.plugins.task_manager;
+
+  if (!taskManager) {
+    server.log(['debug', 'telemetry'], `Task manager is not available`);
+    return;
+  }
+
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
       title: 'Maps telemetry fetch task',
       type: TELEMETRY_TASK_TYPE,
       timeout: '1m',
-      numWorkers: 2,
       createTaskRunner: telemetryTaskRunner(server),
     },
   });

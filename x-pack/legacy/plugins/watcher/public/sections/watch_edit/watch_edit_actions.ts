@@ -47,21 +47,18 @@ function getPropsFromAction(type: string, action: { [key: string]: any }) {
 
 /**
  * Actions instances are not automatically added to the Watch _actions_ Array
- * when we add them in the Json editor. This method takes takes care of it.
+ * when we add them in the JSON watch editor. This method takes takes care of it.
  */
 function createActionsForWatch(watchInstance: BaseWatch) {
   watchInstance.resetActions();
 
-  let action;
-  let type;
-  let actionProps;
-
   Object.keys(watchInstance.watch.actions).forEach(k => {
-    action = watchInstance.watch.actions[k];
-    type = getTypeFromAction(action);
-    actionProps = { ...getPropsFromAction(type, action), ignoreDefaults: true };
+    const action = watchInstance.watch.actions[k];
+    const type = getTypeFromAction(action);
+    const actionProps = { ...getPropsFromAction(type, action), ignoreDefaults: true };
     watchInstance.createAction(type, actionProps);
   });
+
   return watchInstance;
 }
 

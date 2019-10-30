@@ -50,15 +50,6 @@ export const UI_EXPORT_DEFAULTS = {
     fieldFormatEditors: [
       'ui/field_editor/components/field_format_editor/register'
     ],
-    visRequestHandlers: [
-      'ui/vis/request_handlers/courier',
-      'ui/vis/request_handlers/none'
-    ],
-    visResponseHandlers: [
-      'ui/vis/response_handlers/vislib',
-      'ui/vis/response_handlers/none',
-      'ui/vis/response_handlers/legacy',
-    ],
     visEditorTypes: [
       'ui/vis/editors/default/default',
     ],

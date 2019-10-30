@@ -9,7 +9,6 @@
 
 import {
   EuiButtonIcon,
-  EuiHealth,
   EuiLink,
 } from '@elastic/eui';
 
@@ -31,12 +30,13 @@ import { InfluencersCell } from './influencers_cell';
 import { LinksMenu } from './links_menu';
 import { checkPermission } from '../../privilege/check_privilege';
 import { mlFieldFormatService } from '../../services/field_format_service';
-import { getSeverityColor, isRuleSupported } from '../../../common/util/anomaly_utils';
+import { isRuleSupported } from '../../../common/util/anomaly_utils';
 import { formatValue } from '../../formatters/format_value';
 import {
   INFLUENCERS_LIMIT,
   ANOMALIES_TABLE_TABS
 } from './anomalies_table_constants';
+import { SeverityCell } from './severity_cell';
 
 function renderTime(date, aggregationInterval) {
   if (aggregationInterval === 'hour') {
@@ -101,11 +101,7 @@ export function getColumns(
       name: i18n.translate('xpack.ml.anomaliesTable.severityColumnName', {
         defaultMessage: 'severity',
       }),
-      render: (score) => (
-        <EuiHealth color={getSeverityColor(score)} compressed="true">
-          {score >= 1 ? Math.floor(score) : '< 1'}
-        </EuiHealth>
-      ),
+      render: (score, item) => <SeverityCell score={score} multiBucketImpact={item.source.multi_bucket_impact} />,
       sortable: true
     },
     {

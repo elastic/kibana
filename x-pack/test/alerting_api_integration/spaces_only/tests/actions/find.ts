@@ -56,5 +56,36 @@ export default function findActionTests({ getService }: FtrProviderContext) {
           ],
         });
     });
+
+    it(`shouldn't find action from another space`, async () => {
+      const { body: createdAction } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/action`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          description: 'My action',
+          actionTypeId: 'test.index-record',
+          config: {
+            unencrypted: `This value shouldn't get encrypted`,
+          },
+          secrets: {
+            encrypted: 'This value should be encrypted',
+          },
+        })
+        .expect(200);
+      objectRemover.add(Spaces.space1.id, createdAction.id, 'action');
+
+      await supertest
+        .get(
+          `${getUrlPrefix(
+            Spaces.other.id
+          )}/api/action/_find?search=test.index-record&search_fields=actionTypeId`
+        )
+        .expect(200, {
+          page: 1,
+          perPage: 20,
+          total: 0,
+          data: [],
+        });
+    });
   });
 }

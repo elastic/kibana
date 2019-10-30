@@ -21,16 +21,16 @@ import {
   createPermissionFailureMessage,
 } from '../../../../../privilege/check_privilege';
 
-import { DataFrameAnalyticsListRow, DATA_FRAME_TASK_STATE } from './common';
+import { isDataFrameAnalyticsRunning, DataFrameAnalyticsListRow } from './common';
 
 interface DeleteActionProps {
   item: DataFrameAnalyticsListRow;
 }
 
 export const DeleteAction: FC<DeleteActionProps> = ({ item }) => {
-  const disabled = item.stats.state === DATA_FRAME_TASK_STATE.STARTED;
+  const disabled = isDataFrameAnalyticsRunning(item.stats.state);
 
-  const canDeleteDataFrame: boolean = checkPermission('canDeleteDataFrame');
+  const canDeleteDataFrameAnalytics: boolean = checkPermission('canDeleteDataFrameAnalytics');
 
   const [isModalVisible, setModalVisible] = useState(false);
 
@@ -47,9 +47,10 @@ export const DeleteAction: FC<DeleteActionProps> = ({ item }) => {
 
   let deleteButton = (
     <EuiButtonEmpty
+      data-test-subj="mlAnalyticsJobDeleteButton"
       size="xs"
       color="text"
-      disabled={disabled || !canDeleteDataFrame}
+      disabled={disabled || !canDeleteDataFrameAnalytics}
       iconType="trash"
       onClick={openModal}
       aria-label={buttonDeleteText}
@@ -58,7 +59,7 @@ export const DeleteAction: FC<DeleteActionProps> = ({ item }) => {
     </EuiButtonEmpty>
   );
 
-  if (disabled || !canDeleteDataFrame) {
+  if (disabled || !canDeleteDataFrameAnalytics) {
     deleteButton = (
       <EuiToolTip
         position="top"

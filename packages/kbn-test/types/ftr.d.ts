@@ -20,6 +20,8 @@
 import { ToolingLog } from '@kbn/dev-utils';
 import { Config, Lifecycle } from '../src/functional_test_runner/lib';
 
+export { Lifecycle, Config };
+
 interface AsyncInstance<T> {
   /**
    * Services that are initialized async are not ready before the tests execute, so you might need
@@ -37,13 +39,16 @@ interface AsyncInstance<T> {
 type MaybeAsyncInstance<T> = T extends Promise<infer X> ? AsyncInstance<X> & X : T;
 
 /**
+ * Covert a Provider type to the instance type it provides
+ */
+export type ProvidedType<T extends (...args: any[]) => any> = MaybeAsyncInstance<ReturnType<T>>;
+
+/**
  * Convert a map of providers to a map of the instance types they provide, also converting
  * promise types into the async instances that other providers will receive.
  */
 type ProvidedTypeMap<T extends {}> = {
-  [K in keyof T]: T[K] extends (...args: any[]) => any
-    ? MaybeAsyncInstance<ReturnType<T[K]>>
-    : unknown;
+  [K in keyof T]: T[K] extends (...args: any[]) => any ? ProvidedType<T[K]> : unknown;
 };
 
 export interface GenericFtrProviderContext<

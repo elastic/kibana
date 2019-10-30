@@ -16,6 +16,12 @@ import {
   timelineSavedObjectType,
 } from './saved_objects';
 
+import { createSignalsRoute } from './lib/detection_engine/routes/create_signals_route';
+import { readSignalsRoute } from './lib/detection_engine/routes/read_signals_route';
+import { findSignalsRoute } from './lib/detection_engine/routes/find_signals_route';
+import { deleteSignalsRoute } from './lib/detection_engine/routes/delete_signals_route';
+import { updateSignalsRoute } from './lib/detection_engine/routes/update_signals_route';
+
 const APP_ID = 'siem';
 
 export const amMocking = (): boolean => process.env.INGEST_MOCKS === 'true';
@@ -34,7 +40,21 @@ export const initServerWithKibana = (kbnServer: Server) => {
 
   const libs = compose(kbnServer);
   initServer(libs, { mocking, logger });
-
+  if (
+    kbnServer.config().has('xpack.actions.enabled') &&
+    kbnServer.config().get('xpack.actions.enabled') === true &&
+    kbnServer.config().has('xpack.alerting.enabled') &&
+    kbnServer.config().has('xpack.alerting.enabled') === true
+  ) {
+    logger.info(
+      'Detected feature flags for actions and alerting and enabling signals API endpoints'
+    );
+    createSignalsRoute(kbnServer);
+    readSignalsRoute(kbnServer);
+    updateSignalsRoute(kbnServer);
+    deleteSignalsRoute(kbnServer);
+    findSignalsRoute(kbnServer);
+  }
   logger.info('Plugin done initializing');
 
   const xpackMainPlugin = kbnServer.plugins.xpack_main;

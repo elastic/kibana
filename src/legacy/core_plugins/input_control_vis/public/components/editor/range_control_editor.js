@@ -18,14 +18,11 @@
  */
 
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { Fragment } from 'react';
 import { IndexPatternSelectFormRow } from './index_pattern_select_form_row';
 import { FieldSelect } from './field_select';
 
-import {
-  EuiFormRow,
-  EuiFieldNumber,
-} from '@elastic/eui';
+import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -36,15 +33,14 @@ function filterField(field) {
 export function RangeControlEditor(props) {
   const stepSizeId = `stepSize-${props.controlIndex}`;
   const decimalPlacesId = `decimalPlaces-${props.controlIndex}`;
-  const handleDecimalPlacesChange = (evt) => {
+  const handleDecimalPlacesChange = evt => {
     props.handleNumberOptionChange(props.controlIndex, 'decimalPlaces', evt);
   };
-  const handleStepChange = (evt) => {
+  const handleStepChange = evt => {
     props.handleNumberOptionChange(props.controlIndex, 'step', evt);
   };
   return (
-    <div>
-
+    <Fragment>
       <IndexPatternSelectFormRow
         indexPatternId={props.controlParams.indexPattern}
         onChange={props.handleIndexPatternChange}
@@ -62,10 +58,12 @@ export function RangeControlEditor(props) {
 
       <EuiFormRow
         id={stepSizeId}
-        label={<FormattedMessage
-          id="inputControl.editor.rangeControl.stepSizeLabel"
-          defaultMessage="Step Size"
-        />}
+        label={
+          <FormattedMessage
+            id="inputControl.editor.rangeControl.stepSizeLabel"
+            defaultMessage="Step Size"
+          />
+        }
       >
         <EuiFieldNumber
           value={props.controlParams.options.step}
@@ -76,10 +74,12 @@ export function RangeControlEditor(props) {
 
       <EuiFormRow
         id={decimalPlacesId}
-        label={<FormattedMessage
-          id="inputControl.editor.rangeControl.decimalPlacesLabel"
-          defaultMessage="Decimal Places"
-        />}
+        label={
+          <FormattedMessage
+            id="inputControl.editor.rangeControl.decimalPlacesLabel"
+            defaultMessage="Decimal Places"
+          />
+        }
       >
         <EuiFieldNumber
           min={0}
@@ -88,8 +88,7 @@ export function RangeControlEditor(props) {
           data-test-subj={`rangeControlDecimalPlacesInput${props.controlIndex}`}
         />
       </EuiFormRow>
-
-    </div>
+    </Fragment>
   );
 }
 
@@ -99,5 +98,5 @@ RangeControlEditor.propTypes = {
   controlParams: PropTypes.object.isRequired,
   handleFieldNameChange: PropTypes.func.isRequired,
   handleIndexPatternChange: PropTypes.func.isRequired,
-  handleNumberOptionChange: PropTypes.func.isRequired
+  handleNumberOptionChange: PropTypes.func.isRequired,
 };

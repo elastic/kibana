@@ -8,6 +8,7 @@ import { GraphQLOptions } from 'apollo-server-core';
 import { GraphQLSchema } from 'graphql';
 import { Lifecycle, ResponseToolkit } from 'hapi';
 import { RouteOptions } from 'hapi';
+import { SavedObjectsLegacyService } from 'src/core/server';
 
 export interface UMFrameworkRequest {
   user: string;
@@ -29,6 +30,17 @@ export interface UMFrameworkRouteOptions<
   config?: any;
 }
 
+export interface UptimeCoreSetup {
+  route: any;
+}
+
+export interface UptimeCorePlugins {
+  elasticsearch: any;
+  savedObjects: SavedObjectsLegacyService<any>;
+  usageCollector: any;
+  xpack: any;
+}
+
 export type UMFrameworkRouteHandler<RouteRequest extends UMFrameworkRequest> = (
   request: UMFrameworkRequest,
   h: ResponseToolkit
@@ -48,4 +60,5 @@ export interface UMBackendFrameworkAdapter {
     route: UMFrameworkRouteOptions<RouteRequest, RouteResponse>
   ): void;
   registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void;
+  getSavedObjectsClient(): any;
 }

@@ -5,7 +5,7 @@
  */
 
 import { Actions } from '.';
-import { Feature } from '../../../../xpack_main/types';
+import { Feature } from '../../../../../../plugins/features/server';
 import { disableUICapabilitesFactory } from './disable_ui_capabilities';
 
 interface MockServerOptions {

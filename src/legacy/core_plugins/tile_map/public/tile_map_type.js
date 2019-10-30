@@ -27,7 +27,7 @@ import { colorSchemas } from 'ui/vislib/components/color/truncated_colormaps';
 import { convertToGeoJson } from 'ui/vis/map/convert_to_geojson';
 
 import { createTileMapVisualization } from './tile_map_visualization';
-import { visFactory } from '../../visualizations/public/np_ready/public';
+import { visFactory } from '../../visualizations/public';
 import { TileMapOptions } from './components/tile_map_options';
 import { MapTypes } from './map_types';
 
@@ -119,7 +119,7 @@ export function createTileMapTypeDefinition(dependencies) {
         ],
         tmsLayers: [],
       },
-      optionsTemplate: props => <TileMapOptions {...props} serviceSettings={serviceSettings} />,
+      optionsTemplate: (props) => <TileMapOptions {...props} />,
       schemas: new Schemas([
         {
           group: 'metrics',
@@ -143,6 +143,22 @@ export function createTileMapTypeDefinition(dependencies) {
           max: 1,
         },
       ]),
+    },
+    setup: async (savedVis) => {
+      const vis = savedVis.vis;
+      let tmsLayers;
+
+      try {
+        tmsLayers = await serviceSettings.getTMSServices();
+      } catch (e) {
+        return savedVis;
+      }
+
+      vis.type.editorConfig.collections.tmsLayers = tmsLayers;
+      if (!vis.params.wms.selectedTmsLayer && tmsLayers.length) {
+        vis.params.wms.selectedTmsLayer = tmsLayers[0];
+      }
+      return savedVis;
     },
   });
 }

@@ -26,6 +26,7 @@ export default function ({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'visualize', 'timePicker']);
 
+  // FLAKY: https://github.com/elastic/kibana/issues/45089
   describe('gauge chart', function indexPatternCreation() {
     this.tags('smoke');
     const fromTime = '2015-09-19 06:31:44.000';

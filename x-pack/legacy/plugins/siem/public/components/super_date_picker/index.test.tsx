@@ -265,6 +265,7 @@ describe('SIEM Super Date Picker', () => {
         const wrapperFixedEuiFieldSearch = wrapper.find(
           'input[data-test-subj="superDatePickerRefreshIntervalInput"]'
         );
+
         wrapperFixedEuiFieldSearch.simulate('change', { target: { value: '2' } });
         wrapper.update();
 
@@ -427,7 +428,7 @@ describe('SIEM Super Date Picker', () => {
         const mapStateToProps = makeMapStateToProps();
         const props1 = mapStateToProps(state, { id: 'global' });
         const clone = cloneDeep(state);
-        clone.inputs.global.query = [
+        clone.inputs.global.queries = [
           {
             loading: true,
             id: '1',
@@ -445,7 +446,7 @@ describe('SIEM Super Date Picker', () => {
         const mapStateToProps = makeMapStateToProps();
         const props1 = mapStateToProps(state, { id: 'global' });
         const clone = cloneDeep(state);
-        clone.inputs.global.query = [
+        clone.inputs.global.queries = [
           {
             loading: true,
             id: '1',
@@ -456,7 +457,7 @@ describe('SIEM Super Date Picker', () => {
           },
         ];
         const props2 = mapStateToProps(clone, { id: 'global' });
-        expect(props1.refetch).not.toBe(props2.refetch);
+        expect(props1.queries).not.toBe(props2.queries);
       });
     });
   });

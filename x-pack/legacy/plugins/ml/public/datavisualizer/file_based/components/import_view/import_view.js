@@ -548,7 +548,7 @@ export class ImportView extends Component {
 
 async function createKibanaIndexPattern(indexPatternName, indexPatterns, timeFieldName, kibanaConfig) {
   try {
-    const emptyPattern = await indexPatterns.get();
+    const emptyPattern = await indexPatterns.make();
 
     Object.assign(emptyPattern, {
       id: '',

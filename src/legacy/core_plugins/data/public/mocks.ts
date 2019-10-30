@@ -17,19 +17,16 @@
  * under the License.
  */
 
-import { DataSetup } from '.';
-import { filterServiceMock } from './filter/filter_service.mock';
 import { indexPatternsServiceMock } from './index_patterns/index_patterns_service.mock';
 import { queryServiceMock } from './query/query_service.mock';
+import { timefilterServiceMock } from './timefilter/timefilter_service.mock';
 
 function createDataSetupMock() {
-  const mock: MockedKeys<Partial<DataSetup>> = {
-    filter: filterServiceMock.createSetupContract(),
+  return {
     indexPatterns: indexPatternsServiceMock.createSetupContract(),
     query: queryServiceMock.createSetupContract(),
+    timefilter: timefilterServiceMock.createSetupContract(),
   };
-
-  return mock;
 }
 
 function createDataStartMock() {

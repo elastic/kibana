@@ -17,21 +17,21 @@
  * under the License.
  */
 
-import Promise from 'bluebird';
+import Bluebird from 'bluebird';
 import kibanaVersion from './kibana_version';
 import { ensureEsVersion } from './ensure_es_version';
 
-export default function (plugin, server, requestDelay) {
+export default function (plugin, server, requestDelay, ignoreVersionMismatch) {
   plugin.status.yellow('Waiting for Elasticsearch');
 
   function waitUntilReady() {
-    return new Promise((resolve) => {
+    return new Bluebird((resolve) => {
       plugin.status.once('green', resolve);
     });
   }
 
   function check() {
-    return ensureEsVersion(server, kibanaVersion.get())
+    return ensureEsVersion(server, kibanaVersion.get(), ignoreVersionMismatch)
       .then(() => plugin.status.green('Ready'))
       .catch(err => plugin.status.red(err));
   }

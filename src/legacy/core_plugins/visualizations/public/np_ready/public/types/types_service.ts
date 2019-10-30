@@ -17,22 +17,28 @@
  * under the License.
  */
 
-/* eslint-disable @kbn/eslint/no-restricted-paths */
-// @ts-ignore
-import { visFactory } from 'ui/vis/vis_factory';
-// @ts-ignore
-import { DefaultEditorSize } from 'ui/vis/editor_size';
-import * as types from 'ui/vis/vis';
-/* eslint-enable @kbn/eslint/no-restricted-paths */
+import { IconType } from '@elastic/eui';
+import { visTypeAliasRegistry, VisTypeAlias } from './vis_type_alias_registry';
 
-import { VisTypeAliasRegistry, VisTypeAlias } from './vis_type_alias_registry';
+export interface VisType {
+  name: string;
+  title: string;
+  description?: string;
+  visualization: any;
+  isAccessible?: boolean;
+  requestHandler: string;
+  responseHandler: string;
+  icon?: IconType;
+  image?: string;
+  stage: 'experimental' | 'beta' | 'production';
+  requiresSearch: boolean;
+  hidden: boolean;
 
-interface SetupDependencies {
-  Vis: any;
-  VisFactoryProvider: any;
-  VisTypesRegistryProvider: any;
-  defaultFeedbackMessage: any;
-  visTypeAliasRegistry: VisTypeAliasRegistry;
+  // Since we haven't typed everything here yet, we basically "any" the rest
+  // of that interface. This should be removed as soon as this type definition
+  // has been completed. But that way we at least have typing for a couple of
+  // properties on that type.
+  [key: string]: any;
 }
 
 /**
@@ -41,21 +47,43 @@ interface SetupDependencies {
  * @internal
  */
 export class TypesService {
-  public setup({
-    Vis,
-    VisFactoryProvider,
-    VisTypesRegistryProvider,
-    defaultFeedbackMessage,
-    visTypeAliasRegistry,
-  }: SetupDependencies) {
+  private types: Record<string, VisType> = {};
+  private unregisteredHiddenTypes: string[] = [];
+  public setup() {
     return {
-      Vis,
-      VisFactoryProvider,
-      registerVisualization: (registerFn: () => any) => {
-        VisTypesRegistryProvider.register(registerFn);
+      registerVisualization: (registerFn: () => VisType) => {
+        const visDefinition = registerFn();
+        if (this.unregisteredHiddenTypes.includes(visDefinition.name)) {
+          visDefinition.hidden = true;
+        }
+
+        if (this.types[visDefinition.name]) {
+          throw new Error('type already exists!');
+        }
+        this.types[visDefinition.name] = visDefinition;
       },
-      defaultFeedbackMessage, // make default in base vis type, or move?
-      visTypeAliasRegistry,
+      registerAlias: visTypeAliasRegistry.add,
+      hideTypes: (typeNames: string[]) => {
+        typeNames.forEach((name: string) => {
+          if (this.types[name]) {
+            this.types[name].hidden = true;
+          } else {
+            this.unregisteredHiddenTypes.push(name);
+          }
+        });
+      },
+    };
+  }
+
+  public start() {
+    return {
+      get: (visualization: string) => {
+        return this.types[visualization];
+      },
+      all: () => {
+        return [...Object.values(this.types)];
+      },
+      getAliases: visTypeAliasRegistry.get,
     };
   }
 
@@ -64,17 +92,12 @@ export class TypesService {
   }
 }
 
-/** @public */
+/** @internal */
 export type TypesSetup = ReturnType<TypesService['setup']>;
-
-export { visFactory, DefaultEditorSize };
+export type TypesStart = ReturnType<TypesService['start']>;
 
 /** @public types */
-export type VisTypeAlias = VisTypeAlias;
-export type Vis = types.Vis;
-export type VisParams = types.VisParams;
-export type VisProvider = types.VisProvider;
-export type VisState = types.VisState;
-// todo: this breaks it // export { VisualizationController, VisType } from 'ui/vis/vis_types/vis_type';
-export { VisTypesRegistry } from 'ui/registry/vis_types';
-export { Status } from 'ui/vis/update_status';
+export { VisTypeAlias };
+
+/** @public static code */
+// TODO once items are moved from ui/vis into this service

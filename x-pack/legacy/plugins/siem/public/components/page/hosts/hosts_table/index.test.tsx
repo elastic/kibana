@@ -9,7 +9,6 @@ import toJson from 'enzyme-to-json';
 import { getOr } from 'lodash/fp';
 import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
-import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import {
   apolloClientObservable,
@@ -17,11 +16,24 @@ import {
   mockGlobalState,
   TestProviders,
 } from '../../../../mock';
+import { mockUiSettings } from '../../../../mock/ui_settings';
+import { useKibanaCore } from '../../../../lib/compose/kibana_core';
 import { createStore, hostsModel, State } from '../../../../store';
-
+import { HostsTableType } from '../../../../store/hosts/model';
 import { HostsTable } from './index';
 import { mockData } from './mock';
-import { HostsTableType } from '../../../../store/hosts/model';
+
+const mockUseKibanaCore = useKibanaCore as jest.Mock;
+jest.mock('../../../../lib/compose/kibana_core');
+mockUseKibanaCore.mockImplementation(() => ({
+  uiSettings: mockUiSettings,
+}));
+
+// Test will fail because we will to need to mock some core services to make the test work
+// For now let's forget about SiemSearchBar
+jest.mock('../../../search_bar', () => ({
+  SiemSearchBar: () => null,
+}));
 
 describe('Hosts Table', () => {
   const loadPage = jest.fn();
@@ -36,10 +48,11 @@ describe('Hosts Table', () => {
   describe('rendering', () => {
     test('it renders the default Hosts table', () => {
       const wrapper = shallow(
-        <ReduxStoreProvider store={store}>
+        <TestProviders store={store}>
           <HostsTable
             data={mockData.Hosts.edges}
             id="hostsQuery"
+            isInspect={false}
             indexPattern={mockIndexPattern}
             fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.Hosts.pageInfo)}
             loading={false}
@@ -48,7 +61,7 @@ describe('Hosts Table', () => {
             totalCount={mockData.Hosts.totalCount}
             type={hostsModel.HostsType.page}
           />
-        </ReduxStoreProvider>
+        </TestProviders>
       );
 
       expect(toJson(wrapper)).toMatchSnapshot();
@@ -60,6 +73,7 @@ describe('Hosts Table', () => {
           <TestProviders store={store}>
             <HostsTable
               id="hostsQuery"
+              isInspect={false}
               indexPattern={mockIndexPattern}
               loading={false}
               data={mockData.Hosts.edges}
@@ -84,6 +98,7 @@ describe('Hosts Table', () => {
               <HostsTable
                 id="hostsQuery"
                 indexPattern={mockIndexPattern}
+                isInspect={false}
                 loading={false}
                 data={mockData.Hosts.edges}
                 totalCount={mockData.Hosts.totalCount}
@@ -140,7 +155,7 @@ describe('Hosts Table', () => {
             .find('.euiTable thead tr th button')
             .first()
             .text()
-        ).toEqual('NameClick to sort in descending order');
+        ).toEqual('Host nameClick to sort in descending order');
       });
     });
   });

@@ -12,7 +12,6 @@ import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 import { JOB_TYPE } from '../../../../../common/job_creator/util/constants';
 
 interface Props {
-  children: JSX.Element;
   jobType: JOB_TYPE;
 }
 
@@ -23,7 +22,7 @@ export const Description: FC<Props> = memo(({ children, jobType }) => {
     });
     return (
       <EuiDescribedFormGroup
-        idAria="single-example-aria"
+        idAria="description"
         title={<h3>{title}</h3>}
         description={
           <FormattedMessage
@@ -32,8 +31,8 @@ export const Description: FC<Props> = memo(({ children, jobType }) => {
           />
         }
       >
-        <EuiFormRow label={title} describedByIds={['single-example-aria']}>
-          {children}
+        <EuiFormRow label={title} describedByIds={['description']}>
+          <>{children}</>
         </EuiFormRow>
       </EuiDescribedFormGroup>
     );
@@ -43,7 +42,7 @@ export const Description: FC<Props> = memo(({ children, jobType }) => {
     });
     return (
       <EuiDescribedFormGroup
-        idAria="single-example-aria"
+        idAria="description"
         title={<h3>{title}</h3>}
         description={
           <FormattedMessage
@@ -52,8 +51,8 @@ export const Description: FC<Props> = memo(({ children, jobType }) => {
           />
         }
       >
-        <EuiFormRow label={title} describedByIds={['single-example-aria']}>
-          {children}
+        <EuiFormRow label={title} describedByIds={['description']}>
+          <>{children}</>
         </EuiFormRow>
       </EuiDescribedFormGroup>
     );

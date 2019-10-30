@@ -15,5 +15,5 @@ export interface HttpErrorResponse extends HttpResponse
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [error](./kibana-plugin-public.httperrorresponse.error.md) | <code>Error &#124; HttpFetchError</code> |  |
+|  [error](./kibana-plugin-public.httperrorresponse.error.md) | <code>Error &#124; IHttpFetchError</code> |  |
 

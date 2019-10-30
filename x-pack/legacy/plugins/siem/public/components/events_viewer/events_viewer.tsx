@@ -4,17 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiPanel } from '@elastic/eui';
-import { getOr, isEmpty } from 'lodash/fp';
+import { EuiPanel } from '@elastic/eui';
+import { Filter, getEsQueryConfig } from '@kbn/es-query';
+import { getOr, isEmpty, isEqual } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 import { StaticIndexPattern } from 'ui/index_patterns';
+import { Query } from 'src/plugins/data/common';
 
-import { AutoSizer } from '../auto_sizer';
 import { BrowserFields } from '../../containers/source';
 import { TimelineQuery } from '../../containers/timeline';
 import { Direction } from '../../graphql/types';
+import { useKibanaCore } from '../../lib/compose/kibana_core';
 import { KqlMode } from '../../store/timeline/model';
+import { AutoSizer } from '../auto_sizer';
+import { HeaderPanel } from '../header_panel';
 import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import { defaultHeaders } from '../timeline/body/column_headers/default_headers';
 import { Sort } from '../timeline/body/sort';
@@ -25,32 +29,22 @@ import { Footer, footerHeight } from '../timeline/footer';
 import { combineQueries } from '../timeline/helpers';
 import { TimelineRefetch } from '../timeline/refetch_timeline';
 import { isCompactFooter } from '../timeline/timeline';
-import { TimelineContext, TimelineWidthContext } from '../timeline/timeline_context';
-
-import { EventsViewerHeader } from './events_viewer_header';
+import { ManageTimelineContext } from '../timeline/timeline_context';
+import * as i18n from './translations';
 
 const DEFAULT_EVENTS_VIEWER_HEIGHT = 500;
 
 const WrappedByAutoSizer = styled.div`
   width: 100%;
 `; // required by AutoSizer
-
 WrappedByAutoSizer.displayName = 'WrappedByAutoSizer';
-
-const EventsViewerContainer = styled(EuiFlexGroup)`
-  overflow: hidden;
-  padding: 0 10px 0 12px;
-  user-select: none;
-  width: 100%;
-`;
-
-EventsViewerContainer.displayName = 'EventsViewerContainer';
 
 interface Props {
   browserFields: BrowserFields;
   columns: ColumnHeader[];
   dataProviders: DataProvider[];
   end: number;
+  filters: Filter[];
   height?: number;
   id: string;
   indexPattern: StaticIndexPattern;
@@ -58,8 +52,8 @@ interface Props {
   itemsPerPage: number;
   itemsPerPageOptions: number[];
   kqlMode: KqlMode;
-  kqlQueryExpression: string;
   onChangeItemsPerPage: OnChangeItemsPerPage;
+  query: Query;
   showInspect: boolean;
   start: number;
   sort: Sort;
@@ -72,6 +66,7 @@ export const EventsViewer = React.memo<Props>(
     columns,
     dataProviders,
     end,
+    filters,
     height = DEFAULT_EVENTS_VIEWER_HEIGHT,
     id,
     indexPattern,
@@ -79,36 +74,33 @@ export const EventsViewer = React.memo<Props>(
     itemsPerPage,
     itemsPerPageOptions,
     kqlMode,
-    kqlQueryExpression,
     onChangeItemsPerPage,
+    query,
     showInspect,
     start,
     sort,
     toggleColumn,
   }) => {
     const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
-
-    const combinedQueries = combineQueries(
+    const core = useKibanaCore();
+    const combinedQueries = combineQueries({
+      config: getEsQueryConfig(core.uiSettings),
       dataProviders,
       indexPattern,
       browserFields,
-      kqlQueryExpression,
+      filters,
+      kqlQuery: query,
       kqlMode,
       start,
       end,
-      true
-    );
+      isEventViewer: true,
+    });
 
     return (
       <EuiPanel data-test-subj="events-viewer-panel" grow={false}>
         <AutoSizer detectAnyWindowResize={true} content>
           {({ measureRef, content: { width = 0 } }) => (
-            <EventsViewerContainer
-              data-test-subj="events-viewer-container"
-              direction="column"
-              gutterSize="none"
-              justifyContent="flexStart"
-            >
+            <>
               <WrappedByAutoSizer innerRef={measureRef}>
                 <div
                   data-test-subj="events-viewer-measured"
@@ -138,49 +130,63 @@ export const EventsViewer = React.memo<Props>(
                     refetch,
                     totalCount = 0,
                   }) => (
-                    <TimelineRefetch loading={loading} id={id} inspect={inspect} refetch={refetch}>
-                      <EventsViewerHeader
+                    <>
+                      <HeaderPanel
                         id={id}
                         showInspect={showInspect}
-                        totalCount={totalCount}
+                        subtitle={`${i18n.SHOWING}: ${totalCount.toLocaleString()} ${i18n.UNIT(
+                          totalCount
+                        )}`}
+                        title={i18n.EVENTS}
                       />
 
-                      <div data-test-subj="events-container" style={{ width: `${width}px` }}>
-                        <TimelineContext.Provider value={loading}>
-                          <TimelineWidthContext.Provider value={width}>
-                            <StatefulBody
-                              browserFields={browserFields}
-                              data={events}
-                              id={id}
-                              isEventViewer={true}
-                              height={height}
-                              sort={sort}
-                              toggleColumn={toggleColumn}
-                            />
-                            <Footer
-                              compact={isCompactFooter(width)}
-                              getUpdatedAt={getUpdatedAt}
-                              hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                              height={footerHeight}
-                              isLive={isLive}
-                              isLoading={loading}
-                              itemsCount={events.length}
-                              itemsPerPage={itemsPerPage}
-                              itemsPerPageOptions={itemsPerPageOptions}
-                              onChangeItemsPerPage={onChangeItemsPerPage}
-                              onLoadMore={loadMore}
-                              nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                              serverSideEventCount={totalCount}
-                              tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
-                            />
-                          </TimelineWidthContext.Provider>
-                        </TimelineContext.Provider>
+                      <div
+                        data-test-subj={`events-container-loading-${loading}`}
+                        style={{ width: `${width}px` }}
+                      >
+                        <ManageTimelineContext loading={loading} width={width}>
+                          <TimelineRefetch
+                            id={id}
+                            inputId="global"
+                            inspect={inspect}
+                            loading={loading}
+                            refetch={refetch}
+                          />
+
+                          <StatefulBody
+                            browserFields={browserFields}
+                            data={events}
+                            id={id}
+                            isEventViewer={true}
+                            height={height}
+                            sort={sort}
+                            toggleColumn={toggleColumn}
+                          />
+
+                          <Footer
+                            compact={isCompactFooter(width)}
+                            getUpdatedAt={getUpdatedAt}
+                            hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                            height={footerHeight}
+                            isEventViewer={true}
+                            isLive={isLive}
+                            isLoading={loading}
+                            itemsCount={events.length}
+                            itemsPerPage={itemsPerPage}
+                            itemsPerPageOptions={itemsPerPageOptions}
+                            onChangeItemsPerPage={onChangeItemsPerPage}
+                            onLoadMore={loadMore}
+                            nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                            serverSideEventCount={totalCount}
+                            tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
+                          />
+                        </ManageTimelineContext>
                       </div>
-                    </TimelineRefetch>
+                    </>
                   )}
                 </TimelineQuery>
               ) : null}
-            </EventsViewerContainer>
+            </>
           )}
         </AutoSizer>
       </EuiPanel>
@@ -191,6 +197,7 @@ export const EventsViewer = React.memo<Props>(
     prevProps.columns === nextProps.columns &&
     prevProps.dataProviders === nextProps.dataProviders &&
     prevProps.end === nextProps.end &&
+    isEqual(prevProps.filters, nextProps.filters) &&
     prevProps.height === nextProps.height &&
     prevProps.id === nextProps.id &&
     prevProps.indexPattern === nextProps.indexPattern &&
@@ -198,10 +205,9 @@ export const EventsViewer = React.memo<Props>(
     prevProps.itemsPerPage === nextProps.itemsPerPage &&
     prevProps.itemsPerPageOptions === nextProps.itemsPerPageOptions &&
     prevProps.kqlMode === nextProps.kqlMode &&
-    prevProps.kqlQueryExpression === nextProps.kqlQueryExpression &&
+    isEqual(prevProps.query, nextProps.query) &&
     prevProps.showInspect === nextProps.showInspect &&
     prevProps.start === nextProps.start &&
     prevProps.sort === nextProps.sort
 );
-
 EventsViewer.displayName = 'EventsViewer';

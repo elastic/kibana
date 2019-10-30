@@ -49,5 +49,5 @@ export const AnalysisUnavailableContent: React.FunctionComponent<{}> = () => (
 );
 
 const EmptyPrompt = euiStyled(EuiEmptyPrompt)`
-  max-width: 50vw;
+  align-self: center;
 `;

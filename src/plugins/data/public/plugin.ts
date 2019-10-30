@@ -18,20 +18,42 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
-import { ExpressionsService } from './expressions/expressions_service';
+import { DataPublicPluginSetup, DataPublicPluginStart } from './types';
+import { AutocompleteProviderRegister } from './autocomplete_provider';
+import { getSuggestionsProvider } from './suggestions_provider';
+import { SearchService } from './search/search_service';
+import { QueryService } from './query';
 
-export class DataPublicPlugin implements Plugin<{}> {
-  expressions = new ExpressionsService();
+export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPublicPluginStart> {
+  private readonly autocomplete = new AutocompleteProviderRegister();
+  private readonly searchService: SearchService;
+  private readonly queryService: QueryService;
 
-  constructor(initializerContext: PluginInitializerContext) {}
+  constructor(initializerContext: PluginInitializerContext) {
+    this.searchService = new SearchService(initializerContext);
+    this.queryService = new QueryService();
+  }
 
-  public setup(core: CoreSetup) {
-    const expressions = this.expressions.setup();
+  public setup(core: CoreSetup): DataPublicPluginSetup {
     return {
-      expressions,
+      autocomplete: this.autocomplete,
+      search: this.searchService.setup(core),
+      query: this.queryService.setup({
+        uiSettings: core.uiSettings,
+      }),
     };
   }
 
-  public start(core: CoreStart) {}
-  public stop() {}
+  public start(core: CoreStart): DataPublicPluginStart {
+    return {
+      autocomplete: this.autocomplete,
+      getSuggestions: getSuggestionsProvider(core.uiSettings, core.http),
+      search: this.searchService.start(core),
+      query: this.queryService.start(),
+    };
+  }
+
+  public stop() {
+    this.autocomplete.clearProviders();
+  }
 }

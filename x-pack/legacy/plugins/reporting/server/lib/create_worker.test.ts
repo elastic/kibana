@@ -5,12 +5,12 @@
  */
 
 import * as sinon from 'sinon';
-import { KbnServer } from '../../types';
+import { ServerFacade } from '../../types';
 import { createWorkerFactory } from './create_worker';
 // @ts-ignore
 import { Esqueue } from './esqueue';
 // @ts-ignore
-import { ClientMock } from './esqueue/__tests__/fixtures/elasticsearch';
+import { ClientMock } from './esqueue/__tests__/fixtures/legacy_elasticsearch';
 
 const configGetStub = sinon.stub();
 configGetStub.withArgs('xpack.reporting.queue').returns({
@@ -24,13 +24,13 @@ const executeJobFactoryStub = sinon.stub();
 
 const getMockServer = (
   exportTypes: any[] = [{ executeJobFactory: executeJobFactoryStub }]
-): KbnServer => {
+): ServerFacade => {
   return ({
     log: sinon.stub(),
     expose: sinon.stub(),
     config: () => ({ get: configGetStub }),
     plugins: { reporting: { exportTypesRegistry: { getAll: () => exportTypes } } },
-  } as unknown) as KbnServer;
+  } as unknown) as ServerFacade;
 };
 
 describe('Create Worker', () => {

@@ -8,7 +8,7 @@ import { createMockServer } from './_mock_server';
 import { updateAlertRoute } from './update';
 
 const { server, alertsClient } = createMockServer();
-updateAlertRoute(server);
+server.route(updateAlertRoute);
 
 beforeEach(() => jest.resetAllMocks());
 
@@ -35,6 +35,7 @@ test('calls the update function with proper parameters', async () => {
     method: 'PUT',
     url: '/api/alert/1',
     payload: {
+      throttle: null,
       interval: '12s',
       alertTypeParams: {
         otherField: false,
@@ -74,6 +75,7 @@ test('calls the update function with proper parameters', async () => {
             "otherField": false,
           },
           "interval": "12s",
+          "throttle": null,
         },
         "id": "1",
       },

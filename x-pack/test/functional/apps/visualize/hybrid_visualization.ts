@@ -83,7 +83,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       await PageObjects.visualize.waitForVisualizationRenderingStabilized();
       await inspector.open();
-      await inspector.setTablePageSize('50');
+      await inspector.setTablePageSize(50);
       await inspector.expectTableData(expectedData);
     });
   });

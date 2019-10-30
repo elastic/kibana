@@ -57,7 +57,8 @@ import { capabilities } from 'ui/capabilities';
 import { Subscription } from 'rxjs';
 import { npStart } from 'ui/new_platform';
 import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
-import { data } from '../../../data/public/setup';
+import { extractTimeFilter, changeTimeFilter } from '../../../data/public';
+import { start as data } from '../../../data/public/legacy';
 
 import {
   DashboardContainer,
@@ -109,9 +110,7 @@ export class DashboardAppController {
     indexPatterns,
     config,
     confirmModal,
-    courier,
   }: {
-    courier: { fetch: () => void };
     $scope: DashboardAppScope;
     $route: any;
     $routeParams: any;
@@ -257,7 +256,7 @@ export class DashboardAppController {
             updateIndexPatterns(dashboardContainer);
           });
 
-          inputSubscription = dashboardContainer.getInput$().subscribe(async () => {
+          inputSubscription = dashboardContainer.getInput$().subscribe(() => {
             let dirty = false;
 
             // This has to be first because handleDashboardContainerChanges causes
@@ -265,7 +264,7 @@ export class DashboardAppController {
 
             // Add filters modifies the object passed to it, hence the clone deep.
             if (!_.isEqual(container.getInput().filters, queryFilter.getFilters())) {
-              await queryFilter.addFilters(_.cloneDeep(container.getInput().filters));
+              queryFilter.addFilters(_.cloneDeep(container.getInput().filters));
 
               dashboardStateManager.applyFilters($scope.model.query, container.getInput().filters);
               dirty = true;
@@ -331,7 +330,8 @@ export class DashboardAppController {
       getDashboardTitle(
         dashboardStateManager.getTitle(),
         dashboardStateManager.getViewMode(),
-        dashboardStateManager.getIsDirty(timefilter)
+        dashboardStateManager.getIsDirty(timefilter),
+        dashboardStateManager.isNew()
       );
 
     // Push breadcrumbs to new header navigation
@@ -422,7 +422,23 @@ export class DashboardAppController {
     };
 
     $scope.onApplyFilters = filters => {
-      queryFilter.addFiltersAndChangeTimeFilter(filters);
+      if (filters.length) {
+        // All filters originated from one visualization.
+        const indexPatternId = filters[0].meta.index;
+        const indexPattern = _.find(
+          $scope.indexPatterns,
+          (p: IndexPattern) => p.id === indexPatternId
+        );
+        if (indexPattern && indexPattern.timeFieldName) {
+          const { timeRangeFilter, restOfFilters } = extractTimeFilter(
+            indexPattern.timeFieldName,
+            filters
+          );
+          queryFilter.addFilters(restOfFilters);
+          if (timeRangeFilter) changeTimeFilter(timefilter, timeRangeFilter);
+        }
+      }
+
       $scope.appState.$newFilters = [];
     };
 
@@ -437,7 +453,6 @@ export class DashboardAppController {
     $scope.onClearSavedQuery = () => {
       delete $scope.savedQuery;
       dashboardStateManager.setSavedQueryId(undefined);
-      queryFilter.removeAll();
       dashboardStateManager.applyFilters(
         {
           query: '',
@@ -446,10 +461,12 @@ export class DashboardAppController {
         },
         []
       );
+      // Making this method sync broke the updates.
+      // Temporary fix, until we fix the complex state in this file.
+      setTimeout(queryFilter.removeAll, 0);
     };
 
     const updateStateFromSavedQuery = (savedQuery: SavedQuery) => {
-      queryFilter.setFilters(savedQuery.attributes.filters || []);
       dashboardStateManager.applyFilters(
         savedQuery.attributes.query,
         savedQuery.attributes.filters || []
@@ -463,15 +480,18 @@ export class DashboardAppController {
           timefilter.setRefreshInterval(savedQuery.attributes.timefilter.refreshInterval);
         }
       }
+      // Making this method sync broke the updates.
+      // Temporary fix, until we fix the complex state in this file.
+      setTimeout(() => {
+        queryFilter.setFilters(savedQuery.attributes.filters || []);
+      }, 0);
     };
 
-    $scope.$watch('savedQuery', (newSavedQuery: SavedQuery, oldSavedQuery: SavedQuery) => {
+    $scope.$watch('savedQuery', (newSavedQuery: SavedQuery) => {
       if (!newSavedQuery) return;
       dashboardStateManager.setSavedQueryId(newSavedQuery.id);
 
-      if (newSavedQuery.id === (oldSavedQuery && oldSavedQuery.id)) {
-        updateStateFromSavedQuery(newSavedQuery);
-      }
+      updateStateFromSavedQuery(newSavedQuery);
     });
 
     $scope.$watch(
@@ -483,13 +503,14 @@ export class DashboardAppController {
           $scope.savedQuery = undefined;
           return;
         }
-
-        savedQueryService.getSavedQuery(newSavedQueryId).then((savedQuery: SavedQuery) => {
-          $scope.$evalAsync(() => {
-            $scope.savedQuery = savedQuery;
-            updateStateFromSavedQuery(savedQuery);
+        if (!$scope.savedQuery || newSavedQueryId !== $scope.savedQuery.id) {
+          savedQueryService.getSavedQuery(newSavedQueryId).then((savedQuery: SavedQuery) => {
+            $scope.$evalAsync(() => {
+              $scope.savedQuery = savedQuery;
+              updateStateFromSavedQuery(savedQuery);
+            });
           });
-        });
+        }
       }
     );
 

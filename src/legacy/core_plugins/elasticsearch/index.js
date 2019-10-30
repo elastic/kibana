@@ -37,7 +37,7 @@ export default function (kibana) {
       // value from all observables here to be able to synchronously return and create
       // cluster clients afterwards.
       const [esConfig, adminCluster, dataCluster] = await combineLatest(
-        server.newPlatform.setup.core.elasticsearch.legacy.config$,
+        server.newPlatform.__internals.elasticsearch.legacy.config$,
         server.newPlatform.setup.core.elasticsearch.adminClient$,
         server.newPlatform.setup.core.elasticsearch.dataClient$
       ).pipe(
@@ -98,10 +98,14 @@ export default function (kibana) {
       createProxy(server);
 
       // Set up the health check service and start it.
-      const { start, waitUntilReady } = healthCheck(this, server, esConfig.healthCheckDelay.asMilliseconds());
+      const { start, waitUntilReady } = healthCheck(
+        this,
+        server,
+        esConfig.healthCheckDelay.asMilliseconds(),
+        esConfig.ignoreVersionMismatch
+      );
       server.expose('waitUntilReady', waitUntilReady);
       start();
-    }
+    },
   });
-
 }

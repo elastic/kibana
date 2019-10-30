@@ -97,11 +97,18 @@ export const initialTimelineState: TimelineState = {
 export const timelineReducer = reducerWithInitialState(initialTimelineState)
   .case(addTimeline, (state, { id, timeline }) => ({
     ...state,
-    timelineById: addTimelineToStore({ id, timeline }),
+    timelineById: addTimelineToStore({ id, timeline, timelineById: state.timelineById }),
   }))
-  .case(createTimeline, (state, { id, show, columns }) => ({
+  .case(createTimeline, (state, { id, show, columns, itemsPerPage, sort }) => ({
     ...state,
-    timelineById: addNewTimeline({ columns, id, show, timelineById: state.timelineById }),
+    timelineById: addNewTimeline({
+      columns,
+      id,
+      itemsPerPage,
+      sort,
+      show,
+      timelineById: state.timelineById,
+    }),
   }))
   .case(upsertColumn, (state, { column, id, index }) => ({
     ...state,

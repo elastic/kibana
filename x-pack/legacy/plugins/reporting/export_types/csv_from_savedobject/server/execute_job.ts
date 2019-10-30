@@ -4,35 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'hapi';
 import { i18n } from '@kbn/i18n';
-
 import { cryptoFactory, LevelLogger, oncePerServer } from '../../../server/lib';
-import { JobDocOutputExecuted, KbnServer, ExecuteImmediateJobFactory } from '../../../types';
+import {
+  JobDocOutputExecuted,
+  ServerFacade,
+  ExecuteImmediateJobFactory,
+  RequestFacade,
+} from '../../../types';
 import {
   CONTENT_TYPE_CSV,
   CSV_FROM_SAVEDOBJECT_JOB_TYPE,
   PLUGIN_ID,
 } from '../../../common/constants';
-import { CsvResultFromSearch, JobDocPayloadPanelCsv } from '../types';
+import { CsvResultFromSearch, JobDocPayloadPanelCsv, FakeRequest } from '../types';
 import { createGenerateCsv } from './lib';
-
-interface FakeRequest {
-  headers: any;
-  getBasePath: (opts: any) => string;
-  server: KbnServer;
-}
 
 type ExecuteJobFn = (
   jobId: string | null,
   job: JobDocPayloadPanelCsv,
-  realRequest?: Request
+  realRequest?: RequestFacade
 ) => Promise<JobDocOutputExecuted>;
 
-function executeJobFactoryFn(server: KbnServer): ExecuteJobFn {
+function executeJobFactoryFn(server: ServerFacade): ExecuteJobFn {
   const crypto = cryptoFactory(server);
-  const config = server.config();
-  const serverBasePath = config.get('server.basePath');
   const logger = LevelLogger.createForServer(server, [
     PLUGIN_ID,
     CSV_FROM_SAVEDOBJECT_JOB_TYPE,
@@ -42,19 +37,19 @@ function executeJobFactoryFn(server: KbnServer): ExecuteJobFn {
   return async function executeJob(
     jobId: string | null,
     job: JobDocPayloadPanelCsv,
-    realRequest?: Request
+    realRequest?: RequestFacade
   ): Promise<JobDocOutputExecuted> {
     // There will not be a jobID for "immediate" generation.
     // jobID is only for "queued" jobs
     // Use the jobID as a logging tag or "immediate"
     const jobLogger = logger.clone([jobId === null ? 'immediate' : jobId]);
 
-    const { basePath, jobParams } = job;
+    const { jobParams } = job;
     const { isImmediate, panel, visType } = jobParams;
 
     jobLogger.debug(`Execute job generating [${visType}] csv`);
 
-    let requestObject: Request | FakeRequest;
+    let requestObject: RequestFacade | FakeRequest;
     if (isImmediate && realRequest) {
       jobLogger.info(`Executing job from immediate API`);
       requestObject = realRequest;
@@ -80,7 +75,6 @@ function executeJobFactoryFn(server: KbnServer): ExecuteJobFn {
 
       requestObject = {
         headers: decryptedHeaders,
-        getBasePath: () => basePath || serverBasePath,
         server,
       };
     }

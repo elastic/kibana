@@ -18,19 +18,22 @@ interface Props {
 export const AdditionalSection: FC<Props> = ({ additionalExpanded, setAdditionalExpanded }) => {
   return null; // disable this section until custom URLs component is ready
   return (
-    <EuiAccordion
-      id="advanced-section"
-      buttonContent={ButtonContent}
-      onToggle={setAdditionalExpanded}
-      initialIsOpen={additionalExpanded}
-    >
+    <Fragment>
       <EuiSpacer />
-      <EuiFlexGroup gutterSize="xl" style={{ marginLeft: '0px', marginRight: '0px' }}>
-        <EuiFlexItem>
-          <CalendarsSelection />
-        </EuiFlexItem>
-        <EuiFlexItem></EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiAccordion>
+      <EuiAccordion
+        id="advanced-section"
+        buttonContent={ButtonContent}
+        onToggle={setAdditionalExpanded}
+        initialIsOpen={additionalExpanded}
+      >
+        <EuiSpacer />
+        <EuiFlexGroup gutterSize="xl" style={{ marginLeft: '0px', marginRight: '0px' }}>
+          <EuiFlexItem>
+            <CalendarsSelection />
+          </EuiFlexItem>
+          <EuiFlexItem />
+        </EuiFlexGroup>
+      </EuiAccordion>
+    </Fragment>
   );
 };

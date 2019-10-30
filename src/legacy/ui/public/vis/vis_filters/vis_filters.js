@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import { pushFilterBarFilters } from '../push_filters';
 import { onBrushEvent } from './brush_event';
-import { uniqFilters } from '../../../../core_plugins/data/public';
+import { uniqFilters } from '../../../../../plugins/data/public';
 import { toggleFilterNegated } from '@kbn/es-query';
 /**
  * For terms aggregations on `__other__` buckets, this assembles a list of applicable filter
@@ -118,10 +118,7 @@ const VisFiltersProvider = (getAppState, $timeout) => {
 
   return {
     pushFilters,
-    brush: (event) => {
-      onBrushEvent(event, getAppState());
-    },
   };
 };
 
-export { VisFiltersProvider, createFilter, createFiltersFromEvent };
+export { VisFiltersProvider, createFilter, createFiltersFromEvent, onBrushEvent };

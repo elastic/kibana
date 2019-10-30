@@ -250,7 +250,6 @@ exports[`Inspector Data View component should render empty state 1`] = `
           </p>
         </React.Fragment>
       }
-      iconColor="subdued"
       title={
         <h2>
           <FormattedMessage
@@ -576,9 +575,6 @@ exports[`Inspector Data View component should render loading state 1`] = `
           >
             <EuiPanel
               className="eui-textCenter"
-              grow={true}
-              hasShadow={false}
-              paddingSize="m"
             >
               <div
                 className="euiPanel euiPanel--paddingMedium eui-textCenter"

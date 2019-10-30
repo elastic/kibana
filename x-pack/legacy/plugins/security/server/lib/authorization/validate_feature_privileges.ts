@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Feature } from '../../../../xpack_main/types';
+import { Feature } from '../../../../../../plugins/features/server';
 import { areActionsFullyCovered } from '../../../common/privilege_calculator_utils';
 import { Actions } from './actions';
 import { featurePrivilegeBuilderFactory } from './privileges/feature_privilege_builder';

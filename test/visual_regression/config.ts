@@ -26,7 +26,7 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...functionalConfig.getAll(),
 
-    testFiles: [require.resolve('./tests/console_app')],
+    testFiles: [require.resolve('./tests/console_app'), require.resolve('./tests/discover')],
 
     services,
 

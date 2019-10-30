@@ -21,30 +21,25 @@ export interface EventsArgs {
 }
 
 export interface TimelineDetailsProps {
-  children?: (args: EventsArgs) => React.ReactNode;
+  children?: (args: EventsArgs) => React.ReactElement;
   indexName: string;
   eventId: string;
   executeQuery: boolean;
   sourceId: string;
 }
 
-export class TimelineDetailsComponentQuery extends React.PureComponent<TimelineDetailsProps> {
-  private memoizedDetailsEvents: (variables: string, detail: DetailItem[]) => DetailItem[];
+const getDetailsEvent = memoizeOne(
+  (variables: string, detail: DetailItem[]): DetailItem[] => detail
+);
 
-  constructor(props: TimelineDetailsProps) {
-    super(props);
-    this.memoizedDetailsEvents = memoizeOne(this.getDetailsEvent);
-  }
-
-  public render() {
-    const { children, indexName, eventId, executeQuery, sourceId } = this.props;
+export const TimelineDetailsComponentQuery = React.memo<TimelineDetailsProps>(
+  ({ children, indexName, eventId, executeQuery, sourceId }) => {
     const variables: GetTimelineDetailsQuery.Variables = {
       sourceId,
       indexName,
       eventId,
       defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
     };
-
     return executeQuery ? (
       <Query<GetTimelineDetailsQuery.Query, GetTimelineDetailsQuery.Variables>
         query={timelineDetailsQuery}
@@ -55,7 +50,7 @@ export class TimelineDetailsComponentQuery extends React.PureComponent<TimelineD
         {({ data, loading, refetch }) => {
           return children!({
             loading,
-            detailsData: this.memoizedDetailsEvents(
+            detailsData: getDetailsEvent(
               JSON.stringify(variables),
               getOr([], 'source.TimelineDetails.data', data)
             ),
@@ -66,6 +61,4 @@ export class TimelineDetailsComponentQuery extends React.PureComponent<TimelineD
       children!({ loading: false, detailsData: null })
     );
   }
-
-  private getDetailsEvent = (variables: string, detail: DetailItem[]): DetailItem[] => detail;
-}
+);

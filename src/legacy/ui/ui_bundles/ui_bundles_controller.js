@@ -17,22 +17,22 @@
  * under the License.
  */
 
-import { resolve } from 'path';
+import { resolve, relative, isAbsolute } from 'path';
 import { createHash } from 'crypto';
 import { promisify } from 'util';
-import { existsSync } from 'fs';
+import { existsSync, mkdir } from 'fs';
 
 import del from 'del';
 import { makeRe } from 'minimatch';
-import mkdirp from 'mkdirp';
 import jsonStableStringify from 'json-stable-stringify';
 
-import { IS_KIBANA_DISTRIBUTABLE } from '../../utils';
+import { IS_KIBANA_DISTRIBUTABLE, fromRoot } from '../../utils';
 
 import { UiBundle } from './ui_bundle';
 import { appEntryTemplate } from './app_entry_template';
 
-const mkdirpAsync = promisify(mkdirp);
+const mkdirAsync = promisify(mkdir);
+const REPO_ROOT = fromRoot();
 
 function getWebpackAliases(pluginSpecs) {
   return pluginSpecs.reduce((aliases, spec) => {
@@ -49,19 +49,21 @@ function getWebpackAliases(pluginSpecs) {
   }, {});
 }
 
-function sortAllArrays(input) {
-  if (Array.isArray(input)) {
-    return input
-      .map(i => sortAllArrays(i))
-      .sort((a, b) => typeof a === 'string' && typeof b === 'string' ? a.localeCompare(b) : 0);
-  }
-
-  if (typeof input === 'object') {
-    return Object.entries(input)
-      .map(([key, value]) => [key, sortAllArrays(value)]);
-  }
-
-  return input;
+// Recursively clone appExtensions, sorting array and normalizing absolute paths
+function stableCloneAppExtensions(appExtensions) {
+  return Object.fromEntries(
+    Object.entries(appExtensions).map(([extensionType, moduleIds]) => [
+      extensionType,
+      moduleIds
+        .map(moduleId => {
+          if (isAbsolute(moduleId)) {
+            moduleId = `absolute:${relative(REPO_ROOT, moduleId)}`;
+          }
+          return moduleId.replace(/\\/g, '/');
+        })
+        .sort((a, b) => a.localeCompare(b))
+    ])
+  );
 }
 
 export class UiBundlesController {
@@ -75,7 +77,7 @@ export class UiBundlesController {
       sourceMaps: config.get('optimize.sourceMaps'),
       kbnVersion: config.get('pkg.version'),
       buildNum: config.get('pkg.buildNum'),
-      appExtensions: sortAllArrays(uiExports.appExtensions),
+      appExtensions: stableCloneAppExtensions(uiExports.appExtensions),
     };
 
     this._filter = makeRe(config.get('optimize.bundleFilter') || '*', {
@@ -176,7 +178,7 @@ export class UiBundlesController {
   async resetBundleDir() {
     if (!existsSync(this._workingDir)) {
       // create a fresh working directory
-      await mkdirpAsync(this._workingDir);
+      await mkdirAsync(this._workingDir, { recursive: true });
     } else {
       // delete all children of the working directory
       await del(this.resolvePath('*'), {

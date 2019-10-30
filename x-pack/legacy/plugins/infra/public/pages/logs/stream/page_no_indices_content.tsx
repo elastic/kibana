@@ -5,7 +5,8 @@
  */
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { injectI18n, InjectedIntl } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+
 import React from 'react';
 
 import { UICapabilities } from 'ui/capabilities';
@@ -18,25 +19,22 @@ import {
 } from '../../../components/source_configuration';
 
 interface LogsPageNoIndicesContentProps {
-  intl: InjectedIntl;
   uiCapabilities: UICapabilities;
 }
 
 export const LogsPageNoIndicesContent = injectUICapabilities(
-  injectI18n((props: LogsPageNoIndicesContentProps) => {
-    const { intl, uiCapabilities } = props;
+  (props: LogsPageNoIndicesContentProps) => {
+    const { uiCapabilities } = props;
 
     return (
       <WithKibanaChrome>
         {({ basePath }) => (
           <NoIndices
             data-test-subj="noLogsIndicesPrompt"
-            title={intl.formatMessage({
-              id: 'xpack.infra.logsPage.noLoggingIndicesTitle',
+            title={i18n.translate('xpack.infra.logsPage.noLoggingIndicesTitle', {
               defaultMessage: "Looks like you don't have any logging indices.",
             })}
-            message={intl.formatMessage({
-              id: 'xpack.infra.logsPage.noLoggingIndicesDescription',
+            message={i18n.translate('xpack.infra.logsPage.noLoggingIndicesDescription', {
               defaultMessage: "Let's add some!",
             })}
             actions={
@@ -48,10 +46,10 @@ export const LogsPageNoIndicesContent = injectUICapabilities(
                     fill
                     data-test-subj="logsViewSetupInstructionsButton"
                   >
-                    {intl.formatMessage({
-                      id: 'xpack.infra.logsPage.noLoggingIndicesInstructionsActionLabel',
-                      defaultMessage: 'View setup instructions',
-                    })}
+                    {i18n.translate(
+                      'xpack.infra.logsPage.noLoggingIndicesInstructionsActionLabel',
+                      { defaultMessage: 'View setup instructions' }
+                    )}
                   </EuiButton>
                 </EuiFlexItem>
                 {uiCapabilities.logs.configureSource ? (
@@ -60,8 +58,7 @@ export const LogsPageNoIndicesContent = injectUICapabilities(
                       data-test-subj="configureSourceButton"
                       hrefBase={ViewSourceConfigurationButtonHrefBase.logs}
                     >
-                      {intl.formatMessage({
-                        id: 'xpack.infra.configureSourceActionLabel',
+                      {i18n.translate('xpack.infra.configureSourceActionLabel', {
                         defaultMessage: 'Change source configuration',
                       })}
                     </ViewSourceConfigurationButton>
@@ -73,5 +70,5 @@ export const LogsPageNoIndicesContent = injectUICapabilities(
         )}
       </WithKibanaChrome>
     );
-  })
+  }
 );

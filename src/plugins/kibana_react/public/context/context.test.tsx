@@ -20,7 +20,7 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { context, createKibanaReactContext, useKibana, KibanaContextProvider } from './context';
-import { coreMock } from '../../../../core/public/mocks';
+import { coreMock, overlayServiceMock } from '../../../../core/public/mocks';
 import { CoreStart } from './types';
 
 let container: HTMLDivElement | null;
@@ -165,17 +165,11 @@ test('overlays wrapper uses the closest overlays service', () => {
   };
 
   const core1 = {
-    overlays: {
-      openFlyout: jest.fn(),
-      openModal: jest.fn(),
-    },
+    overlays: overlayServiceMock.createStartContract(),
   } as Partial<CoreStart>;
 
   const core2 = {
-    overlays: {
-      openFlyout: jest.fn(),
-      openModal: jest.fn(),
-    },
+    overlays: overlayServiceMock.createStartContract(),
   } as Partial<CoreStart>;
 
   ReactDOM.render(
@@ -237,10 +231,7 @@ test('overlays wrapper uses available overlays service, higher up in <KibanaCont
   };
 
   const core1 = {
-    overlays: {
-      openFlyout: jest.fn(),
-      openModal: jest.fn(),
-    },
+    overlays: overlayServiceMock.createStartContract(),
     notifications: ({
       toasts: {
         add: jest.fn(),

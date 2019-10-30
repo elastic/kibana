@@ -3,7 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { indexPatternRoute } from './index_pattern';
+
+import { indexPatternRoute, kueryBarIndexPatternRoute } from './index_pattern';
 import {
   errorDistributionRoute,
   errorGroupsRoute,
@@ -12,7 +13,8 @@ import {
 import {
   serviceAgentNameRoute,
   serviceTransactionTypesRoute,
-  servicesRoute
+  servicesRoute,
+  serviceNodeMetadataRoute
 } from './services';
 import {
   agentConfigurationRoute,
@@ -21,9 +23,16 @@ import {
   deleteAgentConfigurationRoute,
   listAgentConfigurationEnvironmentsRoute,
   listAgentConfigurationServicesRoute,
-  updateAgentConfigurationRoute
-} from './settings';
+  updateAgentConfigurationRoute,
+  agentConfigurationAgentNameRoute
+} from './settings/agent_configuration';
+import {
+  apmIndexSettingsRoute,
+  apmIndicesRoute,
+  saveApmIndicesRoute
+} from './settings/apm_indices';
 import { metricsChartsRoute } from './metrics';
+import { serviceNodesRoute } from './service_nodes';
 import { tracesRoute, tracesByIdRoute } from './traces';
 import {
   transactionGroupsBreakdownRoute,
@@ -39,20 +48,31 @@ import {
   tracesLocalFiltersRoute,
   transactionGroupsLocalFiltersRoute,
   transactionsLocalFiltersRoute,
+  serviceNodesLocalFiltersRoute,
   uiFiltersEnvironmentsRoute
 } from './ui_filters';
 import { createApi } from './create_api';
+import { serviceMapRoute } from './services';
 
 const createApmApi = () => {
   const api = createApi()
+    // index pattern
     .add(indexPatternRoute)
+    .add(kueryBarIndexPatternRoute)
+
+    // Errors
     .add(errorDistributionRoute)
     .add(errorGroupsRoute)
     .add(errorsRoute)
-    .add(metricsChartsRoute)
+
+    // Services
     .add(serviceAgentNameRoute)
     .add(serviceTransactionTypesRoute)
     .add(servicesRoute)
+    .add(serviceNodeMetadataRoute)
+
+    // Agent configuration
+    .add(agentConfigurationAgentNameRoute)
     .add(agentConfigurationRoute)
     .add(agentConfigurationSearchRoute)
     .add(createAgentConfigurationRoute)
@@ -60,20 +80,37 @@ const createApmApi = () => {
     .add(listAgentConfigurationEnvironmentsRoute)
     .add(listAgentConfigurationServicesRoute)
     .add(updateAgentConfigurationRoute)
+
+    // APM indices
+    .add(apmIndexSettingsRoute)
+    .add(apmIndicesRoute)
+    .add(saveApmIndicesRoute)
+
+    // Metrics
+    .add(metricsChartsRoute)
+    .add(serviceNodesRoute)
+
+    // Traces
     .add(tracesRoute)
     .add(tracesByIdRoute)
+
+    // Transaction groups
     .add(transactionGroupsBreakdownRoute)
     .add(transactionGroupsChartsRoute)
     .add(transactionGroupsDistributionRoute)
     .add(transactionGroupsRoute)
     .add(transactionGroupsAvgDurationByCountry)
+
+    // UI filters
     .add(errorGroupsLocalFiltersRoute)
     .add(metricsLocalFiltersRoute)
     .add(servicesLocalFiltersRoute)
     .add(tracesLocalFiltersRoute)
     .add(transactionGroupsLocalFiltersRoute)
     .add(transactionsLocalFiltersRoute)
-    .add(uiFiltersEnvironmentsRoute);
+    .add(serviceNodesLocalFiltersRoute)
+    .add(uiFiltersEnvironmentsRoute)
+    .add(serviceMapRoute);
 
   return api;
 };

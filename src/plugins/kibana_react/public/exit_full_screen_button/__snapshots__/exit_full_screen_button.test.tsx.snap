@@ -4,9 +4,7 @@ exports[`is rendered 1`] = `
 <ExitFullScreenButtonUi
   onExitFullScreenMode={[Function]}
 >
-  <div
-    className="hideInPercy"
-  >
+  <div>
     <EuiScreenReaderOnly>
       <p
         aria-live="polite"

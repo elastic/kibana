@@ -19,21 +19,6 @@
 
 import { rangeControlFactory } from './range_control_factory';
 
-const mockField = {
-  name: 'myField',
-  format: {
-    convert: (val) => { return val; }
-  }
-};
-
-const mockIndexPattern = {
-  fields: {
-    byName: {
-      myNumberField: mockField,
-    }
-  }
-};
-
 let esSearchResponse;
 class MockSearchSource {
   setParent() {}
@@ -43,22 +28,46 @@ class MockSearchSource {
   }
 }
 
-const mockKbnApi = {
-  indexPatterns: {
-    get: async () => {
-      return mockIndexPattern;
-    }
-  },
-  queryFilter: {
-    getAppFilters: () => {
-      return [];
+jest.mock('ui/timefilter', () => ({
+  createFilter: jest.fn(),
+}));
+
+jest.mock('ui/new_platform', () => ({
+  npStart: {
+    plugins: {
+      data: {
+        query: {
+          filterManager: {
+            fieldName: 'myNumberField',
+            getIndexPattern: () => ({
+              fields: { getByName: name => {
+                const fields = { myNumberField: { name: 'myNumberField' } };
+                return fields[name];
+              }
+              } }),
+            getAppFilters: jest.fn().mockImplementation(() => ([])),
+            getGlobalFilters: jest.fn().mockImplementation(() => ([])),
+          }
+        }
+      }
     },
-    getGlobalFilters: () => {
-      return [];
-    }
   },
-  SearchSource: MockSearchSource,
-};
+}));
+
+jest.mock('../../../../core_plugins/data/public/legacy', () => ({
+  start: {
+    indexPatterns: {
+      indexPatterns: {
+        get: () => ({
+          fields: { getByName: name => {
+            const fields = { myNumberField: { name: 'myNumberField' } };
+            return fields[name];
+          }
+          } }),
+      }
+    },
+  }
+}));
 
 describe('fetch', () => {
   const controlParams = {
@@ -70,7 +79,7 @@ describe('fetch', () => {
 
   let rangeControl;
   beforeEach(async () => {
-    rangeControl = await rangeControlFactory(controlParams, mockKbnApi, useTimeFilter);
+    rangeControl = await rangeControlFactory(controlParams, useTimeFilter, MockSearchSource);
   });
 
   test('should set min and max from aggregation results', async () => {

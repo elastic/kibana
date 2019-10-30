@@ -10,7 +10,6 @@ import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 import { Validation } from '../../../../../common/job_validator';
 
 interface Props {
-  children: JSX.Element;
   validation: Validation;
 }
 
@@ -23,18 +22,14 @@ export const Description: FC<Props> = memo(({ children, validation }) => {
       'A unique identifier for the job. Spaces and the characters  / ? , " < > | * are not allowed',
   });
   return (
-    <EuiDescribedFormGroup
-      idAria="single-example-aria"
-      title={<h3>{title}</h3>}
-      description={description}
-    >
+    <EuiDescribedFormGroup idAria="description" title={<h3>{title}</h3>} description={description}>
       <EuiFormRow
         label={title}
-        describedByIds={['single-example-aria']}
+        describedByIds={['description']}
         error={validation.message}
         isInvalid={validation.valid === false}
       >
-        {children}
+        <>{children}</>
       </EuiFormRow>
     </EuiDescribedFormGroup>
   );

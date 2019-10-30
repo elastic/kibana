@@ -6,30 +6,20 @@
 
 import { ActionType, Services, ActionTypeExecutorOptions } from '../types';
 import { ActionTypeRegistry } from '../action_type_registry';
-import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/plugin.mock';
-import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks';
-import { validateParams, validateSecrets } from '../lib';
+import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
+import { ActionExecutor, validateParams, validateSecrets, TaskRunnerFactory } from '../lib';
 import { getActionType } from './slack';
 import { taskManagerMock } from '../../../task_manager/task_manager.mock';
 
 const ACTION_TYPE_ID = '.slack';
 
-const NO_OP_FN = () => {};
-
 const services: Services = {
-  log: NO_OP_FN,
   callCluster: async (path: string, opts: any) => {},
-  savedObjectsClient: SavedObjectsClientMock.create(),
+  savedObjectsClient: savedObjectsClientMock.create(),
 };
-
-function getServices(): Services {
-  return services;
-}
 
 let actionTypeRegistry: ActionTypeRegistry;
 let actionType: ActionType;
-
-const mockEncryptedSavedObjectsPlugin = encryptedSavedObjectsMock.create();
 
 async function mockSlackExecutor(options: ActionTypeExecutorOptions): Promise<any> {
   const { params } = options;
@@ -49,12 +39,8 @@ async function mockSlackExecutor(options: ActionTypeExecutorOptions): Promise<an
 
 beforeAll(() => {
   actionTypeRegistry = new ActionTypeRegistry({
-    getServices,
-    isSecurityEnabled: true,
     taskManager: taskManagerMock.create(),
-    encryptedSavedObjectsPlugin: mockEncryptedSavedObjectsPlugin,
-    spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
-    getBasePath: jest.fn().mockReturnValue(undefined),
+    taskRunnerFactory: new TaskRunnerFactory(new ActionExecutor()),
   });
   actionTypeRegistry.register(getActionType({ executor: mockSlackExecutor }));
   actionType = actionTypeRegistry.get(ACTION_TYPE_ID);
@@ -123,7 +109,7 @@ describe('validateActionTypeSecrets()', () => {
 describe('execute()', () => {
   test('calls the mock executor with success', async () => {
     const response = await actionType.executor({
-      id: 'some-id',
+      actionId: 'some-id',
       services,
       config: {},
       secrets: { webhookUrl: 'http://example.com' },
@@ -139,7 +125,7 @@ Object {
   test('calls the mock executor with failure', async () => {
     await expect(
       actionType.executor({
-        id: 'some-id',
+        actionId: 'some-id',
         services,
         config: {},
         secrets: { webhookUrl: 'http://example.com' },

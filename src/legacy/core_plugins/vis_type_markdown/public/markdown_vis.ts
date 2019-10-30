@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { visFactory, DefaultEditorSize } from '../../visualizations/public/np_ready/public';
+import { visFactory, DefaultEditorSize } from '../../visualizations/public';
 
 import { MarkdownVisWrapper } from './markdown_vis_controller';
 import { MarkdownOptions } from './markdown_options';

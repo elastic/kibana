@@ -20,26 +20,31 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { settingsDocumentationLink } from '../../../lib/documentation_links';
 import { StepProps } from '../types';
+import { useJsonStep } from './use_json_step';
 
 export const StepSettings: React.FunctionComponent<StepProps> = ({
   template,
-  updateTemplate,
-  errors,
+  setDataGetter,
+  onStepValidityChange,
 }) => {
-  const { settings } = template;
-  const { settings: settingsError } = errors;
+  const { content, setContent, error } = useJsonStep({
+    prop: 'settings',
+    defaultValue: template.settings,
+    setDataGetter,
+    onStepValidityChange,
+  });
 
   return (
     <div data-test-subj="stepSettings">
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiTitle>
-            <h3 data-test-subj="stepTitle">
+            <h2 data-test-subj="stepTitle">
               <FormattedMessage
                 id="xpack.idxMgmt.templateForm.stepSettings.stepTitle"
                 defaultMessage="Index settings (optional)"
               />
-            </h3>
+            </h2>
           </EuiTitle>
 
           <EuiSpacer size="s" />
@@ -89,8 +94,8 @@ export const StepSettings: React.FunctionComponent<StepProps> = ({
             }}
           />
         }
-        isInvalid={Boolean(settingsError)}
-        error={settingsError}
+        isInvalid={Boolean(error)}
+        error={error}
         fullWidth
       >
         <EuiCodeEditor
@@ -113,10 +118,8 @@ export const StepSettings: React.FunctionComponent<StepProps> = ({
               defaultMessage: 'Index settings editor',
             }
           )}
-          value={settings}
-          onChange={(newSettings: string) => {
-            updateTemplate({ settings: newSettings });
-          }}
+          value={content}
+          onChange={(updated: string) => setContent(updated)}
           data-test-subj="settingsEditor"
         />
       </EuiFormRow>

@@ -26,7 +26,7 @@ export function FormRow(props) {
   let control = props.children;
   if (props.disableMsg) {
     control = (
-      <EuiToolTip placement="top" content={props.disableMsg}>
+      <EuiToolTip placement="top" content={props.disableMsg} anchorClassName="eui-displayBlock">
         {control}
       </EuiToolTip>
     );
@@ -44,11 +44,7 @@ export function FormRow(props) {
   );
 
   return (
-    <EuiFormRow
-      label={label}
-      id={props.id}
-      data-test-subj={'inputControl' + props.controlIndex}
-    >
+    <EuiFormRow label={label} id={props.id} data-test-subj={'inputControl' + props.controlIndex}>
       {control}
     </EuiFormRow>
   );

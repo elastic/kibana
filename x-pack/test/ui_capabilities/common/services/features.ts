@@ -23,8 +23,8 @@ export class FeaturesService {
   }
 
   public async get(): Promise<Features> {
-    this.log.debug(`requesting /api/features/v1 to get the features`);
-    const response = await this.axios.get('/api/features/v1');
+    this.log.debug('requesting /api/features to get the features');
+    const response = await this.axios.get('/api/features');
 
     if (response.status !== 200) {
       throw new Error(

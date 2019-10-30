@@ -6,13 +6,14 @@
 
 import { each } from 'lodash';
 import { toastNotifications } from 'ui/notify';
-import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
+import { mlMessageBarService } from 'plugins/ml/components/messagebar';
 import rison from 'rison-node';
 import chrome from 'ui/chrome';
 
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { ml } from 'plugins/ml/services/ml_api_service';
 import { JOB_STATE, DATAFEED_STATE } from 'plugins/ml/../common/constants/states';
+import { parseInterval } from '../../../../common/util/parse_interval';
 import { i18n } from '@kbn/i18n';
 
 export function loadFullJob(jobId) {
@@ -153,11 +154,34 @@ export function cloneJob(jobId) {
         // if the job is from a wizards, i.e. contains a created_by property
         // use tempJobCloningObjects to temporarily store the job
         mlJobService.tempJobCloningObjects.job = job;
+
+        if (
+          job.data_counts.earliest_record_timestamp !== undefined &&
+          job.data_counts.latest_record_timestamp !== undefined &&
+          job.data_counts.latest_bucket_timestamp !== undefined) {
+          // if the job has run before, use the earliest and latest record timestamp
+          // as the cloned job's time range
+          let start = job.data_counts.earliest_record_timestamp;
+          let end = job.data_counts.latest_record_timestamp;
+
+          if (job.datafeed_config.aggregations !== undefined) {
+            // if the datafeed uses aggregations the earliest and latest record timestamps may not be the same
+            // as the start and end of the data in the index.
+            const bucketSpanMs = parseInterval(job.analysis_config.bucket_span).asMilliseconds();
+            // round down to the start of the nearest bucket
+            start = Math.floor(job.data_counts.earliest_record_timestamp / bucketSpanMs) * bucketSpanMs;
+            // use latest_bucket_timestamp and add two bucket spans minus one ms
+            end = job.data_counts.latest_bucket_timestamp + (bucketSpanMs * 2) - 1;
+          }
+
+          mlJobService.tempJobCloningObjects.start = start;
+          mlJobService.tempJobCloningObjects.end = end;
+        }
       } else {
-        // otherwise use the currentJob
-        mlJobService.currentJob = job;
+        // otherwise use the tempJobCloningObjects
+        mlJobService.tempJobCloningObjects.job = job;
       }
-      window.location.href = `#/jobs/new_job`;
+      window.location.href = '#/jobs/new_job';
     })
     .catch((error) => {
       mlMessageBarService.notify.error(error);
@@ -260,13 +284,13 @@ export function filterJobs(jobs, clauses) {
   return filteredJobs;
 }
 
-// check to see if a job has been stored in mlJobService.currentJob
+// check to see if a job has been stored in mlJobService.tempJobCloningObjects
 // if it has, return an object with the minimum properties needed for the
 // start datafeed modal.
 export function checkForAutoStartDatafeed() {
-  const job = mlJobService.currentJob;
+  const job = mlJobService.tempJobCloningObjects.job;
   if (job !== undefined) {
-    mlJobService.currentJob = undefined;
+    mlJobService.tempJobCloningObjects.job = undefined;
     const hasDatafeed = (typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0);
     const datafeedId = hasDatafeed ? job.datafeed_config.datafeed_id : '';
     return {

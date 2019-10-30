@@ -37,3 +37,10 @@ export const drop = (dropTarget: JQuery<HTMLElement>) => {
     .trigger('mousemove', { button: primaryButton })
     .trigger('mouseup');
 };
+
+/** Drags the subject being dragged on the specified drop target, but does not drop it  */
+export const dragWithoutDrop = (dropTarget: JQuery<HTMLElement>) => {
+  cy.wrap(dropTarget).trigger('mousemove', 'center', {
+    button: primaryButton,
+  });
+};

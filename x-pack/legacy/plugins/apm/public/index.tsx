@@ -9,11 +9,9 @@ import ReactDOM from 'react-dom';
 import { npStart } from 'ui/new_platform';
 import 'react-vis/dist/style.css';
 import 'ui/autoload/all';
-import 'ui/autoload/styles';
 import chrome from 'ui/chrome';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
-import 'uiExports/autocompleteProviders';
 import { GlobalHelpExtension } from './components/app/GlobalHelpExtension';
 import { plugin } from './new-platform';
 import { REACT_APP_ROOT_ID } from './new-platform/plugin';

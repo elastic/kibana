@@ -5,13 +5,21 @@
  */
 
 import { CancellationToken } from '../../common/cancellation_token';
-import { JobParams, JobParamPostPayload, JobDocPayload } from '../../types';
+import { JobParamPostPayload, JobDocPayload, ServerFacade } from '../../types';
+
+export interface FakeRequest {
+  headers: any;
+  server: ServerFacade;
+}
 
 export interface JobParamsPostPayloadPanelCsv extends JobParamPostPayload {
   state?: any;
 }
 
-export interface JobParamsPanelCsv extends JobParams {
+export interface JobParamsPanelCsv {
+  savedObjectType: string;
+  savedObjectId: string;
+  isImmediate: boolean;
   panel: SearchPanel;
   post?: JobParamsPostPayloadPanelCsv;
   visType?: string;

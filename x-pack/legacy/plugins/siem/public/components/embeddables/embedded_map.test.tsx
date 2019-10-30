@@ -8,52 +8,43 @@ import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 import { EmbeddedMap } from './embedded_map';
-import { inputsModel } from '../../store/inputs';
+import { SetQuery } from './types';
+import { useKibanaCore } from '../../lib/compose/kibana_core';
 
-jest.mock('ui/new_platform', () => ({
-  npStart: {
-    core: {
-      injectedMetadata: {
-        getKibanaVersion: () => '8.0.0',
-      },
-    },
-  },
-  npSetup: {
-    core: {
-      uiSettings: {
-        get$: () => 'world',
-      },
-    },
+jest.mock('../search_bar', () => ({
+  siemFilterManager: {
+    addFilters: jest.fn(),
   },
 }));
 
+const mockUseKibanaCore = useKibanaCore as jest.Mock;
+jest.mock('../../lib/compose/kibana_core');
+mockUseKibanaCore.mockImplementation(() => ({
+  uiSettings: {
+    get$: () => 'world',
+  },
+  injectedMetadata: {
+    getKibanaVersion: () => '8.0.0',
+  },
+}));
+
+jest.mock('../../lib/compose/kibana_plugins');
+
 describe('EmbeddedMap', () => {
-  let applyFilterQueryFromKueryExpression: (expression: string) => void;
-  let setQuery: ({
-    id,
-    inspect,
-    loading,
-    refetch,
-  }: {
-    id: string;
-    inspect: inputsModel.InspectQuery | null;
-    loading: boolean;
-    refetch: inputsModel.Refetch;
-  }) => void;
+  let setQuery: SetQuery;
 
   beforeEach(() => {
-    applyFilterQueryFromKueryExpression = jest.fn(expression => {});
     setQuery = jest.fn();
   });
 
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
       <EmbeddedMap
-        applyFilterQueryFromKueryExpression={applyFilterQueryFromKueryExpression}
-        queryExpression={''}
-        startDate={new Date('2019-08-28T05:50:47.877Z').getTime()}
         endDate={new Date('2019-08-28T05:50:57.877Z').getTime()}
+        filters={[]}
+        query={{ query: '', language: 'kuery' }}
         setQuery={setQuery}
+        startDate={new Date('2019-08-28T05:50:47.877Z').getTime()}
       />
     );
     expect(toJson(wrapper)).toMatchSnapshot();

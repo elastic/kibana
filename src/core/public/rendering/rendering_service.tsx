@@ -24,11 +24,13 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { InternalChromeStart } from '../chrome';
 import { InternalApplicationStart } from '../application';
 import { InjectedMetadataStart } from '../injected_metadata';
+import { OverlayStart } from '../overlays';
 
 interface StartDeps {
   application: InternalApplicationStart;
   chrome: InternalChromeStart;
   injectedMetadata: InjectedMetadataStart;
+  overlays: OverlayStart;
   targetDomElement: HTMLDivElement;
 }
 
@@ -43,9 +45,16 @@ interface StartDeps {
  * @internal
  */
 export class RenderingService {
-  start({ application, chrome, injectedMetadata, targetDomElement }: StartDeps): RenderingStart {
+  start({
+    application,
+    chrome,
+    injectedMetadata,
+    overlays,
+    targetDomElement,
+  }: StartDeps): RenderingStart {
     const chromeUi = chrome.getHeaderComponent();
     const appUi = application.getComponent();
+    const bannerUi = overlays.banners.getComponent();
 
     const legacyMode = injectedMetadata.getLegacyMode();
     const legacyRef = legacyMode ? React.createRef<HTMLDivElement>() : null;
@@ -58,6 +67,7 @@ export class RenderingService {
           {!legacyMode && (
             <div className="app-wrapper">
               <div className="app-wrapper-panel">
+                <div id="globalBannerList">{bannerUi}</div>
                 <div className="application">{appUi}</div>
               </div>
             </div>

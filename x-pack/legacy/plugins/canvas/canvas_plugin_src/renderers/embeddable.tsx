@@ -17,6 +17,9 @@ import {
 import { start } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import { EmbeddableExpression } from '../expression_types/embeddable';
 import { SavedObjectFinder } from '../../../../../../src/legacy/ui/public/saved_objects/components/saved_object_finder';
+import { RendererStrings } from '../../i18n';
+
+const { embeddable: strings } = RendererStrings;
 
 const embeddablesRegistry: {
   [key: string]: IEmbeddable;
@@ -39,7 +42,7 @@ const renderEmbeddable = (embeddableObject: IEmbeddable, domNode: HTMLElement) =
       <I18nContext>
         <EmbeddablePanel
           embeddable={embeddableObject}
-          getActions={start.getTriggerCompatibleActions}
+          getActions={npStart.plugins.uiActions.getTriggerCompatibleActions}
           getEmbeddableFactory={start.getEmbeddableFactory}
           getAllEmbeddableFactories={start.getEmbeddableFactories}
           notifications={npStart.core.notifications}
@@ -54,8 +57,8 @@ const renderEmbeddable = (embeddableObject: IEmbeddable, domNode: HTMLElement) =
 
 const embeddable = () => ({
   name: 'embeddable',
-  displayName: 'embeddable',
-  help: 'embeddable',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelpDescription(),
   reuseDomNode: true,
   render: async (
     domNode: HTMLElement,

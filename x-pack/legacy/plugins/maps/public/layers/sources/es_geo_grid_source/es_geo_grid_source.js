@@ -12,7 +12,7 @@ import { AbstractESSource } from '../es_source';
 import { HeatmapLayer } from '../../heatmap_layer';
 import { VectorLayer } from '../../vector_layer';
 import { Schemas } from 'ui/vis/editors/default/schemas';
-import { AggConfigs } from 'ui/vis/agg_configs';
+import { AggConfigs } from 'ui/agg_types';
 import { tabifyAggResponse } from 'ui/agg_response/tabify';
 import { convertToGeoJson } from './convert_to_geojson';
 import { VectorStyle } from '../../styles/vector_style';
@@ -21,7 +21,7 @@ import { RENDER_AS } from './render_as';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
 import { GRID_RESOLUTION } from '../../grid_resolution';
-import { SOURCE_DATA_ID_ORIGIN, ES_GEO_GRID } from '../../../../common/constants';
+import { SOURCE_DATA_ID_ORIGIN, ES_GEO_GRID, METRIC_TYPE } from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 
@@ -36,9 +36,16 @@ const aggSchemas = new Schemas([
     title: 'Value',
     min: 1,
     max: Infinity,
-    aggFilter: ['avg', 'count', 'max', 'min', 'sum'],
+    aggFilter: [
+      METRIC_TYPE.AVG,
+      METRIC_TYPE.COUNT,
+      METRIC_TYPE.MAX,
+      METRIC_TYPE.MIN,
+      METRIC_TYPE.SUM,
+      METRIC_TYPE.UNIQUE_COUNT
+    ],
     defaults: [
-      { schema: 'metric', type: 'count' }
+      { schema: 'metric', type: METRIC_TYPE.COUNT }
     ]
   },
   {
@@ -183,14 +190,18 @@ export class ESGeoGridSource extends AbstractESSource {
     });
   }
 
-  async getGeoJsonWithMeta(layerName, searchFilters) {
+  async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback) {
     const indexPattern = await this._getIndexPattern();
     const searchSource  = await this._makeSearchSource(searchFilters, 0);
     const aggConfigs = new AggConfigs(indexPattern, this._makeAggConfigs(searchFilters.geogridPrecision), aggSchemas.all);
     searchSource.setField('aggs', aggConfigs.toDsl());
-    const esResponse = await this._runEsQuery(layerName, searchSource, i18n.translate('xpack.maps.source.esGrid.inspectorDescription', {
-      defaultMessage: 'Elasticsearch geo grid aggregation request'
-    }));
+    const esResponse = await this._runEsQuery(
+      layerName,
+      searchSource,
+      registerCancelCallback,
+      i18n.translate('xpack.maps.source.esGrid.inspectorDescription', {
+        defaultMessage: 'Elasticsearch geo grid aggregation request'
+      }));
 
     const tabifiedResp = tabifyAggResponse(aggConfigs, esResponse);
     const { featureCollection } = convertToGeoJson({
@@ -211,11 +222,11 @@ export class ESGeoGridSource extends AbstractESSource {
   }
 
   _formatMetricKey(metric) {
-    return metric.type !== 'count' ? `${metric.type}_of_${metric.field}` : COUNT_PROP_NAME;
+    return metric.type !== METRIC_TYPE.COUNT ? `${metric.type}_of_${metric.field}` : COUNT_PROP_NAME;
   }
 
   _formatMetricLabel(metric) {
-    return metric.type !== 'count' ? `${metric.type} of ${metric.field}` : COUNT_PROP_LABEL;
+    return metric.type !== METRIC_TYPE.COUNT ? `${metric.type} of ${metric.field}` : COUNT_PROP_LABEL;
   }
 
   _makeAggConfigs(precision) {
@@ -227,7 +238,7 @@ export class ESGeoGridSource extends AbstractESSource {
         schema: 'metric',
         params: {}
       };
-      if (metric.type !== 'count') {
+      if (metric.type !== METRIC_TYPE.COUNT) {
         metricAggConfig.params = { field: metric.field };
       }
       return metricAggConfig;

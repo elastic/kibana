@@ -35,7 +35,9 @@ exports[`PipelineEditor component includes required error message for falsy pipe
     >
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={true}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage
@@ -60,7 +62,9 @@ exports[`PipelineEditor component includes required error message for falsy pipe
       </EuiFormRow>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={true}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage
@@ -83,7 +87,9 @@ exports[`PipelineEditor component includes required error message for falsy pipe
       </EuiFormRow>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={true}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage
@@ -115,7 +121,9 @@ exports[`PipelineEditor component includes required error message for falsy pipe
       </EuiFormRow>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormLabelWithIconTip
@@ -136,6 +144,7 @@ Default value: Number of the host’s CPU cores"
           value={1}
         />
       </EuiFormRow>
+      <EuiSpacer />
       <EuiFlexGroup>
         <FlexItemSetting
           formRowLabelText="Pipeline batch size"
@@ -284,14 +293,10 @@ Default value: 1024"
         grow={false}
       >
         <EuiButton
-          color="primary"
           data-test-subj="btnSavePipeline"
           fill={true}
-          iconSide="left"
           isDisabled={true}
           onClick={[Function]}
-          size="m"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Create and deploy"
@@ -304,13 +309,8 @@ Default value: 1024"
         grow={false}
       >
         <EuiButton
-          color="primary"
           data-test-subj="btnCancel"
-          fill={false}
-          iconSide="left"
           onClick={[Function]}
-          size="m"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Cancel"
@@ -358,7 +358,9 @@ exports[`PipelineEditor component invalidates form for invalid pipeline id input
     >
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={true}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage
@@ -383,7 +385,9 @@ exports[`PipelineEditor component invalidates form for invalid pipeline id input
       </EuiFormRow>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={true}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage
@@ -406,7 +410,9 @@ exports[`PipelineEditor component invalidates form for invalid pipeline id input
       </EuiFormRow>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={true}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage
@@ -438,7 +444,9 @@ exports[`PipelineEditor component invalidates form for invalid pipeline id input
       </EuiFormRow>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormLabelWithIconTip
@@ -459,6 +467,7 @@ Default value: Number of the host’s CPU cores"
           value={1}
         />
       </EuiFormRow>
+      <EuiSpacer />
       <EuiFlexGroup>
         <FlexItemSetting
           formRowLabelText="Pipeline batch size"
@@ -607,14 +616,10 @@ Default value: 1024"
         grow={false}
       >
         <EuiButton
-          color="primary"
           data-test-subj="btnSavePipeline"
           fill={true}
-          iconSide="left"
           isDisabled={true}
           onClick={[Function]}
-          size="m"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Create and deploy"
@@ -627,13 +632,8 @@ Default value: 1024"
         grow={false}
       >
         <EuiButton
-          color="primary"
           data-test-subj="btnCancel"
-          fill={false}
-          iconSide="left"
           onClick={[Function]}
-          size="m"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Cancel"
@@ -681,7 +681,9 @@ exports[`PipelineEditor component invalidates form for pipeline id with spaces 1
     >
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={true}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage
@@ -706,7 +708,9 @@ exports[`PipelineEditor component invalidates form for pipeline id with spaces 1
       </EuiFormRow>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={true}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage
@@ -729,7 +733,9 @@ exports[`PipelineEditor component invalidates form for pipeline id with spaces 1
       </EuiFormRow>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={true}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage
@@ -761,7 +767,9 @@ exports[`PipelineEditor component invalidates form for pipeline id with spaces 1
       </EuiFormRow>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormLabelWithIconTip
@@ -782,6 +790,7 @@ Default value: Number of the host’s CPU cores"
           value={1}
         />
       </EuiFormRow>
+      <EuiSpacer />
       <EuiFlexGroup>
         <FlexItemSetting
           formRowLabelText="Pipeline batch size"
@@ -930,14 +939,10 @@ Default value: 1024"
         grow={false}
       >
         <EuiButton
-          color="primary"
           data-test-subj="btnSavePipeline"
           fill={true}
-          iconSide="left"
           isDisabled={true}
           onClick={[Function]}
-          size="m"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Create and deploy"
@@ -950,13 +955,8 @@ Default value: 1024"
         grow={false}
       >
         <EuiButton
-          color="primary"
           data-test-subj="btnCancel"
-          fill={false}
-          iconSide="left"
           onClick={[Function]}
-          size="m"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Cancel"
@@ -1000,7 +1000,9 @@ exports[`PipelineEditor component matches snapshot for clone pipeline 1`] = `
     >
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={true}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage
@@ -1023,7 +1025,9 @@ exports[`PipelineEditor component matches snapshot for clone pipeline 1`] = `
       </EuiFormRow>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={true}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage
@@ -1055,7 +1059,9 @@ exports[`PipelineEditor component matches snapshot for clone pipeline 1`] = `
       </EuiFormRow>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormLabelWithIconTip
@@ -1076,6 +1082,7 @@ Default value: Number of the host’s CPU cores"
           value={1}
         />
       </EuiFormRow>
+      <EuiSpacer />
       <EuiFlexGroup>
         <FlexItemSetting
           formRowLabelText="Pipeline batch size"
@@ -1224,14 +1231,10 @@ Default value: 1024"
         grow={false}
       >
         <EuiButton
-          color="primary"
           data-test-subj="btnSavePipeline"
           fill={true}
-          iconSide="left"
           isDisabled={false}
           onClick={[Function]}
-          size="m"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Create and deploy"
@@ -1244,13 +1247,8 @@ Default value: 1024"
         grow={false}
       >
         <EuiButton
-          color="primary"
           data-test-subj="btnCancel"
-          fill={false}
-          iconSide="left"
           onClick={[Function]}
-          size="m"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Cancel"
@@ -1265,9 +1263,7 @@ Default value: 1024"
         <EuiButtonEmpty
           color="danger"
           data-test-subj="btnDeletePipeline"
-          iconSide="left"
           onClick={[Function]}
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Delete pipeline"
@@ -1311,7 +1307,9 @@ exports[`PipelineEditor component matches snapshot for create pipeline 1`] = `
     >
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={true}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage
@@ -1336,7 +1334,9 @@ exports[`PipelineEditor component matches snapshot for create pipeline 1`] = `
       </EuiFormRow>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={true}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage
@@ -1359,7 +1359,9 @@ exports[`PipelineEditor component matches snapshot for create pipeline 1`] = `
       </EuiFormRow>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={true}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage
@@ -1391,7 +1393,9 @@ exports[`PipelineEditor component matches snapshot for create pipeline 1`] = `
       </EuiFormRow>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormLabelWithIconTip
@@ -1412,6 +1416,7 @@ Default value: Number of the host’s CPU cores"
           value={1}
         />
       </EuiFormRow>
+      <EuiSpacer />
       <EuiFlexGroup>
         <FlexItemSetting
           formRowLabelText="Pipeline batch size"
@@ -1560,14 +1565,10 @@ Default value: 1024"
         grow={false}
       >
         <EuiButton
-          color="primary"
           data-test-subj="btnSavePipeline"
           fill={true}
-          iconSide="left"
           isDisabled={false}
           onClick={[Function]}
-          size="m"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Create and deploy"
@@ -1580,13 +1581,8 @@ Default value: 1024"
         grow={false}
       >
         <EuiButton
-          color="primary"
           data-test-subj="btnCancel"
-          fill={false}
-          iconSide="left"
           onClick={[Function]}
-          size="m"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Cancel"
@@ -1630,7 +1626,9 @@ exports[`PipelineEditor component matches snapshot for edit pipeline 1`] = `
     >
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={true}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage
@@ -1653,7 +1651,9 @@ exports[`PipelineEditor component matches snapshot for edit pipeline 1`] = `
       </EuiFormRow>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={true}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage
@@ -1685,7 +1685,9 @@ exports[`PipelineEditor component matches snapshot for edit pipeline 1`] = `
       </EuiFormRow>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormLabelWithIconTip
@@ -1706,6 +1708,7 @@ Default value: Number of the host’s CPU cores"
           value={1}
         />
       </EuiFormRow>
+      <EuiSpacer />
       <EuiFlexGroup>
         <FlexItemSetting
           formRowLabelText="Pipeline batch size"
@@ -1854,14 +1857,10 @@ Default value: 1024"
         grow={false}
       >
         <EuiButton
-          color="primary"
           data-test-subj="btnSavePipeline"
           fill={true}
-          iconSide="left"
           isDisabled={false}
           onClick={[Function]}
-          size="m"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Create and deploy"
@@ -1874,13 +1873,8 @@ Default value: 1024"
         grow={false}
       >
         <EuiButton
-          color="primary"
           data-test-subj="btnCancel"
-          fill={false}
-          iconSide="left"
           onClick={[Function]}
-          size="m"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Cancel"
@@ -1895,9 +1889,7 @@ Default value: 1024"
         <EuiButtonEmpty
           color="danger"
           data-test-subj="btnDeletePipeline"
-          iconSide="left"
           onClick={[Function]}
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Delete pipeline"

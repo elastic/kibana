@@ -5,12 +5,13 @@
  */
 
 import { dateAsStringRt } from './index';
+import { isLeft, isRight } from 'fp-ts/lib/Either';
 
 describe('dateAsStringRt', () => {
   it('validates whether a string is a valid date', () => {
-    expect(dateAsStringRt.decode(1566299881499).isLeft()).toBe(true);
+    expect(isLeft(dateAsStringRt.decode(1566299881499))).toBe(true);
 
-    expect(dateAsStringRt.decode('2019-08-20T11:18:31.407Z').isRight()).toBe(
+    expect(isRight(dateAsStringRt.decode('2019-08-20T11:18:31.407Z'))).toBe(
       true
     );
   });
@@ -18,6 +19,10 @@ describe('dateAsStringRt', () => {
   it('returns the string it was given', () => {
     const either = dateAsStringRt.decode('2019-08-20T11:18:31.407Z');
 
-    expect(either.value).toBe('2019-08-20T11:18:31.407Z');
+    if (isRight(either)) {
+      expect(either.right).toBe('2019-08-20T11:18:31.407Z');
+    } else {
+      fail();
+    }
   });
 });

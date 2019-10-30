@@ -190,7 +190,7 @@ describe('helpers', () => {
           {
             columnHeaderType: 'not-filtered',
             id: '@timestamp',
-            width: 240,
+            width: 190,
           },
           {
             columnHeaderType: 'not-filtered',
@@ -276,7 +276,7 @@ describe('helpers', () => {
           {
             columnHeaderType: 'not-filtered',
             id: '@timestamp',
-            width: 240,
+            width: 190,
           },
           {
             columnHeaderType: 'not-filtered',
@@ -363,7 +363,7 @@ describe('helpers', () => {
           {
             columnHeaderType: 'not-filtered',
             id: '@timestamp',
-            width: 240,
+            width: 190,
           },
           {
             columnHeaderType: 'not-filtered',

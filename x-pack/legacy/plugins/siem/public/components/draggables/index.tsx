@@ -167,7 +167,7 @@ export const DraggableBadge = pure<BadgeDraggableType>(
   }) =>
     value != null ? (
       <DefaultDraggable
-        id={`${contextId}-${eventId}-${field}-${value}`}
+        id={`draggable-badge-default-draggable-${contextId}-${eventId}-${field}-${value}`}
         field={field}
         name={name}
         value={value}

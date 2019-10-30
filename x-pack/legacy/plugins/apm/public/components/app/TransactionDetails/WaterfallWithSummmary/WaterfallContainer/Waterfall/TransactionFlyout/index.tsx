@@ -9,16 +9,16 @@ import {
   EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutHeader,
-  EuiHorizontalRule,
   EuiPortal,
   EuiSpacer,
-  EuiTitle
+  EuiTitle,
+  EuiHorizontalRule
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/Transaction';
 import { TransactionActionMenu } from '../../../../../../shared/TransactionActionMenu/TransactionActionMenu';
-import { StickyTransactionProperties } from '../../../StickyTransactionProperties';
+import { TransactionSummary } from '../../../../../../shared/Summary/TransactionSummary';
 import { FlyoutTopLevelProperties } from '../FlyoutTopLevelProperties';
 import { ResponsiveFlyout } from '../ResponsiveFlyout';
 import { TransactionMetadata } from '../../../../../../shared/MetadataTable/TransactionMetadata';
@@ -41,7 +41,6 @@ function TransactionPropertiesTable({
       <EuiTitle size="s">
         <h4>Metadata</h4>
       </EuiTitle>
-      <EuiSpacer />
       <TransactionMetadata transaction={transaction} />
     </div>
   );
@@ -82,13 +81,13 @@ export function TransactionFlyout({
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           <FlyoutTopLevelProperties transaction={transactionDoc} />
-          <EuiHorizontalRule />
-          <StickyTransactionProperties
-            errorCount={errorCount}
+          <EuiSpacer size="m" />
+          <TransactionSummary
             transaction={transactionDoc}
             totalDuration={traceRootDuration}
+            errorCount={errorCount}
           />
-          <EuiHorizontalRule />
+          <EuiHorizontalRule margin="m" />
           <DroppedSpansWarning transactionDoc={transactionDoc} />
           <TransactionPropertiesTable transaction={transactionDoc} />
         </EuiFlyoutBody>

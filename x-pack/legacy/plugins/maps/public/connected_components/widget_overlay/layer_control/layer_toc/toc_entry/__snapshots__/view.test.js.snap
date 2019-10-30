@@ -26,6 +26,7 @@ exports[`TOCEntry is rendered 1`] = `
           "showAtZoomLevel": [Function],
         }
       }
+      removeLayer={[Function]}
       toggleVisible={[Function]}
       zoom={0}
     />
@@ -34,21 +35,16 @@ exports[`TOCEntry is rendered 1`] = `
     >
       <EuiButtonIcon
         aria-label="Edit layer"
-        color="primary"
-        iconSize="m"
         iconType="pencil"
         onClick={[Function]}
         title="Edit layer"
-        type="button"
       />
       <EuiButtonIcon
         aria-label="Reorder layer"
         className="mapTocEntry__grab"
         color="subdued"
-        iconSize="m"
         iconType="grab"
         title="Reorder layer"
-        type="button"
       />
     </div>
   </div>
@@ -98,6 +94,7 @@ exports[`TOCEntry props isReadOnly 1`] = `
           "showAtZoomLevel": [Function],
         }
       }
+      removeLayer={[Function]}
       toggleVisible={[Function]}
       zoom={0}
     />
@@ -147,6 +144,7 @@ exports[`TOCEntry props should display layer details when isLegendDetailsOpen is
           "showAtZoomLevel": [Function],
         }
       }
+      removeLayer={[Function]}
       toggleVisible={[Function]}
       zoom={0}
     />
@@ -155,21 +153,16 @@ exports[`TOCEntry props should display layer details when isLegendDetailsOpen is
     >
       <EuiButtonIcon
         aria-label="Edit layer"
-        color="primary"
-        iconSize="m"
         iconType="pencil"
         onClick={[Function]}
         title="Edit layer"
-        type="button"
       />
       <EuiButtonIcon
         aria-label="Reorder layer"
         className="mapTocEntry__grab"
         color="subdued"
-        iconSize="m"
         iconType="grab"
         title="Reorder layer"
-        type="button"
       />
     </div>
   </div>

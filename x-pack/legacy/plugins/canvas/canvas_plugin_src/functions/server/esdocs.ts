@@ -9,7 +9,7 @@ import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 // @ts-ignore untyped local
 import { queryEsSQL } from '../../../server/lib/query_es_sql';
 import { Filter } from '../../../types';
-import { getFunctionHelp } from '../../strings';
+import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
   index: string;
@@ -81,7 +81,7 @@ export function esdocs(): ExpressionFunction<'esdocs', Filter, Arguments, any> {
       });
 
       if (index) {
-        query.from(index.toLowerCase());
+        query.from(index);
       }
 
       if (fields) {
@@ -92,7 +92,7 @@ export function esdocs(): ExpressionFunction<'esdocs', Filter, Arguments, any> {
       if (sort) {
         const [sortField, sortOrder] = sort.split(',').map(str => str.trim());
         if (sortField) {
-          query.order(`"${sortField}"`, sortOrder.toLowerCase() === 'asc');
+          query.order(`"${sortField}"`, sortOrder === 'asc');
         }
       }
 

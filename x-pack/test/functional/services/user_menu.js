@@ -11,12 +11,12 @@ export function UserMenuProvider({ getService }) {
   return new class UserMenu {
     async clickLogoutButton() {
       await this._ensureMenuOpen();
-      await testSubjects.click('userMenu logoutLink');
+      await testSubjects.click('userMenu > logoutLink');
     }
 
     async clickProvileLink() {
       await this._ensureMenuOpen();
-      await testSubjects.click('userMenu profileLink');
+      await testSubjects.click('userMenu > profileLink');
     }
 
     async logoutLinkExists() {
@@ -25,7 +25,7 @@ export function UserMenuProvider({ getService }) {
       }
 
       await this._ensureMenuOpen();
-      return await testSubjects.exists('userMenu logoutLink');
+      return await testSubjects.exists('userMenu > logoutLink');
     }
 
     async closeMenu() {

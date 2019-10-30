@@ -24,20 +24,37 @@ export const npSetup = {
     chrome: {}
   },
   plugins: {
+    embeddable: {
+      registerEmbeddableFactory: sinon.fake(),
+    },
+    expressions: {
+      registerFunction: sinon.fake(),
+      registerRenderer: sinon.fake(),
+      registerType: sinon.fake(),
+      __LEGACY: {
+        renderers: {
+          register: () => undefined,
+          get: () => null,
+        },
+      },
+    },
     data: {
-      expressions: {
-        registerFunction: sinon.fake(),
-        registerRenderer: sinon.fake(),
-        registerType: sinon.fake(),
+      query: {
+        filterManager: sinon.fake(),
       },
     },
     inspector: {
       registerView: () => undefined,
-      __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: {
+      __LEGACY: {
         views: {
           register: () => undefined,
         },
       },
+    },
+    uiActions: {
+      attachAction: sinon.fake(),
+      registerAction: sinon.fake(),
+      registerTrigger: sinon.fake(),
     },
   },
 };
@@ -47,7 +64,37 @@ export const npStart = {
     chrome: {}
   },
   plugins: {
-    data: {},
+    embeddable: {
+      getEmbeddableFactory: sinon.fake(),
+      getEmbeddableFactories: sinon.fake(),
+      registerEmbeddableFactory: sinon.fake(),
+    },
+    expressions: {
+      registerFunction: sinon.fake(),
+      registerRenderer: sinon.fake(),
+      registerType: sinon.fake(),
+    },
+    data: {
+      getSuggestions: sinon.fake(),
+      query: {
+        filterManager: {
+          getFetches$: sinon.fake(),
+          getFilters: sinon.fake(),
+          getAppFilters: sinon.fake(),
+          getGlobalFilters: sinon.fake(),
+          removeFilter: sinon.fake(),
+          addFilters: sinon.fake(),
+          setFilters: sinon.fake(),
+          removeAll: sinon.fake(),
+          getUpdates$: () => {
+            return {
+              subscribe: () => {}
+            };
+          },
+
+        },
+      },
+    },
     inspector: {
       isAvailable: () => false,
       open: () => ({
@@ -55,11 +102,25 @@ export const npStart = {
         close: () => Promise.resolve(undefined),
       }),
     },
+    uiActions: {
+      attachAction: sinon.fake(),
+      registerAction: sinon.fake(),
+      registerTrigger: sinon.fake(),
+      detachAction: sinon.fake(),
+      executeTriggerActions: sinon.fake(),
+      getTrigger: sinon.fake(),
+      getTriggerActions: sinon.fake(),
+      getTriggerCompatibleActions: sinon.fake(),
+    },
   },
 };
 
 export function __setup__(coreSetup) {
   npSetup.core = coreSetup;
+
+  // no-op application register calls (this is overwritten to
+  // bootstrap an LP plugin outside of tests)
+  npSetup.core.application.register = () => {};
 }
 
 export function __start__(coreStart) {

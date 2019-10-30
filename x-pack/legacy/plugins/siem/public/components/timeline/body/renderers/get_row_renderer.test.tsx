@@ -37,6 +37,7 @@ describe('get_column_renderer', () => {
       browserFields: mockBrowserFields,
       data: nonSuricata,
       children: <span>{'some child'}</span>,
+      timelineId: 'test',
     });
 
     const wrapper = shallow(<span>{row}</span>);
@@ -49,6 +50,7 @@ describe('get_column_renderer', () => {
       browserFields: mockBrowserFields,
       data: nonSuricata,
       children: <span>{'some child'}</span>,
+      timelineId: 'test',
     });
     const wrapper = mount(
       <TestProviders>
@@ -64,6 +66,7 @@ describe('get_column_renderer', () => {
       browserFields: mockBrowserFields,
       data: suricata,
       children: <span>{'some child '}</span>,
+      timelineId: 'test',
     });
     const wrapper = mount(
       <TestProviders>
@@ -82,6 +85,7 @@ describe('get_column_renderer', () => {
       browserFields: mockBrowserFields,
       data: suricata,
       children: <span>{'some child '}</span>,
+      timelineId: 'test',
     });
     const wrapper = mount(
       <TestProviders>
@@ -100,6 +104,7 @@ describe('get_column_renderer', () => {
       browserFields: mockBrowserFields,
       data: zeek,
       children: <span>{'some child '}</span>,
+      timelineId: 'test',
     });
     const wrapper = mount(
       <TestProviders>
@@ -118,6 +123,7 @@ describe('get_column_renderer', () => {
       browserFields: mockBrowserFields,
       data: system,
       children: <span>{'some child '}</span>,
+      timelineId: 'test',
     });
     const wrapper = mount(
       <TestProviders>
@@ -125,7 +131,7 @@ describe('get_column_renderer', () => {
       </TestProviders>
     );
     expect(wrapper.text()).toContain(
-      'some child Braden@zeek-londonattempted a login via6278with resultfailureSource128.199.212.120'
+      'some child Braden@zeek-londonattempted a login via(6278)with resultfailureSource128.199.212.120'
     );
   });
 
@@ -136,6 +142,7 @@ describe('get_column_renderer', () => {
       browserFields: mockBrowserFields,
       data: auditd,
       children: <span>{'some child '}</span>,
+      timelineId: 'test',
     });
     const wrapper = mount(
       <TestProviders>
@@ -143,7 +150,7 @@ describe('get_column_renderer', () => {
       </TestProviders>
     );
     expect(wrapper.text()).toContain(
-      'some child Sessionalice@zeek-sanfranin/executedgpgconf--list-dirs agent-socket'
+      'some child Sessionalice@zeek-sanfranin/executedgpgconf(5402)gpgconf--list-dirsagent-socketgpgconf --list-dirs agent-socket'
     );
   });
 });

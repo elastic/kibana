@@ -40,21 +40,21 @@ export function ClusterStatus({ stats }) {
     },
     {
       label: i18n.translate('xpack.monitoring.elasticsearch.clusterStatus.memoryLabel', {
-        defaultMessage: 'Memory'
+        defaultMessage: 'JVM Heap'
       }),
       value: formatMetric(memUsed, 'byte') + ' / ' + formatMetric(memMax, 'byte'),
       'data-test-subj': 'memory'
     },
     {
       label: i18n.translate('xpack.monitoring.elasticsearch.clusterStatus.totalShardsLabel', {
-        defaultMessage: 'Total Shards'
+        defaultMessage: 'Total shards'
       }),
       value: totalShards,
       'data-test-subj': 'totalShards'
     },
     {
       label: i18n.translate('xpack.monitoring.elasticsearch.clusterStatus.unassignedShardsLabel', {
-        defaultMessage: 'Unassigned Shards'
+        defaultMessage: 'Unassigned shards'
       }),
       value: unassignedShards,
       'data-test-subj': 'unassignedShards'

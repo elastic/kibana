@@ -21,7 +21,7 @@ const { resolve } = require('path');
 
 const { debug } = require('./debug');
 
-const DEFAULT_PLUGIN_PATH = '../../kibana';
+const DEFAULT_PLUGIN_PATH = '../..';
 
 /*
  * Resolves the path to Kibana, either from default setting or config

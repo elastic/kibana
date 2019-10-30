@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { AggConfig } from '../../vis/agg_config';
+import { AggConfig } from '../agg_config';
 import { BaseParamType } from './base';
 
 export class AggParamType extends BaseParamType {
-  makeAgg: (agg: AggConfig, state?: unknown) => AggConfig;
+  makeAgg: (agg: AggConfig, state?: any) => AggConfig;
 
   constructor(config: Record<string, any>) {
     super(config);
@@ -47,7 +47,7 @@ export class AggParamType extends BaseParamType {
       };
     }
     if (!config.editorComponent) {
-      this.editorComponent = require('../controls/sub_agg');
+      this.editorComponent = require('../../vis/editors/default/controls/sub_agg');
     }
     this.makeAgg = config.makeAgg;
     this.valueType = AggConfig;

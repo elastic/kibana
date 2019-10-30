@@ -17,17 +17,17 @@
  * under the License.
  */
 
-export interface VisualizationListItem {
+interface VisualizationListItem {
   editUrl: string;
   icon: string;
   id: string;
-  isExperimental: boolean;
+  stage: 'experimental' | 'beta' | 'production';
   savedObjectType: string;
   title: string;
   typeTitle: string;
 }
 
-export interface VisualizationsAppExtension {
+interface VisualizationsAppExtension {
   docTypes: string[];
   searchFields?: string[];
   toListItem: (savedObject: {
@@ -37,12 +37,19 @@ export interface VisualizationsAppExtension {
   }) => VisualizationListItem;
 }
 
+export interface VisTypeAliasPromotion {
+  description: string;
+  buttonText: string;
+}
+
 export interface VisTypeAlias {
   aliasUrl: string;
   name: string;
   title: string;
   icon: string;
+  promotion?: VisTypeAliasPromotion;
   description: string;
+  stage: 'experimental' | 'beta' | 'production';
 
   appExtensions?: {
     visualizations: VisualizationsAppExtension;
@@ -52,14 +59,14 @@ export interface VisTypeAlias {
 
 const registry: VisTypeAlias[] = [];
 
-export interface VisTypeAliasRegistry {
+interface VisTypeAliasRegistry {
   get: () => VisTypeAlias[];
   add: (newVisTypeAlias: VisTypeAlias) => void;
 }
 
 export const visTypeAliasRegistry: VisTypeAliasRegistry = {
   get: () => [...registry],
-  add: (newVisTypeAlias: VisTypeAlias) => {
+  add: newVisTypeAlias => {
     if (registry.find(visTypeAlias => visTypeAlias.name === newVisTypeAlias.name)) {
       throw new Error(`${newVisTypeAlias.name} already registered`);
     }

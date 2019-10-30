@@ -6,8 +6,8 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
-import moment from 'moment';
-import { Columns } from '../../load_more_table';
+
+import { Columns } from '../../paginated_table';
 import { Anomaly, NarrowDateRange, AnomaliesByNetwork } from '../types';
 import { getRowItemDraggable } from '../../tables/helpers';
 import { EntityDraggable } from '../entity_draggable';
@@ -18,8 +18,7 @@ import * as i18n from './translations';
 import { getEntries } from '../get_entries';
 import { DraggableScore } from '../score/draggable_score';
 import { createExplorerLink } from '../links/create_explorer_link';
-import { LocalizedDateTooltip } from '../../localized_date_tooltip';
-import { PreferenceFormattedDate } from '../../formatted_date';
+import { FormattedRelativePreferenceDate } from '../../formatted_date';
 import { NetworkType } from '../../../store/network/model';
 import { escapeDataProviderId } from '../../drag_and_drop/helpers';
 
@@ -120,11 +119,7 @@ export const getAnomaliesNetworkTableColumns = (
     name: i18n.TIME_STAMP,
     field: 'anomaly.time',
     sortable: true,
-    render: time => (
-      <LocalizedDateTooltip date={moment(new Date(time)).toDate()}>
-        <PreferenceFormattedDate value={new Date(time)} />
-      </LocalizedDateTooltip>
-    ),
+    render: time => <FormattedRelativePreferenceDate value={time} />,
   },
 ];
 
@@ -138,7 +133,7 @@ export const getAnomaliesNetworkTableColumnsCurated = (
   const columns = getAnomaliesNetworkTableColumns(startDate, endDate, interval, narrowDateRange);
 
   // Columns to exclude from ip details pages
-  if (pageType === 'details') {
+  if (pageType === NetworkType.details) {
     return columns.filter(column => column.name !== i18n.NETWORK_NAME);
   } else {
     return columns;

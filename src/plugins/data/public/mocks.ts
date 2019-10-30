@@ -17,34 +17,37 @@
  * under the License.
  */
 import { Plugin } from '.';
+import { searchSetupMock } from './search/mocks';
+import { queryServiceMock } from './query/mocks';
 
 export type Setup = jest.Mocked<ReturnType<Plugin['setup']>>;
 export type Start = jest.Mocked<ReturnType<Plugin['start']>>;
 
+const autocompleteMock: any = {
+  addProvider: jest.fn(),
+  getProvider: jest.fn(),
+  clearProviders: jest.fn(),
+};
+
 const createSetupContract = (): Setup => {
+  const querySetupMock = queryServiceMock.createSetupContract();
   const setupContract: Setup = {
-    expressions: {
-      registerFunction: jest.fn(),
-      registerRenderer: jest.fn(),
-      registerType: jest.fn(),
-      __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: {
-        functions: {
-          register: () => {},
-        } as any,
-        renderers: {
-          register: () => {},
-        } as any,
-        types: {
-          register: () => {},
-        } as any,
-      },
-    },
+    autocomplete: autocompleteMock as Setup['autocomplete'],
+    search: searchSetupMock,
+    query: querySetupMock,
   };
+
   return setupContract;
 };
 
 const createStartContract = (): Start => {
-  const startContract: Start = undefined;
+  const queryStartMock = queryServiceMock.createStartContract();
+  const startContract: Start = {
+    autocomplete: autocompleteMock as Start['autocomplete'],
+    getSuggestions: jest.fn(),
+    search: { search: jest.fn() },
+    query: queryStartMock,
+  };
   return startContract;
 };
 

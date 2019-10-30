@@ -19,7 +19,11 @@
 
 // eslint-disable-next-line max-classes-per-file
 import { IndexPatterns } from './index_patterns';
-import { SavedObjectsClientContract, UiSettingsClientContract } from 'kibana/public';
+import {
+  SavedObjectsClientContract,
+  UiSettingsClientContract,
+  HttpServiceBase,
+} from 'kibana/public';
 
 jest.mock('../errors', () => ({
   IndexPatternMissingIndices: jest.fn(),
@@ -28,12 +32,6 @@ jest.mock('../errors', () => ({
 jest.mock('ui/registry/field_formats', () => ({
   fieldFormats: {
     getDefaultInstance: jest.fn(),
-  },
-}));
-
-jest.mock('ui/notify', () => ({
-  toastNotifications: {
-    addDanger: jest.fn(),
   },
 }));
 
@@ -65,17 +63,16 @@ describe('IndexPatterns', () => {
   beforeEach(() => {
     const savedObjectsClient = {} as SavedObjectsClientContract;
     const uiSettings = {} as UiSettingsClientContract;
+    const http = {} as HttpServiceBase;
 
-    indexPatterns = new IndexPatterns(uiSettings, savedObjectsClient);
+    indexPatterns = new IndexPatterns(uiSettings, savedObjectsClient, http);
   });
 
-  test('does not cache gets without an id', () => {
-    expect(indexPatterns.get()).not.toBe(indexPatterns.get());
-  });
-
-  test('does cache gets for the same id', () => {
+  test('does cache gets for the same id', async () => {
     const id = '1';
+    const indexPattern = await indexPatterns.get(id);
 
-    expect(indexPatterns.get(id)).toBe(indexPatterns.get(id));
+    expect(indexPattern).toBeDefined();
+    expect(indexPattern).toBe(await indexPatterns.get(id));
   });
 });

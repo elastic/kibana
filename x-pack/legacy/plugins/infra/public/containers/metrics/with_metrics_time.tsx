@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import createContainer from 'constate-latest';
+import createContainer from 'constate';
 import React, { useContext, useState, useMemo, useCallback } from 'react';
 import { isNumber } from 'lodash';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
 import * as rt from 'io-ts';
+import { isRight } from 'fp-ts/lib/Either';
 import { replaceStateKeyInQueryString, UrlStateContainer } from '../../utils/url_state';
 import { InfraTimerangeInput } from '../../graphql/types';
 
@@ -159,12 +160,13 @@ const MetricsTimeRT = rt.type({
 
 const mapToTimeUrlState = (value: any) => {
   const result = MetricsTimeRT.decode(value);
-  if (result.isRight()) {
-    const to = isNumber(result.value.to) ? moment(result.value.to).toISOString() : result.value.to;
-    const from = isNumber(result.value.from)
-      ? moment(result.value.from).toISOString()
-      : result.value.from;
-    return { ...result.value, from, to };
+  if (isRight(result)) {
+    const resultValue = result.right;
+    const to = isNumber(resultValue.to) ? moment(resultValue.to).toISOString() : resultValue.to;
+    const from = isNumber(resultValue.from)
+      ? moment(resultValue.from).toISOString()
+      : resultValue.from;
+    return { ...resultValue, from, to };
   }
   return undefined;
 };

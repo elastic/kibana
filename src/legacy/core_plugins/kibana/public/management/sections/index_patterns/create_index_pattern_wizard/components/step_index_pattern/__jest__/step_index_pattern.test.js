@@ -18,18 +18,19 @@
  */
 
 import React from 'react';
-import { StepIndexPatternComponent } from '../step_index_pattern';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { StepIndexPattern } from '../step_index_pattern';
+import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 import { Header } from '../components/header';
 
 jest.mock('../../../lib/ensure_minimum_time', () => ({
-  ensureMinimumTime: async (promises) => Array.isArray(promises) ? await Promise.all(promises) : await promises
+  ensureMinimumTime: async promises =>
+    Array.isArray(promises) ? await Promise.all(promises) : await promises,
 }));
 const mockIndexPatternCreationType = {
   getIndexPatternType: () => 'default',
   getIndexPatternName: () => 'name',
   checkIndicesForErrors: () => false,
-  getShowSystemIndices: () => false
+  getShowSystemIndices: () => false,
 };
 // If we don't mock this, Jest fails with the error `TypeError: Cannot redefine property: prototype
 // at Function.defineProperties`.
@@ -41,33 +42,29 @@ jest.mock('ui/chrome', () => ({
   getUiSettingsClient: () => ({
     get: () => '',
   }),
-  addBasePath: () => { },
+  addBasePath: () => {},
 }));
 
 jest.mock('../../../lib/get_indices', () => ({
   getIndices: (service, indexPatternCreationType, query) => {
     if (query.startsWith('e')) {
-      return [
-        { name: 'es' },
-      ];
+      return [{ name: 'es' }];
     }
 
-    return [
-      { name: 'kibana' },
-    ];
+    return [{ name: 'kibana' }];
   },
 }));
 
 const allIndices = [{ name: 'kibana' }, { name: 'es' }];
 const esService = {};
 const savedObjectsClient = {
-  find: () => ({ savedObjects: [] })
+  find: () => ({ savedObjects: [] }),
 };
-const goToNextStep = () => { };
+const goToNextStep = () => {};
 
 const createComponent = props => {
-  return shallowWithIntl(
-    <StepIndexPatternComponent
+  return shallowWithI18nProvider(
+    <StepIndexPattern
       allIndices={allIndices}
       isIncludingSystemIndices={false}
       esService={esService}
@@ -94,7 +91,9 @@ describe('StepIndexPattern', () => {
     // Ensure the state changes are reflected
     await component.update();
 
-    expect(component.find('[data-test-subj="createIndexPatternStep1IndicesList"]')).toMatchSnapshot();
+    expect(
+      component.find('[data-test-subj="createIndexPatternStep1IndicesList"]')
+    ).toMatchSnapshot();
   });
 
   it('renders errors when input is invalid', async () => {
@@ -121,7 +120,9 @@ describe('StepIndexPattern', () => {
     // Ensure the state changes are reflected
     component.update();
 
-    expect(component.find('[data-test-subj="createIndexPatternStep1IndicesList"]')).toMatchSnapshot();
+    expect(
+      component.find('[data-test-subj="createIndexPatternStep1IndicesList"]')
+    ).toMatchSnapshot();
   });
 
   it('appends a wildcard automatically to queries', async () => {

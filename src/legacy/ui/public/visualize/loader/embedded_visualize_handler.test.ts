@@ -16,18 +16,39 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+jest.mock('ui/new_platform');
+
+import { searchSourceMock } from '../../courier/search_source/mocks';
 import { mockDataLoaderFetch, timefilter } from './embedded_visualize_handler.test.mocks';
 
 import _ from 'lodash';
 // @ts-ignore
 import MockState from '../../../../../fixtures/mock_state';
-import { RequestHandlerParams, Vis } from '../../vis';
+import { Vis } from '../../vis';
 import { VisResponseData } from './types';
 import { Inspector } from '../../inspector';
-import { EmbeddedVisualizeHandler } from './embedded_visualize_handler';
-import { AggConfigs } from 'ui/vis/agg_configs';
+import { EmbeddedVisualizeHandler, RequestHandlerParams } from './embedded_visualize_handler';
+import { AggConfigs } from 'ui/agg_types/agg_configs';
 
-jest.mock('ui/new_platform');
+jest.mock('plugins/interpreter/interpreter', () => ({
+  getInterpreter: () => {
+    return Promise.resolve();
+  },
+}));
+
+jest.mock('../../../../core_plugins/interpreter/public/registries', () => ({
+  registries: {
+    renderers: {
+      get: (name: string) => {
+        return {
+          render: async () => {
+            return {};
+          },
+        };
+      },
+    },
+  },
+}));
 
 describe('EmbeddedVisualizeHandler', () => {
   let handler: any;
@@ -65,7 +86,7 @@ describe('EmbeddedVisualizeHandler', () => {
       inspectorAdapters: {},
       query: undefined,
       queryFilter: null,
-      searchSource: undefined,
+      searchSource: searchSourceMock,
       timeRange: undefined,
       uiState: undefined,
     };
@@ -76,7 +97,7 @@ describe('EmbeddedVisualizeHandler', () => {
       {
         vis: mockVis,
         title: 'My Vis',
-        searchSource: undefined,
+        searchSource: searchSourceMock,
         destroy: () => ({}),
         copyOnSave: false,
         save: () => Promise.resolve('123'),
@@ -108,7 +129,7 @@ describe('EmbeddedVisualizeHandler', () => {
         {
           vis: mockVis,
           title: 'My Vis',
-          searchSource: undefined,
+          searchSource: searchSourceMock,
           destroy: () => ({}),
           copyOnSave: false,
           save: () => Promise.resolve('123'),

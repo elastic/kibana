@@ -39,7 +39,7 @@ import {
   showMultiBucketAnomalyTooltip,
 } from '../../../util/chart_utils';
 import { formatHumanReadableDateTimeSeconds } from '../../../util/date_utils';
-import { TimeBuckets } from 'ui/time_buckets';
+import { TimeBuckets } from '../../../util/time_buckets';
 import { mlTableService } from '../../../services/table_service';
 import { ContextChartMask } from '../context_chart_mask';
 import { findChartPointForAnomalyTime } from '../../timeseriesexplorer_utils';
@@ -103,6 +103,7 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
     focusAnnotationData: PropTypes.array,
     focusChartData: PropTypes.array,
     focusForecastData: PropTypes.array,
+    skipRefresh: PropTypes.bool.isRequired,
     modelPlotEnabled: PropTypes.bool.isRequired,
     renderFocusChartOnly: PropTypes.bool.isRequired,
     selectedJob: PropTypes.object,
@@ -112,7 +113,9 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
     swimlaneData: PropTypes.array,
     timefilter: PropTypes.object.isRequired,
     zoomFrom: PropTypes.object,
-    zoomTo: PropTypes.object
+    zoomTo: PropTypes.object,
+    zoomFromFocusLoaded: PropTypes.object,
+    zoomToFocusLoaded: PropTypes.object
   };
 
   rowMouseenterSubscriber = null;
@@ -202,6 +205,10 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
   }
 
   componentDidUpdate() {
+    if (this.props.skipRefresh) {
+      return;
+    }
+
     if (this.props.renderFocusChartOnly === false) {
       this.renderChart();
       this.drawContextChartSelection();
@@ -378,12 +385,17 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
 
     if ((focusLoadFrom !== contextXMin) || (focusLoadTo !== contextXMax)) {
       this.setContextBrushExtent(new Date(focusLoadFrom), new Date(focusLoadTo), true);
+      const newSelectedBounds = { min: moment(new Date(focusLoadFrom)), max: moment(focusLoadFrom) };
+      this.selectedBounds = newSelectedBounds;
     } else {
       // Don't set the brush if the selection is the full context chart domain.
       this.setBrushVisibility(false);
-      const selectedBounds = this.contextXScale.domain();
-      this.selectedBounds = { min: moment(new Date(selectedBounds[0])), max: moment(selectedBounds[1]) };
-      contextChartSelected({ from: selectedBounds[0], to: selectedBounds[1] });
+      const contextXScaleDomain = this.contextXScale.domain();
+      const newSelectedBounds =  { min: moment(new Date(contextXScaleDomain[0])), max: moment(contextXScaleDomain[1]) };
+      if (!_.isEqual(newSelectedBounds, this.selectedBounds)) {
+        this.selectedBounds = newSelectedBounds;
+        contextChartSelected({ from: contextXScaleDomain[0], to: contextXScaleDomain[1] });
+      }
     }
   }
 
@@ -507,7 +519,9 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
       showAnnotations,
       showForecast,
       showModelBounds,
-      intl
+      intl,
+      zoomFromFocusLoaded,
+      zoomToFocusLoaded,
     } = this.props;
 
     if (focusChartData === undefined) {
@@ -538,10 +552,11 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
     // Elasticsearch aggregation returns points at start of bucket,
     // so set the x-axis min to the start of the first aggregation interval,
     // and the x-axis max to the end of the last aggregation interval.
-    const bounds = this.selectedBounds;
-    if (typeof bounds === 'undefined') {
+    if (zoomFromFocusLoaded === undefined || zoomToFocusLoaded === undefined) {
       return;
     }
+    const bounds = { min: moment(zoomFromFocusLoaded.getTime()), max: moment(zoomToFocusLoaded.getTime()) };
+
     const aggMs = focusAggregationInterval.asMilliseconds();
     const earliest = moment(Math.floor((bounds.min.valueOf()) / aggMs) * aggMs);
     const latest = moment(Math.ceil((bounds.max.valueOf()) / aggMs) * aggMs);
@@ -572,7 +587,15 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
           // If an anomaly coincides with a gap in the data, use the anomaly actual value.
           metricValue = Array.isArray(d.actual) ? d.actual[0] : d.actual;
         }
-        return d.lower !== undefined ? Math.min(metricValue, d.lower) : metricValue;
+        if (d.lower !== undefined) {
+          if (metricValue !== null && metricValue !== undefined) {
+            return Math.min(metricValue, d.lower);
+          } else {
+            // Set according to the minimum of the lower of the model plot results.
+            return d.lower;
+          }
+        }
+        return metricValue;
       });
       yMax = d3.max(combinedData, (d) => {
         let metricValue = d.value;
@@ -1041,7 +1064,9 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
         rightHandle.attr('x', contextXScale(brushExtent[1]) + 0);
 
         topBorder.attr('x', contextXScale(brushExtent[0]) + 1);
-        topBorder.attr('width', contextXScale(brushExtent[1]) - contextXScale(brushExtent[0]) - 2);
+        // Use Math.max(0, ...) to make sure we don't end up
+        // with a negative width which would cause an SVG error.
+        topBorder.attr('width', Math.max(0, contextXScale(brushExtent[1]) - contextXScale(brushExtent[0]) - 2));
       }
 
       this.setBrushVisibility(show);
@@ -1056,12 +1081,26 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
 
     const that = this;
     function brushed() {
+      if (that.props.skipRefresh) {
+        return;
+      }
+
       const isEmpty = brush.empty();
-      showBrush(!isEmpty);
 
       const selectedBounds = isEmpty ? contextXScale.domain() : brush.extent();
       const selectionMin = selectedBounds[0].getTime();
       const selectionMax = selectedBounds[1].getTime();
+
+      // Avoid triggering an update if bounds haven't changed
+      if (
+        that.selectedBounds !== undefined &&
+        that.selectedBounds.min.valueOf() === selectionMin &&
+        that.selectedBounds.max.valueOf() === selectionMax
+      ) {
+        return;
+      }
+
+      showBrush(!isEmpty);
 
       // Set the color of the swimlane cells according to whether they are inside the selection.
       contextGroup.selectAll('.swimlane-cell')
@@ -1250,27 +1289,36 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
     } = this.props;
 
     const fieldFormat = this.fieldFormat;
+    const seriesKey = 'single_metric_viewer';
 
     // Show the time and metric values in the tooltip.
     // Uses date, value, upper, lower and anomalyScore (optional) marker properties.
     const formattedDate = formatHumanReadableDateTimeSeconds(marker.date);
-    let contents = formattedDate + '<br/><hr/>';
+    const tooltipData = [{ name: formattedDate }];
 
     if (_.has(marker, 'anomalyScore')) {
       const score = parseInt(marker.anomalyScore);
       const displayScore = (score > 0 ? score : '< 1');
-      contents += intl.formatMessage({
-        id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.anomalyScoreLabel',
-        defaultMessage: 'anomaly score: {displayScore}{br}'
-      }, { displayScore, br: '<br />' });
+      tooltipData.push({
+        name: intl.formatMessage({
+          id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.anomalyScoreLabel',
+          defaultMessage: 'anomaly score'
+        }),
+        value: displayScore,
+        color: anomalyColorScale(score),
+        seriesKey,
+        yAccessor: 'anomaly_score'
+      });
 
       if (showMultiBucketAnomalyTooltip(marker) === true) {
-        contents += intl.formatMessage({
-          id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.multiBucketImpactLabel',
-          defaultMessage: 'multi-bucket impact: {multiBucketImpactLabel}{br}'
-        }, {
-          br: '<br />',
-          multiBucketImpactLabel: getMultiBucketImpactLabel(marker.multiBucketImpact)
+        tooltipData.push({
+          name: intl.formatMessage({
+            id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.multiBucketImpactLabel',
+            defaultMessage: 'multi-bucket impact'
+          }),
+          value: getMultiBucketImpactLabel(marker.multiBucketImpact),
+          seriesKey,
+          yAccessor: 'multi_bucket_impact'
         });
       }
 
@@ -1281,120 +1329,158 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
         if (_.has(marker, 'actual') && marker.function !== 'rare') {
           // Display the record actual in preference to the chart value, which may be
           // different depending on the aggregation interval of the chart.
-          contents += intl.formatMessage({
-            id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.actualLabel',
-            defaultMessage: 'actual: {actualValue}'
-          }, {
-            actualValue: formatValue(marker.actual, marker.function, fieldFormat)
+          tooltipData.push({
+            name: intl.formatMessage({
+              id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.actualLabel',
+              defaultMessage: 'actual'
+            }),
+            value: formatValue(marker.actual, marker.function, fieldFormat),
+            seriesKey,
+            yAccessor: 'actual'
           });
-          contents += intl.formatMessage({
-            id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.typicalLabel',
-            defaultMessage: '{br}typical: {typicalValue}'
-          }, {
-            br: '<br />',
-            typicalValue: formatValue(marker.typical, marker.function, fieldFormat)
+          tooltipData.push({
+            name: intl.formatMessage({
+              id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.typicalLabel',
+              defaultMessage: 'typical'
+            }),
+            value: formatValue(marker.typical, marker.function, fieldFormat),
+            seriesKey,
+            yAccessor: 'typical'
           });
         } else {
-          contents += intl.formatMessage({
-            id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.valueLabel',
-            defaultMessage: 'value: {value}'
-          }, {
-            value: formatValue(marker.value, marker.function, fieldFormat)
+          tooltipData.push({
+            name: intl.formatMessage({
+              id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.valueLabel',
+              defaultMessage: 'value'
+            }),
+            value: formatValue(marker.value, marker.function, fieldFormat),
+            seriesKey,
+            yAccessor: 'value'
           });
           if (_.has(marker, 'byFieldName') && _.has(marker, 'numberOfCauses')) {
             const numberOfCauses = marker.numberOfCauses;
             // If numberOfCauses === 1, won't go into this block as actual/typical copied to top level fields.
             const byFieldName = mlEscape(marker.byFieldName);
-            contents += intl.formatMessage({
-              id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.moreThanOneUnusualByFieldValuesLabel',
-              defaultMessage: '{br} {numberOfCauses}{plusSign} unusual {byFieldName} values'
-            }, {
-              br: '<br />',
-              numberOfCauses,
-              byFieldName,
-              // Maximum of 10 causes are stored in the record, so '10' may mean more than 10.
-              plusSign: numberOfCauses < 10 ? '' : '+'
+            tooltipData.push({
+              name: intl.formatMessage({
+                id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.moreThanOneUnusualByFieldValuesLabel',
+                defaultMessage: '{numberOfCauses}{plusSign} unusual {byFieldName} values'
+              }, {
+                numberOfCauses,
+                byFieldName,
+                // Maximum of 10 causes are stored in the record, so '10' may mean more than 10.
+                plusSign: numberOfCauses < 10 ? '' : '+'
+              }),
+              seriesKey,
+              yAccessor: 'numberOfCauses'
             });
           }
         }
       } else {
-        contents += intl.formatMessage({
-          id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.modelPlotEnabled.valueLabel',
-          defaultMessage: 'value: {value}'
-        }, {
-          value: formatValue(marker.value, marker.function, fieldFormat)
+        tooltipData.push({
+          name: intl.formatMessage({
+            id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.modelPlotEnabled.valueLabel',
+            defaultMessage: 'value'
+          }),
+          value: formatValue(marker.value, marker.function, fieldFormat),
+          seriesKey,
+          yAccessor: 'value'
         });
-        contents += intl.formatMessage({
-          id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.modelPlotEnabled.upperBoundsLabel',
-          defaultMessage: '{br}upper bounds: {upperBoundsValue}'
-        }, {
-          br: '<br />',
-          upperBoundsValue: formatValue(marker.upper, marker.function, fieldFormat)
+        tooltipData.push({
+          name: intl.formatMessage({
+            id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.modelPlotEnabled.upperBoundsLabel',
+            defaultMessage: 'upper bounds'
+          }),
+          value: formatValue(marker.upper, marker.function, fieldFormat),
+          seriesKey,
+          yAccessor: 'upper_bounds'
         });
-        contents += intl.formatMessage({
-          id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.modelPlotEnabled.lowerBoundsLabel',
-          defaultMessage: '{br}lower bounds: {lowerBoundsValue}'
-        }, {
-          br: '<br />',
-          lowerBoundsValue: formatValue(marker.lower, marker.function, fieldFormat)
+        tooltipData.push({
+          name: intl.formatMessage({
+            id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.modelPlotEnabled.lowerBoundsLabel',
+            defaultMessage: 'lower bounds'
+          }),
+          value: formatValue(marker.lower, marker.function, fieldFormat),
+          seriesKey,
+          yAccessor: 'lower_bounds'
         });
       }
     } else {
       // TODO - need better formatting for small decimals.
       if (_.get(marker, 'isForecast', false) === true) {
-        contents += intl.formatMessage({
-          id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.withoutAnomalyScore.predictionLabel',
-          defaultMessage: 'prediction: {predictionValue}'
-        }, {
-          predictionValue: formatValue(marker.value, marker.function, fieldFormat)
+        tooltipData.push({
+          name: intl.formatMessage({
+            id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.withoutAnomalyScore.predictionLabel',
+            defaultMessage: 'prediction'
+          }),
+          value: formatValue(marker.value, marker.function, fieldFormat),
+          seriesKey,
+          yAccessor: 'prediction'
         });
       } else {
-        contents += intl.formatMessage({
-          id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.withoutAnomalyScore.valueLabel',
-          defaultMessage: 'value: {value}'
-        }, {
-          value: formatValue(marker.value, marker.function, fieldFormat)
+        tooltipData.push({
+          name: intl.formatMessage({
+            id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.withoutAnomalyScore.valueLabel',
+            defaultMessage: 'value'
+          }),
+          value: formatValue(marker.value, marker.function, fieldFormat),
+          seriesKey,
+          yAccessor: 'value'
         });
       }
 
       if (modelPlotEnabled === true) {
-        contents += intl.formatMessage({
-          id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.withoutAnomalyScoreAndModelPlotEnabled.upperBoundsLabel',
-          defaultMessage: '{br}upper bounds: {upperBoundsValue}'
-        }, {
-          br: '<br />',
-          upperBoundsValue: formatValue(marker.upper, marker.function, fieldFormat)
+        tooltipData.push({
+          name: intl.formatMessage({
+            id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.withoutAnomalyScoreAndModelPlotEnabled.upperBoundsLabel',
+            defaultMessage: 'upper bounds'
+          }),
+          value: formatValue(marker.upper, marker.function, fieldFormat),
+          seriesKey,
+          yAccessor: 'upper_bounds'
         });
-        contents += intl.formatMessage({
-          id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.withoutAnomalyScoreAndModelPlotEnabled.lowerBoundsLabel',
-          defaultMessage: '{br}lower bounds: {lowerBoundsValue}'
-        }, {
-          br: '<br />',
-          lowerBoundsValue: formatValue(marker.lower, marker.function, fieldFormat)
+        tooltipData.push({
+          name: intl.formatMessage({
+            id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.withoutAnomalyScoreAndModelPlotEnabled.lowerBoundsLabel',
+            defaultMessage: 'lower bounds'
+          }),
+          value: formatValue(marker.lower, marker.function, fieldFormat),
+          seriesKey,
+          yAccessor: 'lower_bounds'
         });
       }
     }
 
     if (_.has(marker, 'scheduledEvents')) {
-      contents += '<br/><hr/>' + intl.formatMessage({
-        id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.scheduledEventsLabel',
-        defaultMessage: 'Scheduled events:{br}{scheduledEventsValue}'
-      }, {
-        br: '<br />',
-        scheduledEventsValue: marker.scheduledEvents.map(mlEscape).join('<br/>')
+      marker.scheduledEvents.forEach((scheduledEvent, i) => {
+        tooltipData.push({
+          name: intl.formatMessage({
+            id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.scheduledEventsLabel',
+            defaultMessage: 'scheduled event{counter}'
+          }, { counter: marker.scheduledEvents.length > 1 ? ` #${i + 1}` : '' }),
+          value: scheduledEvent,
+          seriesKey,
+          yAccessor: `scheduled_events_${i + 1}`
+        });
       });
     }
 
     if (mlAnnotationsEnabled && _.has(marker, 'annotation')) {
-      contents = mlEscape(marker.annotation);
-      contents += `<br />${moment(marker.timestamp).format('MMMM Do YYYY, HH:mm')}`;
+      tooltipData.length = 0;
+      tooltipData.push({
+        name: marker.annotation
+      });
+      let timespan = moment(marker.timestamp).format('MMMM Do YYYY, HH:mm');
 
       if (typeof marker.end_timestamp !== 'undefined') {
-        contents += ` - ${moment(marker.end_timestamp).format('MMMM Do YYYY, HH:mm')}`;
+        timespan += ` - ${moment(marker.end_timestamp).format('MMMM Do YYYY, HH:mm')}`;
       }
+      tooltipData.push({
+        name: timespan
+      });
     }
 
-    mlChartTooltipService.show(contents, circle, {
+    mlChartTooltipService.show(tooltipData, circle, {
       x: LINE_CHART_ANOMALY_RADIUS * 2,
       y: 0
     });

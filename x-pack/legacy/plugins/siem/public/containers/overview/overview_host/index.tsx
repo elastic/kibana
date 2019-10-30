@@ -15,7 +15,7 @@ import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { GetOverviewHostQuery, OverviewHostData } from '../../../graphql/types';
 import { inputsModel, inputsSelectors } from '../../../store/inputs';
 import { State } from '../../../store';
-import { createFilter } from '../../helpers';
+import { createFilter, getDefaultFetchPolicy } from '../../helpers';
 import { QueryTemplateProps } from '../../query_template';
 
 import { overviewHostQuery } from './index.gql_query';
@@ -45,7 +45,7 @@ const OverviewHostComponentQuery = pure<OverviewHostProps & OverviewHostReducer>
   ({ id = ID, children, filterQuery, isInspected, sourceId, startDate, endDate }) => (
     <Query<GetOverviewHostQuery.Query, GetOverviewHostQuery.Variables>
       query={overviewHostQuery}
-      fetchPolicy="cache-and-network"
+      fetchPolicy={getDefaultFetchPolicy()}
       variables={{
         sourceId,
         timerange: {

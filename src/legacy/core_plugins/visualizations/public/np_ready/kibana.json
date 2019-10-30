@@ -1,9 +1,10 @@
 {
-    "id": "visualizations",
-    "version": "kibana",
-    "requiredPlugins": [
-    ],
-    "server": false,
-    "ui": true
-  }
-  
+  "id": "visualizations",
+  "version": "kibana",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": [
+    "data",
+    "search"
+  ]
+}

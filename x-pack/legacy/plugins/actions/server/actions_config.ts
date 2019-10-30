@@ -5,9 +5,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { tryCatch, fromNullable } from 'fp-ts/lib/Option';
+import { tryCatch, fromNullable, isSome, map, mapNullable, getOrElse } from 'fp-ts/lib/Option';
 import { URL } from 'url';
 import { curry } from 'lodash';
+import { pipe } from 'fp-ts/lib/pipeable';
+
+import { ActionsConfigType } from './types';
 
 export enum WhitelistedHosts {
   Any = '*',
@@ -16,11 +19,6 @@ export enum WhitelistedHosts {
 enum WhitelistingField {
   url = 'url',
   hostname = 'hostname',
-}
-
-export interface ActionsKibanaConfig {
-  enabled: boolean;
-  whitelistedHosts: string[];
 }
 
 export interface ActionsConfigurationUtilities {
@@ -44,27 +42,31 @@ function doesValueWhitelistAnyHostname(whitelistedHostname: string): boolean {
   return whitelistedHostname === WhitelistedHosts.Any;
 }
 
-function isWhitelisted({ whitelistedHosts }: ActionsKibanaConfig, hostname: string): boolean {
+function isWhitelisted({ whitelistedHosts }: ActionsConfigType, hostname: string): boolean {
   return (
     Array.isArray(whitelistedHosts) &&
-    fromNullable(
-      whitelistedHosts.find(
-        whitelistedHostname =>
-          doesValueWhitelistAnyHostname(whitelistedHostname) || whitelistedHostname === hostname
+    isSome(
+      fromNullable(
+        whitelistedHosts.find(
+          whitelistedHostname =>
+            doesValueWhitelistAnyHostname(whitelistedHostname) || whitelistedHostname === hostname
+        )
       )
-    ).isSome()
+    )
   );
 }
 
-function isWhitelistedHostnameInUri(config: ActionsKibanaConfig, uri: string): boolean {
-  return tryCatch(() => new URL(uri))
-    .map(url => url.hostname)
-    .mapNullable(hostname => isWhitelisted(config, hostname))
-    .getOrElse(false);
+function isWhitelistedHostnameInUri(config: ActionsConfigType, uri: string): boolean {
+  return pipe(
+    tryCatch(() => new URL(uri)),
+    map(url => url.hostname),
+    mapNullable(hostname => isWhitelisted(config, hostname)),
+    getOrElse<boolean>(() => false)
+  );
 }
 
 export function getActionsConfigurationUtilities(
-  config: ActionsKibanaConfig
+  config: ActionsConfigType
 ): ActionsConfigurationUtilities {
   const isWhitelistedHostname = curry(isWhitelisted)(config);
   const isWhitelistedUri = curry(isWhitelistedHostnameInUri)(config);

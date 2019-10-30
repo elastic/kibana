@@ -5,7 +5,6 @@ exports[`<SpaceAwarePrivilegeSection> with user profile disabling "manageSpaces"
   color="danger"
   data-test-subj="userCannotManageSpacesCallout"
   iconType="alert"
-  size="m"
   title={
     <p>
       <FormattedMessage

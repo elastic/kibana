@@ -12,7 +12,7 @@ import {
   EuiPageBody,
   EuiPageContent,
   EuiPageContentBody,
-  EuiSpacer
+  EuiSpacer,
 } from '@elastic/eui';
 import { EventInput } from '../event_input';
 import { PatternInput } from '../pattern_input';
@@ -113,6 +113,7 @@ export class GrokDebugger extends React.Component {
                   value={this.state.pattern}
                   onChange={this.onPatternChange}
                 />
+                <EuiSpacer />
                 <CustomPatternsInput
                   value={this.state.customPatterns}
                   onChange={this.onCustomPatternsChange}

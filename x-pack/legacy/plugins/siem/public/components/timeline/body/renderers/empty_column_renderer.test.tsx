@@ -30,6 +30,7 @@ describe('empty_column_renderer', () => {
       eventId: _id,
       values: sourceObj != null ? sourceObj.value : undefined,
       field: defaultHeaders.find(h => h.id === 'source.ip')!,
+      timelineId: 'test',
     });
     const wrapper = shallow(<span>{emptyColumn}</span>);
     expect(toJson(wrapper)).toMatchSnapshot();
@@ -60,6 +61,7 @@ describe('empty_column_renderer', () => {
       eventId: _id,
       values: null,
       field: defaultHeaders.find(h => h.id === 'source.ip')!,
+      timelineId: 'test',
     });
     const wrapper = mount(
       <TestProviders>

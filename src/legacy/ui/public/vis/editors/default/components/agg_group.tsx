@@ -17,28 +17,34 @@
  * under the License.
  */
 
-import React, { useEffect, useReducer } from 'react';
+import React, { useEffect, useReducer, useMemo } from 'react';
 import {
   EuiTitle,
   EuiDragDropContext,
+  DragDropContextProps,
   EuiDroppable,
   EuiDraggable,
   EuiSpacer,
   EuiPanel,
 } from '@elastic/eui';
 
-import { AggConfig } from '../../../agg_config';
+import { AggConfig } from '../../../../agg_types/agg_config';
 import { aggGroupNamesMap, AggGroupNames } from '../agg_groups';
 import { DefaultEditorAgg } from './agg';
 import { DefaultEditorAggAdd } from './agg_add';
 import { DefaultEditorAggCommonProps } from './agg_common_props';
-import { isInvalidAggsTouched, isAggRemovable, calcAggIsTooLow } from './agg_group_helper';
+import {
+  isInvalidAggsTouched,
+  isAggRemovable,
+  calcAggIsTooLow,
+  getEnabledMetricAggsCount,
+} from './agg_group_helper';
 import { aggGroupReducer, initAggsState, AGGS_ACTION_KEYS } from './agg_group_state';
 import { Schema } from '../schemas';
 
 export interface DefaultEditorAggGroupProps extends DefaultEditorAggCommonProps {
   schemas: Schema[];
-  addSchema: (schems: Schema) => void;
+  addSchema: (schemas: Schema) => void;
   reorderAggs: (group: AggConfig[]) => void;
 }
 
@@ -76,6 +82,10 @@ function DefaultEditorAggGroup({
 
   const isGroupValid = Object.values(aggsState).every(item => item.valid);
   const isAllAggsTouched = isInvalidAggsTouched(aggsState);
+  const isMetricAggregationDisabled = useMemo(
+    () => groupName === AggGroupNames.Metrics && getEnabledMetricAggsCount(group) === 1,
+    [groupName, group]
+  );
 
   useEffect(() => {
     // when isAllAggsTouched is true, it means that all invalid aggs are touched and we will set ngModel's touched to true
@@ -101,11 +111,7 @@ function DefaultEditorAggGroup({
     setValidity(isGroupValid);
   }, [isGroupValid]);
 
-  interface DragDropResultProps {
-    source: { index: number };
-    destination?: { index: number } | null;
-  }
-  const onDragEnd = ({ source, destination }: DragDropResultProps) => {
+  const onDragEnd: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
     if (source && destination) {
       const orderedGroup = Array.from(group);
       const [removed] = orderedGroup.splice(source.index, 1);
@@ -135,7 +141,7 @@ function DefaultEditorAggGroup({
     <EuiDragDropContext onDragEnd={onDragEnd}>
       <EuiPanel paddingSize="s">
         <EuiTitle size="xs">
-          <div>{groupNameLabel}</div>
+          <h3>{groupNameLabel}</h3>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiDroppable droppableId={`agg_group_dnd_${groupName}`}>
@@ -158,6 +164,7 @@ function DefaultEditorAggGroup({
                     isDraggable={stats.count > 1}
                     isLastBucket={groupName === AggGroupNames.Buckets && index === group.length - 1}
                     isRemovable={isAggRemovable(agg, group)}
+                    isDisabled={agg.schema.name === 'metric' && isMetricAggregationDisabled}
                     lastParentPipelineAggTitle={lastParentPipelineAggTitle}
                     metricAggs={metricAggs}
                     state={state}

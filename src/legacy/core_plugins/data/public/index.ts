@@ -27,36 +27,29 @@ export function plugin() {
 // /// Export types & static code
 
 /** @public types */
-export type DataSetup = DataSetup;
-export type DataStart = DataStart;
+export { DataSetup, DataStart };
 
-export { ExpressionRenderer, ExpressionRendererProps } from './expressions';
 export { FilterBar, ApplyFiltersPopover } from './filter';
 export {
   Field,
   FieldType,
+  FieldListInterface,
   IndexPattern,
   IndexPatterns,
   StaticIndexPattern,
 } from './index_patterns';
-export { Query, QueryBar, QueryBarInput } from './query';
+export { Query, QueryBarInput } from './query';
 export { SearchBar, SearchBarProps, SavedQueryAttributes, SavedQuery } from './search';
 
 /** @public static code */
 export * from '../common';
-export {
-  FilterManager,
-  FilterStateManager,
-  uniqFilters,
-  onlyDisabledFiltersChanged,
-} from './filter/filter_manager';
+export { FilterStateManager } from './filter/filter_manager';
 export {
   CONTAINS_SPACES,
   getFromSavedObject,
   getRoutes,
   isFilterable,
   IndexPatternSelect,
-  IndexPatternsProvider, // LEGACY
   validateIndexPattern,
   ILLEGAL_CHARACTERS,
   INDEX_PATTERN_ILLEGAL_CHARACTERS,
@@ -68,3 +61,12 @@ export {
   mockFields,
   mockIndexPattern,
 } from './index_patterns';
+
+export {
+  TimeHistoryContract,
+  TimefilterContract,
+  getTime,
+  InputTimeRange,
+  extractTimeFilter,
+  changeTimeFilter,
+} from './timefilter';
