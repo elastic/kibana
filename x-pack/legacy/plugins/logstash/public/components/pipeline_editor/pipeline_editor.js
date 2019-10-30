@@ -318,7 +318,7 @@ class PipelineEditorUi extends React.Component {
             >
               <div data-test-subj="acePipeline">
                 <EuiCodeEditor
-                  mode="plain_text"
+                  mode={new PipelineMode()}
                   onChange={this.onPipelineChange}
                   setOptions={{
                     minLines: 25,
