@@ -26,8 +26,9 @@ import { applicationServiceMock } from '../application/application_service.mock'
 import { httpServiceMock } from '../http/http_service.mock';
 import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
 import { notificationServiceMock } from '../notifications/notifications_service.mock';
-import { ChromeService } from './chrome_service';
 import { docLinksServiceMock } from '../doc_links/doc_links_service.mock';
+import { ChromeService } from './chrome_service';
+import { App } from '../application';
 
 const store = new Map();
 (window as any).localStorage = {
@@ -46,331 +47,408 @@ function defaultStartDeps() {
   };
 }
 
+async function start({
+  options = { browserSupportsCsp: true },
+  cspConfigMock = { warnLegacyBrowsers: true },
+  startDeps = defaultStartDeps(),
+}: { options?: any; cspConfigMock?: any; startDeps?: ReturnType<typeof defaultStartDeps> } = {}) {
+  const service = new ChromeService(options);
+
+  if (cspConfigMock) {
+    startDeps.injectedMetadata.getCspConfig.mockReturnValue(cspConfigMock);
+  }
+
+  return {
+    service,
+    startDeps,
+    chrome: await service.start(startDeps),
+  };
+}
+
+function createApp(id: string, chromeHidden?: boolean): [string, App] {
+  return [id, { id, title: `${id} App`, mount: () => () => {}, chromeHidden }];
+}
+
 beforeEach(() => {
   store.clear();
+  window.history.pushState(undefined, '', '#/home?a=b');
 });
 
 describe('start', () => {
   it('adds legacy browser warning if browserSupportsCsp is disabled and warnLegacyBrowsers is enabled', async () => {
-    const service = new ChromeService({ browserSupportsCsp: false });
-    const startDeps = defaultStartDeps();
-    startDeps.injectedMetadata.getCspConfig.mockReturnValue({ warnLegacyBrowsers: true });
-    await service.start(startDeps);
+    const { startDeps } = await start({ options: { browserSupportsCsp: false } });
+
     expect(startDeps.notifications.toasts.addWarning.mock.calls).toMatchInlineSnapshot(`
-Array [
-  Array [
-    "Your browser does not meet the security requirements for Kibana.",
-  ],
-]
-`);
+      Array [
+        Array [
+          "Your browser does not meet the security requirements for Kibana.",
+        ],
+      ]
+    `);
   });
 
   it('does not add legacy browser warning if browser supports CSP', async () => {
-    const service = new ChromeService({ browserSupportsCsp: true });
-    const startDeps = defaultStartDeps();
-    startDeps.injectedMetadata.getCspConfig.mockReturnValue({ warnLegacyBrowsers: true });
-    await service.start(startDeps);
+    const { startDeps } = await start();
+
     expect(startDeps.notifications.toasts.addWarning).not.toBeCalled();
   });
 
   it('does not add legacy browser warning if warnLegacyBrowsers is disabled', async () => {
-    const service = new ChromeService({ browserSupportsCsp: false });
-    const startDeps = defaultStartDeps();
-    startDeps.injectedMetadata.getCspConfig.mockReturnValue({ warnLegacyBrowsers: false });
-    await service.start(startDeps);
+    const { startDeps } = await start({
+      options: { browserSupportsCsp: false },
+      cspConfigMock: { warnLegacyBrowsers: false },
+    });
+
     expect(startDeps.notifications.toasts.addWarning).not.toBeCalled();
   });
 
   describe('getComponent', () => {
     it('returns a renderable React component', async () => {
-      const service = new ChromeService({ browserSupportsCsp: true });
-      const start = await service.start(defaultStartDeps());
+      const { chrome } = await start();
+
       // Have to do some fanagling to get the type system and enzyme to accept this.
       // Don't capture the snapshot because it's 600+ lines long.
-      expect(shallow(React.createElement(() => start.getHeaderComponent()))).toBeDefined();
+      expect(shallow(React.createElement(() => chrome.getHeaderComponent()))).toBeDefined();
     });
   });
 
   describe('brand', () => {
     it('updates/emits the brand as it changes', async () => {
-      const service = new ChromeService({ browserSupportsCsp: true });
-      const start = await service.start(defaultStartDeps());
-      const promise = start
+      const { chrome, service } = await start();
+      const promise = chrome
         .getBrand$()
         .pipe(toArray())
         .toPromise();
 
-      start.setBrand({
+      chrome.setBrand({
         logo: 'big logo',
         smallLogo: 'not so big logo',
       });
-      start.setBrand({
+      chrome.setBrand({
         logo: 'big logo without small logo',
       });
       service.stop();
 
       await expect(promise).resolves.toMatchInlineSnapshot(`
-Array [
-  Object {},
-  Object {
-    "logo": "big logo",
-    "smallLogo": "not so big logo",
-  },
-  Object {
-    "logo": "big logo without small logo",
-    "smallLogo": undefined,
-  },
-]
-`);
+        Array [
+          Object {},
+          Object {
+            "logo": "big logo",
+            "smallLogo": "not so big logo",
+          },
+          Object {
+            "logo": "big logo without small logo",
+            "smallLogo": undefined,
+          },
+        ]
+      `);
     });
   });
 
   describe('visibility', () => {
     it('updates/emits the visibility', async () => {
-      const service = new ChromeService({ browserSupportsCsp: true });
-      const start = await service.start(defaultStartDeps());
-      const promise = start
+      const { chrome, service } = await start();
+      const promise = chrome
         .getIsVisible$()
         .pipe(toArray())
         .toPromise();
 
-      start.setIsVisible(true);
-      start.setIsVisible(false);
-      start.setIsVisible(true);
+      chrome.setIsVisible(true);
+      chrome.setIsVisible(false);
+      chrome.setIsVisible(true);
       service.stop();
 
       await expect(promise).resolves.toMatchInlineSnapshot(`
-Array [
-  true,
-  true,
-  false,
-  true,
-]
-`);
+        Array [
+          true,
+          true,
+          false,
+          true,
+        ]
+      `);
     });
 
     it('always emits false if embed query string is in hash when set up', async () => {
       window.history.pushState(undefined, '', '#/home?a=b&embed=true');
 
-      const service = new ChromeService({ browserSupportsCsp: true });
-      const start = await service.start(defaultStartDeps());
-      const promise = start
+      const { chrome, service } = await start();
+      const promise = chrome
         .getIsVisible$()
         .pipe(toArray())
         .toPromise();
 
-      start.setIsVisible(true);
-      start.setIsVisible(false);
-      start.setIsVisible(true);
+      chrome.setIsVisible(true);
+      chrome.setIsVisible(false);
+      chrome.setIsVisible(true);
       service.stop();
 
       await expect(promise).resolves.toMatchInlineSnapshot(`
-Array [
-  false,
-  false,
-  false,
-  false,
-]
-`);
+        Array [
+          false,
+          false,
+          false,
+          false,
+        ]
+      `);
+    });
+
+    it('application-specified visibility on mount', async () => {
+      const startDeps = defaultStartDeps();
+
+      // We can fake the application service navigating to the next app by
+      // adding a fake app to the application's available apps then triggering
+      // the next ID.
+      startDeps.application.availableApps = new Map([
+        createApp('alpha'),
+        createApp('beta', true),
+        createApp('gamma', false),
+      ]);
+
+      const { chrome, service } = await start({ startDeps });
+      const promise = chrome
+        .getIsVisible$()
+        .pipe(toArray())
+        .toPromise();
+
+      startDeps.application.currentAppId$.next('alpha');
+      startDeps.application.currentAppId$.next('beta');
+      startDeps.application.currentAppId$.next('gamma');
+      service.stop();
+
+      await expect(promise).resolves.toMatchInlineSnapshot(`
+        Array [
+          true,
+          false,
+          true,
+          false,
+        ]
+      `);
+    });
+
+    it('application-specified visibility has no effect when embed query string is in hash', async () => {
+      window.history.pushState(undefined, '', '#/home?a=b&embed=true');
+      const startDeps = defaultStartDeps();
+
+      // We can fake the application service navigating to the next app by
+      // adding a fake app to the application's available apps then triggering
+      // the next ID.
+      startDeps.application.availableApps = new Map([
+        createApp('alpha'),
+        createApp('beta', true),
+        createApp('gamma', false),
+      ]);
+
+      const { chrome, service } = await start({ startDeps });
+      const promise = chrome
+        .getIsVisible$()
+        .pipe(toArray())
+        .toPromise();
+
+      startDeps.application.currentAppId$.next('alpha');
+      startDeps.application.currentAppId$.next('beta');
+      startDeps.application.currentAppId$.next('gamma');
+      service.stop();
+
+      await expect(promise).resolves.toMatchInlineSnapshot(`
+        Array [
+          false,
+          false,
+          false,
+          false,
+        ]
+      `);
     });
   });
 
   describe('is collapsed', () => {
     it('updates/emits isCollapsed', async () => {
-      const service = new ChromeService({ browserSupportsCsp: true });
-      const start = await service.start(defaultStartDeps());
-      const promise = start
+      const { chrome, service } = await start();
+      const promise = chrome
         .getIsCollapsed$()
         .pipe(toArray())
         .toPromise();
 
-      start.setIsCollapsed(true);
-      start.setIsCollapsed(false);
-      start.setIsCollapsed(true);
+      chrome.setIsCollapsed(true);
+      chrome.setIsCollapsed(false);
+      chrome.setIsCollapsed(true);
       service.stop();
 
       await expect(promise).resolves.toMatchInlineSnapshot(`
-Array [
-  false,
-  true,
-  false,
-  true,
-]
-`);
+        Array [
+          false,
+          true,
+          false,
+          true,
+        ]
+      `);
     });
 
     it('only stores true in localStorage', async () => {
-      const service = new ChromeService({ browserSupportsCsp: true });
-      const start = await service.start(defaultStartDeps());
+      const { chrome } = await start();
 
-      start.setIsCollapsed(true);
+      chrome.setIsCollapsed(true);
       expect(store.size).toBe(1);
 
-      start.setIsCollapsed(false);
+      chrome.setIsCollapsed(false);
       expect(store.size).toBe(0);
     });
   });
 
   describe('application classes', () => {
     it('updates/emits the application classes', async () => {
-      const service = new ChromeService({ browserSupportsCsp: true });
-      const start = await service.start(defaultStartDeps());
-      const promise = start
+      const { chrome, service } = await start();
+      const promise = chrome
         .getApplicationClasses$()
         .pipe(toArray())
         .toPromise();
 
-      start.addApplicationClass('foo');
-      start.addApplicationClass('foo');
-      start.addApplicationClass('bar');
-      start.addApplicationClass('bar');
-      start.addApplicationClass('baz');
-      start.removeApplicationClass('bar');
-      start.removeApplicationClass('foo');
+      chrome.addApplicationClass('foo');
+      chrome.addApplicationClass('foo');
+      chrome.addApplicationClass('bar');
+      chrome.addApplicationClass('bar');
+      chrome.addApplicationClass('baz');
+      chrome.removeApplicationClass('bar');
+      chrome.removeApplicationClass('foo');
       service.stop();
 
       await expect(promise).resolves.toMatchInlineSnapshot(`
-Array [
-  Array [],
-  Array [
-    "foo",
-  ],
-  Array [
-    "foo",
-  ],
-  Array [
-    "foo",
-    "bar",
-  ],
-  Array [
-    "foo",
-    "bar",
-  ],
-  Array [
-    "foo",
-    "bar",
-    "baz",
-  ],
-  Array [
-    "foo",
-    "baz",
-  ],
-  Array [
-    "baz",
-  ],
-]
-`);
+        Array [
+          Array [],
+          Array [
+            "foo",
+          ],
+          Array [
+            "foo",
+          ],
+          Array [
+            "foo",
+            "bar",
+          ],
+          Array [
+            "foo",
+            "bar",
+          ],
+          Array [
+            "foo",
+            "bar",
+            "baz",
+          ],
+          Array [
+            "foo",
+            "baz",
+          ],
+          Array [
+            "baz",
+          ],
+        ]
+      `);
     });
   });
 
   describe('badge', () => {
     it('updates/emits the current badge', async () => {
-      const service = new ChromeService({ browserSupportsCsp: true });
-      const start = await service.start(defaultStartDeps());
-      const promise = start
+      const { chrome, service } = await start();
+      const promise = chrome
         .getBadge$()
         .pipe(toArray())
         .toPromise();
 
-      start.setBadge({ text: 'foo', tooltip: `foo's tooltip` });
-      start.setBadge({ text: 'bar', tooltip: `bar's tooltip` });
-      start.setBadge(undefined);
+      chrome.setBadge({ text: 'foo', tooltip: `foo's tooltip` });
+      chrome.setBadge({ text: 'bar', tooltip: `bar's tooltip` });
+      chrome.setBadge(undefined);
       service.stop();
 
       await expect(promise).resolves.toMatchInlineSnapshot(`
-Array [
-  undefined,
-  Object {
-    "text": "foo",
-    "tooltip": "foo's tooltip",
-  },
-  Object {
-    "text": "bar",
-    "tooltip": "bar's tooltip",
-  },
-  undefined,
-]
-`);
+        Array [
+          undefined,
+          Object {
+            "text": "foo",
+            "tooltip": "foo's tooltip",
+          },
+          Object {
+            "text": "bar",
+            "tooltip": "bar's tooltip",
+          },
+          undefined,
+        ]
+      `);
     });
   });
 
   describe('breadcrumbs', () => {
     it('updates/emits the current set of breadcrumbs', async () => {
-      const service = new ChromeService({ browserSupportsCsp: true });
-      const start = await service.start(defaultStartDeps());
-      const promise = start
+      const { chrome, service } = await start();
+      const promise = chrome
         .getBreadcrumbs$()
         .pipe(toArray())
         .toPromise();
 
-      start.setBreadcrumbs([{ text: 'foo' }, { text: 'bar' }]);
-      start.setBreadcrumbs([{ text: 'foo' }]);
-      start.setBreadcrumbs([{ text: 'bar' }]);
-      start.setBreadcrumbs([]);
+      chrome.setBreadcrumbs([{ text: 'foo' }, { text: 'bar' }]);
+      chrome.setBreadcrumbs([{ text: 'foo' }]);
+      chrome.setBreadcrumbs([{ text: 'bar' }]);
+      chrome.setBreadcrumbs([]);
       service.stop();
 
       await expect(promise).resolves.toMatchInlineSnapshot(`
-Array [
-  Array [],
-  Array [
-    Object {
-      "text": "foo",
-    },
-    Object {
-      "text": "bar",
-    },
-  ],
-  Array [
-    Object {
-      "text": "foo",
-    },
-  ],
-  Array [
-    Object {
-      "text": "bar",
-    },
-  ],
-  Array [],
-]
-`);
+        Array [
+          Array [],
+          Array [
+            Object {
+              "text": "foo",
+            },
+            Object {
+              "text": "bar",
+            },
+          ],
+          Array [
+            Object {
+              "text": "foo",
+            },
+          ],
+          Array [
+            Object {
+              "text": "bar",
+            },
+          ],
+          Array [],
+        ]
+      `);
     });
   });
 
   describe('help extension', () => {
     it('updates/emits the current help extension', async () => {
-      const service = new ChromeService({ browserSupportsCsp: true });
-      const start = await service.start(defaultStartDeps());
-      const promise = start
+      const { chrome, service } = await start();
+      const promise = chrome
         .getHelpExtension$()
         .pipe(toArray())
         .toPromise();
 
-      start.setHelpExtension(() => () => undefined);
-      start.setHelpExtension(undefined);
+      chrome.setHelpExtension(() => () => undefined);
+      chrome.setHelpExtension(undefined);
       service.stop();
 
       await expect(promise).resolves.toMatchInlineSnapshot(`
-Array [
-  undefined,
-  [Function],
-  undefined,
-]
-`);
+        Array [
+          undefined,
+          [Function],
+          undefined,
+        ]
+      `);
     });
   });
 });
 
 describe('stop', () => {
   it('completes applicationClass$, isCollapsed$, breadcrumbs$, isVisible$, and brand$ observables', async () => {
-    const service = new ChromeService({ browserSupportsCsp: true });
-    const start = await service.start(defaultStartDeps());
+    const { chrome, service } = await start();
     const promise = Rx.combineLatest(
-      start.getBrand$(),
-      start.getApplicationClasses$(),
-      start.getIsCollapsed$(),
-      start.getBreadcrumbs$(),
-      start.getIsVisible$(),
-      start.getHelpExtension$()
+      chrome.getBrand$(),
+      chrome.getApplicationClasses$(),
+      chrome.getIsCollapsed$(),
+      chrome.getBreadcrumbs$(),
+      chrome.getIsVisible$(),
+      chrome.getHelpExtension$()
     ).toPromise();
 
     service.stop();
@@ -378,18 +456,17 @@ describe('stop', () => {
   });
 
   it('completes immediately if service already stopped', async () => {
-    const service = new ChromeService({ browserSupportsCsp: true });
-    const start = await service.start(defaultStartDeps());
+    const { chrome, service } = await start();
     service.stop();
 
     await expect(
       Rx.combineLatest(
-        start.getBrand$(),
-        start.getApplicationClasses$(),
-        start.getIsCollapsed$(),
-        start.getBreadcrumbs$(),
-        start.getIsVisible$(),
-        start.getHelpExtension$()
+        chrome.getBrand$(),
+        chrome.getApplicationClasses$(),
+        chrome.getIsCollapsed$(),
+        chrome.getBreadcrumbs$(),
+        chrome.getIsVisible$(),
+        chrome.getHelpExtension$()
       ).toPromise()
     ).resolves.toBe(undefined);
   });

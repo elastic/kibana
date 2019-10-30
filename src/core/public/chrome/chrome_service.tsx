@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
+import { BehaviorSubject, Observable, ReplaySubject, merge } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import * as Url from 'url';
 
@@ -98,12 +98,34 @@ export class ChromeService {
 
     const appTitle$ = new BehaviorSubject<string>('Kibana');
     const brand$ = new BehaviorSubject<ChromeBrand>({});
-    const isVisible$ = new BehaviorSubject(true);
     const isCollapsed$ = new BehaviorSubject(!!localStorage.getItem(IS_COLLAPSED_KEY));
     const applicationClasses$ = new BehaviorSubject<Set<string>>(new Set());
     const helpExtension$ = new BehaviorSubject<ChromeHelpExtension | undefined>(undefined);
     const breadcrumbs$ = new BehaviorSubject<ChromeBreadcrumb[]>([]);
     const badge$ = new BehaviorSubject<ChromeBadge | undefined>(undefined);
+
+    /**
+     * These observables allow consumers to toggle the chrome visibility via either:
+     *   1. Using setIsVisible() to trigger the next visibility$
+     *   2. Setting `chromeHidden` when registering an application, which will
+     *      reset the visibility whenever the next application is mounted
+     *   3. Having embed=true in the query string
+     */
+    const visibility$ = new BehaviorSubject(true);
+    const isVisible$ = merge(
+      visibility$,
+      application.currentAppId$.pipe(
+        map(
+          appId =>
+            !!appId &&
+            application.availableApps.has(appId) &&
+            !!application.availableApps.get(appId)!.chromeHidden
+        )
+      )
+    ).pipe(
+      map(isVisible => (FORCE_HIDDEN ? false : isVisible)),
+      takeUntil(this.stop$)
+    );
 
     const navControls = this.navControls.start();
     const navLinks = this.navLinks.start({ application, http });
@@ -139,10 +161,7 @@ export class ChromeService {
             forceAppSwitcherNavigation$={navLinks.getForceAppSwitcherNavigation$()}
             helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
             homeHref={http.basePath.prepend('/app/kibana#/home')}
-            isVisible$={isVisible$.pipe(
-              map(visibility => (FORCE_HIDDEN ? false : visibility)),
-              takeUntil(this.stop$)
-            )}
+            isVisible$={isVisible$}
             kibanaVersion={injectedMetadata.getKibanaVersion()}
             legacyMode={injectedMetadata.getLegacyMode()}
             navLinks$={navLinks.getNavLinks$()}
@@ -166,15 +185,9 @@ export class ChromeService {
         );
       },
 
-      getIsVisible$: () =>
-        isVisible$.pipe(
-          map(visibility => (FORCE_HIDDEN ? false : visibility)),
-          takeUntil(this.stop$)
-        ),
+      getIsVisible$: () => isVisible$,
 
-      setIsVisible: (visibility: boolean) => {
-        isVisible$.next(visibility);
-      },
+      setIsVisible: (visibility: boolean) => visibility$.next(visibility),
 
       getIsCollapsed$: () => isCollapsed$.pipe(takeUntil(this.stop$)),
 

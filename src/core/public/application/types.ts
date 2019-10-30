@@ -66,6 +66,11 @@ export interface AppBase {
    * Custom capabilities defined by the app.
    */
   capabilities?: Partial<Capabilities>;
+
+  /**
+   * Hide the UI chrome when the application is mounted. Defaults to `false`.
+   */
+  chromeHidden?: boolean;
 }
 
 /**
