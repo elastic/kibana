@@ -25,11 +25,12 @@ import {
   Plugin,
   SavedObjectsClientContract,
 } from 'kibana/public';
-import { Storage } from 'ui/storage';
 import { RenderDeps } from './render_app';
 import { LocalApplicationService } from '../local_application_service';
 import { DataStart } from '../../../data/public';
 import { EmbeddablePublicPlugin } from '../../../../../plugins/embeddable/public';
+import { Storage } from '../../../../../plugins/kibana_utils/public';
+import { NavigationStart } from '../../../navigation/public';
 
 export interface LegacyAngularInjectedDependencies {
   queryFilter: any;
@@ -43,6 +44,7 @@ export interface LegacyAngularInjectedDependencies {
 export interface DashboardPluginStartDependencies {
   data: DataStart;
   embeddables: ReturnType<EmbeddablePublicPlugin['start']>;
+  navigation: NavigationStart;
 }
 
 export interface DashboardPluginSetupDependencies {
@@ -59,6 +61,7 @@ export class DashboardPlugin implements Plugin {
     dataStart: DataStart;
     savedObjectsClient: SavedObjectsClientContract;
     embeddables: ReturnType<EmbeddablePublicPlugin['start']>;
+    navigation: NavigationStart;
   } | null = null;
 
   public setup(
@@ -74,12 +77,13 @@ export class DashboardPlugin implements Plugin {
         if (this.startDependencies === null) {
           throw new Error('not started yet');
         }
-        const { dataStart, savedObjectsClient, embeddables } = this.startDependencies;
+        const { dataStart, savedObjectsClient, embeddables, navigation } = this.startDependencies;
         const angularDependencies = await getAngularDependencies();
         const deps: RenderDeps = {
           core: contextCore as LegacyCoreStart,
           ...legacyServices,
           ...angularDependencies,
+          navigation,
           dataStart,
           indexPatterns: dataStart.indexPatterns.indexPatterns,
           savedObjectsClient,
@@ -101,12 +105,13 @@ export class DashboardPlugin implements Plugin {
 
   start(
     { savedObjects: { client: savedObjectsClient } }: CoreStart,
-    { data: dataStart, embeddables }: DashboardPluginStartDependencies
+    { data: dataStart, embeddables, navigation }: DashboardPluginStartDependencies
   ) {
     this.startDependencies = {
       dataStart,
       savedObjectsClient,
       embeddables,
+      navigation,
     };
   }
 }

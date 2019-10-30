@@ -20,7 +20,6 @@
 import { EuiConfirmModal } from '@elastic/eui';
 import angular, { IModule } from 'angular';
 import { IPrivate } from 'ui/private';
-import { Storage } from 'ui/storage';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/src/angular';
 // @ts-ignore
 import { GlobalStateProvider } from 'ui/state_management/global_state';
@@ -42,7 +41,6 @@ import { PromiseServiceCreator } from 'ui/promises/promises';
 import { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url';
 // @ts-ignore
 import { confirmModalFactory } from 'ui/modals/confirm_modal';
-
 import {
   AppMountContext,
   ChromeStart,
@@ -51,6 +49,7 @@ import {
   UiSettingsClientContract,
 } from 'kibana/public';
 import { configureAppAngularModule } from 'ui/legacy_compat';
+import { Storage } from '../../../../../plugins/kibana_utils/public';
 
 // @ts-ignore
 import { initDashboardApp } from './app';
@@ -63,11 +62,13 @@ import {
 } from '../../../data/public';
 import { SavedQueryService } from '../../../data/public/search/search_bar/lib/saved_query_service';
 import { EmbeddablePublicPlugin } from '../../../../../plugins/embeddable/public';
+import { NavigationStart } from '../../../navigation/public';
 
 export interface RenderDeps {
   core: LegacyCoreStart;
   indexPatterns: DataStart['indexPatterns']['indexPatterns'];
   dataStart: DataStart;
+  navigation: NavigationStart;
   queryFilter: any;
   getUnhashableStates: any;
   shareContextMenuExtensions: any;
@@ -90,7 +91,7 @@ let angularModuleInstance: IModule | null = null;
 
 export const renderApp = (element: HTMLElement, appBasePath: string, deps: RenderDeps) => {
   if (!angularModuleInstance) {
-    angularModuleInstance = createLocalAngularModule(deps.core, deps.dataStart);
+    angularModuleInstance = createLocalAngularModule(deps.core, deps.navigation);
     // global routing stuff
     configureAppAngularModule(angularModuleInstance, deps.core as LegacyCoreStart);
     // custom routing stuff
@@ -102,7 +103,7 @@ export const renderApp = (element: HTMLElement, appBasePath: string, deps: Rende
 
 const mainTemplate = (basePath: string) => `<div style="height: 100%">
   <base href="${basePath}" />
-  <div ng-view style="height: 100%; display:flex; justify-content: center;"></div>
+  <div ng-view style="height: 100%;"></div>
 </div>
 `;
 
@@ -124,7 +125,7 @@ function mountDashboardApp(appBasePath: string, element: HTMLElement) {
   return $injector;
 }
 
-function createLocalAngularModule(core: AppMountContext['core'], data: DataStart) {
+function createLocalAngularModule(core: AppMountContext['core'], navigation: NavigationStart) {
   createLocalI18nModule();
   createLocalPrivateModule();
   createLocalPromiseModule();
@@ -132,7 +133,7 @@ function createLocalAngularModule(core: AppMountContext['core'], data: DataStart
   createLocalKbnUrlModule();
   createLocalStateModule();
   createLocalPersistedStateModule();
-  createLocalTopNavModule(data);
+  createLocalTopNavModule(navigation);
   createLocalConfirmModalModule();
   createLocalFilterBarModule();
 
@@ -218,11 +219,11 @@ function createLocalPrivateModule() {
   angular.module('app/dashboard/Private', []).provider('Private', PrivateProvider);
 }
 
-function createLocalTopNavModule(data: DataStart) {
+function createLocalTopNavModule(navigation: NavigationStart) {
   angular
     .module('app/dashboard/TopNav', ['react'])
     .directive('kbnTopNav', createTopNavDirective)
-    .directive('kbnTopNavHelper', createTopNavHelper(data.ui));
+    .directive('kbnTopNavHelper', createTopNavHelper(navigation.ui));
 }
 
 function createLocalFilterBarModule() {
