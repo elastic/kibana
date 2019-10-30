@@ -10,13 +10,16 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { CoreSetup, CoreStart } from 'src/core/public';
 import chrome, { Chrome } from 'ui/chrome';
 import { npSetup, npStart } from 'ui/new_platform';
-import { Plugin as EmbeddablePlugin } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import { start as embeddablePlugin } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
-import { setup as dataSetup, start as dataStart } from 'src/legacy/core_plugins/data/public/legacy';
+import { Plugin as EmbeddablePlugin } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import { start as embeddablePlugin } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
+import {
+  setup as dataSetup,
+  start as dataStart,
+} from '../../../../../../src/legacy/core_plugins/data/public/legacy';
 import {
   setup as expressionsSetup,
   start as expressionsStart,
-} from 'src/legacy/core_plugins/expressions/public/legacy';
+} from '../../../../../../src/legacy/core_plugins/expressions/public/legacy';
 import {
   Datasource,
   Visualization,

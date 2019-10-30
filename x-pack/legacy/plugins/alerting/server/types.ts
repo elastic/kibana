@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectAttributes, SavedObjectsClientContract } from 'src/core/server';
 import { AlertInstance } from './lib';
 import { AlertTypeRegistry as OrigAlertTypeRegistry } from './alert_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
+import { SavedObjectAttributes, SavedObjectsClientContract } from '../../../../../src/core/server';
 
 export type State = Record<string, any>;
 export type Context = Record<string, any>;

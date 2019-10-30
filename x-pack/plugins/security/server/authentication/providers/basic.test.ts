@@ -6,7 +6,7 @@
 
 import sinon from 'sinon';
 
-import { httpServerMock } from 'src/core/server/mocks';
+import { httpServerMock } from '../../../../../../src/core/server/mocks';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { mockAuthenticationProviderOptions, mockScopedClusterClient } from './base.mock';
 

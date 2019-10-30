@@ -11,7 +11,6 @@ import { npStart } from 'ui/new_platform';
 import { StaticIndexPattern } from 'ui/index_patterns';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { AutocompleteSuggestion } from 'src/plugins/data/public';
 import { fromQuery, toQuery } from '../Links/url_helpers';
 // @ts-ignore
 import { Typeahead } from './Typeahead';
@@ -19,6 +18,7 @@ import { getBoolFilter } from './get_bool_filter';
 import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { history } from '../../../utils/history';
+import { AutocompleteSuggestion } from '../../../../../../../../src/plugins/data/public';
 import { useKueryBarIndexPattern } from '../../../hooks/useKueryBarIndexPattern';
 
 const Container = styled.div`

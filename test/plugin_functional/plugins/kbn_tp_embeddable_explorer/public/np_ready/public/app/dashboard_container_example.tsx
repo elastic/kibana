@@ -19,16 +19,6 @@
 import React from 'react';
 import { EuiButton, EuiLoadingChart } from '@elastic/eui';
 import {
-  DASHBOARD_CONTAINER_TYPE,
-  DashboardContainer,
-  DashboardContainerFactory,
-} from 'src/legacy/core_plugins/dashboard_embeddable_container/public/np_ready/public';
-
-import { CoreStart } from 'src/core/public';
-import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
-import { TGetActionsCompatibleWithTrigger } from 'src/plugins/ui_actions/public';
-import { dashboardInput } from './dashboard_input';
-import {
   ErrorEmbeddable,
   ViewMode,
   isErrorEmbeddable,
@@ -36,6 +26,16 @@ import {
   GetEmbeddableFactory,
   GetEmbeddableFactories,
 } from '../embeddable_api';
+import {
+  DASHBOARD_CONTAINER_TYPE,
+  DashboardContainer,
+  DashboardContainerFactory,
+} from '../../../../../../../../src/legacy/core_plugins/dashboard_embeddable_container/public/np_ready/public';
+
+import { CoreStart } from '../../../../../../../../src/core/public';
+import { dashboardInput } from './dashboard_input';
+import { Start as InspectorStartContract } from '../../../../../../../../src/plugins/inspector/public';
+import { TGetActionsCompatibleWithTrigger } from '../../../../../../../../src/plugins/ui_actions/public';
 
 interface Props {
   getActions: TGetActionsCompatibleWithTrigger;

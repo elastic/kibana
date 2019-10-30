@@ -24,7 +24,7 @@ import 'brace/mode/json';
 const $ = require('jquery');
 const RowParser = require('../../src/sense_editor/row_parser');
 
-import { initializeOutput } from 'src/legacy/core_plugins/console/public/quarantined/src/output';
+import { initializeOutput } from '../../src/output';
 let output;
 
 const tokenIterator = ace.acequire('ace/token_iterator');

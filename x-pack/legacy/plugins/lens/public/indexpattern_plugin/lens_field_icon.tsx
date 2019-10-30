@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { palettes } from '@elastic/eui';
-import { FieldIcon, typeToEuiIconMap } from 'src/plugins/kibana_react/public';
+import { FieldIcon, typeToEuiIconMap } from '../../../../../../src/plugins/kibana_react/public';
 import { DataType } from '../types';
 import { normalizeOperationDataType } from './utils';
 

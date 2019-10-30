@@ -9,7 +9,7 @@ import { tint } from 'polished';
 import React from 'react';
 import styled from 'styled-components';
 
-import { AutocompleteSuggestion } from 'src/plugins/data/public';
+import { AutocompleteSuggestion } from '../../../../../../../src/plugins/data/public';
 
 interface SuggestionItemProps {
   isSelected?: boolean;

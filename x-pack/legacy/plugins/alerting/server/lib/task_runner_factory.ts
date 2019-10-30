@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger } from 'src/core/server';
+import { Logger } from '../../../../../../src/core/server';
 import { RunContext } from '../../../task_manager';
 import { createExecutionHandler } from './create_execution_handler';
 import { createAlertInstanceFactory } from './create_alert_instance_factory';

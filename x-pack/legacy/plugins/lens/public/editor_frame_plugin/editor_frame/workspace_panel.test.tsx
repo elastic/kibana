@@ -7,7 +7,7 @@
 import React from 'react';
 
 import { buildExistsFilter } from '@kbn/es-query';
-import { ExpressionRendererProps } from 'src/legacy/core_plugins/expressions/public';
+import { ExpressionRendererProps } from '../../../../../../../src/legacy/core_plugins/expressions/public';
 import { Visualization, FramePublicAPI, TableSuggestion } from '../../types';
 import {
   createMockVisualization,

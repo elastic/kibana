@@ -11,12 +11,12 @@ import { OutPortal, PortalNode } from 'react-reverse-portal';
 import { Query } from 'src/plugins/data/common';
 import { PluginsStart } from 'ui/new_platform/new_platform';
 
+import { ActionToaster, AppToast } from '../toasters';
 import {
   CONTEXT_MENU_TRIGGER,
   PANEL_BADGE_TRIGGER,
   ViewMode,
-} from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import { ActionToaster, AppToast } from '../toasters';
+} from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import {
   IndexPatternMapping,
   MapEmbeddable,

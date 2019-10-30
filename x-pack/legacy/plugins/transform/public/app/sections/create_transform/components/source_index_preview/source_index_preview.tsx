@@ -29,7 +29,6 @@ import {
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 
-import { KBN_FIELD_TYPES } from 'src/plugins/data/public';
 import {
   ColumnType,
   MlInMemoryTableBasic,
@@ -37,6 +36,7 @@ import {
   SORT_DIRECTION,
 } from '../../../../../shared_imports';
 
+import { KBN_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
 import { Dictionary } from '../../../../../../common/types/common';
 import { formatHumanReadableDateTimeSeconds } from '../../../../../../common/utils/date_utils';
 

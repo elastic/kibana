@@ -11,8 +11,6 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { CoreStart, SavedObjectsClientContract } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
-import { Plugin as DataPlugin } from 'src/plugins/data/public';
 import {
   DatasourceDimensionPanelProps,
   DatasourceDataPanelProps,
@@ -39,6 +37,8 @@ import {
   IndexPatternPrivateState,
   IndexPatternPersistedState,
 } from './types';
+import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import { Plugin as DataPlugin } from '../../../../../../src/plugins/data/public';
 import { Datasource, StateSetter } from '..';
 
 export { OperationType, IndexPatternColumn } from './operations';

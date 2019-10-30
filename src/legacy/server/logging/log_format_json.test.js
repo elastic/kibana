@@ -20,7 +20,7 @@
 import moment from 'moment';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { attachMetaData } from 'src/core/server/legacy/logging/legacy_logging_server';
+import { attachMetaData } from '../../../../src/core/server/legacy/logging/legacy_logging_server';
 import {
   createListStream,
   createPromiseFromStreams,

@@ -18,7 +18,7 @@ import { has } from 'lodash';
 
 export { callClusterFactory } from './server/lib/call_cluster_factory';
 import { getStatsWithXpack } from './server/telemetry_collection';
-import { telemetryCollectionManager } from 'src/legacy/core_plugins/telemetry/server';
+import { telemetryCollectionManager } from '../../../../src/legacy/core_plugins/telemetry/server';
 
 export const xpackMain = (kibana) => {
   return new kibana.Plugin({

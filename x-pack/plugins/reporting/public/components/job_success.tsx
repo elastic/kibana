@@ -6,7 +6,7 @@
 
 import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ToastInput } from 'src/core/public';
+import { ToastInput } from '../../../../../src/core/public';
 import { JobId, JobSummary } from '../../index.d';
 import { ReportLink } from './report_link';
 import { DownloadButton } from './download_button';

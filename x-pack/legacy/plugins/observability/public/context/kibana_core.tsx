@@ -5,7 +5,7 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import { LegacyCoreStart } from 'src/core/public';
+import { LegacyCoreStart } from '../../../../../../src/core/public';
 
 interface AppMountContext {
   core: LegacyCoreStart;

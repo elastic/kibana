@@ -30,8 +30,8 @@ import {
   UiSettingsClientContract,
 } from 'kibana/public';
 // @ts-ignore
-import { Plugin as DataPlugin } from 'src/plugins/data/public';
 import { initGraphApp } from './app';
+import { Plugin as DataPlugin } from '../../../../../src/plugins/data/public';
 
 /**
  * These are dependencies of the Graph app besides the base dependencies

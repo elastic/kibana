@@ -13,7 +13,7 @@ import {
 import React from 'react';
 import styled from 'styled-components';
 
-import { AutocompleteSuggestion } from 'src/plugins/data/public';
+import { AutocompleteSuggestion } from '../../../../../../../src/plugins/data/public';
 
 import { composeStateUpdaters } from '../../utils/typed_react';
 import { SuggestionItem } from './suggestion_item';

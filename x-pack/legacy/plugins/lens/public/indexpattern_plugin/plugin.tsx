@@ -8,11 +8,11 @@ import { CoreSetup } from 'src/core/public';
 // The following dependencies on ui/* and src/legacy/core_plugins must be mocked when testing
 import chrome, { Chrome } from 'ui/chrome';
 import { npSetup, npStart } from 'ui/new_platform';
-import { Storage } from 'src/plugins/kibana_utils/public';
-import { ExpressionsSetup } from 'src/plugins/expressions/public';
+import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 import { getIndexPatternDatasource } from './indexpattern';
 import { renameColumns } from './rename_columns';
 import { autoDate } from './auto_date';
+import { ExpressionsSetup } from '../../../../../../src/plugins/expressions/public';
 
 // TODO these are intermediary types because interpreter is not typed yet
 // They can get replaced by references to the real interfaces as soon as they

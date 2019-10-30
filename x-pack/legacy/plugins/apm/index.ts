@@ -7,8 +7,11 @@
 import { i18n } from '@kbn/i18n';
 import { Server } from 'hapi';
 import { resolve } from 'path';
-import { InternalCoreSetup, PluginInitializerContext } from 'src/core/server';
-import { LegacyPluginInitializer } from 'src/legacy/types';
+import {
+  InternalCoreSetup,
+  PluginInitializerContext
+} from '../../../../src/core/server';
+import { LegacyPluginInitializer } from '../../../../src/legacy/types';
 import mappings from './mappings.json';
 import { plugin } from './server/new-platform/index';
 

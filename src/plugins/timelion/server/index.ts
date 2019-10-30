@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'src/core/server';
+import { PluginInitializerContext } from '../../../../src/core/server';
 import { ConfigSchema } from './config';
 import { Plugin } from './plugin';
 

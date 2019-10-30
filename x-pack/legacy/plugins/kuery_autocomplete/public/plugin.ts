@@ -5,7 +5,7 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { Plugin as DataPublicPlugin } from 'src/plugins/data/public';
+import { Plugin as DataPublicPlugin } from '../../../../../src/plugins/data/public';
 
 // @ts-ignore
 import { kueryProvider } from './autocomplete_providers';

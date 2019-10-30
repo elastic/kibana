@@ -19,8 +19,8 @@
 
 import { writeFileSync } from 'fs';
 import { resolve } from 'path';
-import { getInstalledPackages } from 'src/dev/npm';
-import { LICENSE_OVERRIDES } from 'src/dev/license_checker';
+import { getInstalledPackages } from '../src/dev/npm';
+import { LICENSE_OVERRIDES } from '../src/dev/license_checker';
 
 import {
   isNull,

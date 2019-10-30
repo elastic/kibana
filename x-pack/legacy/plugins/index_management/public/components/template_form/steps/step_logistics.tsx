@@ -7,8 +7,15 @@ import React, { useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { useForm, Form, getUseField } from 'src/plugins/es_ui_shared/static/forms/hook_form_lib';
-import { getFormRow, Field } from 'src/plugins/es_ui_shared/static/forms/components';
+import {
+  useForm,
+  Form,
+  getUseField,
+} from '../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
+import {
+  getFormRow,
+  Field,
+} from '../../../../../../../../src/plugins/es_ui_shared/static/forms/components';
 import { templatesDocumentationLink } from '../../../lib/documentation_links';
 import { StepProps } from '../types';
 import { schemas } from '../template_form_schemas';

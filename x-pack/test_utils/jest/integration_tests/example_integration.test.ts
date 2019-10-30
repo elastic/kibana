@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as kbnTestServer from 'src/test_utils/kbn_server';
+import * as kbnTestServer from '../../../../src/test_utils/kbn_server';
 import { TestKbnServerConfig } from '../../kbn_server_config';
 
 describe('example integration test with kbn server', () => {

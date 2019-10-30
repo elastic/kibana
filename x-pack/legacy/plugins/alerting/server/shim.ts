@@ -6,13 +6,17 @@
 
 import Hapi from 'hapi';
 import { Legacy } from 'kibana';
-import KbnServer from 'src/legacy/server/kbn_server';
-import { CoreSetup, LoggerFactory, SavedObjectsLegacyService } from 'src/core/server';
 import { LegacySpacesPlugin as SpacesPluginStartContract } from '../../spaces';
 import { TaskManager } from '../../task_manager';
 import { XPackMainPlugin } from '../../xpack_main/xpack_main';
+import KbnServer from '../../../../../src/legacy/server/kbn_server';
 import { EncryptedSavedObjectsPlugin } from '../../encrypted_saved_objects';
 import { PluginSetupContract as SecurityPlugin } from '../../../../plugins/security/server';
+import {
+  CoreSetup,
+  LoggerFactory,
+  SavedObjectsLegacyService,
+} from '../../../../../src/core/server';
 import {
   ActionsPlugin,
   PluginSetupContract as ActionsPluginSetupContract,

@@ -4,11 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup, Logger, PluginInitializerContext, RecursiveReadonly } from 'src/core/server';
-import { Capabilities as UICapabilities } from 'src/core/public';
-import { deepFreeze } from 'src/core/utils';
-import { PluginSetupContract as TimelionSetupContract } from 'src/plugins/timelion/server';
+import {
+  CoreSetup,
+  Logger,
+  PluginInitializerContext,
+  RecursiveReadonly,
+} from '../../../../src/core/server';
+import { Capabilities as UICapabilities } from '../../../../src/core/public';
+import { deepFreeze } from '../../../../src/core/utils';
 import { XPackInfo } from '../../../legacy/plugins/xpack_main/server/lib/xpack_info';
+import { PluginSetupContract as TimelionSetupContract } from '../../../../src/plugins/timelion/server';
 import { FeatureRegistry } from './feature_registry';
 import { Feature, FeatureWithAllOrReadPrivileges } from './feature';
 import { uiCapabilitiesForFeatures } from './ui_capabilities_for_features';

@@ -7,8 +7,8 @@
 import { ResponseObject } from 'hapi';
 import { EventEmitter } from 'events';
 import { Legacy } from 'kibana';
-import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
 import { XPackMainPlugin } from '../xpack_main/xpack_main';
+import { ElasticsearchPlugin } from '../../../../src/legacy/core_plugins/elasticsearch';
 import { HeadlessChromiumDriverFactory } from './server/browsers/chromium/driver_factory';
 import { BrowserType } from './server/browsers/types';
 

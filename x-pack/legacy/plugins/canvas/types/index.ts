@@ -9,8 +9,8 @@ export {
   Overflow,
   BackgroundRepeat,
   BackgroundSize,
-} from 'src/legacy/core_plugins/interpreter/public/types/style';
-export * from 'src/plugins/expressions/public';
+} from '../../../../../src/legacy/core_plugins/interpreter/public/types/style';
+export * from '../../../../../src/plugins/expressions/public';
 export * from './assets';
 export * from './canvas';
 export * from './elements';

@@ -5,9 +5,9 @@
  */
 
 import Hapi from 'hapi';
-import { Logger } from 'src/core/server';
 import { EncryptedSavedObjectsStartContract } from '../shim';
 import { LegacySpacesPlugin as SpacesPluginStartContract } from '../../../spaces';
+import { Logger } from '../../../../../../src/core/server';
 import { validateParams, validateConfig, validateSecrets } from './validate_with_schema';
 import {
   ActionTypeExecutorResult,

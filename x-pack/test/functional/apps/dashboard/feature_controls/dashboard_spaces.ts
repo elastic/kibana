@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import {
   createDashboardEditUrl,
   DashboardConstants,
-} from 'src/legacy/core_plugins/kibana/public/dashboard/dashboard_constants';
+} from '../../../../../../src/legacy/core_plugins/kibana/public/dashboard/dashboard_constants';
 import { SpacesService } from '../../../../common/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 

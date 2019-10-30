@@ -27,10 +27,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
-import { FieldIcon } from 'src/plugins/kibana_react/public';
 import { WorkspaceField } from '../../types';
 import { iconChoices } from '../../helpers/style_choices';
 import { LegacyIcon } from '../legacy_icon';
+import { FieldIcon } from '../../../../../../../src/plugins/kibana_react/public';
 import { UpdateableFieldProperties } from './field_manager';
 
 import { isEqual } from '../helpers';

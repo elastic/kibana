@@ -7,7 +7,7 @@
 import { Legacy } from 'kibana';
 import { StaticIndexPattern } from 'ui/index_patterns';
 import { APICaller } from 'src/core/server';
-import { IndexPatternsService } from 'src/legacy/server/index_patterns/service';
+import { IndexPatternsService } from '../../../../../../../src/legacy/server/index_patterns/service';
 import { Setup } from '../helpers/setup_request';
 
 export const getKueryBarIndexPattern = async ({

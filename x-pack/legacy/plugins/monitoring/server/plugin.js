@@ -10,7 +10,7 @@ import { requireUIRoutes } from './routes';
 import { instantiateClient } from './es_client/instantiate_client';
 import { initMonitoringXpackInfo } from './init_monitoring_xpack_info';
 import { initBulkUploader } from './kibana_monitoring';
-import { telemetryCollectionManager } from 'src/legacy/core_plugins/telemetry/server';
+import { telemetryCollectionManager } from '../../../../../src/legacy/core_plugins/telemetry/server';
 import { getStatsWithMonitoring } from './telemetry_collection';
 
 import {

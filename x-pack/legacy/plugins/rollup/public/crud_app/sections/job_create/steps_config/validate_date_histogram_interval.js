@@ -10,7 +10,7 @@ import {
   InvalidEsIntervalFormatError,
   InvalidEsCalendarIntervalError,
   parseEsInterval,
-} from 'src/legacy/core_plugins/data/public';
+} from '../../../../../../../../../src/legacy/core_plugins/data/public';
 
 export function validateDateHistogramInterval(dateHistogramInterval) {
   if (!dateHistogramInterval || !dateHistogramInterval.trim()) {

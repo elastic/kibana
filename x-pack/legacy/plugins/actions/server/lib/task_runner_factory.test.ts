@@ -12,7 +12,10 @@ import { TaskRunnerFactory } from './task_runner_factory';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import { actionExecutorMock } from './action_executor.mock';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/plugin.mock';
-import { savedObjectsClientMock, loggingServiceMock } from 'src/core/server/mocks';
+import {
+  savedObjectsClientMock,
+  loggingServiceMock,
+} from '../../../../../../src/core/server/mocks';
 
 const spaceIdToNamespace = jest.fn();
 const actionTypeRegistry = actionTypeRegistryMock.create();

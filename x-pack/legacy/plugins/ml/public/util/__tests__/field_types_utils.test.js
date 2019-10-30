@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { KBN_FIELD_TYPES } from 'src/plugins/data/public';
+import { KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
 import { ML_JOB_FIELD_TYPES } from './../../../common/constants/field_types';
 import {
   kbnTypeToMLJobType,

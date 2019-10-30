@@ -18,7 +18,7 @@
  */
 
 import { Plugin, CoreSetup } from 'kibana/public';
-import { ISearchAppMountContext } from 'src/plugins/data/public';
+import { ISearchAppMountContext } from '../../../../../src/plugins/data/public';
 
 declare module 'kibana/public' {
   interface AppMountContext {

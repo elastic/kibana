@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IClusterClient, KibanaRequest, Logger } from 'src/core/server';
+import { IClusterClient, KibanaRequest, Logger } from '../../../../../src/core/server';
 
 /**
  * Represents the options to create an APIKey class instance that will be

@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { coreMock, elasticsearchServiceMock } from 'src/core/server/mocks';
+import { coreMock, elasticsearchServiceMock } from '../../../../src/core/server/mocks';
 
 import { ByteSizeValue } from '@kbn/config-schema';
 import { Plugin } from './plugin';
-import { IClusterClient, CoreSetup } from 'src/core/server';
+import { IClusterClient, CoreSetup } from '../../../../src/core/server';
 
 describe('Security Plugin', () => {
   let plugin: Plugin;

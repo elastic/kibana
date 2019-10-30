@@ -5,7 +5,7 @@
  */
 
 import { setupEnvironment, pageHelpers, nextTick, getRandomString } from './helpers';
-import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from 'src/legacy/ui/public/index_patterns';
+import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from '../../../../../../src/legacy/ui/public/index_patterns';
 
 jest.mock('ui/new_platform');
 jest.mock('ui/index_patterns');

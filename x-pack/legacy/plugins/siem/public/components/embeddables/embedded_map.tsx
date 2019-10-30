@@ -13,8 +13,8 @@ import styled, { css } from 'styled-components';
 import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
 import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
 
-import { EmbeddablePanel } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import { start } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
+import { EmbeddablePanel } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import { start } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import { getIndexPatternTitleIdMapping } from '../../hooks/api/helpers';
 import { useIndexPatterns } from '../../hooks/use_index_patterns';

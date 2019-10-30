@@ -10,7 +10,6 @@ import { management } from 'ui/management';
 import { uiModules } from 'ui/modules';
 // @ts-ignore: path dynamic for kibana
 import routes from 'ui/routes';
-import { AutocompleteSuggestion } from 'src/plugins/data/public';
 import { configBlockSchemas } from '../../../common/config_schemas';
 import { translateConfigSchema } from '../../../common/config_schemas_translations_map';
 // @ts-ignore: path dynamic for kibana
@@ -25,6 +24,7 @@ import { TagsLib } from '../tags';
 import { FrontendLibs } from '../types';
 import { MemoryElasticsearchAdapter } from './../adapters/elasticsearch/memory';
 import { ElasticsearchLib } from './../elasticsearch';
+import { AutocompleteSuggestion } from '../../../../../../../src/plugins/data/public';
 
 const onKibanaReady = uiModules.get('kibana').run;
 

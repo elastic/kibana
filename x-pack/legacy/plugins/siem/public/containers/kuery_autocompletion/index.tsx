@@ -6,7 +6,7 @@
 
 import React, { useState } from 'react';
 import { StaticIndexPattern } from 'ui/index_patterns';
-import { AutocompleteSuggestion } from 'src/plugins/data/public';
+import { AutocompleteSuggestion } from '../../../../../../../src/plugins/data/public';
 import { useKibanaPlugins } from '../../lib/compose/kibana_plugins';
 
 type RendererResult = React.ReactElement<JSX.Element> | null;

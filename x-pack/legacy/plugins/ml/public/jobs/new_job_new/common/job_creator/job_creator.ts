@@ -6,9 +6,9 @@
 
 import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/types';
 import { IndexPattern } from 'ui/index_patterns';
-import { ES_FIELD_TYPES } from 'src/plugins/data/common';
 import { IndexPatternTitle } from '../../../../../common/types/kibana';
 import { ML_JOB_AGGREGATION } from '../../../../../common/constants/aggregation_types';
+import { ES_FIELD_TYPES } from '../../../../../../../../../src/plugins/data/common';
 import { Job, Datafeed, Detector, JobId, DatafeedId, BucketSpan } from './configs';
 import { Aggregation, Field } from '../../../../../common/types/fields';
 import { createEmptyJob, createEmptyDatafeed } from './util/default_configs';

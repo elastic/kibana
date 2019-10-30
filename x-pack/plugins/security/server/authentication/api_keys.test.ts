@@ -5,12 +5,12 @@
  */
 
 import { APIKeys } from './api_keys';
-import { IClusterClient, IScopedClusterClient } from 'src/core/server';
+import { IClusterClient, IScopedClusterClient } from '../../../../../src/core/server';
 import {
   httpServerMock,
   loggingServiceMock,
   elasticsearchServiceMock,
-} from 'src/core/server/mocks';
+} from '../../../../../src/core/server/mocks';
 
 describe('API Keys', () => {
   let apiKeys: APIKeys;

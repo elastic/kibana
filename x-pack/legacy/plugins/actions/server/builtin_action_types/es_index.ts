@@ -8,8 +8,8 @@ import { curry } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 
-import { Logger } from 'src/core/server';
 import { nullableType } from './lib/nullable';
+import { Logger } from '../../../../../../src/core/server';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 
 // config definition

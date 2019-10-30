@@ -7,9 +7,9 @@
 import { FeatureRegistry } from '../feature_registry';
 import { defineRoutes } from './index';
 
-import { httpServerMock, httpServiceMock } from 'src/core/server/mocks';
+import { httpServerMock, httpServiceMock } from '../../../../../src/core/server/mocks';
 import { XPackInfoLicense } from '../../../../legacy/plugins/xpack_main/server/lib/xpack_info_license';
-import { RequestHandler } from 'src/core/server';
+import { RequestHandler } from '../../../../../src/core/server';
 
 let currentLicenseLevel: string = 'gold';
 

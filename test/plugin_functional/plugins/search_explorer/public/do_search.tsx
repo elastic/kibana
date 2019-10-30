@@ -21,7 +21,10 @@ import React from 'react';
 import { EuiButton, EuiCodeBlock, EuiFlexItem, EuiFlexGroup, EuiText } from '@elastic/eui';
 import { EuiProgress } from '@elastic/eui';
 import { Observable } from 'rxjs';
-import { IKibanaSearchResponse, IKibanaSearchRequest } from 'src/plugins/data/public';
+import {
+  IKibanaSearchResponse,
+  IKibanaSearchRequest,
+} from '../../../../../src/plugins/data/public';
 
 interface Props {
   request: IKibanaSearchRequest;

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginInitializerContext } from 'src/core/server';
+import { PluginInitializerContext } from '../../../../src/core/server';
 import { Plugin } from './plugin';
 
 // These exports are part of public Features plugin contract, any change in signature of exported

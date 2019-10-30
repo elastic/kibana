@@ -7,7 +7,7 @@
 jest.mock('./providers/basic', () => ({ BasicAuthenticationProvider: jest.fn() }));
 
 import Boom from 'boom';
-import { SessionStorage } from 'src/core/server';
+import { SessionStorage } from '../../../../../src/core/server';
 
 import {
   loggingServiceMock,
@@ -15,7 +15,7 @@ import {
   httpServerMock,
   elasticsearchServiceMock,
   sessionStorageMock,
-} from 'src/core/server/mocks';
+} from '../../../../../src/core/server/mocks';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import { AuthenticationResult } from './authentication_result';
 import { Authenticator, AuthenticatorOptions, ProviderSession } from './authenticator';

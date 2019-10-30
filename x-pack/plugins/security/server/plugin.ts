@@ -12,8 +12,8 @@ import {
   Logger,
   PluginInitializerContext,
   RecursiveReadonly,
-} from 'src/core/server';
-import { deepFreeze } from 'src/core/utils';
+} from '../../../../src/core/server';
+import { deepFreeze } from '../../../../src/core/utils';
 import { XPackInfo } from '../../../legacy/plugins/xpack_main/server/lib/xpack_info';
 import { setupAuthentication, Authentication } from './authentication';
 import { createConfig$ } from './config';

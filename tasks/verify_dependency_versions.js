@@ -19,7 +19,7 @@
 
 import { size } from 'lodash';
 import kibana from '../package.json';
-import xpack from 'x-pack/package.json';
+import xpack from '../x-pack/package.json';
 
 function getMismatches(depType) {
   return Object.keys(kibana[depType])

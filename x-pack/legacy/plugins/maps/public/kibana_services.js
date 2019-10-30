@@ -6,7 +6,7 @@
 
 import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
 export { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
-import { start as data } from 'src/legacy/core_plugins/data/public/legacy';
+import { start as data } from '../../../../../src/legacy/core_plugins/data/public/legacy';
 
 export { SearchSource } from 'ui/courier';
 export const indexPatternService = data.indexPatterns.indexPatterns;

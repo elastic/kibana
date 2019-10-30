@@ -10,7 +10,7 @@ jest.mock('./lib/post_pagerduty', () => ({
 
 import { ActionType, Services, ActionTypeExecutorOptions } from '../types';
 import { validateConfig, validateSecrets, validateParams } from '../lib';
-import { savedObjectsClientMock } from 'src/core/server/mocks';
+import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import { postPagerduty } from './lib/post_pagerduty';
 import { createActionTypeRegistry } from './index.test';
 

@@ -7,8 +7,8 @@
 import React, { useEffect, useReducer } from 'react';
 import { CoreSetup, CoreStart } from 'src/core/public';
 import { Filter } from '@kbn/es-query';
-import { Query, SavedQuery } from 'src/legacy/core_plugins/data/public';
-import { ExpressionRenderer } from 'src/legacy/core_plugins/expressions/public';
+import { Query, SavedQuery } from '../../../../../../../src/legacy/core_plugins/data/public';
+import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/expressions/public';
 import {
   Datasource,
   DatasourcePublicAPI,

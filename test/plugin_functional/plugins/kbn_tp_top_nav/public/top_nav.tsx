@@ -21,7 +21,7 @@ import React from 'react';
 import {
   setup as navSetup,
   start as navStart,
-} from 'src/legacy/core_plugins/navigation/public/legacy';
+} from '../../../../../src/legacy/core_plugins/navigation/public/legacy';
 
 const customExtension = {
   id: 'registered-prop',

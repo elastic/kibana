@@ -21,9 +21,9 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { ES_FIELD_TYPES } from 'src/plugins/data/public';
 import { ColumnType, MlInMemoryTableBasic, SORT_DIRECTION } from '../../../../../shared_imports';
 import { dictionaryToArray } from '../../../../../../common/types/common';
+import { ES_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
 import { formatHumanReadableDateTimeSeconds } from '../../../../../../common/utils/date_utils';
 
 import { useCurrentIndexPattern } from '../../../../lib/kibana';

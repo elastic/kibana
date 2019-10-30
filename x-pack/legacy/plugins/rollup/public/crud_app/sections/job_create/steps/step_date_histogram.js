@@ -26,7 +26,7 @@ import {
 
 import {
   parseEsInterval,
-} from 'src/legacy/core_plugins/data/public';
+} from '../../../../../../../../../src/legacy/core_plugins/data/public';
 
 import {
   dateHistogramDetailsUrl,

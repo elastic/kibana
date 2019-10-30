@@ -18,7 +18,7 @@ import { SavedQuery } from 'src/legacy/core_plugins/data/public';
 
 import { OnTimeChangeProps } from '@elastic/eui';
 import { npStart } from 'ui/new_platform';
-import { start as data } from 'src/legacy/core_plugins/data/public/legacy';
+import { start as data } from '../../../../../../../src/legacy/core_plugins/data/public/legacy';
 
 import { inputsActions } from '../../store/inputs';
 import { InputsRange } from '../../store/inputs/model';

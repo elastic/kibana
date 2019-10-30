@@ -11,7 +11,7 @@ import { FormatFactory } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import {
   IInterpreterRenderFunction,
   IInterpreterRenderHandlers,
-} from 'src/legacy/core_plugins/expressions/public/expressions';
+} from '../../../../../../src/legacy/core_plugins/expressions/public/expressions';
 import { MetricConfig } from './types';
 import { LensMultiTable } from '../types';
 import { AutoScale } from './auto_scale';

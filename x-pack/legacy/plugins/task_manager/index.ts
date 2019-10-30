@@ -6,8 +6,8 @@
 
 import { Root } from 'joi';
 import { Legacy } from 'kibana';
-import { SavedObjectsSerializer, SavedObjectsSchema } from 'src/core/server';
 import { Plugin, PluginSetupContract } from './plugin';
+import { SavedObjectsSerializer, SavedObjectsSchema } from '../../../../src/core/server';
 import mappings from './mappings.json';
 import { migrations } from './migrations';
 

@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { DataPublicPluginSetup } from 'src/plugins/data/public';
-import { Plugin, CoreSetup, PluginInitializerContext } from 'src/core/public';
+import { DataPublicPluginSetup } from '../../../../../src/plugins/data/public';
+import { Plugin, CoreSetup, PluginInitializerContext } from '../../../../../src/core/public';
 import { DEMO_SEARCH_STRATEGY } from '../common';
 import { demoClientSearchStrategyProvider } from './demo_search_strategy';
 import { IDemoRequest, IDemoResponse } from '../common';

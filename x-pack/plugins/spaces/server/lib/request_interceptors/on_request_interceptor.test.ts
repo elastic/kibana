@@ -13,9 +13,9 @@ import {
   CoreSetup,
   IBasePath,
   IRouter,
-} from 'src/core/server';
+} from '../../../../../../src/core/server';
 
-import * as kbnTestServer from 'src/test_utils/kbn_server';
+import * as kbnTestServer from '../../../../../../src/test_utils/kbn_server';
 import { LegacyAPI } from '../../plugin';
 
 describe('onRequestInterceptor', () => {

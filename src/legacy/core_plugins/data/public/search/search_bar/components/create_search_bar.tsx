@@ -23,7 +23,7 @@ import { Filter } from '@kbn/es-query';
 import { CoreStart } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
+import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
 import { TimefilterSetup } from '../../../timefilter';
 import { SearchBar } from '../../../';
 import { SearchBarOwnProps } from '.';

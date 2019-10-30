@@ -17,8 +17,8 @@
  * under the License.
  */
 import { npStart } from 'ui/new_platform';
-import { IAction, createAction } from 'src/plugins/ui_actions/public';
-import { CONTEXT_MENU_TRIGGER } from 'src/plugins/embeddable/public';
+import { IAction, createAction } from '../../../../../src/plugins/ui_actions/public';
+import { CONTEXT_MENU_TRIGGER } from '../../../../../src/plugins/embeddable/public';
 
 export const createSamplePanelLink = (): IAction =>
   createAction({

@@ -6,7 +6,10 @@
 
 import React from 'react';
 import { ExpressionRendererProps } from 'src/legacy/core_plugins/expressions/public';
-import { ExpressionsSetup, ExpressionsStart } from 'src/legacy/core_plugins/expressions/public';
+import {
+  ExpressionsSetup,
+  ExpressionsStart,
+} from '../../../../../../src/legacy/core_plugins/expressions/public';
 import { DatasourcePublicAPI, FramePublicAPI, Visualization, Datasource } from '../types';
 import { EditorFrameSetupPlugins, EditorFrameStartPlugins } from './plugin';
 

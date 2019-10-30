@@ -8,7 +8,7 @@ import Boom from 'boom';
 import { errors } from 'elasticsearch';
 import sinon from 'sinon';
 
-import { httpServerMock } from 'src/core/server/mocks';
+import { httpServerMock } from '../../../../../../src/core/server/mocks';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import {
   MockAuthenticationProviderOptions,
@@ -17,7 +17,7 @@ import {
 } from './base.mock';
 
 import { KerberosAuthenticationProvider } from './kerberos';
-import { ElasticsearchErrorHelpers } from 'src/core/server/elasticsearch';
+import { ElasticsearchErrorHelpers } from '../../../../../../src/core/server/elasticsearch';
 
 describe('KerberosAuthenticationProvider', () => {
   let provider: KerberosAuthenticationProvider;

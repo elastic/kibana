@@ -18,8 +18,8 @@ import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 
 import { npSetup, npStart } from 'ui/new_platform';
-import { Storage } from 'src/plugins/kibana_utils/public';
-import { start as data } from 'src/legacy/core_plugins/data/public/legacy';
+import { Storage } from '../../../../../src/plugins/kibana_utils/public';
+import { start as data } from '../../../../../src/legacy/core_plugins/data/public/legacy';
 import { GraphPlugin } from './plugin';
 
 // @ts-ignore

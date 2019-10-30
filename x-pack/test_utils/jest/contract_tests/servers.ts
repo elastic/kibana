@@ -6,7 +6,7 @@
 
 import url from 'url';
 import { resolve } from 'path';
-import * as kbnTestServer from 'src/test_utils/kbn_server';
+import * as kbnTestServer from '../../../../src/test_utils/kbn_server';
 import { TestKbnServerConfig } from '../../kbn_server_config';
 
 const PLUGIN_PATHS = resolve(__dirname, '../../../');

@@ -10,7 +10,7 @@ jest.mock('tls');
 import { PeerCertificate, TLSSocket } from 'tls';
 import { errors } from 'elasticsearch';
 
-import { elasticsearchServiceMock, httpServerMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock, httpServerMock } from '../../../../../../src/core/server/mocks';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import {
   MockAuthenticationProviderOptionsWithJest,
@@ -18,7 +18,10 @@ import {
 } from './base.mock';
 
 import { PKIAuthenticationProvider } from './pki';
-import { ElasticsearchErrorHelpers, ScopedClusterClient } from 'src/core/server/elasticsearch';
+import {
+  ElasticsearchErrorHelpers,
+  ScopedClusterClient,
+} from '../../../../../../src/core/server/elasticsearch';
 import { Socket } from 'net';
 import { getErrorStatusCode } from '../../errors';
 

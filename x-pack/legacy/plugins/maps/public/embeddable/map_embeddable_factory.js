@@ -11,8 +11,8 @@ import { i18n } from '@kbn/i18n';
 import {
   EmbeddableFactory,
   ErrorEmbeddable
-} from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import { setup } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
+} from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import { setup } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import { MapEmbeddable } from './map_embeddable';
 import { indexPatternService } from '../kibana_services';
 

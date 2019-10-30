@@ -11,7 +11,7 @@ import {
   Plugin,
   PluginInitializerContext,
   NotificationsStart,
-} from 'src/core/public';
+} from '../../../src/core/public';
 
 export type JobId = string;
 export type JobStatus = 'completed' | 'pending' | 'processing' | 'failed';

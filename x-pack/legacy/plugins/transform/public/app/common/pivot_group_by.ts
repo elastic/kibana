@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KBN_FIELD_TYPES } from 'src/plugins/data/public';
 import { Dictionary } from '../../../common/types/common';
+import { KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
 
 import { AggName } from './aggregations';
 import { EsFieldName } from './fields';

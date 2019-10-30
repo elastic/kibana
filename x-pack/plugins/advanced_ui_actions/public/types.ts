@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { OverlayRef } from 'src/core/public';
+import { OverlayRef } from '../../../../src/core/public';
 
 export interface CommonlyUsedRange {
   from: string;

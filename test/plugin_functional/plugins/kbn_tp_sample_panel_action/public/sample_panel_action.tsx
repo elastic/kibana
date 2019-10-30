@@ -20,8 +20,8 @@ import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { npStart, npSetup } from 'ui/new_platform';
 
-import { CONTEXT_MENU_TRIGGER, IEmbeddable } from 'src/plugins/embeddable/public';
-import { createAction } from 'src/plugins/ui_actions/public';
+import { CONTEXT_MENU_TRIGGER, IEmbeddable } from '../../../../../src/plugins/embeddable/public';
+import { createAction } from '../../../../../src/plugins/ui_actions/public';
 
 interface ActionContext {
   embeddable: IEmbeddable;

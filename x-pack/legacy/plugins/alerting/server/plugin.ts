@@ -6,11 +6,11 @@
 
 import Hapi from 'hapi';
 import { first } from 'rxjs/operators';
-import { IClusterClient, KibanaRequest, Logger } from 'src/core/server';
 import { Services } from './types';
 import { AlertsClient } from './alerts_client';
 import { AlertTypeRegistry } from './alert_type_registry';
 import { AlertsClientFactory, TaskRunnerFactory } from './lib';
+import { IClusterClient, KibanaRequest, Logger } from '../../../../../src/core/server';
 import {
   AlertingPluginInitializerContext,
   AlertingCoreSetup,

@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger } from 'src/core/server';
 import { ActionTypeRegistry } from '../action_type_registry';
 import { ActionsConfigurationUtilities } from '../actions_config';
+import { Logger } from '../../../../../../src/core/server';
 
 import { getActionType as getServerLogActionType } from './server_log';
 import { getActionType as getSlackActionType } from './slack';

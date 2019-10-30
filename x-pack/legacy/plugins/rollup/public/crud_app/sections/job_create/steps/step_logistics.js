@@ -25,7 +25,7 @@ import {
 } from '@elastic/eui';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { CronEditor } from 'src/plugins/es_ui_shared/public/components/cron_editor';
+import { CronEditor } from '../../../../../../../../../src/plugins/es_ui_shared/public/components/cron_editor';
 import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/index_patterns';
 import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/indices';
 import { logisticalDetailsUrl, cronUrl } from '../../../services';

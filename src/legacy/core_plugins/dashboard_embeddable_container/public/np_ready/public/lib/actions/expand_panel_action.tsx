@@ -18,9 +18,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IAction, IncompatibleActionError } from 'src/plugins/ui_actions/public';
 import { IEmbeddable } from '../../../../../../embeddable_api/public/np_ready/public';
 import { DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '../embeddable';
+import {
+  IAction,
+  IncompatibleActionError,
+} from '../../../../../../../../../src/plugins/ui_actions/public';
 
 export const EXPAND_PANEL_ACTION = 'togglePanel';
 

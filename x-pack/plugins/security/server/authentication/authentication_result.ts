@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AuthHeaders } from 'src/core/server';
+import { AuthHeaders } from '../../../../../src/core/server';
 import { AuthenticatedUser } from '../../common/model';
 
 /**

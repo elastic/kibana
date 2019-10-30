@@ -8,7 +8,7 @@ import Boom from 'boom';
 import sinon from 'sinon';
 import { ByteSizeValue } from '@kbn/config-schema';
 
-import { httpServerMock } from 'src/core/server/mocks';
+import { httpServerMock } from '../../../../../../src/core/server/mocks';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import {
   MockAuthenticationProviderOptions,

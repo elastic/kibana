@@ -8,11 +8,11 @@ import { useEffect, useState } from 'react';
 
 import { IndexPattern } from 'ui/index_patterns';
 
-import { ES_FIELD_TYPES } from 'src/plugins/data/public';
 import { dictionaryToArray } from '../../../../../../common/types/common';
 import { useApi } from '../../../../hooks/use_api';
 
 import { Dictionary } from '../../../../../../common/types/common';
+import { ES_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
 import {
   getPreviewRequestBody,
   PreviewRequestBody,

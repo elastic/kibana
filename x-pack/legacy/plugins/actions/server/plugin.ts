@@ -7,7 +7,6 @@
 import Hapi from 'hapi';
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { IClusterClient, KibanaRequest, Logger } from 'src/core/server';
 import { ActionsConfigType, Services } from './types';
 import { ActionExecutor, TaskRunnerFactory } from './lib';
 import { ActionsClient } from './actions_client';
@@ -15,6 +14,7 @@ import { ActionTypeRegistry } from './action_type_registry';
 import { ExecuteOptions } from './create_execute_function';
 import { createExecuteFunction } from './create_execute_function';
 import { registerBuiltInActionTypes } from './builtin_action_types';
+import { IClusterClient, KibanaRequest, Logger } from '../../../../../src/core/server';
 import { getActionsConfigurationUtilities } from './actions_config';
 import {
   ActionsPluginInitializerContext,

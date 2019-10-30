@@ -10,7 +10,7 @@ import {
   InvalidEsIntervalFormatError,
   InvalidEsCalendarIntervalError,
   parseEsInterval,
-} from 'src/legacy/core_plugins/data/public';
+} from '../../../../../../../../../src/legacy/core_plugins/data/public';
 
 export function validateRollupDelay(rollupDelay) {
   // This field is optional, so if nothing has been provided we can skip validation.

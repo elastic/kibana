@@ -5,7 +5,7 @@
  */
 import expect from '@kbn/expect';
 // eslint-disable-next-line max-len
-import { VisualizeConstants } from 'src/legacy/core_plugins/kibana/public/visualize/visualize_constants';
+import { VisualizeConstants } from '../../../../../../src/legacy/core_plugins/kibana/public/visualize/visualize_constants';
 import { SpacesService } from '../../../../common/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 

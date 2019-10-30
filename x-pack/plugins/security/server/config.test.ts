@@ -7,7 +7,7 @@
 jest.mock('crypto', () => ({ randomBytes: jest.fn() }));
 
 import { first } from 'rxjs/operators';
-import { loggingServiceMock, coreMock } from 'src/core/server/mocks';
+import { loggingServiceMock, coreMock } from '../../../../src/core/server/mocks';
 import { createConfig$, ConfigSchema } from './config';
 
 describe('config schema', () => {

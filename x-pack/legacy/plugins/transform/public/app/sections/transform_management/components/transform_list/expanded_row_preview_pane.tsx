@@ -7,7 +7,6 @@
 import React, { FC, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
-import { ES_FIELD_TYPES } from 'src/plugins/data/public';
 import { SortDirection, SORT_DIRECTION, FieldDataColumnType } from '../../../../../shared_imports';
 
 import { useApi } from '../../../../hooks/use_api';
@@ -18,6 +17,7 @@ import {
   PreviewRequestBody,
   TransformPivotConfig,
 } from '../../../../common';
+import { ES_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
 import { formatHumanReadableDateTimeSeconds } from '../../../../../../common/utils/date_utils';
 import { TransformTable } from './transform_table';
 

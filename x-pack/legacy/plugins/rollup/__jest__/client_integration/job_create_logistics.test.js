@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MINUTE, HOUR, DAY, WEEK, MONTH, YEAR } from 'src/plugins/es_ui_shared/public/components/cron_editor';
-import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from 'src/legacy/ui/public/index_patterns';
+import { MINUTE, HOUR, DAY, WEEK, MONTH, YEAR } from '../../../../../../src/plugins/es_ui_shared/public/components/cron_editor';
+import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from '../../../../../../src/legacy/ui/public/index_patterns';
 import { setupEnvironment, pageHelpers } from './helpers';
 
 jest.mock('ui/new_platform');

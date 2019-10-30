@@ -5,7 +5,7 @@
  */
 
 import { get } from 'lodash';
-import { createUiStatsReporter } from 'src/legacy/core_plugins/ui_metric/public';
+import { createUiStatsReporter } from '../../../../../../src/legacy/core_plugins/ui_metric/public';
 
 import {
   UIM_APP_NAME,

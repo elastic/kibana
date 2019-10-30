@@ -9,8 +9,8 @@ import { ActionsConfigurationUtilities } from '../actions_config';
 import { ActionTypeRegistry } from '../action_type_registry';
 import { taskManagerMock } from '../../../task_manager/task_manager.mock';
 import { registerBuiltInActionTypes } from './index';
-import { Logger } from 'src/core/server';
-import { loggingServiceMock } from 'src/core/server/mocks';
+import { Logger } from '../../../../../../src/core/server';
+import { loggingServiceMock } from '../../../../../../src/core/server/mocks';
 
 const ACTION_TYPE_IDS = ['.index', '.email', '.pagerduty', '.server-log', '.slack', '.webhook'];
 const MOCK_KIBANA_CONFIG_UTILS: ActionsConfigurationUtilities = {

@@ -20,8 +20,8 @@ import {
 } from 'src/legacy/core_plugins/data/public';
 import { Filter } from '@kbn/es-query';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { start as navigation } from 'src/legacy/core_plugins/navigation/public/legacy';
-import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
+import { start as navigation } from '../../../../../../src/legacy/core_plugins/navigation/public/legacy';
+import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { Document, SavedObjectStore } from '../persistence';
 import { EditorFrameInstance } from '../types';
 import { NativeRenderer } from '../native_renderer';

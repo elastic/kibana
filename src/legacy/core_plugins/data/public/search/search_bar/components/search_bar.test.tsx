@@ -24,7 +24,7 @@ import { IndexPattern } from '../../../index_patterns';
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 import { I18nProvider } from '@kbn/i18n/react';
 
-import { coreMock } from 'src/core/public/mocks';
+import { coreMock } from '../../../../../../../../src/core/public/mocks';
 const startMock = coreMock.createStart();
 
 import { timefilterServiceMock } from '../../../timefilter/timefilter_service.mock';

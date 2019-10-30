@@ -11,8 +11,8 @@ import {
   IndexPatterns as IndexPatternsType,
 } from 'ui/index_patterns';
 
-import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/types';
-import { KibanaConfig } from 'src/legacy/server/kbn_server';
+import { SavedSearch } from '../../../../../../../../src/legacy/core_plugins/kibana/public/discover/types';
+import { KibanaConfig } from '../../../../../../../../src/legacy/server/kbn_server';
 
 // set() method is missing in original d.ts
 export interface KibanaConfigTypeFix extends KibanaConfig {

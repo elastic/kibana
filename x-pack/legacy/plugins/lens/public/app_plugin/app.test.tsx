@@ -10,15 +10,15 @@ import { act } from 'react-dom/test-utils';
 import { buildExistsFilter } from '@kbn/es-query';
 import { App } from './app';
 import { EditorFrameInstance } from '../types';
-import { Storage } from 'src/plugins/kibana_utils/public';
+import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 import { Document, SavedObjectStore } from '../persistence';
 import { mount } from 'enzyme';
 
-import { dataPluginMock } from 'src/plugins/data/public/mocks';
+import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
 const dataStartMock = dataPluginMock.createStartContract();
 
-import { TopNavMenuData } from 'src/legacy/core_plugins/navigation/public';
-import { DataStart } from 'src/legacy/core_plugins/data/public';
+import { TopNavMenuData } from '../../../../../../src/legacy/core_plugins/navigation/public';
+import { DataStart } from '../../../../../../src/legacy/core_plugins/data/public';
 import { coreMock } from 'src/core/public/mocks';
 
 jest.mock('../../../../../../src/legacy/core_plugins/navigation/public/legacy', () => ({
@@ -29,7 +29,7 @@ jest.mock('../../../../../../src/legacy/core_plugins/navigation/public/legacy', 
   },
 }));
 
-import { start as navigation } from 'src/legacy/core_plugins/navigation/public/legacy';
+import { start as navigation } from '../../../../../../src/legacy/core_plugins/navigation/public/legacy';
 
 const { TopNavMenu } = navigation.ui;
 

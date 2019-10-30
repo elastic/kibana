@@ -19,7 +19,7 @@
 import './setup_mocks';
 import 'brace';
 import 'brace/mode/json';
-import { initializeEditor } from 'src/legacy/core_plugins/console/public/quarantined/src/input';
+import { initializeEditor } from '../../src/input';
 import _ from 'lodash';
 const $ = require('jquery');
 

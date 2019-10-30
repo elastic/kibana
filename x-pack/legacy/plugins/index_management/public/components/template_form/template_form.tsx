@@ -14,7 +14,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { serializers } from 'src/plugins/es_ui_shared/static/forms/helpers';
+import { serializers } from '../../../../../../../src/plugins/es_ui_shared/static/forms/helpers';
 import { Template } from '../../../common/types';
 import { TemplateSteps } from './template_steps';
 import { StepAliases, StepLogistics, StepMappings, StepSettings, StepReview } from './steps';
