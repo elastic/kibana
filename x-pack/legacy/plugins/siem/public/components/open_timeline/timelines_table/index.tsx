@@ -124,7 +124,7 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
 
     const sorting = {
       sort: {
-        field: sortField,
+        field: sortField as keyof OpenTimelineResult,
         direction: sortDirection,
       },
     };
