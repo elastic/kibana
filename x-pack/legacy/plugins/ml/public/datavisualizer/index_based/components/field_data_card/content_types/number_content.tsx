@@ -34,9 +34,6 @@ const DEFAULT_TOP_VALUES_THRESHOLD = 100;
 
 export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
   const { stats, fieldFormat } = config;
-  if (stats === undefined) {
-    return null;
-  }
 
   useEffect(() => {
     const chartData = buildChartDataFromStats(stats, METRIC_DISTRIBUTION_CHART_WIDTH);

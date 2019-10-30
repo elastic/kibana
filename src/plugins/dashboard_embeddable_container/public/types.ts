@@ -58,6 +58,11 @@ export interface SavedObjectMetaData<T extends SavedObjectAttributes> {
   showSavedObject?(savedObject: SimpleSavedObject<T>): boolean;
 }
 
+interface FieldSubType {
+  multi?: { parent: string };
+  nested?: { path: string };
+}
+
 export interface Field {
   name: string;
   type: string;
@@ -67,6 +72,5 @@ export interface Field {
   aggregatable: boolean;
   filterable: boolean;
   searchable: boolean;
-  parent?: string;
-  subType?: string;
+  subType?: FieldSubType;
 }
