@@ -42,7 +42,7 @@ Discover::
 * Fixes missing HTML formatting in Doc_Viewer {pull}49326[#49326]
 * Fixes the URL field formatter {pull}46332[#46332]
 Visualizations::
-* Fixes the loss of filters in TSVB after upgrade from to 7.3 {pull}48710[#48710]
+* Fixes the loss of filters in TSVB after upgrade from 7.2 to 7.3 {pull}48710[#48710]
 
 
 [[release-notes-7.4.1]]
