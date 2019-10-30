@@ -100,27 +100,27 @@ export const HomePage = pure(() => (
                   <HeaderGlobal offsetRight={gutterTimeline} />
 
                   <Switch>
-                    <Redirect from="/" exact={true} to={`/${SiemPageName.overview}`} />
+                    <Redirect exact from="/" to={`/${SiemPageName.overview}`} />
                     <Route
                       path={`/:pageName(${SiemPageName.overview})`}
                       render={() => <Overview />}
                     />
                     <Route
                       path={`/:pageName(${SiemPageName.hosts})`}
-                      render={({ match, location }) => (
-                        <HostsContainer url={match.url} location={location} />
+                      render={({ location, match }) => (
+                        <HostsContainer location={location} url={match.url} />
                       )}
                     />
                     <Route
                       path={`/:pageName(${SiemPageName.network})`}
-                      render={({ match, location }) => (
-                        <NetworkContainer url={match.url} location={location} />
+                      render={({ location, match }) => (
+                        <NetworkContainer location={location} url={match.url} />
                       )}
                     />
                     <Route
                       path={`/:pageName(${SiemPageName.detectionEngine})`}
-                      render={({ match, location }) => (
-                        <DetectionEngineContainer url={match.url} location={location} />
+                      render={({ location, match }) => (
+                        <DetectionEngineContainer location={location} url={match.url} />
                       )}
                     />
                     <Route
@@ -130,14 +130,14 @@ export const HomePage = pure(() => (
                     <Route path="/link-to" component={LinkToPage} />
                     <Route
                       path="/ml-hosts"
-                      render={({ match, location }) => (
-                        <MlHostConditionalContainer url={match.url} location={location} />
+                      render={({ location, match }) => (
+                        <MlHostConditionalContainer location={location} url={match.url} />
                       )}
                     />
                     <Route
                       path="/ml-network"
-                      render={({ match, location }) => (
-                        <MlNetworkConditionalContainer url={match.url} location={location} />
+                      render={({ location, match }) => (
+                        <MlNetworkConditionalContainer location={location} url={match.url} />
                       )}
                     />
                     <Route component={NotFoundPage} />
