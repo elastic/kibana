@@ -13,7 +13,6 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import React from 'react';
-// import { useLinks } from '../../hooks';
 
 /** prevents links to the new pages from accessing `window.opener` */
 const REL_NOOPENER = 'noopener';
@@ -23,15 +22,6 @@ const REL_NOFOLLOW = 'nofollow';
 
 /** prevents the browser from sending the current address as referrer via the Referer HTTP header */
 const REL_NOREFERRER = 'noreferrer';
-
-/*
-// skipping images for now
-const WrappedEuiImage = ({alt, src, title}: any) => {
-    const { toImage } = useLinks();
-    const url = toImage(src);
-    return <EuiImage url={url} alt={alt} size="original" caption={title} />
-}
-*/
 
 export const markdownRenderers = {
   root: ({ children }: { children: React.ReactNode[] }) => (
@@ -65,8 +55,6 @@ export const markdownRenderers = {
         return <h6>{children}</h6>;
     }
   },
-  // image: ({src, alt}: {src: string, alt: string}) => <WrappedEuiImage alt={alt} src={src} />,
-  image: () => null,
   link: ({ children, href }: { children: React.ReactNode[]; href?: string }) => (
     <EuiLink href={href} target="_blank" rel={`${REL_NOOPENER} ${REL_NOFOLLOW} ${REL_NOREFERRER}`}>
       {children}

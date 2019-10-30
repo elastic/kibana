@@ -8,9 +8,29 @@ import { EuiLoadingContent, EuiText } from '@elastic/eui';
 import ReactMarkdown from 'react-markdown';
 import { getFileByPath } from '../../data';
 import { markdownRenderers } from './markdown_renderers';
+import { useLinks } from '../../hooks';
 
-export function Readme({ readmePath }: { readmePath: string }) {
+export function Readme({
+  readmePath,
+  packageName,
+  version,
+}: {
+  readmePath: string;
+  packageName: string;
+  version: string;
+}) {
   const [markdown, setMarkdown] = useState<string | undefined>(undefined);
+
+  const handleImageUri = React.useCallback(
+    (uri: string) => {
+      const { toRelativeImage } = useLinks();
+      const isRelative =
+        uri.indexOf('http://') === 0 || uri.indexOf('https://') === 0 ? false : true;
+      const fullUri = isRelative ? toRelativeImage({ packageName, version, path: uri }) : uri;
+      return fullUri;
+    },
+    [packageName, version]
+  );
 
   useEffect(() => {
     getFileByPath(readmePath).then(res => {
@@ -20,9 +40,12 @@ export function Readme({ readmePath }: { readmePath: string }) {
 
   return (
     <Fragment>
-      {// checking against undefined because currently some readme paths exist with empty response
-      markdown !== undefined ? (
-        <ReactMarkdown renderers={markdownRenderers} source={markdown} />
+      {markdown !== undefined ? (
+        <ReactMarkdown
+          transformImageUri={handleImageUri}
+          renderers={markdownRenderers}
+          source={markdown}
+        />
       ) : (
         <EuiText>
           {/* simulates a long page of text loading */}
