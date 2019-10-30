@@ -17,14 +17,15 @@ const selectNotesById = (state: State): NotesById => state.app.notesById;
 
 const getErrors = (state: State): ErrorModel => state.app.errors;
 
-const getNotes = (notesById: NotesById, noteIds: string[]) =>
+export const getNotes = memoizeOne((notesById: NotesById, noteIds: string[]): Note[] =>
   keys(notesById).reduce((acc: Note[], noteId: string) => {
     if (noteIds.includes(noteId)) {
       const note: Note = notesById[noteId];
       return [...acc, note];
     }
     return acc;
-  }, []);
+  }, [])
+);
 
 export const selectNotesByIdSelector = createSelector(
   selectNotesById,
@@ -34,8 +35,7 @@ export const selectNotesByIdSelector = createSelector(
 export const notesByIdsSelector = () =>
   createSelector(
     selectNotesById,
-    (notesById: NotesById) =>
-      memoizeOne((noteIds: string[]): Note[] => getNotes(notesById, noteIds))
+    (notesById: NotesById) => notesById
   );
 
 export const errorsSelector = () =>

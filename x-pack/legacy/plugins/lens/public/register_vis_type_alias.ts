@@ -20,7 +20,7 @@ visualizations.types.registerAlias({
     }),
   },
   title: i18n.translate('xpack.lens.visTypeAlias.title', {
-    defaultMessage: 'Lens Visualizations',
+    defaultMessage: 'Lens',
   }),
   description: i18n.translate('xpack.lens.visTypeAlias.description', {
     defaultMessage: `Lens is a simpler way to create basic visualizations`,
