@@ -18,30 +18,60 @@ describe('Subtitle', () => {
   test('it renders', () => {
     const wrapper = shallow(
       <TestProviders>
-        <Subtitle text="Test subtitle" />
+        <Subtitle items="Test subtitle" />
       </TestProviders>
     );
 
     expect(toJson(wrapper)).toMatchSnapshot();
   });
 
-  test('it renders one subtitle item', () => {
+  test('it renders one subtitle string item', () => {
     const wrapper = mount(
       <TestProviders>
-        <Subtitle text="Test subtitle" />
+        <Subtitle items="Test subtitle" />
       </TestProviders>
     );
 
-    expect(wrapper.find('p').length).toEqual(1);
+    expect(wrapper.find('.siemSubtitle__item--text').length).toEqual(1);
   });
 
-  test('it renders multiple subtitle items', () => {
+  test('it renders multiple subtitle string items', () => {
     const wrapper = mount(
       <TestProviders>
-        <Subtitle text={['Test subtitle 1', 'Test subtitle 2']} />
+        <Subtitle items={['Test subtitle 1', 'Test subtitle 2']} />
       </TestProviders>
     );
 
-    expect(wrapper.find('p').length).toEqual(2);
+    expect(wrapper.find('.siemSubtitle__item--text').length).toEqual(2);
+  });
+
+  test('it renders one subtitle React.ReactNode item', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <Subtitle items="Test subtitle" />
+      </TestProviders>
+    );
+
+    expect(wrapper.find('.siemSubtitle__item--node').length).toEqual(1);
+  });
+
+  test('it renders multiple subtitle React.ReactNode items', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <Subtitle items={['Test subtitle 1', 'Test subtitle 2']} />
+      </TestProviders>
+    );
+
+    expect(wrapper.find('.siemSubtitle__item--node').length).toEqual(2);
+  });
+
+  test('it renders multiple subtitle items of mixed type', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <Subtitle items={['Test subtitle 1', <span>{'Test subtitle 2'}</span>]} />
+      </TestProviders>
+    );
+
+    expect(wrapper.find('.siemSubtitle__item').length).toEqual(2);
   });
 });

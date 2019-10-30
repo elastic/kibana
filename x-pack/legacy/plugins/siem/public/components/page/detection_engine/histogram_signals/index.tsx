@@ -17,8 +17,6 @@ import {
 import React from 'react';
 import { npStart } from 'ui/new_platform';
 
-import * as i18n from './translations';
-
 export const HistogramSignals = React.memo(() => {
   const sampleChartData = [
     { x: 1571090784000, y: 2, a: 'a' },

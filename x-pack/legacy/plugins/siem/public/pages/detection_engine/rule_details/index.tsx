@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiIconTip,
   EuiPanel,
+  EuiProgress,
   EuiSelect,
   EuiSpacer,
   EuiSwitch,
@@ -30,6 +31,7 @@ import { FiltersGlobal } from '../../../components/filters_global';
 import { HeaderPage } from '../../../components/header_page';
 import { HeaderSection } from '../../../components/header_section';
 import { HistogramSignals } from '../../../components/page/detection_engine/histogram_signals';
+import { ProgressInline } from '../../../components/progress_inline';
 import { SiemSearchBar } from '../../../components/search_bar';
 import {
   UtilityBar,
@@ -510,7 +512,12 @@ export const RuleDetailsComponent = React.memo(() => {
                   'Created by: mmarcialis on 12/28/2019, 12:00 PM',
                   'Updated by: agoldstein on 12/28/2019, 12:00 PM',
                 ]}
-                subtitle2="Last signal: 23 minutes ago"
+                subtitle2={[
+                  'Last signal: 23 minutes ago',
+                  <ProgressInline current={95000} max={105000} unit="events">
+                    {'Status: Running'}
+                  </ProgressInline>,
+                ]}
                 title="Automated exfiltration"
               >
                 <EuiFlexGroup alignItems="center">
@@ -549,19 +556,19 @@ export const RuleDetailsComponent = React.memo(() => {
               <EuiSpacer />
 
               <EuiFlexGroup>
-                <EuiFlexItem grow={1}>
+                <EuiFlexItem component="section" grow={1}>
                   <EuiPanel>
                     <HeaderSection title="Definition" />
                   </EuiPanel>
                 </EuiFlexItem>
 
-                <EuiFlexItem grow={2}>
+                <EuiFlexItem component="section" grow={2}>
                   <EuiPanel>
                     <HeaderSection title="About" />
                   </EuiPanel>
                 </EuiFlexItem>
 
-                <EuiFlexItem grow={1}>
+                <EuiFlexItem component="section" grow={1}>
                   <EuiPanel>
                     <HeaderSection title="Schedule" />
                   </EuiPanel>

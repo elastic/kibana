@@ -60,7 +60,7 @@ export const HeaderSection = React.memo<HeaderSectionProps>(
                 </h2>
               </EuiTitle>
 
-              {subtitle && <Subtitle data-test-subj="header-section-subtitle" text={subtitle} />}
+              {subtitle && <Subtitle data-test-subj="header-section-subtitle" items={subtitle} />}
             </EuiFlexItem>
 
             {id && (

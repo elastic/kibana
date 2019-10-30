@@ -73,8 +73,8 @@ export interface HeaderPageProps extends HeaderProps {
   badgeOptions?: BadgeOptions;
   children?: React.ReactNode;
   draggableArguments?: DraggableArguments;
-  subtitle?: SubtitleProps['text'];
-  subtitle2?: SubtitleProps['text'];
+  subtitle?: SubtitleProps['items'];
+  subtitle2?: SubtitleProps['items'];
   title: string | React.ReactNode;
 }
 
@@ -130,8 +130,8 @@ export const HeaderPage = React.memo<HeaderPageProps>(
             </h1>
           </EuiTitle>
 
-          {subtitle && <Subtitle data-test-subj="header-page-subtitle" text={subtitle} />}
-          {subtitle2 && <Subtitle data-test-subj="header-page-subtitle-2" text={subtitle2} />}
+          {subtitle && <Subtitle data-test-subj="header-page-subtitle" items={subtitle} />}
+          {subtitle2 && <Subtitle data-test-subj="header-page-subtitle-2" items={subtitle2} />}
         </FlexItem>
 
         {children && (
