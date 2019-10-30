@@ -435,6 +435,7 @@
     "prettier": "^1.18.2",
     "proxyquire": "1.8.0",
     "regenerate": "^1.4.0",
+    "rimraf": "^3.0.0",
     "sass-lint": "^1.12.1",
     "selenium-webdriver": "^4.0.0-alpha.5",
     "simple-git": "1.116.0",
