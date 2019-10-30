@@ -11,7 +11,8 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { borderRadius, px, unit, units } from '../../../style/variables';
 import { IStackframe } from '../../../../typings/es_schemas/raw/fields/Stackframe';
-import { DottedKeyValueTable } from '../DottedKeyValueTable';
+import { KeyValueTable } from '../KeyValueTable';
+import { flattenObject } from '../../../utils/flattenObject';
 
 const VariablesContainer = styled.div`
   background: ${theme.euiColorEmptyShade};
@@ -24,11 +25,11 @@ interface Props {
   vars: IStackframe['vars'];
 }
 
-export const Variables: React.SFC<Props> = props => {
-  if (!props.vars) {
+export const Variables = ({ vars }: Props) => {
+  if (!vars) {
     return null;
   }
-
+  const flattenedVariables = flattenObject(vars);
   return (
     <React.Fragment>
       <VariablesContainer>
@@ -41,7 +42,7 @@ export const Variables: React.SFC<Props> = props => {
           )}
         >
           <React.Fragment>
-            <DottedKeyValueTable data={props.vars} maxDepth={5} />
+            <KeyValueTable keyValuePairs={flattenedVariables} />
           </React.Fragment>
         </EuiAccordion>
       </VariablesContainer>
