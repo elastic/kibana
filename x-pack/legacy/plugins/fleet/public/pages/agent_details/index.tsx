@@ -6,16 +6,7 @@
 import React, { SFC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiPageBody,
-  EuiPageContent,
-  EuiCallOut,
-  EuiText,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiPageBody, EuiPageContent, EuiCallOut, EuiText, EuiSpacer } from '@elastic/eui';
 import { RouteComponentProps } from 'react-router-dom';
 import { Loading } from '../../components/loading';
 import { AgentEventsTable } from './components/agent_events_table';
@@ -78,20 +69,6 @@ export const AgentDetailsPage: SFC<Props> = ({
         <AgentDetailSection agent={agent} />
         <EuiSpacer size="xl" />
         <AgentEventsTable agent={agent} />
-        <EuiFlexGroup gutterSize="xl">
-          <EuiFlexItem grow={3}>
-            <EuiFlexItem grow={null}>
-              <EuiHorizontalRule />
-            </EuiFlexItem>
-            <EuiFlexItem grow={null}>
-              <EuiHorizontalRule />
-            </EuiFlexItem>
-            <EuiFlexItem grow={null} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={7}>
-            <EuiFlexItem grow={null} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
       </Layout>
     </AgentRefreshContext.Provider>
   );
