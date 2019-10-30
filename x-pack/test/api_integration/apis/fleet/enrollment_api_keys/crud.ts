@@ -8,6 +8,8 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
+const ENROLLMENT_KEY_ID = 'ed22ca17-e178-4cfe-8b02-54ea29fbd6d0';
+
 export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
@@ -29,6 +31,28 @@ export default function({ getService }: FtrProviderContext) {
         expect(apiResponse.list[0]).to.have.keys('id', 'api_key_id', 'name');
       });
     });
+
+    describe('GET /fleet/enrollment-api-keys/{id}', async () => {
+      it('should allow to retrieve existing api keys', async () => {
+        const { body: apiResponse } = await supertest
+          .get(`/api/fleet/enrollment-api-keys/${ENROLLMENT_KEY_ID}`)
+          .expect(200);
+
+        expect(apiResponse.item).to.have.keys('id', 'api_key_id', 'name');
+      });
+    });
+
+    describe('GET /fleet/enrollment-api-keys/{id}', async () => {
+      it('should allow to retrieve existing api keys', async () => {
+        const { body: apiResponse } = await supertest
+          .delete(`/api/fleet/enrollment-api-keys/${ENROLLMENT_KEY_ID}`)
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+
+        expect(apiResponse.success).to.eql(true);
+      });
+    });
+
     describe('POST /fleet/enrollment-api-keys', () => {
       it('should not accept bad parameters', async () => {
         await supertest

@@ -12,7 +12,7 @@ const CHECKIN_INTERVAL = 3000; // 3 seconds
 
 interface Agent {
   id: string;
-  access_token: string;
+  access_api_key: string;
 }
 
 let closing = false;
@@ -27,11 +27,11 @@ run(
       throw createFlagError('please provide a single --path flag');
     }
 
-    if (!flags.enrollmentToken || typeof flags.enrollmentToken !== 'string') {
-      throw createFlagError('please provide a single --path flag');
+    if (!flags.enrollmentApiKey || typeof flags.enrollmentApiKey !== 'string') {
+      throw createFlagError('please provide a single --enrollmentApiKey flag');
     }
     const kibanaUrl: string = (flags.kibanaUrl as string) || 'http://localhost:5601';
-    const agent = await enroll(kibanaUrl, flags.enrollmentToken as string, log);
+    const agent = await enroll(kibanaUrl, flags.enrollmentApiKey as string, log);
 
     log.info('Enrolled with sucess', agent);
 
@@ -46,10 +46,10 @@ run(
       Run a fleet development agent.
     `,
     flags: {
-      string: ['kibanaUrl', 'enrollmentToken'],
+      string: ['kibanaUrl', 'enrollmentApiKey'],
       help: `
         --kibanaUrl kibanaURL to run the fleet agent
-        --enrollmentToken enrollment token
+        --enrollmentApiKey enrollment api key
       `,
     },
   }
@@ -72,7 +72,7 @@ async function checkin(kibanaURL: string, agent: Agent, log: ToolingLog) {
     }),
     headers: {
       'kbn-xsrf': 'xxx',
-      'kbn-fleet-access-token': agent.access_token,
+      Authorization: `ApiKey ${agent.access_api_key}`,
     },
   });
 
@@ -86,7 +86,7 @@ async function checkin(kibanaURL: string, agent: Agent, log: ToolingLog) {
   log.info('checkin', json);
 }
 
-async function enroll(kibanaURL: string, token: string, log: ToolingLog): Promise<Agent> {
+async function enroll(kibanaURL: string, apiKey: string, log: ToolingLog): Promise<Agent> {
   const res = await fetch(`${kibanaURL}/api/fleet/agents/enroll`, {
     method: 'POST',
     body: JSON.stringify({
@@ -106,7 +106,7 @@ async function enroll(kibanaURL: string, token: string, log: ToolingLog): Promis
     }),
     headers: {
       'kbn-xsrf': 'xxx',
-      'kbn-fleet-enrollment-token': token,
+      Authorization: `ApiKey ${apiKey}`,
     },
   });
   const json = await res.json();
@@ -118,6 +118,6 @@ async function enroll(kibanaURL: string, token: string, log: ToolingLog): Promis
 
   return {
     id: json.item.id,
-    access_token: json.item.access_token,
+    access_api_key: json.item.access_api_key,
   };
 }

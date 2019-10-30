@@ -143,6 +143,19 @@ export class ApiKeyLib {
     });
   }
 
+  public async deleteEnrollmentApiKey(user: FrameworkUser, id: string) {
+    const enrollmentApiKey = await this.enrollmentApiKeysRepository.getById(user, id);
+    if (!enrollmentApiKey) {
+      throw Boom.notFound('Enrollment Api Key not found');
+    }
+
+    await this.esAdapter.deleteApiKey(this.frameworkLib.getInternalUser(), {
+      id: enrollmentApiKey.api_key_id,
+    });
+
+    await this.enrollmentApiKeysRepository.delete(user, id);
+  }
+
   private _parseApiKey(user: FrameworkUser) {
     if (user.kind !== 'authenticated') {
       throw new Error('Error must provide an authenticated user');
@@ -154,7 +167,7 @@ export class ApiKeyLib {
       throw new Error('Authorization header must be set');
     }
 
-    if (!authorizationHeader.startWith('ApiKey ')) {
+    if (!authorizationHeader.startsWith('ApiKey ')) {
       throw new Error('Authorization header is malformed');
     }
 

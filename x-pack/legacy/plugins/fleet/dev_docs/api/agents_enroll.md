@@ -20,7 +20,7 @@ Enroll agent
 
 `200` Indicates a successful call.
 `400` For an invalid request.
-`401` For an invalid kbn-fleet-enrollment-token.
+`401` For an invalid api key.
 
 ## Example
 
@@ -58,7 +58,7 @@ The API returns the following:
 
 ## Expected errors
 
-The API will return a response with a `401` status code and an error if the enrollment token is invalid like this:
+The API will return a response with a `401` status code and an error if the enrollment apiKey is invalid like this:
 
 ```js
 {

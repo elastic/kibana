@@ -26,6 +26,8 @@ import { createPUTAgentsRoute } from './agents/put';
 import {
   createGETEnrollmentApiKeysRoute,
   createPOSTEnrollmentApiKeysRoute,
+  createDELETEEnrollmentApiKeyRoute,
+  createGETEnrollmentApiKeyRoute,
 } from './enrollment_api_keys';
 
 export function initRestApi(server: Server, libs: FleetServerLib) {
@@ -53,6 +55,8 @@ function createAgentsRoutes(adapter: HapiFrameworkAdapter, libs: FleetServerLib)
 function createEnrollmentApiKeysRoutes(adapter: HapiFrameworkAdapter, libs: FleetServerLib) {
   adapter.registerRoute(createGETEnrollmentApiKeysRoute(libs));
   adapter.registerRoute(createPOSTEnrollmentApiKeysRoute(libs));
+  adapter.registerRoute(createDELETEEnrollmentApiKeyRoute(libs));
+  adapter.registerRoute(createGETEnrollmentApiKeyRoute(libs));
 
   // enrollment rules
   adapter.registerRoute(createDeleteEnrollmentRuleRoute(libs));
