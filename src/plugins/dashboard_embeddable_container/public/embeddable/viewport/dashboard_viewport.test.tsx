@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-/*
+
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 import React from 'react';
@@ -32,7 +32,7 @@ import {
   CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableFactory,
 } from '../../embeddable_plugin_test_samples';
-import { KibanaContextProvider } from '../../../plugins/kibana_react/public';
+import { KibanaContextProvider } from '../../../../../plugins/kibana_react/public';
 
 let dashboardContainer: DashboardContainer | undefined;
 
@@ -169,4 +169,3 @@ test('DashboardViewport unmount unsubscribes', async done => {
 
   props.container.updateInput({ panels: {} });
 });
-*/

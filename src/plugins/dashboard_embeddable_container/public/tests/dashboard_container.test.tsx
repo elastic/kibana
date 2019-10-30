@@ -23,28 +23,24 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { nextTick } from 'test_utils/enzyme_helpers';
 import { I18nProvider } from '@kbn/i18n/react';
-import { ViewMode, CONTEXT_MENU_TRIGGER, EmbeddablePanel } from '../lib/embeddable_api';
-import {
-  DashboardContainer,
-  DashboardContainerOptions,
-} from '../lib/embeddable/dashboard_container';
-import { getSampleDashboardInput } from '../lib/test_helpers';
+import { ViewMode, CONTEXT_MENU_TRIGGER, EmbeddablePanel } from '../embeddable_plugin';
+import { DashboardContainer, DashboardContainerOptions } from '../embeddable/dashboard_container';
+import { getSampleDashboardInput } from '../test_helpers';
 import {
   CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableFactory,
-} from '../../../../../embeddable_api/public/np_ready/public/lib/test_samples';
-import {
   ContactCardEmbeddableInput,
   ContactCardEmbeddable,
   ContactCardEmbeddableOutput,
-} from '../../../../../embeddable_api/public/np_ready/public/lib/test_samples';
-import { embeddablePluginMock } from '../../../../../embeddable_api/public/np_ready/public/mocks';
-import { createEditModeAction } from '../../../../../embeddable_api/public/np_ready/public/lib/test_samples';
+  createEditModeAction,
+} from '../embeddable_plugin_test_samples';
 // eslint-disable-next-line
-import { inspectorPluginMock } from '../../../../../../../plugins/inspector/public/mocks';
-import { KibanaContextProvider } from '../../../../../../../plugins/kibana_react/public';
+import { embeddablePluginMock } from '../../../embeddable/public/mocks';
 // eslint-disable-next-line
-import { uiActionsPluginMock } from 'src/plugins/ui_actions/public/mocks';
+import { inspectorPluginMock } from '../../../inspector/public/mocks';
+import { KibanaContextProvider } from '../../../kibana_react/public';
+// eslint-disable-next-line
+import { uiActionsPluginMock } from '../../../ui_actions/public/mocks';
 
 test('DashboardContainer in edit mode shows edit mode actions', async () => {
   const inspector = inspectorPluginMock.createStartContract();

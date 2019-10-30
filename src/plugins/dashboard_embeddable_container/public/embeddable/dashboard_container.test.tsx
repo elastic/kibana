@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-/*
+
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { nextTick } from 'test_utils/enzyme_helpers';
@@ -139,4 +139,3 @@ test('Container view mode change propagates to new children', async () => {
 
   expect(embeddable.getInput().viewMode).toBe(ViewMode.EDIT);
 });
-*/

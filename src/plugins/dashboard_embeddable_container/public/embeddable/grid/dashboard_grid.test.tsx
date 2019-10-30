@@ -16,22 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-/*
+
 // @ts-ignore
 import sizeMe from 'react-sizeme';
 
 import React from 'react';
 import { nextTick, mountWithIntl } from 'test_utils/enzyme_helpers';
 import { skip } from 'rxjs/operators';
-import { EmbeddableFactory, GetEmbeddableFactory } from '../../embeddable_api';
+import { EmbeddableFactory, GetEmbeddableFactory } from '../../embeddable_plugin';
 import { DashboardGrid, DashboardGridProps } from './dashboard_grid';
 import { DashboardContainer, DashboardContainerOptions } from '../dashboard_container';
 import { getSampleDashboardInput } from '../../test_helpers';
 import {
   CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableFactory,
-} from '../../../../../../../embeddable_api/public/np_ready/public/lib/test_samples';
-import { KibanaContextProvider } from '../../../../../../../../../plugins/kibana_react/public';
+} from '../../embeddable_plugin_test_samples';
+import { KibanaContextProvider } from '../../../../kibana_react/public';
 
 let dashboardContainer: DashboardContainer | undefined;
 
@@ -184,4 +184,3 @@ test('DashboardGrid unmount unsubscribes', async done => {
 
   props.container.updateInput({ expandedPanelId: '1' });
 });
-*/

@@ -17,10 +17,9 @@
  * under the License.
  */
 
-/*
 import { isErrorEmbeddable, EmbeddableFactory } from '../embeddable_plugin';
 import { ExpandPanelAction } from './expand_panel_action';
-// import { DashboardContainer } from '../embeddable';
+import { DashboardContainer } from '../embeddable';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
 import {
   CONTACT_CARD_EMBEDDABLE,
@@ -29,17 +28,13 @@ import {
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
 } from '../embeddable_plugin_test_samples';
-// import { DashboardOptions } from '../embeddable/dashboard_container_factory';
-
-type DashboardOptions = any;
+import { DashboardOptions } from '../embeddable/dashboard_container_factory';
 
 const embeddableFactories = new Map<string, EmbeddableFactory>();
 embeddableFactories.set(
   CONTACT_CARD_EMBEDDABLE,
   new ContactCardEmbeddableFactory({} as any, (() => null) as any, {} as any)
 );
-
-type DashboardContainer = any;
 
 let container: DashboardContainer;
 let embeddable: ContactCardEmbeddable;
@@ -122,4 +117,3 @@ test('Returns an icon', async () => {
   const action = new ExpandPanelAction();
   expect(action.getIconType({ embeddable })).toBeDefined();
 });
-*/

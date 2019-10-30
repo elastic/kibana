@@ -17,8 +17,7 @@
  * under the License.
  */
 
-/*
-import { isErrorEmbeddable, EmbeddableFactory } from '../embeddable_api';
+import { isErrorEmbeddable, EmbeddableFactory } from '../embeddable_plugin';
 import { ReplacePanelAction } from './replace_panel_action';
 import { DashboardContainer } from '../embeddable';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
@@ -28,7 +27,7 @@ import {
   ContactCardEmbeddable,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
-} from '../../../../../../embeddable_api/public/np_ready/public/lib/test_samples';
+} from '../embeddable_plugin_test_samples';
 import { DashboardOptions } from '../embeddable/dashboard_container_factory';
 
 const embeddableFactories = new Map<string, EmbeddableFactory>();
@@ -83,7 +82,7 @@ test('Executes the replace panel action', async () => {
   let core: any;
   let SavedObjectFinder: any;
   let notifications: any;
-  const action = new ReplacePanelAction(core, SavedObjectFinder, notifications);
+  const action = new ReplacePanelAction(core, SavedObjectFinder, notifications, () => [] as any);
   action.execute({ embeddable });
 });
 
@@ -91,7 +90,7 @@ test('Is not compatible when embeddable is not in a dashboard container', async 
   let core: any;
   let SavedObjectFinder: any;
   let notifications: any;
-  const action = new ReplacePanelAction(core, SavedObjectFinder, notifications);
+  const action = new ReplacePanelAction(core, SavedObjectFinder, notifications, () => [] as any);
   expect(
     await action.isCompatible({
       embeddable: new ContactCardEmbeddable(
@@ -106,7 +105,7 @@ test('Execute throws an error when called with an embeddable not in a parent', a
   let core: any;
   let SavedObjectFinder: any;
   let notifications: any;
-  const action = new ReplacePanelAction(core, SavedObjectFinder, notifications);
+  const action = new ReplacePanelAction(core, SavedObjectFinder, notifications, () => [] as any);
   async function check() {
     await action.execute({ embeddable: container });
   }
@@ -117,7 +116,7 @@ test('Returns title', async () => {
   let core: any;
   let SavedObjectFinder: any;
   let notifications: any;
-  const action = new ReplacePanelAction(core, SavedObjectFinder, notifications);
+  const action = new ReplacePanelAction(core, SavedObjectFinder, notifications, () => [] as any);
   expect(action.getDisplayName({ embeddable })).toBeDefined();
 });
 
@@ -125,7 +124,6 @@ test('Returns an icon', async () => {
   let core: any;
   let SavedObjectFinder: any;
   let notifications: any;
-  const action = new ReplacePanelAction(core, SavedObjectFinder, notifications);
+  const action = new ReplacePanelAction(core, SavedObjectFinder, notifications, () => [] as any);
   expect(action.getIconType({ embeddable })).toBeDefined();
 });
-*/
