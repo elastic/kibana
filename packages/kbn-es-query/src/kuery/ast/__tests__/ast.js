@@ -198,6 +198,68 @@ describe('kuery AST API', function () {
       expect(actual).to.eql(expected);
     });
 
+    it('should support nested queries indicated by curly braces', () => {
+      const expected = nodeTypes.function.buildNode(
+        'nested',
+        'nestedField',
+        nodeTypes.function.buildNode('is', 'childOfNested', 'foo')
+      );
+      const actual = ast.fromKueryExpression('nestedField:{ childOfNested: foo }');
+      expect(actual).to.eql(expected);
+    });
+
+    it('should support nested subqueries and subqueries inside nested queries', () => {
+      const expected = nodeTypes.function.buildNode(
+        'and',
+        [
+          nodeTypes.function.buildNode('is', 'response', '200'),
+          nodeTypes.function.buildNode(
+            'nested',
+            'nestedField',
+            nodeTypes.function.buildNode('or', [
+              nodeTypes.function.buildNode('is', 'childOfNested', 'foo'),
+              nodeTypes.function.buildNode('is', 'childOfNested', 'bar'),
+            ])
+          )]);
+      const actual = ast.fromKueryExpression('response:200 and nestedField:{ childOfNested:foo or childOfNested:bar }');
+      expect(actual).to.eql(expected);
+    });
+
+    it('should support nested sub-queries inside paren groups', () => {
+      const expected = nodeTypes.function.buildNode(
+        'and',
+        [
+          nodeTypes.function.buildNode('is', 'response', '200'),
+          nodeTypes.function.buildNode('or', [
+            nodeTypes.function.buildNode(
+              'nested',
+              'nestedField',
+              nodeTypes.function.buildNode('is', 'childOfNested', 'foo')
+            ),
+            nodeTypes.function.buildNode(
+              'nested',
+              'nestedField',
+              nodeTypes.function.buildNode('is', 'childOfNested', 'bar')
+            ),
+          ])
+        ]);
+      const actual = ast.fromKueryExpression('response:200 and ( nestedField:{ childOfNested:foo } or nestedField:{ childOfNested:bar } )');
+      expect(actual).to.eql(expected);
+    });
+
+    it('should support nested groups inside other nested groups', () => {
+      const expected = nodeTypes.function.buildNode(
+        'nested',
+        'nestedField',
+        nodeTypes.function.buildNode(
+          'nested',
+          'nestedChild',
+          nodeTypes.function.buildNode('is', 'doublyNestedChild', 'foo')
+        )
+      );
+      const actual = ast.fromKueryExpression('nestedField:{ nestedChild:{ doublyNestedChild:foo } }');
+      expect(actual).to.eql(expected);
+    });
   });
 
   describe('fromLiteralExpression', function () {

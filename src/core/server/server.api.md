@@ -511,6 +511,8 @@ export interface CoreSetup {
     elasticsearch: ElasticsearchServiceSetup;
     // (undocumented)
     http: HttpServiceSetup;
+    // (undocumented)
+    uiSettings: UiSettingsServiceSetup;
 }
 
 // @public
@@ -737,7 +739,7 @@ export interface InternalCoreStart {
 // @internal (undocumented)
 export interface InternalUiSettingsServiceSetup {
     asScopedToClient(savedObjectsClient: SavedObjectsClientContract): IUiSettingsClient;
-    setDefaults(values: Record<string, UiSettingsParams>): void;
+    register(settings: Record<string, UiSettingsParams>): void;
 }
 
 // @public
@@ -763,11 +765,8 @@ export type IScopedClusterClient = Pick<ScopedClusterClient, 'callAsCurrentUser'
 export interface IUiSettingsClient {
     get: <T extends SavedObjectAttribute = any>(key: string) => Promise<T>;
     getAll: <T extends SavedObjectAttribute = any>() => Promise<Record<string, T>>;
-    getDefaults: () => Record<string, UiSettingsParams>;
-    getUserProvided: <T extends SavedObjectAttribute = any>() => Promise<Record<string, {
-        userValue?: T;
-        isOverridden?: boolean;
-    }>>;
+    getRegistered: () => Readonly<Record<string, UiSettingsParams>>;
+    getUserProvided: <T extends SavedObjectAttribute = any>() => Promise<Record<string, UserProvidedValues<T>>>;
     isOverridden: (key: string) => boolean;
     remove: (key: string) => Promise<void>;
     removeMany: (keys: string[]) => Promise<void>;
@@ -942,6 +941,9 @@ export type MIGRATION_ASSISTANCE_INDEX_ACTION = 'upgrade' | 'reindex';
 // @public (undocumented)
 export type MIGRATION_DEPRECATION_LEVEL = 'none' | 'info' | 'warning' | 'critical';
 
+// @public
+export type MutatingOperationRefreshSetting = boolean | 'wait_for';
+
 // Warning: (ae-forgotten-export) The symbol "OnPostAuthResult" needs to be exported by the entry point index.d.ts
 // 
 // @public
@@ -1071,6 +1073,9 @@ export interface RequestHandlerContext {
             dataClient: IScopedClusterClient;
             adminClient: IScopedClusterClient;
         };
+        uiSettings: {
+            client: IUiSettingsClient;
+        };
     };
 }
 
@@ -1197,6 +1202,11 @@ export interface SavedObjectsBulkUpdateObject<T extends SavedObjectAttributes = 
 }
 
 // @public (undocumented)
+export interface SavedObjectsBulkUpdateOptions extends SavedObjectsBaseOptions {
+    refresh?: MutatingOperationRefreshSetting;
+}
+
+// @public (undocumented)
 export interface SavedObjectsBulkUpdateResponse<T extends SavedObjectAttributes = any> {
     // (undocumented)
     saved_objects: Array<SavedObjectsUpdateResponse<T>>;
@@ -1208,9 +1218,9 @@ export class SavedObjectsClient {
     constructor(repository: SavedObjectsRepository);
     bulkCreate<T extends SavedObjectAttributes = any>(objects: Array<SavedObjectsBulkCreateObject<T>>, options?: SavedObjectsCreateOptions): Promise<SavedObjectsBulkResponse<T>>;
     bulkGet<T extends SavedObjectAttributes = any>(objects?: SavedObjectsBulkGetObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsBulkResponse<T>>;
-    bulkUpdate<T extends SavedObjectAttributes = any>(objects: Array<SavedObjectsBulkUpdateObject<T>>, options?: SavedObjectsBaseOptions): Promise<SavedObjectsBulkUpdateResponse<T>>;
+    bulkUpdate<T extends SavedObjectAttributes = any>(objects: Array<SavedObjectsBulkUpdateObject<T>>, options?: SavedObjectsBulkUpdateOptions): Promise<SavedObjectsBulkUpdateResponse<T>>;
     create<T extends SavedObjectAttributes = any>(type: string, attributes: T, options?: SavedObjectsCreateOptions): Promise<SavedObject<T>>;
-    delete(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<{}>;
+    delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{}>;
     // (undocumented)
     errors: typeof SavedObjectsErrorHelpers;
     // (undocumented)
@@ -1247,6 +1257,12 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
     overwrite?: boolean;
     // (undocumented)
     references?: SavedObjectReference[];
+    refresh?: MutatingOperationRefreshSetting;
+}
+
+// @public (undocumented)
+export interface SavedObjectsDeleteOptions extends SavedObjectsBaseOptions {
+    refresh?: MutatingOperationRefreshSetting;
 }
 
 // @public (undocumented)
@@ -1554,6 +1570,7 @@ export class SavedObjectsSerializer {
 // @public (undocumented)
 export interface SavedObjectsUpdateOptions extends SavedObjectsBaseOptions {
     references?: SavedObjectReference[];
+    refresh?: MutatingOperationRefreshSetting;
     version?: string;
 }
 
@@ -1595,24 +1612,37 @@ export interface SessionStorageFactory<T> {
 
 // @public
 export interface UiSettingsParams {
-    category: string[];
-    description: string;
-    name: string;
+    category?: string[];
+    description?: string;
+    name?: string;
     optionLabels?: Record<string, string>;
     options?: string[];
     readonly?: boolean;
     requiresPageReload?: boolean;
     type?: UiSettingsType;
-    value: SavedObjectAttribute;
+    value?: SavedObjectAttribute;
+}
+
+// @public (undocumented)
+export interface UiSettingsServiceSetup {
+    register(settings: Record<string, UiSettingsParams>): void;
 }
 
 // @public
 export type UiSettingsType = 'json' | 'markdown' | 'number' | 'select' | 'boolean' | 'string';
 
+// @public
+export interface UserProvidedValues<T extends SavedObjectAttribute = any> {
+    // (undocumented)
+    isOverridden?: boolean;
+    // (undocumented)
+    userValue?: T;
+}
+
 
 // Warnings were encountered during analysis:
 // 
 // src/core/server/http/router/response.ts:316:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/plugins_service.ts:39:5 - (ae-forgotten-export) The symbol "DiscoveredPluginInternal" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/plugins_service.ts:38:5 - (ae-forgotten-export) The symbol "DiscoveredPluginInternal" needs to be exported by the entry point index.d.ts
 
 ```

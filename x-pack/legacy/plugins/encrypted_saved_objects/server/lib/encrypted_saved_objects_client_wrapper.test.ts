@@ -9,14 +9,14 @@ jest.mock('uuid', () => ({ v4: jest.fn().mockReturnValue('uuid-v4-id') }));
 import { EncryptedSavedObjectsClientWrapper } from './encrypted_saved_objects_client_wrapper';
 import { EncryptedSavedObjectsService } from './encrypted_saved_objects_service';
 import { createEncryptedSavedObjectsServiceMock } from './encrypted_saved_objects_service.mock';
-import { SavedObjectsClientMock } from 'src/core/server/saved_objects/service/saved_objects_client.mock';
+import { savedObjectsClientMock } from 'src/core/server/saved_objects/service/saved_objects_client.mock';
 import { SavedObjectsClientContract } from 'src/core/server';
 
 let wrapper: EncryptedSavedObjectsClientWrapper;
 let mockBaseClient: jest.Mocked<SavedObjectsClientContract>;
 let encryptedSavedObjectsServiceMock: jest.Mocked<EncryptedSavedObjectsService>;
 beforeEach(() => {
-  mockBaseClient = SavedObjectsClientMock.create();
+  mockBaseClient = savedObjectsClientMock.create();
   encryptedSavedObjectsServiceMock = createEncryptedSavedObjectsServiceMock([
     {
       type: 'known-type',

@@ -15,7 +15,7 @@ image::infrastructure/images/metrics-explorer-screen.png[Metrics Explorer in Kib
 
 * Metrics Explorer uses data collected from {metricbeat-ref}/metricbeat-overview.html[Metricbeat].
 * You need read permissions on `metricbeat-*` or the metric index specified in the Metrics configuration.
-* Metrics Explorer uses the timestamp field set in the Infrastructure configuration.
+* Metrics Explorer uses the timestamp field from the *Settings* tab.
 By default that is set to `@timestamp`.
 * The interval for the X Axis is set to `auto`.
 The bucket size is determined by the time range.

@@ -63,38 +63,33 @@ const PreviewRenderer = ({
   expression: string;
   ExpressionRendererComponent: ExpressionRenderer;
 }) => {
-  const [expressionError, setExpressionError] = useState<boolean>(false);
-
-  useEffect(() => {
-    setExpressionError(false);
-  }, [expression]);
-
-  return expressionError ? (
-    <div className="lnsSuggestionPanel__suggestionIcon">
-      <EuiIconTip
-        size="xl"
-        color="danger"
-        type="alert"
-        aria-label={i18n.translate('xpack.lens.editorFrame.previewErrorLabel', {
-          defaultMessage: 'Preview rendering failed',
-        })}
-        content={i18n.translate('xpack.lens.editorFrame.previewErrorTooltip', {
-          defaultMessage: 'Preview rendering failed',
-        })}
-      />
-    </div>
-  ) : (
-    <ExpressionRendererComponent
+  return (
+    <div
       className={classNames('lnsSuggestionPanel__chartWrapper', {
         'lnsSuggestionPanel__chartWrapper--withLabel': withLabel,
       })}
-      expression={expression}
-      onRenderFailure={(e: unknown) => {
-        // eslint-disable-next-line no-console
-        console.error(`Failed to render preview: `, e);
-        setExpressionError(true);
-      }}
-    />
+    >
+      <ExpressionRendererComponent
+        expression={expression}
+        renderError={() => {
+          return (
+            <div className="lnsSuggestionPanel__suggestionIcon">
+              <EuiIconTip
+                size="xl"
+                color="danger"
+                type="alert"
+                aria-label={i18n.translate('xpack.lens.editorFrame.previewErrorLabel', {
+                  defaultMessage: 'Preview rendering failed',
+                })}
+                content={i18n.translate('xpack.lens.editorFrame.previewErrorLabel', {
+                  defaultMessage: 'Preview rendering failed',
+                })}
+              />
+            </div>
+          );
+        }}
+      />
+    </div>
   );
 };
 
@@ -259,20 +254,27 @@ export function SuggestionPanel({
         </EuiFlexItem>
         {stagedPreview && (
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              data-test-subj="lensSubmitSuggestion"
-              size="xs"
-              onClick={() => {
-                trackUiEvent('suggestion_confirmed');
-                dispatch({
-                  type: 'SUBMIT_SUGGESTION',
-                });
-              }}
-            >
-              {i18n.translate('xpack.lens.sugegstion.confirmSuggestionLabel', {
-                defaultMessage: 'Reload suggestions',
+            <EuiToolTip
+              content={i18n.translate('xpack.lens.suggestion.refreshSuggestionTooltip', {
+                defaultMessage: 'Refresh the suggestions based on the selected visualization.',
               })}
-            </EuiButtonEmpty>
+            >
+              <EuiButtonEmpty
+                data-test-subj="lensSubmitSuggestion"
+                size="xs"
+                iconType="refresh"
+                onClick={() => {
+                  trackUiEvent('suggestion_confirmed');
+                  dispatch({
+                    type: 'SUBMIT_SUGGESTION',
+                  });
+                }}
+              >
+                {i18n.translate('xpack.lens.sugegstion.refreshSuggestionLabel', {
+                  defaultMessage: 'Refresh',
+                })}
+              </EuiButtonEmpty>
+            </EuiToolTip>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
@@ -365,7 +367,12 @@ function getPreviewExpression(
     const changedLayers = datasource.getLayers(visualizableState.datasourceState);
     changedLayers.forEach(layerId => {
       if (updatedLayerApis[layerId]) {
-        updatedLayerApis[layerId] = datasource.getPublicAPI(datasourceState, () => {}, layerId);
+        updatedLayerApis[layerId] = datasource.getPublicAPI({
+          layerId,
+          dateRange: frame.dateRange,
+          state: datasourceState,
+          setState: () => {},
+        });
       }
     });
   }

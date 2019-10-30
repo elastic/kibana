@@ -16,10 +16,10 @@ export async function getServiceTransactionTypes(
   serviceName: string,
   setup: Setup
 ) {
-  const { start, end, client, config } = setup;
+  const { start, end, client, indices } = setup;
 
   const params = {
-    index: [config.get<string>('apm_oss.transactionIndices')],
+    index: indices['apm_oss.transactionIndices'],
     body: {
       size: 0,
       query: {
@@ -41,6 +41,6 @@ export async function getServiceTransactionTypes(
 
   const { aggregations } = await client.search(params);
   const buckets = idx(aggregations, _ => _.types.buckets) || [];
-  const transactionTypes = buckets.map(bucket => bucket.key);
+  const transactionTypes = buckets.map(bucket => bucket.key as string);
   return { transactionTypes };
 }
