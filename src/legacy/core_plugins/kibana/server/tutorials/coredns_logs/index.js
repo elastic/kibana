@@ -46,7 +46,7 @@ export function corednsLogsSpecProvider(server, context) {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-coredns.html',
       },
     }),
-    //TODO: euiIconType: 'logoCoredns',
+    euiIconType: '/plugins/kibana/home/tutorial_resources/logos/coredns.svg',
     artifacts: {
       dashboards: [
         {

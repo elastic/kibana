@@ -18,6 +18,7 @@
  */
 
 import {
+  auto,
   ICompileProvider,
   IHttpProvider,
   IHttpService,
@@ -333,7 +334,7 @@ const $setupHelpExtensionAutoClear = (newPlatform: CoreStart) => (
 const $setupUrlOverflowHandling = (newPlatform: CoreStart) => (
   $location: ILocationService,
   $rootScope: IRootScopeService,
-  $injector: any
+  $injector: auto.IInjectorService
 ) => {
   const $route = $injector.has('$route') ? $injector.get('$route') : {};
   const urlOverflow = new UrlOverflowService();
