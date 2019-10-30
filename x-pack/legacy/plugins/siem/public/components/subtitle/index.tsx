@@ -12,6 +12,10 @@ const Wrapper = styled.div`
     margin-top: ${theme.eui.euiSizeS};
 
     .siemSubtitle__item {
+      color: ${theme.eui.textColors.subdued};
+      font-size: ${theme.eui.euiFontSizeXS};
+      line-height: ${theme.eui.euiLineHeight};
+
       @media only screen and (min-width: ${theme.eui.euiBreakpoints.s}) {
         display: inline-block;
         margin-right: ${theme.eui.euiSize};
@@ -20,12 +24,6 @@ const Wrapper = styled.div`
           margin-right: 0;
         }
       }
-    }
-
-    .siemSubtitle__item--text {
-      color: ${theme.eui.textColors.subdued};
-      font-size: ${theme.eui.euiFontSizeXS};
-      line-height: ${theme.eui.euiLineHeight};
     }
   `}
 `;

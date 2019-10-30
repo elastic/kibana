@@ -13,14 +13,8 @@ const Wrapper = styled.dl`
     align-items: center;
     display: inline-flex;
 
-    & > * {
-      color: ${theme.eui.textColors.subdued};
-      font-size: ${theme.eui.euiFontSizeXS};
-      line-height: ${theme.eui.euiLineHeight};
-
-      & + * {
-        margin-left: 8px;
-      }
+    & > * + * {
+      margin-left: ${theme.eui.euiSizeS};
     }
 
     .siemProgressInline__bar {
