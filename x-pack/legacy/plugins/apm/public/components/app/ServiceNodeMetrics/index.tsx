@@ -113,7 +113,7 @@ export function ServiceNodeMetrics() {
                 </ElasticDocsLink>
               )
             }}
-          ></FormattedMessage>
+          />
         </EuiCallOut>
       ) : (
         <EuiFlexGroup gutterSize="xl">
@@ -129,7 +129,7 @@ export function ServiceNodeMetrics() {
                   <Truncate>{host}</Truncate>
                 </EuiToolTip>
               }
-            ></EuiStat>
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiStat
@@ -146,7 +146,7 @@ export function ServiceNodeMetrics() {
                   <Truncate>{containerId}</Truncate>
                 </EuiToolTip>
               }
-            ></EuiStat>
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       )}

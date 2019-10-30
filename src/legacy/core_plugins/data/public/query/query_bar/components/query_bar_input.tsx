@@ -430,7 +430,7 @@ export class QueryBarInputUI extends Component<Props, State> {
       body: JSON.stringify({ opt_in: language === 'kuery' }),
     });
 
-    this.services.store.set('kibana.userQueryLanguage', language);
+    this.services.storage.set('kibana.userQueryLanguage', language);
 
     const newQuery = { query: '', language };
     this.onChange(newQuery);
@@ -452,10 +452,10 @@ export class QueryBarInputUI extends Component<Props, State> {
   };
 
   private initPersistedLog = () => {
-    const { uiSettings, store, appName } = this.services;
+    const { uiSettings, storage, appName } = this.services;
     this.persistedLog = this.props.persistedLog
       ? this.props.persistedLog
-      : getQueryLog(uiSettings, store, appName, this.props.query.language);
+      : getQueryLog(uiSettings, storage, appName, this.props.query.language);
   };
 
   public onMouseEnterSuggestion = (index: number) => {
