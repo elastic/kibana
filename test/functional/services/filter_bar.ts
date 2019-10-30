@@ -166,6 +166,7 @@ export function FilterBarProvider({ getService, getPageObjects }: FtrProviderCon
       if (cancelSaveFilterModalButtonExists) {
         await testSubjects.click('cancelSaveFilter');
       }
+      await testSubjects.waitForDeleted('cancelSaveFilter');
     }
 
     /**
