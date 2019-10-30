@@ -7,42 +7,31 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
-import routes from 'ui/routes';
-import { I18nContext } from 'ui/i18n';
 
-import { App } from './app/app';
-import { BASE_PATH } from '../common/constants/base_path';
+import routes from 'ui/routes';
+
+import { CoreStart } from '../../../../../src/core/public';
+
+import { mountReactApp, unmountReactApp } from './app';
+import { REACT_ROOT_ID } from './app/constants';
+import { BASE_PATH } from '../common/constants';
 
 import template from './index.html';
 import { manageAngularLifecycle } from './app/lib/manage_angular_lifecycle';
-import { indexManagementStore } from './app/store';
 
 let elem: HTMLElement | null;
 
-const renderReact = async () => {
-  render(
-    <I18nContext>
-      <Provider store={indexManagementStore()}>
-        <App />
-      </Provider>
-    </I18nContext>,
-    elem
-  );
-};
-
-export const registerRoutes = () => {
+export const registerRoutes = (core: CoreStart) => {
   routes.when(`${BASE_PATH}:view?/:action?/:id?`, {
     template,
     controller: ($scope: any, $route: any) => {
       // clean up previously rendered React app if one exists
       // this happens because of React Router redirects
-      if (elem) {
-        unmountComponentAtNode(elem);
-      }
+      unmountReactApp(elem);
 
       $scope.$$postDigest(() => {
-        elem = document.getElementById('indexManagementReactRoot');
-        renderReact();
+        elem = document.getElementById(REACT_ROOT_ID);
+        mountReactApp(elem, { core });
         manageAngularLifecycle($scope, $route, elem);
       });
     },

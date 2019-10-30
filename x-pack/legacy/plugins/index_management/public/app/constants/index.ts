@@ -13,3 +13,5 @@ export {
   TAB_STATS,
   TAB_EDIT_SETTINGS,
 } from './detail_panel_tabs';
+
+export const REACT_ROOT_ID = 'indexManagementReactRoot';
