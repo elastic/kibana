@@ -260,6 +260,7 @@ export function getIndexPatternDatasource({
                   state,
                   layerId: props.layerId,
                   onError: onIndexPatternLoadError,
+                  replaceIfPossible: true,
                 });
               }}
               {...props}
