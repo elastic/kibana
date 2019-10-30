@@ -32,8 +32,8 @@ jest.mock('./use_observable', () => ({
 
 describe('useKibanaUiSetting', () => {
   test('getKibanaVersion', () => {
-    const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
-    expect(kbnVersion).toEqual('8.0.0');
+    const wrapper = mount(<HookWrapper hook={() => useKibanaUiSetting(DEFAULT_KBN_VERSION)} />);
+    expect(wrapper.text()).toEqual('["8.0.0"]');
   });
 
   test('getTimezone', () => {

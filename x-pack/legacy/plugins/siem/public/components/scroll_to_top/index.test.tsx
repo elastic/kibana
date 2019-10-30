@@ -8,7 +8,7 @@ import { mount } from 'enzyme';
 import * as React from 'react';
 
 import { globalNode, HookWrapper } from '../../mock';
-import { scrollToTop } from '.';
+import { useScrollToTop } from '.';
 
 const spyScroll = jest.fn();
 const spyScrollTo = jest.fn();
@@ -21,7 +21,7 @@ describe('Scroll to top', () => {
 
   test('scroll have been called', () => {
     Object.defineProperty(globalNode.window, 'scroll', { value: spyScroll });
-    mount(<HookWrapper hook={() => scrollToTop()} />);
+    mount(<HookWrapper hook={() => useScrollToTop()} />);
 
     expect(spyScroll).toHaveBeenCalledWith({
       top: 0,
@@ -32,7 +32,7 @@ describe('Scroll to top', () => {
   test('scrollTo have been called', () => {
     Object.defineProperty(globalNode.window, 'scroll', { value: null });
     Object.defineProperty(globalNode.window, 'scrollTo', { value: spyScrollTo });
-    mount(<HookWrapper hook={() => scrollToTop()} />);
+    mount(<HookWrapper hook={() => useScrollToTop()} />);
     expect(spyScrollTo).toHaveBeenCalled();
   });
 });
