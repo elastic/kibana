@@ -31,7 +31,7 @@ import {
   EmbeddableFactory,
   IEmbeddable,
 } from '../../../../../../embeddable_api/public/np_ready/public';
-import { DASHBOARD_CONTAINER_TYPE } from './dashboard_container_factory';
+import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
 import { createPanelState } from './panel';
 import { DashboardPanelState } from './types';
 import { DashboardViewport } from './viewport/dashboard_viewport';

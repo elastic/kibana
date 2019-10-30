@@ -27,8 +27,7 @@ import {
   DashboardContainerOptions,
 } from './dashboard_container';
 import { DashboardCapabilities } from '../types';
-
-export const DASHBOARD_CONTAINER_TYPE = 'dashboard';
+import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
 
 export interface DashboardOptions extends DashboardContainerOptions {
   savedObjectMetaData?: SavedObjectMetaData<SavedObjectAttributes>;
