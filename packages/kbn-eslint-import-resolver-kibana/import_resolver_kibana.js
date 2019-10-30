@@ -73,7 +73,7 @@ exports.resolve = function resolveKibanaPath(importRequest, file, config) {
   config = config || {};
 
   const rewrittenImportFromRoot = IMPORTED_FROM_ROOT_DIRS.some(
-    p => importRequest === p && importRequest.startsWith(`${p}/`)
+    p => importRequest === p || importRequest.startsWith(`${p}/`)
   );
 
   if (rewrittenImportFromRoot) {
