@@ -16,7 +16,7 @@ import { InfraLogAnalysis } from '../log_analysis';
 import { InfraSnapshot } from '../snapshot';
 import { InfraSourceStatus } from '../source_status';
 import { InfraSources } from '../sources';
-import { InfraConfig } from '../../new_platform_config.schema';
+import { InfraConfig } from '../../../../../../plugins/infra/server';
 import { CoreSetup } from '../../../../../../../src/core/server';
 import { InfraServerPluginDeps } from '../adapters/framework/adapter_types';
 

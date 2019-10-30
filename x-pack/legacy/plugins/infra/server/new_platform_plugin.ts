@@ -5,8 +5,7 @@
  */
 import { CoreSetup, PluginInitializerContext } from 'src/core/server';
 import { Server } from 'hapi';
-import { InfraConfig } from './new_platform_config.schema';
-import { Legacy } from '../../../../../kibana';
+import { InfraConfig } from '../../../../plugins/infra/server';
 import { initInfraServer } from './infra_server';
 import { InfraBackendLibs, InfraDomainLibs } from './lib/infra_types';
 import { FrameworkFieldsAdapter } from './lib/adapters/fields/framework_fields_adapter';
@@ -37,11 +36,9 @@ const DEFAULT_CONFIG: InfraConfig = {
 
 export class InfraServerPlugin {
   public config: InfraConfig = DEFAULT_CONFIG;
-  private legacyServer: Legacy.Server;
   public libs: InfraBackendLibs | undefined;
 
-  constructor(context: PluginInitializerContext, legacyServer: Legacy.Server) {
-    this.legacyServer = legacyServer;
+  constructor(context: PluginInitializerContext) {
     const config$ = context.config.create<InfraConfig>();
     config$.subscribe(configValue => {
       this.config = {
@@ -66,7 +63,7 @@ export class InfraServerPlugin {
     const framework = new InfraKibanaBackendFrameworkAdapter(core, this.config, plugins);
     const sources = new InfraSources({
       config: this.config,
-      savedObjects: this.legacyServer.savedObjects,
+      savedObjects: plugins.savedObjects,
     });
     const sourceStatus = new InfraSourceStatus(
       new InfraElasticsearchSourceStatusAdapter(framework),

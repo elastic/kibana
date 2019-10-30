@@ -26,7 +26,7 @@ import {
   RequestHandlerContext,
   KibanaResponseFactory,
 } from '../../../../../../../../src/core/server';
-import { InfraConfig } from '../../../new_platform_config.schema';
+import { InfraConfig } from '../../../../../../../plugins/infra/server';
 
 interface CallWithRequestParams extends GenericParams {
   max_concurrent_shard_requests?: number;
