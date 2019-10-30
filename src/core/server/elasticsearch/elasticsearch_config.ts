@@ -65,6 +65,7 @@ export const config = {
     }),
     apiVersion: schema.string({ defaultValue: DEFAULT_API_VERSION }),
     healthCheck: schema.object({ delay: schema.duration({ defaultValue: 2500 }) }),
+    ignoreVersionMismatch: schema.boolean({ defaultValue: false }),
   }),
 };
 
@@ -73,6 +74,11 @@ export class ElasticsearchConfig {
    * The interval between health check requests Kibana sends to the Elasticsearch.
    */
   public readonly healthCheckDelay: Duration;
+
+  /**
+   * Whether to allow kibana to connect to a non-compatible elasticsearch node.
+   */
+  public readonly ignoreVersionMismatch: boolean;
 
   /**
    * Version of the Elasticsearch (6.7, 7.1 or `master`) client will be connecting to.
@@ -161,6 +167,7 @@ export class ElasticsearchConfig {
   public readonly customHeaders: ElasticsearchConfigType['customHeaders'];
 
   constructor(rawConfig: ElasticsearchConfigType) {
+    this.ignoreVersionMismatch = rawConfig.ignoreVersionMismatch;
     this.apiVersion = rawConfig.apiVersion;
     this.logQueries = rawConfig.logQueries;
     this.hosts = Array.isArray(rawConfig.hosts) ? rawConfig.hosts : [rawConfig.hosts];
