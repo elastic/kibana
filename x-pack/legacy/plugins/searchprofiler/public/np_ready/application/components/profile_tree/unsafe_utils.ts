@@ -5,6 +5,7 @@
  */
 
 import { produce } from 'immer';
+import { i18n } from '@kbn/i18n';
 import tinycolor from 'tinycolor2';
 import _ from 'lodash';
 
@@ -21,17 +22,32 @@ export const comparator = (v1: number, v2: number) => {
 function getToolTip(key: string) {
   switch (key) {
     case 'build_scorer':
-      return 'The time taken to create the Scoring object, which is later used to execute the actual scoring of each doc.';
+      return i18n.translate('xpack.searchProfiler.buildScorerTimeDescription', {
+        defaultMessage:
+          'The time taken to create the Scoring object, which is later used to execute the actual scoring of each doc.',
+      });
     case 'create_weight':
-      return 'The time taken to create the Weight object, which holds temporary information during scoring.';
+      return i18n.translate('xpack.searchProfiler.createWeightTimeDescription', {
+        defaultMessage:
+          'The time taken to create the Weight object, which holds temporary information during scoring.',
+      });
     case 'next_doc':
-      return 'The time taken to advance the iterator to the next matching document.';
+      return i18n.translate('xpack.searchProfiler.nextDocTimeDescription', {
+        defaultMessage: 'The time taken to advance the iterator to the next matching document.',
+      });
     case 'score':
-      return 'The time taken in actually scoring the document against the query.';
+      return i18n.translate('xpack.searchProfiler.scoreTimeDescription', {
+        defaultMessage: 'The time taken in actually scoring the document against the query.',
+      });
     case 'match':
-      return 'The time taken to execute a secondary, more precise scoring phase (used by phrase queries).';
+      return i18n.translate('xpack.searchProfiler.matchTimeDescription', {
+        defaultMessage:
+          'The time taken to execute a secondary, more precise scoring phase (used by phrase queries).',
+      });
     case 'advance':
-      return 'The time taken to advance the iterator to the next document.';
+      return i18n.translate('xpack.searchProfiler.advanceTimeDescription', {
+        defaultMessage: 'The time taken to advance the iterator to the next document.',
+      });
     default:
       return '';
   }

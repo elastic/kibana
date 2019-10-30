@@ -11,6 +11,7 @@
 import React, { useEffect, useRef } from 'react';
 import * as ReactDOM from 'react-dom';
 import { keyCodes, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 const OverlayText = () => (
   // The point of this element is for accessibility purposes, so ignore eslint error
@@ -18,8 +19,16 @@ const OverlayText = () => (
   //
   // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
   <>
-    <EuiText size="s">Press Enter to start editing.</EuiText>
-    <EuiText size="s">When you&rsquo;re done, press Escape to stop editing.</EuiText>
+    <EuiText size="s">
+      {i18n.translate('xpack.searchProfiler.aceAccessibilityOverlayInstructionEnter', {
+        defaultMessage: 'Press Enter to start editing.',
+      })}
+    </EuiText>
+    <EuiText size="s">
+      {i18n.translate('xpack.searchProfiler.aceAccessibilityOverlayInstructionExit', {
+        defaultMessage: `When you are done, press Escape to stop editing.`,
+      })}
+    </EuiText>
   </>
 );
 
@@ -27,41 +36,41 @@ export function useUIAceKeyboardMode(aceTextAreaElement: HTMLTextAreaElement | n
   const overlayMountNode = useRef<HTMLDivElement | null>(null);
   const autoCompleteVisibleRef = useRef<boolean>(false);
 
-  function onDismissOverlay(event: KeyboardEvent) {
-    if (event.keyCode === keyCodes.ENTER) {
-      event.preventDefault();
-      aceTextAreaElement!.focus();
-    }
-  }
-
-  function enableOverlay() {
-    if (overlayMountNode.current) {
-      overlayMountNode.current.focus();
-    }
-  }
-
-  const isAutoCompleteVisible = () => {
-    const autoCompleter = document.querySelector<HTMLDivElement>('.ace_autocomplete');
-    if (!autoCompleter) {
-      return false;
-    }
-    // The autoComplete is just hidden when it's closed, not removed from the DOM.
-    return autoCompleter.style.display !== 'none';
-  };
-
-  const documentKeyDownListener = () => {
-    autoCompleteVisibleRef.current = isAutoCompleteVisible();
-  };
-
-  const aceKeydownListener = (event: KeyboardEvent) => {
-    if (event.keyCode === keyCodes.ESCAPE && !autoCompleteVisibleRef.current) {
-      event.preventDefault();
-      event.stopPropagation();
-      enableOverlay();
-    }
-  };
-
   useEffect(() => {
+    function onDismissOverlay(event: KeyboardEvent) {
+      if (event.keyCode === keyCodes.ENTER) {
+        event.preventDefault();
+        aceTextAreaElement!.focus();
+      }
+    }
+
+    function enableOverlay() {
+      if (overlayMountNode.current) {
+        overlayMountNode.current.focus();
+      }
+    }
+
+    const isAutoCompleteVisible = () => {
+      const autoCompleter = document.querySelector<HTMLDivElement>('.ace_autocomplete');
+      if (!autoCompleter) {
+        return false;
+      }
+      // The autoComplete is just hidden when it's closed, not removed from the DOM.
+      return autoCompleter.style.display !== 'none';
+    };
+
+    const documentKeyDownListener = () => {
+      autoCompleteVisibleRef.current = isAutoCompleteVisible();
+    };
+
+    const aceKeydownListener = (event: KeyboardEvent) => {
+      if (event.keyCode === keyCodes.ESCAPE && !autoCompleteVisibleRef.current) {
+        event.preventDefault();
+        event.stopPropagation();
+        enableOverlay();
+      }
+    };
+
     if (aceTextAreaElement) {
       // We don't control HTML elements inside of ace so we imperatively create an element
       // that acts as a container and insert it just before ace's textarea element
