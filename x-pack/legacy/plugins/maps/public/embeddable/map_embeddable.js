@@ -72,7 +72,7 @@ export class MapEmbeddable extends Embeddable {
     }
   }
 
-  _dispatchSetQuery({ query, timeRange, filters }) {
+  _dispatchSetQuery({ query, timeRange, filters, refresh }) {
     this._prevTimeRange = timeRange;
     this._prevQuery = query;
     this._prevFilters = filters;
@@ -80,6 +80,7 @@ export class MapEmbeddable extends Embeddable {
       filters: filters.filter(filter => !filter.meta.disabled),
       query,
       timeFilters: timeRange,
+      refresh,
     }));
   }
 
@@ -165,7 +166,8 @@ export class MapEmbeddable extends Embeddable {
     this._dispatchSetQuery({
       query: this._prevQuery,
       timeRange: this._prevTimeRange,
-      filters: this._prevFilters
+      filters: this._prevFilters,
+      refresh: true
     });
   }
 
