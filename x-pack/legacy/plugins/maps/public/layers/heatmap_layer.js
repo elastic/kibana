@@ -27,6 +27,8 @@ export class HeatmapLayer extends VectorLayer {
     if (!style) {
       const defaultStyle = HeatmapStyle.createDescriptor();
       this._style = new HeatmapStyle(defaultStyle);
+    } else {
+      this._style = style;
     }
   }
 
