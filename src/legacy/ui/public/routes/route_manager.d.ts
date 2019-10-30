@@ -25,7 +25,8 @@ import { ChromeBreadcrumb } from '../../../../core/public';
 
 interface RouteConfiguration {
   controller?: string | ((...args: any[]) => void);
-  redirectTo?: string | ((params: object, path: string, search: string) => string);
+  redirectTo?: string;
+  resolveRedirectTo?: (...args: any[]) => void;
   reloadOnSearch?: boolean;
   reloadOnUrl?: boolean;
   outerAngularWrapperRoute?: boolean;
