@@ -25,14 +25,14 @@ interface Layouts {
   [type: string]: ReactNode;
 }
 
-const Layouts: Layouts = {
+const layouts: Layouts = {
   host: HostLayout,
   pod: PodLayout,
   container: ContainerLayout,
 };
 
 export const findLayout = (type: InventoryItemType) => {
-  const Layout = idx(Layouts, _ => _[type]);
+  const Layout = idx(layouts, _ => _[type]);
   if (!Layout) {
     throw new Error(
       i18n.translate('xpack.infra.inventoryModels.findLayout.error', {
