@@ -9,11 +9,11 @@ import JoiNamespace from 'joi';
 import { resolve } from 'path';
 import { PluginInitializerContext } from 'src/core/server';
 import KbnServer from 'src/legacy/server/kbn_server';
-import { BehaviorSubject } from 'rxjs';
 import { getConfigSchema } from './server/kibana.index';
 import { savedObjectMappings } from './server/saved_objects';
 import { plugin, InfraServerPluginDeps } from './server/new_platform_index';
 import { UsageCollector } from './server/usage/usage_collector';
+import { InfraSetup } from '../../../plugins/infra/server';
 
 const APP_ID = 'infra';
 const logsSampleDataLinkLabel = i18n.translate('xpack.infra.sampleDataLinkLabel', {
@@ -76,19 +76,16 @@ export function infra(kibana: any) {
     },
     init(legacyServer: any) {
       const { newPlatform } = legacyServer as KbnServer;
-      const { core } = newPlatform.setup;
+      const { core, plugins } = newPlatform.setup;
 
-      const getConfig$ = <T>() =>
-        new BehaviorSubject<T>(legacyServer.config().get('xpack.infra')).asObservable();
+      const infraSetup = (plugins.infra as unknown) as InfraSetup; // chef's kiss
 
       const initContext = ({
-        config: {
-          create: getConfig$,
-          createIfExists: getConfig$,
-        },
+        config: infraSetup.__legacy.config,
         getUiSettingsService: legacyServer.getUiSettingsService, // NP_TODO: Replace this with route handler context instead when ready, see: https://github.com/elastic/kibana/issues/44994
       } as unknown) as PluginInitializerContext;
 
+      // NP_TODO: Use real types from the other plugins as they are migrated
       const pluginDeps: InfraServerPluginDeps = {
         indexPatterns: {
           indexPatternsServiceFactory: legacyServer.indexPatternsServiceFactory,
@@ -98,14 +95,14 @@ export function infra(kibana: any) {
         savedObjects: legacyServer.savedObjects,
       };
 
-      const infraPluginInstance = plugin(initContext, legacyServer);
+      const infraPluginInstance = plugin(initContext);
       infraPluginInstance.setup(core, pluginDeps);
 
       // NP_TODO: EVERYTHING BELOW HERE IS LEGACY, MIGHT NEED TO MOVE SOME OF IT TO NP, NOT SURE HOW
 
       const libs = infraPluginInstance.getLibs();
 
-      // NP_TODO how do we replace this?
+      // NP_TODO how do we replace this? Answer: return from setup function.
       legacyServer.expose(
         'defineInternalSourceConfiguration',
         libs.sources.defineInternalSourceConfiguration.bind(libs.sources)

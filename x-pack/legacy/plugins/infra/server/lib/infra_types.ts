@@ -13,7 +13,7 @@ import { InfraLogAnalysis } from './log_analysis/log_analysis';
 import { InfraSnapshot } from './snapshot';
 import { InfraSources } from './sources';
 import { InfraSourceStatus } from './source_status';
-import { InfraConfig } from '../new_platform_config.schema';
+import { InfraConfig } from '../../../../../plugins/infra/server';
 import { InfraKibanaBackendFrameworkAdapter } from './adapters/framework/kibana_framework_adapter';
 
 export interface InfraDomainLibs {
