@@ -22,21 +22,19 @@ import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { catchError, filter, mergeMap, tap } from 'rxjs/operators';
 import { HttpServiceBase } from 'src/core/public';
-import { ApiItem, NewsfeedItem, FetchResult } from '../../types';
+import { NewsfeedPluginInjectedConfig, ApiItem, NewsfeedItem, FetchResult } from '../../types';
 
-const DEFAULT_LANGUAGE = 'en';
-const NEWSFEED_MAIN_INTERVAL = 120000; // A main interval to check for need to refresh (2min)
-const NEWSFEED_FETCH_INTERVAL = moment.duration(1, 'day'); // how often to actually fetch the API
+type ApiConfig = NewsfeedPluginInjectedConfig['newsfeed']['service'];
+
 const NEWSFEED_LAST_FETCH_STORAGE_KEY = 'newsfeed.lastfetchtime';
 const NEWSFEED_HASH_SET_STORAGE_KEY = 'newsfeed.hashes';
-const NEWSFEED_SERVICE_PATH_TEMPLATE = '/kibana/v{VERSION}.json';
 
 class NewsfeedApiDriver {
-  private readonly userLanguage: string;
-
-  constructor(private readonly kibanaVersion: string, userLanguage: string) {
-    this.userLanguage = userLanguage || DEFAULT_LANGUAGE;
-  }
+  constructor(
+    private readonly kibanaVersion: string,
+    private readonly userLanguage: string,
+    private readonly fetchInterval: number
+  ) {}
 
   shouldFetch(): boolean {
     const lastFetch: string | null = sessionStorage.getItem(NEWSFEED_LAST_FETCH_STORAGE_KEY);
@@ -47,7 +45,7 @@ class NewsfeedApiDriver {
     const now = moment();
     const duration = moment.duration(now.diff(last));
 
-    return duration > NEWSFEED_FETCH_INTERVAL;
+    return duration.asMilliseconds() > this.fetchInterval;
   }
 
   updateLastFetch() {
@@ -68,9 +66,9 @@ class NewsfeedApiDriver {
     return { previous: oldHashes, current: updatedHashes };
   }
 
-  fetchNewsfeedItems(http: HttpServiceBase, urlRoot: string): Rx.Observable<ApiItem[] | null> {
-    const urlPath = NEWSFEED_SERVICE_PATH_TEMPLATE.replace('{VERSION}', this.kibanaVersion);
-    const fullUrl = urlRoot + urlPath;
+  fetchNewsfeedItems(http: HttpServiceBase, config: ApiConfig): Rx.Observable<ApiItem[] | null> {
+    const urlPath = config.pathTemplate.replace('{VERSION}', this.kibanaVersion);
+    const fullUrl = config.urlRoot + urlPath;
 
     return Rx.from(
       http
@@ -150,14 +148,16 @@ class NewsfeedApiDriver {
  */
 export function getApi(
   http: HttpServiceBase,
-  urlRoot: string,
+  config: NewsfeedPluginInjectedConfig['newsfeed'],
   kibanaVersion: string
 ): Rx.Observable<void | FetchResult> {
-  const userLanguage = i18n.getLocale();
-  const driver = new NewsfeedApiDriver(kibanaVersion, userLanguage);
-  return Rx.timer(0, NEWSFEED_MAIN_INTERVAL).pipe(
+  const userLanguage = i18n.getLocale() || config.defaultLanguage;
+  const fetchInterval = config.fetchInterval;
+  const driver = new NewsfeedApiDriver(kibanaVersion, userLanguage, fetchInterval);
+
+  return Rx.timer(0, config.mainInterval).pipe(
     filter(() => driver.shouldFetch()),
-    mergeMap(() => driver.fetchNewsfeedItems(http, urlRoot)),
+    mergeMap(() => driver.fetchNewsfeedItems(http, config.service)),
     filter(items => items != null && items.length > 0),
     tap(() => driver.updateLastFetch()),
     mergeMap(items => driver.modelItems(items!))

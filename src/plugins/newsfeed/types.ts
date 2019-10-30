@@ -19,6 +19,18 @@
 
 import { Moment } from 'moment';
 
+export interface NewsfeedPluginInjectedConfig {
+  newsfeed: {
+    service: {
+      urlRoot: string;
+      pathTemplate: string;
+    };
+    defaultLanguage: string;
+    mainInterval: number; // how often to check last updated time
+    fetchInterval: number; // how often to fetch remote service and set last updated
+  };
+}
+
 export interface ApiItem {
   hash: string;
   expire_on: Date;
@@ -41,6 +53,9 @@ export interface NewsfeedItem {
   publishOn: Moment;
 }
 
+/* TODO: FetchResult needs fields to identify corner-cases:
+/* - pending response
+/* - failed response */
 export interface FetchResult {
   kibanaVersion: string;
   hasNew: boolean;

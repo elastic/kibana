@@ -20,30 +20,46 @@
 import { resolve } from 'path';
 import { LegacyPluginApi, LegacyPluginSpec, ArrayOrItem } from 'src/legacy/plugin_discovery/types';
 import { Legacy } from 'kibana';
-import { PLUGIN_ID, DEFAULT_SERVICE_URLROOT } from './constants';
+import { NewsfeedPluginInjectedConfig } from '../../../plugins/newsfeed/types';
+import { PLUGIN_ID, DEFAULT_SERVICE_URLROOT, DEFAULT_SERVICE_PATH } from './constants';
 
 // eslint-disable-next-line import/no-default-export
 export default function(kibana: LegacyPluginApi): ArrayOrItem<LegacyPluginSpec> {
   const pluginSpec: Legacy.PluginSpecOptions = {
     id: PLUGIN_ID,
     config(Joi: any) {
+      // NewsfeedPluginInjectedConfig in Joi form
       return Joi.object({
         enabled: Joi.boolean().default(true),
-        urlRoot: Joi.when('$dev', {
-          is: true,
-          then: Joi.string().default(DEFAULT_SERVICE_URLROOT),
-          otherwise: Joi.string()
-            .default(DEFAULT_SERVICE_URLROOT)
-            .valid(DEFAULT_SERVICE_URLROOT),
-        }), // urlRoot can only be changed from default when running in dev
+        service: Joi.object({
+          pathTemplate: Joi.string().default(DEFAULT_SERVICE_PATH),
+          urlRoot: Joi.when('$dev', {
+            is: true,
+            then: Joi.string().default(DEFAULT_SERVICE_URLROOT),
+            otherwise: Joi.string()
+              .default(DEFAULT_SERVICE_URLROOT)
+              .valid(DEFAULT_SERVICE_URLROOT),
+          }), // urlRoot can only be changed from default when running in dev
+        }).default(),
+        defaultLanguage: Joi.string().default('en'),
+        mainInterval: Joi.number().default(120 * 1000), // (2min) How often to retry failed fetches, and/or check if newsfeed items need to be refreshed from remote
+        fetchInterval: Joi.number().default(86400 * 1000), // (1day) How often to fetch remote and reset the last fetched time
       }).default();
     },
     uiExports: {
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-      injectDefaultVars(server) {
+      injectDefaultVars(server): NewsfeedPluginInjectedConfig {
         const config = server.config();
         return {
-          newsfeedServiceUrlRoot: config.get('newsfeed.urlRoot'),
+          newsfeed: {
+            service: {
+              pathTemplate: config.get('newsfeed.service.pathTemplate') as string,
+              urlRoot: config.get('newsfeed.service.urlRoot') as string,
+            },
+            defaultLanguage: config.get('newsfeed.defaultLanguage') as string,
+            mainInterval: config.get('newsfeed.mainInterval') as number,
+            fetchInterval: config.get('newsfeed.fetchInterval') as number,
+          },
         };
       },
     },
