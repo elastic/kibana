@@ -69,7 +69,7 @@ export default async function ({ readConfigFile }) {
       license: 'trial',
       from: 'snapshot',
       serverArgs: [
-        '--xpack.security.authc.api_key.enabled=true'
+        'xpack.security.authc.api_key.enabled=true'
       ],
     },
 
