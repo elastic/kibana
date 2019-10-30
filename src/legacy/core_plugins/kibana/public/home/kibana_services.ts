@@ -17,17 +17,17 @@
  * under the License.
  */
 
-import { ToastNotifications } from 'ui/notify/toasts/toast_notifications';
 import {
   ChromeStart,
   DocLinksStart,
+  HttpStart,
   LegacyNavLink,
+  NotificationsSetup,
+  OverlayStart,
   SavedObjectsClientContract,
   UiSettingsClientContract,
   UiSettingsState,
 } from 'kibana/public';
-import { KFetchOptions } from 'ui/kfetch';
-import { KFetchKibanaOptions } from 'ui/kfetch/kfetch';
 import { UiStatsMetricType } from '@kbn/analytics';
 import { FeatureCatalogueEntry } from '../../../../../plugins/feature_catalogue/public';
 
@@ -51,10 +51,10 @@ export interface HomeKibanaServices {
   chrome: ChromeStart;
   telemetryOptInProvider: any;
   uiSettings: UiSettingsClientContract;
-  kfetch: (options: KFetchOptions, kfetchOptions?: KFetchKibanaOptions) => Promise<any>;
+  http: HttpStart;
   savedObjectsClient: SavedObjectsClientContract;
-  toastNotifications: ToastNotifications;
-  banners: any;
+  toastNotifications: NotificationsSetup['toasts'];
+  banners: OverlayStart['banners'];
   METRIC_TYPE: any;
   trackUiMetric: (type: UiStatsMetricType, eventNames: string | string[], count?: number) => void;
   getBasePath: () => string;

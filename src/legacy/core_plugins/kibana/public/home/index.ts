@@ -21,9 +21,6 @@ import { FeatureCatalogueRegistryProvider } from 'ui/registry/feature_catalogue'
 import { npSetup, npStart } from 'ui/new_platform';
 import chrome from 'ui/chrome';
 import { IPrivate } from 'ui/private';
-// @ts-ignore
-import { toastNotifications, banners } from 'ui/notify';
-import { kfetch } from 'ui/kfetch';
 import { HomePlugin, LegacyAngularInjectedDependencies } from './plugin';
 import { createUiStatsReporter, METRIC_TYPE } from '../../../ui_metric/public';
 import { start as data } from '../../../data/public/legacy';
@@ -59,9 +56,6 @@ let copiedLegacyCatalogue = false;
   instance.setup(npSetup.core, {
     __LEGACY: {
       trackUiMetric,
-      toastNotifications,
-      banners,
-      kfetch,
       metadata: npStart.core.injectedMetadata.getLegacyMetadata(),
       METRIC_TYPE,
       getFeatureCatalogueEntries: async () => {

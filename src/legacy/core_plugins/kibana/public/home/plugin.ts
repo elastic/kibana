@@ -19,9 +19,6 @@
 
 import { CoreSetup, CoreStart, LegacyNavLink, Plugin, UiSettingsState } from 'kibana/public';
 import { UiStatsMetricType } from '@kbn/analytics';
-import { ToastNotifications } from 'ui/notify/toasts/toast_notifications';
-import { KFetchOptions } from 'ui/kfetch';
-import { KFetchKibanaOptions } from 'ui/kfetch/kfetch';
 
 import { DataStart } from '../../../data/public';
 import { LocalApplicationService } from '../local_application_service';
@@ -40,10 +37,7 @@ export interface HomePluginStartDependencies {
 export interface HomePluginSetupDependencies {
   __LEGACY: {
     trackUiMetric: (type: UiStatsMetricType, eventNames: string | string[], count?: number) => void;
-    toastNotifications: ToastNotifications;
-    banners: any;
     METRIC_TYPE: any;
-    kfetch: (options: KFetchOptions, kfetchOptions?: KFetchKibanaOptions) => Promise<any>;
     metadata: {
       app: unknown;
       bundleId: string;
@@ -80,6 +74,9 @@ export class HomePlugin implements Plugin {
         const angularDependencies = await getAngularDependencies();
         setServices({
           ...legacyServices,
+          http: contextCore.http,
+          toastNotifications: core.notifications.toasts,
+          banners: contextCore.overlays.banners,
           getInjected: core.injectedMetadata.getInjectedVar,
           docLinks: contextCore.docLinks,
           savedObjectsClient: this.savedObjectsClient!,
