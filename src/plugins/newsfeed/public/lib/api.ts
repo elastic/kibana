@@ -31,8 +31,8 @@ interface FetchResult {
 const DEFAULT_LANGUAGE = 'en'; // TODO: read from settings, default to en
 const NEWSFEED_MAIN_INTERVAL = 120000; // A main interval to check for need to refresh (2min)
 const NEWSFEED_FETCH_INTERVAL = moment.duration(1, 'day'); // how often to actually fetch the API
-const NEWSFEED_LAST_FETCH_STORAGE_KEY = 'xpack.newsfeed.lastfetchtime';
-const NEWSFEED_HASH_SET_STORAGE_KEY = 'xpack.newsfeed.hashes';
+const NEWSFEED_LAST_FETCH_STORAGE_KEY = 'newsfeed.lastfetchtime';
+const NEWSFEED_HASH_SET_STORAGE_KEY = 'newsfeed.hashes';
 // const NEWSFEED_SERVICE_URL_TEMPLATE = 'https://feeds.elastic.co/kibana/v{VERSION}.json';
 const NEWSFEED_SERVICE_URL_TEMPLATE = 'https://feeds.elastic.co/kibana/v7.4.1.json'; // FIXME: needs to support untagged dev branches
 
