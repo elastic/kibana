@@ -40,13 +40,13 @@ exports[`DonutChart component renders a donut chart 1`] = `
     class="euiFlexItem"
   >
     <div
-      class="sc-htpNat kGuflQ"
+      class="sc-AykKE gpqEWB"
     >
       <div
         class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
       >
         <span
-          class="euiFlexItem euiFlexItem--flexGrowZero sc-bdVaJa fYBJge"
+          class="euiFlexItem euiFlexItem--flexGrowZero sc-AykKC biWDWQ"
         >
           <div
             class="euiHealth"
@@ -74,12 +74,12 @@ exports[`DonutChart component renders a donut chart 1`] = `
           </div>
         </span>
         <span
-          class="euiFlexItem euiFlexItem--flexGrowZero sc-bdVaJa fYBJge"
+          class="euiFlexItem euiFlexItem--flexGrowZero sc-AykKC biWDWQ"
         >
           Down
         </span>
         <span
-          class="euiFlexItem sc-bwzfXH dkRrwr"
+          class="euiFlexItem sc-AykKD ijYgiq"
         >
           32
         </span>
@@ -91,7 +91,7 @@ exports[`DonutChart component renders a donut chart 1`] = `
         class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
       >
         <span
-          class="euiFlexItem euiFlexItem--flexGrowZero sc-bdVaJa fYBJge"
+          class="euiFlexItem euiFlexItem--flexGrowZero sc-AykKC biWDWQ"
         >
           <div
             class="euiHealth"
@@ -119,12 +119,12 @@ exports[`DonutChart component renders a donut chart 1`] = `
           </div>
         </span>
         <span
-          class="euiFlexItem euiFlexItem--flexGrowZero sc-bdVaJa fYBJge"
+          class="euiFlexItem euiFlexItem--flexGrowZero sc-AykKC biWDWQ"
         >
           Up
         </span>
         <span
-          class="euiFlexItem sc-bwzfXH dkRrwr"
+          class="euiFlexItem sc-AykKD ijYgiq"
         >
           95
         </span>

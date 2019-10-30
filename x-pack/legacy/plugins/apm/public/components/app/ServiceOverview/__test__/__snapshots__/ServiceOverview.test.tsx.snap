@@ -157,7 +157,7 @@ NodeList [
           class="euiToolTipAnchor"
         >
           <a
-            class="euiLink euiLink--primary sc-bdVaJa eQDnXY"
+            class="euiLink euiLink--primary sc-AykKC TOTqS"
             href="#/services/My Go Service/transactions?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
             rel="noreferrer"
           >
@@ -255,7 +255,7 @@ NodeList [
           class="euiToolTipAnchor"
         >
           <a
-            class="euiLink euiLink--primary sc-bdVaJa eQDnXY"
+            class="euiLink euiLink--primary sc-AykKC TOTqS"
             href="#/services/My Python Service/transactions?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
             rel="noreferrer"
           >
