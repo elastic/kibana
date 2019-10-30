@@ -8,9 +8,14 @@
 
 # App Architecture
 /src/plugins/data/ @elastic/kibana-app-arch
-/src/plugins/kibana_utils/ @elastic/kibana-app-arch
+/src/plugins/embeddable/ @elastic/kibana-app-arch
+/src/plugins/expressions/ @elastic/kibana-app-arch
 /src/plugins/kibana_react/ @elastic/kibana-app-arch
+/src/plugins/kibana_utils/ @elastic/kibana-app-arch
 /src/plugins/navigation/ @elastic/kibana-app-arch
+/src/plugins/ui_actions/ @elastic/kibana-app-arch
+/src/plugins/visualizations/ @elastic/kibana-app-arch
+/x-pack/plugins/advanced_ui_actions/ @elastic/kibana-app-arch
 
 # APM
 /x-pack/legacy/plugins/apm/  @elastic/apm-ui
@@ -56,6 +61,7 @@
 /src/legacy/server/saved_objects/  @elastic/kibana-platform
 /config/kibana.yml @elastic/kibana-platform
 /x-pack/plugins/features/  @elastic/kibana-platform
+/x-pack/plugins/licensing/  @elastic/kibana-platform
 
 # Security
 /x-pack/legacy/plugins/security/  @elastic/kibana-security
