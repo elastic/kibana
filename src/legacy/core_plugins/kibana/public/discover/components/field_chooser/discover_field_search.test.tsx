@@ -17,22 +17,29 @@
  * under the License.
  */
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { DiscoverFieldSearch, Props } from './discover_field_search';
+import { EuiButtonGroupProps } from '@elastic/eui';
+import { ReactWrapper } from 'enzyme';
 
 describe('DiscoverFieldSearch', () => {
   const defaultProps = {
     onChange: jest.fn(),
     value: 'test',
-    types: ['number', 'string', '_source'],
+    types: ['any', 'string', '_source'],
   };
 
   function mountComponent(props?: Props) {
     const compProps = props || defaultProps;
     const comp = mountWithIntl(<DiscoverFieldSearch {...compProps} />);
     return comp;
+  }
+
+  function findButtonGroup(component: ReactWrapper, id: string) {
+    return component.find(`[data-test-subj="${id}ButtonGroup"]`).first();
   }
 
   test('enter value', () => {
@@ -42,15 +49,21 @@ describe('DiscoverFieldSearch', () => {
     expect(defaultProps.onChange).toBeCalledTimes(1);
   });
 
-  test('change in active filters should change facet selection', () => {
-    const component = mountComponent();
+  test('change in active filters should change facet selection and call onChange', () => {
+    const onChange = jest.fn();
+    const component = mountComponent({ ...defaultProps, ...{ onChange } });
     let btn = findTestSubject(component, 'toggleFieldFilterButton');
     expect(btn.hasClass('euiFacetButton--isSelected')).toBeFalsy();
     btn.simulate('click');
-    const aggregatableSelector = findTestSubject(component, 'aggregatableSelect');
-    aggregatableSelector.simulate('change', { target: { value: 'true' } });
+    const aggregatableButtonGroup = findButtonGroup(component, 'aggregatable');
+    act(() => {
+      // @ts-ignore
+      (aggregatableButtonGroup.props() as EuiButtonGroupProps).onChange('aggregatable-true', null);
+    });
+    component.update();
     btn = findTestSubject(component, 'toggleFieldFilterButton');
     expect(btn.hasClass('euiFacetButton--isSelected')).toBe(true);
+    expect(onChange).toBeCalledWith('aggregatable', true);
   });
 
   test('change in active filters should change filters count', () => {
@@ -62,15 +75,27 @@ describe('DiscoverFieldSearch', () => {
     // no active filters
     expect(badge.text()).toEqual('0');
     // change value of aggregatable select
-    const aggregatableSelector = findTestSubject(component, 'aggregatableSelect');
-    aggregatableSelector.simulate('change', { target: { value: 'true' } });
+    const aggregatableButtonGroup = findButtonGroup(component, 'aggregatable');
+    act(() => {
+      // @ts-ignore
+      (aggregatableButtonGroup.props() as EuiButtonGroupProps).onChange('aggregatable-true', null);
+    });
+    component.update();
     expect(badge.text()).toEqual('1');
     // change value of searchable select
-    const searchableSelect = findTestSubject(component, 'searchableSelect');
-    searchableSelect.simulate('change', { target: { value: 'false' } });
+    const searchableButtonGroup = findButtonGroup(component, 'searchable');
+    act(() => {
+      // @ts-ignore
+      (searchableButtonGroup.props() as EuiButtonGroupProps).onChange('searchable-true', null);
+    });
+    component.update();
     expect(badge.text()).toEqual('2');
     // change value of searchable select
-    searchableSelect.simulate('change', { target: { value: 'any' } });
+    act(() => {
+      // @ts-ignore
+      (searchableButtonGroup.props() as EuiButtonGroupProps).onChange('searchable-any', null);
+    });
+    component.update();
     expect(badge.text()).toEqual('1');
   });
 
@@ -90,10 +115,25 @@ describe('DiscoverFieldSearch', () => {
     const component = mountComponent({ ...defaultProps, ...{ onChange } });
     const btn = findTestSubject(component, 'toggleFieldFilterButton');
     btn.simulate('click');
-    const aggregatableSelector = findTestSubject(component, 'aggregatableSelect');
+    const aggregtableButtonGroup = findButtonGroup(component, 'aggregatable');
     const missingSwitch = findTestSubject(component, 'missingSwitch');
-    aggregatableSelector.simulate('change', { target: { value: 'true' } });
+    act(() => {
+      // @ts-ignore
+      (aggregtableButtonGroup.props() as EuiButtonGroupProps).onChange('aggregatable-true', null);
+    });
     missingSwitch.simulate('change', { target: { value: false } });
     expect(onChange).toBeCalledTimes(2);
+  });
+
+  test('change in type filters triggers onChange with appropriate value', () => {
+    const onChange = jest.fn();
+    const component = mountComponent({ ...defaultProps, ...{ onChange } });
+    const btn = findTestSubject(component, 'toggleFieldFilterButton');
+    btn.simulate('click');
+    const typeSelector = findTestSubject(component, 'typeSelect');
+    typeSelector.simulate('change', { target: { value: 'string' } });
+    expect(onChange).toBeCalledWith('type', 'string');
+    typeSelector.simulate('change', { target: { value: 'any' } });
+    expect(onChange).toBeCalledWith('type', 'any');
   });
 });

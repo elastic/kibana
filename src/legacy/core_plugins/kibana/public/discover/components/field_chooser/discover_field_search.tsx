@@ -31,6 +31,7 @@ import {
   EuiSwitch,
   EuiForm,
   EuiFormRow,
+  EuiButtonGroup,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -72,11 +73,15 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
   const searchPlaceholder = i18n.translate('kbn.discover.fieldChooser.searchPlaceHolder', {
     defaultMessage: 'Search fields',
   });
-  const options = [
-    { value: 'any', text: 'any' },
-    { value: 'true', text: 'yes' },
-    { value: 'false', text: 'no' },
-  ];
+  const aggregatableLabel = i18n.translate('kbn.discover.fieldChooser.filter.aggregatableLabel', {
+    defaultMessage: 'Aggregatable',
+  });
+  const searchableLabel = i18n.translate('kbn.discover.fieldChooser.filter.searchableLabel', {
+    defaultMessage: 'Searchable',
+  });
+  const typeLabel = i18n.translate('kbn.discover.fieldChooser.filter.typeLabel', {
+    defaultMessage: 'Type',
+  });
   const typeOptions = types
     ? types.map(type => {
         return { value: type, text: type };
@@ -107,7 +112,11 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
   const applyFilterValue = (id: string, filterValue: string | boolean) => {
     switch (filterValue) {
       case 'any':
-        onChange(id, undefined);
+        if (id !== 'type') {
+          onChange(id, undefined);
+        } else {
+          onChange(id, filterValue);
+        }
         break;
       case 'true':
         onChange(id, true);
@@ -189,34 +198,52 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
     );
   };
 
+  const toggleButtons = (id: string) => {
+    return [
+      {
+        id: `${id}-any`,
+        label: 'any',
+      },
+      {
+        id: `${id}-true`,
+        label: 'yes',
+      },
+      {
+        id: `${id}-false`,
+        label: 'no',
+      },
+    ];
+  };
+
+  const buttonGroup = (id: string, legend: string) => {
+    return (
+      <EuiButtonGroup
+        legend={legend}
+        options={toggleButtons(id)}
+        idSelected={`${id}-${values[id]}`}
+        onChange={optionId => {
+          if (optionId) {
+            // @ts-ignore
+            handleValueChange(id, optionId.match(/-([a-z]+)/)[1]);
+          }
+        }}
+        buttonSize="compressed"
+        isFullWidth
+        data-test-subj={`${id}ButtonGroup`}
+      />
+    );
+  };
+
   const selectionPanel = (
     <div className="dscFieldSearch__formWrapper">
       <EuiForm data-test-subj="filterSelectionPanel">
-        <EuiFormRow
-          fullWidth
-          label={i18n.translate('kbn.discover.fieldChooser.filter.aggregatableLabel', {
-            defaultMessage: 'Aggregatable',
-          })}
-          display="columnCompressed"
-        >
-          {select('aggregatable', options, values.aggregatable)}
+        <EuiFormRow fullWidth label={aggregatableLabel} display="columnCompressed">
+          {buttonGroup('aggregatable', aggregatableLabel)}
         </EuiFormRow>
-        <EuiFormRow
-          fullWidth
-          label={i18n.translate('kbn.discover.fieldChooser.filter.searchableLabel', {
-            defaultMessage: 'Searchable',
-          })}
-          display="columnCompressed"
-        >
-          {select('searchable', options, values.searchable)}
+        <EuiFormRow fullWidth label={searchableLabel} display="columnCompressed">
+          {buttonGroup('searchable', searchableLabel)}
         </EuiFormRow>
-        <EuiFormRow
-          fullWidth
-          label={i18n.translate('kbn.discover.fieldChooser.filter.typeLabel', {
-            defaultMessage: 'Type',
-          })}
-          display="columnCompressed"
-        >
+        <EuiFormRow fullWidth label={typeLabel} display="columnCompressed">
           {select('type', typeOptions, values.type)}
         </EuiFormRow>
       </EuiForm>
