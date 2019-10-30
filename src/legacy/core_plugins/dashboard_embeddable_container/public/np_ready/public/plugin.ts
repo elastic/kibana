@@ -64,8 +64,7 @@ export class DashboardEmbeddableContainerPublicPlugin
     );
     uiActions.registerAction(changeViewAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, changeViewAction.id);
-    */
-
+    
     const factory = new DashboardContainerFactory({
       application,
       notifications,
@@ -76,8 +75,9 @@ export class DashboardEmbeddableContainerPublicPlugin
       ExitFullScreenButton: __LEGACY.ExitFullScreenButton,
       uiActions,
     });
-
+    
     embeddable.registerEmbeddableFactory(factory.type, factory);
+   */
   }
 
   public stop() {}

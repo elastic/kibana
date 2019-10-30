@@ -38,11 +38,15 @@ import { createPanelState } from './panel';
 import { DashboardPanelState } from './types';
 import { DashboardViewport } from './viewport/dashboard_viewport';
 import { Start as InspectorStartContract } from '../../../inspector/public';
+/* eslint-disable */
+import {
+  KibanaContextProvider,
+} from '../../../kibana_react/public/context/context';
 import {
   KibanaReactContext,
   KibanaReactContextValue,
-  KibanaContextProvider,
-} from '../../../kibana_react/public';
+} from '../../../kibana_react/public/context/types';
+/* eslint-enable */
 
 export interface DashboardContainerInput extends ContainerInput {
   viewMode: ViewMode;
