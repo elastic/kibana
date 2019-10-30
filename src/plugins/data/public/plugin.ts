@@ -18,19 +18,22 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
-import { AutocompleteProviderRegister } from './autocomplete_provider';
 import { DataPublicPluginSetup, DataPublicPluginStart } from './types';
-import { SearchService } from './search/search_service';
+import { AutocompleteProviderRegister } from './autocomplete_provider';
 import { getSuggestionsProvider } from './suggestions_provider';
+import { SearchService } from './search/search_service';
 import { FieldFormatRegisty, registerConverters } from './field_formats_provider';
+import { QueryService } from './query';
 
 export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPublicPluginStart> {
   private readonly autocomplete = new AutocompleteProviderRegister();
   private readonly searchService: SearchService;
   private readonly fieldFormats: FieldFormatRegisty = new FieldFormatRegisty();
+  private readonly queryService: QueryService;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.searchService = new SearchService(initializerContext);
+    this.queryService = new QueryService();
   }
 
   public setup(core: CoreSetup): DataPublicPluginSetup {
@@ -42,6 +45,9 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
       autocomplete: this.autocomplete,
       search: this.searchService.setup(core),
       fieldFormats: this.fieldFormats,
+      query: this.queryService.setup({
+        uiSettings: core.uiSettings,
+      }),
     };
   }
 
@@ -51,6 +57,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
       getSuggestions: getSuggestionsProvider(core.uiSettings, core.http),
       search: this.searchService.start(core),
       fieldFormats: this.fieldFormats,
+      query: this.queryService.start(),
     };
   }
 

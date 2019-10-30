@@ -27,10 +27,12 @@ import {
 import { ISearchSetup, ISearchStart } from './search';
 import { IGetSuggestions } from './suggestions_provider/types';
 
+import { QuerySetup, QueryStart } from './query';
 export interface DataPublicPluginSetup {
   autocomplete: AutocompletePublicPluginSetup;
   search: ISearchSetup;
   fieldFormats: FieldFormatRegisty;
+  query: QuerySetup;
 }
 
 export interface DataPublicPluginStart {
@@ -38,6 +40,7 @@ export interface DataPublicPluginStart {
   getSuggestions: IGetSuggestions;
   search: ISearchStart;
   fieldFormats: FieldFormatRegisty;
+  query: QueryStart;
 }
 
 export { IGetSuggestions } from './suggestions_provider/types';

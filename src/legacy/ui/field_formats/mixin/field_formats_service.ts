@@ -18,7 +18,7 @@
  */
 
 import { indexBy, Dictionary } from 'lodash';
-import { FieldFormat, IFieldFormatType } from '../../../../plugins/data/public';
+import { FieldFormat, IFieldFormatType } from '../../../../plugins/data/common';
 
 interface FieldFormatConfig {
   id: string;
