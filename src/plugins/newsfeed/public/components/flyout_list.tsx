@@ -1,20 +1,20 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 import React, { useCallback, useContext } from 'react';
 import {
@@ -34,25 +34,40 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiHeaderAlert } from '../../../../legacy/core_plugins/newsfeed/public/np_ready/components/header_alert/header_alert';
 import { NewsfeedContext } from './newsfeed_header_nav_button';
+import { NewsfeedItem } from '../../types';
 
 export const NewsfeedFlyout = () => {
-  const { setFlyoutVisible } = useContext(NewsfeedContext);
+  const { newsfeed, setFlyoutVisible } = useContext(NewsfeedContext);
   const closeFlyout = useCallback(() => setFlyoutVisible(false), []);
   return (
     <EuiFlyout onClose={closeFlyout} size="s" aria-labelledby="flyoutSmallTitle">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
-          <h2 id="flyoutSmallTitle">What's new</h2>
+          <h2 id="flyoutSmallTitle">
+            <FormattedMessage
+              id="newsfeed.components.flyoutList.flyoutTitle"
+              defaultMessage="What's new"
+            />
+          </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody className={'kbnNews__flyoutAlerts'}>
-        <EuiHeaderAlert
-          title="Control access to features"
-          text="Show or hide applications and features per space in Kibana."
-          action={<EuiLink href="/guides/feature-controls">Learn about feature controls</EuiLink>}
-          date="1 May 2019"
-          badge={<EuiBadge>7.1</EuiBadge>}
-        />
+        {newsfeed.map((item: NewsfeedItem) => {
+          return (
+            <EuiHeaderAlert
+              title={item.title}
+              text={item.description}
+              action={
+                <EuiLink target="_blank" href={item.linkUrl}>
+                  {item.linkText}
+                  <EuiIcon type="popout" size="s" />
+                </EuiLink>
+              }
+              date={item.title}
+              badge={<EuiBadge color="hollow">7.0</EuiBadge>}
+            />
+          );
+        })}
         <EuiHeaderAlert
           title="Kibana 7.0 is turning heads"
           text="Simplified navigation, responsive dashboards, dark mode… pick your favorite."
@@ -77,7 +92,7 @@ export const NewsfeedFlyout = () => {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText color="subdued" size="s">
-              <p>Version 7.0</p>
+              <p>Version 7.0</p>
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
