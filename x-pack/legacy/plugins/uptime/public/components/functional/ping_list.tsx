@@ -40,7 +40,7 @@ interface PingListQueryResult {
 
 interface PingListProps {
   onSelectedStatusChange: (status: string | null) => void;
-  onSelectedLocationChange: (location: EuiComboBoxOptionProps[]) => void;
+  onSelectedLocationChange: (location) => void;
   onPageCountChange: (itemCount: number) => void;
   onUpdateApp: () => void;
   pageSize: number;
@@ -53,7 +53,7 @@ interface ExpandedRowMap {
   [key: string]: JSX.Element;
 }
 
-export const BaseLocationOptions = [{ label: 'All', value: 'All' }];
+export const AllLocationOption = { text: 'All', value: '' };
 
 export const toggleDetails = (
   ping: Ping,
@@ -106,11 +106,11 @@ export const PingListComponent = ({
     },
   ];
   const locations = get<string[]>(data, 'allPings.locations');
-  const locationOptions: EuiComboBoxOptionProps[] = !locations
-    ? BaseLocationOptions
-    : BaseLocationOptions.concat(
+  const locationOptions = !locations
+    ? [AllLocationOption]
+    : [AllLocationOption].concat(
         locations.map(name => {
-          return { label: name, value: name };
+          return { text: name, value: name };
         })
       );
 
@@ -263,7 +263,7 @@ export const PingListComponent = ({
                         onChange={selected => {
                           if (typeof selected.target.value === 'string') {
                             onSelectedStatusChange(
-                              !!selected.target && selected.target.value !== ''
+                              selected.target && selected.target.value !== ''
                                 ? selected.target.value
                                 : null
                             );
@@ -279,16 +279,18 @@ export const PingListComponent = ({
                         defaultMessage: 'Location',
                       })}
                     >
-                      <EuiComboBox
-                        isClearable={false}
-                        singleSelection={{ asPlainText: true }}
-                        selectedOptions={selectedLocation}
+                      <EuiSelect
                         options={locationOptions}
+                        value={selectedLocation}
                         aria-label={i18n.translate('xpack.uptime.pingList.locationLabel', {
                           defaultMessage: 'Location',
                         })}
-                        onChange={(selectedOptions: EuiComboBoxOptionProps[]) => {
-                          onSelectedLocationChange(selectedOptions);
+                        onChange={selected => {
+                          onSelectedLocationChange(
+                            selected.target && selected.target.value !== ''
+                              ? selected.target.value
+                              : null
+                          );
                         }}
                       />
                     </EuiFormRow>

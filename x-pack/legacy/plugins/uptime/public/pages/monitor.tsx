@@ -23,7 +23,7 @@ import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { UptimeSettingsContext } from '../contexts';
 import { useUrlParams } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
-import { BaseLocationOptions } from '../components/functional/ping_list';
+import { AllLocationOption } from '../components/functional/ping_list';
 import { useTrackPageview } from '../../../infra/public';
 import { getTitle } from '../lib/helper/get_title';
 
@@ -74,16 +74,12 @@ export const MonitorPage = ({
     });
   }, [params]);
 
-  const [selectedLocation, setSelectedLocation] = useState<EuiComboBoxOptionProps[]>(
-    BaseLocationOptions
-  );
-
-  const selLocationVal = selectedLocation[0].value === 'All' ? null : selectedLocation[0].value;
+  const [selectedLocation, setSelectedLocation] = useState(null);
 
   const sharedVariables = {
     dateRangeStart,
     dateRangeEnd,
-    location: selLocationVal,
+    location: selectedLocation,
     monitorId,
   };
 

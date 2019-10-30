@@ -81,35 +81,29 @@ exports[`PingList component renders sorted list without errors 1`] = `
                   label="Location"
                   labelType="label"
                 >
-                  <EuiComboBox
+                  <EuiSelect
                     aria-label="Location"
                     compressed={false}
                     fullWidth={false}
-                    isClearable={false}
+                    hasNoInitialSelection={false}
+                    isLoading={false}
                     onChange={[Function]}
                     options={
                       Array [
                         Object {
-                          "label": "All",
-                          "value": "All",
+                          "text": "All",
+                          "value": "",
                         },
                         Object {
-                          "label": "nyc",
+                          "text": "nyc",
                           "value": "nyc",
                         },
                       ]
                     }
-                    selectedOptions={
-                      Array [
-                        Object {
-                          "label": "All",
-                          "value": "All",
-                        },
-                      ]
-                    }
-                    singleSelection={
+                    value={
                       Object {
-                        "asPlainText": true,
+                        "text": "All",
+                        "value": "",
                       }
                     }
                   />
