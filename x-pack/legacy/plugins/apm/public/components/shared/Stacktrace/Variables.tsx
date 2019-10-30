@@ -16,7 +16,6 @@ import { flattenObject } from '../../../utils/flattenObject';
 
 const VariablesContainer = styled.div`
   background: ${theme.euiColorEmptyShade};
-  border-top: 1px solid ${theme.euiColorLightShade};
   border-radius: 0 0 ${borderRadius} ${borderRadius};
   padding: ${px(units.half)} ${px(unit)};
 `;
