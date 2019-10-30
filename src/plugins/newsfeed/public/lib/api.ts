@@ -19,7 +19,7 @@
 
 import * as Rx from 'rxjs';
 import moment from 'moment';
-import { filter, mergeMap, tap } from 'rxjs/operators';
+import { catchError, filter, mergeMap, tap } from 'rxjs/operators';
 import { HttpServiceBase } from '../../../../../src/core/public';
 import { ApiItem, NewsfeedItem, FetchResult } from '../../types';
 
@@ -63,13 +63,18 @@ class NewsfeedApiDriver {
     return { previous: oldHashes, current: updatedHashes };
   }
 
-  fetchNewsfeedItems(http: HttpServiceBase): Rx.Observable<ApiItem[]> {
+  fetchNewsfeedItems(http: HttpServiceBase): Rx.Observable<ApiItem[] | null> {
     return Rx.from(
       http
         .fetch(NEWSFEED_SERVICE_URL_TEMPLATE.replace('{VERSION}', this.kibanaVersion), {
           method: 'GET',
         })
         .then(({ items }) => items)
+    ).pipe(
+      catchError(err => {
+        window.console.error(err);
+        return Rx.of(null);
+      })
     );
   }
 
@@ -133,8 +138,8 @@ export function getApi(
   return Rx.timer(0, NEWSFEED_MAIN_INTERVAL).pipe(
     filter(() => driver.shouldFetch()),
     mergeMap(() => driver.fetchNewsfeedItems(http)),
-    filter(items => items.length > 0),
+    filter(items => items != null && items.length > 0),
     tap(() => driver.updateLastFetch()),
-    mergeMap(items => driver.modelItems(items))
+    mergeMap(items => driver.modelItems(items!))
   );
 }
