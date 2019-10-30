@@ -52,6 +52,14 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     return !!this._options.customColorRamp;
   }
 
+  supportsFeatureState() {
+    return true;
+  }
+
+  isScaled() {
+    return !this.isCustomColorRamp();
+  }
+
   _getMbColor() {
     const isDynamicConfigComplete = _.has(this._options, 'field.name') && _.has(this._options, 'color');
     if (!isDynamicConfigComplete) {

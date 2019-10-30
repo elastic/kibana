@@ -22,6 +22,10 @@ export class AbstractField {
     return this._fieldName;
   }
 
+  isValid() {
+    return !!this._fieldName;
+  }
+
   async getType() {
     return AbstractField.FIELD_TYPE.STRING;
   }

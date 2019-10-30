@@ -167,7 +167,7 @@ export class VectorStyle extends AbstractStyle {
     const scaledFields = this.getDynamicPropertiesArray()
       .map(styleProperty => {
         return {
-          name: styleProperty.getFieldConfig().name,
+          name: styleProperty.getField().getName(),
           min: Infinity,
           max: -Infinity
         };

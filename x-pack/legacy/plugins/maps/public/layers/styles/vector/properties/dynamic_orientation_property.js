@@ -22,6 +22,13 @@ export class DynamicOrientationProperty extends DynamicStyleProperty {
     }
   }
 
+  supportsFeatureState() {
+    return false;
+  }
+
+  isScaled() {
+    return false;
+  }
 
 }
 

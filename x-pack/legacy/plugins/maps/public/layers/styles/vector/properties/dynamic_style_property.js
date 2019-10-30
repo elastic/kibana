@@ -23,11 +23,15 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
       return !!this._field;
     }
 
-    getFieldConfig() {
-      return this._options.field || {};
-    }
-
     getFieldOrigin() {
       return this._options.field.origin;
+    }
+
+    supportsFeatureState() {
+      return true;
+    }
+
+    isScaled() {
+      return true;
     }
 }
