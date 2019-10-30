@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { Filter } from '@kbn/es-query';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from 'src/core/public';
 import {
   IAction,
   createAction,
