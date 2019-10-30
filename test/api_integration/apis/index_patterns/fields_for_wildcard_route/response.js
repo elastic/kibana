@@ -61,8 +61,7 @@ export default function ({ getService }) {
               aggregatable: true,
               name: 'baz.keyword',
               readFromDocValues: true,
-              parent: 'baz',
-              subType: 'multi',
+              subType: { multi: { parent: 'baz' } }
             },
             {
               type: 'number',
@@ -71,6 +70,21 @@ export default function ({ getService }) {
               aggregatable: true,
               name: 'foo',
               readFromDocValues: true,
+            },
+            {
+              aggregatable: true,
+              esTypes: [
+                'keyword'
+              ],
+              name: 'nestedField.child',
+              readFromDocValues: true,
+              searchable: true,
+              subType: {
+                nested: {
+                  path: 'nestedField'
+                }
+              },
+              type: 'string',
             },
           ],
         })
@@ -124,8 +138,7 @@ export default function ({ getService }) {
               aggregatable: true,
               name: 'baz.keyword',
               readFromDocValues: true,
-              parent: 'baz',
-              subType: 'multi',
+              subType: { multi: { parent: 'baz' } }
             },
             {
               aggregatable: false,
@@ -141,6 +154,21 @@ export default function ({ getService }) {
               aggregatable: true,
               name: 'foo',
               readFromDocValues: true,
+            },
+            {
+              aggregatable: true,
+              esTypes: [
+                'keyword'
+              ],
+              name: 'nestedField.child',
+              readFromDocValues: true,
+              searchable: true,
+              subType: {
+                nested: {
+                  path: 'nestedField'
+                }
+              },
+              type: 'string',
             },
           ],
         })

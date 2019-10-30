@@ -206,8 +206,6 @@ module.exports = {
       files: ['x-pack/legacy/plugins/ml/**/*.{js,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
-        'react-hooks/rules-of-hooks': 'off',
-        'jsx-a11y/click-events-have-key-events': 'off',
       },
     },
     {
@@ -225,12 +223,6 @@ module.exports = {
     },
     {
       files: ['x-pack/legacy/plugins/snapshot_restore/**/*.{js,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
-      files: ['x-pack/legacy/plugins/transform/**/*.{js,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
       },

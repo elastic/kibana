@@ -83,7 +83,7 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
       setSavedQueries(sortedAllSavedQueries);
     };
     fetchQueries();
-  }, []);
+  }, [savedQueryService]);
 
   const savedQueryDescriptionText = i18n.translate(
     'data.search.searchBar.savedQueryDescriptionText',
