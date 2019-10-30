@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export * from './lib';
+export * from '../../../../../../plugins/dashboard_embeddable_container/public';
