@@ -34,7 +34,6 @@ export class VectorStyle extends AbstractStyle {
 
   static type = 'VECTOR';
 
-
   static createDescriptor(properties = {}) {
     return {
       type: VectorStyle.type,

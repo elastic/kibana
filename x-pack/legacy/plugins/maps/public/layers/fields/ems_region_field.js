@@ -8,6 +8,7 @@
 import { AbstractField } from './field';
 import { TooltipProperty } from '../tooltips/tooltip_property';
 
+//todo: rename to ESMFileField
 export class EMSRegionLayerField extends AbstractField {
   static type = 'EMS_REGION_LAYER';
 

@@ -7,6 +7,8 @@
 
 export class AbstractField {
 
+  //todo consider removing
+  //double check if we're actually using this consistently
   static FIELD_TYPE = {
     STRING: 'string',
     NUMBER: 'number',

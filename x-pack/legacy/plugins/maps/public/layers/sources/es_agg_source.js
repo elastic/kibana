@@ -16,6 +16,7 @@ const COUNT_PROP_NAME = 'doc_count';
 
 const AGG_DELIMITER = '_of_';
 
+//todo: extract in separate PR
 export class AbstractESAggSource extends AbstractESSource {
 
   static COUNT_PROP_LABEL = COUNT_PROP_LABEL;

@@ -7,6 +7,7 @@
 
 import { AbstractField } from './field';
 
+//todo: need to be implemented
 export class KibanaRegionField extends AbstractField {
 
   static type = 'KIBANA_REGION';
