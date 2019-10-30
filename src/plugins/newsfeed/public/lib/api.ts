@@ -28,7 +28,7 @@ const NEWSFEED_MAIN_INTERVAL = 120000; // A main interval to check for need to r
 const NEWSFEED_FETCH_INTERVAL = moment.duration(1, 'day'); // how often to actually fetch the API
 const NEWSFEED_LAST_FETCH_STORAGE_KEY = 'newsfeed.lastfetchtime';
 const NEWSFEED_HASH_SET_STORAGE_KEY = 'newsfeed.hashes';
-const NEWSFEED_SERVICE_URL_TEMPLATE = 'https://feeds.elastic.co/kibana/v7.0.0.json'; // FIXME: should act as a real template
+const NEWSFEED_SERVICE_URL_TEMPLATE = 'https://feeds.elastic.co/kibana/v{VERSION}.json';
 
 class NewsfeedApiDriver {
   constructor(private readonly kibanaVersion: string) {}
@@ -66,7 +66,7 @@ class NewsfeedApiDriver {
   fetchNewsfeedItems(http: HttpServiceBase): Rx.Observable<ApiItem[]> {
     return Rx.from(
       http
-        .fetch(NEWSFEED_SERVICE_URL_TEMPLATE.replace('VERSION', this.kibanaVersion), {
+        .fetch(NEWSFEED_SERVICE_URL_TEMPLATE.replace('{VERSION}', this.kibanaVersion), {
           method: 'GET',
         })
         .then(({ items }) => items)
