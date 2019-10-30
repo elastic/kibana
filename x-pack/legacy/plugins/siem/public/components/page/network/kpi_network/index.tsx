@@ -39,7 +39,7 @@ interface KpiNetworkProps {
 export const fieldTitleChartMapping: Readonly<StatItems[]> = [
   {
     key: 'UniqueIps',
-    index: 4,
+    index: 2,
     fields: [
       {
         key: 'uniqueSourcePrivateIps',
@@ -92,7 +92,7 @@ const fieldTitleMatrixMapping: Readonly<StatItems[]> = [
   },
   {
     key: 'uniqueFlowId',
-    index: 2,
+    index: 3,
     fields: [
       {
         key: 'uniqueFlowId',
@@ -103,7 +103,7 @@ const fieldTitleMatrixMapping: Readonly<StatItems[]> = [
   },
   {
     key: 'tlsHandshakes',
-    index: 3,
+    index: 4,
     fields: [
       {
         key: 'tlsHandshakes',
