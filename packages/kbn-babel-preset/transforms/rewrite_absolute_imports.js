@@ -18,6 +18,7 @@
  */
 
 const Path = require('path');
+const REPO_ROOT = Path.dirname(require.resolve('../../../package.json'));
 
 const t = require('babel-types');
 
@@ -32,8 +33,8 @@ module.exports = () => ({
         return;
       }
 
-      const absPath = Path.resolve(path.hub.file.opts.root, path.hub.file.opts.sourceFileName);
-      const targetPath = Path.resolve(path.hub.file.opts.root, source.node.value);
+      const absPath = Path.resolve(REPO_ROOT, path.hub.file.opts.sourceFileName);
+      const targetPath = Path.resolve(REPO_ROOT, source.node.value);
       source.replaceWith(t.stringLiteral(Path.relative(Path.dirname(absPath), targetPath)));
     }
   }
