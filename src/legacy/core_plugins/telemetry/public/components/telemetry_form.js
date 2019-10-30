@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import chrome from 'ui/chrome';
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import {
@@ -69,6 +70,10 @@ export class TelemetryForm extends Component {
   }
 
   render() {
+    if (chrome.getInjected('alwaysOptedIn')) {
+      return null;
+    }
+
     const {
       telemetryOptInProvider,
     } = this.props;
