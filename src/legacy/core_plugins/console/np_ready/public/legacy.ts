@@ -27,7 +27,6 @@ import 'brace/mode/text';
 import { npSetup, npStart } from 'ui/new_platform';
 import { I18nContext } from 'ui/i18n';
 import { ResizeChecker } from 'ui/resize_checker';
-import 'ui/autoload/styles';
 import 'ui/capabilities/route_setup';
 /* eslint-enable @kbn/eslint/no-restricted-paths */
 

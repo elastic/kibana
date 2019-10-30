@@ -22,18 +22,17 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { HomeApp } from './components/home_app';
-import { clearServices, getServices } from './kibana_services';
+import { getServices } from './kibana_services';
 
 export const renderApp = async (element: HTMLElement) => {
   const homeTitle = i18n.translate('kbn.home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
-  const { getFeatureCatalogueRegistryProvider, chrome } = getServices();
-  const directories = (await getFeatureCatalogueRegistryProvider()).inTitleOrder;
+  const { getFeatureCatalogueEntries, chrome } = getServices();
+  const directories = await getFeatureCatalogueEntries();
   chrome.setBreadcrumbs([{ text: homeTitle }]);
 
   render(<HomeApp directories={directories} />, element);
 
   return () => {
     unmountComponentAtNode(element);
-    clearServices();
   };
 };
