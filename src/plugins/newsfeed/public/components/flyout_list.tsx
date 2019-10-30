@@ -83,7 +83,7 @@ export const NewsfeedFlyout = () => {
           <EuiFlexItem grow={false}>
             <EuiText color="subdued" size="s">
               <p>
-                {i18n.translate('xpack.reporting.publicNotifier.httpErrorMessage', {
+                {i18n.translate('newsfeed.components.flyoutList.versionLabel', {
                   defaultMessage: `Version ${kibanaVersion}`,
                 })}
               </p>
