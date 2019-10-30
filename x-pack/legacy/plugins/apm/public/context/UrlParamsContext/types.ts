@@ -29,4 +29,5 @@ export type IUrlParams = {
   page?: number;
   pageSize?: number;
   serviceNodeName?: string;
+  processorEvent?: 'transaction' | 'error' | 'metric';
 } & Partial<Record<LocalUIFilterName, string>>;
