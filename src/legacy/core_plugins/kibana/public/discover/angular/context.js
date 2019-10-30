@@ -56,19 +56,20 @@ getAngularModule().config($routeProvider => {
       k7Breadcrumbs,
       controllerAs: 'contextAppRoute',
       resolve: {
-        indexPattern: function ($route, Promise) {
+        indexPattern: ($route, Promise) => {
           const indexPattern = getServices().indexPatterns.get(
             $route.current.params.indexPatternId
           );
-          return Promise.props(indexPattern);
+          return Promise.props({ ip: indexPattern });
         },
       },
       template: contextAppRouteTemplate,
     });
 });
 
-function ContextAppRouteController($routeParams, $scope, AppState, config, indexPattern, Private) {
+function ContextAppRouteController($routeParams, $scope, AppState, config, Private, $route) {
   const queryFilter = Private(FilterBarQueryFilterProvider);
+  const indexPattern = $route.current.locals.indexPattern.ip;
 
   this.state = new AppState(createDefaultAppState(config, indexPattern));
   this.state.save(true);
@@ -88,7 +89,7 @@ function ContextAppRouteController($routeParams, $scope, AppState, config, index
     },
   });
 
-  $scope.$on('$destroy', function () {
+  $scope.$on('$destroy', () => {
     updateSubsciption.unsubscribe();
   });
   this.anchorId = $routeParams.id;

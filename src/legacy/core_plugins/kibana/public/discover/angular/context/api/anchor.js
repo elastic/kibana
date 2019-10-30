@@ -22,13 +22,13 @@ import { i18n } from '@kbn/i18n';
 import { getServices } from '../../../kibana_services';
 
 const { SearchSource } = getServices();
-export function fetchAnchorProvider(indexPatterns) {
+export function fetchAnchorProvider() {
   return async function fetchAnchor(
     indexPatternId,
     anchorId,
     sort
   ) {
-    const indexPattern = await indexPatterns.get(indexPatternId);
+    const indexPattern = await getServices().indexPatterns.get(indexPatternId);
     const searchSource = new SearchSource()
       .setParent(false)
       .setField('index', indexPattern)

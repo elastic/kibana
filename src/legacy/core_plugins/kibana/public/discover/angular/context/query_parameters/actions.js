@@ -27,7 +27,7 @@ import {
 } from './constants';
 
 
-export function QueryParameterActionsProvider(indexPatterns, Private) {
+export function QueryParameterActionsProvider(Private) {
   const queryFilter = Private(getServices().FilterBarQueryFilterProvider);
   const filterGen = getFilterGenerator(queryFilter);
 
@@ -62,7 +62,7 @@ export function QueryParameterActionsProvider(indexPatterns, Private) {
     const indexPatternId = state.queryParameters.indexPatternId;
     const newFilters = filterGen.generate(field, values, operation, indexPatternId);
     queryFilter.addFilters(newFilters);
-    const indexPattern = await indexPatterns.get(indexPatternId);
+    const indexPattern = await getServices().indexPatterns.get(indexPatternId);
     indexPattern.popularizeField(field.name, 1);
   };
 

@@ -18,7 +18,7 @@
  */
 
 import { Filter } from '@kbn/es-query';
-import { IndexPatterns, IndexPattern, getServices } from '../../../kibana_services';
+import { IndexPattern, getServices } from '../../../kibana_services';
 import { reverseSortDir, SortDirection } from './utils/sorting';
 import { extractNanos, convertIsoToMillis } from './utils/date_conversion';
 import { fetchHitsInInterval } from './utils/fetch_hits_in_interval';
@@ -34,14 +34,14 @@ export interface EsHitRecord {
 }
 export type EsHitRecordList = EsHitRecord[];
 
-const { SearchSource } = getServices();
+const { SearchSource, indexPatterns } = getServices();
 
 const DAY_MILLIS = 24 * 60 * 60 * 1000;
 
 // look from 1 day up to 10000 days into the past and future
 const LOOKUP_OFFSETS = [0, 1, 7, 30, 365, 10000].map(days => days * DAY_MILLIS);
 
-function fetchContextProvider(indexPatterns: IndexPatterns) {
+function fetchContextProvider() {
   return {
     fetchSurroundingDocs,
   };
