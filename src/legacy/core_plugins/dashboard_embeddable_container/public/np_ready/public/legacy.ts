@@ -19,8 +19,6 @@
 
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 import { npSetup, npStart } from 'ui/new_platform';
-import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
-import { ExitFullScreenButton } from 'ui/exit_full_screen';
 /* eslint-enable @kbn/eslint/no-restricted-paths */
 
 import { plugin } from '.';
@@ -40,8 +38,8 @@ export const start = pluginInstance.start(npStart.core, {
   embeddable: embeddableStart,
   inspector: npStart.plugins.inspector,
   __LEGACY: {
-    SavedObjectFinder,
-    ExitFullScreenButton,
+    SavedObjectFinder: () => null,
+    ExitFullScreenButton: () => null,
   },
   uiActions: npStart.plugins.uiActions,
 });
