@@ -20,17 +20,12 @@
 import React from 'react';
 import { Subscription } from 'rxjs';
 import { PanelState } from '../../embeddable_plugin';
-import {
-  DashboardContainer,
-  DashboardReactContextValue,
-} from '../../../../../legacy/core_plugins/dashboard_embeddable_container/public/np_ready/public/lib/embeddable/dashboard_container';
+import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
 import { DashboardGrid } from '../grid';
 import { context } from '../../../../kibana_react/public';
 
 export interface DashboardViewportProps {
-  // TODO: ...
-  // container: DashboardContainer;
-  container: any;
+  container: DashboardContainer;
 }
 
 interface State {
