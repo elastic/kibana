@@ -241,7 +241,7 @@ describe('TimelinesTable', () => {
 
     expect(
       wrapper
-        .find('[id="customizablePagination"]')
+        .find('EuiTablePagination EuiPopover')
         .first()
         .exists()
     ).toBe(true);
@@ -272,7 +272,7 @@ describe('TimelinesTable', () => {
 
     expect(
       wrapper
-        .find('[id="customizablePagination"]')
+        .find('EuiTablePagination EuiPopover')
         .first()
         .exists()
     ).toBe(false);
@@ -305,7 +305,7 @@ describe('TimelinesTable', () => {
 
     expect(
       wrapper
-        .find('[id="customizablePagination"]')
+        .find('EuiTablePagination EuiPopover')
         .first()
         .text()
     ).toEqual('Rows per page: 123');
