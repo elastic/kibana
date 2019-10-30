@@ -7,7 +7,7 @@ import { performance } from 'perf_hooks';
 import { SignalHit } from '../../types';
 import { Logger } from '../../../../../../../../src/core/server';
 import { AlertServices } from '../../../../../alerting/server/types';
-import { SignalSourceHit, SignalSearchResponse, SignalAlertParams } from './types';
+import { SignalSourceHit, SignalSearchResponse, SignalAlertParams, BulkResponse } from './types';
 import { buildEventsSearchQuery } from './build_events_query';
 
 // format search_after result for signals index.
@@ -56,7 +56,7 @@ export const singleBulkIndex = async (
     buildBulkBody(doc, params),
   ]);
   const time1 = performance.now();
-  const firstResult = await service.callCluster('bulk', {
+  const firstResult: BulkResponse = await service.callCluster('bulk', {
     index: process.env.SIGNALS_INDEX || '.siem-signals-10-01-2019',
     refresh: false,
     body: bulkBody,
@@ -114,9 +114,11 @@ export const searchAfterAndBulkIndex = async (
   let size = someResult.hits.hits.length - 1;
   logger.info(`first size: ${size}`);
   let sortIds = someResult.hits.hits[0].sort;
-  if (sortIds == null) {
-    logger.warn('sortIds was empty on first search');
+  if (sortIds == null && totalHits > 0) {
+    logger.warn('sortIds was empty on first search but expected more ');
     return false;
+  } else if (sortIds == null && totalHits === 0) {
+    return true;
   }
   let sortId = sortIds[0];
   while (size < totalHits) {

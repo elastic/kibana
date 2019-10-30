@@ -117,6 +117,12 @@ export interface SignalSource {
   '@timestamp': string;
 }
 
+export interface BulkResponse {
+  took: number;
+  errors: boolean;
+  items: unknown[];
+}
+
 export type SignalSearchResponse = SearchResponse<SignalSource>;
 export type SignalSourceHit = SignalSearchResponse['hits']['hits'][0];
 
