@@ -55,6 +55,7 @@ export class DashboardEmbeddableContainerPublicPlugin
     const { application, notifications, overlays } = core;
     const { embeddable, inspector, __LEGACY, uiActions } = plugins;
 
+    /*
     const changeViewAction = new ReplacePanelAction(
       core,
       __LEGACY.SavedObjectFinder,
@@ -63,6 +64,7 @@ export class DashboardEmbeddableContainerPublicPlugin
     );
     uiActions.registerAction(changeViewAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, changeViewAction.id);
+    */
 
     const factory = new DashboardContainerFactory({
       application,

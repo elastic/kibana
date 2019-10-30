@@ -49,7 +49,6 @@ export class DashboardEmbeddableContainerPublicPlugin
   }
 
   public start(core: CoreStart, plugins: StartDependencies): Start {
-    /*
     const { application, notifications, overlays } = core;
     const { embeddable, inspector, uiActions } = plugins;
 
@@ -65,6 +64,7 @@ export class DashboardEmbeddableContainerPublicPlugin
     uiActions.registerAction(changeViewAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, changeViewAction.id);
 
+    /*
     const factory = new DashboardContainerFactory({
       application,
       notifications,
