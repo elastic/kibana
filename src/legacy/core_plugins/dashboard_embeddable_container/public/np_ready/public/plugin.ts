@@ -46,9 +46,9 @@ export class DashboardEmbeddableContainerPublicPlugin
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, { embeddable, uiActions }: SetupDependencies): Setup {
-    const expandPanelAction = new ExpandPanelAction();
-    uiActions.registerAction(expandPanelAction);
-    uiActions.attachAction(CONTEXT_MENU_TRIGGER, expandPanelAction.id);
+    // const expandPanelAction = new ExpandPanelAction();
+    // uiActions.registerAction(expandPanelAction);
+    // uiActions.attachAction(CONTEXT_MENU_TRIGGER, expandPanelAction.id);
   }
 
   public start(core: CoreStart, plugins: StartDependencies): Start {
