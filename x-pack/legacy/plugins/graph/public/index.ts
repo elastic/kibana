@@ -6,7 +6,6 @@
 
 // legacy imports currently necessary to power Graph
 // for a cutover all of these have to be resolved
-import 'uiExports/fieldFormats';
 import 'uiExports/savedObjectTypes';
 import 'uiExports/autocompleteProviders';
 import 'ui/autoload/all';

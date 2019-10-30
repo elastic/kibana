@@ -20,6 +20,7 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
+import { npStart } from 'ui/new_platform';
 import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 import {
   Axis,
@@ -36,8 +37,12 @@ import {
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { buildEsQuery, Filter, getEsQueryConfig } from '@kbn/es-query';
-import { ES_FIELD_TYPES, Query, KBN_FIELD_TYPES, FIELD_FORMAT_IDS } from 'src/plugins/data/common';
-import { npSetup } from 'ui/new_platform';
+import {
+  ES_FIELD_TYPES,
+  Query,
+  KBN_FIELD_TYPES,
+  FIELD_FORMAT_IDS,
+} from '../../../../../../src/plugins/data/public';
 import { DraggedField } from './indexpattern';
 import { DragDrop } from '../drag_drop';
 import { DatasourceDataPanelProps, DataType } from '../types';
@@ -72,8 +77,6 @@ function wrapOnDot(str?: string) {
   // without us having to draw a lot of extra DOM elements, etc
   return str ? str.replace(/\./g, '.\u200B') : '';
 }
-
-const fieldFormats = npSetup.plugins.data.fieldFormats;
 
 export function FieldItem(props: FieldItemProps) {
   const { core, field, indexPattern, highlight, exists, query, dateRange, filters } = props;
@@ -209,6 +212,7 @@ export function FieldItem(props: FieldItemProps) {
 }
 
 function FieldItemPopoverContents(props: State & FieldItemProps) {
+  const fieldFormats = npStart.plugins.data.fieldFormats;
   const { histogram, topValues, indexPattern, field, dateRange, core, sampledValues } = props;
 
   const IS_DARK_THEME = core.uiSettings.get('theme:darkMode');

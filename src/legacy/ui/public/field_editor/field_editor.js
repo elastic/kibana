@@ -35,7 +35,7 @@ import {
   toastNotifications
 } from 'ui/notify';
 
-import { npSetup } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
 
 import {
   EuiBasicTable,
@@ -81,7 +81,7 @@ import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 // This loads Ace editor's "groovy" mode, used below to highlight the script.
 import 'brace/mode/groovy';
 
-const getFieldFormats = () => npSetup.plugins.data.fieldFormats;
+const getFieldFormats = () => npStart.plugins.data.fieldFormats;
 
 export class FieldEditorComponent extends PureComponent {
   static propTypes = {

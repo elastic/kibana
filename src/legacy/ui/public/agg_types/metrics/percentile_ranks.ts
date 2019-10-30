@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { npSetup } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
 import { PercentileRanksEditor } from '../../vis/editors/default/controls/percentile_ranks';
 import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
 import { getResponseAggConfigClass, IResponseAggConfig } from './lib/get_response_agg_config_class';
@@ -31,10 +31,11 @@ import { FIELD_FORMAT_IDS, KBN_FIELD_TYPES } from '../../../../../plugins/data/p
 
 export type IPercentileRanksAggConfig = IResponseAggConfig;
 
-const fieldFormats = npSetup.plugins.data.fieldFormats;
+const getFieldFormats = () => npStart.plugins.data.fieldFormats;
 
 const valueProps = {
   makeLabel(this: IPercentileRanksAggConfig) {
+    const fieldFormats = getFieldFormats();
     const field = this.getField();
     const format =
       (field && field.format) || fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.NUMBER, []);
@@ -83,6 +84,7 @@ export const percentileRanksMetricAgg = new MetricAggType<IPercentileRanksAggCon
     return values.map((value: any) => new ValueAggConfig(value));
   },
   getFormat() {
+    const fieldFormats = getFieldFormats();
     return (
       fieldFormats.getInstance(FIELD_FORMAT_IDS.PERCENT) ||
       fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [])

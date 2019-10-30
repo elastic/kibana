@@ -20,7 +20,7 @@
 import _, { isArray, last, get } from 'lodash';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { npSetup } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
 import { createTickFormatter } from '../../lib/tick_formatter';
 import { calculateLabel } from '../../../../common/calculate_label';
 import { isSortable } from './is_sortable';
@@ -30,8 +30,10 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { METRIC_TYPES } from '../../../../common/metric_types';
 
-const fieldFormats = npSetup.plugins.data.fieldFormats;
-const DateFormat = fieldFormats.getType('date');
+const getDateFormatType = () => {
+  const fieldFormats = npStart.plugins.data.fieldFormats;
+  return fieldFormats.getType('date');
+};
 
 function getColor(rules, colorKey, value) {
   let color;
@@ -50,6 +52,9 @@ function getColor(rules, colorKey, value) {
 export class TableVis extends Component {
   constructor(props) {
     super(props);
+
+    const DateFormat = getDateFormatType();
+
     this.dateFormatter = new DateFormat({}, this.props.getConfig);
   }
 

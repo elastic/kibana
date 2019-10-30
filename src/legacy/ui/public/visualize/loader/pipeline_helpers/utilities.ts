@@ -20,7 +20,7 @@
 import { i18n } from '@kbn/i18n';
 import { identity } from 'lodash';
 import { AggConfig, Vis } from 'ui/vis';
-import { npSetup } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
 import { SerializedFieldFormat } from 'src/plugins/expressions/common/expressions/types/common';
 
 import { FIELD_FORMAT_IDS, FieldFormat } from '../../../../../../plugins/data/public';
@@ -50,7 +50,7 @@ const getConfig = (...args: any[]): any => config.get(...args);
 const getDefaultFieldFormat = () => (({ convert: identity } as unknown) as FieldFormat);
 
 const getFieldFormat = (id?: FIELD_FORMAT_IDS | string, params: object = {}): FieldFormat => {
-  const fieldFormats = npSetup.plugins.data.fieldFormats;
+  const fieldFormats = npStart.plugins.data.fieldFormats;
   const Format = fieldFormats.getType(id as FIELD_FORMAT_IDS);
 
   if (Format) {
@@ -99,6 +99,7 @@ export const getFormat: FormatFactory = (mapping = {}): any => {
     return getDefaultFieldFormat();
   }
   const { id } = mapping;
+  const getUISettings = npStart.core.uiSettings.get;
   if (id === 'range') {
     const RangeFormat = FieldFormat.from((range: any) => {
       const format = getFieldFormat(id, mapping.params);
@@ -114,21 +115,21 @@ export const getFormat: FormatFactory = (mapping = {}): any => {
         },
       });
     });
-    return new RangeFormat({}, npSetup.core.uiSettings.get);
+    return new RangeFormat({}, getUISettings);
   } else if (id === 'date_range') {
     const nestedFormatter = mapping.params as SerializedFieldFormat;
     const DateRangeFormat = FieldFormat.from((range: DateRangeKey) => {
       const format = getFieldFormat(nestedFormatter.id, nestedFormatter.params);
       return dateRange.toString(range, format.convert.bind(format));
     });
-    return new DateRangeFormat({}, npSetup.core.uiSettings.get);
+    return new DateRangeFormat({}, getUISettings);
   } else if (id === 'ip_range') {
     const nestedFormatter = mapping.params as SerializedFieldFormat;
     const IpRangeFormat = FieldFormat.from((range: IpRangeKey) => {
       const format = getFieldFormat(nestedFormatter.id, nestedFormatter.params);
       return ipRange.toString(range, format.convert.bind(format));
     });
-    return new IpRangeFormat({}, npSetup.core.uiSettings.get);
+    return new IpRangeFormat({}, getUISettings);
   } else if (isTermsFieldFormat(mapping) && mapping.params) {
     const params = mapping.params;
     return {

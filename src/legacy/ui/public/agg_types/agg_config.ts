@@ -26,7 +26,7 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { npSetup } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
 import { AggType } from './agg_type';
 import { FieldParamType } from './param_types/field';
 import { AggGroupNames } from '../vis/editors/default/agg_groups';
@@ -381,7 +381,7 @@ export class AggConfig {
   }
 
   fieldOwnFormatter(contentType?: ContentType, defaultFormat?: any) {
-    const fieldFormats = npSetup.plugins.data.fieldFormats;
+    const fieldFormats = npStart.plugins.data.fieldFormats;
     const field = this.getField();
     let format = field && field.format;
     if (!format) format = defaultFormat;

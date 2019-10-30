@@ -9,7 +9,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
 import chrome from 'ui/chrome';
-import { npSetup } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
 
 import { timeBucketsCalcAutoIntervalProvider } from './calc_auto_interval';
 import { parseInterval } from '../../common/util/parse_interval';
@@ -316,7 +316,7 @@ TimeBuckets.prototype.getScaledDateFormat = function () {
 };
 
 TimeBuckets.prototype.getScaledDateFormatter = function () {
-  const fieldFormats = npSetup.plugins.data.fieldFormats;
+  const fieldFormats = npStart.plugins.data.fieldFormats;
   const DateFieldFormat = fieldFormats.getType('date');
   return new DateFieldFormat({
     pattern: this.getScaledDateFormat()

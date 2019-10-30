@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import moment from 'moment';
 import chrome from '../chrome';
-import { npSetup } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
 import { parseInterval } from '../utils/parse_interval';
 import { calcAutoIntervalLessThan, calcAutoIntervalNear } from './calc_auto_interval';
 import {
@@ -29,7 +29,6 @@ import {
 } from './calc_es_interval';
 
 const config = chrome.getUiSettingsClient();
-const fieldFormats = npSetup.plugins.data.fieldFormats;
 
 const getConfig = (...args) => config.get(...args);
 
@@ -312,7 +311,9 @@ TimeBuckets.prototype.getScaledDateFormat = function () {
 };
 
 TimeBuckets.prototype.getScaledDateFormatter = function () {
+  const fieldFormats = npStart.plugins.data.fieldFormats;
   const DateFieldFormat = fieldFormats.getType('date');
+
   return new DateFieldFormat({
     pattern: this.getScaledDateFormat()
   }, getConfig);

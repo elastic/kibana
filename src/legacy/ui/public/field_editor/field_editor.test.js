@@ -20,7 +20,7 @@
 jest.mock('ui/kfetch', () => ({}));
 
 import React from 'react';
-import { npSetup } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 jest.mock('brace/mode/groovy', () => ({}));
@@ -116,8 +116,8 @@ describe('FieldEditor', () => {
       fields,
     };
 
-    npSetup.plugins.data.fieldFormats.getDefaultType = jest.fn(() => Format);
-    npSetup.plugins.data.fieldFormats.getByFieldType = jest.fn((fieldType) => {
+    npStart.plugins.data.fieldFormats.getDefaultType = jest.fn(() => Format);
+    npStart.plugins.data.fieldFormats.getByFieldType = jest.fn((fieldType) => {
       if(fieldType === 'number') {
         return [Format];
       }

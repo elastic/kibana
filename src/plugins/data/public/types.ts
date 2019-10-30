@@ -17,17 +17,16 @@
  * under the License.
  */
 
-export * from './autocomplete_provider/types';
-
 import {
   AutocompletePublicPluginSetup,
   AutocompletePublicPluginStart,
-  FieldFormatRegisty,
-} from '.';
+} from './autocomplete_provider/types';
+
+import { FieldFormatRegisty } from './field_formats_provider';
 import { ISearchSetup, ISearchStart } from './search';
 import { IGetSuggestions } from './suggestions_provider/types';
-
 import { QuerySetup, QueryStart } from './query';
+
 export interface DataPublicPluginSetup {
   autocomplete: AutocompletePublicPluginSetup;
   search: ISearchSetup;
@@ -43,4 +42,5 @@ export interface DataPublicPluginStart {
   query: QueryStart;
 }
 
+export * from './autocomplete_provider/types';
 export { IGetSuggestions } from './suggestions_provider/types';
