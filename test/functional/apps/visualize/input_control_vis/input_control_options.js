@@ -133,13 +133,13 @@ export default function ({ getService, getPageObjects }) {
     describe('updateFiltersOnChange is true', () => {
       before(async () => {
         await PageObjects.visualize.clickVisEditorTab('options');
-        await PageObjects.visualize.checkCheckbox('inputControlEditorUpdateFiltersOnChangeCheckbox');
+        await PageObjects.visualize.checkSwitch('inputControlEditorUpdateFiltersOnChangeCheckbox');
         await PageObjects.visualize.clickGo();
       });
 
       after(async () => {
         await PageObjects.visualize.clickVisEditorTab('options');
-        await PageObjects.visualize.uncheckCheckbox('inputControlEditorUpdateFiltersOnChangeCheckbox');
+        await PageObjects.visualize.uncheckSwitch('inputControlEditorUpdateFiltersOnChangeCheckbox');
         await PageObjects.visualize.clickGo();
       });
 

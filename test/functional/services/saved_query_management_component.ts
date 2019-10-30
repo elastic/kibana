@@ -118,15 +118,17 @@ export function SavedQueryManagementComponentProvider({ getService }: FtrProvide
       await testSubjects.setValue('saveQueryFormDescription', description);
 
       const currentIncludeFiltersValue =
-        (await testSubjects.getAttribute('saveQueryFormIncludeFiltersOption', 'checked')) ===
+        (await testSubjects.getAttribute('saveQueryFormIncludeFiltersOption', 'aria-checked')) ===
         'true';
       if (currentIncludeFiltersValue !== includeFilters) {
         await testSubjects.click('saveQueryFormIncludeFiltersOption');
       }
 
       const currentIncludeTimeFilterValue =
-        (await testSubjects.getAttribute('saveQueryFormIncludeTimeFilterOption', 'checked')) ===
-        'true';
+        (await testSubjects.getAttribute(
+          'saveQueryFormIncludeTimeFilterOption',
+          'aria-checked'
+        )) === 'true';
       if (currentIncludeTimeFilterValue !== includeTimeFilter) {
         await testSubjects.click('saveQueryFormIncludeTimeFilterOption');
       }
