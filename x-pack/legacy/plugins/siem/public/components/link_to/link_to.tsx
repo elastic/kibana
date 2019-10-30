@@ -29,35 +29,34 @@ interface LinkToPageProps {
 export const LinkToPage = pure<LinkToPageProps>(({ match }) => (
   <Switch>
     <Route
-      path={`${match.url}/:pageName(${SiemPageName.overview})`}
       component={RedirectToOverviewPage}
+      path={`${match.url}/:pageName(${SiemPageName.overview})`}
     />
     <Route
+      component={RedirectToHostsPage}
       exact
       path={`${match.url}/:pageName(${SiemPageName.hosts})`}
-      component={RedirectToHostsPage}
     />
     <Route
+      component={RedirectToHostsPage}
       path={`${match.url}/:pageName(${SiemPageName.hosts})/:tabName(${HostsTableType.hosts}|${HostsTableType.authentications}|${HostsTableType.uncommonProcesses}|${HostsTableType.anomalies}|${HostsTableType.events})`}
-      component={RedirectToHostsPage}
-      path={`${match.url}/:pageName(hosts)/:tabName(${HostsTableType.hosts}|${HostsTableType.authentications}|${HostsTableType.uncommonProcesses}|${HostsTableType.anomalies}|${HostsTableType.events})`}
     />
     <Route
+      component={RedirectToHostDetailsPage}
       path={`${match.url}/:pageName(${SiemPageName.hosts})/:detailName/:tabName(${HostsTableType.authentications}|${HostsTableType.uncommonProcesses}|${HostsTableType.anomalies}|${HostsTableType.events})`}
-      component={RedirectToHostDetailsPage}
-      path={`${match.url}/:pageName(hosts)/:detailName/:tabName(${HostsTableType.authentications}|${HostsTableType.uncommonProcesses}|${HostsTableType.anomalies}|${HostsTableType.events})`}
     />
     <Route
+      component={RedirectToHostDetailsPage}
       path={`${match.url}/:pageName(${SiemPageName.hosts})/:detailName`}
-      component={RedirectToHostDetailsPage}
-      path={`${match.url}/:pageName(hosts)/:detailName`}
     />
-
     <Route
+      component={RedirectToNetworkPage}
       exact
       path={`${match.url}/:pageName(${SiemPageName.network})`}
+    />
+    <Route
       component={RedirectToNetworkPage}
-      path={`${match.url}/:pageName(network)/ip/:detailName`}
+      path={`${match.url}/:pageName(${SiemPageName.network})/ip/:detailName`}
     />
     <Route
       component={RedirectToDetectionEnginePage}
@@ -84,12 +83,8 @@ export const LinkToPage = pure<LinkToPageProps>(({ match }) => (
       path={`${match.url}/:pageName(${SiemPageName.detectionEngine})/rules/rule-details/edit-rule`}
     />
     <Route
-      path={`${match.url}/:pageName(${SiemPageName.network})/ip/:detailName`}
-      component={RedirectToNetworkPage}
-    />
-    <Route
-      path={`${match.url}/:pageName(${SiemPageName.timelines})`}
       component={RedirectToTimelinesPage}
+      path={`${match.url}/:pageName(${SiemPageName.timelines})`}
     />
     <Redirect to="/" />
   </Switch>
