@@ -125,7 +125,7 @@ export const TimelinesTable = pure<TimelinesTableProps>(
 
     const sorting = {
       sort: {
-        field: sortField,
+        field: sortField as keyof OpenTimelineResult,
         direction: sortDirection,
       },
     };

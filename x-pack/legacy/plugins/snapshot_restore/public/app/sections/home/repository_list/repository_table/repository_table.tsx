@@ -171,7 +171,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
   const sorting = {
     sort: {
       field: 'name',
-      direction: 'asc',
+      direction: 'asc' as const,
     },
   };
 
@@ -265,7 +265,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
     },
     filters: [
       {
-        type: 'field_value_selection',
+        type: 'field_value_selection' as const,
         field: 'type',
         name: i18n.translate('xpack.snapshotRestore.repositoryList.table.typeFilterLabel', {
           defaultMessage: 'Type',

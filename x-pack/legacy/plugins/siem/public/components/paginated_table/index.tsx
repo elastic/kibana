@@ -14,12 +14,12 @@ import {
   EuiLoadingContent,
   EuiPagination,
   EuiPopover,
+  Direction,
 } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { memo, useState, useEffect } from 'react';
 import styled, { css } from 'styled-components';
 
-import { Direction } from '../../graphql/types';
 import { AuthTableColumns } from '../page/hosts/authentications_table';
 import { HostsTableColumns } from '../page/hosts/hosts_table';
 import { NetworkDnsColumns } from '../page/network/network_dns_table/columns';
@@ -252,10 +252,12 @@ export const PaginatedTable = memo<SiemTables>(
         ) : (
           <>
             <BasicTable
+              // @ts-ignore `Columns` interface differs from EUI's `column` type and is used all over this plugin, so ignore the differences instead of refactoring a lot of code
               columns={columns}
               compressed
               items={pageOfItems}
               onChange={onChange}
+              // @ts-ignore TS complains sorting.field is type `never`
               sorting={
                 sorting
                   ? {
@@ -264,7 +266,7 @@ export const PaginatedTable = memo<SiemTables>(
                         direction: sorting.direction,
                       },
                     }
-                  : null
+                  : undefined
               }
             />
             <FooterAction>
