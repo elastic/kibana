@@ -172,6 +172,7 @@ export async function changeLayerIndexPattern({
   state,
   setState,
   onError,
+  replaceIfPossible,
 }: {
   indexPatternId: string;
   layerId: string;
@@ -179,6 +180,7 @@ export async function changeLayerIndexPattern({
   state: IndexPatternPrivateState;
   setState: SetState;
   onError: ErrorHandler;
+  replaceIfPossible?: boolean;
 }) {
   try {
     const indexPatterns = await loadIndexPatterns({
@@ -197,6 +199,7 @@ export async function changeLayerIndexPattern({
         ...s.indexPatterns,
         [indexPatternId]: indexPatterns[indexPatternId],
       },
+      currentIndexPatternId: replaceIfPossible ? indexPatternId : s.currentIndexPatternId,
     }));
   } catch (err) {
     onError(err);
@@ -212,10 +215,14 @@ async function loadIndexPatternRefs(
     perPage: 10000,
   });
 
-  return result.savedObjects.map(o => ({
-    id: String(o.id),
-    title: (o.attributes as { title: string }).title,
-  }));
+  return result.savedObjects
+    .map(o => ({
+      id: String(o.id),
+      title: (o.attributes as { title: string }).title,
+    }))
+    .sort((a, b) => {
+      return a.title.localeCompare(b.title);
+    });
 }
 
 export async function syncExistingFields({
