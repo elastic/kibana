@@ -64,7 +64,7 @@ export const ActionsPanel: FC<Props> = ({ indexPattern }) => {
         </EuiText>
         <EuiSpacer size="m" />
         <EuiFlexGroup gutterSize="l" responsive={true} wrap={true}>
-          <DataRecognizer indexPattern={indexPattern} results={recognizerResults}></DataRecognizer>
+          <DataRecognizer indexPattern={indexPattern} results={recognizerResults} />
         </EuiFlexGroup>
         <EuiSpacer size="l" />
       </div>
