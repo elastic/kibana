@@ -219,7 +219,11 @@ export const TransformList: FC<Props> = ({
             </h2>
           }
           actions={[
-            <EuiButtonEmpty onClick={onCreateTransform} isDisabled={disabled}>
+            <EuiButtonEmpty
+              onClick={onCreateTransform}
+              isDisabled={disabled}
+              data-test-subj="transformCreateFirstButton"
+            >
               {i18n.translate('xpack.transform.list.emptyPromptButtonText', {
                 defaultMessage: 'Create your first transform',
               })}
@@ -375,25 +379,34 @@ export const TransformList: FC<Props> = ({
 
   return (
     <Fragment>
-      <ProgressBar isLoading={isLoading || transformsLoading} />
-      <TransformTable
-        allowNeutralSort={false}
-        className="transform__TransformTable"
-        columns={columns}
-        error={searchError}
-        hasActions={false}
-        isExpandable={true}
-        isSelectable={false}
-        items={filterActive ? filteredTransforms : transforms}
-        itemId={TRANSFORM_LIST_COLUMN.ID}
-        itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-        onTableChange={onTableChange}
-        pagination={pagination}
-        selection={selection}
-        sorting={sorting}
-        search={search}
-        data-test-subj="transformTableTransforms"
-      />
+      <div data-test-subj="transformListTableContainer">
+        <ProgressBar isLoading={isLoading || transformsLoading} />
+        <TransformTable
+          allowNeutralSort={false}
+          className="transform__TransformTable"
+          columns={columns}
+          error={searchError}
+          hasActions={false}
+          isExpandable={true}
+          isSelectable={false}
+          items={filterActive ? filteredTransforms : transforms}
+          itemId={TRANSFORM_LIST_COLUMN.ID}
+          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+          onTableChange={onTableChange}
+          pagination={pagination}
+          rowProps={item => ({
+            'data-test-subj': `transformListRow row-${item.id}`,
+          })}
+          selection={selection}
+          sorting={sorting}
+          search={search}
+          data-test-subj={
+            isLoading || transformsLoading
+              ? 'transformListTable loading'
+              : 'transformListTable loaded'
+          }
+        />
+      </div>
     </Fragment>
   );
 };

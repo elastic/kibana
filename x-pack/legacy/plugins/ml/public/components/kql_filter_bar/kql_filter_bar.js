@@ -90,7 +90,7 @@ export class KqlFilterBar extends Component {
 
   render() {
     const { error } = this.state;
-    const { initialValue, placeholder, valueExternal } = this.props;
+    const { initialValue, placeholder, valueExternal, testSubj } = this.props;
 
     return (
       <Fragment>
@@ -103,6 +103,7 @@ export class KqlFilterBar extends Component {
           onSubmit={this.onSubmit}
           suggestions={this.state.suggestions}
           valueExternal={valueExternal}
+          testSubj={testSubj}
         />
         { error &&
           <EuiCallOut color="danger">
@@ -118,6 +119,7 @@ KqlFilterBar.propTypes = {
   initialValue: PropTypes.string,
   onSubmit: PropTypes.func.isRequired,
   placeholder: PropTypes.string,
-  valueExternal: PropTypes.string
+  valueExternal: PropTypes.string,
+  testSubj: PropTypes.string,
 };
 

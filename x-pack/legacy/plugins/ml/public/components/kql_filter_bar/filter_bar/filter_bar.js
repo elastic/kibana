@@ -178,6 +178,7 @@ export class FilterBar extends Component {
             onClick={this.onClickInput}
             autoComplete="off"
             spellCheck={false}
+            data-test-subj={this.props.testSubj}
           />
 
           {this.props.isLoading && (
@@ -213,12 +214,14 @@ FilterBar.propTypes = {
   placeholder: PropTypes.string,
   onSubmit: PropTypes.func.isRequired,
   valueExternal: PropTypes.string,
-  suggestions: PropTypes.array.isRequired
+  suggestions: PropTypes.array.isRequired,
+  testSubj: PropTypes.string,
 };
 
 FilterBar.defaultProps = {
   isLoading: false,
   disabled: false,
   placeholder: 'tag : engineering OR tag : marketing',
-  suggestions: []
+  suggestions: [],
+  testSubj: undefined,
 };

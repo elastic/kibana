@@ -31,6 +31,7 @@ export interface FieldDataColumnType {
   render?: RenderFunc;
   footer?: string | ReactElement | FooterFunc;
   textOnly?: boolean;
+  'data-test-subj'?: string;
 }
 
 export interface ComputedColumnType {
@@ -40,6 +41,7 @@ export interface ComputedColumnType {
   sortable?: (item: Item) => any;
   width?: string;
   truncateText?: boolean;
+  'data-test-subj'?: string;
 }
 
 type ICON_TYPES = any;
@@ -183,7 +185,7 @@ export type EuiInMemoryTableProps = CommonProps & {
   selection?: SelectionType;
   itemId?: ItemIdType;
   itemIdToExpandedRowMap?: Record<string, Item>;
-  rowProps?: () => void | Record<string, any>;
+  rowProps?: (item: Item) => void | Record<string, any>;
   cellProps?: () => void | Record<string, any>;
   onTableChange?: (arg: OnTableChangeArg) => void;
 };
