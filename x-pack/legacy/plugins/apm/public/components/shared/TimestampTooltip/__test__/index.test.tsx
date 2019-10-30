@@ -7,7 +7,11 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 import moment from 'moment-timezone';
-import { TimestampTooltip, asAbsoluteTime } from '../index';
+import {
+  TimestampTooltip,
+  asAbsoluteTime,
+  asRelativeDateRange
+} from '../index';
 import { mockNow } from '../../../../utils/testHelpers';
 
 describe('asAbsoluteTime', () => {
@@ -46,16 +50,6 @@ describe('asAbsoluteTime', () => {
     expect(asAbsoluteTime({ time: timeWithoutDST })).toBe(
       'Dec 1, 2019, 13:00:00.000 (UTC+1)'
     );
-  });
-  it('should show end time when available', () => {
-    moment.tz.setDefault('Europe/Copenhagen');
-    expect(
-      asAbsoluteTime({
-        time: 1572266880000,
-        endTime: 1572272640000,
-        precision: 'minutes'
-      })
-    ).toBe('Oct 28, 2019, 13:48 - 15:24 (UTC+1)');
   });
 });
 
@@ -114,5 +108,32 @@ describe('TimestampTooltip', () => {
         .find('EuiToolTip')
         .prop('content')
     ).toBe('Oct 10, 2019 (UTC-7)');
+  });
+});
+
+describe('asRelativeDateRange', () => {
+  it('should return the range formatted with minutes precision', () => {
+    moment.tz.setDefault('Europe/Copenhagen');
+    expect(asRelativeDateRange(1572266880000, 1572272640000, 'minutes')).toBe(
+      'Oct 28, 2019, 13:48 - 15:24 (UTC+1)'
+    );
+  });
+  it('should return the range formatted with seconds precision', () => {
+    moment.tz.setDefault('Europe/Copenhagen');
+    expect(asRelativeDateRange(1572266880000, 1572272640000, 'seconds')).toBe(
+      'Oct 28, 2019, 13:48:00 - 15:24:00 (UTC+1)'
+    );
+  });
+  it('should return the range formatted with milliseconds precision', () => {
+    moment.tz.setDefault('Europe/Copenhagen');
+    expect(
+      asRelativeDateRange(1572266880000, 1572272640000, 'milliseconds')
+    ).toBe('Oct 28, 2019, 13:48:00.000 - 15:24:00.000 (UTC+1)');
+  });
+  it('should return the range formatted with milliseconds precision and minus for timezones with negative UTC offset', () => {
+    moment.tz.setDefault('America/Los_Angeles');
+    expect(
+      asRelativeDateRange(1572266880000, 1572272640000, 'milliseconds')
+    ).toBe('Oct 28, 2019, 05:48:00.000 - 07:24:00.000 (UTC-7)');
   });
 });

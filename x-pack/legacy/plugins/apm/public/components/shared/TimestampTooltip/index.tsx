@@ -12,15 +12,14 @@ interface Props {
    * timestamp in milliseconds
    */
   time: number;
-  endTime?: number;
   precision?: 'days' | 'minutes' | 'seconds' | 'milliseconds';
 }
 
 function getPreciseTime(
   precision: Props['precision'],
-  hasSeparator: boolean = true
+  withSeparator: boolean = true
 ) {
-  const separator = hasSeparator ? ', ' : '';
+  const separator = withSeparator ? ', ' : '';
   switch (precision) {
     case 'days':
       return '';
@@ -37,33 +36,61 @@ function withLeadingPlus(value: number) {
   return value > 0 ? `+${value}` : value;
 }
 
-export function asAbsoluteTime({
-  time,
-  endTime,
-  precision = 'milliseconds'
-}: Props) {
-  const momentTime = moment(time);
+/**
+ * Returns the timezone set on momentTime.
+ * (UTC+offset) when offset if bigger than 0.
+ * (UTC-offset) when offset if lower than 0.
+ * @param momentTime Moment
+ */
+function formatTimezone(momentTime: moment.Moment) {
   const utcOffsetHours = momentTime.utcOffset() / 60;
   const utcOffsetFormatted = Number.isInteger(utcOffsetHours)
     ? withLeadingPlus(utcOffsetHours)
     : 'Z';
+  return momentTime.format(`(UTC${utcOffsetFormatted})`);
+}
 
-  const formattedStartTime = momentTime.format(
-    `MMM D, YYYY${getPreciseTime(precision)}`
+export function asAbsoluteTime({ time, precision = 'milliseconds' }: Props) {
+  const momentTime = moment(time);
+  const formattedTz = formatTimezone(momentTime);
+
+  return momentTime.format(
+    `MMM D, YYYY${getPreciseTime(precision)} ${formattedTz}`
   );
+}
 
-  const formattedTz = momentTime.format(`(UTC${utcOffsetFormatted})`);
+/**
+ *
+ * Format start and end times returning a formatted value based on the precision time:
+ *
+ * | precision time |           returned value                         |
+ * | -------------- |:------------------------------------------------:|
+ * | minutes        | MMM D, YYYY, 00:00 - 01:00 (UTC+1)               |
+ * | seconds        | MMM D, YYYY, 00:00:00 - 01:00:00 (UTC+1)         |
+ * | milliseconds   | MMM D, YYYY, 00:00:00.000 - 01:00:00.000 (UTC+1) |
+ *
+ * @param start timestamp
+ * @param end timestamp
+ * @param precision 'minutes' | 'seconds' | 'milliseconds'
+ */
+export function asRelativeDateRange(
+  start: number,
+  end: number,
+  precision: Exclude<Props['precision'], 'days'>
+) {
+  const precisionFormat = getPreciseTime(precision, false);
 
-  // Format as range
-  if (endTime) {
-    const formattedEndTime = moment(endTime).format(
-      getPreciseTime(precision, false)
-    );
-    return `${formattedStartTime} - ${formattedEndTime} ${formattedTz}`;
-  }
+  const momentStartTime = moment(start);
+  const momentEndTime = moment(end);
 
-  // format as single timezone
-  return `${formattedStartTime} ${formattedTz}`;
+  const formattedTz = formatTimezone(momentStartTime);
+
+  const formattedStartTime = momentStartTime.format(
+    `MMM D, YYYY, ${precisionFormat}`
+  );
+  const formattedEndTime = momentEndTime.format(precisionFormat);
+
+  return `${formattedStartTime} - ${formattedEndTime} ${formattedTz}`;
 }
 
 export function TimestampTooltip({ time, precision = 'milliseconds' }: Props) {
