@@ -22,32 +22,33 @@ import { ElasticsearchConfig, config } from './elasticsearch_config';
 test('set correct defaults', () => {
   const configValue = new ElasticsearchConfig(config.schema.validate({}));
   expect(configValue).toMatchInlineSnapshot(`
-ElasticsearchConfig {
-  "apiVersion": "7.x",
-  "customHeaders": Object {},
-  "healthCheckDelay": "PT2.5S",
-  "hosts": Array [
-    "http://localhost:9200",
-  ],
-  "logQueries": false,
-  "password": undefined,
-  "pingTimeout": "PT30S",
-  "requestHeadersWhitelist": Array [
-    "authorization",
-  ],
-  "requestTimeout": "PT30S",
-  "shardTimeout": "PT30S",
-  "sniffInterval": false,
-  "sniffOnConnectionFault": false,
-  "sniffOnStart": false,
-  "ssl": Object {
-    "alwaysPresentCertificate": true,
-    "certificateAuthorities": undefined,
-    "verificationMode": "full",
-  },
-  "username": undefined,
-}
-`);
+    ElasticsearchConfig {
+      "apiVersion": "7.x",
+      "customHeaders": Object {},
+      "healthCheckDelay": "PT2.5S",
+      "hosts": Array [
+        "http://localhost:9200",
+      ],
+      "ignoreVersionMismatch": false,
+      "logQueries": false,
+      "password": undefined,
+      "pingTimeout": "PT30S",
+      "requestHeadersWhitelist": Array [
+        "authorization",
+      ],
+      "requestTimeout": "PT30S",
+      "shardTimeout": "PT30S",
+      "sniffInterval": false,
+      "sniffOnConnectionFault": false,
+      "sniffOnStart": false,
+      "ssl": Object {
+        "alwaysPresentCertificate": true,
+        "certificateAuthorities": undefined,
+        "verificationMode": "full",
+      },
+      "username": undefined,
+    }
+  `);
 });
 
 test('#hosts accepts both string and array of strings', () => {
