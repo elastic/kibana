@@ -19,7 +19,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('Loads the app', async () => {
       await log.debug('Checking for section header');
-      const headerText = await (await pageObjects.apiKeys.noAPIKeysHeading()).getText();
+      const headerText = await (await pageObjects.apiKeys.noAPIKeysHeading()).getVisibleText();
       expect(headerText).to.be('No API Keys');
 
       const goToConsoleButton = await pageObjects.apiKeys.goToConsoleButton();

@@ -13,7 +13,7 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
     async noAPIKeysHeading() {
       return await testSubjects.find('NoApiKeysHeader');
     },
-    async createPolicyButton() {
+    async goToConsoleButton() {
       return await testSubjects.find('goToConsoleButton');
     },
   };

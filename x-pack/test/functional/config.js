@@ -68,7 +68,9 @@ export default async function ({ readConfigFile }) {
     esTestCluster: {
       license: 'trial',
       from: 'snapshot',
-      serverArgs: ['xpack.security.authc.api_key.enabled=true'],
+      serverArgs: [
+        '--xpack.security.authc.api_key.enabled=true'
+      ],
     },
 
     kbnTestServer: {
