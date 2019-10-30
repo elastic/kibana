@@ -21,12 +21,7 @@ import * as Rx from 'rxjs';
 import { catchError, takeUntil } from 'rxjs/operators';
 import ReactDOM from 'react-dom';
 import React from 'react';
-import {
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-} from '../../../../src/core/public';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { getApi } from './lib/api';
 import { NewsfeedNavButton } from './components/newsfeed_header_nav_button';
 
@@ -34,9 +29,12 @@ export type Setup = void;
 export type Start = void;
 
 export class NewsfeedPublicPlugin implements Plugin<Setup, Start> {
+  private readonly kibanaVersion: string;
   private readonly stop$ = new Rx.ReplaySubject(1);
 
-  constructor(initializerContext: PluginInitializerContext) {}
+  constructor(initializerContext: PluginInitializerContext) {
+    this.kibanaVersion = initializerContext.env.packageInfo.version;
+  }
 
   public setup(core: CoreSetup): Setup {}
 
@@ -52,7 +50,7 @@ export class NewsfeedPublicPlugin implements Plugin<Setup, Start> {
     });
 
     const { http } = core;
-    const api$ = getApi(http).pipe(
+    const api$ = getApi(http, this.kibanaVersion).pipe(
       takeUntil(this.stop$), // stop the interval when stop method is called
       catchError(() => {
         // show a message to try again later?
