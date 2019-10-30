@@ -101,7 +101,7 @@ export class AutocompleteField extends React.Component<
     }
   }
 
-  public componentDidUpdate(prevProps: AutocompleteFieldProps, prevState: AutocompleteFieldState) {
+  public componentDidUpdate(prevProps: AutocompleteFieldProps) {
     const hasNewValue = prevProps.value !== this.props.value;
     const hasNewSuggestions = prevProps.suggestions !== this.props.suggestions;
 
@@ -314,7 +314,7 @@ const AutocompleteContainer = euiStyled.div`
   position: relative;
 `;
 
-const SuggestionsPanel = euiStyled(EuiPanel).attrs(props => ({
+const SuggestionsPanel = euiStyled(EuiPanel).attrs(() => ({
   paddingSize: 'none',
   hasShadow: true,
 }))`

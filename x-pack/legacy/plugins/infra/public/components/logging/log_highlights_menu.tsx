@@ -149,10 +149,10 @@ const goToNextHighlightLabel = i18n.translate(
   }
 );
 
-const ActiveHighlightsIndicator = euiStyled(EuiIcon).attrs(props => ({
+const ActiveHighlightsIndicator = euiStyled(EuiIcon).attrs(({ theme }) => ({
   type: 'checkInCircleFilled',
   size: 'm',
-  color: props.theme.eui.euiColorAccent,
+  color: theme.eui.euiColorAccent,
 }))`
   padding-left: ${props => props.theme.eui.paddingSizes.xs};
 `;

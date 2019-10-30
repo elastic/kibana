@@ -277,7 +277,7 @@ const AutocompleteContainer = styled.div`
   position: relative;
 `;
 
-const SuggestionsPanel = styled(EuiPanel).attrs(props => ({
+const SuggestionsPanel = styled(EuiPanel).attrs(() => ({
   paddingSize: 'none',
   hasShadow: true,
 }))`

@@ -322,7 +322,7 @@ const AutocompleteContainer = euiStyled.div`
 
 AutocompleteContainer.displayName = 'AutocompleteContainer';
 
-const SuggestionsPanel = euiStyled(EuiPanel).attrs(props => ({
+const SuggestionsPanel = euiStyled(EuiPanel).attrs(() => ({
   paddingSize: 'none',
   hasShadow: true,
 }))`

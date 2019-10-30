@@ -195,7 +195,7 @@ interface LogEntryRowWrapperProps {
   scale: TextScale;
 }
 
-const LogEntryRowWrapper = euiStyled.div.attrs(props => ({
+const LogEntryRowWrapper = euiStyled.div.attrs(() => ({
   role: 'row',
 }))<LogEntryRowWrapperProps>`
   align-items: stretch;

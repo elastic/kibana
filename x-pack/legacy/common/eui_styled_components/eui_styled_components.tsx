@@ -16,18 +16,18 @@ export interface EuiTheme {
   darkMode: boolean;
 }
 
-type EuiThemeProvider = Partial<ThemeProviderProps<EuiTheme>>;
-
-const EuiThemeProvider = ({
+const EuiThemeProvider = <
+  OuterTheme extends styledComponents.DefaultTheme = styledComponents.DefaultTheme
+>({
   darkMode = false,
   ...otherProps
-}: EuiThemeProvider & {
+}: Omit<ThemeProviderProps<OuterTheme, OuterTheme & EuiTheme>, 'theme'> & {
   darkMode?: boolean;
-  children?: React.ReactNode;
 }) => (
   <ThemeProvider
     {...otherProps}
-    theme={() => ({
+    theme={(outerTheme?: OuterTheme) => ({
+      ...outerTheme,
       eui: darkMode ? euiDarkVars : euiLightVars,
       darkMode,
     })}

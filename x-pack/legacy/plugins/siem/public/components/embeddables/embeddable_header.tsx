@@ -8,8 +8,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import styled, { css } from 'styled-components';
 
-const Header = styled.header.attrs(props => ({
-  className: 'siemEmbeddable__header',
+const Header = styled.header.attrs(({ className }) => ({
+  className: `siemEmbeddable__header ${className}`,
 }))`
   ${({ theme }) => css`
     border-bottom: ${theme.eui.euiBorderThin};

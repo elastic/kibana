@@ -76,7 +76,7 @@ interface MonospaceCharacterDimensionsProbe {
   scale: TextScale;
 }
 
-const MonospaceCharacterDimensionsProbe = euiStyled.div.attrs(props => ({
+const MonospaceCharacterDimensionsProbe = euiStyled.div.attrs(() => ({
   'aria-hidden': true,
 }))<MonospaceCharacterDimensionsProbe>`
   visibility: hidden;
