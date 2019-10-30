@@ -18,7 +18,7 @@
  */
 
 import sinon from 'sinon';
-import { npSetup } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
 // TODO: We should not be importing from the data plugin directly here; this is only necessary
 // because it is one of the few places that we need to access the IndexPattern class itself, rather
 // than just the type. Doing this as a temporary measure; it will be left behind when migrating to NP.
@@ -31,7 +31,15 @@ import {
 } from 'ui/index_patterns';
 import { FieldFormatRegisty } from '../../plugins/data/public';
 
-const fieldFormats = new FieldFormatRegisty(npSetup.core.uiSettings);
+function getFieldFormats() {
+  if (!getFieldFormats.fieldFormats) {
+    getFieldFormats.fieldFormat = new FieldFormatRegisty();
+
+    getFieldFormats.fieldFormats.init(npStart.core.uiSettings);
+  }
+
+  return getFieldFormats.fieldFormats;
+}
 
 export default  function StubIndexPattern(pattern, getConfig, timeField, fields) {
   this.id = pattern;
@@ -50,7 +58,7 @@ export default  function StubIndexPattern(pattern, getConfig, timeField, fields)
 
   this.getComputedFields = IndexPattern.prototype.getComputedFields.bind(this);
   this.flattenHit = flattenHitWrapper(this, this.metaFields);
-  this.formatHit = formatHitProvider(this, fieldFormats.getDefaultInstance('string'));
+  this.formatHit = formatHitProvider(this, getFieldFormats().getDefaultInstance('string'));
   this.fieldsFetcher = { apiClient: { baseUrl: '' } };
   this.formatField = this.formatHit.formatField;
 
@@ -59,7 +67,7 @@ export default  function StubIndexPattern(pattern, getConfig, timeField, fields)
   };
 
   this.stubSetFieldFormat = function (fieldName, id, params) {
-    const FieldFormat = fieldFormats.getType(id);
+    const FieldFormat = getFieldFormats().getType(id);
     this.fieldFormatMap[fieldName] = new FieldFormat(params);
     this._reindexFields();
   };

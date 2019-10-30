@@ -20,14 +20,22 @@
 import sinon from 'sinon';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import { npSetup } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
 import { VisProvider } from '..';
 import { AggType } from '../../agg_types/agg_type';
 import { AggConfig } from '../../agg_types/agg_config';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { FieldFormatRegisty } from '../../../../../plugins/data/public';
 
-const fieldFormats = new FieldFormatRegisty(npSetup.core.uiSettings);
+function getFieldFormats() {
+  if (!getFieldFormats.fieldFormats) {
+    getFieldFormats.fieldFormat = new FieldFormatRegisty();
+
+    getFieldFormats.fieldFormats.init(npStart.core.uiSettings);
+  }
+
+  return getFieldFormats.fieldFormats;
+}
 
 describe('AggConfig', function () {
 
@@ -444,7 +452,7 @@ describe('AggConfig', function () {
           }
         ]
       });
-      expect(vis.aggs.aggs[0].fieldFormatter()).to.be(fieldFormats.getDefaultInstance('number').getConverterFor());
+      expect(vis.aggs.aggs[0].fieldFormatter()).to.be(getFieldFormats().getDefaultInstance('number').getConverterFor());
     });
   });
 
@@ -472,13 +480,13 @@ describe('AggConfig', function () {
     it('returns the string format if the field does not have a format', function () {
       const agg = vis.aggs.aggs[0];
       agg.params.field = { type: 'number', format: null };
-      expect(agg.fieldFormatter()).to.be(fieldFormats.getDefaultInstance('string').getConverterFor());
+      expect(agg.fieldFormatter()).to.be(getFieldFormats().getDefaultInstance('string').getConverterFor());
     });
 
     it('returns the string format if their is no field', function () {
       const agg = vis.aggs.aggs[0];
       delete agg.params.field;
-      expect(agg.fieldFormatter()).to.be(fieldFormats.getDefaultInstance('string').getConverterFor());
+      expect(agg.fieldFormatter()).to.be(getFieldFormats().getDefaultInstance('string').getConverterFor());
     });
 
     it('returns the html converter if "html" is passed in', function () {
