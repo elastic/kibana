@@ -17,5 +17,19 @@
  * under the License.
  */
 
-// eslint-disable-next-line
-export * from '../../../plugins/expressions/public/functions/tests/utils';
+import { ExpressionType, ExpressionTypeStyle } from '../types';
+
+const name = 'style';
+
+export const style = (): ExpressionType<typeof name, ExpressionTypeStyle> => ({
+  name,
+  from: {
+    null: () => {
+      return {
+        type: 'style',
+        spec: {},
+        css: '',
+      };
+    },
+  },
+});

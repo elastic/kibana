@@ -21,11 +21,11 @@
 import { clone, each, keys, last, mapValues, reduce, zipObject } from 'lodash';
 
 // @ts-ignore
-import { fromExpression, getByAlias, castProvider } from '@kbn/interpreter/common';
+import { fromExpression, getByAlias } from '@kbn/interpreter/common';
 
 import { createError } from './create_error';
 import { ExpressionAST, ExpressionFunctionAST, AnyExpressionFunction, ArgumentType } from './types';
-import { getType } from '../../common';
+import { getType } from './interpreter';
 
 export { createError };
 
@@ -40,7 +40,30 @@ export type ExpressionInterpret = (ast: ExpressionAST, context?: any) => any;
 export function interpreterProvider(config: InterpreterConfig): ExpressionInterpret {
   const { functions, types } = config;
   const handlers = { ...config.handlers, types };
-  const cast = castProvider(types);
+
+  function cast(node: any, toTypeNames: any) {
+    // If you don't give us anything to cast to, you'll get your input back
+    if (!toTypeNames || toTypeNames.length === 0) return node;
+
+    // No need to cast if node is already one of the valid types
+    const fromTypeName = getType(node);
+    if (toTypeNames.includes(fromTypeName)) return node;
+
+    const fromTypeDef = types[fromTypeName];
+
+    for (let i = 0; i < toTypeNames.length; i++) {
+      // First check if the current type can cast to this type
+      if (fromTypeDef && fromTypeDef.castsTo(toTypeNames[i])) {
+        return fromTypeDef.to(node, toTypeNames[i], types);
+      }
+
+      // If that isn't possible, check if this type can cast from the current type
+      const toTypeDef = types[toTypeNames[i]];
+      if (toTypeDef && toTypeDef.castsFrom(fromTypeName)) return toTypeDef.from(node, types);
+    }
+
+    throw new Error(`Can not cast '${fromTypeName}' to any of '${toTypeNames.join(', ')}'`);
+  }
 
   async function invokeChain(chainArr: ExpressionFunctionAST[], context: any): Promise<any> {
     if (!chainArr.length) return context;

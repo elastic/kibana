@@ -17,29 +17,36 @@
  * under the License.
  */
 
-import { get, identity } from 'lodash';
+import { ExpressionType } from '../types';
+import { Render } from '.';
 
-export function getType(node: any) {
-  if (node == null) return 'null';
-  if (typeof node === 'object') {
-    if (!node.type) throw new Error('Objects must have a type property');
-    return node.type;
-  }
-  return typeof node;
+const name = 'range';
+
+export interface Range {
+  type: typeof name;
+  from: number;
+  to: number;
 }
 
-export function serializeProvider(types: any) {
-  return {
-    serialize: provider('serialize'),
-    deserialize: provider('deserialize'),
-  };
-
-  function provider(key: any) {
-    return (context: any) => {
-      const type = getType(context);
-      const typeDef = types[type];
-      const fn: any = get(typeDef, key) || identity;
-      return fn(context);
-    };
-  }
-}
+export const range = (): ExpressionType<typeof name, Range> => ({
+  name,
+  from: {
+    null: (): Range => {
+      return {
+        type: 'range',
+        from: 0,
+        to: 0,
+      };
+    },
+  },
+  to: {
+    render: (value: Range): Render<{ text: string }> => {
+      const text = `from ${value.from} to ${value.to}`;
+      return {
+        type: 'render',
+        as: 'text',
+        value: { text },
+      };
+    },
+  },
+});

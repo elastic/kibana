@@ -17,22 +17,19 @@
  * under the License.
  */
 
-import { clog } from './clog';
-import { esaggs } from './esaggs';
-import { font } from './font';
-import { kibana } from './kibana';
-import { kibanaContext } from './kibana_context';
-import { range } from './range';
-import { visualization } from './visualization';
-import { visDimension } from './vis_dimension';
+import { ExpressionFunction } from '../types';
 
-export const functions = [
-  clog,
-  esaggs,
-  font,
-  kibana,
-  kibanaContext,
-  range,
-  visualization,
-  visDimension,
-];
+const name = 'clog';
+
+type Context = any;
+type ClogExpressionFunction = ExpressionFunction<typeof name, Context, {}, Context>;
+
+export const clog = (): ClogExpressionFunction => ({
+  name,
+  args: {},
+  help: 'Outputs the context to the console',
+  fn: context => {
+    console.log(context); // eslint-disable-line no-console
+    return context;
+  },
+});

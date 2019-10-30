@@ -17,7 +17,6 @@
  * under the License.
  */
 
-export * from './types';
-export { Type } from './interpreter';
-export { interpreterProvider } from './interpreter_provider';
-export { serializeProvider, getType } from './serialize_provider';
+export * from './type_registry';
+export * from './function_registry';
+export * from './render_registry';
