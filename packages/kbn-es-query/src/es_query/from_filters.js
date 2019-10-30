@@ -54,26 +54,23 @@ const translateToQuery = function (filter) {
 
 export function buildQueryFromFilters(filters = [], indexPattern, ignoreFilterIfFieldNotInIndex) {
   filters = filters.filter(filter => filter && !_.get(filter, ['meta', 'disabled']));
+
+  const filtersToESQueries = (negate) => {
+    return filters
+      .filter(filterNegate(negate))
+      .filter(filter => !ignoreFilterIfFieldNotInIndex || filterMatchesIndex(filter, indexPattern))
+      .map(filter => {
+        return migrateFilter(filter, indexPattern);
+      })
+      .map(filter => handleNestedFilter(filter, indexPattern))
+      .map(translateToQuery)
+      .map(cleanFilter);
+  };
+
   return {
     must: [],
-    filter: filters
-      .filter(filterNegate(false))
-      .filter(filter => !ignoreFilterIfFieldNotInIndex || filterMatchesIndex(filter, indexPattern))
-      .map(filter => {
-        return migrateFilter(filter, indexPattern);
-      })
-      .map((filter) => handleNestedFilter(filter, indexPattern))
-      .map(translateToQuery)
-      .map(cleanFilter),
+    filter: filtersToESQueries(false),
     should: [],
-    must_not: filters
-      .filter(filterNegate(true))
-      .filter(filter => !ignoreFilterIfFieldNotInIndex || filterMatchesIndex(filter, indexPattern))
-      .map(filter => {
-        return migrateFilter(filter, indexPattern);
-      })
-      .map((filter) => handleNestedFilter(filter, indexPattern))
-      .map(translateToQuery)
-      .map(cleanFilter),
+    must_not: filtersToESQueries(true),
   };
 }
