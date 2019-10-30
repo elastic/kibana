@@ -24,7 +24,7 @@ import { uiModules } from '../../modules';
 
 const module = uiModules.get('kibana');
 
-module.service('debounce', ['$timeout', function ($timeout) {
+export function DebounceProviderTimeout($timeout) {
   return function (func, wait, options) {
     let timeout;
     let args;
@@ -68,7 +68,9 @@ module.service('debounce', ['$timeout', function ($timeout) {
 
     return debounce;
   };
-}]);
+}
+
+module.service('debounce', ['$timeout', DebounceProviderTimeout]);
 
 export function DebounceProvider(debounce) {
   return debounce;
