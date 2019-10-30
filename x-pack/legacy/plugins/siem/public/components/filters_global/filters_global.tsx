@@ -17,27 +17,25 @@ const disableSticky = 'screen and (max-width: ' + euiLightVars.euiBreakpoints.s 
 const disableStickyMq = window.matchMedia(disableSticky);
 
 const Aside = styled.aside<{ isSticky?: boolean }>`
-  ${props => css`
-    position: relative;
-    z-index: ${props.theme.eui.euiZNavigation};
-    background: ${props.theme.eui.euiColorEmptyShade};
-    border-bottom: ${props.theme.eui.euiBorderThin};
-    box-sizing: content-box;
-    margin: 0 -${gutterTimeline} 0 -${props.theme.eui.euiSizeL};
-    padding: ${props.theme.eui.euiSize} ${gutterTimeline} ${props.theme.eui.euiSize} ${
-    props.theme.eui.euiSizeL
-  };
+  position: relative;
+  z-index: ${({ theme }) => theme.eui.euiZNavigation};
+  background: ${({ theme }) => theme.eui.euiColorEmptyShade};
+  border-bottom: ${({ theme }) => theme.eui.euiBorderThin};
+  box-sizing: content-box;
+  margin: 0 -${gutterTimeline} 0 -${({ theme }) => theme.eui.euiSizeL};
+  padding: ${({ theme }) => theme.eui.euiSize} ${gutterTimeline} ${({ theme }) =>
+  theme.eui.euiSize} ${({ theme }) => theme.eui.euiSizeL};
 
-    ${props.isSticky &&
-      `
+  ${({ isSticky }) =>
+    isSticky &&
+    css`
       top: ${offsetChrome}px !important;
     `}
 
-    @media only ${disableSticky} {
-      position: static !important;
-      z-index: ${props.theme.eui.euiZContent} !important;
-    }
-  `}
+  @media only ${disableSticky} {
+    position: static !important;
+    z-index: ${({ theme }) => theme.eui.euiZContent} !important;
+  }
 `;
 
 Aside.displayName = 'Aside';

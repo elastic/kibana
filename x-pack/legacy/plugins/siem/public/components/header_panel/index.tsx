@@ -14,19 +14,18 @@ interface HeaderProps {
   border?: boolean;
 }
 
-const Header = styled.header.attrs(props => ({
+const Header = styled.header.attrs(() => ({
   className: 'siemHeaderPanel',
 }))<HeaderProps>`
-  ${props => css`
-    margin-bottom: ${props.theme.eui.euiSizeL};
-    user-select: text;
+  margin-bottom: ${({ theme }) => theme.eui.euiSizeL};
+  user-select: text;
 
-    ${props.border &&
-      `
-      border-bottom: ${props.theme.eui.euiBorderThin};
-      padding-bottom: ${props.theme.eui.euiSizeL};
+  ${({ border }) =>
+    border &&
+    css`
+      border-bottom: ${({ theme }) => theme.eui.euiBorderThin};
+      padding-bottom: ${({ theme }) => theme.eui.euiSizeL};
     `}
-  `}
 `;
 
 Header.displayName = 'Header';

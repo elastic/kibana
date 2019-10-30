@@ -42,16 +42,14 @@ interface Props extends ResizeHandleContainerProps {
 }
 
 const ResizeHandleContainer = styled.div<ResizeHandleContainerProps>`
-  ${({ bottom, height, left, positionAbsolute, right, theme, top }) => css`
-    bottom: ${positionAbsolute && bottom};
-    cursor: ${resizeCursorStyle};
-    height: ${height};
-    left: ${positionAbsolute && left};
-    position: ${positionAbsolute && 'absolute'};
-    right: ${positionAbsolute && right};
-    top: ${positionAbsolute && top};
-    z-index: ${positionAbsolute && theme.eui.euiZLevel1};
-  `}
+  bottom: ${({ positionAbsolute, bottom }) => positionAbsolute && bottom};
+  cursor: ${resizeCursorStyle};
+  height: ${({ height }) => height};
+  left: ${({ positionAbsolute, left }) => positionAbsolute && left};
+  position: ${({ positionAbsolute }) => positionAbsolute && 'absolute'};
+  right: ${({ positionAbsolute, right }) => positionAbsolute && right};
+  top: ${({ positionAbsolute, top }) => positionAbsolute && top};
+  z-index: ${({ positionAbsolute, theme }) => positionAbsolute && theme.eui.euiZLevel1};
 `;
 ResizeHandleContainer.displayName = 'ResizeHandleContainer';
 
