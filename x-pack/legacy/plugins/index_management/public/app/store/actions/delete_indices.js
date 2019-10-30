@@ -17,7 +17,7 @@ export const deleteIndices = ({ indexNames }) => async (dispatch) => {
   try {
     await request(indexNames);
   } catch (error) {
-    notificationService.showDangerToast(error.data.message);
+    notificationService.showDangerToast(error.message);
     return dispatch(clearRowStatus({ indexNames }));
   }
   notificationService.showSuccessToast(

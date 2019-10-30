@@ -29,7 +29,7 @@ export const updateIndexSettings = ({
         return dispatch(updateIndexSettingsError({ error: message }));
       }
     } catch (error) {
-      return dispatch(updateIndexSettingsError({ error: error.data.message }));
+      return dispatch(updateIndexSettingsError({ error: error.message }));
     }
   }
   dispatch(updateIndexSettingsSuccess());

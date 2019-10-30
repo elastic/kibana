@@ -272,7 +272,8 @@ export class IndexTable extends Component {
 
   renderError() {
     const { indicesError } = this.props;
-    const data = indicesError.data ? indicesError.data : indicesError;
+
+    const data = indicesError.body ? indicesError.body : indicesError;
 
     const {
       error: errorString,

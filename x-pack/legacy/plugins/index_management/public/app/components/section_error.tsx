@@ -22,14 +22,14 @@ interface Props {
 
 export const SectionError: React.FunctionComponent<Props> = ({ title, error, ...rest }) => {
   const {
-    error: errorString,
     cause, // wrapEsError() on the server adds a "cause" array
     message,
-  } = error.data;
+    statusText,
+  } = error;
 
   return (
     <EuiCallOut title={title} color="danger" iconType="alert" {...rest}>
-      <div>{message || errorString}</div>
+      <div>{message || statusText}</div>
       {cause && (
         <Fragment>
           <EuiSpacer size="m" />

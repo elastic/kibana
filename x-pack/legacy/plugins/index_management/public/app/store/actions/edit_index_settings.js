@@ -14,7 +14,7 @@ export const editIndexSettings = ({ indexName }) => async (dispatch) => {
   try {
     indexSettings = await request(indexName);
   } catch (error) {
-    return notificationService.showDangerToast(error.data.message);
+    return notificationService.showDangerToast(error.message);
   }
   notificationService.showSuccessToast(
     i18n.translate('xpack.idxMgmt.editIndexSettingsAction.successfullySavedSettingsForIndicesMessage', {

@@ -15,7 +15,7 @@ export const loadIndexData = ({ indexName, dataType }) => async (dispatch) => {
   try {
     data = await request(dataType, indexName);
   } catch (error) {
-    notificationService.showDangerToast(error.data.message);
+    notificationService.showDangerToast(error.message);
   }
   dispatch(loadIndexDataSuccess({ data, indexName }));
 };

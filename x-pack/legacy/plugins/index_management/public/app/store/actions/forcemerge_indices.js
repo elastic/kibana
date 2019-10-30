@@ -19,7 +19,7 @@ export const forcemergeIndices = ({ indexNames, maxNumSegments }) => async (disp
   try {
     await request(indexNames, maxNumSegments);
   } catch (error) {
-    notificationService.showDangerToast(error.data.message);
+    notificationService.showDangerToast(error.message);
     return dispatch(clearRowStatus({ indexNames }));
   }
   dispatch(reloadIndices(indexNames));

@@ -19,7 +19,7 @@ export const unfreezeIndices = ({ indexNames }) => async (dispatch) => {
   try {
     await request(indexNames);
   } catch (error) {
-    notificationService.showDangerToast(error.data.message);
+    notificationService.showDangerToast(error.message);
     return dispatch(clearRowStatus({ indexNames }));
   }
   dispatch(reloadIndices(indexNames));
