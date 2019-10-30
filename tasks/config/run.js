@@ -85,8 +85,7 @@ module.exports = function (grunt) {
       title: 'eslint',
       cmd: NODE,
       args: [
-        'scripts/eslint',
-        '--no-cache'
+        'scripts/eslint'
       ]
     }),
 
