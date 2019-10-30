@@ -9,12 +9,12 @@ import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 
 import { styleOptionShapes, rangeShape } from '../style_option_shapes';
-import { VectorStyle } from '../../../vector_style';
-import { ColorGradient } from '../../color_gradient';
+import { VectorStyle } from '../../vector_style';
+import { ColorGradient } from '../../../color_gradient';
 import { CircleIcon } from './circle_icon';
 import { getVectorStyleLabel } from '../get_vector_style_label';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
-import { StyleLegendRow } from '../../style_legend_row';
+import { StyleLegendRow } from '../../../style_legend_row';
 
 function getLineWidthIcons() {
   const defaultStyle = {

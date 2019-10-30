@@ -12,7 +12,7 @@ import { CircleIcon } from './circle_icon';
 import { LineIcon } from './line_icon';
 import { PolygonIcon } from './polygon_icon';
 import { SymbolIcon } from './symbol_icon';
-import { VectorStyle } from '../../../vector_style';
+import { VectorStyle } from '../../vector_style';
 import { getColorRampCenterColor } from '../../../color_utils';
 
 export class VectorIcon extends Component {

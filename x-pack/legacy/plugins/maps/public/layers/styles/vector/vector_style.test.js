@@ -5,8 +5,8 @@
  */
 
 import { VectorStyle } from './vector_style';
-import { DataRequest } from '../util/data_request';
-import { VECTOR_SHAPE_TYPES } from '../sources/vector_feature_types';
+import { DataRequest } from '../../util/data_request';
+import { VECTOR_SHAPE_TYPES } from '../../sources/vector_feature_types';
 
 describe('getDescriptorWithMissingStylePropsRemoved', () => {
   const fieldName = 'doIStillExist';

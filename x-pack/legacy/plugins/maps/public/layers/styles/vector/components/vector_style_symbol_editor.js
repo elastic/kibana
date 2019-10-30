@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { SYMBOLIZE_AS_CIRCLE, SYMBOLIZE_AS_ICON } from '../../vector_constants';
+import { SYMBOLIZE_AS_CIRCLE, SYMBOLIZE_AS_ICON } from '../vector_constants';
 import { SymbolIcon } from './legend/symbol_icon';
 
 const SYMBOLIZE_AS_OPTIONS = [

@@ -7,7 +7,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { SYMBOLIZE_AS_CIRCLE, SYMBOLIZE_AS_ICON } from '../../vector_constants';
+import { SYMBOLIZE_AS_CIRCLE, SYMBOLIZE_AS_ICON } from '../vector_constants';
 import { VectorStyleSymbolEditor } from './vector_style_symbol_editor';
 
 const symbolOptions = [

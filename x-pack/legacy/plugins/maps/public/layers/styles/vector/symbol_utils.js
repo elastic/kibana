@@ -6,7 +6,7 @@
 
 import maki from '@elastic/maki';
 import xml2js from 'xml2js';
-import { parseXmlString } from '../../../common/parse_xml_string';
+import { parseXmlString } from '../../../../common/parse_xml_string';
 
 export const LARGE_MAKI_ICON_SIZE = 15;
 const LARGE_MAKI_ICON_SIZE_AS_STRING = LARGE_MAKI_ICON_SIZE.toString();

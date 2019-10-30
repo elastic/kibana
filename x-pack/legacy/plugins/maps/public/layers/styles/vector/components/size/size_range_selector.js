@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { ValidatedDualRange } from 'ui/validated_range';
-import { DEFAULT_MIN_SIZE, DEFAULT_MAX_SIZE } from '../../../vector_style_defaults';
+import { DEFAULT_MIN_SIZE, DEFAULT_MAX_SIZE } from '../../vector_style_defaults';
 import { i18n } from '@kbn/i18n';
 
 export function SizeRangeSelector({ minSize, maxSize, onChange, ...rest }) {

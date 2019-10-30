@@ -10,7 +10,7 @@ import {
   COLOR_GRADIENTS,
   DEFAULT_FILL_COLORS,
   DEFAULT_LINE_COLORS
-} from './color_utils';
+} from '../color_utils';
 
 const DEFAULT_ICON = 'airfield';
 

@@ -6,23 +6,22 @@
 
 import React from 'react';
 
-import { StaticDynamicStyleRow } from '../../static_dynamic_style_row';
-import { DynamicOrientationSelection } from './dynamic_orientation_selection';
-import { StaticOrientationSelection } from './static_orientation_selection';
-import { i18n } from '@kbn/i18n';
+import { StaticDynamicStyleRow } from '../../../static_dynamic_style_row';
+import { DynamicColorSelection } from './dynamic_color_selection';
+import { StaticColorSelection } from './static_color_selection';
+import { getVectorStyleLabel } from '../get_vector_style_label';
 
-export function OrientationEditor(props) {
+export function VectorStyleColorEditor(props) {
   return (
     <StaticDynamicStyleRow
       ordinalFields={props.ordinalFields}
       property={props.styleProperty}
-      label={i18n.translate('xpack.maps.styles.vector.orientationLabel', {
-        defaultMessage: 'Symbol orientation'
-      })}
+      label={getVectorStyleLabel(props.styleProperty)}
       styleDescriptor={props.styleDescriptor}
       handlePropertyChange={props.handlePropertyChange}
-      DynamicSelector={DynamicOrientationSelection}
-      StaticSelector={StaticOrientationSelection}
+      swatches={props.swatches}
+      DynamicSelector={DynamicColorSelection}
+      StaticSelector={StaticColorSelection}
       defaultDynamicStyleOptions={props.defaultDynamicStyleOptions}
       defaultStaticStyleOptions={props.defaultStaticStyleOptions}
     />

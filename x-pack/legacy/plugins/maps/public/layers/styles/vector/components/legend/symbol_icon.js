@@ -7,7 +7,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
-import { getMakiSymbolSvg, styleSvg, buildSrcUrl } from '../../../symbol_utils';
+import { getMakiSymbolSvg, styleSvg, buildSrcUrl } from '../../symbol_utils';
 
 export class SymbolIcon extends Component {
 

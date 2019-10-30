@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { vectorStyles } from '../../vector_style_defaults';
+import { vectorStyles } from '../vector_style_defaults';
 
 export function getVectorStyleLabel(styleName) {
   switch (styleName) {

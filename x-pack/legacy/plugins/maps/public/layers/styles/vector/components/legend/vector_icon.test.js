@@ -8,7 +8,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { VectorIcon } from './vector_icon';
-import { VectorStyle } from '../../../vector_style';
+import { VectorStyle } from '../../vector_style';
 
 let isPointsOnly = false;
 let isLinesOnly = false;

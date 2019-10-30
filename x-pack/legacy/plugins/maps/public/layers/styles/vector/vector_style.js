@@ -7,14 +7,14 @@
 import _ from 'lodash';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { getColorRampStops } from './color_utils';
-import { VectorStyleEditor } from './components/vector/vector_style_editor';
+import { getColorRampStops } from '../color_utils';
+import { VectorStyleEditor } from './components/vector_style_editor';
 import { getDefaultProperties, vectorStyles } from './vector_style_defaults';
-import { AbstractStyle } from './abstract_style';
-import { SOURCE_DATA_ID_ORIGIN, GEO_JSON_TYPE } from '../../../common/constants';
-import { VectorIcon } from './components/vector/legend/vector_icon';
-import { VectorStyleLegend } from './components/vector/legend/vector_style_legend';
-import { VECTOR_SHAPE_TYPES } from '../sources/vector_feature_types';
+import { AbstractStyle } from '../abstract_style';
+import { SOURCE_DATA_ID_ORIGIN, GEO_JSON_TYPE } from '../../../../common/constants';
+import { VectorIcon } from './components/legend/vector_icon';
+import { VectorStyleLegend } from './components/legend/vector_style_legend';
+import { VECTOR_SHAPE_TYPES } from '../../sources/vector_feature_types';
 import { SYMBOLIZE_AS_CIRCLE, SYMBOLIZE_AS_ICON } from './vector_constants';
 import {
   getMakiSymbolAnchor,
