@@ -15,43 +15,41 @@ exports[`IndexPatternsMissingPrompt renders correctly against snapshot 1`] = `
   body={
     <React.Fragment>
       <p>
-        An ECS compliant Kibana index pattern must be configured to view event data on the map. When using beats, you can run the following setup commands to create the required Kibana index patterns, otherwise you can configure them manually within Kibana settings.
+        <FormattedMessage
+          defaultMessage="An ECS compliant Kibana index pattern must be configured to view events on the map. When using {beats}, you can run the {setup} command on your hosts to automatically create the index patterns. For example: {example}."
+          id="xpack.siem.components.embeddables.indexPatternsMissingPrompt.errorDescription1"
+          values={
+            Object {
+              "beats": <a
+                href="https://www.elastic.coguide/en/beats/libbeat/current/getting-started.html"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                beats
+              </a>,
+              "example": <EuiCode>
+                ./packetbeat setup
+              </EuiCode>,
+              "setup": <EuiCode>
+                setup
+              </EuiCode>,
+            }
+          }
+        />
       </p>
       <p>
-        <ForwardRef
-          href="https://www.elastic.co/guide/en/beats/auditbeat/current/load-kibana-dashboards.html"
-          target="blank"
-        >
-          auditbeat-*
-        </ForwardRef>
-        , 
-        <ForwardRef
-          href="https://www.elastic.co/guide/en/beats/filebeat/current/load-kibana-dashboards.html"
-          target="blank"
-        >
-          filebeat-*
-        </ForwardRef>
-        , 
-        <ForwardRef
-          href="https://www.elastic.co/guide/en/beats/packetbeat/current/load-kibana-dashboards.html"
-          target="blank"
-        >
-          packetbeat-*
-        </ForwardRef>
-        , 
-        <ForwardRef
-          href="https://www.elastic.co/guide/en/beats/winlogbeat/current/load-kibana-dashboards.html"
-          target="blank"
-        >
-          winlogbeat-*
-        </ForwardRef>
+        <FormattedMessage
+          defaultMessage="You can also configure them manually in Kibana."
+          id="xpack.siem.components.embeddables.indexPatternsMissingPrompt.errorDescription2"
+          values={Object {}}
+        />
       </p>
     </React.Fragment>
   }
   iconType="gisApp"
   title={
     <h2>
-      Required Index Patterns Not Configured
+      Required index patterns not configured
     </h2>
   }
   titleSize="xs"
