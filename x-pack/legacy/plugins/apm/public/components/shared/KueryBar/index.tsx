@@ -6,29 +6,20 @@
 
 import React, { useState } from 'react';
 import { uniqueId, startsWith } from 'lodash';
-import { EuiCallOut } from '@elastic/eui';
 import styled from 'styled-components';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
 import { npStart } from 'ui/new_platform';
-import { StaticIndexPattern, getFromSavedObject } from 'ui/index_patterns';
+import { StaticIndexPattern } from 'ui/index_patterns';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 import { fromQuery, toQuery } from '../Links/url_helpers';
-import { KibanaLink } from '../Links/KibanaLink';
 // @ts-ignore
 import { Typeahead } from './Typeahead';
-// @ts-ignore
 import { getBoolFilter } from './get_bool_filter';
 import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { history } from '../../../utils/history';
-import { useMatchedRoutes } from '../../../hooks/useMatchedRoutes';
-import { RouteName } from '../../app/Main/route_config/route_names';
-import { useKibanaCore } from '../../../../../observability/public';
-import { ISavedObject } from '../../../services/rest/savedObjects';
 import { AutocompleteSuggestion } from '../../../../../../../../src/plugins/data/public';
-import { FETCH_STATUS } from '../../../hooks/useFetcher';
-import { useAPMIndexPattern } from '../../../hooks/useAPMIndexPattern';
+import { useKueryBarIndexPattern } from '../../../hooks/useKueryBarIndexPattern';
 
 const Container = styled.div`
   margin-bottom: 10px;
@@ -50,16 +41,10 @@ function convertKueryToEsQuery(
   return toElasticsearchQuery(ast, indexPattern);
 }
 
-function getAPMIndexPatternForKuery(
-  apmIndexPattern: ISavedObject
-): StaticIndexPattern | undefined {
-  return getFromSavedObject(apmIndexPattern);
-}
-
 function getSuggestions(
   query: string,
   selectionStart: number,
-  apmIndexPattern: StaticIndexPattern,
+  indexPattern: StaticIndexPattern,
   boolFilter: unknown
 ) {
   const autocompleteProvider = getAutocompleteProvider('kuery');
@@ -72,7 +57,7 @@ function getSuggestions(
 
   const getAutocompleteSuggestions = autocompleteProvider({
     config,
-    indexPatterns: [apmIndexPattern],
+    indexPatterns: [indexPattern],
     boolFilter
   });
   return getAutocompleteSuggestions({
@@ -83,43 +68,28 @@ function getSuggestions(
 }
 
 export function KueryBar() {
-  const core = useKibanaCore();
   const [state, setState] = useState<State>({
     suggestions: [],
     isLoadingSuggestions: false
   });
   const { urlParams } = useUrlParams();
   const location = useLocation();
-  const matchedRoutes = useMatchedRoutes();
-
-  const apmIndexPatternTitle = core.injectedMetadata.getInjectedVar(
-    'apmIndexPatternTitle'
-  );
-
-  const {
-    apmIndexPattern,
-    status: apmIndexPatternStatus
-  } = useAPMIndexPattern();
-
-  const indexPattern =
-    apmIndexPatternStatus === FETCH_STATUS.SUCCESS
-      ? getAPMIndexPatternForKuery(apmIndexPattern)
-      : null;
-
-  const indexPatternMissing = status === FETCH_STATUS.SUCCESS && !indexPattern;
 
   let currentRequestCheck;
 
-  const exampleMap: { [key: string]: string } = {
-    [RouteName.TRANSACTIONS]: 'transaction.duration.us > 300000',
-    [RouteName.ERRORS]: 'http.response.status_code >= 400',
-    [RouteName.METRICS]: 'process.pid = "1234"'
+  const { processorEvent } = urlParams;
+
+  const examples = {
+    transaction: 'transaction.duration.us > 300000',
+    error: 'http.response.status_code >= 400',
+    metric: 'process.pid = "1234"',
+    defaults:
+      'transaction.duration.us > 300000 AND http.response.status_code >= 400'
   };
 
-  // sets queryExample to the first matched example query, else default example
-  const queryExample =
-    matchedRoutes.map(({ name }) => exampleMap[name]).find(Boolean) ||
-    'transaction.duration.us > 300000 AND http.response.status_code >= 400';
+  const example = examples[processorEvent || 'defaults'];
+
+  const { indexPattern } = useKueryBarIndexPattern(processorEvent);
 
   async function onChange(inputValue: string, selectionStart: number) {
     if (indexPattern == null) {
@@ -179,42 +149,24 @@ export function KueryBar() {
   return (
     <Container>
       <Typeahead
-        disabled={indexPatternMissing}
         isLoading={state.isLoadingSuggestions}
         initialValue={urlParams.kuery}
         onChange={onChange}
         onSubmit={onSubmit}
         suggestions={state.suggestions}
-        queryExample={queryExample}
-      />
-
-      {indexPatternMissing && (
-        <EuiCallOut
-          style={{ display: 'inline-block', marginTop: '10px' }}
-          title={
-            <div>
-              <FormattedMessage
-                id="xpack.apm.kueryBar.indexPatternMissingWarningMessage"
-                defaultMessage="There's no APM index pattern with the title {apmIndexPatternTitle} available. To use the Query bar, please choose to import the APM index pattern via the {setupInstructionsLink}."
-                values={{
-                  apmIndexPatternTitle: `"${apmIndexPatternTitle}"`,
-                  setupInstructionsLink: (
-                    <KibanaLink path={`/home/tutorial/apm`}>
-                      {i18n.translate(
-                        'xpack.apm.kueryBar.setupInstructionsLinkLabel',
-                        { defaultMessage: 'Setup Instructions' }
-                      )}
-                    </KibanaLink>
-                  )
-                }}
-              />
-            </div>
+        placeholder={i18n.translate('xpack.apm.kueryBar.placeholder', {
+          defaultMessage: `Search {event, select,
+            transaction {transactions}
+            metric {metrics}
+            error {errors}
+            other {transactions, errors and metrics}
+          } (E.g. {queryExample})`,
+          values: {
+            queryExample: example,
+            event: processorEvent
           }
-          color="warning"
-          iconType="alert"
-          size="s"
-        />
-      )}
+        })}
+      />
     </Container>
   );
 }

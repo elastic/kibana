@@ -36,16 +36,7 @@ export const ConfirmationButtonTypes = {
   CANCEL: CANCEL_BUTTON
 };
 
-/**
- * @typedef {Object} ConfirmModalOptions
- * @property {String} confirmButtonText
- * @property {String=} cancelButtonText
- * @property {function} onConfirm
- * @property {function=} onCancel
- * @property {String=} title - If given, shows a title on the confirm modal.
- */
-
-module.factory('confirmModal', function ($rootScope, $compile) {
+export function confirmModalFactory($rootScope, $compile) {
   let modalPopover;
   const confirmQueue = [];
 
@@ -114,4 +105,15 @@ module.factory('confirmModal', function ($rootScope, $compile) {
       }
     }
   };
-});
+}
+
+/**
+ * @typedef {Object} ConfirmModalOptions
+ * @property {String} confirmButtonText
+ * @property {String=} cancelButtonText
+ * @property {function} onConfirm
+ * @property {function=} onCancel
+ * @property {String=} title - If given, shows a title on the confirm modal.
+ */
+
+module.factory('confirmModal', confirmModalFactory);

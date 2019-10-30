@@ -7,6 +7,7 @@
 import { get } from 'lodash/fp';
 
 import Hapi from 'hapi';
+import { Filter } from '@kbn/es-query';
 import { SIGNALS_ID } from '../../../../common/constants';
 import {
   Alert,
@@ -18,21 +19,38 @@ import { AlertsClient } from '../../../../../alerting/server/alerts_client';
 import { ActionsClient } from '../../../../../actions/server/actions_client';
 import { SearchResponse } from '../../types';
 
+export type PartialFilter = Partial<Filter>;
+
 export interface SignalAlertParams {
   description: string;
-  from: string;
-  id: string;
-  index: string[];
-  interval: string;
   enabled: boolean;
   filter: Record<string, {}> | undefined;
-  kql: string | undefined;
-  maxSignals: string;
+  filters: PartialFilter[] | undefined;
+  from: string;
+  index: string[];
+  interval: string;
+  id: string;
+  language: string | undefined;
+  maxSignals: number;
   name: string;
-  severity: string;
-  type: 'filter' | 'kql';
-  to: string;
+  query: string | undefined;
   references: string[];
+  savedId: string | undefined;
+  severity: string;
+  to: string;
+  type: 'filter' | 'query' | 'saved_query';
+}
+
+export type SignalAlertParamsRest = Omit<SignalAlertParams, 'maxSignals' | 'saved_id'> & {
+  saved_id: SignalAlertParams['savedId'];
+  max_signals: SignalAlertParams['maxSignals'];
+};
+
+export interface FindParamsRest {
+  per_page: number;
+  page: number;
+  sort_field: string;
+  fields: string[];
 }
 
 export interface Clients {
@@ -73,9 +91,7 @@ export type SignalAlertType = Alert & {
 };
 
 export interface SignalsRequest extends Hapi.Request {
-  payload: Omit<SignalAlertParams, 'maxSignals'> & {
-    max_signals: string;
-  };
+  payload: SignalAlertParamsRest;
 }
 
 export type SignalExecutorOptions = Omit<AlertExecutorOptions, 'params'> & {
