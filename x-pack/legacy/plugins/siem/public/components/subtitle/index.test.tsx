@@ -48,7 +48,7 @@ describe('Subtitle', () => {
   test('it renders one subtitle React.ReactNode item', () => {
     const wrapper = mount(
       <TestProviders>
-        <Subtitle items="Test subtitle" />
+        <Subtitle items={<span>{'Test subtitle'}</span>} />
       </TestProviders>
     );
 
@@ -58,7 +58,7 @@ describe('Subtitle', () => {
   test('it renders multiple subtitle React.ReactNode items', () => {
     const wrapper = mount(
       <TestProviders>
-        <Subtitle items={['Test subtitle 1', 'Test subtitle 2']} />
+        <Subtitle items={[<span>{'Test subtitle 1'}</span>, <span>{'Test subtitle 2'}</span>]} />
       </TestProviders>
     );
 

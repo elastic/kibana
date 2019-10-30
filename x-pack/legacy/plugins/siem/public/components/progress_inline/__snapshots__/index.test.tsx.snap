@@ -1,9 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`HeaderSection it renders 1`] = `
+exports[`ProgressInline it renders 1`] = `
 <Component>
-  <HeaderSection
-    title="Test title"
-  />
+  <ProgressInline
+    current={50}
+    max={100}
+    unit="tests"
+  >
+    Test progress
+  </ProgressInline>
 </Component>
 `;

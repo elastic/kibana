@@ -3,7 +3,7 @@
 exports[`Subtitle it renders 1`] = `
 <Component>
   <Subtitle
-    text="Test subtitle"
+    items="Test subtitle"
   />
 </Component>
 `;
