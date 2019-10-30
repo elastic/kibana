@@ -29,10 +29,11 @@ import {
 import { KFetchOptions } from 'ui/kfetch';
 import { KFetchKibanaOptions } from 'ui/kfetch/kfetch';
 import { UiStatsMetricType } from '@kbn/analytics';
+import { FeatureCatalogueEntry } from '../../../../../plugins/feature_catalogue/public';
 
 export interface HomeKibanaServices {
   indexPatternService: any;
-  getFeatureCatalogueRegistryProvider: () => Promise<any>;
+  getFeatureCatalogueEntries: () => Promise<readonly FeatureCatalogueEntry[]>;
   metadata: {
     app: unknown;
     bundleId: string;

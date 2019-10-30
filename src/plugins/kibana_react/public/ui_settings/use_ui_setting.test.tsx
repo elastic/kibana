@@ -106,7 +106,7 @@ describe('useUiSetting', () => {
 });
 
 describe('useUiSetting$', () => {
-  const TestConsumer$: React.FC<{
+  const TestConsumer: React.FC<{
     setting: string;
     newValue?: string;
   }> = ({ setting, newValue = '' }) => {
@@ -126,7 +126,7 @@ describe('useUiSetting$', () => {
 
     ReactDOM.render(
       <Provider>
-        <TestConsumer$ setting="foo" />
+        <TestConsumer setting="foo" />
       </Provider>,
       container
     );
@@ -143,7 +143,7 @@ describe('useUiSetting$', () => {
 
     ReactDOM.render(
       <Provider>
-        <TestConsumer$ setting="non_existing" />
+        <TestConsumer setting="non_existing" />
       </Provider>,
       container
     );
@@ -159,7 +159,7 @@ describe('useUiSetting$', () => {
 
     ReactDOM.render(
       <Provider>
-        <TestConsumer$ setting="theme:darkMode" />
+        <TestConsumer setting="theme:darkMode" />
       </Provider>,
       container
     );
@@ -174,7 +174,7 @@ describe('useUiSetting$', () => {
 
     ReactDOM.render(
       <Provider>
-        <TestConsumer$ setting="a" newValue="c" />
+        <TestConsumer setting="a" newValue="c" />
       </Provider>,
       container
     );

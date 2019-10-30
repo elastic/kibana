@@ -52,6 +52,8 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
   };
 }
 
+let copiedLegacyCatalogue = false;
+
 (async () => {
   const instance = new HomePlugin();
   instance.setup(npSetup.core, {
@@ -62,12 +64,17 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
       kfetch,
       metadata: npStart.core.injectedMetadata.getLegacyMetadata(),
       METRIC_TYPE,
-      getFeatureCatalogueRegistryProvider: async () => {
-        const injector = await chrome.dangerouslyGetActiveInjector();
-
-        const Private = injector.get<IPrivate>('Private');
-
-        return Private(FeatureCatalogueRegistryProvider as any);
+      getFeatureCatalogueEntries: async () => {
+        if (!copiedLegacyCatalogue) {
+          const injector = await chrome.dangerouslyGetActiveInjector();
+          const Private = injector.get<IPrivate>('Private');
+          // Merge legacy registry with new registry
+          (Private(FeatureCatalogueRegistryProvider as any) as any).inTitleOrder.map(
+            npSetup.plugins.feature_catalogue.register
+          );
+          copiedLegacyCatalogue = true;
+        }
+        return npStart.plugins.feature_catalogue.get();
       },
       getAngularDependencies,
       localApplicationService,
