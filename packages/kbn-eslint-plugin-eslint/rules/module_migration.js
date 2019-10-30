@@ -21,11 +21,15 @@ const Path = require('path');
 const { REPO_ROOT } = require('@kbn/dev-utils');
 
 function checkModuleNameRelative(context, mappings, node) {
-  const requestAbsolute = Path.resolve(Path.dirname(context.getFilename()), node.value);
+  const fileDir = Path.dirname(context.getFilename());
+  const request = node.value;
+  const requestAbsolute = Path.resolve(fileDir, request);
+
   const mapping = mappings.find(
     mapping =>
       Path.isAbsolute(mapping.from) &&
       requestAbsolute.startsWith(mapping.from) &&
+      request.startsWith(Path.relative(fileDir, mapping.from)) &&
       (!mapping.filter || mapping.filter(node, context))
   );
 
