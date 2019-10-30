@@ -73,11 +73,14 @@ export const singleBulkIndex = async (
 
 // utilize search_after for paging results into bulk.
 export const singleSearchAfter = async (
-  searchAfterSortId: string,
+  searchAfterSortId: string | undefined,
   params: SignalAlertParams,
   service: AlertServices,
   logger: Logger
 ): Promise<SignalSearchResponse> => {
+  if (searchAfterSortId == null) {
+    throw Error('Attempted to search after with empty sort id');
+  }
   try {
     const searchAfterQuery = buildEventsSearchQuery({
       index: params.index,
@@ -120,7 +123,10 @@ export const searchAfterAndBulkIndex = async (
   } else if (sortIds == null && totalHits === 0) {
     return true;
   }
-  let sortId = sortIds[0];
+  let sortId;
+  if (sortIds != null) {
+    sortId = sortIds[0];
+  }
   while (size < totalHits) {
     // utilize track_total_hits instead of true
     try {
