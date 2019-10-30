@@ -151,18 +151,38 @@ export function readFieldCapsResponse(fieldCapsResponse: FieldCapsResponse): Fie
     return field.name.includes('.');
   });
 
-  // Discern which sub fields are multi fields. If the parent field is not an object or nested field
-  // the child must be a multi field.
+  // Determine the type of each sub field.
   subFields.forEach(field => {
-    const parentFieldName = field.name
+    const parentFieldNames = field.name
       .split('.')
       .slice(0, -1)
-      .join('.');
-    const parentFieldCaps = kibanaFormattedCaps.find(caps => caps.name === parentFieldName);
+      .map((_, index, parentFieldNameParts) => {
+        return parentFieldNameParts.slice(0, index + 1).join('.');
+      });
+    const parentFieldCaps = parentFieldNames.map(parentFieldName => {
+      return kibanaFormattedCaps.find(caps => caps.name === parentFieldName);
+    });
+    const parentFieldCapsAscending = parentFieldCaps.reverse();
 
-    if (parentFieldCaps && !['object', 'nested'].includes(parentFieldCaps.type)) {
-      field.parent = parentFieldName;
-      field.subType = 'multi';
+    if (parentFieldCaps && parentFieldCaps.length > 0) {
+      let subType = {};
+      // If the parent field is not an object or nested field the child must be a multi field.
+      const firstParent = parentFieldCapsAscending[0];
+      if (firstParent && !['object', 'nested'].includes(firstParent.type)) {
+        subType = { ...subType, multi: { parent: firstParent.name } };
+      }
+
+      // We need to know if any parent field is nested
+      const nestedParentCaps = parentFieldCapsAscending.find(
+        parentCaps => parentCaps && parentCaps.type === 'nested'
+      );
+      if (nestedParentCaps) {
+        subType = { ...subType, nested: { path: nestedParentCaps.name } };
+      }
+
+      if (Object.keys(subType).length > 0) {
+        field.subType = subType;
+      }
     }
   });
 
