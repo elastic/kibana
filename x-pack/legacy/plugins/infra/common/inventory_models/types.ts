@@ -5,6 +5,7 @@
  */
 
 import * as rt from 'io-ts';
+import { InfraSnapshotMetricType } from '../graphql/types';
 
 export const ItemTypeRT = rt.keyof({
   host: null,
@@ -259,9 +260,22 @@ export const SnapshotModelRT = rt.record(
 );
 export type SnapshotModel = rt.TypeOf<typeof SnapshotModelRT>;
 
+export const SnapshotMetricTypeRT = rt.keyof({
+  count: null,
+  cpu: null,
+  load: null,
+  memory: null,
+  tx: null,
+  rx: null,
+  logRate: null,
+});
+
+export type SnapshotMetricType = rt.TypeOf<typeof SnapshotMetricTypeRT>;
+
 export interface InventoryMetrics {
   tsvb: { [name: string]: TSVBMetricModelCreator };
-  snapshot?: { [name: string]: SnapshotModel };
+  snapshot: { [name: string]: SnapshotModel };
+  defaultSnapshot: SnapshotMetricType;
 }
 
 export interface InventoryModel {
