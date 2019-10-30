@@ -21,7 +21,7 @@ import * as Rx from 'rxjs';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { catchError, filter, mergeMap, tap } from 'rxjs/operators';
-import { HttpServiceBase } from '../../../../../src/core/public';
+import { HttpServiceBase } from 'src/core/public';
 import { ApiItem, NewsfeedItem, FetchResult } from '../../types';
 
 const DEFAULT_LANGUAGE = 'en';
@@ -29,7 +29,7 @@ const NEWSFEED_MAIN_INTERVAL = 120000; // A main interval to check for need to r
 const NEWSFEED_FETCH_INTERVAL = moment.duration(1, 'day'); // how often to actually fetch the API
 const NEWSFEED_LAST_FETCH_STORAGE_KEY = 'newsfeed.lastfetchtime';
 const NEWSFEED_HASH_SET_STORAGE_KEY = 'newsfeed.hashes';
-const NEWSFEED_SERVICE_URL_TEMPLATE = 'https://feeds.elastic.co/kibana/v{VERSION}.json';
+const NEWSFEED_SERVICE_PATH_TEMPLATE = '/kibana/v{VERSION}.json';
 
 class NewsfeedApiDriver {
   private readonly userLanguage: string;
@@ -68,10 +68,13 @@ class NewsfeedApiDriver {
     return { previous: oldHashes, current: updatedHashes };
   }
 
-  fetchNewsfeedItems(http: HttpServiceBase): Rx.Observable<ApiItem[] | null> {
+  fetchNewsfeedItems(http: HttpServiceBase, urlRoot: string): Rx.Observable<ApiItem[] | null> {
+    const urlPath = NEWSFEED_SERVICE_PATH_TEMPLATE.replace('{VERSION}', this.kibanaVersion);
+    const fullUrl = urlRoot + urlPath;
+
     return Rx.from(
       http
-        .fetch(NEWSFEED_SERVICE_URL_TEMPLATE.replace('{VERSION}', this.kibanaVersion), {
+        .fetch(fullUrl, {
           method: 'GET',
         })
         .then(({ items }) => items)
@@ -147,13 +150,14 @@ class NewsfeedApiDriver {
  */
 export function getApi(
   http: HttpServiceBase,
+  urlRoot: string,
   kibanaVersion: string
 ): Rx.Observable<void | FetchResult> {
   const userLanguage = i18n.getLocale();
   const driver = new NewsfeedApiDriver(kibanaVersion, userLanguage);
   return Rx.timer(0, NEWSFEED_MAIN_INTERVAL).pipe(
     filter(() => driver.shouldFetch()),
-    mergeMap(() => driver.fetchNewsfeedItems(http)),
+    mergeMap(() => driver.fetchNewsfeedItems(http, urlRoot)),
     filter(items => items != null && items.length > 0),
     tap(() => driver.updateLastFetch()),
     mergeMap(items => driver.modelItems(items!))

@@ -22,8 +22,8 @@ import { catchError, takeUntil } from 'rxjs/operators';
 import ReactDOM from 'react-dom';
 import React from 'react';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { getApi } from './lib/api';
 import { NewsfeedNavButton } from './components/newsfeed_header_nav_button';
+import { getApi } from './lib/api';
 
 export type Setup = void;
 export type Start = void;
@@ -49,8 +49,9 @@ export class NewsfeedPublicPlugin implements Plugin<Setup, Start> {
       mount,
     });
 
-    const { http } = core;
-    const api$ = getApi(http, this.kibanaVersion).pipe(
+    const { http, injectedMetadata } = core;
+    const urlRoot: string = injectedMetadata.getInjectedVar('newsfeedServiceUrlRoot') as string;
+    const api$ = getApi(http, urlRoot, this.kibanaVersion).pipe(
       takeUntil(this.stop$), // stop the interval when stop method is called
       catchError(() => {
         // show a message to try again later?

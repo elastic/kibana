@@ -19,12 +19,34 @@
 
 import { resolve } from 'path';
 import { LegacyPluginApi, LegacyPluginSpec, ArrayOrItem } from 'src/legacy/plugin_discovery/types';
+import { Legacy } from 'kibana';
+import { PLUGIN_ID, DEFAULT_SERVICE_URLROOT } from './constants';
 
 // eslint-disable-next-line import/no-default-export
 export default function(kibana: LegacyPluginApi): ArrayOrItem<LegacyPluginSpec> {
-  return new kibana.Plugin({
+  const pluginSpec: Legacy.PluginSpecOptions = {
+    id: PLUGIN_ID,
+    config(Joi: any) {
+      return Joi.object({
+        enabled: Joi.boolean().default(true),
+        urlRoot: Joi.when('$dev', {
+          is: true,
+          then: Joi.string().default(DEFAULT_SERVICE_URLROOT),
+          otherwise: Joi.string()
+            .default(DEFAULT_SERVICE_URLROOT)
+            .valid(DEFAULT_SERVICE_URLROOT),
+        }), // urlRoot can only be changed from default when running in dev
+      }).default();
+    },
     uiExports: {
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
+      injectDefaultVars(server) {
+        const config = server.config();
+        return {
+          newsfeedServiceUrlRoot: config.get('newsfeed.urlRoot'),
+        };
+      },
     },
-  });
+  };
+  return new kibana.Plugin(pluginSpec);
 }

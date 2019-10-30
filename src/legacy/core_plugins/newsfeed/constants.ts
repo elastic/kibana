@@ -17,9 +17,5 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../../src/core/public';
-import { NewsfeedPublicPlugin } from './plugin';
-
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new NewsfeedPublicPlugin(initializerContext);
-}
+export const PLUGIN_ID = 'newsfeed';
+export const DEFAULT_SERVICE_URLROOT = 'https://feeds.elastic.co';
