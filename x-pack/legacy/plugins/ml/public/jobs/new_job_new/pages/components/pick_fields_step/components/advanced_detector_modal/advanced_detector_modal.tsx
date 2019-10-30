@@ -83,7 +83,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
     createExcludeFrequentOption(detector.excludeFrequent)
   );
   const [descriptionOption, setDescriptionOption] = useState(detector.description || '');
-  const [fieldsEnabled, setFieldsEnabled] = useState(true);
+  const [splitFieldsEnabled, setSplitFieldsEnabled] = useState(true);
   const [excludeFrequentEnabled, setExcludeFrequentEnabled] = useState(true);
   const [fieldOptionEnabled, setFieldOptionEnabled] = useState(true);
   const { descriptionPlaceholder, setDescriptionPlaceholder } = useDetectorPlaceholder(detector);
@@ -139,20 +139,22 @@ export const AdvancedDetectorModal: FC<Props> = ({
     const partitionField = getField(partitionFieldOption.label);
 
     if (agg !== null) {
-      setFieldsEnabled(true);
       setCurrentFieldOptions(agg);
 
       if (isFieldlessAgg(agg) && eventRateField !== undefined) {
+        setSplitFieldsEnabled(true);
         setFieldOption(emptyOption);
         setFieldOptionEnabled(false);
         field = eventRateField;
       } else {
+        setSplitFieldsEnabled(field !== null);
         setFieldOptionEnabled(true);
-        // only enable exclude frequent if there is a by or over selected
-        setExcludeFrequentEnabled(byField !== null || overField !== null);
       }
+      // only enable exclude frequent if there is a by or over selected
+      setExcludeFrequentEnabled(byField !== null || overField !== null);
     } else {
-      setFieldsEnabled(false);
+      setSplitFieldsEnabled(false);
+      setFieldOptionEnabled(false);
     }
 
     const dtr: RichDetector = {
@@ -179,7 +181,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
 
   useEffect(() => {
     const agg = getAgg(aggOption.label);
-    setFieldsEnabled(aggOption.label !== '');
+    setSplitFieldsEnabled(aggOption.label !== '');
     if (agg !== null) {
       setFieldOptionEnabled(isFieldlessAgg(agg) === false);
 
@@ -202,7 +204,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
 
   function saveEnabled() {
     return (
-      fieldsEnabled &&
+      splitFieldsEnabled &&
       (fieldOptionEnabled === false || (fieldOptionEnabled === true && fieldOption.label !== ''))
     );
   }
@@ -211,18 +213,18 @@ export const AdvancedDetectorModal: FC<Props> = ({
     <ModalWrapper onCreateClick={onCreateClick} closeModal={closeModal} saveEnabled={saveEnabled()}>
       <Fragment>
         <EuiFlexGroup>
-          <EuiFlexItem>
+          <EuiFlexItem data-test-subj="mlAdvancedFunctionSelect">
             <AggDescription>
               <EuiComboBox
                 singleSelection={{ asPlainText: true }}
                 options={aggOptions}
-                selectedOptions={[aggOption]}
+                selectedOptions={createSelectedOptions(aggOption, aggOptions)}
                 onChange={onOptionChange(setAggOption)}
                 isClearable={true}
               />
             </AggDescription>
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem data-test-subj="mlAdvancedFieldSelect">
             <FieldDescription>
               <EuiComboBox
                 singleSelection={{ asPlainText: true }}
@@ -230,14 +232,14 @@ export const AdvancedDetectorModal: FC<Props> = ({
                 selectedOptions={createSelectedOptions(fieldOption, currentFieldOptions)}
                 onChange={onOptionChange(setFieldOption)}
                 isClearable={true}
-                isDisabled={fieldsEnabled === false || fieldOptionEnabled === false}
+                isDisabled={fieldOptionEnabled === false}
               />
             </FieldDescription>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiHorizontalRule margin="l" />
         <EuiFlexGrid columns={2}>
-          <EuiFlexItem>
+          <EuiFlexItem data-test-subj="mlAdvancedByFieldSelect">
             <ByFieldDescription>
               <EuiComboBox
                 singleSelection={{ asPlainText: true }}
@@ -245,11 +247,11 @@ export const AdvancedDetectorModal: FC<Props> = ({
                 selectedOptions={createSelectedOptions(byFieldOption, splitFieldOptions)}
                 onChange={onOptionChange(setByFieldOption)}
                 isClearable={true}
-                isDisabled={fieldsEnabled === false}
+                isDisabled={splitFieldsEnabled === false}
               />
             </ByFieldDescription>
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem data-test-subj="mlAdvancedOverFieldSelect">
             <OverFieldDescription>
               <EuiComboBox
                 singleSelection={{ asPlainText: true }}
@@ -257,11 +259,11 @@ export const AdvancedDetectorModal: FC<Props> = ({
                 selectedOptions={createSelectedOptions(overFieldOption, splitFieldOptions)}
                 onChange={onOptionChange(setOverFieldOption)}
                 isClearable={true}
-                isDisabled={fieldsEnabled === false}
+                isDisabled={splitFieldsEnabled === false}
               />
             </OverFieldDescription>
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem data-test-subj="mlAdvancedPartitionFieldSelect">
             <PartitionFieldDescription>
               <EuiComboBox
                 singleSelection={{ asPlainText: true }}
@@ -269,19 +271,22 @@ export const AdvancedDetectorModal: FC<Props> = ({
                 selectedOptions={createSelectedOptions(partitionFieldOption, splitFieldOptions)}
                 onChange={onOptionChange(setPartitionFieldOption)}
                 isClearable={true}
-                isDisabled={fieldsEnabled === false}
+                isDisabled={splitFieldsEnabled === false}
               />
             </PartitionFieldDescription>
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem data-test-subj="mlAdvancedExcludeFrequentSelect">
             <ExcludeFrequentDescription>
               <EuiComboBox
                 singleSelection={{ asPlainText: true }}
                 options={excludeFrequentOptions}
-                selectedOptions={[excludeFrequentOption]}
+                selectedOptions={createSelectedOptions(
+                  excludeFrequentOption,
+                  excludeFrequentOptions
+                )}
                 onChange={onOptionChange(setExcludeFrequentOption)}
                 isClearable={true}
-                isDisabled={fieldsEnabled === false || excludeFrequentEnabled === false}
+                isDisabled={splitFieldsEnabled === false || excludeFrequentEnabled === false}
               />
             </ExcludeFrequentDescription>
           </EuiFlexItem>
@@ -296,6 +301,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
                 placeholder={descriptionPlaceholder}
                 value={descriptionOption}
                 onChange={e => setDescriptionOption(e.target.value)}
+                data-test-subj="mlAdvancedDetectorDescriptionInput"
               />
             </DescriptionDescription>
           </EuiFlexItem>
@@ -393,10 +399,13 @@ function createDefaultDescription(dtr: RichDetector) {
 // if the options list only contains one option and nothing has been selected, set
 // selectedOptions list to be an empty array
 function createSelectedOptions(
-  option: EuiComboBoxOptionProps,
+  selectedOption: EuiComboBoxOptionProps,
   options: EuiComboBoxOptionProps[]
 ): EuiComboBoxOptionProps[] {
-  return options.length === 1 && options[0].label !== option.label ? [] : [option];
+  return (options.length === 1 && options[0].label !== selectedOption.label) ||
+    selectedOption.label === ''
+    ? []
+    : [selectedOption];
 }
 
 function comboBoxOptionsSort(a: EuiComboBoxOptionProps, b: EuiComboBoxOptionProps) {

@@ -4,18 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo } from 'react';
-import moment, { Moment } from 'moment';
-
-import { i18n } from '@kbn/i18n';
 import {
-  EuiDescribedFormGroup,
-  EuiFormRow,
   EuiDatePicker,
+  EuiDatePickerProps,
+  EuiDescribedFormGroup,
   EuiFlexGroup,
   EuiFormControlLayout,
+  EuiFormRow,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import moment, { Moment } from 'moment';
+import React, { useMemo } from 'react';
+
+import { euiStyled } from '../../../../../../../../common/eui_styled_components';
 
 const startTimeLabel = i18n.translate('xpack.infra.analysisSetup.startTimeLabel', {
   defaultMessage: 'Start time',
@@ -84,7 +86,7 @@ export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
           <EuiFormControlLayout
             clear={startTime ? { onClick: () => setStartTime(undefined) } : undefined}
           >
-            <EuiDatePicker
+            <FixedDatePicker
               showTimeSelect
               selected={startTimeValue}
               onChange={date => setStartTime(selectedDateToParam(date))}
@@ -105,7 +107,7 @@ export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
           <EuiFormControlLayout
             clear={endTime ? { onClick: () => setEndTime(undefined) } : undefined}
           >
-            <EuiDatePicker
+            <FixedDatePicker
               showTimeSelect
               selected={endTimeValue}
               onChange={date => setEndTime(selectedDateToParam(date))}
@@ -129,3 +131,18 @@ export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
     </EuiDescribedFormGroup>
   );
 };
+
+const FixedDatePicker = euiStyled(
+  ({
+    className,
+    inputClassName,
+    ...datePickerProps
+  }: {
+    className?: string;
+    inputClassName?: string;
+  } & EuiDatePickerProps) => (
+    <EuiDatePicker {...datePickerProps} className={inputClassName} popperClassName={className} />
+  )
+)`
+  z-index: 3 !important;
+`;
