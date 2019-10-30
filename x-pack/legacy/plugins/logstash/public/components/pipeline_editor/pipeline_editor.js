@@ -325,7 +325,7 @@ class PipelineEditorUi extends React.Component {
                     maxLines: Infinity,
                     readOnly: this.props.licenseService.isReadOnly,
                   }}
-                  theme="github"
+                  theme="textmate"
                   value={this.state.pipeline.pipeline}
                   width={'1017'}
                 />
