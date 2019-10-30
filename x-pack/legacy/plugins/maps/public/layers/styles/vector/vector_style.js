@@ -7,7 +7,6 @@
 import _ from 'lodash';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { getColorRampStops } from '../color_utils';
 import { VectorStyleEditor } from './components/vector_style_editor';
 import { getDefaultProperties, vectorStyles } from './vector_style_defaults';
 import { AbstractStyle } from '../abstract_style';
@@ -16,25 +15,28 @@ import { VectorIcon } from './components/legend/vector_icon';
 import { VectorStyleLegend } from './components/legend/vector_style_legend';
 import { VECTOR_SHAPE_TYPES } from '../../sources/vector_feature_types';
 import { SYMBOLIZE_AS_CIRCLE, SYMBOLIZE_AS_ICON } from './vector_constants';
-import {
-  getMakiSymbolAnchor,
-  LARGE_MAKI_ICON_SIZE,
-  SMALL_MAKI_ICON_SIZE,
-  HALF_LARGE_MAKI_ICON_SIZE
-} from './symbol_utils';
+import { getMakiSymbolAnchor } from './symbol_utils';
+import { getComputedFieldName, getComputedFieldNamePrefix } from './style_util';
+import { StaticStyleProperty } from './properties/static_style_property';
+import { DynamicStyleProperty } from './properties/dynamic_style_property';
+import { DynamicSizeProperty } from './properties/dynamic_size_property';
+import { StaticSizeProperty } from './properties/static_size_property';
+import { StaticColorProperty } from './properties/static_color_property';
+import { DynamicColorProperty } from './properties/dynamic_color_property';
+import { StaticOrientationProperty } from './properties/static_orientation_property';
+import { DynamicOrientationProperty } from './properties/dynamic_orientation_property';
+
+const POINTS = [GEO_JSON_TYPE.POINT, GEO_JSON_TYPE.MULTI_POINT];
+const LINES = [GEO_JSON_TYPE.LINE_STRING, GEO_JSON_TYPE.MULTI_LINE_STRING];
+const POLYGONS = [GEO_JSON_TYPE.POLYGON, GEO_JSON_TYPE.MULTI_POLYGON];
 
 export class VectorStyle extends AbstractStyle {
 
   static type = 'VECTOR';
   static STYLE_TYPE = { 'DYNAMIC': 'DYNAMIC', 'STATIC': 'STATIC' };
 
-  static getComputedFieldName(styleName, fieldName) {
-    return `${VectorStyle.getComputedFieldNamePrefix(fieldName)}__${styleName}`;
-  }
-
-  static getComputedFieldNamePrefix(fieldName) {
-    return `__kbn__dynamic__${fieldName}`;
-  }
+  static getComputedFieldName = getComputedFieldName;
+  static getComputedFieldNamePrefix = getComputedFieldNamePrefix;
 
   constructor(descriptor = {}, source) {
     super();
@@ -43,6 +45,13 @@ export class VectorStyle extends AbstractStyle {
       ...descriptor,
       ...VectorStyle.createDescriptor(descriptor.properties),
     };
+
+    this._lineColorStyleProperty = this._makeStyleProperty(vectorStyles.LINE_COLOR, this._descriptor.properties[vectorStyles.LINE_COLOR]);
+    this._fillColorStyleProperty = this._makeStyleProperty(vectorStyles.FILL_COLOR, this._descriptor.properties[vectorStyles.FILL_COLOR]);
+    this._lineWidthStyleProperty = this._makeStyleProperty(vectorStyles.LINE_WIDTH, this._descriptor.properties[vectorStyles.LINE_WIDTH]);
+    this._iconSizeStyleProperty = this._makeStyleProperty(vectorStyles.ICON_SIZE, this._descriptor.properties[vectorStyles.ICON_SIZE]);
+    // eslint-disable-next-line max-len
+    this._iconOrientationProperty = this._makeStyleProperty(vectorStyles.ICON_ORIENTATION, this._descriptor.properties[vectorStyles.ICON_ORIENTATION]);
   }
 
   static createDescriptor(properties = {}) {
@@ -168,13 +177,13 @@ export class VectorStyle extends AbstractStyle {
     let hasPolygons = false;
     for (let i = 0; i < features.length; i++) {
       const feature = features[i];
-      if (!hasPoints && [GEO_JSON_TYPE.POINT, GEO_JSON_TYPE.MULTI_POINT].includes(feature.geometry.type)) {
+      if (!hasPoints && POINTS.includes(feature.geometry.type)) {
         hasPoints = true;
       }
-      if (!hasLines && [GEO_JSON_TYPE.LINE_STRING, GEO_JSON_TYPE.MULTI_LINE_STRING].includes(feature.geometry.type)) {
+      if (!hasLines && LINES.includes(feature.geometry.type)) {
         hasLines = true;
       }
-      if (!hasPolygons && [GEO_JSON_TYPE.POLYGON, GEO_JSON_TYPE.MULTI_POLYGON].includes(feature.geometry.type)) {
+      if (!hasPolygons && POLYGONS.includes(feature.geometry.type)) {
         hasPolygons = true;
       }
 
@@ -430,210 +439,89 @@ export class VectorStyle extends AbstractStyle {
     return hasGeoJsonProperties;
   }
 
-  _getMBDataDrivenColor({ targetName, colorStops, isSteps }) {
-    if (isSteps) {
-      const firstStopValue = colorStops[0];
-      const lessThenFirstStopValue = firstStopValue - 1;
-      return [
-        'step',
-        ['coalesce', ['feature-state', targetName], lessThenFirstStopValue],
-        'rgba(0,0,0,0)', // MB will assign the base value to any features that is below the first stop value
-        ...colorStops
-      ];
-    }
-
-    return [
-      'interpolate',
-      ['linear'],
-      ['coalesce', ['feature-state', targetName], -1],
-      -1, 'rgba(0,0,0,0)',
-      ...colorStops
-    ];
-  }
-
-  _getMbDataDrivenSize({ targetName, minSize, maxSize }) {
-    return   [
-      'interpolate',
-      ['linear'],
-      ['coalesce', ['feature-state', targetName], 0],
-      0, minSize,
-      1, maxSize
-    ];
-  }
-
-  _getMBColor(styleName, styleDescriptor) {
-    const isStatic = styleDescriptor.type === VectorStyle.STYLE_TYPE.STATIC;
-    if (isStatic) {
-      return _.get(styleDescriptor, 'options.color', null);
-    }
-
-    const isDynamicConfigComplete = _.has(styleDescriptor, 'options.field.name')
-      && _.has(styleDescriptor, 'options.color');
-    if (!isDynamicConfigComplete) {
-      return null;
-    }
-
-    if (styleDescriptor.options.useCustomColorRamp &&
-      (!styleDescriptor.options.customColorRamp ||
-      !styleDescriptor.options.customColorRamp.length)) {
-      return null;
-    }
-
-    return this._getMBDataDrivenColor({
-      targetName: VectorStyle.getComputedFieldName(styleName, styleDescriptor.options.field.name),
-      colorStops: this._getMBColorStops(styleDescriptor),
-      isSteps: styleDescriptor.options.useCustomColorRamp,
-    });
-  }
-
-  _getMBColorStops(styleDescriptor) {
-    if (styleDescriptor.options.useCustomColorRamp) {
-      return styleDescriptor.options.customColorRamp.reduce((accumulatedStops, nextStop) => {
-        return [...accumulatedStops, nextStop.stop, nextStop.color];
-      }, []);
-    }
-
-    return getColorRampStops(styleDescriptor.options.color);
-  }
-
-  _isSizeDynamicConfigComplete(styleDescriptor) {
-    return _.has(styleDescriptor, 'options.field.name')
-      && _.has(styleDescriptor, 'options.minSize')
-      && _.has(styleDescriptor, 'options.maxSize');
-  }
-
-  _getMbSize(styleName, styleDescriptor) {
-    if (styleDescriptor.type === VectorStyle.STYLE_TYPE.STATIC) {
-      return styleDescriptor.options.size;
-    }
-
-    if (this._isSizeDynamicConfigComplete(styleDescriptor)) {
-      return this._getMbDataDrivenSize({
-        targetName: VectorStyle.getComputedFieldName(styleName, styleDescriptor.options.field.name),
-        minSize: styleDescriptor.options.minSize,
-        maxSize: styleDescriptor.options.maxSize,
-      });
-    }
-
-    return null;
+  arePointsSymbolizedAsCircles() {
+    return this._descriptor.properties.symbol.options.symbolizeAs === SYMBOLIZE_AS_CIRCLE;
   }
 
   setMBPaintProperties({ alpha, mbMap, fillLayerId, lineLayerId }) {
-    if (this._descriptor.properties.fillColor) {
-      const color = this._getMBColor(vectorStyles.FILL_COLOR, this._descriptor.properties.fillColor);
-      mbMap.setPaintProperty(fillLayerId, 'fill-color', color);
-      mbMap.setPaintProperty(fillLayerId, 'fill-opacity', alpha);
-    } else {
-      mbMap.setPaintProperty(fillLayerId, 'fill-color', null);
-      mbMap.setPaintProperty(fillLayerId, 'fill-opacity', 0);
-    }
-
-    if (this._descriptor.properties.lineColor) {
-      const color = this._getMBColor(vectorStyles.LINE_COLOR, this._descriptor.properties.lineColor);
-      mbMap.setPaintProperty(lineLayerId, 'line-color', color);
-      mbMap.setPaintProperty(lineLayerId, 'line-opacity', alpha);
-
-    } else {
-      mbMap.setPaintProperty(lineLayerId, 'line-color', null);
-      mbMap.setPaintProperty(lineLayerId, 'line-opacity', 0);
-    }
-
-    if (this._descriptor.properties.lineWidth) {
-      const lineWidth = this._getMbSize(vectorStyles.LINE_WIDTH, this._descriptor.properties.lineWidth);
-      mbMap.setPaintProperty(lineLayerId, 'line-width', lineWidth);
-    } else {
-      mbMap.setPaintProperty(lineLayerId, 'line-width', 0);
-    }
+    this._fillColorStyleProperty.syncFillColorWithMb(fillLayerId, mbMap, alpha);
+    this._lineColorStyleProperty.syncLineColorWithMb(lineLayerId, mbMap, alpha);
+    this._lineWidthStyleProperty.syncLineWidthWithMb(lineLayerId, mbMap);
   }
 
   setMBPaintPropertiesForPoints({ alpha, mbMap, pointLayerId }) {
-    if (this._descriptor.properties.fillColor) {
-      const color = this._getMBColor(vectorStyles.FILL_COLOR, this._descriptor.properties.fillColor);
-      mbMap.setPaintProperty(pointLayerId, 'circle-color', color);
-      mbMap.setPaintProperty(pointLayerId, 'circle-opacity', alpha);
-    } else {
-      mbMap.setPaintProperty(pointLayerId, 'circle-color', null);
-      mbMap.setPaintProperty(pointLayerId, 'circle-opacity', 0);
-    }
-    if (this._descriptor.properties.lineColor) {
-      const color = this._getMBColor(vectorStyles.LINE_COLOR, this._descriptor.properties.lineColor);
-      mbMap.setPaintProperty(pointLayerId, 'circle-stroke-color', color);
-      mbMap.setPaintProperty(pointLayerId, 'circle-stroke-opacity', alpha);
-
-    } else {
-      mbMap.setPaintProperty(pointLayerId, 'circle-stroke-color', null);
-      mbMap.setPaintProperty(pointLayerId, 'circle-stroke-opacity', 0);
-    }
-    if (this._descriptor.properties.lineWidth) {
-      const lineWidth = this._getMbSize(vectorStyles.LINE_WIDTH, this._descriptor.properties.lineWidth);
-      mbMap.setPaintProperty(pointLayerId, 'circle-stroke-width', lineWidth);
-    } else {
-      mbMap.setPaintProperty(pointLayerId, 'circle-stroke-width', 0);
-    }
-    if (this._descriptor.properties.iconSize) {
-      const iconSize = this._getMbSize(vectorStyles.ICON_SIZE, this._descriptor.properties.iconSize);
-      mbMap.setPaintProperty(pointLayerId, 'circle-radius', iconSize);
-    } else {
-      mbMap.setPaintProperty(pointLayerId, 'circle-radius', 0);
-    }
+    this._fillColorStyleProperty.syncCircleColorWithMb(pointLayerId, mbMap, alpha);
+    this._lineColorStyleProperty.syncCircleStrokeWithMb(pointLayerId, mbMap, alpha);
+    this._lineWidthStyleProperty.syncCircleStrokeWidthWithMb(pointLayerId, mbMap);
+    this._iconSizeStyleProperty.syncCircleRadiusWithMb(pointLayerId, mbMap);
   }
 
-  async setMBSymbolPropertiesForPoints({ mbMap, symbolLayerId, alpha }) {
-    mbMap.setLayoutProperty(symbolLayerId, 'icon-ignore-placement', true);
+  setMBSymbolPropertiesForPoints({ mbMap, symbolLayerId, alpha }) {
 
     const symbolId = this._descriptor.properties.symbol.options.symbolId;
+    mbMap.setLayoutProperty(symbolLayerId, 'icon-ignore-placement', true);
     mbMap.setLayoutProperty(symbolLayerId, 'icon-anchor', getMakiSymbolAnchor(symbolId));
-    const color = this._getMBColor(vectorStyles.FILL_COLOR, this._descriptor.properties.fillColor);
-    const haloColor = this._getMBColor(vectorStyles.LINE_COLOR, this._descriptor.properties.lineColor);
-    const haloWidth = this._getMbSize(vectorStyles.LINE_WIDTH, this._descriptor.properties.lineWidth);
-    // icon-color is only supported on SDF icons.
-    mbMap.setPaintProperty(symbolLayerId, 'icon-color', color);
-    mbMap.setPaintProperty(symbolLayerId, 'icon-halo-color', haloColor);
-    mbMap.setPaintProperty(symbolLayerId, 'icon-halo-width', haloWidth);
     mbMap.setPaintProperty(symbolLayerId, 'icon-opacity', alpha);
 
-    // circle sizing is by radius
-    // to make icons be similiar in size to circles then have to deal with icon in half width measurements
-    const iconSize = this._descriptor.properties.iconSize;
-    if (iconSize.type === VectorStyle.STYLE_TYPE.STATIC) {
-      const iconPixels = iconSize.options.size >= HALF_LARGE_MAKI_ICON_SIZE
-        ? LARGE_MAKI_ICON_SIZE
-        : SMALL_MAKI_ICON_SIZE;
-      mbMap.setLayoutProperty(symbolLayerId, 'icon-image', `${symbolId}-${iconPixels}`);
+    // icon-color is only supported on SDF icons.
+    this._fillColorStyleProperty.syncIconColorWithMb(symbolLayerId, mbMap);
+    this._lineColorStyleProperty.syncHaloBorderColorWithMb(symbolLayerId, mbMap);
+    this._lineWidthStyleProperty.syncHaloWidthWithMb(symbolLayerId, mbMap);
+    this._iconSizeStyleProperty.syncIconImageAndSizeWithMb(symbolLayerId, mbMap, symbolId);
+    this._iconOrientationProperty.syncIconRotationWithMb(symbolLayerId, mbMap);
 
-      const halfIconPixels = iconPixels / 2;
-      mbMap.setLayoutProperty(symbolLayerId, 'icon-size', iconSize.options.size / halfIconPixels);
-    } else if (this._isSizeDynamicConfigComplete(iconSize)) {
-      const iconPixels = iconSize.options.maxSize >= HALF_LARGE_MAKI_ICON_SIZE
-        ? LARGE_MAKI_ICON_SIZE
-        : SMALL_MAKI_ICON_SIZE;
-      mbMap.setLayoutProperty(symbolLayerId, 'icon-image', `${symbolId}-${iconPixels}`);
+  }
 
-      const halfIconPixels = iconPixels / 2;
-      const targetName = VectorStyle.getComputedFieldName(vectorStyles.ICON_SIZE, iconSize.options.field.name);
-      // Using property state instead of feature-state because layout properties do not support feature-state
-      mbMap.setLayoutProperty(symbolLayerId, 'icon-size', [
-        'interpolate',
-        ['linear'],
-        ['coalesce', ['get', targetName], 0],
-        0, iconSize.options.minSize / halfIconPixels,
-        1, iconSize.options.maxSize / halfIconPixels
-      ]);
-    }
-
-    const iconOrientation = this._descriptor.properties.iconOrientation;
-    if (iconOrientation.type === VectorStyle.STYLE_TYPE.STATIC) {
-      mbMap.setLayoutProperty(symbolLayerId, 'icon-rotate', iconOrientation.options.orientation);
-    } else if (_.has(iconOrientation, 'options.field.name')) {
-      const targetName = VectorStyle.getComputedFieldName(vectorStyles.ICON_ORIENTATION, iconOrientation.options.field.name);
-      // Using property state instead of feature-state because layout properties do not support feature-state
-      mbMap.setLayoutProperty(symbolLayerId, 'icon-rotate', [
-        'coalesce', ['get', targetName], 0
-      ]);
+  _makeSizeProperty(descriptor, styleName) {
+    if (!descriptor || !descriptor.options) {
+      return new StaticSizeProperty({ size: 0 }, styleName);
+    } else if (descriptor.type === StaticStyleProperty.type) {
+      return new StaticSizeProperty(descriptor.options, styleName);
+    } else if (descriptor.type === DynamicStyleProperty.type) {
+      return new DynamicSizeProperty(descriptor.options, styleName);
+    } else {
+      throw new Error(`${descriptor} not implemented`);
     }
   }
 
-  arePointsSymbolizedAsCircles() {
-    return this._descriptor.properties.symbol.options.symbolizeAs === SYMBOLIZE_AS_CIRCLE;
+  _makeColorProperty(descriptor, styleName) {
+    if (!descriptor || !descriptor.options) {
+      return new StaticColorProperty({ color: null }, styleName);
+    } else if (descriptor.type === StaticStyleProperty.type) {
+      return new StaticColorProperty(descriptor.options, styleName);
+    } else if (descriptor.type === DynamicStyleProperty.type) {
+      return new DynamicColorProperty(descriptor.options, styleName);
+    } else {
+      throw new Error(`${descriptor} not implemented`);
+    }
+  }
+
+  _makeOrientationProperty(descriptor, styleName) {
+    if (!descriptor || !descriptor.options) {
+      return new StaticOrientationProperty({ orientation: 0 }, styleName);
+    } else if (descriptor.type === StaticStyleProperty.type) {
+      return new StaticOrientationProperty(descriptor.options, styleName);
+    } else if (descriptor.type === DynamicStyleProperty.type) {
+      return new DynamicOrientationProperty(descriptor.options, styleName);
+    } else {
+      throw new Error(`${descriptor} not implemented`);
+    }
+  }
+
+  _makeStyleProperty(propertyName, descriptor) {
+
+    if (propertyName === vectorStyles.LINE_WIDTH) {
+      return this._makeSizeProperty(descriptor, vectorStyles.LINE_WIDTH);
+    } else if (propertyName === vectorStyles.ICON_SIZE) {
+      return this._makeSizeProperty(descriptor, vectorStyles.ICON_SIZE);
+    } else if (propertyName === vectorStyles.LINE_COLOR) {
+      return this._makeColorProperty(descriptor, vectorStyles.LINE_COLOR);
+    } else if (propertyName === vectorStyles.FILL_COLOR) {
+      return this._makeColorProperty(descriptor, vectorStyles.FILL_COLOR);
+    } else if (propertyName === vectorStyles.ICON_ORIENTATION) {
+      return this._makeOrientationProperty(descriptor, vectorStyles.ICON_ORIENTATION);
+    }
+
+    throw new Error(`${propertyName} not implemented`);
   }
 }
