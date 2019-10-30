@@ -97,6 +97,14 @@ declare module 'hapi' {
   interface ResponseToolkit {
     renderAppWithDefaultConfig(app: UiApp): ResponseObject;
   }
+
+  /**
+   * Extend the Hapi interface for application-specific configuration on routes
+   * @internal
+   */
+  interface RouteOptionsApp {
+    extendsSession: boolean;
+  }
 }
 
 type KbnMixinFunc = (kbnServer: KbnServer, server: Server, config: any) => Promise<any> | void;
