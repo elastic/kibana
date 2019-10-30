@@ -213,7 +213,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
     <ModalWrapper onCreateClick={onCreateClick} closeModal={closeModal} saveEnabled={saveEnabled()}>
       <Fragment>
         <EuiFlexGroup>
-          <EuiFlexItem>
+          <EuiFlexItem data-test-subj="mlAdvancedFunctionSelect">
             <AggDescription>
               <EuiComboBox
                 singleSelection={{ asPlainText: true }}
@@ -224,7 +224,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
               />
             </AggDescription>
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem data-test-subj="mlAdvancedFieldSelect">
             <FieldDescription>
               <EuiComboBox
                 singleSelection={{ asPlainText: true }}
@@ -239,7 +239,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
         </EuiFlexGroup>
         <EuiHorizontalRule margin="l" />
         <EuiFlexGrid columns={2}>
-          <EuiFlexItem>
+          <EuiFlexItem data-test-subj="mlAdvancedByFieldSelect">
             <ByFieldDescription>
               <EuiComboBox
                 singleSelection={{ asPlainText: true }}
@@ -251,7 +251,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
               />
             </ByFieldDescription>
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem data-test-subj="mlAdvancedOverFieldSelect">
             <OverFieldDescription>
               <EuiComboBox
                 singleSelection={{ asPlainText: true }}
@@ -263,7 +263,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
               />
             </OverFieldDescription>
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem data-test-subj="mlAdvancedPartitionFieldSelect">
             <PartitionFieldDescription>
               <EuiComboBox
                 singleSelection={{ asPlainText: true }}
@@ -275,7 +275,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
               />
             </PartitionFieldDescription>
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem data-test-subj="mlAdvancedExcludeFrequentSelect">
             <ExcludeFrequentDescription>
               <EuiComboBox
                 singleSelection={{ asPlainText: true }}
@@ -301,6 +301,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
                 placeholder={descriptionPlaceholder}
                 value={descriptionOption}
                 onChange={e => setDescriptionOption(e.target.value)}
+                data-test-subj="mlAdvancedDetectorDescriptionInput"
               />
             </DescriptionDescription>
           </EuiFlexItem>

@@ -12,16 +12,17 @@ import { IStackframe } from '../../../../typings/es_schemas/raw/fields/Stackfram
 import { fontFamilyCode, fontSize, px, units } from '../../../style/variables';
 
 const FileDetails = styled.div`
-  color: ${theme.euiColorMediumShade};
-  padding: ${px(units.half)};
+  color: ${theme.euiColorDarkShade};
+  padding: ${px(units.half)} 0;
   font-family: ${fontFamilyCode};
   font-size: ${fontSize};
 `;
+
 const LibraryFrameFileDetail = styled.span`
   color: ${theme.euiColorDarkShade};
 `;
+
 const AppFrameFileDetail = styled.span`
-  font-weight: bold;
   color: ${theme.euiColorFullShade};
 `;
 

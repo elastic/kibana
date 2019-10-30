@@ -21,7 +21,10 @@ import moment from 'moment';
 import { buildRangeFilter } from '@kbn/es-query';
 import { IBucketDateHistogramAggConfig } from '../date_histogram';
 
-export const createFilterDateHistogram = (agg: IBucketDateHistogramAggConfig, key: string) => {
+export const createFilterDateHistogram = (
+  agg: IBucketDateHistogramAggConfig,
+  key: string | number
+) => {
   const start = moment(key);
   const interval = agg.buckets.getInterval();
 

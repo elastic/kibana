@@ -86,10 +86,12 @@ export const createContext = <
     comparator?: Comparator<Result>
   ): Result => {
     const { state$, get } = useStore();
+    /* eslint-disable react-hooks/exhaustive-deps */
     const [observable$, unsubscribe] = useMemo(
       () => observableSelector(get(), state$, selector, comparator),
       [state$]
     );
+    /* eslint-enable react-hooks/exhaustive-deps */
     useLayoutEffect(() => unsubscribe, [observable$, unsubscribe]);
     const value = useObservable(observable$, selector(get()));
     return value;

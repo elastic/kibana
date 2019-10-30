@@ -12,13 +12,13 @@ import { MatrixOverTimeHistogram } from '.';
 jest.mock('@elastic/eui', () => {
   return {
     EuiPanel: (children: JSX.Element) => <>{children}</>,
-    EuiLoadingContent: () => <div className="euiLoadingContent"></div>,
+    EuiLoadingContent: () => <div className="euiLoadingContent" />,
   };
 });
 
 jest.mock('../loader', () => {
   return {
-    Loader: () => <div className="loader"></div>,
+    Loader: () => <div className="loader" />,
   };
 });
 
@@ -28,13 +28,13 @@ jest.mock('../../lib/settings/use_kibana_ui_setting', () => {
 
 jest.mock('../header_panel', () => {
   return {
-    HeaderPanel: () => <div className="headerPanel"></div>,
+    HeaderPanel: () => <div className="headerPanel" />,
   };
 });
 
 jest.mock('../charts/barchart', () => {
   return {
-    BarChart: () => <div className="barchart"></div>,
+    BarChart: () => <div className="barchart" />,
   };
 });
 
