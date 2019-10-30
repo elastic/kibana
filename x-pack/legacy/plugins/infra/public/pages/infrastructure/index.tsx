@@ -106,7 +106,10 @@ export const InfrastructurePage = injectUICapabilities(
               </WithSource>
             )}
           />
-          <Route path={`${match.path}/settings`} component={SettingsPage} />
+          <Route
+            path={`${match.path}/settings`}
+            render={props => <SettingsPage {...props} withCapabilities="infrastructure" />}
+          />
         </Switch>
       </ColumnarPage>
     </Source.Provider>

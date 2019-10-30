@@ -11,8 +11,13 @@ import { SourceConfigurationSettings } from '../../../components/source_configur
 
 interface SettingsPageProps {
   uiCapabilities: UICapabilities;
+  withCapabilities: 'logs' | 'infrastructure';
 }
 
-export const SettingsPage = injectUICapabilities(({ uiCapabilities }: SettingsPageProps) => (
-  <SourceConfigurationSettings shouldAllowEdit={uiCapabilities.logs.configureSource as boolean} />
-));
+export const SettingsPage = injectUICapabilities(
+  ({ uiCapabilities, withCapabilities }: SettingsPageProps) => (
+    <SourceConfigurationSettings
+      shouldAllowEdit={uiCapabilities[withCapabilities].configureSource as boolean}
+    />
+  )
+);

@@ -143,7 +143,10 @@ export const LogsPage = injectUICapabilities(({ match, uiCapabilities }: LogsPag
               <Switch>
                 <Route path={`${match.path}/stream`} component={StreamPage} />
                 <Route path={`${match.path}/analysis`} component={AnalysisPage} />
-                <Route path={`${match.path}/settings`} component={SettingsPage} />
+                <Route
+                  path={`${match.path}/settings`}
+                  render={props => <SettingsPage {...props} withCapabilities="logs" />}
+                />
               </Switch>
             </>
           )}
