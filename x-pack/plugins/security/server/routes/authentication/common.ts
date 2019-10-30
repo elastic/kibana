@@ -7,7 +7,7 @@
 import { SessionInfo } from '../../../public/types';
 import { RouteDefinitionParams } from '..';
 
-export function defineCommonRoutes({ router, logger, authc }: RouteDefinitionParams) {
+export function defineCommonRoutes({ router, logger, authc, basePath }: RouteDefinitionParams) {
   router.get(
     {
       path: '/api/security/session/info',
@@ -32,6 +32,23 @@ export function defineCommonRoutes({ router, logger, authc }: RouteDefinitionPar
         logger.error(err);
         return response.internalError();
       }
+    }
+  );
+
+  router.get(
+    {
+      path: '/api/security/session/extend',
+      validate: false,
+    },
+    async (_context, _request, response) => {
+      // We can't easily return updated session info in a single HTTP call, because session data is obtained from
+      // the HTTP request, not the response. So the easiest way to facilitate this is to redirect the client to the
+      // existing info endpoint after the client's session has been extended.
+      return response.redirected({
+        headers: {
+          location: `${basePath.serverBasePath}/api/security/session/info`,
+        },
+      });
     }
   );
 }
