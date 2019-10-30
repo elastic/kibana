@@ -23,7 +23,8 @@ import _ from 'lodash';
 export function maps(kibana) {
 
   return new kibana.Plugin({
-    require: ['kibana', 'elasticsearch', 'xpack_main', 'tile_map', 'task_manager'],
+    // task_manager could be required, but is only used for telemetry
+    require: ['kibana', 'elasticsearch', 'xpack_main', 'tile_map'],
     id: APP_ID,
     configPrefix: 'xpack.maps',
     publicDir: resolve(__dirname, 'public'),
@@ -42,6 +43,7 @@ export function maps(kibana) {
         const mapConfig = serverConfig.get('map');
 
         return {
+          showMapVisualizationTypes: serverConfig.get('xpack.maps.showMapVisualizationTypes'),
           showMapsInspectorAdapter: serverConfig.get('xpack.maps.showMapsInspectorAdapter'),
           preserveDrawingBuffer: serverConfig.get('xpack.maps.preserveDrawingBuffer'),
           isEmsEnabled: mapConfig.includeElasticMapsService,
@@ -91,6 +93,7 @@ export function maps(kibana) {
     config(Joi) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
+        showMapVisualizationTypes: Joi.boolean().default(false),
         showMapsInspectorAdapter: Joi.boolean().default(false), // flag used in functional testing
         preserveDrawingBuffer: Joi.boolean().default(false), // flag used in functional testing
       }).default();
