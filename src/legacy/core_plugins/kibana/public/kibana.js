@@ -61,10 +61,8 @@ import 'leaflet';
 import { localApplicationService } from './local_application_service';
 
 localApplicationService.forwardApp('doc', 'discover', { keepPrefix: true });
-//localApplicationService.forwardApp('context', 'discover', { keepPrefix: true });
-
-
-localApplicationService.apply(routes);
+localApplicationService.forwardApp('context', 'discover', { keepPrefix: true });
+localApplicationService.attachToAngular(routes);
 
 routes.enable();
 
