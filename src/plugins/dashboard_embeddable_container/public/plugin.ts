@@ -17,10 +17,23 @@
  * under the License.
  */
 
-import { PluginInitializerContext, Plugin } from 'src/core/public';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { IUiActionsSetup, IUiActionsStart } from '../../../plugins/ui_actions/public';
+import { CONTEXT_MENU_TRIGGER, Plugin as EmbeddablePlugin } from './embeddable_plugin';
+import { ExpandPanelAction, ReplacePanelAction } from '.';
+import { DashboardContainerFactory } from './embeddable/dashboard_container_factory';
+import { Start as InspectorStartContract } from '../../../plugins/inspector/public';
 
-type SetupDependencies = any;
-type StartDependencies = any;
+interface SetupDependencies {
+  embeddable: ReturnType<EmbeddablePlugin['setup']>;
+  uiActions: IUiActionsSetup;
+}
+
+interface StartDependencies {
+  embeddable: ReturnType<EmbeddablePlugin['start']>;
+  inspector: InspectorStartContract;
+  uiActions: IUiActionsStart;
+}
 
 export type Setup = void;
 export type Start = void;
@@ -29,14 +42,44 @@ export class DashboardEmbeddableContainerPublicPlugin
   implements Plugin<Setup, Start, SetupDependencies, StartDependencies> {
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(): Setup {
-    // eslint-disable-next-line
-    console.log('SETUP');
+  public setup(core: CoreSetup, { embeddable, uiActions }: SetupDependencies): Setup {
+    /*
+    const expandPanelAction = new ExpandPanelAction();
+    uiActions.registerAction(expandPanelAction);
+    uiActions.attachAction(CONTEXT_MENU_TRIGGER, expandPanelAction.id);
+    */
   }
 
-  public start(): Start {
-    // eslint-disable-next-line
-    console.log('START');
+  public start(core: CoreStart, plugins: StartDependencies): Start {
+    /*
+    const { application, notifications, overlays } = core;
+    const { embeddable, inspector, uiActions } = plugins;
+
+    const SavedObjectFinder = () => null;
+    const ExitFullScreenButton = () => null;
+
+    const changeViewAction = new ReplacePanelAction(
+      core,
+      SavedObjectFinder,
+      notifications,
+      plugins.embeddable.getEmbeddableFactories
+    );
+    uiActions.registerAction(changeViewAction);
+    uiActions.attachAction(CONTEXT_MENU_TRIGGER, changeViewAction.id);
+
+    const factory = new DashboardContainerFactory({
+      application,
+      notifications,
+      overlays,
+      embeddable,
+      inspector,
+      SavedObjectFinder,
+      ExitFullScreenButton,
+      uiActions,
+    });
+
+    embeddable.registerEmbeddableFactory(factory.type, factory);
+    */
   }
 
   public stop() {}

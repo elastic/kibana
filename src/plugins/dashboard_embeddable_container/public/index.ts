@@ -22,7 +22,7 @@ import { DashboardEmbeddableContainerPublicPlugin } from './plugin';
 
 export * from './types';
 export * from './actions';
-export * from './embeddable';
+// export * from './embeddable';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DashboardEmbeddableContainerPublicPlugin(initializerContext);
