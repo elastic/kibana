@@ -270,7 +270,8 @@ export class Authenticator {
     if (existingSession && shouldClearSession) {
       sessionStorage.clear();
     } else if (!attempt.stateless && authenticationResult.shouldUpdateState()) {
-      const { expires, maxExpires } = this.calculateExpiry(existingSession);
+      const shouldExtendSession = request.route.options.extendsSession;
+      const { expires, maxExpires } = this.calculateExpiry(existingSession, shouldExtendSession);
       sessionStorage.set({
         state: authenticationResult.state,
         provider: attempt.provider,
@@ -302,11 +303,13 @@ export class Authenticator {
         ownsSession ? existingSession!.state : null
       );
 
+      const shouldExtendSession = request.route.options.extendsSession;
       this.updateSessionValue(sessionStorage, {
         providerType,
         isSystemAPIRequest: this.options.isSystemAPIRequest(request),
         authenticationResult,
         existingSession: ownsSession ? existingSession : null,
+        shouldExtendSession,
       });
 
       if (
@@ -397,11 +400,13 @@ export class Authenticator {
       providerType,
       authenticationResult,
       existingSession,
+      shouldExtendSession,
       isSystemAPIRequest,
     }: {
       providerType: string;
       authenticationResult: AuthenticationResult;
       existingSession: ProviderSession | null;
+      shouldExtendSession: boolean;
       isSystemAPIRequest: boolean;
     }
   ) {
@@ -425,7 +430,7 @@ export class Authenticator {
     ) {
       sessionStorage.clear();
     } else if (sessionCanBeUpdated) {
-      const { expires, maxExpires } = this.calculateExpiry(existingSession);
+      const { expires, maxExpires } = this.calculateExpiry(existingSession, shouldExtendSession);
       sessionStorage.set({
         state: authenticationResult.shouldUpdateState()
           ? authenticationResult.state
@@ -438,8 +443,15 @@ export class Authenticator {
   }
 
   private calculateExpiry(
-    existingSession: ProviderSession | null
+    existingSession: ProviderSession | null,
+    shouldExtendSession: boolean
   ): { expires: number | null; maxExpires: number | null } {
+    // if we should not extend the session expiration, and there is an existing session,
+    // then just return the values for the existing session
+    if (!shouldExtendSession && existingSession) {
+      return existingSession;
+    }
+
     const maxExpires = existingSession
       ? existingSession.maxExpires
       : this.lifespan && Date.now() + this.lifespan;

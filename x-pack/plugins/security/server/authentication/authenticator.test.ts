@@ -490,6 +490,54 @@ describe('Authenticator', () => {
       expect(mockSessionStorage.clear).not.toHaveBeenCalled();
     });
 
+    it('does not extend session expiration for routes that opt out.', async () => {
+      const user = mockAuthenticatedUser();
+      const state = { authorization: 'Basic xxx' };
+      const options = { routeAppOptions: { extendsSession: false } };
+      const request = httpServerMock.createKibanaRequest(options);
+      const currentDate = new Date(Date.UTC(2019, 10, 10)).valueOf();
+
+      // Create new authenticator with non-null session `idleTimeout`.
+      const idleTimeout = 3600 * 24;
+      mockOptions = getMockOptions({
+        session: {
+          idleTimeout,
+          lifespan: null,
+        },
+        authc: { providers: ['basic'], oidc: {}, saml: {} },
+      });
+
+      mockSessionStorage = sessionStorageMock.create();
+      mockSessionStorage.get.mockResolvedValue({
+        expires: currentDate + idleTimeout / 2,
+        maxExpires: null,
+        state,
+        provider: 'basic',
+      });
+      mockOptions.sessionStorageFactory.asScoped.mockReturnValue(mockSessionStorage);
+
+      authenticator = new Authenticator(mockOptions);
+
+      mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
+        AuthenticationResult.succeeded(user)
+      );
+
+      jest.spyOn(Date, 'now').mockImplementation(() => currentDate);
+
+      const authenticationResult = await authenticator.authenticate(request);
+      expect(authenticationResult.succeeded()).toBe(true);
+      expect(authenticationResult.user).toEqual(user);
+
+      expect(mockSessionStorage.set).toHaveBeenCalledTimes(1);
+      expect(mockSessionStorage.set).toHaveBeenCalledWith({
+        expires: currentDate + idleTimeout / 2,
+        maxExpires: null,
+        state,
+        provider: 'basic',
+      });
+      expect(mockSessionStorage.clear).not.toHaveBeenCalled();
+    });
+
     it('does not extend session expiration past the defined maximum session lifespan.', async () => {
       const user = mockAuthenticatedUser();
       const state = { authorization: 'Basic xxx' };

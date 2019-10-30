@@ -39,6 +39,15 @@ export interface RouteConfigOptions {
   authRequired?: boolean;
 
   /**
+   * A flag shows that authentication for a route:
+   * Extends the user's session when true
+   * Does not extend the user's session when false
+   *
+   * Enabled by default.
+   */
+  extendsSession?: boolean;
+
+  /**
    * Additional metadata tag strings to attach to the route.
    */
   tags?: readonly string[];
