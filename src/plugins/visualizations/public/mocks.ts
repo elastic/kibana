@@ -16,6 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { VisualizationsSetup, VisualizationsStart } from '.';
 
-// eslint-disable-next-line
-export * from '../../../plugins/expressions/public/functions/tests/utils';
+export type Setup = jest.Mocked<VisualizationsSetup>;
+export type Start = jest.Mocked<VisualizationsStart>;
+
+const createSetupContract = (): Setup => {
+  const setupContract: Setup = undefined;
+  return setupContract;
+};
+
+const createStartContract = (): Start => {
+  const startContract: Start = undefined;
+  return startContract;
+};
+
+export const expressionsPluginMock = {
+  createSetupContract,
+  createStartContract,
+};
