@@ -9,7 +9,19 @@ module.exports = {
     './jest.js',
     './react.js',
   ],
-  plugins: ['@kbn/eslint-plugin-eslint'],
+
+  plugins: [
+    'import',
+    '@kbn/eslint-plugin-eslint'
+  ],
+
+  settings: {
+    'import/resolver': {
+      '@kbn/eslint-import-resolver-kibana': {
+        forceNode: true,
+      },
+    },
+  },
 
   parserOptions: {
     ecmaVersion: 2018
