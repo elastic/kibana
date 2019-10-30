@@ -24,7 +24,6 @@ import { SavedObjectAttributes } from './routes/opt_in';
 interface GetTelemetryOptIn {
   request: any;
   currentKibanaVersion: string;
-  alwaysOptedIn: boolean;
 }
 
 // Returns whether telemetry has been opt'ed into or not.
@@ -32,17 +31,12 @@ interface GetTelemetryOptIn {
 export async function getTelemetryOptIn({
   request,
   currentKibanaVersion,
-  alwaysOptedIn,
 }: GetTelemetryOptIn): Promise<boolean | null> {
   const isRequestingApplication = request.path.startsWith('/app');
 
   // Prevent interstitial screens (such as the space selector) from prompting for telemetry
   if (!isRequestingApplication) {
     return false;
-  }
-
-  if (alwaysOptedIn) {
-    return true;
   }
 
   const savedObjectsClient = request.getSavedObjectsClient();

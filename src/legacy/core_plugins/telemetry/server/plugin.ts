@@ -37,7 +37,7 @@ export class TelemetryPlugin {
     const currentKibanaVersion = this.currentKibanaVersion;
     telemetryCollectionManager.setStatsGetter(getStats, 'local');
 
-    const { alwaysOptedIn } = await this.config$.pipe(first()).toPromise();
-    registerRoutes({ alwaysOptedIn, core, currentKibanaVersion });
+    const { allowChangingOptInStatus } = await this.config$.pipe(first()).toPromise();
+    registerRoutes({ allowChangingOptInStatus, core, currentKibanaVersion });
   }
 }

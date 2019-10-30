@@ -46,7 +46,8 @@ const telemetry = (kibana: any) => {
     config(Joi: typeof JoiNamespace) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
-        alwaysOptedIn: Joi.boolean().default(false),
+        optIn: Joi.boolean().default(null),
+        allowChangingOptInStatus: Joi.boolean().default(true),
         // `config` is used internally and not intended to be set
         config: Joi.string().default(Joi.ref('$defaultConfigPath')),
         banner: Joi.boolean().default(true),
@@ -82,10 +83,8 @@ const telemetry = (kibana: any) => {
         },
       },
       async replaceInjectedVars(originalInjectedVars: any, request: any) {
-        const alwaysOptedIn = request.server.config().get('telemetry.alwaysOptedIn');
         const currentKibanaVersion = getCurrentKibanaVersion(request.server);
         const telemetryOptedIn = await getTelemetryOptIn({
-          alwaysOptedIn,
           request,
           currentKibanaVersion,
         });
@@ -98,11 +97,11 @@ const telemetry = (kibana: any) => {
       injectDefaultVars(server: Server) {
         const config = server.config();
         return {
-          alwaysOptedIn: config.get('telemetry.alwaysOptedIn'),
           telemetryEnabled: getXpackConfigWithDeprecated(config, 'telemetry.enabled'),
           telemetryUrl: getXpackConfigWithDeprecated(config, 'telemetry.url'),
           telemetryBanner: getXpackConfigWithDeprecated(config, 'telemetry.banner'),
-          telemetryOptedIn: null,
+          telemetryOptedIn: config.get('telemetry.optIn'),
+          allowChangingOptInStatus: config.get('telemetry.allowChangingOptInStatus'),
         };
       },
       hacks: ['plugins/telemetry/hacks/telemetry_init', 'plugins/telemetry/hacks/telemetry_opt_in'],
@@ -120,10 +119,11 @@ const telemetry = (kibana: any) => {
             const config = server.config();
             return Rx.of({
               enabled: config.get('telemetry.enabled'),
-              alwaysOptedIn: config.get('telemetry.alwaysOptedIn'),
+              optIn: config.get('telemetry.optIn'),
               config: config.get('telemetry.config'),
               banner: config.get('telemetry.banner'),
               url: config.get('telemetry.url'),
+              allowChangingOptInStatus: config.get('telemetry.allowChangingOptInStatus'),
             });
           },
         },
