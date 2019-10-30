@@ -112,7 +112,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig }) => {
       <EuiTitle size="xs">
         <span>
           {i18n.translate('xpack.ml.dataframe.analytics.regressionExploration.jobIdTitle', {
-            defaultMessage: 'Job ID {jobId}',
+            defaultMessage: 'Regression job ID {jobId}',
             values: { jobId: jobConfig.id },
           })}
         </span>
@@ -130,6 +130,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig }) => {
               )}
             </span>
           </EuiTitle>
+          <EuiSpacer />
           <EuiFlexGroup>
             {generalizationEval.error !== null && <ErrorCallout error={generalizationEval.error} />}
             {generalizationEval.error === null && (
@@ -167,6 +168,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig }) => {
               )}
             </span>
           </EuiTitle>
+          <EuiSpacer />
           <EuiFlexGroup>
             {trainingEval.error !== null && <ErrorCallout error={trainingEval.error} />}
             {trainingEval.error === null && (

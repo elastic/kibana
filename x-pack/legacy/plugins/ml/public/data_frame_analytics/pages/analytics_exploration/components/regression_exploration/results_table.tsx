@@ -40,7 +40,8 @@ import { formatHumanReadableDateTimeSeconds } from '../../../../../util/date_uti
 import { SavedSearchQuery } from '../../../../../contexts/kibana';
 
 import {
-  sortColumns,
+  sortRegressionResultsColumns,
+  sortRegressionResultsFields,
   toggleSelectedField,
   DataFrameAnalyticsConfig,
   EsFieldName,
@@ -58,7 +59,7 @@ const ExplorationTitle: React.SFC<{ jobId: string }> = ({ jobId }) => (
   <EuiTitle size="xs">
     <span>
       {i18n.translate('xpack.ml.dataframe.analytics.regressionExploration.jobIdTitle', {
-        defaultMessage: 'Job ID {jobId}',
+        defaultMessage: 'Regression job ID {jobId}',
         values: { jobId },
       })}
     </span>
@@ -119,7 +120,7 @@ export const ResultsTable: FC<Props> = React.memo(({ jobConfig }) => {
   let docFieldsCount = 0;
   if (tableItems.length > 0) {
     docFields = Object.keys(tableItems[0]);
-    docFields.sort();
+    docFields.sort((a, b) => sortRegressionResultsFields(a, b, jobConfig));
     docFieldsCount = docFields.length;
   }
 
@@ -127,7 +128,7 @@ export const ResultsTable: FC<Props> = React.memo(({ jobConfig }) => {
 
   if (jobConfig !== undefined && selectedFields.length > 0 && tableItems.length > 0) {
     columns.push(
-      ...selectedFields.sort(sortColumns(tableItems[0], jobConfig.dest.results_field)).map(k => {
+      ...selectedFields.sort(sortRegressionResultsColumns(tableItems[0], jobConfig)).map(k => {
         const column: ColumnType = {
           field: k,
           name: k,
@@ -309,6 +310,12 @@ export const ResultsTable: FC<Props> = React.memo(({ jobConfig }) => {
     onChange: onQueryChange,
     box: {
       incremental: false,
+      placeholder: i18n.translate(
+        'xpack.ml.dataframe.analytics.regressionExploration.searchBoxPlaceholder',
+        {
+          defaultMessage: 'E.g. avg>0.5',
+        }
+      ),
     },
     filters: [
       {

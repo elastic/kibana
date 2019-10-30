@@ -31,6 +31,8 @@ export {
   getDefaultRegressionFields,
   getFlattenedFields,
   sortColumns,
+  sortRegressionResultsColumns,
+  sortRegressionResultsFields,
   toggleSelectedField,
   EsId,
   EsDoc,
