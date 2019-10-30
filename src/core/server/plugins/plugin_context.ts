@@ -126,6 +126,9 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     savedObjects: {
       internalClient: deps.savedObjects.internalClient,
     },
+    uiSettings: {
+      register: deps.uiSettings.register,
+    },
   };
 }
 

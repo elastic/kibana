@@ -23,6 +23,7 @@ import { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.
 import { httpServiceMock } from './http/http_service.mock';
 import { contextServiceMock } from './context/context_service.mock';
 import { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
+import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 
 export { httpServerMock } from './http/http_server.mocks';
 export { sessionStorageMock } from './http/cookie_session_storage.mocks';
@@ -30,7 +31,7 @@ export { configServiceMock } from './config/config_service.mock';
 export { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.mock';
 export { httpServiceMock } from './http/http_service.mock';
 export { loggingServiceMock } from './logging/logging_service.mock';
-export { SavedObjectsClientMock } from './saved_objects/service/saved_objects_client.mock';
+export { savedObjectsClientMock } from './saved_objects/service/saved_objects_client.mock';
 export { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 
 export function pluginInitializerContextConfigMock<T>(config: T) {
@@ -80,11 +81,15 @@ function createCoreSetupMock() {
   };
   httpMock.createRouter.mockImplementation(() => httpService.createRouter(''));
 
+  const uiSettingsMock = {
+    register: uiSettingsServiceMock.createSetupContract().register,
+  };
   const mock: MockedKeys<CoreSetup> = {
     context: contextServiceMock.createSetupContract(),
     elasticsearch: elasticsearchServiceMock.createSetupContract(),
     http: httpMock,
     savedObjects: savedObjectsServiceMock.createSetupContract(),
+    uiSettings: uiSettingsMock,
   };
 
   return mock;
@@ -96,8 +101,20 @@ function createCoreStartMock() {
   return mock;
 }
 
+function createInternalCoreSetupMock() {
+  const setupDeps = {
+    context: contextServiceMock.createSetupContract(),
+    elasticsearch: elasticsearchServiceMock.createSetupContract(),
+    http: httpServiceMock.createSetupContract(),
+    uiSettings: uiSettingsServiceMock.createSetupContract(),
+    savedObjects: savedObjectsServiceMock.createSetupContract(),
+  };
+  return setupDeps;
+}
+
 export const coreMock = {
   createSetup: createCoreSetupMock,
   createStart: createCoreStartMock,
+  createInternalSetup: createInternalCoreSetupMock,
   createPluginInitializerContext: pluginInitializerContextMock,
 };

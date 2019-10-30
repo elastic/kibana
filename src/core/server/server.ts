@@ -21,7 +21,7 @@ import { take } from 'rxjs/operators';
 import { Type } from '@kbn/config-schema';
 
 import { ConfigService, Env, Config, ConfigPath } from './config';
-import { ElasticsearchService, ElasticsearchServiceSetup } from './elasticsearch';
+import { ElasticsearchService } from './elasticsearch';
 import { HttpService, InternalHttpServiceSetup } from './http';
 import { LegacyService } from './legacy';
 import { Logger, LoggerFactory } from './logging';
@@ -38,8 +38,7 @@ import { config as savedObjectsConfig } from './saved_objects';
 import { config as uiSettingsConfig } from './ui_settings';
 import { mapToObject } from '../utils/';
 import { ContextService } from './context';
-import { InternalSavedObjectsServiceSetup } from './saved_objects/saved_objects_service';
-import { RequestHandlerContext } from '.';
+import { RequestHandlerContext, InternalCoreSetup } from '.';
 
 const coreId = Symbol('core');
 
@@ -108,7 +107,7 @@ export class Server {
       legacyPlugins,
     });
 
-    const coreSetup = {
+    const coreSetup: InternalCoreSetup = {
       context: contextServiceSetup,
       elasticsearch: elasticsearchServiceSetup,
       http: httpSetup,
@@ -165,26 +164,27 @@ export class Server {
     );
   }
 
-  private registerCoreContext(coreSetup: {
-    http: InternalHttpServiceSetup;
-    elasticsearch: ElasticsearchServiceSetup;
-    savedObjects: InternalSavedObjectsServiceSetup;
-  }) {
+  private registerCoreContext(coreSetup: InternalCoreSetup) {
     coreSetup.http.registerRouteHandlerContext(
       coreId,
       'core',
       async (context, req): Promise<RequestHandlerContext['core']> => {
         const adminClient = await coreSetup.elasticsearch.adminClient$.pipe(take(1)).toPromise();
         const dataClient = await coreSetup.elasticsearch.dataClient$.pipe(take(1)).toPromise();
+        const savedObjectsClient = coreSetup.savedObjects.clientProvider.getClient(req);
+
         return {
           savedObjects: {
             // Note: the client provider doesn't support new ES clients
             // emitted from adminClient$
-            client: coreSetup.savedObjects.clientProvider.getClient(req),
+            client: savedObjectsClient,
           },
           elasticsearch: {
             adminClient: adminClient.asScoped(req),
             dataClient: dataClient.asScoped(req),
+          },
+          uiSettings: {
+            client: coreSetup.uiSettings.asScopedToClient(savedObjectsClient),
           },
         };
       }

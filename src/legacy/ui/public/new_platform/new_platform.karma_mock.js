@@ -39,6 +39,9 @@ export const npSetup = {
       },
     },
     data: {
+      query: {
+        filterManager: sinon.fake(),
+      },
     },
     inspector: {
       registerView: () => undefined,
@@ -73,6 +76,24 @@ export const npStart = {
     },
     data: {
       getSuggestions: sinon.fake(),
+      query: {
+        filterManager: {
+          getFetches$: sinon.fake(),
+          getFilters: sinon.fake(),
+          getAppFilters: sinon.fake(),
+          getGlobalFilters: sinon.fake(),
+          removeFilter: sinon.fake(),
+          addFilters: sinon.fake(),
+          setFilters: sinon.fake(),
+          removeAll: sinon.fake(),
+          getUpdates$: () => {
+            return {
+              subscribe: () => {}
+            };
+          },
+
+        },
+      },
     },
     inspector: {
       isAvailable: () => false,
@@ -96,6 +117,10 @@ export const npStart = {
 
 export function __setup__(coreSetup) {
   npSetup.core = coreSetup;
+
+  // no-op application register calls (this is overwritten to
+  // bootstrap an LP plugin outside of tests)
+  npSetup.core.application.register = () => {};
 }
 
 export function __start__(coreStart) {

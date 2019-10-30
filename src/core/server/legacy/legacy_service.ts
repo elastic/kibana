@@ -262,6 +262,9 @@ export class LegacyService implements CoreService {
       savedObjects: {
         internalClient: setupDeps.core.savedObjects.internalClient,
       },
+      uiSettings: {
+        register: setupDeps.core.uiSettings.register,
+      },
     };
     const coreStart: CoreStart = {};
 

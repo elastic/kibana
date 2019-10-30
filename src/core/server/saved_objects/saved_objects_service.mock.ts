@@ -24,7 +24,7 @@ import {
 } from './saved_objects_service';
 import { mockKibanaMigrator } from './migrations/kibana/kibana_migrator.mock';
 import { savedObjectsClientProviderMock } from './service/lib/scoped_client_provider.mock';
-import { SavedObjectsClientMock } from './service/saved_objects_client.mock';
+import { savedObjectsClientMock } from './service/saved_objects_client.mock';
 
 type SavedObjectsServiceContract = PublicMethodsOf<SavedObjectsService>;
 
@@ -40,7 +40,7 @@ const createStartContractMock = () => {
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<InternalSavedObjectsServiceSetup> = {
     clientProvider: savedObjectsClientProviderMock.create(),
-    internalClient: SavedObjectsClientMock.create(),
+    internalClient: savedObjectsClientMock.create(),
   };
 
   return setupContract;
@@ -55,7 +55,7 @@ const createsavedObjectsServiceMock = () => {
 
   mocked.setup.mockResolvedValue({
     clientProvider: savedObjectsClientProviderMock.create(),
-    internalClient: SavedObjectsClientMock.create(),
+    internalClient: savedObjectsClientMock.create(),
   });
   mocked.start.mockResolvedValue(createStartContractMock());
   mocked.stop.mockResolvedValue();

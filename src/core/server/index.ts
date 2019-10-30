@@ -49,9 +49,16 @@ import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plug
 import { ContextSetup } from './context';
 import { SavedObjectsServiceStart } from './saved_objects';
 
-import { InternalUiSettingsServiceSetup } from './ui_settings';
+import {
+  InternalUiSettingsServiceSetup,
+  IUiSettingsClient,
+  UiSettingsServiceSetup,
+} from './ui_settings';
 import { SavedObjectsClientContract } from './saved_objects/types';
-import { SavedObjectsServiceSetup } from './saved_objects/saved_objects_service';
+import {
+  SavedObjectsServiceSetup,
+  InternalSavedObjectsServiceSetup,
+} from './saved_objects/saved_objects_service';
 
 export { bootstrap } from './bootstrap';
 export { ConfigPath, ConfigService, EnvironmentMode, PackageInfo } from './config';
@@ -140,6 +147,7 @@ export {
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
   SavedObjectsBulkUpdateObject,
+  SavedObjectsBulkUpdateOptions,
   SavedObjectsBulkResponse,
   SavedObjectsBulkUpdateResponse,
   SavedObjectsClient,
@@ -168,6 +176,7 @@ export {
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
   SavedObjectsServiceSetup,
+  SavedObjectsDeleteOptions,
 } from './saved_objects';
 
 export {
@@ -175,6 +184,8 @@ export {
   UiSettingsParams,
   InternalUiSettingsServiceSetup,
   UiSettingsType,
+  UiSettingsServiceSetup,
+  UserProvidedValues,
 } from './ui_settings';
 
 export { RecursiveReadonly } from '../utils';
@@ -186,6 +197,7 @@ export {
   SavedObjectAttributeSingle,
   SavedObjectReference,
   SavedObjectsBaseOptions,
+  MutatingOperationRefreshSetting,
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
   SavedObjectsMigrationVersion,
@@ -215,6 +227,9 @@ export interface RequestHandlerContext {
       dataClient: IScopedClusterClient;
       adminClient: IScopedClusterClient;
     };
+    uiSettings: {
+      client: IUiSettingsClient;
+    };
   };
 }
 
@@ -232,6 +247,8 @@ export interface CoreSetup {
   http: HttpServiceSetup;
   /** {@link SavedObjectsServiceSetup} */
   savedObjects: SavedObjectsServiceSetup;
+  /** {@link UiSettingsServiceSetup} */
+  uiSettings: UiSettingsServiceSetup;
 }
 
 /**
@@ -247,7 +264,7 @@ export interface InternalCoreSetup {
   http: InternalHttpServiceSetup;
   elasticsearch: InternalElasticsearchServiceSetup;
   uiSettings: InternalUiSettingsServiceSetup;
-  savedObjects: SavedObjectsServiceSetup;
+  savedObjects: InternalSavedObjectsServiceSetup;
 }
 
 /**

@@ -28,14 +28,12 @@ import { Env } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
 import { CoreContext } from '../core_context';
 import { configServiceMock } from '../config/config_service.mock';
-import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service.mock';
-import { httpServiceMock } from '../http/http_service.mock';
 import { loggingServiceMock } from '../logging/logging_service.mock';
+
 import { PluginWrapper } from './plugin';
 import { PluginName } from './types';
 import { PluginsSystem } from './plugins_system';
-import { contextServiceMock } from '../context/context_service.mock';
-import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
+import { coreMock } from '../mocks';
 
 const logger = loggingServiceMock.create();
 function createPlugin(
@@ -69,12 +67,9 @@ const configService = configServiceMock.create();
 configService.atPath.mockReturnValue(new BehaviorSubject({ initialize: true }));
 let env: Env;
 let coreContext: CoreContext;
-const setupDeps = {
-  context: contextServiceMock.createSetupContract(),
-  elasticsearch: elasticsearchServiceMock.createSetupContract(),
-  http: httpServiceMock.createSetupContract(),
-  savedObjects: savedObjectsServiceMock.createSetupContract(),
-};
+
+const setupDeps = coreMock.createInternalSetup();
+
 beforeEach(() => {
   env = Env.createDefault(getEnvOptions());
 
