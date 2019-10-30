@@ -58,6 +58,11 @@ import { AppMountContext } from 'kibana/public';
 // @ts-ignore
 import { watchMultiDecorator } from 'ui/directives/watch_multi/watch_multi';
 // @ts-ignore
+import { KbnAccessibleClickProvider } from 'ui/accessibility/kbn_accessible_click';
+// @ts-ignore
+import { FieldNameDirectiveProvider } from 'ui/directives/field_name';
+
+// @ts-ignore
 import { registerListenEventListener } from 'ui/directives/listen/listen';
 
 import { setAngularModule } from './kibana_services';
@@ -145,7 +150,9 @@ export function createLocalAngularModule(core: AppMountContext['core']) {
     ])
     .config(watchMultiDecorator)
     .run(registerListenEventListener)
-    .directive('icon', reactDirective => reactDirective(EuiIcon));
+    .directive('icon', reactDirective => reactDirective(EuiIcon))
+    .directive('kbnAccessibleClick', KbnAccessibleClickProvider)
+    .directive('fieldName', FieldNameDirectiveProvider);
 }
 
 export function createLocalGlobalStateModule() {
