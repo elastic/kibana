@@ -40,8 +40,6 @@ export class LogRotator {
     this.keepFiles = config.get('logging.rotate.keepFiles');
     this.running = false;
     this.logFileSize = 0;
-    this.intervalID = 0;
-    this.lastRotateTime = (new Date()).getTime();
     this.isRotating = false;
     this.throttledRotate = throttle(async () => { await this._rotate(); }, 5000);
     this.stalker = null;
@@ -64,9 +62,6 @@ export class LogRotator {
     // init log file size monitor
     await this._startLogFileSizeMonitor();
 
-    // init log file interval monitor
-    // this._startLogFileIntervalMonitor();
-
     this.running = true;
   }
 
@@ -80,9 +75,6 @@ export class LogRotator {
 
     // stop log file size monitor
     this._stopLogFileSizeMonitor();
-
-    // stop log file interval monitor
-    // this._stopLogFileIntervalMonitor();
 
     this.running = false;
   }
@@ -119,7 +111,6 @@ export class LogRotator {
         });
 
         await writeFileAsync(tempFile, 'test');
-
       });
     } catch {
       return false;
@@ -146,8 +137,6 @@ export class LogRotator {
   }
 
   async _logFileSizeMonitorHandler(filename, stats) {
-    console.log('MONITOR');
-
     if (!filename || !stats) {
       return;
     }
@@ -163,27 +152,6 @@ export class LogRotator {
 
     this.stalker.close();
     clearTimeout(this.stalkerUsePollingPolicyTestTimeout);
-  }
-
-  _startLogFileIntervalMonitor() {
-    if (!this.interval) {
-      return;
-    }
-
-    this.intervalID = setInterval(this._logFileIntervalMonitorHandler.bind(this), this.interval * 60 * 1000);
-  }
-
-  async _logFileIntervalMonitorHandler() {
-    await this._rotate();
-  }
-
-  _stopLogFileIntervalMonitor() {
-    if (!this.intervalID) {
-      return;
-    }
-
-    clearInterval(this.intervalID);
-    this.intervalID = 0;
   }
 
   _createExitListener() {
@@ -222,26 +190,14 @@ export class LogRotator {
       return false;
     }
 
-    if (this.logFileSize >= this.everyBytes) {
-      return true;
-    }
-
-    const currentTime = (new Date()).getTime();
-    const elapsedTime = Math.round((currentTime - this.lastRotateTime) / 1000);
-
-    console.log('elapsedTime: ' + elapsedTime + ' interval: ' + this.interval * 60);
-    // return elapsedTime >= this.interval * 30;
-    return false;
+    return this.logFileSize >= this.everyBytes;
   }
 
   async _rotate() {
-    console.log('logSize: ' + this.logFileSize + ' limit: ' + this.everyBytes);
     if (!this._shouldRotate()) {
-      console.log('no');
       return;
     }
 
-    console.log('yes');
     await this._rotateNow();
   }
 
@@ -277,9 +233,6 @@ export class LogRotator {
 
     // Reset log file size
     this.logFileSize = 0;
-
-    // Reset last rotate time
-    this.lastRotateTime = (new Date()).getTime();
 
     // rotate process is finished
     this.isRotating = false;
