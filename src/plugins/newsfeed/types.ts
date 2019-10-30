@@ -24,11 +24,10 @@ export interface ApiItem {
   description: { [lang: string]: string };
   link_text: { [lang: string]: string };
   link_url: { [lang: string]: string };
-
-  badge: null; // not used phase 1
-  image_url: null; // not used phase 1
-  languages: null; // not used phase 1
-  publish_on: null; // not used phase 1
+  badge: { [lang: string]: string } | null;
+  languages: string[] | null;
+  image_url?: null; // not used phase 1
+  publish_on?: null; // not used phase 1
 }
 
 export interface NewsfeedItem {

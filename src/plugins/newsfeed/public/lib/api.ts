@@ -33,8 +33,7 @@ const NEWSFEED_MAIN_INTERVAL = 120000; // A main interval to check for need to r
 const NEWSFEED_FETCH_INTERVAL = moment.duration(1, 'day'); // how often to actually fetch the API
 const NEWSFEED_LAST_FETCH_STORAGE_KEY = 'newsfeed.lastfetchtime';
 const NEWSFEED_HASH_SET_STORAGE_KEY = 'newsfeed.hashes';
-// const NEWSFEED_SERVICE_URL_TEMPLATE = 'https://feeds.elastic.co/kibana/v{VERSION}.json';
-const NEWSFEED_SERVICE_URL_TEMPLATE = 'https://feeds.elastic.co/kibana/v7.4.1.json'; // FIXME: needs to support untagged dev branches
+const NEWSFEED_SERVICE_URL_TEMPLATE = 'https://feeds.elastic.co/kibana/v7.0.0.json'; // FIXME: should act as a real template
 
 class NewsfeedApiDriver {
   constructor(private readonly kibanaVersion: string) {}
@@ -79,14 +78,31 @@ class NewsfeedApiDriver {
     );
   }
 
+  validateItem(item: Partial<NewsfeedItem>) {
+    if ([item.title, item.description, item.linkText, item.linkUrl].includes(undefined)) {
+      return false;
+    }
+    return true;
+  }
+
   modelItems(items: ApiItem[]): Rx.Observable<FetchResult> {
     // calculate hasNew
     const { previous, current } = this.updateHashes(items);
     const hasNew = current.length > previous.length;
 
-    // model feed items
-    const feedItems: NewsfeedItem[] = items.map(it => {
-      return {
+    // build feedItems
+    const feedItems: NewsfeedItem[] = items.reduce((accum: NewsfeedItem[], it: ApiItem) => {
+      const { expire_on: expireOn, languages } = it;
+      const expiration = moment(expireOn);
+      if (expiration.isBefore(Date.now())) {
+        return accum; // ignore item if expired
+      }
+
+      if (languages && !languages.includes(DEFAULT_LANGUAGE)) {
+        return accum; // ignore language mismatch
+      }
+
+      const tempItem = {
         title: it.title[DEFAULT_LANGUAGE],
         description: it.description[DEFAULT_LANGUAGE],
         linkText: it.link_text[DEFAULT_LANGUAGE],
@@ -94,7 +110,13 @@ class NewsfeedApiDriver {
         badge: it.badge != null ? it.badge![DEFAULT_LANGUAGE] : it.badge,
         languages: it.languages,
       };
-    });
+
+      if (!this.validateItem(tempItem)) {
+        return accum; // ignore if title, description, etc is missing
+      }
+
+      return [...accum, tempItem];
+    }, []);
 
     return Rx.of({
       hasNew,
