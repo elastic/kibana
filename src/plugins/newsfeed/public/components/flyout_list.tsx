@@ -41,7 +41,12 @@ export const NewsfeedFlyout = () => {
   const { newsfeed, kibanaVersion, setFlyoutVisible } = useContext(NewsfeedContext);
   const closeFlyout = useCallback(() => setFlyoutVisible(false), []);
   return (
-    <EuiFlyout onClose={closeFlyout} size="s" aria-labelledby="flyoutSmallTitle">
+    <EuiFlyout
+      onClose={closeFlyout}
+      size="s"
+      aria-labelledby="flyoutSmallTitle"
+      className="kbnNews__flyout"
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h2 id="flyoutSmallTitle">

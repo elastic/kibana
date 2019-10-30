@@ -1,3 +1,10 @@
+@import '@elastic/eui/src/components/header/variables';
+
+.kbnNews__flyout {
+  top: $euiHeaderChildSize + 1px;
+  height: calc(100% - #{$euiHeaderChildSize});
+}
+
 .kbnNewsFeed__headerAlert.euiHeaderAlert {
   margin-bottom: $euiSizeL;
   padding: 0 $euiSizeS $euiSizeL;
