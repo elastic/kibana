@@ -108,11 +108,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                   <>
                     <EuiSpacer />
 
-                    <SiemNavigation
-                      navTabs={navTabsNetwork(hasMlUserPermissions)}
-                      display={sourceId}
-                      showBorder={true}
-                    />
+                    <SiemNavigation navTabs={navTabsNetwork(hasMlUserPermissions)} />
 
                     <EuiSpacer />
 

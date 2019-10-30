@@ -47,8 +47,8 @@ export const HeaderGlobal = React.memo<HeaderProps>(({ offsetRight }) => (
             </EuiLink>
           </FlexItem>
 
-          <FlexItem>
-            <SiemNavigation navTabs={navTabs} />
+          <FlexItem component="nav">
+            <SiemNavigation display="condensed" navTabs={navTabs} />
           </FlexItem>
         </EuiFlexGroup>
       </FlexItem>

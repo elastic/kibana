@@ -9,7 +9,6 @@ import { UrlStateType } from '../url_state/constants';
 export interface SiemNavigationComponentProps {
   display?: 'default' | 'condensed';
   navTabs: Record<string, NavTab>;
-  showBorder?: boolean;
 }
 
 export type SearchNavTab = NavTab | { urlKey: UrlStateType; isDetailPage: boolean };

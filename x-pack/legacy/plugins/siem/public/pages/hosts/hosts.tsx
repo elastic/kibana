@@ -7,9 +7,9 @@
 import { EuiSpacer } from '@elastic/eui';
 import { getEsQueryConfig } from '@kbn/es-query';
 import * as React from 'react';
-import { compose } from 'redux';
 import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
+import { compose } from 'redux';
 
 import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
@@ -100,11 +100,7 @@ const HostsComponent = React.memo<HostsComponentProps>(
 
                 <EuiSpacer />
 
-                <SiemNavigation
-                  navTabs={navTabsHosts(hasMlUserPermissions(capabilities))}
-                  display="default"
-                  showBorder={true}
-                />
+                <SiemNavigation navTabs={navTabsHosts(hasMlUserPermissions(capabilities))} />
 
                 <EuiSpacer />
 

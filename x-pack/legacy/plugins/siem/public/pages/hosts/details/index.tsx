@@ -13,7 +13,6 @@ import { compose } from 'redux';
 
 import { FiltersGlobal } from '../../../components/filters_global';
 import { HeaderPage } from '../../../components/header_page';
-import { KpiHostDetailsQuery } from '../../../containers/kpi_host_details';
 import { LastEventTime } from '../../../components/last_event_time';
 import { AnomalyTableProvider } from '../../../components/ml/anomaly/anomaly_table_provider';
 import { hostToCriteria } from '../../../components/ml/criteria/host_to_criteria';
@@ -26,16 +25,17 @@ import { HostOverview } from '../../../components/page/hosts/host_overview';
 import { manageQuery } from '../../../components/page/manage_query';
 import { SiemSearchBar } from '../../../components/search_bar';
 import { HostOverviewByNameQuery } from '../../../containers/hosts/overview';
+import { KpiHostDetailsQuery } from '../../../containers/kpi_host_details';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../../containers/source';
 import { LastEventIndexKey } from '../../../graphql/types';
 import { useKibanaCore } from '../../../lib/compose/kibana_core';
 import { convertToBuildEsQuery } from '../../../lib/keury';
 import { inputsSelectors, State } from '../../../store';
-import { setAbsoluteRangeDatePicker as dispatchAbsoluteRangeDatePicker } from '../../../store/inputs/actions';
 import { setHostDetailsTablesActivePageToZero as dispatchHostDetailsTablesActivePageToZero } from '../../../store/hosts/actions';
+import { setAbsoluteRangeDatePicker as dispatchAbsoluteRangeDatePicker } from '../../../store/inputs/actions';
 import { SpyRoute } from '../../../utils/route/spy_routes';
-import { HostDetailsTabs } from './details_tabs';
 import { HostsEmptyPage } from '../hosts_empty_page';
+import { HostDetailsTabs } from './details_tabs';
 import { navTabsHostDetails } from './nav_tabs';
 import { HostDetailsComponentProps, HostDetailsProps } from './types';
 import { type } from './utils';
@@ -179,8 +179,6 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
 
                 <SiemNavigation
                   navTabs={navTabsHostDetails(detailName, hasMlUserPermissions(capabilities))}
-                  display="default"
-                  showBorder={true}
                 />
 
                 <EuiSpacer />

@@ -6,17 +6,16 @@
 
 import { isEqual } from 'lodash/fp';
 import React, { useEffect } from 'react';
-import { compose } from 'redux';
 import { connect } from 'react-redux';
+import { compose } from 'redux';
 
 import { RouteSpyState } from '../../utils/route/types';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
-
+import { makeMapStateToProps } from '../url_state/helpers';
 import { setBreadcrumbs } from './breadcrumbs';
 import { TabNavigation } from './tab_navigation';
 import { TabNavigationProps } from './tab_navigation/types';
 import { SiemNavigationComponentProps } from './types';
-import { makeMapStateToProps } from '../url_state/helpers';
 
 export const SiemNavigationComponent = React.memo<TabNavigationProps & RouteSpyState>(
   ({
@@ -29,7 +28,6 @@ export const SiemNavigationComponent = React.memo<TabNavigationProps & RouteSpyS
     pathName,
     savedQuery,
     search,
-    showBorder,
     tabName,
     timeline,
     timerange,
@@ -53,21 +51,18 @@ export const SiemNavigationComponent = React.memo<TabNavigationProps & RouteSpyS
     }, [query, pathName, search, filters, navTabs, savedQuery, timerange, timeline]);
 
     return (
-      <nav>
-        <TabNavigation
-          query={query}
-          display={display}
-          filters={filters}
-          navTabs={navTabs}
-          pageName={pageName}
-          pathName={pathName}
-          savedQuery={savedQuery}
-          showBorder={showBorder}
-          tabName={tabName}
-          timeline={timeline}
-          timerange={timerange}
-        />
-      </nav>
+      <TabNavigation
+        query={query}
+        display={display}
+        filters={filters}
+        navTabs={navTabs}
+        pageName={pageName}
+        pathName={pathName}
+        savedQuery={savedQuery}
+        tabName={tabName}
+        timeline={timeline}
+        timerange={timerange}
+      />
     );
   },
   (prevProps, nextProps) => {
