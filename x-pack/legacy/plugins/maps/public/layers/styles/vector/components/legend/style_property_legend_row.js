@@ -14,7 +14,7 @@ import { ColorGradient } from '../../../color_gradient';
 import { CircleIcon } from './circle_icon';
 import { getVectorStyleLabel } from '../get_vector_style_label';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
-import { StyleLegendRow } from '../../../style_legend_row';
+import { StyleLegendRow } from '../../../components/style_legend_row';
 
 function getLineWidthIcons() {
   const defaultStyle = {
