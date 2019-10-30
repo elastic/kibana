@@ -34,10 +34,6 @@ export class AbstractESAggSource extends AbstractESSource {
     ]
   };
 
-  constructor(descriptor, inspectorAdapters) {
-    super(descriptor, inspectorAdapters);
-  }
-
   _formatMetricKey(metric) {
     const aggType = metric.type;
     const fieldName = metric.field;
