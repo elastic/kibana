@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchParams } from 'elasticsearch';
 import { PROCESSOR_EVENT } from '../../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../helpers/setup_request';
 
@@ -12,13 +11,13 @@ import { Setup } from '../../helpers/setup_request';
 export async function getAgentStatus(setup: Setup) {
   const { client, config } = setup;
 
-  const params: SearchParams = {
+  const params = {
     terminateAfter: 1,
     index: [
-      config.get('apm_oss.errorIndices'),
-      config.get('apm_oss.metricsIndices'),
-      config.get('apm_oss.sourcemapIndices'),
-      config.get('apm_oss.transactionIndices')
+      config.get<string>('apm_oss.errorIndices'),
+      config.get<string>('apm_oss.metricsIndices'),
+      config.get<string>('apm_oss.sourcemapIndices'),
+      config.get<string>('apm_oss.transactionIndices')
     ],
     body: {
       size: 0,

@@ -14,9 +14,9 @@ import { EmbeddedMap } from '../../components/embeddables/embedded_map';
 import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
 import { LastEventTime } from '../../components/last_event_time';
+import { SiemNavigation } from '../../components/navigation';
 import { manageQuery } from '../../components/page/manage_query';
 import { KpiNetworkComponent } from '../../components/page/network';
-import { SiemNavigation } from '../../components/navigation';
 import { SiemSearchBar } from '../../components/search_bar';
 import { KpiNetworkQuery } from '../../containers/kpi_network';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
@@ -26,7 +26,6 @@ import { convertToBuildEsQuery } from '../../lib/keury';
 import { networkModel, State, inputsSelectors } from '../../store';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { SpyRoute } from '../../utils/route/spy_routes';
-
 import { navTabsNetwork, NetworkRoutes, NetworkRoutesLoading } from './navigation';
 import { NetworkEmptyPage } from './network_empty_page';
 import * as i18n from './translations';
@@ -77,6 +76,8 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                   endDate={to}
                   setQuery={setQuery}
                 />
+
+                <EuiSpacer />
 
                 <KpiNetworkQuery
                   endDate={to}

@@ -70,17 +70,16 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
       await testSubjects.existOrFail('mlJobWizardAggSelection > comboBoxInput');
     },
 
-    async assertAggAndFieldSelection(expectedIdentifier: string) {
+    async assertAggAndFieldSelection(expectedIdentifier: string[]) {
       const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
         'mlJobWizardAggSelection > comboBoxInput'
       );
-      expect(comboBoxSelectedOptions.length).to.eql(1);
-      expect(comboBoxSelectedOptions[0]).to.eql(expectedIdentifier);
+      expect(comboBoxSelectedOptions).to.eql(expectedIdentifier);
     },
 
     async selectAggAndField(identifier: string, isIdentifierKeptInField: boolean) {
       await comboBox.set('mlJobWizardAggSelection > comboBoxInput', identifier);
-      await this.assertAggAndFieldSelection(isIdentifierKeptInField ? identifier : '');
+      await this.assertAggAndFieldSelection(isIdentifierKeptInField ? [identifier] : []);
     },
 
     async assertBucketSpanInputExists() {

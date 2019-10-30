@@ -34,7 +34,7 @@ export const getConfigSchema = (Joi: typeof JoiNamespace) => {
 
 const DEFAULT_CONFIG = {
   enabled: true,
-  registryUrl: 'http://integrations-registry.app.elstc.co',
+  registryUrl: 'http://package-registry.app.elstc.co',
 };
 
 // As of 2019, this is a Singleton because of the way JavaScript modules are specified.

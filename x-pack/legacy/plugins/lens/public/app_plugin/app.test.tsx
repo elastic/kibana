@@ -17,16 +17,21 @@ import { mount } from 'enzyme';
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
 const dataStartMock = dataPluginMock.createStartContract();
 
-import {
-  TopNavMenu,
-  TopNavMenuData,
-} from '../../../../../../src/legacy/core_plugins/kibana_react/public';
+import { TopNavMenuData } from '../../../../../../src/legacy/core_plugins/navigation/public';
 import { DataStart } from '../../../../../../src/legacy/core_plugins/data/public';
 import { coreMock } from 'src/core/public/mocks';
 
-jest.mock('../../../../../../src/legacy/core_plugins/kibana_react/public', () => ({
-  TopNavMenu: jest.fn(() => null),
+jest.mock('../../../../../../src/legacy/core_plugins/navigation/public/legacy', () => ({
+  start: {
+    ui: {
+      TopNavMenu: jest.fn(() => null),
+    },
+  },
 }));
+
+import { start as navigation } from '../../../../../../src/legacy/core_plugins/navigation/public/legacy';
+
+const { TopNavMenu } = navigation.ui;
 
 jest.mock('ui/new_platform');
 jest.mock('../persistence');
@@ -127,7 +132,7 @@ describe('Lens App', () => {
 
   beforeEach(() => {
     frame = createMockFrame();
-    core = coreMock.createStart();
+    core = coreMock.createStart({ basePath: '/testbasepath' });
 
     core.uiSettings.get.mockImplementation(
       jest.fn(type => {
@@ -140,9 +145,6 @@ describe('Lens App', () => {
         }
       })
     );
-
-    (core.http.basePath.get as jest.Mock).mockReturnValue(`/testbasepath`);
-    (core.http.basePath.prepend as jest.Mock).mockImplementation(s => `/testbasepath${s}`);
   });
 
   it('renders the editor frame', () => {
@@ -494,6 +496,8 @@ describe('Lens App', () => {
       expect(TopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
           query: { query: '', language: 'kuery' },
+          dateRangeFrom: 'now-7d',
+          dateRangeTo: 'now',
         }),
         {}
       );
@@ -568,6 +572,8 @@ describe('Lens App', () => {
       expect(TopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
           query: { query: 'new', language: 'lucene' },
+          dateRangeFrom: 'now-14d',
+          dateRangeTo: 'now-7d',
         }),
         {}
       );

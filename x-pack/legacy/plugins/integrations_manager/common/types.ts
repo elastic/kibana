@@ -34,15 +34,21 @@ export interface RegistryListItem {
 
 export interface ScreenshotItem {
   src: string;
+  title?: string;
 }
 
 // from /package/{name}
 // https://github.com/elastic/integrations-registry/blob/master/docs/api/package.json
 export type ServiceName = 'kibana' | 'elasticsearch' | 'filebeat' | 'metricbeat';
 export type RequirementVersion = string;
+
 export interface ServiceRequirements {
-  'version.min': RequirementVersion;
-  'version.max': RequirementVersion;
+  version: RequirementVersionRange;
+}
+
+export interface RequirementVersionRange {
+  min: RequirementVersion;
+  max: RequirementVersion;
 }
 
 // from /categories
@@ -68,6 +74,7 @@ export interface RegistryPackage {
   name: string;
   version: string;
   description: string;
+  readme?: string;
   icon: string;
   requirement: RequirementsByServiceName;
   title?: string;
