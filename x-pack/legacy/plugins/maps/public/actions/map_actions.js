@@ -25,7 +25,11 @@ import {
   getEventHandlers,
 } from '../reducers/non_serializable_instances';
 import { updateFlyout } from '../actions/ui_actions';
-import { FEATURE_ID_PROPERTY_NAME, SOURCE_DATA_ID_ORIGIN } from '../../common/constants';
+import {
+  FEATURE_ID_PROPERTY_NAME,
+  LAYER_TYPE,
+  SOURCE_DATA_ID_ORIGIN
+} from '../../common/constants';
 
 export const SET_SELECTED_LAYER = 'SET_SELECTED_LAYER';
 export const SET_TRANSIENT_LAYER = 'SET_TRANSIENT_LAYER';
@@ -496,10 +500,16 @@ export function endDataLoad(layerId, dataId, requestToken, data, meta) {
 
     const eventHandlers = getEventHandlers(getState());
     if (eventHandlers && eventHandlers.onDataLoadEnd) {
+      const layer = getLayerById(layerId, getState());
+      const resultMeta = {};
+      if (layer && layer.getType() === LAYER_TYPE.VECTOR) {
+        resultMeta.featuresCount = features.length;
+      }
+
       eventHandlers.onDataLoadEnd({
         layerId,
         dataId,
-        featuresCount: features.length
+        resultMeta
       });
     }
 
