@@ -117,7 +117,7 @@ user you've assigned a {kib} user role. For example, you could log in as the
 +
 --
 
-NOTE: This must be a user who has been assigned the `kibana_user` role.
+NOTE: This must be a user who has been assigned <<kibana-privileges, Kibana privileges>>.
 {kib} server credentials should only be used internally by the {kib} server.
 
 --
