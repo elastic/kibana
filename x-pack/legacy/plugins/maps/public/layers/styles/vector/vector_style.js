@@ -296,7 +296,7 @@ export class VectorStyle extends AbstractStyle {
     );
   }
 
-  getLegendDetails(getFieldLabel, getFieldFormatter) {
+  renderLegendDetails(getFieldLabel, getFieldFormatter) {
     const styles = this.getRawProperties();
     const styleProperties = Object.keys(styles).map(styleName => {
       const { type, options } = styles[styleName];
