@@ -99,7 +99,9 @@ const telemetry = (kibana: any) => {
         return {
           telemetryEnabled: getXpackConfigWithDeprecated(config, 'telemetry.enabled'),
           telemetryUrl: getXpackConfigWithDeprecated(config, 'telemetry.url'),
-          telemetryBanner: getXpackConfigWithDeprecated(config, 'telemetry.banner'),
+          telemetryBanner:
+            config.get('allowChangingOptInStatus') !== true &&
+            getXpackConfigWithDeprecated(config, 'telemetry.banner'),
           telemetryOptedIn: config.get('telemetry.optIn'),
           allowChangingOptInStatus: config.get('telemetry.allowChangingOptInStatus'),
         };
