@@ -330,11 +330,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                             as="div"
                             autoFocus={true}
                             disabled={false}
-                            lockProps={
-                              Object {
-                                "style": undefined,
-                              }
-                            }
+                            lockProps={Object {}}
                             noFocusGuards={false}
                             persistentFocus={false}
                             returnFocus={true}

@@ -14,9 +14,6 @@ interface RowProps {
 
 const Row = styled.div.attrs<RowProps>(props => ({
   className: 'siemSkeletonRow',
-  style: {
-    background: 'red',
-  },
   rowHeight: props.rowHeight || props.theme.eui.euiSizeXL,
   rowPadding:
     props.rowPadding || props.theme.eui.paddingSizes.s + ' ' + props.theme.eui.paddingSizes.xs,

@@ -87,11 +87,7 @@ Array [
                 as="div"
                 autoFocus={true}
                 disabled={false}
-                lockProps={
-                  Object {
-                    "style": undefined,
-                  }
-                }
+                lockProps={Object {}}
                 noFocusGuards={false}
                 persistentFocus={false}
                 returnFocus={true}
@@ -500,11 +496,7 @@ Array [
                 as="div"
                 autoFocus={true}
                 disabled={false}
-                lockProps={
-                  Object {
-                    "style": undefined,
-                  }
-                }
+                lockProps={Object {}}
                 noFocusGuards={false}
                 persistentFocus={false}
                 returnFocus={true}
