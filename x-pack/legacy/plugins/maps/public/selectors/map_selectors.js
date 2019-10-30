@@ -11,7 +11,6 @@ import { VectorTileLayer } from '../layers/vector_tile_layer';
 import { VectorLayer } from '../layers/vector_layer';
 import { HeatmapLayer } from '../layers/heatmap_layer';
 import { ALL_SOURCES } from '../layers/sources/all_sources';
-import { VectorStyle } from '../layers/styles/vector/vector_style';
 import { HeatmapStyle } from '../layers/styles/heatmap/heatmap_style';
 import { timefilter } from 'ui/timefilter';
 import { getInspectorAdapters } from '../reducers/non_serializable_instances';
@@ -19,15 +18,16 @@ import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../reducers/util'
 
 function createLayerInstance(layerDescriptor, inspectorAdapters) {
   const source = createSourceInstance(layerDescriptor.sourceDescriptor, inspectorAdapters);
-  const style = createStyleInstance(layerDescriptor.style, source);
+
   switch (layerDescriptor.type) {
     case TileLayer.type:
-      return new TileLayer({ layerDescriptor, source, style });
+      return new TileLayer({ layerDescriptor, source });
     case VectorLayer.type:
-      return new VectorLayer({ layerDescriptor, source, style });
+      return new VectorLayer({ layerDescriptor, source });
     case VectorTileLayer.type:
-      return new VectorTileLayer({ layerDescriptor, source, style });
+      return new VectorTileLayer({ layerDescriptor, source });
     case HeatmapLayer.type:
+      const style = layerDescriptor.style ? new HeatmapStyle(layerDescriptor.style) : null;
       return new HeatmapLayer({ layerDescriptor, source, style });
     default:
       throw new Error(`Unrecognized layerType ${layerDescriptor.type}`);
@@ -42,25 +42,6 @@ function createSourceInstance(sourceDescriptor, inspectorAdapters) {
     throw new Error(`Unrecognized sourceType ${sourceDescriptor.type}`);
   }
   return new Source(sourceDescriptor, inspectorAdapters);
-}
-
-
-function createStyleInstance(styleDescriptor, source) {
-
-  if (!styleDescriptor || !styleDescriptor.type) {
-    return null;
-  }
-
-  switch (styleDescriptor.type) {
-    case 'TILE'://backfill for old tilestyles.
-      return null;
-    case VectorStyle.type:
-      return new VectorStyle(styleDescriptor, source);
-    case HeatmapStyle.type:
-      return new HeatmapStyle(styleDescriptor);
-    default:
-      throw new Error(`Unrecognized styleType ${styleDescriptor.type}`);
-  }
 }
 
 export const getTooltipState = ({ map }) => {

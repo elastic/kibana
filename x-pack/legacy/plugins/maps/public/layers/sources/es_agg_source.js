@@ -9,9 +9,12 @@ import { AbstractESSource } from './es_source';
 import { ESAggMetricTooltipProperty } from '../tooltips/es_aggmetric_tooltip_property';
 import { ESAggMetricField } from '../fields/es_agg_field';
 import { ESDocField } from '../fields/es_doc_field';
+import { COUNT_AGG_TYPE } from '../../../common/constants';
 
 const COUNT_PROP_LABEL = 'count';
 const COUNT_PROP_NAME = 'doc_count';
+
+const AGG_DELIMITER = '_of_';
 
 export class AbstractESAggSource extends AbstractESSource {
 
@@ -21,7 +24,7 @@ export class AbstractESAggSource extends AbstractESSource {
   constructor(descriptor, inspectorAdapters) {
     super(descriptor, inspectorAdapters);
     this._metricFields = this._descriptor.metrics ? this._descriptor.metrics.map(metric => {
-      const esDocField = metric.field ? new ESDocField({ fieldName: metric.field }) : null;
+      const esDocField = metric.field ? new ESDocField({ fieldName: metric.field, source: this }) : null;
       return new ESAggMetricField({
         label: metric.label,
         esDocField: esDocField,
@@ -31,6 +34,26 @@ export class AbstractESAggSource extends AbstractESSource {
     }) : [];
   }
 
+  createField({ fieldName, label }) {
+    if (fieldName === COUNT_PROP_NAME) {
+      return new ESAggMetricField({
+        aggType: COUNT_AGG_TYPE,
+        label: label,
+        source: this
+      });
+    } else {
+      //this only works because aggType is a fixed set and does not include the `_of_` string
+      const [aggType, docField] = fieldName.split(AGG_DELIMITER);
+      const esDocField = new ESDocField({ fieldName: docField, source: this });
+      return new ESAggMetricField({
+        label: label,
+        esDocField,
+        aggType,
+        source: this
+      });
+    }
+  }
+
   getMetricFieldForName(fieldName) {
     return this._metricFields.find(metricField => {
       return metricField.getName() === fieldName;
@@ -38,24 +61,22 @@ export class AbstractESAggSource extends AbstractESSource {
   }
 
   getMetricFields() {
-    const metrics = this._metricFields.filter(esAggField => {
-      return (esAggField.getAggType() === 'count')  ? true : !!esAggField.getESDocField();
-    });
+    const metrics = this._metricFields.filter(esAggField => esAggField.isValid());
     if (metrics.length === 0) {
       metrics.push(new ESAggMetricField({
-        aggType: 'count',
+        aggType: COUNT_AGG_TYPE,
         source: this
       }));
     }
     return metrics;
   }
 
-  formatMetricKey(type, fieldName) {
-    return type !== 'count' ? `${type}_of_${fieldName}` : COUNT_PROP_NAME;
+  formatMetricKey(aggType, fieldName) {
+    return aggType !== COUNT_AGG_TYPE ? `${aggType}${AGG_DELIMITER}${fieldName}` : COUNT_PROP_NAME;
   }
 
-  formatMetricLabel(type, fieldName) {
-    return type !== 'count' ? `${type} of ${fieldName}` : COUNT_PROP_LABEL;
+  formatMetricLabel(aggType, fieldName) {
+    return aggType !== COUNT_AGG_TYPE ? `${aggType} of ${fieldName}` : COUNT_PROP_LABEL;
   }
 
   createMetricAggConfigs() {

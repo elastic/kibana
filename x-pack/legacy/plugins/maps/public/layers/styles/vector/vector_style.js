@@ -466,36 +466,31 @@ export class VectorStyle extends AbstractStyle {
     return this._descriptor.properties.symbol.options.symbolizeAs === SYMBOLIZE_AS_CIRCLE;
   }
 
-  _makeField(field) {
+  _makeField(fieldDescriptor) {
 
-    if (!this._layer) {
-      console.warn('should be instantiated with layer');
+    if (!fieldDescriptor || !fieldDescriptor.name) {
       return null;
     }
 
-    if (!field || !field.name) {
-      return null;
-    }
-
-    if (field.origin === FIELD_ORIGIN.SOURCE) {
+    if (fieldDescriptor.origin === FIELD_ORIGIN.SOURCE) {
       return this._source.createField({
-        fieldName: field.name,
-        label: field.label
+        fieldName: fieldDescriptor.name,
+        label: fieldDescriptor.label
       });
-    } else if (field.origin === FIELD_ORIGIN.JOIN) {
+    } else if (fieldDescriptor.origin === FIELD_ORIGIN.JOIN) {
 
       let matchingField = null;
-      this._layer.getValidJoins().forEach(join => {
-        matchingField = join.getRightJoinSource().find(source => {
-          return source.getMetricFieldForName(field.name);
-        });
+      const joins = this._layer.getValidJoins();
+      joins.find(join => {
+        const aggSource = join.getRightJoinSource();
+        matchingField = aggSource.getMetricFieldForName(fieldDescriptor.name);
         return !!matchingField;
       });
 
       return matchingField;
 
     } else {
-      throw new Error(`Unknown origin-type ${field.origin}`);
+      throw new Error(`Unknown origin-type ${fieldDescriptor.origin}`);
     }
 
 

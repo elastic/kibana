@@ -102,3 +102,5 @@ export const DRAW_TYPE = {
   BOUNDS: 'BOUNDS',
   POLYGON: 'POLYGON'
 };
+
+export const COUNT_AGG_TYPE = 'count';

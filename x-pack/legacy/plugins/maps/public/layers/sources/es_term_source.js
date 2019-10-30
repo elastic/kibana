@@ -15,6 +15,9 @@ import { AbstractESAggSource } from './es_agg_source';
 
 const TERMS_AGG_NAME = 'join';
 
+const FIELD_NAME_PREFIX = '__kbnjoin__';
+const GROUP_BY_DELIMITER = '_groupby_';
+
 const aggSchemas = new Schemas([
   {
     group: 'metrics',
@@ -68,6 +71,10 @@ export class ESTermSource extends AbstractESAggSource {
     return `<div>editor details</div>`;
   }
 
+  createField() {
+    throw new Error('Not implemented. Should retrieve corresponding field from the inner_join.metrics config.');
+  }
+
   hasCompleteConfig() {
     return (_.has(this._descriptor, 'indexPatternId') && _.has(this._descriptor, 'term'));
   }
@@ -84,9 +91,9 @@ export class ESTermSource extends AbstractESAggSource {
     return this._descriptor.whereQuery;
   }
 
-  formatMetricKey(type, fieldName) {
-    const metricKey = type !== 'count' ? `${type}_of_${fieldName}` : type;
-    return `__kbnjoin__${metricKey}_groupby_${this._descriptor.indexPatternTitle}.${this._termField.getName()}`;
+  formatMetricKey(aggType, fieldName) {
+    const metricKey = aggType !== 'count' ? `${aggType}_of_${fieldName}` : aggType;
+    return `${FIELD_NAME_PREFIX}${metricKey}${GROUP_BY_DELIMITER}${this._descriptor.indexPatternTitle}.${this._termField.getName()}`;
   }
 
   formatMetricLabel(type, fieldName) {

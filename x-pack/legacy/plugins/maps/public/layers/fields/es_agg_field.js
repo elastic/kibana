@@ -6,7 +6,7 @@
 
 
 import { AbstractField } from './field';
-
+import { COUNT_AGG_TYPE } from '../../../common/constants';
 
 export class ESAggMetricField extends AbstractField {
 
@@ -31,8 +31,8 @@ export class ESAggMetricField extends AbstractField {
     return this._aggType;
   }
 
-  getESDocField() {
-    return this._esDocField;
+  isValid() {
+    return (this.getAggType() === COUNT_AGG_TYPE)  ? true : !!this._esDocField;
   }
 
   getPropertyLabel() {
@@ -44,7 +44,7 @@ export class ESAggMetricField extends AbstractField {
   }
 
   getRequestDescription() {
-    return this.getAggType() !== 'count' ? `${this.getAggType()} ${this.getESDocFieldName()}` : 'count';
+    return this.getAggType() !== COUNT_AGG_TYPE ? `${this.getAggType()} ${this.getESDocFieldName()}` : COUNT_AGG_TYPE;
   }
 
   makeMetricAggConfig() {
@@ -55,7 +55,7 @@ export class ESAggMetricField extends AbstractField {
       schema: 'metric',
       params: {}
     };
-    if (this.getAggType() !== 'count') {
+    if (this.getAggType() !== COUNT_AGG_TYPE) {
       metricAggConfig.params = { field: this.getESDocFieldName() };
     }
     return metricAggConfig;

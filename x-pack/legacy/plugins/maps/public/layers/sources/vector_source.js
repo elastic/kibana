@@ -49,7 +49,7 @@ export class AbstractVectorSource extends AbstractSource {
   }
 
   createField() {
-    return null;
+    throw new Error(`Should implemement ${this.constructor.type} ${this}`);
   }
 
   _createDefaultLayerDescriptor(options, mapColors) {

@@ -15,7 +15,4 @@ export class KibanaRegionField extends AbstractField {
     return AbstractField.FIELD_TYPE.STRING;
   }
 
-  createField() {
-    throw new Error('must implement');
-  }
 }
