@@ -46,7 +46,7 @@ export function PackageCard({
     //   <img
     //     width="24"
     //     height="24"
-    //     src={`http://integrations-registry.app.elstc.co${iconUrl}`}
+    //     src={`http://package-registry.app.elstc.co${iconUrl}`}
     //     alt={`${name} icon`}
     //   />
     // );

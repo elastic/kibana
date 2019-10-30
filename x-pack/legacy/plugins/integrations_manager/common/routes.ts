@@ -29,6 +29,9 @@ export function getInfoPath(pkgkey: string) {
   return API_INFO_PATTERN.replace('{pkgkey}', pkgkey);
 }
 
+export function getFilePath(filePath: string) {
+  return `${API_ROOT}${filePath}`;
+}
 export function getInstallPath(pkgkey: string) {
   return API_INSTALL_PATTERN.replace('{pkgkey}', pkgkey).replace(/\/$/, ''); // trim trailing slash
 }
