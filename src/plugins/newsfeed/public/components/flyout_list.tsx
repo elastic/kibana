@@ -17,6 +17,7 @@
  * under the License.
  */
 import React, { useCallback, useContext } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiIcon,
   EuiFlyout,
@@ -37,7 +38,7 @@ import { NewsfeedContext } from './newsfeed_header_nav_button';
 import { NewsfeedItem } from '../../types';
 
 export const NewsfeedFlyout = () => {
-  const { newsfeed, setFlyoutVisible } = useContext(NewsfeedContext);
+  const { newsfeed, kibanaVersion, setFlyoutVisible } = useContext(NewsfeedContext);
   const closeFlyout = useCallback(() => setFlyoutVisible(false), []);
   return (
     <EuiFlyout onClose={closeFlyout} size="s" aria-labelledby="flyoutSmallTitle">
@@ -63,22 +64,11 @@ export const NewsfeedFlyout = () => {
                   <EuiIcon type="popout" size="s" />
                 </EuiLink>
               }
-              date={item.title}
-              badge={<EuiBadge color="hollow">7.0</EuiBadge>}
+              date={item.publishOn.format('DD MMMM YYYY')}
+              badge={<EuiBadge color="hollow">{item.badge}</EuiBadge>}
             />
           );
         })}
-        <EuiHeaderAlert
-          title="Kibana 7.0 is turning heads"
-          text="Simplified navigation, responsive dashboards, dark mode… pick your favorite."
-          action={
-            <EuiLink target="_blank" href="https://www.elastic.co/blog/kibana-7-0-0-released">
-              Read the blog <EuiIcon type="popout" size="s" />
-            </EuiLink>
-          }
-          date="10 April 2019"
-          badge={<EuiBadge color="hollow">7.0</EuiBadge>}
-        />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -92,7 +82,11 @@ export const NewsfeedFlyout = () => {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText color="subdued" size="s">
-              <p>Version 7.0</p>
+              <p>
+                {i18n.translate('xpack.reporting.publicNotifier.httpErrorMessage', {
+                  defaultMessage: `Version ${kibanaVersion}`,
+                })}
+              </p>
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>

@@ -21,12 +21,12 @@ import React, { useState, Fragment, useEffect } from 'react';
 import * as Rx from 'rxjs';
 import { EuiHeaderSectionItemButton, EuiIcon, EuiNotificationBadge } from '@elastic/eui';
 import { NewsfeedFlyout } from './flyout_list';
-import { FetchResult } from '../lib/api';
-import { NewsfeedItem } from '../../types';
+import { NewsfeedItem, FetchResult } from '../../types';
 
 export interface INewsfeedContext {
   setFlyoutVisible: React.Dispatch<React.SetStateAction<boolean>>;
   newsfeed: NewsfeedItem[];
+  kibanaVersion: string | undefined;
 }
 export const NewsfeedContext = React.createContext({} as INewsfeedContext);
 
@@ -39,11 +39,13 @@ export const NewsfeedNavButton = ({ apiFetchResult }: Props) => {
   const [showBadge, setShowBadge] = useState<boolean>(false);
   const [flyoutVisible, setFlyoutVisible] = useState<boolean>(false);
   const [newsfeed, setNewsfeed] = useState<NewsfeedItem[]>([]);
+  const [kibanaVersion, setKibanaVersion] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     function handleStatusChange(fetchResult: FetchResult) {
       setShowBadge(fetchResult.hasNew);
       setNewsfeed(fetchResult.feedItems);
+      setKibanaVersion(fetchResult.kibanaVersion);
     }
 
     subscription = apiFetchResult.subscribe(res => {
@@ -64,7 +66,7 @@ export const NewsfeedNavButton = ({ apiFetchResult }: Props) => {
   }
 
   return (
-    <NewsfeedContext.Provider value={{ setFlyoutVisible, newsfeed }}>
+    <NewsfeedContext.Provider value={{ setFlyoutVisible, newsfeed, kibanaVersion }}>
       <Fragment>
         <EuiHeaderSectionItemButton
           aria-controls="keyPadMenu"
