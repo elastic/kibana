@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
 import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiSpacer } from '@elastic/eui';
 import { AnomaliesChart } from './chart';
-import { Results } from '../../../../../containers/logs/log_analysis/log_analysis_results';
+import { LogRateResults } from '../../../../../containers/logs/log_analysis/log_analysis_results';
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 import {
   getLogEntryRateSeriesForPartition,
@@ -22,7 +22,7 @@ import { AnalyzeInMlButton } from '../analyze_in_ml_button';
 export const AnomaliesTableExpandedRow: React.FunctionComponent<{
   partitionId: string;
   topAnomalyScore: number;
-  results: Results;
+  results: LogRateResults;
   setTimeRange: (timeRange: TimeRange) => void;
   timeRange: TimeRange;
   jobId: string;

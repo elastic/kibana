@@ -6,7 +6,7 @@
 
 import { RectAnnotationDatum } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { Results } from '../../../../../containers/logs/log_analysis/log_analysis_results';
+import { LogRateResults } from '../../../../../containers/logs/log_analysis/log_analysis_results';
 
 export type MLSeverityScoreCategories = 'warning' | 'minor' | 'major' | 'critical';
 type MLSeverityScores = Record<MLSeverityScoreCategories, number>;
@@ -17,7 +17,7 @@ const ML_SEVERITY_SCORES: MLSeverityScores = {
   critical: 75,
 };
 
-export const getLogEntryRatePartitionedSeries = (results: Results) => {
+export const getLogEntryRatePartitionedSeries = (results: LogRateResults) => {
   return results.histogramBuckets.reduce<Array<{ group: string; time: number; value: number }>>(
     (buckets, bucket) => {
       return [
@@ -33,7 +33,7 @@ export const getLogEntryRatePartitionedSeries = (results: Results) => {
   );
 };
 
-export const getLogEntryRateCombinedSeries = (results: Results) => {
+export const getLogEntryRateCombinedSeries = (results: LogRateResults) => {
   return results.histogramBuckets.reduce<Array<{ time: number; value: number }>>(
     (buckets, bucket) => {
       return [
@@ -50,7 +50,7 @@ export const getLogEntryRateCombinedSeries = (results: Results) => {
   );
 };
 
-export const getLogEntryRateSeriesForPartition = (results: Results, partitionId: string) => {
+export const getLogEntryRateSeriesForPartition = (results: LogRateResults, partitionId: string) => {
   return results.partitionBuckets[partitionId].buckets.reduce<
     Array<{ time: number; value: number }>
   >((buckets, bucket) => {
@@ -64,7 +64,7 @@ export const getLogEntryRateSeriesForPartition = (results: Results, partitionId:
   }, []);
 };
 
-export const getAnnotationsForPartition = (results: Results, partitionId: string) => {
+export const getAnnotationsForPartition = (results: LogRateResults, partitionId: string) => {
   return results.partitionBuckets[partitionId].buckets.reduce<
     Record<MLSeverityScoreCategories, RectAnnotationDatum[]>
   >(
@@ -105,11 +105,14 @@ export const getAnnotationsForPartition = (results: Results, partitionId: string
   );
 };
 
-export const getTotalNumberOfLogEntriesForPartition = (results: Results, partitionId: string) => {
+export const getTotalNumberOfLogEntriesForPartition = (
+  results: LogRateResults,
+  partitionId: string
+) => {
   return results.partitionBuckets[partitionId].totalNumberOfLogEntries;
 };
 
-export const getAnnotationsForAll = (results: Results) => {
+export const getAnnotationsForAll = (results: LogRateResults) => {
   return results.histogramBuckets.reduce<Record<MLSeverityScoreCategories, RectAnnotationDatum[]>>(
     (annotatedBucketsBySeverity, bucket) => {
       const maxAnomalyScoresByPartition = bucket.partitions.reduce<
@@ -166,7 +169,7 @@ export const getAnnotationsForAll = (results: Results) => {
   );
 };
 
-export const getTopAnomalyScoreAcrossAllPartitions = (results: Results) => {
+export const getTopAnomalyScoreAcrossAllPartitions = (results: LogRateResults) => {
   const allTopScores = Object.values(results.partitionBuckets).reduce(
     (scores: number[], partition) => {
       return [...scores, partition.topAnomalyScore];

@@ -82,14 +82,16 @@ export const AnalysisResultsContent = ({
     return roundedResult < bucketSpan ? bucketSpan : roundedResult;
   }, [queryTimeRange.value.startTime, queryTimeRange.value.endTime]);
 
-  const { isLoading, results } = useLogAnalysisResults({
+  const { isLoading, logRateResults } = useLogAnalysisResults({
     sourceId,
     startTime: queryTimeRange.value.startTime,
     endTime: queryTimeRange.value.endTime,
     bucketDuration,
     lastRequestTime: queryTimeRange.lastChangedTime,
   });
-  const hasResults = useMemo(() => results && results.histogramBuckets.length > 0, [results]);
+  const hasResults = useMemo(() => logRateResults && logRateResults.histogramBuckets.length > 0, [
+    logRateResults,
+  ]);
 
   const handleQueryTimeRangeChange = useCallback(
     ({ start: startTime, end: endTime }: { start: string; end: string }) => {
@@ -166,7 +168,7 @@ export const AnalysisResultsContent = ({
           <EuiPanel paddingSize="l">
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <EuiFlexItem grow={false}>
-                {results ? (
+                {logRateResults ? (
                   <LoadingOverlayWrapper isLoading={isLoading}>
                     <EuiText size="s">
                       <FormattedMessage
@@ -176,7 +178,7 @@ export const AnalysisResultsContent = ({
                           numberOfLogs: (
                             <EuiBadge color="primary">
                               <EuiText size="s" color="ghost">
-                                {numeral(results.totalNumberOfLogEntries).format('0.00a')}
+                                {numeral(logRateResults.totalNumberOfLogEntries).format('0.00a')}
                               </EuiText>
                             </EuiBadge>
                           ),
@@ -208,7 +210,7 @@ export const AnalysisResultsContent = ({
             {isFirstUse && !hasResults ? <FirstUseCallout /> : null}
             <LogRateResults
               isLoading={isLoading}
-              results={results}
+              results={logRateResults}
               setTimeRange={handleChartTimeRangeChange}
               timeRange={queryTimeRange.value}
             />
@@ -221,7 +223,7 @@ export const AnalysisResultsContent = ({
               jobStatus={jobStatus['log-entry-rate']}
               viewSetupForReconfiguration={viewSetupForReconfiguration}
               viewSetupForUpdate={viewSetupForUpdate}
-              results={results}
+              results={logRateResults}
               setTimeRange={handleChartTimeRangeChange}
               setupStatus={setupStatus}
               timeRange={queryTimeRange.value}

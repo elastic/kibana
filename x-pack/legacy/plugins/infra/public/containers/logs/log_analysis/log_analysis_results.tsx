@@ -19,7 +19,7 @@ type PartitionRecord = Record<
   { buckets: PartitionBucket[]; topAnomalyScore: number; totalNumberOfLogEntries: number }
 >;
 
-export interface Results {
+export interface LogRateResults {
   bucketDuration: number;
   totalNumberOfLogEntries: number;
   histogramBuckets: GetLogEntryRateSuccessResponsePayload['data']['histogramBuckets'];
@@ -52,7 +52,7 @@ export const useLogAnalysisResults = ({
     getLogEntryRate();
   }, [sourceId, startTime, endTime, bucketDuration, lastRequestTime]);
 
-  const results: Results | null = useMemo(() => {
+  const logRateResults: LogRateResults | null = useMemo(() => {
     if (logEntryRate) {
       return {
         bucketDuration: logEntryRate.bucketDuration,
@@ -67,7 +67,7 @@ export const useLogAnalysisResults = ({
 
   return {
     isLoading,
-    results,
+    logRateResults,
   };
 };
 
