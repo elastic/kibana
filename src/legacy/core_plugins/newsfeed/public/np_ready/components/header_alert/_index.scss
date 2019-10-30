@@ -1,7 +1,20 @@
-// TODO: commented the import of this styles because evrything is failing due to the missing imports
-// @import './header_alert';
+.kbnNewsFeed__headerAlert.euiHeaderAlert {
+  margin-bottom: $euiSizeL;
+  padding: 0 $euiSizeS $euiSizeL;
+  border-bottom: $euiBorderThin;
+  border-top: none;
 
-// TODO: remove this test style. It is here just to show that everything is working
-.test_style {
-  color: grey;
+  .euiHeaderAlert__title {
+    @include euiTitle('xs');
+    margin-bottom: $euiSizeS;
+  }
+
+  .euiHeaderAlert__text {
+    @include euiFontSizeS;
+    margin-bottom: $euiSize;
+  }
+
+  .euiHeaderAlert__action {
+    @include euiFontSizeS;
+  }
 }
