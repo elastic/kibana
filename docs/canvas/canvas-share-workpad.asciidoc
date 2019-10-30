@@ -55,7 +55,7 @@ image::images/canvas-create-URL.gif[Create POST URL]
 [[add-workpad-website]]
 === Share the workpad on a website
 
-beta[] Download the workpad and share it on any website, then customize the workpad behavior to rotate or autoplay the pages.
+beta[] Download the workpad and share it on any website, then customize the workpad behavior to autoplay the pages.
 
 . If you are using a Gold or Platinum license, enable reporting in your `config/kibana.yml` file.
 
@@ -74,7 +74,7 @@ NOTE: Shareable workpads encode the current state of the workpad in a JSON file.
 [[change-the-workpad-settings]]
 === Change the shareable workpad settings
 
-After you've added the workpad to your website, you can enable autoplay or hide the toolbar.
+After you've added the workpad to your website, you can enable autoplay or hide the toolbar. You can also configure the autoplay and toolbar settings on the *Share on a website* pane.
 
 [float]
 [[shareable-workpad-enable-autoplay]]
@@ -87,8 +87,9 @@ Automatically cycle through the workpad pages.
 . Click *Auto Play*, then select *Cycle Slides*.
 
 . In the *Set a custom interval* field, enter the interval you want to use, then click *Set*.
-
-. To use the workpad animations, select *Animate cycle*.
++
+[role="screenshot"]
+image::images/canvas_share_autoplay_480.gif[Autoplay settings]
 
 [float]
 [[hide-workpad-toolbar]]
@@ -99,3 +100,6 @@ The toolbar displays the number of pages in your workpad, and the settings icon.
 . In the lower right corner, click the settings icon.
 
 . Click *Toolbar*, then select *Hide Toolbar*.
++
+[role="screenshot"]
+image::images/canvas_share_hidetoolbar_480.gif[Hide toolbar settings]
