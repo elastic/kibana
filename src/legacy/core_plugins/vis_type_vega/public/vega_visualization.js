@@ -21,9 +21,11 @@ import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 import { VegaView } from './vega_view/vega_view';
 import { VegaMapView } from './vega_view/vega_map_view';
-import { findObjectByTitle } from 'ui/saved_objects';
 import { timefilter } from 'ui/timefilter';
 import { start as data } from '../../../core_plugins/data/public/legacy';
+import { npStart } from 'ui/new_platform';
+
+import { findIndexPatternByTitle } from '../../data/public/index_patterns';
 
 export const createVegaVisualization = ({ serviceSettings }) => class VegaVisualization {
   constructor(el, vis) {
@@ -40,7 +42,7 @@ export const createVegaVisualization = ({ serviceSettings }) => class VegaVisual
   async findIndex(index) {
     let idxObj;
     if (index) {
-      idxObj = await findObjectByTitle(this.savedObjectsClient, 'index-pattern', index);
+      idxObj = await findIndexPatternByTitle(this.savedObjectsClient, index);
       if (!idxObj) {
         throw new Error(i18n.translate('visTypeVega.visualization.indexNotFoundErrorMessage', {
           defaultMessage: 'Index {index} not found',
@@ -98,11 +100,12 @@ export const createVegaVisualization = ({ serviceSettings }) => class VegaVisual
         this._vegaView = null;
       }
 
+      const { filterManager } = npStart.plugins.data.query;
       const vegaViewParams = {
         parentEl: this._el,
         vegaParser,
         serviceSettings,
-        queryfilter: data.filter.filterManager,
+        queryfilter: filterManager,
         timefilter: timefilter,
         findIndex: this.findIndex.bind(this),
       };

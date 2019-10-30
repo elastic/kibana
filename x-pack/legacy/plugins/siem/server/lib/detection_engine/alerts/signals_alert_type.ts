@@ -7,7 +7,6 @@
 import { schema } from '@kbn/config-schema';
 import { SIGNALS_ID } from '../../../../common/constants';
 import { Logger } from '../../../../../../../../src/core/server';
-import { AlertType, AlertExecutorOptions } from '../../../../../alerting';
 
 // TODO: Remove this for the build_events_query call eventually
 import { buildEventsReIndex } from './build_events_reindex';
@@ -18,8 +17,10 @@ import { buildEventsScrollQuery } from './build_events_query';
 
 // bulk scroll class
 import { scrollAndBulkIndex } from './utils';
+import { SignalAlertTypeDefinition } from './types';
+import { getFilter } from './get_filter';
 
-export const signalsAlertType = ({ logger }: { logger: Logger }): AlertType => {
+export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTypeDefinition => {
   return {
     id: SIGNALS_ID,
     name: 'SIEM Signals',
@@ -29,12 +30,15 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): AlertType => {
         description: schema.string(),
         from: schema.string(),
         filter: schema.nullable(schema.object({}, { allowUnknowns: true })),
-        id: schema.number(),
+        id: schema.string(),
         index: schema.arrayOf(schema.string()),
-        kql: schema.nullable(schema.string()),
+        language: schema.nullable(schema.string()),
+        savedId: schema.nullable(schema.string()),
+        query: schema.nullable(schema.string()),
+        filters: schema.nullable(schema.arrayOf(schema.object({}, { allowUnknowns: true }))),
         maxSignals: schema.number({ defaultValue: 100 }),
         name: schema.string(),
-        severity: schema.number(),
+        severity: schema.string(),
         to: schema.string(),
         type: schema.string(),
         references: schema.arrayOf(schema.string(), { defaultValue: [] }),
@@ -42,8 +46,7 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): AlertType => {
         scrollLock: schema.maybe(schema.string()),
       }),
     },
-    // TODO: Type the params as it is all filled with any
-    async executor({ services, params, state }: AlertExecutorOptions) {
+    async executor({ services, params }) {
       const instance = services.alertInstanceFactory('siem-signals');
 
       const {
@@ -52,7 +55,10 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): AlertType => {
         from,
         id,
         index,
-        kql,
+        filters,
+        language,
+        savedId,
+        query,
         maxSignals,
         name,
         references,
@@ -66,13 +72,23 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): AlertType => {
       const scroll = scrollLock ? scrollLock : '1m';
       const size = scrollSize ? scrollSize : 400;
 
+      const esFilter = await getFilter({
+        type,
+        filter,
+        filters,
+        language,
+        query,
+        savedId,
+        services,
+        index,
+      });
+
       // TODO: Turn these options being sent in into a template for the alert type
       const noReIndex = buildEventsScrollQuery({
         index,
         from,
         to,
-        kql,
-        filter,
+        filter: esFilter,
         size,
         scroll,
       });
@@ -80,7 +96,6 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): AlertType => {
       const reIndex = buildEventsReIndex({
         index,
         from,
-        kql,
         to,
         // TODO: Change this out once we have solved
         // https://github.com/elastic/kibana/issues/47002
@@ -88,8 +103,8 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): AlertType => {
         severity,
         description,
         name,
-        timeDetected: Date.now(),
-        filter,
+        timeDetected: new Date().toISOString(),
+        filter: esFilter,
         maxDocs: maxSignals,
         ruleRevision: 1,
         id,

@@ -12,17 +12,15 @@ exports[`Logs should render a default message 1`] = `
       id="xpack.monitoring.logs.reason.defaultMessage"
       values={
         Object {
-          "link": <EuiLink
-            color="primary"
+          "link": <ForwardRef
             href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-installation.html"
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Please verify your setup is correct."
               id="xpack.monitoring.logs.reason.defaultMessageLink"
               values={Object {}}
             />
-          </EuiLink>,
+          </ForwardRef>,
         }
       }
     />
@@ -42,13 +40,11 @@ exports[`Logs should render with a no cluster found reason 1`] = `
       id="xpack.monitoring.logs.reason.noClusterMessage"
       values={
         Object {
-          "link": <EuiLink
-            color="primary"
+          "link": <ForwardRef
             href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-installation.html"
-            type="button"
           >
             setup
-          </EuiLink>,
+          </ForwardRef>,
         }
       }
     />
@@ -68,13 +64,11 @@ exports[`Logs should render with a no index found reason 1`] = `
       id="xpack.monitoring.logs.reason.noIndexMessage"
       values={
         Object {
-          "link": <EuiLink
-            color="primary"
+          "link": <ForwardRef
             href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-installation.html"
-            type="button"
           >
             setup
-          </EuiLink>,
+          </ForwardRef>,
         }
       }
     />
@@ -94,13 +88,11 @@ exports[`Logs should render with a no index pattern found reason 1`] = `
       id="xpack.monitoring.logs.reason.noIndexPatternMessage"
       values={
         Object {
-          "link": <EuiLink
-            color="primary"
+          "link": <ForwardRef
             href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-installation.html"
-            type="button"
           >
             Filebeat
-          </EuiLink>,
+          </ForwardRef>,
         }
       }
     />
@@ -120,13 +112,11 @@ exports[`Logs should render with a no node found reason 1`] = `
       id="xpack.monitoring.logs.reason.noNodeMessage"
       values={
         Object {
-          "link": <EuiLink
-            color="primary"
+          "link": <ForwardRef
             href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-installation.html"
-            type="button"
           >
             setup
-          </EuiLink>,
+          </ForwardRef>,
         }
       }
     />
@@ -146,13 +136,11 @@ exports[`Logs should render with a no type found reason 1`] = `
       id="xpack.monitoring.logs.reason.noTypeMessage"
       values={
         Object {
-          "link": <EuiLink
-            color="primary"
+          "link": <ForwardRef
             href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-elasticsearch.html"
-            type="button"
           >
             these directions
-          </EuiLink>,
+          </ForwardRef>,
         }
       }
     />

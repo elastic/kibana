@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-
 // TODO: Re-index is just a temporary solution in order to speed up development
 // of any front end pieces. This should be replaced with a combination of the file
 // build_events_query.ts and any scrolling/scaling solutions from that particular
@@ -14,31 +12,19 @@ import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 interface BuildEventsReIndexParams {
   description: string;
   index: string[];
-  from: number;
-  to: number;
+  from: string;
+  to: string;
   signalsIndex: string;
   maxDocs: number;
-  filter: Record<string, {}> | undefined;
-  kql: string | undefined;
-  severity: number;
+  filter: unknown;
+  severity: string;
   name: string;
-  timeDetected: number;
+  timeDetected: string;
   ruleRevision: number;
   id: string;
   type: string;
   references: string[];
 }
-
-export const getFilter = (kql: string | undefined, filter: Record<string, {}> | undefined) => {
-  if (kql != null) {
-    return toElasticsearchQuery(fromKueryExpression(kql), null);
-  } else if (filter != null) {
-    return filter;
-  } else {
-    // TODO: Re-visit this error (which should never happen) when we do signal errors for the UI
-    throw new TypeError('either kql or filter should be set');
-  }
-};
 
 export const buildEventsReIndex = ({
   description,
@@ -48,7 +34,6 @@ export const buildEventsReIndex = ({
   signalsIndex,
   maxDocs,
   filter,
-  kql,
   severity,
   name,
   timeDetected,
@@ -57,11 +42,10 @@ export const buildEventsReIndex = ({
   type,
   references,
 }: BuildEventsReIndexParams) => {
-  const kqlOrFilter = getFilter(kql, filter);
   const indexPatterns = index.map(element => `"${element}"`).join(',');
   const refs = references.map(element => `"${element}"`).join(',');
   const filterWithTime = [
-    kqlOrFilter,
+    filter,
     {
       bool: {
         filter: [
@@ -131,6 +115,7 @@ export const buildEventsReIndex = ({
           def parent = [
             "id": ctx._id,
             "type": "event",
+            "index": ctx._index,
             "depth": 1
           ];
 
@@ -140,14 +125,15 @@ export const buildEventsReIndex = ({
             "rule_type": "${type}",
             "parent": parent,
             "name": "${name}",
-            "severity": ${severity},
+            "severity": "${severity}",
             "description": "${description}",
-            "time_detected": "${timeDetected}",
+            "original_time": ctx._source['@timestamp'],
             "index_patterns": indexPatterns,
             "references": references
           ];
 
           ctx._source.signal = signal;
+          ctx._source['@timestamp'] = "${timeDetected}";
         `,
         lang: 'painless',
       },

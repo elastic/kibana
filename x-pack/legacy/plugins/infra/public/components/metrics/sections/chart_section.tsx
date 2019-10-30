@@ -18,7 +18,6 @@ import {
   TooltipValue,
 } from '@elastic/charts';
 import { EuiPageContentBody, EuiTitle } from '@elastic/eui';
-import { InfraMetricLayoutSection } from '../../../pages/metrics/layouts/types';
 import { InfraMetricData } from '../../../graphql/types';
 import { getChartTheme } from '../../metrics_explorer/helpers/get_chart_theme';
 import { InfraFormatterType } from '../../../lib/lib';
@@ -34,9 +33,10 @@ import {
 import { ErrorMessage } from './error_message';
 import { useKibanaUiSetting } from '../../../utils/use_kibana_ui_setting';
 import { MetricsTimeInput } from '../../../containers/metrics/with_metrics_time';
+import { InventoryDetailSection } from '../../../../common/inventory_models/types';
 
 interface Props {
-  section: InfraMetricLayoutSection;
+  section: InventoryDetailSection;
   metric: InfraMetricData;
   onChangeRangeTime?: (time: MetricsTimeInput) => void;
   isLiveStreaming?: boolean;
@@ -127,7 +127,7 @@ export const ChartSection = ({
                 key={`series-${section.id}-${series.id}`}
                 id={`series-${section.id}-${series.id}`}
                 series={series}
-                name={getChartName(section, series.id, series.label)}
+                name={getChartName(section, series.id, series.id)}
                 type={getChartType(section, series.id)}
                 color={getChartColor(section, series.id)}
                 stack={visConfig.stacked}

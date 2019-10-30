@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import React, { MouseEventHandler } from 'react';
+import React from 'react';
 import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import * as Url from 'url';
 
 import { i18n } from '@kbn/i18n';
-import { IconType } from '@elastic/eui';
+import { IconType, Breadcrumb as EuiBreadcrumb } from '@elastic/eui';
 
 import { InjectedMetadataStart } from '../injected_metadata';
 import { NotificationsStart } from '../notifications';
@@ -33,10 +33,11 @@ import { HttpStart } from '../http';
 import { ChromeNavLinks, NavLinksService } from './nav_links';
 import { ChromeRecentlyAccessed, RecentlyAccessedService } from './recently_accessed';
 import { NavControlsService, ChromeNavControls } from './nav_controls';
+import { DocTitleService, ChromeDocTitle } from './doc_title';
 import { LoadingIndicator, HeaderWrapper as Header } from './ui';
 import { DocLinksStart } from '../doc_links';
 
-export { ChromeNavControls, ChromeRecentlyAccessed };
+export { ChromeNavControls, ChromeRecentlyAccessed, ChromeDocTitle };
 
 const IS_COLLAPSED_KEY = 'core.chrome.isCollapsed';
 
@@ -59,12 +60,7 @@ export interface ChromeBrand {
 }
 
 /** @public */
-export interface ChromeBreadcrumb {
-  text: string;
-  href?: string;
-  'data-test-subj'?: string;
-  onClick?: MouseEventHandler<HTMLButtonElement>;
-}
+export type ChromeBreadcrumb = EuiBreadcrumb;
 
 /** @public */
 export type ChromeHelpExtension = (element: HTMLDivElement) => () => void;
@@ -87,6 +83,7 @@ export class ChromeService {
   private readonly navControls = new NavControlsService();
   private readonly navLinks = new NavLinksService();
   private readonly recentlyAccessed = new RecentlyAccessedService();
+  private readonly docTitle = new DocTitleService();
 
   constructor(private readonly params: ConstructorParams) {}
 
@@ -111,6 +108,7 @@ export class ChromeService {
     const navControls = this.navControls.start();
     const navLinks = this.navLinks.start({ application, http });
     const recentlyAccessed = await this.recentlyAccessed.start({ http });
+    const docTitle = this.docTitle.start({ document: window.document });
 
     if (!this.params.browserSupportsCsp && injectedMetadata.getCspConfig().warnLegacyBrowsers) {
       notifications.toasts.addWarning(
@@ -124,6 +122,7 @@ export class ChromeService {
       navControls,
       navLinks,
       recentlyAccessed,
+      docTitle,
 
       getHeaderComponent: () => (
         <React.Fragment>
@@ -264,6 +263,8 @@ export interface ChromeStart {
   navControls: ChromeNavControls;
   /** {@inheritdoc ChromeRecentlyAccessed} */
   recentlyAccessed: ChromeRecentlyAccessed;
+  /** {@inheritdoc ChromeDocTitle} */
+  docTitle: ChromeDocTitle;
 
   /**
    * Sets the current app's title

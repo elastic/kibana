@@ -18,13 +18,13 @@ import {
   SavedObjectsClientContract,
   HttpServiceBase,
 } from 'src/core/public';
-import { Storage } from 'ui/storage';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { IndexPatternPrivateState } from '../types';
+import { documentField } from '../document_field';
 
 jest.mock('ui/new_platform');
 jest.mock('../loader');
 jest.mock('../state_helpers');
-jest.mock('../operations');
 
 // Used by indexpattern plugin, which is a dependency of a dependency
 jest.mock('ui/chrome');
@@ -67,6 +67,7 @@ const expectedIndexPatterns = {
         searchable: true,
         exists: true,
       },
+      documentField,
     ],
   },
 };
@@ -129,11 +130,12 @@ describe('IndexPatternDimensionPanel', () => {
       dragDropContext,
       state,
       setState,
+      dateRange: { fromDate: 'now-1d', toDate: 'now' },
       columnId: 'col1',
       layerId: 'first',
       uniqueLabel: 'stuff',
       filterOperations: () => true,
-      storage: {} as Storage,
+      storage: {} as IStorageWrapper,
       uiSettings: {} as UiSettingsClientContract,
       savedObjectsClient: {} as SavedObjectsClientContract,
       http: {} as HttpServiceBase,
@@ -199,7 +201,7 @@ describe('IndexPatternDimensionPanel', () => {
 
     expect(options).toHaveLength(2);
 
-    expect(options![0].label).toEqual('Document');
+    expect(options![0].label).toEqual('Records');
 
     expect(options![1].options!.map(({ label }) => label)).toEqual([
       'timestamp',
@@ -231,7 +233,7 @@ describe('IndexPatternDimensionPanel', () => {
     expect(options![1].options!.map(({ label }) => label)).toEqual(['timestamp', 'source']);
   });
 
-  it('should indicate fields which are imcompatible for the operation of the current column', () => {
+  it('should indicate fields which are incompatible for the operation of the current column', () => {
     wrapper = mount(
       <IndexPatternDimensionPanel
         {...defaultProps}
@@ -262,7 +264,7 @@ describe('IndexPatternDimensionPanel', () => {
 
     const options = wrapper.find(EuiComboBox).prop('options');
 
-    expect(options![0]['data-test-subj']).toEqual('lns-documentOptionIncompatible');
+    expect(options![0]['data-test-subj']).toEqual('lns-fieldOptionIncompatible-Records');
 
     expect(
       options![1].options!.filter(({ label }) => label === 'timestamp')[0]['data-test-subj']
@@ -574,6 +576,40 @@ describe('IndexPatternDimensionPanel', () => {
       ).not.toContain('Incompatible');
     });
 
+    it('should select compatible operation if field not compatible with selected operation', () => {
+      wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} columnId={'col2'} />);
+
+      openPopover();
+
+      wrapper.find('button[data-test-subj="lns-indexPatternDimension-avg"]').simulate('click');
+
+      const comboBox = wrapper.find(EuiComboBox);
+      const options = comboBox.prop('options');
+
+      // options[1][2] is a `source` field of type `string` which doesn't support `avg` operation
+      act(() => {
+        comboBox.prop('onChange')!([options![1].options![2]]);
+      });
+
+      expect(setState).toHaveBeenCalledWith({
+        ...state,
+        layers: {
+          first: {
+            ...state.layers.first,
+            columns: {
+              ...state.layers.first.columns,
+              col2: expect.objectContaining({
+                sourceField: 'source',
+                operationType: 'terms',
+                // Other parts of this don't matter for this test
+              }),
+            },
+            columnOrder: ['col1', 'col2'],
+          },
+        },
+      });
+    });
+
     it('should indicate document compatibility with selected field operation', () => {
       const initialState: IndexPatternPrivateState = {
         ...state,
@@ -624,6 +660,7 @@ describe('IndexPatternDimensionPanel', () => {
                 isBucketed: false,
                 label: '',
                 operationType: 'count',
+                sourceField: 'Records',
               },
             },
           },
@@ -818,6 +855,7 @@ describe('IndexPatternDimensionPanel', () => {
               isBucketed: false,
               label: '',
               operationType: 'count',
+              sourceField: 'Records',
             },
           },
         },
@@ -853,7 +891,7 @@ describe('IndexPatternDimensionPanel', () => {
         .find(EuiSideNav)
         .prop('items')[0]
         .items.map(({ name }) => name)
-    ).toEqual(['Unique count', 'Average', 'Count', 'Filter ratio', 'Maximum', 'Minimum', 'Sum']);
+    ).toEqual(['Unique count', 'Average', 'Count', 'Maximum', 'Minimum', 'Sum']);
   });
 
   it('should add a column on selection of a field', () => {

@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 import { CustomExtentsOptions, CustomExtentsOptionsProps } from './custom_extents_options';
 import { YExtents } from './y_extents';
 import { valueAxis } from './mocks';
@@ -55,23 +55,27 @@ describe('CustomExtentsOptions component', () => {
 
   describe('boundsMargin', () => {
     it('should set validity as true when value is positive', () => {
-      const comp = shallow(<CustomExtentsOptions {...defaultProps} />);
-      comp.find({ paramName: BOUNDS_MARGIN }).prop('setValue')(BOUNDS_MARGIN, 5);
+      defaultProps.axis.scale.boundsMargin = 5;
+      mount(<CustomExtentsOptions {...defaultProps} />);
 
       expect(setMultipleValidity).toBeCalledWith(BOUNDS_MARGIN, true);
     });
 
     it('should set validity as true when value is empty', () => {
-      const comp = shallow(<CustomExtentsOptions {...defaultProps} />);
-      comp.find({ paramName: BOUNDS_MARGIN }).prop('setValue')(BOUNDS_MARGIN, '');
+      const comp = mount(<CustomExtentsOptions {...defaultProps} />);
+      comp.setProps({
+        axis: { ...valueAxis, scale: { ...valueAxis.scale, boundsMargin: undefined } },
+      });
 
       expect(setMultipleValidity).toBeCalledWith(BOUNDS_MARGIN, true);
     });
 
     it('should set validity as false when value is negative', () => {
       defaultProps.axis.scale.defaultYExtents = true;
-      const comp = shallow(<CustomExtentsOptions {...defaultProps} />);
-      comp.find({ paramName: BOUNDS_MARGIN }).prop('setValue')(BOUNDS_MARGIN, -1);
+      const comp = mount(<CustomExtentsOptions {...defaultProps} />);
+      comp.setProps({
+        axis: { ...valueAxis, scale: { ...valueAxis.scale, boundsMargin: -1 } },
+      });
 
       expect(setMultipleValidity).toBeCalledWith(BOUNDS_MARGIN, false);
     });
@@ -103,7 +107,6 @@ describe('CustomExtentsOptions component', () => {
       const comp = shallow(<CustomExtentsOptions {...defaultProps} />);
       comp.find({ paramName: DEFAULT_Y_EXTENTS }).prop('setValue')(DEFAULT_Y_EXTENTS, false);
 
-      expect(setMultipleValidity).toBeCalledWith(BOUNDS_MARGIN, true);
       const newScale = {
         ...defaultProps.axis.scale,
         boundsMargin: undefined,

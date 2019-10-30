@@ -17,25 +17,72 @@ import {
   EuiButtonIcon,
   EuiSpacer,
   EuiCallOut,
+  EuiHorizontalRule,
+  EuiFormRow,
 } from '@elastic/eui';
 
 import { JobCreatorContext } from '../../../job_creator_context';
 import { AdvancedJobCreator } from '../../../../../common/job_creator';
+import { Validation } from '../../../../../common/job_validator';
 import { detectorToString } from '../../../../../../../util/string_utils';
+import { Detector } from '../../../../../common/job_creator/configs';
 
 interface Props {
+  isActive: boolean;
   onEditJob: (i: number) => void;
   onDeleteJob: (i: number) => void;
 }
 
-export const DetectorList: FC<Props> = ({ onEditJob, onDeleteJob }) => {
-  const { jobCreator: jc, jobCreatorUpdated } = useContext(JobCreatorContext);
+export const DetectorList: FC<Props> = ({ isActive, onEditJob, onDeleteJob }) => {
+  const { jobCreator: jc, jobCreatorUpdated, jobValidator, jobValidatorUpdated } = useContext(
+    JobCreatorContext
+  );
   const jobCreator = jc as AdvancedJobCreator;
   const [detectors, setDetectors] = useState(jobCreator.detectors);
+  const [validation, setValidation] = useState(jobValidator.duplicateDetectors);
 
   useEffect(() => {
     setDetectors(jobCreator.detectors);
   }, [jobCreatorUpdated]);
+
+  useEffect(() => {
+    setValidation(jobValidator.duplicateDetectors);
+  }, [jobValidatorUpdated]);
+
+  const Buttons: FC<{ index: number }> = ({ index }) => {
+    return (
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <EuiButtonIcon
+            color="primary"
+            onClick={() => onEditJob(index)}
+            iconType="pencil"
+            aria-label={i18n.translate(
+              'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorList.editButton',
+              {
+                defaultMessage: 'Edit',
+              }
+            )}
+            data-test-subj="mlAdvancedDetectorEditButton"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiButtonIcon
+            color="danger"
+            onClick={() => onDeleteJob(index)}
+            iconType="trash"
+            aria-label={i18n.translate(
+              'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorList.deleteButton',
+              {
+                defaultMessage: 'Delete',
+              }
+            )}
+            data-test-subj="mlAdvancedDetectorDeleteButton"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  };
 
   return (
     <Fragment>
@@ -54,45 +101,35 @@ export const DetectorList: FC<Props> = ({ onEditJob, onDeleteJob }) => {
 
       <EuiFlexGrid columns={3}>
         {detectors.map((d, i) => (
-          <EuiFlexItem key={i}>
+          <EuiFlexItem key={i} data-test-subj={`mlAdvancedDetector ${i}`}>
             <EuiPanel paddingSize="m">
               <EuiFlexGroup>
-                <EuiFlexItem>{detectorToString(d)}</EuiFlexItem>
-                <EuiFlexItem grow={false} style={{ margin: '8px' }}>
-                  <EuiFlexGroup gutterSize="s">
-                    <EuiFlexItem>
-                      <EuiButtonIcon
-                        color="primary"
-                        onClick={() => onEditJob(i)}
-                        iconType="pencil"
-                        aria-label={i18n.translate(
-                          'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorList.editButton',
-                          {
-                            defaultMessage: 'Edit',
-                          }
-                        )}
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <EuiButtonIcon
-                        color="danger"
-                        onClick={() => onDeleteJob(i)}
-                        iconType="trash"
-                        aria-label={i18n.translate(
-                          'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorList.deleteButton',
-                          {
-                            defaultMessage: 'Delete',
-                          }
-                        )}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
+                <EuiFlexItem>
+                  {d.detector_description !== undefined ? (
+                    <div style={{ fontWeight: 'bold' }} data-test-subj="mlDetectorDescription">
+                      {d.detector_description}
+                    </div>
+                  ) : (
+                    <StringifiedDetector detector={d} />
+                  )}
                 </EuiFlexItem>
+                {isActive && (
+                  <EuiFlexItem grow={false} style={{ margin: '8px' }}>
+                    <Buttons index={i} />
+                  </EuiFlexItem>
+                )}
               </EuiFlexGroup>
+              {d.detector_description !== undefined && (
+                <Fragment>
+                  <EuiHorizontalRule margin="s" />
+                  <StringifiedDetector detector={d} />
+                </Fragment>
+              )}
             </EuiPanel>
           </EuiFlexItem>
         ))}
       </EuiFlexGrid>
+      <DuplicateDetectorsWarning validation={validation} />
     </Fragment>
   );
 };
@@ -110,6 +147,7 @@ const NoDetectorsWarning: FC<{ show: boolean }> = ({ show }) => {
           defaultMessage: 'No detectors',
         })}
         iconType="alert"
+        data-test-subj="mlAdvancedNoDetectorsMessage"
       >
         <FormattedMessage
           id="xpack.ml.newJob.wizard.pickFieldsStep.noDetectorsCallout.message"
@@ -119,4 +157,22 @@ const NoDetectorsWarning: FC<{ show: boolean }> = ({ show }) => {
       <EuiSpacer size="s" />
     </Fragment>
   );
+};
+
+const DuplicateDetectorsWarning: FC<{ validation: Validation }> = ({ validation }) => {
+  if (validation.valid === true) {
+    return null;
+  }
+  return (
+    <Fragment>
+      <EuiFormRow error={validation.message} isInvalid={validation.valid === false}>
+        <Fragment />
+      </EuiFormRow>
+      <EuiSpacer size="s" />
+    </Fragment>
+  );
+};
+
+const StringifiedDetector: FC<{ detector: Detector }> = ({ detector }) => {
+  return <div data-test-subj="mlDetectorIdentifier">{detectorToString(detector)}</div>;
 };

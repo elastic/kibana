@@ -22,8 +22,9 @@ import { cloneDeep, get } from 'lodash';
 import { setBounds } from 'ui/agg_types';
 import { SearchSource } from 'ui/courier';
 import { AggConfig, Vis, VisParams, VisState } from 'ui/vis';
+import { isDateHistogramBucketAggConfig } from 'ui/agg_types/buckets/date_histogram';
 import moment from 'moment';
-import { SerializedFieldFormat } from 'src/plugins/expressions/common/expressions/types/common';
+import { SerializedFieldFormat } from 'src/plugins/expressions/public';
 import { createFormat } from './utilities';
 
 interface SchemaConfigParams {
@@ -33,6 +34,7 @@ interface SchemaConfigParams {
 
 export interface SchemaConfig {
   accessor: number;
+  label: string;
   format: SerializedFieldFormat;
   params: SchemaConfigParams;
   aggType: string;
@@ -76,7 +78,7 @@ const vislibCharts: string[] = [
 
 export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
   const createSchemaConfig = (accessor: number, agg: AggConfig): SchemaConfig => {
-    if (agg.type.name === 'date_histogram') {
+    if (isDateHistogramBucketAggConfig(agg)) {
       agg.params.timeRange = timeRange;
       setBounds(agg, true);
     }
@@ -105,10 +107,13 @@ export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
       params.useGeocentroid = agg.params.useGeocentroid;
     }
 
+    const label = agg.makeLabel && agg.makeLabel();
+
     return {
       accessor,
       format,
       params,
+      label,
       aggType: agg.type.name,
     };
   };
@@ -441,18 +446,9 @@ export const buildVislibDimensions = async (
     } else if (xAgg.type.name === 'histogram') {
       const intervalParam = xAgg.type.paramByName('interval');
       const output = { params: {} as any };
-      const searchRequest = {
-        whenAborted: (fn: any) => {
-          if (params.abortSignal) {
-            params.abortSignal.addEventListener('abort', fn);
-          }
-        },
-      };
-      await intervalParam.modifyAggConfigOnSearchRequestStart(
-        xAgg,
-        params.searchSource,
-        searchRequest
-      );
+      await intervalParam.modifyAggConfigOnSearchRequestStart(xAgg, params.searchSource, {
+        abortSignal: params.abortSignal,
+      });
       intervalParam.write(xAgg, output);
       dimensions.x.params.interval = output.params.interval;
     }

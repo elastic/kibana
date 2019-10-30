@@ -67,26 +67,26 @@ export interface HostsSortField {
   direction: Direction;
 }
 
-export interface TlsSortField {
-  field: TlsFields;
-
-  direction: Direction;
-}
-
 export interface UsersSortField {
   field: UsersFields;
 
   direction: Direction;
 }
 
-export interface NetworkTopNFlowSortField {
-  field: NetworkTopNFlowFields;
+export interface NetworkTopTablesSortField {
+  field: NetworkTopTablesFields;
 
   direction: Direction;
 }
 
 export interface NetworkDnsSortField {
   field: NetworkDnsFields;
+
+  direction: Direction;
+}
+
+export interface TlsSortField {
+  field: TlsFields;
 
   direction: Direction;
 }
@@ -239,8 +239,9 @@ export enum HostsFields {
   lastSeen = 'lastSeen',
 }
 
-export enum TlsFields {
-  _id = '_id',
+export enum UsersFields {
+  name = 'name',
+  count = 'count',
 }
 
 export enum FlowTarget {
@@ -250,17 +251,12 @@ export enum FlowTarget {
   source = 'source',
 }
 
-export enum UsersFields {
-  name = 'name',
-  count = 'count',
-}
-
 export enum FlowTargetSourceDest {
   destination = 'destination',
   source = 'source',
 }
 
-export enum NetworkTopNFlowFields {
+export enum NetworkTopTablesFields {
   bytes_in = 'bytes_in',
   bytes_out = 'bytes_out',
   flows = 'flows',
@@ -274,6 +270,10 @@ export enum NetworkDnsFields {
   uniqueDomains = 'uniqueDomains',
   dnsBytesIn = 'dnsBytesIn',
   dnsBytesOut = 'dnsBytesOut',
+}
+
+export enum TlsFields {
+  _id = '_id',
 }
 
 export enum SortFieldTimeline {
@@ -401,6 +401,8 @@ export interface Source {
   /** Gets Authentication success and failures based on a timerange */
   Authentications: AuthenticationsData;
 
+  AuthenticationsOverTime: AuthenticationsOverTimeData;
+
   Timeline: TimelineData;
 
   TimelineDetails: TimelineDetailsData;
@@ -417,8 +419,6 @@ export interface Source {
 
   IpOverview?: Maybe<IpOverviewData>;
 
-  Tls: TlsData;
-
   Users: UsersData;
 
   KpiNetwork?: Maybe<KpiNetworkData>;
@@ -426,7 +426,9 @@ export interface Source {
   KpiHosts: KpiHostsData;
 
   KpiHostDetails: KpiHostDetailsData;
-  /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
+
+  NetworkTopCountries: NetworkTopCountriesData;
+
   NetworkTopNFlow: NetworkTopNFlowData;
 
   NetworkDns: NetworkDnsData;
@@ -434,6 +436,8 @@ export interface Source {
   OverviewNetwork?: Maybe<OverviewNetworkData>;
 
   OverviewHost?: Maybe<OverviewHostData>;
+
+  Tls: TlsData;
   /** Gets UncommonProcesses based on a timerange, or all UncommonProcesses if no criteria is specified */
   UncommonProcesses: UncommonProcessesData;
   /** Just a simple example to get the app name */
@@ -630,6 +634,22 @@ export interface Inspect {
   dsl: string[];
 
   response: string[];
+}
+
+export interface AuthenticationsOverTimeData {
+  inspect?: Maybe<Inspect>;
+
+  authenticationsOverTime: MatrixOverTimeHistogramData[];
+
+  totalCount: number;
+}
+
+export interface MatrixOverTimeHistogramData {
+  x: number;
+
+  y: number;
+
+  g: string;
 }
 
 export interface TimelineData {
@@ -1216,14 +1236,6 @@ export interface EventsOverTimeData {
   totalCount: number;
 }
 
-export interface MatrixOverTimeHistogramData {
-  x: number;
-
-  y: number;
-
-  g: string;
-}
-
 export interface HostsData {
   edges: HostsEdges[];
 
@@ -1310,38 +1322,6 @@ export interface AutonomousSystem {
 
 export interface AutonomousSystemOrganization {
   name?: Maybe<string>;
-}
-
-export interface TlsData {
-  edges: TlsEdges[];
-
-  totalCount: number;
-
-  pageInfo: PageInfoPaginated;
-
-  inspect?: Maybe<Inspect>;
-}
-
-export interface TlsEdges {
-  node: TlsNode;
-
-  cursor: CursorType;
-}
-
-export interface TlsNode {
-  _id?: Maybe<string>;
-
-  timestamp?: Maybe<string>;
-
-  alternativeNames?: Maybe<string[]>;
-
-  notAfter?: Maybe<string[]>;
-
-  commonNames?: Maybe<string[]>;
-
-  ja3?: Maybe<string[]>;
-
-  issuerNames?: Maybe<string[]>;
 }
 
 export interface UsersData {
@@ -1456,6 +1436,68 @@ export interface KpiHostDetailsData {
   inspect?: Maybe<Inspect>;
 }
 
+export interface NetworkTopCountriesData {
+  edges: NetworkTopCountriesEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfoPaginated;
+
+  inspect?: Maybe<Inspect>;
+}
+
+export interface NetworkTopCountriesEdges {
+  node: NetworkTopCountriesItem;
+
+  cursor: CursorType;
+}
+
+export interface NetworkTopCountriesItem {
+  _id?: Maybe<string>;
+
+  source?: Maybe<TopCountriesItemSource>;
+
+  destination?: Maybe<TopCountriesItemDestination>;
+
+  network?: Maybe<TopNetworkTablesEcsField>;
+}
+
+export interface TopCountriesItemSource {
+  country?: Maybe<string>;
+
+  destination_ips?: Maybe<number>;
+
+  flows?: Maybe<number>;
+
+  location?: Maybe<GeoItem>;
+
+  source_ips?: Maybe<number>;
+}
+
+export interface GeoItem {
+  geo?: Maybe<GeoEcsFields>;
+
+  flowTarget?: Maybe<FlowTargetSourceDest>;
+}
+
+export interface TopCountriesItemDestination {
+  country?: Maybe<string>;
+
+  destination_ips?: Maybe<number>;
+
+  flows?: Maybe<number>;
+
+  location?: Maybe<GeoItem>;
+
+  source_ips?: Maybe<number>;
+}
+
+export interface TopNetworkTablesEcsField {
+  bytes_in?: Maybe<number>;
+
+  bytes_out?: Maybe<number>;
+}
+
 export interface NetworkTopNFlowData {
   edges: NetworkTopNFlowEdges[];
 
@@ -1479,7 +1521,7 @@ export interface NetworkTopNFlowItem {
 
   destination?: Maybe<TopNFlowItemDestination>;
 
-  network?: Maybe<TopNFlowNetworkEcsField>;
+  network?: Maybe<TopNetworkTablesEcsField>;
 }
 
 export interface TopNFlowItemSource {
@@ -1502,12 +1544,6 @@ export interface AutonomousSystemItem {
   number?: Maybe<number>;
 }
 
-export interface GeoItem {
-  geo?: Maybe<GeoEcsFields>;
-
-  flowTarget?: Maybe<FlowTargetSourceDest>;
-}
-
 export interface TopNFlowItemDestination {
   autonomous_system?: Maybe<AutonomousSystemItem>;
 
@@ -1520,12 +1556,6 @@ export interface TopNFlowItemDestination {
   flows?: Maybe<number>;
 
   source_ips?: Maybe<number>;
-}
-
-export interface TopNFlowNetworkEcsField {
-  bytes_in?: Maybe<number>;
-
-  bytes_out?: Maybe<number>;
 }
 
 export interface NetworkDnsData {
@@ -1612,6 +1642,38 @@ export interface OverviewHostData {
   winlogbeat?: Maybe<number>;
 
   inspect?: Maybe<Inspect>;
+}
+
+export interface TlsData {
+  edges: TlsEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfoPaginated;
+
+  inspect?: Maybe<Inspect>;
+}
+
+export interface TlsEdges {
+  node: TlsNode;
+
+  cursor: CursorType;
+}
+
+export interface TlsNode {
+  _id?: Maybe<string>;
+
+  timestamp?: Maybe<string>;
+
+  alternativeNames?: Maybe<string[]>;
+
+  notAfter?: Maybe<string[]>;
+
+  commonNames?: Maybe<string[]>;
+
+  ja3?: Maybe<string[]>;
+
+  issuerNames?: Maybe<string[]>;
 }
 
 export interface UncommonProcessesData {
@@ -1926,6 +1988,13 @@ export interface AuthenticationsSourceArgs {
 
   defaultIndex: string[];
 }
+export interface AuthenticationsOverTimeSourceArgs {
+  timerange: TimerangeInput;
+
+  filterQuery?: Maybe<string>;
+
+  defaultIndex: string[];
+}
 export interface TimelineSourceArgs {
   pagination: PaginationInput;
 
@@ -2000,23 +2069,6 @@ export interface IpOverviewSourceArgs {
 
   defaultIndex: string[];
 }
-export interface TlsSourceArgs {
-  filterQuery?: Maybe<string>;
-
-  id?: Maybe<string>;
-
-  ip: string;
-
-  pagination: PaginationInputPaginated;
-
-  sort: TlsSortField;
-
-  flowTarget: FlowTarget;
-
-  timerange: TimerangeInput;
-
-  defaultIndex: string[];
-}
 export interface UsersSourceArgs {
   filterQuery?: Maybe<string>;
 
@@ -2061,6 +2113,23 @@ export interface KpiHostDetailsSourceArgs {
 
   defaultIndex: string[];
 }
+export interface NetworkTopCountriesSourceArgs {
+  id?: Maybe<string>;
+
+  filterQuery?: Maybe<string>;
+
+  ip?: Maybe<string>;
+
+  flowTarget: FlowTargetSourceDest;
+
+  pagination: PaginationInputPaginated;
+
+  sort: NetworkTopTablesSortField;
+
+  timerange: TimerangeInput;
+
+  defaultIndex: string[];
+}
 export interface NetworkTopNFlowSourceArgs {
   id?: Maybe<string>;
 
@@ -2072,7 +2141,7 @@ export interface NetworkTopNFlowSourceArgs {
 
   pagination: PaginationInputPaginated;
 
-  sort: NetworkTopNFlowSortField;
+  sort: NetworkTopTablesSortField;
 
   timerange: TimerangeInput;
 
@@ -2108,6 +2177,23 @@ export interface OverviewHostSourceArgs {
   timerange: TimerangeInput;
 
   filterQuery?: Maybe<string>;
+
+  defaultIndex: string[];
+}
+export interface TlsSourceArgs {
+  filterQuery?: Maybe<string>;
+
+  id?: Maybe<string>;
+
+  ip: string;
+
+  pagination: PaginationInputPaginated;
+
+  sort: TlsSortField;
+
+  flowTarget: FlowTargetSourceDest;
+
+  timerange: TimerangeInput;
 
   defaultIndex: string[];
 }
@@ -2171,6 +2257,58 @@ export interface DeleteTimelineMutationArgs {
 // ====================================================
 // Documents
 // ====================================================
+
+export namespace GetAuthenticationsOverTimeQuery {
+  export type Variables = {
+    sourceId: string;
+    timerange: TimerangeInput;
+    defaultIndex: string[];
+    filterQuery?: Maybe<string>;
+    inspect: boolean;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    AuthenticationsOverTime: AuthenticationsOverTime;
+  };
+
+  export type AuthenticationsOverTime = {
+    __typename?: 'AuthenticationsOverTimeData';
+
+    authenticationsOverTime: _AuthenticationsOverTime[];
+
+    totalCount: number;
+
+    inspect: Maybe<Inspect>;
+  };
+
+  export type _AuthenticationsOverTime = {
+    __typename?: 'MatrixOverTimeHistogramData';
+
+    x: number;
+
+    y: number;
+
+    g: string;
+  };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
+}
 
 export namespace GetAuthenticationsQuery {
   export type Variables = {
@@ -3071,13 +3209,127 @@ export namespace GetNetworkDnsQuery {
   };
 }
 
+export namespace GetNetworkTopCountriesQuery {
+  export type Variables = {
+    sourceId: string;
+    ip?: Maybe<string>;
+    filterQuery?: Maybe<string>;
+    pagination: PaginationInputPaginated;
+    sort: NetworkTopTablesSortField;
+    flowTarget: FlowTargetSourceDest;
+    timerange: TimerangeInput;
+    defaultIndex: string[];
+    inspect: boolean;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    NetworkTopCountries: NetworkTopCountries;
+  };
+
+  export type NetworkTopCountries = {
+    __typename?: 'NetworkTopCountriesData';
+
+    totalCount: number;
+
+    edges: Edges[];
+
+    pageInfo: PageInfo;
+
+    inspect: Maybe<Inspect>;
+  };
+
+  export type Edges = {
+    __typename?: 'NetworkTopCountriesEdges';
+
+    node: Node;
+
+    cursor: Cursor;
+  };
+
+  export type Node = {
+    __typename?: 'NetworkTopCountriesItem';
+
+    source: Maybe<_Source>;
+
+    destination: Maybe<Destination>;
+
+    network: Maybe<Network>;
+  };
+
+  export type _Source = {
+    __typename?: 'TopCountriesItemSource';
+
+    country: Maybe<string>;
+
+    destination_ips: Maybe<number>;
+
+    flows: Maybe<number>;
+
+    source_ips: Maybe<number>;
+  };
+
+  export type Destination = {
+    __typename?: 'TopCountriesItemDestination';
+
+    country: Maybe<string>;
+
+    destination_ips: Maybe<number>;
+
+    flows: Maybe<number>;
+
+    source_ips: Maybe<number>;
+  };
+
+  export type Network = {
+    __typename?: 'TopNetworkTablesEcsField';
+
+    bytes_in: Maybe<number>;
+
+    bytes_out: Maybe<number>;
+  };
+
+  export type Cursor = {
+    __typename?: 'CursorType';
+
+    value: Maybe<string>;
+  };
+
+  export type PageInfo = {
+    __typename?: 'PageInfoPaginated';
+
+    activePage: number;
+
+    fakeTotalCount: number;
+
+    showMorePagesIndicator: boolean;
+  };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
+}
+
 export namespace GetNetworkTopNFlowQuery {
   export type Variables = {
     sourceId: string;
     ip?: Maybe<string>;
     filterQuery?: Maybe<string>;
     pagination: PaginationInputPaginated;
-    sort: NetworkTopNFlowSortField;
+    sort: NetworkTopTablesSortField;
     flowTarget: FlowTargetSourceDest;
     timerange: TimerangeInput;
     defaultIndex: string[];
@@ -3225,7 +3477,7 @@ export namespace GetNetworkTopNFlowQuery {
   };
 
   export type Network = {
-    __typename?: 'TopNFlowNetworkEcsField';
+    __typename?: 'TopNetworkTablesEcsField';
 
     bytes_in: Maybe<number>;
 
@@ -4930,7 +5182,7 @@ export namespace GetTlsQuery {
   export type Variables = {
     sourceId: string;
     filterQuery?: Maybe<string>;
-    flowTarget: FlowTarget;
+    flowTarget: FlowTargetSourceDest;
     ip: string;
     pagination: PaginationInputPaginated;
     sort: TlsSortField;

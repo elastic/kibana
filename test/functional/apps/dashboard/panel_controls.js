@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-import { PIE_CHART_VIS_NAME } from '../../page_objects/dashboard_page';
+import { PIE_CHART_VIS_NAME, AREA_CHART_VIS_NAME, LINE_CHART_VIS_NAME } from '../../page_objects/dashboard_page';
 import {
   VisualizeConstants
 } from '../../../../src/legacy/core_plugins/kibana/public/visualize/visualize_constants';
@@ -28,6 +28,8 @@ export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const dashboardReplacePanel = getService('dashboardReplacePanel');
+  const dashboardVisualizations = getService('dashboardVisualizations');
   const renderable = getService('renderable');
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'discover']);
   const dashboardName = 'Dashboard Panel Controls Test';
@@ -37,19 +39,67 @@ export default function ({ getService, getPageObjects }) {
 
     before(async function () {
       await PageObjects.dashboard.initTests();
-      await browser.refresh();
-      await PageObjects.header.awaitKibanaChrome();
-
-      // This flip between apps fixes the url so state is preserved when switching apps in test mode.
-      // Without this flip the url in test mode looks something like
-      // "http://localhost:5620/app/kibana?_t=1486069030837#/dashboard?_g=...."
-      // after the initial flip, the url will look like this: "http://localhost:5620/app/kibana#/dashboard?_g=...."
-      await PageObjects.header.clickVisualize();
-      await PageObjects.header.clickDashboard();
+      await PageObjects.dashboard.preserveCrossAppState();
     });
 
     after(async function () {
       await PageObjects.dashboard.gotoDashboardLandingPage();
+    });
+
+    describe('visualization object replace flyout', () => {
+      let intialDimensions;
+      before(async () => {
+        await PageObjects.dashboard.clickNewDashboard();
+        await PageObjects.dashboard.setTimepickerInHistoricalDataRange();
+        await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
+        await dashboardAddPanel.addVisualization(LINE_CHART_VIS_NAME);
+        intialDimensions = await PageObjects.dashboard.getPanelDimensions();
+      });
+
+      after(async function () {
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+      });
+
+      it('replaces old panel with selected panel', async () => {
+        await dashboardPanelActions.replacePanelByTitle(PIE_CHART_VIS_NAME);
+        await dashboardReplacePanel.replaceEmbeddable(AREA_CHART_VIS_NAME);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        const panelTitles = await PageObjects.dashboard.getPanelTitles();
+        expect(panelTitles.length).to.be(2);
+        expect(panelTitles[0]).to.be(AREA_CHART_VIS_NAME);
+      });
+
+      it('replaces selected visualization with old dimensions', async () => {
+        const newDimensions = await PageObjects.dashboard.getPanelDimensions();
+        expect(intialDimensions[0]).to.eql(newDimensions[0]);
+      });
+
+      it('replaced panel persisted correctly when dashboard is hard refreshed', async () => {
+        const currentUrl = await browser.getCurrentUrl();
+        await browser.get(currentUrl, true);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.dashboard.waitForRenderComplete();
+        const panelTitles = await PageObjects.dashboard.getPanelTitles();
+        expect(panelTitles.length).to.be(2);
+        expect(panelTitles[0]).to.be(AREA_CHART_VIS_NAME);
+      });
+
+      it('replaced panel with saved search', async () => {
+        const replacedSearch = 'replaced saved search';
+        await dashboardVisualizations.createSavedSearch({ name: replacedSearch, fields: ['bytes', 'agent'] });
+        await PageObjects.header.clickDashboard();
+        const inViewMode = await PageObjects.dashboard.getIsInViewMode();
+        if (inViewMode) {
+          await PageObjects.dashboard.switchToEditMode();
+        }
+        await dashboardPanelActions.replacePanelByTitle(AREA_CHART_VIS_NAME);
+        await dashboardReplacePanel.replaceEmbeddable(replacedSearch, 'search');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.dashboard.waitForRenderComplete();
+        const panelTitles = await PageObjects.dashboard.getPanelTitles();
+        expect(panelTitles.length).to.be(2);
+        expect(panelTitles[0]).to.be(replacedSearch);
+      });
     });
 
     describe('panel edit controls', function () {
@@ -75,6 +125,7 @@ export default function ({ getService, getPageObjects }) {
         await dashboardPanelActions.openContextMenu();
 
         await dashboardPanelActions.expectExistsEditPanelAction();
+        await dashboardPanelActions.expectExistsReplacePanelAction();
         await dashboardPanelActions.expectExistsRemovePanelAction();
       });
 
@@ -88,6 +139,7 @@ export default function ({ getService, getPageObjects }) {
 
         await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.expectExistsEditPanelAction();
+        await dashboardPanelActions.expectExistsReplacePanelAction();
         await dashboardPanelActions.expectExistsRemovePanelAction();
 
         // Get rid of the timestamp in the url.
@@ -102,6 +154,7 @@ export default function ({ getService, getPageObjects }) {
           await dashboardPanelActions.clickExpandPanelToggle();
           await dashboardPanelActions.openContextMenu();
           await dashboardPanelActions.expectMissingEditPanelAction();
+          await dashboardPanelActions.expectMissingReplacePanelAction();
           await dashboardPanelActions.expectMissingRemovePanelAction();
         });
 
@@ -109,6 +162,7 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.dashboard.switchToEditMode();
           await dashboardPanelActions.openContextMenu();
           await dashboardPanelActions.expectExistsEditPanelAction();
+          await dashboardPanelActions.expectExistsReplacePanelAction();
           await dashboardPanelActions.expectMissingRemovePanelAction();
           await dashboardPanelActions.clickExpandPanelToggle();
         });
@@ -134,13 +188,18 @@ export default function ({ getService, getPageObjects }) {
       });
 
       describe('saved search object edit menu', () => {
+        const searchName = 'my search';
         before(async () => {
           await PageObjects.header.clickDiscover();
-          await PageObjects.discover.clickFieldListItemAdd('bytes');
-          await PageObjects.discover.saveSearch('my search');
+          await PageObjects.discover.clickNewSearchButton();
+          await dashboardVisualizations.createSavedSearch({ name: searchName, fields: ['bytes'] });
           await PageObjects.header.waitUntilLoadingHasFinished();
           await PageObjects.header.clickDashboard();
-          await dashboardAddPanel.addSavedSearch('my search');
+          const inViewMode = await PageObjects.dashboard.getIsInViewMode();
+          if (inViewMode) {
+            await PageObjects.dashboard.switchToEditMode();
+          }
+          await dashboardAddPanel.addSavedSearch(searchName);
 
           const panelCount = await PageObjects.dashboard.getPanelCount();
           expect(panelCount).to.be(1);
@@ -151,7 +210,7 @@ export default function ({ getService, getPageObjects }) {
           await dashboardPanelActions.clickEdit();
           await PageObjects.header.waitUntilLoadingHasFinished();
           const queryName = await PageObjects.discover.getCurrentQueryName();
-          expect(queryName).to.be('my search');
+          expect(queryName).to.be(searchName);
         });
 
         it('deletes the saved search when delete link is clicked', async () => {

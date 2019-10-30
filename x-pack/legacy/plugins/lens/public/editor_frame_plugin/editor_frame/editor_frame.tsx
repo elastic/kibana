@@ -89,9 +89,9 @@ export function EditorFrame(props: EditorFrameProps) {
 
       const layers = datasource.getLayers(datasourceState);
       layers.forEach(layer => {
-        const publicAPI = props.datasourceMap[id].getPublicAPI(
-          datasourceState,
-          (newState: unknown) => {
+        const publicAPI = props.datasourceMap[id].getPublicAPI({
+          state: datasourceState,
+          setState: (newState: unknown) => {
             dispatch({
               type: 'UPDATE_DATASOURCE_STATE',
               datasourceId: id,
@@ -99,8 +99,9 @@ export function EditorFrame(props: EditorFrameProps) {
               clearStagedPreview: true,
             });
           },
-          layer
-        );
+          layerId: layer,
+          dateRange: props.dateRange,
+        });
 
         datasourceLayers[layer] = publicAPI;
       });
@@ -259,7 +260,7 @@ export function EditorFrame(props: EditorFrameProps) {
       }
       workspacePanel={
         allLoaded && (
-          <WorkspacePanelWrapper title={state.title} dispatch={dispatch}>
+          <WorkspacePanelWrapper title={state.title}>
             <WorkspacePanel
               activeDatasourceId={state.activeDatasourceId}
               activeVisualizationId={state.visualization.activeId}

@@ -26,20 +26,23 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { AggType, FieldParamType, BucketAggType } from '.';
+import { AggType } from './agg_type';
+import { FieldParamType } from './param_types/field';
 import { AggGroupNames } from '../vis/editors/default/agg_groups';
-// @ts-ignore
-import { fieldFormats } from '../registry/field_formats';
 import { writeParams } from './agg_params';
 import { AggConfigs } from './agg_configs';
 import { Schema } from '../vis/editors/default/schemas';
+import { ContentType } from '../../../../plugins/data/common';
+
+// @ts-ignore
+import { fieldFormats } from '../registry/field_formats';
 
 export interface AggConfigOptions {
-  id: string;
   enabled: boolean;
   type: string;
-  schema: string;
   params: any;
+  id?: string;
+  schema?: string;
 }
 
 const unknownSchema: Schema = {
@@ -139,7 +142,10 @@ export class AggConfig {
 
     // setters
     this.setType(opts.type);
-    this.setSchema(opts.schema);
+
+    if (opts.schema) {
+      this.setSchema(opts.schema);
+    }
 
     // set the params to the values from opts, or just to the defaults
     this.setParams(opts.params || {});
@@ -232,14 +238,14 @@ export class AggConfig {
    *  @param {Courier.SearchRequest} searchRequest
    *  @return {Promise<undefined>}
    */
-  onSearchRequestStart(searchSource: any, searchRequest: any) {
+  onSearchRequestStart(searchSource: any, options: any) {
     if (!this.type) {
       return Promise.resolve();
     }
 
     return Promise.all(
       this.type.params.map((param: any) =>
-        param.modifyAggConfigOnSearchRequestStart(this, searchSource, searchRequest)
+        param.modifyAggConfigOnSearchRequestStart(this, searchSource, options)
       )
     );
   }
@@ -253,7 +259,7 @@ export class AggConfig {
    * @return {void|Object} - if the config has a dsl representation, it is
    *                         returned, else undefined is returned
    */
-  toDsl(aggConfigs: AggConfigs) {
+  toDsl(aggConfigs?: AggConfigs) {
     if (this.type.hasNoDsl) return;
     const output = this.write(aggConfigs) as any;
 
@@ -326,9 +332,9 @@ export class AggConfig {
     return this.type.getValue(this, bucket);
   }
 
-  getKey(bucket: any, key: string) {
-    if (this.type instanceof BucketAggType) {
-      return (this.type as BucketAggType).getKey(bucket, key, this);
+  getKey(bucket: any, key?: string) {
+    if (this.type.getKey) {
+      return this.type.getKey(bucket, key, this);
     } else {
       return '';
     }
@@ -336,6 +342,7 @@ export class AggConfig {
 
   getFieldDisplayName() {
     const field = this.getField();
+
     return field ? field.displayName || this.fieldName() : '';
   }
 
@@ -365,13 +372,16 @@ export class AggConfig {
     return this.aggConfigs.timeRange;
   }
 
-  fieldFormatter(contentType: string, defaultFormat: any) {
+  fieldFormatter(contentType?: ContentType, defaultFormat?: any) {
     const format = this.type && this.type.getFormat(this);
-    if (format) return format.getConverterFor(contentType);
+
+    if (format) {
+      return format.getConverterFor(contentType);
+    }
     return this.fieldOwnFormatter(contentType, defaultFormat);
   }
 
-  fieldOwnFormatter(contentType: string, defaultFormat: any) {
+  fieldOwnFormatter(contentType?: ContentType, defaultFormat?: any) {
     const field = this.getField();
     let format = field && field.format;
     if (!format) format = defaultFormat;

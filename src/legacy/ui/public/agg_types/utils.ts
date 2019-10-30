@@ -49,7 +49,7 @@ function isValidJson(value: string): boolean {
   }
 }
 
-function isValidInterval(value: string, baseInterval: string) {
+function isValidInterval(value: string, baseInterval?: string) {
   if (baseInterval) {
     return _parseWithBase(value, baseInterval);
   } else {

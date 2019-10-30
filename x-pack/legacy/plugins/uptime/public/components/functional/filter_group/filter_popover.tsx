@@ -9,6 +9,7 @@ import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { UptimeFilterButton } from './uptime_filter_button';
 import { toggleSelectedItems } from './toggle_selected_item';
+import { LocationLink } from '../monitor_list/location_link';
 
 export interface FilterPopoverProps {
   fieldName: string;
@@ -54,7 +55,10 @@ export const FilterPopover = ({
           isSelected={tempSelectedItems.length > 0}
           numFilters={items.length}
           numActiveFilters={tempSelectedItems.length}
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={() => {
+            setIsOpen(!isOpen);
+            onFilterFieldChange(fieldName, tempSelectedItems);
+          }}
           title={title}
         />
       }
@@ -70,6 +74,7 @@ export const FilterPopover = ({
     >
       <EuiPopoverTitle>
         <EuiFieldSearch
+          disabled={items.length === 0}
           onSearch={query => setSearchQuery(query)}
           placeholder={
             isLoading
@@ -95,6 +100,7 @@ export const FilterPopover = ({
             {item}
           </EuiFilterSelectItem>
         ))}
+      {id === 'location' && items.length === 0 && <LocationLink />}
     </EuiPopover>
   );
 };

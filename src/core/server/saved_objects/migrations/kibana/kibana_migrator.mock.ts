@@ -17,16 +17,30 @@
  * under the License.
  */
 
-import { KibanaMigrator, mergeProperties } from './kibana_migrator';
+import { KibanaMigrator } from './kibana_migrator';
 import { buildActiveMappings } from '../core';
 import { SavedObjectsMapping } from '../../mappings';
+const { mergeProperties } = jest.requireActual('./kibana_migrator');
+
+const defaultSavedObjectMappings = [
+  {
+    pluginId: 'testplugin',
+    properties: {
+      testtype: {
+        properties: {
+          name: { type: 'keyword' },
+        },
+      },
+    },
+  },
+];
 
 const createMigrator = (
   {
     savedObjectMappings,
   }: {
     savedObjectMappings: SavedObjectsMapping[];
-  } = { savedObjectMappings: [] }
+  } = { savedObjectMappings: defaultSavedObjectMappings }
 ) => {
   const mockMigrator: jest.Mocked<PublicMethodsOf<KibanaMigrator>> = {
     runMigrations: jest.fn(),

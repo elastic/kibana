@@ -1,9 +1,11 @@
 {
   "paths": {
     "common.ui": "src/legacy/ui",
-    "data": "src/legacy/core_plugins/data",
+    "data": ["src/legacy/core_plugins/data", "src/plugins/data"],
     "expressions": "src/legacy/core_plugins/expressions",
+    "expressions_np": "src/plugins/expressions",
     "kibana_react": "src/legacy/core_plugins/kibana_react",
+    "navigation": "src/legacy/core_plugins/navigation",
     "server": "src/legacy/server",
     "console": "src/legacy/core_plugins/console",
     "core": "src/core",
@@ -28,6 +30,8 @@
     "kbnESQuery": "packages/kbn-es-query",
     "inspector": "src/plugins/inspector",
     "kibana-react": "src/plugins/kibana_react",
+    "visualizations": "src/plugins/visualizations",
+    "telemetry": "src/legacy/core_plugins/telemetry",
     "esUi": "src/plugins/es_ui_shared",
     "uiActions": "src/plugins/ui_actions"
   },

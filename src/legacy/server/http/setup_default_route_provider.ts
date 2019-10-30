@@ -40,7 +40,7 @@ export function setupDefaultRouteProvider(server: Legacy.Server) {
         `Ignoring configured default route of '${defaultRoute}', as it is malformed.`
       );
 
-      const fallbackRoute = (await uiSettings.getDefaults()).defaultRoute.value;
+      const fallbackRoute = uiSettings.getRegistered().defaultRoute.value;
 
       const qualifiedFallbackRoute = `${request.getBasePath()}${fallbackRoute}`;
       return qualifiedFallbackRoute;

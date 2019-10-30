@@ -12,13 +12,14 @@ export const getNetworkRoutePath: GetNetworkRoutePath = (
   hasMlUserPermission
 ) => {
   if (capabilitiesFetched && !hasMlUserPermission) {
-    return `${pagePath}/:tabName(${NetworkRouteType.ips}|${NetworkRouteType.dns})`;
+    return `${pagePath}/:tabName(${NetworkRouteType.flows}|${NetworkRouteType.dns}|${NetworkRouteType.tls})`;
   }
 
   return (
     `${pagePath}/:tabName(` +
-    `${NetworkRouteType.ips}|` +
+    `${NetworkRouteType.flows}|` +
     `${NetworkRouteType.dns}|` +
-    `${NetworkRouteType.anomalies})`
+    `${NetworkRouteType.anomalies}|` +
+    `${NetworkRouteType.tls})`
   );
 };

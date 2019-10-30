@@ -37,8 +37,6 @@ export default function({ getService }: FtrProviderContext) {
               uptime: ['all', 'read'],
               apm: ['all', 'read'],
               siem: ['all', 'read'],
-              code: ['all', 'read'],
-              lens: ['all', 'read'],
             },
             global: ['all', 'read'],
             space: ['all', 'read'],
