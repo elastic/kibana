@@ -12,6 +12,7 @@ import {
   EuiFlexItem,
   EuiHealth,
   EuiPanel,
+  EuiSelect,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -84,21 +85,21 @@ export const PingListComponent = ({
 }: Props) => {
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<ExpandedRowMap>({});
 
-  const statusOptions: EuiComboBoxOptionProps[] = [
+  const statusOptions = [
     {
-      label: i18n.translate('xpack.uptime.pingList.statusOptions.allStatusOptionLabel', {
+      text: i18n.translate('xpack.uptime.pingList.statusOptions.allStatusOptionLabel', {
         defaultMessage: 'All',
       }),
       value: '',
     },
     {
-      label: i18n.translate('xpack.uptime.pingList.statusOptions.upStatusOptionLabel', {
+      text: i18n.translate('xpack.uptime.pingList.statusOptions.upStatusOptionLabel', {
         defaultMessage: 'Up',
       }),
       value: 'up',
     },
     {
-      label: i18n.translate('xpack.uptime.pingList.statusOptions.downStatusOptionLabel', {
+      text: i18n.translate('xpack.uptime.pingList.statusOptions.downStatusOptionLabel', {
         defaultMessage: 'Down',
       }),
       value: 'down',
@@ -253,22 +254,17 @@ export const PingListComponent = ({
                         defaultMessage: 'Status',
                       })}
                     >
-                      <EuiComboBox
-                        isClearable={false}
-                        singleSelection={{ asPlainText: true }}
-                        selectedOptions={[
-                          statusOptions.find(({ value }) => value === selectedOption) ||
-                            statusOptions[2],
-                        ]}
+                      <EuiSelect
                         options={statusOptions}
                         aria-label={i18n.translate('xpack.uptime.pingList.statusLabel', {
                           defaultMessage: 'Status',
                         })}
-                        onChange={(selectedOptions: EuiComboBoxOptionProps[]) => {
-                          if (typeof selectedOptions[0].value === 'string') {
+                        value={selectedOption}
+                        onChange={(selected) => {
+                          if (typeof selected.target.value === 'string') {
                             onSelectedStatusChange(
                               // @ts-ignore it's definitely a string
-                              selectedOptions[0].value !== '' ? selectedOptions[0].value : null
+                              selected.target !== '' ? selected.target.value : null
                             );
                           }
                         }}
