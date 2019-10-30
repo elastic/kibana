@@ -279,10 +279,6 @@ export class VectorStyle extends AbstractStyle {
     return this._checkIfOnlyFeatureType(VECTOR_SHAPE_TYPES.LINE);
   }
 
-  _getIsPolygonsOnly = async () => {
-    return this._checkIfOnlyFeatureType(VECTOR_SHAPE_TYPES.POLYGON);
-  }
-
   _getFieldRange = (fieldName) => {
     return _.get(this._descriptor, ['__styleMeta', fieldName]);
   }
@@ -329,8 +325,8 @@ export class VectorStyle extends AbstractStyle {
       .map(styleProperty => {
 
         const styleName = styleProperty.getStyleName();
-        const options = styleProperty.getOptions();
-        const name = options.field.name;
+        const field = styleProperty.getField();
+        const name = field.getName();
 
         // "feature-state" data expressions are not supported with layout properties.
         // To work around this limitation, some styling values must fall back to geojson property values.
@@ -344,7 +340,7 @@ export class VectorStyle extends AbstractStyle {
           supportsFeatureState = false;
           isScaled = false;
         } else if ((styleName === vectorStyles.FILL_COLOR || styleName === vectorStyles.LINE_COLOR)
-          && options.useCustomColorRamp) {
+          && styleProperty.isCustomColorRamp()) {
           supportsFeatureState = true;
           isScaled = false;
         } else {

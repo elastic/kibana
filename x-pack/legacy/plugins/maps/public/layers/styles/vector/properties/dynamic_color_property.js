@@ -48,6 +48,10 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     mbMap.setPaintProperty(mbLayerId, 'line-opacity', alpha);
   }
 
+  isCustomColorRamp() {
+    return !!this._options.customColorRamp;
+  }
+
   _getMbColor() {
     const isDynamicConfigComplete = _.has(this._options, 'field.name') && _.has(this._options, 'color');
     if (!isDynamicConfigComplete) {
