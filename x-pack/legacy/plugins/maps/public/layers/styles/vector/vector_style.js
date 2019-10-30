@@ -324,36 +324,26 @@ export class VectorStyle extends AbstractStyle {
     return this.getDynamicPropertiesArray()
       .map(styleProperty => {
 
-        const styleName = styleProperty.getStyleName();
-        const field = styleProperty.getField();
-        const name = field.getName();
-
         // "feature-state" data expressions are not supported with layout properties.
         // To work around this limitation, some styling values must fall back to geojson property values.
         let supportsFeatureState;
         let isScaled;
-        if (styleName === vectorStyles.ICON_SIZE
+        if (styleProperty.getStyleName() === vectorStyles.ICON_SIZE
           && this._descriptor.properties.symbol.options.symbolizeAs === SYMBOLIZE_AS_ICON) {
           supportsFeatureState = false;
           isScaled = true;
-        } else if (styleName === vectorStyles.ICON_ORIENTATION) {
-          supportsFeatureState = false;
-          isScaled = false;
-        } else if ((styleName === vectorStyles.FILL_COLOR || styleName === vectorStyles.LINE_COLOR)
-          && styleProperty.isCustomColorRamp()) {
-          supportsFeatureState = true;
-          isScaled = false;
         } else {
-          supportsFeatureState = true;
-          isScaled = true;
+          supportsFeatureState = styleProperty.supportsFeatureState();
+          isScaled = styleProperty.isScaled();
         }
 
+        const field = styleProperty.getField();
         return {
           supportsFeatureState,
           isScaled,
-          name,
-          range: this._getFieldRange(name),
-          computedName: getComputedFieldName(styleName, name),
+          name: field.getName(),
+          range: this._getFieldRange(field.getName()),
+          computedName: getComputedFieldName(styleProperty.getStyleName(), field.getName()),
         };
       });
   }
