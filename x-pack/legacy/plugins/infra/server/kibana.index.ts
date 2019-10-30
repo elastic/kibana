@@ -28,6 +28,7 @@ export const getConfigSchema = (Joi: typeof JoiNamespace) => {
     }),
   });
 
+  // NP_TODO: make sure this is all represented in the NP config schema
   const InfraRootConfigSchema = Joi.object({
     enabled: Joi.boolean().default(true),
     query: Joi.object({
