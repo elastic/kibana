@@ -10,8 +10,16 @@ import { EuiLoadingSpinner, EuiPopover } from '@elastic/eui';
 import { FieldItem, FieldItemProps } from './field_item';
 import { coreMock } from 'src/core/public/mocks';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { npStart } from 'ui/new_platform';
 
 jest.mock('ui/new_platform');
+
+npStart.plugins.data.fieldFormats = {
+  // @ts-ignore
+  getDefaultInstance: jest.fn(() => ({
+    convert: jest.fn((s: unknown) => JSON.stringify(s)),
+  })),
+};
 
 const waitForPromises = () => new Promise(resolve => setTimeout(resolve));
 
