@@ -6,12 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
-import { render, unmountComponentAtNode } from 'react-dom';
-import { GrokDebugger } from './components/grok_debugger';
-import React from 'react';
-import { I18nContext } from 'ui/i18n';
 import { npSetup, npStart } from 'ui/new_platform';
-import { GrokdebuggerService } from '../../services/grokdebugger/grokdebugger_service';
 
 npSetup.plugins.devTools.register({
   order: 6,
@@ -32,12 +27,7 @@ npSetup.plugins.devTools.register({
       window.location.hash = '/dev_tools';
       return () => {};
     }
-    render(
-      <I18nContext>
-        <GrokDebugger grokdebuggerService={new GrokdebuggerService(npStart.core.http)} />
-      </I18nContext>,
-      element
-    );
-    return () => unmountComponentAtNode(element);
+    const { renderApp } = await import('./render_app');
+    return renderApp(element, npStart);
   },
 });

@@ -17,6 +17,9 @@
  * under the License.
  */
 
+// This import makes sure dev tools are registered before the app is.
+import 'uiExports/devTools';
+
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
@@ -79,5 +82,10 @@ export class DevToolsPlugin implements Plugin {
 
   start(core: CoreStart, { newPlatformDevTools }: DevToolsPluginStartDependencies) {
     this.getSortedDevTools = newPlatformDevTools.getSortedDevTools;
+    if (this.getSortedDevTools().length === 0) {
+      core.chrome.navLinks.update('kibana:dev_tools', {
+        hidden: true,
+      });
+    }
   }
 }

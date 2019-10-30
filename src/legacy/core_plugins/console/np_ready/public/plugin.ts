@@ -21,7 +21,6 @@ import { render, unmountComponentAtNode } from 'react-dom';
 
 import { PluginInitializerContext, Plugin, CoreStart, CoreSetup } from '../../../../../core/public';
 import { XPluginSet } from './legacy';
-import { boot } from './application';
 
 export class ConsoleUIPlugin implements Plugin<any, any> {
   // @ts-ignore
@@ -38,8 +37,8 @@ export class ConsoleUIPlugin implements Plugin<any, any> {
       order: 1,
       title: 'Console',
       enableRouting: false,
-      mount(ctx, { element }) {
-        // todo make the loading of this async and load via hacks
+      async mount(ctx, { element }) {
+        const { boot } = await import('./application');
         render(
           boot({
             docLinkVersion: ctx.core.docLinks.DOC_LINK_VERSION,

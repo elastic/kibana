@@ -62,7 +62,6 @@ export interface LegacyPluginOptions {
     }>;
     apps: any;
     hacks: string[];
-    devTools: string[];
     styleSheetPaths: string;
     injectDefaultVars: (server: Server) => Record<string, any>;
     noParse: string[];

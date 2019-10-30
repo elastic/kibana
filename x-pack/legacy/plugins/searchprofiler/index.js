@@ -21,7 +21,6 @@ export const searchprofiler = (kibana) => {
     publicDir: resolve(__dirname, 'public'),
 
     uiExports: {
-      devTools: ['plugins/searchprofiler/app'],
       hacks: ['plugins/searchprofiler/register'],
       home: ['plugins/searchprofiler/register_feature'],
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),

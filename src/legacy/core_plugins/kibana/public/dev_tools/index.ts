@@ -25,7 +25,7 @@ import { localApplicationService } from '../local_application_service';
 
 const instance = new DevToolsPlugin();
 
-export const devToolsSetup = instance.setup(npSetup.core, {
+instance.setup(npSetup.core, {
   __LEGACY: {
     localApplicationService,
     FeatureCatalogueRegistryProvider,

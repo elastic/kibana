@@ -14,7 +14,7 @@ import {
   EuiCodeEditor,
   EuiSpacer
 } from '@elastic/eui';
-import { EDITOR } from '../../../../../common/constants';
+import { EDITOR } from '../../../common/constants';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export function CustomPatternsInput({ value, onChange }) {

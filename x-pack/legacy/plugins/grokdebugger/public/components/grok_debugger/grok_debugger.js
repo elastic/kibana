@@ -18,7 +18,7 @@ import { EventInput } from '../event_input';
 import { PatternInput } from '../pattern_input';
 import { CustomPatternsInput } from '../custom_patterns_input';
 import { EventOutput } from '../event_output';
-import { GrokdebuggerRequest } from '../../../../models/grokdebugger_request';
+import { GrokdebuggerRequest } from '../../models/grokdebugger_request';
 import { toastNotifications } from 'ui/notify';
 import { FormattedMessage } from '@kbn/i18n/react';
 
