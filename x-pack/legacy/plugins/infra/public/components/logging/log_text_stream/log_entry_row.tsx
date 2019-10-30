@@ -206,5 +206,5 @@ const LogEntryRowWrapper = euiStyled.div.attrs(props => ({
   justify-content: flex-start;
   overflow: hidden;
 
-  ${props => monospaceTextStyle(props.scale)}
+  ${props => monospaceTextStyle(props.scale)};
 `;

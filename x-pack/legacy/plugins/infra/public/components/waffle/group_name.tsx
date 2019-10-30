@@ -52,7 +52,7 @@ export class GroupName extends React.PureComponent<Props, {}> {
 
 const GroupNameContainer = euiStyled.div`
   position: relative;
-  text-align: center
+  text-align: center;
   font-size: 16px;
   margin-bottom: 5px;
   top: 20px;

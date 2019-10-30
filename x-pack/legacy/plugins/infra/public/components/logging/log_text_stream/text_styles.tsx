@@ -23,7 +23,7 @@ export const monospaceTextStyle = (scale: TextScale) => css`
       default:
         return props.theme.eui.euiFontSize;
     }
-  }}
+  }};
   line-height: ${props => props.theme.eui.euiLineHeight};
 `;
 
@@ -86,5 +86,5 @@ const MonospaceCharacterDimensionsProbe = euiStyled.div.attrs(props => ({
   padding: 0;
   margin: 0;
 
-  ${props => monospaceTextStyle(props.scale)}
+  ${props => monospaceTextStyle(props.scale)};
 `;
