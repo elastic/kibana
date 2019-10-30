@@ -83,7 +83,7 @@ export class VectorStyle extends AbstractStyle {
   }
 
   renderEditor({ layer, onStyleDescriptorChange }) {
-    const styleProperties = { ...this.getProperties() };
+    const styleProperties = { ...this.getRawProperties() };
     const handlePropertyChange = (propertyName, settings) => {
       styleProperties[propertyName] = settings;//override single property, but preserve the rest
       const vectorStyleDescriptor = VectorStyle.createDescriptor(styleProperties);
@@ -113,7 +113,7 @@ export class VectorStyle extends AbstractStyle {
    * can then use to update store state via dispatch.
    */
   getDescriptorWithMissingStylePropsRemoved(nextOrdinalFields) {
-    const originalProperties = this.getProperties();
+    const originalProperties = this.getRawProperties();
     const updatedProperties = {};
 
 
@@ -239,18 +239,13 @@ export class VectorStyle extends AbstractStyle {
     return fieldNames;
   }
 
-  getProperties() {
+  getRawProperties() {
     return this._descriptor.properties || {};
   }
 
   getDynamicPropertiesArray() {
     const styleProperties = this._getAllStyleProperties();
     return styleProperties.filter(styleProperty => styleProperty.isDynamic());
-  }
-
-  _isPropertyDynamic(propertyName) {
-    const styleProperty = this._getAllStyleProperties().find(styleProperty => styleProperty.getName() === propertyName);
-    return styleProperty.isDynamic();
   }
 
   _checkIfOnlyFeatureType = async (featureType) => {
@@ -286,7 +281,7 @@ export class VectorStyle extends AbstractStyle {
   }
 
   getIcon = () => {
-    const styles = this.getProperties();
+    const styles = this.getRawProperties();
     const symbolId = this.arePointsSymbolizedAsCircles()
       ? undefined
       : this._descriptor.properties.symbol.options.symbolId;
@@ -302,7 +297,7 @@ export class VectorStyle extends AbstractStyle {
   }
 
   getLegendDetails(getFieldLabel, getFieldFormatter) {
-    const styles = this.getProperties();
+    const styles = this.getRawProperties();
     const styleProperties = Object.keys(styles).map(styleName => {
       const { type, options } = styles[styleName];
       return {
