@@ -37,8 +37,8 @@ const createLogRotatorConfig = (logFilePath) => {
 
 describe('LogRotator', () => {
   beforeEach(() => {
-    testFilePath = join(mkdtempSync(tmpdir()), 'log_rotator_test_log_file.log');
-    console.log(testFilePath);
+    const tempDir = mkdtempSync(join(tmpdir(), 'log_rotator_test'));
+    testFilePath = join(tempDir, 'log_rotator_test_log_file.log');
     writeFileSync(testFilePath, '');
   });
 
