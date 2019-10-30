@@ -417,6 +417,32 @@ describe('SavedObjectsRepository', () => {
       });
     });
 
+    it('defaults to a refresh setting of `wait_for`', async () => {
+      await savedObjectsRepository.create('index-pattern', {
+        id: 'logstash-*',
+        title: 'Logstash',
+      });
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({
+        refresh: 'wait_for'
+      });
+    });
+
+    it('accepts custom refresh settings', async () => {
+      await savedObjectsRepository.create('index-pattern', {
+        id: 'logstash-*',
+        title: 'Logstash',
+      }, {
+        refresh: true
+      });
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({
+        refresh: true
+      });
+    });
+
     it('should use create action if ID defined and overwrite=false', async () => {
       await savedObjectsRepository.create(
         'index-pattern',
@@ -546,6 +572,28 @@ describe('SavedObjectsRepository', () => {
       );
       expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
+
+    it('defaults to empty references array if none are provided', async () => {
+      await savedObjectsRepository.create(
+        'index-pattern',
+        {
+          title: 'Logstash',
+        },
+        {
+          id: 'logstash-*',
+        }
+      );
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+      expect(callAdminCluster).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          body: expect.objectContaining({
+            references: [],
+          }),
+        })
+      );
+    });
   });
 
   describe('#bulkCreate', () => {
@@ -621,6 +669,61 @@ describe('SavedObjectsRepository', () => {
       ]);
 
       expect(onBeforeWrite).toHaveBeenCalledTimes(1);
+    });
+
+    it('defaults to a refresh setting of `wait_for`', async () => {
+      callAdminCluster.mockReturnValue({
+        items: [
+          { create: { type: 'config', id: 'config:one', _primary_term: 1, _seq_no: 1 } },
+        ],
+      });
+
+      await savedObjectsRepository.bulkCreate([
+        {
+          type: 'config',
+          id: 'one',
+          attributes: { title: 'Test One' },
+          references: [{ name: 'ref_0', type: 'test', id: '1' }],
+        }
+      ]);
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+
+      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({
+        refresh: 'wait_for'
+      });
+    });
+
+    it('accepts a custom refresh setting', async () => {
+      callAdminCluster.mockReturnValue({
+        items: [
+          { create: { type: 'config', id: 'config:one', _primary_term: 1, _seq_no: 1 } },
+          { create: { type: 'index-pattern', id: 'config:two', _primary_term: 1, _seq_no: 1 } },
+        ],
+      });
+
+      await savedObjectsRepository.bulkCreate([
+        {
+          type: 'config',
+          id: 'one',
+          attributes: { title: 'Test One' },
+          references: [{ name: 'ref_0', type: 'test', id: '1' }],
+        },
+        {
+          type: 'index-pattern',
+          id: 'two',
+          attributes: { title: 'Test Two' },
+          references: [{ name: 'ref_0', type: 'test', id: '2' }],
+        },
+      ], {
+        refresh: true
+      });
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+
+      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({
+        refresh: true
+      });
     });
 
     it('migrates the docs', async () => {
@@ -1065,6 +1168,28 @@ describe('SavedObjectsRepository', () => {
 
       expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
+
+    it('defaults to a refresh setting of `wait_for`', async () => {
+      callAdminCluster.mockReturnValue({ result: 'deleted' });
+      await savedObjectsRepository.delete('globaltype', 'logstash-*');
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({
+        refresh: 'wait_for'
+      });
+    });
+
+    it(`accepts a custom refresh setting`, async () => {
+      callAdminCluster.mockReturnValue({ result: 'deleted' });
+      await savedObjectsRepository.delete('globaltype', 'logstash-*', {
+        refresh: false
+      });
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({
+        refresh: false,
+      });
+    });
   });
 
   describe('#deleteByNamespace', () => {
@@ -1102,6 +1227,26 @@ describe('SavedObjectsRepository', () => {
         ignore: [404],
         index: ['.kibana-test', 'beats'],
         refresh: 'wait_for',
+      });
+    });
+
+    it('defaults to a refresh setting of `wait_for`', async () => {
+      callAdminCluster.mockReturnValue(deleteByQueryResults);
+      await savedObjectsRepository.deleteByNamespace('my-namespace');
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({
+        refresh: 'wait_for',
+      });
+    });
+
+    it('accepts a custom refresh setting', async () => {
+      callAdminCluster.mockReturnValue(deleteByQueryResults);
+      await savedObjectsRepository.deleteByNamespace('my-namespace', { refresh: true });
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({
+        refresh: true,
       });
     });
   });
@@ -1232,7 +1377,7 @@ describe('SavedObjectsRepository', () => {
       };
 
       await expect(savedObjectsRepository.find(findOpts)).rejects.toMatchInlineSnapshot(`
-        [Error: KQLSyntaxError: Expected "(", value, whitespace but "<" found.
+        [Error: KQLSyntaxError: Expected "(", "{", value, whitespace but "<" found.
         dashboard.attributes.otherField:<
         --------------------------------^: Bad Request]
       `);
@@ -1962,6 +2107,40 @@ describe('SavedObjectsRepository', () => {
 
       expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
+
+    it('defaults to a refresh setting of `wait_for`', async () => {
+      await savedObjectsRepository.update(
+        'globaltype',
+        'foo',
+        {
+          name: 'bar',
+        }
+      );
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({
+        refresh: 'wait_for'
+      });
+    });
+
+    it('accepts a custom refresh setting', async () => {
+      await savedObjectsRepository.update(
+        'globaltype',
+        'foo',
+        {
+          name: 'bar',
+        },
+        {
+          refresh: true,
+          namespace: 'foo-namespace',
+        }
+      );
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({
+        refresh: true
+      });
+    });
   });
 
   describe('#bulkUpdate', () => {
@@ -2262,6 +2441,44 @@ describe('SavedObjectsRepository', () => {
       });
     });
 
+    it('defaults to a refresh setting of `wait_for`', async () => {
+      const objects = [
+        {
+          type: 'index-pattern',
+          id: `logstash-no-ref`,
+          attributes: { title: `Testing no-ref` },
+          references: []
+        }
+      ];
+
+      mockValidResponse(objects);
+
+      await savedObjectsRepository.bulkUpdate(objects);
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+
+      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({ refresh: 'wait_for' });
+    });
+
+    it('accepts a custom refresh setting', async () => {
+      const objects = [
+        {
+          type: 'index-pattern',
+          id: `logstash-no-ref`,
+          attributes: { title: `Testing no-ref` },
+          references: []
+        }
+      ];
+
+      mockValidResponse(objects);
+
+      await savedObjectsRepository.bulkUpdate(objects, { refresh: true });
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+
+      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({ refresh: true });
+    });
+
     it(`prepends namespace to the id but doesn't add namespace to body when providing namespace for namespaced type`, async () => {
 
       const objects = [
@@ -2501,6 +2718,29 @@ describe('SavedObjectsRepository', () => {
             references: [{ name: 'search_0', type: 'search', id: '123' }],
           },
         },
+      });
+    });
+
+    it('defaults to a refresh setting of `wait_for`', async () => {
+      await savedObjectsRepository.incrementCounter('config', 'doesnotexist', 'buildNum', {
+        namespace: 'foo-namespace'
+      });
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({
+        refresh: 'wait_for'
+      });
+    });
+
+    it('accepts a custom refresh setting', async () => {
+      await savedObjectsRepository.incrementCounter('config', 'doesnotexist', 'buildNum', {
+        namespace: 'foo-namespace',
+        refresh: true
+      });
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({
+        refresh: true
       });
     });
 

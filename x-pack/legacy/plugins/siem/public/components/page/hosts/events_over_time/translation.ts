@@ -13,13 +13,6 @@ export const EVENT_COUNT_FREQUENCY_BY_ACTION = i18n.translate(
   }
 );
 
-export const LOADING_EVENTS_OVER_TIME = i18n.translate(
-  'xpack.siem.eventsOverTime.loadingEventsOverTimeTitle',
-  {
-    defaultMessage: 'Loading events histogram',
-  }
-);
-
 export const SHOWING = i18n.translate('xpack.siem.eventsOverTime.showing', {
   defaultMessage: 'Showing',
 });

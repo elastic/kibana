@@ -23,7 +23,6 @@ import routes from 'ui/routes';
 import 'ui/kbn_top_nav';
 import { uiModules } from 'ui/modules';
 import { docTitle } from 'ui/doc_title';
-import 'ui/autoload/styles';
 import 'ui/autoload/all';
 import 'react-vis/dist/style.css';
 

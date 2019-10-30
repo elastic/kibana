@@ -73,3 +73,87 @@ set these terms will be matched against all fields. For example, a query for `re
 in the response field, but a query for just `200` will search for 200 across all fields in your index.
 ============
 
+===== Nested Field Support
+
+KQL supports querying on {ref}/nested.html[nested fields] through a special syntax. You can query nested fields in subtly different
+ways, depending on the results you want, so crafting nested queries requires extra thought.
+ 
+One main consideration is how to match parts of the nested query to the individual nested documents.
+There are two main approaches to take:
+
+* *Parts of the query may only match a single nested document.* This is what most users want when querying on a nested field.
+* *Parts of the query can match different nested documents.* This is how a regular object field works. 
+ Although generally less useful, there might be occasions where you want to query a nested field in this way.
+
+Let's take a look at the first approach. In the following document, `items` is a nested field:
+
+[source,json]
+----------------------------------
+{
+  "grocery_name": "Elastic Eats",
+  "items": [
+    {
+      "name": "banana",
+      "stock": "12",
+      "category": "fruit"
+    },
+    {
+      "name": "peach",
+      "stock": "10",
+      "category": "fruit"
+    },
+    {
+      "name": "carrot",
+      "stock": "9",
+      "category": "vegetable"
+    },
+    {
+      "name": "broccoli",
+      "stock": "5",
+      "category": "vegetable"
+    }
+  ]
+}
+----------------------------------
+
+To find stores that have more than 10 bananas in stock, you would write a query like this:
+
+`items:{ name:banana and stock > 10 }`
+
+`items` is the "nested path". Everything inside the curly braces (the "nested group") must match a single document. 
+For example, `items:{ name:banana and stock:9 }` does not match because there isn't a single nested document that 
+matches the entire query in the nested group. 
+
+What if you want to find a store with more than 10 bananas that *also* stocks vegetables? This is the second way of querying a nested field, and you can do it like this:
+
+`items:{ name:banana and stock > 10 } and items:{ category:vegetable }`
+
+The first nested group (`name:banana and stock > 10`) must still match a single document, but the `category:vegetables`
+subquery can match a different nested document because it is in a separate group.
+
+KQL's syntax also supports nested fields inside of other nested fields&mdash;you simply have to specify the full path. Suppose you
+have a document where `level1` and `level2` are both nested fields:
+
+[source,json]
+----------------------------------
+{
+  "level1": [
+    {
+      "level2": [
+        {
+          "prop1": "foo",
+          "prop2": "bar"
+        },
+        {
+          "prop1": "baz",
+          "prop2": "qux"
+        }
+      ]
+    }
+  ]
+}
+----------------------------------
+
+You can match on a single nested document by specifying the full path:
+
+`level1.level2:{ prop1:foo and prop2:bar }`

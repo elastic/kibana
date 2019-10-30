@@ -16,27 +16,21 @@ interface LinkToPageProps {
   match: RouteMatch<{}>;
 }
 
-export class LinkToPage extends React.Component<LinkToPageProps> {
-  public render() {
-    const { match } = this.props;
-
-    return (
-      <Switch>
-        <Route
-          path={`${match.url}/:sourceId?/:nodeType(host|container|pod)-logs/:nodeId`}
-          component={RedirectToNodeLogs}
-        />
-        <Route
-          path={`${match.url}/:nodeType(host|container|pod)-detail/:nodeId`}
-          component={RedirectToNodeDetail}
-        />
-        <Route
-          path={`${match.url}/host-detail-via-ip/:hostIp`}
-          component={RedirectToHostDetailViaIP}
-        />
-        <Route path={`${match.url}/:sourceId?/logs`} component={RedirectToLogs} />
-        <Redirect to="/infrastructure" />
-      </Switch>
-    );
-  }
-}
+export const LinkToPage: React.SFC<LinkToPageProps> = props => (
+  <Switch>
+    <Route
+      path={`${props.match.url}/:sourceId?/:nodeType(host|container|pod)-logs/:nodeId`}
+      component={RedirectToNodeLogs}
+    />
+    <Route
+      path={`${props.match.url}/:nodeType(host|container|pod)-detail/:nodeId`}
+      component={RedirectToNodeDetail}
+    />
+    <Route
+      path={`${props.match.url}/host-detail-via-ip/:hostIp`}
+      component={RedirectToHostDetailViaIP}
+    />
+    <Route path={`${props.match.url}/:sourceId?/logs`} component={RedirectToLogs} />
+    <Redirect to="/infrastructure" />
+  </Switch>
+);
