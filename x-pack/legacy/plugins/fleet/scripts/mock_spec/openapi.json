@@ -41,6 +41,9 @@
                   ]
                 }
               }
+            },
+            "headers": {
+              "$ref": "#/components/headers"
             }
           }
         },
@@ -60,6 +63,16 @@
         ],
         "description": "Return polices linked to a datasource",
         "operationId": "getPolicies"
+      },
+      "options": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "$ref": "#/components/headers"
+            }
+          }
+        }
       },
       "parameters": []
     },
@@ -96,5 +109,29 @@
       }
     }
   },
-  "components": {}
+  "components": {
+    "headers": {
+        "Access-Control-Allow-Origin": {
+          "description": "CORS",
+          "schema": {
+            "type": "string"
+          },
+          "example": "http://localhost:5601"
+        },
+        "Access-Control-Allow-Credentials": {
+          "description": "CORS",
+          "schema": {
+            "type": "boolean"
+          },
+          "example": "true"
+        },
+        "Access-Control-Allow-Headers": {
+          "description": "CORS",
+          "schema": {
+            "type": "string"
+          },
+          "example": "kbn-xsrf, kbn-version, credentials"
+        }
+    }
+  }
 }

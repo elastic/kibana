@@ -8,7 +8,7 @@ import { Policy } from '../../../../scripts/mock_spec/types';
 import { RestAPIAdapter } from '../rest_api/adapter_types';
 import { PolicyAdapter } from './memory_policy_adapter';
 
-const POLICIES_SERVER_HOST = `${window.location.protocol}://${window.location.hostname}:4010`;
+const POLICIES_SERVER_HOST = `${window.location.protocol}//${window.location.hostname}:4010`;
 
 export class RestPolicyAdapter extends PolicyAdapter {
   constructor(private readonly REST: RestAPIAdapter) {
