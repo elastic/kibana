@@ -123,12 +123,6 @@ export class ESGeoGridSource extends AbstractESAggSource {
     ];
   }
 
-  getFieldNames() {
-    return this.getMetricFields().map(({ propertyKey }) => {
-      return propertyKey;
-    });
-  }
-
   isGeoGridPrecisionAware() {
     return true;
   }

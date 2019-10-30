@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { AbstractESSource } from './es_source';
 import { ESAggMetricTooltipProperty } from '../tooltips/es_aggmetric_tooltip_property';
 import { METRIC_TYPE } from '../../../common/constants';
@@ -12,7 +11,6 @@ import _ from 'lodash';
 
 const COUNT_PROP_LABEL = 'count';
 const COUNT_PROP_NAME = 'doc_count';
-
 const AGG_DELIMITER = '_of_';
 
 export class AbstractESAggSource extends AbstractESSource {
@@ -86,6 +84,12 @@ export class AbstractESAggSource extends AbstractESSource {
   async getNumberFields() {
     return this.getMetricFields().map(({ propertyKey: name, propertyLabel: label }) => {
       return { label, name };
+    });
+  }
+
+  getFieldNames() {
+    return this.getMetricFields().map(({ propertyKey }) => {
+      return propertyKey;
     });
   }
 
