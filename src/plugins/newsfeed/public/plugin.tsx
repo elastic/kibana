@@ -28,7 +28,7 @@ import {
   Plugin,
 } from '../../../../src/core/public';
 import { getApi } from './lib/api';
-import { MailNavButton } from './components/newsfeed_header_nav_button';
+import { NewsfeedNavButton } from './components/newsfeed_header_nav_button';
 
 export type Setup = void;
 export type Start = void;
@@ -42,7 +42,7 @@ export class NewsfeedPublicPlugin implements Plugin<Setup, Start> {
 
   public start(core: CoreStart): Start {
     function mount(targetDomElement: HTMLElement) {
-      ReactDOM.render(<MailNavButton />, targetDomElement);
+      ReactDOM.render(<NewsfeedNavButton apiFetchResult={api$} />, targetDomElement);
       return () => ReactDOM.unmountComponentAtNode(targetDomElement);
     }
 

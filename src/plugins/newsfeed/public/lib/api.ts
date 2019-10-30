@@ -43,7 +43,7 @@ interface NewsfeedItem {
   linkUrl: string;
 }
 
-interface FetchResult {
+export interface FetchResult {
   hasNew: boolean;
   feedItems: NewsfeedItem[];
 }

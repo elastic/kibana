@@ -17,15 +17,37 @@
  * under the License.
  */
 
-import React, { useState, Fragment } from 'react';
+import React, { useState, Fragment, useEffect } from 'react';
+import * as Rx from 'rxjs';
 import { EuiHeaderSectionItemButton, EuiIcon, EuiNotificationBadge } from '@elastic/eui';
 import { NewsfeedFlyout } from './flyout_list';
+import { FetchResult } from '../lib/api';
 
 export const NewsfeedContext = React.createContext({} as any);
 
-export const MailNavButton = () => {
+interface Props {
+  apiFetchResult: Rx.Observable<void | FetchResult | null>;
+}
+
+export const NewsfeedNavButton = ({ apiFetchResult }: Props) => {
+  let subscription: Rx.Subscription;
   const [showBadge, setShowBadge] = useState<boolean>(true);
   const [flyoutVisible, setFlyoutVisible] = useState<boolean>(false);
+
+  useEffect(() => {
+    function handleStatusChange() {
+      setShowBadge(true);
+    }
+
+    subscription = apiFetchResult.subscribe(handleStatusChange);
+    // Specify how to clean up after this effect:
+    return () => {
+      if (subscription) {
+        subscription.unsubscribe();
+      }
+    };
+  });
+
   function showFlyout() {
     setShowBadge(false);
     setFlyoutVisible(!flyoutVisible);
