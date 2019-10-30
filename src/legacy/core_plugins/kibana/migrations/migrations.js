@@ -460,6 +460,31 @@ function migrateFiltersAggQueryStringQueries(doc) {
 
 }
 
+function migrateSubTypeAndParentFieldProperties(doc) {
+  if (!doc.attributes.fields) return doc;
+
+  const fieldsString = doc.attributes.fields;
+  const fields = JSON.parse(fieldsString);
+  const migratedFields = fields.map(field => {
+    if (field.subType === 'multi') {
+      return {
+        ...omit(field, 'parent'),
+        subType: { multi: { parent: field.parent } }
+      };
+    }
+
+    return field;
+  });
+
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      fields: JSON.stringify(migratedFields),
+    }
+  };
+}
+
 const executeMigrations720 = flow(
   migratePercentileRankAggregation,
   migrateDateHistogramAggregation
@@ -490,6 +515,9 @@ export const migrations = {
       doc.attributes.typeMeta = doc.attributes.typeMeta || undefined;
       return doc;
     },
+    '7.6.0': flow(
+      migrateSubTypeAndParentFieldProperties
+    )
   },
   visualization: {
     /**

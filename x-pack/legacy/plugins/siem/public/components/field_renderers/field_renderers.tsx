@@ -271,7 +271,7 @@ export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverf
               rowItems={rowItems}
               moreMaxHeight={moreMaxHeight}
               overflowIndexStart={overflowIndexStart}
-            ></MoreContainer>
+            />
           </EuiPopover>
         )}
       </EuiFlexItem>

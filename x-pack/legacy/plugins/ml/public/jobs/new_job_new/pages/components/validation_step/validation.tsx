@@ -78,7 +78,7 @@ export const ValidationStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
           />
         </Fragment>
       )}
-      {isCurrentStep === false && <Fragment></Fragment>}
+      {isCurrentStep === false && <Fragment />}
     </Fragment>
   );
 };

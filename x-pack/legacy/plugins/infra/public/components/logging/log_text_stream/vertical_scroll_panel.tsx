@@ -30,6 +30,7 @@ interface VerticalScrollPanelProps<Child> {
   hideScrollbar?: boolean;
   'data-test-subj'?: string;
   isLocked: boolean;
+  entriesCount: number;
 }
 
 interface VerticalScrollPanelSnapshot<Child> {
@@ -226,7 +227,7 @@ export class VerticalScrollPanel<Child> extends React.PureComponent<
     if (
       prevProps.height !== this.props.height ||
       prevProps.target !== this.props.target ||
-      React.Children.count(prevProps.children) !== React.Children.count(this.props.children)
+      prevProps.entriesCount !== this.props.entriesCount
     ) {
       this.handleUpdatedChildren(snapshot.scrollTarget, snapshot.scrollOffset);
     }
