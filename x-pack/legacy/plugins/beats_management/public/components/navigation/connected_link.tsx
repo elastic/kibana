@@ -3,10 +3,18 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { ComponentProps } from 'react';
 
 import { EuiLink } from '@elastic/eui';
-import { Link, withRouter } from 'react-router-dom';
+import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
+
+interface ConnectedLinkComponentProps extends ComponentProps<any>, RouteComponentProps {
+  location: any;
+  path: string;
+  disabled: boolean;
+  query: any;
+  [key: string]: any;
+}
 
 export function ConnectedLinkComponent({
   location,
@@ -15,13 +23,7 @@ export function ConnectedLinkComponent({
   disabled,
   children,
   ...props
-}: {
-  location: any;
-  path: string;
-  disabled: boolean;
-  query: any;
-  [key: string]: any;
-}) {
+}: ConnectedLinkComponentProps) {
   if (disabled) {
     return <EuiLink aria-disabled="true" {...props} />;
   }
@@ -38,4 +40,4 @@ export function ConnectedLinkComponent({
   );
 }
 
-export const ConnectedLink = withRouter<any>(ConnectedLinkComponent);
+export const ConnectedLink = withRouter(ConnectedLinkComponent);
