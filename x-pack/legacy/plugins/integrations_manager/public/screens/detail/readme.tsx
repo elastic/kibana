@@ -7,7 +7,8 @@ import React, { useEffect, useState, Fragment } from 'react';
 import { EuiLoadingContent, EuiText } from '@elastic/eui';
 import ReactMarkdown from 'react-markdown';
 import { getFileByPath } from '../../data';
-import { markdownRenderers, WrappedEuiImage } from './markdown_renderers';
+import { markdownRenderers } from './markdown_renderers';
+import { useLinks } from '../../hooks';
 
 export function Readme({
   readmePath,
@@ -20,6 +21,17 @@ export function Readme({
 }) {
   const [markdown, setMarkdown] = useState<string | undefined>(undefined);
 
+  const handleImageUri = React.useCallback(
+    (uri: string) => {
+      const { toRelativeImage } = useLinks();
+      const isRelative =
+        uri.indexOf('http://') === 0 || uri.indexOf('https://') === 0 ? false : true;
+      const fullUri = isRelative ? toRelativeImage({ packageName, version, path: uri }) : uri;
+      return fullUri;
+    },
+    [packageName, version]
+  );
+
   useEffect(() => {
     getFileByPath(readmePath).then(res => {
       setMarkdown(res);
@@ -29,14 +41,9 @@ export function Readme({
   return (
     <Fragment>
       {markdown !== undefined ? (
-        // pass down package name and version props to the image renderer to create image path
         <ReactMarkdown
-          renderers={{
-            image: ({ ...props }) => (
-              <WrappedEuiImage {...props} packageName={packageName} version={version} />
-            ),
-            ...markdownRenderers,
-          }}
+          transformImageUri={handleImageUri}
+          renderers={markdownRenderers}
           source={markdown}
         />
       ) : (
