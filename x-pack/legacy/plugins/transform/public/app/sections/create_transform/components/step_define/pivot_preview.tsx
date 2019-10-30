@@ -150,7 +150,7 @@ export const PivotPreview: SFC<PivotPreviewProps> = React.memo(({ aggs, groupBy,
     if (clearTable) {
       setTimeout(() => setClearTable(false), 0);
     }
-  });
+  }, [firstColumnNameChanged, clearTable]);
 
   if (firstColumnNameChanged) {
     return null;

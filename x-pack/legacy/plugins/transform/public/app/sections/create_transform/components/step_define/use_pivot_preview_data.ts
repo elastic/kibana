@@ -91,11 +91,14 @@ export const usePivotPreviewData = (
 
   useEffect(() => {
     getPreviewData();
+    // custom comparison
+    /* eslint-disable react-hooks/exhaustive-deps */
   }, [
     indexPattern.title,
     JSON.stringify(aggsArr),
     JSON.stringify(groupByArr),
     JSON.stringify(query),
+    /* eslint-enable react-hooks/exhaustive-deps */
   ]);
 
   return { errorMessage, status, previewData, previewMappings, previewRequest };
