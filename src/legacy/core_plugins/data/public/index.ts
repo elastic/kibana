@@ -43,14 +43,7 @@ export { SearchBar, SearchBarProps, SavedQueryAttributes, SavedQuery } from './s
 
 /** @public static code */
 export * from '../common';
-export {
-  FilterManager,
-  FilterStateManager,
-  uniqFilters,
-  extractTimeFilter,
-  changeTimeFilter,
-  onlyDisabledFiltersChanged,
-} from './filter/filter_manager';
+export { FilterStateManager } from './filter/filter_manager';
 export {
   CONTAINS_SPACES,
   getFromSavedObject,
@@ -80,4 +73,11 @@ export {
   createApplyFiltersPopoverHelper,
 } from './shim/legacy_module';
 
-export { TimeHistoryContract, TimefilterContract, getTime, InputTimeRange } from './timefilter';
+export {
+  TimeHistoryContract,
+  TimefilterContract,
+  getTime,
+  InputTimeRange,
+  extractTimeFilter,
+  changeTimeFilter,
+} from './timefilter';

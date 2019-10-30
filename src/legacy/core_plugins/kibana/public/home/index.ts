@@ -62,12 +62,14 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
       kfetch,
       metadata: npStart.core.injectedMetadata.getLegacyMetadata(),
       METRIC_TYPE,
-      getFeatureCatalogueRegistryProvider: async () => {
+      getFeatureCatalogueEntries: async () => {
         const injector = await chrome.dangerouslyGetActiveInjector();
-
         const Private = injector.get<IPrivate>('Private');
-
-        return Private(FeatureCatalogueRegistryProvider as any);
+        // Merge legacy registry with new registry
+        (Private(FeatureCatalogueRegistryProvider as any) as any).inTitleOrder.map(
+          npSetup.plugins.feature_catalogue.register
+        );
+        return npStart.plugins.feature_catalogue.get();
       },
       getAngularDependencies,
       localApplicationService,

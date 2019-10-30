@@ -26,6 +26,7 @@ import { KFetchKibanaOptions } from 'ui/kfetch/kfetch';
 import { DataStart } from '../../../data/public';
 import { LocalApplicationService } from '../local_application_service';
 import { setServices } from './kibana_services';
+import { FeatureCatalogueEntry } from '../../../../../plugins/feature_catalogue/public';
 
 export interface LegacyAngularInjectedDependencies {
   telemetryOptInProvider: any;
@@ -56,7 +57,7 @@ export interface HomePluginSetupDependencies {
       devMode: boolean;
       uiSettings: { defaults: UiSettingsState; user?: UiSettingsState | undefined };
     };
-    getFeatureCatalogueRegistryProvider: () => Promise<any>;
+    getFeatureCatalogueEntries: () => Promise<readonly FeatureCatalogueEntry[]>;
     getAngularDependencies: () => Promise<LegacyAngularInjectedDependencies>;
     localApplicationService: LocalApplicationService;
   };

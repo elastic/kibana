@@ -29,10 +29,11 @@ import {
 import { KFetchOptions } from 'ui/kfetch';
 import { KFetchKibanaOptions } from 'ui/kfetch/kfetch';
 import { UiStatsMetricType } from '@kbn/analytics';
+import { FeatureCatalogueEntry } from '../../../../../plugins/feature_catalogue/public';
 
 export interface HomeKibanaServices {
   indexPatternService: any;
-  getFeatureCatalogueRegistryProvider: () => Promise<any>;
+  getFeatureCatalogueEntries: () => Promise<readonly FeatureCatalogueEntry[]>;
   metadata: {
     app: unknown;
     bundleId: string;
@@ -65,11 +66,6 @@ export interface HomeKibanaServices {
 let services: HomeKibanaServices | null = null;
 
 export function setServices(newServices: HomeKibanaServices) {
-  if (services) {
-    throw new Error(
-      'Kibana services already set - are you trying to import this module from outside of the home app?'
-    );
-  }
   services = newServices;
 }
 
