@@ -16,8 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 /*
-export { DASHBOARD_CONTAINER_TYPE, DashboardContainerFactory } from './dashboard_container_factory';
+export { DashboardContainerFactory } from './dashboard_container_factory';
 export { DashboardContainer, DashboardContainerInput } from './dashboard_container';
 export { createPanelState } from './panel';
 
@@ -27,5 +28,6 @@ export {
   DASHBOARD_GRID_COLUMN_COUNT,
   DEFAULT_PANEL_HEIGHT,
   DEFAULT_PANEL_WIDTH,
+  DASHBOARD_CONTAINER_TYPE,
 } from './dashboard_constants';
 */
