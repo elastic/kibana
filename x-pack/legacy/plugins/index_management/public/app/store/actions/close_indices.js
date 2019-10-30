@@ -7,7 +7,7 @@
 import { createAction } from 'redux-actions';
 import { i18n }  from '@kbn/i18n';
 import { closeIndices as request } from '../../services';
-import { toastNotifications } from 'ui/notify';
+import { notificationService } from '../../services/notification';
 import { clearRowStatus, reloadIndices } from '../actions';
 
 export const closeIndicesStart = createAction(
@@ -18,11 +18,11 @@ export const closeIndices = ({ indexNames }) => async (dispatch) => {
   try {
     await request(indexNames);
   } catch (error) {
-    toastNotifications.addDanger(error.data.message);
+    notificationService.showDangerToast(error.data.message);
     return dispatch(clearRowStatus({ indexNames }));
   }
   dispatch(reloadIndices(indexNames));
-  toastNotifications.addSuccess(
+  notificationService.showSuccessToast(
     i18n.translate('xpack.idxMgmt.closeIndicesAction.successfullyClosedIndicesMessage', {
       defaultMessage: 'Successfully closed: [{indexNames}]',
       values: { indexNames: indexNames.join(', ') }

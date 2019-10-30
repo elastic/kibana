@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { loadIndexData as request } from '../../services';
 import { createAction } from 'redux-actions';
-import { toastNotifications } from 'ui/notify';
+import { loadIndexData as request } from '../../services';
+import { notificationService } from '../../services/notification';
 
 export const loadIndexDataSuccess = createAction('INDEX_MANAGEMENT_LOAD_INDEX_DATA_SUCCESS');
 
@@ -15,7 +15,7 @@ export const loadIndexData = ({ indexName, dataType }) => async (dispatch) => {
   try {
     data = await request(dataType, indexName);
   } catch (error) {
-    return toastNotifications.addDanger(error.data.message);
+    notificationService.showDangerToast(error.data.message);
   }
   dispatch(loadIndexDataSuccess({ data, indexName }));
 };

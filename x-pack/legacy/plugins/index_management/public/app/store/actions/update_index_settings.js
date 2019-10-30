@@ -8,7 +8,7 @@ import { createAction } from 'redux-actions';
 import { i18n }  from '@kbn/i18n';
 import { updateIndexSettings as request } from '../../services';
 import { reloadIndices } from './reload_indices';
-import { toastNotifications } from 'ui/notify';
+import { notificationService } from '../../services/notification';
 
 export const updateIndexSettingsSuccess = createAction(
   'INDEX_MANAGEMENT_UPDATE_INDEX_SETTINGS_SUCCESS'
@@ -34,7 +34,7 @@ export const updateIndexSettings = ({
   }
   dispatch(updateIndexSettingsSuccess());
   dispatch(reloadIndices([ indexName ]));
-  toastNotifications.addSuccess(
+  notificationService.showSuccessToast(
     i18n.translate('xpack.idxMgmt.updateIndexSettingsAction.settingsSuccessUpdateMessage', {
       defaultMessage: 'Successfully updated settings for index {indexName}',
       values: { indexName }

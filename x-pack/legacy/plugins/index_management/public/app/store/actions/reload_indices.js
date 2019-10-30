@@ -9,7 +9,7 @@ import { i18n }  from '@kbn/i18n';
 import { getIndexNamesForCurrentPage } from '../selectors';
 import { reloadIndices as request } from '../../services';
 import { loadIndices } from './load_indices';
-import { toastNotifications } from 'ui/notify';
+import { notificationService } from '../../services/notification';
 
 export const reloadIndicesSuccess = createAction('INDEX_MANAGEMENT_RELOAD_INDICES_SUCCESS');
 export const reloadIndices = (indexNames) => async (dispatch, getState) => {
@@ -24,12 +24,13 @@ export const reloadIndices = (indexNames) => async (dispatch, getState) => {
     if (error.status === 404 || error.status === 403) {
       return dispatch(loadIndices());
     }
-    return toastNotifications.addDanger(error.data.message);
+    return notificationService.showDangerToast(error.data.message);
+
   }
   if (indices && indices.length > 0) {
     return dispatch(reloadIndicesSuccess({ indices }));
   } else {
-    return toastNotifications.addWarning(
+    return notificationService.showWarningToast(
       i18n.translate('xpack.idxMgmt.reloadIndicesAction.indicesPageRefreshFailureMessage', {
         defaultMessage: 'Failed to refresh current page of indices.',
       })

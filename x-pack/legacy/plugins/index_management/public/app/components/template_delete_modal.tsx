@@ -8,8 +8,8 @@ import { EuiConfirmModal, EuiOverlayMask, EuiCallOut, EuiCheckbox, EuiBadge } fr
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment, useState } from 'react';
-import { toastNotifications } from 'ui/notify';
 import { deleteTemplates } from '../services/api';
+import { notificationService } from '../services/notification';
 import { Template } from '../../../common/types';
 
 export const TemplateDeleteModal = ({
@@ -51,7 +51,7 @@ export const TemplateDeleteModal = ({
               );
 
         callback({ hasDeletedTemplates });
-        toastNotifications.addSuccess(successMessage);
+        notificationService.showSuccessToast(successMessage);
       }
 
       if (error || (errors && errors.length)) {
@@ -71,7 +71,7 @@ export const TemplateDeleteModal = ({
               defaultMessage: "Error deleting template '{name}'",
               values: { name: (errors && errors[0].name) || templatesToDelete[0] },
             });
-        toastNotifications.addDanger(errorMessage);
+        notificationService.showDangerToast(errorMessage);
       }
     });
   };

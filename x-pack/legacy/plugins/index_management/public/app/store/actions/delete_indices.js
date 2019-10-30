@@ -7,7 +7,7 @@
 import { createAction } from 'redux-actions';
 import { i18n }  from '@kbn/i18n';
 import { deleteIndices as request } from '../../services';
-import { toastNotifications } from 'ui/notify';
+import { notificationService } from '../../services/notification';
 import { clearRowStatus } from '../actions';
 
 export const deleteIndicesSuccess = createAction(
@@ -17,10 +17,10 @@ export const deleteIndices = ({ indexNames }) => async (dispatch) => {
   try {
     await request(indexNames);
   } catch (error) {
-    toastNotifications.addDanger(error.data.message);
+    notificationService.showDangerToast(error.data.message);
     return dispatch(clearRowStatus({ indexNames }));
   }
-  toastNotifications.addSuccess(
+  notificationService.showSuccessToast(
     i18n.translate('xpack.idxMgmt.deleteIndicesAction.successfullyDeletedIndicesMessage', {
       defaultMessage: 'Successfully deleted: [{indexNames}]',
       values: { indexNames: indexNames.join(', ') }

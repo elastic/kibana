@@ -6,17 +6,17 @@
 
 import { i18n }  from '@kbn/i18n';
 import { loadIndexSettings as request } from '../../services';
+import { notificationService } from '../../services/notification';
 import { loadIndexDataSuccess } from './load_index_data';
-import { toastNotifications } from 'ui/notify';
 
 export const editIndexSettings = ({ indexName }) => async (dispatch) => {
   let indexSettings;
   try {
     indexSettings = await request(indexName);
   } catch (error) {
-    return toastNotifications.addDanger(error.data.message);
+    return notificationService.showDangerToast(error.data.message);
   }
-  toastNotifications.addSuccess(
+  notificationService.showSuccessToast(
     i18n.translate('xpack.idxMgmt.editIndexSettingsAction.successfullySavedSettingsForIndicesMessage', {
       defaultMessage: 'Successfully saved settings for {indexName}',
       values: { indexName }

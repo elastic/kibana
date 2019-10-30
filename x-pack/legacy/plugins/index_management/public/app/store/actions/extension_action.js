@@ -5,15 +5,15 @@
  */
 
 import { reloadIndices } from '../actions';
-import { toastNotifications } from 'ui/notify';
+import { notificationService } from '../../services/notification';
 
 export const performExtensionAction = ({ requestMethod, indexNames, successMessage }) => async (dispatch) => {
   try {
     await requestMethod(indexNames);
   } catch (error) {
-    toastNotifications.addDanger(error.data.message);
+    notificationService.showDangerToast(error.data.message);
     return;
   }
   dispatch(reloadIndices(indexNames));
-  toastNotifications.addSuccess(successMessage);
+  notificationService.showSuccessToast(successMessage);
 };

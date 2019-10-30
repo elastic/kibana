@@ -6,8 +6,10 @@
 
 import { createAction } from 'redux-actions';
 import { i18n }  from '@kbn/i18n';
-import { toastNotifications } from 'ui/notify';
+
 import { clearCacheIndices as request } from '../../services';
+import { notificationService } from '../../services/notification';
+
 import { clearRowStatus, reloadIndices } from '../actions';
 
 export const clearCacheIndicesStart = createAction(
@@ -18,11 +20,11 @@ export const clearCacheIndices = ({ indexNames }) => async (dispatch) => {
   try {
     await request(indexNames);
   } catch (error) {
-    toastNotifications.addDanger(error.data.message);
+    notificationService.showDangerToast(error.data.message);
     return dispatch(clearRowStatus({ indexNames }));
   }
   dispatch(reloadIndices(indexNames));
-  toastNotifications.addSuccess(
+  notificationService.showSuccessToast(
     i18n.translate('xpack.idxMgmt.clearCacheIndicesAction.successMessage', {
       defaultMessage: 'Successfully cleared cache: [{indexNames}]',
       values: { indexNames: indexNames.join(', ') }
