@@ -33,7 +33,7 @@ const POLYGONS = [GEO_JSON_TYPE.POLYGON, GEO_JSON_TYPE.MULTI_POLYGON];
 export class VectorStyle extends AbstractStyle {
 
   static type = 'VECTOR';
-  static STYLE_TYPE = { 'DYNAMIC': 'DYNAMIC', 'STATIC': 'STATIC' };
+  static STYLE_TYPE = { 'DYNAMIC': DynamicStyleProperty.type, 'STATIC': StaticStyleProperty.type };
 
   static getComputedFieldName = getComputedFieldName;
   static getComputedFieldNamePrefix = getComputedFieldNamePrefix;
