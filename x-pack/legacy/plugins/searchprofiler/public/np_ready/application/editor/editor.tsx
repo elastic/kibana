@@ -51,7 +51,7 @@ export const Editor = memo(({ licenseEnabled, initialValue, onEditorReady }: Pro
     setTextArea(containerRef.current!.querySelector('textarea'));
 
     onEditorReady(createEditorShim(editorInstanceRef.current));
-  }, []);
+  }, [initialValue, onEditorReady, licenseEnabled]);
 
   return <div ref={containerRef} />;
 });
