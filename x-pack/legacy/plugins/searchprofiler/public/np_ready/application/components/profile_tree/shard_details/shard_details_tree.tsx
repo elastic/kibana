@@ -19,17 +19,14 @@ export interface Props {
 export const ShardDetailTree = ({ data, index, shard }: Props) => {
   const renderOperations = (operation: Operation): JSX.Element => {
     const nextOperation = operation.treeRoot || operation;
-    return (
-      <>
-        <ShardDetailsTreeNode shard={shard} index={index} operation={nextOperation} />
-      </>
-    );
+    return <ShardDetailsTreeNode shard={shard} index={index} operation={nextOperation} />;
   };
 
   return (
     <div className="prfDevTool__profileTree__panelBody">
-      <EuiFlexGroup gutterSize="none" direction="column">
-        <EuiFlexItem>
+      <EuiFlexGroup responsive={false} gutterSize="none" direction="column">
+        {/* Setting grow to false here is important for IE11. Don't change without testing first! */}
+        <EuiFlexItem grow={false}>
           <div className="prfDevTool__profileTree__tvHeader">
             <EuiText size="s" className="euiTextAlign--left prfDevTool__profileTree__cell">
               {i18n.translate('xpack.searchProfiler.profileTree.header.typeTitle', {
@@ -55,8 +52,7 @@ export const ShardDetailTree = ({ data, index, shard }: Props) => {
             <div className="prfDevTool__profileTree__cell prfDevTool__profileTree__percentage" />
           </div>
         </EuiFlexItem>
-
-        <EuiFlexItem>{renderOperations(data)}</EuiFlexItem>
+        <EuiFlexItem grow={false}>{renderOperations(data)}</EuiFlexItem>
       </EuiFlexGroup>
     </div>
   );

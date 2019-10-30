@@ -5,6 +5,7 @@
 
 @import 'components/highlight_details_flyout';
 @import 'components/profile_tree';
+@import 'components/percentage_badge';
 
 @import 'containers/main';
 @import 'containers/profile_query_editor';
@@ -59,6 +60,7 @@
   overflow: hidden;
 
   .devApp__container {
+    height: 100%;
     overflow: hidden;
     flex-shrink: 1;
   }

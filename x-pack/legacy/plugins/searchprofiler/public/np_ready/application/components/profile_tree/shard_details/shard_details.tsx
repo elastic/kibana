@@ -5,11 +5,12 @@
  */
 
 import React, { useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiBadge, EuiLink, EuiIcon } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiLink, EuiIcon } from '@elastic/eui';
 
 import { Index, Operation, Shard } from '../../../types';
 import { msToPretty } from '../../../utils';
 import { ShardDetailTree } from './shard_details_tree';
+import { PercentageBadge } from '../../percentage_badge';
 
 interface Props {
   index: Index;
@@ -36,16 +37,11 @@ export const ShardDetails = ({ index, shard, operations }: Props) => {
         </EuiFlexItem>
         <EuiFlexItem grow={false} className="prfDevTool__profileTree__shard__header-flex-item">
           <EuiText className="prfDevTool__shardDetails--dim">
-            <EuiBadge
-              className="prfDevTool__profileTree__progress--time euiTextAlign--center"
-              style={{ '--prfDevToolProgressPercentage': relative + '%' } as any}
-            >
-              <span
-                className="prfDevTool__progress--percent-ie"
-                style={{ width: relative + '%' }}
-              />
-              <span className="prfDevTool__progressText">{msToPretty(time as number, 3)}</span>
-            </EuiBadge>
+            <PercentageBadge
+              timePercentage={relative as number}
+              label={msToPretty(time as number, 3)}
+              valueType={'time'}
+            />
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -12,6 +12,8 @@ import { hasVisibleChild } from '../utils';
 import { useHighlightTreeNode } from '../use_highlight_tree_node';
 import { msToPretty } from '../../../utils';
 
+import { PercentageBadge } from '../../percentage_badge';
+
 import { Index, Operation, Shard } from '../../../types';
 
 export interface Props {
@@ -73,16 +75,7 @@ export const ShardDetailsTreeNode = ({ operation, index, shard }: Props) => {
       </div>
       {/* Time percentage Badge */}
       <div className="prfDevTool__profileTree__cell prfDevTool__profileTree__percentage">
-        <EuiBadge
-          className="prfDevTool__profileTree__progress--percent euiTextAlign--center"
-          style={{ '--prfDevToolProgressPercentage': op.timePercentage + '%' } as any}
-        >
-          <span className="prfDevTool__progressText">{op.timePercentage + '%'}</span>
-        </EuiBadge>
-        <span
-          className="prfDevTool__progress--percent-ie"
-          style={{ width: op.timePercentage + '%' }}
-        />
+        <PercentageBadge timePercentage={op.timePercentage} label={op.timePercentage + '%'} />
       </div>
     </div>
   );
@@ -94,7 +87,7 @@ export const ShardDetailsTreeNode = ({ operation, index, shard }: Props) => {
         className={isHighlighted() ? 'prfDevTool__tvRow--last' : ''}
         style={{ paddingLeft: operation.depth! * TAB_WIDTH_PX + 'px' }}
       >
-        <div className="prfDevTool__profileTree__tvRow">{renderTimeRow(operation)}</div>
+        {renderTimeRow(operation)}
         <div className="prfDevTool__profileTree__tvRow">
           <span className="prfDevTool__detail">
             <EuiCodeBlock paddingSize="none">

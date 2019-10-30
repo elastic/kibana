@@ -9,6 +9,7 @@ import { EuiBasicTable, EuiToolTip, EuiBadge } from '@elastic/eui';
 
 import { BreakdownItem } from '../../types';
 import { nsToPretty } from '../../utils';
+import { PercentageBadge } from '../percentage_badge';
 
 interface Props {
   breakdown: BreakdownItem[];
@@ -35,16 +36,7 @@ export const HighlightDetailsTable = ({ breakdown }: Props) => {
     {
       name: 'Percentage',
       render: (item: BreakdownItem) => (
-        <EuiBadge
-          className="prfDevTool__profileTree__progress--percent euiTextAlign--center"
-          style={{ '--prfDevToolProgressPercentage': item.relative + '%' } as any}
-        >
-          <span
-            className="prfDevTool__progress--percent-ie"
-            style={{ width: item.relative + '%' }}
-          />
-          <span className="prfDevTool__progressText">{item.relative + ' %'}</span>
-        </EuiBadge>
+        <PercentageBadge timePercentage={item.relative as number} label={item.relative + '%'} />
       ),
     },
   ];
