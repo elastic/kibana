@@ -652,7 +652,7 @@ export function setQuery({ query, timeFilters, filters = [], refresh = false }) 
   }
   return async (dispatch, getState) => {
     const prevQuery = getQuery(getState());
-    const prevTriggeredAt = prevQuery && prevQuery.queryLastTriggeredAt
+    const prevTriggeredAt = (prevQuery && prevQuery.queryLastTriggeredAt)
       ? prevQuery.queryLastTriggeredAt
       : generateQueryTimestamp();
 
