@@ -25,6 +25,12 @@ interface RegisterOptInRoutesParams {
   core: CoreSetup;
   currentKibanaVersion: string;
 }
+
+export interface SavedObjectAttributes {
+  enabled?: boolean;
+  lastVersionChecked: string;
+}
+
 export function registerOptInRoutes({ core, currentKibanaVersion }: RegisterOptInRoutesParams) {
   const { server } = core.http as any;
 
@@ -40,18 +46,16 @@ export function registerOptInRoutes({ core, currentKibanaVersion }: RegisterOptI
     },
     handler: async (req: any, h: any) => {
       const savedObjectsClient = req.getSavedObjectsClient();
+      const savedObject: SavedObjectAttributes = {
+        enabled: req.payload.enabled,
+        lastVersionChecked: currentKibanaVersion,
+      };
+      const options = {
+        id: 'telemetry',
+        overwrite: true,
+      };
       try {
-        await savedObjectsClient.create(
-          'telemetry',
-          {
-            enabled: req.payload.enabled,
-            lastVersionChecked: currentKibanaVersion,
-          },
-          {
-            id: 'telemetry',
-            overwrite: true,
-          }
-        );
+        await savedObjectsClient.create('telemetry', savedObject, options);
       } catch (err) {
         return boomify(err);
       }

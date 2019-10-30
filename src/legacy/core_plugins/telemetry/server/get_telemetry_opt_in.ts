@@ -19,6 +19,8 @@
 
 import semver from 'semver';
 
+import { SavedObjectAttributes } from './routes/opt_in';
+
 interface GetTelemetryOptIn {
   request: any;
   currentKibanaVersion: string;
@@ -56,32 +58,33 @@ export async function getTelemetryOptIn({
     throw error;
   }
 
-  const { attributes } = savedObject;
+  const { attributes }: { attributes: SavedObjectAttributes } = savedObject;
 
-  // return `enabled` attribute, unless it's false ...
-  if (attributes.enabled !== false) return attributes.enabled;
+  // if enabled is already null, return null
+  if (attributes.enabled == null) return null;
+
+  const enabled = !!attributes.enabled;
+
+  // if enabled is true, return it
+  if (enabled === true) return enabled;
 
   // Additional check if they've already opted out (enabled: false):
   // - if the Kibana version has changed by at least a minor version,
-  //   set them back to the null state to get prompted again.
+  //   return null to re-prompt.
 
   const lastKibanaVersion = attributes.lastVersionChecked;
 
+  // if the last kibana version isn't set, or is somehow not a string, return null
+  if (typeof lastKibanaVersion !== 'string') return null;
+
   // if version hasn't changed, just return enabled value
-  if (lastKibanaVersion === currentKibanaVersion) return attributes.enabled;
+  if (lastKibanaVersion === currentKibanaVersion) return enabled;
 
   const lastSemver = parseSemver(lastKibanaVersion);
   const currentSemver = parseSemver(currentKibanaVersion);
 
-  // if both versions aren't valid, just return the current enabled value
-  if (lastSemver == null && currentSemver == null) {
-    return attributes.enabled;
-  }
-
-  // if one version is valid and one isn't, return null to force re-prompt
-  if (lastSemver == null || currentSemver == null) {
-    return null;
-  }
+  // if either version is invalid, return null
+  if (lastSemver == null || currentSemver == null) return null;
 
   // actual major/minor version comparison, for cases when to return null
   if (currentSemver.major > lastSemver.major) return null;
@@ -90,22 +93,11 @@ export async function getTelemetryOptIn({
   }
 
   // current version X.Y is not greater than last version X.Y, return enabled
-  return attributes.enabled;
+  return enabled;
 }
 
-function parseSemver(version: string | null): semver.SemVer | null {
-  if (version == null) return null;
-
+function parseSemver(version: string): semver.SemVer | null {
   // semver functions both return nulls AND throw exceptions: "it depends!"
-  let validated: string | null;
-  try {
-    validated = semver.valid(version);
-  } catch (err) {
-    return null;
-  }
-
-  if (validated == null) return null;
-
   try {
     return semver.parse(version);
   } catch (err) {
