@@ -40,6 +40,10 @@ Also see <<breaking-changes-7.4, breaking changes in 7.4>>.
 === Bug fix
 Discover::
 * Fixes missing HTML formatting in Doc_Viewer {pull}49326[#49326]
+* Fixes the URL field formatter {pull}46332[#46332]
+Visualizations::
+* Fixes the loss of filters in TSVB after upgrade from to 7.3 {pull}48710[#48710]
+
 
 [[release-notes-7.4.1]]
 == {kib} 7.4.1
