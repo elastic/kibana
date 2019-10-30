@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import 'brace/mode/plain_text';
 import 'brace/theme/github';
 
+import { PipelineMode } from '../../lib/ace';
 import { isEmpty } from 'lodash';
 import { TOOLTIPS } from '../../../common/constants/tooltips';
 import {
