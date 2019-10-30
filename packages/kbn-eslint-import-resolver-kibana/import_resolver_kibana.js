@@ -23,6 +23,8 @@ const { REPO_ROOT } = require('@kbn/dev-utils');
 const webpackResolver = require('eslint-import-resolver-webpack');
 const nodeResolver = require('eslint-import-resolver-node');
 
+const IMPORTED_FROM_ROOT_DIRS = ['src', 'x-pack'];
+
 const {
   getKibanaPath,
   getProjectRoot,
@@ -70,11 +72,12 @@ function tryNodeResolver(importRequest, file, config) {
 exports.resolve = function resolveKibanaPath(importRequest, file, config) {
   config = config || {};
 
-  if (importRequest.startsWith('src') || importRequest.startsWith('x-pack')) {
-    config = {
-      ...config,
-      forceNode: true,
-    };
+  const rewrittenImportFromRoot = IMPORTED_FROM_ROOT_DIRS.some(
+    p => importRequest === p && importRequest.startsWith(`${p}/`)
+  );
+
+  if (rewrittenImportFromRoot) {
+    config = { ...config, forceNode: true };
     importRequest = Path.resolve(REPO_ROOT, importRequest);
   }
 
