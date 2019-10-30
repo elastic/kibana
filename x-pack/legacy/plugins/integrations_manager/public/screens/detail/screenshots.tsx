@@ -55,11 +55,16 @@ export function Screenshots(props: ScreenshotProps) {
           </NestedEuiFlexItem>
         )}
         <NestedEuiFlexItem>
+          { /* by default EuiImage sets width to 100% and Figure to 22.5rem for large images,
+              set image to same width
+            */
+         }
           <EuiImage
             url={toImage(image.src)}
             alt="screenshot image preview"
             size="l"
             allowFullScreen
+            style={{'width': '22.5rem'}}
           />
         </NestedEuiFlexItem>
       </ScreenshotsContainer>
