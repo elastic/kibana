@@ -62,10 +62,7 @@ export const NewsfeedNavButton = ({ apiFetchResult }: Props) => {
     setShowBadge(false);
     setFlyoutVisible(!flyoutVisible);
   }
-  let flyout;
-  if (flyoutVisible) {
-    flyout = <NewsfeedFlyout />;
-  }
+
   return (
     <NewsfeedContext.Provider value={{ setFlyoutVisible, newsfeed }}>
       <Fragment>
@@ -81,7 +78,7 @@ export const NewsfeedNavButton = ({ apiFetchResult }: Props) => {
             <EuiNotificationBadge className="euiHeaderNotification">&#9642;</EuiNotificationBadge>
           ) : null}
         </EuiHeaderSectionItemButton>
-         {flyout}
+         {flyoutVisible ? <NewsfeedFlyout /> : null}
       </Fragment>
     </NewsfeedContext.Provider>
   );

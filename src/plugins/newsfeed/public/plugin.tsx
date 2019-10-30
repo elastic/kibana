@@ -58,9 +58,6 @@ export class NewsfeedPublicPlugin implements Plugin<Setup, Start> {
         return Rx.of(null);
       })
     );
-
-    // TODO: pass to component?
-    api$.subscribe();
   }
 
   public stop() {
