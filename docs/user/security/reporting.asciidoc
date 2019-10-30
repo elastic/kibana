@@ -19,7 +19,7 @@ and `kibana_user` roles:
 * If you're using the `native` realm, you can assign roles through
 **Management / Users** UI in Kibana or with the `user` API. For example,
 the following request creates a `reporter` user that has the
-`reporting_user` and `kibana_user` roles:
+`reporting_user` role, and another role with sufficient <<kibana-privileges, Kibana privileges>>, such as the `kibana_user` role:
 +
 [source, sh]
 ---------------------------------------------------------------

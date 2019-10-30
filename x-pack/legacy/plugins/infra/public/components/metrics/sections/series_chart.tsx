@@ -45,12 +45,6 @@ export const AreaChart = ({ id, color, series, name, type, stack }: Props) => {
       strokeWidth: 'area' === type ? 1 : 2,
       visible: true,
     },
-    point: {
-      visible: true,
-      radius: 1,
-      strokeWidth: 2,
-      opacity: 1,
-    },
   };
   const colors: DataSeriesColorsValues = {
     colorValues: [],
