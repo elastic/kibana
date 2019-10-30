@@ -96,12 +96,12 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiTitle>
-            <h3>
+            <h2>
               <FormattedMessage
                 id="xpack.snapshotRestore.restoreForm.stepLogisticsTitle"
                 defaultMessage="Restore details"
               />
-            </h3>
+            </h2>
           </EuiTitle>
         </EuiFlexItem>
 

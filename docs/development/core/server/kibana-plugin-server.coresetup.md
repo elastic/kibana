@@ -16,7 +16,8 @@ export interface CoreSetup
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [context](./kibana-plugin-server.coresetup.context.md) | <code>{</code><br/><code>        createContextContainer: ContextSetup['createContextContainer'];</code><br/><code>    }</code> |  |
-|  [elasticsearch](./kibana-plugin-server.coresetup.elasticsearch.md) | <code>{</code><br/><code>        adminClient$: Observable&lt;IClusterClient&gt;;</code><br/><code>        dataClient$: Observable&lt;IClusterClient&gt;;</code><br/><code>        createClient: (type: string, clientConfig?: Partial&lt;ElasticsearchClientConfig&gt;) =&gt; IClusterClient;</code><br/><code>    }</code> |  |
-|  [http](./kibana-plugin-server.coresetup.http.md) | <code>{</code><br/><code>        createCookieSessionStorageFactory: HttpServiceSetup['createCookieSessionStorageFactory'];</code><br/><code>        registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];</code><br/><code>        registerAuth: HttpServiceSetup['registerAuth'];</code><br/><code>        registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];</code><br/><code>        basePath: HttpServiceSetup['basePath'];</code><br/><code>        isTlsEnabled: HttpServiceSetup['isTlsEnabled'];</code><br/><code>        registerRouteHandlerContext: &lt;T extends keyof RequestHandlerContext&gt;(name: T, provider: RequestHandlerContextProvider&lt;T&gt;) =&gt; RequestHandlerContextContainer;</code><br/><code>        createRouter: () =&gt; IRouter;</code><br/><code>    }</code> |  |
+|  [context](./kibana-plugin-server.coresetup.context.md) | <code>ContextSetup</code> | [ContextSetup](./kibana-plugin-server.contextsetup.md) |
+|  [elasticsearch](./kibana-plugin-server.coresetup.elasticsearch.md) | <code>ElasticsearchServiceSetup</code> | [ElasticsearchServiceSetup](./kibana-plugin-server.elasticsearchservicesetup.md) |
+|  [http](./kibana-plugin-server.coresetup.http.md) | <code>HttpServiceSetup</code> | [HttpServiceSetup](./kibana-plugin-server.httpservicesetup.md) |
+|  [uiSettings](./kibana-plugin-server.coresetup.uisettings.md) | <code>UiSettingsServiceSetup</code> | [UiSettingsServiceSetup](./kibana-plugin-server.uisettingsservicesetup.md) |
 

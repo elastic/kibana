@@ -11,18 +11,14 @@ import { ml } from '../../../../../services/ml_api_service';
 import { refreshAnalyticsList$, REFRESH_ANALYTICS_LIST_STATE } from '../../../../common';
 
 import {
-  DATA_FRAME_TASK_STATE,
+  isDataFrameAnalyticsFailed,
   DataFrameAnalyticsListRow,
 } from '../../components/analytics_list/common';
 
 export const deleteAnalytics = async (d: DataFrameAnalyticsListRow) => {
   try {
-    if (d.stats.state === DATA_FRAME_TASK_STATE.FAILED) {
-      await ml.dataFrameAnalytics.stopDataFrameAnalytics(
-        d.config.id,
-        d.stats.state === DATA_FRAME_TASK_STATE.FAILED,
-        true
-      );
+    if (isDataFrameAnalyticsFailed(d.stats.state)) {
+      await ml.dataFrameAnalytics.stopDataFrameAnalytics(d.config.id, true, true);
     }
     await ml.dataFrameAnalytics.deleteDataFrameAnalytics(d.config.id);
     toastNotifications.addSuccess(

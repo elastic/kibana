@@ -18,10 +18,9 @@ const EventsOverTimeManage = manageQuery(EventsOverTimeHistogram);
 
 export const EventsQueryTabBody = ({
   endDate,
-  kqlQueryExpression,
-  startDate,
-  setQuery,
   filterQuery,
+  setQuery,
+  startDate,
   updateDateRange = () => {},
 }: HostsComponentsQueryProps) => {
   return (
@@ -49,12 +48,7 @@ export const EventsQueryTabBody = ({
         )}
       </EventsOverTimeQuery>
       <EuiSpacer size="l" />
-      <StatefulEventsViewer
-        end={endDate}
-        id={HOSTS_PAGE_TIMELINE_ID}
-        kqlQueryExpression={kqlQueryExpression}
-        start={startDate}
-      />
+      <StatefulEventsViewer end={endDate} id={HOSTS_PAGE_TIMELINE_ID} start={startDate} />
     </>
   );
 };

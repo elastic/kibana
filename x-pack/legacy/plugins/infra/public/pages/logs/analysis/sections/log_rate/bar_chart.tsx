@@ -8,33 +8,27 @@ import {
   Axis,
   BarSeries,
   Chart,
-  getAnnotationId,
   getAxisId,
   getSpecId,
   niceTimeFormatter,
-  RectAnnotation,
-  RectAnnotationDatum,
   Settings,
   TooltipValue,
   LIGHT_THEME,
   DARK_THEME,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
+import numeral from '@elastic/numeral';
 import moment from 'moment';
 import React, { useCallback, useMemo } from 'react';
 
-import { GetLogEntryRateSuccessResponsePayload } from '../../../../../../common/http_api/log_analysis/results/log_entry_rate';
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 import { useKibanaUiSetting } from '../../../../../utils/use_kibana_ui_setting';
 
-type LogEntryRateHistogramBuckets = GetLogEntryRateSuccessResponsePayload['data']['histogramBuckets'];
-
 export const LogEntryRateBarChart: React.FunctionComponent<{
-  bucketDuration: number;
-  histogramBuckets: LogEntryRateHistogramBuckets | null;
   setTimeRange: (timeRange: TimeRange) => void;
   timeRange: TimeRange;
-}> = ({ bucketDuration, histogramBuckets, setTimeRange, timeRange }) => {
+  series: Array<{ group: string; time: number; value: number }>;
+}> = ({ series, setTimeRange, timeRange }) => {
   const [dateFormat] = useKibanaUiSetting('dateFormat');
   const [isDarkMode] = useKibanaUiSetting('theme:darkMode');
 
@@ -43,62 +37,7 @@ export const LogEntryRateBarChart: React.FunctionComponent<{
     [timeRange]
   );
 
-  const logEntryRateSeries = useMemo(
-    () =>
-      histogramBuckets
-        ? histogramBuckets.reduce<Array<{ group: string; time: number; value: number }>>(
-            (buckets, bucket) => {
-              return [
-                ...buckets,
-                ...bucket.dataSets.map(dataSet => ({
-                  group: dataSet.dataSetId === '' ? 'unknown' : dataSet.dataSetId,
-                  time: bucket.startTime,
-                  value: dataSet.averageActualLogEntryRate,
-                })),
-              ];
-            },
-            []
-          )
-        : [],
-    [histogramBuckets]
-  );
-
-  const logEntryRateAnomalyAnnotations = useMemo(
-    () =>
-      histogramBuckets
-        ? histogramBuckets.reduce<RectAnnotationDatum[]>((annotatedBuckets, bucket) => {
-            const anomalies = bucket.dataSets.reduce<typeof bucket['dataSets'][0]['anomalies']>(
-              (accumulatedAnomalies, dataSet) => [...accumulatedAnomalies, ...dataSet.anomalies],
-              []
-            );
-            if (anomalies.length <= 0) {
-              return annotatedBuckets;
-            }
-            return [
-              ...annotatedBuckets,
-              {
-                coordinates: {
-                  x0: bucket.startTime,
-                  x1: bucket.startTime + bucketDuration,
-                },
-                details: i18n.translate(
-                  'xpack.infra.logs.analysis.logRateSectionAnomalyCountTooltipLabel',
-                  {
-                    defaultMessage: `{anomalyCount, plural, one {# anomaly} other {# anomalies}}`,
-                    values: {
-                      anomalyCount: anomalies.length,
-                    },
-                  }
-                ),
-              },
-            ];
-          }, [])
-        : [],
-    [histogramBuckets]
-  );
-
   const logEntryRateSpecId = getSpecId('averageValues');
-  const logEntryRateAnomalyAnnotationsId = getAnnotationId('anomalies');
 
   const tooltipProps = useMemo(
     () => ({
@@ -119,24 +58,18 @@ export const LogEntryRateBarChart: React.FunctionComponent<{
   );
 
   return (
-    <div style={{ height: 400, width: '100%' }}>
+    <div style={{ height: 200, width: '100%' }}>
       <Chart className="log-entry-rate-chart">
         <Axis
           id={getAxisId('timestamp')}
-          title={i18n.translate('xpack.infra.logs.analysis.logRateSectionXaxisTitle', {
-            defaultMessage: 'Time',
-          })}
           position="bottom"
           showOverlappingTicks
           tickFormat={chartDateFormatter}
         />
         <Axis
           id={getAxisId('values')}
-          title={i18n.translate('xpack.infra.logs.analysis.logRateSectionYaxisTitle', {
-            defaultMessage: 'Log entries per 15 minutes',
-          })}
           position="left"
-          tickFormat={value => Number(value).toFixed(0)}
+          tickFormat={value => numeral(value.toPrecision(3)).format('0[.][00]a')} // https://github.com/adamwdraper/Numeral-js/issues/194
         />
         <BarSeries
           id={logEntryRateSpecId}
@@ -149,16 +82,14 @@ export const LogEntryRateBarChart: React.FunctionComponent<{
           yAccessors={['value']}
           splitSeriesAccessors={['group']}
           stackAccessors={['time']}
-          data={logEntryRateSeries}
-        />
-        <RectAnnotation
-          dataValues={logEntryRateAnomalyAnnotations}
-          annotationId={logEntryRateAnomalyAnnotationsId}
+          data={series}
         />
         <Settings
           onBrushEnd={handleBrushEnd}
           tooltip={tooltipProps}
           theme={isDarkMode ? DARK_THEME : LIGHT_THEME}
+          showLegend
+          legendPosition="right"
           xDomain={{ min: timeRange.startTime, max: timeRange.endTime }}
         />
       </Chart>

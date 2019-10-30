@@ -349,7 +349,11 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
             as="div"
             autoFocus={true}
             disabled={false}
-            lockProps={Object {}}
+            lockProps={
+              Object {
+                "style": undefined,
+              }
+            }
             noFocusGuards={false}
             persistentFocus={false}
             returnFocus={true}
@@ -1230,7 +1234,9 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                   className="euiSpacer euiSpacer--m"
                                 />
                               </EuiSpacer>
-                              <NewVisHelp>
+                              <NewVisHelp
+                                promotedTypes={Array []}
+                              >
                                 <EuiText>
                                   <div
                                     className="euiText euiText--medium"
@@ -1625,7 +1631,11 @@ exports[`NewVisModal should render as expected 1`] = `
             as="div"
             autoFocus={true}
             disabled={false}
-            lockProps={Object {}}
+            lockProps={
+              Object {
+                "style": undefined,
+              }
+            }
             noFocusGuards={false}
             persistentFocus={false}
             returnFocus={true}
@@ -2488,7 +2498,9 @@ exports[`NewVisModal should render as expected 1`] = `
                                   className="euiSpacer euiSpacer--m"
                                 />
                               </EuiSpacer>
-                              <NewVisHelp>
+                              <NewVisHelp
+                                promotedTypes={Array []}
+                              >
                                 <EuiText>
                                   <div
                                     className="euiText euiText--medium"

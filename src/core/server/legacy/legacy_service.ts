@@ -248,6 +248,9 @@ export class LegacyService implements CoreService<LegacyServiceSetup> {
         basePath: setupDeps.core.http.basePath,
         isTlsEnabled: setupDeps.core.http.isTlsEnabled,
       },
+      uiSettings: {
+        register: setupDeps.core.uiSettings.register,
+      },
     };
     const coreStart: CoreStart = {};
 
@@ -275,6 +278,8 @@ export class LegacyService implements CoreService<LegacyServiceSetup> {
           kibanaMigrator: startDeps.core.savedObjects.migrator,
           uiPlugins: setupDeps.core.plugins.uiPlugins,
           elasticsearch: setupDeps.core.elasticsearch,
+          uiSettings: setupDeps.core.uiSettings,
+          savedObjectsClientProvider: startDeps.core.savedObjects.clientProvider,
         },
         logger: this.coreContext.logger,
       },

@@ -16,20 +16,20 @@ import {
   BarSeriesStyle,
   AreaSeriesStyle,
 } from '@elastic/charts';
-import { InfraMetricLayoutVisualizationType } from '../../../pages/metrics/layouts/types';
 import { InfraDataSeries } from '../../../graphql/types';
+import { InventoryVisType } from '../../../../common/inventory_models/types';
 
 interface Props {
   id: string;
   name: string;
   color: string | null;
   series: InfraDataSeries;
-  type: InfraMetricLayoutVisualizationType;
+  type: InventoryVisType;
   stack: boolean | undefined;
 }
 
 export const SeriesChart = (props: Props) => {
-  if (props.type === InfraMetricLayoutVisualizationType.bar) {
+  if (props.type === 'bar') {
     return <BarChart {...props} />;
   }
   return <AreaChart {...props} />;
@@ -39,17 +39,11 @@ export const AreaChart = ({ id, color, series, name, type, stack }: Props) => {
   const style: RecursivePartial<AreaSeriesStyle> = {
     area: {
       opacity: 1,
-      visible: InfraMetricLayoutVisualizationType.area === type,
+      visible: 'area' === type,
     },
     line: {
-      strokeWidth: InfraMetricLayoutVisualizationType.area === type ? 1 : 2,
+      strokeWidth: 'area' === type ? 1 : 2,
       visible: true,
-    },
-    point: {
-      visible: true,
-      radius: 1,
-      strokeWidth: 2,
-      opacity: 1,
     },
   };
   const colors: DataSeriesColorsValues = {

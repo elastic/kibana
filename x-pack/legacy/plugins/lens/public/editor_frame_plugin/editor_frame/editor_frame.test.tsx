@@ -35,6 +35,7 @@ function generateSuggestion(state = {}): DatasourceSuggestion {
       layerId: 'first',
       changeType: 'unchanged',
     },
+    keptLayerIds: ['first'],
   };
 }
 
@@ -807,30 +808,38 @@ describe('editor_frame', () => {
       await waitForPromises();
 
       expect(mockDatasource.getPublicAPI).toHaveBeenCalledWith(
-        datasource1State,
-        expect.anything(),
-        'first'
+        expect.objectContaining({
+          state: datasource1State,
+          setState: expect.anything(),
+          layerId: 'first',
+        })
       );
       expect(mockDatasource2.getPublicAPI).toHaveBeenCalledWith(
-        datasource2State,
-        expect.anything(),
-        'second'
+        expect.objectContaining({
+          state: datasource2State,
+          setState: expect.anything(),
+          layerId: 'second',
+        })
       );
       expect(mockDatasource2.getPublicAPI).toHaveBeenCalledWith(
-        datasource2State,
-        expect.anything(),
-        'third'
+        expect.objectContaining({
+          state: datasource2State,
+          setState: expect.anything(),
+          layerId: 'third',
+        })
       );
     });
 
     it('should give access to the datasource state in the datasource factory function', async () => {
       const datasourceState = {};
+      const dateRange = { fromDate: 'now-1w', toDate: 'now' };
       mockDatasource.initialize.mockResolvedValue(datasourceState);
       mockDatasource.getLayers.mockReturnValue(['first']);
 
       mount(
         <EditorFrame
           {...getDefaultProps()}
+          dateRange={dateRange}
           visualizationMap={{
             testVis: mockVisualization,
           }}
@@ -845,11 +854,12 @@ describe('editor_frame', () => {
 
       await waitForPromises();
 
-      expect(mockDatasource.getPublicAPI).toHaveBeenCalledWith(
-        datasourceState,
-        expect.any(Function),
-        'first'
-      );
+      expect(mockDatasource.getPublicAPI).toHaveBeenCalledWith({
+        dateRange,
+        state: datasourceState,
+        setState: expect.any(Function),
+        layerId: 'first',
+      });
     });
 
     it('should re-create the public api after state has been set', async () => {
@@ -872,15 +882,17 @@ describe('editor_frame', () => {
       await waitForPromises();
 
       const updatedState = {};
-      const setDatasourceState = mockDatasource.getPublicAPI.mock.calls[0][1];
+      const setDatasourceState = mockDatasource.getPublicAPI.mock.calls[0][0].setState;
       act(() => {
         setDatasourceState(updatedState);
       });
 
       expect(mockDatasource.getPublicAPI).toHaveBeenLastCalledWith(
-        updatedState,
-        expect.any(Function),
-        'first'
+        expect.objectContaining({
+          state: updatedState,
+          setState: expect.any(Function),
+          layerId: 'first',
+        })
       );
     });
   });
@@ -917,6 +929,7 @@ describe('editor_frame', () => {
             layerId: 'first',
             changeType: 'unchanged',
           },
+          keptLayerIds: [],
         },
       ]);
 
@@ -1062,6 +1075,7 @@ describe('editor_frame', () => {
             isMultiRow: true,
             layerId: 'first',
           },
+          keptLayerIds: [],
         },
       ]);
       mount(
@@ -1508,9 +1522,8 @@ describe('editor_frame', () => {
             datasourceStates: { testDatasource: undefined },
             query: { query: '', language: 'lucene' },
             filters: [],
-            dateRange: { fromDate: '', toDate: '' },
           },
-          title: 'New visualization',
+          title: '',
           type: 'lens',
           visualizationType: 'testVis',
         },
@@ -1528,9 +1541,8 @@ describe('editor_frame', () => {
             datasourceStates: { testDatasource: undefined },
             query: { query: '', language: 'lucene' },
             filters: [],
-            dateRange: { fromDate: '', toDate: '' },
           },
-          title: 'New visualization',
+          title: '',
           type: 'lens',
           visualizationType: 'testVis',
         },
@@ -1586,9 +1598,8 @@ describe('editor_frame', () => {
             visualization: { initialState: true },
             query: { query: 'new query', language: 'lucene' },
             filters: [],
-            dateRange: { fromDate: '', toDate: '' },
           },
-          title: 'New visualization',
+          title: '',
           type: 'lens',
           visualizationType: 'testVis',
         },

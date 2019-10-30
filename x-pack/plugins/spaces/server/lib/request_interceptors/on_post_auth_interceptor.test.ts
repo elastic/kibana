@@ -10,10 +10,11 @@ import { Legacy } from 'kibana';
 import { kibanaTestUser } from '@kbn/test';
 import { initSpacesOnRequestInterceptor } from './on_request_interceptor';
 import {
-  HttpServiceSetup,
   CoreSetup,
   SavedObjectsLegacyService,
   SavedObjectsErrorHelpers,
+  IBasePath,
+  IRouter,
 } from '../../../../../../src/core/server';
 import {
   elasticsearchServiceMock,
@@ -45,7 +46,7 @@ describe('onPostAuthInterceptor', () => {
 
   afterEach(async () => await root.shutdown());
 
-  function initKbnServer(http: HttpServiceSetup, routes: 'legacy' | 'new-platform') {
+  function initKbnServer(router: IRouter, basePath: IBasePath, routes: 'legacy' | 'new-platform') {
     const kbnServer = kbnTestServer.getKbnServer(root);
 
     if (routes === 'legacy') {
@@ -54,52 +55,50 @@ describe('onPostAuthInterceptor', () => {
           method: 'GET',
           path: '/foo',
           handler: (req: Legacy.Request, h: Legacy.ResponseToolkit) => {
-            return h.response({ path: req.path, basePath: http.basePath.get(req) });
+            return h.response({ path: req.path, basePath: basePath.get(req) });
           },
         },
         {
           method: 'GET',
           path: '/app/kibana',
           handler: (req: Legacy.Request, h: Legacy.ResponseToolkit) => {
-            return h.response({ path: req.path, basePath: http.basePath.get(req) });
+            return h.response({ path: req.path, basePath: basePath.get(req) });
           },
         },
         {
           method: 'GET',
           path: '/app/app-1',
           handler: (req: Legacy.Request, h: Legacy.ResponseToolkit) => {
-            return h.response({ path: req.path, basePath: http.basePath.get(req) });
+            return h.response({ path: req.path, basePath: basePath.get(req) });
           },
         },
         {
           method: 'GET',
           path: '/app/app-2',
           handler: (req: Legacy.Request, h: Legacy.ResponseToolkit) => {
-            return h.response({ path: req.path, basePath: http.basePath.get(req) });
+            return h.response({ path: req.path, basePath: basePath.get(req) });
           },
         },
         {
           method: 'GET',
           path: '/api/test/foo',
           handler: (req: Legacy.Request) => {
-            return { path: req.path, basePath: http.basePath.get(req) };
+            return { path: req.path, basePath: basePath.get(req) };
           },
         },
         {
           method: 'GET',
           path: '/some/path/s/foo/bar',
           handler: (req: Legacy.Request, h: Legacy.ResponseToolkit) => {
-            return h.response({ path: req.path, basePath: http.basePath.get(req) });
+            return h.response({ path: req.path, basePath: basePath.get(req) });
           },
         },
       ]);
     }
 
     if (routes === 'new-platform') {
-      const router = http.createRouter('/');
-
       router.get({ path: '/api/np_test/foo', validate: false }, (context, req, h) => {
-        return h.ok({ body: { path: req.url.pathname, basePath: http.basePath.get(req) } });
+        return h.ok({ body: { path: req.url.pathname, basePath: basePath.get(req) } });
       });
     }
   }
@@ -211,11 +210,13 @@ describe('onPostAuthInterceptor', () => {
       spacesService,
     });
 
-    initKbnServer(http, 'new-platform');
+    const router = http.createRouter('/');
+
+    initKbnServer(router, http.basePath, 'new-platform');
 
     await root.start();
 
-    initKbnServer(http, 'legacy');
+    initKbnServer(router, http.basePath, 'legacy');
 
     const response = await kbnTestServer.request.get(root, path);
 

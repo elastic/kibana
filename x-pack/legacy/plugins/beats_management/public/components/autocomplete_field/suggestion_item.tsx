@@ -18,29 +18,23 @@ interface SuggestionItemProps {
   suggestion: AutocompleteSuggestion;
 }
 
-export class SuggestionItem extends React.Component<SuggestionItemProps> {
-  public static defaultProps: Partial<SuggestionItemProps> = {
-    isSelected: false,
-  };
+export const SuggestionItem: React.SFC<SuggestionItemProps> = props => {
+  const { isSelected, onClick, onMouseEnter, suggestion } = props;
 
-  public render() {
-    const { isSelected, onClick, onMouseEnter, suggestion } = this.props;
+  return (
+    <SuggestionItemContainer isSelected={isSelected} onClick={onClick} onMouseEnter={onMouseEnter}>
+      <SuggestionItemIconField suggestionType={suggestion.type}>
+        <EuiIcon type={getEuiIconType(suggestion.type)} />
+      </SuggestionItemIconField>
+      <SuggestionItemTextField>{suggestion.text}</SuggestionItemTextField>
+      <SuggestionItemDescriptionField>{suggestion.description}</SuggestionItemDescriptionField>
+    </SuggestionItemContainer>
+  );
+};
 
-    return (
-      <SuggestionItemContainer
-        isSelected={isSelected}
-        onClick={onClick}
-        onMouseEnter={onMouseEnter}
-      >
-        <SuggestionItemIconField suggestionType={suggestion.type}>
-          <EuiIcon type={getEuiIconType(suggestion.type)} />
-        </SuggestionItemIconField>
-        <SuggestionItemTextField>{suggestion.text}</SuggestionItemTextField>
-        <SuggestionItemDescriptionField>{suggestion.description}</SuggestionItemDescriptionField>
-      </SuggestionItemContainer>
-    );
-  }
-}
+SuggestionItem.defaultProps = {
+  isSelected: false,
+};
 
 const SuggestionItemContainer = styled.div<{
   isSelected?: boolean;

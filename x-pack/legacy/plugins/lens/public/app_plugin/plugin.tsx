@@ -8,12 +8,12 @@ import React from 'react';
 import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
 import { HashRouter, Switch, Route, RouteComponentProps } from 'react-router-dom';
 import chrome from 'ui/chrome';
-import { Storage } from 'ui/storage';
 import { CoreSetup, CoreStart } from 'src/core/public';
 import { npSetup, npStart } from 'ui/new_platform';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { DataStart } from '../../../../../../src/legacy/core_plugins/data/public';
 import { start as dataShimStart } from '../../../../../../src/legacy/core_plugins/data/public/legacy';
+import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 import { editorFrameSetup, editorFrameStart, editorFrameStop } from '../editor_frame_plugin';
 import { indexPatternDatasourceSetup, indexPatternDatasourceStop } from '../indexpattern_plugin';
 import { SavedObjectIndexStore } from '../persistence';
@@ -25,6 +25,12 @@ import {
 } from '../datatable_visualization_plugin';
 import { App } from './app';
 import { EditorFrameInstance } from '../types';
+import {
+  LensReportManager,
+  setReportManager,
+  stopReportManager,
+  trackUiEvent,
+} from '../lens_ui_telemetry';
 
 export interface LensPluginStartDependencies {
   data: DataPublicPluginStart;
@@ -63,14 +69,22 @@ export class AppPlugin {
 
     this.instance = editorFrameStartInterface.createInstance({});
 
+    setReportManager(
+      new LensReportManager({
+        storage: new Storage(localStorage),
+        http: core.http,
+      })
+    );
+
     const renderEditor = (routeProps: RouteComponentProps<{ id?: string }>) => {
+      trackUiEvent('loaded');
       return (
         <App
           core={core}
           data={data}
           dataShim={dataShim}
           editorFrame={this.instance!}
-          store={new Storage(localStorage)}
+          storage={new Storage(localStorage)}
           docId={routeProps.match.params.id}
           docStorage={store}
           redirectTo={id => {
@@ -85,6 +99,7 @@ export class AppPlugin {
     };
 
     function NotFound() {
+      trackUiEvent('loaded_404');
       return <FormattedMessage id="xpack.lens.app404" defaultMessage="404 Not Found" />;
     }
 
@@ -105,6 +120,8 @@ export class AppPlugin {
     if (this.instance) {
       this.instance.unmount();
     }
+
+    stopReportManager();
 
     // TODO this will be handled by the plugin platform itself
     indexPatternDatasourceStop();

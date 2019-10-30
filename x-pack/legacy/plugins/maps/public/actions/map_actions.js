@@ -14,7 +14,8 @@ import {
   getMapReady,
   getWaitingForMapReadyLayerListRaw,
   getTransientLayerId,
-  getTooltipState
+  getTooltipState,
+  getQuery,
 } from '../selectors/map_selectors';
 import { FLYOUT_STATE } from '../reducers/ui';
 import {
@@ -143,7 +144,7 @@ export function removeTrackedLayerStateForSelectedLayer() {
 export function replaceLayerList(newLayerList) {
   return (dispatch, getState) => {
     getLayerListRaw(getState()).forEach(({ id }) => {
-      dispatch(removeLayer(id));
+      dispatch(removeLayerFromLayerList(id));
     });
 
     newLayerList.forEach(layerDescriptor => {
@@ -282,7 +283,7 @@ export function removeTransientLayer() {
   return async (dispatch, getState) => {
     const transientLayerId = getTransientLayerId(getState());
     if (transientLayerId) {
-      await dispatch(removeLayer(transientLayerId));
+      await dispatch(removeLayerFromLayerList(transientLayerId));
       await dispatch(setTransientLayer(null));
     }
   };
@@ -611,11 +612,22 @@ export function removeSelectedLayer() {
     const state = getState();
     const layerId = getSelectedLayerId(state);
     dispatch(removeLayer(layerId));
-    dispatch(setSelectedLayer(null));
   };
 }
 
 export function removeLayer(layerId) {
+  return async (dispatch, getState) => {
+    const state = getState();
+    const selectedLayerId = getSelectedLayerId(state);
+    if (layerId === selectedLayerId) {
+      dispatch(updateFlyout(FLYOUT_STATE.NONE));
+      await dispatch(setSelectedLayer(null));
+    }
+    dispatch(removeLayerFromLayerList(layerId));
+  };
+}
+
+function removeLayerFromLayerList(layerId) {
   return (dispatch, getState) => {
     const layerGettingRemoved = getLayerById(layerId, getState());
     if (!layerGettingRemoved) {
@@ -634,15 +646,25 @@ export function removeLayer(layerId) {
   };
 }
 
-export function setQuery({ query, timeFilters, filters = [] }) {
+export function setQuery({ query, timeFilters, filters = [], refresh = false }) {
+  function generateQueryTimestamp() {
+    return (new Date()).toISOString();
+  }
   return async (dispatch, getState) => {
+    const prevQuery = getQuery(getState());
+    const prevTriggeredAt = (prevQuery && prevQuery.queryLastTriggeredAt)
+      ? prevQuery.queryLastTriggeredAt
+      : generateQueryTimestamp();
+
     dispatch({
       type: SET_QUERY,
       timeFilters,
       query: {
         ...query,
-        // ensure query changes to trigger re-fetch even when query is the same because "Refresh" clicked
-        queryLastTriggeredAt: (new Date()).toISOString(),
+        // ensure query changes to trigger re-fetch when "Refresh" clicked
+        queryLastTriggeredAt: refresh
+          ? generateQueryTimestamp()
+          : prevTriggeredAt,
       },
       filters,
     });
@@ -682,7 +704,10 @@ export function clearMissingStyleProperties(layerId) {
     if (!style) {
       return;
     }
-    const ordinalFields = await targetLayer.getOrdinalFields();
+
+    const dateFields = await targetLayer.getDateFields();
+    const numberFields = await targetLayer.getNumberFields();
+    const ordinalFields = [...dateFields, ...numberFields];
     const { hasChanges, nextStyleDescriptor } = style.getDescriptorWithMissingStylePropsRemoved(ordinalFields);
     if (hasChanges) {
       dispatch(updateLayerStyle(layerId, nextStyleDescriptor));

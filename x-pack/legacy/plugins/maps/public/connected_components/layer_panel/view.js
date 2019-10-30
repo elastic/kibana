@@ -30,8 +30,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
+import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
 
-import { Storage } from 'ui/storage';
 const localStorage = new Storage(window.localStorage);
 
 // This import will eventually become a dependency injected by the fully deangularized NP plugin.
@@ -154,7 +154,7 @@ export class LayerPanel extends React.Component {
       <KibanaContextProvider
         services={{
           appName: 'maps',
-          store: localStorage,
+          storage: localStorage,
           data: npStart.plugins.data,
           ...npStart.core,
         }}

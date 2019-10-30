@@ -3,11 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiFlexItem } from '@elastic/eui';
 import { isEqual, last } from 'lodash/fp';
-import React, { useEffect } from 'react';
+import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
-import styled from 'styled-components';
+import { compose } from 'redux';
 import { ActionCreator } from 'typescript-fsa';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
@@ -16,8 +15,8 @@ import {
   Direction,
   FlowTargetSourceDest,
   NetworkTopNFlowEdges,
-  NetworkTopNFlowFields,
-  NetworkTopNFlowSortField,
+  NetworkTopTablesFields,
+  NetworkTopTablesSortField,
 } from '../../../../graphql/types';
 import { networkModel, networkSelectors, State } from '../../../../store';
 import { Criteria, ItemsPerRow, PaginatedTable } from '../../../paginated_table';
@@ -31,7 +30,6 @@ interface OwnProps {
   flowTargeted: FlowTargetSourceDest;
   id: string;
   indexPattern: StaticIndexPattern;
-  ip?: string;
   isInspect: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
@@ -43,28 +41,14 @@ interface OwnProps {
 interface NetworkTopNFlowTableReduxProps {
   activePage: number;
   limit: number;
-  topNFlowSort: NetworkTopNFlowSortField;
+  sort: NetworkTopTablesSortField;
 }
 
 interface NetworkTopNFlowTableDispatchProps {
-  setIpDetailsTablesActivePageToZero: ActionCreator<null>;
-  updateIpDetailsTableActivePage: ActionCreator<{
-    activePage: number;
-    tableType: networkModel.IpDetailsTableType;
-  }>;
-  updateNetworkPageTableActivePage: ActionCreator<{
-    activePage: number;
-    tableType: networkModel.NetworkTableType;
-  }>;
-  updateTopNFlowLimit: ActionCreator<{
-    limit: number;
+  updateNetworkTable: ActionCreator<{
     networkType: networkModel.NetworkType;
     tableType: networkModel.TopNTableType;
-  }>;
-  updateTopNFlowSort: ActionCreator<{
-    topNFlowSort: NetworkTopNFlowSortField;
-    networkType: networkModel.NetworkType;
-    tableType: networkModel.TopNTableType;
+    updates: networkModel.TableUpdates;
   }>;
 }
 
@@ -93,71 +77,61 @@ const NetworkTopNFlowTableComponent = React.memo<NetworkTopNFlowTableProps>(
     flowTargeted,
     id,
     indexPattern,
-    ip,
     isInspect,
     limit,
     loading,
     loadPage,
-    setIpDetailsTablesActivePageToZero,
     showMorePagesIndicator,
-    topNFlowSort,
+    sort,
     totalCount,
     type,
-    updateIpDetailsTableActivePage,
-    updateNetworkPageTableActivePage,
-    updateTopNFlowLimit,
-    updateTopNFlowSort,
+    updateNetworkTable,
   }) => {
-    useEffect(() => {
-      if (ip && activePage !== 0) {
-        setIpDetailsTablesActivePageToZero(null);
-      }
-    }, [ip]);
-    const onChange = (criteria: Criteria, tableType: networkModel.TopNTableType) => {
-      if (criteria.sort != null) {
-        const splitField = criteria.sort.field.split('.');
-        const field = last(splitField);
-        const newSortDirection =
-          field !== topNFlowSort.field ? Direction.desc : criteria.sort.direction; // sort by desc on init click
-        const newTopNFlowSort: NetworkTopNFlowSortField = {
-          field: field as NetworkTopNFlowFields,
-          direction: newSortDirection,
-        };
-        if (!isEqual(newTopNFlowSort, topNFlowSort)) {
-          updateTopNFlowSort({
-            topNFlowSort: newTopNFlowSort,
-            networkType: type,
-            tableType,
-          });
+    const onChange = useCallback(
+      (criteria: Criteria, tableType: networkModel.TopNTableType) => {
+        if (criteria.sort != null) {
+          const splitField = criteria.sort.field.split('.');
+          const field = last(splitField);
+          const newSortDirection = field !== sort.field ? Direction.desc : criteria.sort.direction; // sort by desc on init click
+          const newTopNFlowSort: NetworkTopTablesSortField = {
+            field: field as NetworkTopTablesFields,
+            direction: newSortDirection,
+          };
+          if (!isEqual(newTopNFlowSort, sort)) {
+            updateNetworkTable({
+              networkType: type,
+              tableType,
+              updates: {
+                sort: newTopNFlowSort,
+              },
+            });
+          }
         }
-      }
-    };
+      },
+      [sort, type]
+    );
 
     let tableType: networkModel.TopNTableType;
     const headerTitle: string =
       flowTargeted === FlowTargetSourceDest.source ? i18n.SOURCE_IP : i18n.DESTINATION_IP;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let updateTableActivePage: any;
     if (type === networkModel.NetworkType.page) {
       tableType =
         flowTargeted === FlowTargetSourceDest.source
           ? networkModel.NetworkTableType.topNFlowSource
           : networkModel.NetworkTableType.topNFlowDestination;
-      updateTableActivePage = updateNetworkPageTableActivePage;
     } else {
       tableType =
         flowTargeted === FlowTargetSourceDest.source
           ? networkModel.IpDetailsTableType.topNFlowSource
           : networkModel.IpDetailsTableType.topNFlowDestination;
-      updateTableActivePage = updateIpDetailsTableActivePage;
     }
 
     const field =
-      topNFlowSort.field === NetworkTopNFlowFields.bytes_out ||
-      topNFlowSort.field === NetworkTopNFlowFields.bytes_in
-        ? `node.network.${topNFlowSort.field}`
-        : `node.${flowTargeted}.${topNFlowSort.field}`;
+      sort.field === NetworkTopTablesFields.bytes_out ||
+      sort.field === NetworkTopTablesFields.bytes_in
+        ? `node.network.${sort.field}`
+        : `node.${flowTargeted}.${sort.field}`;
 
     return (
       <PaginatedTable
@@ -176,16 +150,17 @@ const NetworkTopNFlowTableComponent = React.memo<NetworkTopNFlowTableProps>(
         onChange={criteria => onChange(criteria, tableType)}
         pageOfItems={data}
         showMorePagesIndicator={showMorePagesIndicator}
-        sorting={{ field, direction: topNFlowSort.direction }}
+        sorting={{ field, direction: sort.direction }}
         totalCount={fakeTotalCount}
         updateActivePage={newPage =>
-          updateTableActivePage({
-            activePage: newPage,
+          updateNetworkTable({
+            networkType: type,
             tableType,
+            updates: { activePage: newPage },
           })
         }
         updateLimitPagination={newLimit =>
-          updateTopNFlowLimit({ limit: newLimit, networkType: type, tableType })
+          updateNetworkTable({ networkType: type, tableType, updates: { limit: newLimit } })
         }
       />
     );
@@ -194,22 +169,17 @@ const NetworkTopNFlowTableComponent = React.memo<NetworkTopNFlowTableProps>(
 
 NetworkTopNFlowTableComponent.displayName = 'NetworkTopNFlowTableComponent';
 
-const mapStateToProps = (state: State, ownProps: OwnProps) =>
-  networkSelectors.topNFlowSelector(ownProps.flowTargeted, ownProps.type);
+const makeMapStateToProps = () => {
+  const getTopNFlowSelector = networkSelectors.topNFlowSelector();
+  return (state: State, { type, flowTargeted }: OwnProps) =>
+    getTopNFlowSelector(state, type, flowTargeted);
+};
 
-export const NetworkTopNFlowTable = connect(
-  mapStateToProps,
-  {
-    setIpDetailsTablesActivePageToZero: networkActions.setIpDetailsTablesActivePageToZero,
-    updateTopNFlowLimit: networkActions.updateTopNFlowLimit,
-    updateTopNFlowSort: networkActions.updateTopNFlowSort,
-    updateNetworkPageTableActivePage: networkActions.updateNetworkPageTableActivePage,
-    updateIpDetailsTableActivePage: networkActions.updateIpDetailsTableActivePage,
-  }
+export const NetworkTopNFlowTable = compose<React.ComponentClass<OwnProps>>(
+  connect(
+    makeMapStateToProps,
+    {
+      updateNetworkTable: networkActions.updateNetworkTable,
+    }
+  )
 )(NetworkTopNFlowTableComponent);
-
-const SelectTypeItem = styled(EuiFlexItem)`
-  min-width: 180px;
-`;
-
-SelectTypeItem.displayName = 'SelectTypeItem';

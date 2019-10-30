@@ -562,6 +562,62 @@ describe('IndexPattern Data Source suggestions', () => {
           })
         );
       });
+
+      it('creates a new layer and replaces layer if no match is found', () => {
+        const suggestions = getDatasourceSuggestionsForField(stateWithEmptyLayer(), '2', {
+          name: 'source',
+          type: 'string',
+          aggregatable: true,
+          searchable: true,
+        });
+
+        expect(suggestions).toContainEqual(
+          expect.objectContaining({
+            state: expect.objectContaining({
+              layers: {
+                previousLayer: expect.objectContaining({
+                  indexPatternId: '1',
+                }),
+                id1: expect.objectContaining({
+                  indexPatternId: '2',
+                }),
+              },
+            }),
+            table: {
+              changeType: 'initial',
+              label: undefined,
+              isMultiRow: true,
+              columns: expect.arrayContaining([]),
+              layerId: 'id1',
+            },
+            keptLayerIds: ['previousLayer'],
+          })
+        );
+
+        expect(suggestions).toContainEqual(
+          expect.objectContaining({
+            state: expect.objectContaining({
+              layers: {
+                id1: expect.objectContaining({
+                  indexPatternId: '2',
+                }),
+              },
+            }),
+            table: {
+              changeType: 'initial',
+              label: undefined,
+              isMultiRow: false,
+              columns: expect.arrayContaining([
+                expect.objectContaining({
+                  columnId: expect.any(String),
+                }),
+              ]),
+              layerId: 'id1',
+            },
+            keptLayerIds: [],
+          })
+        );
+      });
     });
 
     describe('suggesting extensions to non-empty tables', () => {
@@ -722,7 +778,10 @@ describe('IndexPattern Data Source suggestions', () => {
           searchable: true,
         });
 
-        expect(suggestions).toHaveLength(0);
+        expect(suggestions).toHaveLength(1);
+        // Check that the suggestion is a single metric
+        expect(suggestions[0].table.columns).toHaveLength(1);
+        expect(suggestions[0].table.columns[0].operation.isBucketed).toBeFalsy();
       });
 
       it('prepends a terms column on string field', () => {
@@ -976,12 +1035,25 @@ describe('IndexPattern Data Source suggestions', () => {
       };
 
       const result = getDatasourceSuggestionsFromCurrentState(state);
+
+      expect(result).toContainEqual(
+        expect.objectContaining({
+          table: expect.objectContaining({
+            isMultiRow: true,
+            changeType: 'unchanged',
+            label: undefined,
+            layerId: 'first',
+          }),
+          keptLayerIds: ['first', 'second'],
+        })
+      );
+
       expect(result).toContainEqual(
         expect.objectContaining({
           table: {
             isMultiRow: true,
-            changeType: 'unchanged',
-            label: undefined,
+            changeType: 'layers',
+            label: 'Show only layer 1',
             columns: [
               {
                 columnId: 'col1',
@@ -1002,8 +1074,8 @@ describe('IndexPattern Data Source suggestions', () => {
         expect.objectContaining({
           table: {
             isMultiRow: true,
-            changeType: 'unchanged',
-            label: undefined,
+            changeType: 'layers',
+            label: 'Show only layer 2',
             columns: [
               {
                 columnId: 'cola',
@@ -1053,7 +1125,7 @@ describe('IndexPattern Data Source suggestions', () => {
               {
                 columnId: 'id1',
                 operation: {
-                  label: 'Date histogram of timestamp',
+                  label: 'timestamp',
                   dataType: 'date',
                   isBucketed: true,
                   scale: 'interval',
@@ -1129,7 +1201,7 @@ describe('IndexPattern Data Source suggestions', () => {
               {
                 columnId: 'id1',
                 operation: {
-                  label: 'Date histogram of timestamp',
+                  label: 'timestamp',
                   dataType: 'date',
                   isBucketed: true,
                   scale: 'interval',

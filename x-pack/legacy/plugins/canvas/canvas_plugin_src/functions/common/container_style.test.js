@@ -6,7 +6,7 @@
 
 import { functionWrapper } from '../../../__tests__/helpers/function_wrapper';
 import { elasticLogo } from '../../lib/elastic_logo';
-import { getFunctionErrors } from '../../strings';
+import { getFunctionErrors } from '../../../i18n';
 import { containerStyle } from './containerStyle';
 
 const errors = getFunctionErrors().containerStyle;

@@ -6,6 +6,7 @@
 
 import { idx } from '@kbn/elastic-idx';
 import {
+  ERROR_LOG_LEVEL,
   PROCESSOR_EVENT,
   TRACE_ID,
   TRANSACTION_ID
@@ -17,14 +18,16 @@ export interface ErrorsPerTransaction {
   [transactionId: string]: number;
 }
 
+const includedLogLevels = ['critical', 'error', 'fatal'];
+
 export async function getTraceErrorsPerTransaction(
   traceId: string,
   setup: Setup
 ): Promise<ErrorsPerTransaction> {
-  const { start, end, client, config } = setup;
+  const { start, end, client, indices } = setup;
 
   const params = {
-    index: config.get<string>('apm_oss.errorIndices'),
+    index: indices['apm_oss.errorIndices'],
     body: {
       size: 0,
       query: {
@@ -33,6 +36,10 @@ export async function getTraceErrorsPerTransaction(
             { term: { [TRACE_ID]: traceId } },
             { term: { [PROCESSOR_EVENT]: 'error' } },
             { range: rangeFilter(start, end) }
+          ],
+          should: [
+            { bool: { must_not: [{ exists: { field: ERROR_LOG_LEVEL } }] } },
+            { terms: { [ERROR_LOG_LEVEL]: includedLogLevels } }
           ]
         }
       },

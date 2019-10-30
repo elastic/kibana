@@ -8,10 +8,11 @@ import { Legacy } from 'kibana';
 import { schema } from '@kbn/config-schema';
 import { initSpacesOnRequestInterceptor } from './on_request_interceptor';
 import {
-  HttpServiceSetup,
   KibanaRequest,
   KibanaResponseFactory,
   CoreSetup,
+  IBasePath,
+  IRouter,
 } from '../../../../../../src/core/server';
 
 import * as kbnTestServer from '../../../../../../src/test_utils/kbn_server';
@@ -26,7 +27,7 @@ describe('onRequestInterceptor', () => {
 
   afterEach(async () => await root.shutdown());
 
-  function initKbnServer(http: HttpServiceSetup, routes: 'legacy' | 'new-platform') {
+  function initKbnServer(router: IRouter, basePath: IBasePath, routes: 'legacy' | 'new-platform') {
     const kbnServer = kbnTestServer.getKbnServer(root);
 
     if (routes === 'legacy') {
@@ -35,14 +36,14 @@ describe('onRequestInterceptor', () => {
           method: 'GET',
           path: '/foo',
           handler: (req: Legacy.Request, h: Legacy.ResponseToolkit) => {
-            return h.response({ path: req.path, basePath: http.basePath.get(req) });
+            return h.response({ path: req.path, basePath: basePath.get(req) });
           },
         },
         {
           method: 'GET',
           path: '/some/path/s/foo/bar',
           handler: (req: Legacy.Request, h: Legacy.ResponseToolkit) => {
-            return h.response({ path: req.path, basePath: http.basePath.get(req) });
+            return h.response({ path: req.path, basePath: basePath.get(req) });
           },
         },
         {
@@ -51,7 +52,7 @@ describe('onRequestInterceptor', () => {
           handler: (req: Legacy.Request, h: Legacy.ResponseToolkit) => {
             return h.response({
               path: req.path,
-              basePath: http.basePath.get(req),
+              basePath: basePath.get(req),
               query: req.query,
             });
           },
@@ -60,19 +61,17 @@ describe('onRequestInterceptor', () => {
     }
 
     if (routes === 'new-platform') {
-      const router = http.createRouter('/');
-
       router.get(
         { path: '/np_foo', validate: false },
         (context: unknown, req: KibanaRequest, h: KibanaResponseFactory) => {
-          return h.ok({ body: { path: req.url.pathname, basePath: http.basePath.get(req) } });
+          return h.ok({ body: { path: req.url.pathname, basePath: basePath.get(req) } });
         }
       );
 
       router.get(
         { path: '/some/path/s/np_foo/bar', validate: false },
         (context: unknown, req: KibanaRequest, h: KibanaResponseFactory) => {
-          return h.ok({ body: { path: req.url.pathname, basePath: http.basePath.get(req) } });
+          return h.ok({ body: { path: req.url.pathname, basePath: basePath.get(req) } });
         }
       );
 
@@ -91,7 +90,7 @@ describe('onRequestInterceptor', () => {
           return h.ok({
             body: {
               path: req.url.pathname,
-              basePath: http.basePath.get(req),
+              basePath: basePath.get(req),
               query: req.query,
             },
           });
@@ -115,11 +114,13 @@ describe('onRequestInterceptor', () => {
       http: (http as unknown) as CoreSetup['http'],
     });
 
-    initKbnServer(http, 'new-platform');
+    const router = http.createRouter('/');
+
+    initKbnServer(router, http.basePath, 'new-platform');
 
     await root.start();
 
-    initKbnServer(http, 'legacy');
+    initKbnServer(router, http.basePath, 'legacy');
 
     return {
       http,
