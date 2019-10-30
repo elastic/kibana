@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DocLinksStart } from '../../../../../../../../src/core/public';
+import { DocLinksStart } from '../../../../../../../src/core/public';
 
 class DocumentationService {
   private esDocsBase: string = '';

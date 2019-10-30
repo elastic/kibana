@@ -8,12 +8,14 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { render, unmountComponentAtNode } from 'react-dom';
 
+import { CoreStart } from '../../../../../../src/core/public';
+
 import { App } from './app';
 import { indexManagementStore } from './store';
 
-export const mountReactApp = (elem: HTMLElement | null, { core }: { core: Core }): void => {
+export const mountReactApp = (elem: HTMLElement | null, { core }: { core: CoreStart }): void => {
   if (elem) {
-    const { notifications, i18n } = core;
+    const { i18n } = core;
     const { Context: I18nContext } = i18n;
 
     render(

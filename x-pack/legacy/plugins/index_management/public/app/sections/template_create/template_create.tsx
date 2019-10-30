@@ -8,7 +8,7 @@ import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { TemplateForm } from '../../components';
-import { breadcrumbService } from '../../services/set_breadcrumbs';
+import { breadcrumbService } from '../../services/breadcrumbs';
 import { Template } from '../../../../common/types';
 import { saveTemplate } from '../../services/api';
 import { getTemplateDetailsLink } from '../../services/routing';

@@ -9,29 +9,18 @@ import { MemoryRouter } from 'react-router-dom';
 import { AppWithoutRouter } from '../../public/app/app';
 import { Provider } from 'react-redux';
 import { loadIndicesSuccess } from '../../public/app/store/actions';
+import { breadcrumbService } from '../../public/app/services/breadcrumbs';
+import { uiMetricService } from '../../public/app/services/ui_metric';
+import { notificationService } from '../../public/app/services/notification';
+import { createUiStatsReporter } from '../../../../../../src/legacy/core_plugins/ui_metric/public';
 import { indexManagementStore } from '../../public/app/store';
 import { BASE_PATH } from '../../common/constants';
 import { mountWithIntl } from '../../../../../test_utils/enzyme_helpers';
-// axios has a $http like interface so using it to simulate $http
-import axios from 'axios';
-import axiosXhrAdapter from 'axios/lib/adapters/xhr';
-import { setHttpClient } from '../../public/app/services/api';
 import sinon from 'sinon';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
+jest.mock('ui/new_platform');
 
-jest.mock('ui/chrome', () => ({
-  breadcrumbs: { set: () => { } },
-  addBasePath: path => path || '/api/index_management',
-}));
-
-jest.mock('ui/index_patterns', () => ({
-  ILLEGAL_CHARACTERS: '',
-  CONTAINS_SPACES: '',
-  validateIndexPattern: () => { },
-}));
-
-setHttpClient(axios.create({ adapter: axiosXhrAdapter }));
 let server = null;
 
 let store = null;
@@ -114,6 +103,20 @@ const namesText = rendered => {
 
 describe('index table', () => {
   beforeEach(() => {
+    // Mock initialization of services
+    breadcrumbService.init(
+      {
+        setBreadcrumbs() {},
+      },
+      {}
+    );
+    uiMetricService.init(createUiStatsReporter);
+    notificationService.init({
+      toasts: {
+        add() {}
+      }
+    });
+
     store = indexManagementStore();
     component = (
       <Provider store={store}>

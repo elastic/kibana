@@ -66,7 +66,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
 
   // Track component loaded
   useEffect(() => {
-    uiMetricService.track('loaded', UIM_TEMPLATE_LIST_LOAD);
+    uiMetricService.trackMetric('loaded', UIM_TEMPLATE_LIST_LOAD);
   }, []);
 
   if (isLoading) {

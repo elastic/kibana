@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { npStart } from 'ui/new_platform';
-import { PluginInitializer, PluginInitializerContext } from '../../../../../src/core/public';
 
 import { IndexMgmtPlugin } from './plugin';
 import { __LEGACYStart } from './legacy';
@@ -23,7 +22,7 @@ import {
   getBadgeExtensions,
 } from './index_management_extensions';
 
-export const plugin: PluginInitializer = (initializerContext: PluginInitializerContext) => {
+export const plugin = () => {
   return new IndexMgmtPlugin();
 };
 

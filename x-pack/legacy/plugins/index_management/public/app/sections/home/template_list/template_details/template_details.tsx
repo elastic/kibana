@@ -164,7 +164,7 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
           {TABS.map(tab => (
             <EuiTab
               onClick={() => {
-                uiMetricService.track('click', tabToUiMetricMap[tab.id]);
+                uiMetricService.trackMetric('click', tabToUiMetricMap[tab.id]);
                 setActiveTab(tab.id);
               }}
               isSelected={tab.id === activeTab}

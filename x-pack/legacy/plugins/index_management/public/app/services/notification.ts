@@ -7,15 +7,19 @@
 import { NotificationsStart } from '../../../../../../../src/core/public';
 
 class NotificationService {
+  private toasts: any;
+
   public init(notifications: NotificationsStart): void {
-    this.addToasts = (title: string, type: 'danger' | 'warning' | 'success', text?: string) => {
-      notifications.toasts.add({
-        title,
-        color: type,
-        text,
-      });
-    };
+    this.toasts = notifications.toasts;
   }
+
+  private addToasts = (title: string, type: 'danger' | 'warning' | 'success', text?: string) => {
+    this.toasts.add({
+      title,
+      color: type,
+      text,
+    });
+  };
 
   public showDangerToast(title: string, text?: string) {
     this.addToasts(title, 'danger', text);

@@ -7,7 +7,7 @@ import React, { useEffect, useState, Fragment } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPageBody, EuiPageContent, EuiTitle, EuiSpacer, EuiCallOut } from '@elastic/eui';
-import { breadcrumbService } from '../../services/set_breadcrumbs';
+import { breadcrumbService } from '../../services/breadcrumbs';
 import { loadIndexTemplate, updateTemplate } from '../../services/api';
 import { decodePath, getTemplateDetailsLink } from '../../services/routing';
 import { SectionLoading, SectionError, TemplateForm, Error } from '../../components';

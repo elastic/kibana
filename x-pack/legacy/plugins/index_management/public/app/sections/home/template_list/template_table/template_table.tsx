@@ -45,7 +45,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
           <EuiLink
             href={getTemplateDetailsLink(name, true)}
             data-test-subj="templateDetailsLink"
-            onClick={() => uiMetricService.track('click', UIM_TEMPLATE_SHOW_DETAILS_CLICK)}
+            onClick={() => uiMetricService.trackMetric('click', UIM_TEMPLATE_SHOW_DETAILS_CLICK)}
           >
             {name}
           </EuiLink>

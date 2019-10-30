@@ -54,7 +54,7 @@ export const detailPanel = handleActions(
       };
 
       if (panelTypeToUiMetricMap[panelType]) {
-        uiMetricService.track('count', panelTypeToUiMetricMap[panelType]);
+        uiMetricService.trackMetric('count', panelTypeToUiMetricMap[panelType]);
       }
 
       return {

@@ -10,7 +10,7 @@ import { registerRoutes } from './register_routes';
 import { LegacyStart } from './legacy';
 
 import { httpService } from './app/services/http';
-import { breadcrumbService } from './app/services/set_breadcrumbs';
+import { breadcrumbService } from './app/services/breadcrumbs';
 import { documentationService } from './app/services/documentation';
 import { notificationService } from './app/services/notification';
 import { uiMetricService } from './app/services/ui_metric';
