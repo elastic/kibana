@@ -79,7 +79,6 @@ describe('Toaster', () => {
         </ManageGlobalToaster>
       );
 
-      wrapper.find('[data-test-subj="add-toast"]').simulate('click');
       expect(wrapper.find('[data-test-subj="delete-toaster-id-super-id"]').exists()).toBe(true);
       wrapper.find('[data-test-subj="delete-toast"]').simulate('click');
       expect(wrapper.find('[data-test-subj="delete-toaster-id-super-id"]').exists()).toBe(false);
