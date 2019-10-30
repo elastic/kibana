@@ -18,7 +18,6 @@
  */
 
 import { createReporter, Reporter, UiStatsMetricType } from '@kbn/analytics';
-import axios from 'axios';
 
 let telemetryReporter: Reporter;
 
@@ -55,15 +54,13 @@ export function createAnalyticsReporter(config: AnalyicsReporterConfig) {
     storage: localStorage,
     async http(report) {
       const url = `${basePath}/api/telemetry/report`;
-      await axios.post(
-        url,
-        { report },
-        {
-          headers: {
-            'kbn-xsrf': 'true',
-          },
-        }
-      );
+      await fetch(url, {
+        method: 'POST',
+        headers: {
+          'kbn-xsrf': 'true',
+        },
+        body: JSON.stringify({ report }),
+      });
     },
   });
 }
