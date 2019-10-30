@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { identity } from 'lodash';
 import { AggConfig, Vis } from 'ui/vis';
 import { npStart } from 'ui/new_platform';
-import { SerializedFieldFormat } from 'src/plugins/expressions/common/expressions/types/common';
+import { SerializedFieldFormat } from 'src/plugins/expressions/public';
 
 import { FIELD_FORMAT_IDS, FieldFormat } from '../../../../../../plugins/data/public';
 
