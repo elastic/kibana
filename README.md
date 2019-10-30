@@ -81,10 +81,10 @@ Run the CLI in your project folder (must contain a [`.backportrc.json`](https://
 > backport
 ```
 
-or run this from anywhere:
+or run this from anywhere (will list commits from `elastic/kibana` and backport the selected commit to 7.x):
 
 ```
-> backport --upstream elastic/kibana
+> backport --upstream elastic/kibana --branch 7.x
 ```
 
 The above commands will start an interactive prompt. You can use the `arrow keys` to choose options, `<space>` to select checkboxes and `<enter>` to proceed.
