@@ -19,7 +19,7 @@
 
 import { App, AppUnmount } from 'kibana/public';
 import { UIRoutes } from 'ui/routes';
-import { IScope } from 'angular';
+import { ILocationService, IScope } from 'angular';
 import { npStart } from 'ui/new_platform';
 import { htmlIdGenerator } from '@elastic/eui';
 
@@ -133,7 +133,7 @@ export class LocalApplicationService {
 
     this.forwards.forEach(({ legacyAppId, newAppId, keepPrefix }) => {
       angularRouteManager.when(matchAllWithPrefix(legacyAppId), {
-        resolveRedirectTo: ($location: any) => {
+        resolveRedirectTo: ($location: ILocationService) => {
           const url = $location.url();
           return `/${newAppId}${keepPrefix ? url : url.replace(legacyAppId, '')}`;
         },
