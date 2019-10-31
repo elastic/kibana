@@ -30,21 +30,34 @@ import { docLinksServiceMock } from '../doc_links/doc_links_service.mock';
 import { ChromeService } from './chrome_service';
 import { App } from '../application';
 
+class FakeApp implements App {
+  public title = `${this.id} App`;
+  public mount = () => () => {};
+  constructor(public id: string, public chromeHidden?: boolean) {}
+}
 const store = new Map();
+const originalLocalStorage = window.localStorage;
+
 (window as any).localStorage = {
   setItem: (key: string, value: string) => store.set(String(key), String(value)),
   getItem: (key: string) => store.get(String(key)),
   removeItem: (key: string) => store.delete(String(key)),
 };
 
-function defaultStartDeps() {
-  return {
+function defaultStartDeps(availableApps?: App[]) {
+  const deps = {
     application: applicationServiceMock.createInternalStartContract(),
     docLinks: docLinksServiceMock.createStartContract(),
     http: httpServiceMock.createStartContract(),
     injectedMetadata: injectedMetadataServiceMock.createStartContract(),
     notifications: notificationServiceMock.createStartContract(),
   };
+
+  if (availableApps) {
+    deps.application.availableApps = new Map(availableApps.map(app => [app.id, app]));
+  }
+
+  return deps;
 }
 
 async function start({
@@ -65,13 +78,13 @@ async function start({
   };
 }
 
-function createApp(id: string, chromeHidden?: boolean): [string, App] {
-  return [id, { id, title: `${id} App`, mount: () => () => {}, chromeHidden }];
-}
-
 beforeEach(() => {
   store.clear();
   window.history.pushState(undefined, '', '#/home?a=b');
+});
+
+afterAll(() => {
+  (window as any).localStorage = originalLocalStorage;
 });
 
 describe('start', () => {
@@ -168,7 +181,7 @@ describe('start', () => {
       `);
     });
 
-    it('always emits false if embed query string is in hash when set up', async () => {
+    it('always emits false if embed query string is preset when set up', async () => {
       window.history.pushState(undefined, '', '#/home?a=b&embed=true');
 
       const { chrome, service } = await start();
@@ -193,68 +206,27 @@ describe('start', () => {
     });
 
     it('application-specified visibility on mount', async () => {
-      const startDeps = defaultStartDeps();
-
-      // We can fake the application service navigating to the next app by
-      // adding a fake app to the application's available apps then triggering
-      // the next ID.
-      startDeps.application.availableApps = new Map([
-        createApp('alpha'),
-        createApp('beta', true),
-        createApp('gamma', false),
+      const startDeps = defaultStartDeps([
+        new FakeApp('alpha'), // An undefined chromeHidden is the same as setting to false.
+        new FakeApp('beta', true),
+        new FakeApp('gamma', false),
       ]);
-
+      const { availableApps, currentAppId$ } = startDeps.application;
       const { chrome, service } = await start({ startDeps });
       const promise = chrome
         .getIsVisible$()
         .pipe(toArray())
         .toPromise();
 
-      startDeps.application.currentAppId$.next('alpha');
-      startDeps.application.currentAppId$.next('beta');
-      startDeps.application.currentAppId$.next('gamma');
+      [...availableApps.keys()].forEach(appId => currentAppId$.next(appId));
       service.stop();
 
       await expect(promise).resolves.toMatchInlineSnapshot(`
         Array [
           true,
-          false,
           true,
           false,
-        ]
-      `);
-    });
-
-    it('application-specified visibility has no effect when embed query string is in hash', async () => {
-      window.history.pushState(undefined, '', '#/home?a=b&embed=true');
-      const startDeps = defaultStartDeps();
-
-      // We can fake the application service navigating to the next app by
-      // adding a fake app to the application's available apps then triggering
-      // the next ID.
-      startDeps.application.availableApps = new Map([
-        createApp('alpha'),
-        createApp('beta', true),
-        createApp('gamma', false),
-      ]);
-
-      const { chrome, service } = await start({ startDeps });
-      const promise = chrome
-        .getIsVisible$()
-        .pipe(toArray())
-        .toPromise();
-
-      startDeps.application.currentAppId$.next('alpha');
-      startDeps.application.currentAppId$.next('beta');
-      startDeps.application.currentAppId$.next('gamma');
-      service.stop();
-
-      await expect(promise).resolves.toMatchInlineSnapshot(`
-        Array [
-          false,
-          false,
-          false,
-          false,
+          true,
         ]
       `);
     });

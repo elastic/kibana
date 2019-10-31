@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { BehaviorSubject, Observable, ReplaySubject, merge } from 'rxjs';
+import { BehaviorSubject, Observable, ReplaySubject, combineLatest, of, merge } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import * as Url from 'url';
 
@@ -94,26 +94,20 @@ export class ChromeService {
     injectedMetadata,
     notifications,
   }: StartDeps): Promise<InternalChromeStart> {
-    const FORCE_HIDDEN = isEmbedParamInHash();
-
-    const appTitle$ = new BehaviorSubject<string>('Kibana');
-    const brand$ = new BehaviorSubject<ChromeBrand>({});
-    const isCollapsed$ = new BehaviorSubject(!!localStorage.getItem(IS_COLLAPSED_KEY));
-    const applicationClasses$ = new BehaviorSubject<Set<string>>(new Set());
-    const helpExtension$ = new BehaviorSubject<ChromeHelpExtension | undefined>(undefined);
-    const breadcrumbs$ = new BehaviorSubject<ChromeBreadcrumb[]>([]);
-    const badge$ = new BehaviorSubject<ChromeBadge | undefined>(undefined);
-
     /**
      * These observables allow consumers to toggle the chrome visibility via either:
-     *   1. Using setIsVisible() to trigger the next visibility$
+     *   1. Using setIsVisible() to trigger the next hide$
      *   2. Setting `chromeHidden` when registering an application, which will
      *      reset the visibility whenever the next application is mounted
      *   3. Having embed=true in the query string
      */
-    const visibility$ = new BehaviorSubject(true);
-    const isVisible$ = merge(
-      visibility$,
+    const chromeHidden$ = new BehaviorSubject(false);
+    const forceHidden$ = of(isEmbedParamInHash());
+    const appHidden$ = merge(
+      // Default the app being hidden to false in case the application service has
+      // not emitted an app ID yet since we want to trigger combineLatest below
+      // regardless of having a value yet.
+      of(false),
       application.currentAppId$.pipe(
         map(
           appId =>
@@ -122,10 +116,19 @@ export class ChromeService {
             !!application.availableApps.get(appId)!.chromeHidden
         )
       )
-    ).pipe(
-      map(isVisible => (FORCE_HIDDEN ? false : isVisible)),
+    );
+    const isVisible$ = combineLatest(appHidden$, forceHidden$, chromeHidden$).pipe(
+      map(([appHidden, forceHidden, chromeHidden]) => !(appHidden || forceHidden || chromeHidden)),
       takeUntil(this.stop$)
     );
+
+    const appTitle$ = new BehaviorSubject<string>('Kibana');
+    const brand$ = new BehaviorSubject<ChromeBrand>({});
+    const isCollapsed$ = new BehaviorSubject(!!localStorage.getItem(IS_COLLAPSED_KEY));
+    const applicationClasses$ = new BehaviorSubject<Set<string>>(new Set());
+    const helpExtension$ = new BehaviorSubject<ChromeHelpExtension | undefined>(undefined);
+    const breadcrumbs$ = new BehaviorSubject<ChromeBreadcrumb[]>([]);
+    const badge$ = new BehaviorSubject<ChromeBadge | undefined>(undefined);
 
     const navControls = this.navControls.start();
     const navLinks = this.navLinks.start({ application, http });
@@ -187,7 +190,7 @@ export class ChromeService {
 
       getIsVisible$: () => isVisible$,
 
-      setIsVisible: (visibility: boolean) => visibility$.next(visibility),
+      setIsVisible: (isVisible: boolean) => chromeHidden$.next(!isVisible),
 
       getIsCollapsed$: () => isCollapsed$.pipe(takeUntil(this.stop$)),
 

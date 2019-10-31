@@ -150,12 +150,13 @@ export interface AppMountParameters {
    * export class MyPlugin implements Plugin {
    *   setup({ application }) {
    *     application.register({
-   *     id: 'my-app',
-   *     async mount(context, params) {
-   *       const { renderApp } = await import('./application');
-   *       return renderApp(context, params);
-   *     },
-   *   });
+   *      id: 'my-app',
+   *      async mount(context, params) {
+   *        const { renderApp } = await import('./application');
+   *        return renderApp(context, params);
+   *      },
+   *    });
+   *  }
    * }
    * ```
    *
