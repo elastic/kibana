@@ -23,6 +23,7 @@ import { changeColumn, deleteColumn } from '../state_helpers';
 import { isDraggedField, hasField } from '../utils';
 import { IndexPatternPrivateState, IndexPatternField } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
+import { DateRange } from '../../../common';
 
 export type IndexPatternDimensionPanelProps = DatasourceDimensionPanelProps & {
   state: IndexPatternPrivateState;
@@ -34,12 +35,12 @@ export type IndexPatternDimensionPanelProps = DatasourceDimensionPanelProps & {
   layerId: string;
   http: HttpServiceBase;
   uniqueLabel: string;
+  dateRange: DateRange;
 };
 
 export interface OperationFieldSupportMatrix {
   operationByField: Partial<Record<string, OperationType[]>>;
   fieldByOperation: Partial<Record<OperationType, string[]>>;
-  operationByDocument: OperationType[];
 }
 
 export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPanel(
@@ -55,30 +56,25 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
 
     const supportedOperationsByField: Partial<Record<string, OperationType[]>> = {};
     const supportedFieldsByOperation: Partial<Record<OperationType, string[]>> = {};
-    const supportedOperationsByDocument: OperationType[] = [];
+
     filteredOperationsByMetadata.forEach(({ operations }) => {
       operations.forEach(operation => {
-        if (operation.type === 'field') {
-          if (supportedOperationsByField[operation.field]) {
-            supportedOperationsByField[operation.field]!.push(operation.operationType);
-          } else {
-            supportedOperationsByField[operation.field] = [operation.operationType];
-          }
-
-          if (supportedFieldsByOperation[operation.operationType]) {
-            supportedFieldsByOperation[operation.operationType]!.push(operation.field);
-          } else {
-            supportedFieldsByOperation[operation.operationType] = [operation.field];
-          }
+        if (supportedOperationsByField[operation.field]) {
+          supportedOperationsByField[operation.field]!.push(operation.operationType);
         } else {
-          supportedOperationsByDocument.push(operation.operationType);
+          supportedOperationsByField[operation.field] = [operation.operationType];
+        }
+
+        if (supportedFieldsByOperation[operation.operationType]) {
+          supportedFieldsByOperation[operation.operationType]!.push(operation.field);
+        } else {
+          supportedFieldsByOperation[operation.operationType] = [operation.field];
         }
       });
     });
     return {
       operationByField: _.mapValues(supportedOperationsByField, _.uniq),
       fieldByOperation: _.mapValues(supportedFieldsByOperation, _.uniq),
-      operationByDocument: _.uniq(supportedOperationsByDocument),
     };
   }, [currentIndexPattern, props.filterOperations]);
 

@@ -88,6 +88,7 @@ exports[`MonitorList component renders a no items message when no data is provid
         grow={false}
       >
         <OverviewPageLink
+          dataTestSubj="xpack.uptime.monitorList.prevButton"
           direction="prev"
         />
       </EuiFlexItem>
@@ -95,6 +96,7 @@ exports[`MonitorList component renders a no items message when no data is provid
         grow={false}
       >
         <OverviewPageLink
+          dataTestSubj="xpack.uptime.monitorList.nextButton"
           direction="next"
         />
       </EuiFlexItem>
@@ -253,6 +255,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
         grow={false}
       >
         <OverviewPageLink
+          dataTestSubj="xpack.uptime.monitorList.prevButton"
           direction="prev"
           pagination="{\\"cursorKey\\":{\\"monitor_id\\":123},\\"cursorDirection\\":\\"BEFORE\\",\\"sortOrder\\":\\"ASC\\"}"
         />
@@ -261,6 +264,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
         grow={false}
       >
         <OverviewPageLink
+          dataTestSubj="xpack.uptime.monitorList.nextButton"
           direction="next"
           pagination="{\\"cursorKey\\":{\\"monitor_id\\":456},\\"cursorDirection\\":\\"AFTER\\",\\"sortOrder\\":\\"ASC\\"}"
         />

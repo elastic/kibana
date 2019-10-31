@@ -20,8 +20,6 @@ include::extend.asciidoc[]
 
 include::{kib-repo-dir}/maps/index.asciidoc[]
 
-include::{kib-repo-dir}/code/index.asciidoc[]
-
 include::{kib-repo-dir}/infrastructure/index.asciidoc[]
 
 include::{kib-repo-dir}/logs/index.asciidoc[]
