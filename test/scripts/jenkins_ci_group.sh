@@ -1,31 +1,30 @@
 #!/usr/bin/env bash
 
-set -e
+source test/scripts/jenkins_test_setup.sh
 
-if [[ -n "$IS_PIPELINE_JOB" ]] ; then
-  source src/dev/ci_setup/setup_env.sh
-fi
+if [[ -z "$CODE_COVERAGE" ]] ; then
+  if [[ -z "$IS_PIPELINE_JOB" ]] ; then
+    yarn run grunt functionalTests:ensureAllTestsInCiGroup;
+    node scripts/build --debug --oss;
+  else
+    installDir="$(realpath $PARENT_DIR/kibana/build/oss/kibana-*-SNAPSHOT-linux-x86_64)"
+    destDir=${installDir}-${CI_WORKER_NUMBER}
+    cp -R "$installDir" "$destDir"
 
-export TEST_BROWSER_HEADLESS=1
+    export KIBANA_INSTALL_DIR="$destDir"
+  fi
 
-if [[ -z "$IS_PIPELINE_JOB" ]] ; then
-  yarn run grunt functionalTests:ensureAllTestsInCiGroup;
-  node scripts/build --debug --oss;
+  checks-reporter-with-killswitch "Functional tests / Group ${CI_GROUP}" yarn run grunt "run:functionalTests_ciGroup${CI_GROUP}";
+
+  if [ "$CI_GROUP" == "1" ]; then
+    source test/scripts/jenkins_build_kbn_tp_sample_panel_action.sh
+    yarn run grunt run:pluginFunctionalTestsRelease --from=source;
+    yarn run grunt run:interpreterFunctionalTestsRelease;
+  fi
 else
-  installDir="$(realpath $PARENT_DIR/kibana/build/oss/kibana-*-SNAPSHOT-linux-x86_64)"
-  destDir=${installDir}-${CI_WORKER_NUMBER}
-  cp -R "$installDir" "$destDir"
-
-  export KIBANA_INSTALL_DIR="$destDir"
-fi
-
-checks-reporter-with-killswitch "Functional tests / Group ${CI_GROUP}" yarn run grunt "run:functionalTests_ciGroup${CI_GROUP}";
-
-if [ "$CI_GROUP" == "1" ]; then
-  # build kbn_tp_sample_panel_action
-  cd test/plugin_functional/plugins/kbn_tp_sample_panel_action;
-  checks-reporter-with-killswitch "Build kbn_tp_sample_panel_action" yarn build;
-  cd -;
-  yarn run grunt run:pluginFunctionalTestsRelease --from=source;
-  yarn run grunt run:interpreterFunctionalTestsRelease;
+  echo " -> Running Functional tests with code coverage"
+  checks-reporter-with-killswitch " Functional tests with code coverage / Group ${CI_GROUP}" \
+  node scripts/functional_tests \
+    --debug \
+    --include-tag "ciGroup$CI_GROUP"
 fi

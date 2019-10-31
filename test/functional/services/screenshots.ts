@@ -39,7 +39,7 @@ export async function ScreenshotsProvider({ getService }: FtrProviderContext) {
   const BASELINE_DIRECTORY = resolve(config.get('screenshots.directory'), 'baseline');
 
   if (process.env.CI !== 'true') {
-    await del([SESSION_DIRECTORY, FAILURE_DIRECTORY]);
+    await del([SESSION_DIRECTORY, FAILURE_DIRECTORY], { force: true });
   }
 
   class Screenshots {
