@@ -25,7 +25,7 @@ import { tmpdir } from 'os';
 import { basename, dirname, join, sep } from 'path';
 import { promisify } from 'util';
 
-const mkdtempAsync = promisify(fs.mkdtemp);
+const mkdirAsync = promisify(fs.mkdir);
 const readdirAsync = promisify(fs.readdir);
 const renameAsync = promisify(fs.rename);
 const statAsync = promisify(fs.stat);
@@ -82,7 +82,8 @@ export class LogRotator {
   async _shouldUsePolling() {
     // Setup a test file in order to try the fs env
     // and understand if we need to usePolling or not
-    const tempFileDir = await mkdtempAsync(tmpdir());
+    const tempFileDir = tmpdir();
+    await mkdirAsync(tempFileDir, { recursive: true });
     const tempFile = join(tempFileDir, 'kbn_log_rotation_test_file.log');
     await writeFileAsync(tempFile, '');
 

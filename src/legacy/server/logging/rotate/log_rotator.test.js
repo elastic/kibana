@@ -20,10 +20,10 @@
 import del from 'del';
 import {  existsSync, mkdirSync, writeFileSync } from 'fs';
 import { LogRotator } from './log_rotator';
-import os from 'os';
+import { tmpdir } from 'os';
 import path, { dirname, join } from 'path';
 
-const tempDir = path.join(os.tmpdir(), 'kbn_log_rotator_test');
+const tempDir = path.join(tmpdir(), 'kbn_log_rotator_test');
 const testFilePath = join(tempDir, 'log_rotator_test_log_file.log');
 
 const createLogRotatorConfig = (logFilePath) => {
