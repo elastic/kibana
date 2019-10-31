@@ -18,7 +18,7 @@
  */
 
 import moment from 'moment';
-import { ApiItem, NewsfeedItem, FetchResult } from '../../types';
+import { ApiItem, NewsfeedItem } from '../../types';
 import { NewsfeedApiDriver } from './api';
 
 Object.defineProperty(window, 'localStorage', {
@@ -115,24 +115,20 @@ describe('NewsfeedApiDriver', () => {
   });
 
   describe('modelItems', () => {
-    it('Models empty set with defaults', done => {
+    it('Models empty set with defaults', () => {
       const driver = new NewsfeedApiDriver(kibanaVersion, userLanguage, fetchInterval);
       const apiItems: ApiItem[] = [];
-
-      driver.modelItems(apiItems).subscribe((feedItems: FetchResult) => {
-        expect(feedItems).toMatchInlineSnapshot(`
-          Object {
-            "error": null,
-            "feedItems": Array [],
-            "hasNew": false,
-            "kibanaVersion": "test_version",
-          }
-        `);
-        done();
-      });
+      expect(driver.modelItems(apiItems)).toMatchInlineSnapshot(`
+        Object {
+          "error": null,
+          "feedItems": Array [],
+          "hasNew": false,
+          "kibanaVersion": "test_version",
+        }
+      `);
     });
 
-    it('Selects default language', done => {
+    it('Selects default language', () => {
       const driver = new NewsfeedApiDriver(kibanaVersion, userLanguage, fetchInterval);
       const apiItems: ApiItem[] = [
         {
@@ -162,28 +158,24 @@ describe('NewsfeedApiDriver', () => {
           hash: 'abcabc1231123123hash',
         },
       ];
-
-      driver.modelItems(apiItems).subscribe((feedItems: FetchResult) => {
-        expect(feedItems).toMatchObject({
-          error: null,
-          feedItems: [
-            {
-              badge: 'firefighter',
-              description: 'language test',
-              hash: 'abcabc1231',
-              linkText: 'click here',
-              linkUrl: 'xyzxyzxyz',
-              title: 'speaking English',
-            },
-          ],
-          hasNew: true,
-          kibanaVersion: 'test_version',
-        });
-        done();
+      expect(driver.modelItems(apiItems)).toMatchObject({
+        error: null,
+        feedItems: [
+          {
+            badge: 'firefighter',
+            description: 'language test',
+            hash: 'abcabc1231',
+            linkText: 'click here',
+            linkUrl: 'xyzxyzxyz',
+            title: 'speaking English',
+          },
+        ],
+        hasNew: true,
+        kibanaVersion: 'test_version',
       });
     });
 
-    it('Models multiple', done => {
+    it('Models multiple', () => {
       const driver = new NewsfeedApiDriver(kibanaVersion, userLanguage, fetchInterval);
       const apiItems: ApiItem[] = [
         {
@@ -224,36 +216,32 @@ describe('NewsfeedApiDriver', () => {
           hash: 'defdefdef456456456',
         },
       ];
-
-      driver.modelItems(apiItems).subscribe((feedItems: FetchResult) => {
-        expect(feedItems).toMatchObject({
-          error: null,
-          feedItems: [
-            {
-              badge: null,
-              description: 'this tests the modelItems function',
-              hash: 'abcabc1231',
-              linkText: 'click here',
-              linkUrl: 'about:blank',
-              title: 'guess what',
-            },
-            {
-              badge: 'hero',
-              description: 'this also tests the modelItems function',
-              hash: 'defdefdef4',
-              linkText: 'click here',
-              linkUrl: 'about:blank',
-              title: 'guess when',
-            },
-          ],
-          hasNew: true,
-          kibanaVersion: 'test_version',
-        });
-        done();
+      expect(driver.modelItems(apiItems)).toMatchObject({
+        error: null,
+        feedItems: [
+          {
+            badge: null,
+            description: 'this tests the modelItems function',
+            hash: 'abcabc1231',
+            linkText: 'click here',
+            linkUrl: 'about:blank',
+            title: 'guess what',
+          },
+          {
+            badge: 'hero',
+            description: 'this also tests the modelItems function',
+            hash: 'defdefdef4',
+            linkText: 'click here',
+            linkUrl: 'about:blank',
+            title: 'guess when',
+          },
+        ],
+        hasNew: true,
+        kibanaVersion: 'test_version',
       });
     });
 
-    it('Filters multiple', done => {
+    it('Filters multiple', () => {
       const driver = new NewsfeedApiDriver(kibanaVersion, userLanguage, fetchInterval);
       const apiItems: ApiItem[] = [
         {
@@ -315,24 +303,20 @@ describe('NewsfeedApiDriver', () => {
           hash: 'defdefdef456456456',
         }, // filter: expired
       ];
-
-      driver.modelItems(apiItems).subscribe((feedItems: FetchResult) => {
-        expect(feedItems).toMatchObject({
-          error: null,
-          feedItems: [
-            {
-              badge: null,
-              description: 'this tests the modelItems function',
-              hash: 'abcabc1231',
-              linkText: 'click here',
-              linkUrl: 'about:blank',
-              title: 'guess what',
-            },
-          ],
-          hasNew: true,
-          kibanaVersion: 'test_version',
-        });
-        done();
+      expect(driver.modelItems(apiItems)).toMatchObject({
+        error: null,
+        feedItems: [
+          {
+            badge: null,
+            description: 'this tests the modelItems function',
+            hash: 'abcabc1231',
+            linkText: 'click here',
+            linkUrl: 'about:blank',
+            title: 'guess what',
+          },
+        ],
+        hasNew: true,
+        kibanaVersion: 'test_version',
       });
     });
   });
