@@ -17,13 +17,18 @@
  * under the License.
  */
 
-import Chance from 'chance';
+import { useEffect } from 'react';
 
-export function ChanceProvider({ getService }) {
-  const log = getService('log');
+function useValidation<ParamName extends string>(
+  setValidity: (paramName: ParamName, isValid: boolean) => void,
+  paramName: ParamName,
+  isValid: boolean
+) {
+  useEffect(() => {
+    setValidity(paramName, isValid);
 
-  const seed = Date.now();
-  log.debug('randomness seed: %j', seed);
-
-  return new Chance(seed);
+    return () => setValidity(paramName, true);
+  }, [isValid, paramName, setValidity]);
 }
+
+export { useValidation };
