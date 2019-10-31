@@ -86,10 +86,7 @@ alongside your source data.
 
 If you have a license that includes the {ml-features}, you can create
 {oldetection} {dfanalytics-jobs} and view their results on the *Analytics* page
-in {kib}. For example:
-
-[role="screenshot"]
-image::user/ml/images/outliers.jpg[{oldetection-cap} results in {kib}]
+in {kib}.
 
 For more information about the {dfanalytics} feature, see 
 {stack-ov}/ml-dfanalytics.html[{ml-cap} {dfanalytics}].
