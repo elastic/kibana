@@ -1,16 +1,12 @@
 [[goal-chart]]
-== Goal and Gauge
+=== Goal and Gauge
 
-A goal visualization displays how your metric progresses toward a fixed goal. A gauge visualization displays in which
-predefined range falls your metric.
+A goal visualization displays how your metric progresses toward a fixed goal. A gauge visualization displays in which predefined range falls your metric.
 
-include::metric-aggs.asciidoc[]
-include::parent-pipeline-aggs.asciidoc[]
-include::sibling-pipeline-aggs.asciidoc[]
-
-Open the *Advanced* link to display more customization options:
-
-include::json-input.asciidoc[]
+[role="screenshot"]
+image::images/goal.png[Goal visualization showing 5 days of data colored by their percentage]
+[role="screenshot"]
+image::images/gauge.png[Goal visualization showing 5 days of data colored by their percentage]
 
 Click the *Options* tab to change the following options:
 

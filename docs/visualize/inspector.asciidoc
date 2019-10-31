@@ -1,8 +1,7 @@
 [[vis-inspector]]
 == Inspecting Visualizations
 
-Many visualizations allow you to inspect the query and data behind the 
-visualization. 
+Many visualizations allow you to inspect the query and data behind the visualization. 
 
 To inspect a visualization, click the *Inspect* button in the editor or 
 select *Inspect* from the Dashboard panel menu.

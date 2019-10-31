@@ -21,4 +21,4 @@ To save the current visualization:
 . Click *Save* in the Kibana toolbar.
 . Enter a name for the visualization and click *Save*.
 
-You can import, export and delete saved visualizations from *Management/Kibana/Saved Objects*.
+You can import, export and delete saved visualizations from *<<managing-saved-objects, Management/Kibana/Saved Objects>>*.

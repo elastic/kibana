@@ -1,27 +1,7 @@
 [[heatmap-chart]]
-== Heatmap Chart
+=== Heatmap Chart
 
-A heat map is a graphical representation of data where the individual values contained in a matrix are represented as colors.
-The color for each matrix position is determined by the _metrics_ aggregation. The following aggregations are available for
-this chart:
-
-include::metric-aggs.asciidoc[]
-
-The _buckets_ aggregations determine what information is being retrieved from your data set.
-
-Before you choose a buckets aggregation, specify if you are defining buckets for X or Y axis within a single chart
-or splitting into multiple charts. A multiple chart split must run before any other aggregations.
-When you split a chart, you can change if the splits are displayed in a row or a column by clicking
-the *Rows | Columns* selector.
-
-This chart's X and Y axis supports the following aggregations. Click the linked name of each aggregation to visit the main
-Elasticsearch documentation for that aggregation.
-
-include::bucket-aggs.asciidoc[]
-include::parent-pipeline-aggs.asciidoc[]
-include::sibling-pipeline-aggs.asciidoc[]
-
-Enter a string in the *Custom Label* field to change the display label.
+A heat map displays X and Y data in a matrix of cells, where each cell is shaded by a metric.
 
 You can click the *Advanced* link to display more customization options for your metrics or bucket aggregation:
 

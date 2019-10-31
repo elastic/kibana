@@ -1,20 +1,10 @@
 [[tagcloud-chart]]
-== Tag Clouds
+=== Tag Clouds
 
 A tag cloud visualization is a visual representation of text data, typically used to visualize free form text.
 Tags are usually single words, and the importance of each tag is shown with font size or color.
 
-The font size for each word is determined by the _metrics_ aggregation. The following aggregations are available for
-this chart:
-
-include::metric-aggs.asciidoc[]
-
-
-The _buckets_ aggregations determine what information is being retrieved from your data set.
-
-Before you choose a buckets aggregation, select the *Split Tags* option.
-
-You can specify the following bucket aggregations for tag cloud visualization:
+The tag cloud only supports one type of bucket aggregation:
 
 *Terms*:: A {ref}/search-aggregations-bucket-terms-aggregation.html[_terms_] aggregation enables you to specify the top
 or bottom _n_ elements of a  given field to display, ordered by count or a custom metric.

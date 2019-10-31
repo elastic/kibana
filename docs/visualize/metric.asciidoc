@@ -1,13 +1,4 @@
 [[metric-chart]]
-== Metric
-
-A metric visualization displays a single number for each aggregation you select:
-
-include::metric-aggs.asciidoc[]
-include::sibling-pipeline-aggs.asciidoc[]
-
-You can click the *Advanced* link to display more customization options:
-
-include::json-input.asciidoc[]
+=== Metric
 
 Click the *Options* tab to display the font size slider.

@@ -1,35 +1,20 @@
 [[data-table]]
-== Data Table
+=== Data Table
 
-Datatable visualizations allow you to plot aggregated data from a saved query or index pattern.
-Datatables support multiple levels of {es} {ref}/search-aggregations-bucket.html[bucket]
-aggregations, and one level of {es} {ref}/search-aggregations-metrics.html[metric] aggregations.
-
-. The nested structure of Elasticsearch responses is flattened into a table.
+The nested structure of Elasticsearch responses is flattened into a table.
 Multiple tables can be displayed by configuring a bucket as a "Split table".
 
-Tables support these metrics which can be displayed in each row. If more than one metric is selected,
-you can use parent pipeline aggregations:
+The table visualization has support for bucket aggregations beyond other visualizations:
 
-include::metric-aggs.asciidoc[]
-include::parent-pipeline-aggs.asciidoc[]
-include::sibling-pipeline-aggs.asciidoc[]
-
-To add more rows to the table, or to create multiple tables, you need to use one of these bucket aggregations:
-
-Each bucket type supports the following aggregations:
-
-include::bucket-aggs.asciidoc[]
 *Geohash*:: The {ref}/search-aggregations-bucket-geohashgrid-aggregation.html[_geohash_] aggregation displays points
 based on a geohash.
-*Geotile*:: The {ref}/search-aggregations-bucket-geotilegrid-aggregation.html[_geotile] aggregation groups points
+*Geotile*:: The {ref}/search-aggregations-bucket-geotilegrid-aggregation.html[_geotile_] aggregation groups points
 based on web map tiling.
 
+Tables can 
 Once you've specified a bucket type aggregation, you can define sub-buckets to refine the visualization. Click
 *+ Add* to define a sub-bucket, then choose *Split rows* or *Split table*, then select an
 aggregation from the list of types.
-
-You can use the up or down arrows to the right of the aggregation's type to change the aggregation's priority.
 
 Enter a string in the *Custom Label* field to change the display label.
 

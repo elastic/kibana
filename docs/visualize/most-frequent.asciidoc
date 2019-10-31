@@ -1,0 +1,73 @@
+[[most-frequent]]
+== Most frequently used visualizations
+
+These are:
+
+* Line, Area and Bar charts
+* Pie charts
+* Data table
+* Metric visualization
+* Goal and Gauge visualization
+* Heat maps
+* Tag cloud
+
+These visualizations allow you to plot aggregated data from a <<save-open-search, saved search>> or <<index-patterns, index pattern>>. They all support a single level of 
+Elasticsearch {es} {ref}/search-aggregations-metrics.html[metric] aggregations, and one or more
+levels of {es} {ref}/search-aggregations-bucket.html[bucket] aggregations.
+
+[float]
+=== Configuring your visualization
+
+Once you have selected a visualization and data source, you will see the default editor.
+This editor is broken into *Metrics* and *Buckets*, and includes a default count
+metric. Each visualization supports different configurations for what the metrics and buckets
+represent. For example, a Bar chart would allow you to add an X axis:
+
+[role="screenshot"]
+image::images/add-bucket.png["",height=478]
+
+A common configuration for the X axis is to use a {es} {ref}/search-aggregations-bucket-datehistogram-aggregation.html[date histogram] aggregation:
+
+[role="screenshot"]
+image::images/visualize-date-histogram.png[]
+
+After adding a metric or bucket, you will need to *Apply changes* image:images/apply-changes-button.png[]
+
+If it's supported by the visualization, you can add more buckets. In this example we have
+added a 
+{es} {ref}/search-aggregations-bucket-terms-aggregation.html[terms] aggregation on the field
+`geo.src` to show the top 5 sources of log traffic.
+
+[role="screenshot"]
+image::images/visualize-date-histogram-split-1.png[]
+
+As you can see in the image above, the new aggregation was added after the first one, so the result show
+the top 5 sources of traffic per 3 hours. If you want to change the aggregation order, you can do
+so by dragging:
+
+[role="screenshot"]
+image::images/visualize-drag-reorder.png["",width=366]
+
+After dragging the terms aggregation to the top of the buckets panel, you see that the visualization
+now shows the top 5 sources of traffic overall, and compares them in 3 hour increments:
+
+[role="screenshot"]
+image::images/visualize-date-histogram-split-2.png[]
+
+Read more about how aggregations can be used in visualizations in <<supported-aggregations, supported aggregations>>.
+
+Each visualization also has its own customization options documented in the following pages.
+Most of these visualizations allow you to customize the color of a specific series:
+
+[role="screenshot"]
+image::images/color-picker.png[An array of color dots that users can select,height=267]
+
+include::aggregations.asciidoc[]
+
+include::xychart.asciidoc[]
+include::pie.asciidoc[]
+include::datatable.asciidoc[]
+include::metric.asciidoc[]
+include::goal.asciidoc[]
+include::heatmap.asciidoc[]
+include::tagcloud.asciidoc[]

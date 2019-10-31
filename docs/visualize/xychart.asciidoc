@@ -1,43 +1,8 @@
 [[xy-chart]]
-== Line, Area, and Bar charts
+=== Line, Area, and Bar charts
 
-Line, Area, and Bar charts allow you to plot aggregated data from a saved query or index pattern.
-These visualizations support multiple levels of {es} {ref}/search-aggregations-bucket.html[bucket]
-or {es} {ref}/search-aggregations-pipeline.html[pipeline] aggregations, and one level of
-{es} {ref}/search-aggregations-metrics.html[metric] aggregations.
-
-Charts are expected to contain a single X axis, but you can split charts into multiple smaller Line, Area, or Bar charts using the Split Charts feature.
-
-image::images/bar-terms-subagg.png[]
-
-The chart's X axis supports the following aggregations. Click the linked name of each aggregation to visit the main
-Elasticsearch documentation for that aggregation.
-
-include::bucket-aggs.asciidoc[]
-
-Once you've specified an X axis aggregation, you can define sub-aggregations to refine the visualization. Click *+ Add
-* to define a sub-aggregation, then choose *Split Series* or *Split Chart*, then select a sub-aggregation
-from the list of types.
-
-When multiple aggregations are defined on a chart's axis, you can use the up or down arrows to the right of the
-aggregation's type to change the aggregation's priority.
-
-Enter a string in the *Custom Label* field to change the display label.
-
-
-First you need to select your _metrics_ which define Value axis.
-
-include::metric-aggs.asciidoc[]
-
-The _buckets_ aggregations determine what information is being retrieved from your data set.
-
-Before you choose a buckets aggregation, specify if you are splitting slices within a single chart or splitting into
-multiple charts. A multiple chart split must run before any other aggregations. When you split a chart, you can change
-if the splits are displayed in a row or a column by clicking the *Rows | Columns* selector.
-
-include::color-picker.asciidoc[]
-
-Enter a string in the *Custom Label* field to change the display label.
+Charts are expected to contain a single X axis, but you can split charts into multiple smaller Line, Area, or Bar
+charts using the Split Charts feature.
 
 You can click the *Advanced* link to display more customization options for your metrics or bucket aggregation:
 
@@ -47,13 +12,13 @@ include::json-input.asciidoc[]
 
 [float]
 [[metrics-axes]]
-=== Metrics & Axes
+==== Metrics & Axes
 
 Select the *Metrics & Axes* tab to change the way each individual metric is shown on the chart.
 The data series are styled in the _Metrics_ section, while the axes are styled in the X and Y axis sections.
 
 [float]
-==== Metrics
+===== Metrics
 Modify how each metric from the Data panel is visualized on the chart.
 
 *Chart type*:: Choose between *Area*, *Line*, and *Bar* types.
@@ -62,7 +27,7 @@ Modify how each metric from the Data panel is visualized on the chart.
 *Line mode*:: should the outline of lines or bars appear *smooth*, *straight*, or *stepped*.
 
 [float]
-==== Y-axis
+===== Y-axis
 
 Style all the Y-axes of the chart.
 
@@ -82,7 +47,7 @@ Style all the Y-axes of the chart.
 *Custom Extents*:::: You can define custom minimum and maximum for each axis
 
 [float]
-==== X-Axis
+===== X-Axis
 
 *Position*:: position of the X-Axis (*left* or *right* for horizontal charts, and *top* or *bottom* for vertical charts).
 *Advanced Options*::
@@ -93,18 +58,18 @@ Style all the Y-axes of the chart.
 
 [float]
 [[panel-settings]]
-=== Panel Settings
+==== Panel Settings
 
 These are options that apply to the entire chart and not just the individual data series.
 
 [float]
-==== Common options
+===== Common options
 *Legend Position*:: Move your legend to the *left*, *right*, *top* or *bottom*
 *Show Tooltip*:: Enables or disables the display of tooltip on hovering over chart objects
 *Current Time Marker*:: Show a line indicating the current time
 
 [float]
-==== Grid options
+===== Grid options
 You can enable grid on the chart. By default grid is displayed on the category axis only.
 
 *X-axis*:: You can disable the display of grid lines on category axis

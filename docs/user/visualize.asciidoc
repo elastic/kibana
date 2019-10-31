@@ -13,41 +13,37 @@ to extract and process your data, you can create charts that show
 you the trends, spikes, and dips you need to know about.
 
 You can create visualizations from a search saved from <<discover, Discover>>
-or start with a new search query.
---
+or start from an <<index-patterns, index pattern>>.
 
-[[createvis]]
-== Creating a Visualization
-
-To create a visualization:
+**Creating a Visualization**
 
 . Click on *Visualize* in the side navigation.
 . Click the *Create new visualization* button or the **+** button.
 . Choose the visualization type:
 +
-* *Most frequently used visualizations*
+* *<<most-frequent,Most frequently used visualizations>>*
 [horizontal]
-<<xy-chart,Line&comma; Area and Bar charts>>:: Compare different series in X/Y charts.
-<<pie-chart,Pie chart>>:: Display each source's contribution to a total.
-<<data-table,Data table>>:: Flattens aggregations into table format.
-<<metric-chart,Metric>>:: Display a single number.
-<<goal-chart,Goal and Gauge>>:: Display a number with more decoration.
-<<heatmap-chart,Heat maps>>:: Shade cells within a matrix.
-<<tagcloud-chart,Tag cloud>>:: Display words as a cloud in which the size of the word correspond to its importance.
+<<most-frequent,Line&comma; Area and Bar charts>>:: Compare different series in X/Y charts.
+<<most-frequent,Pie chart>>:: Display each source's contribution to a total.
+<<most-frequent,Data table>>:: Flattens aggregations into table format.
+<<most-frequent,Metric>>:: Display a single number.
+<<most-frequent,Goal and Gauge>>:: Display a number with more decoration.
+<<most-frequent,Heat maps>>:: Shade cells within a matrix.
+<<most-frequent,Tag cloud>>:: Display words as a cloud in which the size of the word correspond to its importance.
 * *Time Series optimized*
 [horizontal]
 <<TSVB,TSVB>>:: Visualize time series data using pipeline aggregations.
-<<timelion,Timelion>>:: Compute and combine data from multiple time series
-data sets.
+<<timelion,_Timelion_>>:: Compute and combine data from multiple time series
+data sets. Hidden by default.
 * *Maps*
 [horizontal]
 <<maps, Elastic maps>>:: Elastic maps is the most powerful way of visualizing map data in Kibana
 <<tilemap,_Coordinate map_>>:: Displays points on a map using a geohash aggregation.
 <<regionmap,_Region map_>>:: Merge any structured map data onto a shape
-* *For use in dashboards*
+* *<<for-dashboard, For use in dashboards>>*
 [horizontal]
-<<controls,Controls>>:: Controls provide the ability to add interactive inputs to Kibana Dashboards.
-<<markdown-widget,Markdown widget>>:: Display free-form information or instructions.
+<<for-dashboard,Controls>>:: Controls provide the ability to add interactive inputs to Kibana Dashboards.
+<<for-dashboard,Markdown widget>>:: Display free-form information or instructions.
 * *For developers*
 [horizontal]
 <<vega-graph,Vega>>:: Complete control over query and display.
@@ -66,65 +62,30 @@ modifications to the saved search are automatically reflected in the
 visualization. To disable automatic updates, you can disconnect a visualization
 from the saved search.
 
-For example, if you're indexing Apache server logs, you could build bar chart
-that shows the distribution of incoming requests by geographic location by
-specifying a terms aggregation on the `geo.src` field:
-
-image::images/bar-terms-agg.png[]
-
-The y-axis shows the number of requests received from each country, and the
-countries are displayed across the x-axis.
-
-Bar, line, or area chart visualizations use _metrics_ for the y-axis and
-_buckets_ for the x-axis. Buckets are analogous to SQL `GROUP BY`
-statements. Pie charts, use the metric for the slice size and the bucket
-for the number of slices.
-
-You can further break down the data by specifying sub aggregations. The first
-aggregation determines the data set for any subsequent aggregations. Sub
-aggregations are applied in order--you can drag the aggregations to change the
-order in which they're applied.
-
-For example, you could add a terms sub aggregation on the `geo.dest` field to
-the Country of Origin bar chart to see the locations those requests were
-targeting.
-
-image::images/bar-terms-subagg.png[]
-
-For more information about working with sub aggregations, see
-https://www.elastic.co/blog/kibana-aggregation-execution-order-and-you[Kibana,
-Aggregation Execution Order, and You].
+--
 
 include::{kib-repo-dir}/visualize/saving.asciidoc[]
 
-include::{kib-repo-dir}/visualize/visualize_rollup_data.asciidoc[]
+include::{kib-repo-dir}/visualize/most-frequent.asciidoc[]
 
-include::{kib-repo-dir}/visualize/xychart.asciidoc[]
-
-include::{kib-repo-dir}/visualize/controls.asciidoc[]
-
-include::{kib-repo-dir}/visualize/datatable.asciidoc[]
-
-include::{kib-repo-dir}/visualize/markdown.asciidoc[]
-
-include::{kib-repo-dir}/visualize/metric.asciidoc[]
-
-include::{kib-repo-dir}/visualize/goal.asciidoc[]
-
-include::{kib-repo-dir}/visualize/pie.asciidoc[]
-
-include::{kib-repo-dir}/visualize/tilemap.asciidoc[]
-
-include::{kib-repo-dir}/visualize/regionmap.asciidoc[]
-
-include::{kib-repo-dir}/visualize/timelion.asciidoc[]
+// include::{kib-repo-dir}/visualize/xychart.asciidoc[]
+// include::{kib-repo-dir}/visualize/pie.asciidoc[]
+// include::{kib-repo-dir}/visualize/datatable.asciidoc[]
+// include::{kib-repo-dir}/visualize/metric.asciidoc[]
+// include::{kib-repo-dir}/visualize/goal.asciidoc[]
+// include::{kib-repo-dir}/visualize/heatmap.asciidoc[]
+// include::{kib-repo-dir}/visualize/tagcloud.asciidoc[]
 
 include::{kib-repo-dir}/visualize/tsvb.asciidoc[]
+include::{kib-repo-dir}/visualize/timelion.asciidoc[]
 
-include::{kib-repo-dir}/visualize/tagcloud.asciidoc[]
+include::{kib-repo-dir}/visualize/tilemap.asciidoc[]
+include::{kib-repo-dir}/visualize/regionmap.asciidoc[]
 
-include::{kib-repo-dir}/visualize/heatmap.asciidoc[]
+include::{kib-repo-dir}/visualize/for-dashboard.asciidoc[]
 
 include::{kib-repo-dir}/visualize/vega.asciidoc[]
 
 include::{kib-repo-dir}/visualize/inspector.asciidoc[]
+
+include::{kib-repo-dir}/visualize/visualize_rollup_data.asciidoc[]
