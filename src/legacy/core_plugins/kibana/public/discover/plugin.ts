@@ -19,9 +19,12 @@
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
 import { IUiActionsStart } from 'src/plugins/ui_actions/public';
-import { Start as EmbeddableStart, Setup as EmbeddableSetup } from 'src/plugins/embeddable/public';
 import { registerFeature } from './helpers/register_feature';
 import './kibana_services';
+import {
+  Start as EmbeddableStart,
+  Setup as EmbeddableSetup,
+} from '../../../../../plugins/embeddable/public';
 
 /**
  * These are the interfaces with your public contracts. You should export these
