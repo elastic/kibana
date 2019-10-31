@@ -123,8 +123,9 @@ export function getSuggestionsProvider({ indexPatterns }) {
   const allFields = flatten(indexPatterns.map(indexPattern => {
     return indexPattern.fields.slice();
   }));
-  return function getOperatorSuggestions({ end, fieldName }) {
-    const fields = allFields.filter(field => field.name === fieldName);
+  return function getOperatorSuggestions({ end, fieldName, nestedPath }) {
+    const fullFieldName = nestedPath ? `${nestedPath}.${fieldName}` : fieldName;
+    const fields = allFields.filter(field => field.name === fullFieldName);
     return flatten(fields.map(field => {
       const matchingOperators = Object.keys(operators).filter(operator => {
         const { fieldTypes } = operators[operator];
