@@ -195,12 +195,12 @@ export class StepDateHistogramUi extends Component {
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiTitle data-test-subj="rollupJobCreateDateHistogramTitle">
-              <h3>
+              <h2>
                 <FormattedMessage
                   id="xpack.rollupJobs.create.stepDateHistogramTitle"
                   defaultMessage="Date histogram"
                 />
-              </h3>
+              </h2>
             </EuiTitle>
           </EuiFlexItem>
 

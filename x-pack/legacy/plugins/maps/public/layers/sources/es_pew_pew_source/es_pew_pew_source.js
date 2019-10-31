@@ -14,7 +14,7 @@ import { UpdateSourceEditor } from './update_source_editor';
 import { VectorStyle } from '../../styles/vector/vector_style';
 import { vectorStyles } from '../../styles/vector/vector_style_defaults';
 import { i18n } from '@kbn/i18n';
-import { SOURCE_DATA_ID_ORIGIN, ES_PEW_PEW } from '../../../../common/constants';
+import { SOURCE_DATA_ID_ORIGIN, ES_PEW_PEW, METRIC_TYPE } from '../../../../common/constants';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { convertToLines } from './convert_to_lines';
 import { Schemas } from 'ui/vis/editors/default/schemas';
@@ -31,9 +31,16 @@ const aggSchemas = new Schemas([
     title: 'Value',
     min: 1,
     max: Infinity,
-    aggFilter: ['avg', 'count', 'max', 'min', 'sum'],
+    aggFilter: [
+      METRIC_TYPE.AVG,
+      METRIC_TYPE.COUNT,
+      METRIC_TYPE.MAX,
+      METRIC_TYPE.MIN,
+      METRIC_TYPE.SUM,
+      METRIC_TYPE.UNIQUE_COUNT
+    ],
     defaults: [
-      { schema: 'metric', type: 'count' }
+      { schema: 'metric', type: METRIC_TYPE.COUNT }
     ]
   }
 ]);

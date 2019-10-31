@@ -34,7 +34,7 @@ export interface EmailAction extends BaseAction {
 
 export interface LoggingAction extends BaseAction {
   type: LoggingActionType;
-  iconClass: 'loggingApp';
+  iconClass: 'logsApp';
   text: string;
 }
 

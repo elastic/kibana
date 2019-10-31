@@ -103,4 +103,13 @@ export const DRAW_TYPE = {
   POLYGON: 'POLYGON'
 };
 
+export const METRIC_TYPE = {
+  AVG: 'avg',
+  COUNT: 'count',
+  MAX: 'max',
+  MIN: 'min',
+  SUM: 'sum',
+  UNIQUE_COUNT: 'cardinality',
+};
+
 export const COUNT_AGG_TYPE = 'count';

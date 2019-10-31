@@ -9,7 +9,7 @@ import _ from 'lodash';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { AggConfigs } from 'ui/agg_types';
 import { i18n } from '@kbn/i18n';
-import { ES_SIZE_LIMIT } from '../../../common/constants';
+import { ES_SIZE_LIMIT, METRIC_TYPE } from '../../../common/constants';
 import { ESDocField } from '../fields/es_doc_field';
 import { AbstractESAggSource } from './es_agg_source';
 
@@ -25,9 +25,16 @@ const aggSchemas = new Schemas([
     title: 'Value',
     min: 1,
     max: Infinity,
-    aggFilter: ['avg', 'count', 'max', 'min', 'sum'],
+    aggFilter: [
+      METRIC_TYPE.AVG,
+      METRIC_TYPE.COUNT,
+      METRIC_TYPE.MAX,
+      METRIC_TYPE.MIN,
+      METRIC_TYPE.SUM,
+      METRIC_TYPE.UNIQUE_COUNT
+    ],
     defaults: [
-      { schema: 'metric', type: 'count' }
+      { schema: 'metric', type: METRIC_TYPE.COUNT }
     ]
   },
   {
@@ -92,12 +99,12 @@ export class ESTermSource extends AbstractESAggSource {
   }
 
   formatMetricKey(aggType, fieldName) {
-    const metricKey = aggType !== 'count' ? `${aggType}_of_${fieldName}` : aggType;
+    const metricKey = aggType !== METRIC_TYPE.COUNT ? `${aggType}_of_${fieldName}` : aggType;
     return `${FIELD_NAME_PREFIX}${metricKey}${GROUP_BY_DELIMITER}${this._descriptor.indexPatternTitle}.${this._termField.getName()}`;
   }
 
   formatMetricLabel(type, fieldName) {
-    const metricLabel = type !== 'count' ? `${type} ${fieldName}` : 'count';
+    const metricLabel = type !== METRIC_TYPE.COUNT ? `${type} ${fieldName}` : 'count';
     return `${metricLabel} of ${this._descriptor.indexPatternTitle}:${this._termField.getName()}`;
   }
 
@@ -119,13 +126,13 @@ export class ESTermSource extends AbstractESAggSource {
 
     const metricPropertyNames = configStates
       .filter(configState => {
-        return configState.schema === 'metric' && configState.type !== 'count';
+        return configState.schema === 'metric' && configState.type !== METRIC_TYPE.COUNT;
       })
       .map(configState => {
         return configState.id;
       });
     const countConfigState = configStates.find(configState => {
-      return configState.type === 'count';
+      return configState.type === METRIC_TYPE.COUNT;
     });
     const countPropertyName = _.get(countConfigState, 'id');
     return {
