@@ -169,16 +169,19 @@ export function getApi(
 
   return Rx.timer(0, config.mainInterval).pipe(
     filter(() => driver.shouldFetch()),
-    mergeMap(() => driver.fetchNewsfeedItems(http, config.service)),
-    tap(() => driver.updateLastFetch()),
-    catchError(err => {
-      window.console.error(err);
-      return Rx.of({
-        error: err,
-        kibanaVersion,
-        hasNew: false,
-        feedItems: [],
-      });
-    })
+    mergeMap(() =>
+      driver.fetchNewsfeedItems(http, config.service).pipe(
+        catchError(err => {
+          window.console.error(err);
+          return Rx.of({
+            error: err,
+            kibanaVersion,
+            hasNew: false,
+            feedItems: [],
+          });
+        })
+      )
+    ),
+    tap(() => driver.updateLastFetch())
   );
 }
