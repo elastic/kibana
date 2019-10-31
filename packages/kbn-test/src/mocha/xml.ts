@@ -22,17 +22,16 @@ import regenerate from 'regenerate';
 import stripAnsi from 'strip-ansi';
 
 // create a regular expression using regenerate() that selects any character that is explicitly allowed by https://www.w3.org/TR/xml/#NT-Char
-const validXmlCharsRE = new RegExp(
-  `(?:${regenerate()
-    .add(0x9, 0xa, 0xd)
-    .addRange(0x20, 0xd7ff)
-    .addRange(0xe000, 0xfffd)
-    .addRange(0x10000, 0x10ffff)
-    .toString()})*`,
-  'g'
-);
+const validXmlCharsRE = regenerate()
+  .add(0x9, 0xa, 0xd)
+  .addRange(0x20, 0xd7ff)
+  .addRange(0xe000, 0xfffd)
+  .addRange(0x10000, 0x10ffff)
+  .toRegExp();
 
 export function escapeCdata(input: string) {
-  const match = stripAnsi(input).match(validXmlCharsRE) || [];
-  return match.join('');
+  return stripAnsi(input)
+    .split('')
+    .filter(char => validXmlCharsRE.test(char))
+    .join('');
 }

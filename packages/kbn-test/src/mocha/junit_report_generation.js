@@ -24,7 +24,7 @@ import { inspect } from 'util';
 import xmlBuilder from 'xmlbuilder';
 
 import { getSnapshotOfRunnableLogs } from './log_cache';
-import { escapeCdata } from '../';
+import { escapeCdata } from './xml';
 
 const dateNow = Date.now.bind(Date);
 
