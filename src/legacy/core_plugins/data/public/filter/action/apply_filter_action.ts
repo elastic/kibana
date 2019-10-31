@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { Filter } from '@kbn/es-query';
-import { npStart } from 'ui/new_platform';
+import { CoreStart } from 'src/core/public';
 import {
   IAction,
   createAction,
@@ -45,6 +45,7 @@ async function isCompatible(context: ActionContext) {
 }
 
 export function createFilterAction(
+  overlays: CoreStart['overlays'],
   filterManager: FilterManager,
   timeFilter: TimefilterContract,
   indexPatternsService: IndexPatternsStart
@@ -77,7 +78,7 @@ export function createFilterAction(
         );
 
         const filterSelectionPromise: Promise<Filter[]> = new Promise(resolve => {
-          const overlay = npStart.core.overlays.openModal(
+          const overlay = overlays.openModal(
             applyFiltersPopover(
               filters,
               indexPatterns,
