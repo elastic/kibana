@@ -51,10 +51,7 @@ export const NewsfeedFlyout = () => {
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h2 id="flyoutSmallTitle">
-            <FormattedMessage
-              id="newsfeed.components.flyoutList.flyoutTitle"
-              defaultMessage="What's new"
-            />
+            <FormattedMessage id="newsfeed.flyoutList.whatsNewTitle" defaultMessage="What's new" />
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
@@ -81,16 +78,13 @@ export const NewsfeedFlyout = () => {
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
-              <FormattedMessage
-                id="newsfeed.components.flyoutList.closeButtonLabel"
-                defaultMessage="Close"
-              />
+              <FormattedMessage id="newsfeed.flyoutList.closeButtonLabel" defaultMessage="Close" />
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText color="subdued" size="s">
               <p>
-                {i18n.translate('newsfeed.components.flyoutList.versionLabel', {
+                {i18n.translate('newsfeed.flyoutList.versionTextLabel', {
                   defaultMessage: `Version ${kibanaVersion}`,
                 })}
               </p>
