@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import { pushFilterBarFilters } from '../push_filters';
+import { npStart } from 'ui/new_platform';
 import { onBrushEvent } from './brush_event';
 import { uniqFilters } from '../../../../../plugins/data/public';
 import { toggleFilterNegated } from '@kbn/es-query';
@@ -104,14 +103,11 @@ const createFiltersFromEvent = (event) => {
   return filters;
 };
 
-const VisFiltersProvider = (getAppState, $timeout) => {
+const VisFiltersProvider = () => {
 
   const pushFilters = (filters, simulate) => {
-    const appState = getAppState();
     if (filters.length && !simulate) {
-      pushFilterBarFilters(appState, uniqFilters(filters));
-      // to trigger angular digest cycle, we can get rid of this once we have either new filterManager or actions API
-      $timeout(_.noop, 0);
+      npStart.plugins.data.query.filterManager.addFilters(uniqFilters(filters));
     }
   };
 
