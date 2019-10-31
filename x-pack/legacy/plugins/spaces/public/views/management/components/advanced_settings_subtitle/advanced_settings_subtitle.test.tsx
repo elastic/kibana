@@ -20,6 +20,7 @@ describe('AdvancedSettingsSubtitle', () => {
       <AdvancedSettingsSubtitle getActiveSpace={() => Promise.resolve(space)} />
     );
 
+    // Wait for active space to resolve before requesting the component to update
     await Promise.resolve();
     await Promise.resolve();
 
