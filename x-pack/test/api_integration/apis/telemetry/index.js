@@ -8,5 +8,6 @@ export default function ({ loadTestFile }) {
   describe('Telemetry', () => {
     loadTestFile(require.resolve('./telemetry'));
     loadTestFile(require.resolve('./telemetry_local'));
+    loadTestFile(require.resolve('./opt_in'));
   });
 }
