@@ -5,6 +5,8 @@
  */
 import React from 'react';
 
+import { i18n } from '@kbn/i18n';
+
 import { NormalizedField, Field as FieldType } from '../../../../types';
 import { UseField, Field } from '../../../../shared_imports';
 import { getFieldConfig } from '../../../../lib';
@@ -61,8 +63,16 @@ export const KeywordType = ({ field }: Props) => {
         <EditFieldSection>
           {/* normalizer */}
           <EditFieldFormRow
-            title={<h3>Use index default normalizer</h3>}
-            description="This is description text."
+            title={
+              <h3>
+                {i18n.translate('xpack.idxMgmt.mappingsEditor.normalizerFieldTitle', {
+                  defaultMessage: 'Use index default normalizer',
+                })}
+              </h3>
+            }
+            description={i18n.translate('xpack.idxMgmt.mappingsEditor.normalizerFieldDescription', {
+              defaultMessage: 'How to pre-process the keyword prior to indexing.',
+            })}
             toggleDefaultValue={getDefaultValueToggle('normalizer', field.source)}
           >
             {isOn =>
@@ -89,8 +99,19 @@ export const KeywordType = ({ field }: Props) => {
 
           {/* ignore_above */}
           <EditFieldFormRow
-            title={<h3>Set length limit</h3>}
-            description="This is description text."
+            title={
+              <h3>
+                {i18n.translate('xpack.idxMgmt.mappingsEditor.lengthLimitFieldTitle', {
+                  defaultMessage: 'Set length limit',
+                })}
+              </h3>
+            }
+            description={i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.lengthLimitFieldDescription',
+              {
+                defaultMessage: 'Do not index any string longer than this value.',
+              }
+            )}
             toggleDefaultValue={getDefaultValueToggle('ignore_above', field.source)}
           >
             <UseField
@@ -112,8 +133,20 @@ export const KeywordType = ({ field }: Props) => {
 
           {/* split_queries_on_whitespace */}
           <EditFieldFormRow
-            title={<h3>Split queries on whitespace</h3>}
-            description="This is description text."
+            title={
+              <h3>
+                {i18n.translate('xpack.idxMgmt.mappingsEditor.splitQueriesOnWhitespaceFieldTitle', {
+                  defaultMessage: 'Split queries on whitespace',
+                })}
+              </h3>
+            }
+            description={i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.splitQueriesOnWhitespaceFieldDescription',
+              {
+                defaultMessage:
+                  'Whether full text queries should split the input on whitespace when building a query for this field.',
+              }
+            )}
             formFieldPath="split_queries_on_whitespace"
           />
         </EditFieldSection>

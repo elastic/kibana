@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 import { ValidationFunc } from '../shared_imports';
 import { NormalizedFields } from '../types';
 
@@ -21,7 +23,9 @@ export const validateUniqueName = (
 
     if (existingNames.filter(name => name !== initialName).includes(value as string)) {
       return {
-        message: 'There is already a field with this name.',
+        message: i18n.translate('xpack.idxMgmt.mappingsEditor.existNamesValidationErrorMessage', {
+          defaultMessage: 'There is already a field with this name.',
+        }),
       };
     }
   };

@@ -5,6 +5,7 @@
  */
 import React, { useState } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { UseField, SelectField, TextField, FieldConfig, FieldHook } from '../../shared_imports';
 import { SelectOption } from '../../types';
@@ -46,7 +47,13 @@ export const SelectWithCustom = ({ path, options, defaultValue, config, label }:
             onClick={toggleCustom(field)}
             className="mappings-editor__select-with-custom__button"
           >
-            {isCustom ? 'Use predefined' : 'Add custom'}
+            {isCustom
+              ? i18n.translate('xpack.idxMgmt.mappingsEditor.predefinedButtonLabel', {
+                  defaultMessage: 'Use predefined',
+                })
+              : i18n.translate('xpack.idxMgmt.mappingsEditor.customButtonLabel', {
+                  defaultMessage: 'Add custom',
+                })}
           </EuiButtonEmpty>
           {isCustom ? (
             <TextField field={field} />
