@@ -1,7 +1,9 @@
 [role="xpack"]
 [[xpack-ml]]
-== {ml-cap}
+= {ml-cap}
 
+[partintro]
+--
 As datasets increase in size and complexity, the human effort required to
 inspect dashboards or maintain rules for spotting infrastructure problems,
 cyber attacks, or business issues becomes impractical. The Elastic {ml} 
