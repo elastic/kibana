@@ -39,7 +39,8 @@ import { NewsfeedItem } from '../../types';
 
 export const NewsfeedFlyout = () => {
   const { newsfeed, kibanaVersion, setFlyoutVisible } = useContext(NewsfeedContext);
-  const closeFlyout = useCallback(() => setFlyoutVisible(false), []);
+  const closeFlyout = useCallback(() => setFlyoutVisible(false), [setFlyoutVisible]);
+
   return (
     <EuiFlyout
       onClose={closeFlyout}
@@ -61,6 +62,7 @@ export const NewsfeedFlyout = () => {
         {newsfeed.map((item: NewsfeedItem) => {
           return (
             <EuiHeaderAlert
+              key={item.hash}
               title={item.title}
               text={item.description}
               action={

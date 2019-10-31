@@ -35,7 +35,6 @@ interface Props {
 }
 
 export const NewsfeedNavButton = ({ apiFetchResult }: Props) => {
-  let subscription: Rx.Subscription;
   const [showBadge, setShowBadge] = useState<boolean>(false);
   const [flyoutVisible, setFlyoutVisible] = useState<boolean>(false);
   const [newsfeed, setNewsfeed] = useState<NewsfeedItem[]>([]);
@@ -48,8 +47,8 @@ export const NewsfeedNavButton = ({ apiFetchResult }: Props) => {
       setKibanaVersion(fetchResult.kibanaVersion);
     }
 
-    subscription = apiFetchResult.subscribe(res => {
-      if (res) {
+    const subscription = apiFetchResult.subscribe(res => {
+      if (res && !res.error) {
         handleStatusChange(res);
       }
     });
@@ -58,7 +57,7 @@ export const NewsfeedNavButton = ({ apiFetchResult }: Props) => {
         subscription.unsubscribe();
       }
     };
-  }, []);
+  }, [apiFetchResult]);
 
   function showFlyout() {
     setShowBadge(false);
