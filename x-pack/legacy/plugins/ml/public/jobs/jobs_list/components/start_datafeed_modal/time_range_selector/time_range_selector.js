@@ -198,7 +198,7 @@ function TabStack({ title, items, switchState, switchFunc }) {
 
             return (
               <li key={i} className={className} >
-                <a onClick={() => switchFunc(item.index)}>{item.label}</a>
+                <a onClick={() => switchFunc(item.index)} onKeyUp={() => {}} >{item.label}</a>
                 {(item.body !== undefined) &&
                   <div className="body">
                     {item.body}

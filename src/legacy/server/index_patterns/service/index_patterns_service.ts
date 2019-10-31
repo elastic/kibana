@@ -28,8 +28,12 @@ export interface FieldDescriptor {
   searchable: boolean;
   type: string;
   esTypes: string[];
-  parent?: string;
-  subType?: string;
+  subType?: FieldSubType;
+}
+
+interface FieldSubType {
+  multi?: { parent: string };
+  nested?: { path: string };
 }
 
 export class IndexPatternsService {
