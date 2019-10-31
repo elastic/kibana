@@ -7,7 +7,6 @@
 import { Filter } from '@kbn/es-query';
 import actionCreatorFactory from 'typescript-fsa';
 
-import { SavedQuery } from '../../../../../../../src/legacy/core_plugins/data/public';
 import { ColumnHeader } from '../../components/timeline/body/column_headers/column_header';
 import { Sort } from '../../components/timeline/body/sort';
 import {
@@ -190,9 +189,9 @@ export const updateAutoSaveMsg = actionCreator<{
 
 export const showCallOutUnauthorizedMsg = actionCreator('SHOW_CALL_OUT_UNAUTHORIZED_MSG');
 
-export const setSavedQuery = actionCreator<{
+export const setSavedQueryId = actionCreator<{
   id: string;
-  savedQuery: SavedQuery | null;
+  savedQueryId: string | null;
 }>('SET_TIMELINE_SAVED_QUERY');
 
 export const setFilters = actionCreator<{

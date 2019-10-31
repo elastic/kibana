@@ -4,7 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, has, merge as mergeObject, set, omit } from 'lodash/fp';
+import {
+  get,
+  has,
+  merge as mergeObject,
+  set,
+  omit,
+  isObject,
+  toString as fpToString,
+} from 'lodash/fp';
 import { Action } from 'redux';
 import { Epic } from 'redux-observable';
 import { from, Observable, empty, merge } from 'rxjs';
@@ -20,6 +28,7 @@ import {
   takeUntil,
 } from 'rxjs/operators';
 
+import { Filter } from '@kbn/es-query';
 import { ColumnHeader } from '../../components/timeline/body/column_headers/column_header';
 import { persistTimelineMutation } from '../../containers/timeline/persist.gql_query';
 import {
@@ -52,6 +61,8 @@ import {
   updateTimeline,
   updateTitle,
   updateAutoSaveMsg,
+  setFilters,
+  setSavedQueryId,
   startTimelineSaving,
   endTimelineSaving,
   createTimeline,
@@ -81,6 +92,8 @@ const timelineActionsType = [
   dataProviderEdited.type,
   removeColumn.type,
   removeProvider.type,
+  setFilters.type,
+  setSavedQueryId.type,
   updateColumns.type,
   updateDataProviderEnabled.type,
   updateDataProviderExcluded.type,
@@ -235,10 +248,12 @@ const timelineInput: TimelineInput = {
   columns: null,
   dataProviders: null,
   description: null,
+  filters: null,
   kqlMode: null,
   kqlQuery: null,
   title: null,
   dateRange: null,
+  savedQueryId: null,
   sort: null,
 };
 
@@ -258,6 +273,34 @@ const convertTimelineAsInput = (
           get(key, timeline).map((col: ColumnHeader) => omit(['width', '__typename'], col)),
           acc
         );
+      } else if (key === 'filters' && get(key, timeline) != null) {
+        const filters = get(key, timeline);
+        return set(
+          key,
+          filters != null
+            ? filters.map((myfilter: Filter) => {
+                const basicFilter = omit(['$state'], myfilter);
+                return {
+                  ...basicFilter,
+                  meta: {
+                    ...basicFilter.meta,
+                    value:
+                      basicFilter.meta.value != null
+                        ? convertToString(basicFilter.meta.value)
+                        : null,
+                    params:
+                      basicFilter.meta.params != null
+                        ? convertToString(basicFilter.meta.params)
+                        : null,
+                  },
+                  ...(basicFilter.query != null
+                    ? { query: convertToString(basicFilter.query) }
+                    : { query: null }),
+                };
+              })
+            : [],
+          acc
+        );
       }
       return set(key, get(key, timeline), acc);
     }
@@ -271,3 +314,14 @@ const omitTypenameInTimeline = (
   oldTimeline: TimelineModel,
   newTimeline: TimelineResult
 ): TimelineModel => JSON.parse(JSON.stringify(mergeObject(oldTimeline, newTimeline)), omitTypename);
+
+const convertToString = (obj: unknown) => {
+  try {
+    if (isObject(obj)) {
+      return JSON.stringify(obj);
+    }
+    return fpToString(obj);
+  } catch {
+    return '';
+  }
+};

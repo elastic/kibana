@@ -146,6 +146,44 @@ export const timelineSavedObjectMappings: {
           },
         },
       },
+      filters: {
+        properties: {
+          meta: {
+            properties: {
+              alias: {
+                type: 'text',
+              },
+              controlledBy: {
+                type: 'text',
+              },
+              disabled: {
+                type: 'boolean',
+              },
+              index: {
+                type: 'keyword',
+              },
+              key: {
+                type: 'keyword',
+              },
+              negate: {
+                type: 'boolean',
+              },
+              params: {
+                type: 'text',
+              },
+              type: {
+                type: 'keyword',
+              },
+              value: {
+                type: 'text',
+              },
+            },
+          },
+          query: {
+            type: 'text',
+          },
+        },
+      },
       kqlMode: {
         type: 'keyword',
       },
@@ -182,6 +220,9 @@ export const timelineSavedObjectMappings: {
             type: 'date',
           },
         },
+      },
+      savedQueryId: {
+        type: 'keyword',
       },
       sort: {
         properties: {

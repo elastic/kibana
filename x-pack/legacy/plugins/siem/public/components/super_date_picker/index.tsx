@@ -12,11 +12,12 @@ import {
   OnRefreshProps,
   OnTimeChangeProps,
 } from '@elastic/eui';
-import { getOr, take } from 'lodash/fp';
+import { getOr, take, isEmpty } from 'lodash/fp';
 import React, { useState, useCallback } from 'react';
 import { connect } from 'react-redux';
-
 import { Dispatch } from 'redux';
+
+import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
 import { inputsModel, State } from '../../store';
 import { inputsActions, timelineActions } from '../../store/actions';
 import { InputsModelId } from '../../store/inputs/constants';
@@ -194,8 +195,18 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
     const endDate = kind === 'relative' ? toStr : new Date(end).toISOString();
     const startDate = kind === 'relative' ? fromStr : new Date(start).toISOString();
 
+    const [quickRanges] = useKibanaUiSetting('timepicker:quickRanges');
+    const commonlyUsedRanges = isEmpty(quickRanges)
+      ? []
+      : quickRanges.map(({ from, to, display }: { from: string; to: string; display: string }) => ({
+          start: from,
+          end: to,
+          label: display,
+        }));
+
     return (
       <EuiSuperDatePicker
+        commonlyUsedRanges={commonlyUsedRanges}
         end={endDate}
         isLoading={isLoading}
         isPaused={policy === 'manual'}

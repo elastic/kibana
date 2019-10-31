@@ -72,6 +72,20 @@ export const oneTimelineQuery = gql`
         userName
         favoriteDate
       }
+      filters {
+        meta {
+          alias
+          controlledBy
+          disabled
+          index
+          key
+          negate
+          params
+          type
+          value
+        }
+        query
+      }
       kqlMode
       kqlQuery {
         filterQuery {
@@ -107,6 +121,7 @@ export const oneTimelineQuery = gql`
         version
       }
       title
+      savedQueryId
       sort {
         columnId
         sortDirection

@@ -4,53 +4,178 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Filter } from '@kbn/es-query';
-import { isEqual } from 'lodash/fp';
+import { Filter, FilterStateStore } from '@kbn/es-query';
+import { isEqual, isEmpty } from 'lodash/fp';
 import React, { memo, useCallback, useState, useEffect } from 'react';
 import { StaticIndexPattern } from 'ui/index_patterns';
-
 import { Query } from 'src/plugins/data/common/types';
 
-import { SavedQuery } from '../../../../../../../../src/legacy/core_plugins/data/public';
+import { Subscription } from 'rxjs';
+import { SavedQueryTimeFilter } from '../../../../../../../../src/legacy/core_plugins/data/public/search';
+import {
+  SavedQuery,
+  FilterManager,
+} from '../../../../../../../../src/legacy/core_plugins/data/public';
+
+import { BrowserFields } from '../../../containers/source';
+import { convertKueryToElasticSearchQuery } from '../../../lib/keury';
+import { useKibanaCore } from '../../../lib/compose/kibana_core';
 import { KueryFilterQuery, KueryFilterQueryKind } from '../../../store';
+import { KqlMode } from '../../../store/timeline/model';
+import { useSavedQueryServices } from '../../../utils/saved_query_services';
+import { DispatchUpdateReduxTime } from '../../super_date_picker';
 import { QueryBar } from '../../query_bar';
+import { DataProvider } from '../data_providers/data_provider';
+import { buildGlobalQuery } from '../helpers';
 
 interface QueryBarTimelineComponentProps {
   applyKqlFilterQuery: (expression: string, kind: KueryFilterQueryKind) => void;
+  browserFields: BrowserFields;
+  dataProviders: DataProvider[];
   filters: Filter[];
+  filterQuery: KueryFilterQuery;
   filterQueryDraft: KueryFilterQuery;
+  from: number;
+  fromStr: string;
+  kqlMode: KqlMode;
   indexPattern: StaticIndexPattern;
-  savedQuery: SavedQuery | null;
+  savedQueryId: string | null;
   setFilters: (filters: Filter[]) => void;
   setKqlFilterQueryDraft: (expression: string, kind: KueryFilterQueryKind) => void;
-  setSavedQuery: (savedQuery: SavedQuery | null) => void;
+  setSavedQueryId: (savedQueryId: string | null) => void;
+  timelineId: string;
+  to: number;
+  toStr: string;
+  updateReduxTime: DispatchUpdateReduxTime;
 }
+
+const timelineFilterDropArea = 'timeline-filter-drop-area';
 
 export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
   ({
     applyKqlFilterQuery,
+    browserFields,
+    dataProviders,
     filters,
+    filterQuery,
     filterQueryDraft,
+    from,
+    fromStr,
+    kqlMode,
     indexPattern,
-    savedQuery,
+    savedQueryId,
     setFilters,
     setKqlFilterQueryDraft,
-    setSavedQuery,
+    setSavedQueryId,
+    timelineId,
+    to,
+    toStr,
+    updateReduxTime,
   }) => {
-    const [filterQuery, setFilterQuery] = useState<Query>({
-      query: filterQueryDraft != null ? filterQueryDraft.expression : '',
-      language: filterQueryDraft != null ? filterQueryDraft.kind : 'kuery',
+    const [dateRangeFrom, setDateRangeFrom] = useState<string>('');
+    const [dateRangeTo, setDateRangTo] = useState<string>('');
+
+    const [savedQuery, setSavedQuery] = useState<SavedQuery | null>(null);
+    const [filterQueryConverted, setFilterQueryConverted] = useState<Query>({
+      query: filterQuery != null ? filterQuery.expression : '',
+      language: filterQuery != null ? filterQuery.kind : 'kuery',
     });
+    const [queryBarFilters, setQueryBarFilters] = useState<Filter[]>([]);
+    const [dataProvidersDsl, setDataProvidersDsl] = useState<string>(
+      convertKueryToElasticSearchQuery(buildGlobalQuery(dataProviders, browserFields), indexPattern)
+    );
+    const core = useKibanaCore();
+    const [filterManager] = useState<FilterManager>(new FilterManager(core.uiSettings));
+
+    const savedQueryServices = useSavedQueryServices();
 
     useEffect(() => {
-      setFilterQuery({
-        query: filterQueryDraft != null ? filterQueryDraft.expression : '',
-        language: filterQueryDraft != null ? filterQueryDraft.kind : 'kuery',
-      });
-    }, [filterQueryDraft]);
+      let isSubscribed = true;
+      const subscriptions = new Subscription();
 
-    const onChangedQueryAndFilter = useCallback(
-      ({ query: newQuery, filters: newFilters }: { query: Query; filters: Filter[] }) => {
+      filterManager.setFilters(filters);
+
+      subscriptions.add(
+        filterManager.getUpdates$().subscribe({
+          next: () => {
+            if (isSubscribed) {
+              const filterWithoutDropArea = filterManager
+                .getFilters()
+                .filter(f => f.meta.controlledBy !== timelineFilterDropArea);
+              setFilters(filterWithoutDropArea);
+              setQueryBarFilters(filterWithoutDropArea);
+            }
+          },
+        })
+      );
+
+      return () => {
+        isSubscribed = false;
+        subscriptions.unsubscribe();
+      };
+    }, []);
+
+    useEffect(() => {
+      const filterWithoutDropArea = filterManager
+        .getFilters()
+        .filter(f => f.meta.controlledBy !== timelineFilterDropArea);
+      if (!isEqual(filters, filterWithoutDropArea)) {
+        filterManager.setFilters(filters);
+      }
+    }, [filters]);
+
+    useEffect(() => {
+      setFilterQueryConverted({
+        query: filterQuery != null ? filterQuery.expression : '',
+        language: filterQuery != null ? filterQuery.kind : 'kuery',
+      });
+    }, [filterQuery]);
+
+    useEffect(() => {
+      setDataProvidersDsl(
+        convertKueryToElasticSearchQuery(
+          buildGlobalQuery(dataProviders, browserFields),
+          indexPattern
+        )
+      );
+    }, [dataProviders, browserFields, indexPattern]);
+
+    useEffect(() => {
+      if (fromStr != null && toStr != null) {
+        setDateRangeFrom(fromStr);
+        setDateRangTo(toStr);
+      } else if (from != null && to != null) {
+        setDateRangeFrom(new Date(from).toISOString());
+        setDateRangTo(new Date(to).toISOString());
+      }
+    }, [from, fromStr, to, toStr]);
+
+    useEffect(() => {
+      let isSubscribed = true;
+      async function setSavedQueryByServices() {
+        if (savedQueryId != null && savedQueryServices != null) {
+          const mySavedQuery = await savedQueryServices.getSavedQuery(savedQueryId);
+          if (isSubscribed) {
+            setSavedQuery({
+              ...mySavedQuery,
+              attributes: {
+                ...mySavedQuery.attributes,
+                filters: filters.filter(f => f.meta.controlledBy !== timelineFilterDropArea),
+              },
+            });
+          }
+        } else if (isSubscribed) {
+          setSavedQuery(null);
+        }
+      }
+      setSavedQueryByServices();
+      return () => {
+        isSubscribed = false;
+      };
+    }, [savedQueryId]);
+
+    const onChangedQuery = useCallback(
+      (newQuery: Query) => {
         if (
           filterQueryDraft == null ||
           ((filterQueryDraft != null && filterQueryDraft.expression !== newQuery.query) ||
@@ -61,19 +186,17 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
             newQuery.language as KueryFilterQueryKind
           );
         }
-        if (!isEqual(filters, newFilters)) {
-          setFilters(newFilters);
-        }
       },
       [filterQueryDraft]
     );
 
-    const onSubmitQueryAndFilter = useCallback(
-      ({ query: newQuery, filters: newFilters }: { query: Query; filters: Filter[] }) => {
+    const onSubmitQuery = useCallback(
+      (newQuery: Query, timefilter?: SavedQueryTimeFilter) => {
+        // TODO need to add time
         if (
-          filterQueryDraft == null ||
-          ((filterQueryDraft != null && filterQueryDraft.expression !== newQuery.query) ||
-            filterQueryDraft.kind !== newQuery.language)
+          filterQuery == null ||
+          ((filterQuery != null && filterQuery.expression !== newQuery.query) ||
+            filterQuery.kind !== newQuery.language)
         ) {
           setKqlFilterQueryDraft(
             newQuery.query as string,
@@ -81,23 +204,98 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
           );
           applyKqlFilterQuery(newQuery.query as string, newQuery.language as KueryFilterQueryKind);
         }
-        if (!isEqual(filters, newFilters)) {
-          setFilters(newFilters);
+        if (timefilter != null) {
+          const isQuickSelection = timefilter.from.includes('now') || timefilter.to.includes('now');
+
+          updateReduxTime({
+            id: 'timeline',
+            end: timefilter.to,
+            start: timefilter.from,
+            isInvalid: false,
+            isQuickSelection,
+            timelineId,
+          });
         }
       },
-      [filterQueryDraft]
+      [filterQuery, timelineId]
+    );
+
+    const onSavedQuery = useCallback(
+      (newSavedQuery: SavedQuery | null) => {
+        if (newSavedQuery != null) {
+          if (newSavedQuery.id !== savedQueryId) {
+            setSavedQueryId(newSavedQuery.id);
+          }
+          if (savedQueryServices != null && dataProvidersDsl !== '') {
+            const dataProviderFilterExists =
+              newSavedQuery.attributes.filters != null
+                ? newSavedQuery.attributes.filters.findIndex(
+                    f => f.meta.controlledBy === timelineFilterDropArea
+                  )
+                : -1;
+            savedQueryServices.saveQuery(
+              {
+                ...newSavedQuery.attributes,
+                filters:
+                  newSavedQuery.attributes.filters != null
+                    ? dataProviderFilterExists > -1
+                      ? [
+                          ...newSavedQuery.attributes.filters.slice(0, dataProviderFilterExists),
+                          getDataProviderFilter(dataProvidersDsl),
+                          ...newSavedQuery.attributes.filters.slice(dataProviderFilterExists + 1),
+                        ]
+                      : [
+                          ...newSavedQuery.attributes.filters,
+                          getDataProviderFilter(dataProvidersDsl),
+                        ]
+                    : [],
+              },
+              {
+                overwrite: true,
+              }
+            );
+          }
+        } else {
+          setSavedQueryId(null);
+        }
+      },
+      [dataProvidersDsl, savedQueryId, savedQueryServices]
     );
 
     return (
       <QueryBar
+        dateRangeFrom={dateRangeFrom}
+        dateRangeTo={dateRangeTo}
+        hideSavedQuery={kqlMode === 'search'}
         indexPattern={indexPattern}
-        filterQuery={filterQuery}
-        filters={filters}
-        onChangedQueryAndFilter={onChangedQueryAndFilter}
-        onSubmitQueryAndFilter={onSubmitQueryAndFilter}
+        filterQuery={filterQueryConverted}
+        filterManager={filterManager}
+        filters={queryBarFilters}
+        onChangedQuery={onChangedQuery}
+        onSubmitQuery={onSubmitQuery}
         savedQuery={savedQuery}
-        setSavedQuery={setSavedQuery}
+        onSavedQuery={onSavedQuery}
       />
     );
   }
 );
+
+const getDataProviderFilter = (dataProviderDsl: string): Filter => {
+  const dslObject = JSON.parse(dataProviderDsl);
+  const key = Object.keys(dslObject);
+  return {
+    ...dslObject,
+    meta: {
+      alias: timelineFilterDropArea,
+      controlledBy: timelineFilterDropArea,
+      negate: false,
+      disabled: false,
+      type: 'custom',
+      key: isEmpty(key) ? 'bool' : key[0],
+      value: dataProviderDsl,
+    },
+    $state: {
+      store: FilterStateStore.APP_STATE,
+    },
+  };
+};

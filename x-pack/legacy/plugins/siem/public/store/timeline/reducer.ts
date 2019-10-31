@@ -45,7 +45,7 @@ import {
   updateTitle,
   upsertColumn,
   updateIsLoading,
-  setSavedQuery,
+  setSavedQueryId,
   setFilters,
 } from './actions';
 import {
@@ -369,11 +369,11 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
     ...state,
     showCallOutUnauthorizedMsg: true,
   }))
-  .case(setSavedQuery, (state, { id, savedQuery }) => ({
+  .case(setSavedQueryId, (state, { id, savedQueryId }) => ({
     ...state,
     timelineById: updateSavedQuery({
       id,
-      savedQuery,
+      savedQueryId,
       timelineById: state.timelineById,
     }),
   }))

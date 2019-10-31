@@ -61,6 +61,14 @@ const omitTypename = (key: string, value: keyof TimelineModel) =>
 const omitTypenameInTimeline = (timeline: TimelineResult): TimelineResult =>
   JSON.parse(JSON.stringify(timeline), omitTypename);
 
+const parseString = (params: string) => {
+  try {
+    return JSON.parse(params);
+  } catch {
+    return params;
+  }
+};
+
 export const defaultTimelineToTimelineModel = (
   timeline: TimelineResult,
   duplicate: boolean
@@ -97,6 +105,25 @@ export const defaultTimelineToTimelineModel = (
           return acc;
         }, {})
       : {},
+    filters:
+      timeline.filters != null
+        ? timeline.filters.map(filter => ({
+            ...filter,
+            $state: {
+              store: 'appState',
+            },
+            meta: {
+              ...filter.meta,
+              ...(filter.meta && filter.meta.params != null
+                ? { params: parseString(filter.meta.params) }
+                : {}),
+              ...(filter.meta && filter.meta.value != null
+                ? { value: parseString(filter.meta.value) }
+                : {}),
+            },
+            ...(filter.query != null ? { query: parseString(filter.query) } : {}),
+          }))
+        : [],
     isFavorite: duplicate
       ? false
       : timeline.favorite != null

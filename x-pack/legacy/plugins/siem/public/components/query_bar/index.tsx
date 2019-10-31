@@ -12,89 +12,100 @@ import { Storage } from 'ui/storage';
 import { Query, TimeRange } from 'src/plugins/data/common/types';
 
 import { isEqual } from 'lodash/fp';
-import { SavedQuery, SearchBar } from '../../../../../../../src/legacy/core_plugins/data/public';
+import {
+  SavedQuery,
+  SearchBar,
+  FilterManager,
+} from '../../../../../../../src/legacy/core_plugins/data/public';
+import { SavedQueryTimeFilter } from '../../../../../../../src/legacy/core_plugins/data/public/search';
 import { TimeHistory } from '../../../../../../../src/legacy/core_plugins/data/public/timefilter';
 
 interface QueryBarComponentProps {
+  dateRangeFrom?: string;
+  dateRangeTo?: string;
+  hideSavedQuery?: boolean;
   indexPattern: StaticIndexPattern;
   filterQuery: Query;
+  filterManager: FilterManager;
   filters: Filter[];
-  onChangedQueryAndFilter: ({ query, filters }: { query: Query; filters: Filter[] }) => void;
-  onSubmitQueryAndFilter: ({ query, filters }: { query: Query; filters: Filter[] }) => void;
+  onChangedQuery: (query: Query) => void;
+  onSubmitQuery: (query: Query, timefilter?: SavedQueryTimeFilter) => void;
   savedQuery?: SavedQuery | null;
-  setSavedQuery: (savedQuery: SavedQuery | null) => void;
+  onSavedQuery: (savedQuery: SavedQuery | null) => void;
 }
 
 export const QueryBar = memo<QueryBarComponentProps>(
   ({
+    dateRangeFrom,
+    dateRangeTo,
+    hideSavedQuery = false,
     indexPattern,
     filterQuery,
-    filters = [],
-    onChangedQueryAndFilter,
-    onSubmitQueryAndFilter,
+    filterManager,
+    filters,
+    onChangedQuery,
+    onSubmitQuery,
     savedQuery,
-    setSavedQuery,
+    onSavedQuery,
   }) => {
     const [draftQuery, setDraftQuery] = useState(filterQuery);
-    const [queryFilters, setQueryFilters] = useState(filters);
 
     useEffect(() => {
       setDraftQuery(filterQuery);
     }, [filterQuery]);
 
-    useEffect(() => {
-      setQueryFilters(filters);
-    }, [filters]);
-
     const onQuerySubmit = useCallback(
       (payload: { dateRange: TimeRange; query?: Query }) => {
-        if (payload.query != null && !isEqual(payload.query, draftQuery)) {
-          onSubmitQueryAndFilter({ query: payload.query, filters });
+        if (payload.query != null && !isEqual(payload.query, filterQuery)) {
+          onSubmitQuery(payload.query);
         }
       },
-      [draftQuery, filters]
+      [filterQuery, onSubmitQuery]
     );
 
     const onQueryChange = useCallback(
       (payload: { dateRange: TimeRange; query?: Query }) => {
         if (payload.query != null && !isEqual(payload.query, draftQuery)) {
-          onChangedQueryAndFilter({ query: payload.query, filters });
           setDraftQuery(draftQuery);
+          onChangedQuery(payload.query);
         }
       },
-      [draftQuery, filters]
+      [draftQuery, onChangedQuery, setDraftQuery]
     );
 
-    const onSaved = useCallback((newSavedQuery: SavedQuery) => {
-      setSavedQuery(newSavedQuery);
-    }, []);
+    const onSaved = useCallback(
+      (newSavedQuery: SavedQuery) => {
+        onSavedQuery(newSavedQuery);
+      },
+      [onSavedQuery]
+    );
 
-    const onSavedQueryUpdated = useCallback((savedQueryUpdated: SavedQuery) => {
-      const { query: newQuery, filters: newFilters } = savedQueryUpdated.attributes;
-      onSubmitQueryAndFilter({ query: newQuery, filters: newFilters || [] });
-    }, []);
+    const onSavedQueryUpdated = useCallback(
+      (savedQueryUpdated: SavedQuery) => {
+        const { query: newQuery, filters: newFilters, timefilter } = savedQueryUpdated.attributes;
+        onSubmitQuery(newQuery, timefilter);
+        filterManager.setFilters(newFilters || []);
+        onSavedQuery(savedQueryUpdated);
+      },
+      [filterManager, onSubmitQuery, onSavedQuery]
+    );
 
     const onClearSavedQuery = useCallback(() => {
       if (savedQuery != null) {
-        onSubmitQueryAndFilter({
-          query: {
-            query: '',
-            language: savedQuery.attributes.query.language,
-          },
-          filters: [],
+        onSubmitQuery({
+          query: '',
+          language: savedQuery.attributes.query.language,
         });
+        filterManager.setFilters([]);
+        onSavedQuery(null);
       }
-    }, []);
+    }, [filterManager, onSubmitQuery, savedQuery]);
 
     const onFiltersUpdated = useCallback(
       (newFilters: Filter[]) => {
-        setQueryFilters(newFilters);
-        onSubmitQueryAndFilter({
-          query: filterQuery,
-          filters: newFilters,
-        });
+        filterManager.setFilters(newFilters);
       },
-      [filters, filterQuery]
+      [filterManager]
     );
 
     const CustomButton = <>{null}</>;
@@ -105,7 +116,9 @@ export const QueryBar = memo<QueryBarComponentProps>(
     return (
       <SearchBar
         customSubmitButton={CustomButton}
-        filters={queryFilters}
+        dateRangeFrom={dateRangeFrom}
+        dateRangeTo={dateRangeTo}
+        filters={filters}
         indexPatterns={indexPatterns}
         query={draftQuery}
         onClearSavedQuery={onClearSavedQuery}
@@ -115,7 +128,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
         onSaved={onSaved}
         onSavedQueryUpdated={onSavedQueryUpdated}
         showAutoRefreshOnly={false}
-        showFilterBar={true}
+        showFilterBar={!hideSavedQuery}
         showDatePicker={false}
         showQueryBar={true}
         showQueryInput={true}

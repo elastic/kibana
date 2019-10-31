@@ -299,6 +299,7 @@ const StatefulTimelineComponent = React.memo<Props>(
       prevProps.start === nextProps.start &&
       isEqual(prevProps.columns, nextProps.columns) &&
       isEqual(prevProps.dataProviders, nextProps.dataProviders) &&
+      isEqual(prevProps.filters, nextProps.filters) &&
       isEqual(prevProps.itemsPerPageOptions, nextProps.itemsPerPageOptions) &&
       isEqual(prevProps.sort, nextProps.sort)
     );

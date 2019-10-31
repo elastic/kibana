@@ -11,13 +11,15 @@ import { pure } from 'recompose';
 import styled, { injectGlobal } from 'styled-components';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
-import { SavedQuery } from '../../../../../../../../src/legacy/core_plugins/data/public';
+import { BrowserFields } from '../../../containers/source';
 import { KueryFilterQuery, KueryFilterQueryKind } from '../../../store';
 import { KqlMode } from '../../../store/timeline/model';
+import { DataProvider } from '../data_providers/data_provider';
 import { QueryBarTimeline } from '../query_bar';
 
-import { modes, options } from './helpers';
+import { options } from './helpers';
 import * as i18n from './translations';
+import { DispatchUpdateReduxTime } from '../../super_date_picker';
 
 const timelineSelectModeItemsClassName = 'timelineSelectModeItemsClassName';
 const searchOrFilterPopoverClassName = 'searchOrFilterPopover';
@@ -41,16 +43,24 @@ injectGlobal`
 
 interface Props {
   applyKqlFilterQuery: (expression: string, kind: KueryFilterQueryKind) => void;
+  browserFields: BrowserFields;
+  dataProviders: DataProvider[];
+  filterQuery: KueryFilterQuery;
   filterQueryDraft: KueryFilterQuery;
+  from: number;
+  fromStr: string;
   indexPattern: StaticIndexPattern;
   kqlMode: KqlMode;
   timelineId: string;
   updateKqlMode: ({ id, kqlMode }: { id: string; kqlMode: KqlMode }) => void;
   setFilters: (filters: Filter[]) => void;
   setKqlFilterQueryDraft: (expression: string, kind: KueryFilterQueryKind) => void;
-  setSavedQuery: (savedQuery: SavedQuery | null) => void;
+  setSavedQueryId: (savedQueryId: string | null) => void;
   filters: Filter[];
-  savedQuery: SavedQuery | null;
+  savedQueryId: string | null;
+  to: number;
+  toStr: string;
+  updateReduxTime: DispatchUpdateReduxTime;
 }
 
 const SearchOrFilterContainer = styled.div`
@@ -77,16 +87,24 @@ ModeFlexItem.displayName = 'ModeFlexItem';
 export const SearchOrFilter = pure<Props>(
   ({
     applyKqlFilterQuery,
+    browserFields,
+    dataProviders,
     indexPattern,
     filters,
+    filterQuery,
     filterQueryDraft,
+    from,
+    fromStr,
     kqlMode,
     timelineId,
-    savedQuery,
+    savedQueryId,
     setFilters,
     setKqlFilterQueryDraft,
-    setSavedQuery,
+    setSavedQueryId,
+    to,
+    toStr,
     updateKqlMode,
+    updateReduxTime,
   }) => (
     <SearchOrFilterContainer>
       <EuiFlexGroup data-test-subj="timeline-search-or-filter" gutterSize="xs">
@@ -105,18 +123,26 @@ export const SearchOrFilter = pure<Props>(
           </EuiToolTip>
         </ModeFlexItem>
         <EuiFlexItem data-test-subj="timeline-search-or-filter-search-container">
-          <EuiToolTip content={modes[kqlMode].kqlBarTooltip}>
-            <QueryBarTimeline
-              applyKqlFilterQuery={applyKqlFilterQuery}
-              filters={filters}
-              filterQueryDraft={filterQueryDraft}
-              indexPattern={indexPattern}
-              savedQuery={savedQuery}
-              setFilters={setFilters}
-              setKqlFilterQueryDraft={setKqlFilterQueryDraft}
-              setSavedQuery={setSavedQuery}
-            />
-          </EuiToolTip>
+          <QueryBarTimeline
+            applyKqlFilterQuery={applyKqlFilterQuery}
+            browserFields={browserFields}
+            dataProviders={dataProviders}
+            filters={filters}
+            filterQuery={filterQuery}
+            filterQueryDraft={filterQueryDraft}
+            from={from}
+            fromStr={fromStr}
+            kqlMode={kqlMode}
+            indexPattern={indexPattern}
+            savedQueryId={savedQueryId}
+            setFilters={setFilters}
+            setKqlFilterQueryDraft={setKqlFilterQueryDraft}
+            setSavedQueryId={setSavedQueryId}
+            timelineId={timelineId}
+            to={to}
+            toStr={toStr}
+            updateReduxTime={updateReduxTime}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </SearchOrFilterContainer>

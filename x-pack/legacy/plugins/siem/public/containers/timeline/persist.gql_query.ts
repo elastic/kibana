@@ -60,6 +60,20 @@ export const persistTimelineMutation = gql`
           userName
           favoriteDate
         }
+        filters {
+          meta {
+            alias
+            controlledBy
+            disabled
+            index
+            key
+            negate
+            params
+            type
+            value
+          }
+          query
+        }
         kqlMode
         kqlQuery {
           filterQuery {
@@ -75,6 +89,7 @@ export const persistTimelineMutation = gql`
           start
           end
         }
+        savedQueryId
         sort {
           columnId
           sortDirection
