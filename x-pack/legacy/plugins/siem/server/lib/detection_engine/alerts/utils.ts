@@ -3,13 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { performance } from 'perf_hooks';
 import { SignalHit } from '../../types';
 import { Logger } from '../../../../../../../../src/core/server';
 import { AlertServices } from '../../../../../alerting/server/types';
-import { SignalSourceHit, SignalSearchResponse, SignalAlertParams } from './types';
+import { SignalSourceHit, SignalSearchResponse, SignalAlertParams, BulkResponse } from './types';
+import { buildEventsSearchQuery } from './build_events_query';
 
-// format scroll search result for signals index.
+// format search_after result for signals index.
 export const buildBulkBody = (doc: SignalSourceHit, signalParams: SignalAlertParams): SignalHit => {
   return {
     ...doc._source,
@@ -54,10 +55,15 @@ export const singleBulkIndex = async (
     },
     buildBulkBody(doc, params),
   ]);
-  const firstResult = await service.callCluster('bulk', {
-    refresh: true,
+  const time1 = performance.now();
+  const firstResult: BulkResponse = await service.callCluster('bulk', {
+    index: process.env.SIGNALS_INDEX || '.siem-signals-10-01-2019',
+    refresh: false,
     body: bulkBody,
   });
+  const time2 = performance.now();
+  logger.info(`individual bulk process time took: ${time2 - time1} milliseconds`);
+  logger.info(`took property says bulk took: ${firstResult.took} milliseconds`);
   if (firstResult.errors) {
     logger.error(`[-] bulkResponse had errors: ${JSON.stringify(firstResult.errors, null, 2)}}`);
     return false;
@@ -65,28 +71,35 @@ export const singleBulkIndex = async (
   return true;
 };
 
-// Given a scroll id, grab the next set of documents
-export const singleScroll = async (
-  scrollId: string | undefined,
-  params: SignalAlertParams & { scrollLock?: number }, // TODO: Finish plumbing the scrollLock all the way to the REST endpoint if this algorithm continues to use it.
+// utilize search_after for paging results into bulk.
+export const singleSearchAfter = async (
+  searchAfterSortId: string | undefined,
+  params: SignalAlertParams,
   service: AlertServices,
   logger: Logger
 ): Promise<SignalSearchResponse> => {
-  const scroll = params.scrollLock ? params.scrollLock : '1m';
+  if (searchAfterSortId == null) {
+    throw Error('Attempted to search after with empty sort id');
+  }
   try {
-    const nextScrollResult = await service.callCluster('scroll', {
-      scroll,
-      scrollId,
+    const searchAfterQuery = buildEventsSearchQuery({
+      index: params.index,
+      from: params.from,
+      to: params.to,
+      filter: params.filter,
+      size: params.size ? params.size : 1000,
+      searchAfterSortId,
     });
-    return nextScrollResult;
+    const nextSearchAfterResult = await service.callCluster('search', searchAfterQuery);
+    return nextSearchAfterResult;
   } catch (exc) {
-    logger.error(`[-] nextScroll threw an error ${exc}`);
+    logger.error(`[-] nextSearchAfter threw an error ${exc}`);
     throw exc;
   }
 };
 
-// scroll through documents and re-index using bulk endpoint.
-export const scrollAndBulkIndex = async (
+// search_after through documents and re-index using bulk endpoint.
+export const searchAfterAndBulkIndex = async (
   someResult: SignalSearchResponse,
   params: SignalAlertParams,
   service: AlertServices,
@@ -98,22 +111,51 @@ export const scrollAndBulkIndex = async (
     logger.warn('First bulk index was unsuccessful');
     return false;
   }
-  let newScrollId = someResult._scroll_id;
-  while (true) {
+
+  const totalHits =
+    typeof someResult.hits.total === 'number' ? someResult.hits.total : someResult.hits.total.value;
+  let size = someResult.hits.hits.length - 1;
+  logger.info(`first size: ${size}`);
+  let sortIds = someResult.hits.hits[0].sort;
+  if (sortIds == null && totalHits > 0) {
+    logger.warn('sortIds was empty on first search but expected more ');
+    return false;
+  } else if (sortIds == null && totalHits === 0) {
+    return true;
+  }
+  let sortId;
+  if (sortIds != null) {
+    sortId = sortIds[0];
+  }
+  while (size < totalHits) {
+    // utilize track_total_hits instead of true
     try {
-      const scrollResult = await singleScroll(newScrollId, params, service, logger);
-      newScrollId = scrollResult._scroll_id;
-      if (scrollResult.hits.hits.length === 0) {
-        logger.info('[+] Finished indexing signals');
-        return true;
+      logger.info(`sortIds: ${sortIds}`);
+      const searchAfterResult: SignalSearchResponse = await singleSearchAfter(
+        sortId,
+        params,
+        service,
+        logger
+      );
+      size += searchAfterResult.hits.hits.length - 1;
+      logger.info(`size: ${size}`);
+      sortIds = searchAfterResult.hits.hits[0].sort;
+      if (sortIds == null) {
+        logger.warn('sortIds was empty search');
+        return false;
       }
-      const bulkSuccess = await singleBulkIndex(scrollResult, params, service, logger);
+      sortId = sortIds[0];
+      logger.info('next bulk index');
+      const bulkSuccess = await singleBulkIndex(searchAfterResult, params, service, logger);
+      logger.info('finished next bulk index');
       if (!bulkSuccess) {
         logger.error('[-] bulk index failed');
       }
     } catch (exc) {
-      logger.error('[-] scroll and bulk threw an error');
+      logger.error(`[-] search_after and bulk threw an error ${exc}`);
       return false;
     }
   }
+  logger.info(`[+] completed bulk index of ${totalHits}`);
+  return true;
 };

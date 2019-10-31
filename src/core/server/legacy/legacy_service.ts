@@ -248,6 +248,9 @@ export class LegacyService implements CoreService<LegacyServiceSetup> {
         basePath: setupDeps.core.http.basePath,
         isTlsEnabled: setupDeps.core.http.isTlsEnabled,
       },
+      uiSettings: {
+        register: setupDeps.core.uiSettings.register,
+      },
     };
     const coreStart: CoreStart = {};
 

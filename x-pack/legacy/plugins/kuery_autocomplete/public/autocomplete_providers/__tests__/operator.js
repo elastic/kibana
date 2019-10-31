@@ -56,4 +56,9 @@ describe('Kuery operator suggestions', function () {
       expect(suggestion).to.have.property('description');
     });
   });
+
+  it('should handle nested paths', () => {
+    const suggestions = getSuggestions({ fieldName: 'child', nestedPath: 'nestedField' });
+    expect(suggestions.length).to.be.greaterThan(0);
+  });
 });

@@ -7,7 +7,7 @@
 import * as Rx from 'rxjs';
 import { toArray, mergeMap } from 'rxjs/operators';
 import { LevelLogger } from '../../../../server/lib';
-import { KbnServer, ConditionalHeaders } from '../../../../types';
+import { ServerFacade, ConditionalHeaders } from '../../../../types';
 import { oncePerServer } from '../../../../server/lib/once_per_server';
 import { screenshotsObservableFactory } from '../../../common/lib/screenshots';
 import { PreserveLayout } from '../../../common/layouts/preserve_layout';
@@ -21,7 +21,7 @@ interface UrlScreenshot {
   screenshots: ScreenshotData[];
 }
 
-function generatePngObservableFn(server: KbnServer) {
+function generatePngObservableFn(server: ServerFacade) {
   const screenshotsObservable = screenshotsObservableFactory(server);
   const captureConcurrency = 1;
 

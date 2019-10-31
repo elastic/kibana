@@ -11,7 +11,7 @@ import { ConcreteTaskInstance } from '../../../task_manager';
 import { TaskRunnerContext, TaskRunnerFactory } from './task_runner_factory';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/plugin.mock';
 import {
-  SavedObjectsClientMock,
+  savedObjectsClientMock,
   loggingServiceMock,
 } from '../../../../../../src/core/server/mocks';
 
@@ -51,7 +51,7 @@ beforeAll(() => {
 
 afterAll(() => fakeTimer.restore());
 
-const savedObjectsClient = SavedObjectsClientMock.create();
+const savedObjectsClient = savedObjectsClientMock.create();
 const encryptedSavedObjectsPlugin = encryptedSavedObjectsMock.create();
 const services = {
   log: jest.fn(),

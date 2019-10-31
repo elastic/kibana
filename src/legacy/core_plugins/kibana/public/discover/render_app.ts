@@ -45,7 +45,6 @@ import { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url';
 import { AppStateProvider } from 'ui/state_management/app_state';
 // @ts-ignore
 // import { createCourierService } from 'ui/courier/courier';
-import { Storage } from 'ui/storage';
 
 import { IndexPatterns } from 'ui/index_patterns';
 // @ts-ignore
@@ -76,6 +75,7 @@ import { registerListenEventListener } from 'ui/directives/listen/listen';
 import { setAngularModule, setServices } from './kibana_services';
 // @ts-ignore
 import { dashboardConfigProvider } from '../dashboard/dashboard_config';
+import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 import {
   ApplyFiltersPopoverFactory,
   ApplyFiltersPopoverHelperFactory,

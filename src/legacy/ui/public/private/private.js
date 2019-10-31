@@ -148,7 +148,7 @@ export function PrivateProvider() {
       if (~privPath.indexOf(prov)) {
         throw new Error(
           'Circular reference to "' + name(prov) + '"' +
-          ' found while resolving private deps: ' + pathToString()
+        ' found while resolving private deps: ' + pathToString()
         );
       }
 

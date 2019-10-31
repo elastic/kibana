@@ -19,8 +19,12 @@
 
 import { get } from 'lodash';
 import { DiscoveredPlugin, PluginName } from '../../server';
-import { EnvironmentMode, PackageInfo } from '../../server/types';
-import { UiSettingsState } from '../ui_settings';
+import {
+  EnvironmentMode,
+  PackageInfo,
+  UiSettingsParams,
+  UserProvidedValues,
+} from '../../server/types';
 import { deepFreeze } from '../../utils/';
 import { Capabilities } from '..';
 
@@ -69,8 +73,8 @@ export interface InjectedMetadataParams {
       serverName: string;
       devMode: boolean;
       uiSettings: {
-        defaults: UiSettingsState;
-        user?: UiSettingsState;
+        defaults: Record<string, UiSettingsParams>;
+        user?: Record<string, UserProvidedValues>;
       };
     };
   };
@@ -179,8 +183,8 @@ export interface InjectedMetadataSetup {
     serverName: string;
     devMode: boolean;
     uiSettings: {
-      defaults: UiSettingsState;
-      user?: UiSettingsState | undefined;
+      defaults: Record<string, UiSettingsParams>;
+      user?: Record<string, UserProvidedValues> | undefined;
     };
   };
   getInjectedVar: (name: string, defaultValue?: any) => unknown;

@@ -7,7 +7,7 @@
 import moment from 'moment';
 import { HttpServiceBase } from 'src/core/public';
 
-import { Storage } from 'src/legacy/core_plugins/data/public/types';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { BASE_API_URL } from '../../common';
 
 const STORAGE_KEY = 'lens-ui-telemetry';
@@ -43,23 +43,13 @@ export class LensReportManager {
   private events: Record<string, Record<string, number>> = {};
   private suggestionEvents: Record<string, Record<string, number>> = {};
 
-  private storage: Storage;
+  private storage: IStorageWrapper;
   private http: HttpServiceBase;
-  private basePath: string;
   private timer: ReturnType<typeof setInterval>;
 
-  constructor({
-    storage,
-    http,
-    basePath,
-  }: {
-    storage: Storage;
-    http: HttpServiceBase;
-    basePath: string;
-  }) {
+  constructor({ storage, http }: { storage: IStorageWrapper; http: HttpServiceBase }) {
     this.storage = storage;
     this.http = http;
-    this.basePath = basePath;
 
     this.readFromStorage();
 
@@ -96,7 +86,7 @@ export class LensReportManager {
     this.readFromStorage();
     if (Object.keys(this.events).length || Object.keys(this.suggestionEvents).length) {
       try {
-        await this.http.post(`${this.basePath}${BASE_API_URL}/telemetry`, {
+        await this.http.post(`${BASE_API_URL}/telemetry`, {
           body: JSON.stringify({
             events: this.events,
             suggestionEvents: this.suggestionEvents,

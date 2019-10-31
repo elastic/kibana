@@ -35,7 +35,7 @@ export const MetricSelector: FC<Props> = ({
       <EuiFlexGroup style={{ maxWidth: MAX_WIDTH }}>
         <EuiFlexItem>
           <EuiFormRow>
-            <EuiButton onClick={showModal}>
+            <EuiButton onClick={showModal} data-test-subj="mlAddDetectorButton">
               <FormattedMessage
                 id="xpack.ml.newJob.wizard.pickFieldsStep.addDetectorButton"
                 defaultMessage="Add detector"
