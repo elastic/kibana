@@ -16,6 +16,7 @@ import {
   EuiFlexItem,
   EuiIconTip,
   EuiPanel,
+  EuiPopover,
   EuiSelect,
   EuiSpacer,
   EuiSwitch,
@@ -496,6 +497,8 @@ const ActivityMonitor = React.memo(() => {
 ActivityMonitor.displayName = 'ActivityMonitor';
 
 export const RuleDetailsComponent = React.memo(() => {
+  const [popoverState, setPopoverState] = useState(false);
+
   return (
     <>
       <WithSource sourceId="default">
@@ -539,7 +542,19 @@ export const RuleDetailsComponent = React.memo(() => {
                       </EuiFlexItem>
 
                       <EuiFlexItem grow={false}>
-                        <EuiButtonIcon iconType="boxesHorizontal" aria-label="Additional actions" />
+                        <EuiPopover
+                          button={
+                            <EuiButtonIcon
+                              aria-label="Additional actions"
+                              iconType="boxesHorizontal"
+                              onClick={() => setPopoverState(!popoverState)}
+                            />
+                          }
+                          closePopover={() => setPopoverState(false)}
+                          isOpen={popoverState}
+                        >
+                          <p>{'Overflow context menu here.'}</p>
+                        </EuiPopover>
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiFlexItem>
