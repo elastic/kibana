@@ -60,4 +60,5 @@ export interface FetchResult {
   kibanaVersion: string;
   hasNew: boolean;
   feedItems: NewsfeedItem[];
+  error: Error | null;
 }

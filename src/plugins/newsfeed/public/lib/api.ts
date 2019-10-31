@@ -66,7 +66,7 @@ class NewsfeedApiDriver {
     return { previous: oldHashes, current: updatedHashes };
   }
 
-  fetchNewsfeedItems(http: HttpServiceBase, config: ApiConfig): Rx.Observable<ApiItem[] | null> {
+  fetchNewsfeedItems(http: HttpServiceBase, config: ApiConfig): Rx.Observable<ApiItem[] | Error> {
     const urlPath = config.pathTemplate.replace('{VERSION}', this.kibanaVersion);
     const fullUrl = config.urlRoot + urlPath;
 
@@ -79,7 +79,7 @@ class NewsfeedApiDriver {
     ).pipe(
       catchError(err => {
         window.console.error(err);
-        return Rx.of(null);
+        return Rx.of(err);
       })
     );
   }
@@ -89,6 +89,23 @@ class NewsfeedApiDriver {
       return false;
     }
     return true;
+  }
+
+  getFetchResultOrError(result: ApiItem[] | Error): Rx.Observable<FetchResult> {
+    if (result instanceof Error) {
+      return Rx.of({
+        hasNew: false,
+        feedItems: [],
+        error: result,
+        kibanaVersion: this.kibanaVersion,
+      });
+    }
+
+    const apiItems: ApiItem[] = result;
+    return Rx.of(apiItems).pipe(
+      tap(() => this.updateLastFetch()),
+      mergeMap(items => this.modelItems(items))
+    );
   }
 
   modelItems(items: ApiItem[]): Rx.Observable<FetchResult> {
@@ -135,6 +152,7 @@ class NewsfeedApiDriver {
     }, []);
 
     return Rx.of({
+      error: null,
       kibanaVersion: this.kibanaVersion,
       hasNew,
       feedItems,
@@ -158,8 +176,6 @@ export function getApi(
   return Rx.timer(0, config.mainInterval).pipe(
     filter(() => driver.shouldFetch()),
     mergeMap(() => driver.fetchNewsfeedItems(http, config.service)),
-    filter(items => items != null && items.length > 0),
-    tap(() => driver.updateLastFetch()),
-    mergeMap(items => driver.modelItems(items!))
+    mergeMap(result => driver.getFetchResultOrError(result))
   );
 }
