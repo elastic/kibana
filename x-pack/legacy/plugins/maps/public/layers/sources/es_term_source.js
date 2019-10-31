@@ -6,34 +6,17 @@
 
 import _ from 'lodash';
 
-import { AbstractESSource } from './es_source';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { AggConfigs } from 'ui/agg_types';
 import { i18n } from '@kbn/i18n';
 import { ESTooltipProperty } from '../tooltips/es_tooltip_property';
 import { ES_SIZE_LIMIT, METRIC_TYPE } from '../../../common/constants';
+import { AbstractESAggSource } from './es_agg_source';
 
 const TERMS_AGG_NAME = 'join';
 
 const aggSchemas = new Schemas([
-  {
-    group: 'metrics',
-    name: 'metric',
-    title: 'Value',
-    min: 1,
-    max: Infinity,
-    aggFilter: [
-      METRIC_TYPE.AVG,
-      METRIC_TYPE.COUNT,
-      METRIC_TYPE.MAX,
-      METRIC_TYPE.MIN,
-      METRIC_TYPE.SUM,
-      METRIC_TYPE.UNIQUE_COUNT
-    ],
-    defaults: [
-      { schema: 'metric', type: METRIC_TYPE.COUNT }
-    ]
-  },
+  AbstractESAggSource.METRIC_SCHEMA_CONFIG,
   {
     group: 'buckets',
     name: 'segment',
@@ -61,7 +44,7 @@ export function extractPropertiesMap(rawEsData, propertyNames, countPropertyName
   return propertiesMap;
 }
 
-export class ESTermSource extends AbstractESSource {
+export class ESTermSource extends AbstractESAggSource {
 
   static type = 'ES_TERM_SOURCE';
 
@@ -156,20 +139,7 @@ export class ESTermSource extends AbstractESSource {
   }
 
   _makeAggConfigs() {
-    const metricAggConfigs = this.getMetricFields().map(metric => {
-      const metricAggConfig = {
-        id: metric.propertyKey,
-        enabled: true,
-        type: metric.type,
-        schema: 'metric',
-        params: {}
-      };
-      if (metric.type !== METRIC_TYPE.COUNT) {
-        metricAggConfig.params = { field: metric.field };
-      }
-      return metricAggConfig;
-    });
-
+    const metricAggConfigs = this.createMetricAggConfigs();
     return [
       ...metricAggConfigs,
       {
@@ -204,11 +174,5 @@ export class ESTermSource extends AbstractESSource {
     } catch (e) {
       return null;
     }
-  }
-
-  getFieldNames() {
-    return this.getMetricFields().map(({ propertyKey }) => {
-      return propertyKey;
-    });
   }
 }
