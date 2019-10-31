@@ -43,7 +43,7 @@ export async function removeInstallation(options: {
   return packageInfo;
 }
 
-async function deletePipeline(callCluster: CallESAsCurrentUser, id: string): Promise<any> {
+async function deletePipeline(callCluster: CallESAsCurrentUser, id: string): Promise<void> {
   // '*' shouldn't ever appear here, but it still would delete all ingest pipelines
   if (id && id !== '*') {
     await callCluster('ingest.deletePipeline', { id });
