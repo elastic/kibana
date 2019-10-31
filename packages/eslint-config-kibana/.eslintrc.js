@@ -45,7 +45,9 @@ module.exports = {
        *   name: the name of the module to disallow
        *   error: error message to show to users, describe what users should do instead
        *
-       * `relativeToNamed` rewrite relative imports from outside `directory` into directory, using `../../../directory/*` format, to use `name/*` instead
+       * `relativeToNamed` rewrite relative imports from outside `directory` into
+       *  directory, using `../../../directory/*` format, to use `name/*` instead
+       *  only applies to `import` and not `require()` calls.
        *   directory: *absolute path* to the directory to find relative imports into
        *   name: the named import that should be used instead of relative imports to directory
        */

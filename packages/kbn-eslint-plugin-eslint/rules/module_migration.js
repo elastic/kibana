@@ -31,6 +31,10 @@ const first = (list, property, test) => {
 };
 
 function checkRelativeToNamed(context, mappings, node) {
+  if (node.parent.type !== 'ImportDeclaration' && !node.parent.type.startsWith('Export')) {
+    return;
+  }
+
   const fileDir = Path.dirname(context.getFilename());
   const request = node.value;
   const requestAbsolute = Path.resolve(fileDir, request);
