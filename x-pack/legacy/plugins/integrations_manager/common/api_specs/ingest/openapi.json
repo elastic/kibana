@@ -49,6 +49,12 @@
             },
             "in": "query",
             "name": "policyid"
+          },
+          {
+            "$ref": "#/components/parameters/pageIndexParam"
+          },
+          {
+            "$ref": "#/components/parameters/pageSizeParam"
           }
         ],
         "description": "Return polices linked to a datasource",
@@ -82,6 +88,12 @@
             },
             "in": "query",
             "name": "policyId"
+          },
+          {
+            "$ref": "#/components/parameters/pageIndexParam"
+          },
+          {
+            "$ref": "#/components/parameters/pageSizeParam"
           }
         ],
         "description": "Return datasources",
@@ -120,5 +132,27 @@
       }
     }
   },
-  "components": {}
+  "components": {
+    "parameters": {
+      "pageSizeParam": {
+        "name": "per_page",
+        "in": "query",
+        "description": "The number of items to return",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "default": 50
+        }
+      },
+      "pageIndexParam": {
+        "name": "page",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "default": 1
+        }
+      }
+    }
+  }
 }
