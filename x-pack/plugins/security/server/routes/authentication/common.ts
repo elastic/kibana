@@ -12,7 +12,6 @@ export function defineCommonRoutes({ router, logger, authc, basePath }: RouteDef
     {
       path: '/api/security/session/info',
       validate: false,
-      options: { extendsSession: false },
     },
     async (_context, request, response) => {
       try {
