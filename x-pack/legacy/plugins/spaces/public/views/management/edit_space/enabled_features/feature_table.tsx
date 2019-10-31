@@ -103,6 +103,7 @@ export class FeatureTable extends Component<Props, {}> {
             checked={checked}
             onChange={this.onChange(record.feature.id) as any}
             label={checked ? `${record.feature.name} visible` : `${record.feature.name} disabled`}
+            showLabel={false}
           />
         );
       },
