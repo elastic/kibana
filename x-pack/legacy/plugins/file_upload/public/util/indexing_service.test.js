@@ -7,7 +7,7 @@
 // Not all index pattern dependencies are avab. in jest context,
 // prevent unrelated import errors by mocking kibana services
 jest.mock('../kibana_services', () => {});
-const checkIndexPatternValid = require('./indexing_service').checkIndexPatternValid;
+const { checkIndexPatternValid } = require('./indexing_service');
 
 describe('indexing_service', () => {
 
