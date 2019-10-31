@@ -26,7 +26,7 @@ import {
   EuiTitle,
   EuiGlobalToastListToast as Toast,
 } from '@elastic/eui';
-import { DashboardPanelState } from 'src/legacy/core_plugins/dashboard_embeddable_container/public/np_ready/public';
+import { DashboardPanelState } from '../embeddable';
 import { NotificationsStart } from '../../../../core/public';
 import {
   IContainer,

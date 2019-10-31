@@ -35,6 +35,7 @@ embeddableFactories.set(
   CONTACT_CARD_EMBEDDABLE,
   new ContactCardEmbeddableFactory({} as any, (() => null) as any, {} as any)
 );
+const getEmbeddableFactories = () => embeddableFactories.values();
 
 let container: DashboardContainer;
 let embeddable: ContactCardEmbeddable;
@@ -82,7 +83,12 @@ test('Executes the replace panel action', async () => {
   let core: any;
   let SavedObjectFinder: any;
   let notifications: any;
-  const action = new ReplacePanelAction(core, SavedObjectFinder, notifications, () => [] as any);
+  const action = new ReplacePanelAction(
+    core,
+    SavedObjectFinder,
+    notifications,
+    getEmbeddableFactories
+  );
   action.execute({ embeddable });
 });
 
@@ -90,7 +96,12 @@ test('Is not compatible when embeddable is not in a dashboard container', async 
   let core: any;
   let SavedObjectFinder: any;
   let notifications: any;
-  const action = new ReplacePanelAction(core, SavedObjectFinder, notifications, () => [] as any);
+  const action = new ReplacePanelAction(
+    core,
+    SavedObjectFinder,
+    notifications,
+    getEmbeddableFactories
+  );
   expect(
     await action.isCompatible({
       embeddable: new ContactCardEmbeddable(
@@ -105,7 +116,12 @@ test('Execute throws an error when called with an embeddable not in a parent', a
   let core: any;
   let SavedObjectFinder: any;
   let notifications: any;
-  const action = new ReplacePanelAction(core, SavedObjectFinder, notifications, () => [] as any);
+  const action = new ReplacePanelAction(
+    core,
+    SavedObjectFinder,
+    notifications,
+    getEmbeddableFactories
+  );
   async function check() {
     await action.execute({ embeddable: container });
   }
@@ -116,7 +132,12 @@ test('Returns title', async () => {
   let core: any;
   let SavedObjectFinder: any;
   let notifications: any;
-  const action = new ReplacePanelAction(core, SavedObjectFinder, notifications, () => [] as any);
+  const action = new ReplacePanelAction(
+    core,
+    SavedObjectFinder,
+    notifications,
+    getEmbeddableFactories
+  );
   expect(action.getDisplayName({ embeddable })).toBeDefined();
 });
 
@@ -124,6 +145,11 @@ test('Returns an icon', async () => {
   let core: any;
   let SavedObjectFinder: any;
   let notifications: any;
-  const action = new ReplacePanelAction(core, SavedObjectFinder, notifications, () => [] as any);
+  const action = new ReplacePanelAction(
+    core,
+    SavedObjectFinder,
+    notifications,
+    getEmbeddableFactories
+  );
   expect(action.getIconType({ embeddable })).toBeDefined();
 });
