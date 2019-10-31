@@ -9,18 +9,13 @@ import React, { Fragment, FC } from 'react';
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { mlNodesAvailable, permissionToViewMlNodeCount } from '../../../../ml_nodes_check';
-import {
-  // cloudDeploymentId,
-  cloudDeploymentAddress,
-  isCloud,
-} from '../../../../services/ml_server_info';
+import { cloudDeploymentId, isCloud } from '../../../../services/ml_server_info';
 
 export const NodeAvailableWarning: FC = () => {
   if (mlNodesAvailable() === true || permissionToViewMlNodeCount() === false) {
     return null;
   } else {
-    // const id = cloudDeploymentId();
-    const address = cloudDeploymentAddress();
+    const id = cloudDeploymentId();
     return (
       <Fragment>
         <EuiCallOut
@@ -43,7 +38,7 @@ export const NodeAvailableWarning: FC = () => {
               id="xpack.ml.jobsList.nodeAvailableWarning.unavailableCreateOrRunJobsDescription"
               defaultMessage="You will not be able to create or run jobs."
             />
-            {isCloud && address !== null && (
+            {isCloud && id !== null && (
               <Fragment>
                 <br />
                 <FormattedMessage
@@ -51,8 +46,7 @@ export const NodeAvailableWarning: FC = () => {
                   defaultMessage="Please edit your {link} and enable a machine learning node."
                   values={{
                     link: (
-                      <EuiLink href={address}>
-                        {/* <EuiLink href={`https://cloud.elastic.co/deployments?q=${id}`}> */}
+                      <EuiLink href={`https://cloud.elastic.co/deployments?q=${id}`}>
                         <FormattedMessage
                           id="xpack.ml.jobsList.nodeAvailableWarning.linkToCloud.hereLinkText"
                           defaultMessage="Elastic Cloud deployment"
