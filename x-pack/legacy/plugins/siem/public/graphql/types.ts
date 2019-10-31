@@ -85,12 +85,6 @@ export interface NetworkDnsSortField {
   direction: Direction;
 }
 
-export interface NetworkHttpSortField {
-  field: string;
-
-  direction: Direction;
-}
-
 export interface TlsSortField {
   field: TlsFields;
 
@@ -1625,19 +1619,19 @@ export interface NetworkHttpEdges {
 export interface NetworkHttpItem {
   _id?: Maybe<string>;
 
-  domains?: Maybe<(Maybe<string>)[]>;
+  domains: string[];
 
   lastHost?: Maybe<string>;
 
   lastSourceIp?: Maybe<string>;
 
-  methods?: Maybe<(Maybe<string>)[]>;
+  methods: string[];
 
   path?: Maybe<string>;
 
   requestCount?: Maybe<number>;
 
-  statuses?: Maybe<(Maybe<string>)[]>;
+  statuses: string[];
 }
 
 export interface OverviewNetworkData {
@@ -2222,8 +2216,6 @@ export interface NetworkHttpSourceArgs {
   ip?: Maybe<string>;
 
   pagination: PaginationInputPaginated;
-
-  sort: NetworkHttpSortField;
 
   timerange: TimerangeInput;
 
@@ -3282,7 +3274,6 @@ export namespace GetNetworkHttpQuery {
     ip?: Maybe<string>;
     filterQuery?: Maybe<string>;
     pagination: PaginationInputPaginated;
-    sort: NetworkHttpSortField;
     timerange: TimerangeInput;
     defaultIndex: string[];
     inspect: boolean;
@@ -3325,19 +3316,19 @@ export namespace GetNetworkHttpQuery {
   export type Node = {
     __typename?: 'NetworkHttpItem';
 
-    domains: Maybe<(Maybe<string>)[]>;
+    domains: string[];
 
     lastHost: Maybe<string>;
 
     lastSourceIp: Maybe<string>;
 
-    methods: Maybe<(Maybe<string>)[]>;
+    methods: string[];
 
     path: Maybe<string>;
 
     requestCount: Maybe<number>;
 
-    statuses: Maybe<(Maybe<string>)[]>;
+    statuses: string[];
   };
 
   export type Cursor = {

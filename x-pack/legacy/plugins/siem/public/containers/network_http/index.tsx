@@ -12,12 +12,7 @@ import { compose } from 'redux';
 import chrome from 'ui/chrome';
 
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
-import {
-  GetNetworkHttpQuery,
-  NetworkHttpEdges,
-  NetworkHttpSortField,
-  PageInfoPaginated,
-} from '../../graphql/types';
+import { GetNetworkHttpQuery, NetworkHttpEdges, PageInfoPaginated } from '../../graphql/types';
 import { inputsModel, inputsSelectors, networkModel, networkSelectors, State } from '../../store';
 import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
@@ -49,7 +44,6 @@ export interface NetworkHttpComponentReduxProps {
   activePage: number;
   isInspected: boolean;
   limit: number;
-  sort: NetworkHttpSortField;
 }
 
 type NetworkHttpProps = OwnProps & NetworkHttpComponentReduxProps;
@@ -72,7 +66,6 @@ class NetworkHttpComponentQuery extends QueryTemplatePaginated<
       skip,
       sourceId,
       startDate,
-      sort,
     } = this.props;
     const variables: GetNetworkHttpQuery.Variables = {
       defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
@@ -80,7 +73,6 @@ class NetworkHttpComponentQuery extends QueryTemplatePaginated<
       inspect: isInspected,
       ip,
       pagination: generateTablePaginationOptions(activePage, limit),
-      sort,
       sourceId,
       timerange: {
         interval: '12h',

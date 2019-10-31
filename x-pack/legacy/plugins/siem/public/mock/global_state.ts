@@ -140,7 +140,6 @@ export const mockGlobalState: State = {
         [networkModel.IpDetailsTableType.http]: {
           activePage: 0,
           limit: 10,
-          sort: { field: NetworkHttpFields.requestCount, direction: Direction.desc },
         },
       },
     },

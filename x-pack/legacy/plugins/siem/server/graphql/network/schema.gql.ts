@@ -162,20 +162,15 @@ export const networkSchema = gql`
     statuses
   }
 
-  input NetworkHttpSortField {
-    field: String!
-    direction: Direction!
-  }
-
   type NetworkHttpItem {
     _id: String
-    domains: [String]
+    domains: [String!]!
     lastHost: String
     lastSourceIp: String
-    methods: [String]
+    methods: [String!]!
     path: String
     requestCount: Float
-    statuses: [String]
+    statuses: [String!]!
   }
 
   type NetworkHttpEdges {
@@ -225,7 +220,6 @@ export const networkSchema = gql`
       filterQuery: String
       ip: String
       pagination: PaginationInputPaginated!
-      sort: NetworkHttpSortField!
       timerange: TimerangeInput!
       defaultIndex: [String!]!
     ): NetworkHttpData!

@@ -87,12 +87,6 @@ export interface NetworkDnsSortField {
   direction: Direction;
 }
 
-export interface NetworkHttpSortField {
-  field: string;
-
-  direction: Direction;
-}
-
 export interface TlsSortField {
   field: TlsFields;
 
@@ -1627,19 +1621,19 @@ export interface NetworkHttpEdges {
 export interface NetworkHttpItem {
   _id?: Maybe<string>;
 
-  domains?: Maybe<(Maybe<string>)[]>;
+  domains: string[];
 
   lastHost?: Maybe<string>;
 
   lastSourceIp?: Maybe<string>;
 
-  methods?: Maybe<(Maybe<string>)[]>;
+  methods: string[];
 
   path?: Maybe<string>;
 
   requestCount?: Maybe<number>;
 
-  statuses?: Maybe<(Maybe<string>)[]>;
+  statuses: string[];
 }
 
 export interface OverviewNetworkData {
@@ -2224,8 +2218,6 @@ export interface NetworkHttpSourceArgs {
   ip?: Maybe<string>;
 
   pagination: PaginationInputPaginated;
-
-  sort: NetworkHttpSortField;
 
   timerange: TimerangeInput;
 
@@ -3038,8 +3030,6 @@ export namespace SourceResolvers {
     ip?: Maybe<string>;
 
     pagination: PaginationInputPaginated;
-
-    sort: NetworkHttpSortField;
 
     timerange: TimerangeInput;
 
@@ -7009,19 +6999,19 @@ export namespace NetworkHttpItemResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = NetworkHttpItem> {
     _id?: _IdResolver<Maybe<string>, TypeParent, TContext>;
 
-    domains?: DomainsResolver<Maybe<(Maybe<string>)[]>, TypeParent, TContext>;
+    domains?: DomainsResolver<string[], TypeParent, TContext>;
 
     lastHost?: LastHostResolver<Maybe<string>, TypeParent, TContext>;
 
     lastSourceIp?: LastSourceIpResolver<Maybe<string>, TypeParent, TContext>;
 
-    methods?: MethodsResolver<Maybe<(Maybe<string>)[]>, TypeParent, TContext>;
+    methods?: MethodsResolver<string[], TypeParent, TContext>;
 
     path?: PathResolver<Maybe<string>, TypeParent, TContext>;
 
     requestCount?: RequestCountResolver<Maybe<number>, TypeParent, TContext>;
 
-    statuses?: StatusesResolver<Maybe<(Maybe<string>)[]>, TypeParent, TContext>;
+    statuses?: StatusesResolver<string[], TypeParent, TContext>;
   }
 
   export type _IdResolver<
@@ -7030,7 +7020,7 @@ export namespace NetworkHttpItemResolvers {
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
   export type DomainsResolver<
-    R = Maybe<(Maybe<string>)[]>,
+    R = string[],
     Parent = NetworkHttpItem,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -7045,7 +7035,7 @@ export namespace NetworkHttpItemResolvers {
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
   export type MethodsResolver<
-    R = Maybe<(Maybe<string>)[]>,
+    R = string[],
     Parent = NetworkHttpItem,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -7060,7 +7050,7 @@ export namespace NetworkHttpItemResolvers {
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
   export type StatusesResolver<
-    R = Maybe<(Maybe<string>)[]>,
+    R = string[],
     Parent = NetworkHttpItem,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;

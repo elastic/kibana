@@ -171,7 +171,7 @@ export class ElasticsearchNetworkAdapter implements NetworkAdapter {
       dsl
     );
     const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
-    const totalCount = getOr(0, 'aggregations.top_n_flow_count.value', response);
+    const totalCount = getOr(0, 'aggregations.http_count.value', response);
     const networkHttpEdges: NetworkHttpEdges[] = getHttpEdges(response);
     const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
     const edges = networkHttpEdges.splice(cursorStart, querySize - cursorStart);
@@ -181,6 +181,19 @@ export class ElasticsearchNetworkAdapter implements NetworkAdapter {
     };
     const showMorePagesIndicator = totalCount > fakeTotalCount;
 
+    console.log(
+      'ALALALAL',
+      JSON.stringify({
+        edges,
+        inspect,
+        pageInfo: {
+          activePage: activePage ? activePage : 0,
+          fakeTotalCount,
+          showMorePagesIndicator,
+        },
+        totalCount,
+      })
+    );
     return {
       edges,
       inspect,
@@ -338,9 +351,9 @@ const formatHttpEdges = (buckets: NetworkHttpBuckets[]): NetworkHttpEdges[] =>
   buckets.map((bucket: NetworkHttpBuckets) => ({
     node: {
       _id: bucket.key,
-      domains: bucket.domains.buckets.map(theBucket => theBucket.key),
-      methods: bucket.methods.buckets.map(theBucket => theBucket.key),
-      statuses: bucket.status.buckets.map(theBucket => theBucket.key),
+      domains: bucket.domains.buckets.map(({ key }) => key),
+      methods: bucket.methods.buckets.map(({ key }) => key),
+      statuses: bucket.status.buckets.map(({ key }) => `${key}`),
       lastHost: get('source.hits.hits[0]._source.host.name', bucket),
       lastSourceIp: get('source.hits.hits[0]._source.source.ip', bucket),
       path: bucket.key,

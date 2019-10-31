@@ -5,7 +5,6 @@
  */
 
 import {
-  NetworkHttpSortField,
   FlowTarget,
   NetworkDnsSortField,
   NetworkTopTablesSortField,
@@ -77,16 +76,13 @@ export interface TlsQuery extends BasicQueryPaginated {
   sort: TlsSortField;
 }
 
-export interface HttpQuery extends BasicQueryPaginated {
-  sort: NetworkHttpSortField;
-}
+export type HttpQuery = BasicQueryPaginated;
 
 export interface TableUpdates {
   activePage?: number;
   limit?: number;
   isPtrIncluded?: boolean;
   sort?:
-    | NetworkHttpSortField
     | NetworkDnsSortField
     | NetworkTopTablesSortField
     | TlsSortField

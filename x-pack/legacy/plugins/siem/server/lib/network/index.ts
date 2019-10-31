@@ -8,7 +8,6 @@ import {
   FlowTargetSourceDest,
   Maybe,
   NetworkDnsSortField,
-  NetworkHttpSortField,
   NetworkTopCountriesData,
   NetworkTopNFlowData,
   NetworkTopTablesSortField,
@@ -32,7 +31,6 @@ export interface NetworkTopCountriesRequestOptions extends RequestOptionsPaginat
 }
 
 export interface NetworkHttpRequestOptions extends RequestOptionsPaginated {
-  networkHttpSort: NetworkHttpSortField;
   ip?: Maybe<string>;
 }
 

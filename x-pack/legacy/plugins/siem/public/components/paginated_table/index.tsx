@@ -23,6 +23,7 @@ import { Direction } from '../../graphql/types';
 import { AuthTableColumns } from '../page/hosts/authentications_table';
 import { HostsTableColumns } from '../page/hosts/hosts_table';
 import { NetworkDnsColumns } from '../page/network/network_dns_table/columns';
+import { NetworkHttpColumns } from '../page/network/network_http_table/columns';
 import {
   NetworkTopNFlowColumns,
   NetworkTopNFlowColumnsIpDetails,
@@ -72,6 +73,7 @@ declare type BasicTableColumns =
   | HostsTableColumns
   | HostsTableColumnsTest
   | NetworkDnsColumns
+  | NetworkHttpColumns
   | NetworkTopCountriesColumns
   | NetworkTopCountriesColumnsIpDetails
   | NetworkTopNFlowColumns

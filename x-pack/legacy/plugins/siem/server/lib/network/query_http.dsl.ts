@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Direction, NetworkHttpSortField } from '../../graphql/types';
 import { createQueryFilterClauses } from '../../utils/build_query';
 
 import { NetworkHttpRequestOptions } from './index';
@@ -20,7 +19,6 @@ const getCountAgg = () => ({
 export const buildHttpQuery = ({
   defaultIndex,
   filterQuery,
-  networkHttpSort,
   pagination: { querySize },
   sourceConfiguration: {
     fields: { timestamp },
@@ -31,6 +29,7 @@ export const buildHttpQuery = ({
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     { range: { [timestamp]: { gte: from, lte: to } } },
+    { exists: { field: 'http.request.method' } },
   ];
 
   const dslQuery = {
@@ -40,7 +39,7 @@ export const buildHttpQuery = ({
     body: {
       aggregations: {
         ...getCountAgg(),
-        ...getHttpAggs(networkHttpSort, querySize),
+        ...getHttpAggs(querySize),
       },
       query: {
         bool: ip
@@ -66,48 +65,39 @@ export const buildHttpQuery = ({
   return dslQuery;
 };
 
-const getHttpAggs = (networkHttpSortField: NetworkHttpSortField, querySize: number) => ({
-  terms: {
-    field: `url.path`,
-    size: querySize,
-    order: {
-      ...getQueryOrder(networkHttpSortField),
+const getHttpAggs = (querySize: number) => ({
+  url: {
+    terms: {
+      field: `url.path`,
+      size: querySize,
     },
-  },
-  aggs: {
-    methods: {
-      terms: {
-        field: 'http.request.method',
-        size: 4,
+    aggs: {
+      methods: {
+        terms: {
+          field: 'http.request.method',
+          size: 4,
+        },
       },
-    },
-    domains: {
-      terms: {
-        field: 'url.domain',
-        size: 4,
+      domains: {
+        terms: {
+          field: 'url.domain',
+          size: 4,
+        },
       },
-    },
-    status: {
-      terms: {
-        field: 'http.response.status_code',
-        size: 4,
+      status: {
+        terms: {
+          field: 'http.response.status_code',
+          size: 4,
+        },
       },
-    },
-    source: {
-      top_hits: {
-        size: 1,
-        _source: {
-          includes: ['host.name', 'source.ip'],
+      source: {
+        top_hits: {
+          size: 1,
+          _source: {
+            includes: ['host.name', 'source.ip'],
+          },
         },
       },
     },
   },
-});
-
-interface QueryOrder {
-  requestCount: Direction;
-}
-
-const getQueryOrder = (networkHttpSortField: NetworkHttpSortField): QueryOrder => ({
-  requestCount: networkHttpSortField.direction,
 });
