@@ -51,6 +51,7 @@ export interface NewsfeedItem {
   linkUrl: string;
   badge: string | null;
   publishOn: Moment;
+  expireOn: Moment;
   hash: string;
 }
 

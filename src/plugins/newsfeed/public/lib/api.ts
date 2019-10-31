@@ -117,6 +117,7 @@ class NewsfeedApiDriver {
         linkUrl: linkUrl[userLanguage],
         badge: badge != null ? badge![userLanguage] : badge,
         publishOn: moment(publishOn),
+        expireOn: moment(expireOn),
         hash,
       };
 
