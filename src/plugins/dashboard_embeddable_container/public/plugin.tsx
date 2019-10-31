@@ -17,12 +17,17 @@
  * under the License.
  */
 
+import * as React from 'react';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { IUiActionsSetup, IUiActionsStart } from '../../../plugins/ui_actions/public';
 import { CONTEXT_MENU_TRIGGER, Plugin as EmbeddablePlugin } from './embeddable_plugin';
 import { ExpandPanelAction, ReplacePanelAction } from '.';
 import { DashboardContainerFactory } from './embeddable/dashboard_container_factory';
 import { Start as InspectorStartContract } from '../../../plugins/inspector/public';
+import {
+  SavedObjectFinder as SavedObjectFinderPure,
+  SavedObjectFinderProps,
+} from '../../../plugins/kibana_react/public';
 
 interface SetupDependencies {
   embeddable: ReturnType<EmbeddablePlugin['setup']>;
@@ -52,7 +57,15 @@ export class DashboardEmbeddableContainerPublicPlugin
     const { application, notifications, overlays } = core;
     const { embeddable, inspector, uiActions } = plugins;
 
-    const SavedObjectFinder = () => null;
+    const SavedObjectFinder = (
+      props: Exclude<SavedObjectFinderProps, 'savedObjects' | 'uiSettings'>
+    ) => (
+      <SavedObjectFinderPure
+        {...props}
+        savedObjects={core.savedObjects}
+        uiSettings={core.uiSettings}
+      />
+    );
     const ExitFullScreenButton = () => null;
 
     const changeViewAction = new ReplacePanelAction(
