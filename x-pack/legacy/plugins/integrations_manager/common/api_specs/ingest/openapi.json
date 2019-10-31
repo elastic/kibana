@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "Ingest",
-    "version": "1.0",
+    "version": "0.2",
     "description": "Strawman API for fka Ingest Plugin",
     "license": {
       "url": "https://raw.githubusercontent.com/elastic/elasticsearch/master/licenses/ELASTIC-LICENSE.txt",
@@ -14,7 +14,8 @@
   },
   "servers": [
     {
-      "url": "http://localhost:5601/api/integrations_manager"
+      "url": "http://localhost:5601/api/epm",
+      "description": "EPM API Root"
     }
   ],
   "paths": {
@@ -39,7 +40,9 @@
         },
         "parameters": [
           {
-            "schema": {},
+            "schema": {
+              "type": "string"
+            },
             "in": "query",
             "name": "datasource"
           },
@@ -48,7 +51,7 @@
               "type": "string"
             },
             "in": "query",
-            "name": "policyid"
+            "name": "use_case"
           },
           {
             "$ref": "#/components/parameters/pageIndexParam"
@@ -57,7 +60,7 @@
             "$ref": "#/components/parameters/pageSizeParam"
           }
         ],
-        "description": "Return polices linked to a datasource",
+        "description": "Return one or many polices based on the given filter",
         "operationId": "getPolicies"
       },
       "parameters": []
@@ -87,7 +90,7 @@
               "type": "string"
             },
             "in": "query",
-            "name": "policyId"
+            "name": "policy_id"
           },
           {
             "$ref": "#/components/parameters/pageIndexParam"
