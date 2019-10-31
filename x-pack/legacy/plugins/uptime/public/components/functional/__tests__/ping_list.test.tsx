@@ -210,7 +210,7 @@ describe('PingList component', () => {
         onUpdateApp={jest.fn()}
         pageSize={30}
         selectedOption="down"
-        selectedLocation={AllLocationOption}
+        selectedLocation={AllLocationOption.value}
       />
     );
     expect(component).toMatchSnapshot();

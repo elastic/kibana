@@ -6,8 +6,6 @@
 import {
   EuiBadge,
   EuiBasicTable,
-  EuiComboBox,
-  EuiComboBoxOptionProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
@@ -39,13 +37,13 @@ interface PingListQueryResult {
 }
 
 interface PingListProps {
-  onSelectedStatusChange: (status: string | null) => void;
-  onSelectedLocationChange: (location) => void;
+  onSelectedStatusChange: (status: string | undefined) => void;
+  onSelectedLocationChange: (location: any) => void;
   onPageCountChange: (itemCount: number) => void;
   onUpdateApp: () => void;
   pageSize: number;
   selectedOption: string;
-  selectedLocation: EuiComboBoxOptionProps[];
+  selectedLocation: string | undefined;
 }
 
 type Props = UptimeGraphQLQueryProps<PingListQueryResult> & PingListProps;
@@ -265,7 +263,7 @@ export const PingListComponent = ({
                             onSelectedStatusChange(
                               selected.target && selected.target.value !== ''
                                 ? selected.target.value
-                                : null
+                                : undefined
                             );
                           }
                         }}

@@ -7,7 +7,6 @@
 import {
   // @ts-ignore No typings for EuiSpacer
   EuiSpacer,
-  EuiComboBoxOptionProps,
 } from '@elastic/eui';
 import { ApolloQueryResult, OperationVariables, QueryOptions } from 'apollo-client';
 import gql from 'graphql-tag';
@@ -23,7 +22,6 @@ import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { UptimeSettingsContext } from '../contexts';
 import { useUrlParams } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
-import { AllLocationOption } from '../components/functional/ping_list';
 import { useTrackPageview } from '../../../infra/public';
 import { getTitle } from '../lib/helper/get_title';
 
@@ -74,7 +72,7 @@ export const MonitorPage = ({
     });
   }, [params]);
 
-  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [selectedLocation, setSelectedLocation] = useState(undefined);
 
   const sharedVariables = {
     dateRangeStart,
@@ -107,7 +105,7 @@ export const MonitorPage = ({
       <PingList
         onPageCountChange={setPingListPageCount}
         onSelectedLocationChange={setSelectedLocation}
-        onSelectedStatusChange={(selectedStatus: string | null) =>
+        onSelectedStatusChange={(selectedStatus: string | undefined) =>
           updateUrlParams({ selectedPingStatus: selectedStatus || '' })
         }
         onUpdateApp={refreshApp}
