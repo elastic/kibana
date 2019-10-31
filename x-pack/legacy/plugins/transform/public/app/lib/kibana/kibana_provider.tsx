@@ -75,6 +75,8 @@ export const KibanaProvider: FC<Props> = ({ savedObjectId, children }) => {
 
   useEffect(() => {
     fetchSavedObject(savedObjectId);
+    // fetchSavedObject should not be tracked.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [savedObjectId]);
 
   return <KibanaContext.Provider value={contextValue}>{children}</KibanaContext.Provider>;

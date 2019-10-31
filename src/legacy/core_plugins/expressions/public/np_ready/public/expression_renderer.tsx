@@ -57,6 +57,7 @@ export const ExpressionRendererImplementation = ({
   const [state, setState] = useState<State>({ ...defaultState });
 
   // Re-fetch data automatically when the inputs change
+  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     if (handlerRef.current) {
       handlerRef.current.update(expression, options);
@@ -68,6 +69,7 @@ export const ExpressionRendererImplementation = ({
     options.variables,
     options.disableCaching,
   ]);
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   // Initialize the loader only once
   useEffect(() => {

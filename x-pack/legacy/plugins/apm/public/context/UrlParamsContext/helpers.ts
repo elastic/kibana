@@ -8,6 +8,13 @@ import { compact, pick } from 'lodash';
 import datemath from '@elastic/datemath';
 import { IUrlParams } from './types';
 
+interface PathParams {
+  processorEvent?: 'error' | 'metric' | 'transaction';
+  serviceName?: string;
+  errorGroupId?: string;
+  serviceNodeName?: string;
+}
+
 export function getParsedDate(rawDate?: string, opts = {}) {
   if (rawDate) {
     const parsed = datemath.parse(rawDate, opts);
@@ -56,7 +63,7 @@ export function removeUndefinedProps<T>(obj: T): Partial<T> {
   return pick(obj, value => value !== undefined);
 }
 
-export function getPathParams(pathname: string = '') {
+export function getPathParams(pathname: string = ''): PathParams {
   const paths = getPathAsArray(pathname);
   const pageName = paths[0];
 
@@ -92,17 +99,15 @@ export function getPathParams(pathname: string = '') {
           };
         case 'nodes':
           return {
+            processorEvent: 'metric',
             serviceName
           };
         case 'service-map':
           return {
-            processorEvent: 'service-map',
             serviceName
           };
         default:
-          return {
-            processorEvent: 'transaction'
-          };
+          return {};
       }
 
     case 'traces':
