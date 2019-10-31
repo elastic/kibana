@@ -64,7 +64,7 @@ or bottom _n_ elements of a  given field to display, ordered by count or a custo
 <<kuery-query, KQL>> or <<lucene-query, Lucene>> query string. Click *Add Filter* to
 add another filter. Click the image:images/labelbutton.png[Label button icon] *label* button to open the label field, where
 you can type in a name to display on the visualization.
-*Significant Terms*:: An aggregation that returns interesting or unusual occurrences of terms in a set. Uses the{ref}/search-aggregations-bucket-significantterms-aggregation.html[Significant terms] aggregation.
+*Significant Terms*:: An aggregation that returns interesting or unusual occurrences of terms in a set. Uses the{es} {ref}/search-aggregations-bucket-significantterms-aggregation.html[Significant terms] aggregation.
 
 
 These visualizations support parent pipeline aggregations:
