@@ -26,9 +26,8 @@ import { getElementPositionAndAttributes } from './get_element_position_data';
 import { getScreenshots } from './get_screenshots';
 import { skipTelemetry } from './skip_telemetry';
 
-// NOTE: Typescript does not throw an error if this interface has errors!
 interface ScreenshotResults {
-  timeRang: TimeRange;
+  timeRange: TimeRange;
   screenshots: Screenshot[];
 }
 
