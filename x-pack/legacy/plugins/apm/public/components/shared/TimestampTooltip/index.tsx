@@ -23,14 +23,14 @@ function getTimeFormat(
 ) {
   const separator = withSeparator ? ', ' : '';
   switch (precision) {
-    case 'days':
-      return '';
     case 'minutes':
       return `${separator}HH:mm`;
     case 'seconds':
       return `${separator}HH:mm:ss`;
-    default:
+    case 'milliseconds':
       return `${separator}HH:mm:ss.SSS`;
+    default:
+      return ``;
   }
 }
 
