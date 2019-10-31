@@ -54,7 +54,7 @@ export async function findLegacyPluginSpecs(settings: unknown, loggerFactory: Lo
     invalidDirectoryError$: Observable<{ path: string }>;
     invalidPackError$: Observable<{ path: string }>;
     otherError$: Observable<unknown>;
-    deprecation$: Observable<unknown>;
+    deprecation$: Observable<{ spec: LegacyPluginSpec; message: string }>;
     invalidVersionSpec$: Observable<LegacyPluginSpec>;
     spec$: Observable<LegacyPluginSpec>;
     disabledSpec$: Observable<LegacyPluginSpec>;
