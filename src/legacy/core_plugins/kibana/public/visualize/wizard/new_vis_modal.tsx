@@ -27,9 +27,7 @@ import { SearchSelection } from './search_selection';
 import { TypeSelection } from './type_selection';
 import { TypesStart, VisTypeAlias } from '../../../../visualizations/public/np_ready/public/types';
 
-import { getServices, METRIC_TYPE, VisType } from '../kibana_services';
-
-const { addBasePath, createUiStatsReporter, uiSettings } = getServices();
+import { getServices, METRIC_TYPE, VisType, createUiStatsReporter } from '../kibana_services';
 
 interface TypeSelectionProps {
   isOpen: boolean;
@@ -51,11 +49,11 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
   };
 
   private readonly isLabsEnabled: boolean;
-  private readonly trackUiMetric: ReturnType<typeof createUiStatsReporter>;
+  private readonly trackUiMetric: ReturnType<typeof any>;
 
   constructor(props: TypeSelectionProps) {
     super(props);
-    this.isLabsEnabled = uiSettings.get('visualize:enableLabs');
+    this.isLabsEnabled = getServices().uiSettings.get('visualize:enableLabs');
 
     this.state = {
       showSearchVisModal: false,
@@ -124,7 +122,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
     this.trackUiMetric(METRIC_TYPE.CLICK, visType.name);
 
     if ('aliasUrl' in visType) {
-      window.location.href = addBasePath(visType.aliasUrl);
+      window.location.href = getServices().addBasePath(visType.aliasUrl);
 
       return;
     }

@@ -17,13 +17,10 @@
  * under the License.
  */
 
-import { getServices, VisEditorTypesRegistryProvider } from '../kibana_services';
+import { VisEditorTypesRegistryProvider } from '../kibana_services';
 
-const { uiModules } = getServices();
-
-uiModules
-  .get('kibana/directive', ['ngSanitize'])
-  .directive('visualizationEditor', function (Private, $timeout, getAppState) {
+export function initVisEditorDirective(app, deps) {
+  app.directive('visualizationEditor', function (Private, $timeout, getAppState) {
     const editorTypes = Private(VisEditorTypesRegistryProvider);
 
     return {
@@ -62,3 +59,4 @@ uiModules
       }
     };
   });
+}

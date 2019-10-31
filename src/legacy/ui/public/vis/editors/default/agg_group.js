@@ -22,34 +22,14 @@ import { wrapInI18nContext } from 'ui/i18n';
 import { uiModules } from '../../../modules';
 import { DefaultEditorAggGroup } from './components/agg_group';
 
-uiModules
-  .get('app/visualize')
-  .directive('visEditorAggGroupWrapper', reactDirective =>
-    reactDirective(wrapInI18nContext(DefaultEditorAggGroup), [
-      ['metricAggs', { watchDepth: 'reference' }], // we watch reference to identify each aggs change in useEffects
-      ['schemas', { watchDepth: 'collection' }],
-      ['state', { watchDepth: 'reference' }],
-      ['addSchema', { watchDepth: 'reference' }],
-      ['onAggParamsChange', { watchDepth: 'reference' }],
-      ['onAggTypeChange', { watchDepth: 'reference' }],
-      ['onToggleEnableAgg', { watchDepth: 'reference' }],
-      ['removeAgg', { watchDepth: 'reference' }],
-      ['reorderAggs', { watchDepth: 'reference' }],
-      ['setTouched', { watchDepth: 'reference' }],
-      ['setValidity', { watchDepth: 'reference' }],
-      'groupName',
-      'formIsTouched',
-      'lastParentPipelineAggTitle',
-      'currentTab',
-    ])
-  )
-  .directive('visEditorAggGroup', function () {
-    return {
-      restrict: 'E',
-      scope: true,
-      require: '?^ngModel',
-      template: function () {
-        return `<vis-editor-agg-group-wrapper	
+/** @internal */
+export const createVisEditorGroupDirective = () => {
+  return {
+    restrict: 'E',
+    scope: true,
+    require: '?^ngModel',
+    template: () => {
+      return `<vis-editor-agg-group-wrapper	
             ng-if="setValidity"	
             current-tab="sidebar.section"
             form-is-touched="formIsTouched"
@@ -67,32 +47,58 @@ uiModules
             set-validity="setValidity"	
             set-touched="setTouched"	
           ></vis-editor-agg-group-wrapper>`;
-      },
-      link: function ($scope, $el, attr, ngModelCtrl) {
-        $scope.groupName = attr.groupName;
-        $scope.$bind('schemas', attr.schemas);
-        // The model can become touched either onBlur event or when the form is submitted.
-        // We also watch $touched to identify when the form is submitted.
-        $scope.$watch(
-          () => {
-            return ngModelCtrl.$touched;
-          },
-          value => {
-            $scope.formIsTouched = value;
-          }
-        );
+    },
+    link: ($scope, $el, attr, ngModelCtrl) => {
+      $scope.groupName = attr.groupName;
+      $scope.$bind('schemas', attr.schemas);
+      // The model can become touched either onBlur event or when the form is submitted.
+      // We also watch $touched to identify when the form is submitted.
+      $scope.$watch(
+        () => {
+          return ngModelCtrl.$touched;
+        },
+        value => {
+          $scope.formIsTouched = value;
+        }
+      );
 
-        $scope.setValidity = isValid => {
-          ngModelCtrl.$setValidity(`aggGroup${$scope.groupName}`, isValid);
-        };
+      $scope.setValidity = isValid => {
+        ngModelCtrl.$setValidity(`aggGroup${$scope.groupName}`, isValid);
+      };
 
-        $scope.setTouched = isTouched => {
-          if (isTouched) {
-            ngModelCtrl.$setTouched();
-          } else {
-            ngModelCtrl.$setUntouched();
-          }
-        };
-      },
-    };
-  });
+      $scope.setTouched = isTouched => {
+        if (isTouched) {
+          ngModelCtrl.$setTouched();
+        } else {
+          ngModelCtrl.$setUntouched();
+        }
+      };
+    },
+  };
+};
+
+/** @internal */
+export const visEditorGroupDeps = [
+  ['metricAggs', { watchDepth: 'reference' }], // we watch reference to identify each aggs change in useEffects
+  ['schemas', { watchDepth: 'collection' }],
+  ['state', { watchDepth: 'reference' }],
+  ['addSchema', { watchDepth: 'reference' }],
+  ['onAggParamsChange', { watchDepth: 'reference' }],
+  ['onAggTypeChange', { watchDepth: 'reference' }],
+  ['onToggleEnableAgg', { watchDepth: 'reference' }],
+  ['removeAgg', { watchDepth: 'reference' }],
+  ['reorderAggs', { watchDepth: 'reference' }],
+  ['setTouched', { watchDepth: 'reference' }],
+  ['setValidity', { watchDepth: 'reference' }],
+  'groupName',
+  'formIsTouched',
+  'lastParentPipelineAggTitle',
+  'currentTab',
+];
+
+uiModules
+  .get('app/visualize')
+  .directive('visEditorAggGroupWrapper', reactDirective =>
+    reactDirective(wrapInI18nContext(DefaultEditorAggGroup), visEditorGroupDeps)
+  )
+  .directive('visEditorAggGroup', createVisEditorGroupDirective);

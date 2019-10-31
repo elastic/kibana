@@ -40,15 +40,6 @@ import {
   VisSavedObject,
 } from '../kibana_services';
 
-const {
-  addBasePath,
-  capabilities,
-  embeddable,
-  getInjector,
-  uiSettings,
-  visualizations,
-} = getServices();
-
 interface VisualizationAttributes extends SavedObjectAttributes {
   visState: string;
 }
@@ -63,7 +54,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
   private readonly visTypes: TypesStart;
 
   static async createVisualizeEmbeddableFactory(): Promise<VisualizeEmbeddableFactory> {
-    return new VisualizeEmbeddableFactory(visualizations.types);
+    return new VisualizeEmbeddableFactory(getServices().visualizations.types);
   }
 
   constructor(visTypes: TypesStart) {
@@ -97,7 +88,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
           if (!visType) {
             return false;
           }
-          if (uiSettings.get('visualize:enableLabs')) {
+          if (getServices().uiSettings.get('visualize:enableLabs')) {
             return true;
           }
           return visType.stage !== 'experimental';
@@ -109,7 +100,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
   }
 
   public isEditable() {
-    return capabilities.visualize.save as boolean;
+    return getServices().visualizeCapabilities.save as boolean;
   }
 
   public getDisplayName() {
@@ -123,16 +114,17 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
     input: Partial<VisualizeInput> & { id: string },
     parent?: Container
   ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> {
-    const $injector = await getInjector();
-    const config = $injector.get<Legacy.KibanaConfig>('config');
-    const savedVisualizations = $injector.get<SavedVisualizations>('savedVisualizations');
+    const config = getServices().config;
+    const savedVisualizations = getServices().savedVisualizations;
 
     try {
       const visId = savedObject.id as string;
 
-      const editUrl = visId ? addBasePath(`/app/kibana${savedVisualizations.urlFor(visId)}`) : '';
+      const editUrl = visId
+        ? getServices().addBasePath(`/app/kibana${savedVisualizations.urlFor(visId)}`)
+        : '';
       const loader = await getVisualizeLoader();
-      const isLabsEnabled = config.get<boolean>('visualize:enableLabs');
+      const isLabsEnabled = config.get('visualize:enableLabs');
 
       if (!isLabsEnabled && savedObject.vis.type.stage === 'experimental') {
         return new DisabledLabEmbeddable(savedObject.title, input);
@@ -164,8 +156,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
     input: Partial<VisualizeInput> & { id: string },
     parent?: Container
   ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> {
-    const $injector = await getInjector();
-    const savedVisualizations = $injector.get<SavedVisualizations>('savedVisualizations');
+    const savedVisualizations = getServices().savedVisualizations;
 
     try {
       const visId = savedObjectId;
@@ -190,6 +181,6 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
   }
 }
 
-VisualizeEmbeddableFactory.createVisualizeEmbeddableFactory().then(embeddableFactory => {
-  embeddable.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
-});
+// VisualizeEmbeddableFactory.createVisualizeEmbeddableFactory().then(embeddableFactory => {
+//   getServices().embeddable.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
+// });

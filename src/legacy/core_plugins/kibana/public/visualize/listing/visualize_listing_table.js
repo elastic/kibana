@@ -27,8 +27,6 @@ import { EuiIcon, EuiBetaBadge, EuiLink, EuiButton, EuiEmptyPrompt } from '@elas
 
 import { getServices } from '../kibana_services';
 
-const { capabilities } = getServices();
-
 class VisualizeListingTable extends Component {
   constructor(props) {
     super(props);
@@ -41,8 +39,8 @@ class VisualizeListingTable extends Component {
         // for data exploration purposes
         createItem={this.props.createItem}
         findItems={this.props.findItems}
-        deleteItems={capabilities.visualize.delete ? this.props.deleteItems : null}
-        editItem={capabilities.visualize.save ? this.props.editItem : null}
+        deleteItems={getServices().visualizeCapabilities.delete ? this.props.deleteItems : null}
+        editItem={getServices().visualizeCapabilities.save ? this.props.editItem : null}
         tableColumns={this.getTableColumns()}
         listingLimit={this.props.listingLimit}
         selectable={item => item.canDelete}

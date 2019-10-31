@@ -27,7 +27,7 @@ import {
   IRootScopeService,
 } from 'angular';
 import $ from 'jquery';
-import { cloneDeep, forOwn, set } from 'lodash';
+import _, { cloneDeep, forOwn, get, set } from 'lodash';
 import React, { Fragment } from 'react';
 import * as Rx from 'rxjs';
 
@@ -36,13 +36,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { CoreStart, LegacyCoreStart } from 'kibana/public';
 
 import { fatalError } from 'ui/notify';
-import { capabilities } from 'ui/capabilities';
+import { RouteConfiguration } from 'ui/routes/route_manager';
 // @ts-ignore
 import { modifyUrl } from 'ui/url';
 // @ts-ignore
 import { UrlOverflowService } from '../error_url_overflow';
-import { npStart } from '../new_platform';
-import { toastNotifications } from '../notify';
 // @ts-ignore
 import { isSystemApiRequest } from '../system_api';
 
@@ -54,8 +52,7 @@ function isDummyWrapperRoute($route: any) {
   );
 }
 
-export const configureAppAngularModule = (angularModule: IModule) => {
-  const newPlatform = npStart.core;
+export const configureAppAngularModule = (angularModule: IModule, newPlatform: LegacyCoreStart) => {
   const legacyMetadata = newPlatform.injectedMetadata.getLegacyMetadata();
 
   forOwn(newPlatform.injectedMetadata.getInjectedVars(), (val, name) => {
@@ -71,7 +68,7 @@ export const configureAppAngularModule = (angularModule: IModule) => {
     .value('buildSha', legacyMetadata.buildSha)
     .value('serverName', legacyMetadata.serverName)
     .value('esUrl', getEsUrl(newPlatform))
-    .value('uiCapabilities', capabilities.get())
+    .value('uiCapabilities', newPlatform.application.capabilities)
     .config(setupCompileProvider(newPlatform))
     .config(setupLocationProvider(newPlatform))
     .config($setupXsrfRequestInterceptor(newPlatform))
@@ -79,7 +76,8 @@ export const configureAppAngularModule = (angularModule: IModule) => {
     .run($setupBreadcrumbsAutoClear(newPlatform))
     .run($setupBadgeAutoClear(newPlatform))
     .run($setupHelpExtensionAutoClear(newPlatform))
-    .run($setupUrlOverflowHandling(newPlatform));
+    .run($setupUrlOverflowHandling(newPlatform))
+    .run($setupUICapabilityRedirect(newPlatform));
 };
 
 const getEsUrl = (newPlatform: CoreStart) => {
@@ -163,6 +161,36 @@ const capture$httpLoadingCount = (newPlatform: CoreStart) => (
 
       return unwatch;
     })
+  );
+};
+
+/**
+ * integrates with angular to automatically redirect to home if required
+ * capability is not met
+ */
+const $setupUICapabilityRedirect = (newPlatform: CoreStart) => (
+  $rootScope: IRootScopeService,
+  $injector: any
+) => {
+  const isKibanaAppRoute = window.location.pathname.endsWith('/app/kibana');
+  // this feature only works within kibana app for now after everything is
+  // switched to the application service, this can be changed to handle all
+  // apps.
+  if (!isKibanaAppRoute) {
+    return;
+  }
+  $rootScope.$on(
+    '$routeChangeStart',
+    (event, { $$route: route }: { $$route?: RouteConfiguration } = {}) => {
+      if (!route || !route.requireUICapability) {
+        return;
+      }
+
+      if (!get(newPlatform.application.capabilities, route.requireUICapability)) {
+        $injector.get('kbnUrl').change('/home');
+        event.preventDefault();
+      }
+    }
   );
 };
 
@@ -324,7 +352,7 @@ const $setupUrlOverflowHandling = (newPlatform: CoreStart) => (
 
     try {
       if (urlOverflow.check($location.absUrl()) <= URL_LIMIT_WARN_WITHIN) {
-        toastNotifications.addWarning({
+        newPlatform.notifications.toasts.addWarning({
           title: i18n.translate('common.ui.chrome.bigUrlWarningNotificationTitle', {
             defaultMessage: 'The URL is big and Kibana might stop working',
           }),

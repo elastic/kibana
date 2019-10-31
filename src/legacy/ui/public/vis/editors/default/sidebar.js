@@ -27,7 +27,8 @@ import { move } from '../../../utils/collection';
 import { AggGroupNames } from './agg_groups';
 import { getEnabledMetricAggsCount } from './components/agg_group_helper';
 
-uiModules.get('app/visualize').directive('visEditorSidebar', function () {
+/** @internal */
+export const createVisEditorSidebarDirective = () => {
   return {
     restrict: 'E',
     template: sidebarTemplate,
@@ -102,4 +103,6 @@ uiModules.get('app/visualize').directive('visEditorSidebar', function () {
       };
     },
   };
-});
+};
+
+uiModules.get('app/visualize').directive('visEditorSidebar', createVisEditorSidebarDirective);

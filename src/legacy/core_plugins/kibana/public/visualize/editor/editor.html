@@ -1,7 +1,7 @@
 <visualize-app class="app-container visEditor visEditor--{{ vis.type.name }}">
   <!-- Linked search. -->
   <div
-      ng-show="chrome.getVisible()"
+      ng-show="isVisible"
       ng-if="vis.type.requiresSearch && state.linked"
       class="fullWidth visEditor__linkedMessage"
     >
@@ -38,7 +38,7 @@
     show-search-bar="true"
     show-query-bar="true"
     show-query-input="showQueryInput()"
-    show-filter-bar="showFilterBar() && chrome.getVisible()"
+    show-filter-bar="showFilterBar() && isVisible"
     show-date-picker="showQueryBarTimePicker()"
     show-auto-refresh-only="!showQueryBarTimePicker()"
     query="state.query"
@@ -65,7 +65,7 @@
     we show the filter bar on its own here if the chrome is not visible.
   -->
   <filter-bar
-    ng-if="vis.type.options.showFilterBar && !chrome.getVisible()"
+    ng-if="vis.type.options.showFilterBar && !isVisible"
     class-name="'globalFilterGroup__filterBar'"
     filters="filters"
     on-filters-updated="onFiltersUpdated"
@@ -83,7 +83,7 @@
   </div>
 
   <visualization-embedded
-    ng-if="!chrome.getVisible()"
+    ng-if="!isVisible"
     class="visualize"
     saved-obj="savedVis"
     ui-state="uiState"
@@ -102,7 +102,7 @@
   >
   </h1>
   <visualization-editor
-    ng-if="chrome.getVisible()"
+    ng-if="isVisible"
     saved-obj="savedVis"
     ui-state="uiState"
     time-range="timeRange"

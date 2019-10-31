@@ -24,11 +24,10 @@ import {
   VisSavedObject,
 } from '../kibana_services';
 
-const { savedObjectsClient, uiSettings } = getServices();
-
 export async function getIndexPattern(
   savedVis: VisSavedObject
 ): Promise<StaticIndexPattern | undefined> {
+  const { savedObjectsClient, uiSettings } = getServices();
   if (savedVis.vis.type.name !== 'metrics') {
     return savedVis.vis.indexPattern;
   }
