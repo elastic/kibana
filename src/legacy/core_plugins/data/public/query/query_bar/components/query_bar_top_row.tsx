@@ -21,7 +21,7 @@ import dateMath from '@elastic/datemath';
 import { doesKueryExpressionHaveLuceneSyntaxError } from '@kbn/es-query';
 
 import classNames from 'classnames';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 import {
   EuiButton,
@@ -78,12 +78,10 @@ function QueryBarTopRowUI(props: Props) {
   const kueryQuerySyntaxLink: string = docLinks!.links.query.kueryQuerySyntax;
 
   const queryLanguage = props.query && props.query.language;
-  let persistedLog: PersistedLog | undefined;
-
-  useEffect(() => {
-    if (!props.query) return;
-    persistedLog = getQueryLog(uiSettings!, storage, appName, props.query.language);
-  }, [queryLanguage]);
+  const persistedLog: PersistedLog | undefined = React.useMemo(
+    () => (queryLanguage ? getQueryLog(uiSettings!, storage, appName, queryLanguage) : undefined),
+    [queryLanguage]
+  );
 
   function onClickSubmitButton(event: React.MouseEvent<HTMLButtonElement>) {
     if (persistedLog && props.query) {
