@@ -21,11 +21,20 @@ import { Component } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { EuiFieldText, EuiOutsideClickDetector, PopoverAnchorPosition } from '@elastic/eui';
+import {
+  EuiFieldText,
+  EuiOutsideClickDetector,
+  PopoverAnchorPosition,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
+  EuiLink,
+} from '@elastic/eui';
 
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { InjectedIntl, injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { debounce, compact, isEqual } from 'lodash';
-
+import { documentationLinks } from 'ui/documentation_links';
+import { Toast } from 'src/core/public';
 import {
   AutocompleteSuggestion,
   AutocompleteSuggestionType,
@@ -302,20 +311,13 @@ export class QueryBarInputUI extends Component<Props, State> {
     }
   };
 
-  private selectSuggestion = ({
-    type,
-    text,
-    start,
-    end,
-  }: {
-    type: AutocompleteSuggestionType;
-    text: string;
-    start: number;
-    end: number;
-  }) => {
+  private selectSuggestion = (suggestion: AutocompleteSuggestion) => {
     if (!this.inputRef) {
       return;
     }
+    const { type, text, start, end, cursorIndex } = suggestion;
+
+    this.handleNestedFieldSyntaxNotification(suggestion);
 
     const query = this.getQueryString();
     const { selectionStart, selectionEnd } = this.inputRef;
@@ -328,9 +330,72 @@ export class QueryBarInputUI extends Component<Props, State> {
 
     this.onQueryStringChange(newQueryString);
 
+    this.setState({
+      selectionStart: start + (cursorIndex ? cursorIndex : text.length),
+      selectionEnd: start + (cursorIndex ? cursorIndex : text.length),
+    });
+
     if (type === recentSearchType) {
       this.setState({ isSuggestionsVisible: false, index: null });
       this.onSubmit({ query: newQueryString, language: this.props.query.language });
+    }
+  };
+
+  private handleNestedFieldSyntaxNotification = (suggestion: AutocompleteSuggestion) => {
+    if (
+      'field' in suggestion &&
+      suggestion.field.subType &&
+      suggestion.field.subType.nested &&
+      !this.services.storage.get('kibana.KQLNestedQuerySyntaxInfoOptOut')
+    ) {
+      const notifications = this.services.notifications;
+
+      const onKQLNestedQuerySyntaxInfoOptOut = (toast: Toast) => {
+        if (!this.services.storage) return;
+        this.services.storage.set('kibana.KQLNestedQuerySyntaxInfoOptOut', true);
+        notifications!.toasts.remove(toast);
+      };
+
+      if (notifications) {
+        const toast = notifications.toasts.add({
+          title: this.props.intl.formatMessage({
+            id: 'data.query.queryBar.KQLNestedQuerySyntaxInfoTitle',
+            defaultMessage: 'KQL nested query syntax',
+          }),
+          text: (
+            <div>
+              <p>
+                <FormattedMessage
+                  id="data.query.queryBar.KQLNestedQuerySyntaxInfoText"
+                  defaultMessage="It looks like you're querying on a nested field.
+                  You can construct KQL syntax for nested queries in different ways, depending on the results you want.
+                  Learn more in our {link}."
+                  values={{
+                    link: (
+                      <EuiLink href={documentationLinks.query.kueryQuerySyntax} target="_blank">
+                        <FormattedMessage
+                          id="data.query.queryBar.KQLNestedQuerySyntaxInfoDocLinkText"
+                          defaultMessage="docs"
+                        />
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              </p>
+              <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiButton size="s" onClick={() => onKQLNestedQuerySyntaxInfoOptOut(toast)}>
+                    <FormattedMessage
+                      id="data.query.queryBar.KQLNestedQuerySyntaxInfoOptOutText"
+                      defaultMessage="Don't show again"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </div>
+          ),
+        });
+      }
     }
   };
 

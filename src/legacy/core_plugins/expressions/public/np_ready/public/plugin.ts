@@ -19,8 +19,9 @@
 
 /* eslint-disable */
 import { npSetup } from 'ui/new_platform';
-import { ExpressionsSetupContract } from '../../../../../../plugins/expressions/public/expressions/expressions_service';
 /* eslint-enable */
+
+import { ExpressionsSetup } from '../../../../../../plugins/expressions/public';
 
 import {
   CoreSetup,
@@ -32,7 +33,7 @@ import {
   Start as InspectorStart,
   Setup as InspectorSetup,
 } from '../../../../../../plugins/inspector/public';
-import { IInterpreter } from './types';
+import { ExpressionInterpreter } from './types';
 import { setInterpreter, setInspector, setRenderersRegistry } from './services';
 import { ExpressionRendererImplementation } from './expression_renderer';
 import { ExpressionLoader, loader } from './loader';
@@ -47,7 +48,7 @@ export interface ExpressionsStartDeps {
   inspector: InspectorStart;
 }
 
-export type ExpressionsSetup = ExpressionsSetupContract;
+export { ExpressionsSetup };
 export type ExpressionsStart = ReturnType<ExpressionsPublicPlugin['start']>;
 
 export class ExpressionsPublicPlugin
@@ -61,7 +62,7 @@ export class ExpressionsPublicPlugin
     // eslint-disable-next-line
     const { getInterpreter } = require('../../../../interpreter/public/interpreter');
     getInterpreter()
-      .then(({ interpreter }: { interpreter: IInterpreter }) => {
+      .then(({ interpreter }: { interpreter: ExpressionInterpreter }) => {
         setInterpreter(interpreter);
       })
       .catch((e: Error) => {
