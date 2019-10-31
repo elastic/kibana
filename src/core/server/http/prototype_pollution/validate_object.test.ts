@@ -73,12 +73,7 @@ test(`fails on circular references`, () => {
   JSON.parse(`{ "foo": { "constructor": { "prototype" : null } } }`),
   JSON.parse(`{ "foo": { "bar": { "constructor": { "prototype" : null } } } }`),
 ].forEach(value => {
-  ['headers', 'payload', 'query', 'params'].forEach(property => {
-    const obj = {
-      [property]: value,
-    };
-    test(`can't submit ${JSON.stringify(obj)}`, () => {
-      expect(() => validateObject(obj)).toThrowErrorMatchingSnapshot();
-    });
+  test(`can't submit ${JSON.stringify(value)}`, () => {
+    expect(() => validateObject(value)).toThrowErrorMatchingSnapshot();
   });
 });
