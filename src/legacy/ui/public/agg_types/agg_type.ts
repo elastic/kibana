@@ -64,7 +64,7 @@ const getFormat = (agg: AggConfig) => {
   const field = agg.getField();
   const fieldFormats = npStart.plugins.data.fieldFormats;
 
-  return field ? field.format : fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING, []);
+  return field ? field.format : fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING);
 };
 
 export class AggType<TAggConfig extends AggConfig = AggConfig, TParam extends AggParam = AggParam> {

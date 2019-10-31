@@ -69,7 +69,10 @@ export class FieldFormatRegisty {
    * @param  {ES_FIELD_TYPES[]} esTypes - Array of ES data types
    * @return {FieldType}
    */
-  getDefaultConfig = (fieldType: KBN_FIELD_TYPES, esTypes: ES_FIELD_TYPES[]): FieldType => {
+  getDefaultConfig = (
+    fieldType: KBN_FIELD_TYPES,
+    esTypes: ES_FIELD_TYPES[] | undefined = undefined
+  ): FieldType => {
     const type = this.getDefaultTypeName(fieldType, esTypes);
 
     return this.defaultMap[type] || this.defaultMap._default_;
@@ -110,12 +113,12 @@ export class FieldFormatRegisty {
    * @param  {ES_FIELD_TYPES[]} esTypes - Array of ES data types
    * @return {ES_FIELD_TYPES}
    */
-  getTypeNameByEsTypes = (esTypes: ES_FIELD_TYPES[]): ES_FIELD_TYPES | undefined => {
+  getTypeNameByEsTypes = (esTypes: ES_FIELD_TYPES[] | undefined): ES_FIELD_TYPES | undefined => {
     if (!Array.isArray(esTypes)) {
       return;
     }
 
-    return esTypes.find(type => this.defaultMap[type] && this.defaultMap[type]!.es);
+    return esTypes.find(type => this.defaultMap[type] && this.defaultMap[type].es);
   };
 
   /**
@@ -128,7 +131,7 @@ export class FieldFormatRegisty {
    */
   getDefaultTypeName = (
     fieldType: KBN_FIELD_TYPES,
-    esTypes: ES_FIELD_TYPES[]
+    esTypes: ES_FIELD_TYPES[] | undefined = undefined
   ): ES_FIELD_TYPES | KBN_FIELD_TYPES => {
     const esType = this.getTypeNameByEsTypes(esTypes);
 
@@ -149,7 +152,6 @@ export class FieldFormatRegisty {
         throw new Error(`Field Format '${formatId}' not found!`);
       }
 
-      // @ts-ignore
       return new DerivedFieldFormat({}, this.getConfig);
     }
   );
@@ -161,7 +163,10 @@ export class FieldFormatRegisty {
    * @param  {ES_FIELD_TYPES[]} esTypes
    * @return {FieldFormat}
    */
-  getDefaultInstancePlain(fieldType: KBN_FIELD_TYPES, esTypes: ES_FIELD_TYPES[]): FieldFormat {
+  getDefaultInstancePlain(
+    fieldType: KBN_FIELD_TYPES,
+    esTypes: ES_FIELD_TYPES[] | undefined = undefined
+  ): FieldFormat {
     const conf = this.getDefaultConfig(fieldType, esTypes);
 
     const DerivedFieldFormat = this.getType(conf.id);

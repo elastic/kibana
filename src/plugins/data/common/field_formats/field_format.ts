@@ -73,7 +73,13 @@ export abstract class FieldFormat {
    */
   public type: any = this.constructor;
 
-  constructor(public _params: any = {}, protected getConfig: Function) {}
+  public _params: any;
+  protected getConfig: Function;
+
+  constructor(_params: any = {}, getConfig: Function) {
+    this._params = _params;
+    this.getConfig = getConfig;
+  }
 
   /**
    * Convert a raw value to a formatted string

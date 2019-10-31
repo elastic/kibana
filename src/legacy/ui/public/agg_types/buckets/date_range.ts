@@ -53,7 +53,7 @@ export const dateRangeBucketAgg = new BucketAggType({
 
     const formatter = agg.fieldOwnFormatter(
       'text',
-      fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.DATE, [])
+      fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.DATE)
     );
     const DateRangeFormat = FieldFormat.from(function(range: DateRangeKey) {
       return dateRange.toString(range, formatter);

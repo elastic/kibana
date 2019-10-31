@@ -24,7 +24,7 @@ class FieldFormatRegistry {
   constructor() {
     this.fieldFormats = new Map();
     this._uiSettings = npStart.core.uiSettings;
-    this.getConfig = (...args) => this._uiSettings.get(...args);
+    this.getConfig = this._uiSettings.get;
     this._defaultMap = [];
     this.init();
   }

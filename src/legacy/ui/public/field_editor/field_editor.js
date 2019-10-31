@@ -140,10 +140,11 @@ export class FieldEditorComponent extends PureComponent {
     const fieldTypes = get(FIELD_TYPES_BY_LANG, field.lang, DEFAULT_FIELD_TYPES);
     field.type = fieldTypes.includes(field.type) ? field.type : fieldTypes[0];
 
-    const DefaultFieldFormat = getFieldFormats().getDefaultType(field.type, field.esTypes);
+    const fieldFotmats = getFieldFormats();
+
     const fieldTypeFormats = [
-      getDefaultFormat(DefaultFieldFormat),
-      ...getFieldFormats().getByFieldType(field.type),
+      getDefaultFormat(fieldFotmats.getDefaultType(field.type, field.esTypes)),
+      ...fieldFotmats.getByFieldType(field.type),
     ];
 
     this.setState({
@@ -168,11 +169,12 @@ export class FieldEditorComponent extends PureComponent {
   onTypeChange = (type) => {
     const { getConfig } = this.props.helpers;
     const { field } = this.state;
-    const DefaultFieldFormat = getFieldFormats().getDefaultType(type);
+    const fieldFormats = getFieldFormats();
+
     field.type = type;
 
     const fieldTypeFormats = [
-      getDefaultFormat(DefaultFieldFormat),
+      getDefaultFormat(fieldFormats.getByFieldType()),
       ...getFieldFormats().getByFieldType(field.type),
     ];
 
@@ -201,6 +203,7 @@ export class FieldEditorComponent extends PureComponent {
     const { getConfig } = this.props.helpers;
     const { field, fieldTypeFormats } = this.state;
     const FieldFormat = fieldTypeFormats.find((format) => format.id === formatId) || fieldTypeFormats[0];
+
     field.format = new FieldFormat(params, getConfig);
 
     this.setState({
@@ -689,6 +692,7 @@ export class FieldEditorComponent extends PureComponent {
   }
 
   saveField = async () => {
+    const fieldFormat = this.state.field.format;
     const field = this.state.field.toActualField();
     const { indexPattern, intl } = this.props;
     const { fieldFormatId } = this.state;
@@ -726,7 +730,7 @@ export class FieldEditorComponent extends PureComponent {
     if (!fieldFormatId) {
       indexPattern.fieldFormatMap[field.name] = undefined;
     } else {
-      indexPattern.fieldFormatMap[field.name] = field.format;
+      indexPattern.fieldFormatMap[field.name] = fieldFormat;
     }
 
     return indexPattern.save()
