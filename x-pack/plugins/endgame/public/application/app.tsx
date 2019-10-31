@@ -9,7 +9,7 @@ import ReactDOM from 'react-dom';
 import { BrowserRouter, Route, withRouter, RouteComponentProps, Switch } from 'react-router-dom';
 import { EuiPage, EuiPageSideBar, EuiSideNav, EuiImage, EuiCallOut } from '@elastic/eui';
 import { EndgameAppContext } from '../common/app_context';
-import LogoUrl from '../static/images/logo.png';
+// import LogoUrl from '../static/images/logo.png';
 import { routePaths } from '../common/route_paths';
 import { Page } from '../components/page';
 
@@ -57,8 +57,8 @@ class EndgameApp extends PureComponent<{
               <NavBar />
             </EuiPageSideBar>
             <Switch>
-              {routePaths.map(({ id, path, component }) => (
-                <Route path={path} exact component={component} key={id} />
+              {routePaths.map(({ id, path, exact, component }) => (
+                <Route path={path} exact={exact} component={component} key={id} />
               ))}
               <Route path="*">
                 <Page>

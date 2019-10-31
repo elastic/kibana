@@ -24,18 +24,21 @@ export const routePaths = [
     name: 'Home',
     id: 'home',
     path: '/',
+    exact: true,
     component: ShowLanding,
   },
   {
     name: 'Endpoints',
     id: 'endpoints',
     path: '/endpoints',
+    exact: false,
     component: ShowEndpoints,
   },
   {
     name: 'Alerts',
     id: 'alerts',
     path: '/alerts',
+    exact: true,
     component: ShowAlerts,
   },
 ];

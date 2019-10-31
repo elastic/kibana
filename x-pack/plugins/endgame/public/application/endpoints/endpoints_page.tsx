@@ -5,90 +5,28 @@
  */
 
 import React, { PureComponent } from 'react';
-import { withRouter } from 'react-router-dom';
+import { Switch, Route } from 'react-router-dom';
+import { EuiSpacer } from '@elastic/eui';
 
-import { EuiBasicTable, EuiLink } from '@elastic/eui';
-import { EndgameAppContext } from '../../common/app_context';
 import { Page } from '../../components/page';
-import { SearchBar } from '../../components/search_bar';
-
-const EndpointName = withRouter(function({ history, path, name }) {
-  return <EuiLink onClick={() => history.push(path)}>{name}</EuiLink>;
-});
-
-const columns = [
-  {
-    field: '_source',
-    name: 'Name',
-    render: source => {
-      return <span>{source.host.name}</span>;
-    },
-  },
-  {
-    field: '_source',
-    name: 'IP Address',
-    render: source => {
-      return <span>{source.host.ip}</span>;
-    },
-  },
-  {
-    field: '_source',
-    name: 'Operating System',
-    render: source => {
-      return <span>{source.host.os.name + ' ' + source.host.os.version}</span>;
-    },
-  },
-  {
-    field: 'alert_count',
-    name: 'Alerts',
-  },
-  {
-    field: '_source',
-    name: 'Host Name',
-    render: source => {
-      return <span>{source.host.hostname}</span>;
-    },
-  },
-];
-
-interface State {
-  queriedEndpointMetadata: {};
-}
+import { RouteNotFound } from '../../components/route_not_found';
+import { endpointsSubRoutes } from './endpoints_sub_route_paths';
+import { PocSelectorConnected } from './poc_selector';
 
 export class EndpointsPage extends PureComponent {
-  static contextType = EndgameAppContext;
-
-  state = { results: [], queriedEndpointMetadata: [] };
-  public updateOnChange = ({ updatedResult }: { updatedResult: {} }) => {
-    this.setState({ queriedEndpointMetadata: updatedResult });
-  };
-
-  context!: React.ContextType<typeof EndgameAppContext>;
-
   render() {
-    const { results, queriedEndpointMetadata } = this.state;
-
     return (
       <Page title="Endpoints">
-        <SearchBar
-          searchItems={results}
-          defaultFields={[`_source`]}
-          updateOnChange={this.updateOnChange}
-        />
-        <EuiBasicTable items={queriedEndpointMetadata} columns={columns} />
-        <code>
-          <pre>{JSON.stringify(this.state.results, null, 4)}</pre>
-        </code>
+        <PocSelectorConnected />
+        <EuiSpacer size="xxl" />
+        <Switch>
+          {endpointsSubRoutes.map(({ id, path, component }) => (
+            <Route path={path} key={id} component={component} />
+          ))}
+
+          <Route path="/endpoints/*" component={RouteNotFound} />
+        </Switch>
       </Page>
     );
-  }
-
-  async componentDidMount() {
-    // Load some API data for this component
-    const results = await this.context.appContext.core.http.get('_api/endpoints').catch(e => {
-      console.error(e); //eslint-disable-line
-      return Promise.resolve([]);
-    });
-    this.setState({ results, queriedEndpointMetadata: results });
   }
 }
