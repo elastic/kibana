@@ -228,7 +228,7 @@ def sendKibanaMail() {
   }
 }
 
-def bash(script, label="") {
+def bash(script) {
   sh(
     script: "#!/bin/bash\n${script}",
     label: label

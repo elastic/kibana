@@ -1,4 +1,4 @@
-def call(script, label = "", enableJunitProcessing = false) {
+def call(script, label, enableJunitProcessing = false) {
   def extraConfig = enableJunitProcessing ? "" : "--config ${env.WORKSPACE}/kibana/.ci/runbld_no_junit.yml"
 
   sh(
