@@ -25,16 +25,51 @@ import { VisProvider } from '..';
 import { AggType } from '../../agg_types/agg_type';
 import { AggConfig } from '../../agg_types/agg_config';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { FieldFormatRegisty } from '../../../../../plugins/data/public';
+import {
+  FIELD_FORMAT_IDS,
+  FieldFormatRegisty,
+  StringFormat,
+  NumberFormat,
+  BoolFormat,
+  BytesFormat,
+  ColorFormat,
+  DateFormat,
+  DateNanosFormat,
+  DurationFormat,
+  IpFormat,
+  PercentFormat,
+  RelativeDateFormat, SourceFormat, StaticLookupFormat, TruncateFormat, UrlFormat,
+} from '../../../../../plugins/data/public';
+import { setFieldFormats } from '../../../../core_plugins/data/public/index_patterns/services';
 
-function getFieldFormats() {
-  if (!getFieldFormats.fieldFormats) {
-    getFieldFormats.fieldFormat = new FieldFormatRegisty();
+function getFieldFormatsRegistry() {
+  if (!getFieldFormatsRegistry.fieldFormats) {
+    getFieldFormatsRegistry.fieldFormats = new FieldFormatRegisty();
 
-    getFieldFormats.fieldFormats.init(npStart.core.uiSettings);
+    getFieldFormatsRegistry.fieldFormats.register([
+      BoolFormat,
+      BytesFormat,
+      ColorFormat,
+      DateFormat,
+      DateNanosFormat,
+      DurationFormat,
+      IpFormat,
+      NumberFormat,
+      PercentFormat,
+      RelativeDateFormat,
+      SourceFormat,
+      StaticLookupFormat,
+      StringFormat,
+      TruncateFormat,
+      UrlFormat
+    ]);
+
+    getFieldFormatsRegistry.fieldFormats.init(npStart.core.uiSettings);
+
+    setFieldFormats(getFieldFormatsRegistry.fieldFormats);
   }
 
-  return getFieldFormats.fieldFormats;
+  return getFieldFormatsRegistry.fieldFormats;
 }
 
 describe('AggConfig', function () {
@@ -452,7 +487,8 @@ describe('AggConfig', function () {
           }
         ]
       });
-      expect(vis.aggs.aggs[0].fieldFormatter()).to.be(getFieldFormats().getDefaultInstance('number').getConverterFor());
+      expect(vis.aggs.aggs[0].fieldFormatter()).to.be(getFieldFormatsRegistry()
+        .getDefaultInstance(FIELD_FORMAT_IDS.NUMBER).getConverterFor());
     });
   });
 
@@ -480,13 +516,13 @@ describe('AggConfig', function () {
     it('returns the string format if the field does not have a format', function () {
       const agg = vis.aggs.aggs[0];
       agg.params.field = { type: 'number', format: null };
-      expect(agg.fieldFormatter()).to.be(getFieldFormats().getDefaultInstance('string').getConverterFor());
+      expect(agg.fieldFormatter()).to.be(getFieldFormatsRegistry().getDefaultInstance(FIELD_FORMAT_IDS.STRING).getConverterFor());
     });
 
     it('returns the string format if their is no field', function () {
       const agg = vis.aggs.aggs[0];
       delete agg.params.field;
-      expect(agg.fieldFormatter()).to.be(getFieldFormats().getDefaultInstance('string').getConverterFor());
+      expect(agg.fieldFormatter()).to.be(getFieldFormatsRegistry().getDefaultInstance(FIELD_FORMAT_IDS.STRING).getConverterFor());
     });
 
     it('returns the html converter if "html" is passed in', function () {

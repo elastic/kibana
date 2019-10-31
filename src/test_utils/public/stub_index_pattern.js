@@ -29,16 +29,54 @@ import {
   formatHitProvider,
   flattenHitWrapper,
 } from 'ui/index_patterns';
-import { FieldFormatRegisty } from '../../plugins/data/public';
+import {
+  FieldFormatRegisty,
+  StringFormat,
+  FIELD_FORMAT_IDS,
+  NumberFormat,
+  BytesFormat,
+  BoolFormat,
+  UrlFormat,
+  ColorFormat,
+  DateFormat,
+  DateNanosFormat,
+  DurationFormat,
+  IpFormat,
+  PercentFormat,
+  RelativeDateFormat,
+  SourceFormat,
+  StaticLookupFormat, TruncateFormat,
+} from '../../plugins/data/public';
+import { setFieldFormats } from '../../../src/legacy/core_plugins/data/public/index_patterns/services';
 
-function getFieldFormats() {
-  if (!getFieldFormats.fieldFormats) {
-    getFieldFormats.fieldFormat = new FieldFormatRegisty();
+function getFieldFormatsRegistry() {
+  if (!getFieldFormatsRegistry.fieldFormats) {
+    getFieldFormatsRegistry.fieldFormats = new FieldFormatRegisty();
 
-    getFieldFormats.fieldFormats.init(npStart.core.uiSettings);
+    getFieldFormatsRegistry.fieldFormats.register([
+      BoolFormat,
+      BytesFormat,
+      ColorFormat,
+      DateFormat,
+      DateNanosFormat,
+      DurationFormat,
+      IpFormat,
+      NumberFormat,
+      PercentFormat,
+      RelativeDateFormat,
+      SourceFormat,
+      StaticLookupFormat,
+      StringFormat,
+      TruncateFormat,
+      UrlFormat
+    ]);
+
+    getFieldFormatsRegistry.fieldFormats.init(npStart.core.uiSettings);
+
+    setFieldFormats(getFieldFormatsRegistry.fieldFormats);
   }
 
-  return getFieldFormats.fieldFormats;
+  return getFieldFormatsRegistry.fieldFormats;
 }
 
 export default  function StubIndexPattern(pattern, getConfig, timeField, fields) {
@@ -58,7 +96,7 @@ export default  function StubIndexPattern(pattern, getConfig, timeField, fields)
 
   this.getComputedFields = IndexPattern.prototype.getComputedFields.bind(this);
   this.flattenHit = flattenHitWrapper(this, this.metaFields);
-  this.formatHit = formatHitProvider(this, getFieldFormats().getDefaultInstance('string'));
+  this.formatHit = formatHitProvider(this, getFieldFormatsRegistry().getDefaultInstance(FIELD_FORMAT_IDS.STRING));
   this.fieldsFetcher = { apiClient: { baseUrl: '' } };
   this.formatField = this.formatHit.formatField;
 
@@ -67,7 +105,7 @@ export default  function StubIndexPattern(pattern, getConfig, timeField, fields)
   };
 
   this.stubSetFieldFormat = function (fieldName, id, params) {
-    const FieldFormat = getFieldFormats().getType(id);
+    const FieldFormat = getFieldFormatsRegistry().getType(id);
     this.fieldFormatMap[fieldName] = new FieldFormat(params);
     this._reindexFields();
   };

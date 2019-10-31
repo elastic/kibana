@@ -28,6 +28,11 @@ import stackedSeries from 'fixtures/vislib/mock_data/date_histogram/_stacked_ser
 import $ from 'jquery';
 import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
 import '../../persisted_state';
+import { npStart } from 'ui/new_platform';
+
+npStart.plugins.data.fieldFormats = {
+  getType: () => undefined,
+};
 
 const dataArray = [
   series,
