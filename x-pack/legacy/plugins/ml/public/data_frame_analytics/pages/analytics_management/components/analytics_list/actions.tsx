@@ -13,7 +13,7 @@ import {
   createPermissionFailureMessage,
 } from '../../../../../privilege/check_privilege';
 
-import { isOutlierAnalysis, getAnalysisType, getDependentVar } from '../../../../common/analytics';
+import { getAnalysisType } from '../../../../common/analytics';
 
 import { getResultsUrl, isDataFrameAnalyticsRunning, DataFrameAnalyticsListRow } from './common';
 import { stopAnalytics } from '../../services/analytics_service';
@@ -25,14 +25,11 @@ export const AnalyticsViewAction = {
   isPrimary: true,
   render: (item: DataFrameAnalyticsListRow) => {
     const analysisType = getAnalysisType(item.config.analysis);
-    const destIndex = item.config.dest.index;
-    const dependentVariable = getDependentVar(item.config.analysis);
+    const jobStatus = item.stats.state;
 
-    const url = getResultsUrl(item.id, analysisType, destIndex, dependentVariable);
-    // Disable 'View' link for regression until results view is complete
+    const url = getResultsUrl(item.id, analysisType, jobStatus);
     return (
       <EuiButtonEmpty
-        disabled={!isOutlierAnalysis(item.config.analysis)}
         onClick={() => (window.location.href = url)}
         size="xs"
         color="text"

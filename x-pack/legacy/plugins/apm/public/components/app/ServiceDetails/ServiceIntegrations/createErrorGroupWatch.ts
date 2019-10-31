@@ -17,7 +17,6 @@ import {
   PROCESSOR_EVENT,
   SERVICE_NAME
 } from '../../../../../common/elasticsearch_fieldnames';
-import { StringMap } from '../../../../../typings/common';
 // @ts-ignore
 import { createWatch } from '../../../../services/rest/watcher';
 
@@ -50,8 +49,8 @@ interface Arguments {
 
 interface Actions {
   log_error: { logging: { text: string } };
-  slack_webhook?: StringMap;
-  email?: StringMap;
+  slack_webhook?: Record<string, unknown>;
+  email?: Record<string, unknown>;
 }
 
 export async function createErrorGroupWatch({
