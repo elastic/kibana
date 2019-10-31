@@ -92,7 +92,7 @@ Basic authentication is supported _only_ if `basic` authentication provider is e
 ==== OpenID Connect Single Sign-On
 
 Similar to SAML, authentication with OpenID Connect allows users to log in to {kib} using an OpenID Connect Provider such as Google, or Okta. OpenID Connect
-should also be configured in {es}, see {xpack-ref}/saml-guide.html[Configuring OpenID Connect Single-Sign-On on the Elastic Stack] for more details.
+should also be configured in {es}. For more details, see {ref}/oidc-guide.html[Configuring single sign-on to the {stack} using OpenID Connect].
 
 Set the configuration values in `kibana.yml` as follows:
 
