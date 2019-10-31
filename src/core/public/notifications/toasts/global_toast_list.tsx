@@ -20,7 +20,6 @@
 import { EuiGlobalToastList, EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
 import React from 'react';
 import * as Rx from 'rxjs';
-import { isString, omit } from 'lodash';
 
 import { MountWrapper } from '../../utils';
 import { Toast } from './toasts_api';
@@ -34,20 +33,11 @@ interface State {
   toasts: Toast[];
 }
 
-const convertToEui = (toast: Toast): EuiToast => {
-  const wrap = (value: Toast['title'] | Toast['text']) =>
-    isString(value) || value === undefined ? value : <MountWrapper mount={value} />;
-  const euiToast: EuiToast = {
-    ...omit(toast, ['title', 'text']),
-  };
-  if (toast.title !== undefined) {
-    euiToast.title = wrap(toast.title);
-  }
-  if (toast.text !== undefined) {
-    euiToast.text = wrap(toast.text);
-  }
-  return euiToast;
-};
+const convertToEui = (toast: Toast): EuiToast => ({
+  ...toast,
+  title: typeof toast.title === 'function' ? <MountWrapper mount={toast.title} /> : toast.title,
+  text: typeof toast.text === 'function' ? <MountWrapper mount={toast.text} /> : toast.text,
+});
 
 export class GlobalToastList extends React.Component<Props, State> {
   public state: State = {
