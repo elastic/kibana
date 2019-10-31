@@ -359,7 +359,7 @@ describe('NewsfeedApiDriver', () => {
 
 describe('getApi', () => {
   const mockHttpGet = jest.fn();
-  const httpMock = ({
+  let httpMock = ({
     fetch: mockHttpGet,
   } as unknown) as HttpServiceBase;
   const configMock: NewsfeedPluginInjectedConfig = {
@@ -369,40 +369,69 @@ describe('getApi', () => {
         pathTemplate: '/kibana-test/v{VERSION}.json',
       },
       defaultLanguage: 'vn',
-      mainInterval: 1,
+      mainInterval: 86400000,
       fetchInterval: 86400000,
     },
   };
-  const mockApiItems: ApiItem[] = [
-    {
-      title: {
-        en: 'speaking English',
-        es: 'habla Espanol',
-      },
-      description: {
-        en: 'language test',
-        es: 'idiomas',
-      },
-      languages: ['en', 'es'],
-      link_text: {
-        en: 'click here',
-        es: 'aqui',
-      },
-      link_url: {
-        en: 'xyzxyzxyz',
-        es: 'abcabc',
-      },
-      badge: {
-        en: 'firefighter',
-        es: 'bombero',
-      },
-      publish_on: new Date('2014-10-31T04:23:47Z'),
-      expire_on: new Date('2049-10-31T04:23:47Z'),
-      hash: 'abcabc1231123123hash',
-    },
-  ];
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  beforeEach(() => {
+    httpMock = ({
+      fetch: mockHttpGet,
+    } as unknown) as HttpServiceBase;
+  });
+
+  it('creates a result', done => {
+    const mockApiItems: ApiItem[] = [];
+    mockHttpGet.mockImplementationOnce(() => {
+      return Promise.resolve({ items: mockApiItems });
+    });
+    getApi(httpMock, configMock.newsfeed, '6.8.2').subscribe(result => {
+      expect(result).toMatchInlineSnapshot(`
+        Object {
+          "error": null,
+          "feedItems": Array [],
+          "hasNew": false,
+          "kibanaVersion": "6.8.2",
+        }
+      `);
+      done();
+    });
+  });
 
   it('pipelines the Driver methods together', done => {
+    const mockApiItems: ApiItem[] = [
+      {
+        title: {
+          en: 'speaking English',
+          es: 'habla Espanol',
+        },
+        description: {
+          en: 'language test',
+          es: 'idiomas',
+        },
+        languages: ['en', 'es'],
+        link_text: {
+          en: 'click here',
+          es: 'aqui',
+        },
+        link_url: {
+          en: 'xyzxyzxyz',
+          es: 'abcabc',
+        },
+        badge: {
+          en: 'firefighter',
+          es: 'bombero',
+        },
+        publish_on: new Date('2014-10-31T04:23:47Z'),
+        expire_on: new Date('2049-10-31T04:23:47Z'),
+        hash: 'abcabc1231123123hash',
+      },
+    ];
+
     mockHttpGet.mockImplementationOnce((arg1, arg2) => {
       if (
         arg1 === 'http://fakenews.co/kibana-test/v6.8.2.json' &&
@@ -411,13 +440,10 @@ describe('getApi', () => {
       ) {
         return Promise.resolve({ items: mockApiItems });
       }
-
       return Promise.reject('wrong args!');
     });
 
-    const api$ = getApi(httpMock, configMock.newsfeed, '6.8.2');
-
-    api$.subscribe(result => {
+    getApi(httpMock, configMock.newsfeed, '6.8.2').subscribe(result => {
       expect(result).toMatchInlineSnapshot(`
         Object {
           "error": null,
@@ -434,6 +460,24 @@ describe('getApi', () => {
             },
           ],
           "hasNew": true,
+          "kibanaVersion": "6.8.2",
+        }
+      `);
+      done();
+    });
+  });
+
+  it('forwards an error', done => {
+    mockHttpGet.mockImplementationOnce((arg1, arg2) => {
+      return Promise.reject('sorry, try again later!');
+    });
+
+    getApi(httpMock, configMock.newsfeed, '6.8.2').subscribe(result => {
+      expect(result).toMatchInlineSnapshot(`
+        Object {
+          "error": "sorry, try again later!",
+          "feedItems": Array [],
+          "hasNew": false,
           "kibanaVersion": "6.8.2",
         }
       `);
