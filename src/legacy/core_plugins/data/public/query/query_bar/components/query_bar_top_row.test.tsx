@@ -79,7 +79,7 @@ const createMockWebStorage = () => ({
 });
 
 const createMockStorage = () => ({
-  store: createMockWebStorage(),
+  storage: createMockWebStorage(),
   get: jest.fn(),
   set: jest.fn(),
   remove: jest.fn(),
@@ -112,7 +112,7 @@ function wrapQueryBarTopRowInContext(testProps: any) {
   const services = {
     ...startMock,
     appName: 'discover',
-    store: createMockStorage(),
+    storage: createMockStorage(),
   };
 
   return (

@@ -19,4 +19,5 @@ export interface CoreSetup
 |  [context](./kibana-plugin-server.coresetup.context.md) | <code>ContextSetup</code> | [ContextSetup](./kibana-plugin-server.contextsetup.md) |
 |  [elasticsearch](./kibana-plugin-server.coresetup.elasticsearch.md) | <code>ElasticsearchServiceSetup</code> | [ElasticsearchServiceSetup](./kibana-plugin-server.elasticsearchservicesetup.md) |
 |  [http](./kibana-plugin-server.coresetup.http.md) | <code>HttpServiceSetup</code> | [HttpServiceSetup](./kibana-plugin-server.httpservicesetup.md) |
+|  [uiSettings](./kibana-plugin-server.coresetup.uisettings.md) | <code>UiSettingsServiceSetup</code> | [UiSettingsServiceSetup](./kibana-plugin-server.uisettingsservicesetup.md) |
 
