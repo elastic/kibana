@@ -83,7 +83,7 @@ export const SiemApp = memo<{ core: LegacyCoreStart; plugins: PluginsStart }>(
       services={{
         appName: 'siem',
         data: plugins.data,
-        store: new Storage(localStorage),
+        storage: new Storage(localStorage),
         ...core,
       }}
     >

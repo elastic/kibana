@@ -17,6 +17,7 @@ import React, { useState, useCallback } from 'react';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 
+import { DEFAULT_TIMEPICKER_QUICK_RANGES } from '../../../common/constants';
 import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
 import { inputsModel, State } from '../../store';
 import { inputsActions, timelineActions } from '../../store/actions';
@@ -195,7 +196,7 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
     const endDate = kind === 'relative' ? toStr : new Date(end).toISOString();
     const startDate = kind === 'relative' ? fromStr : new Date(start).toISOString();
 
-    const [quickRanges] = useKibanaUiSetting('timepicker:quickRanges');
+    const [quickRanges] = useKibanaUiSetting(DEFAULT_TIMEPICKER_QUICK_RANGES);
     const commonlyUsedRanges = isEmpty(quickRanges)
       ? []
       : quickRanges.map(({ from, to, display }: { from: string; to: string; display: string }) => ({

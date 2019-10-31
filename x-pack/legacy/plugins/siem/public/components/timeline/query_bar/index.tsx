@@ -70,8 +70,12 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
     toStr,
     updateReduxTime,
   }) => {
-    const [dateRangeFrom, setDateRangeFrom] = useState<string>('');
-    const [dateRangeTo, setDateRangTo] = useState<string>('');
+    const [dateRangeFrom, setDateRangeFrom] = useState<string>(
+      fromStr != null ? fromStr : new Date(from).toISOString()
+    );
+    const [dateRangeTo, setDateRangTo] = useState<string>(
+      toStr != null ? toStr : new Date(to).toISOString()
+    );
 
     const [savedQuery, setSavedQuery] = useState<SavedQuery | null>(null);
     const [filterQueryConverted, setFilterQueryConverted] = useState<Query>({

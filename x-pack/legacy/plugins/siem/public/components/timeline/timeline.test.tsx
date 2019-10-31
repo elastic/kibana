@@ -33,6 +33,7 @@ const mockUseKibanaCore = useKibanaCore as jest.Mock;
 jest.mock('../../lib/compose/kibana_core');
 mockUseKibanaCore.mockImplementation(() => ({
   uiSettings: mockUiSettings,
+  savedObjects: {},
 }));
 
 describe('Timeline', () => {
