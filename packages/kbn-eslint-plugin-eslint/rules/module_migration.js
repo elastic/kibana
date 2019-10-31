@@ -20,76 +20,83 @@
 const Path = require('path');
 const { REPO_ROOT } = require('@kbn/dev-utils');
 
-function checkModuleNameRelative(context, mappings, node) {
+const fwdSlash = path => path.split('\\').join('/');
+
+const first = (list, property, test) => {
+  for (const item of list) {
+    if (item[property] && test(item[property])) {
+      return item[property];
+    }
+  }
+};
+
+function checkRelativeToNamed(context, mappings, node) {
   const fileDir = Path.dirname(context.getFilename());
   const request = node.value;
   const requestAbsolute = Path.resolve(fileDir, request);
 
-  const mapping = mappings.find(
-    mapping =>
-      Path.isAbsolute(mapping.from) &&
-      requestAbsolute.startsWith(mapping.from) &&
-      request.startsWith(Path.relative(fileDir, mapping.from)) &&
-      (!mapping.filter || mapping.filter(node, context))
+  const relativeToNamed = first(
+    mappings,
+    'relativeToNamed',
+    ({ directory }) =>
+      requestAbsolute.startsWith(directory) &&
+      request.startsWith(fwdSlash(Path.relative(fileDir, directory)))
   );
 
-  if (!mapping) {
+  if (!relativeToNamed) {
     return;
   }
 
+  const { directory, name } = relativeToNamed;
+  const newRequest = fwdSlash(Path.join(name, Path.relative(directory, requestAbsolute)));
   context.report({
-    message: `Relative imports to "${Path.relative(REPO_ROOT, mapping.from)}" is not allowed`,
+    message: `Relative import to "${Path.relative(
+      REPO_ROOT,
+      directory
+    )}" are not allowed, use "${newRequest}" instead.`,
     loc: node.loc,
     fix(fixer) {
-      const subReq = requestAbsolute.replace(mapping.from, '').replace(/\\/g, '/');
-      return fixer.replaceText(node, subReq ? `'${mapping.to}${subReq}'` : mapping.to);
+      return fixer.replaceText(node, `'${newRequest}'`);
     },
   });
 }
 
 function checkModuleNameNode(context, mappings, node) {
   if (node.value.startsWith('../') || node.value.startsWith('./')) {
-    return checkModuleNameRelative(context, mappings, node);
-  }
-
-  const mapping = mappings.find(
-    mapping =>
-      (mapping.from === node.value || node.value.startsWith(`${mapping.from}/`)) &&
-      (!mapping.filter || mapping.filter(node, context))
-  );
-
-  if (!mapping) {
+    checkRelativeToNamed(context, mappings, node);
     return;
   }
 
-  let newSource;
+  const disallow = first(
+    mappings,
+    'disallow',
+    ({ name }) => node.value === name || node.value.startsWith(`${name}/`)
+  );
 
-  if (mapping.to === false) {
+  if (disallow) {
     context.report({
-      message: mapping.disallowedMessage || `Importing "${mapping.from}" is not allowed`,
+      message: disallow.error,
       loc: node.loc,
     });
     return;
   }
 
-  // support for toRelative added to migrate away from X-Pack being bundled
-  // within node modules. after that migration, this can be removed.
-  if (mapping.toRelative) {
-    const sourceDirectory = Path.dirname(context.getFilename());
-    const localModulePath = node.value.replace(new RegExp(`^${mapping.from}\/`), '');
-    const modulePath = Path.resolve(REPO_ROOT, mapping.toRelative, localModulePath);
-    const relativePath = Path.relative(sourceDirectory, modulePath);
+  const rename = first(
+    mappings,
+    'rename',
+    ({ from }) => from === node.value || node.value.startsWith(`${from}/`)
+  );
 
-    newSource = relativePath.startsWith('.') ? relativePath : `./${relativePath}`;
-  } else {
-    newSource = node.value.replace(mapping.from, mapping.to);
+  if (!rename) {
+    return;
   }
 
+  const newRequest = node.value.replace(rename.from, rename.to);
   context.report({
-    message: `Imported module "${node.value}" should be "${newSource}"`,
+    message: `Imported module "${node.value}" should be "${newRequest}"`,
     loc: node.loc,
     fix(fixer) {
-      return fixer.replaceText(node, `'${newSource}'`);
+      return fixer.replaceText(node, `'${newRequest}'`);
     },
   });
 }
@@ -101,40 +108,67 @@ module.exports = {
       {
         type: 'array',
         items: {
-          type: 'object',
-          properties: {
-            from: {
-              type: 'string',
-            },
-            to: {
-              anyOf: [
-                {
-                  type: 'string',
-                },
-                {
-                  const: false,
-                },
-              ],
-            },
-            toRelative: {
-              type: 'string',
-            },
-            disallowedMessage: {
-              type: 'string',
-            },
-            filter: {
-              type: 'function',
-            },
-          },
           anyOf: [
+            // rename configs
             {
-              required: ['from', 'to'],
+              type: 'object',
+              properties: {
+                rename: {
+                  type: 'object',
+                  properties: {
+                    from: {
+                      type: 'string',
+                    },
+                    to: {
+                      type: 'string',
+                    },
+                  },
+                  required: ['from', 'to'],
+                },
+              },
+              additionalProperties: false,
             },
+
+            // disallow configs
             {
-              required: ['from', 'toRelative'],
+              type: 'object',
+              properties: {
+                disallow: {
+                  type: 'object',
+                  properties: {
+                    name: {
+                      type: 'string',
+                    },
+                    error: {
+                      type: 'string',
+                    },
+                  },
+                  required: ['name', 'error'],
+                },
+              },
+              additionalProperties: false,
+            },
+
+            // relativeToNamed configs
+            {
+              type: 'object',
+              properties: {
+                relativeToNamed: {
+                  type: 'object',
+                  properties: {
+                    name: {
+                      type: 'string',
+                    },
+                    directory: {
+                      type: 'string',
+                    },
+                  },
+                  required: ['name', 'directory'],
+                },
+              },
+              additionalProperties: false,
             },
           ],
-          additionalProperties: false,
         },
         default: [],
         minItems: 1,

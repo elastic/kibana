@@ -34,25 +34,45 @@ module.exports = {
   rules: {
     '@kbn/eslint/module_migration': [
       'error',
+      /**
+       * define the current migration types to execute
+       *
+       * `rename` rename imports for one module to another
+       *   from: the name of the module to replace in imports
+       *   to: the new name of the module to use
+       *
+       * `disallow` prevent imports of a specific module, direct users to do something else
+       *   name: the name of the module to disallow
+       *   error: error message to show to users, describe what users should do instead
+       *
+       * `relativeToNamed` rewrite relative imports from outside `directory` into directory, using `../../../directory/*` format, to use `name/*` instead
+       *   directory: *absolute path* to the directory to find relative imports into
+       *   name: the named import that should be used instead of relative imports to directory
+       */
       [
         {
-          from: 'expect.js',
-          to: '@kbn/expect',
+          rename: {
+            from: 'expect.js',
+            to: '@kbn/expect',
+          }
         },
         {
-          from: 'mkdirp',
-          to: false,
-          disallowedMessage: `Don't use 'mkdirp', use the new { recursive: true } option of Fs.mkdir instead`
+          disallow: {
+            name: 'mkdirp',
+            error: `Don't use 'mkdirp', use the new { recursive: true } option of Fs.mkdir instead`
+          },
         },
         {
-          from: Path.resolve(REPO_ROOT, 'src'),
-          filter: (node) => node.parent.type === 'ImportDeclaration' || node.parent.type.startsWith('Export'),
-          to: 'src'
+          relativeToNamed: {
+            name: 'src',
+            directory: Path.resolve(REPO_ROOT, 'src'),
+          },
         },
         {
-          from: Path.resolve(REPO_ROOT, 'x-pack'),
-          filter: (node) => node.parent.type === 'ImportDeclaration' || node.parent.type.startsWith('Export'),
-          to: 'x-pack'
+          relativeToNamed: {
+            name: 'x-pack',
+            directory: Path.resolve(REPO_ROOT, 'x-pack'),
+          },
         },
       ],
     ],
