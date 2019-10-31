@@ -25,7 +25,7 @@ import {
   HttpSetup,
 } from 'kibana/public';
 import { Plugin as ExpressionsPlugin } from 'src/plugins/expressions/public';
-import { DataPublicPluginSetup } from 'src/plugins/data/public';
+import { DataPublicPluginSetup, TimefilterContract } from 'src/plugins/data/public';
 import { VisualizationsSetup } from '../../visualizations/public/np_ready/public';
 import { getTimelionVisualizationConfig } from './timelion_vis_fn';
 import { getTimelionVisualization } from './vis';
@@ -38,7 +38,7 @@ export interface TimelionVisualizationDependencies extends LegacyDependenciesPlu
   uiSettings: UiSettingsClientContract;
   http: HttpSetup;
   timelionPanels: Map<string, Panel>;
-  data: DataPublicPluginSetup;
+  timefilter: TimefilterContract;
 }
 
 /** @internal */
@@ -69,7 +69,7 @@ export class TimelionPlugin implements Plugin<Promise<void>, void> {
       uiSettings: core.uiSettings,
       http: core.http,
       timelionPanels,
-      data,
+      timefilter: data.query.timefilter.timefilter,
       ...(await __LEGACY.setup(core, timelionPanels)),
     };
 

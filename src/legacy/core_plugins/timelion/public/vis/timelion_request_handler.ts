@@ -50,7 +50,7 @@ export interface TimelionSuccessResponse {
 }
 
 export function getTimelionRequestHandler(dependencies: TimelionVisualizationDependencies) {
-  const { uiSettings, http, data } = dependencies;
+  const { uiSettings, http, timefilter } = dependencies;
   const timezone = timezoneProvider(uiSettings)();
 
   return async function({
@@ -78,7 +78,6 @@ export function getTimelionRequestHandler(dependencies: TimelionVisualizationDep
     const esQueryConfigs = getEsQueryConfig(uiSettings);
 
     // parse the time range client side to make sure it behaves like other charts
-    const { timefilter } = data.query.timefilter;
     const timeRangeBounds = timefilter.calculateBounds(timeRange);
 
     try {
