@@ -17,16 +17,15 @@
  * under the License.
  */
 
-import * as React from 'react';
-import { CoreStart } from '../../../../core/public';
+import { PluginInitializerContext } from '../../../core/public';
+import { DashboardEmbeddableContainerPublicPlugin } from './plugin';
 
-export interface KibanaReactOverlays {
-  openFlyout: (
-    node: React.ReactNode,
-    options?: Parameters<CoreStart['overlays']['openFlyout']>['1']
-  ) => ReturnType<CoreStart['overlays']['openFlyout']>;
-  openModal: (
-    node: React.ReactNode,
-    options?: Parameters<CoreStart['overlays']['openFlyout']>['1']
-  ) => ReturnType<CoreStart['overlays']['openModal']>;
+export * from './types';
+export * from './actions';
+export * from './embeddable';
+
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new DashboardEmbeddableContainerPublicPlugin(initializerContext);
 }
+
+export { DashboardEmbeddableContainerPublicPlugin as Plugin };

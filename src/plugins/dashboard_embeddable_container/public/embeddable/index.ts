@@ -17,16 +17,15 @@
  * under the License.
  */
 
-import * as React from 'react';
-import { CoreStart } from '../../../../core/public';
+export { DashboardContainerFactory } from './dashboard_container_factory';
+export { DashboardContainer, DashboardContainerInput } from './dashboard_container';
+export { createPanelState } from './panel';
 
-export interface KibanaReactOverlays {
-  openFlyout: (
-    node: React.ReactNode,
-    options?: Parameters<CoreStart['overlays']['openFlyout']>['1']
-  ) => ReturnType<CoreStart['overlays']['openFlyout']>;
-  openModal: (
-    node: React.ReactNode,
-    options?: Parameters<CoreStart['overlays']['openFlyout']>['1']
-  ) => ReturnType<CoreStart['overlays']['openModal']>;
-}
+export { DashboardPanelState, GridData } from './types';
+
+export {
+  DASHBOARD_GRID_COLUMN_COUNT,
+  DEFAULT_PANEL_HEIGHT,
+  DEFAULT_PANEL_WIDTH,
+  DASHBOARD_CONTAINER_TYPE,
+} from './dashboard_constants';
