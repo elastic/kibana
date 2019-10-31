@@ -19,8 +19,9 @@
 
 import sinon, { stub } from 'sinon';
 import moment from 'moment';
+import { HttpServiceBase } from 'src/core/public';
 import { NEWSFEED_HASH_SET_STORAGE_KEY } from '../../constants';
-import { ApiItem, NewsfeedItem } from '../../types';
+import { ApiItem, NewsfeedItem, NewsfeedPluginInjectedConfig } from '../../types';
 import { NewsfeedApiDriver, getApi } from './api';
 
 const localStorageGet = sinon.stub();
@@ -357,7 +358,86 @@ describe('NewsfeedApiDriver', () => {
 });
 
 describe('getApi', () => {
-  it('pipelines the Driver methods together', () => {
-    const api$ = getApi();
+  const mockHttpGet = jest.fn();
+  const httpMock = ({
+    fetch: mockHttpGet,
+  } as unknown) as HttpServiceBase;
+  const configMock: NewsfeedPluginInjectedConfig = {
+    newsfeed: {
+      service: {
+        urlRoot: 'http://fakenews.co',
+        pathTemplate: '/kibana-test/v{VERSION}.json',
+      },
+      defaultLanguage: 'vn',
+      mainInterval: 1,
+      fetchInterval: 86400000,
+    },
+  };
+  const mockApiItems: ApiItem[] = [
+    {
+      title: {
+        en: 'speaking English',
+        es: 'habla Espanol',
+      },
+      description: {
+        en: 'language test',
+        es: 'idiomas',
+      },
+      languages: ['en', 'es'],
+      link_text: {
+        en: 'click here',
+        es: 'aqui',
+      },
+      link_url: {
+        en: 'xyzxyzxyz',
+        es: 'abcabc',
+      },
+      badge: {
+        en: 'firefighter',
+        es: 'bombero',
+      },
+      publish_on: new Date('2014-10-31T04:23:47Z'),
+      expire_on: new Date('2049-10-31T04:23:47Z'),
+      hash: 'abcabc1231123123hash',
+    },
+  ];
+
+  it('pipelines the Driver methods together', done => {
+    mockHttpGet.mockImplementationOnce((arg1, arg2) => {
+      if (
+        arg1 === 'http://fakenews.co/kibana-test/v6.8.2.json' &&
+        arg2.method &&
+        arg2.method === 'GET'
+      ) {
+        return Promise.resolve({ items: mockApiItems });
+      }
+
+      return Promise.reject('wrong args!');
+    });
+
+    const api$ = getApi(httpMock, configMock.newsfeed, '6.8.2');
+
+    api$.subscribe(result => {
+      expect(result).toMatchInlineSnapshot(`
+        Object {
+          "error": null,
+          "feedItems": Array [
+            Object {
+              "badge": "firefighter",
+              "description": "language test",
+              "expireOn": "2049-10-31T04:23:47.000Z",
+              "hash": "abcabc1231",
+              "linkText": "click here",
+              "linkUrl": "xyzxyzxyz",
+              "publishOn": "2014-10-31T04:23:47.000Z",
+              "title": "speaking English",
+            },
+          ],
+          "hasNew": true,
+          "kibanaVersion": "6.8.2",
+        }
+      `);
+      done();
+    });
   });
 });
