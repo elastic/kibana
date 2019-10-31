@@ -10,7 +10,6 @@ import React, {
   isValidElement,
   cloneElement,
   FunctionComponent,
-  useCallback,
   useMemo,
 } from 'react';
 import { EuiTitle } from '@elastic/eui';

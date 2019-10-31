@@ -5,7 +5,6 @@
  */
 
 import * as rt from 'io-ts';
-import { InfraSnapshotMetricType } from '../graphql/types';
 
 export const ItemTypeRT = rt.keyof({
   host: null,
