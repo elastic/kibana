@@ -1377,7 +1377,7 @@ describe('SavedObjectsRepository', () => {
       };
 
       await expect(savedObjectsRepository.find(findOpts)).rejects.toMatchInlineSnapshot(`
-        [Error: KQLSyntaxError: Expected "(", value, whitespace but "<" found.
+        [Error: KQLSyntaxError: Expected "(", "{", value, whitespace but "<" found.
         dashboard.attributes.otherField:<
         --------------------------------^: Bad Request]
       `);
