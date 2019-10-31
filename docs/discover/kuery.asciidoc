@@ -120,11 +120,17 @@ To find stores that have more than 10 bananas in stock, you would write a query 
 
 `items:{ name:banana and stock > 10 }`
 
-`items` is the "nested path". Everything inside the curly braces (the "nested group") must match a single document. 
-For example, `items:{ name:banana and stock:9 }` does not match because there isn't a single nested document that 
+`items` is the "nested path". Everything inside the curly braces (the "nested group") must match a single nested document. 
+`items:{ name:banana and stock:9 }` does not match because there isn't a single nested document that 
 matches the entire query in the nested group. 
 
-What if you want to find a store with more than 10 bananas that *also* stocks vegetables? This is the second way of querying a nested field, and you can do it like this:
+`items:{ name:banana } and items:{ stock:9 }` is a similar looking query but returns different results. Since the 
+subqueries are in separate nested groups they can match different nested documents. `name:banana` will match the first
+document in the array and `stock:9` will match the third document in the array. This is the second way of querying a 
+nested field, mentioned above.
+
+You can combine these two strategies to create complex queries. What if you wanted to find a store with more than 10 
+bananas that *also* stocks vegetables? You could do this:
 
 `items:{ name:banana and stock > 10 } and items:{ category:vegetable }`
 
