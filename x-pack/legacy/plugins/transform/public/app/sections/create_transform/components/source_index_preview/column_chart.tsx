@@ -46,7 +46,6 @@ export const ColumnChart: FC<Props> = ({ indexPattern, columnType, query }) => {
   const api = useApi();
 
   const hoveredRow = useObservable(hoveredRow$);
-  console.warn('hoveredRow', hoveredRow);
 
   const field = indexPattern.fields.find(f => f.name === columnType.name);
 
@@ -205,9 +204,6 @@ export const ColumnChart: FC<Props> = ({ indexPattern, columnType, query }) => {
       return '#5782ae';
     }
 
-    if (xScaleType === 'time') {
-      console.warn('time', moment(hoveredRow._source[field.name]).unix(), +d.key, d.key);
-    }
     return '#d4dae5';
   };
 

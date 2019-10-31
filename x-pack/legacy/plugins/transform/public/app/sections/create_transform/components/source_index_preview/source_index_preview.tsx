@@ -19,6 +19,7 @@ import {
   EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormLabel,
   EuiPanel,
   EuiPopover,
   EuiPopoverTitle,
@@ -315,7 +316,7 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
     defaultMessage: 'Copy Dev Console statement of the source index preview to the clipboard.',
   });
 
-  const getRowProps = (item: EsDoc) => {
+  const rowProps = (item: EsDoc) => {
     return {
       onMouseOver: () => hoveredRow$.next(item),
       onMouseLeave: () => hoveredRow$.next(null),
@@ -326,7 +327,7 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
     <>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <EuiBadge>{indexPattern.title}</EuiBadge>
+          <EuiFormLabel>Source data preview</EuiFormLabel>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup alignItems="center" gutterSize="xs">
@@ -394,33 +395,31 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiPanel grow={false} paddingSize="none">
-        {status === SOURCE_INDEX_STATUS.LOADING && <EuiProgress size="xs" color="accent" />}
-        {status !== SOURCE_INDEX_STATUS.LOADING && (
-          <EuiProgress size="xs" color="accent" max={1} value={0} />
-        )}
-        {clearTable === false && columns.length > 0 && sorting !== false && (
-          <div ref={sourceIndexTableElement} className="transformDataGrid">
-            <MlInMemoryTableBasic
-              allowNeutralSort={false}
-              compressed
-              items={tableItems}
-              columns={columns}
-              pagination={{
-                initialPageSize: 5,
-                pageSizeOptions: [5, 10, 25],
-              }}
-              hasActions={false}
-              isSelectable={false}
-              itemId="_id"
-              itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-              isExpandable={true}
-              rowProps={getRowProps}
-              sorting={sorting}
-            />
-          </div>
-        )}
-      </EuiPanel>
+      {status === SOURCE_INDEX_STATUS.LOADING && <EuiProgress size="xs" color="accent" />}
+      {status !== SOURCE_INDEX_STATUS.LOADING && (
+        <EuiProgress size="xs" color="accent" max={1} value={0} />
+      )}
+      {clearTable === false && columns.length > 0 && sorting !== false && (
+        <div ref={sourceIndexTableElement} className="transformDataGrid">
+          <MlInMemoryTableBasic
+            allowNeutralSort={false}
+            compressed
+            items={tableItems}
+            columns={columns}
+            pagination={{
+              initialPageSize: 5,
+              pageSizeOptions: [5, 10, 25],
+            }}
+            hasActions={false}
+            isSelectable={false}
+            itemId="_id"
+            itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+            isExpandable={true}
+            rowProps={rowProps}
+            sorting={sorting}
+          />
+        </div>
+      )}
     </>
   );
 });

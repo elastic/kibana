@@ -12,8 +12,14 @@ future versions to blend in more with the overall design of the Kibana managemen
   max-width: 100%;
 }
 
-.transformDataGrid td {
+.transformDataGrid td, .transformDataGrid th {
   border-right: 1px solid #d4dae5;
+}
+.transformDataGrid th {
+  border-top:0px;
+}
+.transformDataGrid table {
+  border-left: 1px solid #d4dae5;
 }
 
 .transformDataGrid .euiTableCellContent {

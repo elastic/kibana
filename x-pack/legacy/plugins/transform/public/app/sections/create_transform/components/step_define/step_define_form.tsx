@@ -14,11 +14,12 @@ import { toastNotifications } from 'ui/notify';
 import {
   EuiBadge,
   EuiButton,
+  EuiButtonToggle,
   EuiCodeEditor,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
-  EuiFormHelpText,
+  EuiFormLabel,
   EuiFormRow,
   EuiLink,
   EuiPanel,
@@ -506,91 +507,14 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
   const numIndexFields = indexPattern.fields.length;
   const disabledQuery = numIndexFields > maxIndexFields;
 
-  return (
-    <EuiForm>
-      {kibanaContext.currentSavedSearch === undefined && typeof searchString === 'string' && (
-        <Fragment>
-          {!disabledQuery && (
-            <Fragment>
-              {!isAdvancedSourceEditorEnabled && (
-                <EuiFormRow
-                  fullWidth
-                  label={i18n.translate('xpack.transform.stepDefineForm.queryLabel', {
-                    defaultMessage: 'Query',
-                  })}
-                  helpText={i18n.translate('xpack.transform.stepDefineForm.queryHelpText', {
-                    defaultMessage: 'Use a query to filter the source data (optional).',
-                  })}
-                >
-                  <KqlFilterBar
-                    indexPattern={indexPattern}
-                    onSubmit={searchHandler}
-                    initialValue={searchString === defaultSearch ? emptySearch : searchString}
-                    placeholder={i18n.translate('xpack.transform.stepDefineForm.queryPlaceholder', {
-                      defaultMessage: 'e.g. {example}',
-                      values: { example: 'method : "GET" or status : "404"' },
-                    })}
-                  />
-                </EuiFormRow>
-              )}
-            </Fragment>
-          )}
-        </Fragment>
-      )}
-
-      {isAdvancedSourceEditorEnabled && (
-        <Fragment>
-          <EuiFormRow
-            fullWidth
-            label={i18n.translate('xpack.transform.stepDefineForm.advancedSourceEditorLabel', {
-              defaultMessage: 'Source query clause',
-            })}
-            helpText={advancedSourceEditorHelpText}
-          >
-            <EuiPanel grow={false} paddingSize="none">
-              <EuiCodeEditor
-                mode="json"
-                height="300px"
-                width="100%"
-                value={advancedEditorSourceConfig}
-                onChange={(d: string) => {
-                  setAdvancedEditorSourceConfig(d);
-
-                  // Disable the "Apply"-Button if the config hasn't changed.
-                  if (advancedEditorSourceConfigLastApplied === d) {
-                    setAdvancedSourceEditorApplyButtonEnabled(false);
-                    return;
-                  }
-
-                  // Try to parse the string passed on from the editor.
-                  // If parsing fails, the "Apply"-Button will be disabled
-                  try {
-                    JSON.parse(d);
-                    setAdvancedSourceEditorApplyButtonEnabled(true);
-                  } catch (e) {
-                    setAdvancedSourceEditorApplyButtonEnabled(false);
-                  }
-                }}
-                setOptions={{
-                  fontSize: '12px',
-                }}
-                theme="textmate"
-                aria-label={i18n.translate(
-                  'xpack.transform.stepDefineForm.advancedSourceEditorAriaLabel',
-                  {
-                    defaultMessage: 'Advanced query editor',
-                  }
-                )}
-              />
-            </EuiPanel>
-          </EuiFormRow>
-        </Fragment>
-      )}
+  const advancedEditorButton = (
+    <>
       {kibanaContext.currentSavedSearch === undefined && (
-        <EuiFormRow fullWidth>
-          <EuiFlexGroup gutterSize="none">
-            <EuiFlexItem>
+        <>
+          <EuiFlexItem grow={false}>
+            <div style={{ paddingBottom: '4px' }}>
               <EuiSwitch
+                compressed
                 label={i18n.translate(
                   'xpack.transform.stepDefineForm.advancedEditorSourceConfigSwitchLabel',
                   {
@@ -617,11 +541,116 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
                   type={'source'}
                 />
               )}
-            </EuiFlexItem>
-            {isAdvancedSourceEditorEnabled && (
+            </div>
+          </EuiFlexItem>
+        </>
+      )}
+    </>
+  );
+
+  return (
+    <EuiForm>
+      <h3>
+        Source index <EuiBadge>{indexPattern.title}</EuiBadge>
+      </h3>
+      <EuiSpacer size="s" />
+      <EuiFormRow fullWidth>
+        <>
+          {kibanaContext.currentSavedSearch === undefined && typeof searchString === 'string' && (
+            <Fragment>
+              {!disabledQuery && !isAdvancedSourceEditorEnabled && (
+                <Fragment>
+                  <EuiFormRow
+                    fullWidth
+                    helpText={i18n.translate('xpack.transform.stepDefineForm.queryHelpText', {
+                      defaultMessage:
+                        'Use a query to filter the source data, it will be applied to the transform configuration (optional).',
+                    })}
+                  >
+                    <>
+                      <EuiFlexGroup>
+                        <EuiFlexItem>
+                          <EuiFormLabel>
+                            {i18n.translate('xpack.transform.stepDefineForm.queryLabel', {
+                              defaultMessage: 'Query',
+                            })}
+                          </EuiFormLabel>
+                        </EuiFlexItem>
+                        {advancedEditorButton}
+                      </EuiFlexGroup>
+                      <KqlFilterBar
+                        disabled={isAdvancedSourceEditorEnabled}
+                        indexPattern={indexPattern}
+                        onSubmit={searchHandler}
+                        initialValue={searchString === defaultSearch ? emptySearch : searchString}
+                        placeholder={i18n.translate(
+                          'xpack.transform.stepDefineForm.queryPlaceholder',
+                          {
+                            defaultMessage: 'e.g. {example}',
+                            values: { example: 'method : "GET" or status : "404"' },
+                          }
+                        )}
+                      />
+                    </>
+                  </EuiFormRow>
+                </Fragment>
+              )}
+            </Fragment>
+          )}
+
+          {isAdvancedSourceEditorEnabled && (
+            <Fragment>
+              <EuiFormRow fullWidth helpText={advancedSourceEditorHelpText}>
+                <>
+                  <EuiFlexGroup>
+                    <EuiFlexItem>
+                      <EuiFormLabel>
+                        {i18n.translate('xpack.transform.stepDefineForm.queryLabel', {
+                          defaultMessage: 'Query',
+                        })}
+                      </EuiFormLabel>
+                    </EuiFlexItem>
+                    {advancedEditorButton}
+                  </EuiFlexGroup>
+                  <EuiCodeEditor
+                    mode="json"
+                    height="300px"
+                    width="100%"
+                    value={advancedEditorSourceConfig}
+                    onChange={(d: string) => {
+                      setAdvancedEditorSourceConfig(d);
+
+                      // Disable the "Apply"-Button if the config hasn't changed.
+                      if (advancedEditorSourceConfigLastApplied === d) {
+                        setAdvancedSourceEditorApplyButtonEnabled(false);
+                        return;
+                      }
+
+                      // Try to parse the string passed on from the editor.
+                      // If parsing fails, the "Apply"-Button will be disabled
+                      try {
+                        JSON.parse(d);
+                        setAdvancedSourceEditorApplyButtonEnabled(true);
+                      } catch (e) {
+                        setAdvancedSourceEditorApplyButtonEnabled(false);
+                      }
+                    }}
+                    setOptions={{
+                      fontSize: '12px',
+                    }}
+                    theme="textmate"
+                    aria-label={i18n.translate(
+                      'xpack.transform.stepDefineForm.advancedSourceEditorAriaLabel',
+                      {
+                        defaultMessage: 'Advanced query editor',
+                      }
+                    )}
+                  />
+                </>
+              </EuiFormRow>
               <EuiButton
-                size="s"
                 fill
+                iconType="search"
                 onClick={applyAdvancedSourceEditorChanges}
                 disabled={!isAdvancedSourceEditorApplyButtonEnabled}
               >
@@ -632,30 +661,29 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
                   }
                 )}
               </EuiButton>
+            </Fragment>
+          )}
+          {kibanaContext.currentSavedSearch !== undefined &&
+            kibanaContext.currentSavedSearch.id !== undefined && (
+              <EuiFormRow
+                fullWidth
+                label={i18n.translate('xpack.transform.stepDefineForm.savedSearchLabel', {
+                  defaultMessage: 'Saved search',
+                })}
+              >
+                <EuiBadge>{kibanaContext.currentSavedSearch.title}</EuiBadge>
+              </EuiFormRow>
             )}
-          </EuiFlexGroup>
-        </EuiFormRow>
-      )}
-      {kibanaContext.currentSavedSearch !== undefined &&
-        kibanaContext.currentSavedSearch.id !== undefined && (
-          <EuiFormRow
-            fullWidth
-            label={i18n.translate('xpack.transform.stepDefineForm.savedSearchLabel', {
-              defaultMessage: 'Saved search',
-            })}
-          >
-            <EuiBadge>{kibanaContext.currentSavedSearch.title}</EuiBadge>
-          </EuiFormRow>
-        )}
+        </>
+      </EuiFormRow>
 
-      <EuiFormRow
-        fullWidth
-        label={i18n.translate('xpack.transform.stepDefineForm.sourceIndexPreview', {
-          defaultMessage: 'Source index preview',
-        })}
-      >
+      <EuiFormRow fullWidth>
         <SourceIndexPreview cellClick={addToSearch} query={pivotQuery} />
       </EuiFormRow>
+
+      <EuiSpacer size="m" />
+      <h3>Pivot configuration</h3>
+      <EuiSpacer size="s" />
 
       {!isAdvancedPivotEditorEnabled && (
         <Fragment>
@@ -758,6 +786,7 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
         <EuiFlexGroup gutterSize="none">
           <EuiFlexItem>
             <EuiSwitch
+              compressed
               label={i18n.translate('xpack.transform.stepDefineForm.advancedEditorSwitchLabel', {
                 defaultMessage: 'Advanced pivot editor',
               })}
@@ -800,19 +829,6 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
           )}
         </EuiFlexGroup>
       </EuiFormRow>
-      {!valid && (
-        <Fragment>
-          <EuiSpacer size="m" />
-          <EuiFormHelpText style={{ maxWidth: '320px' }}>
-            {i18n.translate('xpack.transform.stepDefineForm.formHelp', {
-              defaultMessage:
-                'Transforms are scalable and automated processes for pivoting. Choose at least one group-by and aggregation to get started.',
-            })}
-          </EuiFormHelpText>
-          <EuiSpacer size="m" />
-        </Fragment>
-      )}
-
       <EuiFormRow
         fullWidth
         label={i18n.translate('xpack.transform.stepDefineForm.pivotPreview', {
