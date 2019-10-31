@@ -37,6 +37,10 @@ export class ApiKeyLib implements Interface<ApiKeyLibType> {
     throw new Error('Method not implemented.');
   }
 
+  public async deleteEnrollmentApiKeyForPolicyId(user: FrameworkUser, policyId: string) {
+    throw new Error('Method not implemented.');
+  }
+
   public async getEnrollmentApiKey(
     user: FrameworkUser,
     keyId: string

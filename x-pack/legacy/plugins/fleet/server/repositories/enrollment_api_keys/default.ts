@@ -43,7 +43,10 @@ export class EnrollmentApiKeysRepository implements EnrollmentApiKeysRepositoryT
       type: SAVED_OBJECT_TYPE,
       page,
       perPage,
-      filter: kuery && kuery !== '' ? kuery : undefined,
+      filter:
+        kuery && kuery !== ''
+          ? kuery.replace(/enrollment_api_keys\./g, 'enrollment_api_keys.attributes.')
+          : undefined,
     });
 
     const items = saved_objects.map(this._savedObjectToEnrollmentApiKey);

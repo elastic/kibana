@@ -18,6 +18,7 @@ import {
 import { FrameworkLib } from './framework';
 import { FrameworkUser, internalAuthData } from '../adapters/framework/adapter_types';
 import { ElasticsearchAdapter } from '../adapters/elasticsearch/adapter_types';
+import { DEFAULT_POLICY_ID } from '../../common/constants';
 
 export class ApiKeyLib {
   constructor(
@@ -124,12 +125,13 @@ export class ApiKeyLib {
     }
   ): Promise<EnrollmentApiKey> {
     const id = uuid();
+    const { name: providedKeyName, policyId = DEFAULT_POLICY_ID, expiration } = data;
 
-    const name = this._getEnrollmentApiKeyName(id, data.name, data.policyId);
+    const name = this._getEnrollmentApiKeyName(id, providedKeyName, policyId);
 
     const key = await this.esAdapter.createApiKey(this.frameworkLib.getInternalUser(), {
       name,
-      expiration: data.expiration,
+      expiration,
     });
 
     const apiKey = Buffer.from(`${key.id}:${key.api_key}`).toString('base64');
@@ -139,8 +141,28 @@ export class ApiKeyLib {
       apiKeyId: key.id,
       apiKey,
       name,
-      policyId: data.policyId,
+      policyId,
     });
+  }
+
+  public async deleteEnrollmentApiKeyForPolicyId(user: FrameworkUser, policyId: string) {
+    let hasMore = true;
+    let page = 1;
+    while (hasMore) {
+      const { items } = await this.enrollmentApiKeysRepository.list(user, {
+        page: page++,
+        perPage: 100,
+        kuery: `enrollment_api_keys.policy_id:${policyId}`,
+      });
+
+      if (items.length === 0) {
+        hasMore = false;
+      }
+
+      for (const apiKey of items) {
+        await this.deleteEnrollmentApiKey(user, apiKey.id);
+      }
+    }
   }
 
   public async deleteEnrollmentApiKey(user: FrameworkUser, id: string) {

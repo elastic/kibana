@@ -8,3 +8,5 @@ export { INDEX_NAMES } from './index_names';
 export { PLUGIN } from './plugin';
 export * from './agent';
 export const BASE_PATH = '/fleet';
+
+export const DEFAULT_POLICY_ID = 'default';
