@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useCallback, ChangeEvent } from 'react';
 import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
+import { useValidation } from './utils';
 
 interface NumberInputOptionProps<ParamName extends string> {
   disabled?: boolean;
@@ -29,16 +30,17 @@ interface NumberInputOptionProps<ParamName extends string> {
   min?: number;
   paramName: ParamName;
   step?: number;
-  value?: number | '';
+  value: number | null;
   'data-test-subj'?: string;
-  setValue: (paramName: ParamName, value: number | '') => void;
+  setValue(paramName: ParamName, value: number | null): void;
+  setValidity(paramName: ParamName, isValid: boolean): void;
 }
 
 /**
- * Do not use this component anymore.
- * Please, use NumberInputOption in 'required_number_input.tsx'.
+ * Use only this component instead of NumberInputOption in 'number_input.tsx'.
  * It is required for compatibility with TS 3.7.0
- * This should be removed in the future
+ *
+ * @param {number} props.value Should be numeric only
  */
 function NumberInputOption<ParamName extends string>({
   disabled,
@@ -49,25 +51,34 @@ function NumberInputOption<ParamName extends string>({
   min,
   paramName,
   step,
-  value = '',
+  value,
   setValue,
+  setValidity,
   'data-test-subj': dataTestSubj,
 }: NumberInputOptionProps<ParamName>) {
+  const isValid = value !== null;
+  useValidation(setValidity, paramName, isValid);
+
+  const onChange = useCallback(
+    (ev: ChangeEvent<HTMLInputElement>) =>
+      setValue(paramName, isNaN(ev.target.valueAsNumber) ? null : ev.target.valueAsNumber),
+    [setValue, paramName]
+  );
+
   return (
     <EuiFormRow label={label} error={error} isInvalid={isInvalid} fullWidth compressed>
       <EuiFieldNumber
-        data-test-subj={dataTestSubj}
-        disabled={disabled}
         compressed
         fullWidth
-        isInvalid={isInvalid}
+        required
+        data-test-subj={dataTestSubj}
+        disabled={disabled}
+        isInvalid={!isValid}
         step={step}
         max={max}
         min={min}
-        value={value}
-        onChange={ev =>
-          setValue(paramName, isNaN(ev.target.valueAsNumber) ? '' : ev.target.valueAsNumber)
-        }
+        value={value === null ? '' : value}
+        onChange={onChange}
       />
     </EuiFormRow>
   );
