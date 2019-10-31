@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 
 import { styleOptionShapes, rangeShape } from '../style_option_shapes';
 import { VectorStyle } from '../../vector_style';
-import { ColorGradient } from '../../../color_gradient';
+import { ColorGradient } from '../../../components/color_gradient';
 import { CircleIcon } from './circle_icon';
 import { getVectorStyleLabel } from '../get_vector_style_label';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';

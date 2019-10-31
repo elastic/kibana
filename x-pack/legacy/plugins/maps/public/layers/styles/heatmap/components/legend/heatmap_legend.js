@@ -7,7 +7,7 @@
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { ColorGradient } from '../../../color_gradient';
+import { ColorGradient } from '../../../components/color_gradient';
 import { StyleLegendRow } from '../../../components/style_legend_row';
 import {
   DEFAULT_RGB_HEATMAP_COLOR_RAMP,

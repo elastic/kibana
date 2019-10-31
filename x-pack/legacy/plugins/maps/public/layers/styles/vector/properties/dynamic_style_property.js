@@ -9,8 +9,4 @@ import { AbstractStyleProperty } from './style_property';
 
 export class DynamicStyleProperty extends AbstractStyleProperty {
     static type = 'DYNAMIC';
-
-    constructor(options, styleName) {
-      super(options, styleName);
-    }
 }

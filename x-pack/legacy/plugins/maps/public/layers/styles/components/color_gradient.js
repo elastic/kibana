@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { COLOR_RAMP_NAMES, getRGBColorRangeStrings, getLinearGradient } from './color_utils';
+import { COLOR_RAMP_NAMES, getRGBColorRangeStrings, getLinearGradient } from '../color_utils';
 import classNames from 'classnames';
 
 export const ColorGradient = ({ colorRamp, colorRampName, className }) => {
