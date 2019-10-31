@@ -79,10 +79,13 @@ To quickly filter the logs stream by one of the field values, in the log event d
 This automatically adds a search filter to the logs stream to filter the entries by this field and value.
 
 [float]
+[[view-log-anomalies]]
 === View log anomalies
-If you have a license that includes the machine learning features, you can click *Analysis* to <<xpack-logs-analysis-page, use machine learning to detect and inspect anomalies>> in your log data.
+
+If the {ml} {anomaly-detect} features are enabled, you can click *Analysis* to <<xpack-logs-analysis-page, use machine learning to detect and inspect anomalies>> in your log data.
 
 [float]
+[[using-logs-other-actions]]
 === Other actions
 
 To see other actions related to the event, in the log event details, click *Actions*.
