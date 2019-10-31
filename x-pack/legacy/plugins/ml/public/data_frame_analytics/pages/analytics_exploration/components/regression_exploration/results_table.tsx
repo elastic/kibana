@@ -78,6 +78,7 @@ export const ResultsTable: FC<Props> = React.memo(({ jobConfig }) => {
   const [isColumnsPopoverVisible, setColumnsPopoverVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState<SavedSearchQuery>(defaultSearchQuery);
   const [searchError, setSearchError] = useState<any>(undefined);
+  const [searchString, setSearchString] = useState<string | undefined>(undefined);
 
   // EuiInMemoryTable has an issue with dynamic sortable columns
   // and will trigger a full page Kibana error in such a case.
@@ -299,6 +300,7 @@ export const ResultsTable: FC<Props> = React.memo(({ jobConfig }) => {
       try {
         const esQueryDsl = Query.toESQuery(query);
         setSearchQuery(esQueryDsl);
+        setSearchString(query.text);
         setSearchError(undefined);
       } catch (e) {
         setSearchError(e.toString());
@@ -308,6 +310,7 @@ export const ResultsTable: FC<Props> = React.memo(({ jobConfig }) => {
 
   const search = {
     onChange: onQueryChange,
+    defaultQuery: searchString,
     box: {
       incremental: false,
       placeholder: i18n.translate(
