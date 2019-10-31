@@ -11,7 +11,6 @@ import mean from 'lodash.mean';
 import { rgba } from 'polished';
 import { TimeSeriesAPIResponse } from '../../server/lib/transactions/charts';
 import { ApmTimeSeriesResponse } from '../../server/lib/transactions/charts/get_timeseries_data/transform';
-import { StringMap } from '../../typings/common';
 import {
   Coordinate,
   RectCoordinate,
@@ -192,7 +191,7 @@ function getColorByKey(keys: string[]) {
   const assignedColors = ['HTTP 2xx', 'HTTP 3xx', 'HTTP 4xx', 'HTTP 5xx'];
 
   const unknownKeys = difference(keys, assignedColors);
-  const unassignedColors: StringMap<string> = zipObject(unknownKeys, [
+  const unassignedColors: Record<string, string> = zipObject(unknownKeys, [
     theme.euiColorVis1,
     theme.euiColorVis3,
     theme.euiColorVis4,
