@@ -21,7 +21,7 @@ export class EndpointsPage extends PureComponent {
         <EuiSpacer size="xxl" />
         <Switch>
           {endpointsSubRoutes.map(({ id, path, component }) => (
-            <Route path={path} key={id} component={component} />
+            <Route path={path} exact key={id} component={component} />
           ))}
 
           <Route path="/endpoints/*" component={RouteNotFound} />
