@@ -21,7 +21,12 @@ import { resolve } from 'path';
 import { LegacyPluginApi, LegacyPluginSpec, ArrayOrItem } from 'src/legacy/plugin_discovery/types';
 import { Legacy } from 'kibana';
 import { NewsfeedPluginInjectedConfig } from '../../../plugins/newsfeed/types';
-import { PLUGIN_ID, DEFAULT_SERVICE_URLROOT, DEFAULT_SERVICE_PATH } from './constants';
+import {
+  PLUGIN_ID,
+  DEFAULT_SERVICE_URLROOT,
+  DEV_SERVICE_URLROOT,
+  DEFAULT_SERVICE_PATH,
+} from './constants';
 
 // eslint-disable-next-line import/no-default-export
 export default function(kibana: LegacyPluginApi): ArrayOrItem<LegacyPluginSpec> {
@@ -35,7 +40,9 @@ export default function(kibana: LegacyPluginApi): ArrayOrItem<LegacyPluginSpec> 
           pathTemplate: Joi.string().default(DEFAULT_SERVICE_PATH),
           urlRoot: Joi.when('$dev', {
             is: true,
-            then: Joi.string().default(DEFAULT_SERVICE_URLROOT),
+            then: Joi.string()
+              .default(DEV_SERVICE_URLROOT)
+              .regex(/[^\/]$/),
             otherwise: Joi.string()
               .default(DEFAULT_SERVICE_URLROOT)
               .valid(DEFAULT_SERVICE_URLROOT),

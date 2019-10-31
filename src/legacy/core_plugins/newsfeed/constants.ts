@@ -19,4 +19,5 @@
 
 export const PLUGIN_ID = 'newsfeed';
 export const DEFAULT_SERVICE_URLROOT = 'https://feeds.elastic.co';
+export const DEV_SERVICE_URLROOT = 'https://feeds-staging.elastic.co';
 export const DEFAULT_SERVICE_PATH = '/kibana/v{VERSION}.json';
