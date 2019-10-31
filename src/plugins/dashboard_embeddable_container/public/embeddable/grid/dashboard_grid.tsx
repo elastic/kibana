@@ -34,10 +34,7 @@ import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../dashboard
 import { DashboardPanelState, GridData } from '../types';
 import { withKibana } from '../../../../kibana_react/public';
 import { DashboardContainerInput } from '../dashboard_container';
-
-// import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
-type DashboardContainer = any;
-type DashboardReactContextValue = any;
+import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
 
 let lastValidGridSize = 0;
 

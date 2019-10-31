@@ -56,7 +56,7 @@ beforeEach(async () => {
   const input = getSampleDashboardInput({
     panels: {
       '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
-        explicitInput: { firstName: 'Sam', id: '123' } as any,
+        explicitInput: { firstName: 'Sam', id: '123' },
         type: CONTACT_CARD_EMBEDDABLE,
       }),
     },

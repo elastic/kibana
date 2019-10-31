@@ -20,10 +20,7 @@
 import { i18n } from '@kbn/i18n';
 import { IEmbeddable } from '../embeddable_plugin';
 import { IAction, IncompatibleActionError } from '../ui_actions_plugin';
-
-const DASHBOARD_CONTAINER_TYPE = 'dashboard';
-type DashboardContainer = any;
-// import { DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '../embeddable';
+import { DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '../embeddable';
 
 export const EXPAND_PANEL_ACTION = 'togglePanel';
 
@@ -89,6 +86,6 @@ export class ExpandPanelAction implements IAction<ActionContext> {
     const newValue = isExpanded(embeddable) ? undefined : embeddable.id;
     embeddable.parent.updateInput({
       expandedPanelId: newValue,
-    } as any);
+    });
   }
 }
