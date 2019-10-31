@@ -27,7 +27,7 @@ import { wrapInI18nContext } from 'ui/i18n';
 // @ts-ignore
 import { uiModules as modules } from 'ui/modules';
 import routes from 'ui/routes';
-import { npStart } from 'ui/new_platform';
+import { npSetup, npStart } from 'ui/new_platform';
 import { IPrivate } from 'ui/private';
 import { FeatureCatalogueRegistryProvider } from 'ui/registry/feature_catalogue';
 import { createUiStatsReporter, METRIC_TYPE } from '../../../ui_metric/public';
@@ -55,10 +55,14 @@ export function getServices() {
     indexPatternService: data.indexPatterns.indexPatterns,
     shouldShowTelemetryOptIn,
     telemetryOptInProvider,
-    getFeatureCatalogueRegistryProvider: async () => {
+    getFeatureCatalogueEntries: async () => {
       const injector = await chrome.dangerouslyGetActiveInjector();
       const Private = injector.get<IPrivate>('Private');
-      return Private(FeatureCatalogueRegistryProvider as any);
+      // Merge legacy registry with new registry
+      (Private(FeatureCatalogueRegistryProvider as any) as any).inTitleOrder.map(
+        npSetup.plugins.feature_catalogue.register
+      );
+      return npStart.plugins.feature_catalogue.get();
     },
 
     trackUiMetric: createUiStatsReporter('Kibana_home'),

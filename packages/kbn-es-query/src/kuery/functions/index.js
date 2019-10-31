@@ -25,6 +25,7 @@ import * as range from './range';
 import * as exists from './exists';
 import * as geoBoundingBox from './geo_bounding_box';
 import * as geoPolygon from './geo_polygon';
+import * as nested from './nested';
 
 export const functions = {
   is,
@@ -35,4 +36,5 @@ export const functions = {
   exists,
   geoBoundingBox,
   geoPolygon,
+  nested,
 };

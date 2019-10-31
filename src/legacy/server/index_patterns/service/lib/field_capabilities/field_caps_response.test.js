@@ -37,10 +37,10 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
     describe('conflicts', () => {
       it('returns a field for each in response, no filtering', () => {
         const fields = readFieldCapsResponse(esResponse);
-        expect(fields).toHaveLength(22);
+        expect(fields).toHaveLength(24);
       });
 
-      it('includes only name, type, esTypes, searchable, aggregatable, readFromDocValues, and maybe conflictDescriptions, parent, ' +
+      it('includes only name, type, esTypes, searchable, aggregatable, readFromDocValues, and maybe conflictDescriptions, ' +
         'and subType of each field', () => {
         const responseClone = cloneDeep(esResponse);
         // try to trick it into including an extra field
@@ -48,7 +48,7 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
         const fields = readFieldCapsResponse(responseClone);
 
         fields.forEach(field => {
-          const fieldWithoutOptionalKeys = omit(field, 'conflictDescriptions', 'parent', 'subType');
+          const fieldWithoutOptionalKeys = omit(field, 'conflictDescriptions', 'subType');
 
           expect(Object.keys(fieldWithoutOptionalKeys)).toEqual([
             'name',
@@ -65,8 +65,8 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
         sandbox.spy(shouldReadFieldFromDocValuesNS, 'shouldReadFieldFromDocValues');
         const fields = readFieldCapsResponse(esResponse);
         const conflictCount = fields.filter(f => f.type === 'conflict').length;
-        // +1 is for the object field which gets filtered out of the final return value from readFieldCapsResponse
-        sinon.assert.callCount(shouldReadFieldFromDocValues, fields.length - conflictCount + 1);
+        // +2 is for the object and nested fields which get filtered out of the final return value from readFieldCapsResponse
+        sinon.assert.callCount(shouldReadFieldFromDocValues, fields.length - conflictCount + 2);
       });
 
       it('converts es types to kibana types', () => {
@@ -132,20 +132,41 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
         expect(mixSearchableOther.searchable).toBe(true);
       });
 
-      it('returns multi fields with parent and subType keys describing the relationship', () => {
+      it('returns multi fields with a subType key describing the relationship', () => {
         const fields = readFieldCapsResponse(esResponse);
         const child = fields.find(f => f.name === 'multi_parent.child');
-        expect(child).toHaveProperty('parent', 'multi_parent');
-        expect(child).toHaveProperty('subType', 'multi');
+        expect(child).toHaveProperty('subType', { multi: { parent: 'multi_parent' } });
       });
 
-      it('should not confuse object children for multi field children', () => {
+      it('returns nested sub-fields with a subType key describing the relationship', () => {
+        const fields = readFieldCapsResponse(esResponse);
+        const child = fields.find(f => f.name === 'nested_object_parent.child');
+        expect(child).toHaveProperty('subType', { nested: { path: 'nested_object_parent' } });
+      });
+
+      it('handles fields that are both nested and multi', () => {
+        const fields = readFieldCapsResponse(esResponse);
+        const child = fields.find(f => f.name === 'nested_object_parent.child.keyword');
+        expect(child).toHaveProperty(
+          'subType',
+          {
+            nested: { path: 'nested_object_parent' },
+            multi: { parent: 'nested_object_parent.child' }
+          });
+      });
+
+      it('does not include the field actually mapped as nested itself', () => {
+        const fields = readFieldCapsResponse(esResponse);
+        const child = fields.find(f => f.name === 'nested_object_parent');
+        expect(child).toBeUndefined();
+      });
+
+      it('should not confuse object children for multi or nested field children', () => {
         // We detect multi fields by finding fields that have a dot in their name and then looking
-        // to see if their parents are *not* object or nested fields. In the future we may want to
-        // add parent and subType info for object and nested fields but for now we don't need it.
+        // to see if their parents are *not* object fields. In the future we may want to
+        // add subType info for object fields but for now we don't need it.
         const fields = readFieldCapsResponse(esResponse);
         const child = fields.find(f => f.name === 'object_parent.child');
-        expect(child).not.toHaveProperty('parent');
         expect(child).not.toHaveProperty('subType');
       });
     });
