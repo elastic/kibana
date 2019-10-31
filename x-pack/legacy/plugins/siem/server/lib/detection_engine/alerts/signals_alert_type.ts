@@ -13,11 +13,12 @@ import { buildEventsReIndex } from './build_events_reindex';
 
 // TODO: Comment this in and use this instead of the reIndex API
 // once scrolling and other things are done with it.
-import { buildEventsScrollQuery } from './build_events_query';
+import { buildEventsSearchQuery } from './build_events_query';
 
 // bulk scroll class
-import { scrollAndBulkIndex } from './utils';
+import { searchAfterAndBulkIndex } from './utils';
 import { SignalAlertTypeDefinition } from './types';
+import { getFilter } from './get_filter';
 
 export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTypeDefinition => {
   return {
@@ -31,15 +32,17 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
         filter: schema.nullable(schema.object({}, { allowUnknowns: true })),
         id: schema.string(),
         index: schema.arrayOf(schema.string()),
-        kql: schema.nullable(schema.string()),
+        language: schema.nullable(schema.string()),
+        savedId: schema.nullable(schema.string()),
+        query: schema.nullable(schema.string()),
+        filters: schema.nullable(schema.arrayOf(schema.object({}, { allowUnknowns: true }))),
         maxSignals: schema.number({ defaultValue: 100 }),
         name: schema.string(),
         severity: schema.string(),
         to: schema.string(),
         type: schema.string(),
         references: schema.arrayOf(schema.string(), { defaultValue: [] }),
-        scrollSize: schema.maybe(schema.number()),
-        scrollLock: schema.maybe(schema.string()),
+        size: schema.maybe(schema.number()),
       }),
     },
     async executor({ services, params }) {
@@ -51,49 +54,39 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
         from,
         id,
         index,
-        kql,
+        filters,
+        language,
+        savedId,
+        query,
         maxSignals,
         name,
         references,
         severity,
         to,
         type,
-        scrollSize,
-        scrollLock,
+        size,
       } = params;
 
-      const scroll = scrollLock ? scrollLock : '1m';
-      const size = scrollSize ? scrollSize : 400;
+      const searchAfterSize = size ? size : 1000;
 
-      // TODO: Turn these options being sent in into a template for the alert type
-      const noReIndex = buildEventsScrollQuery({
-        index,
-        from,
-        to,
-        kql,
+      const esFilter = await getFilter({
+        type,
         filter,
-        size,
-        scroll,
+        filters,
+        language,
+        query,
+        savedId,
+        services,
+        index,
       });
 
-      const reIndex = buildEventsReIndex({
+      // TODO: Turn these options being sent in into a template for the alert type
+      const noReIndex = buildEventsSearchQuery({
         index,
         from,
-        kql,
         to,
-        // TODO: Change this out once we have solved
-        // https://github.com/elastic/kibana/issues/47002
-        signalsIndex: process.env.SIGNALS_INDEX || '.siem-signals-10-01-2019',
-        severity,
-        description,
-        name,
-        timeDetected: new Date().toISOString(),
-        filter,
-        maxDocs: maxSignals,
-        ruleRevision: 1,
-        id,
-        type,
-        references,
+        filter: esFilter,
+        size: searchAfterSize,
       });
 
       try {
@@ -103,6 +96,24 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
         // signals instead of the ReIndex() api
 
         if (process.env.USE_REINDEX_API === 'true') {
+          const reIndex = buildEventsReIndex({
+            index,
+            from,
+            to,
+            // TODO: Change this out once we have solved
+            // https://github.com/elastic/kibana/issues/47002
+            signalsIndex: process.env.SIGNALS_INDEX || '.siem-signals-10-01-2019',
+            severity,
+            description,
+            name,
+            timeDetected: new Date().toISOString(),
+            filter: esFilter,
+            maxDocs: maxSignals,
+            ruleRevision: 1,
+            id,
+            type,
+            references,
+          });
           const result = await services.callCluster('reindex', reIndex);
 
           // TODO: Error handling here and writing of any errors that come back from ES by
@@ -113,7 +124,7 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
           const noReIndexResult = await services.callCluster('search', noReIndex);
           logger.info(`Total docs to reindex: ${noReIndexResult.hits.total.value}`);
 
-          const bulkIndexResult = await scrollAndBulkIndex(
+          const bulkIndexResult = await searchAfterAndBulkIndex(
             noReIndexResult,
             params,
             services,

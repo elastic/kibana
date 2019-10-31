@@ -80,3 +80,5 @@ export interface DataRecognizerConfigResponse {
     dashboard: KibanaObjectResponse;
   };
 }
+
+export type JobOverride = Partial<Job>;

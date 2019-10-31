@@ -19,13 +19,7 @@
 
 import { UiSettingsClientContract, CoreStart } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
-
-export interface Storage {
-  get: (key: string) => any;
-  set: (key: string, value: any) => void;
-  remove: (key: string) => any;
-  clear: () => void;
-}
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 
 export interface IDataPluginServices extends Partial<CoreStart> {
   appName: string;
@@ -33,6 +27,6 @@ export interface IDataPluginServices extends Partial<CoreStart> {
   savedObjects: CoreStart['savedObjects'];
   notifications: CoreStart['notifications'];
   http: CoreStart['http'];
-  store: Storage;
+  storage: IStorageWrapper;
   data: DataPublicPluginStart;
 }

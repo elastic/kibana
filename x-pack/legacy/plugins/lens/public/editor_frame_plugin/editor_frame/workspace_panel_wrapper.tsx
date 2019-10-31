@@ -15,9 +15,11 @@ interface Props {
 export function WorkspacePanelWrapper({ children, title }: Props) {
   return (
     <EuiPageContent className="lnsWorkspacePanelWrapper">
-      <EuiPageContentHeader className="lnsWorkspacePanelWrapper__pageContentHeader">
-        <span data-test-subj="lns_ChartTitle">{title}</span>
-      </EuiPageContentHeader>
+      {title && (
+        <EuiPageContentHeader className="lnsWorkspacePanelWrapper__pageContentHeader">
+          <span data-test-subj="lns_ChartTitle">{title}</span>
+        </EuiPageContentHeader>
+      )}
       <EuiPageContentBody className="lnsWorkspacePanelWrapper__pageContentBody">
         {children}
       </EuiPageContentBody>
