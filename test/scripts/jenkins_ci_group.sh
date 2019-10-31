@@ -2,21 +2,29 @@
 
 source test/scripts/jenkins_test_setup.sh
 
-if [[ -z "$IS_PIPELINE_JOB" ]] ; then
-  yarn run grunt functionalTests:ensureAllTestsInCiGroup;
-  node scripts/build --debug --oss;
+if [[ -z "$CODE_COVERAGE" ]] ; then
+  if [[ -z "$IS_PIPELINE_JOB" ]] ; then
+    yarn run grunt functionalTests:ensureAllTestsInCiGroup;
+    node scripts/build --debug --oss;
+  else
+    installDir="$(realpath $PARENT_DIR/kibana/build/oss/kibana-*-SNAPSHOT-linux-x86_64)"
+    destDir=${installDir}-${CI_WORKER_NUMBER}
+    cp -R "$installDir" "$destDir"
+
+    export KIBANA_INSTALL_DIR="$destDir"
+  fi
+
+  checks-reporter-with-killswitch "Functional tests / Group ${CI_GROUP}" yarn run grunt "run:functionalTests_ciGroup${CI_GROUP}";
+
+  if [ "$CI_GROUP" == "1" ]; then
+    source test/scripts/jenkins_build_kbn_tp_sample_panel_action.sh
+    yarn run grunt run:pluginFunctionalTestsRelease --from=source;
+    yarn run grunt run:interpreterFunctionalTestsRelease;
+  fi
 else
-  installDir="$(realpath $PARENT_DIR/kibana/build/oss/kibana-*-SNAPSHOT-linux-x86_64)"
-  destDir=${installDir}-${CI_WORKER_NUMBER}
-  cp -R "$installDir" "$destDir"
-
-  export KIBANA_INSTALL_DIR="$destDir"
-fi
-
-checks-reporter-with-killswitch "Functional tests / Group ${CI_GROUP}" yarn run grunt "run:functionalTests_ciGroup${CI_GROUP}";
-
-if [ "$CI_GROUP" == "1" ]; then
-  source test/scripts/jenkins_build_kbn_tp_sample_panel_action.sh
-  yarn run grunt run:pluginFunctionalTestsRelease --from=source;
-  yarn run grunt run:interpreterFunctionalTestsRelease;
+  echo " -> Running Functional tests with code coverage"
+  checks-reporter-with-killswitch " Functional tests with code coverage / Group ${CI_GROUP}" \
+  node scripts/functional_tests \
+    --debug \
+    --include-tag "ciGroup$CI_GROUP"
 fi

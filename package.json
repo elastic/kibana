@@ -71,7 +71,14 @@
     "kbn:bootstrap": "yarn build:types && node scripts/register_git_hook",
     "spec_to_console": "node scripts/spec_to_console",
     "backport-skip-ci": "backport --prDescription \"[skip-ci]\"",
-    "cover:report": "nyc report --temp-dir target/kibana-coverage/functional --report-dir target/coverage/report --reporter=lcov && open ./target/coverage/report/lcov-report/index.html"
+    "cover:report": "nyc report --temp-dir target/kibana-coverage/functional --report-dir target/coverage/report --reporter=lcov && open ./target/coverage/report/lcov-report/index.html",
+    "cover:convert-post": "node scripts/convert_and_send_json_summary.js",
+    "cover:debug-convert-post": "yarn cover:convert-post --debug ",
+    "cover:verbose-convert-post": "TIME_STAMP=$(node -pe \"require('moment')().format()\") DELAY=0 yarn cover:convert-post --verbose ",
+    "cover:mocha:convert-post": "yarn cover:debug-convert-post --path target/kibana-coverage/mocha/coverage-summary.json",
+    "cover:jest:convert-post": "yarn cover:debug-convert-post --path target/kibana-coverage/jest/coverage-summary.json",
+    "cover:functional:convert-post": "yarn cover:verbose-convert-post --path target/coverage/report/functional/coverage-summary.json",
+    "cover:functional:merge": "nyc report --temp-dir target/kibana-coverage/functional --report-dir target/coverage/report/functional --reporter=json-summary"
   },
   "repository": {
     "type": "git",
@@ -427,6 +434,7 @@
     "node-sass": "^4.9.4",
     "normalize-path": "^3.0.0",
     "nyc": "^14.1.1",
+    "oboe": "^2.1.5",
     "pixelmatch": "4.0.2",
     "pkg-up": "^2.0.0",
     "pngjs": "^3.4.0",

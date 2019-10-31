@@ -71,6 +71,7 @@ export default {
   ],
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest',
   coverageReporters: [
+    'json-summary',
     'html',
     'text',
   ],
