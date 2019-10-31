@@ -18,7 +18,7 @@
  */
 
 import { Url } from 'url';
-import { Request } from 'hapi';
+import { Request, RouteOptionsApp } from 'hapi';
 
 import { ObjectType, TypeOf } from '@kbn/config-schema';
 
@@ -150,7 +150,7 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
 
   private getRouteInfo() {
     const request = this[requestSymbol];
-    const app = request.route.settings.app;
+    const app = request.route.settings.app as KibanaRouteOptionsApp;
     return {
       path: request.path,
       method: request.method,
@@ -188,4 +188,12 @@ function isRequest(request: any): request is LegacyRequest {
  */
 export function isRealRequest(request: unknown): request is KibanaRequest | LegacyRequest {
   return isKibanaRequest(request) || isRequest(request);
+}
+
+/**
+ * Extend the Hapi interface for application-specific configuration on routes
+ * @internal
+ */
+interface KibanaRouteOptionsApp extends RouteOptionsApp {
+  extendsSession: boolean;
 }
