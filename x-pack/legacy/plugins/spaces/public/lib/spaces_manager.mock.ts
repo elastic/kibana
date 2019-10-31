@@ -5,10 +5,11 @@
  */
 
 import { of, Observable } from 'rxjs';
+import { Space } from '../../common/model/space';
 
 function createSpacesManagerMock() {
   return {
-    onActiveSpaceChange$: of(undefined) as Observable<Space>,
+    onActiveSpaceChange$: (of(undefined) as unknown) as Observable<Space>,
     getSpaces: jest.fn().mockResolvedValue([]),
     getSpace: jest.fn().mockResolvedValue(undefined),
     getActiveSpace: jest.fn().mockResolvedValue(undefined),
