@@ -22,7 +22,7 @@ const columns = [
     field: '_source.host.hostname',
     name: 'Name',
     render: (name: string, item: { _id: string }) => {
-      return <EndpointName name={name} path={`/endpoints/${item._id}`} />;
+      return <EndpointName name={name} path={`/endpoints/view/${item._id}`} />;
     },
   },
   {

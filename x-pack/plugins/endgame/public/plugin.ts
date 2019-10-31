@@ -21,7 +21,9 @@ export class EndgameClient implements Plugin {
       id: PLUGIN_ID,
       title: 'Endgame Security',
       async mount(context: AppMountContext, params: AppMountParameters) {
-        const { mountApp } = await import('./application');
+        const { mountApp } = await import(
+          /* webpackChunkName: "endgame-application" */ './application'
+        );
         return mountApp(context, params);
       },
     });

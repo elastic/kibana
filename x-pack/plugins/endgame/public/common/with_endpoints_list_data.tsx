@@ -38,7 +38,7 @@ export function withEndPointsListData<P extends { endpoints: object[] }>(C: Comp
     async componentDidMount() {
       // Load some API data for this component
       const endpoints = await this.context.appContext.core.http
-        .get(`${this.context.apiPrefixPath}/endpoints`)
+        .get(`${this.context.apiPrefixPath}/endpoints2`)
         .catch((e: Error) => {
           console.error(e); //eslint-disable-line
           return Promise.resolve({ hits: { hits: [] } });

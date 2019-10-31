@@ -57,7 +57,7 @@ export function withEndpointDetailData<P extends { endpoint: null | object } & R
       // Load some API data for this component
       const endpoint = await this.context.appContext.core.http
         // FIXME: need help fixing issue below with `id` and TS validation
-        .get(`${this.context.apiPrefixPath}/endpoints/${this.props.match.params.id}`)
+        .get(`${this.context.apiPrefixPath}/endpoints2/${this.props.match.params.id}`)
         .catch((e: Error) => {
           console.error(e); //eslint-disable-line
           return Promise.resolve([]);
