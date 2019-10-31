@@ -104,7 +104,7 @@ export class ExpressionRenderHandler {
     try {
       // Rendering is asynchronous, completed by handlers.done()
       getRenderersRegistry()
-        .get(data.as)
+        .get(data.as)!
         .render(this.element, data.value, { ...this.handlers, ...extraHandlers });
     } catch (e) {
       this.renderSubject.next({

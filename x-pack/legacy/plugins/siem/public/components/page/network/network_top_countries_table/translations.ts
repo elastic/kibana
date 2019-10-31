@@ -34,14 +34,14 @@ export const FLOWS = i18n.translate('xpack.siem.networkTopCountriesTable.column.
 export const DESTINATION_COUNTRIES = i18n.translate(
   'xpack.siem.networkTopCountriesTable.heading.destinationCountries',
   {
-    defaultMessage: 'Destination Countries',
+    defaultMessage: 'Destination countries',
   }
 );
 
 export const SOURCE_COUNTRIES = i18n.translate(
   'xpack.siem.networkTopCountriesTable.heading.sourceCountries',
   {
-    defaultMessage: 'Source Countries',
+    defaultMessage: 'Source countries',
   }
 );
 

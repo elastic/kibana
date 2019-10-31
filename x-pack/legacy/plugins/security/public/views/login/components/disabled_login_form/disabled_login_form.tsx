@@ -5,24 +5,20 @@
  */
 
 import { EuiPanel, EuiText } from '@elastic/eui';
-import React, { Component, ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 
 interface Props {
   title: ReactNode;
   message: ReactNode;
 }
 
-export class DisabledLoginForm extends Component<Props, {}> {
-  public render() {
-    return (
-      <EuiPanel>
-        <EuiText color="danger" style={{ textAlign: 'center' }}>
-          <p>{this.props.title}</p>
-        </EuiText>
-        <EuiText style={{ textAlign: 'center' }}>
-          <p>{this.props.message}</p>
-        </EuiText>
-      </EuiPanel>
-    );
-  }
-}
+export const DisabledLoginForm: React.SFC<Props> = props => (
+  <EuiPanel>
+    <EuiText color="danger" style={{ textAlign: 'center' }}>
+      <p>{props.title}</p>
+    </EuiText>
+    <EuiText style={{ textAlign: 'center' }}>
+      <p>{props.message}</p>
+    </EuiText>
+  </EuiPanel>
+);
