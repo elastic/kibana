@@ -36,6 +36,7 @@ import { EuiHeaderAlert } from '../../../../legacy/core_plugins/newsfeed/public/
 import { NewsfeedContext } from './newsfeed_header_nav_button';
 import { NewsfeedItem } from '../../types';
 import { NewsEmptyPrompt } from './empty_news';
+import { NewsLoadingPrompt } from './loading_news';
 
 export const NewsfeedFlyout = () => {
   const { newsFetchResult, setFlyoutVisible } = useContext(NewsfeedContext);
@@ -56,7 +57,9 @@ export const NewsfeedFlyout = () => {
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody className={'kbnNews__flyoutAlerts'}>
-        {newsFetchResult && newsFetchResult.feedItems.length > 0 ? (
+        {!newsFetchResult ? (
+          <NewsLoadingPrompt />
+        ) : newsFetchResult.feedItems.length > 0 ? (
           newsFetchResult.feedItems.map((item: NewsfeedItem) => {
             return (
               <EuiHeaderAlert
