@@ -17,9 +17,6 @@ const CHART_HEIGHT = 350;
 
 export const DocumentCountContent: FC<FieldDataCardProps> = ({ config }) => {
   const { stats } = config;
-  if (stats === undefined) {
-    return null;
-  }
 
   const { documentCounts, timeRangeEarliest, timeRangeLatest } = stats;
 

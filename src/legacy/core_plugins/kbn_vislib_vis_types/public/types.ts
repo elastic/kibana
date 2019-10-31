@@ -70,8 +70,8 @@ export interface Scale {
 
 interface ThresholdLine {
   show: boolean;
-  value: number;
-  width: number;
+  value: number | null;
+  width: number | null;
   style: ThresholdLineStyles;
   color: string;
 }
