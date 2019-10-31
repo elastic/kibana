@@ -19,12 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import {
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { DashboardPanelState } from '../embeddable';
 import { NotificationsStart, Toast } from '../../../../core/public';
 import {

@@ -42,6 +42,7 @@ import {
 import {
   withKibana,
   KibanaReactContextValue,
+  toMountPoint,
 } from '../../../../../../../plugins/kibana_react/public';
 import { IndexPattern, StaticIndexPattern } from '../../../index_patterns';
 import { Query, getQueryLog } from '../index';
@@ -362,7 +363,7 @@ export class QueryBarInputUI extends Component<Props, State> {
             id: 'data.query.queryBar.KQLNestedQuerySyntaxInfoTitle',
             defaultMessage: 'KQL nested query syntax',
           }),
-          text: (
+          text: toMountPoint(
             <div>
               <p>
                 <FormattedMessage
