@@ -3,6 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
 
 import React, { useEffect, useState } from 'react';
 
@@ -12,23 +17,28 @@ import { SortDirection, SORT_DIRECTION } from '../../../../../components/ml_in_m
 
 import { ml } from '../../../../../services/ml_api_service';
 import { getNestedProperty } from '../../../../../util/object_utils';
+import { SavedSearchQuery } from '../../../../../contexts/kibana';
 
 import {
-  getDefaultSelectableFields,
+  getDefaultRegressionFields,
   getFlattenedFields,
   DataFrameAnalyticsConfig,
   EsFieldName,
+  getPredictedFieldName,
   INDEX_STATUS,
   SEARCH_SIZE,
 } from '../../../../common';
 
-import { getOutlierScoreFieldName } from './common';
+export const defaultSearchQuery = {
+  match_all: {},
+};
 
 type TableItem = Record<string, any>;
 
 interface LoadExploreDataArg {
   field: string;
   direction: SortDirection;
+  searchQuery: SavedSearchQuery;
 }
 export interface UseExploreDataReturnType {
   errorMessage: string;
@@ -37,6 +47,11 @@ export interface UseExploreDataReturnType {
   sortDirection: SortDirection;
   status: INDEX_STATUS;
   tableItems: TableItem[];
+}
+
+interface SearchQuery {
+  query: SavedSearchQuery;
+  sort?: any;
 }
 
 export const useExploreData = (
@@ -50,27 +65,31 @@ export const useExploreData = (
   const [sortField, setSortField] = useState<string>('');
   const [sortDirection, setSortDirection] = useState<SortDirection>(SORT_DIRECTION.ASC);
 
-  const loadExploreData = async ({ field, direction }: LoadExploreDataArg) => {
+  const loadExploreData = async ({ field, direction, searchQuery }: LoadExploreDataArg) => {
     if (jobConfig !== undefined) {
       setErrorMessage('');
       setStatus(INDEX_STATUS.LOADING);
 
       try {
         const resultsField = jobConfig.dest.results_field;
+        const body: SearchQuery = {
+          query: searchQuery,
+        };
+
+        if (field !== undefined) {
+          body.sort = [
+            {
+              [field]: {
+                order: direction,
+              },
+            },
+          ];
+        }
 
         const resp: SearchResponse<any> = await ml.esSearch({
           index: jobConfig.dest.index,
           size: SEARCH_SIZE,
-          body: {
-            query: { match_all: {} },
-            sort: [
-              {
-                [field]: {
-                  order: direction,
-                },
-              },
-            ],
-          },
+          body,
         });
 
         setSortField(field);
@@ -85,7 +104,7 @@ export const useExploreData = (
         }
 
         if (selectedFields.length === 0) {
-          const newSelectedFields = getDefaultSelectableFields(docs, resultsField);
+          const newSelectedFields = getDefaultRegressionFields(docs, jobConfig);
           setSelectedFields(newSelectedFields);
         }
 
@@ -133,8 +152,9 @@ export const useExploreData = (
   useEffect(() => {
     if (jobConfig !== undefined) {
       loadExploreData({
-        field: getOutlierScoreFieldName(jobConfig),
+        field: getPredictedFieldName(jobConfig.dest.results_field, jobConfig.analysis),
         direction: SORT_DIRECTION.DESC,
+        searchQuery: defaultSearchQuery,
       });
     }
   }, [jobConfig && jobConfig.id]);

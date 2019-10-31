@@ -4,13 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import React, { Fragment, FC, useEffect, useState } from 'react';
 import moment from 'moment-timezone';
 
 import { i18n } from '@kbn/i18n';
-
-import d3 from 'd3';
-
 import {
   EuiBadge,
   EuiButtonIcon,
@@ -22,13 +19,14 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiProgress,
+  EuiSpacer,
   EuiText,
   EuiTitle,
   EuiToolTip,
+  Query,
 } from '@elastic/eui';
 
-import euiThemeLight from '@elastic/eui/dist/eui_theme_light.json';
-import euiThemeDark from '@elastic/eui/dist/eui_theme_dark.json';
+import { Query as QueryType } from '../../../analytics_management/components/analytics_list/common';
 
 import {
   ColumnType,
@@ -38,50 +36,32 @@ import {
   SORT_DIRECTION,
 } from '../../../../../components/ml_in_memory_table';
 
-import { useUiChromeContext } from '../../../../../contexts/ui/use_ui_chrome_context';
-
 import { formatHumanReadableDateTimeSeconds } from '../../../../../util/date_utils';
-import { ml } from '../../../../../services/ml_api_service';
+import { SavedSearchQuery } from '../../../../../contexts/kibana';
 
 import {
-  sortColumns,
+  sortRegressionResultsColumns,
+  sortRegressionResultsFields,
   toggleSelectedField,
   DataFrameAnalyticsConfig,
   EsFieldName,
   EsDoc,
   MAX_COLUMNS,
+  getPredictedFieldName,
   INDEX_STATUS,
 } from '../../../../common';
-
-import { getOutlierScoreFieldName } from './common';
-import { useExploreData } from './use_explore_data';
-import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
 import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/columns';
+import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
 
-const customColorScaleFactory = (n: number) => (t: number) => {
-  if (t < 1 / n) {
-    return 0;
-  }
-  if (t < 3 / n) {
-    return (n / 4) * (t - 1 / n);
-  }
-  return 0.5 + (t - 3 / n);
-};
-
-const FEATURE_INFLUENCE = 'feature_influence';
-
-interface GetDataFrameAnalyticsResponse {
-  count: number;
-  data_frame_analytics: DataFrameAnalyticsConfig[];
-}
+import { useExploreData, defaultSearchQuery } from './use_explore_data';
 
 const PAGE_SIZE_OPTIONS = [5, 10, 25, 50];
 
 const ExplorationTitle: React.SFC<{ jobId: string }> = ({ jobId }) => (
   <EuiTitle size="xs">
     <span>
-      {i18n.translate('xpack.ml.dataframe.analytics.exploration.jobIdTitle', {
-        defaultMessage: 'Outlier detection job ID {jobId}',
+      {i18n.translate('xpack.ml.dataframe.analytics.regressionExploration.jobIdTitle', {
+        defaultMessage: 'Regression job ID {jobId}',
         values: { jobId },
       })}
     </span>
@@ -89,40 +69,19 @@ const ExplorationTitle: React.SFC<{ jobId: string }> = ({ jobId }) => (
 );
 
 interface Props {
-  jobId: string;
+  jobConfig: DataFrameAnalyticsConfig;
   jobStatus: DATA_FRAME_TASK_STATE;
 }
 
-export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
-  const [jobConfig, setJobConfig] = useState<DataFrameAnalyticsConfig | undefined>(undefined);
-
+export const ResultsTable: FC<Props> = React.memo(({ jobConfig, jobStatus }) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(25);
-
-  useEffect(() => {
-    (async function() {
-      const analyticsConfigs: GetDataFrameAnalyticsResponse = await ml.dataFrameAnalytics.getDataFrameAnalytics(
-        jobId
-      );
-      if (
-        Array.isArray(analyticsConfigs.data_frame_analytics) &&
-        analyticsConfigs.data_frame_analytics.length > 0
-      ) {
-        setJobConfig(analyticsConfigs.data_frame_analytics[0]);
-      }
-    })();
-  }, []);
-
-  const euiTheme = useUiChromeContext()
-    .getUiSettingsClient()
-    .get('theme:darkMode')
-    ? euiThemeDark
-    : euiThemeLight;
-
   const [clearTable, setClearTable] = useState(false);
-
   const [selectedFields, setSelectedFields] = useState([] as EsFieldName[]);
   const [isColumnsPopoverVisible, setColumnsPopoverVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState<SavedSearchQuery>(defaultSearchQuery);
+  const [searchError, setSearchError] = useState<any>(undefined);
+  const [searchString, setSearchString] = useState<string | undefined>(undefined);
 
   // EuiInMemoryTable has an issue with dynamic sortable columns
   // and will trigger a full page Kibana error in such a case.
@@ -165,31 +124,15 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
   let docFieldsCount = 0;
   if (tableItems.length > 0) {
     docFields = Object.keys(tableItems[0]);
-    docFields.sort();
+    docFields.sort((a, b) => sortRegressionResultsFields(a, b, jobConfig));
     docFieldsCount = docFields.length;
   }
 
   const columns: ColumnType[] = [];
 
   if (jobConfig !== undefined && selectedFields.length > 0 && tableItems.length > 0) {
-    // table cell color coding takes into account:
-    // - whether the theme is dark/light
-    // - the number of analysis features
-    // based on that
-    const cellBgColorScale = d3.scale
-      .linear()
-      .domain([0, 1])
-      // typings for .range() incorrectly don't allow passing in a color extent.
-      // @ts-ignore
-      .range([d3.rgb(euiTheme.euiColorEmptyShade), d3.rgb(euiTheme.euiColorVis1)]);
-    const featureCount = Object.keys(tableItems[0]).filter(key =>
-      key.includes(`${jobConfig.dest.results_field}.${FEATURE_INFLUENCE}.`)
-    ).length;
-    const customScale = customColorScaleFactory(featureCount);
-    const cellBgColor = (n: number) => cellBgColorScale(customScale(n));
-
     columns.push(
-      ...selectedFields.sort(sortColumns(tableItems[0], jobConfig.dest.results_field)).map(k => {
+      ...selectedFields.sort(sortRegressionResultsColumns(tableItems[0], jobConfig)).map(k => {
         const column: ColumnType = {
           field: k,
           name: k,
@@ -208,7 +151,7 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
             return (
               <EuiToolTip
                 content={i18n.translate(
-                  'xpack.ml.dataframe.analytics.exploration.indexArrayToolTipContent',
+                  'xpack.ml.dataframe.analytics.regressionExploration.indexArrayToolTipContent',
                   {
                     defaultMessage:
                       'The full content of this array based column cannot be displayed.',
@@ -217,7 +160,7 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
               >
                 <EuiBadge>
                   {i18n.translate(
-                    'xpack.ml.dataframe.analytics.exploration.indexArrayBadgeContent',
+                    'xpack.ml.dataframe.analytics.regressionExploration.indexArrayBadgeContent',
                     {
                       defaultMessage: 'array',
                     }
@@ -231,7 +174,7 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
             return (
               <EuiToolTip
                 content={i18n.translate(
-                  'xpack.ml.dataframe.analytics.exploration.indexObjectToolTipContent',
+                  'xpack.ml.dataframe.analytics.regressionExploration.indexObjectToolTipContent',
                   {
                     defaultMessage:
                       'The full content of this object based column cannot be displayed.',
@@ -240,7 +183,7 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
               >
                 <EuiBadge>
                   {i18n.translate(
-                    'xpack.ml.dataframe.analytics.exploration.indexObjectBadgeContent',
+                    'xpack.ml.dataframe.analytics.regressionExploration.indexObjectBadgeContent',
                     {
                       defaultMessage: 'object',
                     }
@@ -250,30 +193,7 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
             );
           }
 
-          const split = k.split('.');
-          let backgroundColor;
-          const color = undefined;
-          const resultsField = jobConfig.dest.results_field;
-
-          if (fullItem[`${resultsField}.${FEATURE_INFLUENCE}.${k}`] !== undefined) {
-            backgroundColor = cellBgColor(fullItem[`${resultsField}.${FEATURE_INFLUENCE}.${k}`]);
-          }
-
-          if (split.length > 2 && split[0] === resultsField && split[1] === FEATURE_INFLUENCE) {
-            backgroundColor = cellBgColor(d);
-          }
-
-          return (
-            <div
-              className="mlColoredTableCell"
-              style={{
-                backgroundColor,
-                color,
-              }}
-            >
-              {d}
-            </div>
-          );
+          return d;
         };
 
         let columnType;
@@ -310,16 +230,34 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
   }
 
   useEffect(() => {
-    // by default set the sorting to descending on the `outlier_score` field.
+    if (jobConfig !== undefined) {
+      const predictedFieldName = getPredictedFieldName(
+        jobConfig.dest.results_field,
+        jobConfig.analysis
+      );
+      const predictedFieldSelected = selectedFields.includes(predictedFieldName);
+
+      const field = predictedFieldSelected ? predictedFieldName : selectedFields[0];
+      const direction = predictedFieldSelected ? SORT_DIRECTION.DESC : SORT_DIRECTION.ASC;
+      loadExploreData({ field, direction, searchQuery });
+      return;
+    }
+  }, [JSON.stringify(searchQuery)]);
+
+  useEffect(() => {
+    // by default set the sorting to descending on the prediction field (`<dependent_varible or prediction_field_name>_prediction`).
     // if that's not available sort ascending on the first column.
     // also check if the current sorting field is still available.
     if (jobConfig !== undefined && columns.length > 0 && !selectedFields.includes(sortField)) {
-      const outlierScoreFieldName = getOutlierScoreFieldName(jobConfig);
-      const outlierScoreFieldSelected = selectedFields.includes(outlierScoreFieldName);
+      const predictedFieldName = getPredictedFieldName(
+        jobConfig.dest.results_field,
+        jobConfig.analysis
+      );
+      const predictedFieldSelected = selectedFields.includes(predictedFieldName);
 
-      const field = outlierScoreFieldSelected ? outlierScoreFieldName : selectedFields[0];
-      const direction = outlierScoreFieldSelected ? SORT_DIRECTION.DESC : SORT_DIRECTION.ASC;
-      loadExploreData({ field, direction });
+      const field = predictedFieldSelected ? predictedFieldName : selectedFields[0];
+      const direction = predictedFieldSelected ? SORT_DIRECTION.DESC : SORT_DIRECTION.ASC;
+      loadExploreData({ field, direction, searchQuery });
       return;
     }
   }, [jobConfig, columns.length, sortField, sortDirection, tableItems.length]);
@@ -327,7 +265,7 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
   let sorting: SortingPropType = false;
   let onTableChange;
 
-  if (columns.length > 0 && sortField !== '') {
+  if (columns.length > 0 && sortField !== '' && sortField !== undefined) {
     sorting = {
       sort: {
         field: sortField,
@@ -345,7 +283,7 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
 
       if (sort.field !== sortField || sort.direction !== sortDirection) {
         setClearTable(true);
-        loadExploreData(sort);
+        loadExploreData({ ...sort, searchQuery });
       }
     };
   }
@@ -358,28 +296,66 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
     hidePerPageOptions: false,
   };
 
+  const onQueryChange = ({ query, error }: { query: QueryType; error: any }) => {
+    if (error) {
+      setSearchError(error.message);
+    } else {
+      try {
+        const esQueryDsl = Query.toESQuery(query);
+        setSearchQuery(esQueryDsl);
+        setSearchString(query.text);
+        setSearchError(undefined);
+      } catch (e) {
+        setSearchError(e.toString());
+      }
+    }
+  };
+
+  const search = {
+    onChange: onQueryChange,
+    defaultQuery: searchString,
+    box: {
+      incremental: false,
+      placeholder: i18n.translate(
+        'xpack.ml.dataframe.analytics.regressionExploration.searchBoxPlaceholder',
+        {
+          defaultMessage: 'E.g. avg>0.5',
+        }
+      ),
+    },
+    filters: [
+      {
+        type: 'field_value_toggle_group',
+        field: `${jobConfig.dest.results_field}.is_training`,
+        items: [
+          {
+            value: false,
+            name: i18n.translate(
+              'xpack.ml.dataframe.analytics.regressionExploration.isTestingLabel',
+              {
+                defaultMessage: 'Testing',
+              }
+            ),
+          },
+          {
+            value: true,
+            name: i18n.translate(
+              'xpack.ml.dataframe.analytics.regressionExploration.isTrainingLabel',
+              {
+                defaultMessage: 'Training',
+              }
+            ),
+          },
+        ],
+      },
+    ],
+  };
+
   if (jobConfig === undefined) {
     return null;
   }
 
   if (status === INDEX_STATUS.ERROR) {
-    return (
-      <EuiPanel grow={false}>
-        <ExplorationTitle jobId={jobConfig.id} />
-        <EuiCallOut
-          title={i18n.translate('xpack.ml.dataframe.analytics.exploration.indexError', {
-            defaultMessage: 'An error occurred loading the index data.',
-          })}
-          color="danger"
-          iconType="cross"
-        >
-          <p>{errorMessage}</p>
-        </EuiCallOut>
-      </EuiPanel>
-    );
-  }
-
-  if (status === INDEX_STATUS.LOADED && tableItems.length === 0) {
     return (
       <EuiPanel grow={false}>
         <EuiFlexGroup gutterSize="s">
@@ -391,17 +367,13 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiCallOut
-          title={i18n.translate('xpack.ml.dataframe.analytics.exploration.noDataCalloutTitle', {
-            defaultMessage: 'Empty index query result.',
+          title={i18n.translate('xpack.ml.dataframe.analytics.regressionExploration.indexError', {
+            defaultMessage: 'An error occurred loading the index data.',
           })}
-          color="primary"
+          color="danger"
+          iconType="cross"
         >
-          <p>
-            {i18n.translate('xpack.ml.dataframe.analytics.exploration.noDataCalloutBody', {
-              defaultMessage:
-                'The query for the index returned no results. Please make sure the index contains documents and your query is not too restrictive.',
-            })}
-          </p>
+          <p>{errorMessage}</p>
         </EuiCallOut>
       </EuiPanel>
     );
@@ -425,11 +397,14 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
             <EuiFlexItem style={{ textAlign: 'right' }}>
               {docFieldsCount > MAX_COLUMNS && (
                 <EuiText size="s">
-                  {i18n.translate('xpack.ml.dataframe.analytics.exploration.fieldSelection', {
-                    defaultMessage:
-                      '{selectedFieldsLength, number} of {docFieldsCount, number} {docFieldsCount, plural, one {field} other {fields}} selected',
-                    values: { selectedFieldsLength: selectedFields.length, docFieldsCount },
-                  })}
+                  {i18n.translate(
+                    'xpack.ml.dataframe.analytics.regressionExploration.fieldSelection',
+                    {
+                      defaultMessage:
+                        '{selectedFieldsLength, number} of {docFieldsCount, number} {docFieldsCount, plural, one {field} other {fields}} selected',
+                      values: { selectedFieldsLength: selectedFields.length, docFieldsCount },
+                    }
+                  )}
                 </EuiText>
               )}
             </EuiFlexItem>
@@ -442,7 +417,7 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
                       iconType="gear"
                       onClick={toggleColumnsPopover}
                       aria-label={i18n.translate(
-                        'xpack.ml.dataframe.analytics.exploration.selectColumnsAriaLabel',
+                        'xpack.ml.dataframe.analytics.regressionExploration.selectColumnsAriaLabel',
                         {
                           defaultMessage: 'Select columns',
                         }
@@ -455,7 +430,7 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
                 >
                   <EuiPopoverTitle>
                     {i18n.translate(
-                      'xpack.ml.dataframe.analytics.exploration.selectFieldsPopoverTitle',
+                      'xpack.ml.dataframe.analytics.regressionExploration.selectFieldsPopoverTitle',
                       {
                         defaultMessage: 'Select fields',
                       }
@@ -483,20 +458,24 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
       {status !== INDEX_STATUS.LOADING && (
         <EuiProgress size="xs" color="accent" max={1} value={0} />
       )}
-      {clearTable === false && columns.length > 0 && sortField !== '' && (
-        <MlInMemoryTableBasic
-          allowNeutralSort={false}
-          className="mlDataFrameAnalyticsExploration"
-          columns={columns}
-          compressed
-          hasActions={false}
-          isSelectable={false}
-          items={tableItems}
-          onTableChange={onTableChange}
-          pagination={pagination}
-          responsive={false}
-          sorting={sorting}
-        />
+      {clearTable === false && (columns.length > 0 || searchQuery !== defaultSearchQuery) && (
+        <Fragment>
+          <EuiSpacer />
+          <MlInMemoryTableBasic
+            allowNeutralSort={false}
+            columns={columns}
+            compressed
+            hasActions={false}
+            isSelectable={false}
+            items={tableItems}
+            onTableChange={onTableChange}
+            pagination={pagination}
+            responsive={false}
+            search={search}
+            error={searchError}
+            sorting={sorting}
+          />
+        </Fragment>
       )}
     </EuiPanel>
   );
