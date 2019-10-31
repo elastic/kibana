@@ -121,7 +121,7 @@ describe('DiscoverFieldSearch', () => {
       // @ts-ignore
       (aggregtableButtonGroup.props() as EuiButtonGroupProps).onChange('aggregatable-true', null);
     });
-    missingSwitch.simulate('change', { target: { value: false } });
+    missingSwitch.simulate('click');
     expect(onChange).toBeCalledTimes(2);
   });
 
