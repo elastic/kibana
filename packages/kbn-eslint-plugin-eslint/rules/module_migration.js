@@ -39,13 +39,20 @@ function checkRelativeToNamed(context, mappings, node) {
   const request = node.value;
   const requestAbsolute = Path.resolve(fileDir, request);
 
-  const relativeToNamed = first(
-    mappings,
-    'relativeToNamed',
-    ({ directory }) =>
-      requestAbsolute.startsWith(directory) &&
-      request.startsWith(fwdSlash(Path.relative(fileDir, directory)))
-  );
+  const relativeToNamed = first(mappings, 'relativeToNamed', ({ directory }) => {
+    if (!requestAbsolute.startsWith(directory)) {
+      return false;
+    }
+
+    const relativeImport = fwdSlash(Path.relative(fileDir, directory));
+    if (relativeImport.match(/^[\.\/]+$/)) {
+      // if relative import is made up purely of `../` repeated then the file is within that directory
+      // and we should ignore it
+      return false;
+    }
+
+    return request.startsWith(relativeImport);
+  });
 
   if (!relativeToNamed) {
     return;

@@ -47,7 +47,7 @@ module.exports = {
        *
        * `relativeToNamed` rewrite relative imports from outside `directory` into
        *  directory, using `../../../directory/*` format, to use `name/*` instead
-       *  only applies to `import` and not `require()` calls.
+       *  only applies to `import`/`export` and relative imports from outside of directory
        *   directory: *absolute path* to the directory to find relative imports into
        *   name: the named import that should be used instead of relative imports to directory
        */
