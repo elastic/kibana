@@ -53,5 +53,5 @@ export const Editor = memo(({ licenseEnabled, initialValue, onEditorReady }: Pro
     onEditorReady(createEditorShim(editorInstanceRef.current));
   }, [initialValue, onEditorReady, licenseEnabled]);
 
-  return <div ref={containerRef} />;
+  return <div data-test-subj="searchProfilerEditor" ref={containerRef} />;
 });
