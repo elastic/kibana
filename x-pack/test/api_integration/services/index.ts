@@ -25,13 +25,10 @@ import { SiemGraphQLClientProvider, SiemGraphQLClientFactoryProvider } from './s
 import { InfraOpsSourceConfigurationProvider } from './infraops_source_configuration';
 
 export const services = {
-  chance: kibanaApiIntegrationServices.chance,
+  ...kibanaCommonServices,
+
   esSupertest: kibanaApiIntegrationServices.esSupertest,
   supertest: kibanaApiIntegrationServices.supertest,
-
-  esArchiver: kibanaCommonServices.esArchiver,
-  kibanaServer: kibanaCommonServices.kibanaServer,
-  retry: kibanaCommonServices.retry,
 
   es: EsProvider,
   esSupertestWithoutAuth: EsSupertestWithoutAuthProvider,

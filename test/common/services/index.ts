@@ -21,10 +21,12 @@ import { EsProvider } from './es';
 import { EsArchiverProvider } from './es_archiver';
 import { KibanaServerProvider } from './kibana_server';
 import { RetryProvider } from './retry';
+import { RandomnessProvider } from './randomness';
 
 export const services = {
   es: EsProvider,
   esArchiver: EsArchiverProvider,
   kibanaServer: KibanaServerProvider,
   retry: RetryProvider,
+  randomness: RandomnessProvider,
 };
