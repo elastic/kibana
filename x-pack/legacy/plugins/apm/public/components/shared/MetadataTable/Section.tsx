@@ -15,7 +15,7 @@ interface Props {
 }
 
 export function Section({ keyValuePairs }: Props) {
-  if (keyValuePairs) {
+  if (keyValuePairs && keyValuePairs.length > 0) {
     return <KeyValueTable keyValuePairs={keyValuePairs} />;
   }
   return (
