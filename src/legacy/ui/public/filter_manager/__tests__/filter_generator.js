@@ -24,7 +24,7 @@ import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { getFilterGenerator } from '..';
 import { FilterBarQueryFilterProvider } from '../../filter_manager/query_filter';
-import { uniqFilters } from '../../../../core_plugins/data/public/filter/filter_manager/lib/uniq_filters';
+import { uniqFilters } from '../../../../../plugins/data/public';
 import { getPhraseScript } from '@kbn/es-query';
 let queryFilter;
 let filterGen;
@@ -76,7 +76,7 @@ describe('Filter Manager', function () {
     expect(queryFilter.addFilters.callCount).to.be(1);
     checkAddFilters(1, [{
       meta: { index: 'myIndex', negate: false },
-      query: { match: { myField: { query: 1, type: 'phrase' } } }
+      query: { match_phrase: { myField: 1 } }
     }]);
   });
 
@@ -85,13 +85,13 @@ describe('Filter Manager', function () {
     expect(queryFilter.addFilters.callCount).to.be(1);
     checkAddFilters(3, [{
       meta: { index: 'myIndex', negate: false },
-      query: { match: { myField: { query: 1, type: 'phrase' } } }
+      query: { match_phrase: { myField: 1 } }
     }, {
       meta: { index: 'myIndex', negate: false },
-      query: { match: { myField: { query: 2, type: 'phrase' } } }
+      query: { match_phrase: { myField: 2 } }
     }, {
       meta: { index: 'myIndex', negate: false },
-      query: { match: { myField: { query: 3, type: 'phrase' } } }
+      query: { match_phrase: { myField: 3 } }
     }]);
   });
 
@@ -107,7 +107,7 @@ describe('Filter Manager', function () {
     filterGen.add('myField', 1, '+', 'myIndex');
     checkAddFilters(1, [{
       meta: { index: 'myIndex', negate: false },
-      query: { match: { myField: { query: 1, type: 'phrase' } } }
+      query: { match_phrase: { myField: 1 } }
     }], 0);
     expect(appState.filters).to.have.length(1);
 
@@ -115,7 +115,7 @@ describe('Filter Manager', function () {
     filterGen.add('myField', 1, '-', 'myIndex');
     checkAddFilters(1, [{
       meta: { index: 'myIndex', negate: true, disabled: false },
-      query: { match: { myField: { query: 1, type: 'phrase' } } }
+      query: { match_phrase: { myField: 1 } }
     }], 1);
     expect(appState.filters).to.have.length(1);
 
@@ -152,7 +152,7 @@ describe('Filter Manager', function () {
   it('should enable matching filters being changed', function () {
     _.each([true, false], function (negate) {
       appState.filters = [{
-        query: { match: { myField: { query: 1 } } },
+        query: { match_phrase: { myField: 1 } },
         meta: { disabled: true, negate: negate }
       }];
       expect(appState.filters.length).to.be(1);

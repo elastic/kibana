@@ -16,14 +16,15 @@ import { watchStatusAndLicenseToInitialize } from
   '../../server/lib/watch_status_and_license_to_initialize';
 import { initTelemetryCollection } from './server/maps_telemetry';
 import { i18n } from '@kbn/i18n';
-import { APP_ID, APP_ICON, createMapPath } from './common/constants';
+import { APP_ID, APP_ICON, createMapPath, MAP_SAVED_OBJECT_TYPE } from './common/constants';
 import { getAppTitle } from './common/i18n_getters';
 import _ from 'lodash';
 
 export function maps(kibana) {
 
   return new kibana.Plugin({
-    require: ['kibana', 'elasticsearch', 'xpack_main', 'tile_map', 'task_manager'],
+    // task_manager could be required, but is only used for telemetry
+    require: ['kibana', 'elasticsearch', 'xpack_main', 'tile_map'],
     id: APP_ID,
     configPrefix: 'xpack.maps',
     publicDir: resolve(__dirname, 'public'),
@@ -42,6 +43,7 @@ export function maps(kibana) {
         const mapConfig = serverConfig.get('map');
 
         return {
+          showMapVisualizationTypes: serverConfig.get('xpack.maps.showMapVisualizationTypes'),
           showMapsInspectorAdapter: serverConfig.get('xpack.maps.showMapsInspectorAdapter'),
           preserveDrawingBuffer: serverConfig.get('xpack.maps.preserveDrawingBuffer'),
           isEmsEnabled: mapConfig.includeElasticMapsService,
@@ -69,7 +71,7 @@ export function maps(kibana) {
         }
       },
       savedObjectsManagement: {
-        'map': {
+        [MAP_SAVED_OBJECT_TYPE]: {
           icon: APP_ICON,
           defaultSearchField: 'title',
           isImportableAndExportable: true,
@@ -91,6 +93,7 @@ export function maps(kibana) {
     config(Joi) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
+        showMapVisualizationTypes: Joi.boolean().default(false),
         showMapsInspectorAdapter: Joi.boolean().default(false), // flag used in functional testing
         preserveDrawingBuffer: Joi.boolean().default(false), // flag used in functional testing
       }).default();
@@ -109,18 +112,18 @@ export function maps(kibana) {
       let routesInitialized = false;
 
       xpackMainPlugin.registerFeature({
-        id: 'maps',
+        id: APP_ID,
         name: i18n.translate('xpack.maps.featureRegistry.mapsFeatureName', {
           defaultMessage: 'Maps',
         }),
         icon: APP_ICON,
-        navLinkId: 'maps',
+        navLinkId: APP_ID,
         app: [APP_ID, 'kibana'],
-        catalogue: ['maps'],
+        catalogue: [APP_ID],
         privileges: {
           all: {
             savedObject: {
-              all: ['map', 'query'],
+              all: [MAP_SAVED_OBJECT_TYPE, 'query'],
               read: ['index-pattern']
             },
             ui: ['save', 'show', 'saveQuery'],
@@ -128,7 +131,7 @@ export function maps(kibana) {
           read: {
             savedObject: {
               all: [],
-              read: ['map', 'index-pattern', 'query']
+              read: [MAP_SAVED_OBJECT_TYPE, 'index-pattern', 'query']
             },
             ui: ['show'],
           },
@@ -155,7 +158,7 @@ export function maps(kibana) {
         {
           path: createMapPath('2c9c1f60-1909-11e9-919b-ffe5949a18d2'),
           label: sampleDataLinkLabel,
-          icon: 'gisApp'
+          icon: APP_ICON
         }
       ]);
       server.replacePanelInSampleDatasetDashboard({
@@ -174,7 +177,7 @@ export function maps(kibana) {
         {
           path: createMapPath('5dd88580-1906-11e9-919b-ffe5949a18d2'),
           label: sampleDataLinkLabel,
-          icon: 'gisApp'
+          icon: APP_ICON
         }
       ]);
       server.replacePanelInSampleDatasetDashboard({
@@ -182,7 +185,7 @@ export function maps(kibana) {
         dashboardId: '7adfa750-4c81-11e8-b3d7-01146121b73d',
         oldEmbeddableId: '334084f0-52fd-11e8-a160-89cc2ad9e8e2',
         embeddableId: '5dd88580-1906-11e9-919b-ffe5949a18d2',
-        embeddableType: 'map',
+        embeddableType: MAP_SAVED_OBJECT_TYPE,
         embeddableConfig: {
           isLayerTOCOpen: true
         },
@@ -193,7 +196,7 @@ export function maps(kibana) {
         {
           path: createMapPath('de71f4f0-1902-11e9-919b-ffe5949a18d2'),
           label: sampleDataLinkLabel,
-          icon: 'gisApp'
+          icon: APP_ICON
         }
       ]);
       server.replacePanelInSampleDatasetDashboard({
@@ -201,13 +204,13 @@ export function maps(kibana) {
         dashboardId: 'edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b',
         oldEmbeddableId: '06cf9c40-9ee8-11e7-8711-e7a007dcef99',
         embeddableId: 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
-        embeddableType: 'map',
+        embeddableType: MAP_SAVED_OBJECT_TYPE,
         embeddableConfig: {
           isLayerTOCOpen: false
         },
       });
 
-      server.injectUiAppVars('maps', async () => {
+      server.injectUiAppVars(APP_ID, async () => {
         return await server.getInjectedUiAppVars('kibana');
       });
     }

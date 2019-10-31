@@ -19,7 +19,6 @@
 
 // @ts-ignore
 import { fieldFormats } from 'ui/registry/field_formats';
-import { NotificationsSetup } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { ObjDefine } from './obj_define';
@@ -27,8 +26,14 @@ import { FieldFormat } from '../../../../../../plugins/data/common/field_formats
 // @ts-ignore
 import { shortenDottedString } from '../../../../../core_plugins/kibana/common/utils/shorten_dotted_string';
 import { IndexPattern } from '../index_patterns';
+import { getNotifications } from '../services';
 
 import { getKbnFieldType } from '../../../../../../plugins/data/public';
+
+interface FieldSubType {
+  multi?: { parent: string };
+  nested?: { path: string };
+}
 
 export type FieldSpec = Record<string, any>;
 export interface FieldType {
@@ -47,8 +52,7 @@ export interface FieldType {
   visualizable?: boolean;
   readFromDocValues?: boolean;
   scripted?: boolean;
-  parent?: string;
-  subType?: string;
+  subType?: FieldSubType;
   displayName?: string;
   format?: any;
 }
@@ -68,8 +72,7 @@ export class Field implements FieldType {
   sortable?: boolean;
   visualizable?: boolean;
   scripted?: boolean;
-  parent?: string;
-  subType?: string;
+  subType?: FieldSubType;
   displayName?: string;
   format: any;
   routes: Record<string, string> = {
@@ -80,8 +83,7 @@ export class Field implements FieldType {
   constructor(
     indexPattern: IndexPattern,
     spec: FieldSpec | Field,
-    shortDotsEnable: boolean = false,
-    notifications: NotificationsSetup
+    shortDotsEnable: boolean = false
   ) {
     // unwrap old instances of Field
     if (spec instanceof Field) spec = spec.$$spec;
@@ -106,8 +108,9 @@ export class Field implements FieldType {
         values: { name: spec.name, title: indexPattern.title },
         defaultMessage: 'Field {name} in indexPattern {title} is using an unknown field type.',
       });
+      const { toasts } = getNotifications();
 
-      notifications.toasts.addDanger({
+      toasts.addDanger({
         title,
         text,
       });
@@ -165,7 +168,6 @@ export class Field implements FieldType {
     obj.writ('conflictDescriptions');
 
     // multi info
-    obj.fact('parent');
     obj.fact('subType');
 
     return obj.create();

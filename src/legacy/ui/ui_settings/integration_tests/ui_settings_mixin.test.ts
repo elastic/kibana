@@ -20,7 +20,7 @@
 import sinon from 'sinon';
 import expect from '@kbn/expect';
 
-import { SavedObjectsClientMock } from '../../../../core/server/mocks';
+import { savedObjectsClientMock } from '../../../../core/server/mocks';
 import * as uiSettingsServiceFactoryNS from '../ui_settings_service_factory';
 import * as getUiSettingsServiceForRequestNS from '../ui_settings_service_for_request';
 // @ts-ignore
@@ -73,7 +73,7 @@ describe('uiSettingsMixin()', () => {
       newPlatform: {
         __internals: {
           uiSettings: {
-            setDefaults: sinon.stub(),
+            register: sinon.stub(),
           },
         },
       },
@@ -93,9 +93,9 @@ describe('uiSettingsMixin()', () => {
 
   it('passes uiSettingsDefaults to the new platform', () => {
     const { kbnServer } = setup();
-    sinon.assert.calledOnce(kbnServer.newPlatform.__internals.uiSettings.setDefaults);
+    sinon.assert.calledOnce(kbnServer.newPlatform.__internals.uiSettings.register);
     sinon.assert.calledWithExactly(
-      kbnServer.newPlatform.__internals.uiSettings.setDefaults,
+      kbnServer.newPlatform.__internals.uiSettings.register,
       uiSettingDefaults
     );
   });
@@ -129,7 +129,7 @@ describe('uiSettingsMixin()', () => {
 
       sinon.assert.notCalled(uiSettingsServiceFactoryStub);
 
-      const savedObjectsClient = SavedObjectsClientMock.create();
+      const savedObjectsClient = savedObjectsClientMock.create();
       decorations.server.uiSettingsServiceFactory({
         savedObjectsClient,
       });

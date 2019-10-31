@@ -26,13 +26,13 @@ import { Exploration } from './components/exploration';
 import { RegressionExploration } from './components/regression_exploration';
 
 import { ANALYSIS_CONFIG_TYPE } from '../../common/analytics';
+import { DATA_FRAME_TASK_STATE } from '../analytics_management/components/analytics_list/common';
 
 export const Page: FC<{
   jobId: string;
-  analysisType: string;
-  destIndex: string;
-  depVar: string;
-}> = ({ jobId, analysisType, destIndex, depVar }) => (
+  analysisType: ANALYSIS_CONFIG_TYPE;
+  jobStatus: DATA_FRAME_TASK_STATE;
+}> = ({ jobId, analysisType, jobStatus }) => (
   <Fragment>
     <NavigationMenu tabId="data_frame_analytics" />
     <EuiPage data-test-subj="mlPageDataFrameAnalyticsExploration">
@@ -66,9 +66,11 @@ export const Page: FC<{
         </EuiPageContentHeader>
         <EuiPageContentBody>
           <EuiSpacer size="l" />
-          {analysisType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION && <Exploration jobId={jobId} />}
+          {analysisType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION && (
+            <Exploration jobId={jobId} jobStatus={jobStatus} />
+          )}
           {analysisType === ANALYSIS_CONFIG_TYPE.REGRESSION && (
-            <RegressionExploration jobId={jobId} destIndex={destIndex} dependentVariable={depVar} />
+            <RegressionExploration jobId={jobId} jobStatus={jobStatus} />
           )}
         </EuiPageContentBody>
       </EuiPageBody>

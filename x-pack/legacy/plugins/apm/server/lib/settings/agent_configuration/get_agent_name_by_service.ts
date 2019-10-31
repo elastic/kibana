@@ -19,14 +19,14 @@ export async function getAgentNameByService({
   serviceName: string;
   setup: Setup;
 }) {
-  const { client, config } = setup;
+  const { client, indices } = setup;
 
   const params = {
     terminateAfter: 1,
     index: [
-      config.get<string>('apm_oss.metricsIndices'),
-      config.get<string>('apm_oss.errorIndices'),
-      config.get<string>('apm_oss.transactionIndices')
+      indices['apm_oss.metricsIndices'],
+      indices['apm_oss.errorIndices'],
+      indices['apm_oss.transactionIndices']
     ],
     body: {
       size: 0,
@@ -49,6 +49,8 @@ export async function getAgentNameByService({
   };
 
   const { aggregations } = await client.search(params);
-  const agentName = idx(aggregations, _ => _.agent_names.buckets[0].key);
+  const agentName = idx(aggregations, _ => _.agent_names.buckets[0].key) as
+    | string
+    | undefined;
   return { agentName };
 }
