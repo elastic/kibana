@@ -35,30 +35,17 @@ async function resourceSaga(
     isOnPage,
   })) {
     if (userIsOnPageAndLoggedIn) {
-      if (shouldInitialize) {
-        try {
-          const response = await context.core.http.get('/alerts', {
-            query: {
-              pageIndex: 0,
-              pageSize: 10,
-            },
-          });
-          dispatch(alertListActions.serverReturnedData(response.elasticsearchResponse));
-        } catch (error) {
-          // TODO: dispatch an error action
-          throw new Error(error);
-        }
-      } else if (
+      if (
+        shouldInitialize ||
         action.type === alertListActions.userPaginatedOrSortedTable.type ||
         action.type === alertListActions.serverReturnedArchiveItems.type
       ) {
-        // const { pageIndex, pageSize, sortField, sortDirection } = action.payload[0]
-        const pageIndex = alertListSelectors.pageIndex(state);
-        const pageSize = alertListSelectors.pageSize(state);
-        const sortField = alertListSelectors.sortField(state);
-        const sortDirection = alertListSelectors.sortDirection(state);
-
         try {
+          const pageIndex = alertListSelectors.pageIndex(state);
+          const pageSize = alertListSelectors.pageSize(state);
+          const sortField = alertListSelectors.sortField(state);
+          const sortDirection = alertListSelectors.sortDirection(state);
+
           const response = await context.core.http.get('/alerts', {
             query: {
               pageIndex,

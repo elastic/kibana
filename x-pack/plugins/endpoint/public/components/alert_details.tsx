@@ -11,17 +11,14 @@ import { EuiTitle, EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eu
 import { RouteComponentProps } from 'react-router';
 import { AppMountContext } from 'kibana/public';
 import * as alertDetailsSelectors from '../selectors/alert_details';
+import { actions as alertDetailsActions } from '../actions/alert_details';
 
-export const AlertDetails = ({
-  context,
-  history,
-  match,
-}: { context: AppMountContext } & RouteComponentProps<{ alertId: string }>) => {
+export const AlertDetails = () => {
   const dispatch = useDispatch();
   const alertData = useSelector(alertDetailsSelectors.alertDetailsData);
 
   function closeFlyout() {
-    history.push('/alerts');
+    dispatch(alertDetailsActions.userClosedAlertDetailsFlyout());
   }
 
   function processName() {

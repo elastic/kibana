@@ -11,6 +11,11 @@ export const actions = {
   serverReturnedAlertDetailsData: actionCreatorFactory<'serverReturnedAlertDetailsData', [object]>(
     'serverReturnedAlertDetailsData'
   ),
+  userClosedAlertDetailsFlyout: actionCreatorFactory<'userClosedAlertDetailsFlyout', []>(
+    'userClosedAlertDetailsFlyout'
+  ),
 };
 
-export type AlertDetailsAction = ReturnType<typeof actions.serverReturnedAlertDetailsData>;
+export type AlertDetailsAction =
+  | ReturnType<typeof actions.serverReturnedAlertDetailsData>
+  | ReturnType<typeof actions.userClosedAlertDetailsFlyout>;

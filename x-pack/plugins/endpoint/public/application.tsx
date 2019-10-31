@@ -6,15 +6,10 @@
 
 import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom';
-import {
-  BrowserRouter as Router,
-  Route,
-  useLocation,
-  withRouter,
-  RouteComponentProps,
-} from 'react-router-dom';
+import { Router, Route, useLocation, withRouter, RouteComponentProps } from 'react-router-dom';
 
-import { Provider } from 'react-redux';
+import { createBrowserHistory, History } from 'history';
+import { Provider, useDispatch } from 'react-redux';
 import { EuiPage, EuiPageSideBar } from '@elastic/eui';
 import { AppMountContext, AppMountParameters } from 'kibana/public';
 import { storeFactory } from './store';
@@ -24,26 +19,34 @@ import { Management } from './components/management';
 import { AlertList } from './components/alert_list';
 import { AlertDetails } from './components/alert_details';
 
-const EndpointRouter = ({ basename, context }: { basename: string; context: AppMountContext }) => {
-  const store = storeFactory(context);
-  const LocationChangeWrapper = function({ children }) {
-    // TODO: Find another way that doesn't require updating react-router-dom to 5.1.0
-    function dispatchOnLocationChange() {
-      const location = useLocation();
-      useEffect(() => {
-        store.dispatch({
-          type: 'LOCATION_CHANGE',
-          payload: {},
-        });
-      }, [location]);
-    }
-    dispatchOnLocationChange();
-    return <>{children}</>;
-  };
+const LocationChangeWrapper = function({ children }) {
+  // TODO: Find another way that doesn't require updating react-router-dom to 5.1.0
+  function dispatchOnLocationChange() {
+    const location = useLocation();
+    const dispatch = useDispatch();
+    useEffect(() => {
+      dispatch({
+        type: 'LOCATION_CHANGE',
+        payload: {},
+      });
+    }, [location]);
+  }
+  dispatchOnLocationChange();
+  return <>{children}</>;
+};
 
+const EndpointRouter = ({
+  history,
+  context,
+  store,
+}: {
+  history: History;
+  context: AppMountContext;
+  store: any;
+}) => {
   return (
     <Provider store={store}>
-      <Router basename={basename}>
+      <Router history={history}>
         <LocationChangeWrapper>
           <EuiPage>
             <EuiPageSideBar>
@@ -51,11 +54,8 @@ const EndpointRouter = ({ basename, context }: { basename: string; context: AppM
             </EuiPageSideBar>
             <Route path="/" exact component={Home} />
             <Route path="/management" component={Management} />
-            <Route path="/alerts" render={props => <AlertList {...props} context={context} />} />
-            <Route
-              path="/alerts/:alertId"
-              render={props => <AlertDetails {...props} context={context} />}
-            />
+            <Route path="/alerts" render={() => <AlertList />} />
+            <Route path="/alerts/:alertId" render={() => <AlertDetails />} />
           </EuiPage>
         </LocationChangeWrapper>
       </Router>
@@ -67,7 +67,9 @@ export const renderApp = (
   context: AppMountContext,
   { appBasePath, element }: AppMountParameters
 ) => {
-  ReactDOM.render(<EndpointRouter basename={appBasePath} context={context} />, element);
+  const history = createBrowserHistory({ basename: appBasePath });
+  const store = storeFactory(context, history);
+  ReactDOM.render(<EndpointRouter history={history} context={context} store={store} />, element);
 
   return () => ReactDOM.unmountComponentAtNode(element);
 };

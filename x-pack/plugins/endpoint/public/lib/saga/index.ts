@@ -8,9 +8,8 @@
  * See https://docs.microsoft.com/en-us/previous-versions/msp-n-p/jj591569(v%3dpandp.10)
  */
 // TODO: Type this library
-export function sagaMiddleware(saga) {
+export function createSagaMiddleware(saga) {
   const iteratorInstances = new Set();
-  const { promise: dispatchPromise, resolve: resolveDispatch } = promiseFactory();
 
   async function* iterator() {
     const instance = { queue: [], nextResolve: null };
@@ -48,15 +47,12 @@ export function sagaMiddleware(saga) {
     }
   }
 
-  dispatchPromise.then(function(dispatch) {
-    saga({
+  let runSaga: () => void;
+  function middleware({ getState, dispatch }) {
+    runSaga = saga.bind(null, {
       actionsAndState: iterator,
       dispatch,
     });
-  });
-
-  return function middleware({ getState, dispatch }) {
-    resolveDispatch(dispatch);
     return next => action => {
       // Call the next dispatch method in the middleware chain.
       const returnValue = next(action);
@@ -70,19 +66,11 @@ export function sagaMiddleware(saga) {
       // a middleware further in chain changed it.
       return returnValue;
     };
-  };
-}
+  }
 
-function promiseFactory() {
-  let resolve = null;
-  let reject = null;
-  const newPromise = new Promise(function(resolveFunction, rejectFunction) {
-    resolve = resolveFunction;
-    reject = rejectFunction;
-  });
-  return {
-    promise: newPromise,
-    resolve,
-    reject,
+  middleware.run = function() {
+    runSaga();
   };
+
+  return middleware;
 }

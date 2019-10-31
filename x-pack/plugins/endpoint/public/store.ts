@@ -5,13 +5,21 @@
  */
 
 import { createStore, applyMiddleware } from 'redux';
+import { History } from 'history';
 import { composeWithDevTools } from 'redux-devtools-extension';
 import { AppMountContext } from 'kibana/public';
-import { sagaMiddleware } from './lib/saga';
+import { createSagaMiddleware } from './lib/saga';
 import reducers from './reducers';
 import saga from './sagas';
 
-export function storeFactory(context: AppMountContext) {
-  const middlewares = [sagaMiddleware(saga(context))];
-  return createStore(reducers, undefined, composeWithDevTools(applyMiddleware(...middlewares)));
+export function storeFactory(context: AppMountContext, history: History) {
+  const sagaMiddleware = createSagaMiddleware(saga(context, history));
+  const middlewares = [sagaMiddleware];
+  const store = createStore(
+    reducers,
+    undefined,
+    composeWithDevTools(applyMiddleware(...middlewares))
+  );
+  sagaMiddleware.run();
+  return store;
 }

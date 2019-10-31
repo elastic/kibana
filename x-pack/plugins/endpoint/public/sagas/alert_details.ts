@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { History } from 'history';
 import { AppMountContext } from 'kibana/public';
 import { withPageNavigationStatus } from './common';
 import { hrefIsForAlertDetail, alertIdFromHref } from '../concerns/alerts/routing';
@@ -17,7 +18,8 @@ export async function alertDetailsSaga(...args: any[]) {
 // TODO type actionsAndState, dispatch
 async function resourceSaga(
   { actionsAndState, dispatch }: { actionsAndState: any; dispatch: any },
-  context: AppMountContext
+  context: AppMountContext,
+  history: History
 ) {
   for await (const {
     action,
@@ -25,12 +27,13 @@ async function resourceSaga(
     href,
     state,
     shouldInitialize,
+    hrefChanged,
   } of withPageNavigationStatus({
     actionsAndState,
     isOnPage: hrefIsForAlertDetail,
   })) {
     if (userIsOnPageAndLoggedIn) {
-      if (shouldInitialize) {
+      if (shouldInitialize || hrefChanged) {
         try {
           const response = await context.core.http.get('/alerts/' + alertIdFromHref(href), {});
           dispatch(
@@ -42,6 +45,8 @@ async function resourceSaga(
           // TODO: dispatch an error action
           throw new Error(error);
         }
+      } else if (action.type === alertDetailsActions.userClosedAlertDetailsFlyout.type) {
+        history.push('/alerts');
       }
     }
   }
