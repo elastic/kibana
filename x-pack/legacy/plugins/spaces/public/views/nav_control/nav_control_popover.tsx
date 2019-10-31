@@ -8,7 +8,6 @@ import {
   EuiPopover,
   PopoverAnchorPosition,
   EuiLoadingSpinner,
-  // @ts-ignore
   EuiHeaderSectionItemButton,
 } from '@elastic/eui';
 import React, { Component } from 'react';
@@ -48,7 +47,7 @@ export class NavControlPopover extends Component<Props, State> {
 
     if (this.props.spacesManager) {
       this.props.spacesManager.on('request_refresh', () => {
-        this.loadSpaces(true);
+        this.loadSpaces({ refreshActiveSpace: true });
       });
     }
   }
@@ -97,7 +96,7 @@ export class NavControlPopover extends Component<Props, State> {
     );
   }
 
-  private async loadSpaces(refreshActiveSpace: boolean = false) {
+  private async loadSpaces({ refreshActiveSpace = false } = {}) {
     const { spacesManager } = this.props;
 
     if (this.state.loading) {
