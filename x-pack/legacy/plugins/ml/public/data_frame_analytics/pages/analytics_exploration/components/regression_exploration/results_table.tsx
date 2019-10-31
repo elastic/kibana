@@ -50,6 +50,8 @@ import {
   getPredictedFieldName,
   INDEX_STATUS,
 } from '../../../../common';
+import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/columns';
+import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
 
 import { useExploreData, defaultSearchQuery } from './use_explore_data';
 
@@ -68,9 +70,10 @@ const ExplorationTitle: React.SFC<{ jobId: string }> = ({ jobId }) => (
 
 interface Props {
   jobConfig: DataFrameAnalyticsConfig;
+  jobStatus: DATA_FRAME_TASK_STATE;
 }
 
-export const ResultsTable: FC<Props> = React.memo(({ jobConfig }) => {
+export const ResultsTable: FC<Props> = React.memo(({ jobConfig, jobStatus }) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [clearTable, setClearTable] = useState(false);
@@ -355,7 +358,14 @@ export const ResultsTable: FC<Props> = React.memo(({ jobConfig }) => {
   if (status === INDEX_STATUS.ERROR) {
     return (
       <EuiPanel grow={false}>
-        <ExplorationTitle jobId={jobConfig.id} />
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <ExplorationTitle jobId={jobConfig.id} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <span>{getTaskStateBadge(jobStatus)}</span>
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiCallOut
           title={i18n.translate('xpack.ml.dataframe.analytics.regressionExploration.indexError', {
             defaultMessage: 'An error occurred loading the index data.',
@@ -373,7 +383,14 @@ export const ResultsTable: FC<Props> = React.memo(({ jobConfig }) => {
     <EuiPanel grow={false}>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
         <EuiFlexItem grow={false}>
-          <ExplorationTitle jobId={jobConfig.id} />
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <ExplorationTitle jobId={jobConfig.id} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <span>{getTaskStateBadge(jobStatus)}</span>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>

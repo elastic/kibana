@@ -10,6 +10,7 @@ import { ml } from '../../../../../services/ml_api_service';
 import { DataFrameAnalyticsConfig } from '../../../../common';
 import { EvaluatePanel } from './evaluate_panel';
 import { ResultsTable } from './results_table';
+import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
 
 interface GetDataFrameAnalyticsResponse {
   count: number;
@@ -24,9 +25,10 @@ const LoadingPanel: FC = () => (
 
 interface Props {
   jobId: string;
+  jobStatus: DATA_FRAME_TASK_STATE;
 }
 
-export const RegressionExploration: FC<Props> = ({ jobId }) => {
+export const RegressionExploration: FC<Props> = ({ jobId, jobStatus }) => {
   const [jobConfig, setJobConfig] = useState<DataFrameAnalyticsConfig | undefined>(undefined);
   const [isLoadingJobConfig, setIsLoadingJobConfig] = useState<boolean>(false);
 
@@ -50,12 +52,12 @@ export const RegressionExploration: FC<Props> = ({ jobId }) => {
     <Fragment>
       {isLoadingJobConfig === true && jobConfig === undefined && <LoadingPanel />}
       {isLoadingJobConfig === false && jobConfig !== undefined && (
-        <EvaluatePanel jobConfig={jobConfig} />
+        <EvaluatePanel jobConfig={jobConfig} jobStatus={jobStatus} />
       )}
       <EuiSpacer />
       {isLoadingJobConfig === true && jobConfig === undefined && <LoadingPanel />}
       {isLoadingJobConfig === false && jobConfig !== undefined && (
-        <ResultsTable jobConfig={jobConfig} />
+        <ResultsTable jobConfig={jobConfig} jobStatus={jobStatus} />
       )}
     </Fragment>
   );

@@ -25,8 +25,9 @@ export const AnalyticsViewAction = {
   isPrimary: true,
   render: (item: DataFrameAnalyticsListRow) => {
     const analysisType = getAnalysisType(item.config.analysis);
+    const jobStatus = item.stats.state;
 
-    const url = getResultsUrl(item.id, analysisType);
+    const url = getResultsUrl(item.id, analysisType, jobStatus);
     return (
       <EuiButtonEmpty
         onClick={() => (window.location.href = url)}

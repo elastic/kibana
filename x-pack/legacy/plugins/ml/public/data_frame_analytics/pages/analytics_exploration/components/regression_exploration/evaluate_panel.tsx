@@ -17,9 +17,12 @@ import {
   Eval,
   DataFrameAnalyticsConfig,
 } from '../../../../common';
+import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/columns';
+import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
 
 interface Props {
   jobConfig: DataFrameAnalyticsConfig;
+  jobStatus: DATA_FRAME_TASK_STATE;
 }
 
 const meanSquaredErrorText = i18n.translate(
@@ -36,7 +39,7 @@ const rSquaredText = i18n.translate(
 );
 const defaultEval: Eval = { meanSquaredError: '', rSquared: '', error: null };
 
-export const EvaluatePanel: FC<Props> = ({ jobConfig }) => {
+export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus }) => {
   const [trainingEval, setTrainingEval] = useState<Eval>(defaultEval);
   const [generalizationEval, setGeneralizationEval] = useState<Eval>(defaultEval);
   const [isLoadingTraining, setIsLoadingTraining] = useState<boolean>(false);
@@ -109,14 +112,21 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig }) => {
 
   return (
     <EuiPanel>
-      <EuiTitle size="xs">
-        <span>
-          {i18n.translate('xpack.ml.dataframe.analytics.regressionExploration.jobIdTitle', {
-            defaultMessage: 'Regression job ID {jobId}',
-            values: { jobId: jobConfig.id },
-          })}
-        </span>
-      </EuiTitle>
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <span>
+              {i18n.translate('xpack.ml.dataframe.analytics.regressionExploration.jobIdTitle', {
+                defaultMessage: 'Regression job ID {jobId}',
+                values: { jobId: jobConfig.id },
+              })}
+            </span>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <span>{getTaskStateBadge(jobStatus)}</span>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer size="m" />
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem>
