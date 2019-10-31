@@ -11,6 +11,7 @@ import {
   EuiCallOut,
   EuiFilterButton,
   EuiFilterGroup,
+  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
@@ -41,6 +42,7 @@ import {
 } from '../../../components/utility_bar';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../../containers/source';
 import { SpyRoute } from '../../../utils/route/spy_routes';
+import { DetectionEngineEmptyPage } from '../detection_engine_empty_page';
 import * as i18n from './translations';
 
 // Michael: Will need to change this to get the current datetime format from Kibana settings.
@@ -565,6 +567,38 @@ export const RuleDetailsComponent = React.memo(() => {
                 <EuiFlexItem component="section" grow={2}>
                   <EuiPanel>
                     <HeaderSection title="About" />
+
+                    {/* <p>{'Description'}</p> */}
+
+                    {/* <EuiFlexGrid columns={2}>
+                      <EuiFlexItem style={{ flex: '0 0 calc(100% - 24px)' }}>
+                        <p>{'Description'}</p>
+                      </EuiFlexItem>
+
+                      <EuiFlexItem>
+                        <p>{'Severity'}</p>
+                      </EuiFlexItem>
+
+                      <EuiFlexItem>
+                        <p>{'Risk score boost'}</p>
+                      </EuiFlexItem>
+
+                      <EuiFlexItem>
+                        <p>{'References'}</p>
+                      </EuiFlexItem>
+
+                      <EuiFlexItem>
+                        <p>{'False positives'}</p>
+                      </EuiFlexItem>
+
+                      <EuiFlexItem>
+                        <p>{'Mitre ATT&CK types'}</p>
+                      </EuiFlexItem>
+
+                      <EuiFlexItem>
+                        <p>{'Tags'}</p>
+                      </EuiFlexItem>
+                    </EuiFlexGrid> */}
                   </EuiPanel>
                 </EuiFlexItem>
 
@@ -596,7 +630,7 @@ export const RuleDetailsComponent = React.memo(() => {
             <>
               <HeaderPage border title={i18n.PAGE_TITLE} />
 
-              {/* <HostsEmptyPage /> */}
+              <DetectionEngineEmptyPage />
             </>
           );
         }}

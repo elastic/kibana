@@ -29,6 +29,7 @@ import {
 } from '../../components/utility_bar';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { SpyRoute } from '../../utils/route/spy_routes';
+import { DetectionEngineEmptyPage } from './detection_engine_empty_page';
 import * as i18n from './translations';
 
 const OpenSignals = React.memo(() => {
@@ -188,7 +189,7 @@ export const DetectionEngineComponent = React.memo(() => {
             <>
               <HeaderPage border title={i18n.PAGE_TITLE} />
 
-              {/* <HostsEmptyPage /> */}
+              <DetectionEngineEmptyPage />
             </>
           );
         }}

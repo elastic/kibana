@@ -213,7 +213,7 @@ const AllRules = React.memo(() => {
       field: 'activate',
       name: 'Activate',
       render: (value: ColumnTypes['activate']) => (
-        // Michael: Errors occur when attempting to use "showLabel" prop. Likely need to wait for styled-components upgrade before uncommenting.
+        // Michael: Uncomment props below when EUI 14.9.0 is added to Kibana.
         <EuiSwitch
           checked={value}
           // label="Activate"
