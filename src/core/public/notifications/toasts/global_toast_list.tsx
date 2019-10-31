@@ -73,7 +73,7 @@ export class GlobalToastList extends React.Component<Props, State> {
       <EuiGlobalToastList
         data-test-subj="globalToastList"
         toasts={this.state.toasts.map(convertToEui)}
-        dismissToast={toast => this.props.dismissToast(toast.id)}
+        dismissToast={({ id }) => this.props.dismissToast(id)}
         /**
          * This prop is overriden by the individual toasts that are added.
          * Use `Infinity` here so that it's obvious a timeout hasn't been

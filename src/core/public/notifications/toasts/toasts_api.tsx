@@ -131,7 +131,7 @@ export class ToastsApi implements IToasts {
 
   /**
    * Removes a toast from the current array of toasts if present.
-   * @param toastOrId - a {@link Toast} returned by {@link ToastsApi.add} or it's id
+   * @param toastOrId - a {@link Toast} returned by {@link ToastsApi.add} or its id
    */
   public remove(toastOrId: Toast | string) {
     const toRemove = isString(toastOrId) ? toastOrId : toastOrId.id;
