@@ -4,12 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
+import * as Rx from 'rxjs';
+import { shallow } from 'enzyme';
 import React from 'react';
 import { SpaceAvatar } from '../../components';
 import { spacesManagerMock } from '../../lib/mocks';
 import { SpacesManager } from '../../lib';
 import { NavControlPopover } from './nav_control_popover';
+import { EuiHeaderSectionItemButton } from '@elastic/eui';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 describe('NavControlPopover', () => {
   it('renders without crashing', () => {
@@ -39,13 +42,13 @@ describe('NavControlPopover', () => {
         disabledFeatures: [],
       },
     ]);
-    spacesManager.getActiveSpace = jest.fn().mockResolvedValue({
+    spacesManager.onActiveSpaceChange$ = Rx.of({
       id: 'foo-space',
       name: 'foo',
       disabledFeatures: [],
     });
 
-    const wrapper = mount<any, any>(
+    const wrapper = mountWithIntl(
       <NavControlPopover
         spacesManager={(spacesManager as unknown) as SpacesManager}
         anchorPosition={'rightCenter'}
@@ -53,13 +56,13 @@ describe('NavControlPopover', () => {
       />
     );
 
-    return new Promise(resolve => {
-      setTimeout(() => {
-        expect(wrapper.state().spaces).toHaveLength(2);
-        wrapper.update();
-        expect(wrapper.find(SpaceAvatar)).toHaveLength(1);
-        resolve();
-      }, 20);
-    });
+    wrapper.find(EuiHeaderSectionItemButton).simulate('click');
+
+    // Wait for `getSpaces` promise to resolve
+    await Promise.resolve();
+    await Promise.resolve();
+    wrapper.update();
+
+    expect(wrapper.find(SpaceAvatar)).toHaveLength(3);
   });
 });

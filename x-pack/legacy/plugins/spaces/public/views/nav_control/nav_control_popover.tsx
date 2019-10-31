@@ -12,6 +12,7 @@ import {
 } from '@elastic/eui';
 import React, { Component } from 'react';
 import { Capabilities } from 'src/core/public';
+import { Subscription } from 'rxjs';
 import { Space } from '../../../common/model/space';
 import { SpaceAvatar } from '../../components';
 import { SpacesManager } from '../../lib/spaces_manager';
@@ -32,6 +33,8 @@ interface State {
 }
 
 export class NavControlPopover extends Component<Props, State> {
+  private activeSpace$?: Subscription;
+
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -42,13 +45,19 @@ export class NavControlPopover extends Component<Props, State> {
     };
   }
 
-  public componentDidMount() {
-    this.loadSpaces();
+  public componentWillMount() {
+    this.activeSpace$ = this.props.spacesManager.onActiveSpaceChange$.subscribe({
+      next: activeSpace => {
+        this.setState({
+          activeSpace,
+        });
+      },
+    });
+  }
 
-    if (this.props.spacesManager) {
-      this.props.spacesManager.on('request_refresh', () => {
-        this.loadSpaces({ refreshActiveSpace: true });
-      });
+  public componentWillUnmount() {
+    if (this.activeSpace$) {
+      this.activeSpace$.unsubscribe();
     }
   }
 
@@ -96,7 +105,7 @@ export class NavControlPopover extends Component<Props, State> {
     );
   }
 
-  private async loadSpaces({ refreshActiveSpace = false } = {}) {
+  private async loadSpaces() {
     const { spacesManager } = this.props;
 
     if (this.state.loading) {
@@ -107,14 +116,10 @@ export class NavControlPopover extends Component<Props, State> {
       loading: true,
     });
 
-    const [activeSpace, spaces] = await Promise.all([
-      spacesManager.getActiveSpace(refreshActiveSpace),
-      spacesManager.getSpaces(),
-    ]);
+    const spaces = await spacesManager.getSpaces();
 
     this.setState({
       spaces,
-      activeSpace,
       loading: false,
     });
   }
