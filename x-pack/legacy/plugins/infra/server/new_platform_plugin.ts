@@ -21,6 +21,7 @@ import { InfraSnapshot } from './lib/snapshot';
 import { InfraSourceStatus } from './lib/source_status';
 import { InfraSources } from './lib/sources';
 import { InfraServerPluginDeps } from './lib/adapters/framework';
+import { METRICS_FEATURE, LOGS_FEATURE } from './features';
 
 export interface KbnServer extends Server {
   usage: any;
@@ -94,6 +95,9 @@ export class InfraServerPlugin {
       sourceStatus,
       ...domainLibs,
     };
+
+    plugins.features.registerFeature(METRICS_FEATURE);
+    plugins.features.registerFeature(LOGS_FEATURE);
 
     initInfraServer(this.libs);
   }

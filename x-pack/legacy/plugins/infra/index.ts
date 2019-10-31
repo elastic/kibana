@@ -77,7 +77,6 @@ export function infra(kibana: any) {
     init(legacyServer: any) {
       const { newPlatform } = legacyServer as KbnServer;
       const { core, plugins } = newPlatform.setup;
-
       const infraSetup = (plugins.infra as unknown) as InfraSetup; // chef's kiss
 
       const initContext = ({
@@ -93,6 +92,7 @@ export function infra(kibana: any) {
         metrics: legacyServer.plugins.metrics,
         spaces: legacyServer.plugins.spaces,
         savedObjects: legacyServer.savedObjects,
+        features: plugins.features,
       };
 
       const infraPluginInstance = plugin(initContext);
@@ -110,65 +110,6 @@ export function infra(kibana: any) {
 
       // Register a function with server to manage the collection of usage stats
       legacyServer.usage.collectorSet.register(UsageCollector.getUsageCollector(legacyServer));
-
-      const xpackMainPlugin = legacyServer.plugins.xpack_main;
-      xpackMainPlugin.registerFeature({
-        id: 'infrastructure',
-        name: i18n.translate('xpack.infra.featureRegistry.linkInfrastructureTitle', {
-          defaultMessage: 'Infrastructure',
-        }),
-        icon: 'infraApp',
-        navLinkId: 'infra:home',
-        app: ['infra', 'kibana'],
-        catalogue: ['infraops'],
-        privileges: {
-          all: {
-            api: ['infra'],
-            savedObject: {
-              all: ['infrastructure-ui-source'],
-              read: ['index-pattern'],
-            },
-            ui: ['show', 'configureSource', 'save'],
-          },
-          read: {
-            api: ['infra'],
-            savedObject: {
-              all: [],
-              read: ['infrastructure-ui-source', 'index-pattern'],
-            },
-            ui: ['show'],
-          },
-        },
-      });
-
-      xpackMainPlugin.registerFeature({
-        id: 'logs',
-        name: i18n.translate('xpack.infra.featureRegistry.linkLogsTitle', {
-          defaultMessage: 'Logs',
-        }),
-        icon: 'loggingApp',
-        navLinkId: 'infra:logs',
-        app: ['infra', 'kibana'],
-        catalogue: ['infralogging'],
-        privileges: {
-          all: {
-            api: ['infra'],
-            savedObject: {
-              all: ['infrastructure-ui-source'],
-              read: [],
-            },
-            ui: ['show', 'configureSource', 'save'],
-          },
-          read: {
-            api: ['infra'],
-            savedObject: {
-              all: [],
-              read: ['infrastructure-ui-source'],
-            },
-            ui: ['show'],
-          },
-        },
-      });
 
       // NP_TODO: How do we move this to new platform?
       legacyServer.addAppLinksToSampleDataset('logs', [

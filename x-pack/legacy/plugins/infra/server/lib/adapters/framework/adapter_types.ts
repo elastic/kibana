@@ -24,6 +24,7 @@ export interface InfraServerPluginDeps {
     indexPatternsServiceFactory: any;
   };
   savedObjects: any;
+  features: any;
 }
 
 /* eslint-disable  @typescript-eslint/unified-signatures */
