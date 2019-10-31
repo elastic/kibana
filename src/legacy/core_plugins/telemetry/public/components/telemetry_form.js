@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import {
@@ -70,10 +69,6 @@ export class TelemetryForm extends Component {
   }
 
   render() {
-    if (!chrome.getInjected('allowChangingOptInStatus')) {
-      return null;
-    }
-
     const {
       telemetryOptInProvider,
     } = this.props;
@@ -82,6 +77,10 @@ export class TelemetryForm extends Component {
       showExample,
       queryMatches,
     } = this.state;
+
+    if (!telemetryOptInProvider.canChangeOptInStatus()) {
+      return null;
+    }
 
     if (queryMatches !== null && !queryMatches) {
       return null;
