@@ -143,7 +143,7 @@ class TlsComponentQuery extends QueryTemplatePaginated<
 const makeMapStateToProps = () => {
   const getTlsSelector = networkSelectors.tlsSelector();
   const getQuery = inputsSelectors.globalQueryByIdSelector();
-  return (state: State, { flowTarget, id = `${ID}-${flowTarget}`, type }: OwnProps) => {
+  return (state: State, { flowTarget, id = ID, type }: OwnProps) => {
     const { isInspected } = getQuery(state, id);
     return {
       ...getTlsSelector(state, type, flowTarget),

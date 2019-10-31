@@ -102,6 +102,19 @@ describe('kuery functions', function () {
         expect(geoBoundingBox.toElasticsearchQuery)
           .withArgs(node, indexPattern).to.throwException(/Geo bounding box query does not support scripted fields/);
       });
+
+      it('should use a provided nested context to create a full field name', function () {
+        const node = nodeTypes.function.buildNode('geoBoundingBox', 'geo', params);
+        const result = geoBoundingBox.toElasticsearchQuery(
+          node,
+          indexPattern,
+          {},
+          { nested: { path: 'nestedField' } }
+        );
+        expect(result).to.have.property('geo_bounding_box');
+        expect(result.geo_bounding_box).to.have.property('nestedField.geo');
+      });
+
     });
   });
 });

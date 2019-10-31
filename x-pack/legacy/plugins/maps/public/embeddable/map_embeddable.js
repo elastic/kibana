@@ -11,7 +11,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 import { Embeddable, APPLY_FILTER_TRIGGER } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import { onlyDisabledFiltersChanged } from '../../../../../../src/legacy/core_plugins/data/public';
+import { onlyDisabledFiltersChanged } from '../../../../../../src/plugins/data/public';
 
 import { I18nContext } from 'ui/i18n';
 
@@ -72,7 +72,7 @@ export class MapEmbeddable extends Embeddable {
     }
   }
 
-  _dispatchSetQuery({ query, timeRange, filters }) {
+  _dispatchSetQuery({ query, timeRange, filters, refresh }) {
     this._prevTimeRange = timeRange;
     this._prevQuery = query;
     this._prevFilters = filters;
@@ -80,6 +80,7 @@ export class MapEmbeddable extends Embeddable {
       filters: filters.filter(filter => !filter.meta.disabled),
       query,
       timeFilters: timeRange,
+      refresh,
     }));
   }
 
@@ -165,7 +166,8 @@ export class MapEmbeddable extends Embeddable {
     this._dispatchSetQuery({
       query: this._prevQuery,
       timeRange: this._prevTimeRange,
-      filters: this._prevFilters
+      filters: this._prevFilters,
+      refresh: true
     });
   }
 

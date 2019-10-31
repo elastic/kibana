@@ -19,10 +19,11 @@
 
 import { first } from 'rxjs/operators';
 import { loader, ExpressionLoader } from './loader';
+import { ExpressionDataHandler } from './execute';
 import { fromExpression } from '@kbn/interpreter/common';
 import { IInterpreterRenderHandlers } from './types';
 import { Observable } from 'rxjs';
-import { ExpressionAST } from '../../../../../../plugins/expressions/common';
+import { ExpressionAST } from '../../../../../../plugins/expressions/public';
 
 const element: HTMLElement = null as any;
 
@@ -48,27 +49,37 @@ jest.mock('./services', () => {
   };
 });
 
+jest.mock('./execute', () => {
+  const actual = jest.requireActual('./execute');
+  return {
+    ExpressionDataHandler: jest
+      .fn()
+      .mockImplementation((...args) => new actual.ExpressionDataHandler(...args)),
+    execute: jest.fn().mockReturnValue(actual.execute),
+  };
+});
+
 describe('execute helper function', () => {
-  it('returns ExpressionDataHandler instance', () => {
+  it('returns ExpressionLoader instance', () => {
     const response = loader(element, '', {});
     expect(response).toBeInstanceOf(ExpressionLoader);
   });
 });
 
-describe('ExpressionDataHandler', () => {
+describe('ExpressionLoader', () => {
   const expressionString = '';
 
   describe('constructor', () => {
     it('accepts expression string', () => {
-      const expressionDataHandler = new ExpressionLoader(element, expressionString, {});
-      expect(expressionDataHandler.getExpression()).toEqual(expressionString);
+      const expressionLoader = new ExpressionLoader(element, expressionString, {});
+      expect(expressionLoader.getExpression()).toEqual(expressionString);
     });
 
     it('accepts expression AST', () => {
       const expressionAST = fromExpression(expressionString) as ExpressionAST;
-      const expressionDataHandler = new ExpressionLoader(element, expressionAST, {});
-      expect(expressionDataHandler.getExpression()).toEqual(expressionString);
-      expect(expressionDataHandler.getAst()).toEqual(expressionAST);
+      const expressionLoader = new ExpressionLoader(element, expressionAST, {});
+      expect(expressionLoader.getExpression()).toEqual(expressionString);
+      expect(expressionLoader.getAst()).toEqual(expressionAST);
     });
 
     it('creates observables', () => {
@@ -117,9 +128,86 @@ describe('ExpressionDataHandler', () => {
     expect(response).toBe(2);
   });
 
-  it('cancel() aborts request', () => {
-    const expressionDataHandler = new ExpressionLoader(element, expressionString, {});
-    expressionDataHandler.cancel();
+  it('cancels the previous request when the expression is updated', () => {
+    const cancelMock = jest.fn();
+
+    (ExpressionDataHandler as jest.Mock).mockImplementationOnce(() => ({
+      getData: () => true,
+      cancel: cancelMock,
+    }));
+
+    const expressionLoader = new ExpressionLoader(element, expressionString, {});
+    expressionLoader.update('new', {});
+
+    expect(cancelMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not send an observable message if a request was aborted', () => {
+    const cancelMock = jest.fn();
+
+    const getData = jest
+      .fn()
+      .mockResolvedValueOnce({
+        type: 'error',
+        error: {
+          name: 'AbortError',
+        },
+      })
+      .mockResolvedValueOnce({
+        type: 'real',
+      });
+
+    (ExpressionDataHandler as jest.Mock).mockImplementationOnce(() => ({
+      getData,
+      cancel: cancelMock,
+    }));
+    (ExpressionDataHandler as jest.Mock).mockImplementationOnce(() => ({
+      getData,
+      cancel: cancelMock,
+    }));
+
+    const expressionLoader = new ExpressionLoader(element, expressionString, {});
+
+    expect.assertions(2);
+    expressionLoader.data$.subscribe({
+      next(data) {
+        expect(data).toEqual({
+          type: 'real',
+        });
+      },
+      error() {
+        expect(false).toEqual('Should not be called');
+      },
+    });
+
+    expressionLoader.update('new expression', {});
+
+    expect(getData).toHaveBeenCalledTimes(2);
+  });
+
+  it('sends an observable error if the data fetching failed', () => {
+    const cancelMock = jest.fn();
+
+    const getData = jest.fn().mockResolvedValue('rejected');
+
+    (ExpressionDataHandler as jest.Mock).mockImplementationOnce(() => ({
+      getData,
+      cancel: cancelMock,
+    }));
+
+    const expressionLoader = new ExpressionLoader(element, expressionString, {});
+
+    expect.assertions(2);
+    expressionLoader.data$.subscribe({
+      next(data) {
+        expect(data).toEqual('Should not be called');
+      },
+      error(error) {
+        expect(error.message).toEqual('Could not fetch data');
+      },
+    });
+
+    expect(getData).toHaveBeenCalledTimes(1);
   });
 
   it('inspect() returns correct inspector adapters', () => {
