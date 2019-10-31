@@ -29,7 +29,7 @@ type ApiConfig = NewsfeedPluginInjectedConfig['newsfeed']['service'];
 const NEWSFEED_LAST_FETCH_STORAGE_KEY = 'newsfeed.lastfetchtime';
 const NEWSFEED_HASH_SET_STORAGE_KEY = 'newsfeed.hashes';
 
-class NewsfeedApiDriver {
+export class NewsfeedApiDriver {
   constructor(
     private readonly kibanaVersion: string,
     private readonly userLanguage: string,
@@ -59,7 +59,7 @@ class NewsfeedApiDriver {
     if (hashSet != null) {
       oldHashes = hashSet.split(',');
     }
-    const newHashes = items.map(i => i.hash.slice(0, 10));
+    const newHashes = items.map(i => i.hash);
     const updatedHashes = [...new Set(oldHashes.concat(newHashes))];
     localStorage.setItem(NEWSFEED_HASH_SET_STORAGE_KEY, updatedHashes.join(','));
 
@@ -80,10 +80,16 @@ class NewsfeedApiDriver {
   }
 
   validateItem(item: Partial<NewsfeedItem>) {
-    if ([item.title, item.description, item.linkText, item.linkUrl].includes(undefined)) {
-      return false;
-    }
-    return true;
+    const hasMissing = [
+      item.title,
+      item.description,
+      item.linkText,
+      item.linkUrl,
+      item.publishOn,
+      item.hash,
+    ].includes(undefined);
+
+    return !hasMissing;
   }
 
   modelItems(items: ApiItem[]): Rx.Observable<FetchResult> {
@@ -115,10 +121,10 @@ class NewsfeedApiDriver {
         description: description[userLanguage],
         linkText: linkText[userLanguage],
         linkUrl: linkUrl[userLanguage],
-        badge: badge != null ? badge![userLanguage] : badge,
+        badge: badge != null ? badge![userLanguage] : null,
         publishOn: moment(publishOn),
         expireOn: moment(expireOn),
-        hash,
+        hash: hash.slice(0, 10), // optimize for storage
       };
 
       if (!this.validateItem(tempItem)) {

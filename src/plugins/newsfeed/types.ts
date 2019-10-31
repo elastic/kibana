@@ -39,8 +39,8 @@ export interface ApiItem {
   description: { [lang: string]: string };
   link_text: { [lang: string]: string };
   link_url: { [lang: string]: string };
-  badge: { [lang: string]: string } | null;
-  languages: string[] | null;
+  badge?: { [lang: string]: string } | null;
+  languages?: string[] | null;
   image_url?: null; // not used phase 1
 }
 
