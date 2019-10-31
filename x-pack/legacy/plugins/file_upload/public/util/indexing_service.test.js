@@ -4,15 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-describe('indexing_service', () => {
+// Not all index pattern dependencies are avab. in jest context,
+// prevent unrelated import errors by mocking kibana services
+jest.mock('../kibana_services', () => {});
+const checkIndexPatternValid = require('./indexing_service').checkIndexPatternValid;
 
-  let checkIndexPatternValid;
-  beforeAll(() => {
-    // Not all index pattern dependencies are avab. in jest context,
-    // prevent unrelated import errors by mocking kibana services
-    jest.mock('../kibana_services', () => {});
-    checkIndexPatternValid = require('./indexing_service').checkIndexPatternValid;
-  });
+describe('indexing_service', () => {
 
   const validNames = [
     'lowercaseletters', // Lowercase only
