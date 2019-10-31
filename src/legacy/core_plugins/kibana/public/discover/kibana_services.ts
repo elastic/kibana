@@ -16,28 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import 'ui/collapsible_sidebar';
-import 'ui/directives/listen';
-import 'ui/fixed_scroll';
-import 'ui/directives/css_truncate';
-
 import { npStart } from 'ui/new_platform';
-import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing/get_unhashable_states_provider';
-import { IPrivate } from 'ui/private';
-import chromeLegacy from 'ui/chrome';
 import angular from 'angular'; // just used in embeddables and discover controller
-import uiRoutes from 'ui/routes';
 // @ts-ignore
-import { uiModules } from 'ui/modules';
 import { SearchSource } from 'ui/courier';
-// @ts-ignore
-import { StateProvider } from 'ui/state_management/state';
-// @ts-ignore
-import { SavedObjectProvider } from 'ui/saved_objects/saved_object';
-import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
-import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
-import { timefilter } from 'ui/timefilter';
-import { ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
 // @ts-ignore
 import { IndexPattern, IndexPatterns } from 'ui/index_patterns';
 import { wrapInI18nContext } from 'ui/i18n';
@@ -46,10 +28,6 @@ import { docTitle } from 'ui/doc_title';
 // @ts-ignore
 import * as docViewsRegistry from 'ui/registry/doc_views';
 import { start as data } from '../../../data/public/legacy';
-// @ts-ignore
-import { createSavedSearchesService } from './saved_searches/saved_searches';
-// @ts-ignore
-import { createSavedSearchFactory } from './saved_searches/_saved_search';
 
 export let angularModule: any = null;
 
@@ -59,28 +37,6 @@ export function setAngularModule(module: any) {
 
 export function getAngularModule() {
   return angularModule;
-}
-
-/**
- * Get dependencies relying on the global angular context.
- * They also have to get resolved together with the legacy imports
- */
-export async function getAngularDependencies(): Promise<any> {
-  const injector = await chromeLegacy.dangerouslyGetActiveInjector();
-
-  const Private = injector.get<IPrivate>('Private');
-
-  const queryFilter = Private(FilterBarQueryFilterProvider);
-  const getUnhashableStates = Private(getUnhashableStatesProvider);
-  const shareContextMenuExtensions = Private(ShareContextMenuExtensionsRegistryProvider);
-  const savedObjectRegistry = Private(SavedObjectRegistryProvider);
-
-  return {
-    queryFilter,
-    getUnhashableStates,
-    shareContextMenuExtensions,
-    savedObjectRegistry,
-  };
 }
 
 let services = {
@@ -95,28 +51,12 @@ let services = {
   metadata: npStart.core.injectedMetadata.getLegacyMetadata(),
   toastNotifications: npStart.core.notifications.toasts,
   uiSettings: npStart.core.uiSettings,
+  timefilter: data.timefilter.timefilter,
   // legacy
   docTitle,
   docViewsRegistry,
-  FilterBarQueryFilterProvider,
-  getInjector: () => {
-    return chromeLegacy.dangerouslyGetActiveInjector();
-  },
-  getSavedSearchById: async (id: string, kbnUrl: unknown) => {
-    const injector = await chromeLegacy.dangerouslyGetActiveInjector();
-    const Private = injector.get<IPrivate>('Private');
-    const SavedSearch = createSavedSearchFactory(Private);
-
-    const service = createSavedSearchesService(Private, SavedSearch, kbnUrl, chromeLegacy);
-    return service.get(id);
-  },
-  SavedObjectProvider,
+  queryFilter: undefined,
   SearchSource,
-  ShareContextMenuExtensionsRegistryProvider,
-  StateProvider,
-  timefilter,
-  uiModules,
-  uiRoutes,
   wrapInI18nContext,
 };
 export function getServices() {
@@ -154,8 +94,6 @@ export { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 // @ts-ignore
 export { timezoneProvider } from 'ui/vis/lib/timezone';
-// @ts-ignore
-export { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 // @ts-ignore
 export { tabifyAggResponse } from 'ui/agg_response/tabify';
 // @ts-ignore

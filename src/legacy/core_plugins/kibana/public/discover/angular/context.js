@@ -24,7 +24,7 @@ import { getAngularModule, getServices, subscribeWithScope } from './../kibana_s
 import './context_app';
 import contextAppRouteTemplate from './context.html';
 import { getRootBreadcrumbs } from '../breadcrumbs';
-const { FilterBarQueryFilterProvider, chrome } = getServices();
+const { queryFilter, chrome } = getServices();
 
 const k7Breadcrumbs = $route => {
   const { indexPattern } = $route.current.locals;
@@ -67,8 +67,7 @@ getAngularModule().config($routeProvider => {
     });
 });
 
-function ContextAppRouteController($routeParams, $scope, AppState, config, Private, $route) {
-  const queryFilter = Private(FilterBarQueryFilterProvider);
+function ContextAppRouteController($routeParams, $scope, AppState, config, $route) {
   const indexPattern = $route.current.locals.indexPattern.ip;
 
   this.state = new AppState(createDefaultAppState(config, indexPattern));

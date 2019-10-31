@@ -27,7 +27,7 @@ import {
   Setup as EmbeddableSetup,
 } from '../../../../../plugins/embeddable/public';
 import { LocalApplicationService } from '../local_application_service';
-import { getAngularDependencies } from './kibana_services';
+import { getAngularDependencies } from './get_angular_dependencies';
 
 /**
  * These are the interfaces with your public contracts. You should export these
@@ -56,8 +56,8 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
       order: -1004,
       euiIconType: 'discoverApp',
       mount: async (context, params) => {
-        const { renderApp } = await import('./render_app');
         const angularDeps = await getAngularDependencies();
+        const { renderApp } = await import('./render_app');
         return renderApp(params.element, params.appBasePath, context, angularDeps);
       },
     });

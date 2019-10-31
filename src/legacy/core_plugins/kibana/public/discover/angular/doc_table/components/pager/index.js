@@ -16,13 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { getServices } from '../../../../kibana_services';
+import { getAngularModule, getServices } from '../../../../kibana_services';
 import { ToolBarPagerText } from './tool_bar_pager_text';
 import { ToolBarPagerButtons } from './tool_bar_pager_buttons';
 
-const { wrapInI18nContext, uiModules } = getServices();
+const { wrapInI18nContext } = getServices();
 
-const app = uiModules.get('kibana');
+const app = getAngularModule();
 
 app.directive('toolBarPagerText', function (reactDirective) {
   return reactDirective(wrapInI18nContext(ToolBarPagerText));

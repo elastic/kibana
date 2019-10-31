@@ -61,11 +61,19 @@ import { watchMultiDecorator } from 'ui/directives/watch_multi/watch_multi';
 import { KbnAccessibleClickProvider } from 'ui/accessibility/kbn_accessible_click';
 // @ts-ignore
 import { FieldNameDirectiveProvider } from 'ui/directives/field_name';
+// @ts-ignore
+import { CollapsibleSidebarProvider } from 'ui/collapsible_sidebar/collapsible_sidebar';
+// @ts-ignore
+import { FixedScrollProvider } from 'ui/fixed_scroll';
+// @ts-ignore
+import { DebounceProviderTimeout } from 'ui/directives/debounce/debounce';
+// @ts-ignore
+import { CssTruncateProvide } from 'ui/directives/css_truncate';
 
 // @ts-ignore
 import { registerListenEventListener } from 'ui/directives/listen/listen';
 
-import { setAngularModule } from './kibana_services';
+import { setAngularModule, setServices } from './kibana_services';
 // @ts-ignore
 import { dashboardConfigProvider } from '../dashboard/dashboard_config';
 
@@ -77,9 +85,12 @@ const thirdPartyAngularDependencies = [
   'ui.bootstrap',
   'elasticsearch',
 ];
+let discoverUiModule: any;
 
 export function getDiscoverModule(core: AppMountContext['core']) {
-  const discoverUiModule = createLocalAngularModule(core);
+  if (!discoverUiModule) {
+    discoverUiModule = createLocalAngularModule(core);
+  }
   configureAppAngularModule(discoverUiModule);
   setAngularModule(discoverUiModule);
   return getDiscoverModule;
@@ -92,6 +103,7 @@ export async function renderApp(
   angularDeps: any
 ) {
   getDiscoverModule(core);
+  setServices(angularDeps);
   require('./angular');
   const $injector = mountDiscoverApp(appBasePath, element);
   return () => $injector.get('$rootScope').$destroy();
@@ -152,7 +164,11 @@ export function createLocalAngularModule(core: AppMountContext['core']) {
     .run(registerListenEventListener)
     .directive('icon', reactDirective => reactDirective(EuiIcon))
     .directive('kbnAccessibleClick', KbnAccessibleClickProvider)
-    .directive('fieldName', FieldNameDirectiveProvider);
+    .directive('fieldName', FieldNameDirectiveProvider)
+    .directive('collapsibleSidebar', CollapsibleSidebarProvider)
+    .directive('cssTruncate', CssTruncateProvide)
+    .service('debounce', ['$timeout', DebounceProviderTimeout])
+    .directive('fixedScroll', FixedScrollProvider);
 }
 
 export function createLocalGlobalStateModule() {

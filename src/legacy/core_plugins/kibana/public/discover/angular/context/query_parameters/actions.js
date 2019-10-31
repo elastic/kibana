@@ -27,8 +27,8 @@ import {
 } from './constants';
 
 
-export function QueryParameterActionsProvider(Private) {
-  const queryFilter = Private(getServices().FilterBarQueryFilterProvider);
+export function QueryParameterActionsProvider() {
+  const queryFilter = getServices().queryFilter;
   const filterGen = getFilterGenerator(queryFilter);
 
   const setPredecessorCount = (state) => (predecessorCount) => (

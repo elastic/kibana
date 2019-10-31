@@ -44,7 +44,6 @@ import {
   getRequestInspectorStats,
   getResponseInspectorStats,
   getServices,
-  getUnhashableStatesProvider,
   hasSearchStategyForIndexPattern,
   intervalOptions,
   isDefaultTypeIndexPattern,
@@ -64,18 +63,18 @@ import {
 const {
   chrome,
   docTitle,
-  FilterBarQueryFilterProvider,
-  ShareContextMenuExtensionsRegistryProvider,
-  StateProvider,
+  shareContextMenuExtensions,
+  queryFilter,
+  State,
   timefilter,
   toastNotifications,
-  uiSettings
+  uiSettings,
+  getUnhashableStates
 } = getServices();
 
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../breadcrumbs';
 import { extractTimeFilter, changeTimeFilter } from '../../../../data/public';
 import { start as data } from '../../../../data/public/legacy';
-
 
 const { savedQueryService } = data.search.services;
 
@@ -113,8 +112,7 @@ app.config($routeProvider => {
     template: indexTemplate,
     reloadOnSearch: false,
     resolve: {
-      ip: function (Promise, Private) {
-        const State = Private(StateProvider);
+      ip: function (Promise) {
         const indexPatterns = data.indexPatterns.indexPatterns;
         return indexPatterns.getCache().then((savedObjects) => {
           /**
@@ -185,10 +183,6 @@ function discoverController(
 ) {
   const Vis = Private(VisProvider);
   const responseHandler = vislibSeriesResponseHandlerProvider().handler;
-  const getUnhashableStates = Private(getUnhashableStatesProvider);
-  const shareContextMenuExtensions = Private(ShareContextMenuExtensionsRegistryProvider);
-
-  const queryFilter = Private(FilterBarQueryFilterProvider);
   const filterGen = getFilterGenerator(queryFilter);
 
   const inspectorAdapters = {

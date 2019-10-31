@@ -16,15 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-//field_name directive will be replaced very soon
-import 'ui/directives/field_name';
-import './discover_field';
-import './discover_field_search_directive';
-import './discover_index_pattern_directive';
 import _ from 'lodash';
 import $ from 'jquery';
 import rison from 'rison-node';
 import { fieldCalculator } from './lib/field_calculator';
+import './discover_field';
+import './discover_field_search_directive';
+import './discover_index_pattern_directive';
 import {
   FieldList, getAngularModule,
 } from '../../kibana_services';
