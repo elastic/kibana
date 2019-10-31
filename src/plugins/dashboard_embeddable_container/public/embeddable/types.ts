@@ -16,17 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { PanelState, EmbeddableInput } from '../embeddable_plugin';
+export type PanelId = string;
+export type SavedObjectId = string;
 
-import * as React from 'react';
-import { CoreStart } from '../../../../core/public';
+export interface GridData {
+  w: number;
+  h: number;
+  x: number;
+  y: number;
+  i: string;
+}
 
-export interface KibanaReactOverlays {
-  openFlyout: (
-    node: React.ReactNode,
-    options?: Parameters<CoreStart['overlays']['openFlyout']>['1']
-  ) => ReturnType<CoreStart['overlays']['openFlyout']>;
-  openModal: (
-    node: React.ReactNode,
-    options?: Parameters<CoreStart['overlays']['openFlyout']>['1']
-  ) => ReturnType<CoreStart['overlays']['openModal']>;
+export interface DashboardPanelState<TEmbeddableInput extends EmbeddableInput = EmbeddableInput>
+  extends PanelState<TEmbeddableInput> {
+  readonly gridData: GridData;
 }
