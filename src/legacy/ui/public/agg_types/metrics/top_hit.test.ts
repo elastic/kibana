@@ -19,8 +19,8 @@
 
 import { dropRight, last } from 'lodash';
 import { topHitMetricAgg } from './top_hit';
-import { AggConfigs } from 'ui/agg_types';
-import { IMetricAggConfig } from 'ui/agg_types/metrics/metric_agg_type';
+import { AggConfigs } from '../agg_configs';
+import { IMetricAggConfig } from './metric_agg_type';
 import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
 
 jest.mock('ui/new_platform');

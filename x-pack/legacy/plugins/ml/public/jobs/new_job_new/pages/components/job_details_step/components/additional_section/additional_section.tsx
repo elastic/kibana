@@ -31,7 +31,7 @@ export const AdditionalSection: FC<Props> = ({ additionalExpanded, setAdditional
           <EuiFlexItem>
             <CalendarsSelection />
           </EuiFlexItem>
-          <EuiFlexItem></EuiFlexItem>
+          <EuiFlexItem />
         </EuiFlexGroup>
       </EuiAccordion>
     </Fragment>

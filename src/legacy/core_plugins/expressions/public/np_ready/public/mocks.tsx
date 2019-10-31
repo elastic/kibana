@@ -39,6 +39,11 @@ const createExpressionsSetupMock = (): ExpressionsSetup => {
       types: {
         register: () => {},
       } as any,
+      getExecutor: () => ({
+        interpreter: {
+          interpretAst: () => {},
+        },
+      }),
     },
   };
 };

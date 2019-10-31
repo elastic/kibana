@@ -47,14 +47,20 @@ interface AnalyicsReporterConfig {
 }
 
 export function createAnalyticsReporter(config: AnalyicsReporterConfig) {
-  const { localStorage, basePath, $http, debug } = config;
+  const { localStorage, basePath, debug } = config;
 
   return createReporter({
     debug,
     storage: localStorage,
     async http(report) {
       const url = `${basePath}/api/telemetry/report`;
-      await $http.post(url, { report });
+      await fetch(url, {
+        method: 'POST',
+        headers: {
+          'kbn-xsrf': 'true',
+        },
+        body: JSON.stringify({ report }),
+      });
     },
   });
 }
