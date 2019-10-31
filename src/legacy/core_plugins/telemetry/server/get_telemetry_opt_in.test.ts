@@ -94,10 +94,13 @@ describe('get_telemetry_opt_in', () => {
   const EnabledFalseVersionChecks: VersionCheckTable = [
     { lastVersionChecked: '8.0.0', currentKibanaVersion: '8.0.0', result: false },
     { lastVersionChecked: '8.0.0', currentKibanaVersion: '8.0.1', result: false },
+    { lastVersionChecked: '8.0.1', currentKibanaVersion: '8.0.0', result: false },
     { lastVersionChecked: '8.0.0', currentKibanaVersion: '8.1.0', result: null },
     { lastVersionChecked: '8.0.0', currentKibanaVersion: '9.0.0', result: null },
     { lastVersionChecked: '8.0.0', currentKibanaVersion: '7.0.0', result: false },
     { lastVersionChecked: '8.1.0', currentKibanaVersion: '8.0.0', result: false },
+    { lastVersionChecked: '8.0.0-X', currentKibanaVersion: '8.0.0', result: false },
+    { lastVersionChecked: '8.0.0', currentKibanaVersion: '8.0.0-X', result: false },
     { lastVersionChecked: null, currentKibanaVersion: '8.0.0', result: null },
     { lastVersionChecked: undefined, currentKibanaVersion: '8.0.0', result: null },
     { lastVersionChecked: 5, currentKibanaVersion: '8.0.0', result: null },

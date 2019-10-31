@@ -10,13 +10,14 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function optInTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const kibanaServer = getService('kibanaServer');
+  const kibanaVersionAccessor = kibanaServer.version;
 
   describe('/api/telemetry/v2/optIn API', () => {
     let kibanaVersion: any;
 
     before(async () => {
-      const { body } = await supertest.get('/api/status').expect(200);
-      kibanaVersion = body.version.number;
+      kibanaVersion = await kibanaVersionAccessor.get();
 
       expect(typeof kibanaVersion).to.eql('string');
       expect(kibanaVersion.length).to.be.greaterThan(0);
