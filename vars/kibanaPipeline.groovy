@@ -244,7 +244,7 @@ def buildXpack() {
 def runErrorReporter() {
   bash """
     source src/dev/ci_setup/setup_env.sh
-    node scripts/report_failed_tests
+    node src/dev/failed_tests/cli
   """
 }
 
