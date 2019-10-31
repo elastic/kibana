@@ -17,16 +17,5 @@
  * under the License.
  */
 
-import * as React from 'react';
-import { CoreStart } from '../../../../core/public';
-
-export interface KibanaReactOverlays {
-  openFlyout: (
-    node: React.ReactNode,
-    options?: Parameters<CoreStart['overlays']['openFlyout']>['1']
-  ) => ReturnType<CoreStart['overlays']['openFlyout']>;
-  openModal: (
-    node: React.ReactNode,
-    options?: Parameters<CoreStart['overlays']['openFlyout']>['1']
-  ) => ReturnType<CoreStart['overlays']['openModal']>;
-}
+// eslint-disable-next-line
+export * from '../../../plugins/embeddable/public/lib/test_samples';
