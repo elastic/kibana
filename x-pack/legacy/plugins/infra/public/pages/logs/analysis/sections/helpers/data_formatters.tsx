@@ -6,7 +6,7 @@
 
 import { RectAnnotationDatum } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { GetLogEntryRateSuccessResponsePayload } from '../../../../../../common/http_api/log_analysis/results/log_entry_rate';
+import { LogRateResults } from '../../../../../containers/logs/log_analysis/log_analysis_results';
 
 export type MLSeverityScoreCategories = 'warning' | 'minor' | 'major' | 'critical';
 type MLSeverityScores = Record<MLSeverityScoreCategories, number>;
@@ -17,15 +17,13 @@ const ML_SEVERITY_SCORES: MLSeverityScores = {
   critical: 75,
 };
 
-export const getLogEntryRatePartitionedSeries = (
-  results: GetLogEntryRateSuccessResponsePayload['data']
-) => {
+export const getLogEntryRatePartitionedSeries = (results: LogRateResults) => {
   return results.histogramBuckets.reduce<Array<{ group: string; time: number; value: number }>>(
     (buckets, bucket) => {
       return [
         ...buckets,
         ...bucket.partitions.map(partition => ({
-          group: partition.partitionId === '' ? 'unknown' : partition.partitionId,
+          group: getFriendlyNameForPartitionId(partition.partitionId),
           time: bucket.startTime,
           value: partition.averageActualLogEntryRate,
         })),
@@ -35,9 +33,7 @@ export const getLogEntryRatePartitionedSeries = (
   );
 };
 
-export const getLogEntryRateCombinedSeries = (
-  results: GetLogEntryRateSuccessResponsePayload['data']
-) => {
+export const getLogEntryRateCombinedSeries = (results: LogRateResults) => {
   return results.histogramBuckets.reduce<Array<{ time: number; value: number }>>(
     (buckets, bucket) => {
       return [
@@ -54,69 +50,27 @@ export const getLogEntryRateCombinedSeries = (
   );
 };
 
-export const getLogEntryRateSeriesForPartition = (
-  results: GetLogEntryRateSuccessResponsePayload['data'],
-  partitionId: string
-) => {
-  return results.histogramBuckets.reduce<Array<{ time: number; value: number }>>(
-    (buckets, bucket) => {
-      const partitionResults = bucket.partitions.find(partition => {
-        return (
-          partition.partitionId === partitionId ||
-          (partition.partitionId === '' && partitionId === 'unknown')
-        );
-      });
-      if (!partitionResults) {
-        return buckets;
-      }
-      return [
-        ...buckets,
-        {
-          time: bucket.startTime,
-          value: partitionResults.averageActualLogEntryRate,
-        },
-      ];
-    },
-    []
-  );
+export const getLogEntryRateSeriesForPartition = (results: LogRateResults, partitionId: string) => {
+  return results.partitionBuckets[partitionId].buckets.reduce<
+    Array<{ time: number; value: number }>
+  >((buckets, bucket) => {
+    return [
+      ...buckets,
+      {
+        time: bucket.startTime,
+        value: bucket.averageActualLogEntryRate,
+      },
+    ];
+  }, []);
 };
 
-export const getTopAnomalyScoresByPartition = (
-  results: GetLogEntryRateSuccessResponsePayload['data']
-) => {
-  return results.histogramBuckets.reduce<Record<string, number>>((topScores, bucket) => {
-    bucket.partitions.forEach(partition => {
-      if (partition.maximumAnomalyScore > 0) {
-        topScores = {
-          ...topScores,
-          [partition.partitionId]:
-            !topScores[partition.partitionId] ||
-            partition.maximumAnomalyScore > topScores[partition.partitionId]
-              ? partition.maximumAnomalyScore
-              : topScores[partition.partitionId],
-        };
-      }
-    });
-    return topScores;
-  }, {});
-};
-
-export const getAnnotationsForPartition = (
-  results: GetLogEntryRateSuccessResponsePayload['data'],
-  partitionId: string
-) => {
-  return results.histogramBuckets.reduce<Record<MLSeverityScoreCategories, RectAnnotationDatum[]>>(
+export const getAnnotationsForPartition = (results: LogRateResults, partitionId: string) => {
+  return results.partitionBuckets[partitionId].buckets.reduce<
+    Record<MLSeverityScoreCategories, RectAnnotationDatum[]>
+  >(
     (annotatedBucketsBySeverity, bucket) => {
-      const partitionResults = bucket.partitions.find(partition => {
-        return (
-          partition.partitionId === partitionId ||
-          (partition.partitionId === '' && partitionId === 'unknown')
-        );
-      });
-      const severityCategory = partitionResults
-        ? getSeverityCategoryForScore(partitionResults.maximumAnomalyScore)
-        : null;
-      if (!partitionResults || !partitionResults.maximumAnomalyScore || !severityCategory) {
+      const severityCategory = getSeverityCategoryForScore(bucket.maximumAnomalyScore);
+      if (!severityCategory) {
         return annotatedBucketsBySeverity;
       }
 
@@ -134,7 +88,7 @@ export const getAnnotationsForPartition = (
               {
                 defaultMessage: 'Max anomaly score: {maxAnomalyScore}',
                 values: {
-                  maxAnomalyScore: formatAnomalyScore(partitionResults.maximumAnomalyScore),
+                  maxAnomalyScore: formatAnomalyScore(bucket.maximumAnomalyScore),
                 },
               }
             ),
@@ -152,29 +106,17 @@ export const getAnnotationsForPartition = (
 };
 
 export const getTotalNumberOfLogEntriesForPartition = (
-  results: GetLogEntryRateSuccessResponsePayload['data'],
+  results: LogRateResults,
   partitionId: string
 ) => {
-  return results.histogramBuckets.reduce<number>((sumPartitionNumberOfLogEntries, bucket) => {
-    const partitionResults = bucket.partitions.find(partition => {
-      return (
-        partition.partitionId === partitionId ||
-        (partition.partitionId === '' && partitionId === 'unknown')
-      );
-    });
-    if (!partitionResults || !partitionResults.numberOfLogEntries) {
-      return sumPartitionNumberOfLogEntries;
-    } else {
-      return (sumPartitionNumberOfLogEntries += partitionResults.numberOfLogEntries);
-    }
-  }, 0);
+  return results.partitionBuckets[partitionId].totalNumberOfLogEntries;
 };
 
-export const getAnnotationsForAll = (results: GetLogEntryRateSuccessResponsePayload['data']) => {
+export const getAnnotationsForAll = (results: LogRateResults) => {
   return results.histogramBuckets.reduce<Record<MLSeverityScoreCategories, RectAnnotationDatum[]>>(
     (annotatedBucketsBySeverity, bucket) => {
       const maxAnomalyScoresByPartition = bucket.partitions.reduce<
-        Array<{ partitionId: string; maximumAnomalyScore: number }>
+        Array<{ partitionName: string; maximumAnomalyScore: number }>
       >((bucketMaxAnomalyScoresByPartition, partition) => {
         if (!getSeverityCategoryForScore(partition.maximumAnomalyScore)) {
           return bucketMaxAnomalyScoresByPartition;
@@ -182,7 +124,7 @@ export const getAnnotationsForAll = (results: GetLogEntryRateSuccessResponsePayl
         return [
           ...bucketMaxAnomalyScoresByPartition,
           {
-            partitionId: partition.partitionId ? partition.partitionId : 'unknown',
+            partitionName: getFriendlyNameForPartitionId(partition.partitionId),
             maximumAnomalyScore: formatAnomalyScore(partition.maximumAnomalyScore),
           },
         ];
@@ -227,16 +169,14 @@ export const getAnnotationsForAll = (results: GetLogEntryRateSuccessResponsePayl
   );
 };
 
-export const getTopAnomalyScoreAcrossAllPartitions = (
-  results: GetLogEntryRateSuccessResponsePayload['data']
-) => {
-  const allMaxScores = results.histogramBuckets.reduce<number[]>((scores, bucket) => {
-    const bucketMaxScores = bucket.partitions.reduce<number[]>((bucketScores, partition) => {
-      return [...bucketScores, partition.maximumAnomalyScore];
-    }, []);
-    return [...scores, ...bucketMaxScores];
-  }, []);
-  return Math.max(...allMaxScores);
+export const getTopAnomalyScoreAcrossAllPartitions = (results: LogRateResults) => {
+  const allTopScores = Object.values(results.partitionBuckets).reduce(
+    (scores: number[], partition) => {
+      return [...scores, partition.topAnomalyScore];
+    },
+    []
+  );
+  return Math.max(...allTopScores);
 };
 
 const getSeverityCategoryForScore = (score: number): MLSeverityScoreCategories | undefined => {
@@ -256,4 +196,8 @@ const getSeverityCategoryForScore = (score: number): MLSeverityScoreCategories |
 
 export const formatAnomalyScore = (score: number) => {
   return Math.round(score);
+};
+
+export const getFriendlyNameForPartitionId = (partitionId: string) => {
+  return partitionId !== '' ? partitionId : 'unknown';
 };
