@@ -16,11 +16,11 @@ const makeOverviewBreadcrumb = (search?: string, basepath?: string): ChromeBread
 
 export const getOverviewPageBreadcrumbs = (
   search?: string,
-  basepath?: string
-): ChromeBreadcrumb[] => [makeOverviewBreadcrumb(search, basepath)];
+  basePath?: string
+): ChromeBreadcrumb[] => [makeOverviewBreadcrumb(search, basePath)];
 
 export const getMonitorPageBreadcrumb = (
   name: string,
   search?: string,
-  basepath?: string
-): ChromeBreadcrumb[] => [makeOverviewBreadcrumb(search, basepath), { text: name }];
+  basePath?: string
+): ChromeBreadcrumb[] => [makeOverviewBreadcrumb(search, basePath), { text: name }];
