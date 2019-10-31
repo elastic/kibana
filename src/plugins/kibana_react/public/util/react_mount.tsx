@@ -32,7 +32,9 @@ export const reactMount = (component: React.ReactNode): MountPoint => {
     ReactDOM.render(<I18nProvider>{component}</I18nProvider>, element);
     return () => ReactDOM.unmountComponentAtNode(element);
   };
-  // used for proper snapshot serialization
-  mount.__reactMount__ = component;
+  // only used for tests and proper snapshot serialization
+  if (process.env.NODE_ENV !== 'production') {
+    mount.__reactMount__ = component;
+  }
   return mount;
 };
