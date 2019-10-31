@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Omit } from 'utility-types';
 import { SearchParams, SearchResponse } from 'elasticsearch';
 import { AggregationResponseMap, AggregationInputMap } from './aggregations';
-import { StringMap } from '../common';
 
 export interface ESSearchBody {
   query?: any;
@@ -55,6 +53,11 @@ export type ESSearchResponse<
 
 export interface ESFilter {
   [key: string]: {
-    [key: string]: string | string[] | number | StringMap | ESFilter[];
+    [key: string]:
+      | string
+      | string[]
+      | number
+      | Record<string, unknown>
+      | ESFilter[];
   };
 }
