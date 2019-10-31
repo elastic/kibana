@@ -33,19 +33,23 @@ import { showSaveModal, SaveResult } from 'ui/saved_objects/show_saved_object_sa
 import { showShareContextMenu } from 'ui/share';
 import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 
-import {
-  AppStateClass as TAppStateClass,
-  AppState as TAppState,
-} from 'ui/state_management/app_state';
+import { State } from 'ui/state_management/state';
+
+import { AppStateClass as TAppStateClass } from 'ui/state_management/app_state';
 
 import { KbnUrl } from 'ui/url/kbn_url';
 import { Filter } from '@kbn/es-query';
 import { IndexPattern } from 'ui/index_patterns';
-import { Query, SavedQuery } from 'src/legacy/core_plugins/data/public';
 import { SaveOptions } from 'ui/saved_objects/saved_object';
 import { Subscription } from 'rxjs';
 import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
-import { extractTimeFilter, changeTimeFilter } from '../../../data/public';
+import {
+  extractTimeFilter,
+  changeTimeFilter,
+  FilterStateManager,
+  Query,
+  SavedQuery,
+} from '../../../data/public';
 
 import {
   DashboardContainer,
@@ -80,9 +84,8 @@ export interface DashboardAppControllerDependencies extends RenderDeps {
   $scope: DashboardAppScope;
   $route: any;
   $routeParams: any;
-  getAppState: {
-    previouslyStored: () => TAppState | undefined;
-  };
+  getAppState: any;
+  globalState: State;
   indexPatterns: {
     getDefault: () => Promise<IndexPattern>;
   };
@@ -104,6 +107,7 @@ export class DashboardAppController {
     $route,
     $routeParams,
     getAppState,
+    globalState,
     dashboardConfig,
     localStorage,
     kbnUrl,
@@ -111,8 +115,6 @@ export class DashboardAppController {
     indexPatterns,
     config,
     confirmModal,
-    queryFilter,
-    getUnhashableStates,
     shareContextMenuExtensions,
     savedQueryService,
     embeddables,
@@ -121,8 +123,16 @@ export class DashboardAppController {
     dataStart: {
       timefilter: { timefilter },
     },
-    core: { notifications, overlays, chrome, injectedMetadata, docLinks },
+    npDataStart,
+    core: { notifications, overlays, chrome, injectedMetadata },
   }: DashboardAppControllerDependencies) {
+    new FilterStateManager(globalState, getAppState, npDataStart.query.filterManager);
+    const queryFilter = npDataStart.query.filterManager;
+
+    function getUnhashableStates(): State[] {
+      return [getAppState(), globalState].filter(Boolean);
+    }
+
     let lastReloadRequestTime = 0;
 
     const dash = ($scope.dash = $route.current.locals.dash);

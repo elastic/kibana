@@ -28,13 +28,12 @@ import {
 import { RenderDeps } from './render_app';
 import { LocalApplicationService } from '../local_application_service';
 import { DataStart } from '../../../data/public';
+import { DataPublicPluginStart as NpDataStart } from '../../../../../plugins/data/public';
 import { EmbeddablePublicPlugin } from '../../../../../plugins/embeddable/public';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { NavigationStart } from '../../../navigation/public';
 
 export interface LegacyAngularInjectedDependencies {
-  queryFilter: any;
-  getUnhashableStates: any;
   shareContextMenuExtensions: any;
   dashboardConfig: any;
   savedObjectRegistry: any;
@@ -43,6 +42,7 @@ export interface LegacyAngularInjectedDependencies {
 
 export interface DashboardPluginStartDependencies {
   data: DataStart;
+  npData: NpDataStart;
   embeddables: ReturnType<EmbeddablePublicPlugin['start']>;
   navigation: NavigationStart;
 }
@@ -59,6 +59,7 @@ export interface DashboardPluginSetupDependencies {
 export class DashboardPlugin implements Plugin {
   private startDependencies: {
     dataStart: DataStart;
+    npDataStart: NpDataStart;
     savedObjectsClient: SavedObjectsClientContract;
     embeddables: ReturnType<EmbeddablePublicPlugin['start']>;
     navigation: NavigationStart;
@@ -77,7 +78,13 @@ export class DashboardPlugin implements Plugin {
         if (this.startDependencies === null) {
           throw new Error('not started yet');
         }
-        const { dataStart, savedObjectsClient, embeddables, navigation } = this.startDependencies;
+        const {
+          dataStart,
+          savedObjectsClient,
+          embeddables,
+          navigation,
+          npDataStart,
+        } = this.startDependencies;
         const angularDependencies = await getAngularDependencies();
         const deps: RenderDeps = {
           core: contextCore as LegacyCoreStart,
@@ -85,6 +92,7 @@ export class DashboardPlugin implements Plugin {
           ...angularDependencies,
           navigation,
           dataStart,
+          npDataStart,
           indexPatterns: dataStart.indexPatterns.indexPatterns,
           savedObjectsClient,
           chrome: contextCore.chrome,
@@ -105,10 +113,11 @@ export class DashboardPlugin implements Plugin {
 
   start(
     { savedObjects: { client: savedObjectsClient } }: CoreStart,
-    { data: dataStart, embeddables, navigation }: DashboardPluginStartDependencies
+    { data: dataStart, embeddables, navigation, npData }: DashboardPluginStartDependencies
   ) {
     this.startDependencies = {
       dataStart,
+      npDataStart: npData,
       savedObjectsClient,
       embeddables,
       navigation,

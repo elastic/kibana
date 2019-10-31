@@ -102,15 +102,15 @@ export function initDashboardAppDirective(app: any, deps: RenderDeps) {
         $routeParams: {
           id?: string;
         },
-        getAppState: {
-          previouslyStored: () => TAppState | undefined;
-        }
+        getAppState: any,
+        globalState: any
       ) =>
         new DashboardAppController({
           $route,
           $scope,
           $routeParams,
           getAppState,
+          globalState,
           kbnUrl,
           AppStateClass: AppState,
           config,

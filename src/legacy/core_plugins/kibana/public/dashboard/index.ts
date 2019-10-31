@@ -24,8 +24,6 @@ import { docTitle } from 'ui/doc_title/doc_title';
 import chrome from 'ui/chrome';
 import { IPrivate } from 'ui/private';
 import { ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
-import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing/get_unhashable_states_provider';
-import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 import { DashboardPlugin, LegacyAngularInjectedDependencies } from './plugin';
 import { start as data } from '../../../data/public/legacy';
 import { localApplicationService } from '../local_application_service';
@@ -43,14 +41,10 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
 
   const Private = injector.get<IPrivate>('Private');
 
-  const queryFilter = Private(FilterBarQueryFilterProvider);
-  const getUnhashableStates = Private(getUnhashableStatesProvider);
   const shareContextMenuExtensions = Private(ShareContextMenuExtensionsRegistryProvider);
   const savedObjectRegistry = Private(SavedObjectRegistryProvider);
 
   return {
-    queryFilter,
-    getUnhashableStates,
     shareContextMenuExtensions,
     dashboardConfig: injector.get('dashboardConfig'),
     savedObjectRegistry,
@@ -70,6 +64,7 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
   });
   instance.start(npStart.core, {
     data,
+    npData: npStart.plugins.data,
     embeddables,
     navigation,
   });

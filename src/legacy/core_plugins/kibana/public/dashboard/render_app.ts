@@ -63,14 +63,14 @@ import {
 import { SavedQueryService } from '../../../data/public/search/search_bar/lib/saved_query_service';
 import { EmbeddablePublicPlugin } from '../../../../../plugins/embeddable/public';
 import { NavigationStart } from '../../../navigation/public';
+import { DataPublicPluginStart as NpDataStart } from '../../../../../plugins/data/public';
 
 export interface RenderDeps {
   core: LegacyCoreStart;
   indexPatterns: DataStart['indexPatterns']['indexPatterns'];
   dataStart: DataStart;
+  npDataStart: NpDataStart;
   navigation: NavigationStart;
-  queryFilter: any;
-  getUnhashableStates: any;
   shareContextMenuExtensions: any;
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectRegistry: any;
