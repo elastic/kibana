@@ -6,8 +6,6 @@
 
 import { SpacesManager } from 'plugins/spaces/lib/spaces_manager';
 import { NavControlPopover } from 'plugins/spaces/views/nav_control/nav_control_popover';
-// @ts-ignore
-import { Path } from 'plugins/xpack_main/services/path';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { CoreStart } from 'src/core/public';
@@ -17,7 +15,7 @@ export function initSpacesNavControl(spacesManager: SpacesManager, core: CoreSta
   core.chrome.navControls.registerLeft({
     order: 1000,
     mount(targetDomElement: HTMLElement) {
-      if (Path.isUnauthenticated()) {
+      if (core.http.anonymousPaths.isAnonymous(window.location.pathname)) {
         return () => null;
       }
 
