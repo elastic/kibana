@@ -30,8 +30,8 @@ import uiRoutes from 'ui/routes';
 import { DOC_LINK_VERSION } from 'ui/documentation_links';
 import { I18nContext } from 'ui/i18n';
 import { ResizeChecker } from 'ui/resize_checker';
-import 'ui/autoload/styles';
 /* eslint-enable @kbn/eslint/no-restricted-paths */
+
 import template from '../../public/quarantined/index.html';
 import { App, AppUnmount, NotificationsSetup } from '../../../../../core/public';
 
