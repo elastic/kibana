@@ -36,7 +36,7 @@ export function getKibanaInstructionsForEnablingMetricbeat(product, _meta, {
                   <Fragment>
                     {` `}
                     <EuiLink
-                      href={`${ELASTIC_WEBSITE_URL}guide/en/kibana/reference/${DOC_LINK_VERSION}/configuring-metricbeat.html`}
+                      href={`${ELASTIC_WEBSITE_URL}guide/en/kibana/reference/${DOC_LINK_VERSION}/monitoring-metricbeat.html`}
                       target="_blank"
                     >
                       <FormattedMessage
