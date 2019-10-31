@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiButton } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink } from '@elastic/eui';
 import React from 'react';
 import styled, { css } from 'styled-components';
 
@@ -54,19 +54,19 @@ export const HeaderGlobal = React.memo<HeaderProps>(({ offsetRight }) => (
       </FlexItem>
 
       <FlexItem grow={false}>
-        <EuiFlexGroup alignItems="center" responsive={false} wrap>
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
           <FlexItem grow={false}>
             <MlPopover />
           </FlexItem>
 
           <FlexItem grow={false}>
-            <EuiButton
+            <EuiButtonEmpty
               data-test-subj="add-data"
               href="kibana#home/tutorial_directory/siem"
               iconType="plusInCircle"
             >
               {i18n.BUTTON_ADD_DATA}
-            </EuiButton>
+            </EuiButtonEmpty>
           </FlexItem>
         </EuiFlexGroup>
       </FlexItem>
