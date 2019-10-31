@@ -7,8 +7,6 @@ import React from 'react';
 import { EuiToolTip } from '@elastic/eui';
 import moment from 'moment-timezone';
 
-const DEFAULT_TIMEZONE_FORMAT = 'Z';
-
 interface Props {
   /**
    * timestamp in milliseconds
@@ -35,22 +33,18 @@ function getTimeFormat(
 }
 
 /**
- * Adds plus sign when offsetHours is greater than 0.
- * offsetHours = 2 -> returns: +2
- * offsetHours = 0 - > returns: 0
- * @param offsetHours
- */
-function getCustomTimezoneFormat(offsetHours: number) {
-  return offsetHours > 0 ? `+${offsetHours}` : offsetHours;
-}
-
-/**
  * Returns the timezone set on momentTime.
  * (UTC+offset) when offset if bigger than 0.
  * (UTC-offset) when offset if lower than 0.
  * @param momentTime Moment
  */
 function formatTimezone(momentTime: moment.Moment) {
+  const DEFAULT_TIMEZONE_FORMAT = 'Z';
+
+  // Adds plus sign when offsetHours is greater than 0.
+  const getCustomTimezoneFormat = (offsetHours: number) =>
+    offsetHours > 0 ? `+${offsetHours}` : offsetHours;
+
   const utcOffsetHours = momentTime.utcOffset() / 60;
 
   const utcOffsetFormatted = Number.isInteger(utcOffsetHours)
