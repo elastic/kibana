@@ -44,12 +44,7 @@ export const EuiHeaderAlert = ({
 }: IEuiHeaderAlertProps) => {
   const classes = classNames('euiHeaderAlert', 'kbnNewsFeed__headerAlert', className);
 
-  let badgeContent: JSX.Element | null;
-  if (badge) {
-    badgeContent = badge;
-  } else {
-    badgeContent = null;
-  }
+  const badgeContent = badge || null;
 
   return (
     <EuiI18n token="euiHeaderAlert.dismiss" default="Dismiss">

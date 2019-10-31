@@ -25,7 +25,7 @@ import { FetchResult } from '../../types';
 
 export interface INewsfeedContext {
   setFlyoutVisible: React.Dispatch<React.SetStateAction<boolean>>;
-  newsFetchResult: FetchResult | undefined;
+  newsFetchResult: FetchResult | void | null;
 }
 export const NewsfeedContext = React.createContext({} as INewsfeedContext);
 
@@ -36,24 +36,18 @@ interface Props {
 export const NewsfeedNavButton = ({ apiFetchResult }: Props) => {
   const [showBadge, setShowBadge] = useState<boolean>(false);
   const [flyoutVisible, setFlyoutVisible] = useState<boolean>(false);
-  const [newsFetchResult, setNewsFetchResult] = useState<FetchResult | undefined>(undefined);
+  const [newsFetchResult, setNewsFetchResult] = useState<FetchResult | null | void>(null);
 
   useEffect(() => {
-    function handleStatusChange(fetchResult: FetchResult) {
-      setShowBadge(fetchResult.hasNew);
+    function handleStatusChange(fetchResult: FetchResult | void | null) {
+      if (fetchResult) {
+        setShowBadge(fetchResult.hasNew);
+      }
       setNewsFetchResult(fetchResult);
     }
 
-    const subscription = apiFetchResult.subscribe(res => {
-      if (res) {
-        handleStatusChange(res);
-      }
-    });
-    return () => {
-      if (subscription) {
-        subscription.unsubscribe();
-      }
-    };
+    const subscription = apiFetchResult.subscribe(res => handleStatusChange(res));
+    return () => subscription.unsubscribe();
   }, [apiFetchResult]);
 
   function showFlyout() {
