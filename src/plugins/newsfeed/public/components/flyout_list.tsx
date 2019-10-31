@@ -35,9 +35,10 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiHeaderAlert } from '../../../../legacy/core_plugins/newsfeed/public/np_ready/components/header_alert/header_alert';
 import { NewsfeedContext } from './newsfeed_header_nav_button';
 import { NewsfeedItem } from '../../types';
+import { NewsEmptyPrompt } from './empty_news';
 
 export const NewsfeedFlyout = () => {
-  const { newsfeed, kibanaVersion, setFlyoutVisible } = useContext(NewsfeedContext);
+  const { newsFetchResult, setFlyoutVisible } = useContext(NewsfeedContext);
   const closeFlyout = useCallback(() => setFlyoutVisible(false), [setFlyoutVisible]);
 
   return (
@@ -55,23 +56,27 @@ export const NewsfeedFlyout = () => {
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody className={'kbnNews__flyoutAlerts'}>
-        {newsfeed.map((item: NewsfeedItem) => {
-          return (
-            <EuiHeaderAlert
-              key={item.hash}
-              title={item.title}
-              text={item.description}
-              action={
-                <EuiLink target="_blank" href={item.linkUrl}>
-                  {item.linkText}
-                  <EuiIcon type="popout" size="s" />
-                </EuiLink>
-              }
-              date={item.publishOn.format('DD MMMM YYYY')}
-              badge={<EuiBadge color="hollow">{item.badge}</EuiBadge>}
-            />
-          );
-        })}
+        {newsFetchResult && newsFetchResult.feedItems.length > 0 ? (
+          newsFetchResult.feedItems.map((item: NewsfeedItem) => {
+            return (
+              <EuiHeaderAlert
+                key={item.hash}
+                title={item.title}
+                text={item.description}
+                action={
+                  <EuiLink target="_blank" href={item.linkUrl}>
+                    {item.linkText}
+                    <EuiIcon type="popout" size="s" />
+                  </EuiLink>
+                }
+                date={item.publishOn.format('DD MMMM YYYY')}
+                badge={<EuiBadge color="hollow">{item.badge}</EuiBadge>}
+              />
+            );
+          })
+        ) : (
+          <NewsEmptyPrompt />
+        )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -81,15 +86,17 @@ export const NewsfeedFlyout = () => {
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiText color="subdued" size="s">
-              <p>
-                <FormattedMessage
-                  id="newsfeed.flyoutList.versionTextLabel"
-                  defaultMessage="{version}"
-                  values={{ version: `Version ${kibanaVersion}` }}
-                />
-              </p>
-            </EuiText>
+            {newsFetchResult ? (
+              <EuiText color="subdued" size="s">
+                <p>
+                  <FormattedMessage
+                    id="newsfeed.flyoutList.versionTextLabel"
+                    defaultMessage="{version}"
+                    values={{ version: `Version ${newsFetchResult.kibanaVersion}` }}
+                  />
+                </p>
+              </EuiText>
+            ) : null}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
