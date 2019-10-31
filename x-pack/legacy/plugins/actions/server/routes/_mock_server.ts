@@ -5,7 +5,7 @@
  */
 
 import Hapi from 'hapi';
-import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks';
+import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import { actionsClientMock } from '../actions_client.mock';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/plugin.mock';
@@ -21,7 +21,7 @@ export function createMockServer(config: Record<string, any> = defaultConfig) {
 
   const actionsClient = actionsClientMock.create();
   const actionTypeRegistry = actionTypeRegistryMock.create();
-  const savedObjectsClient = SavedObjectsClientMock.create();
+  const savedObjectsClient = savedObjectsClientMock.create();
   const encryptedSavedObjects = encryptedSavedObjectsMock.create();
 
   server.config = () => {

@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import 'ui/autoload/styles';
 import chrome from 'ui/chrome';
 import { hashUrl } from 'ui/state_management/state_hashing';
 import uiRoutes from 'ui/routes';

@@ -112,7 +112,7 @@ describe('getCategoryColumns', () => {
 
     expect(
       wrapper.find(`.field-browser-category-pane-${selectedCategoryId}-${timelineId}`).first()
-    ).toHaveStyleRule('font-weight', 'bold');
+    ).toHaveStyleRule('font-weight', 'bold', { modifier: '.euiText' });
   });
 
   test('it does NOT render an un-selected category with bold text', () => {
@@ -135,7 +135,7 @@ describe('getCategoryColumns', () => {
 
     expect(
       wrapper.find(`.field-browser-category-pane-${notTheSelectedCategoryId}-${timelineId}`).first()
-    ).toHaveStyleRule('font-weight', 'normal');
+    ).toHaveStyleRule('font-weight', 'normal', { modifier: '.euiText' });
   });
 
   test('it invokes onCategorySelected when a user clicks a category', () => {

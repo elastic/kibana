@@ -1,0 +1,131 @@
+#!/bin/groovy
+
+library 'kibana-pipeline-library'
+kibanaLibrary.load()
+
+// Looks like 'oss:ciGroup:1' or 'oss:firefoxSmoke'
+def JOB_PARTS = params.CI_GROUP.split(':')
+def IS_XPACK = JOB_PARTS[0] == 'xpack'
+def JOB = JOB_PARTS[1]
+def CI_GROUP = JOB_PARTS.size() > 2 ? JOB_PARTS[2] : ''
+def EXECUTIONS = params.NUMBER_EXECUTIONS.toInteger()
+def AGENT_COUNT = getAgentCount(EXECUTIONS)
+
+def worker = getWorkerFromParams(IS_XPACK, JOB, CI_GROUP)
+
+def workerFailures = []
+
+currentBuild.displayName += trunc(" ${params.GITHUB_OWNER}:${params.branch_specifier}", 24)
+currentBuild.description = "${params.CI_GROUP}<br />Agents: ${AGENT_COUNT}<br />Executions: ${params.NUMBER_EXECUTIONS}"
+
+stage("Kibana Pipeline") {
+  timeout(time: 180, unit: 'MINUTES') {
+    timestamps {
+      ansiColor('xterm') {
+        def agents = [:]
+        for(def agentNumber = 1; agentNumber <= AGENT_COUNT; agentNumber++) {
+          def agentNumberInside = agentNumber
+          def agentExecutions = floor(EXECUTIONS/AGENT_COUNT) + (agentNumber <= EXECUTIONS%AGENT_COUNT ? 1 : 0)
+          agents["agent-${agentNumber}"] = {
+            catchError {
+              print "Agent ${agentNumberInside} - ${agentExecutions} executions"
+
+              kibanaPipeline.withWorkers('flaky-test-runner', {
+                if (!IS_XPACK) {
+                  kibanaPipeline.buildOss()
+                  if (CI_GROUP == '1') {
+                    runbld "./test/scripts/jenkins_build_kbn_tp_sample_panel_action.sh"
+                  }
+                } else {
+                  kibanaPipeline.buildXpack()
+                }
+              }, getWorkerMap(agentNumberInside, agentExecutions, worker, workerFailures))()
+            }
+          }
+        }
+
+        parallel(agents)
+
+        currentBuild.description += ", Failures: ${workerFailures.size()}"
+
+        if (workerFailures.size() > 0) {
+          print "There were ${workerFailures.size()} test suite failures."
+          print "The executions that failed were:"
+          print workerFailures.join("\n")
+          print "Please check 'Test Result' and 'Pipeline Steps' pages for more info"
+        }
+      }
+    }
+  }
+}
+
+def getWorkerFromParams(isXpack, job, ciGroup) {
+  if (!isXpack) {
+    if (job == 'firefoxSmoke') {
+      return kibanaPipeline.getPostBuildWorker('firefoxSmoke', { runbld './test/scripts/jenkins_firefox_smoke.sh' })
+    } else if(job == 'visualRegression') {
+      return kibanaPipeline.getPostBuildWorker('visualRegression', { runbld './test/scripts/jenkins_visual_regression.sh' })
+    } else {
+      return kibanaPipeline.getOssCiGroupWorker(ciGroup)
+    }
+  }
+
+  if (job == 'firefoxSmoke') {
+    return kibanaPipeline.getPostBuildWorker('xpack-firefoxSmoke', { runbld './test/scripts/jenkins_xpack_firefox_smoke.sh' })
+  } else if(job == 'visualRegression') {
+    return kibanaPipeline.getPostBuildWorker('xpack-visualRegression', { runbld './test/scripts/jenkins_xpack_visual_regression.sh' })
+  } else {
+    return kibanaPipeline.getXpackCiGroupWorker(ciGroup)
+  }
+}
+
+def getWorkerMap(agentNumber, numberOfExecutions, worker, workerFailures, maxWorkerProcesses = 12) {
+  def workerMap = [:]
+  def numberOfWorkers = Math.min(numberOfExecutions, maxWorkerProcesses)
+
+  for(def i = 1; i <= numberOfWorkers; i++) {
+    def workerExecutions = numberOfExecutions/numberOfWorkers + (i <= numberOfExecutions%numberOfWorkers ? 1 : 0)
+
+    workerMap["agent-${agentNumber}-worker-${i}"] = { workerNumber ->
+      for(def j = 0; j < workerExecutions; j++) {
+        print "Execute agent-${agentNumber} worker-${workerNumber}: ${j}"
+        withEnv([
+          "JOB=agent-${agentNumber}-worker-${workerNumber}-${j}",
+          "REMOVE_KIBANA_INSTALL_DIR=1",
+        ]) {
+          catchError {
+            try {
+              worker(workerNumber)
+            } catch (ex) {
+              workerFailures << "agent-${agentNumber} worker-${workerNumber}-${j}"
+              throw ex
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return workerMap
+}
+
+def getAgentCount(executions) {
+  // Increase agent count every 24 worker processess, up to 3 agents maximum
+  return Math.min(3, 1 + floor(executions/24))
+}
+
+def trunc(str, length) {
+  if (str.size() >= length) {
+    return str.take(length) + "..."
+  }
+
+  return str;
+}
+
+// All of the real rounding/truncating methods are sandboxed
+def floor(num) {
+  return num
+    .toString()
+    .split('\\.')[0]
+    .toInteger()
+}

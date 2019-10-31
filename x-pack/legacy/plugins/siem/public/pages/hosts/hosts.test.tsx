@@ -19,7 +19,8 @@ import { wait } from '../../lib/helpers';
 import { TestProviders } from '../../mock';
 import { mockUiSettings } from '../../mock/ui_settings';
 import { InputsModelId } from '../../store/inputs/constants';
-import { Hosts, HostsComponentProps } from './hosts';
+import { HostsComponentProps } from './types';
+import { Hosts } from './hosts';
 import { useKibanaCore } from '../../lib/compose/kibana_core';
 
 jest.mock('../../lib/settings/use_kibana_ui_setting');
@@ -97,6 +98,7 @@ describe('Hosts - rendering', () => {
     }>,
     query: { query: '', language: 'kuery' },
     filters: [],
+    hostsPagePath: '',
   };
 
   beforeAll(() => {
