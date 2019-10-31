@@ -18,10 +18,9 @@ export interface PluginsSetup {
   feature_catalogue?: FeatureCatalogueSetup;
 }
 
-export class SpacesPlugin implements Plugin<{}, SpacesPluginStart, PluginsSetup> {
-  private spacesManager: SpacesManager | undefined;
+export class SpacesPlugin implements Plugin<void, SpacesPluginStart, PluginsSetup> {
+  private spacesManager?: SpacesManager;
 
-  constructor(initializerContext: PluginInitializerContext) {}
 
   public async start(core: CoreStart) {
     const serverBasePath = core.injectedMetadata.getInjectedVar('serverBasePath') as string;

@@ -43,7 +43,7 @@ class SpacesMenuUI extends Component<Props, State> {
     const { searchTerm } = this.state;
 
     const items = isLoading
-      ? [1, 2, 3].map(this.rendePlaceholderMenuItem)
+      ? [1, 2, 3].map(this.renderPlaceholderMenuItem)
       : this.getVisibleSpaces(searchTerm).map(this.renderSpaceMenuItem);
 
     const panelProps = {
@@ -188,9 +188,9 @@ class SpacesMenuUI extends Component<Props, State> {
     );
   };
 
-  private rendePlaceholderMenuItem = (key: string | number): JSX.Element => {
+  private renderPlaceholderMenuItem = (key: string | number): JSX.Element => {
     return (
-      <EuiContextMenuItem key={key} onClick={() => null}>
+      <EuiContextMenuItem key={key} disabled={true}>
         <EuiLoadingContent lines={1} />
       </EuiContextMenuItem>
     );
