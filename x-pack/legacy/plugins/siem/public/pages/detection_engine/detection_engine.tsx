@@ -150,6 +150,7 @@ export const DetectionEngineComponent = React.memo(() => {
                 <HeaderSection title="Signal detection frequency">
                   <EuiSelect
                     options={sampleChartOptions}
+                    onChange={() => {}}
                     prepend="Stack by"
                     value={sampleChartOptions[0].value}
                   />

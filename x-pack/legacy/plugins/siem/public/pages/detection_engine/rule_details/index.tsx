@@ -15,7 +15,6 @@ import {
   EuiFlexItem,
   EuiIconTip,
   EuiPanel,
-  EuiProgress,
   EuiSelect,
   EuiSpacer,
   EuiSwitch,
@@ -154,6 +153,7 @@ const Signals = React.memo(() => {
         <HeaderSection title="Signal detection frequency">
           <EuiSelect
             options={sampleChartOptions}
+            onChange={() => {}}
             prepend="Stack by"
             value={sampleChartOptions[0].value}
           />
@@ -522,7 +522,7 @@ export const RuleDetailsComponent = React.memo(() => {
               >
                 <EuiFlexGroup alignItems="center">
                   <EuiFlexItem grow={false}>
-                    <EuiSwitch label="Activate rule" />
+                    <EuiSwitch checked={true} label="Activate rule" onChange={() => {}} />
                   </EuiFlexItem>
 
                   <EuiFlexItem grow={false}>

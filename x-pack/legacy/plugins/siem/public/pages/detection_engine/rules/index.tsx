@@ -193,8 +193,10 @@ const AllRules = React.memo(() => {
         <div>
           {typeof value !== 'string' ? (
             <>
-              {value.map(tag => (
-                <EuiBadge color="hollow">{tag}</EuiBadge>
+              {value.map((tag, i) => (
+                <EuiBadge color="hollow" key={i}>
+                  {tag}
+                </EuiBadge>
               ))}
             </>
           ) : (
@@ -210,7 +212,15 @@ const AllRules = React.memo(() => {
       align: 'center',
       field: 'activate',
       name: 'Activate',
-      render: (value: ColumnTypes['activate']) => <EuiSwitch checked={value} />,
+      render: (value: ColumnTypes['activate']) => (
+        // Michael: Errors occur when attempting to use "showLabel" prop. Likely need to wait for styled-components upgrade before uncommenting.
+        <EuiSwitch
+          checked={value}
+          // label="Activate"
+          onChange={() => {}}
+          // showLabel={false}
+        />
+      ),
       sortable: true,
       width: '65px',
     },

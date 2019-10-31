@@ -31,22 +31,13 @@ Wrapper.displayName = 'Wrapper';
 
 interface SubtitleItemProps {
   children: string | React.ReactNode;
-  key?: number;
 }
 
-const SubtitleItem = React.memo<SubtitleItemProps>(({ children, key }) => {
+const SubtitleItem = React.memo<SubtitleItemProps>(({ children }) => {
   if (typeof children === 'string') {
-    return (
-      <p className="siemSubtitle__item siemSubtitle__item--text" key={key}>
-        {children}
-      </p>
-    );
+    return <p className="siemSubtitle__item siemSubtitle__item--text">{children}</p>;
   } else {
-    return (
-      <div className="siemSubtitle__item siemSubtitle__item--node" key={key}>
-        {children}
-      </div>
-    );
+    return <div className="siemSubtitle__item siemSubtitle__item--node">{children}</div>;
   }
 });
 SubtitleItem.displayName = 'SubtitleItem';
