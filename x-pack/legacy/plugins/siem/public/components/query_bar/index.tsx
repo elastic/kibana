@@ -7,18 +7,16 @@
 import { Filter } from '@kbn/es-query';
 import React, { memo, useState, useEffect, useMemo, useCallback } from 'react';
 import { StaticIndexPattern, IndexPattern } from 'ui/index_patterns';
-import { Storage } from 'ui/storage';
 
 import { Query, TimeRange } from 'src/plugins/data/common/types';
 
 import { isEqual } from 'lodash/fp';
-import {
-  SavedQuery,
-  SearchBar,
-  FilterManager,
-} from '../../../../../../../src/legacy/core_plugins/data/public';
+
+import { SavedQuery, SearchBar } from '../../../../../../../src/legacy/core_plugins/data/public';
+import { FilterManager } from '../../../../../../../src/plugins/data/public';
 import { SavedQueryTimeFilter } from '../../../../../../../src/legacy/core_plugins/data/public/search';
 import { TimeHistory } from '../../../../../../../src/legacy/core_plugins/data/public/timefilter';
+import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
 
 interface QueryBarComponentProps {
   dateRangeFrom?: string;

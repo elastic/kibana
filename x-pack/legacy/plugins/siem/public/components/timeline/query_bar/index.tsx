@@ -12,10 +12,8 @@ import { Query } from 'src/plugins/data/common/types';
 
 import { Subscription } from 'rxjs';
 import { SavedQueryTimeFilter } from '../../../../../../../../src/legacy/core_plugins/data/public/search';
-import {
-  SavedQuery,
-  FilterManager,
-} from '../../../../../../../../src/legacy/core_plugins/data/public';
+import { SavedQuery } from '../../../../../../../../src/legacy/core_plugins/data/public';
+import { FilterManager } from '../../../../../../../../src/plugins/data/public';
 
 import { BrowserFields } from '../../../containers/source';
 import { convertKueryToElasticSearchQuery } from '../../../lib/keury';
@@ -101,7 +99,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
             if (isSubscribed) {
               const filterWithoutDropArea = filterManager
                 .getFilters()
-                .filter(f => f.meta.controlledBy !== timelineFilterDropArea);
+                .filter((f: Filter) => f.meta.controlledBy !== timelineFilterDropArea);
               setFilters(filterWithoutDropArea);
               setQueryBarFilters(filterWithoutDropArea);
             }
@@ -118,7 +116,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
     useEffect(() => {
       const filterWithoutDropArea = filterManager
         .getFilters()
-        .filter(f => f.meta.controlledBy !== timelineFilterDropArea);
+        .filter((f: Filter) => f.meta.controlledBy !== timelineFilterDropArea);
       if (!isEqual(filters, filterWithoutDropArea)) {
         filterManager.setFilters(filters);
       }
