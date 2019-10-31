@@ -6,7 +6,12 @@
 
 import { SavedObjectsClientContract } from 'src/core/server/';
 import { SAVED_OBJECT_TYPE } from '../../common/constants';
-import { getInstallationObject, assetUsesObjects, CallESAsCurrentUser } from './index';
+import {
+  getInstallationObject,
+  assetUsesObjects,
+  CallESAsCurrentUser,
+  getPackageInfo,
+} from './index';
 import { AssetType } from '../../common/types';
 
 export async function removeInstallation(options: {
@@ -33,7 +38,9 @@ export async function removeInstallation(options: {
   await Promise.all(deletePromises);
 
   // successful delete's in SO client return {}. return something more useful
-  return installedObjects;
+  const packageInfo = await getPackageInfo({ savedObjectsClient, pkgkey });
+
+  return packageInfo;
 }
 
 async function deletePipeline(callCluster: CallESAsCurrentUser, id: string): Promise<any> {

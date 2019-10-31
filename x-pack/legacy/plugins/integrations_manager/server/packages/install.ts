@@ -8,7 +8,7 @@ import { SavedObject, SavedObjectsClientContract } from 'src/core/server/';
 import { SAVED_OBJECT_TYPE } from '../../common/constants';
 import { AssetReference, AssetType, InstallationAttributes } from '../../common/types';
 import * as Registry from '../registry';
-import { assetUsesObjects, getInstallationObject } from './index';
+import { assetUsesObjects, getInstallationObject, getPackageInfo } from './index';
 import { getObjects } from './get_objects';
 
 export async function installPackage(options: {
@@ -17,31 +17,31 @@ export async function installPackage(options: {
 }) {
   const { savedObjectsClient, pkgkey } = options;
 
-  // Only install Kibana assets during package installation. All other asset types need special handling
+  // Only install certain Kibana assets during package installation.
+  // All other asset types need special handling
   const assetTypes: AssetType[] = [AssetType.visualization, AssetType.dashboard, AssetType.search];
 
-  let result = {};
-
-  // this is a for loop because using forEach with an async callback wouldn't wait for the
-  // awaits to resolve, and we'd return an empty result
-  for (let i = 0; i < assetTypes.length; i++) {
+  const installPromises = assetTypes.map(async assetType => {
     const toSave = await installAssets({
       savedObjectsClient,
       pkgkey,
-      assetType: assetTypes[i],
+      assetType,
     });
 
     if (toSave.length) {
       // Save those references in the integration manager's state saved object
-      // The latest return value is the state of this object after all updates
-      result = await saveInstallationReferences({
+      await saveInstallationReferences({
         savedObjectsClient,
         pkgkey,
         toSave,
       });
     }
-  }
-  return result;
+  });
+  await Promise.all(installPromises);
+
+  const packageInfo = await getPackageInfo({ savedObjectsClient, pkgkey });
+
+  return packageInfo;
 }
 
 // the function which how to install each of the various asset types
@@ -109,41 +109,6 @@ async function installKibanaSavedObjects({
     return installed;
   }
 }
-
-// async function installPipelines({
-//   callCluster,
-//   pkgkey,
-// }: {
-//   callCluster: CallESAsCurrentUser;
-//   pkgkey: string;
-// }) {
-//   const isPipeline = ({ path }: Registry.ArchiveEntry) =>
-//     Registry.pathParts(path).type === 'ingest-pipeline';
-//   const paths = await Registry.getArchiveInfo(pkgkey, isPipeline);
-//   const installationPromises = paths.map(path => installPipeline({ callCluster, path }));
-//   const references = await Promise.all(installationPromises);
-
-//   return references;
-// }
-
-// async function installPipeline({
-//   callCluster,
-//   path,
-// }: {
-//   callCluster: CallESAsCurrentUser;
-//   path: string;
-// }): Promise<AssetReference> {
-//   const buffer = Registry.getAsset(path);
-//   // sample data is invalid json. strip the offending parts before parsing
-//   const json = buffer.toString('utf8').replace(/\\/g, '');
-//   const pipeline = JSON.parse(json);
-//   const { file, type } = Registry.pathParts(path);
-//   const id = file.replace('.json', '');
-//   // TODO: any sort of error, not "happy path", handling
-//   await callCluster('ingest.putPipeline', { id, body: pipeline });
-
-//   return { id, type };
-// }
 
 function toAssetReference({ id, type }: SavedObject) {
   const reference: AssetReference = { id, type };
