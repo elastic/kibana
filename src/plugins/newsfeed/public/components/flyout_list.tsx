@@ -17,7 +17,6 @@
  * under the License.
  */
 import React, { useCallback, useContext } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
   EuiIcon,
   EuiFlyout,
@@ -84,9 +83,11 @@ export const NewsfeedFlyout = () => {
           <EuiFlexItem grow={false}>
             <EuiText color="subdued" size="s">
               <p>
-                {i18n.translate('newsfeed.flyoutList.versionTextLabel', {
-                  defaultMessage: `Version ${kibanaVersion}`,
-                })}
+                <FormattedMessage
+                  id="newsfeed.flyoutList.versionTextLabel"
+                  defaultMessage="{version}"
+                  values={{ version: `Version ${kibanaVersion}` }}
+                />
               </p>
             </EuiText>
           </EuiFlexItem>
