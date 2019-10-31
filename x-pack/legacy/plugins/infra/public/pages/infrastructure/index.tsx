@@ -22,7 +22,7 @@ import { WithSource } from '../../containers/with_source';
 import { Source } from '../../containers/source';
 import { MetricsExplorerPage } from './metrics_explorer';
 import { SnapshotPage } from './snapshot';
-import { SettingsPage } from '../shared/settings';
+import { MetricsSettingsPage } from './settings';
 import { AppNavigation } from '../../components/navigation/app_navigation';
 
 interface InfrastructurePageProps extends RouteComponentProps {
@@ -106,10 +106,7 @@ export const InfrastructurePage = injectUICapabilities(
               </WithSource>
             )}
           />
-          <Route
-            path={`${match.path}/settings`}
-            render={props => <SettingsPage {...props} withCapabilities="infrastructure" />}
-          />
+          <Route path={`${match.path}/settings`} component={MetricsSettingsPage} />
         </Switch>
       </ColumnarPage>
     </Source.Provider>

@@ -19,7 +19,7 @@ import { SourceLoadingPage } from '../../components/source_loading_page';
 import { SourceErrorPage } from '../../components/source_error_page';
 import { Source, useSource } from '../../containers/source';
 import { StreamPage } from './stream';
-import { SettingsPage } from '../shared/settings';
+import { LogsSettingsPage } from './settings';
 import { AppNavigation } from '../../components/navigation/app_navigation';
 import { AnalysisPage } from './analysis';
 import {
@@ -99,10 +99,7 @@ export const LogsPage = injectUICapabilities(({ match, uiCapabilities }: LogsPag
               <Switch>
                 <Route path={streamTab.path} component={StreamPage} />
                 <Route path={logRateTab.path} component={AnalysisPage} />
-                <Route
-                  path={settingsTab.path}
-                  render={props => <SettingsPage {...props} withCapabilities="logs" />}
-                />
+                <Route path={settingsTab.path} component={LogsSettingsPage} />
                 <RedirectWithQueryParams
                   from={`${match.path}/analysis`}
                   to={logRateTab.path}

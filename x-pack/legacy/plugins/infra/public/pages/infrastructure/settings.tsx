@@ -7,17 +7,15 @@
 import React from 'react';
 import { UICapabilities } from 'ui/capabilities';
 import { injectUICapabilities } from 'ui/capabilities/react';
-import { SourceConfigurationSettings } from '../../../components/source_configuration/source_configuration_settings';
+import { SourceConfigurationSettings } from '../../components/source_configuration/source_configuration_settings';
 
 interface SettingsPageProps {
   uiCapabilities: UICapabilities;
-  withCapabilities: 'logs' | 'infrastructure';
 }
 
-export const SettingsPage = injectUICapabilities(
-  ({ uiCapabilities, withCapabilities }: SettingsPageProps) => (
-    <SourceConfigurationSettings
-      shouldAllowEdit={uiCapabilities[withCapabilities].configureSource as boolean}
-    />
-  )
-);
+export const MetricsSettingsPage = injectUICapabilities(({ uiCapabilities }: SettingsPageProps) => (
+  <SourceConfigurationSettings
+    shouldAllowEdit={uiCapabilities.infrastructure.configureSource as boolean}
+    displaySettings="metrics"
+  />
+));
