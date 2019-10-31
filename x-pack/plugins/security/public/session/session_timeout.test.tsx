@@ -26,9 +26,11 @@ const expectWarningToast = (
     Array [
       Object {
         "color": "warning",
-        "text": reactMount(<SessionTimeoutWarning
-          onRefreshSession={[Function]}
-        />),
+        "text": MountPoint {
+          "reactNode": <SessionTimeoutWarning
+            onRefreshSession={[Function]}
+          />,
+        },
         "title": "Warning",
         "toastLifeTimeMs": ${toastLifeTimeMS},
       },

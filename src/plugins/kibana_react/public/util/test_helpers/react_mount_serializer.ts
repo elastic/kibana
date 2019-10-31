@@ -17,12 +17,14 @@
  * under the License.
  */
 
-// eslint-disable-next-line import/no-default-export
-export default {
-  test(value: any) {
-    return value && value.__reactMount__;
-  },
-  print(value: any, serialize: any, indent: any) {
-    return `reactMount(${serialize(value.__reactMount__)})`;
-  },
-};
+export function test(value: any) {
+  return value && value.__reactMount__;
+}
+
+export function print(value: any, serialize: any) {
+  // there is no proper way to correctly indent multiline values
+  // so the trick here is to use the Object representation and rewriting the root object name
+  return serialize({
+    reactNode: value.__reactMount__,
+  }).replace('Object', 'MountPoint');
+}
