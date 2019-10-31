@@ -17,6 +17,7 @@ export enum AssetType {
   search = 'search',
   ingestPipeline = 'ingest-pipeline',
   indexPattern = 'index-pattern',
+  timelionSheet = 'timelion-sheet',
 }
 
 // Registry's response types
