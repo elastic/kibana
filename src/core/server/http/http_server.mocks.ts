@@ -40,7 +40,6 @@ interface RequestFixtureOptions {
   method?: RouteMethod;
   socket?: Socket;
   routeTags?: string[];
-  routeAppOptions?: any;
 }
 
 function createKibanaRequestMock({
@@ -52,7 +51,6 @@ function createKibanaRequestMock({
   method = 'get',
   socket = new Socket(),
   routeTags,
-  routeAppOptions,
 }: RequestFixtureOptions = {}) {
   const queryString = querystring.stringify(query);
   return KibanaRequest.from(
@@ -69,7 +67,7 @@ function createKibanaRequestMock({
         query: queryString,
         search: queryString ? `?${queryString}` : queryString,
       },
-      route: { settings: { tags: routeTags, app: routeAppOptions } },
+      route: { settings: { tags: routeTags } },
       raw: {
         req: { socket },
       },

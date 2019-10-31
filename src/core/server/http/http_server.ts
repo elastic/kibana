@@ -127,15 +127,13 @@ export class HttpServer {
     for (const router of this.registeredRouters) {
       for (const route of router.getRoutes()) {
         this.log.debug(`registering route handler for [${route.path}]`);
-        const { authRequired = true, extendsSession = true, tags } = route.options;
-        // Hapi provides the "server.options.app" property to pass in application-specific configuration
+        const { authRequired = true, tags } = route.options;
         this.server.route({
           handler: route.handler,
           method: route.method,
           path: route.path,
           options: {
             auth: authRequired ? undefined : false,
-            app: { extendsSession },
             tags: tags ? Array.from(tags) : undefined,
           },
         });
