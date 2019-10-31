@@ -28,17 +28,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "./models/policy.v1.json"
-                    },
-                    {
-                      "type": "array",
-                      "items": {
-                        "$ref": "./models/policy.v1.json"
-                      }
-                    }
-                  ]
+                  "type": "array",
+                  "items": {
+                    "$ref": "./models/policy.v1.json"
+                  }
                 }
               }
             }
@@ -93,6 +86,37 @@
         ],
         "description": "Return datasources",
         "operationId": "getDatasourcs"
+      }
+    },
+    "/policy/{policy_id}": {
+      "parameters": [
+        {
+          "type": "string",
+          "name": "policy_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "summary": "Get policy by id",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "./models/policy.v1.json"
+                }
+              }
+            }
+          }
+        },
+        "description": "Get Policy by id",
+        "operationId": "getPolicyById"
       }
     }
   },
