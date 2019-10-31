@@ -51,6 +51,7 @@ export interface ExpressionType<
   to?: {
     [type: string]: ExpressionValueConverter<Value, any>;
   };
+  help?: string;
 }
 
 export type AnyExpressionType = ExpressionType<string, ExpressionValueBoxed>;

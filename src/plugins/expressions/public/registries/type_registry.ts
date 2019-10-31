@@ -17,5 +17,13 @@
  * under the License.
  */
 
-// eslint-disable-next-line
-export * from '../../../plugins/expressions/public/functions/tests/utils';
+import { Registry } from './registry';
+import { Type } from '../interpreter';
+import { AnyExpressionType } from '../types';
+
+export class TypesRegistry extends Registry<Type> {
+  register(typeDefinition: AnyExpressionType | (() => AnyExpressionType)) {
+    const type = new Type(typeof typeDefinition === 'object' ? typeDefinition : typeDefinition());
+    this.set(type.name, type);
+  }
+}

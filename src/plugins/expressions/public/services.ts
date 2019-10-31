@@ -17,25 +17,19 @@
  * under the License.
  */
 
-import { ExpressionType } from '../types';
+import { createKibanaUtilsCore, createGetterSetter } from '../../kibana_utils/public';
+import { ExpressionInterpreter } from './types';
+import { Start as IInspector } from '../../inspector/public';
+import { ExpressionsSetup } from './plugin';
 
-const name = 'style';
+export const { getCoreStart, setCoreStart, savedObjects } = createKibanaUtilsCore();
 
-export interface Style {
-  type: typeof name;
-  spec: any;
-  css: string;
-}
+export const [getInspector, setInspector] = createGetterSetter<IInspector>('Inspector');
 
-export const style = (): ExpressionType<typeof name, Style> => ({
-  name,
-  from: {
-    null: () => {
-      return {
-        type: 'style',
-        spec: {},
-        css: '',
-      };
-    },
-  },
-});
+export const [getInterpreter, setInterpreter] = createGetterSetter<ExpressionInterpreter>(
+  'Interpreter'
+);
+
+export const [getRenderersRegistry, setRenderersRegistry] = createGetterSetter<
+  ExpressionsSetup['__LEGACY']['renderers']
+>('Renderers registry');

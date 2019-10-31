@@ -17,29 +17,8 @@
  * under the License.
  */
 
-export { ArgumentType } from './arguments';
-export {
-  TypeToString,
-  KnownTypeToString,
-  TypeString,
-  UnmappedTypeStrings,
-  UnwrapPromise,
-} from './common';
-export { ExpressionFunction, AnyExpressionFunction, FunctionHandlers } from './functions';
-export { ExpressionType, AnyExpressionType } from './types';
-export * from '../expression_types';
-
-export type ExpressionArgAST = string | boolean | number | ExpressionAST;
-
-export interface ExpressionFunctionAST {
-  type: 'function';
-  function: string;
-  arguments: {
-    [key: string]: ExpressionArgAST[];
+export function createHandlers() {
+  return {
+    environment: 'client',
   };
-}
-
-export interface ExpressionAST {
-  type: 'expression';
-  chain: ExpressionFunctionAST[];
 }

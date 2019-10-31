@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { openSans } from '../../common/lib/fonts';
-import { font } from './font';
-import { functionWrapper } from '../../test_helpers';
+import { openSans } from '../../fonts';
+import { font } from '../font';
+import { functionWrapper } from './utils';
 
 describe('font', () => {
   const fn: any = functionWrapper(font);

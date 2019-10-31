@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { getType } from './serialize_provider';
+import { getType } from './interpreter';
 
 describe('getType()', () => {
   test('returns "null" string for null or undefined', () => {
