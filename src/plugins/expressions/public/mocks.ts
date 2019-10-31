@@ -16,10 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Plugin } from '.';
+import { ExpressionsSetup, ExpressionsStart } from '.';
 
-export type Setup = jest.Mocked<ReturnType<Plugin['setup']>>;
-export type Start = jest.Mocked<ReturnType<Plugin['start']>>;
+export type Setup = jest.Mocked<ExpressionsSetup>;
+export type Start = jest.Mocked<ExpressionsStart>;
 
 const createSetupContract = (): Setup => {
   const setupContract: Setup = {
@@ -36,28 +36,18 @@ const createSetupContract = (): Setup => {
       types: {
         register: () => {},
       } as any,
+      getExecutor: () => ({
+        interpreter: {
+          interpretAst: () => {},
+        },
+      }),
     },
   };
   return setupContract;
 };
 
 const createStartContract = (): Start => {
-  const startContract: Start = {
-    registerFunction: jest.fn(),
-    registerRenderer: jest.fn(),
-    registerType: jest.fn(),
-    __LEGACY: {
-      functions: {
-        register: () => {},
-      } as any,
-      renderers: {
-        register: () => {},
-      } as any,
-      types: {
-        register: () => {},
-      } as any,
-    },
-  };
+  const startContract: Start = undefined;
   return startContract;
 };
 

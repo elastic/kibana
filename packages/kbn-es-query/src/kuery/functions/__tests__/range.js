@@ -181,6 +181,60 @@ describe('kuery functions', function () {
         expect(result).to.eql(expected);
       });
 
+      it('should use a provided nested context to create a full field name', function () {
+        const expected = {
+          bool: {
+            should: [
+              {
+                range: {
+                  'nestedField.bytes': {
+                    gt: 1000,
+                    lt: 8000
+                  }
+                }
+              }
+            ],
+            minimum_should_match: 1
+          }
+        };
+
+        const node = nodeTypes.function.buildNode('range', 'bytes', { gt: 1000, lt: 8000 });
+        const result = range.toElasticsearchQuery(
+          node,
+          indexPattern,
+          {},
+          { nested: { path: 'nestedField' } }
+        );
+        expect(result).to.eql(expected);
+      });
+
+      it('should automatically add a nested query when a wildcard field name covers a nested field', function () {
+        const expected = {
+          bool: {
+            should: [
+              {
+                nested: {
+                  path: 'nestedField.nestedChild',
+                  query: {
+                    range: {
+                      'nestedField.nestedChild.doublyNestedChild': {
+                        gt: 1000,
+                        lt: 8000
+                      }
+                    }
+                  },
+                  score_mode: 'none'
+                }
+              }
+            ],
+            minimum_should_match: 1
+          }
+        };
+
+        const node = nodeTypes.function.buildNode('range', '*doublyNested*', { gt: 1000, lt: 8000 });
+        const result = range.toElasticsearchQuery(node, indexPattern);
+        expect(result).to.eql(expected);
+      });
     });
   });
 });

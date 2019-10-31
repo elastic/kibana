@@ -35,6 +35,7 @@ function generateSuggestion(state = {}): DatasourceSuggestion {
       layerId: 'first',
       changeType: 'unchanged',
     },
+    keptLayerIds: ['first'],
   };
 }
 
@@ -928,6 +929,7 @@ describe('editor_frame', () => {
             layerId: 'first',
             changeType: 'unchanged',
           },
+          keptLayerIds: [],
         },
       ]);
 
@@ -1073,6 +1075,7 @@ describe('editor_frame', () => {
             isMultiRow: true,
             layerId: 'first',
           },
+          keptLayerIds: [],
         },
       ]);
       mount(
@@ -1520,7 +1523,7 @@ describe('editor_frame', () => {
             query: { query: '', language: 'lucene' },
             filters: [],
           },
-          title: 'New visualization',
+          title: '',
           type: 'lens',
           visualizationType: 'testVis',
         },
@@ -1539,7 +1542,7 @@ describe('editor_frame', () => {
             query: { query: '', language: 'lucene' },
             filters: [],
           },
-          title: 'New visualization',
+          title: '',
           type: 'lens',
           visualizationType: 'testVis',
         },
@@ -1596,7 +1599,7 @@ describe('editor_frame', () => {
             query: { query: 'new query', language: 'lucene' },
             filters: [],
           },
-          title: 'New visualization',
+          title: '',
           type: 'lens',
           visualizationType: 'testVis',
         },
