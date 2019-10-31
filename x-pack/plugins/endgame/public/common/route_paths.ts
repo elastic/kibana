@@ -8,15 +8,21 @@ import { PureComponent } from 'react';
 import { toAsyncComponent } from './to_async_component';
 
 const ShowLanding = toAsyncComponent(
-  async () => ((await import('../application/landing')).LandingPage as unknown) as PureComponent
+  async () =>
+    ((await import(/* webpackChunkName: "landing" */ '../application/landing'))
+      .LandingPage as unknown) as PureComponent
 );
 
 const ShowEndpoints = toAsyncComponent(
-  async () => ((await import('../application/endpoints')).EndpointsPage as unknown) as PureComponent
+  async () =>
+    ((await import(/* webpackChunkName: "endpoints" */ '../application/endpoints'))
+      .EndpointsPage as unknown) as PureComponent
 );
 
 const ShowAlerts = toAsyncComponent(
-  async () => ((await import('../application/alerts')).AlertsPage as unknown) as PureComponent
+  async () =>
+    ((await import(/* webpackChunkName: "alerts" */ '../application/alerts'))
+      .AlertsPage as unknown) as PureComponent
 );
 
 export const routePaths = [

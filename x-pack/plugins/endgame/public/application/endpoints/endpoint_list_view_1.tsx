@@ -80,10 +80,12 @@ export class EndpointListView1 extends PureComponent {
 
   async componentDidMount() {
     // Load some API data for this component
-    const results = await this.context.appContext.core.http.get('_api/endpoints').catch(e => {
+    const results = await this.context.appContext.core.http
+      .get(`${this.context.apiPrefixPath}/endpoints`)
+      .catch(e => {
       console.error(e); //eslint-disable-line
-      return Promise.resolve([]);
-    });
+        return Promise.resolve([]);
+      });
     this.setState({ results, queriedEndpointMetadata: results });
   }
 }
