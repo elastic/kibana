@@ -23,10 +23,10 @@ import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
 import {
   TimeRange,
+  Query,
   onlyDisabledFiltersChanged,
   esFilters,
 } from '../../../../../../plugins/data/public';
-import { Query } from '../../../../data/public';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 
 import {

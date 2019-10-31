@@ -50,13 +50,13 @@ import {
 import { KbnUrl } from 'ui/url/kbn_url';
 import { IndexPattern } from 'ui/index_patterns';
 import { IPrivate } from 'ui/private';
-import { Query, SavedQuery } from 'src/legacy/core_plugins/data/public';
+import { SavedQuery } from 'src/legacy/core_plugins/data/public';
 import { SaveOptions } from 'ui/saved_objects/saved_object';
 import { capabilities } from 'ui/capabilities';
 import { Subscription } from 'rxjs';
 import { npStart } from 'ui/new_platform';
 import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
-import { extractTimeFilter, changeTimeFilter } from '../../../../../plugins/data/public';
+import { extractTimeFilter, changeTimeFilter, Query } from '../../../../../plugins/data/public';
 import { start as data } from '../../../data/public/legacy';
 import { esFilters } from '../../../../../plugins/data/public';
 

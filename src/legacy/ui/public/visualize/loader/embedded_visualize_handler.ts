@@ -28,7 +28,12 @@ import { AggConfigs } from 'ui/agg_types/agg_configs';
 import { SearchSource } from 'ui/courier';
 import { QueryFilter } from 'ui/filter_manager/query_filter';
 
-import { TimeRange, onlyDisabledFiltersChanged } from '../../../../../plugins/data/public';
+import {
+  esFilters,
+  TimeRange,
+  Query,
+  onlyDisabledFiltersChanged,
+} from '../../../../../plugins/data/public';
 import { registries } from '../../../../core_plugins/interpreter/public/registries';
 import { Inspector } from '../../inspector';
 import { Adapters } from '../../inspector/types';
@@ -42,8 +47,6 @@ import { Vis } from '../../vis';
 import { VisFiltersProvider } from '../../vis/vis_filters';
 import { PipelineDataLoader } from './pipeline_data_loader';
 import { visualizationLoader } from './visualization_loader';
-import { Query } from '../../../../core_plugins/data/public';
-import { esFilters } from '../../../../../plugins/data/public';
 
 import { DataAdapter, RequestAdapter } from '../../inspector/adapters';
 

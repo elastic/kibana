@@ -17,15 +17,13 @@
  * under the License.
  */
 
-import { TimeRange } from 'src/plugins/data/public';
-import { Query } from 'src/legacy/core_plugins/data/public';
 import { SavedObject } from 'ui/saved_objects/saved_object';
 import { VisResponseValue } from 'src/plugins/visualizations/public';
 import { SearchSource } from '../../courier';
 import { PersistedState } from '../../persisted_state';
 import { AppState } from '../../state_management/app_state';
 import { Vis } from '../../vis';
-import { esFilters } from '../../../../../plugins/data/public';
+import { esFilters, TimeRange, Query } from '../../../../../plugins/data/public';
 
 export interface VisSavedObject extends SavedObject {
   vis: Vis;
