@@ -17,5 +17,26 @@
  * under the License.
  */
 
-// eslint-disable-next-line
-export * from '../../../plugins/expressions/public/functions/tests/utils';
+export class Registry<T> {
+  private data: Record<string, T> = {};
+
+  set(id: string, item: T) {
+    this.data[id] = item;
+  }
+
+  get(id: string): T | null {
+    return this.data[id] || null;
+  }
+
+  toJS(): Record<string, T> {
+    return { ...this.data };
+  }
+
+  toArray(): T[] {
+    return Object.values(this.data);
+  }
+
+  reset() {
+    this.data = {};
+  }
+}

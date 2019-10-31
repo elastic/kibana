@@ -17,35 +17,17 @@
  * under the License.
  */
 
-import { ExpressionType, Render } from '../../../common/expressions/types';
+import { mapValues } from 'lodash';
+import { AnyExpressionFunction, FunctionHandlers } from '../../types';
 
-const name = 'range';
-
-export interface Range {
-  type: typeof name;
-  from: number;
-  to: number;
-}
-
-export const range = (): ExpressionType<typeof name, Range> => ({
-  name,
-  from: {
-    null: (): Range => {
-      return {
-        type: 'range',
-        from: 0,
-        to: 0,
-      };
-    },
-  },
-  to: {
-    render: (value: Range): Render<{ text: string }> => {
-      const text = `from ${value.from} to ${value.to}`;
-      return {
-        type: 'render',
-        as: 'text',
-        value: { text },
-      };
-    },
-  },
-});
+// Takes a function spec and passes in default args,
+// overriding with any provided args.
+export const functionWrapper = <T extends AnyExpressionFunction>(fnSpec: () => T) => {
+  const spec = fnSpec();
+  const defaultArgs = mapValues(spec.args, argSpec => argSpec.default);
+  return (
+    context: object | null,
+    args: Record<string, any> = {},
+    handlers: FunctionHandlers = {}
+  ) => spec.fn(context, { ...defaultArgs, ...args }, handlers);
+};
