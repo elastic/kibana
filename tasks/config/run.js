@@ -166,6 +166,7 @@ module.exports = function (grunt) {
       cmd: YARN,
       args: [
         'nyc',
+        '--reporter=json-summary',
         '--reporter=html',
         '--report-dir=./target/kibana-coverage/mocha',
         NODE,

@@ -20,10 +20,13 @@ node scripts/functional_tests --assert-none-excluded \
   --include-tag ciGroup9 \
   --include-tag ciGroup10
 
-echo " -> building and extracting default Kibana distributable for use in functional tests"
-cd "$KIBANA_DIR"
-node scripts/build --debug --no-oss
-linuxBuild="$(find "$KIBANA_DIR/target" -name 'kibana-*-linux-x86_64.tar.gz')"
-installDir="$PARENT_DIR/install/kibana"
-mkdir -p "$installDir"
-tar -xzf "$linuxBuild" -C "$installDir" --strip=1
+# Do not build kibana for code coverage run
+if [[ -z "$CODE_COVERAGE" ]] ; then
+  echo " -> building and extracting default Kibana distributable for use in functional tests"
+  cd "$KIBANA_DIR"
+  node scripts/build --debug --no-oss
+  linuxBuild="$(find "$KIBANA_DIR/target" -name 'kibana-*-linux-x86_64.tar.gz')"
+  installDir="$PARENT_DIR/install/kibana"
+  mkdir -p "$installDir"
+  tar -xzf "$linuxBuild" -C "$installDir" --strip=1
+fi
