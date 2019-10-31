@@ -99,7 +99,7 @@ describe('toggleUiCapabilities', () => {
       disabledFeatures: [],
     };
 
-    const capabilities: Capabilities = buildCapabilities();
+    const capabilities = buildCapabilities();
     const result = toggleUICapabilities(features, capabilities, space);
     expect(result).toEqual(buildCapabilities());
   });
@@ -111,7 +111,7 @@ describe('toggleUiCapabilities', () => {
       disabledFeatures: ['i-do-not-exist'],
     };
 
-    const capabilities: Capabilities = buildCapabilities();
+    const capabilities = buildCapabilities();
     const result = toggleUICapabilities(features, capabilities, space);
     expect(result).toEqual(buildCapabilities());
   });
@@ -123,7 +123,7 @@ describe('toggleUiCapabilities', () => {
       disabledFeatures: ['feature_2'],
     };
 
-    const capabilities: Capabilities = buildCapabilities();
+    const capabilities = buildCapabilities();
     const result = toggleUICapabilities(features, capabilities, space);
 
     const expectedCapabilities = buildCapabilities();
@@ -144,7 +144,7 @@ describe('toggleUiCapabilities', () => {
       disabledFeatures: ['feature_1', 'feature_2', 'feature_3'],
     };
 
-    const capabilities: Capabilities = buildCapabilities();
+    const capabilities = buildCapabilities();
     const result = toggleUICapabilities(features, capabilities, space);
 
     const expectedCapabilities = buildCapabilities();

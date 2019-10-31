@@ -5,7 +5,7 @@
  */
 import * as Rx from 'rxjs';
 import { createLegacyAPI, mockRouteContextWithInvalidLicense } from '../__fixtures__';
-import { CoreSetup, IRouter, kibanaResponseFactory } from 'src/core/server';
+import { CoreSetup, kibanaResponseFactory } from 'src/core/server';
 import { httpServiceMock, httpServerMock, elasticsearchServiceMock } from 'src/core/server/mocks';
 import { SpacesService } from '../../../spaces_service';
 import { createOptionalPlugin } from '../../../../../../legacy/server/lib/optional_plugin';
@@ -16,7 +16,7 @@ import { initGetActiveSpaceApi } from './get_active_space';
 describe('GET /internal/spaces/_active_space', () => {
   const setup = async () => {
     const httpService = httpServiceMock.createSetupContract();
-    const router = httpService.createRouter('') as jest.Mocked<IRouter>;
+    const router = httpServiceMock.createRouter();
 
     const legacyAPI = createLegacyAPI();
 

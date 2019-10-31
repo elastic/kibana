@@ -13,7 +13,7 @@ import { ENTER_SPACE_PATH } from '../../common/constants';
 import { addSpaceIdToPath } from '../../../../../plugins/spaces/common';
 
 export class SpacesManager extends EventEmitter {
-  private activeSpace: Promise<Space> | undefined;
+  private activeSpace?: Promise<Space>;
 
   constructor(private readonly serverBasePath: string, private readonly http: HttpSetup) {
     super();

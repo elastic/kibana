@@ -41,13 +41,11 @@ class SpaceSelectorUI extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
-    const state: State = {
+    this.state = {
       loading: false,
       searchTerm: '',
       spaces: [],
     };
-
-    this.state = state;
   }
 
   public setHeaderRef = (ref: HTMLElement | null) => {
