@@ -24,7 +24,7 @@ import { SearchSource } from 'ui/courier';
 import { AggConfig, Vis, VisParams, VisState } from 'ui/vis';
 import { isDateHistogramBucketAggConfig } from 'ui/agg_types/buckets/date_histogram';
 import moment from 'moment';
-import { SerializedFieldFormat } from 'src/plugins/expressions/common/expressions/types/common';
+import { SerializedFieldFormat } from 'src/plugins/expressions/public';
 import { createFormat } from './utilities';
 
 interface SchemaConfigParams {

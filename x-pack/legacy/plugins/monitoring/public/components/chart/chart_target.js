@@ -35,6 +35,7 @@ export class ChartTarget extends React.Component {
   componentWillUnmount() {
     this.shutdownChart();
     window.removeEventListener('resize', this._handleResize);
+    this.componentUnmounted = true;
   }
 
   filterByShow(seriesToShow) {
@@ -62,7 +63,6 @@ export class ChartTarget extends React.Component {
 
   componentDidMount() {
     this.renderChart();
-    window.addEventListener('resize', this._handleResize, false);
   }
 
   componentDidUpdate() {
@@ -94,6 +94,9 @@ export class ChartTarget extends React.Component {
     const data = this.filterData(series, this.props.seriesToShow);
 
     this.plot = $.plot(target, data, await this.getOptions());
+    if (this.componentUnmounted || !this.plot) {
+      return;
+    }
 
     this._handleResize = () => {
       if (!this.plot) { return; }
@@ -109,6 +112,8 @@ export class ChartTarget extends React.Component {
          * the event */
       }
     };
+
+    window.addEventListener('resize', this._handleResize, false);
 
     this.handleMouseLeave = () => {
       eventBus.trigger('thorPlotLeave', []);
