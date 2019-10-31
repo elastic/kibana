@@ -49,8 +49,22 @@ const buildTelemetryOptInProvider = () => {
 };
 
 describe('TelemetryForm', () => {
-  it('renders as expected', () => {
+  it('renders as expected when allows to change optIn status', () => {
     mockInjectedMetadata({ telemetryOptedIn: null, allowChangingOptInStatus: true });
+
+    expect(shallowWithIntl(
+      <TelemetryForm
+        spacesEnabled={false}
+        query={{ text: '' }}
+        onQueryMatchChange={jest.fn()}
+        telemetryOptInProvider={buildTelemetryOptInProvider()}
+        enableSaving={true}
+      />)
+    ).toMatchSnapshot();
+  });
+
+  it(`doesn't render form when not allowed to change optIn status`, () => {
+    mockInjectedMetadata({ telemetryOptedIn: null, allowChangingOptInStatus: false });
 
     expect(shallowWithIntl(
       <TelemetryForm
