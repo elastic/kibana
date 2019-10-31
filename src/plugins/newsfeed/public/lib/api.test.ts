@@ -82,7 +82,7 @@ describe('NewsfeedApiDriver', () => {
       `);
     });
 
-    it('replaces the previous hashes with the current', () => {
+    it('concatenates the previous hashes with the current', () => {
       localStorageGet.throws('Wrong key passed!');
       localStorageGet.withArgs(NEWSFEED_HASH_SET_STORAGE_KEY).returns('happyness');
       const driver = getDriver();
@@ -362,6 +362,21 @@ describe('getApi', () => {
   let httpMock = ({
     fetch: mockHttpGet,
   } as unknown) as HttpServiceBase;
+
+  const getHttpMockWithItems = (mockApiItems: ApiItem[]) => (
+    arg1: string,
+    arg2: { method: string }
+  ) => {
+    if (
+      arg1 === 'http://fakenews.co/kibana-test/v6.8.2.json' &&
+      arg2.method &&
+      arg2.method === 'GET'
+    ) {
+      return Promise.resolve({ items: mockApiItems });
+    }
+    return Promise.reject('wrong args!');
+  };
+
   const configMock: NewsfeedPluginInjectedConfig = {
     newsfeed: {
       service: {
@@ -385,10 +400,7 @@ describe('getApi', () => {
   });
 
   it('creates a result', done => {
-    const mockApiItems: ApiItem[] = [];
-    mockHttpGet.mockImplementationOnce(() => {
-      return Promise.resolve({ items: mockApiItems });
-    });
+    mockHttpGet.mockImplementationOnce(() => Promise.resolve({ items: [] }));
     getApi(httpMock, configMock.newsfeed, '6.8.2').subscribe(result => {
       expect(result).toMatchInlineSnapshot(`
         Object {
@@ -402,7 +414,7 @@ describe('getApi', () => {
     });
   });
 
-  it('pipelines the Driver methods together', done => {
+  it('hasNew is true when the service returns hashes not in the cache', done => {
     const mockApiItems: ApiItem[] = [
       {
         title: {
@@ -432,16 +444,7 @@ describe('getApi', () => {
       },
     ];
 
-    mockHttpGet.mockImplementationOnce((arg1, arg2) => {
-      if (
-        arg1 === 'http://fakenews.co/kibana-test/v6.8.2.json' &&
-        arg2.method &&
-        arg2.method === 'GET'
-      ) {
-        return Promise.resolve({ items: mockApiItems });
-      }
-      return Promise.reject('wrong args!');
-    });
+    mockHttpGet.mockImplementationOnce(getHttpMockWithItems(mockApiItems));
 
     getApi(httpMock, configMock.newsfeed, '6.8.2').subscribe(result => {
       expect(result).toMatchInlineSnapshot(`
@@ -467,10 +470,48 @@ describe('getApi', () => {
     });
   });
 
-  it('forwards an error', done => {
-    mockHttpGet.mockImplementationOnce((arg1, arg2) => {
-      return Promise.reject('sorry, try again later!');
+  it('hasNew is false when service returns hashes that are all stored', done => {
+    localStorageGet.throws('Wrong key passed!');
+    localStorageGet.withArgs(NEWSFEED_HASH_SET_STORAGE_KEY).returns('happyness');
+    const mockApiItems: ApiItem[] = [
+      {
+        title: { en: 'hasNew test' },
+        description: { en: 'test' },
+        link_text: { en: 'click here' },
+        link_url: { en: 'xyzxyzxyz' },
+        badge: { en: 'firefighter' },
+        publish_on: new Date('2014-10-31T04:23:47Z'),
+        expire_on: new Date('2049-10-31T04:23:47Z'),
+        hash: 'happyness',
+      },
+    ];
+    mockHttpGet.mockImplementationOnce(getHttpMockWithItems(mockApiItems));
+    getApi(httpMock, configMock.newsfeed, '6.8.2').subscribe(result => {
+      expect(result).toMatchInlineSnapshot(`
+        Object {
+          "error": null,
+          "feedItems": Array [
+            Object {
+              "badge": "firefighter",
+              "description": "test",
+              "expireOn": "2049-10-31T04:23:47.000Z",
+              "hash": "happyness",
+              "linkText": "click here",
+              "linkUrl": "xyzxyzxyz",
+              "publishOn": "2014-10-31T04:23:47.000Z",
+              "title": "hasNew test",
+            },
+          ],
+          "hasNew": false,
+          "kibanaVersion": "6.8.2",
+        }
+      `);
+      done();
     });
+  });
+
+  it('forwards an error', done => {
+    mockHttpGet.mockImplementationOnce((arg1, arg2) => Promise.reject('sorry, try again later!'));
 
     getApi(httpMock, configMock.newsfeed, '6.8.2').subscribe(result => {
       expect(result).toMatchInlineSnapshot(`
