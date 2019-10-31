@@ -284,7 +284,7 @@
     "moment-timezone": "^0.5.27",
     "monaco-editor": "~0.17.0",
     "ngreact": "^0.5.1",
-    "nock": "10.0.6",
+    "nock": "11.7.0",
     "node-fetch": "^2.6.0",
     "nodemailer": "^4.7.0",
     "object-hash": "^1.3.1",
