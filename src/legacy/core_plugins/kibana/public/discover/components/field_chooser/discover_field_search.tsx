@@ -221,8 +221,7 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
         legend={legend}
         options={toggleButtons(id)}
         idSelected={`${id}-${values[id]}`}
-        // @ts-ignore
-        onChange={optionId => handleValueChange(id, optionId.match(/-([a-z]+)/)[1])}
+        onChange={optionId => handleValueChange(id, optionId.replace(`${id}-`, ''))}
         buttonSize="compressed"
         isFullWidth
         data-test-subj={`${id}ButtonGroup`}
