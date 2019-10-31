@@ -19,17 +19,13 @@
 
 import React, { useCallback } from 'react';
 import { EuiBottomBar, EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonEmpty } from '@elastic/eui';
-import { visDimension } from 'src/legacy/core_plugins/interpreter/public/functions/vis_dimension';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { discardChanges } from '../state';
 
-function DefaultEditorBottomBar({ dispatch, vis }) {
-  const discardChanges = useCallback(
-    () =>
-      dispatch({
-        type: 'discardChanges',
-        payload: vis,
-      }),
-    [dispatch, vis]
-  );
+function DefaultEditorBottomBar({ dispatch, isDirty, vis }) {
+  const onClickDiscard = useCallback(() => dispatch(discardChanges(vis)), [dispatch, vis]);
+  const { enableAutoApply } = vis.type.editorConfig;
 
   return (
     <EuiBottomBar>
@@ -37,16 +33,52 @@ function DefaultEditorBottomBar({ dispatch, vis }) {
         <EuiFlexItem grow={false}></EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty color="ghost" size="s" iconType="cross" onClick={discardChanges}>
-                Discard changes
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton color="ghost" fill size="s" iconType="play">
-                Update chart
-              </EuiButton>
-            </EuiFlexItem>
+            {!enableAutoApply && (
+              <>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    aria-label={i18n.translate(
+                      'common.ui.vis.editors.sidebar.discardChangesAriaLabel',
+                      {
+                        defaultMessage: 'Reset the visualization',
+                      }
+                    )}
+                    color="ghost"
+                    data-test-subj="visualizeEditorResetButton"
+                    disabled={!isDirty}
+                    iconType="cross"
+                    onClick={onClickDiscard}
+                    size="s"
+                  >
+                    <FormattedMessage
+                      id="common.ui.vis.editors.sidebar.discardChangesButtonLabel"
+                      defaultMessage="Discard changes"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    aria-label={i18n.translate(
+                      'common.ui.vis.editors.sidebar.applyChangesAriaLabel',
+                      {
+                        defaultMessage: 'Update the visualization with your changes',
+                      }
+                    )}
+                    color="ghost"
+                    disabled={!isDirty || enableAutoApply}
+                    fill
+                    iconType="play"
+                    size="s"
+                  >
+                    <FormattedMessage
+                      id="common.ui.vis.editors.sidebar.updateChartButtonLabel"
+                      defaultMessage="Update chart"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              </>
+            )}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>

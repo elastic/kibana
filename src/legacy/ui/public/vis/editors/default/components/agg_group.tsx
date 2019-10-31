@@ -57,6 +57,7 @@ function DefaultEditorAggGroup({
   schemas = [],
   addSchema,
   onAggParamsChange,
+  onAggTypeChange,
   onToggleEnableAgg,
   removeAgg,
   reorderAggs,
@@ -168,6 +169,7 @@ function DefaultEditorAggGroup({
                     metricAggs={metricAggs}
                     state={state}
                     onAggParamsChange={onAggParamsChange}
+                    onAggTypeChange={onAggTypeChange}
                     onToggleEnableAgg={onToggleEnableAgg}
                     removeAgg={removeAgg}
                     setTouched={isTouched => setTouchedHandler(agg.id, isTouched)}

@@ -21,12 +21,12 @@ import React, { useCallback } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { DefaultEditorAggGroup } from './agg_group';
 import { AggGroupNames } from '../agg_groups';
+import { addNewAgg, changeAggType, setAggParamValue } from '../state';
 
 function DefaultEditorDataTab({
   metricAggs,
   state,
   schemas,
-  onParamChange,
   onToggleEnableAgg,
   removeAgg,
   reorderAggs,
@@ -41,28 +41,16 @@ function DefaultEditorDataTab({
 
   const onAggParamsChange = useCallback(
     (aggId, paramName, value) => {
-      dispatch({
-        type: 'setAggParamValue',
-        payload: {
-          aggId,
-          paramName,
-          value,
-        },
-      });
+      dispatch(setAggParamValue(aggId, paramName, value));
     },
     [dispatch]
   );
 
-  const addSchema = useCallback(
-    schema =>
-      dispatch({
-        type: 'addNewAgg',
-        payload: {
-          schema,
-        },
-      }),
-    [dispatch]
-  );
+  const addSchema = useCallback(schema => dispatch(addNewAgg(schema)), [dispatch]);
+
+  const onAggTypeChange = useCallback((aggId, value) => dispatch(changeAggType(aggId, value)), [
+    dispatch,
+  ]);
 
   const commonProps = {
     addSchema,
@@ -70,6 +58,7 @@ function DefaultEditorDataTab({
     state,
     reorderAggs,
     onAggParamsChange,
+    onAggTypeChange,
     onToggleEnableAgg,
     setValidity,
     setTouched,

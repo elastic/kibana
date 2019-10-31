@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useReducer, useEffect, useMemo, useCallback } from 'react';
+import React, { useReducer, useEffect, useMemo } from 'react';
 import { EuiForm, EuiAccordion, EuiSpacer, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -58,7 +58,7 @@ type EditorParamConfigType = EditorParamConfig & {
 export interface SubAggParamsProp {
   formIsTouched: boolean;
   onAggParamsChange: OnParamChange;
-  onAggTypeChange: (agg: AggConfig, aggType: AggType) => void;
+  onAggTypeChange: (aggId: AggConfig['id'], aggType: AggType) => void;
 }
 export interface DefaultEditorAggParamsProps extends SubAggParamsProp {
   agg: AggConfig;
@@ -88,6 +88,7 @@ function DefaultEditorAggParams({
   metricAggs,
   state = {} as VisState,
   onAggParamsChange,
+  onAggTypeChange,
   setTouched,
   setValidity,
 }: DefaultEditorAggParamsProps) {
@@ -114,12 +115,6 @@ function DefaultEditorAggParams({
 
   const isAllInvalidParamsTouched =
     !!errors.length || isInvalidParamsTouched(agg.type, aggType, paramsState);
-
-  const onAggTypeChange = useCallback((aggr, value) => {
-    if (aggr.type !== value) {
-      aggr.type = value;
-    }
-  }, []);
 
   // reset validity before component destroyed
   useUnmount(() => setValidity(true));
@@ -215,7 +210,7 @@ function DefaultEditorAggParams({
         isSubAggregation={aggIndex >= 1 && groupName === AggGroupNames.Buckets}
         showValidation={formIsTouched || aggType.touched}
         setValue={value => {
-          onAggTypeChange(agg, value);
+          onAggTypeChange(agg.id, value);
           // reset touched and valid of params
           onChangeParamsState({ type: AGG_PARAMS_ACTION_KEYS.RESET });
         }}

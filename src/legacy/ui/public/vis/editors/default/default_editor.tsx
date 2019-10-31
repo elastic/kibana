@@ -17,62 +17,23 @@
  * under the License.
  */
 
-import React, { useEffect, useReducer, useRef, useState } from 'react';
+import React, { useEffect, useReducer, useRef, useState, useCallback } from 'react';
 import { getVisualizeLoader, EmbeddedVisualizeHandler } from 'ui/visualize';
-import { AggConfigs } from 'ui/agg_types';
 import { VisEditorSideBar } from './vis_editor_sidebar';
 import { DefaultEditorBottomBar } from './components/bottom_bar';
+import { editorStateReducer, initEditorState, useEditorState, useEditorReducer } from './state';
+// import { Resizer } from './resizer';
+import { EditorStateActionTypes } from './state/constants';
 
 const sidebarClassName = 'visEditor__collapsibleSidebar';
 
-function initEditorState(vis) {
-  return vis.copyCurrentState(true);
-}
-
-function editorStateReducer(state, action) {
-  switch (action.type) {
-    case 'setAggParamValue': {
-      const { aggId, paramName, value } = action.payload;
-
-      const newAggs = state.aggs.aggs.map(agg => {
-        if (agg.id === aggId) {
-          const parsedAgg = agg.toJSON();
-
-          return {
-            ...parsedAgg,
-            params: {
-              ...parsedAgg.params,
-              [paramName]: value,
-            },
-          };
-        }
-
-        return agg;
-      });
-
-      return {
-        ...state,
-        aggs: new AggConfigs(state.aggs.indexPattern, newAggs, state.aggs.schemas),
-      };
-    }
-    case 'addNewAgg': {
-      const newAggs = [...state.aggs.aggs, state.aggs.createAggConfig(action.payload)];
-
-      return {
-        ...state,
-        aggs: new AggConfigs(state.aggs.indexPattern, newAggs, state.aggs.schemas),
-      };
-    }
-
-    case 'discardChanges': {
-      return initEditorState(action.payload);
-    }
-  }
-}
-
 function DefaultEditor({ el, savedObj, uiState, timeRange, filters, appState, vis, optionTabs }) {
   const visRef = useRef<HTMLDivElement>(null);
+  const sidebarRef = useRef<HTMLDivElement>(null);
   const [visHandler, setVisHandler] = useState<EmbeddedVisualizeHandler | null>(null);
+  const [sidebarStyle, setSidebarStyle] = useState({});
+  const { isDirty, setDirty } = useEditorState();
+  const [state, dispatch] = useEditorReducer(vis);
 
   useEffect(() => {
     async function visualize() {
@@ -84,7 +45,6 @@ function DefaultEditor({ el, savedObj, uiState, timeRange, filters, appState, vi
         const loader = await getVisualizeLoader();
         const handler = loader.embedVisualizationWithSavedObject(visRef.current, savedObj, {
           uiState,
-          listenOnChange: false,
           timeRange,
           filters,
           appState,
@@ -102,53 +62,54 @@ function DefaultEditor({ el, savedObj, uiState, timeRange, filters, appState, vi
     visualize();
   }, [visRef.current, visHandler, uiState, savedObj, timeRange, filters, appState]);
 
-  const onParamChange = (params, paramName, value) => {
-    if (params[paramName] !== value) {
-      params[paramName] = value;
-    }
-  };
-
   const setVisType = type => {
     vis.type.type = type;
   };
 
-  const [state, dispatch] = useReducer(editorStateReducer, vis, initEditorState);
+  useEffect(() => {
+    vis.on('dirtyStateChange', ({ isDirty }) => {
+      setDirty(isDirty);
+    });
+  }, [vis]);
+
+  const onResize = useCallback(width => {
+    setSidebarStyle(style => ({ ...style, width }));
+  }, []);
 
   return (
     <div className="visEditor--default">
       <div
         className="visEditor__canvas"
         ref={visRef}
-        data-shared-item
-        data-shared-items-container
-        render-complete
+        data-shared-item=""
+        data-shared-items-container=""
+        render-complete=""
         data-title={vis.title}
         data-description={vis.description}
       />
 
-      <button className="visEditor__resizer">
-        <i className="fa fa-ellipsis-h" />
-      </button>
+      {/* <Resizer direction="horizontal" element={sidebarRef} onResize={onResize} /> */}
 
       <div
+        style={sidebarStyle}
         className={`collapsible-sidebar ${sidebarClassName} ${
           vis.type.editorConfig.defaultSize
             ? `visEditor__collapsibleSidebar--${vis.type.editorConfig.defaultSize}`
             : ''
         }`}
+        ref={sidebarRef}
       >
         <VisEditorSideBar
           optionTabs={optionTabs}
           vis={vis}
           state={state}
-          onParamChange={onParamChange}
           uiState={uiState}
           setVisType={setVisType}
           dispatch={dispatch}
         />
       </div>
 
-      <DefaultEditorBottomBar dispatch={dispatch} vis={vis} />
+      <DefaultEditorBottomBar dispatch={dispatch} isDirty={isDirty} vis={vis} />
     </div>
   );
 }

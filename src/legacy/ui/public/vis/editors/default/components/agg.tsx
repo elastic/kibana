@@ -58,6 +58,7 @@ function DefaultEditorAgg({
   lastParentPipelineAggTitle,
   state,
   onAggParamsChange,
+  onAggTypeChange,
   onToggleEnableAgg,
   removeAgg,
   setTouched,
@@ -264,6 +265,7 @@ function DefaultEditorAgg({
           metricAggs={metricAggs}
           state={state}
           onAggParamsChange={onAggParamsChange}
+          onAggTypeChange={onAggTypeChange}
           setTouched={setTouched}
           setValidity={onSetValidity}
         />

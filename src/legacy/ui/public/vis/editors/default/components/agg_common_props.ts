@@ -35,6 +35,7 @@ export interface DefaultEditorAggCommonProps {
   metricAggs: AggConfig[];
   state: VisState;
   onAggParamsChange: OnParamChange;
+  onAggTypeChange: (aggId: AggConfig['id'], aggType: AggType) => void;
   onToggleEnableAgg: (agg: AggConfig, isEnable: boolean) => void;
   removeAgg: (agg: AggConfig) => void;
   setTouched: (isTouched: boolean) => void;

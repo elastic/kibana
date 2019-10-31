@@ -24,8 +24,8 @@ import { keyCodes, EuiTabbedContent } from '@elastic/eui';
 
 import { VisEditorNavBar, OptionTab } from './vis_editor_navbar';
 import { DefaultEditorDataTab } from './components/data_tab';
-import { safeMakeLabel } from './controls/agg_utils';
 import { VisOptionsProps } from './vis_options_props';
+import { setStateParamValue } from './state';
 
 interface VisEditorSideBarProps {
   hasHistogramAgg?: boolean;
@@ -40,7 +40,6 @@ function VisEditorSideBar({
   stageEditableVis,
   state,
   uiState,
-  onParamChange,
   setVisType,
   removeAgg,
   reorderAggs,
@@ -48,21 +47,12 @@ function VisEditorSideBar({
   dispatch,
 }: VisEditorSideBarProps) {
   const [selectedTab, setSelectedTab] = useState(optionTabs[0].name);
-  const [aggsLabels, setAggsLabels] = useState('');
 
-  useEffect(() => {
-    const labels = state.aggs.aggs
-      .map(agg => {
-        return safeMakeLabel(agg);
-      })
-      .join();
-
-    setAggsLabels(labels);
-  });
-
-  const setStateParamValue = useCallback(
-    (paramName, value) => onParamChange(state.params, paramName, value),
-    [onParamChange, state.params]
+  const onStateParamsChange = useCallback(
+    (paramName, value) => {
+      dispatch(setStateParamValue(paramName, value));
+    },
+    [dispatch]
   );
 
   const setValidity = () => {
@@ -82,12 +72,11 @@ function VisEditorSideBar({
 
   const optionTabProps = {
     aggs: state.aggs,
-    aggsLabels,
     hasHistogramAgg,
     stateParams: state.params,
     vis,
     uiState,
-    setValue: setStateParamValue,
+    setValue: onStateParamsChange,
     setValidity,
     setVisType,
     setTouched,

@@ -23,6 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { I18nContext } from 'ui/i18n';
 import { DefaultEditor } from './default_editor';
 import { DefaultEditorDataTab } from './components/data_tab';
+import { EditorStateContextProvider } from './state';
 
 export function createEditorController() {
   return class {
@@ -66,7 +67,9 @@ export function createEditorController() {
     render(props) {
       render(
         <I18nContext>
-          <DefaultEditor {...this.state} {...props} />
+          <EditorStateContextProvider>
+            <DefaultEditor {...this.state} {...props} />
+          </EditorStateContextProvider>
         </I18nContext>,
         this.el
       );

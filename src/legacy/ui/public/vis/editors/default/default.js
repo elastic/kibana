@@ -21,7 +21,6 @@ import 'ui/angular-bootstrap';
 import './fancy_forms';
 import './sidebar';
 import { i18n } from '@kbn/i18n';
-import './vis_editor_resizer';
 import './vis_type_agg_filter';
 import $ from 'jquery';
 

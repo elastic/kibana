@@ -22,6 +22,7 @@ import { cloneDeep, uniq, get } from 'lodash';
 import { EuiSpacer } from '@elastic/eui';
 
 import { AggConfig } from 'ui/vis';
+import { useEditorState } from 'ui/vis/editors/default/state';
 import { BasicVislibParams, ValueAxis, SeriesParam, Axis } from '../../../types';
 import { ValidationVisOptionsProps } from '../../common';
 import { SeriesPanel } from './series_panel';
@@ -52,7 +53,7 @@ export type ChangeValueAxis = (
 const VALUE_AXIS_PREFIX = 'ValueAxis-';
 
 function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>) {
-  const { stateParams, setValue, aggs, aggsLabels, setVisType, vis } = props;
+  const { stateParams, setValue, aggs, setVisType, vis } = props;
 
   const [isCategoryAxisHorizontal, setIsCategoryAxisHorizontal] = useState(true);
 
@@ -240,11 +241,17 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
   const metrics = useMemo(() => {
     const schemaName = vis.type.schemas.metrics[0].name;
     return aggs.bySchemaName(schemaName);
-  }, [vis.type.schemas.metrics[0].name, aggs, aggsLabels]);
+  }, [vis.type.schemas.metrics[0].name, aggs]);
 
   const firstValueAxesId = stateParams.valueAxes[0].id;
 
+  const { isDirty } = useEditorState();
+
   useEffect(() => {
+    if (!isDirty) {
+      return;
+    }
+
     const updatedSeries = metrics.map(agg => {
       const params = stateParams.seriesParams.find(param => param.data.id === agg.id);
       const label = agg.makeLabel();
@@ -270,7 +277,7 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
     });
 
     setValue('seriesParams', updatedSeries);
-  }, [aggsLabels, metrics, firstValueAxesId]);
+  }, [isDirty, metrics, firstValueAxesId]);
 
   const visType = useMemo(() => {
     const types = uniq(stateParams.seriesParams.map(({ type }) => type));
@@ -282,8 +289,12 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
   }, [visType]);
 
   useEffect(() => {
+    if (!isDirty) {
+      return;
+    }
+
     updateAxisTitle();
-  }, [aggsLabels]);
+  }, [aggs, isDirty]);
 
   return (
     <>
