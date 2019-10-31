@@ -23,11 +23,9 @@ import { i18n } from '@kbn/i18n';
 import { catchError, filter, mergeMap, tap } from 'rxjs/operators';
 import { HttpServiceBase } from 'src/core/public';
 import { NewsfeedPluginInjectedConfig, ApiItem, NewsfeedItem, FetchResult } from '../../types';
+import { NEWSFEED_LAST_FETCH_STORAGE_KEY, NEWSFEED_HASH_SET_STORAGE_KEY } from '../../constants';
 
 type ApiConfig = NewsfeedPluginInjectedConfig['newsfeed']['service'];
-
-const NEWSFEED_LAST_FETCH_STORAGE_KEY = 'newsfeed.lastfetchtime';
-const NEWSFEED_HASH_SET_STORAGE_KEY = 'newsfeed.hashes';
 
 export class NewsfeedApiDriver {
   constructor(
@@ -53,17 +51,18 @@ export class NewsfeedApiDriver {
   }
 
   updateHashes(items: NewsfeedItem[]): { previous: string[]; current: string[] } {
-    // combine localStorage hashes with new hashes
-    const hashSet: string | null = localStorage.getItem(NEWSFEED_HASH_SET_STORAGE_KEY);
-    let oldHashes: string[] = [];
-    if (hashSet != null) {
-      oldHashes = hashSet.split(',');
+    // replace localStorage hashes with new hashes
+    const stored: string | null = localStorage.getItem(NEWSFEED_HASH_SET_STORAGE_KEY);
+    let old: string[] = [];
+    if (stored != null) {
+      old = stored.split(',');
     }
+
     const newHashes = items.map(i => i.hash);
-    const updatedHashes = [...new Set(oldHashes.concat(newHashes))];
+    const updatedHashes = [...new Set(old.concat(newHashes))];
     localStorage.setItem(NEWSFEED_HASH_SET_STORAGE_KEY, updatedHashes.join(','));
 
-    return { previous: oldHashes, current: updatedHashes };
+    return { previous: old, current: updatedHashes };
   }
 
   fetchNewsfeedItems(http: HttpServiceBase, config: ApiConfig): Rx.Observable<FetchResult> {
@@ -124,7 +123,7 @@ export class NewsfeedApiDriver {
         badge: badge != null ? badge![userLanguage] : null,
         publishOn: moment(publishOn),
         expireOn: moment(expireOn),
-        hash: hash.slice(0, 10), // optimize for storage
+        hash: hash.slice(0, 10), // optimize for storage and faster parsing
       };
 
       if (!this.validateItem(tempItem)) {

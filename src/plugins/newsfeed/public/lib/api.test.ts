@@ -17,21 +17,26 @@
  * under the License.
  */
 
+import sinon, { stub } from 'sinon';
 import moment from 'moment';
 import { ApiItem, NewsfeedItem } from '../../types';
 import { NewsfeedApiDriver } from './api';
+import { NEWSFEED_HASH_SET_STORAGE_KEY } from '../../constants';
+
+const localStorageGet = sinon.stub();
+const sessionStoragetGet = sinon.stub();
 
 Object.defineProperty(window, 'localStorage', {
   value: {
-    getItem: jest.fn(() => undefined), // for hash
-    setItem: jest.fn(() => null),
+    getItem: localStorageGet,
+    setItem: stub(),
   },
   writable: true,
 });
 Object.defineProperty(window, 'sessionStorage', {
   value: {
-    getItem: jest.fn(() => undefined), // for last update time
-    setItem: jest.fn(() => null),
+    getItem: sessionStoragetGet,
+    setItem: stub(),
   },
   writable: true,
 });
@@ -40,45 +45,74 @@ describe('NewsfeedApiDriver', () => {
   const kibanaVersion = 'test_version';
   const userLanguage = 'en';
   const fetchInterval = 2000;
+  const getDriver = () => new NewsfeedApiDriver(kibanaVersion, userLanguage, fetchInterval);
 
   afterEach(() => {
-    jest.resetAllMocks();
+    sinon.reset();
   });
 
   it('shouldFetch defaults to true', () => {
-    const driver = new NewsfeedApiDriver(kibanaVersion, userLanguage, fetchInterval);
+    const driver = getDriver();
     expect(driver.shouldFetch()).toBe(true);
   });
 
-  it('updatedHashes returns previous and current storage', () => {
-    const driver = new NewsfeedApiDriver(kibanaVersion, userLanguage, fetchInterval);
+  describe('updateHashes', () => {
+    it('returns previous and current storage', () => {
+      const driver = getDriver();
+      const items: NewsfeedItem[] = [
+        {
+          title: 'Good news, everyone!',
+          description: 'good item description',
+          linkText: 'click here',
+          linkUrl: 'about:blank',
+          badge: 'test',
+          publishOn: moment(1572489035150),
+          expireOn: moment(1572489047858),
+          hash: 'hash1oneoneoneone',
+        },
+      ];
+      expect(driver.updateHashes(items)).toMatchInlineSnapshot(`
+        Object {
+          "current": Array [
+            "hash1oneoneoneone",
+          ],
+          "previous": Array [],
+        }
+      `);
+    });
 
-    const items: NewsfeedItem[] = [
-      {
-        title: 'Good news, everyone!',
-        description: 'good item description',
-        linkText: 'click here',
-        linkUrl: 'about:blank',
-        badge: 'test',
-        publishOn: moment(1572489035150),
-        expireOn: moment(1572489047858),
-        hash: 'hash1oneoneoneone',
-      },
-    ];
-    expect(driver.updateHashes(items)).toMatchInlineSnapshot(`
-      Object {
-        "current": Array [
-          "hash1oneoneoneone",
-        ],
-        "previous": Array [],
-      }
-    `);
-
-    // TODO: test concatenation
+    it('replaces the previous hashes with the current', () => {
+      localStorageGet.throws('Wrong key passed!');
+      localStorageGet.withArgs(NEWSFEED_HASH_SET_STORAGE_KEY).returns('happyness');
+      const driver = getDriver();
+      const items: NewsfeedItem[] = [
+        {
+          title: 'Better news, everyone!',
+          description: 'better item description',
+          linkText: 'click there',
+          linkUrl: 'about:blank',
+          badge: 'concatentated',
+          publishOn: moment(1572489035150),
+          expireOn: moment(1572489047858),
+          hash: 'three33hash',
+        },
+      ];
+      expect(driver.updateHashes(items)).toMatchInlineSnapshot(`
+        Object {
+          "current": Array [
+            "happyness",
+            "three33hash",
+          ],
+          "previous": Array [
+            "happyness",
+          ],
+        }
+      `);
+    });
   });
 
   it('Validates items for required fields', () => {
-    const driver = new NewsfeedApiDriver(kibanaVersion, userLanguage, fetchInterval);
+    const driver = getDriver();
     expect(driver.validateItem({})).toBe(false);
     expect(
       driver.validateItem({
@@ -116,7 +150,7 @@ describe('NewsfeedApiDriver', () => {
 
   describe('modelItems', () => {
     it('Models empty set with defaults', () => {
-      const driver = new NewsfeedApiDriver(kibanaVersion, userLanguage, fetchInterval);
+      const driver = getDriver();
       const apiItems: ApiItem[] = [];
       expect(driver.modelItems(apiItems)).toMatchInlineSnapshot(`
         Object {
@@ -129,7 +163,7 @@ describe('NewsfeedApiDriver', () => {
     });
 
     it('Selects default language', () => {
-      const driver = new NewsfeedApiDriver(kibanaVersion, userLanguage, fetchInterval);
+      const driver = getDriver();
       const apiItems: ApiItem[] = [
         {
           title: {
@@ -176,7 +210,7 @@ describe('NewsfeedApiDriver', () => {
     });
 
     it('Models multiple', () => {
-      const driver = new NewsfeedApiDriver(kibanaVersion, userLanguage, fetchInterval);
+      const driver = getDriver();
       const apiItems: ApiItem[] = [
         {
           title: {
@@ -242,7 +276,7 @@ describe('NewsfeedApiDriver', () => {
     });
 
     it('Filters multiple', () => {
-      const driver = new NewsfeedApiDriver(kibanaVersion, userLanguage, fetchInterval);
+      const driver = getDriver();
       const apiItems: ApiItem[] = [
         {
           title: {
