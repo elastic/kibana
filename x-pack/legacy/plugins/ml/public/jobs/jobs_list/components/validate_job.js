@@ -5,7 +5,7 @@
  */
 
 
-import { newJobLimits } from '../../new_job_new/utils/new_job_defaults';
+import { newJobLimits } from '../../../services/ml_server_info';
 import { populateValidationMessages } from '../../new_job_new/common/job_validator/util';
 
 import {
