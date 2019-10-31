@@ -34,5 +34,5 @@ export * from './types';
 
 export { IRequestTypesMap, IResponseTypesMap } from './search';
 export * from './search';
-
+export * from './es_query';
 export * from './query';

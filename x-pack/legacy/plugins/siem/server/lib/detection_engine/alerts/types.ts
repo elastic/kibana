@@ -7,7 +7,7 @@
 import { get } from 'lodash/fp';
 
 import Hapi from 'hapi';
-import { Filter } from '@kbn/es-query';
+import { esFilters } from '../../../../../../../../src/plugins/data/public';
 import { SIGNALS_ID } from '../../../../common/constants';
 import {
   Alert,
@@ -19,7 +19,7 @@ import { AlertsClient } from '../../../../../alerting/server/alerts_client';
 import { ActionsClient } from '../../../../../actions/server/actions_client';
 import { SearchResponse } from '../../types';
 
-export type PartialFilter = Partial<Filter>;
+export type PartialFilter = Partial<esFilters.Filter>;
 
 export interface SignalAlertParams {
   description: string;

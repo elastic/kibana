@@ -17,9 +17,16 @@
  * under the License.
  */
 
-export * from './exists';
-export * from './phrase';
-export * from './phrases';
-export * from './query';
-export * from './range';
-export * from './lib';
+export * from './custom_filter';
+export * from './exists_filter';
+export * from './geo_bounding_box_filter';
+export * from './geo_polygon_filter';
+export * from './match_all_filter';
+export * from './meta_filter';
+export * from './missing_filter';
+export * from './phrase_filter';
+export * from './phrases_filter';
+export * from './query_string_filter';
+export * from './range_filter';
+
+export * from './types';

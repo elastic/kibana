@@ -17,30 +17,29 @@
  * under the License.
  */
 
-import { buildQueryFilter } from '../query';
-import { cloneDeep } from 'lodash';
-import expect from '@kbn/expect';
-import indexPattern from '../../__fixtures__/index_pattern_response.json';
-import filterSkeleton from '../../__fixtures__/filter_skeleton';
+import { Filter, FilterMeta } from './meta_filter';
+import { IndexPattern, Field } from './types';
 
-let expected;
+export type ExistsFilterMeta = FilterMeta;
 
-describe('Filter Manager', function () {
-  describe('Phrase filter builder', function () {
-    beforeEach(() => {
-      expected = cloneDeep(filterSkeleton);
-    });
+export interface FilterExistsProperty {
+  field: any;
+}
 
-    it('should be a function', function () {
-      expect(buildQueryFilter).to.be.a(Function);
-    });
+export type ExistsFilter = Filter & {
+  meta: ExistsFilterMeta;
+  exists?: FilterExistsProperty;
+};
 
-    it('should return a query filter when passed a standard field', function () {
-      expected.query = {
-        foo: 'bar'
-      };
-      expect(buildQueryFilter({ foo: 'bar' }, indexPattern.id)).to.eql(expected);
-    });
+export const isExistsFilter = (filter: any): filter is ExistsFilter => filter && filter.exists;
 
-  });
-});
+export const buildExistsFilter = (field: Field, indexPattern: IndexPattern) => {
+  return {
+    meta: {
+      index: indexPattern.id,
+    },
+    exists: {
+      field: field.name,
+    },
+  } as ExistsFilter;
+};

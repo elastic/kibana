@@ -17,18 +17,31 @@
  * under the License.
  */
 
-import { Filter, FilterMeta } from './meta_filter';
+import { buildQueryFilter } from './query_string_filter';
+import { IndexPattern } from './types';
 
-export type QueryStringFilterMeta = FilterMeta;
+describe('Phrase filter builder', () => {
+  let indexPattern: IndexPattern;
 
-export type QueryStringFilter = Filter & {
-  meta: QueryStringFilterMeta;
-  query?: {
-    query_string: {
-      query: string;
+  beforeEach(() => {
+    indexPattern = {
+      id: 'id',
     };
-  };
-};
+  });
 
-export const isQueryStringFilter = (filter: any): filter is QueryStringFilter =>
-  filter && filter.query && filter.query.query_string;
+  it('should be a function', () => {
+    expect(typeof buildQueryFilter).toBe('function');
+  });
+
+  it('should return a query filter when passed a standard field', () => {
+    expect(buildQueryFilter({ foo: 'bar' }, indexPattern.id, '')).toEqual({
+      meta: {
+        alias: '',
+        index: 'id',
+      },
+      query: {
+        foo: 'bar',
+      },
+    });
+  });
+});

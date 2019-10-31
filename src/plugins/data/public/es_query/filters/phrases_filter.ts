@@ -18,6 +18,8 @@
  */
 
 import { Filter, FilterMeta } from './meta_filter';
+import { Field, IndexPattern } from './types';
+import { getPhraseScript } from './phrase_filter';
 
 export type PhrasesFilterMeta = FilterMeta & {
   params: string[]; // The unformatted values
@@ -30,3 +32,39 @@ export type PhrasesFilter = Filter & {
 
 export const isPhrasesFilter = (filter: any): filter is PhrasesFilter =>
   filter && filter.meta.type === 'phrases';
+
+// Creates a filter where the given field matches one or more of the given values
+// params should be an array of values
+export function buildPhrasesFilter(field: Field, params: any, indexPattern: IndexPattern) {
+  const index = indexPattern.id;
+  const type = 'phrases';
+  const key = field.name;
+
+  const format = (f: Field, value: any) =>
+    f && f.format && f.format.convert ? f.format.convert(value) : value;
+
+  const value = params.map((v: any) => format(field, v)).join(', ');
+
+  let should;
+  if (field.scripted) {
+    should = params.map((v: any) => ({
+      script: getPhraseScript(field, v),
+    }));
+  } else {
+    should = params.map((v: any) => ({
+      match_phrase: {
+        [field.name]: v,
+      },
+    }));
+  }
+
+  return {
+    meta: { index, type, key, value, params },
+    query: {
+      bool: {
+        should,
+        minimum_should_match: 1,
+      },
+    },
+  } as PhrasesFilter;
+}

@@ -16,18 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import * as esFilters from './filters';
 
-import { Filter, FilterMeta } from './meta_filter';
-
-export type ExistsFilterMeta = FilterMeta;
-
-export interface FilterExistsProperty {
-  field: any;
-}
-
-export type ExistsFilter = Filter & {
-  meta: ExistsFilterMeta;
-  exists?: FilterExistsProperty;
-};
-
-export const isExistsFilter = (filter: any): filter is ExistsFilter => filter && filter.exists;
+export { esFilters };

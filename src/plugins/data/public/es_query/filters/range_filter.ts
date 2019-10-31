@@ -16,9 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import _, { get, keys } from 'lodash';
+import { Filter, FilterMeta } from './meta_filter';
+import { Field, IndexPattern } from './types';
 
-import _ from 'lodash';
 const OPERANDS_IN_RANGE = 2;
+
 const operators = {
   gt: '>',
   gte: '>=',
@@ -39,33 +42,91 @@ const dateComparators = {
   lt: 'boolean lt(Supplier s, def v) {return s.get().toInstant().isBefore(Instant.parse(v))}',
 };
 
-function formatValue(field, params) {
-  return _.map(params, (val, key) => operators[key] + format(field, val)).join(' ');
+export interface RangeFilterParams {
+  from?: number | string;
+  to?: number | string;
+  gt?: number | string;
+  lt?: number | string;
+  gte?: number | string;
+  lte?: number | string;
+  format?: string;
+}
+
+const hasRangeKeys = (params: RangeFilterParams) =>
+  Boolean(
+    keys(params).find((key: string) => ['gte', 'gt', 'lte', 'lt', 'from', 'to'].includes(key))
+  );
+
+export type RangeFilterMeta = FilterMeta & {
+  params: RangeFilterParams;
+  field?: any;
+  formattedValue?: string;
+};
+
+export type RangeFilter = Filter & {
+  meta: RangeFilterMeta;
+  script?: {
+    script: {
+      params: any;
+      lang: string;
+      source: any;
+    };
+  };
+  match_all?: any;
+  range: { [key: string]: RangeFilterParams };
+};
+
+export const isRangeFilter = (filter: any): filter is RangeFilter => filter && filter.range;
+
+export const isScriptedRangeFilter = (filter: any): filter is RangeFilter => {
+  const params: RangeFilterParams = get(filter, 'script.script.params', {});
+
+  return hasRangeKeys(params);
+};
+
+function formatValue(field: Field, params: any[]) {
+  return _.map(params, (val: any, key: string) => get(operators, key) + format(field, val)).join(
+    ' '
+  );
+}
+
+function format(field: Field, value: any) {
+  return field && field.format && field.format.convert ? field.format.convert(value) : value;
 }
 
 // Creates a filter where the value for the given field is in the given range
 // params should be an object containing `lt`, `lte`, `gt`, and/or `gte`
-export function buildRangeFilter(field, params, indexPattern, formattedValue) {
-  const filter = { meta: { index: indexPattern.id } };
-  if (formattedValue) filter.meta.formattedValue = formattedValue;
+export function buildRangeFilter(
+  field: Field,
+  params: RangeFilterParams,
+  indexPattern: IndexPattern,
+  formattedValue?: string
+): RangeFilter {
+  const filter: any = { meta: { index: indexPattern.id, params: {} } };
 
-  params = _.mapValues(params, (value) => {
-    return (field.type === 'number') ? parseFloat(value) : value;
+  if (formattedValue) {
+    filter.meta.formattedValue = formattedValue;
+  }
+
+  params = _.mapValues(params, value => {
+    return field.type === 'number' ? parseFloat(value) : value;
   });
 
   if ('gte' in params && 'gt' in params) throw new Error('gte and gt are mutually exclusive');
   if ('lte' in params && 'lt' in params) throw new Error('lte and lt are mutually exclusive');
 
-  const totalInfinite = ['gt', 'lt'].reduce((totalInfinite, op) => {
+  const totalInfinite = ['gt', 'lt'].reduce((acc: number, op: any) => {
     const key = op in params ? op : `${op}e`;
-    const isInfinite = Math.abs(params[key]) === Infinity;
+    const isInfinite = Math.abs(get(params, key)) === Infinity;
 
     if (isInfinite) {
-      totalInfinite++;
+      acc++;
+
+      // @ts-ignore
       delete params[key];
     }
 
-    return totalInfinite;
+    return acc;
   }, 0);
 
   if (totalInfinite === OPERANDS_IN_RANGE) {
@@ -81,23 +142,27 @@ export function buildRangeFilter(field, params, indexPattern, formattedValue) {
     filter.range[field.name] = params;
   }
 
-  return filter;
+  return filter as RangeFilter;
 }
 
-export function getRangeScript(field, params) {
-  const knownParams = _.pick(params, (val, key) => {
+export function getRangeScript(field: IndexPattern, params: RangeFilterParams) {
+  const knownParams = _.pick(params, (val, key: any) => {
     return key in operators;
   });
-  let script = _.map(knownParams, function (val, key) {
-    return '(' + field.script + ')' + operators[key] + key;
+  let script = _.map(knownParams, function(val: any, key: string) {
+    return '(' + field.script + ')' + get(operators, key) + key;
   }).join(' && ');
 
   // We must wrap painless scripts in a lambda in case they're more than a simple expression
   if (field.lang === 'painless') {
     const comp = field.type === 'date' ? dateComparators : comparators;
-    const currentComparators = _.reduce(knownParams, (acc, val, key) => acc.concat(comp[key]), []).join(' ');
+    const currentComparators = _.reduce(
+      knownParams,
+      (acc, val, key) => acc.concat(get(comp, key)),
+      []
+    ).join(' ');
 
-    const comparisons = _.map(knownParams, function (val, key) {
+    const comparisons = _.map(knownParams, function(val, key) {
       return `${key}(() -> { ${field.script} }, params.${key})`;
     }).join(' && ');
 
@@ -108,14 +173,7 @@ export function getRangeScript(field, params) {
     script: {
       source: script,
       params: knownParams,
-      lang: field.lang
-    }
+      lang: field.lang,
+    },
   };
 }
-
-function format(field, value) {
-  return field && field.format && field.format.convert
-    ? field.format.convert(value)
-    : value;
-}
-

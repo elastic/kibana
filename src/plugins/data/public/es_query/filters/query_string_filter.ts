@@ -17,14 +17,34 @@
  * under the License.
  */
 
-// Creates a filter where the given field exists
-export function buildExistsFilter(field, indexPattern) {
-  return {
-    meta: {
-      index: indexPattern.id
-    },
-    exists: {
-      field: field.name
-    }
+import { Filter, FilterMeta } from './meta_filter';
+import { IndexPattern } from './types';
+
+export type QueryStringFilterMeta = FilterMeta;
+
+export type QueryStringFilter = Filter & {
+  meta: QueryStringFilterMeta;
+  query?: {
+    query_string: {
+      query: string;
+    };
   };
+};
+
+export const isQueryStringFilter = (filter: any): filter is QueryStringFilter =>
+  filter && filter.query && filter.query.query_string;
+
+// Creates a filter corresponding to a raw Elasticsearch query DSL object
+export function buildQueryFilter(
+  query: QueryStringFilter['query'],
+  index: IndexPattern,
+  alias: string
+) {
+  return {
+    query,
+    meta: {
+      index,
+      alias,
+    },
+  } as QueryStringFilter;
 }
