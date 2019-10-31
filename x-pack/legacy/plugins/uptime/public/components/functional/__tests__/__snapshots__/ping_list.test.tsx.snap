@@ -100,12 +100,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
                         },
                       ]
                     }
-                    value={
-                      Object {
-                        "text": "All",
-                        "value": "",
-                      }
-                    }
+                    value=""
                   />
                 </EuiFormRow>
               </EuiFlexItem>
