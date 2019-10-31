@@ -21,7 +21,6 @@ import {
   EuiProgress,
   EuiSpacer,
   EuiText,
-  EuiTitle,
   EuiToolTip,
   Query,
 } from '@elastic/eui';
@@ -54,19 +53,9 @@ import { getTaskStateBadge } from '../../../analytics_management/components/anal
 import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
 
 import { useExploreData, defaultSearchQuery } from './use_explore_data';
+import { ExplorationTitle } from './regression_exploration';
 
 const PAGE_SIZE_OPTIONS = [5, 10, 25, 50];
-
-const ExplorationTitle: React.SFC<{ jobId: string }> = ({ jobId }) => (
-  <EuiTitle size="xs">
-    <span>
-      {i18n.translate('xpack.ml.dataframe.analytics.regressionExploration.jobIdTitle', {
-        defaultMessage: 'Regression job ID {jobId}',
-        values: { jobId },
-      })}
-    </span>
-  </EuiTitle>
-);
 
 interface Props {
   jobConfig: DataFrameAnalyticsConfig;
@@ -240,7 +229,6 @@ export const ResultsTable: FC<Props> = React.memo(({ jobConfig, jobStatus }) => 
       const field = predictedFieldSelected ? predictedFieldName : selectedFields[0];
       const direction = predictedFieldSelected ? SORT_DIRECTION.DESC : SORT_DIRECTION.ASC;
       loadExploreData({ field, direction, searchQuery });
-      return;
     }
   }, [JSON.stringify(searchQuery)]);
 
@@ -258,7 +246,6 @@ export const ResultsTable: FC<Props> = React.memo(({ jobConfig, jobStatus }) => 
       const field = predictedFieldSelected ? predictedFieldName : selectedFields[0];
       const direction = predictedFieldSelected ? SORT_DIRECTION.DESC : SORT_DIRECTION.ASC;
       loadExploreData({ field, direction, searchQuery });
-      return;
     }
   }, [jobConfig, columns.length, sortField, sortDirection, tableItems.length]);
 
