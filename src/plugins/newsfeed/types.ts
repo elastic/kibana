@@ -51,6 +51,7 @@ export interface NewsfeedItem {
   linkUrl: string;
   badge: string | null;
   publishOn: Moment;
+  hash: string;
 }
 
 /* TODO: FetchResult needs fields to identify corner-cases:

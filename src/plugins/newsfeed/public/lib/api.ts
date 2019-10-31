@@ -52,7 +52,7 @@ class NewsfeedApiDriver {
     sessionStorage.setItem(NEWSFEED_LAST_FETCH_STORAGE_KEY, Date.now().toString());
   }
 
-  updateHashes(items: ApiItem[]): { previous: string[]; current: string[] } {
+  updateHashes(items: NewsfeedItem[]): { previous: string[]; current: string[] } {
     // combine localStorage hashes with new hashes
     const hashSet: string | null = localStorage.getItem(NEWSFEED_HASH_SET_STORAGE_KEY);
     let oldHashes: string[] = [];
@@ -87,12 +87,8 @@ class NewsfeedApiDriver {
   }
 
   modelItems(items: ApiItem[]): Rx.Observable<FetchResult> {
-    // calculate hasNew
-    const { previous, current } = this.updateHashes(items);
-    const hasNew = current.length > previous.length;
-
-    // build feedItems
     const userLanguage = this.userLanguage;
+
     const feedItems: NewsfeedItem[] = items.reduce((accum: NewsfeedItem[], it: ApiItem) => {
       const {
         expire_on: expireOn,
@@ -103,6 +99,7 @@ class NewsfeedApiDriver {
         link_url: linkUrl,
         badge,
         publish_on: publishOn,
+        hash,
       } = it;
 
       if (moment(expireOn).isBefore(Date.now())) {
@@ -120,6 +117,7 @@ class NewsfeedApiDriver {
         linkUrl: linkUrl[userLanguage],
         badge: badge != null ? badge![userLanguage] : badge,
         publishOn: moment(publishOn),
+        hash,
       };
 
       if (!this.validateItem(tempItem)) {
@@ -128,6 +126,10 @@ class NewsfeedApiDriver {
 
       return [...accum, tempItem];
     }, []);
+
+    // calculate hasNew
+    const { previous, current } = this.updateHashes(feedItems);
+    const hasNew = current.length > previous.length;
 
     return Rx.of({
       error: null,
