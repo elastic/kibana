@@ -48,6 +48,7 @@ export function screenshotsObservableFactory(server: ServerFacade) {
       browserTimezone,
     });
 
+    // @ts-ignore this needs to be refactored to use less random type declaration and instead rely on structures that work with inference
     return create$.pipe(
       mergeMap(({ driver$, exit$ }) => {
         const screenshot$ = driver$.pipe(
