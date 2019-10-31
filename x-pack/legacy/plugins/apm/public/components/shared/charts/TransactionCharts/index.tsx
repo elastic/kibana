@@ -33,7 +33,7 @@ import { MLJobLink } from '../../Links/MachineLearningLinks/MLJobLink';
 import { LicenseContext } from '../../../../context/LicenseContext';
 import { TransactionLineChart } from './TransactionLineChart';
 import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
-import { getTimeFormatter } from '../../../../utils/formatters';
+import { getDurationFormatted } from '../../../../utils/formatters';
 import { DurationByCountryMap } from './DurationByCountryMap';
 import {
   TRANSACTION_PAGE_LOAD,
@@ -154,7 +154,7 @@ export class TransactionCharts extends Component<TransactionChartProps> {
     const { responseTimeSeries, tpmSeries } = charts;
     const { transactionType } = urlParams;
     const maxY = this.getMaxY(responseTimeSeries);
-    const formatter = getTimeFormatter(maxY);
+    const formatter = getDurationFormatted(maxY);
 
     return (
       <>

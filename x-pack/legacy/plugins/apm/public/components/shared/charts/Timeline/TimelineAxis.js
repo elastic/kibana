@@ -12,7 +12,7 @@ import { XYPlot, XAxis } from 'react-vis';
 import LastTickValue from './LastTickValue';
 import AgentMarker from './AgentMarker';
 import { px } from '../../../../style/variables';
-import { getTimeFormatter } from '../../../../utils/formatters';
+import { getDurationFormatted } from '../../../../utils/formatters';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 
 // Remove any tick that is too close to topTraceDuration
@@ -33,7 +33,7 @@ const getXAxisTickValues = (tickValues, topTraceDuration) => {
 
 function TimelineAxis({ plotValues, agentMarks, topTraceDuration }) {
   const { margins, tickValues, width, xDomain, xMax, xScale } = plotValues;
-  const tickFormat = getTimeFormatter(xMax);
+  const tickFormat = getDurationFormatted(xMax);
   const xAxisTickValues = getXAxisTickValues(tickValues, topTraceDuration);
 
   return (

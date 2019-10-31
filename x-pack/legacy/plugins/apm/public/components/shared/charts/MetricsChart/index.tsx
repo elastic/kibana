@@ -13,7 +13,7 @@ import {
   asPercent,
   getFixedByteFormatter,
   asDecimal,
-  asTime,
+  asDuration,
   asInteger
 } from '../../../../utils/formatters';
 import { Coordinate } from '../../../../../typings/timeseries';
@@ -67,7 +67,7 @@ function getYTickFormatter(chart: GenericMetricsChart) {
       return (y: number | null | undefined) => asPercent(y || 0, 1);
     }
     case 'time': {
-      return (y: number | null | undefined) => asTime(y);
+      return (y: number | null | undefined) => asDuration(y);
     }
     case 'integer': {
       return (y: number | null | undefined) =>
@@ -89,7 +89,7 @@ function getTooltipFormatter({ yUnit }: GenericMetricsChart) {
       return (c: Coordinate) => asPercent(c.y || 0, 1);
     }
     case 'time': {
-      return (c: Coordinate) => asTime(c.y);
+      return (c: Coordinate) => asDuration(c.y);
     }
     case 'integer': {
       return (c: Coordinate) =>

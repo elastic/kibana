@@ -115,23 +115,26 @@ export type TimeFormatter = (
 
 type TimeFormatterBuilder = (max: number) => TimeFormatter;
 
-export const getTimeFormatter: TimeFormatterBuilder = memoize((max: number) => {
-  const unit = timeUnit(max);
-  switch (unit) {
-    case 'h':
-      return asHours;
-    case 'm':
-      return asMinutes;
-    case 's':
-      return asSeconds;
-    case 'ms':
-      return asMillis;
-    case 'us':
-      return asMicros;
+export const getDurationFormatted: TimeFormatterBuilder = memoize(
+  (max: number) => {
+    const unit = durationUnit(max);
+    switch (unit) {
+      case 'h':
+        return asHours;
+      case 'm':
+        return asMinutes;
+      case 's':
+        return asSeconds;
+      case 'ms':
+        return asMillis;
+      case 'us':
+        return asMicros;
+    }
   }
-});
+);
 
-export function timeUnit(max: number) {
+// todo change it to durationUnit
+export function durationUnit(max: number) {
   if (max > HOURS_CUT_OFF) {
     return 'h';
   } else if (max > MINUTES_CUT_OFF) {
@@ -145,14 +148,14 @@ export function timeUnit(max: number) {
   }
 }
 
-export function asTime(
+export function asDuration(
   value: FormatterValue,
   { withUnit = true, defaultValue = NOT_AVAILABLE_LABEL }: FormatterOptions = {}
 ) {
   if (value == null) {
     return defaultValue;
   }
-  const formatter = getTimeFormatter(value);
+  const formatter = getDurationFormatted(value);
   return formatter(value, { withUnit, defaultValue });
 }
 

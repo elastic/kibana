@@ -11,7 +11,10 @@ import React, { FunctionComponent, useCallback } from 'react';
 import { TransactionDistributionAPIResponse } from '../../../../../server/lib/transactions/distribution';
 import { IBucket } from '../../../../../server/lib/transactions/distribution/get_buckets/transform';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
-import { getTimeFormatter, timeUnit } from '../../../../utils/formatters';
+import {
+  getDurationFormatted,
+  durationUnit
+} from '../../../../utils/formatters';
 // @ts-ignore
 import Histogram from '../../../shared/charts/Histogram';
 import { EmptyMessage } from '../../../shared/EmptyMessage';
@@ -132,8 +135,8 @@ export const TransactionDistribution: FunctionComponent<Props> = (
   );
 
   const xMax = d3.max(buckets, d => d.x) || 0;
-  const timeFormatter = getTimeFormatter(xMax);
-  const unit = timeUnit(xMax);
+  const timeFormatter = getDurationFormatted(xMax);
+  const unit = durationUnit(xMax);
 
   const bucketIndex = buckets.findIndex(
     bucket =>

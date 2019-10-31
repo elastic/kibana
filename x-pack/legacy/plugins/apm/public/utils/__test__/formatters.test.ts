@@ -6,32 +6,32 @@
 
 import {
   asPercent,
-  asTime,
+  asDuration,
   getFixedByteFormatter,
   asDynamicBytes
 } from '../formatters';
 
 describe('formatters', () => {
-  describe('asTime', () => {
+  describe('asDuration', () => {
     it('formats correctly with defaults', () => {
-      expect(asTime(null)).toEqual('N/A');
-      expect(asTime(undefined)).toEqual('N/A');
-      expect(asTime(0)).toEqual('0 μs');
-      expect(asTime(1)).toEqual('1 μs');
-      expect(asTime(1000)).toEqual('1,000 μs');
-      expect(asTime(1000 * 1000)).toEqual('1,000 ms');
-      expect(asTime(1000 * 1000 * 10)).toEqual('10,000 ms');
-      expect(asTime(1000 * 1000 * 20)).toEqual('20.0 s');
-      expect(asTime(60000000 * 10)).toEqual('10.0 min');
-      expect(asTime(3600000000 * 1.5)).toEqual('1.5 h');
+      expect(asDuration(null)).toEqual('N/A');
+      expect(asDuration(undefined)).toEqual('N/A');
+      expect(asDuration(0)).toEqual('0 μs');
+      expect(asDuration(1)).toEqual('1 μs');
+      expect(asDuration(1000)).toEqual('1,000 μs');
+      expect(asDuration(1000 * 1000)).toEqual('1,000 ms');
+      expect(asDuration(1000 * 1000 * 10)).toEqual('10,000 ms');
+      expect(asDuration(1000 * 1000 * 20)).toEqual('20.0 s');
+      expect(asDuration(60000000 * 10)).toEqual('10.0 min');
+      expect(asDuration(3600000000 * 1.5)).toEqual('1.5 h');
     });
 
     it('formats without unit', () => {
-      expect(asTime(1000, { withUnit: false })).toEqual('1,000');
+      expect(asDuration(1000, { withUnit: false })).toEqual('1,000');
     });
 
     it('falls back to default value', () => {
-      expect(asTime(undefined, { defaultValue: 'nope' })).toEqual('nope');
+      expect(asDuration(undefined, { defaultValue: 'nope' })).toEqual('nope');
     });
   });
 
