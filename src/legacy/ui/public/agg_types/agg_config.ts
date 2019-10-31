@@ -332,7 +332,7 @@ export class AggConfig {
     return this.type.getValue(this, bucket);
   }
 
-  getKey(bucket: any, key: string) {
+  getKey(bucket: any, key?: string) {
     if (this.type.getKey) {
       return this.type.getKey(bucket, key, this);
     } else {

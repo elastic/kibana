@@ -24,7 +24,7 @@ import { PIE_CHART_VIS_NAME, AREA_CHART_VIS_NAME } from '../../page_objects/dash
 // eslint-disable-next-line
 import {
   DEFAULT_PANEL_WIDTH
-} from '../../../../src/legacy/core_plugins/dashboard_embeddable_container/public/np_ready/public/lib/embeddable/dashboard_constants';
+} from '../../../../src/plugins/dashboard_embeddable_container/public/embeddable/dashboard_constants';
 
 export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'visualize', 'header', 'discover']);

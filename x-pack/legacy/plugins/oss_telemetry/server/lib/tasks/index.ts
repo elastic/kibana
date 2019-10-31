@@ -11,6 +11,11 @@ import { visualizationsTaskRunner } from './visualizations/task_runner';
 export function registerTasks(server: HapiServer) {
   const taskManager = server.plugins.task_manager;
 
+  if (!taskManager) {
+    server.log(['debug', 'telemetry'], `Task manager is not available`);
+    return;
+  }
+
   taskManager.registerTaskDefinitions({
     [VIS_TELEMETRY_TASK]: {
       title: 'X-Pack telemetry calculator for Visualizations',
@@ -43,7 +48,7 @@ export function scheduleTasks(server: HapiServer) {
           state: { stats: {}, runs: 0 },
         });
       } catch (e) {
-        server.log(['warning', 'telemetry'], `Error scheduling task, received ${e.message}`);
+        server.log(['debug', 'telemetry'], `Error scheduling task, received ${e.message}`);
       }
     })();
   });
