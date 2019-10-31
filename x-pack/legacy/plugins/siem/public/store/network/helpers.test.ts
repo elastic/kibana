@@ -6,11 +6,12 @@
 
 import {
   Direction,
-  NetworkTopTablesFields,
+  FlowTarget,
   NetworkDnsFields,
+  NetworkHttpFields,
+  NetworkTopTablesFields,
   TlsFields,
   UsersFields,
-  FlowTarget,
 } from '../../graphql/types';
 import { DEFAULT_TABLE_LIMIT } from '../constants';
 import { NetworkModel, NetworkTableType, IpDetailsTableType, NetworkType } from './model';
@@ -68,6 +69,11 @@ export const mockNetworkState: NetworkModel = {
           direction: Direction.desc,
         },
       },
+      [NetworkTableType.http]: {
+        activePage: 0,
+        limit: DEFAULT_TABLE_LIMIT,
+        sort: { field: NetworkHttpFields.requestCount, direction: Direction.desc },
+      },
     },
   },
   details: {
@@ -119,6 +125,11 @@ export const mockNetworkState: NetworkModel = {
           field: UsersFields.name,
           direction: Direction.asc,
         },
+      },
+      [IpDetailsTableType.http]: {
+        activePage: 0,
+        limit: DEFAULT_TABLE_LIMIT,
+        sort: { field: NetworkHttpFields.requestCount, direction: Direction.desc },
       },
     },
     flowTarget: FlowTarget.source,
