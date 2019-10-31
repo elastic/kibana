@@ -7,6 +7,8 @@ import React from 'react';
 import { EuiToolTip } from '@elastic/eui';
 import moment from 'moment-timezone';
 
+const DEFAULT_TIMEZONE_FORMAT = 'Z';
+
 interface Props {
   /**
    * timestamp in milliseconds
@@ -15,7 +17,7 @@ interface Props {
   precision?: 'days' | 'minutes' | 'seconds' | 'milliseconds';
 }
 
-function getPreciseTime(
+function getTimeFormat(
   precision: Props['precision'],
   withSeparator: boolean = true
 ) {
@@ -32,8 +34,14 @@ function getPreciseTime(
   }
 }
 
-function withLeadingPlus(value: number) {
-  return value > 0 ? `+${value}` : value;
+/**
+ * Adds plus sign when offsetHours is greater than 0.
+ * offsetHours = 2 -> returns: +2
+ * offsetHours = 0 - > returns: 0
+ * @param offsetHours
+ */
+function getCustomTimezoneFormat(offsetHours: number) {
+  return offsetHours > 0 ? `+${offsetHours}` : offsetHours;
 }
 
 /**
@@ -44,9 +52,11 @@ function withLeadingPlus(value: number) {
  */
 function formatTimezone(momentTime: moment.Moment) {
   const utcOffsetHours = momentTime.utcOffset() / 60;
+
   const utcOffsetFormatted = Number.isInteger(utcOffsetHours)
-    ? withLeadingPlus(utcOffsetHours)
-    : 'Z';
+    ? getCustomTimezoneFormat(utcOffsetHours)
+    : DEFAULT_TIMEZONE_FORMAT;
+
   return momentTime.format(`(UTC${utcOffsetFormatted})`);
 }
 
@@ -55,7 +65,7 @@ export function asAbsoluteTime({ time, precision = 'milliseconds' }: Props) {
   const formattedTz = formatTimezone(momentTime);
 
   return momentTime.format(
-    `MMM D, YYYY${getPreciseTime(precision)} ${formattedTz}`
+    `MMM D, YYYY${getTimeFormat(precision)} ${formattedTz}`
   );
 }
 
@@ -78,7 +88,7 @@ export function asRelativeDateRange(
   end: number,
   precision: Exclude<Props['precision'], 'days'>
 ) {
-  const precisionFormat = getPreciseTime(precision, false);
+  const timeFormat = getTimeFormat(precision, false);
 
   const momentStartTime = moment(start);
   const momentEndTime = moment(end);
@@ -86,9 +96,9 @@ export function asRelativeDateRange(
   const formattedTz = formatTimezone(momentStartTime);
 
   const formattedStartTime = momentStartTime.format(
-    `MMM D, YYYY, ${precisionFormat}`
+    `MMM D, YYYY, ${timeFormat}`
   );
-  const formattedEndTime = momentEndTime.format(precisionFormat);
+  const formattedEndTime = momentEndTime.format(timeFormat);
 
   return `${formattedStartTime} - ${formattedEndTime} ${formattedTz}`;
 }
