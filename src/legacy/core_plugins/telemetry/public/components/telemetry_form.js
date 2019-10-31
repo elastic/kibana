@@ -70,7 +70,7 @@ export class TelemetryForm extends Component {
   }
 
   render() {
-    if (chrome.getInjected('allowChangingOptInStatus')) {
+    if (!chrome.getInjected('allowChangingOptInStatus')) {
       return null;
     }
 

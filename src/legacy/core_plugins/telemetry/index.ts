@@ -46,7 +46,9 @@ const telemetry = (kibana: any) => {
     config(Joi: typeof JoiNamespace) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
-        optIn: Joi.boolean().default(null),
+        optIn: Joi.boolean()
+          .allow(null)
+          .default(null),
         allowChangingOptInStatus: Joi.boolean().default(true),
         // `config` is used internally and not intended to be set
         config: Joi.string().default(Joi.ref('$defaultConfigPath')),
@@ -83,11 +85,16 @@ const telemetry = (kibana: any) => {
         },
       },
       async replaceInjectedVars(originalInjectedVars: any, request: any) {
+        const config = request.server.config();
         const currentKibanaVersion = getCurrentKibanaVersion(request.server);
-        const telemetryOptedIn = await getTelemetryOptIn({
+        let telemetryOptedIn = await getTelemetryOptIn({
           request,
           currentKibanaVersion,
         });
+
+        if (telemetryOptedIn == null) {
+          telemetryOptedIn = config.get('telemetry.optIn');
+        }
 
         return {
           ...originalInjectedVars,
@@ -100,7 +107,7 @@ const telemetry = (kibana: any) => {
           telemetryEnabled: getXpackConfigWithDeprecated(config, 'telemetry.enabled'),
           telemetryUrl: getXpackConfigWithDeprecated(config, 'telemetry.url'),
           telemetryBanner:
-            config.get('allowChangingOptInStatus') !== true &&
+            config.get('telemetry.allowChangingOptInStatus') !== false &&
             getXpackConfigWithDeprecated(config, 'telemetry.banner'),
           telemetryOptedIn: config.get('telemetry.optIn'),
           allowChangingOptInStatus: config.get('telemetry.allowChangingOptInStatus'),
