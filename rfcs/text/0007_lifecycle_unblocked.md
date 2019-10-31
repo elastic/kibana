@@ -136,9 +136,9 @@ export class Plugin {
     // the cluster). The difference is that these details are now internal to
     // the API.
     (async () => {
-      const docs = await context.core.savedObjects.client.find({...});
+      const docs = await core.savedObjects.client.find({...});
       ...
-      await context.core.savedObjects.client.update(...);
+      await core.savedObjects.client.update(...);
     })();
   }
 }
