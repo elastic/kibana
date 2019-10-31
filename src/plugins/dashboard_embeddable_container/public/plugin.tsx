@@ -75,7 +75,7 @@ export class DashboardEmbeddableContainerPublicPlugin
       React.useEffect(() => {
         core.chrome.setIsVisible(false);
         return () => core.chrome.setIsVisible(true);
-      });
+      }, []);
     };
 
     const ExitFullScreenButton: React.FC<ExitFullScreenButtonProps> = props => {
