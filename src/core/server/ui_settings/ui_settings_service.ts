@@ -26,56 +26,14 @@ import { Logger } from '../logging';
 import { SavedObjectsClientContract, SavedObjectAttribute } from '../saved_objects/types';
 import { InternalHttpServiceSetup } from '../http';
 import { UiSettingsConfigType } from './ui_settings_config';
-import { IUiSettingsClient, UiSettingsClient } from './ui_settings_client';
+import { UiSettingsClient } from './ui_settings_client';
+import { InternalUiSettingsServiceSetup, UiSettingsParams } from './types';
 import { mapToObject } from '../../utils/';
+
+import { registerRoutes } from './routes';
 
 interface SetupDeps {
   http: InternalHttpServiceSetup;
-}
-
-/**
- * UI element type to represent the settings.
- * @public
- * */
-export type UiSettingsType = 'json' | 'markdown' | 'number' | 'select' | 'boolean' | 'string';
-
-/**
- * UiSettings parameters defined by the plugins.
- * @public
- * */
-export interface UiSettingsParams {
-  /** title in the UI */
-  name: string;
-  /** default value to fall back to if a user doesn't provide any */
-  value: SavedObjectAttribute;
-  /** description provided to a user in UI */
-  description: string;
-  /** used to group the configured setting in the UI */
-  category: string[];
-  /** a range of valid values */
-  options?: string[];
-  /** text labels for 'select' type UI element */
-  optionLabels?: Record<string, string>;
-  /** a flag indicating whether new value applying requires page reloading */
-  requiresPageReload?: boolean;
-  /** a flag indicating that value cannot be changed */
-  readonly?: boolean;
-  /** defines a type of UI element {@link UiSettingsType} */
-  type?: UiSettingsType;
-}
-
-/** @internal */
-export interface InternalUiSettingsServiceSetup {
-  /**
-   * Sets the parameters with default values for the uiSettings.
-   * @param values
-   */
-  setDefaults(values: Record<string, UiSettingsParams>): void;
-  /**
-   * Creates uiSettings client with provided *scoped* saved objects client {@link IUiSettingsClient}
-   * @param values
-   */
-  asScopedToClient(savedObjectsClient: SavedObjectsClientContract): IUiSettingsClient;
 }
 
 /** @internal */
@@ -90,12 +48,13 @@ export class UiSettingsService implements CoreService<InternalUiSettingsServiceS
   }
 
   public async setup(deps: SetupDeps): Promise<InternalUiSettingsServiceSetup> {
+    registerRoutes(deps.http.createRouter(''));
     this.log.debug('Setting up ui settings service');
     const overrides = await this.getOverrides(deps);
     const { version, buildNum } = this.coreContext.env.packageInfo;
 
     return {
-      setDefaults: this.setDefaults.bind(this),
+      register: this.register.bind(this),
       asScopedToClient: (savedObjectsClient: SavedObjectsClientContract) => {
         return new UiSettingsClient({
           type: 'config',
@@ -114,10 +73,10 @@ export class UiSettingsService implements CoreService<InternalUiSettingsServiceS
 
   public async stop() {}
 
-  private setDefaults(values: Record<string, UiSettingsParams> = {}) {
-    Object.entries(values).forEach(([key, value]) => {
+  private register(settings: Record<string, UiSettingsParams> = {}) {
+    Object.entries(settings).forEach(([key, value]) => {
       if (this.uiSettingsDefaults.has(key)) {
-        throw new Error(`uiSettings defaults for key [${key}] has been already set`);
+        throw new Error(`uiSettings for the key [${key}] has been already registered`);
       }
       this.uiSettingsDefaults.set(key, value);
     });

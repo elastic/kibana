@@ -29,7 +29,7 @@ jest.mock('ui/new_platform');
 
 const dataShim = {
   ui: {
-    SearchBar: () => <div className="searchBar"></div>,
+    SearchBar: () => <div className="searchBar" />,
   },
 };
 
