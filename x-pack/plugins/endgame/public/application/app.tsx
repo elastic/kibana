@@ -6,21 +6,29 @@
 import { AppMountContext, AppMountParameters } from 'kibana/public';
 import React, { PureComponent } from 'react';
 import ReactDOM from 'react-dom';
-import { BrowserRouter, Route, withRouter, RouteComponentProps, Switch } from 'react-router-dom';
-import { EuiPage, EuiPageSideBar, EuiSideNav, EuiImage, EuiCallOut } from '@elastic/eui';
+import { BrowserRouter, Route, withRouter, Switch, RouteComponentProps } from 'react-router-dom';
+import { EuiPage, EuiPageSideBar, EuiSideNav, EuiImage } from '@elastic/eui';
 import { EndgameAppContext } from '../common/app_context';
-// import LogoUrl from '../static/images/logo.png';
+import LogoUrl from '../static/images/logo.png';
 import { routePaths } from '../common/route_paths';
 import { Page } from '../components/page';
+import { RouteNotFound } from '../components/route_not_found';
 
-const NavBar = withRouter(function({ history }: RouteComponentProps) {
+const NotFoundPage = (props: RouteComponentProps) => {
+  return (
+    <Page>
+      <RouteNotFound {...props} />
+    </Page>
+  );
+};
+
+const NavBar = withRouter(function({ history }) {
   return (
     <EuiSideNav
       items={[
         {
           name: 'Endpoint Security',
           id: '0',
-          /**
           icon: (
             <EuiImage
               alt="Endpoint Security"
@@ -29,7 +37,6 @@ const NavBar = withRouter(function({ history }: RouteComponentProps) {
               style={{ width: '16px' }}
             />
           ),
-             **/
           items: routePaths.map(({ name, id, path }) => ({
             name,
             id,
@@ -51,22 +58,22 @@ class EndgameApp extends PureComponent<{
     const { appBasePath, appContext } = this.props;
     return (
       <BrowserRouter basename={appBasePath}>
-        <EndgameAppContext.Provider value={{ appContext }}>
+        <EndgameAppContext.Provider
+          value={{
+            appContext,
+            basePath: appBasePath,
+            apiPrefixPath: `/app/endgame/_api`, // When used with the `appContent.core.http.get` service, the server prefix is added
+          }}
+        >
           <EuiPage>
             <EuiPageSideBar>
               <NavBar />
             </EuiPageSideBar>
             <Switch>
-              {routePaths.map(({ id, path, exact, component }) => (
+              {routePaths.map(({ id, path, component, exact }) => (
                 <Route path={path} exact={exact} component={component} key={id} />
               ))}
-              <Route path="*">
-                <Page>
-                  <EuiCallOut title="Route not found (404)" color="warning" iconType="help">
-                    <p>That page does not exists</p>
-                  </EuiCallOut>
-                </Page>
-              </Route>
+              <Route path="*" component={NotFoundPage} />
             </Switch>
           </EuiPage>
         </EndgameAppContext.Provider>
