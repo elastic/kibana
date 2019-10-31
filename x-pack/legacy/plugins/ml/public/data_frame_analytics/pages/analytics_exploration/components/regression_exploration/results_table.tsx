@@ -8,6 +8,7 @@ import React, { Fragment, FC, useEffect, useState } from 'react';
 import moment from 'moment-timezone';
 
 import { i18n } from '@kbn/i18n';
+import { idx } from '@kbn/elastic-idx';
 import {
   EuiBadge,
   EuiButtonIcon,
@@ -53,6 +54,11 @@ import {
 import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/columns';
 import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
 
+import { useKibanaContext } from '../../../../../contexts/kibana';
+
+import { hoveredRow$ } from '../exploration/column_chart';
+import { useColumnCharts } from '../exploration/use_column_charts';
+
 import { useExploreData, defaultSearchQuery } from './use_explore_data';
 
 const PAGE_SIZE_OPTIONS = [5, 10, 25, 50];
@@ -74,6 +80,7 @@ interface Props {
 }
 
 export const ResultsTable: FC<Props> = React.memo(({ jobConfig, jobStatus }) => {
+  const kibanaContext = useKibanaContext();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [clearTable, setClearTable] = useState(false);
@@ -129,6 +136,36 @@ export const ResultsTable: FC<Props> = React.memo(({ jobConfig, jobStatus }) => 
   }
 
   const columns: ColumnType[] = [];
+
+  const indexPatternTitle = jobConfig !== undefined ? jobConfig.dest.index : '';
+
+  const [indexPattern, setIndexPattern] = useState(undefined);
+  const getIndexPattern = async () => {
+    const savedObjects = (await kibanaContext.indexPatterns.getCache()) || [];
+    const indexPatternSavedObject = savedObjects.find(obj => {
+      const title = idx(obj, _ => _.attributes.title);
+      if (title !== undefined && title === indexPatternTitle) {
+        const id = idx(obj, _ => _.id);
+        if (id !== undefined) {
+          return true;
+        }
+      }
+      return false;
+    });
+    if (indexPatternSavedObject === undefined) {
+      return;
+    }
+    const theIndexPattern: IndexPattern = await kibanaContext.indexPatterns.get(
+      indexPatternSavedObject.id
+    );
+    setIndexPattern(theIndexPattern);
+  };
+
+  useEffect(() => {
+    getIndexPattern();
+  }, [indexPatternTitle]);
+
+  const sourceIndexTableElement = useColumnCharts(indexPattern, columns, searchQuery);
 
   if (jobConfig !== undefined && selectedFields.length > 0 && tableItems.length > 0) {
     columns.push(
@@ -461,20 +498,22 @@ export const ResultsTable: FC<Props> = React.memo(({ jobConfig, jobStatus }) => 
       {clearTable === false && (columns.length > 0 || searchQuery !== defaultSearchQuery) && (
         <Fragment>
           <EuiSpacer />
-          <MlInMemoryTableBasic
-            allowNeutralSort={false}
-            columns={columns}
-            compressed
-            hasActions={false}
-            isSelectable={false}
-            items={tableItems}
-            onTableChange={onTableChange}
-            pagination={pagination}
-            responsive={false}
-            search={search}
-            error={searchError}
-            sorting={sorting}
-          />
+          <div ref={sourceIndexTableElement} className="transformDataGrid">
+            <MlInMemoryTableBasic
+              allowNeutralSort={false}
+              columns={columns}
+              compressed
+              hasActions={false}
+              isSelectable={false}
+              items={tableItems}
+              onTableChange={onTableChange}
+              pagination={pagination}
+              responsive={false}
+              search={search}
+              error={searchError}
+              sorting={sorting}
+            />
+          </div>
         </Fragment>
       )}
     </EuiPanel>
