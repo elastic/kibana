@@ -7,6 +7,10 @@
 import { Request } from 'hapi';
 import { boomify, badRequest } from 'boom';
 import { Legacy } from 'kibana';
+import {
+  PluginSetupContract,
+  PluginStartContract,
+} from '../../../../plugins/encrypted_saved_objects/server';
 
 const SAVED_OBJECT_WITH_SECRET_TYPE = 'saved-object-with-secret';
 
@@ -21,15 +25,17 @@ export default function esoPlugin(kibana: any) {
         method: 'GET',
         path: '/api/saved_objects/get-decrypted-as-internal-user/{id}',
         async handler(request: Request) {
+          const encryptedSavedObjectsStart = server.newPlatform.start.plugins
+            .encrypted_saved_objects as PluginStartContract;
           const namespace = server.plugins.spaces && server.plugins.spaces.getSpaceId(request);
           try {
-            return await (server.plugins as any).encrypted_saved_objects.getDecryptedAsInternalUser(
+            return await encryptedSavedObjectsStart.getDecryptedAsInternalUser(
               SAVED_OBJECT_WITH_SECRET_TYPE,
               request.params.id,
               { namespace: namespace === 'default' ? undefined : namespace }
             );
           } catch (err) {
-            if ((server.plugins as any).encrypted_saved_objects.isEncryptionError(err)) {
+            if (encryptedSavedObjectsStart.isEncryptionError(err)) {
               return badRequest('Failed to encrypt attributes');
             }
 
@@ -38,7 +44,8 @@ export default function esoPlugin(kibana: any) {
         },
       });
 
-      (server.plugins as any).encrypted_saved_objects.registerType({
+      (server.newPlatform.setup.plugins
+        .encrypted_saved_objects as PluginSetupContract).registerType({
         type: SAVED_OBJECT_WITH_SECRET_TYPE,
         attributesToEncrypt: new Set(['privateProperty']),
         attributesToExcludeFromAAD: new Set(['publicPropertyExcludedFromAAD']),
