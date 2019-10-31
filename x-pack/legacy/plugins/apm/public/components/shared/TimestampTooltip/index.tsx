@@ -30,7 +30,7 @@ function getTimeFormat(
     case 'milliseconds':
       return `${separator}HH:mm:ss.SSS`;
     default:
-      return ``;
+      return '';
   }
 }
 
