@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { FeatureCatalogueSetup } from 'src/plugins/feature_catalogue/public';
 import { SpacesManager } from './lib';
 import { initSpacesNavControl } from './views/nav_control';
@@ -20,7 +20,6 @@ export interface PluginsSetup {
 
 export class SpacesPlugin implements Plugin<void, SpacesPluginStart, PluginsSetup> {
   private spacesManager?: SpacesManager;
-
 
   public async start(core: CoreStart) {
     const serverBasePath = core.injectedMetadata.getInjectedVar('serverBasePath') as string;

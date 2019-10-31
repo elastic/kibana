@@ -8,10 +8,7 @@ import { npSetup, npStart } from 'ui/new_platform';
 import { plugin } from './index';
 import { SpacesPlugin, PluginsSetup } from './plugin';
 
-const spacesPlugin: SpacesPlugin = plugin({
-  opaqueId: Symbol('spaces plugin'),
-  env: null as any,
-});
+const spacesPlugin: SpacesPlugin = plugin();
 
 const plugins: PluginsSetup = {
   feature_catalogue: npSetup.plugins.feature_catalogue,
