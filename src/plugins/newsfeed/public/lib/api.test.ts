@@ -20,7 +20,7 @@
 import sinon, { stub } from 'sinon';
 import moment from 'moment';
 import { HttpServiceBase } from 'src/core/public';
-import { NEWSFEED_HASH_SET_STORAGE_KEY } from '../../constants';
+import { NEWSFEED_HASH_SET_STORAGE_KEY, NEWSFEED_LAST_FETCH_STORAGE_KEY } from '../../constants';
 import { ApiItem, NewsfeedItem, NewsfeedPluginInjectedConfig } from '../../types';
 import { NewsfeedApiDriver, getApi } from './api';
 
@@ -52,9 +52,25 @@ describe('NewsfeedApiDriver', () => {
     sinon.reset();
   });
 
-  it('shouldFetch defaults to true', () => {
-    const driver = getDriver();
-    expect(driver.shouldFetch()).toBe(true);
+  describe('shouldFetch', () => {
+    it('defaults to true', () => {
+      const driver = getDriver();
+      expect(driver.shouldFetch()).toBe(true);
+    });
+
+    it('returns true if last fetch time precedes page load time', () => {
+      sessionStoragetGet.throws('Wrong key passed!');
+      sessionStoragetGet.withArgs(NEWSFEED_LAST_FETCH_STORAGE_KEY).returns(322642800000); // 1980-03-23
+      const driver = getDriver();
+      expect(driver.shouldFetch()).toBe(true);
+    });
+
+    it('returns false if last fetch time is new', () => {
+      sessionStoragetGet.throws('Wrong key passed!');
+      sessionStoragetGet.withArgs(NEWSFEED_LAST_FETCH_STORAGE_KEY).returns(3005017200000); // 2065-03-23
+      const driver = getDriver();
+      expect(driver.shouldFetch()).toBe(false);
+    });
   });
 
   describe('updateHashes', () => {
