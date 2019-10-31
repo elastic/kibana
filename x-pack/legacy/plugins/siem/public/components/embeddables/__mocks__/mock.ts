@@ -216,6 +216,6 @@ export const mockLayerListDouble = [
 
 export const mockMapLayerEventHandlers: MapLayerEventHandlers = {
   onDataLoad: ({ layerId, dataId }: OnDataLoadProps) => {},
-  onDataLoadEnd: ({ layerId, dataId, featuresCount }: OnDataLoadEndProps) => {},
+  onDataLoadEnd: ({ layerId, dataId, resultMeta }: OnDataLoadEndProps) => {},
   onDataLoadError: ({ layerId, dataId, errorMessage }: OnDataLoadErrorProps) => {},
 };

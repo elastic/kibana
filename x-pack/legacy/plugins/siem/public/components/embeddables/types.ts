@@ -75,7 +75,9 @@ export interface OnDataLoadProps {
 export interface OnDataLoadEndProps {
   layerId: string;
   dataId: string;
-  featuresCount: number;
+  resultMeta: {
+    featuresCount: number;
+  };
 }
 
 export interface OnDataLoadErrorProps {
@@ -86,7 +88,7 @@ export interface OnDataLoadErrorProps {
 
 export interface MapLayerEventHandlers {
   onDataLoad({ layerId, dataId }: OnDataLoadProps): void;
-  onDataLoadEnd({ layerId, dataId, featuresCount }: OnDataLoadEndProps): void;
+  onDataLoadEnd({ layerId, dataId, resultMeta }: OnDataLoadEndProps): void;
   onDataLoadError({ layerId, dataId, errorMessage }: OnDataLoadErrorProps): void;
 }
 

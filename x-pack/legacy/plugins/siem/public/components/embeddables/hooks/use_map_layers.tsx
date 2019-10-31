@@ -53,9 +53,15 @@ export const useMapLayers = (): Return => {
     onDataLoad: ({ layerId, dataId }: OnDataLoadProps) => {
       setMapLayers(prevMapLayers => mergeMapLayers(prevMapLayers, dataId, layerId, true));
     },
-    onDataLoadEnd: ({ layerId, dataId, featuresCount }: OnDataLoadEndProps) => {
+    onDataLoadEnd: ({ layerId, dataId, resultMeta }: OnDataLoadEndProps) => {
       setMapLayers(prevMapLayers =>
-        mergeMapLayers(prevMapLayers, dataId, layerId, false, featuresCount)
+        mergeMapLayers(
+          prevMapLayers,
+          dataId,
+          layerId,
+          false,
+          resultMeta.featuresCount != null ? resultMeta.featuresCount : 0
+        )
       );
     },
     onDataLoadError: ({ layerId, dataId, errorMessage }: OnDataLoadErrorProps) => {
