@@ -71,7 +71,7 @@ export function maps(kibana) {
         }
       },
       savedObjectsManagement: {
-        'map': {
+        [MAP_SAVED_OBJECT_TYPE]: {
           icon: APP_ICON,
           defaultSearchField: 'title',
           isImportableAndExportable: true,
@@ -158,7 +158,7 @@ export function maps(kibana) {
         {
           path: createMapPath('2c9c1f60-1909-11e9-919b-ffe5949a18d2'),
           label: sampleDataLinkLabel,
-          icon: 'gisApp'
+          icon: APP_ICON
         }
       ]);
       server.replacePanelInSampleDatasetDashboard({
@@ -177,7 +177,7 @@ export function maps(kibana) {
         {
           path: createMapPath('5dd88580-1906-11e9-919b-ffe5949a18d2'),
           label: sampleDataLinkLabel,
-          icon: 'gisApp'
+          icon: APP_ICON
         }
       ]);
       server.replacePanelInSampleDatasetDashboard({
@@ -185,7 +185,7 @@ export function maps(kibana) {
         dashboardId: '7adfa750-4c81-11e8-b3d7-01146121b73d',
         oldEmbeddableId: '334084f0-52fd-11e8-a160-89cc2ad9e8e2',
         embeddableId: '5dd88580-1906-11e9-919b-ffe5949a18d2',
-        embeddableType: 'map',
+        embeddableType: MAP_SAVED_OBJECT_TYPE,
         embeddableConfig: {
           isLayerTOCOpen: true
         },
@@ -196,7 +196,7 @@ export function maps(kibana) {
         {
           path: createMapPath('de71f4f0-1902-11e9-919b-ffe5949a18d2'),
           label: sampleDataLinkLabel,
-          icon: 'gisApp'
+          icon: APP_ICON
         }
       ]);
       server.replacePanelInSampleDatasetDashboard({
@@ -204,13 +204,13 @@ export function maps(kibana) {
         dashboardId: 'edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b',
         oldEmbeddableId: '06cf9c40-9ee8-11e7-8711-e7a007dcef99',
         embeddableId: 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
-        embeddableType: 'map',
+        embeddableType: MAP_SAVED_OBJECT_TYPE,
         embeddableConfig: {
           isLayerTOCOpen: false
         },
       });
 
-      server.injectUiAppVars('maps', async () => {
+      server.injectUiAppVars(APP_ID, async () => {
         return await server.getInjectedUiAppVars('kibana');
       });
     }
