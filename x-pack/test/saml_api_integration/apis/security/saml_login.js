@@ -12,7 +12,7 @@ import expect from '@kbn/expect';
 import request from 'request';
 
 export default function ({ getService }) {
-  const chance = getService('chance');
+  const randomness = getService('randomness');
   const supertest = getService('supertestWithoutAuth');
   const config = getService('config');
 
@@ -21,7 +21,7 @@ export default function ({ getService }) {
   function createSAMLResponse(options = {}) {
     return getSAMLResponse({
       destination: `http://localhost:${kibanaServerConfig.port}/api/security/v1/saml`,
-      sessionIndex: chance.natural(),
+      sessionIndex: String(randomness.naturalNumber()),
       ...options,
     });
   }
@@ -288,7 +288,7 @@ export default function ({ getService }) {
         const handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0]);
         const samlRequestId = await getSAMLRequestId(handshakeResponse.headers.location);
 
-        idpSessionIndex = chance.natural();
+        idpSessionIndex = String(randomness.naturalNumber());
         const samlAuthenticationResponse = await supertest.post('/api/security/v1/saml')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', handshakeCookie.cookieString())
