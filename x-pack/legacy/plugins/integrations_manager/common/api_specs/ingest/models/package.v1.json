@@ -1,7 +1,7 @@
 {
   "title": "Package",
   "type": "object",
-  "description": "Multiple dashboard templates and multiple input templates, eg access log, error log, metrics, consisting of index template, ingest pipeline, ML jobs.",
+  "description": "A group of items related to a data ingestion source (e.g. MySQL, nginx, AWS). Can include Kibana assets, ES assets, data source configuration templates, manual install steps, etc.",
   "properties": {
     "name": {
       "type": "string",

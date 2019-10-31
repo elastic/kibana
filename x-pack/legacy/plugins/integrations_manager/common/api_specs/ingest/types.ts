@@ -4,44 +4,55 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable @typescript-eslint/array-type */
+
 /**
- * Has config from zero or more datasources.
+ * The entire config for the Beats agent, including all assigned data source config outputs
+ * along with agent-wide configuration values
  */
 export interface Policy {
-  datasources?: Datasource[];
+  datasources?: Array<Datasource>;
   description?: string;
   id: string;
   name?: string;
   status: Status;
+  use_case?: string;
 }
 
 /**
- * A package with a use case (eg prod_west). The use case ID must be unique. A datasource
- * can have multiple streams.
+ * A logical grouping of places where data is coming from, such as "Production", "Staging",
+ * "Production East-1", "Metrics Cluster", etc. -- these groupings are user-defined. We
+ * store information collected from the user about this logical grouping such as a name and
+ * any other information we need about it to generate the associated config. A package
+ * defines its own data source templates that can use user-provided values to generate the
+ * data source config. A single data source will typically enable users to collect both logs
+ * and metrics. A data source can be in multiple policies at the same time. A datasource can
+ * have multiple streams.
  */
 export interface Datasource {
   id?: string;
-  /**
-   * Should be unique
-   */
   name: string;
   package: Package;
   read_alias?: string;
-  streams: Stream[];
+  streams: Array<Stream>;
 }
 
 /**
- * Multiple dashboard templates and multiple input templates, eg access log, error log,
- * metrics, consisting of index template, ingest pipeline, ML jobs.
+ * A group of items related to a data ingestion source (e.g. MySQL, nginx, AWS). Can include
+ * Kibana assets, ES assets, data source configuration templates, manual install steps, etc.
  */
 export interface Package {
-  assets: Asset[];
+  assets: Array<Asset>;
   description?: string;
   name: string;
   title?: string;
   version: string;
 }
 
+/**
+ * Item installed for Kibana (e.g. dashboard, visualization), Elasticsearch (e.g. ingest
+ * pipeline, ILM policy), or a Kibana plugin (e.g. ML job)
+ */
 export interface Asset {
   id: string;
   type: AssetType;
@@ -67,7 +78,7 @@ export interface Stream {
   id: string;
   input: Input;
   output: Output;
-  processors?: string[];
+  processors?: Array<string>;
 }
 
 /**
@@ -86,7 +97,7 @@ export interface Input {
    * Need a distinction for "main" ingest pipeline. Should be handled during install. Likely
    * by package/manifest format
    */
-  ingest_pipelines?: string[];
+  ingest_pipelines?: Array<string>;
   type: InputType;
 }
 

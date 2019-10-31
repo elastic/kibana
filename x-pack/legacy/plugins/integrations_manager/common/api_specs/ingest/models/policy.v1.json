@@ -1,29 +1,15 @@
 {
   "title": "Policy",
   "type": "object",
-  "description": "Has config from zero or more datasources.",
-  "x-examples": {
-    "example-1": {
-      "value": {
-        "id": "policy_example",
-        "name": "Example Policy",
-        "datasources": [
-          {
-            "use_case": "prod_west",
-            "packcage": {},
-            "streams": [
-              {}
-            ]
-          }
-        ]
-      }
-    }
-  },
+  "description": "The entire config for the Beats agent, including all assigned data source config outputs along with agent-wide configuration values",
   "properties": {
     "id": {
       "type": "string"
     },
     "name": {
+      "type": "string"
+    },
+    "use_case": {
       "type": "string"
     },
     "datasources": {

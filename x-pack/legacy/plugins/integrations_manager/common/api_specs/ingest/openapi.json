@@ -100,13 +100,12 @@
           }
         ],
         "description": "Return datasources",
-        "operationId": "getDatasourcs"
+        "operationId": "getDatasources"
       }
     },
     "/policy/{policy_id}": {
       "parameters": [
         {
-          "type": "string",
           "name": "policy_id",
           "in": "path",
           "required": true,
