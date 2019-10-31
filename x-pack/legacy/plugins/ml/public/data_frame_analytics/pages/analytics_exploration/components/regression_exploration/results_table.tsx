@@ -65,24 +65,11 @@ interface Props {
 export const ResultsTable: FC<Props> = React.memo(({ jobConfig, jobStatus }) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(25);
-  const [clearTable, setClearTable] = useState(false);
   const [selectedFields, setSelectedFields] = useState([] as EsFieldName[]);
   const [isColumnsPopoverVisible, setColumnsPopoverVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState<SavedSearchQuery>(defaultSearchQuery);
   const [searchError, setSearchError] = useState<any>(undefined);
   const [searchString, setSearchString] = useState<string | undefined>(undefined);
-
-  // EuiInMemoryTable has an issue with dynamic sortable columns
-  // and will trigger a full page Kibana error in such a case.
-  // The following is a workaround until this is solved upstream:
-  // - If the sortable/columns config changes,
-  //   the table will be unmounted/not rendered.
-  //   This is what setClearTable(true) in toggleColumn() does.
-  // - After that on next render it gets re-enabled. To make sure React
-  //   doesn't consolidate the state updates, setTimeout is used.
-  if (clearTable) {
-    setTimeout(() => setClearTable(false), 0);
-  }
 
   function toggleColumnsPopover() {
     setColumnsPopoverVisible(!isColumnsPopoverVisible);
@@ -94,7 +81,6 @@ export const ResultsTable: FC<Props> = React.memo(({ jobConfig, jobStatus }) => 
 
   function toggleColumn(column: EsFieldName) {
     if (tableItems.length > 0 && jobConfig !== undefined) {
-      setClearTable(true);
       // spread to a new array otherwise the component wouldn't re-render
       setSelectedFields([...toggleSelectedField(selectedFields, column)]);
     }
@@ -269,7 +255,6 @@ export const ResultsTable: FC<Props> = React.memo(({ jobConfig, jobStatus }) => 
       setPageSize(size);
 
       if (sort.field !== sortField || sort.direction !== sortDirection) {
-        setClearTable(true);
         loadExploreData({ ...sort, searchQuery });
       }
     };
@@ -445,7 +430,7 @@ export const ResultsTable: FC<Props> = React.memo(({ jobConfig, jobStatus }) => 
       {status !== INDEX_STATUS.LOADING && (
         <EuiProgress size="xs" color="accent" max={1} value={0} />
       )}
-      {clearTable === false && (columns.length > 0 || searchQuery !== defaultSearchQuery) && (
+      {(columns.length > 0 || searchQuery !== defaultSearchQuery) && (
         <Fragment>
           <EuiSpacer />
           <MlInMemoryTableBasic
