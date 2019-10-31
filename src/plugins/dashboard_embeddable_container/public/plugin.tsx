@@ -17,6 +17,8 @@
  * under the License.
  */
 
+/* eslint-disable max-classes-per-file */
+
 import * as React from 'react';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { IUiActionsSetup, IUiActionsStart } from '../../../plugins/ui_actions/public';
@@ -25,8 +27,10 @@ import { ExpandPanelAction, ReplacePanelAction } from '.';
 import { DashboardContainerFactory } from './embeddable/dashboard_container_factory';
 import { Start as InspectorStartContract } from '../../../plugins/inspector/public';
 import {
-  SavedObjectFinder as SavedObjectFinderPure,
+  SavedObjectFinder as SavedObjectFinderUi,
   SavedObjectFinderProps,
+  ExitFullScreenButton as ExitFullScreenButtonUi,
+  ExitFullScreenButtonProps,
 } from '../../../plugins/kibana_react/public';
 
 interface SetupDependencies {
@@ -57,16 +61,27 @@ export class DashboardEmbeddableContainerPublicPlugin
     const { application, notifications, overlays } = core;
     const { embeddable, inspector, uiActions } = plugins;
 
-    const SavedObjectFinder = (
-      props: Exclude<SavedObjectFinderProps, 'savedObjects' | 'uiSettings'>
-    ) => (
-      <SavedObjectFinderPure
+    const SavedObjectFinder: React.FC<
+      Exclude<SavedObjectFinderProps, 'savedObjects' | 'uiSettings'>
+    > = props => (
+      <SavedObjectFinderUi
         {...props}
         savedObjects={core.savedObjects}
         uiSettings={core.uiSettings}
       />
     );
-    const ExitFullScreenButton = () => null;
+
+    const useHideChrome = () => {
+      React.useEffect(() => {
+        core.chrome.setIsVisible(false);
+        return () => core.chrome.setIsVisible(true);
+      });
+    };
+
+    const ExitFullScreenButton: React.FC<ExitFullScreenButtonProps> = props => {
+      useHideChrome();
+      return <ExitFullScreenButtonUi {...props} />;
+    };
 
     const changeViewAction = new ReplacePanelAction(
       core,
