@@ -179,10 +179,7 @@ export class DashboardAppController {
         [key: string]: DashboardPanelState;
       } = {};
       dashboardStateManager.getPanels().forEach((panel: SavedDashboardPanel) => {
-        embeddablesMap[panel.panelIndex] = convertSavedDashboardPanelToPanelState(
-          panel,
-          dashboardStateManager.getUseMargins()
-        );
+        embeddablesMap[panel.panelIndex] = convertSavedDashboardPanelToPanelState(panel);
       });
       let expandedPanelId;
       if (dashboardContainer && !isErrorEmbeddable(dashboardContainer)) {

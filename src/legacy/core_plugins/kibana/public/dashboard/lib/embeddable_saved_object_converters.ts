@@ -21,8 +21,7 @@ import { DashboardPanelState } from 'src/legacy/core_plugins/dashboard_embeddabl
 import { SavedDashboardPanel } from '../types';
 
 export function convertSavedDashboardPanelToPanelState(
-  savedDashboardPanel: SavedDashboardPanel,
-  useMargins: boolean
+  savedDashboardPanel: SavedDashboardPanel
 ): DashboardPanelState {
   return {
     type: savedDashboardPanel.type,

@@ -25,6 +25,7 @@ import { DataStart } from 'src/legacy/core_plugins/data/public';
 import {
   AppMountContext,
   ChromeStart,
+  LegacyCoreStart,
   SavedObjectsClientContract,
   ToastsStart,
   UiSettingsClientContract,
@@ -80,7 +81,7 @@ export interface LegacyAngularInjectedDependencies {
 
 export const renderApp = ({ appBasePath, element, ...deps }: GraphDependencies) => {
   const graphAngularModule = createLocalAngularModule(deps.coreStart);
-  configureAppAngularModule(graphAngularModule);
+  configureAppAngularModule(graphAngularModule, deps.coreStart as LegacyCoreStart);
   initGraphApp(graphAngularModule, deps);
   const $injector = mountGraphApp(appBasePath, element);
   return () => $injector.get('$rootScope').$destroy();

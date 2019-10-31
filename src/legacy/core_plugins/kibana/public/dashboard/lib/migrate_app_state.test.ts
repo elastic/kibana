@@ -43,7 +43,7 @@ test('migrate app state from 6.0', async () => {
     getQueryParamName: () => 'a',
     save: mockSave,
   };
-  migrateAppState(appState);
+  migrateAppState(appState, '8.0');
   expect(appState.uiState).toBeUndefined();
 
   const newPanel = (appState.panels[0] as unknown) as SavedDashboardPanel;
@@ -80,7 +80,7 @@ test('migrate sort from 6.1', async () => {
     save: mockSave,
     useMargins: false,
   };
-  migrateAppState(appState);
+  migrateAppState(appState, '8.0');
   expect(appState.uiState).toBeUndefined();
 
   const newPanel = (appState.panels[0] as unknown) as SavedDashboardPanel;
@@ -112,7 +112,7 @@ test('migrates 6.0 even when uiState does not exist', async () => {
     getQueryParamName: () => 'a',
     save: mockSave,
   };
-  migrateAppState(appState);
+  migrateAppState(appState, '8.0');
   expect((appState as any).uiState).toBeUndefined();
 
   const newPanel = (appState.panels[0] as unknown) as SavedDashboardPanel;
@@ -147,7 +147,7 @@ test('6.2 migration adjusts w & h without margins', async () => {
     save: mockSave,
     useMargins: false,
   };
-  migrateAppState(appState);
+  migrateAppState(appState, '8.0');
   expect((appState as any).uiState).toBeUndefined();
 
   const newPanel = (appState.panels[0] as unknown) as SavedDashboardPanel;
@@ -184,7 +184,7 @@ test('6.2 migration adjusts w & h with margins', async () => {
     save: mockSave,
     useMargins: true,
   };
-  migrateAppState(appState);
+  migrateAppState(appState, '8.0');
   expect((appState as any).uiState).toBeUndefined();
 
   const newPanel = (appState.panels[0] as unknown) as SavedDashboardPanel;
