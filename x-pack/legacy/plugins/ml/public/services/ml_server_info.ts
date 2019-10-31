@@ -76,23 +76,3 @@ export function cloudDeploymentId(): string | null {
     return null;
   }
 }
-
-export function cloudDeploymentAddress(): string | null {
-  if (cloudInfo.cloudId === null) {
-    return null;
-  }
-
-  const tempCloudId = cloudInfo.cloudId.replace(/^.+:/, '');
-  try {
-    const matches = atob(tempCloudId).match(/^(.+?)\.(.+?)\..*?\$(.+)\$/);
-    if (matches && matches.length === 4) {
-      const region = matches[1];
-      const platform = matches[2];
-      const deploymentId = matches[3];
-      return `https://cloud.elastic.co/region/${platform}-${region}/deployment/${deploymentId}/edit`;
-    }
-    return null;
-  } catch (error) {
-    return null;
-  }
-}
