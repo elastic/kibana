@@ -20,6 +20,11 @@ type QueryNetworkTopNFlowResolver = ChildResolverOf<
   QuerySourceResolver
 >;
 
+type QueryNetworkHttpResolver = ChildResolverOf<
+  AppResolverOf<SourceResolvers.NetworkHttpResolver>,
+  QuerySourceResolver
+>;
+
 type QueryDnsResolver = ChildResolverOf<
   AppResolverOf<SourceResolvers.NetworkDnsResolver>,
   QuerySourceResolver
@@ -33,6 +38,7 @@ export const createNetworkResolvers = (
   libs: NetworkResolversDeps
 ): {
   Source: {
+    NetworkHttp: QueryNetworkHttpResolver;
     NetworkTopCountries: QueryNetworkTopCountriesResolver;
     NetworkTopNFlow: QueryNetworkTopNFlowResolver;
     NetworkDns: QueryDnsResolver;
@@ -56,6 +62,14 @@ export const createNetworkResolvers = (
         ip: args.ip,
       };
       return libs.network.getNetworkTopNFlow(req, options);
+    },
+    async NetworkHttp(source, args, { req }, info) {
+      const options = {
+        ...createOptionsPaginated(source, args, info),
+        networkHttpSort: args.sort,
+        ip: args.ip,
+      };
+      return libs.network.getNetworkHttp(req, options);
     },
     async NetworkDns(source, args, { req }, info) {
       const options = {

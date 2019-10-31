@@ -10,6 +10,7 @@ import {
   Direction,
   FlowTarget,
   NetworkDnsFields,
+  NetworkHttpFields,
   NetworkTopTablesFields,
   TlsFields,
   UsersFields,
@@ -58,6 +59,14 @@ export const initialNetworkState: NetworkState = {
         },
         isPtrIncluded: false,
       },
+      [NetworkTableType.http]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+        sort: {
+          field: NetworkHttpFields.requestCount,
+          direction: Direction.desc,
+        },
+      },
       [NetworkTableType.tls]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
@@ -86,6 +95,14 @@ export const initialNetworkState: NetworkState = {
   },
   details: {
     queries: {
+      [IpDetailsTableType.http]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+        sort: {
+          field: NetworkHttpFields.requestCount,
+          direction: Direction.desc,
+        },
+      },
       [IpDetailsTableType.topCountriesSource]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
