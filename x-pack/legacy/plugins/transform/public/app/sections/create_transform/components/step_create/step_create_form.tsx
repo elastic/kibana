@@ -77,6 +77,8 @@ export const StepCreateForm: SFC<Props> = React.memo(
 
     useEffect(() => {
       onChange({ created, started, indexPatternId });
+      // custom comparison
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [created, started, indexPatternId]);
 
     const api = useApi();
