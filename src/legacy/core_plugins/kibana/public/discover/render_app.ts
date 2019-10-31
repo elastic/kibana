@@ -76,6 +76,12 @@ import { registerListenEventListener } from 'ui/directives/listen/listen';
 import { setAngularModule, setServices } from './kibana_services';
 // @ts-ignore
 import { dashboardConfigProvider } from '../dashboard/dashboard_config';
+import {
+  ApplyFiltersPopoverFactory,
+  ApplyFiltersPopoverHelperFactory,
+  FilterBarFactory,
+  FilterBarHelperFactory,
+} from '../../../data/public/shim/legacy_module';
 
 const moduleName = 'app/discover';
 const thirdPartyAngularDependencies = [
@@ -167,8 +173,12 @@ export function createLocalAngularModule(core: AppMountContext['core']) {
     .directive('fieldName', FieldNameDirectiveProvider)
     .directive('collapsibleSidebar', CollapsibleSidebarProvider)
     .directive('cssTruncate', CssTruncateProvide)
-    .service('debounce', ['$timeout', DebounceProviderTimeout])
-    .directive('fixedScroll', FixedScrollProvider);
+    .directive('fixedScroll', FixedScrollProvider)
+    .directive('filterBar', FilterBarFactory)
+    .directive('filterBarHelper', FilterBarHelperFactory)
+    .directive('applyFiltersPopover', ApplyFiltersPopoverFactory)
+    .directive('applyFiltersPopoverHelper', ApplyFiltersPopoverHelperFactory)
+    .service('debounce', ['$timeout', DebounceProviderTimeout]);
 }
 
 export function createLocalGlobalStateModule() {
