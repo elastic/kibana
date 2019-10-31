@@ -85,6 +85,10 @@ export interface NetworkDnsSortField {
   direction: Direction;
 }
 
+export interface NetworkHttpSortField {
+  direction: Direction;
+}
+
 export interface TlsSortField {
   field: TlsFields;
 
@@ -2217,6 +2221,8 @@ export interface NetworkHttpSourceArgs {
 
   pagination: PaginationInputPaginated;
 
+  sort: NetworkHttpSortField;
+
   timerange: TimerangeInput;
 
   defaultIndex: string[];
@@ -3274,6 +3280,7 @@ export namespace GetNetworkHttpQuery {
     ip?: Maybe<string>;
     filterQuery?: Maybe<string>;
     pagination: PaginationInputPaginated;
+    sort: NetworkHttpSortField;
     timerange: TimerangeInput;
     defaultIndex: string[];
     inspect: boolean;

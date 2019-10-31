@@ -162,6 +162,10 @@ export const networkSchema = gql`
     statuses
   }
 
+  input NetworkHttpSortField {
+    direction: Direction!
+  }
+
   type NetworkHttpItem {
     _id: String
     domains: [String!]!
@@ -220,6 +224,7 @@ export const networkSchema = gql`
       filterQuery: String
       ip: String
       pagination: PaginationInputPaginated!
+      sort: NetworkHttpSortField!
       timerange: TimerangeInput!
       defaultIndex: [String!]!
     ): NetworkHttpData!

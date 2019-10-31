@@ -9,12 +9,18 @@ import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 
 import { networkActions } from '../../../../store/actions';
-import { NetworkHttpEdges } from '../../../../graphql/types';
+import {
+  Direction,
+  NetworkHttpEdges,
+  NetworkHttpFields,
+  NetworkHttpSortField,
+} from '../../../../graphql/types';
 import { networkModel, networkSelectors, State } from '../../../../store';
-import { ItemsPerRow, PaginatedTable } from '../../../paginated_table';
+import { Criteria, ItemsPerRow, PaginatedTable } from '../../../paginated_table';
 
 import { getNetworkHttpColumns } from './columns';
 import * as i18n from './translations';
+import { isEqual, last } from 'lodash/fp';
 
 interface OwnProps {
   data: NetworkHttpEdges[];
@@ -31,6 +37,7 @@ interface OwnProps {
 interface NetworkHttpTableReduxProps {
   activePage: number;
   limit: number;
+  sort: NetworkHttpSortField;
 }
 
 interface NetworkHttpTableDispatchProps {
@@ -65,10 +72,30 @@ export const NetworkHttpTableComponent = React.memo<NetworkHttpTableProps>(
     loading,
     loadPage,
     showMorePagesIndicator,
+    sort,
     totalCount,
     type,
     updateNetworkTable,
   }) => {
+    const onChange = (criteria: Criteria, tableType: networkModel.HttpTableType) => {
+      if (criteria.sort != null) {
+        const splitField = criteria.sort.field.split('.');
+        const field = last(splitField);
+        const newSortDirection = field !== sort.field ? Direction.desc : criteria.sort.direction; // sort by desc on init click
+        const newHttpSort: NetworkHttpSortField = {
+          direction: newSortDirection,
+        };
+        if (!isEqual(newHttpSort, sort)) {
+          updateNetworkTable({
+            networkType: type,
+            tableType,
+            updates: {
+              sort: newHttpSort,
+            },
+          });
+        }
+      }
+    };
     const tableType =
       type === networkModel.NetworkType.page
         ? networkModel.NetworkTableType.http
@@ -87,8 +114,10 @@ export const NetworkHttpTableComponent = React.memo<NetworkHttpTableProps>(
         limit={limit}
         loading={loading}
         loadPage={newActivePage => loadPage(newActivePage)}
+        onChange={criteria => onChange(criteria, tableType)}
         pageOfItems={data}
         showMorePagesIndicator={showMorePagesIndicator}
+        sorting={{ field: sort.field, direction: sort.direction }}
         totalCount={fakeTotalCount}
         updateActivePage={newPage =>
           updateNetworkTable({

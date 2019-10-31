@@ -7,6 +7,7 @@
 import {
   FlowTarget,
   NetworkDnsSortField,
+  NetworkHttpSortField,
   NetworkTopTablesSortField,
   TlsSortField,
   UsersSortField,
@@ -40,6 +41,8 @@ export type TopCountriesTableType =
   | NetworkTableType.topCountriesSource;
 
 export type TopTlsTableType = IpDetailsTableType.tls | NetworkTableType.tls;
+
+export type HttpTableType = IpDetailsTableType.http | NetworkTableType.http;
 
 export enum IpDetailsTableType {
   http = 'http',
@@ -76,7 +79,9 @@ export interface TlsQuery extends BasicQueryPaginated {
   sort: TlsSortField;
 }
 
-export type HttpQuery = BasicQueryPaginated;
+export interface HttpQuery extends BasicQueryPaginated {
+  sort: NetworkHttpSortField;
+}
 
 export interface TableUpdates {
   activePage?: number;
@@ -84,6 +89,7 @@ export interface TableUpdates {
   isPtrIncluded?: boolean;
   sort?:
     | NetworkDnsSortField
+    | NetworkHttpSortField
     | NetworkTopTablesSortField
     | TlsSortField
     | UsersSortField;

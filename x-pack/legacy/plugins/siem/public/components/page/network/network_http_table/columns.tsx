@@ -102,6 +102,7 @@ export const getNetworkHttpColumns = (tableId: string): NetworkHttpColumns => [
     align: 'right',
     field: `node.${NetworkHttpFields.requestCount}`,
     name: i18n.REQUESTS,
+    sortable: true,
     render: requestCount => {
       if (requestCount != null) {
         return numeral(requestCount).format('0,000');

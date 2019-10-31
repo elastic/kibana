@@ -66,6 +66,7 @@ export const createNetworkResolvers = (
     async NetworkHttp(source, args, { req }, info) {
       const options = {
         ...createOptionsPaginated(source, args, info),
+        networkHttpSort: args.sort,
         ip: args.ip,
       };
       return libs.network.getNetworkHttp(req, options);

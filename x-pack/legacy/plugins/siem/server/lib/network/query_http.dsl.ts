@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { Direction, NetworkHttpSortField } from '../../graphql/types';
 import { createQueryFilterClauses } from '../../utils/build_query';
 
 import { NetworkHttpRequestOptions } from './index';
@@ -19,6 +19,7 @@ const getCountAgg = () => ({
 export const buildHttpQuery = ({
   defaultIndex,
   filterQuery,
+  networkHttpSort,
   pagination: { querySize },
   sourceConfiguration: {
     fields: { timestamp },
@@ -39,7 +40,7 @@ export const buildHttpQuery = ({
     body: {
       aggregations: {
         ...getCountAgg(),
-        ...getHttpAggs(querySize),
+        ...getHttpAggs(networkHttpSort, querySize),
       },
       query: {
         bool: ip
@@ -65,7 +66,7 @@ export const buildHttpQuery = ({
   return dslQuery;
 };
 
-const getHttpAggs = (querySize: number) => ({
+const getHttpAggs = (networkHttpSortField: NetworkHttpSortField, querySize: number) => ({
   url: {
     terms: {
       field: `url.path`,

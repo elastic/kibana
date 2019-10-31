@@ -12,6 +12,7 @@ export const networkHttpQuery = gql`
     $ip: String
     $filterQuery: String
     $pagination: PaginationInputPaginated!
+    $sort: NetworkHttpSortField!
     $timerange: TimerangeInput!
     $defaultIndex: [String!]!
     $inspect: Boolean!
@@ -22,6 +23,7 @@ export const networkHttpQuery = gql`
         filterQuery: $filterQuery
         ip: $ip
         pagination: $pagination
+        sort: $sort
         timerange: $timerange
         defaultIndex: $defaultIndex
       ) {

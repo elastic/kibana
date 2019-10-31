@@ -43,7 +43,6 @@ export const NAVIGATION_HTTP_TITLE = i18n.translate('xpack.siem.network.navigati
   defaultMessage: 'HTTP',
 });
 
-
 export const NAVIGATION_ANOMALIES_TITLE = i18n.translate(
   'xpack.siem.network.navigation.anomaliesTitle',
   {
