@@ -15,34 +15,36 @@ you the trends, spikes, and dips you need to know about.
 You can create visualizations from a search saved from <<discover, Discover>>
 or start from an <<index-patterns, index pattern>>.
 
-**Creating a Visualization**
+[float]
+[[create-a-visualization]]
+== Create a visualization
 
-. Click on *Visualize* in the side navigation.
-. Click the *Create new visualization* button or the **+** button.
+. Open *Visualize*.
+. Click *Create new visualization*.
 . Choose the visualization type:
 +
 * *<<most-frequent,Most frequently used visualizations>>*
 [horizontal]
-<<most-frequent,Line&comma; Area and Bar charts>>:: Compare different series in X/Y charts.
-<<most-frequent,Pie chart>>:: Display each source's contribution to a total.
+<<most-frequent,Line&comma; area and bar charts>>:: Compare different series in X/Y charts.
+<<most-frequent,Pie chart>>:: Display each source contribution to a total.
 <<most-frequent,Data table>>:: Flattens aggregations into table format.
 <<most-frequent,Metric>>:: Display a single number.
-<<most-frequent,Goal and Gauge>>:: Display a number with more decoration.
-<<most-frequent,Heat maps>>:: Shade cells within a matrix.
-<<most-frequent,Tag cloud>>:: Display words as a cloud in which the size of the word correspond to its importance.
-* *Time Series optimized*
+<<most-frequent,Goal and gauge>>:: Display a number with more decoration.
+<<most-frequent,Heat maps>>:: Display shaded cells within a matrix.
+<<most-frequent,Tag cloud>>:: Display words in a cloud, where the size of the word corresponds to its importance.
+* *Time series optimized*
 [horizontal]
 <<TSVB,TSVB>>:: Visualize time series data using pipeline aggregations.
 <<timelion,_Timelion_>>:: Compute and combine data from multiple time series
 data sets. Hidden by default.
 * *Maps*
 [horizontal]
-<<maps, Elastic maps>>:: Elastic maps is the most powerful way of visualizing map data in Kibana
+<<maps, Elastic maps>>:: The most powerful way of visualizing map data in {kib}.
 <<tilemap,_Coordinate map_>>:: Displays points on a map using a geohash aggregation.
-<<regionmap,_Region map_>>:: Merge any structured map data onto a shape
+<<regionmap,_Region map_>>:: Merge any structured map data onto a shape.
 * *<<for-dashboard, For use in dashboards>>*
 [horizontal]
-<<for-dashboard,Controls>>:: Controls provide the ability to add interactive inputs to Kibana Dashboards.
+<<for-dashboard,Controls>>:: Provides the ability to add interactive inputs to a Dashboard.
 <<for-dashboard,Markdown widget>>:: Display free-form information or instructions.
 * *For developers*
 [horizontal]

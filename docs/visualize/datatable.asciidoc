@@ -1,36 +1,37 @@
 [[data-table]]
-=== Data Table
+=== Data table
 
 The nested structure of Elasticsearch responses is flattened into a table.
 Multiple tables can be displayed by configuring a bucket as a "Split table".
 
 The table visualization has support for bucket aggregations beyond other visualizations:
 
-*Geohash*:: The {ref}/search-aggregations-bucket-geohashgrid-aggregation.html[_geohash_] aggregation displays points
-based on a geohash.
-*Geotile*:: The {ref}/search-aggregations-bucket-geotilegrid-aggregation.html[_geotile_] aggregation groups points
-based on web map tiling.
+{ref}/search-aggregations-bucket-geohashgrid-aggregation.html[Geohash]:: Displays points based on a geohash.
 
-Tables can 
-Once you've specified a bucket type aggregation, you can define sub-buckets to refine the visualization. Click
-*+ Add* to define a sub-bucket, then choose *Split rows* or *Split table*, then select an
-aggregation from the list of types.
+{ref}/search-aggregations-bucket-geotilegrid-aggregation.html[Geotile]:: Groups points based on web map tiling.
 
-Enter a string in the *Custom Label* field to change the display label.
+Once you've specified a bucket type aggregation, you can define sub-buckets to refine the visualization.
 
-You can click the *Advanced* link to display more customization options for your metrics or bucket aggregation:
+. To define a sub-bucket, click *+ Add*.
 
-*Exclude Pattern*:: Specify a pattern in this field to exclude from the results.
-*Include Pattern*:: Specify a pattern in this field to include in the results.
+. Choose *Split rows* or *Split table*.
+
+. From the list of types, select an aggregation.
+
+. In the *Custom Label* field, enter a label name.
+
+. To display customization options for your metrics or bucket aggregations, click *Advanced*.
+* *Exclude Pattern* - Specifies a pattern in this field to exclude from the results.
+* *Include Pattern* - Specifies a pattern in this field to include in the results.
 include::json-input.asciidoc[]
 
-Select the *Options* tab to change the following aspects of the table:
+To make changes to the table, select *Options*, then change the following options:
 
-*Per Page*:: This field controls the pagination of the table. The default value is ten rows per page.
-*Show metrics for every bucket/level*:: Check this box to display the intermediate results for each bucket aggregation.
-*Show partial rows*:: Check this box to display a row even when there is no result.
-*Show total*:: Check this box to display a row at the bottom of the table with each column's total value.
-*Total function*:: This field controls the function used to calculate totals that you can toggle with the **Show total** checkbox.
-*Percentage column*:: Select a column to add a percentage based column on the same data.
+* *Per Page* - Controls the pagination of the table. The default value is ten rows per page.
+* *Show metrics for every bucket/level* - Displays the intermediate results for each bucket aggregation.
+* *Show partial rows* - Displays a row even when there is no result.
+* *Show total* - Displays a row at the bottom of the table with each column's total value.
+* *Total function* - Controls the function used to calculate totals that you can toggle with the **Show total** checkbox.
+* *Percentage column* - Select a column to add a percentage based column on the same data.
 
-NOTE: Enabling these behaviors may have a substantial effect on performance.
+NOTE: Enabling the *Options* behaviors may have a substantial effect on performance.
