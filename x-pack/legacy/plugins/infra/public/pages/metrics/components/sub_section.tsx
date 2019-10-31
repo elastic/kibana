@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { isValidElement, cloneElement, FunctionComponent, Children, useMemo } from 'react';
 import { EuiTitle } from '@elastic/eui';
 import { InventoryMetric } from '../../../../common/inventory_models/types';
 import { LayoutProps } from '../types';
@@ -30,18 +30,22 @@ export const SubSection: FunctionComponent<SubSectionProps> = ({
   if (!metric) {
     return null;
   }
-  const childrenWithProps = React.Children.map(children, child => {
-    if (React.isValidElement(child)) {
-      return React.cloneElement(child, {
-        metric,
-        id,
-        onChangeRangeTime,
-        isLiveStreaming,
-        stopLiveStreaming,
-      });
-    }
-    return null;
-  });
+  const childrenWithProps = useMemo(
+    () =>
+      Children.map(children, child => {
+        if (isValidElement(child)) {
+          return cloneElement(child, {
+            metric,
+            id,
+            onChangeRangeTime,
+            isLiveStreaming,
+            stopLiveStreaming,
+          });
+        }
+        return null;
+      }),
+    [children, metric, id, onChangeRangeTime, isLiveStreaming, stopLiveStreaming]
+  );
   return (
     <div style={{ margin: '10px 0 16px 0' }} id={id}>
       {label ? (
