@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../../src/core/public';
+import { PluginInitializerContext } from 'src/core/public';
 import { NewsfeedPublicPlugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
