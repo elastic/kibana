@@ -50,10 +50,13 @@ import {
   EsFieldName,
   EsDoc,
   MAX_COLUMNS,
+  INDEX_STATUS,
 } from '../../../../common';
 
 import { getOutlierScoreFieldName } from './common';
-import { INDEX_STATUS, useExploreData } from './use_explore_data';
+import { useExploreData } from './use_explore_data';
+import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
+import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/columns';
 
 const customColorScaleFactory = (n: number) => (t: number) => {
   if (t < 1 / n) {
@@ -78,7 +81,7 @@ const ExplorationTitle: React.SFC<{ jobId: string }> = ({ jobId }) => (
   <EuiTitle size="xs">
     <span>
       {i18n.translate('xpack.ml.dataframe.analytics.exploration.jobIdTitle', {
-        defaultMessage: 'Job ID {jobId}',
+        defaultMessage: 'Outlier detection job ID {jobId}',
         values: { jobId },
       })}
     </span>
@@ -87,9 +90,10 @@ const ExplorationTitle: React.SFC<{ jobId: string }> = ({ jobId }) => (
 
 interface Props {
   jobId: string;
+  jobStatus: DATA_FRAME_TASK_STATE;
 }
 
-export const Exploration: FC<Props> = React.memo(({ jobId }) => {
+export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
   const [jobConfig, setJobConfig] = useState<DataFrameAnalyticsConfig | undefined>(undefined);
 
   const [pageIndex, setPageIndex] = useState(0);
@@ -378,7 +382,14 @@ export const Exploration: FC<Props> = React.memo(({ jobId }) => {
   if (status === INDEX_STATUS.LOADED && tableItems.length === 0) {
     return (
       <EuiPanel grow={false}>
-        <ExplorationTitle jobId={jobConfig.id} />
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <ExplorationTitle jobId={jobConfig.id} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <span>{getTaskStateBadge(jobStatus)}</span>
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiCallOut
           title={i18n.translate('xpack.ml.dataframe.analytics.exploration.noDataCalloutTitle', {
             defaultMessage: 'Empty index query result.',
@@ -400,7 +411,14 @@ export const Exploration: FC<Props> = React.memo(({ jobId }) => {
     <EuiPanel grow={false}>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
         <EuiFlexItem grow={false}>
-          <ExplorationTitle jobId={jobConfig.id} />
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <ExplorationTitle jobId={jobConfig.id} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <span>{getTaskStateBadge(jobStatus)}</span>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
