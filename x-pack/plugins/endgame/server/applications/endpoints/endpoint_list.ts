@@ -33,4 +33,29 @@ export function setupEndpointListApi(router: IRouter, coreSetup: CoreSetup): voi
       });
     }
   );
+
+  router.get(
+    {
+      path: '/endpoints2',
+      validate: {},
+    },
+    async function handleGetEndpointsList(context, request, response) {
+      let responseBody;
+
+      // DEVELOPMENT MODE (is removed during webpack build)
+      // TODO: is this valid in Kibana runtime? Search of code base seems to suggest its OK
+      if (process.env.NODE_ENV !== 'production') {
+        responseBody = (await import('./endpoint_dev_stubs')).endpoints2;
+      } else {
+        return response.customError({
+          body: 'This API is not implemented yet.',
+          statusCode: 501,
+        });
+      }
+
+      return response.ok({
+        body: responseBody,
+      });
+    }
+  );
 }
