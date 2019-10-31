@@ -21,14 +21,14 @@ import Hapi from 'hapi';
 import Joi from 'joi';
 import stringify from 'json-stable-stringify';
 import { SavedObjectsClientContract } from 'src/core/server';
+// Disable lint errors for imports from src/core/server/saved_objects until SavedObjects migration is complete
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getSortedObjectsForExport } from 'src/core/server/saved_objects';
 import {
   createPromiseFromStreams,
   createMapStream,
   createConcatStream,
 } from '../../../utils/streams';
-// Disable lint errors for imports from src/core/server/saved_objects until SavedObjects migration is complete
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { getSortedObjectsForExport } from '../../../../core/server/saved_objects';
 import { Prerequisites } from './types';
 
 interface ExportRequest extends Hapi.Request {
