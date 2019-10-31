@@ -73,7 +73,7 @@ export class ExtendedTemplate extends PureComponent<Props> {
     if (isDisabled) {
       return (
         <EuiText color="subdued" size="xs">
-          <p>Swtich on to view axis settings</p>
+          <p>{strings.getDisabledText()}</p>
         </EuiText>
       );
     }

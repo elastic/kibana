@@ -35,6 +35,10 @@ export const ArgumentStrings = {
       i18n.translate('xpack.canvas.uis.arguments.axisConfigLabel', {
         defaultMessage: 'Visualization axis configuration',
       }),
+    getDisabledText: () =>
+      i18n.translate('xpack.canvas.uis.arguments.axisConfigDisabledText', {
+        defaultMessage: 'Switch on to view axis settings',
+      }),
     getPositionBottom: () =>
       i18n.translate('xpack.canvas.uis.arguments.axisConfig.position.options.bottomDropDown', {
         defaultMessage: 'bottom',
@@ -123,6 +127,14 @@ export const ArgumentStrings = {
     getCreateNewGroup: () =>
       i18n.translate('xpack.canvas.uis.arguments.filterGroup.createNewGroupLinkText', {
         defaultMessage: 'Create new group',
+      }),
+    getButtonSet: () =>
+      i18n.translate('xpack.canvas.uis.arguments.filterGroup.setValue', {
+        defaultMessage: 'Set',
+      }),
+    getButtonCancel: () =>
+      i18n.translate('xpack.canvas.uis.arguments.filterGroup.cancelValue', {
+        defaultMessage: 'Cancel',
       }),
     getDisplayName: () =>
       i18n.translate('xpack.canvas.uis.arguments.filterGroupTitle', {
