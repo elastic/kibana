@@ -7,7 +7,7 @@
 import { NotificationsSetup, Toast, HttpSetup } from 'src/core/public';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { reactMount } from '../../../../../src/plugins/kibana_react/public';
+import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
 import { SessionTimeoutWarning } from './session_timeout_warning';
 import { ISessionExpired } from './session_expired';
 
@@ -66,7 +66,7 @@ export class SessionTimeout {
   private showWarning = () => {
     this.warningToast = this.notifications.toasts.add({
       color: 'warning',
-      text: reactMount(<SessionTimeoutWarning onRefreshSession={this.refreshSession} />),
+      text: toMountPoint(<SessionTimeoutWarning onRefreshSession={this.refreshSession} />),
       title: i18n.translate('xpack.security.components.sessionTimeoutWarning.title', {
         defaultMessage: 'Warning',
       }),

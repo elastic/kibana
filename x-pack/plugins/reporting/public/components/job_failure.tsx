@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { ToastInput } from '../../../../../src/core/public';
-import { reactMount } from '../../../../../src/plugins/kibana_react/public';
+import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
 import { JobSummary, ManagementLinkFn } from '../../index.d';
 
 export const getFailureToast = (
@@ -18,14 +18,14 @@ export const getFailureToast = (
   getManagmenetLink: ManagementLinkFn
 ): ToastInput => {
   return {
-    title: reactMount(
+    title: toMountPoint(
       <FormattedMessage
         id="xpack.reporting.publicNotifier.error.couldNotCreateReportTitle"
         defaultMessage="Could not create report for {reportObjectType} '{reportObjectTitle}'."
         values={{ reportObjectType: job.type, reportObjectTitle: job.title }}
       />
     ),
-    text: reactMount(
+    text: toMountPoint(
       <Fragment>
         <EuiCallOut
           size="m"

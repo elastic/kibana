@@ -24,7 +24,7 @@ import {
   EuiSpacer,
   EuiButtonEmpty
 } from '@elastic/eui';
-import { reactMount } from '../../../../../plugins/kibana_react/public';
+import { toMountPoint } from '../../../../../plugins/kibana_react/public';
 
 export const createZoomWarningMsg = (function () {
   let disableZoomMsg = false;
@@ -108,7 +108,7 @@ export const createZoomWarningMsg = (function () {
 
   const zoomToast = ({
     title: 'No additional zoom levels',
-    text: reactMount(<ZoomWarning onChange={setZoomMsg}/>),
+    text: toMountPoint(<ZoomWarning onChange={setZoomMsg}/>),
     'data-test-subj': 'maxZoomWarning',
   });
 

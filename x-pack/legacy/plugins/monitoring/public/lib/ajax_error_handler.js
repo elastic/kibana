@@ -14,7 +14,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { reactMount } from '../../../../../../src/plugins/kibana_react/public';
+import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 
 export function formatMonitoringError(err) {
   // TODO: We should stop using Boom for errors and instead write a custom handler to return richer error objects
@@ -48,12 +48,12 @@ export function ajaxErrorHandlersProvider($injector) {
       kbnUrl.redirect('access-denied');
     } else if (err.status === 404 && !contains(window.location.hash, 'no-data')) { // pass through if this is a 404 and we're already on the no-data page
       toastNotifications.addDanger({
-        title: reactMount(
+        title: toMountPoint(
           <FormattedMessage
             id="xpack.monitoring.ajaxErrorHandler.requestFailedNotificationTitle"
             defaultMessage="Monitoring Request Failed"
           />),
-        text: reactMount(
+        text: toMountPoint(
           <div>
             { formatMonitoringError(err) }
             <EuiSpacer />
@@ -72,12 +72,12 @@ export function ajaxErrorHandlersProvider($injector) {
       });
     } else {
       toastNotifications.addDanger({
-        title: reactMount(
+        title: toMountPoint(
           <FormattedMessage
             id="xpack.monitoring.ajaxErrorHandler.requestErrorNotificationTitle"
             defaultMessage="Monitoring Request Error"
           />),
-        text: reactMount(formatMonitoringError(err))
+        text: toMountPoint(formatMonitoringError(err))
       });
     }
 

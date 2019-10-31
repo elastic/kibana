@@ -12,7 +12,7 @@ import { toastNotifications } from 'ui/notify';
 
 import { EuiLink, EuiSwitch, EuiFieldText, EuiForm, EuiFormRow, EuiSelect } from '@elastic/eui';
 
-import { reactMount } from '../../../../../../../../../../src/plugins/kibana_react/public';
+import { toMountPoint } from '../../../../../../../../../../src/plugins/kibana_react/public';
 import { isKibanaContextInitialized, KibanaContext } from '../../../../lib/kibana';
 import { isValidIndexName } from '../../../../../../common/utils/es_utils';
 
@@ -92,7 +92,7 @@ export const StepDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChang
             title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingTransformList', {
               defaultMessage: 'An error occurred getting the existing transform IDs:',
             }),
-            text: reactMount(<ToastNotificationText text={e} />),
+            text: toMountPoint(<ToastNotificationText text={e} />),
           });
         }
 
@@ -103,7 +103,7 @@ export const StepDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChang
             title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingIndexNames', {
               defaultMessage: 'An error occurred getting the existing index names:',
             }),
-            text: reactMount(<ToastNotificationText text={e} />),
+            text: toMountPoint(<ToastNotificationText text={e} />),
           });
         }
 
@@ -117,7 +117,7 @@ export const StepDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChang
                 defaultMessage: 'An error occurred getting the existing index pattern titles:',
               }
             ),
-            text: reactMount(<ToastNotificationText text={e} />),
+            text: toMountPoint(<ToastNotificationText text={e} />),
           });
         }
       }

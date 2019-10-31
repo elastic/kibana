@@ -39,7 +39,7 @@ import { fatalError } from 'ui/notify';
 import { capabilities } from 'ui/capabilities';
 // @ts-ignore
 import { modifyUrl } from 'ui/url';
-import { reactMount } from '../../../../plugins/kibana_react/public';
+import { toMountPoint } from '../../../../plugins/kibana_react/public';
 // @ts-ignore
 import { UrlOverflowService } from '../error_url_overflow';
 import { npStart } from '../new_platform';
@@ -306,7 +306,7 @@ const $setupUrlOverflowHandling = (newPlatform: CoreStart) => (
           title: i18n.translate('common.ui.chrome.bigUrlWarningNotificationTitle', {
             defaultMessage: 'The URL is big and Kibana might stop working',
           }),
-          text: reactMount(
+          text: toMountPoint(
             <Fragment>
               <FormattedMessage
                 id="common.ui.chrome.bigUrlWarningNotificationMessage"

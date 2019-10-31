@@ -7,7 +7,7 @@
 import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ToastInput } from '../../../../../src/core/public';
-import { reactMount } from '../../../../../src/plugins/kibana_react/public';
+import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
 import { JobId, JobSummary } from '../../index.d';
 import { ReportLink } from './report_link';
 import { DownloadButton } from './download_button';
@@ -17,14 +17,14 @@ export const getWarningFormulasToast = (
   getReportLink: () => string,
   getDownloadLink: (jobId: JobId) => string
 ): ToastInput => ({
-  title: reactMount(
+  title: toMountPoint(
     <FormattedMessage
       id="xpack.reporting.publicNotifier.csvContainsFormulas.formulaReportTitle"
       defaultMessage="Report may contain formulas {reportObjectType} '{reportObjectTitle}'"
       values={{ reportObjectType: job.type, reportObjectTitle: job.title }}
     />
   ),
-  text: reactMount(
+  text: toMountPoint(
     <Fragment>
       <p>
         <FormattedMessage

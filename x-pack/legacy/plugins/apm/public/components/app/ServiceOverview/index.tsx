@@ -9,7 +9,7 @@ import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo } from 'react';
 import url from 'url';
-import { reactMount } from '../../../../../../../../src/plugins/kibana_react/public';
+import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { NoServicesMessage } from './NoServicesMessage';
 import { ServiceList } from './ServiceList';
@@ -56,7 +56,7 @@ export function ServiceOverview() {
           defaultMessage:
             'Legacy data was detected within the selected time range'
         }),
-        text: reactMount(
+        text: toMountPoint(
           <p>
             {i18n.translate('xpack.apm.serviceOverview.toastText', {
               defaultMessage:
