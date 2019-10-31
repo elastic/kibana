@@ -21,7 +21,7 @@ import { npStart } from 'ui/new_platform';
 import { onBrushEvent } from './brush_event';
 import { uniqFilters } from '../../../../../plugins/data/public';
 import { toggleFilterNegated } from '@kbn/es-query';
-import _ from "lodash";
+import _ from 'lodash';
 import { changeTimeFilter, extractTimeFilter } from '../../../../core_plugins/data/public/timefilter';
 import {  start as data } from '../../../../core_plugins/data/public/legacy';
 /**
@@ -106,6 +106,7 @@ const createFiltersFromEvent = (event) => {
   return filters;
 };
 
+// TODO make sure the visualize app is updating the breadcrumb correctly
 const VisFiltersProvider = () => {
 
   // TODO this function used to simply put the new filters in
@@ -114,21 +115,21 @@ const VisFiltersProvider = () => {
   // filter manager (while splitting out the time filter)
   // This channel does not work anymore because it's not the same
   // angular context and thus the appstate won't update
-  const pushFilters = (filters, simulate) => {
+  const pushFilters = async (filters, simulate) => {
     if (filters.length && !simulate) {
       // All filters originated from one visualization.
       const indexPatternId = filters[0].meta.index;
       const indexPattern = _.find(
-        $scope.indexPatterns,
+        await data.indexPatterns.indexPatterns.getCache(),
         p => p.id === indexPatternId
       );
-      if (indexPattern && indexPattern.timeFieldName) {
+      // TODO just add everything to the filter bar if index pattern doesn't have timefield
+      if (indexPattern && indexPattern.attributes.timeFieldName) {
         const { timeRangeFilter, restOfFilters } = extractTimeFilter(
-          indexPattern.timeFieldName,
+          indexPattern.attributes.timeFieldName,
           filters
         );
-        npStart.plugins.data.query.filterManager.addFilters(uniqFilters(filters));
-        npStart.plugins.data.query.filterManager.addFilters(restOfFilters);
+        npStart.plugins.data.query.filterManager.addFilters(uniqFilters(restOfFilters));
         if (timeRangeFilter) changeTimeFilter(data.timefilter.timefilter, timeRangeFilter);
       }
     }
