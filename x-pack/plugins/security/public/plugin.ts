@@ -13,8 +13,10 @@ import {
 } from './session';
 
 export class SecurityPlugin implements Plugin<SecurityPluginSetup, SecurityPluginStart> {
+  private sessionTimeout!: SessionTimeout;
+
   public setup(core: CoreSetup) {
-    const { http, notifications, injectedMetadata } = core;
+    const { http, notifications } = core;
     const { basePath, anonymousPaths } = http;
     anonymousPaths.register('/login');
     anonymousPaths.register('/logout');
@@ -22,21 +24,18 @@ export class SecurityPlugin implements Plugin<SecurityPluginSetup, SecurityPlugi
 
     const sessionExpired = new SessionExpired(basePath);
     http.intercept(new UnauthorizedResponseHttpInterceptor(sessionExpired, anonymousPaths));
-    const sessionTimeout = new SessionTimeout(
-      injectedMetadata.getInjectedVar('session.idleTimeout', null) as number | null,
-      notifications,
-      sessionExpired,
-      http
-    );
-    http.intercept(new SessionTimeoutHttpInterceptor(sessionTimeout, anonymousPaths));
+    this.sessionTimeout = new SessionTimeout(notifications, sessionExpired, http);
+    http.intercept(new SessionTimeoutHttpInterceptor(this.sessionTimeout, anonymousPaths));
 
     return {
       anonymousPaths,
-      sessionTimeout,
+      sessionTimeout: this.sessionTimeout,
     };
   }
 
-  public start() {}
+  public start() {
+    this.sessionTimeout.init();
+  }
 }
 
 export type SecurityPluginSetup = ReturnType<SecurityPlugin['setup']>;

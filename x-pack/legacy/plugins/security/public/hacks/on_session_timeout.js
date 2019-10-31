@@ -21,7 +21,7 @@ module.config(($httpProvider) => {
     function interceptorFactory(responseHandler) {
       return function interceptor(response) {
         if (!isUnauthenticated && !isSystemApiRequest(response.config)) {
-          npSetup.plugins.security.sessionTimeout.extend();
+          npSetup.plugins.security.sessionTimeout.extend(response.config.url);
         }
         return responseHandler(response);
       };
