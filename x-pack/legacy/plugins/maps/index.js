@@ -16,7 +16,7 @@ import { watchStatusAndLicenseToInitialize } from
   '../../server/lib/watch_status_and_license_to_initialize';
 import { initTelemetryCollection } from './server/maps_telemetry';
 import { i18n } from '@kbn/i18n';
-import { APP_ID, APP_ICON, createMapPath } from './common/constants';
+import { APP_ID, APP_ICON, createMapPath, MAP_SAVED_OBJECT_TYPE } from './common/constants';
 import { getAppTitle } from './common/i18n_getters';
 import _ from 'lodash';
 
@@ -112,18 +112,18 @@ export function maps(kibana) {
       let routesInitialized = false;
 
       xpackMainPlugin.registerFeature({
-        id: 'maps',
+        id: APP_ID,
         name: i18n.translate('xpack.maps.featureRegistry.mapsFeatureName', {
           defaultMessage: 'Maps',
         }),
         icon: APP_ICON,
-        navLinkId: 'maps',
+        navLinkId: APP_ID,
         app: [APP_ID, 'kibana'],
-        catalogue: ['maps'],
+        catalogue: [APP_ID],
         privileges: {
           all: {
             savedObject: {
-              all: ['map', 'query'],
+              all: [MAP_SAVED_OBJECT_TYPE, 'query'],
               read: ['index-pattern']
             },
             ui: ['save', 'show', 'saveQuery'],
@@ -131,7 +131,7 @@ export function maps(kibana) {
           read: {
             savedObject: {
               all: [],
-              read: ['map', 'index-pattern', 'query']
+              read: [MAP_SAVED_OBJECT_TYPE, 'index-pattern', 'query']
             },
             ui: ['show'],
           },
