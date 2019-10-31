@@ -23,7 +23,7 @@ export const searchprofiler = (kibana: any) => {
 
     uiExports: {
       // NP Ready
-      devTools: ['plugins/searchprofiler/legacy.ts'],
+      devTools: [`${publicSrc}/legacy.ts`],
       styleSheetPaths: `${publicSrc}/np_ready/application/index.scss`,
       // Legacy
       hacks: ['plugins/searchprofiler/register.js'],
