@@ -18,8 +18,31 @@
  */
 
 const Path = require('path');
+const { readFileSync } = require('fs');
 
 const t = require('babel-types');
+
+// we have to determine the root of the Kibana repo to properly resolve imports
+// and since this package runs from source, and from the node_modules directory
+// we are breaking the rules and embedding that info here.
+const KIBANA_PACKAGE_JSON = __dirname.includes('node_modules')
+  ? Path.resolve(__dirname, '../../../../package.json')
+  : Path.resolve(__dirname, '../../../package.json');
+
+try {
+  const pkg = JSON.parse(readFileSync(KIBANA_PACKAGE_JSON, 'utf8'));
+  if (pkg.name !== 'kibana') {
+    throw true;
+  }
+} catch (error) {
+  throw new Error(`
+    Unable to determine absolute path to Kibana repo, @kbn/babel-preset expects to either run
+    from the packages/ directory in source, or from the root of the node_modules directory
+    in the distributable.
+  `);
+}
+
+const REPO_ROOT = Path.dirname(KIBANA_PACKAGE_JSON);
 
 module.exports = () => ({
   name: '@kbn/babel-preset/transform/rewrite_absolute_imports',
@@ -32,16 +55,23 @@ module.exports = () => ({
         return;
       }
 
-      if (!path.hub.file.opts.root) {
-        throw new Error(`Missing 'root' option, required to implement rewrite_absolute_imports transform`);
+      const { root, sourceFileName, filename } = path.hub.file.opts;
+
+      let absPath;
+      if (sourceFileName && Path.isAbsolute(sourceFileName)) {
+        absPath = sourceFileName;
+      } else if (filename && Path.isAbsolute(filename)) {
+        absPath = filename;
+      } else if (!absPath && root) {
+        absPath = Path.resolve(root, sourceFileName || filename);
+      } else {
+        throw new Error(`
+          Unable to determine absolute path of file, either sourceFileName or filename opt
+          must be defined for the file and be absolute or combined with the root file opt.
+        `);
       }
 
-      if (!path.hub.file.opts.sourceFileName && !path.hub.file.opts.filename) {
-        throw new Error('Missing either `filename` or `sourceFileName`, required to implement rewrite_absolute_imports transform');
-      }
-
-      const absPath = Path.resolve(path.hub.file.opts.root, path.hub.file.opts.sourceFileName || path.hub.file.opts.filename);
-      const targetPath = Path.resolve(path.hub.file.opts.root, source.node.value);
+      const targetPath = Path.resolve(REPO_ROOT, source.node.value);
       source.replaceWith(t.stringLiteral(Path.relative(Path.dirname(absPath), targetPath)));
     }
   }
