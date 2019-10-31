@@ -21,6 +21,9 @@ import { npStart } from 'ui/new_platform';
 import { onBrushEvent } from './brush_event';
 import { uniqFilters } from '../../../../../plugins/data/public';
 import { toggleFilterNegated } from '@kbn/es-query';
+import _ from "lodash";
+import { changeTimeFilter, extractTimeFilter } from '../../../../core_plugins/data/public/timefilter';
+import {  start as data } from '../../../../core_plugins/data/public/legacy';
 /**
  * For terms aggregations on `__other__` buckets, this assembles a list of applicable filter
  * terms based on a specific cell in the tabified data.
@@ -105,9 +108,29 @@ const createFiltersFromEvent = (event) => {
 
 const VisFiltersProvider = () => {
 
+  // TODO this function used to simply put the new filters in
+  // the app state. Dashboard/Visualize simply listened to
+  // the app state change via angular and pushed it into the actual
+  // filter manager (while splitting out the time filter)
+  // This channel does not work anymore because it's not the same
+  // angular context and thus the appstate won't update
   const pushFilters = (filters, simulate) => {
     if (filters.length && !simulate) {
-      npStart.plugins.data.query.filterManager.addFilters(uniqFilters(filters));
+      // All filters originated from one visualization.
+      const indexPatternId = filters[0].meta.index;
+      const indexPattern = _.find(
+        $scope.indexPatterns,
+        p => p.id === indexPatternId
+      );
+      if (indexPattern && indexPattern.timeFieldName) {
+        const { timeRangeFilter, restOfFilters } = extractTimeFilter(
+          indexPattern.timeFieldName,
+          filters
+        );
+        npStart.plugins.data.query.filterManager.addFilters(uniqFilters(filters));
+        npStart.plugins.data.query.filterManager.addFilters(restOfFilters);
+        if (timeRangeFilter) changeTimeFilter(data.timefilter.timefilter, timeRangeFilter);
+      }
     }
   };
 

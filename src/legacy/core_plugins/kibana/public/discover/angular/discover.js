@@ -427,6 +427,7 @@ function discoverController(
     queryFilter.setFilters(filters);
   };
 
+  // TODO this isnt used anymore here, just in visualize and dashboards
   $scope.applyFilters = filters => {
     const { timeRangeFilter, restOfFilters } = extractTimeFilter($scope.indexPattern.timeFieldName, filters);
     queryFilter.addFilters(restOfFilters);
