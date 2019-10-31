@@ -22,8 +22,8 @@ import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { catchError, filter, mergeMap, tap } from 'rxjs/operators';
 import { HttpServiceBase } from 'src/core/public';
-import { NewsfeedPluginInjectedConfig, ApiItem, NewsfeedItem, FetchResult } from '../../types';
 import { NEWSFEED_LAST_FETCH_STORAGE_KEY, NEWSFEED_HASH_SET_STORAGE_KEY } from '../../constants';
+import { NewsfeedPluginInjectedConfig, ApiItem, NewsfeedItem, FetchResult } from '../../types';
 
 type ApiConfig = NewsfeedPluginInjectedConfig['newsfeed']['service'];
 

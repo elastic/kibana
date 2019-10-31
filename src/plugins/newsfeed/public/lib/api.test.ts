@@ -19,9 +19,9 @@
 
 import sinon, { stub } from 'sinon';
 import moment from 'moment';
-import { ApiItem, NewsfeedItem } from '../../types';
-import { NewsfeedApiDriver } from './api';
 import { NEWSFEED_HASH_SET_STORAGE_KEY } from '../../constants';
+import { ApiItem, NewsfeedItem } from '../../types';
+import { NewsfeedApiDriver, getApi } from './api';
 
 const localStorageGet = sinon.stub();
 const sessionStoragetGet = sinon.stub();
@@ -353,5 +353,11 @@ describe('NewsfeedApiDriver', () => {
         kibanaVersion: 'test_version',
       });
     });
+  });
+});
+
+describe('getApi', () => {
+  it('pipelines the Driver methods together', () => {
+    const api$ = getApi();
   });
 });
