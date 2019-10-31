@@ -52,9 +52,16 @@ test('can display string element as title', () => {
   wrapper.toasts.show({ title: 'foo' });
 
   expect(notifications.toasts.add).toHaveBeenCalledTimes(1);
-  expect(notifications.toasts.add.mock.calls[0][0]).toMatchObject({
-    title: 'foo',
-  });
+  expect(notifications.toasts.add.mock.calls[0][0]).toMatchInlineSnapshot(`
+    Object {
+      "color": undefined,
+      "iconType": undefined,
+      "onClose": undefined,
+      "text": reactMount(<React.Fragment />),
+      "title": reactMount("foo"),
+      "toastLifeTimeMs": undefined,
+    }
+  `);
 });
 
 test('can display React element as title', () => {
@@ -106,8 +113,10 @@ test('can set toast properties', () => {
       "color": "danger",
       "iconType": "foo",
       "onClose": undefined,
-      "text": "1",
-      "title": "2",
+      "text": reactMount(<React.Fragment>
+        1
+      </React.Fragment>),
+      "title": reactMount("2"),
       "toastLifeTimeMs": 3,
     }
   `);
@@ -122,21 +131,36 @@ test('can display success, warning and danger toasts', () => {
   wrapper.toasts.danger({ title: '3' });
 
   expect(notifications.toasts.add).toHaveBeenCalledTimes(3);
-  expect(notifications.toasts.add.mock.calls[0][0]).toMatchObject({
-    title: '1',
-    color: 'success',
-    iconType: 'check',
-  });
-  expect(notifications.toasts.add.mock.calls[1][0]).toMatchObject({
-    title: '2',
-    color: 'warning',
-    iconType: 'help',
-  });
-  expect(notifications.toasts.add.mock.calls[2][0]).toMatchObject({
-    title: '3',
-    color: 'danger',
-    iconType: 'alert',
-  });
+  expect(notifications.toasts.add.mock.calls[0][0]).toMatchInlineSnapshot(`
+    Object {
+      "color": "success",
+      "iconType": "check",
+      "onClose": undefined,
+      "text": reactMount(<React.Fragment />),
+      "title": reactMount("1"),
+      "toastLifeTimeMs": undefined,
+    }
+  `);
+  expect(notifications.toasts.add.mock.calls[1][0]).toMatchInlineSnapshot(`
+    Object {
+      "color": "warning",
+      "iconType": "help",
+      "onClose": undefined,
+      "text": reactMount(<React.Fragment />),
+      "title": reactMount("2"),
+      "toastLifeTimeMs": undefined,
+    }
+  `);
+  expect(notifications.toasts.add.mock.calls[2][0]).toMatchInlineSnapshot(`
+    Object {
+      "color": "danger",
+      "iconType": "alert",
+      "onClose": undefined,
+      "text": reactMount(<React.Fragment />),
+      "title": reactMount("3"),
+      "toastLifeTimeMs": undefined,
+    }
+  `);
 });
 
 test('if body is not set, renders it empty', () => {

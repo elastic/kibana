@@ -18,7 +18,6 @@
  */
 
 import * as React from 'react';
-import { isString } from 'lodash';
 import { KibanaServices } from '../context/types';
 import { KibanaReactNotifications } from './types';
 import { reactMount } from '../util';
@@ -36,8 +35,8 @@ export const createNotifications = (services: KibanaServices): KibanaReactNotifi
       throw new TypeError('Could not show notification as notifications service is not available.');
     }
     services.notifications!.toasts.add({
-      title: isString(title) ? title : reactMount(title),
-      text: isString(body) ? body : reactMount(<>{body || null}</>),
+      title: reactMount(title),
+      text: reactMount(<>{body || null}</>),
       color,
       iconType,
       toastLifeTimeMs,
