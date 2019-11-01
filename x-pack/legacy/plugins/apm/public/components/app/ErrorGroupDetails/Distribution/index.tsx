@@ -10,7 +10,7 @@ import React from 'react';
 // @ts-ignore
 import Histogram from '../../../shared/charts/Histogram';
 import { EmptyMessage } from '../../../shared/EmptyMessage';
-import { asRelativeDateRange } from '../../../../utils/datetime_formatters';
+import { asRelativeDateTimeRange } from '../../../../utils/datetime_formatters';
 
 interface IBucket {
   key: number;
@@ -53,7 +53,7 @@ interface Props {
 }
 
 const tooltipHeader = (bucket: FormattedBucket) =>
-  asRelativeDateRange(bucket.x0, bucket.x);
+  asRelativeDateTimeRange(bucket.x0, bucket.x);
 
 export function ErrorDistribution({ distribution, title }: Props) {
   const buckets = getFormattedBuckets(

@@ -7,8 +7,8 @@ import React from 'react';
 import { EuiToolTip } from '@elastic/eui';
 import moment from 'moment-timezone';
 import {
-  asAbsoluteTime,
-  TimePrecision
+  asAbsoluteDateTime,
+  TimeUnit
 } from '../../../utils/datetime_formatters';
 
 interface Props {
@@ -16,13 +16,13 @@ interface Props {
    * timestamp in milliseconds
    */
   time: number;
-  precision?: TimePrecision;
+  timeUnit?: TimeUnit;
 }
 
-export function TimestampTooltip({ time, precision = 'milliseconds' }: Props) {
+export function TimestampTooltip({ time, timeUnit = 'milliseconds' }: Props) {
   const momentTime = moment(time);
   const relativeTimeLabel = momentTime.fromNow();
-  const absoluteTimeLabel = asAbsoluteTime({ time, precision });
+  const absoluteTimeLabel = asAbsoluteDateTime(time, timeUnit);
 
   return (
     <EuiToolTip content={absoluteTimeLabel}>
