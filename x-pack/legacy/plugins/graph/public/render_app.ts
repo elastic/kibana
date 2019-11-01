@@ -21,7 +21,6 @@ import { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_to
 import { confirmModalFactory } from 'ui/modals/confirm_modal';
 
 // type imports
-import { DataStart } from 'src/legacy/core_plugins/data/public';
 import {
   AppMountContext,
   ChromeStart,
@@ -29,9 +28,10 @@ import {
   ToastsStart,
   UiSettingsClientContract,
 } from 'kibana/public';
+import { DataStart } from 'src/legacy/core_plugins/data/public';
+import { Plugin as DataPlugin } from 'src/plugins/data/public';
 // @ts-ignore
 import { initGraphApp } from './app';
-import { Plugin as DataPlugin } from '../../../../../src/plugins/data/public';
 
 /**
  * These are dependencies of the Graph app besides the base dependencies

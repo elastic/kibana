@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { VISUALIZE_EMBEDDABLE_TYPE } from 'src/legacy/core_plugins/kibana/public/visualize/embeddable';
+import { SEARCH_EMBEDDABLE_TYPE } from 'src/legacy/core_plugins/kibana/public/discover/embeddable/constants';
 // @ts-ignore
 import { MAP_SAVED_OBJECT_TYPE } from '../../../maps/common/constants';
-import { VISUALIZE_EMBEDDABLE_TYPE } from '../../../../../../src/legacy/core_plugins/kibana/public/visualize/embeddable';
-import { SEARCH_EMBEDDABLE_TYPE } from '../../../../../../src/legacy/core_plugins/kibana/public/discover/embeddable/constants';
 
 export const EmbeddableTypes = {
   map: MAP_SAVED_OBJECT_TYPE,

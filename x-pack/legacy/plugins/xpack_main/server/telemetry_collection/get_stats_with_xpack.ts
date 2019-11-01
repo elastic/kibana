@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { getLocalStats } from 'src/legacy/core_plugins/telemetry/server/telemetry_collection';
 // @ts-ignore
 import { getXPack } from './get_xpack';
-import { getLocalStats } from '../../../../../../src/legacy/core_plugins/telemetry/server/telemetry_collection';
 
 /**
  * Get the telemetry data.

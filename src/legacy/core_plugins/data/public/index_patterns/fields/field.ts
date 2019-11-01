@@ -17,7 +17,6 @@
  * under the License.
  */
 
-// @ts-ignore
 import { fieldFormats } from 'ui/registry/field_formats';
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
