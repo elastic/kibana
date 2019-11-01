@@ -3,6 +3,7 @@
 :global .kbnCanvas :local .root {
   margin: 0 $euiSizeS;
   cursor: pointer;
+  flex-shrink: 0;
 }
 
 :global .kbnCanvas :local .root :global .canvasPage {
