@@ -118,9 +118,18 @@ export const AlertsList: React.FunctionComponent = () => {
 
   const alertsTableColumns = [
     {
+      field: 'name',
+      name: i18n.translate(
+        'xpack.alertingUI.sections.alertsList.alertsListTable.columns.nameTitle',
+        { defaultMessage: 'Name' }
+      ),
+      sortable: false,
+      truncateText: true,
+    },
+    {
       field: 'alertType',
       name: i18n.translate(
-        'xpack.alertingUI.sections.alertsList.alertsListTable.columns.alertType',
+        'xpack.alertingUI.sections.alertsList.alertsListTable.columns.alertTypeTitle',
         { defaultMessage: 'Type' }
       ),
       sortable: false,
@@ -129,7 +138,7 @@ export const AlertsList: React.FunctionComponent = () => {
     {
       field: 'interval',
       name: i18n.translate(
-        'xpack.alertingUI.sections.alertsList.alertsListTable.columns.interval',
+        'xpack.alertingUI.sections.alertsList.alertsListTable.columns.intervalTitle',
         { defaultMessage: 'Runs every' }
       ),
       sortable: false,

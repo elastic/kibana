@@ -99,8 +99,7 @@ export async function loadAlerts({
     query: {
       page: page.index + 1,
       per_page: page.size,
-      // TODO: Add search fields
-      // search_fields: searchText ? '' : undefined,
+      search_fields: searchText ? 'name' : undefined,
       search: searchText,
     },
   });
