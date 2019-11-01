@@ -69,10 +69,7 @@ export class FieldFormatRegisty {
    * @param  {ES_FIELD_TYPES[]} esTypes - Array of ES data types
    * @return {FieldType}
    */
-  getDefaultConfig = (
-    fieldType: KBN_FIELD_TYPES,
-    esTypes: ES_FIELD_TYPES[] | undefined = undefined
-  ): FieldType => {
+  getDefaultConfig = (fieldType: KBN_FIELD_TYPES, esTypes?: ES_FIELD_TYPES[]): FieldType => {
     const type = this.getDefaultTypeName(fieldType, esTypes);
 
     return this.defaultMap[type] || this.defaultMap._default_;
@@ -131,7 +128,7 @@ export class FieldFormatRegisty {
    */
   getDefaultTypeName = (
     fieldType: KBN_FIELD_TYPES,
-    esTypes: ES_FIELD_TYPES[] | undefined = undefined
+    esTypes?: ES_FIELD_TYPES[]
   ): ES_FIELD_TYPES | KBN_FIELD_TYPES => {
     const esType = this.getTypeNameByEsTypes(esTypes);
 
@@ -163,10 +160,7 @@ export class FieldFormatRegisty {
    * @param  {ES_FIELD_TYPES[]} esTypes
    * @return {FieldFormat}
    */
-  getDefaultInstancePlain(
-    fieldType: KBN_FIELD_TYPES,
-    esTypes: ES_FIELD_TYPES[] | undefined = undefined
-  ): FieldFormat {
+  getDefaultInstancePlain(fieldType: KBN_FIELD_TYPES, esTypes?: ES_FIELD_TYPES[]): FieldFormat {
     const conf = this.getDefaultConfig(fieldType, esTypes);
 
     const DerivedFieldFormat = this.getType(conf.id);

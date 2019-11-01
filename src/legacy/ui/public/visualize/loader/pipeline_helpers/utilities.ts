@@ -94,7 +94,7 @@ export const createFormat = (agg: AggConfig): SerializedFieldFormat => {
 
 export type FormatFactory = (mapping?: SerializedFieldFormat) => FieldFormat;
 
-export const getFormat: FormatFactory = (mapping = {}): any => {
+export const getFormat: FormatFactory = mapping => {
   if (!mapping) {
     return getDefaultFieldFormat();
   }
@@ -167,7 +167,7 @@ export const getFormat: FormatFactory = (mapping = {}): any => {
         // @ts-ignore
         return format.convert(val, type, undefined, parsedUrl);
       },
-    };
+    } as FieldFormat;
   } else {
     return getFieldFormat(id, mapping.params);
   }
