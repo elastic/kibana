@@ -40,7 +40,9 @@ function getAreaOptionTabs() {
       title: i18n.translate('kbnVislibVisTypes.area.tabs.panelSettingsTitle', {
         defaultMessage: 'Panel settings',
       }),
-      editor: PointSeriesOptions,
+      editor: (props: VisOptionsProps<BasicVislibParams>) => (
+        <ValidationWrapper {...props} component={PointSeriesOptions} />
+      ),
     },
   ];
 }
