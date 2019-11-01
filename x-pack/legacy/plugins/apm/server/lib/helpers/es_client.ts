@@ -14,7 +14,6 @@ import {
 import { Legacy } from 'kibana';
 import { cloneDeep, has, isString, set, pick } from 'lodash';
 import { OBSERVER_VERSION_MAJOR } from '../../../common/elasticsearch_fieldnames';
-import { StringMap, Omit } from '../../../typings/common';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import {
   ESSearchResponse,
@@ -95,7 +94,7 @@ interface APMOptions {
 
 export function getESClient(req: Legacy.Request) {
   const cluster = req.server.plugins.elasticsearch.getCluster('data');
-  const query = req.query as StringMap;
+  const query = req.query as Record<string, unknown>;
 
   return {
     search: async <

@@ -8,7 +8,6 @@ import { EuiBasicTable } from '@elastic/eui';
 import { sortByOrder } from 'lodash';
 import React, { useMemo, useCallback, ReactNode } from 'react';
 import { idx } from '@kbn/elastic-idx';
-import { StringMap } from '../../../../typings/common';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { history } from '../../../utils/history';
 import { fromQuery, toQuery } from '../Links/url_helpers';
@@ -16,7 +15,7 @@ import { fromQuery, toQuery } from '../Links/url_helpers';
 // TODO: this should really be imported from EUI
 export interface ITableColumn<T> {
   name: ReactNode;
-  actions?: StringMap[];
+  actions?: Array<Record<string, unknown>>;
   field?: string;
   dataType?: string;
   align?: string;
