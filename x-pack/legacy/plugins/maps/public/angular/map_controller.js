@@ -7,6 +7,7 @@
 import _ from 'lodash';
 import chrome from 'ui/chrome';
 import 'ui/directives/listen';
+import 'ui/directives/storage';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -197,7 +198,7 @@ app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppSta
     }
   });
   /* End of Saved Queries */
-  async function onQueryChange({ filters, query, time }) {
+  async function onQueryChange({ filters, query, time, refresh }) {
     if (filters) {
       filterManager.setFilters(filters); // Maps and merges filters
       $scope.filters = filterManager.getFilters();
@@ -209,22 +210,24 @@ app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppSta
       $scope.time = time;
     }
     syncAppAndGlobalState();
-    dispatchSetQuery();
+    dispatchSetQuery(refresh);
   }
 
-  function dispatchSetQuery() {
+  function dispatchSetQuery(refresh) {
     store.dispatch(setQuery({
       filters: $scope.filters,
       query: $scope.query,
-      timeFilters: $scope.time
+      timeFilters: $scope.time,
+      refresh,
     }));
   }
 
   $scope.indexPatterns = [];
-  $scope.updateQueryAndDispatch = function ({ dateRange, query }) {
+  $scope.onQuerySubmit = function ({ dateRange, query }) {
     onQueryChange({
       query,
       time: dateRange,
+      refresh: true,
     });
   };
   $scope.updateFiltersAndDispatch = function (filters) {

@@ -34,7 +34,7 @@ export function ToolBarPagerButtons(props: Props) {
         disabled={!props.hasPreviousPage}
         data-test-subj="btnPrevPage"
       >
-        <span className="kuiButton__icon kuiIcon fa-chevron-left"></span>
+        <span className="kuiButton__icon kuiIcon fa-chevron-left" />
       </button>
       <button
         className="kuiButton kuiButton--basic kuiButton--icon"
@@ -42,7 +42,7 @@ export function ToolBarPagerButtons(props: Props) {
         disabled={!props.hasNextPage}
         data-test-subj="btnNextPage"
       >
-        <span className="kuiButton__icon kuiIcon fa-chevron-right"></span>
+        <span className="kuiButton__icon kuiIcon fa-chevron-right" />
       </button>
     </div>
   );

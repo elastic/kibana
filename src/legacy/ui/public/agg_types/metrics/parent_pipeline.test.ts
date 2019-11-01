@@ -22,8 +22,8 @@ import { derivativeMetricAgg } from './derivative';
 import { cumulativeSumMetricAgg } from './cumulative_sum';
 import { movingAvgMetricAgg } from './moving_avg';
 import { serialDiffMetricAgg } from './serial_diff';
-import { AggConfigs } from 'ui/agg_types';
-import { IMetricAggConfig, MetricAggType } from 'ui/agg_types/metrics/metric_agg_type';
+import { AggConfigs } from '../agg_configs';
+import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
 
 jest.mock('../../vis/editors/default/schemas', () => {
   class MockedSchemas {

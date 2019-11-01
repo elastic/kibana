@@ -9,7 +9,6 @@ import { ES_INDEX_NAME } from './constants';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  // const chance = getService('chance');
   const es = getService('es');
   const esArchiver = getService('esArchiver');
 
