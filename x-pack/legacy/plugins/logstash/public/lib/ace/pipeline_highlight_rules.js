@@ -10,7 +10,7 @@ const {
   TextHighlightRules
 } = ace.acequire('ace/mode/text_highlight_rules');
 
-const LOGSTASH_KEYWORDS = [
+const LOGSTASH_FILTER_PLUGINS = [
   'aggregate',
   'alter',
   'bytes',
@@ -59,7 +59,7 @@ const LOGSTASH_KEYWORDS = [
   'xml'
 ];
 
-const LOGSTASH_INPUT_OUTPUT = [
+const LOGSTASH_INPUT_PLUGINS = [
   'azure_event_hubs',
   'beats',
   'cloudwatch',
@@ -115,6 +115,64 @@ const LOGSTASH_INPUT_OUTPUT = [
   'xmpp'
 ];
 
+const LOGSTASH_OUTPUT_PLUGINS = [
+  'boundary',
+  'circonus',
+  'cloudwatch',
+  'csv',
+  'datadog',
+  'datadog_metrics',
+  'elastic_app_search',
+  'elasticsearch',
+  'email',
+  'exec',
+  'file',
+  'ganglia',
+  'gelf',
+  'google_bigquery',
+  'google_cloud_storage',
+  'google_pubsub',
+  'graphite',
+  'graphtastic',
+  'http',
+  'influxdb',
+  'irc',
+  'java_sink',
+  'java_stdout',
+  'juggernaut',
+  'kafka',
+  'librato',
+  'loggly',
+  'lumberjack',
+  'metriccatcher',
+  'mongodb',
+  'nagios',
+  'nagios_nsca',
+  'opentsdb',
+  'pagerduty',
+  'pipe',
+  'rabbitmq',
+  'redis',
+  'redmine',
+  'riak',
+  'riemann',
+  's3',
+  'sns',
+  'solr_http',
+  'sqs',
+  'statsd',
+  'stdout',
+  'stomp',
+  'syslog',
+  'tcp',
+  'timber',
+  'udp',
+  'webhdfs',
+  'websocket',
+  'xmpp',
+  'zabbix'
+];
+
 export function PipelineHighlightRules() {
   this.name = 'PipelineHighlightRules';
   this.$rules = {
@@ -125,11 +183,15 @@ export function PipelineHighlightRules() {
       },
       {
         token: 'entity.name.function',
-        regex: LOGSTASH_KEYWORDS.join('|')
+        regex: LOGSTASH_FILTER_PLUGINS.join('|')
       },
       {
         token: 'entity.name.function',
-        regex: LOGSTASH_INPUT_OUTPUT.join('|')
+        regex: LOGSTASH_INPUT_PLUGINS.join('|')
+      },
+      {
+        token: 'entity.name.function',
+        regex: LOGSTASH_OUTPUT_PLUGINS.join('|')
       },
       {
         token: 'storage.type',
