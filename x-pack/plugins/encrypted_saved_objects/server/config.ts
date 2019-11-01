@@ -32,9 +32,9 @@ export function createConfig$(context: PluginInitializerContext) {
       let encryptionKey = config.encryptionKey;
       if (encryptionKey === undefined) {
         logger.warn(
-          'Generating a random key for xpack.encrypted_saved_objects.encryptionKey. ' +
+          'Generating a random key for xpack.encryptedSavedObjects.encryptionKey. ' +
             'To be able to decrypt encrypted saved objects attributes after restart, ' +
-            'please set xpack.encrypted_saved_objects.encryptionKey in kibana.yml'
+            'please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml'
         );
 
         encryptionKey = crypto.randomBytes(16).toString('hex');

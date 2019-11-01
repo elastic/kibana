@@ -18,7 +18,7 @@ const SAVED_OBJECT_WITH_SECRET_TYPE = 'saved-object-with-secret';
 export default function esoPlugin(kibana: any) {
   return new kibana.Plugin({
     id: 'eso',
-    require: ['encrypted_saved_objects'],
+    require: ['encryptedSavedObjects'],
     uiExports: { mappings: require('./mappings.json') },
     init(server: Legacy.Server) {
       server.route({
@@ -26,7 +26,7 @@ export default function esoPlugin(kibana: any) {
         path: '/api/saved_objects/get-decrypted-as-internal-user/{id}',
         async handler(request: Request) {
           const encryptedSavedObjectsStart = server.newPlatform.start.plugins
-            .encrypted_saved_objects as PluginStartContract;
+            .encryptedSavedObjects as PluginStartContract;
           const namespace = server.plugins.spaces && server.plugins.spaces.getSpaceId(request);
           try {
             return await encryptedSavedObjectsStart.getDecryptedAsInternalUser(
@@ -44,8 +44,7 @@ export default function esoPlugin(kibana: any) {
         },
       });
 
-      (server.newPlatform.setup.plugins
-        .encrypted_saved_objects as PluginSetupContract).registerType({
+      (server.newPlatform.setup.plugins.encryptedSavedObjects as PluginSetupContract).registerType({
         type: SAVED_OBJECT_WITH_SECRET_TYPE,
         attributesToEncrypt: new Set(['privateProperty']),
         attributesToExcludeFromAAD: new Set(['publicPropertyExcludedFromAAD']),

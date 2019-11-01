@@ -33,7 +33,7 @@ describe('config schema', () => {
     `);
   });
 
-  it('should throw error if xpack.encrypted_saved_objects.encryptionKey is less than 32 characters', () => {
+  it('should throw error if xpack.encryptedSavedObjects.encryptionKey is less than 32 characters', () => {
     expect(() =>
       ConfigSchema.validate({ encryptionKey: 'foo' })
     ).toThrowErrorMatchingInlineSnapshot(
@@ -49,7 +49,7 @@ describe('config schema', () => {
 });
 
 describe('createConfig$()', () => {
-  it('should log a warning and set xpack.encrypted_saved_objects.encryptionKey if not set', async () => {
+  it('should log a warning and set xpack.encryptedSavedObjects.encryptionKey if not set', async () => {
     const mockRandomBytes = jest.requireMock('crypto').randomBytes;
     mockRandomBytes.mockReturnValue('ab'.repeat(16));
 
@@ -62,7 +62,7 @@ describe('createConfig$()', () => {
     expect(loggingServiceMock.collect(contextMock.logger).warn).toMatchInlineSnapshot(`
       Array [
         Array [
-          "Generating a random key for xpack.encrypted_saved_objects.encryptionKey. To be able to decrypt encrypted saved objects attributes after restart, please set xpack.encrypted_saved_objects.encryptionKey in kibana.yml",
+          "Generating a random key for xpack.encryptedSavedObjects.encryptionKey. To be able to decrypt encrypted saved objects attributes after restart, please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml",
         ],
       ]
     `);

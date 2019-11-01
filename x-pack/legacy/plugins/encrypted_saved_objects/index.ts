@@ -14,8 +14,8 @@ export const encryptedSavedObjects = (kibana: {
   Plugin: new (options: Legacy.PluginSpecOptions & { configPrefix?: string }) => unknown;
 }) =>
   new kibana.Plugin({
-    id: 'encrypted_saved_objects',
-    configPrefix: 'xpack.encrypted_saved_objects',
+    id: 'encryptedSavedObjects',
+    configPrefix: 'xpack.encryptedSavedObjects',
     require: ['xpack_main'],
 
     // Some legacy plugins still use `enabled` config key, so we keep it here, but the rest of the
@@ -27,7 +27,7 @@ export const encryptedSavedObjects = (kibana: {
 
     init(server: Legacy.Server) {
       const encryptedSavedObjectsPlugin = (server.newPlatform.setup.plugins
-        .encrypted_saved_objects as unknown) as PluginSetupContract;
+        .encryptedSavedObjects as unknown) as PluginSetupContract;
       if (!encryptedSavedObjectsPlugin) {
         throw new Error('New Platform XPack EncryptedSavedObjects plugin is not available.');
       }
@@ -36,7 +36,7 @@ export const encryptedSavedObjects = (kibana: {
         savedObjects: server.savedObjects,
         auditLogger: new AuditLogger(
           server,
-          'encrypted_saved_objects',
+          'encryptedSavedObjects',
           server.config(),
           server.plugins.xpack_main.info
         ),

@@ -9,14 +9,14 @@ security and spaces filtering as well as performing audit logging.
 
 ## Usage
 
-Follow these steps to use `encrypted_saved_objects` in your plugin: 
+Follow these steps to use `encryptedSavedObjects` in your plugin: 
 
-1. Declare `encrypted_saved_objects` as a dependency in `kibana.json`:
+1. Declare `encryptedSavedObjects` as a dependency in `kibana.json`:
 
 ```json
 {
   ...
-  "requiredPlugins": ["encrypted_saved_objects"],
+  "requiredPlugins": [encryptedSavedObjects],
   ...
 }
 ```
@@ -41,7 +41,7 @@ searchable or analyzed:
 ```typescript
 ...
 public setup(core: CoreSetup, { encryptedSavedObjects }: PluginSetupDependencies) {
-  encrypted_saved_objects.registerType({
+  encryptedSavedObjects.registerType({
     type: 'my-saved-object-type',
     attributesToEncrypt: new Set(['mySecret']),
   });
@@ -77,7 +77,7 @@ and preferably only as a part of the Kibana server routines that are outside of 
 user has control over.
 
 ```typescript
-const savedObjectWithDecryptedContent =  await encrypted_saved_objects.getDecryptedAsInternalUser(
+const savedObjectWithDecryptedContent =  await encryptedSavedObjects.getDecryptedAsInternalUser(
   'my-saved-object-type',
   'saved-object-id'
 );

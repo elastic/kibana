@@ -50,18 +50,6 @@ export function createMockServer(config: Record<string, any> = defaultConfig) {
     },
   });
 
-  server.register({
-    name: 'encrypted_saved_objects',
-    register(pluginServer: Hapi.Server) {
-      pluginServer.expose('isEncryptionError', encryptedSavedObjectsStart.isEncryptionError);
-      pluginServer.expose('registerType', encryptedSavedObjectsSetup.registerType);
-      pluginServer.expose(
-        'getDecryptedAsInternalUser',
-        encryptedSavedObjectsStart.getDecryptedAsInternalUser
-      );
-    },
-  });
-
   server.decorate('request', 'getSavedObjectsClient', () => savedObjectsClient);
   server.decorate('request', 'getActionsClient', () => actionsClient);
   server.decorate('request', 'getBasePath', () => '/s/my-space');

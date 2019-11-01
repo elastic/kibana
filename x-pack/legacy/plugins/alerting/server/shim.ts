@@ -72,13 +72,13 @@ export interface AlertingPluginsSetup {
   task_manager: TaskManagerSetupContract;
   actions: ActionsPluginSetupContract;
   xpack_main: XPackMainPluginSetupContract;
-  encrypted_saved_objects: EncryptedSavedObjectsSetupContract;
+  encryptedSavedObjects: EncryptedSavedObjectsSetupContract;
 }
 export interface AlertingPluginsStart {
   actions: ActionsPluginStartContract;
   security?: SecurityPluginStartContract;
   spaces: () => SpacesPluginStartContract | undefined;
-  encrypted_saved_objects: EncryptedSavedObjectsStartContract;
+  encryptedSavedObjects: EncryptedSavedObjectsStartContract;
   task_manager: TaskManagerStartContract;
 }
 
@@ -119,8 +119,8 @@ export function shim(
     task_manager: server.plugins.task_manager,
     actions: server.plugins.actions.setup,
     xpack_main: server.plugins.xpack_main,
-    encrypted_saved_objects: newPlatform.setup.plugins
-      .encrypted_saved_objects as EncryptedSavedObjectsSetupContract,
+    encryptedSavedObjects: newPlatform.setup.plugins
+      .encryptedSavedObjects as EncryptedSavedObjectsSetupContract,
   };
 
   const pluginsStart: AlertingPluginsStart = {
@@ -129,8 +129,8 @@ export function shim(
     // TODO: Currently a function because it's an optional dependency that
     // initializes after this function is called
     spaces: () => server.plugins.spaces,
-    encrypted_saved_objects: newPlatform.start.plugins
-      .encrypted_saved_objects as EncryptedSavedObjectsStartContract,
+    encryptedSavedObjects: newPlatform.start.plugins
+      .encryptedSavedObjects as EncryptedSavedObjectsStartContract,
     task_manager: server.plugins.task_manager,
   };
 

@@ -40,7 +40,7 @@ export function setupSavedObjects({
   // `namespace` is included into AAD.
   savedObjects.addScopedSavedObjectsClientWrapperFactory(
     Number.MAX_SAFE_INTEGER,
-    'encrypted_saved_objects',
+    'encryptedSavedObjects',
     ({ client: baseClient }) => new EncryptedSavedObjectsClientWrapper({ baseClient, service })
   );
 
