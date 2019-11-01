@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { VISUALIZE_EMBEDDABLE_TYPE } from 'src/legacy/core_plugins/kibana/public/visualize/embeddable';
+import { VISUALIZE_EMBEDDABLE_TYPE } from 'src/legacy/core_plugins/kibana/public/visualize/embeddable/constants';
 import { SEARCH_EMBEDDABLE_TYPE } from 'src/legacy/core_plugins/kibana/public/discover/embeddable/constants';
 // @ts-ignore
 import { MAP_SAVED_OBJECT_TYPE } from '../../../maps/common/constants';
