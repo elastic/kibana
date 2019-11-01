@@ -17,14 +17,6 @@
  * under the License.
  */
 
-import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
-import 'ui/directives/kbn_href';
-import { uiModules } from 'ui/modules';
-import { timefilter } from 'ui/timefilter';
-import chrome from 'ui/chrome';
-import { wrapInI18nContext } from 'ui/i18n';
-import { toastNotifications } from 'ui/notify';
-import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { VisualizeListingTable } from './visualize_listing_table';
 import { NewVisModal } from '../wizard/new_vis_modal';
 import { VisualizeConstants } from '../visualize_constants';
