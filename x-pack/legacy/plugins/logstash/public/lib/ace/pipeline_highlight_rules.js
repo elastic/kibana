@@ -183,7 +183,7 @@ export function PipelineHighlightRules() {
       },
       {
         token: 'constant.numeric',
-        regex: '\\s\\d+'
+        regex: '\\s\\d+\\b'
       },
       {
         token: 'entity.name.function',
