@@ -52,7 +52,12 @@ async function post(log, body) {
   try {
 
     await client.index({ index, body });
-    log.verbose('\nSent to es:\n', pretty(body));
+    log.verbose(`
+Sent:
+ES HOST: ${redacted}
+Index: ${index}
+${pretty(body)}
+`);
 
   } catch (e) {
 
