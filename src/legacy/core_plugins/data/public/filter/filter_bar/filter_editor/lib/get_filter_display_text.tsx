@@ -29,7 +29,12 @@ export function getFilterDisplayText(filter: Filter, filterDisplayName: string) 
         defaultMessage: 'NOT ',
       })}`
     : '';
-  const prefix = <EuiTextColor color="danger">{prefixText}</EuiTextColor>;
+  const prefix =
+    filter.meta.negate && !filter.meta.disabled ? (
+      <EuiTextColor color="danger">{prefixText}</EuiTextColor>
+    ) : (
+      prefixText
+    );
 
   if (filter.meta.alias !== null) {
     return `${prefix}${filter.meta.alias}`;
@@ -40,7 +45,7 @@ export function getFilterDisplayText(filter: Filter, filterDisplayName: string) 
       return (
         <Fragment>
           {prefix}
-          {existsOperator.message}
+          {filter.meta.key} {existsOperator.message}
         </Fragment>
       );
     case 'geo_bounding_box':
