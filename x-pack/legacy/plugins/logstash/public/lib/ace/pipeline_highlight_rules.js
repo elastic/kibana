@@ -140,8 +140,8 @@ export function PipelineHighlightRules() {
         regex: '["](?:(?:\\\\.)|(?:[^"\\\\]))*?["]'
       },
       {
-        token: 'constant.numeric',
-        regex: '\\d+'
+        token: 'string',
+        regex: '[\'](?:(?:\\\\.)|(?:[^\'\\\\]))*?[\']'
       },
       {
         token: 'keyword.operator',
