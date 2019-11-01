@@ -54,6 +54,7 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
   const shareContextMenuExtensions = Private(ShareContextMenuExtensionsRegistryProvider);
   const savedObjectRegistry = Private(SavedObjectRegistryProvider);
   const savedObjectClient = Private(SavedObjectsClientProvider);
+  const editorTypes = Private(VisEditorTypesRegistryProvider);
 
   return {
     queryFilter,
@@ -64,12 +65,13 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
     savedObjectRegistry,
     savedDashboards: injector.get('savedDashboards'),
     savedVisualizations: injector.get('savedVisualizations'),
+    editorTypes,
   };
 }
 
 (async () => {
   const instance = new VisualizePlugin();
-  instance.setup(npSetup.core, {
+  await instance.setup(npSetup.core, {
     __LEGACY: {
       localApplicationService,
       getAngularDependencies,

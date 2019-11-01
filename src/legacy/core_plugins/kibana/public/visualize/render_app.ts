@@ -177,8 +177,6 @@ function createLocalAngularModule(
   createLocalConfirmModalModule(angular);
   createLocalFilterBarModule(angular);
 
-  createLocalDefaultEditorModule(angular, wrapInI18nContext);
-
   const visualizeAngularModule: IModule = angular.module(moduleName, [
     ...thirdPartyAngularDependencies,
     'app/visualize/Config',
@@ -283,18 +281,4 @@ function createLocalI18nModule(angular: any) {
     .provider('i18n', I18nProvider)
     .filter('i18n', i18nFilter)
     .directive('i18nId', i18nDirective);
-}
-
-function createLocalDefaultEditorModule(angular: any, wrapInI18nContext: any) {
-  angular
-    .module('app/visualize/editor', ['react', 'ngReact'])
-    .directive('visEditorSidebar', createVisEditorSidebarDirective)
-    // .directive('visEditorAggGroupWrapper', (reactDirective: any) =>
-    //   reactDirective(wrapInI18nContext(DefaultEditorAggGroup), visEditorGroupDeps)
-    // )
-    // .directive('visOptionsReactWrapper', (reactDirective: any) =>
-    //   reactDirective(wrapInI18nContext(VisOptionsReactWrapper), visOptionsDeps)
-    // )
-    // .directive('visEditorAggGroup', createVisEditorGroupDirective)
-    // .directive('visEditorVisOptions', createVisOptionsDirective);
 }

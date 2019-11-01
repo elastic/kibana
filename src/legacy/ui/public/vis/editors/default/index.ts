@@ -23,12 +23,3 @@ export { ComboBoxGroupedOptions } from './utils';
 export * from './vis_options_props';
 export * from './utils';
 export * from './agg_groups';
-// @ts-ignore
-export { createVisEditorGroupDirective, visEditorGroupDeps } from './agg_groups';
-export { DefaultEditorAggGroup } from './components/agg_group';
-
-// @ts-ignore
-export { createVisOptionsDirective, visOptionsDeps } from './vis_options';
-export { VisOptionsReactWrapper } from './vis_options_react_wrapper';
-// @ts-ignore
-export { createVisEditorSidebarDirective } from './sidebar';
