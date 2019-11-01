@@ -64,6 +64,7 @@ describe('#atSpace', () => {
         errorThrown = err;
       }
 
+      expect(mockClusterClient.asScoped).toHaveBeenCalledWith(request);
       expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith(
         'shield.hasPrivileges',
         {
@@ -306,6 +307,7 @@ describe('#atSpaces', () => {
         errorThrown = err;
       }
 
+      expect(mockClusterClient.asScoped).toHaveBeenCalledWith(request);
       expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith(
         'shield.hasPrivileges',
         {
@@ -783,6 +785,7 @@ describe('#globally', () => {
         errorThrown = err;
       }
 
+      expect(mockClusterClient.asScoped).toHaveBeenCalledWith(request);
       expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith(
         'shield.hasPrivileges',
         {
