@@ -60,6 +60,20 @@ export const singleBulkIndex = async (
     refresh: false,
     body: bulkBody,
   });
+  // return service
+  //   .callCluster('bulk', {
+  //     index: process.env.SIGNALS_INDEX || '.siem-signals-10-01-2019',
+  //     refresh: false,
+  //     body: bulkBody,
+  //   })
+  //   .then(result => {
+  //     if (result.errors) {
+  //       logger.error(result.errors);
+  //       return Promise.reject(false); // eslint-disable-line prefer-promise-reject-errors
+  //     }
+  //     logger.info('finished');
+  //     return Promise.resolve(true);
+  //   });
   const time2 = performance.now();
   logger.debug(`individual bulk process time took: ${time2 - time1} milliseconds`);
   logger.debug(`took property says bulk took: ${firstResult.took} milliseconds`);
@@ -86,10 +100,13 @@ export const singleSearchAfter = async (
       from: params.from,
       to: params.to,
       filter: params.filter,
-      size: params.size ? params.size : 1000,
+      size: params.size ? params.size : 1,
       searchAfterSortId,
     });
-    const nextSearchAfterResult = await service.callCluster('search', searchAfterQuery);
+    const nextSearchAfterResult: SignalSearchResponse = await service.callCluster(
+      'search',
+      searchAfterQuery
+    );
     return nextSearchAfterResult;
   } catch (exc) {
     logger.error(`[-] nextSearchAfter threw an error ${exc}`);
@@ -130,7 +147,7 @@ export const searchAfterAndBulkIndex = async (
   if (sortIds != null) {
     sortId = sortIds[0];
   }
-  while (size < totalHits) {
+  while (size < totalHits && size !== 0) {
     // utilize track_total_hits instead of true
     try {
       logger.debug(`sortIds: ${sortIds}`);

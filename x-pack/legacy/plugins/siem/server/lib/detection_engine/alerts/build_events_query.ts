@@ -10,7 +10,7 @@ interface BuildEventsSearchQuery {
   to: string;
   filter: unknown;
   size: number;
-  searchAfterSortId?: string;
+  searchAfterSortId?: string | number;
 }
 
 export const buildEventsSearchQuery = ({

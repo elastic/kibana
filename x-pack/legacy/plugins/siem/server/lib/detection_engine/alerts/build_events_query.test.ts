@@ -147,4 +147,148 @@ describe('create_signals', () => {
       },
     });
   });
+  test('if searchAfterSortId is a valid sortId string', () => {
+    const fakeSortId = '123456789012';
+    const query = buildEventsSearchQuery({
+      index: ['auditbeat-*'],
+      from: 'now-5m',
+      to: 'today',
+      filter: {},
+      size: 100,
+      searchAfterSortId: fakeSortId,
+    });
+    expect(query).toEqual({
+      allowNoIndices: true,
+      index: ['auditbeat-*'],
+      size: 100,
+      ignoreUnavailable: true,
+      body: {
+        query: {
+          bool: {
+            filter: [
+              {},
+              {
+                bool: {
+                  filter: [
+                    {
+                      bool: {
+                        should: [
+                          {
+                            range: {
+                              '@timestamp': {
+                                gte: 'now-5m',
+                              },
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                    {
+                      bool: {
+                        should: [
+                          {
+                            range: {
+                              '@timestamp': {
+                                lte: 'today',
+                              },
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                match_all: {},
+              },
+            ],
+          },
+        },
+        track_total_hits: true,
+        sort: [
+          {
+            '@timestamp': {
+              order: 'asc',
+            },
+          },
+        ],
+        search_after: [fakeSortId],
+      },
+    });
+  });
+  test('if searchAfterSortId is a valid sortId number', () => {
+    const fakeSortIdNumber = 123456789012;
+    const query = buildEventsSearchQuery({
+      index: ['auditbeat-*'],
+      from: 'now-5m',
+      to: 'today',
+      filter: {},
+      size: 100,
+      searchAfterSortId: fakeSortIdNumber,
+    });
+    expect(query).toEqual({
+      allowNoIndices: true,
+      index: ['auditbeat-*'],
+      size: 100,
+      ignoreUnavailable: true,
+      body: {
+        query: {
+          bool: {
+            filter: [
+              {},
+              {
+                bool: {
+                  filter: [
+                    {
+                      bool: {
+                        should: [
+                          {
+                            range: {
+                              '@timestamp': {
+                                gte: 'now-5m',
+                              },
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                    {
+                      bool: {
+                        should: [
+                          {
+                            range: {
+                              '@timestamp': {
+                                lte: 'today',
+                              },
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                match_all: {},
+              },
+            ],
+          },
+        },
+        track_total_hits: true,
+        sort: [
+          {
+            '@timestamp': {
+              order: 'asc',
+            },
+          },
+        ],
+        search_after: [fakeSortIdNumber],
+      },
+    });
+  });
 });
