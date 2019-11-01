@@ -22,14 +22,9 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import {
-  // TODO: add type annotations
-  // @ts-ignore
   EuiButtonEmpty,
-  // @ts-ignore
   EuiFlexGroup,
-  // @ts-ignore
   EuiFlexItem,
-  // @ts-ignore
   EuiHeaderSectionItemButton,
   EuiIcon,
   EuiPopover,
@@ -95,7 +90,7 @@ class HeaderHelpMenuUI extends Component<Props, State> {
 
     const defaultContent = useDefaultContent ? (
       <Fragment>
-        <EuiButtonEmpty href={kibanaDocLink} target="_blank" size="xs">
+        <EuiButtonEmpty href={kibanaDocLink} target="_blank" size="xs" flush="left">
           <FormattedMessage
             id="core.ui.chrome.headerGlobalNav.helpMenuKibanaDocumentationTitle"
             defaultMessage="Kibana documentation"
@@ -109,6 +104,7 @@ class HeaderHelpMenuUI extends Component<Props, State> {
           target="_blank"
           size="xs"
           iconType="help"
+          flush="left"
         >
           <FormattedMessage
             id="core.ui.chrome.headerGlobalNav.helpMenuAskUsTitle"
@@ -123,6 +119,7 @@ class HeaderHelpMenuUI extends Component<Props, State> {
           target="_blank"
           size="xs"
           iconType="editorComment"
+          flush="left"
         >
           <FormattedMessage
             id="core.ui.chrome.headerGlobalNav.helpMenuGiveFeedbackTitle"
@@ -137,6 +134,7 @@ class HeaderHelpMenuUI extends Component<Props, State> {
           target="_blank"
           size="xs"
           iconType="logoGithub"
+          flush="left"
         >
           <FormattedMessage
             id="core.ui.chrome.headerGlobalNav.helpMenuOpenGitHubIssueTitle"
