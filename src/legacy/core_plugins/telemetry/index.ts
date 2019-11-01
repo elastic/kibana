@@ -86,14 +86,23 @@ const telemetry = (kibana: any) => {
       },
       async replaceInjectedVars(originalInjectedVars: any, request: any) {
         const config = request.server.config();
+        const optIn = config.get('telemetry.optIn');
+        const allowChangingOptInStatus = config.get('telemetry.allowChangingOptInStatus');
         const currentKibanaVersion = getCurrentKibanaVersion(request.server);
-        let telemetryOptedIn = await getTelemetryOptIn({
-          request,
-          currentKibanaVersion,
-        });
+        let telemetryOptedIn: boolean | null;
 
-        if (telemetryOptedIn == null) {
-          telemetryOptedIn = config.get('telemetry.optIn');
+        if (typeof optIn === 'boolean' && !allowChangingOptInStatus) {
+          // When not allowed to change optIn status and an optIn value is set, we'll overwrite with that
+          telemetryOptedIn = optIn;
+        } else {
+          telemetryOptedIn = await getTelemetryOptIn({
+            request,
+            currentKibanaVersion,
+          });
+          if (telemetryOptedIn === null) {
+            // In the senario there's no value set in telemetryOptedIn, we'll return optIn value
+            telemetryOptedIn = optIn;
+          }
         }
 
         return {
