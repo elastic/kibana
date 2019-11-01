@@ -20,6 +20,7 @@
 
 import { getFields } from './get_fields';
 import * as ast from '../../ast';
+import { i18n } from '@kbn/i18n';
 
 export function getFullFieldNameNode(rootNameNode, indexPattern, nestedPath) {
   const fullFieldNameNode = {
@@ -37,25 +38,45 @@ export function getFullFieldNameNode(rootNameNode, indexPattern, nestedPath) {
 
   if (fields.length === 0) {
     const fieldName = ast.toElasticsearchQuery(fullFieldNameNode);
-    throw new Error(`${fieldName} does not exist in index pattern ${indexPattern.title}`);
+    throw new Error(i18n.translate('kbnESQuery.kql.errors.fieldNotInIndexPatternText', {
+      defaultMessage: `{fieldName} does not exist in index pattern {patternTitle}`,
+      values: {
+        fieldName,
+        patternTitle: indexPattern.title,
+      },
+    }));
   }
 
   const errors = fields.reduce((acc, field) => {
     const nestedPathFromField = field.subType && field.subType.nested ? field.subType.nested.path : undefined;
 
     if (nestedPath && !nestedPathFromField) {
-      return [...acc, `${field.name} is not a nested field but is in nested group "${nestedPath}" in the KQL expression.`];
+      return [...acc, i18n.translate('kbnESQuery.kql.errors.nonNestedFieldInNestedGroupText', {
+        defaultMessage: `{fieldName} is not a nested field but is in nested group "{nestedPath}" in the KQL expression.`,
+        values: {
+          fieldName: field.name,
+          nestedPath,
+        },
+      })];
     }
 
     if (nestedPathFromField && !nestedPath) {
-      return [...acc, `${field.name} is a nested field, but is not in a nested group in the KQL expression.`];
+      return [...acc, i18n.translate('kbnESQuery.kql.errors.nestedFieldWithoutNestedGroupText', {
+        defaultMessage: `{fieldName} is a nested field, but is not in a nested group in the KQL expression.`,
+        values: {
+          fieldName: field.name,
+        },
+      })];
     }
 
     if (nestedPathFromField !== nestedPath) {
-      return [
-        ...acc,
-        `Nested field ${field.name} is being queried with the incorrect nested path. The correct path is ${field.subType.nested.path}.`
-      ];
+      return [...acc, i18n.translate('kbnESQuery.kql.errors.incorrectNestedPathText', {
+        defaultMessage: `Nested field {fieldName} is being queried with the incorrect nested path. The correct path is {correctPath}.`,
+        values: {
+          fieldName: field.name,
+          correctPath: field.subType.nested.path,
+        },
+      })];
     }
 
     return acc;
