@@ -21,17 +21,14 @@ import { AlertDetails } from './components/alert_details';
 
 const LocationChangeWrapper = function({ children }) {
   // TODO: Find another way that doesn't require updating react-router-dom to 5.1.0
-  function dispatchOnLocationChange() {
-    const location = useLocation();
-    const dispatch = useDispatch();
-    useEffect(() => {
-      dispatch({
-        type: 'LOCATION_CHANGE',
-        payload: {},
-      });
-    }, [location]);
-  }
-  dispatchOnLocationChange();
+  const location = useLocation();
+  const dispatch = useDispatch();
+  useEffect(() => {
+    dispatch({
+      type: 'LOCATION_CHANGE',
+      payload: {},
+    });
+  }, [dispatch, location]);
   return <>{children}</>;
 };
 

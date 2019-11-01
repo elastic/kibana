@@ -36,7 +36,7 @@ export const Management = () => (
           </EuiTitle>
         </EuiPageContentHeaderSection>
       </EuiPageContentHeader>
-      <EuiPageContentBody>Page A's content goes here</EuiPageContentBody>
+      <EuiPageContentBody>Page As content goes here</EuiPageContentBody>
     </EuiPageContent>
   </EuiPageBody>
 );
