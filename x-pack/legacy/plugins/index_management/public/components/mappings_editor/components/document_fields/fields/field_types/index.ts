@@ -11,12 +11,14 @@ import { TextType } from './text_type';
 import { KeywordType } from './keyword_type';
 import { NumericType } from './numeric_type';
 import { BooleanType } from './boolean_type';
+import { BinaryType } from './binary_type';
 
 const typeMapToParametersForm: { [key in DataType]?: ComponentType<any> } = {
   text: TextType,
   keyword: KeywordType,
   numeric: NumericType,
   boolean: BooleanType,
+  binary: BinaryType,
 };
 
 export const getParametersFormForType = (
