@@ -17,16 +17,19 @@
  * under the License.
  */
 
+import React from 'react';
+import { EuiTextColor } from '@elastic/eui';
 import { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { existsOperator, isOneOfOperator } from './filter_operators';
 
 export function getFilterDisplayText(filter: Filter, filterDisplayName: string) {
-  const prefix = filter.meta.negate
+  const prefixText = filter.meta.negate
     ? ` ${i18n.translate('data.filter.filterBar.negatedFilterPrefix', {
         defaultMessage: 'NOT ',
       })}`
     : '';
+  const prefix = <EuiTextColor color="danger">{prefixText}</EuiTextColor>;
 
   if (filter.meta.alias !== null) {
     return `${prefix}${filter.meta.alias}`;
@@ -34,20 +37,61 @@ export function getFilterDisplayText(filter: Filter, filterDisplayName: string) 
 
   switch (filter.meta.type) {
     case 'exists':
-      return `${prefix}${filter.meta.key} ${existsOperator.message}`;
+      return (
+        <span>
+          {prefix}
+          {existsOperator.message}
+        </span>
+      );
     case 'geo_bounding_box':
-      return `${prefix}${filter.meta.key}: ${filterDisplayName}`;
+      return (
+        <span>
+          {prefix}
+          {filter.meta.key}: {filterDisplayName}
+        </span>
+      );
     case 'geo_polygon':
-      return `${prefix}${filter.meta.key}: ${filterDisplayName}`;
+      return (
+        <span>
+          {prefix}
+          {filter.meta.key}: {filterDisplayName}
+        </span>
+      );
     case 'phrase':
-      return `${prefix}${filter.meta.key}: ${filterDisplayName}`;
+      return (
+        <span>
+          {prefix}
+          {filter.meta.key}: {filterDisplayName}
+        </span>
+      );
     case 'phrases':
-      return `${prefix}${filter.meta.key} ${isOneOfOperator.message} ${filterDisplayName}`;
+      return (
+        <span>
+          {prefix}
+          {filter.meta.key} {isOneOfOperator.message} {filterDisplayName}
+        </span>
+      );
     case 'query_string':
-      return `${prefix}${filterDisplayName}`;
+      return (
+        <span>
+          {prefix}
+          {filterDisplayName}
+        </span>
+      );
     case 'range':
-      return `${prefix}${filter.meta.key}: ${filterDisplayName}`;
+    case 'phrase':
+      return (
+        <span>
+          {prefix}
+          {filter.meta.key}: {filterDisplayName}
+        </span>
+      );
     default:
-      return `${prefix}${JSON.stringify(filter.query)}`;
+      return (
+        <span>
+          {prefix}
+          {JSON.stringify(filter.query)}
+        </span>
+      );
   }
 }
