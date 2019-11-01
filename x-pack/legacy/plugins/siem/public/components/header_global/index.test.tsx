@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
-import 'jest-styled-components';
 import React from 'react';
 
 import { TestProviders } from '../../mock';
@@ -32,38 +30,5 @@ describe('HeaderGlobal', () => {
     );
 
     expect(toJson(wrapper)).toMatchSnapshot();
-  });
-
-  test('it applies offset styles when offsetRight is provided', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <HeaderGlobal offsetRight="100px" />
-      </TestProviders>
-    );
-    const siemHeaderGlobal = wrapper.find('.siemHeaderGlobal').first();
-
-    expect(siemHeaderGlobal).toHaveStyleRule('margin', `0 -100px 0 -${euiDarkVars.euiSizeL}`);
-    expect(siemHeaderGlobal).toHaveStyleRule(
-      'padding',
-      `${euiDarkVars.paddingSizes.m} 100px ${euiDarkVars.paddingSizes.m} ${euiDarkVars.paddingSizes.l}`
-    );
-  });
-
-  test('it DOES NOT apply offset styles when offsetRight is not provided', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <HeaderGlobal />
-      </TestProviders>
-    );
-    const siemHeaderGlobal = wrapper.find('.siemHeaderGlobal').first();
-
-    expect(siemHeaderGlobal).toHaveStyleRule(
-      'margin',
-      `0 -${euiDarkVars.euiSizeL} 0 -${euiDarkVars.euiSizeL}`
-    );
-    expect(siemHeaderGlobal).toHaveStyleRule(
-      'padding',
-      `${euiDarkVars.paddingSizes.m} ${euiDarkVars.paddingSizes.l} ${euiDarkVars.paddingSizes.m} ${euiDarkVars.paddingSizes.l}`
-    );
   });
 });
