@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { StaticIndexPattern, Field } from 'ui/index_patterns';
 import { AutocompleteProviderRegister } from '.';
 
 export type AutocompletePublicPluginSetup = Pick<
@@ -50,11 +50,22 @@ export type AutocompleteSuggestionType =
   | 'conjunction'
   | 'recentSearch';
 
+// A union type allows us to do easy type guards in the code. For example, if I want to ensure I'm
+// working with a FieldAutocompleteSuggestion, I can just do `if ('field' in suggestion)` and the
+// TypeScript compiler will narrow the type to the parts of the union that have a field prop.
 /** @public **/
-export interface AutocompleteSuggestion {
+export type AutocompleteSuggestion = BasicAutocompleteSuggestion | FieldAutocompleteSuggestion;
+
+interface BasicAutocompleteSuggestion {
   description?: string;
   end: number;
   start: number;
   text: string;
   type: AutocompleteSuggestionType;
+  cursorIndex?: number;
 }
+
+export type FieldAutocompleteSuggestion = BasicAutocompleteSuggestion & {
+  type: 'field';
+  field: Field;
+};

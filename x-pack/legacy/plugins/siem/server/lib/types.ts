@@ -193,5 +193,16 @@ export interface AggregationRequest {
         };
       };
     };
+    top_hits?: {
+      size?: number;
+      sort?: Array<{
+        [aggSortField: string]: {
+          order: SortRequestDirection;
+        };
+      }>;
+      _source: {
+        includes: string[];
+      };
+    };
   };
 }
