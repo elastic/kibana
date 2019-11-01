@@ -79,6 +79,8 @@ function getFieldFormatsRegistry() {
   return getFieldFormatsRegistry.fieldFormats;
 }
 
+getFieldFormatsRegistry();
+
 export default  function StubIndexPattern(pattern, getConfig, timeField, fields) {
   this.id = pattern;
   this.title = pattern;
@@ -112,3 +114,5 @@ export default  function StubIndexPattern(pattern, getConfig, timeField, fields)
 
   this._reindexFields();
 }
+
+export { getFieldFormatsRegistry };

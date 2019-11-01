@@ -20,57 +20,14 @@
 import sinon from 'sinon';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import { npStart } from 'ui/new_platform';
 import { VisProvider } from '..';
 import { AggType } from '../../agg_types/agg_type';
 import { AggConfig } from '../../agg_types/agg_config';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import {
-  FIELD_FORMAT_IDS,
-  FieldFormatRegisty,
-  StringFormat,
-  NumberFormat,
-  BoolFormat,
-  BytesFormat,
-  ColorFormat,
-  DateFormat,
-  DateNanosFormat,
-  DurationFormat,
-  IpFormat,
-  PercentFormat,
-  RelativeDateFormat, SourceFormat, StaticLookupFormat, TruncateFormat, UrlFormat,
+  FIELD_FORMAT_IDS
 } from '../../../../../plugins/data/public';
-import { setFieldFormats } from '../../../../core_plugins/data/public/index_patterns/services';
-
-function getFieldFormatsRegistry() {
-  if (!getFieldFormatsRegistry.fieldFormats) {
-    getFieldFormatsRegistry.fieldFormats = new FieldFormatRegisty();
-
-    getFieldFormatsRegistry.fieldFormats.register([
-      BoolFormat,
-      BytesFormat,
-      ColorFormat,
-      DateFormat,
-      DateNanosFormat,
-      DurationFormat,
-      IpFormat,
-      NumberFormat,
-      PercentFormat,
-      RelativeDateFormat,
-      SourceFormat,
-      StaticLookupFormat,
-      StringFormat,
-      TruncateFormat,
-      UrlFormat
-    ]);
-
-    getFieldFormatsRegistry.fieldFormats.init(npStart.core.uiSettings);
-
-    setFieldFormats(getFieldFormatsRegistry.fieldFormats);
-  }
-
-  return getFieldFormatsRegistry.fieldFormats;
-}
+import { getFieldFormatsRegistry } from '../../../../../test_utils/public/stub_index_pattern';
 
 describe('AggConfig', function () {
 
@@ -487,6 +444,7 @@ describe('AggConfig', function () {
           }
         ]
       });
+
       expect(vis.aggs.aggs[0].fieldFormatter()).to.be(getFieldFormatsRegistry()
         .getDefaultInstance(FIELD_FORMAT_IDS.NUMBER).getConverterFor());
     });
