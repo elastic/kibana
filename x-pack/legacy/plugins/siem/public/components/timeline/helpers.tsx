@@ -113,7 +113,7 @@ export const combineQueries = ({
   isEventViewer?: boolean;
 }): { filterQuery: string } | null => {
   const kuery: Query = { query: '', language: kqlQuery.language };
-  if (isEmpty(dataProviders) && isEmpty(kqlQuery.query) && !isEventViewer) {
+  if (isEmpty(dataProviders) && isEmpty(kqlQuery.query) && isEmpty(filters) && !isEventViewer) {
     return null;
   } else if (isEmpty(dataProviders) && isEmpty(kqlQuery.query) && isEventViewer) {
     kuery.query = `@timestamp >= ${start} and @timestamp <= ${end}`;
