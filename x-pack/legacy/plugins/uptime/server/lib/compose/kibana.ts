@@ -16,8 +16,8 @@ import { UMKibanaSavedObjectsAdapter } from '../adapters/saved_objects/kibana_sa
 import { UptimeCorePlugins, UptimeCoreSetup } from '../adapters/framework';
 
 export function compose(server: UptimeCoreSetup, plugins: UptimeCorePlugins): UMServerLibs {
-  const { elasticsearch, savedObjects, xpack } = plugins;
-  const framework = new UMKibanaBackendFrameworkAdapter(server, plugins);
+  const { elasticsearch, xpack } = plugins;
+  const framework = new UMKibanaBackendFrameworkAdapter(server);
   const database = new UMKibanaDatabaseAdapter(elasticsearch);
 
   const authDomain = new UMAuthDomain(new UMXPackAuthAdapter(xpack), {});
@@ -27,7 +27,7 @@ export function compose(server: UptimeCoreSetup, plugins: UptimeCorePlugins): UM
     monitors: new ElasticsearchMonitorsAdapter(database),
     monitorStates: new ElasticsearchMonitorStatesAdapter(database),
     pings: new ElasticsearchPingsAdapter(database),
-    savedObjects: new UMKibanaSavedObjectsAdapter(savedObjects, elasticsearch),
+    savedObjects: UMKibanaSavedObjectsAdapter,
   };
 
   return {

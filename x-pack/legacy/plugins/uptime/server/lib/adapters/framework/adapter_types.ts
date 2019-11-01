@@ -60,5 +60,4 @@ export interface UMBackendFrameworkAdapter {
     route: UMFrameworkRouteOptions<RouteRequest, RouteResponse>
   ): void;
   registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void;
-  getSavedObjectsClient(): any;
 }

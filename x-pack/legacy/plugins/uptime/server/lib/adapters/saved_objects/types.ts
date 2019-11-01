@@ -5,5 +5,5 @@
  */
 
 export interface UMSavedObjectsAdapter {
-  getUptimeIndexPattern: () => Promise<any>;
+  getUptimeIndexPattern: (request: any) => Promise<any>;
 }
