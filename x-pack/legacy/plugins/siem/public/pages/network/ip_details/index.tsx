@@ -25,6 +25,7 @@ import { WrapperPage } from '../../../components/wrapper_page';
 import { IpOverviewQuery } from '../../../containers/ip_overview';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../../containers/source';
 import { FlowTargetSourceDest, LastEventIndexKey } from '../../../graphql/types';
+import { useKibanaCore } from '../../../lib/compose/kibana_core';
 import { decodeIpv6 } from '../../../lib/helpers';
 import { convertToBuildEsQuery } from '../../../lib/keury';
 import { ConditionalFlexGroup } from '../../../pages/network/navigation/conditional_flex_group';
@@ -33,14 +34,13 @@ import { setAbsoluteRangeDatePicker as dispatchAbsoluteRangeDatePicker } from '.
 import { setIpDetailsTablesActivePageToZero as dispatchIpDetailsTablesActivePageToZero } from '../../../store/network/actions';
 import { SpyRoute } from '../../../utils/route/spy_routes';
 import { NetworkEmptyPage } from '../network_empty_page';
-
-import { IPDetailsComponentProps } from './types';
-export { getBreadcrumbs } from './utils';
-import { TlsQueryTable } from './tls_query_table';
-import { UsersQueryTable } from './users_query_table';
-import { NetworkTopNFlowQueryTable } from './network_top_n_flow_query_table';
 import { NetworkTopCountriesQueryTable } from './network_top_countries_query_table';
-import { useKibanaCore } from '../../../lib/compose/kibana_core';
+import { NetworkTopNFlowQueryTable } from './network_top_n_flow_query_table';
+import { TlsQueryTable } from './tls_query_table';
+import { IPDetailsComponentProps } from './types';
+import { UsersQueryTable } from './users_query_table';
+
+export { getBreadcrumbs } from './utils';
 
 const IpOverviewManage = manageQuery(IpOverview);
 
@@ -85,6 +85,7 @@ export const IPDetailsComponent = React.memo<IPDetailsComponentProps>(
               queries: [query],
               filters,
             });
+
             return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
               <StickyContainer>
                 <FiltersGlobal>
@@ -257,12 +258,12 @@ export const IPDetailsComponent = React.memo<IPDetailsComponentProps>(
             );
           }}
         </WithSource>
+
         <SpyRoute />
       </>
     );
   }
 );
-
 IPDetailsComponent.displayName = 'IPDetailsComponent';
 
 const makeMapStateToProps = () => {

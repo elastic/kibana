@@ -17,7 +17,6 @@ import * as i18n from './translations';
 const TimelinesContainer = styled.div`
   width: 100%:
 `;
-
 TimelinesContainer.displayName = 'TimelinesContainer';
 
 interface TimelinesProps<TCache = object> {
@@ -42,6 +41,7 @@ export const TimelinesPage = React.memo<OwnProps>(({ apolloClient }) => (
         />
       </TimelinesContainer>
     </WrapperPage>
+
     <SpyRoute />
   </>
 ));

@@ -63,6 +63,7 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
     }, [detailName]);
     const capabilities = useContext(MlCapabilitiesContext);
     const core = useKibanaCore();
+
     return (
       <>
         <WithSource sourceId="default">
@@ -96,6 +97,7 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
                 ...filters,
               ],
             });
+
             return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
               <StickyContainer>
                 <FiltersGlobal>
@@ -212,6 +214,7 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
             );
           }}
         </WithSource>
+
         <SpyRoute />
       </>
     );

@@ -49,6 +49,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
     capabilitiesFetched,
   }) => {
     const core = useKibanaCore();
+
     return (
       <>
         <WithSource sourceId={sourceId}>
@@ -59,6 +60,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
               queries: [query],
               filters,
             });
+
             return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
               <StickyContainer>
                 <FiltersGlobal>
@@ -141,12 +143,12 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
             );
           }}
         </WithSource>
+
         <SpyRoute />
       </>
     );
   }
 );
-
 NetworkComponent.displayName = 'NetworkComponent';
 
 const makeMapStateToProps = () => {
