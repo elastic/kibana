@@ -108,7 +108,6 @@ export const defaultTimelineToTimelineModel = (
     filters:
       timeline.filters != null
         ? timeline.filters.map(filter => ({
-            ...filter,
             $state: {
               store: 'appState',
             },
@@ -122,6 +121,7 @@ export const defaultTimelineToTimelineModel = (
                 : {}),
             },
             ...(filter.query != null ? { query: parseString(filter.query) } : {}),
+            ...(filter.exists != null ? { exists: parseString(filter.exists) } : {}),
           }))
         : [],
     isFavorite: duplicate

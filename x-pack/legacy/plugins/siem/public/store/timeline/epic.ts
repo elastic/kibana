@@ -296,6 +296,9 @@ const convertTimelineAsInput = (
                   ...(basicFilter.query != null
                     ? { query: convertToString(basicFilter.query) }
                     : { query: null }),
+                  ...(basicFilter.exists != null
+                    ? { exists: convertToString(basicFilter.exists) }
+                    : { exists: null }),
                 };
               })
             : [],

@@ -75,6 +75,7 @@ const SavedFilterMetaRuntimeType = runtimeTypes.partial({
 });
 
 const SavedFilterRuntimeType = runtimeTypes.partial({
+  exists: unionWithNullType(runtimeTypes.string),
   meta: unionWithNullType(SavedFilterMetaRuntimeType),
   query: unionWithNullType(runtimeTypes.string),
 });

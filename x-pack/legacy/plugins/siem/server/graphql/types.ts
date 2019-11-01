@@ -195,6 +195,8 @@ export interface FilterTimelineInput {
   meta?: Maybe<FilterMetaTimelineInput>;
 
   query?: Maybe<string>;
+
+  exists?: Maybe<string>;
 }
 
 export interface FilterMetaTimelineInput {
@@ -1907,6 +1909,8 @@ export interface FilterTimelineResult {
   meta?: Maybe<FilterMetaTimelineResult>;
 
   query?: Maybe<string>;
+
+  exists?: Maybe<string>;
 }
 
 export interface FilterMetaTimelineResult {
@@ -7916,6 +7920,8 @@ export namespace FilterTimelineResultResolvers {
     meta?: MetaResolver<Maybe<FilterMetaTimelineResult>, TypeParent, TContext>;
 
     query?: QueryResolver<Maybe<string>, TypeParent, TContext>;
+
+    exists?: ExistsResolver<Maybe<string>, TypeParent, TContext>;
   }
 
   export type MetaResolver<
@@ -7924,6 +7930,11 @@ export namespace FilterTimelineResultResolvers {
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
   export type QueryResolver<
+    R = Maybe<string>,
+    Parent = FilterTimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type ExistsResolver<
     R = Maybe<string>,
     Parent = FilterTimelineResult,
     TContext = SiemContext

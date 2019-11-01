@@ -49,6 +49,7 @@ export interface Filter {
   $state?: FilterState;
   meta: FilterMeta;
   query?: any;
+  exists?: any;
 }
 
 export interface LatLon {

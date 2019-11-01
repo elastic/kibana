@@ -182,6 +182,9 @@ export const timelineSavedObjectMappings: {
           query: {
             type: 'text',
           },
+          exists: {
+            type: 'text',
+          },
         },
       },
       kqlMode: {
