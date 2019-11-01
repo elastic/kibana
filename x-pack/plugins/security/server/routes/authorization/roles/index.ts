@@ -6,11 +6,13 @@
 
 import { RouteDefinitionParams } from '../..';
 import { defineGetRolesRoutes } from './get';
+import { defineGetAllRolesRoutes } from './get_all';
 import { defineDeleteRolesRoutes } from './delete';
 import { definePutRolesRoutes } from './put';
 
 export function defineRolesRoutes(params: RouteDefinitionParams) {
   defineGetRolesRoutes(params);
+  defineGetAllRolesRoutes(params);
   defineDeleteRolesRoutes(params);
   definePutRolesRoutes(params);
 }
