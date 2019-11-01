@@ -56,24 +56,16 @@ export const AgentListPage: React.SFC<{}> = () => {
   const [policies, setPolicies] = useState<any[]>([]);
   const [isPoliciesLoading, setIsPoliciesLoading] = useState<boolean>(false);
   const [isPoliciesFilterOpen, setIsPoliciesFilterOpen] = useState<boolean>(false);
-  const currentFilteredPolicyIds: string[] = [];
-
-  // Get list of filtered policy ids from current search string
-  search.replace(/[\W]*agents\.policy_id[\W]*:[\W]*"?([\w]+)"?/, (match, policy) => {
-    currentFilteredPolicyIds.push(policy);
-    return policy;
-  });
+  const [selectedPolicies, setSelectedPolicies] = useState<string[]>([]);
 
   // Add a policy id to current search
   const addPolicyFilter = (policyId: string) => {
-    setSearch(`${search}${search.trim() ? ' or' : ''} agents.policy_id : "${policyId}"`);
+    setSelectedPolicies([...selectedPolicies, policyId]);
   };
 
   // Remove a policy id from current search
   const removePolicyFilter = (policyId: string) => {
-    setSearch(
-      search.replace(new RegExp(`(and|or)?\\s+agents.policy_id\\s*:\\s*"?${policyId}"?`), '')
-    );
+    setSelectedPolicies(selectedPolicies.filter(policy => policy !== policyId));
   };
 
   // Agent enrollment flyout state
@@ -83,12 +75,25 @@ export const AgentListPage: React.SFC<{}> = () => {
   const fetchAgents = async () => {
     setIsLoading(true);
     setLastPolledAgentsMs(new Date().getTime());
+
+    // Build kuery from current search and policy filter states
+    let kuery = search.trim();
+    if (selectedPolicies.length) {
+      if (kuery) {
+        kuery = `(${kuery}) and`;
+      }
+      kuery = `${kuery} agents.policy_id : (${selectedPolicies
+        .map(policy => `"${policy}"`)
+        .join(' or ')})`;
+    }
+
     const { list, total } = await libs.agents.getAll(
       pagination.currentPage,
       pagination.pageSize,
-      search,
+      kuery,
       showInactive
     );
+
     setAgents(list);
     setTotalAgents(total);
     setIsLoading(false);
@@ -105,13 +110,15 @@ export const AgentListPage: React.SFC<{}> = () => {
   useEffect(() => {
     fetchAgents();
     fetchPolicies();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showInactive]);
 
-  // Update agents if pagination or query state changes
+  // Update agents if pagination, query, or policy filter state changes
   useEffect(() => {
     fetchAgents();
     setAreAllAgentsSelected(false);
-  }, [pagination, search]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pagination, search, selectedPolicies]);
 
   // Poll for agents on interval
   useInterval(() => {
@@ -331,7 +338,7 @@ export const AgentListPage: React.SFC<{}> = () => {
                         iconType="arrowDown"
                         onClick={() => setIsPoliciesFilterOpen(!isPoliciesFilterOpen)}
                         isSelected={isPoliciesFilterOpen}
-                        hasActiveFilters={currentFilteredPolicyIds.length > 0}
+                        hasActiveFilters={selectedPolicies.length > 0}
                         disabled={isPoliciesLoading}
                       >
                         Policies
@@ -344,10 +351,10 @@ export const AgentListPage: React.SFC<{}> = () => {
                     <div className="euiFilterSelect__items">
                       {policies.map((policy, index) => (
                         <EuiFilterSelectItem
-                          checked={currentFilteredPolicyIds.includes(policy.id) ? 'on' : undefined}
+                          checked={selectedPolicies.includes(policy.id) ? 'on' : undefined}
                           key={index}
                           onClick={() => {
-                            if (currentFilteredPolicyIds.includes(policy.id)) {
+                            if (selectedPolicies.includes(policy.id)) {
                               removePolicyFilter(policy.id);
                             } else {
                               addPolicyFilter(policy.id);
@@ -389,7 +396,7 @@ export const AgentListPage: React.SFC<{}> = () => {
                 id="xpack.fleet.agentList.loadingAgentsMessage"
                 defaultMessage="Loading agents…"
               />
-            ) : !search.trim() && totalAgents === 0 ? (
+            ) : !search.trim() && selectedPolicies.length === 0 && totalAgents === 0 ? (
               emptyPrompt
             ) : (
               <FormattedMessage

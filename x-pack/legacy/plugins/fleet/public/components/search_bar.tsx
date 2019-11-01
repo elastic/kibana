@@ -98,6 +98,7 @@ function useSuggestions(fieldPrefix: string, search: string) {
 
   useEffect(() => {
     fetchSuggestions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedSearch]);
 
   return {

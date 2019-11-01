@@ -15,7 +15,7 @@ import { uiModules } from 'ui/modules';
 import routes from 'ui/routes';
 // @ts-ignore: path dynamic for kibana
 import { MemoryAgentAdapter } from '../adapters/agent/memory_agent_adapter';
-import { MemoryPolicyAdapter } from '../adapters/policy/memory_policy_adapter';
+import { PolicyAdapter } from '../adapters/policy/memory_policy_adapter';
 import { KibanaFrameworkAdapter } from '../adapters/framework/kibana_framework_adapter';
 import { AgentsLib } from '../agent';
 import { PoliciesLib } from '../policy';
@@ -40,7 +40,7 @@ export function compose(
   const elasticsearchLib = new ElasticsearchLib(esAdapter);
 
   const agents = new AgentsLib(new MemoryAgentAdapter([]));
-  const policies = new PoliciesLib(new MemoryPolicyAdapter([]));
+  const policies = new PoliciesLib(new PolicyAdapter([]));
 
   const pluginUIModule = uiModules.get('app/fleet');
 

@@ -5,10 +5,12 @@
  */
 
 import { RestAgentAdapter } from '../adapters/agent/rest_agent_adapter';
+import { RestPolicyAdapter } from '../adapters/policy/rest_policy_adapter';
 import { MemoryElasticsearchAdapter } from '../adapters/elasticsearch/memory';
 import { TestingFrameworkAdapter } from '../adapters/framework/testing_framework_adapter';
 import { NodeAxiosAPIAdapter } from '../adapters/rest_api/node_axios_api_adapter';
 import { AgentsLib } from '../agent';
+import { PoliciesLib } from '../policy';
 import { ElasticsearchLib } from '../elasticsearch';
 import { FrameworkLib } from '../framework';
 import { FrontendLibs } from '../types';
@@ -19,6 +21,7 @@ export function compose(basePath: string): FrontendLibs {
   const elasticsearchLib = new ElasticsearchLib(esAdapter);
 
   const agents = new AgentsLib(new RestAgentAdapter(api));
+  const policies = new PoliciesLib(new RestPolicyAdapter(api));
 
   const framework = new FrameworkLib(
     new TestingFrameworkAdapter(
@@ -50,6 +53,7 @@ export function compose(basePath: string): FrontendLibs {
     framework,
     elasticsearch: elasticsearchLib,
     agents,
+    policies,
   };
   return libs;
 }

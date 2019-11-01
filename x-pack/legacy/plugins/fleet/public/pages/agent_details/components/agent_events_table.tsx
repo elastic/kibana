@@ -91,6 +91,7 @@ function useGetAgentEvents(
   };
   useEffect(() => {
     fetchAgentEvents();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [agent.id, debouncedSearch, pagination]);
 
   return { ...state, refresh: fetchAgentEvents };
