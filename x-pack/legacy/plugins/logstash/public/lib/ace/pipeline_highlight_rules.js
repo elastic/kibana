@@ -182,6 +182,10 @@ export function PipelineHighlightRules() {
         regex: '#.*$'
       },
       {
+        token: 'constant.numeric',
+        regex: '\\s\\d+'
+      },
+      {
         token: 'entity.name.function',
         regex: LOGSTASH_FILTER_PLUGINS.join('|')
       },
@@ -211,15 +215,11 @@ export function PipelineHighlightRules() {
       },
       {
         token: 'paren.lparen',
-        regex: '[[({]'
+        regex: '[({]'
       },
       {
         token: 'paren.rparen',
-        regex: '[\\])}]'
-      },
-      {
-        token: 'text',
-        regex: '\\s+'
+        regex: '[)}]'
       }
     ]
   };
