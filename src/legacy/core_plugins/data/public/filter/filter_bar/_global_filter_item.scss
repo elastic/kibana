@@ -1,10 +1,6 @@
 @import '@elastic/eui/src/components/form/variables';
 @import '@elastic/eui/src/components/form/mixins';
 
-$kbnGlobalFilterItemBorderColor: tintOrShade($euiColorMediumShade, 35%, 20%);
-$kbnGlobalFilterItemBorderColorExcluded: tintOrShade($euiColorDanger, 70%, 50%);
-$kbnGlobalFilterItemPinnedColorExcluded: tintOrShade($euiColorDanger, 30%, 20%);
-
 /**
  * 1.  Allow wrapping of long filter items
  */
