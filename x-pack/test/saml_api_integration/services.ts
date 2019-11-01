@@ -7,7 +7,7 @@
 import { services as apiIntegrationServices } from '../api_integration/services';
 
 export const services = {
-  chance: apiIntegrationServices.chance,
+  randomness: apiIntegrationServices.randomness,
   es: apiIntegrationServices.es,
   supertestWithoutAuth: apiIntegrationServices.supertestWithoutAuth,
 };

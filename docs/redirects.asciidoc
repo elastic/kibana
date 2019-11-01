@@ -35,3 +35,7 @@ This page has moved. Please see <<infra-configure-source>>.
 
 This page has moved. Please see <<xpack-logs-configuring>>.
 
+[role="exclude",id="extend"]
+== Extend your use case
+
+This page was deleted. See <<xpack-graph>> and <<xpack-ml>>.
