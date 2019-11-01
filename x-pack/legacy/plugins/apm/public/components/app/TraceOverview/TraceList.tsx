@@ -10,7 +10,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { ITransactionGroup } from '../../../../server/lib/transaction_groups/transform';
 import { fontSizes, truncate } from '../../../style/variables';
-import { asMillis } from '../../../utils/formatters';
+import { asMillis } from '../../../utils/duration_formatters';
 import { EmptyMessage } from '../../shared/EmptyMessage';
 import { ImpactBar } from '../../shared/ImpactBar';
 import { TransactionDetailLink } from '../../shared/Links/apm/TransactionDetailLink';

@@ -19,7 +19,7 @@ import {
 } from '../../../../style/variables';
 import Legend from '../Legend';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
-import { asAbsoluteTime } from '../../../../utils/formatters';
+import { asAbsoluteTime } from '../../../../utils/datetime_formatters';
 
 const TooltipElm = styled.div`
   margin: 0 ${px(unit)};

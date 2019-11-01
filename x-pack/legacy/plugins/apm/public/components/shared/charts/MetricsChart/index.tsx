@@ -15,7 +15,7 @@ import {
   asDecimal,
   asDuration,
   asInteger
-} from '../../../../utils/formatters';
+} from '../../../../utils/duration_formatters';
 import { Coordinate } from '../../../../../typings/timeseries';
 import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
 import { useChartsSync } from '../../../../hooks/useChartsSync';

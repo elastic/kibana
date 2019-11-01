@@ -6,7 +6,10 @@
 import React from 'react';
 import { EuiToolTip } from '@elastic/eui';
 import moment from 'moment-timezone';
-import { asAbsoluteTime, TimePrecision } from '../../../utils/formatters';
+import {
+  asAbsoluteTime,
+  TimePrecision
+} from '../../../utils/datetime_formatters';
 
 interface Props {
   /**

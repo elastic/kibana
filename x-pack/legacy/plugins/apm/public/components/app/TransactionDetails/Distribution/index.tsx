@@ -13,8 +13,8 @@ import { IBucket } from '../../../../../server/lib/transactions/distribution/get
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import {
   getDurationFormatter,
-  durationUnit
-} from '../../../../utils/formatters';
+  getDurationUnit
+} from '../../../../utils/duration_formatters';
 // @ts-ignore
 import Histogram from '../../../shared/charts/Histogram';
 import { EmptyMessage } from '../../../shared/EmptyMessage';
@@ -136,7 +136,7 @@ export const TransactionDistribution: FunctionComponent<Props> = (
 
   const xMax = d3.max(buckets, d => d.x) || 0;
   const timeFormatter = getDurationFormatter(xMax);
-  const unit = durationUnit(xMax);
+  const unit = getDurationUnit(xMax);
 
   const bucketIndex = buckets.findIndex(
     bucket =>

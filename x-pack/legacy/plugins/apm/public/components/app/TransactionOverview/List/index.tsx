@@ -11,7 +11,7 @@ import styled from 'styled-components';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { ITransactionGroup } from '../../../../../server/lib/transaction_groups/transform';
 import { fontFamilyCode, truncate } from '../../../../style/variables';
-import { asDecimal, asMillis } from '../../../../utils/formatters';
+import { asDecimal, asMillis } from '../../../../utils/duration_formatters';
 import { ImpactBar } from '../../../shared/ImpactBar';
 import { ITableColumn, ManagedTable } from '../../../shared/ManagedTable';
 import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';

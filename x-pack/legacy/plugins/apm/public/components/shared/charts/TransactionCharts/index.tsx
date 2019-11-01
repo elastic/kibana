@@ -27,8 +27,9 @@ import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import {
   asInteger,
   tpmUnit,
-  TimeFormatter
-} from '../../../../utils/formatters';
+  TimeFormatter,
+  getDurationFormatter
+} from '../../../../utils/duration_formatters';
 import { MLJobLink } from '../../Links/MachineLearningLinks/MLJobLink';
 import { LicenseContext } from '../../../../context/LicenseContext';
 import { TransactionLineChart } from './TransactionLineChart';

@@ -13,8 +13,8 @@ import response from './response.json';
 import {
   getDurationFormatter,
   asDecimal,
-  durationUnit
-} from '../../../../../utils/formatters';
+  getDurationUnit
+} from '../../../../../utils/duration_formatters';
 import { toJson } from '../../../../../utils/testHelpers';
 import { getFormattedBuckets } from '../../../../app/TransactionDetails/Distribution/index';
 
@@ -26,7 +26,7 @@ describe('Histogram', () => {
     const buckets = getFormattedBuckets(response.buckets, response.bucketSize);
     const xMax = d3.max(buckets, d => d.x);
     const timeFormatter = getDurationFormatter(xMax);
-    const unit = durationUnit(xMax);
+    const unit = getDurationUnit(xMax);
 
     wrapper = mount(
       <HistogramInner

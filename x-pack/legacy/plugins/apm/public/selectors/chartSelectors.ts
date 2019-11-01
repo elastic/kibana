@@ -16,7 +16,7 @@ import {
   RectCoordinate,
   TimeSeries
 } from '../../typings/timeseries';
-import { asDecimal, asMillis, tpmUnit } from '../utils/formatters';
+import { asDecimal, asMillis, tpmUnit } from '../utils/duration_formatters';
 import { IUrlParams } from '../context/UrlParamsContext/types';
 import { getEmptySeries } from '../components/shared/charts/CustomPlot/getEmptySeries';
 import { httpStatusCodeToColor } from '../utils/httpStatusCodeToColor';

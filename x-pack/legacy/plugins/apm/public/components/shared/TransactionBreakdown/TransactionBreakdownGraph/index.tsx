@@ -10,7 +10,7 @@ import { throttle } from 'lodash';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
 import { TransactionLineChart } from '../../charts/TransactionCharts/TransactionLineChart';
-import { asPercent } from '../../../../utils/formatters';
+import { asPercent } from '../../../../utils/duration_formatters';
 import { unit } from '../../../../style/variables';
 import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
 import { trackEvent } from '../../../../../../infra/public/hooks/use_track_metric';

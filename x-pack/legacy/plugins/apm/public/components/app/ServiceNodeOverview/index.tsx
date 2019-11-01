@@ -18,7 +18,7 @@ import {
   asDynamicBytes,
   asInteger,
   asPercent
-} from '../../../utils/formatters';
+} from '../../../utils/duration_formatters';
 import { ServiceNodeMetricOverviewLink } from '../../shared/Links/apm/ServiceNodeMetricOverviewLink';
 import { truncate, px, unit } from '../../../style/variables';
 
