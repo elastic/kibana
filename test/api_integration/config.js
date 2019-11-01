@@ -42,7 +42,8 @@ export default async function ({ readConfigFile }) {
         '--elasticsearch.healthCheck.delay=3600000',
         '--server.xsrf.disableProtection=true',
         `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'newsfeed')}`,
-        `--server.xsrf.whitelist=${JSON.stringify([`/api/_newsfeed-FTS-external-service-simulators/kibana`])}`,
+        `--newsfeed.service.urlRoot=/api/_newsfeed-FTS-external-service-simulators`,
+        `--server.xsrf.whitelist=${JSON.stringify([`/api/_newsfeed-FTS-external-service-simulators`])}`,
       ],
     },
   };

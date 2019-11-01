@@ -28,7 +28,21 @@ export async function initPlugin(server: Hapi.Server, path: string) {
     method: ['GET'],
     path: `${path}/kibana/v{version}.json`,
     options: {
-      auth: false,
+      cors: {
+        origin: ['*'],
+        additionalHeaders: [
+          'Sec-Fetch-Mode',
+          'Access-Control-Request-Method',
+          'Access-Control-Request-Headers',
+          'cache-control',
+          'x-requested-with',
+          'Origin',
+          'User-Agent',
+          'DNT',
+          'content-type',
+          'kbn-version',
+        ],
+      },
     },
     handler: newsfeedHandler,
   });
