@@ -44,10 +44,9 @@ function isTermsFieldFormat(
   return serializedFieldFormat.id === 'terms';
 }
 
-const config = chrome.getUiSettingsClient();
-
-const getConfig = (...args: any[]): any => config.get(...args);
-const getDefaultFieldFormat = () => (({ convert: identity } as unknown) as FieldFormat);
+const getConfig = (key: string, defaultOverride?: any): any =>
+  npStart.core.uiSettings.get(key, defaultOverride);
+const DefaultFieldFormat = FieldFormat.from(identity);
 
 const getFieldFormat = (id?: FIELD_FORMAT_IDS | string, params: object = {}): FieldFormat => {
   const fieldFormats = npStart.plugins.data.fieldFormats;
@@ -56,7 +55,7 @@ const getFieldFormat = (id?: FIELD_FORMAT_IDS | string, params: object = {}): Fi
   if (Format) {
     return new Format(params, getConfig);
   } else {
-    return getDefaultFieldFormat();
+    return new DefaultFieldFormat({}, getConfig);
   }
 };
 
@@ -96,7 +95,7 @@ export type FormatFactory = (mapping?: SerializedFieldFormat) => FieldFormat;
 
 export const getFormat: FormatFactory = mapping => {
   if (!mapping) {
-    return getDefaultFieldFormat();
+    return new DefaultFieldFormat({}, getConfig);
   }
   const { id } = mapping;
   const getUISettings = npStart.core.uiSettings.get;

@@ -23,13 +23,16 @@ import { npStart } from 'ui/new_platform';
 import { BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
 import { IpRangeTypeParamEditor } from '../../vis/editors/default/controls/ip_range_type';
 import { IpRangesParamEditor } from '../../vis/editors/default/controls/ip_ranges';
-import { FieldFormat } from '../../../../../plugins/data/public';
 import { ipRange } from '../../utils/ip_range';
 import { BUCKET_TYPES } from './bucket_agg_types';
 
 // @ts-ignore
 import { createFilterIpRange } from './create_filter/ip_range';
-import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
+import {
+  KBN_FIELD_TYPES,
+  TEXT_CONTEXT_TYPE,
+  FieldFormat,
+} from '../../../../../plugins/data/public';
 
 const ipRangeTitle = i18n.translate('common.ui.aggTypes.buckets.ipRangeTitle', {
   defaultMessage: 'IPv4 Range',
@@ -52,7 +55,7 @@ export const ipRangeBucketAgg = new BucketAggType({
   getFormat(agg) {
     const fieldFormats = npStart.plugins.data.fieldFormats;
     const formatter = agg.fieldOwnFormatter(
-      'text',
+      TEXT_CONTEXT_TYPE,
       fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.IP)
     );
     const IpRangeFormat = FieldFormat.from(function(range: IpRangeKey) {
