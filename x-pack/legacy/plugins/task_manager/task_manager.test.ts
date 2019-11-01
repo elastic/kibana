@@ -215,6 +215,10 @@ describe('TaskManager', () => {
       expect(claim).not.toHaveBeenCalled();
     });
 
+    /**
+     * This handles the case in which Elasticsearch has had inline script disabled.
+     * This is achieved by setting the `script.allowed_types` flag on Elasticsearch to `none`
+     */
     test('handles failure due to inline scripts being disabled', () => {
       const logger = mockLogger();
       const claim = jest.fn(() => {
