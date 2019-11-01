@@ -11,36 +11,30 @@ import React from 'react';
 import { AutocompleteSuggestion } from '../../../../../../../src/plugins/data/public';
 import euiStyled from '../../../../../common/eui_styled_components';
 
-interface SuggestionItemProps {
+interface Props {
   isSelected?: boolean;
   onClick?: React.MouseEventHandler<HTMLDivElement>;
   onMouseEnter?: React.MouseEventHandler<HTMLDivElement>;
   suggestion: AutocompleteSuggestion;
 }
 
-export class SuggestionItem extends React.Component<SuggestionItemProps> {
-  public static defaultProps: Partial<SuggestionItemProps> = {
-    isSelected: false,
-  };
+export const SuggestionItem: React.SFC<Props> = props => {
+  const { isSelected, onClick, onMouseEnter, suggestion } = props;
 
-  public render() {
-    const { isSelected, onClick, onMouseEnter, suggestion } = this.props;
+  return (
+    <SuggestionItemContainer isSelected={isSelected} onClick={onClick} onMouseEnter={onMouseEnter}>
+      <SuggestionItemIconField suggestionType={suggestion.type}>
+        <EuiIcon type={getEuiIconType(suggestion.type)} />
+      </SuggestionItemIconField>
+      <SuggestionItemTextField>{suggestion.text}</SuggestionItemTextField>
+      <SuggestionItemDescriptionField>{suggestion.description}</SuggestionItemDescriptionField>
+    </SuggestionItemContainer>
+  );
+};
 
-    return (
-      <SuggestionItemContainer
-        isSelected={isSelected}
-        onClick={onClick}
-        onMouseEnter={onMouseEnter}
-      >
-        <SuggestionItemIconField suggestionType={suggestion.type}>
-          <EuiIcon type={getEuiIconType(suggestion.type)} />
-        </SuggestionItemIconField>
-        <SuggestionItemTextField>{suggestion.text}</SuggestionItemTextField>
-        <SuggestionItemDescriptionField>{suggestion.description}</SuggestionItemDescriptionField>
-      </SuggestionItemContainer>
-    );
-  }
-}
+SuggestionItem.defaultProps = {
+  isSelected: false,
+};
 
 const SuggestionItemContainer = euiStyled.div<{
   isSelected?: boolean;

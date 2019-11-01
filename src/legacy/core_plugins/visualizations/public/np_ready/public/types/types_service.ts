@@ -48,16 +48,30 @@ export interface VisType {
  */
 export class TypesService {
   private types: Record<string, VisType> = {};
+  private unregisteredHiddenTypes: string[] = [];
   public setup() {
     return {
       registerVisualization: (registerFn: () => VisType) => {
         const visDefinition = registerFn();
+        if (this.unregisteredHiddenTypes.includes(visDefinition.name)) {
+          visDefinition.hidden = true;
+        }
+
         if (this.types[visDefinition.name]) {
           throw new Error('type already exists!');
         }
         this.types[visDefinition.name] = visDefinition;
       },
       registerAlias: visTypeAliasRegistry.add,
+      hideTypes: (typeNames: string[]) => {
+        typeNames.forEach((name: string) => {
+          if (this.types[name]) {
+            this.types[name].hidden = true;
+          } else {
+            this.unregisteredHiddenTypes.push(name);
+          }
+        });
+      },
     };
   }
 

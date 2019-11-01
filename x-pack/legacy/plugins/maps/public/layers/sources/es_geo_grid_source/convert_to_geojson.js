@@ -20,8 +20,7 @@ export function convertToGeoJson({ table, renderAs }) {
   }
 
   const metricColumns = table.columns.filter(column => {
-    return column.aggConfig.type.type === 'metrics'
-      && column.aggConfig.type.dslName !== 'geo_centroid';
+    return column.aggConfig.type.type === 'metrics' && column.aggConfig.type.dslName !== 'geo_centroid';
   });
   const geocentroidColumn = table.columns.find(column => column.aggConfig.type.dslName === 'geo_centroid');
   if (!geocentroidColumn) {

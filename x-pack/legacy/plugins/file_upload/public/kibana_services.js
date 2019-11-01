@@ -4,10 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { uiModules } from 'ui/modules';
+import { start as data } from '../../../../../src/legacy/core_plugins/data/public/legacy';
 
-export let indexPatternService;
-
-uiModules.get('app/file_upload').run(($injector) => {
-  indexPatternService = $injector.get('indexPatterns');
-});
+export const indexPatternService = data.indexPatterns.indexPatterns;

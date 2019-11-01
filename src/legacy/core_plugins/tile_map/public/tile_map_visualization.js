@@ -21,9 +21,8 @@ import { get } from 'lodash';
 import { GeohashLayer } from './geohash_layer';
 import { BaseMapsVisualizationProvider } from './base_maps_visualization';
 import { TileMapTooltipFormatterProvider } from './editors/_tooltip_formatter';
+import { npStart } from 'ui/new_platform';
 import { getFormat } from '../../../ui/public/visualize/loader/pipeline_helpers/utilities';
-import { start as data } from '../../../core_plugins/data/public/legacy';
-const filterManager = data.filter.filterManager;
 
 export const createTileMapVisualization = ({ serviceSettings, $injector }) => {
   const BaseMapsVisualization = new BaseMapsVisualizationProvider(serviceSettings);
@@ -189,6 +188,7 @@ export const createTileMapVisualization = ({ serviceSettings, $injector }) => {
       filter[filterName] = { ignore_unmapped: true };
       filter[filterName][field] = filterData;
 
+      const { filterManager } = npStart.plugins.data.query;
       filterManager.addFilters([filter]);
 
       this.vis.updateState();

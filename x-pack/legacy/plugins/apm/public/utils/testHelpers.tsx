@@ -15,9 +15,9 @@ import { Moment } from 'moment-timezone';
 import React from 'react';
 import { render, waitForElement } from 'react-testing-library';
 import { MemoryRouter } from 'react-router-dom';
-import { ESFilter } from 'elasticsearch';
 import { LocationProvider } from '../context/LocationContext';
 import { PromiseReturnType } from '../../typings/common';
+import { ESFilter } from '../../typings/elasticsearch';
 
 export function toJson(wrapper: ReactWrapper) {
   return enzymeToJson(wrapper, {
@@ -102,6 +102,15 @@ interface MockSetup {
     has: any;
   };
   uiFiltersES: ESFilter[];
+  indices: {
+    'apm_oss.sourcemapIndices': string;
+    'apm_oss.errorIndices': string;
+    'apm_oss.onboardingIndices': string;
+    'apm_oss.spanIndices': string;
+    'apm_oss.transactionIndices': string;
+    'apm_oss.metricsIndices': string;
+    'apm_oss.apmAgentConfigurationIndex': string;
+  };
 }
 
 export async function inspectSearchParams(
@@ -127,7 +136,16 @@ export async function inspectSearchParams(
       {
         term: { 'service.environment': 'prod' }
       }
-    ]
+    ],
+    indices: {
+      'apm_oss.sourcemapIndices': 'myIndex',
+      'apm_oss.errorIndices': 'myIndex',
+      'apm_oss.onboardingIndices': 'myIndex',
+      'apm_oss.spanIndices': 'myIndex',
+      'apm_oss.transactionIndices': 'myIndex',
+      'apm_oss.metricsIndices': 'myIndex',
+      'apm_oss.apmAgentConfigurationIndex': 'myIndex'
+    }
   };
   try {
     await fn(mockSetup);

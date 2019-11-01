@@ -82,7 +82,7 @@ export const usePivotPreviewData = (
       setPreviewMappings(resp.mappings);
       setStatus(PIVOT_PREVIEW_STATUS.LOADED);
     } catch (e) {
-      setErrorMessage(JSON.stringify(e));
+      setErrorMessage(JSON.stringify(e, null, 2));
       setPreviewData([]);
       setPreviewMappings({ properties: {} });
       setStatus(PIVOT_PREVIEW_STATUS.ERROR);
@@ -91,11 +91,15 @@ export const usePivotPreviewData = (
 
   useEffect(() => {
     getPreviewData();
+    // custom comparison
+    /* eslint-disable react-hooks/exhaustive-deps */
   }, [
     indexPattern.title,
     JSON.stringify(aggsArr),
     JSON.stringify(groupByArr),
     JSON.stringify(query),
+    /* eslint-enable react-hooks/exhaustive-deps */
   ]);
+
   return { errorMessage, status, previewData, previewMappings, previewRequest };
 };
