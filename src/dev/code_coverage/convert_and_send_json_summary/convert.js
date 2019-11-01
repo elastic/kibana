@@ -40,12 +40,28 @@ export default ({ coveragePath }, log) => {
       map(truncate),
       map(timeStamp),
       map(distro),
+      map(massage),
       map(enrich),
       map(last),
       // debug stream
       // tap(x => console.log(`\n### x\n\t${JSON.stringify(x, null, 2)}`)),
     );
 };
+// TODO: This fn is quick and dirty, fixup later
+function massage(obj) {
+  Object.keys(obj).forEach(key => {
+    if (typeof obj[key] === 'object') {
+      const o = obj[key];
+      Object.keys(o).forEach(k => {
+        if (o[k] === 'Unknown') {
+          o[k] = 0;
+        }
+      });
+    }
+    // console.log(obj[key])
+  });
+  return obj;
+}
 function statsAndPath(...xs) {
   const [coveredFilePath] = xs[0][1];
   const [stats] = xs[0];
@@ -82,9 +98,16 @@ function timeStamp(obj) {
 }
 function distro(obj) {
   const { coveredFilePath } = obj;
+  let distro;
+  if (process.env.DISTRO) {
+    distro = process.env.DISTRO;
+  } else {
+    distro = coveredFilePath.includes(XPACK) ? XPACK : 'OSS';
+  }
+
   return {
     ...obj,
-    distro: process.env.DISTRO || coveredFilePath.includes(XPACK) ? XPACK : 'OSS',
+    distro,
   };
 }
 function coverageType(obj) {
