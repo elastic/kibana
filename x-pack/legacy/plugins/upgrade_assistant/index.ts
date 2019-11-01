@@ -10,11 +10,15 @@ import mappings from './mappings.json';
 import { initServer } from './server';
 
 export function upgradeAssistant(kibana: any) {
-  return new kibana.Plugin({
+  const publicSrc = resolve(__dirname, 'public');
+  const npSrc = resolve(publicSrc, 'np_ready');
+
+  const config: Legacy.PluginSpecOptions = {
     id: 'upgrade_assistant',
     configPrefix: 'xpack.upgrade_assistant',
     require: ['elasticsearch'],
     uiExports: {
+      // @ts-ignore
       managementSections: ['plugins/upgrade_assistant'],
       savedObjectSchemas: {
         'upgrade-assistant-reindex-operation': {
@@ -24,10 +28,10 @@ export function upgradeAssistant(kibana: any) {
           isNamespaceAgnostic: true,
         },
       },
-      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
+      styleSheetPaths: resolve(npSrc, 'application/index.scss'),
       mappings,
     },
-    publicDir: resolve(__dirname, 'public'),
+    publicDir: publicSrc,
 
     config() {
       return Joi.object({
@@ -39,5 +43,6 @@ export function upgradeAssistant(kibana: any) {
       // Add server routes and initialize the plugin here
       initServer(server);
     },
-  });
+  };
+  return new kibana.Plugin(config);
 }
