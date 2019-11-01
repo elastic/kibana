@@ -27,16 +27,29 @@ function getConfigStub(config = {}) {
   };
 }
 
+const msearchMockResponse = Promise.resolve([]);
+msearchMockResponse.abort = jest.fn();
+const msearchMock = jest.fn().mockReturnValue(msearchMockResponse);
+
+const searchMockResponse = Promise.resolve([]);
+searchMockResponse.abort = jest.fn();
+const searchMock = jest.fn().mockReturnValue(searchMockResponse);
+
 describe('defaultSearchStrategy', function () {
   describe('search', function () {
     let searchArgs;
 
     beforeEach(() => {
-      const msearchMock = jest.fn().mockReturnValue(Promise.resolve([]));
-      const searchMock = jest.fn().mockReturnValue(Promise.resolve([]));
+      msearchMockResponse.abort.mockClear();
+      msearchMock.mockClear();
+
+      searchMockResponse.abort.mockClear();
+      searchMock.mockClear();
 
       searchArgs = {
-        searchRequests: [],
+        searchRequests: [{
+          index: { title: 'foo' }
+        }],
         es: {
           msearch: msearchMock,
           search: searchMock,
@@ -72,6 +85,22 @@ describe('defaultSearchStrategy', function () {
       });
       await search(searchArgs);
       expect(searchArgs.es.msearch.mock.calls[0][0]).toHaveProperty('ignore_throttled', false);
+    });
+
+    test('should properly call abort with msearch', () => {
+      searchArgs.config = getConfigStub({
+        'courier:batchSearches': true
+      });
+      search(searchArgs).abort();
+      expect(msearchMockResponse.abort).toHaveBeenCalled();
+    });
+
+    test('should properly abort with search', async () => {
+      searchArgs.config = getConfigStub({
+        'courier:batchSearches': false
+      });
+      search(searchArgs).abort();
+      expect(searchMockResponse.abort).toHaveBeenCalled();
     });
   });
 });

@@ -66,10 +66,9 @@ function search({ searchRequests, es, config, esShardTimeout }) {
   const abortController = new AbortController();
   const searchParams = getSearchParams(config, esShardTimeout);
   const promises = searchRequests.map(({ index, body }) => {
-    const searching = es.search({ index: index.title || index, body, ...searchParams })
-      .catch(({ response }) => JSON.parse(response));
+    const searching = es.search({ index: index.title || index, body, ...searchParams });
     abortController.signal.addEventListener('abort', searching.abort);
-    return searching;
+    return searching.catch(({ response }) => JSON.parse(response));
   });
   return {
     searching: Promise.all(promises),
