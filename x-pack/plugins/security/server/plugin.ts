@@ -92,7 +92,7 @@ export interface PluginSetupDependencies {
 export class Plugin {
   private readonly logger: Logger;
   private clusterClient?: IClusterClient;
-  private spacesService?: SpacesService;
+  private spacesService?: SpacesService | symbol = Symbol('not accessed');
   private licenseSubscription?: Subscription;
 
   private legacyAPI?: LegacyAPI;
@@ -103,7 +103,14 @@ export class Plugin {
     return this.legacyAPI;
   };
 
-  private readonly getSpacesService = () => this.spacesService;
+  private readonly getSpacesService = () => {
+    // Changing property value from Symbol to undefined denotes the fact that property was accessed.
+    if (!this.wasSpacesServiceAccessed()) {
+      this.spacesService = undefined;
+    }
+
+    return this.spacesService as SpacesService | undefined;
+  };
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
@@ -167,7 +174,13 @@ export class Plugin {
         mode: authz.mode,
       },
 
-      registerSpacesService: service => (this.spacesService = service),
+      registerSpacesService: service => {
+        if (this.wasSpacesServiceAccessed()) {
+          throw new Error('Spaces service has been accessed before registration.');
+        }
+
+        this.spacesService = service;
+      },
 
       __legacyCompat: {
         registerLegacyAPI: (legacyAPI: LegacyAPI) => {
@@ -217,5 +230,9 @@ export class Plugin {
       this.licenseSubscription.unsubscribe();
       this.licenseSubscription = undefined;
     }
+  }
+
+  private wasSpacesServiceAccessed() {
+    return typeof this.spacesService !== 'symbol';
   }
 }
