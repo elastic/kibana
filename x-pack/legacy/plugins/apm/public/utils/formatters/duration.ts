@@ -24,87 +24,91 @@ interface FormatterOptions {
   defaultValue?: string;
 }
 
-export function asHours(
-  value: FormatterValue,
-  { withUnit = true, defaultValue = NOT_AVAILABLE_LABEL }: FormatterOptions = {}
-) {
-  if (value == null) {
-    return defaultValue;
-  }
-  const hoursLabel =
-    SPACE +
-    i18n.translate('xpack.apm.formatters.hoursTimeUnitLabel', {
-      defaultMessage: 'h'
-    });
-  const formatted = asDecimal(value / 3600000000);
-  return `${formatted}${withUnit ? hoursLabel : ''}`;
+interface DurationTimeUnit {
+  [timeUnit: string]: {
+    label: string;
+    defaultLabel: string;
+    convert: (value: number) => string;
+  };
 }
 
-export function asMinutes(
-  value: FormatterValue,
-  { withUnit = true, defaultValue = NOT_AVAILABLE_LABEL }: FormatterOptions = {}
-) {
-  if (value == null) {
-    return defaultValue;
+const durationUnit: DurationTimeUnit = {
+  hours: {
+    label: 'xpack.apm.formatters.hoursTimeUnitLabel',
+    defaultLabel: 'h',
+    convert: (value: number) =>
+      asDecimal(moment.duration(value / 1000).asHours())
+  },
+  minutes: {
+    label: 'xpack.apm.formatters.minutesTimeUnitLabel',
+    defaultLabel: 'min',
+    convert: (value: number) =>
+      asDecimal(moment.duration(value / 1000).asMinutes())
+  },
+  seconds: {
+    label: 'xpack.apm.formatters.secondsTimeUnitLabel',
+    defaultLabel: 's',
+    convert: (value: number) =>
+      asDecimal(moment.duration(value / 1000).asSeconds())
+  },
+  milliseconds: {
+    label: 'xpack.apm.formatters.millisTimeUnitLabel',
+    defaultLabel: 'ms',
+    convert: (value: number) =>
+      asInteger(moment.duration(value / 1000).asMilliseconds())
+  },
+  microseconds: {
+    label: 'xpack.apm.formatters.microsTimeUnitLabel',
+    defaultLabel: 'μs',
+    convert: (value: number) => asInteger(value)
   }
-  const minutesLabel =
-    SPACE +
-    i18n.translate('xpack.apm.formatters.minutesTimeUnitLabel', {
-      defaultMessage: 'min'
-    });
-  const formatted = asDecimal(value / 60000000);
-  return `${formatted}${withUnit ? minutesLabel : ''}`;
-}
+};
 
-export function asSeconds(
+function convertTo(
+  timeUnit: string,
   value: FormatterValue,
-  { withUnit = true, defaultValue = NOT_AVAILABLE_LABEL }: FormatterOptions = {}
+  withUnit: boolean,
+  defaultValue: string
 ) {
-  if (value == null) {
-    return defaultValue;
-  }
-  const secondsLabel =
-    SPACE +
-    i18n.translate('xpack.apm.formatters.secondsTimeUnitLabel', {
-      defaultMessage: 's'
-    });
-  const formatted = asDecimal(value / 1000000);
-  return `${formatted}${withUnit ? secondsLabel : ''}`;
-}
-
-export function asMillis(
-  value: FormatterValue,
-  { withUnit = true, defaultValue = NOT_AVAILABLE_LABEL }: FormatterOptions = {}
-) {
-  if (value == null) {
+  const unit = durationUnit[timeUnit];
+  if (!unit || value == null) {
     return defaultValue;
   }
 
-  const millisLabel =
+  const message =
     SPACE +
-    i18n.translate('xpack.apm.formatters.millisTimeUnitLabel', {
-      defaultMessage: 'ms'
+    i18n.translate(unit.label, {
+      defaultMessage: unit.defaultLabel
     });
-  const formatted = asInteger(value / 1000);
-  return `${formatted}${withUnit ? millisLabel : ''}`;
+
+  const convertedValue = unit.convert(value);
+  return `${convertedValue}${withUnit ? message : ''}`;
 }
 
-export function asMicros(
+export const asHours = (
   value: FormatterValue,
   { withUnit = true, defaultValue = NOT_AVAILABLE_LABEL }: FormatterOptions = {}
-) {
-  if (value == null) {
-    return defaultValue;
-  }
+) => convertTo('hours', value, withUnit, defaultValue);
 
-  const microsLabel =
-    SPACE +
-    i18n.translate('xpack.apm.formatters.microsTimeUnitLabel', {
-      defaultMessage: 'μs'
-    });
-  const formatted = asInteger(value);
-  return `${formatted}${withUnit ? microsLabel : ''}`;
-}
+export const asMinutes = (
+  value: FormatterValue,
+  { withUnit = true, defaultValue = NOT_AVAILABLE_LABEL }: FormatterOptions = {}
+) => convertTo('minutes', value, withUnit, defaultValue);
+
+export const asSeconds = (
+  value: FormatterValue,
+  { withUnit = true, defaultValue = NOT_AVAILABLE_LABEL }: FormatterOptions = {}
+) => convertTo('seconds', value, withUnit, defaultValue);
+
+export const asMillis = (
+  value: FormatterValue,
+  { withUnit = true, defaultValue = NOT_AVAILABLE_LABEL }: FormatterOptions = {}
+) => convertTo('milliseconds', value, withUnit, defaultValue);
+
+export const asMicros = (
+  value: FormatterValue,
+  { withUnit = true, defaultValue = NOT_AVAILABLE_LABEL }: FormatterOptions = {}
+) => convertTo('microseconds', value, withUnit, defaultValue);
 
 export type TimeFormatter = (
   value: FormatterValue,
