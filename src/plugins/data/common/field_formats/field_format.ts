@@ -181,7 +181,7 @@ export abstract class FieldFormat {
     };
   }
 
-  static from(convertFn: FieldFormatConvertFunction): ReturnType<typeof createCustomFieldFormat> {
+  static from(convertFn: FieldFormatConvertFunction): IFieldFormatType {
     return createCustomFieldFormat(convertFn);
   }
 
