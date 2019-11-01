@@ -12,7 +12,7 @@ import { TransactionDistributionAPIResponse } from '../../../../../server/lib/tr
 import { IBucket } from '../../../../../server/lib/transactions/distribution/get_buckets/transform';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import {
-  getDurationFormatted,
+  getDurationFormatter,
   durationUnit
 } from '../../../../utils/formatters';
 // @ts-ignore
@@ -135,7 +135,7 @@ export const TransactionDistribution: FunctionComponent<Props> = (
   );
 
   const xMax = d3.max(buckets, d => d.x) || 0;
-  const timeFormatter = getDurationFormatted(xMax);
+  const timeFormatter = getDurationFormatter(xMax);
   const unit = durationUnit(xMax);
 
   const bucketIndex = buckets.findIndex(

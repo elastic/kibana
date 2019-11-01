@@ -3,12 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import moment from 'moment-timezone';
 import {
   asPercent,
   asDuration,
   getFixedByteFormatter,
-  asDynamicBytes
+  asDynamicBytes,
+  asRelativeDateRange,
+  asAbsoluteTime
 } from '../formatters';
 
 describe('formatters', () => {
@@ -128,6 +130,144 @@ describe('formatters', () => {
         expect(formatInTB(null)).toEqual('');
         expect(formatInTB(NaN)).toEqual('');
       });
+    });
+  });
+
+  describe('asRelativeDateRange', () => {
+    const formatDateToTimezone = (
+      date: string,
+      timezone: string = 'Europe/Amsterdam'
+    ) =>
+      moment(date)
+        .tz(timezone)
+        .valueOf();
+
+    describe('years range', () => {
+      it('returns years range when difference is greater than 5 years', () => {
+        const start = formatDateToTimezone('2000-01-01 01:01:01');
+        const end = formatDateToTimezone('2010-01-01 01:01:01');
+        const dateRange = asRelativeDateRange(start, end);
+        expect(dateRange).toEqual('2000 - 2010');
+      });
+      it('returns years range when difference is equal to 5 years', () => {
+        const start = formatDateToTimezone('2010-01-01 01:01:01');
+        const end = formatDateToTimezone('2015-01-01 01:01:01');
+        const dateRange = asRelativeDateRange(start, end);
+        expect(dateRange).toEqual('2010 - 2015');
+      });
+    });
+    describe('months range', () => {
+      it('when difference is equal to 4 years ', () => {
+        const start = formatDateToTimezone('2010-01-01 01:01:01');
+        const end = formatDateToTimezone('2014-04-01 01:01:01');
+        const dateRange = asRelativeDateRange(start, end);
+        expect(dateRange).toEqual('Jan 2010 - Apr 2014');
+      });
+      it('when difference is equal to 6 months ', () => {
+        const start = formatDateToTimezone('2019-01-01 01:01:01');
+        const end = formatDateToTimezone('2019-07-01 01:01:01');
+        const dateRange = asRelativeDateRange(start, end);
+        expect(dateRange).toEqual('Jan 2019 - Jul 2019');
+      });
+    });
+    describe('days range', () => {
+      it('when difference is greater than 1 days', () => {
+        const start = formatDateToTimezone('2019-10-01 01:01:01');
+        const end = formatDateToTimezone('2019-10-05 01:01:01');
+        const dateRange = asRelativeDateRange(start, end);
+        expect(dateRange).toEqual('Oct 1, 2019 - Oct 5, 2019');
+      });
+      it('when difference is equal to 1 days', () => {
+        const start = formatDateToTimezone('2019-10-01 01:01:01');
+        const end = formatDateToTimezone('2019-10-03 01:01:01');
+        const dateRange = asRelativeDateRange(start, end);
+        expect(dateRange).toEqual('Oct 1, 2019 - Oct 3, 2019');
+      });
+    });
+    describe('hours range', () => {
+      it('when difference is greater than 5 hours', () => {
+        const start = formatDateToTimezone('2019-10-31 01:01:01');
+        const end = formatDateToTimezone('2019-10-31 10:01:01');
+        const dateRange = asRelativeDateRange(start, end);
+        expect(dateRange).toEqual('Oct 31, 2019, 01:01 - 10:01 (UTC+1)');
+      });
+      it('when difference is equal to 5 hours', () => {
+        const start = formatDateToTimezone('2019-10-31 01:01:01');
+        const end = formatDateToTimezone('2019-10-31 06:01:01');
+        const dateRange = asRelativeDateRange(start, end);
+        expect(dateRange).toEqual('Oct 31, 2019, 01:01 - 06:01 (UTC+1)');
+      });
+    });
+    describe('minutes range', () => {
+      it('when difference is greater than 5 minutes', () => {
+        const start = formatDateToTimezone('2019-10-31 01:01:01');
+        const end = formatDateToTimezone('2019-10-31 01:15:01');
+        const dateRange = asRelativeDateRange(start, end);
+        expect(dateRange).toEqual('Oct 31, 2019, 01:01:01 - 01:15:01 (UTC+1)');
+      });
+      it('when difference is equal to 5 minutes', () => {
+        const start = formatDateToTimezone('2019-10-31 01:01:01');
+        const end = formatDateToTimezone('2019-10-31 01:06:01');
+        const dateRange = asRelativeDateRange(start, end);
+        expect(dateRange).toEqual('Oct 31, 2019, 01:01:01 - 01:06:01 (UTC+1)');
+      });
+    });
+    describe('milliseconds range', () => {
+      it('when difference is greater than 5 seconds', () => {
+        const start = formatDateToTimezone('2019-10-31 01:01:01.001');
+        const end = formatDateToTimezone('2019-10-31 01:01:10.002');
+        const dateRange = asRelativeDateRange(start, end);
+        expect(dateRange).toEqual(
+          'Oct 31, 2019, 01:01:01.001 - 01:01:10.002 (UTC+1)'
+        );
+      });
+      it('when difference is equal to 1 second', () => {
+        const start = formatDateToTimezone('2019-10-31 01:01:01.001');
+        const end = formatDateToTimezone('2019-10-31 01:01:02.002');
+        const dateRange = asRelativeDateRange(start, end);
+        expect(dateRange).toEqual(
+          'Oct 31, 2019, 01:01:01.001 - 01:01:02.002 (UTC+1)'
+        );
+      });
+    });
+  });
+
+  describe('asAbsoluteTime', () => {
+    afterAll(() => moment.tz.setDefault(''));
+
+    it('should add a leading plus for timezones with positive UTC offset', () => {
+      moment.tz.setDefault('Europe/Copenhagen');
+      expect(
+        asAbsoluteTime({ time: 1559390400000, precision: 'minutes' })
+      ).toBe('Jun 1, 2019, 14:00 (UTC+2)');
+    });
+
+    it('should add a leading minus for timezones with negative UTC offset', () => {
+      moment.tz.setDefault('America/Los_Angeles');
+      expect(
+        asAbsoluteTime({ time: 1559390400000, precision: 'minutes' })
+      ).toBe('Jun 1, 2019, 05:00 (UTC-7)');
+    });
+
+    it('should use default UTC offset formatting when offset contains minutes', () => {
+      moment.tz.setDefault('Canada/Newfoundland');
+      expect(
+        asAbsoluteTime({ time: 1559390400000, precision: 'minutes' })
+      ).toBe('Jun 1, 2019, 09:30 (UTC-02:30)');
+    });
+
+    it('should respect DST', () => {
+      moment.tz.setDefault('Europe/Copenhagen');
+      const timeWithDST = 1559390400000; //  Jun 1, 2019
+      const timeWithoutDST = 1575201600000; //  Dec 1, 2019
+
+      expect(asAbsoluteTime({ time: timeWithDST })).toBe(
+        'Jun 1, 2019, 14:00:00.000 (UTC+2)'
+      );
+
+      expect(asAbsoluteTime({ time: timeWithoutDST })).toBe(
+        'Dec 1, 2019, 13:00:00.000 (UTC+1)'
+      );
     });
   });
 });

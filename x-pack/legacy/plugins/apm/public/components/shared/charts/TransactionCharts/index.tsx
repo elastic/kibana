@@ -154,7 +154,7 @@ export class TransactionCharts extends Component<TransactionChartProps> {
     const { responseTimeSeries, tpmSeries } = charts;
     const { transactionType } = urlParams;
     const maxY = this.getMaxY(responseTimeSeries);
-    const formatter = getDurationFormatted(maxY);
+    const formatter = getDurationFormatter(maxY);
 
     return (
       <>

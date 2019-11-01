@@ -11,7 +11,7 @@ import d3 from 'd3';
 import { HistogramInner } from '../index';
 import response from './response.json';
 import {
-  getDurationFormatted,
+  getDurationFormatter,
   asDecimal,
   durationUnit
 } from '../../../../../utils/formatters';
@@ -25,7 +25,7 @@ describe('Histogram', () => {
   beforeEach(() => {
     const buckets = getFormattedBuckets(response.buckets, response.bucketSize);
     const xMax = d3.max(buckets, d => d.x);
-    const timeFormatter = getDurationFormatted(xMax);
+    const timeFormatter = getDurationFormatter(xMax);
     const unit = durationUnit(xMax);
 
     wrapper = mount(
