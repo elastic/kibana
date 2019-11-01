@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiProgress } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 interface Props {
@@ -15,6 +15,7 @@ interface Props {
 export const SessionIdleTimeoutWarning = (props: Props) => {
   return (
     <>
+      <EuiProgress size="xs" color="danger" position="absolute" />
       <p>
         <FormattedMessage
           id="xpack.security.components.sessionIdleTimeoutWarning.message"

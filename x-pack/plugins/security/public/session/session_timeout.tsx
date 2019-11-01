@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { NotificationsSetup, Toast, HttpSetup } from 'src/core/public';
+import { NotificationsSetup, Toast, HttpSetup, ToastInput } from 'src/core/public';
 import React from 'react';
 import BroadcastChannel from 'broadcast-channel';
 import LeaderElection from 'broadcast-channel/leader-election';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
 import { SessionIdleTimeoutWarning } from './session_idle_timeout_warning';
+import { SessionLifespanWarning } from './session_lifespan_warning';
 import { ISessionExpired } from './session_expired';
 import { SessionInfo } from '../types';
 
@@ -83,7 +84,7 @@ export class SessionTimeout {
   }
 
   private updateTimeouts = () => {
-    const timeout = this.getTimeout();
+    const { timeout, isMaximum } = this.getTimeout();
     if (timeout == null) {
       return;
     }
@@ -105,7 +106,7 @@ export class SessionTimeout {
 
     // set timeouts
     const val = timeout - WARNING_MS - GRACE_PERIOD_MS - 1000;
-    if (this.elector && this.elector.isLeader && val > 0) {
+    if (this.elector && this.elector.isLeader && val > 0 && !isMaximum) {
       // one tab should check for the latest session info before the warning displays
       // if session info has changed, that will be broadcasted to any other open tabs
       this.updateTimer = window.setTimeout(() => this.getSessionInfo(), val);
@@ -115,17 +116,24 @@ export class SessionTimeout {
       Math.max(timeout - WARNING_MS - GRACE_PERIOD_MS, 0)
     );
     this.expirationTimer = window.setTimeout(
-      () => this.sessionExpired.logout(),
+      () => this.sessionExpired.logout(isMaximum),
       Math.max(timeout - GRACE_PERIOD_MS, 0)
     );
   };
 
-  private getTimeout = (): number | null => {
+  private getTimeout = (): { timeout: number | null; isMaximum: boolean } => {
     let timeout = null;
-    if (this.sessionInfo && this.sessionInfo.expires) {
-      timeout = this.sessionInfo.expires - this.sessionInfo.now;
+    let isMaximum = false;
+    if (this.sessionInfo) {
+      const { now, expires, maxExpires } = this.sessionInfo;
+      if (expires) {
+        timeout = expires - now;
+        if (maxExpires) {
+          isMaximum = maxExpires <= expires + GRACE_PERIOD_MS;
+        }
+      }
     }
-    return timeout;
+    return { timeout, isMaximum };
   };
 
   private receiveMessage = (sessionInfo: SessionInfo) => {
@@ -134,15 +142,31 @@ export class SessionTimeout {
   };
 
   private showWarning = () => {
-    const timeout = this.getTimeout();
-    this.warningToast = this.notifications.toasts.add({
-      color: 'warning',
-      text: toMountPoint(<SessionTimeoutWarning onRefreshSession={this.refreshSession} />),
-      title: i18n.translate('xpack.security.components.sessionIdleTimeoutWarning.title', {
-        defaultMessage: 'Warning',
-      }),
-      toastLifeTimeMs: Math.min(timeout! - GRACE_PERIOD_MS, WARNING_MS),
-    });
+    const { timeout, isMaximum } = this.getTimeout();
+    const toastLifeTimeMs = Math.min(timeout! - GRACE_PERIOD_MS, WARNING_MS);
+    let toast: ToastInput;
+    if (!isMaximum) {
+      toast = {
+        color: 'warning',
+        text: toMountPoint(<SessionIdleTimeoutWarning onRefreshSession={this.refreshSession} />),
+        title: i18n.translate('xpack.security.components.sessionIdleTimeoutWarning.title', {
+          defaultMessage: 'Warning',
+        }),
+        iconType: 'clock',
+        toastLifeTimeMs,
+      };
+    } else {
+      toast = {
+        color: 'danger',
+        text: toMountPoint(<SessionLifespanWarning />),
+        title: i18n.translate('xpack.security.components.sessionLifespanWarning.title', {
+          defaultMessage: 'Warning',
+        }),
+        iconType: 'alert',
+        toastLifeTimeMs,
+      };
+    }
+    this.warningToast = this.notifications.toasts.add(toast);
   };
 
   private getSessionInfo = async (extend = false) => {

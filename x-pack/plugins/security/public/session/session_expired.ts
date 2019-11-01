@@ -7,18 +7,19 @@
 import { HttpSetup } from 'src/core/public';
 
 export interface ISessionExpired {
-  logout(): void;
+  logout(isMaximum: boolean): void;
 }
 
 export class SessionExpired {
   constructor(private basePath: HttpSetup['basePath']) {}
 
-  logout() {
+  logout(isMaximum: boolean) {
     const next = this.basePath.remove(
       `${window.location.pathname}${window.location.search}${window.location.hash}`
     );
+    const msg = isMaximum ? 'SESSION_ENDED' : 'SESSION_EXPIRED';
     window.location.assign(
-      this.basePath.prepend(`/logout?next=${encodeURIComponent(next)}&msg=SESSION_EXPIRED`)
+      this.basePath.prepend(`/logout?next=${encodeURIComponent(next)}&msg=${msg}`)
     );
   }
 }

@@ -35,7 +35,7 @@ export class UnauthorizedResponseHttpInterceptor implements HttpInterceptor {
     }
 
     if (response.status === 401) {
-      this.sessionExpired.logout();
+      this.sessionExpired.logout(false);
       controller.halt();
     }
   }

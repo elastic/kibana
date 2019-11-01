@@ -19,12 +19,28 @@ it('redirects user to "/logout" when there is no basePath', async () => {
     });
   });
 
-  sessionExpired.logout();
+  sessionExpired.logout(false);
 
   const url = await newUrlPromise;
   expect(url).toBe(
     `/logout?next=${encodeURIComponent('/foo/bar?baz=quz#quuz')}&msg=SESSION_EXPIRED`
   );
+});
+
+it('redirects user with correct message when session lifespan is exceeded', async () => {
+  const { basePath } = coreMock.createSetup().http;
+  mockCurrentUrl('/foo/bar?baz=quz#quuz');
+  const sessionExpired = new SessionExpired(basePath);
+  const newUrlPromise = new Promise<string>(resolve => {
+    jest.spyOn(window.location, 'assign').mockImplementation(url => {
+      resolve(url);
+    });
+  });
+
+  sessionExpired.logout(true);
+
+  const url = await newUrlPromise;
+  expect(url).toBe(`/logout?next=${encodeURIComponent('/foo/bar?baz=quz#quuz')}&msg=SESSION_ENDED`);
 });
 
 it('redirects user to "/${basePath}/logout" and removes basePath from next parameter when there is a basePath', async () => {
@@ -37,7 +53,7 @@ it('redirects user to "/${basePath}/logout" and removes basePath from next param
     });
   });
 
-  sessionExpired.logout();
+  sessionExpired.logout(false);
 
   const url = await newUrlPromise;
   expect(url).toBe(

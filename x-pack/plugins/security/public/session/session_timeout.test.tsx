@@ -18,7 +18,7 @@ const expectNoWarningToast = (
   expect(notifications.toasts.add).not.toHaveBeenCalled();
 };
 
-const expectWarningToast = (
+const expectIdleTimeoutWarningToast = (
   notifications: ReturnType<typeof coreMock.createSetup>['notifications'],
   toastLifeTimeMS: number = 60000
 ) => {
@@ -27,6 +27,7 @@ const expectWarningToast = (
     Array [
       Object {
         "color": "warning",
+        "iconType": "clock",
         "text": MountPoint {
           "reactNode": <SessionIdleTimeoutWarning
             onRefreshSession={[Function]}
@@ -37,6 +38,26 @@ const expectWarningToast = (
       },
     ]
   `);
+};
+
+const expectLifespanWarningToast = (
+  notifications: ReturnType<typeof coreMock.createSetup>['notifications'],
+  toastLifeTimeMS: number = 60000
+) => {
+  expect(notifications.toasts.add).toHaveBeenCalledTimes(1);
+  expect(notifications.toasts.add.mock.calls[0]).toMatchInlineSnapshot(`
+  Array [
+    Object {
+      "color": "danger",
+      "iconType": "alert",
+      "text": MountPoint {
+        "reactNode": <SessionLifespanWarning />,
+      },
+      "title": "Warning",
+      "toastLifeTimeMs": ${toastLifeTimeMS},
+    },
+  ]
+`);
 };
 
 const expectWarningToastHidden = (
@@ -118,12 +139,22 @@ describe('Session Timeout', () => {
   });
 
   describe('warning toast', () => {
-    test(`shows session expiration warning toast`, async () => {
+    test(`shows idle timeout warning toast`, async () => {
       await sessionTimeout.init();
 
       // we display the warning a minute before we expire the the session, which is 5 seconds before it actually expires
       jest.advanceTimersByTime(55 * 1000);
-      expectWarningToast(notifications);
+      expectIdleTimeoutWarningToast(notifications);
+    });
+
+    test(`shows lifespan warning toast`, async () => {
+      const sessionInfo = { now, expires: now + 2 * 60 * 1000, maxExpires: now + 2 * 60 * 1000 };
+      http.fetch.mockResolvedValue(sessionInfo);
+      await sessionTimeout.init();
+
+      // we display the warning a minute before we expire the the session, which is 5 seconds before it actually expires
+      jest.advanceTimersByTime(55 * 1000);
+      expectLifespanWarningToast(notifications);
     });
 
     test(`extend only results in an HTTP call if a warning is shown`, async () => {
@@ -138,7 +169,7 @@ describe('Session Timeout', () => {
       await sessionTimeout.extend('/foo');
       expect(http.fetch).toHaveBeenCalledTimes(1);
       jest.advanceTimersByTime(10 * 1000);
-      expectWarningToast(notifications);
+      expectIdleTimeoutWarningToast(notifications);
 
       http.fetch.mockResolvedValue({
         now: now + 55 * 1000,
@@ -156,7 +187,7 @@ describe('Session Timeout', () => {
       // we display the warning a minute before we expire the the session, which is 5 seconds before it actually expires
       const elapsed = 55 * 1000;
       jest.advanceTimersByTime(elapsed);
-      expectWarningToast(notifications);
+      expectIdleTimeoutWarningToast(notifications);
 
       http.fetch.mockResolvedValue({
         now: now + elapsed,
@@ -175,7 +206,7 @@ describe('Session Timeout', () => {
       // we display the warning a minute before we expire the the session, which is 5 seconds before it actually expires
       const elapsed = 55 * 1000;
       jest.advanceTimersByTime(elapsed);
-      expectWarningToast(notifications);
+      expectIdleTimeoutWarningToast(notifications);
 
       await sessionTimeout.extend('/api/security/session/info');
       expect(http.fetch).toHaveBeenCalledTimes(1);
@@ -216,7 +247,7 @@ describe('Session Timeout', () => {
 
       // we display the warning a minute before we expire the the session, which is 5 seconds before it actually expires
       jest.advanceTimersByTime(55 * 1000);
-      expectWarningToast(notifications);
+      expectIdleTimeoutWarningToast(notifications);
 
       const toastInput = notifications.toasts.add.mock.calls[0][0];
       expect(toastInput).toHaveProperty('text');
@@ -232,7 +263,7 @@ describe('Session Timeout', () => {
       expect(http.fetch).toHaveBeenCalled();
 
       jest.advanceTimersByTime(0);
-      expectWarningToast(notifications, 59 * 1000);
+      expectIdleTimeoutWarningToast(notifications, 59 * 1000);
     });
   });
 
@@ -253,7 +284,7 @@ describe('Session Timeout', () => {
 
       const elapsed = 114 * 1000;
       jest.advanceTimersByTime(elapsed);
-      expectWarningToast(notifications);
+      expectIdleTimeoutWarningToast(notifications);
 
       const sessionInfo = {
         now: now + elapsed,
