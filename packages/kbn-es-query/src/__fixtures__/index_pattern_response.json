@@ -161,8 +161,7 @@
       "searchable": true,
       "aggregatable": true,
       "readFromDocValues": true,
-      "parent": "machine.os",
-      "subType": "multi"
+      "subType": { "multi": { "parent": "machine.os" } }
     },
     {
       "name": "geo.src",
@@ -277,6 +276,28 @@
       "searchable": true,
       "aggregatable": true,
       "readFromDocValues": false
+    },
+    {
+      "name": "nestedField.child",
+      "type": "string",
+      "esTypes": ["text"],
+      "count": 0,
+      "scripted": false,
+      "searchable": true,
+      "aggregatable": false,
+      "readFromDocValues": false,
+      "subType": { "nested": { "path": "nestedField" } }
+    },
+    {
+      "name": "nestedField.nestedChild.doublyNestedChild",
+      "type": "string",
+      "esTypes": ["text"],
+      "count": 0,
+      "scripted": false,
+      "searchable": true,
+      "aggregatable": false,
+      "readFromDocValues": false,
+      "subType": { "nested": { "path": "nestedField.nestedChild" } }
     }
   ]
 }

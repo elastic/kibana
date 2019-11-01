@@ -8,12 +8,20 @@ import React, { FC, Fragment, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiStat, EuiTitle } from '@elastic/eui';
 import { ErrorCallout } from './error_callout';
-import { getValuesFromResponse, loadEvalData, Eval } from '../../../../common';
+import {
+  getValuesFromResponse,
+  getDependentVar,
+  getPredictionFieldName,
+  loadEvalData,
+  Eval,
+  DataFrameAnalyticsConfig,
+} from '../../../../common';
+import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/columns';
+import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
 
 interface Props {
-  jobId: string;
-  index: string;
-  dependentVariable: string;
+  jobConfig: DataFrameAnalyticsConfig;
+  jobStatus: DATA_FRAME_TASK_STATE;
 }
 
 const meanSquaredErrorText = i18n.translate(
@@ -30,23 +38,28 @@ const rSquaredText = i18n.translate(
 );
 const defaultEval: Eval = { meanSquaredError: '', rSquared: '', error: null };
 
-export const EvaluatePanel: FC<Props> = ({ jobId, index, dependentVariable }) => {
+export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus }) => {
   const [trainingEval, setTrainingEval] = useState<Eval>(defaultEval);
   const [generalizationEval, setGeneralizationEval] = useState<Eval>(defaultEval);
   const [isLoadingTraining, setIsLoadingTraining] = useState<boolean>(false);
   const [isLoadingGeneralization, setIsLoadingGeneralization] = useState<boolean>(false);
 
+  const index = jobConfig.dest.index;
+  const dependentVariable = getDependentVar(jobConfig.analysis);
+  const predictionFieldName = getPredictionFieldName(jobConfig.analysis);
+  // default is 'ml'
+  const resultsField = jobConfig.dest.results_field;
+
   const loadData = async () => {
     setIsLoadingGeneralization(true);
     setIsLoadingTraining(true);
-    // TODO: resultsField and predictionFieldName will need to be properly passed to this function
-    // once the results view is in use.
+
     const genErrorEval = await loadEvalData({
       isTraining: false,
       index,
       dependentVariable,
-      resultsField: 'ml',
-      predictionFieldName: undefined,
+      resultsField,
+      predictionFieldName,
     });
 
     if (genErrorEval.success === true && genErrorEval.eval) {
@@ -65,14 +78,13 @@ export const EvaluatePanel: FC<Props> = ({ jobId, index, dependentVariable }) =>
         error: genErrorEval.error,
       });
     }
-    // TODO: resultsField and predictionFieldName will need to be properly passed to this function
-    // once the results view is in use.
+
     const trainingErrorEval = await loadEvalData({
       isTraining: true,
       index,
       dependentVariable,
-      resultsField: 'ml',
-      predictionFieldName: undefined,
+      resultsField,
+      predictionFieldName,
     });
 
     if (trainingErrorEval.success === true && trainingErrorEval.eval) {
@@ -99,14 +111,21 @@ export const EvaluatePanel: FC<Props> = ({ jobId, index, dependentVariable }) =>
 
   return (
     <EuiPanel>
-      <EuiTitle size="xs">
-        <span>
-          {i18n.translate('xpack.ml.dataframe.analytics.regressionExploration.jobIdTitle', {
-            defaultMessage: 'Job ID {jobId}',
-            values: { jobId },
-          })}
-        </span>
-      </EuiTitle>
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <span>
+              {i18n.translate('xpack.ml.dataframe.analytics.regressionExploration.jobIdTitle', {
+                defaultMessage: 'Regression job ID {jobId}',
+                values: { jobId: jobConfig.id },
+              })}
+            </span>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <span>{getTaskStateBadge(jobStatus)}</span>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer size="m" />
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem>

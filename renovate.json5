@@ -570,6 +570,14 @@
         ],
       },
       {
+        groupSlug: 'supertest-as-promised',
+        groupName: 'supertest-as-promised related packages',
+        packageNames: [
+          'supertest-as-promised',
+          '@types/supertest-as-promised',
+        ],
+      },
+      {
         groupSlug: 'type-detect',
         groupName: 'type-detect related packages',
         packageNames: [
