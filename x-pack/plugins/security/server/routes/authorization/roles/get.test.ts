@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import Boom from 'boom';
-import { RequestHandlerContext } from '../../../../../../../src/core/server';
+import { kibanaResponseFactory, RequestHandlerContext } from '../../../../../../../src/core/server';
 import { ILicenseCheck } from '../../../../../licensing/server';
 import { LICENSE_STATUS } from '../../../../../licensing/server/constants';
 import { defineGetRolesRoutes } from './get';
@@ -22,7 +22,7 @@ interface TestOptions {
   name?: string;
   licenseCheckResult?: ILicenseCheck;
   apiResponse?: () => Promise<unknown>;
-  asserts: { statusCode: 200 | 403 | 406 | 500; result?: Record<string, any> };
+  asserts: { statusCode: number; result?: Record<string, any> };
 }
 
 describe('GET roles', () => {
@@ -53,25 +53,9 @@ describe('GET roles', () => {
         licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } },
       } as unknown) as RequestHandlerContext;
 
-      const mockResponseResult = { status: asserts.statusCode, options: {} };
-      const mockResponse = httpServerMock.createResponseFactory();
-      let mockResponseFactory;
-      if (asserts.statusCode === 200) {
-        mockResponseFactory = mockResponse.ok;
-      } else if (asserts.statusCode === 403) {
-        mockResponseFactory = mockResponse.forbidden;
-      } else {
-        mockResponseFactory = mockResponse.customError;
-      }
-      mockResponseFactory.mockReturnValue(mockResponseResult);
-
-      const response = await handler(mockContext, mockRequest, mockResponse);
-
-      expect(response).toBe(mockResponseResult);
-      expect(mockResponseFactory).toHaveBeenCalledTimes(1);
-      if (asserts.result !== undefined) {
-        expect(mockResponseFactory).toHaveBeenCalledWith(asserts.result);
-      }
+      const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
+      expect(response.status).toBe(asserts.statusCode);
+      expect(response.payload).toEqual(asserts.result);
 
       if (apiResponse) {
         expect(mockRouteDefinitionParams.clusterClient.asScoped).toHaveBeenCalledWith(mockRequest);
@@ -86,13 +70,13 @@ describe('GET roles', () => {
   describe('failure', () => {
     getRolesTest(`returns result of license check`, {
       licenseCheckResult: { check: LICENSE_STATUS.Invalid, message: 'test forbidden message' },
-      asserts: { statusCode: 403, result: { body: { message: 'test forbidden message' } } },
+      asserts: { statusCode: 403, result: { message: 'test forbidden message' } },
     });
 
     const error = Boom.notAcceptable('test not acceptable message');
     getRolesTest(`returns error from cluster client`, {
       apiResponse: () => Promise.reject(error),
-      asserts: { statusCode: 406, result: { body: error, statusCode: 406 } },
+      asserts: { statusCode: 406, result: error },
     });
 
     getRolesTest(`return error if we have empty resources`, {
@@ -118,10 +102,7 @@ describe('GET roles', () => {
       }),
       asserts: {
         statusCode: 500,
-        result: {
-          body: new Error("ES returned an application entry without resources, can't process this"),
-          statusCode: 500,
-        },
+        result: new Error("ES returned an application entry without resources, can't process this"),
       },
     });
   });
@@ -149,32 +130,30 @@ describe('GET roles', () => {
       }),
       asserts: {
         statusCode: 200,
-        result: {
-          body: [
-            {
-              name: 'first_role',
-              metadata: {
-                _reserved: true,
-              },
-              transient_metadata: {
-                enabled: true,
-              },
-              elasticsearch: {
-                cluster: ['manage_watcher'],
-                indices: [
-                  {
-                    names: ['.kibana*'],
-                    privileges: ['read', 'view_index_metadata'],
-                  },
-                ],
-                run_as: ['other_user'],
-              },
-              kibana: [],
-              _transform_error: [],
-              _unrecognized_applications: [],
+        result: [
+          {
+            name: 'first_role',
+            metadata: {
+              _reserved: true,
             },
-          ],
-        },
+            transient_metadata: {
+              enabled: true,
+            },
+            elasticsearch: {
+              cluster: ['manage_watcher'],
+              indices: [
+                {
+                  names: ['.kibana*'],
+                  privileges: ['read', 'view_index_metadata'],
+                },
+              ],
+              run_as: ['other_user'],
+            },
+            kibana: [],
+            _transform_error: [],
+            _unrecognized_applications: [],
+          },
+        ],
       },
     });
 
@@ -204,33 +183,31 @@ describe('GET roles', () => {
           }),
           asserts: {
             statusCode: 200,
-            result: {
-              body: [
-                {
-                  name: 'first_role',
-                  metadata: {
-                    _reserved: true,
-                  },
-                  transient_metadata: {
-                    enabled: true,
-                  },
-                  elasticsearch: {
-                    cluster: [],
-                    indices: [],
-                    run_as: [],
-                  },
-                  kibana: [
-                    {
-                      base: ['all', 'read'],
-                      feature: {},
-                      spaces: ['*'],
-                    },
-                  ],
-                  _transform_error: [],
-                  _unrecognized_applications: [],
+            result: [
+              {
+                name: 'first_role',
+                metadata: {
+                  _reserved: true,
                 },
-              ],
-            },
+                transient_metadata: {
+                  enabled: true,
+                },
+                elasticsearch: {
+                  cluster: [],
+                  indices: [],
+                  run_as: [],
+                },
+                kibana: [
+                  {
+                    base: ['all', 'read'],
+                    feature: {},
+                    spaces: ['*'],
+                  },
+                ],
+                _transform_error: [],
+                _unrecognized_applications: [],
+              },
+            ],
           },
         }
       );
@@ -264,36 +241,34 @@ describe('GET roles', () => {
           }),
           asserts: {
             statusCode: 200,
-            result: {
-              body: [
-                {
-                  name: 'first_role',
-                  metadata: {
-                    _reserved: true,
-                  },
-                  transient_metadata: {
-                    enabled: true,
-                  },
-                  elasticsearch: {
-                    cluster: [],
-                    indices: [],
-                    run_as: [],
-                  },
-                  kibana: [
-                    {
-                      base: [],
-                      feature: {
-                        foo: ['foo-privilege-1', 'foo-privilege-2'],
-                        bar: ['bar-privilege-1'],
-                      },
-                      spaces: ['*'],
-                    },
-                  ],
-                  _transform_error: [],
-                  _unrecognized_applications: [],
+            result: [
+              {
+                name: 'first_role',
+                metadata: {
+                  _reserved: true,
                 },
-              ],
-            },
+                transient_metadata: {
+                  enabled: true,
+                },
+                elasticsearch: {
+                  cluster: [],
+                  indices: [],
+                  run_as: [],
+                },
+                kibana: [
+                  {
+                    base: [],
+                    feature: {
+                      foo: ['foo-privilege-1', 'foo-privilege-2'],
+                      bar: ['bar-privilege-1'],
+                    },
+                    spaces: ['*'],
+                  },
+                ],
+                _transform_error: [],
+                _unrecognized_applications: [],
+              },
+            ],
           },
         }
       );
@@ -323,34 +298,32 @@ describe('GET roles', () => {
           }),
           asserts: {
             statusCode: 200,
-            result: {
-              body: [
-                {
-                  name: 'first_role',
-                  metadata: {
-                    _reserved: true,
-                  },
-                  transient_metadata: {
-                    enabled: true,
-                  },
-                  elasticsearch: {
-                    cluster: [],
-                    indices: [],
-                    run_as: [],
-                  },
-                  kibana: [
-                    {
-                      _reserved: ['customApplication1', 'customApplication2'],
-                      base: [],
-                      feature: {},
-                      spaces: ['*'],
-                    },
-                  ],
-                  _transform_error: [],
-                  _unrecognized_applications: [],
+            result: [
+              {
+                name: 'first_role',
+                metadata: {
+                  _reserved: true,
                 },
-              ],
-            },
+                transient_metadata: {
+                  enabled: true,
+                },
+                elasticsearch: {
+                  cluster: [],
+                  indices: [],
+                  run_as: [],
+                },
+                kibana: [
+                  {
+                    _reserved: ['customApplication1', 'customApplication2'],
+                    base: [],
+                    feature: {},
+                    spaces: ['*'],
+                  },
+                ],
+                _transform_error: [],
+                _unrecognized_applications: [],
+              },
+            ],
           },
         }
       );
@@ -380,34 +353,32 @@ describe('GET roles', () => {
           }),
           asserts: {
             statusCode: 200,
-            result: {
-              body: [
-                {
-                  name: 'first_role',
-                  metadata: {
-                    _reserved: true,
-                  },
-                  transient_metadata: {
-                    enabled: true,
-                  },
-                  elasticsearch: {
-                    cluster: [],
-                    indices: [],
-                    run_as: [],
-                  },
-                  kibana: [
-                    {
-                      _reserved: ['customApplication1', 'customApplication2'],
-                      base: [],
-                      feature: {},
-                      spaces: ['*'],
-                    },
-                  ],
-                  _transform_error: [],
-                  _unrecognized_applications: [],
+            result: [
+              {
+                name: 'first_role',
+                metadata: {
+                  _reserved: true,
                 },
-              ],
-            },
+                transient_metadata: {
+                  enabled: true,
+                },
+                elasticsearch: {
+                  cluster: [],
+                  indices: [],
+                  run_as: [],
+                },
+                kibana: [
+                  {
+                    _reserved: ['customApplication1', 'customApplication2'],
+                    base: [],
+                    feature: {},
+                    spaces: ['*'],
+                  },
+                ],
+                _transform_error: [],
+                _unrecognized_applications: [],
+              },
+            ],
           },
         }
       );
@@ -444,38 +415,36 @@ describe('GET roles', () => {
           }),
           asserts: {
             statusCode: 200,
-            result: {
-              body: [
-                {
-                  name: 'first_role',
-                  metadata: {
-                    _reserved: true,
-                  },
-                  transient_metadata: {
-                    enabled: true,
-                  },
-                  elasticsearch: {
-                    cluster: [],
-                    indices: [],
-                    run_as: [],
-                  },
-                  kibana: [
-                    {
-                      base: ['all', 'read'],
-                      feature: {},
-                      spaces: ['marketing', 'sales'],
-                    },
-                    {
-                      base: ['read'],
-                      feature: {},
-                      spaces: ['engineering'],
-                    },
-                  ],
-                  _transform_error: [],
-                  _unrecognized_applications: [],
+            result: [
+              {
+                name: 'first_role',
+                metadata: {
+                  _reserved: true,
                 },
-              ],
-            },
+                transient_metadata: {
+                  enabled: true,
+                },
+                elasticsearch: {
+                  cluster: [],
+                  indices: [],
+                  run_as: [],
+                },
+                kibana: [
+                  {
+                    base: ['all', 'read'],
+                    feature: {},
+                    spaces: ['marketing', 'sales'],
+                  },
+                  {
+                    base: ['read'],
+                    feature: {},
+                    spaces: ['engineering'],
+                  },
+                ],
+                _transform_error: [],
+                _unrecognized_applications: [],
+              },
+            ],
           },
         }
       );
@@ -514,43 +483,41 @@ describe('GET roles', () => {
           }),
           asserts: {
             statusCode: 200,
-            result: {
-              body: [
-                {
-                  name: 'first_role',
-                  metadata: {
-                    _reserved: true,
-                  },
-                  transient_metadata: {
-                    enabled: true,
-                  },
-                  elasticsearch: {
-                    cluster: [],
-                    indices: [],
-                    run_as: [],
-                  },
-                  kibana: [
-                    {
-                      base: [],
-                      feature: {
-                        foo: ['foo-privilege-1', 'foo-privilege-2'],
-                        bar: ['bar-privilege-1'],
-                      },
-                      spaces: ['marketing', 'sales'],
-                    },
-                    {
-                      base: [],
-                      feature: {
-                        foo: ['foo-privilege-1'],
-                      },
-                      spaces: ['engineering'],
-                    },
-                  ],
-                  _transform_error: [],
-                  _unrecognized_applications: [],
+            result: [
+              {
+                name: 'first_role',
+                metadata: {
+                  _reserved: true,
                 },
-              ],
-            },
+                transient_metadata: {
+                  enabled: true,
+                },
+                elasticsearch: {
+                  cluster: [],
+                  indices: [],
+                  run_as: [],
+                },
+                kibana: [
+                  {
+                    base: [],
+                    feature: {
+                      foo: ['foo-privilege-1', 'foo-privilege-2'],
+                      bar: ['bar-privilege-1'],
+                    },
+                    spaces: ['marketing', 'sales'],
+                  },
+                  {
+                    base: [],
+                    feature: {
+                      foo: ['foo-privilege-1'],
+                    },
+                    spaces: ['engineering'],
+                  },
+                ],
+                _transform_error: [],
+                _unrecognized_applications: [],
+              },
+            ],
           },
         }
       );
@@ -581,27 +548,25 @@ describe('GET roles', () => {
         }),
         asserts: {
           statusCode: 200,
-          result: {
-            body: [
-              {
-                name: 'first_role',
-                metadata: {
-                  _reserved: true,
-                },
-                transient_metadata: {
-                  enabled: true,
-                },
-                elasticsearch: {
-                  cluster: [],
-                  indices: [],
-                  run_as: [],
-                },
-                kibana: [],
-                _transform_error: ['kibana'],
-                _unrecognized_applications: [],
+          result: [
+            {
+              name: 'first_role',
+              metadata: {
+                _reserved: true,
               },
-            ],
-          },
+              transient_metadata: {
+                enabled: true,
+              },
+              elasticsearch: {
+                cluster: [],
+                indices: [],
+                run_as: [],
+              },
+              kibana: [],
+              _transform_error: ['kibana'],
+              _unrecognized_applications: [],
+            },
+          ],
         },
       }
     );
@@ -631,27 +596,25 @@ describe('GET roles', () => {
         }),
         asserts: {
           statusCode: 200,
-          result: {
-            body: [
-              {
-                name: 'first_role',
-                metadata: {
-                  _reserved: true,
-                },
-                transient_metadata: {
-                  enabled: true,
-                },
-                elasticsearch: {
-                  cluster: [],
-                  indices: [],
-                  run_as: [],
-                },
-                kibana: [],
-                _transform_error: ['kibana'],
-                _unrecognized_applications: [],
+          result: [
+            {
+              name: 'first_role',
+              metadata: {
+                _reserved: true,
               },
-            ],
-          },
+              transient_metadata: {
+                enabled: true,
+              },
+              elasticsearch: {
+                cluster: [],
+                indices: [],
+                run_as: [],
+              },
+              kibana: [],
+              _transform_error: ['kibana'],
+              _unrecognized_applications: [],
+            },
+          ],
         },
       }
     );
@@ -686,27 +649,25 @@ describe('GET roles', () => {
         }),
         asserts: {
           statusCode: 200,
-          result: {
-            body: [
-              {
-                name: 'first_role',
-                metadata: {
-                  _reserved: true,
-                },
-                transient_metadata: {
-                  enabled: true,
-                },
-                elasticsearch: {
-                  cluster: [],
-                  indices: [],
-                  run_as: [],
-                },
-                kibana: [],
-                _transform_error: ['kibana'],
-                _unrecognized_applications: [],
+          result: [
+            {
+              name: 'first_role',
+              metadata: {
+                _reserved: true,
               },
-            ],
-          },
+              transient_metadata: {
+                enabled: true,
+              },
+              elasticsearch: {
+                cluster: [],
+                indices: [],
+                run_as: [],
+              },
+              kibana: [],
+              _transform_error: ['kibana'],
+              _unrecognized_applications: [],
+            },
+          ],
         },
       }
     );
@@ -741,27 +702,25 @@ describe('GET roles', () => {
         }),
         asserts: {
           statusCode: 200,
-          result: {
-            body: [
-              {
-                name: 'first_role',
-                metadata: {
-                  _reserved: true,
-                },
-                transient_metadata: {
-                  enabled: true,
-                },
-                elasticsearch: {
-                  cluster: [],
-                  indices: [],
-                  run_as: [],
-                },
-                kibana: [],
-                _transform_error: ['kibana'],
-                _unrecognized_applications: [],
+          result: [
+            {
+              name: 'first_role',
+              metadata: {
+                _reserved: true,
               },
-            ],
-          },
+              transient_metadata: {
+                enabled: true,
+              },
+              elasticsearch: {
+                cluster: [],
+                indices: [],
+                run_as: [],
+              },
+              kibana: [],
+              _transform_error: ['kibana'],
+              _unrecognized_applications: [],
+            },
+          ],
         },
       }
     );
@@ -796,27 +755,25 @@ describe('GET roles', () => {
         }),
         asserts: {
           statusCode: 200,
-          result: {
-            body: [
-              {
-                name: 'first_role',
-                metadata: {
-                  _reserved: true,
-                },
-                transient_metadata: {
-                  enabled: true,
-                },
-                elasticsearch: {
-                  cluster: [],
-                  indices: [],
-                  run_as: [],
-                },
-                kibana: [],
-                _transform_error: ['kibana'],
-                _unrecognized_applications: [],
+          result: [
+            {
+              name: 'first_role',
+              metadata: {
+                _reserved: true,
               },
-            ],
-          },
+              transient_metadata: {
+                enabled: true,
+              },
+              elasticsearch: {
+                cluster: [],
+                indices: [],
+                run_as: [],
+              },
+              kibana: [],
+              _transform_error: ['kibana'],
+              _unrecognized_applications: [],
+            },
+          ],
         },
       }
     );
@@ -846,27 +803,25 @@ describe('GET roles', () => {
         }),
         asserts: {
           statusCode: 200,
-          result: {
-            body: [
-              {
-                name: 'first_role',
-                metadata: {
-                  _reserved: true,
-                },
-                transient_metadata: {
-                  enabled: true,
-                },
-                elasticsearch: {
-                  cluster: [],
-                  indices: [],
-                  run_as: [],
-                },
-                kibana: [],
-                _transform_error: ['kibana'],
-                _unrecognized_applications: [],
+          result: [
+            {
+              name: 'first_role',
+              metadata: {
+                _reserved: true,
               },
-            ],
-          },
+              transient_metadata: {
+                enabled: true,
+              },
+              elasticsearch: {
+                cluster: [],
+                indices: [],
+                run_as: [],
+              },
+              kibana: [],
+              _transform_error: ['kibana'],
+              _unrecognized_applications: [],
+            },
+          ],
         },
       }
     );
@@ -901,27 +856,25 @@ describe('GET roles', () => {
         }),
         asserts: {
           statusCode: 200,
-          result: {
-            body: [
-              {
-                name: 'first_role',
-                metadata: {
-                  _reserved: true,
-                },
-                transient_metadata: {
-                  enabled: true,
-                },
-                elasticsearch: {
-                  cluster: [],
-                  indices: [],
-                  run_as: [],
-                },
-                kibana: [],
-                _transform_error: ['kibana'],
-                _unrecognized_applications: [],
+          result: [
+            {
+              name: 'first_role',
+              metadata: {
+                _reserved: true,
               },
-            ],
-          },
+              transient_metadata: {
+                enabled: true,
+              },
+              elasticsearch: {
+                cluster: [],
+                indices: [],
+                run_as: [],
+              },
+              kibana: [],
+              _transform_error: ['kibana'],
+              _unrecognized_applications: [],
+            },
+          ],
         },
       }
     );
@@ -951,27 +904,25 @@ describe('GET roles', () => {
         }),
         asserts: {
           statusCode: 200,
-          result: {
-            body: [
-              {
-                name: 'first_role',
-                metadata: {
-                  _reserved: true,
-                },
-                transient_metadata: {
-                  enabled: true,
-                },
-                elasticsearch: {
-                  cluster: [],
-                  indices: [],
-                  run_as: [],
-                },
-                kibana: [],
-                _transform_error: ['kibana'],
-                _unrecognized_applications: [],
+          result: [
+            {
+              name: 'first_role',
+              metadata: {
+                _reserved: true,
               },
-            ],
-          },
+              transient_metadata: {
+                enabled: true,
+              },
+              elasticsearch: {
+                cluster: [],
+                indices: [],
+                run_as: [],
+              },
+              kibana: [],
+              _transform_error: ['kibana'],
+              _unrecognized_applications: [],
+            },
+          ],
         },
       }
     );
@@ -1006,27 +957,25 @@ describe('GET roles', () => {
         }),
         asserts: {
           statusCode: 200,
-          result: {
-            body: [
-              {
-                name: 'first_role',
-                metadata: {
-                  _reserved: true,
-                },
-                transient_metadata: {
-                  enabled: true,
-                },
-                elasticsearch: {
-                  cluster: [],
-                  indices: [],
-                  run_as: [],
-                },
-                kibana: [],
-                _transform_error: ['kibana'],
-                _unrecognized_applications: [],
+          result: [
+            {
+              name: 'first_role',
+              metadata: {
+                _reserved: true,
               },
-            ],
-          },
+              transient_metadata: {
+                enabled: true,
+              },
+              elasticsearch: {
+                cluster: [],
+                indices: [],
+                run_as: [],
+              },
+              kibana: [],
+              _transform_error: ['kibana'],
+              _unrecognized_applications: [],
+            },
+          ],
         },
       }
     );
@@ -1056,27 +1005,25 @@ describe('GET roles', () => {
         }),
         asserts: {
           statusCode: 200,
-          result: {
-            body: [
-              {
-                name: 'first_role',
-                metadata: {
-                  _reserved: true,
-                },
-                transient_metadata: {
-                  enabled: true,
-                },
-                elasticsearch: {
-                  cluster: [],
-                  indices: [],
-                  run_as: [],
-                },
-                kibana: [],
-                _transform_error: ['kibana'],
-                _unrecognized_applications: [],
+          result: [
+            {
+              name: 'first_role',
+              metadata: {
+                _reserved: true,
               },
-            ],
-          },
+              transient_metadata: {
+                enabled: true,
+              },
+              elasticsearch: {
+                cluster: [],
+                indices: [],
+                run_as: [],
+              },
+              kibana: [],
+              _transform_error: ['kibana'],
+              _unrecognized_applications: [],
+            },
+          ],
         },
       }
     );
@@ -1106,27 +1053,25 @@ describe('GET roles', () => {
         }),
         asserts: {
           statusCode: 200,
-          result: {
-            body: [
-              {
-                name: 'first_role',
-                metadata: {
-                  _reserved: true,
-                },
-                transient_metadata: {
-                  enabled: true,
-                },
-                elasticsearch: {
-                  cluster: [],
-                  indices: [],
-                  run_as: [],
-                },
-                kibana: [],
-                _transform_error: ['kibana'],
-                _unrecognized_applications: [],
+          result: [
+            {
+              name: 'first_role',
+              metadata: {
+                _reserved: true,
               },
-            ],
-          },
+              transient_metadata: {
+                enabled: true,
+              },
+              elasticsearch: {
+                cluster: [],
+                indices: [],
+                run_as: [],
+              },
+              kibana: [],
+              _transform_error: ['kibana'],
+              _unrecognized_applications: [],
+            },
+          ],
         },
       }
     );
@@ -1156,27 +1101,25 @@ describe('GET roles', () => {
         }),
         asserts: {
           statusCode: 200,
-          result: {
-            body: [
-              {
-                name: 'first_role',
-                metadata: {
-                  _reserved: true,
-                },
-                transient_metadata: {
-                  enabled: true,
-                },
-                elasticsearch: {
-                  cluster: [],
-                  indices: [],
-                  run_as: [],
-                },
-                kibana: [],
-                _transform_error: ['kibana'],
-                _unrecognized_applications: [],
+          result: [
+            {
+              name: 'first_role',
+              metadata: {
+                _reserved: true,
               },
-            ],
-          },
+              transient_metadata: {
+                enabled: true,
+              },
+              elasticsearch: {
+                cluster: [],
+                indices: [],
+                run_as: [],
+              },
+              kibana: [],
+              _transform_error: ['kibana'],
+              _unrecognized_applications: [],
+            },
+          ],
         },
       }
     );
@@ -1206,27 +1149,25 @@ describe('GET roles', () => {
         }),
         asserts: {
           statusCode: 200,
-          result: {
-            body: [
-              {
-                name: 'first_role',
-                metadata: {
-                  _reserved: true,
-                },
-                transient_metadata: {
-                  enabled: true,
-                },
-                elasticsearch: {
-                  cluster: [],
-                  indices: [],
-                  run_as: [],
-                },
-                kibana: [],
-                _transform_error: ['kibana'],
-                _unrecognized_applications: [],
+          result: [
+            {
+              name: 'first_role',
+              metadata: {
+                _reserved: true,
               },
-            ],
-          },
+              transient_metadata: {
+                enabled: true,
+              },
+              elasticsearch: {
+                cluster: [],
+                indices: [],
+                run_as: [],
+              },
+              kibana: [],
+              _transform_error: ['kibana'],
+              _unrecognized_applications: [],
+            },
+          ],
         },
       }
     );
@@ -1254,27 +1195,25 @@ describe('GET roles', () => {
       }),
       asserts: {
         statusCode: 200,
-        result: {
-          body: [
-            {
-              name: 'first_role',
-              metadata: {
-                _reserved: true,
-              },
-              transient_metadata: {
-                enabled: true,
-              },
-              elasticsearch: {
-                cluster: [],
-                indices: [],
-                run_as: [],
-              },
-              kibana: [],
-              _transform_error: [],
-              _unrecognized_applications: ['kibana-.another-kibana'],
+        result: [
+          {
+            name: 'first_role',
+            metadata: {
+              _reserved: true,
             },
-          ],
-        },
+            transient_metadata: {
+              enabled: true,
+            },
+            elasticsearch: {
+              cluster: [],
+              indices: [],
+              run_as: [],
+            },
+            kibana: [],
+            _transform_error: [],
+            _unrecognized_applications: ['kibana-.another-kibana'],
+          },
+        ],
       },
     });
 
@@ -1337,61 +1276,59 @@ describe('GET roles', () => {
       }),
       asserts: {
         statusCode: 200,
-        result: {
-          body: [
-            {
-              name: 'a_role',
-              metadata: {
-                _reserved: true,
-              },
-              transient_metadata: {
-                enabled: true,
-              },
-              elasticsearch: {
-                cluster: [],
-                indices: [],
-                run_as: [],
-              },
-              kibana: [],
-              _transform_error: [],
-              _unrecognized_applications: ['kibana-.another-kibana'],
+        result: [
+          {
+            name: 'a_role',
+            metadata: {
+              _reserved: true,
             },
-            {
-              name: 'b_role',
-              metadata: {
-                _reserved: true,
-              },
-              transient_metadata: {
-                enabled: true,
-              },
-              elasticsearch: {
-                cluster: [],
-                indices: [],
-                run_as: [],
-              },
-              kibana: [],
-              _transform_error: [],
-              _unrecognized_applications: ['kibana-.another-kibana'],
+            transient_metadata: {
+              enabled: true,
             },
-            {
-              name: 'z_role',
-              metadata: {
-                _reserved: true,
-              },
-              transient_metadata: {
-                enabled: true,
-              },
-              elasticsearch: {
-                cluster: [],
-                indices: [],
-                run_as: [],
-              },
-              kibana: [],
-              _transform_error: [],
-              _unrecognized_applications: ['kibana-.another-kibana'],
+            elasticsearch: {
+              cluster: [],
+              indices: [],
+              run_as: [],
             },
-          ],
-        },
+            kibana: [],
+            _transform_error: [],
+            _unrecognized_applications: ['kibana-.another-kibana'],
+          },
+          {
+            name: 'b_role',
+            metadata: {
+              _reserved: true,
+            },
+            transient_metadata: {
+              enabled: true,
+            },
+            elasticsearch: {
+              cluster: [],
+              indices: [],
+              run_as: [],
+            },
+            kibana: [],
+            _transform_error: [],
+            _unrecognized_applications: ['kibana-.another-kibana'],
+          },
+          {
+            name: 'z_role',
+            metadata: {
+              _reserved: true,
+            },
+            transient_metadata: {
+              enabled: true,
+            },
+            elasticsearch: {
+              cluster: [],
+              indices: [],
+              run_as: [],
+            },
+            kibana: [],
+            _transform_error: [],
+            _unrecognized_applications: ['kibana-.another-kibana'],
+          },
+        ],
       },
     });
   });
@@ -1431,25 +1368,9 @@ describe('GET role', () => {
         licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } },
       } as unknown) as RequestHandlerContext;
 
-      const mockResponseResult = { status: asserts.statusCode, options: {} };
-      const mockResponse = httpServerMock.createResponseFactory();
-      let mockResponseFactory;
-      if (asserts.statusCode === 200) {
-        mockResponseFactory = mockResponse.ok;
-      } else if (asserts.statusCode === 403) {
-        mockResponseFactory = mockResponse.forbidden;
-      } else {
-        mockResponseFactory = mockResponse.customError;
-      }
-      mockResponseFactory.mockReturnValue(mockResponseResult);
-
-      const response = await handler(mockContext, mockRequest, mockResponse);
-
-      expect(response).toBe(mockResponseResult);
-      expect(mockResponseFactory).toHaveBeenCalledTimes(1);
-      if (asserts.result !== undefined) {
-        expect(mockResponseFactory).toHaveBeenCalledWith(asserts.result);
-      }
+      const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
+      expect(response.status).toBe(asserts.statusCode);
+      expect(response.payload).toEqual(asserts.result);
 
       if (apiResponse) {
         expect(mockRouteDefinitionParams.clusterClient.asScoped).toHaveBeenCalledWith(mockRequest);
@@ -1466,14 +1387,14 @@ describe('GET role', () => {
   describe('failure', () => {
     getRoleTest(`returns result of license check`, {
       licenseCheckResult: { check: LICENSE_STATUS.Invalid, message: 'test forbidden message' },
-      asserts: { statusCode: 403, result: { body: { message: 'test forbidden message' } } },
+      asserts: { statusCode: 403, result: { message: 'test forbidden message' } },
     });
 
     const error = Boom.notAcceptable('test not acceptable message');
     getRoleTest(`returns error from cluster client`, {
       name: 'first_role',
       apiResponse: () => Promise.reject(error),
-      asserts: { statusCode: 406, result: { body: error, statusCode: 406 } },
+      asserts: { statusCode: 406, result: error },
     });
 
     getRoleTest(`return error if we have empty resources`, {
@@ -1500,10 +1421,7 @@ describe('GET role', () => {
       }),
       asserts: {
         statusCode: 500,
-        result: {
-          body: new Error("ES returned an application entry without resources, can't process this"),
-          statusCode: 500,
-        },
+        result: new Error("ES returned an application entry without resources, can't process this"),
       },
     });
   });
@@ -1533,28 +1451,26 @@ describe('GET role', () => {
       asserts: {
         statusCode: 200,
         result: {
-          body: {
-            name: 'first_role',
-            metadata: {
-              _reserved: true,
-            },
-            transient_metadata: {
-              enabled: true,
-            },
-            elasticsearch: {
-              cluster: ['manage_watcher'],
-              indices: [
-                {
-                  names: ['.kibana*'],
-                  privileges: ['read', 'view_index_metadata'],
-                },
-              ],
-              run_as: ['other_user'],
-            },
-            kibana: [],
-            _transform_error: [],
-            _unrecognized_applications: [],
+          name: 'first_role',
+          metadata: {
+            _reserved: true,
           },
+          transient_metadata: {
+            enabled: true,
+          },
+          elasticsearch: {
+            cluster: ['manage_watcher'],
+            indices: [
+              {
+                names: ['.kibana*'],
+                privileges: ['read', 'view_index_metadata'],
+              },
+            ],
+            run_as: ['other_user'],
+          },
+          kibana: [],
+          _transform_error: [],
+          _unrecognized_applications: [],
         },
       },
     });
@@ -1587,29 +1503,27 @@ describe('GET role', () => {
           asserts: {
             statusCode: 200,
             result: {
-              body: {
-                name: 'first_role',
-                metadata: {
-                  _reserved: true,
-                },
-                transient_metadata: {
-                  enabled: true,
-                },
-                elasticsearch: {
-                  cluster: [],
-                  indices: [],
-                  run_as: [],
-                },
-                kibana: [
-                  {
-                    base: ['all', 'read'],
-                    feature: {},
-                    spaces: ['*'],
-                  },
-                ],
-                _transform_error: [],
-                _unrecognized_applications: [],
+              name: 'first_role',
+              metadata: {
+                _reserved: true,
               },
+              transient_metadata: {
+                enabled: true,
+              },
+              elasticsearch: {
+                cluster: [],
+                indices: [],
+                run_as: [],
+              },
+              kibana: [
+                {
+                  base: ['all', 'read'],
+                  feature: {},
+                  spaces: ['*'],
+                },
+              ],
+              _transform_error: [],
+              _unrecognized_applications: [],
             },
           },
         }
@@ -1646,32 +1560,30 @@ describe('GET role', () => {
           asserts: {
             statusCode: 200,
             result: {
-              body: {
-                name: 'first_role',
-                metadata: {
-                  _reserved: true,
-                },
-                transient_metadata: {
-                  enabled: true,
-                },
-                elasticsearch: {
-                  cluster: [],
-                  indices: [],
-                  run_as: [],
-                },
-                kibana: [
-                  {
-                    base: [],
-                    feature: {
-                      foo: ['foo-privilege-1', 'foo-privilege-2'],
-                      bar: ['bar-privilege-1'],
-                    },
-                    spaces: ['*'],
-                  },
-                ],
-                _transform_error: [],
-                _unrecognized_applications: [],
+              name: 'first_role',
+              metadata: {
+                _reserved: true,
               },
+              transient_metadata: {
+                enabled: true,
+              },
+              elasticsearch: {
+                cluster: [],
+                indices: [],
+                run_as: [],
+              },
+              kibana: [
+                {
+                  base: [],
+                  feature: {
+                    foo: ['foo-privilege-1', 'foo-privilege-2'],
+                    bar: ['bar-privilege-1'],
+                  },
+                  spaces: ['*'],
+                },
+              ],
+              _transform_error: [],
+              _unrecognized_applications: [],
             },
           },
         }
@@ -1704,30 +1616,28 @@ describe('GET role', () => {
           asserts: {
             statusCode: 200,
             result: {
-              body: {
-                name: 'first_role',
-                metadata: {
-                  _reserved: true,
-                },
-                transient_metadata: {
-                  enabled: true,
-                },
-                elasticsearch: {
-                  cluster: [],
-                  indices: [],
-                  run_as: [],
-                },
-                kibana: [
-                  {
-                    _reserved: ['customApplication1', 'customApplication2'],
-                    base: [],
-                    feature: {},
-                    spaces: ['*'],
-                  },
-                ],
-                _transform_error: [],
-                _unrecognized_applications: [],
+              name: 'first_role',
+              metadata: {
+                _reserved: true,
               },
+              transient_metadata: {
+                enabled: true,
+              },
+              elasticsearch: {
+                cluster: [],
+                indices: [],
+                run_as: [],
+              },
+              kibana: [
+                {
+                  _reserved: ['customApplication1', 'customApplication2'],
+                  base: [],
+                  feature: {},
+                  spaces: ['*'],
+                },
+              ],
+              _transform_error: [],
+              _unrecognized_applications: [],
             },
           },
         }
@@ -1760,30 +1670,28 @@ describe('GET role', () => {
           asserts: {
             statusCode: 200,
             result: {
-              body: {
-                name: 'first_role',
-                metadata: {
-                  _reserved: true,
-                },
-                transient_metadata: {
-                  enabled: true,
-                },
-                elasticsearch: {
-                  cluster: [],
-                  indices: [],
-                  run_as: [],
-                },
-                kibana: [
-                  {
-                    _reserved: ['customApplication1', 'customApplication2'],
-                    base: [],
-                    feature: {},
-                    spaces: ['*'],
-                  },
-                ],
-                _transform_error: [],
-                _unrecognized_applications: [],
+              name: 'first_role',
+              metadata: {
+                _reserved: true,
               },
+              transient_metadata: {
+                enabled: true,
+              },
+              elasticsearch: {
+                cluster: [],
+                indices: [],
+                run_as: [],
+              },
+              kibana: [
+                {
+                  _reserved: ['customApplication1', 'customApplication2'],
+                  base: [],
+                  feature: {},
+                  spaces: ['*'],
+                },
+              ],
+              _transform_error: [],
+              _unrecognized_applications: [],
             },
           },
         }
@@ -1823,34 +1731,32 @@ describe('GET role', () => {
           asserts: {
             statusCode: 200,
             result: {
-              body: {
-                name: 'first_role',
-                metadata: {
-                  _reserved: true,
-                },
-                transient_metadata: {
-                  enabled: true,
-                },
-                elasticsearch: {
-                  cluster: [],
-                  indices: [],
-                  run_as: [],
-                },
-                kibana: [
-                  {
-                    base: ['all', 'read'],
-                    feature: {},
-                    spaces: ['marketing', 'sales'],
-                  },
-                  {
-                    base: ['read'],
-                    feature: {},
-                    spaces: ['engineering'],
-                  },
-                ],
-                _transform_error: [],
-                _unrecognized_applications: [],
+              name: 'first_role',
+              metadata: {
+                _reserved: true,
               },
+              transient_metadata: {
+                enabled: true,
+              },
+              elasticsearch: {
+                cluster: [],
+                indices: [],
+                run_as: [],
+              },
+              kibana: [
+                {
+                  base: ['all', 'read'],
+                  feature: {},
+                  spaces: ['marketing', 'sales'],
+                },
+                {
+                  base: ['read'],
+                  feature: {},
+                  spaces: ['engineering'],
+                },
+              ],
+              _transform_error: [],
+              _unrecognized_applications: [],
             },
           },
         }
@@ -1892,39 +1798,37 @@ describe('GET role', () => {
           asserts: {
             statusCode: 200,
             result: {
-              body: {
-                name: 'first_role',
-                metadata: {
-                  _reserved: true,
-                },
-                transient_metadata: {
-                  enabled: true,
-                },
-                elasticsearch: {
-                  cluster: [],
-                  indices: [],
-                  run_as: [],
-                },
-                kibana: [
-                  {
-                    base: [],
-                    feature: {
-                      foo: ['foo-privilege-1', 'foo-privilege-2'],
-                      bar: ['bar-privilege-1'],
-                    },
-                    spaces: ['marketing', 'sales'],
-                  },
-                  {
-                    base: [],
-                    feature: {
-                      foo: ['foo-privilege-1'],
-                    },
-                    spaces: ['engineering'],
-                  },
-                ],
-                _transform_error: [],
-                _unrecognized_applications: [],
+              name: 'first_role',
+              metadata: {
+                _reserved: true,
               },
+              transient_metadata: {
+                enabled: true,
+              },
+              elasticsearch: {
+                cluster: [],
+                indices: [],
+                run_as: [],
+              },
+              kibana: [
+                {
+                  base: [],
+                  feature: {
+                    foo: ['foo-privilege-1', 'foo-privilege-2'],
+                    bar: ['bar-privilege-1'],
+                  },
+                  spaces: ['marketing', 'sales'],
+                },
+                {
+                  base: [],
+                  feature: {
+                    foo: ['foo-privilege-1'],
+                  },
+                  spaces: ['engineering'],
+                },
+              ],
+              _transform_error: [],
+              _unrecognized_applications: [],
             },
           },
         }
@@ -1958,23 +1862,21 @@ describe('GET role', () => {
         asserts: {
           statusCode: 200,
           result: {
-            body: {
-              name: 'first_role',
-              metadata: {
-                _reserved: true,
-              },
-              transient_metadata: {
-                enabled: true,
-              },
-              elasticsearch: {
-                cluster: [],
-                indices: [],
-                run_as: [],
-              },
-              kibana: [],
-              _transform_error: ['kibana'],
-              _unrecognized_applications: [],
+            name: 'first_role',
+            metadata: {
+              _reserved: true,
             },
+            transient_metadata: {
+              enabled: true,
+            },
+            elasticsearch: {
+              cluster: [],
+              indices: [],
+              run_as: [],
+            },
+            kibana: [],
+            _transform_error: ['kibana'],
+            _unrecognized_applications: [],
           },
         },
       }
@@ -2007,23 +1909,21 @@ describe('GET role', () => {
         asserts: {
           statusCode: 200,
           result: {
-            body: {
-              name: 'first_role',
-              metadata: {
-                _reserved: true,
-              },
-              transient_metadata: {
-                enabled: true,
-              },
-              elasticsearch: {
-                cluster: [],
-                indices: [],
-                run_as: [],
-              },
-              kibana: [],
-              _transform_error: ['kibana'],
-              _unrecognized_applications: [],
+            name: 'first_role',
+            metadata: {
+              _reserved: true,
             },
+            transient_metadata: {
+              enabled: true,
+            },
+            elasticsearch: {
+              cluster: [],
+              indices: [],
+              run_as: [],
+            },
+            kibana: [],
+            _transform_error: ['kibana'],
+            _unrecognized_applications: [],
           },
         },
       }
@@ -2061,23 +1961,21 @@ describe('GET role', () => {
         asserts: {
           statusCode: 200,
           result: {
-            body: {
-              name: 'first_role',
-              metadata: {
-                _reserved: true,
-              },
-              transient_metadata: {
-                enabled: true,
-              },
-              elasticsearch: {
-                cluster: [],
-                indices: [],
-                run_as: [],
-              },
-              kibana: [],
-              _transform_error: ['kibana'],
-              _unrecognized_applications: [],
+            name: 'first_role',
+            metadata: {
+              _reserved: true,
             },
+            transient_metadata: {
+              enabled: true,
+            },
+            elasticsearch: {
+              cluster: [],
+              indices: [],
+              run_as: [],
+            },
+            kibana: [],
+            _transform_error: ['kibana'],
+            _unrecognized_applications: [],
           },
         },
       }
@@ -2115,23 +2013,21 @@ describe('GET role', () => {
         asserts: {
           statusCode: 200,
           result: {
-            body: {
-              name: 'first_role',
-              metadata: {
-                _reserved: true,
-              },
-              transient_metadata: {
-                enabled: true,
-              },
-              elasticsearch: {
-                cluster: [],
-                indices: [],
-                run_as: [],
-              },
-              kibana: [],
-              _transform_error: ['kibana'],
-              _unrecognized_applications: [],
+            name: 'first_role',
+            metadata: {
+              _reserved: true,
             },
+            transient_metadata: {
+              enabled: true,
+            },
+            elasticsearch: {
+              cluster: [],
+              indices: [],
+              run_as: [],
+            },
+            kibana: [],
+            _transform_error: ['kibana'],
+            _unrecognized_applications: [],
           },
         },
       }
@@ -2164,23 +2060,21 @@ describe('GET role', () => {
         asserts: {
           statusCode: 200,
           result: {
-            body: {
-              name: 'first_role',
-              metadata: {
-                _reserved: true,
-              },
-              transient_metadata: {
-                enabled: true,
-              },
-              elasticsearch: {
-                cluster: [],
-                indices: [],
-                run_as: [],
-              },
-              kibana: [],
-              _transform_error: ['kibana'],
-              _unrecognized_applications: [],
+            name: 'first_role',
+            metadata: {
+              _reserved: true,
             },
+            transient_metadata: {
+              enabled: true,
+            },
+            elasticsearch: {
+              cluster: [],
+              indices: [],
+              run_as: [],
+            },
+            kibana: [],
+            _transform_error: ['kibana'],
+            _unrecognized_applications: [],
           },
         },
       }
@@ -2218,23 +2112,21 @@ describe('GET role', () => {
         asserts: {
           statusCode: 200,
           result: {
-            body: {
-              name: 'first_role',
-              metadata: {
-                _reserved: true,
-              },
-              transient_metadata: {
-                enabled: true,
-              },
-              elasticsearch: {
-                cluster: [],
-                indices: [],
-                run_as: [],
-              },
-              kibana: [],
-              _transform_error: ['kibana'],
-              _unrecognized_applications: [],
+            name: 'first_role',
+            metadata: {
+              _reserved: true,
             },
+            transient_metadata: {
+              enabled: true,
+            },
+            elasticsearch: {
+              cluster: [],
+              indices: [],
+              run_as: [],
+            },
+            kibana: [],
+            _transform_error: ['kibana'],
+            _unrecognized_applications: [],
           },
         },
       }
@@ -2267,23 +2159,21 @@ describe('GET role', () => {
         asserts: {
           statusCode: 200,
           result: {
-            body: {
-              name: 'first_role',
-              metadata: {
-                _reserved: true,
-              },
-              transient_metadata: {
-                enabled: true,
-              },
-              elasticsearch: {
-                cluster: [],
-                indices: [],
-                run_as: [],
-              },
-              kibana: [],
-              _transform_error: ['kibana'],
-              _unrecognized_applications: [],
+            name: 'first_role',
+            metadata: {
+              _reserved: true,
             },
+            transient_metadata: {
+              enabled: true,
+            },
+            elasticsearch: {
+              cluster: [],
+              indices: [],
+              run_as: [],
+            },
+            kibana: [],
+            _transform_error: ['kibana'],
+            _unrecognized_applications: [],
           },
         },
       }
@@ -2321,23 +2211,21 @@ describe('GET role', () => {
         asserts: {
           statusCode: 200,
           result: {
-            body: {
-              name: 'first_role',
-              metadata: {
-                _reserved: true,
-              },
-              transient_metadata: {
-                enabled: true,
-              },
-              elasticsearch: {
-                cluster: [],
-                indices: [],
-                run_as: [],
-              },
-              kibana: [],
-              _transform_error: ['kibana'],
-              _unrecognized_applications: [],
+            name: 'first_role',
+            metadata: {
+              _reserved: true,
             },
+            transient_metadata: {
+              enabled: true,
+            },
+            elasticsearch: {
+              cluster: [],
+              indices: [],
+              run_as: [],
+            },
+            kibana: [],
+            _transform_error: ['kibana'],
+            _unrecognized_applications: [],
           },
         },
       }
@@ -2370,23 +2258,21 @@ describe('GET role', () => {
         asserts: {
           statusCode: 200,
           result: {
-            body: {
-              name: 'first_role',
-              metadata: {
-                _reserved: true,
-              },
-              transient_metadata: {
-                enabled: true,
-              },
-              elasticsearch: {
-                cluster: [],
-                indices: [],
-                run_as: [],
-              },
-              kibana: [],
-              _transform_error: ['kibana'],
-              _unrecognized_applications: [],
+            name: 'first_role',
+            metadata: {
+              _reserved: true,
             },
+            transient_metadata: {
+              enabled: true,
+            },
+            elasticsearch: {
+              cluster: [],
+              indices: [],
+              run_as: [],
+            },
+            kibana: [],
+            _transform_error: ['kibana'],
+            _unrecognized_applications: [],
           },
         },
       }
@@ -2419,23 +2305,21 @@ describe('GET role', () => {
         asserts: {
           statusCode: 200,
           result: {
-            body: {
-              name: 'first_role',
-              metadata: {
-                _reserved: true,
-              },
-              transient_metadata: {
-                enabled: true,
-              },
-              elasticsearch: {
-                cluster: [],
-                indices: [],
-                run_as: [],
-              },
-              kibana: [],
-              _transform_error: ['kibana'],
-              _unrecognized_applications: [],
+            name: 'first_role',
+            metadata: {
+              _reserved: true,
             },
+            transient_metadata: {
+              enabled: true,
+            },
+            elasticsearch: {
+              cluster: [],
+              indices: [],
+              run_as: [],
+            },
+            kibana: [],
+            _transform_error: ['kibana'],
+            _unrecognized_applications: [],
           },
         },
       }
@@ -2468,23 +2352,21 @@ describe('GET role', () => {
         asserts: {
           statusCode: 200,
           result: {
-            body: {
-              name: 'first_role',
-              metadata: {
-                _reserved: true,
-              },
-              transient_metadata: {
-                enabled: true,
-              },
-              elasticsearch: {
-                cluster: [],
-                indices: [],
-                run_as: [],
-              },
-              kibana: [],
-              _transform_error: ['kibana'],
-              _unrecognized_applications: [],
+            name: 'first_role',
+            metadata: {
+              _reserved: true,
             },
+            transient_metadata: {
+              enabled: true,
+            },
+            elasticsearch: {
+              cluster: [],
+              indices: [],
+              run_as: [],
+            },
+            kibana: [],
+            _transform_error: ['kibana'],
+            _unrecognized_applications: [],
           },
         },
       }
@@ -2517,23 +2399,21 @@ describe('GET role', () => {
         asserts: {
           statusCode: 200,
           result: {
-            body: {
-              name: 'first_role',
-              metadata: {
-                _reserved: true,
-              },
-              transient_metadata: {
-                enabled: true,
-              },
-              elasticsearch: {
-                cluster: [],
-                indices: [],
-                run_as: [],
-              },
-              kibana: [],
-              _transform_error: ['kibana'],
-              _unrecognized_applications: [],
+            name: 'first_role',
+            metadata: {
+              _reserved: true,
             },
+            transient_metadata: {
+              enabled: true,
+            },
+            elasticsearch: {
+              cluster: [],
+              indices: [],
+              run_as: [],
+            },
+            kibana: [],
+            _transform_error: ['kibana'],
+            _unrecognized_applications: [],
           },
         },
       }
@@ -2564,23 +2444,21 @@ describe('GET role', () => {
       asserts: {
         statusCode: 200,
         result: {
-          body: {
-            name: 'first_role',
-            metadata: {
-              _reserved: true,
-            },
-            transient_metadata: {
-              enabled: true,
-            },
-            elasticsearch: {
-              cluster: [],
-              indices: [],
-              run_as: [],
-            },
-            kibana: [],
-            _transform_error: [],
-            _unrecognized_applications: ['kibana-.another-kibana'],
+          name: 'first_role',
+          metadata: {
+            _reserved: true,
           },
+          transient_metadata: {
+            enabled: true,
+          },
+          elasticsearch: {
+            cluster: [],
+            indices: [],
+            run_as: [],
+          },
+          kibana: [],
+          _transform_error: [],
+          _unrecognized_applications: ['kibana-.another-kibana'],
         },
       },
     });

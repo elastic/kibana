@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandlerContext } from '../../../../../../../src/core/server';
+import { kibanaResponseFactory, RequestHandlerContext } from '../../../../../../../src/core/server';
 import { ILicenseCheck } from '../../../../../licensing/server';
 // TODO, require from licensing plugin root once https://github.com/elastic/kibana/pull/44922 is merged.
 import { LICENSE_STATUS } from '../../../../../licensing/server/constants';
@@ -42,7 +42,7 @@ const createRawKibanaPrivileges: () => RawKibanaPrivileges = () => {
 interface TestOptions {
   licenseCheckResult?: ILicenseCheck;
   includeActions?: boolean;
-  asserts: { statusCode: 200 | 403; result: Record<string, any> };
+  asserts: { statusCode: number; result: Record<string, any> };
 }
 
 describe('GET privileges', () => {
@@ -70,17 +70,10 @@ describe('GET privileges', () => {
         licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } },
       } as unknown) as RequestHandlerContext;
 
-      const mockResponseResult = { status: asserts.statusCode, options: {} };
-      const mockResponse = httpServerMock.createResponseFactory();
-      const mockResponseFactory =
-        asserts.statusCode === 200 ? mockResponse.ok : mockResponse.forbidden;
-      mockResponseFactory.mockReturnValue(mockResponseResult);
+      const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
+      expect(response.status).toBe(asserts.statusCode);
+      expect(response.payload).toEqual(asserts.result);
 
-      const response = handler(mockContext, mockRequest, mockResponse);
-
-      expect(response).toBe(mockResponseResult);
-      expect(mockResponseFactory).toHaveBeenCalledTimes(1);
-      expect(mockResponseFactory).toHaveBeenCalledWith(asserts.result);
       expect(mockContext.licensing.license.check).toHaveBeenCalledWith('security', 'basic');
     });
   };
@@ -88,14 +81,14 @@ describe('GET privileges', () => {
   describe('failure', () => {
     getPrivilegesTest(`returns result of routePreCheckLicense`, {
       licenseCheckResult: { check: LICENSE_STATUS.Invalid, message: 'test forbidden message' },
-      asserts: { statusCode: 403, result: { body: { message: 'test forbidden message' } } },
+      asserts: { statusCode: 403, result: { message: 'test forbidden message' } },
     });
   });
 
   describe('success', () => {
     getPrivilegesTest(`returns registered application privileges with actions when requested`, {
       includeActions: true,
-      asserts: { statusCode: 200, result: { body: createRawKibanaPrivileges() } },
+      asserts: { statusCode: 200, result: createRawKibanaPrivileges() },
     });
 
     getPrivilegesTest(`returns registered application privileges without actions`, {
@@ -103,12 +96,10 @@ describe('GET privileges', () => {
       asserts: {
         statusCode: 200,
         result: {
-          body: {
-            global: ['all', 'read'],
-            space: ['all', 'read'],
-            features: { feature1: ['all'], feature2: ['all'] },
-            reserved: ['customApplication1', 'customApplication2'],
-          },
+          global: ['all', 'read'],
+          space: ['all', 'read'],
+          features: { feature1: ['all'], feature2: ['all'] },
+          reserved: ['customApplication1', 'customApplication2'],
         },
       },
     });

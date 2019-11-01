@@ -5,7 +5,7 @@
  */
 
 import { Type } from '@kbn/config-schema';
-import { RequestHandlerContext } from '../../../../../../../src/core/server';
+import { kibanaResponseFactory, RequestHandlerContext } from '../../../../../../../src/core/server';
 import { ILicenseCheck } from '../../../../../licensing/server';
 import { LICENSE_STATUS } from '../../../../../licensing/server/constants';
 import { GLOBAL_RESOURCE } from '../../../../common/constants';
@@ -48,7 +48,7 @@ interface TestOptions {
   licenseCheckResult?: ILicenseCheck;
   apiResponses?: Array<() => Promise<unknown>>;
   payload?: Record<string, any>;
-  asserts: { statusCode: 204 | 403; result?: Record<string, any>; apiArguments?: unknown[][] };
+  asserts: { statusCode: number; result?: Record<string, any>; apiArguments?: unknown[][] };
 }
 
 const putRoleTest = (
@@ -87,25 +87,9 @@ const putRoleTest = (
       licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } },
     } as unknown) as RequestHandlerContext;
 
-    const mockResponseResult = { status: asserts.statusCode, options: {} };
-    const mockResponse = httpServerMock.createResponseFactory();
-    let mockResponseFactory;
-    if (asserts.statusCode === 204) {
-      mockResponseFactory = mockResponse.noContent;
-    } else if (asserts.statusCode === 403) {
-      mockResponseFactory = mockResponse.forbidden;
-    } else {
-      mockResponseFactory = mockResponse.customError;
-    }
-    mockResponseFactory.mockReturnValue(mockResponseResult);
-
-    const response = await handler(mockContext, mockRequest, mockResponse);
-
-    expect(response).toBe(mockResponseResult);
-    expect(mockResponseFactory).toHaveBeenCalledTimes(1);
-    if (asserts.result !== undefined) {
-      expect(mockResponseFactory).toHaveBeenCalledWith(asserts.result);
-    }
+    const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
+    expect(response.status).toBe(asserts.statusCode);
+    expect(response.payload).toEqual(asserts.result);
 
     if (Array.isArray(asserts.apiArguments)) {
       for (const apiArguments of asserts.apiArguments) {
@@ -391,7 +375,7 @@ describe('PUT role', () => {
     putRoleTest(`returns result of license checker`, {
       name: 'foo-role',
       licenseCheckResult: { check: LICENSE_STATUS.Invalid, message: 'test forbidden message' },
-      asserts: { statusCode: 403, result: { body: { message: 'test forbidden message' } } },
+      asserts: { statusCode: 403, result: { message: 'test forbidden message' } },
     });
   });
 
