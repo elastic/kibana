@@ -17,12 +17,10 @@
  * under the License.
  */
 
-import React, { useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiTabs, EuiTab, EuiButtonToggle, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { EuiTabs, EuiTab } from '@elastic/eui';
 
-import { VisOptionsProps } from './vis_options_props';
+import { VisOptionsProps } from '../../vis_options_props';
 
 export interface OptionTab {
   editor: React.ComponentType<VisOptionsProps | any>;
@@ -30,13 +28,17 @@ export interface OptionTab {
   title: string;
 }
 
-interface VisEditorNavBarProps {
+interface DefaultEditorNavBarProps {
   optionTabs: OptionTab[];
   selectedTab: string;
   setSelectedTab(name: string): void;
 }
 
-function VisEditorNavBar({ selectedTab, setSelectedTab, optionTabs }: VisEditorNavBarProps) {
+function DefaultEditorNavBar({
+  selectedTab,
+  setSelectedTab,
+  optionTabs,
+}: DefaultEditorNavBarProps) {
   return (
     <EuiTabs className="visEditorSidebar__nav" size="s">
       {optionTabs.map(({ name, title }) => (
@@ -53,4 +55,4 @@ function VisEditorNavBar({ selectedTab, setSelectedTab, optionTabs }: VisEditorN
   );
 }
 
-export { VisEditorNavBar };
+export { DefaultEditorNavBar };

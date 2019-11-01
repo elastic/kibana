@@ -19,19 +19,10 @@
 
 import React, { useCallback } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import { DefaultEditorAggGroup } from './agg_group';
-import { AggGroupNames } from '../agg_groups';
-import { addNewAgg, changeAggType, setAggParamValue } from '../state';
+import { DefaultEditorAggGroup } from '../agg_group';
+import { AggGroupNames } from '../../agg_groups';
 
-function DefaultEditorDataTab({
-  metricAggs,
-  state,
-  schemas,
-  onToggleEnableAgg,
-  removeAgg,
-  reorderAggs,
-  dispatch,
-}) {
+function DefaultEditorDataTab({ metricAggs, state, schemas, reorderAggs, actions }) {
   const setValidity = () => {
     console.log('setValidity');
   };
@@ -39,30 +30,17 @@ function DefaultEditorDataTab({
     console.log('setTouched');
   };
 
-  const onAggParamsChange = useCallback(
-    (aggId, paramName, value) => {
-      dispatch(setAggParamValue(aggId, paramName, value));
-    },
-    [dispatch]
-  );
-
-  const addSchema = useCallback(schema => dispatch(addNewAgg(schema)), [dispatch]);
-
-  const onAggTypeChange = useCallback((aggId, value) => dispatch(changeAggType(aggId, value)), [
-    dispatch,
-  ]);
-
   const commonProps = {
-    addSchema,
+    addSchema: actions.addNewAgg,
     metricAggs,
     state,
     reorderAggs,
-    onAggParamsChange,
-    onAggTypeChange,
-    onToggleEnableAgg,
+    onAggParamsChange: actions.setAggParamValue,
+    onAggTypeChange: actions.changeAggType,
+    onToggleEnableAgg: actions.toggleEnabledAgg,
     setValidity,
     setTouched,
-    removeAgg,
+    removeAgg: actions.removeAgg,
   };
 
   return (

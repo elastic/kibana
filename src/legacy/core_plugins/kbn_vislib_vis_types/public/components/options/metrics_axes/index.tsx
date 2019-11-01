@@ -22,7 +22,7 @@ import { cloneDeep, uniq, get } from 'lodash';
 import { EuiSpacer } from '@elastic/eui';
 
 import { AggConfig } from 'ui/vis';
-import { useEditorState } from 'ui/vis/editors/default/state';
+import { useEditorContext } from 'ui/vis/editors/default/state';
 import { BasicVislibParams, ValueAxis, SeriesParam, Axis } from '../../../types';
 import { ValidationVisOptionsProps } from '../../common';
 import { SeriesPanel } from './series_panel';
@@ -245,7 +245,7 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
 
   const firstValueAxesId = stateParams.valueAxes[0].id;
 
-  const { isDirty } = useEditorState();
+  const { isDirty } = useEditorContext();
 
   useEffect(() => {
     if (!isDirty) {

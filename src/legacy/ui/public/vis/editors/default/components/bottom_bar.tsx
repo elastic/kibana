@@ -21,11 +21,17 @@ import React, { useCallback } from 'react';
 import { EuiBottomBar, EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { discardChanges } from '../state';
+import { Vis } from 'ui/vis';
 
-function DefaultEditorBottomBar({ dispatch, isDirty, vis }) {
-  const onClickDiscard = useCallback(() => dispatch(discardChanges(vis)), [dispatch, vis]);
+interface DefaultEditorBottomBarProps {
+  vis: Vis;
+  isDirty: boolean;
+  discardChanges(vis: Vis): void;
+}
+
+function DefaultEditorBottomBar({ discardChanges, isDirty, vis }: DefaultEditorBottomBarProps) {
   const { enableAutoApply } = vis.type.editorConfig;
+  const onClickDiscard = useCallback(() => discardChanges(vis), [discardChanges, vis]);
 
   return (
     <EuiBottomBar>

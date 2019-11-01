@@ -36,8 +36,8 @@ export interface DefaultEditorAggCommonProps {
   state: VisState;
   onAggParamsChange: OnParamChange;
   onAggTypeChange: (aggId: AggConfig['id'], aggType: AggType) => void;
-  onToggleEnableAgg: (agg: AggConfig, isEnable: boolean) => void;
-  removeAgg: (agg: AggConfig) => void;
+  onToggleEnableAgg: (aggId: AggConfig['id'], isEnable: boolean) => void;
+  removeAgg: (aggId: AggConfig['id']) => void;
   setTouched: (isTouched: boolean) => void;
   setValidity: (isValid: boolean) => void;
 }

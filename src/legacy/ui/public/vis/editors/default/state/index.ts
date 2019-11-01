@@ -17,33 +17,34 @@
  * under the License.
  */
 
-import { useCallback, useEffect, useReducer } from 'react';
+import { useMemo, useReducer } from 'react';
+import { Vis } from 'ui/vis';
 import { editorStateReducer, initEditorState } from './reducers';
 import { EditorStateActionTypes } from './constants';
+import { editorActions } from './actions';
 
-export * from './actions';
-// export * from './reducers';
 export * from './editor_state_context';
 
-export function useEditorReducer(vis) {
+export function useEditorReducer(vis: Vis) {
   const [state, dispatch] = useReducer(editorStateReducer, vis, initEditorState);
 
-  const stateDispatch = useCallback(
-    action => {
-      vis.emit('dirtyStateChange', {
-        isDirty: action.type !== EditorStateActionTypes.DISCARD_CHANGES,
-      });
+  const actions = useMemo(
+    () =>
+      Object.keys(editorActions).reduce((wrappedDispatchActions, actionCreator) => {
+        wrappedDispatchActions[actionCreator] = (...params) => {
+          const action = editorActions[actionCreator](...params);
 
-      dispatch(action);
-    },
+          vis.emit('dirtyStateChange', {
+            isDirty: action.type !== EditorStateActionTypes.DISCARD_CHANGES,
+          });
+
+          dispatch(action);
+        };
+
+        return wrappedDispatchActions;
+      }, {}),
     [vis]
   );
 
-  // useEffect(() => {
-  //   vis.on('dirtyStateChange', ({ isDirty }) => {
-  //     setDirty(isDirty);
-  //   });
-  // }, [vis]);
-
-  return [state, stateDispatch];
+  return [state, actions];
 }

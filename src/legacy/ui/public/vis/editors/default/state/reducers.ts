@@ -17,15 +17,25 @@
  * under the License.
  */
 
-import { AggConfigs } from 'ui/agg_types';
-import { Vis } from 'ui/vis';
+import { AggConfigs, AggConfig } from 'ui/agg_types';
+import { Vis, VisState } from 'ui/vis';
 import { EditorStateActionTypes } from './constants';
+import { AggGroupNames } from '../agg_groups';
+import { getEnabledMetricAggsCount } from '../components/agg_group_helper';
 
 function initEditorState(vis: Vis) {
   return vis.copyCurrentState(true);
 }
 
-function editorStateReducer(state, action) {
+function editorStateReducer(
+  state: VisState,
+  action: {
+    type: EditorStateActionTypes;
+    payload: {
+      [key: string]: any;
+    };
+  }
+) {
   switch (action.type) {
     case EditorStateActionTypes.ADD_NEW_AGG: {
       const newAggs = [...state.aggs.aggs, state.aggs.createAggConfig(action.payload)];
@@ -96,6 +106,57 @@ function editorStateReducer(state, action) {
           ...state.params,
           [paramName]: value,
         },
+      };
+    }
+
+    case EditorStateActionTypes.REMOVE_AGG: {
+      let isMetric = false;
+
+      const newAggs = state.aggs.aggs.filter(({ id, schema }) => {
+        if (id === action.payload.aggId) {
+          if (schema.group === AggGroupNames.Metrics) {
+            isMetric = true;
+          }
+
+          return false;
+        }
+
+        return true;
+      });
+
+      if (isMetric && getEnabledMetricAggsCount(newAggs) === 0) {
+        const aggToEnable = newAggs.find(agg => agg.schema.name === 'metric');
+
+        if (aggToEnable) {
+          aggToEnable.enabled = true;
+        }
+      }
+
+      return {
+        ...state,
+        aggs: new AggConfigs(state.aggs.indexPattern, newAggs, state.aggs.schemas),
+      };
+    }
+
+    case EditorStateActionTypes.TOGGLE_ENABLED_AGG: {
+      const { aggId, enabled } = action.payload;
+
+      const newAggs = state.aggs.aggs.map(agg => {
+        if (agg.id === aggId) {
+          const parsedAgg = agg.toJSON();
+
+          return {
+            ...parsedAgg,
+            enabled,
+          };
+        }
+
+        return agg;
+      });
+
+      return {
+        ...state,
+        aggs: new AggConfigs(state.aggs.indexPattern, newAggs, state.aggs.schemas),
       };
     }
   }

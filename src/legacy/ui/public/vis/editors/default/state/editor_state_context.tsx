@@ -17,29 +17,38 @@
  * under the License.
  */
 
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useCallback, useContext, useState } from 'react';
 
-const EditorStateContext = createContext([{}, () => {}]);
+interface EditorState {
+  isDirty: boolean;
+}
 
-const EditorStateContextProvider = props => {
+type setEditorState = (state: EditorState) => void;
+
+const EditorStateContext = createContext<[EditorState, setEditorState]>([
+  {} as EditorState,
+  () => {},
+]);
+
+const EditorStateContextProvider = ({ children }: { children: React.ReactElement }) => {
   const [state, setState] = useState({ isDirty: false });
 
   return (
-    <EditorStateContext.Provider value={[state, setState]}>
-      {props.children}
-    </EditorStateContext.Provider>
+    <EditorStateContext.Provider value={[state, setState]}>{children}</EditorStateContext.Provider>
   );
 };
 
-const useEditorState = () => {
-  const [editorState, setEditorState] = useContext(EditorStateContext);
+const useEditorContext = () => {
+  const [context, setContext] = useContext(EditorStateContext);
 
-  const setDirty = (isDirty: boolean) => setEditorState(state => ({ ...state, isDirty }));
+  const setDirty = useCallback((isDirty: boolean) => setContext({ ...context, isDirty }), [
+    context,
+  ]);
 
   return {
-    ...editorState,
+    ...context,
     setDirty,
   };
 };
 
-export { useEditorState, EditorStateContextProvider };
+export { useEditorContext, EditorStateContextProvider };

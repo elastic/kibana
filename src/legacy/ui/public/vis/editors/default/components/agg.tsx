@@ -146,7 +146,7 @@ function DefaultEditorAgg({
         color: 'text',
         disabled: isDisabled,
         type: 'eye',
-        onClick: () => onToggleEnableAgg(agg, false),
+        onClick: () => onToggleEnableAgg(agg.id, false),
         tooltip: i18n.translate('common.ui.vis.editors.agg.disableAggButtonTooltip', {
           defaultMessage: 'Disable aggregation',
         }),
@@ -158,7 +158,7 @@ function DefaultEditorAgg({
         id: 'enableAggregation',
         color: 'text',
         type: 'eyeClosed',
-        onClick: () => onToggleEnableAgg(agg, true),
+        onClick: () => onToggleEnableAgg(agg.id, true),
         tooltip: i18n.translate('common.ui.vis.editors.agg.enableAggButtonTooltip', {
           defaultMessage: 'Enable aggregation',
         }),
@@ -180,7 +180,7 @@ function DefaultEditorAgg({
         id: 'removeDimension',
         color: 'danger',
         type: 'cross',
-        onClick: () => removeAgg(agg),
+        onClick: () => removeAgg(agg.id),
         tooltip: i18n.translate('common.ui.vis.editors.agg.removeDimensionButtonTooltip', {
           defaultMessage: 'Remove dimension',
         }),

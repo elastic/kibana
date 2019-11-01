@@ -17,21 +17,23 @@
  * under the License.
  */
 
+import { AggConfig, Vis } from 'ui/vis';
 import { EditorStateActionTypes } from './constants';
+import { Schema } from '../schemas';
 
-const addNewAgg = schema => ({
+const addNewAgg = (schema: Schema) => ({
   type: EditorStateActionTypes.ADD_NEW_AGG,
   payload: {
     schema,
   },
 });
 
-const discardChanges = vis => ({
+const discardChanges = (vis: Vis) => ({
   type: EditorStateActionTypes.DISCARD_CHANGES,
   payload: vis,
 });
 
-const changeAggType = (aggId, value) => ({
+const changeAggType = (aggId: AggConfig['id'], value: AggConfig['type']) => ({
   type: EditorStateActionTypes.CHANGE_AGG_TYPE,
   payload: {
     aggId,
@@ -39,7 +41,11 @@ const changeAggType = (aggId, value) => ({
   },
 });
 
-const setAggParamValue = (aggId, paramName, value) => ({
+const setAggParamValue = <T extends keyof AggConfig['params']>(
+  aggId: AggConfig['id'],
+  paramName: T,
+  value: AggConfig['params'][T]
+) => ({
   type: EditorStateActionTypes.SET_AGG_PARAM_VALUE,
   payload: {
     aggId,
@@ -48,7 +54,10 @@ const setAggParamValue = (aggId, paramName, value) => ({
   },
 });
 
-const setStateParamValue = (paramName, value) => ({
+const setStateParamValue = <T extends keyof AggConfig['params']>(
+  paramName: T,
+  value: AggConfig['params'][T]
+) => ({
   type: EditorStateActionTypes.SET_STATE_PARAM_VALUE,
   payload: {
     paramName,
@@ -56,4 +65,27 @@ const setStateParamValue = (paramName, value) => ({
   },
 });
 
-export { addNewAgg, discardChanges, changeAggType, setAggParamValue, setStateParamValue };
+const removeAgg = (aggId: AggConfig['id']) => ({
+  type: EditorStateActionTypes.REMOVE_AGG,
+  payload: {
+    aggId,
+  },
+});
+
+const toggleEnabledAgg = (aggId: AggConfig['id'], enabled: AggConfig['enabled']) => ({
+  type: EditorStateActionTypes.TOGGLE_ENABLED_AGG,
+  payload: {
+    aggId,
+    enabled,
+  },
+});
+
+export const editorActions = {
+  addNewAgg,
+  discardChanges,
+  changeAggType,
+  setAggParamValue,
+  setStateParamValue,
+  removeAgg,
+  toggleEnabledAgg,
+};

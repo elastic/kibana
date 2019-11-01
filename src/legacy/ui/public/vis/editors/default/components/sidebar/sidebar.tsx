@@ -17,22 +17,17 @@
  * under the License.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { has } from 'lodash';
+import React, { useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { keyCodes, EuiTabbedContent } from '@elastic/eui';
 
-import { VisEditorNavBar, OptionTab } from './vis_editor_navbar';
-import { DefaultEditorDataTab } from './components/data_tab';
-import { VisOptionsProps } from './vis_options_props';
-import { setStateParamValue } from './state';
+import { DefaultEditorNavBar, OptionTab } from './navbar';
 
-interface VisEditorSideBarProps {
+interface DefaultEditorSideBarProps {
   hasHistogramAgg?: boolean;
   optionTabs: OptionTab[];
 }
 
-function VisEditorSideBar({
+function DefaultEditorSideBar({
   hasHistogramAgg,
   optionTabs,
   metricAggs,
@@ -41,33 +36,18 @@ function VisEditorSideBar({
   state,
   uiState,
   setVisType,
-  removeAgg,
-  reorderAggs,
-  onToggleEnableAgg,
-  dispatch,
-}: VisEditorSideBarProps) {
+  actions,
+}: DefaultEditorSideBarProps) {
   const [selectedTab, setSelectedTab] = useState(optionTabs[0].name);
 
-  const onStateParamsChange = useCallback(
-    (paramName, value) => {
-      dispatch(setStateParamValue(paramName, value));
-    },
-    [dispatch]
-  );
-
-  const setValidity = () => {
-    console.log('setValidity');
-  };
-  const setTouched = () => {
-    console.log('setTouched');
-  };
+  const setValidity = () => {};
+  const setTouched = () => {};
 
   const dataTabProps = {
-    dispatch,
+    actions,
     metricAggs,
     state,
     schemas: vis.type.schemas,
-    removeAgg,
   };
 
   const optionTabProps = {
@@ -76,7 +56,7 @@ function VisEditorSideBar({
     stateParams: state.params,
     vis,
     uiState,
-    setValue: onStateParamsChange,
+    setValue: actions.setStateParamValue,
     setValidity,
     setVisType,
     setTouched,
@@ -102,7 +82,7 @@ function VisEditorSideBar({
           )}
 
           {optionTabs.length > 1 && (
-            <VisEditorNavBar
+            <DefaultEditorNavBar
               optionTabs={optionTabs}
               selectedTab={selectedTab}
               setSelectedTab={setSelectedTab}
@@ -125,4 +105,4 @@ function VisEditorSideBar({
   );
 }
 
-export { VisEditorSideBar };
+export { DefaultEditorSideBar };

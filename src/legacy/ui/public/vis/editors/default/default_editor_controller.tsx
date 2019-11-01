@@ -22,7 +22,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { I18nContext } from 'ui/i18n';
 import { DefaultEditor } from './default_editor';
-import { DefaultEditorDataTab } from './components/data_tab';
+import { DefaultEditorDataTab } from './components/sidebar';
 import { EditorStateContextProvider } from './state';
 
 export function createEditorController() {

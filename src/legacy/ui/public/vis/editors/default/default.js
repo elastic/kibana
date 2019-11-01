@@ -19,14 +19,11 @@
 
 import 'ui/angular-bootstrap';
 import './fancy_forms';
-import './sidebar';
-import { i18n } from '@kbn/i18n';
 import './vis_type_agg_filter';
 import $ from 'jquery';
 
 import _ from 'lodash';
 import angular from 'angular';
-import defaultEditorTemplate from './default.html';
 import { parentPipelineAggHelper } from 'ui/agg_types/metrics/lib/parent_pipeline_agg_helper';
 
 import { VisEditorTypesRegistryProvider } from '../../../registry/vis_editor_types';
@@ -157,7 +154,7 @@ const defaultEditor = function ($rootScope, $compile) {
           // Load the default editor template, attach it to the DOM and compile it.
           // It should be added to the DOM before compiling, to prevent some resize
           // listener issues.
-          const template = $(defaultEditorTemplate);
+          const template = $('defaultEditorTemplate');
           this.el.html(template);
           $compile(template)($scope);
         } else {
@@ -206,4 +203,4 @@ const defaultEditor = function ($rootScope, $compile) {
   };
 };
 
-VisEditorTypesRegistryProvider.register(defaultEditor);
+// VisEditorTypesRegistryProvider.register(defaultEditor);

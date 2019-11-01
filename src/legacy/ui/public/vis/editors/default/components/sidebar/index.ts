@@ -17,22 +17,6 @@
  * under the License.
  */
 
-import { uiModules } from '../../../modules';
-import { VisEditorSideBar } from './vis_editor_sidebar';
-import { wrapInI18nContext } from 'ui/i18n';
-
-uiModules.get('app/visualize').directive('visEditorSidebar', reactDirective => reactDirective(wrapInI18nContext(VisEditorSideBar), [
-  ['metricAggs', { watchDepth: 'reference' }], // we watch reference to identify each aggs change in useEffects
-  ['schemas', { watchDepth: 'collection' }],
-  ['state', { watchDepth: 'reference' }],
-  ['vis', { watchDepth: 'collection' }],
-  ['stageEditableVis', { watchDepth: 'reference' }],
-  'optionTabs',
-  'hasHistogramAgg',
-  'uiState',
-  'onParamChange',
-  'setVisType',
-  'removeAgg',
-  'reorderAggs',
-  'onToggleEnableAgg'
-]));
+export { DefaultEditorSideBar } from './sidebar';
+export { DefaultEditorDataTab } from './data_tab';
+export { OptionTab } from './navbar';
