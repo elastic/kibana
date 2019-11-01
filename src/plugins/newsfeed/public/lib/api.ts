@@ -28,6 +28,8 @@ import { NewsfeedPluginInjectedConfig, ApiItem, NewsfeedItem, FetchResult } from
 type ApiConfig = NewsfeedPluginInjectedConfig['newsfeed']['service'];
 
 export class NewsfeedApiDriver {
+  private readonly loadedTime = moment();
+
   constructor(
     private readonly kibanaVersion: string,
     private readonly userLanguage: string,
@@ -40,6 +42,12 @@ export class NewsfeedApiDriver {
       return true;
     }
     const last = moment(lastFetch, 'x'); // parse as unix ms timestamp
+
+    // does the last fetch time precede the time that the page was loaded?
+    if (this.loadedTime.diff(last) > 0) {
+      return true;
+    }
+
     const now = moment();
     const duration = moment.duration(now.diff(last));
 
@@ -161,16 +169,19 @@ export function getApi(
 
   return Rx.timer(0, config.mainInterval).pipe(
     filter(() => driver.shouldFetch()),
-    mergeMap(() => driver.fetchNewsfeedItems(http, config.service)),
-    tap(() => driver.updateLastFetch()),
-    catchError(err => {
-      window.console.error(err);
-      return Rx.of({
-        error: err,
-        kibanaVersion,
-        hasNew: false,
-        feedItems: [],
-      });
-    })
+    mergeMap(() =>
+      driver.fetchNewsfeedItems(http, config.service).pipe(
+        catchError(err => {
+          window.console.error(err);
+          return Rx.of({
+            error: err,
+            kibanaVersion,
+            hasNew: false,
+            feedItems: [],
+          });
+        })
+      )
+    ),
+    tap(() => driver.updateLastFetch())
   );
 }

@@ -20,22 +20,17 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiLoadingKibana } from '@elastic/eui';
 
-export const NewsEmptyPrompt = () => {
+export const NewsLoadingPrompt = () => {
   return (
     <EuiEmptyPrompt
-      iconType="documents"
-      titleSize="s"
-      title={
-        <h2>
-          <FormattedMessage id="newsfeed.emptyPrompt.noNewsTitle" defaultMessage="No news?" />
-        </h2>
-      }
+      title={<EuiLoadingKibana size="xl" />}
       body={
         <p>
           <FormattedMessage
-            id="newsfeed.emptyPrompt.noNewsText"
-            defaultMessage="If your Kibana instance doesn’t have internet access, ask your administrator to disable this feature. Otherwise, we’ll keep trying to fetch the news."
+            id="newsfeed.loadingPrompt.gettingNewsText"
+            defaultMessage="Getting the latest news..."
           />
         </p>
       }
