@@ -124,6 +124,7 @@ export const createSignals = async ({
 
     return alertsClient.create({
       data: {
+        name: 'SIEM Alert',
         alertTypeId: SIGNALS_ID,
         alertTypeParams: {
           description,
