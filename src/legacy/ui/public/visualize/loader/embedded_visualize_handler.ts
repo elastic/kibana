@@ -28,7 +28,8 @@ import { toastNotifications } from 'ui/notify';
 import { AggConfigs } from 'ui/agg_types/agg_configs';
 import { SearchSource } from 'ui/courier';
 import { QueryFilter } from 'ui/filter_manager/query_filter';
-import { TimeRange } from 'src/plugins/data/public';
+
+import { TimeRange, onlyDisabledFiltersChanged } from '../../../../../plugins/data/public';
 import { registries } from '../../../../core_plugins/interpreter/public/registries';
 import { Inspector } from '../../inspector';
 import { Adapters } from '../../inspector/types';
@@ -42,7 +43,7 @@ import { Vis } from '../../vis';
 import { VisFiltersProvider } from '../../vis/vis_filters';
 import { PipelineDataLoader } from './pipeline_data_loader';
 import { visualizationLoader } from './visualization_loader';
-import { onlyDisabledFiltersChanged, Query } from '../../../../core_plugins/data/public';
+import { Query } from '../../../../core_plugins/data/public';
 
 import { DataAdapter, RequestAdapter } from '../../inspector/adapters';
 
@@ -518,9 +519,9 @@ export class EmbeddedVisualizeHandler {
     // If the data loader was aborted then no need to surface this error in the UI
     if (error && error.name === 'AbortError') return;
 
-    // TODO: come up with a general way to cancel execution of pipeline expressions.
-    if (this.dataLoaderParams.searchSource && this.dataLoaderParams.searchSource.cancelQueued) {
-      this.dataLoaderParams.searchSource.cancelQueued();
+    // Cancel execution of pipeline expressions
+    if (this.abortController) {
+      this.abortController.abort();
     }
 
     this.vis.requestError = error;
@@ -537,16 +538,16 @@ export class EmbeddedVisualizeHandler {
 
   private rendererProvider = (response: VisResponseData | null) => {
     const renderer = registries.renderers.get(get(response || {}, 'as', 'visualization'));
-    const args = [
-      this.element,
-      get(response, 'value', { visType: this.vis.type.name }),
-      this.handlers,
-    ];
 
     if (!renderer) {
       return null;
     }
 
-    return () => renderer.render(...args);
+    return () =>
+      renderer.render(
+        this.element,
+        get(response, 'value', { visType: this.vis.type.name }),
+        this.handlers
+      );
   };
 }

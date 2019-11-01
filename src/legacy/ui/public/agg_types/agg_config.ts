@@ -238,14 +238,14 @@ export class AggConfig {
    *  @param {Courier.SearchRequest} searchRequest
    *  @return {Promise<undefined>}
    */
-  onSearchRequestStart(searchSource: any, searchRequest: any) {
+  onSearchRequestStart(searchSource: any, options: any) {
     if (!this.type) {
       return Promise.resolve();
     }
 
     return Promise.all(
       this.type.params.map((param: any) =>
-        param.modifyAggConfigOnSearchRequestStart(this, searchSource, searchRequest)
+        param.modifyAggConfigOnSearchRequestStart(this, searchSource, options)
       )
     );
   }
@@ -332,7 +332,7 @@ export class AggConfig {
     return this.type.getValue(this, bucket);
   }
 
-  getKey(bucket: any, key: string) {
+  getKey(bucket: any, key?: string) {
     if (this.type.getKey) {
       return this.type.getKey(bucket, key, this);
     } else {

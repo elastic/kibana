@@ -21,7 +21,7 @@ import { spawn } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-import rimraf from 'rimraf';
+import del from 'del';
 
 import { safeDump } from 'js-yaml';
 import { createMapStream, createSplitStream, createPromiseFromStreams } from '../../../legacy/utils/streams';
@@ -70,7 +70,7 @@ describe('Server logging configuration', function () {
       child = undefined;
     }
 
-    rimraf.sync(tempDir);
+    del.sync(tempDir, { force: true });
   });
 
   const isWindows = /^win/.test(process.platform);

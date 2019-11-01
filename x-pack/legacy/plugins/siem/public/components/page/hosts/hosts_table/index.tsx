@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 import { StaticIndexPattern } from 'ui/index_patterns';
@@ -115,22 +115,25 @@ const HostsTableComponent = React.memo<HostsTableProps>(
     updateTableActivePage,
     updateTableLimit,
   }) => {
-    const onChange = (criteria: Criteria) => {
-      if (criteria.sort != null) {
-        const sort: HostsSortField = {
-          field: getSortField(criteria.sort.field),
-          direction: criteria.sort.direction,
-        };
-        if (sort.direction !== direction || sort.field !== sortField) {
-          updateHostsSort({
-            sort,
-            hostsType: type,
-          });
+    const onChange = useCallback(
+      (criteria: Criteria) => {
+        if (criteria.sort != null) {
+          const sort: HostsSortField = {
+            field: getSortField(criteria.sort.field),
+            direction: criteria.sort.direction,
+          };
+          if (sort.direction !== direction || sort.field !== sortField) {
+            updateHostsSort({
+              sort,
+              hostsType: type,
+            });
+          }
         }
-      }
-    };
+      },
+      [direction, sortField, type]
+    );
 
-    const hostsColumns = useMemo(() => getHostsColumns(type, indexPattern), [type, indexPattern]);
+    const hostsColumns = useMemo(() => getHostsColumns(), []);
 
     const sorting = useMemo(() => getSorting(`${sortField}-${direction}`, sortField, direction), [
       sortField,

@@ -28,13 +28,13 @@ import { Env } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
 import { CoreContext } from '../core_context';
 import { configServiceMock } from '../config/config_service.mock';
-import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service.mock';
-import { httpServiceMock } from '../http/http_service.mock';
 import { loggingServiceMock } from '../logging/logging_service.mock';
+
 import { PluginWrapper } from './plugin';
 import { PluginName } from './types';
 import { PluginsSystem } from './plugins_system';
-import { contextServiceMock } from '../context/context_service.mock';
+
+import { coreMock } from '../mocks';
 
 const logger = loggingServiceMock.create();
 function createPlugin(
@@ -68,11 +68,8 @@ const configService = configServiceMock.create();
 configService.atPath.mockReturnValue(new BehaviorSubject({ initialize: true }));
 let env: Env;
 let coreContext: CoreContext;
-const setupDeps = {
-  context: contextServiceMock.createSetupContract(),
-  elasticsearch: elasticsearchServiceMock.createSetupContract(),
-  http: httpServiceMock.createSetupContract(),
-};
+const setupDeps = coreMock.createInternalSetup();
+
 beforeEach(() => {
   env = Env.createDefault(getEnvOptions());
 
@@ -117,7 +114,7 @@ test('`setupPlugins` throws plugin has missing required dependency', async () =>
   pluginsSystem.addPlugin(createPlugin('some-id', { required: ['missing-dep'] }));
 
   await expect(pluginsSystem.setupPlugins(setupDeps)).rejects.toMatchInlineSnapshot(
-    `[Error: Topological ordering of plugins did not complete, these edges could not be ordered: [["some-id",{}]]]`
+    `[Error: Topological ordering of plugins did not complete, these plugins have cyclic or missing dependencies: ["some-id"]]`
   );
 });
 
@@ -127,7 +124,7 @@ test('`setupPlugins` throws if plugins have circular required dependency', async
   pluginsSystem.addPlugin(createPlugin('depends-on-2', { required: ['depends-on-1'] }));
 
   await expect(pluginsSystem.setupPlugins(setupDeps)).rejects.toMatchInlineSnapshot(
-    `[Error: Topological ordering of plugins did not complete, these edges could not be ordered: [["depends-on-1",{}],["depends-on-2",{}]]]`
+    `[Error: Topological ordering of plugins did not complete, these plugins have cyclic or missing dependencies: ["depends-on-1","depends-on-2"]]`
   );
 });
 
@@ -137,7 +134,7 @@ test('`setupPlugins` throws if plugins have circular optional dependency', async
   pluginsSystem.addPlugin(createPlugin('depends-on-2', { optional: ['depends-on-1'] }));
 
   await expect(pluginsSystem.setupPlugins(setupDeps)).rejects.toMatchInlineSnapshot(
-    `[Error: Topological ordering of plugins did not complete, these edges could not be ordered: [["depends-on-1",{}],["depends-on-2",{}]]]`
+    `[Error: Topological ordering of plugins did not complete, these plugins have cyclic or missing dependencies: ["depends-on-1","depends-on-2"]]`
   );
 });
 

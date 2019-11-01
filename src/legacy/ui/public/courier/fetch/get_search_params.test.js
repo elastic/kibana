@@ -99,10 +99,10 @@ describe('getSearchParams', () => {
 
   test('includes timeout according to esShardTimeout if greater than 0', () => {
     const config = getConfigStub();
-    let searchParams = getSearchParams(config, null, 0);
+    let searchParams = getSearchParams(config, 0);
     expect(searchParams.timeout).toBe(undefined);
 
-    searchParams = getSearchParams(config, null, 100);
+    searchParams = getSearchParams(config, 100);
     expect(searchParams.timeout).toBe('100ms');
   });
 });

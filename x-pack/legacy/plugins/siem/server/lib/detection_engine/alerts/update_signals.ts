@@ -6,28 +6,8 @@
 
 import { defaults } from 'lodash/fp';
 import { AlertAction } from '../../../../../alerting/server/types';
-import { AlertsClient } from '../../../../../alerting/server/alerts_client';
-import { ActionsClient } from '../../../../../actions/server/actions_client';
 import { readSignals } from './read_signals';
-
-export interface SignalParams {
-  alertsClient: AlertsClient;
-  actionsClient: ActionsClient;
-  description?: string;
-  from?: string;
-  id: string;
-  index?: string[];
-  interval?: string;
-  enabled?: boolean;
-  filter?: Record<string, {}> | undefined;
-  kql?: string | undefined;
-  maxSignals?: string;
-  name?: string;
-  severity?: number;
-  type?: string; // TODO: Replace this type with a static enum type
-  to?: string;
-  references?: string[];
-}
+import { SignalParams } from './types';
 
 export const calculateInterval = (
   interval: string | undefined,
@@ -42,30 +22,21 @@ export const calculateInterval = (
   }
 };
 
-export const calculateKqlAndFilter = (
-  kql: string | undefined,
-  filter: {} | undefined
-): { kql: string | null | undefined; filter: {} | null | undefined } => {
-  if (filter != null) {
-    return { kql: null, filter };
-  } else if (kql != null) {
-    return { kql, filter: null };
-  } else {
-    return { kql: undefined, filter: undefined };
-  }
-};
-
 export const updateSignal = async ({
   alertsClient,
   actionsClient, // TODO: Use this whenever we add feature support for different action types
   description,
   enabled,
+  query,
+  language,
+  savedId,
+  filters,
   filter,
   from,
   id,
   index,
   interval,
-  kql,
+  maxSignals,
   name,
   severity,
   to,
@@ -82,18 +53,20 @@ export const updateSignal = async ({
 
   const alertTypeParams = signal.alertTypeParams || {};
 
-  const { kql: nextKql, filter: nextFilter } = calculateKqlAndFilter(kql, filter);
-
   const nextAlertTypeParams = defaults(
     {
       ...alertTypeParams,
     },
     {
       description,
-      filter: nextFilter,
+      filter,
       from,
+      query,
+      language,
+      savedId,
+      filters,
       index,
-      kql: nextKql,
+      maxSignals,
       name,
       severity,
       to,
@@ -103,14 +76,15 @@ export const updateSignal = async ({
   );
 
   if (signal.enabled && !enabled) {
-    await alertsClient.disable({ id });
+    await alertsClient.disable({ id: signal.id });
   } else if (!signal.enabled && enabled) {
-    await alertsClient.enable({ id });
+    await alertsClient.enable({ id: signal.id });
   }
 
   return alertsClient.update({
-    id,
+    id: signal.id,
     data: {
+      name: 'SIEM Alert',
       interval: calculateInterval(interval, signal.interval),
       actions,
       alertTypeParams: nextAlertTypeParams,
