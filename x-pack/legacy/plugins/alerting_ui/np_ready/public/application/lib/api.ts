@@ -11,6 +11,7 @@ import { Action, ActionType, Alert, AlertType } from '../../types';
 // all the actions in advance and assume the total count to not go over 100 or so.
 // We'll set this max setting assuming it's never reached.
 const MAX_ACTIONS_RETURNED = 10000;
+const WATCHER_API_ROOT = '/api/watcher';
 
 interface LoadActionTypesOpts {
   http: HttpServiceBase;
@@ -164,4 +165,30 @@ export async function unmuteAllAlertInstances({
   http: HttpServiceBase;
 }): Promise<void> {
   await http.post(`${BASE_ALERT_API_PATH}/${id}/_unmute_all`);
+}
+
+// TODO: replace watcher api with the proper from alerts
+
+export async function getMatchingIndicesForThresholdAlertType({
+  pattern,
+  http,
+}: {
+  pattern: string;
+  http: HttpServiceBase;
+}): Promise<Record<string, any>> {
+  return await http.post(`${WATCHER_API_ROOT}/indices`, {
+    body: JSON.stringify(pattern),
+  });
+}
+
+export async function getThresholdAlertTypeFields({
+  indices,
+  http,
+}: {
+  indices: string[];
+  http: HttpServiceBase;
+}): Promise<Record<string, any>> {
+  return await http.post(`${WATCHER_API_ROOT}/fields`, {
+    body: JSON.stringify(indices),
+  });
 }

@@ -14,9 +14,15 @@ import {
   EuiPopoverTitle,
   EuiSelect,
 } from '@elastic/eui';
-import { AlertTypeModel, AlertType, Alert } from '../../../../types';
+import { AlertTypeModel, AlertType, Alert, ValidationResult } from '../../../../types';
 import { Comparator, AggregationType, GroupByType } from './types';
-import { COMPARATORS, AGGREGATION_TYPES } from '../../../constants';
+import { COMPARATORS, AGGREGATION_TYPES, TIME_UNITS } from '../../../constants';
+import {
+  getMatchingIndicesForThresholdAlertType,
+  getThresholdAlertTypeFields,
+} from '../../../lib/api';
+import { getTimeUnitLabel } from '../../../lib/get_time_unit_label';
+import { useAppDependencies } from '../../..';
 
 const DEFAULT_VALUES = {
   AGG_TYPE: 'count',
@@ -35,8 +41,8 @@ export function getActionType(): AlertTypeModel {
     id: 'threshold',
     name: 'Index Threshold',
     iconClass: 'alert',
-    aggType: DEFAULT_VALUES.AGG_TYPE,
     alertTypeParamsExpression: IndexThresholdAlertTypeExpression,
+    validate: validateAlertType,
   };
 }
 
@@ -47,13 +53,34 @@ interface Props {
   hasErrors?: boolean;
 }
 
+function validateAlertType(alert: Alert): ValidationResult {
+  return { errors: {} };
+}
+
 export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> = ({
   alert,
   setAlertTypeParams,
   errors,
   hasErrors,
 }) => {
+  const {
+    core: { http },
+  } = useAppDependencies();
+  const firstFieldOption = {
+    text: i18n.translate('xpack.alertingUI.sections.alertAdd.threshold.timeFieldOptionLabel', {
+      defaultMessage: 'Select a field',
+    }),
+    value: '',
+  };
+
   const [aggTypePopoverOpen, setAggTypePopoverOpen] = useState(false);
+  const [indexPattern, setIndexPattern] = useState([]);
+  const [esFields, setEsFields] = useState([]);
+  const [indexOptions, setIndexOptions] = useState<IOption[]>([]);
+  const [timeFieldOptions, setTimeFieldOptions] = useState([firstFieldOption]);
+
+  const [aggFieldPopoverOpen, setAggFieldPopoverOpen] = useState(false);
+  const [groupByPopoverOpen, setGroupByPopoverOpen] = useState(false);
 
   const comparators: { [key: string]: Comparator } = {
     [COMPARATORS.GREATER_THAN]: {
@@ -161,6 +188,92 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
       value: 'top',
       validNormalizedTypes: ['number', 'date', 'keyword'],
     },
+  };
+
+  const expressionErrorMessage = i18n.translate(
+    'xpack.alertingUI.sections.alertAdd.threshold.fixErrorInExpressionBelowValidationMessage',
+    {
+      defaultMessage: 'Expression contains errors.',
+    }
+  );
+
+  const getTimeOptions = (unitSize: string) =>
+    Object.entries(TIME_UNITS).map(([_key, value]) => {
+      return {
+        text: getTimeUnitLabel(value, unitSize),
+        value,
+      };
+    });
+
+  const getFields = async (indices: string[]) => {
+    return await getThresholdAlertTypeFields({ indices, http });
+  };
+  const getTimeFieldOptions = (fields: any) => {
+    const options = [firstFieldOption];
+
+    fields.forEach((field: any) => {
+      if (field.type === 'date') {
+        options.push({
+          text: field.name,
+          value: field.name,
+        });
+      }
+    });
+    return options;
+  };
+
+  interface IOption {
+    label: string;
+    options: Array<{ value: string; label: string }>;
+  }
+
+  const getIndexOptions = async (pattern: string, indexPatterns: string[]) => {
+    const options: IOption[] = [];
+
+    if (!pattern) {
+      return options;
+    }
+
+    const matchingIndices = (await getMatchingIndicesForThresholdAlertType({
+      pattern,
+      http,
+    })) as string[];
+    const matchingIndexPatterns = indexPatterns.filter(anIndexPattern => {
+      return anIndexPattern.includes(pattern);
+    }) as string[];
+
+    if (matchingIndices.length || matchingIndexPatterns.length) {
+      const matchingOptions = _.uniq([...matchingIndices, ...matchingIndexPatterns]);
+
+      options.push({
+        label: i18n.translate(
+          'xpack.alertingUI.sections.alertAdd.threshold.indicesAndIndexPatternsLabel',
+          {
+            defaultMessage: 'Based on your indices and index patterns',
+          }
+        ),
+        options: matchingOptions.map(match => {
+          return {
+            label: match,
+            value: match,
+          };
+        }),
+      });
+    }
+
+    options.push({
+      label: i18n.translate('xpack.alertingUI.sections.alertAdd.threshold.chooseLabel', {
+        defaultMessage: 'Choose…',
+      }),
+      options: [
+        {
+          value: pattern,
+          label: pattern,
+        },
+      ],
+    });
+
+    return options;
   };
 
   return (

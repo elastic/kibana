@@ -84,6 +84,6 @@ export interface AlertTypeModel {
   id: string;
   name: string;
   iconClass: string;
-  aggType: string;
+  validate: (alert: Alert) => ValidationResult;
   alertTypeParamsExpression: React.FunctionComponent<any>;
 }
