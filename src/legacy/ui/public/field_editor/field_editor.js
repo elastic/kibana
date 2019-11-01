@@ -140,11 +140,11 @@ export class FieldEditorComponent extends PureComponent {
     const fieldTypes = get(FIELD_TYPES_BY_LANG, field.lang, DEFAULT_FIELD_TYPES);
     field.type = fieldTypes.includes(field.type) ? field.type : fieldTypes[0];
 
-    const fieldFotmats = getFieldFormats();
+    const fieldFormats = getFieldFormats();
 
     const fieldTypeFormats = [
-      getDefaultFormat(fieldFotmats.getDefaultType(field.type, field.esTypes)),
-      ...fieldFotmats.getByFieldType(field.type),
+      getDefaultFormat(fieldFormats.getDefaultType(field.type, field.esTypes)),
+      ...fieldFormats.getByFieldType(field.type),
     ];
 
     this.setState({
@@ -170,11 +170,12 @@ export class FieldEditorComponent extends PureComponent {
     const { getConfig } = this.props.helpers;
     const { field } = this.state;
     const fieldFormats = getFieldFormats();
+    const DefaultFieldFormat = fieldFormats.getDefaultType(type);
 
     field.type = type;
 
     const fieldTypeFormats = [
-      getDefaultFormat(fieldFormats.getByFieldType()),
+      getDefaultFormat(DefaultFieldFormat),
       ...getFieldFormats().getByFieldType(field.type),
     ];
 
