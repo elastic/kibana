@@ -12,12 +12,12 @@ interface Props {
   onRefreshSession: () => void;
 }
 
-export const SessionTimeoutWarning = (props: Props) => {
+export const SessionIdleTimeoutWarning = (props: Props) => {
   return (
     <>
       <p>
         <FormattedMessage
-          id="xpack.security.components.sessionTimeoutWarning.message"
+          id="xpack.security.components.sessionIdleTimeoutWarning.message"
           defaultMessage="You will soon be logged out due to inactivity. Click OK to resume."
         />
       </p>
@@ -29,7 +29,7 @@ export const SessionTimeoutWarning = (props: Props) => {
           data-test-subj="refreshSessionButton"
         >
           <FormattedMessage
-            id="xpack.security.components.sessionTimeoutWarning.okButtonText"
+            id="xpack.security.components.sessionIdleTimeoutWarning.okButtonText"
             defaultMessage="OK"
           />
         </EuiButton>

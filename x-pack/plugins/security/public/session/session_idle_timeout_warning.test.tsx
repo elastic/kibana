@@ -5,12 +5,12 @@
  */
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { SessionTimeoutWarning } from './session_timeout_warning';
+import { SessionIdleTimeoutWarning } from './session_idle_timeout_warning';
 
-describe('SessionTimeoutWarning', () => {
+describe('SessionIdleTimeoutWarning', () => {
   it('fires its callback when the OK button is clicked', () => {
     const handler = jest.fn();
-    const wrapper = mountWithIntl(<SessionTimeoutWarning onRefreshSession={handler} />);
+    const wrapper = mountWithIntl(<SessionIdleTimeoutWarning onRefreshSession={handler} />);
 
     expect(handler).toBeCalledTimes(0);
     wrapper.find('EuiButton[data-test-subj="refreshSessionButton"]').simulate('click');

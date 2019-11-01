@@ -10,7 +10,7 @@ import BroadcastChannel from 'broadcast-channel';
 import LeaderElection from 'broadcast-channel/leader-election';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
-import { SessionTimeoutWarning } from './session_timeout_warning';
+import { SessionIdleTimeoutWarning } from './session_idle_timeout_warning';
 import { ISessionExpired } from './session_expired';
 import { SessionInfo } from '../types';
 
@@ -138,7 +138,7 @@ export class SessionTimeout {
     this.warningToast = this.notifications.toasts.add({
       color: 'warning',
       text: toMountPoint(<SessionTimeoutWarning onRefreshSession={this.refreshSession} />),
-      title: i18n.translate('xpack.security.components.sessionTimeoutWarning.title', {
+      title: i18n.translate('xpack.security.components.sessionIdleTimeoutWarning.title', {
         defaultMessage: 'Warning',
       }),
       toastLifeTimeMs: Math.min(timeout! - GRACE_PERIOD_MS, WARNING_MS),

@@ -28,7 +28,7 @@ const expectWarningToast = (
       Object {
         "color": "warning",
         "text": MountPoint {
-          "reactNode": <SessionTimeoutWarning
+          "reactNode": <SessionIdleTimeoutWarning
             onRefreshSession={[Function]}
           />,
         },
