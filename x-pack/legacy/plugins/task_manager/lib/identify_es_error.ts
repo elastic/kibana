@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-interface ESErrorCausedBy {
+export interface ESErrorCausedBy {
+  type?: string;
   reason?: string;
   caused_by?: ESErrorCausedBy;
 }
 
-interface ESError {
+export interface ESError {
   root_cause?: ESErrorCausedBy[];
   caused_by?: ESErrorCausedBy;
 }
@@ -45,13 +46,13 @@ export function identifyEsError(err: { response: string }) {
     if (error) {
       const { root_cause: rootCause = [], caused_by: causedBy } = error;
 
-      // The caused_by chain has the most information so use that if it's available. If not then
-      // settle for the root_cause.
-      const causedByChain = extractCausedByChain(causedBy);
-      if (causedByChain.length) {
-        return causedByChain;
-      }
-      return rootCause.length ? extractCausedByChain(rootCause[0]) : [];
+      return [
+        ...extractCausedByChain(causedBy),
+        ...rootCause.reduce(
+          (acc: string[], innerRootCause) => extractCausedByChain(innerRootCause, acc),
+          []
+        ),
+      ];
     }
   }
   return [];
