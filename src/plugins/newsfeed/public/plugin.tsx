@@ -21,6 +21,7 @@ import * as Rx from 'rxjs';
 import { catchError, takeUntil } from 'rxjs/operators';
 import ReactDOM from 'react-dom';
 import React from 'react';
+import { I18nProvider } from '@kbn/i18n/react';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { NewsfeedPluginInjectedConfig } from '../types';
 import { NewsfeedNavButton } from './components/newsfeed_header_nav_button';
@@ -41,7 +42,12 @@ export class NewsfeedPublicPlugin implements Plugin<Setup, Start> {
 
   public start(core: CoreStart): Start {
     function mount(targetDomElement: HTMLElement) {
-      ReactDOM.render(<NewsfeedNavButton apiFetchResult={api$} />, targetDomElement);
+      ReactDOM.render(
+        <I18nProvider>
+          <NewsfeedNavButton apiFetchResult={api$} />
+        </I18nProvider>,
+        targetDomElement
+      );
       return () => ReactDOM.unmountComponentAtNode(targetDomElement);
     }
 
