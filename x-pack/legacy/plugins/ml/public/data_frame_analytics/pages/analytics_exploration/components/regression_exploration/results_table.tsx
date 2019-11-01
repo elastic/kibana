@@ -49,6 +49,7 @@ import {
   MAX_COLUMNS,
   getPredictedFieldName,
   INDEX_STATUS,
+  SEARCH_SIZE,
 } from '../../../../common';
 import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/columns';
 import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
@@ -437,7 +438,8 @@ export const ResultsTable: FC<Props> = React.memo(({ jobConfig, jobStatus }) => 
             helpText={i18n.translate(
               'xpack.ml.dataframe.analytics.regressionExploration.documentsShownHelpText',
               {
-                defaultMessage: 'Showing first 1000 documents',
+                defaultMessage: 'Showing first {searchSize} documents',
+                values: { searchSize: SEARCH_SIZE },
               }
             )}
           >
