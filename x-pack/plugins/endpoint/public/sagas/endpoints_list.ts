@@ -53,7 +53,7 @@ async function resourceSaga(
               sortDirection,
             },
           });
-          dispatch(endpointsListActions.serverReturnedData(response.elasticsearchResponse));
+          dispatch(endpointsListActions.serverReturnedData(response));
         } catch (error) {
           // TODO: dispatch an error action
           throw new Error(error);
