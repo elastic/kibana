@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { StringMap } from '../../../typings/common';
-
 export class SessionStorageMock {
-  private store: StringMap = {};
+  private store: Record<string, unknown> = {};
 
   public clear() {
     this.store = {};

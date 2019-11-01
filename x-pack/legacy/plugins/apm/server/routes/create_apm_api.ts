@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { indexPatternRoute } from './index_pattern';
+import { indexPatternRoute, kueryBarIndexPatternRoute } from './index_pattern';
 import {
   errorDistributionRoute,
   errorGroupsRoute,
@@ -58,6 +58,7 @@ const createApmApi = () => {
   const api = createApi()
     // index pattern
     .add(indexPatternRoute)
+    .add(kueryBarIndexPatternRoute)
 
     // Errors
     .add(errorDistributionRoute)
