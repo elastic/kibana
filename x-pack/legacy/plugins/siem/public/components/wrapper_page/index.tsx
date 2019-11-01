@@ -8,9 +8,11 @@ import classNames from 'classnames';
 import React from 'react';
 import styled, { css } from 'styled-components';
 
+import { gutterTimeline } from '../../lib/helpers';
+
 const Wrapper = styled.div`
   ${({ theme }) => css`
-    padding: ${theme.eui.paddingSizes.l} 70px ${theme.eui.paddingSizes.l}
+    padding: ${theme.eui.paddingSizes.l} ${gutterTimeline} ${theme.eui.paddingSizes.l}
       ${theme.eui.paddingSizes.l};
 
     &.siemWrapperPage--restrictWidthDefault,

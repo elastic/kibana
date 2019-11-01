@@ -8,36 +8,30 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink } from '@el
 import React from 'react';
 import styled, { css } from 'styled-components';
 
+import { gutterTimeline } from '../../lib/helpers';
 import { navTabs } from '../../pages/home/home_navigations';
 import { getOverviewUrl } from '../link_to';
 import { MlPopover } from '../ml_popover/ml_popover';
 import { SiemNavigation } from '../navigation';
 import * as i18n from './translations';
 
-interface HeaderProps {
-  offsetRight?: string;
-}
-
-const Header = styled.header.attrs({
-  className: 'siemHeaderGlobal',
-})<HeaderProps>`
-  ${({ offsetRight, theme }) => css`
+const Wrapper = styled.header`
+  ${({ theme }) => css`
     background: ${theme.eui.euiColorEmptyShade};
     border-bottom: ${theme.eui.euiBorderThin};
-    // margin: 0 -${offsetRight ? offsetRight : theme.eui.euiSizeL} 0 -${theme.eui.euiSizeL};
-    padding: ${theme.eui.paddingSizes.m} ${offsetRight ? offsetRight : theme.eui.paddingSizes.l}
-      ${theme.eui.paddingSizes.m} ${theme.eui.paddingSizes.l};
+    padding: ${theme.eui.paddingSizes.m} ${gutterTimeline} ${theme.eui.paddingSizes.m}
+      ${theme.eui.paddingSizes.l};
   `}
 `;
-Header.displayName = 'Header';
+Wrapper.displayName = 'Wrapper';
 
 const FlexItem = styled(EuiFlexItem)`
   min-width: 0;
 `;
 FlexItem.displayName = 'FlexItem';
 
-export const HeaderGlobal = React.memo<HeaderProps>(({ offsetRight }) => (
-  <Header offsetRight={offsetRight}>
+export const HeaderGlobal = React.memo(() => (
+  <Wrapper className="siemHeaderGlobal">
     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap>
       <FlexItem>
         <EuiFlexGroup alignItems="center" responsive={false}>
@@ -71,6 +65,6 @@ export const HeaderGlobal = React.memo<HeaderProps>(({ offsetRight }) => (
         </EuiFlexGroup>
       </FlexItem>
     </EuiFlexGroup>
-  </Header>
+  </Wrapper>
 ));
 HeaderGlobal.displayName = 'HeaderGlobal';

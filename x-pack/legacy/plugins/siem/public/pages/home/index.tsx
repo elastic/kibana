@@ -42,8 +42,6 @@ const WrappedByAutoSizer = styled.div`
 `;
 WrappedByAutoSizer.displayName = 'WrappedByAutoSizer';
 
-const gutterTimeline = '70px'; // Temporary until timeline is moved - MichaelMarcialis
-
 const usersViewing = ['elastic']; // TODO: get the users viewing this timeline from Elasticsearch (persistance)
 
 /** the global Kibana navigation at the top of every page */
@@ -61,7 +59,7 @@ export const HomePage = React.memo(() => (
   <AutoSizer detectAnyWindowResize={true} content>
     {({ measureRef, windowMeasurement: { height: windowHeight = 0 } }) => (
       <WrappedByAutoSizer data-test-subj="wrapped-by-auto-sizer" innerRef={measureRef}>
-        <HeaderGlobal offsetRight={gutterTimeline} />
+        <HeaderGlobal />
 
         <main data-test-subj="pageContainer">
           <WithSource sourceId="default">
