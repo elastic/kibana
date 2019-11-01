@@ -28,8 +28,22 @@ import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { VisualizeListingTable } from './visualize_listing_table';
 import { NewVisModal } from '../wizard/new_vis_modal';
 import { VisualizeConstants } from '../visualize_constants';
-import { start as visualizations } from '../../../../visualizations/public/np_ready/public/legacy';
 import { i18n } from '@kbn/i18n';
+
+import { getServices } from '../kibana_services';
+
+const {
+  addBasePath,
+  chrome,
+  chromeLegacy,
+  SavedObjectRegistryProvider,
+  SavedObjectsClientProvider,
+  timefilter,
+  toastNotifications,
+  uiModules,
+  wrapInI18nContext,
+  visualizations,
+} = getServices();
 
 const app = uiModules.get('app/visualize', ['ngRoute', 'react']);
 app.directive('visualizeListingTable', reactDirective =>
@@ -54,11 +68,11 @@ export function VisualizeListingController($injector, createNewVis) {
 
   this.editItem = ({ editUrl }) => {
     // for visualizations the edit and view URLs are the same
-    window.location = chrome.addBasePath(editUrl);
+    window.location.href = addBasePath(editUrl);
   };
 
   this.getViewUrl = ({ editUrl }) => {
-    return chrome.addBasePath(editUrl);
+    return addBasePath(editUrl);
   };
 
   this.closeNewVisModal = () => {
@@ -100,7 +114,7 @@ export function VisualizeListingController($injector, createNewVis) {
       })
     )
       .then(() => {
-        chrome.untrackNavLinksForDeletedSavedObjects(selectedItems.map(item => item.id));
+        chromeLegacy.untrackNavLinksForDeletedSavedObjects(selectedItems.map(item => item.id));
       })
       .catch(error => {
         toastNotifications.addError(error, {
@@ -111,7 +125,7 @@ export function VisualizeListingController($injector, createNewVis) {
       });
   };
 
-  chrome.breadcrumbs.set([
+  chrome.setBreadcrumbs([
     {
       text: i18n.translate('kbn.visualize.visualizeListingBreadcrumbsTitle', {
         defaultMessage: 'Visualize',
