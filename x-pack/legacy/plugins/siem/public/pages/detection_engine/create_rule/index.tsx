@@ -7,17 +7,20 @@
 import React from 'react';
 
 import { HeaderPage } from '../../../components/header_page';
+import { WrapperPage } from '../../../components/wrapper_page';
 import { SpyRoute } from '../../../utils/route/spy_routes';
 import * as i18n from './translations';
 
 export const CreateRuleComponent = React.memo(() => {
   return (
     <>
-      <HeaderPage
-        backOptions={{ href: '#detection-engine/rules', text: 'Back to rules' }}
-        border
-        title={i18n.PAGE_TITLE}
-      />
+      <WrapperPage restrictWidth>
+        <HeaderPage
+          backOptions={{ href: '#detection-engine/rules', text: 'Back to rules' }}
+          border
+          title={i18n.PAGE_TITLE}
+        />
+      </WrapperPage>
 
       <SpyRoute />
     </>

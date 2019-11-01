@@ -24,7 +24,7 @@ const Header = styled.header.attrs({
   ${({ offsetRight, theme }) => css`
     background: ${theme.eui.euiColorEmptyShade};
     border-bottom: ${theme.eui.euiBorderThin};
-    margin: 0 -${offsetRight ? offsetRight : theme.eui.euiSizeL} 0 -${theme.eui.euiSizeL};
+    // margin: 0 -${offsetRight ? offsetRight : theme.eui.euiSizeL} 0 -${theme.eui.euiSizeL};
     padding: ${theme.eui.paddingSizes.m} ${offsetRight ? offsetRight : theme.eui.paddingSizes.l}
       ${theme.eui.paddingSizes.m} ${theme.eui.paddingSizes.l};
   `}

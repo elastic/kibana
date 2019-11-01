@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPage, EuiPageBody } from '@elastic/eui';
 import * as React from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { AutoSizer } from '../../components/auto_sizer';
@@ -46,13 +44,6 @@ WrappedByAutoSizer.displayName = 'WrappedByAutoSizer';
 
 const gutterTimeline = '70px'; // Temporary until timeline is moved - MichaelMarcialis
 
-const Page = styled(EuiPage)`
-  ${({ theme }) => `
-    padding: 0 ${gutterTimeline} ${theme.eui.paddingSizes.l} ${theme.eui.paddingSizes.l};
-  `}
-`;
-Page.displayName = 'Page';
-
 const usersViewing = ['elastic']; // TODO: get the users viewing this timeline from Elasticsearch (persistance)
 
 /** the global Kibana navigation at the top of every page */
@@ -66,12 +57,13 @@ const calculateFlyoutHeight = ({
   windowHeight: number;
 }): number => Math.max(0, windowHeight - globalHeaderSize);
 
-export const HomePage = pure(() => (
+export const HomePage = React.memo(() => (
   <AutoSizer detectAnyWindowResize={true} content>
     {({ measureRef, windowMeasurement: { height: windowHeight = 0 } }) => (
       <WrappedByAutoSizer data-test-subj="wrapped-by-auto-sizer" innerRef={measureRef}>
-        <Page data-test-subj="pageContainer">
-          <HelpMenu />
+        <HeaderGlobal offsetRight={gutterTimeline} />
+
+        <main data-test-subj="pageContainer">
           <WithSource sourceId="default">
             {({ browserFields, indexPattern }) => (
               <DragDropContextWrapper browserFields={browserFields}>
@@ -96,61 +88,59 @@ export const HomePage = pure(() => (
                   />
                 </Flyout>
 
-                <EuiPageBody>
-                  <HeaderGlobal offsetRight={gutterTimeline} />
-
-                  <Switch>
-                    <Redirect exact from="/" to={`/${SiemPageName.overview}`} />
-                    <Route
-                      path={`/:pageName(${SiemPageName.overview})`}
-                      render={() => <Overview />}
-                    />
-                    <Route
-                      path={`/:pageName(${SiemPageName.hosts})`}
-                      render={({ location, match }) => (
-                        <HostsContainer location={location} url={match.url} />
-                      )}
-                    />
-                    <Route
-                      path={`/:pageName(${SiemPageName.network})`}
-                      render={({ location, match }) => (
-                        <NetworkContainer location={location} url={match.url} />
-                      )}
-                    />
-                    <Route
-                      path={`/:pageName(${SiemPageName.detectionEngine})`}
-                      render={({ location, match }) => (
-                        <DetectionEngineContainer location={location} url={match.url} />
-                      )}
-                    />
-                    <Route
-                      path={`/:pageName(${SiemPageName.timelines})`}
-                      render={() => <Timelines />}
-                    />
-                    <Route path="/link-to" component={LinkToPage} />
-                    <Route
-                      path="/ml-hosts"
-                      render={({ location, match }) => (
-                        <MlHostConditionalContainer location={location} url={match.url} />
-                      )}
-                    />
-                    <Route
-                      path="/ml-network"
-                      render={({ location, match }) => (
-                        <MlNetworkConditionalContainer location={location} url={match.url} />
-                      )}
-                    />
-                    <Route component={NotFoundPage} />
-                  </Switch>
-                </EuiPageBody>
+                <Switch>
+                  <Redirect exact from="/" to={`/${SiemPageName.overview}`} />
+                  <Route
+                    path={`/:pageName(${SiemPageName.overview})`}
+                    render={() => <Overview />}
+                  />
+                  <Route
+                    path={`/:pageName(${SiemPageName.hosts})`}
+                    render={({ location, match }) => (
+                      <HostsContainer location={location} url={match.url} />
+                    )}
+                  />
+                  <Route
+                    path={`/:pageName(${SiemPageName.network})`}
+                    render={({ location, match }) => (
+                      <NetworkContainer location={location} url={match.url} />
+                    )}
+                  />
+                  <Route
+                    path={`/:pageName(${SiemPageName.detectionEngine})`}
+                    render={({ location, match }) => (
+                      <DetectionEngineContainer location={location} url={match.url} />
+                    )}
+                  />
+                  <Route
+                    path={`/:pageName(${SiemPageName.timelines})`}
+                    render={() => <Timelines />}
+                  />
+                  <Route path="/link-to" component={LinkToPage} />
+                  <Route
+                    path="/ml-hosts"
+                    render={({ location, match }) => (
+                      <MlHostConditionalContainer location={location} url={match.url} />
+                    )}
+                  />
+                  <Route
+                    path="/ml-network"
+                    render={({ location, match }) => (
+                      <MlNetworkConditionalContainer location={location} url={match.url} />
+                    )}
+                  />
+                  <Route component={NotFoundPage} />
+                </Switch>
               </DragDropContextWrapper>
             )}
           </WithSource>
-        </Page>
+        </main>
+
+        <HelpMenu />
+
         <SpyRoute />
       </WrappedByAutoSizer>
     )}
   </AutoSizer>
 ));
-
 HomePage.displayName = 'HomePage';

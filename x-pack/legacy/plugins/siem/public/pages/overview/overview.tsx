@@ -14,13 +14,12 @@ import { documentationLinks } from 'ui/documentation_links';
 import { HeaderPage } from '../../components/header_page';
 import { OverviewHost } from '../../components/page/overview/overview_host';
 import { OverviewNetwork } from '../../components/page/overview/overview_network';
+import { WrapperPage } from '../../components/wrapper_page';
 import { GlobalTime } from '../../containers/global_time';
-
 import { Summary } from './summary';
 import { EmptyPage } from '../../components/empty_page';
 import { WithSource, indicesExistOrDataTemporarilyUnavailable } from '../../containers/source';
 import { SpyRoute } from '../../utils/route/spy_routes';
-
 import * as i18n from './translations';
 
 const basePath = chrome.getBasePath();
@@ -32,40 +31,46 @@ export const OverviewComponent = pure(() => {
 
   return (
     <>
-      <HeaderPage
-        badgeOptions={{ beta: true, text: i18n.PAGE_BADGE_LABEL, tooltip: i18n.PAGE_BADGE_TOOLTIP }}
-        border
-        subtitle={i18n.PAGE_SUBTITLE}
-        title={i18n.PAGE_TITLE}
-      />
+      <WrapperPage>
+        <HeaderPage
+          badgeOptions={{
+            beta: true,
+            text: i18n.PAGE_BADGE_LABEL,
+            tooltip: i18n.PAGE_BADGE_TOOLTIP,
+          }}
+          border
+          subtitle={i18n.PAGE_SUBTITLE}
+          title={i18n.PAGE_TITLE}
+        />
 
-      <WithSource sourceId="default">
-        {({ indicesExist }) =>
-          indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
-            <GlobalTime>
-              {({ setQuery }) => (
-                <EuiFlexGroup>
-                  <Summary />
-                  <OverviewHost endDate={dateEnd} startDate={dateStart} setQuery={setQuery} />
-                  <OverviewNetwork endDate={dateEnd} startDate={dateStart} setQuery={setQuery} />
-                </EuiFlexGroup>
-              )}
-            </GlobalTime>
-          ) : (
-            <EmptyPage
-              actionPrimaryIcon="gear"
-              actionPrimaryLabel={i18n.EMPTY_ACTION_PRIMARY}
-              actionPrimaryUrl={`${basePath}/app/kibana#/home/tutorial_directory/siem`}
-              actionSecondaryIcon="popout"
-              actionSecondaryLabel={i18n.EMPTY_ACTION_SECONDARY}
-              actionSecondaryTarget="_blank"
-              actionSecondaryUrl={documentationLinks.siem}
-              data-test-subj="empty-page"
-              title={i18n.EMPTY_TITLE}
-            />
-          )
-        }
-      </WithSource>
+        <WithSource sourceId="default">
+          {({ indicesExist }) =>
+            indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
+              <GlobalTime>
+                {({ setQuery }) => (
+                  <EuiFlexGroup>
+                    <Summary />
+                    <OverviewHost endDate={dateEnd} startDate={dateStart} setQuery={setQuery} />
+                    <OverviewNetwork endDate={dateEnd} startDate={dateStart} setQuery={setQuery} />
+                  </EuiFlexGroup>
+                )}
+              </GlobalTime>
+            ) : (
+              <EmptyPage
+                actionPrimaryIcon="gear"
+                actionPrimaryLabel={i18n.EMPTY_ACTION_PRIMARY}
+                actionPrimaryUrl={`${basePath}/app/kibana#/home/tutorial_directory/siem`}
+                actionSecondaryIcon="popout"
+                actionSecondaryLabel={i18n.EMPTY_ACTION_SECONDARY}
+                actionSecondaryTarget="_blank"
+                actionSecondaryUrl={documentationLinks.siem}
+                data-test-subj="empty-page"
+                title={i18n.EMPTY_TITLE}
+              />
+            )
+          }
+        </WithSource>
+      </WrapperPage>
       <SpyRoute />
     </>
   );

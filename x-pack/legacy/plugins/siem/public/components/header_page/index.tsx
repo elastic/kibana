@@ -20,7 +20,7 @@ const Header = styled.header.attrs({
   className: 'siemHeaderPage',
 })<HeaderProps>`
   ${({ border, theme }) => css`
-    margin: ${theme.eui.euiSizeL} 0;
+    margin-bottom: ${theme.eui.euiSizeL};
 
     ${border &&
       css`

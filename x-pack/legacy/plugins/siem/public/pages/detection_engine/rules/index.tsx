@@ -27,7 +27,6 @@ import React, { useState } from 'react';
 import { getEmptyTagValue } from '../../../components/empty_value';
 import { HeaderPage } from '../../../components/header_page';
 import { HeaderSection } from '../../../components/header_section';
-// import { LinkIcon } from '../../../components/link_icon';
 import {
   UtilityBar,
   UtilityBarAction,
@@ -35,6 +34,7 @@ import {
   UtilityBarSection,
   UtilityBarText,
 } from '../../../components/utility_bar';
+import { WrapperPage } from '../../../components/wrapper_page';
 import { SpyRoute } from '../../../utils/route/spy_routes';
 import * as i18n from './translations';
 
@@ -606,8 +606,6 @@ const AllRules = React.memo(() => {
 
         <EuiBasicTable
           columns={columns}
-          // compressed
-          // hasActions={false}
           isSelectable
           itemId="id"
           items={sampleTableData}
@@ -661,20 +659,6 @@ const ActivityMonitor = React.memo(() => {
     field: string;
     direction: string;
   }
-
-  // const actions = [
-  //   {
-  //     render: (item: ColumnTypes) => {
-  //       if (item.status === 'Running') {
-  //         return <LinkIcon iconType="stop">{'Stop'}</LinkIcon>;
-  //       } else if (item.status === 'Stopped') {
-  //         return <LinkIcon iconType="play">{'Resume'}</LinkIcon>;
-  //       } else {
-  //         return <>{''}</>;
-  //       }
-  //     },
-  //   },
-  // ];
 
   const actions = [
     {
@@ -1019,8 +1003,6 @@ const ActivityMonitor = React.memo(() => {
 
         <EuiBasicTable
           columns={columns}
-          // compressed
-          // hasActions={false}
           isSelectable
           itemId="id"
           items={sampleTableData}
@@ -1055,40 +1037,42 @@ ActivityMonitor.displayName = 'ActivityMonitor';
 export const RulesComponent = React.memo(() => {
   return (
     <>
-      <HeaderPage
-        backOptions={{ href: '#detection-engine', text: 'Back to detection engine' }}
-        subtitle="Last completed run: 23 minutes ago"
-        title={i18n.PAGE_TITLE}
-      >
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
-          <EuiFlexItem grow={false}>
-            <EuiButton href="#" iconType="importAction">
-              {'Import rule…'}
-            </EuiButton>
-          </EuiFlexItem>
+      <WrapperPage>
+        <HeaderPage
+          backOptions={{ href: '#detection-engine', text: 'Back to detection engine' }}
+          subtitle="Last completed run: 23 minutes ago"
+          title={i18n.PAGE_TITLE}
+        >
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
+            <EuiFlexItem grow={false}>
+              <EuiButton href="#" iconType="importAction">
+                {'Import rule…'}
+              </EuiButton>
+            </EuiFlexItem>
 
-          <EuiFlexItem grow={false}>
-            <EuiButton fill href="#/detection-engine/rules/create-rule" iconType="plusInCircle">
-              {'Add new rule'}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </HeaderPage>
+            <EuiFlexItem grow={false}>
+              <EuiButton fill href="#/detection-engine/rules/create-rule" iconType="plusInCircle">
+                {'Add new rule'}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </HeaderPage>
 
-      <EuiTabbedContent
-        tabs={[
-          {
-            id: 'tabAllRules',
-            name: 'All rules',
-            content: <AllRules />,
-          },
-          {
-            id: 'tabActivityMonitor',
-            name: 'Activity monitor',
-            content: <ActivityMonitor />,
-          },
-        ]}
-      />
+        <EuiTabbedContent
+          tabs={[
+            {
+              id: 'tabAllRules',
+              name: 'All rules',
+              content: <AllRules />,
+            },
+            {
+              id: 'tabActivityMonitor',
+              name: 'Activity monitor',
+              content: <ActivityMonitor />,
+            },
+          ]}
+        />
+      </WrapperPage>
 
       <SpyRoute />
     </>

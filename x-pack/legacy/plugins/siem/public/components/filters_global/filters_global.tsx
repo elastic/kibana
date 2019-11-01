@@ -22,8 +22,8 @@ const Aside = styled.aside<{ isSticky?: boolean }>`
     z-index: ${props.theme.eui.euiZNavigation};
     background: ${props.theme.eui.euiColorEmptyShade};
     border-bottom: ${props.theme.eui.euiBorderThin};
-    box-sizing: content-box;
-    margin: 0 -${gutterTimeline} 0 -${props.theme.eui.euiSizeL};
+    // box-sizing: content-box;
+    // margin: 0 -${gutterTimeline} 0 -${props.theme.eui.euiSizeL};
     padding: ${props.theme.eui.euiSize} ${gutterTimeline} ${props.theme.eui.euiSize} ${
     props.theme.eui.euiSizeL
   };

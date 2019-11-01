@@ -41,6 +41,7 @@ import {
   UtilityBarSection,
   UtilityBarText,
 } from '../../../components/utility_bar';
+import { WrapperPage } from '../../../components/wrapper_page';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../../containers/source';
 import { SpyRoute } from '../../../utils/route/spy_routes';
 import { DetectionEngineEmptyPage } from '../detection_engine_empty_page';
@@ -509,83 +510,84 @@ export const RuleDetailsComponent = React.memo(() => {
                 <SiemSearchBar id="global" indexPattern={indexPattern} />
               </FiltersGlobal>
 
-              <HeaderPage
-                backOptions={{ href: '#detection-engine/rules', text: 'Back to rules' }}
-                badgeOptions={{ text: 'Experimental' }}
-                border
-                subtitle={[
-                  'Created by: mmarcialis on 12/28/2019, 12:00 PM',
-                  'Updated by: agoldstein on 12/28/2019, 12:00 PM',
-                ]}
-                subtitle2={[
-                  'Last signal: 23 minutes ago',
-                  <ProgressInline current={95000} max={105000} unit="events">
-                    {'Status: Running'}
-                  </ProgressInline>,
-                ]}
-                title="Automated exfiltration"
-              >
-                <EuiFlexGroup alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    <EuiSwitch checked={true} label="Activate rule" onChange={() => {}} />
+              <WrapperPage>
+                <HeaderPage
+                  backOptions={{ href: '#detection-engine/rules', text: 'Back to rules' }}
+                  badgeOptions={{ text: 'Experimental' }}
+                  border
+                  subtitle={[
+                    'Created by: mmarcialis on 12/28/2019, 12:00 PM',
+                    'Updated by: agoldstein on 12/28/2019, 12:00 PM',
+                  ]}
+                  subtitle2={[
+                    'Last signal: 23 minutes ago',
+                    <ProgressInline current={95000} max={105000} unit="events">
+                      {'Status: Running'}
+                    </ProgressInline>,
+                  ]}
+                  title="Automated exfiltration"
+                >
+                  <EuiFlexGroup alignItems="center">
+                    <EuiFlexItem grow={false}>
+                      <EuiSwitch checked={true} label="Activate rule" onChange={() => {}} />
+                    </EuiFlexItem>
+
+                    <EuiFlexItem grow={false}>
+                      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                        <EuiFlexItem grow={false}>
+                          <EuiButton
+                            href="#detection-engine/rules/rule-details/edit-rule"
+                            iconType="visControls"
+                          >
+                            {'Edit rule settings'}
+                          </EuiButton>
+                        </EuiFlexItem>
+
+                        <EuiFlexItem grow={false}>
+                          <EuiPopover
+                            button={
+                              <EuiButtonIcon
+                                aria-label="Additional actions"
+                                iconType="boxesHorizontal"
+                                onClick={() => setPopoverState(!popoverState)}
+                              />
+                            }
+                            closePopover={() => setPopoverState(false)}
+                            isOpen={popoverState}
+                          >
+                            <p>{'Overflow context menu here.'}</p>
+                          </EuiPopover>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </HeaderPage>
+
+                <EuiCallOut
+                  color="danger"
+                  iconType="alert"
+                  size="s"
+                  title="Rule failed to run on 12/28/2019, 12:00 PM"
+                >
+                  <p>{'Full fail message here.'}</p>
+                </EuiCallOut>
+
+                <EuiSpacer />
+
+                <EuiFlexGroup>
+                  <EuiFlexItem component="section" grow={1}>
+                    <EuiPanel>
+                      <HeaderSection title="Definition" />
+                    </EuiPanel>
                   </EuiFlexItem>
 
-                  <EuiFlexItem grow={false}>
-                    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                      <EuiFlexItem grow={false}>
-                        <EuiButton
-                          href="#detection-engine/rules/rule-details/edit-rule"
-                          iconType="visControls"
-                        >
-                          {'Edit rule settings'}
-                        </EuiButton>
-                      </EuiFlexItem>
+                  <EuiFlexItem component="section" grow={2}>
+                    <EuiPanel>
+                      <HeaderSection title="About" />
 
-                      <EuiFlexItem grow={false}>
-                        <EuiPopover
-                          button={
-                            <EuiButtonIcon
-                              aria-label="Additional actions"
-                              iconType="boxesHorizontal"
-                              onClick={() => setPopoverState(!popoverState)}
-                            />
-                          }
-                          closePopover={() => setPopoverState(false)}
-                          isOpen={popoverState}
-                        >
-                          <p>{'Overflow context menu here.'}</p>
-                        </EuiPopover>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </HeaderPage>
+                      {/* <p>{'Description'}</p> */}
 
-              <EuiCallOut
-                color="danger"
-                iconType="alert"
-                size="s"
-                title="Rule failed to run on 12/28/2019, 12:00 PM"
-              >
-                <p>{'Full fail message here.'}</p>
-              </EuiCallOut>
-
-              <EuiSpacer />
-
-              <EuiFlexGroup>
-                <EuiFlexItem component="section" grow={1}>
-                  <EuiPanel>
-                    <HeaderSection title="Definition" />
-                  </EuiPanel>
-                </EuiFlexItem>
-
-                <EuiFlexItem component="section" grow={2}>
-                  <EuiPanel>
-                    <HeaderSection title="About" />
-
-                    {/* <p>{'Description'}</p> */}
-
-                    {/* <EuiFlexGrid columns={2}>
+                      {/* <EuiFlexGrid columns={2}>
                       <EuiFlexItem style={{ flex: '0 0 calc(100% - 24px)' }}>
                         <p>{'Description'}</p>
                       </EuiFlexItem>
@@ -614,39 +616,40 @@ export const RuleDetailsComponent = React.memo(() => {
                         <p>{'Tags'}</p>
                       </EuiFlexItem>
                     </EuiFlexGrid> */}
-                  </EuiPanel>
-                </EuiFlexItem>
+                    </EuiPanel>
+                  </EuiFlexItem>
 
-                <EuiFlexItem component="section" grow={1}>
-                  <EuiPanel>
-                    <HeaderSection title="Schedule" />
-                  </EuiPanel>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+                  <EuiFlexItem component="section" grow={1}>
+                    <EuiPanel>
+                      <HeaderSection title="Schedule" />
+                    </EuiPanel>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
 
-              <EuiSpacer />
+                <EuiSpacer />
 
-              <EuiTabbedContent
-                tabs={[
-                  {
-                    id: 'tabSignals',
-                    name: 'Signals',
-                    content: <Signals />,
-                  },
-                  {
-                    id: 'tabActivityMonitor',
-                    name: 'Activity monitor',
-                    content: <ActivityMonitor />,
-                  },
-                ]}
-              />
+                <EuiTabbedContent
+                  tabs={[
+                    {
+                      id: 'tabSignals',
+                      name: 'Signals',
+                      content: <Signals />,
+                    },
+                    {
+                      id: 'tabActivityMonitor',
+                      name: 'Activity monitor',
+                      content: <ActivityMonitor />,
+                    },
+                  ]}
+                />
+              </WrapperPage>
             </StickyContainer>
           ) : (
-            <>
+            <WrapperPage>
               <HeaderPage border title={i18n.PAGE_TITLE} />
 
               <DetectionEngineEmptyPage />
-            </>
+            </WrapperPage>
           );
         }}
       </WithSource>

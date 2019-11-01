@@ -16,6 +16,7 @@ import React from 'react';
 
 import { HeaderPage } from '../../../components/header_page';
 import { HeaderSection } from '../../../components/header_section';
+import { WrapperPage } from '../../../components/wrapper_page';
 import { SpyRoute } from '../../../utils/route/spy_routes';
 import * as i18n from './translations';
 
@@ -55,14 +56,57 @@ Schedule.displayName = 'Schedule';
 export const EditRuleComponent = React.memo(() => {
   return (
     <>
-      <HeaderPage
-        backOptions={{
-          href: '#detection-engine/rules/rule-details',
-          text: 'Back to automated exfiltration',
-        }}
-        title={i18n.PAGE_TITLE}
-      >
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+      <WrapperPage restrictWidth>
+        <HeaderPage
+          backOptions={{
+            href: '#detection-engine/rules/rule-details',
+            text: 'Back to automated exfiltration',
+          }}
+          title={i18n.PAGE_TITLE}
+        >
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiButton href="#/detection-engine/rules/rule-details" iconType="cross">
+                {'Cancel'}
+              </EuiButton>
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <EuiButton fill href="#/detection-engine/rules/rule-details" iconType="save">
+                {'Save changes'}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </HeaderPage>
+
+        <EuiTabbedContent
+          tabs={[
+            {
+              id: 'tabDefine',
+              name: 'Define',
+              content: <Define />,
+            },
+            {
+              id: 'tabAbout',
+              name: 'About',
+              content: <About />,
+            },
+            {
+              id: 'tabSchedule',
+              name: 'Schedule',
+              content: <Schedule />,
+            },
+          ]}
+        />
+
+        <EuiSpacer />
+
+        <EuiFlexGroup
+          alignItems="center"
+          gutterSize="s"
+          justifyContent="flexEnd"
+          responsive={false}
+        >
           <EuiFlexItem grow={false}>
             <EuiButton href="#/detection-engine/rules/rule-details" iconType="cross">
               {'Cancel'}
@@ -75,43 +119,7 @@ export const EditRuleComponent = React.memo(() => {
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </HeaderPage>
-
-      <EuiTabbedContent
-        tabs={[
-          {
-            id: 'tabDefine',
-            name: 'Define',
-            content: <Define />,
-          },
-          {
-            id: 'tabAbout',
-            name: 'About',
-            content: <About />,
-          },
-          {
-            id: 'tabSchedule',
-            name: 'Schedule',
-            content: <Schedule />,
-          },
-        ]}
-      />
-
-      <EuiSpacer />
-
-      <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="flexEnd" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiButton href="#/detection-engine/rules/rule-details" iconType="cross">
-            {'Cancel'}
-          </EuiButton>
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <EuiButton fill href="#/detection-engine/rules/rule-details" iconType="save">
-            {'Save changes'}
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      </WrapperPage>
 
       <SpyRoute />
     </>

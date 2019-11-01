@@ -20,6 +20,7 @@ import { SiemNavigation } from '../../components/navigation';
 import { KpiHostsComponent } from '../../components/page/hosts';
 import { manageQuery } from '../../components/page/manage_query';
 import { SiemSearchBar } from '../../components/search_bar';
+import { WrapperPage } from '../../components/wrapper_page';
 import { GlobalTimeArgs } from '../../containers/global_time';
 import { KpiHostsQuery } from '../../containers/kpi_hosts';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
@@ -68,61 +69,63 @@ const HostsComponent = React.memo<HostsComponentProps>(
                   <SiemSearchBar indexPattern={indexPattern} id="global" />
                 </FiltersGlobal>
 
-                <HeaderPage
-                  border
-                  subtitle={<LastEventTime indexKey={LastEventIndexKey.hosts} />}
-                  title={i18n.PAGE_TITLE}
-                />
+                <WrapperPage>
+                  <HeaderPage
+                    border
+                    subtitle={<LastEventTime indexKey={LastEventIndexKey.hosts} />}
+                    title={i18n.PAGE_TITLE}
+                  />
 
-                <KpiHostsQuery
-                  endDate={to}
-                  filterQuery={filterQuery}
-                  skip={isInitializing}
-                  sourceId="default"
-                  startDate={from}
-                >
-                  {({ kpiHosts, loading, id, inspect, refetch }) => (
-                    <KpiHostsComponentManage
-                      data={kpiHosts}
-                      from={from}
-                      id={id}
-                      inspect={inspect}
-                      loading={loading}
-                      refetch={refetch}
-                      setQuery={setQuery}
-                      to={to}
-                      narrowDateRange={(min: number, max: number) => {
-                        setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
-                      }}
-                    />
-                  )}
-                </KpiHostsQuery>
+                  <KpiHostsQuery
+                    endDate={to}
+                    filterQuery={filterQuery}
+                    skip={isInitializing}
+                    sourceId="default"
+                    startDate={from}
+                  >
+                    {({ kpiHosts, loading, id, inspect, refetch }) => (
+                      <KpiHostsComponentManage
+                        data={kpiHosts}
+                        from={from}
+                        id={id}
+                        inspect={inspect}
+                        loading={loading}
+                        refetch={refetch}
+                        setQuery={setQuery}
+                        to={to}
+                        narrowDateRange={(min: number, max: number) => {
+                          setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
+                        }}
+                      />
+                    )}
+                  </KpiHostsQuery>
 
-                <EuiSpacer />
+                  <EuiSpacer />
 
-                <SiemNavigation navTabs={navTabsHosts(hasMlUserPermissions(capabilities))} />
+                  <SiemNavigation navTabs={navTabsHosts(hasMlUserPermissions(capabilities))} />
 
-                <EuiSpacer />
+                  <EuiSpacer />
 
-                <HostsTabs
-                  deleteQuery={deleteQuery}
-                  to={to}
-                  filterQuery={filterQuery}
-                  isInitializing={isInitializing}
-                  setQuery={setQuery}
-                  from={from}
-                  type={hostsModel.HostsType.page}
-                  indexPattern={indexPattern}
-                  setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
-                  hostsPagePath={hostsPagePath}
-                />
+                  <HostsTabs
+                    deleteQuery={deleteQuery}
+                    to={to}
+                    filterQuery={filterQuery}
+                    isInitializing={isInitializing}
+                    setQuery={setQuery}
+                    from={from}
+                    type={hostsModel.HostsType.page}
+                    indexPattern={indexPattern}
+                    setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
+                    hostsPagePath={hostsPagePath}
+                  />
+                </WrapperPage>
               </StickyContainer>
             ) : (
-              <>
+              <WrapperPage>
                 <HeaderPage border title={i18n.PAGE_TITLE} />
 
                 <HostsEmptyPage />
-              </>
+              </WrapperPage>
             );
           }}
         </WithSource>
