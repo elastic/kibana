@@ -4,11 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FC, useState, useEffect } from 'react';
+import React, { Fragment, FC, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiButtonEmpty, EuiCallOut, EuiEmptyPrompt } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+} from '@elastic/eui';
 
 import { DataFrameAnalyticsId, useRefreshAnalyticsList } from '../../../../common';
 import { checkPermission } from '../../../../../privilege/check_privilege';
@@ -22,7 +29,6 @@ import {
   Query,
   Clause,
 } from './common';
-import { ActionDispatchers } from '../../hooks/use_create_analytics_form/actions';
 import { getAnalyticsFactory } from '../../services/analytics_service';
 import { getColumns } from './columns';
 import { ExpandedRow } from './expanded_row';
@@ -33,7 +39,9 @@ import {
   SortDirection,
   SORT_DIRECTION,
 } from '../../../../../components/ml_in_memory_table';
-import { AnalyticStatsBarStats } from '../../../../../components/stats_bar';
+import { AnalyticStatsBarStats, StatsBar } from '../../../../../components/stats_bar';
+import { RefreshAnalyticsListButton } from '../refresh_analytics_list_button';
+import { CreateAnalyticsButton } from '../create_analytics_button';
 
 function getItemIdToExpandedRowMap(
   itemIds: DataFrameAnalyticsId[],
@@ -60,19 +68,16 @@ function stringMatch(str: string | undefined, substr: string) {
 }
 
 interface Props {
-  isManagementTable?: boolean;
+  allowCreate?: boolean;
   isMlEnabledInSpace?: boolean;
   blockRefresh?: boolean;
-  openCreateJobModal?: ActionDispatchers['openModal'];
-  onJobStatsChange?: (stats: AnalyticStatsBarStats | undefined) => void;
+  createAnalyticsForm?: any;
 }
-// isManagementTable - for use in Kibana managagement ML section
 export const DataFrameAnalyticsList: FC<Props> = ({
-  isManagementTable = false,
+  allowCreate = true,
   isMlEnabledInSpace = true,
   blockRefresh = false,
-  openCreateJobModal,
-  onJobStatsChange,
+  createAnalyticsForm,
 }) => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -105,12 +110,6 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     setIsInitialized,
     blockRefresh
   );
-
-  useEffect(() => {
-    if (onJobStatsChange) {
-      onJobStatsChange(analyticsStats);
-    }
-  }, [analyticsStats]);
 
   // Subscribe to the refresh observable to trigger reloading the analytics list.
   useRefreshAnalyticsList({
@@ -227,9 +226,12 @@ export const DataFrameAnalyticsList: FC<Props> = ({
             </h2>
           }
           actions={
-            !isManagementTable && openCreateJobModal !== undefined
+            !allowCreate
               ? [
-                  <EuiButtonEmpty onClick={openCreateJobModal} isDisabled={disabled}>
+                  <EuiButtonEmpty
+                    onClick={createAnalyticsForm.actions.openModal}
+                    isDisabled={disabled}
+                  >
                     {i18n.translate('xpack.ml.dataFrame.analyticsList.emptyPromptButtonText', {
                       defaultMessage: 'Create your first data frame analytics job',
                     })}
@@ -246,7 +248,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   const columns = getColumns(
     expandedRowItemIds,
     setExpandedRowItemIds,
-    isManagementTable,
+    allowCreate,
     isMlEnabledInSpace
   );
 
@@ -324,7 +326,28 @@ export const DataFrameAnalyticsList: FC<Props> = ({
 
   return (
     <Fragment>
-      <ProgressBar isLoading={isLoading} />
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
+          {analyticsStats && (
+            <EuiFlexItem grow={false}>
+              <StatsBar stats={analyticsStats} dataTestSub={'mlAnalyticsStatsBar'} />
+            </EuiFlexItem>
+          )}
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <RefreshAnalyticsListButton />
+            </EuiFlexItem>
+            {allowCreate && (
+              <EuiFlexItem grow={false}>
+                <CreateAnalyticsButton {...createAnalyticsForm} />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
       <MlInMemoryTable
         allowNeutralSort={false}
         className="mlAnalyticsTable"

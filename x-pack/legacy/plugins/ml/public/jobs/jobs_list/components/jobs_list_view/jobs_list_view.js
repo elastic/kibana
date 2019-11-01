@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
+import React, { Component } from 'react';
 import { timefilter } from 'ui/timefilter';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { ml } from 'plugins/ml/services/ml_api_service';
-import { loadFullJob, filterJobs, checkForAutoStartDatafeed } from '../utils';
+import { checkForAutoStartDatafeed, filterJobs, loadFullJob } from '../utils';
 import { JobsList } from '../jobs_list';
 import { JobDetails } from '../job_details';
 import { JobFilterBar } from '../job_filter_bar';
@@ -26,21 +27,9 @@ import { isEqual } from 'lodash';
 
 import {
   DEFAULT_REFRESH_INTERVAL_MS,
-  MINIMUM_REFRESH_INTERVAL_MS,
   DELETING_JOBS_REFRESH_INTERVAL_MS,
+  MINIMUM_REFRESH_INTERVAL_MS,
 } from '../../../../../common/constants/jobs_list';
-
-import React, {
-  Component
-} from 'react';
-
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 
 
 let jobsRefreshInterval =  null;
@@ -446,14 +435,6 @@ export class JobsListView extends Component {
     return (
       <React.Fragment>
         <div className="job-management" data-test-subj="ml-jobs-list">
-          <EuiTitle>
-            <h1>
-              <FormattedMessage
-                id="xpack.ml.jobsList.title"
-                defaultMessage="Anomaly Detection"
-              />
-            </h1>
-          </EuiTitle>
 
           <NodeAvailableWarning />
 
@@ -473,7 +454,7 @@ export class JobsListView extends Component {
                     isRefreshing={isRefreshing}
                   />
                 </EuiFlexItem>
-                {isManagementTable === undefined &&
+                {!isManagementTable &&
                 <EuiFlexItem grow={false}>
                   <NewJobButton />
                 </EuiFlexItem>}
