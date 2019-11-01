@@ -234,7 +234,7 @@ const SearchBarComponent = memo<SiemSearchBarProps & SiemSearchBarRedux & SiemSe
           savedQuery: undefined,
         });
       }
-    }, [id, end, fromStr, start, toStr]);
+    }, [id, end, fromStr, start, toStr, savedQuery]);
 
     useEffect(() => {
       let isSubscribed = true;

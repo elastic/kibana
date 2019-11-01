@@ -26,8 +26,10 @@ interface QueryBarComponentProps {
   filterQuery: Query;
   filterManager: FilterManager;
   filters: Filter[];
+  isRefreshPaused?: boolean;
   onChangedQuery: (query: Query) => void;
   onSubmitQuery: (query: Query, timefilter?: SavedQueryTimeFilter) => void;
+  refreshInterval?: number;
   savedQuery?: SavedQuery | null;
   onSavedQuery: (savedQuery: SavedQuery | null) => void;
 }
@@ -38,11 +40,13 @@ export const QueryBar = memo<QueryBarComponentProps>(
     dateRangeTo,
     hideSavedQuery = false,
     indexPattern,
+    isRefreshPaused,
     filterQuery,
     filterManager,
     filters,
     onChangedQuery,
     onSubmitQuery,
+    refreshInterval,
     savedQuery,
     onSavedQuery,
   }) => {
@@ -118,6 +122,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
         dateRangeTo={dateRangeTo}
         filters={filters}
         indexPatterns={indexPatterns}
+        isRefreshPaused={isRefreshPaused}
         query={draftQuery}
         onClearSavedQuery={onClearSavedQuery}
         onFiltersUpdated={onFiltersUpdated}
@@ -125,6 +130,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
         onQuerySubmit={onQuerySubmit}
         onSaved={onSaved}
         onSavedQueryUpdated={onSavedQueryUpdated}
+        refreshInterval={refreshInterval}
         showAutoRefreshOnly={false}
         showFilterBar={!hideSavedQuery}
         showDatePicker={false}

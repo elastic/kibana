@@ -195,6 +195,8 @@ export interface FilterTimelineInput {
   query?: Maybe<string>;
 
   exists?: Maybe<string>;
+
+  bool?: Maybe<string>;
 }
 
 export interface FilterMetaTimelineInput {
@@ -1909,6 +1911,8 @@ export interface FilterTimelineResult {
   query?: Maybe<string>;
 
   exists?: Maybe<string>;
+
+  bool?: Maybe<string>;
 }
 
 export interface FilterMetaTimelineResult {
@@ -5105,6 +5109,8 @@ export namespace GetOneTimeline {
     query: Maybe<string>;
 
     exists: Maybe<string>;
+
+    bool: Maybe<string>;
   };
 
   export type Meta = {
@@ -5369,6 +5375,8 @@ export namespace PersistTimelineMutation {
     query: Maybe<string>;
 
     exists: Maybe<string>;
+
+    bool: Maybe<string>;
   };
 
   export type Meta = {

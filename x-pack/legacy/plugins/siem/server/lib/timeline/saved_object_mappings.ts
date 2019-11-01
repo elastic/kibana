@@ -185,6 +185,9 @@ export const timelineSavedObjectMappings: {
           exists: {
             type: 'text',
           },
+          bool: {
+            type: 'text',
+          },
         },
       },
       kqlMode: {

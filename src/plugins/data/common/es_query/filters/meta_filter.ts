@@ -50,6 +50,7 @@ export interface Filter {
   meta: FilterMeta;
   query?: any;
   exists?: any;
+  bool?: any;
 }
 
 export interface LatLon {

@@ -74,6 +74,7 @@ export const persistTimelineMutation = gql`
           }
           query
           exists
+          bool
         }
         kqlMode
         kqlQuery {

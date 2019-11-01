@@ -40,7 +40,9 @@ interface StateReduxProps {
   filterQueryDraft: KueryFilterQuery;
   from: number;
   fromStr: string;
-  kqlMode?: KqlMode;
+  isRefreshPaused: boolean;
+  kqlMode: KqlMode;
+  refreshInterval: number;
   savedQueryId: string | null;
   to: number;
   toStr: string;
@@ -80,7 +82,9 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
     from,
     fromStr,
     indexPattern,
+    isRefreshPaused,
     kqlMode,
+    refreshInterval,
     savedQueryId,
     setFilters,
     setKqlFilterQueryDraft,
@@ -147,7 +151,9 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
         from={from}
         fromStr={fromStr}
         indexPattern={indexPattern}
+        isRefreshPaused={isRefreshPaused}
         kqlMode={kqlMode!}
+        refreshInterval={refreshInterval}
         savedQueryId={savedQueryId}
         setFilters={setFiltersInTimeline}
         setKqlFilterQueryDraft={setFilterQueryDraftFromKueryExpression!}
@@ -162,6 +168,13 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
   },
   (prevProps, nextProps) => {
     return (
+      prevProps.from === nextProps.from &&
+      prevProps.fromStr === nextProps.fromStr &&
+      prevProps.to === nextProps.to &&
+      prevProps.toStr === nextProps.toStr &&
+      prevProps.isRefreshPaused === nextProps.isRefreshPaused &&
+      prevProps.refreshInterval === nextProps.refreshInterval &&
+      prevProps.timelineId === nextProps.timelineId &&
       isEqual(prevProps.browserFields, nextProps.browserFields) &&
       isEqual(prevProps.dataProviders, nextProps.dataProviders) &&
       isEqual(prevProps.filters, nextProps.filters) &&
@@ -181,9 +194,11 @@ const makeMapStateToProps = () => {
   const getKqlFilterQueryDraft = timelineSelectors.getKqlFilterQueryDraftSelector();
   const getKqlFilterQuery = timelineSelectors.getKqlFilterKuerySelector();
   const getInputsTimeline = inputsSelectors.getTimelineSelector();
+  const getInputsPolicy = inputsSelectors.getTimelinePolicySelector();
   const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
     const timeline: TimelineModel = getTimeline(state, timelineId);
     const input: inputsModel.InputsRange = getInputsTimeline(state);
+    const policy: inputsModel.Policy = getInputsPolicy(state);
     return {
       dataProviders: timeline.dataProviders,
       filterQuery: getKqlFilterQuery(state, timelineId),
@@ -191,7 +206,9 @@ const makeMapStateToProps = () => {
       filters: timeline.filters,
       from: input.timerange.from,
       fromStr: input.timerange.fromStr,
+      isRefreshPaused: policy.kind === 'manual',
       kqlMode: getOr('filter', 'kqlMode', timeline),
+      refreshInterval: policy.duration,
       savedQueryId: getOr(null, 'savedQueryId', timeline),
       to: input.timerange.to,
       toStr: input.timerange.toStr,

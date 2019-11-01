@@ -37,6 +37,8 @@ interface QueryBarTimelineComponentProps {
   fromStr: string;
   kqlMode: KqlMode;
   indexPattern: StaticIndexPattern;
+  isRefreshPaused: boolean;
+  refreshInterval: number;
   savedQueryId: string | null;
   setFilters: (filters: Filter[]) => void;
   setKqlFilterQueryDraft: (expression: string, kind: KueryFilterQueryKind) => void;
@@ -61,10 +63,12 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
     fromStr,
     kqlMode,
     indexPattern,
+    isRefreshPaused,
     savedQueryId,
     setFilters,
     setKqlFilterQueryDraft,
     setSavedQueryId,
+    refreshInterval,
     timelineId,
     to,
     toStr,
@@ -270,11 +274,13 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
         dateRangeTo={dateRangeTo}
         hideSavedQuery={kqlMode === 'search'}
         indexPattern={indexPattern}
+        isRefreshPaused={isRefreshPaused}
         filterQuery={filterQueryConverted}
         filterManager={filterManager}
         filters={queryBarFilters}
         onChangedQuery={onChangedQuery}
         onSubmitQuery={onSubmitQuery}
+        refreshInterval={refreshInterval}
         savedQuery={savedQuery}
         onSavedQuery={onSavedQuery}
       />

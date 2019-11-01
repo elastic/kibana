@@ -120,8 +120,9 @@ export const defaultTimelineToTimelineModel = (
                 ? { value: parseString(filter.meta.value) }
                 : {}),
             },
-            ...(filter.query != null ? { query: parseString(filter.query) } : {}),
+            ...(filter.bool != null ? { exists: parseString(filter.bool) } : {}),
             ...(filter.exists != null ? { exists: parseString(filter.exists) } : {}),
+            ...(filter.query != null ? { query: parseString(filter.query) } : {}),
           }))
         : [],
     isFavorite: duplicate

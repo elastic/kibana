@@ -257,7 +257,7 @@ const timelineInput: TimelineInput = {
   sort: null,
 };
 
-const convertTimelineAsInput = (
+export const convertTimelineAsInput = (
   timeline: TimelineModel,
   timelineTimeRange: TimeRange
 ): TimelineInput =>
@@ -293,12 +293,15 @@ const convertTimelineAsInput = (
                         ? convertToString(basicFilter.meta.params)
                         : null,
                   },
-                  ...(basicFilter.query != null
-                    ? { query: convertToString(basicFilter.query) }
-                    : { query: null }),
+                  ...(basicFilter.bool != null
+                    ? { bool: convertToString(basicFilter.bool) }
+                    : { bool: null }),
                   ...(basicFilter.exists != null
                     ? { exists: convertToString(basicFilter.exists) }
                     : { exists: null }),
+                  ...(basicFilter.query != null
+                    ? { query: convertToString(basicFilter.query) }
+                    : { query: null }),
                 };
               })
             : [],

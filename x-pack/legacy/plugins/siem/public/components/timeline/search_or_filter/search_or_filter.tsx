@@ -50,9 +50,11 @@ interface Props {
   from: number;
   fromStr: string;
   indexPattern: StaticIndexPattern;
+  isRefreshPaused: boolean;
   kqlMode: KqlMode;
   timelineId: string;
   updateKqlMode: ({ id, kqlMode }: { id: string; kqlMode: KqlMode }) => void;
+  refreshInterval: number;
   setFilters: (filters: Filter[]) => void;
   setKqlFilterQueryDraft: (expression: string, kind: KueryFilterQueryKind) => void;
   setSavedQueryId: (savedQueryId: string | null) => void;
@@ -90,6 +92,7 @@ export const SearchOrFilter = pure<Props>(
     browserFields,
     dataProviders,
     indexPattern,
+    isRefreshPaused,
     filters,
     filterQuery,
     filterQueryDraft,
@@ -97,6 +100,7 @@ export const SearchOrFilter = pure<Props>(
     fromStr,
     kqlMode,
     timelineId,
+    refreshInterval,
     savedQueryId,
     setFilters,
     setKqlFilterQueryDraft,
@@ -134,6 +138,8 @@ export const SearchOrFilter = pure<Props>(
             fromStr={fromStr}
             kqlMode={kqlMode}
             indexPattern={indexPattern}
+            isRefreshPaused={isRefreshPaused}
+            refreshInterval={refreshInterval}
             savedQueryId={savedQueryId}
             setFilters={setFilters}
             setKqlFilterQueryDraft={setKqlFilterQueryDraft}

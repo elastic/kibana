@@ -117,6 +117,7 @@ export const timelineSchema = gql`
     meta: FilterMetaTimelineInput
     query: String
     exists: String
+    bool: String
   }
 
   input TimelineInput {
@@ -203,6 +204,7 @@ export const timelineSchema = gql`
     meta: FilterMetaTimelineResult
     query: String
     exists: String
+    bool: String
   }
 
   type TimelineResult {
