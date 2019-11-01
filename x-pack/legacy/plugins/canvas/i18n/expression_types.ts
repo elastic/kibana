@@ -101,6 +101,10 @@ export const ArgTypesStrings = {
       i18n.translate('xpack.canvas.expressionTypes.argTypes.seriesStyle.colorLabel', {
         defaultMessage: 'Color',
       }),
+    getColorValueDefault: () =>
+      i18n.translate('xpack.canvas.expressionTypes.argTypes.seriesStyle.colorValueDefault', {
+        defaultMessage: 'Auto',
+      }),
     getStyleLabel: () =>
       i18n.translate('xpack.canvas.expressionTypes.argTypes.seriesStyle.styleLabel', {
         defaultMessage: 'Style',

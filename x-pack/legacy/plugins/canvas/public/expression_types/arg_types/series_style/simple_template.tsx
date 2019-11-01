@@ -55,10 +55,10 @@ export const SimpleTemplate: FunctionComponent<Props> = props => {
           <EuiFlexItem grow={false}>
             <EuiText size="xs">
               <EuiLink
-                aria-label={`${strings.getColorLabel()}: Auto`}
+                aria-label={`${strings.getColorLabel()}: ${strings.getColorValueDefault()}`}
                 onClick={() => handleChange('color', '#000000')}
               >
-                Auto
+                {strings.getColorValueDefault()}
               </EuiLink>
             </EuiText>
           </EuiFlexItem>
