@@ -123,6 +123,7 @@ export class DataPlugin implements Plugin<DataSetup, DataStart, {}, DataPluginSt
 
     uiActions.registerAction(
       createFilterAction(
+        core.overlays,
         data.query.filterManager,
         this.setupApi.timefilter.timefilter,
         indexPatternsService

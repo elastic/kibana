@@ -18,6 +18,7 @@
  */
 
 import {
+  auto,
   ICompileProvider,
   IHttpProvider,
   IHttpService,
@@ -52,7 +53,12 @@ function isDummyWrapperRoute($route: any) {
   );
 }
 
+<<<<<<< HEAD
 export const configureAppAngularModule = (angularModule: IModule, newPlatform: LegacyCoreStart) => {
+=======
+export const configureAppAngularModule = (angularModule: IModule) => {
+  const newPlatform = npStart.core;
+>>>>>>> kibana/master
   const legacyMetadata = newPlatform.injectedMetadata.getLegacyMetadata();
 
   forOwn(newPlatform.injectedMetadata.getInjectedVars(), (val, name) => {
@@ -333,7 +339,7 @@ const $setupHelpExtensionAutoClear = (newPlatform: CoreStart) => (
 const $setupUrlOverflowHandling = (newPlatform: CoreStart) => (
   $location: ILocationService,
   $rootScope: IRootScopeService,
-  $injector: any
+  $injector: auto.IInjectorService
 ) => {
   const $route = $injector.has('$route') ? $injector.get('$route') : {};
   const urlOverflow = new UrlOverflowService();
