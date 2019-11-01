@@ -16,7 +16,7 @@ Follow these steps to use `encryptedSavedObjects` in your plugin:
 ```json
 {
   ...
-  "requiredPlugins": [encryptedSavedObjects],
+  "requiredPlugins": ["encryptedSavedObjects"],
   ...
 }
 ```
