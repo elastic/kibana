@@ -42,6 +42,7 @@ export interface Action {
   id: string;
   actionTypeId: string;
   description: string;
+  referencedByCount: number;
   config: Record<string, any>;
 }
 
@@ -62,6 +63,7 @@ export interface AlertAction {
 
 export interface Alert {
   id: string;
+  name: string;
   enabled: boolean;
   alertTypeId: string;
   interval: string;

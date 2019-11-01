@@ -5,7 +5,7 @@
  */
 
 import React, { Fragment, useState, useEffect } from 'react';
-import { EuiInMemoryTable, EuiSpacer, EuiButton } from '@elastic/eui';
+import { EuiBadge, EuiInMemoryTable, EuiSpacer, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ActionsContext } from '../../../context/actions_context';
@@ -118,24 +118,36 @@ export const ActionsList: React.FunctionComponent = () => {
     {
       field: 'actionType',
       name: i18n.translate(
-        'xpack.alertingUI.sections.actionsList.actionsListTable.columns.actionType',
+        'xpack.alertingUI.sections.actionsList.actionsListTable.columns.actionTypeTitle',
         {
           defaultMessage: 'Type',
         }
       ),
-      sortable: true,
+      sortable: false,
       truncateText: true,
     },
     {
       field: 'description',
       name: i18n.translate(
-        'xpack.alertingUI.sections.actionsList.actionsListTable.columns.description',
+        'xpack.alertingUI.sections.actionsList.actionsListTable.columns.descriptionTitle',
         {
           defaultMessage: 'Title',
         }
       ),
-      sortable: true,
+      sortable: false,
       truncateText: true,
+    },
+    {
+      field: 'referencedByCount',
+      name: i18n.translate(
+        'xpack.alertingUI.sections.actionsList.actionsListTable.columns.referencedByCountTitle',
+        { defaultMessage: 'Attached actions' }
+      ),
+      sortable: false,
+      truncateText: true,
+      render: (value: number, item: ActionTableItem) => {
+        return <EuiBadge>{value}</EuiBadge>;
+      },
     },
     {
       name: i18n.translate(
