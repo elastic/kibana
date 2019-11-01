@@ -27,7 +27,7 @@ import { toggleSetupMode } from '../../lib/setup_mode';
 import { EmailActionData, ManageEmailAction } from './manage_email_action';
 import { getMissingFieldErrors } from '../../lib/form_validation';
 
-interface AlertsConfigurationProps {
+export interface AlertsConfigurationProps {
   clusterUuid: string;
   emailAddress: string;
   onDone: Function;
@@ -96,6 +96,7 @@ export const AlertsConfiguration: React.FC<AlertsConfigurationProps> = (
           secrets: pick(data, ['user', 'password']),
         }),
       });
+      setEditAction(null);
     } else {
       await kfetch({
         method: 'POST',

@@ -89,7 +89,6 @@ export const ManageEmailAction: React.FC<ManageActionModalProps> = (
           general: err.body.message,
         });
       }
-      setIsSaving(false);
     }
   }
 
