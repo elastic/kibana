@@ -81,6 +81,12 @@ const ToolbarTranslations = {
   Count: i18n.translate('xpack.infra.waffle.metricOptions.countText', {
     defaultMessage: 'Count',
   }),
+  DiskIOReadBytes: i18n.translate('xpack.infra.waffle.metricOptions.diskIOReadBytes', {
+    defaultMessage: 'Disk Reads',
+  }),
+  DiskIOWriteBytes: i18n.translate('xpack.infra.waffle.metricOptions.diskIOWriteBytes', {
+    defaultMessage: 'Disk Writes',
+  }),
 };
 
 export const toGroupByOpt = (field: string) => ({
@@ -125,6 +131,16 @@ export const toMetricOpt = (metric: InfraSnapshotMetricType) => {
       return {
         text: ToolbarTranslations.Count,
         value: InfraSnapshotMetricType.count,
+      };
+    case InfraSnapshotMetricType.diskIOReadBytes:
+      return {
+        text: ToolbarTranslations.DiskIOReadBytes,
+        value: InfraSnapshotMetricType.diskIOReadBytes,
+      };
+    case InfraSnapshotMetricType.diskIOWriteBytes:
+      return {
+        text: ToolbarTranslations.DiskIOWriteBytes,
+        value: InfraSnapshotMetricType.diskIOWriteBytes,
       };
   }
 };

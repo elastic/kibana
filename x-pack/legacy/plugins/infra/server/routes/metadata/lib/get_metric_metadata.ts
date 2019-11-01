@@ -12,8 +12,7 @@ import {
   InfraMetadataAggregationResponse,
 } from '../../../lib/adapters/framework';
 import { InfraSourceConfiguration } from '../../../lib/sources';
-import { getIdFieldName } from './get_id_field_name';
-import { NAME_FIELDS } from '../../../lib/constants';
+import { findInventoryFields } from '../../../../common/inventory_models';
 
 export interface InfraMetricsAdapterResponse {
   id: string;
@@ -28,8 +27,7 @@ export const getMetricMetadata = async (
   nodeId: string,
   nodeType: 'host' | 'pod' | 'container'
 ): Promise<InfraMetricsAdapterResponse> => {
-  const idFieldName = getIdFieldName(sourceConfiguration, nodeType);
-
+  const fields = findInventoryFields(nodeType, sourceConfiguration.fields);
   const metricQuery = {
     allowNoIndices: true,
     ignoreUnavailable: true,
@@ -40,7 +38,7 @@ export const getMetricMetadata = async (
           must_not: [{ match: { 'event.dataset': 'aws.ec2' } }],
           filter: [
             {
-              match: { [idFieldName]: nodeId },
+              match: { [fields.id]: nodeId },
             },
           ],
         },
@@ -49,7 +47,7 @@ export const getMetricMetadata = async (
       aggs: {
         nodeName: {
           terms: {
-            field: NAME_FIELDS[nodeType],
+            field: fields.ip,
             size: 1,
           },
         },

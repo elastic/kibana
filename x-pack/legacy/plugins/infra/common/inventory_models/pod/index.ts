@@ -11,6 +11,11 @@ import { nginx as nginxRequiredMetrics } from '../shared/metrics/required_metric
 export const pod: InventoryModel = {
   id: 'pod',
   requiredModules: ['kubernetes'],
+  fields: {
+    id: 'kubernetes.pod.uid',
+    name: 'kubernetes.pod.name',
+    ip: 'kubernetes.pod.ip',
+  },
   metrics,
   requiredMetrics: [
     'podOverview',

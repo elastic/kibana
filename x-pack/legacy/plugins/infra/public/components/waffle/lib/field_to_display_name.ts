@@ -10,6 +10,14 @@ interface Lookup {
   [id: string]: string;
 }
 
+const availabilityZoneName = i18n.translate('xpack.infra.groupByDisplayNames.availabilityZone', {
+  defaultMessage: 'Availability zone',
+});
+
+const machineTypeName = i18n.translate('xpack.infra.groupByDisplayNames.machineType', {
+  defaultMessage: 'Machine type',
+});
+
 export const fieldToName = (field: string) => {
   const LOOKUP: Lookup = {
     'kubernetes.namespace': i18n.translate('xpack.infra.groupByDisplayNames.kubernetesNamespace', {
@@ -21,12 +29,8 @@ export const fieldToName = (field: string) => {
     'host.name': i18n.translate('xpack.infra.groupByDisplayNames.hostName', {
       defaultMessage: 'Host',
     }),
-    'cloud.availability_zone': i18n.translate('xpack.infra.groupByDisplayNames.availabilityZone', {
-      defaultMessage: 'Availability zone',
-    }),
-    'cloud.machine.type': i18n.translate('xpack.infra.groupByDisplayNames.machineType', {
-      defaultMessage: 'Machine type',
-    }),
+    'cloud.availability_zone': availabilityZoneName,
+    'cloud.machine.type': machineTypeName,
     'cloud.project.id': i18n.translate('xpack.infra.groupByDisplayNames.projectID', {
       defaultMessage: 'Project ID',
     }),
@@ -35,6 +39,17 @@ export const fieldToName = (field: string) => {
     }),
     'service.type': i18n.translate('xpack.infra.groupByDisplayNames.serviceType', {
       defaultMessage: 'Service type',
+    }),
+    'aws.cloud.availability_zone': availabilityZoneName,
+    'aws.cloud.machine.type': machineTypeName,
+    'aws.tags': i18n.translate('xpack.infra.groupByDisplayNames.tags', {
+      defaultMessage: 'Tags',
+    }),
+    'aws.ec2.instance.image.id': i18n.translate('xpack.infra.groupByDisplayNames.image', {
+      defaultMessage: 'Image',
+    }),
+    'aws.ec2.instance.state.name': i18n.translate('xpack.infra.groupByDisplayNames.state.name', {
+      defaultMessage: 'State',
     }),
   };
   return LOOKUP[field] || field;

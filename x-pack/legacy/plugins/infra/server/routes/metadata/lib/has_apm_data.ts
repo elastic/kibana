@@ -9,7 +9,7 @@ import {
   InfraBackendFrameworkAdapter,
 } from '../../../lib/adapters/framework';
 import { InfraSourceConfiguration } from '../../../lib/sources';
-import { getIdFieldName } from './get_id_field_name';
+import { findInventoryFields } from '../../../../common/inventory_models';
 
 export const hasAPMData = async (
   framework: InfraBackendFrameworkAdapter,
@@ -20,10 +20,10 @@ export const hasAPMData = async (
 ) => {
   const config = framework.config(req);
   const apmIndex = config.get('apm_oss.transactionIndices') || 'apm-*';
+  const fields = findInventoryFields(nodeType, sourceConfiguration.fields);
   // There is a bug in APM ECS data where host.name is not set.
   // This will fixed with: https://github.com/elastic/apm-server/issues/2502
-  const nodeFieldName =
-    nodeType === 'host' ? 'host.hostname' : getIdFieldName(sourceConfiguration, nodeType);
+  const nodeFieldName = nodeType === 'host' ? 'host.hostname' : fields.id;
   const params = {
     allowNoIndices: true,
     ignoreUnavailable: true,

@@ -580,6 +580,7 @@ export enum InfraNodeType {
   pod = 'pod',
   container = 'container',
   host = 'host',
+  awsEC2 = 'awsEC2',
 }
 
 export enum InfraSnapshotMetricType {
@@ -590,6 +591,8 @@ export enum InfraSnapshotMetricType {
   tx = 'tx',
   rx = 'rx',
   logRate = 'logRate',
+  diskIOReadBytes = 'diskIOReadBytes',
+  diskIOWriteBytes = 'diskIOWriteBytes',
 }
 
 export enum InfraMetric {

@@ -267,6 +267,8 @@ export const SnapshotMetricTypeRT = rt.keyof({
   tx: null,
   rx: null,
   logRate: null,
+  diskIOReadBytes: null,
+  diskIOWriteBytes: null,
 });
 
 export type SnapshotMetricType = rt.TypeOf<typeof SnapshotMetricTypeRT>;
@@ -280,6 +282,11 @@ export interface InventoryMetrics {
 export interface InventoryModel {
   id: string;
   requiredModules: string[];
+  fields: {
+    id: string;
+    name: string;
+    ip: string;
+  };
   metrics: InventoryMetrics;
   requiredMetrics: InventoryMetric[];
 }

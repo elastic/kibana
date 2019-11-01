@@ -10,6 +10,11 @@ import { InventoryModel } from '../types';
 export const container: InventoryModel = {
   id: 'container',
   requiredModules: ['docker'],
+  fields: {
+    id: 'container.id',
+    name: 'container.name',
+    ip: 'continaer.ip_address',
+  },
   metrics,
   requiredMetrics: [
     'containerOverview',

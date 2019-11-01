@@ -14,7 +14,7 @@ import { InfraNodeType } from '../../../graphql/types';
 import { InfraMetadataInfo } from '../../../../common/http_api/metadata_api';
 import { getPodNodeName } from './get_pod_node_name';
 import { CLOUD_METRICS_MODULES } from '../../../lib/constants';
-import { getIdFieldName } from './get_id_field_name';
+import { findInventoryFields } from '../../../../common/inventory_models';
 
 export const getNodeInfo = async (
   framework: InfraBackendFrameworkAdapter,
@@ -47,6 +47,7 @@ export const getNodeInfo = async (
     }
     return {};
   }
+  const fields = findInventoryFields(nodeType, sourceConfiguration.fields);
   const params = {
     allowNoIndices: true,
     ignoreUnavailable: true,
@@ -58,7 +59,7 @@ export const getNodeInfo = async (
       query: {
         bool: {
           must_not: CLOUD_METRICS_MODULES.map(module => ({ match: { 'event.module': module } })),
-          filter: [{ match: { [getIdFieldName(sourceConfiguration, nodeType)]: nodeId } }],
+          filter: [{ match: { [fields.id]: nodeId } }],
         },
       },
     },

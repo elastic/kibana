@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPopover, EuiContextMenu, EuiFilterButton, EuiFilterGroup } from '@elastic/eui';
+import {
+  EuiPopover,
+  EuiContextMenu,
+  EuiFilterButton,
+  EuiFilterGroup,
+  EuiContextMenuPanelDescriptor,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import React, { useCallback, useState, useMemo } from 'react';
@@ -43,31 +49,48 @@ export const WaffleInventorySwitcher = (props: Props) => {
   const goToHost = useCallback(() => goToNodeType('host' as InfraNodeType), [goToNodeType]);
   const goToK8 = useCallback(() => goToNodeType('pod' as InfraNodeType), [goToNodeType]);
   const goToDocker = useCallback(() => goToNodeType('container' as InfraNodeType), [goToNodeType]);
+  const goToAwsEC2 = useCallback(() => goToNodeType('awsEC2' as InfraNodeType), [goToNodeType]);
   const panels = useMemo(
-    () => [
-      {
-        id: 0,
-        items: [
-          {
-            name: i18n.translate('xpack.infra.waffle.nodeTypeSwitcher.hostsLabel', {
-              defaultMessage: 'Hosts',
-            }),
-            icon: 'host',
-            onClick: goToHost,
-          },
-          {
-            name: 'Kubernetes',
-            icon: 'kubernetes',
-            onClick: goToK8,
-          },
-          {
-            name: 'Docker',
-            icon: 'docker',
-            onClick: goToDocker,
-          },
-        ],
-      },
-    ],
+    () =>
+      [
+        {
+          id: 'firstPanel',
+          items: [
+            {
+              name: i18n.translate('xpack.infra.waffle.nodeTypeSwitcher.hostsLabel', {
+                defaultMessage: 'Hosts',
+              }),
+              icon: 'host',
+              onClick: goToHost,
+            },
+            {
+              name: 'Kubernetes',
+              icon: 'kubernetes',
+              onClick: goToK8,
+            },
+            {
+              name: 'Docker',
+              icon: 'docker',
+              onClick: goToDocker,
+            },
+            {
+              name: 'AWS',
+              icon: 'aws',
+              panel: 'awsPanel',
+            },
+          ],
+        },
+        {
+          id: 'awsPanel',
+          title: 'AWS',
+          items: [
+            {
+              name: 'EC2',
+              onClick: goToAwsEC2,
+            },
+          ],
+        },
+      ] as EuiContextMenuPanelDescriptor[],
     []
   );
   const selectedText = useMemo(() => {
@@ -80,6 +103,8 @@ export const WaffleInventorySwitcher = (props: Props) => {
         return 'Kubernetes';
       case InfraNodeType.container:
         return 'Docker';
+      case InfraNodeType.awsEC2:
+        return 'AWS EC2';
     }
   }, [props.nodeType]);
 
@@ -102,7 +127,7 @@ export const WaffleInventorySwitcher = (props: Props) => {
         withTitle
         anchorPosition="downLeft"
       >
-        <EuiContextMenu initialPanelId={0} panels={panels} />
+        <EuiContextMenu initialPanelId="firstPanel" panels={panels} />
       </EuiPopover>
     </EuiFilterGroup>
   );

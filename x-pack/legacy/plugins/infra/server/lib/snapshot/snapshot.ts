@@ -35,9 +35,9 @@ import {
   InfraSnapshotNodeGroupByBucket,
   InfraSnapshotNodeMetricsBucket,
 } from './response_helpers';
-import { IP_FIELDS } from '../constants';
 import { getAllCompositeData } from '../../utils/get_all_composite_data';
 import { createAfterKeyHandler } from '../../utils/create_afterkey_handler';
+import { findInventoryModel } from '../../../common/inventory_models';
 
 export interface InfraSnapshotRequestOptions {
   nodeType: InfraNodeType;
@@ -83,6 +83,7 @@ const requestGroupedNodes = async (
   options: InfraSnapshotRequestOptions,
   framework: InfraBackendFrameworkAdapter
 ): Promise<InfraSnapshotNodeGroupByBucket[]> => {
+  const inventoryModel = findInventoryModel(options.nodeType);
   const query = {
     allowNoIndices: true,
     index: `${options.sourceConfiguration.logAlias},${options.sourceConfiguration.metricAlias}`,
@@ -116,7 +117,7 @@ const requestGroupedNodes = async (
               top_hits: {
                 sort: [{ [options.sourceConfiguration.fields.timestamp]: { order: 'desc' } }],
                 _source: {
-                  includes: [IP_FIELDS[options.nodeType]],
+                  includes: [inventoryModel.fields.ip],
                 },
                 size: 1,
               },

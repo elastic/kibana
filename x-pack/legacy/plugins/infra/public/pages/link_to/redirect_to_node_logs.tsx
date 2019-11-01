@@ -14,7 +14,7 @@ import { LoadingPage } from '../../components/loading_page';
 import { replaceLogFilterInQueryString } from '../../containers/logs/with_log_filter';
 import { replaceLogPositionInQueryString } from '../../containers/logs/with_log_position';
 import { replaceSourceIdInQueryString } from '../../containers/source_id';
-import { InfraNodeType } from '../../graphql/types';
+import { InfraNodeType, SourceConfigurationFields } from '../../graphql/types';
 import { getFilterFromLocation, getTimeFromLocation } from './query_params';
 import { useSource } from '../../containers/source/source';
 
@@ -23,6 +23,15 @@ type RedirectToNodeLogsType = RouteComponentProps<{
   nodeType: InfraNodeType;
   sourceId?: string;
 }>;
+
+const getFieldByNodeType = (nodeType: InfraNodeType, fields: SourceConfigurationFields.Fields) => {
+  switch (nodeType) {
+    case InfraNodeType.awsEC2:
+      return 'cloud.instance.id';
+    default:
+      return fields[nodeType];
+  }
+};
 
 export const RedirectToNodeLogs = ({
   match: {
@@ -50,7 +59,7 @@ export const RedirectToNodeLogs = ({
     return null;
   }
 
-  const nodeFilter = `${configuration.fields[nodeType]}: ${nodeId}`;
+  const nodeFilter = `${getFieldByNodeType(nodeType, configuration.fields)}: ${nodeId}`;
   const userFilter = getFilterFromLocation(location);
   const filter = userFilter ? `(${nodeFilter}) and (${userFilter})` : nodeFilter;
 

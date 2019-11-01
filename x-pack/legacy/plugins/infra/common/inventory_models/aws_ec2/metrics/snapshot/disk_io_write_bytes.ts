@@ -4,4 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const CLOUD_METRICS_MODULES = ['aws'];
+import { SnapshotModel } from '../../../types';
+
+export const diskIOWriteBytes: SnapshotModel = {
+  diskIOWriteBytes: {
+    avg: {
+      field: 'aws.ec2.diskio.write.bytes_per_sec',
+    },
+  },
+};

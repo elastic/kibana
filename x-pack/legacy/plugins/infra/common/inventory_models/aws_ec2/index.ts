@@ -6,20 +6,16 @@
 
 import { metrics } from './metrics';
 import { InventoryModel } from '../types';
-import {
-  aws as awsRequiredMetrics,
-  nginx as nginxRequireMetrics,
-} from '../shared/metrics/required_metrics';
 
-export const host: InventoryModel = {
-  id: 'host',
-  requiredModules: ['system'],
-  fields: {
-    id: 'host.name',
-    name: 'host.name',
-    ip: 'host.ip',
-  },
+export const awsEC2: InventoryModel = {
+  id: 'awsEC2',
+  requiredModules: ['aws'],
   metrics,
+  fields: {
+    id: 'cloud.instance.id',
+    name: 'cloud.instance.name',
+    ip: 'aws.ec2.instance.public.ip',
+  },
   requiredMetrics: [
     'hostSystemOverview',
     'hostCpuUsage',
@@ -31,7 +27,5 @@ export const host: InventoryModel = {
     'hostK8sMemoryCap',
     'hostK8sDiskCap',
     'hostK8sPodCap',
-    ...awsRequiredMetrics,
-    ...nginxRequireMetrics,
   ],
 };

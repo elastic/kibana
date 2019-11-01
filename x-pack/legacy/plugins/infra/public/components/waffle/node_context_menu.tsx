@@ -53,6 +53,7 @@ export const NodeContextMenu = injectUICapabilities(
       [InfraNodeType.host]: 'host.hostname',
       [InfraNodeType.container]: 'container.id',
       [InfraNodeType.pod]: 'kubernetes.pod.uid',
+      [InfraNodeType.awsEC2]: 'cloud.instance.id',
     };
 
     const nodeLogsMenuItem = {
