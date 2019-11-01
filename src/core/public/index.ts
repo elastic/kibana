@@ -117,13 +117,7 @@ export {
   InterceptedHttpResponse,
 } from './http';
 
-export {
-  OverlayStart,
-  OverlayBannerMount,
-  OverlayBannerUnmount,
-  OverlayBannersStart,
-  OverlayRef,
-} from './overlays';
+export { OverlayStart, OverlayBannersStart, OverlayRef } from './overlays';
 
 export {
   Toast,

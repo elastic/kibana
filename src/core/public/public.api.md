@@ -633,12 +633,9 @@ export interface NotificationsStart {
     toasts: ToastsStart;
 }
 
-// @public
-export type OverlayBannerMount = (element: HTMLElement) => OverlayBannerUnmount;
-
 // @public (undocumented)
 export interface OverlayBannersStart {
-    add(mount: OverlayBannerMount, priority?: number): string;
+    add(mount: MountPoint, priority?: number): string;
     // Warning: (ae-forgotten-export) The symbol "OverlayBanner" needs to be exported by the entry point index.d.ts
     // 
     // @internal (undocumented)
@@ -646,11 +643,8 @@ export interface OverlayBannersStart {
     // (undocumented)
     getComponent(): JSX.Element;
     remove(id: string): boolean;
-    replace(id: string | undefined, mount: OverlayBannerMount, priority?: number): string;
+    replace(id: string | undefined, mount: MountPoint, priority?: number): string;
 }
-
-// @public
-export type OverlayBannerUnmount = () => void;
 
 // @public
 export interface OverlayRef {
