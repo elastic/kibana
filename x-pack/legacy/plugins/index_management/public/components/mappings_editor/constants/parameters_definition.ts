@@ -48,7 +48,7 @@ export const PARAMETERS_DEFINITION = {
             message: i18n.translate(
               'xpack.idxMgmt.mappingsEditor.fieldNameFieldDotValidationErrorMessage',
               {
-                defaultMessage: 'Cannot contain a dot (.)',
+                defaultMessage: 'Cannot contain a dot (.).',
               }
             ),
           }),
@@ -156,7 +156,7 @@ export const PARAMETERS_DEFINITION = {
                 message: i18n.translate(
                   'xpack.idxMgmt.mappingsEditor.boostFieldValidationErrorMessage',
                   {
-                    defaultMessage: 'The value must be greater or equal than 0.',
+                    defaultMessage: 'The value must be greater or equal to 0.',
                   }
                 ),
               };
@@ -179,7 +179,7 @@ export const PARAMETERS_DEFINITION = {
                 message: i18n.translate(
                   'xpack.idxMgmt.mappingsEditor.scalingFactorFieldValidationErrorMessage',
                   {
-                    defaultMessage: 'The value must be greater or equal than 0.',
+                    defaultMessage: 'The value must be greater or equal to 0.',
                   }
                 ),
               };

@@ -326,7 +326,7 @@ export const TextType = React.memo(({ field }: Props) => {
                             title={i18n.translate(
                               'xpack.idxMgmt.mappingsEditor.positionsErrorMessage',
                               {
-                                defaultMessage: 'Postions not enabled.',
+                                defaultMessage: 'Positions not enabled.',
                               }
                             )}
                             color="danger"
