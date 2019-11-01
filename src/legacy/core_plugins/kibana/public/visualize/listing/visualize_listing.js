@@ -23,7 +23,7 @@ import { NewVisModal } from '../wizard/new_vis_modal';
 import { VisualizeConstants } from '../visualize_constants';
 import { i18n } from '@kbn/i18n';
 
-import { getServices, config } from '../kibana_services';
+import { getServices } from '../kibana_services';
 
 export function initListingDirective(app, deps) {
   app.directive('visualizeListingTable', reactDirective =>

@@ -19,8 +19,10 @@
 
 import { EuiConfirmModal } from '@elastic/eui';
 import { IModule } from 'angular';
-import { IPrivate } from 'ui/private';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/src/angular';
+
+import { IPrivate } from 'ui/private';
+import { configureAppAngularModule } from 'ui/legacy_compat';
 // @ts-ignore
 import { GlobalStateProvider } from 'ui/state_management/global_state';
 // @ts-ignore
@@ -45,26 +47,13 @@ import { confirmModalFactory } from 'ui/modals/confirm_modal';
 import {
   AppMountContext,
   ChromeStart,
+  DocLinksStart,
   LegacyCoreStart,
   SavedObjectsClientContract,
+  ToastsStart,
   UiSettingsClientContract,
 } from 'kibana/public';
-import { configureAppAngularModule } from 'ui/legacy_compat';
-
-import {
-  createVisEditorSidebarDirective,
-  visEditorGroupDeps,
-  visOptionsDeps,
-  createVisEditorGroupDirective,
-  DefaultEditorAggGroup,
-  VisOptionsReactWrapper,
-  createVisOptionsDirective,
-} from 'ui/vis/editors/default';
-
 import { Storage } from '../../../../../plugins/kibana_utils/public';
-
-// @ts-ignore
-import { initVisualizeApp } from './app';
 import {
   createApplyFiltersPopoverDirective,
   createApplyFiltersPopoverHelper,
@@ -76,34 +65,42 @@ import { SavedQueryService } from '../../../data/public/search/search_bar/lib/sa
 import { EmbeddablePublicPlugin } from '../../../../../plugins/embeddable/public';
 import { NavigationStart } from '../../../navigation/public';
 import { VisualizationsStart } from '../../../visualizations/public';
-import { VISUALIZE_EMBEDDABLE_TYPE, VisualizeEmbeddableFactory } from './embeddable/constants';
+import { DataPublicPluginStart as NpDataStart } from '../../../../../plugins/data/public';
+
+// @ts-ignore
+import { initVisualizeApp } from './app';
+import { DocTitle } from './kibana_services';
 
 export interface RenderDeps {
-  angular: any;
-  core: LegacyCoreStart;
-  indexPatterns: DataStart['indexPatterns']['indexPatterns'];
-  dataStart: DataStart;
-  navigation: NavigationStart;
-  visualizations: VisualizationsStart;
-  queryFilter: any;
-  getUnhashableStates: any;
-  shareContextMenuExtensions: any;
-  savedObjectsClient: SavedObjectsClientContract;
-  savedObjectRegistry: any;
-  config: any;
-  savedDashboards: any;
-  visualizeCapabilities: any;
-  uiCapabilities: any;
-  docTitle: any;
-  uiSettings: UiSettingsClientContract;
-  chrome: ChromeStart;
   addBasePath: (path: string) => string;
-  FeatureCatalogueRegistryProvider: any;
-  savedQueryService: SavedQueryService;
+  angular: any;
+  chrome: ChromeStart;
+  config: any;
+  core: LegacyCoreStart;
+  dataStart: DataStart;
+  docLinks: DocLinksStart;
+  docTitle: DocTitle;
   embeddables: ReturnType<EmbeddablePublicPlugin['start']>;
-  embeddable: ReturnType<EmbeddablePublicPlugin['setup']>;
+  FeatureCatalogueRegistryProvider: any;
+  getBasePath: () => string;
+  getInjected: (name: string, defaultValue?: any) => unknown;
+  getUnhashableStates: any;
+  indexPatterns: DataStart['indexPatterns']['indexPatterns'];
+  indexPatternService: any;
   localStorage: Storage;
-  VisEmbeddableFactory: VisualizeEmbeddableFactory;
+  npDataStart: NpDataStart;
+  navigation: NavigationStart;
+  queryFilter: any;
+  savedObjectRegistry: any;
+  savedDashboards: any;
+  savedObjectsClient: SavedObjectsClientContract;
+  savedQueryService: SavedQueryService;
+  shareContextMenuExtensions: any;
+  toastNotifications: ToastsStart;
+  uiCapabilities: any;
+  uiSettings: UiSettingsClientContract;
+  visualizeCapabilities: any;
+  visualizations: VisualizationsStart;
   wrapInI18nContext: any;
 }
 
@@ -111,26 +108,11 @@ let angularModuleInstance: IModule | null = null;
 
 export const renderApp = async (element: HTMLElement, appBasePath: string, deps: RenderDeps) => {
   if (!angularModuleInstance) {
-    angularModuleInstance = createLocalAngularModule(
-      deps.core,
-      deps.navigation,
-      deps.angular,
-      deps.wrapInI18nContext
-    );
+    angularModuleInstance = createLocalAngularModule(deps.core, deps.navigation, deps.angular);
     // global routing stuff
     configureAppAngularModule(angularModuleInstance, deps.core as LegacyCoreStart);
     // custom routing stuff
     initVisualizeApp(angularModuleInstance, deps);
-
-    const { VisEmbeddableFactory } = deps;
-    const createVisualizeEmbeddableFactory: () => Promise<
-      VisualizeEmbeddableFactory
-    > = async () => {
-      return new VisEmbeddableFactory(deps.visualizations.types);
-    };
-    await createVisualizeEmbeddableFactory().then((embeddableFactory: any) => {
-      deps.embeddable.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
-    });
   }
   const $injector = mountVisualizeApp(appBasePath, element, deps.angular);
   return () => $injector.get('$rootScope').$destroy();
@@ -163,8 +145,7 @@ function mountVisualizeApp(appBasePath: string, element: HTMLElement, angular: a
 function createLocalAngularModule(
   core: AppMountContext['core'],
   navigation: NavigationStart,
-  angular: any,
-  wrapInI18nContext: any
+  angular: any
 ) {
   createLocalI18nModule(angular);
   createLocalPrivateModule(angular);
@@ -195,7 +176,7 @@ function createLocalConfirmModalModule(angular: any) {
   angular
     .module('app/visualize/ConfirmModal', ['react'])
     .factory('confirmModal', confirmModalFactory)
-    .directive('confirmModal', reactDirective => reactDirective(EuiConfirmModal));
+    .directive('confirmModal', (reactDirective: any) => reactDirective(EuiConfirmModal));
 }
 
 function createLocalStateModule(angular: any) {

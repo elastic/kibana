@@ -18,7 +18,7 @@
  */
 
 export function initVisualizationDirective(app, deps) {
-  app.directive('visualizationEmbedded', function (Private, $timeout, getAppState) {
+  app.directive('visualizationEmbedded', function ($timeout, getAppState) {
 
     return {
       restrict: 'E',

@@ -17,12 +17,8 @@
  * under the License.
  */
 
-import { VisEditorTypesRegistryProvider } from '../kibana_services';
-
 export function initVisEditorDirective(app, deps) {
-  app.directive('visualizationEditor', function (Private, $timeout, getAppState) {
-    const editorTypes = Private(VisEditorTypesRegistryProvider);
-
+  app.directive('visualizationEditor', function ($timeout, getAppState) {
     return {
       restrict: 'E',
       scope: {
@@ -35,7 +31,8 @@ export function initVisEditorDirective(app, deps) {
       link: function ($scope, element) {
         const editorType = $scope.savedObj.vis.type.editor;
         const Editor = typeof editorType === 'function' ? editorType :
-          editorTypes.find(editor => editor.key === editorType);
+          deps.editorTypes.find(editor => editor.key === editorType);
+
         const editor = new Editor(element[0], $scope.savedObj);
 
         $scope.renderFunction = () => {

@@ -102,7 +102,7 @@ export class LocalApplicationService {
    *
    * @param angularRouteManager The current `ui/routes` instance
    */
-  apply(angularRouteManager: UIRoutes) {
+  attachToAngular(angularRouteManager: UIRoutes) {
     this.apps.forEach(app => {
       const wrapperElementId = this.idGenerator();
       angularRouteManager.when(matchAllWithPrefix(app), {

@@ -21,18 +21,21 @@ import 'angular-sanitize'; // used in visualization_editor.js and visualization.
 import 'ui/collapsible_sidebar'; // used in default editor
 import 'ui/vis/editors/default/sidebar';
 
-import { FeatureCatalogueRegistryProvider } from 'ui/registry/feature_catalogue';
-import { npSetup, npStart } from 'ui/new_platform';
-import { SavedObjectRegistryProvider, SavedObjectsClientProvider } from 'ui/saved_objects';
-import { docTitle } from 'ui/doc_title/doc_title';
 import chrome from 'ui/chrome';
+import { docTitle } from 'ui/doc_title/doc_title';
+import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
+import { npSetup, npStart } from 'ui/new_platform';
 import { IPrivate } from 'ui/private';
+import { FeatureCatalogueRegistryProvider } from 'ui/registry/feature_catalogue';
+// @ts-ignore
+import { VisEditorTypesRegistryProvider } from 'ui/registry/vis_editor_types';
+import { SavedObjectRegistryProvider, SavedObjectsClientProvider } from 'ui/saved_objects';
 import { ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
 import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing/get_unhashable_states_provider';
-import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
+
 import { VisualizePlugin, LegacyAngularInjectedDependencies } from './plugin';
-import { start as data } from '../../../data/public/legacy';
 import { localApplicationService } from '../local_application_service';
+import { start as data } from '../../../data/public/legacy';
 import {
   start as embeddables,
   setup as embeddable,
@@ -57,33 +60,35 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
   const editorTypes = Private(VisEditorTypesRegistryProvider);
 
   return {
-    queryFilter,
-    getUnhashableStates,
-    shareContextMenuExtensions,
+    editorTypes,
     config: injector.get('config'),
+    getUnhashableStates,
+    queryFilter,
     savedObjectClient,
     savedObjectRegistry,
     savedDashboards: injector.get('savedDashboards'),
     savedVisualizations: injector.get('savedVisualizations'),
-    editorTypes,
+    shareContextMenuExtensions,
   };
 }
 
 (async () => {
   const instance = new VisualizePlugin();
-  await instance.setup(npSetup.core, {
+  instance.setup(npSetup.core, {
     __LEGACY: {
-      localApplicationService,
+      docTitle,
       getAngularDependencies,
       FeatureCatalogueRegistryProvider,
-      docTitle,
+      localApplicationService,
     },
-    embeddable,
   });
-  instance.start(npStart.core, {
+  await instance.start(npStart.core, {
     data,
+    // it's needed to register embeddable factory
+    embeddable,
     embeddables,
     navigation,
+    npData: npStart.plugins.data,
     visualizations,
   });
 })();

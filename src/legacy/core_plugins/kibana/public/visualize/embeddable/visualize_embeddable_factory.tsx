@@ -19,11 +19,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { Legacy } from 'kibana';
-
 import { SavedObjectAttributes } from 'kibana/server';
 import { showNewVisModal } from '../wizard';
-import { SavedVisualizations } from '../types';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import { getIndexPattern } from './get_index_pattern';
 import { VisualizeEmbeddable, VisualizeInput, VisualizeOutput } from './visualize_embeddable';
@@ -114,15 +111,12 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
     input: Partial<VisualizeInput> & { id: string },
     parent?: Container
   ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> {
-    const config = getServices().config;
-    const savedVisualizations = getServices().savedVisualizations;
+    const { addBasePath, config, savedVisualizations } = getServices();
 
     try {
       const visId = savedObject.id as string;
 
-      const editUrl = visId
-        ? getServices().addBasePath(`/app/kibana${savedVisualizations.urlFor(visId)}`)
-        : '';
+      const editUrl = visId ? addBasePath(`/app/kibana${savedVisualizations.urlFor(visId)}`) : '';
       const loader = await getVisualizeLoader();
       const isLabsEnabled = config.get('visualize:enableLabs');
 
@@ -156,12 +150,10 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
     input: Partial<VisualizeInput> & { id: string },
     parent?: Container
   ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> {
-    const savedVisualizations = getServices().savedVisualizations;
-
     try {
       const visId = savedObjectId;
 
-      const savedObject = await savedVisualizations.get(visId);
+      const savedObject = await getServices().savedVisualizations.get(visId);
       return this.createFromObject(savedObject, input, parent);
     } catch (e) {
       console.error(e); // eslint-disable-line no-console
@@ -180,7 +172,3 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
     return undefined;
   }
 }
-
-// VisualizeEmbeddableFactory.createVisualizeEmbeddableFactory().then(embeddableFactory => {
-//   getServices().embeddable.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
-// });

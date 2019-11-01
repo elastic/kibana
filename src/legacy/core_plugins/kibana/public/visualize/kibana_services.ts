@@ -25,7 +25,6 @@ import {
   UiSettingsClientContract,
 } from 'kibana/public';
 
-
 // load directives
 import '../../../data/public';
 
@@ -46,7 +45,6 @@ export interface VisualizeKibanaServices {
   getInjected: (name: string, defaultValue?: any) => unknown;
   FeatureCatalogueRegistryProvider: any;
   indexPatterns: any;
-  METRIC_TYPE: any;
   toastNotifications: ToastNotifications;
   savedObjectsClient: SavedObjectsClientContract;
   savedVisualizations: SavedVisualizations;
@@ -78,17 +76,14 @@ export function clearServices() {
   services = null;
 }
 
+// export types
+export { DocTitle } from 'ui/doc_title/doc_title';
 
 // export legacy static dependencies
 export { ensureDefaultIndexPattern } from 'ui/legacy_compat';
 
-
-
-
 export { getFromSavedObject } from 'ui/index_patterns';
 export { PersistedState } from 'ui/persisted_state';
-// @ts-ignore
-export { VisEditorTypesRegistryProvider } from 'ui/registry/vis_editor_types';
 // @ts-ignore
 export { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 export { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';

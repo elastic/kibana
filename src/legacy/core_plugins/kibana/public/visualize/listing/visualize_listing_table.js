@@ -33,14 +33,15 @@ class VisualizeListingTable extends Component {
   }
 
   render() {
+    const { visualizeCapabilities } = getServices();
     return (
       <TableListView
         // we allow users to create visualizations even if they can't save them
         // for data exploration purposes
         createItem={this.props.createItem}
         findItems={this.props.findItems}
-        deleteItems={getServices().visualizeCapabilities.delete ? this.props.deleteItems : null}
-        editItem={getServices().visualizeCapabilities.save ? this.props.editItem : null}
+        deleteItems={visualizeCapabilities.delete ? this.props.deleteItems : null}
+        editItem={visualizeCapabilities.save ? this.props.editItem : null}
         tableColumns={this.getTableColumns()}
         listingLimit={this.props.listingLimit}
         selectable={item => item.canDelete}

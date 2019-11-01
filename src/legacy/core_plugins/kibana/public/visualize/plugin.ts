@@ -29,15 +29,19 @@ import {
   SavedObjectsClientContract,
 } from 'kibana/public';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
-import { setServices } from './kibana_services';
-import { LocalApplicationService } from '../local_application_service';
 import { DataStart } from '../../../data/public';
 import { EmbeddablePublicPlugin } from '../../../../../plugins/embeddable/public';
 import { NavigationStart } from '../../../navigation/public';
 import { VisualizationsStart } from '../../../visualizations/public';
+import { DataPublicPluginStart as NpDataStart } from '../../../../../plugins/data/public';
+import { LocalApplicationService } from '../local_application_service';
 import { VisualizeEmbeddableFactory } from './embeddable/visualize_embeddable_factory';
+import { VISUALIZE_EMBEDDABLE_TYPE } from './embeddable/constants';
+import { RenderDeps } from './render_app';
+import { setServices, DocTitle } from './kibana_services';
 
 export interface LegacyAngularInjectedDependencies {
+  editorTypes: any;
   queryFilter: any;
   getUnhashableStates: any;
   shareContextMenuExtensions: any;
@@ -50,8 +54,10 @@ export interface LegacyAngularInjectedDependencies {
 
 export interface VisualizePluginStartDependencies {
   data: DataStart;
+  embeddable: ReturnType<EmbeddablePublicPlugin['setup']>;
   embeddables: ReturnType<EmbeddablePublicPlugin['start']>;
   navigation: NavigationStart;
+  npData: NpDataStart;
   visualizations: VisualizationsStart;
 }
 
@@ -60,17 +66,17 @@ export interface VisualizePluginSetupDependencies {
     getAngularDependencies: () => Promise<LegacyAngularInjectedDependencies>;
     localApplicationService: LocalApplicationService;
     FeatureCatalogueRegistryProvider: any;
-    docTitle: any;
+    docTitle: DocTitle;
   };
-  embeddable: any;
 }
 
 export class VisualizePlugin implements Plugin {
   private startDependencies: {
     dataStart: DataStart;
-    savedObjectsClient: SavedObjectsClientContract;
     embeddables: ReturnType<EmbeddablePublicPlugin['start']>;
     navigation: NavigationStart;
+    npDataStart: NpDataStart;
+    savedObjectsClient: SavedObjectsClientContract;
     visualizations: VisualizationsStart;
   } | null = null;
 
@@ -78,7 +84,6 @@ export class VisualizePlugin implements Plugin {
     core: CoreSetup,
     {
       __LEGACY: { localApplicationService, getAngularDependencies, ...legacyServices },
-      embeddable,
     }: VisualizePluginSetupDependencies
   ) {
     const app: App = {
@@ -94,11 +99,12 @@ export class VisualizePlugin implements Plugin {
           savedObjectsClient,
           embeddables,
           navigation,
+          npDataStart,
           visualizations,
         } = this.startDependencies;
 
         const angularDependencies = await getAngularDependencies();
-        const deps = {
+        const deps: RenderDeps = {
           core: contextCore as LegacyCoreStart,
           ...legacyServices,
           ...angularDependencies,
@@ -107,7 +113,6 @@ export class VisualizePlugin implements Plugin {
           chrome: contextCore.chrome,
           dataStart,
           docLinks: contextCore.docLinks,
-          embeddable,
           embeddables,
           getBasePath: core.http.basePath.get,
           getInjected: core.injectedMetadata.getInjectedVar,
@@ -115,12 +120,13 @@ export class VisualizePlugin implements Plugin {
           indexPatternService: dataStart.indexPatterns.indexPatterns,
           localStorage: new Storage(localStorage),
           navigation,
+          npDataStart,
           savedObjectsClient,
           savedQueryService: dataStart.search.services.savedQueryService,
+          toastNotifications: contextCore.notifications.toasts,
           uiCapabilities: contextCore.application.capabilities,
           uiSettings: contextCore.uiSettings,
           visualizeCapabilities: contextCore.application.capabilities.visualize,
-          VisEmbeddableFactory: VisualizeEmbeddableFactory,
           visualizations,
           wrapInI18nContext,
         };
@@ -132,16 +138,34 @@ export class VisualizePlugin implements Plugin {
     localApplicationService.register({ ...app, id: 'visualize' });
   }
 
-  start(
+  async start(
     { savedObjects: { client: savedObjectsClient } }: CoreStart,
-    { data: dataStart, embeddables, navigation, visualizations }: VisualizePluginStartDependencies
+    {
+      data: dataStart,
+      embeddables,
+      navigation,
+      npData,
+      visualizations,
+      embeddable,
+    }: VisualizePluginStartDependencies
   ) {
     this.startDependencies = {
       dataStart,
-      savedObjectsClient,
       embeddables,
       navigation,
+      npDataStart: npData,
+      savedObjectsClient,
       visualizations,
     };
+
+    const createVisualizeEmbeddableFactory: () => Promise<
+      VisualizeEmbeddableFactory
+    > = async () => {
+      return new VisualizeEmbeddableFactory(visualizations.types);
+    };
+
+    await createVisualizeEmbeddableFactory().then((embeddableFactory: any) => {
+      embeddable.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
+    });
   }
 }
