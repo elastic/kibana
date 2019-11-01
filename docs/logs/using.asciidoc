@@ -17,7 +17,7 @@ image::logs/images/logs-console.png[Logs Console in Kibana]
 Use the search bar to perform ad hoc searches for specific text.
 You can also create structured queries using {kibana-ref}/kuery-query.html[Kibana Query Language].
 For example, enter `host.hostname : "host1"` to see only the information for `host1`.
-// ++ this isn't quite the same as the corresponding infrastructure description now.
+// ++ this isn't quite the same as the corresponding metrics description now.
 
 [float]
 [[logs-configure-source]]

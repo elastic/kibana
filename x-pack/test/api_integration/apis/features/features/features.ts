@@ -111,7 +111,6 @@ export default function({ getService }: FtrProviderContext) {
             'ml',
             'apm',
             'canvas',
-            'code',
             'infrastructure',
             'logs',
             'maps',
