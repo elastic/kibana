@@ -7,6 +7,7 @@
 export function getTestAlertData(overwrites = {}) {
   return {
     enabled: true,
+    name: 'abc',
     alertTypeId: 'test.noop',
     interval: '10s',
     throttle: '1m',
