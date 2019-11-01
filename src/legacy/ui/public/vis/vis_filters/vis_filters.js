@@ -117,20 +117,25 @@ const VisFiltersProvider = () => {
   // angular context and thus the appstate won't update
   const pushFilters = async (filters, simulate) => {
     if (filters.length && !simulate) {
+      const dedupedFilters = uniqFilters(filters);
       // All filters originated from one visualization.
-      const indexPatternId = filters[0].meta.index;
+      const indexPatternId = dedupedFilters[0].meta.index;
       const indexPattern = _.find(
         await data.indexPatterns.indexPatterns.getCache(),
         p => p.id === indexPatternId
       );
-      // TODO just add everything to the filter bar if index pattern doesn't have timefield
+      if (dedupedFilters.length > 1) {
+        // TODO show apply filter popover and wait for user input
+      }
       if (indexPattern && indexPattern.attributes.timeFieldName) {
         const { timeRangeFilter, restOfFilters } = extractTimeFilter(
           indexPattern.attributes.timeFieldName,
-          filters
+          dedupedFilters
         );
-        npStart.plugins.data.query.filterManager.addFilters(uniqFilters(restOfFilters));
+        npStart.plugins.data.query.filterManager.addFilters(restOfFilters);
         if (timeRangeFilter) changeTimeFilter(data.timefilter.timefilter, timeRangeFilter);
+      } else {
+        npStart.plugins.data.query.filterManager.addFilters(dedupedFilters);
       }
     }
   };
