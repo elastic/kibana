@@ -46,10 +46,6 @@ export default function RouteManager() {
         route.reloadOnSearch = false;
       }
 
-      if (route.requireDefaultIndex == null) {
-        route.requireDefaultIndex = false;
-      }
-
       wrapRouteWithPrep(route, setup);
       $routeProvider.when(path, route);
     });

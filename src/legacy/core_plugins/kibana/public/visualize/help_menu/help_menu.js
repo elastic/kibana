@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { Fragment, PureComponent } from 'react';
+import React, { PureComponent } from 'react';
 import { EuiButton, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 
@@ -25,16 +25,21 @@ export class HelpMenu extends PureComponent {
   render() {
     return (
       <I18nProvider>
-        <EuiHorizontalRule margin="none" />
-        <EuiSpacer />
-        <EuiButton
-          fill
-          iconType="popout"
-          href={`${this.props.docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${this.props.docLinks.DOC_LINK_VERSION}/visualize.html`}
-          target="_blank"
-        >
-          <FormattedMessage id="kbn.visualize.helpMenu.docLabel" defaultMessage="Visualize documentation" />
-        </EuiButton>
+        <>
+          <EuiHorizontalRule margin="none" />
+          <EuiSpacer />
+          <EuiButton
+            fill
+            iconType="popout"
+            href={`${this.props.docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${this.props.docLinks.DOC_LINK_VERSION}/visualize.html`}
+            target="_blank"
+          >
+            <FormattedMessage
+              id="kbn.visualize.helpMenu.docLabel"
+              defaultMessage="Visualize documentation"
+            />
+          </EuiButton>
+        </>
       </I18nProvider>
     );
   }

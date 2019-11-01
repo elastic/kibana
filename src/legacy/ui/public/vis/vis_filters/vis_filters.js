@@ -17,11 +17,13 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import { pushFilterBarFilters } from '../push_filters';
+import { npStart } from 'ui/new_platform';
 import { onBrushEvent } from './brush_event';
 import { uniqFilters } from '../../../../../plugins/data/public';
 import { toggleFilterNegated } from '@kbn/es-query';
+import _ from 'lodash';
+import { changeTimeFilter, extractTimeFilter } from '../../../../core_plugins/data/public/timefilter';
+import {  start as data } from '../../../../core_plugins/data/public/legacy';
 /**
  * For terms aggregations on `__other__` buckets, this assembles a list of applicable filter
  * terms based on a specific cell in the tabified data.
@@ -104,14 +106,37 @@ const createFiltersFromEvent = (event) => {
   return filters;
 };
 
-const VisFiltersProvider = (getAppState, $timeout) => {
+// TODO make sure the visualize app is updating the breadcrumb correctly
+const VisFiltersProvider = () => {
 
-  const pushFilters = (filters, simulate) => {
-    const appState = getAppState();
+  // TODO this function used to simply put the new filters in
+  // the app state. Dashboard/Visualize simply listened to
+  // the app state change via angular and pushed it into the actual
+  // filter manager (while splitting out the time filter)
+  // This channel does not work anymore because it's not the same
+  // angular context and thus the appstate won't update
+  const pushFilters = async (filters, simulate) => {
     if (filters.length && !simulate) {
-      pushFilterBarFilters(appState, uniqFilters(filters));
-      // to trigger angular digest cycle, we can get rid of this once we have either new filterManager or actions API
-      $timeout(_.noop, 0);
+      const dedupedFilters = uniqFilters(filters);
+      // All filters originated from one visualization.
+      const indexPatternId = dedupedFilters[0].meta.index;
+      const indexPattern = _.find(
+        await data.indexPatterns.indexPatterns.getCache(),
+        p => p.id === indexPatternId
+      );
+      if (dedupedFilters.length > 1) {
+        // TODO show apply filter popover and wait for user input
+      }
+      if (indexPattern && indexPattern.attributes.timeFieldName) {
+        const { timeRangeFilter, restOfFilters } = extractTimeFilter(
+          indexPattern.attributes.timeFieldName,
+          dedupedFilters
+        );
+        npStart.plugins.data.query.filterManager.addFilters(restOfFilters);
+        if (timeRangeFilter) changeTimeFilter(data.timefilter.timefilter, timeRangeFilter);
+      } else {
+        npStart.plugins.data.query.filterManager.addFilters(dedupedFilters);
+      }
     }
   };
 
