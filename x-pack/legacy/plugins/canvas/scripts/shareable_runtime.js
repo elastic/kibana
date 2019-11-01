@@ -91,10 +91,20 @@ run(
 
     clean();
     log.info('Building Canvas Shareable Workpad Runtime...');
-    execa.sync('yarn', ['webpack', '--config', webpackConfig, '--hide-modules', '--progress'], {
-      ...options,
-      env,
-    });
+    execa.sync(
+      'yarn',
+      [
+        'webpack',
+        '--config',
+        webpackConfig,
+        '--hide-modules',
+        ...(process.stdout.isTTY ? ['--progress'] : []),
+      ],
+      {
+        ...options,
+        env,
+      }
+    );
     log.success('...runtime built!');
   },
   {

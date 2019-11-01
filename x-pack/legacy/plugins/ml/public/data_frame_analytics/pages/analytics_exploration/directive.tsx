@@ -53,8 +53,7 @@ module.directive('mlDataFrameAnalyticsExploration', ($injector: InjectorService)
             <Page
               jobId={globalState.ml.jobId}
               analysisType={globalState.ml.analysisType}
-              destIndex={globalState.ml.destIndex}
-              depVar={globalState.ml.depVar}
+              jobStatus={globalState.ml.jobStatus}
             />
           </KibanaContext.Provider>
         </I18nContext>,
