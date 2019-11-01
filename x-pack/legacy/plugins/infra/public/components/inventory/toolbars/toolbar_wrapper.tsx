@@ -108,7 +108,7 @@ export const toMetricOpt = (metric: InfraSnapshotMetricType) => {
     case InfraSnapshotMetricType.tx:
       return {
         text: ToolbarTranslations.OutboundTraffic,
-        value: InfraSnapshotMetricType.rx,
+        value: InfraSnapshotMetricType.tx,
       };
     case InfraSnapshotMetricType.logRate:
       return {
