@@ -33,6 +33,8 @@ import { VisualizeConstants } from '../visualize_constants';
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
 import { extractTimeFilter, changeTimeFilter } from '../../../../data/public';
 
+import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
+
 import {
   getServices,
   angular,
@@ -661,6 +663,8 @@ function VisEditor(
     ' ' +
     vis.type.feedbackMessage;
   };
+
+  addHelpMenuToAppChrome(chrome);
 
   init();
 }
