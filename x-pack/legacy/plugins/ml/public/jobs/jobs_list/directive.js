@@ -16,7 +16,7 @@ import { checkFullLicense } from 'plugins/ml/license/check_license';
 import { checkGetJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
 import { getMlNodeCount } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import { getJobManagementBreadcrumbs } from 'plugins/ml/jobs/breadcrumbs';
-import { loadMlServerInfo } from '../../services/ml_server_info';
+import { loadMlServerInfo } from 'plugins/ml/services/ml_server_info';
 
 import uiRoutes from 'ui/routes';
 
