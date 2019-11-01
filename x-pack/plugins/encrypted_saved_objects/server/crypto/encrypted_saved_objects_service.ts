@@ -294,7 +294,7 @@ export class EncryptedSavedObjectsService {
       }
     }
 
-    if (Object.keys(attributesAAD).length) {
+    if (Object.keys(attributesAAD).length === 0) {
       this.logger.debug(
         `The AAD for saved object "${descriptorToArray(
           descriptor
