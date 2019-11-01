@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { PureComponent } from 'react';
+import React from 'react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import {
   EuiBasicTable,
   EuiLink,
@@ -25,7 +25,7 @@ import {
   isFiltered,
   filteredEndpointListData,
 } from '../selectors/endpoints_list';
-import { actions, EndpointListActions } from '../actions/endpoints_list';
+import { actions } from '../actions/endpoints_list';
 
 const EndpointName = withRouter<RouteComponentProps & { path: string; name: string }>(function({
   history,
@@ -61,60 +61,44 @@ const columns = [
   },
 ];
 
-export class EndpointsPage extends PureComponent<{
-  endpoints: any[];
-  userFilteredData: EndpointListActions;
-  showFiltered: boolean;
-  filteredEndpoints: any[];
-}> {
-  render() {
-    const { endpoints, userFilteredData, showFiltered, filteredEndpoints } = this.props;
+export const EndpointsPage = () => {
+  const dispatch = useDispatch();
+  const endpoints = useSelector(endpointsListData);
+  const showFiltered = useSelector(isFiltered);
+  const filteredEndpoints = useSelector(filteredEndpointListData);
+  const handleUserFilteredData = ({ updatedResult }: { updatedResult: any[] }) => {
+    dispatch(actions.userFilteredData({ filteredData: updatedResult, isFiltered: true }));
+  };
 
-    return (
-      <EuiPageBody>
-        <EuiPageHeader>
-          <EuiPageHeaderSection>
-            <EuiTitle size="l">
-              <h1>Endpoints</h1>
+  return (
+    <EuiPageBody>
+      <EuiPageHeader>
+        <EuiPageHeaderSection>
+          <EuiTitle size="l">
+            <h1>Endpoints</h1>
+          </EuiTitle>
+        </EuiPageHeaderSection>
+      </EuiPageHeader>
+      <EuiPageContent>
+        <EuiPageContentHeader>
+          <EuiPageContentHeaderSection>
+            <EuiTitle>
+              <h2>Endpoint List</h2>
             </EuiTitle>
-          </EuiPageHeaderSection>
-        </EuiPageHeader>
-        <EuiPageContent>
-          <EuiPageContentHeader>
-            <EuiPageContentHeaderSection>
-              <EuiTitle>
-                <h2>Endpoint List</h2>
-              </EuiTitle>
-            </EuiPageContentHeaderSection>
-          </EuiPageContentHeader>
-          <EuiPageContentBody>
-            <SearchBar
-              searchItems={endpoints}
-              defaultFields={[`_source`]}
-              updateOnChange={({ updatedResult }: { updatedResult: any[] }) =>
-                userFilteredData({ filteredData: updatedResult, isFiltered: true })
-              }
-            />
-            <EuiBasicTable items={showFiltered ? filteredEndpoints : endpoints} columns={columns} />
-            <code>
-              <pre>{JSON.stringify(endpoints, null, 4)}</pre>
-            </code>
-          </EuiPageContentBody>
-        </EuiPageContent>
-      </EuiPageBody>
-    );
-  }
-}
-
-export const EndpointsPageConnected = connect(
-  state => {
-    return {
-      endpoints: endpointsListData(state),
-      showFiltered: isFiltered(state),
-      filteredEndpoints: filteredEndpointListData(state),
-    };
-  },
-  {
-    userFilteredData: actions.userFilteredData,
-  }
-)(EndpointsPage);
+          </EuiPageContentHeaderSection>
+        </EuiPageContentHeader>
+        <EuiPageContentBody>
+          <SearchBar
+            searchItems={endpoints}
+            defaultFields={[`_source`]}
+            updateOnChange={handleUserFilteredData}
+          />
+          <EuiBasicTable items={showFiltered ? filteredEndpoints : endpoints} columns={columns} />
+          <code>
+            <pre>{JSON.stringify(endpoints, null, 4)}</pre>
+          </code>
+        </EuiPageContentBody>
+      </EuiPageContent>
+    </EuiPageBody>
+  );
+};

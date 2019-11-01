@@ -11,7 +11,7 @@ import { actions as endpointsListActions } from '../actions/endpoints_list';
 import * as endpointsListSelectors from '../selectors/endpoints_list';
 
 function isOnPage(href: any) {
-  return hrefIsForPath(href, '/vkm/app/endpoint/endpoints');
+  return hrefIsForPath(href, '/app/endpoint/endpoints');
 }
 
 // TODO: type this properly

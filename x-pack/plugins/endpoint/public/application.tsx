@@ -18,10 +18,11 @@ import { Home } from './components/home';
 import { Management } from './components/management';
 import { AlertList } from './components/alert_list';
 import { AlertDetails } from './components/alert_details';
-import { EndpointsPageConnected } from './components/endpoints_page';
+import { EndpointsPage } from './components/endpoints_page';
 
 const LocationChangeWrapper = function({ children }) {
   // TODO: Find another way that doesn't require updating react-router-dom to 5.1.0
+  // hi
   const location = useLocation();
   const dispatch = useDispatch();
   useEffect(() => {
@@ -52,7 +53,7 @@ const EndpointRouter = ({
             </EuiPageSideBar>
             <Route path="/" exact component={Home} />
             <Route path="/management" component={Management} />
-            <Route path="/endpoints" component={EndpointsPageConnected} />
+            <Route path="/endpoints" component={EndpointsPage} />
             <Route path="/alerts" render={() => <AlertList />} />
             <Route path="/alerts/:alertId" render={() => <AlertDetails />} />
           </EuiPage>
