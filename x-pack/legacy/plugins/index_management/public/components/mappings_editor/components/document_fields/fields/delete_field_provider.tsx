@@ -7,6 +7,8 @@
 import React, { useState, Fragment } from 'react';
 import { EuiConfirmModal, EuiOverlayMask, EuiBadge } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+
 import { useMappingsState, useDispatch } from '../../../mappings_state';
 import { NormalizedField } from '../../../types';
 import { buildFieldTreeFromIds } from '../../../lib';
@@ -75,12 +77,26 @@ export const DeleteFieldProvider = ({ children }: Props) => {
           title={title}
           onCancel={closeModal}
           onConfirm={confirmDelete}
-          cancelButtonText="Cancel"
+          cancelButtonText={i18n.translate(
+            'xpack.idxMgmt.mappingsEditor.deleteFieldCancelButtonLabel',
+            {
+              defaultMessage: 'Cancel',
+            }
+          )}
           buttonColor="danger"
-          confirmButtonText="Remove"
+          confirmButtonText={i18n.translate(
+            'xpack.idxMgmt.mappingsEditor.deleteFieldRemoveButtonLabel',
+            {
+              defaultMessage: 'Remove',
+            }
+          )}
         >
           <Fragment>
-            <p>This will also delete the following fields.</p>
+            <p>
+              {i18n.translate('xpack.idxMgmt.mappingsEditor.deleteDescription', {
+                defaultMessage: 'This will also delete the following fields.',
+              })}
+            </p>
             <FieldsTree fields={fieldsTree} />
           </Fragment>
         </EuiConfirmModal>

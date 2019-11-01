@@ -15,6 +15,8 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+
 import { NormalizedField } from '../../../types';
 import {
   TYPE_DEFINITION,
@@ -108,17 +110,27 @@ export const FieldsListItem = React.memo(function FieldListItemComponent({
         {canHaveChildFields && (
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty onClick={addField} disabled={isAddFieldBtnDisabled}>
-              Add child
+              {i18n.translate('xpack.idxMgmt.mappingsEditor.addChildButtonLabel', {
+                defaultMessage: 'Add child',
+              })}
             </EuiButtonEmpty>
           </EuiFlexItem>
         )}
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={editField}>Edit</EuiButtonEmpty>
+          <EuiButtonEmpty onClick={editField}>
+            {i18n.translate('xpack.idxMgmt.mappingsEditor.editFieldButtonLabel', {
+              defaultMessage: 'Edit',
+            })}
+          </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <DeleteFieldProvider>
             {deleteField => (
-              <EuiButtonEmpty onClick={() => deleteField(field)}>Remove</EuiButtonEmpty>
+              <EuiButtonEmpty onClick={() => deleteField(field)}>
+                {i18n.translate('xpack.idxMgmt.mappingsEditor.removeFieldButtonLabel', {
+                  defaultMessage: 'Remove',
+                })}
+              </EuiButtonEmpty>
             )}
           </DeleteFieldProvider>
         </EuiFlexItem>

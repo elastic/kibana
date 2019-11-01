@@ -19,7 +19,9 @@ export const DocValuesParameter = () => (
         })}
       </h3>
     }
-    description="Whether to store fields on disk in a column-stride fashion."
+    description={i18n.translate('xpack.idxMgmt.mappingsEditor.docValuesFieldDescription', {
+      defaultMessage: 'Whether to store fields on disk in a column-stride fashion.',
+    })}
     formFieldPath="doc_values"
   />
 );

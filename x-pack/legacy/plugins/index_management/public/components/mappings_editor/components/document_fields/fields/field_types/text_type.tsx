@@ -295,7 +295,7 @@ export const TextType = React.memo(({ field }: Props) => {
               'xpack.idxMgmt.mappingsEditor.positionIncrementGapFieldDescription',
               {
                 defaultMessage:
-                  'The number of fake term position which should be inserted between each element of an array of strings.',
+                  'The number of fake term positions which should be inserted between each element of an array of strings.',
               }
             )}
             toggleDefaultValue={getDefaultValueToggle('position_increment_gap', field.source)}
