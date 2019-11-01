@@ -10,7 +10,6 @@ import {
   Direction,
   FlowTarget,
   NetworkDnsFields,
-  NetworkHttpFields,
   NetworkTopTablesFields,
   TlsFields,
   UsersFields,
@@ -63,7 +62,6 @@ export const initialNetworkState: NetworkState = {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         sort: {
-          field: NetworkHttpFields.requestCount,
           direction: Direction.desc,
         },
       },
@@ -99,7 +97,6 @@ export const initialNetworkState: NetworkState = {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         sort: {
-          field: NetworkHttpFields.requestCount,
           direction: Direction.desc,
         },
       },

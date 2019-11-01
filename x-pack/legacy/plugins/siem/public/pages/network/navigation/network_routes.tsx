@@ -98,16 +98,16 @@ export const NetworkRoutes = ({
         )}
       />
       <Route
+        path={`${networkPagePath}/:tabName(${NetworkRouteType.http})`}
+        render={() => <HttpQueryTabBody {...tabProps} />}
+      />
+      <Route
         path={`${networkPagePath}/:tabName(${NetworkRouteType.tls})`}
         render={() => <TlsQueryTabBody {...tabProps} flowTarget={FlowTargetSourceDest.source} />}
       />
       <Route
         path={`${networkPagePath}/:tabName(${NetworkRouteType.anomalies})`}
         render={() => <AnomaliesQueryTabBody {...anomaliesProps} />}
-      />
-      <Route
-        path={`${networkPagePath}/:tabName(${NetworkRouteType.http})`}
-        render={() => <HttpQueryTabBody {...tabProps} />}
       />
     </Switch>
   );

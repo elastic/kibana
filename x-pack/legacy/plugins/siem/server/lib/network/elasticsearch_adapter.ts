@@ -181,19 +181,6 @@ export class ElasticsearchNetworkAdapter implements NetworkAdapter {
     };
     const showMorePagesIndicator = totalCount > fakeTotalCount;
 
-    console.log(
-      'ALALALAL',
-      JSON.stringify({
-        edges,
-        inspect,
-        pageInfo: {
-          activePage: activePage ? activePage : 0,
-          fakeTotalCount,
-          showMorePagesIndicator,
-        },
-        totalCount,
-      })
-    );
     return {
       edges,
       inspect,

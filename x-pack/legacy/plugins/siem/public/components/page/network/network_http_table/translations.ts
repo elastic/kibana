@@ -6,8 +6,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const INCOMING_HTTP_REQUESTS = i18n.translate('xpack.siem.networkHttpTable.title', {
-  defaultMessage: 'Incoming HTTP Requests',
+export const HTTP_REQUESTS = i18n.translate('xpack.siem.networkHttpTable.title', {
+  defaultMessage: 'HTTP Requests',
 });
 
 export const UNIT = (totalCount: number) =>

@@ -26,6 +26,13 @@ export const navTabsNetwork = (hasMlUserPermissions: boolean): NetworkNavTab => 
       disabled: false,
       urlKey: 'network',
     },
+    [NetworkRouteType.http]: {
+      id: NetworkRouteType.http,
+      name: i18n.NAVIGATION_HTTP_TITLE,
+      href: getTabsOnNetworkUrl(NetworkRouteType.http),
+      disabled: false,
+      urlKey: 'network',
+    },
     [NetworkRouteType.tls]: {
       id: NetworkRouteType.tls,
       name: i18n.NAVIGATION_TLS_TITLE,
@@ -37,13 +44,6 @@ export const navTabsNetwork = (hasMlUserPermissions: boolean): NetworkNavTab => 
       id: NetworkRouteType.anomalies,
       name: i18n.NAVIGATION_ANOMALIES_TITLE,
       href: getTabsOnNetworkUrl(NetworkRouteType.anomalies),
-      disabled: false,
-      urlKey: 'network',
-    },
-    [NetworkRouteType.http]: {
-      id: NetworkRouteType.http,
-      name: i18n.NAVIGATION_HTTP_TITLE,
-      href: getTabsOnNetworkUrl(NetworkRouteType.http),
       disabled: false,
       urlKey: 'network',
     },

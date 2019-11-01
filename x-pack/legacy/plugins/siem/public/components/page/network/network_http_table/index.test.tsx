@@ -19,7 +19,7 @@ import { mockData } from './mock';
 
 jest.mock('../../../../lib/settings/use_kibana_ui_setting');
 
-describe('NetworkTopNFlow Table Component', () => {
+describe('NetworkHttp Table Component', () => {
   const loadPage = jest.fn();
   const state: State = mockGlobalState;
 
@@ -30,13 +30,13 @@ describe('NetworkTopNFlow Table Component', () => {
   });
 
   describe('rendering', () => {
-    test('it renders the default NetworkTopNFlow table', () => {
+    test('it renders the default NetworkHttp table', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
           <NetworkHttpTable
             data={mockData.NetworkHttp.edges}
             fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkHttp.pageInfo)}
-            id="dns"
+            id="http"
             isInspect={false}
             loading={false}
             loadPage={loadPage}
@@ -63,7 +63,7 @@ describe('NetworkTopNFlow Table Component', () => {
             <NetworkHttpTable
               data={mockData.NetworkHttp.edges}
               fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkHttp.pageInfo)}
-              id="dns"
+              id="http"
               isInspect={false}
               loading={false}
               loadPage={loadPage}
@@ -79,9 +79,8 @@ describe('NetworkTopNFlow Table Component', () => {
         </MockedProvider>
       );
 
-      expect(store.getState().network.page.queries!.dns.sort).toEqual({
+      expect(store.getState().network.page.queries!.http.sort).toEqual({
         direction: 'desc',
-        field: 'queryCount',
       });
 
       wrapper
@@ -91,9 +90,8 @@ describe('NetworkTopNFlow Table Component', () => {
 
       wrapper.update();
 
-      expect(store.getState().network.page.queries!.dns.sort).toEqual({
+      expect(store.getState().network.page.queries!.http.sort).toEqual({
         direction: 'asc',
-        field: 'dnsName',
       });
       expect(
         wrapper

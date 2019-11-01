@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Direction, NetworkHttpSortField } from '../../graphql/types';
+import { NetworkHttpSortField } from '../../graphql/types';
 import { createQueryFilterClauses } from '../../utils/build_query';
 
 import { NetworkHttpRequestOptions } from './index';
@@ -52,6 +52,11 @@ export const buildHttpQuery = ({
                     'source.ip': ip,
                   },
                 },
+                {
+                  term: {
+                    'destination.ip': ip,
+                  },
+                },
               ],
               minimum_should_match: 1,
             }
@@ -71,6 +76,9 @@ const getHttpAggs = (networkHttpSortField: NetworkHttpSortField, querySize: numb
     terms: {
       field: `url.path`,
       size: querySize,
+      order: {
+        _count: networkHttpSortField.direction,
+      },
     },
     aggs: {
       methods: {

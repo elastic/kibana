@@ -8,7 +8,6 @@ import {
   Direction,
   FlowTarget,
   NetworkDnsFields,
-  NetworkHttpFields,
   NetworkTopTablesFields,
   TlsFields,
   UsersFields,
@@ -72,7 +71,7 @@ export const mockNetworkState: NetworkModel = {
       [NetworkTableType.http]: {
         activePage: 0,
         limit: DEFAULT_TABLE_LIMIT,
-        sort: { field: NetworkHttpFields.requestCount, direction: Direction.desc },
+        sort: { direction: Direction.desc },
       },
     },
   },
@@ -129,7 +128,7 @@ export const mockNetworkState: NetworkModel = {
       [IpDetailsTableType.http]: {
         activePage: 0,
         limit: DEFAULT_TABLE_LIMIT,
-        sort: { field: NetworkHttpFields.requestCount, direction: Direction.desc },
+        sort: { direction: Direction.desc },
       },
     },
     flowTarget: FlowTarget.source,
@@ -155,6 +154,13 @@ describe('Network redux store', () => {
           limit: 10,
           sort: { field: 'uniqueDomains', direction: 'desc' },
           isPtrIncluded: false,
+        },
+        [NetworkTableType.http]: {
+          activePage: 0,
+          limit: 10,
+          sort: {
+            direction: 'desc',
+          },
         },
         [NetworkTableType.tls]: {
           activePage: 0,
@@ -209,6 +215,13 @@ describe('Network redux store', () => {
           sort: {
             direction: 'desc',
             field: 'bytes_out',
+          },
+        },
+        [IpDetailsTableType.http]: {
+          activePage: 0,
+          limit: 10,
+          sort: {
+            direction: 'desc',
           },
         },
         [IpDetailsTableType.tls]: {

@@ -9,7 +9,6 @@ import {
   Direction,
   FlowTarget,
   HostsFields,
-  NetworkHttpFields,
   NetworkDnsFields,
   NetworkTopTablesFields,
   TlsFields,
@@ -100,7 +99,7 @@ export const mockGlobalState: State = {
         [networkModel.NetworkTableType.http]: {
           activePage: 0,
           limit: 10,
-          sort: { field: NetworkHttpFields.requestCount, direction: Direction.desc },
+          sort: { direction: Direction.desc },
         },
       },
     },
@@ -140,6 +139,7 @@ export const mockGlobalState: State = {
         [networkModel.IpDetailsTableType.http]: {
           activePage: 0,
           limit: 10,
+          sort: { direction: Direction.desc },
         },
       },
     },

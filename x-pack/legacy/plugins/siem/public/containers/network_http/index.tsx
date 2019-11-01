@@ -12,7 +12,12 @@ import { compose } from 'redux';
 import chrome from 'ui/chrome';
 
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
-import { GetNetworkHttpQuery, NetworkHttpEdges, PageInfoPaginated } from '../../graphql/types';
+import {
+  GetNetworkHttpQuery,
+  NetworkHttpEdges,
+  NetworkHttpSortField,
+  PageInfoPaginated,
+} from '../../graphql/types';
 import { inputsModel, inputsSelectors, networkModel, networkSelectors, State } from '../../store';
 import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
@@ -44,6 +49,7 @@ export interface NetworkHttpComponentReduxProps {
   activePage: number;
   isInspected: boolean;
   limit: number;
+  sort: NetworkHttpSortField;
 }
 
 type NetworkHttpProps = OwnProps & NetworkHttpComponentReduxProps;
@@ -65,6 +71,7 @@ class NetworkHttpComponentQuery extends QueryTemplatePaginated<
       limit,
       skip,
       sourceId,
+      sort,
       startDate,
     } = this.props;
     const variables: GetNetworkHttpQuery.Variables = {
@@ -73,6 +80,7 @@ class NetworkHttpComponentQuery extends QueryTemplatePaginated<
       inspect: isInspected,
       ip,
       pagination: generateTablePaginationOptions(activePage, limit),
+      sort,
       sourceId,
       timerange: {
         interval: '12h',
@@ -130,7 +138,7 @@ class NetworkHttpComponentQuery extends QueryTemplatePaginated<
 }
 
 const makeMapStateToProps = () => {
-  const getHttpSelector = networkSelectors.topNFlowSelector();
+  const getHttpSelector = networkSelectors.httpSelector();
   const getQuery = inputsSelectors.globalQueryByIdSelector();
   return (state: State, { id = ID, type }: OwnProps) => {
     const { isInspected } = getQuery(state, id);

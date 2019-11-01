@@ -7,7 +7,7 @@
 import React from 'react';
 import { getOr } from 'lodash/fp';
 import { manageQuery } from '../../../components/page/manage_query';
-import { NetworkWithIndexComponentsQueryTableProps } from './types';
+import { OwnProps } from './types';
 import { NetworkHttpQuery } from '../../../containers/network_http';
 import { NetworkHttpTable } from '../../../components/page/network/network_http_table';
 
@@ -16,17 +16,14 @@ const NetworkHttpTableManage = manageQuery(NetworkHttpTable);
 export const NetworkHttpQueryTable = ({
   endDate,
   filterQuery,
-  flowTarget,
   ip,
   setQuery,
   skip,
   startDate,
   type,
-  indexPattern,
-}: NetworkWithIndexComponentsQueryTableProps) => (
+}: OwnProps) => (
   <NetworkHttpQuery
     endDate={endDate}
-    flowTarget={flowTarget}
     filterQuery={filterQuery}
     ip={ip}
     skip={skip}
@@ -49,7 +46,6 @@ export const NetworkHttpQueryTable = ({
         data={networkHttp}
         fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
         id={id}
-        indexPattern={indexPattern}
         inspect={inspect}
         isInspect={isInspected}
         loading={loading}

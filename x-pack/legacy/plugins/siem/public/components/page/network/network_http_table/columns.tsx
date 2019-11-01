@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import numeral from '@elastic/numeral';
 import { NetworkHttpFields, NetworkHttpItem } from '../../../../graphql/types';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { getEmptyTagValue } from '../../../empty_value';
+import { IPDetailsLink } from '../../../links';
 import { Columns } from '../../../paginated_table';
 
 import * as i18n from './translations';
@@ -95,6 +97,7 @@ export const getNetworkHttpColumns = (tableId: string): NetworkHttpColumns => [
             attrName: 'source.ip',
             idPrefix: escapeDataProviderId(`${tableId}-table-lastSourceIp`),
             rowItem: lastSourceIp,
+            render: () => <IPDetailsLink ip={lastSourceIp} />,
           })
         : getEmptyTagValue(),
   },
