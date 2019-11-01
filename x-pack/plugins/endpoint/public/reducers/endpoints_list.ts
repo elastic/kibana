@@ -17,6 +17,8 @@ interface EndpointsListState {
       };
     };
   };
+  isFiltered: boolean;
+  filteredData: any[];
   pageIndex: number;
   pageSize: number;
   showPerPageOptions: boolean;
@@ -34,6 +36,8 @@ const initialState: EndpointsListState = {
       },
     },
   },
+  isFiltered: false,
+  filteredData: [],
   pageIndex: 0,
   pageSize: 10,
   showPerPageOptions: true,
@@ -44,6 +48,8 @@ export function endpointListReducer(state = initialState, action: EndpointListAc
   switch (action.type) {
     case actions.serverReturnedData.type:
       return { ...state, data: action.payload[0] };
+    case actions.userFilteredData.type:
+      return { ...state, ...action.payload[0] };
     default:
       return state;
   }

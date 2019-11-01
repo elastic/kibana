@@ -5,8 +5,8 @@
  */
 
 import React, { PureComponent } from 'react';
-import { withRouter } from 'react-router-dom';
-
+import { withRouter, RouteComponentProps } from 'react-router-dom';
+import { connect } from 'react-redux';
 import {
   EuiBasicTable,
   EuiLink,
@@ -19,67 +19,56 @@ import {
   EuiPageContentBody,
   EuiPageContentHeaderSection,
 } from '@elastic/eui';
-// import { EndgameAppContext } from '../../common/app_context';
 import { SearchBar } from './search_bar';
+import {
+  endpointsListData,
+  isFiltered,
+  filteredEndpointListData,
+} from '../selectors/endpoints_list';
+import { actions, EndpointListActions } from '../actions/endpoints_list';
 
-const EndpointName = withRouter(function({ history, path, name }) {
+const EndpointName = withRouter<RouteComponentProps & { path: string; name: string }>(function({
+  history,
+  path,
+  name,
+}) {
   return <EuiLink onClick={() => history.push(path)}>{name}</EuiLink>;
 });
 
 const columns = [
   {
-    field: '_source',
+    field: '_source.host.hostname',
     name: 'Name',
-    render: source => {
-      return <span>{source.host.name}</span>;
+    render: (name: string, item: { _id: string }) => {
+      return <EndpointName name={name} path={`/endpoints/view/${item._id}`} />;
     },
   },
   {
-    field: '_source',
+    field: '_source.host.ip',
     name: 'IP Address',
-    render: source => {
-      return <span>{source.host.ip}</span>;
-    },
   },
   {
-    field: '_source',
+    field: '_source.host.os.full',
     name: 'Operating System',
-    render: source => {
-      return <span>{source.host.os.name + ' ' + source.host.os.version}</span>;
-    },
   },
   {
-    field: 'alert_count',
-    name: 'Alerts',
+    field: '_source.endpoint.domain',
+    name: 'Domain',
   },
   {
-    field: '_source',
+    field: '_source.host.name',
     name: 'Host Name',
-    render: source => {
-      return <span>{source.host.hostname}</span>;
-    },
   },
 ];
-//
-// interface State {
-//   queriedEndpointMetadata: {};
-// }
 
-export class EndpointsPage extends PureComponent {
-  // static contextType = EndgameAppContext;
-  //
-  // state = { results: [], queriedEndpointMetadata: [] };
-  // public updateOnChange = ({ updatedResult }: { updatedResult: {} }) => {
-  //   this.setState({ queriedEndpointMetadata: updatedResult });
-  // };
-  //
-  // context!: React.ContextType<typeof EndgameAppContext>;
-
+export class EndpointsPage extends PureComponent<{
+  endpoints: any[];
+  userFilteredData: EndpointListActions;
+  showFiltered: boolean;
+  filteredEndpoints: any[];
+}> {
   render() {
-    // const { results, queriedEndpointMetadata } = this.state;
-
-    const queriedEndpointMetadata = [];
-    const results = [];
+    const { endpoints, userFilteredData, showFiltered, filteredEndpoints } = this.props;
 
     return (
       <EuiPageBody>
@@ -100,26 +89,32 @@ export class EndpointsPage extends PureComponent {
           </EuiPageContentHeader>
           <EuiPageContentBody>
             <SearchBar
-              searchItems={results}
+              searchItems={endpoints}
               defaultFields={[`_source`]}
-              updateOnChange={() => {}}
+              updateOnChange={({ updatedResult }: { updatedResult: any[] }) =>
+                userFilteredData({ filteredData: updatedResult, isFiltered: true })
+              }
             />
-            <EuiBasicTable items={queriedEndpointMetadata} columns={columns} />
+            <EuiBasicTable items={showFiltered ? filteredEndpoints : endpoints} columns={columns} />
             <code>
-              <pre>{JSON.stringify(results, null, 4)}</pre>
+              <pre>{JSON.stringify(endpoints, null, 4)}</pre>
             </code>
           </EuiPageContentBody>
         </EuiPageContent>
       </EuiPageBody>
     );
   }
-
-  // async componentDidMount() {
-  //   // Load some API data for this component
-  //   const results = await this.context.appContext.core.http.get('_api/endpoints').catch(e => {
-  //     console.error(e); //eslint-disable-line
-  //     return Promise.resolve([]);
-  //   });
-  //   this.setState({ results, queriedEndpointMetadata: results });
-  // }
 }
+
+export const EndpointsPageConnected = connect(
+  state => {
+    return {
+      endpoints: endpointsListData(state),
+      showFiltered: isFiltered(state),
+      filteredEndpoints: filteredEndpointListData(state),
+    };
+  },
+  {
+    userFilteredData: actions.userFilteredData,
+  }
+)(EndpointsPage);

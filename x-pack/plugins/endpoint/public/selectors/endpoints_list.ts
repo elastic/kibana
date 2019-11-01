@@ -9,7 +9,15 @@ function endpointsListState(state: any) {
 }
 // TODO: type 'state' properly
 export function endpointsListData(state: any) {
-  return endpointsListState(state).data.hits;
+  return endpointsListState(state).data.hits.hits;
+}
+
+export function isFiltered(state: any) {
+  return endpointsListState(state).isFiltered;
+}
+
+export function filteredEndpointListData(state: any) {
+  return endpointsListState(state).filteredData;
 }
 
 export function totalHits(state: any) {
