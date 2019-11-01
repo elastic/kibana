@@ -33,19 +33,19 @@ export const initIpToHostName = ({ framework }: InfraBackendLibs) => {
         body: ipToHostSchema,
       },
     },
-    async (context, request, response) => {
+    async (requestContext, { body }, response) => {
       try {
         const params = {
-          index: request.body.index_pattern,
+          index: body.index_pattern,
           body: {
             size: 1,
             query: {
-              match: { 'host.ip': request.body.ip },
+              match: { 'host.ip': body.ip },
             },
             _source: ['host.name'],
           },
         };
-        const { hits } = await callWithRequest<HostDoc>(request, 'search', params);
+        const { hits } = await callWithRequest<HostDoc>(requestContext, 'search', params);
         if (hits.total.value === 0) {
           return response.notFound({
             body: { message: 'Host with matching IP address not found.' },

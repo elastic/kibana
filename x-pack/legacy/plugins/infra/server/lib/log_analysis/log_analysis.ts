@@ -17,7 +17,7 @@ import {
   LogRateModelPlotBucket,
   CompositeTimestampPartitionKey,
 } from './queries';
-import { KibanaRequest } from '../../../../../../../src/core/server';
+import { KibanaRequest, RequestHandlerContext } from '../../../../../../../src/core/server';
 
 const COMPOSITE_AGGREGATION_BATCH_SIZE = 1000;
 
@@ -28,27 +28,31 @@ export class InfraLogAnalysis {
     }
   ) {}
 
-  public getJobIds(request: KibanaRequest, sourceId: string) {
+  public getJobIds(requestContext: RequestHandlerContext, sourceId: string) {
     return {
-      logEntryRate: getJobId(this.libs.framework.getSpaceId(request), sourceId, 'log-entry-rate'),
+      logEntryRate: getJobId(
+        this.libs.framework.getSpaceId(requestContext),
+        sourceId,
+        'log-entry-rate'
+      ),
     };
   }
 
   public async getLogEntryRateBuckets(
-    request: KibanaRequest,
+    requestContext: RequestHandlerContext,
     sourceId: string,
     startTime: number,
     endTime: number,
     bucketDuration: number
   ) {
-    const logRateJobId = this.getJobIds(request, sourceId).logEntryRate;
+    const logRateJobId = this.getJobIds(requestContext, sourceId).logEntryRate;
 
     let mlModelPlotBuckets: LogRateModelPlotBucket[] = [];
     let afterLatestBatchKey: CompositeTimestampPartitionKey | undefined;
 
     while (true) {
       const mlModelPlotResponse = await this.libs.framework.callWithRequest(
-        request,
+        requestContext,
         'search',
         createLogEntryRateQuery(
           logRateJobId,

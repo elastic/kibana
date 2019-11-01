@@ -15,7 +15,7 @@ import zip from 'lodash/fp/zip';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fold } from 'fp-ts/lib/Either';
 import { identity, constant } from 'fp-ts/lib/function';
-import { KibanaRequest } from 'src/core/server';
+import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
 import { compareTimeKeys, isTimeKey, TimeKey } from '../../../../common/time';
 import { JsonObject } from '../../../../common/typed_json';
 import {
@@ -107,7 +107,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
   }
 
   public async getContainedLogSummaryBuckets(
-    request: KibanaRequest,
+    requestContext: RequestHandlerContext,
     sourceConfiguration: InfraSourceConfiguration,
     start: number,
     end: number,
@@ -166,7 +166,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
       },
     };
 
-    const response = await this.framework.callWithRequest<any, {}>(request, 'search', query);
+    const response = await this.framework.callWithRequest<any, {}>(requestContext, 'search', query);
 
     return pipe(
       LogSummaryResponseRuntimeType.decode(response),

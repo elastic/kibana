@@ -4,26 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { RequestHandlerContext } from 'src/core/server';
 import { InfraSourceStatusAdapter } from '../../source_status';
-import {
-  InfraBackendFrameworkAdapter,
-  InfraDatabaseGetIndicesResponse,
-  InfraFrameworkRequest,
-} from '../framework';
+import { InfraBackendFrameworkAdapter, InfraDatabaseGetIndicesResponse } from '../framework';
 
 export class InfraElasticsearchSourceStatusAdapter implements InfraSourceStatusAdapter {
   constructor(private readonly framework: InfraBackendFrameworkAdapter) {}
 
-  public async getIndexNames(request: InfraFrameworkRequest, aliasName: string) {
+  public async getIndexNames(requestContext: RequestHandlerContext, aliasName: string) {
     const indexMaps = await Promise.all([
       this.framework
-        .callWithRequest(request, 'indices.getAlias', {
+        .callWithRequest<string[]>(requestContext, 'indices.getAlias', {
           name: aliasName,
           filterPath: '*.settings.index.uuid', // to keep the response size as small as possible
         })
         .catch(withDefaultIfNotFound<InfraDatabaseGetIndicesResponse>({})),
       this.framework
-        .callWithRequest(request, 'indices.get', {
+        .callWithRequest<string[]>(requestContext, 'indices.get', {
           index: aliasName,
           filterPath: '*.settings.index.uuid', // to keep the response size as small as possible
         })
@@ -36,15 +33,15 @@ export class InfraElasticsearchSourceStatusAdapter implements InfraSourceStatusA
     );
   }
 
-  public async hasAlias(request: InfraFrameworkRequest, aliasName: string) {
-    return await this.framework.callWithRequest(request, 'indices.existsAlias', {
+  public async hasAlias(requestContext: RequestHandlerContext, aliasName: string) {
+    return await this.framework.callWithRequest(requestContext, 'indices.existsAlias', {
       name: aliasName,
     });
   }
 
-  public async hasIndices(request: InfraFrameworkRequest, indexNames: string) {
+  public async hasIndices(requestContext: RequestHandlerContext, indexNames: string) {
     return await this.framework
-      .callWithRequest(request, 'search', {
+      .callWithRequest(requestContext, 'search', {
         ignore_unavailable: true,
         allow_no_indices: true,
         index: indexNames,

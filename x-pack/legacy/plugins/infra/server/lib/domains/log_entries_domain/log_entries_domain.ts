@@ -7,7 +7,7 @@
 import stringify from 'json-stable-stringify';
 import { sortBy } from 'lodash';
 
-import { KibanaRequest } from 'src/core/server';
+import { RequestHandlerContext } from 'src/core/server';
 import { TimeKey } from '../../../../common/time';
 import { JsonObject } from '../../../../common/typed_json';
 import {
@@ -40,7 +40,7 @@ export class InfraLogEntriesDomain {
   ) {}
 
   public async getLogEntriesAround(
-    request: KibanaRequest,
+    requestContext: RequestHandlerContext,
     sourceId: string,
     key: TimeKey,
     maxCountBefore: number,
@@ -55,14 +55,17 @@ export class InfraLogEntriesDomain {
       };
     }
 
-    const { configuration } = await this.libs.sources.getSourceConfiguration(request, sourceId);
+    const { configuration } = await this.libs.sources.getSourceConfiguration(
+      requestContext,
+      sourceId
+    );
     const messageFormattingRules = compileFormattingRules(
       getBuiltinRules(configuration.fields.message)
     );
     const requiredFields = getRequiredFields(configuration, messageFormattingRules);
 
     const documentsBefore = await this.adapter.getAdjacentLogEntryDocuments(
-      request,
+      requestContext,
       configuration,
       requiredFields,
       key,
@@ -80,7 +83,7 @@ export class InfraLogEntriesDomain {
           };
 
     const documentsAfter = await this.adapter.getAdjacentLogEntryDocuments(
-      request,
+      requestContext,
       configuration,
       requiredFields,
       lastKeyBefore,
@@ -101,7 +104,7 @@ export class InfraLogEntriesDomain {
   }
 
   public async getLogEntriesBetween(
-    request: KibanaRequest,
+    requestContext: RequestHandlerContext,
     sourceId: string,
     startKey: TimeKey,
     endKey: TimeKey,
@@ -114,7 +117,7 @@ export class InfraLogEntriesDomain {
     );
     const requiredFields = getRequiredFields(configuration, messageFormattingRules);
     const documents = await this.adapter.getContainedLogEntryDocuments(
-      request,
+      requestContext,
       configuration,
       requiredFields,
       startKey,
@@ -129,7 +132,7 @@ export class InfraLogEntriesDomain {
   }
 
   public async getLogEntryHighlights(
-    request: KibanaRequest,
+    requestContext: RequestHandlerContext,
     sourceId: string,
     startKey: TimeKey,
     endKey: TimeKey,
@@ -158,7 +161,7 @@ export class InfraLogEntriesDomain {
           : highlightQuery;
         const [documentsBefore, documents, documentsAfter] = await Promise.all([
           this.adapter.getAdjacentLogEntryDocuments(
-            request,
+            requestContext,
             configuration,
             requiredFields,
             startKey,
@@ -168,7 +171,7 @@ export class InfraLogEntriesDomain {
             highlightQuery
           ),
           this.adapter.getContainedLogEntryDocuments(
-            request,
+            requestContext,
             configuration,
             requiredFields,
             startKey,
@@ -177,7 +180,7 @@ export class InfraLogEntriesDomain {
             highlightQuery
           ),
           this.adapter.getAdjacentLogEntryDocuments(
-            request,
+            requestContext,
             configuration,
             requiredFields,
             endKey,
@@ -203,7 +206,7 @@ export class InfraLogEntriesDomain {
   }
 
   public async getLogSummaryBucketsBetween(
-    request: KibanaRequest,
+    requestContext: RequestHandlerContext,
     sourceId: string,
     start: number,
     end: number,
@@ -212,7 +215,7 @@ export class InfraLogEntriesDomain {
   ): Promise<InfraLogSummaryBucket[]> {
     const { configuration } = await this.libs.sources.getSourceConfiguration(request, sourceId);
     const dateRangeBuckets = await this.adapter.getContainedLogSummaryBuckets(
-      request,
+      requestContext,
       configuration,
       start,
       end,
@@ -223,7 +226,7 @@ export class InfraLogEntriesDomain {
   }
 
   public async getLogSummaryHighlightBucketsBetween(
-    request: KibanaRequest,
+    requestContext: RequestHandlerContext,
     sourceId: string,
     start: number,
     end: number,
@@ -248,7 +251,7 @@ export class InfraLogEntriesDomain {
             }
           : highlightQuery;
         const summaryBuckets = await this.adapter.getContainedLogSummaryBuckets(
-          request,
+          requestContext,
           configuration,
           start,
           end,
@@ -266,11 +269,11 @@ export class InfraLogEntriesDomain {
   }
 
   public async getLogItem(
-    request: KibanaRequest,
+    requestContext: RequestHandlerContext,
     id: string,
     sourceConfiguration: InfraSourceConfiguration
   ): Promise<InfraLogItem> {
-    const document = await this.adapter.getLogItem(request, id, sourceConfiguration);
+    const document = await this.adapter.getLogItem(requestContext, id, sourceConfiguration);
     const defaultFields = [
       { field: '_index', value: document._index },
       { field: '_id', value: document._id },
@@ -300,7 +303,7 @@ interface LogItemHit {
 
 export interface LogEntriesAdapter {
   getAdjacentLogEntryDocuments(
-    request: KibanaRequest,
+    requestContext: RequestHandlerContext,
     sourceConfiguration: InfraSourceConfiguration,
     fields: string[],
     start: TimeKey,
@@ -311,7 +314,7 @@ export interface LogEntriesAdapter {
   ): Promise<LogEntryDocument[]>;
 
   getContainedLogEntryDocuments(
-    request: KibanaRequest,
+    requestContext: RequestHandlerContext,
     sourceConfiguration: InfraSourceConfiguration,
     fields: string[],
     start: TimeKey,
@@ -321,7 +324,7 @@ export interface LogEntriesAdapter {
   ): Promise<LogEntryDocument[]>;
 
   getContainedLogSummaryBuckets(
-    request: KibanaRequest,
+    requestContext: RequestHandlerContext,
     sourceConfiguration: InfraSourceConfiguration,
     start: number,
     end: number,
@@ -330,7 +333,7 @@ export interface LogEntriesAdapter {
   ): Promise<LogSummaryBucket[]>;
 
   getLogItem(
-    request: KibanaRequest,
+    requestContext: RequestHandlerContext,
     id: string,
     source: InfraSourceConfiguration
   ): Promise<LogItemHit>;

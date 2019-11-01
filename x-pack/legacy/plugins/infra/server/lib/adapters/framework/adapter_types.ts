@@ -10,7 +10,7 @@ import { Lifecycle, ResponseToolkit, RouteOptions } from 'hapi';
 import { Legacy } from 'kibana';
 import { JsonObject } from '../../../../common/typed_json';
 import { TSVBMetricModel } from '../../../../common/inventory_models/types';
-import { KibanaRequest } from '../../../../../../../../src/core/server';
+import { KibanaRequest, RequestHandlerContext } from '../../../../../../../../src/core/server';
 
 export const internalInfraFrameworkRequest = Symbol('internalInfraFrameworkRequest');
 
@@ -30,11 +30,11 @@ export interface InfraServerPluginDeps {
 /* eslint-disable  @typescript-eslint/unified-signatures */
 export interface InfraBackendFrameworkAdapter<R = unknown> {
   registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void;
-  callWithRequest<Hit = {}, Aggregation = undefined>(
-    req: KibanaRequest,
-    method: 'search',
-    options?: object
-  ): Promise<InfraDatabaseSearchResponse<Hit, Aggregation>>;
+  // callWithRequest<Hit = {}, Aggregation = undefined>(
+  //   requestContext: RequestHandlerContext,
+  //   method: 'search',
+  //   options?: object
+  // ): Promise<InfraDatabaseSearchResponse<Hit, Aggregation>>;
   // callWithRequest<Hit = {}, Aggregation = undefined>(
   //   req: InfraFrameworkRequest,
   //   method: 'msearch',
@@ -67,10 +67,14 @@ export interface InfraBackendFrameworkAdapter<R = unknown> {
   // ): Promise<InfraDatabaseSearchResponse>;
 
   // NP_TODO: using Promise<unknown> here until new platform callAsCurrentUser can return types
-  // callWithRequest(req: KibanaRequest, method: string, options?: object): Promise<unknown>;
+  callWithRequest(
+    requestContext: RequestHandlerContext,
+    method: string,
+    options?: object
+  ): Promise<unknown>;
 
-  getIndexPatternsService(req: KibanaRequest): Legacy.IndexPatternsService;
-  getSpaceId(request: KibanaRequest): string;
+  getIndexPatternsService(requestContext: RequestHandlerContext): Legacy.IndexPatternsService;
+  getSpaceId(requestContext: RequestHandlerContext): string;
   makeTSVBRequest(
     req: KibanaRequest,
     model: TSVBMetricModel,

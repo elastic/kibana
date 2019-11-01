@@ -11,7 +11,6 @@ import { GraphQLSchema } from 'graphql';
 import { Legacy } from 'kibana';
 import { runHttpQuery } from 'apollo-server-core';
 import { schema, TypeOf } from '@kbn/config-schema';
-import { first } from 'rxjs/operators';
 import {
   InfraBackendFrameworkAdapter,
   InfraTSVBResponse,
@@ -153,34 +152,17 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
   }
 
   public async callWithRequest<Hit = {}, Aggregation = undefined>(
-    request: KibanaRequest | Legacy.Request,
+    requestContext: RequestHandlerContext,
     endpoint: string,
-    params: CallWithRequestParams,
-    ...rest: any[]
+    params: CallWithRequestParams
   ) {
-    const client = (await this.core.elasticsearch.dataClient$.pipe(first()).toPromise()).asScoped(
-      request
-    );
+    const { elasticsearch, uiSettings } = requestContext.core;
 
-    // NP_TODO: mocking out uiSettings b/c I have no idea how to shim it woot
-    const uiSettings = {
-      get: (value: string) =>
-        new Promise((resolve, reject) => {
-          if (value === 'search:includeFrozen') {
-            return resolve(false);
-          }
-          if (value === 'courier:maxConcurrentShardRequests') {
-            return resolve(3);
-          }
-          return reject(new Error(`unknown ui setting key ${value}`));
-        }),
-    };
-
-    const includeFrozen = (await uiSettings.get('search:includeFrozen')) as boolean; // NP_TODO when we get real uiSettings, remove casting as boolean!
+    const includeFrozen = await uiSettings.client.get('search:includeFrozen');
     if (endpoint === 'msearch') {
-      const maxConcurrentShardRequests = (await uiSettings.get(
+      const maxConcurrentShardRequests = await uiSettings.client.get(
         'courier:maxConcurrentShardRequests'
-      )) as number; // NP_TODO when we get real uiSettings, remove casting as number!
+      );
       if (maxConcurrentShardRequests > 0) {
         params = { ...params, max_concurrent_shard_requests: maxConcurrentShardRequests };
       }
@@ -192,18 +174,20 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
         }
       : {};
 
-    const fields = await client.callAsCurrentUser(endpoint, {
+    const fields = await elasticsearch.dataClient.callAsCurrentUser(endpoint, {
       ...params,
       ...frozenIndicesParams,
     });
     return fields as Promise<InfraDatabaseSearchResponse<Hit, Aggregation>>;
   }
 
-  public getIndexPatternsService(request: KibanaRequest): Legacy.IndexPatternsService {
+  public getIndexPatternsService(
+    requestContext: RequestHandlerContext
+  ): Legacy.IndexPatternsService {
     return this.plugins.indexPatterns.indexPatternsServiceFactory({
       callCluster: async (method: string, args: [GenericParams], ...rest: any[]) => {
         const fieldCaps = await this.callWithRequest(
-          request,
+          requestContext,
           method,
           { ...args, allowNoIndices: true } as GenericParams,
           ...rest
@@ -213,18 +197,18 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
     });
   }
 
-  public getSpaceId(request: KibanaRequest): string {
+  // NP_TODO: Does this function still work with legacy getSpaceId? When can we switch
+  // to NP plugin for spaces, with associated exported types???
+  public getSpaceId(requestContext: RequestHandlerContext): string {
     const spacesPlugin = this.plugins.spaces;
 
     if (spacesPlugin && typeof spacesPlugin.getSpaceId === 'function') {
-      return spacesPlugin.getSpaceId(request);
+      return spacesPlugin.getSpaceId(requestContext);
     } else {
       return 'default';
     }
   }
 
-  // NP_TODO: this function still needs NP migration for the metrics plugin
-  // and for the getBasePath
   public async makeTSVBRequest(
     request: KibanaRequest,
     model: TSVBMetricModel,
