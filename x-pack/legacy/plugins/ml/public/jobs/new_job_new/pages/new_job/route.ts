@@ -22,7 +22,7 @@ import { Route } from '../../../../../common/types/kibana';
 
 import { loadNewJobCapabilities } from '../../../../services/new_job_capabilities_service';
 
-import { loadNewJobDefaults } from '../../utils/new_job_defaults';
+import { loadMlServerInfo } from '../../../../services/ml_server_info';
 
 import { mlJobService } from '../../../../services/job_service';
 import { JOB_TYPE } from '../../common/job_creator/util/constants';
@@ -58,7 +58,7 @@ routes.forEach((route: Route) => {
       indexPattern: loadCurrentIndexPattern,
       savedSearch: loadCurrentSavedSearch,
       loadNewJobCapabilities,
-      loadNewJobDefaults,
+      loadMlServerInfo,
       existingJobsAndGroups: mlJobService.getJobAndGroupIds,
       jobType: () => route.id,
     },
