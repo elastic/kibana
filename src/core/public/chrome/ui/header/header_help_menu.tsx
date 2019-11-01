@@ -17,10 +17,10 @@
  * under the License.
  */
 
+import * as Rx from 'rxjs';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
-import * as Rx from 'rxjs';
-
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import {
   // TODO: add type annotations
   // @ts-ignore
@@ -38,10 +38,10 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 
 import { HeaderExtension } from './header_extension';
 import { ChromeHelpExtension } from '../../chrome_service';
+import { ELASTIC_SUPPORT_LINK, KIBANA_GET_HELP_LINK, KIBANA_FEEDBACK_LINK } from '../../constants';
 
 interface Props {
   helpExtension$: Rx.Observable<ChromeHelpExtension>;
@@ -106,11 +106,7 @@ class HeaderHelpMenuUI extends Component<Props, State> {
         <EuiLink
           target="_blank"
           external={true}
-          href={
-            this.props.isCloudEnabled
-              ? 'https://support.elastic.co/'
-              : 'https://www.elastic.co/kibana/gethelp'
-          }
+          href={this.props.isCloudEnabled ? ELASTIC_SUPPORT_LINK : KIBANA_GET_HELP_LINK}
         >
           <EuiIcon type="questionInCircle" size="l" />
           <FormattedMessage
@@ -121,7 +117,7 @@ class HeaderHelpMenuUI extends Component<Props, State> {
 
         <EuiSpacer />
 
-        <EuiLink target="_blank" external={true} href="https://www.elastic.co/kibana/feedback">
+        <EuiLink target="_blank" external={true} href={KIBANA_FEEDBACK_LINK}>
           <EuiIcon type="editorComment" size="l" />
           <FormattedMessage
             id="core.ui.chrome.headerGlobalNav.helpMenuFeedbackDescription"
