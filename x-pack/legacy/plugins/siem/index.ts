@@ -8,7 +8,6 @@ import { i18n } from '@kbn/i18n';
 import { resolve } from 'path';
 import { Server } from 'hapi';
 
-import KbnServer from '../../../../src/legacy/server/kbn_server';
 import { initServerWithKibana } from './server/kibana.index';
 import { savedObjectMappings } from './server/saved_objects';
 
@@ -24,9 +23,7 @@ import {
   DEFAULT_FROM,
   DEFAULT_TO,
 } from './common/constants';
-import { signalsAlertType } from './server/lib/detection_engine/alerts/signals_alert_type';
 import { defaultIndexPattern } from './default_index_pattern';
-import { isAlertExecutor } from './server/lib/detection_engine/alerts/types';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const siem = (kibana: any) => {
@@ -125,16 +122,6 @@ export const siem = (kibana: any) => {
       mappings: savedObjectMappings,
     },
     init(server: Server) {
-      const newPlatform = ((server as unknown) as KbnServer).newPlatform;
-      if (server.plugins.alerting != null) {
-        const type = signalsAlertType({
-          logger: newPlatform.coreContext.logger.get('plugins', APP_ID),
-        });
-        if (isAlertExecutor(type)) {
-          server.plugins.alerting.setup.registerType(type);
-        }
-      }
-      server.injectUiAppVars('siem', async () => server.getInjectedUiAppVars('kibana'));
       initServerWithKibana(server);
     },
   });

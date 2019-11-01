@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { Server } from 'hapi';
 
+import KbnServer from 'src/legacy/server/kbn_server';
 import { initServer } from './init_server';
 import { compose } from './lib/compose/kibana';
 import { createLogger } from './utils/logger';
@@ -16,6 +17,8 @@ import {
   timelineSavedObjectType,
 } from './saved_objects';
 
+import { signalsAlertType } from './lib/detection_engine/alerts/signals_alert_type';
+import { isAlertExecutor } from './lib/detection_engine/alerts/types';
 import { createSignalsRoute } from './lib/detection_engine/routes/create_signals_route';
 import { readSignalsRoute } from './lib/detection_engine/routes/read_signals_route';
 import { findSignalsRoute } from './lib/detection_engine/routes/find_signals_route';
@@ -27,6 +30,17 @@ const APP_ID = 'siem';
 export const amMocking = (): boolean => process.env.INGEST_MOCKS === 'true';
 
 export const initServerWithKibana = (kbnServer: Server) => {
+  const newPlatform = ((kbnServer as unknown) as KbnServer).newPlatform;
+  if (kbnServer.plugins.alerting != null) {
+    const type = signalsAlertType({
+      logger: newPlatform.coreContext.logger.get('plugins', APP_ID),
+    });
+    if (isAlertExecutor(type)) {
+      kbnServer.plugins.alerting.setup.registerType(type);
+    }
+  }
+  kbnServer.injectUiAppVars('siem', async () => kbnServer.getInjectedUiAppVars('kibana'));
+
   // bind is so "this" binds correctly to the logger since hapi server does not auto-bind its methods
   const logger = createLogger(kbnServer.log.bind(kbnServer));
   logger.info('Plugin initializing');
