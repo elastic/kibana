@@ -1,0 +1,78 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { AppMountContext } from 'kibana/public';
+import { withPageNavigationStatus } from './common';
+import { hrefIsForPath } from '../concerns/routing';
+import { actions as endpointsListActions } from '../actions/endpoints_list';
+import * as endpointsListSelectors from '../selectors/endpoints_list';
+
+function isOnPage(href: any) {
+  return hrefIsForPath(href, '/vkm/app/endpoint/endpoints');
+}
+
+// TODO: type this properly
+export async function endpointsListSaga(...args: any[]) {
+  await Promise.all([resourceSaga(...args)]);
+}
+
+// TODO type actionsAndState, dispatch
+async function resourceSaga(
+  { actionsAndState, dispatch }: { actionsAndState: any; dispatch: any },
+  context: AppMountContext
+) {
+  for await (const {
+    action,
+    userIsOnPageAndLoggedIn,
+    // href,
+    state,
+    shouldInitialize,
+  } of withPageNavigationStatus({
+    actionsAndState,
+    isOnPage,
+  })) {
+    if (userIsOnPageAndLoggedIn) {
+      if (
+        shouldInitialize ||
+        action.type === endpointsListActions.userPaginatedOrSortedTable.type
+      ) {
+        try {
+          const pageIndex = endpointsListSelectors.pageIndex(state);
+          const pageSize = endpointsListSelectors.pageSize(state);
+          const sortField = endpointsListSelectors.sortField(state);
+          const sortDirection = endpointsListSelectors.sortDirection(state);
+
+          const response = await context.core.http.get('/endpoints', {
+            query: {
+              pageIndex,
+              pageSize,
+              sortField,
+              sortDirection,
+            },
+          });
+          dispatch(endpointsListActions.serverReturnedData(response.elasticsearchResponse));
+        } catch (error) {
+          // TODO: dispatch an error action
+          throw new Error(error);
+        }
+      }
+      // else if (action.type === endpointsListActions.userClickedArchiveItems.type) {
+      //   try {
+      //     const idsToArchive = action.payload[0];
+      //     await context.core.http.post('/alerts/archive', {
+      //       query: {
+      //         alerts: idsToArchive.join(','), // TODO: seems strange that we can't use lists in query params
+      //       },
+      //     });
+      //     dispatch(endpointsListActions.serverReturnedArchiveItems());
+      //   } catch (error) {
+      //     // TODO: dispatch an error action
+      //     throw new Error(error);
+      //   }
+      // }
+    }
+  }
+}
