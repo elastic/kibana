@@ -43,7 +43,7 @@ export const NodeAvailableWarning: FC = () => {
                 <br />
                 <FormattedMessage
                   id="xpack.ml.jobsList.nodeAvailableWarning.linkToCloudDescription"
-                  defaultMessage="Please edit your {link} and enable a machine learning node."
+                  defaultMessage="Please edit your {link}. You may enable a free 1GB machine learning node or expand your existing ML configuration."
                   values={{
                     link: (
                       <EuiLink href={`https://cloud.elastic.co/deployments?q=${id}`}>
