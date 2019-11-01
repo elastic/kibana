@@ -114,13 +114,12 @@ function coverageType(obj) {
   const { coveragePath } = obj;
 
   let coverageType = 'OTHER';
-  const basePath = 'kibana-coverage';
 
-  if (coveragePath.includes(`${basePath}/mocha`)) {
+  if (coveragePath.includes(`mocha`)) {
     coverageType = 'MOCHA';
   }
 
-  if (coveragePath.includes(`${basePath}/jest`)) {
+  if (coveragePath.includes(`jest`)) {
     coverageType = 'JEST';
   }
 
