@@ -16,7 +16,7 @@ remove(toastOrId: Toast | string): void;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  toastOrId | <code>Toast &#124; string</code> | a [Toast](./kibana-plugin-public.toast.md) returned by [ToastsApi.add()](./kibana-plugin-public.toastsapi.add.md) or it's id |
+|  toastOrId | <code>Toast &#124; string</code> | a [Toast](./kibana-plugin-public.toast.md) returned by [ToastsApi.add()](./kibana-plugin-public.toastsapi.add.md) or its id |
 
 <b>Returns:</b>
 

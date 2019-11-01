@@ -17,12 +17,10 @@
  * under the License.
  */
 
-import React, { useEffect, useRef } from 'react';
-import ReactDOM from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
-
 /**
- * A function that will mount the banner inside the provided element.
+ * A function that will should mount DOM content inside the provided container element
+ * and return a handler to unmount it.
+ *
  * @param element the container element to render into
  * @returns a {@link UnmountCallback} that unmount the element on call.
  *
@@ -37,26 +35,3 @@ export type MountPoint = (element: HTMLElement) => UnmountCallback;
  * @public
  */
 export type UnmountCallback = () => void;
-
-/**
- * MountWrapper is a react component to mount a {@link MountPoint} inside a react tree.
- *
- * @internal
- */
-export const MountWrapper: React.FunctionComponent<{ mount: MountPoint }> = ({ mount }) => {
-  const element = useRef(null);
-  useEffect(() => mount(element.current!), [mount]);
-  return <div className="kbnMountWrapper" ref={element} />;
-};
-
-/**
- * Mount converter for react components.
- *
- * @param component to get a mount for
- *
- * @internal
- */
-export const mountReact = (component: React.ReactNode): MountPoint => (element: HTMLElement) => {
-  ReactDOM.render(<I18nProvider>{component}</I18nProvider>, element);
-  return () => ReactDOM.unmountComponentAtNode(element);
-};

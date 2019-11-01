@@ -136,7 +136,7 @@ export {
   ErrorToastOptions,
 } from './notifications';
 
-export { MountPoint, UnmountCallback } from './utils';
+export { MountPoint, UnmountCallback } from './types';
 
 /**
  * Core services exposed to the `Plugin` setup lifecycle

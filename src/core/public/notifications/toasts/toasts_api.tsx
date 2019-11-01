@@ -20,10 +20,10 @@
 import { EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
 import React from 'react';
 import * as Rx from 'rxjs';
-import { isString } from 'lodash';
 
 import { ErrorToast } from './error_toast';
-import { MountPoint, mountReact } from '../../utils';
+import { MountPoint } from '../../types';
+import { mountReactNode } from '../../utils';
 import { UiSettingsClientContract } from '../../ui_settings';
 import { OverlayStart } from '../../overlays';
 
@@ -134,7 +134,7 @@ export class ToastsApi implements IToasts {
    * @param toastOrId - a {@link Toast} returned by {@link ToastsApi.add} or its id
    */
   public remove(toastOrId: Toast | string) {
-    const toRemove = isString(toastOrId) ? toastOrId : toastOrId.id;
+    const toRemove = typeof toastOrId === 'string' ? toastOrId : toastOrId.id;
     const list = this.toasts$.getValue();
     const listWithoutToast = list.filter(t => t.id !== toRemove);
     if (listWithoutToast.length !== list.length) {
@@ -200,7 +200,7 @@ export class ToastsApi implements IToasts {
       iconType: 'alert',
       title: options.title,
       toastLifeTimeMs: this.uiSettings.get('notifications:lifetime:error'),
-      text: mountReact(
+      text: mountReactNode(
         <ErrorToast
           openModal={this.openModal.bind(this)}
           error={error}
