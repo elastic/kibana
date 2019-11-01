@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { asDuration } from '../duration';
+import { asDuration, getDurationUnit } from '../duration';
 
 describe('duration formatters', () => {
   describe('asDuration', () => {
@@ -26,6 +26,19 @@ describe('duration formatters', () => {
 
     it('falls back to default value', () => {
       expect(asDuration(undefined, { defaultValue: 'nope' })).toEqual('nope');
+    });
+  });
+  describe('getDurationUnit', () => {
+    test('should return right duration unit', () => {
+      expect(getDurationUnit(3600000001)).toEqual('h');
+      expect(getDurationUnit(3600000000)).toEqual('m');
+      expect(getDurationUnit(60000001)).toEqual('m');
+      expect(getDurationUnit(60000000)).toEqual('s');
+      expect(getDurationUnit(10 * 1000000 + 1)).toEqual('s');
+      expect(getDurationUnit(10 * 1000000)).toEqual('ms');
+      expect(getDurationUnit(10 * 1000 + 1)).toEqual('ms');
+      expect(getDurationUnit(10 * 1000)).toEqual('us');
+      expect(getDurationUnit(10)).toEqual('us');
     });
   });
 });

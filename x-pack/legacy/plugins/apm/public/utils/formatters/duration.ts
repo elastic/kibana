@@ -5,14 +5,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import moment from 'moment';
 import { memoize } from 'lodash';
 import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
 import { asDecimal, asInteger } from './formatters';
+import { TimeUnit } from './datetime';
 
-const HOURS_CUT_OFF = 3600000000; // 1 hour (in microseconds)
-const MINUTES_CUT_OFF = 60000000; // 1 minute (in microseconds)
-const SECONDS_CUT_OFF = 10 * 1000000; // 10 seconds (in microseconds)
-const MILLISECONDS_CUT_OFF = 10 * 1000; // 10 milliseconds (in microseconds)
 const SPACE = ' ';
 
 /*
@@ -134,17 +132,22 @@ export const getDurationFormatter: TimeFormatterBuilder = memoize(
 );
 
 export function getDurationUnit(max: number) {
-  if (max > HOURS_CUT_OFF) {
+  const toMicroseconds = (timeUnit: TimeUnit, multiplier: number = 1000) =>
+    moment.duration(1, timeUnit).asMilliseconds() * multiplier;
+
+  if (max > toMicroseconds('hours')) {
     return 'h';
-  } else if (max > MINUTES_CUT_OFF) {
-    return 'm';
-  } else if (max > SECONDS_CUT_OFF) {
-    return 's';
-  } else if (max > MILLISECONDS_CUT_OFF) {
-    return 'ms';
-  } else {
-    return 'us';
   }
+  if (max > toMicroseconds('minutes')) {
+    return 'm';
+  }
+  if (max > toMicroseconds('seconds', 10000)) {
+    return 's';
+  }
+  if (max > toMicroseconds('seconds', 10)) {
+    return 'ms';
+  }
+  return 'us';
 }
 
 export function asDuration(
