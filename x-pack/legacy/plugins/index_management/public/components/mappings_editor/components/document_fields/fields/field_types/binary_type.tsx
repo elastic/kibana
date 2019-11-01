@@ -5,15 +5,10 @@
  */
 import React from 'react';
 
-import { NormalizedField } from '../../../../types';
 import { StoreParameter, DocValuesParameter } from '../../field_parameters';
 import { EditFieldSection } from '../edit_field';
 
-interface Props {
-  field: NormalizedField;
-}
-
-export const BinaryType = ({ field }: Props) => {
+export const BinaryType = () => {
   return (
     <>
       <EditFieldSection>

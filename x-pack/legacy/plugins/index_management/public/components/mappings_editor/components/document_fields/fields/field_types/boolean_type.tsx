@@ -25,10 +25,6 @@ const getDefaultValueToggle = (param: string, field: FieldType) => {
     case 'null_value': {
       return field.null_value !== undefined && field.null_value !== '';
     }
-    case 'ignore_malformed': {
-      // we are inverting the underlying setting by setting the label to "Reject malformed"
-      return field.ignore_malformed !== undefined ? !field.ignore_malformed : true;
-    }
     default:
       return false;
   }
