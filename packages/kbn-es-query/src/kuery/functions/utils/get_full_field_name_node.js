@@ -19,6 +19,7 @@
 
 
 import { getFields } from './get_fields';
+import * as ast from '../../ast';
 
 export function getFullFieldNameNode(rootNameNode, indexPattern, nestedPath) {
   const fullFieldNameNode = {
@@ -33,6 +34,11 @@ export function getFullFieldNameNode(rootNameNode, indexPattern, nestedPath) {
     return fullFieldNameNode;
   }
   const fields = getFields(fullFieldNameNode, indexPattern);
+
+  if (fields.length === 0) {
+    const fieldName = ast.toElasticsearchQuery(fullFieldNameNode);
+    throw new Error(`${fieldName} does not exist in index pattern ${indexPattern.title}`);
+  }
 
   const errors = fields.reduce((acc, field) => {
     const nestedPathFromField = field.subType && field.subType.nested ? field.subType.nested.path : undefined;
