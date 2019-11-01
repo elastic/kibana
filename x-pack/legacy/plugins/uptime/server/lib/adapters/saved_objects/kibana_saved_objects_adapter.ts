@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Boom from 'boom';
 import uptimeIndexPattern from './heartbeat_index_pattern.json';
 import { UMSavedObjectsAdapter } from './types.js';
 
@@ -13,7 +14,7 @@ export const UMKibanaSavedObjectsAdapter: UMSavedObjectsAdapter = {
     try {
       savedObjectsClient = request.getSavedObjectsClient();
     } catch (error) {
-      // handle
+      throw Boom.internal('Unable to get saved objects client');
     }
     try {
       return await savedObjectsClient.get('index-pattern', uptimeIndexPattern.id);
