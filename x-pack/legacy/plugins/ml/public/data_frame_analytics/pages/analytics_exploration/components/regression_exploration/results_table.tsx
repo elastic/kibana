@@ -15,6 +15,7 @@ import {
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
   EuiPanel,
   EuiPopover,
   EuiPopoverTitle,
@@ -432,6 +433,16 @@ export const ResultsTable: FC<Props> = React.memo(({ jobConfig, jobStatus }) => 
       )}
       {(columns.length > 0 || searchQuery !== defaultSearchQuery) && (
         <Fragment>
+          <EuiFormRow
+            helpText={i18n.translate(
+              'xpack.ml.dataframe.analytics.regressionExploration.documentsShownHelpText',
+              {
+                defaultMessage: 'Showing first 1000 documents',
+              }
+            )}
+          >
+            <Fragment />
+          </EuiFormRow>
           <EuiSpacer />
           <MlInMemoryTableBasic
             allowNeutralSort={false}
