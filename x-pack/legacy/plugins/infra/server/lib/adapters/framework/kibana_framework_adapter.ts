@@ -49,7 +49,7 @@ interface CallWithRequestParams extends GenericParams {
 export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFrameworkAdapter {
   public router: IRouter;
   private core: CoreSetup;
-  private plugins: InfraServerPluginDeps;
+  public plugins: InfraServerPluginDeps;
 
   constructor(core: CoreSetup, config: InfraConfig, plugins: InfraServerPluginDeps) {
     this.router = core.http.createRouter();
@@ -186,19 +186,17 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
   ): Legacy.IndexPatternsService {
     return this.plugins.indexPatterns.indexPatternsServiceFactory({
       callCluster: async (method: string, args: [GenericParams], ...rest: any[]) => {
-        const fieldCaps = await this.callWithRequest(
-          requestContext,
-          method,
-          { ...args, allowNoIndices: true } as GenericParams,
-          ...rest
-        );
+        const fieldCaps = await this.callWithRequest(requestContext, method, {
+          ...args,
+          allowNoIndices: true,
+        } as GenericParams);
         return fieldCaps;
       },
     });
   }
 
-  // NP_TODO: Does this function still work with legacy getSpaceId? When can we switch
-  // to NP plugin for spaces, with associated exported types???
+  // NP_TODO: Does this function still work with legacy getSpaceId(requestContext)?
+  // When can we switch to NP plugin for spaces, with associated exported types???
   public getSpaceId(requestContext: RequestHandlerContext): string {
     const spacesPlugin = this.plugins.spaces;
 
@@ -209,6 +207,7 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
     }
   }
 
+  // NP_TODO: This method needs to no longer require full KibanaRequest
   public async makeTSVBRequest(
     request: KibanaRequest,
     model: TSVBMetricModel,

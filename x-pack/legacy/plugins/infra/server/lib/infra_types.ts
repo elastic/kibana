@@ -5,7 +5,6 @@
  */
 
 import { InfraSourceConfiguration } from '../../public/graphql/types';
-import { InfraFrameworkRequest } from './adapters/framework';
 import { InfraFieldsDomain } from './domains/fields_domain';
 import { InfraLogEntriesDomain } from './domains/log_entries_domain';
 import { InfraMetricsDomain } from './domains/metrics_domain';
@@ -40,8 +39,4 @@ export interface InfraConfiguration {
   sources: {
     default: InfraSourceConfiguration;
   };
-}
-
-export interface InfraContext {
-  req: InfraFrameworkRequest;
 }

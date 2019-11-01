@@ -6,9 +6,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { flatten, get } from 'lodash';
-
+import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
 import { InfraMetric, InfraMetricData, InfraNodeType } from '../../../graphql/types';
-import { InfraBackendFrameworkAdapter, InfraFrameworkRequest } from '../framework';
+import { InfraBackendFrameworkAdapter } from '../framework';
 import { InfraMetricsAdapter, InfraMetricsRequestOptions } from './adapter_types';
 import { checkValidNode } from './lib/check_valid_node';
 import { InvalidNodeError } from './lib/errors';
@@ -23,8 +23,9 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
   }
 
   public async getMetrics(
-    req: InfraFrameworkRequest,
-    options: InfraMetricsRequestOptions
+    requestContext: RequestHandlerContext,
+    options: InfraMetricsRequestOptions,
+    rawRequest: KibanaRequest // NP_TODO: Temporarily needed until metrics getVisData no longer needs full request
   ): Promise<InfraMetricData[]> {
     const fields = {
       [InfraNodeType.host]: options.sourceConfiguration.fields.host,
@@ -41,7 +42,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
     };
 
     const search = <Aggregation>(searchOptions: object) =>
-      this.framework.callWithRequest<{}, Aggregation>(req, 'search', searchOptions);
+      this.framework.callWithRequest<{}, Aggregation>(requestContext, 'search', searchOptions);
 
     const validNode = await checkValidNode(search, indexPattern, nodeField, options.nodeIds.nodeId);
     if (!validNode) {
@@ -88,7 +89,8 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
       const filters = model.map_field_to
         ? [{ match: { [model.map_field_to]: id } }]
         : [{ match: { [nodeField]: id } }];
-      return this.framework.makeTSVBRequest(req, model, timerange, filters);
+      // NP_TODO: make this method no longer require raw request :(
+      return this.framework.makeTSVBRequest(rawRequest, model, timerange, filters);
     });
     return Promise.all(requests)
       .then(results => {

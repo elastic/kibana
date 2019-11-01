@@ -14,6 +14,7 @@ import { savedObjectMappings } from './server/saved_objects';
 import { plugin, InfraServerPluginDeps } from './server/new_platform_index';
 import { UsageCollector } from './server/usage/usage_collector';
 import { InfraSetup } from '../../../plugins/infra/server';
+import { getApmIndices } from '../apm/server/lib/settings/apm_indices/get_apm_indices';
 
 const APP_ID = 'infra';
 const logsSampleDataLinkLabel = i18n.translate('xpack.infra.sampleDataLinkLabel', {
@@ -94,6 +95,9 @@ export function infra(kibana: any) {
         spaces: legacyServer.plugins.spaces,
         savedObjects: legacyServer.savedObjects,
         features: plugins.features,
+        apm: {
+          getIndices: () => getApmIndices(legacyServer),
+        },
       };
 
       const infraPluginInstance = plugin(initContext);

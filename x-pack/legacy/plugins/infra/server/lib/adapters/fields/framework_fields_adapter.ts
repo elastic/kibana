@@ -6,11 +6,8 @@
 
 import { startsWith, uniq, first } from 'lodash';
 import { idx } from '@kbn/elastic-idx';
-import {
-  InfraBackendFrameworkAdapter,
-  InfraFrameworkRequest,
-  InfraDatabaseSearchResponse,
-} from '../framework';
+import { RequestHandlerContext } from 'src/core/server';
+import { InfraBackendFrameworkAdapter, InfraDatabaseSearchResponse } from '../framework';
 import { FieldsAdapter, IndexFieldDescriptor } from './adapter_types';
 import { getAllowedListForPrefix } from '../../../../common/ecs_allowed_list';
 import { getAllCompositeData } from '../../../utils/get_all_composite_data';
@@ -38,15 +35,19 @@ export class FrameworkFieldsAdapter implements FieldsAdapter {
   }
 
   public async getIndexFields(
-    request: InfraFrameworkRequest,
+    requestContext: RequestHandlerContext,
     indices: string,
     timefield: string
   ): Promise<IndexFieldDescriptor[]> {
-    const indexPatternsService = this.framework.getIndexPatternsService(request);
+    const indexPatternsService = this.framework.getIndexPatternsService(requestContext);
     const response = await indexPatternsService.getFieldsForWildcard({
       pattern: indices,
     });
-    const { dataSets, modules } = await this.getDataSetsAndModules(request, indices, timefield);
+    const { dataSets, modules } = await this.getDataSetsAndModules(
+      requestContext,
+      indices,
+      timefield
+    );
     const allowedList = modules.reduce(
       (acc, name) => uniq([...acc, ...getAllowedListForPrefix(name)]),
       [] as string[]
@@ -59,7 +60,7 @@ export class FrameworkFieldsAdapter implements FieldsAdapter {
   }
 
   private async getDataSetsAndModules(
-    request: InfraFrameworkRequest,
+    requestContext: RequestHandlerContext,
     indices: string,
     timefield: string
   ): Promise<{ dataSets: string[]; modules: string[] }> {
@@ -109,7 +110,7 @@ export class FrameworkFieldsAdapter implements FieldsAdapter {
 
     const buckets = await getAllCompositeData<DataSetResponse, Bucket>(
       this.framework,
-      request,
+      requestContext,
       params,
       bucketSelector,
       handleAfterKey

@@ -111,7 +111,10 @@ export class InfraLogEntriesDomain {
     filterQuery?: LogEntryQuery,
     highlightQuery?: LogEntryQuery
   ): Promise<InfraLogEntry[]> {
-    const { configuration } = await this.libs.sources.getSourceConfiguration(request, sourceId);
+    const { configuration } = await this.libs.sources.getSourceConfiguration(
+      requestContext,
+      sourceId
+    );
     const messageFormattingRules = compileFormattingRules(
       getBuiltinRules(configuration.fields.message)
     );
@@ -143,7 +146,10 @@ export class InfraLogEntriesDomain {
     }>,
     filterQuery?: LogEntryQuery
   ): Promise<InfraLogEntry[][]> {
-    const { configuration } = await this.libs.sources.getSourceConfiguration(request, sourceId);
+    const { configuration } = await this.libs.sources.getSourceConfiguration(
+      requestContext,
+      sourceId
+    );
     const messageFormattingRules = compileFormattingRules(
       getBuiltinRules(configuration.fields.message)
     );
@@ -213,7 +219,10 @@ export class InfraLogEntriesDomain {
     bucketSize: number,
     filterQuery?: LogEntryQuery
   ): Promise<InfraLogSummaryBucket[]> {
-    const { configuration } = await this.libs.sources.getSourceConfiguration(request, sourceId);
+    const { configuration } = await this.libs.sources.getSourceConfiguration(
+      requestContext,
+      sourceId
+    );
     const dateRangeBuckets = await this.adapter.getContainedLogSummaryBuckets(
       requestContext,
       configuration,
@@ -234,7 +243,10 @@ export class InfraLogEntriesDomain {
     highlightQueries: string[],
     filterQuery?: LogEntryQuery
   ): Promise<InfraLogSummaryHighlightBucket[][]> {
-    const { configuration } = await this.libs.sources.getSourceConfiguration(request, sourceId);
+    const { configuration } = await this.libs.sources.getSourceConfiguration(
+      requestContext,
+      sourceId
+    );
     const messageFormattingRules = compileFormattingRules(
       getBuiltinRules(configuration.fields.message)
     );

@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { RequestHandlerContext } from 'src/core/server';
 import {
   InfraBackendFrameworkAdapter,
-  InfraFrameworkRequest,
   InfraMetadataAggregationBucket,
   InfraMetadataAggregationResponse,
 } from '../../../lib/adapters/framework';
@@ -19,7 +19,7 @@ export interface InfraCloudMetricsAdapterResponse {
 
 export const getCloudMetricsMetadata = async (
   framework: InfraBackendFrameworkAdapter,
-  req: InfraFrameworkRequest,
+  requestContext: RequestHandlerContext,
   sourceConfiguration: InfraSourceConfiguration,
   instanceId: string
 ): Promise<InfraCloudMetricsAdapterResponse> => {
@@ -51,7 +51,7 @@ export const getCloudMetricsMetadata = async (
     {
       metrics?: InfraMetadataAggregationResponse;
     }
-  >(req, 'search', metricQuery);
+  >(requestContext, 'search', metricQuery);
 
   const buckets =
     response.aggregations && response.aggregations.metrics

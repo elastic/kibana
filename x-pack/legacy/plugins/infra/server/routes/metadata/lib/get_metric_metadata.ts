@@ -5,8 +5,8 @@
  */
 
 import { get } from 'lodash';
+import { RequestHandlerContext } from 'src/core/server';
 import {
-  InfraFrameworkRequest,
   InfraMetadataAggregationBucket,
   InfraBackendFrameworkAdapter,
   InfraMetadataAggregationResponse,
@@ -23,7 +23,7 @@ export interface InfraMetricsAdapterResponse {
 
 export const getMetricMetadata = async (
   framework: InfraBackendFrameworkAdapter,
-  req: InfraFrameworkRequest,
+  requestContext: RequestHandlerContext,
   sourceConfiguration: InfraSourceConfiguration,
   nodeId: string,
   nodeType: 'host' | 'pod' | 'container'
@@ -69,7 +69,7 @@ export const getMetricMetadata = async (
       metrics?: InfraMetadataAggregationResponse;
       nodeName?: InfraMetadataAggregationResponse;
     }
-  >(req, 'search', metricQuery);
+  >(requestContext, 'search', metricQuery);
 
   const buckets =
     response.aggregations && response.aggregations.metrics

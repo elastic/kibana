@@ -12,7 +12,6 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fold } from 'fp-ts/lib/Either';
 import { RequestHandlerContext } from 'src/core/server';
 import { Pick3 } from '../../../common/utility_types';
-import { InfraFrameworkRequest } from '../adapters/framework';
 import { defaultSourceConfiguration } from './defaults';
 import { NotFoundError } from './errors';
 import { infraSourceConfigurationSavedObjectType } from './saved_object_mappings';
@@ -125,9 +124,9 @@ export class InfraSources {
     };
   }
 
-  public async deleteSourceConfiguration(request: InfraFrameworkRequest, sourceId: string) {
+  public async deleteSourceConfiguration(requestContext: RequestHandlerContext, sourceId: string) {
     await this.libs.savedObjects
-      .getScopedSavedObjectsClient(request)
+      .getScopedSavedObjectsClient(requestContext)
       .delete(infraSourceConfigurationSavedObjectType, sourceId);
   }
 

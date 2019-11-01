@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraWrappableRequest } from '../../lib/adapters/framework';
-
 export interface InfraTimerange {
   field: string;
   from: number;
