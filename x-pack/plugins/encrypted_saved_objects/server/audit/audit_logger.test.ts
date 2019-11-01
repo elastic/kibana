@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EncryptedSavedObjectsAuditLogger } from './encrypted_saved_objects_audit_logger';
+import { EncryptedSavedObjectsAuditLogger } from './audit_logger';
 
 test('properly logs audit events', () => {
   const mockInternalAuditLogger = { log: jest.fn() };
-  const audit = new EncryptedSavedObjectsAuditLogger(mockInternalAuditLogger);
+  const audit = new EncryptedSavedObjectsAuditLogger(() => mockInternalAuditLogger);
 
   audit.encryptAttributesSuccess(['one', 'two'], {
     type: 'known-type',
