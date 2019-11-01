@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import { EuiTextColor } from '@elastic/eui';
 import { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
@@ -38,60 +38,60 @@ export function getFilterDisplayText(filter: Filter, filterDisplayName: string) 
   switch (filter.meta.type) {
     case 'exists':
       return (
-        <span>
+        <Fragment>
           {prefix}
           {existsOperator.message}
-        </span>
+        </Fragment>
       );
     case 'geo_bounding_box':
       return (
-        <span>
+        <Fragment>
           {prefix}
           {filter.meta.key}: {filterDisplayName}
-        </span>
+        </Fragment>
       );
     case 'geo_polygon':
       return (
-        <span>
+        <Fragment>
           {prefix}
           {filter.meta.key}: {filterDisplayName}
-        </span>
+        </Fragment>
       );
     case 'phrase':
       return (
-        <span>
+        <Fragment>
           {prefix}
           {filter.meta.key}: {filterDisplayName}
-        </span>
+        </Fragment>
       );
     case 'phrases':
       return (
-        <span>
+        <Fragment>
           {prefix}
           {filter.meta.key} {isOneOfOperator.message} {filterDisplayName}
-        </span>
+        </Fragment>
       );
     case 'query_string':
       return (
-        <span>
+        <Fragment>
           {prefix}
           {filterDisplayName}
-        </span>
+        </Fragment>
       );
     case 'range':
     case 'phrase':
       return (
-        <span>
+        <Fragment>
           {prefix}
           {filter.meta.key}: {filterDisplayName}
-        </span>
+        </Fragment>
       );
     default:
       return (
-        <span>
+        <Fragment>
           {prefix}
           {JSON.stringify(filter.query)}
-        </span>
+        </Fragment>
       );
   }
 }
