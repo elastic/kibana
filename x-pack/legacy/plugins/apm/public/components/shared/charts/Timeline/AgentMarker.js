@@ -10,7 +10,7 @@ import { EuiToolTip } from '@elastic/eui';
 import Legend from '../Legend';
 import { units, px } from '../../../../style/variables';
 import styled from 'styled-components';
-import { asDuration } from '../../../../utils/duration_formatters';
+import { asDuration } from '../../../../utils/formatters';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 
 const NameContainer = styled.div`

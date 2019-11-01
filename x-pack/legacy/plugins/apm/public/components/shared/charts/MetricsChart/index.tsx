@@ -9,13 +9,13 @@ import { GenericMetricsChart } from '../../../../../server/lib/metrics/transform
 // @ts-ignore
 import CustomPlot from '../CustomPlot';
 import {
-  asDynamicBytes,
-  asPercent,
-  getFixedByteFormatter,
   asDecimal,
-  asDuration,
-  asInteger
-} from '../../../../utils/duration_formatters';
+  asPercent,
+  asInteger,
+  asDynamicBytes,
+  getFixedByteFormatter,
+  asDuration
+} from '../../../../utils/formatters';
 import { Coordinate } from '../../../../../typings/timeseries';
 import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
 import { useChartsSync } from '../../../../hooks/useChartsSync';

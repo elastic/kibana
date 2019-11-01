@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { memoize } from 'lodash';
-import { NOT_AVAILABLE_LABEL } from '../../common/i18n';
+import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
+import { asDecimal, asInteger } from './formatters';
 
 const HOURS_CUT_OFF = 3600000000; // 1 hour (in microseconds)
 const MINUTES_CUT_OFF = 60000000; // 1 minute (in microseconds)
@@ -157,93 +157,3 @@ export function asDuration(
   const formatter = getDurationFormatter(value);
   return formatter(value, { withUnit, defaultValue });
 }
-
-export function asDecimal(value: number) {
-  return numeral(value).format('0,0.0');
-}
-
-export function asInteger(value: number) {
-  return numeral(value).format('0,0');
-}
-
-export function tpmUnit(type?: string) {
-  return type === 'request'
-    ? i18n.translate('xpack.apm.formatters.requestsPerMinLabel', {
-        defaultMessage: 'rpm'
-      })
-    : i18n.translate('xpack.apm.formatters.transactionsPerMinLabel', {
-        defaultMessage: 'tpm'
-      });
-}
-
-export function asPercent(
-  numerator: number,
-  denominator: number | undefined,
-  fallbackResult = ''
-) {
-  if (!denominator || isNaN(numerator)) {
-    return fallbackResult;
-  }
-
-  const decimal = numerator / denominator;
-  return numeral(decimal).format('0.0%');
-}
-
-function asKilobytes(value: number) {
-  return `${asDecimal(value / 1000)} KB`;
-}
-
-function asMegabytes(value: number) {
-  return `${asDecimal(value / 1e6)} MB`;
-}
-
-function asGigabytes(value: number) {
-  return `${asDecimal(value / 1e9)} GB`;
-}
-
-function asTerabytes(value: number) {
-  return `${asDecimal(value / 1e12)} TB`;
-}
-
-function asBytes(value: number) {
-  return `${asDecimal(value)} B`;
-}
-
-const bailIfNumberInvalid = (cb: (val: number) => string) => {
-  return (val: number | null | undefined) => {
-    if (val === null || val === undefined || isNaN(val)) {
-      return '';
-    }
-    return cb(val);
-  };
-};
-
-export const asDynamicBytes = bailIfNumberInvalid((value: number) => {
-  return unmemoizedFixedByteFormatter(value)(value);
-});
-
-const unmemoizedFixedByteFormatter = (max: number) => {
-  if (max > 1e12) {
-    return asTerabytes;
-  }
-
-  if (max > 1e9) {
-    return asGigabytes;
-  }
-
-  if (max > 1e6) {
-    return asMegabytes;
-  }
-
-  if (max > 1000) {
-    return asKilobytes;
-  }
-
-  return asBytes;
-};
-
-export const getFixedByteFormatter = memoize((max: number) => {
-  const formatter = unmemoizedFixedByteFormatter(max);
-
-  return bailIfNumberInvalid(formatter);
-});

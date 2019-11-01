@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import moment from 'moment-timezone';
-import {
-  asRelativeDateTimeRange,
-  asAbsoluteDateTime
-} from '../datetime_formatters';
+import { asRelativeDateTimeRange, asAbsoluteDateTime } from '../datetime';
 
 describe('date time formatters', () => {
   describe('asRelativeDateTimeRange', () => {

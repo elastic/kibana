@@ -10,7 +10,7 @@ import React from 'react';
 // @ts-ignore
 import Histogram from '../../../shared/charts/Histogram';
 import { EmptyMessage } from '../../../shared/EmptyMessage';
-import { asRelativeDateTimeRange } from '../../../../utils/datetime_formatters';
+import { asRelativeDateTimeRange } from '../../../../utils/formatters';
 
 interface IBucket {
   key: number;

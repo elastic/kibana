@@ -14,7 +14,7 @@ import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import {
   getDurationFormatter,
   getDurationUnit
-} from '../../../../utils/duration_formatters';
+} from '../../../../utils/formatters';
 // @ts-ignore
 import Histogram from '../../../shared/charts/Histogram';
 import { EmptyMessage } from '../../../shared/EmptyMessage';

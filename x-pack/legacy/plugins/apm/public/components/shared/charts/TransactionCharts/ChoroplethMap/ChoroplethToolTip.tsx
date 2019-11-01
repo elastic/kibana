@@ -6,10 +6,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  asDuration,
-  asInteger
-} from '../../../../../utils/duration_formatters';
+import { asDuration, asInteger } from '../../../../../utils/formatters';
 import { fontSizes } from '../../../../../style/variables';
 
 export const ChoroplethToolTip: React.SFC<{

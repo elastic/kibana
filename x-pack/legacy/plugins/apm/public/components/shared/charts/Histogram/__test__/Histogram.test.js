@@ -11,10 +11,10 @@ import d3 from 'd3';
 import { HistogramInner } from '../index';
 import response from './response.json';
 import {
-  getDurationFormatter,
   asDecimal,
+  getDurationFormatter,
   getDurationUnit
-} from '../../../../../utils/duration_formatters';
+} from '../../../../../utils/formatters';
 import { toJson } from '../../../../../utils/testHelpers';
 import { getFormattedBuckets } from '../../../../app/TransactionDetails/Distribution/index';
 

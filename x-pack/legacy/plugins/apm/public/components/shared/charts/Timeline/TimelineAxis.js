@@ -12,7 +12,7 @@ import { XYPlot, XAxis } from 'react-vis';
 import LastTickValue from './LastTickValue';
 import AgentMarker from './AgentMarker';
 import { px } from '../../../../style/variables';
-import { getDurationFormatter } from '../../../../utils/duration_formatters';
+import { getDurationFormatter } from '../../../../utils/formatters';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 
 // Remove any tick that is too close to topTraceDuration

@@ -6,10 +6,7 @@
 import React from 'react';
 import { EuiToolTip } from '@elastic/eui';
 import moment from 'moment-timezone';
-import {
-  asAbsoluteDateTime,
-  TimeUnit
-} from '../../../utils/datetime_formatters';
+import { asAbsoluteDateTime, TimeUnit } from '../../../utils/formatters';
 
 interface Props {
   /**

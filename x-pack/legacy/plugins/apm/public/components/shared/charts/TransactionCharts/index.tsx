@@ -29,7 +29,7 @@ import {
   tpmUnit,
   TimeFormatter,
   getDurationFormatter
-} from '../../../../utils/duration_formatters';
+} from '../../../../utils/formatters';
 import { MLJobLink } from '../../Links/MachineLearningLinks/MLJobLink';
 import { LicenseContext } from '../../../../context/LicenseContext';
 import { TransactionLineChart } from './TransactionLineChart';
