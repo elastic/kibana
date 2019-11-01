@@ -8,6 +8,8 @@ import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+
 import { EditFieldFormRow } from '../fields/edit_field';
 import { PARAMETERS_OPTIONS } from '../../../constants';
 import { getFieldConfig } from '../../../lib';
@@ -24,8 +26,16 @@ export const IndexParameter = ({
   hasIndexOptions = true,
 }: Props) => (
   <EditFieldFormRow
-    title={<h3>Searchable</h3>}
-    description="This is description text."
+    title={
+      <h3>
+        {i18n.translate('xpack.idxMgmt.mappingsEditor.searchableFieldTitle', {
+          defaultMessage: 'Searchable',
+        })}
+      </h3>
+    }
+    description={i18n.translate('xpack.idxMgmt.mappingsEditor.searchableFieldDescription', {
+      defaultMessage: 'Allow the field to be searchable.',
+    })}
     formFieldPath="index"
     direction="column"
   >
@@ -47,7 +57,9 @@ export const IndexParameter = ({
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText size="s" color="subdued">
-            This is description text.
+            {i18n.translate('xpack.idxMgmt.mappingsEditor.indexOptionsFieldDescription', {
+              defaultMessage: 'Information that should be stored in the index.',
+            })}
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>

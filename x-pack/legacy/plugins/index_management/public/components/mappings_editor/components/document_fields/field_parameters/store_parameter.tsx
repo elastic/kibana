@@ -6,12 +6,23 @@
 
 import React from 'react';
 
+import { i18n } from '@kbn/i18n';
+
 import { EditFieldFormRow } from '../fields/edit_field';
 
 export const StoreParameter = () => (
   <EditFieldFormRow
-    title={<h3>Store field value</h3>}
-    description="This is description text."
+    title={
+      <h3>
+        {i18n.translate('xpack.idxMgmt.mappingsEditor.storeFieldValueFieldTitle', {
+          defaultMessage: 'Store field value',
+        })}
+      </h3>
+    }
+    description={i18n.translate('xpack.idxMgmt.mappingsEditor.storeFieldValueFieldDescription', {
+      defaultMessage:
+        'Whether the field value should be stored and retrieved separately from the _source field.',
+    })}
     formFieldPath="store"
   />
 );

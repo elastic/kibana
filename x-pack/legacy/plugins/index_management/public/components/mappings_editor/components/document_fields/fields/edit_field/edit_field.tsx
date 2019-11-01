@@ -106,7 +106,14 @@ export const EditField = React.memo(({ field }: Props) => {
                 >
                   <EuiFlyoutHeader>
                     <EuiTitle size="m">
-                      <h2>Edit field '{field.source.name}'</h2>
+                      <h2>
+                        {i18n.translate('xpack.idxMgmt.mappingsEditor.editFieldTitle', {
+                          defaultMessage: "Edit field '{fieldName}'",
+                          values: {
+                            fieldName: field.source.name,
+                          },
+                        })}
+                      </h2>
                     </EuiTitle>
                     <EuiCode>{field.path}</EuiCode>
                     <EuiSpacer size="s" />
@@ -165,7 +172,14 @@ export const EditField = React.memo(({ field }: Props) => {
 
                     <EuiFlexGroup justifyContent="flexEnd">
                       <EuiFlexItem grow={false}>
-                        <EuiButtonEmpty onClick={cancel}>Cancel</EuiButtonEmpty>
+                        <EuiButtonEmpty onClick={cancel}>
+                          {i18n.translate(
+                            'xpack.idxMgmt.mappingsEditor.editFieldCancelButtonLabel',
+                            {
+                              defaultMessage: 'Cancel',
+                            }
+                          )}
+                        </EuiButtonEmpty>
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <EuiButton
@@ -174,7 +188,12 @@ export const EditField = React.memo(({ field }: Props) => {
                           type="submit"
                           disabled={form.isSubmitted && !form.isValid}
                         >
-                          Update
+                          {i18n.translate(
+                            'xpack.idxMgmt.mappingsEditor.editFieldUpdateButtonLabel',
+                            {
+                              defaultMessage: 'Update',
+                            }
+                          )}
                         </EuiButton>
                       </EuiFlexItem>
                     </EuiFlexGroup>
