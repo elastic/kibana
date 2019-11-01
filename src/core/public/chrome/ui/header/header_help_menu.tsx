@@ -43,7 +43,7 @@ import { HeaderExtension } from './header_extension';
 import { ChromeHelpExtension } from '../../chrome_service';
 
 interface Props {
-  helpExtension$: Rx.Observable<ChromeHelpExtension>;
+  helpExtension$: Rx.Observable<ChromeHelpExtension | undefined>;
   intl: InjectedIntl;
   kibanaVersion: string;
   useDefaultContent?: boolean;
