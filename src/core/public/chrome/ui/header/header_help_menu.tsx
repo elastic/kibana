@@ -24,7 +24,7 @@ import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import {
   // TODO: add type annotations
   // @ts-ignore
-  EuiButton,
+  EuiButtonEmpty,
   // @ts-ignore
   EuiFlexGroup,
   // @ts-ignore
@@ -32,16 +32,19 @@ import {
   // @ts-ignore
   EuiHeaderSectionItemButton,
   EuiIcon,
-  EuiLink,
   EuiPopover,
   EuiPopoverTitle,
   EuiSpacer,
-  EuiText,
 } from '@elastic/eui';
 
 import { HeaderExtension } from './header_extension';
 import { ChromeHelpExtension } from '../../chrome_service';
-import { ELASTIC_SUPPORT_LINK, KIBANA_GET_HELP_LINK, KIBANA_FEEDBACK_LINK } from '../../constants';
+import {
+  ELASTIC_SUPPORT_LINK,
+  GITHUB_CREATE_ISSUE_LINK,
+  KIBANA_GET_HELP_LINK,
+  KIBANA_FEEDBACK_LINK,
+} from '../../constants';
 
 interface Props {
   helpExtension$: Rx.Observable<ChromeHelpExtension>;
@@ -92,47 +95,54 @@ class HeaderHelpMenuUI extends Component<Props, State> {
 
     const defaultContent = useDefaultContent ? (
       <Fragment>
-        <EuiText size="s">
-          <p>
-            <FormattedMessage
-              id="core.ui.chrome.headerGlobalNav.helpMenuHelpDescription"
-              defaultMessage="Get updates, information, and answers in our documentation."
-            />
-          </p>
-        </EuiText>
+        <EuiButtonEmpty href={kibanaDocLink} target="_blank" size="xs">
+          <FormattedMessage
+            id="core.ui.chrome.headerGlobalNav.helpMenuKibanaDocumentationTitle"
+            defaultMessage="Kibana documentation"
+          />
+        </EuiButtonEmpty>
 
-        <EuiSpacer />
+        <EuiSpacer size="xs" />
 
-        <EuiLink
-          target="_blank"
-          external={true}
+        <EuiButtonEmpty
           href={this.props.isCloudEnabled ? ELASTIC_SUPPORT_LINK : KIBANA_GET_HELP_LINK}
+          target="_blank"
+          size="xs"
+          iconType="help"
         >
-          <EuiIcon type="questionInCircle" size="l" />
           <FormattedMessage
-            id="core.ui.chrome.headerGlobalNav.helpMenuGetHelpDescription"
-            defaultMessage="Get Help"
+            id="core.ui.chrome.headerGlobalNav.helpMenuAskUsTitle"
+            defaultMessage="Ask us"
           />
-        </EuiLink>
+        </EuiButtonEmpty>
 
-        <EuiSpacer />
+        <EuiSpacer size="xs" />
 
-        <EuiLink target="_blank" external={true} href={KIBANA_FEEDBACK_LINK}>
-          <EuiIcon type="editorComment" size="l" />
+        <EuiButtonEmpty
+          href={KIBANA_FEEDBACK_LINK}
+          target="_blank"
+          size="xs"
+          iconType="editorComment"
+        >
           <FormattedMessage
-            id="core.ui.chrome.headerGlobalNav.helpMenuFeedbackDescription"
-            defaultMessage="Kibana Feedback"
+            id="core.ui.chrome.headerGlobalNav.helpMenuGiveFeedbackTitle"
+            defaultMessage="Give feedback"
           />
-        </EuiLink>
+        </EuiButtonEmpty>
 
-        <EuiSpacer />
+        <EuiSpacer size="xs" />
 
-        <EuiButton iconType="popout" href={kibanaDocLink} target="_blank">
+        <EuiButtonEmpty
+          href={GITHUB_CREATE_ISSUE_LINK}
+          target="_blank"
+          size="xs"
+          iconType="logoGithub"
+        >
           <FormattedMessage
-            id="core.ui.chrome.headerGlobalNav.helpMenuGoToDocumentation"
-            defaultMessage="Go to documentation"
+            id="core.ui.chrome.headerGlobalNav.helpMenuOpenGitHubIssueTitle"
+            defaultMessage="Open an issue in GitHub"
           />
-        </EuiButton>
+        </EuiButtonEmpty>
       </Fragment>
     ) : null;
 
