@@ -22,23 +22,16 @@ import { Vis, VisState } from 'ui/vis';
 import { EditorStateActionTypes } from './constants';
 import { AggGroupNames } from '../agg_groups';
 import { getEnabledMetricAggsCount } from '../components/agg_group_helper';
+import { ActionType } from './actions';
 
 function initEditorState(vis: Vis) {
   return vis.copyCurrentState(true);
 }
 
-function editorStateReducer(
-  state: VisState,
-  action: {
-    type: EditorStateActionTypes;
-    payload: {
-      [key: string]: any;
-    };
-  }
-) {
+function editorStateReducer(state: VisState, action: ActionType) {
   switch (action.type) {
     case EditorStateActionTypes.ADD_NEW_AGG: {
-      const newAggs = [...state.aggs.aggs, state.aggs.createAggConfig(action.payload)];
+      const newAggs = [...state.aggs.aggs, state.aggs.createAggConfig(action.payload as AggConfig)];
 
       return {
         ...state,
@@ -47,7 +40,7 @@ function editorStateReducer(
     }
 
     case EditorStateActionTypes.DISCARD_CHANGES: {
-      return initEditorState(action.payload);
+      return initEditorState(action.payload as Vis);
     }
 
     case EditorStateActionTypes.CHANGE_AGG_TYPE: {

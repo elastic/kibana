@@ -21,7 +21,7 @@ import { useMemo, useReducer } from 'react';
 import { Vis } from 'ui/vis';
 import { editorStateReducer, initEditorState } from './reducers';
 import { EditorStateActionTypes } from './constants';
-import { editorActions } from './actions';
+import { editorActions, EditorActions } from './actions';
 
 export * from './editor_state_context';
 
@@ -30,19 +30,22 @@ export function useEditorReducer(vis: Vis) {
 
   const actions = useMemo(
     () =>
-      Object.keys(editorActions).reduce((wrappedDispatchActions, actionCreator) => {
-        wrappedDispatchActions[actionCreator] = (...params) => {
-          const action = editorActions[actionCreator](...params);
+      (Object.keys(editorActions) as Array<keyof EditorActions>).reduce<EditorActions>(
+        (wrappedDispatchActions, actionCreator) => {
+          wrappedDispatchActions[actionCreator] = (...params: any) => {
+            const action = editorActions[actionCreator](...params);
 
-          vis.emit('dirtyStateChange', {
-            isDirty: action.type !== EditorStateActionTypes.DISCARD_CHANGES,
-          });
+            vis.emit('dirtyStateChange', {
+              isDirty: action.type !== EditorStateActionTypes.DISCARD_CHANGES,
+            });
 
-          dispatch(action);
-        };
+            dispatch(action);
+          };
 
-        return wrappedDispatchActions;
-      }, {}),
+          return wrappedDispatchActions;
+        },
+        {} as EditorActions
+      ),
     [vis]
   );
 
