@@ -53,7 +53,7 @@ export const ipRangeBucketAgg = new BucketAggType({
     const fieldFormats = npStart.plugins.data.fieldFormats;
     const formatter = agg.fieldOwnFormatter(
       'text',
-      fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.IP, [])
+      fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.IP)
     );
     const IpRangeFormat = FieldFormat.from(function(range: IpRangeKey) {
       return ipRange.toString(range, formatter);

@@ -117,7 +117,7 @@ export class IndexPattern implements StaticIndexPattern {
     this.flattenHit = flattenHitWrapper(this, this.getConfig('metaFields'));
     this.formatHit = formatHitProvider(
       this,
-      getFieldFormats().getDefaultInstance(KBN_FIELD_TYPES.STRING, [])
+      getFieldFormats().getDefaultInstance(KBN_FIELD_TYPES.STRING)
     );
     this.formatField = this.formatHit.formatField;
   }

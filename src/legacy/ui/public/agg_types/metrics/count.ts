@@ -37,7 +37,7 @@ export const countMetricAgg = new MetricAggType({
   getFormat() {
     const fieldFormats = npStart.plugins.data.fieldFormats;
 
-    return fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.NUMBER, []);
+    return fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.NUMBER);
   },
   getValue(agg, bucket) {
     return bucket.doc_count;

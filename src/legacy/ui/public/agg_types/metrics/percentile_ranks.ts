@@ -38,7 +38,7 @@ const valueProps = {
     const fieldFormats = getFieldFormats();
     const field = this.getField();
     const format =
-      (field && field.format) || fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.NUMBER, []);
+      (field && field.format) || fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.NUMBER);
     const customLabel = this.getParam('customLabel');
     const label = customLabel || this.getFieldDisplayName();
 
@@ -87,7 +87,7 @@ export const percentileRanksMetricAgg = new MetricAggType<IPercentileRanksAggCon
     const fieldFormats = getFieldFormats();
     return (
       fieldFormats.getInstance(FIELD_FORMAT_IDS.PERCENT) ||
-      fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [])
+      fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.NUMBER)
     );
   },
   getValue(agg, bucket) {

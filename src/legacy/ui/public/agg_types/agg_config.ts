@@ -385,7 +385,7 @@ export class AggConfig {
     const field = this.getField();
     let format = field && field.format;
     if (!format) format = defaultFormat;
-    if (!format) format = fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING, []);
+    if (!format) format = fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING);
     return format.getConverterFor(contentType);
   }
 
