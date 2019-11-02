@@ -35,7 +35,6 @@ export class IndexAction extends BaseAction {
     const result = super.upstreamJson;
 
     Object.assign(result, {
-      index: this.index,
       index: {
         index: this.index,
       }
