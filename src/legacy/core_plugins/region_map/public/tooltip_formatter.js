@@ -20,7 +20,7 @@
 import $ from 'jquery';
 import template from './tooltip.html';
 
-export const TileMapTooltipFormatter = ($injector) => {
+export const TileMapTooltipFormatter = function ($injector) {
   const $rootScope = $injector.get('$rootScope');
   const $compile = $injector.get('$compile');
 
@@ -35,19 +35,17 @@ export const TileMapTooltipFormatter = ($injector) => {
     }
 
     $tooltipScope.details = [];
-    if (fieldName && metric) {
+    if (fieldName) {
       $tooltipScope.details.push({
         label: fieldName,
         value: metric.term,
       });
     }
 
-    if (metric) {
-      $tooltipScope.details.push({
-        label: metricName,
-        value: fieldFormatter ? fieldFormatter.convert(metric.value, 'text') : metric.value,
-      });
-    }
+    $tooltipScope.details.push({
+      label: metricName,
+      value: fieldFormatter ? fieldFormatter.convert(metric.value, 'text') : metric.value,
+    });
 
     $tooltipScope.$apply();
     return $el.html();
