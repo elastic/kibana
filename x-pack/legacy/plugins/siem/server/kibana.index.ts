@@ -7,7 +7,6 @@
 import { i18n } from '@kbn/i18n';
 import { Server } from 'hapi';
 
-import KbnServer from 'src/legacy/server/kbn_server';
 import { initServer } from './init_server';
 import { compose } from './lib/compose/kibana';
 import { createLogger } from './utils/logger';
@@ -30,7 +29,8 @@ const APP_ID = 'siem';
 export const amMocking = (): boolean => process.env.INGEST_MOCKS === 'true';
 
 export const initServerWithKibana = (kbnServer: Server) => {
-  const newPlatform = ((kbnServer as unknown) as KbnServer).newPlatform;
+  const { newPlatform } = kbnServer;
+
   if (kbnServer.plugins.alerting != null) {
     const type = signalsAlertType({
       logger: newPlatform.coreContext.logger.get('plugins', APP_ID),
