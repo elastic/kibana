@@ -144,6 +144,7 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
       dataType: 'date',
       render: (time: number) => formatHumanReadableDateTimeSeconds(time),
       textOnly: true,
+      truncateText: true,
       sortable: true,
       width: '20%',
     },
