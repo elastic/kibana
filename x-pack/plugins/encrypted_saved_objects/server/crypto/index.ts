@@ -7,7 +7,7 @@
 export {
   EncryptedSavedObjectsService,
   EncryptedSavedObjectTypeRegistration,
+  descriptorToArray,
+  SavedObjectDescriptor,
 } from './encrypted_saved_objects_service';
 export { EncryptionError } from './encryption_error';
-export { EncryptedSavedObjectsAuditLogger } from './encrypted_saved_objects_audit_logger';
-export { EncryptedSavedObjectsClientWrapper } from './encrypted_saved_objects_client_wrapper';
