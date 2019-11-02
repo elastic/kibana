@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { isMaster } from 'cluster';
+import { isMaster, isWorker } from 'cluster';
 import { LogRotator } from './log_rotator';
 
 let logRotator = null;
 
-export async function setupLoggingRotate(config) {
+export async function setupLoggingRotate(server, config) {
   // If log rotate is not enabled we skip
   if (!config.get('logging.rotate.enable')) {
     return;
@@ -31,7 +31,7 @@ export async function setupLoggingRotate(config) {
   // We don't want to run logging rotate server if
   // we are not logging to a file
   if (config.get('logging.rotate.enable') && config.get('logging.dest') === 'stdout') {
-    this.logWithMetadata(
+    server.logWithMetadata(
       ['warning', 'logging:rotate'],
       'Logging rotate is enabled but logging.dest is configured for stdout. The logging rotate will take no action.'
     );
@@ -39,8 +39,8 @@ export async function setupLoggingRotate(config) {
   }
 
   // We just want to start the logging rotate service once
-  // and we choose to use the master from the cluster
-  if (!isMaster) {
+  // and we choose to use the master (prod) or the worker server (dev)
+  if (!isMaster && isWorker && process.env.kbnWorkerType !== 'server') {
     return;
   }
 

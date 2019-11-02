@@ -18,7 +18,7 @@
  */
 
 import * as chokidar from 'chokidar';
-import { workers } from 'cluster';
+import { isMaster } from 'cluster';
 import fs from 'fs';
 import { once, throttle } from 'lodash';
 import { tmpdir } from 'os';
@@ -276,10 +276,13 @@ export class LogRotator {
   }
 
   _sendReloadLogConfigSignal() {
-    process.kill(process.pid, 'SIGHUP');
+    if (isMaster) {
+      process.emit('SIGHUP');
+      return;
+    }
 
-    Object.values(workers).forEach((worker) => {
-      process.kill(worker.process.pid, 'SIGHUP');
-    });
+    // Send a special message to the cluster manager
+    // so it can forward it correctly
+    process.send(['RELOAD_LOGGING_CONFIG_FROM_SERVER_WORKER']);
   }
 }

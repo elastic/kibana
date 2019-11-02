@@ -24,7 +24,7 @@ jest.mock('fs', () => ({
 }));
 
 jest.mock('../../../legacy/server/logging/rotate', () => ({
-  setupLoggingRotate: jest.fn(),
+  setupLoggingRotate: jest.fn().mockImplementation(() => Promise.resolve({})),
 }));
 
 const timestamp = new Date(Date.UTC(2012, 1, 1));
