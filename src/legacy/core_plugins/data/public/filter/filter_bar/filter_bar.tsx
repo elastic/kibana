@@ -119,6 +119,7 @@ function FilterBarUI(props: Props) {
         size="xs"
         onClick={() => setIsAddFilterPopoverOpen(true)}
         data-test-subj="addFilter"
+        className="globalFilterBar__addButton"
       >
         +{' '}
         <FormattedMessage
