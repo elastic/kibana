@@ -23,17 +23,22 @@ import { share } from 'rxjs/operators';
 import { event, RenderId, Data, IInterpreterRenderHandlers } from './types';
 import { getRenderersRegistry } from './services';
 
+interface RenderError {
+  type: 'error';
+  error: { type?: string; message: string };
+}
+
 export type IExpressionRendererExtraHandlers = Record<string, any>;
 
 export class ExpressionRenderHandler {
-  render$: Observable<RenderId>;
+  render$: Observable<RenderId | RenderError>;
   update$: Observable<any>;
   events$: Observable<event>;
 
   private element: HTMLElement;
   private destroyFn?: any;
   private renderCount: number = 0;
-  private renderSubject: Rx.Subject<unknown>;
+  private renderSubject: Rx.Subject<RenderId | RenderError>;
   private eventsSubject: Rx.Subject<unknown>;
   private updateSubject: Rx.Subject<unknown>;
   private handlers: IInterpreterRenderHandlers;
