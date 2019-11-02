@@ -19,7 +19,6 @@ export async function indexData(parsedFile, transformDetails, indexName, dataTyp
     throw(i18n.translate('xpack.fileUpload.indexingService.noFileImported', {
       defaultMessage: 'No file imported.'
     }));
-    return;
   }
 
   // Perform any processing required on file prior to indexing
