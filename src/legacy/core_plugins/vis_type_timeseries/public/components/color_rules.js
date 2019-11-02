@@ -46,7 +46,7 @@ class ColorRulesUI extends Component {
       const part = {};
       part[name] = cast(_.get(e, '[0].value', _.get(e, 'target.value')));
       if (part[name] === 'undefined') part[name] = undefined;
-      if (part[name] === NaN) part[name] = undefined;
+      if (isNaN(part[name])) part[name] = undefined;
       handleChange(_.assign({}, item, part));
     };
   }
