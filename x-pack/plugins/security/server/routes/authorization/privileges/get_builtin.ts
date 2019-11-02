@@ -9,7 +9,7 @@ import { RouteDefinitionParams } from '../..';
 
 export function defineGetBuiltinPrivilegesRoutes({ router, clusterClient }: RouteDefinitionParams) {
   router.get(
-    { path: '/api/security/esPrivileges/builtin', validate: false },
+    { path: '/internal/security/esPrivileges/builtin', validate: false },
     async (context, request, response) => {
       const privileges: BuiltinESPrivileges = await clusterClient
         .asScoped(request)
