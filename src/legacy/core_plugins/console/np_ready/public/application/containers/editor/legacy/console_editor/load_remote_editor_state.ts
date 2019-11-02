@@ -39,7 +39,7 @@ export function loadRemoteState({ url, input }: InitializationArgs) {
     headers: {},
   };
 
-  if (/https?:\/\/api.github.com/.test(url)) {
+  if (/https?:\/\/api\.github\.com/.test(url)) {
     loadFrom.headers = { Accept: 'application/vnd.github.v3.raw' };
   }
 
