@@ -62,7 +62,7 @@ export const NewsfeedNavButton = ({ apiFetchResult }: Props) => {
           aria-controls="keyPadMenu"
           aria-expanded={flyoutVisible}
           aria-haspopup="true"
-          aria-label="Apps menu"
+          aria-label="Newsfeed menu"
           onClick={showFlyout}
         >
           <EuiIcon type="email" size="m" />
