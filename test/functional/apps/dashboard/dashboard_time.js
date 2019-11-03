@@ -24,9 +24,8 @@ const dashboardName = 'Dashboard Test Time';
 const fromTime = '2015-09-19 06:31:44.000';
 const toTime = '2015-09-23 18:31:44.000';
 
-export default function ({ getPageObjects, getService }) {
+export default function ({ getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'timePicker']);
-  const browser = getService('browser');
 
   describe('dashboard time', () => {
     before(async function () {
@@ -71,23 +70,6 @@ export default function ({ getPageObjects, getService }) {
         const time = await PageObjects.timePicker.getTimeConfig();
         expect(time.start).to.equal('Sep 19, 2015 @ 06:31:44.000');
         expect(time.end).to.equal('Sep 23, 2015 @ 18:31:44.000');
-      });
-
-      // If time is stored with a dashboard, it's supposed to override the current time settings when opened.
-      // However, if the URL also contains time in the global state, then the global state
-      // time should take precedence.
-      it('should be overwritten by global state', async function () {
-        const currentUrl = await browser.getCurrentUrl();
-        const kibanaBaseUrl = currentUrl.substring(0, currentUrl.indexOf('#'));
-        const id = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
-
-        await PageObjects.dashboard.gotoDashboardLandingPage();
-
-        const urlWithGlobalTime = `${kibanaBaseUrl}#/dashboard/${id}?_g=(time:(from:now-1h,to:now))`;
-        await browser.get(urlWithGlobalTime, false);
-        const time = await PageObjects.timePicker.getTimeConfig();
-        expect(time.start).to.equal('~ an hour ago');
-        expect(time.end).to.equal('now');
       });
     });
 
