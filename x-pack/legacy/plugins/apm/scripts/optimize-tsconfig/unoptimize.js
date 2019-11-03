@@ -12,23 +12,13 @@ const promisify = require('util').promisify;
 const removeFile = promisify(fs.unlink);
 const exists = promisify(fs.exists);
 
-const { xpackRoot, kibanaRoot, apmRoot } = require('./paths');
+const { apmRoot, filesToIgnore } = require('./paths');
 
 async function unoptimizeTsConfig() {
-  await execa('git', [
-    'update-index',
-    '--no-skip-worktree',
-    path.resolve(xpackRoot, 'tsconfig.json')
-  ]);
-
-  await execa('git', [
-    'update-index',
-    '--no-skip-worktree',
-    path.resolve(kibanaRoot, 'tsconfig.json')
-  ]);
-
-  await execa('git', ['checkout', path.resolve(xpackRoot, 'tsconfig.json')]);
-  await execa('git', ['checkout', path.resolve(kibanaRoot, 'tsconfig.json')]);
+  for (const filename of filesToIgnore) {
+    await execa('git', ['update-index', '--no-skip-worktree', filename]);
+    await execa('git', ['checkout', filename]);
+  }
 
   const apmTsConfig = path.join(apmRoot, 'tsconfig.json');
   if (await exists(apmTsConfig)) {

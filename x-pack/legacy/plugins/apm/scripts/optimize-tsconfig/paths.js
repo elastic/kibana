@@ -11,9 +11,15 @@ const kibanaRoot = path.resolve(xpackRoot, '..');
 
 const tsconfigTpl = path.resolve(__dirname, './tsconfig.json');
 
+const filesToIgnore = [
+  path.resolve(xpackRoot, 'tsconfig.json'),
+  path.resolve(kibanaRoot, 'tsconfig.json')
+];
+
 module.exports = {
   apmRoot,
   xpackRoot,
   kibanaRoot,
-  tsconfigTpl
+  tsconfigTpl,
+  filesToIgnore
 };

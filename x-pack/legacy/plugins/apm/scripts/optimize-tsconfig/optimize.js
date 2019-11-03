@@ -17,26 +17,33 @@ const rename = promisify(fs.rename);
 const readFile = promisify(fs.readFile);
 const writeFile = promisify(fs.writeFile);
 
-const { xpackRoot, kibanaRoot, apmRoot, tsconfigTpl } = require('./paths');
+const {
+  xpackRoot,
+  kibanaRoot,
+  apmRoot,
+  tsconfigTpl,
+  filesToIgnore
+} = require('./paths');
 const { unoptimizeTsConfig } = require('./unoptimize');
 
 function updateParentTsConfigs() {
   return Promise.all(
-    [xpackRoot, kibanaRoot].map(async dir => {
-      const filename = path.resolve(dir, 'apm.tsconfig.json');
+    [
+      path.resolve(xpackRoot, 'apm.tsconfig.json'),
+      path.resolve(kibanaRoot, 'tsconfig.json')
+    ].map(async filename => {
       const config = json5.parse(await readFile(filename, 'utf-8'));
-
-      const include = [];
-      const extendsOption =
-        'extends' in config ? { extends: '../apm.tsconfig.json' } : {};
 
       await writeFile(
         filename,
-        JSON.stringify({
-          ...config,
-          include,
-          ...extendsOption
-        }),
+        JSON.stringify(
+          {
+            ...config,
+            include: []
+          },
+          null,
+          2
+        ),
         { encoding: 'utf-8' }
       );
     })
@@ -44,17 +51,9 @@ function updateParentTsConfigs() {
 }
 
 async function setIgnoreChanges() {
-  await execa('git', [
-    'update-index',
-    '--skip-worktree',
-    path.resolve(xpackRoot, 'tsconfig.json')
-  ]);
-
-  await execa('git', [
-    'update-index',
-    '--skip-worktree',
-    path.resolve(kibanaRoot, 'tsconfig.json')
-  ]);
+  for (const filename of filesToIgnore) {
+    await execa('git', ['update-index', '--skip-worktree', filename]);
+  }
 }
 
 const optimizeTsConfig = () => {
@@ -65,10 +64,6 @@ const optimizeTsConfig = () => {
         rename(
           path.resolve(xpackRoot, 'tsconfig.json'),
           path.resolve(xpackRoot, 'apm.tsconfig.json')
-        ),
-        rename(
-          path.resolve(kibanaRoot, 'tsconfig.json'),
-          path.resolve(kibanaRoot, 'apm.tsconfig.json')
         )
       ])
     )
