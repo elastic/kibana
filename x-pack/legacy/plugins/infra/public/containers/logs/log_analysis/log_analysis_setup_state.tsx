@@ -6,8 +6,10 @@
 
 import { useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { useAsyncMemo } from 'use-async-memo';
 
 import { isExampleDataIndex } from '../../../../common/log_analysis';
+import { callIndexPatternsValidate } from './api/index_patterns_validate';
 
 type SetupHandler = (
   indices: string[],
@@ -59,20 +61,32 @@ export const useAnalysisSetupState = ({
     return cleanupAndSetupModule(selectedIndexNames, startTime, endTime);
   }, [cleanupAndSetupModule, selectedIndexNames, startTime, endTime]);
 
-  const validationErrors: string[] = useMemo(
-    () =>
-      Object.values(selectedIndices).some(isSelected => isSelected)
-        ? []
-        : [
-            i18n.translate(
-              'xpack.infra.analysisSetup.indicesSelectionTooFewSelectedIndicesDescription',
-              {
-                defaultMessage: 'Select at least one index name.',
-              }
-            ),
-          ],
+  const validationErrors = useAsyncMemo<string[]>(
+    async () => {
+      if (selectedIndexNames.length === 0) {
+        return [
+          i18n.translate(
+            'xpack.infra.analysisSetup.indicesSelectionTooFewSelectedIndicesDescription',
+            {
+              defaultMessage: 'Select at least one index name.',
+            }
+          ),
+        ];
+      }
 
-    [selectedIndices]
+      const res = await callIndexPatternsValidate({
+        timestamp: '@timestamp', // FIXME
+        indexPatternName: selectedIndexNames.join(','),
+      });
+
+      if (res.data.errors && res.data.errors.length > 0) {
+        return res.data.errors.map(error => error.message);
+      }
+
+      return [];
+    },
+    [selectedIndexNames],
+    []
   );
 
   return {
