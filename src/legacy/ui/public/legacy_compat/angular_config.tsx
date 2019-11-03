@@ -47,13 +47,32 @@ import { isSystemApiRequest } from '../system_api';
 
 const URL_LIMIT_WARN_WITHIN = 1000;
 
-function isDummyWrapperRoute($route: any) {
+/**
+ * Detects whether a given angular route is a dummy route that doesn't
+ * require any action. There are two ways this can happen:
+ * If `outerAngularWrapperRoute` is set on the route config object,
+ * it means the local application service set up this route on the outer angular
+ * and the internal routes will handle the hooks.
+ *
+ * If angular did not detect a route and it is the local angular, we are currently
+ * navigating away from a URL controlled by a local angular router and the
+ * application will get unmounted. In this case the outer router will handle
+ * the hooks.
+ * @param $route Injected $route dependency
+ * @param isLocalAngular Flag whether this is the local angular router
+ */
+function isDummyRoute($route: any, isLocalAngular: boolean) {
   return (
-    $route.current && $route.current.$$route && $route.current.$$route.outerAngularWrapperRoute
+    ($route.current && $route.current.$$route && $route.current.$$route.outerAngularWrapperRoute) ||
+    (!$route.current && isLocalAngular)
   );
 }
 
-export const configureAppAngularModule = (angularModule: IModule, newPlatform: LegacyCoreStart) => {
+export const configureAppAngularModule = (
+  angularModule: IModule,
+  newPlatform: LegacyCoreStart,
+  isLocalAngular: boolean
+) => {
   const legacyMetadata = newPlatform.injectedMetadata.getLegacyMetadata();
 
   forOwn(newPlatform.injectedMetadata.getInjectedVars(), (val, name) => {
@@ -74,10 +93,10 @@ export const configureAppAngularModule = (angularModule: IModule, newPlatform: L
     .config(setupLocationProvider(newPlatform))
     .config($setupXsrfRequestInterceptor(newPlatform))
     .run(capture$httpLoadingCount(newPlatform))
-    .run($setupBreadcrumbsAutoClear(newPlatform))
-    .run($setupBadgeAutoClear(newPlatform))
-    .run($setupHelpExtensionAutoClear(newPlatform))
-    .run($setupUrlOverflowHandling(newPlatform))
+    .run($setupBreadcrumbsAutoClear(newPlatform, isLocalAngular))
+    .run($setupBadgeAutoClear(newPlatform, isLocalAngular))
+    .run($setupHelpExtensionAutoClear(newPlatform, isLocalAngular))
+    .run($setupUrlOverflowHandling(newPlatform, isLocalAngular))
     .run($setupUICapabilityRedirect(newPlatform));
 };
 
@@ -200,7 +219,7 @@ const $setupUICapabilityRedirect = (newPlatform: CoreStart) => (
  * lets us integrate with the angular router so that we can automatically clear
  * the breadcrumbs if we switch to a Kibana app that does not use breadcrumbs correctly
  */
-const $setupBreadcrumbsAutoClear = (newPlatform: CoreStart) => (
+const $setupBreadcrumbsAutoClear = (newPlatform: CoreStart, isLocalAngular: boolean) => (
   $rootScope: IRootScopeService,
   $injector: any
 ) => {
@@ -222,7 +241,7 @@ const $setupBreadcrumbsAutoClear = (newPlatform: CoreStart) => (
   });
 
   $rootScope.$on('$routeChangeSuccess', () => {
-    if (isDummyWrapperRoute($route)) {
+    if (isDummyRoute($route, isLocalAngular)) {
       return;
     }
     const current = $route.current || {};
@@ -250,7 +269,7 @@ const $setupBreadcrumbsAutoClear = (newPlatform: CoreStart) => (
  * lets us integrate with the angular router so that we can automatically clear
  * the badge if we switch to a Kibana app that does not use the badge correctly
  */
-const $setupBadgeAutoClear = (newPlatform: CoreStart) => (
+const $setupBadgeAutoClear = (newPlatform: CoreStart, isLocalAngular: boolean) => (
   $rootScope: IRootScopeService,
   $injector: any
 ) => {
@@ -264,7 +283,7 @@ const $setupBadgeAutoClear = (newPlatform: CoreStart) => (
   });
 
   $rootScope.$on('$routeChangeSuccess', () => {
-    if (isDummyWrapperRoute($route)) {
+    if (isDummyRoute($route, isLocalAngular)) {
       return;
     }
     const current = $route.current || {};
@@ -293,7 +312,7 @@ const $setupBadgeAutoClear = (newPlatform: CoreStart) => (
  * the helpExtension if we switch to a Kibana app that does not set its own
  * helpExtension
  */
-const $setupHelpExtensionAutoClear = (newPlatform: CoreStart) => (
+const $setupHelpExtensionAutoClear = (newPlatform: CoreStart, isLocalAngular: boolean) => (
   $rootScope: IRootScopeService,
   $injector: any
 ) => {
@@ -311,14 +330,14 @@ const $setupHelpExtensionAutoClear = (newPlatform: CoreStart) => (
   const $route = $injector.has('$route') ? $injector.get('$route') : {};
 
   $rootScope.$on('$routeChangeStart', () => {
-    if (isDummyWrapperRoute($route)) {
+    if (isDummyRoute($route, isLocalAngular)) {
       return;
     }
     helpExtensionSetSinceRouteChange = false;
   });
 
   $rootScope.$on('$routeChangeSuccess', () => {
-    if (isDummyWrapperRoute($route)) {
+    if (isDummyRoute($route, isLocalAngular)) {
       return;
     }
     const current = $route.current || {};
@@ -331,7 +350,7 @@ const $setupHelpExtensionAutoClear = (newPlatform: CoreStart) => (
   });
 };
 
-const $setupUrlOverflowHandling = (newPlatform: CoreStart) => (
+const $setupUrlOverflowHandling = (newPlatform: CoreStart, isLocalAngular: boolean) => (
   $location: ILocationService,
   $rootScope: IRootScopeService,
   $injector: auto.IInjectorService
@@ -339,7 +358,7 @@ const $setupUrlOverflowHandling = (newPlatform: CoreStart) => (
   const $route = $injector.has('$route') ? $injector.get('$route') : {};
   const urlOverflow = new UrlOverflowService();
   const check = () => {
-    if (isDummyWrapperRoute($route)) {
+    if (isDummyRoute($route, isLocalAngular)) {
       return;
     }
     // disable long url checks when storing state in session storage

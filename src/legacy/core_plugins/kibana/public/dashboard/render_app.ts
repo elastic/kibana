@@ -93,7 +93,7 @@ export const renderApp = (element: HTMLElement, appBasePath: string, deps: Rende
   if (!angularModuleInstance) {
     angularModuleInstance = createLocalAngularModule(deps.core, deps.navigation);
     // global routing stuff
-    configureAppAngularModule(angularModuleInstance, deps.core as LegacyCoreStart);
+    configureAppAngularModule(angularModuleInstance, deps.core as LegacyCoreStart, true);
     // custom routing stuff
     initDashboardApp(angularModuleInstance, deps);
   }

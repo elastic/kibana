@@ -83,7 +83,7 @@ export interface LegacyAngularInjectedDependencies {
 
 export const renderApp = ({ appBasePath, element, ...deps }: GraphDependencies) => {
   const graphAngularModule = createLocalAngularModule(deps.navigation);
-  configureAppAngularModule(graphAngularModule, deps.coreStart as LegacyCoreStart);
+  configureAppAngularModule(graphAngularModule, deps.coreStart as LegacyCoreStart, true);
   initGraphApp(graphAngularModule, deps);
   const $injector = mountGraphApp(appBasePath, element);
   return () => $injector.get('$rootScope').$destroy();
