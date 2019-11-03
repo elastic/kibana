@@ -53,7 +53,6 @@ export const AnalysisSetupIndicesForm: React.FunctionComponent<{
     >
       <EuiFormRow
         describedByIds={['indices']}
-        error={validationErrors}
         fullWidth
         isInvalid={validationErrors.length > 0}
         label={indicesSelectionLabel}
