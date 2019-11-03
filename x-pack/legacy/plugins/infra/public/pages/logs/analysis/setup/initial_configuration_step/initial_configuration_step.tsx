@@ -5,13 +5,9 @@
  */
 
 import { EuiSpacer, EuiForm } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React from 'react';
 
-import {
-  AnalysisSetupIndicesForm,
-  IndicesSelection,
-  IndicesValidationError,
-} from './analysis_setup_indices_form';
+import { AnalysisSetupIndicesForm, IndicesSelection } from './analysis_setup_indices_form';
 import { AnalysisSetupTimerangeForm } from './analysis_setup_timerange_form';
 
 interface InitialConfigurationStepProps {
@@ -21,7 +17,7 @@ interface InitialConfigurationStepProps {
   endTime: number | undefined;
   selectedIndices: IndicesSelection;
   setSelectedIndices: (selectedIndices: IndicesSelection) => void;
-  validationErrors?: IndicesValidationError[];
+  validationErrors?: string[];
 }
 
 export const InitialConfigurationStep: React.FunctionComponent<InitialConfigurationStepProps> = ({
@@ -33,12 +29,6 @@ export const InitialConfigurationStep: React.FunctionComponent<InitialConfigurat
   setSelectedIndices,
   validationErrors = [],
 }: InitialConfigurationStepProps) => {
-  const indicesFormValidationErrors = useMemo(
-    () =>
-      validationErrors.filter(validationError => validationError === 'TOO_FEW_SELECTED_INDICES'),
-    [validationErrors]
-  );
-
   return (
     <>
       <EuiSpacer size="m" />
@@ -52,7 +42,7 @@ export const InitialConfigurationStep: React.FunctionComponent<InitialConfigurat
         <AnalysisSetupIndicesForm
           indices={selectedIndices}
           onChangeSelectedIndices={setSelectedIndices}
-          validationErrors={indicesFormValidationErrors}
+          validationErrors={validationErrors}
         />
       </EuiForm>
     </>

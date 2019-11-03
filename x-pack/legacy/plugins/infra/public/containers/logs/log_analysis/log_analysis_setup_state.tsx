@@ -5,6 +5,7 @@
  */
 
 import { useState, useCallback, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 
 import { isExampleDataIndex } from '../../../../common/log_analysis';
 
@@ -21,8 +22,6 @@ interface AnalysisSetupStateArguments {
 }
 
 type IndicesSelection = Record<string, boolean>;
-
-type ValidationErrors = 'TOO_FEW_SELECTED_INDICES';
 
 const fourWeeksInMs = 86400000 * 7 * 4;
 
@@ -60,11 +59,19 @@ export const useAnalysisSetupState = ({
     return cleanupAndSetupModule(selectedIndexNames, startTime, endTime);
   }, [cleanupAndSetupModule, selectedIndexNames, startTime, endTime]);
 
-  const validationErrors: ValidationErrors[] = useMemo(
+  const validationErrors: string[] = useMemo(
     () =>
       Object.values(selectedIndices).some(isSelected => isSelected)
         ? []
-        : ['TOO_FEW_SELECTED_INDICES' as const],
+        : [
+            i18n.translate(
+              'xpack.infra.analysisSetup.indicesSelectionTooFewSelectedIndicesDescription',
+              {
+                defaultMessage: 'Select at least one index name.',
+              }
+            ),
+          ],
+
     [selectedIndices]
   );
 

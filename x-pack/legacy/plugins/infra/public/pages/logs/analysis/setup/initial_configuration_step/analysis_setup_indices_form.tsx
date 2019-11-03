@@ -11,12 +11,10 @@ import React, { useCallback, useMemo } from 'react';
 
 export type IndicesSelection = Record<string, boolean>;
 
-export type IndicesValidationError = 'TOO_FEW_SELECTED_INDICES';
-
 export const AnalysisSetupIndicesForm: React.FunctionComponent<{
   indices: IndicesSelection;
   onChangeSelectedIndices: (selectedIndices: IndicesSelection) => void;
-  validationErrors?: IndicesValidationError[];
+  validationErrors?: string[];
 }> = ({ indices, onChangeSelectedIndices, validationErrors = [] }) => {
   const choices = useMemo(
     () =>
@@ -55,7 +53,7 @@ export const AnalysisSetupIndicesForm: React.FunctionComponent<{
     >
       <EuiFormRow
         describedByIds={['indices']}
-        error={validationErrors.map(formatValidationError)}
+        error={validationErrors}
         fullWidth
         isInvalid={validationErrors.length > 0}
         label={indicesSelectionLabel}
@@ -74,15 +72,3 @@ export const AnalysisSetupIndicesForm: React.FunctionComponent<{
 const indicesSelectionLabel = i18n.translate('xpack.infra.analysisSetup.indicesSelectionLabel', {
   defaultMessage: 'Indices',
 });
-
-const formatValidationError = (validationError: IndicesValidationError) => {
-  switch (validationError) {
-    case 'TOO_FEW_SELECTED_INDICES':
-      return i18n.translate(
-        'xpack.infra.analysisSetup.indicesSelectionTooFewSelectedIndicesDescription',
-        {
-          defaultMessage: 'Select at least one index name.',
-        }
-      );
-  }
-};
