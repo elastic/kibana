@@ -22,17 +22,14 @@ import './editor/editor';
 import { i18n } from '@kbn/i18n';
 import './saved_visualizations/_saved_vis';
 import './saved_visualizations/saved_visualizations';
-import uiRoutes from 'ui/routes';
 import visualizeListingTemplate from './listing/visualize_listing.html';
 import { VisualizeListingController } from './listing/visualize_listing';
 import { VisualizeConstants } from './visualize_constants';
-import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import { getLandingBreadcrumbs, getWizardStep1Breadcrumbs } from './breadcrumbs';
 
-// load directives
-import '../../../data/public';
-import { npStart } from '../../../../ui/public/new_platform';
-import { start as data } from '../../../data/public/legacy';
+import { getServices, FeatureCatalogueCategory } from './kibana_services';
+
+const { FeatureCatalogueRegistryProvider, uiRoutes } = getServices();
 
 uiRoutes
   .defaults(/visualize/, {
@@ -60,7 +57,7 @@ uiRoutes
     controllerAs: 'listingController',
     resolve: {
       createNewVis: () => false,
-      hasDefaultIndex: ($rootScope, kbnUrl) => ensureDefaultIndexPattern(npStart.core, data, $rootScope, kbnUrl)
+      hasDefaultIndex: ($rootScope, kbnUrl) => ensureDefaultIndexPattern(getServices().core, getServices().data, $rootScope, kbnUrl)
     },
   })
   .when(VisualizeConstants.WIZARD_STEP_1_PAGE_PATH, {
@@ -70,7 +67,7 @@ uiRoutes
     controllerAs: 'listingController',
     resolve: {
       createNewVis: () => true,
-      hasDefaultIndex: ($rootScope, kbnUrl) => ensureDefaultIndexPattern(npStart.core, data, $rootScope, kbnUrl)
+      hasDefaultIndex: ($rootScope, kbnUrl) => ensureDefaultIndexPattern(getServices().core, getServices().data, $rootScope, kbnUrl)
     },
   });
 

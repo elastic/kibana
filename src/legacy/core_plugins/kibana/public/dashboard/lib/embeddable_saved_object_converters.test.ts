@@ -103,7 +103,7 @@ test('convertPanelStateToSavedDashboardPanel', () => {
     type: 'search',
   };
 
-  expect(convertPanelStateToSavedDashboardPanel(dashboardPanel, '8.0.0')).toEqual({
+  expect(convertPanelStateToSavedDashboardPanel(dashboardPanel, '6.3.0')).toEqual({
     type: 'search',
     embeddableConfig: {
       something: 'hi!',
