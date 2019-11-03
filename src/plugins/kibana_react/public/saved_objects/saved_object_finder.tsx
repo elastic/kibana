@@ -104,7 +104,7 @@ interface SavedObjectFinderInitialPageSize extends BaseSavedObjectFinder {
   initialPageSize?: 5 | 10 | 15 | 25;
   fixedPageSize?: undefined;
 }
-type SavedObjectFinderProps = {
+export type SavedObjectFinderProps = {
   savedObjects: CoreStart['savedObjects'];
   uiSettings: CoreStart['uiSettings'];
 } & (SavedObjectFinderFixedPage | SavedObjectFinderInitialPageSize);
