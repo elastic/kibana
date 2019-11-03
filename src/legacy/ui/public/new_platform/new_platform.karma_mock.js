@@ -48,6 +48,9 @@ export const npSetup = {
         filterManager: sinon.fake(),
       },
     },
+    devTools: {
+      register: () => {},
+    },
     inspector: {
       registerView: () => undefined,
       __LEGACY: {
@@ -78,6 +81,9 @@ export const npStart = {
       registerFunction: sinon.fake(),
       registerRenderer: sinon.fake(),
       registerType: sinon.fake(),
+    },
+    devTools: {
+      getSortedDevTools: () => [],
     },
     data: {
       getSuggestions: sinon.fake(),
