@@ -106,7 +106,6 @@ const createFiltersFromEvent = (event) => {
   return filters;
 };
 
-// TODO make sure the visualize app is updating the breadcrumb correctly
 const VisFiltersProvider = () => {
 
   const pushFilters = async (filters, simulate) => {
