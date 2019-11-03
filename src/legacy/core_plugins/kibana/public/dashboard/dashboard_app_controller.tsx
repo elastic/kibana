@@ -149,9 +149,12 @@ export class DashboardAppController {
 
     $scope.appState = dashboardStateManager.getAppState();
 
-    // The 'previouslyStored' check is so we only update the time filter on dashboard open, not during
+    // The hash check is so we only update the time filter on dashboard open, not during
     // normal cross app navigation.
-    if (dashboardStateManager.getIsTimeSavedWithDashboard() && !getAppState.previouslyStored()) {
+    if (
+      dashboardStateManager.getIsTimeSavedWithDashboard() &&
+      !window.location.hash.includes('_a=')
+    ) {
       dashboardStateManager.syncTimefilterWithDashboard(timefilter);
     }
     $scope.showSaveQuery = dashboardCapabilities.saveQuery as boolean;
