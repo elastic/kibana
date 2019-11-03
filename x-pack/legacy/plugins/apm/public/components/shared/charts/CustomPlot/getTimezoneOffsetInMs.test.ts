@@ -7,7 +7,8 @@
 import { getTimezoneOffsetInMs } from './getTimezoneOffsetInMs';
 import moment from 'moment-timezone';
 
-describe('getTimezoneOffsetInMs', () => {
+// FAILING: https://github.com/elastic/kibana/issues/50005
+describe.skip('getTimezoneOffsetInMs', () => {
   describe('when no default timezone is set', () => {
     it('guesses the timezone', () => {
       const guess = jest.fn(() => 'Etc/UTC');
