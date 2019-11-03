@@ -27,6 +27,7 @@ export const updateIfIdExists = async ({
   maxSignals,
   name,
   severity,
+  size,
   to,
   type,
   references,
@@ -49,6 +50,7 @@ export const updateIfIdExists = async ({
       maxSignals,
       name,
       severity,
+      size,
       to,
       type,
       references,
@@ -78,6 +80,7 @@ export const createSignals = async ({
   maxSignals,
   name,
   severity,
+  size,
   to,
   type,
   references,
@@ -100,6 +103,7 @@ export const createSignals = async ({
     maxSignals,
     name,
     severity,
+    size,
     to,
     type,
     references,
@@ -120,6 +124,7 @@ export const createSignals = async ({
 
     return alertsClient.create({
       data: {
+        name: 'SIEM Alert',
         alertTypeId: SIGNALS_ID,
         alertTypeParams: {
           description,
