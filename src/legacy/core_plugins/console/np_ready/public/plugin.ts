@@ -18,6 +18,7 @@
  */
 
 import { render, unmountComponentAtNode } from 'react-dom';
+import { i18n } from '@kbn/i18n';
 
 import { PluginInitializerContext, Plugin, CoreStart, CoreSetup } from '../../../../../core/public';
 import { XPluginSet } from './legacy';
@@ -35,7 +36,9 @@ export class ConsoleUIPlugin implements Plugin<any, any> {
     devTools.register({
       id: 'console',
       order: 1,
-      title: 'Console',
+      title: i18n.translate('console.consoleDisplayName', {
+        defaultMessage: 'Console',
+      }),
       enableRouting: false,
       async mount(ctx, { element }) {
         const { boot } = await import('./application');

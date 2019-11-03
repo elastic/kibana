@@ -19,7 +19,7 @@
 
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { EuiTab, EuiTabs } from '@elastic/eui';
+import { EuiTab, EuiTabs, EuiToolTip } from '@elastic/eui';
 import { HashRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
 import * as React from 'react';
 import ReactDOM from 'react-dom';
@@ -62,19 +62,19 @@ function DevToolsWrapper({
     <main className="devApp">
       <EuiTabs>
         {devTools.map(currentDevTool => (
-          // TODO tooltips
-          <EuiTab
-            key={currentDevTool.id}
-            disabled={currentDevTool.disabled}
-            isSelected={currentDevTool === activeDevTool}
-            onClick={() => {
-              if (!currentDevTool.disabled) {
-                updateRoute(`/dev_tools/${currentDevTool.id}`);
-              }
-            }}
-          >
-            {currentDevTool.title}
-          </EuiTab>
+          <EuiToolTip content={currentDevTool.tooltipContent} key={currentDevTool.id}>
+            <EuiTab
+              disabled={currentDevTool.disabled}
+              isSelected={currentDevTool === activeDevTool}
+              onClick={() => {
+                if (!currentDevTool.disabled) {
+                  updateRoute(`/dev_tools/${currentDevTool.id}`);
+                }
+              }}
+            >
+              {currentDevTool.title}
+            </EuiTab>
+          </EuiToolTip>
         ))}
       </EuiTabs>
       <div

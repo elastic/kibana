@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import {
   Plugin,
   CoreStart,
@@ -36,7 +37,9 @@ export class SearchProfilerUIPlugin implements Plugin {
     } = plugins;
     devTools.register({
       id: 'searchprofiler',
-      title: 'SearchProfiler',
+      title: i18n.translate('xpack.searchProfiler.pageDisplayName', {
+        defaultMessage: 'Search Profiler',
+      }),
       order: 5,
       enableRouting: false,
       async mount(ctx, params) {
