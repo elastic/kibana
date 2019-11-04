@@ -6,19 +6,17 @@
 
 jest.mock('@elastic/node-crypto', () => jest.fn());
 
-import { EncryptedSavedObjectsAuditLogger } from './encrypted_saved_objects_audit_logger';
+import { EncryptedSavedObjectsAuditLogger } from '../audit';
 import { EncryptedSavedObjectsService } from './encrypted_saved_objects_service';
 import { EncryptionError } from './encryption_error';
+
+import { loggingServiceMock } from 'src/core/server/mocks';
+import { encryptedSavedObjectsAuditLoggerMock } from '../audit/index.mock';
 
 let service: EncryptedSavedObjectsService;
 let mockAuditLogger: jest.Mocked<EncryptedSavedObjectsAuditLogger>;
 beforeEach(() => {
-  mockAuditLogger = {
-    encryptAttributesSuccess: jest.fn(),
-    encryptAttributeFailure: jest.fn(),
-    decryptAttributesSuccess: jest.fn(),
-    decryptAttributeFailure: jest.fn(),
-  } as any;
+  mockAuditLogger = encryptedSavedObjectsAuditLoggerMock.create();
 
   // Call actual `@elastic/node-crypto` by default, but allow to override implementation in tests.
   jest
@@ -27,8 +25,7 @@ beforeEach(() => {
 
   service = new EncryptedSavedObjectsService(
     'encryption-key-abc',
-    ['known-type-1', 'known-type-2'],
-    { debug: jest.fn(), error: jest.fn() } as any,
+    loggingServiceMock.create().get(),
     mockAuditLogger
   );
 });
@@ -53,12 +50,6 @@ describe('#registerType', () => {
     expect(() =>
       service.registerType({ type: 'known-type-1', attributesToEncrypt: new Set(['attr']) })
     ).toThrowError('The "known-type-1" saved object type is already registered.');
-  });
-
-  it('throws if `type` references to the unknown type', () => {
-    expect(() =>
-      service.registerType({ type: 'unknown-type', attributesToEncrypt: new Set(['attr']) })
-    ).toThrowError('The type "unknown-type" is not known saved object type.');
   });
 });
 
@@ -137,8 +128,7 @@ describe('#encryptAttributes', () => {
 
     service = new EncryptedSavedObjectsService(
       'encryption-key-abc',
-      ['known-type-1', 'known-type-2'],
-      { debug: jest.fn(), error: jest.fn() } as any,
+      loggingServiceMock.create().get(),
       mockAuditLogger
     );
   });
@@ -773,8 +763,7 @@ describe('#decryptAttributes', () => {
     it('fails if encrypted with another encryption key', async () => {
       service = new EncryptedSavedObjectsService(
         'encryption-key-abc*',
-        ['known-type-1'],
-        { debug: jest.fn(), error: jest.fn() } as any,
+        loggingServiceMock.create().get(),
         mockAuditLogger
       );
 
