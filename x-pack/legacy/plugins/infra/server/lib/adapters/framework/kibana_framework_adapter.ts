@@ -174,11 +174,10 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
         }
       : {};
 
-    const fields = await elasticsearch.dataClient.callAsCurrentUser(endpoint, {
+    return elasticsearch.dataClient.callAsCurrentUser(endpoint, {
       ...params,
       ...frozenIndicesParams,
     });
-    return fields as Promise<InfraDatabaseSearchResponse<Hit, Aggregation>>;
   }
 
   public getIndexPatternsService(

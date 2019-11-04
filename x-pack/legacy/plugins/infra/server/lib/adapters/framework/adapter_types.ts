@@ -33,46 +33,45 @@ export interface InfraServerPluginDeps {
 }
 
 /* eslint-disable  @typescript-eslint/unified-signatures */
-export interface InfraBackendFrameworkAdapter<R = unknown> {
+export interface InfraBackendFrameworkAdapter {
   plugins: InfraServerPluginDeps;
   registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void;
   callWithRequest<Hit = {}, Aggregation = undefined>(
     requestContext: RequestHandlerContext,
-    method: string, // 'search',
+    endpoint: 'search',
     options?: object
   ): Promise<InfraDatabaseSearchResponse<Hit, Aggregation>>;
 
-  // NP_TODO: Figure out how to unblock these types
-  // callWithRequest<Hit = {}, Aggregation = undefined>(
-  //   requestContext: RequestHandlerContext,
-  //   method: 'msearch',
-  //   options?: object
-  // ): Promise<InfraDatabaseMultiResponse<Hit, Aggregation>>;
-  // callWithRequest(
-  //   requestContext: RequestHandlerContext,
-  //   method: 'fieldCaps',
-  //   options?: object
-  // ): Promise<InfraDatabaseFieldCapsResponse>;
-  // callWithRequest(
-  //   requestContext: RequestHandlerContext,
-  //   method: 'indices.existsAlias',
-  //   options?: object
-  // ): Promise<boolean>;
-  // callWithRequest(
-  //   requestContext: RequestHandlerContext,
-  //   method: 'indices.getAlias' | 'indices.get',
-  //   options?: object
-  // ): Promise<InfraDatabaseGetIndicesResponse>;
-  // callWithRequest(
-  //   requestContext: RequestHandlerContext,
-  //   method: 'ml.getBuckets',
-  //   options?: object
-  // ): Promise<InfraDatabaseGetIndicesResponse>;
-  // callWithRequest(
-  //   requestContext: RequestHandlerContext,
-  //   method: string,
-  //   options?: object
-  // ): Promise<InfraDatabaseSearchResponse>;
+  callWithRequest<Hit = {}, Aggregation = undefined>(
+    requestContext: RequestHandlerContext,
+    endpoint: 'msearch',
+    options?: object
+  ): Promise<InfraDatabaseMultiResponse<Hit, Aggregation>>;
+  callWithRequest(
+    requestContext: RequestHandlerContext,
+    endpoint: 'fieldCaps',
+    options?: object
+  ): Promise<InfraDatabaseFieldCapsResponse>;
+  callWithRequest(
+    requestContext: RequestHandlerContext,
+    endpoint: 'indices.existsAlias',
+    options?: object
+  ): Promise<boolean>;
+  callWithRequest(
+    requestContext: RequestHandlerContext,
+    endpoint: 'indices.getAlias' | 'indices.get',
+    options?: object
+  ): Promise<InfraDatabaseGetIndicesResponse>;
+  callWithRequest(
+    requestContext: RequestHandlerContext,
+    endpoint: 'ml.getBuckets',
+    options?: object
+  ): Promise<InfraDatabaseGetIndicesResponse>;
+  callWithRequest(
+    requestContext: RequestHandlerContext,
+    endpoint: string,
+    options?: object
+  ): Promise<InfraDatabaseSearchResponse>;
 
   getIndexPatternsService(requestContext: RequestHandlerContext): Legacy.IndexPatternsService;
   getSpaceId(requestContext: RequestHandlerContext): string;
