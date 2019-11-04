@@ -41,6 +41,9 @@ import { toastNotifications } from 'ui/notify';
 import FileDownloadRow from './file_download_row';
 
 const useStyles = createUseStyles({
+  modal: {
+    width: '600px',
+  },
   footer: {
     display: 'flex',
     alignItems: 'center',
@@ -110,7 +113,7 @@ const FileDownloadModal = (props: FileDownloadModalProps) => {
 
   return (
     <EuiOverlayMask>
-      <EuiModal onClose={handleClose}>
+      <EuiModal className={classes.modal} onClose={handleClose}>
         <EuiModalHeader>
           <EuiModalHeaderTitle>
             <EuiTextColor

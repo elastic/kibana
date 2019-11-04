@@ -40,6 +40,9 @@ const useStyles = makeStyles(
         font: '400 100%/1.4 Ubuntu,Tahoma,sans-serif',
         flexWrap: 'nowrap',
       },
+      '& > div > div:first-child': {
+        width: '100%',
+      },
       '& a': {
         textDecoration: 'underline !important',
       },
