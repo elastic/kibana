@@ -5,6 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { get } from 'lodash';
 import { resolve } from 'path';
 
 /**
@@ -30,6 +31,7 @@ export const getUiExports = () => ({
     return {
       monitoringUiEnabled: config.get('xpack.monitoring.ui.enabled'),
       monitoringLegacyEmailAddress: config.get('xpack.monitoring.cluster_alerts.email_notifications.email_address'),
+      isOnCloud: get(server.plugins, 'cloud.config.isCloudEnabled', false)
     };
   },
   hacks: [ 'plugins/monitoring/hacks/toggle_app_link_in_nav' ],

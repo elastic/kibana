@@ -6,6 +6,7 @@
 
 import { get, contains } from 'lodash';
 import chrome from 'ui/chrome';
+import { i18n } from '@kbn/i18n';
 import { ajaxErrorHandlersProvider } from './ajax_error_handler';
 
 function isOnPage(hash: string) {
@@ -89,7 +90,7 @@ export const updateSetupModeData = async (uuid?: string, fetchWithoutClusterUuid
   const oldData = setupModeState.data;
   const data = await fetchCollectionData(uuid, fetchWithoutClusterUuid);
   setupModeState.data = data;
-  if (get(data, '_meta.isOnCloud', false)) {
+  if (chrome.getInjected('isOnCloud')) {
     return toggleSetupMode(false); // eslint-disable-line no-use-before-define
   }
   notifySetupModeDataChange(oldData);
@@ -148,17 +149,17 @@ export const setSetupModeMenuItem = () => {
   }
 
   const globalState = angularState.injector.get('globalState');
-  const navItems = globalState.inSetupMode
-    ? []
-    : [
-        {
-          id: 'enter',
-          label: 'Enter Setup Mode',
-          description: 'Enter setup',
-          run: () => toggleSetupMode(true),
-          testId: 'enterSetupMode',
-        },
-      ];
+  const navItems = [];
+  if (!globalState.inSetupMode && !chrome.getInjected('isOnCloud')) {
+    navItems.push({
+      id: 'enter',
+      label: i18n.translate('xpack.monitoring.setupMode.enter', {
+        defaultMessage: 'Enter Setup Mode',
+      }),
+      run: () => toggleSetupMode(true),
+      testId: 'enterSetupMode',
+    });
+  }
 
   angularState.scope.topNavMenu = [...navItems];
   // LOL angular
