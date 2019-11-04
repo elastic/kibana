@@ -7,7 +7,6 @@
 import 'hapi';
 
 import { CloudPlugin } from '../legacy/plugins/cloud';
-import { EncryptedSavedObjectsPlugin } from '../legacy/plugins/encrypted_saved_objects';
 import { XPackMainPlugin } from '../legacy/plugins/xpack_main/xpack_main';
 import { SecurityPlugin } from '../legacy/plugins/security';
 import { ActionsPlugin, ActionsClient } from '../legacy/plugins/actions';
@@ -23,7 +22,6 @@ declare module 'hapi' {
     cloud?: CloudPlugin;
     xpack_main: XPackMainPlugin;
     security?: SecurityPlugin;
-    encrypted_saved_objects?: EncryptedSavedObjectsPlugin;
     actions?: ActionsPlugin;
     alerting?: AlertingPlugin;
     task_manager?: TaskManager;
