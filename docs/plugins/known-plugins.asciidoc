@@ -19,6 +19,7 @@ This list of plugins is not guaranteed to work on your version of Kibana. Instea
 * https://github.com/johtani/analyze-api-ui-plugin[Analyze UI] (johtani) - UI for elasticsearch _analyze API
 * https://github.com/TrumanDu/cleaner[Cleaner] (TrumanDu)- Setting index ttl.
 * https://github.com/bitsensor/elastalert-kibana-plugin[ElastAlert Kibana Plugin] (BitSensor) - UI to create, test and edit ElastAlert rules
+* https://github.com/query-ai/queryai-kibana-plugin[AI Analyst] (Query.AI) - App providing: NLP queries, automation, ML visualizations and insights
 
 [float]
 === Timelion Extensions
