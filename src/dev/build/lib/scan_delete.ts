@@ -28,7 +28,7 @@ import { count, map, mergeAll, mergeMap } from 'rxjs/operators';
 import { assertAbsolute } from './fs';
 
 const getStat$ = Rx.bindNodeCallback(Fs.stat);
-const getReadDir$ = Rx.bindNodeCallback(Fs.readdir);
+const getReadDir$ = Rx.bindNodeCallback<string, string[]>(Fs.readdir);
 
 interface Options {
   directory: string;
