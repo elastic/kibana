@@ -258,3 +258,5 @@ export const NUMBER_OF_MIGRATED_ALERTS = 1;
  */
 export const MONITORING_CONFIG_SAVED_OBJECT_ID = 'monitoring';
 export const MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS = 'alertingEmailAddress';
+
+export const ALERT_EMAIL_SERVICES = ['gmail', 'hotmail', 'icloud', 'outlook365', 'ses', 'yahoo'];

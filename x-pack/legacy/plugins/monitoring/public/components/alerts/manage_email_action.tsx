@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-
+import React, { Fragment } from 'react';
 import {
   EuiForm,
   EuiFormRow,
@@ -18,10 +17,13 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSuperSelect,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ActionResult } from '../../../../actions/server/types';
-import { getMissingFieldErrors, hasErrors } from '../../lib/form_validation';
+import { getMissingFieldErrors, hasErrors, getRequiredFieldError } from '../../lib/form_validation';
+import { ALERT_EMAIL_SERVICES } from '../../../common/constants';
 
 export interface EmailActionData {
   service: string;
@@ -60,6 +62,8 @@ const CANCEL_LABEL = i18n.translate('xpack.monitoring.alerts.migrate.manageActio
   defaultMessage: 'Cancel',
 });
 
+const NEW_SERVICE_ID = '__new__';
+
 export const ManageEmailAction: React.FC<ManageActionModalProps> = (
   props: ManageActionModalProps
 ) => {
@@ -72,24 +76,74 @@ export const ManageEmailAction: React.FC<ManageActionModalProps> = (
     getMissingFieldErrors(defaultData, DEFAULT_DATA)
   );
   const [data, setData] = React.useState(defaultData);
+  const [createNewService, setCreateNewService] = React.useState(false);
+  const [newService, setNewService] = React.useState('');
 
   React.useEffect(() => {
-    setErrors(getMissingFieldErrors(data, DEFAULT_DATA));
-  }, [data]);
+    const missingFieldErrors = getMissingFieldErrors(data, DEFAULT_DATA);
+    if (!missingFieldErrors.service) {
+      if (data.service === NEW_SERVICE_ID && !newService) {
+        missingFieldErrors.service = getRequiredFieldError('service');
+      }
+    }
+    setErrors(missingFieldErrors);
+  }, [data, newService]);
 
   async function saveEmailAction() {
     setShowErrors(true);
     if (!hasErrors(errors)) {
       setShowErrors(false);
       setIsSaving(true);
+      const mergedData = {
+        ...data,
+        service: data.service === NEW_SERVICE_ID ? newService : data.service,
+      };
       try {
-        await createEmailAction(data);
+        await createEmailAction(mergedData);
       } catch (err) {
         setErrors({
           general: err.body.message,
         });
       }
     }
+  }
+
+  const serviceOptions = ALERT_EMAIL_SERVICES.map(service => ({
+    value: service,
+    inputDisplay: <EuiText>{service}</EuiText>,
+    dropdownDisplay: <EuiText>{service}</EuiText>,
+  }));
+
+  serviceOptions.push({
+    value: NEW_SERVICE_ID,
+    inputDisplay: (
+      <EuiText>
+        {i18n.translate('xpack.monitoring.alerts.migrate.manageAction.addingNewServiceText', {
+          defaultMessage: 'Adding new service...',
+        })}
+      </EuiText>
+    ),
+    dropdownDisplay: (
+      <EuiText>
+        {i18n.translate('xpack.monitoring.alerts.migrate.manageAction.addNewServiceText', {
+          defaultMessage: 'Add new service...',
+        })}
+      </EuiText>
+    ),
+  });
+
+  let addNewServiceUi = null;
+  if (createNewService) {
+    addNewServiceUi = (
+      <Fragment>
+        <EuiSpacer />
+        <EuiFieldText
+          value={newService}
+          onChange={e => setNewService(e.target.value)}
+          isInvalid={showErrors}
+        />
+      </Fragment>
+    );
   }
 
   return (
@@ -108,11 +162,24 @@ export const ManageEmailAction: React.FC<ManageActionModalProps> = (
         error={errors.service}
         isInvalid={showErrors && !!errors.service}
       >
-        <EuiFieldText
-          value={data.service}
-          onChange={e => setData({ ...data, service: e.target.value })}
-          isInvalid={showErrors}
-        />
+        <Fragment>
+          <EuiSuperSelect
+            options={serviceOptions}
+            valueOfSelected={data.service}
+            onChange={id => {
+              if (id === NEW_SERVICE_ID) {
+                setCreateNewService(true);
+                setData({ ...data, service: NEW_SERVICE_ID });
+              } else {
+                setCreateNewService(false);
+                setData({ ...data, service: id });
+              }
+            }}
+            hasDividers
+            isInvalid={showErrors}
+          />
+          {addNewServiceUi}
+        </Fragment>
       </EuiFormRow>
 
       <EuiFormRow
