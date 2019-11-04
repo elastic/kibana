@@ -77,17 +77,12 @@ export class UpdateSourceEditor extends Component {
     //todo move this all to the source
     const rawTooltipFields = getSourceFields(indexPattern.fields);
     const tooltipFields = rawTooltipFields.map(field => {
-      console.log('f', field, field.name);
-      if (!field.name) {
-        console.log('this field has no name!', field);
-      }
       return new ESDocField({
         fieldName: field.name,
         source: this.props.source
       });
     });
 
-    console.log('set state', tooltipFields);
     this.setState({
       tooltipFields: tooltipFields,
       termFields: getTermsFields(indexPattern.fields), //todo change term fields to use fields
@@ -180,7 +175,6 @@ export class UpdateSourceEditor extends Component {
   }
 
   render() {
-    console.log('ttf - apsed in', this.props.tooltipFields);
     return (
       <Fragment>
         <EuiFormRow>

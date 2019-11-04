@@ -16,8 +16,6 @@ export class AbstractField {
   };
 
   constructor({ fieldName, source }) {
-    console.trace();
-    console.log('make field', source, fieldName);
     this._fieldName = fieldName;
     this._source = source;
   }
