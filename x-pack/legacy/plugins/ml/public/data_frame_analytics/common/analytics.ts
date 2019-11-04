@@ -29,6 +29,15 @@ interface RegressionAnalysis {
   };
 }
 
+export const SEARCH_SIZE = 1000;
+
+export enum INDEX_STATUS {
+  UNUSED,
+  LOADING,
+  LOADED,
+  ERROR,
+}
+
 export interface Eval {
   meanSquaredError: number | '';
   rSquared: number | '';
@@ -89,6 +98,16 @@ export const getPredictionFieldName = (analysis: AnalysisConfig) => {
     predictionFieldName = analysis.regression.prediction_field_name;
   }
   return predictionFieldName;
+};
+
+export const getPredictedFieldName = (resultsField: string, analysis: AnalysisConfig) => {
+  // default is 'ml'
+  const predictionFieldName = getPredictionFieldName(analysis);
+  const defaultPredictionField = `${getDependentVar(analysis)}_prediction`;
+  const predictedField = `${resultsField}.${
+    predictionFieldName ? predictionFieldName : defaultPredictionField
+  }`;
+  return predictedField;
 };
 
 export const isOutlierAnalysis = (arg: any): arg is OutlierAnalysis => {
