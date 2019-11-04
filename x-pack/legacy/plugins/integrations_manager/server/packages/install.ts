@@ -8,7 +8,7 @@ import { SavedObject, SavedObjectsClientContract } from 'src/core/server/';
 import { SAVED_OBJECT_TYPE } from '../../common/constants';
 import { AssetReference, AssetType, InstallationAttributes } from '../../common/types';
 import * as Registry from '../registry';
-import { assetUsesObjects, getInstallationObject, getPackageInfo } from './index';
+import { getInstallationObject, getPackageInfo } from './index';
 import { getObjects } from './get_objects';
 
 export async function installPackage(options: {
@@ -17,31 +17,21 @@ export async function installPackage(options: {
 }) {
   const { savedObjectsClient, pkgkey } = options;
 
-  // Only install certain Kibana assets during package installation.
-  // All other asset types need special handling
-  const assetTypes: AssetType[] = [AssetType.visualization, AssetType.dashboard, AssetType.search];
+  const toSave = await installAssets({
+    savedObjectsClient,
+    pkgkey,
+  });
 
-  const installPromises = assetTypes.map(async assetType => {
-    const toSave = await installAssets({
+  if (toSave.length) {
+    // Save those references in the integration manager's state saved object
+    await saveInstallationReferences({
       savedObjectsClient,
       pkgkey,
-      assetType,
+      toSave,
     });
+  }
 
-    if (toSave.length) {
-      // Save those references in the integration manager's state saved object
-      await saveInstallationReferences({
-        savedObjectsClient,
-        pkgkey,
-        toSave,
-      });
-    }
-  });
-  await Promise.all(installPromises);
-
-  const packageInfo = await getPackageInfo({ savedObjectsClient, pkgkey });
-
-  return packageInfo;
+  return getPackageInfo({ savedObjectsClient, pkgkey });
 }
 
 // the function which how to install each of the various asset types
@@ -50,15 +40,20 @@ export async function installPackage(options: {
 export async function installAssets(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
-  assetType: AssetType;
 }) {
-  const { savedObjectsClient, pkgkey, assetType } = options;
-  if (assetUsesObjects(assetType)) {
-    const references = await installKibanaSavedObjects({ savedObjectsClient, pkgkey, assetType });
-    return references;
-  }
+  const { savedObjectsClient, pkgkey } = options;
 
-  return [];
+  // Only install certain Kibana assets during package installation.
+  // All other asset types need special handling
+  const typesToInstall = [AssetType.visualization, AssetType.dashboard, AssetType.search];
+
+  const installationPromises = typesToInstall.map(async assetType =>
+    installKibanaSavedObjects({ savedObjectsClient, pkgkey, assetType })
+  );
+
+  // installKibanaSavedObjects returns AssetReference[], so .map creates AssetReference[][]
+  // call .flat to flatten into one dimensional array
+  return Promise.all(installationPromises).then(results => results.flat());
 }
 
 export async function saveInstallationReferences(options: {
