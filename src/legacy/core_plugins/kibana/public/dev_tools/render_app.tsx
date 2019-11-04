@@ -80,7 +80,7 @@ function DevToolsWrapper({
       <div
         className="devApp__container"
         role="tabpanel"
-        key={activeDevTool.id}
+        data-test-subj={activeDevTool.id}
         ref={async element => {
           if (
             element &&
