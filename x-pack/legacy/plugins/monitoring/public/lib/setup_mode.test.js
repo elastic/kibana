@@ -4,13 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  toggleSetupMode,
-  initSetupModeState,
-  getSetupModeState,
-  updateSetupModeData,
-  setSetupModeMenuItem
-} from './setup_mode';
+let toggleSetupMode;
+let initSetupModeState;
+let getSetupModeState;
+let updateSetupModeData;
+let setSetupModeMenuItem;
 
 jest.mock('./ajax_error_handler', () => ({
   ajaxErrorHandlersProvider: err => {
@@ -52,16 +50,31 @@ function waitForSetupModeData(action) {
   process.nextTick(action);
 }
 
-describe('setup_mode', () => {
-  describe('setup', () => {
-    afterEach(async () => {
-      try {
-        toggleSetupMode(false);
-      } catch (err) {
-        // Do nothing...
-      }
-    });
+function setModules() {
+  jest.resetModules();
+  injectorModulesMock.globalState.inSetupMode = false;
 
+  const setupMode = require('./setup_mode');
+  toggleSetupMode = setupMode.toggleSetupMode;
+  initSetupModeState = setupMode.initSetupModeState;
+  getSetupModeState = setupMode.getSetupModeState;
+  updateSetupModeData = setupMode.updateSetupModeData;
+  setSetupModeMenuItem = setupMode.setSetupModeMenuItem;
+}
+
+describe('setup_mode', () => {
+  beforeEach(async () => {
+    jest.doMock('ui/chrome', () => ({
+      getInjected: (key) => {
+        if (key === 'isOnCloud') {
+          return false;
+        }
+      }
+    }));
+    setModules();
+  });
+
+  describe('setup', () => {
     it('should require angular state', async () => {
       let error;
       try {
@@ -99,21 +112,25 @@ describe('setup_mode', () => {
   describe('in setup mode', () => {
     afterEach(async () => {
       data = {};
-      toggleSetupMode(false);
     });
 
     it('should enable it through clicking top nav item', async () => {
       initSetupModeState(angularStateMock.scope, angularStateMock.injector);
+      setSetupModeMenuItem();
+      expect(injectorModulesMock.globalState.inSetupMode).toBe(false);
       await angularStateMock.scope.topNavMenu[0].run();
       expect(injectorModulesMock.globalState.inSetupMode).toBe(true);
     });
 
     it('should not fetch data if on cloud', async (done) => {
-      data = {
-        _meta: {
-          isOnCloud: true
+      jest.doMock('ui/chrome', () => ({
+        getInjected: (key) => {
+          if (key === 'isOnCloud') {
+            return true;
+          }
         }
-      };
+      }));
+      setModules();
       initSetupModeState(angularStateMock.scope, angularStateMock.injector);
       await toggleSetupMode(true);
       waitForSetupModeData(() => {

@@ -547,7 +547,6 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, nodeU
   status._meta = {
     secondsAgo: NUMBER_OF_SECONDS_AGO_TO_LOOK,
     liveClusterUuid,
-    isOnCloud: get(req.server.plugins, 'cloud.config.isCloudEnabled', false)
   };
 
   return status;
