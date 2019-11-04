@@ -181,6 +181,11 @@ export const AgentListPage: React.SFC<{}> = () => {
         defaultMessage: 'Policy',
       }),
       truncateText: true,
+      render: (policy: string) => (
+        <ConnectedLink color="primary" path={`/policies/${policy}`}>
+          {policy}
+        </ConnectedLink>
+      ),
     },
     {
       field: 'active',
@@ -244,7 +249,7 @@ export const AgentListPage: React.SFC<{}> = () => {
 
         <EuiTitle size="l">
           <h1>
-            <FormattedMessage id="xpack.fleet.agentList.pageTitle" defaultMessage="Elastic Fleet" />
+            <FormattedMessage id="xpack.fleet.agentList.pageTitle" defaultMessage="Agents" />
           </h1>
         </EuiTitle>
         <EuiSpacer size="s" />
