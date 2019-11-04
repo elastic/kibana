@@ -211,14 +211,7 @@ export const getDefaultRegressionFields = (
         return false;
       }
 
-      let value = false;
-      docs.forEach(row => {
-        const source = row._source;
-        if (source[k] !== null) {
-          value = true;
-        }
-      });
-      return value;
+      return docs.some(row => row._source[k] !== null);
     })
     .sort((a, b) => sortRegressionResultsFields(a, b, jobConfig))
     .slice(0, DEFAULT_REGRESSION_COLUMNS);
@@ -239,14 +232,7 @@ export const getDefaultSelectableFields = (docs: EsDoc[], resultsField: string):
         return false;
       }
 
-      let value = false;
-      docs.forEach(row => {
-        const source = row._source;
-        if (source[k] !== null) {
-          value = true;
-        }
-      });
-      return value;
+      return docs.some(row => row._source[k] !== null);
     })
     .slice(0, MAX_COLUMNS);
 };

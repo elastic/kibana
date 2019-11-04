@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { EuiBadge } from '@elastic/eui';
+import { EuiBadge, useInnerText } from '@elastic/eui';
 import { Filter, isFilterPinned } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import React, { SFC } from 'react';
@@ -36,9 +36,12 @@ export const FilterView: SFC<Props> = ({
   displayName,
   ...rest
 }: Props) => {
+  const [ref, innerText] = useInnerText();
+  const displayText = <span ref={ref}>{getFilterDisplayText(filter, displayName)}</span>;
+
   let title = i18n.translate('data.filter.filterBar.moreFilterActionsMessage', {
-    defaultMessage: 'Filter: {displayText}. Select for more filter actions.',
-    values: { displayText: getFilterDisplayText(filter, displayName) },
+    defaultMessage: 'Filter: {innerText}. Select for more filter actions.',
+    values: { innerText },
   });
 
   if (isFilterPinned(filter)) {
@@ -72,7 +75,7 @@ export const FilterView: SFC<Props> = ({
       })}
       {...rest}
     >
-      <span>{getFilterDisplayText(filter, displayName)}</span>
+      {displayText}
     </EuiBadge>
   );
 };
