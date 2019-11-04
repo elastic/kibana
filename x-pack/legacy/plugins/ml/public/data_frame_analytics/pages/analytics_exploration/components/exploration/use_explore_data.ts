@@ -18,18 +18,11 @@ import {
   getFlattenedFields,
   DataFrameAnalyticsConfig,
   EsFieldName,
+  INDEX_STATUS,
+  SEARCH_SIZE,
 } from '../../../../common';
 
 import { getOutlierScoreFieldName } from './common';
-
-const SEARCH_SIZE = 1000;
-
-export enum INDEX_STATUS {
-  UNUSED,
-  LOADING,
-  LOADED,
-  ERROR,
-}
 
 type TableItem = Record<string, any>;
 

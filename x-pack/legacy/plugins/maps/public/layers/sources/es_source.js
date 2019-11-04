@@ -15,7 +15,6 @@ import { timefilter } from 'ui/timefilter';
 import _ from 'lodash';
 import { AggConfigs } from 'ui/agg_types';
 import { i18n } from '@kbn/i18n';
-
 import uuid from 'uuid/v4';
 import { copyPersistentState } from '../../reducers/util';
 import { ES_GEO_FIELD_TYPE } from '../../../common/constants';
@@ -55,6 +54,7 @@ export class AbstractESSource extends AbstractVectorSource {
     clonedDescriptor.id = uuid();
     return clonedDescriptor;
   }
+
 
   async _runEsQuery(requestName, searchSource, registerCancelCallback, requestDescription) {
     const abortController = new AbortController();

@@ -14,7 +14,7 @@ import { UpdateSourceEditor } from './update_source_editor';
 import { VectorStyle } from '../../styles/vector/vector_style';
 import { vectorStyles } from '../../styles/vector/vector_style_defaults';
 import { i18n } from '@kbn/i18n';
-import { SOURCE_DATA_ID_ORIGIN, ES_PEW_PEW, METRIC_TYPE } from '../../../../common/constants';
+import { SOURCE_DATA_ID_ORIGIN, ES_PEW_PEW } from '../../../../common/constants';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { convertToLines } from './convert_to_lines';
 import { Schemas } from 'ui/vis/editors/default/schemas';
@@ -24,26 +24,7 @@ import { DynamicStyleProperty } from '../../styles/vector/properties/dynamic_sty
 
 const MAX_GEOTILE_LEVEL = 29;
 
-const aggSchemas = new Schemas([
-  {
-    group: 'metrics',
-    name: 'metric',
-    title: 'Value',
-    min: 1,
-    max: Infinity,
-    aggFilter: [
-      METRIC_TYPE.AVG,
-      METRIC_TYPE.COUNT,
-      METRIC_TYPE.MAX,
-      METRIC_TYPE.MIN,
-      METRIC_TYPE.SUM,
-      METRIC_TYPE.UNIQUE_COUNT
-    ],
-    defaults: [
-      { schema: 'metric', type: METRIC_TYPE.COUNT }
-    ]
-  }
-]);
+const aggSchemas = new Schemas([AbstractESAggSource.METRIC_SCHEMA_CONFIG]);
 
 export class ESPewPewSource extends AbstractESAggSource {
 
@@ -184,9 +165,8 @@ export class ESPewPewSource extends AbstractESAggSource {
   }
 
   async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback) {
-
-    const metricAggConfigs = this.createMetricAggConfigs();
     const indexPattern = await this.getIndexPattern();
+    const metricAggConfigs = this.createMetricAggConfigs();
     const aggConfigs = new AggConfigs(indexPattern, metricAggConfigs, aggSchemas.all);
 
     const searchSource  = await this._makeSearchSource(searchFilters, 0);

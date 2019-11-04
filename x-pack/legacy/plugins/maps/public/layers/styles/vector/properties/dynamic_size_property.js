@@ -79,6 +79,9 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
   }
 
   _isSizeDynamicConfigComplete() {
+    if (!this._field) {
+      return false;
+    }
     return this._field.isValid() && _.has(this._options, 'minSize') && _.has(this._options, 'maxSize');
   }
 }

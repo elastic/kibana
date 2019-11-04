@@ -19,24 +19,7 @@ const FIELD_NAME_PREFIX = '__kbnjoin__';
 const GROUP_BY_DELIMITER = '_groupby_';
 
 const aggSchemas = new Schemas([
-  {
-    group: 'metrics',
-    name: 'metric',
-    title: 'Value',
-    min: 1,
-    max: Infinity,
-    aggFilter: [
-      METRIC_TYPE.AVG,
-      METRIC_TYPE.COUNT,
-      METRIC_TYPE.MAX,
-      METRIC_TYPE.MIN,
-      METRIC_TYPE.SUM,
-      METRIC_TYPE.UNIQUE_COUNT
-    ],
-    defaults: [
-      { schema: 'metric', type: METRIC_TYPE.COUNT }
-    ]
-  },
+  AbstractESAggSource.METRIC_SCHEMA_CONFIG,
   {
     group: 'buckets',
     name: 'segment',

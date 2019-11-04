@@ -4,23 +4,36 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { AbstractESSource } from './es_source';
 import { ESAggMetricTooltipProperty } from '../tooltips/es_aggmetric_tooltip_property';
 import { ESAggMetricField } from '../fields/es_agg_field';
 import { ESDocField } from '../fields/es_doc_field';
-import { COUNT_AGG_TYPE } from '../../../common/constants';
+import { METRIC_TYPE, COUNT_AGG_TYPE } from '../../../common/constants';
 
 const COUNT_PROP_LABEL = 'count';
 const COUNT_PROP_NAME = 'doc_count';
-
 const AGG_DELIMITER = '_of_';
 
-//todo: extract in separate PR
 export class AbstractESAggSource extends AbstractESSource {
 
-  static COUNT_PROP_LABEL = COUNT_PROP_LABEL;
-  static COUNT_PROP_NANE = COUNT_PROP_NAME;
+  static METRIC_SCHEMA_CONFIG = {
+    group: 'metrics',
+    name: 'metric',
+    title: 'Value',
+    min: 1,
+    max: Infinity,
+    aggFilter: [
+      METRIC_TYPE.AVG,
+      METRIC_TYPE.COUNT,
+      METRIC_TYPE.MAX,
+      METRIC_TYPE.MIN,
+      METRIC_TYPE.SUM,
+      METRIC_TYPE.UNIQUE_COUNT
+    ],
+    defaults: [
+      { schema: 'metric', type: METRIC_TYPE.COUNT }
+    ]
+  };
 
   constructor(descriptor, inspectorAdapters) {
     super(descriptor, inspectorAdapters);
@@ -99,7 +112,6 @@ export class AbstractESAggSource extends AbstractESSource {
       console.warn(`Unable to find Index pattern ${this._descriptor.indexPatternId}, values are not formatted`);
       return properties;
     }
-
 
     const metricFields = this.getMetricFields();
     const tooltipProperties = [];

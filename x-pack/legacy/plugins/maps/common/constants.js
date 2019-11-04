@@ -111,6 +111,6 @@ export const METRIC_TYPE = {
   UNIQUE_COUNT: 'cardinality',
 };
 
-export const COUNT_AGG_TYPE = 'count';
+export const COUNT_AGG_TYPE = METRIC_TYPE.COUNT;
 
 export const STYLE_TYPE = { 'STATIC': 'STATIC', 'DYNAMIC': 'DYNAMIC' };

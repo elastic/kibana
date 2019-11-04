@@ -283,19 +283,13 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async openSidebarFieldFilter() {
-      const fieldFilterFormExists = await testSubjects.exists('discoverFieldFilter');
-      if (!fieldFilterFormExists) {
-        await testSubjects.click('toggleFieldFilterButton');
-        await testSubjects.existOrFail('discoverFieldFilter');
-      }
+      await testSubjects.click('toggleFieldFilterButton');
+      await testSubjects.existOrFail('filterSelectionPanel');
     }
 
     async closeSidebarFieldFilter() {
-      const fieldFilterFormExists = await testSubjects.exists('discoverFieldFilter');
-      if (fieldFilterFormExists) {
-        await testSubjects.click('toggleFieldFilterButton');
-        await testSubjects.missingOrFail('discoverFieldFilter', { allowHidden: true });
-      }
+      await testSubjects.click('toggleFieldFilterButton');
+      await testSubjects.missingOrFail('filterSelectionPanel', { allowHidden: true });
     }
 
   }

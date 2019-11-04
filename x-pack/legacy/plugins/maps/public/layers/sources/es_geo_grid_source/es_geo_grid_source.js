@@ -20,7 +20,7 @@ import { RENDER_AS } from './render_as';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
 import { GRID_RESOLUTION } from '../../grid_resolution';
-import { SOURCE_DATA_ID_ORIGIN, ES_GEO_GRID, METRIC_TYPE } from '../../../../common/constants';
+import { SOURCE_DATA_ID_ORIGIN, ES_GEO_GRID } from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { AbstractESAggSource } from '../es_agg_source';
@@ -29,24 +29,7 @@ import { DynamicStyleProperty } from '../../styles/vector/properties/dynamic_sty
 const MAX_GEOTILE_LEVEL = 29;
 
 const aggSchemas = new Schemas([
-  {
-    group: 'metrics',
-    name: 'metric',
-    title: 'Value',
-    min: 1,
-    max: Infinity,
-    aggFilter: [
-      METRIC_TYPE.AVG,
-      METRIC_TYPE.COUNT,
-      METRIC_TYPE.MAX,
-      METRIC_TYPE.MIN,
-      METRIC_TYPE.SUM,
-      METRIC_TYPE.UNIQUE_COUNT
-    ],
-    defaults: [
-      { schema: 'metric', type: METRIC_TYPE.COUNT }
-    ]
-  },
+  AbstractESAggSource.METRIC_SCHEMA_CONFIG,
   {
     group: 'buckets',
     name: 'segment',

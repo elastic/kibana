@@ -7,20 +7,20 @@
 import _ from 'lodash';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { VectorStyleEditor } from './components/vector/vector_style_editor';
+import { VectorStyleEditor } from './components/vector_style_editor';
 import { getDefaultProperties, vectorStyles } from './vector_style_defaults';
 import { AbstractStyle } from '../abstract_style';
 import { SOURCE_DATA_ID_ORIGIN, GEO_JSON_TYPE, FIELD_ORIGIN, STYLE_TYPE } from '../../../../common/constants';
-import { VectorIcon } from './components/vector/legend/vector_icon';
-import { VectorStyleLegend } from './components/vector/legend/vector_style_legend';
+import { VectorIcon } from './components/legend/vector_icon';
+import { VectorStyleLegend } from './components/legend/vector_style_legend';
 import { VECTOR_SHAPE_TYPES } from '../../sources/vector_feature_types';
 import { SYMBOLIZE_AS_CIRCLE, SYMBOLIZE_AS_ICON } from './vector_constants';
 import { getMakiSymbolAnchor } from './symbol_utils';
-import { DynamicStyleProperty } from './properties/dynamic_style_property';
+import { getComputedFieldName } from './style_util';
 import { StaticStyleProperty } from './properties/static_style_property';
+import { DynamicStyleProperty } from './properties/dynamic_style_property';
 import { DynamicSizeProperty } from './properties/dynamic_size_property';
 import { StaticSizeProperty } from './properties/static_size_property';
-import { getComputedFieldName } from './style_util';
 import { StaticColorProperty } from './properties/static_color_property';
 import { DynamicColorProperty } from './properties/dynamic_color_property';
 import { StaticOrientationProperty } from './properties/static_orientation_property';
@@ -113,7 +113,7 @@ export class VectorStyle extends AbstractStyle {
    * can then use to update store state via dispatch.
    */
   getDescriptorWithMissingStylePropsRemoved(nextOrdinalFields) {
-    const originalProperties = this.getRawProperties();
+    const originalProperties = this.getProperties();
     const updatedProperties = {};
 
 
@@ -157,7 +157,6 @@ export class VectorStyle extends AbstractStyle {
         ...updatedProperties,
       })
     };
-
   }
 
   async pluckStyleMetaFromSourceDataRequest(sourceDataRequest) {
@@ -416,6 +415,10 @@ export class VectorStyle extends AbstractStyle {
     return hasGeoJsonProperties;
   }
 
+  arePointsSymbolizedAsCircles() {
+    return this._descriptor.properties.symbol.options.symbolizeAs === SYMBOLIZE_AS_CIRCLE;
+  }
+
   setMBPaintProperties({ alpha, mbMap, fillLayerId, lineLayerId }) {
     this._fillColorStyleProperty.syncFillColorWithMb(fillLayerId, mbMap, alpha);
     this._lineColorStyleProperty.syncLineColorWithMb(lineLayerId, mbMap, alpha);
@@ -514,6 +517,4 @@ export class VectorStyle extends AbstractStyle {
       throw new Error(`${descriptor} not implemented`);
     }
   }
-
-
 }
