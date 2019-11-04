@@ -18,10 +18,10 @@
  */
 
 import { CoreSetup } from 'src/core/server';
-import { registerOptInRoutes } from './opt_in';
+import { registerTelemetryConfigRoutes } from './telemetry_config';
 import { registerTelemetryDataRoutes } from './telemetry_stats';
 
 export function registerRoutes(core: CoreSetup) {
-  registerOptInRoutes(core);
+  registerTelemetryConfigRoutes(core);
   registerTelemetryDataRoutes(core);
 }

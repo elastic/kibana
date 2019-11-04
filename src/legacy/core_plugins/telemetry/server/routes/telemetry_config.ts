@@ -21,8 +21,35 @@ import Joi from 'joi';
 import { boomify } from 'boom';
 import { CoreSetup } from 'src/core/server';
 
-export function registerOptInRoutes(core: CoreSetup) {
+async function updateTelemetrySavedObjectFromReq(req: any) {
+  const savedObjectsClient = req.getSavedObjectsClient();
+  return await savedObjectsClient.update('telemetry', 'telemetry', req.payload);
+}
+
+export function registerTelemetryConfigRoutes(core: CoreSetup) {
   const { server } = core.http as any;
+
+  server.route({
+    method: 'POST',
+    path: '/api/telemetry/v2/usageFetcher',
+    options: {
+      validate: {
+        payload: Joi.object({
+          usageFetcher: Joi.string()
+            .allow(['browser', 'server'])
+            .required(),
+        }),
+      },
+    },
+    handler: async (req: any, h: any) => {
+      try {
+        await updateTelemetrySavedObjectFromReq(req);
+      } catch (err) {
+        return boomify(err);
+      }
+      return h.response({}).code(200);
+    },
+  });
 
   server.route({
     method: 'POST',
@@ -35,18 +62,8 @@ export function registerOptInRoutes(core: CoreSetup) {
       },
     },
     handler: async (req: any, h: any) => {
-      const savedObjectsClient = req.getSavedObjectsClient();
       try {
-        await savedObjectsClient.create(
-          'telemetry',
-          {
-            enabled: req.payload.enabled,
-          },
-          {
-            id: 'telemetry',
-            overwrite: true,
-          }
-        );
+        await updateTelemetrySavedObjectFromReq(req);
       } catch (err) {
         return boomify(err);
       }
