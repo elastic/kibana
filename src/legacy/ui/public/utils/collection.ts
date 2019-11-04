@@ -36,7 +36,7 @@ export function move(
   objs: object[],
   obj: object | number,
   below: number | boolean,
-  qualifier: (object: object, index: number) => any
+  qualifier: (object: object, index: number) => any = () => {}
 ): object[] {
   const origI = _.isNumber(obj) ? obj : objs.indexOf(obj);
   if (origI === -1) {

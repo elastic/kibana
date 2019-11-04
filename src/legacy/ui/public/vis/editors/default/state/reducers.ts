@@ -19,6 +19,7 @@
 
 import { AggConfigs, AggConfig } from 'ui/agg_types';
 import { Vis, VisState } from 'ui/vis';
+import { move } from 'ui/utils/collection';
 import { EditorStateActionTypes } from './constants';
 import { AggGroupNames } from '../agg_groups';
 import { getEnabledMetricAggsCount } from '../components/agg_group_helper';
@@ -124,6 +125,17 @@ function editorStateReducer(state: VisState, action: ActionType) {
           aggToEnable.enabled = true;
         }
       }
+
+      return {
+        ...state,
+        aggs: new AggConfigs(state.aggs.indexPattern, newAggs, state.aggs.schemas),
+      };
+    }
+
+    case EditorStateActionTypes.REORDER_AGGS: {
+      const { sourceAgg, destinationAgg } = action.payload;
+      const destinationIndex = state.aggs.aggs.indexOf(destinationAgg);
+      const newAggs = move([...state.aggs.aggs], sourceAgg, destinationIndex);
 
       return {
         ...state,

@@ -42,6 +42,7 @@ export interface EditorActions {
     value: AggConfig['params'][T]
   ): ActionType;
   removeAgg(aggId: AggConfig['id']): ActionType;
+  reorderAggs(sourceAgg: AggConfig, destinationAgg: AggConfig): ActionType;
   toggleEnabledAgg(aggId: AggConfig['id'], enabled: AggConfig['enabled']): ActionType;
 }
 
@@ -89,6 +90,14 @@ const removeAgg: EditorActions['removeAgg'] = aggId => ({
   },
 });
 
+const reorderAggs: EditorActions['reorderAggs'] = (sourceAgg, destinationAgg) => ({
+  type: EditorStateActionTypes.REORDER_AGGS,
+  payload: {
+    sourceAgg,
+    destinationAgg,
+  },
+});
+
 const toggleEnabledAgg: EditorActions['toggleEnabledAgg'] = (aggId, enabled) => ({
   type: EditorStateActionTypes.TOGGLE_ENABLED_AGG,
   payload: {
@@ -104,5 +113,6 @@ export const editorActions: EditorActions = {
   setAggParamValue,
   setStateParamValue,
   removeAgg,
+  reorderAggs,
   toggleEnabledAgg,
 };

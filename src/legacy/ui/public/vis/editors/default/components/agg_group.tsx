@@ -41,11 +41,12 @@ import {
 } from './agg_group_helper';
 import { aggGroupReducer, initAggsState, AGGS_ACTION_KEYS } from './agg_group_state';
 import { Schema } from '../schemas';
+import { EditorActions } from '../state/actions';
 
 export interface DefaultEditorAggGroupProps extends DefaultEditorAggCommonProps {
   schemas: Schema[];
   addSchema: (schemas: Schema) => void;
-  reorderAggs: (group: AggConfig[]) => void;
+  reorderAggs: EditorActions['reorderAggs'];
 }
 
 function DefaultEditorAggGroup({
@@ -113,11 +114,7 @@ function DefaultEditorAggGroup({
 
   const onDragEnd: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
     if (source && destination) {
-      const orderedGroup = Array.from(group);
-      const [removed] = orderedGroup.splice(source.index, 1);
-      orderedGroup.splice(destination.index, 0, removed);
-
-      reorderAggs(orderedGroup);
+      reorderAggs(group[source.index], group[destination.index]);
     }
   };
 

@@ -22,7 +22,7 @@ import { EuiSpacer } from '@elastic/eui';
 import { DefaultEditorAggGroup } from '../agg_group';
 import { AggGroupNames } from '../../agg_groups';
 
-function DefaultEditorDataTab({ metricAggs, state, schemas, reorderAggs, actions }) {
+function DefaultEditorDataTab({ metricAggs, state, schemas, actions }) {
   const setValidity = () => {
     console.log('setValidity');
   };
@@ -34,7 +34,7 @@ function DefaultEditorDataTab({ metricAggs, state, schemas, reorderAggs, actions
     addSchema: actions.addNewAgg,
     metricAggs,
     state,
-    reorderAggs,
+    reorderAggs: actions.reorderAggs,
     onAggParamsChange: actions.setAggParamValue,
     onAggTypeChange: actions.changeAggType,
     onToggleEnableAgg: actions.toggleEnabledAgg,

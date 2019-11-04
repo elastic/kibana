@@ -112,51 +112,10 @@ const defaultEditor = function ($rootScope, $compile) {
             }
           }, true);
 
-          $scope.onParamChange = (params, paramName, value) => {
-            if (params[paramName] !== value) {
-              params[paramName] = value;
-            }
-          };
-
           $scope.setVisType = (type) => {
             $scope.vis.type.type = type;
           };
 
-          $scope.removeAgg = function (agg) {
-            const aggs = $scope.state.aggs.aggs;
-            const index = aggs.indexOf(agg);
-
-            aggs.splice(index, 1);
-
-            if (agg.schema.group === AggGroupNames.Metrics) {
-              const metrics = $scope.state.aggs.bySchemaGroup(AggGroupNames.Metrics);
-
-              if (getEnabledMetricAggsCount(metrics) === 0) {
-                metrics.find(aggregation => aggregation.schema.name === 'metric').enabled = true;
-              }
-            }
-          };
-
-          $scope.onToggleEnableAgg = (agg, isEnable) => {
-            agg.enabled = isEnable;
-          };
-
-          $scope.reorderAggs = (group) => {
-            //the aggs have been reordered in [group] and we need
-            //to apply that ordering to [vis.aggs]
-            const indexOffset = $scope.state.aggs.aggs.indexOf(group[0]);
-            _.forEach(group, (agg, index) => {
-              move($scope.state.aggs.aggs, agg, indexOffset + index);
-            });
-          };
-
-
-          // Load the default editor template, attach it to the DOM and compile it.
-          // It should be added to the DOM before compiling, to prevent some resize
-          // listener issues.
-          const template = $('defaultEditorTemplate');
-          this.el.html(template);
-          $compile(template)($scope);
         } else {
           $scope = this.$scope;
           updateScope();
