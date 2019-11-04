@@ -68,7 +68,7 @@ export class ESSearchSource extends AbstractESSource {
       topHitsSize: _.get(descriptor, 'topHitsSize', 1),
     }, inspectorAdapters);
 
-    this._tooltipFields = this._descriptor.tooltipProperties.map((property) => this.createField(property));
+    this._tooltipFields = this._descriptor.tooltipProperties.map((property) => this.createField({ fieldName: property }));
   }
 
   createField({ fieldName }) {

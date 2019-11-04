@@ -8,7 +8,7 @@ import React from 'react';
 
 import { EuiFormRow, EuiSuperSelect } from '@elastic/eui';
 import { COLOR_GRADIENTS } from '../../color_utils';
-import { ColorGradient } from '../../color_gradient';
+import { ColorGradient } from '../../components/color_gradient';
 import {
   DEFAULT_RGB_HEATMAP_COLOR_RAMP,
   DEFAULT_HEATMAP_COLOR_RAMP_NAME,

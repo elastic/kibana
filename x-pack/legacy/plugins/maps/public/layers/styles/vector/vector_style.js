@@ -33,7 +33,7 @@ const POLYGONS = [GEO_JSON_TYPE.POLYGON, GEO_JSON_TYPE.MULTI_POLYGON];
 export class VectorStyle extends AbstractStyle {
 
   static type = 'VECTOR';
-
+  static STYLE_TYPE = { 'STATIC': StaticStyleProperty.type, 'DYNAMIC': DynamicStyleProperty.type };
   static createDescriptor(properties = {}) {
     return {
       type: VectorStyle.type,
@@ -63,12 +63,13 @@ export class VectorStyle extends AbstractStyle {
       ...VectorStyle.createDescriptor(descriptor.properties),
     };
 
-    this._lineColorStyleProperty = this._makeStyleProperty(vectorStyles.LINE_COLOR, this._descriptor.properties[vectorStyles.LINE_COLOR]);
-    this._fillColorStyleProperty = this._makeStyleProperty(vectorStyles.FILL_COLOR, this._descriptor.properties[vectorStyles.FILL_COLOR]);
-    this._lineWidthStyleProperty = this._makeStyleProperty(vectorStyles.LINE_WIDTH, this._descriptor.properties[vectorStyles.LINE_WIDTH]);
-    this._iconSizeStyleProperty = this._makeStyleProperty(vectorStyles.ICON_SIZE, this._descriptor.properties[vectorStyles.ICON_SIZE]);
+    this._lineColorStyleProperty = this._makeColorProperty(this._descriptor.properties[vectorStyles.LINE_COLOR], vectorStyles.LINE_COLOR);
+    this._fillColorStyleProperty = this._makeColorProperty(this._descriptor.properties[vectorStyles.FILL_COLOR], vectorStyles.FILL_COLOR);
+    this._lineWidthStyleProperty = this._makeSizeProperty(this._descriptor.properties[vectorStyles.LINE_WIDTH], vectorStyles.LINE_WIDTH);
+    this._iconSizeStyleProperty = this._makeSizeProperty(this._descriptor.properties[vectorStyles.ICON_SIZE], vectorStyles.ICON_SIZE);
     // eslint-disable-next-line max-len
-    this._iconOrientationProperty = this._makeStyleProperty(vectorStyles.ICON_ORIENTATION, this._descriptor.properties[vectorStyles.ICON_ORIENTATION]);
+    this._iconOrientationProperty = this._makeOrientationProperty(this._descriptor.properties[vectorStyles.ICON_ORIENTATION], vectorStyles.ICON_ORIENTATION);
+
   }
 
   _getAllStyleProperties() {
@@ -514,21 +515,5 @@ export class VectorStyle extends AbstractStyle {
     }
   }
 
-  _makeStyleProperty(propertyName, descriptor) {
-
-    if (propertyName === vectorStyles.LINE_WIDTH) {
-      return this._makeSizeProperty(descriptor, vectorStyles.LINE_WIDTH);
-    } else if (propertyName === vectorStyles.ICON_SIZE) {
-      return this._makeSizeProperty(descriptor, vectorStyles.ICON_SIZE);
-    } else if (propertyName === vectorStyles.LINE_COLOR) {
-      return this._makeColorProperty(descriptor, vectorStyles.LINE_COLOR);
-    } else if (propertyName === vectorStyles.FILL_COLOR) {
-      return this._makeColorProperty(descriptor, vectorStyles.FILL_COLOR);
-    } else if (propertyName === vectorStyles.ICON_ORIENTATION) {
-      return this._makeOrientationProperty(descriptor, vectorStyles.ICON_ORIENTATION);
-    }
-
-    throw new Error(`${propertyName} not implemented`);
-  }
 
 }

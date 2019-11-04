@@ -62,7 +62,10 @@ export class TooltipSelector extends Component {
       return;
     }
 
+    console.log('tpf', this.props.fields);
+
     const getProps = async field => {
+      console.log('getprops', field);
       return new Promise(async (resolve, reject) => {
         try {
           const label = await field.getLabel();
@@ -72,7 +75,7 @@ export class TooltipSelector extends Component {
             type: type,
             name: field.getName()
           });
-        }catch(e) {
+        } catch(e) {
           reject(e);
         }
       });

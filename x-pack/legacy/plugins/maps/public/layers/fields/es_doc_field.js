@@ -23,6 +23,7 @@ export class ESDocField extends AbstractField {
   }
 
   async getType() {
+    console.trace();
     const field = await this._getField();
     return field.type;
   }
