@@ -45,6 +45,8 @@ import { VISUALIZE_EMBEDDABLE_TYPE } from './embeddable/constants';
 import { VisualizeConstants } from './visualize_constants';
 import { setServices, VisualizeKibanaServices, DocTitle } from './kibana_services';
 
+import { start as visualizationsStart } from '../../../visualizations/public/np_ready/public/legacy';
+
 export interface LegacyAngularInjectedDependencies {
   chromeLegacy: any;
   editorTypes: any;
@@ -137,9 +139,6 @@ export class VisualizePlugin implements Plugin {
         };
         setServices(deps);
 
-        const embeddableFactory = new VisualizeEmbeddableFactory(visualizations.types);
-        embeddableSetup.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
-
         const { renderApp } = await import('./render_app');
         return renderApp(params.element, params.appBasePath, deps);
       },
@@ -161,6 +160,9 @@ export class VisualizePlugin implements Plugin {
 
     localApplicationService.register({ ...app, id: 'visualize' });
     VisEditorTypesRegistryProvider.register(defaultEditor);
+
+    const embeddableFactory = new VisualizeEmbeddableFactory(visualizationsStart.types);
+    embeddableSetup.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
   }
 
   start(
