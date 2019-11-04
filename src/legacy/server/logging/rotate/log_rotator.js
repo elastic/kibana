@@ -191,8 +191,7 @@ export class LogRotator {
       return false;
     }
 
-    // return this.logFileSize >= this.everyBytes;
-    return this.logFileSize >= 25000;
+    return this.logFileSize >= this.everyBytes;
   }
 
   async _rotate() {
