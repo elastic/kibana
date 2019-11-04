@@ -17,12 +17,5 @@
  * under the License.
  */
 
-// @ts-ignore
-import { getLocalStats } from './get_local_stats';
-import { StatsGetter, getStatsGetterConfig } from '../collection_manager';
-
-export const getStats: StatsGetter = async function(config) {
-  const { callCluster, server } = getStatsGetterConfig(config, 'data');
-
-  return [await getLocalStats({ callCluster, server })];
-};
+const usageAgent =
+  window && window.navigator && window.navigator.userAgent ? window.navigator.userAgent : '';

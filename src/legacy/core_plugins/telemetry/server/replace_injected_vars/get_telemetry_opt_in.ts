@@ -17,12 +17,17 @@
  * under the License.
  */
 
-// @ts-ignore
-import { getLocalStats } from './get_local_stats';
-import { StatsGetter, getStatsGetterConfig } from '../collection_manager';
+export function getTelemetryOptIn(telemetrySavedObject: any, request: any) {
+  const isRequestingApplication = request.path.startsWith('/app');
 
-export const getStats: StatsGetter = async function(config) {
-  const { callCluster, server } = getStatsGetterConfig(config, 'data');
+  // Prevent interstitial screens (such as the space selector) from prompting for telemetry
+  if (!isRequestingApplication) {
+    return false;
+  }
 
-  return [await getLocalStats({ callCluster, server })];
-};
+  if (telemetrySavedObject === false || telemetrySavedObject === null) {
+    return telemetrySavedObject;
+  }
+
+  return telemetrySavedObject.enabled;
+}

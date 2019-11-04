@@ -19,6 +19,4 @@
 
 // @ts-ignore
 export { getLocalStats } from './get_local_stats';
-
-// @ts-ignore
 export { getStats } from './get_stats';

@@ -17,12 +17,7 @@
  * under the License.
  */
 
-// @ts-ignore
-import { getLocalStats } from './get_local_stats';
-import { StatsGetter, getStatsGetterConfig } from '../collection_manager';
-
-export const getStats: StatsGetter = async function(config) {
-  const { callCluster, server } = getStatsGetterConfig(config, 'data');
-
-  return [await getLocalStats({ callCluster, server })];
-};
+export { replaceTelemetryInjectedVars } from './replace_injected_vars';
+export { getTelemetryOptIn } from './get_telemetry_opt_in';
+export { getTelemetryUsageFetcher } from './get_telemetry_usage_fetcher';
+export { getTelemetrySavedObject } from './get_telemetry_saved_object';

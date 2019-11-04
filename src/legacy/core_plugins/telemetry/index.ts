@@ -26,7 +26,7 @@ import { i18n } from '@kbn/i18n';
 import mappings from './mappings.json';
 import { CONFIG_TELEMETRY, getConfigTelemetryDesc } from './common/constants';
 import { getXpackConfigWithDeprecated } from './common/get_xpack_config_with_deprecated';
-import { telemetryPlugin, getTelemetryOptIn } from './server';
+import { telemetryPlugin, replaceTelemetryInjectedVars, FetcherTask } from './server';
 
 import {
   createLocalizationUsageCollector,
@@ -57,6 +57,9 @@ const telemetry = (kibana: any) => {
             `https://telemetry.elastic.co/xpack/${ENDPOINT_VERSION}/send`
           ),
         }),
+        usageFetcher: Joi.string()
+          .allow(['server', 'browser'])
+          .default('browser'),
       }).default();
     },
     uiExports: {
@@ -77,11 +80,13 @@ const telemetry = (kibana: any) => {
         },
       },
       async replaceInjectedVars(originalInjectedVars: any, request: any) {
-        const telemetryOptedIn = await getTelemetryOptIn(request);
-
+        const telemetryInjectedVars = await replaceTelemetryInjectedVars(
+          originalInjectedVars,
+          request
+        );
         return {
           ...originalInjectedVars,
-          telemetryOptedIn,
+          ...telemetryInjectedVars,
         };
       },
       injectDefaultVars(server: Server) {
@@ -91,20 +96,27 @@ const telemetry = (kibana: any) => {
           telemetryUrl: getXpackConfigWithDeprecated(config, 'telemetry.url'),
           telemetryBanner: getXpackConfigWithDeprecated(config, 'telemetry.banner'),
           telemetryOptedIn: null,
+          telemetryUsageFetcher: config.get('telemetry.usageFetcher'),
         };
       },
       hacks: ['plugins/telemetry/hacks/telemetry_init', 'plugins/telemetry/hacks/telemetry_opt_in'],
       mappings,
     },
-    init(server: Server) {
+    init(server: Server, kibanaConfig: any) {
       const initializerContext = {} as PluginInitializerContext;
 
       const coreSetup = ({
         http: { server },
         log: server.log,
       } as any) as CoreSetup;
+      // const coreStart = {
+      //   savedObjects: server.savedObjects,
+      // }
+      const npTelemetryPlugin = telemetryPlugin(initializerContext);
+      npTelemetryPlugin.setup(coreSetup);
 
-      telemetryPlugin(initializerContext).setup(coreSetup);
+      const fetcherTask = new FetcherTask(server, kibanaConfig);
+      fetcherTask.start();
 
       // register collectors
       server.usage.collectorSet.register(createLocalizationUsageCollector(server));

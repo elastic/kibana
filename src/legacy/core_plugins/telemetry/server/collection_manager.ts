@@ -17,12 +17,55 @@
  * under the License.
  */
 
-class TelemetryCollectionManager {
-  private getterMethod?: any;
+import { encryptTelemetry } from './collectors';
+
+export type EncryptedStatsGetterConfig = { unencrypted: false } & {
+  server: any;
+  start: any;
+  end: any;
+  isDev: boolean;
+};
+
+export type UnencryptedStatsGetterConfig = { unencrypted: true } & {
+  req: any;
+  start: any;
+  end: any;
+  isDev: boolean;
+};
+
+export interface StatsCollectionConfig {
+  callCluster: any;
+  server: any;
+  start: any;
+  end: any;
+}
+
+export type StatsGetterConfig = UnencryptedStatsGetterConfig | EncryptedStatsGetterConfig;
+
+export type StatsGetter = (config: StatsGetterConfig) => Promise<any[]>;
+
+export const getStatsGetterConfig = (
+  config: StatsGetterConfig,
+  esClutser: string
+): StatsCollectionConfig => {
+  const { start, end } = config;
+  const server = config.unencrypted ? config.req.server : config.server;
+  const { callWithRequest, callWithInternalUser } = server.plugins.elasticsearch.getCluster(
+    esClutser
+  );
+  const callCluster = config.unencrypted
+    ? (...args: any[]) => callWithRequest(config.req, ...args)
+    : callWithInternalUser;
+
+  return { server, callCluster, start, end };
+};
+
+export class TelemetryCollectionManager {
+  private getterMethod?: StatsGetter;
   private collectionTitle?: string;
   private getterMethodPriority = 0;
 
-  public setStatsGetter = (statsGetter: any, title: string, priority = 0) => {
+  public setStatsGetter = (statsGetter: StatsGetter, title: string, priority = 0) => {
     if (priority >= this.getterMethodPriority) {
       this.getterMethod = statsGetter;
       this.collectionTitle = title;
@@ -30,7 +73,16 @@ class TelemetryCollectionManager {
     }
   };
 
-  getCollectionTitle = () => {
+  private getStats = async (config: StatsGetterConfig) => {
+    if (!this.getterMethod) {
+      throw Error('Stats getter method not set.');
+    }
+    const usageData = await this.getterMethod(config);
+
+    if (config.unencrypted) return usageData;
+    return encryptTelemetry(usageData, config.isDev);
+  };
+  public getCollectionTitle = () => {
     return this.collectionTitle;
   };
 
@@ -39,7 +91,7 @@ class TelemetryCollectionManager {
       throw Error('Stats getter method not set.');
     }
     return {
-      getStats: this.getterMethod,
+      getStats: this.getStats,
       priority: this.getterMethodPriority,
       title: this.collectionTitle,
     };

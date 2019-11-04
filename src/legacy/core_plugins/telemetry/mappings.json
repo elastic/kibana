@@ -3,6 +3,13 @@
     "properties": {
       "enabled": {
         "type": "boolean"
+      },
+      "usageFetcher": {
+        "ignore_above": 256,
+        "type": "keyword"
+      },
+      "lastReported": {
+        "type": "date"
       }
     }
   }

@@ -17,12 +17,21 @@
  * under the License.
  */
 
-// @ts-ignore
-import { getLocalStats } from './get_local_stats';
-import { StatsGetter, getStatsGetterConfig } from '../collection_manager';
+export async function getTelemetrySavedObject(savedObjectsClient: any) {
+  try {
+    const { attributes } = await savedObjectsClient.get('telemetry', 'telemetry');
+    return attributes;
+  } catch (error) {
+    if (savedObjectsClient.errors.isNotFoundError(error)) {
+      return null;
+    }
 
-export const getStats: StatsGetter = async function(config) {
-  const { callCluster, server } = getStatsGetterConfig(config, 'data');
+    // if we aren't allowed to get the telemetry document, we can assume that we won't
+    // be able to opt into telemetry either, so we're returning `false` here instead of null
+    if (savedObjectsClient.errors.isForbiddenError(error)) {
+      return false;
+    }
 
-  return [await getLocalStats({ callCluster, server })];
-};
+    throw error;
+  }
+}
