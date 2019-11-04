@@ -12,7 +12,7 @@ import {
 } from '../../common/constants';
 import { Logger } from 'src/core/server';
 import { AlertServices } from '../../../alerting/server/types';
-import { SavedObjectsClientMock } from 'src/core/server/mocks';
+import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { AlertInstance } from '../../../alerting/server/lib';
 import { AlertState } from './types';
 import { SavedObject, SavedObjectAttributes } from 'src/core/server';
@@ -65,7 +65,7 @@ describe('getLicenseExpiration', () => {
     const services: MockServices | AlertServices = {
       callCluster: jest.fn(),
       alertInstanceFactory: jest.fn(),
-      savedObjectsClient: SavedObjectsClientMock.create(),
+      savedObjectsClient: savedObjectsClientMock.create(),
     };
     const params = {
       clusterUuid: '1abd45',
@@ -106,7 +106,7 @@ describe('getLicenseExpiration', () => {
         }
       ),
       alertInstanceFactory: jest.fn(),
-      savedObjectsClient: SavedObjectsClientMock.create(),
+      savedObjectsClient: savedObjectsClientMock.create(),
     };
 
     const params = {
@@ -141,7 +141,7 @@ describe('getLicenseExpiration', () => {
     const emailAddress = 'foo@foo.com';
     const alert = getLicenseExpiration(getMonitoringCluster, getLogger);
 
-    const savedObjectsClient = SavedObjectsClientMock.create();
+    const savedObjectsClient = savedObjectsClientMock.create();
     savedObjectsClient.get.mockReturnValue(
       new Promise(resolve => {
         const savedObject: SavedObject<SavedObjectAttributes> = {
@@ -211,7 +211,7 @@ describe('getLicenseExpiration', () => {
     const emailAddress = 'foo@foo.com';
     const alert = getLicenseExpiration(getMonitoringCluster, getLogger);
 
-    const savedObjectsClient = SavedObjectsClientMock.create();
+    const savedObjectsClient = savedObjectsClientMock.create();
     savedObjectsClient.get.mockReturnValue(
       new Promise(resolve => {
         const savedObject: SavedObject<SavedObjectAttributes> = {
@@ -285,7 +285,7 @@ describe('getLicenseExpiration', () => {
     const emailAddress = 'foo@foo.com';
     const alert = getLicenseExpiration(getMonitoringCluster, getLogger);
 
-    const savedObjectsClient = SavedObjectsClientMock.create();
+    const savedObjectsClient = savedObjectsClientMock.create();
     savedObjectsClient.get.mockReturnValue(
       new Promise(resolve => {
         const savedObject: SavedObject<SavedObjectAttributes> = {
@@ -350,7 +350,7 @@ describe('getLicenseExpiration', () => {
     const emailAddress = 'foo@foo.com';
     const alert = getLicenseExpiration(getMonitoringCluster, getLogger);
 
-    const savedObjectsClient = SavedObjectsClientMock.create();
+    const savedObjectsClient = savedObjectsClientMock.create();
     savedObjectsClient.get.mockReturnValue(
       new Promise(resolve => {
         const savedObject: SavedObject<SavedObjectAttributes> = {
