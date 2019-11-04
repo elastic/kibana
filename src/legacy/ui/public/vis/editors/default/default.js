@@ -37,7 +37,7 @@ import { AggGroupNames } from './agg_groups';
 
 import { start as embeddables } from '../../../../../core_plugins/embeddable_api/public/np_ready/public/legacy';
 
-const defaultEditor = function ($rootScope, $compile, getAppState) {
+const defaultEditor = function ($rootScope, $compile) {
   return class DefaultEditor {
     static key = 'default';
 
@@ -57,7 +57,7 @@ const defaultEditor = function ($rootScope, $compile, getAppState) {
       }
     }
 
-    render({ uiState, timeRange, filters, query }) {
+    render({ uiState, timeRange, filters, query, appState }) {
       let $scope;
 
       const updateScope = () => {
@@ -160,7 +160,7 @@ const defaultEditor = function ($rootScope, $compile, getAppState) {
 
           this._handler = await embeddables.getEmbeddableFactory('visualization').createFromObject(this.savedObj, {
             uiState: uiState,
-            appState: getAppState(),
+            appState,
             timeRange: timeRange,
             filters: filters || [],
             query: query,
