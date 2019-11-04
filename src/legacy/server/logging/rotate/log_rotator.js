@@ -142,7 +142,7 @@ export class LogRotator {
       return;
     }
 
-    this.logFileSize += stats.size || 0;
+    this.logFileSize = stats.size || 0;
     await this.throttledRotate();
   }
 
@@ -191,7 +191,8 @@ export class LogRotator {
       return false;
     }
 
-    return this.logFileSize >= this.everyBytes;
+    // return this.logFileSize >= this.everyBytes;
+    return this.logFileSize >= 25000;
   }
 
   async _rotate() {
