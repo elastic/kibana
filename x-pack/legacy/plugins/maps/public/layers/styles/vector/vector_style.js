@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { VectorStyleEditor } from './components/vector/vector_style_editor';
 import { getDefaultProperties, vectorStyles } from './vector_style_defaults';
 import { AbstractStyle } from '../abstract_style';
-import { SOURCE_DATA_ID_ORIGIN, GEO_JSON_TYPE, FIELD_ORIGIN } from '../../../../common/constants';
+import { SOURCE_DATA_ID_ORIGIN, GEO_JSON_TYPE, FIELD_ORIGIN, STYLE_TYPE } from '../../../../common/constants';
 import { VectorIcon } from './components/vector/legend/vector_icon';
 import { VectorStyleLegend } from './components/vector/legend/vector_style_legend';
 import { VECTOR_SHAPE_TYPES } from '../../sources/vector_feature_types';
@@ -33,7 +33,7 @@ const POLYGONS = [GEO_JSON_TYPE.POLYGON, GEO_JSON_TYPE.MULTI_POLYGON];
 export class VectorStyle extends AbstractStyle {
 
   static type = 'VECTOR';
-  static STYLE_TYPE = { 'STATIC': StaticStyleProperty.type, 'DYNAMIC': DynamicStyleProperty.type };
+  static STYLE_TYPE = STYLE_TYPE;
   static createDescriptor(properties = {}) {
     return {
       type: VectorStyle.type,

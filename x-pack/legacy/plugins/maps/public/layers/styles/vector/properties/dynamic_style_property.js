@@ -6,9 +6,10 @@
 
 
 import { AbstractStyleProperty } from './style_property';
+import { STYLE_TYPE } from '../../../../../common/constants';
 
 export class DynamicStyleProperty extends AbstractStyleProperty {
-    static type = 'DYNAMIC';
+    static type = STYLE_TYPE.DYNAMIC;
 
     constructor(options, styleName, field) {
       super(options, styleName);

@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 export const EMS_CATALOGUE_PATH = 'ems/catalogue';
 
 export const EMS_FILES_CATALOGUE_PATH = 'ems/files';
@@ -113,3 +112,5 @@ export const METRIC_TYPE = {
 };
 
 export const COUNT_AGG_TYPE = 'count';
+
+export const STYLE_TYPE = { 'STATIC': 'STATIC', 'DYNAMIC': 'DYNAMIC' };
