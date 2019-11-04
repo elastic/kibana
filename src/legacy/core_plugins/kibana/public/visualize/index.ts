@@ -31,7 +31,6 @@ import { FeatureCatalogueRegistryProvider } from 'ui/registry/feature_catalogue'
 import { VisEditorTypesRegistryProvider } from 'ui/registry/vis_editor_types';
 import { SavedObjectRegistryProvider, SavedObjectsClientProvider } from 'ui/saved_objects';
 import { ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
-import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing/get_unhashable_states_provider';
 
 import { VisualizePlugin, LegacyAngularInjectedDependencies } from './plugin';
 import { localApplicationService } from '../local_application_service';
@@ -53,7 +52,6 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
   const Private = injector.get<IPrivate>('Private');
 
   const queryFilter = Private(FilterBarQueryFilterProvider);
-  const getUnhashableStates = Private(getUnhashableStatesProvider);
   const shareContextMenuExtensions = Private(ShareContextMenuExtensionsRegistryProvider);
   const savedObjectRegistry = Private(SavedObjectRegistryProvider);
   const savedObjectClient = Private(SavedObjectsClientProvider);
@@ -63,7 +61,6 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
     chromeLegacy: chrome,
     editorTypes,
     config: injector.get('config'),
-    getUnhashableStates,
     queryFilter,
     savedObjectClient,
     savedObjectRegistry,

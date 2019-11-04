@@ -49,7 +49,6 @@ export interface LegacyAngularInjectedDependencies {
   chromeLegacy: any;
   editorTypes: any;
   queryFilter: any;
-  getUnhashableStates: any;
   shareContextMenuExtensions: any;
   config: any;
   savedObjectRegistry: any;

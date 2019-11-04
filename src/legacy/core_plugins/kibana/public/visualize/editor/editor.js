@@ -73,6 +73,8 @@ function VisualizeAppController(
   Promise,
   config,
   kbnBaseUrl,
+  getAppState,
+  globalState,
 ) {
   const {
     angular,
@@ -80,7 +82,6 @@ function VisualizeAppController(
     localStorage,
     queryFilter,
     visualizeCapabilities,
-    getUnhashableStates,
     shareContextMenuExtensions,
     dataStart: {
       timefilter: { timefilter },
@@ -172,6 +173,7 @@ function VisualizeAppController(
     run: (anchorElement) => {
       const hasUnappliedChanges = vis.dirty;
       const hasUnsavedChanges = $appStatus.dirty;
+      const getUnhashableStates = () => [getAppState(), globalState].filter(Boolean);
       showShareContextMenu({
         anchorElement,
         allowEmbed: true,
