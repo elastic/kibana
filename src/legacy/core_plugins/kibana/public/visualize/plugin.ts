@@ -138,15 +138,8 @@ export class VisualizePlugin implements Plugin {
     localApplicationService.register({ ...app, id: 'visualize' });
     VisEditorTypesRegistryProvider.register(defaultEditor);
 
-    const createVisualizeEmbeddableFactory: () => Promise<
-      VisualizeEmbeddableFactory
-    > = async () => {
-      return new VisualizeEmbeddableFactory(visualizationsSetup.types);
-    };
-
-    await createVisualizeEmbeddableFactory().then((embeddableFactory: any) => {
-      embeddableSetup.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
-    });
+    const embeddableFactory = new VisualizeEmbeddableFactory(visualizationsSetup.types);
+    embeddableSetup.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
   }
 
   start(
