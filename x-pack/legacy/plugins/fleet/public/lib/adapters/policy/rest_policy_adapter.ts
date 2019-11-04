@@ -15,6 +15,14 @@ export class RestPolicyAdapter extends PolicyAdapter {
     super([]);
   }
 
+  public async get(id: string): Promise<Policy | null> {
+    try {
+      return await this.REST.get<Policy>(`${POLICIES_SERVER_HOST}/policy/${id}`);
+    } catch (e) {
+      return null;
+    }
+  }
+
   public async getAll() {
     try {
       return await this.REST.get<Policy[]>(`${POLICIES_SERVER_HOST}/policies`);

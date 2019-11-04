@@ -96,7 +96,7 @@ export const PolicyListPage: React.SFC<{}> = () => {
       name: i18n.translate('xpack.fleet.policyList.datasourcesCountColumnTitle', {
         defaultMessage: 'Datasources assigned',
       }),
-      render: (datasources: Policy['datasources']) => (datasources ? datasources.length : '0'),
+      render: (datasources: Policy['datasources']) => (datasources ? datasources.length : 0),
     },
     {
       name: i18n.translate('xpack.fleet.policyList.actionsColumnTitle', {

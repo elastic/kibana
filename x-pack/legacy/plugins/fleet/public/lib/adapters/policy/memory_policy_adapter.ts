@@ -12,6 +12,10 @@ export class PolicyAdapter {
     this.memoryDB = db;
   }
 
+  public async get(id: string) {
+    return this.memoryDB.find(policy => policy.id === id) || null;
+  }
+
   public async getAll(): Promise<Policy[]> {
     return this.memoryDB;
   }

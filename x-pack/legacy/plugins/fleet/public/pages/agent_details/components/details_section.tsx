@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Agent } from '../../../../common/types/domain_data';
+import { ConnectedLink } from '../../../components/navigation/connected_link';
 import { AgentHealth } from '../../../components/agent_health';
 import { AgentUnenrollProvider } from '../../../components/agent_unenroll_provider';
 import { AgentMetadataFlyout } from './metadata_flyout';
@@ -76,13 +77,9 @@ export const AgentDetailSection: SFC<Props> = ({ agent }) => {
         defaultMessage: 'Policy',
       }),
       description: (
-        <EuiLink color="text">
-          <FormattedMessage
-            id="xpack.fleet.agentDetails.policyLink"
-            defaultMessage="{policy} (view)"
-            values={{ policy: agent.policy_id }}
-          />
-        </EuiLink>
+        <ConnectedLink color="primary" path={`/policies/${agent.policy_id}`}>
+          {agent.policy_id}
+        </ConnectedLink>
       ),
     },
   ];

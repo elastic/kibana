@@ -10,6 +10,14 @@ import { PolicyAdapter } from './adapters/policy/memory_policy_adapter';
 export class PoliciesLib {
   constructor(private readonly adapter: PolicyAdapter) {}
 
+  /**
+   * Get a policy by id
+   * @param id
+   */
+  public async get(id: string): Promise<Policy | null> {
+    return await this.adapter.get(id);
+  }
+
   /** Get an array of all policies */
   public getAll = async (): Promise<Policy[]> => {
     return await this.adapter.getAll();
