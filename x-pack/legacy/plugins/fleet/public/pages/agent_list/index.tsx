@@ -20,6 +20,10 @@ import {
   EuiSearchBar,
   EuiLink,
   EuiSwitch,
+  EuiFilterGroup,
+  EuiPopover,
+  EuiFilterSelectItem,
+  EuiFilterButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -48,6 +52,22 @@ export const AgentListPage: React.SFC<{}> = () => {
   const [selectedAgents, setSelectedAgents] = useState<Agent[]>([]);
   const [areAllAgentsSelected, setAreAllAgentsSelected] = useState<boolean>(false);
 
+  // Policies state (for filtering)
+  const [policies, setPolicies] = useState<any[]>([]);
+  const [isPoliciesLoading, setIsPoliciesLoading] = useState<boolean>(false);
+  const [isPoliciesFilterOpen, setIsPoliciesFilterOpen] = useState<boolean>(false);
+  const [selectedPolicies, setSelectedPolicies] = useState<string[]>([]);
+
+  // Add a policy id to current search
+  const addPolicyFilter = (policyId: string) => {
+    setSelectedPolicies([...selectedPolicies, policyId]);
+  };
+
+  // Remove a policy id from current search
+  const removePolicyFilter = (policyId: string) => {
+    setSelectedPolicies(selectedPolicies.filter(policy => policy !== policyId));
+  };
+
   // Agent enrollment flyout state
   const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState<boolean>(false);
 
@@ -55,27 +75,50 @@ export const AgentListPage: React.SFC<{}> = () => {
   const fetchAgents = async () => {
     setIsLoading(true);
     setLastPolledAgentsMs(new Date().getTime());
+
+    // Build kuery from current search and policy filter states
+    let kuery = search.trim();
+    if (selectedPolicies.length) {
+      if (kuery) {
+        kuery = `(${kuery}) and`;
+      }
+      kuery = `${kuery} agents.policy_id : (${selectedPolicies
+        .map(policy => `"${policy}"`)
+        .join(' or ')})`;
+    }
+
     const { list, total } = await libs.agents.getAll(
       pagination.currentPage,
       pagination.pageSize,
-      search,
+      kuery,
       showInactive
     );
+
     setAgents(list);
     setTotalAgents(total);
     setIsLoading(false);
   };
 
+  // Fetch policies method
+  const fetchPolicies = async () => {
+    setIsPoliciesLoading(true);
+    setPolicies(await libs.policies.getAll());
+    setIsPoliciesLoading(false);
+  };
+
   // Load initial list of agents
   useEffect(() => {
     fetchAgents();
+    fetchPolicies();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showInactive]);
 
-  // Update agents if pagination or query state changes
+  // Update agents if pagination, query, or policy filter state changes
   useEffect(() => {
     fetchAgents();
     setAreAllAgentsSelected(false);
-  }, [pagination, search]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pagination, search, selectedPolicies]);
 
   // Poll for agents on interval
   useInterval(() => {
@@ -272,17 +315,60 @@ export const AgentListPage: React.SFC<{}> = () => {
             </EuiFlexItem>
           ) : null}
           <EuiFlexItem grow={4}>
-            <SearchBar
-              value={search}
-              onChange={newSearch => {
-                setPagination({
-                  ...pagination,
-                  currentPage: 1,
-                });
-                setSearch(newSearch);
-              }}
-              fieldPrefix="agents"
-            />
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem grow={3}>
+                <SearchBar
+                  value={search}
+                  onChange={newSearch => {
+                    setPagination({
+                      ...pagination,
+                      currentPage: 1,
+                    });
+                    setSearch(newSearch);
+                  }}
+                  fieldPrefix="agents"
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={1}>
+                <EuiFilterGroup>
+                  <EuiPopover
+                    ownFocus
+                    button={
+                      <EuiFilterButton
+                        iconType="arrowDown"
+                        onClick={() => setIsPoliciesFilterOpen(!isPoliciesFilterOpen)}
+                        isSelected={isPoliciesFilterOpen}
+                        hasActiveFilters={selectedPolicies.length > 0}
+                        disabled={isPoliciesLoading}
+                      >
+                        Policies
+                      </EuiFilterButton>
+                    }
+                    isOpen={isPoliciesFilterOpen}
+                    closePopover={() => setIsPoliciesFilterOpen(false)}
+                    panelPaddingSize="none"
+                  >
+                    <div className="euiFilterSelect__items">
+                      {policies.map((policy, index) => (
+                        <EuiFilterSelectItem
+                          checked={selectedPolicies.includes(policy.id) ? 'on' : undefined}
+                          key={index}
+                          onClick={() => {
+                            if (selectedPolicies.includes(policy.id)) {
+                              removePolicyFilter(policy.id);
+                            } else {
+                              addPolicyFilter(policy.id);
+                            }
+                          }}
+                        >
+                          {policy.name}
+                        </EuiFilterSelectItem>
+                      ))}
+                    </div>
+                  </EuiPopover>
+                </EuiFilterGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
           {libs.framework.capabilities.write && (
             <EuiFlexItem grow={false}>
@@ -305,15 +391,29 @@ export const AgentListPage: React.SFC<{}> = () => {
           className="fleet__agentList__table"
           loading={isLoading}
           noItemsMessage={
-            isLoading
-              ? i18n.translate('xpack.fleet.agentList.loadingAgentsMessage', {
-                  defaultMessage: 'Loading agents…',
-                })
-              : !search.trim() && totalAgents === 0
-              ? emptyPrompt
-              : i18n.translate('xpack.fleet.agentList.noFilteredAgentsPrompt', {
-                  defaultMessage: 'No agents found',
-                })
+            isLoading ? (
+              <FormattedMessage
+                id="xpack.fleet.agentList.loadingAgentsMessage"
+                defaultMessage="Loading agents…"
+              />
+            ) : !search.trim() && selectedPolicies.length === 0 && totalAgents === 0 ? (
+              emptyPrompt
+            ) : (
+              <FormattedMessage
+                id="xpack.fleet.agentList.noFilteredAgentsPrompt"
+                defaultMessage="No agents found. {clearFiltersLink}"
+                values={{
+                  clearFiltersLink: (
+                    <EuiLink onClick={() => setSearch('')}>
+                      <FormattedMessage
+                        id="xpack.fleet.agentList.clearFiltersLinkText"
+                        defaultMessage="Clear filters"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            )
           }
           items={totalAgents ? agents : []}
           itemId="id"

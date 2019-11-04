@@ -11,7 +11,7 @@ run(
   async ({ log }) => {
     const specPath = resolve(__dirname, 'openapi.json');
     const prismPath = resolve(__dirname, '../../node_modules/.bin/prism');
-    const prismProc = spawn(prismPath, ['mock', specPath]);
+    const prismProc = spawn(prismPath, ['mock', specPath, '--cors=false']);
 
     prismProc.stdout.on('data', data => {
       process.stdout.write(data);

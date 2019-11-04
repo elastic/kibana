@@ -86,10 +86,10 @@ export const AgentDetailsPage: SFC<Props> = ({
             <EuiFlexItem grow={null}>
               <EuiHorizontalRule />
             </EuiFlexItem>
-            <EuiFlexItem grow={null}></EuiFlexItem>
+            <EuiFlexItem grow={null} />
           </EuiFlexItem>
           <EuiFlexItem grow={7}>
-            <EuiFlexItem grow={null}></EuiFlexItem>
+            <EuiFlexItem grow={null} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </Layout>

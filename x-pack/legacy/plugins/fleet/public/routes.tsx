@@ -28,6 +28,7 @@ function useWaitUntilFrameworkReady() {
 
   useEffect(() => {
     waitUntilReady();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return { isLoading };

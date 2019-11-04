@@ -21,10 +21,12 @@
   },
   "properties": {
     "id": {
-      "type": "string"
+      "type": "string",
+      "example": "policy_example"
     },
     "name": {
-      "type": "string"
+      "type": "string",
+      "example": "Example Policy"
     },
     "datasources": {
       "type": "array",

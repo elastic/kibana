@@ -42,6 +42,7 @@ export function useGetAgent(id: string) {
   };
   useEffect(() => {
     fetchAgent();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   return {
