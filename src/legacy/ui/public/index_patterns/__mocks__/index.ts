@@ -45,6 +45,6 @@ export {
   IndexPatternMissingIndices,
   NoDefaultIndexPattern,
   NoDefinedIndexPatterns,
-  mockFields,
-  mockIndexPattern,
+  stubFields,
+  stubIndexPattern,
 } from '../../../../core_plugins/data/public';

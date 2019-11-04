@@ -23,16 +23,17 @@ import {
   HttpServiceBase,
   NotificationsStart,
 } from 'src/core/public';
-import { Field, FieldList, FieldListInterface, FieldType } from './fields';
-import { createFlattenHitWrapper } from './index_patterns';
+import { Field, FieldList, FieldListInterface, FieldType, stubFields } from './fields';
 import { createIndexPatternSelect } from './components';
 import { setNotifications } from './services';
 
 import {
+  createFlattenHitWrapper,
   formatHitProvider,
   IndexPattern,
   IndexPatterns,
   StaticIndexPattern,
+  stubIndexPattern,
 } from './index_patterns';
 
 export interface IndexPatternDependencies {
@@ -92,8 +93,6 @@ export {
   INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
   isFilterable,
   validateIndexPattern,
-  mockFields,
-  mockIndexPattern,
 } from './utils';
 
 /** @public */
@@ -111,7 +110,16 @@ export type IndexPatternsSetup = ReturnType<IndexPatternsService['setup']>;
 export type IndexPatternsStart = ReturnType<IndexPatternsService['start']>;
 
 /** @public */
-export { IndexPattern, IndexPatterns, StaticIndexPattern, Field, FieldType, FieldListInterface };
+export {
+  IndexPattern,
+  IndexPatterns,
+  StaticIndexPattern,
+  Field,
+  FieldType,
+  FieldListInterface,
+  stubFields,
+  stubIndexPattern,
+};
 
 /** @public */
 export { getIndexPatternTitle, findIndexPatternByTitle } from './utils';

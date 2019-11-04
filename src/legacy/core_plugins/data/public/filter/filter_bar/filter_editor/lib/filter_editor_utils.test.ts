@@ -18,7 +18,7 @@
  */
 
 import { FilterStateStore, toggleFilterNegated } from '@kbn/es-query';
-import { mockFields, mockIndexPattern } from '../../../../index_patterns';
+import { stubIndexPattern, stubFields } from '../../../../index_patterns';
 import { IndexPattern, Field } from '../../../../index';
 import {
   buildFilter,
@@ -45,8 +45,8 @@ import { rangeFilter } from './fixtures/range_filter';
 
 jest.mock('ui/new_platform');
 
-const mockedFields = mockFields as Field[];
-const mockedIndexPattern = mockIndexPattern as IndexPattern;
+const mockedFields = stubFields as Field[];
+const mockedIndexPattern = stubIndexPattern as IndexPattern;
 
 describe('Filter editor utils', () => {
   describe('getQueryDslFromFilter', () => {
@@ -171,14 +171,14 @@ describe('Filter editor utils', () => {
 
   describe('getOperatorOptions', () => {
     it('returns range for number fields', () => {
-      const [field] = mockFields.filter(({ type }) => type === 'number');
+      const [field] = stubFields.filter(({ type }) => type === 'number');
       const operatorOptions = getOperatorOptions(field as Field);
       const rangeOperator = operatorOptions.find(operator => operator.type === 'range');
       expect(rangeOperator).not.toBeUndefined();
     });
 
     it('does not return range for string fields', () => {
-      const [field] = mockFields.filter(({ type }) => type === 'string');
+      const [field] = stubFields.filter(({ type }) => type === 'string');
       const operatorOptions = getOperatorOptions(field as Field);
       const rangeOperator = operatorOptions.find(operator => operator.type === 'range');
       expect(rangeOperator).toBeUndefined();
