@@ -27,6 +27,7 @@ import {
   OwnershipClaimingOpts,
   ClaimOwnershipResult,
 } from './task_store';
+import { identifyEsError } from './lib/identify_es_error';
 
 export interface TaskManagerOpts {
   logger: Logger;
@@ -259,20 +260,31 @@ export async function claimAvailableTasks(
   logger: Logger
 ) {
   if (availableWorkers > 0) {
-    const { docs, claimedTasks } = await claim({
-      size: availableWorkers,
-      claimOwnershipUntil: intervalFromNow('30s')!,
-    });
+    try {
+      const { docs, claimedTasks } = await claim({
+        size: availableWorkers,
+        claimOwnershipUntil: intervalFromNow('30s')!,
+      });
 
-    if (docs.length !== claimedTasks) {
-      logger.warn(
-        `[Task Ownership error]: (${claimedTasks}) tasks were claimed by Kibana, but (${docs.length}) tasks were fetched`
-      );
+      if (docs.length !== claimedTasks) {
+        logger.warn(
+          `[Task Ownership error]: (${claimedTasks}) tasks were claimed by Kibana, but (${docs.length}) tasks were fetched`
+        );
+      }
+      return docs;
+    } catch (ex) {
+      if (identifyEsError(ex).includes('cannot execute [inline] scripts')) {
+        logger.warn(
+          `Task Manager cannot operate when inline scripts are disabled in Elasticsearch`
+        );
+      } else {
+        throw ex;
+      }
     }
-    return docs;
+  } else {
+    logger.info(
+      `[Task Ownership]: Task Manager has skipped Claiming Ownership of available tasks at it has ran out Available Workers. If this happens often, consider adjusting the "xpack.task_manager.max_workers" configuration.`
+    );
   }
-  logger.info(
-    `[Task Ownership]: Task Manager has skipped Claiming Ownership of available tasks at it has ran out Available Workers. If this happens often, consider adjusting the "xpack.task_manager.max_workers" configuration.`
-  );
   return [];
 }
