@@ -19,10 +19,10 @@
 
 // @ts-ignore
 import { getLocalStats } from './get_local_stats';
-import { StatsGetter, getStatsGetterConfig } from '../collection_manager';
+import { StatsGetter, getStatsCollectionConfig } from '../collection_manager';
 
 export const getStats: StatsGetter = async function(config) {
-  const { callCluster, server } = getStatsGetterConfig(config, 'data');
+  const { callCluster, server } = getStatsCollectionConfig(config, 'data');
 
   return [await getLocalStats({ callCluster, server })];
 };

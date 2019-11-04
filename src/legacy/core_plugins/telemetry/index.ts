@@ -109,11 +109,8 @@ const telemetry = (kibana: any) => {
         http: { server },
         log: server.log,
       } as any) as CoreSetup;
-      // const coreStart = {
-      //   savedObjects: server.savedObjects,
-      // }
-      const npTelemetryPlugin = telemetryPlugin(initializerContext);
-      npTelemetryPlugin.setup(coreSetup);
+
+      telemetryPlugin(initializerContext).setup(coreSetup);
 
       const fetcherTask = new FetcherTask(server, kibanaConfig);
       fetcherTask.start();

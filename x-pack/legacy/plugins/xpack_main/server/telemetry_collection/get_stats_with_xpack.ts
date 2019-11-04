@@ -9,11 +9,11 @@ import { getXPack } from './get_xpack';
 import { getLocalStats } from '../../../../../../src/legacy/core_plugins/telemetry/server/telemetry_collection';
 import {
   StatsGetter,
-  getStatsGetterConfig,
+  getStatsCollectionConfig,
 } from '../../../../../../src/legacy/core_plugins/telemetry/server/collection_manager';
 
 export const getStatsWithXpack: StatsGetter = async function(config) {
-  const { server, callCluster } = getStatsGetterConfig(config, 'data');
+  const { server, callCluster } = getStatsCollectionConfig(config, 'data');
 
   const localStats = await getLocalStats({ server, callCluster });
   const { license, xpack } = await getXPack(callCluster);

@@ -44,7 +44,7 @@ export type StatsGetterConfig = UnencryptedStatsGetterConfig | EncryptedStatsGet
 
 export type StatsGetter = (config: StatsGetterConfig) => Promise<any[]>;
 
-export const getStatsGetterConfig = (
+export const getStatsCollectionConfig = (
   config: StatsGetterConfig,
   esClutser: string
 ): StatsCollectionConfig => {

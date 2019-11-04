@@ -9,12 +9,12 @@ import { getAllStats } from './get_all_stats';
 import { getStatsWithXpack } from '../../../xpack_main/server/telemetry_collection';
 import {
   StatsGetter,
-  getStatsGetterConfig,
+  getStatsCollectionConfig,
 } from '../../../../../../src/legacy/core_plugins/telemetry/server/collection_manager';
 
 export const getStatsWithMonitoring: StatsGetter = async function(config) {
   let response = [];
-  const { start, end, server, callCluster } = getStatsGetterConfig(config, 'monitoring');
+  const { start, end, server, callCluster } = getStatsCollectionConfig(config, 'monitoring');
 
   try {
     response = await getAllStats({ server, callCluster, start, end });

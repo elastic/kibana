@@ -21,7 +21,11 @@ import moment from 'moment';
 import fetch from 'node-fetch';
 import { telemetryCollectionManager } from './collection_manager';
 import { REPORT_INTERVAL_MS } from '../common/constants';
-// @ts-ignore
+
+interface TelemetrySavedConfigs {
+  enabled?: null | boolean;
+  usageFetcher?: 'string';
+}
 
 export class FetcherTask {
   private readonly checkDuration = 60000;
@@ -45,7 +49,7 @@ export class FetcherTask {
 
   private getCurrentConfigs = async () => {
     const internalRepository = this.getInternalRepository();
-    let telemetrySavedConfigs = {};
+    let telemetrySavedConfigs: TelemetrySavedConfigs = {};
     try {
       const telemetrySavedObject = await internalRepository.get('telemetry', 'telemetry');
       telemetrySavedConfigs = telemetrySavedObject.attributes;
@@ -62,7 +66,7 @@ export class FetcherTask {
       telemetryUsageFetcher:
         typeof telemetrySavedConfigs.usageFetcher === 'undefined'
           ? this.serverConfigs.usageFetcher
-          : telemetrySavedObject.usageFetcher,
+          : telemetrySavedConfigs.usageFetcher,
       telemetryUrl: this.serverConfigs.url,
     };
   };
@@ -75,7 +79,7 @@ export class FetcherTask {
     });
   };
 
-  private checkReportStatus = ({ telemetryOptIn, telemetryUsageFetcher }) => {
+  private checkReportStatus = ({ telemetryOptIn, telemetryUsageFetcher }: any) => {
     if (telemetryOptIn && telemetryUsageFetcher === 'server') {
       if (!this.lastReported || Date.now() - this.lastReported > REPORT_INTERVAL_MS) {
         return true;
