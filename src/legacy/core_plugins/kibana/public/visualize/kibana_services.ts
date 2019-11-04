@@ -62,18 +62,13 @@ export interface VisualizeKibanaServices {
 
 let services: VisualizeKibanaServices | null = null;
 export function setServices(newServices: VisualizeKibanaServices) {
-  if (services) {
-    throw new Error(
-      'Kibana services already set - are you trying to import this module from outside of the home app?'
-    );
-  }
   services = newServices;
 }
 
 export function getServices() {
   if (!services) {
     throw new Error(
-      'Kibana services not set - are you trying to import this module from outside of the home app?'
+      'Kibana services not set - are you trying to import this module from outside of the visualize app?'
     );
   }
   return services;
