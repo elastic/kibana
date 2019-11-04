@@ -42,9 +42,14 @@ describe('registerTimefilterWithGlobalState()', () => {
       }
     };
 
+    const rootScope = {
+      $on: jest.fn()
+    };
+
     registerTimefilterWithGlobalState(
       timefilter,
-      globalState
+      globalState,
+      rootScope,
     );
 
     expect(setTime.mock.calls.length).toBe(2);
