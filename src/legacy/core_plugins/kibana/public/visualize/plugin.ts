@@ -46,6 +46,7 @@ import { VisualizeConstants } from './visualize_constants';
 import { setServices, VisualizeKibanaServices, DocTitle } from './kibana_services';
 
 export interface LegacyAngularInjectedDependencies {
+  chromeLegacy: any;
   editorTypes: any;
   queryFilter: any;
   getUnhashableStates: any;

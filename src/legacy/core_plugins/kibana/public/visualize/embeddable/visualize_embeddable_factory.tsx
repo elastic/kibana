@@ -118,7 +118,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
 
       const editUrl = visId ? addBasePath(`/app/kibana${savedVisualizations.urlFor(visId)}`) : '';
       const loader = await getVisualizeLoader();
-      const isLabsEnabled = config.get('visualize:enableLabs');
+      const isLabsEnabled = config.get<boolean>('visualize:enableLabs');
 
       if (!isLabsEnabled && savedObject.vis.type.stage === 'experimental') {
         return new DisabledLabEmbeddable(savedObject.title, input);

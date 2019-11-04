@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import 'angular-sanitize'; // used in visualization_editor.js and visualization.js
+import 'angular-sanitize';
 import 'ui/collapsible_sidebar'; // used in default editor
 import 'ui/vis/editors/default/sidebar';
 
@@ -60,6 +60,7 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
   const editorTypes = Private(VisEditorTypesRegistryProvider);
 
   return {
+    chromeLegacy: chrome,
     editorTypes,
     config: injector.get('config'),
     getUnhashableStates,

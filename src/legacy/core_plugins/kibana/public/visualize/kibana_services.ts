@@ -39,8 +39,9 @@ export interface VisualizeKibanaServices {
   addBasePath: (url: string) => string;
   angular: any;
   chrome: ChromeStart;
+  chromeLegacy: any;
   core: LegacyCoreStart;
-  config: any;
+  config: UiSettingsClientContract;
   dataStart: any;
   docLinks: DocLinksStart;
   embeddables: ReturnType<EmbeddablePublicPlugin['start']>;
