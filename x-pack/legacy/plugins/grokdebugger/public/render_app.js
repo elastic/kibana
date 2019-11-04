@@ -9,7 +9,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 
 import { GrokDebugger } from './components/grok_debugger';
 import { GrokdebuggerService } from './services/grokdebugger/grokdebugger_service';
-import { I18nProvider } from '@kbn/i18n/src/react';
+import { I18nProvider } from '@kbn/i18n/react';
 
 export function renderApp(element, npStart) {
   render(
