@@ -21,7 +21,7 @@ import { useRef, useEffect, useState } from 'react';
 import React from 'react';
 import classNames from 'classnames';
 import { EuiLoadingChart, EuiProgress } from '@elastic/eui';
-import { ExpressionAST, IExpressionLoaderParams, IInterpreterErrorResult } from './types';
+import { ExpressionAST, IExpressionLoaderParams } from './types';
 import { ExpressionLoader } from './loader';
 
 // Accept all options of the runner as props except for the
@@ -35,7 +35,7 @@ export interface ExpressionRendererProps extends IExpressionLoaderParams {
 interface State {
   isEmpty: boolean;
   isLoading: boolean;
-  error: null | Error;
+  error: null | { message: string };
 }
 
 export type ExpressionRenderer = React.FC<ExpressionRendererProps>;
@@ -57,6 +57,7 @@ export const ExpressionRendererImplementation = ({
   const [state, setState] = useState<State>({ ...defaultState });
 
   // Re-fetch data automatically when the inputs change
+  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     if (handlerRef.current) {
       handlerRef.current.update(expression, options);
@@ -68,6 +69,7 @@ export const ExpressionRendererImplementation = ({
     options.variables,
     options.disableCaching,
   ]);
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   // Initialize the loader only once
   useEffect(() => {
@@ -80,7 +82,7 @@ export const ExpressionRendererImplementation = ({
         }
         setState(prevState => ({ ...prevState, isLoading: true }));
       });
-      handlerRef.current.render$.subscribe((item: number | IInterpreterErrorResult) => {
+      handlerRef.current.render$.subscribe(item => {
         if (!handlerRef.current) {
           return;
         }

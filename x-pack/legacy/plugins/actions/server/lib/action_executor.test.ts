@@ -8,7 +8,7 @@ import Hapi from 'hapi';
 import { schema } from '@kbn/config-schema';
 import { ActionExecutor } from './action_executor';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
-import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/plugin.mock';
+import { encryptedSavedObjectsMock } from '../../../../../plugins/encrypted_saved_objects/server/mocks';
 import {
   savedObjectsClientMock,
   loggingServiceMock,
@@ -24,7 +24,7 @@ function getServices() {
     callCluster: jest.fn(),
   };
 }
-const encryptedSavedObjectsPlugin = encryptedSavedObjectsMock.create();
+const encryptedSavedObjectsPlugin = encryptedSavedObjectsMock.createStart();
 const actionTypeRegistry = actionTypeRegistryMock.create();
 
 const executeParams = {
