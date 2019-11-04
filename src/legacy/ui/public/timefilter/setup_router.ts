@@ -41,49 +41,58 @@ export function getTimefilterConfig() {
   };
 }
 
+export const registerTimefilterWithGlobalStateFactory = (
+  timefilter: TimefilterContract,
+  globalState: any,
+  $rootScope: IScope
+) => {
+  // settings have to be re-fetched here, to make sure that settings changed by overrideLocalDefault are taken into account.
+  const config = getTimefilterConfig();
+  timefilter.setTime(_.defaults(globalState.time || {}, config.timeDefaults));
+  timefilter.setRefreshInterval(
+    _.defaults(globalState.refreshInterval || {}, config.refreshIntervalDefaults)
+  );
+
+  globalState.on('fetch_with_changes', () => {
+    // clone and default to {} in one
+    const newTime: TimeRange = _.defaults({}, globalState.time, config.timeDefaults);
+    const newRefreshInterval: RefreshInterval = _.defaults(
+      {},
+      globalState.refreshInterval,
+      config.refreshIntervalDefaults
+    );
+
+    if (newTime) {
+      if (newTime.to) newTime.to = convertISO8601(newTime.to);
+      if (newTime.from) newTime.from = convertISO8601(newTime.from);
+    }
+
+    timefilter.setTime(newTime);
+    timefilter.setRefreshInterval(newRefreshInterval);
+  });
+
+  const updateGlobalStateWithTime = () => {
+    globalState.time = timefilter.getTime();
+    globalState.refreshInterval = timefilter.getRefreshInterval();
+    globalState.save();
+  };
+
+  const sub1 = subscribeWithScope($rootScope, timefilter.getRefreshIntervalUpdate$(), {
+    next: updateGlobalStateWithTime,
+  });
+
+  const sub2 = subscribeWithScope($rootScope, timefilter.getTimeUpdate$(), {
+    next: updateGlobalStateWithTime,
+  });
+
+  $rootScope.$on('$destroy', () => {
+    sub1.unsubscribe();
+    sub2.unsubscribe();
+  });
+};
+
 // Currently some parts of Kibana (index patterns, timefilter) rely on addSetupWork in the uiRouter
 // and require it to be executed to properly function.
 // This function is exposed for applications that do not use uiRoutes like APM
 // Kibana issue https://github.com/elastic/kibana/issues/19110 tracks the removal of this dependency on uiRouter
-export const registerTimefilterWithGlobalState = _.once(
-  (timefilter: TimefilterContract, globalState: any, $rootScope: IScope) => {
-    // settings have to be re-fetched here, to make sure that settings changed by overrideLocalDefault are taken into account.
-    const config = getTimefilterConfig();
-    timefilter.setTime(_.defaults(globalState.time || {}, config.timeDefaults));
-    timefilter.setRefreshInterval(
-      _.defaults(globalState.refreshInterval || {}, config.refreshIntervalDefaults)
-    );
-
-    globalState.on('fetch_with_changes', () => {
-      // clone and default to {} in one
-      const newTime: TimeRange = _.defaults({}, globalState.time, config.timeDefaults);
-      const newRefreshInterval: RefreshInterval = _.defaults(
-        {},
-        globalState.refreshInterval,
-        config.refreshIntervalDefaults
-      );
-
-      if (newTime) {
-        if (newTime.to) newTime.to = convertISO8601(newTime.to);
-        if (newTime.from) newTime.from = convertISO8601(newTime.from);
-      }
-
-      timefilter.setTime(newTime);
-      timefilter.setRefreshInterval(newRefreshInterval);
-    });
-
-    const updateGlobalStateWithTime = () => {
-      globalState.time = timefilter.getTime();
-      globalState.refreshInterval = timefilter.getRefreshInterval();
-      globalState.save();
-    };
-
-    subscribeWithScope($rootScope, timefilter.getRefreshIntervalUpdate$(), {
-      next: updateGlobalStateWithTime,
-    });
-
-    subscribeWithScope($rootScope, timefilter.getTimeUpdate$(), {
-      next: updateGlobalStateWithTime,
-    });
-  }
-);
+export const registerTimefilterWithGlobalState = _.once(registerTimefilterWithGlobalStateFactory);

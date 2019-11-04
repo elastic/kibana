@@ -151,10 +151,7 @@ export class DashboardAppController {
 
     // The hash check is so we only update the time filter on dashboard open, not during
     // normal cross app navigation.
-    if (
-      dashboardStateManager.getIsTimeSavedWithDashboard() &&
-      !window.location.hash.includes('_a=')
-    ) {
+    if (dashboardStateManager.getIsTimeSavedWithDashboard() && !globalState.$inheritedGlobalState) {
       dashboardStateManager.syncTimefilterWithDashboard(timefilter);
     }
     $scope.showSaveQuery = dashboardCapabilities.saveQuery as boolean;

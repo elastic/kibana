@@ -55,6 +55,7 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
 (async () => {
   const instance = new DashboardPlugin();
   instance.setup(npSetup.core, {
+    feature_catalogue: npSetup.plugins.feature_catalogue,
     __LEGACY: {
       localApplicationService,
       getAngularDependencies,

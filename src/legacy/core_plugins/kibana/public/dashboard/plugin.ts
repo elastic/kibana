@@ -25,6 +25,7 @@ import {
   Plugin,
   SavedObjectsClientContract,
 } from 'kibana/public';
+import { i18n } from '@kbn/i18n';
 import { RenderDeps } from './render_app';
 import { LocalApplicationService } from '../local_application_service';
 import { DataStart } from '../../../data/public';
@@ -32,6 +33,11 @@ import { DataPublicPluginStart as NpDataStart } from '../../../../../plugins/dat
 import { EmbeddablePublicPlugin } from '../../../../../plugins/embeddable/public';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { NavigationStart } from '../../../navigation/public';
+import { DashboardConstants } from './dashboard_constants';
+import {
+  FeatureCatalogueCategory,
+  FeatureCatalogueSetup,
+} from '../../../../../plugins/feature_catalogue/public';
 
 export interface LegacyAngularInjectedDependencies {
   shareContextMenuExtensions: any;
@@ -54,6 +60,7 @@ export interface DashboardPluginSetupDependencies {
     FeatureCatalogueRegistryProvider: any;
     docTitle: any;
   };
+  feature_catalogue: FeatureCatalogueSetup;
 }
 
 export class DashboardPlugin implements Plugin {
@@ -68,7 +75,13 @@ export class DashboardPlugin implements Plugin {
   public setup(
     core: CoreSetup,
     {
-      __LEGACY: { localApplicationService, getAngularDependencies, ...legacyServices },
+      __LEGACY: {
+        localApplicationService,
+        getAngularDependencies,
+        FeatureCatalogueRegistryProvider,
+        ...legacyServices
+      },
+      feature_catalogue,
     }: DashboardPluginSetupDependencies
   ) {
     const app: App = {
@@ -102,6 +115,7 @@ export class DashboardPlugin implements Plugin {
           embeddables,
           dashboardCapabilities: contextCore.application.capabilities.dashboard,
           localStorage: new Storage(localStorage),
+          sessionStorage: new Storage(sessionStorage),
         };
         const { renderApp } = await import('./render_app');
         return renderApp(params.element, params.appBasePath, deps);
@@ -109,6 +123,20 @@ export class DashboardPlugin implements Plugin {
     };
     localApplicationService.register({ ...app, id: 'dashboard' });
     localApplicationService.register({ ...app, id: 'dashboards' });
+
+    feature_catalogue.register({
+      id: 'dashboard',
+      title: i18n.translate('kbn.dashboard.featureCatalogue.dashboardTitle', {
+        defaultMessage: 'Dashboard',
+      }),
+      description: i18n.translate('kbn.dashboard.featureCatalogue.dashboardDescription', {
+        defaultMessage: 'Display and share a collection of visualizations and saved searches.',
+      }),
+      icon: 'dashboardApp',
+      path: `/app/kibana#${DashboardConstants.LANDING_PAGE_PATH}`,
+      showOnHomePage: true,
+      category: FeatureCatalogueCategory.DATA,
+    });
   }
 
   start(

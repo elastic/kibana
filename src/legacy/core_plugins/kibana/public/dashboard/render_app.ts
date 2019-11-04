@@ -20,6 +20,7 @@
 import { EuiConfirmModal } from '@elastic/eui';
 import angular, { IModule } from 'angular';
 import { IPrivate } from 'ui/private';
+import { State } from 'ui/state_management/state';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 // @ts-ignore
 import { GlobalStateProvider } from 'ui/state_management/global_state';
@@ -81,10 +82,10 @@ export interface RenderDeps {
   uiSettings: UiSettingsClientContract;
   chrome: ChromeStart;
   addBasePath: (path: string) => string;
-  FeatureCatalogueRegistryProvider: any;
   savedQueryService: SavedQueryService;
   embeddables: ReturnType<EmbeddablePublicPlugin['start']>;
   localStorage: Storage;
+  sessionStorage: Storage;
 }
 
 let angularModuleInstance: IModule | null = null;
@@ -98,7 +99,23 @@ export const renderApp = (element: HTMLElement, appBasePath: string, deps: Rende
     initDashboardApp(angularModuleInstance, deps);
   }
   const $injector = mountDashboardApp(appBasePath, element);
-  return () => $injector.get('$rootScope').$destroy();
+  // const hasGlobalURLState = window.location.hash.includes('_g=');
+  // // only inject global state if there is none in the url itself (that takes precedence)
+  // if (!hasGlobalURLState) {
+  //   const globalStateStuff = deps.sessionStorage.get('oss-kibana-cross-app-state') || {};
+  //   const globalState = $injector.get<State>('globalState');
+  //   globalState.time = deps.dataStart.timefilter.timefilter.getTime();
+  //   globalState.refreshInterval = deps.dataStart.timefilter.timefilter.getRefreshInterval();
+  //   Object.keys(globalStateStuff).forEach(key => {
+  //     globalState[key] = globalStateStuff[key];
+  //   });
+  //   globalState.save();
+  // }
+  return () => {
+    const currentGlobalState = $injector.get<State>('globalState');
+    deps.sessionStorage.set('oss-kibana-cross-app-state', currentGlobalState.toObject());
+    $injector.get('$rootScope').$destroy();
+  };
 };
 
 const mainTemplate = (basePath: string) => `<div style="height: 100%">
@@ -120,7 +137,6 @@ function mountDashboardApp(appBasePath: string, element: HTMLElement) {
   // make angular-within-angular possible
   const $injector = angular.bootstrap(mountpoint, [moduleName]);
   // initialize global state handler
-  // $injector.get('globalState');
   element.appendChild(mountpoint);
   return $injector;
 }

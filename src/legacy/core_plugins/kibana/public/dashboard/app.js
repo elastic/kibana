@@ -30,10 +30,10 @@ import {
   InvalidJSONProperty,
   SavedObjectNotFound,
 } from '../../../../../plugins/kibana_utils/public';
-import { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import { DashboardListing, EMPTY_FILTER } from './listing/dashboard_listing';
 import { addHelpMenuToAppChrome } from './help_menu/help_menu_util';
 import { start as data } from '../../../data/public/legacy';
+import { registerTimefilterWithGlobalStateFactory } from '../../../../ui/public/timefilter/setup_router';
 
 export function initDashboardApp(app, deps) {
   initDashboardAppDirective(app, deps);
@@ -48,6 +48,35 @@ export function initDashboardApp(app, deps) {
     });
     addHelpMenuToAppChrome(deps.chrome, deps.core.docLinks);
   }
+
+  app.run(globalState => {
+    globalState.fetch();
+    if (!globalState.time) {
+      globalState.time = deps.dataStart.timefilter.timefilter.getTime();
+    }
+    if (!globalState.refreshInterval) {
+      globalState.refreshInterval = deps.dataStart.timefilter.timefilter.getRefreshInterval();
+    }
+    const hasGlobalURLState = window.location.hash.includes('_g=');
+    // only inject global state if there is none in the url itself (that takes precedence)
+    if (!hasGlobalURLState) {
+      const globalStateStuff = deps.sessionStorage.get('oss-kibana-cross-app-state') || {};
+      Object.keys(globalStateStuff).forEach(key => {
+        globalState[key] = globalStateStuff[key];
+      });
+    } else {
+      globalState.$inheritedGlobalState = true;
+    }
+    globalState.save();
+  });
+
+  app.run((globalState, $rootScope) => {
+    registerTimefilterWithGlobalStateFactory(
+      deps.dataStart.timefilter.timefilter,
+      globalState,
+      $rootScope
+    );
+  });
 
   app.config(function ($routeProvider) {
     const defaults = {
@@ -209,21 +238,5 @@ export function initDashboardApp(app, deps) {
       })
       .when(`dashboard/:tail*?`, { redirectTo: `/${deps.core.injectedMetadata.getInjectedVar('kbnDefaultAppId')}` })
       .when(`dashboards/:tail*?`, { redirectTo: `/${deps.core.injectedMetadata.getInjectedVar('kbnDefaultAppId')}` });
-  });
-
-  deps.FeatureCatalogueRegistryProvider.register(() => {
-    return {
-      id: 'dashboard',
-      title: i18n.translate('kbn.dashboard.featureCatalogue.dashboardTitle', {
-        defaultMessage: 'Dashboard',
-      }),
-      description: i18n.translate('kbn.dashboard.featureCatalogue.dashboardDescription', {
-        defaultMessage: 'Display and share a collection of visualizations and saved searches.',
-      }),
-      icon: 'dashboardApp',
-      path: `/app/kibana#${DashboardConstants.LANDING_PAGE_PATH}`,
-      showOnHomePage: true,
-      category: FeatureCatalogueCategory.DATA,
-    };
   });
 }
