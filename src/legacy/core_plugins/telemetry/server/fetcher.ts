@@ -18,6 +18,7 @@
  */
 
 import moment from 'moment';
+// @ts-ignore
 import fetch from 'node-fetch';
 import { telemetryCollectionManager } from './collection_manager';
 import { REPORT_INTERVAL_MS } from '../common/constants';
