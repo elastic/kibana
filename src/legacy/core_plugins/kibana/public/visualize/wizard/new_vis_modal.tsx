@@ -49,7 +49,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
   };
 
   private readonly isLabsEnabled: boolean;
-  private readonly trackUiMetric: ReturnType<typeof any>;
+  private readonly trackUiMetric: ReturnType<typeof createUiStatsReporter>;
 
   constructor(props: TypeSelectionProps) {
     super(props);

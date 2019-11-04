@@ -18,7 +18,6 @@
  */
 
 import _ from 'lodash';
-import { EmbeddedVisualizeHandler } from 'ui/visualize/loader/embedded_visualize_handler';
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
 import { Filter } from '@kbn/es-query';
@@ -32,6 +31,7 @@ import {
   Embeddable,
   EmbeddableInput,
   EmbeddableOutput,
+  EmbeddedVisualizeHandler,
   PersistedState,
   StaticIndexPattern,
   VisSavedObject,

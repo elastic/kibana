@@ -106,15 +106,8 @@ const createFiltersFromEvent = (event) => {
   return filters;
 };
 
-// TODO make sure the visualize app is updating the breadcrumb correctly
 const VisFiltersProvider = () => {
 
-  // TODO this function used to simply put the new filters in
-  // the app state. Dashboard/Visualize simply listened to
-  // the app state change via angular and pushed it into the actual
-  // filter manager (while splitting out the time filter)
-  // This channel does not work anymore because it's not the same
-  // angular context and thus the appstate won't update
   const pushFilters = async (filters, simulate) => {
     if (filters.length && !simulate) {
       const dedupedFilters = uniqFilters(filters);

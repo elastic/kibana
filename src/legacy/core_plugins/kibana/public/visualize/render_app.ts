@@ -44,73 +44,30 @@ import { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url';
 // @ts-ignore
 import { confirmModalFactory } from 'ui/modals/confirm_modal';
 
-import {
-  AppMountContext,
-  ChromeStart,
-  DocLinksStart,
-  LegacyCoreStart,
-  SavedObjectsClientContract,
-  ToastsStart,
-  UiSettingsClientContract,
-} from 'kibana/public';
-import { Storage } from '../../../../../plugins/kibana_utils/public';
+import { AppMountContext, LegacyCoreStart } from 'kibana/public';
 import {
   createApplyFiltersPopoverDirective,
   createApplyFiltersPopoverHelper,
   createFilterBarDirective,
   createFilterBarHelper,
-  DataStart,
 } from '../../../data/public';
-import { SavedQueryService } from '../../../data/public/search/search_bar/lib/saved_query_service';
-import { EmbeddablePublicPlugin } from '../../../../../plugins/embeddable/public';
 import { NavigationStart } from '../../../navigation/public';
-import { VisualizationsStart } from '../../../visualizations/public';
-import { DataPublicPluginStart as NpDataStart } from '../../../../../plugins/data/public';
 
 // @ts-ignore
 import { initVisualizeApp } from './app';
-import { DocTitle } from './kibana_services';
-
-export interface RenderDeps {
-  addBasePath: (path: string) => string;
-  angular: any;
-  chrome: ChromeStart;
-  config: any;
-  core: LegacyCoreStart;
-  dataStart: DataStart;
-  docLinks: DocLinksStart;
-  docTitle: DocTitle;
-  embeddables: ReturnType<EmbeddablePublicPlugin['start']>;
-  FeatureCatalogueRegistryProvider: any;
-  getBasePath: () => string;
-  getInjected: (name: string, defaultValue?: any) => unknown;
-  getUnhashableStates: any;
-  indexPatterns: DataStart['indexPatterns']['indexPatterns'];
-  indexPatternService: any;
-  localStorage: Storage;
-  npDataStart: NpDataStart;
-  navigation: NavigationStart;
-  queryFilter: any;
-  savedObjectRegistry: any;
-  savedDashboards: any;
-  savedObjectsClient: SavedObjectsClientContract;
-  savedQueryService: SavedQueryService;
-  shareContextMenuExtensions: any;
-  toastNotifications: ToastsStart;
-  uiCapabilities: any;
-  uiSettings: UiSettingsClientContract;
-  visualizeCapabilities: any;
-  visualizations: VisualizationsStart;
-  wrapInI18nContext: any;
-}
+import { VisualizeKibanaServices } from './kibana_services';
 
 let angularModuleInstance: IModule | null = null;
 
-export const renderApp = async (element: HTMLElement, appBasePath: string, deps: RenderDeps) => {
+export const renderApp = async (
+  element: HTMLElement,
+  appBasePath: string,
+  deps: VisualizeKibanaServices
+) => {
   if (!angularModuleInstance) {
     angularModuleInstance = createLocalAngularModule(deps.core, deps.navigation, deps.angular);
     // global routing stuff
-    configureAppAngularModule(angularModuleInstance, deps.core as LegacyCoreStart);
+    configureAppAngularModule(angularModuleInstance, deps.core as LegacyCoreStart, true);
     // custom routing stuff
     initVisualizeApp(angularModuleInstance, deps);
   }

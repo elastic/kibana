@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { RenderDeps } from './render_app';
+import { VisualizeKibanaServices } from './kibana_services';
 
 // @ts-ignore
 import { initEditorDirective } from './editor/editor';
 // @ts-ignore
 import { initListingDirective } from './listing/visualize_listing';
 
-export function initVisualizeAppDirective(app: any, deps: RenderDeps) {
+export function initVisualizeAppDirective(app: any, deps: VisualizeKibanaServices) {
   initEditorDirective(app, deps);
   initListingDirective(app, deps);
 }

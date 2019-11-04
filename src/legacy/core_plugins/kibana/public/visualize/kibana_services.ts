@@ -17,19 +17,21 @@
  * under the License.
  */
 
-import { ToastNotifications } from 'ui/notify/toasts/toast_notifications';
 import {
   ChromeStart,
   DocLinksStart,
+  LegacyCoreStart,
   SavedObjectsClientContract,
+  ToastsStart,
   UiSettingsClientContract,
 } from 'kibana/public';
 
 // load directives
 import '../../../data/public';
 
-// @ts-ignore
-import { SavedObjectProvider } from 'ui/saved_objects/saved_object';
+import { SavedQueryService } from '../../../data/public/search/search_bar/lib/saved_query_service';
+import { NavigationStart } from '../../../navigation/public';
+import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { EmbeddablePublicPlugin } from '../../../../../plugins/embeddable/public';
 import { SavedVisualizations } from './types';
 
@@ -37,6 +39,7 @@ export interface VisualizeKibanaServices {
   addBasePath: (url: string) => string;
   angular: any;
   chrome: ChromeStart;
+  core: LegacyCoreStart;
   config: any;
   dataStart: any;
   docLinks: DocLinksStart;
@@ -45,12 +48,16 @@ export interface VisualizeKibanaServices {
   getInjected: (name: string, defaultValue?: any) => unknown;
   FeatureCatalogueRegistryProvider: any;
   indexPatterns: any;
-  toastNotifications: ToastNotifications;
+  localStorage: Storage;
+  navigation: NavigationStart;
+  toastNotifications: ToastsStart;
   savedObjectsClient: SavedObjectsClientContract;
+  savedQueryService: SavedQueryService;
   savedVisualizations: SavedVisualizations;
   uiSettings: UiSettingsClientContract;
   visualizeCapabilities: any;
   visualizations: any;
+  wrapInI18nContext: any;
 }
 
 let services: VisualizeKibanaServices | null = null;
@@ -78,23 +85,17 @@ export function clearServices() {
 
 // export types
 export { DocTitle } from 'ui/doc_title/doc_title';
-
-// export legacy static dependencies
-export { ensureDefaultIndexPattern } from 'ui/legacy_compat';
-
-export { getFromSavedObject } from 'ui/index_patterns';
+export { EmbeddedVisualizeHandler } from 'ui/visualize/loader/embedded_visualize_handler';
+export { StaticIndexPattern } from 'ui/index_patterns';
 export { PersistedState } from 'ui/persisted_state';
-// @ts-ignore
-export { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
-export { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
-export { showShareContextMenu } from 'ui/share';
-export { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
-export { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
-export { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
-export { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
-export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
-export { getVisualizeLoader } from 'ui/visualize/loader';
-export { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
+export { AppState } from 'ui/state_management/app_state';
+export { VisType } from 'ui/vis';
+export { VisualizeLoader } from 'ui/visualize/loader';
+export {
+  VisSavedObject,
+  VisualizeLoaderParams,
+  VisualizeUpdateParams,
+} from 'ui/visualize/loader/types';
 export {
   Container,
   Embeddable,
@@ -104,17 +105,18 @@ export {
   ErrorEmbeddable,
 } from '../../../../../plugins/embeddable/public';
 
-// export types
-export { StaticIndexPattern } from 'ui/index_patterns';
-export { AppState } from 'ui/state_management/app_state';
-export { VisType } from 'ui/vis';
-export { VisualizeLoader } from 'ui/visualize/loader';
-export {
-  VisSavedObject,
-  VisualizeLoaderParams,
-  VisualizeUpdateParams,
-} from 'ui/visualize/loader/types';
-
+// export legacy static dependencies
+export { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
+export { ensureDefaultIndexPattern } from 'ui/legacy_compat';
+export { getFromSavedObject } from 'ui/index_patterns';
+export { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
+export { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
+export { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
+export { showShareContextMenu } from 'ui/share';
+export { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
+export { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
+export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
+export { getVisualizeLoader } from 'ui/visualize/loader';
 export { METRIC_TYPE, createUiStatsReporter } from '../../../ui_metric/public';
 
 // export const

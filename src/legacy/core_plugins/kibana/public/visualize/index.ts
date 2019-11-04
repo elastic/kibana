@@ -35,13 +35,16 @@ import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing/g
 
 import { VisualizePlugin, LegacyAngularInjectedDependencies } from './plugin';
 import { localApplicationService } from '../local_application_service';
-import { start as data } from '../../../data/public/legacy';
+import { start as dataStart } from '../../../data/public/legacy';
 import {
   start as embeddables,
-  setup as embeddable,
+  setup as embeddableSetup,
 } from '../../../embeddable_api/public/np_ready/public/legacy';
 import { start as navigation } from '../../../navigation/public/legacy';
-import { start as visualizations } from '../../../visualizations/public/np_ready/public/legacy';
+import {
+  start as visualizations,
+  setup as visualizationsSetup,
+} from '../../../visualizations/public/np_ready/public/legacy';
 
 /**
  * Get dependencies relying on the global angular context.
@@ -75,6 +78,8 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
 (async () => {
   const instance = new VisualizePlugin();
   instance.setup(npSetup.core, {
+    embeddableSetup,
+    visualizationsSetup,
     __LEGACY: {
       docTitle,
       getAngularDependencies,
@@ -82,13 +87,10 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
       localApplicationService,
     },
   });
-  await instance.start(npStart.core, {
-    data,
-    // it's needed to register embeddable factory
-    embeddable,
+  instance.start(npStart.core, {
+    dataStart,
     embeddables,
     navigation,
-    npData: npStart.plugins.data,
     visualizations,
   });
 })();

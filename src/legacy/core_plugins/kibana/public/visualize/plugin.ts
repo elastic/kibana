@@ -20,6 +20,10 @@
 import angular from 'angular';
 import { wrapInI18nContext } from 'ui/i18n';
 
+// @ts-ignore
+import { VisEditorTypesRegistryProvider } from 'ui/registry/vis_editor_types';
+// @ts-ignore
+import { defaultEditor } from 'ui/vis/editors/default/default';
 import {
   App,
   CoreSetup,
@@ -28,17 +32,16 @@ import {
   Plugin,
   SavedObjectsClientContract,
 } from 'kibana/public';
+import { VisualizationsSetup } from '../../../visualizations/public';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { DataStart } from '../../../data/public';
 import { EmbeddablePublicPlugin } from '../../../../../plugins/embeddable/public';
 import { NavigationStart } from '../../../navigation/public';
 import { VisualizationsStart } from '../../../visualizations/public';
-import { DataPublicPluginStart as NpDataStart } from '../../../../../plugins/data/public';
 import { LocalApplicationService } from '../local_application_service';
 import { VisualizeEmbeddableFactory } from './embeddable/visualize_embeddable_factory';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './embeddable/constants';
-import { RenderDeps } from './render_app';
-import { setServices, DocTitle } from './kibana_services';
+import { setServices, VisualizeKibanaServices, DocTitle } from './kibana_services';
 
 export interface LegacyAngularInjectedDependencies {
   editorTypes: any;
@@ -53,15 +56,15 @@ export interface LegacyAngularInjectedDependencies {
 }
 
 export interface VisualizePluginStartDependencies {
-  data: DataStart;
-  embeddable: ReturnType<EmbeddablePublicPlugin['setup']>;
+  dataStart: DataStart;
   embeddables: ReturnType<EmbeddablePublicPlugin['start']>;
   navigation: NavigationStart;
-  npData: NpDataStart;
   visualizations: VisualizationsStart;
 }
 
 export interface VisualizePluginSetupDependencies {
+  embeddableSetup: ReturnType<EmbeddablePublicPlugin['setup']>;
+  visualizationsSetup: VisualizationsSetup;
   __LEGACY: {
     getAngularDependencies: () => Promise<LegacyAngularInjectedDependencies>;
     localApplicationService: LocalApplicationService;
@@ -75,14 +78,15 @@ export class VisualizePlugin implements Plugin {
     dataStart: DataStart;
     embeddables: ReturnType<EmbeddablePublicPlugin['start']>;
     navigation: NavigationStart;
-    npDataStart: NpDataStart;
     savedObjectsClient: SavedObjectsClientContract;
     visualizations: VisualizationsStart;
   } | null = null;
 
-  public setup(
+  public async setup(
     core: CoreSetup,
     {
+      embeddableSetup,
+      visualizationsSetup,
       __LEGACY: { localApplicationService, getAngularDependencies, ...legacyServices },
     }: VisualizePluginSetupDependencies
   ) {
@@ -99,17 +103,16 @@ export class VisualizePlugin implements Plugin {
           savedObjectsClient,
           embeddables,
           navigation,
-          npDataStart,
           visualizations,
         } = this.startDependencies;
 
         const angularDependencies = await getAngularDependencies();
-        const deps: RenderDeps = {
-          core: contextCore as LegacyCoreStart,
+        const deps: VisualizeKibanaServices = {
           ...legacyServices,
           ...angularDependencies,
           addBasePath: contextCore.http.basePath.prepend,
           angular,
+          core: contextCore as LegacyCoreStart,
           chrome: contextCore.chrome,
           dataStart,
           docLinks: contextCore.docLinks,
@@ -117,14 +120,11 @@ export class VisualizePlugin implements Plugin {
           getBasePath: core.http.basePath.get,
           getInjected: core.injectedMetadata.getInjectedVar,
           indexPatterns: dataStart.indexPatterns.indexPatterns,
-          indexPatternService: dataStart.indexPatterns.indexPatterns,
           localStorage: new Storage(localStorage),
           navigation,
-          npDataStart,
           savedObjectsClient,
           savedQueryService: dataStart.search.services.savedQueryService,
           toastNotifications: contextCore.notifications.toasts,
-          uiCapabilities: contextCore.application.capabilities,
           uiSettings: contextCore.uiSettings,
           visualizeCapabilities: contextCore.application.capabilities.visualize,
           visualizations,
@@ -136,36 +136,29 @@ export class VisualizePlugin implements Plugin {
       },
     };
     localApplicationService.register({ ...app, id: 'visualize' });
+    VisEditorTypesRegistryProvider.register(defaultEditor);
+
+    const createVisualizeEmbeddableFactory: () => Promise<
+      VisualizeEmbeddableFactory
+    > = async () => {
+      return new VisualizeEmbeddableFactory(visualizationsSetup.types);
+    };
+
+    await createVisualizeEmbeddableFactory().then((embeddableFactory: any) => {
+      embeddableSetup.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
+    });
   }
 
-  async start(
+  start(
     { savedObjects: { client: savedObjectsClient } }: CoreStart,
-    {
-      data: dataStart,
-      embeddables,
-      navigation,
-      npData,
-      visualizations,
-      embeddable,
-    }: VisualizePluginStartDependencies
+    { dataStart, embeddables, navigation, visualizations }: VisualizePluginStartDependencies
   ) {
     this.startDependencies = {
       dataStart,
       embeddables,
       navigation,
-      npDataStart: npData,
       savedObjectsClient,
       visualizations,
     };
-
-    const createVisualizeEmbeddableFactory: () => Promise<
-      VisualizeEmbeddableFactory
-    > = async () => {
-      return new VisualizeEmbeddableFactory(visualizations.types);
-    };
-
-    await createVisualizeEmbeddableFactory().then((embeddableFactory: any) => {
-      embeddable.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
-    });
   }
 }

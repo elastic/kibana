@@ -33,7 +33,6 @@ import { keyCodes } from '@elastic/eui';
 import { parentPipelineAggHelper } from 'ui/agg_types/metrics/lib/parent_pipeline_agg_helper';
 import { DefaultEditorSize } from '../../editor_size';
 
-import { VisEditorTypesRegistryProvider } from '../../../registry/vis_editor_types';
 import { AggGroupNames } from './agg_groups';
 
 import { start as embeddables } from '../../../../../core_plugins/embeddable_api/public/np_ready/public/legacy';
@@ -194,7 +193,5 @@ const defaultEditor = function ($rootScope, $compile, getAppState) {
     }
   };
 };
-
-VisEditorTypesRegistryProvider.register(defaultEditor);
 
 export { defaultEditor };
