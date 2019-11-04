@@ -51,14 +51,14 @@ export function initDashboardApp(app, deps) {
 
   app.run(globalState => {
     globalState.fetch();
+    const hasGlobalURLState = Object.keys(globalState.toObject()).length;
     if (!globalState.time) {
       globalState.time = deps.dataStart.timefilter.timefilter.getTime();
     }
     if (!globalState.refreshInterval) {
       globalState.refreshInterval = deps.dataStart.timefilter.timefilter.getRefreshInterval();
     }
-    const hasGlobalURLState = window.location.hash.includes('_g=');
-    // only inject global state if there is none in the url itself (that takes precedence)
+    // only inject cross app global state if there is none in the url itself (that takes precedence)
     if (!hasGlobalURLState) {
       const globalStateStuff = deps.sessionStorage.get('oss-kibana-cross-app-state') || {};
       Object.keys(globalStateStuff).forEach(key => {
