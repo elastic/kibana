@@ -8,10 +8,9 @@ import { AbstractESSource } from './es_source';
 import { ESAggMetricTooltipProperty } from '../tooltips/es_aggmetric_tooltip_property';
 import { ESAggMetricField } from '../fields/es_agg_field';
 import { ESDocField } from '../fields/es_doc_field';
-import { METRIC_TYPE, COUNT_AGG_TYPE } from '../../../common/constants';
+import { METRIC_TYPE, COUNT_AGG_TYPE, COUNT_PROP_LABEL, COUNT_PROP_NAME } from '../../../common/constants';
 
-const COUNT_PROP_LABEL = 'count';
-const COUNT_PROP_NAME = 'doc_count';
+
 const AGG_DELIMITER = '_of_';
 
 export class AbstractESAggSource extends AbstractESSource {

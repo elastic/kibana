@@ -112,5 +112,9 @@ export const METRIC_TYPE = {
 };
 
 export const COUNT_AGG_TYPE = METRIC_TYPE.COUNT;
+export const COUNT_PROP_LABEL = METRIC_TYPE.COUNT;
+export const COUNT_PROP_NAME = 'doc_count';
 
 export const STYLE_TYPE = { 'STATIC': 'STATIC', 'DYNAMIC': 'DYNAMIC' };
+
+
