@@ -28,7 +28,6 @@ import { uiModules } from 'ui/modules';
 import 'uiExports/home';
 import 'uiExports/visTypes';
 
-import 'uiExports/visEditorTypes';
 import 'uiExports/visualize';
 import 'uiExports/savedObjectTypes';
 import 'uiExports/fieldFormats';

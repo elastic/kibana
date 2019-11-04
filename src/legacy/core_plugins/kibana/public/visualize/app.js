@@ -34,7 +34,7 @@ import {
   getEditBreadcrumbs
 } from './breadcrumbs';
 
-import { ensureDefaultIndexPattern, FeatureCatalogueCategory } from './kibana_services';
+import { ensureDefaultIndexPattern } from './kibana_services';
 
 export function initVisualizeApp(app, deps) {
   initVisualizeAppDirective(app, deps);
@@ -152,22 +152,5 @@ export function initVisualizeApp(app, deps) {
       .when(`visualize/:tail*?`, {
         redirectTo: `/${deps.core.injectedMetadata.getInjectedVar('kbnDefaultAppId')}`,
       });
-
-
-  });
-
-  deps.FeatureCatalogueRegistryProvider.register(() => {
-    return {
-      id: 'visualize',
-      title: 'Visualize',
-      description: i18n.translate('kbn.visualize.visualizeDescription', {
-        defaultMessage:
-          'Create visualizations and aggregate data stores in your Elasticsearch indices.',
-      }),
-      icon: 'visualizeApp',
-      path: `/app/kibana#${VisualizeConstants.LANDING_PAGE_PATH}`,
-      showOnHomePage: true,
-      category: FeatureCatalogueCategory.DATA,
-    };
   });
 }

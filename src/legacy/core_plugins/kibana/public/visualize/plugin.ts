@@ -18,10 +18,12 @@
  */
 
 import angular from 'angular';
+import { i18n } from '@kbn/i18n';
 import { wrapInI18nContext } from 'ui/i18n';
 
 // @ts-ignore
 import { VisEditorTypesRegistryProvider } from 'ui/registry/vis_editor_types';
+import { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 // @ts-ignore
 import { defaultEditor } from 'ui/vis/editors/default/default';
 import {
@@ -32,7 +34,6 @@ import {
   Plugin,
   SavedObjectsClientContract,
 } from 'kibana/public';
-import { VisualizationsSetup } from '../../../visualizations/public';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { DataStart } from '../../../data/public';
 import { EmbeddablePublicPlugin } from '../../../../../plugins/embeddable/public';
@@ -41,6 +42,7 @@ import { VisualizationsStart } from '../../../visualizations/public';
 import { LocalApplicationService } from '../local_application_service';
 import { VisualizeEmbeddableFactory } from './embeddable/visualize_embeddable_factory';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './embeddable/constants';
+import { VisualizeConstants } from './visualize_constants';
 import { setServices, VisualizeKibanaServices, DocTitle } from './kibana_services';
 
 export interface LegacyAngularInjectedDependencies {
@@ -64,7 +66,6 @@ export interface VisualizePluginStartDependencies {
 
 export interface VisualizePluginSetupDependencies {
   embeddableSetup: ReturnType<EmbeddablePublicPlugin['setup']>;
-  visualizationsSetup: VisualizationsSetup;
   __LEGACY: {
     getAngularDependencies: () => Promise<LegacyAngularInjectedDependencies>;
     localApplicationService: LocalApplicationService;
@@ -86,8 +87,12 @@ export class VisualizePlugin implements Plugin {
     core: CoreSetup,
     {
       embeddableSetup,
-      visualizationsSetup,
-      __LEGACY: { localApplicationService, getAngularDependencies, ...legacyServices },
+      __LEGACY: {
+        localApplicationService,
+        getAngularDependencies,
+        FeatureCatalogueRegistryProvider,
+        ...legacyServices
+      },
     }: VisualizePluginSetupDependencies
   ) {
     const app: App = {
@@ -131,15 +136,31 @@ export class VisualizePlugin implements Plugin {
           wrapInI18nContext,
         };
         setServices(deps);
+
+        const embeddableFactory = new VisualizeEmbeddableFactory(visualizations.types);
+        embeddableSetup.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
+
         const { renderApp } = await import('./render_app');
         return renderApp(params.element, params.appBasePath, deps);
       },
     };
+    FeatureCatalogueRegistryProvider.register(() => {
+      return {
+        id: 'visualize',
+        title: 'Visualize',
+        description: i18n.translate('kbn.visualize.visualizeDescription', {
+          defaultMessage:
+            'Create visualizations and aggregate data stores in your Elasticsearch indices.',
+        }),
+        icon: 'visualizeApp',
+        path: `/app/kibana#${VisualizeConstants.LANDING_PAGE_PATH}`,
+        showOnHomePage: true,
+        category: FeatureCatalogueCategory.DATA,
+      };
+    });
+
     localApplicationService.register({ ...app, id: 'visualize' });
     VisEditorTypesRegistryProvider.register(defaultEditor);
-
-    const embeddableFactory = new VisualizeEmbeddableFactory(visualizationsSetup.types);
-    embeddableSetup.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
   }
 
   start(

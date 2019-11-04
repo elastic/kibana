@@ -41,10 +41,7 @@ import {
   setup as embeddableSetup,
 } from '../../../embeddable_api/public/np_ready/public/legacy';
 import { start as navigation } from '../../../navigation/public/legacy';
-import {
-  start as visualizations,
-  setup as visualizationsSetup,
-} from '../../../visualizations/public/np_ready/public/legacy';
+import { start as visualizations } from '../../../visualizations/public/np_ready/public/legacy';
 
 /**
  * Get dependencies relying on the global angular context.
@@ -79,7 +76,6 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
   const instance = new VisualizePlugin();
   instance.setup(npSetup.core, {
     embeddableSetup,
-    visualizationsSetup,
     __LEGACY: {
       docTitle,
       getAngularDependencies,

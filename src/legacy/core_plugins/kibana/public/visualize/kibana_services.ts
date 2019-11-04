@@ -46,7 +46,6 @@ export interface VisualizeKibanaServices {
   embeddables: ReturnType<EmbeddablePublicPlugin['start']>;
   getBasePath: () => string;
   getInjected: (name: string, defaultValue?: any) => unknown;
-  FeatureCatalogueRegistryProvider: any;
   indexPatterns: any;
   localStorage: Storage;
   navigation: NavigationStart;
@@ -118,6 +117,3 @@ export { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 export { getVisualizeLoader } from 'ui/visualize/loader';
 export { METRIC_TYPE, createUiStatsReporter } from '../../../ui_metric/public';
-
-// export const
-export { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';

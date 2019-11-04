@@ -18,7 +18,6 @@ import 'uiExports/contextMenuActions';
 import 'uiExports/visTypes';
 import 'uiExports/visResponseHandlers';
 import 'uiExports/visRequestHandlers';
-import 'uiExports/visEditorTypes';
 import 'uiExports/inspectorViews';
 import 'uiExports/savedObjectTypes';
 import 'uiExports/embeddableActions';

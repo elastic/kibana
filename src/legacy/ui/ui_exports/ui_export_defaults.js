@@ -50,9 +50,6 @@ export const UI_EXPORT_DEFAULTS = {
     fieldFormatEditors: [
       'ui/field_editor/components/field_format_editor/register'
     ],
-    visEditorTypes: [
-      'ui/vis/editors/default/default',
-    ],
     embeddableFactories: [
       'plugins/kibana/discover/embeddable/search_embeddable_factory',
     ],

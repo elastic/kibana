@@ -16,7 +16,6 @@ import { CanvasRootController } from './angular/controllers';
 import 'uiExports/visTypes';
 import 'uiExports/visResponseHandlers';
 import 'uiExports/visRequestHandlers';
-import 'uiExports/visEditorTypes';
 import 'uiExports/savedObjectTypes';
 import 'uiExports/spyModes';
 import 'uiExports/fieldFormats';
