@@ -21,7 +21,7 @@ import {
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
 } from 'src/core/server';
-import { EncryptedSavedObjectsService } from './encrypted_saved_objects_service';
+import { EncryptedSavedObjectsService } from '../crypto';
 
 interface EncryptedSavedObjectsClientOptions {
   baseClient: SavedObjectsClientContract;
