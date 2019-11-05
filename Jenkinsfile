@@ -26,7 +26,7 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
               'oss-ciGroup12': kibanaPipeline.getOssCiGroupWorker(12),
               'oss-firefoxSmoke': kibanaPipeline.getPostBuildWorker('firefoxSmoke', { runbld './test/scripts/jenkins_firefox_smoke.sh' }),
               'oss-accessibility': kibanaPipeline.getPostBuildWorker('accessibility', { runbld './test/scripts/jenkins_accessibility.sh' }),
-              // 'oss-visualRegression': kibanaPipeline.getPostBuildWorker('visualRegression', { runbld './test/scripts/jenkins_visual_regression.sh' }),
+              'oss-visualRegression': kibanaPipeline.getPostBuildWorker('visualRegression', { runbld './test/scripts/jenkins_visual_regression.sh' }),
             ]),
             'kibana-xpack-agent': kibanaPipeline.withWorkers('kibana-xpack-tests', { kibanaPipeline.buildXpack() }, [
               'xpack-ciGroup1': kibanaPipeline.getXpackCiGroupWorker(1),
@@ -41,7 +41,7 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
               'xpack-ciGroup10': kibanaPipeline.getXpackCiGroupWorker(10),
               'xpack-firefoxSmoke': kibanaPipeline.getPostBuildWorker('xpack-firefoxSmoke', { runbld './test/scripts/jenkins_xpack_firefox_smoke.sh' }),
               'xpack-accessibility': kibanaPipeline.getPostBuildWorker('xpack-accessibility', { runbld './test/scripts/jenkins_xpack_accessibility.sh' }),
-              // 'xpack-visualRegression': kibanaPipeline.getPostBuildWorker('xpack-visualRegression', { runbld './test/scripts/jenkins_xpack_visual_regression.sh' }),
+              'xpack-visualRegression': kibanaPipeline.getPostBuildWorker('xpack-visualRegression', { runbld './test/scripts/jenkins_xpack_visual_regression.sh' }),
             ]),
           ])
         }

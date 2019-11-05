@@ -75,7 +75,7 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
     if (isOpen) {
       fetchCountAndSavedQueries();
     }
-  }, [isOpen, activePage]);
+  }, [isOpen, activePage, savedQueryService]);
 
   const goToPage = (pageNumber: number) => {
     setActivePage(pageNumber);

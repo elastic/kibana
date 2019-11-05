@@ -112,11 +112,14 @@ export function existingFields(
   docs: Array<{ _source: Document }>,
   fields: FieldDescriptor[]
 ): string[] {
-  const allFields = fields.map(field => ({
-    name: field.name,
-    parent: field.parent,
-    path: (field.parent || field.name).split('.'),
-  }));
+  const allFields = fields.map(field => {
+    const parent = field.subType && field.subType.multi && field.subType.multi.parent;
+    return {
+      name: field.name,
+      parent,
+      path: (parent || field.name).split('.'),
+    };
+  });
   const missingFields = new Set(allFields);
 
   for (const doc of docs) {

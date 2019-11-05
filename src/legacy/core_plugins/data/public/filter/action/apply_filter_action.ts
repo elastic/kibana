@@ -19,14 +19,14 @@
 
 import { i18n } from '@kbn/i18n';
 import { Filter } from '@kbn/es-query';
-import { npStart } from 'ui/new_platform';
+import { CoreStart } from 'src/core/public';
 import {
   IAction,
   createAction,
   IncompatibleActionError,
 } from '../../../../../../plugins/ui_actions/public';
-import { changeTimeFilter, extractTimeFilter, FilterManager } from '../filter_manager';
-import { TimefilterContract } from '../../timefilter';
+import { FilterManager } from '../../../../../../plugins/data/public';
+import { TimefilterContract, changeTimeFilter, extractTimeFilter } from '../../timefilter';
 import { applyFiltersPopover } from '../apply_filters/apply_filters_popover';
 import { IndexPatternsStart } from '../../index_patterns';
 export const GLOBAL_APPLY_FILTER_ACTION = 'GLOBAL_APPLY_FILTER_ACTION';
@@ -41,6 +41,7 @@ async function isCompatible(context: ActionContext) {
 }
 
 export function createFilterAction(
+  overlays: CoreStart['overlays'],
   filterManager: FilterManager,
   timeFilter: TimefilterContract,
   indexPatternsService: IndexPatternsStart
@@ -73,7 +74,7 @@ export function createFilterAction(
         );
 
         const filterSelectionPromise: Promise<Filter[]> = new Promise(resolve => {
-          const overlay = npStart.core.overlays.openModal(
+          const overlay = overlays.openModal(
             applyFiltersPopover(
               filters,
               indexPatterns,

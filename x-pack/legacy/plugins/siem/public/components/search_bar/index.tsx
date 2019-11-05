@@ -17,6 +17,7 @@ import { TimeRange, Query } from 'src/plugins/data/common/types';
 import { SavedQuery } from 'src/legacy/core_plugins/data/public';
 
 import { OnTimeChangeProps } from '@elastic/eui';
+import { npStart } from 'ui/new_platform';
 import { start as data } from '../../../../../../../src/legacy/core_plugins/data/public/legacy';
 
 import { inputsActions } from '../../store/inputs';
@@ -39,12 +40,11 @@ import { timelineActions, hostsActions, networkActions } from '../../store/actio
 
 const {
   ui: { SearchBar },
-  filter,
   search,
   timefilter,
 } = data;
 
-export const siemFilterManager = filter.filterManager;
+export const siemFilterManager = npStart.plugins.data.query.filterManager;
 export const savedQueryService = search.services.savedQueryService;
 
 interface SiemSearchBarRedux {

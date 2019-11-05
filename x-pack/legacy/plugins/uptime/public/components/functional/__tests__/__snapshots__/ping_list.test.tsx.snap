@@ -150,7 +150,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
             "render": [Function],
           },
           Object {
-            "align": "left",
+            "align": "right",
             "dataType": "number",
             "field": "monitor.ip",
             "name": "IP",

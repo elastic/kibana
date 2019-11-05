@@ -221,6 +221,27 @@
         "searchable": true,
         "aggregatable": true
       }
+    },
+    "nested_object_parent": {
+      "nested": {
+        "type": "nested",
+        "searchable": false,
+        "aggregatable": false
+      }
+    },
+    "nested_object_parent.child": {
+      "text": {
+        "type": "text",
+        "searchable": true,
+        "aggregatable": false
+      }
+    },
+    "nested_object_parent.child.keyword": {
+      "keyword": {
+        "type": "keyword",
+        "searchable": true,
+        "aggregatable": true
+      }
     }
   }
 }
