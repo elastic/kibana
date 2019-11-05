@@ -42,7 +42,7 @@ cp -a resources/ %{buildroot}/usr/local/%{name}-%{kibana_version}-linux-x64/
 
 mkdir -p %{buildroot}/usr/local/%{name}-%{kibana_version}-linux-x64/scripts
 cp scripts/exportAssets.py %{buildroot}/usr/local/%{name}-%{kibana_version}-linux-x64/scripts
-cp scripts/loadAssets.py %{buildroot}/usr/local/%{name}-%{kibana_version}-linux-x64/scripts
+cp scripts/configureKibana.py %{buildroot}/usr/local/%{name}-%{kibana_version}-linux-x64/scripts
 cp scripts/util.py %{buildroot}/usr/local/%{name}-%{kibana_version}-linux-x64/scripts
 
 mkdir -p %{buildroot}/usr/local/www/probe/
