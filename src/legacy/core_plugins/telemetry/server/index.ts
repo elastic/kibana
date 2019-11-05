@@ -25,5 +25,5 @@ export { getTelemetryOptIn } from './get_telemetry_opt_in';
 export { telemetryCollectionManager } from './collection_manager';
 
 export const telemetryPlugin = (initializerContext: PluginInitializerContext) =>
-  new TelemetryPlugin();
+  new TelemetryPlugin(initializerContext);
 export { constants };
