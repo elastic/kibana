@@ -85,7 +85,7 @@ There are two main approaches to take:
 * *Parts of the query can match different nested documents.* This is how a regular object field works. 
  Although generally less useful, there might be occasions where you want to query a nested field in this way.
 
-Let's take a look at the first approach. In the following document, items is a nested field. Each document in the nested 
+Let's take a look at the first approach. In the following document, `items` is a nested field. Each document in the nested 
 field contains a name, stock, and category.
 
 [source,json]
