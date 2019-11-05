@@ -188,9 +188,10 @@ The following sections apply both to <<saml>> and <<oidc>>
 
 Once the user logs in to {kib} Single Sign-On, either using SAML or OpenID Connect, {es} issues access and refresh tokens
 that {kib} encrypts and stores them in its own session cookie. This way, the user isn't redirected to the Identity Provider
-for every request that requires authentication. It also means that the {kib} session depends on the `xpack.security.sessionTimeout` 
-setting and the user is automatically logged out if the session expires. An access token that is stored in the session cookie 
-can expire, in  which case {kib} will automatically renew it with a one-time-use refresh token and store it in the same cookie.
+for every request that requires authentication. It also means that the {kib} session depends on the `xpack.security.session.idleTimeout`
+and `xpack.security.session.lifespan` settings, and the user is automatically logged out if the session expires. An access token
+that is stored in the session cookie can expire, in which case {kib} will automatically renew it with a one-time-use refresh
+token and store it in the same cookie.
 
 {kib} can only determine if an access token has expired if it receives a request that requires authentication. If both access
 and refresh tokens have already expired (for example, after 24 hours of inactivity), {kib} initiates a new "handshake" and
