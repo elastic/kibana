@@ -90,7 +90,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         it(`can navigate to search profiler`, async () => {
-          await testSubjects.existOrFail('searchProfiler');
+          await testSubjects.existOrFail('searchprofiler');
         });
 
         it(`doesn't show read-only badge`, async () => {
@@ -173,7 +173,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         it(`can navigate to search profiler`, async () => {
-          await testSubjects.existOrFail('searchProfiler');
+          await testSubjects.existOrFail('searchprofiler');
         });
 
         it(`shows read-only badge`, async () => {
