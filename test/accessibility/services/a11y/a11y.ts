@@ -27,7 +27,7 @@ import { analyzeWithAxe, analyzeWithAxeWithClient } from './analyze_with_axe';
 
 interface AxeContext {
   include?: string[];
-  exclude?: string[];
+  exclude?: string[][];
 }
 
 interface TestOptions {
@@ -45,6 +45,7 @@ export const normalizeResult = (report: any) => {
 export function A11yProvider({ getService }: FtrProviderContext) {
   const browser = getService('browser');
   const Wd = getService('__webdriver__');
+  const log = getService('log');
 
   /**
    * Accessibility testing service using the Axe (https://www.deque.com/axe/)
@@ -67,7 +68,10 @@ export function A11yProvider({ getService }: FtrProviderContext) {
     private getAxeContext(global: boolean, excludeTestSubj?: string | string[]): AxeContext {
       return {
         include: global ? undefined : [testSubjectToCss('appA11yRoot')],
-        exclude: ([] as string[]).concat(excludeTestSubj || []).map(ts => testSubjectToCss(ts)),
+        exclude: ([] as string[])
+          .concat(excludeTestSubj || [])
+          .map(ts => [testSubjectToCss(ts)])
+          .concat([['.ace_scrollbar']]),
       };
     }
 
@@ -75,7 +79,8 @@ export function A11yProvider({ getService }: FtrProviderContext) {
       const errorMsgs = [];
 
       for (const result of report.incomplete) {
-        errorMsgs.push(printResult(chalk.yellow('UNABLE TO VALIDATE'), result));
+        // these items require human review and can't be definitively validated
+        log.warning(printResult(chalk.yellow('UNABLE TO VALIDATE'), result));
       }
 
       for (const result of report.violations) {
@@ -91,7 +96,6 @@ export function A11yProvider({ getService }: FtrProviderContext) {
       const axeOptions = {
         reporter: 'v2',
         runOnly: ['wcag2a', 'wcag2aa'],
-        exclude: ['.ace_scrollbar'],
         rules: {
           'color-contrast': {
             enabled: false,
