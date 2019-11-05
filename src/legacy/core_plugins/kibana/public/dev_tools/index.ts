@@ -18,7 +18,6 @@
  */
 
 import { npSetup, npStart } from 'ui/new_platform';
-import { FeatureCatalogueRegistryProvider } from 'ui/registry/feature_catalogue';
 
 import { DevToolsPlugin } from './plugin';
 import { localApplicationService } from '../local_application_service';
@@ -28,8 +27,6 @@ const instance = new DevToolsPlugin();
 instance.setup(npSetup.core, {
   __LEGACY: {
     localApplicationService,
-    // TODO move this to NP plugion
-    FeatureCatalogueRegistryProvider,
   },
 });
 instance.start(npStart.core, {

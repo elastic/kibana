@@ -31,6 +31,7 @@ import { ResizeChecker } from 'ui/resize_checker';
 
 export interface XPluginSet {
   devTools: DevToolsSetup;
+  feature_catalogue: FeatureCatalogueSetup;
   __LEGACY: {
     I18nContext: any;
     ResizeChecker: any;
@@ -39,6 +40,7 @@ export interface XPluginSet {
 
 import { plugin } from '.';
 import { DevToolsSetup } from '../../../../../plugins/dev_tools/public';
+import { FeatureCatalogueSetup } from '../../../../../plugins/feature_catalogue/public';
 
 const pluginInstance = plugin({} as any);
 

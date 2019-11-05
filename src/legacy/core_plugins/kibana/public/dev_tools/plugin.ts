@@ -21,8 +21,6 @@
 import 'uiExports/devTools';
 
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
-import { i18n } from '@kbn/i18n';
-import { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
 import { LocalApplicationService } from '../local_application_service';
 import { DevTool, DevToolsStart } from '../../../../../plugins/dev_tools/public';
@@ -30,7 +28,6 @@ import { DevTool, DevToolsStart } from '../../../../../plugins/dev_tools/public'
 export interface DevToolsPluginSetupDependencies {
   __LEGACY: {
     localApplicationService: LocalApplicationService;
-    FeatureCatalogueRegistryProvider: any;
   };
 }
 
@@ -43,26 +40,8 @@ export class DevToolsPlugin implements Plugin {
 
   public setup(
     core: CoreSetup,
-    {
-      __LEGACY: { localApplicationService, FeatureCatalogueRegistryProvider },
-    }: DevToolsPluginSetupDependencies
+    { __LEGACY: { localApplicationService } }: DevToolsPluginSetupDependencies
   ) {
-    // TODO move this to console
-    FeatureCatalogueRegistryProvider.register(() => {
-      return {
-        id: 'console',
-        title: i18n.translate('kbn.devTools.consoleTitle', {
-          defaultMessage: 'Console',
-        }),
-        description: i18n.translate('kbn.devTools.consoleDescription', {
-          defaultMessage: 'Skip cURL and use this JSON interface to work with your data directly.',
-        }),
-        icon: 'consoleApp',
-        path: '/app/kibana#/dev_tools/console',
-        showOnHomePage: true,
-        category: FeatureCatalogueCategory.ADMIN,
-      };
-    });
     localApplicationService.register({
       id: 'dev_tools',
       title: 'Dev Tools',

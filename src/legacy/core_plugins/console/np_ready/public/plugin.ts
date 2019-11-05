@@ -20,6 +20,7 @@
 import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 
+import { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import { PluginInitializerContext, Plugin, CoreStart, CoreSetup } from '../../../../../core/public';
 import { XPluginSet } from './legacy';
 
@@ -31,7 +32,22 @@ export class ConsoleUIPlugin implements Plugin<any, any> {
     const {
       __LEGACY: { I18nContext, ResizeChecker },
       devTools,
+      feature_catalogue,
     } = pluginSet;
+
+    feature_catalogue.register({
+      id: 'console',
+      title: i18n.translate('kbn.devTools.consoleTitle', {
+        defaultMessage: 'Console',
+      }),
+      description: i18n.translate('kbn.devTools.consoleDescription', {
+        defaultMessage: 'Skip cURL and use this JSON interface to work with your data directly.',
+      }),
+      icon: 'consoleApp',
+      path: '/app/kibana#/dev_tools/console',
+      showOnHomePage: true,
+      category: FeatureCatalogueCategory.ADMIN,
+    });
 
     devTools.register({
       id: 'console',
