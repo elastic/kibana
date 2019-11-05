@@ -28,6 +28,7 @@ const instance = new DevToolsPlugin();
 instance.setup(npSetup.core, {
   __LEGACY: {
     localApplicationService,
+    // TODO move this to NP plugion
     FeatureCatalogueRegistryProvider,
   },
 });

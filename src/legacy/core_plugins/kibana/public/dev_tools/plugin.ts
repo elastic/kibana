@@ -47,6 +47,7 @@ export class DevToolsPlugin implements Plugin {
       __LEGACY: { localApplicationService, FeatureCatalogueRegistryProvider },
     }: DevToolsPluginSetupDependencies
   ) {
+    // TODO move this to console
     FeatureCatalogueRegistryProvider.register(() => {
       return {
         id: 'console',
