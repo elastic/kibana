@@ -37,10 +37,10 @@ export class ConsoleUIPlugin implements Plugin<any, any> {
 
     feature_catalogue.register({
       id: 'console',
-      title: i18n.translate('kbn.devTools.consoleTitle', {
+      title: i18n.translate('console.devToolsTitle', {
         defaultMessage: 'Console',
       }),
-      description: i18n.translate('kbn.devTools.consoleDescription', {
+      description: i18n.translate('console.devToolsDescription', {
         defaultMessage: 'Skip cURL and use this JSON interface to work with your data directly.',
       }),
       icon: 'consoleApp',
