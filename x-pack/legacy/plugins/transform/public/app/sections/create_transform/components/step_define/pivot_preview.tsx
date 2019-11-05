@@ -74,7 +74,7 @@ const PreviewTitle: SFC<PreviewTitleProps> = ({ previewRequest }) => {
 
   return (
     <EuiFlexGroup>
-      <EuiFlexItem></EuiFlexItem>
+      <EuiFlexItem />
       <EuiFlexItem grow={false}>
         <EuiCopy
           beforeMessage={euiCopyText}

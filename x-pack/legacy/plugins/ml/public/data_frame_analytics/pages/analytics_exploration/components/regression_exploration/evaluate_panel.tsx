@@ -45,7 +45,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus }) => {
   const [isLoadingTraining, setIsLoadingTraining] = useState<boolean>(false);
   const [isLoadingGeneralization, setIsLoadingGeneralization] = useState<boolean>(false);
 
-  const index = idx(jobConfig, _ => _.dest.index) as string;
+  const index = jobConfig.dest.index;
   const dependentVariable = getDependentVar(jobConfig.analysis);
   const predictionFieldName = getPredictionFieldName(jobConfig.analysis);
   // default is 'ml'

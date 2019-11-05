@@ -118,8 +118,5 @@ export function isCompletedAnalyticsJob(stats: DataFrameAnalyticsStats) {
 }
 
 export function getResultsUrl(jobId: string, analysisType: string, status: DATA_FRAME_TASK_STATE) {
-  const jobStatusString = `,jobStatus:${status}`;
-  return `ml#/data_frame_analytics/exploration?_g=(ml:(jobId:${jobId},analysisType:${analysisType}${
-    analysisType === 'regression' ? jobStatusString : ''
-  }))`;
+  return `ml#/data_frame_analytics/exploration?_g=(ml:(jobId:${jobId},analysisType:${analysisType},jobStatus:${status}))`;
 }

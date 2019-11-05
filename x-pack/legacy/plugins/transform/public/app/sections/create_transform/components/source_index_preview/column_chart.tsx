@@ -159,7 +159,8 @@ export const ColumnChart: FC<Props> = ({ indexPattern, columnType, query }) => {
       fetchCardinality();
       fetchChartTermsData();
     }
-  }, [JSON.stringify(query)]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [field.type, JSON.stringify(query)]);
 
   if (data.length === 0) {
     return null;
