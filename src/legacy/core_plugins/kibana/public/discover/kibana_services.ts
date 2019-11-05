@@ -39,7 +39,28 @@ export function getAngularModule() {
   return angularModule;
 }
 
-let services = {
+interface ServiceDeps {
+  addBasePath: any;
+  capabilities: any;
+  chrome: any;
+  docLinks: any;
+  eui_utils: any;
+  indexPatterns: any;
+  inspector: any;
+  metadata: any;
+  toastNotifications: any;
+  uiSettings: any;
+  timefilter: any;
+  // legacy
+  docTitle: any;
+  docViewsRegistry: any;
+  SearchSource: any;
+  wrapInI18nContext: any;
+  getSavedSearchById?: any;
+  getSavedSearchUrlById?: any;
+}
+
+let services: ServiceDeps = {
   // new plattform
   addBasePath: npStart.core.http.basePath.prepend,
   capabilities: npStart.core.application.capabilities,
@@ -55,11 +76,10 @@ let services = {
   // legacy
   docTitle,
   docViewsRegistry,
-  queryFilter: undefined,
   SearchSource,
   wrapInI18nContext,
 };
-export function getServices() {
+export function getServices(): ServiceDeps {
   return services;
 }
 
@@ -98,6 +118,8 @@ export { timezoneProvider } from 'ui/vis/lib/timezone';
 export { tabifyAggResponse } from 'ui/agg_response/tabify';
 // @ts-ignore
 export { vislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
+export { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
+export { ensureDefaultIndexPattern } from 'ui/legacy_compat';
 
 // EXPORT types
 export { VisProvider } from 'ui/vis';

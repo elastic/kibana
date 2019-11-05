@@ -29,6 +29,7 @@ import './lib/pager';
 
 import { getLimitedSearchResultsMessage } from './doc_table_strings';
 
+
 getAngularModule()
   .directive('docTable', function (config, getAppState, pagerFactory, $filter) {
     return {

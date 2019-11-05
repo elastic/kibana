@@ -18,6 +18,7 @@
  */
 import { PluginInitializer, PluginInitializerContext } from 'kibana/public';
 import { npSetup, npStart } from 'ui/new_platform';
+import { SavedObjectRegistryProvider } from 'ui/saved_objects';
 import { localApplicationService } from '../local_application_service';
 import { DiscoverPlugin, DiscoverSetup, DiscoverStart } from './plugin';
 
@@ -34,3 +35,7 @@ export const setup = pluginInstance.setup(npSetup.core, {
   ...{ localApplicationService },
 });
 export const start = pluginInstance.start(npStart.core, npStart.plugins);
+
+SavedObjectRegistryProvider.register((savedSearches: any) => {
+  return savedSearches;
+});

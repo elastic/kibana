@@ -23,7 +23,7 @@ import { Filter, FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { TExecuteTriggerActions } from 'src/plugins/ui_actions/public';
 import { setup as data } from '../../../../data/public/legacy';
-import { getTime, onlyDisabledFiltersChanged, Query } from '../../../../data/public';
+import { getTime, Query } from '../../../../data/public';
 import {
   APPLY_FILTER_TRIGGER,
   Container,
@@ -46,7 +46,7 @@ import {
   RequestAdapter,
   SearchSource,
 } from '../kibana_services';
-import { TimeRange } from '../../../../../../plugins/data/public';
+import { onlyDisabledFiltersChanged, TimeRange } from '../../../../../../plugins/data/public';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 
 interface SearchScope extends ng.IScope {

@@ -64,7 +64,6 @@ const {
   chrome,
   docTitle,
   shareContextMenuExtensions,
-  queryFilter,
   State,
   timefilter,
   toastNotifications,
@@ -75,6 +74,7 @@ const {
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../breadcrumbs';
 import { extractTimeFilter, changeTimeFilter } from '../../../../data/public';
 import { start as data } from '../../../../data/public/legacy';
+import { getIndexPatternId } from '../helpers/get_index_pattern_id';
 
 const { savedQueryService } = data.search.services;
 
@@ -114,7 +114,7 @@ app.config($routeProvider => {
     resolve: {
       ip: function (Promise) {
         const indexPatterns = data.indexPatterns.indexPatterns;
-        return indexPatterns.getCache().then((savedObjects) => {
+        return indexPatterns.getCache().then((indexPatternList) => {
           /**
            *  In making the indexPattern modifiable it was placed in appState. Unfortunately,
            *  the load order of AppState conflicts with the load order of many other things
@@ -125,15 +125,14 @@ app.config($routeProvider => {
            *  @type {State}
            */
           const state = new State('_a', {});
-          const specified = !!state.index;
-          const exists = _.findIndex(savedObjects, o => o.id === state.index) > -1;
-          const id = exists ? state.index : uiSettings.get('defaultIndex');
+
+          const id = getIndexPatternId(state.index, indexPatternList, uiSettings.get('defaultIndex'));
           state.destroy();
           return Promise.props({
-            list: savedObjects,
+            list: indexPatternList,
             loaded: indexPatterns.get(id),
             stateVal: state.index,
-            stateValFound: specified && exists,
+            stateValFound: !!state.index && id === state.index,
           });
         });
       },
@@ -179,7 +178,8 @@ function discoverController(
   config,
   kbnUrl,
   localStorage,
-  uiCapabilities
+  uiCapabilities,
+  queryFilter
 ) {
   const Vis = Private(VisProvider);
   const responseHandler = vislibSeriesResponseHandlerProvider().handler;
@@ -943,7 +943,6 @@ function discoverController(
   const updateStateFromSavedQuery = (savedQuery) => {
     $state.query = savedQuery.attributes.query;
     $state.save();
-
     queryFilter.setFilters(savedQuery.attributes.filters || []);
 
     if (savedQuery.attributes.timefilter) {
@@ -974,7 +973,6 @@ function discoverController(
       $scope.savedQuery = undefined;
       return;
     }
-
     if (!$scope.savedQuery || newSavedQueryId !== $scope.savedQuery.id) {
       savedQueryService.getSavedQuery(newSavedQueryId).then((savedQuery) => {
         $scope.$evalAsync(() => {
@@ -984,6 +982,7 @@ function discoverController(
       });
     }
   });
+
 
   async function setupVisualization() {
     // If no timefield has been specified we don't create a histogram of messages

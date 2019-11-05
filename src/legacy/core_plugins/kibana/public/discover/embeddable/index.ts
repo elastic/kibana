@@ -17,11 +17,6 @@
  * under the License.
  */
 
-/**
- * TODO: find out what requires this file on bootstrap, caused error since local angular has't
- * bootstrapped yet
- * export * from './types';
- * export * from './search_embeddable_factory';
- * export * from './search_embeddable';
- * export { SEARCH_EMBEDDABLE_TYPE } from './constants';
- **/
+export * from './types';
+export * from './search_embeddable_factory';
+export * from './search_embeddable';

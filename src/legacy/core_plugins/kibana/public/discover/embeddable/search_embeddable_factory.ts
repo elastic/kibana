@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { IPrivate } from 'ui/private';
 import { i18n } from '@kbn/i18n';
 import { TExecuteTriggerActions } from 'src/plugins/ui_actions/public';
 import '../angular/doc_table';
@@ -27,10 +26,10 @@ import {
   Container,
 } from '../../../../../../plugins/embeddable/public';
 import { TimeRange } from '../../../../../../plugins/data/public';
-import { SavedSearchLoader } from '../types';
 import { SearchEmbeddable } from './search_embeddable';
 import { SearchInput, SearchOutput } from './types';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
+import { getEmbeddableInjector } from '../render_app';
 
 export class SearchEmbeddableFactory extends EmbeddableFactory<
   SearchInput,
@@ -70,20 +69,17 @@ export class SearchEmbeddableFactory extends EmbeddableFactory<
     input: Partial<SearchInput> & { id: string; timeRange: TimeRange },
     parent?: Container
   ): Promise<SearchEmbeddable | ErrorEmbeddable> {
-    const $injector = await getServices().getInjector();
+    const $injector = getEmbeddableInjector();
 
     const $compile = $injector.get<ng.ICompileService>('$compile');
     const $rootScope = $injector.get<ng.IRootScopeService>('$rootScope');
-    const searchLoader = $injector.get<SavedSearchLoader>('savedSearches');
-    const editUrl = await getServices().addBasePath(
-      `/app/kibana${searchLoader.urlFor(savedObjectId)}`
-    );
+    const kbnUrl = $injector.get<ng.IRootScopeService>('kbnUrl');
+    const queryFilter = $injector.get<ng.IRootScopeService>('queryFilter');
 
-    const Private = $injector.get<IPrivate>('Private');
-
-    const queryFilter = Private(getServices().FilterBarQueryFilterProvider);
+    const url = await getServices().getSavedSearchUrlById(savedObjectId, kbnUrl);
+    const editUrl = await getServices().addBasePath(`/app/kibana${url}`);
     try {
-      const savedObject = await searchLoader.get(savedObjectId);
+      const savedObject = await getServices().getSavedSearchById(savedObjectId, kbnUrl);
       return new SearchEmbeddable(
         {
           savedSearch: savedObject,

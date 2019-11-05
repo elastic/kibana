@@ -21,13 +21,14 @@ import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/p
 import { IUiActionsStart } from 'src/plugins/ui_actions/public';
 import { registerFeature } from './helpers/register_feature';
 import './kibana_services';
-// import { SearchEmbeddableFactory } from './embeddable';
 import {
   Start as EmbeddableStart,
   Setup as EmbeddableSetup,
 } from '../../../../../plugins/embeddable/public';
 import { LocalApplicationService } from '../local_application_service';
-import { getAngularDependencies } from './get_angular_dependencies';
+import { getGlobalAngular } from './get_global_angular';
+import { getAngularModule } from './get_inner_angular';
+import { setServices } from './kibana_services';
 
 /**
  * These are the interfaces with your public contracts. You should export these
@@ -47,8 +48,10 @@ interface DiscoverStartPlugins {
 }
 
 export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
+  private innerAngular: any;
   constructor(initializerContext: PluginInitializerContext) {}
   setup(core: CoreSetup, plugins: DiscoverSetupPlugins): DiscoverSetup {
+    this.bootstrapAngular(core);
     registerFeature();
     plugins.localApplicationService.register({
       id: 'discover',
@@ -56,17 +59,30 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
       order: -1004,
       euiIconType: 'discoverApp',
       mount: async (context, params) => {
-        const angularDeps = await getAngularDependencies();
         const { renderApp } = await import('./render_app');
-        return renderApp(params.element, params.appBasePath, context, angularDeps);
+        return renderApp(params.element, params.appBasePath);
       },
     });
   }
 
   start(core: CoreStart, plugins: DiscoverStartPlugins): DiscoverStart {
-    // const factory = new SearchEmbeddableFactory(plugins.uiActions.executeTriggerActions);
-    // plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
+    this.registerEmbeddable(plugins);
   }
 
   stop() {}
+
+  private async bootstrapAngular(core: CoreSetup) {
+    if (!this.innerAngular) {
+      const innerAngular = getAngularModule(core);
+      const angularDeps = await getGlobalAngular();
+      setServices(angularDeps);
+      this.innerAngular = innerAngular;
+    }
+  }
+
+  private async registerEmbeddable(plugins: DiscoverStartPlugins) {
+    const { SearchEmbeddableFactory } = await import('./embeddable');
+    const factory = new SearchEmbeddableFactory(plugins.uiActions.executeTriggerActions);
+    plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
+  }
 }

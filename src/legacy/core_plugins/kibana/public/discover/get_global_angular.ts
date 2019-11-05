@@ -18,10 +18,8 @@
  */
 import chromeLegacy from 'ui/chrome';
 import { IPrivate } from 'ui/private';
-import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing/get_unhashable_states_provider';
 import { ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
-import { SavedObjectRegistryProvider } from 'ui/saved_objects';
 // @ts-ignore
 import { StateProvider } from 'ui/state_management/state';
 // @ts-ignore
@@ -29,33 +27,37 @@ import { createSavedSearchesService } from './saved_searches/saved_searches';
 // @ts-ignore
 import { createSavedSearchFactory } from './saved_searches/_saved_search';
 
+export interface AngularGlobalInjectedDependencies {
+  getSavedSearchById: any;
+  getSavedSearchUrlById: any;
+  getUnhashableStates: any;
+  shareContextMenuExtensions: any;
+  State: any;
+}
+
 /**
  * Get dependencies relying on the global angular context.
  * They also have to get resolved together with the legacy imports
  */
-export async function getAngularDependencies(): Promise<any> {
+export async function getGlobalAngular(): Promise<AngularGlobalInjectedDependencies> {
   const injector = await chromeLegacy.dangerouslyGetActiveInjector();
   const Private = injector.get<IPrivate>('Private');
-
-  const queryFilter = Private(FilterBarQueryFilterProvider);
   const getUnhashableStates = Private(getUnhashableStatesProvider);
   const shareContextMenuExtensions = Private(ShareContextMenuExtensionsRegistryProvider);
-  const savedObjectRegistry = Private(SavedObjectRegistryProvider);
   const State = Private(StateProvider);
+
   return {
-    getInjector: () => {
-      return injector;
-    },
     getSavedSearchById: async (id: string, kbnUrl: unknown) => {
       const SavedSearch = createSavedSearchFactory(Private);
       const service = createSavedSearchesService(Private, SavedSearch, kbnUrl, chromeLegacy);
       return service.get(id);
     },
+    getSavedSearchUrlById: async (id: string, kbnUrl: unknown) => {
+      const SavedSearch = createSavedSearchFactory(Private);
+      const service = createSavedSearchesService(Private, SavedSearch, kbnUrl, chromeLegacy);
+      return service.urlFor(id);
+    },
     getUnhashableStates,
-    injector,
-    Private,
-    queryFilter,
-    savedObjectRegistry,
     shareContextMenuExtensions,
     State,
   };
