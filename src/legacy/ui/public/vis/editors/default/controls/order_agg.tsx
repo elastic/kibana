@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { AggParamType } from '../../../../agg_types/param_types/agg';
 import { AggConfig } from '../../..';
@@ -51,8 +51,6 @@ function OrderAggParamEditor({
     }
   }, [agg.params.orderBy, metricAggs]);
 
-  const [innerState, setInnerState] = useState(true);
-
   if (!agg.params.orderAgg) {
     return null;
   }
@@ -68,11 +66,7 @@ function OrderAggParamEditor({
         indexPattern={agg.getIndexPattern()}
         metricAggs={metricAggs}
         state={state}
-        onAggParamsChange={(...rest) => {
-          // to force update when sub-agg params are changed
-          setInnerState(!innerState);
-          subAggParams.onAggParamsChange(...rest);
-        }}
+        setAggParamValue={subAggParams.setAggParamValue}
         onAggTypeChange={subAggParams.onAggTypeChange}
         setValidity={setValidity}
         setTouched={setTouched}

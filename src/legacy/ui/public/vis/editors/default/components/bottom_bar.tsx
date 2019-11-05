@@ -17,21 +17,35 @@
  * under the License.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { EuiBottomBar, EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { Vis } from 'ui/vis';
+import { useEditorContext } from '../state';
 
 interface DefaultEditorBottomBarProps {
   vis: Vis;
-  isDirty: boolean;
+  state: any;
   discardChanges(vis: Vis): void;
 }
 
-function DefaultEditorBottomBar({ discardChanges, isDirty, vis }: DefaultEditorBottomBarProps) {
+function DefaultEditorBottomBar({ discardChanges, vis, state }: DefaultEditorBottomBarProps) {
   const { enableAutoApply } = vis.type.editorConfig;
   const onClickDiscard = useCallback(() => discardChanges(vis), [discardChanges, vis]);
+  const { isDirty, setDirty } = useEditorContext();
+
+  const applyChanges = useCallback(() => {
+    vis.setCurrentState(state);
+    vis.updateState();
+    setDirty(false);
+  }, [vis, state]);
+
+  useEffect(() => {
+    vis.on('dirtyStateChange', ({ isDirty: dirty }: { isDirty: boolean }) => {
+      setDirty(dirty);
+    });
+  }, [vis]);
 
   return (
     <EuiBottomBar>
@@ -75,6 +89,7 @@ function DefaultEditorBottomBar({ discardChanges, isDirty, vis }: DefaultEditorB
                     disabled={!isDirty || enableAutoApply}
                     fill
                     iconType="play"
+                    onClick={applyChanges}
                     size="s"
                   >
                     <FormattedMessage

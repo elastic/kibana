@@ -56,8 +56,6 @@ function SubMetricParamEditor({
     }
   }, []);
 
-  const [innerState, setInnerState] = useState(true);
-
   if (!agg.params[type]) {
     return null;
   }
@@ -75,11 +73,7 @@ function SubMetricParamEditor({
         indexPattern={agg.getIndexPattern()}
         metricAggs={metricAggs}
         state={state}
-        onAggParamsChange={(...rest) => {
-          // to force update when sub-agg params are changed
-          setInnerState(!innerState);
-          subAggParams.onAggParamsChange(...rest);
-        }}
+        setAggParamValue={subAggParams.setAggParamValue}
         onAggTypeChange={subAggParams.onAggTypeChange}
         setValidity={setValidity}
         setTouched={setTouched}

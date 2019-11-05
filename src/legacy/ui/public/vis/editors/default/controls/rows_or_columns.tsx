@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiButtonGroup, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AggControlProps } from './agg_control_props';
@@ -28,8 +28,8 @@ const PARAMS = {
   COLUMNS: 'visEditorSplitBy__false',
 };
 
-function RowsOrColumnsControl({ aggParams, setValue }: AggControlProps) {
-  const idSelected = `visEditorSplitBy__${aggParams.row}`;
+function RowsOrColumnsControl({ agg, setAggParamValue }: AggControlProps) {
+  const idSelected = `visEditorSplitBy__${agg.params.row}`;
   const options = [
     {
       id: PARAMS.ROWS,
@@ -44,6 +44,10 @@ function RowsOrColumnsControl({ aggParams, setValue }: AggControlProps) {
       }),
     },
   ];
+  const onChange = useCallback(
+    optionId => setAggParamValue(agg.id, PARAMS.NAME, optionId === PARAMS.ROWS),
+    [setAggParamValue]
+  );
 
   return (
     <>
@@ -56,7 +60,7 @@ function RowsOrColumnsControl({ aggParams, setValue }: AggControlProps) {
           options={options}
           isFullWidth={true}
           idSelected={idSelected}
-          onChange={optionId => setValue(aggParams, PARAMS.NAME, optionId === PARAMS.ROWS)}
+          onChange={onChange}
         />
       </EuiFormRow>
       <EuiSpacer size="m" />

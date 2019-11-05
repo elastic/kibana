@@ -101,6 +101,10 @@ export function VisProvider(Private, getAppState) {
       }
     }
 
+    setVisType(type) {
+      this.type.type = type;
+    }
+
     updateState() {
       this.setState(this.getCurrentState(true));
       this.emit('update');

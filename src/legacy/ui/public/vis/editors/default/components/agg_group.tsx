@@ -57,7 +57,7 @@ function DefaultEditorAggGroup({
   state,
   schemas = [],
   addSchema,
-  onAggParamsChange,
+  setAggParamValue,
   onAggTypeChange,
   onToggleEnableAgg,
   removeAgg,
@@ -165,7 +165,7 @@ function DefaultEditorAggGroup({
                     lastParentPipelineAggTitle={lastParentPipelineAggTitle}
                     metricAggs={metricAggs}
                     state={state}
-                    onAggParamsChange={onAggParamsChange}
+                    setAggParamValue={setAggParamValue}
                     onAggTypeChange={onAggTypeChange}
                     onToggleEnableAgg={onToggleEnableAgg}
                     removeAgg={removeAgg}

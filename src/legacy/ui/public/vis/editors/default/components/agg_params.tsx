@@ -48,7 +48,7 @@ import { FixedParam, TimeIntervalParam, EditorParamConfig } from '../../config/t
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { useUnmount } from '../../../../../../../plugins/kibana_react/public/util/use_unmount';
 import { AggGroupNames } from '../agg_groups';
-import { OnParamChange } from './agg_common_props';
+import { EditorActions } from '../state/actions';
 
 const FIXED_VALUE_PROP = 'fixedValue';
 const DEFAULT_PROP = 'default';
@@ -57,7 +57,7 @@ type EditorParamConfigType = EditorParamConfig & {
 };
 export interface SubAggParamsProp {
   formIsTouched: boolean;
-  onAggParamsChange: OnParamChange;
+  setAggParamValue: EditorActions['setAggParamValue'];
   onAggTypeChange: (aggId: AggConfig['id'], aggType: AggType) => void;
 }
 export interface DefaultEditorAggParamsProps extends SubAggParamsProp {
@@ -87,7 +87,7 @@ function DefaultEditorAggParams({
   indexPattern,
   metricAggs,
   state = {} as VisState,
-  onAggParamsChange,
+  setAggParamValue,
   onAggTypeChange,
   setTouched,
   setValidity,
@@ -144,7 +144,7 @@ function DefaultEditorAggParams({
         } else {
           newValue = typedParamConfig[property];
         }
-        onAggParamsChange(agg.params, param, newValue);
+        setAggParamValue(agg.id, param, newValue);
       }
     });
   }, [editorConfig]);
@@ -168,7 +168,7 @@ function DefaultEditorAggParams({
         key={`${paramInstance.aggParam.name}${agg.type ? agg.type.name : ''}`}
         disabled={disabledParams && disabledParams.includes(paramInstance.aggParam.name)}
         showValidation={formIsTouched || model.touched}
-        onChange={onAggParamsChange}
+        setAggParamValue={setAggParamValue}
         setValidity={valid => {
           onChangeParamsState({
             type: AGG_PARAMS_ACTION_KEYS.VALID,
@@ -185,7 +185,7 @@ function DefaultEditorAggParams({
           });
         }}
         subAggParams={{
-          onAggParamsChange,
+          setAggParamValue,
           onAggTypeChange,
           formIsTouched,
         }}

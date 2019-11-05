@@ -29,7 +29,7 @@ import { TimeRange } from 'src/plugins/data/public';
 
 import { DefaultEditorSideBar, OptionTab } from './components/sidebar';
 import { DefaultEditorBottomBar } from './components/bottom_bar';
-import { useEditorContext, useEditorReducer } from './state';
+import { useEditorReducer } from './state';
 // import { Resizer } from './resizer';
 
 const sidebarClassName = 'visEditor__collapsibleSidebar';
@@ -58,7 +58,6 @@ function DefaultEditor({
   const sidebarRef = useRef<HTMLDivElement>(null);
   const [visHandler, setVisHandler] = useState<EmbeddedVisualizeHandler | null>(null);
   // const [sidebarStyle, setSidebarStyle] = useState({});
-  const { isDirty, setDirty } = useEditorContext();
   const [state, actions] = useEditorReducer(vis);
 
   useEffect(() => {
@@ -87,16 +86,6 @@ function DefaultEditor({
 
     visualize();
   }, [visRef.current, visHandler, uiState, savedObj, timeRange, filters, appState]);
-
-  const setVisType = type => {
-    vis.type.type = type;
-  };
-
-  useEffect(() => {
-    vis.on('dirtyStateChange', ({ isDirty: dirty }: { isDirty: boolean }) => {
-      setDirty(dirty);
-    });
-  }, [vis]);
 
   // const onResize = useCallback(width => {
   //   setSidebarStyle(style => ({ ...style, width }));
@@ -129,12 +118,11 @@ function DefaultEditor({
           vis={vis}
           state={state}
           uiState={uiState}
-          setVisType={setVisType}
           actions={actions}
         />
       </div>
 
-      <DefaultEditorBottomBar discardChanges={actions.discardChanges} isDirty={isDirty} vis={vis} />
+      <DefaultEditorBottomBar discardChanges={actions.discardChanges} state={state} vis={vis} />
     </div>
   );
 }

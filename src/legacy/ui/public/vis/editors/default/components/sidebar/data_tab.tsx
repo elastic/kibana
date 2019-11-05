@@ -17,12 +17,23 @@
  * under the License.
  */
 
-import React, { useCallback } from 'react';
+import React, { useMemo } from 'react';
+import { findLast } from 'lodash';
 import { EuiSpacer } from '@elastic/eui';
+
+import { parentPipelineAggHelper } from 'ui/agg_types/metrics/lib/parent_pipeline_agg_helper';
+import { AggConfig } from 'ui/agg_types';
+import { MetricAggType } from 'ui/agg_types/metrics/metric_agg_type';
 import { DefaultEditorAggGroup } from '../agg_group';
 import { AggGroupNames } from '../../agg_groups';
+import { EditorActions } from '../../state/actions';
 
-function DefaultEditorDataTab({ metricAggs, state, schemas, actions }) {
+interface DefaultEditorDataTabProps {
+  metricAggs: AggConfig[];
+  actions: EditorActions;
+}
+
+function DefaultEditorDataTab({ metricAggs, state, schemas, actions }: DefaultEditorDataTabProps) {
   const setValidity = () => {
     console.log('setValidity');
   };
@@ -30,12 +41,24 @@ function DefaultEditorDataTab({ metricAggs, state, schemas, actions }) {
     console.log('setTouched');
   };
 
+  const lastParentPipelineAgg = useMemo(
+    () =>
+      findLast(
+        metricAggs,
+        ({ type }: { type: MetricAggType }) => type.subtype === parentPipelineAggHelper.subtype
+      ),
+    [metricAggs]
+  );
+  const lastParentPipelineAggTitle = lastParentPipelineAgg && lastParentPipelineAgg.type.title;
+
   const commonProps = {
     addSchema: actions.addNewAgg,
+    lastParentPipelineAggTitle,
     metricAggs,
     state,
     reorderAggs: actions.reorderAggs,
-    onAggParamsChange: actions.setAggParamValue,
+    setAggParamValue: actions.setAggParamValue,
+    setStateParamValue: actions.setStateParamValue,
     onAggTypeChange: actions.changeAggType,
     onToggleEnableAgg: actions.toggleEnabledAgg,
     setValidity,

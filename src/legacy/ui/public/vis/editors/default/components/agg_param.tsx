@@ -20,19 +20,19 @@
 import React, { useCallback, useEffect } from 'react';
 
 import { AggParamEditorProps, AggParamCommonProps } from './agg_param_props';
-import { OnParamChange } from './agg_common_props';
+import { EditorActions } from '../state/actions';
 
 interface DefaultEditorAggParamProps<T> extends AggParamCommonProps<T> {
   paramEditor: React.ComponentType<AggParamEditorProps<T>>;
-  onChange: OnParamChange;
+  setAggParamValue: EditorActions['setAggParamValue'];
 }
 
 function DefaultEditorAggParam<T>(props: DefaultEditorAggParamProps<T>) {
-  const { agg, aggParam, paramEditor: ParamEditor, onChange, setValidity, ...rest } = props;
+  const { agg, aggParam, paramEditor: ParamEditor, setAggParamValue, setValidity, ...rest } = props;
 
-  const setValue = useCallback((value: T) => onChange(agg.id, aggParam.name, value), [
-    onChange,
-    agg.params,
+  const setValue = useCallback((value: T) => setAggParamValue(agg.id, aggParam.name, value), [
+    setAggParamValue,
+    agg.id,
     aggParam.name,
   ]);
 

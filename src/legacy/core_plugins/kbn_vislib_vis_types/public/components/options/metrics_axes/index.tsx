@@ -285,8 +285,8 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
   }, [stateParams.seriesParams]);
 
   useEffect(() => {
-    setVisType(visType);
-  }, [visType]);
+    vis.setVisType(visType);
+  }, [vis, visType]);
 
   useEffect(() => {
     if (!isDirty) {

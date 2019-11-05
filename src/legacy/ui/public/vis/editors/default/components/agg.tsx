@@ -57,7 +57,8 @@ function DefaultEditorAgg({
   metricAggs,
   lastParentPipelineAggTitle,
   state,
-  onAggParamsChange,
+  setAggParamValue,
+  setStateParamValue,
   onAggTypeChange,
   onToggleEnableAgg,
   removeAgg,
@@ -103,8 +104,8 @@ function DefaultEditorAgg({
 
   useEffect(() => {
     if (isLastBucketAgg && ['date_histogram', 'histogram'].includes(agg.type.name)) {
-      onAggParamsChange(
-        agg.params,
+      setAggParamValue(
+        agg.id,
         'min_doc_count',
         // "histogram" agg has an editor for "min_doc_count" param, which accepts boolean
         // "date_histogram" agg doesn't have an editor for "min_doc_count" param, it should be set as a numeric value
@@ -248,9 +249,10 @@ function DefaultEditorAgg({
         <EuiSpacer size="m" />
         {SchemaComponent && (
           <SchemaComponent
-            aggParams={agg.params}
+            agg={agg}
             editorStateParams={state.params}
-            setValue={onAggParamsChange}
+            setAggParamValue={setAggParamValue}
+            setStateParamValue={setStateParamValue}
           />
         )}
         <DefaultEditorAggParams
@@ -264,7 +266,7 @@ function DefaultEditorAgg({
           indexPattern={agg.getIndexPattern()}
           metricAggs={metricAggs}
           state={state}
-          onAggParamsChange={onAggParamsChange}
+          setAggParamValue={setAggParamValue}
           onAggTypeChange={onAggTypeChange}
           setTouched={setTouched}
           setValidity={onSetValidity}

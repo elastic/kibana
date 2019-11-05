@@ -17,28 +17,41 @@
  * under the License.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { get } from 'lodash';
 
+import { Vis, VisState } from 'ui/vis';
+import { PersistedState } from 'ui/persisted_state';
 import { DefaultEditorNavBar, OptionTab } from './navbar';
+import { EditorActions } from '../../state/actions';
+import { AggGroupNames } from '../../agg_groups';
 
 interface DefaultEditorSideBarProps {
-  hasHistogramAgg?: boolean;
+  actions: EditorActions;
   optionTabs: OptionTab[];
+  state: VisState;
+  uiState: PersistedState;
+  vis: Vis;
 }
 
 function DefaultEditorSideBar({
-  hasHistogramAgg,
+  actions,
   optionTabs,
-  metricAggs,
-  vis,
-  stageEditableVis,
   state,
   uiState,
-  setVisType,
-  actions,
+  vis,
 }: DefaultEditorSideBarProps) {
   const [selectedTab, setSelectedTab] = useState(optionTabs[0].name);
+
+  const responseAggs = useMemo(() => state.aggs.getResponseAggs(), [state.aggs]);
+  const metricAggs = useMemo(
+    () => responseAggs.filter(agg => get(agg, 'schema.group') === AggGroupNames.Metrics),
+    [responseAggs]
+  );
+  const hasHistogramAgg = useMemo(() => responseAggs.some(agg => agg.type.name === 'histogram'), [
+    responseAggs,
+  ]);
 
   const setValidity = () => {};
   const setTouched = () => {};
@@ -58,7 +71,6 @@ function DefaultEditorSideBar({
     uiState,
     setValue: actions.setStateParamValue,
     setValidity,
-    setVisType,
     setTouched,
   };
 
