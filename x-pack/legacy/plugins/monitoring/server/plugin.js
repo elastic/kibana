@@ -137,7 +137,7 @@ export class Plugin {
       };
     });
 
-    if (KIBANA_ALERTING_ENABLED) {
+    if (KIBANA_ALERTING_ENABLED && plugins.alerting) {
       // this is not ready right away but we need to register
       // alerts right away
       async function getMonitoringCluster() {

@@ -17,7 +17,12 @@ import { initInfraSource } from './server/lib/logs/init_infra_source';
  * @return {Object} Monitoring UI Kibana plugin object
  */
 export const monitoring = (kibana) => new kibana.Plugin({
-  require: ['kibana', 'elasticsearch', 'xpack_main', 'alerting'],
+  require: ['kibana', 'elasticsearch', 'xpack_main'],
+  // Uncomment these lines to turn on alerting and action for kibana alerting and comment the other
+  // require statement out. These are hidden behind feature flags at the moment so if you turn
+  // these on without the feature flags turned on then Kibana will crash since we are a legacy plugin
+  // and legacy plugins cannot have optional requirements.
+  // require: ['kibana', 'elasticsearch', 'xpack_main', 'alerting', 'actions'],
   id: 'monitoring',
   configPrefix: 'xpack.monitoring',
   publicDir: resolve(__dirname, 'public'),
