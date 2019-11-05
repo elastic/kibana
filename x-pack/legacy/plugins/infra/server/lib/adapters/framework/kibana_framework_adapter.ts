@@ -16,6 +16,9 @@ import {
   InfraTSVBResponse,
   InfraServerPluginDeps,
   InfraDatabaseSearchResponse,
+  InfraDatabaseMultiResponse,
+  InfraDatabaseFieldCapsResponse,
+  InfraDatabaseGetIndicesResponse,
 } from './adapter_types';
 import { TSVBMetricModel } from '../../../../common/inventory_models/types';
 import {
@@ -150,6 +153,43 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
     this.router.post(routeOptions, handler);
     this.router.get(routeOptions, handler);
   }
+
+  callWithRequest<Hit = {}, Aggregation = undefined>(
+    requestContext: RequestHandlerContext,
+    endpoint: 'search',
+    options?: CallWithRequestParams
+  ): Promise<InfraDatabaseSearchResponse<Hit, Aggregation>>;
+  callWithRequest<Hit = {}, Aggregation = undefined>(
+    requestContext: RequestHandlerContext,
+    endpoint: 'msearch',
+    options?: CallWithRequestParams
+  ): Promise<InfraDatabaseMultiResponse<Hit, Aggregation>>;
+  callWithRequest(
+    requestContext: RequestHandlerContext,
+    endpoint: 'fieldCaps',
+    options?: CallWithRequestParams
+  ): Promise<InfraDatabaseFieldCapsResponse>;
+  callWithRequest(
+    requestContext: RequestHandlerContext,
+    endpoint: 'indices.existsAlias',
+    options?: CallWithRequestParams
+  ): Promise<boolean>;
+  callWithRequest(
+    requestContext: RequestHandlerContext,
+    endpoint: 'indices.getAlias' | 'indices.get',
+    options?: CallWithRequestParams
+  ): Promise<InfraDatabaseGetIndicesResponse>;
+  callWithRequest(
+    requestContext: RequestHandlerContext,
+    /* eslint-disable-next-line  @typescript-eslint/unified-signatures */
+    endpoint: 'ml.getBuckets',
+    options?: CallWithRequestParams
+  ): Promise<InfraDatabaseGetIndicesResponse>;
+  callWithRequest(
+    requestContext: RequestHandlerContext,
+    endpoint: string,
+    options?: CallWithRequestParams
+  ): Promise<InfraDatabaseSearchResponse>;
 
   public async callWithRequest<Hit = {}, Aggregation = undefined>(
     requestContext: RequestHandlerContext,

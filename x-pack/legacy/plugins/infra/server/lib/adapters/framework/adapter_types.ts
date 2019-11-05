@@ -36,42 +36,9 @@ export interface InfraServerPluginDeps {
 export interface InfraBackendFrameworkAdapter {
   plugins: InfraServerPluginDeps;
   registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void;
-  callWithRequest<Hit = {}, Aggregation = undefined>(
-    requestContext: RequestHandlerContext,
-    endpoint: 'search',
-    options?: object
-  ): Promise<InfraDatabaseSearchResponse<Hit, Aggregation>>;
 
-  callWithRequest<Hit = {}, Aggregation = undefined>(
-    requestContext: RequestHandlerContext,
-    endpoint: 'msearch',
-    options?: object
-  ): Promise<InfraDatabaseMultiResponse<Hit, Aggregation>>;
-  callWithRequest(
-    requestContext: RequestHandlerContext,
-    endpoint: 'fieldCaps',
-    options?: object
-  ): Promise<InfraDatabaseFieldCapsResponse>;
-  callWithRequest(
-    requestContext: RequestHandlerContext,
-    endpoint: 'indices.existsAlias',
-    options?: object
-  ): Promise<boolean>;
-  callWithRequest(
-    requestContext: RequestHandlerContext,
-    endpoint: 'indices.getAlias' | 'indices.get',
-    options?: object
-  ): Promise<InfraDatabaseGetIndicesResponse>;
-  callWithRequest(
-    requestContext: RequestHandlerContext,
-    endpoint: 'ml.getBuckets',
-    options?: object
-  ): Promise<InfraDatabaseGetIndicesResponse>;
-  callWithRequest(
-    requestContext: RequestHandlerContext,
-    endpoint: string,
-    options?: object
-  ): Promise<InfraDatabaseSearchResponse>;
+  // NP_TODO: Why didn't the callWithRequest overrides work here, but they work
+  // when we copied them into the kibana_framework_adapter file directly??
 
   getIndexPatternsService(requestContext: RequestHandlerContext): Legacy.IndexPatternsService;
   getSpaceId(requestContext: RequestHandlerContext): string;
