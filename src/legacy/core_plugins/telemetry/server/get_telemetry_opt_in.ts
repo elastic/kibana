@@ -17,7 +17,21 @@
  * under the License.
  */
 
-export async function getTelemetryOptIn(request: any) {
+import semver from 'semver';
+
+import { SavedObjectAttributes } from './routes/opt_in';
+
+interface GetTelemetryOptIn {
+  request: any;
+  currentKibanaVersion: string;
+}
+
+// Returns whether telemetry has been opt'ed into or not.
+// Returns null not set, meaning Kibana should prompt in the UI.
+export async function getTelemetryOptIn({
+  request,
+  currentKibanaVersion,
+}: GetTelemetryOptIn): Promise<boolean | null> {
   const isRequestingApplication = request.path.startsWith('/app');
 
   // Prevent interstitial screens (such as the space selector) from prompting for telemetry
@@ -27,9 +41,9 @@ export async function getTelemetryOptIn(request: any) {
 
   const savedObjectsClient = request.getSavedObjectsClient();
 
+  let savedObject;
   try {
-    const { attributes } = await savedObjectsClient.get('telemetry', 'telemetry');
-    return attributes.enabled;
+    savedObject = await savedObjectsClient.get('telemetry', 'telemetry');
   } catch (error) {
     if (savedObjectsClient.errors.isNotFoundError(error)) {
       return null;
@@ -42,5 +56,51 @@ export async function getTelemetryOptIn(request: any) {
     }
 
     throw error;
+  }
+
+  const { attributes }: { attributes: SavedObjectAttributes } = savedObject;
+
+  // if enabled is already null, return null
+  if (attributes.enabled == null) return null;
+
+  const enabled = !!attributes.enabled;
+
+  // if enabled is true, return it
+  if (enabled === true) return enabled;
+
+  // Additional check if they've already opted out (enabled: false):
+  // - if the Kibana version has changed by at least a minor version,
+  //   return null to re-prompt.
+
+  const lastKibanaVersion = attributes.lastVersionChecked;
+
+  // if the last kibana version isn't set, or is somehow not a string, return null
+  if (typeof lastKibanaVersion !== 'string') return null;
+
+  // if version hasn't changed, just return enabled value
+  if (lastKibanaVersion === currentKibanaVersion) return enabled;
+
+  const lastSemver = parseSemver(lastKibanaVersion);
+  const currentSemver = parseSemver(currentKibanaVersion);
+
+  // if either version is invalid, return null
+  if (lastSemver == null || currentSemver == null) return null;
+
+  // actual major/minor version comparison, for cases when to return null
+  if (currentSemver.major > lastSemver.major) return null;
+  if (currentSemver.major === lastSemver.major) {
+    if (currentSemver.minor > lastSemver.minor) return null;
+  }
+
+  // current version X.Y is not greater than last version X.Y, return enabled
+  return enabled;
+}
+
+function parseSemver(version: string): semver.SemVer | null {
+  // semver functions both return nulls AND throw exceptions: "it depends!"
+  try {
+    return semver.parse(version);
+  } catch (err) {
+    return null;
   }
 }
