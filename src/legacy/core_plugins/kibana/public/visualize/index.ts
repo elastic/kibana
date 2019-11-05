@@ -82,6 +82,7 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
   });
   instance.start(npStart.core, {
     dataStart,
+    npData: npStart.plugins.data,
     embeddables,
     navigation,
     visualizations,

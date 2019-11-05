@@ -39,6 +39,27 @@ import { ensureDefaultIndexPattern } from './kibana_services';
 export function initVisualizeApp(app, deps) {
   initVisualizeAppDirective(app, deps);
 
+  app.run(globalState => {
+    globalState.fetch();
+    const hasGlobalURLState = Object.keys(globalState.toObject()).length;
+    if (!globalState.time) {
+      globalState.time = deps.dataStart.timefilter.timefilter.getTime();
+    }
+    if (!globalState.refreshInterval) {
+      globalState.refreshInterval = deps.dataStart.timefilter.timefilter.getRefreshInterval();
+    }
+    // only inject cross app global state if there is none in the url itself (that takes precedence)
+    if (!hasGlobalURLState) {
+      const globalStateStuff = deps.sessionStorage.get('oss-kibana-cross-app-state') || {};
+      Object.keys(globalStateStuff).forEach(key => {
+        globalState[key] = globalStateStuff[key];
+      });
+    } else {
+      globalState.$inheritedGlobalState = true;
+    }
+    globalState.save();
+  });
+
   app.config(function ($routeProvider) {
     const defaults = {
       requireUICapability: 'visualize.show',

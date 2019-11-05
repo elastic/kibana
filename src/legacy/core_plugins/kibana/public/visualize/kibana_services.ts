@@ -26,13 +26,13 @@ import {
   UiSettingsClientContract,
 } from 'kibana/public';
 
-// load directives
-import '../../../data/public';
+import { DataStart } from '../../../data/public';
 
 import { SavedQueryService } from '../../../data/public/search/search_bar/lib/saved_query_service';
 import { NavigationStart } from '../../../navigation/public';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { EmbeddablePublicPlugin } from '../../../../../plugins/embeddable/public';
+import { DataPublicPluginStart as NpDataStart } from '../../../../../plugins/data/public';
 import { SavedVisualizations } from './types';
 
 export interface VisualizeKibanaServices {
@@ -41,7 +41,8 @@ export interface VisualizeKibanaServices {
   chrome: ChromeStart;
   chromeLegacy: any;
   core: LegacyCoreStart;
-  dataStart: any;
+  dataStart: DataStart;
+  npDataStart: NpDataStart;
   docLinks: DocLinksStart;
   embeddables: ReturnType<EmbeddablePublicPlugin['start']>;
   getBasePath: () => string;

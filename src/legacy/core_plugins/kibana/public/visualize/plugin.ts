@@ -36,6 +36,7 @@ import {
 } from 'kibana/public';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { DataStart } from '../../../data/public';
+import { DataPublicPluginStart as NpDataStart } from '../../../../../plugins/data/public';
 import { EmbeddablePublicPlugin } from '../../../../../plugins/embeddable/public';
 import { NavigationStart } from '../../../navigation/public';
 import { VisualizationsStart } from '../../../visualizations/public';
@@ -60,6 +61,7 @@ export interface LegacyAngularInjectedDependencies {
 
 export interface VisualizePluginStartDependencies {
   dataStart: DataStart;
+  npData: NpDataStart;
   embeddables: ReturnType<EmbeddablePublicPlugin['start']>;
   navigation: NavigationStart;
   visualizations: VisualizationsStart;
@@ -78,6 +80,7 @@ export interface VisualizePluginSetupDependencies {
 export class VisualizePlugin implements Plugin {
   private startDependencies: {
     dataStart: DataStart;
+    npDataStart: NpDataStart;
     embeddables: ReturnType<EmbeddablePublicPlugin['start']>;
     navigation: NavigationStart;
     savedObjectsClient: SavedObjectsClientContract;
@@ -110,6 +113,7 @@ export class VisualizePlugin implements Plugin {
           embeddables,
           navigation,
           visualizations,
+          npDataStart,
         } = this.startDependencies;
 
         const angularDependencies = await getAngularDependencies();
@@ -121,6 +125,7 @@ export class VisualizePlugin implements Plugin {
           core: contextCore as LegacyCoreStart,
           chrome: contextCore.chrome,
           dataStart,
+          npDataStart,
           docLinks: contextCore.docLinks,
           embeddables,
           getBasePath: core.http.basePath.get,
@@ -166,10 +171,11 @@ export class VisualizePlugin implements Plugin {
 
   start(
     { savedObjects: { client: savedObjectsClient } }: CoreStart,
-    { dataStart, embeddables, navigation, visualizations }: VisualizePluginStartDependencies
+    { dataStart, embeddables, navigation, visualizations, npData }: VisualizePluginStartDependencies
   ) {
     this.startDependencies = {
       dataStart,
+      npDataStart: npData,
       embeddables,
       navigation,
       savedObjectsClient,

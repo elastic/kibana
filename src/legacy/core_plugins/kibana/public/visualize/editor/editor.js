@@ -28,7 +28,7 @@ import { migrateAppState } from './lib';
 import { DashboardConstants } from '../../dashboard/dashboard_constants';
 import { VisualizeConstants } from '../visualize_constants';
 import { getEditBreadcrumbs } from '../breadcrumbs';
-import { extractTimeFilter, changeTimeFilter } from '../../../../data/public';
+import { extractTimeFilter, changeTimeFilter, FilterStateManager } from '../../../../data/public';
 
 import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
 
@@ -79,7 +79,6 @@ function VisualizeAppController(
     angular,
     indexPatterns,
     localStorage,
-    queryFilter,
     visualizeCapabilities,
     shareContextMenuExtensions,
     dataStart: {
@@ -93,8 +92,11 @@ function VisualizeAppController(
     docLinks,
     savedQueryService,
     uiSettings,
+    npDataStart,
   } = getServices();
 
+  new FilterStateManager(globalState, getAppState, npDataStart.query.filterManager);
+  const queryFilter = npDataStart.query.filterManager;
   // Retrieve the resolved SavedVis instance.
   const savedVis = $route.current.locals.savedVis;
   // vis is instance of src/legacy/ui/public/vis/vis.js.
