@@ -17,17 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
-
-// @ts-ignore
-import { uiModules } from 'ui/modules';
 import { IInjector } from 'ui/chrome';
-
-// @ts-ignore
-import * as filterActions from 'plugins/kibana/discover/doc_table/actions/filter';
-
-// @ts-ignore
-import { getFilterGenerator } from 'ui/filter_manager';
 
 import {
   AppStateClass as TAppStateClass,
@@ -37,8 +27,6 @@ import {
 import { KbnUrl } from 'ui/url/kbn_url';
 import { Filter } from '@kbn/es-query';
 import { TimeRange } from 'src/plugins/data/public';
-import { IndexPattern } from 'ui/index_patterns';
-import { IPrivate } from 'ui/private';
 import { StaticIndexPattern, Query, SavedQuery } from 'plugins/data';
 import moment from 'moment';
 import { Subscription } from 'rxjs';
@@ -48,6 +36,7 @@ import { SavedObjectDashboard } from './saved_dashboard/saved_dashboard';
 import { DashboardAppState, SavedDashboardPanel, ConfirmModalFn } from './types';
 
 import { DashboardAppController } from './dashboard_app_controller';
+import { RenderDeps } from './render_app';
 
 export interface DashboardAppScope extends ng.IScope {
   dash: SavedObjectDashboard;
@@ -94,54 +83,40 @@ export interface DashboardAppScope extends ng.IScope {
   kbnTopNav: any;
   enterEditMode: () => void;
   timefilterSubscriptions$: Subscription;
+  isVisible: boolean;
 }
 
-const app = uiModules.get('app/dashboard', ['elasticsearch', 'ngRoute', 'react', 'kibana/config']);
+export function initDashboardAppDirective(app: any, deps: RenderDeps) {
+  app.directive('dashboardApp', function($injector: IInjector) {
+    const AppState = $injector.get<TAppStateClass<DashboardAppState>>('AppState');
+    const kbnUrl = $injector.get<KbnUrl>('kbnUrl');
+    const confirmModal = $injector.get<ConfirmModalFn>('confirmModal');
+    const config = deps.uiSettings;
 
-app.directive('dashboardApp', function($injector: IInjector) {
-  const AppState = $injector.get<TAppStateClass<DashboardAppState>>('AppState');
-  const kbnUrl = $injector.get<KbnUrl>('kbnUrl');
-  const confirmModal = $injector.get<ConfirmModalFn>('confirmModal');
-  const config = $injector.get('config');
-
-  const Private = $injector.get<IPrivate>('Private');
-
-  const indexPatterns = $injector.get<{
-    getDefault: () => Promise<IndexPattern>;
-  }>('indexPatterns');
-
-  return {
-    restrict: 'E',
-    controllerAs: 'dashboardApp',
-    controller: (
-      $scope: DashboardAppScope,
-      $route: any,
-      $routeParams: {
-        id?: string;
-      },
-      getAppState: {
-        previouslyStored: () => TAppState | undefined;
-      },
-      dashboardConfig: {
-        getHideWriteControls: () => boolean;
-      },
-      localStorage: {
-        get: (prop: string) => unknown;
-      }
-    ) =>
-      new DashboardAppController({
-        $route,
-        $scope,
-        $routeParams,
-        getAppState,
-        dashboardConfig,
-        localStorage,
-        Private,
-        kbnUrl,
-        AppStateClass: AppState,
-        indexPatterns,
-        config,
-        confirmModal,
-      }),
-  };
-});
+    return {
+      restrict: 'E',
+      controllerAs: 'dashboardApp',
+      controller: (
+        $scope: DashboardAppScope,
+        $route: any,
+        $routeParams: {
+          id?: string;
+        },
+        getAppState: any,
+        globalState: any
+      ) =>
+        new DashboardAppController({
+          $route,
+          $scope,
+          $routeParams,
+          getAppState,
+          globalState,
+          kbnUrl,
+          AppStateClass: AppState,
+          config,
+          confirmModal,
+          ...deps,
+        }),
+    };
+  });
+}

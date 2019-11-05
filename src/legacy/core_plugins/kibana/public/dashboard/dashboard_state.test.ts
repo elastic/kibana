@@ -55,6 +55,7 @@ describe('DashboardState', function() {
       savedDashboard,
       AppStateClass: getAppStateMock() as AppStateClass<DashboardAppState>,
       hideWriteControls: false,
+      kibanaVersion: '7.0.0',
     });
   }
 

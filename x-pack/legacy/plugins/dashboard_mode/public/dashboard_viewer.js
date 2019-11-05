@@ -36,12 +36,16 @@ import 'ui/agg_response';
 import 'ui/agg_types';
 import 'leaflet';
 import { npStart } from 'ui/new_platform';
+import { localApplicationService } from 'plugins/kibana/local_application_service';
+
 
 import { showAppRedirectNotification } from 'ui/notify';
 import { DashboardConstants, createDashboardEditUrl } from 'plugins/kibana/dashboard/dashboard_constants';
 
 uiModules.get('kibana')
   .config(dashboardConfigProvider => dashboardConfigProvider.turnHideWriteControlsOn());
+
+localApplicationService.attachToAngular(routes);
 
 routes.enable();
 routes.otherwise({ redirectTo: defaultUrl() });

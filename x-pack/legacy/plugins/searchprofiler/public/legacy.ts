@@ -8,7 +8,6 @@
 import { npSetup } from 'ui/new_platform';
 import { I18nContext } from 'ui/i18n';
 import uiRoutes from 'ui/routes';
-import 'ui/capabilities/route_setup';
 // @ts-ignore
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 // @ts-ignore
