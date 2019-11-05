@@ -119,7 +119,6 @@ export { tabifyAggResponse } from 'ui/agg_response/tabify';
 // @ts-ignore
 export { vislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
 export { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
-export { ensureDefaultIndexPattern } from 'ui/legacy_compat';
 
 // EXPORT types
 export { VisProvider } from 'ui/vis';
