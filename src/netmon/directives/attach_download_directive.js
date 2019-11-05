@@ -29,6 +29,7 @@ module.directive('attachDownload', function (reactDirective) {
   return reactDirective(AttachDownload,
     [
       'session',
-      'fileName'
+      'fileName',
+      'captured'
     ]);
 });

@@ -42,7 +42,7 @@ import FileDownloadRow from './file_download_row';
 
 const useStyles = createUseStyles({
   modal: {
-    width: '600px',
+    minWidth: '600px',
   },
   footer: {
     display: 'flex',
