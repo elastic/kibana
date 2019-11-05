@@ -46,8 +46,6 @@ import { VISUALIZE_EMBEDDABLE_TYPE } from './embeddable/constants';
 import { VisualizeConstants } from './visualize_constants';
 import { setServices, VisualizeKibanaServices, DocTitle } from './kibana_services';
 
-import { start as visualizationsStart } from '../../../visualizations/public/np_ready/public/legacy';
-
 export interface LegacyAngularInjectedDependencies {
   chromeLegacy: any;
   editorTypes: any;
@@ -65,10 +63,10 @@ export interface VisualizePluginStartDependencies {
   embeddables: ReturnType<EmbeddablePublicPlugin['start']>;
   navigation: NavigationStart;
   visualizations: VisualizationsStart;
+  getAngularDependencies: () => Promise<LegacyAngularInjectedDependencies>;
 }
 
 export interface VisualizePluginSetupDependencies {
-  embeddableSetup: ReturnType<EmbeddablePublicPlugin['setup']>;
   __LEGACY: {
     getAngularDependencies: () => Promise<LegacyAngularInjectedDependencies>;
     localApplicationService: LocalApplicationService;
@@ -90,7 +88,6 @@ export class VisualizePlugin implements Plugin {
   public async setup(
     core: CoreSetup,
     {
-      embeddableSetup,
       __LEGACY: {
         localApplicationService,
         getAngularDependencies,
@@ -135,6 +132,7 @@ export class VisualizePlugin implements Plugin {
           navigation,
           savedObjectsClient,
           savedQueryService: dataStart.search.services.savedQueryService,
+          sessionStorage: new Storage(sessionStorage),
           toastNotifications: contextCore.notifications.toasts,
           uiSettings: contextCore.uiSettings,
           visualizeCapabilities: contextCore.application.capabilities.visualize,
@@ -164,14 +162,27 @@ export class VisualizePlugin implements Plugin {
 
     localApplicationService.register({ ...app, id: 'visualize' });
     VisEditorTypesRegistryProvider.register(defaultEditor);
-
-    const embeddableFactory = new VisualizeEmbeddableFactory(visualizationsStart.types);
-    embeddableSetup.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
   }
 
-  start(
-    { savedObjects: { client: savedObjectsClient } }: CoreStart,
-    { dataStart, embeddables, navigation, visualizations, npData }: VisualizePluginStartDependencies
+  async start(
+    {
+      savedObjects: { client: savedObjectsClient },
+      uiSettings,
+      http: {
+        basePath: { prepend: addBasePath },
+      },
+      application: {
+        capabilities: { visualize: visualizeCapabilities },
+      },
+    }: CoreStart,
+    {
+      dataStart,
+      embeddables,
+      navigation,
+      visualizations,
+      npData,
+      getAngularDependencies,
+    }: VisualizePluginStartDependencies
   ) {
     this.startDependencies = {
       dataStart,
@@ -181,5 +192,17 @@ export class VisualizePlugin implements Plugin {
       savedObjectsClient,
       visualizations,
     };
+
+    const { savedVisualizations } = await getAngularDependencies();
+    setServices({
+      visualizations,
+      uiSettings,
+      addBasePath,
+      savedObjectsClient,
+      savedVisualizations,
+      visualizeCapabilities,
+    });
+    const embeddableFactory = new VisualizeEmbeddableFactory(visualizations.types);
+    embeddables.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
   }
 }

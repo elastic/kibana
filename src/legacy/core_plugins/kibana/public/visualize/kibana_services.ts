@@ -54,15 +54,16 @@ export interface VisualizeKibanaServices {
   savedObjectsClient: SavedObjectsClientContract;
   savedQueryService: SavedQueryService;
   savedVisualizations: SavedVisualizations;
+  sessionStorage: Storage;
   uiSettings: UiSettingsClientContract;
   visualizeCapabilities: any;
   visualizations: any;
   wrapInI18nContext: any;
 }
 
-let services: VisualizeKibanaServices | null = null;
-export function setServices(newServices: VisualizeKibanaServices) {
-  services = newServices;
+let services: Partial<VisualizeKibanaServices> | null = null;
+export function setServices(newServices: Partial<VisualizeKibanaServices>) {
+  services = { ...services, ...newServices };
 }
 
 export function getServices() {

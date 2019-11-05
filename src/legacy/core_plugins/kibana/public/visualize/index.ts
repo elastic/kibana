@@ -35,10 +35,7 @@ import { ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
 import { VisualizePlugin, LegacyAngularInjectedDependencies } from './plugin';
 import { localApplicationService } from '../local_application_service';
 import { start as dataStart } from '../../../data/public/legacy';
-import {
-  start as embeddables,
-  setup as embeddableSetup,
-} from '../../../embeddable_api/public/np_ready/public/legacy';
+import { start as embeddables } from '../../../embeddable_api/public/np_ready/public/legacy';
 import { start as navigation } from '../../../navigation/public/legacy';
 import { start as visualizations } from '../../../visualizations/public/np_ready/public/legacy';
 
@@ -72,7 +69,6 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
 (async () => {
   const instance = new VisualizePlugin();
   instance.setup(npSetup.core, {
-    embeddableSetup,
     __LEGACY: {
       docTitle,
       getAngularDependencies,
@@ -80,11 +76,12 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
       localApplicationService,
     },
   });
-  instance.start(npStart.core, {
+  await instance.start(npStart.core, {
     dataStart,
     npData: npStart.plugins.data,
     embeddables,
     navigation,
     visualizations,
+    getAngularDependencies,
   });
 })();
