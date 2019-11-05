@@ -4,23 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-interface BuildEventsScrollQuery {
+interface BuildEventsSearchQuery {
   index: string[];
   from: string;
   to: string;
   filter: unknown;
   size: number;
-  scroll: string;
+  searchAfterSortId?: string;
 }
 
-export const buildEventsScrollQuery = ({
+export const buildEventsSearchQuery = ({
   index,
   from,
   to,
   filter,
   size,
-  scroll,
-}: BuildEventsScrollQuery) => {
+  searchAfterSortId,
+}: BuildEventsSearchQuery) => {
   const filterWithTime = [
     filter,
     {
@@ -58,10 +58,9 @@ export const buildEventsScrollQuery = ({
       },
     },
   ];
-  return {
+  const searchQuery = {
     allowNoIndices: true,
     index,
-    scroll,
     size,
     ignoreUnavailable: true,
     body: {
@@ -76,7 +75,23 @@ export const buildEventsScrollQuery = ({
         },
       },
       track_total_hits: true,
-      sort: ['_doc'],
+      sort: [
+        {
+          '@timestamp': {
+            order: 'asc',
+          },
+        },
+      ],
     },
   };
+  if (searchAfterSortId) {
+    return {
+      ...searchQuery,
+      body: {
+        ...searchQuery.body,
+        search_after: [searchAfterSortId],
+      },
+    };
+  }
+  return searchQuery;
 };

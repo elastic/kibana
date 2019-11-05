@@ -29,6 +29,7 @@ export default function ({ getService, getPageObjects }) {
   const visualTesting = getService('visualTesting');
   const defaultSettings = {
     defaultIndex: 'logstash-*',
+    'discover:sampleSize': 1
   };
 
   describe('discover', function describeIndexTests() {

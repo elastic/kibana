@@ -18,7 +18,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 
 import euiStyled from '../../../../../../../../common/eui_styled_components';
-import { GetLogEntryRateSuccessResponsePayload } from '../../../../../../common/http_api';
+import { LogRateResults } from '../../../../../containers/logs/log_analysis/log_analysis_results';
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 import { JobStatus, SetupStatus } from '../../../../../../common/log_analysis';
 import {
@@ -36,7 +36,7 @@ import { LoadingOverlayWrapper } from '../../../../../components/loading_overlay
 export const AnomaliesResults: React.FunctionComponent<{
   isLoading: boolean;
   jobStatus: JobStatus;
-  results: GetLogEntryRateSuccessResponsePayload['data'] | null;
+  results: LogRateResults | null;
   setTimeRange: (timeRange: TimeRange) => void;
   setupStatus: SetupStatus;
   timeRange: TimeRange;
@@ -195,7 +195,7 @@ const title = i18n.translate('xpack.infra.logs.analysis.anomaliesSectionTitle', 
 });
 
 interface ParsedAnnotationDetails {
-  anomalyScoresByPartition: Array<{ partitionId: string; maximumAnomalyScore: number }>;
+  anomalyScoresByPartition: Array<{ partitionName: string; maximumAnomalyScore: number }>;
 }
 
 const overallAnomalyScoreLabel = i18n.translate(
@@ -213,11 +213,11 @@ const AnnotationTooltip: React.FunctionComponent<{ details: string }> = ({ detai
         <b>{overallAnomalyScoreLabel}</b>
       </span>
       <ul>
-        {parsedDetails.anomalyScoresByPartition.map(({ partitionId, maximumAnomalyScore }) => {
+        {parsedDetails.anomalyScoresByPartition.map(({ partitionName, maximumAnomalyScore }) => {
           return (
-            <li key={`overall-anomaly-chart-${partitionId}`}>
+            <li key={`overall-anomaly-chart-${partitionName}`}>
               <span>
-                {`${partitionId}: `}
+                {`${partitionName}: `}
                 <b>{maximumAnomalyScore}</b>
               </span>
             </li>
