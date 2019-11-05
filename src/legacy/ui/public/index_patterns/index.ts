@@ -47,8 +47,6 @@ export {
   IndexPatternMissingIndices,
   NoDefaultIndexPattern,
   NoDefinedIndexPatterns,
-  stubFields,
-  stubIndexPattern,
 } from '../../../core_plugins/data/public';
 
 // types
@@ -60,3 +58,6 @@ export {
   IndexPatterns,
   StaticIndexPattern,
 } from '../../../core_plugins/data/public';
+
+// stubs
+export { stubFields, stubIndexPattern } from '../../../core_plugins/data/public/stubs';

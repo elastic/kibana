@@ -23,7 +23,7 @@ import {
   HttpServiceBase,
   NotificationsStart,
 } from 'src/core/public';
-import { Field, FieldList, FieldListInterface, FieldType, stubFields } from './fields';
+import { Field, FieldList, FieldListInterface, FieldType } from './fields';
 import { createIndexPatternSelect } from './components';
 import { setNotifications } from './services';
 
@@ -33,7 +33,6 @@ import {
   IndexPattern,
   IndexPatterns,
   StaticIndexPattern,
-  stubIndexPattern,
 } from './index_patterns';
 
 export interface IndexPatternDependencies {
@@ -110,16 +109,7 @@ export type IndexPatternsSetup = ReturnType<IndexPatternsService['setup']>;
 export type IndexPatternsStart = ReturnType<IndexPatternsService['start']>;
 
 /** @public */
-export {
-  IndexPattern,
-  IndexPatterns,
-  StaticIndexPattern,
-  Field,
-  FieldType,
-  FieldListInterface,
-  stubFields,
-  stubIndexPattern,
-};
+export { IndexPattern, IndexPatterns, StaticIndexPattern, Field, FieldType, FieldListInterface };
 
 /** @public */
 export { getIndexPatternTitle, findIndexPatternByTitle } from './utils';

@@ -19,4 +19,3 @@
 
 export * from './field_list';
 export * from './field';
-export { stubFields } from './__test__';

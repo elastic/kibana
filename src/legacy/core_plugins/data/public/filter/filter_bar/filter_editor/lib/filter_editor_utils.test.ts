@@ -18,7 +18,7 @@
  */
 
 import { FilterStateStore, toggleFilterNegated } from '@kbn/es-query';
-import { stubIndexPattern, stubFields } from '../../../../index_patterns';
+import { stubIndexPattern, stubFields } from '../../../../stubs';
 import { IndexPattern, Field } from '../../../../index';
 import {
   buildFilter,

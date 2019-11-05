@@ -17,4 +17,5 @@
  * under the License.
  */
 
-export { fields as stubFields } from './fields.stub';
+export { stubIndexPattern } from './index_patterns/index_patterns/index_pattern.stub';
+export { stubFields } from './index_patterns/fields/field.stub';

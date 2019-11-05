@@ -58,8 +58,6 @@ export {
   IndexPatternMissingIndices,
   NoDefaultIndexPattern,
   NoDefinedIndexPatterns,
-  stubFields,
-  stubIndexPattern,
 } from './index_patterns';
 
 export {
