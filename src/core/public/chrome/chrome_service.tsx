@@ -96,7 +96,7 @@ export class ChromeService {
   }: StartDeps): Promise<InternalChromeStart> {
     /**
      * These observables allow consumers to toggle the chrome visibility via either:
-     *   1. Using setIsVisible() to trigger the next hide$
+     *   1. Using setIsVisible() to trigger the next chromeHidden$
      *   2. Setting `chromeHidden` when registering an application, which will
      *      reset the visibility whenever the next application is mounted
      *   3. Having embed=true in the query string

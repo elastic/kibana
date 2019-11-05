@@ -230,6 +230,28 @@ describe('start', () => {
         ]
       `);
     });
+
+    it('changing visibility has no effect on chrome-hiding application', async () => {
+      const startDeps = defaultStartDeps([new FakeApp('alpha', true)]);
+      const { currentAppId$ } = startDeps.application;
+      const { chrome, service } = await start({ startDeps });
+      const promise = chrome
+        .getIsVisible$()
+        .pipe(toArray())
+        .toPromise();
+
+      currentAppId$.next('alpha');
+      chrome.setIsVisible(true);
+      service.stop();
+
+      await expect(promise).resolves.toMatchInlineSnapshot(`
+        Array [
+          true,
+          false,
+          false,
+        ]
+      `);
+    });
   });
 
   describe('is collapsed', () => {
