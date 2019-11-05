@@ -12,6 +12,7 @@ import { getDurationSchema } from '../lib';
 interface ScheduleRequest extends Hapi.Request {
   payload: {
     enabled: boolean;
+    name: string;
     alertTypeId: string;
     interval: string;
     actions: AlertAction[];
@@ -32,6 +33,7 @@ export const createAlertRoute = {
       payload: Joi.object()
         .keys({
           enabled: Joi.boolean().default(true),
+          name: Joi.string().required(),
           alertTypeId: Joi.string().required(),
           throttle: getDurationSchema().default(null),
           interval: getDurationSchema().required(),

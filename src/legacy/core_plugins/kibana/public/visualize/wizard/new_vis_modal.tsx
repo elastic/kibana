@@ -22,13 +22,14 @@ import React from 'react';
 import { EuiModal, EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import chrome from 'ui/chrome';
-import { VisType } from 'ui/vis';
 import { VisualizeConstants } from '../visualize_constants';
-import { createUiStatsReporter, METRIC_TYPE } from '../../../../ui_metric/public';
 import { SearchSelection } from './search_selection';
 import { TypeSelection } from './type_selection';
 import { TypesStart, VisTypeAlias } from '../../../../visualizations/public/np_ready/public/types';
+
+import { getServices, METRIC_TYPE, VisType } from '../kibana_services';
+
+const { addBasePath, createUiStatsReporter, uiSettings } = getServices();
 
 interface TypeSelectionProps {
   isOpen: boolean;
@@ -54,7 +55,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
 
   constructor(props: TypeSelectionProps) {
     super(props);
-    this.isLabsEnabled = chrome.getUiSettingsClient().get('visualize:enableLabs');
+    this.isLabsEnabled = uiSettings.get('visualize:enableLabs');
 
     this.state = {
       showSearchVisModal: false,
@@ -123,7 +124,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
     this.trackUiMetric(METRIC_TYPE.CLICK, visType.name);
 
     if ('aliasUrl' in visType) {
-      window.location = chrome.addBasePath(visType.aliasUrl);
+      window.location.href = addBasePath(visType.aliasUrl);
 
       return;
     }

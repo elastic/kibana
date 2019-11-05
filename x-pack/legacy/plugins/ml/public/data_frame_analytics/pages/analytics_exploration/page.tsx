@@ -66,7 +66,9 @@ export const Page: FC<{
         </EuiPageContentHeader>
         <EuiPageContentBody>
           <EuiSpacer size="l" />
-          {analysisType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION && <Exploration jobId={jobId} />}
+          {analysisType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION && (
+            <Exploration jobId={jobId} jobStatus={jobStatus} />
+          )}
           {analysisType === ANALYSIS_CONFIG_TYPE.REGRESSION && (
             <RegressionExploration jobId={jobId} jobStatus={jobStatus} />
           )}

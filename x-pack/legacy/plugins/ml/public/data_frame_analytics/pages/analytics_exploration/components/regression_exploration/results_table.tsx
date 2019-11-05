@@ -16,13 +16,13 @@ import {
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
   EuiPanel,
   EuiPopover,
   EuiPopoverTitle,
   EuiProgress,
   EuiSpacer,
   EuiText,
-  EuiTitle,
   EuiToolTip,
   Query,
 } from '@elastic/eui';
@@ -50,6 +50,7 @@ import {
   MAX_COLUMNS,
   getPredictedFieldName,
   INDEX_STATUS,
+  SEARCH_SIZE,
 } from '../../../../common';
 import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/columns';
 import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
@@ -60,19 +61,9 @@ import { hoveredRow$ } from '../exploration/column_chart';
 import { useColumnCharts } from '../exploration/use_column_charts';
 
 import { useExploreData, defaultSearchQuery } from './use_explore_data';
+import { ExplorationTitle } from './regression_exploration';
 
 const PAGE_SIZE_OPTIONS = [5, 10, 25, 50];
-
-const ExplorationTitle: React.SFC<{ jobId: string }> = ({ jobId }) => (
-  <EuiTitle size="xs">
-    <span>
-      {i18n.translate('xpack.ml.dataframe.analytics.regressionExploration.jobIdTitle', {
-        defaultMessage: 'Regression job ID {jobId}',
-        values: { jobId },
-      })}
-    </span>
-  </EuiTitle>
-);
 
 interface Props {
   jobConfig: DataFrameAnalyticsConfig;
@@ -83,24 +74,11 @@ export const ResultsTable: FC<Props> = React.memo(({ jobConfig, jobStatus }) => 
   const kibanaContext = useKibanaContext();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(25);
-  const [clearTable, setClearTable] = useState(false);
   const [selectedFields, setSelectedFields] = useState([] as EsFieldName[]);
   const [isColumnsPopoverVisible, setColumnsPopoverVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState<SavedSearchQuery>(defaultSearchQuery);
   const [searchError, setSearchError] = useState<any>(undefined);
   const [searchString, setSearchString] = useState<string | undefined>(undefined);
-
-  // EuiInMemoryTable has an issue with dynamic sortable columns
-  // and will trigger a full page Kibana error in such a case.
-  // The following is a workaround until this is solved upstream:
-  // - If the sortable/columns config changes,
-  //   the table will be unmounted/not rendered.
-  //   This is what setClearTable(true) in toggleColumn() does.
-  // - After that on next render it gets re-enabled. To make sure React
-  //   doesn't consolidate the state updates, setTimeout is used.
-  if (clearTable) {
-    setTimeout(() => setClearTable(false), 0);
-  }
 
   function toggleColumnsPopover() {
     setColumnsPopoverVisible(!isColumnsPopoverVisible);
@@ -112,7 +90,6 @@ export const ResultsTable: FC<Props> = React.memo(({ jobConfig, jobStatus }) => 
 
   function toggleColumn(column: EsFieldName) {
     if (tableItems.length > 0 && jobConfig !== undefined) {
-      setClearTable(true);
       // spread to a new array otherwise the component wouldn't re-render
       setSelectedFields([...toggleSelectedField(selectedFields, column)]);
     }
@@ -277,7 +254,6 @@ export const ResultsTable: FC<Props> = React.memo(({ jobConfig, jobStatus }) => 
       const field = predictedFieldSelected ? predictedFieldName : selectedFields[0];
       const direction = predictedFieldSelected ? SORT_DIRECTION.DESC : SORT_DIRECTION.ASC;
       loadExploreData({ field, direction, searchQuery });
-      return;
     }
   }, [JSON.stringify(searchQuery)]);
 
@@ -295,7 +271,6 @@ export const ResultsTable: FC<Props> = React.memo(({ jobConfig, jobStatus }) => 
       const field = predictedFieldSelected ? predictedFieldName : selectedFields[0];
       const direction = predictedFieldSelected ? SORT_DIRECTION.DESC : SORT_DIRECTION.ASC;
       loadExploreData({ field, direction, searchQuery });
-      return;
     }
   }, [jobConfig, columns.length, sortField, sortDirection, tableItems.length]);
 
@@ -319,7 +294,6 @@ export const ResultsTable: FC<Props> = React.memo(({ jobConfig, jobStatus }) => 
       setPageSize(size);
 
       if (sort.field !== sortField || sort.direction !== sortDirection) {
-        setClearTable(true);
         loadExploreData({ ...sort, searchQuery });
       }
     };
@@ -495,8 +469,19 @@ export const ResultsTable: FC<Props> = React.memo(({ jobConfig, jobStatus }) => 
       {status !== INDEX_STATUS.LOADING && (
         <EuiProgress size="xs" color="accent" max={1} value={0} />
       )}
-      {clearTable === false && (columns.length > 0 || searchQuery !== defaultSearchQuery) && (
+      {(columns.length > 0 || searchQuery !== defaultSearchQuery) && (
         <Fragment>
+          <EuiFormRow
+            helpText={i18n.translate(
+              'xpack.ml.dataframe.analytics.regressionExploration.documentsShownHelpText',
+              {
+                defaultMessage: 'Showing first {searchSize} documents',
+                values: { searchSize: SEARCH_SIZE },
+              }
+            )}
+          >
+            <Fragment />
+          </EuiFormRow>
           <EuiSpacer />
           <div ref={sourceIndexTableElement} className="transformDataGrid">
             <MlInMemoryTableBasic
