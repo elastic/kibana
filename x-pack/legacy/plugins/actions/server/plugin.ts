@@ -97,12 +97,12 @@ export class Plugin {
     // - `secrets` properties will be encrypted
     // - `config` will be included in AAD
     // - everything else excluded from AAD
-    plugins.encrypted_saved_objects.registerType({
+    plugins.encryptedSavedObjects.registerType({
       type: 'action',
       attributesToEncrypt: new Set(['secrets']),
       attributesToExcludeFromAAD: new Set(['description']),
     });
-    plugins.encrypted_saved_objects.registerType({
+    plugins.encryptedSavedObjects.registerType({
       type: 'action_task_params',
       attributesToEncrypt: new Set(['apiKey']),
     });
@@ -169,11 +169,11 @@ export class Plugin {
       logger,
       spaces: plugins.spaces,
       getServices,
-      encryptedSavedObjectsPlugin: plugins.encrypted_saved_objects,
+      encryptedSavedObjectsPlugin: plugins.encryptedSavedObjects,
       actionTypeRegistry: actionTypeRegistry!,
     });
     taskRunnerFactory!.initialize({
-      encryptedSavedObjectsPlugin: plugins.encrypted_saved_objects,
+      encryptedSavedObjectsPlugin: plugins.encryptedSavedObjects,
       getBasePath,
       spaceIdToNamespace,
     });
