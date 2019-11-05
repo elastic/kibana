@@ -56,6 +56,8 @@ import { AppStateProvider } from 'ui/state_management/app_state';
 // @ts-ignore
 import { GlobalStateProvider } from 'ui/state_management/global_state';
 // @ts-ignore
+import { createRenderCompleteDirective } from 'ui/render_complete/directive';
+// @ts-ignore
 import { StateManagementConfigProvider } from 'ui/state_management/config_provider';
 // @ts-ignore
 import { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url';
@@ -73,8 +75,6 @@ import {
 } from '../../../data/public/shim/legacy_module';
 // @ts-ignore
 import { IndexPatterns } from '../../../data/public/index_patterns/index_patterns';
-// @ts-ignore
-import { dashboardConfigProvider } from '../dashboard/dashboard_config';
 // @ts-ignore
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 
@@ -142,6 +142,7 @@ export function getInnerAngular(core: CoreSetup) {
     .directive('filterBarHelper', FilterBarHelperFactory)
     .directive('applyFiltersPopover', ApplyFiltersPopoverFactory)
     .directive('applyFiltersPopoverHelper', ApplyFiltersPopoverHelperFactory)
+    .directive('renderComplete', createRenderCompleteDirective)
     .service('debounce', ['$timeout', DebounceProviderTimeout])
     .service('queryFilter', function(Private: any) {
       return Private(FilterBarQueryFilterProvider);
