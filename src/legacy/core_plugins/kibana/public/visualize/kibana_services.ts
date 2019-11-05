@@ -41,7 +41,6 @@ export interface VisualizeKibanaServices {
   chrome: ChromeStart;
   chromeLegacy: any;
   core: LegacyCoreStart;
-  config: UiSettingsClientContract;
   dataStart: any;
   docLinks: DocLinksStart;
   embeddables: ReturnType<EmbeddablePublicPlugin['start']>;

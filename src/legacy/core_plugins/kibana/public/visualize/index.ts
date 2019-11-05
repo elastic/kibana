@@ -60,7 +60,6 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
   return {
     chromeLegacy: chrome,
     editorTypes,
-    config: injector.get('config'),
     queryFilter,
     savedObjectClient,
     savedObjectRegistry,

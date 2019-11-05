@@ -52,7 +52,6 @@ export interface LegacyAngularInjectedDependencies {
   editorTypes: any;
   queryFilter: any;
   shareContextMenuExtensions: any;
-  config: any;
   savedObjectRegistry: any;
   savedObjectClient: any;
   savedDashboards: any;

@@ -71,7 +71,6 @@ function VisualizeAppController(
   kbnUrl,
   redirectWhenMissing,
   Promise,
-  config,
   kbnBaseUrl,
   getAppState,
   globalState,
@@ -93,6 +92,7 @@ function VisualizeAppController(
     getBasePath,
     docLinks,
     savedQueryService,
+    uiSettings,
   } = getServices();
 
   // Retrieve the resolved SavedVis instance.
@@ -238,7 +238,7 @@ function VisualizeAppController(
     linked: !!savedVis.savedSearchId,
     query: searchSource.getOwnField('query') || {
       query: '',
-      language: localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage')
+      language: localStorage.get('kibana.userQueryLanguage') || uiSettings.get('search:queryLanguage')
     },
     filters: searchSource.getOwnField('filter') || [],
     vis: savedVisState
@@ -440,7 +440,7 @@ function VisualizeAppController(
     delete $state.savedQuery;
     $state.query = {
       query: '',
-      language: localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage')
+      language: localStorage.get('kibana.userQueryLanguage') || uiSettings.get('search:queryLanguage')
     };
     queryFilter.removeAll();
     $state.save();

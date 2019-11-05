@@ -111,14 +111,14 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
     input: Partial<VisualizeInput> & { id: string },
     parent?: Container
   ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> {
-    const { addBasePath, config, savedVisualizations } = getServices();
+    const { addBasePath, uiSettings, savedVisualizations } = getServices();
 
     try {
       const visId = savedObject.id as string;
 
       const editUrl = visId ? addBasePath(`/app/kibana${savedVisualizations.urlFor(visId)}`) : '';
       const loader = await getVisualizeLoader();
-      const isLabsEnabled = config.get<boolean>('visualize:enableLabs');
+      const isLabsEnabled = uiSettings.get('visualize:enableLabs');
 
       if (!isLabsEnabled && savedObject.vis.type.stage === 'experimental') {
         return new DisabledLabEmbeddable(savedObject.title, input);
