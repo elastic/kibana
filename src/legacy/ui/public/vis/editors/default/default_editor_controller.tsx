@@ -20,63 +20,73 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
+
+import { VisSavedObject } from 'ui/visualize/loader/types';
 import { I18nContext } from 'ui/i18n';
+import { EditorRenderProps } from 'src/legacy/core_plugins/kibana/public/visualize/types';
 import { DefaultEditor } from './default_editor';
-import { DefaultEditorDataTab } from './components/sidebar';
+import { DefaultEditorDataTab, OptionTab } from './components/sidebar';
 import { EditorStateContextProvider } from './state';
 
-export function createEditorController() {
-  return class {
-    constructor(el, savedObj) {
-      this.el = el;
-      const { type: visType } = savedObj.vis;
-
-      const optionTabs = [
-        ...(visType.schemas.buckets || visType.schemas.metrics
-          ? [
-              {
-                name: 'data',
-                title: i18n.translate('common.ui.vis.editors.sidebar.tabs.dataLabel', {
-                  defaultMessage: 'Data',
-                }),
-                editor: DefaultEditorDataTab,
-              },
-            ]
-          : []),
-
-        ...(!visType.editorConfig.optionTabs && visType.editorConfig.optionsTemplate
-          ? [
-              {
-                name: 'options',
-                title: i18n.translate('common.ui.vis.editors.sidebar.tabs.optionsLabel', {
-                  defaultMessage: 'Options',
-                }),
-                editor: visType.editorConfig.optionsTemplate,
-              },
-            ]
-          : visType.editorConfig.optionTabs),
-      ];
-
-      this.state = {
-        savedObj,
-        vis: savedObj.vis,
-        optionTabs,
-      };
-    }
-
-    render(props) {
-      render(
-        <I18nContext>
-          <EditorStateContextProvider>
-            <DefaultEditor {...this.state} {...props} />
-          </EditorStateContextProvider>
-        </I18nContext>,
-        this.el
-      );
-    }
-
-    destroy() {
-      unmountComponentAtNode(this.el);
-    }
-  };
+export interface DefaultEditorControllerState {
+  savedObj: VisSavedObject;
+  optionTabs: OptionTab[];
 }
+
+class DefaultEditorController {
+  private el: HTMLElement;
+  private state: DefaultEditorControllerState;
+
+  constructor(el: HTMLElement, savedObj: VisSavedObject) {
+    this.el = el;
+    const { type: visType } = savedObj.vis;
+
+    const optionTabs = [
+      ...(visType.schemas.buckets || visType.schemas.metrics
+        ? [
+            {
+              name: 'data',
+              title: i18n.translate('common.ui.vis.editors.sidebar.tabs.dataLabel', {
+                defaultMessage: 'Data',
+              }),
+              editor: DefaultEditorDataTab,
+            },
+          ]
+        : []),
+
+      ...(!visType.editorConfig.optionTabs && visType.editorConfig.optionsTemplate
+        ? [
+            {
+              name: 'options',
+              title: i18n.translate('common.ui.vis.editors.sidebar.tabs.optionsLabel', {
+                defaultMessage: 'Options',
+              }),
+              editor: visType.editorConfig.optionsTemplate,
+            },
+          ]
+        : visType.editorConfig.optionTabs),
+    ];
+
+    this.state = {
+      savedObj,
+      optionTabs,
+    };
+  }
+
+  render(props: EditorRenderProps) {
+    render(
+      <I18nContext>
+        <EditorStateContextProvider>
+          <DefaultEditor {...this.state} {...props} />
+        </EditorStateContextProvider>
+      </I18nContext>,
+      this.el
+    );
+  }
+
+  destroy() {
+    unmountComponentAtNode(this.el);
+  }
+}
+
+export { DefaultEditorController };

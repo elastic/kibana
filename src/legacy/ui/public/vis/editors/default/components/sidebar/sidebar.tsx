@@ -61,6 +61,8 @@ function DefaultEditorSideBar({
     metricAggs,
     state,
     schemas: vis.type.schemas,
+    setValidity,
+    setTouched,
   };
 
   const optionTabProps = {

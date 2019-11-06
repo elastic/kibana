@@ -54,28 +54,9 @@ const defaultEditor = function ($rootScope, $compile) {
 
       return new Promise(resolve => {
         if (!this.$scope) {
-          this.$scope = $scope = $rootScope.$new();
-
-          updateScope();
-
-          $scope.state = $scope.vis.copyCurrentState(true);
-          $scope.oldState = $scope.vis.getSerializableState($scope.state);
 
           $scope.toggleSidebar = () => {
             $scope.$broadcast('render');
-          };
-
-          this.el.one('renderComplete', resolve);
-          // track state of editable vis vs. "actual" vis
-          $scope.stageEditableVis = () => {
-            $scope.oldState = $scope.vis.getSerializableState($scope.state);
-            $scope.vis.setCurrentState($scope.state);
-            $scope.vis.updateState();
-            $scope.vis.dirty = false;
-          };
-          $scope.resetEditableVis = () => {
-            $scope.state = $scope.vis.copyCurrentState(true);
-            $scope.vis.dirty = false;
           };
 
           $scope.autoApplyEnabled = false;
@@ -90,18 +71,6 @@ const defaultEditor = function ($rootScope, $compile) {
             }, 800));
           }
 
-          $scope.$watch(() => {
-            return $scope.vis.getSerializableState($scope.state);
-          }, function (newState) {
-            $scope.vis.dirty = !angular.equals(newState, $scope.oldState);
-            const responseAggs = $scope.state.aggs.getResponseAggs();
-            $scope.hasHistogramAgg = responseAggs.some(agg => agg.type.name === 'histogram');
-            $scope.metricAggs = responseAggs.filter(agg =>
-              _.get(agg, 'schema.group') === AggGroupNames.Metrics);
-            const lastParentPipelineAgg = _.findLast($scope.metricAggs, ({ type }) => type.subtype === parentPipelineAggHelper.subtype);
-            $scope.lastParentPipelineAggTitle = lastParentPipelineAgg && lastParentPipelineAgg.type.title;
-          }, true);
-
           // fires when visualization state changes, and we need to copy changes to editorState
           $scope.$watch(() => {
             return $scope.vis.getCurrentState(false);
@@ -111,10 +80,6 @@ const defaultEditor = function ($rootScope, $compile) {
               $scope.oldState = newState;
             }
           }, true);
-
-          $scope.setVisType = (type) => {
-            $scope.vis.type.type = type;
-          };
 
         } else {
           $scope = this.$scope;

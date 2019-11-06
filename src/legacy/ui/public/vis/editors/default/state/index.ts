@@ -18,14 +18,14 @@
  */
 
 import { useMemo, useReducer } from 'react';
-import { Vis } from 'ui/vis';
+import { Vis, VisState } from 'ui/vis';
 import { editorStateReducer, initEditorState } from './reducers';
 import { EditorStateActionTypes } from './constants';
 import { editorActions, EditorActions } from './actions';
 
 export * from './editor_state_context';
 
-export function useEditorReducer(vis: Vis) {
+export function useEditorReducer(vis: Vis): [VisState, EditorActions] {
   const [state, dispatch] = useReducer(editorStateReducer, vis, initEditorState);
 
   const actions = useMemo(

@@ -21,6 +21,11 @@ import { AggParam } from '../../../agg_types';
 import { AggGroupNames } from './agg_groups';
 import { AggControlProps } from './controls/agg_control_props';
 
+export interface ISchemas {
+  [AggGroupNames.Buckets]: Schema[];
+  [AggGroupNames.Metrics]: Schema[];
+}
+
 export interface Schema {
   aggFilter: string | string[];
   editor: boolean | string;

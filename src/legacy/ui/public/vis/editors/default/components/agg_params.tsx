@@ -86,7 +86,7 @@ function DefaultEditorAggParams({
   formIsTouched,
   indexPattern,
   metricAggs,
-  state = {} as VisState,
+  state,
   setAggParamValue,
   onAggTypeChange,
   setTouched,

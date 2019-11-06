@@ -53,7 +53,7 @@ export type ChangeValueAxis = (
 const VALUE_AXIS_PREFIX = 'ValueAxis-';
 
 function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>) {
-  const { stateParams, setValue, aggs, setVisType, vis } = props;
+  const { stateParams, setValue, aggs, vis } = props;
 
   const [isCategoryAxisHorizontal, setIsCategoryAxisHorizontal] = useState(true);
 

@@ -19,6 +19,7 @@
 
 import { VisSavedObject } from 'ui/visualize/loader/types';
 
+export { EditorRenderProps } from './editor/types';
 export interface SavedVisualizations {
   urlFor: (id: string) => string;
   get: (id: string) => Promise<VisSavedObject>;

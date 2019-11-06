@@ -17,6 +17,14 @@
  * under the License.
  */
 
-export interface AggParams {
-  [key: string]: unknown;
+import { Filter } from '@kbn/es-query';
+import { TimeRange } from 'src/plugins/data/public';
+import { AppState } from 'ui/state_management/app_state';
+import { PersistedState } from 'ui/persisted_state';
+
+export interface EditorRenderProps {
+  appState: AppState;
+  filters: Filter[];
+  uiState: PersistedState;
+  timeRange: TimeRange;
 }

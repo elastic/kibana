@@ -33,14 +33,16 @@ jest.mock('./agg_params', () => ({
 
 describe('DefaultEditorAgg component', () => {
   let defaultProps: DefaultEditorAggProps;
-  let onAggParamsChange: jest.Mock;
+  let setAggParamValue: jest.Mock;
+  let setStateParamValue: jest.Mock;
   let setTouched: jest.Mock;
   let onToggleEnableAgg: jest.Mock;
   let removeAgg: jest.Mock;
   let setValidity: jest.Mock;
 
   beforeEach(() => {
-    onAggParamsChange = jest.fn();
+    setAggParamValue = jest.fn();
+    setStateParamValue = jest.fn();
     setTouched = jest.fn();
     onToggleEnableAgg = jest.fn();
     removeAgg = jest.fn();
@@ -66,7 +68,8 @@ describe('DefaultEditorAgg component', () => {
       isRemovable: false,
       metricAggs: [],
       state: {} as VisState,
-      onAggParamsChange,
+      setAggParamValue,
+      setStateParamValue,
       onAggTypeChange: () => {},
       setValidity,
       setTouched,
@@ -197,7 +200,7 @@ describe('DefaultEditorAgg component', () => {
       const comp = mount(<DefaultEditorAgg {...defaultProps} />);
       comp.find('[data-test-subj="toggleDisableAggregationBtn disable"] button').simulate('click');
 
-      expect(defaultProps.onToggleEnableAgg).toBeCalledWith(defaultProps.agg, false);
+      expect(defaultProps.onToggleEnableAgg).toBeCalledWith(defaultProps.agg.id, false);
     });
 
     it('should disable the disableAggregation button', () => {
@@ -217,7 +220,7 @@ describe('DefaultEditorAgg component', () => {
       const comp = mount(<DefaultEditorAgg {...defaultProps} />);
       comp.find('[data-test-subj="toggleDisableAggregationBtn enable"] button').simulate('click');
 
-      expect(defaultProps.onToggleEnableAgg).toBeCalledWith(defaultProps.agg, true);
+      expect(defaultProps.onToggleEnableAgg).toBeCalledWith(defaultProps.agg.id, true);
     });
 
     it('should call removeAgg', () => {
@@ -225,7 +228,7 @@ describe('DefaultEditorAgg component', () => {
       const comp = mount(<DefaultEditorAgg {...defaultProps} />);
       comp.find('[data-test-subj="removeDimensionBtn"] button').simulate('click');
 
-      expect(defaultProps.removeAgg).toBeCalledWith(defaultProps.agg);
+      expect(defaultProps.removeAgg).toBeCalledWith(defaultProps.agg.id);
     });
   });
 
@@ -270,8 +273,8 @@ describe('DefaultEditorAgg component', () => {
       const comp = mount(<DefaultEditorAgg {...defaultProps} />);
       comp.setProps({ agg: { ...defaultProps.agg, type: { name: 'histogram' } } });
 
-      expect(defaultProps.onAggParamsChange).toHaveBeenCalledWith(
-        defaultProps.agg.params,
+      expect(defaultProps.setAggParamValue).toHaveBeenCalledWith(
+        defaultProps.agg.id,
         'min_doc_count',
         true
       );
@@ -284,8 +287,8 @@ describe('DefaultEditorAgg component', () => {
       const comp = mount(<DefaultEditorAgg {...defaultProps} />);
       comp.setProps({ agg: { ...defaultProps.agg, type: { name: 'date_histogram' } } });
 
-      expect(defaultProps.onAggParamsChange).toHaveBeenCalledWith(
-        defaultProps.agg.params,
+      expect(defaultProps.setAggParamValue).toHaveBeenCalledWith(
+        defaultProps.agg.id,
         'min_doc_count',
         0
       );

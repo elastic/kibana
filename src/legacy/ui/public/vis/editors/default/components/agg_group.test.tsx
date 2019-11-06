@@ -109,7 +109,9 @@ describe('DefaultEditorAgg component', () => {
       reorderAggs,
       addSchema: () => {},
       removeAgg: () => {},
-      onAggParamsChange: () => {},
+      setAggParamValue: jest.fn(),
+      setStateParamValue: jest.fn(),
+      onAggTypeChange: jest.fn(),
       onToggleEnableAgg: () => {},
     };
   });

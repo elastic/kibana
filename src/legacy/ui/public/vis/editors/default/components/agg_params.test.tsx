@@ -79,7 +79,7 @@ jest.mock('./agg_param', () => ({
 }));
 
 describe('DefaultEditorAggParams component', () => {
-  let onAggParamsChange: jest.Mock;
+  let setAggParamValue: jest.Mock;
   let onAggTypeChange: jest.Mock;
   let setTouched: jest.Mock;
   let setValidity: jest.Mock;
@@ -87,7 +87,7 @@ describe('DefaultEditorAggParams component', () => {
   let defaultProps: DefaultEditorAggParamsProps;
 
   beforeEach(() => {
-    onAggParamsChange = jest.fn();
+    setAggParamValue = jest.fn();
     onAggTypeChange = jest.fn();
     setTouched = jest.fn();
     setValidity = jest.fn();
@@ -105,7 +105,7 @@ describe('DefaultEditorAggParams component', () => {
       indexPattern: {} as IndexPattern,
       metricAggs: [],
       state: {} as VisState,
-      onAggParamsChange,
+      setAggParamValue,
       onAggTypeChange,
       setTouched,
       setValidity,
@@ -131,16 +131,16 @@ describe('DefaultEditorAggParams component', () => {
   it('should set fixed and default values when editorConfig is defined (works in rollup index)', () => {
     mount(<DefaultEditorAggParams {...defaultProps} />);
 
-    expect(onAggParamsChange).toHaveBeenNthCalledWith(
+    expect(setAggParamValue).toHaveBeenNthCalledWith(
       1,
-      defaultProps.agg.params,
+      defaultProps.agg.id,
       'useNormalizedEsInterval',
       false
     );
     expect(intervalDeserialize).toHaveBeenCalledWith('1m');
-    expect(onAggParamsChange).toHaveBeenNthCalledWith(
+    expect(setAggParamValue).toHaveBeenNthCalledWith(
       2,
-      defaultProps.agg.params,
+      defaultProps.agg.id,
       'interval',
       'deserialized'
     );

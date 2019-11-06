@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import { createFiltersFromEvent, onBrushEvent } from '../vis_filters';
-import { createEditorController } from '../../vis/editors/default/default_editor_controller';
+import { DefaultEditorController } from '../../vis/editors/default/default_editor_controller';
 
 export class BaseVisType {
   constructor(opts = {}) {
@@ -48,7 +48,7 @@ export class BaseVisType {
       },
       requestHandler: 'courier',    // select one from registry or pass a function
       responseHandler: 'none',
-      editor: createEditorController(),
+      editor: DefaultEditorController,
       editorConfig: {
         collections: {},         // collections used for configuration (list of positions, ...)
       },

@@ -21,9 +21,10 @@ import React from 'react';
 import { EuiTabs, EuiTab } from '@elastic/eui';
 
 import { VisOptionsProps } from '../../vis_options_props';
+import { DefaultEditorDataTabProps } from './data_tab';
 
 export interface OptionTab {
-  editor: React.ComponentType<VisOptionsProps | any>;
+  editor: React.ComponentType<VisOptionsProps | DefaultEditorDataTabProps>;
   name: string;
   title: string;
 }

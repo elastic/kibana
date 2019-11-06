@@ -21,29 +21,68 @@ import { AggConfig, Vis } from 'ui/vis';
 import { EditorStateActionTypes } from './constants';
 import { Schema } from '../schemas';
 
-export interface ActionType {
-  type: EditorStateActionTypes;
-  payload: {
-    [key: string]: any;
-  };
+export interface ActionType<T, P> {
+  type: T;
+  payload: P;
 }
 
+type AggId = AggConfig['id'];
+type AggParams = AggConfig['params'];
+
+type AddNewAgg = ActionType<EditorStateActionTypes.ADD_NEW_AGG, { schema: Schema }>;
+type DiscardChanges = ActionType<EditorStateActionTypes.DISCARD_CHANGES, Vis>;
+type ChangeAggType = ActionType<
+  EditorStateActionTypes.CHANGE_AGG_TYPE,
+  { aggId: AggId; value: AggConfig['type'] }
+>;
+type SetAggParamValue<T extends AggParams = string> = ActionType<
+  EditorStateActionTypes.SET_AGG_PARAM_VALUE,
+  {
+    aggId: AggId;
+    paramName: T;
+    value: AggParams[T];
+  }
+>;
+type SetStateParamValue<T extends keyof AggParams = string> = ActionType<
+  EditorStateActionTypes.SET_STATE_PARAM_VALUE,
+  { paramName: T; value: AggParams[T] }
+>;
+type RemoveAgg = ActionType<EditorStateActionTypes.REMOVE_AGG, { aggId: AggId }>;
+type ReorderAggs = ActionType<
+  EditorStateActionTypes.REORDER_AGGS,
+  { sourceAgg: AggConfig; destinationAgg: AggConfig }
+>;
+type ToggleEnabledAgg = ActionType<
+  EditorStateActionTypes.TOGGLE_ENABLED_AGG,
+  { aggId: AggId; enabled: AggConfig['enabled'] }
+>;
+
+export type EditorAction =
+  | AddNewAgg
+  | DiscardChanges
+  | ChangeAggType
+  | SetAggParamValue
+  | SetStateParamValue
+  | RemoveAgg
+  | ReorderAggs
+  | ToggleEnabledAgg;
+
 export interface EditorActions {
-  addNewAgg(schema: Schema): ActionType;
-  discardChanges(vis: Vis): ActionType;
-  changeAggType(aggId: AggConfig['id'], value: AggConfig['type']): ActionType;
-  setAggParamValue<T extends keyof AggConfig['params']>(
-    aggId: AggConfig['id'],
+  addNewAgg(schema: Schema): AddNewAgg;
+  discardChanges(vis: Vis): DiscardChanges;
+  changeAggType(aggId: AggId, value: AggConfig['type']): ChangeAggType;
+  setAggParamValue<T extends keyof AggParams>(
+    aggId: AggId,
     paramName: T,
-    value: AggConfig['params'][T]
-  ): ActionType;
-  setStateParamValue<T extends keyof AggConfig['params']>(
+    value: AggParams[T]
+  ): SetAggParamValue<T>;
+  setStateParamValue<T extends keyof AggParams>(
     paramName: T,
-    value: AggConfig['params'][T]
-  ): ActionType;
-  removeAgg(aggId: AggConfig['id']): ActionType;
-  reorderAggs(sourceAgg: AggConfig, destinationAgg: AggConfig): ActionType;
-  toggleEnabledAgg(aggId: AggConfig['id'], enabled: AggConfig['enabled']): ActionType;
+    value: AggParams[T]
+  ): SetStateParamValue<T>;
+  removeAgg(aggId: AggId): RemoveAgg;
+  reorderAggs(sourceAgg: AggConfig, destinationAgg: AggConfig): ReorderAggs;
+  toggleEnabledAgg(aggId: AggId, enabled: AggConfig['enabled']): ToggleEnabledAgg;
 }
 
 const addNewAgg: EditorActions['addNewAgg'] = schema => ({
@@ -106,7 +145,7 @@ const toggleEnabledAgg: EditorActions['toggleEnabledAgg'] = (aggId, enabled) => 
   },
 });
 
-export const editorActions: EditorActions = {
+export const editorActions = {
   addNewAgg,
   discardChanges,
   changeAggType,

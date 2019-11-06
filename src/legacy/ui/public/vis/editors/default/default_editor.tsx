@@ -18,32 +18,17 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
-import { Filter } from '@kbn/es-query';
 
-import { PersistedState } from 'ui/persisted_state';
-import { AppState } from 'ui/state_management/app_state';
 import { getVisualizeLoader, EmbeddedVisualizeHandler } from 'ui/visualize';
-import { VisSavedObject } from 'ui/visualize/loader/types';
-import { Vis } from 'ui/vis';
-import { TimeRange } from 'src/plugins/data/public';
+import { EditorRenderProps } from 'src/legacy/core_plugins/kibana/public/visualize/types';
 
-import { DefaultEditorSideBar, OptionTab } from './components/sidebar';
+import { DefaultEditorSideBar } from './components/sidebar';
 import { DefaultEditorBottomBar } from './components/bottom_bar';
 import { useEditorReducer } from './state';
+import { DefaultEditorControllerState } from './default_editor_controller';
 // import { Resizer } from './resizer';
 
 const sidebarClassName = 'visEditor__collapsibleSidebar';
-
-interface DefaultEditorProps {
-  el: HTMLElement;
-  filters: Filter[];
-  uiState: PersistedState;
-  timeRange: TimeRange;
-  appState: AppState;
-  vis: Vis;
-  savedObj: VisSavedObject;
-  optionTabs: OptionTab[];
-}
 
 function DefaultEditor({
   savedObj,
@@ -51,13 +36,13 @@ function DefaultEditor({
   timeRange,
   filters,
   appState,
-  vis,
   optionTabs,
-}: DefaultEditorProps) {
+}: DefaultEditorControllerState & EditorRenderProps) {
   const visRef = useRef<HTMLDivElement>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
   const [visHandler, setVisHandler] = useState<EmbeddedVisualizeHandler | null>(null);
   // const [sidebarStyle, setSidebarStyle] = useState({});
+  const { vis } = savedObj;
   const [state, actions] = useEditorReducer(vis);
 
   useEffect(() => {

@@ -34,15 +34,15 @@ exports[`DefaultEditorAggParams component should init with the default set of pa
       }
     }
     key="customLabelundefined"
-    onChange={[MockFunction]}
+    setAggParamValue={[MockFunction]}
     setTouched={[Function]}
     setValidity={[Function]}
     showValidation={false}
     subAggParams={
       Object {
         "formIsTouched": false,
-        "onAggParamsChange": [MockFunction],
         "onAggTypeChange": [MockFunction],
+        "setAggParamValue": [MockFunction],
       }
     }
   />
@@ -73,15 +73,15 @@ exports[`DefaultEditorAggParams component should init with the default set of pa
           }
         }
         key="jsonundefined"
-        onChange={[MockFunction]}
+        setAggParamValue={[MockFunction]}
         setTouched={[Function]}
         setValidity={[Function]}
         showValidation={false}
         subAggParams={
           Object {
             "formIsTouched": false,
-            "onAggParamsChange": [MockFunction],
             "onAggTypeChange": [MockFunction],
+            "setAggParamValue": [MockFunction],
           }
         }
       />

@@ -24,23 +24,29 @@ import { EuiSpacer } from '@elastic/eui';
 import { parentPipelineAggHelper } from 'ui/agg_types/metrics/lib/parent_pipeline_agg_helper';
 import { AggConfig } from 'ui/agg_types';
 import { MetricAggType } from 'ui/agg_types/metrics/metric_agg_type';
+import { VisState } from 'ui/vis';
 import { DefaultEditorAggGroup } from '../agg_group';
 import { AggGroupNames } from '../../agg_groups';
 import { EditorActions } from '../../state/actions';
+import { ISchemas } from '../../schemas';
 
-interface DefaultEditorDataTabProps {
-  metricAggs: AggConfig[];
+export interface DefaultEditorDataTabProps {
   actions: EditorActions;
+  metricAggs: AggConfig[];
+  schemas: ISchemas;
+  state: VisState;
+  setTouched(isTouched: boolean): void;
+  setValidity(isValid: boolean): void;
 }
 
-function DefaultEditorDataTab({ metricAggs, state, schemas, actions }: DefaultEditorDataTabProps) {
-  const setValidity = () => {
-    console.log('setValidity');
-  };
-  const setTouched = () => {
-    console.log('setTouched');
-  };
-
+function DefaultEditorDataTab({
+  actions,
+  metricAggs,
+  schemas,
+  state,
+  setTouched,
+  setValidity,
+}: DefaultEditorDataTabProps) {
   const lastParentPipelineAgg = useMemo(
     () =>
       findLast(

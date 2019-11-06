@@ -58,6 +58,7 @@ function DefaultEditorAggGroup({
   schemas = [],
   addSchema,
   setAggParamValue,
+  setStateParamValue,
   onAggTypeChange,
   onToggleEnableAgg,
   removeAgg,
@@ -166,6 +167,7 @@ function DefaultEditorAggGroup({
                     metricAggs={metricAggs}
                     state={state}
                     setAggParamValue={setAggParamValue}
+                    setStateParamValue={setStateParamValue}
                     onAggTypeChange={onAggTypeChange}
                     onToggleEnableAgg={onToggleEnableAgg}
                     removeAgg={removeAgg}
