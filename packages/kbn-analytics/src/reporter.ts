@@ -18,7 +18,7 @@
  */
 
 import { wrapArray } from './util';
-import { Metric, UiStatsMetric, createUiStatsMetric } from './metrics';
+import { Metric, UiStatsMetric, createUiStatsMetric, trackUsageAgent } from './metrics';
 
 import { Storage, ReportStorageManager } from './storage';
 import { Report, ReportManager } from './report';
@@ -40,10 +40,11 @@ export class Reporter {
   private reportManager: ReportManager;
   private storageManager: ReportStorageManager;
   private debug: boolean;
+  private retryCount = 0;
+  private readonly maxRetries = 3;
 
   constructor(config: ReporterConfig) {
     const { http, storage, debug, checkInterval = 10000, storageKey = 'analytics' } = config;
-
     this.http = http;
     this.checkInterval = checkInterval;
     this.interval = null;
@@ -63,14 +64,14 @@ export class Reporter {
     this.storageManager.store(this.reportManager.report);
   }
 
-  public start() {
+  public start = () => {
     if (!this.interval) {
       this.interval = setTimeout(() => {
         this.interval = null;
         this.sendReports();
       }, this.checkInterval);
     }
-  }
+  };
 
   private log(message: any) {
     if (this.debug) {
@@ -79,32 +80,47 @@ export class Reporter {
     }
   }
 
-  public reportUiStats(
+  public reportUiStats = (
     appName: string,
     type: UiStatsMetric['type'],
     eventNames: string | string[],
     count?: number
-  ) {
+  ) => {
     const metrics = wrapArray(eventNames).map(eventName => {
-      if (this) this.log(`${type} Metric -> (${appName}:${eventName}):`);
+      this.log(`${type} Metric -> (${appName}:${eventName}):`);
       const report = createUiStatsMetric({ type, appName, eventName, count });
       this.log(report);
       return report;
     });
     this.saveToReport(metrics);
-  }
+  };
 
-  public async sendReports() {
+  public reportUserAgent = (appName: string) => {
+    this.log(`Reporting user-agent.`);
+    const report = trackUsageAgent(appName);
+    this.saveToReport([report]);
+  };
+
+  public sendReports = async () => {
     if (!this.reportManager.isReportEmpty()) {
       try {
         await this.http(this.reportManager.report);
         this.flushReport();
+        this.retryCount = 0;
       } catch (err) {
+        this.retryCount = this.retryCount + 1;
         this.log(`Error Sending Metrics Report ${err}`);
+        if (this.retryCount > this.maxRetries) {
+          this.log(`Max retries reached; Flushing report.`);
+          this.flushReport();
+        } else if (this.reportManager.report.reportVersion !== ReportManager.REPORT_VERSION) {
+          this.log(`Report Version mismatch; Flushing report.`);
+          this.flushReport();
+        }
       }
     }
     this.start();
-  }
+  };
 }
 
 export function createReporter(reportedConf: ReporterConfig) {

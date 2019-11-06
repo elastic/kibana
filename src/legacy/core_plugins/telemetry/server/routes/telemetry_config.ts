@@ -20,10 +20,21 @@
 import Joi from 'joi';
 import { boomify } from 'boom';
 import { CoreSetup } from 'src/core/server';
+import { SavedObjectsErrorHelpers } from '../../../../../core/server';
 
 async function updateTelemetrySavedObjectFromReq(req: any) {
   const savedObjectsClient = req.getSavedObjectsClient();
-  return await savedObjectsClient.update('telemetry', 'telemetry', req.payload);
+  try {
+    return await savedObjectsClient.update('telemetry', 'telemetry', req.payload);
+  } catch (err) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+      return await savedObjectsClient.create('telemetry', req.payload, {
+        id: 'telemetry',
+        overwrite: true,
+      });
+    }
+    throw err;
+  }
 }
 
 export function registerTelemetryConfigRoutes(core: CoreSetup) {

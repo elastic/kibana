@@ -18,6 +18,9 @@
  */
 
 import { createReporter, Reporter, UiStatsMetricType } from '@kbn/analytics';
+import { kfetch } from 'ui/kfetch';
+// @ts-ignore
+import { addSystemApiHeader } from 'ui/system_api';
 
 let telemetryReporter: Reporter;
 
@@ -39,27 +42,35 @@ export const createUiStatsReporter = (appName: string) => (
   }
 };
 
+export const trackUserAgent = (appName: string) => {
+  if (telemetryReporter) {
+    return telemetryReporter.reportUserAgent(appName);
+  }
+};
+
+export const createUiMetricReporter = (appName: string) => (type: UiStatsMetricType): void => {
+  if (telemetryReporter) {
+    return telemetryReporter.reportUiStats(appName, type, eventNames, count);
+  }
+};
+
 interface AnalyicsReporterConfig {
   localStorage: any;
-  basePath: string;
   debug: boolean;
-  $http: ng.IHttpService;
 }
 
 export function createAnalyticsReporter(config: AnalyicsReporterConfig) {
-  const { localStorage, basePath, debug } = config;
+  const { localStorage, debug } = config;
 
   return createReporter({
     debug,
     storage: localStorage,
     async http(report) {
-      const url = `${basePath}/api/telemetry/report`;
-      await fetch(url, {
+      return kfetch({
         method: 'POST',
-        headers: {
-          'kbn-xsrf': 'true',
-        },
-        body: JSON.stringify({ report }),
+        pathname: '/api/telemetry/report',
+        body: JSON.stringify(report),
+        headers: addSystemApiHeader({}),
       });
     },
   });

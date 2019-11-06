@@ -16,6 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { METRIC_TYPE } from './';
 
-const usageAgent =
-  window && window.navigator && window.navigator.userAgent ? window.navigator.userAgent : '';
+export interface UserAgentMetric {
+  type: METRIC_TYPE.USER_AGENT;
+  appName: string;
+  userAgent: string;
+}
+
+export function trackUsageAgent(appName: string): UserAgentMetric {
+  const userAgent =
+    window && window.navigator && window.navigator.userAgent ? window.navigator.userAgent : '';
+  return {
+    type: METRIC_TYPE.USER_AGENT,
+    appName,
+    userAgent,
+  };
+}

@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export { createUiStatsReporter } from './services/telemetry_analytics';
+export { createUiStatsReporter, trackUserAgent } from './services/telemetry_analytics';
 export { METRIC_TYPE } from '@kbn/analytics';
