@@ -84,6 +84,7 @@ export class LogRotator {
     // and understand if we need to usePolling or not
     const tempFileDir = tmpdir();
     await mkdirAsync(tempFileDir, { recursive: true });
+
     const tempFile = join(tempFileDir, 'kbn_log_rotation_test_file.log');
     await writeFileAsync(tempFile, '');
 
@@ -99,8 +100,6 @@ export class LogRotator {
           testWatcher.close();
           await unlinkAsync(tempFile);
           resolve(completeStatus);
-
-          return true;
         });
 
         fallbackTimeout = setTimeout(async () => {
