@@ -151,7 +151,7 @@ export const PingListComponent = ({
       render: (location: string) => <LocationName location={location} />,
     },
     {
-      align: 'left',
+      align: 'right',
       dataType: 'number',
       field: 'monitor.ip',
       name: i18n.translate('xpack.uptime.pingList.ipAddressColumnLabel', {

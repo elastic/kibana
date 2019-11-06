@@ -8,7 +8,6 @@ import _ from 'lodash';
 import React, { useState, useEffect, useCallback } from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { Storage } from 'ui/storage';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { CoreStart, NotificationsStart } from 'src/core/public';
@@ -20,6 +19,7 @@ import {
   Query,
 } from 'src/legacy/core_plugins/data/public';
 import { Filter } from '@kbn/es-query';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { start as navigation } from '../../../../../../src/legacy/core_plugins/navigation/public/legacy';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { Document, SavedObjectStore } from '../persistence';
@@ -49,7 +49,7 @@ export function App({
   data,
   dataShim,
   core,
-  store,
+  storage,
   docId,
   docStorage,
   redirectTo,
@@ -58,14 +58,14 @@ export function App({
   data: DataPublicPluginStart;
   core: CoreStart;
   dataShim: DataStart;
-  store: Storage;
+  storage: IStorageWrapper;
   docId?: string;
   docStorage: SavedObjectStore;
   redirectTo: (id?: string) => void;
 }) {
   const timeDefaults = core.uiSettings.get('timepicker:timeDefaults');
   const language =
-    store.get('kibana.userQueryLanguage') || core.uiSettings.get('search:queryLanguage');
+    storage.get('kibana.userQueryLanguage') || core.uiSettings.get('search:queryLanguage');
 
   const [state, setState] = useState<State>({
     isLoading: !!docId,
@@ -170,7 +170,7 @@ export function App({
         services={{
           appName: 'lens',
           data,
-          store,
+          storage,
           ...core,
         }}
       >
@@ -247,7 +247,7 @@ export function App({
                   query: {
                     query: '',
                     language:
-                      store.get('kibana.userQueryLanguage') ||
+                      storage.get('kibana.userQueryLanguage') ||
                       core.uiSettings.get('search:queryLanguage'),
                   },
                 }));

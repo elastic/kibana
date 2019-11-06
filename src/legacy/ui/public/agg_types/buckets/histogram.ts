@@ -21,7 +21,7 @@ import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 
-import chrome from '../../chrome';
+import { npStart } from 'ui/new_platform';
 import { BucketAggType, IBucketAggConfig, BucketAggParam } from './_bucket_agg_type';
 import { createFilterHistogram } from './create_filter/histogram';
 import { NumberIntervalParamEditor } from '../../vis/editors/default/controls/number_interval';
@@ -32,7 +32,7 @@ import { AggConfig } from '../agg_config';
 import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
 import { BUCKET_TYPES } from './bucket_agg_types';
 
-interface AutoBounds {
+export interface AutoBounds {
   min: number;
   max: number;
 }
@@ -42,7 +42,8 @@ export interface IBucketHistogramAggConfig extends IBucketAggConfig {
   getAutoBounds: () => AutoBounds;
 }
 
-const config = chrome.getUiSettingsClient();
+const getUIConfig = () => npStart.core.uiSettings;
+
 export const histogramBucketAgg = new BucketAggType<IBucketHistogramAggConfig>({
   name: BUCKET_TYPES.HISTOGRAM,
   title: i18n.translate('common.ui.aggTypes.buckets.histogramTitle', {
@@ -135,25 +136,30 @@ export const histogramBucketAgg = new BucketAggType<IBucketHistogramAggConfig>({
         if (interval <= 0) {
           interval = 1;
         }
+        const autoBounds = aggConfig.getAutoBounds();
 
         // ensure interval does not create too many buckets and crash browser
-        if (aggConfig.getAutoBounds()) {
-          const range = aggConfig.getAutoBounds().max - aggConfig.getAutoBounds().min;
+        if (autoBounds) {
+          const range = autoBounds.max - autoBounds.min;
           const bars = range / interval;
+
+          const config = getUIConfig();
           if (bars > config.get('histogram:maxBars')) {
             const minInterval = range / config.get('histogram:maxBars');
+
             // Round interval by order of magnitude to provide clean intervals
             // Always round interval up so there will always be less buckets than histogram:maxBars
             const orderOfMagnitude = Math.pow(10, Math.floor(Math.log10(minInterval)));
             let roundInterval = orderOfMagnitude;
+
             while (roundInterval < minInterval) {
               roundInterval += orderOfMagnitude;
             }
             interval = roundInterval;
           }
         }
-
         const base = aggConfig.params.intervalBase;
+
         if (base) {
           if (interval < base) {
             // In case the specified interval is below the base, just increase it to it's base

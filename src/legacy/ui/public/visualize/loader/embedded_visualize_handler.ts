@@ -538,16 +538,16 @@ export class EmbeddedVisualizeHandler {
 
   private rendererProvider = (response: VisResponseData | null) => {
     const renderer = registries.renderers.get(get(response || {}, 'as', 'visualization'));
-    const args = [
-      this.element,
-      get(response, 'value', { visType: this.vis.type.name }),
-      this.handlers,
-    ];
 
     if (!renderer) {
       return null;
     }
 
-    return () => renderer.render(...args);
+    return () =>
+      renderer.render(
+        this.element,
+        get(response, 'value', { visType: this.vis.type.name }),
+        this.handlers
+      );
   };
 }

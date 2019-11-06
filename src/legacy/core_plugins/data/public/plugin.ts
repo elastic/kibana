@@ -22,10 +22,7 @@ import { SearchService, SearchStart, createSearchBar, StatetfulSearchBarProps } 
 import { QueryService, QuerySetup } from './query';
 import { TimefilterService, TimefilterSetup } from './timefilter';
 import { IndexPatternsService, IndexPatternsSetup, IndexPatternsStart } from './index_patterns';
-import {
-  LegacyDependenciesPluginSetup,
-  LegacyDependenciesPluginStart,
-} from './shim/legacy_dependencies_plugin';
+import { Storage, IStorageWrapper } from '../../../../../src/plugins/kibana_utils/public';
 import { DataPublicPluginStart } from '../../../../plugins/data/public';
 import { initLegacyModule } from './shim/legacy_module';
 import { IUiActionsSetup } from '../../../../plugins/ui_actions/public';
@@ -35,19 +32,9 @@ import {
 } from './filter/action/apply_filter_action';
 import { APPLY_FILTER_TRIGGER } from '../../../../plugins/embeddable/public';
 
-/**
- * Interface for any dependencies on other plugins' `setup` contracts.
- *
- * @internal
- */
-export interface DataPluginSetupDependencies {
-  __LEGACY: LegacyDependenciesPluginSetup;
-}
-
 export interface DataPluginStartDependencies {
   data: DataPublicPluginStart;
   uiActions: IUiActionsSetup;
-  __LEGACY: LegacyDependenciesPluginStart;
 }
 
 /**
@@ -87,22 +74,24 @@ export interface DataStart {
  * in the setup/start interfaces. The remaining items exported here are either types,
  * or static code.
  */
-export class DataPlugin
-  implements
-    Plugin<DataSetup, DataStart, DataPluginSetupDependencies, DataPluginStartDependencies> {
+
+export class DataPlugin implements Plugin<DataSetup, DataStart, {}, DataPluginStartDependencies> {
   private readonly indexPatterns: IndexPatternsService = new IndexPatternsService();
   private readonly query: QueryService = new QueryService();
   private readonly search: SearchService = new SearchService();
   private readonly timefilter: TimefilterService = new TimefilterService();
 
   private setupApi!: DataSetup;
+  private storage!: IStorageWrapper;
 
-  public setup(core: CoreSetup, { __LEGACY }: DataPluginSetupDependencies): DataSetup {
+  public setup(core: CoreSetup): DataSetup {
     const { uiSettings } = core;
+
+    this.storage = new Storage(window.localStorage);
 
     const timefilterService = this.timefilter.setup({
       uiSettings,
-      store: __LEGACY.storage,
+      storage: this.storage,
     });
     this.setupApi = {
       indexPatterns: this.indexPatterns.setup(),
@@ -113,10 +102,7 @@ export class DataPlugin
     return this.setupApi;
   }
 
-  public start(
-    core: CoreStart,
-    { __LEGACY, data, uiActions }: DataPluginStartDependencies
-  ): DataStart {
+  public start(core: CoreStart, { data, uiActions }: DataPluginStartDependencies): DataStart {
     const { uiSettings, http, notifications, savedObjects } = core;
 
     const indexPatternsService = this.indexPatterns.start({
@@ -131,12 +117,13 @@ export class DataPlugin
     const SearchBar = createSearchBar({
       core,
       data,
-      store: __LEGACY.storage,
+      storage: this.storage,
       timefilter: this.setupApi.timefilter,
     });
 
     uiActions.registerAction(
       createFilterAction(
+        core.overlays,
         data.query.filterManager,
         this.setupApi.timefilter.timefilter,
         indexPatternsService

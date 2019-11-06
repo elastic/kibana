@@ -368,7 +368,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         onLoad={this.onLoadSavedQuery}
         savedQueryService={this.savedQueryService}
         onClearSavedQuery={this.props.onClearSavedQuery}
-      ></SavedQueryManagementComponent>
+      />
     );
 
     let queryBar;

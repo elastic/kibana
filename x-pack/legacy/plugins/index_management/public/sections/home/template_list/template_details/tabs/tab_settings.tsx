@@ -34,6 +34,6 @@ export const TabSettings: React.FunctionComponent<Props> = ({ templateDetails })
       }
       iconType="pin"
       data-test-subj="noSettingsCallout"
-    ></EuiCallOut>
+    />
   );
 };

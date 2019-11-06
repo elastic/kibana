@@ -19,18 +19,12 @@
 
 import { get, has } from 'lodash';
 import { i18n } from '@kbn/i18n';
-// @ts-ignore
 import { AggConfigs } from 'ui/agg_types/agg_configs';
 import { createFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import chrome from 'ui/chrome';
-
-// need to get rid of angular from these
-// @ts-ignore
 import { TimeRange } from 'src/plugins/data/public';
 import { SearchSource } from '../../../../ui/public/courier/search_source';
-// @ts-ignore
 import { FilterBarQueryFilterProvider } from '../../../../ui/public/filter_manager/query_filter';
-
 import { buildTabularInspectorData } from '../../../../ui/public/inspector/build_tabular_inspector_data';
 import {
   getRequestInspectorStats,
@@ -39,11 +33,14 @@ import {
 import { calculateObjectHash } from '../../../../ui/public/vis/lib/calculate_object_hash';
 import { getTime } from '../../../../ui/public/timefilter';
 import { RequestHandlerParams } from '../../../../ui/public/visualize/loader/embedded_visualize_handler';
-// @ts-ignore
-import { tabifyAggResponse } from '../../../../ui/public/agg_response/tabify/tabify';
 import { KibanaContext, KibanaDatatable } from '../../common';
 import { ExpressionFunction, KibanaDatatableColumn } from '../../types';
 import { start as data } from '../../../data/public/legacy';
+
+// @ts-ignore
+import { tabifyAggResponse } from '../../../../ui/public/agg_response/tabify/tabify';
+// @ts-ignore
+import { SearchSourceProvider } from '../../../../ui/public/courier/search_source';
 
 const name = 'esaggs';
 

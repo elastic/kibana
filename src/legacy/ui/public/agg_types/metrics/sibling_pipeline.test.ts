@@ -23,8 +23,8 @@ import { bucketAvgMetricAgg } from './bucket_avg';
 import { bucketMinMetricAgg } from './bucket_min';
 import { bucketMaxMetricAgg } from './bucket_max';
 
-import { AggConfigs } from 'ui/agg_types';
-import { IMetricAggConfig, MetricAggType } from 'ui/agg_types/metrics/metric_agg_type';
+import { AggConfigs } from '../agg_configs';
+import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
 
 jest.mock('../../vis/editors/default/schemas', () => {
   class MockedSchemas {

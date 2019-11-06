@@ -574,6 +574,7 @@ describe('workspace_panel', () => {
         {
           state: {},
           table: expectedTable,
+          keptLayerIds: [],
         },
       ]);
       mockVisualization.getSuggestions.mockReturnValueOnce([
@@ -613,6 +614,7 @@ describe('workspace_panel', () => {
             columns: [],
             changeType: 'unchanged',
           },
+          keptLayerIds: [],
         },
       ]);
       mockVisualization.getSuggestions.mockReturnValueOnce([
@@ -639,6 +641,7 @@ describe('workspace_panel', () => {
             columns: [],
             changeType: 'unchanged',
           },
+          keptLayerIds: [],
         },
       ]);
       mockVisualization2.getSuggestions.mockReturnValueOnce([
@@ -665,6 +668,7 @@ describe('workspace_panel', () => {
             columns: [],
             changeType: 'unchanged',
           },
+          keptLayerIds: [],
         },
       ]);
       mockVisualization.getSuggestions.mockReturnValueOnce([
@@ -694,6 +698,7 @@ describe('workspace_panel', () => {
             layerId: '1',
             changeType: 'unchanged',
           },
+          keptLayerIds: [],
         },
         {
           state: {},
@@ -703,6 +708,7 @@ describe('workspace_panel', () => {
             layerId: '1',
             changeType: 'unchanged',
           },
+          keptLayerIds: [],
         },
       ]);
       mockVisualization.getSuggestions.mockReturnValueOnce([
