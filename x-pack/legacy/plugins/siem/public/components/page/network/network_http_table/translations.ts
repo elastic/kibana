@@ -16,30 +16,33 @@ export const UNIT = (totalCount: number) =>
     defaultMessage: `{totalCount, plural, =1 {request} other {requests}}`,
   });
 
-export const METHOD = i18n.translate('xpack.siem.networkHttpTable.column.method', {
+export const METHOD = i18n.translate('xpack.siem.networkHttpTable.column.methodTitle', {
   defaultMessage: 'Method',
 });
-export const DOMAIN = i18n.translate('xpack.siem.networkHttpTable.column.domain', {
+export const DOMAIN = i18n.translate('xpack.siem.networkHttpTable.column.domainTitle', {
   defaultMessage: 'Domain',
 });
 
-export const PATH = i18n.translate('xpack.siem.networkHttpTable.column.path', {
+export const PATH = i18n.translate('xpack.siem.networkHttpTable.column.pathTitle', {
   defaultMessage: 'Path',
 });
 
-export const STATUS = i18n.translate('xpack.siem.networkHttpTable.column.status', {
+export const STATUS = i18n.translate('xpack.siem.networkHttpTable.column.statusTitle', {
   defaultMessage: 'Status',
 });
 
-export const LAST_HOST = i18n.translate('xpack.siem.networkHttpTable.column.status', {
+export const LAST_HOST = i18n.translate('xpack.siem.networkHttpTable.column.lastHostTitle', {
   defaultMessage: 'Last host',
 });
 
-export const LAST_SOURCE_IP = i18n.translate('xpack.siem.networkHttpTable.column.status', {
-  defaultMessage: 'Last source Ip',
-});
+export const LAST_SOURCE_IP = i18n.translate(
+  'xpack.siem.networkHttpTable.column.lastSourceIpTitle',
+  {
+    defaultMessage: 'Last source Ip',
+  }
+);
 
-export const REQUESTS = i18n.translate('xpack.siem.networkHttpTable.column.status', {
+export const REQUESTS = i18n.translate('xpack.siem.networkHttpTable.column.requestsTitle', {
   defaultMessage: 'Requests',
 });
 

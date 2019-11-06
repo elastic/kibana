@@ -6,7 +6,7 @@
 
 import React from 'react';
 import numeral from '@elastic/numeral';
-import { NetworkHttpFields, NetworkHttpItem } from '../../../../graphql/types';
+import { NetworkHttpEdges, NetworkHttpFields, NetworkHttpItem } from '../../../../graphql/types';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { getEmptyTagValue } from '../../../empty_value';
 import { IPDetailsLink } from '../../../links';
@@ -15,38 +15,37 @@ import { Columns } from '../../../paginated_table';
 import * as i18n from './translations';
 import { getRowItemDraggable, getRowItemDraggables } from '../../../tables/helpers';
 export type NetworkHttpColumns = [
-  Columns<NetworkHttpItem['methods']>,
-  Columns<NetworkHttpItem['domains']>,
+  Columns<NetworkHttpEdges>,
+  Columns<NetworkHttpEdges>,
   Columns<NetworkHttpItem['path']>,
-  Columns<NetworkHttpItem['statuses']>,
-  Columns<NetworkHttpItem['lastHost']>,
-  Columns<NetworkHttpItem['lastSourceIp']>,
+  Columns<NetworkHttpEdges>,
+  Columns<NetworkHttpEdges>,
+  Columns<NetworkHttpEdges>,
   Columns<NetworkHttpItem['requestCount']>
 ];
 
 export const getNetworkHttpColumns = (tableId: string): NetworkHttpColumns => [
   {
-    field: `node.${NetworkHttpFields.methods}`,
     name: i18n.METHOD,
-    render: methods =>
-      Array.isArray(methods) && methods.length > 0
+    render: ({ node: { methods, path } }) => {
+      return Array.isArray(methods) && methods.length > 0
         ? getRowItemDraggables({
             attrName: 'http.request.method',
             displayCount: 3,
-            idPrefix: escapeDataProviderId(`${tableId}-table-methods`),
+            idPrefix: escapeDataProviderId(`${tableId}-table-methods-${path}`),
             rowItems: methods,
           })
-        : getEmptyTagValue(),
+        : getEmptyTagValue();
+    },
   },
   {
-    field: `node.${NetworkHttpFields.domains}`,
     name: i18n.DOMAIN,
-    render: domains =>
+    render: ({ node: { domains, path } }) =>
       Array.isArray(domains) && domains.length > 0
         ? getRowItemDraggables({
             attrName: 'url.domain',
             displayCount: 3,
-            idPrefix: escapeDataProviderId(`${tableId}-table-domains`),
+            idPrefix: escapeDataProviderId(`${tableId}-table-domains-${path}`),
             rowItems: domains,
           })
         : getEmptyTagValue(),
@@ -58,44 +57,41 @@ export const getNetworkHttpColumns = (tableId: string): NetworkHttpColumns => [
       path != null
         ? getRowItemDraggable({
             attrName: 'url.path',
-            idPrefix: escapeDataProviderId(`${tableId}-table-path`),
+            idPrefix: escapeDataProviderId(`${tableId}-table-path-${path}`),
             rowItem: path,
           })
         : getEmptyTagValue(),
   },
   {
-    field: `node.${NetworkHttpFields.statuses}`,
     name: i18n.STATUS,
-    render: statuses =>
+    render: ({ node: { statuses, path } }) =>
       Array.isArray(statuses) && statuses.length > 0
         ? getRowItemDraggables({
             attrName: 'http.response.status_code',
             displayCount: 3,
-            idPrefix: escapeDataProviderId(`${tableId}-table-statuses`),
+            idPrefix: escapeDataProviderId(`${tableId}-table-statuses-${path}`),
             rowItems: statuses,
           })
         : getEmptyTagValue(),
   },
   {
-    field: `node.${NetworkHttpFields.lastHost}`,
     name: i18n.LAST_HOST,
-    render: lastHost =>
+    render: ({ node: { lastHost, path } }) =>
       lastHost != null
         ? getRowItemDraggable({
             attrName: 'host.name',
-            idPrefix: escapeDataProviderId(`${tableId}-table-lastHost`),
+            idPrefix: escapeDataProviderId(`${tableId}-table-lastHost-${path}`),
             rowItem: lastHost,
           })
         : getEmptyTagValue(),
   },
   {
-    field: `node.${NetworkHttpFields.lastSourceIp}`,
     name: i18n.LAST_SOURCE_IP,
-    render: lastSourceIp =>
+    render: ({ node: { lastSourceIp, path } }) =>
       lastSourceIp != null
         ? getRowItemDraggable({
             attrName: 'source.ip',
-            idPrefix: escapeDataProviderId(`${tableId}-table-lastSourceIp`),
+            idPrefix: escapeDataProviderId(`${tableId}-table-lastSourceIp-${path}`),
             rowItem: lastSourceIp,
             render: () => <IPDetailsLink ip={lastSourceIp} />,
           })
