@@ -114,7 +114,7 @@ export class LogRotator {
         await writeFileAsync(tempFile, 'test');
       });
     } catch {
-      return false;
+      return true;
     }
   }
 
