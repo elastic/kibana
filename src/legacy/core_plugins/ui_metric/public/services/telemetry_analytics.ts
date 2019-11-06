@@ -48,12 +48,6 @@ export const trackUserAgent = (appName: string) => {
   }
 };
 
-export const createUiMetricReporter = (appName: string) => (type: UiStatsMetricType): void => {
-  if (telemetryReporter) {
-    return telemetryReporter.reportUiStats(appName, type, eventNames, count);
-  }
-};
-
 interface AnalyicsReporterConfig {
   localStorage: any;
   debug: boolean;

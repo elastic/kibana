@@ -18,7 +18,13 @@
  */
 
 import { wrapArray } from './util';
-import { Metric, UiStatsMetric, createUiStatsMetric, trackUsageAgent } from './metrics';
+import {
+  Metric,
+  UiStatsMetric,
+  createUiStatsMetric,
+  trackUsageAgent,
+  UiStatsMetricType,
+} from './metrics';
 
 import { Storage, ReportStorageManager } from './storage';
 import { Report, ReportManager } from './report';
@@ -82,7 +88,7 @@ export class Reporter {
 
   public reportUiStats = (
     appName: string,
-    type: UiStatsMetric['type'],
+    type: UiStatsMetricType,
     eventNames: string | string[],
     count?: number
   ) => {
