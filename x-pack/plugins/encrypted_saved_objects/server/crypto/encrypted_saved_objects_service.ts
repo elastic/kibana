@@ -8,8 +8,8 @@
 import nodeCrypto from '@elastic/node-crypto';
 import stringify from 'json-stable-stringify';
 import typeDetect from 'type-detect';
-import { Server } from 'kibana';
-import { EncryptedSavedObjectsAuditLogger } from './encrypted_saved_objects_audit_logger';
+import { Logger } from 'src/core/server';
+import { EncryptedSavedObjectsAuditLogger } from '../audit';
 import { EncryptionError } from './encryption_error';
 
 /**
@@ -62,14 +62,12 @@ export class EncryptedSavedObjectsService {
 
   /**
    * @param encryptionKey The key used to encrypt and decrypt saved objects attributes.
-   * @param knownTypes The list of all known saved object types.
-   * @param log Ordinary logger instance.
+   * @param logger Ordinary logger instance.
    * @param audit Audit logger instance.
    */
   constructor(
     encryptionKey: string,
-    private readonly knownTypes: readonly string[],
-    private readonly log: Server.Logger,
+    private readonly logger: Logger,
     private readonly audit: EncryptedSavedObjectsAuditLogger
   ) {
     this.crypto = nodeCrypto({ encryptionKey });
@@ -89,10 +87,6 @@ export class EncryptedSavedObjectsService {
 
     if (this.typeRegistrations.has(typeRegistration.type)) {
       throw new Error(`The "${typeRegistration.type}" saved object type is already registered.`);
-    }
-
-    if (!this.knownTypes.includes(typeRegistration.type)) {
-      throw new Error(`The type "${typeRegistration.type}" is not known saved object type.`);
     }
 
     this.typeRegistrations.set(typeRegistration.type, typeRegistration);
@@ -160,7 +154,9 @@ export class EncryptedSavedObjectsService {
             encryptionAAD
           );
         } catch (err) {
-          this.log.error(`Failed to encrypt "${attributeName}" attribute: ${err.message || err}`);
+          this.logger.error(
+            `Failed to encrypt "${attributeName}" attribute: ${err.message || err}`
+          );
           this.audit.encryptAttributeFailure(attributeName, descriptor);
 
           throw new EncryptionError(
@@ -176,7 +172,7 @@ export class EncryptedSavedObjectsService {
     // not the case we should collect and log them to make troubleshooting easier.
     const encryptedAttributesKeys = Object.keys(encryptedAttributes);
     if (encryptedAttributesKeys.length !== typeRegistration.attributesToEncrypt.size) {
-      this.log.debug(
+      this.logger.debug(
         `The following attributes of saved object "${descriptorToArray(
           descriptor
         )}" should have been encrypted: ${Array.from(
@@ -238,7 +234,7 @@ export class EncryptedSavedObjectsService {
           encryptionAAD
         );
       } catch (err) {
-        this.log.error(`Failed to decrypt "${attributeName}" attribute: ${err.message || err}`);
+        this.logger.error(`Failed to decrypt "${attributeName}" attribute: ${err.message || err}`);
         this.audit.decryptAttributeFailure(attributeName, descriptor);
 
         throw new EncryptionError(
@@ -253,7 +249,7 @@ export class EncryptedSavedObjectsService {
     // not the case we should collect and log them to make troubleshooting easier.
     const decryptedAttributesKeys = Object.keys(decryptedAttributes);
     if (decryptedAttributesKeys.length !== typeRegistration.attributesToEncrypt.size) {
-      this.log.debug(
+      this.logger.debug(
         `The following attributes of saved object "${descriptorToArray(
           descriptor
         )}" should have been decrypted: ${Array.from(
@@ -298,8 +294,8 @@ export class EncryptedSavedObjectsService {
       }
     }
 
-    if (Object.keys(attributesAAD).length) {
-      this.log.debug(
+    if (Object.keys(attributesAAD).length === 0) {
+      this.logger.debug(
         `The AAD for saved object "${descriptorToArray(
           descriptor
         )}" does not include any attributes.`
