@@ -6,18 +6,19 @@
 
 jest.mock('uuid', () => ({ v4: jest.fn().mockReturnValue('uuid-v4-id') }));
 
-import { EncryptedSavedObjectsClientWrapper } from './encrypted_saved_objects_client_wrapper';
-import { EncryptedSavedObjectsService } from './encrypted_saved_objects_service';
-import { createEncryptedSavedObjectsServiceMock } from './encrypted_saved_objects_service.mock';
-import { savedObjectsClientMock } from 'src/core/server/saved_objects/service/saved_objects_client.mock';
 import { SavedObjectsClientContract } from 'src/core/server';
+import { EncryptedSavedObjectsService } from '../crypto';
+import { EncryptedSavedObjectsClientWrapper } from './encrypted_saved_objects_client_wrapper';
+
+import { savedObjectsClientMock } from 'src/core/server/mocks';
+import { encryptedSavedObjectsServiceMock } from '../crypto/index.mock';
 
 let wrapper: EncryptedSavedObjectsClientWrapper;
 let mockBaseClient: jest.Mocked<SavedObjectsClientContract>;
-let encryptedSavedObjectsServiceMock: jest.Mocked<EncryptedSavedObjectsService>;
+let encryptedSavedObjectsServiceMockInstance: jest.Mocked<EncryptedSavedObjectsService>;
 beforeEach(() => {
   mockBaseClient = savedObjectsClientMock.create();
-  encryptedSavedObjectsServiceMock = createEncryptedSavedObjectsServiceMock([
+  encryptedSavedObjectsServiceMockInstance = encryptedSavedObjectsServiceMock.create([
     {
       type: 'known-type',
       attributesToEncrypt: new Set(['attrSecret']),
@@ -25,7 +26,7 @@ beforeEach(() => {
   ]);
 
   wrapper = new EncryptedSavedObjectsClientWrapper({
-    service: encryptedSavedObjectsServiceMock,
+    service: encryptedSavedObjectsServiceMockInstance,
     baseClient: mockBaseClient,
   } as any);
 });
@@ -76,8 +77,8 @@ describe('#create', () => {
       attributes: { attrOne: 'one', attrThree: 'three' },
     });
 
-    expect(encryptedSavedObjectsServiceMock.encryptAttributes).toHaveBeenCalledTimes(1);
-    expect(encryptedSavedObjectsServiceMock.encryptAttributes).toHaveBeenCalledWith(
+    expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledTimes(1);
+    expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledWith(
       { type: 'known-type', id: 'uuid-v4-id' },
       { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' }
     );
@@ -107,8 +108,8 @@ describe('#create', () => {
       attributes: { attrOne: 'one', attrThree: 'three' },
     });
 
-    expect(encryptedSavedObjectsServiceMock.encryptAttributes).toHaveBeenCalledTimes(1);
-    expect(encryptedSavedObjectsServiceMock.encryptAttributes).toHaveBeenCalledWith(
+    expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledTimes(1);
+    expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledWith(
       { type: 'known-type', id: 'uuid-v4-id', namespace: 'some-namespace' },
       { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' }
     );
@@ -236,8 +237,8 @@ describe('#bulkCreate', () => {
       ],
     });
 
-    expect(encryptedSavedObjectsServiceMock.encryptAttributes).toHaveBeenCalledTimes(1);
-    expect(encryptedSavedObjectsServiceMock.encryptAttributes).toHaveBeenCalledWith(
+    expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledTimes(1);
+    expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledWith(
       { type: 'known-type', id: 'uuid-v4-id' },
       { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' }
     );
@@ -272,8 +273,8 @@ describe('#bulkCreate', () => {
       ],
     });
 
-    expect(encryptedSavedObjectsServiceMock.encryptAttributes).toHaveBeenCalledTimes(1);
-    expect(encryptedSavedObjectsServiceMock.encryptAttributes).toHaveBeenCalledWith(
+    expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledTimes(1);
+    expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledWith(
       { type: 'known-type', id: 'uuid-v4-id', namespace: 'some-namespace' },
       { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' }
     );
@@ -390,12 +391,12 @@ describe('#bulkUpdate', () => {
       ],
     });
 
-    expect(encryptedSavedObjectsServiceMock.encryptAttributes).toHaveBeenCalledTimes(2);
-    expect(encryptedSavedObjectsServiceMock.encryptAttributes).toHaveBeenCalledWith(
+    expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledTimes(2);
+    expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledWith(
       { type: 'known-type', id: 'some-id' },
       { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' }
     );
-    expect(encryptedSavedObjectsServiceMock.encryptAttributes).toHaveBeenCalledWith(
+    expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledWith(
       { type: 'known-type', id: 'some-id-2' },
       { attrOne: 'one 2', attrSecret: 'secret 2', attrThree: 'three 2' }
     );
@@ -459,8 +460,8 @@ describe('#bulkUpdate', () => {
       ],
     });
 
-    expect(encryptedSavedObjectsServiceMock.encryptAttributes).toHaveBeenCalledTimes(1);
-    expect(encryptedSavedObjectsServiceMock.encryptAttributes).toHaveBeenCalledWith(
+    expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledTimes(1);
+    expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledWith(
       { type: 'known-type', id: 'some-id', namespace: 'some-namespace' },
       { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' }
     );
@@ -822,8 +823,8 @@ describe('#update', () => {
       attributes: { attrOne: 'one', attrThree: 'three' },
     });
 
-    expect(encryptedSavedObjectsServiceMock.encryptAttributes).toHaveBeenCalledTimes(1);
-    expect(encryptedSavedObjectsServiceMock.encryptAttributes).toHaveBeenCalledWith(
+    expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledTimes(1);
+    expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledWith(
       { type: 'known-type', id: 'some-id' },
       { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' }
     );
@@ -849,8 +850,8 @@ describe('#update', () => {
       attributes: { attrOne: 'one', attrThree: 'three' },
     });
 
-    expect(encryptedSavedObjectsServiceMock.encryptAttributes).toHaveBeenCalledTimes(1);
-    expect(encryptedSavedObjectsServiceMock.encryptAttributes).toHaveBeenCalledWith(
+    expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledTimes(1);
+    expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledWith(
       { type: 'known-type', id: 'some-id', namespace: 'some-namespace' },
       { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' }
     );
