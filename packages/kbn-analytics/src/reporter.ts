@@ -18,13 +18,7 @@
  */
 
 import { wrapArray } from './util';
-import {
-  Metric,
-  UiStatsMetric,
-  createUiStatsMetric,
-  trackUsageAgent,
-  UiStatsMetricType,
-} from './metrics';
+import { Metric, createUiStatsMetric, trackUsageAgent, UiStatsMetricType } from './metrics';
 
 import { Storage, ReportStorageManager } from './storage';
 import { Report, ReportManager } from './report';
