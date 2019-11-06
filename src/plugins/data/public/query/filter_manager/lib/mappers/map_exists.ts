@@ -18,7 +18,7 @@
  */
 
 import { get } from 'lodash';
-import { esFilters } from '../../../../es_query';
+import { esFilters } from '../../../../../common/es_query';
 
 export const mapExists = (filter: esFilters.Filter) => {
   if (esFilters.isExistsFilter(filter)) {

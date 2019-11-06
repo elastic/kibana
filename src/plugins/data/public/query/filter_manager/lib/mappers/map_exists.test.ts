@@ -19,7 +19,7 @@
 
 import { mapExists } from './map_exists';
 import { mapQueryString } from './map_query_string';
-import { esFilters } from '../../../../es_query';
+import { esFilters } from '../../../../../common/es_query';
 
 describe('filter manager utilities', () => {
   describe('mapExists()', () => {

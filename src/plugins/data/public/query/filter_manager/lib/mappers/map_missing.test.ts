@@ -18,7 +18,7 @@
  */
 
 import { mapMissing } from './map_missing';
-import { esFilters } from '../../../../es_query';
+import { esFilters } from '../../../../../common/es_query';
 
 describe('filter manager utilities', () => {
   describe('mapMissing()', () => {

@@ -7,7 +7,7 @@
 import { get } from 'lodash/fp';
 
 import Hapi from 'hapi';
-import { esFilters } from '../../../../../../../../src/plugins/data/public';
+import { esFilters } from '../../../../../../../../src/plugins/data/common';
 import { SIGNALS_ID } from '../../../../common/constants';
 import {
   Alert,

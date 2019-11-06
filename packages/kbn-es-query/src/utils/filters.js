@@ -17,13 +17,12 @@
  * under the License.
  */
 
-import _ from 'lodash';
-
+import { pick, get, reduce, map } from 'lodash';
 
 /** @deprecated
  * @see src/plugins/data/public/es_query/filters/phrase_filter.ts
  * Code was already moved into src/plugins/data/public.
- * This method will be removed after moving es_query into new platform
+ * This method will be removed after moving 'es_query' into new platform
  * */
 export const getConvertedValueForField = (field, value) => {
   if (typeof value !== 'boolean' && field.type === 'boolean') {
@@ -41,7 +40,7 @@ export const getConvertedValueForField = (field, value) => {
 /** @deprecated
  * @see src/plugins/data/public/es_query/filters/phrase_filter.ts
  * Code was already moved into src/plugins/data/public.
- * This method will be removed after moving es_query into new platform
+ * This method will be removed after moving 'es_query' into new platform
  * */
 export const buildInlineScriptForPhraseFilter = (scriptedField) => {
   // We must wrap painless scripts in a lambda in case they're more than a simple expression
@@ -58,7 +57,7 @@ export const buildInlineScriptForPhraseFilter = (scriptedField) => {
 /** @deprecated
  * @see src/plugins/data/public/es_query/filters/phrase_filter.ts
  * Code was already moved into src/plugins/data/public.
- * This method will be removed after moving es_query into new platform
+ * This method will be removed after moving 'es_query' into new platform
  * */
 export function getPhraseScript(field, value) {
   const convertedValue = getConvertedValueForField(field, value);
@@ -78,7 +77,7 @@ export function getPhraseScript(field, value) {
 /** @deprecated
  * @see src/plugins/data/public/es_query/filters/range_filter.ts
  * Code was already moved into src/plugins/data/public.
- * This method will be removed after moving es_query into new platform
+ * This method will be removed after moving 'kuery' into new platform
  * */
 export function getRangeScript(field, params) {
   const operators = {
@@ -101,23 +100,23 @@ export function getRangeScript(field, params) {
     lt: 'boolean lt(Supplier s, def v) {return s.get().toInstant().isBefore(Instant.parse(v))}',
   };
 
-  const knownParams = _.pick(params, (val, key) => {
+  const knownParams = pick(params, (val, key) => {
     return key in operators;
   });
-  let script = _.map(knownParams, function (val, key) {
-    return '(' + field.script + ')' + _.get(operators, key) + key;
+  let script = map(knownParams, (val, key) => {
+    return '(' + field.script + ')' + get(operators, key) + key;
   }).join(' && ');
 
   // We must wrap painless scripts in a lambda in case they're more than a simple expression
   if (field.lang === 'painless') {
     const comp = field.type === 'date' ? dateComparators : comparators;
-    const currentComparators = _.reduce(
+    const currentComparators = reduce(
       knownParams,
-      (acc, val, key) => acc.concat(_.get(comp, key)),
+      (acc, val, key) => acc.concat(get(comp, key)),
       []
     ).join(' ');
 
-    const comparisons = _.map(knownParams, function (val, key) {
+    const comparisons = map(knownParams, (val, key) => {
       return `${key}(() -> { ${field.script} }, params.${key})`;
     }).join(' && ');
 

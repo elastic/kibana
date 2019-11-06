@@ -18,7 +18,7 @@
  */
 
 import { mapDefault } from './map_default';
-import { esFilters } from '../../../../es_query';
+import { esFilters } from '../../../../../common/es_query';
 
 describe('filter manager utilities', () => {
   describe('mapDefault()', () => {

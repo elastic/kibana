@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import _, { get, keys } from 'lodash';
+import { map, reduce, mapValues, get, keys, pick } from 'lodash';
 import { Filter, FilterMeta } from './meta_filter';
 import { Field, IndexPattern } from './types';
 
@@ -84,33 +84,27 @@ export const isScriptedRangeFilter = (filter: any): filter is RangeFilter => {
   return hasRangeKeys(params);
 };
 
-function formatValue(field: Field, params: any[]) {
-  return _.map(params, (val: any, key: string) => get(operators, key) + format(field, val)).join(
-    ' '
-  );
-}
+const formatValue = (field: Field, params: any[]) =>
+  map(params, (val: any, key: string) => get(operators, key) + format(field, val)).join(' ');
 
-function format(field: Field, value: any) {
-  return field && field.format && field.format.convert ? field.format.convert(value) : value;
-}
+const format = (field: Field, value: any) =>
+  field && field.format && field.format.convert ? field.format.convert(value) : value;
 
 // Creates a filter where the value for the given field is in the given range
 // params should be an object containing `lt`, `lte`, `gt`, and/or `gte`
-export function buildRangeFilter(
+export const buildRangeFilter = (
   field: Field,
   params: RangeFilterParams,
   indexPattern: IndexPattern,
   formattedValue?: string
-): RangeFilter {
+): RangeFilter => {
   const filter: any = { meta: { index: indexPattern.id, params: {} } };
 
   if (formattedValue) {
     filter.meta.formattedValue = formattedValue;
   }
 
-  params = _.mapValues(params, value => {
-    return field.type === 'number' ? parseFloat(value) : value;
-  });
+  params = mapValues(params, value => (field.type === 'number' ? parseFloat(value) : value));
 
   if ('gte' in params && 'gt' in params) throw new Error('gte and gt are mutually exclusive');
   if ('lte' in params && 'lt' in params) throw new Error('lte and lt are mutually exclusive');
@@ -143,28 +137,28 @@ export function buildRangeFilter(
   }
 
   return filter as RangeFilter;
-}
+};
 
-export function getRangeScript(field: IndexPattern, params: RangeFilterParams) {
-  const knownParams = _.pick(params, (val, key: any) => {
-    return key in operators;
-  });
-  let script = _.map(knownParams, function(val: any, key: string) {
-    return '(' + field.script + ')' + get(operators, key) + key;
-  }).join(' && ');
+export const getRangeScript = (field: IndexPattern, params: RangeFilterParams) => {
+  const knownParams = pick(params, (val, key: any) => key in operators);
+  let script = map(
+    knownParams,
+    (val: any, key: string) => '(' + field.script + ')' + get(operators, key) + key
+  ).join(' && ');
 
   // We must wrap painless scripts in a lambda in case they're more than a simple expression
   if (field.lang === 'painless') {
     const comp = field.type === 'date' ? dateComparators : comparators;
-    const currentComparators = _.reduce(
+    const currentComparators = reduce(
       knownParams,
       (acc, val, key) => acc.concat(get(comp, key)),
       []
     ).join(' ');
 
-    const comparisons = _.map(knownParams, function(val, key) {
-      return `${key}(() -> { ${field.script} }, params.${key})`;
-    }).join(' && ');
+    const comparisons = map(
+      knownParams,
+      (val, key) => `${key}(() -> { ${field.script} }, params.${key})`
+    ).join(' && ');
 
     script = `${currentComparators}${comparisons}`;
   }
@@ -176,4 +170,4 @@ export function getRangeScript(field: IndexPattern, params: RangeFilterParams) {
       lang: field.lang,
     },
   };
-}
+};

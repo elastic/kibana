@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { esFilters } from '../../../../es_query';
+import { esFilters } from '../../../../../common/es_query';
 
 export const mapQueryString = (filter: esFilters.Filter) => {
   if (esFilters.isQueryStringFilter(filter)) {

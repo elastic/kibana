@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { esFilters } from '../../../../es_query';
+import { esFilters } from '../../../../../common/es_query';
 
 export const mapPhrases = (filter: esFilters.Filter) => {
   if (!esFilters.isPhrasesFilter(filter)) {

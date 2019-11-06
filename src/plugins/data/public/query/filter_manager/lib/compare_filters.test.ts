@@ -18,7 +18,7 @@
  */
 
 import { compareFilters } from './compare_filters';
-import { esFilters } from '../../../es_query';
+import { esFilters } from '../../../../common/es_query';
 
 describe('filter manager utilities', () => {
   describe('compare filters', () => {

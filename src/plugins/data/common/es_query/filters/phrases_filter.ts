@@ -35,7 +35,7 @@ export const isPhrasesFilter = (filter: any): filter is PhrasesFilter =>
 
 // Creates a filter where the given field matches one or more of the given values
 // params should be an array of values
-export function buildPhrasesFilter(field: Field, params: any, indexPattern: IndexPattern) {
+export const buildPhrasesFilter = (field: Field, params: any, indexPattern: IndexPattern) => {
   const index = indexPattern.id;
   const type = 'phrases';
   const key = field.name;
@@ -67,4 +67,4 @@ export function buildPhrasesFilter(field: Field, params: any, indexPattern: Inde
       },
     },
   } as PhrasesFilter;
-}
+};

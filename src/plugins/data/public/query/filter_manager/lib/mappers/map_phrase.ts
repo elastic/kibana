@@ -18,7 +18,7 @@
  */
 
 import { get } from 'lodash';
-import { esFilters } from '../../../../es_query';
+import { esFilters } from '../../../../../common/es_query';
 
 const getScriptedPhraseValue = (filter: esFilters.PhraseFilter) =>
   get(filter, ['script', 'script', 'params', 'value']);

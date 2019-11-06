@@ -35,16 +35,15 @@ export const isQueryStringFilter = (filter: any): filter is QueryStringFilter =>
   filter && filter.query && filter.query.query_string;
 
 // Creates a filter corresponding to a raw Elasticsearch query DSL object
-export function buildQueryFilter(
+export const buildQueryFilter = (
   query: QueryStringFilter['query'],
   index: IndexPattern,
   alias: string
-) {
-  return {
+) =>
+  ({
     query,
     meta: {
       index,
       alias,
     },
-  } as QueryStringFilter;
-}
+  } as QueryStringFilter);

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { esFilters } from '../../../../es_query';
+import { esFilters } from '../../../../../common/es_query';
 
 const POINTS_SEPARATOR = ', ';
 
