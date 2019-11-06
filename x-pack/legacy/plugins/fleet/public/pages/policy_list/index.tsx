@@ -58,26 +58,10 @@ export const PolicyListPage: React.SFC<{}> = () => {
       render: (name: string, policy: Policy) => name || policy.id,
     },
     {
-      field: 'status',
-      name: i18n.translate('xpack.fleet.policyList.statusColumnTitle', {
-        defaultMessage: 'Status',
+      field: 'description',
+      name: i18n.translate('xpack.fleet.policyList.descriptionColumnTitle', {
+        defaultMessage: 'Description',
       }),
-      render: (status: PolicyStatus) =>
-        status === PolicyStatus.Active ? (
-          <EuiHealth color="success">
-            <FormattedMessage
-              id="xpack.fleet.policyList.activeStatusText"
-              defaultMessage="Active"
-            />
-          </EuiHealth>
-        ) : (
-          <EuiHealth color="subdued">
-            <FormattedMessage
-              id="xpack.fleet.policyList.inactiveStatusText"
-              defaultMessage="Inactive"
-            />
-          </EuiHealth>
-        ),
     },
     {
       field: 'name',
@@ -87,7 +71,7 @@ export const PolicyListPage: React.SFC<{}> = () => {
       render: () => (
         // TODO: Make this link to filtered agents list and change to real agent count
         <ConnectedLink color="primary" path={`/agents`}>
-          {'3'}
+          {'78'}
         </ConnectedLink>
       ),
     },
