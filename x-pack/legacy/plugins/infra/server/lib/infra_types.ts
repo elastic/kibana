@@ -13,7 +13,13 @@ import { InfraSnapshot } from './snapshot';
 import { InfraSources } from './sources';
 import { InfraSourceStatus } from './source_status';
 import { InfraConfig } from '../../../../../plugins/infra/server';
-import { InfraKibanaBackendFrameworkAdapter } from './adapters/framework/kibana_framework_adapter';
+import { KibanaFramework } from './adapters/framework/kibana_framework_adapter';
+
+// NP_TODO: We shouldn't need this context anymore but I am
+// not sure how the graphql stuff uses it, so we can't remove it yet
+export interface InfraContext {
+  req: any;
+}
 
 export interface InfraDomainLibs {
   fields: InfraFieldsDomain;
@@ -23,7 +29,7 @@ export interface InfraDomainLibs {
 
 export interface InfraBackendLibs extends InfraDomainLibs {
   configuration: InfraConfig;
-  framework: InfraKibanaBackendFrameworkAdapter;
+  framework: KibanaFramework;
   logAnalysis: InfraLogAnalysis;
   snapshot: InfraSnapshot;
   sources: InfraSources;

@@ -4,13 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchResponse } from 'elasticsearch';
-import { GraphQLSchema } from 'graphql';
+import { SearchResponse, GenericParams } from 'elasticsearch';
 import { Lifecycle } from 'hapi';
-import { Legacy } from 'kibana';
-import { JsonObject } from '../../../../common/typed_json';
-import { TSVBMetricModel } from '../../../../common/inventory_models/types';
-import { KibanaRequest, RequestHandlerContext } from '../../../../../../../../src/core/server';
 
 interface ApmIndices {
   'apm_oss.transactionIndices': string | undefined;
@@ -32,23 +27,12 @@ export interface InfraServerPluginDeps {
   };
 }
 
-/* eslint-disable  @typescript-eslint/unified-signatures */
-export interface InfraBackendFrameworkAdapter {
-  plugins: InfraServerPluginDeps;
-  registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void;
-
-  // NP_TODO: Why didn't the callWithRequest overrides work here, but they work
-  // when we copied them into the kibana_framework_adapter file directly??
-
-  getIndexPatternsService(requestContext: RequestHandlerContext): Legacy.IndexPatternsService;
-  getSpaceId(requestContext: RequestHandlerContext): string;
-  makeTSVBRequest(
-    req: KibanaRequest,
-    model: TSVBMetricModel,
-    timerange: { min: number; max: number },
-    filters: JsonObject[]
-  ): Promise<InfraTSVBResponse>;
+export interface CallWithRequestParams extends GenericParams {
+  max_concurrent_shard_requests?: number;
+  name?: string;
+  index?: string;
 }
+
 export type InfraResponse = Lifecycle.ReturnValue;
 
 export interface InfraFrameworkPluginOptions {

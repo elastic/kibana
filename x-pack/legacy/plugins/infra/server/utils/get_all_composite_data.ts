@@ -5,17 +5,15 @@
  */
 
 import { RequestHandlerContext } from 'src/core/server';
-import {
-  InfraBackendFrameworkAdapter,
-  InfraDatabaseSearchResponse,
-} from '../lib/adapters/framework';
+import { KibanaFramework } from '../lib/adapters/framework/kibana_framework_adapter';
+import { InfraDatabaseSearchResponse } from '../lib/adapters/framework';
 
 export const getAllCompositeData = async <
   Aggregation = undefined,
   Bucket = {},
   Options extends object = {}
 >(
-  framework: InfraBackendFrameworkAdapter,
+  framework: KibanaFramework,
   requestContext: RequestHandlerContext,
   options: Options,
   bucketSelector: (response: InfraDatabaseSearchResponse<{}, Aggregation>) => Bucket[],

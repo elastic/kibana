@@ -20,7 +20,7 @@ import { HttpLink } from 'apollo-link-http';
 import { withClientState } from 'apollo-link-state';
 import { InfraFrontendLibs } from '../lib';
 import introspectionQueryResultData from '../../graphql/introspection.json';
-import { InfraKibanaFrameworkAdapter } from '../adapters/framework/kibana_framework_adapter';
+import { KibanaFramework } from '../adapters/framework/kibana_framework_adapter';
 import { InfraKibanaObservableApiAdapter } from '../adapters/observable_api/kibana_observable_api';
 
 export function compose(): InfraFrontendLibs {
@@ -57,7 +57,7 @@ export function compose(): InfraFrontendLibs {
 
   const infraModule = uiModules.get('app/infa');
 
-  const framework = new InfraKibanaFrameworkAdapter(infraModule, uiRoutes, timezoneProvider);
+  const framework = new KibanaFramework(infraModule, uiRoutes, timezoneProvider);
 
   const libs: InfraFrontendLibs = {
     apolloClient,

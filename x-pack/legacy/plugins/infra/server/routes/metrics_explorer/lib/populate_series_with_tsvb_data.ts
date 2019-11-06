@@ -6,7 +6,7 @@
 
 import { union } from 'lodash';
 import { KibanaRequest } from 'src/core/server';
-import { InfraBackendFrameworkAdapter } from '../../../lib/adapters/framework';
+import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';
 import {
   MetricsExplorerColumnType,
   MetricsExplorerRow,
@@ -19,7 +19,7 @@ import { JsonObject } from '../../../../common/typed_json';
 export const populateSeriesWithTSVBData = (
   request: KibanaRequest,
   options: MetricsExplorerRequestBody,
-  framework: InfraBackendFrameworkAdapter
+  framework: KibanaFramework
 ) => async (series: MetricsExplorerSeries) => {
   // IF there are no metrics selected then we should return an empty result.
   if (options.metrics.length === 0) {

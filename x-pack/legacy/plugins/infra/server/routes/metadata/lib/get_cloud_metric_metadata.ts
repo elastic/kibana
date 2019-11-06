@@ -6,10 +6,10 @@
 
 import { RequestHandlerContext } from 'src/core/server';
 import {
-  InfraBackendFrameworkAdapter,
   InfraMetadataAggregationBucket,
   InfraMetadataAggregationResponse,
 } from '../../../lib/adapters/framework';
+import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';
 import { InfraSourceConfiguration } from '../../../lib/sources';
 import { CLOUD_METRICS_MODULES } from '../../../lib/constants';
 
@@ -18,7 +18,7 @@ export interface InfraCloudMetricsAdapterResponse {
 }
 
 export const getCloudMetricsMetadata = async (
-  framework: InfraBackendFrameworkAdapter,
+  framework: KibanaFramework,
   requestContext: RequestHandlerContext,
   sourceConfiguration: InfraSourceConfiguration,
   instanceId: string

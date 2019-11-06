@@ -12,9 +12,9 @@ import { Legacy } from 'kibana';
 import { runHttpQuery } from 'apollo-server-core';
 import { schema, TypeOf } from '@kbn/config-schema';
 import {
-  InfraBackendFrameworkAdapter,
   InfraTSVBResponse,
   InfraServerPluginDeps,
+  CallWithRequestParams,
   InfraDatabaseSearchResponse,
   InfraDatabaseMultiResponse,
   InfraDatabaseFieldCapsResponse,
@@ -29,10 +29,6 @@ import {
   KibanaResponseFactory,
 } from '../../../../../../../../src/core/server';
 import { InfraConfig } from '../../../../../../../plugins/infra/server';
-
-interface CallWithRequestParams extends GenericParams {
-  max_concurrent_shard_requests?: number;
-}
 
 // const anyObject = schema.object({}, { allowUnknowns: true });
 
@@ -49,7 +45,7 @@ interface CallWithRequestParams extends GenericParams {
 //   options?: any;
 // }
 
-export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFrameworkAdapter {
+export class KibanaFramework {
   public router: IRouter;
   private core: CoreSetup;
   public plugins: InfraServerPluginDeps;
@@ -60,7 +56,7 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
     this.plugins = plugins;
   }
 
-  public registerGraphQLEndpoint(routePath: string, gqlSchema: GraphQLSchema): void {
+  public registerGraphQLEndpoint(routePath: string, gqlSchema: GraphQLSchema) {
     const body = schema.object({
       operationName: schema.string(),
       query: schema.string(),
@@ -176,13 +172,7 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
   ): Promise<boolean>;
   callWithRequest(
     requestContext: RequestHandlerContext,
-    endpoint: 'indices.getAlias' | 'indices.get',
-    options?: CallWithRequestParams
-  ): Promise<InfraDatabaseGetIndicesResponse>;
-  callWithRequest(
-    requestContext: RequestHandlerContext,
-    /* eslint-disable-next-line  @typescript-eslint/unified-signatures */
-    endpoint: 'ml.getBuckets',
+    endpoint: 'indices.getAlias' | 'indices.get' | 'ml.getBuckets',
     options?: CallWithRequestParams
   ): Promise<InfraDatabaseGetIndicesResponse>;
   callWithRequest(
@@ -252,7 +242,7 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
     model: TSVBMetricModel,
     timerange: { min: number; max: number },
     filters: any[]
-  ) {
+  ): Promise<InfraTSVBResponse> {
     const { getVisData } = this.plugins.metrics;
     if (typeof getVisData !== 'function') {
       throw new Error('TSVB is not available');
@@ -272,7 +262,6 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
         filters,
       },
     });
-    const result = await getVisData(requestCopy);
-    return result as InfraTSVBResponse;
+    return getVisData(requestCopy);
   }
 }

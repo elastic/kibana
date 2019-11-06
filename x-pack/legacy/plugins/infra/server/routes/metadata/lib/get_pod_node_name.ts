@@ -6,12 +6,12 @@
 
 import { first, get } from 'lodash';
 import { RequestHandlerContext } from 'src/core/server';
-import { InfraBackendFrameworkAdapter } from '../../../lib/adapters/framework';
+import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';
 import { InfraSourceConfiguration } from '../../../lib/sources';
 import { getIdFieldName } from './get_id_field_name';
 
 export const getPodNodeName = async (
-  framework: InfraBackendFrameworkAdapter,
+  framework: KibanaFramework,
   requestContext: RequestHandlerContext,
   sourceConfiguration: InfraSourceConfiguration,
   nodeId: string,

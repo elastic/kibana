@@ -8,9 +8,9 @@ import { get } from 'lodash';
 import { RequestHandlerContext } from 'src/core/server';
 import {
   InfraMetadataAggregationBucket,
-  InfraBackendFrameworkAdapter,
   InfraMetadataAggregationResponse,
 } from '../../../lib/adapters/framework';
+import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';
 import { InfraSourceConfiguration } from '../../../lib/sources';
 import { getIdFieldName } from './get_id_field_name';
 import { NAME_FIELDS } from '../../../lib/constants';
@@ -22,7 +22,7 @@ export interface InfraMetricsAdapterResponse {
 }
 
 export const getMetricMetadata = async (
-  framework: InfraBackendFrameworkAdapter,
+  framework: KibanaFramework,
   requestContext: RequestHandlerContext,
   sourceConfiguration: InfraSourceConfiguration,
   nodeId: string,

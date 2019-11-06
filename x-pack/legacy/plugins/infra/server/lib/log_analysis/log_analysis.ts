@@ -9,7 +9,7 @@ import { map, fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { getJobId } from '../../../common/log_analysis';
 import { throwErrors, createPlainError } from '../../../common/runtime_types';
-import { InfraBackendFrameworkAdapter } from '../adapters/framework';
+import { KibanaFramework } from '../adapters/framework/kibana_framework_adapter';
 import { NoLogRateResultsIndexError } from './errors';
 import {
   logRateModelPlotResponseRT,
@@ -24,7 +24,7 @@ const COMPOSITE_AGGREGATION_BATCH_SIZE = 1000;
 export class InfraLogAnalysis {
   constructor(
     private readonly libs: {
-      framework: InfraBackendFrameworkAdapter;
+      framework: KibanaFramework;
     }
   ) {}
 

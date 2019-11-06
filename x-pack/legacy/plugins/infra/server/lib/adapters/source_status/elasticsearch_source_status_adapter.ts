@@ -6,21 +6,22 @@
 
 import { RequestHandlerContext } from 'src/core/server';
 import { InfraSourceStatusAdapter } from '../../source_status';
-import { InfraBackendFrameworkAdapter, InfraDatabaseGetIndicesResponse } from '../framework';
+import { InfraDatabaseGetIndicesResponse } from '../framework';
+import { KibanaFramework } from '../framework/kibana_framework_adapter';
 
 export class InfraElasticsearchSourceStatusAdapter implements InfraSourceStatusAdapter {
-  constructor(private readonly framework: InfraBackendFrameworkAdapter) {}
+  constructor(private readonly framework: KibanaFramework) {}
 
   public async getIndexNames(requestContext: RequestHandlerContext, aliasName: string) {
     const indexMaps = await Promise.all([
       this.framework
-        .callWithRequest<string[]>(requestContext, 'indices.getAlias', {
+        .callWithRequest(requestContext, 'indices.getAlias', {
           name: aliasName,
           filterPath: '*.settings.index.uuid', // to keep the response size as small as possible
         })
         .catch(withDefaultIfNotFound<InfraDatabaseGetIndicesResponse>({})),
       this.framework
-        .callWithRequest<string[]>(requestContext, 'indices.get', {
+        .callWithRequest(requestContext, 'indices.get', {
           index: aliasName,
           filterPath: '*.settings.index.uuid', // to keep the response size as small as possible
         })

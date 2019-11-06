@@ -7,7 +7,8 @@
 import { startsWith, uniq, first } from 'lodash';
 import { idx } from '@kbn/elastic-idx';
 import { RequestHandlerContext } from 'src/core/server';
-import { InfraBackendFrameworkAdapter, InfraDatabaseSearchResponse } from '../framework';
+import { InfraDatabaseSearchResponse } from '../framework';
+import { KibanaFramework } from '../framework/kibana_framework_adapter';
 import { FieldsAdapter, IndexFieldDescriptor } from './adapter_types';
 import { getAllowedListForPrefix } from '../../../../common/ecs_allowed_list';
 import { getAllCompositeData } from '../../../utils/get_all_composite_data';
@@ -28,9 +29,9 @@ interface DataSetResponse {
 }
 
 export class FrameworkFieldsAdapter implements FieldsAdapter {
-  private framework: InfraBackendFrameworkAdapter;
+  private framework: KibanaFramework;
 
-  constructor(framework: InfraBackendFrameworkAdapter) {
+  constructor(framework: KibanaFramework) {
     this.framework = framework;
   }
 

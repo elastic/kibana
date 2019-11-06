@@ -6,7 +6,7 @@
 
 import { first } from 'lodash';
 import { RequestHandlerContext } from 'src/core/server';
-import { InfraBackendFrameworkAdapter } from '../../../lib/adapters/framework';
+import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';
 import { InfraSourceConfiguration } from '../../../lib/sources';
 import { InfraNodeType } from '../../../graphql/types';
 import { InfraMetadataInfo } from '../../../../common/http_api/metadata_api';
@@ -15,7 +15,7 @@ import { CLOUD_METRICS_MODULES } from '../../../lib/constants';
 import { getIdFieldName } from './get_id_field_name';
 
 export const getNodeInfo = async (
-  framework: InfraBackendFrameworkAdapter,
+  framework: KibanaFramework,
   requestContext: RequestHandlerContext,
   sourceConfiguration: InfraSourceConfiguration,
   nodeId: string,

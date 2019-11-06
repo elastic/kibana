@@ -14,7 +14,8 @@ import {
   InfraNodeType,
   InfraSourceConfiguration,
 } from '../../graphql/types';
-import { InfraBackendFrameworkAdapter, InfraDatabaseSearchResponse } from '../adapters/framework';
+import { InfraDatabaseSearchResponse } from '../adapters/framework';
+import { KibanaFramework } from '../adapters/framework/kibana_framework_adapter';
 import { InfraSources } from '../sources';
 
 import { JsonObject } from '../../../common/typed_json';
@@ -46,9 +47,7 @@ export interface InfraSnapshotRequestOptions {
 }
 
 export class InfraSnapshot {
-  constructor(
-    private readonly libs: { sources: InfraSources; framework: InfraBackendFrameworkAdapter }
-  ) {}
+  constructor(private readonly libs: { sources: InfraSources; framework: KibanaFramework }) {}
 
   public async getNodes(
     requestContext: RequestHandlerContext,
@@ -78,7 +77,7 @@ const handleAfterKey = createAfterKeyHandler('body.aggregations.nodes.composite.
 const requestGroupedNodes = async (
   requestContext: RequestHandlerContext,
   options: InfraSnapshotRequestOptions,
-  framework: InfraBackendFrameworkAdapter
+  framework: KibanaFramework
 ): Promise<InfraSnapshotNodeGroupByBucket[]> => {
   const query = {
     allowNoIndices: true,
@@ -133,7 +132,7 @@ const requestGroupedNodes = async (
 const requestNodeMetrics = async (
   requestContext: RequestHandlerContext,
   options: InfraSnapshotRequestOptions,
-  framework: InfraBackendFrameworkAdapter
+  framework: KibanaFramework
 ): Promise<InfraSnapshotNodeMetricsBucket[]> => {
   const index =
     options.metric.type === 'logRate'

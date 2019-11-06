@@ -26,7 +26,7 @@ import {
 } from '../../domains/log_entries_domain';
 import { InfraSourceConfiguration } from '../../sources';
 import { SortedSearchHit } from '../framework';
-import { InfraBackendFrameworkAdapter } from '../framework';
+import { KibanaFramework } from '../framework/kibana_framework_adapter';
 
 const DAY_MILLIS = 24 * 60 * 60 * 1000;
 const LOOKUP_OFFSETS = [0, 1, 7, 30, 365, 10000, Infinity].map(days => days * DAY_MILLIS);
@@ -40,7 +40,7 @@ interface LogItemHit {
 }
 
 export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
-  constructor(private readonly framework: InfraBackendFrameworkAdapter) {}
+  constructor(private readonly framework: KibanaFramework) {}
 
   public async getAdjacentLogEntryDocuments(
     requestContext: RequestHandlerContext,

@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { flatten, get } from 'lodash';
 import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
 import { InfraMetric, InfraMetricData, InfraNodeType } from '../../../graphql/types';
-import { InfraBackendFrameworkAdapter } from '../framework';
+import { KibanaFramework } from '../framework/kibana_framework_adapter';
 import { InfraMetricsAdapter, InfraMetricsRequestOptions } from './adapter_types';
 import { checkValidNode } from './lib/check_valid_node';
 import { InvalidNodeError } from './lib/errors';
@@ -16,9 +16,9 @@ import { metrics } from '../../../../common/inventory_models';
 import { TSVBMetricModelCreator } from '../../../../common/inventory_models/types';
 
 export class KibanaMetricsAdapter implements InfraMetricsAdapter {
-  private framework: InfraBackendFrameworkAdapter;
+  private framework: KibanaFramework;
 
-  constructor(framework: InfraBackendFrameworkAdapter) {
+  constructor(framework: KibanaFramework) {
     this.framework = framework;
   }
 
