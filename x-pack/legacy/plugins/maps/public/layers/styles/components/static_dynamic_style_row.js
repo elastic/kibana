@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { VectorStyle } from '../vector_style';
+import { VectorStyle } from '../vector/vector_style';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 

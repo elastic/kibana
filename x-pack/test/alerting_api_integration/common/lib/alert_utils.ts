@@ -178,6 +178,7 @@ export class AlertUtils {
     }
     const response = await request.send({
       enabled: true,
+      name: 'abc',
       interval: '1m',
       throttle: '1m',
       alertTypeId: 'test.always-firing',
