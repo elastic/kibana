@@ -51,7 +51,7 @@ describe('metric_vis - controller', function () {
 
     expect(metrics.length).to.be(1);
     expect(metrics[0].label).to.be('Count');
-    expect(metrics[0].value).to.be(4301021);
+    expect(metrics[0].value).to.be('<span ng-non-bindable>4301021</span>');
   });
 
   it('should support multi-value metrics', function () {
