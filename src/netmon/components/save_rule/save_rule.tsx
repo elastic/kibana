@@ -18,17 +18,20 @@
  */
 
 import React, { useReducer } from 'react';
+import { makeStyles } from '@material-ui/core/styles';
 import _ from 'lodash';
 import {
   EuiButton,
+  EuiIcon,
   EuiLoadingSpinner,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiTextColor,
   EuiOverlayMask,
+  EuiTextColor,
+  EuiToolTip,
 } from '@elastic/eui';
 import { convertQuery } from '@logrhythm/nm-web-shared/services/query_mapping';
 import {
@@ -37,6 +40,16 @@ import {
   QueryRule,
 } from '@logrhythm/nm-web-shared/services/query_rules';
 import { SaveRuleForm, SaveRuleFormDataValidation } from './save_rule_form';
+
+const useStyles = makeStyles({
+  buttonContent: {
+    display: 'flex',
+    alignItems: 'center',
+  },
+  infoIcon: {
+    marginLeft: '2px',
+  },
+});
 
 const validateForm = (value: QueryRule | null): SaveRuleFormDataValidation | null => {
   const validation = {
@@ -140,10 +153,13 @@ const reducer = (state: SaveRuleState, action: SaveRuleAction): SaveRuleState =>
 
 export interface SaveRuleProps {
   query: string;
+  disabledForLanguage?: boolean;
 }
 
 export const SaveRule = (props: SaveRuleProps) => {
-  const { query } = props;
+  const { query, disabledForLanguage = false } = props;
+
+  const classes = useStyles();
 
   const [state, dispatch] = useReducer(reducer, {
     dataSubmitted: false,
@@ -298,9 +314,19 @@ export const SaveRule = (props: SaveRuleProps) => {
 
   return (
     <div>
-      <EuiButton fill onClick={startSaveRule}>
-        Save Rule
-      </EuiButton>
+      <EuiToolTip
+        content={
+          !!disabledForLanguage &&
+          'Query Rules cannot be created with a KQL query. Please convert your query to Lucene before continuing.'
+        }
+      >
+        <EuiButton fill onClick={startSaveRule} disabled={disabledForLanguage}>
+          <div className={classes.buttonContent}>
+            <span>Save Rule</span>
+            {!!disabledForLanguage && <EuiIcon className={classes.infoIcon} type="iInCircle" />}
+          </div>
+        </EuiButton>
+      </EuiToolTip>
       {modal}
     </div>
   );

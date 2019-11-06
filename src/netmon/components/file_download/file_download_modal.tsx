@@ -18,7 +18,7 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
-import { createUseStyles } from 'react-jss';
+import { makeStyles } from '@material-ui/core/styles';
 import _ from 'lodash';
 import {
   EuiButton,
@@ -40,7 +40,7 @@ import { SessionFileDownloader } from '@logrhythm/nm-web-shared/services/session
 import { toastNotifications } from 'ui/notify';
 import FileDownloadRow from './file_download_row';
 
-const useStyles = createUseStyles({
+const useStyles = makeStyles({
   modal: {
     width: '600px',
   },

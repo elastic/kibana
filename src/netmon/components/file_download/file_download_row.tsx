@@ -18,14 +18,14 @@
  */
 
 import React from 'react';
-import { createUseStyles } from 'react-jss';
+import { makeStyles } from '@material-ui/core/styles';
 import _ from 'lodash';
 import { EuiHorizontalRule, EuiIcon, EuiProgress, EuiTextColor, EuiToolTip } from '@elastic/eui';
 // @ts-ignore
 import { saveAs } from '@elastic/filesaver';
 import { SingleFileStatus, DownloadStatus } from '@logrhythm/nm-web-shared/services/session_files';
 
-const useStyles = createUseStyles({
+const useStyles = makeStyles({
   fileDownloadItem: {
     display: 'flex',
     alignItems: 'center',
