@@ -80,8 +80,8 @@ class VisEditorVisualizationUI extends Component {
     await this._handler.render(this._visEl.current);
 
     this._subscription = this._handler.handler.data$.subscribe(data => {
-      this.setPanelInterval(data.visData);
-      onDataChange(data);
+      this.setPanelInterval(data.value.visData);
+      onDataChange(data.value);
     });
   }
 

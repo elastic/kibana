@@ -36,7 +36,6 @@ import {
   EmbeddableFactory,
   EmbeddableOutput,
   ErrorEmbeddable,
-  getVisualizeLoader,
   VisSavedObject,
 } from '../kibana_services';
 

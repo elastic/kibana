@@ -45,24 +45,6 @@ import {
 import { dispatchRenderComplete } from '../../../../../../plugins/kibana_utils/public';
 import { mapFilter } from '../../../../../../plugins/data/public';
 
-import { Query } from '../../../../data/public';
-import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
-
-import {
-  AppState,
-  Container,
-  Embeddable,
-  EmbeddableInput,
-  EmbeddableOutput,
-  PersistedState,
-  StaticIndexPattern,
-  VisSavedObject,
-  VisualizeLoader,
-  VisualizeLoaderParams,
-  VisualizeUpdateParams,
-} from '../kibana_services';
-
-
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
 export interface VisSavedObject extends SavedObject {
