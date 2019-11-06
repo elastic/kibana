@@ -26,7 +26,7 @@ import chrome from 'ui/chrome';
 import { buildEsQuery } from '@kbn/es-query';
 import { FiltersParamEditor, FilterValue } from '../../vis/editors/default/controls/filters';
 import { createFilterFilters } from './create_filter/filters';
-import { BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
+import { BucketAggType } from './_bucket_agg_type';
 import { setup as data } from '../../../../core_plugins/data/public/legacy';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 
@@ -50,7 +50,7 @@ export const filtersBucketAgg = new BucketAggType({
       name: 'filters',
       editorComponent: FiltersParamEditor,
       default: [{ input: { query: '', language: config.get('search:queryLanguage') }, label: '' }],
-      write(aggConfig: IBucketAggConfig, output: Record<string, any>) {
+      write(aggConfig, output) {
         const inFilters: FilterValue[] = aggConfig.params.filters;
         if (!_.size(inFilters)) return;
 

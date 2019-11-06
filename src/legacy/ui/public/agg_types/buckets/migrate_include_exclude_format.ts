@@ -18,11 +18,11 @@
  */
 
 import { isString, isObject } from 'lodash';
-import { AggConfig } from 'ui/agg_types';
 import { IBucketAggConfig, BucketAggType, BucketAggParam } from './_bucket_agg_type';
+import { AggConfig } from '../agg_config';
 
 export const isType = (type: string) => {
-  return (agg: IBucketAggConfig): boolean => {
+  return (agg: AggConfig): boolean => {
     const field = agg.params.field;
 
     return field && field.type === type;
@@ -32,7 +32,7 @@ export const isType = (type: string) => {
 export const isStringType = isType('string');
 
 export const migrateIncludeExcludeFormat = {
-  serialize(this: BucketAggParam, value: any, agg: AggConfig) {
+  serialize(this: BucketAggParam<IBucketAggConfig>, value: any, agg: IBucketAggConfig) {
     if (this.shouldShow && !this.shouldShow(agg)) return;
     if (!value || isString(value)) return value;
     else return value.pattern;
@@ -46,4 +46,4 @@ export const migrateIncludeExcludeFormat = {
       output.params[this.name] = value;
     }
   },
-};
+} as Partial<BucketAggParam<IBucketAggConfig>>;

@@ -17,17 +17,18 @@
  * under the License.
  */
 
-import { AggParam, initParams } from './agg_params';
+import { initParams } from './agg_params';
 import { BaseParamType } from './param_types/base';
 import { FieldParamType } from './param_types/field';
 import { OptionedParamType } from './param_types/optioned';
+import { AggParamType } from '../agg_types/param_types/agg';
 
 jest.mock('ui/new_platform');
 
 describe('AggParams class', () => {
   describe('constructor args', () => {
     it('accepts an array of param defs', () => {
-      const params = [{ name: 'one' }, { name: 'two' }] as AggParam[];
+      const params = [{ name: 'one' }, { name: 'two' }] as AggParamType[];
       const aggParams = initParams(params);
 
       expect(aggParams).toHaveLength(params.length);
@@ -37,7 +38,7 @@ describe('AggParams class', () => {
 
   describe('AggParam creation', () => {
     it('Uses the FieldParamType class for params with the name "field"', () => {
-      const params = [{ name: 'field', type: 'field' }] as AggParam[];
+      const params = [{ name: 'field', type: 'field' }] as AggParamType[];
       const aggParams = initParams(params);
 
       expect(aggParams).toHaveLength(params.length);
@@ -50,7 +51,7 @@ describe('AggParams class', () => {
           name: 'order',
           type: 'optioned',
         },
-      ];
+      ] as AggParamType[];
       const aggParams = initParams(params);
 
       expect(aggParams).toHaveLength(params.length);
@@ -71,7 +72,7 @@ describe('AggParams class', () => {
           name: 'waist',
           displayName: 'waist',
         },
-      ] as AggParam[];
+      ] as AggParamType[];
 
       const aggParams = initParams(params);
 

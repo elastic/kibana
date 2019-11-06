@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { PercentileRanksEditor } from '../../vis/editors/default/controls/percentile_ranks';
-import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
+import { MetricAggType } from './metric_agg_type';
 import { getResponseAggConfigClass, IResponseAggConfig } from './lib/get_response_agg_config_class';
 
 import { getPercentileValue } from './percentiles_get_value';
@@ -69,7 +69,7 @@ export const percentileRanksMetricAgg = new MetricAggType<IPercentileRanksAggCon
       default: [],
     },
     {
-      write(agg: IMetricAggConfig, output: Record<string, any>) {
+      write(agg, output) {
         output.params.keyed = false;
       },
     },

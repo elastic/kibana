@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 
 import { npStart } from 'ui/new_platform';
-import { BucketAggType, IBucketAggConfig, BucketAggParam } from './_bucket_agg_type';
+import { BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
 import { createFilterHistogram } from './create_filter/histogram';
 import { NumberIntervalParamEditor } from '../../vis/editors/default/controls/number_interval';
 import { MinDocCountParamEditor } from '../../vis/editors/default/controls/min_doc_count';
@@ -131,7 +131,7 @@ export const histogramBucketAgg = new BucketAggType<IBucketHistogramAggConfig>({
             );
           });
       },
-      write(aggConfig: IBucketHistogramAggConfig, output: Record<string, any>) {
+      write(aggConfig, output) {
         let interval = parseFloat(aggConfig.params.interval);
         if (interval <= 0) {
           interval = 1;
@@ -172,12 +172,12 @@ export const histogramBucketAgg = new BucketAggType<IBucketHistogramAggConfig>({
 
         output.params.interval = interval;
       },
-    } as BucketAggParam,
+    },
     {
       name: 'min_doc_count',
       default: false,
       editorComponent: MinDocCountParamEditor,
-      write(aggConfig: AggConfig, output: Record<string, any>) {
+      write(aggConfig, output) {
         if (aggConfig.params.min_doc_count) {
           output.params.min_doc_count = 0;
         } else {
@@ -198,7 +198,7 @@ export const histogramBucketAgg = new BucketAggType<IBucketHistogramAggConfig>({
         max: '',
       },
       editorComponent: ExtendedBoundsParamEditor,
-      write(aggConfig: AggConfig, output: Record<string, any>) {
+      write(aggConfig, output) {
         const { min, max } = aggConfig.params.extended_bounds;
 
         if (aggConfig.params.has_extended_bounds && (min || min === 0) && (max || max === 0)) {

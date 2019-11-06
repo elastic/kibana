@@ -124,7 +124,10 @@ export class AggConfigs {
     return aggConfigs;
   }
 
-  createAggConfig(params: AggConfig | AggConfigOptions, { addToAggConfigs = true } = {}) {
+  createAggConfig<T extends AggConfig = AggConfig>(
+    params: AggConfig | AggConfigOptions,
+    { addToAggConfigs = true } = {}
+  ) {
     let aggConfig;
     if (params instanceof AggConfig) {
       aggConfig = params;
@@ -135,7 +138,7 @@ export class AggConfigs {
     if (addToAggConfigs) {
       this.aggs.push(aggConfig);
     }
-    return aggConfig;
+    return aggConfig as T;
   }
 
   /**
