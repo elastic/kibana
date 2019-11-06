@@ -5,7 +5,7 @@
  */
 
 export {
-  SendRequestOptions,
+  SendRequestConfig,
   SendRequestResponse,
   UseRequestConfig,
   sendRequest,

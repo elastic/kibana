@@ -21,19 +21,18 @@ import { useEffect, useState, useRef } from 'react';
 
 import { HttpServiceBase } from '../../../../../src/core/public';
 
+export interface SendRequestConfig {
+  path: string;
+  method: 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head';
+  body?: any;
+}
+
 export interface SendRequestResponse {
   data: any;
   error: Error | null;
 }
 
-export interface SendRequestOptions {
-  method: 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head';
-  body?: any;
-}
-
-export interface UseRequestConfig {
-  path: string;
-  requestOptions: SendRequestOptions;
+export interface UseRequestConfig extends SendRequestConfig {
   pollIntervalMs?: number;
   initialData?: any;
   deserializer?: (data: any) => any;
@@ -49,11 +48,10 @@ export interface UseRequestResponse {
 
 export const sendRequest = async (
   httpClient: HttpServiceBase,
-  path: string,
-  requestOptions: SendRequestOptions
+  { path, method, body }: SendRequestConfig
 ): Promise<SendRequestResponse> => {
   try {
-    const response = await httpClient.fetch(path, requestOptions);
+    const response = await httpClient[method](path, { body });
 
     return { data: response, error: null };
   } catch (e) {
@@ -68,7 +66,8 @@ export const useRequest = (
   httpClient: HttpServiceBase,
   {
     path,
-    requestOptions,
+    method,
+    body,
     pollIntervalMs,
     initialData,
     deserializer = (data: any): any => data,
@@ -107,7 +106,13 @@ export const useRequest = (
     // "old" error/data or loading state when a new request is in-flight.
     setIsLoading(true);
 
-    const response = await sendRequest(httpClient, path, requestOptions);
+    const requestBody = {
+      path,
+      method,
+      body,
+    };
+
+    const response = await sendRequest(httpClient, requestBody);
     const { data: serializedResponseData, error: responseError } = response;
     const responseData = deserializer(serializedResponseData);
 

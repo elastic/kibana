@@ -5,7 +5,7 @@
  */
 
 import {
-  SendRequestOptions,
+  SendRequestConfig,
   SendRequestResponse,
   UseRequestConfig,
   sendRequest as _sendRequest,
@@ -14,11 +14,8 @@ import {
 
 import { httpService } from './http';
 
-export const sendRequest = (
-  path: string,
-  options: SendRequestOptions
-): Promise<SendRequestResponse> => {
-  return _sendRequest(httpService.httpClient, path, options);
+export const sendRequest = (config: SendRequestConfig): Promise<SendRequestResponse> => {
+  return _sendRequest(httpService.httpClient, config);
 };
 
 export const useRequest = (config: UseRequestConfig) => {

@@ -194,19 +194,15 @@ export async function loadIndexData(type: string, indexName: string) {
 export function loadIndexTemplates() {
   return useRequest({
     path: `${API_BASE_PATH}/templates`,
-    requestOptions: {
-      method: 'get',
-    },
+    method: 'get',
   });
 }
 
 export async function deleteTemplates(names: Array<Template['name']>) {
-  const result = sendRequest(
-    `${API_BASE_PATH}/templates/${names.map(name => encodeURIComponent(name)).join(',')}`,
-    {
-      method: 'delete',
-    }
-  );
+  const result = sendRequest({
+    path: `${API_BASE_PATH}/templates/${names.map(name => encodeURIComponent(name)).join(',')}`,
+    method: 'delete',
+  });
 
   const uimActionType = names.length > 1 ? UIM_TEMPLATE_DELETE_MANY : UIM_TEMPLATE_DELETE;
 
@@ -218,14 +214,13 @@ export async function deleteTemplates(names: Array<Template['name']>) {
 export function loadIndexTemplate(name: Template['name']) {
   return useRequest({
     path: `${API_BASE_PATH}/templates/${encodeURIComponent(name)}`,
-    requestOptions: {
-      method: 'get',
-    },
+    method: 'get',
   });
 }
 
 export async function saveTemplate(template: Template, isClone?: boolean) {
-  const result = sendRequest(`${API_BASE_PATH}/templates`, {
+  const result = await sendRequest({
+    path: `${API_BASE_PATH}/templates`,
     method: 'put',
     body: JSON.stringify(template),
   });
@@ -239,7 +234,8 @@ export async function saveTemplate(template: Template, isClone?: boolean) {
 
 export async function updateTemplate(template: Template) {
   const { name } = template;
-  const result = sendRequest(`${API_BASE_PATH}/templates/${encodeURIComponent(name)}`, {
+  const result = await sendRequest({
+    path: `${API_BASE_PATH}/templates/${encodeURIComponent(name)}`,
     method: 'put',
     body: JSON.stringify(template),
   });
@@ -250,7 +246,8 @@ export async function updateTemplate(template: Template) {
 }
 
 export async function loadTemplateToClone(name: Template['name']) {
-  return sendRequest(`${API_BASE_PATH}/templates/${encodeURIComponent(name)}`, {
+  return await sendRequest({
+    path: `${API_BASE_PATH}/templates/${encodeURIComponent(name)}`,
     method: 'get',
   });
 }
