@@ -66,8 +66,8 @@ describe('metric_vis - controller', function () {
 
     expect(metrics.length).to.be(2);
     expect(metrics[0].label).to.be('1st percentile of bytes');
-    expect(metrics[0].value).to.be(182);
+    expect(metrics[0].value).to.be('<span ng-non-bindable>182</span>');
     expect(metrics[1].label).to.be('99th percentile of bytes');
-    expect(metrics[1].value).to.be(445842.4634666484);
+    expect(metrics[1].value).to.be('<span ng-non-bindable>445842.4634666484</span>');
   });
 });
