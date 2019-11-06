@@ -58,6 +58,3 @@ export {
   IndexPatterns,
   StaticIndexPattern,
 } from '../../../core_plugins/data/public';
-
-// stubs
-export { stubFields, stubIndexPattern } from '../../../core_plugins/data/public/stubs';
