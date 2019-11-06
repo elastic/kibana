@@ -84,6 +84,7 @@ export const updateSignal = async ({
   return alertsClient.update({
     id: signal.id,
     data: {
+      name: 'SIEM Alert',
       interval: calculateInterval(interval, signal.interval),
       actions,
       alertTypeParams: nextAlertTypeParams,
