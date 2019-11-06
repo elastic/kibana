@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import angular from 'angular';
+import { IAngularStatic } from 'angular';
 import { i18n } from '@kbn/i18n';
 import { wrapInI18nContext } from 'ui/i18n';
 
@@ -69,6 +69,7 @@ export interface VisualizePluginStartDependencies {
 export interface VisualizePluginSetupDependencies {
   feature_catalogue: FeatureCatalogueSetup;
   __LEGACY: {
+    angular: IAngularStatic;
     getAngularDependencies: () => Promise<LegacyAngularInjectedDependencies>;
     localApplicationService: LocalApplicationService;
     docTitle: DocTitle;
@@ -120,7 +121,6 @@ export class VisualizePlugin implements Plugin {
           ...legacyServices,
           ...angularDependencies,
           addBasePath: contextCore.http.basePath.prepend,
-          angular,
           core: contextCore as LegacyCoreStart,
           chrome: contextCore.chrome,
           dataStart,

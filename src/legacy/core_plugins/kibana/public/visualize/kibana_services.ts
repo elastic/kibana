@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { IAngularStatic } from 'angular';
 import {
   ChromeStart,
   DocLinksStart,
@@ -37,7 +38,7 @@ import { SavedVisualizations } from './types';
 
 export interface VisualizeKibanaServices {
   addBasePath: (url: string) => string;
-  angular: any;
+  angular: IAngularStatic;
   chrome: ChromeStart;
   chromeLegacy: any;
   core: LegacyCoreStart;

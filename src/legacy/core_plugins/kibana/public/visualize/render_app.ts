@@ -18,22 +18,22 @@
  */
 
 import { EuiConfirmModal } from '@elastic/eui';
-import { IModule } from 'angular';
+import { IModule, IAngularStatic } from 'angular';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/src/angular';
 
 import { IPrivate } from 'ui/private';
+import { State } from 'ui/state_management/state';
 import { configureAppAngularModule } from 'ui/legacy_compat';
 // @ts-ignore
 import { GlobalStateProvider } from 'ui/state_management/global_state';
 // @ts-ignore
 import { StateManagementConfigProvider } from 'ui/state_management/config_provider';
 // @ts-ignore
-import { AppStateProvider } from 'ui/state_management/app_state';
+import { AppStateProvider, AppState } from 'ui/state_management/app_state';
 // @ts-ignore
 import { PrivateProvider } from 'ui/private/private';
 // @ts-ignore
 import { EventsProvider } from 'ui/events';
-// @ts-ignore
 import { PersistedState } from 'ui/persisted_state';
 // @ts-ignore
 import { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_top_nav';
@@ -72,7 +72,11 @@ export const renderApp = async (
     initVisualizeApp(angularModuleInstance, deps);
   }
   const $injector = mountVisualizeApp(appBasePath, element, deps.angular);
-  return () => $injector.get('$rootScope').$destroy();
+  return () => {
+    const currentGlobalState = $injector.get<State>('globalState');
+    deps.sessionStorage.set('oss-kibana-cross-app-state', currentGlobalState.toObject());
+    $injector.get('$rootScope').$destroy();
+  };
 };
 
 const mainTemplate = (basePath: string) => `<div style="height: 100%">
@@ -85,10 +89,9 @@ const moduleName = 'app/visualize';
 
 const thirdPartyAngularDependencies = ['ngSanitize', 'ngRoute', 'react'];
 
-function mountVisualizeApp(appBasePath: string, element: HTMLElement, angular: any) {
+function mountVisualizeApp(appBasePath: string, element: HTMLElement, angular: IAngularStatic) {
   const mountpoint = document.createElement('div');
   mountpoint.setAttribute('style', 'height: 100%');
-  // eslint-disable-next-line
   mountpoint.innerHTML = mainTemplate(appBasePath);
   // bootstrap angular into detached element and attach it later to
   // make angular-within-angular possible
@@ -102,7 +105,7 @@ function mountVisualizeApp(appBasePath: string, element: HTMLElement, angular: a
 function createLocalAngularModule(
   core: AppMountContext['core'],
   navigation: NavigationStart,
-  angular: any
+  angular: IAngularStatic
 ) {
   createLocalI18nModule(angular);
   createLocalPrivateModule(angular);
@@ -129,14 +132,14 @@ function createLocalAngularModule(
   return visualizeAngularModule;
 }
 
-function createLocalConfirmModalModule(angular: any) {
+function createLocalConfirmModalModule(angular: IAngularStatic) {
   angular
     .module('app/visualize/ConfirmModal', ['react'])
     .factory('confirmModal', confirmModalFactory)
-    .directive('confirmModal', (reactDirective: any) => reactDirective(EuiConfirmModal));
+    .directive('confirmModal', reactDirective => reactDirective(EuiConfirmModal));
 }
 
-function createLocalStateModule(angular: any) {
+function createLocalStateModule(angular: IAngularStatic) {
   angular
     .module('app/visualize/State', [
       'app/visualize/Private',
@@ -145,18 +148,18 @@ function createLocalStateModule(angular: any) {
       'app/visualize/Promise',
       'app/visualize/PersistedState',
     ])
-    .factory('AppState', function(Private: any) {
+    .factory('AppState', function(Private: IPrivate) {
       return Private(AppStateProvider);
     })
-    .service('getAppState', function(Private: any) {
-      return Private(AppStateProvider).getAppState;
+    .service('getAppState', function(Private: IPrivate) {
+      return Private<AppState>(AppStateProvider).getAppState;
     })
-    .service('globalState', function(Private: any) {
+    .service('globalState', function(Private: IPrivate) {
       return Private(GlobalStateProvider);
     });
 }
 
-function createLocalPersistedStateModule(angular: any) {
+function createLocalPersistedStateModule(angular: IAngularStatic) {
   angular
     .module('app/visualize/PersistedState', ['app/visualize/Private', 'app/visualize/Promise'])
     .factory('PersistedState', (Private: IPrivate) => {
@@ -169,14 +172,14 @@ function createLocalPersistedStateModule(angular: any) {
     });
 }
 
-function createLocalKbnUrlModule(angular: any) {
+function createLocalKbnUrlModule(angular: IAngularStatic) {
   angular
     .module('app/visualize/KbnUrl', ['app/visualize/Private', 'ngRoute'])
     .service('kbnUrl', (Private: IPrivate) => Private(KbnUrlProvider))
     .service('redirectWhenMissing', (Private: IPrivate) => Private(RedirectWhenMissingProvider));
 }
 
-function createLocalConfigModule(core: AppMountContext['core'], angular: any) {
+function createLocalConfigModule(core: AppMountContext['core'], angular: IAngularStatic) {
   angular
     .module('app/visualize/Config', ['app/visualize/Private'])
     .provider('stateManagementConfig', StateManagementConfigProvider)
@@ -189,22 +192,22 @@ function createLocalConfigModule(core: AppMountContext['core'], angular: any) {
     });
 }
 
-function createLocalPromiseModule(angular: any) {
+function createLocalPromiseModule(angular: IAngularStatic) {
   angular.module('app/visualize/Promise', []).service('Promise', PromiseServiceCreator);
 }
 
-function createLocalPrivateModule(angular: any) {
+function createLocalPrivateModule(angular: IAngularStatic) {
   angular.module('app/visualize/Private', []).provider('Private', PrivateProvider);
 }
 
-function createLocalTopNavModule(navigation: NavigationStart, angular: any) {
+function createLocalTopNavModule(navigation: NavigationStart, angular: IAngularStatic) {
   angular
     .module('app/visualize/TopNav', ['react'])
     .directive('kbnTopNav', createTopNavDirective)
     .directive('kbnTopNavHelper', createTopNavHelper(navigation.ui));
 }
 
-function createLocalFilterBarModule(angular: any) {
+function createLocalFilterBarModule(angular: IAngularStatic) {
   angular
     .module('app/visualize/FilterBar', ['react'])
     .directive('filterBar', createFilterBarDirective)
@@ -213,7 +216,7 @@ function createLocalFilterBarModule(angular: any) {
     .directive('applyFiltersPopoverHelper', createApplyFiltersPopoverHelper);
 }
 
-function createLocalI18nModule(angular: any) {
+function createLocalI18nModule(angular: IAngularStatic) {
   angular
     .module('app/visualize/I18n', [])
     .provider('i18n', I18nProvider)
