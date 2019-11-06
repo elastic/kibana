@@ -21,24 +21,21 @@ import moment from 'moment';
 // @ts-ignore
 import fetch from 'node-fetch';
 import { telemetryCollectionManager } from './collection_manager';
+import { getTelemetryOptIn, getTelemetryUsageFetcher } from './telemetry_config';
+import { getTelemetrySavedObject, updateTelemetrySavedObject } from './telemetry_repository';
 import { REPORT_INTERVAL_MS } from '../common/constants';
-
-interface TelemetrySavedConfigs {
-  enabled?: null | boolean;
-  usageFetcher?: 'string';
-}
 
 export class FetcherTask {
   private readonly checkDuration = 60000;
   private intervalId?: NodeJS.Timeout;
   private lastReported?: number;
   private isSending = false;
-  private serverConfigs: any;
+  private telemetryPluginConfig: any;
   private server: any;
 
-  constructor(server: any, serverConfigs: any) {
+  constructor(server: any, telemetryPluginConfig: any) {
     this.server = server;
-    this.serverConfigs = serverConfigs;
+    this.telemetryPluginConfig = telemetryPluginConfig;
   }
 
   private getInternalRepository = () => {
@@ -50,32 +47,24 @@ export class FetcherTask {
 
   private getCurrentConfigs = async () => {
     const internalRepository = this.getInternalRepository();
-    let telemetrySavedConfigs: TelemetrySavedConfigs = {};
-    try {
-      const telemetrySavedObject = await internalRepository.get('telemetry', 'telemetry');
-      telemetrySavedConfigs = telemetrySavedObject.attributes;
-    } catch (err) {
-      // Swallow errors getting telemetry saved object (Saved object NotFound or other errors)
-      telemetrySavedConfigs = {};
-    }
+    const telemetrySavedObject = await getTelemetrySavedObject(internalRepository);
+    const telemetryPluginConfig = this.telemetryPluginConfig;
+    const currentKibanaVersion = '';
 
     return {
-      telemetryOptIn:
-        typeof telemetrySavedConfigs.enabled === 'boolean'
-          ? telemetrySavedConfigs.enabled
-          : this.serverConfigs.optIn,
-      telemetryUsageFetcher:
-        typeof telemetrySavedConfigs.usageFetcher === 'undefined'
-          ? this.serverConfigs.usageFetcher
-          : telemetrySavedConfigs.usageFetcher,
-      telemetryUrl: this.serverConfigs.url,
+      telemetryOptIn: getTelemetryOptIn({ currentKibanaVersion, telemetrySavedObject }),
+      telemetryUsageFetcher: getTelemetryUsageFetcher({
+        telemetrySavedObject,
+        telemetryPluginConfig,
+      }),
+      telemetryUrl: telemetryPluginConfig.url,
     };
   };
 
   private updateLastReported = async () => {
     const internalRepository = this.getInternalRepository();
     this.lastReported = Date.now();
-    await internalRepository.update('telemetry', 'telemetry', {
+    updateTelemetrySavedObject(internalRepository, {
       lastReported: this.lastReported,
     });
   };
@@ -88,6 +77,7 @@ export class FetcherTask {
     }
     return false;
   };
+
   private fetchTelemetry = async () => {
     const { getStats, title } = telemetryCollectionManager.getStatsGetter();
     this.server.log(['debug', 'telemetry', 'fetcher'], `Fetching usage using ${title} getter.`);
@@ -103,6 +93,7 @@ export class FetcherTask {
       isDev: config.get('env.dev'),
     });
   };
+
   private sendTelemetry = async (url: string, cluster: any): Promise<void> => {
     this.server.log(['debug', 'telemetry', 'fetcher'], `Sending usage stats.`);
     await fetch(url, {

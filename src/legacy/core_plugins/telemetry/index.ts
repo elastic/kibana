@@ -32,6 +32,7 @@ import {
   createLocalizationUsageCollector,
   createTelemetryUsageCollector,
   createUiMetricUsageCollector,
+  createTelemetryPluginUsageCollector,
 } from './server/collectors';
 
 const ENDPOINT_VERSION = 'v2';
@@ -105,7 +106,7 @@ const telemetry = (kibana: any) => {
       hacks: ['plugins/telemetry/hacks/telemetry_init', 'plugins/telemetry/hacks/telemetry_opt_in'],
       mappings,
     },
-    init(server: Server, kibanaConfig: any) {
+    init(server: Server, pluginConfig: any) {
       const initializerContext = {
         env: {
           packageInfo: {
@@ -120,11 +121,11 @@ const telemetry = (kibana: any) => {
       } as any) as CoreSetup;
 
       telemetryPlugin(initializerContext).setup(coreSetup);
-
-      const fetcherTask = new FetcherTask(server, kibanaConfig);
+      const fetcherTask = new FetcherTask(server, pluginConfig);
       fetcherTask.start();
 
       // register collectors
+      server.usage.collectorSet.register(createTelemetryPluginUsageCollector(server));
       server.usage.collectorSet.register(createLocalizationUsageCollector(server));
       server.usage.collectorSet.register(createTelemetryUsageCollector(server));
       server.usage.collectorSet.register(createUiMetricUsageCollector(server));

@@ -21,12 +21,10 @@ import { UiStatsMetric } from './ui_stats';
 import { UserAgentMetric } from './user_agent';
 
 export { UiStatsMetric, createUiStatsMetric, UiStatsMetricType } from './ui_stats';
-
 export { Stats } from './stats';
 export { trackUsageAgent } from './user_agent';
 
 export type Metric = UiStatsMetric | UserAgentMetric;
-
 export enum METRIC_TYPE {
   COUNT = 'count',
   LOADED = 'loaded',

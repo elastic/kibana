@@ -17,15 +17,15 @@
  * under the License.
  */
 
-import { TelemetrySavedObjectAttributes } from '../routes/telemetry_config';
+import { TelemetrySavedObjectAttributes } from './';
 import { SavedObjectsErrorHelpers } from '../../../../../core/server';
 
 export type TelemetrySavedObject = TelemetrySavedObjectAttributes | null | false;
-type GetTelemetrySavedObject = (savedObjectsClient: any) => Promise<TelemetrySavedObject>;
+type GetTelemetrySavedObject = (repository: any) => Promise<TelemetrySavedObject>;
 
-export const getTelemetrySavedObject: GetTelemetrySavedObject = async (savedObjectsClient: any) => {
+export const getTelemetrySavedObject: GetTelemetrySavedObject = async (repository: any) => {
   try {
-    const { attributes } = await savedObjectsClient.get('telemetry', 'telemetry');
+    const { attributes } = await repository.get('telemetry', 'telemetry');
     return attributes;
   } catch (error) {
     if (SavedObjectsErrorHelpers.isNotFoundError(error)) {

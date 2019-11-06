@@ -16,25 +16,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { TelemetrySavedObject } from './get_telemetry_saved_object';
 
-interface GetTelemetryUsageFetcherConfig {
-  originalInjectedVars: any;
-  telemetrySavedObject: TelemetrySavedObject;
-}
+import { getTelemetrySavedObject } from '../telemetry_repository';
+import { getTelemetryOptIn } from './get_telemetry_opt_in';
+import { getTelemetryUsageFetcher } from './get_telemetry_usage_fetcher';
 
-export function getTelemetryUsageFetcher({
-  telemetrySavedObject,
-  originalInjectedVars,
-}: GetTelemetryUsageFetcherConfig) {
-  const { telemetryUsageFetcher } = originalInjectedVars;
-  if (!telemetrySavedObject) {
-    return telemetryUsageFetcher;
-  }
+export async function replaceTelemetryInjectedVars(
+  telemetryPluginConfig: any,
+  request: any,
+  currentKibanaVersion: string
+) {
+  const savedObjectsClient = request.getSavedObjectsClient();
+  const telemetrySavedObject = await getTelemetrySavedObject(savedObjectsClient);
+  const telemetryOptedIn = getTelemetryOptIn({
+    telemetrySavedObject,
+    request,
+    currentKibanaVersion,
+  });
 
-  if (typeof telemetrySavedObject.usageFetcher === 'undefined') {
-    return telemetryUsageFetcher;
-  }
+  const telemetryUsageFetcher = getTelemetryUsageFetcher({
+    telemetrySavedObject,
+    telemetryPluginConfig,
+  });
 
-  return telemetrySavedObject.usageFetcher;
+  return {
+    telemetryOptedIn,
+    telemetryUsageFetcher,
+  };
 }

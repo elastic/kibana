@@ -16,8 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { TelemetrySavedObject } from '../telemetry_repository/get_telemetry_saved_object';
 
-export { replaceTelemetryInjectedVars } from './replace_injected_vars';
-export { getTelemetryOptIn } from './get_telemetry_opt_in';
-export { getTelemetryUsageFetcher } from './get_telemetry_usage_fetcher';
-export { getTelemetrySavedObject } from './get_telemetry_saved_object';
+interface GetTelemetryUsageFetcherConfig {
+  telemetryPluginConfig: any;
+  telemetrySavedObject: TelemetrySavedObject;
+}
+
+export function getTelemetryUsageFetcher({
+  telemetrySavedObject,
+  telemetryPluginConfig,
+}: GetTelemetryUsageFetcherConfig) {
+  const { telemetryUsageFetcher } = telemetryPluginConfig;
+  if (!telemetrySavedObject) {
+    return telemetryUsageFetcher;
+  }
+
+  if (typeof telemetrySavedObject.usageFetcher === 'undefined') {
+    return telemetryUsageFetcher;
+  }
+
+  return telemetrySavedObject.usageFetcher;
+}

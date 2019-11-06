@@ -17,29 +17,12 @@
  * under the License.
  */
 
-import { getTelemetrySavedObject } from './get_telemetry_saved_object';
-import { getTelemetryOptIn } from './get_telemetry_opt_in';
-import { getTelemetryUsageFetcher } from './get_telemetry_usage_fetcher';
+export { getTelemetrySavedObject } from './get_telemetry_saved_object';
+export { updateTelemetrySavedObject } from './update_telemetry_saved_object';
 
-export async function replaceTelemetryInjectedVars(
-  originalInjectedVars: any,
-  request: any,
-  currentKibanaVersion: string
-) {
-  const savedObjectsClient = request.getSavedObjectsClient();
-  const telemetrySavedObject = await getTelemetrySavedObject(savedObjectsClient);
-  const telemetryOptedIn = getTelemetryOptIn({
-    telemetrySavedObject,
-    request,
-    currentKibanaVersion,
-  });
-  const telemetryUsageFetcher = getTelemetryUsageFetcher({
-    telemetrySavedObject,
-    originalInjectedVars,
-  });
-
-  return {
-    telemetryOptedIn,
-    telemetryUsageFetcher,
-  };
+export interface TelemetrySavedObjectAttributes {
+  enabled?: boolean | null;
+  lastVersionChecked?: string;
+  usageFetcher?: 'browser' | 'server';
+  lastReported?: number;
 }

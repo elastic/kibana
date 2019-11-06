@@ -18,7 +18,7 @@
  */
 
 import { getTelemetryOptIn } from './get_telemetry_opt_in';
-import { TelemetrySavedObject } from './get_telemetry_saved_object';
+import { TelemetrySavedObject } from '../telemetry_repository/get_telemetry_saved_object';
 
 describe('getTelemetryOptIn', () => {
   it('returns false when request path is not /app*', () => {

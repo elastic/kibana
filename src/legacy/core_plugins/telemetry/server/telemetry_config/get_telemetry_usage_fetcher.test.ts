@@ -18,7 +18,7 @@
  */
 
 import { getTelemetryUsageFetcher } from './get_telemetry_usage_fetcher';
-import { TelemetrySavedObject } from './get_telemetry_saved_object';
+import { TelemetrySavedObject } from '../telemetry_repository/get_telemetry_saved_object';
 
 describe('getTelemetryUsageFetcher', () => {
   it('returns kibana.yml config when saved object not found', () => {
@@ -64,11 +64,11 @@ interface CallGetTelemetryUsageFetcherParams {
 
 function callGetTelemetryUsageFetcher(params: CallGetTelemetryUsageFetcherParams) {
   const telemetrySavedObject = getMockTelemetrySavedObject(params);
-  const originalInjectedVars = getMockOriginalInjectedVars(params);
-  return getTelemetryUsageFetcher({ originalInjectedVars, telemetrySavedObject });
+  const telemetryPluginConfig = getMockTelemetryPluginConfig(params);
+  return getTelemetryUsageFetcher({ telemetryPluginConfig, telemetrySavedObject });
 }
 
-function getMockOriginalInjectedVars(params: CallGetTelemetryUsageFetcherParams) {
+function getMockTelemetryPluginConfig(params: CallGetTelemetryUsageFetcherParams) {
   return {
     telemetryUsageFetcher: params.configUsageFetcher,
   };

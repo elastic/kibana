@@ -20,35 +20,14 @@
 import Joi from 'joi';
 import { boomify } from 'boom';
 import { CoreSetup } from 'src/core/server';
-import { SavedObjectsErrorHelpers } from '../../../../../core/server';
+import {
+  TelemetrySavedObjectAttributes,
+  updateTelemetrySavedObject,
+} from '../telemetry_repository';
 
 interface RegisterOptInRoutesParams {
   core: CoreSetup;
   currentKibanaVersion: string;
-}
-
-export interface TelemetrySavedObjectAttributes {
-  enabled?: boolean | null;
-  lastVersionChecked?: string;
-  usageFetcher?: 'browser' | 'server';
-}
-
-async function updateTelemetrySavedObjectFromReq(
-  req: any,
-  savedObjectAttributes: TelemetrySavedObjectAttributes
-) {
-  const savedObjectsClient = req.getSavedObjectsClient();
-  try {
-    return await savedObjectsClient.update('telemetry', 'telemetry', savedObjectAttributes);
-  } catch (err) {
-    if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
-      return await savedObjectsClient.create('telemetry', savedObjectAttributes, {
-        id: 'telemetry',
-        overwrite: true,
-      });
-    }
-    throw err;
-  }
 }
 
 export function registerTelemetryConfigRoutes({
@@ -72,7 +51,8 @@ export function registerTelemetryConfigRoutes({
     handler: async (req: any, h: any) => {
       try {
         const attributes: TelemetrySavedObjectAttributes = req.payload;
-        await updateTelemetrySavedObjectFromReq(req, attributes);
+        const savedObjectsClient = req.getSavedObjectsClient();
+        await updateTelemetrySavedObject(savedObjectsClient, attributes);
       } catch (err) {
         return boomify(err);
       }
@@ -96,7 +76,8 @@ export function registerTelemetryConfigRoutes({
           enabled: req.payload.enabled,
           lastVersionChecked: currentKibanaVersion,
         };
-        await updateTelemetrySavedObjectFromReq(req, attributes);
+        const savedObjectsClient = req.getSavedObjectsClient();
+        await updateTelemetrySavedObject(savedObjectsClient, attributes);
       } catch (err) {
         return boomify(err);
       }

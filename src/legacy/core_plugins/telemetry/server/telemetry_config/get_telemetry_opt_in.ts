@@ -18,10 +18,10 @@
  */
 
 import semver from 'semver';
-import { TelemetrySavedObject } from './get_telemetry_saved_object';
+import { TelemetrySavedObject } from '../telemetry_repository/get_telemetry_saved_object';
 
 interface GetTelemetryOptInConfig {
-  request: any;
+  request?: any;
   telemetrySavedObject: TelemetrySavedObject;
   currentKibanaVersion: string;
 }
@@ -33,11 +33,12 @@ export const getTelemetryOptIn: GetTelemetryOptIn = ({
   telemetrySavedObject,
   currentKibanaVersion,
 }) => {
-  const isRequestingApplication = request.path.startsWith('/app');
-
-  // Prevent interstitial screens (such as the space selector) from prompting for telemetry
-  if (!isRequestingApplication) {
-    return false;
+  if (request) {
+    const isRequestingApplication = request.path.startsWith('/app');
+    // Prevent interstitial screens (such as the space selector) from prompting for telemetry
+    if (!isRequestingApplication) {
+      return false;
+    }
   }
 
   if (telemetrySavedObject === false) {
