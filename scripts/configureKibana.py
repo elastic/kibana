@@ -73,12 +73,15 @@ def load_assets(path_to_files):
 def setup_config():
     # setup the default query type to be Lucene (not KQL)
     try:
-        url = 'http://localhost:9200/api/kibana/settings'
+        url = 'http://localhost:5601/analyze/api/kibana/settings'
         session = requests.Session()
         retries = Retry(total=5, backoff_factor=0.3, status_forcelist=[500, 503])
         session.mount('https://', HTTPAdapter(max_retries=retries))
         session.mount('http://', HTTPAdapter(max_retries=retries))
-        headers = { 'Content-type': 'application/json' }
+        headers = {
+            'Content-type': 'application/json',
+            'kbn-version': '7.2.0'
+        }
         data = json.dumps({
             'changes': {
                 'search:queryLanguage': 'lucene'
