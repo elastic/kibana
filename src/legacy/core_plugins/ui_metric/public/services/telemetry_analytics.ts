@@ -18,7 +18,6 @@
  */
 
 import { createReporter, Reporter, UiStatsMetricType } from '@kbn/analytics';
-import { kfetch } from 'ui/kfetch';
 // @ts-ignore
 import { addSystemApiHeader } from 'ui/system_api';
 
@@ -51,10 +50,11 @@ export const trackUserAgent = (appName: string) => {
 interface AnalyicsReporterConfig {
   localStorage: any;
   debug: boolean;
+  kfetch: any;
 }
 
 export function createAnalyticsReporter(config: AnalyicsReporterConfig) {
-  const { localStorage, debug } = config;
+  const { localStorage, debug, kfetch } = config;
 
   return createReporter({
     debug,

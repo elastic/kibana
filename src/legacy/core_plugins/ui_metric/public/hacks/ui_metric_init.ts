@@ -20,6 +20,7 @@
 // @ts-ignore
 import { uiModules } from 'ui/modules';
 import chrome from 'ui/chrome';
+import { kfetch } from 'ui/kfetch';
 import {
   createAnalyticsReporter,
   setTelemetryReporter,
@@ -29,7 +30,8 @@ import {
 function telemetryInit($injector: any) {
   const localStorage = $injector.get('localStorage');
   const debug = chrome.getInjected('debugUiMetric');
-  const uiReporter = createAnalyticsReporter({ localStorage, debug });
+
+  const uiReporter = createAnalyticsReporter({ localStorage, debug, kfetch });
   setTelemetryReporter(uiReporter);
   trackUserAgent('kibana');
 }
