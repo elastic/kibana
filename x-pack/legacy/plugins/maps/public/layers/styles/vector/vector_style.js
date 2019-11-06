@@ -113,14 +113,16 @@ export class VectorStyle extends AbstractStyle {
    * can then use to update store state via dispatch.
    */
   getDescriptorWithMissingStylePropsRemoved(nextOrdinalFields) {
-    const originalProperties = this.getProperties();
+
+
+    const originalProperties = this.getRawProperties();
     const updatedProperties = {};
 
 
     this.getDynamicPropertiesArray().forEach(dynamicProperty =>{
 
       const field = dynamicProperty.getField();
-      if (field || !field.isValid()) {
+      if (!field || !field.isValid()) {
         return;
       }
 
