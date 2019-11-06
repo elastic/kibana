@@ -33,7 +33,7 @@ import { App } from '../application';
 class FakeApp implements App {
   public title = `${this.id} App`;
   public mount = () => () => {};
-  constructor(public id: string, public chromeHidden?: boolean) {}
+  constructor(public id: string, public chromeless?: boolean) {}
 }
 const store = new Map();
 const originalLocalStorage = window.localStorage;
@@ -207,7 +207,7 @@ describe('start', () => {
 
     it('application-specified visibility on mount', async () => {
       const startDeps = defaultStartDeps([
-        new FakeApp('alpha'), // An undefined chromeHidden is the same as setting to false.
+        new FakeApp('alpha'), // An undefined `chromeless` is the same as setting to false.
         new FakeApp('beta', true),
         new FakeApp('gamma', false),
       ]);

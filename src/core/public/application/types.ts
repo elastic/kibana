@@ -70,7 +70,7 @@ export interface AppBase {
   /**
    * Hide the UI chrome when the application is mounted. Defaults to `false`.
    */
-  chromeHidden?: boolean;
+  chromeless?: boolean;
 }
 
 /**

@@ -97,7 +97,7 @@ export class ChromeService {
     /**
      * These observables allow consumers to toggle the chrome visibility via either:
      *   1. Using setIsVisible() to trigger the next chromeHidden$
-     *   2. Setting `chromeHidden` when registering an application, which will
+     *   2. Setting `chromeless` when registering an application, which will
      *      reset the visibility whenever the next application is mounted
      *   3. Having embed=true in the query string
      */
@@ -113,7 +113,7 @@ export class ChromeService {
           appId =>
             !!appId &&
             application.availableApps.has(appId) &&
-            !!application.availableApps.get(appId)!.chromeHidden
+            !!application.availableApps.get(appId)!.chromeless
         )
       )
     );

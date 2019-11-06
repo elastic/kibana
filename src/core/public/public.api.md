@@ -22,7 +22,7 @@ export interface App extends AppBase {
 // @public (undocumented)
 export interface AppBase {
     capabilities?: Partial<Capabilities>;
-    chromeHidden?: boolean;
+    chromeless?: boolean;
     euiIconType?: string;
     icon?: string;
     // (undocumented)
