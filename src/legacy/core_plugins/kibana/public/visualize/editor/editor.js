@@ -90,13 +90,12 @@ function VisualizeAppController(
     docTitle,
     getBasePath,
     docLinks,
+    queryFilter,
     savedQueryService,
     uiSettings,
-    npDataStart,
   } = getServices();
 
-  new FilterStateManager(globalState, getAppState, npDataStart.query.filterManager);
-  const queryFilter = npDataStart.query.filterManager;
+  new FilterStateManager(globalState, getAppState, queryFilter);
   // Retrieve the resolved SavedVis instance.
   const savedVis = $route.current.locals.savedVis;
   // vis is instance of src/legacy/ui/public/vis/vis.js.

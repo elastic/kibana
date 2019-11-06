@@ -23,7 +23,6 @@ import 'ui/vis/editors/default/sidebar';
 
 import chrome from 'ui/chrome';
 import { docTitle } from 'ui/doc_title/doc_title';
-import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 import { npSetup, npStart } from 'ui/new_platform';
 import { IPrivate } from 'ui/private';
 // @ts-ignore
@@ -47,7 +46,6 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
 
   const Private = injector.get<IPrivate>('Private');
 
-  const queryFilter = Private(FilterBarQueryFilterProvider);
   const shareContextMenuExtensions = Private(ShareContextMenuExtensionsRegistryProvider);
   const savedObjectRegistry = Private(SavedObjectRegistryProvider);
   const savedObjectClient = Private(SavedObjectsClientProvider);
@@ -56,7 +54,6 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
   return {
     chromeLegacy: chrome,
     editorTypes,
-    queryFilter,
     savedObjectClient,
     savedObjectRegistry,
     savedDashboards: injector.get('savedDashboards'),
@@ -73,6 +70,7 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
       docTitle,
       getAngularDependencies,
       localApplicationService,
+      VisEditorTypesRegistryProvider,
     },
   });
   await instance.start(npStart.core, {

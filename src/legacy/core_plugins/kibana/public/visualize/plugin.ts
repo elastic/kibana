@@ -22,8 +22,6 @@ import { i18n } from '@kbn/i18n';
 import { wrapInI18nContext } from 'ui/i18n';
 
 // @ts-ignore
-import { VisEditorTypesRegistryProvider } from 'ui/registry/vis_editor_types';
-// @ts-ignore
 import { defaultEditor } from 'ui/vis/editors/default/default';
 import {
   App,
@@ -52,7 +50,6 @@ import {
 export interface LegacyAngularInjectedDependencies {
   chromeLegacy: any;
   editorTypes: any;
-  queryFilter: any;
   shareContextMenuExtensions: any;
   savedObjectRegistry: any;
   savedObjectClient: any;
@@ -75,6 +72,7 @@ export interface VisualizePluginSetupDependencies {
     getAngularDependencies: () => Promise<LegacyAngularInjectedDependencies>;
     localApplicationService: LocalApplicationService;
     docTitle: DocTitle;
+    VisEditorTypesRegistryProvider: any;
   };
 }
 
@@ -92,7 +90,12 @@ export class VisualizePlugin implements Plugin {
     core: CoreSetup,
     {
       feature_catalogue,
-      __LEGACY: { localApplicationService, getAngularDependencies, ...legacyServices },
+      __LEGACY: {
+        localApplicationService,
+        getAngularDependencies,
+        VisEditorTypesRegistryProvider,
+        ...legacyServices
+      },
     }: VisualizePluginSetupDependencies
   ) {
     const app: App = {
@@ -129,6 +132,7 @@ export class VisualizePlugin implements Plugin {
           indexPatterns: dataStart.indexPatterns.indexPatterns,
           localStorage: new Storage(localStorage),
           navigation,
+          queryFilter: npDataStart.query.filterManager,
           savedObjectsClient,
           savedQueryService: dataStart.search.services.savedQueryService,
           sessionStorage: new Storage(sessionStorage),
@@ -163,16 +167,7 @@ export class VisualizePlugin implements Plugin {
   }
 
   async start(
-    {
-      savedObjects: { client: savedObjectsClient },
-      uiSettings,
-      http: {
-        basePath: { prepend: addBasePath },
-      },
-      application: {
-        capabilities: { visualize: visualizeCapabilities },
-      },
-    }: CoreStart,
+    { savedObjects: { client: savedObjectsClient }, uiSettings, http, application }: CoreStart,
     {
       dataStart,
       embeddables,
@@ -192,14 +187,16 @@ export class VisualizePlugin implements Plugin {
     };
 
     const { savedVisualizations } = await getAngularDependencies();
+    // we partially set services because embeddable factory can be used without running visualize plugin
     setServices({
       visualizations,
       uiSettings,
-      addBasePath,
+      addBasePath: http.basePath.prepend,
       savedObjectsClient,
       savedVisualizations,
-      visualizeCapabilities,
+      visualizeCapabilities: application.capabilities.visualize,
     });
+
     const embeddableFactory = new VisualizeEmbeddableFactory(visualizations.types);
     embeddables.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
   }

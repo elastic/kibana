@@ -42,6 +42,7 @@ export interface VisualizeKibanaServices {
   chromeLegacy: any;
   core: LegacyCoreStart;
   dataStart: DataStart;
+  editorTypes: any;
   npDataStart: NpDataStart;
   docLinks: DocLinksStart;
   embeddables: ReturnType<EmbeddablePublicPlugin['start']>;
@@ -50,6 +51,7 @@ export interface VisualizeKibanaServices {
   indexPatterns: any;
   localStorage: Storage;
   navigation: NavigationStart;
+  queryFilter: any;
   toastNotifications: ToastsStart;
   savedObjectsClient: SavedObjectsClientContract;
   savedQueryService: SavedQueryService;
