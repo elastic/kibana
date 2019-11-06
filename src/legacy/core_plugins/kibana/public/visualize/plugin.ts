@@ -23,7 +23,6 @@ import { wrapInI18nContext } from 'ui/i18n';
 
 // @ts-ignore
 import { VisEditorTypesRegistryProvider } from 'ui/registry/vis_editor_types';
-import { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 // @ts-ignore
 import { defaultEditor } from 'ui/vis/editors/default/default';
 import {
@@ -45,6 +44,10 @@ import { VisualizeEmbeddableFactory } from './embeddable/visualize_embeddable_fa
 import { VISUALIZE_EMBEDDABLE_TYPE } from './embeddable/constants';
 import { VisualizeConstants } from './visualize_constants';
 import { setServices, VisualizeKibanaServices, DocTitle } from './kibana_services';
+import {
+  FeatureCatalogueCategory,
+  FeatureCatalogueSetup,
+} from '../../../../../plugins/feature_catalogue/public';
 
 export interface LegacyAngularInjectedDependencies {
   chromeLegacy: any;
@@ -67,10 +70,10 @@ export interface VisualizePluginStartDependencies {
 }
 
 export interface VisualizePluginSetupDependencies {
+  feature_catalogue: FeatureCatalogueSetup;
   __LEGACY: {
     getAngularDependencies: () => Promise<LegacyAngularInjectedDependencies>;
     localApplicationService: LocalApplicationService;
-    FeatureCatalogueRegistryProvider: any;
     docTitle: DocTitle;
   };
 }
@@ -88,12 +91,8 @@ export class VisualizePlugin implements Plugin {
   public async setup(
     core: CoreSetup,
     {
-      __LEGACY: {
-        localApplicationService,
-        getAngularDependencies,
-        FeatureCatalogueRegistryProvider,
-        ...legacyServices
-      },
+      feature_catalogue,
+      __LEGACY: { localApplicationService, getAngularDependencies, ...legacyServices },
     }: VisualizePluginSetupDependencies
   ) {
     const app: App = {
@@ -145,19 +144,18 @@ export class VisualizePlugin implements Plugin {
         return renderApp(params.element, params.appBasePath, deps);
       },
     };
-    FeatureCatalogueRegistryProvider.register(() => {
-      return {
-        id: 'visualize',
-        title: 'Visualize',
-        description: i18n.translate('kbn.visualize.visualizeDescription', {
-          defaultMessage:
-            'Create visualizations and aggregate data stores in your Elasticsearch indices.',
-        }),
-        icon: 'visualizeApp',
-        path: `/app/kibana#${VisualizeConstants.LANDING_PAGE_PATH}`,
-        showOnHomePage: true,
-        category: FeatureCatalogueCategory.DATA,
-      };
+
+    feature_catalogue.register({
+      id: 'visualize',
+      title: 'Visualize',
+      description: i18n.translate('kbn.visualize.visualizeDescription', {
+        defaultMessage:
+          'Create visualizations and aggregate data stores in your Elasticsearch indices.',
+      }),
+      icon: 'visualizeApp',
+      path: `/app/kibana#${VisualizeConstants.LANDING_PAGE_PATH}`,
+      showOnHomePage: true,
+      category: FeatureCatalogueCategory.DATA,
     });
 
     localApplicationService.register({ ...app, id: 'visualize' });

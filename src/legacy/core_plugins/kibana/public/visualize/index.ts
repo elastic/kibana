@@ -26,7 +26,6 @@ import { docTitle } from 'ui/doc_title/doc_title';
 import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 import { npSetup, npStart } from 'ui/new_platform';
 import { IPrivate } from 'ui/private';
-import { FeatureCatalogueRegistryProvider } from 'ui/registry/feature_catalogue';
 // @ts-ignore
 import { VisEditorTypesRegistryProvider } from 'ui/registry/vis_editor_types';
 import { SavedObjectRegistryProvider, SavedObjectsClientProvider } from 'ui/saved_objects';
@@ -69,10 +68,10 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
 (async () => {
   const instance = new VisualizePlugin();
   instance.setup(npSetup.core, {
+    feature_catalogue: npSetup.plugins.feature_catalogue,
     __LEGACY: {
       docTitle,
       getAngularDependencies,
-      FeatureCatalogueRegistryProvider,
       localApplicationService,
     },
   });
