@@ -95,6 +95,7 @@ describe('EmbeddedVisualizeHandler', () => {
     handler = new EmbeddedVisualizeHandler(
       div,
       {
+        id: '1',
         vis: mockVis,
         title: 'My Vis',
         searchSource: searchSourceMock,
@@ -127,6 +128,7 @@ describe('EmbeddedVisualizeHandler', () => {
       handler = new EmbeddedVisualizeHandler(
         div,
         {
+          id: '1',
           vis: mockVis,
           title: 'My Vis',
           searchSource: searchSourceMock,

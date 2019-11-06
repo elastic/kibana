@@ -10,15 +10,14 @@ import React, { Fragment } from 'react';
 import { EuiEmptyPrompt, EuiLink, EuiButton } from '@elastic/eui';
 
 import { CoreStart, ApplicationStart } from 'kibana/public';
-// @ts-ignore
-import { TableListView } from '../../../../../../src/legacy/core_plugins/kibana/public/table_list_view/table_list_view';
+import { TableListView } from '../../../../../../src/plugins/kibana_react/public';
 import { GraphWorkspaceSavedObject } from '../types';
 
 export interface ListingProps {
   coreStart: CoreStart;
   createItem: () => void;
-  findItems: (query: string, limit: number) => Promise<GraphWorkspaceSavedObject[]>;
-  deleteItems: (ids: string[]) => Promise<void>;
+  findItems: (query: string) => Promise<{ total: number; hits: GraphWorkspaceSavedObject[] }>;
+  deleteItems: (records: GraphWorkspaceSavedObject[]) => Promise<void>;
   editItem: (record: GraphWorkspaceSavedObject) => void;
   getViewUrl: (record: GraphWorkspaceSavedObject) => string;
   listingLimit: number;
@@ -31,10 +30,10 @@ export function Listing(props: ListingProps) {
   return (
     <I18nProvider>
       <TableListView
-        createItem={props.capabilities.save ? props.createItem : null}
+        createItem={props.capabilities.save ? props.createItem : undefined}
         findItems={props.findItems}
-        deleteItems={props.capabilities.delete ? props.deleteItems : null}
-        editItem={props.capabilities.save ? props.editItem : null}
+        deleteItems={props.capabilities.delete ? props.deleteItems : undefined}
+        editItem={props.capabilities.save ? props.editItem : undefined}
         tableColumns={getTableColumns(props.getViewUrl)}
         listingLimit={props.listingLimit}
         initialFilter={props.initialFilter}

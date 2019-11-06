@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiLink, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 
-import { TableListView } from './../../table_list_view';
+import { TableListView } from '../../../../../../../src/plugins/kibana_react/public';
 
 export const EMPTY_FILTER = '';
 

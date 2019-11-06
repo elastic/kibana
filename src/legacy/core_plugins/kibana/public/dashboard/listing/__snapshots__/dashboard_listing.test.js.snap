@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`after fetch hideWriteControls 1`] = `
-<InjectIntl(TableListViewUi)
+<TableListView
   createItem={null}
   deleteItems={null}
   editItem={null}
@@ -47,7 +47,7 @@ exports[`after fetch hideWriteControls 1`] = `
 `;
 
 exports[`after fetch initialFilter 1`] = `
-<InjectIntl(TableListViewUi)
+<TableListView
   createItem={[Function]}
   deleteItems={[Function]}
   editItem={[Function]}
@@ -137,7 +137,7 @@ exports[`after fetch initialFilter 1`] = `
 `;
 
 exports[`after fetch renders call to action when no dashboards exist 1`] = `
-<InjectIntl(TableListViewUi)
+<TableListView
   createItem={[Function]}
   deleteItems={[Function]}
   editItem={[Function]}
@@ -227,7 +227,7 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
 `;
 
 exports[`after fetch renders table rows 1`] = `
-<InjectIntl(TableListViewUi)
+<TableListView
   createItem={[Function]}
   deleteItems={[Function]}
   editItem={[Function]}
@@ -317,7 +317,7 @@ exports[`after fetch renders table rows 1`] = `
 `;
 
 exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
-<InjectIntl(TableListViewUi)
+<TableListView
   createItem={[Function]}
   deleteItems={[Function]}
   editItem={[Function]}
@@ -407,7 +407,7 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
 `;
 
 exports[`renders empty page in before initial fetch to avoid flickering 1`] = `
-<InjectIntl(TableListViewUi)
+<TableListView
   createItem={[Function]}
   deleteItems={[Function]}
   editItem={[Function]}

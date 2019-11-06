@@ -16,6 +16,4 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-export { TableListView } from './table_list_view';
-
+export * from './table_list_view';
