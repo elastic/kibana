@@ -17,21 +17,27 @@
  * under the License.
  */
 
-export async function getTelemetrySavedObject(savedObjectsClient: any) {
+import { TelemetrySavedObjectAttributes } from '../routes/telemetry_config';
+import { SavedObjectsErrorHelpers } from '../../../../../core/server';
+
+export type TelemetrySavedObject = TelemetrySavedObjectAttributes | null | false;
+type GetTelemetrySavedObject = (savedObjectsClient: any) => Promise<TelemetrySavedObject>;
+
+export const getTelemetrySavedObject: GetTelemetrySavedObject = async (savedObjectsClient: any) => {
   try {
     const { attributes } = await savedObjectsClient.get('telemetry', 'telemetry');
     return attributes;
   } catch (error) {
-    if (savedObjectsClient.errors.isNotFoundError(error)) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
       return null;
     }
 
     // if we aren't allowed to get the telemetry document, we can assume that we won't
     // be able to opt into telemetry either, so we're returning `false` here instead of null
-    if (savedObjectsClient.errors.isForbiddenError(error)) {
+    if (SavedObjectsErrorHelpers.isForbiddenError(error)) {
       return false;
     }
 
     throw error;
   }
-}
+};

@@ -21,7 +21,12 @@ import { CoreSetup } from 'src/core/server';
 import { registerTelemetryConfigRoutes } from './telemetry_config';
 import { registerTelemetryDataRoutes } from './telemetry_stats';
 
-export function registerRoutes(core: CoreSetup) {
-  registerTelemetryConfigRoutes(core);
+interface RegisterRoutesParams {
+  core: CoreSetup;
+  currentKibanaVersion: string;
+}
+
+export function registerRoutes({ core, currentKibanaVersion }: RegisterRoutesParams) {
+  registerTelemetryConfigRoutes({ core, currentKibanaVersion });
   registerTelemetryDataRoutes(core);
 }

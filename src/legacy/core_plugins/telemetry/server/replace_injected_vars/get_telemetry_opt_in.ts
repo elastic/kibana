@@ -17,7 +17,22 @@
  * under the License.
  */
 
-export function getTelemetryOptIn(telemetrySavedObject: any, request: any) {
+import semver from 'semver';
+import { TelemetrySavedObject } from './get_telemetry_saved_object';
+
+interface GetTelemetryOptInConfig {
+  request: any;
+  telemetrySavedObject: TelemetrySavedObject;
+  currentKibanaVersion: string;
+}
+
+type GetTelemetryOptIn = (config: GetTelemetryOptInConfig) => null | boolean;
+
+export const getTelemetryOptIn: GetTelemetryOptIn = ({
+  request,
+  telemetrySavedObject,
+  currentKibanaVersion,
+}) => {
   const isRequestingApplication = request.path.startsWith('/app');
 
   // Prevent interstitial screens (such as the space selector) from prompting for telemetry
@@ -25,9 +40,52 @@ export function getTelemetryOptIn(telemetrySavedObject: any, request: any) {
     return false;
   }
 
-  if (telemetrySavedObject === false || telemetrySavedObject === null) {
-    return telemetrySavedObject;
+  if (telemetrySavedObject === false) {
+    return false;
   }
 
-  return telemetrySavedObject.enabled;
+  if (telemetrySavedObject === null || telemetrySavedObject.enabled == null) {
+    return null;
+  }
+
+  const enabled = !!telemetrySavedObject.enabled;
+
+  // if enabled is true, return it
+  if (enabled === true) return enabled;
+
+  // Additional check if they've already opted out (enabled: false):
+  // - if the Kibana version has changed by at least a minor version,
+  //   return null to re-prompt.
+
+  const lastKibanaVersion = telemetrySavedObject.lastVersionChecked;
+
+  // if the last kibana version isn't set, or is somehow not a string, return null
+  if (typeof lastKibanaVersion !== 'string') return null;
+
+  // if version hasn't changed, just return enabled value
+  if (lastKibanaVersion === currentKibanaVersion) return enabled;
+
+  const lastSemver = parseSemver(lastKibanaVersion);
+  const currentSemver = parseSemver(currentKibanaVersion);
+
+  // if either version is invalid, return null
+  if (lastSemver == null || currentSemver == null) return null;
+
+  // actual major/minor version comparison, for cases when to return null
+  if (currentSemver.major > lastSemver.major) return null;
+  if (currentSemver.major === lastSemver.major) {
+    if (currentSemver.minor > lastSemver.minor) return null;
+  }
+
+  // current version X.Y is not greater than last version X.Y, return enabled
+  return enabled;
+};
+
+function parseSemver(version: string): semver.SemVer | null {
+  // semver functions both return nulls AND throw exceptions: "it depends!"
+  try {
+    return semver.parse(version);
+  } catch (err) {
+    return null;
+  }
 }

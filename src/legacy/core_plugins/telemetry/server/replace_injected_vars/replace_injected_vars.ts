@@ -21,14 +21,22 @@ import { getTelemetrySavedObject } from './get_telemetry_saved_object';
 import { getTelemetryOptIn } from './get_telemetry_opt_in';
 import { getTelemetryUsageFetcher } from './get_telemetry_usage_fetcher';
 
-export async function replaceTelemetryInjectedVars(originalInjectedVars: any, request: any) {
+export async function replaceTelemetryInjectedVars(
+  originalInjectedVars: any,
+  request: any,
+  currentKibanaVersion: string
+) {
   const savedObjectsClient = request.getSavedObjectsClient();
   const telemetrySavedObject = await getTelemetrySavedObject(savedObjectsClient);
-  const telemetryOptedIn = getTelemetryOptIn(telemetrySavedObject, request);
-  const telemetryUsageFetcher = getTelemetryUsageFetcher(
+  const telemetryOptedIn = getTelemetryOptIn({
     telemetrySavedObject,
-    originalInjectedVars
-  );
+    request,
+    currentKibanaVersion,
+  });
+  const telemetryUsageFetcher = getTelemetryUsageFetcher({
+    telemetrySavedObject,
+    originalInjectedVars,
+  });
 
   return {
     telemetryOptedIn,

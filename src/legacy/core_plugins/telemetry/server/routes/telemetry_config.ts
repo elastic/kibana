@@ -22,13 +22,27 @@ import { boomify } from 'boom';
 import { CoreSetup } from 'src/core/server';
 import { SavedObjectsErrorHelpers } from '../../../../../core/server';
 
-async function updateTelemetrySavedObjectFromReq(req: any) {
+interface RegisterOptInRoutesParams {
+  core: CoreSetup;
+  currentKibanaVersion: string;
+}
+
+export interface TelemetrySavedObjectAttributes {
+  enabled?: boolean | null;
+  lastVersionChecked?: string;
+  usageFetcher?: 'browser' | 'server';
+}
+
+async function updateTelemetrySavedObjectFromReq(
+  req: any,
+  savedObjectAttributes: TelemetrySavedObjectAttributes
+) {
   const savedObjectsClient = req.getSavedObjectsClient();
   try {
-    return await savedObjectsClient.update('telemetry', 'telemetry', req.payload);
+    return await savedObjectsClient.update('telemetry', 'telemetry', savedObjectAttributes);
   } catch (err) {
     if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
-      return await savedObjectsClient.create('telemetry', req.payload, {
+      return await savedObjectsClient.create('telemetry', savedObjectAttributes, {
         id: 'telemetry',
         overwrite: true,
       });
@@ -37,7 +51,10 @@ async function updateTelemetrySavedObjectFromReq(req: any) {
   }
 }
 
-export function registerTelemetryConfigRoutes(core: CoreSetup) {
+export function registerTelemetryConfigRoutes({
+  core,
+  currentKibanaVersion,
+}: RegisterOptInRoutesParams) {
   const { server } = core.http as any;
 
   server.route({
@@ -54,7 +71,8 @@ export function registerTelemetryConfigRoutes(core: CoreSetup) {
     },
     handler: async (req: any, h: any) => {
       try {
-        await updateTelemetrySavedObjectFromReq(req);
+        const attributes: TelemetrySavedObjectAttributes = req.payload;
+        await updateTelemetrySavedObjectFromReq(req, attributes);
       } catch (err) {
         return boomify(err);
       }
@@ -74,7 +92,11 @@ export function registerTelemetryConfigRoutes(core: CoreSetup) {
     },
     handler: async (req: any, h: any) => {
       try {
-        await updateTelemetrySavedObjectFromReq(req);
+        const attributes: TelemetrySavedObjectAttributes = {
+          enabled: req.payload.enabled,
+          lastVersionChecked: currentKibanaVersion,
+        };
+        await updateTelemetrySavedObjectFromReq(req, attributes);
       } catch (err) {
         return boomify(err);
       }

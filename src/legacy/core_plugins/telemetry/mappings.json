@@ -10,6 +10,9 @@
       },
       "lastReported": {
         "type": "date"
+      },
+      "lastVersionChecked": {
+        "type": "keyword"
       }
     }
   }

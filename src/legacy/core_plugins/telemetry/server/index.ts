@@ -26,5 +26,5 @@ export { replaceTelemetryInjectedVars } from './replace_injected_vars';
 export { telemetryCollectionManager } from './collection_manager';
 
 export const telemetryPlugin = (initializerContext: PluginInitializerContext) =>
-  new TelemetryPlugin();
+  new TelemetryPlugin(initializerContext);
 export { constants };

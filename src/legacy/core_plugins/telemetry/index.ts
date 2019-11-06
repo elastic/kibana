@@ -80,10 +80,13 @@ const telemetry = (kibana: any) => {
         },
       },
       async replaceInjectedVars(originalInjectedVars: any, request: any) {
+        const currentKibanaVersion = getCurrentKibanaVersion(request.server);
         const telemetryInjectedVars = await replaceTelemetryInjectedVars(
           originalInjectedVars,
-          request
+          request,
+          currentKibanaVersion
         );
+
         return {
           ...originalInjectedVars,
           ...telemetryInjectedVars,
@@ -103,7 +106,13 @@ const telemetry = (kibana: any) => {
       mappings,
     },
     init(server: Server, kibanaConfig: any) {
-      const initializerContext = {} as PluginInitializerContext;
+      const initializerContext = {
+        env: {
+          packageInfo: {
+            version: getCurrentKibanaVersion(server),
+          },
+        },
+      } as PluginInitializerContext;
 
       const coreSetup = ({
         http: { server },
@@ -125,3 +134,7 @@ const telemetry = (kibana: any) => {
 
 // eslint-disable-next-line import/no-default-export
 export default telemetry;
+
+function getCurrentKibanaVersion(server: Server): string {
+  return server.config().get('pkg.version');
+}
