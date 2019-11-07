@@ -104,9 +104,12 @@ export class FetcherTask {
   };
 
   private sendIfDue = async () => {
+    if (this.isSending) {
+      return;
+    }
     try {
       const telemetryConfig = await this.getCurrentConfigs();
-      if (this.isSending || !this.checkReportStatus(telemetryConfig)) {
+      if (!this.checkReportStatus(telemetryConfig)) {
         return;
       }
 
