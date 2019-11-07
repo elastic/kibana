@@ -50,7 +50,7 @@ export class FetcherTask {
     const config = this.server.config();
     const currentKibanaVersion = config.get('pkg.version');
     const defaultTelemetryUsageFetcher = config.get('telemetry.usageFetcher');
-    const telemetryUrl = getXpackConfigWithDeprecated(config, 'telemetry.url');
+    const telemetryUrl = getXpackConfigWithDeprecated(config, 'telemetry.url') as string;
 
     return {
       telemetryOptIn: getTelemetryOptIn({ currentKibanaVersion, telemetrySavedObject }),
