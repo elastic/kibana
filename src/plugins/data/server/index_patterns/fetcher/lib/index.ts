@@ -17,5 +17,6 @@
  * under the License.
  */
 
-export { getFieldCapabilities } from './field_capabilities';
-export { FieldCapsResponse } from './field_caps_response';
+export { getFieldCapabilities, shouldReadFieldFromDocValues } from './field_capabilities';
+export { resolveTimePattern } from './resolve_time_pattern';
+export { createNoMatchingIndicesError } from './errors';
