@@ -21,16 +21,6 @@ import { getTelemetryOptIn } from './get_telemetry_opt_in';
 import { TelemetrySavedObject } from '../telemetry_repository/get_telemetry_saved_object';
 
 describe('getTelemetryOptIn', () => {
-  it('returns false when request path is not /app*', () => {
-    const params = getCallGetTelemetryOptInParams({
-      requestPath: '/foo/bar',
-    });
-
-    const result = callGetTelemetryOptIn(params);
-
-    expect(result).toBe(false);
-  });
-
   it('returns null when saved object not found', () => {
     const params = getCallGetTelemetryOptInParams({
       savedObjectNotFound: true,
@@ -131,7 +121,6 @@ describe('getTelemetryOptIn', () => {
 });
 
 interface CallGetTelemetryOptInParams {
-  requestPath: string;
   savedObjectNotFound: boolean;
   savedObjectForbidden: boolean;
   enabled: boolean | null | undefined;
@@ -141,7 +130,6 @@ interface CallGetTelemetryOptInParams {
 }
 
 const DefaultParams = {
-  requestPath: '/app/something',
   savedObjectNotFound: false,
   savedObjectForbidden: false,
   enabled: true,
@@ -157,9 +145,8 @@ function getCallGetTelemetryOptInParams(
 
 function callGetTelemetryOptIn(params: CallGetTelemetryOptInParams) {
   const { currentKibanaVersion } = params;
-  const request = getMockRequest(params);
   const telemetrySavedObject = getMockTelemetrySavedObject(params);
-  return getTelemetryOptIn({ request, currentKibanaVersion, telemetrySavedObject });
+  return getTelemetryOptIn({ currentKibanaVersion, telemetrySavedObject });
 }
 
 function getMockTelemetrySavedObject(params: CallGetTelemetryOptInParams): TelemetrySavedObject {
@@ -174,11 +161,5 @@ function getMockTelemetrySavedObject(params: CallGetTelemetryOptInParams): Telem
   return {
     enabled: params.enabled,
     lastVersionChecked: params.lastVersionChecked,
-  };
-}
-
-function getMockRequest(params: CallGetTelemetryOptInParams): any {
-  return {
-    path: params.requestPath,
   };
 }
