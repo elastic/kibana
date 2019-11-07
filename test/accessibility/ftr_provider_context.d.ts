@@ -17,8 +17,9 @@
  * under the License.
  */
 
-export { getFieldCapabilities } from './field_capabilities';
-// @ts-ignore
-export { resolveTimePattern } from './resolve_time_pattern';
-// @ts-ignore
-export { createNoMatchingIndicesError } from './errors';
+import { GenericFtrProviderContext } from '@kbn/test/types/ftr';
+
+import { pageObjects } from './page_objects';
+import { services } from './services';
+
+export type FtrProviderContext = GenericFtrProviderContext<typeof services, typeof pageObjects>;
