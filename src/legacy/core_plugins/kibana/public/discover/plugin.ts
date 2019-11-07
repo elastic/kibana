@@ -29,6 +29,7 @@ import { LocalApplicationService } from '../local_application_service';
 import { getGlobalAngular } from './get_global_angular';
 import { getAngularModule } from './get_inner_angular';
 import { setServices } from './kibana_services';
+import { NavigationStart } from '../../../navigation/public';
 
 /**
  * These are the interfaces with your public contracts. You should export these
@@ -45,6 +46,7 @@ interface DiscoverSetupPlugins {
 interface DiscoverStartPlugins {
   uiActions: IUiActionsStart;
   embeddable: EmbeddableStart;
+  navigation: NavigationStart;
 }
 
 export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
@@ -65,15 +67,15 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
   }
 
   start(core: CoreStart, plugins: DiscoverStartPlugins): DiscoverStart {
-    this.bootstrapAngular(core);
+    this.bootstrapAngular(core, plugins);
     this.registerEmbeddable(plugins);
   }
 
   stop() {}
 
-  private async bootstrapAngular(core: CoreStart) {
+  private async bootstrapAngular(core: CoreStart, plugins: DiscoverStartPlugins) {
     if (!this.innerAngular) {
-      const innerAngular = getAngularModule(core);
+      const innerAngular = getAngularModule(core, plugins);
       const angularDeps = await getGlobalAngular();
       setServices(angularDeps);
       this.innerAngular = innerAngular;

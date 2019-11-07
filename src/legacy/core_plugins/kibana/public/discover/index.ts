@@ -21,6 +21,7 @@ import { npSetup, npStart } from 'ui/new_platform';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects';
 import { localApplicationService } from '../local_application_service';
 import { DiscoverPlugin, DiscoverSetup, DiscoverStart } from './plugin';
+import { start as navigation } from '../../../navigation/public/legacy';
 
 // Core will be looking for this when loading our plugin in the new platform
 export const plugin: PluginInitializer<DiscoverSetup, DiscoverStart> = (
@@ -34,7 +35,7 @@ export const setup = pluginInstance.setup(npSetup.core, {
   ...npSetup.plugins,
   ...{ localApplicationService },
 });
-export const start = pluginInstance.start(npStart.core, npStart.plugins);
+export const start = pluginInstance.start(npStart.core, { ...npStart.plugins, ...{ navigation } });
 
 SavedObjectRegistryProvider.register((savedSearches: any) => {
   return savedSearches;

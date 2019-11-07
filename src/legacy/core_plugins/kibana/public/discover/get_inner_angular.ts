@@ -67,16 +67,18 @@ import { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_to
 import { configureAppAngularModule } from 'ui/legacy_compat';
 import { setAngularModule } from './kibana_services';
 // @ts-ignore
+
 import {
-  ApplyFiltersPopoverFactory,
-  ApplyFiltersPopoverHelperFactory,
-  FilterBarFactory,
-  FilterBarHelperFactory,
+  createApplyFiltersPopoverDirective,
+  createApplyFiltersPopoverHelper,
+  createFilterBarDirective,
+  createFilterBarHelper,
 } from '../../../data/public/shim/legacy_module';
 // @ts-ignore
 import { IndexPatterns } from '../../../data/public/index_patterns/index_patterns';
 // @ts-ignore
 import { Storage } from '../../../../../plugins/kibana_utils/public';
+import { NavigationStart } from '../../../navigation/public';
 
 export const moduleName = 'app/discover';
 const thirdPartyAngularDependencies = [
@@ -87,8 +89,8 @@ const thirdPartyAngularDependencies = [
   'elasticsearch',
 ];
 
-export function getAngularModule(core: CoreStart) {
-  const discoverUiModule = getInnerAngular(core);
+export function getAngularModule(core: CoreStart, deps: any) {
+  const discoverUiModule = getInnerAngular(core, deps.navigation);
   configureAppAngularModule(discoverUiModule, core as LegacyCoreStart, true);
   setAngularModule(discoverUiModule);
 }
@@ -99,14 +101,14 @@ export const mainTemplate = (basePath: string) => `<div style="height: 100%">
 </div>
 `;
 
-export function getInnerAngular(core: CoreStart) {
+export function getInnerAngular(core: CoreStart, navigation: NavigationStart) {
   createLocalI18nModule();
   createLocalPrivateModule();
   createLocalPromiseModule();
   createLocalConfigModule(core.uiSettings);
   createLocalKbnUrlModule();
   createLocalPersistedStateModule();
-  createLocalTopNavModule();
+  createLocalTopNavModule(navigation);
   createLocalGlobalStateModule();
   createLocalAppStateModule();
   createLocalStorageModule();
@@ -134,10 +136,10 @@ export function getInnerAngular(core: CoreStart) {
     .directive('collapsibleSidebar', CollapsibleSidebarProvider)
     .directive('cssTruncate', CssTruncateProvide)
     .directive('fixedScroll', FixedScrollProvider)
-    .directive('filterBar', FilterBarFactory)
-    .directive('filterBarHelper', FilterBarHelperFactory)
-    .directive('applyFiltersPopover', ApplyFiltersPopoverFactory)
-    .directive('applyFiltersPopoverHelper', ApplyFiltersPopoverHelperFactory)
+    .directive('filterBar', createFilterBarDirective)
+    .directive('filterBarHelper', createFilterBarHelper)
+    .directive('applyFiltersPopover', createApplyFiltersPopoverDirective)
+    .directive('applyFiltersPopoverHelper', createApplyFiltersPopoverHelper)
     .directive('renderComplete', createRenderCompleteDirective)
     .service('debounce', ['$timeout', DebounceProviderTimeout])
     .service('queryFilter', function(Private: any) {
@@ -201,11 +203,11 @@ function createLocalPrivateModule() {
   angular.module('discoverPrivate', []).provider('Private', PrivateProvider);
 }
 
-function createLocalTopNavModule() {
+function createLocalTopNavModule(navigation: NavigationStart) {
   angular
     .module('discoverTopNav', ['react'])
     .directive('kbnTopNav', createTopNavDirective)
-    .directive('kbnTopNavHelper', createTopNavHelper);
+    .directive('kbnTopNavHelper', createTopNavHelper(navigation.ui));
 }
 
 function createLocalI18nModule() {
