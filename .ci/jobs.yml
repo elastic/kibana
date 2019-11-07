@@ -14,6 +14,7 @@ JOB:
   - kibana-ciGroup10
   - kibana-ciGroup11
   - kibana-ciGroup12
+  - kibana-accessibility
   - kibana-visualRegression
 
   # make sure all x-pack-ciGroups are listed in test/scripts/jenkins_xpack_ci_group.sh
@@ -28,6 +29,7 @@ JOB:
   - x-pack-ciGroup8
   - x-pack-ciGroup9
   - x-pack-ciGroup10
+  - x-pack-accessibility
   - x-pack-visualRegression
 
 # `~` is yaml for `null`
