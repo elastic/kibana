@@ -56,11 +56,10 @@ export default function () {
         `--elasticsearch.password=${servers.elasticsearch.password}`,
         `--kibana.disableWelcomeScreen=true`,
         '--telemetry.banner=false',
-        '--ui_metric.enabled=false',
+        '--ui_metric.enabled=true',
         `--server.maxPayloadBytes=1679958`,
       ],
     },
-
     services
   };
 }
