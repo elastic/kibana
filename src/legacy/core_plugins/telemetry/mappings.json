@@ -12,6 +12,7 @@
         "type": "date"
       },
       "lastVersionChecked": {
+        "ignore_above": 256,
         "type": "keyword"
       }
     }
