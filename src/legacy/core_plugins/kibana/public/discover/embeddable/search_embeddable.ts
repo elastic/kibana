@@ -290,7 +290,6 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     searchSource.getSearchRequestBody().then((body: any) => {
       inspectorRequest.json(body);
     });
-
     this.searchScope.isLoading = true;
 
     try {
@@ -298,8 +297,14 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       const resp = await searchSource.fetch({
         abortSignal: this.abortController.signal,
       });
-
-      this.searchScope.isLoading = false;
+      if (!this.searchScope) {
+        // the search scope is undefined for some reason. To reproduce:
+        // save a dashboard with time range, edit time range, refresh
+        // cancel, and confirm losing changes, then there's this error
+        // note that there are also to much fetches during this process
+        // this has to be investigated
+        return;
+      }
 
       // Log response to inspector
       inspectorRequest.stats(getResponseInspectorStats(searchSource, resp)).ok({ json: resp });
