@@ -38,7 +38,7 @@ describe('Doc Table', function () {
   let fakeRowVals;
   let stubFieldFormatConverter;
 
-  beforeEach(ngMock.module('kibana', 'apps/discover'));
+  beforeEach(ngMock.module('app/discover'));
   beforeEach(
     ngMock.inject(function (_config_, $rootScope, Private) {
       config = _config_;
