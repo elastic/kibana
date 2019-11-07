@@ -17,5 +17,14 @@
  * under the License.
  */
 
-export { getFieldCapabilities } from './field_capabilities';
-export { FieldCapsResponse } from './field_caps_response';
+import { CoreSetup } from 'kibana/server';
+import { Plugin } from '../../../../core/server';
+import { registerRoutes } from './routes';
+
+export class IndexPatternsService implements Plugin<void> {
+  public setup({ http, elasticsearch }: CoreSetup) {
+    registerRoutes(http, elasticsearch);
+  }
+
+  public start() {}
+}

@@ -37,7 +37,6 @@ async function getAngularInjectedDependencies(): Promise<LegacyAngularInjectedDe
   const Private = injector.get<IPrivate>('Private');
 
   return {
-    $http: injector.get('$http'),
     savedObjectRegistry: Private(SavedObjectRegistryProvider),
     kbnBaseUrl: injector.get('kbnBaseUrl'),
     savedGraphWorkspaces: Private(SavedWorkspacesProvider),
