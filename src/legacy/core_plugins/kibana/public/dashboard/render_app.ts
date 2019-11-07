@@ -99,21 +99,7 @@ export const renderApp = (element: HTMLElement, appBasePath: string, deps: Rende
     initDashboardApp(angularModuleInstance, deps);
   }
   const $injector = mountDashboardApp(appBasePath, element);
-  // const hasGlobalURLState = window.location.hash.includes('_g=');
-  // // only inject global state if there is none in the url itself (that takes precedence)
-  // if (!hasGlobalURLState) {
-  //   const globalStateStuff = deps.sessionStorage.get('oss-kibana-cross-app-state') || {};
-  //   const globalState = $injector.get<State>('globalState');
-  //   globalState.time = deps.dataStart.timefilter.timefilter.getTime();
-  //   globalState.refreshInterval = deps.dataStart.timefilter.timefilter.getRefreshInterval();
-  //   Object.keys(globalStateStuff).forEach(key => {
-  //     globalState[key] = globalStateStuff[key];
-  //   });
-  //   globalState.save();
-  // }
   return () => {
-    const currentGlobalState = $injector.get<State>('globalState');
-    deps.sessionStorage.set('oss-kibana-cross-app-state', currentGlobalState.toObject());
     $injector.get('$rootScope').$destroy();
   };
 };

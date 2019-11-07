@@ -34,6 +34,7 @@ import { DashboardListing, EMPTY_FILTER } from './listing/dashboard_listing';
 import { addHelpMenuToAppChrome } from './help_menu/help_menu_util';
 import { start as data } from '../../../data/public/legacy';
 import { registerTimefilterWithGlobalStateFactory } from '../../../../ui/public/timefilter/setup_router';
+import { syncOnMount, syncOnUnmount } from './global_state_sync';
 
 export function initDashboardApp(app, deps) {
   initDashboardAppDirective(app, deps);
@@ -49,25 +50,14 @@ export function initDashboardApp(app, deps) {
     addHelpMenuToAppChrome(deps.chrome, deps.core.docLinks);
   }
 
+  app.run(($rootScope, globalState) => {
+    $rootScope.$on('$destroy', () => {
+      syncOnUnmount(globalState, deps.sessionStorage);
+    });
+  });
+
   app.run(globalState => {
-    globalState.fetch();
-    const hasGlobalURLState = Object.keys(globalState.toObject()).length;
-    if (!globalState.time) {
-      globalState.time = deps.dataStart.timefilter.timefilter.getTime();
-    }
-    if (!globalState.refreshInterval) {
-      globalState.refreshInterval = deps.dataStart.timefilter.timefilter.getRefreshInterval();
-    }
-    // only inject cross app global state if there is none in the url itself (that takes precedence)
-    if (!hasGlobalURLState) {
-      const globalStateStuff = deps.sessionStorage.get('oss-kibana-cross-app-state') || {};
-      Object.keys(globalStateStuff).forEach(key => {
-        globalState[key] = globalStateStuff[key];
-      });
-    } else {
-      globalState.$inheritedGlobalState = true;
-    }
-    globalState.save();
+    syncOnMount(globalState, deps.dataStart, deps.npDataStart, deps.sessionStorage);
   });
 
   app.run((globalState, $rootScope) => {
