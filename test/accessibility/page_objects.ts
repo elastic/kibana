@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export * from './index_patterns_service';
+export { pageObjects } from '../functional/page_objects';
