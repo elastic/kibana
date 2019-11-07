@@ -21,7 +21,8 @@ import { getTelemetrySavedObject } from '../telemetry_repository';
 import { getTelemetryOptIn } from './get_telemetry_opt_in';
 import { getTelemetryUsageFetcher } from './get_telemetry_usage_fetcher';
 
-export async function replaceTelemetryInjectedVars(request: any, currentKibanaVersion: string) {
+export async function replaceTelemetryInjectedVars(request: any) {
+  const currentKibanaVersion = request.server.config().get('pkg.version');
   const savedObjectsClient = request.getSavedObjectsClient();
   const telemetrySavedObject = await getTelemetrySavedObject(savedObjectsClient);
   const telemetryOptedIn = getTelemetryOptIn({

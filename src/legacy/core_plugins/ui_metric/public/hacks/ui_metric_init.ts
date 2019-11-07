@@ -29,16 +29,17 @@ import {
 import { isUnauthenticated } from '../../../telemetry/public/services';
 
 function telemetryInit($injector: any) {
-  const localStorage = $injector.get('localStorage');
+  const uiMetricEnabled = chrome.getInjected('uiMetricEnabled');
   const debug = chrome.getInjected('debugUiMetric');
+  if (!uiMetricEnabled || isUnauthenticated()) {
+    return;
+  }
+  const localStorage = $injector.get('localStorage');
 
   const uiReporter = createAnalyticsReporter({ localStorage, debug, kfetch });
   setTelemetryReporter(uiReporter);
-  trackUserAgent('kibana');
-  if (isUnauthenticated()) {
-    return;
-  }
   uiReporter.start();
+  trackUserAgent('kibana');
 }
 
 uiModules.get('kibana').run(telemetryInit);

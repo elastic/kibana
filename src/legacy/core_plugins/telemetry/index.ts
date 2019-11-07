@@ -81,12 +81,7 @@ const telemetry = (kibana: any) => {
         },
       },
       async replaceInjectedVars(originalInjectedVars: any, request: any) {
-        const currentKibanaVersion = getCurrentKibanaVersion(request.server);
-        const telemetryInjectedVars = await replaceTelemetryInjectedVars(
-          request,
-          currentKibanaVersion
-        );
-
+        const telemetryInjectedVars = await replaceTelemetryInjectedVars(request);
         return Object.assign(originalInjectedVars, telemetryInjectedVars);
       },
       injectDefaultVars(server: Server) {
@@ -106,7 +101,7 @@ const telemetry = (kibana: any) => {
       const initializerContext = {
         env: {
           packageInfo: {
-            version: getCurrentKibanaVersion(server),
+            version: server.config().get('pkg.version'),
           },
         },
       } as PluginInitializerContext;
@@ -118,8 +113,7 @@ const telemetry = (kibana: any) => {
 
       telemetryPlugin(initializerContext).setup(coreSetup);
       const fetcherTask = new FetcherTask(server);
-      fetcherTask.stop();
-
+      fetcherTask.start();
       // register collectors
       server.usage.collectorSet.register(createTelemetryPluginUsageCollector(server));
       server.usage.collectorSet.register(createLocalizationUsageCollector(server));
@@ -131,7 +125,3 @@ const telemetry = (kibana: any) => {
 
 // eslint-disable-next-line import/no-default-export
 export default telemetry;
-
-function getCurrentKibanaVersion(server: Server): string {
-  return server.config().get('pkg.version');
-}
