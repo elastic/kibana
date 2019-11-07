@@ -7,6 +7,13 @@
 import { coreMock } from 'src/core/public/mocks';
 import { SessionExpired } from './session_expired';
 
+Object.defineProperty(window, 'sessionStorage', {
+  value: {
+    getItem: jest.fn(() => null),
+  },
+  writable: true,
+});
+
 const mockCurrentUrl = (url: string) => window.history.pushState({}, '', url);
 
 it('redirects user to "/logout" when there is no basePath', async () => {

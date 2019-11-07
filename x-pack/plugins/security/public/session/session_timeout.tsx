@@ -60,7 +60,7 @@ export class SessionTimeout {
 
     // subscribe to a broadcast channel for session timeout messages
     // this allows us to synchronize the UX across tabs and avoid repetitive API calls
-    this.channel.onmessage = this.receiveMessage;
+    this.channel.onmessage = this.handleSessionInfo;
     this.elector.awaitLeadership().then(() => {
       this.updateTimeouts();
     });
@@ -136,9 +136,10 @@ export class SessionTimeout {
     return { timeout, isMaximum };
   };
 
-  private receiveMessage = (sessionInfo: SessionInfo) => {
+  private handleSessionInfo = (sessionInfo: SessionInfo) => {
     this.sessionInfo = sessionInfo;
     this.updateTimeouts();
+    sessionStorage.setItem('session.provider', sessionInfo.provider);
   };
 
   private showWarning = () => {
@@ -175,8 +176,7 @@ export class SessionTimeout {
     try {
       const result = await this.http.fetch(path, { method: 'GET', headers });
 
-      this.sessionInfo = result;
-      this.updateTimeouts();
+      this.handleSessionInfo(result);
       this.channel.postMessage(result);
     } catch (err) {
       // do nothing; 401 errors will be caught by the http interceptor

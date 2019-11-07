@@ -8,4 +8,5 @@ export interface SessionInfo {
   now: number;
   expires: number | null;
   maxExpires: number | null;
+  provider: string;
 }

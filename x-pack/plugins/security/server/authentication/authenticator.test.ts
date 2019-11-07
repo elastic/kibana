@@ -897,6 +897,32 @@ describe('Authenticator', () => {
       expect(deauthenticationResult.redirectURL).toBe('some-url');
     });
 
+    it('if session does not exist but provider name is valid, returns whatever authentication provider returns.', async () => {
+      const request = httpServerMock.createKibanaRequest({ query: { provider: 'basic' } });
+      mockSessionStorage.get.mockResolvedValue(null);
+
+      mockBasicAuthenticationProvider.logout.mockResolvedValue(
+        DeauthenticationResult.redirectTo('some-url')
+      );
+
+      const deauthenticationResult = await authenticator.logout(request);
+
+      expect(mockBasicAuthenticationProvider.logout).toHaveBeenCalledTimes(1);
+      expect(mockSessionStorage.clear).not.toHaveBeenCalled();
+      expect(deauthenticationResult.redirected()).toBe(true);
+      expect(deauthenticationResult.redirectURL).toBe('some-url');
+    });
+
+    it('returns `notHandled` if session does not exist and provider name is invalid', async () => {
+      const request = httpServerMock.createKibanaRequest({ query: { provider: 'foo' } });
+      mockSessionStorage.get.mockResolvedValue(null);
+
+      const deauthenticationResult = await authenticator.logout(request);
+
+      expect(deauthenticationResult.notHandled()).toBe(true);
+      expect(mockSessionStorage.clear).not.toHaveBeenCalled();
+    });
+
     it('only clears session if it belongs to not configured provider.', async () => {
       const request = httpServerMock.createKibanaRequest();
       const state = { authorization: 'Bearer xxx' };

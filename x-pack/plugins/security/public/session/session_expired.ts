@@ -18,8 +18,10 @@ export class SessionExpired {
       `${window.location.pathname}${window.location.search}${window.location.hash}`
     );
     const msg = isMaximum ? 'SESSION_ENDED' : 'SESSION_EXPIRED';
+    const providerName = sessionStorage.getItem('session.provider');
+    const provider = providerName ? `&provider=${providerName}` : '';
     window.location.assign(
-      this.basePath.prepend(`/logout?next=${encodeURIComponent(next)}&msg=${msg}`)
+      this.basePath.prepend(`/logout?next=${encodeURIComponent(next)}&msg=${msg}${provider}`)
     );
   }
 }

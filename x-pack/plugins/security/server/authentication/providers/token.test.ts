@@ -422,20 +422,16 @@ describe('TokenAuthenticationProvider', () => {
   });
 
   describe('`logout` method', () => {
-    it('returns `notHandled` if state is not presented.', async () => {
+    it('returns `redirected` if state is not presented.', async () => {
       const request = httpServerMock.createKibanaRequest();
-      const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
       let deauthenticateResult = await provider.logout(request);
-      expect(deauthenticateResult.notHandled()).toBe(true);
+      expect(deauthenticateResult.redirected()).toBe(true);
 
       deauthenticateResult = await provider.logout(request, null);
-      expect(deauthenticateResult.notHandled()).toBe(true);
+      expect(deauthenticateResult.redirected()).toBe(true);
 
       sinon.assert.notCalled(mockOptions.tokens.invalidate);
-
-      deauthenticateResult = await provider.logout(request, tokenPair);
-      expect(deauthenticateResult.notHandled()).toBe(false);
     });
 
     it('fails if `tokens.invalidate` fails', async () => {

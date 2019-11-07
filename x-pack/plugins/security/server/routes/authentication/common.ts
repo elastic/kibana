@@ -17,7 +17,7 @@ export function defineCommonRoutes({ router, logger, authc, basePath }: RouteDef
       try {
         const sessionInfo = await authc.sessionInfo(request);
         // This is an authenticated request, so sessionInfo will always be non-null.
-        const { expires, maxExpires } = sessionInfo!;
+        const { expires, maxExpires, provider } = sessionInfo!;
         const now = new Date().getTime();
         // We can't rely on the client's system clock, so in addition to returning expiration timestamps, we also return
         // the current server time -- that way the client can calculate the relative time to expiration.
@@ -25,6 +25,7 @@ export function defineCommonRoutes({ router, logger, authc, basePath }: RouteDef
           now,
           expires,
           maxExpires,
+          provider,
         };
         return response.ok({ body });
       } catch (err) {

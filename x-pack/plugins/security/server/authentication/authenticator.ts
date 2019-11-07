@@ -330,10 +330,18 @@ export class Authenticator {
 
     const sessionStorage = this.options.sessionStorageFactory.asScoped(request);
     const sessionValue = await this.getSessionValue(sessionStorage);
+    const providerName = this.getProviderName(request.query);
     if (sessionValue) {
       sessionStorage.clear();
 
       return this.providers.get(sessionValue.provider)!.logout(request, sessionValue.state);
+    } else if (providerName) {
+      // provider name is passed in a query param and sourced from the browser's local storage;
+      // hence, we can't assume that this provider exists, so we have to check it
+      const provider = this.providers.get(providerName);
+      if (provider) {
+        return provider.logout(request, null);
+      }
     }
 
     // Normally when there is no active session in Kibana, `logout` method shouldn't do anything
@@ -448,6 +456,13 @@ export class Authenticator {
         maxExpires,
       });
     }
+  }
+
+  private getProviderName(query: any): string | null {
+    if (query && query.provider && typeof query.provider === 'string') {
+      return query.provider;
+    }
+    return null;
   }
 
   private calculateExpiry(
