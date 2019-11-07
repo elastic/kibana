@@ -27,7 +27,7 @@ import { REPORT_INTERVAL_MS } from '../common/constants';
 import { getXpackConfigWithDeprecated } from '../common/get_xpack_config_with_deprecated';
 
 export class FetcherTask {
-  private readonly checkDuration = 60000;
+  private readonly checkDurationMs = 60 * 1000 * 5;
   private intervalId?: NodeJS.Timeout;
   private lastReported?: number;
   private isSending = false;
@@ -131,7 +131,7 @@ export class FetcherTask {
   };
 
   public start = () => {
-    this.intervalId = setInterval(() => this.sendIfDue(), this.checkDuration);
+    this.intervalId = setInterval(() => this.sendIfDue(), this.checkDurationMs);
   };
   public stop = () => {
     if (this.intervalId) {

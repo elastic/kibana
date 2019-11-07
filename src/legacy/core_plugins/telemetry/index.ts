@@ -118,7 +118,7 @@ const telemetry = (kibana: any) => {
 
       telemetryPlugin(initializerContext).setup(coreSetup);
       const fetcherTask = new FetcherTask(server);
-      fetcherTask.start();
+      fetcherTask.stop();
 
       // register collectors
       server.usage.collectorSet.register(createTelemetryPluginUsageCollector(server));
