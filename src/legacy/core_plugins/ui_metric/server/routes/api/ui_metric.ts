@@ -91,13 +91,12 @@ export function registerUiMetricRoute(server: Server) {
       },
     },
     handler: async (req: any, h: any) => {
-      const report = req.payload;
-
       try {
+        const report = req.payload;
         await storeReport(server, report);
-        return {};
+        return { status: 'ok' };
       } catch (error) {
-        return new Boom('Something went wrong', { statusCode: error.status });
+        return h.response({ status: 'fail' }).code(200);
       }
     },
   });

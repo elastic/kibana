@@ -60,12 +60,17 @@ export function createAnalyticsReporter(config: AnalyicsReporterConfig) {
     debug,
     storage: localStorage,
     async http(report) {
-      return kfetch({
+      const response = await kfetch({
         method: 'POST',
         pathname: '/api/telemetry/report',
         body: JSON.stringify(report),
         headers: addSystemApiHeader({}),
       });
+
+      if (response.status !== 'ok') {
+        throw Error('Unable to store report.');
+      }
+      return response;
     },
   });
 }

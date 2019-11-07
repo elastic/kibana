@@ -96,15 +96,17 @@ export class ReportManager {
     const key = ReportManager.createMetricKey(metric);
     switch (metric.type) {
       case METRIC_TYPE.USER_AGENT: {
-        const { appName, type } = metric;
-        this.report.userAgent = {
-          [key]: {
-            key,
-            appName,
-            type,
-            userAgent: metric.userAgent,
-          },
-        };
+        const { appName, type, userAgent } = metric;
+        if (userAgent) {
+          this.report.userAgent = {
+            [key]: {
+              key,
+              appName,
+              type,
+              userAgent: metric.userAgent,
+            },
+          };
+        }
         return;
       }
       case METRIC_TYPE.CLICK:
