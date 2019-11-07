@@ -104,10 +104,10 @@ export class ChromeService {
     const chromeHidden$ = new BehaviorSubject(false);
     const forceHidden$ = of(isEmbedParamInHash());
     const appHidden$ = merge(
-      // Default the app being hidden to false in case the application service has
-      // not emitted an app ID yet since we want to trigger combineLatest below
-      // regardless of having a value yet.
-      of(false),
+      // Default the app being hidden to the same value as forceHidden$ in case the
+      // application service has not emitted an app ID yet, since we want to trigger
+      // combineLatest below regardless of having an application value yet.
+      forceHidden$,
       application.currentAppId$.pipe(
         map(
           appId =>
