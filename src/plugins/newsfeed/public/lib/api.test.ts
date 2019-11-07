@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { take, tap, toArray } from 'rxjs/operators';
+import { interval, race } from 'rxjs';
 import sinon, { stub } from 'sinon';
 import moment from 'moment';
 import { HttpServiceBase } from 'src/core/public';
@@ -443,7 +445,6 @@ describe('getApi', () => {
   let httpMock = ({
     fetch: mockHttpGet,
   } as unknown) as HttpServiceBase;
-
   const getHttpMockWithItems = (mockApiItems: ApiItem[]) => (
     arg1: string,
     arg2: { method: string }
@@ -457,24 +458,24 @@ describe('getApi', () => {
     }
     return Promise.reject('wrong args!');
   };
-
-  const configMock: NewsfeedPluginInjectedConfig = {
-    newsfeed: {
-      service: {
-        urlRoot: 'http://fakenews.co',
-        pathTemplate: '/kibana-test/v{VERSION}.json',
-      },
-      defaultLanguage: 'en',
-      mainInterval: 86400000,
-      fetchInterval: 86400000,
-    },
-  };
+  let configMock: NewsfeedPluginInjectedConfig;
 
   afterEach(() => {
     jest.resetAllMocks();
   });
 
   beforeEach(() => {
+    configMock = {
+      newsfeed: {
+        service: {
+          urlRoot: 'http://fakenews.co',
+          pathTemplate: '/kibana-test/v{VERSION}.json',
+        },
+        defaultLanguage: 'en',
+        mainInterval: 86400000,
+        fetchInterval: 86400000,
+      },
+    };
     httpMock = ({
       fetch: mockHttpGet,
     } as unknown) as HttpServiceBase;
@@ -604,6 +605,97 @@ describe('getApi', () => {
         }
       `);
       done();
+    });
+  });
+
+  describe('Retry fetching', () => {
+    const successItems: ApiItem[] = [
+      {
+        title: { en: 'hasNew test' },
+        description: { en: 'test' },
+        link_text: { en: 'click here' },
+        link_url: { en: 'xyzxyzxyz' },
+        badge: { en: 'firefighter' },
+        publish_on: new Date('2014-10-31T04:23:47Z'),
+        expire_on: new Date('2049-10-31T04:23:47Z'),
+        hash: 'happyness',
+      },
+    ];
+
+    it("retries until fetch doesn't error", done => {
+      configMock.newsfeed.mainInterval = 10; // fast retry for testing
+      mockHttpGet
+        .mockImplementationOnce(() => Promise.reject('Sorry, try again later!'))
+        .mockImplementationOnce(() => Promise.reject('Sorry, internal server error!'))
+        .mockImplementationOnce(() => Promise.reject("Sorry, it's too cold to go outside!"))
+        .mockImplementationOnce(getHttpMockWithItems(successItems));
+
+      getApi(httpMock, configMock.newsfeed, '6.8.2')
+        .pipe(
+          take(4),
+          toArray()
+        )
+        .subscribe(result => {
+          expect(result).toMatchInlineSnapshot(`
+            Array [
+              Object {
+                "error": "Sorry, try again later!",
+                "feedItems": Array [],
+                "hasNew": false,
+                "kibanaVersion": "6.8.2",
+              },
+              Object {
+                "error": "Sorry, internal server error!",
+                "feedItems": Array [],
+                "hasNew": false,
+                "kibanaVersion": "6.8.2",
+              },
+              Object {
+                "error": "Sorry, it's too cold to go outside!",
+                "feedItems": Array [],
+                "hasNew": false,
+                "kibanaVersion": "6.8.2",
+              },
+              Object {
+                "error": null,
+                "feedItems": Array [
+                  Object {
+                    "badge": "firefighter",
+                    "description": "test",
+                    "expireOn": "2049-10-31T04:23:47.000Z",
+                    "hash": "happyness",
+                    "linkText": "click here",
+                    "linkUrl": "xyzxyzxyz",
+                    "publishOn": "2014-10-31T04:23:47.000Z",
+                    "title": "hasNew test",
+                  },
+                ],
+                "hasNew": false,
+                "kibanaVersion": "6.8.2",
+              },
+            ]
+          `);
+          done();
+        });
+    });
+
+    it("doesn't retry if fetch succeeds", done => {
+      configMock.newsfeed.mainInterval = 10; // fast retry for testing
+      mockHttpGet.mockImplementation(getHttpMockWithItems(successItems));
+
+      const timeout$ = interval(1000); // cancels fetching when the test is done
+      let timesFetched = 0;
+
+      const get$ = getApi(httpMock, configMock.newsfeed, '6.8.2').pipe(
+        tap(() => {
+          timesFetched++;
+        })
+      );
+
+      race(get$, timeout$).subscribe(() => {
+        expect(timesFetched).toBe(1); // first fetch was successful, so there was no retry
+        done();
+      });
     });
   });
 });
