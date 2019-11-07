@@ -34,7 +34,7 @@ import { createEsService } from 'ui/es';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 // @ts-ignore
 import { PrivateProvider } from 'ui/private/private';
-import { CoreSetup, UiSettingsClientContract } from 'kibana/public';
+import { CoreStart, LegacyCoreStart, UiSettingsClientContract } from 'kibana/public';
 // @ts-ignore
 import { watchMultiDecorator } from 'ui/directives/watch_multi/watch_multi';
 // @ts-ignore
@@ -86,15 +86,11 @@ const thirdPartyAngularDependencies = [
   'ui.bootstrap',
   'elasticsearch',
 ];
-let discoverUiModule: any;
 
-export function getAngularModule(core: CoreSetup) {
-  if (!discoverUiModule) {
-    discoverUiModule = getInnerAngular(core);
-  }
-  configureAppAngularModule(discoverUiModule);
+export function getAngularModule(core: CoreStart) {
+  const discoverUiModule = getInnerAngular(core);
+  configureAppAngularModule(discoverUiModule, core as LegacyCoreStart, true);
   setAngularModule(discoverUiModule);
-  return discoverUiModule;
 }
 
 export const mainTemplate = (basePath: string) => `<div style="height: 100%">
@@ -103,7 +99,7 @@ export const mainTemplate = (basePath: string) => `<div style="height: 100%">
 </div>
 `;
 
-export function getInnerAngular(core: CoreSetup) {
+export function getInnerAngular(core: CoreStart) {
   createLocalI18nModule();
   createLocalPrivateModule();
   createLocalPromiseModule();

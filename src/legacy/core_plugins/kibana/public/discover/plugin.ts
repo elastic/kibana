@@ -51,7 +51,6 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
   private innerAngular: any;
   constructor(initializerContext: PluginInitializerContext) {}
   setup(core: CoreSetup, plugins: DiscoverSetupPlugins): DiscoverSetup {
-    this.bootstrapAngular(core);
     registerFeature();
     plugins.localApplicationService.register({
       id: 'discover',
@@ -66,12 +65,13 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
   }
 
   start(core: CoreStart, plugins: DiscoverStartPlugins): DiscoverStart {
+    this.bootstrapAngular(core);
     this.registerEmbeddable(plugins);
   }
 
   stop() {}
 
-  private async bootstrapAngular(core: CoreSetup) {
+  private async bootstrapAngular(core: CoreStart) {
     if (!this.innerAngular) {
       const innerAngular = getAngularModule(core);
       const angularDeps = await getGlobalAngular();
