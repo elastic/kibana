@@ -19,8 +19,6 @@
 
 import { expectExpressionProvider } from './helpers';
 
-// this file showcases how to use testing utilities defined in helpers.js together with the kbn_tp_run_pipeline
-// test plugin to write autmated tests for interprete
 export default function ({ getService, updateBaselines }) {
 
   let expectExpression;
@@ -29,8 +27,6 @@ export default function ({ getService, updateBaselines }) {
       expectExpression = expectExpressionProvider({ getService, updateBaselines });
     });
 
-    // we should not use this for tests like the ones below. this should be unit tested.
-    // - tests against a single function could easily be written as unit tests (and should be)
     describe('correctly renders metric', () => {
       let dataContext;
       before(async () => {
@@ -46,30 +42,34 @@ export default function ({ getService, updateBaselines }) {
         dataContext = await expectExpression('partial_metric_test', expression).getResponse();
       });
 
-      it.skip('with invalid data', async () => {
+      it('with invalid data', async () => {
         const expression = 'metricVis metric={visdimension 0}';
-        await (await expectExpression('metric_invalid_data', expression).toMatchSnapshot()).toMatchScreenshot();
+        await expectExpression('metric_invalid_data', expression).toMatchSnapshot();
+
+        // Test fails on chromedriver 76
+        // https://github.com/elastic/kibana/issues/42842
+        // await (await expectExpression('metric_invalid_data', expression).toMatchSnapshot()).toMatchScreenshot();
       });
 
-      // Test fails on chromedriver 76
-      // https://github.com/elastic/kibana/issues/42842
-      it.skip('with single metric data', async () => {
+      it('with single metric data', async () => {
         const expression = 'metricVis metric={visdimension 0}';
-        await (await expectExpression('metric_single_metric_data', expression, dataContext).toMatchSnapshot()).toMatchScreenshot();
+        await expectExpression('metric_single_metric_data', expression, dataContext).toMatchSnapshot();
+        // Test fails on chromedriver 76
+        // https://github.com/elastic/kibana/issues/42842
+        //await (await expectExpression('metric_single_metric_data', expression, dataContext).toMatchSnapshot()).toMatchScreenshot();
       });
 
-      // Test fails on chromedriver 76
-      // https://github.com/elastic/kibana/issues/42842
-      it.skip('with multiple metric data', async () => {
+      it('with multiple metric data', async () => {
         const expression = 'metricVis metric={visdimension 0} metric={visdimension 1}';
         await expectExpression('metric_multi_metric_data', expression, dataContext).toMatchSnapshot();
       });
 
-      // Test fails on chromedriver 76
-      // https://github.com/elastic/kibana/issues/42842
-      it.skip('with metric and bucket data', async () => {
+      it('with metric and bucket data', async () => {
         const expression = 'metricVis metric={visdimension 0} bucket={visdimension 2}';
-        await (await expectExpression('metric_all_data', expression, dataContext).toMatchSnapshot()).toMatchScreenshot();
+        await expectExpression('metric_all_data', expression, dataContext).toMatchSnapshot();
+        // Test fails on chromedriver 76
+        // https://github.com/elastic/kibana/issues/42842
+        // await (await expectExpression('metric_all_data', expression, dataContext).toMatchSnapshot()).toMatchScreenshot();
       });
 
       it('with percentage option', async () => {
