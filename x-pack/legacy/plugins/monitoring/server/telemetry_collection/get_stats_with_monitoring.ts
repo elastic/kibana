@@ -14,9 +14,9 @@ import {
 
 export const getStatsWithMonitoring: StatsGetter = async function(config) {
   let response = [];
-  const { start, end, server, callCluster } = getStatsCollectionConfig(config, 'monitoring');
 
   try {
+    const { start, end, server, callCluster } = getStatsCollectionConfig(config, 'monitoring');
     response = await getAllStats({ server, callCluster, start, end });
   } catch (err) {
     // no-op

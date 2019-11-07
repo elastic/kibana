@@ -64,8 +64,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await Promise.all([
           security.role.delete('global_advanced_settings_all_role'),
           security.user.delete('global_advanced_settings_all_user'),
+          PageObjects.security.logout(),
         ]);
-        await PageObjects.security.logout();
       });
 
       it('shows management navlink', async () => {

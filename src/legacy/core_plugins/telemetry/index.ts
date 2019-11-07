@@ -97,6 +97,10 @@ const telemetry = (kibana: any) => {
       hacks: ['plugins/telemetry/hacks/telemetry_init', 'plugins/telemetry/hacks/telemetry_opt_in'],
       mappings,
     },
+    postInit(server: Server) {
+      const fetcherTask = new FetcherTask(server);
+      fetcherTask.start();
+    },
     init(server: Server) {
       const initializerContext = {
         env: {
@@ -112,8 +116,6 @@ const telemetry = (kibana: any) => {
       } as any) as CoreSetup;
 
       telemetryPlugin(initializerContext).setup(coreSetup);
-      const fetcherTask = new FetcherTask(server);
-      fetcherTask.start();
       // register collectors
       server.usage.collectorSet.register(createTelemetryPluginUsageCollector(server));
       server.usage.collectorSet.register(createLocalizationUsageCollector(server));
