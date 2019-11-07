@@ -27,9 +27,7 @@ const app = getAngularModule();
 app.directive('discoverFieldSearch', function(reactDirective: any) {
   return reactDirective(wrapInI18nContext(DiscoverFieldSearch), [
     ['onChange', { watchDepth: 'reference' }],
-    ['onShowFilter', { watchDepth: 'reference' }],
-    ['showFilter', { watchDepth: 'value' }],
     ['value', { watchDepth: 'value' }],
-    ['filtersActive', { watchDepth: 'value' }],
+    ['types', { watchDepth: 'value' }],
   ]);
 });
