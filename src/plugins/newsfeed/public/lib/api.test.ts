@@ -292,7 +292,7 @@ describe('NewsfeedApiDriver', () => {
       });
     });
 
-    it('Filters multiple', () => {
+    it('Filters expired', () => {
       const driver = getDriver();
       const apiItems: ApiItem[] = [
         {
@@ -308,37 +308,30 @@ describe('NewsfeedApiDriver', () => {
           link_url: {
             en: 'about:blank',
           },
-          publish_on: new Date('2014-10-31T04:23:47Z'),
-          expire_on: new Date('2049-10-31T04:23:47Z'),
+          publish_on: new Date('2013-10-31T04:23:47Z'),
+          expire_on: new Date('2014-10-31T04:23:47Z'), // too old
           hash: 'abcabc1231123123hash',
-        }, // preserve
+        },
+      ];
+      expect(driver.modelItems(apiItems)).toMatchInlineSnapshot(`
+        Object {
+          "error": null,
+          "feedItems": Array [],
+          "hasNew": false,
+          "kibanaVersion": "test_version",
+        }
+      `);
+    });
+
+    it('Filters pre-published', () => {
+      const driver = getDriver();
+      const apiItems: ApiItem[] = [
         {
           title: {
-            es: 'Espanol',
+            en: 'guess what',
           },
           description: {
-            es: 'this also tests the modelItems function',
-          },
-          link_text: {
-            es: 'click here',
-          },
-          link_url: {
-            es: 'about:blank',
-          },
-          badge: {
-            es: 'hero',
-          },
-          languages: ['es'],
-          publish_on: new Date('2014-10-31T04:23:47Z'),
-          expire_on: new Date('2049-10-31T04:23:47Z'),
-          hash: 'defdefdef456456456',
-        }, // filter: not english
-        {
-          title: {
-            en: 'this is expired',
-          },
-          description: {
-            en: 'this also tests the modelItems function',
+            en: 'this tests the modelItems function',
           },
           link_text: {
             en: 'click here',
@@ -346,29 +339,19 @@ describe('NewsfeedApiDriver', () => {
           link_url: {
             en: 'about:blank',
           },
-          badge: {
-            en: 'hero',
-          },
-          publish_on: new Date('2014-10-31T04:23:47Z'),
-          expire_on: new Date('1999-01-01T00:00:00Z'),
-          hash: 'defdefdef456456456',
-        }, // filter: expired
+          publish_on: new Date('2055-10-31T04:23:47Z'), // too new
+          expire_on: new Date('2056-10-31T04:23:47Z'),
+          hash: 'abcabc1231123123hash',
+        },
       ];
-      expect(driver.modelItems(apiItems)).toMatchObject({
-        error: null,
-        feedItems: [
-          {
-            badge: null,
-            description: 'this tests the modelItems function',
-            hash: 'abcabc1231',
-            linkText: 'click here',
-            linkUrl: 'about:blank',
-            title: 'guess what',
-          },
-        ],
-        hasNew: true,
-        kibanaVersion: 'test_version',
-      });
+      expect(driver.modelItems(apiItems)).toMatchInlineSnapshot(`
+        Object {
+          "error": null,
+          "feedItems": Array [],
+          "hasNew": false,
+          "kibanaVersion": "test_version",
+        }
+      `);
     });
   });
 });

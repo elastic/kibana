@@ -119,6 +119,10 @@ export class NewsfeedApiDriver {
         return accum; // ignore item if expired
       }
 
+      if (moment(publishOnUtc).isAfter(Date.now())) {
+        return accum; // ignore item if publish date hasn't occurred yet (pre-published)
+      }
+
       if (languages && !languages.includes(userLanguage)) {
         return accum; // ignore language mismatch
       }
