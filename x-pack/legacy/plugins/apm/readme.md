@@ -68,7 +68,7 @@ yarn prettier  "./x-pack/legacy/plugins/apm/**/*.{tsx,ts,js}" --write
 yarn eslint ./x-pack/legacy/plugins/apm --fix
 ```
 
-#### Further resouces
+#### Further resources
 
 - [Cypress integration tests](cypress/README.md)
 - [VSCode setup instructions](./dev_docs/vscode_setup.md)
