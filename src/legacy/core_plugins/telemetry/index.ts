@@ -83,15 +83,11 @@ const telemetry = (kibana: any) => {
       async replaceInjectedVars(originalInjectedVars: any, request: any) {
         const currentKibanaVersion = getCurrentKibanaVersion(request.server);
         const telemetryInjectedVars = await replaceTelemetryInjectedVars(
-          originalInjectedVars,
           request,
           currentKibanaVersion
         );
 
-        return {
-          ...originalInjectedVars,
-          ...telemetryInjectedVars,
-        };
+        return Object.assign(originalInjectedVars, telemetryInjectedVars);
       },
       injectDefaultVars(server: Server) {
         const config = server.config();
@@ -106,7 +102,7 @@ const telemetry = (kibana: any) => {
       hacks: ['plugins/telemetry/hacks/telemetry_init', 'plugins/telemetry/hacks/telemetry_opt_in'],
       mappings,
     },
-    init(server: Server, pluginConfig: any) {
+    init(server: Server) {
       const initializerContext = {
         env: {
           packageInfo: {
@@ -121,7 +117,7 @@ const telemetry = (kibana: any) => {
       } as any) as CoreSetup;
 
       telemetryPlugin(initializerContext).setup(coreSetup);
-      const fetcherTask = new FetcherTask(server, pluginConfig);
+      const fetcherTask = new FetcherTask(server);
       fetcherTask.start();
 
       // register collectors

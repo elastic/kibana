@@ -64,14 +64,8 @@ interface CallGetTelemetryUsageFetcherParams {
 
 function callGetTelemetryUsageFetcher(params: CallGetTelemetryUsageFetcherParams) {
   const telemetrySavedObject = getMockTelemetrySavedObject(params);
-  const telemetryPluginConfig = getMockTelemetryPluginConfig(params);
-  return getTelemetryUsageFetcher({ telemetryPluginConfig, telemetrySavedObject });
-}
-
-function getMockTelemetryPluginConfig(params: CallGetTelemetryUsageFetcherParams) {
-  return {
-    telemetryUsageFetcher: params.configUsageFetcher,
-  };
+  const defaultTelemetryUsageFetcher = params.configUsageFetcher;
+  return getTelemetryUsageFetcher({ defaultTelemetryUsageFetcher, telemetrySavedObject });
 }
 
 function getMockTelemetrySavedObject(

@@ -24,18 +24,17 @@ import { telemetryCollectionManager } from './collection_manager';
 import { getTelemetryOptIn, getTelemetryUsageFetcher } from './telemetry_config';
 import { getTelemetrySavedObject, updateTelemetrySavedObject } from './telemetry_repository';
 import { REPORT_INTERVAL_MS } from '../common/constants';
+import { getXpackConfigWithDeprecated } from '../common/get_xpack_config_with_deprecated';
 
 export class FetcherTask {
   private readonly checkDuration = 60000;
   private intervalId?: NodeJS.Timeout;
   private lastReported?: number;
   private isSending = false;
-  private telemetryPluginConfig: any;
   private server: any;
 
-  constructor(server: any, telemetryPluginConfig: any) {
+  constructor(server: any) {
     this.server = server;
-    this.telemetryPluginConfig = telemetryPluginConfig;
   }
 
   private getInternalRepository = () => {
@@ -48,16 +47,18 @@ export class FetcherTask {
   private getCurrentConfigs = async () => {
     const internalRepository = this.getInternalRepository();
     const telemetrySavedObject = await getTelemetrySavedObject(internalRepository);
-    const telemetryPluginConfig = this.telemetryPluginConfig;
-    const currentKibanaVersion = '';
+    const config = this.server.config();
+    const currentKibanaVersion = config.get('pkg.version');
+    const defaultTelemetryUsageFetcher = config.get('telemetry.usageFetcher');
+    const telemetryUrl = getXpackConfigWithDeprecated(config, 'telemetry.url');
 
     return {
       telemetryOptIn: getTelemetryOptIn({ currentKibanaVersion, telemetrySavedObject }),
       telemetryUsageFetcher: getTelemetryUsageFetcher({
         telemetrySavedObject,
-        telemetryPluginConfig,
+        defaultTelemetryUsageFetcher,
       }),
-      telemetryUrl: telemetryPluginConfig.url,
+      telemetryUrl,
     };
   };
 
