@@ -54,6 +54,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
               objectRemover.add(space.id, response.body.id, 'alert');
               expect(response.body).to.eql({
                 id: response.body.id,
+                name: 'abc',
                 actions: [],
                 enabled: true,
                 alertTypeId: 'test.noop',
@@ -171,10 +172,10 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 statusCode: 400,
                 error: 'Bad Request',
                 message:
-                  'child "alertTypeId" fails because ["alertTypeId" is required]. child "interval" fails because ["interval" is required]. child "alertTypeParams" fails because ["alertTypeParams" is required]. child "actions" fails because ["actions" is required]',
+                  'child "name" fails because ["name" is required]. child "alertTypeId" fails because ["alertTypeId" is required]. child "interval" fails because ["interval" is required]. child "alertTypeParams" fails because ["alertTypeParams" is required]. child "actions" fails because ["actions" is required]',
                 validation: {
                   source: 'payload',
-                  keys: ['alertTypeId', 'interval', 'alertTypeParams', 'actions'],
+                  keys: ['name', 'alertTypeId', 'interval', 'alertTypeParams', 'actions'],
                 },
               });
               break;

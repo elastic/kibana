@@ -5,7 +5,7 @@
  */
 
 import Hapi from 'hapi';
-import { EncryptedSavedObjectsStartContract } from '../shim';
+import { PluginStartContract as EncryptedSavedObjectsStartContract } from '../../../../../plugins/encrypted_saved_objects/server';
 import { LegacySpacesPlugin as SpacesPluginStartContract } from '../../../spaces';
 import { Logger } from '../../../../../../src/core/server';
 import { validateParams, validateConfig, validateSecrets } from './validate_with_schema';

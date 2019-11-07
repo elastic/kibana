@@ -58,3 +58,21 @@ const renderTooltipContent = ({ addFilters, closeTooltip, features, isLocked, lo
 
 const mapEmbeddable = await factory.createFromState(state, input, parent, renderTooltipContent);
 ```
+
+
+#### Event handlers
+```
+const eventHandlers = {
+  onDataLoad: (layerId: string, dataId: string) => {
+    // take action on data load
+  },
+  onDataLoadEnd: (layerId: string, dataId: string, resultMeta: object) => {
+    // take action on data load end
+  },
+  onDataLoadError: (layerId: string, dataId: string, errorMessage: string) => {
+    // take action on data load error
+  },
+}
+
+const mapEmbeddable = await factory.createFromState(state, input, parent, renderTooltipContent, eventHandlers);
+```
