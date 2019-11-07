@@ -82,8 +82,12 @@ export const monitoring = (kibana) => new kibana.Plugin({
       elasticsearch: server.plugins.elasticsearch,
       alerting: server.plugins.alerting,
     };
-
-    new Plugin().setup(serverFacade, plugins);
+    const plugin = new Plugin();
+    const { initializeAlerting } = plugin.setup(serverFacade, plugins);
+    const { kbnServer } = server.plugins.xpack_main.status.plugin;
+    kbnServer.afterPluginsInit(() => {
+      initializeAlerting(server.plugins.alerting);
+    });
   },
   config,
   deprecations,
