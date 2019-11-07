@@ -23,10 +23,12 @@ export type BeforeSaveFunction = (
 ) => Promise<BeforeSaveMiddlewareParams>;
 
 export type BeforeRunFunction = (params: RunContext) => Promise<RunContext>;
+export type BeforeMarkRunningFunction = (params: RunContext) => Promise<RunContext>;
 
 export interface Middleware {
   beforeSave: BeforeSaveFunction;
   beforeRun: BeforeRunFunction;
+  beforeMarkRunning: BeforeMarkRunningFunction;
 }
 
 export function addMiddlewareToChain(prevMiddleware: Middleware, middleware: Middleware) {
@@ -39,8 +41,14 @@ export function addMiddlewareToChain(prevMiddleware: Middleware, middleware: Mid
     ? (params: RunContext) => middleware.beforeRun(params).then(prevMiddleware.beforeRun)
     : prevMiddleware.beforeRun;
 
+  const beforeMarkRunning = middleware.beforeMarkRunning
+    ? (params: RunContext) =>
+        middleware.beforeMarkRunning(params).then(prevMiddleware.beforeMarkRunning)
+    : prevMiddleware.beforeMarkRunning;
+
   return {
     beforeSave,
     beforeRun,
+    beforeMarkRunning,
   };
 }
