@@ -171,7 +171,7 @@ interface Props {
   navLinks$: Rx.Observable<ChromeNavLink[]>;
   recentlyAccessed$: Rx.Observable<ChromeRecentlyAccessedHistoryItem[]>;
   forceAppSwitcherNavigation$: Rx.Observable<boolean>;
-  helpExtension$: Rx.Observable<ChromeHelpExtension>;
+  helpExtension$: Rx.Observable<ChromeHelpExtension | undefined>;
   legacyMode: boolean;
   navControlsLeft$: Rx.Observable<readonly ChromeNavControl[]>;
   navControlsRight$: Rx.Observable<readonly ChromeNavControl[]>;
