@@ -5,7 +5,6 @@
  */
 
 import routes from 'ui/routes';
-import 'ui/capabilities/route_setup';
 import { toastNotifications } from 'ui/notify';
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import template from './grokdebugger_route.html';

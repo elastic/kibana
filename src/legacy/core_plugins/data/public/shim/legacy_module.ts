@@ -27,7 +27,8 @@ import { npStart } from 'ui/new_platform';
 import { FilterBar, ApplyFiltersPopover } from '../filter';
 import { IndexPatterns } from '../index_patterns/index_patterns';
 
-export function FilterBarFactory() {
+/** @internal */
+export const createFilterBarDirective = () => {
   return {
     restrict: 'E',
     template: '',
@@ -55,9 +56,10 @@ export function FilterBarFactory() {
       return linkFn;
     },
   };
-}
+};
 
-export function FilterBarHelperFactory(reactDirective: any) {
+/** @internal */
+export const createFilterBarHelper = (reactDirective: any) => {
   return reactDirective(wrapInI18nContext(FilterBar), [
     ['uiSettings', { watchDepth: 'reference' }],
     ['docLinks', { watchDepth: 'reference' }],
@@ -67,9 +69,10 @@ export function FilterBarHelperFactory(reactDirective: any) {
     ['className', { watchDepth: 'reference' }],
     ['pluginDataStart', { watchDepth: 'reference' }],
   ]);
-}
+};
 
-export function ApplyFiltersPopoverFactory() {
+/** @internal */
+export const createApplyFiltersPopoverDirective = () => {
   return {
     restrict: 'E',
     template: '',
@@ -104,10 +107,11 @@ export function ApplyFiltersPopoverFactory() {
       return linkFn;
     },
   };
-}
+};
 
-export function ApplyFiltersPopoverHelperFactory(reactDirective: any) {
-  return reactDirective(wrapInI18nContext(ApplyFiltersPopover), [
+/** @internal */
+export const createApplyFiltersPopoverHelper = (reactDirective: any) =>
+  reactDirective(wrapInI18nContext(ApplyFiltersPopover), [
     ['filters', { watchDepth: 'collection' }],
     ['onCancel', { watchDepth: 'reference' }],
     ['onSubmit', { watchDepth: 'reference' }],
@@ -116,16 +120,15 @@ export function ApplyFiltersPopoverHelperFactory(reactDirective: any) {
     // Key is needed to trigger a full rerender of the component
     'key',
   ]);
-}
 
 /** @internal */
 export const initLegacyModule = once((indexPatterns: IndexPatterns): void => {
   uiModules
     .get('app/kibana', ['react'])
-    .directive('filterBar', FilterBarFactory)
-    .directive('filterBarHelper', FilterBarHelperFactory)
-    .directive('applyFiltersPopover', ApplyFiltersPopoverFactory)
-    .directive('applyFiltersPopoverHelper', ApplyFiltersPopoverHelperFactory);
+    .directive('filterBar', createFilterBarDirective)
+    .directive('filterBarHelper', createFilterBarHelper)
+    .directive('applyFiltersPopover', createApplyFiltersPopoverDirective)
+    .directive('applyFiltersPopoverHelper', createApplyFiltersPopoverHelper);
 
   uiModules.get('kibana/index_patterns').value('indexPatterns', indexPatterns);
 });

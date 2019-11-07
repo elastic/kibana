@@ -23,42 +23,33 @@ import React from 'react';
 import angular from 'angular';
 import { uniq } from 'lodash';
 
-import chrome from 'ui/chrome';
 import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
-import { toastNotifications } from 'ui/notify';
 
 // @ts-ignore
 import { ConfirmationButtonTypes } from 'ui/modals/confirm_modal';
-import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
-
-import { docTitle } from 'ui/doc_title/doc_title';
 
 import { showSaveModal, SaveResult } from 'ui/saved_objects/show_saved_object_save_modal';
 
-import { showShareContextMenu, ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
+import { showShareContextMenu } from 'ui/share';
 import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 
-import { timefilter } from 'ui/timefilter';
+import { State } from 'ui/state_management/state';
 
-import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing/get_unhashable_states_provider';
-
-import {
-  AppStateClass as TAppStateClass,
-  AppState as TAppState,
-} from 'ui/state_management/app_state';
+import { AppStateClass as TAppStateClass } from 'ui/state_management/app_state';
 
 import { KbnUrl } from 'ui/url/kbn_url';
 import { Filter } from '@kbn/es-query';
 import { IndexPattern } from 'ui/index_patterns';
-import { IPrivate } from 'ui/private';
-import { Query, SavedQuery } from 'src/legacy/core_plugins/data/public';
 import { SaveOptions } from 'ui/saved_objects/saved_object';
-import { capabilities } from 'ui/capabilities';
 import { Subscription } from 'rxjs';
-import { npStart } from 'ui/new_platform';
 import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
-import { extractTimeFilter, changeTimeFilter } from '../../../data/public';
-import { start as data } from '../../../data/public/legacy';
+import {
+  extractTimeFilter,
+  changeTimeFilter,
+  FilterStateManager,
+  Query,
+  SavedQuery,
+} from '../../../data/public';
 
 import {
   DashboardContainer,
@@ -73,7 +64,6 @@ import {
   ViewMode,
   openAddPanelFlyout,
 } from '../../../embeddable_api/public/np_ready/public';
-import { start } from '../../../embeddable_api/public/np_ready/public/legacy';
 import { DashboardAppState, NavAction, ConfirmModalFn, SavedDashboardPanel } from './types';
 
 import { showOptionsPopover } from './top_nav/show_options_popover';
@@ -88,8 +78,23 @@ import { getDashboardTitle } from './dashboard_strings';
 import { DashboardAppScope } from './dashboard_app';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '../visualize/embeddable';
 import { convertSavedDashboardPanelToPanelState } from './lib/embeddable_saved_object_converters';
+import { RenderDeps } from './render_app';
 
-const { savedQueryService } = data.search.services;
+export interface DashboardAppControllerDependencies extends RenderDeps {
+  $scope: DashboardAppScope;
+  $route: any;
+  $routeParams: any;
+  getAppState: any;
+  globalState: State;
+  indexPatterns: {
+    getDefault: () => Promise<IndexPattern>;
+  };
+  dashboardConfig: any;
+  kbnUrl: KbnUrl;
+  AppStateClass: TAppStateClass<DashboardAppState>;
+  config: any;
+  confirmModal: ConfirmModalFn;
+}
 
 export class DashboardAppController {
   // Part of the exposed plugin API - do not remove without careful consideration.
@@ -102,37 +107,31 @@ export class DashboardAppController {
     $route,
     $routeParams,
     getAppState,
+    globalState,
     dashboardConfig,
     localStorage,
-    Private,
     kbnUrl,
     AppStateClass,
     indexPatterns,
     config,
     confirmModal,
-  }: {
-    $scope: DashboardAppScope;
-    $route: any;
-    $routeParams: any;
-    getAppState: {
-      previouslyStored: () => TAppState | undefined;
-    };
-    indexPatterns: {
-      getDefault: () => Promise<IndexPattern>;
-    };
-    dashboardConfig: any;
-    localStorage: {
-      get: (prop: string) => unknown;
-    };
-    Private: IPrivate;
-    kbnUrl: KbnUrl;
-    AppStateClass: TAppStateClass<DashboardAppState>;
-    config: any;
-    confirmModal: ConfirmModalFn;
-  }) {
-    const queryFilter = Private(FilterBarQueryFilterProvider);
-    const getUnhashableStates = Private(getUnhashableStatesProvider);
-    const shareContextMenuExtensions = Private(ShareContextMenuExtensionsRegistryProvider);
+    shareContextMenuExtensions,
+    savedQueryService,
+    embeddables,
+    dashboardCapabilities,
+    docTitle,
+    dataStart: {
+      timefilter: { timefilter },
+    },
+    npDataStart,
+    core: { notifications, overlays, chrome, injectedMetadata },
+  }: DashboardAppControllerDependencies) {
+    new FilterStateManager(globalState, getAppState, npDataStart.query.filterManager);
+    const queryFilter = npDataStart.query.filterManager;
+
+    function getUnhashableStates(): State[] {
+      return [getAppState(), globalState].filter(Boolean);
+    }
 
     let lastReloadRequestTime = 0;
 
@@ -145,16 +144,17 @@ export class DashboardAppController {
       savedDashboard: dash,
       AppStateClass,
       hideWriteControls: dashboardConfig.getHideWriteControls(),
+      kibanaVersion: injectedMetadata.getKibanaVersion(),
     });
 
     $scope.appState = dashboardStateManager.getAppState();
 
-    // The 'previouslyStored' check is so we only update the time filter on dashboard open, not during
+    // The hash check is so we only update the time filter on dashboard open, not during
     // normal cross app navigation.
-    if (dashboardStateManager.getIsTimeSavedWithDashboard() && !getAppState.previouslyStored()) {
+    if (dashboardStateManager.getIsTimeSavedWithDashboard() && !globalState.$inheritedGlobalState) {
       dashboardStateManager.syncTimefilterWithDashboard(timefilter);
     }
-    $scope.showSaveQuery = capabilities.get().dashboard.saveQuery as boolean;
+    $scope.showSaveQuery = dashboardCapabilities.saveQuery as boolean;
 
     const updateIndexPatterns = (container?: DashboardContainer) => {
       if (!container || isErrorEmbeddable(container)) {
@@ -189,10 +189,7 @@ export class DashboardAppController {
         [key: string]: DashboardPanelState;
       } = {};
       dashboardStateManager.getPanels().forEach((panel: SavedDashboardPanel) => {
-        embeddablesMap[panel.panelIndex] = convertSavedDashboardPanelToPanelState(
-          panel,
-          dashboardStateManager.getUseMargins()
-        );
+        embeddablesMap[panel.panelIndex] = convertSavedDashboardPanelToPanelState(panel);
       });
       let expandedPanelId;
       if (dashboardContainer && !isErrorEmbeddable(dashboardContainer)) {
@@ -241,7 +238,7 @@ export class DashboardAppController {
     let outputSubscription: Subscription | undefined;
 
     const dashboardDom = document.getElementById('dashboardViewport');
-    const dashboardFactory = start.getEmbeddableFactory(
+    const dashboardFactory = embeddables.getEmbeddableFactory(
       DASHBOARD_CONTAINER_TYPE
     ) as DashboardContainerFactory;
     dashboardFactory
@@ -336,7 +333,7 @@ export class DashboardAppController {
 
     // Push breadcrumbs to new header navigation
     const updateBreadcrumbs = () => {
-      chrome.breadcrumbs.set([
+      chrome.setBreadcrumbs([
         {
           text: i18n.translate('kbn.dashboard.dashboardAppBreadcrumbsTitle', {
             defaultMessage: 'Dashboard',
@@ -528,7 +525,7 @@ export class DashboardAppController {
     });
 
     $scope.$watch(
-      () => capabilities.get().dashboard.saveQuery,
+      () => dashboardCapabilities.saveQuery,
       newCapability => {
         $scope.showSaveQuery = newCapability as boolean;
       }
@@ -628,7 +625,7 @@ export class DashboardAppController {
       return saveDashboard(angular.toJson, timefilter, dashboardStateManager, saveOptions)
         .then(function(id) {
           if (id) {
-            toastNotifications.addSuccess({
+            notifications.toasts.addSuccess({
               title: i18n.translate('kbn.dashboard.dashboardWasSavedSuccessMessage', {
                 defaultMessage: `Dashboard '{dashTitle}' was saved`,
                 values: { dashTitle: dash.title },
@@ -646,7 +643,7 @@ export class DashboardAppController {
           return { id };
         })
         .catch(error => {
-          toastNotifications.addDanger({
+          notifications.toasts.addDanger({
             title: i18n.translate('kbn.dashboard.dashboardWasNotSavedDangerMessage', {
               defaultMessage: `Dashboard '{dashTitle}' was not saved. Error: {errorMessage}`,
               values: {
@@ -767,10 +764,10 @@ export class DashboardAppController {
       if (dashboardContainer && !isErrorEmbeddable(dashboardContainer)) {
         openAddPanelFlyout({
           embeddable: dashboardContainer,
-          getAllFactories: start.getEmbeddableFactories,
-          getFactory: start.getEmbeddableFactory,
-          notifications: npStart.core.notifications,
-          overlays: npStart.core.overlays,
+          getAllFactories: embeddables.getEmbeddableFactories,
+          getFactory: embeddables.getEmbeddableFactory,
+          notifications,
+          overlays,
           SavedObjectFinder,
         });
       }
@@ -818,8 +815,13 @@ export class DashboardAppController {
       },
     });
 
+    const visibleSubscription = chrome.getIsVisible$().subscribe(isVisible => {
+      $scope.isVisible = isVisible;
+    });
+
     $scope.$on('$destroy', () => {
       updateSubscription.unsubscribe();
+      visibleSubscription.unsubscribe();
       $scope.timefilterSubscriptions$.unsubscribe();
 
       dashboardStateManager.destroy();

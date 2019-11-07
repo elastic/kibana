@@ -55,6 +55,7 @@ export class DashboardStateManager {
   };
   private stateDefaults: DashboardAppStateDefaults;
   private hideWriteControls: boolean;
+  private kibanaVersion: string;
   public isDirty: boolean;
   private changeListeners: Array<(status: { dirty: boolean }) => void>;
   private stateMonitor: StateMonitor<DashboardAppStateDefaults>;
@@ -69,11 +70,14 @@ export class DashboardStateManager {
     savedDashboard,
     AppStateClass,
     hideWriteControls,
+    kibanaVersion,
   }: {
     savedDashboard: SavedObjectDashboard;
     AppStateClass: TAppStateClass<DashboardAppState>;
     hideWriteControls: boolean;
+    kibanaVersion: string;
   }) {
+    this.kibanaVersion = kibanaVersion;
     this.savedDashboard = savedDashboard;
     this.hideWriteControls = hideWriteControls;
 
@@ -85,7 +89,7 @@ export class DashboardStateManager {
     // appState based on the URL (the url trumps the defaults). This means if we update the state format at all and
     // want to handle BWC, we must not only migrate the data stored with saved Dashboard, but also any old state in the
     // url.
-    migrateAppState(this.appState);
+    migrateAppState(this.appState, kibanaVersion);
 
     this.isDirty = false;
 
@@ -147,7 +151,8 @@ export class DashboardStateManager {
       }
 
       convertedPanelStateMap[panelState.explicitInput.id] = convertPanelStateToSavedDashboardPanel(
-        panelState
+        panelState,
+        this.kibanaVersion
       );
 
       if (

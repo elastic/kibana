@@ -36,6 +36,8 @@ jest.mock('plugins/interpreter/interpreter', () => ({
   },
 }));
 
+jest.mock('../../../../core_plugins/data/public/legacy', () => ({}));
+
 jest.mock('../../../../core_plugins/interpreter/public/registries', () => ({
   registries: {
     renderers: {
