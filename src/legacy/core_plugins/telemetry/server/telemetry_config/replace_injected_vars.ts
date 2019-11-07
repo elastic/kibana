@@ -22,15 +22,23 @@ import { getTelemetryOptIn } from './get_telemetry_opt_in';
 import { getTelemetryUsageFetcher } from './get_telemetry_usage_fetcher';
 
 export async function replaceTelemetryInjectedVars(request: any) {
+  const defaultTelemetryUsageFetcher = request.server.config().get('telemetry.usageFetcher');
+  const isRequestingApplication = request.path.startsWith('/app');
+  // Prevent interstitial screens (such as the space selector) from prompting for telemetry
+  if (!isRequestingApplication) {
+    return {
+      telemetryOptedIn: false,
+    };
+  }
+
   const currentKibanaVersion = request.server.config().get('pkg.version');
   const savedObjectsClient = request.getSavedObjectsClient();
   const telemetrySavedObject = await getTelemetrySavedObject(savedObjectsClient);
   const telemetryOptedIn = getTelemetryOptIn({
     telemetrySavedObject,
-    request,
     currentKibanaVersion,
   });
-  const defaultTelemetryUsageFetcher = request.server.config().get('telemetry.usageFetcher');
+
   const telemetryUsageFetcher = getTelemetryUsageFetcher({
     telemetrySavedObject,
     defaultTelemetryUsageFetcher,
