@@ -28,7 +28,7 @@ import { NewsfeedPluginInjectedConfig, ApiItem, NewsfeedItem, FetchResult } from
 type ApiConfig = NewsfeedPluginInjectedConfig['newsfeed']['service'];
 
 export class NewsfeedApiDriver {
-  private readonly loadedTime = moment();
+  private readonly loadedTime = moment().utc(); // the date is compared to time in UTC format coming from the service
 
   constructor(
     private readonly kibanaVersion: string,
@@ -37,18 +37,18 @@ export class NewsfeedApiDriver {
   ) {}
 
   shouldFetch(): boolean {
-    const lastFetch: string | null = sessionStorage.getItem(NEWSFEED_LAST_FETCH_STORAGE_KEY);
-    if (lastFetch == null) {
+    const lastFetchUtc: string | null = sessionStorage.getItem(NEWSFEED_LAST_FETCH_STORAGE_KEY);
+    if (lastFetchUtc == null) {
       return true;
     }
-    const last = moment(lastFetch, 'x'); // parse as unix ms timestamp
+    const last = moment(lastFetchUtc, 'x'); // parse as unix ms timestamp (already is UTC)
 
     // does the last fetch time precede the time that the page was loaded?
     if (this.loadedTime.diff(last) > 0) {
       return true;
     }
 
-    const now = moment();
+    const now = moment.utc(); // always use UTC to compare timestamps that came from the service
     const duration = moment.duration(now.diff(last));
 
     return duration.asMilliseconds() > this.fetchInterval;
@@ -104,18 +104,18 @@ export class NewsfeedApiDriver {
 
     const feedItems: NewsfeedItem[] = items.reduce((accum: NewsfeedItem[], it: ApiItem) => {
       const {
-        expire_on: expireOn,
+        expire_on: expireOnUtc,
+        publish_on: publishOnUtc,
         languages,
         title,
         description,
         link_text: linkText,
         link_url: linkUrl,
         badge,
-        publish_on: publishOn,
         hash,
       } = it;
 
-      if (moment(expireOn).isBefore(Date.now())) {
+      if (moment(expireOnUtc).isBefore(Date.now())) {
         return accum; // ignore item if expired
       }
 
@@ -129,8 +129,8 @@ export class NewsfeedApiDriver {
         linkText: linkText[userLanguage],
         linkUrl: linkUrl[userLanguage],
         badge: badge != null ? badge![userLanguage] : null,
-        publishOn: moment(publishOn),
-        expireOn: moment(expireOn),
+        publishOn: moment(publishOnUtc),
+        expireOn: moment(expireOnUtc),
         hash: hash.slice(0, 10), // optimize for storage and faster parsing
       };
 
