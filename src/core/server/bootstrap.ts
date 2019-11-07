@@ -73,10 +73,14 @@ export async function bootstrap({
   process.on('SIGHUP', () => reloadLoggingConfig());
 
   // This is only used by the LogRotator service
+  // in order to be able to reload the log configuration
+  // under the cluster mode
   process.on('message', msg => {
-    if (msg && msg.reloadLoggingConfig) {
-      reloadLoggingConfig();
+    if (!msg || msg.reloadLoggingConfig !== true) {
+      return;
     }
+
+    reloadLoggingConfig();
   });
 
   function reloadLoggingConfig() {

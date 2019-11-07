@@ -80,15 +80,15 @@ export class LogRotator {
   }
 
   async _shouldUsePolling() {
-    // Setup a test file in order to try the fs env
-    // and understand if we need to usePolling or not
-    const tempFileDir = tmpdir();
-    await mkdirAsync(tempFileDir, { recursive: true });
-
-    const tempFile = join(tempFileDir, 'kbn_log_rotation_test_file.log');
-    await writeFileAsync(tempFile, '');
-
     try {
+      // Setup a test file in order to try the fs env
+      // and understand if we need to usePolling or not
+      const tempFileDir = tmpdir();
+      const tempFile = join(tempFileDir, 'kbn_log_rotation_use_polling_test_file.log');
+
+      await mkdirAsync(tempFileDir, { recursive: true });
+      await writeFileAsync(tempFile, '');
+
       const testWatcher = fs.watch(tempFile, { persistent: false });
 
       return new Promise(async (resolve) => {
@@ -282,6 +282,7 @@ export class LogRotator {
 
     // Send a special message to the cluster manager
     // so it can forward it correctly
+    // It will only run when we are under cluster mode (not under a production environment)
     process.send(['RELOAD_LOGGING_CONFIG_FROM_SERVER_WORKER']);
   }
 }

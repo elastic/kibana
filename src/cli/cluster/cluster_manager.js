@@ -90,12 +90,13 @@ export default class ClusterManager {
       });
     });
 
-    // when receive that event from server worker
+    // When receive that event from server worker
     // forward a reloadLoggingConfig message to master
     // and all workers. This is only used by LogRotator service
     // when the cluster mode is enabled
     this.server.on('reloadLoggingConfigFromServerWorker', () => {
       process.emit('message', { reloadLoggingConfig: true });
+
       this.workers.forEach(worker => {
         worker.fork.send({ reloadLoggingConfig: true });
       });
