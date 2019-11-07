@@ -683,7 +683,7 @@ describe('getApi', () => {
       configMock.newsfeed.mainInterval = 10; // fast retry for testing
       mockHttpGet.mockImplementation(getHttpMockWithItems(successItems));
 
-      const timeout$ = interval(1000); // cancels fetching when the test is done
+      const timeout$ = interval(1000); // lets us capture some results after a short time
       let timesFetched = 0;
 
       const get$ = getApi(httpMock, configMock.newsfeed, '6.8.2').pipe(
