@@ -106,6 +106,13 @@ export const withWaffleViewState = connect(
               ),
             })
           );
+        } else {
+          dispatch(
+            waffleFilterActions.applyWaffleFilterQuery({
+              query: null,
+              serializedQuery: null,
+            })
+          );
         }
       },
     };
