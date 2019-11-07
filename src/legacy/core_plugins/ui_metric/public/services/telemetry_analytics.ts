@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { createReporter, Reporter, UiStatsMetricType } from '@kbn/analytics';
+import { Reporter, UiStatsMetricType } from '@kbn/analytics';
 // @ts-ignore
 import { addSystemApiHeader } from 'ui/system_api';
 
@@ -56,7 +56,7 @@ interface AnalyicsReporterConfig {
 export function createAnalyticsReporter(config: AnalyicsReporterConfig) {
   const { localStorage, debug, kfetch } = config;
 
-  return createReporter({
+  return new Reporter({
     debug,
     storage: localStorage,
     async http(report) {

@@ -122,9 +122,3 @@ export class Reporter {
     this.start();
   };
 }
-
-export function createReporter(reportedConf: ReporterConfig) {
-  const reporter = new Reporter(reportedConf);
-  reporter.start();
-  return reporter;
-}

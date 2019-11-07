@@ -26,6 +26,7 @@ import {
   setTelemetryReporter,
   trackUserAgent,
 } from '../services/telemetry_analytics';
+import { isUnauthenticated } from '../../../telemetry/public/services';
 
 function telemetryInit($injector: any) {
   const localStorage = $injector.get('localStorage');
@@ -34,6 +35,10 @@ function telemetryInit($injector: any) {
   const uiReporter = createAnalyticsReporter({ localStorage, debug, kfetch });
   setTelemetryReporter(uiReporter);
   trackUserAgent('kibana');
+  if (isUnauthenticated()) {
+    return;
+  }
+  uiReporter.start();
 }
 
 uiModules.get('kibana').run(telemetryInit);
