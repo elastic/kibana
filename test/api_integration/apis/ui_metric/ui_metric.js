@@ -55,19 +55,18 @@ export default function ({ getService }) {
         .send(report)
         .expect(200);
 
-      return es.search({
-        index: '.kibana',
-        q: 'type:user-action',
-      }).then(response => {
-        const ids = response.hits.hits.map(({ _id }) => _id);
-        expect(ids.includes('user-action:myApp:myEvent'));
-      });
+      const response = await es.search({ index: '.kibana', q: 'type:ui-metric' });
+      const ids = response.hits.hits.map(({ _id }) => _id);
+      expect(ids.includes('ui-metric:myApp:myEvent')).to.eql(true);
     });
 
     it('supports multiple events', async () => {
       const userAgentMetric = createUserAgentMetric('kibana');
-      const uiStatsMetric1 = createStatsMetric('myEvent1');
-      const uiStatsMetric2 = createStatsMetric('myEvent2');
+      const uiStatsMetric1 = createStatsMetric('myEvent');
+      const hrTime = process.hrtime();
+      const nano = hrTime[0] * 1000000000 + hrTime[1];
+      const uniqueEventName = `myEvent${nano}`;
+      const uiStatsMetric2 = createStatsMetric(uniqueEventName);
       const report = {
         userAgent: {
           [userAgentMetric.key]: userAgentMetric,
@@ -84,44 +83,12 @@ export default function ({ getService }) {
         .send(report)
         .expect(200);
 
-
-      const response = await es.search({
-        index: '.kibana',
-        q: 'type:user-action',
-      });
-
+      const response = await es.search({ index: '.kibana', q: 'type:ui-metric' });
       const ids = response.hits.hits.map(({ _id }) => _id);
-      expect(ids.includes('user-action:myApp:myEvent1'));
-      expect(ids.includes('user-action:myApp:myEvent2'));
-      expect(ids.includes(`user-action:kibana-user_agent:${userAgentMetric.userAgent}`));
+      expect(ids.includes('ui-metric:myApp:myEvent')).to.eql(true);
+      expect(ids.includes(`ui-metric:myApp:${uniqueEventName}`)).to.eql(true);
+      expect(ids.includes(`ui-metric:kibana-user_agent:${userAgentMetric.userAgent}`)).to.eql(true);
     });
-
-    it('supports multiple events', async () => {
-      const uiStatsMetric1 = createStatsMetric('myEvent1');
-      const uiStatsMetric2 = createStatsMetric('myEvent2');
-      const report = {
-        uiStatsMetrics: {
-          [uiStatsMetric1.key]: uiStatsMetric1,
-          [uiStatsMetric2.key]: uiStatsMetric2,
-        }
-      };
-      await supertest
-        .post('/api/telemetry/report')
-        .set('kbn-xsrf', 'kibana')
-        .set('content-type', 'application/json')
-        .send(report)
-        .expect(200);
-
-      return es.search({
-        index: '.kibana',
-        q: 'type:user-action',
-      }).then(response => {
-        const ids = response.hits.hits.map(({ _id }) => _id);
-        expect(ids.includes('user-action:myApp:myEvent1'));
-        expect(ids.includes('user-action:myApp:myEvent2'));
-      });
-    });
-
   });
 }
 
