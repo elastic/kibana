@@ -22,7 +22,11 @@ import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { catchError, filter, mergeMap, tap } from 'rxjs/operators';
 import { HttpServiceBase } from 'src/core/public';
-import { NEWSFEED_LAST_FETCH_STORAGE_KEY, NEWSFEED_HASH_SET_STORAGE_KEY } from '../../constants';
+import {
+  NEWSFEED_FALLBACK_LANGUAGE,
+  NEWSFEED_LAST_FETCH_STORAGE_KEY,
+  NEWSFEED_HASH_SET_STORAGE_KEY,
+} from '../../constants';
 import { NewsfeedPluginInjectedConfig, ApiItem, NewsfeedItem, FetchResult } from '../../types';
 
 type ApiConfig = NewsfeedPluginInjectedConfig['newsfeed']['service'];
@@ -100,9 +104,8 @@ export class NewsfeedApiDriver {
   }
 
   modelItems(items: ApiItem[]): FetchResult {
-    const userLanguage = this.userLanguage;
-
     const feedItems: NewsfeedItem[] = items.reduce((accum: NewsfeedItem[], it: ApiItem) => {
+      let chosenLanguage = this.userLanguage;
       const {
         expire_on: expireOnUtc,
         publish_on: publishOnUtc,
@@ -123,16 +126,16 @@ export class NewsfeedApiDriver {
         return accum; // ignore item if publish date hasn't occurred yet (pre-published)
       }
 
-      if (languages && !languages.includes(userLanguage)) {
-        return accum; // ignore language mismatch
+      if (languages && !languages.includes(chosenLanguage)) {
+        chosenLanguage = NEWSFEED_FALLBACK_LANGUAGE; // don't remove the item: fallback on a language
       }
 
       const tempItem: NewsfeedItem = {
-        title: title[userLanguage],
-        description: description[userLanguage],
-        linkText: linkText[userLanguage],
-        linkUrl: linkUrl[userLanguage],
-        badge: badge != null ? badge![userLanguage] : null,
+        title: title[chosenLanguage],
+        description: description[chosenLanguage],
+        linkText: linkText[chosenLanguage],
+        linkUrl: linkUrl[chosenLanguage],
+        badge: badge != null ? badge![chosenLanguage] : null,
         publishOn: moment(publishOnUtc),
         expireOn: moment(expireOnUtc),
         hash: hash.slice(0, 10), // optimize for storage and faster parsing

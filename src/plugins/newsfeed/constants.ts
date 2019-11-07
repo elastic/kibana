@@ -17,5 +17,6 @@
  * under the License.
  */
 
+export const NEWSFEED_FALLBACK_LANGUAGE = 'en';
 export const NEWSFEED_LAST_FETCH_STORAGE_KEY = 'newsfeed.lastfetchtime';
 export const NEWSFEED_HASH_SET_STORAGE_KEY = 'newsfeed.hashes';

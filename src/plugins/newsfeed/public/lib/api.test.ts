@@ -65,7 +65,7 @@ describe('NewsfeedApiDriver', () => {
       expect(driver.shouldFetch()).toBe(true);
     });
 
-    it('returns false if last fetch time is new', () => {
+    it('returns false if last fetch time is recent enough', () => {
       sessionStoragetGet.throws('Wrong key passed!');
       sessionStoragetGet.withArgs(NEWSFEED_LAST_FETCH_STORAGE_KEY).returns(3005017200000); // 2065-03-23
       const driver = getDriver();
@@ -226,7 +226,89 @@ describe('NewsfeedApiDriver', () => {
       });
     });
 
-    it('Models multiple', () => {
+    it("Falls back to English when user language isn't present", () => {
+      // Set Language to French
+      const driver = new NewsfeedApiDriver(kibanaVersion, 'fr', fetchInterval);
+      const apiItems: ApiItem[] = [
+        {
+          title: {
+            en: 'speaking English',
+            fr: 'Le Title',
+          },
+          description: {
+            en: 'not French',
+            fr: 'Le Description',
+          },
+          languages: ['en', 'fr'],
+          link_text: {
+            en: 'click here',
+            fr: 'Le Link Text',
+          },
+          link_url: {
+            en: 'xyzxyzxyz',
+            fr: 'le_url',
+          },
+          badge: {
+            en: 'firefighter',
+            fr: 'le_badge',
+          },
+          publish_on: new Date('2014-10-31T04:23:47Z'),
+          expire_on: new Date('2049-10-31T04:23:47Z'),
+          hash: 'frfrfrfr1231123123hash',
+        }, // fallback: no
+        {
+          title: {
+            en: 'speaking English',
+            es: 'habla Espanol',
+          },
+          description: {
+            en: 'not French',
+            es: 'no Espanol',
+          },
+          languages: ['en', 'es'],
+          link_text: {
+            en: 'click here',
+            es: 'aqui',
+          },
+          link_url: {
+            en: 'xyzxyzxyz',
+            es: 'abcabc',
+          },
+          badge: {
+            en: 'firefighter',
+            es: 'bombero',
+          },
+          publish_on: new Date('2014-10-31T04:23:47Z'),
+          expire_on: new Date('2049-10-31T04:23:47Z'),
+          hash: 'enenenen1231123123hash',
+        }, // fallback: yes
+      ];
+      expect(driver.modelItems(apiItems)).toMatchObject({
+        error: null,
+        feedItems: [
+          {
+            badge: 'le_badge',
+            description: 'Le Description',
+            hash: 'frfrfrfr12',
+            linkText: 'Le Link Text',
+            linkUrl: 'le_url',
+            title: 'Le Title',
+          },
+          {
+            badge: 'firefighter',
+            description: 'not French',
+            hash: 'enenenen12',
+            linkText: 'click here',
+            linkUrl: 'xyzxyzxyz',
+            title: 'speaking English',
+          },
+        ],
+        hasNew: true,
+        kibanaVersion: 'test_version',
+      });
+    });
+
+    it('Models multiple items into an API FetchResult', () => {
       const driver = getDriver();
       const apiItems: ApiItem[] = [
         {
@@ -382,7 +464,7 @@ describe('getApi', () => {
         urlRoot: 'http://fakenews.co',
         pathTemplate: '/kibana-test/v{VERSION}.json',
       },
-      defaultLanguage: 'vn',
+      defaultLanguage: 'en',
       mainInterval: 86400000,
       fetchInterval: 86400000,
     },
