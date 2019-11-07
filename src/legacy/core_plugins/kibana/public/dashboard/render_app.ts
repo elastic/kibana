@@ -20,7 +20,6 @@
 import { EuiConfirmModal } from '@elastic/eui';
 import angular, { IModule } from 'angular';
 import { IPrivate } from 'ui/private';
-import { State } from 'ui/state_management/state';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 // @ts-ignore
 import { GlobalStateProvider } from 'ui/state_management/global_state';
