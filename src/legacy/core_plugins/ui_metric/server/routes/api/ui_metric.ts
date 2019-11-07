@@ -33,12 +33,14 @@ export async function storeReport(server: any, report: Report) {
     ...userAgents.map(async ([key, metric]) => {
       const { userAgent } = metric;
       const savedObjectId = `${key}:${userAgent}`;
-      return internalRepository.incrementCounter('ui-metric', savedObjectId, 'count');
+      return await internalRepository.update('ui-metric', savedObjectId, {
+        count: 1,
+      });
     }),
     ...uiStatsMetrics.map(async ([key, metric]) => {
       const { appName, eventName } = metric;
       const savedObjectId = `${appName}:${eventName}`;
-      return internalRepository.incrementCounter('ui-metric', savedObjectId, 'count');
+      return await internalRepository.update('ui-metric', savedObjectId, 'count');
     }),
   ]);
 }
