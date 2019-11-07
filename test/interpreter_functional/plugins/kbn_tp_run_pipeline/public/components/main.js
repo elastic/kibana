@@ -55,6 +55,7 @@ class Main extends React.Component {
 
     window.renderPipelineResponse = async (context = {}) => {
       return new Promise(resolve => {
+        props.visualizationLoader.destroy(this.chartDiv);
         if (context.type !== 'render') {
           this.setState({ expression: 'Expression did not return render type!\n\n' + JSON.stringify(context) });
           return resolve();
