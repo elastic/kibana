@@ -57,32 +57,12 @@ export class KibanaFramework {
   }
 
   public registerGraphQLEndpoint(routePath: string, gqlSchema: GraphQLSchema) {
-    const body = schema.object({
-      operationName: schema.string(),
-      query: schema.string(),
-      // NP_TODO: we short circuit validation here, need to understand the best way forward
-      // whether it's using io-ts and skipping ALL config-schema validation or figuring out
-      // why the nested maybe stuff inside variables didn't work well here
-      variables: schema.object(
-        {
-          // sourceId: schema.string(),
-          // countBefore: schema.maybe(schema.number()),
-          // countAfter: schema.maybe(schema.number()),
-          // filterQuery: schema.maybe(schema.string()),
-          // timeKey: schema.maybe(
-          //   schema.object({
-          //     time: schema.maybe(schema.number()),
-          //     tiebreaker: schema.maybe(schema.number()),
-          //   })
-          // ),
-        },
-        { allowUnknowns: true }
-      ),
-    });
+    // These endpoints are validated by GraphQL at runtime and with GraphQL generated types
+    const body = schema.object({}, { allowUnknowns: true });
     type Body = TypeOf<typeof body>;
 
     const routeOptions = {
-      path: `/api/infra${routePath}`, // NP_TODO: figure out how to not hard-code this path prefix
+      path: `/api/infra${routePath}`,
       validate: {
         body,
       },

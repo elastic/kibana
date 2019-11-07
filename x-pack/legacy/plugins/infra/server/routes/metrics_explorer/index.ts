@@ -14,13 +14,12 @@ import { MetricsExplorerRequestBody } from './types';
 
 // NP_TODO: need to replace all of this with real types or io-ts or something?
 const escapeHatch = schema.object({}, { allowUnknowns: true });
-type EscapeHatch = typeof escapeHatch;
 
 export const initMetricExplorerRoute = (libs: InfraBackendLibs) => {
   const { framework } = libs;
   const { callWithRequest } = framework;
 
-  framework.router.post<EscapeHatch, EscapeHatch, EscapeHatch>(
+  framework.router.post(
     {
       path: '/api/infra/metrics_explorer',
       validate: {

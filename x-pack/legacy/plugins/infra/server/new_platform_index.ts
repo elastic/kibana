@@ -9,7 +9,6 @@ import { InfraServerPlugin } from './new_platform_plugin';
 import { config, InfraConfig } from '../../../../plugins/infra/server';
 import { InfraServerPluginDeps } from './lib/adapters/framework';
 
-// NP_TODO: kibana NP needs "config" to be exported from here, I think?
 export { config, InfraConfig, InfraServerPluginDeps };
 
 export function plugin(context: PluginInitializerContext) {
