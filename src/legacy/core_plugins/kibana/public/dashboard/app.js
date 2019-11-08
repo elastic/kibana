@@ -34,7 +34,7 @@ import { DashboardListing, EMPTY_FILTER } from './listing/dashboard_listing';
 import { addHelpMenuToAppChrome } from './help_menu/help_menu_util';
 import { start as data } from '../../../data/public/legacy';
 import { registerTimefilterWithGlobalStateFactory } from '../../../../ui/public/timefilter/setup_router';
-import { syncOnMount, syncOnUnmount } from './global_state_sync';
+import { syncOnMount } from './global_state_sync';
 
 export function initDashboardApp(app, deps) {
   initDashboardAppDirective(app, deps);
@@ -50,14 +50,8 @@ export function initDashboardApp(app, deps) {
     addHelpMenuToAppChrome(deps.chrome, deps.core.docLinks);
   }
 
-  app.run(($rootScope, globalState) => {
-    $rootScope.$on('$destroy', () => {
-      syncOnUnmount(globalState, deps.sessionStorage);
-    });
-  });
-
   app.run(globalState => {
-    syncOnMount(globalState, deps.dataStart, deps.npDataStart, deps.sessionStorage);
+    syncOnMount(globalState, deps.dataStart, deps.npDataStart);
   });
 
   app.run((globalState, $rootScope) => {
