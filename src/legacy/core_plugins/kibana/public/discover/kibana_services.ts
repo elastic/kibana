@@ -40,6 +40,7 @@ export function getAngularModule() {
 }
 
 interface ServiceDeps {
+  core: any;
   addBasePath: any;
   capabilities: any;
   chrome: any;
@@ -62,6 +63,7 @@ interface ServiceDeps {
 
 let services: ServiceDeps = {
   // new plattform
+  core: npStart.core,
   addBasePath: npStart.core.http.basePath.prepend,
   capabilities: npStart.core.application.capabilities,
   chrome: npStart.core.chrome,
@@ -119,6 +121,7 @@ export { tabifyAggResponse } from 'ui/agg_response/tabify';
 // @ts-ignore
 export { vislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
 export { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
+export { ensureDefaultIndexPattern } from 'ui/legacy_compat';
 
 // EXPORT types
 export { VisProvider } from 'ui/vis';

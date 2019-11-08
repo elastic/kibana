@@ -58,9 +58,11 @@ import {
   VisProvider,
   SavedObjectSaveModal,
   getAngularModule,
+  ensureDefaultIndexPattern,
 } from '../kibana_services';
 
 const {
+  core,
   chrome,
   docTitle,
   shareContextMenuExtensions,
@@ -112,48 +114,49 @@ app.config($routeProvider => {
     template: indexTemplate,
     reloadOnSearch: false,
     resolve: {
-      ip: function (Promise) {
+      savedObjects: function (redirectWhenMissing, $route, kbnUrl, Promise, $rootScope) {
         const indexPatterns = data.indexPatterns.indexPatterns;
-        return indexPatterns.getCache().then((indexPatternList) => {
-          /**
-           *  In making the indexPattern modifiable it was placed in appState. Unfortunately,
-           *  the load order of AppState conflicts with the load order of many other things
-           *  so in order to get the name of the index we should use, and to switch to the
-           *  default if necessary, we parse the appState with a temporary State object and
-           *  then destroy it immediatly after we're done
-           *
-           *  @type {State}
-           */
-          const state = new State('_a', {});
-
-          const id = getIndexPatternId(state.index, indexPatternList, uiSettings.get('defaultIndex'));
-          state.destroy();
+        const savedSearchId = $route.current.params.id;
+        return ensureDefaultIndexPattern(core, data, $rootScope, kbnUrl).then(() => {
           return Promise.props({
-            list: indexPatternList,
-            loaded: indexPatterns.get(id),
-            stateVal: state.index,
-            stateValFound: !!state.index && id === state.index,
+            ip: indexPatterns.getCache().then((indexPatternList) => {
+              /**
+               *  In making the indexPattern modifiable it was placed in appState. Unfortunately,
+               *  the load order of AppState conflicts with the load order of many other things
+               *  so in order to get the name of the index we should use, and to switch to the
+               *  default if necessary, we parse the appState with a temporary State object and
+               *  then destroy it immediatly after we're done
+               *
+               *  @type {State}
+               */
+              const state = new State('_a', {});
+
+              const id = getIndexPatternId(state.index, indexPatternList, uiSettings.get('defaultIndex'));
+              state.destroy();
+              return Promise.props({
+                list: indexPatternList,
+                loaded: indexPatterns.get(id),
+                stateVal: state.index,
+                stateValFound: !!state.index && id === state.index,
+              });
+            }),
+            savedSearch: getServices().getSavedSearchById(savedSearchId, kbnUrl)
+              .then((savedSearch) => {
+                if (savedSearchId) {
+                  chrome.recentlyAccessed.add(
+                    savedSearch.getFullPath(),
+                    savedSearch.title,
+                    savedSearchId);
+                }
+                return savedSearch;
+              })
+              .catch(redirectWhenMissing({
+                'search': '/discover',
+                'index-pattern': '/management/kibana/objects/savedSearches/' + $route.current.params.id
+              }))
           });
         });
       },
-      savedSearch: function (redirectWhenMissing, $route, kbnUrl, Promise) {
-        const savedSearchId = $route.current.params.id;
-        const entry = getServices().getSavedSearchById(savedSearchId, kbnUrl)
-          .then((savedSearch) => {
-            if (savedSearchId) {
-              chrome.recentlyAccessed.add(
-                savedSearch.getFullPath(),
-                savedSearch.title,
-                savedSearchId);
-            }
-            return savedSearch;
-          })
-          .catch(redirectWhenMissing({
-            'search': '/discover',
-            'index-pattern': '/management/kibana/objects/savedSearches/' + $route.current.params.id
-          }));
-        return Promise.props({ entry  });
-      }
     }
   });
 });
@@ -216,7 +219,7 @@ function discoverController(
   };
 
   // the saved savedSearch
-  const savedSearch = $route.current.locals.savedSearch.entry;
+  const savedSearch = $route.current.locals.savedObjects.savedSearch;
 
   let abortController;
   $scope.$on('$destroy', () => {
@@ -532,7 +535,7 @@ function discoverController(
     sampleSize: config.get('discover:sampleSize'),
     timefield: isDefaultTypeIndexPattern($scope.indexPattern) && $scope.indexPattern.timeFieldName,
     savedSearch: savedSearch,
-    indexPatternList: $route.current.locals.ip.list,
+    indexPatternList: $route.current.locals.savedObjects.ip.list,
   };
 
   const shouldSearchOnPageLoad = () => {
@@ -1046,7 +1049,7 @@ function discoverController(
       loaded: loadedIndexPattern,
       stateVal,
       stateValFound,
-    } = $route.current.locals.ip;
+    } = $route.current.locals.savedObjects.ip;
 
     const ownIndexPattern = $scope.searchSource.getOwnField('index');
 
@@ -1094,12 +1097,12 @@ function discoverController(
   // Block the UI from loading if the user has loaded a rollup index pattern but it isn't
   // supported.
   $scope.isUnsupportedIndexPattern = (
-    !isDefaultTypeIndexPattern($route.current.locals.ip.loaded)
-    && !hasSearchStategyForIndexPattern($route.current.locals.ip.loaded)
+    !isDefaultTypeIndexPattern($route.current.locals.savedObjects.ip.loaded)
+    && !hasSearchStategyForIndexPattern($route.current.locals.savedObjects.ip.loaded)
   );
 
   if ($scope.isUnsupportedIndexPattern) {
-    $scope.unsupportedIndexPatternType = $route.current.locals.ip.loaded.type;
+    $scope.unsupportedIndexPatternType = $route.current.locals.savedObjects.ip.loaded.type;
     return;
   }
 
