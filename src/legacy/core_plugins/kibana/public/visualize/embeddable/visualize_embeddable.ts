@@ -34,7 +34,11 @@ import { IExpressionLoaderParams } from '../../../../expressions/public/np_ready
 import { start as expressions } from '../../../../expressions/public/legacy';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import { Query } from '../../../../data/public';
-import { TimeRange, onlyDisabledFiltersChanged, esFilters } from '../../../../../../plugins/data/public';
+import {
+  TimeRange,
+  onlyDisabledFiltersChanged,
+  esFilters,
+} from '../../../../../../plugins/data/public';
 import {
   EmbeddableInput,
   EmbeddableOutput,
@@ -289,7 +293,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
 
     // this is a hack to make editor still work, will be removed once we clean up editor
     this.vis.hasInspector = () => {
-      if (['markdown', 'input_control_vis', 'metrics'].includes(this.vis.type.name)) {
+      if (['markdown', 'input_control_vis', 'metrics', 'vega'].includes(this.vis.type.name)) {
         return false;
       }
       return this.getInspectorAdapters();
@@ -331,7 +335,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       this.handler.events$.subscribe(async event => {
         if (this.actions[event.name]) {
           event.data.aggConfigs = getTableAggs(this.vis);
-          const filters: Filter[] = this.actions[event.name](event.data) || [];
+          const filters: esFilters.Filter[] = this.actions[event.name](event.data) || [];
           const mappedFilters = filters.map(mapFilter);
           const timeFieldName = this.vis.indexPattern.timeFieldName;
 

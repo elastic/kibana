@@ -24,7 +24,6 @@ import { uiModules } from 'ui/modules';
 import chrome from 'ui/chrome';
 
 import { RequestAdapter, DataAdapter } from 'ui/inspector/adapters';
-import { runPipeline } from 'ui/visualize/loader/pipeline_helpers';
 import { registries } from 'plugins/interpreter/registries';
 
 // This is required so some default styles and required scripts/Angular modules are loaded,
@@ -55,6 +54,17 @@ app.config($locationProvider => {
 app.config(stateManagementConfigProvider =>
   stateManagementConfigProvider.disable()
 );
+
+import { fromExpression } from '@kbn/interpreter/common';
+import { getInterpreter } from '../../../../../src/legacy/core_plugins/interpreter/public/interpreter';
+
+export const runPipeline = async (expression, context, handlers) => {
+  const ast = fromExpression(expression);
+  const { interpreter } = await getInterpreter();
+  const pipelineResponse = await interpreter.interpretAst(ast, context, handlers);
+  return pipelineResponse;
+};
+
 
 function RootController($scope, $element) {
   const domNode = $element[0];

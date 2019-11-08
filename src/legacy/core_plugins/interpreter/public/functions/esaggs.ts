@@ -25,8 +25,7 @@ import chrome from 'ui/chrome';
 
 // need to get rid of angular from these
 // @ts-ignore
-import { Query, TimeRange } from 'src/plugins/data/public';
-import { Filter } from '@kbn/es-query';
+import { Query, TimeRange, esFilters } from 'src/plugins/data/public';
 import { SearchSource } from '../../../../ui/public/courier/search_source';
 // @ts-ignore
 import {
@@ -47,7 +46,7 @@ export interface RequestHandlerParams {
   aggs: AggConfigs;
   timeRange?: TimeRange;
   query?: Query;
-  filters?: Filter[];
+  filters?: esFilters.Filter[];
   forceFetch: boolean;
   queryFilter: QueryFilter;
   uiState?: PersistedState;
