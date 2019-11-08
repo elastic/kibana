@@ -44,7 +44,7 @@ export class Reporter {
   private readonly maxRetries = 3;
 
   constructor(config: ReporterConfig) {
-    const { http, storage, debug, checkInterval = 10000, storageKey = 'analytics' } = config;
+    const { http, storage, debug, checkInterval = 90000, storageKey = 'analytics' } = config;
     this.http = http;
     this.checkInterval = checkInterval;
     this.interval = null;

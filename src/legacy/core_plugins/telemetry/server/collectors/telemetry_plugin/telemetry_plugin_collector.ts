@@ -18,7 +18,8 @@
  */
 
 import { TELEMETRY_STATS_TYPE } from '../../../common/constants';
-import { getTelemetrySavedObject } from '../../telemetry_repository';
+import { getTelemetrySavedObject, TelemetrySavedObject } from '../../telemetry_repository';
+import { getTelemetryOptIn, getTelemetryUsageFetcher } from '../../telemetry_config';
 export interface TelemetryUsageStats {
   optIn?: boolean | null;
   usageFetcher?: 'browser' | 'server';
@@ -27,17 +28,28 @@ export interface TelemetryUsageStats {
 
 export function createCollectorFetch(server: any) {
   return async function fetchUsageStats(): Promise<TelemetryUsageStats> {
-    const { getSavedObjectsRepository } = server.savedObjects;
-    const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
-    const internalRepository = getSavedObjectsRepository(callWithInternalUser);
-    const telemetrySavedObject = await getTelemetrySavedObject(internalRepository);
+    const config = server.config();
+    const defaultTelemetryUsageFetcher = config.get('telemetry.usageFetcher');
+    const currentKibanaVersion = config.get('pkg.version');
 
-    if (!telemetrySavedObject) return {};
+    let telemetrySavedObject: TelemetrySavedObject = {};
+
+    try {
+      const { getSavedObjectsRepository } = server.savedObjects;
+      const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
+      const internalRepository = getSavedObjectsRepository(callWithInternalUser);
+      telemetrySavedObject = await getTelemetrySavedObject(internalRepository);
+    } catch (err) {
+      // no-op
+    }
 
     return {
-      optIn: telemetrySavedObject.enabled,
-      lastReported: telemetrySavedObject.lastReported,
-      usageFetcher: telemetrySavedObject.usageFetcher,
+      optIn: getTelemetryOptIn({ currentKibanaVersion, telemetrySavedObject }),
+      lastReported: telemetrySavedObject ? telemetrySavedObject.lastReported : undefined,
+      usageFetcher: getTelemetryUsageFetcher({
+        telemetrySavedObject,
+        defaultTelemetryUsageFetcher,
+      }),
     };
   };
 }

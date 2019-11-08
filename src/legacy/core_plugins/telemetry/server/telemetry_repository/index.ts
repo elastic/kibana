@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export { getTelemetrySavedObject } from './get_telemetry_saved_object';
+export { getTelemetrySavedObject, TelemetrySavedObject } from './get_telemetry_saved_object';
 export { updateTelemetrySavedObject } from './update_telemetry_saved_object';
 
 export interface TelemetrySavedObjectAttributes {

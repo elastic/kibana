@@ -63,10 +63,10 @@ export const getStatsCollectionConfig = (
 export class TelemetryCollectionManager {
   private getterMethod?: StatsGetter;
   private collectionTitle?: string;
-  private getterMethodPriority = 0;
+  private getterMethodPriority = -1;
 
   public setStatsGetter = (statsGetter: StatsGetter, title: string, priority = 0) => {
-    if (priority >= this.getterMethodPriority) {
+    if (priority > this.getterMethodPriority) {
       this.getterMethod = statsGetter;
       this.collectionTitle = title;
       this.getterMethodPriority = priority;
