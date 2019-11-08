@@ -36,10 +36,11 @@ export interface PluginCore {
 export class Plugin {
   constructor(initializerContext: PluginInitializerContext) {}
   // called when plugin is setting up during Kibana's startup sequence
-  public setup(core: CoreSetup) {}
+  public setup(core: CoreSetup) {
+    setClient(core.http.fetch);
+  }
   // called after all plugins are set up
   public start(core: PluginCore) {
-    setClient(core.http.fetch);
     ReactDOM.render(<App core={core} />, core.renderTo);
   }
 }
