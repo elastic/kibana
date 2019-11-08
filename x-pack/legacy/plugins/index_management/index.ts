@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { Legacy } from 'kibana';
 import { createRouter } from '../../server/lib/create_router';
 import { registerLicenseChecker } from '../../server/lib/register_license_checker';
-import { PLUGIN } from './common/constants';
+import { PLUGIN, API_BASE_PATH } from './common/constants';
 import { LegacySetup } from './server/plugin';
 import { plugin as initServerPlugin } from './server';
 
@@ -33,7 +33,7 @@ export function indexManagement(kibana: any) {
       const pluginsSetup = {};
 
       const __LEGACY: LegacySetup = {
-        router: createRouter(server, PLUGIN.ID, '/api/index_management/'),
+        router: createRouter(server, PLUGIN.ID, `${API_BASE_PATH}/`),
         plugins: {
           license: {
             registerLicenseChecker: registerLicenseChecker.bind(

@@ -5,6 +5,8 @@
  */
 
 import React from 'react';
+import axios from 'axios';
+import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 import { MemoryRouter } from 'react-router-dom';
 import { AppWithoutRouter } from '../../public/app/app';
 import { Provider } from 'react-redux';
@@ -12,14 +14,21 @@ import { loadIndicesSuccess } from '../../public/app/store/actions';
 import { breadcrumbService } from '../../public/app/services/breadcrumbs';
 import { uiMetricService } from '../../public/app/services/ui_metric';
 import { notificationService } from '../../public/app/services/notification';
+import { httpService } from '../../public/app/services/http';
 import { createUiStatsReporter } from '../../../../../../src/legacy/core_plugins/ui_metric/public';
 import { indexManagementStore } from '../../public/app/store';
-import { BASE_PATH } from '../../common/constants';
+import { BASE_PATH, API_BASE_PATH } from '../../common/constants';
 import { mountWithIntl } from '../../../../../test_utils/enzyme_helpers';
 import sinon from 'sinon';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
+/* eslint-disable @kbn/eslint/no-restricted-paths */
+import { notificationServiceMock } from '../../../../../../src/core/public/notifications/notifications_service.mock';
+import { chromeServiceMock } from '../../../../../../src/core/public/chrome/chrome_service.mock';
+
 jest.mock('ui/new_platform');
+
+const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
 
 let server = null;
 
@@ -104,18 +113,12 @@ const namesText = rendered => {
 describe('index table', () => {
   beforeEach(() => {
     // Mock initialization of services
-    breadcrumbService.init(
-      {
-        setBreadcrumbs() {},
-      },
-      {}
-    );
+    // @ts-ignore
+    httpService.init(mockHttpClient);
+    breadcrumbService.init(chromeServiceMock.createStartContract(), '');
     uiMetricService.init(createUiStatsReporter);
-    notificationService.init({
-      toasts: {
-        add() {}
-      }
-    });
+    notificationService.init(notificationServiceMock.createStartContract());
+
 
     store = indexManagementStore();
     component = (
@@ -127,7 +130,7 @@ describe('index table', () => {
     );
     store.dispatch(loadIndicesSuccess({ indices }));
     server = sinon.fakeServer.create();
-    server.respondWith('/api/index_management/indices', [
+    server.respondWith(`${API_BASE_PATH}/indices`, [
       200,
       { 'Content-Type': 'application/json' },
       JSON.stringify(indices)
@@ -137,7 +140,7 @@ describe('index table', () => {
       { 'Content-Type': 'application/json' },
       JSON.stringify({ acknowledged: true })
     ]);
-    server.respondWith('/api/index_management/indices/reload', [
+    server.respondWith(`${API_BASE_PATH}/indices/reload`, [
       200,
       { 'Content-Type': 'application/json' },
       JSON.stringify(indices)
@@ -350,7 +353,8 @@ describe('index table', () => {
         status: index.name === 'testy0' ? 'close' : index.status
       };
     });
-    server.respondWith('/api/index_management/indices/reload', [
+
+    server.respondWith(`${API_BASE_PATH}/indices/reload`, [
       200,
       { 'Content-Type': 'application/json' },
       JSON.stringify(modifiedIndices)
@@ -364,7 +368,7 @@ describe('index table', () => {
         status: index.name === 'testy1' ? 'open' : index.status
       };
     });
-    server.respondWith('/api/index_management/indices/reload', [
+    server.respondWith(`${API_BASE_PATH}/indices/reload`, [
       200,
       { 'Content-Type': 'application/json' },
       JSON.stringify(modifiedIndices)

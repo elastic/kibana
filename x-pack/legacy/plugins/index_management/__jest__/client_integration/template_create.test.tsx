@@ -310,15 +310,16 @@ describe.skip('<TemplateCreate />', () => {
 
         const latestRequest = server.requests[server.requests.length - 1];
 
-        const expected = {
+        const expected = JSON.stringify({
+          isManaged: false,
           name: TEMPLATE_NAME,
           indexPatterns: DEFAULT_INDEX_PATTERNS,
           settings: SETTINGS,
           mappings: MAPPINGS,
           aliases: ALIASES,
-          isManaged: false,
-        };
-        expect(JSON.parse(latestRequest.requestBody)).toEqual(expected);
+        });
+
+        expect(JSON.parse(latestRequest.requestBody).body).toEqual(expected);
       });
 
       it('should surface the API errors from the put HTTP request', async () => {

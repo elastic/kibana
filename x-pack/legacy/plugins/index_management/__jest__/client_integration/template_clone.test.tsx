@@ -113,16 +113,13 @@ describe.skip('<TemplateClone />', () => {
 
       const latestRequest = server.requests[server.requests.length - 1];
 
-      const body = JSON.parse(latestRequest.requestBody);
-      const expected = {
+      const expected = JSON.stringify({
         ...templateToClone,
         name: `${templateToClone.name}-copy`,
         indexPatterns: DEFAULT_INDEX_PATTERNS,
-        aliases: {},
-        mappings: {},
-        settings: {},
-      };
-      expect(body).toEqual(expected);
+      });
+
+      expect(JSON.parse(latestRequest.requestBody).body).toEqual(expected);
     });
   });
 });

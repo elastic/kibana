@@ -41,7 +41,7 @@ import { Template } from '../../../common/types';
 
 export async function loadIndices() {
   const response = await httpService.httpClient.get(`${API_BASE_PATH}/indices`);
-  return response;
+  return response.data ? response.data : response;
 }
 
 export async function reloadIndices(indexNames: string[]) {
@@ -49,7 +49,7 @@ export async function reloadIndices(indexNames: string[]) {
     indexNames,
   });
   const response = await httpService.httpClient.post(`${API_BASE_PATH}/indices/reload`, { body });
-  return response;
+  return response.data ? response.data : response;
 }
 
 export async function closeIndices(indices: string[]) {
@@ -243,11 +243,4 @@ export async function updateTemplate(template: Template) {
   uiMetricService.trackMetric('count', UIM_TEMPLATE_UPDATE);
 
   return result;
-}
-
-export async function loadTemplateToClone(name: Template['name']) {
-  return await sendRequest({
-    path: `${API_BASE_PATH}/templates/${encodeURIComponent(name)}`,
-    method: 'get',
-  });
 }

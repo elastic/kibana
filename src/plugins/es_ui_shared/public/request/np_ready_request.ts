@@ -53,11 +53,14 @@ export const sendRequest = async (
   try {
     const response = await httpClient[method](path, { body });
 
-    return { data: response, error: null };
+    return {
+      data: response.data ? response.data : response,
+      error: null,
+    };
   } catch (e) {
     return {
       data: null,
-      error: e.response ? e.response : e,
+      error: e.response && e.response.data ? e.response.data : e.body,
     };
   }
 };

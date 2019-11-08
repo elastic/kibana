@@ -118,17 +118,18 @@ describe.skip('<TemplateEdit />', () => {
 
       const { version, order } = templateToEdit;
 
-      const expected = {
+      const expected = JSON.stringify({
         name: TEMPLATE_NAME,
         version,
         order,
         indexPatterns: UPDATED_INDEX_PATTERN,
+        isManaged: false,
         settings: SETTINGS,
         mappings: MAPPINGS,
         aliases: ALIASES,
-        isManaged: false,
-      };
-      expect(JSON.parse(latestRequest.requestBody)).toEqual(expected);
+      });
+
+      expect(JSON.parse(latestRequest.requestBody).body).toEqual(expected);
     });
   });
 });
