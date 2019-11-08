@@ -27,7 +27,7 @@ import { Utils } from '../data_model/utils';
 import { VISUALIZATION_COLORS } from '@elastic/eui';
 import { i18n }  from '@kbn/i18n';
 import { TooltipHandler } from './vega_tooltip';
-import { buildQueryFilter } from '@kbn/es-query';
+import { esFilters } from '../../../../../plugins/data/public';
 
 import { getEnableExternalUrls } from '../helpers/vega_config_provider';
 
@@ -263,7 +263,7 @@ export class VegaBaseView {
    */
   async addFilterHandler(query, index) {
     const indexId = await this._findIndex(index);
-    const filter = buildQueryFilter(query, indexId);
+    const filter = esFilters.buildQueryFilter(query, indexId);
     this._queryfilter.addFilters(filter);
   }
 
@@ -274,7 +274,7 @@ export class VegaBaseView {
   async removeFilterHandler(query, index) {
     const $injector = await chrome.dangerouslyGetActiveInjector();
     const indexId = await this._findIndex(index);
-    const filter = buildQueryFilter(query, indexId);
+    const filter = esFilters.buildQueryFilter(query, indexId);
 
     // This is a workaround for the https://github.com/elastic/kibana/issues/18863
     // Once fixed, replace with a direct call (no await is needed because its not async)

@@ -7,6 +7,7 @@
 import {
   FlowTarget,
   NetworkDnsSortField,
+  NetworkHttpSortField,
   NetworkTopTablesSortField,
   TlsSortField,
   UsersSortField,
@@ -19,6 +20,7 @@ export enum NetworkType {
 
 export enum NetworkTableType {
   dns = 'dns',
+  http = 'http',
   topCountriesDestination = 'topCountriesDestination',
   topCountriesSource = 'topCountriesSource',
   topNFlowDestination = 'topNFlowDestination',
@@ -40,7 +42,10 @@ export type TopCountriesTableType =
 
 export type TopTlsTableType = IpDetailsTableType.tls | NetworkTableType.tls;
 
+export type HttpTableType = IpDetailsTableType.http | NetworkTableType.http;
+
 export enum IpDetailsTableType {
+  http = 'http',
   tls = 'tls',
   topCountriesDestination = 'topCountriesDestination',
   topCountriesSource = 'topCountriesSource',
@@ -74,15 +79,25 @@ export interface TlsQuery extends BasicQueryPaginated {
   sort: TlsSortField;
 }
 
+export interface HttpQuery extends BasicQueryPaginated {
+  sort: NetworkHttpSortField;
+}
+
 export interface TableUpdates {
   activePage?: number;
   limit?: number;
   isPtrIncluded?: boolean;
-  sort?: NetworkDnsSortField | NetworkTopTablesSortField | TlsSortField | UsersSortField;
+  sort?:
+    | NetworkDnsSortField
+    | NetworkHttpSortField
+    | NetworkTopTablesSortField
+    | TlsSortField
+    | UsersSortField;
 }
 
 export interface NetworkQueries {
   [NetworkTableType.dns]: DnsQuery;
+  [NetworkTableType.http]: HttpQuery;
   [NetworkTableType.topCountriesDestination]: TopCountriesQuery;
   [NetworkTableType.topCountriesSource]: TopCountriesQuery;
   [NetworkTableType.topNFlowDestination]: TopNFlowQuery;
@@ -99,6 +114,7 @@ export interface UsersQuery extends BasicQueryPaginated {
 }
 
 export interface IpOverviewQueries {
+  [IpDetailsTableType.http]: HttpQuery;
   [IpDetailsTableType.tls]: TlsQuery;
   [IpDetailsTableType.topCountriesDestination]: TopCountriesQuery;
   [IpDetailsTableType.topCountriesSource]: TopCountriesQuery;
