@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Filter } from '@kbn/es-query';
 import { decode, encode, RisonValue } from 'rison-node';
 import { Location } from 'history';
 import { QueryString } from 'ui/utils/query_string';
-import { Query } from 'src/plugins/data/common';
+import { Query, esFilters } from 'src/plugins/data/public';
 
 import { inputsSelectors, State, timelineSelectors } from '../../store';
 import { SiemPageName } from '../../pages/home/types';
@@ -154,7 +153,7 @@ export const makeMapStateToProps = () => {
 
     let searchAttr: {
       [CONSTANTS.appQuery]?: Query;
-      [CONSTANTS.filters]?: Filter[];
+      [CONSTANTS.filters]?: esFilters.Filter[];
       [CONSTANTS.savedQuery]?: string;
     } = {
       [CONSTANTS.appQuery]: getGlobalQuerySelector(state),

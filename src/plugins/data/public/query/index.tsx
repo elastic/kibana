@@ -18,5 +18,4 @@
  */
 
 export * from './query_service';
-
 export * from './filter_manager';
