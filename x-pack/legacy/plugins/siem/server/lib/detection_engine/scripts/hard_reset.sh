@@ -14,3 +14,4 @@ set -e
 ./delete_all_alert_tasks.sh
 ./delete_signal_index.sh
 ./put_signal_index.sh
+./delete_all_api_keys.sh
