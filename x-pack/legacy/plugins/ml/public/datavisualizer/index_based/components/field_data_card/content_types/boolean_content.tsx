@@ -28,9 +28,6 @@ function getPercentLabel(valueCount: number, totalCount: number): string {
 
 export const BooleanContent: FC<FieldDataCardProps> = ({ config }) => {
   const { stats } = config;
-  if (stats === undefined) {
-    return null;
-  }
 
   const { count, sampleCount, trueCount, falseCount } = stats;
   const docsPercent = roundToDecimalPlace((count / sampleCount) * 100);

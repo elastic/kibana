@@ -18,9 +18,6 @@ import { TopValues } from '../top_values';
 
 export const KeywordContent: FC<FieldDataCardProps> = ({ config }) => {
   const { stats, fieldFormat } = config;
-  if (stats === undefined) {
-    return null;
-  }
 
   const { count, sampleCount, cardinality } = stats;
   const docsPercent = roundToDecimalPlace((count / sampleCount) * 100);

@@ -195,8 +195,8 @@ export class WarningsFlyoutStep extends React.Component<
                   values={{
                     true: <EuiCode>true</EuiCode>,
                     false: <EuiCode>false</EuiCode>,
-                    yes: <EuiCode>"yes"</EuiCode>,
-                    on: <EuiCode>"on"</EuiCode>,
+                    yes: <EuiCode>&quot;yes&quot;</EuiCode>,
+                    on: <EuiCode>&quot;on&quot;</EuiCode>,
                     one: <EuiCode>1</EuiCode>,
                   }}
                 />
