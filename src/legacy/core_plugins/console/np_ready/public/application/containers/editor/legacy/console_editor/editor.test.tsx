@@ -23,7 +23,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import * as sinon from 'sinon';
 
 import { EditorContextProvider } from '../../context';
-import { AppContextProvider } from '../../../../context';
+import { AppContextProvider } from '../../../../contexts';
 import { Editor } from './editor';
 
 jest.mock('../../../../components/editor_example.tsx', () => {});
@@ -46,7 +46,7 @@ jest.mock('../../../../../../../public/quarantined/src/input.ts', () => {
   };
 });
 
-import * as sendRequestModule from './send_current_request_to_es';
+import * as sendRequestModule from '../../../../hooks/use_send_request_to_es/send_current_request_to_es';
 import * as consoleMenuActions from '../console_menu_actions';
 
 describe('Legacy (Ace) Console Editor Component Smoke Test', () => {

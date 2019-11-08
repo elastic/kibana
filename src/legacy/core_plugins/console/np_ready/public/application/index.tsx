@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { NotificationsSetup } from '../../../../../../core/public';
-import { AppContextProvider } from './context';
+import { AppContextProvider } from './contexts';
 import { EditorContextProvider } from './containers/editor/context';
 import { Main } from './containers';
 import { createStorage, createHistory, createSettings, Settings } from '../services';

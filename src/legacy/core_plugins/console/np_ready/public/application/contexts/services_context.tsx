@@ -18,7 +18,7 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import { NotificationsSetup } from '../../../../../../../core/public';
+import { NotificationsSetup } from 'kibana/public';
 import { History, Storage, Settings } from '../../services';
 
 interface ContextValue {

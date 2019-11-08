@@ -18,11 +18,11 @@
  */
 
 // @ts-ignore
-import mappings from '../../../../../../../public/quarantined/src/mappings';
+import mappings from '../../../../../public/quarantined/src/mappings';
 // @ts-ignore
-import utils from '../../../../../../../public/quarantined/src/utils';
+import utils from '../../../../../public/quarantined/src/utils';
 // @ts-ignore
-import * as es from '../../../../../../../public/quarantined/src/es';
+import * as es from '../../../../../public/quarantined/src/es';
 
 export interface EsRequestArgs {
   callback: (esPath: any, esMethod: any, esData: any) => void;

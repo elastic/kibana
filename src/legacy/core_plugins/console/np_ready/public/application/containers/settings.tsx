@@ -22,7 +22,7 @@ import { AutocompleteOptions, DevToolsSettingsModal } from '../components';
 
 // @ts-ignore
 import mappings from '../../../../public/quarantined/src/mappings';
-import { useAppContext } from '../context';
+import { useAppContext } from '../contexts';
 import { DevToolsSettings } from '../../services';
 import { useEditorActionContext } from './editor/context';
 
@@ -90,7 +90,7 @@ export function Settings({ onClose }: Props) {
     // Let the rest of the application know settings have updated.
     dispatch({
       type: 'updateSettings',
-      value: newSettings,
+      payload: newSettings,
     });
     onClose();
   };

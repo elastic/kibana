@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 import $ from 'jquery';
 
 import { EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useAppContext } from '../../../../context';
+import { useAppContext } from '../../../../contexts';
 import { useUIAceKeyboardMode } from '../use_ui_ace_keyboard_mode';
 import { ConsoleMenu } from '../../../../components';
 
@@ -122,7 +122,7 @@ function _Editor({ previousStateLocation = 'stored' }: EditorProps) {
 
     dispatch({
       type: 'setInputEditor',
-      value: editorInstanceRef.current,
+      payload: editorInstanceRef.current,
     });
 
     setTextArea(editorRef.current!.querySelector('textarea'));

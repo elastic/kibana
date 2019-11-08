@@ -18,60 +18,58 @@
  */
 
 import { Reducer } from 'react';
+import { produce } from 'immer';
+import { identity } from 'fp-ts/lib/function';
 
-import { instance as registry } from './editor_registry';
-import { ContextValue } from './editor_context';
-
-import { restoreRequestFromHistory } from '../legacy/console_history/restore_request_from_history';
-import {
-  sendCurrentRequestToES,
-  EsRequestArgs,
-} from '../legacy/console_editor/send_current_request_to_es';
+// import { restoreRequestFromHistory } from '../legacy/console_history/restore_request_from_history';
+// import {
+//   sendCurrentRequestToES,
+//   EsRequestArgs,
+// } from '../legacy/console_editor/send_current_request_to_es';
 import { DevToolsSettings } from '../../../../services';
 
+export interface Store {
+  ready: boolean;
+  settings: DevToolsSettings;
+}
+
+export const initialValue: Store = produce<Store>(
+  {
+    ready: false,
+    settings: null as any,
+  },
+  identity
+);
+
 export type Action =
-  | { type: 'setInputEditor'; value: any }
-  | { type: 'setOutputEditor'; value: any }
-  | { type: 'restoreRequest'; value: any }
-  | { type: 'updateSettings'; value: DevToolsSettings }
-  | { type: 'sendRequestToEs'; value: EsRequestArgs }
-  | { type: 'updateRequestHistory'; value: any };
+  | { type: 'setInputEditor'; payload: any }
+  | { type: 'updateSettings'; payload: DevToolsSettings };
 
-export const reducer: Reducer<ContextValue, Action> = (state, action) => {
-  const nextState = { ...state };
-
-  if (action.type === 'setInputEditor') {
-    registry.setInputEditor(action.value);
-    if (registry.getOutputEditor()) {
-      nextState.editorsReady = true;
+export const reducer: Reducer<Store | undefined, Action> = (state = initialValue, action) =>
+  produce<Store>(state, draft => {
+    if (action.type === 'setInputEditor') {
+      if (action.payload) {
+        draft.ready = true;
+      }
+      return;
     }
-  }
 
-  if (action.type === 'setOutputEditor') {
-    registry.setOutputEditor(action.value);
-    if (registry.getInputEditor()) {
-      nextState.editorsReady = true;
+    if (action.type === 'updateSettings') {
+      draft.settings = action.payload;
+      return;
     }
-  }
 
-  if (action.type === 'restoreRequest') {
-    restoreRequestFromHistory(registry.getInputEditor(), action.value);
-  }
+    //
+    // if (action.type === 'sendRequestToEs') {
+    //   const { callback, isPolling, isUsingTripleQuotes } = action.value;
+    //   sendCurrentRequestToES({
+    //     input: registry.getInputEditor(),
+    //     output: registry.getOutputEditor(),
+    //     callback,
+    //     isUsingTripleQuotes,
+    //     isPolling,
+    //   });
+    // }
 
-  if (action.type === 'updateSettings') {
-    nextState.settings = action.value;
-  }
-
-  if (action.type === 'sendRequestToEs') {
-    const { callback, isPolling, isUsingTripleQuotes } = action.value;
-    sendCurrentRequestToES({
-      input: registry.getInputEditor(),
-      output: registry.getOutputEditor(),
-      callback,
-      isUsingTripleQuotes,
-      isPolling,
-    });
-  }
-
-  return nextState;
-};
+    return draft;
+  });

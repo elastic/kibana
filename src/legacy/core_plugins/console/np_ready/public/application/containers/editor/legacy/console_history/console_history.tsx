@@ -32,7 +32,7 @@ import {
   EuiButton,
 } from '@elastic/eui';
 
-import { useAppContext } from '../../../../context';
+import { useAppContext } from '../../../../contexts';
 import { HistoryViewer } from './history_viewer';
 import { useEditorActionContext, useEditorReadContext } from '../../context';
 

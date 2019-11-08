@@ -17,16 +17,12 @@
  * under the License.
  */
 
-import React, { createContext, Dispatch, useContext, useReducer } from 'react';
-import { Action, reducer } from './reducer';
+import React, { createContext, Dispatch, useReducer } from 'react';
+import { Action, reducer, Store, initialValue } from './reducer';
 import { DevToolsSettings } from '../../../../services';
+import { createUseContext } from '../../../contexts/create_use_context';
 
-export interface ContextValue {
-  editorsReady: boolean;
-  settings: DevToolsSettings;
-}
-
-const EditorReadContext = createContext<ContextValue>(null as any);
+const EditorReadContext = createContext<Store>(null as any);
 const EditorActionContext = createContext<Dispatch<Action>>(null as any);
 
 export interface EditorContextArgs {
@@ -34,35 +30,17 @@ export interface EditorContextArgs {
   settings: DevToolsSettings;
 }
 
-const initialValue: ContextValue = {
-  editorsReady: false,
-  settings: null as any,
-};
-
 export function EditorContextProvider({ children, settings }: EditorContextArgs) {
   const [state, dispatch] = useReducer(reducer, initialValue, value => ({
     ...value,
     settings,
   }));
   return (
-    <EditorReadContext.Provider value={state}>
+    <EditorReadContext.Provider value={state as any}>
       <EditorActionContext.Provider value={dispatch}>{children}</EditorActionContext.Provider>
     </EditorReadContext.Provider>
   );
 }
 
-export const useEditorActionContext = () => {
-  const context = useContext(EditorActionContext);
-  if (context === undefined) {
-    throw new Error('useEditorActionContext must be used inside EditorActionContext');
-  }
-  return context;
-};
-
-export const useEditorReadContext = () => {
-  const context = useContext(EditorReadContext);
-  if (context === undefined) {
-    throw new Error('useEditorReadContext must be used inside EditorContextProvider');
-  }
-  return context;
-};
+export const useEditorReadContext = createUseContext(EditorReadContext, 'EditorReadContext');
+export const useEditorActionContext = createUseContext(EditorActionContext, 'EditorActionContext');

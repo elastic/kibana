@@ -17,4 +17,14 @@
  * under the License.
  */
 
-export { useAppContext, AppContextProvider } from './app_context';
+import { Context, useContext } from 'react';
+
+export const createUseContext = <T>(Ctx: Context<T>, name: string) => {
+  return () => {
+    const ctx = useContext(Ctx);
+    if (!ctx) {
+      throw new Error(`${name} should be used inside of ${name}Provider!`);
+    }
+    return ctx;
+  };
+};

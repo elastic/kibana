@@ -17,6 +17,4 @@
  * under the License.
  */
 
-export { ConsoleHistory, autoIndent, getDocumentation } from './legacy';
-export { Editor } from './editor';
-export { useEditorActionContext, useEditorReadContext, EditorContextProvider } from './context';
+export { useSendRequestToES } from './use_send_request_to_es';

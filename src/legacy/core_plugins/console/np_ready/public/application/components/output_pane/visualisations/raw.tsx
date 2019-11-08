@@ -17,6 +17,21 @@
  * under the License.
  */
 
-export { ConsoleHistory, autoIndent, getDocumentation } from './legacy';
-export { Editor } from './editor';
-export { useEditorActionContext, useEditorReadContext, EditorContextProvider } from './context';
+import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiCodeBlock } from '@elastic/eui';
+import { OutputPaneVisualisationProps, OutputPaneVisualisationDescriptor } from '../types';
+
+export const title = i18n.translate('console.visRawOutputPane.title', { defaultMessage: 'Raw' });
+
+export const isCompatible = (_: unknown) => true;
+
+export const Raw = ({ data }: OutputPaneVisualisationProps<any>) => {
+  return <EuiCodeBlock>{data}</EuiCodeBlock>;
+};
+
+export const descriptor: OutputPaneVisualisationDescriptor = {
+  Component: Raw,
+  isCompatible,
+  title,
+};

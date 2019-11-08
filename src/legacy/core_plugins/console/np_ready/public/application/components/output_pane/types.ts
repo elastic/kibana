@@ -17,6 +17,23 @@
  * under the License.
  */
 
-export { ConsoleHistory, autoIndent, getDocumentation } from './legacy';
-export { Editor } from './editor';
-export { useEditorActionContext, useEditorReadContext, EditorContextProvider } from './context';
+import { FunctionComponent } from 'react';
+
+export type BaseResponseTypes =
+  | 'application/json'
+  | 'text/csv'
+  | 'text/tab-separated-values'
+  | 'text/plain'
+  | 'application/yaml';
+
+export interface OutputPaneVisualisationProps<T> {
+  data: T;
+}
+
+export interface OutputPaneVisualisationDescriptor<T = unknown> {
+  // i18n friendly name
+  title: string;
+  // A way to test if the visualisation is compatible with the data
+  isCompatible: (result: { data: unknown; type: BaseResponseTypes }) => boolean;
+  Component: FunctionComponent<OutputPaneVisualisationProps<T>>;
+}

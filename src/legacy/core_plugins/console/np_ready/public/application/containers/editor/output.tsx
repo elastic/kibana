@@ -17,6 +17,21 @@
  * under the License.
  */
 
-export { ConsoleHistory, autoIndent, getDocumentation } from './legacy';
-export { Editor } from './editor';
-export { useEditorActionContext, useEditorReadContext, EditorContextProvider } from './context';
+import React from 'react';
+import { OutputPane, BaseResponseTypes } from '../../components';
+
+import * as rawVis from '../../components/output_pane/visualisations/raw';
+import { useRequestReadContext } from '../../contexts/request_context';
+
+export const Output = () => {
+  const { lastResult } = useRequestReadContext();
+
+  let data: unknown | null = null;
+  let type: BaseResponseTypes | null = null;
+  if (lastResult) {
+    data = lastResult.data;
+    type = lastResult.type;
+  }
+
+  return <OutputPane visualisationDescriptors={[rawVis.descriptor]} data={data} type={type} />;
+};
