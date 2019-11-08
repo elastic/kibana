@@ -47,6 +47,10 @@ export type SignalAlertParamsRest = Omit<SignalAlertParams, 'maxSignals' | 'save
   max_signals: SignalAlertParams['maxSignals'];
 };
 
+export type UpdateSignalAlertParamsRest = Partial<Omit<SignalAlertParamsRest, 'id'>> & {
+  id: SignalAlertParams['id'];
+};
+
 export interface FindParamsRest {
   per_page: number;
   page: number;
@@ -60,6 +64,10 @@ export interface Clients {
 }
 
 export type SignalParams = SignalAlertParams & Clients;
+
+export type UpdateSignalParams = Partial<Omit<SignalAlertParams, 'id'>> & {
+  id: SignalAlertParams['id'];
+} & Clients;
 
 export type DeleteSignalParams = Clients & { id: string };
 
@@ -93,6 +101,10 @@ export type SignalAlertType = Alert & {
 
 export interface SignalsRequest extends Hapi.Request {
   payload: SignalAlertParamsRest;
+}
+
+export interface UpdateSignalsRequest extends Hapi.Request {
+  payload: UpdateSignalAlertParamsRest;
 }
 
 export type SignalExecutorOptions = Omit<AlertExecutorOptions, 'params'> & {
