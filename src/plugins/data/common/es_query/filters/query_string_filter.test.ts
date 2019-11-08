@@ -17,14 +17,31 @@
  * under the License.
  */
 
-// Creates a filter where the given field exists
-export function buildExistsFilter(field, indexPattern) {
-  return {
-    meta: {
-      index: indexPattern.id
-    },
-    exists: {
-      field: field.name
-    }
-  };
-}
+import { buildQueryFilter } from './query_string_filter';
+import { IndexPattern } from './types';
+
+describe('Phrase filter builder', () => {
+  let indexPattern: IndexPattern;
+
+  beforeEach(() => {
+    indexPattern = {
+      id: 'id',
+    };
+  });
+
+  it('should be a function', () => {
+    expect(typeof buildQueryFilter).toBe('function');
+  });
+
+  it('should return a query filter when passed a standard field', () => {
+    expect(buildQueryFilter({ foo: 'bar' }, indexPattern.id, '')).toEqual({
+      meta: {
+        alias: '',
+        index: 'id',
+      },
+      query: {
+        foo: 'bar',
+      },
+    });
+  });
+});

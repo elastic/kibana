@@ -16,17 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import * as esFilters from './filters';
 
-import { Filter, FilterMeta } from './meta_filter';
-
-export type PhrasesFilterMeta = FilterMeta & {
-  params: string[]; // The unformatted values
-  field?: string;
-};
-
-export type PhrasesFilter = Filter & {
-  meta: PhrasesFilterMeta;
-};
-
-export const isPhrasesFilter = (filter: any): filter is PhrasesFilter =>
-  filter && filter.meta.type === 'phrases';
+export { esFilters };
