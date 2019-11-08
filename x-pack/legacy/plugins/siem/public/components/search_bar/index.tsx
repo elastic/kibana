@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Filter } from '@kbn/es-query';
 import { getOr, isEqual, set } from 'lodash/fp';
 import React, { memo, useEffect, useCallback, useMemo } from 'react';
 import { connect } from 'react-redux';
@@ -37,6 +36,7 @@ import {
   toStrSelector,
 } from './selectors';
 import { timelineActions, hostsActions, networkActions } from '../../store/actions';
+import { esFilters } from '../../../../../../../src/plugins/data/public';
 
 const {
   ui: { SearchBar },
@@ -67,7 +67,7 @@ interface SiemSearchBarDispatch {
     id: InputsModelId;
     savedQuery: SavedQuery | undefined;
   }) => void;
-  setSearchBarFilter: ({ id, filters }: { id: InputsModelId; filters: Filter[] }) => void;
+  setSearchBarFilter: ({ id, filters }: { id: InputsModelId; filters: esFilters.Filter[] }) => void;
 }
 
 interface SiemSearchBarProps {
@@ -313,7 +313,7 @@ SearchBarComponent.displayName = 'SiemSearchBar';
 
 interface UpdateReduxSearchBar extends OnTimeChangeProps {
   id: InputsModelId;
-  filters?: Filter[];
+  filters?: esFilters.Filter[];
   query?: Query;
   savedQuery?: SavedQuery;
   resetSavedQuery?: boolean;
@@ -397,7 +397,7 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   updateSearch: dispatchUpdateSearch(dispatch),
   setSavedQuery: ({ id, savedQuery }: { id: InputsModelId; savedQuery: SavedQuery | undefined }) =>
     dispatch(inputsActions.setSavedQuery({ id, savedQuery })),
-  setSearchBarFilter: ({ id, filters }: { id: InputsModelId; filters: Filter[] }) =>
+  setSearchBarFilter: ({ id, filters }: { id: InputsModelId; filters: esFilters.Filter[] }) =>
     dispatch(inputsActions.setSearchBarFilter({ id, filters })),
 });
 

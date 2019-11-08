@@ -53,9 +53,9 @@ import {
   MAP_SAVED_OBJECT_TYPE,
   MAP_APP_PATH
 } from '../../common/constants';
-import { FilterStateStore } from '@kbn/es-query';
 import { start as data } from '../../../../../../src/legacy/core_plugins/data/public/legacy';
 import { npStart } from 'ui/new_platform';
+import { esFilters } from '../../../../../../src/plugins/data/public';
 
 const { savedQueryService } = data.search.services;
 
@@ -247,7 +247,7 @@ app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppSta
 
   function addFilters(newFilters) {
     newFilters.forEach(filter => {
-      filter.$state = FilterStateStore.APP_STATE;
+      filter.$state = esFilters.FilterStateStore.APP_STATE;
     });
     $scope.updateFiltersAndDispatch([...$scope.filters, ...newFilters]);
   }
