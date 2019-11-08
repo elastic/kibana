@@ -37,7 +37,7 @@ import { ChromeHelpExtension } from '../../chrome_service';
 import {
   ELASTIC_SUPPORT_LINK,
   GITHUB_CREATE_ISSUE_LINK,
-  KIBANA_GET_HELP_LINK,
+  KIBANA_ASK_ELASTIC_LINK,
   KIBANA_FEEDBACK_LINK,
 } from '../../constants';
 
@@ -100,15 +100,15 @@ class HeaderHelpMenuUI extends Component<Props, State> {
         <EuiSpacer size="xs" />
 
         <EuiButtonEmpty
-          href={this.props.isCloudEnabled ? ELASTIC_SUPPORT_LINK : KIBANA_GET_HELP_LINK}
+          href={this.props.isCloudEnabled ? ELASTIC_SUPPORT_LINK : KIBANA_ASK_ELASTIC_LINK}
           target="_blank"
           size="xs"
           iconType="help"
           flush="left"
         >
           <FormattedMessage
-            id="core.ui.chrome.headerGlobalNav.helpMenuAskUsTitle"
-            defaultMessage="Ask us"
+            id="core.ui.chrome.headerGlobalNav.helpMenuAskElasticTitle"
+            defaultMessage="Ask Elastic"
           />
         </EuiButtonEmpty>
 

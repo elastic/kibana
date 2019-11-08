@@ -18,6 +18,6 @@
  */
 
 export const ELASTIC_SUPPORT_LINK = 'https://support.elastic.co/';
-export const KIBANA_GET_HELP_LINK = 'https://www.elastic.co/kibana/gethelp';
 export const KIBANA_FEEDBACK_LINK = 'https://www.elastic.co/kibana/feedback';
+export const KIBANA_ASK_ELASTIC_LINK = 'https://www.elastic.co/kibana/ask-elastic';
 export const GITHUB_CREATE_ISSUE_LINK = 'https://github.com/elastic/kibana/issues/new/choose';
