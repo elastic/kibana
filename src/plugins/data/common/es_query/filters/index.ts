@@ -17,30 +17,16 @@
  * under the License.
  */
 
-import { buildQueryFilter } from '../query';
-import { cloneDeep } from 'lodash';
-import expect from '@kbn/expect';
-import indexPattern from '../../__fixtures__/index_pattern_response.json';
-import filterSkeleton from '../../__fixtures__/filter_skeleton';
+export * from './custom_filter';
+export * from './exists_filter';
+export * from './geo_bounding_box_filter';
+export * from './geo_polygon_filter';
+export * from './match_all_filter';
+export * from './meta_filter';
+export * from './missing_filter';
+export * from './phrase_filter';
+export * from './phrases_filter';
+export * from './query_string_filter';
+export * from './range_filter';
 
-let expected;
-
-describe('Filter Manager', function () {
-  describe('Phrase filter builder', function () {
-    beforeEach(() => {
-      expected = cloneDeep(filterSkeleton);
-    });
-
-    it('should be a function', function () {
-      expect(buildQueryFilter).to.be.a(Function);
-    });
-
-    it('should return a query filter when passed a standard field', function () {
-      expected.query = {
-        foo: 'bar'
-      };
-      expect(buildQueryFilter({ foo: 'bar' }, indexPattern.id)).to.eql(expected);
-    });
-
-  });
-});
+export * from './types';
