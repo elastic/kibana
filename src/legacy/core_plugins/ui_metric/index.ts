@@ -46,7 +46,6 @@ export default function(kibana: any) {
       mappings: require('./mappings.json'),
       hacks: ['plugins/ui_metric/hacks/ui_metric_init'],
     },
-
     init(server: Legacy.Server) {
       registerUiMetricRoute(server);
     },
