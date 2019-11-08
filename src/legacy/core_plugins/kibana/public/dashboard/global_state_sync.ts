@@ -20,27 +20,22 @@
 import { State } from 'ui/state_management/state';
 import { DataStart } from '../../../data/public';
 import { DataPublicPluginStart as NpDataStart } from '../../../../../plugins/data/public';
-import { Storage } from '../../../../../plugins/kibana_utils/public';
-
-const GLOBAL_STATE_SHARE_KEY = 'oss-kibana-cross-app-state';
 
 /**
  * Helper function to sync the global state with the various state providers
  * when a local angular application mounts. There are three different ways
  * global state can be passed into the application:
  * * parameter in the URL hash - e.g. shared link
- * * state shared in the session storage - e.g. reload-navigation from another app.
  * * in-memory state in the data plugin exports (timefilter and filterManager) - e.g. default values
  *
  * This function looks up the three sources (earlier in the list means it takes precedence),
  * puts it into the globalState object and syncs it with the url.
+ *
+ * Currently the legacy chrome takes care of restoring the global state when navigating from
+ * one app to another - to migrate away from that it will become necessary to also write the current
+ * state to local storage
  */
-export function syncOnMount(
-  globalState: State,
-  data: DataStart,
-  npData: NpDataStart,
-  sessionStorage: Storage
-) {
+export function syncOnMount(globalState: State, data: DataStart, npData: NpDataStart) {
   // pull in global state information from the URL
   globalState.fetch();
   // remember whether there were info in the URL
@@ -60,18 +55,6 @@ export function syncOnMount(
   if (hasGlobalURLState) {
     // set flag the global state is set from the URL
     globalState.$inheritedGlobalState = true;
-  } else {
-    Object.assign(globalState, sessionStorage.get(GLOBAL_STATE_SHARE_KEY) || {});
   }
   globalState.save();
-}
-
-/**
- * Helper function to sync the global state when a local angular application unmounts.
- * It will put the current global state into the session storage to be able to re-apply it
- * if the application mounts again even if another application won't retain the state in
- * the url.
- */
-export function syncOnUnmount(globalState: State, sessionStorage: Storage) {
-  sessionStorage.set(GLOBAL_STATE_SHARE_KEY, globalState.toObject());
 }

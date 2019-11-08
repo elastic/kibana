@@ -115,7 +115,6 @@ export class DashboardPlugin implements Plugin {
           embeddables,
           dashboardCapabilities: contextCore.application.capabilities.dashboard,
           localStorage: new Storage(localStorage),
-          sessionStorage: new Storage(sessionStorage),
         };
         const { renderApp } = await import('./render_app');
         return renderApp(params.element, params.appBasePath, deps);

@@ -84,7 +84,6 @@ export interface RenderDeps {
   savedQueryService: SavedQueryService;
   embeddables: ReturnType<EmbeddablePublicPlugin['start']>;
   localStorage: Storage;
-  sessionStorage: Storage;
 }
 
 let angularModuleInstance: IModule | null = null;
