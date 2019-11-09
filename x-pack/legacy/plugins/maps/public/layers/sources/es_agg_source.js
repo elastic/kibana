@@ -98,9 +98,13 @@ export class AbstractESAggSource extends AbstractESSource {
 
 
   async getNumberFields() {
-    return this.getMetricFields().map(esAggMetricField => {
-      return { label: esAggMetricField.getPropertyLabel(), name: esAggMetricField.getName() };
+    const numberFieldPromises = this.getMetricFields().map(async (esAggMetricField) => {
+      return {
+        label: await esAggMetricField.getLabel(),
+        name: esAggMetricField.getName()
+      };
     });
+    return Promise.all(numberFieldPromises);
   }
 
   async filterAndFormatPropertiesToHtmlForMetricFields(properties) {
@@ -113,8 +117,8 @@ export class AbstractESAggSource extends AbstractESSource {
     }
 
     const metricFields = this.getMetricFields();
-    const tooltipProperties = [];
-    metricFields.forEach((metricField) => {
+    const tooltipPropertiesPromises = [];
+    metricFields.forEach(async (metricField) => {
       let value;
       for (const key in properties) {
         if (properties.hasOwnProperty(key) && metricField.getName() === key) {
@@ -125,15 +129,14 @@ export class AbstractESAggSource extends AbstractESSource {
 
       const tooltipProperty  = new ESAggMetricTooltipProperty(
         metricField.getName(),
-        metricField.getPropertyLabel(),
+        await metricField.getLabel(),
         value,
         indexPattern,
         metricField
       );
-      tooltipProperties.push(tooltipProperty);
+      tooltipPropertiesPromises.push(tooltipProperty);
     });
 
-    return tooltipProperties;
-
+    return Promise.all(tooltipPropertiesPromises);
   }
 }
