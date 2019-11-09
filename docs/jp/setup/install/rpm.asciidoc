@@ -17,7 +17,7 @@ rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch
 -------------------------
 
 [[rpm-repo]]
-==== RPTリポジトリからのインストール
+==== RPMリポジトリからのインストール
 
 ifeval::["{release-state}"=="unreleased"]
 
