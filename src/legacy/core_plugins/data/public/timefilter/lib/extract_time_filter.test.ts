@@ -17,15 +17,23 @@
  * under the License.
  */
 
-import { Filter, buildRangeFilter, buildQueryFilter, buildPhraseFilter } from '@kbn/es-query';
 import { extractTimeFilter } from './extract_time_filter';
+import { esFilters } from '../../../../../../plugins/data/public';
 
 describe('filter manager utilities', () => {
   describe('extractTimeFilter()', () => {
     test('should detect timeFilter', async () => {
-      const filters: Filter[] = [
-        buildQueryFilter({ _type: { match: { query: 'apache', type: 'phrase' } } }, 'logstash-*'),
-        buildRangeFilter({ name: 'time' }, { gt: 1388559600000, lt: 1388646000000 }, 'logstash-*'),
+      const filters: esFilters.Filter[] = [
+        esFilters.buildQueryFilter(
+          { _type: { match: { query: 'apache', type: 'phrase' } } },
+          'logstash-*',
+          ''
+        ),
+        esFilters.buildRangeFilter(
+          { name: 'time' },
+          { gt: 1388559600000, lt: 1388646000000 },
+          'logstash-*'
+        ),
       ];
       const result = await extractTimeFilter('time', filters);
 
@@ -34,9 +42,13 @@ describe('filter manager utilities', () => {
     });
 
     test("should not return timeFilter when name doesn't match", async () => {
-      const filters: Filter[] = [
-        buildQueryFilter({ _type: { match: { query: 'apache', type: 'phrase' } } }, 'logstash-*'),
-        buildRangeFilter({ name: '@timestamp' }, { from: 1, to: 2 }, 'logstash-*'),
+      const filters: esFilters.Filter[] = [
+        esFilters.buildQueryFilter(
+          { _type: { match: { query: 'apache', type: 'phrase' } } },
+          'logstash-*',
+          ''
+        ),
+        esFilters.buildRangeFilter({ name: '@timestamp' }, { from: 1, to: 2 }, 'logstash-*', ''),
       ];
       const result = await extractTimeFilter('time', filters);
 
@@ -45,9 +57,13 @@ describe('filter manager utilities', () => {
     });
 
     test('should not return a non range filter, even when names match', async () => {
-      const filters: Filter[] = [
-        buildQueryFilter({ _type: { match: { query: 'apache', type: 'phrase' } } }, 'logstash-*'),
-        buildPhraseFilter({ name: 'time' }, 'banana', 'logstash-*'),
+      const filters: esFilters.Filter[] = [
+        esFilters.buildQueryFilter(
+          { _type: { match: { query: 'apache', type: 'phrase' } } },
+          'logstash-*',
+          ''
+        ),
+        esFilters.buildPhraseFilter({ name: 'time' }, 'banana', 'logstash-*'),
       ];
       const result = await extractTimeFilter('time', filters);
 
