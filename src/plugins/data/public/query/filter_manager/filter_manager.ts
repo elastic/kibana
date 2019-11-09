@@ -87,7 +87,6 @@ export class FilterManager {
           ? -1
           : 1;
       }
-
     });
 
     const filtersUpdated = !_.isEqual(this.filters, newFilters);

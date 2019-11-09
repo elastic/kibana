@@ -184,7 +184,6 @@ describe('filter_manager', () => {
       expect(updateListener.callCount).toBe(1);
     });
 
-
     test('app state should accept array and preserve order', async () => {
       const f1 = getFilter(esFilters.FilterStateStore.APP_STATE, false, false, 'age', 34);
       const f2 = getFilter(esFilters.FilterStateStore.APP_STATE, false, false, 'gender', 'female');
