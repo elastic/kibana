@@ -29,7 +29,7 @@ const rightSource = {
 const mockSource = {
   getInspectorAdapters() {
   },
-  createField(name) {
+  createField({ fieldName: name }) {
     return {
       getName() {
         return name;
