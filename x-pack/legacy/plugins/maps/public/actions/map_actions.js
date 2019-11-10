@@ -745,9 +745,6 @@ export function clearMissingStyleProperties(layerId) {
       return;
     }
 
-    // const dateFields = await targetLayer.getDateFields();
-    // const numberFields = await targetLayer.getNumberFields();
-    // const ordinalFields = [...dateFields, ...numberFields];
     const ordinalFields = await targetLayer.getOrdinalFields();
     const { hasChanges, nextStyleDescriptor } = style.getDescriptorWithMissingStylePropsRemoved(ordinalFields);
     if (hasChanges) {

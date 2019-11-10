@@ -188,11 +188,10 @@ export class VectorLayer extends AbstractLayer {
 
     const getFieldLabel = async fieldName => {
       const ordinalFields = await this.getOrdinalFields();
-      const field = ordinalFields.find(({ name }) => {
-        return name === fieldName;
+      const field = ordinalFields.find(field => {
+        return field.getName() === fieldName;
       });
-
-      return field ? field.label : fieldName;
+      return field ? await field.getLabel() : fieldName;
     };
 
     const getFieldFormatter = async field => {
@@ -245,24 +244,11 @@ export class VectorLayer extends AbstractLayer {
     return this._source.getDisplayName();
   }
 
-
-  async getDateFieldsOO() {
+  async getDateFields() {
     const timeFields = await this._source.getDateFields();
-    return timeFields.map(async (field) => {
+    return timeFields.map((field) => {
       return new FieldWithOrigin({ field: field, origin: FIELD_ORIGIN.SOURCE });
     });
-  }
-
-  async getDateFields() {
-    const timeFields = await this.getDateFieldsOO();
-    const fieldPromises = timeFields.map(async (field) => {
-      return {
-        label: await field.getLabel(),
-        name: field.getName(),
-        origin: field.getOrigin()
-      };
-    });
-    return Promise.all(fieldPromises);
   }
 
   async getNumberFields() {
@@ -270,6 +256,7 @@ export class VectorLayer extends AbstractLayer {
     const numberFieldOptions = numberFields.map(field => {
       return new FieldWithOrigin({
         field: field,
+        origin: FIELD_ORIGIN.SOURCE
       });
     });
     const joinFields = [];
@@ -283,16 +270,7 @@ export class VectorLayer extends AbstractLayer {
       joinFields.push(...fields);
     });
 
-
-    const promises = ([...numberFieldOptions, ...joinFields]).map(async (field) => {
-      return {
-        label: await field.getLabel(),
-        name: field.getName(),
-        origin: field.getOrigin()
-      };
-    });
-
-    return Promise.all(promises);
+    return [...numberFieldOptions, ...joinFields];
   }
 
   async getOrdinalFields() {
@@ -821,20 +799,24 @@ export class VectorLayer extends AbstractLayer {
 
     if (field.origin === FIELD_ORIGIN.SOURCE) {
       return this._source;
-    }
-
-    const join = this.getValidJoins().find(join => {
-      const matchingField = join.getJoinFields().find(joinField => {
-        return joinField.getName() === field.name;
+    } else if (field.origin === FIELD_ORIGIN.JOIN) {
+      const join = this.getValidJoins().find(join => {
+        const matchingField = join.getJoinFields().find(joinField => {
+          return joinField.getName() === field.name;
+        });
+        return !!matchingField;
       });
-      return !!matchingField;
-    });
 
-    if (!join) {
+      if (!join) {
+        return null;
+      }
+
+      return join.getRightJoinSource();
+    } else {
       return null;
     }
 
-    return join.getRightJoinSource();
+
   }
 
 }

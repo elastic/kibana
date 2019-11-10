@@ -127,8 +127,8 @@ export class VectorStyle extends AbstractStyle {
       }
 
       const fieldName = field.getName();
-      const matchingOrdinalField = nextOrdinalFields.find(oridinalField => {
-        return fieldName === oridinalField.name;
+      const matchingOrdinalField = nextOrdinalFields.find(ordinalField => {
+        return fieldName === ordinalField.getName();
       });
 
       if (matchingOrdinalField) {

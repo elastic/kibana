@@ -5,6 +5,8 @@
  */
 
 
+import { FIELD_ORIGIN } from '../../../common/constants';
+
 export class AbstractField {
 
   //todo consider removing
@@ -40,6 +42,9 @@ export class AbstractField {
     throw new Error('must implement Field#createTooltipProperty');
   }
 
+  getOrigin() {
+    return FIELD_ORIGIN.UNDEFINED;
+  }
 }
 
 

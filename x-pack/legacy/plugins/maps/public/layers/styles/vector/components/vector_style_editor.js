@@ -56,16 +56,34 @@ export class VectorStyleEditor extends Component {
     if (!this._isMounted) {
       return;
     }
-    if (!_.isEqual(dateFields, this.state.dateFields)) {
-      this.setState({ dateFields });
+    const dateFieldPromises = dateFields.map(async (field) => {
+      return {
+        label: await field.getLabel(),
+        name: field.getName(),
+        origin: field.getOrigin()
+      };
+    });
+    const dateFieldsArray = await Promise.all(dateFieldPromises);
+
+    if (!_.isEqual(dateFieldsArray, this.state.dateFields)) {
+      this.setState({ dateFields: dateFieldsArray });
     }
 
     const numberFields = await this.props.layer.getNumberFields();
     if (!this._isMounted) {
       return;
     }
-    if (!_.isEqual(numberFields, this.state.numberFields)) {
-      this.setState({ numberFields });
+    const numberFieldPromises = numberFields.map(async (field) => {
+      return {
+        label: await field.getLabel(),
+        name: field.getName(),
+        origin: field.getOrigin()
+      };
+    });
+
+    const numberFieldsArray = await Promise.all(numberFieldPromises);
+    if (!_.isEqual(numberFieldsArray, this.state.numberFields)) {
+      this.setState({ numberFields: numberFieldsArray });
     }
 
   }
