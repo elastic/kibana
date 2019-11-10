@@ -24,7 +24,7 @@ export class ESAggMetricField extends AbstractField {
   }
 
   async getLabel() {
-    return this.getPropertyLabel();
+    return this._label ? this._label : this._source.formatMetricLabel(this.getAggType(), this.getESDocFieldName());
   }
 
   getAggType() {
@@ -33,10 +33,6 @@ export class ESAggMetricField extends AbstractField {
 
   isValid() {
     return (this.getAggType() === COUNT_AGG_TYPE)  ? true : !!this._esDocField;
-  }
-
-  getPropertyLabel() {
-    return this._label ? this._label : this._source.formatMetricLabel(this.getAggType(), this.getESDocFieldName());
   }
 
   getESDocFieldName() {

@@ -46,7 +46,6 @@ describe('getMetricFields', () => {
 
     expect(metrics[0].getAggType()).toEqual('count');
     expect(metrics[0].getName()).toEqual('__kbnjoin__count_groupby_myIndex.myTermField');
-    expect(metrics[0].getPropertyLabel()).toEqual('count of myIndex:myTermField');
     expect(await metrics[0].getLabel()).toEqual('count of myIndex:myTermField');
 
   });
@@ -63,12 +62,10 @@ describe('getMetricFields', () => {
     expect(metrics[0].getAggType()).toEqual('sum');
     expect(metrics[0].getESDocFieldName()).toEqual(sumFieldName);
     expect(metrics[0].getName()).toEqual('__kbnjoin__sum_of_myFieldGettingSummed_groupby_myIndex.myTermField');
-    expect(metrics[0].getPropertyLabel()).toEqual('my custom label');
     expect(await metrics[0].getLabel()).toEqual('my custom label');
 
     expect(metrics[1].getAggType()).toEqual('count');
     expect(metrics[1].getName()).toEqual('__kbnjoin__count_groupby_myIndex.myTermField');
-    expect(metrics[1].getPropertyLabel()).toEqual('count of myIndex:myTermField');
     expect(await metrics[1].getLabel()).toEqual('count of myIndex:myTermField');
 
   });

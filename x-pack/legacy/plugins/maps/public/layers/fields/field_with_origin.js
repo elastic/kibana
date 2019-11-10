@@ -34,13 +34,6 @@ export class FieldWithOrigin extends AbstractField {
     return await this._field.getLabel();
   }
 
-  getPropertyLabel() {
-    if (!this._field.getPropertyLabel) {
-      throw new Error('getPropertyLabel not implemented');
-    }
-    return this._field.getPropertyLabel();
-  }
-
   getOrigin() {
     return this._origin;
   }
