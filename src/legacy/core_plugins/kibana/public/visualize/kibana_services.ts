@@ -98,7 +98,6 @@ export { VisEditorTypesRegistryProvider } from 'ui/registry/vis_editor_types';
 // @ts-ignore
 export { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 export { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
-export { showShareContextMenu } from 'ui/share';
 export { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 export { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
 export { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';

@@ -46,10 +46,10 @@ export class ShareActionsContextMenu {
     };
   }
 
-  private onClose() {
+  private onClose = () => {
     ReactDOM.unmountComponentAtNode(this.container);
     this.isOpen = false;
-  }
+  };
 
   private showShareContextMenu({
     anchorElement,
