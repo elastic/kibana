@@ -38,7 +38,7 @@ describe('ErrorGroupOverview -> List', () => {
     const storeState = {};
     const wrapper = mount(
       <MockUrlParamsProvider>
-        <ErrorGroupList items={[]} />
+        <ErrorGroupList items={[]} onUiStateChange={() => Promise.resolve()} />
       </MockUrlParamsProvider>,
       storeState
     );
@@ -49,7 +49,10 @@ describe('ErrorGroupOverview -> List', () => {
   it('should render with data', () => {
     const wrapper = mount(
       <MockUrlParamsProvider>
-        <ErrorGroupList items={props.items} />
+        <ErrorGroupList
+          items={props.items}
+          onUiStateChange={() => Promise.resolve()}
+        />
       </MockUrlParamsProvider>
     );
 

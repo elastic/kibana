@@ -12,6 +12,7 @@ import { HttpServiceBase, HttpFetchOptions } from 'kibana/public';
 export type FetchOptions = HttpFetchOptions & {
   pathname: string;
   forceCache?: boolean;
+  bypassCache?: boolean;
   method?: string;
 };
 
@@ -46,7 +47,8 @@ export async function callApi<T = void>(
   fetchOptions: FetchOptions
 ): Promise<T> {
   const cacheKey = getCacheKey(fetchOptions);
-  const cacheResponse = cache.get(cacheKey);
+  const cacheResponse = !fetchOptions.bypassCache ? cache.get(cacheKey) : null;
+
   if (cacheResponse) {
     return cacheResponse;
   }

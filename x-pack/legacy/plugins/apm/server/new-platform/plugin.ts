@@ -9,6 +9,7 @@ import { CoreSetup } from 'src/core/server';
 import { makeApmUsageCollector } from '../lib/apm_telemetry';
 import { createApmAgentConfigurationIndex } from '../lib/settings/agent_configuration/create_agent_config_index';
 import { createApmApi } from '../routes/create_apm_api';
+import { setupIndices } from '../lib/setup_indices';
 
 export interface LegacySetup {
   server: Server;
@@ -19,5 +20,6 @@ export class Plugin {
     createApmApi().init(core, __LEGACY);
     createApmAgentConfigurationIndex(core, __LEGACY);
     makeApmUsageCollector(core, __LEGACY);
+    setupIndices(core);
   }
 }

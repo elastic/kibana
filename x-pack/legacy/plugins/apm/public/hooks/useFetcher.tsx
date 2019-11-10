@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, useEffect, useState, useMemo } from 'react';
+import React, { useContext, useEffect, useState, useMemo, useRef } from 'react';
 import { idx } from '@kbn/elastic-idx';
 import { i18n } from '@kbn/i18n';
 import { IHttpFetchError } from 'src/core/public';
@@ -12,7 +12,7 @@ import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public'
 import { LoadingIndicatorContext } from '../context/LoadingIndicatorContext';
 import { useComponentId } from './useComponentId';
 import { useKibanaCore } from '../../../observability/public';
-import { APMClient } from '../services/rest/createCallApmApi';
+import { APMClient, APMClientOptions } from '../services/rest/createCallApmApi';
 import { useCallApmApi } from './useCallApmApi';
 
 export enum FETCH_STATUS {
@@ -42,12 +42,28 @@ export function useFetcher<TReturn>(
   options: {
     preservePreviousData?: boolean;
   } = {}
-): Result<InferResponseType<TReturn>> & { refetch: () => void } {
+): Result<InferResponseType<TReturn>> & { refetch: () => Promise<TReturn> } {
   const { notifications } = useKibanaCore();
   const { preservePreviousData = true } = options;
   const id = useComponentId();
 
   const callApmApi = useCallApmApi();
+
+  const tasks = useRef<Array<{ resolve: Function; reject: Function }>>([]);
+
+  const resolveRunningTasks = (data?: TReturn) => {
+    tasks.current.forEach(task => {
+      task.resolve(data);
+    });
+    tasks.current = [];
+  };
+
+  const rejectRunningTasks = (error: Error) => {
+    tasks.current.forEach(task => {
+      task.reject(error);
+    });
+    tasks.current = [];
+  };
 
   const { dispatchStatus } = useContext(LoadingIndicatorContext);
   const [result, setResult] = useState<Result<InferResponseType<TReturn>>>({
@@ -60,11 +76,18 @@ export function useFetcher<TReturn>(
     let didCancel = false;
 
     async function doFetch() {
-      const promise = fn(callApmApi);
+      const callApmApiProxy = (clientOptions: APMClientOptions) => {
+        const decoratedClientOptions =
+          // bypass the cache on refetches
+          counter > 0 ? { ...clientOptions, bypassCache: true } : clientOptions;
+        return callApmApi(decoratedClientOptions as never);
+      };
+      const promise = fn(callApmApiProxy);
       // if `fn` doesn't return a promise it is a signal that data fetching was not initiated.
       // This can happen if the data fetching is conditional (based on certain inputs).
       // In these cases it is not desirable to invoke the global loading spinner, or change the status to success
       if (!promise) {
+        resolveRunningTasks();
         return;
       }
 
@@ -85,6 +108,7 @@ export function useFetcher<TReturn>(
             status: FETCH_STATUS.SUCCESS,
             error: undefined
           } as Result<InferResponseType<TReturn>>);
+          resolveRunningTasks(data);
         }
       } catch (e) {
         const err = e as IHttpFetchError;
@@ -117,6 +141,7 @@ export function useFetcher<TReturn>(
             status: FETCH_STATUS.FAILURE,
             error: e
           });
+          rejectRunningTasks(e);
         }
       }
     }
@@ -142,7 +167,10 @@ export function useFetcher<TReturn>(
       ...result,
       refetch: () => {
         // this will invalidate the deps to `useEffect` and will result in a new request
-        setCounter(count => count + 1);
+        return new Promise((resolve, reject) => {
+          setCounter(count => count + 1);
+          tasks.current.push({ resolve, reject });
+        });
       }
     };
   }, [result]);

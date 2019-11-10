@@ -8,8 +8,9 @@
 import {
   SearchParams,
   IndexDocumentParams,
-  IndicesDeleteParams,
-  IndicesCreateParams
+  DeleteDocumentParams,
+  IndicesCreateParams,
+  DeleteDocumentByQueryParams
 } from 'elasticsearch';
 import { Legacy } from 'kibana';
 import { cloneDeep, has, isString, set, pick } from 'lodash';
@@ -147,6 +148,9 @@ export function getESClient(
     },
     delete: (params: IndicesDeleteParams) => {
       return callMethod('delete', params);
+    },
+    deleteByQuery: (params: DeleteDocumentByQueryParams) => {
+      return callMethod('deleteByQuery', params);
     },
     indicesCreate: (params: IndicesCreateParams) => {
       return callMethod('indices.create', params);

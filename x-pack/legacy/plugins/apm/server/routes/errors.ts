@@ -11,6 +11,15 @@ import { getErrorGroup } from '../lib/errors/get_error_group';
 import { getErrorGroups } from '../lib/errors/get_error_groups';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { uiFiltersRt, rangeRt } from './default_api_types';
+import { muteErrorGroup } from '../lib/errors/mute_error_group';
+import { unmuteErrorGroup } from '../lib/errors/unmute_error_group';
+import { resolveErrorGroup } from '../lib/errors/resolve_error_group';
+
+export const errorStatusRt = t.union([
+  t.literal('all'),
+  t.literal('active'),
+  t.literal('archived')
+]);
 
 export const errorsRoute = createRoute(core => ({
   path: '/api/apm/services/{serviceName}/errors',
@@ -20,6 +29,7 @@ export const errorsRoute = createRoute(core => ({
     }),
     query: t.intersection([
       t.partial({
+        errorStatus: errorStatusRt,
         sortField: t.string,
         sortDirection: t.union([t.literal('asc'), t.literal('desc')])
       }),
@@ -30,13 +40,14 @@ export const errorsRoute = createRoute(core => ({
   handler: async (req, { query, path }) => {
     const setup = await setupRequest(req);
     const { serviceName } = path;
-    const { sortField, sortDirection } = query;
+    const { sortField, sortDirection, errorStatus } = query;
 
     return getErrorGroups({
       serviceName,
       sortField,
       sortDirection,
-      setup
+      setup,
+      errorStatus
     });
   }
 }));
@@ -76,5 +87,53 @@ export const errorDistributionRoute = createRoute(() => ({
     const { serviceName } = path;
     const { groupId } = query;
     return getErrorDistribution({ serviceName, groupId, setup });
+  }
+}));
+
+export const errorGroupMuteRoute = createRoute(() => ({
+  path: '/api/apm/services/{serviceName}/errors/{groupId}/mute',
+  method: 'POST',
+  params: {
+    path: t.type({
+      serviceName: t.string,
+      groupId: t.string
+    })
+  },
+  handler: async (req, { path }) => {
+    const setup = await setupRequest(req);
+    const { serviceName, groupId } = path;
+    return muteErrorGroup({ groupId, serviceName, setup });
+  }
+}));
+
+export const errorGroupUnmuteRoute = createRoute(() => ({
+  path: '/api/apm/services/{serviceName}/errors/{groupId}/unmute',
+  method: 'POST',
+  params: {
+    path: t.type({
+      serviceName: t.string,
+      groupId: t.string
+    })
+  },
+  handler: async (req, { path }) => {
+    const setup = await setupRequest(req);
+    const { serviceName, groupId } = path;
+    return unmuteErrorGroup({ groupId, serviceName, setup });
+  }
+}));
+
+export const errorGroupResolveRoute = createRoute(() => ({
+  path: '/api/apm/services/{serviceName}/errors/{groupId}/resolve',
+  method: 'POST',
+  params: {
+    path: t.type({
+      serviceName: t.string,
+      groupId: t.string
+    })
+  },
+  handler: async (req, { path }) => {
+    const setup = await setupRequest(req);
+    const { serviceName, groupId } = path;
+    return resolveErrorGroup({ groupId, serviceName, setup });
   }
 }));

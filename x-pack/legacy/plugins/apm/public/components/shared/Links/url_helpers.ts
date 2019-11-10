@@ -39,6 +39,7 @@ export type APMQueryParams = {
   refreshPaused?: string | boolean;
   refreshInterval?: string | number;
   searchTerm?: string;
+  errorStatus?: string;
 } & { [key in LocalUIFilterName]?: string };
 
 // forces every value of T[K] to be type: string

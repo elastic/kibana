@@ -8,7 +8,10 @@ import { indexPatternRoute, kueryBarIndexPatternRoute } from './index_pattern';
 import {
   errorDistributionRoute,
   errorGroupsRoute,
-  errorsRoute
+  errorsRoute,
+  errorGroupMuteRoute,
+  errorGroupUnmuteRoute,
+  errorGroupResolveRoute
 } from './errors';
 import {
   serviceAgentNameRoute,
@@ -63,6 +66,9 @@ const createApmApi = () => {
     // Errors
     .add(errorDistributionRoute)
     .add(errorGroupsRoute)
+    .add(errorGroupMuteRoute)
+    .add(errorGroupUnmuteRoute)
+    .add(errorGroupResolveRoute)
     .add(errorsRoute)
 
     // Services

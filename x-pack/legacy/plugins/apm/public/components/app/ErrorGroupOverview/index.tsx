@@ -9,7 +9,8 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiSpacer,
-  EuiTitle
+  EuiTitle,
+  EuiHorizontalRule
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
@@ -19,14 +20,28 @@ import { ErrorGroupList } from './List';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useTrackPageview } from '../../../../../infra/public';
 import { PROJECTION } from '../../../../common/projections/typings';
-import { LocalUIFilters } from '../../shared/LocalUIFilters';
+import {
+  LocalUIFilters,
+  LocalUIFilterProps
+} from '../../shared/LocalUIFilters';
+import { ErrorStatusFilter } from '../../shared/LocalUIFilters/ErrorStatusFilter';
 
-const ErrorGroupOverview: React.SFC = () => {
+const ErrorGroupOverview = () => {
   const { urlParams, uiFilters } = useUrlParams();
 
-  const { serviceName, start, end, sortField, sortDirection } = urlParams;
+  const {
+    serviceName,
+    start,
+    end,
+    sortField,
+    sortDirection,
+    errorStatus
+  } = urlParams;
 
-  const { data: errorDistributionData } = useFetcher(
+  const {
+    data: errorDistributionData,
+    refetch: refetchErrorDistribution
+  } = useFetcher(
     callApmApi => {
       if (serviceName && start && end) {
         return callApmApi({
@@ -47,7 +62,10 @@ const ErrorGroupOverview: React.SFC = () => {
     [serviceName, start, end, uiFilters]
   );
 
-  const { data: errorGroupListData } = useFetcher(
+  const {
+    data: errorGroupListData,
+    refetch: refetchErrorGroupList
+  } = useFetcher(
     callApmApi => {
       const normalizedSortDirection = sortDirection === 'asc' ? 'asc' : 'desc';
 
@@ -63,13 +81,14 @@ const ErrorGroupOverview: React.SFC = () => {
               end,
               sortField,
               sortDirection: normalizedSortDirection,
-              uiFilters: JSON.stringify(uiFilters)
+              uiFilters: JSON.stringify(uiFilters),
+              errorStatus
             }
           }
         });
       }
     },
-    [serviceName, start, end, sortField, sortDirection, uiFilters]
+    [serviceName, start, end, sortField, sortDirection, uiFilters, errorStatus]
   );
 
   useTrackPageview({
@@ -79,16 +98,17 @@ const ErrorGroupOverview: React.SFC = () => {
   useTrackPageview({ app: 'apm', path: 'error_group_overview', delay: 15000 });
 
   const localUIFiltersConfig = useMemo(() => {
-    const config: React.ComponentProps<typeof LocalUIFilters> = {
+    const config: LocalUIFilterProps = {
       filterNames: ['host', 'containerId', 'podName'],
       params: {
-        serviceName
+        serviceName,
+        errorStatus
       },
       projection: PROJECTION.ERROR_GROUPS
     };
 
     return config;
-  }, [serviceName]);
+  }, [errorStatus, serviceName]);
 
   if (!errorDistributionData || !errorGroupListData) {
     return null;
@@ -97,7 +117,11 @@ const ErrorGroupOverview: React.SFC = () => {
   return (
     <EuiFlexGroup>
       <EuiFlexItem grow={1}>
-        <LocalUIFilters {...localUIFiltersConfig} />
+        <LocalUIFilters {...localUIFiltersConfig}>
+          <ErrorStatusFilter />
+          <EuiSpacer size="xl" />
+          <EuiHorizontalRule margin="none" />
+        </LocalUIFilters>
       </EuiFlexItem>
       <EuiFlexItem grow={7}>
         <EuiFlexGroup>
@@ -124,7 +148,15 @@ const ErrorGroupOverview: React.SFC = () => {
           </EuiTitle>
           <EuiSpacer size="s" />
 
-          <ErrorGroupList items={errorGroupListData} />
+          <ErrorGroupList
+            items={errorGroupListData}
+            onUiStateChange={() => {
+              return Promise.all([
+                refetchErrorDistribution(),
+                refetchErrorGroupList()
+              ]).then(() => undefined);
+            }}
+          />
         </EuiPanel>
       </EuiFlexItem>
     </EuiFlexGroup>

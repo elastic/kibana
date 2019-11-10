@@ -24,6 +24,7 @@ import { createRoute } from './create_route';
 import { uiFiltersRt, rangeRt } from './default_api_types';
 import { jsonRt } from '../../common/runtime_types/json_rt';
 import { getServiceNodesProjection } from '../../common/projections/service_nodes';
+import { errorStatusRt } from './errors';
 
 export const uiFiltersEnvironmentsRoute = createRoute(() => ({
   path: '/api/apm/ui_filters/environments',
@@ -192,14 +193,16 @@ export const metricsLocalFiltersRoute = createLocalFiltersRoute({
 export const errorGroupsLocalFiltersRoute = createLocalFiltersRoute({
   path: '/api/apm/ui_filters/local_filters/errorGroups',
   getProjection: ({ setup, query }) => {
-    const { serviceName } = query;
+    const { serviceName, errorStatus } = query;
     return getErrorGroupsProjection({
       setup,
-      serviceName
+      serviceName,
+      errorStatus
     });
   },
   queryRt: t.type({
-    serviceName: t.string
+    serviceName: t.string,
+    errorStatus: errorStatusRt
   })
 });
 

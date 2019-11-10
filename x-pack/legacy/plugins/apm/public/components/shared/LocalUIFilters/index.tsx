@@ -18,7 +18,7 @@ import { Filter } from './Filter';
 import { useLocalUIFilters } from '../../../hooks/useLocalUIFilters';
 import { PROJECTION } from '../../../../common/projections/typings';
 
-interface Props {
+export interface LocalUIFilterProps {
   projection: PROJECTION;
   filterNames: LocalUIFilterName[];
   params?: Record<string, string | number | boolean | undefined>;
@@ -36,7 +36,7 @@ const LocalUIFilters = ({
   filterNames,
   children,
   showCount = true
-}: Props) => {
+}: LocalUIFilterProps) => {
   const { filters, setFilterValue, clearValues } = useLocalUIFilters({
     filterNames,
     projection,

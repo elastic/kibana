@@ -19,6 +19,11 @@ import { toQuery } from '../../components/shared/Links/url_helpers';
 import { TIMEPICKER_DEFAULTS } from './constants';
 import { localUIFilterNames } from '../../../server/lib/ui_filters/local_ui_filters/config';
 import { pickKeys } from '../../utils/pickKeys';
+import {
+  ACTIVE_ERRORS,
+  ARCHIVED_ERRORS,
+  ALL_ERRORS
+} from '../../../common/errors';
 
 type TimeUrlParams = Pick<
   IUrlParams,
@@ -54,10 +59,17 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     rangeFrom = TIMEPICKER_DEFAULTS.rangeFrom,
     rangeTo = TIMEPICKER_DEFAULTS.rangeTo,
     environment,
-    searchTerm
+    searchTerm,
+    errorStatus: errorStatusFromQuery
   } = query;
 
   const localUIFilters = pickKeys(query, ...localUIFilterNames);
+
+  const errorStatus =
+    errorStatusFromQuery !== ARCHIVED_ERRORS &&
+    errorStatusFromQuery !== ALL_ERRORS
+      ? ACTIVE_ERRORS
+      : errorStatusFromQuery;
 
   return removeUndefinedProps({
     // date params
@@ -91,7 +103,7 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     serviceNodeName: serviceNodeName
       ? decodeURIComponent(serviceNodeName)
       : serviceNodeName,
-
+    errorStatus,
     // ui filters
     environment,
     ...localUIFilters
