@@ -6,10 +6,9 @@
 
 import { useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useAsyncMemo } from 'use-async-memo';
 
 import { isExampleDataIndex } from '../../../../common/log_analysis';
-import { callIndexPatternsValidate } from './api/index_patterns_validate';
+import { AvailableIndex } from './log_analysis_jobs';
 
 type SetupHandler = (
   indices: string[],
@@ -18,7 +17,7 @@ type SetupHandler = (
 ) => void;
 
 interface AnalysisSetupStateArguments {
-  availableIndices: string[];
+  availableIndices: AvailableIndex[];
   cleanupAndSetupModule: SetupHandler;
   setupModule: SetupHandler;
 }
@@ -37,20 +36,21 @@ export const useAnalysisSetupState = ({
 
   const [selectedIndices, setSelectedIndices] = useState<IndicesSelection>(
     availableIndices.reduce(
-      (indexMap, indexName) => ({
+      (indexMap, entry) => ({
         ...indexMap,
-        [indexName]: !(availableIndices.length > 1 && isExampleDataIndex(indexName)),
+        [entry.indexPattern]: !(
+          availableIndices.length > 1 && isExampleDataIndex(entry.indexPattern)
+        ),
       }),
       {}
     )
   );
-
   const selectedIndexNames = useMemo(
     () =>
       Object.entries(selectedIndices)
         .filter(([_indexName, isSelected]) => isSelected)
         .map(([indexName]) => indexName),
-    [selectedIndices]
+    [selectedIndices, availableIndices]
   );
 
   const setup = useCallback(() => {
@@ -61,33 +61,30 @@ export const useAnalysisSetupState = ({
     return cleanupAndSetupModule(selectedIndexNames, startTime, endTime);
   }, [cleanupAndSetupModule, selectedIndexNames, startTime, endTime]);
 
-  const validationErrors = useAsyncMemo<string[]>(
-    async () => {
-      if (selectedIndexNames.length === 0) {
-        return [
-          i18n.translate(
-            'xpack.infra.analysisSetup.indicesSelectionTooFewSelectedIndicesDescription',
-            {
-              defaultMessage: 'Select at least one index name.',
-            }
-          ),
-        ];
-      }
+  const validationErrors = useMemo<string[]>(() => {
+    if (selectedIndexNames.length === 0) {
+      return [
+        i18n.translate(
+          'xpack.infra.analysisSetup.indicesSelectionTooFewSelectedIndicesDescription',
+          {
+            defaultMessage: 'Select at least one index name.',
+          }
+        ),
+      ];
+    }
 
-      const res = await callIndexPatternsValidate({
-        timestamp: '@timestamp', // FIXME
-        indexPatternName: selectedIndexNames.join(','),
-      });
+    const indicesWithErrors = availableIndices.filter(
+      index => selectedIndexNames.includes(index.indexPattern) && !index.valid
+    );
 
-      if (res.data.errors && res.data.errors.length > 0) {
-        return res.data.errors.map(error => error.message);
-      }
+    if (indicesWithErrors.length > 0) {
+      return indicesWithErrors
+        .map(index => index.errorMessage!)
+        .filter(message => message !== undefined);
+    }
 
-      return [];
-    },
-    [selectedIndexNames],
-    []
-  );
+    return [];
+  }, [selectedIndexNames, availableIndices]);
 
   return {
     cleanupAndSetup,

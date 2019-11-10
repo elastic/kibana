@@ -21,6 +21,7 @@ import euiStyled from '../../../../../../common/eui_styled_components';
 import { SetupStatus } from '../../../../common/log_analysis';
 import { useTrackPageview } from '../../../hooks/use_track_metric';
 import { AnalysisSetupSteps } from './setup';
+import { AvailableIndex } from '../../../containers/logs/log_analysis';
 
 type SetupHandler = (
   indices: string[],
@@ -29,7 +30,7 @@ type SetupHandler = (
 ) => void;
 
 interface AnalysisSetupContentProps {
-  availableIndices: string[];
+  availableIndices: AvailableIndex[];
   cleanupAndSetup: SetupHandler;
   errorMessages: string[];
   setup: SetupHandler;

@@ -6,6 +6,7 @@
 
 import createContainer from 'constate';
 import { useMemo, useCallback, useEffect } from 'react';
+import { useAsyncMemo } from 'use-async-memo';
 
 import { callGetMlModuleAPI } from './api/ml_get_module';
 import { bucketSpan, getJobId } from '../../../../common/log_analysis';
@@ -14,6 +15,13 @@ import { callJobsSummaryAPI } from './api/ml_get_jobs_summary_api';
 import { callSetupMlModuleAPI, SetupMlModuleResponsePayload } from './api/ml_setup_module_api';
 import { useLogAnalysisCleanup } from './log_analysis_cleanup';
 import { useStatusState } from './log_analysis_status_state';
+import { callIndexPatternsValidate } from './api/index_patterns_validate';
+
+export interface AvailableIndex {
+  indexPattern: string;
+  valid: boolean;
+  errorMessage?: string;
+}
 
 const MODULE_ID = 'logs_ui_analysis';
 
@@ -110,8 +118,28 @@ export const useLogAnalysisJobs = ({
     [fetchJobStatusRequest.state, fetchModuleDefinitionRequest.state]
   );
 
-  const availableIndices = useMemo(() => indexPattern.split(','), [indexPattern]);
+  const indexPatterns = indexPattern.split(',');
+  const availableIndices = useAsyncMemo<AvailableIndex[]>(
+    async () => {
+      const indicesValidation = await callIndexPatternsValidate({
+        timestamp: timeField,
+        indexPatternName: indexPattern,
+      });
 
+      const errors = indicesValidation.data.errors || [];
+
+      return indexPatterns.map<AvailableIndex>(pattern => {
+        const indexValidation = errors.find(err => err.indexPattern === pattern);
+        return {
+          indexPattern: pattern,
+          valid: indexValidation === undefined,
+          errorMessage: indexValidation ? indexValidation.message : undefined,
+        };
+      });
+    },
+    [indexPattern],
+    indexPatterns.map<AvailableIndex>(pattern => ({ indexPattern: pattern, valid: false }))
+  );
   const viewResults = useCallback(() => {
     dispatch({ type: 'viewedResults' });
   }, []);

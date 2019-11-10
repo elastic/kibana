@@ -12,6 +12,7 @@ import { SetupStatus } from '../../../../../common/log_analysis';
 import { useAnalysisSetupState } from '../../../../containers/logs/log_analysis/log_analysis_setup_state';
 import { InitialConfigurationStep } from './initial_configuration_step';
 import { ProcessStep } from './process_step';
+import { AvailableIndex } from '../../../../containers/logs/log_analysis';
 
 type SetupHandler = (
   indices: string[],
@@ -20,7 +21,7 @@ type SetupHandler = (
 ) => void;
 
 interface AnalysisSetupStepsProps {
-  availableIndices: string[];
+  availableIndices: AvailableIndex[];
   cleanupAndSetup: SetupHandler;
   errorMessages: string[];
   setup: SetupHandler;
