@@ -50,11 +50,11 @@ export class HeatmapStyle extends AbstractStyle {
     );
   }
 
-  getLegendDetails(label) {
+  getLegendDetails(field) {
     return (
       <HeatmapLegend
         colorRampName={this._descriptor.colorRampName}
-        label={label}
+        field={field}
       />
     );
   }

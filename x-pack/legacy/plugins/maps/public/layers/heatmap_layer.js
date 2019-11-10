@@ -104,7 +104,6 @@ export class HeatmapLayer extends VectorLayer {
 
   getLegendDetails() {
     const metricFields = this._source.getMetricFields();
-    const label = metricFields[0].getPropertyLabel();
-    return this._style.getLegendDetails(label);
+    return this._style.getLegendDetails(metricFields[0]);
   }
 }
