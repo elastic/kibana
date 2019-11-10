@@ -110,7 +110,9 @@ function DevToolsWrapper({
 function redirectOnMissingCapabilities(appMountContext: AppMountContext) {
   if (!appMountContext.core.application.capabilities.dev_tools.show) {
     window.location.hash = '/home';
+    return true;
   }
+  return false;
 }
 
 function setBadge(appMountContext: AppMountContext) {
@@ -145,7 +147,9 @@ export function renderApp(
   basePath: string,
   devTools: DevTool[]
 ) {
-  redirectOnMissingCapabilities(appMountContext);
+  if (redirectOnMissingCapabilities(appMountContext)) {
+    return;
+  }
   setBadge(appMountContext);
   setBreadcrumbs(appMountContext);
   ReactDOM.render(
