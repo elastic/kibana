@@ -19,11 +19,11 @@
 import _ from 'lodash';
 import * as Rx from 'rxjs';
 import { Subscription } from 'rxjs';
-import { Filter, FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { TExecuteTriggerActions } from 'src/plugins/ui_actions/public';
 import { npStart } from 'ui/new_platform';
 import {
+  esFilters,
   TimeRange,
   onlyDisabledFiltersChanged,
   getTime,
@@ -81,7 +81,7 @@ export interface FilterManager {
     values: string | string[],
     operation: string,
     index: number
-  ) => Filter[];
+  ) => esFilters.Filter[];
 }
 
 interface SearchEmbeddableConfig {
@@ -111,7 +111,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
   private abortController?: AbortController;
 
   private prevTimeRange?: TimeRange;
-  private prevFilters?: Filter[];
+  private prevFilters?: esFilters.Filter[];
   private prevQuery?: Query;
 
   constructor(
@@ -254,7 +254,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       let filters = this.filterGen.generate(field, value, operator, indexPattern.id);
       filters = filters.map(filter => ({
         ...filter,
-        $state: { store: FilterStateStore.APP_STATE },
+        $state: { store: esFilters.FilterStateStore.APP_STATE },
       }));
 
       await this.executeTriggerActions(APPLY_FILTER_TRIGGER, {

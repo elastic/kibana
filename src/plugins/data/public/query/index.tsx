@@ -18,7 +18,6 @@
  */
 
 export * from './query_service';
-
 export * from './filter_manager';
 
 export * from './timefilter';
