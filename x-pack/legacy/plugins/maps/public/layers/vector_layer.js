@@ -24,6 +24,7 @@ import { isRefreshOnlyQuery } from './util/is_refresh_only_query';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DataRequestAbortError } from './util/data_request';
+import { FieldWithOrigin } from './fields/field_with_origin';
 
 const VISIBILITY_FILTER_CLAUSE = ['all',
   [
@@ -184,8 +185,9 @@ export class VectorLayer extends AbstractLayer {
   }
 
   getLegendDetails() {
+
     const getFieldLabel = async fieldName => {
-      const ordinalFields = await this._getOrdinalFields();
+      const ordinalFields = await this.getOrdinalFields();
       const field = ordinalFields.find(({ name }) => {
         return name === fieldName;
       });
@@ -243,41 +245,57 @@ export class VectorLayer extends AbstractLayer {
     return this._source.getDisplayName();
   }
 
-  async getDateFields() {
+
+  async getDateFieldsOO() {
     const timeFields = await this._source.getDateFields();
-    return timeFields.map(({ label, name }) => {
+    return timeFields.map(async (field) => {
+      return new FieldWithOrigin({ field: field, origin: FIELD_ORIGIN.SOURCE });
+    });
+  }
+
+  async getDateFields() {
+    const timeFields = await this.getDateFieldsOO();
+    const fieldPromises = timeFields.map(async (field) => {
       return {
-        label,
-        name,
-        origin: SOURCE_DATA_ID_ORIGIN
+        label: await field.getLabel(),
+        name: field.getName(),
+        origin: field.getOrigin()
       };
     });
+    return Promise.all(fieldPromises);
   }
 
   async getNumberFields() {
     const numberFields = await this._source.getNumberFields();
-    const numberFieldOptions = numberFields.map(({ label, name }) => {
-      return {
-        label,
-        name,
-        origin: FIELD_ORIGIN.SOURCE
-      };
+    const numberFieldOptions = numberFields.map(field => {
+      return new FieldWithOrigin({
+        field: field,
+      });
     });
     const joinFields = [];
     this.getValidJoins().forEach(join => {
       const fields = join.getJoinFields().map(joinField => {
-        return {
-          ...joinField,
-          origin: FIELD_ORIGIN.JOIN,
-        };
+        return new FieldWithOrigin({
+          field: joinField,
+          origin: FIELD_ORIGIN.JOIN
+        });
       });
       joinFields.push(...fields);
     });
 
-    return [...numberFieldOptions, ...joinFields];
+
+    const promises = ([...numberFieldOptions, ...joinFields]).map(async (field) => {
+      return {
+        label: await field.getLabel(),
+        name: field.getName(),
+        origin: field.getOrigin()
+      };
+    });
+
+    return Promise.all(promises);
   }
 
-  async _getOrdinalFields() {
+  async getOrdinalFields() {
     return [
       ... await this.getDateFields(),
       ... await this.getNumberFields()
@@ -807,7 +825,7 @@ export class VectorLayer extends AbstractLayer {
 
     const join = this.getValidJoins().find(join => {
       const matchingField = join.getJoinFields().find(joinField => {
-        return joinField.name === field.name;
+        return joinField.getName() === field.name;
       });
       return !!matchingField;
     });

@@ -30,9 +30,7 @@ export class InnerJoin {
   }
 
   getJoinFields() {
-    return this._rightSource.getMetricFields().map(esAggMetricField => {
-      return { label: esAggMetricField.getPropertyLabel(), name: esAggMetricField.getName() };
-    });
+    return this._rightSource.getMetricFields();
   }
 
   // Source request id must be static and unique because the re-fetch logic uses the id to locate the previous request.

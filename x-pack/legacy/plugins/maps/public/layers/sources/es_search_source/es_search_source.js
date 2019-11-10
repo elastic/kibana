@@ -99,7 +99,7 @@ export class ESSearchSource extends AbstractESSource {
     try {
       const indexPattern = await this.getIndexPattern();
       return indexPattern.fields.getByType('number').map(field => {
-        return { name: field.name, label: field.name };
+        return this.createField({ fieldName: field.name });
       });
     } catch (error) {
       return [];
@@ -110,7 +110,7 @@ export class ESSearchSource extends AbstractESSource {
     try {
       const indexPattern = await this.getIndexPattern();
       return indexPattern.fields.getByType('date').map(field => {
-        return { name: field.name, label: field.name };
+        return this.createField({ fieldName: field.name });
       });
     } catch (error) {
       return [];
@@ -175,7 +175,7 @@ export class ESSearchSource extends AbstractESSource {
   }
 
   async _excludeDateFields(fieldNames) {
-    const dateFieldNames = _.map(await this.getDateFields(), 'name');
+    const dateFieldNames = (await this.getDateFields()).map(field => field.getName());
     return fieldNames.filter(field => {
       return !dateFieldNames.includes(field);
     });
@@ -183,7 +183,7 @@ export class ESSearchSource extends AbstractESSource {
 
   // Returns docvalue_fields array for the union of indexPattern's dateFields and request's field names.
   async _getDateDocvalueFields(searchFields) {
-    const dateFieldNames = _.map(await this.getDateFields(), 'name');
+    const dateFieldNames = (await this.getDateFields()).map(field => field.getName());
     return searchFields
       .filter(fieldName => {
         return dateFieldNames.includes(fieldName);

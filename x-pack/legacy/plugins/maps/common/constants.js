@@ -54,7 +54,7 @@ export const FIELD_ORIGIN = {
   JOIN: 'join'
 };
 
-export const SOURCE_DATA_ID_ORIGIN = 'source';
+export const SOURCE_DATA_ID_ORIGIN = FIELD_ORIGIN.SOURCE;
 
 export const GEOJSON_FILE = 'GEOJSON_FILE';
 

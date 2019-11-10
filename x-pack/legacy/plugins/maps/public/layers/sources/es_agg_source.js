@@ -98,13 +98,7 @@ export class AbstractESAggSource extends AbstractESSource {
 
 
   async getNumberFields() {
-    const numberFieldPromises = this.getMetricFields().map(async (esAggMetricField) => {
-      return {
-        label: await esAggMetricField.getLabel(),
-        name: esAggMetricField.getName()
-      };
-    });
-    return Promise.all(numberFieldPromises);
+    return this.getMetricFields();
   }
 
   async filterAndFormatPropertiesToHtmlForMetricFields(properties) {
