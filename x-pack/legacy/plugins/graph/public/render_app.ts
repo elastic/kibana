@@ -64,10 +64,6 @@ export interface GraphDependencies extends LegacyAngularInjectedDependencies {
  */
 export interface LegacyAngularInjectedDependencies {
   /**
-   * angular $http service
-   */
-  $http: any;
-  /**
    * Instance of SavedObjectRegistryProvider
    */
   savedObjectRegistry: any;

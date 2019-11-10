@@ -355,10 +355,10 @@ module.exports = {
                   '!src/core/server/*.test.mocks.ts',
 
                   'src/plugins/**/public/**/*',
-                  '!src/plugins/**/public/index*',
+                  '!src/plugins/**/public/index.{js,ts,tsx}',
 
                   'src/plugins/**/server/**/*',
-                  '!src/plugins/**/server/index*',
+                  '!src/plugins/**/server/index.{js,ts,tsx}',
                 ],
                 allowSameFolder: true,
               },
@@ -393,6 +393,7 @@ module.exports = {
         'x-pack/test/functional/apps/**/*.js',
         'x-pack/legacy/plugins/apm/**/*.js',
         'test/*/config.ts',
+        'test/*/{tests,test_suites,apis,apps}/**/*',
         'test/visual_regression/tests/**/*',
         'x-pack/test/*/{tests,test_suites,apis,apps}/**/*',
         'x-pack/test/*/*config.*ts',

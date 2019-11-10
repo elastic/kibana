@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import chrome from 'ui/chrome';
 import {
   ClusterSettingsChecker,
   NodeSettingsChecker,
@@ -99,7 +100,12 @@ export class NoDataController extends MonitoringViewBaseController {
 
     this.renderReact(
       <I18nContext>
-        <NoData {...props} enabler={enabler} changePath={this.changePath} />
+        <NoData
+          {...props}
+          enabler={enabler}
+          changePath={this.changePath}
+          isOnCloud={chrome.getInjected('isOnCloud')}
+        />
       </I18nContext>
     );
   }

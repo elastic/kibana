@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Filter } from '@kbn/es-query';
 import uuid from 'uuid';
 import React from 'react';
 import { OutPortal, PortalNode } from 'react-reverse-portal';
@@ -28,6 +27,7 @@ import { getLayerList } from './map_config';
 // @ts-ignore Missing type defs as maps moves to Typescript
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../maps/common/constants';
 import * as i18n from './translations';
+import { esFilters } from '../../../../../../../src/plugins/data/public';
 
 /**
  * Displays an error toast for the provided title and message
@@ -86,7 +86,7 @@ export const setupEmbeddablesAPI = (plugins: PluginsStart) => {
  * @throws Error if EmbeddableFactory does not exist
  */
 export const createEmbeddable = async (
-  filters: Filter[],
+  filters: esFilters.Filter[],
   indexPatterns: IndexPatternMapping[],
   query: Query,
   startDate: number,
