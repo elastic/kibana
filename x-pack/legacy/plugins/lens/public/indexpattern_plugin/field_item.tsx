@@ -35,8 +35,9 @@ import {
   niceTimeFormatter,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { Filter, buildEsQuery, getEsQueryConfig } from '@kbn/es-query';
+import { buildEsQuery, getEsQueryConfig } from '@kbn/es-query';
 import { Query } from 'src/plugins/data/common';
+import { esFilters } from '../../../../../../src/plugins/data/public';
 // @ts-ignore
 import { fieldFormats } from '../../../../../../src/legacy/ui/public/registry/field_formats';
 import { DraggedField } from './indexpattern';
@@ -55,7 +56,7 @@ export interface FieldItemProps {
   exists: boolean;
   query: Query;
   dateRange: DatasourceDataPanelProps['dateRange'];
-  filters: Filter[];
+  filters: esFilters.Filter[];
   hideDetails?: boolean;
 }
 
