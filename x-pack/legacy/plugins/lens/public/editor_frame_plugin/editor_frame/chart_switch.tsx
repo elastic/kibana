@@ -28,6 +28,7 @@ interface VisualizationSelection {
   dataLoss: 'nothing' | 'layers' | 'everything' | 'columns';
   datasourceId?: string;
   datasourceState?: unknown;
+  sameDatasources?: boolean;
 }
 
 interface Props {
@@ -89,7 +90,10 @@ export function ChartSwitch(props: Props) {
       'SWITCH_VISUALIZATION'
     );
 
-    if (!selection.datasourceId || selection.dataLoss === 'everything') {
+    if (
+      (!selection.datasourceId && !selection.sameDatasources) ||
+      selection.dataLoss === 'everything'
+    ) {
       props.framePublicAPI.removeLayers(Object.keys(props.framePublicAPI.datasourceLayers));
     }
   };
@@ -109,6 +113,7 @@ export function ChartSwitch(props: Props) {
         dataLoss: 'nothing',
         keptLayerIds: Object.keys(props.framePublicAPI.datasourceLayers),
         getVisualizationState: () => switchVisType(subVisualizationId, props.visualizationState),
+        sameDatasources: true,
       };
     }
 
