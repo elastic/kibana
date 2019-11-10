@@ -6,7 +6,6 @@
 
 import React, { useEffect, useReducer } from 'react';
 import { CoreSetup, CoreStart } from 'src/core/public';
-import { Filter } from '@kbn/es-query';
 import { Query, SavedQuery } from '../../../../../../../src/legacy/core_plugins/data/public';
 import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/expressions/public';
 import {
@@ -26,6 +25,7 @@ import { Document } from '../../persistence/saved_object_store';
 import { getSavedObjectFormat } from './save';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 import { generateId } from '../../id_generator';
+import { esFilters } from '../../../../../../../src/plugins/data/public';
 
 export interface EditorFrameProps {
   doc?: Document;
@@ -41,7 +41,7 @@ export interface EditorFrameProps {
     toDate: string;
   };
   query: Query;
-  filters: Filter[];
+  filters: esFilters.Filter[];
   savedQuery?: SavedQuery;
   onChange: (arg: {
     filterableIndexPatterns: DatasourceMetaData['filterableIndexPatterns'];

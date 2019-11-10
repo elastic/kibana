@@ -6,11 +6,11 @@
 
 import {
   Direction,
-  NetworkTopTablesFields,
+  FlowTarget,
   NetworkDnsFields,
+  NetworkTopTablesFields,
   TlsFields,
   UsersFields,
-  FlowTarget,
 } from '../../graphql/types';
 import { DEFAULT_TABLE_LIMIT } from '../constants';
 import { NetworkModel, NetworkTableType, IpDetailsTableType, NetworkType } from './model';
@@ -68,6 +68,11 @@ export const mockNetworkState: NetworkModel = {
           direction: Direction.desc,
         },
       },
+      [NetworkTableType.http]: {
+        activePage: 0,
+        limit: DEFAULT_TABLE_LIMIT,
+        sort: { direction: Direction.desc },
+      },
     },
   },
   details: {
@@ -120,6 +125,11 @@ export const mockNetworkState: NetworkModel = {
           direction: Direction.asc,
         },
       },
+      [IpDetailsTableType.http]: {
+        activePage: 0,
+        limit: DEFAULT_TABLE_LIMIT,
+        sort: { direction: Direction.desc },
+      },
     },
     flowTarget: FlowTarget.source,
   },
@@ -144,6 +154,13 @@ describe('Network redux store', () => {
           limit: 10,
           sort: { field: 'uniqueDomains', direction: 'desc' },
           isPtrIncluded: false,
+        },
+        [NetworkTableType.http]: {
+          activePage: 0,
+          limit: 10,
+          sort: {
+            direction: 'desc',
+          },
         },
         [NetworkTableType.tls]: {
           activePage: 0,
@@ -198,6 +215,13 @@ describe('Network redux store', () => {
           sort: {
             direction: 'desc',
             field: 'bytes_out',
+          },
+        },
+        [IpDetailsTableType.http]: {
+          activePage: 0,
+          limit: 10,
+          sort: {
+            direction: 'desc',
           },
         },
         [IpDetailsTableType.tls]: {
