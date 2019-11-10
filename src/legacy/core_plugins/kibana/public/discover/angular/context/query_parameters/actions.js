@@ -29,7 +29,7 @@ import {
 
 
 export function QueryParameterActionsProvider(indexPatterns) {
-  const filterManager = npStart.plugins.data.filterManager;
+  const { filterManager } = npStart.plugins.data;
 
   const setPredecessorCount = (state) => (predecessorCount) => (
     state.queryParameters.predecessorCount = clamp(
