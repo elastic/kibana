@@ -8,19 +8,17 @@ import { Legacy } from 'kibana';
 import { StaticIndexPattern } from 'ui/index_patterns';
 import { APICaller } from 'src/core/server';
 import { IndexPatternsFetcher } from '../../../../../../../src/plugins/data/server';
-import { Setup } from '../helpers/setup_request';
+import { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
 
-export const getKueryBarIndexPattern = async ({
+export const getDynamicIndexPattern = async ({
   request,
-  processorEvent,
-  setup
+  indices,
+  processorEvent
 }: {
   request: Legacy.Request;
-  processorEvent?: 'transaction' | 'error' | 'metric';
-  setup: Setup;
+  indices: ApmIndicesConfig;
+  processorEvent: 'transaction' | 'error' | 'metric' | undefined;
 }) => {
-  const { indices } = setup;
-
   const indexPatternsFetcher = new IndexPatternsFetcher(
     (...rest: Parameters<APICaller>) =>
       request.server.plugins.elasticsearch
@@ -40,14 +38,20 @@ export const getKueryBarIndexPattern = async ({
 
   const configuredIndices = indexNames.map(name => indicesMap[name]);
 
-  const fields = await indexPatternsFetcher.getFieldsForWildcard({
-    pattern: configuredIndices
-  });
+  try {
+    const fields = await indexPatternsFetcher.getFieldsForWildcard({
+      pattern: configuredIndices
+    });
 
-  const pattern: StaticIndexPattern = {
-    fields,
-    title: configuredIndices.join(',')
-  };
+    const pattern: StaticIndexPattern = {
+      fields,
+      title: configuredIndices.join(',')
+    };
 
-  return pattern;
+    return pattern;
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error('Could not get dynamic index pattern', e);
+    return;
+  }
 };

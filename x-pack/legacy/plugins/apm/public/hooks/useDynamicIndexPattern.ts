@@ -4,15 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { idx } from '@kbn/elastic-idx';
 import { useFetcher } from './useFetcher';
 
-export function useKueryBarIndexPattern(
+export function useDynamicIndexPattern(
   processorEvent: 'transaction' | 'metric' | 'error' | undefined
 ) {
-  const { data: indexPattern, status } = useFetcher(
+  const { data, status } = useFetcher(
     callApmApi => {
       return callApmApi({
-        pathname: '/api/apm/kuery_bar_index_pattern',
+        pathname: '/api/apm/index_pattern/dynamic',
         forceCache: true,
         params: {
           query: {
@@ -25,7 +26,7 @@ export function useKueryBarIndexPattern(
   );
 
   return {
-    indexPattern,
+    indexPattern: idx(data, _ => _.dynamicIndexPattern),
     status
   };
 }

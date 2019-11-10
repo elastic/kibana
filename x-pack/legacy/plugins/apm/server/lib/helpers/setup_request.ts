@@ -5,7 +5,6 @@
  */
 
 import { Legacy } from 'kibana';
-import { Server } from 'hapi';
 import moment from 'moment';
 import { KibanaConfig } from 'src/legacy/server/kbn_server';
 import { getESClient } from './es_client';
@@ -16,13 +15,19 @@ import {
 } from '../settings/apm_indices/get_apm_indices';
 import { ESFilter } from '../../../typings/elasticsearch';
 import { ESClient } from './es_client';
+import { StaticIndexPattern } from '../../../../../../../src/legacy/core_plugins/data/public';
+import { getDynamicIndexPattern } from '../index_pattern/get_dynamic_index_pattern';
+import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
 
-function decodeUiFilters(server: Server, uiFiltersEncoded?: string) {
-  if (!uiFiltersEncoded) {
+function decodeUiFilters(
+  indexPattern: StaticIndexPattern | undefined,
+  uiFiltersEncoded?: string
+) {
+  if (!uiFiltersEncoded || !indexPattern) {
     return [];
   }
   const uiFilters = JSON.parse(uiFiltersEncoded);
-  return getUiFiltersES(server, uiFilters);
+  return getUiFiltersES(indexPattern, uiFilters);
 }
 
 export interface APMRequestQuery {
@@ -30,6 +35,7 @@ export interface APMRequestQuery {
   start?: string;
   end?: string;
   uiFilters?: string;
+  processorEvent?: 'transaction' | 'error' | 'metric';
 }
 // Explicitly type Setup to prevent TS initialization errors
 // https://github.com/microsoft/TypeScript/issues/34933
@@ -42,6 +48,7 @@ export interface Setup {
   internalClient: ESClient;
   config: KibanaConfig;
   indices: ApmIndicesConfig;
+  dynamicIndexPattern?: IIndexPattern;
 }
 
 export async function setupRequest(req: Legacy.Request): Promise<Setup> {
@@ -51,10 +58,15 @@ export async function setupRequest(req: Legacy.Request): Promise<Setup> {
     req
   );
   const config = server.config();
-  const [uiFiltersES, indices] = await Promise.all([
-    decodeUiFilters(server, query.uiFilters),
-    getApmIndices({ config, savedObjectsClient })
-  ]);
+  const indices = await getApmIndices({ config, savedObjectsClient });
+
+  // TODO: `dynamicIndexPattern` should be cached by user. Currently it's not cached at all
+  const dynamicIndexPattern = await getDynamicIndexPattern({
+    request: req,
+    indices,
+    processorEvent: query.processorEvent
+  });
+  const uiFiltersES = decodeUiFilters(dynamicIndexPattern, query.uiFilters);
 
   return {
     start: moment.utc(query.start).valueOf(),
@@ -63,6 +75,7 @@ export async function setupRequest(req: Legacy.Request): Promise<Setup> {
     client: getESClient(req, { clientAsInternalUser: false }),
     internalClient: getESClient(req, { clientAsInternalUser: true }),
     config,
-    indices
+    indices,
+    dynamicIndexPattern
   };
 }

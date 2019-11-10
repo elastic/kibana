@@ -6,25 +6,18 @@
 import { Server } from 'hapi';
 import { getInternalSavedObjectsClient } from '../helpers/saved_objects_client';
 import apmIndexPattern from '../../../../../../../src/legacy/core_plugins/kibana/server/tutorials/apm/index_pattern.json';
+import { APM_STATIC_INDEX_PATTERN_ID } from '../../../common/index_pattern_constants';
 
-export async function getAPMIndexPattern(server: Server) {
+export function createStaticIndexPattern(server: Server) {
   const config = server.config();
   const apmIndexPatternTitle = config.get('apm_oss.indexPattern');
   const internalSavedObjectsClient = getInternalSavedObjectsClient(server);
-  try {
-    return await internalSavedObjectsClient.get(
-      'index-pattern',
-      apmIndexPattern.id
-    );
-  } catch (error) {
-    // if GET fails, then create a new index pattern saved object
-    return await internalSavedObjectsClient.create(
-      'index-pattern',
-      {
-        ...apmIndexPattern.attributes,
-        title: apmIndexPatternTitle
-      },
-      { id: apmIndexPattern.id, overwrite: false }
-    );
-  }
+  return internalSavedObjectsClient.create(
+    'index-pattern',
+    {
+      ...apmIndexPattern.attributes,
+      title: apmIndexPatternTitle
+    },
+    { id: APM_STATIC_INDEX_PATTERN_ID, overwrite: false }
+  );
 }
