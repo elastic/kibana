@@ -17,7 +17,6 @@
  * under the License.
  */
 
-// Should be import { Field } from './index_patterns';
-export type Field = any;
+import { Field } from '..';
 
 export type IGetSuggestions = (index: string, field: Field, query: string, boolFilter?: any) => any;

@@ -26,9 +26,6 @@ import { IInjector } from 'ui/chrome';
 // @ts-ignore
 import * as filterActions from 'plugins/kibana/discover/doc_table/actions/filter';
 
-// @ts-ignore
-import { getFilterGenerator } from 'ui/filter_manager';
-
 import {
   AppStateClass as TAppStateClass,
   AppState as TAppState,

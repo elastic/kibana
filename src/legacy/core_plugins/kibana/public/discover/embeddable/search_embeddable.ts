@@ -21,10 +21,14 @@ import * as Rx from 'rxjs';
 import { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { TExecuteTriggerActions } from 'src/plugins/ui_actions/public';
-import { TimeRange, onlyDisabledFiltersChanged } from '../../../../../../plugins/data/public';
+import {
+  TimeRange,
+  onlyDisabledFiltersChanged,
+  FilterManager,
+} from '../../../../../../plugins/data/public';
 import { setup as data } from '../../../../data/public/legacy';
 import { Query, getTime } from '../../../../data/public';
-import { esFilters } from '../../../../../../plugins/data/public';
+import { esFilters, generateFilters } from '../../../../../../plugins/data/public';
 import {
   APPLY_FILTER_TRIGGER,
   Container,
@@ -39,7 +43,6 @@ import { getSortForSearchSource } from '../angular/doc_table/lib/get_sort_for_se
 import {
   Adapters,
   angular,
-  getFilterGenerator,
   getRequestInspectorStats,
   getResponseInspectorStats,
   getServices,
@@ -66,18 +69,6 @@ interface SearchScope extends ng.IScope {
   isLoading?: boolean;
 }
 
-export interface FilterManager {
-  generate: (
-    field: {
-      name: string;
-      scripted: boolean;
-    },
-    values: string | string[],
-    operation: string,
-    index: number
-  ) => esFilters.Filter[];
-}
-
 interface SearchEmbeddableConfig {
   $rootScope: ng.IRootScopeService;
   $compile: ng.ICompileService;
@@ -101,7 +92,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
   private autoRefreshFetchSubscription?: Subscription;
   private subscription?: Subscription;
   public readonly type = SEARCH_EMBEDDABLE_TYPE;
-  private filterGen: FilterManager;
+  private filterManager: FilterManager;
   private abortController?: AbortController;
 
   private prevTimeRange?: TimeRange;
@@ -128,7 +119,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       parent
     );
 
-    this.filterGen = getFilterGenerator(queryFilter);
+    this.filterManager = queryFilter as FilterManager;
     this.savedSearch = savedSearch;
     this.$rootScope = $rootScope;
     this.$compile = $compile;
@@ -245,7 +236,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     };
 
     searchScope.filter = async (field, value, operator) => {
-      let filters = this.filterGen.generate(field, value, operator, indexPattern.id);
+      let filters = generateFilters(this.filterManager, field, value, operator, indexPattern.id);
       filters = filters.map(filter => ({
         ...filter,
         $state: { store: esFilters.FilterStateStore.APP_STATE },
