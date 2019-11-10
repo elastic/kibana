@@ -18,10 +18,20 @@
  */
 
 import del from 'del';
-import {  existsSync, mkdirSync, writeFileSync } from 'fs';
+import {  existsSync, mkdirSync, statSync, writeFileSync } from 'fs';
+import lodash from 'lodash';
 import { LogRotator } from './log_rotator';
 import { tmpdir } from 'os';
 import { dirname, join } from 'path';
+
+
+const mockOn = jest.fn();
+jest.mock('chokidar', () => ({
+  watch: jest.fn(() => ({
+    on: mockOn,
+    close: jest.fn()
+  })),
+}));
 
 const tempDir = join(tmpdir(), 'kbn_log_rotator_test');
 const testFilePath = join(tempDir, 'log_rotator_test_log_file.log');
@@ -30,7 +40,7 @@ const createLogRotatorConfig = (logFilePath) => {
   return new Map([
     ['logging.dest', logFilePath],
     ['logging.rotate.everyBytes', 2],
-    ['logging.rotate.keepFiles', 7],
+    ['logging.rotate.keepFiles', 2],
     ['logging.rotate.usePolling', false],
     ['logging.rotate.pollingInterval', 10]
   ]);
@@ -48,6 +58,7 @@ describe('LogRotator', () => {
 
   afterEach(() => {
     del.sync(dirname(testFilePath), { force: true });
+    mockOn.mockClear();
   });
 
   it('rotates log file when bigger than set limit on start', async () => {
@@ -65,7 +76,7 @@ describe('LogRotator', () => {
     expect(existsSync(join(testLogFileDir, 'log_rotator_test_log_file.log.0'))).toBeTruthy();
   });
 
-  it.skip('rotates log file when bigger than set limit over time', async () => {
+  it('rotates log file when equal than set limit over time', async () => {
     writeBytesToFile(testFilePath, 1);
 
     const logRotator = new LogRotator(createLogRotatorConfig(testFilePath));
@@ -77,21 +88,71 @@ describe('LogRotator', () => {
     const testLogFileDir = dirname(testFilePath);
     expect(existsSync(join(testLogFileDir, 'log_rotator_test_log_file.log.0'))).toBeFalsy();
 
-    writeBytesToFile(testFilePath, 3);
+    writeBytesToFile(testFilePath, 1);
+
+    // ['change', [asyncFunction]]
+    const onChangeCb = mockOn.mock.calls[0][1];
+    await onChangeCb(testLogFileDir, { size: 2 });
 
     await logRotator.stop();
     expect(existsSync(join(testLogFileDir, 'log_rotator_test_log_file.log.0'))).toBeTruthy();
   });
 
-  it('rotates log file when file size is equal to the limit', async () => {
+  it('rotates log file when file size is bigger than limit', async () => {
+    writeBytesToFile(testFilePath, 1);
 
+    const logRotator = new LogRotator(createLogRotatorConfig(testFilePath));
+    jest.spyOn(logRotator, '_sendReloadLogConfigSignal').mockImplementation(() => {});
+    await logRotator.start();
+
+    expect(logRotator.running).toBe(true);
+
+    const testLogFileDir = dirname(testFilePath);
+    expect(existsSync(join(testLogFileDir, 'log_rotator_test_log_file.log.0'))).toBeFalsy();
+
+    writeBytesToFile(testFilePath, 2);
+
+    // ['change', [asyncFunction]]
+    const onChangeCb = mockOn.mock.calls[0][1];
+    await onChangeCb(testLogFileDir, { size: 3 });
+
+    await logRotator.stop();
+    expect(existsSync(join(testLogFileDir, 'log_rotator_test_log_file.log.0'))).toBeTruthy();
   });
 
   it('rotates log file service correctly keeps number of files', async () => {
+    jest.spyOn(lodash, 'throttle').mockImplementation(fn => fn);
 
+    writeBytesToFile(testFilePath, 3);
+
+    const logRotator = new LogRotator(createLogRotatorConfig(testFilePath));
+    jest.spyOn(logRotator, '_sendReloadLogConfigSignal').mockImplementation(() => {});
+    await logRotator.start();
+
+    expect(logRotator.running).toBe(true);
+
+    const testLogFileDir = dirname(testFilePath);
+    expect(existsSync(join(testLogFileDir, 'log_rotator_test_log_file.log.0'))).toBeTruthy();
+
+    writeBytesToFile(testFilePath, 2);
+
+    // ['change', [asyncFunction]]
+    const onChangeCb = mockOn.mock.calls[0][1];
+    await onChangeCb(testLogFileDir, { size: 2 });
+
+    writeBytesToFile(testFilePath, 5);
+    await onChangeCb(testLogFileDir, { size: 5 });
+
+    await logRotator.stop();
+    expect(existsSync(join(testLogFileDir, 'log_rotator_test_log_file.log.0'))).toBeTruthy();
+    expect(existsSync(join(testLogFileDir, 'log_rotator_test_log_file.log.1'))).toBeTruthy();
+    expect(existsSync(join(testLogFileDir, 'log_rotator_test_log_file.log.2'))).toBeFalsy();
+    expect(statSync(join(testLogFileDir, 'log_rotator_test_log_file.log.0')).size).toBe(5);
+
+    lodash.throttle.mockRestore();
   });
 
-  it('rotates log file service correctly detects if it needs to use polling', async () => {
+  it.skip('rotates log file service correctly detects if it needs to use polling', async () => {
 
   });
 });
