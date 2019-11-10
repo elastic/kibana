@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { QueryService } from '.';
+import { QueryService, QuerySetup } from '.';
 import { timefilterServiceMock } from './timefilter/timefilter_service.mock';
 
 type QueryServiceClientContract = PublicMethodsOf<QueryService>;
 
 const createSetupContractMock = () => {
-  const setupContract = {
+  const setupContract: jest.Mocked<QuerySetup> = {
     filterManager: jest.fn() as any,
     timefilter: timefilterServiceMock.createSetupContract(),
   };

@@ -16,8 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { Plugin } from '.';
 import { searchSetupMock } from './search/mocks';
 import { queryServiceMock } from './query/mocks';
+
+export type Setup = jest.Mocked<ReturnType<Plugin['setup']>>;
+export type Start = jest.Mocked<ReturnType<Plugin['start']>>;
 
 const autocompleteMock: any = {
   addProvider: jest.fn(),
@@ -25,7 +29,7 @@ const autocompleteMock: any = {
   clearProviders: jest.fn(),
 };
 
-const createSetupContract = () => {
+const createSetupContract = (): Setup => {
   const querySetupMock = queryServiceMock.createSetupContract();
   const setupContract = {
     autocomplete: autocompleteMock,
@@ -36,7 +40,7 @@ const createSetupContract = () => {
   return setupContract;
 };
 
-const createStartContract = () => {
+const createStartContract = (): Start => {
   const queryStartMock = queryServiceMock.createStartContract();
   const startContract = {
     autocomplete: autocompleteMock,
