@@ -18,7 +18,7 @@
  */
 
 import del from 'del';
-import {  existsSync, mkdirSync, statSync, writeFileSync } from 'fs';
+import fs, {  existsSync, mkdirSync, statSync, writeFileSync } from 'fs';
 import lodash from 'lodash';
 import { LogRotator } from './log_rotator';
 import { tmpdir } from 'os';
@@ -152,7 +152,37 @@ describe('LogRotator', () => {
     lodash.throttle.mockRestore();
   });
 
-  it.skip('rotates log file service correctly detects if it needs to use polling', async () => {
+  it('rotates log file service correctly detects usePolling when it should be false', async () => {
+    writeBytesToFile(testFilePath, 1);
 
+    const logRotator = new LogRotator(createLogRotatorConfig(testFilePath));
+    jest.spyOn(logRotator, '_sendReloadLogConfigSignal').mockImplementation(() => {});
+    await logRotator.start();
+
+    expect(logRotator.running).toBe(true);
+    expect(logRotator.usePolling).toBe(false);
+
+    const usePolling = await logRotator._shouldUsePolling();
+    expect(usePolling).toBe(false);
+
+    await logRotator.stop();
   });
+
+  it('rotates log file service correctly detects usePolling when it should be true', async () => {
+    writeBytesToFile(testFilePath, 1);
+
+    const logRotator = new LogRotator(createLogRotatorConfig(testFilePath));
+    jest.spyOn(logRotator, '_sendReloadLogConfigSignal').mockImplementation(() => {});
+    jest.spyOn(fs, 'watch').mockImplementation(() => ({
+      on: jest.fn(),
+      close: jest.fn()
+    }));
+
+    await logRotator.start();
+
+    expect(logRotator.running).toBe(true);
+    expect(logRotator.usePolling).toBe(true);
+
+    await logRotator.stop();
+  }, 20000);
 });
