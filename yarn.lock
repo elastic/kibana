@@ -26410,7 +26410,7 @@ style-loader@0.23.1, style-loader@^0.23.1:
     loader-utils "^1.1.0"
     schema-utils "^1.0.0"
 
-styled-components@5.0.0-rc.1:
+styled-components@^5.0.0-rc.1:
   version "5.0.0-rc.1"
   resolved "https://registry.yarnpkg.com/styled-components/-/styled-components-5.0.0-rc.1.tgz#c94f7f5b04a7d73875d86fcb07db434391a633c2"
   integrity sha512-8YpQtS+w1UmjJVjWx/fVFsyp22KT3rnNuMWRk9zIrjz+x8BSZVaIPLfpVSeG4p81LpH1cQTNSXAZ1lZwBHpRUQ==
