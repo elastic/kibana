@@ -35,7 +35,10 @@ import {
 
 import { format as formatUrl, parse as parseUrl } from 'url';
 
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { HttpStart } from 'kibana/public';
+import { i18n } from '@kbn/i18n';
+
 import { shortenUrl } from '../lib/url_shortener';
 
 interface Props {
@@ -44,7 +47,8 @@ interface Props {
   objectId?: string;
   objectType: string;
   shareableUrl?: string;
-  intl: InjectedIntl;
+  basePath: string;
+  post: HttpStart['post'];
 }
 
 enum ExportUrlAsType {
@@ -60,7 +64,7 @@ interface State {
   shortUrlErrorMsg?: string;
 }
 
-class UrlPanelContentUI extends Component<Props, State> {
+export class UrlPanelContent extends Component<Props, State> {
   private mounted?: boolean;
   private shortUrlCache?: string;
 
@@ -92,41 +96,43 @@ class UrlPanelContentUI extends Component<Props, State> {
 
   public render() {
     return (
-      <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareUrlForm">
-        {this.renderExportAsRadioGroup()}
+      <I18nProvider>
+        <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareUrlForm">
+          {this.renderExportAsRadioGroup()}
 
-        {this.renderShortUrlSwitch()}
+          {this.renderShortUrlSwitch()}
 
-        <EuiSpacer size="m" />
+          <EuiSpacer size="m" />
 
-        <EuiCopy
-          textToCopy={this.state.url || ''}
-          anchorClassName="kbnShareContextMenu__copyAnchor"
-        >
-          {(copy: () => void) => (
-            <EuiButton
-              fill
-              onClick={copy}
-              disabled={this.state.isCreatingShortUrl || this.state.url === ''}
-              data-share-url={this.state.url}
-              data-test-subj="copyShareUrlButton"
-              size="s"
-            >
-              {this.props.isEmbedded ? (
-                <FormattedMessage
-                  id="common.ui.share.urlPanel.copyIframeCodeButtonLabel"
-                  defaultMessage="Copy iFrame code"
-                />
-              ) : (
-                <FormattedMessage
-                  id="common.ui.share.urlPanel.copyLinkButtonLabel"
-                  defaultMessage="Copy link"
-                />
-              )}
-            </EuiButton>
-          )}
-        </EuiCopy>
-      </EuiForm>
+          <EuiCopy
+            textToCopy={this.state.url || ''}
+            anchorClassName="kbnShareContextMenu__copyAnchor"
+          >
+            {(copy: () => void) => (
+              <EuiButton
+                fill
+                onClick={copy}
+                disabled={this.state.isCreatingShortUrl || this.state.url === ''}
+                data-share-url={this.state.url}
+                data-test-subj="copyShareUrlButton"
+                size="s"
+              >
+                {this.props.isEmbedded ? (
+                  <FormattedMessage
+                    id="common.ui.share.urlPanel.copyIframeCodeButtonLabel"
+                    defaultMessage="Copy iFrame code"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="common.ui.share.urlPanel.copyLinkButtonLabel"
+                    defaultMessage="Copy link"
+                  />
+                )}
+              </EuiButton>
+            )}
+          </EuiCopy>
+        </EuiForm>
+      </I18nProvider>
     );
   }
 
@@ -240,7 +246,10 @@ class UrlPanelContentUI extends Component<Props, State> {
     });
 
     try {
-      const shortUrl = await shortenUrl(this.getSnapshotUrl());
+      const shortUrl = await shortenUrl(this.getSnapshotUrl(), {
+        basePath: this.props.basePath,
+        post: this.props.post,
+      });
       if (this.mounted) {
         this.shortUrlCache = shortUrl;
         this.setState(
@@ -258,13 +267,13 @@ class UrlPanelContentUI extends Component<Props, State> {
           {
             useShortUrl: false,
             isCreatingShortUrl: false,
-            shortUrlErrorMsg: this.props.intl.formatMessage(
+            shortUrlErrorMsg: i18n.translate(
+              'common.ui.share.urlPanel.unableCreateShortUrlErrorMessage',
               {
-                id: 'common.ui.share.urlPanel.unableCreateShortUrlErrorMessage',
                 defaultMessage: 'Unable to create short URL. Error: {errorMessage}',
-              },
-              {
-                errorMessage: fetchError.message,
+                values: {
+                  errorMessage: fetchError.message,
+                },
               }
             ),
           },
@@ -393,5 +402,3 @@ class UrlPanelContentUI extends Component<Props, State> {
     );
   };
 }
-
-export const UrlPanelContent = injectI18n(UrlPanelContentUI);

@@ -18,14 +18,15 @@
  */
 
 import { CoreStart, Plugin } from 'src/core/public';
+import { ShareActionsRegistry, ShareActionsRegistrySetup } from './services';
 import {
-  ShareActionsRegistry,
-  ShareActionsRegistrySetup,
-  ShareActionsRegistryStart,
-} from './services';
+  ShareActionsContextMenu,
+  ShareActionsContextMenuStart,
+} from './services/share_context_menu';
 
 export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
   private readonly shareActionsRegistry = new ShareActionsRegistry();
+  private readonly shareActionsContextMenu = new ShareActionsContextMenu();
 
   public async setup() {
     return {
@@ -35,7 +36,7 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
 
   public async start(core: CoreStart) {
     return {
-      ...this.shareActionsRegistry.start(),
+      ...this.shareActionsContextMenu.start(core, this.shareActionsRegistry.start()),
     };
   }
 }
@@ -44,4 +45,4 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
 export type SharePluginSetup = ShareActionsRegistrySetup;
 
 /** @public */
-export type SharePluginStart = ShareActionsRegistryStart;
+export type SharePluginStart = ShareActionsContextMenuStart;

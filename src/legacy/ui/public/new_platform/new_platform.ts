@@ -32,6 +32,7 @@ import {
   FeatureCatalogueSetup,
   FeatureCatalogueStart,
 } from '../../../../plugins/feature_catalogue/public';
+import { SharePluginSetup, SharePluginStart } from '../../../../plugins/share/public';
 
 export interface PluginsSetup {
   data: ReturnType<DataPlugin['setup']>;
@@ -40,6 +41,7 @@ export interface PluginsSetup {
   feature_catalogue: FeatureCatalogueSetup;
   inspector: InspectorSetup;
   uiActions: IUiActionsSetup;
+  share: SharePluginSetup;
 }
 
 export interface PluginsStart {
@@ -50,6 +52,7 @@ export interface PluginsStart {
   feature_catalogue: FeatureCatalogueStart;
   inspector: InspectorStart;
   uiActions: IUiActionsStart;
+  share: SharePluginStart;
 }
 
 export const npSetup = {

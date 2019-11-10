@@ -18,7 +18,7 @@
  */
 
 export { SharePluginSetup, SharePluginStart } from './plugin';
-export { ShareActionProps, ShareActionsProvider, ShareAction } from './services';
+export { ShareActionProps, ShareActionsProvider, ShareAction } from './types';
 import { SharePlugin } from './plugin';
 
 export const plugin = () => new SharePlugin();

@@ -36,7 +36,6 @@ import { wrapInI18nContext } from 'ui/i18n';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
 import { FeatureCatalogueRegistryProvider } from 'ui/registry/feature_catalogue';
-import { ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
 import { timefilter } from 'ui/timefilter';
 
 // Saved objects
@@ -62,6 +61,7 @@ const services = {
   toastNotifications: npStart.core.notifications.toasts,
   uiSettings: npStart.core.uiSettings,
 
+  share: npStart.plugins.share,
   data,
   embeddables,
   visualizations,
@@ -77,7 +77,6 @@ const services = {
   SavedObjectProvider,
   SavedObjectRegistryProvider,
   SavedObjectsClientProvider,
-  ShareContextMenuExtensionsRegistryProvider,
   timefilter,
   uiModules,
   uiRoutes,
@@ -107,6 +106,7 @@ export { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 export { getVisualizeLoader } from 'ui/visualize/loader';
 export { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
+export { unhashUrl } from 'ui/state_management/state_hashing';
 export {
   Container,
   Embeddable,

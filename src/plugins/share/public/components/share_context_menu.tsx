@@ -19,12 +19,15 @@
 
 import React, { Component } from 'react';
 
+import { I18nProvider } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenu } from '@elastic/eui';
 
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import { ShareAction, ShareActionProvider, ShareContextMenuPanelItem } from 'ui/share/share_action';
+import { HttpStart } from 'kibana/public';
+
 import { UrlPanelContent } from './url_panel_content';
+import { ShareAction, ShareContextMenuPanelItem } from '../types';
 
 interface Props {
   allowEmbed: boolean;
@@ -36,30 +39,31 @@ interface Props {
   sharingData: any;
   isDirty: boolean;
   onClose: () => void;
-  intl: InjectedIntl;
+  basePath: string;
+  post: HttpStart['post'];
 }
 
-class ShareContextMenuUI extends Component<Props> {
+export class ShareContextMenu extends Component<Props> {
   public render() {
     const { panels, initialPanelId } = this.getPanels();
     return (
-      <EuiContextMenu
-        initialPanelId={initialPanelId}
-        panels={panels}
-        data-test-subj="shareContextMenu"
-      />
+      <I18nProvider>
+        <EuiContextMenu
+          initialPanelId={initialPanelId}
+          panels={panels}
+          data-test-subj="shareContextMenu"
+        />
+      </I18nProvider>
     );
   }
 
   private getPanels = () => {
     const panels: EuiContextMenuPanelDescriptor[] = [];
     const menuItems: ShareContextMenuPanelItem[] = [];
-    const { intl } = this.props;
 
     const permalinkPanel = {
       id: panels.length + 1,
-      title: intl.formatMessage({
-        id: 'common.ui.share.contextMenu.permalinkPanelTitle',
+      title: i18n.translate('common.ui.share.contextMenu.permalinkPanelTitle', {
         defaultMessage: 'Permalink',
       }),
       content: (
@@ -67,12 +71,13 @@ class ShareContextMenuUI extends Component<Props> {
           allowShortUrl={this.props.allowShortUrl}
           objectId={this.props.objectId}
           objectType={this.props.objectType}
+          basePath={this.props.basePath}
+          post={this.props.post}
         />
       ),
     };
     menuItems.push({
-      name: intl.formatMessage({
-        id: 'common.ui.share.contextMenu.permalinksLabel',
+      name: i18n.translate('common.ui.share.contextMenu.permalinksLabel', {
         defaultMessage: 'Permalinks',
       }),
       icon: 'link',
@@ -84,8 +89,7 @@ class ShareContextMenuUI extends Component<Props> {
     if (this.props.allowEmbed) {
       const embedPanel = {
         id: panels.length + 1,
-        title: intl.formatMessage({
-          id: 'common.ui.share.contextMenu.embedCodePanelTitle',
+        title: i18n.translate('common.ui.share.contextMenu.embedCodePanelTitle', {
           defaultMessage: 'Embed Code',
         }),
         content: (
@@ -94,13 +98,14 @@ class ShareContextMenuUI extends Component<Props> {
             isEmbedded
             objectId={this.props.objectId}
             objectType={this.props.objectType}
+            basePath={this.props.basePath}
+            post={this.props.post}
           />
         ),
       };
       panels.push(embedPanel);
       menuItems.push({
-        name: intl.formatMessage({
-          id: 'common.ui.share.contextMenu.embedCodeLabel',
+        name: i18n.translate('common.ui.share.contextMenu.embedCodeLabel', {
           defaultMessage: 'Embed code',
         }),
         icon: 'console',
@@ -124,15 +129,12 @@ class ShareContextMenuUI extends Component<Props> {
     if (menuItems.length > 1) {
       const topLevelMenuPanel = {
         id: panels.length + 1,
-        title: intl.formatMessage(
-          {
-            id: 'common.ui.share.contextMenuTitle',
-            defaultMessage: 'Share this {objectType}',
-          },
-          {
+        title: i18n.translate('common.ui.share.contextMenuTitle', {
+          defaultMessage: 'Share this {objectType}',
+          values: {
             objectType: this.props.objectType,
-          }
-        ),
+          },
+        }),
         items: menuItems
           // Sorts ascending on sort order first and then ascending on name
           .sort((a, b) => {
@@ -163,5 +165,3 @@ class ShareContextMenuUI extends Component<Props> {
     return { panels, initialPanelId };
   };
 }
-
-export const ShareContextMenu = injectI18n(ShareContextMenuUI);
