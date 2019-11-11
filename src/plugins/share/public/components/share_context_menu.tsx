@@ -27,7 +27,7 @@ import { EuiContextMenu } from '@elastic/eui';
 import { HttpStart } from 'kibana/public';
 
 import { UrlPanelContent } from './url_panel_content';
-import { ShareAction, ShareContextMenuPanelItem } from '../types';
+import { ShareMenuItem, ShareContextMenuPanelItem } from '../types';
 
 interface Props {
   allowEmbed: boolean;
@@ -35,7 +35,7 @@ interface Props {
   objectId?: string;
   objectType: string;
   shareableUrl?: string;
-  shareActions: ShareAction[];
+  shareMenuItems: ShareMenuItem[];
   sharingData: any;
   isDirty: boolean;
   onClose: () => void;
@@ -73,6 +73,7 @@ export class ShareContextMenu extends Component<Props> {
           objectType={this.props.objectType}
           basePath={this.props.basePath}
           post={this.props.post}
+          shareableUrl={this.props.shareableUrl}
         />
       ),
     };
@@ -100,6 +101,7 @@ export class ShareContextMenu extends Component<Props> {
             objectType={this.props.objectType}
             basePath={this.props.basePath}
             post={this.props.post}
+            shareableUrl={this.props.shareableUrl}
           />
         ),
       };
@@ -114,7 +116,7 @@ export class ShareContextMenu extends Component<Props> {
       });
     }
 
-    this.props.shareActions.forEach(({ shareMenuItem, panel }) => {
+    this.props.shareMenuItems.forEach(({ shareMenuItem, panel }) => {
       const panelId = panels.length + 1;
       panels.push({
         ...panel,

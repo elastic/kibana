@@ -17,12 +17,13 @@
  * under the License.
  */
 
-import { registryMock } from './plugin.test.mocks';
+import { registryMock, managerMock } from './plugin.test.mocks';
 import { SharePlugin } from './plugin';
 import { CoreStart } from 'kibana/public';
 
 describe('SharePlugin', () => {
   beforeEach(() => {
+    managerMock.start.mockClear();
     registryMock.setup.mockClear();
     registryMock.start.mockClear();
   });
@@ -36,12 +37,16 @@ describe('SharePlugin', () => {
   });
 
   describe('start', () => {
-    test('wires up and returns registry', async () => {
+    test('wires up and returns show function, but not registry', async () => {
       const service = new SharePlugin();
       await service.setup();
       const start = await service.start({} as CoreStart);
       expect(registryMock.start).toHaveBeenCalled();
-      expect(start.getActions).toBeDefined();
+      expect(managerMock.start).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ getShareMenuItems: expect.any(Function) })
+      );
+      expect(start.showShareContextMenu).toBeDefined();
     });
   });
 });

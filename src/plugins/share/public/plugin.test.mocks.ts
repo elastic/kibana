@@ -17,9 +17,12 @@
  * under the License.
  */
 
-import { shareActionsRegistryMock } from './services/share_actions_registry.mock';
+import { shareMenuRegistryMock } from './services/share_menu_registry.mock';
+import { shareMenuManagerMock } from './services/share_menu_manager.mock';
 
-export const registryMock = shareActionsRegistryMock.create();
+export const registryMock = shareMenuRegistryMock.create();
+export const managerMock = shareMenuManagerMock.create();
 jest.doMock('./services', () => ({
-  ShareActionsRegistry: jest.fn(() => registryMock),
+  ShareMenuRegistry: jest.fn(() => registryMock),
+  ShareMenuManager: jest.fn(() => managerMock),
 }));

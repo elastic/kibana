@@ -17,45 +17,48 @@
  * under the License.
  */
 
-import { ShareAction, ShareActionProps, ShareActionsRegistry } from './share_actions_registry';
+import { ShareMenuRegistry } from './share_menu_registry';
+import { ShareMenuItem, ShareMenuItemProps } from '../types';
 
 describe('ShareActionsRegistry', () => {
   describe('setup', () => {
     test('throws when registering duplicate id', () => {
-      const setup = new ShareActionsRegistry().setup();
+      const setup = new ShareMenuRegistry().setup();
       setup.register({
         id: 'myTest',
-        getShareActions: () => [],
+        getShareMenuItems: () => [],
       });
       expect(() =>
         setup.register({
           id: 'myTest',
-          getShareActions: () => [],
+          getShareMenuItems: () => [],
         })
-      ).toThrowErrorMatchingInlineSnapshot();
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Share menu provider with id [myTest] has already been registered. Use a unique id."`
+      );
     });
   });
 
   describe('start', () => {
     describe('getActions', () => {
       test('returns a flat list of actions returned by all providers', () => {
-        const service = new ShareActionsRegistry();
+        const service = new ShareMenuRegistry();
         const registerFunction = service.setup().register;
-        const shareAction1 = {} as ShareAction;
-        const shareAction2 = {} as ShareAction;
-        const shareAction3 = {} as ShareAction;
+        const shareAction1 = {} as ShareMenuItem;
+        const shareAction2 = {} as ShareMenuItem;
+        const shareAction3 = {} as ShareMenuItem;
         const provider1Callback = jest.fn(() => [shareAction1]);
         const provider2Callback = jest.fn(() => [shareAction2, shareAction3]);
         registerFunction({
           id: 'myTest',
-          getShareActions: provider1Callback,
+          getShareMenuItems: provider1Callback,
         });
         registerFunction({
           id: 'myTest2',
-          getShareActions: provider2Callback,
+          getShareMenuItems: provider2Callback,
         });
-        const actionProps = {} as ShareActionProps;
-        expect(service.start().getActions(actionProps)).toEqual([
+        const actionProps = {} as ShareMenuItemProps;
+        expect(service.start().getShareMenuItems(actionProps)).toEqual([
           shareAction1,
           shareAction2,
           shareAction3,

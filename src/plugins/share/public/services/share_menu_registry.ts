@@ -17,33 +17,34 @@
  * under the License.
  */
 
-import { ShareActionProps, ShareActionsProvider } from '../types';
+import { ShareMenuItemProps, ShareMenuProvider } from '../types';
 
-export class ShareActionsRegistry {
-  private readonly shareActionsProviders = new Map<string, ShareActionsProvider>();
+export class ShareMenuRegistry {
+  private readonly shareMenuProviders = new Map<string, ShareMenuProvider>();
 
   public setup() {
     return {
-      register: (shareActionsProvider: ShareActionsProvider) => {
-        if (this.shareActionsProviders.has(shareActionsProvider.id)) {
+      register: (shareMenuProvider: ShareMenuProvider) => {
+        if (this.shareMenuProviders.has(shareMenuProvider.id)) {
           throw new Error(
-            `Share action provider with id [${shareActionsProvider.id}] has already been registered. Use a unique id.`
+            `Share menu provider with id [${shareMenuProvider.id}] has already been registered. Use a unique id.`
           );
         }
 
-        this.shareActionsProviders.set(shareActionsProvider.id, shareActionsProvider);
+        this.shareMenuProviders.set(shareMenuProvider.id, shareMenuProvider);
       },
     };
   }
 
   public start() {
     return {
-      getActions: (props: ShareActionProps) =>
-        Array.from(this.shareActionsProviders.values())
-          .flatMap(shareActionProvider => shareActionProvider.getShareActions(props))
+      getShareMenuItems: (props: ShareMenuItemProps) =>
+        Array.from(this.shareMenuProviders.values()).flatMap(shareActionProvider =>
+          shareActionProvider.getShareMenuItems(props)
+        ),
     };
   }
 }
 
-export type ShareActionsRegistrySetup = ReturnType<ShareActionsRegistry['setup']>;
-export type ShareActionsRegistryStart = ReturnType<ShareActionsRegistry['start']>;
+export type ShareMenuRegistrySetup = ReturnType<ShareMenuRegistry['setup']>;
+export type ShareMenuRegistryStart = ReturnType<ShareMenuRegistry['start']>;

@@ -17,35 +17,24 @@
  * under the License.
  */
 
-import { SharePluginSetup, SharePluginStart } from '../plugin';
-import { ShareActionsRegistry } from './share_actions_registry';
+import { ShareMenuManager, ShareMenuManagerStart } from './share_menu_manager';
 
-const createSetupMock = (): jest.Mocked<SharePluginSetup> => {
-  const setup = {
-    register: jest.fn(),
-  };
-  return setup;
-};
-
-const createStartMock = (): jest.Mocked<SharePluginStart> => {
+const createStartMock = (): jest.Mocked<ShareMenuManagerStart> => {
   const start = {
-    getActions: jest.fn(),
+    showShareContextMenu: jest.fn(),
   };
   return start;
 };
 
-const createMock = (): jest.Mocked<PublicMethodsOf<ShareActionsRegistry>> => {
+const createMock = (): jest.Mocked<PublicMethodsOf<ShareMenuManager>> => {
   const service = {
-    setup: jest.fn(),
     start: jest.fn(),
   };
-  service.setup.mockImplementation(createSetupMock);
   service.start.mockImplementation(createStartMock);
   return service;
 };
 
-export const shareActionsRegistryMock = {
-  createSetup: createSetupMock,
+export const shareMenuManagerMock = {
   createStart: createStartMock,
   create: createMock,
 };

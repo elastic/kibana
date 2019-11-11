@@ -11,20 +11,19 @@ import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import { npSetup } from 'ui/new_platform';
 import React from 'react';
 import chrome from 'ui/chrome';
-import { unhashUrl } from 'ui/state_management/state_hashing';
 import { ScreenCapturePanelContent } from '../components/screen_capture_panel_content';
-import { ShareActionProps } from '../../../../../../src/plugins/share/public';
+import { ShareMenuItemProps } from '../../../../../../src/plugins/share/public';
 
 async function reportingProvider() {
   const injector = await chrome.dangerouslyGetActiveInjector();
-  const getShareActions = ({
+  const getShareMenuItems = ({
     objectType,
     objectId,
     sharingData,
     isDirty,
     onClose,
     shareableUrl,
-  }: ShareActionProps) => {
+  }: ShareMenuItemProps) => {
     if (!['dashboard', 'visualization'].includes(objectType)) {
       return [];
     }
@@ -53,7 +52,6 @@ async function reportingProvider() {
 
     const getPngJobParams = () => {
       // Replace hashes with original RISON values.
-      const unhashedUrl = unhashUrl(window.location.href, getUnhashableStates());
       const relativeUrl = shareableUrl.replace(window.location.origin + chrome.getBasePath(), '');
 
       const browserTimezone =
@@ -87,6 +85,7 @@ async function reportingProvider() {
           sortOrder: 10,
         },
         panel: {
+          id: 'reportingPdfPanel',
           title: panelTitle,
           content: (
             <ScreenCapturePanelContent
@@ -115,7 +114,7 @@ async function reportingProvider() {
           sortOrder: 10,
         },
         panel: {
-          id: 'reportingPanel',
+          id: 'reportingPngPanel',
           title: panelTitle,
           content: (
             <ScreenCapturePanelContent
@@ -136,7 +135,7 @@ async function reportingProvider() {
 
   return {
     id: 'screenCaptureReports',
-    getShareActions,
+    getShareMenuItems,
   };
 }
 

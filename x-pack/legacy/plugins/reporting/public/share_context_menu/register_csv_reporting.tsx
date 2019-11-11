@@ -10,16 +10,16 @@ import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import React from 'react';
 import { npSetup } from 'ui/new_platform';
 import { ReportingPanelContent } from '../components/reporting_panel_content';
-import { ShareActionProps } from '../../../../../../src/plugins/share/public';
+import { ShareMenuItemProps } from '../../../../../../src/plugins/share/public';
 
 function reportingProvider() {
-  const getShareActions = ({
+  const getShareMenuItems = ({
     objectType,
     objectId,
     sharingData,
     isDirty,
     onClose,
-  }: ShareActionProps) => {
+  }: ShareMenuItemProps) => {
     if ('search' !== objectType) {
       return [];
     }
@@ -69,7 +69,7 @@ function reportingProvider() {
 
   return {
     id: 'csvReports',
-    getShareActions,
+    getShareMenuItems,
   };
 }
 

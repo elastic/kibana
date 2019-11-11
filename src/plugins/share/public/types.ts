@@ -25,13 +25,13 @@ import {
 /**
  * @public
  * Properties of the current object to share. Registered share
- * actions provider will provide suitable actions which have to
+ * menu providers will provide suitable items which have to
  * be rendered in an appropriate place by the caller.
  *
  * It is possible to use the static function `showShareContextMenu`
  * to render the menu as a popover.
  * */
-export interface ShareActionProps {
+export interface ShareMenuItemProps {
   objectType: string;
   objectId?: string;
   /**
@@ -53,7 +53,7 @@ export interface ShareActionProps {
  * @public
  * Eui context menu entry shown directly in the context menu. `sortOrder` is
  * used to order the individual items in a flat list returned by all registered
- * action providers.
+ * menu providers.
  * */
 export interface ShareContextMenuPanelItem extends EuiContextMenuPanelItemDescriptor {
   sortOrder: number;
@@ -61,23 +61,23 @@ export interface ShareContextMenuPanelItem extends EuiContextMenuPanelItemDescri
 
 /**
  * @public
- * Definition of an action item rendered in the share menu. `shareMenuItem` is shown
+ * Definition of a menu item rendered in the share menu. `shareMenuItem` is shown
  * directly in the context menu. If the item is clicked, the `panel` is shown.
  * */
-export interface ShareAction {
+export interface ShareMenuItem {
   shareMenuItem: ShareContextMenuPanelItem;
   panel: EuiContextMenuPanelDescriptor;
 }
 
 /** @public */
-export interface ShareActionsProvider {
+export interface ShareMenuProvider {
   readonly id: string;
 
-  getShareActions: (actionProps: ShareActionProps) => ShareAction[];
+  getShareMenuItems: (actionProps: ShareMenuItemProps) => ShareMenuItem[];
 }
 
 /** @public */
-export interface ShowProps extends Omit<ShareActionProps, 'onClose'> {
+export interface ShowProps extends Omit<ShareMenuItemProps, 'onClose'> {
   anchorElement: HTMLElement;
   allowEmbed: boolean;
   allowShortUrl: boolean;

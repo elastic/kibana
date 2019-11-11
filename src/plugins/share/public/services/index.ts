@@ -17,4 +17,5 @@
  * under the License.
  */
 
-export * from './share_actions_registry';
+export * from './share_menu_registry';
+export * from './share_menu_manager';

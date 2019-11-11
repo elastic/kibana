@@ -24,21 +24,21 @@ import { EuiWrappingPopover } from '@elastic/eui';
 
 import { CoreStart, HttpStart } from 'kibana/public';
 import { ShareContextMenu } from '../components/share_context_menu';
-import { ShareAction, ShowProps } from '../types';
-import { ShareActionsRegistryStart } from './share_actions_registry';
+import { ShareMenuItem, ShowProps } from '../types';
+import { ShareMenuRegistryStart } from './share_menu_registry';
 
-export class ShareActionsContextMenu {
+export class ShareMenuManager {
   private isOpen = false;
 
   private container = document.createElement('div');
 
-  start(core: CoreStart, shareRegistry: ShareActionsRegistryStart) {
+  start(core: CoreStart, shareRegistry: ShareMenuRegistryStart) {
     return {
       showShareContextMenu: (props: ShowProps) => {
-        const shareActions = shareRegistry.getActions({ ...props, onClose: this.onClose });
+        const menuItems = shareRegistry.getShareMenuItems({ ...props, onClose: this.onClose });
         this.showShareContextMenu({
           ...props,
-          shareActions,
+          menuItems,
           post: core.http.post,
           basePath: core.http.basePath.get(),
         });
@@ -59,11 +59,11 @@ export class ShareActionsContextMenu {
     objectType,
     sharingData,
     isDirty,
-    shareActions,
+    menuItems,
     shareableUrl,
     post,
     basePath,
-  }: ShowProps & { shareActions: ShareAction[]; post: HttpStart['post']; basePath: string }) {
+  }: ShowProps & { menuItems: ShareMenuItem[]; post: HttpStart['post']; basePath: string }) {
     if (this.isOpen) {
       this.onClose();
       return;
@@ -88,7 +88,7 @@ export class ShareActionsContextMenu {
             allowShortUrl={allowShortUrl}
             objectId={objectId}
             objectType={objectType}
-            shareActions={shareActions}
+            shareMenuItems={menuItems}
             sharingData={sharingData}
             shareableUrl={shareableUrl}
             isDirty={isDirty}
@@ -102,4 +102,4 @@ export class ShareActionsContextMenu {
     ReactDOM.render(element, this.container);
   }
 }
-export type ShareActionsContextMenuStart = ReturnType<ShareActionsContextMenu['start']>;
+export type ShareMenuManagerStart = ReturnType<ShareMenuManager['start']>;
