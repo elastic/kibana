@@ -37,8 +37,7 @@ import {
   EuiConfirmModal,
   EuiCallOut,
 } from '@elastic/eui';
-import { npStart } from 'ui/new_platform';
-import { SavedObject } from 'ui/saved_objects/saved_object';
+import { SavedObject, ToastsStart, UiSettingsClientContract } from 'kibana/public';
 
 export const EMPTY_FILTER = '';
 
@@ -61,6 +60,8 @@ export interface TableListViewProps {
   // update possible column types to something like (FieldDataColumn | ComputedColumn | ActionsColumn)[] when they have been added to EUI
   tableColumns: Column[];
   tableListTitle: string;
+  toastNotifications: ToastsStart;
+  uiSettings: UiSettingsClientContract;
 }
 
 export interface TableListViewState {
@@ -87,7 +88,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
   constructor(props: TableListViewProps) {
     super(props);
 
-    const initialPageSize = npStart.core.uiSettings.get('savedObjects:perPage');
+    const initialPageSize = props.uiSettings.get('savedObjects:perPage');
     this.pagination = {
       initialPageIndex: 0,
       initialPageSize,
@@ -101,7 +102,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
       isDeletingItems: false,
       showDeleteModal: false,
       showLimitError: false,
-      filter: this.props.initialFilter,
+      filter: props.initialFilter,
       selectedIds: [],
     };
   }
@@ -160,7 +161,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
       const itemsById = indexBy(this.state.items, 'id');
       await this.props.deleteItems(this.state.selectedIds.map(id => itemsById[id]));
     } catch (error) {
-      npStart.core.notifications.toasts.addDanger({
+      this.props.toastNotifications.addDanger({
         title: (
           <FormattedMessage
             id="kibana-react.table_list_view.listing.unableToDeleteDangerMessage"
@@ -354,9 +355,9 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
       ? {
           onSelectionChange: (obj: SavedObject[]) => {
             this.setState({
-              selectedIds: obj.map(item => {
-                return item.id;
-              }),
+              selectedIds: obj
+                .map(item => item.id)
+                .filter((id: undefined | string): id is string => Boolean(id)),
             });
           },
         }

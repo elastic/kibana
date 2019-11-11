@@ -27,7 +27,7 @@ import { EuiIcon, EuiBetaBadge, EuiLink, EuiButton, EuiEmptyPrompt } from '@elas
 
 import { getServices } from '../kibana_services';
 
-const { capabilities } = getServices();
+const { capabilities, toastNotifications, uiSettings } = getServices();
 
 class VisualizeListingTable extends Component {
   constructor(props) {
@@ -57,6 +57,8 @@ class VisualizeListingTable extends Component {
         tableListTitle={i18n.translate('kbn.visualize.listing.table.listTitle', {
           defaultMessage: 'Visualizations',
         })}
+        toastNotifications={toastNotifications}
+        uiSettings={uiSettings}
       />
     );
   }

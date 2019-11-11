@@ -24,7 +24,7 @@ import { Query } from 'src/legacy/core_plugins/data/public';
 import { esFilters } from '../../../../../../plugins/data/public';
 
 export interface SavedObjectDashboard extends SavedObject {
-  id: string;
+  id?: string;
   copyOnSave: boolean;
   timeRestore: boolean;
   timeTo?: string;

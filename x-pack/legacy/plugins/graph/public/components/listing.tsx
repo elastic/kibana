@@ -42,6 +42,7 @@ export function Listing(props: ListingProps) {
           props.createItem,
           props.coreStart.application
         )}
+        toastNotifications={props.coreStart.notifications.toasts}
         entityName={i18n.translate('xpack.graph.listing.table.entityName', {
           defaultMessage: 'graph',
         })}
@@ -51,6 +52,7 @@ export function Listing(props: ListingProps) {
         tableListTitle={i18n.translate('xpack.graph.listing.graphsTitle', {
           defaultMessage: 'Graphs',
         })}
+        uiSettings={props.coreStart.uiSettings}
       />
     </I18nProvider>
   );
