@@ -206,7 +206,7 @@ export default function({ getService }: FtrProviderContext) {
       },
     },
     {
-      // TODO: fix the categorization test as soon as Kibana and ES are in synch again
+      // TODO: fix and re-enable the categorization test as soon as Kibana and ES are in sync again
       skipTest: true,
       suiteTitle: 'with categorization detector and default datafeed settings',
       jobSource: 'ecommerce',
