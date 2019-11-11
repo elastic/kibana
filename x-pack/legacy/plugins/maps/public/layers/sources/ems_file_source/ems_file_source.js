@@ -146,9 +146,7 @@ export class EMSFileSource extends AbstractVectorSource {
   async getLeftJoinFields() {
     const emsFileLayer = await this.getEMSFileLayer();
     const fields = emsFileLayer.getFieldsInLanguage();
-    return fields.map(f => {
-      return { name: f.name, label: f.description };
-    });
+    return fields.map(f => this.createField({ fieldName: f.name }));
   }
 
   canFormatFeatureProperties() {

@@ -422,10 +422,7 @@ export class ESSearchSource extends AbstractESSource {
   async getLeftJoinFields() {
     const indexPattern = await this.getIndexPattern();
     // Left fields are retrieved from _source.
-    return getSourceFields(indexPattern.fields)
-      .map(field => {
-        return { name: field.name, label: field.name };
-      });
+    return getSourceFields(indexPattern.fields).map(field => this.createField({ fieldName: field.name }));
   }
 
   async getSupportedShapeTypes() {

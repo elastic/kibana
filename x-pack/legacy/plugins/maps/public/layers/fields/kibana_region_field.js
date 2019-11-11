@@ -6,14 +6,20 @@
 
 
 import { AbstractField } from './field';
+import { TooltipProperty } from '../tooltips/tooltip_property';
 
-//todo: need to be implemented
 export class KibanaRegionField extends AbstractField {
 
   static type = 'KIBANA_REGION';
 
-  async getType() {
-    return AbstractField.FIELD_TYPE.STRING;
+  async getLabel() {
+    const meta = await this._source.getVectorFileMeta();
+    const field = meta.fields.find(f => f.name === this._fieldName);
+    return field ? field.description : this._fieldName;
   }
 
+  async createTooltipProperty(value) {
+    const label = await this.getLabel();
+    return new TooltipProperty(this.getName(), label, value);
+  }
 }
