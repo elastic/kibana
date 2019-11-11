@@ -44,7 +44,6 @@ export const getInfraIpHref = (summary: MonitorSummary, basePath: string) => {
     }
     if (!Array.isArray(value)) {
       const expression = encodeURIComponent(`host.ip : ${value}`);
-      console.log("RET BASE", value);
       return addBasePath(
         basePath,
         `/app/infra#/infrastructure/inventory?waffleFilter=(expression:'${expression}',kind:kuery)`
