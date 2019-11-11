@@ -27,7 +27,7 @@ import {
 
 import { createIndexPatternCache } from './_pattern_cache';
 import { IndexPattern } from './index_pattern';
-import { IndexPatternsApiClient } from './index_patterns_api_client';
+import { IndexPatternsApiClient, GetFieldsOptions } from './index_patterns_api_client';
 
 const indexPatternCache = createIndexPatternCache();
 
@@ -87,6 +87,14 @@ export class IndexPatterns {
       fields.forEach((f: string) => (result[f] = obj[f] || idx(obj, _ => _.attributes[f])));
       return result;
     });
+  };
+
+  getFieldsForTimePattern = (options: GetFieldsOptions = {}) => {
+    return this.apiClient.getFieldsForTimePattern(options);
+  };
+
+  getFieldsForWildcard = (options: GetFieldsOptions = {}) => {
+    return this.apiClient.getFieldsForWildcard(options);
   };
 
   clearCache = (id?: string) => {

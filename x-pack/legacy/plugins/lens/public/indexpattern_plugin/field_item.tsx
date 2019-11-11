@@ -36,12 +36,13 @@ import {
   TooltipType,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { buildEsQuery, Filter, getEsQueryConfig } from '@kbn/es-query';
+import { buildEsQuery, getEsQueryConfig } from '@kbn/es-query';
 import {
+  esFilters,
+  FIELD_FORMAT_IDS,
+  KBN_FIELD_TYPES,
   ES_FIELD_TYPES,
   Query,
-  KBN_FIELD_TYPES,
-  FIELD_FORMAT_IDS,
 } from '../../../../../../src/plugins/data/public';
 import { DraggedField } from './indexpattern';
 import { DragDrop } from '../drag_drop';
@@ -59,7 +60,7 @@ export interface FieldItemProps {
   exists: boolean;
   query: Query;
   dateRange: DatasourceDataPanelProps['dateRange'];
-  filters: Filter[];
+  filters: esFilters.Filter[];
   hideDetails?: boolean;
 }
 

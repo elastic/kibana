@@ -21,9 +21,8 @@ import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
 import { npStart } from 'ui/new_platform';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import { BucketAggType } from './_bucket_agg_type';
+import { BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
 import { createFilterDateRange } from './create_filter/date_range';
-import { AggConfig } from '../agg_config';
 import { DateRangesParamEditor } from '../../vis/editors/default/controls/date_ranges';
 
 // @ts-ignore
@@ -71,7 +70,7 @@ export const dateRangeBucketAgg = new BucketAggType({
       name: 'field',
       type: 'field',
       filterFieldTypes: KBN_FIELD_TYPES.DATE,
-      default(agg: AggConfig) {
+      default(agg: IBucketAggConfig) {
         return agg.getIndexPattern().timeFieldName;
       },
     },
@@ -90,7 +89,7 @@ export const dateRangeBucketAgg = new BucketAggType({
       default: undefined,
       // Implimentation method is the same as that of date_histogram
       serialize: () => undefined,
-      write: (agg: AggConfig, output: Record<string, any>) => {
+      write: (agg: IBucketAggConfig, output: Record<string, any>) => {
         const field = agg.getParam('field');
         let tz = agg.getParam('time_zone');
 
