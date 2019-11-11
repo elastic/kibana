@@ -37,6 +37,7 @@ interface OwnProps {
  */
 interface StoreProps {
   count: SnapshotType;
+  lastRefresh: number;
   loading: boolean;
 }
 
@@ -53,11 +54,9 @@ interface DispatchProps {
  */
 type Props = OwnProps & StoreProps & DispatchProps;
 
-export const PresentationalComponent: React.FC<StoreProps & Pick<OwnProps, 'height'>> = ({
-  count,
-  height,
-  loading,
-}) => (
+export const PresentationalComponent: React.FC<
+  Pick<StoreProps, 'count' | 'loading'> & Pick<OwnProps, 'height'>
+> = ({ count, height, loading }) => (
   <ChartWrapper loading={loading} height={height}>
     <SnapshotHeading down={get<number>(count, 'down', 0)} total={get<number>(count, 'total', 0)} />
     <EuiSpacer size="xs" />
@@ -82,12 +81,13 @@ export const Container: React.FC<Props> = ({
   filters,
   height,
   statusFilter,
+  lastRefresh,
   loading,
   loadSnapshotCount,
 }: Props) => {
   useEffect(() => {
     loadSnapshotCount(dateRangeStart, dateRangeEnd, filters, statusFilter);
-  }, [dateRangeStart, dateRangeEnd, filters, statusFilter]);
+  }, [dateRangeStart, dateRangeEnd, filters, lastRefresh, statusFilter]);
   return <PresentationalComponent count={count} height={height} loading={loading} />;
 };
 
@@ -95,8 +95,12 @@ export const Container: React.FC<Props> = ({
  * Provides state to connected component.
  * @param state the root app state
  */
-const mapStateToProps = ({ snapshot: { count, loading } }: AppState): StoreProps => ({
+const mapStateToProps = ({
+  snapshot: { count, loading },
+  ui: { lastRefresh },
+}: AppState): StoreProps => ({
   count,
+  lastRefresh,
   loading,
 });
 
