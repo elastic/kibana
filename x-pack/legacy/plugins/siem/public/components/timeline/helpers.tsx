@@ -120,6 +120,11 @@ export const combineQueries = ({
     return {
       filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
     };
+  } else if (isEmpty(dataProviders) && isEmpty(kqlQuery.query) && !isEmpty(filters)) {
+    kuery.query = `@timestamp >= ${start} and @timestamp <= ${end}`;
+    return {
+      filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
+    };
   } else if (isEmpty(dataProviders) && !isEmpty(kqlQuery.query)) {
     kuery.query = `(${kqlQuery.query}) and @timestamp >= ${start} and @timestamp <= ${end}`;
     return {

@@ -87,6 +87,7 @@ export const oneTimelineQuery = gql`
         query
         exists
         bool
+        range
       }
       kqlMode
       kqlQuery {

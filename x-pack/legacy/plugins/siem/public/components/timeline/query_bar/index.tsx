@@ -101,7 +101,6 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
     useEffect(() => {
       let isSubscribed = true;
       const subscriptions = new Subscription();
-
       filterManager.setFilters(filters);
 
       subscriptions.add(

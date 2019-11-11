@@ -75,6 +75,7 @@ export const persistTimelineMutation = gql`
           query
           exists
           bool
+          range
         }
         kqlMode
         kqlQuery {

@@ -5115,6 +5115,8 @@ export namespace GetOneTimeline {
     exists: Maybe<string>;
 
     bool: Maybe<string>;
+
+    range: Maybe<string>;
   };
 
   export type Meta = {
@@ -5381,6 +5383,8 @@ export namespace PersistTimelineMutation {
     exists: Maybe<string>;
 
     bool: Maybe<string>;
+
+    range: Maybe<string>;
   };
 
   export type Meta = {
