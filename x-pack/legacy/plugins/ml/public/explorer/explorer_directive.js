@@ -19,14 +19,12 @@ import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
 import { I18nContext } from 'ui/i18n';
-import { timefilter } from 'ui/timefilter';
 
 import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
 import { TimeBuckets } from 'plugins/ml/util/time_buckets';
 
 import { getSelectedJobIds, jobSelectServiceFactory } from '../components/job_selector/job_select_service_utils';
 import { mlJobService } from '../services/job_service';
-import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
 
 import { interval$ } from '../components/controls/select_interval';
 import { severity$ } from '../components/controls/select_severity';
@@ -40,9 +38,6 @@ import { createJobs } from './explorer_utils';
 
 module.directive('mlExplorerDirective', function (config, globalState, $rootScope, $timeout, AppState) {
   function link($scope, element) {
-    timefilter.enableTimeRangeSelector();
-    timefilter.enableAutoRefreshSelector();
-
     const subscriptions = new Subscription();
 
     const { jobSelectService, unsubscribeFromGlobalState } = jobSelectServiceFactory(globalState);
@@ -166,20 +161,6 @@ module.directive('mlExplorerDirective', function (config, globalState, $rootScop
     // Listen for changes to job selection.
     $scope.jobSelectionUpdateInProgress = false;
 
-    subscriptions.add(mlTimefilterRefresh$.subscribe(() => {
-      if ($scope.jobSelectionUpdateInProgress === false) {
-        explorer$.next({ action: EXPLORER_ACTION.REDRAW });
-      }
-    }));
-
-    // Refresh all the data when the time range is altered.
-    subscriptions.add(timefilter.getFetch$().subscribe(() => {
-      if ($scope.jobSelectionUpdateInProgress === false) {
-        explorer$.next({ action: EXPLORER_ACTION.RELOAD });
-      }
-    }));
-
-
     // Load the job info needed by the dashboard, then do the first load.
     // Jobs load via route resolver
     function componentDidMountCallback() {
@@ -254,6 +235,7 @@ module.directive('mlExplorerDirective', function (config, globalState, $rootScop
     element.on('$destroy', () => {
       ReactDOM.unmountComponentAtNode(element[0]);
       $scope.$destroy();
+      subscriptions.unsubscribe();
       unsubscribeFromGlobalState();
       // Cancel listening for updates to the global nav state.
       // navListener();

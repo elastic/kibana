@@ -13,6 +13,7 @@ import PropTypes from 'prop-types';
 import React, { createRef } from 'react';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import DragSelect from 'dragselect/dist/ds.min.js';
+import { Subscription, Subject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 
@@ -96,12 +97,11 @@ import { ExplorerChartsContainer } from './explorer_charts/explorer_charts_conta
 // Anomalies Table
 import { AnomaliesTable } from '../components/anomalies_table/anomalies_table';
 
-import { ResizeChecker } from 'ui/resize_checker';
+import { ResizeChecker } from '../../../../../../src/plugins/kibana_utils/public';
 import { timefilter } from 'ui/timefilter';
 import { toastNotifications } from 'ui/notify';
 
 import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
-import { Subject } from 'rxjs';
 
 function mapSwimlaneOptionsToEuiOptions(options) {
   return options.map(option => ({
@@ -202,7 +202,13 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       explorer$.next({ action: EXPLORER_ACTION.REDRAW });
     }
 
+    subscriptions = new Subscription();
+    jobSelectionUpdateInProgress = false;
+
     componentDidMount() {
+      timefilter.enableTimeRangeSelector();
+      timefilter.enableAutoRefreshSelector();
+
       this.updateCharts = explorerChartsContainerServiceFactory((data) => {
         this.setState({
           chartsData: {
@@ -220,6 +226,12 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         this.updateExplorer();
       });
 
+      // Refresh all the data when the time range is altered.
+      this.subscriptions.add(timefilter.getFetch$().subscribe(() => {
+        this.resetCache();
+        this.updateExplorer();
+      }));
+
       // Required to redraw the time series chart when the container is resized.
       this.resizeChecker = new ResizeChecker(this.resizeRef.current);
       this.resizeChecker.on('resize', () => {
@@ -233,6 +245,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
     componentWillUnmount() {
       this._unsubscribeAll.next();
       this._unsubscribeAll.complete();
+      this.subscriptions.unsubscribe();
       this.resizeChecker.destroy();
     }
 
