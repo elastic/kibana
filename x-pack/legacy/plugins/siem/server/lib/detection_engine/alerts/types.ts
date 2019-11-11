@@ -7,7 +7,7 @@
 import { get } from 'lodash/fp';
 
 import Hapi from 'hapi';
-import { Filter } from '@kbn/es-query';
+import { esFilters } from '../../../../../../../../src/plugins/data/common';
 import { SIGNALS_ID } from '../../../../common/constants';
 import {
   Alert,
@@ -19,7 +19,7 @@ import { AlertsClient } from '../../../../../alerting/server/alerts_client';
 import { ActionsClient } from '../../../../../actions/server/actions_client';
 import { SearchResponse } from '../../types';
 
-export type PartialFilter = Partial<Filter>;
+export type PartialFilter = Partial<esFilters.Filter>;
 
 export interface SignalAlertParams {
   description: string;
@@ -37,6 +37,7 @@ export interface SignalAlertParams {
   references: string[];
   savedId: string | undefined;
   severity: string;
+  size: number | undefined;
   to: string;
   type: 'filter' | 'query' | 'saved_query';
 }
@@ -114,6 +115,12 @@ export type SearchTypes =
 export interface SignalSource {
   [key: string]: SearchTypes;
   '@timestamp': string;
+}
+
+export interface BulkResponse {
+  took: number;
+  errors: boolean;
+  items: unknown[];
 }
 
 export type SignalSearchResponse = SearchResponse<SignalSource>;

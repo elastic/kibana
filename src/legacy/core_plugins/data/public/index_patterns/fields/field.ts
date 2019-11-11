@@ -30,6 +30,11 @@ import { getNotifications } from '../services';
 
 import { getKbnFieldType } from '../../../../../../plugins/data/public';
 
+interface FieldSubType {
+  multi?: { parent: string };
+  nested?: { path: string };
+}
+
 export type FieldSpec = Record<string, any>;
 export interface FieldType {
   name: string;
@@ -47,8 +52,7 @@ export interface FieldType {
   visualizable?: boolean;
   readFromDocValues?: boolean;
   scripted?: boolean;
-  parent?: string;
-  subType?: string;
+  subType?: FieldSubType;
   displayName?: string;
   format?: any;
 }
@@ -68,8 +72,7 @@ export class Field implements FieldType {
   sortable?: boolean;
   visualizable?: boolean;
   scripted?: boolean;
-  parent?: string;
-  subType?: string;
+  subType?: FieldSubType;
   displayName?: string;
   format: any;
   routes: Record<string, string> = {
@@ -165,7 +168,6 @@ export class Field implements FieldType {
     obj.writ('conflictDescriptions');
 
     // multi info
-    obj.fact('parent');
     obj.fact('subType');
 
     return obj.create();
