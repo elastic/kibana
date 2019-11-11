@@ -47,7 +47,7 @@ import {
   APPLY_FILTER_TRIGGER,
 } from '../../../../../../plugins/embeddable/public';
 import { dispatchRenderComplete } from '../../../../../../plugins/kibana_utils/public';
-import { mapFilter } from '../../../../../../plugins/data/public';
+import { mapAndFlattenFilters } from '../../../../../../plugins/data/public';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -237,34 +237,16 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     }
 
     if (this.handler && dirty) {
-      const updatedParams: IExpressionLoaderParams = {
-        searchContext: {
-          type: 'kibana_context',
-          timeRange: this.timeRange,
-          query: this.input.query,
-          filters: this.input.filters,
-        },
-      };
-      this.expression = await buildPipeline(this.vis, {
-        searchSource: this.savedVisualization.searchSource,
-        timeRange: this.timeRange,
-      });
-
-      this.vis.filters = { timeRange: this.timeRange };
-
-      this.handler.update(this.expression, updatedParams);
+      this.updateHandler();
     }
   }
 
   /**
    *
    * @param {Element} domNode
-   * @param {ContainerState} containerState
    */
   public async render(domNode: HTMLElement) {
     this.timeRange = _.cloneDeep(this.input.timeRange);
-    this.query = this.input.query;
-    this.filters = this.input.filters;
 
     this.transferCustomizationsToUiState();
 
@@ -293,7 +275,8 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
 
     // this is a hack to make editor still work, will be removed once we clean up editor
     this.vis.hasInspector = () => {
-      if (['markdown', 'input_control_vis', 'metrics', 'vega'].includes(this.vis.type.name)) {
+      const visTypesWithoutInspector = ['markdown', 'input_control_vis', 'metrics', 'vega'];
+      if (visTypesWithoutInspector.includes(this.vis.type.name)) {
         return false;
       }
       return this.getInspectorAdapters();
@@ -301,42 +284,19 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
 
     this.vis.openInspector = this.openInspector;
 
-    this.vis.filters = { timeRange: this.timeRange };
-
-    const expressionParams: IExpressionLoaderParams = {
-      searchContext: {
-        filters: this.filters,
-        timeRange: this.timeRange,
-        query: this.query,
-        type: 'kibana_context',
-      },
-      extraHandlers: {
-        vis: this.vis,
-        uiState: this.uiState,
-      },
-    };
-
     const div = document.createElement('div');
     div.className = `visualize panel-content panel-content--fullWidth`;
     domNode.appendChild(div);
     this.domNode = div;
 
-    this.expression = await buildPipeline(this.vis, {
-      searchSource: this.savedVisualization.searchSource,
-      timeRange: this.timeRange,
-    });
-    if (!this.handler) {
-      this.handler = new expressions.ExpressionLoader(div, this.expression, expressionParams);
-    } else {
-      this.handler.update(this.expression, expressionParams);
-    }
+    this.handler = new expressions.ExpressionLoader(this.domNode);
 
     this.subscriptions.push(
       this.handler.events$.subscribe(async event => {
         if (this.actions[event.name]) {
           event.data.aggConfigs = getTableAggs(this.vis);
           const filters: esFilters.Filter[] = this.actions[event.name](event.data) || [];
-          const mappedFilters = filters.map(mapFilter);
+          const mappedFilters = mapAndFlattenFilters(filters);
           const timeFieldName = this.vis.indexPattern.timeFieldName;
 
           npStart.plugins.uiActions.executeTriggerActions(APPLY_FILTER_TRIGGER, {
@@ -374,6 +334,8 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
         dispatchRenderComplete(div);
       })
     );
+
+    this.updateHandler();
   }
 
   public destroy() {
@@ -393,19 +355,36 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     this.handleVisUpdate();
   };
 
+  private async updateHandler() {
+    const expressionParams: IExpressionLoaderParams = {
+      searchContext: {
+        type: 'kibana_context',
+        timeRange: this.timeRange,
+        query: this.input.query,
+        filters: this.input.filters,
+      },
+      extraHandlers: {
+        vis: this.vis,
+        uiState: this.uiState,
+      },
+    };
+    this.expression = await buildPipeline(this.vis, {
+      searchSource: this.savedVisualization.searchSource,
+      timeRange: this.timeRange,
+    });
+
+    this.vis.filters = { timeRange: this.timeRange };
+
+    this.handler.update(this.expression, expressionParams);
+  }
+
   private handleVisUpdate = async () => {
     if (this.appState) {
       this.appState.vis = this.savedVisualization.vis.getState();
       this.appState.save();
     }
 
-    if (this.handler) {
-      this.expression = await buildPipeline(this.vis, {
-        searchSource: this.savedVisualization.searchSource,
-        timeRange: this.timeRange,
-      });
-      this.handler.update(this.expression);
-    }
+    this.updateHandler();
   };
 
   private uiStateChangeHandler = () => {

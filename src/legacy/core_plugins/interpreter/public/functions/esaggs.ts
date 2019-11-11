@@ -23,8 +23,6 @@ import { AggConfigs } from 'ui/agg_types/agg_configs';
 import { createFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import chrome from 'ui/chrome';
 
-// need to get rid of angular from these
-// @ts-ignore
 import { Query, TimeRange, esFilters } from 'src/plugins/data/public';
 import { SearchSource } from '../../../../ui/public/courier/search_source';
 // @ts-ignore

@@ -58,7 +58,7 @@ app.config(stateManagementConfigProvider =>
 import { fromExpression } from '@kbn/interpreter/common';
 import { getInterpreter } from '../../../../../src/legacy/core_plugins/interpreter/public/interpreter';
 
-export const runPipeline = async (expression, context, handlers) => {
+const runPipeline = async (expression, context, handlers) => {
   const ast = fromExpression(expression);
   const { interpreter } = await getInterpreter();
   const pipelineResponse = await interpreter.interpretAst(ast, context, handlers);

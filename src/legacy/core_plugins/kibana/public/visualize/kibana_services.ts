@@ -47,6 +47,7 @@ import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_regis
 import { Vis } from 'ui/vis';
 import { SearchSource } from 'ui/courier';
 
+import { from } from 'rxjs';
 import { createUiStatsReporter, METRIC_TYPE } from '../../../ui_metric/public';
 import { start as visualizations } from '../../../visualizations/public/np_ready/public/legacy';
 import { start as data } from '../../../data/public/legacy';
@@ -123,14 +124,7 @@ export { StaticIndexPattern } from 'ui/index_patterns';
 export { AppState } from 'ui/state_management/app_state';
 export { VisType } from 'ui/vis';
 
-export interface VisSavedObject extends SavedObject {
-  vis: Vis;
-  description?: string;
-  searchSource: SearchSource;
-  title: string;
-  uiStateJSON?: string;
-  destroy: () => void;
-}
-
 // export const
 export { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
+
+export { VisSavedObject } from './embeddable/visualize_embeddable';

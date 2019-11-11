@@ -107,12 +107,6 @@ class VisualizationChart extends React.Component<VisualizationChartProps> {
 
     this.visualization = new Visualization(this.chartDiv.current, vis);
 
-    // In case the visualization implementation has an isLoaded function, we
-    // call that and wait for the result to resolve (in case it was a promise).
-    if (this.visualization && this.visualization.isLoaded) {
-      this.visualization.isLoaded();
-    }
-
     // We know that containerDiv.current will never be null, since we will always
     // have rendered and the div is always rendered into the tree (i.e. not
     // inside any condition).

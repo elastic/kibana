@@ -42,8 +42,8 @@ export class ExpressionLoader {
 
   constructor(
     element: HTMLElement,
-    expression: string | ExpressionAST,
-    params: IExpressionLoaderParams
+    expression?: string | ExpressionAST,
+    params?: IExpressionLoaderParams
   ) {
     this.dataSubject = new Subject();
     this.data$ = this.dataSubject.asObservable().pipe(share());
@@ -66,7 +66,9 @@ export class ExpressionLoader {
 
     this.setParams(params);
 
-    this.loadData(expression, this.params);
+    if (expression) {
+      this.loadData(expression, this.params);
+    }
   }
 
   destroy() {
@@ -121,7 +123,7 @@ export class ExpressionLoader {
     this.loadingSubject.next();
     if (expression) {
       this.loadData(expression, this.params);
-    } else {
+    } else if (this.data) {
       this.render(this.data);
     }
   }
