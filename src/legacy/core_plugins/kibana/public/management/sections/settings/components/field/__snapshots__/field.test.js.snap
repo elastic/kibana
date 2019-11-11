@@ -463,7 +463,7 @@ exports[`Field for boolean setting should render as read only if saving is disab
         display="row"
         error={null}
         fullWidth={false}
-        hasChildLabel={true}
+        hasChildLabel={false}
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
@@ -557,7 +557,7 @@ exports[`Field for boolean setting should render as read only with help text if 
         display="row"
         error={null}
         fullWidth={false}
-        hasChildLabel={true}
+        hasChildLabel={false}
         hasEmptyLabelSpace={false}
         helpText={
           <EuiText
@@ -650,7 +650,7 @@ exports[`Field for boolean setting should render custom setting icon if it is cu
         display="row"
         error={null}
         fullWidth={false}
-        hasChildLabel={true}
+        hasChildLabel={false}
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
@@ -722,7 +722,7 @@ exports[`Field for boolean setting should render default value if there is no us
         display="row"
         error={null}
         fullWidth={false}
-        hasChildLabel={true}
+        hasChildLabel={false}
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
@@ -816,7 +816,7 @@ exports[`Field for boolean setting should render user value if there is user val
         display="row"
         error={null}
         fullWidth={false}
-        hasChildLabel={true}
+        hasChildLabel={false}
         hasEmptyLabelSpace={false}
         helpText={
           <span>
