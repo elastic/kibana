@@ -43,6 +43,7 @@ const mockedDate = new Date('2019-02-12T21:01:22.479Z');
 function getMockData(overwrites: Record<string, any> = {}) {
   return {
     enabled: true,
+    name: 'abc',
     alertTypeId: '123',
     interval: '10s',
     throttle: null,
@@ -172,6 +173,7 @@ describe('create()', () => {
         "interval": "10s",
         "muteAll": false,
         "mutedInstanceIds": Array [],
+        "name": "abc",
         "throttle": null,
         "updatedBy": "elastic",
       }
@@ -504,6 +506,7 @@ describe('create()', () => {
           },
         ],
         alertTypeId: '123',
+        name: 'abc',
         alertTypeParams: { bar: true },
         apiKey: Buffer.from('123:abc').toString('base64'),
         apiKeyOwner: 'elastic',
@@ -1173,6 +1176,7 @@ describe('update()', () => {
       id: '1',
       data: {
         interval: '10s',
+        name: 'abc',
         alertTypeParams: {
           bar: true,
         },
@@ -1230,6 +1234,7 @@ describe('update()', () => {
         "apiKeyOwner": null,
         "enabled": true,
         "interval": "10s",
+        "name": "abc",
         "scheduledTaskId": "task-123",
         "updatedBy": "elastic",
       }
@@ -1304,6 +1309,7 @@ describe('update()', () => {
       id: '1',
       data: {
         interval: '10s',
+        name: 'abc',
         alertTypeParams: {
           bar: true,
         },
@@ -1362,6 +1368,7 @@ describe('update()', () => {
         "apiKeyOwner": "elastic",
         "enabled": true,
         "interval": "10s",
+        "name": "abc",
         "scheduledTaskId": "task-123",
         "updatedBy": "elastic",
       }
@@ -1406,6 +1413,7 @@ describe('update()', () => {
         id: '1',
         data: {
           interval: '10s',
+          name: 'abc',
           alertTypeParams: {
             bar: true,
           },
