@@ -67,7 +67,9 @@ export const EndpointsPage = () => {
   const showFiltered = useSelector(isFiltered);
   const filteredEndpoints = useSelector(filteredEndpointListData);
   const handleUserFilteredData = ({ updatedResult }: { updatedResult: any[] }) => {
-    dispatch(actions.userFilteredData({ filteredData: updatedResult, isFiltered: true }));
+    dispatch(
+      actions.userFilteredEndpointListData({ filteredData: updatedResult, isFiltered: true })
+    );
   };
 
   return (
