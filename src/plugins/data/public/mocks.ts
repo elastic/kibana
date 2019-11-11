@@ -48,8 +48,8 @@ const fieldFormatsMock: PublicMethodsOf<FieldFormatRegisty> = {
 
 const createSetupContract = (): Setup => {
   const querySetupMock = queryServiceMock.createSetupContract();
-  const setupContract: Setup = {
-    autocomplete: autocompleteMock as Setup['autocomplete'],
+  const setupContract = {
+    autocomplete: autocompleteMock,
     search: searchSetupMock,
     fieldFormats: fieldFormatsMock as Setup['fieldFormats'],
     query: querySetupMock,
@@ -60,8 +60,8 @@ const createSetupContract = (): Setup => {
 
 const createStartContract = (): Start => {
   const queryStartMock = queryServiceMock.createStartContract();
-  const startContract: Start = {
-    autocomplete: autocompleteMock as Start['autocomplete'],
+  const startContract = {
+    autocomplete: autocompleteMock,
     getSuggestions: jest.fn(),
     search: { search: jest.fn() },
     fieldFormats: fieldFormatsMock as Setup['fieldFormats'],
