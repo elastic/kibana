@@ -18,12 +18,12 @@
  */
 
 // @ts-ignore
-import { buildEsQuery, getEsQueryConfig, Filter } from '@kbn/es-query';
+import { buildEsQuery, getEsQueryConfig } from '@kbn/es-query';
 // @ts-ignore
 import { timezoneProvider } from 'ui/vis/lib/timezone';
 import { KIBANA_CONTEXT_NAME } from 'src/plugins/expressions/public';
 import { Query } from 'src/legacy/core_plugins/data/public';
-import { TimeRange } from 'src/plugins/data/public';
+import { TimeRange, esFilters } from 'src/plugins/data/public';
 import { VisParams } from 'ui/vis';
 import { i18n } from '@kbn/i18n';
 import { TimelionVisualizationDependencies } from '../plugin';
@@ -60,7 +60,7 @@ export function getTimelionRequestHandler(dependencies: TimelionVisualizationDep
     visParams,
   }: {
     timeRange: TimeRange;
-    filters: Filter[];
+    filters: esFilters.Filter[];
     query: Query;
     visParams: VisParams;
     forceFetch?: boolean;
