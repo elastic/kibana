@@ -4,5 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './snapshot';
-export * from './ui';
+import { fork } from 'redux-saga/effects';
+import { fetchSnapshotCountSaga } from './snapshot';
+
+export function* rootSaga() {
+  yield fork(fetchSnapshotCountSaga);
+}

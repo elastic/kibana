@@ -4,11 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SnapshotCount } from '../../../common/graphql/types';
-import { SnapshotActionTypes } from '../actions/snapshot';
+import { Snapshot } from '../../../common/runtime_types';
+import {
+  FETCH_SNAPSHOT_COUNT,
+  FETCH_SNAPSHOT_COUNT_FAIL,
+  FETCH_SNAPSHOT_COUNT_SUCCESS,
+  SnapshotActionTypes,
+} from '../actions';
 
 export interface SnapshotState {
-  count: SnapshotCount;
+  count: Snapshot;
+  errors: any[];
+  loading: boolean;
 }
 
 const initialState: SnapshotState = {
@@ -18,15 +25,29 @@ const initialState: SnapshotState = {
     total: 0,
     up: 0,
   },
+  errors: [],
+  loading: false,
 };
 
 export function snapshotReducer(state = initialState, action: SnapshotActionTypes): SnapshotState {
   switch (action.type) {
     case FETCH_SNAPSHOT_COUNT:
-      const { payload: }  
-    return {
+      return {
         ...state,
-        count
-      }
+        loading: true,
+      };
+    case FETCH_SNAPSHOT_COUNT_SUCCESS:
+      return {
+        ...state,
+        count: action.payload,
+        loading: false,
+      };
+    case FETCH_SNAPSHOT_COUNT_FAIL:
+      return {
+        ...state,
+        errors: [...state.errors, action.payload],
+      };
+    default:
+      return state;
   }
 }

@@ -6,8 +6,10 @@
 
 import { combineReducers } from 'redux';
 
+import { snapshotReducer } from './snapshot';
 import { uiReducer } from './ui';
 
 export const rootReducer = combineReducers({
+  snapshot: snapshotReducer,
   ui: uiReducer,
 });

@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SnapshotCount } from '../../../common/graphql/types';
-
+import { Snapshot } from '../../../common/runtime_types';
 export const FETCH_SNAPSHOT_COUNT = 'FETCH_SNAPSHOT_COUNT';
+export const FETCH_SNAPSHOT_COUNT_FAIL = 'FETCH_SNAPSHOT_COUNT_FAIL';
+export const FETCH_SNAPSHOT_COUNT_SUCCESS = 'FETCH_SNAPSHOT_COUNT_SUCCESS';
 
-interface GetSnapshotPayload {
+export interface GetSnapshotPayload {
+  basePath: string;
   dateRangeStart: string;
   dateRangeEnd: string;
   filters?: string;
@@ -17,12 +19,26 @@ interface GetSnapshotPayload {
 
 interface GetSnapshotCountAction {
   type: typeof FETCH_SNAPSHOT_COUNT;
-  payload: SnapshotCount;
+  payload: GetSnapshotPayload;
 }
 
-export type SnapshotActionTypes = GetSnapshotCountAction;
+interface GetSnapshotCountSuccessAction {
+  type: typeof FETCH_SNAPSHOT_COUNT_SUCCESS;
+  payload: Snapshot;
+}
+
+interface GetSnapshotCountFailAction {
+  type: typeof FETCH_SNAPSHOT_COUNT_FAIL;
+  payload: Error;
+}
+
+export type SnapshotActionTypes =
+  | GetSnapshotCountAction
+  | GetSnapshotCountSuccessAction
+  | GetSnapshotCountFailAction;
 
 export const fetchSnapshotCount = (
+  basePath: string,
   dateRangeStart: string,
   dateRangeEnd: string,
   filters?: string,
@@ -30,9 +46,15 @@ export const fetchSnapshotCount = (
 ): GetSnapshotCountAction => ({
   type: FETCH_SNAPSHOT_COUNT,
   payload: {
+    basePath,
     dateRangeStart,
     dateRangeEnd,
     filters,
     statusFilter,
   },
+});
+
+export const fetchSnapshotCountFail = (error: Error): GetSnapshotCountFailAction => ({
+  type: FETCH_SNAPSHOT_COUNT_FAIL,
+  payload: error,
 });

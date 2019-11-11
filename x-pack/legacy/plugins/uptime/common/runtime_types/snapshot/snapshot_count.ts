@@ -4,5 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './snapshot';
-export * from './ui';
+import * as t from 'io-ts';
+
+export const SnapshotType = t.partial({
+  down: t.number,
+  mixed: t.number,
+  total: t.number,
+  up: t.number,
+});
+
+export type Snapshot = t.TypeOf<typeof SnapshotType>;

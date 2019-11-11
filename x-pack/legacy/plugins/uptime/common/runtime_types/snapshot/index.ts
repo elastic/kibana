@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './snapshot';
-export * from './ui';
+export { Snapshot, SnapshotType } from './snapshot_count';
