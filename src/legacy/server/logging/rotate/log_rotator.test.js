@@ -168,13 +168,19 @@ describe('LogRotator', () => {
     await logRotator.stop();
   });
 
+
   it('rotates log file service correctly detects usePolling when it should be true', async () => {
     writeBytesToFile(testFilePath, 1);
 
     const logRotator = new LogRotator(createLogRotatorConfig(testFilePath));
     jest.spyOn(logRotator, '_sendReloadLogConfigSignal').mockImplementation(() => {});
+
     jest.spyOn(fs, 'watch').mockImplementation(() => ({
-      on: jest.fn(),
+      on: jest.fn((eventType, cb) => {
+        if (eventType === 'error') {
+          cb();
+        }
+      }),
       close: jest.fn()
     }));
 
@@ -184,5 +190,29 @@ describe('LogRotator', () => {
     expect(logRotator.usePolling).toBe(true);
 
     await logRotator.stop();
-  }, 20000);
+  });
+
+  it('rotates log file service correctly fallback to usePolling true after defined timeout', async () => {
+    jest.useFakeTimers();
+    writeBytesToFile(testFilePath, 1);
+
+    const logRotator = new LogRotator(createLogRotatorConfig(testFilePath));
+    jest.spyOn(logRotator, '_sendReloadLogConfigSignal').mockImplementation(() => {});
+    jest.spyOn(fs, 'watch').mockImplementation(() => ({
+      on: jest.fn((ev) => {
+        if (ev === 'error') {
+          jest.runTimersToTime(15000);
+        }
+      }),
+      close: jest.fn()
+    }));
+
+    await logRotator.start();
+
+    expect(logRotator.running).toBe(true);
+    expect(logRotator.usePolling).toBe(true);
+
+    await logRotator.stop();
+    jest.useRealTimers();
+  });
 });

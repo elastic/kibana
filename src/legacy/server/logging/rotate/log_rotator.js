@@ -110,6 +110,10 @@ export class LogRotator {
           await onResolve(resolve, false);
         });
 
+        testWatcher.on('error', async () => {
+          await onResolve(resolve, true);
+        });
+
         await writeFileAsync(tempFile, 'test');
       });
     } catch {
