@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { get } from 'lodash';
 import { DonutChart } from './charts';
@@ -13,6 +12,7 @@ import { Snapshot as SnapshotType } from '../../../common/graphql/types';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
 import { snapshotQuery } from '../../queries';
 import { ChartWrapper } from './charts/chart_wrapper';
+import { SnapshotHeading } from './snapshot_heading';
 
 const SNAPSHOT_CHART_WIDTH = 144;
 const SNAPSHOT_CHART_HEIGHT = 144;
@@ -31,18 +31,10 @@ export const SnapshotComponent = ({
   loading,
 }: UptimeGraphQLQueryProps<SnapshotQueryResult>) => (
   <ChartWrapper loading={loading}>
-    <EuiTitle size="s">
-      <h2>
-        <FormattedMessage
-          id="xpack.uptime.snapshot.downCountsMessage"
-          defaultMessage="{down}/{total} monitors are down"
-          values={{
-            down: get<number>(data, 'snapshot.counts.down', 0),
-            total: get<number>(data, 'snapshot.counts.total', 0),
-          }}
-        />
-      </h2>
-    </EuiTitle>
+    <SnapshotHeading
+      down={get<number>(data, 'snapshot.counts.down', 0)}
+      total={get<number>(data, 'snapshot.counts.total', 0)}
+    />
     <EuiSpacer size="xs" />
     <DonutChart
       up={get<number>(data, 'snapshot.counts.up', 0)}

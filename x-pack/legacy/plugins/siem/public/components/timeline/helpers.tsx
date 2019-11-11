@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Filter } from '@kbn/es-query';
 import { isEmpty, isNumber, get } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import { StaticIndexPattern } from 'ui/index_patterns';
-import { Query } from 'src/plugins/data/common';
+import { Query, esFilters } from 'src/plugins/data/public';
 
 import { escapeQueryValue, convertToBuildEsQuery, EsQueryConfig } from '../../lib/keury';
 
@@ -106,7 +105,7 @@ export const combineQueries = ({
   dataProviders: DataProvider[];
   indexPattern: StaticIndexPattern;
   browserFields: BrowserFields;
-  filters: Filter[];
+  filters: esFilters.Filter[];
   kqlQuery: Query;
   kqlMode: string;
   start: number;

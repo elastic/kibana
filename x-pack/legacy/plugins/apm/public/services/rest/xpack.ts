@@ -5,7 +5,6 @@
  */
 
 import { HttpServiceBase } from 'kibana/public';
-import { StringMap } from '../../../typings/common';
 import { callApi } from './callApi';
 
 export interface LicenseApiResponse {
@@ -13,11 +12,11 @@ export interface LicenseApiResponse {
     is_active: boolean;
   };
   features: {
-    beats_management?: StringMap;
-    graph?: StringMap;
-    grokdebugger?: StringMap;
-    index_management?: StringMap;
-    logstash?: StringMap;
+    beats_management?: Record<string, unknown>;
+    graph?: Record<string, unknown>;
+    grokdebugger?: Record<string, unknown>;
+    index_management?: Record<string, unknown>;
+    logstash?: Record<string, unknown>;
     ml?: {
       is_available: boolean;
       license_type: number;
@@ -25,12 +24,12 @@ export interface LicenseApiResponse {
       enable_links: boolean;
       show_links: boolean;
     };
-    reporting?: StringMap;
-    rollup?: StringMap;
-    searchprofiler?: StringMap;
-    security?: StringMap;
-    spaces?: StringMap;
-    tilemap?: StringMap;
+    reporting?: Record<string, unknown>;
+    rollup?: Record<string, unknown>;
+    searchprofiler?: Record<string, unknown>;
+    security?: Record<string, unknown>;
+    spaces?: Record<string, unknown>;
+    tilemap?: Record<string, unknown>;
     watcher?: {
       is_available: boolean;
       enable_links: boolean;

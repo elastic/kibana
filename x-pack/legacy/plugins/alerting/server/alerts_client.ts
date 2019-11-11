@@ -72,6 +72,7 @@ interface CreateOptions {
 interface UpdateOptions {
   id: string;
   data: {
+    name: string;
     interval: string;
     actions: AlertAction[];
     alertTypeParams: Record<string, any>;
