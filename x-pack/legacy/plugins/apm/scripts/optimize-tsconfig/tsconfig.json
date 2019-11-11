@@ -1,0 +1,11 @@
+{
+  "extends": "../../../apm.tsconfig.json",
+  "include": [
+    "./**/*",
+    "../../../typings/**/*"
+  ],
+  "exclude": [
+    "**/__fixtures__/**/*",
+    "./cypress/**/*"
+  ]
+}

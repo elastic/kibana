@@ -34,6 +34,7 @@ import { setAbsoluteRangeDatePicker as dispatchAbsoluteRangeDatePicker } from '.
 import { setIpDetailsTablesActivePageToZero as dispatchIpDetailsTablesActivePageToZero } from '../../../store/network/actions';
 import { SpyRoute } from '../../../utils/route/spy_routes';
 import { NetworkEmptyPage } from '../network_empty_page';
+import { NetworkHttpQueryTable } from './network_http_query_table';
 import { NetworkTopCountriesQueryTable } from './network_top_countries_query_table';
 import { NetworkTopNFlowQueryTable } from './network_top_n_flow_query_table';
 import { TlsQueryTable } from './tls_query_table';
@@ -216,6 +217,18 @@ export const IPDetailsComponent = React.memo<IPDetailsComponentProps>(
                     endDate={to}
                     filterQuery={filterQuery}
                     flowTarget={flowTarget}
+                    ip={ip}
+                    skip={isInitializing}
+                    startDate={from}
+                    type={networkModel.NetworkType.details}
+                    setQuery={setQuery}
+                  />
+
+                  <EuiSpacer />
+
+                  <NetworkHttpQueryTable
+                    endDate={to}
+                    filterQuery={filterQuery}
                     ip={ip}
                     skip={isInitializing}
                     startDate={from}
