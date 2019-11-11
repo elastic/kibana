@@ -26,7 +26,6 @@ import {
   FILTERABLE_EMBEDDABLE,
 } from '../lib/test_samples/embeddables/filterable_embeddable';
 import { ERROR_EMBEDDABLE_TYPE } from '../lib/embeddables/error_embeddable';
-import { Filter, FilterStateStore } from '@kbn/es-query';
 import { FilterableEmbeddableFactory } from '../lib/test_samples/embeddables/filterable_embeddable_factory';
 import { CONTACT_CARD_EMBEDDABLE } from '../lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory';
 import { SlowContactCardEmbeddableFactory } from '../lib/test_samples/embeddables/contact_card/slow_contact_card_embeddable_factory';
@@ -46,6 +45,7 @@ import {
 import { coreMock } from '../../../../core/public/mocks';
 import { testPlugin } from './test_plugin';
 import { of } from './helpers';
+import { esFilters } from '../../../../plugins/data/public';
 
 async function creatHelloWorldContainerAndEmbeddable(
   containerInput: ContainerInput = { id: 'hello', panels: {} },
@@ -437,8 +437,8 @@ test('Test nested reactions', async done => {
 
 test('Explicit embeddable input mapped to undefined will default to inherited', async () => {
   const { start } = await creatHelloWorldContainerAndEmbeddable();
-  const derivedFilter: Filter = {
-    $state: { store: FilterStateStore.APP_STATE },
+  const derivedFilter: esFilters.Filter = {
+    $state: { store: esFilters.FilterStateStore.APP_STATE },
     meta: { disabled: false, alias: 'name', negate: false },
     query: { match: {} },
   };

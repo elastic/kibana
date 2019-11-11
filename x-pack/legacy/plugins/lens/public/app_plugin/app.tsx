@@ -18,7 +18,6 @@ import {
   SavedQuery,
   Query,
 } from 'src/legacy/core_plugins/data/public';
-import { Filter } from '@kbn/es-query';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { start as navigation } from '../../../../../../src/legacy/core_plugins/navigation/public/legacy';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
@@ -26,6 +25,7 @@ import { Document, SavedObjectStore } from '../persistence';
 import { EditorFrameInstance } from '../types';
 import { NativeRenderer } from '../native_renderer';
 import { trackUiEvent } from '../lens_ui_telemetry';
+import { esFilters } from '../../../../../../src/plugins/data/public';
 
 interface State {
   isLoading: boolean;
@@ -40,7 +40,7 @@ interface State {
     toDate: string;
   };
   query: Query;
-  filters: Filter[];
+  filters: esFilters.Filter[];
   savedQuery?: SavedQuery;
 }
 

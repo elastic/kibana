@@ -21,8 +21,11 @@ import _ from 'lodash';
 import { EmbeddedVisualizeHandler } from 'ui/visualize/loader/embedded_visualize_handler';
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
-import { Filter } from '@kbn/es-query';
-import { TimeRange, onlyDisabledFiltersChanged } from '../../../../../../plugins/data/public';
+import {
+  TimeRange,
+  onlyDisabledFiltersChanged,
+  esFilters,
+} from '../../../../../../plugins/data/public';
 import { Query } from '../../../../data/public';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 
@@ -55,7 +58,7 @@ export interface VisualizeEmbeddableConfiguration {
 export interface VisualizeInput extends EmbeddableInput {
   timeRange?: TimeRange;
   query?: Query;
-  filters?: Filter[];
+  filters?: esFilters.Filter[];
   vis?: {
     colors?: { [key: string]: string };
   };
@@ -79,7 +82,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   private timeRange?: TimeRange;
   private query?: Query;
   private title?: string;
-  private filters?: Filter[];
+  private filters?: esFilters.Filter[];
   private visCustomizations: VisualizeInput['vis'];
   private subscription: Subscription;
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
