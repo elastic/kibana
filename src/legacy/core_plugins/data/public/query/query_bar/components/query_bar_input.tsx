@@ -33,7 +33,6 @@ import {
 
 import { InjectedIntl, injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { debounce, compact, isEqual } from 'lodash';
-import { documentationLinks } from 'ui/documentation_links';
 import { Toast } from 'src/core/public';
 import {
   AutocompleteSuggestion,
@@ -349,7 +348,7 @@ export class QueryBarInputUI extends Component<Props, State> {
       suggestion.field.subType.nested &&
       !this.services.storage.get('kibana.KQLNestedQuerySyntaxInfoOptOut')
     ) {
-      const notifications = this.services.notifications;
+      const { notifications, docLinks } = this.services;
 
       const onKQLNestedQuerySyntaxInfoOptOut = (toast: Toast) => {
         if (!this.services.storage) return;
@@ -357,7 +356,7 @@ export class QueryBarInputUI extends Component<Props, State> {
         notifications!.toasts.remove(toast);
       };
 
-      if (notifications) {
+      if (notifications && docLinks) {
         const toast = notifications.toasts.add({
           title: this.props.intl.formatMessage({
             id: 'data.query.queryBar.KQLNestedQuerySyntaxInfoTitle',
@@ -373,7 +372,7 @@ export class QueryBarInputUI extends Component<Props, State> {
                   Learn more in our {link}."
                   values={{
                     link: (
-                      <EuiLink href={documentationLinks.query.kueryQuerySyntax} target="_blank">
+                      <EuiLink href={docLinks.links.query.kueryQuerySyntax} target="_blank">
                         <FormattedMessage
                           id="data.query.queryBar.KQLNestedQuerySyntaxInfoDocLinkText"
                           defaultMessage="docs"

@@ -291,6 +291,9 @@ const $setupHelpExtensionAutoClear = (newPlatform: CoreStart) => (
   });
 
   $rootScope.$on('$routeChangeSuccess', () => {
+    if (isDummyWrapperRoute($route)) {
+      return;
+    }
     const current = $route.current || {};
 
     if (helpExtensionSetSinceRouteChange || (current.$$route && current.$$route.redirectTo)) {

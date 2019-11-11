@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { Filter } from '@kbn/es-query';
 import { IndexPatterns, IndexPattern, getServices } from '../../../kibana_services';
 import { reverseSortDir, SortDirection } from './utils/sorting';
 import { extractNanos, convertIsoToMillis } from './utils/date_conversion';
@@ -25,6 +24,7 @@ import { fetchHitsInInterval } from './utils/fetch_hits_in_interval';
 import { generateIntervals } from './utils/generate_intervals';
 import { getEsQuerySearchAfter } from './utils/get_es_query_search_after';
 import { getEsQuerySort } from './utils/get_es_query_sort';
+import { esFilters } from '../../../../../../../../plugins/data/public';
 
 export type SurrDocType = 'successors' | 'predecessors';
 export interface EsHitRecord {
@@ -67,7 +67,7 @@ function fetchContextProvider(indexPatterns: IndexPatterns) {
     tieBreakerField: string,
     sortDir: SortDirection,
     size: number,
-    filters: Filter[]
+    filters: esFilters.Filter[]
   ) {
     if (typeof anchor !== 'object' || anchor === null) {
       return [];
@@ -112,7 +112,7 @@ function fetchContextProvider(indexPatterns: IndexPatterns) {
     return documents;
   }
 
-  async function createSearchSource(indexPattern: IndexPattern, filters: Filter[]) {
+  async function createSearchSource(indexPattern: IndexPattern, filters: esFilters.Filter[]) {
     return new SearchSource()
       .setParent(false)
       .setField('index', indexPattern)
