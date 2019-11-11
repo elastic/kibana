@@ -1032,7 +1032,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
         const firstCount = await this.getVisualizationRenderingCount();
         log.debug(`-- firstCount=${firstCount}`);
 
-        await PageObjects.common.sleep(1000);
+        await PageObjects.common.sleep(2000);
 
         const secondCount = await this.getVisualizationRenderingCount();
         log.debug(`-- secondCount=${secondCount}`);
