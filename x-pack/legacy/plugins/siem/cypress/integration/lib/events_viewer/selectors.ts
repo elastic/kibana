@@ -14,7 +14,7 @@ export const EVENTS_VIEWER_FIELDS_BUTTON = `${EVENTS_VIEWER_PANEL} [data-test-su
 export const KQL_SEARCH_BAR = '[data-test-subj="queryInput"]';
 
 /** The Events Viewer Showing N events header subtitle */
-export const HEADER_SUBTITLE = `${EVENTS_VIEWER_PANEL} [data-test-subj="subtitle"]`;
+export const HEADER_SUBTITLE = `${EVENTS_VIEWER_PANEL} [data-test-subj="header-panel-subtitle"]`;
 
 /** The inspect query modal */
 export const INSPECT_MODAL = '[data-test-subj="modal-inspect-euiModal"]';
