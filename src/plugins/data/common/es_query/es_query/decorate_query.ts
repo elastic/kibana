@@ -17,23 +17,31 @@
  * under the License.
  */
 
-export function buildQueryFromFilters(filters: unknown[], indexPattern: unknown): unknown;
-export function buildEsQuery(
-  indexPattern: unknown,
-  queries: unknown,
-  filters: unknown,
-  config?: {
-    allowLeadingWildcards: boolean;
-    queryStringOptions: unknown;
-    ignoreFilterIfFieldNotInIndex: boolean;
-    dateFormatTZ?: string | null;
+import { extend, defaults } from 'lodash';
+import { getTimeZoneFromSettings } from '../utils';
+import { DslQuery, isEsQueryString } from './es_query_dsl';
+
+/**
+ * Decorate queries with default parameters
+ * @param query object
+ * @param queryStringOptions query:queryString:options from UI settings
+ * @param dateFormatTZ dateFormat:tz from UI settings
+ * @returns {object}
+ */
+
+export function decorateQuery(
+  query: DslQuery,
+  queryStringOptions: Record<string, any>,
+  dateFormatTZ?: string
+) {
+  if (isEsQueryString(query)) {
+    extend(query.query_string, queryStringOptions);
+    if (dateFormatTZ) {
+      defaults(query.query_string, {
+        time_zone: getTimeZoneFromSettings(dateFormatTZ),
+      });
+    }
   }
-): unknown;
-export function getEsQueryConfig(config: {
-  get: (name: string) => unknown;
-}): {
-  allowLeadingWildcards: boolean;
-  queryStringOptions: unknown;
-  ignoreFilterIfFieldNotInIndex: boolean;
-  dateFormatTZ?: string | null;
-};
+
+  return query;
+}

@@ -17,23 +17,16 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import { getTimeZoneFromSettings } from '../utils/get_time_zone_from_settings';
+import { isString } from 'lodash';
+import { DslQuery } from './es_query_dsl';
 
-/**
- * Decorate queries with default parameters
- * @param query object
- * @param queryStringOptions query:queryString:options from UI settings
- * @param dateFormatTZ dateFormat:tz from UI settings
- * @returns {object}
- */
-
-export function decorateQuery(query, queryStringOptions, dateFormatTZ = null) {
-  if (_.has(query, 'query_string.query')) {
-    _.extend(query.query_string, queryStringOptions);
-    if (dateFormatTZ) {
-      _.defaults(query.query_string, { time_zone: getTimeZoneFromSettings(dateFormatTZ) });
+export function luceneStringToDsl(query: string | any): DslQuery {
+  if (isString(query)) {
+    if (query.trim() === '') {
+      return { match_all: {} };
     }
+
+    return { query_string: { query } };
   }
 
   return query;

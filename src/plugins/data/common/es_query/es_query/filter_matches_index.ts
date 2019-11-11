@@ -17,30 +17,18 @@
  * under the License.
  */
 
-import { Filter, FilterMeta } from './meta_filter';
 import { IIndexPattern } from '../../index_patterns';
 import { IFieldType } from '../../fields';
+import { Filter } from '../filters';
 
-export type ExistsFilterMeta = FilterMeta;
-
-export interface FilterExistsProperty {
-  field: any;
+/*
+ * TODO: We should base this on something better than `filter.meta.key`. We should probably modify
+ * this to check if `filter.meta.index` matches `indexPattern.id` instead, but that's a breaking
+ * change.
+ */
+export function filterMatchesIndex(filter: Filter, indexPattern: IIndexPattern | null) {
+  if (!filter.meta || !indexPattern) {
+    return true;
+  }
+  return indexPattern.fields.some((field: IFieldType) => field.name === filter.meta.key);
 }
-
-export type ExistsFilter = Filter & {
-  meta: ExistsFilterMeta;
-  exists?: FilterExistsProperty;
-};
-
-export const isExistsFilter = (filter: any): filter is ExistsFilter => filter && filter.exists;
-
-export const buildExistsFilter = (field: IFieldType, indexPattern: IIndexPattern) => {
-  return {
-    meta: {
-      index: indexPattern.id,
-    },
-    exists: {
-      field: field.name,
-    },
-  } as ExistsFilter;
-};

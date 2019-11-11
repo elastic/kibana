@@ -17,28 +17,49 @@
  * under the License.
  */
 
-import { Filter, FilterMeta } from './meta_filter';
+import { has } from 'lodash';
 
-export type QueryStringFilterMeta = FilterMeta;
-
-export type QueryStringFilter = Filter & {
-  meta: QueryStringFilterMeta;
-  query?: {
-    query_string: {
-      query: string;
+export interface DslRangeQuery {
+  range: {
+    [name: string]: {
+      gte: number;
+      lte: number;
+      format: string;
     };
   };
-};
+}
 
-export const isQueryStringFilter = (filter: any): filter is QueryStringFilter =>
-  filter && filter.query && filter.query.query_string;
+export interface DslMatchQuery {
+  match: {
+    [name: string]: {
+      query: string;
+      operator: string;
+      zero_terms_query: string;
+    };
+  };
+}
 
-// Creates a filter corresponding to a raw Elasticsearch query DSL object
-export const buildQueryFilter = (query: QueryStringFilter['query'], index: string, alias: string) =>
-  ({
-    query,
-    meta: {
-      index,
-      alias,
-    },
-  } as QueryStringFilter);
+export interface DslQueryStringQuery {
+  query_string: {
+    query: string;
+    analyze_wildcard?: boolean;
+  };
+}
+
+export interface DslMatchAllQuery {
+  match_all: Record<string, string>;
+}
+
+export interface DslTermQuery {
+  term: Record<string, string>;
+}
+
+export type DslQuery =
+  | DslRangeQuery
+  | DslMatchQuery
+  | DslQueryStringQuery
+  | DslMatchAllQuery
+  | DslTermQuery;
+
+export const isEsQueryString = (query: any): query is DslQueryStringQuery =>
+  has(query, 'query_string.query');

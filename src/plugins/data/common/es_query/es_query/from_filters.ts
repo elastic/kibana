@@ -16,10 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import _ from 'lodash';
+import { isUndefined } from 'lodash';
 import { migrateFilter } from './migrate_filter';
 import { filterMatchesIndex } from './filter_matches_index';
+import { Filter, cleanFilter, isFilterDisabled } from '../filters';
+import { IIndexPattern } from '../../index_patterns';
 
 /**
  * Create a filter that can be reversed for filters with negate set
@@ -28,11 +29,12 @@ import { filterMatchesIndex } from './filter_matches_index';
  *                          through otherwise it will filter out
  * @returns {function}
  */
-const filterNegate = function (reverse) {
-  return function (filter) {
-    if (_.isUndefined(filter.meta) || _.isUndefined(filter.meta.negate)) return !reverse;
-    return filter.meta && filter.meta.negate === reverse;
-  };
+const filterNegate = (reverse: boolean) => (filter: Filter) => {
+  if (isUndefined(filter.meta) || isUndefined(filter.meta.negate)) {
+    return !reverse;
+  }
+
+  return filter.meta && filter.meta.negate === reverse;
 };
 
 /**
@@ -40,7 +42,7 @@ const filterNegate = function (reverse) {
  * @param  {Object} filter - The filter to translate
  * @return {Object} the query version of that filter
  */
-const translateToQuery = function (filter) {
+const translateToQuery = (filter: Filter) => {
   if (!filter) return;
 
   if (filter.query) {
@@ -50,17 +52,13 @@ const translateToQuery = function (filter) {
   return filter;
 };
 
-/**
- * Clean out any invalid attributes from the filters
- * @param {object} filter The filter to clean
- * @returns {object}
- */
-const cleanFilter = function (filter) {
-  return _.omit(filter, ['meta', '$state']);
-};
+export const buildQueryFromFilters = (
+  filters: Filter[] = [],
+  indexPattern: IIndexPattern | null,
+  ignoreFilterIfFieldNotInIndex: boolean = false
+) => {
+  filters = filters.filter(filter => filter && !isFilterDisabled(filter));
 
-export function buildQueryFromFilters(filters = [], indexPattern, ignoreFilterIfFieldNotInIndex) {
-  filters = filters.filter(filter => filter && !_.get(filter, ['meta', 'disabled']));
   return {
     must: [],
     filter: filters
@@ -68,17 +66,13 @@ export function buildQueryFromFilters(filters = [], indexPattern, ignoreFilterIf
       .filter(filter => !ignoreFilterIfFieldNotInIndex || filterMatchesIndex(filter, indexPattern))
       .map(translateToQuery)
       .map(cleanFilter)
-      .map(filter => {
-        return migrateFilter(filter, indexPattern);
-      }),
+      .map(filter => migrateFilter(filter, indexPattern)),
     should: [],
     must_not: filters
       .filter(filterNegate(true))
       .filter(filter => !ignoreFilterIfFieldNotInIndex || filterMatchesIndex(filter, indexPattern))
       .map(translateToQuery)
       .map(cleanFilter)
-      .map(filter => {
-        return migrateFilter(filter, indexPattern);
-      }),
+      .map(filter => migrateFilter(filter, indexPattern)),
   };
-}
+};

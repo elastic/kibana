@@ -17,12 +17,19 @@
  * under the License.
  */
 
-// TODO: We should base this on something better than `filter.meta.key`. We should probably modify
-// this to check if `filter.meta.index` matches `indexPattern.id` instead, but that's a breaking
-// change.
-export function filterMatchesIndex(filter, indexPattern) {
-  if (!filter.meta || !indexPattern) {
-    return true;
-  }
-  return indexPattern.fields.some(field => field.name === filter.meta.key);
+import { IFieldType } from '../fields';
+
+export interface IIndexPattern {
+  fields: IFieldType[];
+  title: string;
+  id?: string;
+  type?: string;
+  timeFieldName?: string;
+  fieldFormatMap?: Record<
+    string,
+    {
+      id: string;
+      params: unknown;
+    }
+  >;
 }

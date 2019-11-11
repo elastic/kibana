@@ -18,7 +18,8 @@
  */
 import { map, reduce, mapValues, get, keys, pick } from 'lodash';
 import { Filter, FilterMeta } from './meta_filter';
-import { Field, IndexPattern } from './types';
+import { IIndexPattern } from '../../index_patterns';
+import { IFieldType } from '../../fields';
 
 const OPERANDS_IN_RANGE = 2;
 
@@ -84,18 +85,18 @@ export const isScriptedRangeFilter = (filter: any): filter is RangeFilter => {
   return hasRangeKeys(params);
 };
 
-const formatValue = (field: Field, params: any[]) =>
+const formatValue = (field: IFieldType, params: any[]) =>
   map(params, (val: any, key: string) => get(operators, key) + format(field, val)).join(' ');
 
-const format = (field: Field, value: any) =>
+const format = (field: IFieldType, value: any) =>
   field && field.format && field.format.convert ? field.format.convert(value) : value;
 
 // Creates a filter where the value for the given field is in the given range
 // params should be an object containing `lt`, `lte`, `gt`, and/or `gte`
 export const buildRangeFilter = (
-  field: Field,
+  field: IFieldType,
   params: RangeFilterParams,
-  indexPattern: IndexPattern,
+  indexPattern: IIndexPattern,
   formattedValue?: string
 ): RangeFilter => {
   const filter: any = { meta: { index: indexPattern.id, params: {} } };
@@ -139,7 +140,7 @@ export const buildRangeFilter = (
   return filter as RangeFilter;
 };
 
-export const getRangeScript = (field: IndexPattern, params: RangeFilterParams) => {
+export const getRangeScript = (field: IFieldType, params: RangeFilterParams) => {
   const knownParams = pick(params, (val, key: any) => key in operators);
   let script = map(
     knownParams,

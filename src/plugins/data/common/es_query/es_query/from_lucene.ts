@@ -16,34 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { map } from 'lodash';
+import { decorateQuery } from './decorate_query';
+import { luceneStringToDsl } from './lucene_string_to_dsl';
+import { Query } from '../../query/types';
 
-import _ from 'lodash';
-import { getConvertedValueForField } from '../utils/filters';
+export function buildQueryFromLucene(
+  queries: Query[],
+  queryStringOptions: Record<string, any>,
+  dateFormatTZ?: string
+) {
+  const combinedQueries = map(queries, query => {
+    const queryDsl = luceneStringToDsl(query.query);
+    return decorateQuery(queryDsl, queryStringOptions, dateFormatTZ);
+  });
 
-export function migrateFilter(filter, indexPattern) {
-  if (filter.match) {
-    const fieldName = Object.keys(filter.match)[0];
-
-
-    if (isMatchPhraseFilter(filter, fieldName)) {
-      const params = _.get(filter, ['match', fieldName]);
-      if (indexPattern) {
-        const field = indexPattern.fields.find(f => f.name === fieldName);
-        if (field) {
-          params.query = getConvertedValueForField(field, params.query);
-        }
-      }
-      return {
-        match_phrase: {
-          [fieldName]: _.omit(params, 'type'),
-        },
-      };
-    }
-  }
-
-  return filter;
-}
-
-function isMatchPhraseFilter(filter, fieldName) {
-  return _.get(filter, ['match', fieldName, 'type']) === 'phrase';
+  return {
+    must: combinedQueries,
+    filter: [],
+    should: [],
+    must_not: [],
+  };
 }

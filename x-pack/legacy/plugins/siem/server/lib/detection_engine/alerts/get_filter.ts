@@ -4,11 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { buildEsQuery } from '@kbn/es-query';
-import { Query } from 'src/plugins/data/common/query';
 import { AlertServices } from '../../../../../alerting/server/types';
 import { SignalAlertParams, PartialFilter } from './types';
 import { assertUnreachable } from '../../../utils/build_query';
+import {
+  Query,
+  esQuery,
+  esFilters,
+  IIndexPattern,
+} from '../../../../../../../../src/plugins/data/common';
 
 export const getQueryFilter = (
   query: string,
@@ -19,7 +23,8 @@ export const getQueryFilter = (
   const indexPattern = {
     fields: [],
     title: index.join(),
-  };
+  } as IIndexPattern;
+
   const queries: Query[] = [{ query, language }];
   const config = {
     allowLeadingWildcards: true,
@@ -27,13 +32,12 @@ export const getQueryFilter = (
     ignoreFilterIfFieldNotInIndex: false,
     dateFormatTZ: 'Zulu',
   };
-  const esQuery = buildEsQuery(
-    indexPattern,
-    queries,
-    filters.filter(f => f.meta != null && f.meta.disabled === false),
-    config
+
+  const enabledFilters = ((filters as unknown) as esFilters.Filter[]).filter(
+    f => f && !esFilters.isFilterDisabled(f)
   );
-  return esQuery;
+
+  return esQuery.buildEsQuery(indexPattern, queries, enabledFilters, config);
 };
 
 interface GetFilterArgs {

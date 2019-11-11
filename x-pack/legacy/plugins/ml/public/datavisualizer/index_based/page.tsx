@@ -6,9 +6,6 @@
 
 import React, { FC, Fragment, useEffect, useState } from 'react';
 import { merge } from 'rxjs';
-
-// @ts-ignore
-import { decorateQuery, luceneStringToDsl } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 
 import { FieldType } from 'ui/index_patterns';
@@ -25,7 +22,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-
+import { esQuery } from '../../../../../../../src/plugins/data/public';
 import { NavigationMenu } from '../../components/navigation_menu';
 import { KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
 import { ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
@@ -194,8 +191,8 @@ export const Page: FC = () => {
           },
         };
       } else {
-        qry = luceneStringToDsl(qryString);
-        decorateQuery(qry, kibanaConfig.get('query:queryString:options'));
+        qry = esQuery.luceneStringToDsl(qryString);
+        esQuery.decorateQuery(qry, kibanaConfig.get('query:queryString:options'));
       }
 
       setSearchQuery(qry);

@@ -20,11 +20,20 @@
 import { mapExists } from './map_exists';
 import { mapQueryString } from './map_query_string';
 import { esFilters } from '../../../../../common/es_query';
+import { IIndexPattern, IFieldType } from '../../../../../common/types';
 
 describe('filter manager utilities', () => {
   describe('mapExists()', () => {
+    let indexPattern: IIndexPattern;
+
+    beforeEach(() => {
+      indexPattern = {
+        id: 'index',
+      } as IIndexPattern;
+    });
+
     test('should return the key and value for matching filters', async () => {
-      const filter = esFilters.buildExistsFilter({ name: '_type' }, 'index');
+      const filter = esFilters.buildExistsFilter({ name: '_type' } as IFieldType, indexPattern);
       const result = mapExists(filter);
 
       expect(result).toHaveProperty('key', '_type');

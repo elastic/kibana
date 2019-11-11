@@ -16,8 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { IFieldType } from '../../fields';
 
-export const fields = [
+export const fields: IFieldType[] = [
   {
     name: 'bytes',
     type: 'number',
@@ -317,4 +318,4 @@ export const fields = [
   },
 ];
 
-export const getField = (name: string) => fields.find(field => field.name === name);
+export const getField = (name: string) => fields.find(field => field.name === name) as IFieldType;

@@ -17,31 +17,36 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
-import { filterMatchesIndex } from '../filter_matches_index';
+import { Filter } from '../filters';
+import { filterMatchesIndex } from './filter_matches_index';
+import { IIndexPattern } from '../../index_patterns';
 
-describe('filterMatchesIndex', function () {
+describe('filterMatchesIndex', () => {
   it('should return true if the filter has no meta', () => {
-    const filter = {};
-    const indexPattern = { id: 'foo', fields: [{ name: 'bar' }] };
-    expect(filterMatchesIndex(filter, indexPattern)).to.be(true);
+    const filter = {} as Filter;
+    const indexPattern = { id: 'foo', fields: [{ name: 'bar' }] } as IIndexPattern;
+
+    expect(filterMatchesIndex(filter, indexPattern)).toBe(true);
   });
 
   it('should return true if no index pattern is passed', () => {
-    const filter = { meta: { index: 'foo', key: 'bar' } };
-    const indexPattern = undefined;
-    expect(filterMatchesIndex(filter, indexPattern)).to.be(true);
+    const filter = { meta: { index: 'foo', key: 'bar' } } as Filter;
+    const indexPattern = null;
+
+    expect(filterMatchesIndex(filter, indexPattern)).toBe(true);
   });
 
   it('should return true if the filter key matches a field name', () => {
-    const filter = { meta: { index: 'foo', key: 'bar' } };
-    const indexPattern = { id: 'foo', fields: [{ name: 'bar' }] };
-    expect(filterMatchesIndex(filter, indexPattern)).to.be(true);
+    const filter = { meta: { index: 'foo', key: 'bar' } } as Filter;
+    const indexPattern = { id: 'foo', fields: [{ name: 'bar' }] } as IIndexPattern;
+
+    expect(filterMatchesIndex(filter, indexPattern)).toBe(true);
   });
 
   it('should return false if the filter key does not match a field name', () => {
-    const filter = { meta: { index: 'foo', key: 'baz' } };
-    const indexPattern = { id: 'foo', fields: [{ name: 'bar' }] };
-    expect(filterMatchesIndex(filter, indexPattern)).to.be(false);
+    const filter = { meta: { index: 'foo', key: 'baz' } } as Filter;
+    const indexPattern = { id: 'foo', fields: [{ name: 'bar' }] } as IIndexPattern;
+
+    expect(filterMatchesIndex(filter, indexPattern)).toBe(false);
   });
 });

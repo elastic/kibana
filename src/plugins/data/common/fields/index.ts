@@ -17,30 +17,4 @@
  * under the License.
  */
 
-import { Filter, FilterMeta } from './meta_filter';
-import { IIndexPattern } from '../../index_patterns';
-import { IFieldType } from '../../fields';
-
-export type ExistsFilterMeta = FilterMeta;
-
-export interface FilterExistsProperty {
-  field: any;
-}
-
-export type ExistsFilter = Filter & {
-  meta: ExistsFilterMeta;
-  exists?: FilterExistsProperty;
-};
-
-export const isExistsFilter = (filter: any): filter is ExistsFilter => filter && filter.exists;
-
-export const buildExistsFilter = (field: IFieldType, indexPattern: IIndexPattern) => {
-  return {
-    meta: {
-      index: indexPattern.id,
-    },
-    exists: {
-      field: field.name,
-    },
-  } as ExistsFilter;
-};
+export * from './types';

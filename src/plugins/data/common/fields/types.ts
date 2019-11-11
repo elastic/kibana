@@ -17,30 +17,28 @@
  * under the License.
  */
 
-import { Filter, FilterMeta } from './meta_filter';
-import { IIndexPattern } from '../../index_patterns';
-import { IFieldType } from '../../fields';
-
-export type ExistsFilterMeta = FilterMeta;
-
-export interface FilterExistsProperty {
-  field: any;
+export interface IFieldSubType {
+  multi?: { parent: string };
+  nested?: { path: string };
 }
 
-export type ExistsFilter = Filter & {
-  meta: ExistsFilterMeta;
-  exists?: FilterExistsProperty;
-};
-
-export const isExistsFilter = (filter: any): filter is ExistsFilter => filter && filter.exists;
-
-export const buildExistsFilter = (field: IFieldType, indexPattern: IIndexPattern) => {
-  return {
-    meta: {
-      index: indexPattern.id,
-    },
-    exists: {
-      field: field.name,
-    },
-  } as ExistsFilter;
-};
+export interface IFieldType {
+  name: string;
+  type: string;
+  script?: string;
+  lang?: string;
+  count?: number;
+  // esTypes might be undefined on old index patterns that have not been refreshed since we added
+  // this prop. It is also undefined on scripted fields.
+  esTypes?: string[];
+  aggregatable?: boolean;
+  filterable?: boolean;
+  searchable?: boolean;
+  sortable?: boolean;
+  visualizable?: boolean;
+  readFromDocValues?: boolean;
+  scripted?: boolean;
+  subType?: IFieldSubType;
+  displayName?: string;
+  format?: any;
+}

@@ -20,9 +20,7 @@
 import { timefilter } from 'ui/timefilter';
 import { TimeRange } from 'src/plugins/data/public';
 import { Query } from 'src/legacy/core_plugins/data/public';
-import { buildEsQuery, getEsQueryConfig } from '@kbn/es-query';
-
-import { esFilters } from '../../../../plugins/data/public';
+import { esFilters, esQuery } from '../../../../plugins/data/public';
 
 // @ts-ignore
 import { VegaParser } from './data_model/vega_parser';
@@ -52,8 +50,8 @@ export function createVegaRequestHandler({
   return ({ timeRange, filters, query, visParams }: VegaRequestHandlerParams) => {
     timeCache.setTimeRange(timeRange);
 
-    const esQueryConfigs = getEsQueryConfig(uiSettings);
-    const filtersDsl = buildEsQuery(undefined, query, filters, esQueryConfigs);
+    const esQueryConfigs = esQuery.getEsQueryConfig(uiSettings);
+    const filtersDsl = esQuery.buildEsQuery(null, query, filters, esQueryConfigs);
     const vp = new VegaParser(visParams.spec, searchCache, timeCache, filtersDsl, serviceSettings);
 
     return vp.parseAsync();

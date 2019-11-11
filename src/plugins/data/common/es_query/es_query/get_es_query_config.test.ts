@@ -16,13 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { get } from 'lodash';
+import { getEsQueryConfig } from './get_es_query_config';
+import { UiSettingsClientContract } from 'kibana/public';
 
-import expect from '@kbn/expect';
-import { getEsQueryConfig } from '../get_es_query_config';
-
-const config = {
-  get(item) {
-    return config[item];
+const config = ({
+  get(item: string) {
+    return get(config, item);
   },
   'query:allowLeadingWildcards': {
     allowLeadingWildcards: true,
@@ -36,10 +36,10 @@ const config = {
   'dateFormat:tz': {
     dateFormatTZ: 'Browser',
   },
-};
+} as unknown) as UiSettingsClientContract;
 
-describe('getEsQueryConfig', function () {
-  it('should return the parameters of an Elasticsearch query config requested', function () {
+describe('getEsQueryConfig', () => {
+  test('should return the parameters of an Elasticsearch query config requested', () => {
     const result = getEsQueryConfig(config);
     const expected = {
       allowLeadingWildcards: {
@@ -55,12 +55,12 @@ describe('getEsQueryConfig', function () {
         queryStringOptions: {},
       },
     };
-    expect(result).to.eql(expected);
-    expect(result).to.have.keys(
-      'allowLeadingWildcards',
-      'dateFormatTZ',
-      'ignoreFilterIfFieldNotInIndex',
-      'queryStringOptions'
-    );
+
+    expect(result).toEqual(expected);
+
+    expect(result).toHaveProperty('allowLeadingWildcards');
+    expect(result).toHaveProperty('dateFormatTZ');
+    expect(result).toHaveProperty('ignoreFilterIfFieldNotInIndex');
+    expect(result).toHaveProperty('queryStringOptions');
   });
 });

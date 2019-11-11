@@ -4,17 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { buildEsQuery, fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { isEmpty, isString, flow } from 'lodash/fp';
-import { StaticIndexPattern } from 'ui/index_patterns';
-import { Query } from 'src/plugins/data/common';
-import { esFilters } from '../../../../../../../src/plugins/data/public';
+import {
+  Query,
+  esFilters,
+  esQuery,
+  IIndexPattern,
+} from '../../../../../../../src/plugins/data/public';
 
 import { KueryFilterQuery } from '../../store';
 
 export const convertKueryToElasticSearchQuery = (
   kueryExpression: string,
-  indexPattern: StaticIndexPattern
+  indexPattern: IIndexPattern
 ) => {
   try {
     return kueryExpression
@@ -68,29 +71,22 @@ export const escapeKuery = flow(
   escapeWhitespace
 );
 
-export interface EsQueryConfig {
-  allowLeadingWildcards: boolean;
-  queryStringOptions: unknown;
-  ignoreFilterIfFieldNotInIndex: boolean;
-  dateFormatTZ?: string | null;
-}
-
 export const convertToBuildEsQuery = ({
   config,
   indexPattern,
   queries,
   filters,
 }: {
-  config: EsQueryConfig;
-  indexPattern: StaticIndexPattern;
+  config: esQuery.EsQueryConfig;
+  indexPattern: IIndexPattern;
   queries: Query[];
   filters: esFilters.Filter[];
 }) => {
   try {
     return JSON.stringify(
-      buildEsQuery(indexPattern, queries, filters.filter(f => f.meta.disabled === false), {
+      esQuery.buildEsQuery(indexPattern, queries, filters.filter(f => f.meta.disabled === false), {
         ...config,
-        dateFormatTZ: null,
+        dateFormatTZ: undefined,
       })
     );
   } catch (exp) {
