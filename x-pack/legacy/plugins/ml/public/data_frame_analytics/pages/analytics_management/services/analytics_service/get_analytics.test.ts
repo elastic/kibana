@@ -13,7 +13,7 @@ jest.mock('ui/index_patterns', () => ({
 }));
 
 describe('get_analytics', () => {
-  it('should get analytics jobs stats', () => {
+  test('should get analytics jobs stats', () => {
     // arrange
     const mockResponse: GetDataFrameAnalyticsStatsResponseOk = {
       count: 2,
