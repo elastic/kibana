@@ -16,7 +16,7 @@ export interface GetSnapshotPayload {
   statusFilter?: string;
 }
 
-interface GetSnapshotCountAction {
+interface GetSnapshotCountFetchAction {
   type: typeof FETCH_SNAPSHOT_COUNT;
   payload: GetSnapshotPayload;
 }
@@ -32,7 +32,7 @@ interface GetSnapshotCountFailAction {
 }
 
 export type SnapshotActionTypes =
-  | GetSnapshotCountAction
+  | GetSnapshotCountFetchAction
   | GetSnapshotCountSuccessAction
   | GetSnapshotCountFailAction;
 
@@ -41,7 +41,7 @@ export const fetchSnapshotCount = (
   dateRangeEnd: string,
   filters?: string,
   statusFilter?: string
-): GetSnapshotCountAction => ({
+): GetSnapshotCountFetchAction => ({
   type: FETCH_SNAPSHOT_COUNT,
   payload: {
     dateRangeStart,
