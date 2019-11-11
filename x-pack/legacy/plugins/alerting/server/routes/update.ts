@@ -15,6 +15,7 @@ interface UpdateRequest extends Hapi.Request {
   };
   payload: {
     alertTypeId: string;
+    name: string;
     interval: string;
     actions: AlertAction[];
     alertTypeParams: Record<string, any>;
@@ -36,6 +37,7 @@ export const updateAlertRoute = {
           throttle: getDurationSchema()
             .required()
             .allow(null),
+          name: Joi.string().required(),
           interval: getDurationSchema().required(),
           alertTypeParams: Joi.object().required(),
           actions: Joi.array()
