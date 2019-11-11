@@ -9,8 +9,8 @@ import { Action } from 'redux-actions';
 import {
   FETCH_SNAPSHOT_COUNT,
   FETCH_SNAPSHOT_COUNT_FAIL,
-  GetSnapshotPayload,
   FETCH_SNAPSHOT_COUNT_SUCCESS,
+  GetSnapshotPayload,
 } from '../actions';
 import { fetchSnapshotCount } from '../api';
 import { getBasePath } from '../selectors';
