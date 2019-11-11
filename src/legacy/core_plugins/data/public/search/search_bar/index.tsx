@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { esFilters } from '../../../../../../plugins/data/public';
-import { RefreshInterval, TimeRange, Query } from 'src/plugins/data/public';
+import { RefreshInterval, TimeRange, Query, esFilters } from 'src/plugins/data/public';
 
 export * from './components';
 

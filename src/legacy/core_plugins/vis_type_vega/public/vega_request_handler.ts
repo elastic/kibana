@@ -19,9 +19,7 @@
 
 import { timefilter } from 'ui/timefilter';
 
-// @ts-ignore
 import { buildEsQuery, getEsQueryConfig } from '@kbn/es-query';
-
 import { esFilters, TimeRange, Query } from '../../../../plugins/data/public';
 
 // @ts-ignore
