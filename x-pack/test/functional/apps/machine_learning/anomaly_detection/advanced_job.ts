@@ -206,6 +206,8 @@ export default function({ getService }: FtrProviderContext) {
       },
     },
     {
+      // TODO: fix the categorization test as soon as Kibana and ES are in synch again
+      skipTest: true,
       suiteTitle: 'with categorization detector and default datafeed settings',
       jobSource: 'ecommerce',
       jobId: `ec_advanced_2_${Date.now()}`,
@@ -285,7 +287,9 @@ export default function({ getService }: FtrProviderContext) {
       await ml.api.cleanMlIndices();
     });
 
-    for (const testData of testDataList) {
+    for (const testData of testDataList.filter(td => {
+      return td.skipTest !== true;
+    })) {
       describe(`${testData.suiteTitle}`, function() {
         it('job creation loads the job management page', async () => {
           await ml.navigation.navigateToMl();
