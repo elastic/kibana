@@ -29,11 +29,9 @@ const APP_ID = 'siem';
 export const amMocking = (): boolean => process.env.INGEST_MOCKS === 'true';
 
 export const initServerWithKibana = (kbnServer: Server) => {
-  const { newPlatform } = kbnServer;
-
   if (kbnServer.plugins.alerting != null) {
     const type = signalsAlertType({
-      logger: newPlatform.coreContext.logger.get('plugins', APP_ID),
+      logger: kbnServer.newPlatform.coreContext.logger.get('plugins', APP_ID),
     });
     if (isAlertExecutor(type)) {
       kbnServer.plugins.alerting.setup.registerType(type);
