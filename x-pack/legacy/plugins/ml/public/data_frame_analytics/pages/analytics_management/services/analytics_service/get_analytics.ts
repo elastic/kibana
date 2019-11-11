@@ -85,7 +85,7 @@ export function getInitialAnalyticsStats(): AnalyticStatsBarStats {
  */
 export function getAnalyticsJobsStats(
   analyticsStats: GetDataFrameAnalyticsStatsResponseOk
-): AnalyticStatsBarStats | undefined {
+): AnalyticStatsBarStats {
   const resultStats: AnalyticStatsBarStats = analyticsStats.data_frame_analytics.reduce(
     (acc, { state }) => {
       if (isDataFrameAnalyticsFailed(state)) {
@@ -99,6 +99,7 @@ export function getAnalyticsJobsStats(
     },
     getInitialAnalyticsStats()
   );
+  resultStats.failed.show = resultStats.failed.value > 0;
   resultStats.total.value = analyticsStats.count;
   return resultStats;
 }
