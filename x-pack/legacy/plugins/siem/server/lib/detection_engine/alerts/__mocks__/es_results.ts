@@ -24,7 +24,7 @@ export const sampleSignalAlertParams = (maxSignals: number | undefined): SignalA
   filter: undefined,
   filters: undefined,
   savedId: undefined,
-  size: undefined,
+  size: 1000,
 });
 
 export const sampleDocNoSortId: SignalSourceHit = {

@@ -86,7 +86,7 @@ export const singleSearchAfter = async (
       from: params.from,
       to: params.to,
       filter: params.filter,
-      size: params.size ? params.size : 1,
+      size: params.size ? params.size : 1000,
       maxDocs: params.maxSignals,
       searchAfterSortId,
     });
