@@ -55,6 +55,7 @@ export function initVisualizeApp(app, deps) {
 
   app.config(function ($routeProvider) {
     const defaults = {
+      reloadOnSearch: false,
       requireUICapability: 'visualize.show',
       badge: () => {
         if (deps.visualizeCapabilities.save) {
