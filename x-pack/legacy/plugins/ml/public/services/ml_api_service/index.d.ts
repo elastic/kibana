@@ -9,7 +9,7 @@ import { AggFieldNamePair } from '../../../common/types/fields';
 import { ExistingJobsAndGroups } from '../job_service';
 import { PrivilegesResponse } from '../../../common/types/privileges';
 import { MlSummaryJobs } from '../../../common/types/jobs';
-import { MlServerDefaults, MlServerLimits } from '../ml_server_info';
+import { MlServerDefaults, MlServerLimits } from '../../jobs/new_job_new/utils/new_job_defaults';
 import { ES_AGGREGATION } from '../../../common/constants/aggregation_types';
 
 // TODO This is not a complete representation of all methods of `ml.*`.
