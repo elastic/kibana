@@ -145,7 +145,7 @@ const FileDownloadModal = (props: FileDownloadModalProps) => {
                 <FileDownloadRow
                   key={`file_${f}`}
                   overallStatus={downloadStatus.overall}
-                  fileName={f}
+                  fileName={fileType === 'pcap' ? `${f}.pcap` : f}
                   fileStatus={downloadStatus.fileStatuses[f]}
                 />
               ))}
