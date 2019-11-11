@@ -41,7 +41,6 @@ export const UptimeDatePicker = (props: UptimeDatePickerProps) => {
         updateUrl({ dateRangeStart: start, dateRangeEnd: end });
         refreshApp();
       }}
-      // @ts-ignore onRefresh is not defined on EuiSuperDatePicker's type yet
       onRefresh={refreshApp}
       onRefreshChange={({ isPaused, refreshInterval }: SuperDateRangePickerRefreshChangedEvent) => {
         updateUrl({
