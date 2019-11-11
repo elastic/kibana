@@ -49,53 +49,53 @@ export const FieldsConfigurationPanel = ({
       </h3>
     </EuiTitle>
     <EuiSpacer size="m" />
+    <EuiDescribedFormGroup
+      idAria="timestampField"
+      title={
+        <FormattedMessage
+          id="xpack.infra.sourceConfiguration.timestampFieldLabel"
+          defaultMessage="Timestamp"
+        />
+      }
+      description={
+        <FormattedMessage
+          id="xpack.infra.sourceConfiguration.timestampFieldDescription"
+          defaultMessage="Timestamp used to sort log entries"
+        />
+      }
+    >
+      <EuiFormRow
+        describedByIds={['timestampField']}
+        error={timestampFieldProps.error}
+        fullWidth
+        helpText={
+          <FormattedMessage
+            id="xpack.infra.sourceConfiguration.timestampFieldRecommendedValue"
+            defaultMessage="The recommended value is {defaultValue}"
+            values={{
+              defaultValue: <EuiCode>@timestamp</EuiCode>,
+            }}
+          />
+        }
+        isInvalid={timestampFieldProps.isInvalid}
+        label={
+          <FormattedMessage
+            id="xpack.infra.sourceConfiguration.timestampFieldLabel"
+            defaultMessage="Timestamp"
+          />
+        }
+      >
+        <EuiFieldText
+          fullWidth
+          disabled={isLoading}
+          readOnly={readOnly}
+          isLoading={isLoading}
+          {...timestampFieldProps}
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
     {displaySettings === 'logs' && (
       <>
-        <EuiDescribedFormGroup
-          idAria="timestampField"
-          title={
-            <FormattedMessage
-              id="xpack.infra.sourceConfiguration.timestampFieldLabel"
-              defaultMessage="Timestamp"
-            />
-          }
-          description={
-            <FormattedMessage
-              id="xpack.infra.sourceConfiguration.timestampFieldDescription"
-              defaultMessage="Timestamp used to sort log entries"
-            />
-          }
-        >
-          <EuiFormRow
-            describedByIds={['timestampField']}
-            error={timestampFieldProps.error}
-            fullWidth
-            helpText={
-              <FormattedMessage
-                id="xpack.infra.sourceConfiguration.timestampFieldRecommendedValue"
-                defaultMessage="The recommended value is {defaultValue}"
-                values={{
-                  defaultValue: <EuiCode>@timestamp</EuiCode>,
-                }}
-              />
-            }
-            isInvalid={timestampFieldProps.isInvalid}
-            label={
-              <FormattedMessage
-                id="xpack.infra.sourceConfiguration.timestampFieldLabel"
-                defaultMessage="Timestamp"
-              />
-            }
-          >
-            <EuiFieldText
-              fullWidth
-              disabled={isLoading}
-              readOnly={readOnly}
-              isLoading={isLoading}
-              {...timestampFieldProps}
-            />
-          </EuiFormRow>
-        </EuiDescribedFormGroup>
         <EuiDescribedFormGroup
           idAria="tiebreakerField"
           title={
