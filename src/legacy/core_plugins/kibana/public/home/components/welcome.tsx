@@ -25,6 +25,8 @@
 
 import React from 'react';
 import {
+  EuiLink,
+  EuiTextColor,
   EuiTitle,
   EuiSpacer,
   EuiFlexGroup,
@@ -46,7 +48,7 @@ interface Props {
 /**
  * Shows a full-screen welcome page that gives helpful quick links to beginners.
  */
-export class Welcome extends React.PureComponent<Props> {
+export class Welcome extends React.Component<Props> {
   private services = getServices();
 
   private hideOnEsc = (e: KeyboardEvent) => {
@@ -115,6 +117,29 @@ export class Welcome extends React.PureComponent<Props> {
                   onConfirm={this.onSampleDataConfirm}
                   onDecline={this.onSampleDataDecline}
                 />
+                <EuiSpacer size="s" />
+                <EuiTextColor className="euiText--small" color="subdued">
+                  <FormattedMessage
+                    id="kbn.home.dataManagementDisclaimerPrivacy"
+                    defaultMessage="To learn about how usage data helps us manage and improve our products and services, see our "
+                  />
+                  <EuiLink href="#">
+                    <FormattedMessage
+                      id="kbn.home.dataManagementDisclaimerPrivacyLink"
+                      defaultMessage="Privacy Policy."
+                    />
+                  </EuiLink>
+                  <FormattedMessage
+                    id="kbn.home.dataManagementDisableCollection"
+                    defaultMessage=" To disable collection, "
+                  />
+                  <EuiLink href="#">
+                    <FormattedMessage
+                      id="kbn.home.dataManagementDisableCollectionLink"
+                      defaultMessage="click here."
+                    />
+                  </EuiLink>
+                </EuiTextColor>
                 <EuiSpacer size="xs" />
               </EuiFlexItem>
             </EuiFlexGroup>
