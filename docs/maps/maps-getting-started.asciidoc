@@ -84,7 +84,7 @@ the {es} index `kibana_sample_data_logs` on the shared key iso2 = geo.src.
 . Set *Right source* to *kibana_sample_data_logs*.
 . Set *Right field* to *geo.src*.
 
-===== Set the vector style
+===== Set the layer style
 
 All of the world countries are still a single color because the layer is using <<maps-vector-style-static, static styling>>.
 To shade the world countries based on which country is sending the most requests, you'll need to use <<maps-vector-style-data-driven, data driven styling>>.

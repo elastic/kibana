@@ -123,6 +123,29 @@ you did at the beginning of the tutorial, when you marked the `play_name` field
 as `not analyzed`.
 
 [float]
+[[tutorial-visualize-markdown]]
+=== Markdown
+
+Create a Markdown widget to add formatted text to your dashboard.
+
+. Create a *Markdown* visualization.
+. Copy the following text into the text box.
++
+[source,markdown]
+# This is a tutorial dashboard!
+The Markdown widget uses **markdown** syntax.
+> Blockquotes in Markdown use the > character.
+
+. Click *Apply changes* image:images/apply-changes-button.png[].
++
+The Markdown renders in the preview pane.
++
+[role="screenshot"]
+image::images/tutorial-visualize-md-2.png[]
+
+. *Save* this visualization with the name `Markdown Example`.
+
+[float]
 [[tutorial-visualize-map]]
 === Map
 
@@ -145,7 +168,7 @@ menu to create a Map.
 .. Set *Index pattern* to *logstash*.
 .. Click the *Add layer* button.
 
-. Set the vector style.
+. Set the layer style.
 .. For *Fill color*, select the yellow to red color ramp.
 .. For *Border color*, select white.
 .. Click *Save & close*.
@@ -157,29 +180,6 @@ image::images/tutorial-visualize-map-2.png[]
 
 . Navigate the map by clicking and dragging.  Use the controls
 on the left to zoom the map and set filters.
-. In the application toolbar, click *Save*.
-. Enter `Map Example` for the title.
-. Click *Save*.
+. *Save* this map with the name `Map Example`.
 
-[float]
-[[tutorial-visualize-markdown]]
-=== Markdown
 
-The final visualization is a Markdown widget that renders formatted text.
-
-. Return to the Visualization app and create a *Markdown* visualization.
-. Copy the following text into the text box.
-+
-[source,markdown]
-# This is a tutorial dashboard!
-The Markdown widget uses **markdown** syntax.
-> Blockquotes in Markdown use the > character.
-
-. Click *Apply changes* image:images/apply-changes-button.png[].
-+
-The Markdown renders in the preview pane.
-+
-[role="screenshot"]
-image::images/tutorial-visualize-md-2.png[]
-
-. *Save* this visualization with the name `Markdown Example`.
