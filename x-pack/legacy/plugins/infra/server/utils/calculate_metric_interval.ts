@@ -5,7 +5,6 @@
  */
 
 import { InfraBackendFrameworkAdapter, InfraFrameworkRequest } from '../lib/adapters/framework';
-import { InfraTimerangeInput } from '../../public/graphql/types';
 
 interface Options {
   indexPattern: string;
@@ -16,6 +15,10 @@ interface Options {
   };
 }
 
+/**
+ * Look at the data from metricbeat and get the max period for a given timerange.
+ * This is useful for visualizing metric modules like s3 that only send metrics once per day.
+ */
 export const calculateMetricInterval = async (
   framework: InfraBackendFrameworkAdapter,
   request: InfraFrameworkRequest,
