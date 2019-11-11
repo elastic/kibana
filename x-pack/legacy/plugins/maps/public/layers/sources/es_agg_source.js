@@ -112,7 +112,7 @@ export class AbstractESAggSource extends AbstractESSource {
 
     const metricFields = this.getMetricFields();
     const tooltipPropertiesPromises = [];
-    metricFields.forEach(async (metricField) => {
+    metricFields.forEach((metricField) => {
       let value;
       for (const key in properties) {
         if (properties.hasOwnProperty(key) && metricField.getName() === key) {
@@ -121,16 +121,21 @@ export class AbstractESAggSource extends AbstractESSource {
         }
       }
 
-      const tooltipProperty  = new ESAggMetricTooltipProperty(
-        metricField.getName(),
-        await metricField.getLabel(),
-        value,
-        indexPattern,
-        metricField
-      );
-      tooltipPropertiesPromises.push(tooltipProperty);
+      const tooltipPromise = new Promise(async (resolve) => {
+        const tooltipProperty  = new ESAggMetricTooltipProperty(
+          metricField.getName(),
+          await metricField.getLabel(),
+          value,
+          indexPattern,
+          metricField
+        );
+        resolve(tooltipProperty);
+      });
+
+
+      tooltipPropertiesPromises.push(tooltipPromise);
     });
 
-    return Promise.all(tooltipPropertiesPromises);
+    return await Promise.all(tooltipPropertiesPromises);
   }
 }
