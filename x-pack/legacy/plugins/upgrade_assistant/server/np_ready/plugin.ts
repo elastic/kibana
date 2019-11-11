@@ -5,7 +5,6 @@
  */
 import { Plugin, CoreSetup, CoreStart } from 'src/core/server';
 import { ServerShim } from './types';
-import { UpgradeAssistantTelemetryServer } from '../../common/types';
 import { credentialStoreFactory } from './lib/reindexing/credential_store';
 import { makeUpgradeAssistantUsageCollector } from './lib/telemetry';
 import { registerClusterCheckupRoutes } from './routes/cluster_checkup';

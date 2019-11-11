@@ -44,11 +44,16 @@ export function upgradeAssistant(kibana: any) {
       const instance = plugin({} as any);
       instance.setup({} as any, {
         __LEGACY: {
-          route: server.route.bind(server),
+          // Legacy objects
+          events: server.events,
+          usage: server.usage,
           savedObjects: server.savedObjects,
-          log: server.log.bind(server),
-          events: server.events.bind(server),
 
+          // Legacy functions
+          log: server.log.bind(server),
+          route: server.route.bind(server),
+
+          // Legacy plugins
           plugins: {
             elasticsearch: server.plugins.elasticsearch,
             xpack_main: server.plugins.xpack_main,

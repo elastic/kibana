@@ -95,8 +95,6 @@ const START_UPGRADE_STEP = (isCloudEnabled: boolean) => ({
 export const StepsUI: StatelessComponent<
   UpgradeAssistantTabProps & ReactIntl.InjectedIntlProps
 > = ({ checkupData, setSelectedTabIndex, intl }) => {
-  // Uncomment when START_UPGRADE_STEP is in use!
-  // const { isCloudEnabled } = useAppContext();
   const checkupDataTyped = (checkupData! as unknown) as { [checkupType: string]: any[] };
   const countByType = Object.keys(checkupDataTyped).reduce(
     (counts, checkupType) => {
@@ -106,7 +104,8 @@ export const StepsUI: StatelessComponent<
     {} as { [checkupType: string]: number }
   );
 
-  const { http, XSRF } = useAppContext();
+  // Uncomment when START_UPGRADE_STEP is in use!
+  const { http, XSRF /* , isCloudEnabled */ } = useAppContext();
 
   return (
     <EuiSteps
@@ -272,6 +271,7 @@ export const StepsUI: StatelessComponent<
 
         // Swap in START_UPGRADE_STEP on the last minor release.
         WAIT_FOR_RELEASE_STEP,
+        // START_UPGRADE_STEP(isCloudEnabled),
       ]}
     />
   );
