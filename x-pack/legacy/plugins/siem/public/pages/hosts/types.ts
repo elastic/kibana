@@ -6,8 +6,7 @@
 
 import { StaticIndexPattern } from 'ui/index_patterns';
 import { ActionCreator } from 'typescript-fsa';
-import { Filter } from '@kbn/es-query';
-import { Query } from 'src/plugins/data/common';
+import { Query, esFilters } from 'src/plugins/data/public';
 
 import { SiemPageName } from '../home/types';
 import { hostsModel } from '../../store';
@@ -19,7 +18,7 @@ export const hostDetailsPagePath = `${hostsPagePath}/:detailName`;
 
 export interface HostsComponentReduxProps {
   query: Query;
-  filters: Filter[];
+  filters: esFilters.Filter[];
 }
 
 export interface HostsComponentDispatchProps {

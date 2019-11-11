@@ -20,8 +20,8 @@
 import _ from 'lodash';
 import { pushFilterBarFilters } from '../push_filters';
 import { onBrushEvent } from './brush_event';
-import { uniqFilters } from '../../../../../plugins/data/public';
-import { toggleFilterNegated } from '@kbn/es-query';
+import { uniqFilters, esFilters } from '../../../../../plugins/data/public';
+
 /**
  * For terms aggregations on `__other__` buckets, this assembles a list of applicable filter
  * terms based on a specific cell in the tabified data.
@@ -94,7 +94,7 @@ const createFiltersFromEvent = (event) => {
     if (filter) {
       filter.forEach(f => {
         if (event.negate) {
-          f = toggleFilterNegated(f);
+          f = esFilters.toggleFilterNegated(f);
         }
         filters.push(f);
       });
