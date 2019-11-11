@@ -10,10 +10,6 @@ import { hrefIsForPath } from '../concerns/routing';
 import { actions as endpointsListActions } from '../actions/endpoints_list';
 import * as endpointsListSelectors from '../selectors/endpoints_list';
 
-function isOnPage(href: any) {
-  return hrefIsForPath(href, '/app/endpoint/endpoints');
-}
-
 // TODO: type this properly
 export async function endpointsListSaga(...args: any[]) {
   await Promise.all([resourceSaga(...args)]);
@@ -24,6 +20,14 @@ async function resourceSaga(
   { actionsAndState, dispatch }: { actionsAndState: any; dispatch: any },
   context: AppMountContext
 ) {
+  function isOnPage(href: any) {
+    const isOnPageResponse: boolean = hrefIsForPath(
+      href,
+      `${context.core.http.basePath.get()}/app/endpoint/endpoints`
+    );
+    return isOnPageResponse;
+  }
+
   for await (const {
     action,
     userIsOnPageAndLoggedIn,
@@ -37,7 +41,7 @@ async function resourceSaga(
     if (userIsOnPageAndLoggedIn) {
       if (
         shouldInitialize ||
-        action.type === endpointsListActions.userPaginatedOrSortedTable.type
+        action.type === endpointsListActions.userPaginatedOrSortedEndpointListTable.type
       ) {
         try {
           const pageIndex = endpointsListSelectors.pageIndex(state);
@@ -53,7 +57,7 @@ async function resourceSaga(
               sortDirection,
             },
           });
-          dispatch(endpointsListActions.serverReturnedData(response));
+          dispatch(endpointsListActions.serverReturnedEndpointListData(response));
         } catch (error) {
           // TODO: dispatch an error action
           throw new Error(error);

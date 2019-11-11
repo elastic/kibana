@@ -46,9 +46,9 @@ const initialState: EndpointsListState = {
 
 export function endpointListReducer(state = initialState, action: EndpointListActions) {
   switch (action.type) {
-    case actions.serverReturnedData.type:
+    case actions.serverReturnedEndpointListData.type:
       return { ...state, data: action.payload[0] };
-    case actions.userFilteredData.type:
+    case actions.userFilteredEndpointListData.type:
       return { ...state, ...action.payload[0] };
     default:
       return state;

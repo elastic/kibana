@@ -9,10 +9,14 @@ import { actionCreatorFactory } from '../lib/action_creator';
 
 // TODO: Type return value
 export const actions = {
-  serverReturnedData: actionCreatorFactory<'serverReturnedData', [any]>('serverReturnedData'),
-  userFilteredData: actionCreatorFactory<'userFilteredData', [any]>('userFilteredData'),
-  userPaginatedOrSortedTable: actionCreatorFactory<
-    'userPaginatedOrSortedTable',
+  serverReturnedEndpointListData: actionCreatorFactory<'serverReturnedEndpointListData', [any]>(
+    'serverReturnedEndpointListData'
+  ),
+  userFilteredEndpointListData: actionCreatorFactory<'userFilteredEndpointListData', [any]>(
+    'userFilteredEndpointListData'
+  ),
+  userPaginatedOrSortedEndpointListTable: actionCreatorFactory<
+    'userPaginatedOrSortedEndpointListTable',
     [
       {
         pageIndex: number;
@@ -21,7 +25,7 @@ export const actions = {
         sortDirection: Direction;
       }
     ]
-  >('userPaginatedOrSortedTable'),
+  >('userPaginatedOrSortedEndpointListTable'),
   // userSelectedTableItems: actionCreatorFactory<'userSelectedTableItems', [object[]]>(
   //   'userSelectedTableItems'
   // ),
@@ -34,8 +38,8 @@ export const actions = {
 };
 
 export type EndpointListActions =
-  | ReturnType<typeof actions.serverReturnedData>
-  | ReturnType<typeof actions.userFilteredData>
-  | ReturnType<typeof actions.userPaginatedOrSortedTable>;
+  | ReturnType<typeof actions.serverReturnedEndpointListData>
+  | ReturnType<typeof actions.userFilteredEndpointListData>
+  | ReturnType<typeof actions.userPaginatedOrSortedEndpointListTable>;
 // | ReturnType<typeof actions.userSelectedTableItems>
 // | ReturnType<typeof actions.userClickedArchiveItems>;
